@@ -1,7 +1,7 @@
 {
-  "generated_at_utc": "2026-07-30T14:55:54Z",
+  "generated_at_utc": "2026-08-07T14:08:09Z",
   "mode": "observe-only",
-  "base_ref": "d35586d30",
+  "base_ref": "64db4e554",
   "thresholds": {
     "python_file_sloc": {
       "yellow": 650,
@@ -37,21 +37,21 @@
   },
   "overall": {
     "python_prod_file_sloc": {
-      "count": 932.0,
-      "p50": 124.0,
-      "p75": 300.5,
-      "p90": 676.4,
-      "p95": 972.45,
-      "p99": 2010.73,
+      "count": 933.0,
+      "p50": 126.0,
+      "p75": 303.0,
+      "p90": 679.8,
+      "p95": 976.6,
+      "p99": 2010.56,
       "max": 5697.0
     },
     "python_prod_max_function_len": {
-      "count": 751.0,
+      "count": 752.0,
       "p50": 59.0,
       "p75": 109.0,
-      "p90": 185.0,
-      "p95": 238.5,
-      "p99": 351.0,
+      "p90": 183.8,
+      "p95": 241.45,
+      "p99": 356.9,
       "max": 2126.0
     },
     "python_prod_max_cc": {
@@ -64,21 +64,21 @@
       "max": 0.0
     },
     "js_source_file_sloc": {
-      "count": 200.0,
-      "p50": 252.5,
-      "p75": 573.0,
-      "p90": 1231.7,
-      "p95": 1588.5,
-      "p99": 2428.64,
+      "count": 201.0,
+      "p50": 252.0,
+      "p75": 572.0,
+      "p90": 1238.0,
+      "p95": 1586.0,
+      "p99": 2426.0,
       "max": 2835.0
     },
     "js_source_max_cc": {
-      "count": 200.0,
+      "count": 201.0,
       "p50": 6.0,
       "p75": 21.0,
-      "p90": 32.1,
-      "p95": 44.05,
-      "p99": 86.07,
+      "p90": 33.0,
+      "p95": 44.0,
+      "p99": 86.0,
       "max": 155.0
     }
   },
@@ -90,11 +90,11 @@
       },
       {
         "path": "wepppy/microservices/rq_engine/schema_defaults_routes.py",
-        "value": 4238.0
+        "value": 4242.0
       },
       {
         "path": "tests/weppcloud/routes/test_pure_controls_render.py",
-        "value": 3539.0
+        "value": 3549.0
       },
       {
         "path": "tests/nodb/mods/test_features_export_service.py",
@@ -110,7 +110,11 @@
       },
       {
         "path": "tests/nodb/mods/test_omni.py",
-        "value": 2906.0
+        "value": 2929.0
+      },
+      {
+        "path": "wepppy/rq/project_rq.py",
+        "value": 2689.0
       },
       {
         "path": "wepppy/wepp/management/managements.py",
@@ -121,16 +125,12 @@
         "value": 2430.0
       },
       {
-        "path": "wepppy/rq/project_rq.py",
-        "value": 2375.0
-      },
-      {
         "path": "wepppy/climates/cligen/cligen.py",
         "value": 2318.0
       },
       {
         "path": "wepppy/nodb/base.py",
-        "value": 2213.0
+        "value": 2221.0
       },
       {
         "path": "wepppy/wepp/fuzzing/single_ofe_stratified_campaign.py",
@@ -141,15 +141,15 @@
         "value": 2016.0
       },
       {
+        "path": "tests/rq/test_project_rq_mutation_guards.py",
+        "value": 2006.0
+      },
+      {
         "path": "wepppy/weppcloud/routes/run_0/run_0_bp.py",
         "value": 1999.0
       },
       {
         "path": "tests/microservices/test_browse_auth_routes.py",
-        "value": 1951.0
-      },
-      {
-        "path": "tests/rq/test_project_rq_mutation_guards.py",
         "value": 1951.0
       },
       {
@@ -162,7 +162,7 @@
       },
       {
         "path": "wepppy/nodb/core/landuse.py",
-        "value": 1887.0
+        "value": 1899.0
       }
     ],
     "python_max_function_len_top20": [
@@ -172,7 +172,7 @@
       },
       {
         "path": "wepppy/microservices/rq_engine/schema_defaults_routes.py",
-        "value": 2069.0
+        "value": 2073.0
       },
       {
         "path": "tests/nodb/mods/disturbed/live_e2e/runbook.py",
@@ -199,12 +199,12 @@
         "value": 381.0
       },
       {
-        "path": "wepppy/rq/wepp_rq_pipeline.py",
-        "value": 352.0
+        "path": "wepppy/nodb/core/landuse.py",
+        "value": 362.0
       },
       {
-        "path": "wepppy/nodb/core/landuse.py",
-        "value": 350.0
+        "path": "wepppy/rq/wepp_rq_pipeline.py",
+        "value": 352.0
       },
       {
         "path": "wepppy/weppcloud/routes/run_0/run_0_bp.py",
@@ -235,16 +235,16 @@
         "value": 309.0
       },
       {
+        "path": "wepppy/rq/project_rq_fork.py",
+        "value": 303.0
+      },
+      {
         "path": "wepppy/nodb/mods/ash_transport/ashpost.py",
         "value": 301.0
       },
       {
         "path": "wepppy/nodb/mods/rusle/k_integration.py",
         "value": 300.0
-      },
-      {
-        "path": "wepppy/nodb/mods/features_export/service.py",
-        "value": 290.0
       }
     ],
     "python_max_cc_top20": [],
@@ -275,7 +275,7 @@
       },
       {
         "path": "wepppy/weppcloud/controllers_js/channel_gl.js",
-        "value": 1782.0
+        "value": 1873.0
       },
       {
         "path": "wepppy/weppcloud/controllers_js/geneva_summary_report.js",
@@ -283,7 +283,7 @@
       },
       {
         "path": "wepppy/weppcloud/controllers_js/control_base.js",
-        "value": 1659.0
+        "value": 1727.0
       },
       {
         "path": "wepppy/weppcloud/controllers_js/subcatchment_delineation.js",
@@ -311,7 +311,11 @@
       },
       {
         "path": "wepppy/weppcloud/controllers_js/climate.js",
-        "value": 1350.0
+        "value": 1352.0
+      },
+      {
+        "path": "wepppy/weppcloud/controllers_js/channel_delineation.js",
+        "value": 1322.0
       },
       {
         "path": "wepppy/weppcloud/controllers_js/disturbed.js",
@@ -323,10 +327,6 @@
       },
       {
         "path": "wepppy/weppcloud/controllers_js/__tests__/project.test.js",
-        "value": 1238.0
-      },
-      {
-        "path": "wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js",
         "value": 1238.0
       }
     ],
@@ -396,196 +396,22 @@
         "value": 36.0
       },
       {
+        "path": "wepppy/weppcloud/controllers_js/channel_delineation.js",
+        "value": 35.0
+      },
+      {
+        "path": "wepppy/weppcloud/controllers_js/channel_gl.js",
+        "value": 35.0
+      },
+      {
         "path": "wepppy/weppcloud/controllers_js/subcatchments_gl.js",
         "value": 34.0
       },
       {
         "path": "wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js",
         "value": 34.0
-      },
-      {
-        "path": "wepppy/weppcloud/controllers_js/bootstrap_observability.js",
-        "value": 33.0
-      },
-      {
-        "path": "wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js",
-        "value": 33.0
       }
     ]
   },
-  "changed_files": [
-    {
-      "path": "tests/weppcloud/routes/test_command_bar_mcp_token.py",
-      "base_path": "tests/weppcloud/routes/test_command_bar_mcp_token.py",
-      "status": "M",
-      "language": "python",
-      "metrics": [
-        {
-          "name": "python_file_sloc",
-          "base": 141.0,
-          "current": 187.0,
-          "trend": "worsened",
-          "severity": "green"
-        },
-        {
-          "name": "python_function_len",
-          "base": 39.0,
-          "current": 42.0,
-          "trend": "worsened",
-          "severity": "green"
-        },
-        {
-          "name": "python_cc",
-          "base": null,
-          "current": null,
-          "trend": "n/a",
-          "severity": "unknown"
-        }
-      ],
-      "highest_severity": "green"
-    },
-    {
-      "path": "tests/weppcloud/routes/test_project_bp.py",
-      "base_path": "tests/weppcloud/routes/test_project_bp.py",
-      "status": "M",
-      "language": "python",
-      "metrics": [
-        {
-          "name": "python_file_sloc",
-          "base": 678.0,
-          "current": 693.0,
-          "trend": "worsened",
-          "severity": "yellow"
-        },
-        {
-          "name": "python_function_len",
-          "base": 107.0,
-          "current": 107.0,
-          "trend": "unchanged",
-          "severity": "yellow"
-        },
-        {
-          "name": "python_cc",
-          "base": null,
-          "current": null,
-          "trend": "n/a",
-          "severity": "unknown"
-        }
-      ],
-      "highest_severity": "yellow"
-    },
-    {
-      "path": "tests/weppcloud/routes/test_pure_controls_render.py",
-      "base_path": "tests/weppcloud/routes/test_pure_controls_render.py",
-      "status": "M",
-      "language": "python",
-      "metrics": [
-        {
-          "name": "python_file_sloc",
-          "base": 3513.0,
-          "current": 3539.0,
-          "trend": "worsened",
-          "severity": "red"
-        },
-        {
-          "name": "python_function_len",
-          "base": 118.0,
-          "current": 118.0,
-          "trend": "unchanged",
-          "severity": "yellow"
-        },
-        {
-          "name": "python_cc",
-          "base": null,
-          "current": null,
-          "trend": "n/a",
-          "severity": "unknown"
-        }
-      ],
-      "highest_severity": "red"
-    },
-    {
-      "path": "wepppy/weppcloud/controllers_js/__tests__/command_bar.test.js",
-      "base_path": "wepppy/weppcloud/controllers_js/__tests__/command_bar.test.js",
-      "status": "A",
-      "language": "javascript",
-      "metrics": [
-        {
-          "name": "js_file_sloc",
-          "base": null,
-          "current": 159.0,
-          "trend": "new",
-          "severity": "green"
-        },
-        {
-          "name": "js_cc",
-          "base": null,
-          "current": 10.0,
-          "trend": "new",
-          "severity": "green"
-        }
-      ],
-      "highest_severity": "green"
-    },
-    {
-      "path": "wepppy/weppcloud/routes/command_bar/command_bar.py",
-      "base_path": "wepppy/weppcloud/routes/command_bar/command_bar.py",
-      "status": "M",
-      "language": "python",
-      "metrics": [
-        {
-          "name": "python_file_sloc",
-          "base": 248.0,
-          "current": 269.0,
-          "trend": "worsened",
-          "severity": "green"
-        },
-        {
-          "name": "python_function_len",
-          "base": 78.0,
-          "current": 81.0,
-          "trend": "worsened",
-          "severity": "yellow"
-        },
-        {
-          "name": "python_cc",
-          "base": null,
-          "current": null,
-          "trend": "n/a",
-          "severity": "unknown"
-        }
-      ],
-      "highest_severity": "yellow"
-    },
-    {
-      "path": "wepppy/weppcloud/routes/nodb_api/project_bp.py",
-      "base_path": "wepppy/weppcloud/routes/nodb_api/project_bp.py",
-      "status": "M",
-      "language": "python",
-      "metrics": [
-        {
-          "name": "python_file_sloc",
-          "base": 548.0,
-          "current": 549.0,
-          "trend": "worsened",
-          "severity": "green"
-        },
-        {
-          "name": "python_function_len",
-          "base": 70.0,
-          "current": 70.0,
-          "trend": "unchanged",
-          "severity": "green"
-        },
-        {
-          "name": "python_cc",
-          "base": null,
-          "current": null,
-          "trend": "n/a",
-          "severity": "unknown"
-        }
-      ],
-      "highest_severity": "green"
-    }
-  ]
+  "changed_files": []
 }
