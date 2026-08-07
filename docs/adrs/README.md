@@ -80,3 +80,4 @@ Each ADR should normally include:
 - `ADR-0036`: [Restore disturbed9002 Least-Cost Breach Default](ADR-0036-disturbed9002-least-cost-breach-default.md) (Accepted, 2026-07-30)
 - `ADR-0037`: [Increase WBT Least-Cost Breach Distance Default](ADR-0037-wbt-least-cost-breach-distance-default.md) (Accepted, 2026-07-30)
 - `ADR-0038`: [Universal User Model-Responsibility Contract](ADR-0038-universal-user-model-responsibility-contract.md) (Accepted, 2026-08-03)
+- `ADR-0039`: [WEPP Prep-Completion Timeout](ADR-0039-wepp-prep-completion-timeout.md) (Accepted, 2026-08-07)

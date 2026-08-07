@@ -514,6 +514,10 @@ build through job completion before review.
 **Description**: Establish one evidence-backed contract standard and execute an iterative series of bounded work packages to audit every Pure UI controller from rendered fields through JavaScript payloads, route parsing, persistence, RQ behavior, and reload.
 
 **Current Status**:
+- [DOM-14A](docs/work-packages/20260728_wepp_core_ui_contract/) has an accepted,
+  dual-reviewed prep-completion timeout amendment pending implementation:
+  complete `wepp1` recovery measured 1,234.117 seconds, yielding a proposed
+  3,703-second RQ timeout and 4,003-second Git-lock lifetime.
 - [SHR-06](docs/work-packages/20260729_pure_ui_command_bar_contract/)
   closed with direct keyboard/history/request, privileged recovery, MCP
   secrecy, Wojak/StatusStream, and hostile-content evidence; repaired
