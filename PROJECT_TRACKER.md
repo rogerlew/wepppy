@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 19 packages (above target range)
+**Current WIP**: 24 packages (above target range; calculated from the 24 package entries in the In Progress section)
 
 ### 3. Manage Flow
 Monitor how long packages spend in each column:
@@ -353,6 +353,21 @@ When resuming Kubernetes work:
 
 ## 🚧 In Progress
 
+### RQ Jobstatus Advisory Queue Rank
+
+**Started**: 2026-08-07
+**Size**: Medium-High (contract checkpoint, implementation, focused gates, and independent reviews)
+**Priority**: High
+**Security impact**: `high` (bounded queue-state disclosure on an open-by-default polling route)
+**Link**: [docs/work-packages/20260807_rq_jobstatus_queue_rank/](docs/work-packages/20260807_rq_jobstatus_queue_rank/)
+**Description**: Add an optional advisory `queue` snapshot to jobstatus that
+  ranks the next queued member of the requested registered RQ tree, including
+  Culvert children and finalizers, with one-based rank and bounded single-queue
+  Redis access. Auth, queue topology, dependency edges, and browse-token scope
+  remain unchanged.
+**Status**: Contract checkpoint in progress; production implementation is
+  blocked until the standalone reviewed ancestor is committed.
+
 ### Fork/Archive Serial Queue Isolation (proposed SURF-03A)
 
 **Started**: 2026-08-03
@@ -472,7 +487,7 @@ authentication tokens from logs, restore persistent security logging under
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 16 packages
+**Current WIP Count**: 24 packages (calculated from the In Progress section)
 
 ### SSURGO Intelligent Fallback Empirical Study
 **Started**: 2026-07-21

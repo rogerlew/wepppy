@@ -51,6 +51,13 @@ Mode switch via `RQ_ENGINE_POLL_AUTH_MODE`:
 - `required` - bearer token required; must include `rq:status`.
 
 Polling hardening:
+- The optional `jobstatus.queue` snapshot follows whichever polling auth result
+  the endpoint already produced. It does not require a token in `open` mode,
+  does not vary by token class, and does not add scope requirements. The
+  long-lived Culvert service JWT with `rq:status` remains sufficient for
+  authenticated polling. The short-lived returned Culvert `browse_token` is a
+  separate batch-scoped artifact token for browse/download only and does not
+  gain `rq:status`.
 - In-memory rate limiter (`endpoint + caller + ip`).
 - Default limit: `400` requests per `60` seconds.
 - Env vars:
@@ -176,8 +183,40 @@ Submission/command responses:
 
 Polling responses:
 - `jobstatus`:
-  `{job_id, runid, status, started_at, ended_at, conditioning_diagnostics?,
-  error?, error_id?}`.
+  `{job_id, runid, status, started_at, ended_at, progress?, queue?,
+  conditioning_diagnostics?, error?, error_id?}`. `progress` is the existing
+  aggregate job-count object; its runtime semantics are unchanged.
+  When present, `queue` is exactly:
+  ```json
+  {
+    "name": "batch",
+    "rank": 17,
+    "jobs_ahead": 16,
+    "position_job_id": "next-queued-member-job-id",
+    "basis": "next_queued_job_in_tree",
+    "observed_at": "2026-08-07T18:42:11Z"
+  }
+  ```
+  `name` is a non-empty RQ queue origin. `rank` is a positive one-based
+  position in the current ordered Redis queue list. `jobs_ahead` is the
+  non-negative zero-based offset of the selected job and must satisfy
+  `rank == jobs_ahead + 1`. `position_job_id` is the requested root or a
+  registered descendant reached exclusively through `job.meta` keys beginning
+  with `jobs:`. `basis` is exactly `next_queued_job_in_tree`; `observed_at` is a
+  UTC RFC 3339/ISO-8601 timestamp ending in `Z`.
+  The object is present only when a normalized `queued` member exists, every
+  queued candidate has a non-empty resolvable origin, all candidates share one
+  origin, and a candidate remains in that origin's ordered queue list at the
+  read. The minimum zero-based offset wins. Omit the entire object for no
+  queued member, started/terminal/deferred-only/scheduled-only trees,
+  missing/invalid origin, mixed origins, a dequeue race with no remaining
+  candidate, or any expected RQ/Redis race that prevents a reliable snapshot.
+  Never return null, partial/guessed data, rank zero/negative values, queue
+  depth, unrelated job IDs or metadata, or a cross-queue global rank. For
+  multiple same-origin candidates use one ordered queue snapshot or equivalent
+  bounded operation, not one scan/position call per child. The snapshot is
+  advisory, not an ETA, reservation, fairness guarantee, capacity estimate, or
+  stable promise.
   The optional field is present only for successful WBT channel delineation
   and follows `docs/schemas/wbt-conditioning-diagnostics-contract.md`; a
   terminal WBT tree cannot report success with missing or invalid diagnostics.

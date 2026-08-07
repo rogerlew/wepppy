@@ -84,6 +84,29 @@ Use existing RQ engine endpoints instead of custom status routes:
 - `/rq-engine/api/jobstatus/{job_id}`
 - `/rq-engine/api/jobinfo/{job_id}` (if richer metadata is needed)
 
+`jobstatus` is open by default and is governed by `RQ_ENGINE_POLL_AUTH_MODE`:
+`open` accepts anonymous polling, `token_optional` accepts anonymous polling
+but validates a supplied bearer token, and `required` requires a bearer token
+with `rq:status`. These modes and the existing polling rate limit are unchanged.
+
+Successful `jobstatus` responses may contain an optional advisory `queue`
+object. It reports the one-based current Redis-list rank of the earliest queued
+member in the requested registered job tree. A Culvert root that has already
+started or finished may therefore report a queued `jobs:*` per-culvert child or
+the dependent finalizer in `batch`; it does not have to report the root ID.
+The object contains `rank`, `jobs_ahead`, `name`, `position_job_id`, the exact
+`basis` value `next_queued_job_in_tree`, and UTC `observed_at`. Treat it as a
+current advisory snapshot, not an ETA or promise. It is optional and may be
+absent for terminal/started-only/deferred-only/scheduled-only trees, mixed or
+missing queue origins, or normal status/Redis races. Never infer failure or job
+loss from its absence, and continue using `status` as the lifecycle authority.
+
+The long-lived Culvert service JWT is the credential for submission, retry, and
+authenticated status polling; it includes `rq:status`. The short-lived
+returned `browse_token` is a separate batch-scoped token for artifact
+browse/download only. It is not a polling credential and is not given
+`rq:status`.
+
 ### Artifacts access (existing)
 Use the browse service for listing/downloading artifacts instead of a culvert-specific endpoint.
 

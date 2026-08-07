@@ -103,10 +103,53 @@ Landuse first-class route notes (2026-04-24):
 
 ## Job polling responses
 - Job status (jobstatus):
-  - `{job_id, runid, status, started_at, ended_at, conditioning_diagnostics?, error?, error_id?}`
+  - `{job_id, runid, status, started_at, ended_at, progress?, queue?, conditioning_diagnostics?, error?, error_id?}`
   - For registered trees, any queued/started/deferred/scheduled descendant keeps
     the aggregate non-terminal. Failed/stopped/canceled takes precedence only
     after no descendant remains active.
+  - `progress` is the existing aggregate job-count object. Its runtime behavior
+    is unchanged; the field is listed here to correct the stale summary above.
+  - `queue` is an optional advisory snapshot. When present its exact shape is:
+    ```json
+    {
+      "queue": {
+        "name": "batch",
+        "rank": 17,
+        "jobs_ahead": 16,
+        "position_job_id": "next-queued-member-job-id",
+        "basis": "next_queued_job_in_tree",
+        "observed_at": "2026-08-07T18:42:11Z"
+      }
+    }
+    ```
+    `name` is a non-empty RQ queue origin. `rank` is a positive one-based
+    position in that queue's current Redis list. `jobs_ahead` is the
+    non-negative zero-based offset of `position_job_id`, and
+    `rank == jobs_ahead + 1`. `position_job_id` is the requested root or a
+    descendant reached only through registered `job.meta` keys beginning with
+    `jobs:`. `basis` is exactly `next_queued_job_in_tree`. `observed_at` is a
+    UTC RFC 3339/ISO-8601 timestamp ending in `Z`, preferably with second
+    precision.
+  - `queue` is present only when at least one registered tree member has
+    normalized raw RQ status `queued`, every queued candidate has a resolvable
+    non-empty origin, all queued candidates resolve to the same origin, and at
+    least one candidate remains in that origin's ordered Redis queue list when
+    read. The selected candidate has the smallest zero-based offset. Started,
+    terminal, deferred-only, scheduled-only, missing-origin, invalid-origin,
+    mixed-origin, and unreliable-race cases omit the entire key. Do not emit
+    `queue: null`, a partial object, zero/negative ranks, guessed names, queue
+    depth, unrelated identifiers, or a synthetic cross-queue rank.
+  - Queue/status races are ordinary: a candidate that disappears may be
+    ignored, another remaining same-tree candidate may be selected, and an
+    unreliable optional lookup omits `queue` while preserving the authoritative
+    status response. Redis/RQ errors in this optional lookup must not become
+    HTTP 500 responses.
+  - The snapshot is advisory and is not an ETA, reservation, fairness
+    guarantee, worker-capacity estimate, or stable rank promise. For multiple
+    candidates in one origin, implementations must use one ordered queue
+    snapshot or equivalent bounded operation, not one full scan/position lookup
+    per child. Origins from separate Redis lists are intentionally not
+    comparable. Current Culvert parent, children, and finalizer use `batch`.
   - `conditioning_diagnostics` is present only for successful WBT channel
     delineation and follows
     `docs/schemas/wbt-conditioning-diagnostics-contract.md`. A terminal WBT
