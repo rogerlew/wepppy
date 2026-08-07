@@ -9,7 +9,13 @@ from rq.job import Job
 REDIS_HOST: str
 RQ_DB: int
 
-def recursive_get_job_details(job: Job, redis_conn: redis.Redis, now: datetime) -> Dict[str, Any]: ...
+def recursive_get_job_details(
+    job: Job,
+    redis_conn: redis.Redis,
+    now: datetime,
+    *,
+    queue_candidates: list[Tuple[str, str, str | None]] | None = ...,
+) -> Dict[str, Any]: ...
 
 def get_wepppy_rq_job_info(job_id: str) -> Dict[str, Any]: ...
 

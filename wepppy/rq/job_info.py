@@ -4,11 +4,13 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 import hashlib
+import logging
 import math
 import re
 from typing import Any, Dict, List, MutableMapping, Sequence, Tuple
 
 import redis
+from rq import Queue
 from rq.exceptions import NoSuchJobError
 from rq.job import Job
 from rq.utils import utcnow
@@ -22,6 +24,79 @@ from wepppy.config.redis_settings import (
 REDIS_HOST: str = redis_host()
 RQ_DB: int = int(RedisDB.RQ)
 UNKNOWN_PROGRESS_UPDATED_AT = "1970-01-01T00:00:00Z"
+QUEUE_RANK_BASIS = "next_queued_job_in_tree"
+
+logger = logging.getLogger(__name__)
+
+
+def _normalize_job_status(value: Any) -> str:
+    enum_value = getattr(value, "value", None)
+    raw_value = enum_value if isinstance(enum_value, str) else str(value)
+    return raw_value.strip().lower()
+
+
+def _normalize_queue_origin(value: Any) -> str | None:
+    if isinstance(value, bytes):
+        value = value.decode("utf-8", errors="replace")
+    origin = str(value or "").strip()
+    return origin or None
+
+
+def _build_queue_snapshot(
+    redis_conn: redis.Redis,
+    candidates: Sequence[Tuple[str, str, str | None]],
+    observed_at: datetime | None = None,
+) -> Dict[str, Any] | None:
+    queued_candidates: list[tuple[str, str]] = []
+    seen_job_ids: set[str] = set()
+    origins: set[str] = set()
+
+    for raw_job_id, status, raw_origin in candidates:
+        if status != "queued":
+            continue
+        job_id = str(raw_job_id or "").strip()
+        origin = _normalize_queue_origin(raw_origin)
+        if not job_id or job_id in seen_job_ids or origin is None:
+            if not job_id or origin is None:
+                return None
+            continue
+        seen_job_ids.add(job_id)
+        origins.add(origin)
+        queued_candidates.append((job_id, origin))
+
+    if not queued_candidates or len(origins) != 1:
+        return None
+
+    origin = next(iter(origins))
+    try:
+        ordered_job_ids = Queue(name=origin, connection=redis_conn).get_job_ids()
+    except (redis.exceptions.RedisError, NoSuchJobError):
+        logger.debug("Unable to observe optional queue rank", exc_info=True)
+        return None
+
+    candidate_ids = {job_id for job_id, _ in queued_candidates}
+    offsets = {
+        str(job_id): offset
+        for offset, job_id in enumerate(ordered_job_ids)
+        if str(job_id) in candidate_ids
+    }
+    if not offsets:
+        return None
+
+    position_job_id, jobs_ahead = min(offsets.items(), key=lambda item: item[1])
+    observed = observed_at or utcnow()
+    if observed.tzinfo is None:
+        observed = observed.replace(tzinfo=timezone.utc)
+    else:
+        observed = observed.astimezone(timezone.utc)
+    return {
+        "name": origin,
+        "rank": jobs_ahead + 1,
+        "jobs_ahead": jobs_ahead,
+        "position_job_id": position_job_id,
+        "basis": QUEUE_RANK_BASIS,
+        "observed_at": observed.strftime("%Y-%m-%dT%H:%M:%SZ"),
+    }
 
 
 def _resolve_runid(job: Job) -> str | None:
@@ -53,7 +128,13 @@ def _extract_exc_info(job: Job) -> str | None:
     return None
 
 
-def recursive_get_job_details(job: Job, redis_conn: redis.Redis, now: datetime) -> Dict[str, Any]:
+def recursive_get_job_details(
+    job: Job,
+    redis_conn: redis.Redis,
+    now: datetime,
+    *,
+    queue_candidates: list[Tuple[str, str, str | None]] | None = None,
+) -> Dict[str, Any]:
     """Recursively fetch job details including any children jobs."""
     elapsed_s = None
     if job.started_at:
@@ -65,10 +146,19 @@ def recursive_get_job_details(job: Job, redis_conn: redis.Redis, now: datetime) 
     culvert_batch_uuid = (
         job.meta.get("culvert_batch_uuid") if isinstance(job.meta, dict) else None
     )
+    raw_status = job.get_status()
+    if queue_candidates is not None:
+        queue_candidates.append(
+            (
+                str(job.id),
+                _normalize_job_status(raw_status),
+                _normalize_queue_origin(getattr(job, "origin", None)),
+            )
+        )
     job_info: Dict[str, Any] = {
         "job_id": job.id,
         "runid": _resolve_runid(job),
-        "status": job.get_status(),
+        "status": raw_status,
         "result": job.result,
         "started_at": str(job.started_at) if job.started_at else None,
         "ended_at": str(job.ended_at) if job.ended_at else None,
@@ -102,7 +192,16 @@ def recursive_get_job_details(job: Job, redis_conn: redis.Redis, now: datetime) 
             job_order = key.split(',')[0].split(':')[1]
             try:
                 child_job = Job.fetch(child_job_id, connection=redis_conn)
-                child_job_info = recursive_get_job_details(child_job, redis_conn, now) if child_job else None
+                child_job_info = (
+                    recursive_get_job_details(
+                        child_job,
+                        redis_conn,
+                        now,
+                        queue_candidates=queue_candidates,
+                    )
+                    if child_job
+                    else None
+                )
             except NoSuchJobError:
                 child_job_info = None
             job_info.setdefault("children", {}).setdefault(job_order, []).append(child_job_info)
@@ -296,7 +395,13 @@ def get_wepppy_rq_job_status(job_id: str) -> Dict[str, Any]:
         if not job:
             return {"job_id": job_id, "status": "not_found"}
 
-        all_jobs_tree = recursive_get_job_details(job, redis_conn, now)
+        queue_candidates: list[Tuple[str, str, str | None]] = []
+        all_jobs_tree = recursive_get_job_details(
+            job,
+            redis_conn,
+            now,
+            queue_candidates=queue_candidates,
+        )
 
         # Walk the job tree to collect all statuses and end times
         statuses, end_times, started_times = _flatten_job_tree(all_jobs_tree)
@@ -345,6 +450,9 @@ def get_wepppy_rq_job_status(job_id: str) -> Dict[str, Any]:
                 "updated_at": progress_updated_at,
             },
         }
+        queue_snapshot = _build_queue_snapshot(redis_conn, queue_candidates)
+        if queue_snapshot is not None:
+            response["queue"] = queue_snapshot
         diagnostics = []
         diagnostics_required = False
         registered_job_ids = set()

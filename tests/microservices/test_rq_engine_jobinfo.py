@@ -32,14 +32,36 @@ def test_jobstatus_returns_stubbed_payload(monkeypatch: pytest.MonkeyPatch) -> N
 
     def fake_jobstatus(job_id: str) -> dict[str, str]:
         seen["job_id"] = job_id
-        return {"status": "ok", "job_id": job_id}
+        return {
+            "status": "queued",
+            "job_id": job_id,
+            "queue": {
+                "name": "batch",
+                "rank": 2,
+                "jobs_ahead": 1,
+                "position_job_id": "child-1",
+                "basis": "next_queued_job_in_tree",
+                "observed_at": "2026-08-07T18:42:11Z",
+            },
+        }
 
     monkeypatch.setattr(job_routes, "get_wepppy_rq_job_status", fake_jobstatus)
 
     with TestClient(rq_engine.app) as client:
         response = client.get("/api/jobstatus/job-123")
 
-    assert response.json() == {"status": "ok", "job_id": "job-123"}
+    assert response.json() == {
+        "status": "queued",
+        "job_id": "job-123",
+        "queue": {
+            "name": "batch",
+            "rank": 2,
+            "jobs_ahead": 1,
+            "position_job_id": "child-1",
+            "basis": "next_queued_job_in_tree",
+            "observed_at": "2026-08-07T18:42:11Z",
+        },
+    }
     assert seen["job_id"] == "job-123"
 
 
@@ -167,6 +189,56 @@ def test_polling_mode_required_rejects_without_token(monkeypatch: pytest.MonkeyP
 
     assert response.status_code == 401
     assert response.json()["error"]["code"] == "unauthorized"
+
+
+def test_polling_mode_required_accepts_valid_jobstatus_token(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv(job_routes.POLL_AUTH_MODE_ENV, "required")
+
+    def _require_jwt(request, required_scopes=None):
+        assert required_scopes == ["rq:status"]
+        return {"sub": "u-status", "scope": "rq:status"}
+
+    monkeypatch.setattr(job_routes, "require_jwt", _require_jwt)
+    monkeypatch.setattr(
+        job_routes,
+        "get_wepppy_rq_job_status",
+        lambda job_id: {"status": "queued", "job_id": job_id},
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get(
+            "/api/jobstatus/job-required-ok",
+            headers={"Authorization": "Bearer test-token"},
+        )
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "queued", "job_id": "job-required-ok"}
+
+
+def test_polling_mode_required_wrong_scope_remains_forbidden(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv(job_routes.POLL_AUTH_MODE_ENV, "required")
+
+    def _require_jwt(request, required_scopes=None):
+        raise rq_auth.AuthError(
+            "Token missing required scope(s): rq:status",
+            status_code=403,
+            code="forbidden",
+        )
+
+    monkeypatch.setattr(job_routes, "require_jwt", _require_jwt)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get(
+            "/api/jobstatus/job-wrong-scope",
+            headers={"Authorization": "Bearer wrong-scope-token"},
+        )
+
+    assert response.status_code == 403
+    assert response.json()["error"]["code"] == "forbidden"
 
 
 def test_polling_mode_token_optional_accepts_without_token(monkeypatch: pytest.MonkeyPatch) -> None:
