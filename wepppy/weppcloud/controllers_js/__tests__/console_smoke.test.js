@@ -553,7 +553,10 @@ describe("Fork console smoke", () => {
             body: "undisturbify=false&skip_wepp_runs_output=false&skip_omni_scenarios_contrasts=false",
         });
 
-        expect(statusStreamInstance.append).toHaveBeenCalledWith("Submitting fork job...");
+        expect(statusStreamInstance.append).toHaveBeenCalledWith(
+            "Fork job is queued and waiting for the fork worker."
+        );
+        expect(statusStreamInstance.append).not.toHaveBeenCalledWith("Submitting fork job...");
      
         const consoleBlock = document.getElementById("the_console");
         expect(consoleBlock.dataset.state).toBe("attention");
@@ -579,6 +582,55 @@ describe("Fork console smoke", () => {
             jobId: "job-456",
             newRunId: "demo-run-new",
         }));
+    });
+
+    test("replaces submitting text with queued guidance only after acceptance", async () => {
+        let resolveForkRequest;
+        const pendingForkResponse = new Promise((resolve) => {
+            resolveForkRequest = resolve;
+        });
+        fetchMock.mockImplementation((url) => {
+            if (url === "http://localhost/rq-engine/api/runs/demo-run/cfg/session-token") {
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve({ token: "session-token" }),
+                });
+            }
+            if (url === "http://localhost/rq-engine/api/runs/demo-run/cfg/fork") {
+                return pendingForkResponse;
+            }
+            return Promise.reject(new Error(`Unexpected fetch: ${url}`));
+        });
+
+        document.getElementById("fork_form").dispatchEvent(
+            new Event("submit", { bubbles: true, cancelable: true })
+        );
+        await flushPromises();
+
+        expect(document.getElementById("the_console").textContent).toBe("Submitting fork job...");
+        expect(statusStreamInstance.append).not.toHaveBeenCalledWith(
+            "Fork job is queued and waiting for the fork worker."
+        );
+
+        resolveForkRequest({
+            ok: true,
+            text: () => Promise.resolve(JSON.stringify({
+                job_id: "job-456",
+                new_runid: "demo-run-new",
+                undisturbify: false,
+                skip_wepp_runs_output: false,
+                skip_omni_scenarios_contrasts: false,
+            })),
+        });
+        await flushPromises();
+
+        expect(document.getElementById("the_console").textContent).toContain(
+            "New runid: demo-run-new"
+        );
+        expect(statusStreamInstance.append).toHaveBeenCalledWith(
+            "Fork job is queued and waiting for the fork worker."
+        );
+        expect(statusStreamInstance.append).not.toHaveBeenCalledWith("Submitting fork job...");
     });
 
     test("propagates rendered true option defaults into the exact submit payload", async () => {

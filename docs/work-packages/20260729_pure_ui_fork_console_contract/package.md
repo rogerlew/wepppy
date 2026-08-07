@@ -130,6 +130,10 @@ Static console guidance states that an accepted fork may wait and copies source
 state available when the worker begins. Existing destination creation and
 authorized catalog visibility before dispatch are retained; the console does
 not expose destination navigation until the existing readiness gate passes.
+The transient `Submitting fork job...` message applies only while the submission
+request is unresolved. After the API accepts the job, the status log states
+`Fork job is queued and waiting for the fork worker.` so queued serial work is
+not presented as an in-progress submission.
 
 Fork options, auth/CAP submission behavior, response and tracking storage,
 copy/identity rules, downstream undisturbify jobs, and terminal semantics remain

@@ -14,6 +14,9 @@ Control: `wepppy/weppcloud/templates/controls/fork_console_control.htm`
 - Shows source run ID (read-only), an undisturbify checkbox, a `Skip wepp/runs and wepp/output` checkbox, a `Skip Omni Scenarios/Contrasts and reset controllers` checkbox, and submit/cancel controls.
 - Emits bounded stage and heartbeat updates via the `<runid>:fork` StatusStream channel only while a job is tracked.
 - Renders authoritative job status plus start/end timestamps in the status panel (`#rq_job`) via polling.
+- Shows `Submitting fork job...` only while the submission request is pending.
+  After acceptance, the console reports that the job is queued and waiting for
+  the fork worker; this may persist while earlier serial fork/archive work runs.
 - Replaces copy-heartbeat text in a live status region instead of appending it to the console log.
 
 ## Front-End Orchestration

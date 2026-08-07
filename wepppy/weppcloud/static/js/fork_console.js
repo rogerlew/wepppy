@@ -995,7 +995,6 @@
       }
 
       resetStatusLog();
-      appendStatus("Submitting fork job...");
 
       var forkUrl = origin + "/rq-engine/api/runs/" + runId + "/" + config + "/fork";
       var payload = new URLSearchParams({
@@ -1101,6 +1100,7 @@
           }
 
           saveTrackedForkRecord();
+          appendStatus("Fork job is queued and waiting for the fork worker.");
           showTrackedJob(false);
         })
         .catch(function (err) {
