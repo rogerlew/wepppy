@@ -4,12 +4,14 @@
 
 `wctl rq-info` wraps `rq info` for WEPPcloud's RQ pools, targeting Redis DB 9
 and the `default`, `batch`, and `fork-archive` queues by default. The command
-runs inside `rq-worker` unless `--service` selects another worker container,
-such as `rq-worker-fork-archive` on wepp3.
+runs inside `rq-worker` when that service exists. On the dedicated wepp3
+topology it automatically targets `rq-worker-fork-archive`; `--service` remains
+an explicit override.
 
 ## Goals
 
-1. Provide a single command that always shows both `default` and `batch` queues.
+1. Provide a single command that always shows `default`, `batch`, and
+   `fork-archive` queues.
 2. Preserve `rq info` behavior while appending user-provided flags (for example `--interval 1`).
 3. Keep the invocation explicit about Redis DB 9 while supporting both env-based and secret-file Redis auth.
 
@@ -23,7 +25,9 @@ wctl rq-info --detail --detail-limit 10 [RQ_INFO_ARGS...]
 
 ## Behavior
 
-- Executes `rq info` inside the `rq-worker` container.
+- Executes `rq info` inside `rq-worker`, or automatically inside
+  `rq-worker-fork-archive` when the effective Compose topology contains only
+  the dedicated worker.
 - Runs a lightweight inline Python preflight sync to rebuild RQ worker registry set indexes
   from live worker hash keys before invoking `rq info`.
   - If no live worker hashes remain (for example, long-running jobs exceeded worker TTL),
@@ -31,13 +35,14 @@ wctl rq-info --detail --detail-limit 10 [RQ_INFO_ARGS...]
 - Resolves the Redis URL *inside the container* via `wepppy.config.redis_settings.redis_url(RedisDB.RQ)` so it can:
   - force Redis DB 9
   - inject credentials from `REDIS_PASSWORD_FILE` (preferred) or `REDIS_PASSWORD` (legacy)
-- Always targets the `default batch` queue args, then appends any extra CLI args.
+- Always targets the `default batch fork-archive` queue args, then appends any
+  extra CLI args.
 - Returns the exit code from the underlying `rq info` command.
 - Logs the docker compose exec invocation at INFO level (Redis URLs are redacted if present in the logged command).
 - `--detail` appends a job summary (runid, description, auth actor) using the RQ Python API.
 - `--detail-limit` caps the number of jobs per state and queue (default: 50; 0 = unlimited).
-- `--service` selects the Compose service used for both RQ and detail inspection
-  (default: `rq-worker`).
+- `--service` overrides the Compose service used for both RQ and detail
+  inspection.
 
 ## Examples
 

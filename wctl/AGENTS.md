@@ -75,6 +75,9 @@ The legacy man page has been retired; Typer help (`wctl --help`) is now the cano
 - `doc-catalog`, `doc-refs`, and `doc-bench` forward flags directly to the underlying binaries; prefer adding `--path docs` during local smoke tests for faster runs.
 - `doc-toc` converts positional Markdown paths to repeated `--path` flags before invoking `markdown-doc toc`, ensuring at least one target is supplied.
 - `doc-mv` always performs a dry-run first, prompts on `/dev/tty`, then applies the move unless `--dry-run-only` (skip apply) or `--force` (skip prompt) is used. The confirmation helper lives in `doc_mv_confirm()`.
+- `rq-info` inspects the effective Compose service list: it prefers `rq-worker`
+  and falls back to `rq-worker-fork-archive` for the dedicated wepp3 topology;
+  an explicit `--service` always wins.
 - To exercise the prompt flow in non-interactive harnesses, temporarily prepend a mock `markdown-doc` binary (for example under `/tmp/mock-md`) so the command can complete without scanning the full repository.
 
 Keep this guide accurate. It’s the authoritative checklist agents should follow to keep the user experience consistent whenever wctl evolves.
