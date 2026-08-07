@@ -11,7 +11,7 @@
 - [x] Add focused unit, route, OpenAPI, Culvert-shaped, race, disclosure, and access-bound tests.
 - [x] Update durable documentation and run all required gates.
 - [x] Complete independent code, QA, and security reviews; remediate findings (`97141ba44`, `7b5c6d67a`).
-- [ ] Archive this plan and close the package in the closure commit.
+- [x] Archive this plan and close the package in closure commit `4565ec00b`.
 
 ## Surprises & Discoveries
 
@@ -65,8 +65,8 @@ uses one-based public rank and zero-based `jobs_ahead`, omits on mixed origins
 and normal races, and never changes aggregate status or authentication. Focused
 and full validation passed. Review artifacts record no unresolved High/Medium
 findings; the one ordered queue snapshot is the explicit residual cost allowed
-by the approved contract. The remaining closure action is archival and commit
-recording.
+by the approved contract. The plan is archived and the package is closed in
+`4565ec00b`.
 
 ## Context and Orientation
 

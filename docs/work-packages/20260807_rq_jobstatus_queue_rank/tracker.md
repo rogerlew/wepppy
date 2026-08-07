@@ -37,8 +37,7 @@
 
 ### Done
 
-- Package closure is ready; the closure commit SHA will be added immediately
-  after the final staged-diff review.
+- Package closed in `4565ec00b3b6a6d494b1abf7585cfb5d2b95f19c`.
 
 ## Timeline
 
@@ -184,7 +183,7 @@ run-pytest tests --maxfail=1` passed with 5,961 passed, 61 skipped, and 1,054
 warnings in 13:03.
 
 **Commits**: checkpoint `7ce0cf524`, implementation `a416e7dd7`, remediation
-`97141ba44`, `7b5c6d67a`; closure commit pending.
+`97141ba44`, `7b5c6d67a`, closure `4565ec00b`.
 
 ## Watch List
 

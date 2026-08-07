@@ -136,7 +136,7 @@ artifacts, validation evidence, intentional local commits, and archived plan.
 - Contract checkpoint: `7ce0cf524d9e7f4d2be6270ca220b574f04e91ed`.
 - Implementation: `a416e7dd7a30007fe67e74982db4d7fc0e16063d`.
 - Review remediation: `97141ba44`.
-- Closure commit: recorded in `tracker.md` after commit creation.
+- Closure commit: `4565ec00b3b6a6d494b1abf7585cfb5d2b95f19c`.
 - The approved one-snapshot queue-read tradeoff is documented in the code,
   contract decision, and dedicated security review. No queue wiring, auth, JWT,
   or route inventory changes were made.

@@ -968,8 +968,7 @@ queue wiring, dependency edges, cancellation, and response status codes remain
 unchanged.
 
 **Commits**: checkpoint `7ce0cf524`, implementation `a416e7dd7`, review
-remediation `97141ba44` and `7b5c6d67a`; closure commit recorded in the package
-tracker after final commit.
+remediation `97141ba44` and `7b5c6d67a`; closure `4565ec00b`.
 
 **Validation Notes**:
 
