@@ -6,9 +6,9 @@
 
 **Timezone**: UTC  
 **Started**: 2026-05-05 20:26 UTC  
-**Current phase**: Canonical-Parquet incident bridge checkpoint
+**Current phase**: Canonical-Parquet incident bridge implementation validation
 **Last updated**: 2026-08-07 UTC
-**Next milestone**: Ratify and implement bounded current-inventory reads
+**Next milestone**: Commit implementation and run production canary
 **Security impact**: `high` for SURF-19A
 **Dedicated security review**: `yes`
 **Security artifact**: `artifacts/2026-08-07_checkpoint_ops_security_review.md`
@@ -30,8 +30,9 @@
 
 ### In Progress
 
-- [ ] Replace per-run `.slp` and ash globs with canonical Parquet footer reads.
-- [ ] Close dual checkpoint review and commit standalone ancestor.
+- [x] Replace per-run `.slp` and ash globs with canonical Parquet footer reads.
+- [x] Enforce single-flight publication and rollback every promotion failure.
+- [x] Close dual checkpoint review and commit standalone ancestor `64db4e554`.
 
 ### Blocked
 
@@ -39,6 +40,8 @@
 
 ### Done
 
+- [x] Completed independent correctness and operations/security implementation reviews with no remaining high/medium findings (2026-08-07 UTC).
+- [x] Passed 29 focused tests and the full repository suite: 5,929 passed, 61 skipped (2026-08-07 UTC).
 - [x] Diagnosed production job `7aa39c98-de7c-4298-8d5f-35e3784775e4` timing out after 36,000 seconds in the per-run `.slp` glob (2026-08-07 UTC).
 - [x] Recorded operator approval to use canonical Parquet counts without legacy parity (2026-08-07 UTC).
 
@@ -149,9 +152,9 @@
 
 ### Code and Tests
 
-- [ ] SURF-19A footer-only and ignored-legacy-file tests pass.
-- [ ] Missing, corrupt, racing, warning, zero-discovery, and watershed/ash systemic-containment tests pass.
-- [ ] Location, project aggregation, TTL, and all-output last-good tests pass.
+- [x] SURF-19A footer-only and ignored-legacy-file tests pass.
+- [x] Missing, corrupt, racing, warning, zero-discovery, and watershed/ash systemic-containment tests pass.
+- [x] Location, project aggregation, TTL, single-flight, and all-output promotion-rollback tests pass.
 
 - [ ] Ledger module unit tests pass.
 - [ ] Backfill idempotence tests pass.

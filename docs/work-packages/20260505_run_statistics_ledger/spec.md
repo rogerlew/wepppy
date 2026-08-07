@@ -235,6 +235,13 @@ maintenance compiler uses only bounded canonical artifact reads:
   25 percent of discovered runs abort publication. A new empty destination
   with no prior output may publish an initial empty set. On abort every
   last-known-good output remains in place.
+- Sorted nonblocking locks on every configured output directory make the
+  compiler single-flight even when `run_locations_path` uses its supported
+  cross-directory override.
+  Candidate and backup names are generation-unique; promotion failure restores
+  every prior output before the job fails. A durable publication journal lets
+  the next locked invocation recover interruption or rollback failure, and
+  generation cleanup removes unpublished candidate files containing access data.
 
 This bridge preserves output field names and shapes, but intentionally does not
 preserve legacy values. The fields represent rows in current canonical

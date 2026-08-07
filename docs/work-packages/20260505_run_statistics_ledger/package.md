@@ -102,6 +102,11 @@ The goal is to make project counts by configuration, WEPP hillslope run counts, 
 - **Danger signals**: repeat timeout, systemic guard trip, implausible count collapse, widespread warnings, partial publication, or location/project loss caused only by missing counts.
 - **Observation window**: 14 days after production rollout.
 - **Temporary calluses introduced**: systemic publication guard and stable legacy keys during migration.
+- **Publication support**: a nonblocking output-directory file lock prevents
+  overlapping compilers; generation-unique candidates and backups restore the
+  complete prior set on promotion failure. A durable journal supports
+  next-invocation recovery after interruption, and failure cleanup removes
+  unpublished access-data candidates.
 - **Sunset owner and due date**: Roger Lew / WEPPcloud operator records a
   keep-reduce-remove decision 14 calendar days after SURF-19A activation.
 - **Systemic-guard sunset criteria**: Keep the guard if it trips, any correlated

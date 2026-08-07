@@ -16,7 +16,9 @@ This plan implements the contract in `docs/work-packages/20260505_run_statistics
 - [x] (2026-05-05 20:42 UTC) Storage decision revised: Postgres source-of-truth ledger; stats endpoint inventory captured.
 - [x] (2026-05-05 23:05 UTC) Documentation consistency audit aligned storage, endpoint migration scope, and validation tracking.
 - [x] (2026-08-07 UTC) Production ten-hour compiler timeout diagnosed at the per-run `.slp` glob; operator approved canonical Parquet counts without legacy parity.
-- [ ] Ratify and implement the bounded canonical-Parquet active-inventory bridge.
+- [x] (2026-08-07 13:53 UTC) Ratified SURF-19A checkpoint in standalone ancestor `64db4e554` after dual review.
+- [x] (2026-08-07 UTC) Completed SURF-19A implementation and independent correctness/operations-security review; 29 focused and 5,929 full-suite tests passed.
+- [ ] Deploy and run the fenced production canary; record duration, artifact health, guard state, and output totals.
 - [ ] Implement the Postgres statistics ledger module and unit tests.
 - [ ] Add deterministic backfill and rollup generation tests.
 - [ ] Add WEPP hillslope and WATAR runtime hooks.
