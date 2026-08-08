@@ -358,6 +358,48 @@ cancellable or justify a second worker. Use Redis queue inspection plus
 host-local process state, and fence wepp3 during recovery when the old process
 cannot be proven dead.
 
+## Production Incident: Stale NFS Handle During WEPP Watershed Close (2026-08-08)
+
+Job `081511ff-e854-4d60-ad19-fdef4f89971a` for run
+`mdobre-webbed-glue` failed on the production `wepp2` default worker while
+closing a WEPP watershed output stream:
+
+- RQ worker: `c7021dd8bf844dceb3e282b417875599`
+- Worker container: `6c2f64355f8b...` on `wepp2`
+  (`192.168.100.217`)
+- Started: `2026-08-08T02:52:12.409143Z`
+- Ended: `2026-08-08T03:08:56.959061Z`
+- Elapsed: `1004.549918` seconds
+- Run path: `/geodata/wc1/runs/md/mdobre-webbed-glue`
+  (container view: `/wc1/runs/md/mdobre-webbed-glue`)
+- Failure point: `wepp_runner/wepp_runner.py`,
+  `_close_stream_with_diagnostics()`, at `stream.close()`
+- Error: `OSError: [Errno 116] Stale file handle`
+
+The worker's run path was backed by the production NFSv4.2 mount:
+
+```text
+nas.rocket.net:/wepp on /geodata type nfs4
+rw,noatime,vers=4.2,hard,timeo=600,retrans=2,rsize=65536,wsize=65536,
+acregmax=30,acdirmin=5,clientaddr=192.168.100.217,addr=192.168.100.101
+```
+
+Redis `exc_info`, `job.meta["exc_string"]`, and the run-scoped
+`exceptions.log` contained the same stale-handle traceback. The run directory
+was accessible from both `wepp1` and `wepp2` during follow-up, and narrowly
+filtered kernel logs retained no matching NFS outage message for the failure
+window. The evidence therefore attributes the job failure to an NFS stale-file
+handle at the `wepp2` client/NAS filesystem boundary, but does not establish a
+NAS-wide outage or distinguish among a transient remount, NFS state-recovery
+event, export change, or server-side file replacement.
+
+Operational takeaway: classify `Errno 116` during WEPP stream close as an
+infrastructure/NFS failure rather than a model-computation failure unless
+separate model evidence exists. Because close/flush did not complete reliably,
+do not assume outputs are complete merely because files remain present. Verify
+required artifacts before retrying or consuming results. A currently readable
+run path shows recovery, not that the failed write was durable.
+
 ## Small-File Read/Write/Delete + Metadata Microbench (2026-02-10)
 
 This is a lightweight microbench intended to approximate UI pain on metadata-heavy paths (many small files).
