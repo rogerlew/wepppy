@@ -49,10 +49,11 @@ does not run or authorize the Topanga census.
 
 ## Outcomes & Retrospective
 
-Gate 2.1 remediation is complete. The acceptance report records active-trace
+Gate 2.1 remediation is complete and accepted. The acceptance report records active-trace
 parity in both 1980 lanes, exact selected-method replays, strict schema
-validation, the 1986 anomalies, and the inactive control. Phase 2 remains held
-until this remediation receives review; no census work was run.
+validation, the 1986 anomalies, and the inactive control. Phase 2A is now
+authorized under the separate review disposition; no census work was run by
+this remediation package.
 
 ## Context and Orientation
 

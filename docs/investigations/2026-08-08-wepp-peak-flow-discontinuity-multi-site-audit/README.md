@@ -5,11 +5,12 @@
 > changes propagate through watershed routing, and whether the behavior
 > generalizes beyond Topanga.
 
-**Status: GATE 2.1 REMEDIATION COMPLETE; PHASE 2 HELD FOR REVIEW
-(`2026-08-08`).** Versioned schemas, immutable event-packet capture,
+**Status: GATE 2.1 ACCEPTED; PHASE 2A AUTHORIZED (`2026-08-08`).** Versioned
+schemas, immutable event-packet capture,
 process-isolated solver replay, active-trace parity, and compact Topanga
-acceptance fixtures now pass the remediation command. The full Topanga census
-remains blocked pending an explicit GO. Cross-site, prevalence, snow, and
+acceptance fixtures pass the remediation command. A stratified multi-hillslope
+pilot is authorized now; the full Topanga census is automatically authorized
+after its declared exit criteria pass. Cross-site prevalence, snow-site, and
 overland flow element (OFE) work remains deferred.
 
 ## Why This Investigation Exists
@@ -106,8 +107,7 @@ summarized in the
 
 #### Phase 1 result
 
-**Status: Gate 2.1 remediation passed on 2026-08-08. Phase 2 remains blocked
-pending an explicit review and authorization.**
+**Status: Gate 2.1 accepted on 2026-08-08. Phase 2A is authorized.**
 
 The [Phase 1 work package](../../work-packages/20260808_peakflow_phase1/package.md)
 contains the schemas, build manifests, parity evidence, immutable event
@@ -116,6 +116,9 @@ byte-identical copies of all seven canonical Hill 106 outputs with tracing
 actively enabled in both Ksat lanes. Its selected-method replay matched the
 post-clamp production peak exactly for both lanes. The observer source is the
 pushed WEPP-Forest commit `ea25ad79`.
+
+The authoritative authorization and pilot exit criteria are recorded in the
+[Gate 2.1 review disposition](../../work-packages/20260808_peakflow_gate21/artifacts/gate21-review-disposition.md).
 
 The legacy `APPMTH` input has `v* = 1.3753` for Ksat 20 and `v* = 4.4017` for
 Ksat 35, both outside the documented `v* ≤ 1` derivation range. Recomputing

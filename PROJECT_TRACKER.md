@@ -353,20 +353,20 @@ When resuming Kubernetes work:
 
 ## 🚧 In Progress
 
-### Peak-Flow Gate 2.1 Remediation
+### Peak-Flow Discontinuity Multi-Site Audit
 
 **Started**: 2026-08-08
-**Size**: Narrow assurance remediation
+**Size**: Multi-phase investigation
 **Priority**: High
 **Security impact**: `none`
-**Link**: [docs/work-packages/20260808_peakflow_gate21/](docs/work-packages/20260808_peakflow_gate21/)
+**Link**: [multi-site audit](docs/investigations/2026-08-08-wepp-peak-flow-discontinuity-multi-site-audit/README.md)
 
-**Description**: Correct observer branch logging, APPMTH validity diagnostics,
-complete event packets, active-trace parity, schema conformance, and full
-one-command acceptance. The Topanga Phase 2 census remains held.
+**Description**: Gate 2.1 assurance remediation is accepted. Phase 2A now
+applies the validated observer and replay machinery in a stratified Topanga
+multi-hillslope pilot before the full candidate census.
 
-**Next Steps**: Review the passing Gate 2.1 evidence and issue an explicit
-GO/HOLD disposition before any pilot or census execution.
+**Next Steps**: Execute the authorized stratified Phase 2A pilot and evaluate
+its automatic full-census exit criteria.
 
 ---
 

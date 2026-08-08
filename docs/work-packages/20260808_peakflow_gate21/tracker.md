@@ -4,9 +4,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-08 21:55 UTC
-**Current phase**: Remediation complete; awaiting GO review
-**Last updated**: 2026-08-08 22:55 UTC
-**Next milestone**: Independent Gate 2.1 disposition
+**Current phase**: Accepted; Phase 2A released
+**Last updated**: 2026-08-08 23:20 UTC
+**Next milestone**: Phase 2A stratified multi-hillslope pilot
 **Security impact**: `none`
 **Dedicated security review**: `no`
 **Security artifact**: N/A
@@ -23,7 +23,7 @@
 
 ### Blocked
 
-- [ ] Phase 2 census — held pending an explicit post-remediation GO.
+- [ ] Cross-site, snow-site, and OFE phases — deferred under Gates 4 and 5.
 
 ### Done
 
@@ -32,12 +32,14 @@
 - [x] Observer corrected and pinned at `ea25ad79` (2026-08-08 22:35 UTC).
 - [x] Typed schemas and APPMTH domain diagnostics corrected (2026-08-08 22:44 UTC).
 - [x] Complete one-command acceptance passed (2026-08-08 22:53 UTC).
+- [x] Gate 2.1 accepted and Phase 2A authorized (2026-08-08 23:20 UTC).
 
 ## Timeline
 
 - **2026-08-08 21:55 UTC** – Gate 2.1 package opened; census hold retained.
 - **2026-08-08 22:53 UTC** – Both active-trace parity lanes, exact replay,
   1986 fixtures, and inactive control passed; census hold retained for review.
+- **2026-08-08 23:20 UTC** – Review accepted Gate 2.1 and released Phase 2A.
 
 ## Decisions Log
 
@@ -70,7 +72,7 @@ Gate 2.1 evidence without rewriting the historical Phase 1 record.
 ### Documentation
 
 - [x] Package, tracker, ExecPlan, investigation, and artifact guide synchronized.
-- [ ] Documentation lint passes.
+- [x] Documentation lint passes.
 
 ### Testing
 
@@ -112,6 +114,23 @@ Gate 2.1 evidence without rewriting the historical Phase 1 record.
 - Obtain an independent GO/HOLD disposition before any pilot or census.
 
 **Test results**: Gate 2.1 acceptance passed; targeted pytest pending final gate.
+
+### 2026-08-08 23:20 UTC: Review accepted
+
+**Agent/Contributor**: Human reviewer
+
+**Work completed**:
+
+- Accepted all seven Gate 2.1 remediation closures.
+- Authorized the staged Phase 2A pilot and recorded automatic census exit
+  criteria.
+
+**Next steps**:
+
+- Scaffold and execute the stratified Phase 2A pilot within the authorized
+  scope.
+
+**Test results**: review disposition only; no model execution performed.
 
 ## Watch List
 

@@ -1,6 +1,6 @@
 # Peak-Flow Gate 2.1 Remediation
 
-**Status**: Remediation complete; awaiting review (2026-08-08)
+**Status**: Accepted; Phase 2A authorized (2026-08-08)
 **Timezone**: UTC
 
 ## Overview
@@ -117,7 +117,7 @@ command trustworthy across the event population before any Phase 2 census.
 ## References
 
 - [`tracker.md`](tracker.md) — live remediation status.
-- [`prompts/active/gate21_execplan.md`](prompts/active/gate21_execplan.md) —
+- [`prompts/completed/gate21_execplan.md`](prompts/completed/gate21_execplan.md) —
   executable plan.
 - [Phase 1 artifacts](../20260808_peakflow_phase1/artifacts/README.md).
 
@@ -128,7 +128,10 @@ command trustworthy across the event population before any Phase 2 census.
 - Full-precision 1980 expected packet/replay contract.
 - Active parity and Gate 2.1 acceptance reports.
 - One-command fixture acceptance entry point.
+- [Accepted review disposition](artifacts/gate21-review-disposition.md).
 
 ## Follow-up Work
 
-The census remains held until this package receives an explicit GO review.
+Phase 2A is authorized. The full Topanga census follows automatically after
+the pilot satisfies the exit criteria in the review disposition. Gates 4 and
+5 continue to defer cross-site prevalence, snow-site, and OFE work.
