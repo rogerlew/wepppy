@@ -1,3 +1,5 @@
+from uuid import UUID
+
 import pytest
 
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
@@ -151,6 +153,7 @@ def test_migrate_run_allows_admin_without_run_claim(
     assert response.status_code == 202
     payload = response.json()
     assert payload["job_id"]
+    assert str(UUID(payload["job_id"])) == payload["job_id"]
     assert payload["status_url"] == f"/rq-engine/api/jobstatus/{payload['job_id']}"
     assert payload["result"]["was_readonly"] is True
 

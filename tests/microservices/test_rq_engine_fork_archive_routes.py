@@ -1,6 +1,7 @@
 import contextlib
 import asyncio
 from types import SimpleNamespace
+from uuid import UUID
 
 import pytest
 from rq.exceptions import NoSuchJobError
@@ -329,6 +330,7 @@ def test_fork_enqueues_job(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
     assert enqueue_args[0] is fork_archive_routes.fork_rq
     assert enqueue_args[1] == ("run-1", "new-run", True, True, True)
     assert "timeout" in enqueue_kwargs
+    assert str(UUID(str(enqueue_kwargs["job_id"]))) == enqueue_kwargs["job_id"]
 
 
 @pytest.mark.parametrize(

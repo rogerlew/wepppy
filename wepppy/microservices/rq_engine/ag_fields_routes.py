@@ -39,6 +39,7 @@ from wepppy.nodb.mods.ag_fields.routing_schemes import (
 )
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.rq.auth_actor import current_auth_actor
+from wepppy.rq.job_id import new_rq_job_id
 from wepppy.rq.ag_fields_rq import (
     AGFIELDS_BUILD_SUBFIELDS_JOB_KEY,
     AGFIELDS_PLANTDB_JOB_KEY,
@@ -227,7 +228,7 @@ def _enqueue_watershed_jobs(
                         f"(schemes={','.join(active_schemes)})."
                     )
                 queue = Queue(connection=redis_conn)
-                planned_job_ids = {scheme.value: str(uuid4()) for scheme in schemes}
+                planned_job_ids = {scheme.value: new_rq_job_id() for scheme in schemes}
                 if len(schemes) == 1:
                     scheme = schemes[0]
                     job_id = planned_job_ids[scheme.value]
@@ -243,8 +244,8 @@ def _enqueue_watershed_jobs(
                     )
                     root_job_id = job_id
                 else:
-                    parent_job_id = str(uuid4())
-                    finalizer_job_id = str(uuid4())
+                    parent_job_id = new_rq_job_id()
+                    finalizer_job_id = new_rq_job_id()
                     parent_meta: dict[str, Any] = {
                         "runid": runid,
                         "child_dispatch_lock_key": (

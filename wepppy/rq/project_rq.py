@@ -42,7 +42,7 @@ from wepppy.config.redis_settings import (
     redis_connection_kwargs,
     redis_host,
 )
-
+from wepppy.rq.job_id import new_rq_job_id
 from wepppy.weppcloud.utils.helpers import get_wd, get_primary_wd
 from wepppy.weppcloud.user_preferences import (
     WBT_BOUNDARY_POLICY_SNAPSHOT_KEY,
@@ -659,8 +659,8 @@ def _enqueue_serial_subcatchment_tree(
     if existing is not None:
         return existing
 
-    child_id = uuid.uuid4().hex
-    receipt_id = uuid.uuid4().hex
+    child_id = new_rq_job_id()
+    receipt_id = new_rq_job_id()
     original_parent_meta = dict(parent_job.meta)
 
     for attempt in range(WBT_SUBCATCHMENT_ADMISSION_RETRY_ATTEMPTS):
@@ -2850,7 +2850,7 @@ def fork_rq(
             conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
             with redis.Redis(**conn_kwargs) as redis_conn:
                 q = Queue(connection=redis_conn)
-                finalizer_job_id = uuid.uuid4().hex
+                finalizer_job_id = new_rq_job_id()
                 _transfer_profile_fork_claim(
                     new_runid,
                     new_wd,

@@ -6,7 +6,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_job",
-    "source_lineno": 167,
+    "source_lineno": 168,
     "source_module": "wepppy/microservices/rq_engine/ag_fields_routes.py"
   },
   {
@@ -16,7 +16,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_watershed_jobs",
-    "source_lineno": 238,
+    "source_lineno": 239,
     "source_module": "wepppy/microservices/rq_engine/ag_fields_routes.py"
   },
   {
@@ -26,7 +26,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_watershed_jobs",
-    "source_lineno": 262,
+    "source_lineno": 263,
     "source_module": "wepppy/microservices/rq_engine/ag_fields_routes.py"
   },
   {
@@ -270,7 +270,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_migration_job",
-    "source_lineno": 134,
+    "source_lineno": 135,
     "source_module": "wepppy/microservices/rq_engine/migration_routes.py"
   },
   {
@@ -610,7 +610,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_serial_subcatchment_tree",
-    "source_lineno": 724,
+    "source_lineno": 725,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -622,7 +622,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_serial_subcatchment_tree",
-    "source_lineno": 732,
+    "source_lineno": 733,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -632,7 +632,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 1541,
+    "source_lineno": 1542,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -642,7 +642,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 1557,
+    "source_lineno": 1558,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -654,7 +654,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 1565,
+    "source_lineno": 1566,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -666,7 +666,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fork_rq",
-    "source_lineno": 2862,
+    "source_lineno": 2863,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {

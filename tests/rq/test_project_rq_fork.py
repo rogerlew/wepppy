@@ -925,6 +925,8 @@ def test_fork_rq_undisturbify_enqueues_finish_job(monkeypatch: pytest.MonkeyPatc
     assert depends_on.dependencies == ["wepp-job"]
     assert depends_on.allow_failure is True
     assert isinstance(finalizer_job_id, str) and finalizer_job_id
+    assert len(finalizer_job_id) == 36
+    assert finalizer_job_id.count("-") == 4
 
 
 def test_fork_rq_reports_ttl_import_failures(

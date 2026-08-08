@@ -17,6 +17,7 @@ from wepppy.nodb.base import lock_statuses
 from wepppy.nodb.core.ron import Ron
 from wepppy.nodb.redis_prep import RedisPrep
 from wepppy.nodb.status_messenger import StatusMessenger
+from wepppy.rq.job_id import new_rq_job_id
 from wepppy.rq.migrations_rq import migrations_rq
 from wepppy.weppcloud.utils.helpers import get_run_owners_lazy, get_wd
 
@@ -26,7 +27,6 @@ from .responses import error_response, error_response_with_traceback
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
-
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
 MIGRATION_JOB_KEY = "migrations"
@@ -128,7 +128,7 @@ def _enqueue_migration_job(
                             "A migration job is already running for this project"
                         )
 
-                job_id = uuid4().hex
+                job_id = new_rq_job_id()
                 prep.set_rq_job_id(MIGRATION_JOB_KEY, job_id)
                 queue = Queue(connection=redis_conn)
                 job = queue.enqueue_call(

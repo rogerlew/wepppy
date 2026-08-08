@@ -4,6 +4,8 @@ from pathlib import Path
 
 import pytest
 
+from wepppy.weppcloud.routes.rq.job_dashboard import routes
+
 pytestmark = pytest.mark.routes
 
 
@@ -46,3 +48,28 @@ def test_dashboard_loads_controller_stale_check_and_qr_assets() -> None:
     assert "static_url('js/controllers-gl.js')" in template
     assert "static_url('js/controllers_gl_stale_check.js')" in template
     assert "static_url('js/qrcode.js')" in template
+
+
+@pytest.mark.parametrize(
+    "job_id",
+    [
+        "b774ed39c0ef44f2bb0efbdc6dda2c84",
+        "b774ed39-c0ef-44f2-bb0e-fbdc6dda2c84",
+    ],
+)
+def test_dashboard_preserves_exact_rq_job_id(
+    monkeypatch: pytest.MonkeyPatch,
+    job_id: str,
+) -> None:
+    rendered: dict[str, str] = {}
+
+    def fake_render_template(template_name: str, **context: str) -> str:
+        rendered.update(context)
+        return template_name
+
+    monkeypatch.setattr(routes, "render_template", fake_render_template)
+
+    result = routes.job_dashboard_route.__wrapped__(job_id)
+
+    assert result == "dashboard_pure.htm"
+    assert rendered["job_id"] == job_id

@@ -345,6 +345,8 @@ def test_same_run_policy_trees_serialize_through_abstraction(
                 receipt_meta={},
                 parent_job=parent,
             )
+            assert len(build.id) == 36 and build.id.count("-") == 4
+            assert len(receipt.id) == 36 and receipt.id.count("-") == 4
             assert parent.meta["jobs:0,func:build_subcatchments_rq"] == build.id
             assert (
                 parent.meta["jobs:1,func:abstract_watershed_rq"]
