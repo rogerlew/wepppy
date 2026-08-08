@@ -65,6 +65,10 @@ Git LFS rule for `*.pdf` files.
   cases, 42 horizon-Ksat × anisotropy cases, and 48 fixed-Ksat anisotropy ×
   PMET-Kcb cases. The closest reasonable candidate produces `9.35 mm` total
   runoff, still above the provisional `6.2 mm` target.
+- [`artifacts/wepp-peak-flow-solver-documentation-and-topanga-evidence.md`](artifacts/wepp-peak-flow-solver-documentation-and-topanga-evidence.md)
+  reconciles the official NSERL peak-flow method, the pinned WEPP-Forest
+  implementation, and the controlled Topanga discontinuity evidence for
+  stakeholder review.
 
 ## Current Findings
 
