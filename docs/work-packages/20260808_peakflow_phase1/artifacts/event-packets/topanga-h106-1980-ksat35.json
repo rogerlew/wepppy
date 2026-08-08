@@ -1,6 +1,6 @@
 {
   "event_id": "topanga-h106-1980-02-14-ksat35",
-  "payload_sha256": "a3540a2c711d8fd93a433bef13566f797e9e3ad7bff23c130de3a5225bd5388d",
+  "payload_sha256": "c39cd934279e17015658c73f141e0d35870f86377deae9b3018151082135a0e5",
   "post_surplus_forcing": [
     {
       "point_ordinal": 1,
@@ -261,13 +261,18 @@
     "calendar_year": 1980,
     "effective_length_m": 111.4000015258789,
     "forcing_max_post_surplus_m_s": 2.6209552743239328e-05,
+    "hillslope_id": "106",
     "m": 1.5,
     "model_day": 45,
     "ns": 22,
     "ofe": 1,
     "positive_excess_duration_s": 2478.439453125,
     "remax_pre_surplus_m_s": 5.374457032303326e-06,
+    "run_id": "mutant-ksat35",
     "runoff_post_reconciliation_m": 0.058631740510463715,
+    "runoff_pre_reconciliation_m": 0.006993219256401062,
+    "solver_call_ordinal": 1,
+    "surdra_raw_m": 0.05163852125406265,
     "surplus_added_rate_m_s": 2.0835095710936002e-05,
     "surplus_assignment_duration_s": 2478.439453125,
     "surplus_assignment_mode": "positive_excess",
@@ -275,5 +280,5 @@
     "tp2_s": 5100.0
   },
   "schema_version": "1.0.0",
-  "source_build_id": "wepp-f24c957e-phase1-observer"
+  "source_build_id": "wepp-ea25ad79-gate21-observer"
 }

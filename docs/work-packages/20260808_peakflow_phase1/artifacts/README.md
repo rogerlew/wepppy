@@ -22,7 +22,7 @@ so `HDRIVE` cannot overwrite COMMON-block state in the observational run.
 | --- | --- |
 | `schemas/*.schema.json` | Gate 0 grains and field contracts are versioned |
 | `observer-build-manifest.json` | Observational build provenance |
-| `observer-parity-report.json` | All seven canonical outputs are byte-identical with tracing disabled |
+| `observer-parity-report.json` | All seven canonical outputs are byte-identical with tracing active in both Ksat lanes |
 | `event-packets/*.json` | Full-precision 1980 event operands and pre-/post-surplus forcing |
 | `replay-build-manifest.json` | Standalone driver and linked legacy routines |
 | `replay-reports/*.json` | Exact selected-method replay and separately labeled counterfactuals |
@@ -31,19 +31,20 @@ so `HDRIVE` cannot overwrite COMMON-block state in the observational run.
 
 ## Observational Build
 
-The source transformation is hash-guarded and refuses any `irs.for` other than
-the pinned acceptance version:
+The observer is committed and pushed on WEPP-Forest branch
+`feature/peakflow-phase1-observer` at `ea25ad79`. The staging helper is
+hash-guarded and refuses any `irs.for` other than that pinned acceptance file:
 
 ```bash
 python tools/peakflow_phase1_instrument.py \
-  /path/to/pinned/src/irs.for \
-  /path/to/isolated-build/src/irs.for
+  /path/to/ea25ad79/src/irs.for /path/to/isolated-build/src/irs.for
 make -C /path/to/isolated-build/src COMPILER=gfortran wepp_hill
 ```
 
 Place an empty `peak_diag.on` beside the run file to enable `peak_diag.csv`.
-Without that marker, the seven files under the fixture's `output/` directory
-must match the reference hashes in `observer-parity-report.json` byte for byte.
+Gate 2.1 runs each Ksat lane both with and without that marker. All seven
+canonical files, including the current `.hbp` pass artifact, must match byte
+for byte within each lane.
 
 ## Standalone Replay
 
@@ -53,8 +54,9 @@ Compile `peak_replay_driver.for` with the exact pinned routines listed in
 ```bash
 python tools/peakflow_phase1_replay.py packetize peak_diag.csv packet.json \
   --year 1980 --day 45 \
-  --build-id wepp-f24c957e-phase1-observer \
-  --event-id topanga-h106-1980-02-14-ksat20
+  --build-id wepp-ea25ad79-gate21-observer \
+  --event-id topanga-h106-1980-02-14-ksat20 \
+  --run-id baseline-ksat20 --hillslope-id 106 --ofe 1
 
 python tools/peakflow_phase1_replay.py replay packet.json \
   --binary /path/to/peak_replay \
@@ -68,19 +70,13 @@ claim about legacy WEPP behavior.
 
 ## Acceptance Fixtures
 
-Run the compact 1980 fixture, 1986 fixtures, and inactive control from the
-repository root:
+Run the complete Gate 2.1 chain from the repository root. The two environment
+variables point to binaries whose hashes must match the committed manifests:
 
 ```bash
+WEPP_GATE21_OBSERVER_BINARY=/path/to/wepp_hill \
+WEPP_GATE21_REPLAY_BINARY=/path/to/peak_replay \
 docs/investigations/2026-08-08-wepp-peak-flow-discontinuity-multi-site-audit/artifacts/topanga-h106-1980-ksat/run-and-check.sh
-
-python tools/peakflow_phase1_1986_fixture.py \
-  docs/investigations/2026-08-07-topanga-2025-fire-peak-flow-analysis/artifacts/openwepp-hill106-effective-duration-reproducer \
-  --binary wepp_runner/bin/wepp_260803
-
-python tools/peakflow_phase1_negative_control.py \
-  docs/investigations/2026-08-08-wepp-peak-flow-discontinuity-multi-site-audit/artifacts/topanga-h106-1980-ksat \
-  --binary wepp_runner/bin/wepp_260803
 ```
 
 ## Limits

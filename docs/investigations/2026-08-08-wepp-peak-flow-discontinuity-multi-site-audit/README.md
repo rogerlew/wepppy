@@ -5,12 +5,12 @@
 > changes propagate through watershed routing, and whether the behavior
 > generalizes beyond Topanga.
 
-**Status: CONDITIONALLY ACCEPTED — PROTOCOL DEVELOPMENT AND TOPANGA FIXTURE
-HARDENING (`2026-08-08`).** Work is authorized on versioned schemas, immutable
-event-packet capture, process-isolated solver replay, build provenance, and
-compact Topanga acceptance fixtures. The full Topanga census is blocked until
-Gates 0–2 pass. Cross-site, prevalence, snow, and overland flow element (OFE)
-work remains deferred.
+**Status: GATE 2.1 REMEDIATION COMPLETE; PHASE 2 HELD FOR REVIEW
+(`2026-08-08`).** Versioned schemas, immutable event-packet capture,
+process-isolated solver replay, active-trace parity, and compact Topanga
+acceptance fixtures now pass the remediation command. The full Topanga census
+remains blocked pending an explicit GO. Cross-site, prevalence, snow, and
+overland flow element (OFE) work remains deferred.
 
 ## Why This Investigation Exists
 
@@ -106,15 +106,16 @@ summarized in the
 
 #### Phase 1 result
 
-**Status: Gates 0–2 passed on 2026-08-08. Phase 2 remains blocked pending an
-explicit review and authorization.**
+**Status: Gate 2.1 remediation passed on 2026-08-08. Phase 2 remains blocked
+pending an explicit review and authorization.**
 
 The [Phase 1 work package](../../work-packages/20260808_peakflow_phase1/package.md)
 contains the schemas, build manifests, parity evidence, immutable event
 packets, and process-isolated replay reports. The observational build produced
 byte-identical copies of all seven canonical Hill 106 outputs with tracing
-disabled. Its selected-method replay matched the production peak exactly for
-both 1980 Ksat lanes.
+actively enabled in both Ksat lanes. Its selected-method replay matched the
+post-clamp production peak exactly for both lanes. The observer source is the
+pushed WEPP-Forest commit `ea25ad79`.
 
 The legacy `APPMTH` input has `v* = 1.3753` for Ksat 20 and `v* = 4.4017` for
 Ksat 35, both outside the documented `v* ≤ 1` derivation range. Recomputing

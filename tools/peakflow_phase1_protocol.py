@@ -33,6 +33,74 @@ SHA256 = {"type": "string", "pattern": "^[0-9a-f]{64}$"}
 NUMBER = {"type": "number"}
 NONNEGATIVE = {"type": "number", "minimum": 0}
 
+FORCING_POINT = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["point_ordinal", "time_s", "rate_m_s"],
+    "properties": {
+        "point_ordinal": {"type": "integer", "minimum": 1},
+        "time_s": NONNEGATIVE,
+        "rate_m_s": NONNEGATIVE,
+    },
+}
+
+FORCING_INTERVAL = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["interval_ordinal", "start_s", "end_s", "rate_m_s"],
+    "properties": {
+        "interval_ordinal": {"type": "integer", "minimum": 1},
+        "start_s": NONNEGATIVE,
+        "end_s": NONNEGATIVE,
+        "rate_m_s": NONNEGATIVE,
+    },
+}
+
+APP_DIAGNOSTIC = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["vave_m_s", "vstar", "tstar", "tc", "qpstar", "equation_branch", "within_documented_vstar_domain", "within_documented_tstar_domain", "within_documented_qpstar_domain", "finite_result"],
+    "properties": {
+        "vave_m_s": NONNEGATIVE,
+        "vstar": NUMBER,
+        "tstar": NUMBER,
+        "tc": {"type": ["number", "null"]},
+        "qpstar": NUMBER,
+        "equation_branch": {"enum": ["partial_equilibrium", "quasi_equilibrium_a", "quasi_equilibrium_b", "constant_or_out_of_domain"]},
+        "within_documented_vstar_domain": {"type": "boolean"},
+        "within_documented_tstar_domain": {"type": "boolean"},
+        "within_documented_qpstar_domain": {"type": "boolean"},
+        "finite_result": {"type": "boolean"},
+    },
+}
+
+REPLAY_PROPERTIES = {
+    "appmth_peak_m_s": NONNEGATIVE,
+    "hdrive_peak_m_s": NONNEGATIVE,
+    "hdrive_nqt": {"type": "integer", "minimum": 0},
+    "hdrive_nq": {"type": "integer", "minimum": 0},
+    "hdrive_final_routed_volume_fraction": NONNEGATIVE,
+    "appmth": APP_DIAGNOSTIC,
+}
+
+LEGACY_REPLAY = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": list(REPLAY_PROPERTIES),
+    "properties": REPLAY_PROPERTIES,
+}
+
+HARMONIZED_REPLAY = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": [*REPLAY_PROPERTIES, "forcing_integral_m", "positive_support_duration_s"],
+    "properties": {
+        **REPLAY_PROPERTIES,
+        "forcing_integral_m": NONNEGATIVE,
+        "positive_support_duration_s": NONNEGATIVE,
+    },
+}
+
 
 SCHEMAS: dict[str, dict[str, Any]] = {
     "event-packet": _schema(
@@ -44,10 +112,42 @@ SCHEMAS: dict[str, dict[str, Any]] = {
             "payload_sha256": SHA256,
             "scalars": {
                 "type": "object",
-                "additionalProperties": {"type": ["number", "integer", "string", "boolean", "null"]},
+                "additionalProperties": False,
+                "required": [
+                    "calendar_year", "model_day", "run_id", "hillslope_id", "ofe",
+                    "solver_call_ordinal", "runoff_pre_reconciliation_m",
+                    "runoff_post_reconciliation_m", "surdra_raw_m", "surplus_depth_m",
+                    "positive_excess_duration_s", "surplus_assignment_duration_s",
+                    "surplus_assignment_mode", "remax_pre_surplus_m_s",
+                    "forcing_max_post_surplus_m_s", "surplus_added_rate_m_s", "tp2_s",
+                    "alpha", "m", "effective_length_m", "ns",
+                ],
+                "properties": {
+                    "calendar_year": {"type": "integer"},
+                    "model_day": {"type": "integer", "minimum": 1},
+                    "run_id": NONEMPTY,
+                    "hillslope_id": NONEMPTY,
+                    "ofe": {"type": "integer", "minimum": 1},
+                    "solver_call_ordinal": {"type": "integer", "minimum": 1},
+                    "runoff_pre_reconciliation_m": NONNEGATIVE,
+                    "runoff_post_reconciliation_m": NONNEGATIVE,
+                    "surdra_raw_m": NONNEGATIVE,
+                    "surplus_depth_m": NONNEGATIVE,
+                    "positive_excess_duration_s": NONNEGATIVE,
+                    "surplus_assignment_duration_s": NONNEGATIVE,
+                    "surplus_assignment_mode": {"enum": ["none", "positive_excess", "storm", "upstream", "fallback_24h"]},
+                    "remax_pre_surplus_m_s": NONNEGATIVE,
+                    "forcing_max_post_surplus_m_s": NONNEGATIVE,
+                    "surplus_added_rate_m_s": NONNEGATIVE,
+                    "tp2_s": NUMBER,
+                    "alpha": NUMBER,
+                    "m": NUMBER,
+                    "effective_length_m": NONNEGATIVE,
+                    "ns": {"type": "integer", "minimum": 1},
+                },
             },
-            "pre_surplus_forcing": {"type": "array", "items": {"type": "object"}},
-            "post_surplus_forcing": {"type": "array", "minItems": 2, "items": {"type": "object"}},
+            "pre_surplus_forcing": {"type": "array", "items": FORCING_INTERVAL},
+            "post_surplus_forcing": {"type": "array", "minItems": 2, "items": FORCING_POINT},
             "production": {
                 "type": "object",
                 "required": ["selected_solver", "peak_m_s"],
@@ -57,6 +157,19 @@ SCHEMAS: dict[str, dict[str, Any]] = {
                 },
                 "additionalProperties": False,
             },
+        },
+    ),
+    "replay-report": _schema(
+        "replay-report",
+        ["event_id", "packet_sha256", "replay_process", "selected_method_delta_m_s", "legacy_input_replay", "harmonized_forcing_diagnostic", "hdrive_stopping_condition"],
+        {
+            "event_id": NONEMPTY,
+            "packet_sha256": SHA256,
+            "replay_process": {"const": "standalone_peak_replay_executable"},
+            "selected_method_delta_m_s": NONNEGATIVE,
+            "legacy_input_replay": LEGACY_REPLAY,
+            "harmonized_forcing_diagnostic": HARMONIZED_REPLAY,
+            "hdrive_stopping_condition": {"enum": ["95_percent_volume", "ns_plus_200_limit", "array_limit", "iteration_limit"]},
         },
     ),
     "build-manifest": _schema(

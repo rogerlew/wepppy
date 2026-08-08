@@ -15,49 +15,73 @@ from typing import Any
 SCHEMA_VERSION = "1.0.0"
 
 
+def appmth_domain_flags(vstar: float, tstar: float, qpstar: float) -> dict[str, bool]:
+    """Evaluate the closed validity intervals documented for APPMTH."""
+    return {
+        "within_documented_vstar_domain": 0.08 <= vstar <= 1.0,
+        "within_documented_tstar_domain": 0.09 <= tstar <= 10.0,
+        "within_documented_qpstar_domain": 0.07 <= qpstar <= 8.0,
+    }
+
+
 def canonical_sha256(value: Any) -> str:
     encoded = json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
     return hashlib.sha256(encoded).hexdigest()
 
 
-def packetize(trace: Path, year: int, day: int, build_id: str, event_id: str) -> dict[str, Any]:
+def packetize(
+    trace: Path,
+    year: int,
+    day: int,
+    build_id: str,
+    event_id: str,
+    run_id: str,
+    hillslope_id: str,
+    ofe: int,
+    solver_call_ordinal: int,
+) -> dict[str, Any]:
     rows = [line.split(",") for line in trace.read_text().splitlines()]
-    prefix = (str(year), str(day), "1")
-    scalar = next(row for row in rows if row[0] == "SCALAR" and tuple(row[1:4]) == prefix)
-    result = next(row for row in rows if row[0] == "RESULT" and tuple(row[1:4]) == prefix)
-    pre = [row for row in rows if row[0] == "PRE" and tuple(row[1:4]) == prefix]
-    post = [row for row in rows if row[0] == "POST" and tuple(row[1:4]) == prefix]
-    assignment_modes = {0: "none", 1: "positive_excess", 2: "storm_or_upstream", 3: "fallback_24h"}
+    prefix = (str(year), str(day), str(ofe), str(solver_call_ordinal))
+    scalar = next(row for row in rows if row[0] == "SCALAR" and tuple(row[1:5]) == prefix)
+    result = next(row for row in rows if row[0] == "RESULT" and tuple(row[1:5]) == prefix)
+    pre = [row for row in rows if row[0] == "PRE" and tuple(row[1:5]) == prefix]
+    post = [row for row in rows if row[0] == "POST" and tuple(row[1:5]) == prefix]
+    assignment_modes = {0: "none", 1: "positive_excess", 2: "storm", 3: "upstream", 4: "fallback_24h"}
     payload = {
         "event_id": event_id,
         "source_build_id": build_id,
         "scalars": {
             "calendar_year": year,
             "model_day": day,
-            "ofe": 1,
-            "runoff_post_reconciliation_m": float(scalar[4]),
-            "surplus_depth_m": float(scalar[5]),
-            "positive_excess_duration_s": float(scalar[6]),
-            "surplus_assignment_duration_s": float(scalar[7]),
-            "remax_pre_surplus_m_s": float(scalar[8]),
-            "forcing_max_post_surplus_m_s": float(scalar[9]),
-            "surplus_added_rate_m_s": float(scalar[10]),
-            "tp2_s": float(scalar[11]),
-            "alpha": float(scalar[12]),
-            "m": float(scalar[13]),
-            "effective_length_m": float(scalar[14]),
-            "ns": int(scalar[15]),
-            "surplus_assignment_mode": assignment_modes[int(scalar[16])],
+            "run_id": run_id,
+            "hillslope_id": hillslope_id,
+            "ofe": ofe,
+            "solver_call_ordinal": solver_call_ordinal,
+            "runoff_pre_reconciliation_m": float(scalar[5]),
+            "runoff_post_reconciliation_m": float(scalar[6]),
+            "surdra_raw_m": float(scalar[7]),
+            "surplus_depth_m": float(scalar[8]),
+            "positive_excess_duration_s": float(scalar[9]),
+            "surplus_assignment_duration_s": float(scalar[10]),
+            "remax_pre_surplus_m_s": float(scalar[11]),
+            "forcing_max_post_surplus_m_s": float(scalar[12]),
+            "surplus_added_rate_m_s": float(scalar[13]),
+            "tp2_s": float(scalar[14]),
+            "alpha": float(scalar[15]),
+            "m": float(scalar[16]),
+            "effective_length_m": float(scalar[17]),
+            "ns": int(scalar[18]),
+            "surplus_assignment_mode": assignment_modes[int(scalar[19])],
         },
         "pre_surplus_forcing": [],
         "post_surplus_forcing": [
-            {"point_ordinal": int(row[4]), "time_s": float(row[5]), "rate_m_s": float(row[6])}
+            {"point_ordinal": int(row[5]), "time_s": float(row[6]), "rate_m_s": float(row[7])}
             for row in post
         ],
-        "production": {"selected_solver": result[4], "peak_m_s": float(result[5])},
+        "production": {"selected_solver": result[5], "peak_m_s": float(result[6])},
     }
     positive_pre = {
-        int(row[4]): (float(row[5]), float(row[6]), float(row[7])) for row in pre
+        int(row[5]): (float(row[6]), float(row[7]), float(row[8])) for row in pre
     }
     post_points = payload["post_surplus_forcing"]
     for index, point in enumerate(post_points[:-1], start=1):
@@ -93,23 +117,30 @@ def app_diagnostics(
     tstar = te / duration
     vstar = vave / remax
     if tstar >= 1.0:
+        qpstar = 1.0 / tstar**m
         branch = "partial_equilibrium"
     elif vstar < 1.0:
         a = 0.6 * (1.0 - vstar)
         tc = (1.0 - math.sqrt(1.0 - 4.0 * a * vstar)) / (2.0 * a)
-        branch = "quasi_equilibrium_a" if tstar > tc else "quasi_equilibrium_b"
+        if tstar > tc:
+            qpstar = 1.0 / tstar
+            branch = "quasi_equilibrium_a"
+        else:
+            qpstar = 1.0 / vstar - 0.6 * (1.0 - vstar) / vstar * tstar
+            branch = "quasi_equilibrium_b"
     else:
+        qpstar = 1.0
         branch = "constant_or_out_of_domain"
         tc = None
     return {
         "vave_m_s": vave,
         "vstar": vstar,
         "tstar": tstar,
+        "qpstar": qpstar,
         "tc": tc if "tc" in locals() else None,
         "equation_branch": branch,
-        "within_documented_vstar_domain": 0.0 < vstar <= 1.0,
-        "within_documented_tstar_domain": math.isfinite(tstar) and tstar > 0.0,
-        "finite_result": all(math.isfinite(value) for value in (vave, vstar, tstar)),
+        **appmth_domain_flags(vstar, tstar, qpstar),
+        "finite_result": all(math.isfinite(value) for value in (vave, vstar, tstar, qpstar)),
     }
 
 
@@ -200,13 +231,20 @@ def main() -> None:
     create.add_argument("--day", type=int, required=True)
     create.add_argument("--build-id", required=True)
     create.add_argument("--event-id", required=True)
+    create.add_argument("--run-id", required=True)
+    create.add_argument("--hillslope-id", required=True)
+    create.add_argument("--ofe", type=int, required=True)
+    create.add_argument("--solver-call-ordinal", type=int, default=1)
     run = subparsers.add_parser("replay")
     run.add_argument("packet", type=Path)
     run.add_argument("--binary", type=Path, required=True)
     run.add_argument("--output", type=Path)
     args = parser.parse_args()
     if args.command == "packetize":
-        result = packetize(args.trace, args.year, args.day, args.build_id, args.event_id)
+        result = packetize(
+            args.trace, args.year, args.day, args.build_id, args.event_id,
+            args.run_id, args.hillslope_id, args.ofe, args.solver_call_ordinal,
+        )
     else:
         result = replay(args.packet, args.binary)
     rendered = json.dumps(result, indent=2, sort_keys=True) + "\n"

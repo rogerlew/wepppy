@@ -16,6 +16,7 @@ SCHEMA_DIR = (
     Path(__file__).parents[2]
     / "docs/work-packages/20260808_peakflow_phase1/artifacts/schemas"
 )
+ARTIFACT_DIR = SCHEMA_DIR.parent
 
 
 @pytest.mark.parametrize("name", sorted(SCHEMAS))
@@ -50,3 +51,14 @@ def test_event_presence_is_explicit() -> None:
         "solver_call_ordinal": 1,
     }
     assert any(error.validator == "required" for error in validator.iter_errors(invalid))
+
+
+@pytest.mark.parametrize("name", ["observer-build-manifest.json", "replay-build-manifest.json"])
+def test_build_manifests_conform(name: str) -> None:
+    jsonschema.validate(json.loads((ARTIFACT_DIR / name).read_text()), SCHEMAS["build-manifest"])
+
+
+@pytest.mark.parametrize("name", ["topanga-h106-1980-ksat20.json", "topanga-h106-1980-ksat35.json"])
+def test_replay_reports_conform(name: str) -> None:
+    report = json.loads((ARTIFACT_DIR / "replay-reports" / name).read_text())
+    jsonschema.validate(report, SCHEMAS["replay-report"])

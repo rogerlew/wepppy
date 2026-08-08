@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-08-08
-**Active Packages**: 23
+**Active Packages**: 24
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 23 packages (above target range; calculated from the 23 package entries in the In Progress section)
+**Current WIP**: 24 packages (above target range; calculated from the 24 package entries in the In Progress section)
 
 ### 3. Manage Flow
 Monitor how long packages spend in each column:
@@ -352,6 +352,23 @@ When resuming Kubernetes work:
 ---
 
 ## 🚧 In Progress
+
+### Peak-Flow Gate 2.1 Remediation
+
+**Started**: 2026-08-08
+**Size**: Narrow assurance remediation
+**Priority**: High
+**Security impact**: `none`
+**Link**: [docs/work-packages/20260808_peakflow_gate21/](docs/work-packages/20260808_peakflow_gate21/)
+
+**Description**: Correct observer branch logging, APPMTH validity diagnostics,
+complete event packets, active-trace parity, schema conformance, and full
+one-command acceptance. The Topanga Phase 2 census remains held.
+
+**Next Steps**: Review the passing Gate 2.1 evidence and issue an explicit
+GO/HOLD disposition before any pilot or census execution.
+
+---
 
 ### Fork/Archive Serial Queue Isolation (proposed SURF-03A)
 

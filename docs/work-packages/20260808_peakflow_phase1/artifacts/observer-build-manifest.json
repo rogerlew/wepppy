@@ -1,23 +1,19 @@
 {
   "architecture": "x86_64",
-  "build_id": "wepp-f24c957e-phase1-observer",
+  "build_id": "wepp-ea25ad79-gate21-observer",
   "compiler": "GNU Fortran",
   "compiler_version": "13.3.0",
-  "executable_sha256": "c157e49ef64359596340e6ff698231faa5173a0f3a2a49b68f3de0b1b6391516",
-  "floating_point_flags": [
-    "-ffpe-trap=invalid,zero,overflow",
-    "-finit-local-zero",
-    "-fno-align-commons"
-  ],
-  "input_tree_sha256": "c260a14f549d0add9535502ba7db0421ac5264aa733eb908de788c4c562e495d",
-  "instrumentation_patch_sha256": "e1bcd511150893ba3b40ad5bc432b10a687e69beee6b3cc480e0c6b570c84791",
-  "linker_libraries": [],
+  "executable_sha256": "2ec15778df957f909da383df9e3e0c9b516688d367c11f0109c6012387c0731f",
+  "floating_point_flags": ["-ffpe-trap=invalid,zero,overflow", "-finit-local-zero", "-fno-align-commons"],
+  "input_tree_sha256": "5d829e7cac0638f08a73b4de2c2dd583f1055cee0562932e7ab8695a53627be2",
+  "instrumentation_patch_sha256": null,
+  "linker_libraries": ["zlib"],
   "optimization_flags": ["-O2", "-mcmodel=medium"],
   "os": "Linux 6.8.0-136-generic",
   "preprocessor_definitions": [],
   "reproducibility_level": "internal",
   "schema_version": "1.0.0",
   "source_clean": true,
-  "source_commit": "f24c957e3633898e0fd4cbbea5ae08c781f29dba",
+  "source_commit": "ea25ad79ef7dab20206bca095b2958786f5ae317",
   "source_repository": "wepp-in-the-woods/wepp-forest"
 }

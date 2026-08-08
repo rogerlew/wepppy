@@ -4,10 +4,12 @@
     "appmth": {
       "equation_branch": "quasi_equilibrium_b",
       "finite_result": true,
+      "qpstar": 1.089273309236333,
       "tc": 0.9560138202202941,
       "tstar": 0.2877848034737155,
       "vave_m_s": 2.3656850025373946e-05,
       "vstar": 0.9026041099261473,
+      "within_documented_qpstar_domain": true,
       "within_documented_tstar_domain": true,
       "within_documented_vstar_domain": true
     },
@@ -24,10 +26,12 @@
     "appmth": {
       "equation_branch": "constant_or_out_of_domain",
       "finite_result": true,
+      "qpstar": 1.0,
       "tc": null,
       "tstar": 0.28778531492609233,
       "vave_m_s": 2.3656716905686954e-05,
       "vstar": 4.401694303907835,
+      "within_documented_qpstar_domain": true,
       "within_documented_tstar_domain": true,
       "within_documented_vstar_domain": false
     },
@@ -37,7 +41,7 @@
     "hdrive_nqt": 33,
     "hdrive_peak_m_s": 2.5754497983143665e-05
   },
-  "packet_sha256": "a3540a2c711d8fd93a433bef13566f797e9e3ad7bff23c130de3a5225bd5388d",
+  "packet_sha256": "c39cd934279e17015658c73f141e0d35870f86377deae9b3018151082135a0e5",
   "replay_process": "standalone_peak_replay_executable",
   "schema_version": "1.0.0",
   "selected_method_delta_m_s": 0.0
