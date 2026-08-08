@@ -5,10 +5,12 @@
 > changes propagate through watershed routing, and whether the behavior
 > generalizes beyond Topanga.
 
-**Status: PLANNING (`2026-08-08`).** Topanga is the first site and the methods
-development fixture. Multi-site, snow, and overland flow element (OFE)
-experiments begin only after the Topanga instrumentation and event ledger are
-reproducible.
+**Status: CONDITIONALLY ACCEPTED — PROTOCOL DEVELOPMENT AND TOPANGA FIXTURE
+HARDENING (`2026-08-08`).** Work is authorized on versioned schemas, immutable
+event-packet capture, process-isolated solver replay, build provenance, and
+compact Topanga acceptance fixtures. The full Topanga census is blocked until
+Gates 0–2 pass. Cross-site, prevalence, snow, and overland flow element (OFE)
+work remains deferred.
 
 ## Why This Investigation Exists
 
@@ -26,8 +28,10 @@ channel routing, or whether they are specific to warm, rain-dominated
 shrubland. This investigation answers those broader questions with a common
 instrumentation and mutation protocol.
 
-The intended result is a reproducible defect census and a set of compact
-regression fixtures for openWEPP development. This is not a calibration study,
+The intended result is first a reproducible *candidate anomaly census*. A
+candidate becomes a confirmed implementation defect only after local
+bracketing, frozen-event replay, and mechanism tracing. Compact confirmed
+fixtures will support openWEPP development. This is not a calibration study,
 and it is not an attempt to repair the legacy WEPP implementation.
 
 ## Study Questions
@@ -46,7 +50,7 @@ and it is not an attempt to repair the legacy WEPP implementation.
 
 ## Scenario Contract
 
-Every site will use the same primary scenario pairing:
+Post-fire sites should use this scenario pairing:
 
 | Scenario | WEPPcloud role | Interpretation |
 | --- | --- | --- |
@@ -61,29 +65,39 @@ parameterization.
 Within a site, the paired scenarios must share climate realization, terrain,
 watershed topology, channel inputs, simulation dates, and non-scenario model
 settings. Differences in soil or management files must be enumerated before
-analysis. Comparisons are made on the same calendar events; return-period
-rankings are secondary summaries and never substitute for event pairing.
+analysis. Burned and unburned are analysis strata, not the primary causal
+comparison. Within each frozen stratum, the causal unit is its baseline versus
+the same scenario with one controlled mutation. Comparisons use the same
+calendar events; return-period rankings are secondary summaries and never
+substitute for event pairing.
+
+The enriched discovery portfolio will retain the burned-base/unburned-Omni
+pairing at every site. A later blind portfolio may admit a site with one or
+more frozen reference scenarios when no defensible fire pairing exists. Any
+such expansion changes the target population and must be preregistered before
+results are examined.
 
 ## Staged Study Design
 
 ### Phase 1: Establish the Mechanics at Topanga
 
-Topanga is the development and validation site for the complete workflow. The
-first phase will:
+Topanga is the development and validation site for the protocol. Phase 1 is
+limited to Gates 0–2 and will:
 
 1. build an observationally instrumented WEPP executable from a pinned source
    commit;
 2. prove that an unmodified build reproduces the established outputs;
 3. prove that diagnostic logging does not alter normal outputs;
-4. record every runoff-producing event on every hillslope;
-5. calculate normal, forced-`APPMTH`, and forced-`HDRIVE` peak estimates from
-   the same event forcing;
-6. apply small, one-hillslope-at-a-time mutations;
-7. trace each local response through downstream channels and the outlet; and
-8. freeze representative reproducer decks for each distinct defect class.
+4. capture immutable event packets for the acceptance fixtures;
+5. replay the selected and counterfactual methods outside the observational
+   process;
+6. distinguish legacy-input replay from harmonized-forcing diagnostics;
+7. freeze the 1980 Ksat and 1986 canopy/cover reproducers; and
+8. validate an inactive-parameter negative control.
 
 Hill 106 and the February 14, 1980 Ksat pair are the first acceptance fixture.
-The new ledger must reproduce the operands and peaks reported in the
+The fixture must be self-contained and one-command reproducible. Its trace
+must reproduce the operands and peaks reported in the
 [instrumented Ksat diagnostic](../2026-08-07-topanga-2025-fire-peak-flow-analysis/artifacts/hill106-ksat-peakflow-diagnostic.md).
 
 The broader implementation evidence and official WEPP documentation are
@@ -92,10 +106,10 @@ summarized in the
 
 ### Phase 2: Complete the Topanga Watershed Census
 
-After the Hill 106 fixture passes, apply the core mutation screen to every
-Topanga hillslope. Mutate one hillslope per run while leaving all other
-hillslopes and channels unchanged. This separates a local solver response from
-changes caused by simultaneous watershed-wide parameterization.
+Phase 2 begins only after Gates 0–2 pass. Apply the core mutation screen to
+every eligible Topanga hillslope. Mutate one hillslope per run while leaving
+all other hillslopes and channels unchanged. This separates a local solver
+response from changes caused by simultaneous watershed-wide parameterization.
 
 For mutations that expose a discontinuity, retain three levels of response:
 
@@ -112,9 +126,16 @@ local errors or synchronizes them into a larger outlet response.
 
 ### Phase 3: Extend to Rain- and Snow-Dominated Sites
 
-Once Topanga produces a stable data contract and automated analysis, add sites
-incrementally. Every site must have a burned base scenario and an unburned
-Omni scenario. The initial portfolio should include:
+Phase 3 begins only after the Topanga census passes Gate 3. Add sites
+incrementally under two preregistered portfolios:
+
+- **enriched discovery:** known-positive cases such as Topanga, Palisades, and
+  Stevens Canyon, used to discover and reproduce mechanisms; and
+- **blind audit:** sites selected by declared hydrologic and provenance
+  criteria before their peak anomalies are examined.
+
+Report prevalence separately for the two portfolios. The initial combined
+portfolio should include:
 
 | Site class | Minimum representation | Purpose |
 | --- | ---: | --- |
@@ -140,11 +161,11 @@ matched multiple-OFE representation. This phase begins after the cross-site
 hillslope mechanics are understood because OFE boundaries add infiltration,
 routing, and state-transfer interactions.
 
-The paired profiles should preserve, as closely as WEPP permits:
+The homogeneous paired profiles must preserve, as closely as WEPP permits:
 
-- total hillslope length, width, area, relief, and mean slope;
+- the complete slope profile, total length, width, area, and relief;
 - climate sequence and simulation dates;
-- area-weighted soil and management properties;
+- the complete hydraulic, soil, and management parameterization;
 - initial and boundary conditions; and
 - channel and watershed routing outside the test hillslope.
 
@@ -171,46 +192,109 @@ high-ET contrasts follow only after the small-perturbation response is known.
 
 ## Instrumentation Contract
 
-Here, *instrumented* means a temporary diagnostic executable that records
-internal operands without changing the model equations or normal outputs.
-Counterfactual solver selection must be isolated from the observational build
-and clearly labeled.
+Here, *observational instrumentation* means a diagnostic WEPP executable that
+captures internal operands without changing equations, control flow, shared
+state, or canonical outputs. It executes the normally selected peak method
+exactly once. Additional solver calls are not permitted inside this process.
 
-For every hillslope-event with runoff or surface return, record at least:
+The required architecture is:
 
-- site, scenario, mutation, hillslope, OFE, date, and downstream path;
-- precipitation depth, intensity, and event duration;
-- antecedent soil water and saturation by layer;
-- snow state and melt input where applicable;
-- runoff before and after water-balance reconciliation;
-- hourly `ui_scrunf(ii)` where hourly water balance is active;
-- daily `surdra` and the `surpls` depth passed into the peak calculation;
-- positive-excess duration, `durre` or `drlast`;
-- rainfall-excess series before surface-return insertion;
-- solver forcing series after surface-return insertion;
-- `remax` before and after reconciliation;
-- `tp(2)`, `ealpha`, friction, flow width, and rill width;
-- selected peak method and both shadow-method peaks;
-- runoff, `PeakRO`, and rectangular-equivalent `EffDur`; and
-- hillslope, downstream-channel, and outlet hydrographs and peaks.
+```text
+observational WEPP execution
+    -> capture versioned, immutable event packet
+    -> execute the normal selected solver exactly once
+    -> preserve all normal WEPP outputs
+    -> replay APPMTH and HDRIVE from the event packet
+       in a separate process or standalone diagnostic executable
+```
 
-The event ledger must preserve raw values and units. Derived classifications
-belong in separate columns so the source observations remain auditable.
+This isolation is required because `HDRIVE` overwrites shared COMMON-block
+hydrograph arrays, time arrays, counters, and integration state. Snapshot and
+restore inside WEPP is out of scope unless complete state restoration can be
+audited and output parity demonstrated. The offline selected-method replay
+must reproduce the production-selected peak; that is the completeness test for
+the event packet.
+
+Two counterfactual families must remain distinct:
+
+1. **Legacy-input replay** supplies each method exactly the operands the legacy
+   implementation provides. `HDRIVE` receives the post-`surdra` series, while
+   `APPMTH` receives runoff, duration, and the legacy pre-insertion `remax`.
+2. **Harmonized-forcing diagnostic** derives the approximate-method summaries
+   from the same post-`surdra` forcing series supplied to `HDRIVE`. This is not
+   legacy behavior; it tests algorithm disagreement after removing the
+   inconsistent forcing summaries.
+
+For every captured hillslope-event, the scalar packet must include:
+
+```text
+positive_excess_duration_s
+surplus_assignment_duration_s
+surplus_assignment_mode
+surplus_depth_mm
+surplus_added_rate_mm_h
+remax_pre_surplus_mm_h
+forcing_max_post_surplus_mm_h
+tp2_s
+selected_solver
+```
+
+`surplus_assignment_mode` distinguishes positive-excess duration, storm
+duration, upstream duration, and the 24-hour fallback. It prevents the
+shorthand `surdra/durre` from hiding which duration was actually used.
+
+For `APPMTH`, also capture `vave`, `vstar`, `tstar`, `tc`, `qpstar`, equation
+branch, documented-domain flags for `vstar` and `tstar`, and finite-result
+status. For `HDRIVE`, capture the stopping condition, final routed-volume
+fraction, iteration count, and whether an array or iteration limit was
+reached. Common state includes precipitation and snow forcing, antecedent
+layer water and saturation, hourly `ui_scrunf(ii)` when active, pre- and
+post-reconciliation runoff, `ealpha`, friction, flow width, rill width, and
+the complete pre- and post-surplus interval series.
+
+## Versioned Data Contract
+
+No single table is expected to hold scalar events, layers, interval series,
+and routed hydrographs. Gate 0 requires versioned schemas for these grains:
+
+| Dataset | Grain |
+| --- | --- |
+| Build manifest | one row per compiled executable |
+| Run manifest | one row per executable/input run |
+| Mutation manifest | one row per requested mutation |
+| Event scalar ledger | run × hillslope × OFE × model day × solver-call ordinal |
+| Layer-state ledger | event × soil layer |
+| Event forcing series | event × forcing stage × interval |
+| Routing response ledger | mutation event × downstream reach |
+| Hydrograph series | routing response × timestamp |
+| Site-selection manifest | one row per candidate or admitted site |
+| Artifact-storage manifest | one row per authoritative large artifact |
+
+Keys, units, nullability, enumerations, and schema versions must be explicit.
+The mutation manifest records requested and realized values so clipping,
+formatting, or input-file rounding cannot pass silently. The event key includes
+a solver-call ordinal even when only one call is expected.
+
+Baseline and mutation ledgers are outer-joined. A mutation may create or
+remove runoff, so absence is represented with an explicit `event_present`
+field and is never silently converted to numerical zero. Raw observations and
+derived classifications remain separate.
 
 ## Event Classification
 
 Every mutation is paired to its baseline by site, scenario, hillslope, and
-date. The analysis will calculate changes in runoff, peak, `surdra`, positive-
-excess duration, `surdra/durre`, pre- and post-reconciliation forcing, solver
-selection, and downstream peak timing.
+date. Full-history sensitivity allows each mutation to generate its own
+antecedent state. Every flagged case also receives frozen-event replay from an
+immutable packet so forcing construction and solver response can be isolated.
 
 Initial diagnostic flags are:
 
 - **timing compression:** a small mutation strongly changes
-  `surdra/durre`;
+  `surplus_added_rate_mm_h` or its assignment mode;
 - **solver switch:** `tp(2)` crosses zero and changes the selected method;
-- **solver disagreement:** shadow `APPMTH` and `HDRIVE` peaks differ
-  materially on identical forcing;
+- **legacy solver disagreement:** legacy-input replays differ materially;
+- **harmonized solver disagreement:** methods differ materially after their
+  summaries are derived from the same post-surplus forcing;
 - **within-solver discontinuity:** peak changes abruptly without a method
   switch;
 - **routing attenuation or amplification:** the downstream response is
@@ -219,45 +303,166 @@ Initial diagnostic flags are:
   changes; and
 - **unresolved:** recorded mechanics do not yet explain the response.
 
-A small mutation is screened as potentially discontinuous when it causes any
-of the following:
+A small mutation is screened as a candidate anomaly when it causes any of the
+following, subject to preregistered absolute floors for runoff, peak, surplus,
+and their denominators:
 
 - more than a 25% peak change with less than a 5% runoff change;
 - more than a twofold peak change;
 - a solver-method switch;
-- more than a twofold change in `surdra/durre`; or
+- more than a twofold change in assigned surplus rate; or
 - reversal of the expected local response to Ksat or surface cover.
 
-These thresholds organize review; they do not define physical correctness.
-All continuous values will be retained.
+These thresholds organize review; they do not prove a discontinuity or define
+physical correctness. Sign reversals are diagnostic only because saturated
+systems need not be globally monotone in Ksat or cover. All continuous values
+and all applicable flags are retained.
+
+Each candidate receives an adaptive local bracket, frozen-event replay, and
+separate review of forcing construction and solver response. Evidence state is
+recorded as one of:
+
+```text
+screened
+reproduced
+locally_bracketed
+mechanism_traced
+confirmed_implementation_defect
+physically_unresolved
+```
+
+The candidate anomaly census and confirmed-mechanism census are reported
+separately.
 
 ## Required Outputs
 
 The investigation will maintain:
 
-1. a manifest of source commits, executable hashes, site run identifiers, and
-   scenario inputs;
-2. an event ledger with one row per run, hillslope, and date;
-3. a routing ledger relating hillslope responses to downstream channels;
-4. a discontinuity census by site, scenario, parameter, and mechanism;
+1. versioned build, run, mutation, site-selection, and storage manifests;
+2. normalized scalar, layer, forcing, routing, and hydrograph datasets;
+3. a candidate anomaly census by site, stratum, parameter, and mechanism;
+4. a separately adjudicated confirmed-mechanism census;
 5. paired plots of runoff ratio versus peak ratio;
-6. plots of peak response versus `surdra/durre` and solver selection;
+6. plots of peak response versus assigned surplus rate and solver selection;
 7. local and outlet hydrographs for representative events;
 8. maps of flagged hillslopes and their routing paths; and
 9. frozen input decks for openWEPP regression development.
 
+Cross-site rates use explicit denominators: eligible mutation trials, paired
+runoff-producing events, eligible hillslopes, and audited sites. Observations
+within one hillslope or site are not treated as statistically independent.
+
 ## Reproducibility and Change Control
 
-- Pin source commits and record executable SHA-256 hashes.
+- Pin source commits and record compiler and version, optimization and
+  floating-point flags, preprocessor definitions, linker and runtime
+  libraries, operating system, architecture, instrumentation-patch hash,
+  source-tree cleanliness, input-tree hash, and executable SHA-256.
 - Preserve an unmodified reference build beside each diagnostic build.
-- Demonstrate that logging-only builds reproduce ordinary output exactly.
-- Keep forced-method counterfactuals separate from observational runs.
+- Define the canonical files and fields used for parity. Prefer byte equality;
+  preregister tolerances and ignored metadata where byte equality is not
+  deterministic.
+- Keep every forced-method replay outside the observational WEPP process.
 - Run complete climate histories so mutations generate their own antecedent
   states.
+- Use frozen-event replay to adjudicate every screened candidate.
 - Do not compare unmatched event dates as evidence of a mechanism.
 - Record every input mutation as a machine-readable patch or manifest entry.
-- Store derived tables and figures under [`artifacts/`](artifacts/README.md).
+- Use inactive `kr` and version-9002 `ksatfac` mutations as negative controls;
+  their manifests must prove the intended inactive token changed while
+  hydrologic output did not.
+- For one-hillslope mutations, assert that other hillslopes and channels
+  outside the declared downstream closure remain unchanged, and verify volume
+  consistency and hydrograph timestamps along the affected path.
+- Store one complete baseline ledger per stratum. Mutation runs retain the
+  target hillslope, downstream closure, outlet, and checksums for unchanged
+  elements; full outputs are retained for flagged or combined experiments.
+- Store large scalar data in partitioned Parquet and variable-length series in
+  separately compressed storage. Commit schemas, manifests, compact fixtures,
+  summaries, and content hashes rather than bulk output.
 - Restore shared source worktrees after temporary diagnostic builds.
+
+Internal reproducibility means authorized developers can rebuild the
+restricted WEPP-Forest source and verify the executable. Public
+reproducibility requires an external reviewer to rebuild and execute the
+fixture from a public source tree such as DEP Windows WEPP or openWEPP. Every
+result and fixture must state which level it satisfies. A binary hash alone
+provides identity, not public rebuildability.
+
+## Acceptance Gates
+
+### Gate 0 — Protocol and Schemas
+
+Pass when versioned schemas exist for builds, runs, mutations, scalar events,
+interval forcing, routing responses, site selection, and artifact storage.
+Requested and realized mutation values must both be recorded.
+
+### Gate 1 — Instrumentation Safety
+
+Pass when:
+
+1. the unmodified pinned build reproduces the frozen reference output;
+2. the observational build satisfies its declared non-diagnostic output-parity
+   policy;
+3. the captured event packet is immutable and versioned;
+4. offline selected-method replay reproduces the normal selected peak;
+5. counterfactual `HDRIVE` cannot mutate the observational process; and
+6. legacy-input and harmonized-forcing results are separately labeled.
+
+### Gate 2 — Topanga Acceptance Fixtures
+
+Pass when:
+
+- the compact 1980 Ksat-20/Ksat-35 pair is committed and one-command
+  reproducible;
+- its complete operand trace agrees with the existing diagnostic;
+- the 1986 canopy and ground-cover fixtures reproduce their extreme responses
+  and remain labeled `mechanism_unresolved`;
+- an inactive-parameter control produces no hydrologic response; and
+- all `APPMTH` domain flags and surface-return assignment branches are
+  represented in the schema.
+
+The 1980 fixture must include both input decks, `SHA256SUMS`, the exact input
+diff, a complete build manifest, full-precision expected event values, and a
+one-command checker. The checker must prove that exactly one intended soil
+value differs.
+
+```text
+topanga-h106-1980-ksat/
+├── README.md
+├── SHA256SUMS
+├── baseline-ksat20/runs/...
+├── mutant-ksat35/runs/...
+├── input-diff.txt
+├── build-manifest.json
+├── expected-event.json
+└── run-and-check.sh
+```
+
+`expected-event.json` includes full-precision runoff before and after
+reconciliation, `surdra`, `surpls`, both duration definitions, assignment
+mode and rate, pre-insertion `remax`, post-insertion forcing maximum, `tp(2)`,
+selected method, and every required replay peak.
+
+### Gate 3 — Topanga Candidate Census
+
+Pass when every eligible trial has a terminal disposition, event pairing uses
+outer joins, absent and zero events remain distinct, candidates receive local
+bracketing, routing closure is validated, and combined experiments follow a
+predeclared selection rule.
+
+### Gate 4 — Cross-Site Work
+
+Pass when enriched and blind portfolios are preregistered, at least one
+independent rain-dominated site and one snow-influenced site satisfy the same
+contract, schema changes are versioned, and every prevalence estimate names
+its population and denominator.
+
+### Gate 5 — OFE Experiment
+
+Pass when the homogeneous single- and multiple-OFE pair preserves the complete
+slope profile and hydraulic parameterization. OFE state and forcing use their
+own table grains. The heterogeneous follow-up remains a separate experiment.
 
 ## Current Decisions
 
@@ -265,21 +470,26 @@ The investigation will maintain:
 | --- | --- |
 | Start with Topanga | Hill 106 supplies an established acceptance fixture and known discontinuities |
 | Complete mechanics before adding sites | Prevents inconsistent instrumentation and repeated forensic work |
-| Burned base versus unburned Omni at every site | Provides one consistent cross-site scenario contract |
+| Treat burned and unburned as strata | Controlled mutations within a frozen scenario are the causal comparison |
+| Retain burned base versus unburned Omni in the discovery portfolio | Preserves a consistent post-fire WEPPcloud context without conflating it with the mutation effect |
 | Compare identical dates | Preserves storm and antecedent-state context |
 | Mutate one hillslope first | Separates local calculation defects from watershed synchronization |
+| Isolate solver replay by process | Prevents `HDRIVE` shared-state mutations from contaminating observational output |
+| Separate legacy and harmonized replay | Distinguishes solver algorithms from inconsistent legacy forcing summaries |
 | Include snow sites after Topanga | Tests a materially different water-input and soil-state regime without complicating initial development |
 | Defer OFE comparison | OFE boundaries introduce additional coupling best studied after the single-profile mechanics are understood |
 | Produce openWEPP fixtures, not a legacy repair | The legacy code lacks the isolation and regression coverage needed for a dependable repair effort |
 
 ## Immediate Next Steps
 
-1. Define the diagnostic executable's event-ledger schema.
-2. Reproduce the Hill 106 February 14, 1980 Ksat trace through that schema.
-3. Add noninvasive shadow calculations for both peak methods.
-4. Prove normal-output parity between the reference and logging-only builds.
-5. Run the `±1%` Ksat and `±0.01` paired-cover screen across Topanga.
-6. Review the Topanga census before selecting the next site.
+1. Complete Gate 0 schemas and manifests.
+2. Freeze the self-contained Hill 106 February 14, 1980 Ksat pair.
+3. Implement immutable event-packet capture in the observational build.
+4. Implement process-isolated legacy-input and harmonized-forcing replays.
+5. Declare and prove canonical output parity.
+6. Reproduce the 1980 trace, the unresolved 1986 anomalies, and an inactive-
+   parameter negative control.
+7. Stop for Gate 2 review before any full Topanga mutation census.
 
 ## Related Investigations
 
@@ -292,3 +502,4 @@ The investigation will maintain:
 | Version | Date | Changes |
 | --- | --- | --- |
 | 1.0 | 2026-08-08 | Established the Topanga-first multi-site audit, scenario contract, snow-site phase, and single- versus multiple-OFE follow-up. |
+| 1.1 | 2026-08-08 | Incorporated the conditional planning review: isolated solver replay, dual replay semantics, normalized schemas, fixture requirements, evidence states, negative controls, storage policy, sampling portfolios, and acceptance gates. |

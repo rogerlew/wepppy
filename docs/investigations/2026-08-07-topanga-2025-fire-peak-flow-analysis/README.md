@@ -526,15 +526,17 @@ be revised as source imagery and model inputs mature; the fixed version and
 retrieval date above preserve the provenance of this comparison. See the
 [OpenET availability guidance](https://openet.gitbook.io/docs/additional-resources/data-availability).
 
-## Next Steps
+## Evidence Status
 
-- Build an event-level burned/undisturbed comparison from raw output using
-  same-date comparisons as well as independently ranked return periods.
-- Reconstruct calendar-year 2020 outlet flow for the complete WEPPcloud
-  watershed, including routed surface flow, lateral flow, groundwater/baseflow,
-  and channel losses, rather than treating one hillslope as the basin outlet.
-- Identify a modeled basin that matches the F54C-R drainage area, or locate an
-  observed record for the actual modeled watershed, before promoting any
-  calibration parameter set.
-- Constrain PMET Kcb and seasonal ET against independent vegetation or ET
-  evidence before considering `Kcb = 1.20` a candidate value.
+| Claim or artifact | Status |
+| --- | --- |
+| 1980 Ksat/`surdra` timing mechanism | Confirmed for fixture event |
+| `tp(2)` solver-switch contribution | Confirmed secondary mechanism |
+| 1986 canopy/cover discontinuity | Reproduced; immediate branch unresolved |
+| Cross-watershed prevalence | Not established |
+| Which 1986 peak regime is physically correct | Not established |
+| OpenET absolute ET as a calibration target | Rejected for this application |
+| Early exploratory executable results | Superseded where noted |
+
+Protocol development and generalization now belong to the
+[WEPP peak-flow discontinuity multi-site audit](../2026-08-08-wepp-peak-flow-discontinuity-multi-site-audit/README.md).
