@@ -17,6 +17,7 @@ _Scanned root_: `wepppy`
 - [x] `wepppy/all_your_base/geo/ogrmerge.py`
 - [x] `wepppy/all_your_base/geo/raster_geo_transformer.py`
 - [x] `wepppy/all_your_base/geo/shapefile.py`
+- [ ] `wepppy/all_your_base/geo/vrt.py`
 - [x] `wepppy/all_your_base/geo/webclients/__init__.py`
 - [x] `wepppy/all_your_base/geo/webclients/elevation.py`
 - [x] `wepppy/all_your_base/geo/webclients/wmesque.py`
@@ -42,10 +43,11 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/au/soils/soil_build.py`
 - [ ] `wepppy/climates/__init__.py`
 - [ ] `wepppy/climates/cligen/__init__.py`
+- [ ] `wepppy/climates/cligen/_scripts/build_tenerife_station_db.py`
 - [ ] `wepppy/climates/cligen/_scripts/stations_sqlitedb_builder.py`
 - [ ] `wepppy/climates/cligen/cligen.py`
-- [ ] `wepppy/climates/cligen/stations/__init__.py`
 - [ ] `wepppy/climates/cligen/single_storm.py`
+- [ ] `wepppy/climates/cligen/stations/__init__.py`
 - [ ] `wepppy/climates/climatena_ca/__init__.py`
 - [x] `wepppy/climates/daymet/__init__.py`
 - [x] `wepppy/climates/daymet/daily_interpolation.py`
@@ -62,6 +64,10 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/climates/gridmet/gridmet_singlelocation_client.py`
 - [ ] `wepppy/climates/holden_wrf_atlas.py`
 - [ ] `wepppy/climates/metquery_client.py`
+- [ ] `wepppy/climates/noaa/__init__.py`
+- [ ] `wepppy/climates/noaa/atlas14.py`
+- [ ] `wepppy/climates/noaa/temporal_distributions/_scripts/download_all_temporal_distributions.py`
+- [ ] `wepppy/climates/noaa/temporal_distributions/_scripts/test_download.py`
 - [ ] `wepppy/climates/noaa_precip_freqs_client.py`
 - [ ] `wepppy/climates/prism/__init__.py`
 - [ ] `wepppy/climates/prism/daily_client.py`
@@ -72,6 +78,7 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/climates/validation/build_snotelf2.py`
 - [ ] `wepppy/config/__init__.py`
 - [ ] `wepppy/config/redis_settings.py`
+- [ ] `wepppy/config/secrets.py`
 - [ ] `wepppy/eu/__init__.py`
 - [ ] `wepppy/eu/climates/__init__.py`
 - [ ] `wepppy/eu/climates/eobs/__init__.py`
@@ -94,15 +101,14 @@ _Scanned root_: `wepppy`
 - [x] `wepppy/export/arc_export.py`
 - [x] `wepppy/export/ermit_input.py`
 - [x] `wepppy/export/export.py`
-- [x] `wepppy/export/gpkg_export.py`
-- [x] `wepppy/export/prep_details.py`
 - [ ] `wepppy/f_esri/__init__.py`
+- [ ] `wepppy/io_wait.py`
 - [ ] `wepppy/landcover/__init__.py`
 - [ ] `wepppy/landcover/emapr/__init__.py`
 - [ ] `wepppy/landcover/emapr/oregonstate_emapr.py`
 - [ ] `wepppy/landcover/landcover_map.py`
 - [ ] `wepppy/landcover/rap/__init__.py`
-- [ ] `wepppy/landcover/rap/rangeland_analysis_platform.py`
+- [x] `wepppy/landcover/rap/rangeland_analysis_platform.py`
 - [ ] `wepppy/locales/__init__.py`
 - [ ] `wepppy/locales/canada/__init__.py`
 - [ ] `wepppy/locales/canada/bc/__init__.py`
@@ -114,19 +120,92 @@ _Scanned root_: `wepppy`
 - [x] `wepppy/locales/conus/__init__.py`
 - [x] `wepppy/locales/conus/openet/__init__.py`
 - [x] `wepppy/locales/conus/openet/openet_client.py`
+- [ ] `wepppy/locales/earth/copernicus/__init__.py`
+- [ ] `wepppy/locales/earth/copernicus-dem-30m/scripts/build_vrt_from_stac.py`
 - [ ] `wepppy/locales/earth/opentopography/__init__.py`
 - [ ] `wepppy/locales/earth/soils/__init__.py`
 - [ ] `wepppy/locales/earth/soils/isric/__init__.py`
-- [ ] `wepppy/locales/tenerife/soils/db/process.py`
 - [ ] `wepppy/mcp/__init__.py`
 - [ ] `wepppy/mcp/base.py`
 - [ ] `wepppy/mcp/report_editor.py`
 - [ ] `wepppy/mcp/report_files.py`
 - [ ] `wepppy/microservices/__init__.py`
-- [ ] `wepppy/microservices/browse/_download.py`
 - [ ] `wepppy/microservices/_gdalinfo.py`
+- [ ] `wepppy/microservices/browse/__init__.py`
+- [ ] `wepppy/microservices/browse/_download.py`
+- [ ] `wepppy/microservices/browse/auth.py`
 - [ ] `wepppy/microservices/browse/browse.py`
+- [ ] `wepppy/microservices/browse/dtale.py`
+- [ ] `wepppy/microservices/browse/files_api.py`
+- [ ] `wepppy/microservices/browse/flow.py`
+- [ ] `wepppy/microservices/browse/listing.py`
+- [ ] `wepppy/microservices/browse/parquet_tables.py`
+- [ ] `wepppy/microservices/browse/report.py`
+- [ ] `wepppy/microservices/browse/security.py`
+- [ ] `wepppy/microservices/culvert_payload_validator.py`
+- [ ] `wepppy/microservices/download/__init__.py`
+- [ ] `wepppy/microservices/download/app.py`
+- [ ] `wepppy/microservices/dss_preview.py`
 - [ ] `wepppy/microservices/elevationquery.py`
+- [ ] `wepppy/microservices/parquet_filters.py`
+- [ ] `wepppy/microservices/rq_engine/__init__.py`
+- [ ] `wepppy/microservices/rq_engine/admin_job_routes.py`
+- [ ] `wepppy/microservices/rq_engine/ag_fields_routes.py`
+- [ ] `wepppy/microservices/rq_engine/ash_routes.py`
+- [ ] `wepppy/microservices/rq_engine/auth.py`
+- [ ] `wepppy/microservices/rq_engine/batch_routes.py`
+- [ ] `wepppy/microservices/rq_engine/bootstrap_routes.py`
+- [ ] `wepppy/microservices/rq_engine/climate_routes.py`
+- [ ] `wepppy/microservices/rq_engine/culvert_routes.py`
+- [ ] `wepppy/microservices/rq_engine/debris_flow_routes.py`
+- [ ] `wepppy/microservices/rq_engine/debug_routes.py`
+- [ ] `wepppy/microservices/rq_engine/dss_export_routes.py`
+- [ ] `wepppy/microservices/rq_engine/export_routes.py`
+- [ ] `wepppy/microservices/rq_engine/fork_archive_routes.py`
+- [ ] `wepppy/microservices/rq_engine/geneva_routes.py`
+- [ ] `wepppy/microservices/rq_engine/job_routes.py`
+- [ ] `wepppy/microservices/rq_engine/landuse_routes.py`
+- [ ] `wepppy/microservices/rq_engine/landuse_soils_routes.py`
+- [ ] `wepppy/microservices/rq_engine/migration_routes.py`
+- [ ] `wepppy/microservices/rq_engine/omni_routes.py`
+- [ ] `wepppy/microservices/rq_engine/openapi.py`
+- [ ] `wepppy/microservices/rq_engine/openet_ts_routes.py`
+- [ ] `wepppy/microservices/rq_engine/orchestration_read_routes.py`
+- [ ] `wepppy/microservices/rq_engine/payloads.py`
+- [ ] `wepppy/microservices/rq_engine/polaris_routes.py`
+- [ ] `wepppy/microservices/rq_engine/project_routes.py`
+- [ ] `wepppy/microservices/rq_engine/rap_ts_routes.py`
+- [ ] `wepppy/microservices/rq_engine/responses.py`
+- [ ] `wepppy/microservices/rq_engine/rhem_routes.py`
+- [ ] `wepppy/microservices/rq_engine/roads_routes.py`
+- [ ] `wepppy/microservices/rq_engine/run_sync_routes.py`
+- [ ] `wepppy/microservices/rq_engine/rusle_routes.py`
+- [ ] `wepppy/microservices/rq_engine/schema_defaults_routes.py`
+- [ ] `wepppy/microservices/rq_engine/session_routes.py`
+- [ ] `wepppy/microservices/rq_engine/setup_discovery_routes.py`
+- [ ] `wepppy/microservices/rq_engine/soils_routes.py`
+- [ ] `wepppy/microservices/rq_engine/swat_routes.py`
+- [ ] `wepppy/microservices/rq_engine/treatments_routes.py`
+- [ ] `wepppy/microservices/rq_engine/upload_batch_runner_routes.py`
+- [ ] `wepppy/microservices/rq_engine/upload_climate_routes.py`
+- [ ] `wepppy/microservices/rq_engine/upload_disturbed_routes.py`
+- [ ] `wepppy/microservices/rq_engine/upload_helpers.py`
+- [ ] `wepppy/microservices/rq_engine/upload_huc_fire_routes.py`
+- [ ] `wepppy/microservices/rq_engine/watershed_routes.py`
+- [ ] `wepppy/microservices/rq_engine/wepp_routes.py`
+- [ ] `wepppy/microservices/rq_engine/wepp_run_payload.py`
+- [ ] `wepppy/microservices/shape_converter/__init__.py`
+- [ ] `wepppy/microservices/shape_converter/abuse_controls.py`
+- [ ] `wepppy/microservices/shape_converter/app.py`
+- [ ] `wepppy/microservices/shape_converter/archive_validation.py`
+- [ ] `wepppy/microservices/shape_converter/cleanup.py`
+- [ ] `wepppy/microservices/shape_converter/convert.py`
+- [ ] `wepppy/microservices/shape_converter/convert_parser_worker.py`
+- [ ] `wepppy/microservices/shape_converter/crs.py`
+- [ ] `wepppy/microservices/shape_converter/errors.py`
+- [ ] `wepppy/microservices/shape_converter/inspect.py`
+- [ ] `wepppy/microservices/shape_converter/serialization.py`
+- [ ] `wepppy/microservices/upload_boundary.py`
 - [ ] `wepppy/nodb/__init__.py`
 - [x] `wepppy/nodb/base.py`
 - [ ] `wepppy/nodb/batch_runner.py`
@@ -134,20 +213,48 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/nodb/configs/_migration/_tomlnull_validate.py`
 - [x] `wepppy/nodb/core/__init__.py`
 - [x] `wepppy/nodb/core/climate.py`
+- [ ] `wepppy/nodb/core/climate_artifact_export_service.py`
+- [ ] `wepppy/nodb/core/climate_build_helpers.py`
+- [ ] `wepppy/nodb/core/climate_build_router.py`
+- [ ] `wepppy/nodb/core/climate_gridmet_multiple_build_service.py`
+- [ ] `wepppy/nodb/core/climate_input_parser.py`
+- [ ] `wepppy/nodb/core/climate_mode_build_services.py`
+- [ ] `wepppy/nodb/core/climate_scaling_service.py`
+- [ ] `wepppy/nodb/core/climate_station_catalog_service.py`
+- [ ] `wepppy/nodb/core/climate_user_defined_station_meta_service.py`
 - [x] `wepppy/nodb/core/landuse.py`
+- [x] `wepppy/nodb/core/management_overrides.py`
+- [x] `wepppy/nodb/core/map_object.py`
 - [x] `wepppy/nodb/core/ron.py`
 - [x] `wepppy/nodb/core/soils.py`
 - [x] `wepppy/nodb/core/topaz.py`
 - [x] `wepppy/nodb/core/watershed.py`
+- [ ] `wepppy/nodb/core/watershed_errors.py`
+- [ ] `wepppy/nodb/core/watershed_mixins.py`
 - [x] `wepppy/nodb/core/wepp.py`
+- [ ] `wepppy/nodb/core/wepp_bootstrap_service.py`
+- [ ] `wepppy/nodb/core/wepp_input_parser.py`
+- [ ] `wepppy/nodb/core/wepp_postprocess_service.py`
+- [ ] `wepppy/nodb/core/wepp_prep_service.py`
+- [ ] `wepppy/nodb/core/wepp_run_service.py`
+- [x] `wepppy/nodb/culverts_runner.py`
 - [x] `wepppy/nodb/duckdb_agents.py`
+- [ ] `wepppy/nodb/geojson_crs_inference.py`
 - [ ] `wepppy/nodb/locales/__init__.py`
 - [ ] `wepppy/nodb/locales/climate_catalog.py`
 - [ ] `wepppy/nodb/locales/landuse_catalog.py`
 - [ ] `wepppy/nodb/mods/__init__.py`
 - [ ] `wepppy/nodb/mods/ag_fields/__init__.py`
 - [x] `wepppy/nodb/mods/ag_fields/ag_fields.py`
+- [ ] `wepppy/nodb/mods/ag_fields/concept1_inputs.py`
+- [ ] `wepppy/nodb/mods/ag_fields/concept1_integration.py`
+- [ ] `wepppy/nodb/mods/ag_fields/concept1_planner.py`
+- [ ] `wepppy/nodb/mods/ag_fields/corpus_execution.py`
+- [ ] `wepppy/nodb/mods/ag_fields/hybrid_integration.py`
+- [ ] `wepppy/nodb/mods/ag_fields/management_corpus.py`
 - [ ] `wepppy/nodb/mods/ag_fields/polygonize_sub_fields.py`
+- [ ] `wepppy/nodb/mods/ag_fields/routing_schemes.py`
+- [ ] `wepppy/nodb/mods/ag_fields/watershed_integration.py`
 - [x] `wepppy/nodb/mods/ash_transport/__init__.py`
 - [ ] `wepppy/nodb/mods/ash_transport/_scripts/migrate_ash_model.py`
 - [x] `wepppy/nodb/mods/ash_transport/ash.py`
@@ -166,8 +273,64 @@ _Scanned root_: `wepppy`
 - [x] `wepppy/nodb/mods/debris_flow/debris_flow.py`
 - [ ] `wepppy/nodb/mods/disturbed/__init__.py`
 - [ ] `wepppy/nodb/mods/disturbed/disturbed.py`
+- [ ] `wepppy/nodb/mods/disturbed/route_coefficients.py`
 - [ ] `wepppy/nodb/mods/emapr/__init__.py`
 - [ ] `wepppy/nodb/mods/emapr/emapr_ts.py`
+- [ ] `wepppy/nodb/mods/features_export/__init__.py`
+- [ ] `wepppy/nodb/mods/features_export/cache_key.py`
+- [ ] `wepppy/nodb/mods/features_export/cache_rehydration.py`
+- [ ] `wepppy/nodb/mods/features_export/carrier_layer_materializer.py`
+- [ ] `wepppy/nodb/mods/features_export/catalog_loader.py`
+- [ ] `wepppy/nodb/mods/features_export/column_selection.py`
+- [ ] `wepppy/nodb/mods/features_export/contracts.py`
+- [ ] `wepppy/nodb/mods/features_export/dependency_tracker.py`
+- [ ] `wepppy/nodb/mods/features_export/discovery.py`
+- [ ] `wepppy/nodb/mods/features_export/duckdb_materializer.py`
+- [ ] `wepppy/nodb/mods/features_export/exporters/__init__.py`
+- [ ] `wepppy/nodb/mods/features_export/exporters/base.py`
+- [ ] `wepppy/nodb/mods/features_export/exporters/csv.py`
+- [ ] `wepppy/nodb/mods/features_export/exporters/geodatabase.py`
+- [ ] `wepppy/nodb/mods/features_export/exporters/geojson.py`
+- [ ] `wepppy/nodb/mods/features_export/exporters/geopackage.py`
+- [ ] `wepppy/nodb/mods/features_export/exporters/geoparquet.py`
+- [ ] `wepppy/nodb/mods/features_export/exporters/kmz.py`
+- [ ] `wepppy/nodb/mods/features_export/exporters/packaging.py`
+- [ ] `wepppy/nodb/mods/features_export/exporters/parquet.py`
+- [ ] `wepppy/nodb/mods/features_export/exporters/tabular_common.py`
+- [ ] `wepppy/nodb/mods/features_export/geometry_carriers.py`
+- [ ] `wepppy/nodb/mods/features_export/identity_columns.py`
+- [ ] `wepppy/nodb/mods/features_export/join_planner.py`
+- [ ] `wepppy/nodb/mods/features_export/legacy_source_materializer.py`
+- [ ] `wepppy/nodb/mods/features_export/manifest.py`
+- [ ] `wepppy/nodb/mods/features_export/manifest_builder.py`
+- [ ] `wepppy/nodb/mods/features_export/output_column_naming.py`
+- [ ] `wepppy/nodb/mods/features_export/planner.py`
+- [ ] `wepppy/nodb/mods/features_export/profiles.py`
+- [ ] `wepppy/nodb/mods/features_export/readme_builder.py`
+- [ ] `wepppy/nodb/mods/features_export/service.py`
+- [ ] `wepppy/nodb/mods/features_export/tabular_temporal_layout.py`
+- [ ] `wepppy/nodb/mods/features_export/temporal_wide_materializer.py`
+- [ ] `wepppy/nodb/mods/geneva/__init__.py`
+- [ ] `wepppy/nodb/mods/geneva/collaborators/__init__.py`
+- [ ] `wepppy/nodb/mods/geneva/collaborators/artifact_io.py`
+- [ ] `wepppy/nodb/mods/geneva/collaborators/batch_run_service.py`
+- [ ] `wepppy/nodb/mods/geneva/collaborators/cn_table_service.py`
+- [ ] `wepppy/nodb/mods/geneva/collaborators/config_service.py`
+- [ ] `wepppy/nodb/mods/geneva/collaborators/frequency_panel_service.py`
+- [ ] `wepppy/nodb/mods/geneva/collaborators/hru_event_measure_service.py`
+- [ ] `wepppy/nodb/mods/geneva/collaborators/hru_map_geometry_service.py`
+- [ ] `wepppy/nodb/mods/geneva/collaborators/hru_preparation_service.py`
+- [ ] `wepppy/nodb/mods/geneva/collaborators/hsg_assignment_service.py`
+- [ ] `wepppy/nodb/mods/geneva/collaborators/kernel_gateway.py`
+- [ ] `wepppy/nodb/mods/geneva/collaborators/report_payload_service.py`
+- [ ] `wepppy/nodb/mods/geneva/collaborators/results_service.py`
+- [ ] `wepppy/nodb/mods/geneva/errors.py`
+- [ ] `wepppy/nodb/mods/geneva/geneva.py`
+- [ ] `wepppy/nodb/mods/geneva/schemas/__init__.py`
+- [ ] `wepppy/nodb/mods/geneva/schemas/config_schema.py`
+- [ ] `wepppy/nodb/mods/geneva/schemas/query_schema.py`
+- [ ] `wepppy/nodb/mods/geneva/schemas/results_schema.py`
+- [ ] `wepppy/nodb/mods/geneva/schemas/run_batch_schema.py`
 - [ ] `wepppy/nodb/mods/locations/__init__.py`
 - [ ] `wepppy/nodb/mods/locations/general/__init__.py`
 - [ ] `wepppy/nodb/mods/locations/general/general.py`
@@ -185,11 +348,31 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/nodb/mods/observed/observed.py`
 - [ ] `wepppy/nodb/mods/omni/__init__.py`
 - [x] `wepppy/nodb/mods/omni/omni.py`
+- [ ] `wepppy/nodb/mods/omni/omni_artifact_export_service.py`
+- [ ] `wepppy/nodb/mods/omni/omni_build_router.py`
+- [ ] `wepppy/nodb/mods/omni/omni_clone_contrast_service.py`
+- [ ] `wepppy/nodb/mods/omni/omni_contrast_build_service.py`
+- [ ] `wepppy/nodb/mods/omni/omni_contrast_status_report_service.py`
+- [x] `wepppy/nodb/mods/omni/omni_documentation.py`
+- [ ] `wepppy/nodb/mods/omni/omni_input_parser.py`
+- [ ] `wepppy/nodb/mods/omni/omni_mode_build_services.py`
+- [ ] `wepppy/nodb/mods/omni/omni_run_orchestration_service.py`
+- [ ] `wepppy/nodb/mods/omni/omni_scaling_service.py`
+- [ ] `wepppy/nodb/mods/omni/omni_state_contrast_mixin.py`
+- [ ] `wepppy/nodb/mods/omni/omni_station_catalog_service.py`
+- [ ] `wepppy/nodb/mods/openet/__init__.py`
+- [x] `wepppy/nodb/mods/openet/openet_ts.py`
+- [ ] `wepppy/nodb/mods/openet/smoke_climate_engine_openet.py`
 - [ ] `wepppy/nodb/mods/path_ce/__init__.py`
-- [ ] `wepppy/nodb/mods/path_ce/data_loader.py`
+- [ ] `wepppy/nodb/mods/path_ce/data_prep.py`
 - [ ] `wepppy/nodb/mods/path_ce/path_ce_solver.py`
 - [ ] `wepppy/nodb/mods/path_ce/path_cost_effective.py`
-- [ ] `wepppy/nodb/mods/path_ce_model.py`
+- [ ] `wepppy/nodb/mods/path_ce/preconditions.py`
+- [ ] `wepppy/nodb/mods/path_ce/presets.py`
+- [ ] `wepppy/nodb/mods/path_ce/report_service.py`
+- [ ] `wepppy/nodb/mods/path_ce/threshold_sweep.py`
+- [ ] `wepppy/nodb/mods/polaris/__init__.py`
+- [ ] `wepppy/nodb/mods/polaris/polaris.py`
 - [ ] `wepppy/nodb/mods/rangeland_cover/__init__.py`
 - [x] `wepppy/nodb/mods/rangeland_cover/rangeland_cover.py`
 - [ ] `wepppy/nodb/mods/rap/__init__.py`
@@ -200,18 +383,42 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/nodb/mods/rhem/__init__.py`
 - [x] `wepppy/nodb/mods/rhem/rhem.py`
 - [ ] `wepppy/nodb/mods/rhem/rhempost.py`
+- [ ] `wepppy/nodb/mods/roads/__init__.py`
+- [ ] `wepppy/nodb/mods/roads/monotonic_segments.py`
+- [ ] `wepppy/nodb/mods/roads/roads.py`
 - [ ] `wepppy/nodb/mods/rred/__init__.py`
 - [ ] `wepppy/nodb/mods/rred/rred.py`
 - [ ] `wepppy/nodb/mods/rred/rred_api.py`
+- [ ] `wepppy/nodb/mods/rusle/__init__.py`
+- [ ] `wepppy/nodb/mods/rusle/c_formula.py`
+- [ ] `wepppy/nodb/mods/rusle/c_integration.py`
+- [ ] `wepppy/nodb/mods/rusle/c_lookup.py`
+- [ ] `wepppy/nodb/mods/rusle/c_manifest.py`
+- [ ] `wepppy/nodb/mods/rusle/k_compare.py`
+- [ ] `wepppy/nodb/mods/rusle/k_epic.py`
+- [ ] `wepppy/nodb/mods/rusle/k_integration.py`
+- [ ] `wepppy/nodb/mods/rusle/k_manifest.py`
+- [ ] `wepppy/nodb/mods/rusle/k_nomograph.py`
+- [ ] `wepppy/nodb/mods/rusle/k_reference.py`
+- [ ] `wepppy/nodb/mods/rusle/ls_integration.py`
+- [ ] `wepppy/nodb/mods/rusle/r_modes.py`
+- [ ] `wepppy/nodb/mods/rusle/rusle.py`
 - [ ] `wepppy/nodb/mods/salvage_logging/__init__.py`
 - [ ] `wepppy/nodb/mods/salvage_logging/burn_roads.py`
-- [ ] `wepppy/nodb/mods/salvage_logging/flowpaths.py`
 - [ ] `wepppy/nodb/mods/salvage_logging/roads.py`
 - [ ] `wepppy/nodb/mods/shrubland/__init__.py`
 - [x] `wepppy/nodb/mods/shrubland/shrubland.py`
 - [ ] `wepppy/nodb/mods/shrubland/shrubland_map.py`
 - [ ] `wepppy/nodb/mods/skid_trails/__init__.py`
 - [ ] `wepppy/nodb/mods/skid_trails/skid_trails.py`
+- [ ] `wepppy/nodb/mods/swat/__init__.py`
+- [ ] `wepppy/nodb/mods/swat/_helpers.py`
+- [ ] `wepppy/nodb/mods/swat/errors.py`
+- [ ] `wepppy/nodb/mods/swat/print_prt.py`
+- [ ] `wepppy/nodb/mods/swat/swat.py`
+- [ ] `wepppy/nodb/mods/swat/swat_connectivity_mixin.py`
+- [ ] `wepppy/nodb/mods/swat/swat_recall_mixin.py`
+- [ ] `wepppy/nodb/mods/swat/swat_txtinout_mixin.py`
 - [ ] `wepppy/nodb/mods/treatments/__init__.py`
 - [ ] `wepppy/nodb/mods/treatments/mulch_application.py`
 - [ ] `wepppy/nodb/mods/treatments/treatments.py`
@@ -220,6 +427,7 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/nodb/mods/treecanopy/treecanopy_map.py`
 - [x] `wepppy/nodb/prep.py`
 - [x] `wepppy/nodb/redis_prep.py`
+- [ ] `wepppy/nodb/scripts/dss_export/plot_peak_chan_compare.py`
 - [ ] `wepppy/nodb/scripts/omni/_scripts/_0_omni_create.py`
 - [ ] `wepppy/nodb/scripts/omni/_scripts/_omni_build_contrasts.py`
 - [ ] `wepppy/nodb/scripts/omni/_scripts/_omni_build_scenario.py`
@@ -227,12 +435,20 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/nodb/scripts/omni/_scripts/_omni_test_gpkg_extract.py`
 - [ ] `wepppy/nodb/scripts/omni/_scripts/_run_omni.py`
 - [ ] `wepppy/nodb/scripts/update_extended_mods_data.py`
+- [x] `wepppy/nodb/skeletonize.py`
 - [x] `wepppy/nodb/status_messenger.py`
 - [x] `wepppy/nodb/unitizer.py`
 - [x] `wepppy/nodb/version.py`
+- [x] `wepppy/nodb/wepp_nodb_post_utils.py`
+- [ ] `wepppy/observability/__init__.py`
+- [ ] `wepppy/observability/correlation.py`
+- [ ] `wepppy/profile_coverage/__init__.py`
+- [ ] `wepppy/profile_coverage/runtime.py`
+- [ ] `wepppy/profile_coverage/settings.py`
 - [ ] `wepppy/profile_recorder/__init__.py`
 - [x] `wepppy/profile_recorder/assembler.py`
 - [x] `wepppy/profile_recorder/config.py`
+- [ ] `wepppy/profile_recorder/expectations.py`
 - [x] `wepppy/profile_recorder/playback.py`
 - [x] `wepppy/profile_recorder/profile_recorder.py`
 - [x] `wepppy/profile_recorder/utils.py`
@@ -251,46 +467,110 @@ _Scanned root_: `wepppy`
 - [x] `wepppy/query_engine/executor.py`
 - [x] `wepppy/query_engine/formatter.py`
 - [x] `wepppy/query_engine/payload.py`
+- [ ] `wepppy/query_engine/storm_event_analyzer.py`
 - [x] `wepppy/rhem/__init__.py`
 - [ ] `wepppy/rhem/out/__init__.py`
 - [ ] `wepppy/rhem/out/full_output.py`
 - [ ] `wepppy/rhem/out/rhemtotalwatsed.py`
 - [x] `wepppy/rhem/rhem.py`
 - [ ] `wepppy/rq/__init__.py`
+- [x] `wepppy/rq/ag_fields_rq.py`
 - [x] `wepppy/rq/agent_rq.py`
+- [x] `wepppy/rq/auth_actor.py`
 - [x] `wepppy/rq/batch_rq.py`
 - [x] `wepppy/rq/cancel_job.py`
+- [x] `wepppy/rq/culvert_rq.py`
+- [x] `wepppy/rq/culvert_rq_helpers.py`
+- [x] `wepppy/rq/culvert_rq_manifest.py`
+- [x] `wepppy/rq/culvert_rq_pipeline.py`
+- [ ] `wepppy/rq/ermit_export_rq.py`
+- [x] `wepppy/rq/exception_logging.py`
+- [ ] `wepppy/rq/features_export_rq.py`
+- [ ] `wepppy/rq/geneva_rq.py`
 - [x] `wepppy/rq/interchange_rq.py`
 - [x] `wepppy/rq/job_info.py`
+- [ ] `wepppy/rq/job_listings.py`
+- [x] `wepppy/rq/job_summary.py`
+- [x] `wepppy/rq/jobinfo_payloads.py`
 - [x] `wepppy/rq/land_and_soil_rq.py`
+- [x] `wepppy/rq/migrations_rq.py`
 - [x] `wepppy/rq/omni_rq.py`
 - [x] `wepppy/rq/path_ce_rq.py`
 - [x] `wepppy/rq/project_rq.py`
+- [x] `wepppy/rq/project_rq_archive.py`
+- [x] `wepppy/rq/project_rq_delete.py`
+- [x] `wepppy/rq/project_rq_fork.py`
+- [ ] `wepppy/rq/roads_rq.py`
 - [x] `wepppy/rq/rq_worker.py`
+- [x] `wepppy/rq/run_sync_rq.py`
+- [ ] `wepppy/rq/swat_rq.py`
+- [x] `wepppy/rq/topo_utils.py`
 - [x] `wepppy/rq/wepp_rq.py`
+- [x] `wepppy/rq/wepp_rq_dss.py`
+- [x] `wepppy/rq/wepp_rq_pipeline.py`
+- [x] `wepppy/rq/wepp_rq_stage_finalize.py`
+- [x] `wepppy/rq/wepp_rq_stage_helpers.py`
+- [x] `wepppy/rq/wepp_rq_stage_post.py`
+- [x] `wepppy/rq/wepp_rq_stage_prep.py`
 - [x] `wepppy/rq/weppcloudr_rq.py`
+- [ ] `wepppy/runtime_paths/__init__.py`
+- [ ] `wepppy/runtime_paths/errors.py`
+- [ ] `wepppy/runtime_paths/fs.py`
+- [ ] `wepppy/runtime_paths/materialize.py`
+- [ ] `wepppy/runtime_paths/mutations.py`
+- [ ] `wepppy/runtime_paths/parquet_sidecars.py`
+- [ ] `wepppy/runtime_paths/paths.py`
+- [ ] `wepppy/runtime_paths/projections.py`
+- [ ] `wepppy/runtime_paths/thaw_freeze.py`
+- [ ] `wepppy/runtime_paths/wepp_inputs.py`
 - [ ] `wepppy/soils/__init__.py`
 - [x] `wepppy/soils/ssurgo/__init__.py`
 - [ ] `wepppy/soils/ssurgo/data/__init__.py`
 - [ ] `wepppy/soils/ssurgo/data/surgo/build/surgo_tabular_db_builder.py`
+- [x] `wepppy/soils/ssurgo/fallback.py`
 - [x] `wepppy/soils/ssurgo/spatializer.py`
 - [x] `wepppy/soils/ssurgo/ssurgo.py`
 - [x] `wepppy/soils/ssurgo/statsgo_spatial.py`
 - [x] `wepppy/soils/ssurgo/surgo_map.py`
 - [ ] `wepppy/soils/ssurgo/tests/__init__.py`
 - [ ] `wepppy/soils/ssurgo/tests/testsoils/__init__.py`
+- [ ] `wepppy/tools/__init__.py`
+- [ ] `wepppy/tools/migrations/__init__.py`
+- [ ] `wepppy/tools/migrations/cache.py`
+- [ ] `wepppy/tools/migrations/interchange.py`
+- [ ] `wepppy/tools/migrations/landuse.py`
 - [ ] `wepppy/tools/migrations/migrate_ashpost_pickles.py`
+- [ ] `wepppy/tools/migrations/migrate_interchange.py`
 - [ ] `wepppy/tools/migrations/migrate_landuse_parquet.py`
+- [ ] `wepppy/tools/migrations/migrate_observed_nodb.py`
+- [ ] `wepppy/tools/migrations/migrate_run.py`
+- [ ] `wepppy/tools/migrations/migrate_run_paths.py`
 - [ ] `wepppy/tools/migrations/migrate_soils_parquet.py`
 - [ ] `wepppy/tools/migrations/migrate_watersheds_peridot_tables.py`
 - [ ] `wepppy/tools/migrations/migrate_wbt_geojson_ids.py`
+- [ ] `wepppy/tools/migrations/nodb.py`
+- [ ] `wepppy/tools/migrations/nodir_bulk.py`
+- [ ] `wepppy/tools/migrations/parquet_paths.py`
+- [ ] `wepppy/tools/migrations/run_migrations.py`
+- [x] `wepppy/tools/migrations/runner.py`
+- [ ] `wepppy/tools/migrations/soils.py`
+- [ ] `wepppy/tools/migrations/unroll_root_resources_batch.py`
+- [ ] `wepppy/tools/migrations/watershed.py`
+- [ ] `wepppy/tools/scheduler.py`
 - [ ] `wepppy/topo/__init__.py`
+- [ ] `wepppy/topo/osm_roads/__init__.py`
+- [ ] `wepppy/topo/osm_roads/cache.py`
+- [ ] `wepppy/topo/osm_roads/contracts.py`
+- [ ] `wepppy/topo/osm_roads/errors.py`
+- [ ] `wepppy/topo/osm_roads/overpass.py`
+- [ ] `wepppy/topo/osm_roads/service.py`
 - [ ] `wepppy/topo/peridot/__init__.py`
 - [ ] `wepppy/topo/peridot/flowpath.py`
 - [ ] `wepppy/topo/peridot/peridot_runner.py`
 - [ ] `wepppy/topo/topaz/__init__.py`
 - [ ] `wepppy/topo/topaz/topaz.py`
 - [ ] `wepppy/topo/watershed_abstraction/__init__.py`
+- [ ] `wepppy/topo/watershed_abstraction/mofe_map.py`
 - [x] `wepppy/topo/watershed_abstraction/slope_file.py`
 - [x] `wepppy/topo/watershed_abstraction/support.py`
 - [x] `wepppy/topo/watershed_abstraction/watershed_abstraction.py`
@@ -298,8 +578,12 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/topo/watershed_collection/__init__.py`
 - [x] `wepppy/topo/watershed_collection/watershed_collection.py`
 - [x] `wepppy/topo/wbt/__init__.py`
+- [ ] `wepppy/topo/wbt/osm_roads_consumer.py`
+- [ ] `wepppy/topo/wbt/terrain_processor.py`
+- [ ] `wepppy/topo/wbt/terrain_processor_helpers.py`
 - [x] `wepppy/topo/wbt/wbt_documentation.py`
 - [x] `wepppy/topo/wbt/wbt_topaz_emulator.py`
+- [ ] `wepppy/vulture_whitelist.py`
 - [ ] `wepppy/watershed_boundary_dataset/__init__.py`
 - [ ] `wepppy/watershed_boundary_dataset/usgs_wbd.py`
 - [x] `wepppy/webservices/__init__.py`
@@ -316,9 +600,17 @@ _Scanned root_: `wepppy`
 - [x] `wepppy/webservices/wmesque2.py`
 - [ ] `wepppy/wepp/__init__.py`
 - [ ] `wepppy/wepp/_scripts/compare.py`
+- [ ] `wepppy/wepp/fuzzing/__init__.py`
+- [ ] `wepppy/wepp/fuzzing/seeded_soil_landuse_generators.py`
+- [ ] `wepppy/wepp/fuzzing/single_ofe_stratified_campaign.py`
 - [x] `wepppy/wepp/interchange/__init__.py`
+- [x] `wepppy/wepp/interchange/_rust_interchange.py`
 - [x] `wepppy/wepp/interchange/_utils.py`
-- [x] `wepppy/wepp/interchange/concurrency.py`
+- [x] `wepppy/wepp/interchange/ag_fields_interchange.py`
+- [ ] `wepppy/wepp/interchange/date_filters.py`
+- [ ] `wepppy/wepp/interchange/dss_dates.py`
+- [ ] `wepppy/wepp/interchange/hec_ras_boundary.py`
+- [ ] `wepppy/wepp/interchange/hec_ras_buffer.py`
 - [x] `wepppy/wepp/interchange/hill_ebe_interchange.py`
 - [x] `wepppy/wepp/interchange/hill_element_interchange.py`
 - [x] `wepppy/wepp/interchange/hill_interchange.py`
@@ -340,6 +632,7 @@ _Scanned root_: `wepppy`
 - [x] `wepppy/wepp/interchange/watershed_loss_interchange.py`
 - [x] `wepppy/wepp/interchange/watershed_pass_interchange.py`
 - [x] `wepppy/wepp/interchange/watershed_soil_interchange.py`
+- [x] `wepppy/wepp/interchange/watershed_tc_out_interchange.py`
 - [x] `wepppy/wepp/interchange/watershed_totalwatsed_export.py`
 - [ ] `wepppy/wepp/management/__init__.py`
 - [x] `wepppy/wepp/management/channels.py`
@@ -362,6 +655,7 @@ _Scanned root_: `wepppy`
 - [x] `wepppy/wepp/reports/loss_channel_report.py`
 - [x] `wepppy/wepp/reports/loss_hill_report.py`
 - [x] `wepppy/wepp/reports/loss_outlet_report.py`
+- [x] `wepppy/wepp/reports/output_scope.py`
 - [x] `wepppy/wepp/reports/report_base.py`
 - [x] `wepppy/wepp/reports/return_periods.py`
 - [x] `wepppy/wepp/reports/row_data.py`
@@ -387,20 +681,35 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/weppcloud/_config_logging.py`
 - [ ] `wepppy/weppcloud/_context_processors.py`
 - [ ] `wepppy/weppcloud/_jinja_filters.py`
-- [ ] `wepppy/weppcloud/_scripts/archive_weppcloud_runs.py`
 - [ ] `wepppy/weppcloud/_scripts/compile_dot_logs.py`
+- [ ] `wepppy/weppcloud/_scripts/import_access_data.py`
 - [ ] `wepppy/weppcloud/_scripts/issue_auth_token.py`
 - [ ] `wepppy/weppcloud/_scripts/reset_password.py`
+- [ ] `wepppy/weppcloud/_scripts/revoke_auth_token.py`
+- [ ] `wepppy/weppcloud/_scripts/scan_access_logs.py`
 - [ ] `wepppy/weppcloud/app.py`
+- [ ] `wepppy/weppcloud/auth_forms.py`
+- [ ] `wepppy/weppcloud/bootstrap/__init__.py`
+- [ ] `wepppy/weppcloud/bootstrap/api_shared.py`
+- [ ] `wepppy/weppcloud/bootstrap/enable_jobs.py`
+- [ ] `wepppy/weppcloud/bootstrap/git_lock.py`
+- [ ] `wepppy/weppcloud/bootstrap/pre_receive.py`
 - [ ] `wepppy/weppcloud/combined_watershed_viewer_generator.py`
 - [ ] `wepppy/weppcloud/configuration.py`
 - [ ] `wepppy/weppcloud/controllers_js/build_controllers_js.py`
 - [ ] `wepppy/weppcloud/controllers_js/unitizer_map_builder.py`
 - [ ] `wepppy/weppcloud/db_api/__init__.py`
+- [ ] `wepppy/weppcloud/feature_registry/__init__.py`
+- [ ] `wepppy/weppcloud/feature_registry/runtime.py`
+- [ ] `wepppy/weppcloud/feature_registry/schema.py`
 - [ ] `wepppy/weppcloud/migrations/env.py`
 - [ ] `wepppy/weppcloud/migrations/versions/28e48afd0090_add_fs_uniquifier_to_user.py`
 - [ ] `wepppy/weppcloud/migrations/versions/4b48d5aa1ba9_add_oauth_account_table.py`
+- [ ] `wepppy/weppcloud/migrations/versions/7b3c068e7a1d_add_run_migrations_table.py`
+- [ ] `wepppy/weppcloud/migrations/versions/b7d9c3e2f1a4_add_bootstrap_disabled_to_run.py`
+- [ ] `wepppy/weppcloud/migrations/versions/c91f6b2a4d7e_add_user_preferences.py`
 - [ ] `wepppy/weppcloud/migrations/versions/cac20a11c2cb_add_last_modified_and_last_accessed_to_.py`
+- [ ] `wepppy/weppcloud/profile_coverage.py`
 - [ ] `wepppy/weppcloud/routes/__init__.py`
 - [ ] `wepppy/weppcloud/routes/_common.py`
 - [ ] `wepppy/weppcloud/routes/_run_context.py`
@@ -414,23 +723,24 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/weppcloud/routes/archive_dashboard/archive_dashboard.py`
 - [ ] `wepppy/weppcloud/routes/batch_runner/__init__.py`
 - [ ] `wepppy/weppcloud/routes/batch_runner/batch_runner_bp.py`
+- [ ] `wepppy/weppcloud/routes/bootstrap.py`
 - [ ] `wepppy/weppcloud/routes/combined_watershed_viewer.py`
 - [ ] `wepppy/weppcloud/routes/command_bar/__init__.py`
 - [ ] `wepppy/weppcloud/routes/command_bar/command_bar.py`
 - [ ] `wepppy/weppcloud/routes/diff/__init__.py`
 - [ ] `wepppy/weppcloud/routes/diff/diff.py`
-- [ ] `wepppy/weppcloud/routes/export.py`
 - [ ] `wepppy/weppcloud/routes/fork_console/__init__.py`
 - [ ] `wepppy/weppcloud/routes/fork_console/fork_console.py`
 - [ ] `wepppy/weppcloud/routes/geodata.py`
+- [ ] `wepppy/weppcloud/routes/gl_dashboard.py`
 - [ ] `wepppy/weppcloud/routes/huc_fire.py`
 - [ ] `wepppy/weppcloud/routes/jsoncrack.py`
 - [ ] `wepppy/weppcloud/routes/locations.py`
-- [ ] `wepppy/weppcloud/routes/map.py`
 - [ ] `wepppy/weppcloud/routes/nodb_api/__init__.py`
 - [x] `wepppy/weppcloud/routes/nodb_api/climate_bp.py`
 - [x] `wepppy/weppcloud/routes/nodb_api/debris_flow_bp.py`
 - [x] `wepppy/weppcloud/routes/nodb_api/disturbed_bp.py`
+- [x] `wepppy/weppcloud/routes/nodb_api/geneva_bp.py`
 - [x] `wepppy/weppcloud/routes/nodb_api/interchange_bp.py`
 - [x] `wepppy/weppcloud/routes/nodb_api/landuse_bp.py`
 - [ ] `wepppy/weppcloud/routes/nodb_api/observed_bp.py`
@@ -440,6 +750,7 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/weppcloud/routes/nodb_api/rangeland_bp.py`
 - [ ] `wepppy/weppcloud/routes/nodb_api/rangeland_cover_bp.py`
 - [ ] `wepppy/weppcloud/routes/nodb_api/rhem_bp.py`
+- [ ] `wepppy/weppcloud/routes/nodb_api/roads_bp.py`
 - [ ] `wepppy/weppcloud/routes/nodb_api/soils_bp.py`
 - [ ] `wepppy/weppcloud/routes/nodb_api/treatments_bp.py`
 - [ ] `wepppy/weppcloud/routes/nodb_api/unitizer_bp.py`
@@ -451,11 +762,16 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/weppcloud/routes/readme_md/readme_md.py`
 - [ ] `wepppy/weppcloud/routes/recorder_bp.py`
 - [ ] `wepppy/weppcloud/routes/rq/__init__.py`
+- [ ] `wepppy/weppcloud/routes/rq/info_details/__init__.py`
+- [ ] `wepppy/weppcloud/routes/rq/info_details/routes.py`
 - [ ] `wepppy/weppcloud/routes/rq/job_dashboard/__init__.py`
 - [ ] `wepppy/weppcloud/routes/rq/job_dashboard/routes.py`
 - [ ] `wepppy/weppcloud/routes/run_0/__init__.py`
 - [ ] `wepppy/weppcloud/routes/run_0/run_0_bp.py`
+- [ ] `wepppy/weppcloud/routes/run_sync_dashboard/__init__.py`
+- [ ] `wepppy/weppcloud/routes/run_sync_dashboard/run_sync_dashboard.py`
 - [ ] `wepppy/weppcloud/routes/stats.py`
+- [ ] `wepppy/weppcloud/routes/storm_event_analyzer.py`
 - [ ] `wepppy/weppcloud/routes/test_bp.py`
 - [ ] `wepppy/weppcloud/routes/ui_showcase/__init__.py`
 - [ ] `wepppy/weppcloud/routes/ui_showcase/ui_showcase_bp.py`
@@ -464,16 +780,29 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/weppcloud/routes/usersum/usersum.py`
 - [ ] `wepppy/weppcloud/routes/weppcloud_site.py`
 - [ ] `wepppy/weppcloud/routes/weppcloudr.py`
-- [ ] `wepppy/weppcloud/run_statistics.py`
+- [x] `wepppy/weppcloud/run_statistics.py`
 - [ ] `wepppy/weppcloud/static/open-iconic/png/recolor.py`
 - [ ] `wepppy/weppcloud/static/resources/usgs/_to_geocsv.py`
 - [ ] `wepppy/weppcloud/static-src/node_modules/flatted/python/flatted.py`
 - [ ] `wepppy/weppcloud/static-src/scripts/convert_vscode_theme.py`
+- [x] `wepppy/weppcloud/user_preferences.py`
+- [ ] `wepppy/weppcloud/usersum_anchors.py`
+- [ ] `wepppy/weppcloud/usersum_docs/__init__.py`
+- [ ] `wepppy/weppcloud/usersum_docs/docs_contracts.py`
+- [ ] `wepppy/weppcloud/usersum_docs/docs_index.py`
+- [ ] `wepppy/weppcloud/usersum_docs/pg_search.py`
+- [ ] `wepppy/weppcloud/usersum_docs/runtime_catalog.py`
+- [ ] `wepppy/weppcloud/usersum_docs/vendor_sync.py`
 - [ ] `wepppy/weppcloud/utils/__init__.py`
 - [x] `wepppy/weppcloud/utils/agent_auth.py`
-- [x] `wepppy/weppcloud/utils/archive.py`
+- [ ] `wepppy/weppcloud/utils/assets.py`
 - [x] `wepppy/weppcloud/utils/auth_tokens.py`
+- [ ] `wepppy/weppcloud/utils/browse_cookie.py`
+- [x] `wepppy/weppcloud/utils/cap_guard.py`
+- [x] `wepppy/weppcloud/utils/cap_verify.py`
 - [x] `wepppy/weppcloud/utils/helpers.py`
 - [x] `wepppy/weppcloud/utils/oauth.py`
-- [ ] `wepppy/weppcloud/utils/test/test_archive.py`
+- [ ] `wepppy/weppcloud/utils/rq_engine_token.py`
+- [ ] `wepppy/weppcloud/utils/run_ttl.py`
+- [ ] `wepppy/weppcloud/utils/runid.py`
 - [x] `wepppy/weppcloud/utils/uploads.py`

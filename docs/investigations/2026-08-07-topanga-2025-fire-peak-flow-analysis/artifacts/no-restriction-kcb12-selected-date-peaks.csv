@@ -1,0 +1,11 @@
+return_period_years,selected_by,event_date,burned_peak_m3s,undisturbed_peak_m3s,burned_minus_undisturbed_m3s
+2,burned,2021-12-29,63.17,96.75,-33.58
+5,burned,2019-01-16,83.95,64.60,19.35
+10,burned,1982-11-30,106.00,94.97,11.03
+20,burned,2021-12-30,124.38,128.91,-4.53
+25,burned,1995-01-03,145.55,138.38,7.17
+2,undisturbed,2005-02-21,55.58,87.62,-32.04
+5,undisturbed,1996-02-20,73.63,112.51,-38.89
+10,undisturbed,2005-01-09,50.34,138.19,-87.85
+20,undisturbed,1983-03-01,62.65,161.64,-98.98
+25,undisturbed,1995-01-10,50.06,174.67,-124.61

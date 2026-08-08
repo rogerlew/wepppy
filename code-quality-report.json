@@ -1,7 +1,7 @@
 {
-  "generated_at_utc": "2026-08-07T14:08:09Z",
+  "generated_at_utc": "2026-08-07T19:13:21Z",
   "mode": "observe-only",
-  "base_ref": "64db4e554",
+  "base_ref": "7ce0cf524d9e7f4d2be6270ca220b574f04e91ed",
   "thresholds": {
     "python_file_sloc": {
       "yellow": 650,
@@ -40,15 +40,15 @@
       "count": 933.0,
       "p50": 126.0,
       "p75": 303.0,
-      "p90": 679.8,
-      "p95": 976.6,
+      "p90": 683.2,
+      "p95": 984.8,
       "p99": 2010.56,
       "max": 5697.0
     },
     "python_prod_max_function_len": {
       "count": 752.0,
       "p50": 59.0,
-      "p75": 109.0,
+      "p75": 109.25,
       "p90": 183.8,
       "p95": 241.45,
       "p99": 356.9,
@@ -158,7 +158,7 @@
       },
       {
         "path": "wepppy/nodb/mods/disturbed/disturbed.py",
-        "value": 1929.0
+        "value": 1939.0
       },
       {
         "path": "wepppy/nodb/core/landuse.py",
@@ -295,11 +295,11 @@
       },
       {
         "path": "wepppy/weppcloud/static/js/gl-dashboard/map/layers.js",
-        "value": 1568.0
+        "value": 1572.0
       },
       {
         "path": "wepppy/weppcloud/static/js/gl-dashboard/layers/renderer.js",
-        "value": 1547.0
+        "value": 1549.0
       },
       {
         "path": "wepppy/weppcloud/static/js/gl-dashboard/layers/detector.js",
@@ -413,5 +413,126 @@
       }
     ]
   },
-  "changed_files": []
+  "changed_files": [
+    {
+      "path": "tests/microservices/test_rq_engine_jobinfo.py",
+      "base_path": "tests/microservices/test_rq_engine_jobinfo.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 494.0,
+          "current": 554.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 37.0,
+          "current": 37.0,
+          "trend": "unchanged",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/rq/test_job_info.py",
+      "base_path": "tests/rq/test_job_info.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 336.0,
+          "current": 336.0,
+          "trend": "unchanged",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 64.0,
+          "current": 64.0,
+          "trend": "unchanged",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/rq/test_job_queue_rank.py",
+      "base_path": "tests/rq/test_job_queue_rank.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 235.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 21.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "wepppy/rq/job_info.py",
+      "base_path": "wepppy/rq/job_info.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 377.0,
+          "current": 473.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 153.0,
+          "current": 162.0,
+          "trend": "worsened",
+          "severity": "red"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    }
+  ]
 }
