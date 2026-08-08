@@ -1,0 +1,51 @@
+{
+  "event_date": "1980-02-14",
+  "executable_sha256": "4a5158e224c175ac06c760f1006cc19f7691a9bd28911d94788af2622ba178a5",
+  "lanes": {
+    "baseline-ksat20": {
+      "internal_trace": {
+        "forcing_max_post_surplus_mm_h": 64.05,
+        "legacy_appmth_peak_mm_h": 47.710,
+        "legacy_hdrive_peak_mm_h": 61.751,
+        "positive_excess_duration_s": 4536.60,
+        "remax_pre_surplus_mm_h": 34.69,
+        "selected_solver": "APPMTH",
+        "surplus_added_rate_mm_h": 29.36,
+        "surplus_depth_mm": 36.999,
+        "tp2_s": 0.0
+      },
+      "published_output": {
+        "antecedent_profile_water_mm": {"absolute_tolerance": 0.01, "value": 211.87},
+        "effective_intensity_mm_h": {"absolute_tolerance": 0.001, "value": 39.233},
+        "effective_surface_ksat_mm_h": {"absolute_tolerance": 0.001, "value": 20.0},
+        "precip_mm": {"absolute_tolerance": 0.001, "value": 82.4},
+        "production_peak_mm_h": {"absolute_tolerance": 0.003, "value": 47.710},
+        "rectangular_effective_duration_h": {"absolute_tolerance": 0.001, "value": 1.260},
+        "runoff_post_reconciliation_mm": {"absolute_tolerance": 0.003, "value": 60.122}
+      }
+    },
+    "mutant-ksat35": {
+      "internal_trace": {
+        "forcing_max_post_surplus_mm_h": 94.35,
+        "legacy_appmth_peak_mm_h": 85.162,
+        "legacy_hdrive_peak_mm_h": 92.714,
+        "positive_excess_duration_s": 2478.44,
+        "remax_pre_surplus_mm_h": 19.35,
+        "selected_solver": "HDRIVE",
+        "surplus_added_rate_mm_h": 75.00,
+        "surplus_depth_mm": 51.637,
+        "tp2_s": 5100.0
+      },
+      "published_output": {
+        "antecedent_profile_water_mm": {"absolute_tolerance": 0.01, "value": 211.85},
+        "effective_intensity_mm_h": {"absolute_tolerance": 0.001, "value": 46.731},
+        "effective_surface_ksat_mm_h": {"absolute_tolerance": 0.001, "value": 35.0},
+        "precip_mm": {"absolute_tolerance": 0.001, "value": 82.4},
+        "production_peak_mm_h": {"absolute_tolerance": 0.003, "value": 92.714},
+        "rectangular_effective_duration_h": {"absolute_tolerance": 0.001, "value": 0.632},
+        "runoff_post_reconciliation_mm": {"absolute_tolerance": 0.003, "value": 58.630}
+      }
+    }
+  },
+  "schema_version": "1.0.0"
+}

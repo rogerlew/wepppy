@@ -1,0 +1,17 @@
+{
+  "all_byte_equal": true,
+  "comparison_policy": "Byte-for-byte equality for every file emitted under output/; stdout, stderr, and the opt-in diagnostic trace are excluded.",
+  "files": {
+    "H106.ebe.dat": "dae32142a04c6c2bf86274a3bc13110dedc14130cd0b0a859a2861ad3c4d2303",
+    "H106.element.dat": "b56a819cbf08b5e1a79a718fe7194c48c8eeadeeca9282b57821fb435951c37c",
+    "H106.loss.dat": "cc85882693c6f1e68a9b730c1ec5512b3c0917d2f7bc0f4641a243a463c06e9b",
+    "H106.pass.dat": "17820418e27a23cb077c8c0962622fb59cd230edb4ee7e136418d628ad82852c",
+    "H106.plot.dat": "9c66e293091a18bb0026b468450c5a36731c1057a1854e0788761cd5b3966c04",
+    "H106.soil.dat": "083c8e8ac9e3e45f1b7b75b3a5c10054f07525b7cac3ee7172c3fc42fdacd5b4",
+    "H106.wat.dat": "d256e2755c378b7633799ecb240eb6d503040fa9bac1a5104af11af0cce8a514"
+  },
+  "fixture": "topanga-h106-1980-ksat/baseline-ksat20",
+  "observer_marker_present": false,
+  "reference_executable_sha256": "4a5158e224c175ac06c760f1006cc19f7691a9bd28911d94788af2622ba178a5",
+  "schema_version": "1.0.0"
+}

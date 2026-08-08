@@ -1,0 +1,57 @@
+{
+  "$id": "https://github.com/rogerlew/wepppy/peakflow-phase1/schemas/artifact-storage.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "artifact_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "byte_size": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "dataset_schema_version": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "format": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "locator": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "producer_run_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "retention_status": {
+      "enum": [
+        "committed",
+        "authoritative_external",
+        "derived_rebuildable",
+        "expired"
+      ]
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "artifact_id",
+    "locator",
+    "format",
+    "byte_size",
+    "sha256",
+    "retention_status"
+  ],
+  "title": "Artifact Storage",
+  "type": "object"
+}

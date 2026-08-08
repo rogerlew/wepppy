@@ -1,0 +1,112 @@
+{
+  "$id": "https://github.com/rogerlew/wepppy/peakflow-phase1/schemas/event-scalar.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "calendar_date": {
+      "format": "date",
+      "type": "string"
+    },
+    "event_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "event_present": {
+      "type": "boolean"
+    },
+    "forcing_max_post_surplus_mm_h": {
+      "minimum": 0,
+      "type": "number"
+    },
+    "hillslope_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "model_day": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "ofe": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "packet_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "positive_excess_duration_s": {
+      "minimum": 0,
+      "type": "number"
+    },
+    "production_peak_mm_h": {
+      "minimum": 0,
+      "type": "number"
+    },
+    "remax_pre_surplus_mm_h": {
+      "minimum": 0,
+      "type": "number"
+    },
+    "run_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "runoff_post_reconciliation_mm": {
+      "minimum": 0,
+      "type": "number"
+    },
+    "runoff_pre_reconciliation_mm": {
+      "minimum": 0,
+      "type": "number"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "selected_solver": {
+      "enum": [
+        "APPMTH",
+        "HDRIVE",
+        "none"
+      ]
+    },
+    "solver_call_ordinal": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "surplus_added_rate_mm_h": {
+      "minimum": 0,
+      "type": "number"
+    },
+    "surplus_assignment_duration_s": {
+      "minimum": 0,
+      "type": "number"
+    },
+    "surplus_assignment_mode": {
+      "enum": [
+        "positive_excess",
+        "storm",
+        "upstream",
+        "fallback_24h",
+        "none"
+      ]
+    },
+    "surplus_depth_mm": {
+      "minimum": 0,
+      "type": "number"
+    },
+    "tp2_s": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "schema_version",
+    "event_id",
+    "run_id",
+    "hillslope_id",
+    "ofe",
+    "model_day",
+    "solver_call_ordinal",
+    "event_present"
+  ],
+  "title": "Event Scalar",
+  "type": "object"
+}

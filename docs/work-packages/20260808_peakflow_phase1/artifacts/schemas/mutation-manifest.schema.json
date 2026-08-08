@@ -1,0 +1,56 @@
+{
+  "$id": "https://github.com/rogerlew/wepppy/peakflow-phase1/schemas/mutation-manifest.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "baseline_value": {
+      "type": "number"
+    },
+    "clipped": {
+      "type": "boolean"
+    },
+    "expected_hydrologically_active": {
+      "type": "boolean"
+    },
+    "input_diff_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "mutation_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "parameter": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "realized_value": {
+      "type": "number"
+    },
+    "requested_value": {
+      "type": "number"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "target": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "units": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "mutation_id",
+    "target",
+    "parameter",
+    "requested_value",
+    "realized_value",
+    "units"
+  ],
+  "title": "Mutation Manifest",
+  "type": "object"
+}

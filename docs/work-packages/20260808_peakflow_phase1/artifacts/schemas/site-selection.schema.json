@@ -1,0 +1,56 @@
+{
+  "$id": "https://github.com/rogerlew/wepppy/peakflow-phase1/schemas/site-selection.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "exclusion_reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "hydrologic_regime": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "portfolio": {
+      "enum": [
+        "enriched_discovery",
+        "blind_audit"
+      ]
+    },
+    "provenance_criteria": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "selection_examined_peak_anomalies": {
+      "type": "boolean"
+    },
+    "selection_status": {
+      "enum": [
+        "candidate",
+        "admitted",
+        "excluded"
+      ]
+    },
+    "site_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "site_id",
+    "portfolio",
+    "selection_status",
+    "selection_examined_peak_anomalies"
+  ],
+  "title": "Site Selection",
+  "type": "object"
+}

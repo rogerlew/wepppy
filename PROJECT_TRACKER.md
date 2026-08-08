@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-08-07
+**Last Updated**: 2026-08-08
 **Active Packages**: 23
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -950,6 +950,21 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### Topanga Peak-Flow Audit Phase 1
+
+**Completed**: 2026-08-08
+**Status**: ✅ **GATES 0–2 COMPLETE**
+**Security impact**: `none`
+**Link**: [docs/work-packages/20260808_peakflow_phase1/](docs/work-packages/20260808_peakflow_phase1/)
+
+**Summary**: Published versioned audit schemas; froze compact 1980 Ksat and
+1986 canopy/ground-cover fixtures; proved seven-file observational byte parity;
+captured immutable event packets; reproduced both selected peaks exactly in a
+separate legacy solver executable; and passed an inactive version-9002
+Ksat-factor negative control. Phase 2 remains blocked pending explicit review.
+
+---
 
 ### RQ Jobstatus Advisory Queue Rank
 

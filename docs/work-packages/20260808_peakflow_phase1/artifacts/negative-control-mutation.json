@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0.0",
+  "mutation_id": "topanga-h106-9002-ksatfac-negative-control",
+  "target": "topanga-h106",
+  "parameter": "ksatfac",
+  "requested_value": 9.3,
+  "realized_value": 9.3,
+  "units": "dimensionless",
+  "baseline_value": 1.3,
+  "clipped": false,
+  "input_diff_sha256": "16899fb6ca4607119c7422ff4b762681b04c18c0c68fb924b00fc58f768cc769",
+  "expected_hydrologically_active": false
+}

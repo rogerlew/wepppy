@@ -1,0 +1,44 @@
+{
+  "event_id": "topanga-h106-1980-02-14-ksat20",
+  "harmonized_forcing_diagnostic": {
+    "appmth": {
+      "equation_branch": "quasi_equilibrium_b",
+      "finite_result": true,
+      "tc": 0.8574066275450488,
+      "tstar": 0.18941086787059885,
+      "vave_m_s": 1.3252465379936208e-05,
+      "vstar": 0.7448734513976791,
+      "within_documented_tstar_domain": true,
+      "within_documented_vstar_domain": true
+    },
+    "appmth_peak_m_s": 1.72757117979927e-05,
+    "forcing_integral_m": 0.06012113250133949,
+    "hdrive_final_routed_volume_fraction": 0.9545084834098816,
+    "hdrive_nq": 39,
+    "hdrive_nqt": 38,
+    "hdrive_peak_m_s": 1.7150297935586423e-05,
+    "positive_support_duration_s": 4536.599853515625
+  },
+  "hdrive_stopping_condition": "95_percent_volume",
+  "legacy_input_replay": {
+    "appmth": {
+      "equation_branch": "constant_or_out_of_domain",
+      "finite_result": true,
+      "tc": null,
+      "tstar": 0.1894112135317399,
+      "vave_m_s": 1.3252394965390688e-05,
+      "vstar": 1.3752755154915384,
+      "within_documented_tstar_domain": true,
+      "within_documented_vstar_domain": false
+    },
+    "appmth_peak_m_s": 1.3252394637675025e-05,
+    "hdrive_final_routed_volume_fraction": 0.954513669013977,
+    "hdrive_nq": 39,
+    "hdrive_nqt": 38,
+    "hdrive_peak_m_s": 1.7150297935586423e-05
+  },
+  "packet_sha256": "5bb31ed3c440a3356c6dea1c4d8ad75be8f53c47c959ef52177b826ddc47cfdf",
+  "replay_process": "standalone_peak_replay_executable",
+  "schema_version": "1.0.0",
+  "selected_method_delta_m_s": 0.0
+}

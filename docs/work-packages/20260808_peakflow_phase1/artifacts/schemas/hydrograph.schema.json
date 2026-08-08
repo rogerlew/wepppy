@@ -1,0 +1,30 @@
+{
+  "$id": "https://github.com/rogerlew/wepppy/peakflow-phase1/schemas/hydrograph.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "flow_m3_s": {
+      "minimum": 0,
+      "type": "number"
+    },
+    "routing_response_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "timestamp_s": {
+      "minimum": 0,
+      "type": "number"
+    }
+  },
+  "required": [
+    "schema_version",
+    "routing_response_id",
+    "timestamp_s",
+    "flow_m3_s"
+  ],
+  "title": "Hydrograph",
+  "type": "object"
+}

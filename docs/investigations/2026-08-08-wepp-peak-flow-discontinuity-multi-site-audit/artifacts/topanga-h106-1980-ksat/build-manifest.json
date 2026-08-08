@@ -1,0 +1,19 @@
+{
+  "architecture": "x86_64",
+  "build_id": "wepp-260803-f24c957e",
+  "compiler": "GNU Fortran",
+  "compiler_version": "13.3.0",
+  "executable_sha256": "4a5158e224c175ac06c760f1006cc19f7691a9bd28911d94788af2622ba178a5",
+  "floating_point_flags": [],
+  "input_tree_sha256": "c260a14f549d0add9535502ba7db0421ac5264aa733eb908de788c4c562e495d",
+  "instrumentation_patch_sha256": null,
+  "linker_libraries": [],
+  "optimization_flags": [],
+  "os": "Linux",
+  "preprocessor_definitions": [],
+  "reproducibility_level": "internal",
+  "schema_version": "1.0.0",
+  "source_clean": true,
+  "source_commit": "f24c957e3633898e0fd4cbbea5ae08c781f29dba",
+  "source_repository": "wepp-in-the-woods/wepp-forest"
+}

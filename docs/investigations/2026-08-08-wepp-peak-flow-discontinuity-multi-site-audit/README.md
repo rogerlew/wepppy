@@ -82,7 +82,7 @@ results are examined.
 ### Phase 1: Establish the Mechanics at Topanga
 
 Topanga is the development and validation site for the protocol. Phase 1 is
-limited to Gates 0–2 and will:
+limited to Gates 0–2 and has:
 
 1. build an observationally instrumented WEPP executable from a pinned source
    commit;
@@ -103,6 +103,30 @@ must reproduce the operands and peaks reported in the
 The broader implementation evidence and official WEPP documentation are
 summarized in the
 [stakeholder peak-flow report](../2026-08-07-topanga-2025-fire-peak-flow-analysis/artifacts/wepp-peak-flow-solver-documentation-and-topanga-evidence.md).
+
+#### Phase 1 result
+
+**Status: Gates 0–2 passed on 2026-08-08. Phase 2 remains blocked pending an
+explicit review and authorization.**
+
+The [Phase 1 work package](../../work-packages/20260808_peakflow_phase1/package.md)
+contains the schemas, build manifests, parity evidence, immutable event
+packets, and process-isolated replay reports. The observational build produced
+byte-identical copies of all seven canonical Hill 106 outputs with tracing
+disabled. Its selected-method replay matched the production peak exactly for
+both 1980 Ksat lanes.
+
+The legacy `APPMTH` input has `v* = 1.3753` for Ksat 20 and `v* = 4.4017` for
+Ksat 35, both outside the documented `v* ≤ 1` derivation range. Recomputing
+the summary from the same post-surplus forcing passed to `HDRIVE` gives
+`v* = 0.7449` and `0.9026`. This does not repair WEPP; it demonstrates that
+legacy algorithm disagreement is mixed with inconsistent forcing summaries.
+
+The frozen 1986 checks reproduce the `3.563 → 294.416 mm/h` canopy jump and
+the `3.563 → 312.292 mm/h` ground-cover jump. Both remain
+`mechanism_unresolved`. A version-9002 `ksatfac` mutation from `1.3` to `9.3`
+produced byte-identical canonical outputs and passed as the inactive-parameter
+negative control.
 
 ### Phase 2: Complete the Topanga Watershed Census
 

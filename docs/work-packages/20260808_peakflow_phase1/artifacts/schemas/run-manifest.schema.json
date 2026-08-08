@@ -1,0 +1,65 @@
+{
+  "$id": "https://github.com/rogerlew/wepppy/peakflow-phase1/schemas/run-manifest.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "build_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "canonical_output_policy": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "command": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "input_tree_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "mutation_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "run_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "scenario_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "site_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "terminal_status": {
+      "enum": [
+        "created",
+        "running",
+        "complete",
+        "failed"
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "run_id",
+    "build_id",
+    "site_id",
+    "scenario_id",
+    "input_tree_sha256"
+  ],
+  "title": "Run Manifest",
+  "type": "object"
+}

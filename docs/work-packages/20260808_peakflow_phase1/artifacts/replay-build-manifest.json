@@ -1,0 +1,29 @@
+{
+  "architecture": "x86_64",
+  "compiler": "GNU Fortran 13.3.0",
+  "driver_sha256": "5cf0cb94ba9fca9b8b2c607ddc8fc91d6cbd6e322023aaf6029abf768a0cc08e",
+  "executable_sha256": "2f1601975d0b9754ae8f5fc70c79ae2914d78e720eab55946d51c8fded8f5098",
+  "flags": [
+    "-O2",
+    "-fno-align-commons",
+    "-mcmodel=medium",
+    "-ffixed-form",
+    "-ffixed-line-length-72",
+    "-ffpe-trap=invalid,zero,overflow",
+    "-finit-local-zero"
+  ],
+  "linked_pinned_routines": [
+    "appmth.for",
+    "hdrive.for",
+    "hdepth.for",
+    "phi.for",
+    "psiinv.for",
+    "psis.for",
+    "sint.for",
+    "sintdp.for",
+    "bgnrnd.for",
+    "rand.for"
+  ],
+  "schema_version": "1.0.0",
+  "source_commit": "f24c957e3633898e0fd4cbbea5ae08c781f29dba"
+}

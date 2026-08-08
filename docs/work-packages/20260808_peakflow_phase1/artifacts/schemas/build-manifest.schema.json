@@ -1,0 +1,101 @@
+{
+  "$id": "https://github.com/rogerlew/wepppy/peakflow-phase1/schemas/build-manifest.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "architecture": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "build_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "compiler": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "compiler_version": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "executable_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "floating_point_flags": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "input_tree_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "instrumentation_patch_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "linker_libraries": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "optimization_flags": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "os": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "preprocessor_definitions": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "reproducibility_level": {
+      "enum": [
+        "internal",
+        "public"
+      ]
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "source_clean": {
+      "type": "boolean"
+    },
+    "source_commit": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "source_repository": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "build_id",
+    "source_commit",
+    "compiler",
+    "compiler_version",
+    "source_clean",
+    "executable_sha256"
+  ],
+  "title": "Build Manifest",
+  "type": "object"
+}
