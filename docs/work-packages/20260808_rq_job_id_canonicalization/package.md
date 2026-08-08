@@ -1,6 +1,6 @@
 # RQ Job ID Canonicalization and Dashboard Compatibility
 
-**Status**: Open (2026-08-08)
+**Status**: Closed (2026-08-08)
 **Timezone**: UTC
 
 ## Overview
@@ -41,3 +41,14 @@ dependencies are excluded.
 - `wepppy/rq/README.md`
 - `wepppy/weppcloud/routes/rq/job_dashboard/README.md`
 - `docs/standards/contract-first-change-standard.md`
+
+## Closure Notes
+
+**Closed**: 2026-08-08
+
+Canonical generation now uses one `str(uuid4())` helper across serialized
+subcatchment, migration, fork/finalizer, and AgFields preallocation. The job
+dashboard preserves exact IDs, so existing bare-hex records remain inspectable.
+No auth, queue topology, dependency edge, or response shape changed.
+
+Checkpoint: `1778b66d1`; implementation: `41b23983d`.

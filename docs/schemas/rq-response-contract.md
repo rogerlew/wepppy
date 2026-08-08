@@ -37,7 +37,8 @@
   new bare-hex RQ job IDs.
 - These rules apply to RQ job IDs, not error IDs, JWT `jti` values, filenames,
   lock-owner tokens, or other non-job correlation identifiers.
-- Implementation conformance is pending the RQ job-ID normalization change.
+- Implementation conforms as of `41b23983d`: preallocated UUID RQ job IDs use
+  the shared canonical generator and job lookup preserves exact stored IDs.
 
 ## Job submission responses
 - Async job submission endpoints may return HTTP `200` or `202` depending on
