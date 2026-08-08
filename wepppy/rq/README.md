@@ -72,6 +72,11 @@ job = q.enqueue(run_watershed_rq, 'my-runid', wepp_bin='wepp_250915')
 print("queued job", job.id)
 ```
 - Jobs automatically log to `<run>/rq.log` and publish to `<runid>:wepp`.
+- Generate preallocated RQ job IDs with
+  `wepppy.rq.job_id.new_rq_job_id()`. It returns the canonical hyphenated
+  `str(uuid4())` representation used by RQ itself. Never use `uuid4().hex` for
+  an RQ job ID. Treat stored IDs as opaque exact strings when linking jobs,
+  building URLs, or polling; legacy bare-hex IDs must not be reformatted.
 - Store dependent job ids in `job.meta['jobs:<order>,...]` if you need cascading cancellation.
 
 ### Inspect or cancel a job tree

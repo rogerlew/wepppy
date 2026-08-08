@@ -21,6 +21,9 @@ The job dashboard renders a live view of RQ job trees with status chips, progres
 - Polling re-renders the tree and preserves open state by tracking `<details open>` nodes.
 - Group status derives from terminal job statuses (finished, failed, canceled, stopped); mixed states stay `running`.
 - Cancel status strings are normalized to `canceled` in status mapping.
+- Job IDs are passed to rq-engine exactly as supplied. The dashboard must not
+  add or remove UUID hyphens: canonical new IDs are hyphenated, while legacy
+  bare-hex RQ records remain valid until their Redis TTL expires.
 
 ## Security
 - The dashboard route is gated by `requires_cap` for anonymous users.
