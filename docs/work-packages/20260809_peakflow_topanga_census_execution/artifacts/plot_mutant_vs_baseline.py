@@ -18,7 +18,8 @@ EVIDENCE = Path(
 OUTPUT = Path(__file__).with_name("topanga-mutant-vs-baseline-peakflow.png")
 PEAK_FLOOR_M_S = 1e-7
 M_S_TO_MM_H = 3.6e6
-COLORS = {"burned": "#e67e22", "undisturbed": "#238b57"}
+SURDRA_COLORS = {"burned": "#e67e22", "undisturbed": "#238b57"}
+NO_SURDRA_COLOR = "#777777"
 LABELS = {"burned": "Burned", "undisturbed": "Unburned (undisturbed)"}
 MARKERS = {
     ("ksat", "minus"): "v",
@@ -58,6 +59,8 @@ def main() -> None:
             "mutant_event_present",
             "peak_m_s_baseline",
             "peak_m_s_mutant",
+            "surdra_realized_m_baseline",
+            "surdra_realized_m_mutant",
         ],
     )
     frame = frame.loc[
@@ -68,6 +71,7 @@ def main() -> None:
     ].copy()
     frame["baseline_mm_h"] = frame.peak_m_s_baseline * M_S_TO_MM_H
     frame["mutant_mm_h"] = frame.peak_m_s_mutant * M_S_TO_MM_H
+    frame["has_surdra"] = frame.surdra_realized_m_baseline.gt(0) | frame.surdra_realized_m_mutant.gt(0)
 
     figure, axes = plt.subplots(1, 2, figsize=(15.6, 7.4), dpi=180, sharex=True, sharey=True)
     figure.patch.set_facecolor("#fbfaf7")
@@ -84,24 +88,29 @@ def main() -> None:
                   linestyle=":", zorder=1)
         for mutation, marker in MARKERS.items():
             family, direction = mutation
-            subset = frame.loc[
+            mutation_subset = frame.loc[
                 frame.scenario.eq(scenario)
                 & frame.family.eq(family)
                 & frame.direction.eq(direction)
             ]
-            axis.scatter(
-                subset["baseline_mm_h"],
-                subset["mutant_mm_h"],
-                marker=marker,
-                s=10,
-                linewidths=0.45,
-                facecolors="none",
-                edgecolors=response_edgecolors(subset, COLORS[scenario]),
-                rasterized=True,
-                zorder=2,
-            )
+            for has_surdra, color, zorder in (
+                (False, NO_SURDRA_COLOR, 2),
+                (True, SURDRA_COLORS[scenario], 3),
+            ):
+                subset = mutation_subset.loc[mutation_subset.has_surdra.eq(has_surdra)]
+                axis.scatter(
+                    subset["baseline_mm_h"],
+                    subset["mutant_mm_h"],
+                    marker=marker,
+                    s=10,
+                    linewidths=0.45,
+                    facecolors="none",
+                    edgecolors=response_edgecolors(subset, color),
+                    rasterized=True,
+                    zorder=zorder,
+                )
         axis.plot(limits, limits, color="#4a4a4a", linewidth=0.7,
-                  zorder=3, label="1:1")
+                  zorder=4, label="1:1")
         axis.set_xscale("log")
         axis.set_yscale("log")
         axis.set_xlim(limits)
@@ -110,8 +119,9 @@ def main() -> None:
         axis.grid(which="major", color="#555555", alpha=0.13, linewidth=0.7)
         axis.grid(which="minor", color="#555555", alpha=0.045, linewidth=0.5)
         axis.set_title(
-            f"{LABELS[scenario]} (n={frame.scenario.eq(scenario).sum():,})",
-            color=COLORS[scenario], fontsize=12, weight="semibold", pad=9,
+            f"{LABELS[scenario]} (n={frame.scenario.eq(scenario).sum():,}; "
+            f"surdra={len(frame.loc[frame.scenario.eq(scenario) & frame.has_surdra]):,})",
+            color=SURDRA_COLORS[scenario], fontsize=12, weight="semibold", pad=9,
         )
         axis.set_xlabel("Baseline peak flow (mm/h)", fontsize=11, labelpad=8)
         for spine in axis.spines.values():
@@ -134,18 +144,14 @@ def main() -> None:
     )
     axes[0].set_ylabel("Mutant peak flow (mm/h)", fontsize=11, labelpad=8)
     handles, labels = axes[0].get_legend_handles_labels()
-    handles.extend(
-        Line2D(
-            [],
-            [],
-            marker="x",
-            linestyle="none",
-            color=COLORS[scenario],
-            alpha=0.75,
-            label=f"{LABELS[scenario]} (n={frame.scenario.eq(scenario).sum():,})",
-        )
-        for scenario in ("undisturbed", "burned")
-    )
+    handles.extend([
+        Line2D([], [], marker="x", linestyle="none", color=NO_SURDRA_COLOR,
+               alpha=0.75, label="No surface return in either run"),
+        Line2D([], [], marker="x", linestyle="none", color=SURDRA_COLORS["undisturbed"],
+               alpha=0.75, label="Unburned: surface return in baseline or mutant"),
+        Line2D([], [], marker="x", linestyle="none", color=SURDRA_COLORS["burned"],
+               alpha=0.75, label="Burned: surface return in baseline or mutant"),
+    ])
     handles.extend(
         Line2D(
             [],

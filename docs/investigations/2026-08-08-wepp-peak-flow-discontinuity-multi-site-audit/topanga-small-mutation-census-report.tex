@@ -434,8 +434,10 @@ ties, so this convention has no material effect on the reported proportions.
 The classification is descriptive and independent of the candidate screen.
 
 The figure separates unburned and burned rows onto left and right axes with
-identical scales, uses color for scenario, hollow triangle orientation for the
-two-by-two mutation matrix, and opacity for directional agreement. Faint
+identical scales. Green and orange identify positive surface return in the
+unburned and burned panels, respectively; gray identifies pairs with no
+surface return in either run. Hollow triangle orientation shows the two-by-two
+mutation matrix, and opacity shows directional agreement. Faint
 markers ($\alpha=0.2$) are congruent; dark markers ($\alpha=0.6$) are
 incongruent. Reference lines mark ratios of 1, 0.5 and 2, and 0.2 and 5.
 
@@ -598,12 +600,24 @@ points forms large upper and lower departures.
   \includegraphics[width=\textwidth]{topanga-mutant-vs-baseline-peakflow.png}
   \caption{Mutant versus baseline hillslope peak flow for paired-positive
   Topanga event rows. Unburned and burned strata occupy the left and right axes.
-  Triangle orientation identifies mutation family and direction. Opacity
-  identifies agreement with the ordinary inverse hydrologic response. The
+  Green unburned and orange burned markers identify pairs with positive surface
+  return in the baseline or mutant run; gray markers have no surface return in
+  either run. Triangle orientation identifies mutation family and direction.
+  Opacity identifies agreement with the ordinary inverse hydrologic response. The
   thin 1:1 line is drawn above the markers; dashed and dotted lines mark
   twofold and fivefold departures.}
   \label{fig:scatter}
 \end{figure}
+
+Surface return occurs in 81,904 of 87,206 unburned plotted rows and 74,026 of
+111,880 burned rows. It is present in 567 of the 989 twofold-tail rows and 420
+of the 604 fivefold-tail rows. Surface return therefore accompanies much of
+the anomalous population, but it does not explain the entire tail: 422
+twofold-tail rows and 184 fivefold-tail rows have no positive surface return in
+either paired run. Most of that no-return tail is in the burned stratum. The
+partition supports the documented surface-return timing mechanism for a large
+part of the population while showing that additional peak-response mechanisms
+must also be present.
 
 Only 989 rows (0.50\% of the plotted population, approximately one in 201) lie
 outside the 0.5--2 band, and 604 (0.30\%, approximately one in 330) lie outside
@@ -802,38 +816,62 @@ the chapter made a clear favorable claim: assuming correct parameter values,
 surface hydrology ``should perform the best for large events on a single OFE''
 and the worst for medium events on multiple OFEs.
 
-The Topanga mutation census empirically refutes that favorable expectation when
-performance includes local event-scale reliability. The experiment operates at
-hillslope scale, corresponding to the favorable single-OFE setting, yet the
-incongruent share of central-band \Ksat{} responses increases rather than
-decreases with baseline peak magnitude. The census also identifies rare
-many-fold changes under one-percent probes while event runoff remains nearly
-fixed. These are not merely the small-event noise, multiple-OFE averaging, or
-multipeaked-hydrograph errors emphasized in the documented limitations. The
-events most relevant to upper-tail interpretation are among those for which
-the expected local response becomes less dependable.
+The source history changes how that claim should be judged. In 1993, WEPP
+calculated excess water above the upper soil-water limit in a variable named
+\texttt{surdra}. The source comments state that the water was not used because
+runoff had already been routed and erosion had already been calculated. The
+1995 documentation was therefore accurate when it said that return flow was
+not explicitly represented. The surface-return pathway implicated at Topanga
+was added later. A source comment dates S. Dun's initial \texttt{surdra}
+runoff addback to May 22, 2003, with a modification on January 28, 2004.
+Related comments date its integration with the peak-flow routine to June 6,
+2003, with the no-duration handling extended on July 6, 2004. That code spreads
+the daily returned-water volume across selected subdaily rainfall-excess
+intervals before calculating the peak. On November 19, 2009, the call to the
+daily water balance was moved inside the peak-flow routine; the accompanying
+comment notes that this differed from WEPP's original sequence and might affect
+other global variables \cite{stakeholder}.
 
-The boundary of that refutation should remain explicit. Mutation stability is
-not the same experiment as comparison with observed peaks, and baseline
-\PeakRO{} is not necessarily identical to the rainfall-excess or runoff-volume
-measure of event size that informed the original claim. The census therefore
-does not erase the published routing comparisons. It does show that their
-average-error result cannot support the broader inference that a large,
-single-OFE peak is a dependable individual prediction.
+This history is supported by source-code forensics. The dated comments show
+what the developers calculated, what they deliberately left unused, and when
+the later addback and sequencing changes appeared. That evidence is not
+available from the model output or the 1995 documentation alone. It was
+possible to identify the Topanga defect because unofficially preserved WEPP
+source copies could be compared and instrumented. USDA has distributed WEPP
+primarily as an executable and has not provided users with an official,
+complete release of the production source. Most WEPP users therefore cannot
+inspect this calculation, trace a surprising peak through the program, or see
+that the documented performance claim predates the surface-return code.
 
-The discrepancy is understandable in historical context. The original
-developers evaluated the approximation with the theory, selected cases, data,
-and computing resources available in the early 1990s. They did not claim to
-have exhaustively tested local continuity under small parameter changes across
-complete, multi-decadal event populations. A census comprising hundreds of
-thousands of paired event responses would have been computationally
-impractical during the original development effort. The Topanga census applies
-modern computational capacity to a different validation dimension that appears
-not to have been systematically examined in the intervening decades:
-population-scale local response continuity. The result should therefore be
-read as extending, rather than faulting, the original validation work while
-still recognizing that one of its performance expectations does not survive
-this new empirical test.
+Stone et al.'s favorable claim could therefore have been true for the 1995
+model they evaluated. This study does not have a 1995 executable and does not
+test that historical version. What the Topanga census refutes is the continued
+use of the 1995 claim as assurance about the present implementation. On the
+current single-OFE hillslopes, the incongruent share of central-band \Ksat{}
+responses increases rather than decreases with baseline peak magnitude, and a
+one-percent change can produce a many-fold peak change while runoff remains
+nearly fixed. The large events most relevant to frequency analysis are not the
+most dependable individual peak estimates in the current model.
+
+The most likely history is straightforward. A later development change added
+a useful water-balance pathway that the original developers had deliberately
+left unresolved because of its timing within the daily calculation. That
+change altered the water supplied to the peak-flow calculation, but the peak
+method and its performance guidance were not re-evaluated at population scale.
+The Chapter 4 statement remained in the documentation even though the model
+around it had changed. In that sense, the documentation became stale: it
+continued to describe the scope and evidence of the 1995 peak calculation, not
+the behavior of the later surface-return implementation. Limited access to the
+source made that mismatch much harder for users to recognize.
+
+The historical omission is understandable. The original developers evaluated
+the approximation using the theory, selected cases, data, and computing
+resources available in the early 1990s. A census of hundreds of thousands of
+paired event responses would have been impractical. The Topanga census applies
+modern computing to a validation question that appears not to have been asked
+after the surface-return pathway was added. Its contribution is not to show
+that Stone et al. were wrong in 1995. It is to show that a later model change
+invalidated the assumption that their original performance claim still applied.
 
 \subsection{Production-scale implication}
 
