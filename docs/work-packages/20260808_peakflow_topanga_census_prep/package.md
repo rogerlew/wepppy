@@ -115,8 +115,9 @@ execution package.
 - **Depends on**: [Phase 2A pilot](../20260808_peakflow_phase2a_pilot/package.md).
 - **Related**: [Phase 1 assurance](../20260808_peakflow_phase1/package.md) and
   [Gate 2.1](../20260808_peakflow_gate21/package.md).
-- **Follow-up**: a separately scaffolded Topanga census execution package only
-  after this package publishes a GO disposition.
+- **Follow-up**:
+  [Topanga census execution](../20260809_peakflow_topanga_census_execution/package.md),
+  scaffolded after this package published GO.
 
 ## Timeline Estimate
 
@@ -154,6 +155,6 @@ execution package.
 
 ## Follow-up Work
 
-After a GO disposition, create the separately dated Topanga census execution
-package. That package will consume the frozen plan without changing trial
-eligibility, mutation semantics, screening floors, or output contracts.
+The [separately dated Topanga census execution package](../20260809_peakflow_topanga_census_execution/package.md)
+now consumes the frozen plan without changing trial eligibility, mutation
+semantics, screening floors, or output contracts.

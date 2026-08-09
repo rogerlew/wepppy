@@ -358,21 +358,22 @@ When resuming Kubernetes work:
 **Started**: 2026-08-08
 **Size**: Multi-phase investigation
 **Priority**: High
-**Security impact**: `high` for the completed preparation package's local path
-and subprocess surfaces; review passed
+**Security impact**: `high` for the active execution package's local path,
+subprocess, concurrency, and recovery surfaces
 **Security review**:
-[preparation security artifact](docs/work-packages/20260808_peakflow_topanga_census_prep/artifacts/20260809_security_review.md)
+[execution security artifact](docs/work-packages/20260809_peakflow_topanga_census_execution/artifacts/20260809_security_review.md)
 
-**Link**: [Topanga census preparation](docs/work-packages/20260808_peakflow_topanga_census_prep/package.md)
+**Link**: [Topanga census execution](docs/work-packages/20260809_peakflow_topanga_census_execution/package.md)
 
 **Description**: Phase 2A validated the local observer, event-pairing, bracket,
 and replay machinery. The completed preparation package now provides the
 reusable engine and frozen Topanga matrix: 1,120 requested, 1,088 eligible, and
-32 excluded trials. Its GO disposition authorizes a separate execution package;
-no full-census outcome exists yet.
+32 excluded trials. Its GO disposition authorized the now-scaffolded execution
+package; no full-census outcome exists yet and execution remains held by
+preflight and security checkpoints.
 
-**Next Steps**: Create the separately dated
-`20260809_peakflow_topanga_census_execution` package and consume frozen plan ID
+**Next Steps**: Execute the active plan to validate the selection and consume
+frozen plan ID
 `b575fde4a28cf85f1d28e0dfff305472b5419fd9b3639d39dc437600617080de`
 without changing eligibility or mutation semantics.
 

@@ -5,8 +5,8 @@
 **Timezone**: UTC
 **Started**: 2026-08-08 22:59 UTC
 **Current phase**: Pilot complete; local census released by design amendment
-**Last updated**: 2026-08-09 04:22 UTC
-**Next milestone**: Prepare the durable engine and freeze the Topanga matrix
+**Last updated**: 2026-08-09 05:17 UTC
+**Next milestone**: Execute the frozen matrix through the linked package
 **Security impact**: `none`
 **Dedicated security review**: `no`
 **Security artifact**: N/A
@@ -15,8 +15,7 @@
 
 ### Ready / Backlog
 
-- [ ] Complete the linked durable-engine preparation package.
-- [ ] Create the separate execution package only after preparation GO.
+- [ ] Complete the linked Topanga census execution package.
 
 ### In Progress
 
@@ -55,6 +54,8 @@
   census without changing the failed pilot evidence (2026-08-09 02:38 UTC).
 - [x] Scaffolded the durable-engine preparation successor and separated it from
   full-matrix execution (2026-08-09 04:22 UTC).
+- [x] Preparation published GO and the separate execution package was
+  scaffolded with preflight holds (2026-08-09 05:17 UTC).
 
 ## Timeline
 
@@ -76,6 +77,8 @@
   census and deferred downstream-impact claims to a separate follow-up.
 - **2026-08-09 04:22 UTC** – Opened the preparation package; execution remains
   blocked until it freezes a validated matrix and publishes GO.
+- **2026-08-09 05:17 UTC** – Preparation published GO and the separately gated
+  execution package was opened for the frozen 1,088-trial selection.
 
 ## Decisions Log
 

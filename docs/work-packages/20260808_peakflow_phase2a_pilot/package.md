@@ -118,7 +118,8 @@ watershed-outlet claims.
 - **Related**: [multi-site audit protocol](../../investigations/2026-08-08-wepp-peak-flow-discontinuity-multi-site-audit/README.md).
 - **Follow-up**:
   [durable Topanga census preparation](../20260808_peakflow_topanga_census_prep/package.md),
-  followed by a separately authorized execution package.
+  followed by the active
+  [Topanga census execution package](../20260809_peakflow_topanga_census_execution/package.md).
 
 ## Timeline Estimate
 
@@ -150,12 +151,11 @@ watershed-outlet claims.
 
 ## Follow-up Work
 
-Complete the [durable census preparation package](../20260808_peakflow_topanga_census_prep/package.md)
-without per-mutation watershed routing. It must prove pilot parity and freeze
-the eligible Topanga matrix before a separate execution package begins.
-Preserve routing failures for a sampled follow-up after off-path isolation and
-channel-volume authority are repaired. Cross-site, snow-site, and OFE work
-remain governed by Gates 4 and 5.
+Execute the frozen matrix through the
+[Topanga census execution package](../20260809_peakflow_topanga_census_execution/package.md)
+without per-mutation watershed routing. Preserve routing failures for a sampled
+follow-up after off-path isolation and channel-volume authority are repaired.
+Cross-site, snow-site, and OFE work remain governed by Gates 4 and 5.
 
 ## Final Disposition
 
