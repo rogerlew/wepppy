@@ -155,6 +155,13 @@ full-history hillslope model and observer. Retain the target pass, event
 ledger, mutation manifest, and candidate evidence. Do not execute the
 watershed binary or retain all-channel output for every mutation.
 
+Delivery is split into two work packages. The active
+[census-preparation package](../../work-packages/20260808_peakflow_topanga_census_prep/package.md)
+extracts a site-independent engine, proves Phase 2A parity, and freezes the
+complete eligible Topanga trial plan without executing it. Only after that
+package publishes GO will a separately dated full-census execution package be
+created to consume the frozen plan and produce outcomes.
+
 For mutations that expose a discontinuity, retain the local response and its
 mechanism evidence:
 
@@ -530,10 +537,14 @@ own table grains. The heterogeneous follow-up remains a separate experiment.
 
 ## Immediate Next Steps
 
-1. Freeze the eligible Topanga hillslope set and local mutation matrix.
-2. Execute full-history hillslope observer runs without watershed routing.
-3. Screen the outer-joined event ledger and adjudicate selected candidates.
-4. Publish local prevalence and mechanism results with no downstream-impact
+1. Complete the durable-engine preparation package and freeze the eligible
+   Topanga local mutation matrix without executing it.
+2. Publish a preparation GO/NO-GO disposition and exact plan hash.
+3. On GO, create a separately dated full-census execution package that consumes
+   the frozen plan unchanged.
+4. Execute hillslope observer runs, screen the outer-joined event ledger, and
+   adjudicate selected candidates without watershed routing.
+5. Publish local prevalence and mechanism results with no downstream-impact
    claims.
 
 ## Related Investigations
@@ -549,3 +560,4 @@ own table grains. The heterogeneous follow-up remains a separate experiment.
 | 1.0 | 2026-08-08 | Established the Topanga-first multi-site audit, scenario contract, snow-site phase, and single- versus multiple-OFE follow-up. |
 | 1.1 | 2026-08-08 | Incorporated the conditional planning review: isolated solver replay, dual replay semantics, normalized schemas, fixture requirements, evidence states, negative controls, storage policy, sampling portfolios, and acceptance gates. |
 | 1.2 | 2026-08-09 | Culled watershed routing from the census critical path; authorized a local hillslope census and deferred downstream-impact claims to a separate sampled follow-up. |
+| 1.3 | 2026-08-09 | Split delivery into a durable-engine and frozen-matrix preparation package followed by a separately authorized Topanga execution package. |

@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "evidence_root": {"type": "string"},
+    "executable": {
+      "additionalProperties": false,
+      "properties": {"path": {"type": "string"}, "sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"}},
+      "required": ["path", "sha256"], "type": "object"
+    },
+    "hillslope_discovery": {"type": "object"},
+    "mutation_families": {"minItems": 2, "type": "array"},
+    "population_exception": {"type": ["string", "null"]},
+    "projections": {"type": "object"},
+    "provenance": {"type": "object"},
+    "scenarios": {"minItems": 1, "type": "array"},
+    "schema_version": {"const": "1.0.0"},
+    "screening": {"type": "object"},
+    "selected_hillslopes": {"items": {"type": "integer"}, "type": "array"},
+    "site": {"pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$", "type": "string"}
+  },
+  "required": ["schema_version", "site", "scenarios", "evidence_root", "executable", "hillslope_discovery", "mutation_families", "screening"],
+  "type": "object"
+}

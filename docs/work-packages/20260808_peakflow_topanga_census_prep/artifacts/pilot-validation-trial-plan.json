@@ -1,0 +1,1784 @@
+{
+  "evidence_root": "/home/workdir/peakflow-topanga-census-prep-validation",
+  "executable": {
+    "path": "/home/workdir/wepp-forest_260430_baseline/src/wepp_hill",
+    "sha256": "2ec15778df957f909da383df9e3e0c9b516688d367c11f0109c6012387c0731f"
+  },
+  "input_authorities": [
+    {
+      "authority": "/wc1/runs/ha/hand-to-mouth-drought/wepp",
+      "input_tree_sha256": "b0968d699147ef982888923985fcfd9e32330c576e5d9fbe61a0ed461d65a155",
+      "scenario": "burned"
+    },
+    {
+      "authority": "/wc1/runs/ha/hand-to-mouth-drought/_pups/omni/scenarios/undisturbed/wepp",
+      "input_tree_sha256": "58944cc4f378d473fe18d87101e579976a9cbd5a549cbed71f7372e033740b45",
+      "scenario": "undisturbed"
+    }
+  ],
+  "manifest_sha256": "c9bc5623c8b32be6f62f701cc3fffab332e8555247286aab18e9ccc81b10bf89",
+  "plan_id": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747",
+  "schema_version": "1.0.0",
+  "site": "topanga-pilot-validation",
+  "study_id": "c9bc5623c8b32be6f62f701cc3fffab332e8555247286aab18e9ccc81b10bf89",
+  "totals": {
+    "by_family": {
+      "cover": {
+        "eligible": 32,
+        "excluded": 0,
+        "requested": 32
+      },
+      "ksat": {
+        "eligible": 32,
+        "excluded": 0,
+        "requested": 32
+      }
+    },
+    "by_scenario": {
+      "burned": {
+        "eligible": 32,
+        "excluded": 0,
+        "requested": 32
+      },
+      "undisturbed": {
+        "eligible": 32,
+        "excluded": 0,
+        "requested": 32
+      }
+    },
+    "eligible": 64,
+    "excluded": 0,
+    "exclusion_reasons": {},
+    "requested": 64
+  },
+  "trials": [
+    {
+      "direction": "minus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/burned/h106/ksat-minus",
+      "exclusion_reason": null,
+      "expected_value": 19.8,
+      "family": "ksat",
+      "hillslope_id": 106,
+      "input_sha256": "aece24f649724620a8454ac14b0004216bf8b0d86e616a33d70ab9fe80e7a618",
+      "lines": [
+        88
+      ],
+      "parameter": "first_horizon_ksat_mm_h",
+      "relative_input": "p106.sol",
+      "requested_change": 0.99,
+      "scenario": "burned",
+      "site": "topanga-pilot-validation",
+      "source_value": 20.0,
+      "tokens": [
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-burned-h106-ksat-minus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "plus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/burned/h106/ksat-plus",
+      "exclusion_reason": null,
+      "expected_value": 20.2,
+      "family": "ksat",
+      "hillslope_id": 106,
+      "input_sha256": "aece24f649724620a8454ac14b0004216bf8b0d86e616a33d70ab9fe80e7a618",
+      "lines": [
+        88
+      ],
+      "parameter": "first_horizon_ksat_mm_h",
+      "relative_input": "p106.sol",
+      "requested_change": 1.01,
+      "scenario": "burned",
+      "site": "topanga-pilot-validation",
+      "source_value": 20.0,
+      "tokens": [
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-burned-h106-ksat-plus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "minus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/burned/h106/cover-minus",
+      "exclusion_reason": null,
+      "expected_value": {
+        "inrcov": 0.54,
+        "rilcov": 0.54
+      },
+      "family": "cover",
+      "hillslope_id": 106,
+      "input_sha256": "17e8fc29e972ea9ff2b1be93d3f08c66e91809cf67900b3f5d02fad0a34cbbde",
+      "lines": [
+        35,
+        38
+      ],
+      "parameter": "paired_inrcov_rilcov",
+      "relative_input": "p106.man",
+      "requested_change": -0.01,
+      "scenario": "burned",
+      "site": "topanga-pilot-validation",
+      "source_value": {
+        "inrcov": 0.55,
+        "rilcov": 0.55
+      },
+      "tokens": [
+        6,
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-burned-h106-cover-minus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "plus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/burned/h106/cover-plus",
+      "exclusion_reason": null,
+      "expected_value": {
+        "inrcov": 0.56,
+        "rilcov": 0.56
+      },
+      "family": "cover",
+      "hillslope_id": 106,
+      "input_sha256": "17e8fc29e972ea9ff2b1be93d3f08c66e91809cf67900b3f5d02fad0a34cbbde",
+      "lines": [
+        35,
+        38
+      ],
+      "parameter": "paired_inrcov_rilcov",
+      "relative_input": "p106.man",
+      "requested_change": 0.01,
+      "scenario": "burned",
+      "site": "topanga-pilot-validation",
+      "source_value": {
+        "inrcov": 0.55,
+        "rilcov": 0.55
+      },
+      "tokens": [
+        6,
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-burned-h106-cover-plus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "minus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/burned/h84/ksat-minus",
+      "exclusion_reason": null,
+      "expected_value": 19.8,
+      "family": "ksat",
+      "hillslope_id": 84,
+      "input_sha256": "20e13c70429b97bfb49a3821375de7e8a1a5af582f77d686080be7c150095c7c",
+      "lines": [
+        92
+      ],
+      "parameter": "first_horizon_ksat_mm_h",
+      "relative_input": "p84.sol",
+      "requested_change": 0.99,
+      "scenario": "burned",
+      "site": "topanga-pilot-validation",
+      "source_value": 20.0,
+      "tokens": [
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-burned-h84-ksat-minus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "plus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/burned/h84/ksat-plus",
+      "exclusion_reason": null,
+      "expected_value": 20.2,
+      "family": "ksat",
+      "hillslope_id": 84,
+      "input_sha256": "20e13c70429b97bfb49a3821375de7e8a1a5af582f77d686080be7c150095c7c",
+      "lines": [
+        92
+      ],
+      "parameter": "first_horizon_ksat_mm_h",
+      "relative_input": "p84.sol",
+      "requested_change": 1.01,
+      "scenario": "burned",
+      "site": "topanga-pilot-validation",
+      "source_value": 20.0,
+      "tokens": [
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-burned-h84-ksat-plus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "minus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/burned/h84/cover-minus",
+      "exclusion_reason": null,
+      "expected_value": {
+        "inrcov": 0.79,
+        "rilcov": 0.79
+      },
+      "family": "cover",
+      "hillslope_id": 84,
+      "input_sha256": "db0e050d3224436bd269427af23750f0c72831f9aeb642e5495ad1be18a92302",
+      "lines": [
+        35,
+        38
+      ],
+      "parameter": "paired_inrcov_rilcov",
+      "relative_input": "p84.man",
+      "requested_change": -0.01,
+      "scenario": "burned",
+      "site": "topanga-pilot-validation",
+      "source_value": {
+        "inrcov": 0.8,
+        "rilcov": 0.8
+      },
+      "tokens": [
+        6,
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-burned-h84-cover-minus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "plus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/burned/h84/cover-plus",
+      "exclusion_reason": null,
+      "expected_value": {
+        "inrcov": 0.81,
+        "rilcov": 0.81
+      },
+      "family": "cover",
+      "hillslope_id": 84,
+      "input_sha256": "db0e050d3224436bd269427af23750f0c72831f9aeb642e5495ad1be18a92302",
+      "lines": [
+        35,
+        38
+      ],
+      "parameter": "paired_inrcov_rilcov",
+      "relative_input": "p84.man",
+      "requested_change": 0.01,
+      "scenario": "burned",
+      "site": "topanga-pilot-validation",
+      "source_value": {
+        "inrcov": 0.8,
+        "rilcov": 0.8
+      },
+      "tokens": [
+        6,
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-burned-h84-cover-plus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "minus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/burned/h8/ksat-minus",
+      "exclusion_reason": null,
+      "expected_value": 19.8,
+      "family": "ksat",
+      "hillslope_id": 8,
+      "input_sha256": "1eba3736466d67b2ef62c2ccc092f09dc5ece5bae8b79908f76d80455b51d287",
+      "lines": [
+        88
+      ],
+      "parameter": "first_horizon_ksat_mm_h",
+      "relative_input": "p8.sol",
+      "requested_change": 0.99,
+      "scenario": "burned",
+      "site": "topanga-pilot-validation",
+      "source_value": 20.0,
+      "tokens": [
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-burned-h8-ksat-minus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "plus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/burned/h8/ksat-plus",
+      "exclusion_reason": null,
+      "expected_value": 20.2,
+      "family": "ksat",
+      "hillslope_id": 8,
+      "input_sha256": "1eba3736466d67b2ef62c2ccc092f09dc5ece5bae8b79908f76d80455b51d287",
+      "lines": [
+        88
+      ],
+      "parameter": "first_horizon_ksat_mm_h",
+      "relative_input": "p8.sol",
+      "requested_change": 1.01,
+      "scenario": "burned",
+      "site": "topanga-pilot-validation",
+      "source_value": 20.0,
+      "tokens": [
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-burned-h8-ksat-plus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "minus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/burned/h8/cover-minus",
+      "exclusion_reason": null,
+      "expected_value": {
+        "inrcov": 0.79,
+        "rilcov": 0.79
+      },
+      "family": "cover",
+      "hillslope_id": 8,
+      "input_sha256": "491fee73e1a4bb0bf05d3f42e35acd84089fb24196eb2f0ca49aa9b060f0783b",
+      "lines": [
+        35,
+        38
+      ],
+      "parameter": "paired_inrcov_rilcov",
+      "relative_input": "p8.man",
+      "requested_change": -0.01,
+      "scenario": "burned",
+      "site": "topanga-pilot-validation",
+      "source_value": {
+        "inrcov": 0.8,
+        "rilcov": 0.8
+      },
+      "tokens": [
+        6,
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-burned-h8-cover-minus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "plus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/burned/h8/cover-plus",
+      "exclusion_reason": null,
+      "expected_value": {
+        "inrcov": 0.81,
+        "rilcov": 0.81
+      },
+      "family": "cover",
+      "hillslope_id": 8,
+      "input_sha256": "491fee73e1a4bb0bf05d3f42e35acd84089fb24196eb2f0ca49aa9b060f0783b",
+      "lines": [
+        35,
+        38
+      ],
+      "parameter": "paired_inrcov_rilcov",
+      "relative_input": "p8.man",
+      "requested_change": 0.01,
+      "scenario": "burned",
+      "site": "topanga-pilot-validation",
+      "source_value": {
+        "inrcov": 0.8,
+        "rilcov": 0.8
+      },
+      "tokens": [
+        6,
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-burned-h8-cover-plus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "minus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/burned/h35/ksat-minus",
+      "exclusion_reason": null,
+      "expected_value": 19.8,
+      "family": "ksat",
+      "hillslope_id": 35,
+      "input_sha256": "20e13c70429b97bfb49a3821375de7e8a1a5af582f77d686080be7c150095c7c",
+      "lines": [
+        92
+      ],
+      "parameter": "first_horizon_ksat_mm_h",
+      "relative_input": "p35.sol",
+      "requested_change": 0.99,
+      "scenario": "burned",
+      "site": "topanga-pilot-validation",
+      "source_value": 20.0,
+      "tokens": [
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-burned-h35-ksat-minus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "plus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/burned/h35/ksat-plus",
+      "exclusion_reason": null,
+      "expected_value": 20.2,
+      "family": "ksat",
+      "hillslope_id": 35,
+      "input_sha256": "20e13c70429b97bfb49a3821375de7e8a1a5af582f77d686080be7c150095c7c",
+      "lines": [
+        92
+      ],
+      "parameter": "first_horizon_ksat_mm_h",
+      "relative_input": "p35.sol",
+      "requested_change": 1.01,
+      "scenario": "burned",
+      "site": "topanga-pilot-validation",
+      "source_value": 20.0,
+      "tokens": [
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-burned-h35-ksat-plus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "minus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/burned/h35/cover-minus",
+      "exclusion_reason": null,
+      "expected_value": {
+        "inrcov": 0.79,
+        "rilcov": 0.79
+      },
+      "family": "cover",
+      "hillslope_id": 35,
+      "input_sha256": "db0e050d3224436bd269427af23750f0c72831f9aeb642e5495ad1be18a92302",
+      "lines": [
+        35,
+        38
+      ],
+      "parameter": "paired_inrcov_rilcov",
+      "relative_input": "p35.man",
+      "requested_change": -0.01,
+      "scenario": "burned",
+      "site": "topanga-pilot-validation",
+      "source_value": {
+        "inrcov": 0.8,
+        "rilcov": 0.8
+      },
+      "tokens": [
+        6,
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-burned-h35-cover-minus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "plus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/burned/h35/cover-plus",
+      "exclusion_reason": null,
+      "expected_value": {
+        "inrcov": 0.81,
+        "rilcov": 0.81
+      },
+      "family": "cover",
+      "hillslope_id": 35,
+      "input_sha256": "db0e050d3224436bd269427af23750f0c72831f9aeb642e5495ad1be18a92302",
+      "lines": [
+        35,
+        38
+      ],
+      "parameter": "paired_inrcov_rilcov",
+      "relative_input": "p35.man",
+      "requested_change": 0.01,
+      "scenario": "burned",
+      "site": "topanga-pilot-validation",
+      "source_value": {
+        "inrcov": 0.8,
+        "rilcov": 0.8
+      },
+      "tokens": [
+        6,
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-burned-h35-cover-plus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "minus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/burned/h31/ksat-minus",
+      "exclusion_reason": null,
+      "expected_value": 19.8,
+      "family": "ksat",
+      "hillslope_id": 31,
+      "input_sha256": "d3c173139b5fd4bbd4890dc7b2f05d0f590564b0261f514bc148ae5de59e2785",
+      "lines": [
+        92
+      ],
+      "parameter": "first_horizon_ksat_mm_h",
+      "relative_input": "p31.sol",
+      "requested_change": 0.99,
+      "scenario": "burned",
+      "site": "topanga-pilot-validation",
+      "source_value": 20.0,
+      "tokens": [
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-burned-h31-ksat-minus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "plus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/burned/h31/ksat-plus",
+      "exclusion_reason": null,
+      "expected_value": 20.2,
+      "family": "ksat",
+      "hillslope_id": 31,
+      "input_sha256": "d3c173139b5fd4bbd4890dc7b2f05d0f590564b0261f514bc148ae5de59e2785",
+      "lines": [
+        92
+      ],
+      "parameter": "first_horizon_ksat_mm_h",
+      "relative_input": "p31.sol",
+      "requested_change": 1.01,
+      "scenario": "burned",
+      "site": "topanga-pilot-validation",
+      "source_value": 20.0,
+      "tokens": [
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-burned-h31-ksat-plus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "minus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/burned/h31/cover-minus",
+      "exclusion_reason": null,
+      "expected_value": {
+        "inrcov": 0.54,
+        "rilcov": 0.54
+      },
+      "family": "cover",
+      "hillslope_id": 31,
+      "input_sha256": "2ada015ed9000e9f3420d77b84db87b8e48218ba1133fd1e2a8fa11b14ca3b1d",
+      "lines": [
+        35,
+        38
+      ],
+      "parameter": "paired_inrcov_rilcov",
+      "relative_input": "p31.man",
+      "requested_change": -0.01,
+      "scenario": "burned",
+      "site": "topanga-pilot-validation",
+      "source_value": {
+        "inrcov": 0.55,
+        "rilcov": 0.55
+      },
+      "tokens": [
+        6,
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-burned-h31-cover-minus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "plus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/burned/h31/cover-plus",
+      "exclusion_reason": null,
+      "expected_value": {
+        "inrcov": 0.56,
+        "rilcov": 0.56
+      },
+      "family": "cover",
+      "hillslope_id": 31,
+      "input_sha256": "2ada015ed9000e9f3420d77b84db87b8e48218ba1133fd1e2a8fa11b14ca3b1d",
+      "lines": [
+        35,
+        38
+      ],
+      "parameter": "paired_inrcov_rilcov",
+      "relative_input": "p31.man",
+      "requested_change": 0.01,
+      "scenario": "burned",
+      "site": "topanga-pilot-validation",
+      "source_value": {
+        "inrcov": 0.55,
+        "rilcov": 0.55
+      },
+      "tokens": [
+        6,
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-burned-h31-cover-plus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "minus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/burned/h91/ksat-minus",
+      "exclusion_reason": null,
+      "expected_value": 14.85,
+      "family": "ksat",
+      "hillslope_id": 91,
+      "input_sha256": "5d47e0f71eca17dc748e3cfed5862fc5467d1edf313fb405cd67b578444b49c9",
+      "lines": [
+        90
+      ],
+      "parameter": "first_horizon_ksat_mm_h",
+      "relative_input": "p91.sol",
+      "requested_change": 0.99,
+      "scenario": "burned",
+      "site": "topanga-pilot-validation",
+      "source_value": 15.0,
+      "tokens": [
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-burned-h91-ksat-minus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "plus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/burned/h91/ksat-plus",
+      "exclusion_reason": null,
+      "expected_value": 15.15,
+      "family": "ksat",
+      "hillslope_id": 91,
+      "input_sha256": "5d47e0f71eca17dc748e3cfed5862fc5467d1edf313fb405cd67b578444b49c9",
+      "lines": [
+        90
+      ],
+      "parameter": "first_horizon_ksat_mm_h",
+      "relative_input": "p91.sol",
+      "requested_change": 1.01,
+      "scenario": "burned",
+      "site": "topanga-pilot-validation",
+      "source_value": 15.0,
+      "tokens": [
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-burned-h91-ksat-plus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "minus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/burned/h91/cover-minus",
+      "exclusion_reason": null,
+      "expected_value": {
+        "inrcov": 0.29,
+        "rilcov": 0.29
+      },
+      "family": "cover",
+      "hillslope_id": 91,
+      "input_sha256": "6f2efcd251bdca0613c391993a0b2ba64c43ae4d4daeaf19beff9bf938020cf2",
+      "lines": [
+        35,
+        38
+      ],
+      "parameter": "paired_inrcov_rilcov",
+      "relative_input": "p91.man",
+      "requested_change": -0.01,
+      "scenario": "burned",
+      "site": "topanga-pilot-validation",
+      "source_value": {
+        "inrcov": 0.3,
+        "rilcov": 0.3
+      },
+      "tokens": [
+        6,
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-burned-h91-cover-minus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "plus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/burned/h91/cover-plus",
+      "exclusion_reason": null,
+      "expected_value": {
+        "inrcov": 0.31,
+        "rilcov": 0.31
+      },
+      "family": "cover",
+      "hillslope_id": 91,
+      "input_sha256": "6f2efcd251bdca0613c391993a0b2ba64c43ae4d4daeaf19beff9bf938020cf2",
+      "lines": [
+        35,
+        38
+      ],
+      "parameter": "paired_inrcov_rilcov",
+      "relative_input": "p91.man",
+      "requested_change": 0.01,
+      "scenario": "burned",
+      "site": "topanga-pilot-validation",
+      "source_value": {
+        "inrcov": 0.3,
+        "rilcov": 0.3
+      },
+      "tokens": [
+        6,
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-burned-h91-cover-plus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "minus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/burned/h85/ksat-minus",
+      "exclusion_reason": null,
+      "expected_value": 19.8,
+      "family": "ksat",
+      "hillslope_id": 85,
+      "input_sha256": "d3c173139b5fd4bbd4890dc7b2f05d0f590564b0261f514bc148ae5de59e2785",
+      "lines": [
+        92
+      ],
+      "parameter": "first_horizon_ksat_mm_h",
+      "relative_input": "p85.sol",
+      "requested_change": 0.99,
+      "scenario": "burned",
+      "site": "topanga-pilot-validation",
+      "source_value": 20.0,
+      "tokens": [
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-burned-h85-ksat-minus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "plus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/burned/h85/ksat-plus",
+      "exclusion_reason": null,
+      "expected_value": 20.2,
+      "family": "ksat",
+      "hillslope_id": 85,
+      "input_sha256": "d3c173139b5fd4bbd4890dc7b2f05d0f590564b0261f514bc148ae5de59e2785",
+      "lines": [
+        92
+      ],
+      "parameter": "first_horizon_ksat_mm_h",
+      "relative_input": "p85.sol",
+      "requested_change": 1.01,
+      "scenario": "burned",
+      "site": "topanga-pilot-validation",
+      "source_value": 20.0,
+      "tokens": [
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-burned-h85-ksat-plus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "minus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/burned/h85/cover-minus",
+      "exclusion_reason": null,
+      "expected_value": {
+        "inrcov": 0.54,
+        "rilcov": 0.54
+      },
+      "family": "cover",
+      "hillslope_id": 85,
+      "input_sha256": "2ada015ed9000e9f3420d77b84db87b8e48218ba1133fd1e2a8fa11b14ca3b1d",
+      "lines": [
+        35,
+        38
+      ],
+      "parameter": "paired_inrcov_rilcov",
+      "relative_input": "p85.man",
+      "requested_change": -0.01,
+      "scenario": "burned",
+      "site": "topanga-pilot-validation",
+      "source_value": {
+        "inrcov": 0.55,
+        "rilcov": 0.55
+      },
+      "tokens": [
+        6,
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-burned-h85-cover-minus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "plus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/burned/h85/cover-plus",
+      "exclusion_reason": null,
+      "expected_value": {
+        "inrcov": 0.56,
+        "rilcov": 0.56
+      },
+      "family": "cover",
+      "hillslope_id": 85,
+      "input_sha256": "2ada015ed9000e9f3420d77b84db87b8e48218ba1133fd1e2a8fa11b14ca3b1d",
+      "lines": [
+        35,
+        38
+      ],
+      "parameter": "paired_inrcov_rilcov",
+      "relative_input": "p85.man",
+      "requested_change": 0.01,
+      "scenario": "burned",
+      "site": "topanga-pilot-validation",
+      "source_value": {
+        "inrcov": 0.55,
+        "rilcov": 0.55
+      },
+      "tokens": [
+        6,
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-burned-h85-cover-plus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "minus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/burned/h62/ksat-minus",
+      "exclusion_reason": null,
+      "expected_value": 19.8,
+      "family": "ksat",
+      "hillslope_id": 62,
+      "input_sha256": "1b37f855b378c744a9754e60fb6358cda734bf81125f84988eba79913fba6238",
+      "lines": [
+        90
+      ],
+      "parameter": "first_horizon_ksat_mm_h",
+      "relative_input": "p62.sol",
+      "requested_change": 0.99,
+      "scenario": "burned",
+      "site": "topanga-pilot-validation",
+      "source_value": 20.0,
+      "tokens": [
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-burned-h62-ksat-minus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "plus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/burned/h62/ksat-plus",
+      "exclusion_reason": null,
+      "expected_value": 20.2,
+      "family": "ksat",
+      "hillslope_id": 62,
+      "input_sha256": "1b37f855b378c744a9754e60fb6358cda734bf81125f84988eba79913fba6238",
+      "lines": [
+        90
+      ],
+      "parameter": "first_horizon_ksat_mm_h",
+      "relative_input": "p62.sol",
+      "requested_change": 1.01,
+      "scenario": "burned",
+      "site": "topanga-pilot-validation",
+      "source_value": 20.0,
+      "tokens": [
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-burned-h62-ksat-plus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "minus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/burned/h62/cover-minus",
+      "exclusion_reason": null,
+      "expected_value": {
+        "inrcov": 0.54,
+        "rilcov": 0.54
+      },
+      "family": "cover",
+      "hillslope_id": 62,
+      "input_sha256": "17e8fc29e972ea9ff2b1be93d3f08c66e91809cf67900b3f5d02fad0a34cbbde",
+      "lines": [
+        35,
+        38
+      ],
+      "parameter": "paired_inrcov_rilcov",
+      "relative_input": "p62.man",
+      "requested_change": -0.01,
+      "scenario": "burned",
+      "site": "topanga-pilot-validation",
+      "source_value": {
+        "inrcov": 0.55,
+        "rilcov": 0.55
+      },
+      "tokens": [
+        6,
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-burned-h62-cover-minus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "plus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/burned/h62/cover-plus",
+      "exclusion_reason": null,
+      "expected_value": {
+        "inrcov": 0.56,
+        "rilcov": 0.56
+      },
+      "family": "cover",
+      "hillslope_id": 62,
+      "input_sha256": "17e8fc29e972ea9ff2b1be93d3f08c66e91809cf67900b3f5d02fad0a34cbbde",
+      "lines": [
+        35,
+        38
+      ],
+      "parameter": "paired_inrcov_rilcov",
+      "relative_input": "p62.man",
+      "requested_change": 0.01,
+      "scenario": "burned",
+      "site": "topanga-pilot-validation",
+      "source_value": {
+        "inrcov": 0.55,
+        "rilcov": 0.55
+      },
+      "tokens": [
+        6,
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-burned-h62-cover-plus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "minus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/undisturbed/h106/ksat-minus",
+      "exclusion_reason": null,
+      "expected_value": 34.65,
+      "family": "ksat",
+      "hillslope_id": 106,
+      "input_sha256": "023c3e5083e7d159da7caa28cf109c7176cbf52d1983ccd53eb72cf1d6510ba7",
+      "lines": [
+        88
+      ],
+      "parameter": "first_horizon_ksat_mm_h",
+      "relative_input": "p106.sol",
+      "requested_change": 0.99,
+      "scenario": "undisturbed",
+      "site": "topanga-pilot-validation",
+      "source_value": 35.0,
+      "tokens": [
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-undisturbed-h106-ksat-minus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "plus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/undisturbed/h106/ksat-plus",
+      "exclusion_reason": null,
+      "expected_value": 35.35,
+      "family": "ksat",
+      "hillslope_id": 106,
+      "input_sha256": "023c3e5083e7d159da7caa28cf109c7176cbf52d1983ccd53eb72cf1d6510ba7",
+      "lines": [
+        88
+      ],
+      "parameter": "first_horizon_ksat_mm_h",
+      "relative_input": "p106.sol",
+      "requested_change": 1.01,
+      "scenario": "undisturbed",
+      "site": "topanga-pilot-validation",
+      "source_value": 35.0,
+      "tokens": [
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-undisturbed-h106-ksat-plus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "minus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/undisturbed/h106/cover-minus",
+      "exclusion_reason": null,
+      "expected_value": {
+        "inrcov": 0.89,
+        "rilcov": 0.89
+      },
+      "family": "cover",
+      "hillslope_id": 106,
+      "input_sha256": "dcc6d714f6093f5d57574c0d9170b894ce97843696897274053c71b233e17251",
+      "lines": [
+        35,
+        38
+      ],
+      "parameter": "paired_inrcov_rilcov",
+      "relative_input": "p106.man",
+      "requested_change": -0.01,
+      "scenario": "undisturbed",
+      "site": "topanga-pilot-validation",
+      "source_value": {
+        "inrcov": 0.9,
+        "rilcov": 0.9
+      },
+      "tokens": [
+        6,
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-undisturbed-h106-cover-minus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "plus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/undisturbed/h106/cover-plus",
+      "exclusion_reason": null,
+      "expected_value": {
+        "inrcov": 0.91,
+        "rilcov": 0.91
+      },
+      "family": "cover",
+      "hillslope_id": 106,
+      "input_sha256": "dcc6d714f6093f5d57574c0d9170b894ce97843696897274053c71b233e17251",
+      "lines": [
+        35,
+        38
+      ],
+      "parameter": "paired_inrcov_rilcov",
+      "relative_input": "p106.man",
+      "requested_change": 0.01,
+      "scenario": "undisturbed",
+      "site": "topanga-pilot-validation",
+      "source_value": {
+        "inrcov": 0.9,
+        "rilcov": 0.9
+      },
+      "tokens": [
+        6,
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-undisturbed-h106-cover-plus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "minus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/undisturbed/h84/ksat-minus",
+      "exclusion_reason": null,
+      "expected_value": 39.6,
+      "family": "ksat",
+      "hillslope_id": 84,
+      "input_sha256": "440afb316923bc09d9a5353e72d1f4c4b3ae27e589f91e073f80c8d6b91a01c8",
+      "lines": [
+        92
+      ],
+      "parameter": "first_horizon_ksat_mm_h",
+      "relative_input": "p84.sol",
+      "requested_change": 0.99,
+      "scenario": "undisturbed",
+      "site": "topanga-pilot-validation",
+      "source_value": 40.0,
+      "tokens": [
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-undisturbed-h84-ksat-minus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "plus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/undisturbed/h84/ksat-plus",
+      "exclusion_reason": null,
+      "expected_value": 40.4,
+      "family": "ksat",
+      "hillslope_id": 84,
+      "input_sha256": "440afb316923bc09d9a5353e72d1f4c4b3ae27e589f91e073f80c8d6b91a01c8",
+      "lines": [
+        92
+      ],
+      "parameter": "first_horizon_ksat_mm_h",
+      "relative_input": "p84.sol",
+      "requested_change": 1.01,
+      "scenario": "undisturbed",
+      "site": "topanga-pilot-validation",
+      "source_value": 40.0,
+      "tokens": [
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-undisturbed-h84-ksat-plus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "minus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/undisturbed/h84/cover-minus",
+      "exclusion_reason": null,
+      "expected_value": {
+        "inrcov": 0.89,
+        "rilcov": 0.89
+      },
+      "family": "cover",
+      "hillslope_id": 84,
+      "input_sha256": "59fc2380d3ce098b10f5e27a9351bfe019870b6c9e7645a3c8013ec81a22e163",
+      "lines": [
+        35,
+        38
+      ],
+      "parameter": "paired_inrcov_rilcov",
+      "relative_input": "p84.man",
+      "requested_change": -0.01,
+      "scenario": "undisturbed",
+      "site": "topanga-pilot-validation",
+      "source_value": {
+        "inrcov": 0.9,
+        "rilcov": 0.9
+      },
+      "tokens": [
+        6,
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-undisturbed-h84-cover-minus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "plus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/undisturbed/h84/cover-plus",
+      "exclusion_reason": null,
+      "expected_value": {
+        "inrcov": 0.91,
+        "rilcov": 0.91
+      },
+      "family": "cover",
+      "hillslope_id": 84,
+      "input_sha256": "59fc2380d3ce098b10f5e27a9351bfe019870b6c9e7645a3c8013ec81a22e163",
+      "lines": [
+        35,
+        38
+      ],
+      "parameter": "paired_inrcov_rilcov",
+      "relative_input": "p84.man",
+      "requested_change": 0.01,
+      "scenario": "undisturbed",
+      "site": "topanga-pilot-validation",
+      "source_value": {
+        "inrcov": 0.9,
+        "rilcov": 0.9
+      },
+      "tokens": [
+        6,
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-undisturbed-h84-cover-plus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "minus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/undisturbed/h8/ksat-minus",
+      "exclusion_reason": null,
+      "expected_value": 34.65,
+      "family": "ksat",
+      "hillslope_id": 8,
+      "input_sha256": "023c3e5083e7d159da7caa28cf109c7176cbf52d1983ccd53eb72cf1d6510ba7",
+      "lines": [
+        88
+      ],
+      "parameter": "first_horizon_ksat_mm_h",
+      "relative_input": "p8.sol",
+      "requested_change": 0.99,
+      "scenario": "undisturbed",
+      "site": "topanga-pilot-validation",
+      "source_value": 35.0,
+      "tokens": [
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-undisturbed-h8-ksat-minus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "plus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/undisturbed/h8/ksat-plus",
+      "exclusion_reason": null,
+      "expected_value": 35.35,
+      "family": "ksat",
+      "hillslope_id": 8,
+      "input_sha256": "023c3e5083e7d159da7caa28cf109c7176cbf52d1983ccd53eb72cf1d6510ba7",
+      "lines": [
+        88
+      ],
+      "parameter": "first_horizon_ksat_mm_h",
+      "relative_input": "p8.sol",
+      "requested_change": 1.01,
+      "scenario": "undisturbed",
+      "site": "topanga-pilot-validation",
+      "source_value": 35.0,
+      "tokens": [
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-undisturbed-h8-ksat-plus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "minus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/undisturbed/h8/cover-minus",
+      "exclusion_reason": null,
+      "expected_value": {
+        "inrcov": 0.89,
+        "rilcov": 0.89
+      },
+      "family": "cover",
+      "hillslope_id": 8,
+      "input_sha256": "dcc6d714f6093f5d57574c0d9170b894ce97843696897274053c71b233e17251",
+      "lines": [
+        35,
+        38
+      ],
+      "parameter": "paired_inrcov_rilcov",
+      "relative_input": "p8.man",
+      "requested_change": -0.01,
+      "scenario": "undisturbed",
+      "site": "topanga-pilot-validation",
+      "source_value": {
+        "inrcov": 0.9,
+        "rilcov": 0.9
+      },
+      "tokens": [
+        6,
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-undisturbed-h8-cover-minus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "plus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/undisturbed/h8/cover-plus",
+      "exclusion_reason": null,
+      "expected_value": {
+        "inrcov": 0.91,
+        "rilcov": 0.91
+      },
+      "family": "cover",
+      "hillslope_id": 8,
+      "input_sha256": "dcc6d714f6093f5d57574c0d9170b894ce97843696897274053c71b233e17251",
+      "lines": [
+        35,
+        38
+      ],
+      "parameter": "paired_inrcov_rilcov",
+      "relative_input": "p8.man",
+      "requested_change": 0.01,
+      "scenario": "undisturbed",
+      "site": "topanga-pilot-validation",
+      "source_value": {
+        "inrcov": 0.9,
+        "rilcov": 0.9
+      },
+      "tokens": [
+        6,
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-undisturbed-h8-cover-plus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "minus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/undisturbed/h35/ksat-minus",
+      "exclusion_reason": null,
+      "expected_value": 39.6,
+      "family": "ksat",
+      "hillslope_id": 35,
+      "input_sha256": "440afb316923bc09d9a5353e72d1f4c4b3ae27e589f91e073f80c8d6b91a01c8",
+      "lines": [
+        92
+      ],
+      "parameter": "first_horizon_ksat_mm_h",
+      "relative_input": "p35.sol",
+      "requested_change": 0.99,
+      "scenario": "undisturbed",
+      "site": "topanga-pilot-validation",
+      "source_value": 40.0,
+      "tokens": [
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-undisturbed-h35-ksat-minus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "plus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/undisturbed/h35/ksat-plus",
+      "exclusion_reason": null,
+      "expected_value": 40.4,
+      "family": "ksat",
+      "hillslope_id": 35,
+      "input_sha256": "440afb316923bc09d9a5353e72d1f4c4b3ae27e589f91e073f80c8d6b91a01c8",
+      "lines": [
+        92
+      ],
+      "parameter": "first_horizon_ksat_mm_h",
+      "relative_input": "p35.sol",
+      "requested_change": 1.01,
+      "scenario": "undisturbed",
+      "site": "topanga-pilot-validation",
+      "source_value": 40.0,
+      "tokens": [
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-undisturbed-h35-ksat-plus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "minus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/undisturbed/h35/cover-minus",
+      "exclusion_reason": null,
+      "expected_value": {
+        "inrcov": 0.89,
+        "rilcov": 0.89
+      },
+      "family": "cover",
+      "hillslope_id": 35,
+      "input_sha256": "59fc2380d3ce098b10f5e27a9351bfe019870b6c9e7645a3c8013ec81a22e163",
+      "lines": [
+        35,
+        38
+      ],
+      "parameter": "paired_inrcov_rilcov",
+      "relative_input": "p35.man",
+      "requested_change": -0.01,
+      "scenario": "undisturbed",
+      "site": "topanga-pilot-validation",
+      "source_value": {
+        "inrcov": 0.9,
+        "rilcov": 0.9
+      },
+      "tokens": [
+        6,
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-undisturbed-h35-cover-minus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "plus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/undisturbed/h35/cover-plus",
+      "exclusion_reason": null,
+      "expected_value": {
+        "inrcov": 0.91,
+        "rilcov": 0.91
+      },
+      "family": "cover",
+      "hillslope_id": 35,
+      "input_sha256": "59fc2380d3ce098b10f5e27a9351bfe019870b6c9e7645a3c8013ec81a22e163",
+      "lines": [
+        35,
+        38
+      ],
+      "parameter": "paired_inrcov_rilcov",
+      "relative_input": "p35.man",
+      "requested_change": 0.01,
+      "scenario": "undisturbed",
+      "site": "topanga-pilot-validation",
+      "source_value": {
+        "inrcov": 0.9,
+        "rilcov": 0.9
+      },
+      "tokens": [
+        6,
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-undisturbed-h35-cover-plus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "minus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/undisturbed/h31/ksat-minus",
+      "exclusion_reason": null,
+      "expected_value": 39.6,
+      "family": "ksat",
+      "hillslope_id": 31,
+      "input_sha256": "440afb316923bc09d9a5353e72d1f4c4b3ae27e589f91e073f80c8d6b91a01c8",
+      "lines": [
+        92
+      ],
+      "parameter": "first_horizon_ksat_mm_h",
+      "relative_input": "p31.sol",
+      "requested_change": 0.99,
+      "scenario": "undisturbed",
+      "site": "topanga-pilot-validation",
+      "source_value": 40.0,
+      "tokens": [
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-undisturbed-h31-ksat-minus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "plus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/undisturbed/h31/ksat-plus",
+      "exclusion_reason": null,
+      "expected_value": 40.4,
+      "family": "ksat",
+      "hillslope_id": 31,
+      "input_sha256": "440afb316923bc09d9a5353e72d1f4c4b3ae27e589f91e073f80c8d6b91a01c8",
+      "lines": [
+        92
+      ],
+      "parameter": "first_horizon_ksat_mm_h",
+      "relative_input": "p31.sol",
+      "requested_change": 1.01,
+      "scenario": "undisturbed",
+      "site": "topanga-pilot-validation",
+      "source_value": 40.0,
+      "tokens": [
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-undisturbed-h31-ksat-plus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "minus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/undisturbed/h31/cover-minus",
+      "exclusion_reason": null,
+      "expected_value": {
+        "inrcov": 0.89,
+        "rilcov": 0.89
+      },
+      "family": "cover",
+      "hillslope_id": 31,
+      "input_sha256": "59fc2380d3ce098b10f5e27a9351bfe019870b6c9e7645a3c8013ec81a22e163",
+      "lines": [
+        35,
+        38
+      ],
+      "parameter": "paired_inrcov_rilcov",
+      "relative_input": "p31.man",
+      "requested_change": -0.01,
+      "scenario": "undisturbed",
+      "site": "topanga-pilot-validation",
+      "source_value": {
+        "inrcov": 0.9,
+        "rilcov": 0.9
+      },
+      "tokens": [
+        6,
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-undisturbed-h31-cover-minus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "plus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/undisturbed/h31/cover-plus",
+      "exclusion_reason": null,
+      "expected_value": {
+        "inrcov": 0.91,
+        "rilcov": 0.91
+      },
+      "family": "cover",
+      "hillslope_id": 31,
+      "input_sha256": "59fc2380d3ce098b10f5e27a9351bfe019870b6c9e7645a3c8013ec81a22e163",
+      "lines": [
+        35,
+        38
+      ],
+      "parameter": "paired_inrcov_rilcov",
+      "relative_input": "p31.man",
+      "requested_change": 0.01,
+      "scenario": "undisturbed",
+      "site": "topanga-pilot-validation",
+      "source_value": {
+        "inrcov": 0.9,
+        "rilcov": 0.9
+      },
+      "tokens": [
+        6,
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-undisturbed-h31-cover-plus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "minus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/undisturbed/h91/ksat-minus",
+      "exclusion_reason": null,
+      "expected_value": 34.65,
+      "family": "ksat",
+      "hillslope_id": 91,
+      "input_sha256": "d78fa3e06db4bb49c51b08ed8f7c01e82001f47946edde43ce49ea2d3afa7001",
+      "lines": [
+        90
+      ],
+      "parameter": "first_horizon_ksat_mm_h",
+      "relative_input": "p91.sol",
+      "requested_change": 0.99,
+      "scenario": "undisturbed",
+      "site": "topanga-pilot-validation",
+      "source_value": 35.0,
+      "tokens": [
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-undisturbed-h91-ksat-minus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "plus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/undisturbed/h91/ksat-plus",
+      "exclusion_reason": null,
+      "expected_value": 35.35,
+      "family": "ksat",
+      "hillslope_id": 91,
+      "input_sha256": "d78fa3e06db4bb49c51b08ed8f7c01e82001f47946edde43ce49ea2d3afa7001",
+      "lines": [
+        90
+      ],
+      "parameter": "first_horizon_ksat_mm_h",
+      "relative_input": "p91.sol",
+      "requested_change": 1.01,
+      "scenario": "undisturbed",
+      "site": "topanga-pilot-validation",
+      "source_value": 35.0,
+      "tokens": [
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-undisturbed-h91-ksat-plus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "minus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/undisturbed/h91/cover-minus",
+      "exclusion_reason": null,
+      "expected_value": {
+        "inrcov": 0.89,
+        "rilcov": 0.89
+      },
+      "family": "cover",
+      "hillslope_id": 91,
+      "input_sha256": "dcc6d714f6093f5d57574c0d9170b894ce97843696897274053c71b233e17251",
+      "lines": [
+        35,
+        38
+      ],
+      "parameter": "paired_inrcov_rilcov",
+      "relative_input": "p91.man",
+      "requested_change": -0.01,
+      "scenario": "undisturbed",
+      "site": "topanga-pilot-validation",
+      "source_value": {
+        "inrcov": 0.9,
+        "rilcov": 0.9
+      },
+      "tokens": [
+        6,
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-undisturbed-h91-cover-minus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "plus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/undisturbed/h91/cover-plus",
+      "exclusion_reason": null,
+      "expected_value": {
+        "inrcov": 0.91,
+        "rilcov": 0.91
+      },
+      "family": "cover",
+      "hillslope_id": 91,
+      "input_sha256": "dcc6d714f6093f5d57574c0d9170b894ce97843696897274053c71b233e17251",
+      "lines": [
+        35,
+        38
+      ],
+      "parameter": "paired_inrcov_rilcov",
+      "relative_input": "p91.man",
+      "requested_change": 0.01,
+      "scenario": "undisturbed",
+      "site": "topanga-pilot-validation",
+      "source_value": {
+        "inrcov": 0.9,
+        "rilcov": 0.9
+      },
+      "tokens": [
+        6,
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-undisturbed-h91-cover-plus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "minus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/undisturbed/h85/ksat-minus",
+      "exclusion_reason": null,
+      "expected_value": 39.6,
+      "family": "ksat",
+      "hillslope_id": 85,
+      "input_sha256": "440afb316923bc09d9a5353e72d1f4c4b3ae27e589f91e073f80c8d6b91a01c8",
+      "lines": [
+        92
+      ],
+      "parameter": "first_horizon_ksat_mm_h",
+      "relative_input": "p85.sol",
+      "requested_change": 0.99,
+      "scenario": "undisturbed",
+      "site": "topanga-pilot-validation",
+      "source_value": 40.0,
+      "tokens": [
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-undisturbed-h85-ksat-minus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "plus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/undisturbed/h85/ksat-plus",
+      "exclusion_reason": null,
+      "expected_value": 40.4,
+      "family": "ksat",
+      "hillslope_id": 85,
+      "input_sha256": "440afb316923bc09d9a5353e72d1f4c4b3ae27e589f91e073f80c8d6b91a01c8",
+      "lines": [
+        92
+      ],
+      "parameter": "first_horizon_ksat_mm_h",
+      "relative_input": "p85.sol",
+      "requested_change": 1.01,
+      "scenario": "undisturbed",
+      "site": "topanga-pilot-validation",
+      "source_value": 40.0,
+      "tokens": [
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-undisturbed-h85-ksat-plus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "minus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/undisturbed/h85/cover-minus",
+      "exclusion_reason": null,
+      "expected_value": {
+        "inrcov": 0.89,
+        "rilcov": 0.89
+      },
+      "family": "cover",
+      "hillslope_id": 85,
+      "input_sha256": "59fc2380d3ce098b10f5e27a9351bfe019870b6c9e7645a3c8013ec81a22e163",
+      "lines": [
+        35,
+        38
+      ],
+      "parameter": "paired_inrcov_rilcov",
+      "relative_input": "p85.man",
+      "requested_change": -0.01,
+      "scenario": "undisturbed",
+      "site": "topanga-pilot-validation",
+      "source_value": {
+        "inrcov": 0.9,
+        "rilcov": 0.9
+      },
+      "tokens": [
+        6,
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-undisturbed-h85-cover-minus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "plus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/undisturbed/h85/cover-plus",
+      "exclusion_reason": null,
+      "expected_value": {
+        "inrcov": 0.91,
+        "rilcov": 0.91
+      },
+      "family": "cover",
+      "hillslope_id": 85,
+      "input_sha256": "59fc2380d3ce098b10f5e27a9351bfe019870b6c9e7645a3c8013ec81a22e163",
+      "lines": [
+        35,
+        38
+      ],
+      "parameter": "paired_inrcov_rilcov",
+      "relative_input": "p85.man",
+      "requested_change": 0.01,
+      "scenario": "undisturbed",
+      "site": "topanga-pilot-validation",
+      "source_value": {
+        "inrcov": 0.9,
+        "rilcov": 0.9
+      },
+      "tokens": [
+        6,
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-undisturbed-h85-cover-plus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "minus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/undisturbed/h62/ksat-minus",
+      "exclusion_reason": null,
+      "expected_value": 34.65,
+      "family": "ksat",
+      "hillslope_id": 62,
+      "input_sha256": "d78fa3e06db4bb49c51b08ed8f7c01e82001f47946edde43ce49ea2d3afa7001",
+      "lines": [
+        90
+      ],
+      "parameter": "first_horizon_ksat_mm_h",
+      "relative_input": "p62.sol",
+      "requested_change": 0.99,
+      "scenario": "undisturbed",
+      "site": "topanga-pilot-validation",
+      "source_value": 35.0,
+      "tokens": [
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-undisturbed-h62-ksat-minus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "plus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/undisturbed/h62/ksat-plus",
+      "exclusion_reason": null,
+      "expected_value": 35.35,
+      "family": "ksat",
+      "hillslope_id": 62,
+      "input_sha256": "d78fa3e06db4bb49c51b08ed8f7c01e82001f47946edde43ce49ea2d3afa7001",
+      "lines": [
+        90
+      ],
+      "parameter": "first_horizon_ksat_mm_h",
+      "relative_input": "p62.sol",
+      "requested_change": 1.01,
+      "scenario": "undisturbed",
+      "site": "topanga-pilot-validation",
+      "source_value": 35.0,
+      "tokens": [
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-undisturbed-h62-ksat-plus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "minus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/undisturbed/h62/cover-minus",
+      "exclusion_reason": null,
+      "expected_value": {
+        "inrcov": 0.89,
+        "rilcov": 0.89
+      },
+      "family": "cover",
+      "hillslope_id": 62,
+      "input_sha256": "dcc6d714f6093f5d57574c0d9170b894ce97843696897274053c71b233e17251",
+      "lines": [
+        35,
+        38
+      ],
+      "parameter": "paired_inrcov_rilcov",
+      "relative_input": "p62.man",
+      "requested_change": -0.01,
+      "scenario": "undisturbed",
+      "site": "topanga-pilot-validation",
+      "source_value": {
+        "inrcov": 0.9,
+        "rilcov": 0.9
+      },
+      "tokens": [
+        6,
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-undisturbed-h62-cover-minus-2a19c6e0b1ce"
+    },
+    {
+      "direction": "plus",
+      "eligibility": "eligible",
+      "evidence_locator": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/undisturbed/h62/cover-plus",
+      "exclusion_reason": null,
+      "expected_value": {
+        "inrcov": 0.91,
+        "rilcov": 0.91
+      },
+      "family": "cover",
+      "hillslope_id": 62,
+      "input_sha256": "dcc6d714f6093f5d57574c0d9170b894ce97843696897274053c71b233e17251",
+      "lines": [
+        35,
+        38
+      ],
+      "parameter": "paired_inrcov_rilcov",
+      "relative_input": "p62.man",
+      "requested_change": 0.01,
+      "scenario": "undisturbed",
+      "site": "topanga-pilot-validation",
+      "source_value": {
+        "inrcov": 0.9,
+        "rilcov": 0.9
+      },
+      "tokens": [
+        6,
+        3
+      ],
+      "trial_id": "topanga-pilot-validation-undisturbed-h62-cover-plus-2a19c6e0b1ce"
+    }
+  ]
+}

@@ -5,8 +5,8 @@
 **Timezone**: UTC
 **Started**: 2026-08-08 22:59 UTC
 **Current phase**: Pilot complete; local census released by design amendment
-**Last updated**: 2026-08-09 02:38 UTC
-**Next milestone**: Execute the hillslope-only Topanga census
+**Last updated**: 2026-08-09 04:22 UTC
+**Next milestone**: Prepare the durable engine and freeze the Topanga matrix
 **Security impact**: `none`
 **Dedicated security review**: `no`
 **Security artifact**: N/A
@@ -15,8 +15,8 @@
 
 ### Ready / Backlog
 
-- [ ] Freeze the eligible hillslope set and execute the local mutation census.
-- [ ] Screen and adjudicate local candidates without watershed routing.
+- [ ] Complete the linked durable-engine preparation package.
+- [ ] Create the separate execution package only after preparation GO.
 
 ### In Progress
 
@@ -53,6 +53,8 @@
   UTC).
 - [x] Amended the study to cull per-mutation routing and release the local
   census without changing the failed pilot evidence (2026-08-09 02:38 UTC).
+- [x] Scaffolded the durable-engine preparation successor and separated it from
+  full-matrix execution (2026-08-09 04:22 UTC).
 
 ## Timeline
 
@@ -72,6 +74,8 @@
   criteria 5–7.
 - **2026-08-09 02:38 UTC** – Retired routing criteria 5–7 as gates for the local
   census and deferred downstream-impact claims to a separate follow-up.
+- **2026-08-09 04:22 UTC** – Opened the preparation package; execution remains
+  blocked until it freezes a validated matrix and publishes GO.
 
 ## Decisions Log
 

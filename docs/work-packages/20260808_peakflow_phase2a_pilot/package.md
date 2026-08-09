@@ -116,7 +116,9 @@ watershed-outlet claims.
 - **Depends on**: [Phase 1 assurance](../20260808_peakflow_phase1/package.md)
   and [Gate 2.1 remediation](../20260808_peakflow_gate21/package.md).
 - **Related**: [multi-site audit protocol](../../investigations/2026-08-08-wepp-peak-flow-discontinuity-multi-site-audit/README.md).
-- **Follow-up**: local Topanga census under the amended hillslope-only gate.
+- **Follow-up**:
+  [durable Topanga census preparation](../20260808_peakflow_topanga_census_prep/package.md),
+  followed by a separately authorized execution package.
 
 ## Timeline Estimate
 
@@ -148,9 +150,11 @@ watershed-outlet claims.
 
 ## Follow-up Work
 
-Begin the local Topanga census without per-mutation watershed routing. Preserve
-the routing failures for a separate sampled follow-up after off-path isolation
-and channel-volume authority are repaired. Cross-site, snow-site, and OFE work
+Complete the [durable census preparation package](../20260808_peakflow_topanga_census_prep/package.md)
+without per-mutation watershed routing. It must prove pilot parity and freeze
+the eligible Topanga matrix before a separate execution package begins.
+Preserve routing failures for a sampled follow-up after off-path isolation and
+channel-volume authority are repaired. Cross-site, snow-site, and OFE work
 remain governed by Gates 4 and 5.
 
 ## Final Disposition

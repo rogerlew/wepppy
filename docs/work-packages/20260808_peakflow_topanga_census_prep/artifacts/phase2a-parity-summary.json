@@ -1,0 +1,18 @@
+{
+  "checks": {
+    "baseline_only_rows": 30,
+    "candidate_rows": 697,
+    "candidate_trials": 61,
+    "complete_trials": 64,
+    "event_pairs_sha256": "c5a82b3387c31b7563e5a679661f210857d9b5af5f63b56526b1f8426474fdfe",
+    "exact_one_input_diff_trials": 64,
+    "mutant_only_rows": 25,
+    "outer_join_rows": 14157,
+    "report_id": "80f10c9d636aa17f761e50f6c0ee06e596f976c2d735f636a8979b1a39935bd1",
+    "terminal_ledger_sha256": "e7990c67cfcd0fd4de264459960a403ef46a40ffdba49e103bf106e71d248ccd",
+    "terminal_trials": 64
+  },
+  "errors": [],
+  "schema_version": "1.0.0",
+  "valid": true
+}
