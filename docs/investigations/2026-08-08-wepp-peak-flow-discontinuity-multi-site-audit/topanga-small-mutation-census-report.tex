@@ -66,6 +66,13 @@ and higher \Ksat{} lowers it---but their magnitude is disproportionate to a
 one-percent input change. Within the 0.5--2 band, the fraction of \Ksat{}
 responses having the opposite sign rises sharply with baseline peak magnitude.
 
+Source forensics and an instrumented Hill 106 event identify one mechanism.
+Present WEPP assigns a daily soil-water surface return new subdaily timing by
+dividing it by the duration of intervals already having positive infiltration
+excess. This pathway was added in 2003--2004, after the 1995 peak-method
+evaluation, and was not subsequently documented or evaluated at population
+scale. It explains much, but not all, of the census tail.
+
 Topanga therefore supports a focused conclusion: very small local mutations
 are sufficient to reveal a structured, \Ksat-sensitive peak-flow response that
 cannot be characterized by smooth local sensitivity alone. At hillslope scale,
@@ -122,35 +129,191 @@ enters an already wet profile can be returned to the surface. It does not,
 however, follow that a daily returned-water volume has a uniquely determined
 subdaily timing or peak rate.
 
-\subsection{Why a discontinuity is plausible in the legacy calculation}
+\subsection{What the official documentation describes}
 
-The Topanga Hill 106 instrumentation established two relevant implementation
-features. First, WEPP accumulates soil-water surface return as a daily depth,
-\surdra. The peak-flow path divides that depth by a selected positive-excess
-duration and adds the resulting constant rate to selected subdaily intervals.
-\Ksat{} can change both the returned depth and the selected duration. A larger
-daily depth can therefore be compressed into a shorter interval even while
-total runoff and maximum infiltration-excess rate decline.
+WEPP was designed primarily to predict erosion for conservation and land
+management analysis. Chapter 4 says that surface hydrology supplies the
+erosion component with runoff volume, peak discharge, rainfall-excess
+intensity, and rainfall-excess duration \cite{stone1995}. In continuous
+simulation, most peaks are estimated with an approximation to kinematic-wave
+routing rather than read from a retained, fully routed hydrograph. The erosion
+calculation then assumes steady discharge at the peak and defines an effective
+duration
 
-Second, an exact-zero ponding-time sentinel selects the approximate peak method
-(\texttt{APPMTH}), while a positive value selects characteristic routing
-(\texttt{HDRIVE}). There is no continuity constraint between their returned
-peaks. Forced-solver experiments show that this branch can enlarge a gap, but
-the surface-return timing construction can produce a large gap even when both
-lanes use the same solver.
+\begin{equation}
+  D_e=\frac{Q_v}{q_p}.
+\end{equation}
 
-The instrumented February 14, 1980 Hill 106 event illustrates the mechanism.
-Changing only \Ksat{} from 20 to 35 mm/h reduced final
-runoff from 60.122 to 58.630 mm, but increased the daily
-surface-return depth from 36.999 to 51.637 mm. The selected
-positive-excess duration shortened from 4,536.6 to 2,478.4 seconds. The imposed
-surface-return rate consequently increased from 29.36 to 75.00 mm/h, and the
-published peak increased from 47.710 to 92.714 mm/h.
+This rectangle has the calculated peak as its height and the event runoff as
+its area. Effective duration is therefore calculated after the peak. It is not
+an independently routed hydrograph duration or time to peak. A very short
+reported duration is a consequence of a large calculated peak, not separate
+evidence that the physical runoff pulse was short.
 
-This known case motivated a census rather than another isolated sensitivity
-run. The census was designed to preserve full antecedent history and discover
-where similarly abrupt responses occur across the complete Topanga hillslope
-population.
+The continuous-simulation approximation was evaluated over the domain shown
+in Table~\ref{tab:stone-domain}. Its three equation branches had reported mean
+errors of 1\%, 10\%, and 5\% relative to kinematic-wave routing, or 6.6\%
+combined. These were comparisons with another model calculation, not with
+observed event peaks. Chapter 4 did not prescribe warnings, clamps, or another
+method outside the tested domain, and it did not report tests of continuity
+under small changes in \Ksat{}, vegetation, or cover.
+
+\begin{table}[H]
+  \centering
+  \caption{Domain used to develop the Chapter 4 continuous-simulation peak
+  approximation.}
+  \label{tab:stone-domain}
+  \begin{tabular}{lrr}
+    \toprule
+    Dimensionless quantity & Minimum & Maximum \\
+    \midrule
+    Discharge time, $t^*$ & 0.09 & 10.0 \\
+    Mean-to-maximum excess ratio, $v^*$ & 0.08 & 1.0 \\
+    Peak ratio, $q^*$ & 0.07 & 8.0 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The documentation also gave substantial warnings. Chapter 4 says WEPP does not
+explicitly represent variable contributing areas or return flow, calculates
+rainfall excess before routing, does not fully couple routing and recession
+infiltration in all cases, and expects more peak error for multipeaked
+hydrographs. It nevertheless states that surface hydrology should perform best
+for large events on one OFE, assuming correct parameters. Chapter 6 reports
+that runoff volume compared more favorably with observations than peak rate in
+one drainage evaluation; peak validity remained undetermined because hydraulic
+roughness had not been measured \cite{savabi1995}. These statements support
+caution, but they do not describe the later surface-return timing problem.
+
+\subsection{How the present implementation constructs a peak}
+
+The source and Topanga instrumentation show the following sequence:
+
+\begin{enumerate}
+  \item Rainfall and infiltration produce a subdaily rainfall-excess series.
+  \item \texttt{REID} sums only intervals with positive excess to obtain the
+    selected duration, excluding zero-excess gaps between bursts.
+  \item The daily water balance calculates \surdra{}, water that cannot remain
+    in the full surface soil layer.
+  \item The peak path calculates
+    \begin{equation}
+      \text{return rate}=\frac{\text{daily surface-return depth}}
+      {\text{positive-excess duration}}
+    \end{equation}
+    and adds that constant rate only to intervals already having positive
+    infiltration excess.
+  \item An exactly zero stored ponding time selects the approximate
+    \texttt{APPMTH} solver; a positive value selects \texttt{HDRIVE}
+    characteristic routing. No check requires the two methods to agree at the
+    boundary.
+  \item After the peak is returned, WEPP calculates $D_e=Q_v/q_p$, capped at
+    one day.
+\end{enumerate}
+
+The operation conserves the daily water amount, but it does not preserve when
+that water reached the surface. For example, if 20 mm is returned on a day
+with two hours of positive infiltration excess, the code adds 10 mm/h to those
+two hours. If a small parameter change leaves the same depth but shortens the
+selected duration to one hour, the imposed rate doubles. The water volume is
+unchanged, but the constructed peak forcing is not.
+
+Enabling the hourly water balance does not preserve the missing timing in this
+path. The hourly routine calculates surface return in \texttt{ui\_scrunf}, but
+then sums those hourly values into daily \surdra{}. The peak routine consumes
+that daily sum rather than the hourly return series. It assigns new timing from
+the infiltration-excess intervals even though hourly return values had already
+been calculated.
+
+When surface return exists without any positive-excess duration, the code must
+choose another time window. It tries a storm-derived duration, then an upslope
+flow duration, and finally a 24-hour fallback. These choices preserve volume,
+but none records when the soil actually returned the water.
+
+\subsection{Controlled experiments that identified the defect}
+
+The census followed several controlled Hill 106 experiments. They address
+different questions and should not be treated as demonstrations of one common
+cause.
+
+\begin{table}[H]
+  \centering
+  \small
+  \caption{Controlled Topanga evidence preceding the census.}
+  \label{tab:controlled-evidence}
+  \begin{tabular}{p{0.19\textwidth}p{0.25\textwidth}p{0.20\textwidth}p{0.25\textwidth}}
+    \toprule
+    Experiment & Controlled change & Peak response & What it establishes \\
+    \midrule
+    1980 burned \Ksat{} & 20 to 35 mm/h & 47.71 to 92.71 mm/h & Instrumented surface-return compression; solver switch secondary \\
+    1986 canopy screen & LAI 5 to 6; canopy 0.70 to 0.90 & 3.56 to 294.42 mm/h & Severe discontinuity; immediate branch unresolved \\
+    1986 cover bracket & Paired cover 0.80 to 0.90 & 312.29 to 3.56 mm/h & Compact boundary for replay \\
+    1986 cover matrix & 36 canopy/cover combinations & 3.516 to 323.029 mm/h & Two regimes while runoff remained 42.834--44.115 mm \\
+    2005 cover step & Paired cover 0.80 to 0.90 & 97.74 to 157.62 mm/h & Recurrence on another date with nearly fixed runoff \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The 1980 event was traced with diagnostic logging placed between the water
+balance and the peak solvers. The logging recorded values ordinary WEPP output
+does not expose and did not change the hydrology or peak equations.
+
+\begin{table}[H]
+  \centering
+  \caption{Internal operands for the instrumented February 14, 1980 event.}
+  \label{tab:instrumented-1980}
+  \begin{tabular}{lrr}
+    \toprule
+    Recorded value & \Ksat{} 20 & \Ksat{} 35 \\
+    \midrule
+    Final runoff & 60.122 mm & 58.630 mm \\
+    Daily surface return & 36.999 mm & 51.637 mm \\
+    Positive-excess duration & 4,536.60 s & 2,478.44 s \\
+    Imposed return rate & 29.36 mm/h & 75.00 mm/h \\
+    Maximum excess before insertion & 34.69 mm/h & 19.35 mm/h \\
+    Maximum forcing after insertion & 64.05 mm/h & 94.35 mm/h \\
+    Stored ponding time & 0 s & 5,100 s \\
+    Selected method & \texttt{APPMTH} & \texttt{HDRIVE} \\
+    Published \PeakRO{} & 47.710 mm/h & 92.714 mm/h \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The higher-\Ksat{} run behaved as expected before the surface-return insertion:
+it had less runoff and a lower maximum infiltration-excess rate. The reversal
+appeared when a larger daily return was divided by a duration that was 45\%
+shorter. Separate diagnostic builds then forced both already-constructed event
+inputs through the same solver.
+
+\begin{table}[H]
+  \centering
+  \caption{Forced-solver counterfactual for the 1980 \Ksat{} event.}
+  \label{tab:forced-solvers}
+  \begin{tabular}{lrr}
+    \toprule
+    Solver assignment & \Ksat{} 20 peak & \Ksat{} 35 peak \\
+    \midrule
+    Normal selection & 47.710 mm/h & 92.714 mm/h \\
+    Both \texttt{HDRIVE} & 61.751 mm/h & 92.714 mm/h \\
+    Both \texttt{APPMTH} & 47.710 mm/h & 85.162 mm/h \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The solver switch enlarged the difference but did not create it. Under either
+common solver, the higher-\Ksat{} event retained the larger peak because its
+surface return had already been assigned a much higher rate. This controlled
+case motivated a census across the complete Topanga hillslope population.
+
+\subsection{Shared implementation and source scope}
+
+The public Daily Erosion Project repository contains a verbatim import of the
+September 2024 Windows WEPP source. Comparison with the reviewed WEPP-Forest
+source found byte-identical \texttt{REID}, \texttt{APPMTH}, \texttt{HDRIVE},
+\texttt{GRNA}, and shared hydrology-state definitions. Both lineages contain
+the same daily-surplus insertion, exact-zero solver selection, and effective
+duration calculation \cite{stakeholder}. The Topanga runtime instrumentation
+used WEPP-Forest. The Windows comparison is static source evidence; it does not
+claim that every Windows executable was run on the Topanga fixtures.
 
 \section{Study Design}
 
@@ -789,32 +952,12 @@ surplus, and positive-excess duration. The census establishes the
 state-dependent displacement, while candidate replay must determine which
 duration, forcing-mode, or solver boundary explains each cluster.
 
-\subsection{Chapter 4 expectations and historical context}
+\subsection{What changed after Chapter 4}
 
-Stone et al. described peak discharge as one of four surface-hydrology
-quantities supplied primarily to the WEPP erosion component, together with
-rainfall-excess duration, rainfall intensity during excess, and runoff volume
-\cite{stone1995}. For continuous simulation, most event peaks are not taken
-from a retained, fully routed hydrograph. They are estimated with an
-approximation to kinematic-wave routing. WEPP then assumes steady discharge at
-that peak and computes an effective duration, $D_e=Q_v/q_p$, so that the
-rectangular representation preserves event runoff volume in the rill-erosion
-calculation. The reported peak is therefore an erosion-oriented reduction of
-event hydrology as well as a hydrologic output; its interpretation is not
-equivalent to that of an observed hydrograph ordinate.
-
-Chapter 4 both supported and qualified this construction. Within the tested
-dimensionless domain, the three branches of the continuous-simulation
-approximation had a reported combined average error of 6.6\% relative to the
-kinematic-wave routing solution. That was an approximation comparison, not a
-population-scale validation against observed event peaks. Stone et al. also
-warned that WEPP represents Hortonian flow but not variable contributing areas
-or return flow explicitly, computes rainfall excess before routing, does not
-fully couple routed water with recession infiltration in all cases, and
-expects greater peak error for multipeaked hydrographs. Against those warnings,
-the chapter made a clear favorable claim: assuming correct parameter values,
-surface hydrology ``should perform the best for large events on a single OFE''
-and the worst for medium events on multiple OFEs.
+Chapter 4's statement that surface hydrology should perform best for large
+events on one OFE described the model and evidence available in 1995. The
+source history shows that the surface-return pathway now implicated in the
+Topanga anomalies was not part of that evaluated calculation.
 
 The source history changes how that claim should be judged. In 1993, WEPP
 calculated excess water above the upper soil-water limit in a variable named
@@ -831,6 +974,27 @@ intervals before calculating the peak. On November 19, 2009, the call to the
 daily water balance was moved inside the peak-flow routine; the accompanying
 comment notes that this differed from WEPP's original sequence and might affect
 other global variables \cite{stakeholder}.
+
+\begin{table}[H]
+  \centering
+  \small
+  \caption{Source-supported history of the surface-return pathway.}
+  \label{tab:surdra-history}
+  \begin{tabular}{lp{0.67\textwidth}}
+    \toprule
+    Date & Source evidence and meaning \\
+    \midrule
+    May 1993 & \surdra{} calculated but explicitly unused because runoff routing and erosion had already occurred \\
+    July 1995 & Chapter 4 published with return flow outside the documented formulation \\
+    May 22, 2003 & Initial \surdra{} runoff addback \\
+    June 6, 2003 & Integration with the peak-flow routine \\
+    January 28, 2004 & Surface-return addback modified \\
+    July 6, 2004 & No-duration handling extended \\
+    November 19, 2009 & Daily water balance moved inside the peak-flow routine \\
+    2026 & Topanga population-scale mutation census \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
 This history is supported by source-code forensics. The dated comments show
 what the developers calculated, what they deliberately left unused, and when
@@ -857,7 +1021,7 @@ The most likely history is straightforward. A later development change added
 a useful water-balance pathway that the original developers had deliberately
 left unresolved because of its timing within the daily calculation. That
 change altered the water supplied to the peak-flow calculation, but the peak
-method and its performance guidance were not re-evaluated at population scale.
+method and its performance guidance were not reevaluated at population scale.
 The Chapter 4 statement remained in the documentation even though the model
 around it had changed. In that sense, the documentation became stale: it
 continued to describe the scope and evidence of the 1995 peak calculation, not
@@ -986,6 +1150,34 @@ comparison case, not ground truth.
 
 \section{Limitations and Claim Boundary}
 
+\paragraph{What is established.}
+The documentation, source comparison, diagnostic execution, and census jointly
+establish that:
+
+\begin{itemize}
+  \item present WEPP assigns a daily \surdra{} depth new subdaily timing rather
+    than routing the hourly return series;
+  \item that operation caused the 1980 \Ksat{} peak reversal, while the solver
+    switch enlarged but did not create the reversal;
+  \item controlled canopy and cover changes expose additional repeatable peak
+    discontinuities;
+  \item the Topanga population contains a structured, predominantly
+    \Ksat{}-associated extreme tail; and
+  \item runoff volume is substantially more stable than calculated peak rate.
+\end{itemize}
+
+\paragraph{What remains unresolved.}
+The evidence does not establish that every extreme row has the same cause.
+Positive surface return occurs in 567 of 989 twofold-tail rows and 420 of 604
+fivefold-tail rows, leaving a material no-return tail, especially in the
+burned stratum. The immediate branch behind the 1986 cover boundary is not yet
+known; neither side of an extreme pair has been established as the physically
+correct peak; and the Windows source comparison is static rather than a fully
+instrumented execution of every Topanga fixture. Watershed routing and effects
+at the outlet also remain outside this census.
+
+\paragraph{Study-scope limitations.}
+
 \begin{itemize}
   \item \textbf{One enriched-discovery site.} Topanga was selected because it
     contained known anomalies. These rates are not cross-site prevalence
@@ -1104,6 +1296,25 @@ The principal local sources for this report are:
     analysis under the Topanga execution work package.
 \end{itemize}
 
+Two diagnostic stages should not be confused. The original Hill 106 mechanism
+trace and forced-solver tests used WEPP-Forest source commit
+\texttt{2f65506d239b449b...fa55158} and executable \texttt{wepp\_260803}.
+The later census observer used commit \texttt{ea25ad79} and recorded every
+peak-solver call without changing ordinary WEPP outputs. The public Windows
+comparison used Daily Erosion Project commit
+\texttt{e2609d9e67757f...ef657c}, whose \texttt{src/wepp20240930} directory is
+recorded as a verbatim September 2024 WEPP import. Public implementation links,
+complete hashes, and file comparisons are retained in the stakeholder evidence
+report \cite{stakeholder}.
+
+The source-code evidence is essential to the defect identification. Ordinary
+WEPP output does not expose the daily return depth, selected duration, imposed
+rate, ponding-time sentinel, or solver handoff. USDA has distributed WEPP
+primarily as an executable and has not provided an official complete release
+of the production source. The analysis was possible because preserved source
+copies could be compared, instrumented, and checked against unchanged model
+outputs.
+
 The figure source is
 \path{docs/work-packages/20260809_peakflow_topanga_census_execution/artifacts/}.
 The immutable event ledger is inventoried by the execution package's external
@@ -1118,6 +1329,13 @@ Stone, J. J., Lane, L. J., and Shirley, E. D. (1995).
 Project: Hillslope Profile and Watershed Model Documentation}, Chapter 4,
 NSERL Report No. 10.
 \url{https://www.ars.usda.gov/ARSUserFiles/50201000/WEPP/chap4.pdf}.
+
+\bibitem{savabi1995}
+Savabi, M. R., Skaggs, R. W., and Onstad, C. A. (1995).
+``Subsurface Hydrology.'' In \emph{USDA--Water Erosion Prediction Project:
+Hillslope Profile and Watershed Model Documentation}, Chapter 6,
+NSERL Report No. 10.
+\url{https://www.ars.usda.gov/ARSUserFiles/50201000/WEPP/chap6.pdf}.
 
 \bibitem{stakeholder}
 Lew, R. and agentic collaborators (2026).
