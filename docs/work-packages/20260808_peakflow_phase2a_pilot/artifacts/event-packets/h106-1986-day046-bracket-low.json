@@ -1,0 +1,97 @@
+{
+  "event_id": "topanga-undisturbed-h106-1986-day046-bracket-low",
+  "payload_sha256": "4fe920912231322794c87d9635d86dcf504ff588d1603c460bb85f5ecb57525d",
+  "post_surplus_forcing": [
+    {
+      "point_ordinal": 1,
+      "rate_m_s": 1e-10,
+      "time_s": 0.0
+    },
+    {
+      "point_ordinal": 2,
+      "rate_m_s": 1e-10,
+      "time_s": 600.0
+    },
+    {
+      "point_ordinal": 3,
+      "rate_m_s": 1e-10,
+      "time_s": 921.074951171875
+    },
+    {
+      "point_ordinal": 4,
+      "rate_m_s": 0.00010775750831015785,
+      "time_s": 1112.8974609375
+    },
+    {
+      "point_ordinal": 5,
+      "rate_m_s": 0.00010799890162616066,
+      "time_s": 1200.0
+    },
+    {
+      "point_ordinal": 6,
+      "rate_m_s": 0.0,
+      "time_s": 1516.5565185546875
+    }
+  ],
+  "pre_surplus_forcing": [
+    {
+      "end_s": 600.0,
+      "interval_ordinal": 1,
+      "rate_m_s": 0.0,
+      "start_s": 0.0
+    },
+    {
+      "end_s": 921.074951171875,
+      "interval_ordinal": 2,
+      "rate_m_s": 0.0,
+      "start_s": 600.0
+    },
+    {
+      "end_s": 1112.8974609375,
+      "interval_ordinal": 3,
+      "rate_m_s": 0.0,
+      "start_s": 921.074951171875
+    },
+    {
+      "end_s": 1200.0,
+      "interval_ordinal": 4,
+      "rate_m_s": 7.451432537664004e-08,
+      "start_s": 1112.8974609375
+    },
+    {
+      "end_s": 1516.5565185546875,
+      "interval_ordinal": 5,
+      "rate_m_s": 3.159076413794537e-07,
+      "start_s": 1200.0
+    }
+  ],
+  "production": {
+    "peak_m_s": 8.407950372202322e-05,
+    "selected_solver": "APPMTH"
+  },
+  "scalars": {
+    "alpha": 1.0334925651550293,
+    "calendar_year": 1986,
+    "effective_length_m": 111.4000015258789,
+    "forcing_max_post_surplus_m_s": 0.00010799890151247382,
+    "hillslope_id": "106",
+    "m": 1.5,
+    "model_day": 46,
+    "ns": 5,
+    "ofe": 1,
+    "positive_excess_duration_s": 403.6590576171875,
+    "remax_pre_surplus_m_s": 3.159076413794537e-07,
+    "run_id": "phase2a-3b5778d7c9171311-bracket-low",
+    "runoff_post_reconciliation_m": 0.0434689037501812,
+    "runoff_pre_reconciliation_m": 1.6873524373295368e-06,
+    "solver_call_ordinal": 1,
+    "surdra_raw_m": 0.043467216193675995,
+    "surplus_added_rate_m_s": 0.0001076829939847812,
+    "surplus_assignment_duration_s": 403.6590576171875,
+    "surplus_assignment_mode": "positive_excess",
+    "surplus_depth_m": 0.043467216193675995,
+    "tp2_s": 0.0
+  },
+  "schema_version": "1.0.0",
+  "source_build_id": "wepp-ea25ad79-gate21-observer"
+}

@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "hillslopes": {
+      "contains": {
+        "properties": {
+          "hillslope_id": {
+            "const": 106
+          }
+        },
+        "type": "object"
+      },
+      "maxItems": 8,
+      "minItems": 8,
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "selection_frozen_before_mutations": {
+      "const": true
+    }
+  },
+  "required": [
+    "schema_version",
+    "selection_frozen_before_mutations",
+    "hillslopes"
+  ],
+  "type": "object"
+}

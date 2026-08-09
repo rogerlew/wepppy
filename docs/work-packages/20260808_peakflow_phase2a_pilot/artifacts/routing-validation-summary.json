@@ -1,0 +1,22 @@
+{
+  "closure_peak_changed_records": 338450,
+  "closure_water_balance_changed_records": 3454430,
+  "complete_trials": 64,
+  "invalid_timestamp_records": 0,
+  "negative_flow_records": 0,
+  "offpath_changed_records": 34899,
+  "pilot_id": "8162d509d69cb4da",
+  "raw_artifact_count": 132,
+  "raw_routing_bytes": 14955676362,
+  "retention": "external_retain",
+  "routing_trials": 64,
+  "runtime_s": {
+    "baseline_sum": 267.4731445380021,
+    "trial_median": 147.8315716625657,
+    "trial_sum": 9480.251854993403
+  },
+  "schema_version": "1.0.0",
+  "selection_id": "3b5778d7c9171311",
+  "trials_with_140_unchanged_hillslopes": 0,
+  "trials_with_exactly_139_unchanged_hillslopes": 64
+}

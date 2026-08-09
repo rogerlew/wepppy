@@ -1,0 +1,251 @@
+{
+  "algorithm": "forced_h106_then_greedy_maximum_coverage_with_maximin_numeric_tiebreak",
+  "baseline_events_sha256": "8ea085f8bcbb8b3d16f96fb4df7bb0750727cf7f4dea7e83135f717ee805b0ee",
+  "eligibility": {
+    "eligible_count": 131,
+    "excluded_hillslopes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      48,
+      97,
+      103
+    ],
+    "rule": "both_scenarios_allow_unclipped_inrcov_and_rilcov_plus_or_minus_0.01"
+  },
+  "hillslopes": [
+    {
+      "baseline_covariates": {
+        "cover": 0.7250000000000001,
+        "elevation": 458.2,
+        "path_length_m": 2939.482681718907,
+        "slope": 0.928890631621804,
+        "surdra_fraction": 0.8915583136327817,
+        "surface_ksat_mm_h": 27.5
+      },
+      "categories": [
+        "cover_low",
+        "observer_no_surplus",
+        "solver_APPMTH",
+        "solver_HDRIVE",
+        "surface_ksat_mm_h_low"
+      ],
+      "forced_control": true,
+      "hillslope_id": 106,
+      "rank": 1
+    },
+    {
+      "baseline_covariates": {
+        "cover": 0.8500000000000001,
+        "elevation": 767.8,
+        "path_length_m": 4009.188309203678,
+        "slope": 1.1687702456958615,
+        "surdra_fraction": 0.43103448275862066,
+        "surface_ksat_mm_h": 30.0
+      },
+      "categories": [
+        "cover_high",
+        "elevation_high",
+        "observer_no_surplus",
+        "path_length_m_high",
+        "slope_high",
+        "solver_APPMTH",
+        "solver_HDRIVE",
+        "surdra_fraction_low",
+        "surface_ksat_mm_h_high"
+      ],
+      "forced_control": false,
+      "hillslope_id": 84,
+      "rank": 2
+    },
+    {
+      "baseline_covariates": {
+        "cover": 0.8500000000000001,
+        "elevation": 137.6,
+        "path_length_m": 869.1168824543142,
+        "slope": 0.4045724761984113,
+        "surdra_fraction": 0.936527345486883,
+        "surface_ksat_mm_h": 27.5
+      },
+      "categories": [
+        "cover_high",
+        "elevation_low",
+        "observer_no_surplus",
+        "path_length_m_low",
+        "slope_low",
+        "solver_APPMTH",
+        "solver_HDRIVE",
+        "surdra_fraction_high",
+        "surface_ksat_mm_h_low"
+      ],
+      "forced_control": false,
+      "hillslope_id": 8,
+      "rank": 3
+    },
+    {
+      "baseline_covariates": {
+        "cover": 0.8500000000000001,
+        "elevation": 415.6,
+        "path_length_m": 2564.92424049175,
+        "slope": 3.82537193988883,
+        "surdra_fraction": 0.23185022026431718,
+        "surface_ksat_mm_h": 30.0
+      },
+      "categories": [
+        "cover_high",
+        "observer_no_surplus",
+        "slope_high",
+        "solver_APPMTH",
+        "solver_HDRIVE",
+        "surdra_fraction_low",
+        "surface_ksat_mm_h_high"
+      ],
+      "forced_control": false,
+      "hillslope_id": 35,
+      "rank": 4
+    },
+    {
+      "baseline_covariates": {
+        "cover": 0.7250000000000001,
+        "elevation": 250.7,
+        "path_length_m": 2280.3657992645926,
+        "slope": 1.0852462355623544,
+        "surdra_fraction": 0.258133824432167,
+        "surface_ksat_mm_h": 30.0
+      },
+      "categories": [
+        "cover_low",
+        "elevation_low",
+        "observer_no_surplus",
+        "solver_APPMTH",
+        "solver_HDRIVE",
+        "surdra_fraction_low",
+        "surface_ksat_mm_h_high"
+      ],
+      "forced_control": false,
+      "hillslope_id": 31,
+      "rank": 5
+    },
+    {
+      "baseline_covariates": {
+        "cover": 0.6,
+        "elevation": 816.4,
+        "path_length_m": 4154.041122946064,
+        "slope": 0.6143721019726235,
+        "surdra_fraction": 0.5775477216748769,
+        "surface_ksat_mm_h": 25.0
+      },
+      "categories": [
+        "cover_low",
+        "elevation_high",
+        "observer_no_surplus",
+        "path_length_m_high",
+        "solver_APPMTH",
+        "solver_HDRIVE",
+        "surface_ksat_mm_h_low"
+      ],
+      "forced_control": false,
+      "hillslope_id": 91,
+      "rank": 6
+    },
+    {
+      "baseline_covariates": {
+        "cover": 0.7250000000000001,
+        "elevation": 678.3,
+        "path_length_m": 4009.188309203678,
+        "slope": 3.0824887072148583,
+        "surdra_fraction": 0.28132355603838494,
+        "surface_ksat_mm_h": 30.0
+      },
+      "categories": [
+        "cover_low",
+        "elevation_high",
+        "observer_no_surplus",
+        "path_length_m_high",
+        "slope_high",
+        "solver_APPMTH",
+        "solver_HDRIVE",
+        "surdra_fraction_low",
+        "surface_ksat_mm_h_high"
+      ],
+      "forced_control": false,
+      "hillslope_id": 85,
+      "rank": 7
+    },
+    {
+      "baseline_covariates": {
+        "cover": 0.7250000000000001,
+        "elevation": 687.0,
+        "path_length_m": 3794.0411229460638,
+        "slope": 2.761861385682345,
+        "surdra_fraction": 0.8616554291333052,
+        "surface_ksat_mm_h": 27.5
+      },
+      "categories": [
+        "cover_low",
+        "elevation_high",
+        "observer_no_surplus",
+        "path_length_m_high",
+        "slope_high",
+        "solver_APPMTH",
+        "solver_HDRIVE",
+        "surface_ksat_mm_h_low"
+      ],
+      "forced_control": false,
+      "hillslope_id": 62,
+      "rank": 8
+    }
+  ],
+  "inventory_sha256": "9a0cde542e0c8b18286080ad4138a5a9f9057493749477f1f8a74f7abedf428f",
+  "missing_categories": [],
+  "pilot_id": "8162d509d69cb4da",
+  "required_categories": [
+    "cover_high",
+    "cover_low",
+    "elevation_high",
+    "elevation_low",
+    "observer_no_surplus",
+    "path_length_m_high",
+    "path_length_m_low",
+    "slope_high",
+    "slope_low",
+    "solver_APPMTH",
+    "solver_HDRIVE",
+    "surdra_fraction_high",
+    "surdra_fraction_low",
+    "surface_ksat_mm_h_high",
+    "surface_ksat_mm_h_low"
+  ],
+  "schema_version": "1.0.0",
+  "selection_frozen_before_mutations": true,
+  "selection_id": "3b5778d7c9171311",
+  "thresholds": {
+    "cover": {
+      "q25": 0.7250000000000001,
+      "q75": 0.8500000000000001
+    },
+    "elevation": {
+      "q25": 282.29999999999995,
+      "q75": 553.675
+    },
+    "path_length_m": {
+      "q25": 2032.8657992645929,
+      "q75": 3539.482681718907
+    },
+    "slope": {
+      "q25": 0.5732542204113822,
+      "q75": 1.1078984530394604
+    },
+    "surdra_fraction": {
+      "q25": 0.4829253104543704,
+      "q75": 0.9059620291836554
+    },
+    "surface_ksat_mm_h": {
+      "q25": 27.5,
+      "q75": 30.0
+    }
+  }
+}

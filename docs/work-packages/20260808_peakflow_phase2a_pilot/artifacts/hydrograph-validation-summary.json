@@ -1,0 +1,40 @@
+{
+  "closure": [
+    155,
+    157,
+    183,
+    184,
+    185,
+    191,
+    197,
+    198,
+    199,
+    201
+  ],
+  "event": {
+    "day": 46,
+    "hillslope_id": 106,
+    "scenario": "undisturbed",
+    "year": 1986
+  },
+  "interval_rows": 2880,
+  "invalid_timestamp_records": 0,
+  "lane_timestamps_compatible": true,
+  "lanes": [
+    "candidate-h106-low-interval",
+    "candidate-h106-high-interval"
+  ],
+  "max_relative_volume_error": 0.35744981009223964,
+  "negative_flow_records": 0,
+  "pilot_id": "8162d509d69cb4da",
+  "schema_version": "1.0.0",
+  "series": {
+    "bytes": 6674,
+    "format": "parquet",
+    "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/hydrograph-h106-1986-day046.parquet",
+    "retention": "retain",
+    "sha256": "768edeafb2b51cb4602a805e3e3980dbb4f8659015f7c9b1f39ce52f4d4b47c9"
+  },
+  "volume_checks": 20,
+  "volume_mismatches": 20
+}

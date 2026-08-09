@@ -359,14 +359,15 @@ When resuming Kubernetes work:
 **Size**: Multi-phase investigation
 **Priority**: High
 **Security impact**: `none`
-**Link**: [multi-site audit](docs/investigations/2026-08-08-wepp-peak-flow-discontinuity-multi-site-audit/README.md)
+**Link**: [Phase 2A work package](docs/work-packages/20260808_peakflow_phase2a_pilot/package.md)
 
-**Description**: Gate 2.1 assurance remediation is accepted. Phase 2A now
-applies the validated observer and replay machinery in a stratified Topanga
-multi-hillslope pilot before the full candidate census.
+**Description**: Phase 2A validated the local observer, event-pairing, bracket,
+and replay machinery. Routing criteria 5–7 failed, so downstream-impact claims
+are deferred. A 2026-08-09 design amendment culls watershed routing from the
+census critical path and releases the hillslope-only Topanga census.
 
-**Next Steps**: Execute the authorized stratified Phase 2A pilot and evaluate
-its automatic full-census exit criteria.
+**Next Steps**: Execute the full-history local hillslope mutation census,
+screen the outer-joined event ledger, and adjudicate selected candidates.
 
 ---
 

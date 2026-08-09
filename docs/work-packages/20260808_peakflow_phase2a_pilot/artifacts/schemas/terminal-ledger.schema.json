@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "requested_trials": {
+      "const": 64
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "statuses": {
+      "type": "object"
+    },
+    "terminal_trials": {
+      "const": 64
+    }
+  },
+  "required": [
+    "schema_version",
+    "requested_trials",
+    "terminal_trials",
+    "statuses"
+  ],
+  "type": "object"
+}

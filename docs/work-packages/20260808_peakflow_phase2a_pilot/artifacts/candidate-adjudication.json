@@ -1,0 +1,69 @@
+{
+  "hdrive_replays": {
+    "below_0_95": 2,
+    "disposition": "stopped_excluded_from_candidate_statistics",
+    "fractions": [
+      0.9675273895263672,
+      0.9675140380859375,
+      0.9544304013252258,
+      0.9521324038505554,
+      0.5311459302902222,
+      0.5311459898948669
+    ],
+    "total": 6
+  },
+  "known_positive": {
+    "endpoint_peak_ratio": 84.95217646758142,
+    "endpoint_replays": {
+      "high": {
+        "hdrive_fraction_harmonized": 0.5311459898948669,
+        "hdrive_fraction_legacy": 0.5311459302902222,
+        "packet_sha256": "ac9ed2842a7bf30dd7daea33ace7131863ecd910273d7c3b8f5bd35ac787d4af",
+        "selected_method_delta_m_s": 0.0,
+        "selected_solver": "APPMTH",
+        "surface_ksat_mm_h": 34.96436767578124,
+        "surplus_added_rate_m_s": 9.89727482192393e-07,
+        "surplus_assignment_mode": "storm"
+      },
+      "low": {
+        "hdrive_fraction_harmonized": 0.9521324038505554,
+        "hdrive_fraction_legacy": 0.9544304013252258,
+        "packet_sha256": "4fe920912231322794c87d9635d86dcf504ff588d1603c460bb85f5ecb57525d",
+        "selected_method_delta_m_s": 0.0,
+        "selected_solver": "APPMTH",
+        "surface_ksat_mm_h": 34.96428222656249,
+        "surplus_added_rate_m_s": 0.0001076829939847812,
+        "surplus_assignment_mode": "positive_excess"
+      }
+    },
+    "event": {
+      "day": 46,
+      "hillslope_id": 106,
+      "scenario": "undisturbed",
+      "year": 1986
+    },
+    "evidence_state": "mechanism_traced",
+    "final_bracket_mm_h": [
+      34.96428222656249,
+      34.96436767578124
+    ],
+    "final_width_mm_h": 8.544921875142109e-05,
+    "initial_bracket_mm_h": [
+      34.65,
+      35.0
+    ],
+    "iterations": 12,
+    "mechanism": "surplus_assignment_mode_changes from positive_excess to storm while APPMTH remains selected"
+  },
+  "no_surplus_packet": {
+    "event_id": "topanga-burned-h031-1980-day045-no-surplus",
+    "packet_sha256": "a26d18c8ac85fd1a6d0455d6a6d4d07f27fd337c3c113d04afb99d8402ac742a",
+    "selected_solver": "APPMTH",
+    "surplus_depth_m": 0.0
+  },
+  "observer_sha256": "2ec15778df957f909da383df9e3e0c9b516688d367c11f0109c6012387c0731f",
+  "pilot_id": "8162d509d69cb4da",
+  "replay_sha256": "708bd3f6a27c078b7466c594ac5551cfd567f210ffa517754ff8afe8d8877709",
+  "schema_version": "1.0.0",
+  "selection_id": "3b5778d7c9171311"
+}

@@ -1,0 +1,361 @@
+{
+  "event_id": "topanga-burned-h031-1980-day045-no-surplus",
+  "payload_sha256": "a26d18c8ac85fd1a6d0455d6a6d4d07f27fd337c3c113d04afb99d8402ac742a",
+  "post_surplus_forcing": [
+    {
+      "point_ordinal": 1,
+      "rate_m_s": 1e-10,
+      "time_s": 0.0
+    },
+    {
+      "point_ordinal": 2,
+      "rate_m_s": 1e-10,
+      "time_s": 300.0
+    },
+    {
+      "point_ordinal": 3,
+      "rate_m_s": 1e-10,
+      "time_s": 600.0
+    },
+    {
+      "point_ordinal": 4,
+      "rate_m_s": 1e-10,
+      "time_s": 900.0
+    },
+    {
+      "point_ordinal": 5,
+      "rate_m_s": 1e-10,
+      "time_s": 1200.0
+    },
+    {
+      "point_ordinal": 6,
+      "rate_m_s": 1e-10,
+      "time_s": 1500.0
+    },
+    {
+      "point_ordinal": 7,
+      "rate_m_s": 1e-10,
+      "time_s": 1800.0
+    },
+    {
+      "point_ordinal": 8,
+      "rate_m_s": 1e-10,
+      "time_s": 2100.0
+    },
+    {
+      "point_ordinal": 9,
+      "rate_m_s": 1e-10,
+      "time_s": 2400.0
+    },
+    {
+      "point_ordinal": 10,
+      "rate_m_s": 1e-10,
+      "time_s": 2700.0
+    },
+    {
+      "point_ordinal": 11,
+      "rate_m_s": 1e-10,
+      "time_s": 3000.0
+    },
+    {
+      "point_ordinal": 12,
+      "rate_m_s": 4.7259050006687175e-07,
+      "time_s": 3203.641845703125
+    },
+    {
+      "point_ordinal": 13,
+      "rate_m_s": 6.325102276605321e-06,
+      "time_s": 3300.0
+    },
+    {
+      "point_ordinal": 14,
+      "rate_m_s": 6.345369001792278e-06,
+      "time_s": 3600.0
+    },
+    {
+      "point_ordinal": 15,
+      "rate_m_s": 9.81007997324923e-06,
+      "time_s": 3888.0
+    },
+    {
+      "point_ordinal": 16,
+      "rate_m_s": 9.820366358326282e-06,
+      "time_s": 4200.0
+    },
+    {
+      "point_ordinal": 17,
+      "rate_m_s": 7.806161193002481e-06,
+      "time_s": 4419.66357421875
+    },
+    {
+      "point_ordinal": 18,
+      "rate_m_s": 7.811430805304553e-06,
+      "time_s": 4500.0
+    },
+    {
+      "point_ordinal": 19,
+      "rate_m_s": 7.817873665771913e-06,
+      "time_s": 4800.0
+    },
+    {
+      "point_ordinal": 20,
+      "rate_m_s": 5.800778126285877e-06,
+      "time_s": 5031.19091796875
+    },
+    {
+      "point_ordinal": 21,
+      "rate_m_s": 5.8042010095959995e-06,
+      "time_s": 5100.0
+    },
+    {
+      "point_ordinal": 22,
+      "rate_m_s": 5.80956702833646e-06,
+      "time_s": 5400.0
+    },
+    {
+      "point_ordinal": 23,
+      "rate_m_s": 3.791465587710263e-06,
+      "time_s": 5750.89013671875
+    },
+    {
+      "point_ordinal": 24,
+      "rate_m_s": 3.794779331656173e-06,
+      "time_s": 6000.0
+    },
+    {
+      "point_ordinal": 25,
+      "rate_m_s": 3.7980587421770906e-06,
+      "time_s": 6300.0
+    },
+    {
+      "point_ordinal": 26,
+      "rate_m_s": 1.7750991219145362e-06,
+      "time_s": 6625.43310546875
+    },
+    {
+      "point_ordinal": 27,
+      "rate_m_s": 1.777447778295027e-06,
+      "time_s": 6900.0
+    },
+    {
+      "point_ordinal": 28,
+      "rate_m_s": 1.7796332940633874e-06,
+      "time_s": 7200.0
+    },
+    {
+      "point_ordinal": 29,
+      "rate_m_s": 1.7814093098422745e-06,
+      "time_s": 7500.0
+    },
+    {
+      "point_ordinal": 30,
+      "rate_m_s": 0.0,
+      "time_s": 7740.24169921875
+    }
+  ],
+  "pre_surplus_forcing": [
+    {
+      "end_s": 300.0,
+      "interval_ordinal": 1,
+      "rate_m_s": 1e-10,
+      "start_s": 0.0
+    },
+    {
+      "end_s": 600.0,
+      "interval_ordinal": 2,
+      "rate_m_s": 1e-10,
+      "start_s": 300.0
+    },
+    {
+      "end_s": 900.0,
+      "interval_ordinal": 3,
+      "rate_m_s": 1e-10,
+      "start_s": 600.0
+    },
+    {
+      "end_s": 1200.0,
+      "interval_ordinal": 4,
+      "rate_m_s": 1e-10,
+      "start_s": 900.0
+    },
+    {
+      "end_s": 1500.0,
+      "interval_ordinal": 5,
+      "rate_m_s": 1e-10,
+      "start_s": 1200.0
+    },
+    {
+      "end_s": 1800.0,
+      "interval_ordinal": 6,
+      "rate_m_s": 1e-10,
+      "start_s": 1500.0
+    },
+    {
+      "end_s": 2100.0,
+      "interval_ordinal": 7,
+      "rate_m_s": 1e-10,
+      "start_s": 1800.0
+    },
+    {
+      "end_s": 2400.0,
+      "interval_ordinal": 8,
+      "rate_m_s": 1e-10,
+      "start_s": 2100.0
+    },
+    {
+      "end_s": 2700.0,
+      "interval_ordinal": 9,
+      "rate_m_s": 1e-10,
+      "start_s": 2400.0
+    },
+    {
+      "end_s": 3000.0,
+      "interval_ordinal": 10,
+      "rate_m_s": 1e-10,
+      "start_s": 2700.0
+    },
+    {
+      "end_s": 3203.641845703125,
+      "interval_ordinal": 11,
+      "rate_m_s": 1e-10,
+      "start_s": 3000.0
+    },
+    {
+      "end_s": 3300.0,
+      "interval_ordinal": 12,
+      "rate_m_s": 4.7259050006687175e-07,
+      "start_s": 3203.641845703125
+    },
+    {
+      "end_s": 3600.0,
+      "interval_ordinal": 13,
+      "rate_m_s": 6.325102276605321e-06,
+      "start_s": 3300.0
+    },
+    {
+      "end_s": 3888.0,
+      "interval_ordinal": 14,
+      "rate_m_s": 6.345369001792278e-06,
+      "start_s": 3600.0
+    },
+    {
+      "end_s": 4200.0,
+      "interval_ordinal": 15,
+      "rate_m_s": 9.81007997324923e-06,
+      "start_s": 3888.0
+    },
+    {
+      "end_s": 4419.66357421875,
+      "interval_ordinal": 16,
+      "rate_m_s": 9.820366358326282e-06,
+      "start_s": 4200.0
+    },
+    {
+      "end_s": 4500.0,
+      "interval_ordinal": 17,
+      "rate_m_s": 7.806161193002481e-06,
+      "start_s": 4419.66357421875
+    },
+    {
+      "end_s": 4800.0,
+      "interval_ordinal": 18,
+      "rate_m_s": 7.811430805304553e-06,
+      "start_s": 4500.0
+    },
+    {
+      "end_s": 5031.19091796875,
+      "interval_ordinal": 19,
+      "rate_m_s": 7.817873665771913e-06,
+      "start_s": 4800.0
+    },
+    {
+      "end_s": 5100.0,
+      "interval_ordinal": 20,
+      "rate_m_s": 5.800778126285877e-06,
+      "start_s": 5031.19091796875
+    },
+    {
+      "end_s": 5400.0,
+      "interval_ordinal": 21,
+      "rate_m_s": 5.8042010095959995e-06,
+      "start_s": 5100.0
+    },
+    {
+      "end_s": 5750.89013671875,
+      "interval_ordinal": 22,
+      "rate_m_s": 5.80956702833646e-06,
+      "start_s": 5400.0
+    },
+    {
+      "end_s": 6000.0,
+      "interval_ordinal": 23,
+      "rate_m_s": 3.791465587710263e-06,
+      "start_s": 5750.89013671875
+    },
+    {
+      "end_s": 6300.0,
+      "interval_ordinal": 24,
+      "rate_m_s": 3.794779331656173e-06,
+      "start_s": 6000.0
+    },
+    {
+      "end_s": 6625.43310546875,
+      "interval_ordinal": 25,
+      "rate_m_s": 3.7980587421770906e-06,
+      "start_s": 6300.0
+    },
+    {
+      "end_s": 6900.0,
+      "interval_ordinal": 26,
+      "rate_m_s": 1.7750991219145362e-06,
+      "start_s": 6625.43310546875
+    },
+    {
+      "end_s": 7200.0,
+      "interval_ordinal": 27,
+      "rate_m_s": 1.777447778295027e-06,
+      "start_s": 6900.0
+    },
+    {
+      "end_s": 7500.0,
+      "interval_ordinal": 28,
+      "rate_m_s": 1.7796332940633874e-06,
+      "start_s": 7200.0
+    },
+    {
+      "end_s": 7740.24169921875,
+      "interval_ordinal": 29,
+      "rate_m_s": 1.7814093098422745e-06,
+      "start_s": 7500.0
+    }
+  ],
+  "production": {
+    "peak_m_s": 9.648109880799893e-06,
+    "selected_solver": "APPMTH"
+  },
+  "scalars": {
+    "alpha": 0.9564391374588013,
+    "calendar_year": 1980,
+    "effective_length_m": 10.0,
+    "forcing_max_post_surplus_m_s": 9.820366358326282e-06,
+    "hillslope_id": "31",
+    "m": 1.5,
+    "model_day": 45,
+    "ns": 29,
+    "ofe": 1,
+    "positive_excess_duration_s": 4536.599609375,
+    "remax_pre_surplus_m_s": 9.820366358326282e-06,
+    "run_id": "phase2a-burned-h031-baseline",
+    "runoff_post_reconciliation_m": 0.02324676886200905,
+    "runoff_pre_reconciliation_m": 0.02324676886200905,
+    "solver_call_ordinal": 1,
+    "surdra_raw_m": 0.0,
+    "surplus_added_rate_m_s": 0.0,
+    "surplus_assignment_duration_s": 4536.599609375,
+    "surplus_assignment_mode": "none",
+    "surplus_depth_m": 0.0,
+    "tp2_s": 0.0
+  },
+  "schema_version": "1.0.0",
+  "source_build_id": "wepp-ea25ad79-gate21-observer"
+}

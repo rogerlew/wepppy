@@ -83,3 +83,4 @@ Each ADR should normally include:
 - `ADR-0039`: [WEPP Prep-Completion Timeout](ADR-0039-wepp-prep-completion-timeout.md) (Accepted, 2026-08-07)
 - `ADR-0040`: [Canonical Parquet Counts for Run Inventory](ADR-0040-canonical-parquet-counts-for-run-inventory.md) (Accepted, 2026-08-07)
 - `ADR-0041`: [Canonical USGS SBS Accessibility Palette](ADR-0041-sbs-usgs-section508-palette.md) (Accepted, 2026-08-07)
+- `ADR-0042`: [Peak-Flow Phase 2A Screening and Volume Floors](ADR-0042-peakflow-phase2a-screening-and-volume-floors.md) (Accepted, 2026-08-08)

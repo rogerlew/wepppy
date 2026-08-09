@@ -1,0 +1,48 @@
+{
+  "event_id": "topanga-undisturbed-h106-1986-day046-bracket-low",
+  "harmonized_forcing_diagnostic": {
+    "appmth": {
+      "equation_branch": "partial_equilibrium",
+      "finite_result": true,
+      "qpstar": 0.7817172224816468,
+      "tc": null,
+      "tstar": 1.1784202943148858,
+      "vave_m_s": 0.00010794708888816853,
+      "vstar": 0.9995202475468549,
+      "within_documented_qpstar_domain": true,
+      "within_documented_tstar_domain": true,
+      "within_documented_vstar_domain": true
+    },
+    "appmth_peak_m_s": 8.438407530775294e-05,
+    "forcing_integral_m": 0.04357382017311688,
+    "hdrive_final_routed_volume_fraction": 0.9521324038505554,
+    "hdrive_nq": 15,
+    "hdrive_nqt": 18,
+    "hdrive_peak_m_s": 8.438409713562578e-05,
+    "positive_support_duration_s": 403.6590576171875
+  },
+  "hdrive_stopping_condition": "95_percent_volume",
+  "legacy_input_replay": {
+    "appmth": {
+      "equation_branch": "partial_equilibrium",
+      "finite_result": true,
+      "qpstar": 0.7807755515132792,
+      "tc": null,
+      "tstar": 1.1793676098716817,
+      "vave_m_s": 0.00010768717542665721,
+      "vstar": 340.8818316531582,
+      "within_documented_qpstar_domain": true,
+      "within_documented_tstar_domain": true,
+      "within_documented_vstar_domain": false
+    },
+    "appmth_peak_m_s": 8.407950372202322e-05,
+    "hdrive_final_routed_volume_fraction": 0.9544304013252258,
+    "hdrive_nq": 15,
+    "hdrive_nqt": 18,
+    "hdrive_peak_m_s": 8.438409713562578e-05
+  },
+  "packet_sha256": "4fe920912231322794c87d9635d86dcf504ff588d1603c460bb85f5ecb57525d",
+  "replay_process": "standalone_peak_replay_executable",
+  "schema_version": "1.0.0",
+  "selected_method_delta_m_s": 0.0
+}

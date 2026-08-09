@@ -1,0 +1,15 @@
+iteration,surface_ksat_mm_h,peak_m_s,regime,solver,trace
+0,34.65,8.352379518328235e-05,low_ksat_response,APPMTH,/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/adjudication/3b5778d7c9171311/h106-1986-day046/bracket/ksat-34p65/runs/peak_diag.csv
+1,34.825,8.392814925173298e-05,low_ksat_response,APPMTH,/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/adjudication/3b5778d7c9171311/h106-1986-day046/bracket/ksat-34p825/runs/peak_diag.csv
+2,34.9125,8.401810919167474e-05,low_ksat_response,APPMTH,/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/adjudication/3b5778d7c9171311/h106-1986-day046/bracket/ksat-34p9125/runs/peak_diag.csv
+3,34.95625,8.406880806433037e-05,low_ksat_response,APPMTH,/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/adjudication/3b5778d7c9171311/h106-1986-day046/bracket/ksat-34p95625/runs/peak_diag.csv
+6,34.961718749999996,8.407625136896968e-05,low_ksat_response,APPMTH,/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/adjudication/3b5778d7c9171311/h106-1986-day046/bracket/ksat-34p96171875/runs/peak_diag.csv
+8,34.9630859375,8.407798304688185e-05,low_ksat_response,APPMTH,/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/adjudication/3b5778d7c9171311/h106-1986-day046/bracket/ksat-34p9630859375/runs/peak_diag.csv
+9,34.963769531249994,8.40788270579651e-05,low_ksat_response,APPMTH,/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/adjudication/3b5778d7c9171311/h106-1986-day046/bracket/ksat-34p96376953125/runs/peak_diag.csv
+10,34.96411132812499,8.407927816733718e-05,low_ksat_response,APPMTH,/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/adjudication/3b5778d7c9171311/h106-1986-day046/bracket/ksat-34p964111328125/runs/peak_diag.csv
+11,34.96428222656249,8.407950372202322e-05,low_ksat_response,APPMTH,/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/adjudication/3b5778d7c9171311/h106-1986-day046/bracket/ksat-34p964282226562/runs/peak_diag.csv
+12,34.96436767578124,9.89727482192393e-07,high_ksat_response,APPMTH,/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/adjudication/3b5778d7c9171311/h106-1986-day046/bracket/ksat-34p964367675781/runs/peak_diag.csv
+7,34.96445312499999,9.897271411318798e-07,high_ksat_response,APPMTH,/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/adjudication/3b5778d7c9171311/h106-1986-day046/bracket/ksat-34p964453125/runs/peak_diag.csv
+5,34.967187499999994,9.897223662846955e-07,high_ksat_response,APPMTH,/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/adjudication/3b5778d7c9171311/h106-1986-day046/bracket/ksat-34p9671875/runs/peak_diag.csv
+4,34.978125,9.897036079564714e-07,high_ksat_response,APPMTH,/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/adjudication/3b5778d7c9171311/h106-1986-day046/bracket/ksat-34p978125/runs/peak_diag.csv
+0,35.0,9.8966575023951e-07,high_ksat_response,APPMTH,/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/adjudication/3b5778d7c9171311/h106-1986-day046/bracket/ksat-35/runs/peak_diag.csv

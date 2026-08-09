@@ -1,17 +1,17 @@
 # WEPP Peak-Flow Discontinuity Multi-Site Audit
 
-> A staged, instrumented investigation of how often WEPP peak-flow estimates
-> change discontinuously under small hillslope-parameter mutations, how those
-> changes propagate through watershed routing, and whether the behavior
-> generalizes beyond Topanga.
+> A staged, instrumented investigation of how often WEPP hillslope peak-flow
+> estimates change discontinuously under small parameter mutations and whether
+> the behavior generalizes beyond Topanga. Watershed propagation is a separate
+> follow-up, not part of the census critical path.
 
-**Status: GATE 2.1 ACCEPTED; PHASE 2A AUTHORIZED (`2026-08-08`).** Versioned
-schemas, immutable event-packet capture,
-process-isolated solver replay, active-trace parity, and compact Topanga
-acceptance fixtures pass the remediation command. A stratified multi-hillslope
-pilot is authorized now; the full Topanga census is automatically authorized
-after its declared exit criteria pass. Cross-site prevalence, snow-site, and
-overland flow element (OFE) work remains deferred.
+**Status: PHASE 2A COMPLETE; LOCAL TOPANGA CENSUS AUTHORIZED (`2026-08-09`).**
+Versioned schemas, immutable event-packet capture, process-isolated solver
+replay, active-trace parity, and compact Topanga acceptance fixtures pass. The
+[local-census amendment](../../work-packages/20260808_peakflow_phase2a_pilot/artifacts/study-design-amendment-local-census.md)
+culls per-mutation watershed routing so unresolved routing criteria do not
+block the local census. Cross-site prevalence, snow-site, and overland flow
+element (OFE) work remain staged behind their own gates.
 
 ## Why This Investigation Exists
 
@@ -39,13 +39,14 @@ and it is not an attempt to repair the legacy WEPP implementation.
 
 1. How frequently do small Ksat, ground-cover, canopy, or vegetation changes
    produce discontinuous hillslope peak-flow responses?
-2. How much of each response is attributable to constructing the subdaily
-   forcing from `surdra`, switching between `APPMTH` and `HDRIVE`, behavior
-   within one solver, or watershed routing?
+2. How much of each local response is attributable to constructing the
+   subdaily forcing from `surdra`, switching between `APPMTH` and `HDRIVE`, or
+   behavior within one solver?
 3. Are the discontinuities concentrated in particular antecedent-moisture,
    soil, vegetation, rainfall, or snowmelt conditions?
-4. Are large hillslope discontinuities attenuated, preserved, synchronized,
-   or amplified at downstream channels and the watershed outlet?
+4. In a separate routing follow-up, are selected large hillslope
+   discontinuities attenuated, preserved, synchronized, or amplified at
+   downstream channels and the watershed outlet?
 5. Does OFE discretization change the frequency or magnitude of the response?
 6. Which cases should become frozen openWEPP regression tests?
 
@@ -134,27 +135,42 @@ negative control.
 
 ### Phase 2: Complete the Topanga Watershed Census
 
-Phase 2 begins only after Gates 0–2 pass. Apply the core mutation screen to
-every eligible Topanga hillslope. Mutate one hillslope per run while leaving
-all other hillslopes and channels unchanged. This separates a local solver
-response from changes caused by simultaneous watershed-wide parameterization.
+Phase 2 begins with the authorized
+[Phase 2A multi-hillslope pilot](../../work-packages/20260808_peakflow_phase2a_pilot/package.md).
+The pilot completed on 2026-08-09 and passed seven of its ten original exit
+criteria. Its [exit report](../../work-packages/20260808_peakflow_phase2a_pilot/artifacts/phase2a-exit-report.md)
+correctly withholds the original routing-coupled census. A subsequent
+[study-design amendment](../../work-packages/20260808_peakflow_phase2a_pilot/artifacts/study-design-amendment-local-census.md)
+retires routing criteria 5–7 as gates for the local census while preserving
+them as failed pilot evidence.
 
-For mutations that expose a discontinuity, retain three levels of response:
+The pilot nevertheless mechanism-traced the undisturbed Hill 106 1986 day-46
+response: an `84.95×` APPMTH peak jump lies inside a Ksat bracket only
+`8.54e-5 mm/h` wide and coincides with a surplus-assignment switch from
+`positive_excess` to `storm`. This is a candidate forcing-construction defect,
+not authorization for prevalence claims.
+
+For the local census, mutate one hillslope per run and execute only its
+full-history hillslope model and observer. Retain the target pass, event
+ledger, mutation manifest, and candidate evidence. Do not execute the
+watershed binary or retain all-channel output for every mutation.
+
+For mutations that expose a discontinuity, retain the local response and its
+mechanism evidence:
 
 ```text
 hillslope parameter mutation
     -> local hillslope hydrograph and PeakRO
-    -> downstream channel hydrographs
-    -> watershed outlet hydrograph and peak
+    -> adaptive bracket and frozen-event replay
 ```
 
-Selected mutations will then be applied to all affected hillslopes together
-and watershed-wide. These combined runs test whether routing attenuates the
-local errors or synchronizes them into a larger outlet response.
+Selected routing experiments may later test downstream consequences after the
+channel-output authority is reconciled. They are a separate sampled study and
+do not gate local prevalence or mechanism results.
 
 ### Phase 3: Extend to Rain- and Snow-Dominated Sites
 
-Phase 3 begins only after the Topanga census passes Gate 3. Add sites
+Phase 3 begins after the local Topanga census passes Gate 3. Add sites
 incrementally under two preregistered portfolios:
 
 - **enriched discovery:** known-positive cases such as Topanga, Palisades, and
@@ -282,8 +298,9 @@ the complete pre- and post-surplus interval series.
 
 ## Versioned Data Contract
 
-No single table is expected to hold scalar events, layers, interval series,
-and routed hydrographs. Gate 0 requires versioned schemas for these grains:
+No single table is expected to hold scalar events, layers, or interval series.
+Gate 0 requires versioned schemas for the core local grains. Routing schemas
+apply only when the separate routing follow-up is executed:
 
 | Dataset | Grain |
 | --- | --- |
@@ -293,8 +310,8 @@ and routed hydrographs. Gate 0 requires versioned schemas for these grains:
 | Event scalar ledger | run × hillslope × OFE × model day × solver-call ordinal |
 | Layer-state ledger | event × soil layer |
 | Event forcing series | event × forcing stage × interval |
-| Routing response ledger | mutation event × downstream reach |
-| Hydrograph series | routing response × timestamp |
+| Routing response ledger (follow-up only) | mutation event × downstream reach |
+| Hydrograph series (follow-up only) | routing response × timestamp |
 | Site-selection manifest | one row per candidate or admitted site |
 | Artifact-storage manifest | one row per authoritative large artifact |
 
@@ -325,10 +342,10 @@ Initial diagnostic flags are:
   summaries are derived from the same post-surplus forcing;
 - **within-solver discontinuity:** peak changes abruptly without a method
   switch;
-- **routing attenuation or amplification:** the downstream response is
-  proportionally smaller or larger than the local response;
-- **synchronization change:** outlet peak changes because tributary timing
-  changes; and
+- **routing attenuation or amplification (follow-up only):** the downstream
+  response is proportionally smaller or larger than the local response;
+- **synchronization change (follow-up only):** outlet peak changes because
+  tributary timing changes; and
 - **unresolved:** recorded mechanics do not yet explain the response.
 
 A small mutation is screened as a candidate anomaly when it causes any of the
@@ -367,13 +384,13 @@ separately.
 The investigation will maintain:
 
 1. versioned build, run, mutation, site-selection, and storage manifests;
-2. normalized scalar, layer, forcing, routing, and hydrograph datasets;
+2. normalized scalar, layer, and forcing datasets;
 3. a candidate anomaly census by site, stratum, parameter, and mechanism;
 4. a separately adjudicated confirmed-mechanism census;
 5. paired plots of runoff ratio versus peak ratio;
 6. plots of peak response versus assigned surplus rate and solver selection;
-7. local and outlet hydrographs for representative events;
-8. maps of flagged hillslopes and their routing paths; and
+7. local hydrographs for representative events;
+8. maps of flagged hillslopes; and
 9. frozen input decks for openWEPP regression development.
 
 Cross-site rates use explicit denominators: eligible mutation trials, paired
@@ -399,12 +416,12 @@ within one hillslope or site are not treated as statistically independent.
 - Use inactive `kr` and version-9002 `ksatfac` mutations as negative controls;
   their manifests must prove the intended inactive token changed while
   hydrologic output did not.
-- For one-hillslope mutations, assert that other hillslopes and channels
-  outside the declared downstream closure remain unchanged, and verify volume
-  consistency and hydrograph timestamps along the affected path.
-- Store one complete baseline ledger per stratum. Mutation runs retain the
-  target hillslope, downstream closure, outlet, and checksums for unchanged
-  elements; full outputs are retained for flagged or combined experiments.
+- For a separate routing follow-up, assert that channels outside the declared
+  downstream closure remain unchanged and verify volume consistency and
+  hydrograph timestamps along the affected path.
+- Store one complete baseline ledger per stratum. Local census mutation runs
+  retain the target hillslope pass, observer ledger, and immutable manifest;
+  do not retain all-channel or outlet output.
 - Store large scalar data in partitioned Parquet and variable-length series in
   separately compressed storage. Commit schemas, manifests, compact fixtures,
   summaries, and content hashes rather than bulk output.
@@ -422,8 +439,9 @@ provides identity, not public rebuildability.
 ### Gate 0 — Protocol and Schemas
 
 Pass when versioned schemas exist for builds, runs, mutations, scalar events,
-interval forcing, routing responses, site selection, and artifact storage.
-Requested and realized mutation values must both be recorded.
+interval forcing, site selection, and artifact storage. Requested and realized
+mutation values must both be recorded. Routing-response schemas are required
+only for a separate routing follow-up.
 
 ### Gate 1 — Instrumentation Safety
 
@@ -474,10 +492,11 @@ selected method, and every required replay peak.
 
 ### Gate 3 — Topanga Candidate Census
 
-Pass when every eligible trial has a terminal disposition, event pairing uses
-outer joins, absent and zero events remain distinct, candidates receive local
-bracketing, routing closure is validated, and combined experiments follow a
-predeclared selection rule.
+Pass when every eligible local trial has a terminal disposition, event pairing
+uses outer joins, absent and zero events remain distinct, and selected
+candidates receive local bracketing, frozen-event replay, and mechanism
+classification. Routing closure and combined watershed experiments are not
+Gate 3 requirements.
 
 ### Gate 4 — Cross-Site Work
 
@@ -507,17 +526,15 @@ own table grains. The heterogeneous follow-up remains a separate experiment.
 | Include snow sites after Topanga | Tests a materially different water-input and soil-state regime without complicating initial development |
 | Defer OFE comparison | OFE boundaries introduce additional coupling best studied after the single-profile mechanics are understood |
 | Produce openWEPP fixtures, not a legacy repair | The legacy code lacks the isolation and regression coverage needed for a dependable repair effort |
+| Cull routing from the census critical path | Local prevalence and mechanism questions can be answered without the unresolved cost and authority problems in watershed output |
 
 ## Immediate Next Steps
 
-1. Complete Gate 0 schemas and manifests.
-2. Freeze the self-contained Hill 106 February 14, 1980 Ksat pair.
-3. Implement immutable event-packet capture in the observational build.
-4. Implement process-isolated legacy-input and harmonized-forcing replays.
-5. Declare and prove canonical output parity.
-6. Reproduce the 1980 trace, the unresolved 1986 anomalies, and an inactive-
-   parameter negative control.
-7. Stop for Gate 2 review before any full Topanga mutation census.
+1. Freeze the eligible Topanga hillslope set and local mutation matrix.
+2. Execute full-history hillslope observer runs without watershed routing.
+3. Screen the outer-joined event ledger and adjudicate selected candidates.
+4. Publish local prevalence and mechanism results with no downstream-impact
+   claims.
 
 ## Related Investigations
 
@@ -531,3 +548,4 @@ own table grains. The heterogeneous follow-up remains a separate experiment.
 | --- | --- | --- |
 | 1.0 | 2026-08-08 | Established the Topanga-first multi-site audit, scenario contract, snow-site phase, and single- versus multiple-OFE follow-up. |
 | 1.1 | 2026-08-08 | Incorporated the conditional planning review: isolated solver replay, dual replay semantics, normalized schemas, fixture requirements, evidence states, negative controls, storage policy, sampling portfolios, and acceptance gates. |
+| 1.2 | 2026-08-09 | Culled watershed routing from the census critical path; authorized a local hillslope census and deferred downstream-impact claims to a separate sampled follow-up. |

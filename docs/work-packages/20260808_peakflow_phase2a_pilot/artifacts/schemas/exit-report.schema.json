@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "criteria": {
+      "items": {
+        "properties": {
+          "status": {
+            "enum": [
+              "pass",
+              "fail"
+            ]
+          }
+        },
+        "required": [
+          "criterion",
+          "status",
+          "evidence"
+        ],
+        "type": "object"
+      },
+      "maxItems": 10,
+      "minItems": 10,
+      "type": "array"
+    },
+    "full_census_authorized": {
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    }
+  },
+  "required": [
+    "schema_version",
+    "criteria",
+    "full_census_authorized"
+  ],
+  "type": "object"
+}
