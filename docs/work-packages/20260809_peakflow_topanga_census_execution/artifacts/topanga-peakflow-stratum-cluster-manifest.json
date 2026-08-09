@@ -1,0 +1,42 @@
+{
+  "baseline_peak_bins_mm_h_left_closed_right_open": [
+    0.3,
+    1,
+    3,
+    10,
+    30,
+    100,
+    300,
+    800
+  ],
+  "central_band_inclusive": [
+    0.5,
+    2.0
+  ],
+  "directional_rule": "plus/lower or minus/higher is congruent; all other responses are incongruent",
+  "matched_keys": [
+    "hillslope_id",
+    "family",
+    "direction",
+    "year",
+    "day",
+    "ofe",
+    "ordinal"
+  ],
+  "outputs": [
+    "topanga-peakflow-stratum-cluster-bins.csv",
+    "topanga-peakflow-stratum-cluster-summary.csv",
+    "topanga-peakflow-stratum-matched-clusters.csv"
+  ],
+  "peak_change_gt25pct_rule": "abs(mutant-baseline)/max(abs(baseline), 1e-7 m/s) > 0.25",
+  "plan_id": "b575fde4a28cf85f1d28e0dfff305472b5419fd9b3639d39dc437600617080de",
+  "population": {
+    "baseline_event_present": true,
+    "baseline_peak_floor_m_s": 1e-07,
+    "mutant_event_present": true,
+    "mutant_peak_positive": true
+  },
+  "schema_version": "1.0.0",
+  "source": "/home/workdir/peakflow-topanga-census-evidence/b575fde4a28cf85f1d28e0dfff305472b5419fd9b3639d39dc437600617080de/ledgers/event-pairs.parquet",
+  "source_sha256": "a5b5fab3aad38b1e5ad3b0d691a75070cbfa35c5d4a9baae3ae7ddc366bf4701"
+}

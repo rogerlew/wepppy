@@ -5,13 +5,20 @@
 > the behavior generalizes beyond Topanga. Watershed propagation is a separate
 > follow-up, not part of the census critical path.
 
-**Status: PHASE 2A COMPLETE; LOCAL TOPANGA CENSUS AUTHORIZED (`2026-08-09`).**
-Versioned schemas, immutable event-packet capture, process-isolated solver
-replay, active-trace parity, and compact Topanga acceptance fixtures pass. The
+**Status: TOPANGA LOCAL CENSUS COMPLETE (`2026-08-09`); CROSS-SITE REPLICATION
+PENDING.** Versioned schemas, immutable event-packet capture, process-isolated
+solver replay, active-trace parity, compact acceptance fixtures, and the full
+1,088-trial Topanga local census pass. The
 [local-census amendment](../../work-packages/20260808_peakflow_phase2a_pilot/artifacts/study-design-amendment-local-census.md)
 culls per-mutation watershed routing so unresolved routing criteria do not
 block the local census. Cross-site prevalence, snow-site, and overland flow
 element (OFE) work remain staged behind their own gates.
+
+The interim LaTeX report
+[Small-Mutation Screening of WEPP Hillslope Peak Flow](topanga-small-mutation-census-report.pdf)
+documents the complete methodology and Topanga census results while preserving
+additional-site replication as future work. Its editable source is
+[`topanga-small-mutation-census-report.tex`](topanga-small-mutation-census-report.tex).
 
 ## Why This Investigation Exists
 
@@ -159,9 +166,10 @@ Delivery is split into two work packages. The completed
 [census-preparation package](../../work-packages/20260808_peakflow_topanga_census_prep/package.md)
 extracted a site-independent engine, proved Phase 2A parity, and froze the
 complete eligible Topanga trial plan without executing it. Its GO disposition
-authorized the active
+authorized the now-completed
 [full-census execution package](../../work-packages/20260809_peakflow_topanga_census_execution/package.md)
-to consume the frozen plan and produce outcomes after preflight gates pass.
+to consume the frozen plan. That package completed all 1,088 eligible trials
+and published the immutable event ledger and screening summaries.
 
 For mutations that expose a discontinuity, retain the local response and its
 mechanism evidence:
@@ -562,3 +570,4 @@ own table grains. The heterogeneous follow-up remains a separate experiment.
 | 1.2 | 2026-08-09 | Culled watershed routing from the census critical path; authorized a local hillslope census and deferred downstream-impact claims to a separate sampled follow-up. |
 | 1.3 | 2026-08-09 | Split delivery into a durable-engine and frozen-matrix preparation package followed by a separately authorized Topanga execution package. |
 | 1.4 | 2026-08-09 | Recorded preparation GO and activated the separately gated execution package for the frozen 1,088-trial matrix. |
+| 1.5 | 2026-08-09 | Recorded completion of the Topanga census and linked the interim methodology and results report; cross-site replication remains pending. |

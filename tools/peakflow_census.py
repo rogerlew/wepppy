@@ -9,7 +9,16 @@ from pathlib import Path
 
 import pandas as pd
 
-from wepppy.wepp.peakflow_census.common import atomic_write_json, content_hash
+from wepppy.wepp.peakflow_census.common import atomic_write_json, content_hash, sha256_file
+from wepppy.wepp.peakflow_census.census import (
+    aggregate_execution,
+    build_execution_selection,
+    execute_selection,
+    load_input_snapshot,
+    load_execution_selection,
+    preflight_execution,
+    stage_input_snapshot,
+)
 from wepppy.wepp.peakflow_census.execution import ExecutionContext, execute_trial
 from wepppy.wepp.peakflow_census.manifest import load_study_manifest
 from wepppy.wepp.peakflow_census.observer import parse_trace
@@ -36,9 +45,23 @@ def validate_plan_command(args: argparse.Namespace) -> None:
 
 
 def execute_command(args: argparse.Namespace) -> None:
-    if not args.trial_id:
-        raise ValueError("execute requires at least one explicit --trial-id; implicit all is prohibited")
     plan = _load_plan(args.plan)
+    if args.selection:
+        if args.trial_id:
+            raise ValueError("use either --selection or --trial-id, not both")
+        selection = load_execution_selection(args.selection, plan)
+        report = preflight_execution(args.plan, selection)
+        if not report.valid:
+            raise ValueError(f"execution preflight failed: {report.errors[0]}")
+        input_snapshot = (load_input_snapshot(args.input_snapshot, plan, selection)
+                          if args.input_snapshot else None)
+        snapshot = execute_selection(plan, selection, args.workers, args.dry_run,
+                                     input_snapshot=input_snapshot,
+                                     progress_path=args.progress)
+        print(json.dumps(snapshot.as_dict(), indent=2, sort_keys=True))
+        return
+    if not args.trial_id:
+        raise ValueError("execute requires --selection or at least one explicit --trial-id")
     selected = set(args.trial_id)
     trials = [trial for trial in plan.trials if trial.trial_id in selected]
     if {trial.trial_id for trial in trials} != selected:
@@ -51,6 +74,52 @@ def execute_command(args: argparse.Namespace) -> None:
                                    Path(plan.executable["path"]), plan.executable["sha256"], args.file_prefix)
         terminals.append(execute_trial(trial, context))
     print(json.dumps({"selected": len(trials), "statuses": [item["status"] for item in terminals]}, indent=2))
+
+
+def freeze_selection_command(args: argparse.Namespace) -> None:
+    plan = _load_plan(args.plan)
+    selection = build_execution_selection(plan, sha256_file(args.plan))
+    atomic_write_json(args.output, selection.as_dict(), overwrite=False)
+    print(json.dumps({"selection_id": selection.selection_id,
+                      "selected": len(selection.trial_ids)}, indent=2, sort_keys=True))
+
+
+def preflight_command(args: argparse.Namespace) -> None:
+    plan = _load_plan(args.plan)
+    selection = load_execution_selection(args.selection, plan)
+    report = preflight_execution(args.plan, selection, require_empty=args.require_empty)
+    if args.output:
+        atomic_write_json(args.output, report.as_dict())
+    print(json.dumps(report.as_dict(), indent=2, sort_keys=True))
+    if not report.valid:
+        raise SystemExit(1)
+
+
+def stage_inputs_command(args: argparse.Namespace) -> None:
+    plan = _load_plan(args.plan)
+    selection = load_execution_selection(args.selection, plan)
+    report = preflight_execution(args.plan, selection)
+    if not report.valid:
+        raise ValueError(f"input staging preflight failed: {report.errors[0]}")
+    manifest = stage_input_snapshot(plan, selection, sha256_file(args.plan), args.output)
+    print(json.dumps({"input_snapshot_id": manifest["input_snapshot_id"],
+                      "scenarios": sorted(manifest["scenarios"])}, indent=2, sort_keys=True))
+
+
+def aggregate_command(args: argparse.Namespace) -> None:
+    plan = _load_plan(args.plan)
+    selection = load_execution_selection(args.selection, plan)
+    snapshot = load_input_snapshot(args.input_snapshot, plan, selection)
+    authority = json.loads(args.baseline_authority.read_text(encoding="utf-8"))
+    identity = {key: authority[key] for key in ("schema_version", "plan_id", "selection_id",
+                                                "path", "sha256")}
+    if authority.get("authority_id") != content_hash(identity):
+        raise ValueError("baseline authority identity mismatch")
+    if authority["plan_id"] != plan.plan_id or authority["selection_id"] != selection.selection_id:
+        raise ValueError("baseline authority plan or selection mismatch")
+    summary = aggregate_execution(plan, selection, Path(authority["path"]), authority["sha256"],
+                                  snapshot["input_snapshot_id"])
+    print(json.dumps(summary.as_dict(), indent=2, sort_keys=True))
 
 
 def pair_command(args: argparse.Namespace) -> None:
@@ -93,10 +162,36 @@ def parser() -> argparse.ArgumentParser:
     validate.set_defaults(function=validate_plan_command)
     execute = commands.add_parser("execute")
     execute.add_argument("--plan", type=Path, required=True)
-    execute.add_argument("--trial-id", action="append", required=True)
+    execute.add_argument("--selection", type=Path)
+    execute.add_argument("--input-snapshot", type=Path)
+    execute.add_argument("--trial-id", action="append")
+    execute.add_argument("--workers", type=int, default=1)
+    execute.add_argument("--dry-run", action="store_true")
+    execute.add_argument("--progress", type=Path)
     execute.add_argument("--run-dir", default="runs")
     execute.add_argument("--file-prefix", default="p")
     execute.set_defaults(function=execute_command)
+    selection = commands.add_parser("freeze-selection")
+    selection.add_argument("--plan", type=Path, required=True)
+    selection.add_argument("--output", type=Path, required=True)
+    selection.set_defaults(function=freeze_selection_command)
+    preflight = commands.add_parser("preflight")
+    preflight.add_argument("--plan", type=Path, required=True)
+    preflight.add_argument("--selection", type=Path, required=True)
+    preflight.add_argument("--output", type=Path)
+    preflight.add_argument("--require-empty", action="store_true")
+    preflight.set_defaults(function=preflight_command)
+    stage = commands.add_parser("stage-inputs")
+    stage.add_argument("--plan", type=Path, required=True)
+    stage.add_argument("--selection", type=Path, required=True)
+    stage.add_argument("--output", type=Path, required=True)
+    stage.set_defaults(function=stage_inputs_command)
+    aggregate = commands.add_parser("aggregate")
+    aggregate.add_argument("--plan", type=Path, required=True)
+    aggregate.add_argument("--selection", type=Path, required=True)
+    aggregate.add_argument("--input-snapshot", type=Path, required=True)
+    aggregate.add_argument("--baseline-authority", type=Path, required=True)
+    aggregate.set_defaults(function=aggregate_command)
     pair = commands.add_parser("pair-events")
     pair.add_argument("--plan", type=Path, required=True)
     pair.add_argument("--trial-id", required=True)

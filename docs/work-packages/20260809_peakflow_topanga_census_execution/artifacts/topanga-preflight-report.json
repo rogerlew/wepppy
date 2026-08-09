@@ -1,0 +1,24 @@
+{
+  "checks": {
+    "available_bytes": 26215928496128,
+    "checked_at_utc": "2026-08-09T05:47:03.403081+00:00",
+    "eligible": 1088,
+    "evidence_root": "/home/workdir/peakflow-topanga-census-evidence",
+    "excluded": 32,
+    "existing_terminals": 0,
+    "input_tree_sha256": {
+      "burned": "b0968d699147ef982888923985fcfd9e32330c576e5d9fbe61a0ed461d65a155",
+      "undisturbed": "58944cc4f378d473fe18d87101e579976a9cbd5a549cbed71f7372e033740b45"
+    },
+    "plan_file_sha256": "32e6f5e99a77747fcdd93388302f2a5ffb496a87b764ac4505e09691955db756",
+    "plan_id": "b575fde4a28cf85f1d28e0dfff305472b5419fd9b3639d39dc437600617080de",
+    "projected_retained_bytes": 16089950152,
+    "requested": 1120,
+    "selected": 1088,
+    "selection_id": "2e450acbaa131c268fab70bd048480e1bc100990094071d74b432bf1579e3e3d"
+  },
+  "errors": [],
+  "report_id": "9fb23f8578d9b42526eb43ea739d84b06006b30fd64fed18d09e0cd5ea42bc50",
+  "schema_version": "1.0.0",
+  "valid": true
+}

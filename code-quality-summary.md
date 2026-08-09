@@ -1,8 +1,8 @@
 # Code Quality Observability Report
 
 - Mode: `observe-only` (non-blocking)
-- Generated (UTC): `2026-08-07T19:13:21Z`
-- Base ref: `7ce0cf524d9e7f4d2be6270ca220b574f04e91ed`
+- Generated (UTC): `2026-08-09T06:09:46Z`
+- Base ref: `origin/master`
 
 ## Threshold Bands
 
@@ -27,22 +27,15 @@
 
 | Distribution | Count | p50 | p75 | p90 | p95 | p99 | Max |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| `python_prod_file_sloc` | 933 | 126.0 | 303.0 | 683.2 | 984.8 | 2010.56 | 5697.0 |
-| `python_prod_max_function_len` | 752 | 59.0 | 109.25 | 183.8 | 241.45 | 356.9 | 2126.0 |
+| `python_prod_file_sloc` | 952 | 124.0 | 300.25 | 679.9 | 985.15 | 2007.33 | 5697.0 |
+| `python_prod_max_function_len` | 770 | 58.0 | 109.0 | 182.0 | 238.75 | 355.1 | 2126.0 |
 | `python_prod_max_cc` | 0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 |
 | `js_source_file_sloc` | 201 | 252.0 | 572.0 | 1238.0 | 1586.0 | 2426.0 | 2835.0 |
 | `js_source_max_cc` | 201 | 6.0 | 21.0 | 33.0 | 44.0 | 86.0 | 155.0 |
 
 ## Changed Files
 
-- Files analyzed: `4`; highest severity red: `1`, yellow: `0`; worsened metric entries: `3` (exceptions: `0`, actionable: `3`)
-
-| File | Lang | Highest | Key Metric Deltas |
-| --- | --- | --- | --- |
-| `tests/microservices/test_rq_engine_jobinfo.py` | `python` | `green` | python_file_sloc 494->554 (worsened, green)<br>python_function_len 37->37 (unchanged, green)<br>python_cc n/a->n/a (n/a, unknown) |
-| `tests/rq/test_job_info.py` | `python` | `green` | python_file_sloc 336->336 (unchanged, green)<br>python_function_len 64->64 (unchanged, green)<br>python_cc n/a->n/a (n/a, unknown) |
-| `tests/rq/test_job_queue_rank.py` | `python` | `green` | python_file_sloc n/a->235 (new, green)<br>python_function_len n/a->21 (new, green)<br>python_cc n/a->n/a (n/a, unknown) |
-| `wepppy/rq/job_info.py` | `python` | `red` | python_file_sloc 377->473 (worsened, green)<br>python_function_len 153->162 (worsened, red)<br>python_cc n/a->n/a (n/a, unknown) |
+_No changed-file analysis available (base ref missing or no analyzable files changed)._
 
 ## Hotspots (Current Tree)
 
@@ -57,7 +50,7 @@
 | `tests/nodb/mods/test_roads_controller.py` | 3240 |
 | `wepppy/nodb/mods/features_export/service.py` | 3022 |
 | `tests/nodb/mods/test_omni.py` | 2929 |
-| `wepppy/rq/project_rq.py` | 2689 |
+| `wepppy/rq/project_rq.py` | 2690 |
 | `wepppy/wepp/management/managements.py` | 2548 |
 | `wepppy/nodb/core/wepp.py` | 2430 |
 

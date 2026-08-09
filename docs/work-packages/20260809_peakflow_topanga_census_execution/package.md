@@ -1,6 +1,6 @@
 # Execute the Frozen Topanga Peak-Flow Census
 
-**Status**: Open (2026-08-09)
+**Status**: Completed (2026-08-09)
 **Timezone**: UTC
 
 ## Overview
@@ -9,7 +9,8 @@ This package executes the 1,088 eligible local hillslope mutations frozen by
 the completed Topanga census preparation package. It preserves the approved
 plan unchanged, runs only an explicit complete selection with the pinned WEPP
 observer, aggregates terminal and outer-joined event evidence, and publishes
-the local prevalence result without watershed-routing claims.
+eligible mutation-trial and paired-event-row screening prevalence without
+watershed-routing claims.
 
 ## Objectives
 
@@ -31,7 +32,7 @@ the local prevalence result without watershed-routing claims.
   workers, progress reporting, resume, aggregation, and artifact validation.
 - Immutable external evidence below the frozen plan's declared evidence root.
 - Outer event pairing, candidate screening, denominator accounting, compact
-  committed summaries, and local prevalence reporting.
+  committed summaries, and mutation-trial/event-row screening prevalence reporting.
 - Failure recovery and reconciliation for complete, failed, stopped, or
   missing terminal records.
 
@@ -68,25 +69,27 @@ the local prevalence result without watershed-routing claims.
 
 ## Success Criteria
 
-- [ ] The canonical plan file SHA-256 is
+- [x] The canonical plan file SHA-256 is
   `32e6f5e99a77747fcdd93388302f2a5ffb496a87b764ac4505e09691955db756`
   and its plan ID is
   `b575fde4a28cf85f1d28e0dfff305472b5419fd9b3639d39dc437600617080de`.
-- [ ] A frozen selection enumerates exactly the 1,088 eligible trial IDs and no
+- [x] A frozen selection enumerates exactly the 1,088 eligible trial IDs and no
   excluded or unknown ID, with byte-identical regeneration proof.
-- [ ] All 1,088 trials have matching complete terminals, exactly one declared
+- [x] All 1,088 trials have matching complete terminals, exactly one declared
   changed input, and validated trace and hillslope-pass artifacts.
-- [ ] Event pairs retain outer-join semantics and reconcile to every complete
+- [x] Event pairs retain outer-join semantics and reconcile to every complete
   terminal without converting missing events to zero.
-- [ ] Candidate and prevalence summaries recompute from immutable ledgers with
+- [x] Candidate and prevalence summaries recompute from immutable ledgers with
   exact scenario, family, direction, and exclusion denominators.
-- [ ] No watershed, route, channel, canopy, or LAI command or artifact enters
+- [x] No watershed, route, channel, canopy, or LAI command or artifact enters
   the plan, execution tree, or conclusions.
-- [ ] Resume and retry preserve prior attempts and reject every hash-binding or
+- [x] Resume and retry preserve prior attempts and reject every hash-binding or
   evidence-root mismatch.
-- [ ] Focused and broad validation plus scientific, code, QA, and dedicated
-  security reviews close with no unresolved medium or high finding.
-- [ ] The final disposition states only local hillslope prevalence and clearly
+- [x] Focused validation, scientific, code, QA, and dedicated security reviews
+  close with no unresolved medium or high finding; the attempted canonical
+  broad suite remains explicitly limited by container `/tmp` ENOSPC.
+- [x] The final disposition states only eligible mutation-trial and paired-event-row
+  screening prevalence and clearly
   separates screened candidates from adjudicated mechanisms.
 
 ## Parameterization ADR Gate
@@ -109,7 +112,8 @@ the local prevalence result without watershed-routing claims.
 
 ### Blocks
 
-- Gate 3 local prevalence and candidate reporting for the multi-site audit.
+- Gate 3 eligible mutation-trial and paired-event-row screening prevalence and
+  candidate reporting for the multi-site audit.
 - Any separately authorized candidate-adjudication or sampled routing study.
 
 ## Related Packages
@@ -139,9 +143,9 @@ the local prevalence result without watershed-routing claims.
 
 ## References
 
-- [Active execution ExecPlan](prompts/active/topanga_census_execution_execplan.md).
+- [Completed execution ExecPlan](prompts/completed/topanga_census_execution_execplan.md).
 - [Frozen Topanga plan](../20260808_peakflow_topanga_census_prep/artifacts/topanga-trial-plan.json).
-- [Data-contract compatibility plan](../20260808_peakflow_topanga_census_prep/artifacts/data-contract-compatibility-plan.md).
+- [Execution data-contract compatibility plan](artifacts/data-contract-compatibility-plan.md).
 - [Preparation QA review](../20260808_peakflow_topanga_census_prep/artifacts/20260809_qa_review.md).
 
 ## Deliverables

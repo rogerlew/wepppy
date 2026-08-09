@@ -37,6 +37,18 @@ def tree_hash(paths: Iterable[Path], root: Path) -> str:
 
 
 def resolve_within(root: Path, candidate: Path, *, must_exist: bool = True) -> Path:
+    absolute_root = root.absolute()
+    absolute_candidate = candidate.absolute()
+    try:
+        relative = absolute_candidate.relative_to(absolute_root)
+    except ValueError as error:
+        raise ValueError(f"path escapes declared root {absolute_root}: {candidate}") from error
+    current = absolute_root
+    for part in ((), *[(item,) for item in relative.parts]):
+        if part:
+            current = current / part[0]
+        if current.exists() and current.is_symlink():
+            raise ValueError(f"symlink path component is prohibited: {current}")
     resolved_root = root.resolve(strict=True)
     resolved = candidate.resolve(strict=must_exist)
     if not resolved.is_relative_to(resolved_root):
@@ -55,7 +67,13 @@ def atomic_write_json(path: Path, value: Any, *, overwrite: bool = True) -> None
             stream.write(payload)
             stream.flush()
             os.fsync(stream.fileno())
-        os.replace(temporary, path)
+        if overwrite:
+            os.replace(temporary, path)
+        else:
+            try:
+                os.link(temporary, path)
+            except FileExistsError as error:
+                raise FileExistsError(f"refusing to overwrite frozen artifact: {path}") from error
     finally:
         try:
             Path(temporary).unlink()

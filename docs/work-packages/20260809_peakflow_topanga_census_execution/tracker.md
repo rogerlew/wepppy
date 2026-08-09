@@ -4,9 +4,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-09 05:17 UTC
-**Current phase**: Scaffolded; execution not started
-**Last updated**: 2026-08-09 05:17 UTC
-**Next milestone**: Freeze compatibility, preflight, and execution-selection contracts
+**Current phase**: Completed
+**Last updated**: 2026-08-09 06:35 UTC
+**Next milestone**: Separately governed candidate adjudication or cross-site replication
 **Security impact**: `high`
 **Dedicated security review**: `yes`
 **Security artifact**: `artifacts/20260809_security_review.md`
@@ -15,17 +15,7 @@
 
 ### Ready / Backlog
 
-- [ ] Write the execution data-compatibility and regression plan before data or
-  schema mutations.
-- [ ] Verify the frozen plan, binary, authorities, storage, and empty census
-  evidence root.
-- [ ] Add and test explicit selection-file, bounded-worker, progress, resume,
-  aggregation, and validation wiring.
-- [ ] Freeze the exact 1,088-trial eligible selection.
-- [ ] Execute and reconcile the complete local hillslope census.
-- [ ] Aggregate event pairs, candidates, denominators, and local prevalence.
-- [ ] Complete scientific, code, QA, and security reviews.
-- [ ] Publish the execution disposition and follow-up handoff.
+- None.
 
 ### In Progress
 
@@ -33,19 +23,39 @@
 
 ### Blocked
 
-- [ ] Full-matrix execution is blocked until preflight, compatibility, selection,
-  dry-run, and security checkpoint gates pass.
-- [ ] Candidate adjudication and watershed routing are outside this package.
+- None. Candidate adjudication and watershed routing remain outside this package.
 
 ### Done
 
 - [x] Preparation GO verified and separately dated execution package scaffolded
   (2026-08-09 05:17 UTC).
+- [x] Execution data-contract compatibility and generated-artifact regression
+  plan published before code or data changes (2026-08-09 05:45 UTC).
+- [x] Frozen plan, selection, staged inputs, observer, paths, and storage passed
+  preflight and dry-run; independent interim security review issued GO.
+- [x] Bounded eight-worker execution completed 1,088/1,088 terminals with zero
+  failed or stopped trials (2026-08-09 06:06 UTC).
+- [x] Immutable aggregation reconciled 225,654 event pairs, 11,506 candidate
+  rows, all denominators, and 24,265 retained non-lock artifacts.
+- [x] Independent scientific, code, QA, and security re-reviews passed with no
+  unresolved medium/high findings.
+- [x] Final execution disposition published and lifecycle documents synchronized.
 
 ## Timeline
 
 - **2026-08-09 05:17 UTC** - Created package, tracker, active ExecPlan, and
   failing initial security gate; no census trial executed.
+- **2026-08-09 05:45 UTC** - Froze the additive execution compatibility and
+  generated-artifact regression plan; confirmed the frozen plan hash and clean
+  worktree, and observed that the evidence parent is absent rather than populated.
+- **2026-08-09 05:52 UTC** - Independent security checkpoint issued GO after
+  three HOLD/remediation cycles; launched the frozen matrix with eight workers.
+- **2026-08-09 06:06 UTC** - Reconciled 1,088 complete terminals and no failures.
+- **2026-08-09 06:20 UTC** - Published deterministic outer-pair, candidate,
+  denominator, prevalence, and complete storage-inventory evidence; final
+  reviews returned HOLDs that are being remediated before disposition.
+- **2026-08-09 06:35 UTC** - Closed every review finding, published the PASS
+  disposition, synchronized the project board, and archived the ExecPlan.
 
 ## Decisions Log
 
@@ -83,25 +93,26 @@ creating a new matrix.
 
 ### Code and Data
 
-- [ ] Frozen plan and explicit selection hashes match authorities.
-- [ ] Compatibility and downstream generated-artifact plan is published.
-- [ ] Focused engine and execution tests pass.
-- [ ] All terminal and event-pair denominators reconcile.
-- [ ] Broad-exception and code-quality checks pass.
+- [x] Frozen plan and explicit selection hashes match authorities.
+- [x] Compatibility and downstream generated-artifact plan is published.
+- [x] Focused engine and execution tests pass.
+- [x] All terminal and event-pair denominators reconcile.
+- [x] Broad-exception and code-quality checks pass.
 
 ### Security
 
 - [x] High security impact recorded for path, subprocess, and concurrency surfaces.
-- [ ] Dedicated security review has no unresolved medium/high findings.
-- [ ] Source and evidence paths remain root-constrained and symlink-safe.
-- [ ] Explicit selection cannot introduce excluded or unknown trials.
-- [ ] Subprocesses use the pinned binary and no shell interpretation.
+- [x] Dedicated security review has no unresolved medium/high findings.
+- [x] Source and evidence paths remain root-constrained and symlink-safe.
+- [x] Explicit selection cannot introduce excluded or unknown trials.
+- [x] Subprocesses use the pinned binary and no shell interpretation.
 
 ### Documentation
 
 - [x] Package, tracker, active ExecPlan, and security-review scaffold exist.
-- [ ] Operator execution, recovery, retention, and disposition docs are synchronized.
-- [ ] Documentation lint and spelling normalization pass.
+- [x] Operator execution, recovery, retention, and disposition docs are synchronized.
+- [x] Documentation lint passed; spelling normalization was previewed and the
+  canonical US `afterward` form was retained.
 
 ## Progress Notes
 

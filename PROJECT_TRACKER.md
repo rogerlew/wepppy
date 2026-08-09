@@ -365,17 +365,15 @@ subprocess, concurrency, and recovery surfaces
 
 **Link**: [Topanga census execution](docs/work-packages/20260809_peakflow_topanga_census_execution/package.md)
 
-**Description**: Phase 2A validated the local observer, event-pairing, bracket,
-and replay machinery. The completed preparation package now provides the
-reusable engine and frozen Topanga matrix: 1,120 requested, 1,088 eligible, and
-32 excluded trials. Its GO disposition authorized the now-scaffolded execution
-package; no full-census outcome exists yet and execution remains held by
-preflight and security checkpoints.
+**Description**: The frozen Topanga local screening census completed all 1,088
+eligible mutation trials with zero failed or stopped terminals. Immutable
+aggregation produced 225,654 outer event rows and 11,506 screened candidate
+rows across 1,027 mutation trials, with all 32 preregistered exclusions retained
+in denominators. Scientific, code, QA, and security reviews passed.
 
-**Next Steps**: Execute the active plan to validate the selection and consume
-frozen plan ID
-`b575fde4a28cf85f1d28e0dfff305472b5419fd9b3639d39dc437600617080de`
-without changing eligibility or mutation semantics.
+**Next Steps**: Use the completed local screening disposition to scope separately
+governed candidate adjudication and cross-site replication. Do not infer routing
+or downstream impact from the mutation-trial screening rates.
 
 ---
 

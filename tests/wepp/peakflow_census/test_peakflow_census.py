@@ -2,17 +2,33 @@ from __future__ import annotations
 
 import json
 import shutil
+from dataclasses import replace
 from pathlib import Path
 
 import pandas as pd
 import pytest
 
-from wepppy.wepp.peakflow_census.common import atomic_write_json, sha256_file, tree_hash
+from wepppy.wepp.peakflow_census.common import atomic_write_json, content_hash, sha256_file, tree_hash
+from wepppy.wepp.peakflow_census.census import (
+    TERMINAL_SCHEMA_HASH,
+    _atomic_parquet,
+    _denominator_grains,
+    _ledger_root,
+    _selection_execution_lock,
+    _validate_complete_terminal,
+    build_execution_selection,
+    execute_selection,
+    load_execution_selection,
+    load_input_snapshot,
+    preflight_execution,
+    progress_snapshot,
+    stage_input_snapshot,
+)
 from wepppy.wepp.peakflow_census.execution import ExecutionContext, execute_trial
 from wepppy.wepp.peakflow_census.manifest import load_study_manifest
 from wepppy.wepp.peakflow_census.mutations import apply_mutation
 from wepppy.wepp.peakflow_census.pairing import pair_events
-from wepppy.wepp.peakflow_census.planning import plan_trials
+from wepppy.wepp.peakflow_census.planning import plan_trials, trial_plan_from_dict
 from wepppy.wepp.peakflow_census.validation import validate_phase2a_evidence, validate_plan
 
 def _manifest(tmp_path: Path, scenarios: list[Path], *, selected: list[int] | None = None) -> Path:
@@ -145,7 +161,7 @@ def test_manifest_rejects_symlinked_authority_escape(tmp_path: Path) -> None:
     authority = tmp_path / "authority"
     authority.mkdir()
     (authority / "runs").symlink_to(outside, target_is_directory=True)
-    with pytest.raises(ValueError, match="escapes declared root"):
+    with pytest.raises(ValueError, match="symlink path component|escapes declared root"):
         load_study_manifest(_manifest(tmp_path, [authority]))
 
 
@@ -199,3 +215,181 @@ def test_phase2a_immutable_evidence_parity_and_precision() -> None:
     assert row.peak_m_s_baseline == 1.1847274663523422e-06
     assert row.peak_m_s_mutant == 1.1851082035718719e-06
     assert not bool(row.candidate)
+
+
+@pytest.mark.unit
+def test_execution_selection_is_exact_ordered_eligible_set(tmp_path: Path) -> None:
+    study = load_study_manifest(_manifest(tmp_path, _synthetic_authorities(tmp_path), selected=[7]))
+    plan = plan_trials(study)
+    plan_path = tmp_path / "plan.json"
+    atomic_write_json(plan_path, plan.as_dict())
+    selection = build_execution_selection(plan, sha256_file(plan_path))
+    selection_path = tmp_path / "selection.json"
+    atomic_write_json(selection_path, selection.as_dict())
+    assert load_execution_selection(selection_path, plan) == selection
+    assert selection.trial_ids == tuple(
+        trial.trial_id for trial in plan.trials if trial.eligibility == "eligible"
+    )
+    tampered = selection.as_dict()
+    tampered["trial_ids"] = list(reversed(tampered["trial_ids"]))
+    atomic_write_json(selection_path, tampered)
+    with pytest.raises(ValueError, match="eligible trial"):
+        load_execution_selection(selection_path, plan)
+
+
+@pytest.mark.unit
+def test_preflight_and_dry_run_create_no_trial_evidence(tmp_path: Path) -> None:
+    study = load_study_manifest(_manifest(tmp_path, _synthetic_authorities(tmp_path), selected=[7]))
+    plan = plan_trials(study)
+    plan_path = tmp_path / "plan.json"
+    atomic_write_json(plan_path, plan.as_dict())
+    selection = build_execution_selection(plan, sha256_file(plan_path))
+    report = preflight_execution(plan_path, selection, require_empty=True)
+    assert report.valid, report.errors
+    snapshot = execute_selection(plan, selection, workers=2, dry_run=True)
+    assert snapshot.selected == len(selection.trial_ids)
+    assert snapshot.pending == len(selection.trial_ids)
+    assert snapshot.active == snapshot.complete == snapshot.failed == snapshot.stopped == 0
+    assert not (study.evidence_root / plan.plan_id).exists()
+
+
+@pytest.mark.unit
+def test_execute_selection_rejects_unbounded_worker_count(tmp_path: Path) -> None:
+    study = load_study_manifest(_manifest(tmp_path, _synthetic_authorities(tmp_path), selected=[7]))
+    plan = plan_trials(study)
+    plan_path = tmp_path / "plan.json"
+    atomic_write_json(plan_path, plan.as_dict())
+    selection = build_execution_selection(plan, sha256_file(plan_path))
+    with pytest.raises(ValueError, match="workers must be between"):
+        execute_selection(plan, selection, workers=0, dry_run=True)
+    with pytest.raises(ValueError, match="workers must be between"):
+        execute_selection(plan, selection, workers=33, dry_run=True)
+
+
+@pytest.mark.unit
+def test_execute_selection_rejects_concurrent_process_owner(tmp_path: Path) -> None:
+    study = load_study_manifest(_manifest(tmp_path, _synthetic_authorities(tmp_path), selected=[7]))
+    plan = plan_trials(study)
+    plan_path = tmp_path / "plan.json"
+    atomic_write_json(plan_path, plan.as_dict())
+    selection = build_execution_selection(plan, sha256_file(plan_path))
+    with _selection_execution_lock(plan):
+        with pytest.raises(ValueError, match="already executing"):
+            with _selection_execution_lock(plan):
+                pass
+
+
+@pytest.mark.unit
+def test_resolve_within_rejects_in_root_symlink_redirect(tmp_path: Path) -> None:
+    from wepppy.wepp.peakflow_census.common import resolve_within
+
+    root = tmp_path / "root"
+    target = root / "target"
+    target.mkdir(parents=True)
+    (root / "redirect").symlink_to(target, target_is_directory=True)
+    with pytest.raises(ValueError, match="symlink path component"):
+        resolve_within(root, root / "redirect" / "artifact", must_exist=False)
+
+
+@pytest.mark.unit
+def test_staged_bundle_is_hash_bound_and_required_for_execution(tmp_path: Path) -> None:
+    study = load_study_manifest(_manifest(tmp_path, _synthetic_authorities(tmp_path), selected=[7]))
+    plan = plan_trials(study)
+    plan_path = tmp_path / "plan.json"
+    atomic_write_json(plan_path, plan.as_dict())
+    selection = build_execution_selection(plan, sha256_file(plan_path))
+    snapshot_path = tmp_path / "input-snapshot.json"
+    staged = stage_input_snapshot(plan, selection, sha256_file(plan_path), snapshot_path)
+    loaded = load_input_snapshot(snapshot_path, plan, selection)
+    assert loaded["input_snapshot_id"] == staged["input_snapshot_id"]
+    with pytest.raises(ValueError, match="requires a validated input snapshot"):
+        execute_selection(plan, selection, workers=1, dry_run=False)
+    result = execute_selection(plan, selection, workers=2, dry_run=False,
+                               input_snapshot=loaded)
+    assert result.failed == len(selection.trial_ids)
+    assert result.stopped == 0
+    snapshot_file = Path(loaded["scenarios"]["stratum-0"]["run_root"]) / "p7.cli"
+    snapshot_file.chmod(0o644)
+    snapshot_file.write_text("drift")
+    with pytest.raises(ValueError, match="staged input hash mismatch"):
+        load_input_snapshot(snapshot_path, plan, selection)
+
+
+@pytest.mark.unit
+def test_complete_terminal_rejects_mutation_tampering(tmp_path: Path) -> None:
+    frozen = trial_plan_from_dict(json.loads(Path(
+        "docs/work-packages/20260808_peakflow_topanga_census_prep/artifacts/topanga-trial-plan.json"
+    ).read_text()))
+    plan = replace(frozen, evidence_root=str(tmp_path / "evidence"))
+    trial = next(item for item in plan.trials if item.eligibility == "eligible")
+    trial_root = Path(plan.evidence_root) / trial.evidence_locator
+    trace = trial_root / "runs/peak_diag.csv"
+    hbp = trial_root / f"output/H{trial.hillslope_id}.hbp"
+    trace.parent.mkdir(parents=True)
+    hbp.parent.mkdir(parents=True)
+    trace.write_text("trace")
+    hbp.write_text("pass")
+    after_hash = "a" * 64
+    bindings = {"schema_hash": TERMINAL_SCHEMA_HASH, "plan_id": plan.plan_id,
+                "trial_id": trial.trial_id, "input_sha256": trial.input_sha256,
+                "executable_sha256": plan.executable["sha256"],
+                "input_snapshot_id": "snapshot", "attempt_id": "attempt"}
+    terminal = {"schema_version": "1.1.0", **bindings, "status": "complete",
+                "terminal_id": content_hash({**bindings, "status": "complete"}),
+                "returncode": 0, "changed_inputs": [trial.relative_input],
+                "mutation": {"file": trial.relative_input, "parameter": trial.parameter,
+                             "requested_change": trial.requested_change,
+                             "source_value": trial.source_value,
+                             "expected_value": trial.expected_value,
+                             "realized_value": trial.expected_value,
+                             "lines": list(trial.lines), "tokens": list(trial.tokens),
+                             "before_sha256": trial.input_sha256, "after_sha256": after_hash},
+                "input_hashes_before": {trial.relative_input: trial.input_sha256, "shared": "b" * 64},
+                "input_hashes_after": {trial.relative_input: after_hash, "shared": "b" * 64},
+                "trace": str(trace), "trace_sha256": sha256_file(trace),
+                "hbp": str(hbp), "hbp_sha256": sha256_file(hbp)}
+    _validate_complete_terminal(plan, trial, terminal, input_snapshot_id="snapshot")
+    terminal["mutation"]["realized_value"] = -1
+    with pytest.raises(ValueError, match="realized mutation mismatch"):
+        _validate_complete_terminal(plan, trial, terminal, input_snapshot_id="snapshot")
+    terminal["plan_id"] = "0" * 64
+    atomic_write_json(trial_root / "terminal.json", terminal)
+    selection = build_execution_selection(plan, "f" * 64)
+    with pytest.raises(ValueError, match="binding mismatch in progress"):
+        progress_snapshot(plan, selection, input_snapshot_id="snapshot")
+
+
+@pytest.mark.unit
+def test_denominator_grains_include_exclusions_and_immutable_parquet(tmp_path: Path) -> None:
+    plan = trial_plan_from_dict(json.loads(Path(
+        "docs/work-packages/20260808_peakflow_topanga_census_prep/artifacts/topanga-trial-plan.json"
+    ).read_text()))
+    selection = build_execution_selection(plan, "f" * 64)
+    pairs = pd.DataFrame([{"trial_id": selection.trial_ids[0], "candidate": True}])
+    grains = _denominator_grains(plan, selection, pairs, pairs)
+    overall = next(item for item in grains if item["grain"] == "overall")
+    assert (overall["requested_trials"], overall["excluded_trials"],
+            overall["selected_trials"]) == (1120, 32, 1088)
+    path = tmp_path / "ledger.parquet"
+    _atomic_parquet(pd.DataFrame({"value": [1]}), path)
+    first_hash = sha256_file(path)
+    _atomic_parquet(pd.DataFrame({"value": [1]}), path)
+    assert sha256_file(path) == first_hash
+    with pytest.raises(FileExistsError, match="immutable ledger"):
+        _atomic_parquet(pd.DataFrame({"value": [2]}), path)
+
+
+@pytest.mark.unit
+def test_ledger_root_rejects_symlinked_parent(tmp_path: Path) -> None:
+    frozen = trial_plan_from_dict(json.loads(Path(
+        "docs/work-packages/20260808_peakflow_topanga_census_prep/artifacts/topanga-trial-plan.json"
+    ).read_text()))
+    evidence = tmp_path / "evidence"
+    plan = replace(frozen, evidence_root=str(evidence))
+    plan_root = evidence / plan.plan_id
+    outside = tmp_path / "outside"
+    plan_root.mkdir(parents=True)
+    outside.mkdir()
+    (plan_root / "ledgers").symlink_to(outside, target_is_directory=True)
+    with pytest.raises(ValueError, match="symlink path component"):
+        _ledger_root(plan)

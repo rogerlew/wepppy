@@ -15,7 +15,8 @@
 
 ### Ready / Backlog
 
-- [ ] Complete the linked Topanga census execution package.
+- [x] Complete the linked Topanga census execution package (1,088 complete
+  terminals; PASS disposition published 2026-08-09).
 
 ### In Progress
 

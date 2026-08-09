@@ -1,7 +1,7 @@
 {
-  "generated_at_utc": "2026-08-07T19:13:21Z",
+  "generated_at_utc": "2026-08-09T06:09:46Z",
   "mode": "observe-only",
-  "base_ref": "7ce0cf524d9e7f4d2be6270ca220b574f04e91ed",
+  "base_ref": "origin/master",
   "thresholds": {
     "python_file_sloc": {
       "yellow": 650,
@@ -37,21 +37,21 @@
   },
   "overall": {
     "python_prod_file_sloc": {
-      "count": 933.0,
-      "p50": 126.0,
-      "p75": 303.0,
-      "p90": 683.2,
-      "p95": 984.8,
-      "p99": 2010.56,
+      "count": 952.0,
+      "p50": 124.0,
+      "p75": 300.25,
+      "p90": 679.9,
+      "p95": 985.15,
+      "p99": 2007.33,
       "max": 5697.0
     },
     "python_prod_max_function_len": {
-      "count": 752.0,
-      "p50": 59.0,
-      "p75": 109.25,
-      "p90": 183.8,
-      "p95": 241.45,
-      "p99": 356.9,
+      "count": 770.0,
+      "p50": 58.0,
+      "p75": 109.0,
+      "p90": 182.0,
+      "p95": 238.75,
+      "p99": 355.1,
       "max": 2126.0
     },
     "python_prod_max_cc": {
@@ -114,7 +114,7 @@
       },
       {
         "path": "wepppy/rq/project_rq.py",
-        "value": 2689.0
+        "value": 2690.0
       },
       {
         "path": "wepppy/wepp/management/managements.py",
@@ -413,126 +413,5 @@
       }
     ]
   },
-  "changed_files": [
-    {
-      "path": "tests/microservices/test_rq_engine_jobinfo.py",
-      "base_path": "tests/microservices/test_rq_engine_jobinfo.py",
-      "status": "M",
-      "language": "python",
-      "metrics": [
-        {
-          "name": "python_file_sloc",
-          "base": 494.0,
-          "current": 554.0,
-          "trend": "worsened",
-          "severity": "green"
-        },
-        {
-          "name": "python_function_len",
-          "base": 37.0,
-          "current": 37.0,
-          "trend": "unchanged",
-          "severity": "green"
-        },
-        {
-          "name": "python_cc",
-          "base": null,
-          "current": null,
-          "trend": "n/a",
-          "severity": "unknown"
-        }
-      ],
-      "highest_severity": "green"
-    },
-    {
-      "path": "tests/rq/test_job_info.py",
-      "base_path": "tests/rq/test_job_info.py",
-      "status": "M",
-      "language": "python",
-      "metrics": [
-        {
-          "name": "python_file_sloc",
-          "base": 336.0,
-          "current": 336.0,
-          "trend": "unchanged",
-          "severity": "green"
-        },
-        {
-          "name": "python_function_len",
-          "base": 64.0,
-          "current": 64.0,
-          "trend": "unchanged",
-          "severity": "green"
-        },
-        {
-          "name": "python_cc",
-          "base": null,
-          "current": null,
-          "trend": "n/a",
-          "severity": "unknown"
-        }
-      ],
-      "highest_severity": "green"
-    },
-    {
-      "path": "tests/rq/test_job_queue_rank.py",
-      "base_path": "tests/rq/test_job_queue_rank.py",
-      "status": "A",
-      "language": "python",
-      "metrics": [
-        {
-          "name": "python_file_sloc",
-          "base": null,
-          "current": 235.0,
-          "trend": "new",
-          "severity": "green"
-        },
-        {
-          "name": "python_function_len",
-          "base": null,
-          "current": 21.0,
-          "trend": "new",
-          "severity": "green"
-        },
-        {
-          "name": "python_cc",
-          "base": null,
-          "current": null,
-          "trend": "n/a",
-          "severity": "unknown"
-        }
-      ],
-      "highest_severity": "green"
-    },
-    {
-      "path": "wepppy/rq/job_info.py",
-      "base_path": "wepppy/rq/job_info.py",
-      "status": "M",
-      "language": "python",
-      "metrics": [
-        {
-          "name": "python_file_sloc",
-          "base": 377.0,
-          "current": 473.0,
-          "trend": "worsened",
-          "severity": "green"
-        },
-        {
-          "name": "python_function_len",
-          "base": 153.0,
-          "current": 162.0,
-          "trend": "worsened",
-          "severity": "red"
-        },
-        {
-          "name": "python_cc",
-          "base": null,
-          "current": null,
-          "trend": "n/a",
-          "severity": "unknown"
-        }
-      ],
-      "highest_severity": "red"
-    }
-  ]
+  "changed_files": []
 }

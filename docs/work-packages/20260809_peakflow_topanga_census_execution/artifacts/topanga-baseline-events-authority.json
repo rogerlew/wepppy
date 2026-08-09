@@ -1,0 +1,8 @@
+{
+  "authority_id": "f474742128c53701be078c9d68a76cc1ed819a61a6d3e07494b329c8f5305bb3",
+  "path": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/baseline-events.parquet",
+  "plan_id": "b575fde4a28cf85f1d28e0dfff305472b5419fd9b3639d39dc437600617080de",
+  "schema_version": "1.0.0",
+  "selection_id": "2e450acbaa131c268fab70bd048480e1bc100990094071d74b432bf1579e3e3d",
+  "sha256": "8ea085f8bcbb8b3d16f96fb4df7bb0750727cf7f4dea7e83135f717ee805b0ee"
+}
