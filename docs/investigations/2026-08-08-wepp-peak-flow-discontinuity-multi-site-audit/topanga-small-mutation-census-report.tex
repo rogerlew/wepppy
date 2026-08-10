@@ -315,6 +315,60 @@ duration calculation \cite{stakeholder}. The Topanga runtime instrumentation
 used WEPP-Forest. The Windows comparison is static source evidence; it does not
 claim that every Windows executable was run on the Topanga fixtures.
 
+\subsection{The missing coupling and why a direct repair was abandoned}
+
+The fundamental shortcoming is not simply that WEPP calculates saturation
+excess. It is that the peak-flow path does not carry the calculated hourly
+saturation-excess series forward as a time-varying source to the kinematic-wave
+calculation. The hourly water balance knows when water is returned to the
+surface, but the legacy path reduces those hourly values to the daily scalar
+\surdra{}. After the original infiltration-excess event has been constructed,
+the peak routine attempts to reconcile that missing runoff by dividing the
+daily \surdra{} depth by a selected duration and adding the resulting constant
+rate to the existing rainfall-excess array. The kinematic-wave solver, when
+selected, therefore receives a reconstructed forcing series rather than the
+actual hourly combination of infiltration excess and saturation excess. This
+distinction is important: the addback occurs before the final \texttt{HDRIVE}
+call, but after the model has discarded the timing needed to define the source
+correctly. Volume can still balance for the day while the imposed rate, event
+shape, and resulting \PeakRO{} depend on an artificial duration.
+
+The production Papanicolaou (Lane D) water-balance implementation in
+openWEPP takes a different approach. It retains a closing 24-bin surface-runoff
+ledger and preserves saturation-return water in the hour in which the soil-water
+calculation produced it. That same closed hourly ledger supplies the active
+Lane D routing source. The published hillslope peak is defined more
+conservatively as the maximum hourly mean flow from the ledger, rather than as
+an instantaneous subhourly kinematic-wave peak. The complete frozen Topanga
+small-mutation design was then repeated in openWEPP: all 1,088 trials completed,
+with 1,913,158 finite paired-positive peak rows, and no row combined runoff
+volume within 5\% of baseline with a peak change of twofold or greater. Thus,
+the openWEPP study did not reproduce the unexplained, volume-stable \PeakRO{}
+anomalies found in legacy WEPP. This is evidence for the benefit of preserving
+hourly source timing, not a claim of observed-flow accuracy, subhourly peak
+resolution, or watershed-outlet validation \cite{openweppclosure}.
+
+A bounded WEPP-Forest repair was also attempted. Its intended change was to
+retain hourly saturation excess separately, combine it with infiltration excess,
+and let the existing characteristic solver route that time-varying lateral
+inflow. The feasibility work was stopped before production wiring because the
+existing solver could not accept the required series without changing deeper
+contracts. In the mixed Hill 106 test, its normal 95\%-volume stopping rule
+terminated at 75,600 seconds even though forcing continued through 86,400
+seconds; only 93.58\% of the combined input had arrived by that time. In a
+saturation-only test, exact zero-flow intervals caused a floating-point trap in
+the characteristic integration, where cumulative terms are divided by the
+current step rate. Retaining the legacy substitute of a tiny positive rate
+would avoid the trap only by erasing the dry gaps that the repair was meant to
+preserve. The attempted change also crossed established ownership boundaries
+for infiltration, depression storage, recession infiltration, runoff volume,
+event duration, and erosion inputs. It was therefore not a safe, local patch:
+it would require a zero-aware characteristic formulation or another explicitly
+time-series solver, followed by renewed water-balance, erosion, and routing
+validation. The experimental code was removed and WEPP-Forest was restored
+byte-for-byte to the diagnostic release; the failed feasibility evidence was
+retained in the closed work package \cite{forestpf01}.
+
 \section{Study Design}
 
 \subsection{Scenario strata and experimental unit}
@@ -1293,7 +1347,11 @@ The principal local sources for this report are:
   \item the multi-site audit protocol and its local-census amendment;
   \item the frozen Topanga execution disposition and prevalence summary; and
   \item the figures, sidecars, plotting scripts, and repeatable stratum-cluster
-    analysis under the Topanga execution work package.
+    analysis under the Topanga execution work package;
+  \item the completed openWEPP hourly peak-authority closure and repeated
+    Topanga mutation census; and
+  \item the closed WEPP-Forest feasibility package documenting why direct
+    hourly saturation-return insertion was abandoned.
 \end{itemize}
 
 Two diagnostic stages should not be confused. The original Hill 106 mechanism
@@ -1355,6 +1413,14 @@ WEPP Peak-Flow Discontinuity Multi-Site Audit (2026).
 \bibitem{disposition}
 Frozen Topanga Local Census Execution Disposition (2026).
 \path{docs/work-packages/20260809_peakflow_topanga_census_execution/artifacts/execution-disposition.md}.
+
+\bibitem{openweppclosure}
+openWEPP Hourly Peak-Runoff Authority Closure (2026).
+\path{/workdir/openWEPP/docs/work-packages/20260809-hourly-peak-runoff-authority-closure-001/}.
+
+\bibitem{forestpf01}
+WEPP-Forest PF01 \surdra{} Kinematic-Wave Partitioning Work Package (2026).
+\path{/workdir/wepp-forest_260430_baseline/docs/work-packages/20260810-pf01-surdra-kinematic-wave-partitioning/}.
 
 \end{thebibliography}
 
