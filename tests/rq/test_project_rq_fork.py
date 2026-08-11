@@ -4,6 +4,8 @@ import json
 import itertools
 import os
 import shutil
+import socket
+import stat
 import sys
 import types
 from pathlib import Path
@@ -16,6 +18,13 @@ pytestmark = pytest.mark.unit
 
 def _extract_excludes(cmd: list[str]) -> list[str]:
     return [cmd[index + 1] for index, token in enumerate(cmd[:-1]) if token == "--exclude"]
+
+
+def _assert_real_empty_directory(path: Path) -> None:
+    entry = path.lstat()
+    assert stat.S_ISDIR(entry.st_mode)
+    assert not path.is_symlink()
+    assert list(path.iterdir()) == []
 
 
 def test_build_fork_rsync_cmd_directory_mode_has_no_nodir_cache_exclude() -> None:
@@ -97,6 +106,216 @@ def test_reset_fork_omni_directories_rejects_symlink_target(tmp_path: Path) -> N
     (destination / "_pups" / "omni" / "scenarios").symlink_to(external, target_is_directory=True)
     (destination / "_pups" / "omni" / "contrasts").mkdir()
     (destination / "omni").mkdir()
+
+    with pytest.raises(ValueError, match="real directory"):
+        fork_helpers._reset_fork_omni_directories(str(destination))
+
+    assert sentinel.read_text(encoding="ascii") == "keep"
+
+
+def test_reset_fork_omni_directories_creates_absent_ancestors_and_is_idempotent(
+    tmp_path: Path,
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    destination = tmp_path / "destination"
+    destination.mkdir()
+    unrelated = destination / "unrelated.txt"
+    unrelated.write_text("keep", encoding="ascii")
+
+    fork_helpers._reset_fork_omni_directories(str(destination))
+    fork_helpers._reset_fork_omni_directories(str(destination))
+
+    _assert_real_empty_directory(destination / "_pups" / "omni" / "scenarios")
+    _assert_real_empty_directory(destination / "_pups" / "omni" / "contrasts")
+    _assert_real_empty_directory(destination / "omni")
+    assert unrelated.read_text(encoding="ascii") == "keep"
+
+
+def test_reset_fork_omni_directories_creates_missing_omni_and_preserves_pups(
+    tmp_path: Path,
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    destination = tmp_path / "destination"
+    pups = destination / "_pups"
+    pups.mkdir(parents=True, mode=0o750)
+    sibling = pups / "other-controller"
+    sibling.mkdir()
+    sentinel = sibling / "sentinel.txt"
+    sentinel.write_text("keep", encoding="ascii")
+    before = pups.stat()
+
+    fork_helpers._reset_fork_omni_directories(str(destination))
+
+    after = pups.stat()
+    assert (after.st_uid, after.st_gid, stat.S_IMODE(after.st_mode)) == (
+        before.st_uid,
+        before.st_gid,
+        stat.S_IMODE(before.st_mode),
+    )
+    assert sentinel.read_text(encoding="ascii") == "keep"
+    _assert_real_empty_directory(pups / "omni" / "scenarios")
+    _assert_real_empty_directory(pups / "omni" / "contrasts")
+    _assert_real_empty_directory(destination / "omni")
+
+
+def test_reset_fork_omni_directories_resets_only_exact_populated_targets(
+    tmp_path: Path,
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    destination = tmp_path / "destination"
+    omni_children = destination / "_pups" / "omni"
+    scenarios = omni_children / "scenarios"
+    contrasts = omni_children / "contrasts"
+    aggregate = destination / "omni"
+    scenarios.mkdir(parents=True)
+    contrasts.mkdir()
+    aggregate.mkdir()
+    (scenarios / "scenario.txt").write_text("remove", encoding="ascii")
+    (contrasts / "contrast.txt").write_text("remove", encoding="ascii")
+    (aggregate / "aggregate.txt").write_text("remove", encoding="ascii")
+    retained = omni_children / "retained.txt"
+    retained.write_text("keep", encoding="ascii")
+
+    fork_helpers._reset_fork_omni_directories(str(destination))
+
+    _assert_real_empty_directory(scenarios)
+    _assert_real_empty_directory(contrasts)
+    _assert_real_empty_directory(aggregate)
+    assert retained.read_text(encoding="ascii") == "keep"
+
+
+@pytest.mark.parametrize("ancestor", ["_pups", "_pups/omni"])
+@pytest.mark.parametrize("entry_type", ["symlink", "file", "fifo", "socket"])
+def test_reset_fork_omni_directories_rejects_hostile_ancestor(
+    tmp_path: Path,
+    ancestor: str,
+    entry_type: str,
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    destination = tmp_path / "destination"
+    destination.mkdir()
+    target = destination / ancestor
+    target.parent.mkdir(parents=True, exist_ok=True)
+    external = tmp_path / "external"
+    external.mkdir()
+    sentinel = external / "sentinel.txt"
+    sentinel.write_text("keep", encoding="ascii")
+    bound_socket: socket.socket | None = None
+    try:
+        if entry_type == "symlink":
+            target.symlink_to(external, target_is_directory=True)
+        elif entry_type == "file":
+            target.write_text("hostile", encoding="ascii")
+        elif entry_type == "fifo":
+            os.mkfifo(target)
+        else:
+            bound_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            bound_socket.bind(str(target))
+
+        with pytest.raises(OSError):
+            fork_helpers._reset_fork_omni_directories(str(destination))
+    finally:
+        if bound_socket is not None:
+            bound_socket.close()
+
+    assert sentinel.read_text(encoding="ascii") == "keep"
+    assert list(external.iterdir()) == [sentinel]
+
+
+def test_reset_fork_omni_directories_rejects_ancestor_swap_after_creation(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    destination = tmp_path / "destination"
+    destination.mkdir()
+    external = tmp_path / "external"
+    external.mkdir()
+    sentinel = external / "sentinel.txt"
+    sentinel.write_text("keep", encoding="ascii")
+    original_open = fork_helpers._open_fork_dir
+    raced = False
+
+    def _swap_before_open(name: str, *, dir_fd: int | None = None) -> int:
+        nonlocal raced
+        if name == "_pups" and dir_fd is not None and not raced:
+            raced = True
+            (destination / "_pups").rmdir()
+            (destination / "_pups").symlink_to(external, target_is_directory=True)
+        return original_open(name, dir_fd=dir_fd)
+
+    monkeypatch.setattr(fork_helpers, "_open_fork_dir", _swap_before_open)
+
+    with pytest.raises(OSError):
+        fork_helpers._reset_fork_omni_directories(str(destination))
+
+    assert sentinel.read_text(encoding="ascii") == "keep"
+    assert list(external.iterdir()) == [sentinel]
+
+
+def test_reset_fork_omni_directories_retries_after_nested_creation_failure(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    destination = tmp_path / "destination"
+    destination.mkdir()
+    original_mkdir = fork_helpers.os.mkdir
+    failed = False
+
+    def _fail_first_nested_create(
+        name: str,
+        mode: int = 0o777,
+        *,
+        dir_fd: int | None = None,
+    ) -> None:
+        nonlocal failed
+        if name == "omni" and dir_fd is not None and not failed:
+            failed = True
+            raise PermissionError("injected nested creation failure")
+        original_mkdir(name, mode, dir_fd=dir_fd)
+
+    monkeypatch.setattr(fork_helpers.os, "mkdir", _fail_first_nested_create)
+
+    with pytest.raises(PermissionError, match="injected nested creation failure"):
+        fork_helpers._reset_fork_omni_directories(str(destination))
+
+    assert (destination / "_pups").is_dir()
+    assert not (destination / "_pups" / "omni").exists()
+
+    fork_helpers._reset_fork_omni_directories(str(destination))
+
+    _assert_real_empty_directory(destination / "_pups" / "omni" / "scenarios")
+    _assert_real_empty_directory(destination / "_pups" / "omni" / "contrasts")
+    _assert_real_empty_directory(destination / "omni")
+
+
+@pytest.mark.parametrize("entry_type", ["symlink", "file", "fifo"])
+def test_reset_fork_omni_directories_rejects_hostile_root_aggregate(
+    tmp_path: Path,
+    entry_type: str,
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    destination = tmp_path / "destination"
+    (destination / "_pups" / "omni").mkdir(parents=True)
+    aggregate = destination / "omni"
+    external = tmp_path / "external"
+    external.mkdir()
+    sentinel = external / "sentinel.txt"
+    sentinel.write_text("keep", encoding="ascii")
+    if entry_type == "symlink":
+        aggregate.symlink_to(external, target_is_directory=True)
+    elif entry_type == "file":
+        aggregate.write_text("hostile", encoding="ascii")
+    else:
+        os.mkfifo(aggregate)
 
     with pytest.raises(ValueError, match="real directory"):
         fork_helpers._reset_fork_omni_directories(str(destination))
@@ -963,6 +1182,72 @@ def test_fork_rq_reports_ttl_import_failures(
     project.fork_rq("source-run", "new-run", undisturbify=False)
 
     assert any("STATUS TTL initialization failed" in message for message in published)
+
+
+def test_fork_rq_skip_omni_completes_when_child_workspace_is_absent(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import wepppy.rq.project_rq as project
+
+    destination = tmp_path / "destination"
+    destination.mkdir()
+    published: list[str] = []
+    monkeypatch.setattr(project, "get_current_job", lambda: SimpleNamespace(id="job-empty-omni"))
+    monkeypatch.setattr(project.StatusMessenger, "publish", lambda _channel, message: published.append(message))
+    monkeypatch.setattr(project, "get_primary_wd", lambda _runid: str(destination))
+    monkeypatch.setattr(
+        project._fork_helpers,
+        "prepare_fork_run",
+        lambda *args, **kwargs: str(destination),
+    )
+    monkeypatch.setattr(project, "clear_nodb_file_cache", lambda *_args, **_kwargs: None)
+
+    class _OmniStub:
+        def reset_for_fork(self) -> None:
+            pass
+
+    monkeypatch.setattr(project.Omni, "getInstance", lambda _wd: _OmniStub())
+    monkeypatch.setattr(project.Omni, "load_detached", lambda _wd: None)
+    monkeypatch.setattr(
+        project._fork_helpers,
+        "_rewrite_fork_redisprep_dump",
+        lambda _wd: {"attrs:loaded": "true"},
+    )
+    monkeypatch.setattr(
+        project._fork_helpers,
+        "_clear_query_engine_catalog_cache",
+        lambda *_args, **_kwargs: None,
+    )
+
+    class _RedisStub:
+        def delete(self, *_args) -> None:
+            pass
+
+        def hset(self, *_args) -> None:
+            pass
+
+    class _PrepStub:
+        def __init__(self, _wd: str) -> None:
+            self.run_id = "new-run"
+            self.redis = _RedisStub()
+
+    monkeypatch.setattr(project, "RedisPrep", _PrepStub)
+    monkeypatch.setattr(project, "_reset_forked_run_job_markers", lambda *_args, **_kwargs: None)
+
+    project.fork_rq(
+        "source-run",
+        "new-run",
+        undisturbify=False,
+        skip_wepp_runs_output=True,
+        skip_omni_scenarios_contrasts=True,
+    )
+
+    assert any("TRIGGER   fork FORK_COMPLETE" in message for message in published)
+    assert not any("FORK_FAILED" in message for message in published)
+    _assert_real_empty_directory(destination / "_pups" / "omni" / "scenarios")
+    _assert_real_empty_directory(destination / "_pups" / "omni" / "contrasts")
+    _assert_real_empty_directory(destination / "omni")
 
 
 def test_fork_rq_uses_wrapper_helper_aliases(monkeypatch: pytest.MonkeyPatch) -> None:

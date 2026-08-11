@@ -393,6 +393,25 @@ review, and standalone ancestor are required before implementation.
 
 ---
 
+### Fork Omni Empty-State Conformance Fix (SURF-04B-C1)
+
+**Started**: 2026-08-10
+**Priority**: Critical
+**Security impact**: `high`
+**Link**: [docs/work-packages/20260810_fork_omni_empty_state_fix/](docs/work-packages/20260810_fork_omni_empty_state_fix/)
+**Description**: Restore the accepted checked-fork contract for sources that
+legitimately have no `_pups` Omni child workspace. Three wepp1 jobs failed with
+`FileNotFoundError('_pups')` because security-oriented directory verification
+incorrectly treated valid absence as corruption.
+**Status**: Closed 2026-08-11. Conformance patch, 102 focused RQ tests,
+review-governance amendments, and independent correctness/QA/security reviews
+all pass with no unresolved findings. Repository-wide validation was attempted;
+unrelated cwd and integration opt-in leakage blockers are documented with
+isolated-test evidence. No production mutation, retry, deployment, commit, or
+push was performed.
+
+---
+
 ### Omni Fork Symlink Retarget Hardening (SURF-04A)
 
 **Started**: 2026-08-02

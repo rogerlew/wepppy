@@ -60,6 +60,15 @@ def _open_optional_fork_dir(name: str, *, dir_fd: int) -> int | None:
         return None
 
 
+def _open_or_create_fork_dir(name: str, *, dir_fd: int) -> int:
+    """Create one missing reset ancestor, then open it without following links."""
+    try:
+        os.mkdir(name, dir_fd=dir_fd)
+    except FileExistsError:
+        pass
+    return _open_fork_dir(name, dir_fd=dir_fd)
+
+
 def _open_fork_chain(root_fd: int, parts: tuple[str, ...]) -> tuple[int, list[int]]:
     parent_fd = root_fd
     opened: list[int] = []
@@ -981,10 +990,12 @@ def _reset_fork_omni_directories(run_wd: str) -> None:
     root_fd = _open_fork_dir(run_wd)
     opened: list[int] = []
     try:
-        pups_fd, pups_opened = _open_fork_chain(root_fd, ("_pups", "omni"))
-        opened.extend(pups_opened)
-        _replace_fork_dir_with_empty(pups_fd, "scenarios")
-        _replace_fork_dir_with_empty(pups_fd, "contrasts")
+        pups_fd = _open_or_create_fork_dir("_pups", dir_fd=root_fd)
+        opened.append(pups_fd)
+        omni_fd = _open_or_create_fork_dir("omni", dir_fd=pups_fd)
+        opened.append(omni_fd)
+        _replace_fork_dir_with_empty(omni_fd, "scenarios")
+        _replace_fork_dir_with_empty(omni_fd, "contrasts")
         _replace_fork_dir_with_empty(root_fd, "omni")
     finally:
         for fd in reversed(opened):

@@ -59,6 +59,35 @@ Contract-first sequencing applies to intended behavior changes anywhere across:
 - UI-coupled NoDb/server mutation, persistence, invalidation, and hydration;
 - RQ enqueue sites, workers, dependencies, terminal/error states, and outputs.
 
+## Valid-State and User-Experience Gate (Required)
+
+Before implementation, enumerate valid runtime states separately from request
+or flag combinations. At minimum assess absent or never-used optional state,
+present-empty state, populated state, supported legacy state, and malformed or
+hostile state. A claim of exhaustive coverage is valid only when it names both
+the input matrix and the state matrix.
+
+For every user-reachable exception, record whether the triggering condition is
+expected or exceptional and cite the canonical contract that permits failure.
+Expected absence of optional state defaults to create or no-op behavior when
+that is necessary to reach an already-required final state; it must not be
+reclassified as corruption merely because a safety helper requires an existing
+object.
+
+Security, locking, and containment controls are noninterference constraints on
+valid behavior. Their review evidence must prove both sides:
+
+- every valid state still reaches its contracted user outcome; and
+- every malformed or hostile state fails without escaping its authorized
+  boundary.
+
+Correctness and user-experience review owns the first obligation. Security
+review owns the second and verifies noninterference, but security approval
+cannot substitute for correctness approval. At least one direct, unmocked test
+must exercise each changed safety, persistence, or filesystem boundary; an
+orchestration test that mocks the failing boundary is not conformance evidence
+for that boundary.
+
 ## Required Pre-Implementation Checkpoint
 
 For an intended behavior change, implementation files must not be edited until
@@ -226,6 +255,13 @@ Reviewers reject a change when implementation precedes its required contract
 checkpoint, an unlisted document is treated as normative, applicable contracts
 are omitted, or code is used to infer intent. A conformance fix must prove that
 normative behavior stayed unchanged.
+
+Reviewers also reject production behavior changes when the valid-state matrix
+is absent, user-reachable exceptions lack an explicit policy, security evidence
+covers only hostile inputs, or mocks replace the boundary that can produce the
+reported failure. Use
+`docs/prompt_templates/correctness_review_template.md` for production behavior
+and incident-remediation review artifacts.
 
 Every production change also updates affected user, operator, and developer
 documentation in the same final change set. Contract-first ordering is additive

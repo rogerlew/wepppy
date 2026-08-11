@@ -182,3 +182,18 @@ Closed on 2026-08-06. Contract checkpoint `82e47916f` precedes implementation
 commit `3269f7e97`. The delivered UI/API/RQ/NoDb flow, exhaustive boolean
 matrix, destination/source invariants, focused and full validation, and final
 correctness, QA, and security reviews all passed.
+
+## Post-Closure Production Incident - 2026-08-10
+
+Three wepp1 jobs exposed a release-blocking coverage gap: a valid source with
+no materialized `_pups` Omni child workspace failed with
+`FileNotFoundError('_pups')`. The implementation verified existing ancestors
+but did not establish missing optional ancestors, contradicting this package's
+required final-state and idempotence contract.
+
+The prior phrase "exhaustive boolean matrix" described only request flags and
+must not be read as exhaustive runtime-state coverage. Populated and hostile
+fixtures omitted the ordinary never-used-feature state, and higher-level tests
+mocked the failing directory helper. Remediation and review-governance changes
+are tracked in
+`docs/work-packages/20260810_fork_omni_empty_state_fix/` (SURF-04B-C1).

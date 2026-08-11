@@ -7,6 +7,7 @@ This directory groups long-running initiatives into self-contained "work package
 **Quick links:**
 - [`PROJECT_TRACKER.md`](../../PROJECT_TRACKER.md) (root) — Kanban board showing active/backlog/completed packages
 - [`docs/prompt_templates/`](../prompt_templates/) — Templates for package.md, tracker.md, and prompts
+- [`docs/prompt_templates/correctness_review_template.md`](../prompt_templates/correctness_review_template.md) — Valid-state and user-experience review gate
 - [`docs/prompt_templates/security_review_template.md`](../prompt_templates/security_review_template.md) — Dedicated security review checklist and artifact template
 - [`docs/standards/hardening-lifecycle-standard.md`](../standards/hardening-lifecycle-standard.md) — Incident hardening and callus-softening lifecycle standard
 - [`docs/god-tier-prompting-strategy.md`](../god-tier-prompting-strategy.md) — Guide to writing effective prompts for work packages
@@ -39,11 +40,15 @@ Feel free to omit `notes/` or `artifacts/` if the package stays simple.
 2. Fill in `package.md` with the problem statement, scope, stakeholders, and exit criteria (use template from `docs/prompt_templates/package_template.md`).
 3. Complete security impact triage in `package.md` (`none | low | high`) and record whether a dedicated security review artifact is required.
 4. Track all actions in `tracker.md` (Kanban list, decision log, verification checklist, etc.) — use template from `docs/prompt_templates/tracker_template.md`.
-5. If security impact is `high`, create `artifacts/<date>_security_review.md` using `docs/prompt_templates/security_review_template.md` and close all medium/high findings before package closeout.
-6. Drop prompts or automation scripts in `prompts/active/`; when they finish, move them to `prompts/completed/` with a brief outcome summary (inline at top of file or as `<prompt>_outcome.md`).
-7. **Update `PROJECT_TRACKER.md`** (root) when starting, progressing, or closing packages so other agents can discover active work.
-8. When the initiative ends, update `package.md` with the closure date and highlight deliverables or follow-ups.
-9. If the package changes parameterization defaults/formulas/thresholds/unit conversions/fallback rules, add or update an ADR in `docs/adrs/` per `docs/standards/parameterization-adr-standard.md`.
+5. For production behavior changes and incident fixes, create
+   `artifacts/<date>_correctness_review.md` from
+   `docs/prompt_templates/correctness_review_template.md`. Close every
+   medium/high finding before package closeout.
+6. If security impact is `high`, create `artifacts/<date>_security_review.md` using `docs/prompt_templates/security_review_template.md` and close all medium/high findings before package closeout.
+7. Drop prompts or automation scripts in `prompts/active/`; when they finish, move them to `prompts/completed/` with a brief outcome summary (inline at top of file or as `<prompt>_outcome.md`).
+8. **Update `PROJECT_TRACKER.md`** (root) when starting, progressing, or closing packages so other agents can discover active work.
+9. When the initiative ends, update `package.md` with the closure date and highlight deliverables or follow-ups.
+10. If the package changes parameterization defaults/formulas/thresholds/unit conversions/fallback rules, add or update an ADR in `docs/adrs/` per `docs/standards/parameterization-adr-standard.md`.
 
 Keeping everything inside one folder makes handoffs easier and lets us archive the package without losing the history.
 
@@ -183,6 +188,25 @@ Treat the following as `high` by default:
 - CI/CD runner permissions, deployment wiring, or external egress surfaces
 
 For `high` packages, use `docs/prompt_templates/security_review_template.md` and require no unresolved medium/high findings before closure.
+
+## Correctness and User-Experience Review Gate
+
+Production behavior changes and incident fixes require an independent
+correctness artifact based on
+`docs/prompt_templates/correctness_review_template.md`. The review must:
+
+- identify the user's goal and every user-reachable error introduced or
+  retained by the change;
+- enumerate absent, empty, populated, supported legacy, and hostile states
+  separately from input/flag combinations;
+- include direct, unmocked evidence at each changed safety or persistence
+  boundary;
+- prove that security controls do not reject valid states; and
+- refuse unsupported claims that coverage is exhaustive or complete.
+
+Correctness/UX, QA, and security are distinct gates. Security containment does
+not close a correctness finding, and a green broad suite does not close a state
+that the suite never constructed.
 
 ## Size and Scope Guidelines
 

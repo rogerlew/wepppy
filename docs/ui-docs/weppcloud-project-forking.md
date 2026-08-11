@@ -79,6 +79,10 @@ Module: `wepppy/rq/project_rq.py`
   - Publishes copy stage transitions, a replaceable elapsed-time heartbeat every 10 seconds, and bounded final summary/error tails to `<runid>:fork`.
   - When `skip_wepp_runs_output=True` (or when `undisturbify=True`), excludes `wepp/runs` and `wepp/output` from content copy, then creates those directories in the destination run.
   - When `skip_omni_scenarios_contrasts=True`, excludes exactly `_pups/omni/scenarios` and `_pups/omni/contrasts`, recreates empty real collection and aggregate directories, resets only the destination Omni controller, clears its two completion timestamps, and invalidates copied query-engine catalog/cache.
+  - A source that has never created Omni child workspaces may legitimately lack
+    `_pups` or `_pups/omni`. In skip mode the fork creates those missing real
+    destination ancestors and continues; only an existing symlink, special
+    entry, or non-directory ancestor is an error.
   - Remediation in progress (SURF-04A): in that skip mode,
     remove copied Omni contrast `wepp/runs` symlinks whose root targets were
     intentionally excluded; regular materialized contrast files remain

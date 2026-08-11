@@ -218,3 +218,23 @@ fork/archive consumers when releasing the implementation.
 lint and tests (`105` suites / `756` tests), package/root docs lint, and diff
 whitespace checks. See the completed ExecPlan and repository history for the
 earlier full-suite evidence.
+
+### 2026-08-11 00:00 UTC: Post-closure production regression
+
+**Agent/Contributor**: Codex
+
+**Work completed**:
+
+- Recorded three wepp1 checked-fork failures with the shared
+  `FileNotFoundError('_pups')` signature.
+- Corrected the closeout evidence: the boolean matrix was exhaustive only over
+  inputs, not absent/empty/populated/legacy/hostile filesystem states.
+- Opened SURF-04B-C1 for the conformance patch and governance remediation.
+
+**Next steps**:
+
+- Require direct empty-state evidence and independent correctness, QA, and
+  security review in the remediation package.
+
+**Test results**: Existing focused suite passed 85 tests while missing the
+production layout, demonstrating the coverage gap.
