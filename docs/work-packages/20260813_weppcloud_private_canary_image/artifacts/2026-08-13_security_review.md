@@ -90,6 +90,7 @@ Risk acceptance authority: the package owner must acknowledge any accepted risk.
 - Focused pytest: workflow check `1 passed, 1 deselected`; Compose check executed directly because host `wctl` is absent and the built runtime does not contain the Compose plugin.
 - Caddy: configuration valid and formatted.
 - Protected production files: empty diff from baseline; exact hashes in compatibility inventory.
+- GitHub run `31739044295`: failed before compilation with `base name (${RUNTIME_BASE_IMAGE}) should not be blank`; minimal global-ARG scope fix applied and retry pending. The run also warned that pinned Node 20 Actions are currently forced onto Node 24 by GitHub; this did not grant additional permissions.
 
 ## Residual Risk
 

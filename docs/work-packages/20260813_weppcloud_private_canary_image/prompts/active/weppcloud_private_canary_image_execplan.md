@@ -31,6 +31,9 @@ After this work, reviewers can publish the repository's existing common WEPPpy r
 - Observation: Docker did not activate a loopback port publish while Caddy was attached only to an `internal: true` network.
   Evidence: Caddy was healthy and its HostConfig listed port 18080, but NetworkSettings had no published port and host curl failed. Attaching only Caddy to a second edge network made `127.0.0.1:18080` reachable while Redis/web remained internal.
 
+- Observation: Dockerfile build arguments used by multiple `FROM` instructions must be declared before the first `FROM` to remain globally available.
+  Evidence: GitHub run `31739044295` failed with `base name (${RUNTIME_BASE_IMAGE}) should not be blank`. Moving both image arguments above the first stage fixes their BuildKit scope; a retry is pending.
+
 ## Decision Log
 
 - Decision: Implement a standalone compatibility Compose file instead of an override layered onto production Compose.
@@ -125,3 +128,5 @@ Use Docker Compose v2 already installed on `dev-01`, Caddy's existing `caddy:2-a
 Revision note (2026-08-13 19:36 UTC): Initial self-contained plan created from the dispatch, repository governance, and paired private-canary package.
 
 Revision note (2026-08-13 20:02 UTC): Recorded completed inventory/implementation/local validation, immutable publication inputs, observed startup/network surprises, and the remaining GitHub publication/PR milestone.
+
+Revision note (2026-08-13 20:07 UTC): Recorded the first CI build's global Dockerfile ARG failure and its minimal scope correction; publication remains pending retry.

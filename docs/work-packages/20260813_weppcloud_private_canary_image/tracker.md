@@ -127,10 +127,11 @@
 - `wctl` is not installed on `dev-01`, despite the documented baseline. Focused checks ran directly and one pytest selection ran inside the built image.
 - Initial web startup failed because a vendored Discord module opens a fixed token path; `/dev/null` satisfies the import without a credential.
 - An internal-only network suppressed the host loopback publish; the final design attaches only Caddy to a loopback edge network while Redis/web remain on the internal backend.
+- First GitHub run `31739044295` failed before compilation because `RUNTIME_BASE_IMAGE` was declared after the first Dockerfile stage and was blank in the second `FROM`; both base arguments were moved to global Dockerfile scope for the retry.
 
 **Next steps**: Commit/push, observe GHCR workflow, verify privacy and digest, remove the transient feature-branch push trigger, finalize governance, and open the PR.
 
-**Test results**: Local build pass; runtime smoke pass; static contracts 2 pass; focused pytest 1 pass/1 deselected; Caddy valid; protected diff and secret-pattern check pass.
+**Test results**: Local build pass; runtime smoke pass; static contracts 2 pass; focused pytest 1 pass/1 deselected; Caddy valid; protected diff and secret-pattern check pass. GitHub run `31739044295` failed with the exact global-ARG issue above; retry pending.
 
 ## Watch List
 

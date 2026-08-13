@@ -1,6 +1,7 @@
 # syntax=docker/dockerfile:1@sha256:ecfaec9ed6d810b56388c508f4121597bfbba70d41a6dfeee4d8cad5f295fc32
 
 ARG STATIC_BUILDER_IMAGE=node:20-alpine
+ARG RUNTIME_BASE_IMAGE=python:3.12-slim
 FROM ${STATIC_BUILDER_IMAGE} AS static-builder
 WORKDIR /app
 COPY wepppy/weppcloud/static-src/package.json wepppy/weppcloud/static-src/package-lock.json ./
@@ -8,7 +9,6 @@ RUN npm ci --legacy-peer-deps
 COPY wepppy/weppcloud/static-src/ ./
 RUN npm run build
 
-ARG RUNTIME_BASE_IMAGE=python:3.12-slim
 FROM ${RUNTIME_BASE_IMAGE} AS base
 
 LABEL org.opencontainers.image.source="https://github.com/rogerlew/wepppy"
