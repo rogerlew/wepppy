@@ -16,7 +16,7 @@ After this work, reviewers can publish the repository's existing common WEPPpy r
 - [x] (2026-08-13 20:02 UTC) Build and exercise the image on `dev-01`; capture and resolve two smoke-only startup/network issues.
 - [x] (2026-08-13 20:02 UTC) Run focused checks, protected-file comparison, preliminary security review, and secret-sensitive diff review.
 - [x] (2026-08-13 20:20 UTC) Commit/push, observe successful publication, pull and smoke the exact digest, and finalize security evidence.
-- [ ] Open a ready-for-review PR and record its URL.
+- [x] (2026-08-13 20:25 UTC) Open ready-for-review PR https://github.com/rogerlew/wepppy/pull/611 and record its URL.
 
 ## Surprises & Discoveries
 
@@ -54,7 +54,7 @@ After this work, reviewers can publish the repository's existing common WEPPpy r
 
 ## Outcomes & Retrospective
 
-Implementation and artifact acceptance are complete. GitHub run `31739217249` published source `ed1b538df02a8db0d709257ea9dacc330c56b9d9` as `ghcr.io/rogerlew/wepppy:sha-ed1b538df02a8db0d709257ea9dacc330c56b9d9` with digest `sha256:ee92666229df8fdffe4b06b1dff2cfd0e9e06823ada59915c8b492d8a468eb51`. The exact digest passed the three-service runtime contract and the security gate. Only PR creation remains.
+Implementation and artifact acceptance are complete. GitHub run `31739217249` published source `ed1b538df02a8db0d709257ea9dacc330c56b9d9` as `ghcr.io/rogerlew/wepppy:sha-ed1b538df02a8db0d709257ea9dacc330c56b9d9` with digest `sha256:ee92666229df8fdffe4b06b1dff2cfd0e9e06823ada59915c8b492d8a468eb51`. The exact digest passed the three-service runtime contract and the security gate. PR https://github.com/rogerlew/wepppy/pull/611 is ready for review.
 
 ## Context and Orientation
 
@@ -138,3 +138,5 @@ Revision note (2026-08-13 20:02 UTC): Recorded completed inventory/implementatio
 Revision note (2026-08-13 20:07 UTC): Recorded the first CI build's global Dockerfile ARG failure and its minimal scope correction; publication remains pending retry.
 
 Revision note (2026-08-13 20:20 UTC): Recorded successful GHCR publication, exact tag/digest, authenticated pull, anonymous privacy probe, digest-pinned runtime acceptance, and final security sign-off.
+
+Revision note (2026-08-13 20:25 UTC): Recorded ready-for-review PR #611 and completed every planned non-live milestone.

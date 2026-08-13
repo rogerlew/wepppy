@@ -4,9 +4,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-13 19:36 UTC
-**Current phase**: Ready-for-review handoff
-**Last updated**: 2026-08-13 20:20 UTC
-**Next milestone**: Open the ready-for-review PR and capture its URL
+**Current phase**: Review
+**Last updated**: 2026-08-13 20:25 UTC
+**Next milestone**: Reviewer disposition of PR #611
 **Security impact**: `high`
 **Dedicated security review**: `yes`
 **Security artifact**: `docs/work-packages/20260813_weppcloud_private_canary_image/artifacts/2026-08-13_security_review.md`
@@ -15,7 +15,7 @@
 
 ### Ready / Backlog
 
-- [ ] Open a ready-for-review PR and capture its URL.
+- [ ] None.
 
 ### In Progress
 
@@ -36,12 +36,14 @@
 - [x] Completed preliminary security and secret-sensitive diff review; final GHCR readback remains (2026-08-13 20:02 UTC).
 - [x] Published source `ed1b538df02a8db0d709257ea9dacc330c56b9d9`, read back digest `sha256:ee92666229df8fdffe4b06b1dff2cfd0e9e06823ada59915c8b492d8a468eb51`, and passed the digest-pinned smoke (2026-08-13 20:20 UTC).
 - [x] Finalized the dedicated security review with no unresolved medium/high implementation findings (2026-08-13 20:20 UTC).
+- [x] Opened ready-for-review PR https://github.com/rogerlew/wepppy/pull/611 (2026-08-13 20:25 UTC).
 
 ## Timeline
 
 - **2026-08-13 19:36 UTC** – Package created; non-live implementation began.
 - **2026-08-13 20:02 UTC** – Local image build and isolated runtime compatibility passed; publication evidence began.
 - **2026-08-13 20:20 UTC** – GHCR run `31739217249` succeeded; exact digest pull, privacy probe, runtime smoke, and teardown passed.
+- **2026-08-13 20:25 UTC** – Opened ready-for-review PR #611.
 
 ## Decisions Log
 
@@ -151,6 +153,18 @@
 **Next steps**: Run final diff/lint checks, commit, push, and open the ready-for-review PR.
 
 **Test results**: GitHub publish pass; exact digest pull/runtime pass; privacy probe pass; cleanup pass. The published image's local compressed-content size reported by Docker is 2,195,646,167 bytes.
+
+### 2026-08-13 20:25 UTC: Review handoff
+
+**Agent/Contributor**: Codex
+
+**Work completed**: Opened ready-for-review PR https://github.com/rogerlew/wepppy/pull/611 with exact artifact and validation evidence.
+
+**Blockers encountered**: None for this phase.
+
+**Next steps**: Reviewer disposition; live Kubernetes work remains explicitly out of scope.
+
+**Test results**: Final scoped diff and PR state verified.
 
 ## Watch List
 
