@@ -41,7 +41,7 @@ This package delivers the non-live WEPPpy half of the private WEPPcloud canary: 
 - [ ] The inventory and minimum compatibility matrix are complete.
 - [ ] The workflow uses only `contents: read` and `packages: write`, commit-derived tags, and full-SHA Action pins.
 - [ ] A built image passes focused Compose rendering and runtime smoke checks, or an exact build failure is recorded.
-- [ ] The workflow reports the pushed immutable digest.
+- [x] The workflow reports the pushed immutable digest.
 - [ ] Existing production Compose files are byte-for-byte unchanged.
 - [ ] Lint/tests and a secret-sensitive diff review pass.
 - [ ] A ready-for-review PR records the source SHA, image tag/digest, validation, and blockers.
@@ -92,7 +92,10 @@ This package delivers the non-live WEPPpy half of the private WEPPcloud canary: 
 
 ## Deliverables
 
-- Pending implementation and PR links.
+- Successful publication run: https://github.com/rogerlew/wepppy/actions/runs/31739217249
+- Source image commit: `ed1b538df02a8db0d709257ea9dacc330c56b9d9`
+- Published digest: `sha256:ee92666229df8fdffe4b06b1dff2cfd0e9e06823ada59915c8b492d8a468eb51`
+- PR link pending creation after final validation.
 
 ## Follow-up Work
 

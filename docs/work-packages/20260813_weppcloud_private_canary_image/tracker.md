@@ -4,9 +4,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-13 19:36 UTC
-**Current phase**: Publication evidence
-**Last updated**: 2026-08-13 20:02 UTC
-**Next milestone**: Push the branch, read back the private GHCR digest, and finalize the PR
+**Current phase**: Ready-for-review handoff
+**Last updated**: 2026-08-13 20:20 UTC
+**Next milestone**: Open the ready-for-review PR and capture its URL
 **Security impact**: `high`
 **Dedicated security review**: `yes`
 **Security artifact**: `docs/work-packages/20260813_weppcloud_private_canary_image/artifacts/2026-08-13_security_review.md`
@@ -15,12 +15,11 @@
 
 ### Ready / Backlog
 
-- [ ] Finalize security review and governance with GHCR readback.
 - [ ] Open a ready-for-review PR and capture its URL.
 
 ### In Progress
 
-- [ ] Commit and push the branch; capture workflow image tag/digest/privacy evidence.
+- [ ] None.
 
 ### Blocked
 
@@ -35,11 +34,14 @@
 - [x] Built the common image and passed isolated Caddy + WEPPcloud + Redis runtime smoke checks (2026-08-13 20:02 UTC).
 - [x] Proved protected production Compose/Caddy files have an empty baseline diff (2026-08-13 20:02 UTC).
 - [x] Completed preliminary security and secret-sensitive diff review; final GHCR readback remains (2026-08-13 20:02 UTC).
+- [x] Published source `ed1b538df02a8db0d709257ea9dacc330c56b9d9`, read back digest `sha256:ee92666229df8fdffe4b06b1dff2cfd0e9e06823ada59915c8b492d8a468eb51`, and passed the digest-pinned smoke (2026-08-13 20:20 UTC).
+- [x] Finalized the dedicated security review with no unresolved medium/high implementation findings (2026-08-13 20:20 UTC).
 
 ## Timeline
 
 - **2026-08-13 19:36 UTC** – Package created; non-live implementation began.
 - **2026-08-13 20:02 UTC** – Local image build and isolated runtime compatibility passed; publication evidence began.
+- **2026-08-13 20:20 UTC** – GHCR run `31739217249` succeeded; exact digest pull, privacy probe, runtime smoke, and teardown passed.
 
 ## Decisions Log
 
@@ -63,8 +65,8 @@
 
 | Risk | Severity | Likelihood | Mitigation | Status |
 | --- | --- | --- | --- | --- |
-| Shared runtime image build regresses production consumers | High | Medium | Build common Dockerfile, retain default args, and record production-file hashes/diff | Mitigated; CI run pending |
-| Workflow authority or tags are broader/mutable | High | Medium | Minimum permissions, full Action SHAs, commit tag, digest output, private package readback | CI readback pending |
+| Shared runtime image build regresses production consumers | High | Medium | Build common Dockerfile, retain default args, and record production-file hashes/diff | Mitigated; CI and smoke passed |
+| Workflow authority or tags are broader/mutable | High | Medium | Minimum permissions, full Action SHAs, commit tag, digest output, private package readback | Mitigated; run/readback passed |
 | Flask startup requires more services/secrets than the minimum design | High | Medium | Synthetic inputs and `/dev/null` for legacy Discord import; PostgreSQL explicitly deferred | Mitigated/documented |
 | Smoke stack accidentally includes workers/socket/public exposure | High | Low | Static assertions, rendered negative checks, loopback-only edge | Closed |
 
@@ -78,15 +80,15 @@
 
 ### Security
 
-- [ ] Dedicated security review has no unresolved medium/high findings.
+- [x] Dedicated security review has no unresolved medium/high implementation findings.
 - [x] No production secret was accessed or retained.
 - [x] Secret-sensitive diff review passes.
 
 ### Documentation
 
 - [x] Compatibility inventory and matrix record exact contracts and evidence.
-- [ ] Active ExecPlan and tracker reflect final state (publication/PR pending).
-- [ ] Exact source SHA, image tag/digest, permissions, inputs, tests, and startup needs are recorded (GHCR digest pending).
+- [x] Active ExecPlan and tracker reflect final state (PR creation pending).
+- [x] Exact source SHA, image tag/digest, permissions, inputs, tests, and startup needs are recorded.
 
 ### Testing
 
@@ -131,7 +133,24 @@
 
 **Next steps**: Commit/push, observe GHCR workflow, verify privacy and digest, remove the transient feature-branch push trigger, finalize governance, and open the PR.
 
-**Test results**: Local build pass; runtime smoke pass; static contracts 2 pass; focused pytest 1 pass/1 deselected; Caddy valid; protected diff and secret-pattern check pass. GitHub run `31739044295` failed with the exact global-ARG issue above; retry pending.
+**Test results**: Local build pass; runtime smoke pass; static contracts 2 pass; focused pytest 1 pass/1 deselected; Caddy valid; protected diff and secret-pattern check pass. GitHub run `31739044295` failed with the exact global-ARG issue above; corrected run `31739217249` passed.
+
+### 2026-08-13 20:20 UTC: Published-artifact acceptance
+
+**Agent/Contributor**: Codex
+
+**Work completed**:
+
+- GitHub run `31739217249` published `ghcr.io/rogerlew/wepppy:sha-ed1b538df02a8db0d709257ea9dacc330c56b9d9` at digest `sha256:ee92666229df8fdffe4b06b1dff2cfd0e9e06823ada59915c8b492d8a468eb51`.
+- Authenticated digest pull succeeded; anonymous manifest access returned HTTP 401 without changing package settings.
+- The exact digest passed health, proxy, static, root, storage-permission, no-socket, and loopback-only port checks; explicit teardown left no project containers or networks.
+- Removed the temporary feature-branch publish trigger; the final workflow supports manual dispatch and pushes to `master` only.
+
+**Blockers encountered**: The local GitHub token lacks `read:packages`, so GitHub's package metadata API returned 403. Authenticated pull plus the anonymous 401 probe supplied the required artifact and privacy evidence.
+
+**Next steps**: Run final diff/lint checks, commit, push, and open the ready-for-review PR.
+
+**Test results**: GitHub publish pass; exact digest pull/runtime pass; privacy probe pass; cleanup pass. The published image's local compressed-content size reported by Docker is 2,195,646,167 bytes.
 
 ## Watch List
 

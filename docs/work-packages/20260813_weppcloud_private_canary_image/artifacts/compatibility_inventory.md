@@ -6,7 +6,7 @@
 - Inventory date: 2026-08-13 UTC.
 - Protected files were read only. Their baseline/current Git blob hashes are identical and are recorded below.
 - Secret names and mount destinations were inspected from tracked configuration. No secret file under `docker/secrets/` was opened, copied, or generated.
-- The local smoke build used the working-tree Docker context and is compatibility evidence, not the eventual clean GitHub publication artifact. The GitHub workflow checks out its dispatched commit before building.
+- The local smoke build used the working-tree Docker context. Final acceptance also exercised the exact GHCR digest built from source `ed1b538df02a8db0d709257ea9dacc330c56b9d9`.
 
 ## Production service inventory
 
@@ -41,7 +41,9 @@ Production Caddy returns its own `/health` and `/weppcloud/health`, serves multi
 
 The GitHub workflow builds repository context `.` with `docker/Dockerfile` for `linux/amd64` and the existing production-compatible identity arguments `APP_USER=roger`, `APP_GROUP=docker`, `APP_UID=1000`, and `APP_GID=993`. The output tag is `ghcr.io/<lowercase-owner>/wepppy:sha-<full-source-SHA>` and the workflow reports `ghcr.io/<lowercase-owner>/wepppy@sha256:<digest>`.
 
-The existing Dockerfile contains several inputs outside the WEPPpy source SHA: floating base tags `python:3.12-slim` and `node:20-alpine`; the Dockerfile frontend `docker/dockerfile:1`; the current uv installer; DuckDB's downloaded `spatial` extension; and Git clones of `rosetta` plus `weppcloud2`, `f-esri`, `weppcloud-wbt`, and `wepppyo3`, with the latter four using branch defaults. Quarto is version/checksum pinned, the Python requirements file is version-pinned, and the Brotli Git dependency is commit-pinned. Therefore the workflow yields an immutable, attributable published artifact and digest, but independently repeated builds of the same WEPPpy commit are not guaranteed byte-identical. Resolving that deeper reproducibility gap requires separately reviewed Dockerfile input pins and is not hidden by this package.
+The publication run pinned the Dockerfile frontend, both base images, uv `0.12.3`, and all five sibling Git repositories. The exact inputs are recorded in `.github/workflows/publish-weppcloud-image.yml`. Debian package indexes and DuckDB's downloaded `spatial` extension remain externally resolved, so independently repeated builds are not guaranteed byte-identical. The published artifact itself is immutable at `ghcr.io/rogerlew/wepppy@sha256:ee92666229df8fdffe4b06b1dff2cfd0e9e06823ada59915c8b492d8a468eb51`.
+
+GitHub Actions run `31739217249` built source `ed1b538df02a8db0d709257ea9dacc330c56b9d9`, pushed tag `ghcr.io/rogerlew/wepppy:sha-ed1b538df02a8db0d709257ea9dacc330c56b9d9`, and reported digest `sha256:ee92666229df8fdffe4b06b1dff2cfd0e9e06823ada59915c8b492d8a468eb51`. An authenticated digest pull succeeded. An unauthenticated manifest request returned HTTP 401, demonstrating that the package was not publicly readable without changing repository or package settings.
 
 ## Protected-file non-mutation evidence
 
@@ -62,7 +64,7 @@ The existing Dockerfile contains several inputs outside the WEPPpy source SHA: f
 
 | Check | Compose smoke | Future Kubernetes canary | Result/need |
 | --- | --- | --- | --- |
-| Common image starts as UID 1000/GID 993 | Local commit-tagged image | Same GHCR image by digest | Compose pass after ephemeral mount ownership fix. |
+| Common image starts as UID 1000/GID 993 | Exact GHCR digest | Same GHCR image by digest | Compose pass after ephemeral mount ownership fix. |
 | Caddy health | Loopback `/health` | Private ingress to Caddy `/health` | Compose pass. |
 | Flask health through Caddy | `/weppcloud/health` | Same path | Compose pass. |
 | WEPPcloud root through Caddy | `/weppcloud/` | Same path | Compose HTTP 200. |

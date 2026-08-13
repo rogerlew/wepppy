@@ -24,8 +24,8 @@
 
 | ID | Severity | Surface | Description | Evidence | Required action | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| SEC-01 | High | CI authority | Image publication must not receive repository-write, identity-token, or unrelated secret authority. | Workflow top-level permissions are exactly `contents: read` and `packages: write`; login uses only `secrets.GITHUB_TOKEN`. | Keep exact permissions and verify the run. | Resolved pending run readback |
-| SEC-02 | High | Supply chain | Floating Action refs or workload tags could execute or deploy changed content. | All four Actions use verified 40-character release SHAs; Caddy/Redis use platform digests; output includes the pushed manifest digest; tests reject floating Action refs. | Verify GHCR digest and consume by digest. | Resolved pending run readback |
+| SEC-01 | High | CI authority | Image publication must not receive repository-write, identity-token, or unrelated secret authority. | Workflow top-level permissions are exactly `contents: read` and `packages: write`; login uses only `secrets.GITHUB_TOKEN`; run `31739217249` passed. | Keep exact permissions. | Resolved |
+| SEC-02 | High | Supply chain | Floating Action refs or workload tags could execute or deploy changed content. | All four Actions use verified 40-character release SHAs; Caddy/Redis use platform digests; the exact reported GHCR digest was pulled and smoked. | Consume the runtime image by digest. | Resolved |
 | SEC-03 | Medium | Build provenance | The existing Dockerfile used floating sibling Git branches and base tags. | Workflow supplies full Git SHAs, base image digests, and a versioned uv installer through default-preserving Dockerfile build args. The frontend syntax is digest-pinned. | Record pins and remaining apt/DuckDB external resolution limits. | Resolved |
 | SEC-04 | High | Secrets | Full WEPPcloud imports a fixed Discord token path even when notifications are disabled. | First smoke failed at `discord_client.py`; retry succeeded with `/dev/null` mounted at the fixed path. | Never inject Discord credentials into the web-only canary; retain empty-file workaround or repair upstream import coupling later. | Resolved for smoke; follow-up documented |
 | SEC-05 | High | Network/privilege | Workers, sockets, host datasets, or broad host ports would exceed authority. | Rendered model has only Caddy/WEPPcloud/Redis; Caddy binds `127.0.0.1`; Redis/web have no host ports; no Docker socket; backend network is internal. | Keep negative assertions. | Resolved |
@@ -36,12 +36,12 @@ Risk acceptance authority: the package owner must acknowledge any accepted risk.
 
 ## Verdict
 
-- **Gate status**: fail pending GHCR workflow/digest/privacy readback
+- **Gate status**: pass
 - **Unresolved findings**:
-  - High: 2 evidence gates (SEC-01 and SEC-02 run readback)
+  - High: 0
   - Medium: 0 implementation findings; SEC-07 is a recorded pre-existing residual risk
   - Low: 0
-- **Release recommendation**: hold final ready-for-review status until the branch workflow completes and the package is confirmed private.
+- **Release recommendation**: ready for review for this non-live phase. No live deployment is authorized by this verdict.
 
 ## Surface Checks
 
@@ -72,7 +72,7 @@ Risk acceptance authority: the package owner must acknowledge any accepted risk.
 - [x] Actions are pinned by full commit SHA.
 - [x] Caddy and Redis smoke images are pinned by digest.
 - [x] Common image uses a full source-SHA tag and reports its immutable digest.
-- [ ] Successful workflow, private-package visibility, and digest readback recorded.
+- [x] Successful workflow, private-package visibility, and digest readback recorded.
 
 ### Logging and rollback
 
@@ -90,7 +90,10 @@ Risk acceptance authority: the package owner must acknowledge any accepted risk.
 - Focused pytest: workflow check `1 passed, 1 deselected`; Compose check executed directly because host `wctl` is absent and the built runtime does not contain the Compose plugin.
 - Caddy: configuration valid and formatted.
 - Protected production files: empty diff from baseline; exact hashes in compatibility inventory.
-- GitHub run `31739044295`: failed before compilation with `base name (${RUNTIME_BASE_IMAGE}) should not be blank`; minimal global-ARG scope fix applied and retry pending. The run also warned that pinned Node 20 Actions are currently forced onto Node 24 by GitHub; this did not grant additional permissions.
+- GitHub run `31739044295`: failed before compilation with `base name (${RUNTIME_BASE_IMAGE}) should not be blank`; the minimal global-ARG scope fix was applied.
+- GitHub run `31739217249`: pass in 7m22s for source `ed1b538df02a8db0d709257ea9dacc330c56b9d9`; tag `ghcr.io/rogerlew/wepppy:sha-ed1b538df02a8db0d709257ea9dacc330c56b9d9`; digest `sha256:ee92666229df8fdffe4b06b1dff2cfd0e9e06823ada59915c8b492d8a468eb51`. GitHub emitted build provenance. The run warned that pinned Node 20 Actions are forced onto Node 24; permissions remained unchanged.
+- Registry evidence: authenticated exact-digest pull passed; anonymous manifest access returned HTTP 401. GitHub's package metadata API returned 403 because the local user token lacks `read:packages`; no scope or setting was changed.
+- Exact published-image smoke: all three services healthy; `/health`, `/weppcloud/health`, `/weppcloud/static/compatibility.txt`, and `/weppcloud/` passed; `/wc1` write passed; `/geodata` write was denied; Docker socket absent; Redis/web had no host port; only Caddy bound `127.0.0.1:18080`; teardown left no project containers or networks.
 
 ## Residual Risk
 
@@ -103,5 +106,5 @@ Risk acceptance authority: the package owner must acknowledge any accepted risk.
 
 ## Sign-off
 
-- **Security reviewer**: pending final workflow readback
+- **Security reviewer**: Codex — pass, 2026-08-13
 - **Package owner**: pending PR review

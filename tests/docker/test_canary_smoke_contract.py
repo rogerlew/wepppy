@@ -73,10 +73,7 @@ def test_workflow_has_minimum_permissions_immutable_tags_and_pinned_actions() ->
 
     assert workflow["permissions"] == {"contents": "read", "packages": "write"}
     assert "workflow_dispatch" in workflow[True]
-    assert workflow[True]["push"]["branches"] == [
-        "master",
-        "weppcloud-private-canary-image",
-    ]
+    assert workflow[True]["push"]["branches"] == ["master"]
     assert "secrets.GITHUB_TOKEN" in workflow_text
     assert "sha-${GITHUB_SHA}" in workflow_text
     assert "steps.build.outputs.digest" in workflow_text

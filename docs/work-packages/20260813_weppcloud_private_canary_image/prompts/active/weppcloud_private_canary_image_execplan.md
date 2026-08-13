@@ -15,7 +15,8 @@ After this work, reviewers can publish the repository's existing common WEPPpy r
 - [x] (2026-08-13 20:02 UTC) Implement additive Compose/Caddy smoke configuration and focused assertions.
 - [x] (2026-08-13 20:02 UTC) Build and exercise the image on `dev-01`; capture and resolve two smoke-only startup/network issues.
 - [x] (2026-08-13 20:02 UTC) Run focused checks, protected-file comparison, preliminary security review, and secret-sensitive diff review.
-- [ ] Commit, push, open a ready-for-review PR, observe workflow publication, and record tag/digest.
+- [x] (2026-08-13 20:20 UTC) Commit/push, observe successful publication, pull and smoke the exact digest, and finalize security evidence.
+- [ ] Open a ready-for-review PR and record its URL.
 
 ## Surprises & Discoveries
 
@@ -32,7 +33,10 @@ After this work, reviewers can publish the repository's existing common WEPPpy r
   Evidence: Caddy was healthy and its HostConfig listed port 18080, but NetworkSettings had no published port and host curl failed. Attaching only Caddy to a second edge network made `127.0.0.1:18080` reachable while Redis/web remained internal.
 
 - Observation: Dockerfile build arguments used by multiple `FROM` instructions must be declared before the first `FROM` to remain globally available.
-  Evidence: GitHub run `31739044295` failed with `base name (${RUNTIME_BASE_IMAGE}) should not be blank`. Moving both image arguments above the first stage fixes their BuildKit scope; a retry is pending.
+  Evidence: GitHub run `31739044295` failed with `base name (${RUNTIME_BASE_IMAGE}) should not be blank`. Moving both image arguments above the first stage fixed their BuildKit scope; run `31739217249` then succeeded.
+
+- Observation: GitHub's package metadata API requires a `read:packages` user-token scope that the local token does not carry, but registry authentication and artifact pull use the workflow-created package authorization successfully.
+  Evidence: the metadata API returned 403, authenticated digest pull succeeded, and an anonymous manifest request returned 401. No repository or package setting was changed.
 
 ## Decision Log
 
@@ -50,7 +54,7 @@ After this work, reviewers can publish the repository's existing common WEPPpy r
 
 ## Outcomes & Retrospective
 
-The local implementation and runtime evidence are complete. The existing common image builds and the minimum three-service stack passes the intended HTTP, storage, Redis, and negative-boundary checks. GitHub publication, private-package/digest readback, final security sign-off, and the PR remain.
+Implementation and artifact acceptance are complete. GitHub run `31739217249` published source `ed1b538df02a8db0d709257ea9dacc330c56b9d9` as `ghcr.io/rogerlew/wepppy:sha-ed1b538df02a8db0d709257ea9dacc330c56b9d9` with digest `sha256:ee92666229df8fdffe4b06b1dff2cfd0e9e06823ada59915c8b492d8a468eb51`. The exact digest passed the three-service runtime contract and the security gate. Only PR creation remains.
 
 ## Context and Orientation
 
@@ -94,6 +98,8 @@ Validate protected files and the patch:
 
 Observed local results: build passed with local manifest digest `sha256:f70d212bd5d75ade2d183f807899bd00bf7f6c89b65029ae196dc53a1e626296`; the final HTTP checks returned `OK`, JSON string `"OK"`, the static compatibility text, and HTTP 200 for `/weppcloud/`. `/wc1` accepted a write, `/geodata` rejected one, and neither Redis nor WEPPcloud published a host port. The explicit project teardown removed its containers and networks; two stale volumes created by the first pre-`tmpfs` revision were removed by exact name.
 
+Published-artifact results: run `31739217249` succeeded in 7m22s. An authenticated pull of `ghcr.io/rogerlew/wepppy@sha256:ee92666229df8fdffe4b06b1dff2cfd0e9e06823ada59915c8b492d8a468eb51` succeeded; the exact image then passed the same HTTP, storage, socket, port, and cleanup checks. Anonymous manifest access returned 401.
+
 ## Validation and Acceptance
 
 The Compose file must render without accessing `docker/secrets/`. Static assertions must show exactly Caddy, WEPPcloud, and Redis; no worker, Docker socket, host filesystem production mounts, external data credential, OAuth, SMTP, CAPTCHA, or public route may appear. Caddy `/health` and `/weppcloud/health` must return HTTP 200, `/weppcloud/` must traverse to the Flask application, and at least one packaged static asset must be served. Redis must be ephemeral and reachable only on the private Compose network.
@@ -130,3 +136,5 @@ Revision note (2026-08-13 19:36 UTC): Initial self-contained plan created from t
 Revision note (2026-08-13 20:02 UTC): Recorded completed inventory/implementation/local validation, immutable publication inputs, observed startup/network surprises, and the remaining GitHub publication/PR milestone.
 
 Revision note (2026-08-13 20:07 UTC): Recorded the first CI build's global Dockerfile ARG failure and its minimal scope correction; publication remains pending retry.
+
+Revision note (2026-08-13 20:20 UTC): Recorded successful GHCR publication, exact tag/digest, authenticated pull, anonymous privacy probe, digest-pinned runtime acceptance, and final security sign-off.
