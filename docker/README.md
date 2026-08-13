@@ -69,6 +69,30 @@ Production Python services also fail startup unless the vendored
 canonical `wepppyo3/release/linux/py312` artifact whenever the native
 interchange is intentionally refreshed.
 
+### Commit-derived private image publication
+
+`.github/workflows/publish-weppcloud-image.yml` is a manually dispatched,
+non-deploying workflow for the common `docker/Dockerfile` runtime. It publishes
+`ghcr.io/<owner>/wepppy:sha-<full-source-SHA>` with repository-token permissions
+limited to `contents: read` and `packages: write`, then reports the immutable
+manifest digest. Consumers must pin `ghcr.io/<owner>/wepppy@sha256:<digest>`;
+the commit tag is provenance metadata, not a deployment pin.
+
+The Dockerfile keeps its existing branch/tag defaults for normal Compose
+builds, but exposes base-image, uv-installer, Rosetta, and sibling-repository
+build arguments. The publication workflow supplies immutable base digests,
+versioned installer URL, and full Git SHAs through those arguments. This does
+not change any production Compose default. Review the exact current pins and
+remaining external-build limits in
+`docs/work-packages/20260813_weppcloud_private_canary_image/artifacts/compatibility_inventory.md`.
+
+`docker/docker-compose.canary-smoke.yml` is an isolated compatibility harness,
+not a deployment file. It contains only Caddy, WEPPcloud, and ephemeral Redis,
+binds Caddy to loopback, and requires synthetic smoke inputs plus an exact
+commit-tagged or digest-pinned WEPPcloud image. Always use the explicit project
+name `weppcloud-canary-smoke`; never layer this file onto a production Compose
+stack.
+
 ### Production Worker Pool (Dedicated RQ Hosts)
 
 Worker-only stacks (no Flask/Caddy/Redis/Postgres) use:

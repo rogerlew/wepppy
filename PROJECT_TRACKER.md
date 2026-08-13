@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-08-09
-**Active Packages**: 24
+**Last Updated**: 2026-08-13
+**Active Packages**: 25
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -352,6 +352,22 @@ When resuming Kubernetes work:
 ---
 
 ## 🚧 In Progress
+
+### WEPPcloud Private-Canary Image Compatibility
+
+**Started**: 2026-08-13
+**Size**: Focused cross-cutting implementation
+**Priority**: High
+**Security impact**: `high` (private image publication and CI token authority)
+**Link**: [docs/work-packages/20260813_weppcloud_private_canary_image/](docs/work-packages/20260813_weppcloud_private_canary_image/)
+**Description**: Build the existing common runtime image with a commit-derived
+private GHCR reference and immutable digest, then prove an additive minimum
+Caddy + WEPPcloud + ephemeral Redis compatibility stack without changing or
+starting a production Compose deployment.
+**Next Steps**: Complete the inventory, local smoke build, security review, and
+GitHub Actions publication evidence; then open the ready-for-review PR.
+
+---
 
 ### Peak-Flow Discontinuity Multi-Site Audit
 
