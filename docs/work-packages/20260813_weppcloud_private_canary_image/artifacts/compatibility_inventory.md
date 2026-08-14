@@ -25,6 +25,10 @@ The protected base file `docker/docker-compose.prod.yml` defines a broad product
 
 ## Secret and startup inventory
 
+The durable operator contract is now
+[`docs/infrastructure/weppcloud-web-runtime-contract.md`](../../../infrastructure/weppcloud-web-runtime-contract.md).
+This section records the compatibility investigation that led to it.
+
 The production base declares these secret IDs: `redis_password`, `discord_bot_token`, `postgres_password`, `flask_secret_key`, `flask_security_password_salt`, `wepp_auth_jwt_secrets`, `agent_jwt_secret`, `wepp_mcp_jwt_secret`, `dtale_internal_token`, `cap_secret`, `oauth_github_client_secret`, `oauth_google_client_secret`, `zoho_noreply_email_password`, `opentopography_api_key`, `climate_engine_api_key`, and `admin_password`.
 
 The minimum web process requires non-empty Flask `SECRET_KEY` and `SECURITY_PASSWORD_SALT`. The smoke contract also supplies a separate synthetic `AGENT_JWT_SECRET` and password-protected Redis. OAuth, SMTP, CAPTCHA/CAP, WEPP JWT, MCP JWT, D-Tale, admin, and external-data credentials are omitted.
