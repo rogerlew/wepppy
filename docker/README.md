@@ -5,6 +5,10 @@
 This guide covers both the development (`docker-compose.dev.yml`) and production (`docker-compose.prod.yml`) Docker Compose stacks for WEPPcloud.
 It also covers the production worker pool stack (`docker-compose.prod.worker.yml`) used on dedicated RQ worker hosts.
 
+The canonical web-process startup, minimum configuration, and secret inventory
+is documented in
+[`docs/infrastructure/weppcloud-web-runtime-contract.md`](../docs/infrastructure/weppcloud-web-runtime-contract.md).
+
 `docker-compose.dev.hpc.yml` is a legacy configuration that is being
 repurposed. It is not a supported WEPPcloud development or worker deployment
 target; do not extend new worker topology into it unless its replacement

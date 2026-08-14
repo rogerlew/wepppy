@@ -16,6 +16,7 @@ This directory holds top-level documentation that supports the codebase. Use the
 Prefer to keep documentation alongside the relevant source module when practical. Use the `docs/` tree for cross-cutting references, UI guidance, or coordinated efforts (work packages and mini packages).
 
 ## Canonical Contracts
+- WEPPcloud web startup and minimum secrets: `docs/infrastructure/weppcloud-web-runtime-contract.md`
 - CSRF: `docs/schemas/weppcloud-csrf-contract.md`
 - Browser/session lifecycle: `docs/schemas/weppcloud-session-contract.md`
 - JWT/auth claims and token classes: `docs/dev-notes/auth-token.spec.md`
