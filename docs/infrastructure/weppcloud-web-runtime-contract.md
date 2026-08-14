@@ -12,10 +12,16 @@ otherwise.
 
 ## Process contract
 
-The common image starts through `docker/weppcloud-entrypoint.sh`, which performs
-the tracked JavaScript and native-library preflights before executing the
-container command. The web process is Gunicorn serving
-`wepppy.weppcloud.app:app` on port `8000`.
+The common image has no `ENTRYPOINT`. Its Dockerfile `CMD`, or an explicit
+orchestrator command override, starts Gunicorn serving
+`wepppy.weppcloud.app:app` on port `8000`. The deployed Kubernetes digest was
+inspected to confirm the non-root `roger` user, `/workdir/wepppy` working
+directory, Gunicorn executable, and expected vendored compatibility path.
+
+`docker/weppcloud-entrypoint.sh` exists for Compose-specific workflows but is
+not wired into the common image and must not be assumed to run in Kubernetes.
+Any preflight needed by Kubernetes must be explicit in image build validation,
+an init container, or the workload command rather than relying on that script.
 
 The production image default is four workers, two threads, and a 1,800-second
 timeout. A resource-bounded canary may override that to one worker, two threads,
@@ -177,6 +183,8 @@ belong in the environment manifests, not in the secret object.
 - `wepppy/weppcloud/configuration.py` — Flask, PostgreSQL, and session startup
 - `wepppy/config/secrets.py` — canonical `*_FILE` resolution behavior
 - `wepppy/config/redis_settings.py` — Redis URL construction and password injection
-- `docker/Dockerfile` and `docker/weppcloud-entrypoint.sh` — image startup
+- `docker/Dockerfile` — common image startup contract
+- `docker/weppcloud-entrypoint.sh` — optional Compose workflow helper, not the
+  common image entrypoint
 - `docker/docker-compose.canary-smoke.yml` — isolated compatibility evidence
 - `docs/infrastructure/secrets.md` — full multi-service secret catalog
