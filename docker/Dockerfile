@@ -1,13 +1,15 @@
-# syntax=docker/dockerfile:1
+# syntax=docker/dockerfile:1@sha256:ecfaec9ed6d810b56388c508f4121597bfbba70d41a6dfeee4d8cad5f295fc32
 
-FROM node:20-alpine AS static-builder
+ARG STATIC_BUILDER_IMAGE=node:20-alpine
+ARG RUNTIME_BASE_IMAGE=python:3.12-slim
+FROM ${STATIC_BUILDER_IMAGE} AS static-builder
 WORKDIR /app
 COPY wepppy/weppcloud/static-src/package.json wepppy/weppcloud/static-src/package-lock.json ./
 RUN npm ci --legacy-peer-deps
 COPY wepppy/weppcloud/static-src/ ./
 RUN npm run build
 
-FROM python:3.12-slim AS base
+FROM ${RUNTIME_BASE_IMAGE} AS base
 
 LABEL org.opencontainers.image.source="https://github.com/rogerlew/wepppy"
 
@@ -29,6 +31,9 @@ ARG WEPPCLOUD2_REPO=https://github.com/wepp-in-the-woods/weppcloud2.git
 ARG WEPPCLOUD2_REF=main
 ARG WEPPPYO3_REPO=https://github.com/wepp-in-the-woods/wepppyo3.git
 ARG WEPPPYO3_REF=main
+ARG ROSETTA_REPO=https://github.com/rogerlew/rosetta.git
+ARG ROSETTA_REF=main
+ARG UV_INSTALLER_URL=https://astral.sh/uv/install.sh
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -77,7 +82,7 @@ RUN curl -fsSL "https://download.docker.com/linux/static/stable/x86_64/docker-${
 
 ENV UV_SKIP_UPDATE_CHECK=1
 
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
+RUN curl -LsSf "${UV_INSTALLER_URL}" | sh && \
     ln -s /root/.local/bin/uv /usr/local/bin/uv
 
 # Resolve Python dependencies with uv inside a dedicated virtual environment.
@@ -100,8 +105,10 @@ RUN /opt/venv/bin/python -c "import duckdb; \
 
 # Vendor Rosetta directly from GitHub into site-packages, including LFS assets.
 RUN SITE_PACKAGES=$(/opt/venv/bin/python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])') && \
-    git clone --depth=1 https://github.com/rogerlew/rosetta /tmp/rosetta && \
+    git init /tmp/rosetta && \
     pushd /tmp/rosetta >/dev/null && \
+    git fetch --depth=1 "${ROSETTA_REPO}" "${ROSETTA_REF}" && \
+    git checkout --detach FETCH_HEAD && \
     git lfs pull && \
     popd >/dev/null && \
     rm -rf /tmp/rosetta/.git && \

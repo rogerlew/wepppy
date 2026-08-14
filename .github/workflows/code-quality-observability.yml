@@ -38,7 +38,7 @@ jobs:
     - self-hosted
     - Linux
     - X64
-    - homelab
+    - remote-ci
     permissions:
       contents: read
       pull-requests: write

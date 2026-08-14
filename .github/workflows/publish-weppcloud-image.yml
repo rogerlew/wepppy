@@ -1,0 +1,89 @@
+name: Publish WEPPcloud common runtime image
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    outputs:
+      image: ${{ steps.image.outputs.name }}
+      tag: ${{ steps.image.outputs.tag }}
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - name: Check out the dispatched source commit
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Derive immutable image coordinates
+        id: image
+        shell: bash
+        run: |
+          set -euo pipefail
+          image_name="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/wepppy"
+          image_tag="sha-${GITHUB_SHA}"
+          echo "name=${image_name}" >> "${GITHUB_OUTPUT}"
+          echo "tag=${image_tag}" >> "${GITHUB_OUTPUT}"
+          echo "ref=${image_name}:${image_tag}" >> "${GITHUB_OUTPUT}"
+
+      - name: Log in to private GHCR
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+
+      - name: Build and push the existing common runtime image
+        id: build
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
+        with:
+          context: .
+          file: docker/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.image.outputs.ref }}
+          build-args: |
+            STATIC_BUILDER_IMAGE=node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
+            RUNTIME_BASE_IMAGE=python:3.12-slim@sha256:229a2c5bfa27522db7815ea81f9bed70af17ccb9de9fc7ad142b1877b5830d36
+            UV_INSTALLER_URL=https://astral.sh/uv/0.12.3/install.sh
+            ROSETTA_REF=471c6e9434cfc30035d591387ad933f842a27983
+            WEPPCLOUD2_REF=7c92e33cd6c6b8d33732edd943f9840834d88b34
+            F_ESRI_REF=fe3bac7b297a33d5aacc083c434bc5637a0d8604
+            WBT_REF=314d15d68344890b43045e5325776a2841b0b1ca
+            WEPPPYO3_REF=ab91fc519195e95b8908922aba5036bcbae07f21
+            APP_USER=roger
+            APP_GROUP=docker
+            APP_UID=1000
+            APP_GID=993
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+
+      - name: Report immutable image digest
+        shell: bash
+        env:
+          IMAGE_NAME: ${{ steps.image.outputs.name }}
+          IMAGE_TAG: ${{ steps.image.outputs.tag }}
+          IMAGE_DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          set -euo pipefail
+          test -n "${IMAGE_DIGEST}"
+          {
+            echo "## WEPPcloud common runtime image"
+            echo
+            echo "- Source SHA: \`${GITHUB_SHA}\`"
+            echo "- Commit tag: \`${IMAGE_NAME}:${IMAGE_TAG}\`"
+            echo "- Immutable reference: \`${IMAGE_NAME}@${IMAGE_DIGEST}\`"
+            echo "- Dockerfile: \`docker/Dockerfile\`"
+            echo "- Build context: repository root"
+            echo "- Platform: \`linux/amd64\`"
+          } >> "${GITHUB_STEP_SUMMARY}"
