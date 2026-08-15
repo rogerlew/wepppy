@@ -99,6 +99,11 @@ This section is the Phase 0 “inventory” deliverable for the secrets migratio
   - `OPENET_API_KEY` authenticates requests to `openet-api.org` (OpenET monthly time-series API).
 - `CAP_SITE_KEY`:
   - Public “site key” used by browser clients. Do not store it as a secret file, but keep it adjacent to `CAP_SECRET` in deployment docs because operators often rotate them together.
+- `CAP_VERIFY_BASE_URL`:
+  - Optional non-secret server-only override for CAP verification. Keep
+    `CAP_BASE_URL=/cap` for browser assets while setting this to an internal
+    service URL such as `http://weppcloud-cap:3000/cap` in Kubernetes. Compose
+    behavior is unchanged when the override is absent.
 - `DATABASE_URL` / `SQLALCHEMY_DATABASE_URI`:
   - Treated as secret-bearing because they typically embed the DB password. Prefer composing them at runtime from non-secrets + `postgres_password` rather than storing them in env long-term.
 
