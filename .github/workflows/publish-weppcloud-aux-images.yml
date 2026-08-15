@@ -1,0 +1,109 @@
+name: Publish WEPPcloud auxiliary runtime images
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    name: Build, test, and publish ${{ matrix.service }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - service: status
+            image: wepppy-status
+            dockerfile: services/status2/Dockerfile
+          - service: preflight
+            image: wepppy-preflight
+            dockerfile: services/preflight2/Dockerfile
+          - service: cap
+            image: wepppy-cap
+            dockerfile: services/cap/Dockerfile
+          - service: weppcloudr
+            image: weppcloudr
+            dockerfile: weppcloudR/Dockerfile
+    steps:
+      - name: Check out the dispatched source commit
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Derive immutable image coordinates
+        id: image
+        shell: bash
+        env:
+          PACKAGE_NAME: ${{ matrix.image }}
+        run: |
+          set -euo pipefail
+          image_name="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/${PACKAGE_NAME}"
+          image_tag="sha-${GITHUB_SHA}"
+          echo "name=${image_name}" >> "${GITHUB_OUTPUT}"
+          echo "tag=${image_tag}" >> "${GITHUB_OUTPUT}"
+          echo "ref=${image_name}:${image_tag}" >> "${GITHUB_OUTPUT}"
+
+      - name: Log in to GHCR
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+
+      - name: Build reviewed image into the runner
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          platforms: linux/amd64
+          load: true
+          tags: ${{ steps.image.outputs.ref }}
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+
+      - name: Validate runtime contract before publication
+        shell: bash
+        env:
+          SERVICE: ${{ matrix.service }}
+          IMAGE_REF: ${{ steps.image.outputs.ref }}
+        run: |
+          set -euo pipefail
+          docker/validate-aux-image-contract.sh "${SERVICE}" "${IMAGE_REF}" "${GITHUB_SHA}"
+
+      - name: Push tested image and capture digest
+        id: push
+        shell: bash
+        env:
+          IMAGE_REF: ${{ steps.image.outputs.ref }}
+        run: |
+          set -euo pipefail
+          docker push "${IMAGE_REF}" | tee push.log
+          digest=$(sed -n 's/^.*digest: \(sha256:[0-9a-f]\{64\}\).*$/\1/p' push.log | tail -1)
+          test -n "${digest}"
+          echo "digest=${digest}" >> "${GITHUB_OUTPUT}"
+
+      - name: Report immutable image digest
+        shell: bash
+        env:
+          SERVICE: ${{ matrix.service }}
+          IMAGE_NAME: ${{ steps.image.outputs.name }}
+          IMAGE_TAG: ${{ steps.image.outputs.tag }}
+          IMAGE_DIGEST: ${{ steps.push.outputs.digest }}
+          DOCKERFILE: ${{ matrix.dockerfile }}
+        run: |
+          set -euo pipefail
+          {
+            echo "## ${SERVICE} runtime image"
+            echo
+            echo "- Source SHA: \`${GITHUB_SHA}\`"
+            echo "- Commit tag: \`${IMAGE_NAME}:${IMAGE_TAG}\`"
+            echo "- Immutable reference: \`${IMAGE_NAME}@${IMAGE_DIGEST}\`"
+            echo "- Dockerfile: \`${DOCKERFILE}\`"
+            echo "- Platform: \`linux/amd64\`"
+            echo "- Pre-publication runtime contract: \`PASS\`"
+          } >> "${GITHUB_STEP_SUMMARY}"
