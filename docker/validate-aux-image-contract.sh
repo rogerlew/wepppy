@@ -77,6 +77,7 @@ case "${service}" in
       -e CAP_SITE_KEY=contract-site \
       -e CAP_SECRET=contract-only \
       -e CAP_CORS_ORIGIN=https://canary.invalid \
+      -e CAP_ASSET_ROOT=/opt/cap \
       "${image}" >/dev/null
     host_port=$(docker port "${container}" 3000/tcp | awk -F: 'END {print $NF}')
     wait_for_url "http://127.0.0.1:${host_port}/cap/health"
