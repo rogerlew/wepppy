@@ -28,3 +28,20 @@ def test_cap_verify_marks_session_and_returns_success(monkeypatch: pytest.Monkey
 
         with client.session_transaction() as session:
             assert CAP_SESSION_KEY in session
+
+
+def test_cap_verify_uses_internal_verification_url(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app = Flask(__name__)
+    monkeypatch.setenv("CAP_BASE_URL", "/cap")
+    monkeypatch.setenv("CAP_VERIFY_BASE_URL", "http://weppcloud-cap:3000/cap/")
+    monkeypatch.setenv("CAP_SITE_KEY", "canary-site")
+    monkeypatch.setenv("CAP_SECRET", "test-only-secret")
+
+    with app.test_request_context("https://weppcloud.example/weppcloud/login"):
+        assert cap_verify_module._resolve_cap_config() == (
+            "http://weppcloud-cap:3000/cap",
+            "canary-site",
+            "test-only-secret",
+        )

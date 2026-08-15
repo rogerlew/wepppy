@@ -17,6 +17,9 @@ class CapVerificationError(RuntimeError):
 
 def _resolve_cap_config() -> Tuple[str, str, str]:
     base_url = current_app.config.get("CAP_BASE_URL") or os.getenv("CAP_BASE_URL")
+    verify_base_url = current_app.config.get("CAP_VERIFY_BASE_URL") or os.getenv(
+        "CAP_VERIFY_BASE_URL"
+    )
     site_key = current_app.config.get("CAP_SITE_KEY") or os.getenv("CAP_SITE_KEY")
     secret = current_app.config.get("CAP_SECRET") or get_secret("CAP_SECRET")
 
@@ -27,7 +30,7 @@ def _resolve_cap_config() -> Tuple[str, str, str]:
     if not secret:
         raise CapVerificationError("CAP_SECRET is required for CAPTCHA verification.")
 
-    base_url = base_url.rstrip("/")
+    base_url = (verify_base_url or base_url).rstrip("/")
     if base_url.startswith("/"):
         if not has_request_context():
             raise CapVerificationError(
