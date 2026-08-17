@@ -15,6 +15,14 @@ import wepppy.rq.omni_rq as omni_rq
 pytestmark = pytest.mark.unit
 
 
+def _child_job_stub(job_id: str) -> SimpleNamespace:
+    """Enqueued-job stub whose status keeps `_release_deferred_job_if_ready` a no-op."""
+    return SimpleNamespace(
+        id=job_id,
+        get_status=lambda refresh=True: omni_rq.JobStatus.QUEUED,
+    )
+
+
 @pytest.fixture()
 def omni_rq_environment(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     published = []
@@ -183,7 +191,7 @@ def test_run_omni_scenarios_rq_concurrency_uses_helper_outputs_for_dependency_me
             self.connection = connection
 
         def enqueue_call(self, func, args=(), kwargs=None, timeout=None, depends_on=None):
-            job = SimpleNamespace(id=f"child-{len(enqueue_calls) + 1}")
+            job = _child_job_stub(f"child-{len(enqueue_calls) + 1}")
             enqueue_calls.append(
                 {
                     "func": func,
@@ -262,18 +270,21 @@ def test_run_omni_scenarios_rq_concurrency_uses_helper_outputs_for_dependency_me
     assert stage2["kwargs"]["dependency_target"] == "key:uniform_low"
     assert stage2["kwargs"]["dependency_path"] == "/dep/uniform_low/loss_pw0.txt"
     assert stage2["kwargs"]["signature"] == "sig:mulch"
-    assert isinstance(stage2["depends_on"], list)
-    assert stage2["depends_on"][0].id == stage1["job"].id
+    assert isinstance(stage2["depends_on"], omni_rq.Dependency)
+    assert stage2["depends_on"].dependencies == [stage1["job"].id]
+    assert stage2["depends_on"].allow_failure is True
 
     compile_job = enqueue_calls[2]
     assert compile_job["func"] is omni_rq._compile_hillslope_summaries_rq
-    assert isinstance(compile_job["depends_on"], list)
-    assert compile_job["depends_on"][0].id == stage2["job"].id
+    assert isinstance(compile_job["depends_on"], omni_rq.Dependency)
+    assert compile_job["depends_on"].dependencies == [stage2["job"].id]
+    assert compile_job["depends_on"].allow_failure is True
 
     finalize_job = enqueue_calls[3]
     assert finalize_job["func"] is omni_rq._finalize_omni_scenarios_rq
-    assert isinstance(finalize_job["depends_on"], list)
-    assert finalize_job["depends_on"][0].id == compile_job["job"].id
+    assert isinstance(finalize_job["depends_on"], omni_rq.Dependency)
+    assert finalize_job["depends_on"].dependencies == [compile_job["job"].id]
+    assert finalize_job["depends_on"].allow_failure is True
 
     assert any(kind == "dependency_target" for kind, _ in omni.helper_calls)
     assert any(kind == "loss_path" for kind, _ in omni.helper_calls)
@@ -704,7 +715,7 @@ def test_run_omni_contrasts_rq_reruns_hillslopes_for_deduped_scenarios_when_dele
             self.connection = connection
 
         def enqueue_call(self, func, args=(), kwargs=None, timeout=None, depends_on=None):
-            job = SimpleNamespace(id=f"child-{len(enqueue_calls) + 1}")
+            job = _child_job_stub(f"child-{len(enqueue_calls) + 1}")
             enqueue_calls.append(
                 {
                     "func": func,
@@ -882,7 +893,7 @@ def test_run_omni_contrasts_rq_does_not_rerun_hillslopes_when_delete_disabled(
             self.connection = connection
 
         def enqueue_call(self, func, args=(), kwargs=None, timeout=None, depends_on=None):
-            job = SimpleNamespace(id=f"child-{len(enqueue_calls) + 1}")
+            job = _child_job_stub(f"child-{len(enqueue_calls) + 1}")
             enqueue_calls.append(
                 {
                     "func": func,
@@ -1103,3 +1114,105 @@ def test_finalize_omni_scenarios_rq_timestamps_and_triggers(
     assert prep.timestamps == [omni_rq.TaskEnum.run_omni_scenarios]
     assert any("TRIGGER omni OMNI_SCENARIO_RUN_TASK_COMPLETED" in message for _, message in published)
     assert any("TRIGGER omni END_BROADCAST" in message for _, message in published)
+
+
+def test_failure_tolerant_depends_on_allows_upstream_failure() -> None:
+    dependency = omni_rq._failure_tolerant_depends_on(
+        [_child_job_stub("a"), _child_job_stub("b")]
+    )
+
+    assert isinstance(dependency, omni_rq.Dependency)
+    assert dependency.dependencies == ["a", "b"]
+    assert dependency.allow_failure is True
+
+
+def test_failure_tolerant_depends_on_returns_none_without_jobs() -> None:
+    assert omni_rq._failure_tolerant_depends_on(None) is None
+    assert omni_rq._failure_tolerant_depends_on([]) is None
+
+
+def test_release_deferred_job_if_ready_enqueues_met_dependencies(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    removed_jobs: list[object] = []
+
+    class _Registry:
+        def __init__(self, queue) -> None:
+            self.queue = queue
+
+        def remove(self, job) -> None:
+            removed_jobs.append(job)
+
+    class _DeferredJob:
+        def get_status(self, refresh: bool = True):
+            return omni_rq.JobStatus.DEFERRED
+
+        def dependencies_are_met(self) -> bool:
+            return True
+
+    class _Queue:
+        def __init__(self) -> None:
+            self.enqueued: list[object] = []
+
+        def _enqueue_job(self, job) -> None:
+            self.enqueued.append(job)
+
+    monkeypatch.setattr(omni_rq, "DeferredJobRegistry", _Registry)
+    queue = _Queue()
+    deferred_job = _DeferredJob()
+
+    omni_rq._release_deferred_job_if_ready(queue, deferred_job)
+
+    assert removed_jobs == [deferred_job]
+    assert queue.enqueued == [deferred_job]
+
+
+def test_release_deferred_job_if_ready_keeps_unmet_dependencies_deferred(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    removed_jobs: list[object] = []
+
+    class _Registry:
+        def __init__(self, queue) -> None:
+            self.queue = queue
+
+        def remove(self, job) -> None:
+            removed_jobs.append(job)
+
+    class _DeferredJob:
+        def get_status(self, refresh: bool = True):
+            return omni_rq.JobStatus.DEFERRED
+
+        def dependencies_are_met(self) -> bool:
+            return False
+
+    class _Queue:
+        def __init__(self) -> None:
+            self.enqueued: list[object] = []
+
+        def _enqueue_job(self, job) -> None:
+            self.enqueued.append(job)
+
+    monkeypatch.setattr(omni_rq, "DeferredJobRegistry", _Registry)
+    queue = _Queue()
+
+    omni_rq._release_deferred_job_if_ready(queue, _DeferredJob())
+
+    assert removed_jobs == []
+    assert queue.enqueued == []
+
+
+def test_release_deferred_job_if_ready_ignores_non_deferred_jobs(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class _Registry:
+        def __init__(self, queue) -> None:
+            raise AssertionError("registry must not be touched for non-deferred jobs")
+
+    class _Queue:
+        def _enqueue_job(self, job) -> None:
+            raise AssertionError("non-deferred jobs must not be re-enqueued")
+
+    monkeypatch.setattr(omni_rq, "DeferredJobRegistry", _Registry)
+
+    omni_rq._release_deferred_job_if_ready(_Queue(), _child_job_stub("queued"))

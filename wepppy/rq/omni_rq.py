@@ -12,7 +12,8 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 
 import redis
 from rq import Queue, get_current_job
-from rq.job import Job
+from rq.job import Dependency, Job, JobStatus
+from rq.registry import DeferredJobRegistry
 
 from wepppy.config.redis_settings import (
     RedisDB,
@@ -52,6 +53,37 @@ REDIS_HOST: str = redis_host()
 RQ_DB: int = int(RedisDB.RQ)
 
 TIMEOUT: int = 43_200
+
+
+def _failure_tolerant_depends_on(jobs: Optional[List[Job]]) -> Optional[Dependency]:
+    """Build a dependency edge that still releases dependents when upstream jobs fail.
+
+    A bare ``depends_on`` list makes RQ hold the dependent in ``deferred`` forever
+    once any dependency fails, because ``dependencies_are_met`` only tolerates
+    failures when ``allow_failure`` is set. The Omni finalizers must always run --
+    they stamp ``RedisPrep`` and emit ``END_BROADCAST`` -- so every Omni edge is
+    failure tolerant and downstream stages run over whatever succeeded.
+    """
+    if not jobs:
+        return None
+    return Dependency(jobs=[dependency.id for dependency in jobs], allow_failure=True)
+
+
+def _release_deferred_job_if_ready(queue: Queue, deferred_job: Job) -> None:
+    """Release a job whose dependencies were already terminal when it was enqueued.
+
+    ``Queue.setup_dependencies`` defers a new job when any dependency is not
+    ``finished``, including dependencies that already failed. Those dependencies
+    have already fanned out to their dependents, so nothing will release this job
+    later. Re-check the failure-tolerant condition and enqueue it here.
+    """
+    if deferred_job.get_status(refresh=True) != JobStatus.DEFERRED:
+        return
+    if not deferred_job.dependencies_are_met():
+        return
+
+    DeferredJobRegistry(queue=queue).remove(deferred_job)
+    queue._enqueue_job(deferred_job)
 
 
 def _recover_mixed_nodir_roots(
@@ -664,7 +696,7 @@ def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
                 stage1_jobs.append(child_job)
                 job.save()
 
-            depends_on_stage2 = stage1_jobs if stage1_jobs else None
+            depends_on_stage2 = _failure_tolerant_depends_on(stage1_jobs)
             for task in stage2_tasks:
                 child_job = q.enqueue_call(
                     func=run_omni_scenario_rq,
@@ -680,26 +712,28 @@ def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
                 job.meta[f"jobs:1,scenario:{task['scenario_name']}"] = child_job.id
                 stage2_jobs.append(child_job)
                 job.save()
+                _release_deferred_job_if_ready(q, child_job)
 
             compile_depends: List[Job] = stage2_jobs or stage1_jobs
             compile_job = q.enqueue_call(
                 func=_compile_hillslope_summaries_rq,
                 args=[runid],
                 timeout=TIMEOUT,
-                depends_on=compile_depends if compile_depends else None,
+                depends_on=_failure_tolerant_depends_on(compile_depends),
             )
             job.meta['jobs:2,func:_compile_hillslope_summaries_rq'] = compile_job.id
             job.save()
+            _release_deferred_job_if_ready(q, compile_job)
 
-            final_depends: List[Job] = [compile_job]
             final_job = q.enqueue_call(
                 func=_finalize_omni_scenarios_rq,
                 args=[runid],
                 timeout=TIMEOUT,
-                depends_on=final_depends,
+                depends_on=_failure_tolerant_depends_on([compile_job]),
             )
             job.meta['jobs:3,func:_finalize_omni_scenarios_rq'] = final_job.id
             job.save()
+            _release_deferred_job_if_ready(q, final_job)
 
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
         return final_job
@@ -829,27 +863,30 @@ def run_omni_contrasts_rq(runid: str) -> Optional[Job]:
                 batch_size = 1
             for start in range(0, len(run_ids), batch_size):
                 batch_jobs: List[Job] = []
+                depends_on_batch = _failure_tolerant_depends_on(batch_depends)
                 for contrast_id in run_ids[start:start + batch_size]:
                     child_job = q.enqueue_call(
                         func=run_omni_contrast_rq,
                         args=[runid, contrast_id],
                         timeout=TIMEOUT,
-                        depends_on=batch_depends,
+                        depends_on=depends_on_batch,
                     )
                     job.meta[f'jobs:contrast:{contrast_id}'] = child_job.id
                     batch_jobs.append(child_job)
                     contrast_jobs.append(child_job)
                     job.save()
+                    _release_deferred_job_if_ready(q, child_job)
                 batch_depends = batch_jobs
 
             final_job = q.enqueue_call(
                 func=_finalize_omni_contrasts_rq,
                 args=[runid],
                 timeout=TIMEOUT,
-                depends_on=batch_depends,
+                depends_on=_failure_tolerant_depends_on(batch_depends),
             )
             job.meta['jobs:finalize:_finalize_omni_contrasts_rq'] = final_job.id
             job.save()
+            _release_deferred_job_if_ready(q, final_job)
 
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
         return final_job

@@ -270,7 +270,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_migration_job",
-    "source_lineno": 135,
+    "source_lineno": 134,
     "source_module": "wepppy/microservices/rq_engine/migration_routes.py"
   },
   {
@@ -534,25 +534,27 @@
     "source_module": "wepppy/rq/culvert_rq_pipeline.py"
   },
   {
-    "depends_on": [],
+    "depends_on": [
+      "_failure_tolerant_depends_on(batch_depends)"
+    ],
     "enqueue_target": "run_omni_contrast_rq",
     "job_meta_stage": "jobs:contrast",
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_omni_contrasts_rq",
-    "source_lineno": 833,
+    "source_lineno": 868,
     "source_module": "wepppy/rq/omni_rq.py"
   },
   {
     "depends_on": [
-      "run_omni_contrast_rq"
+      "_failure_tolerant_depends_on(batch_depends)"
     ],
     "enqueue_target": "_finalize_omni_contrasts_rq",
     "job_meta_stage": "jobs:finalize",
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_omni_contrasts_rq",
-    "source_lineno": 845,
+    "source_lineno": 881,
     "source_module": "wepppy/rq/omni_rq.py"
   },
   {
@@ -562,43 +564,43 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_omni_scenarios_rq",
-    "source_lineno": 653,
+    "source_lineno": 685,
     "source_module": "wepppy/rq/omni_rq.py"
   },
   {
     "depends_on": [
-      "run_omni_scenario_rq"
+      "_failure_tolerant_depends_on(stage1_jobs)"
     ],
     "enqueue_target": "run_omni_scenario_rq",
     "job_meta_stage": "jobs:1",
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_omni_scenarios_rq",
-    "source_lineno": 669,
+    "source_lineno": 701,
     "source_module": "wepppy/rq/omni_rq.py"
   },
   {
     "depends_on": [
-      "run_omni_scenario_rq"
+      "_failure_tolerant_depends_on(compile_depends)"
     ],
     "enqueue_target": "_compile_hillslope_summaries_rq",
     "job_meta_stage": "jobs:2",
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_omni_scenarios_rq",
-    "source_lineno": 685,
+    "source_lineno": 718,
     "source_module": "wepppy/rq/omni_rq.py"
   },
   {
     "depends_on": [
-      "_compile_hillslope_summaries_rq"
+      "_failure_tolerant_depends_on([compile_job])"
     ],
     "enqueue_target": "_finalize_omni_scenarios_rq",
     "job_meta_stage": "jobs:3",
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_omni_scenarios_rq",
-    "source_lineno": 695,
+    "source_lineno": 728,
     "source_module": "wepppy/rq/omni_rq.py"
   },
   {
@@ -610,7 +612,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_serial_subcatchment_tree",
-    "source_lineno": 725,
+    "source_lineno": 724,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -622,7 +624,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_serial_subcatchment_tree",
-    "source_lineno": 733,
+    "source_lineno": 732,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -632,7 +634,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 1542,
+    "source_lineno": 1541,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -642,7 +644,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 1558,
+    "source_lineno": 1557,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -654,7 +656,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 1566,
+    "source_lineno": 1565,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -666,7 +668,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fork_rq",
-    "source_lineno": 2863,
+    "source_lineno": 2862,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
