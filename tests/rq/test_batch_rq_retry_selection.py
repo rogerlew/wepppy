@@ -12,6 +12,7 @@ import wepppy.rq.batch_rq as batch_rq
 from wepppy.nodb import batch_runner as batch_runner_module
 from wepppy.nodb.batch_runner import BatchRunner
 from wepppy.nodb.redis_prep import TaskEnum
+import wepppy.rq.job_dependencies as job_dependencies
 
 
 pytestmark = pytest.mark.unit
@@ -977,6 +978,8 @@ def test_release_deferred_finalizer_if_ready_enqueues_met_dependencies(
             removed_jobs.append(job)
 
     class _FinalJob:
+        _dependency_ids = ["upstream"]
+
         def get_status(self, refresh: bool = True):
             return batch_rq.JobStatus.DEFERRED
 
@@ -990,7 +993,7 @@ def test_release_deferred_finalizer_if_ready_enqueues_met_dependencies(
         def _enqueue_job(self, job) -> None:
             self.enqueued.append(job)
 
-    monkeypatch.setattr(batch_rq, "DeferredJobRegistry", _Registry)
+    monkeypatch.setattr(job_dependencies, "DeferredJobRegistry", _Registry)
     queue = _Queue()
     final_job = _FinalJob()
 
@@ -1013,6 +1016,8 @@ def test_release_deferred_finalizer_if_ready_keeps_unmet_dependencies_deferred(
             removed_jobs.append(job)
 
     class _FinalJob:
+        _dependency_ids = ["upstream"]
+
         def get_status(self, refresh: bool = True):
             return batch_rq.JobStatus.DEFERRED
 
@@ -1026,7 +1031,7 @@ def test_release_deferred_finalizer_if_ready_keeps_unmet_dependencies_deferred(
         def _enqueue_job(self, job) -> None:
             self.enqueued.append(job)
 
-    monkeypatch.setattr(batch_rq, "DeferredJobRegistry", _Registry)
+    monkeypatch.setattr(job_dependencies, "DeferredJobRegistry", _Registry)
     queue = _Queue()
 
     batch_rq._release_deferred_finalizer_if_ready(queue, _FinalJob())

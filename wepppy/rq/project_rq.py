@@ -97,6 +97,10 @@ from . import project_rq_archive as _archive_helpers
 from . import project_rq_delete as _delete_helpers
 from . import project_rq_fork as _fork_helpers
 from .wepp_rq import run_wepp_rq
+from wepppy.rq.job_dependencies import (
+    failure_tolerant_depends_on,
+    release_deferred_job_if_ready,
+)
 
 _hostname = socket.gethostname()
 _logger = logging.getLogger(__name__)
@@ -733,7 +737,10 @@ def _enqueue_serial_subcatchment_tree(
                 abstract_watershed_rq,
                 args=(runid, True),
                 timeout=TIMEOUT,
-                depends_on=child,
+                # Failure tolerant so a failed build still releases the receipt.
+                # No release_deferred_job_if_ready here: this runs inside the
+                # admission WATCH/MULTI, which registers deferral explicitly.
+                depends_on=failure_tolerant_depends_on(child),
                 job_id=receipt_id,
                 meta=registered_receipt_meta,
             )
@@ -1574,8 +1581,9 @@ def fetch_dem_and_build_channels_rq(
                         job.id,
                     ),
                     timeout=build_channels_timeout,
-                    depends_on=ajob,
+                    depends_on=failure_tolerant_depends_on(ajob),
                 )
+                release_deferred_job_if_ready(q, bjob)
                 job.meta['jobs:1,func:build_channels_rq'] = bjob.id
                 job.save()
         

@@ -8,6 +8,7 @@ import pytest
 
 from wepppy.nodb.mods.ag_fields import AgFieldsRunError, PlantFileProcessingError
 from wepppy.rq import ag_fields_rq
+import wepppy.rq.job_dependencies as job_dependencies
 
 
 pytestmark = pytest.mark.unit
@@ -481,6 +482,8 @@ def test_release_deferred_job_if_ready_enqueues_met_dependency(
             removed.append(job)
 
     class DummyJob:
+        _dependency_ids = ["upstream"]
+
         def get_status(self, refresh=True):
             return ag_fields_rq.JobStatus.DEFERRED
 
@@ -494,7 +497,7 @@ def test_release_deferred_job_if_ready_enqueues_met_dependency(
         def _enqueue_job(self, job):
             self.enqueued.append(job)
 
-    monkeypatch.setattr(ag_fields_rq, "DeferredJobRegistry", DummyRegistry)
+    monkeypatch.setattr(job_dependencies, "DeferredJobRegistry", DummyRegistry)
     queue = DummyQueue()
     job = DummyJob()
 
@@ -517,6 +520,8 @@ def test_release_deferred_job_if_ready_keeps_unmet_dependency_deferred(
             removed.append(job)
 
     class DummyJob:
+        _dependency_ids = ["upstream"]
+
         def get_status(self, refresh=True):
             return ag_fields_rq.JobStatus.DEFERRED
 
@@ -530,7 +535,7 @@ def test_release_deferred_job_if_ready_keeps_unmet_dependency_deferred(
         def _enqueue_job(self, job):
             self.enqueued.append(job)
 
-    monkeypatch.setattr(ag_fields_rq, "DeferredJobRegistry", DummyRegistry)
+    monkeypatch.setattr(job_dependencies, "DeferredJobRegistry", DummyRegistry)
     queue = DummyQueue()
     job = DummyJob()
 

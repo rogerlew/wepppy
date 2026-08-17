@@ -12,8 +12,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 
 import redis
 from rq import Queue, get_current_job
-from rq.job import Dependency, Job, JobStatus
-from rq.registry import DeferredJobRegistry
+from rq.job import Job
 
 from wepppy.config.redis_settings import (
     RedisDB,
@@ -23,6 +22,10 @@ from wepppy.config.redis_settings import (
 
 from wepppy.weppcloud.utils.helpers import get_wd
 from wepppy.rq.exception_logging import with_exception_logging
+from wepppy.rq.job_dependencies import (
+    failure_tolerant_depends_on as _failure_tolerant_depends_on,
+    release_deferred_job_if_ready as _release_deferred_job_if_ready,
+)
 
 from wepppy.nodb.base import clear_nodb_file_cache
 from wepppy.nodb.core import Wepp
@@ -53,37 +56,6 @@ REDIS_HOST: str = redis_host()
 RQ_DB: int = int(RedisDB.RQ)
 
 TIMEOUT: int = 43_200
-
-
-def _failure_tolerant_depends_on(jobs: Optional[List[Job]]) -> Optional[Dependency]:
-    """Build a dependency edge that still releases dependents when upstream jobs fail.
-
-    A bare ``depends_on`` list makes RQ hold the dependent in ``deferred`` forever
-    once any dependency fails, because ``dependencies_are_met`` only tolerates
-    failures when ``allow_failure`` is set. The Omni finalizers must always run --
-    they stamp ``RedisPrep`` and emit ``END_BROADCAST`` -- so every Omni edge is
-    failure tolerant and downstream stages run over whatever succeeded.
-    """
-    if not jobs:
-        return None
-    return Dependency(jobs=[dependency.id for dependency in jobs], allow_failure=True)
-
-
-def _release_deferred_job_if_ready(queue: Queue, deferred_job: Job) -> None:
-    """Release a job whose dependencies were already terminal when it was enqueued.
-
-    ``Queue.setup_dependencies`` defers a new job when any dependency is not
-    ``finished``, including dependencies that already failed. Those dependencies
-    have already fanned out to their dependents, so nothing will release this job
-    later. Re-check the failure-tolerant condition and enqueue it here.
-    """
-    if deferred_job.get_status(refresh=True) != JobStatus.DEFERRED:
-        return
-    if not deferred_job.dependencies_are_met():
-        return
-
-    DeferredJobRegistry(queue=queue).remove(deferred_job)
-    queue._enqueue_job(deferred_job)
 
 
 def _recover_mixed_nodir_roots(

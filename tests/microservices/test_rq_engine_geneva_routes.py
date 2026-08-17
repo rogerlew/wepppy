@@ -11,6 +11,7 @@ from wepppy.microservices.rq_engine import geneva_routes
 from wepppy.nodb.base import NoDbAlreadyLockedError
 from wepppy.nodb.mods.geneva.errors import GenevaValidationError
 from wepppy.nodb.redis_prep import TaskEnum
+from rq.job import Dependency
 
 
 pytestmark = pytest.mark.microservice
@@ -79,6 +80,14 @@ class _GenevaRouteStub:
             },
             "updated_at": "2026-04-16T00:00:00Z",
         }
+
+
+def _assert_depends_on(call: dict, expected_ids: list[str]) -> None:
+    """Geneva chains its jobs with failure-tolerant Dependency edges."""
+    dependency = call["depends_on"]
+    assert isinstance(dependency, Dependency)
+    assert dependency.dependencies == expected_ids
+    assert dependency.allow_failure is True
 
 
 def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -243,7 +252,7 @@ def test_run_workflow_enqueues_chained_jobs_with_forced_rebuild(
 
     panel_call = calls[1]["kwargs"]
     assert panel_call["func"] is geneva_routes.run_geneva_build_frequency_panel_rq
-    assert panel_call["depends_on"].id == "geneva-prepare-1"
+    _assert_depends_on(panel_call, ["geneva-prepare-1"])
     assert panel_call["args"] == (
         "run-1",
         "cfg",
@@ -258,7 +267,7 @@ def test_run_workflow_enqueues_chained_jobs_with_forced_rebuild(
 
     run_call = calls[2]["kwargs"]
     assert run_call["func"] is geneva_routes.run_geneva_run_batch_rq
-    assert run_call["depends_on"].id == "geneva-panel-2"
+    _assert_depends_on(run_call, ["geneva-panel-2"])
     assert run_call["args"] == (
         "run-1",
         "cfg",

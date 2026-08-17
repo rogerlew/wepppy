@@ -39,6 +39,7 @@ from wepppy.nodb.base import (
 from wepppy.nodb.batch_runner import BatchRunner
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.nodb.status_messenger import StatusMessenger
+from wepppy.rq.job_dependencies import release_deferred_job_if_ready
 from wepppy.rq.omni_rq import run_omni_scenarios_rq
 from wepppy.topo.watershed_collection import WatershedFeature
 try:
@@ -273,13 +274,7 @@ def _format_active_jobs_text(active_jobs: list[str]) -> str:
 
 def _release_deferred_finalizer_if_ready(queue: Queue, final_job: Job) -> None:
     """Release a failure-tolerant finalizer if all dependencies are already terminal."""
-    if final_job.get_status(refresh=True) != JobStatus.DEFERRED:
-        return
-    if not final_job.dependencies_are_met():
-        return
-
-    DeferredJobRegistry(queue=queue).remove(final_job)
-    queue._enqueue_job(final_job)
+    release_deferred_job_if_ready(queue, final_job)
 
 
 def delete_batch_rq(batch_name: str) -> dict[str, Any]:

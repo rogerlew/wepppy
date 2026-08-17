@@ -5,6 +5,11 @@ from typing import Any, Callable, Optional
 from rq import Queue
 from rq.job import Job
 
+from wepppy.rq.job_dependencies import (
+    failure_tolerant_depends_on,
+    release_deferred_job_if_ready,
+)
+
 
 def _delete_after_interchange_enabled(*, wepp: Any, climate: Any) -> bool:
     value = getattr(wepp, "delete_after_interchange", None)
@@ -35,8 +40,9 @@ def _enqueue(
         args=args,
         kwargs=kwargs,
         timeout=timeout,
-        depends_on=depends_on,
+        depends_on=failure_tolerant_depends_on(depends_on),
     )
+    release_deferred_job_if_ready(q, child_job)
     return _record_enqueue(parent_job, key, child_job)
 
 

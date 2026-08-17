@@ -7,6 +7,7 @@ import pytest
 
 import wepppy.rq.swat_rq as swat_rq
 import wepppy.rq.wepp_rq as wepp_rq
+from rq.job import JobStatus
 
 pytestmark = pytest.mark.unit
 
@@ -47,7 +48,7 @@ def _stub_rq_queue(monkeypatch: pytest.MonkeyPatch, module) -> list[dict[str, ob
             timeout=None,
             depends_on=None,
         ):
-            job = SimpleNamespace(id=f"job-{len(calls) + 1}")
+            job = SimpleNamespace(id=f"job-{len(calls) + 1}", get_status=lambda refresh=True: JobStatus.QUEUED)
             calls.append(
                 {
                     "func": func,
@@ -401,7 +402,7 @@ def test_prep_watershed_enqueue_uses_prep_only_pipeline(monkeypatch: pytest.Monk
                 "timeout": timeout,
             }
         )
-        return SimpleNamespace(id="job-final")
+        return SimpleNamespace(id="job-final", get_status=lambda refresh=True: JobStatus.QUEUED)
 
     monkeypatch.setattr(
         wepp_rq._pipeline,

@@ -29,6 +29,10 @@ from .auth import AuthError, _normalize_scopes, authorize_run_access, require_jw
 from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response
+from wepppy.rq.job_dependencies import (
+    failure_tolerant_depends_on,
+    release_deferred_job_if_ready,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -293,14 +297,16 @@ def _enqueue_geneva_workflow_jobs(
             func=run_geneva_build_frequency_panel_rq,
             args=(runid, config, panel_payload),
             timeout=GENEVA_RQ_TIMEOUT,
-            depends_on=prepare_job,
+            depends_on=failure_tolerant_depends_on(prepare_job),
         )
+        release_deferred_job_if_ready(queue, panel_job)
         run_batch_job = queue.enqueue_call(
             func=run_geneva_run_batch_rq,
             args=(runid, config, run_batch_payload),
             timeout=GENEVA_RQ_TIMEOUT,
-            depends_on=panel_job,
+            depends_on=failure_tolerant_depends_on(panel_job),
         )
+        release_deferred_job_if_ready(queue, run_batch_job)
 
     prepare_job_id = str(prepare_job.id)
     panel_job_id = str(panel_job.id)

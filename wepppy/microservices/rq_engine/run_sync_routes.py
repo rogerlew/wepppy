@@ -23,6 +23,10 @@ from wepppy.rq.run_sync_rq import DEFAULT_TARGET_ROOT, STATUS_CHANNEL_SUFFIX, ru
 from .auth import AuthError, require_jwt, require_roles
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
+from wepppy.rq.job_dependencies import (
+    failure_tolerant_depends_on,
+    release_deferred_job_if_ready,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -229,8 +233,9 @@ async def run_sync(request: Request) -> JSONResponse:
                     (wd, runid),
                     {"archive_before": archive_before},
                     timeout=MIGRATIONS_TIMEOUT,
-                    depends_on=sync_job,
+                    depends_on=failure_tolerant_depends_on(sync_job),
                 )
+                release_deferred_job_if_ready(queue, migration_job)
                 jobs_info["migration_job_id"] = migration_job.id
                 job_ids.append(migration_job.id)
                 jobs_info["job_ids"] = job_ids

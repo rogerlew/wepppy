@@ -17,6 +17,7 @@ from rq.job import Dependency, Job, JobStatus
 from rq.registry import DeferredJobRegistry
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+from wepppy.rq.job_dependencies import release_deferred_job_if_ready
 from wepppy.nodb.base import clear_nodb_file_cache
 from wepppy.nodb.core.climate import Climate
 from wepppy.nodb.mods.ag_fields import AgFields, AgFieldsRunError, PlantFileProcessingError
@@ -355,13 +356,7 @@ def run_ag_fields_watershed_rq(
 
 def _release_deferred_job_if_ready(queue: Queue, dependent_job: Job) -> None:
     """Release a failure-tolerant dependent whose prerequisites are terminal."""
-    if dependent_job.get_status(refresh=True) != JobStatus.DEFERRED:
-        return
-    if not dependent_job.dependencies_are_met():
-        return
-
-    DeferredJobRegistry(queue=queue).remove(dependent_job)
-    queue._enqueue_job(dependent_job)
+    release_deferred_job_if_ready(queue, dependent_job)
 
 
 @with_exception_logging
