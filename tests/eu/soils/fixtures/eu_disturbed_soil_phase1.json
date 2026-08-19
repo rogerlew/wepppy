@@ -13,6 +13,7 @@
     {
       "case_id": "pilot-0001-control",
       "source_capture": "production_query_replay_payload",
+      "expected_quality": "valid",
       "provenance": {"sample_id": 1, "row": 242, "col": 4841, "lng": 23.55681303809423, "lat": 69.98905517560759},
       "esdb": {
         "fao90lev1": ["1", "PZ", "Podzol"],
@@ -40,6 +41,7 @@
     {
       "case_id": "pilot-0007-depth-order",
       "source_capture": "production_query_replay_payload",
+      "expected_quality": "rejected",
       "provenance": {"sample_id": 7, "row": 226, "col": 5114, "lng": 30.43033652459702, "lat": 69.52113673277971},
       "esdb": {
         "fao90lev1": ["4", "HS", "Histosol"],
@@ -65,8 +67,37 @@
       "expected_output": {"status": "built", "key": "HS_0_5_3_M_M_V_D__21,61,18,0", "horizon_depths": [1200.0, 600.0]}
     },
     {
+      "case_id": "pilot-0021-missing-landuse-metadata",
+      "source_capture": "production_query_replay_payload",
+      "expected_quality": "degraded",
+      "provenance": {"sample_id": 21, "row": 122, "col": 5959, "lng": 49.971113440411905, "lat": 67.0775369162099},
+      "esdb": {
+        "fao90lev1": ["4", "HS", "Histosol"],
+        "usedom": ["0", "0", "No information"],
+        "textdepchg": ["5", "5", "No textural change between 20 and 120 cm depth"],
+        "il": ["1", "1", "No impermeable layer within 150 cm"],
+        "cec_top": ["1", "M", "Medium (15-40 cmol(+)/kg)"],
+        "cec_sub": ["1", "M", "Medium (15-40 cmol(+)/kg)"],
+        "dgh": ["2", "V", "Very deep ( > 120 cm)"],
+        "dimp": ["1", "D", "Deep ( > 80 cm)"],
+        "dr": ["4", "S", "Shallow ( < 40 cm)"]
+      },
+      "stu": {
+        "STU_EU_T_CLAY": 40.0, "STU_EU_S_CLAY": 27.0,
+        "STU_EU_T_SAND": 20.0, "STU_EU_S_SAND": 47.0,
+        "STU_EU_T_SILT": 40.0, "STU_EU_S_SILT": 26.0,
+        "STU_EU_T_OC": 33.63, "STU_EU_S_OC": 32.89,
+        "STU_EU_T_BD": 0.2759242, "STU_EU_S_BD": 0.28223872,
+        "STU_EU_T_GRAVEL": 1.0, "STU_EU_S_GRAVEL": 2.0
+      },
+      "hydrogrids": {"sl1": 2768.0, "sl2": 2768.0, "sl3": 2768.0, "sl4": 2768.0, "sl5": 56.0, "sl6": 56.0, "sl7": 56.0},
+      "expected_issues": ["source.usedom.no_information"],
+      "expected_output": {"status": "built", "key": "HS_0_5_1_M_M_V_D_S_40,40,20,0", "horizon_depths": [1200.0, 1500.0]}
+    },
+    {
       "case_id": "pilot-0014-zero-stu",
       "source_capture": "production_query_replay_payload",
+      "expected_quality": "rejected",
       "provenance": {"sample_id": 14, "row": 271, "col": 5468, "lng": 38.1245623018145, "lat": 68.03212725625757},
       "esdb": {
         "fao90lev1": ["8", "LP", "Leptosol"],
@@ -94,6 +125,7 @@
     {
       "case_id": "pilot-0050-hydrogrids-out-of-bounds",
       "source_capture": "pilot_source_screen_before_builder_exception",
+      "expected_quality": "rejected",
       "provenance": {"sample_id": 50, "row": 76, "col": 7355, "lng": 71.32433343969802, "lat": 58.878825989612515},
       "esdb": {
         "fao90lev1": ["12", "PD", "Podzoluvisol"],
@@ -121,6 +153,7 @@
     {
       "case_id": "pilot-0057-missing-depth-source",
       "source_capture": "pilot_source_screen_before_builder_exception",
+      "expected_quality": "rejected",
       "provenance": {"sample_id": 57, "row": 503, "col": 4453, "lng": 13.146080614437453, "lat": 68.06344048122288},
       "esdb": {
         "fao90lev1": ["8", "LP", "Leptosol"],
@@ -148,6 +181,7 @@
     {
       "case_id": "pilot-0354-missing-rat-value",
       "source_capture": "pilot_source_screen_before_builder_exception",
+      "expected_quality": "rejected",
       "provenance": {"sample_id": 354, "row": 1518, "col": 4609, "lng": 14.992116208989042, "lat": 58.84343474068093},
       "esdb": {
         "fao90lev1": ["11", "CM", "Cambisol"],

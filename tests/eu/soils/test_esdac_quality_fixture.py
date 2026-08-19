@@ -71,10 +71,11 @@ def test_phase1_fixture_has_provenance_and_expected_case_classes() -> None:
     assert fixture["schema_version"] == 1
     assert fixture["source"]["manifest_seed"] == 20260819
     assert fixture["source"]["pilot_sample_count"] == 1000
-    assert len(fixture["cases"]) == 6
-    assert {case["expected_output"]["status"] for case in fixture["cases"]} == {
-        "built",
-        "exception",
+    assert len(fixture["cases"]) == 7
+    assert {case["expected_quality"] for case in fixture["cases"]} == {
+        "valid",
+        "degraded",
+        "rejected",
     }
     for case in fixture["cases"]:
         assert case["provenance"]["lng"] is not None
@@ -88,7 +89,7 @@ def test_phase1_fixture_has_provenance_and_expected_case_classes() -> None:
         assert case["hydrogrids"]
 
 
-@pytest.mark.parametrize("case_index", range(6))
+@pytest.mark.parametrize("case_index", range(7))
 def test_phase1_fixture_replays_builder_cases(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

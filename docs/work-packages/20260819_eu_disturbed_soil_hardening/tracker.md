@@ -7,10 +7,10 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-19 19:37 UTC
-**Current phase**: Phase 2 quality taxonomy and invariant contract
-**Last updated**: 2026-08-19 20:56 UTC
-**Next milestone**: Classify fixture evidence into valid, degraded, and
-rejected outcomes before production validation changes
+**Current phase**: Phase 2 quality-contract review
+**Last updated**: 2026-08-19 21:04 UTC
+**Next milestone**: Approve ADR-0043 and the quality taxonomy before Phase 3
+production validation design
 **Security impact**: `none`
 **Dedicated security review**: `no`
 **Security artifact**: N/A
@@ -24,15 +24,16 @@ rejected outcomes before production validation changes
 - [ ] Add Marta's cases later if coordinates or run artifacts become
   available.
 - [x] Add deterministic replay fixture and no-geodata test harness.
-- [ ] Define quality taxonomy and valid/degraded/rejected contract.
+- [x] Define the evidence-backed quality taxonomy and draft the
+  valid/degraded/rejected contract.
 - [ ] Implement the approved validation boundary and diagnostics.
 - [ ] Validate disturbed downstream generated artifacts.
 - [ ] Complete correctness, QA, docs, and observation gates.
 
 ### In Progress
 
-- [ ] Phase 0 scale-up: review whether the 50,000-sample campaign is needed
-  after the pilot prevalence and runtime evidence.
+- [ ] Phase 2 contract review: approve the proposed taxonomy and ADR-0043;
+  no production behavior changes are authorized until approval.
 
 ### Blocked
 
@@ -60,6 +61,9 @@ None.
 - [x] Added a six-case Phase 1 fixture with one control, two output-order
   cases, a zero-valued STU case, and three builder exception classes; replay
   tests pass without EU geodata (2026-08-19 20:56 UTC).
+- [x] Added the Phase 2 taxonomy, seven-case valid/degraded/rejected matrix,
+  and proposed ADR-0043; replay tests pass without EU geodata
+  (2026-08-19 21:04 UTC).
 
 ## Phase Gates
 
@@ -86,6 +90,8 @@ None.
   Phase 0 evidence review is pending.
 - **2026-08-19 20:56 UTC** – Phase 1 fixture and no-geodata replay harness
   completed; all six cases reproduce.
+- **2026-08-19 21:04 UTC** – Phase 2 taxonomy and proposed ADR-0043 drafted;
+  the replay suite covers valid, degraded, and rejected outcomes.
 - **Pending** – 50,000-sample campaign and deterministic fixture accepted.
 - **Pending** – Quality contract approved.
 - **Pending** – Production hardening implemented and validated.
@@ -134,6 +140,26 @@ campaign. Run source screening before full builds and retain raw payloads.
 **Impact**: Phase 0 can discover failure cases independently of Marta, while
 the pilot provides a performance and anomaly-rate checkpoint before scaling.
 
+### 2026-08-19 21:04 UTC: Evidence-backed quality contract
+
+**Context**: The Phase 1 fixture demonstrates both physically valid metadata
+degradation and mandatory source/output failures. The builder currently has no
+structured outcome boundary.
+
+**Decision**: Propose three outcomes: `valid`, `degraded` with visible
+provenance, and `rejected` with field-qualified reason codes. Individual zero
+texture components and zero gravel remain allowed; all-zero mandatory STU
+texture, non-increasing horizons, provider failures, and all-missing Ksat are
+rejected.
+
+**Rationale**: The rules distinguish scientifically valid zero values from
+missing evidence and prevent a generic fallback from masking source defects.
+The one-percentage texture tolerance, partial-Ksat policy, and depth-class
+handling are recorded in ADR-0043 because they affect model inputs.
+
+**Approval state**: Proposed. EU soil maintainer review is required before
+Phase 3 production implementation.
+
 ## Risks and Issues
 
 | Risk | Severity | Likelihood | Mitigation | Status |
@@ -151,7 +177,8 @@ the pilot provides a performance and anomaly-rate checkpoint before scaling.
   1,000 samples; targeted builds produced 35 exceptions and 59 generated
   files with non-increasing horizon depths. Ten screened controls built with
   no output-order issue.
-- **Post-change health signals**: pending fixture and implementation.
+- **Post-change health signals**: seven-case fixture covers valid, degraded,
+  and rejected outcomes; replay tests pass with no runtime behavior change.
 - **Danger signals observed**: quality checks currently emphasize file
   creation; invalid-source outcomes are not structured; source screening
   found STU zeros/missing values and missing depth classes; full builds are
@@ -174,8 +201,8 @@ the pilot provides a performance and anomaly-rate checkpoint before scaling.
 - [ ] ESDAC module documentation describes quality outcomes and diagnostics.
 - [ ] User/operator documentation describes invalid-source behavior.
 - [ ] Package and changed docs pass `wctl doc-lint`.
-- [ ] Parameterization ADR is added if defaults, thresholds, formulas, units,
-  or fallback heuristics change.
+- [x] Proposed parameterization ADR-0043 is drafted; approval remains open
+  before Phase 3 implementation.
 
 ### Testing
 
@@ -237,6 +264,32 @@ passed (`6 passed`, 2 deprecation warnings); `wctl run-pytest
 tests/eu/soils/test_esdac_quality_fixture.py` passed (`7 passed`, 2
 deprecation warnings).
 
+### 2026-08-19 21:04 UTC: Phase 2 contract draft
+
+**Agent/Contributor**: Codex
+
+**Work completed**:
+
+- Classified seven minimized cases as valid, degraded, or rejected, including
+  the missing-land-use metadata case added to the fixture.
+- Documented source, derived-horizon, Ksat, and serialization invariants in
+  `artifacts/quality-taxonomy.md`.
+- Drafted [ADR-0043](../../adrs/ADR-0043-eu-esdac-soil-quality-contract.md)
+  for the threshold and fallback decisions that must precede Phase 3.
+- Made no production runtime changes.
+
+**Approval needed**: EU soil maintainer review of the proposed contract,
+especially texture tolerance, partial Ksat treatment, and depth-class policy.
+
+**Test results**: `wctl run-pytest
+tests/eu/soils/test_esdac_quality_fixture.py` passed (`8 passed`, 2
+deprecation warnings). The Phase 0 search test remains green from the prior
+phase (`6 passed`, 2 deprecation warnings).
+
+**Next steps**: Approve or amend ADR-0043, then design Phase 3 validation and
+structured diagnostics. Decide separately whether the 50,000-sample campaign
+is warranted.
+
 ## Watch List
 
 - **Source-version drift**: ESDAC and SoilHydroGrids values must be captured
@@ -264,20 +317,22 @@ the captured cases to drive evidence-backed hardening.
 
 **From**: Codex
 **To**: User / next session
-**Date**: 2026-08-19 20:46 UTC
+**Date**: 2026-08-19 21:04 UTC
 
 **What's complete**:
 
 - Work-package scaffold and active ExecPlan are present.
 - Initial source-review hypotheses and phase gates are recorded.
-- Phase 1 fixture and replay tests reproduce six pilot cases without EU
+- Phase 1 fixture and replay tests reproduce seven pilot cases without EU
   raster installation.
+- Phase 2 taxonomy and proposed ADR-0043 are documented; no runtime behavior
+  has changed.
 
 **What's next**:
 
-1. Define the Phase 2 quality taxonomy and outcome contract.
-2. Decide and execute the 50,000-sample campaign if the evidence review
-   requires broader prevalence estimates.
+1. Review and approve or amend the Phase 2 quality taxonomy and ADR-0043.
+2. Decide and execute the 50,000-sample campaign if broader prevalence
+   estimates are required.
 3. Implement the smallest validation boundary only after the contract and
    parameterization decisions are recorded.
 

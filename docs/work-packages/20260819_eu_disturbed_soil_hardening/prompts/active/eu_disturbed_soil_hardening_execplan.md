@@ -34,9 +34,13 @@ plan and the companion tracker at every stopping point.
 - [x] (2026-08-19 20:56 UTC) Captured six minimized pilot cases with source
   payloads, provenance, expected outcomes, and a no-geodata replay harness;
   the fixture suite passed (`7 passed`).
+- [x] (2026-08-19 21:04 UTC) Added a seventh degraded replay case and drafted
+  the evidence-backed taxonomy and proposed ADR-0043; the fixture suite
+  passed (`8 passed`).
 - [ ] Phase 0 scale-up: decide whether to run the 50,000-sample campaign.
 - [x] Phase 1: capture source payload fixture and deterministic replay harness.
-- [ ] Phase 2: define and document evidence-backed quality invariants.
+- [ ] Phase 2: review and approve the evidence-backed quality invariants and
+  proposed ADR-0043.
 - [ ] Phase 3: agree validation/result/error contract.
 - [ ] Phase 4: implement production hardening and diagnostics.
 - [ ] Phase 5: validate disturbed downstream generated artifacts.
@@ -96,6 +100,12 @@ plan and the companion tracker at every stopping point.
   the fixture was recaptured from the production query path; sample 0050
   fails before a complete production payload exists.
 
+- Observation: Missing land-use metadata can coexist with a physically valid
+  profile and valid serialized horizons.
+  Evidence: `pilot-0021-missing-landuse-metadata` replays with `usedom=0`,
+  ordered depths, and finite output; it is classified as degraded rather than
+  rejected.
+
 ## Decision Log
 
 - Decision: Create a captured source-payload fixture before changing builder
@@ -132,6 +142,14 @@ plan and the companion tracker at every stopping point.
   production categorical-key normalization and exception classes.
   Date/Author: 2026-08-19 / Codex.
 
+- Decision: Propose a three-state quality contract and field-qualified reason
+  codes before implementing validation.
+  Rationale: the fixture distinguishes optional metadata degradation from
+  mandatory source, horizon, Ksat, and serialization failures. The proposed
+  texture tolerance and partial-Ksat policy affect generated model inputs and
+  are therefore recorded in ADR-0043 for maintainer approval.
+  Date/Author: 2026-08-19 / Codex; proposed for EU soil maintainer review.
+
 ## Outcomes & Retrospective
 
 Phase 1 confirmed that the reported classes are replayable without live
@@ -139,8 +157,9 @@ rasters: source zeros can reach the current builder, cumulative horizons can
 be written in decreasing order, and source/provider failures surface as
 unstructured exceptions. The fixture also exposed a distinction between
 screen-cell payloads and production query payloads, which is now recorded as
-provenance rather than silently merged. Phase 2 is now the active step; no
-production validation or fallback behavior has changed.
+provenance rather than silently merged. Phase 2 drafted a seven-case
+valid/degraded/rejected contract and ADR-0043; maintainer approval is pending,
+and no production validation or fallback behavior has changed.
 
 ## Context and Orientation
 

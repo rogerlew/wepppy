@@ -209,11 +209,11 @@ explicitly recorded.
 
 ## Parameterization ADR Gate
 
-- **Parameterization change present**: `TBD; likely yes if defaults,
-  thresholds, or fallback rules change`
-- **ADR required**: `TBD; must be yes if parameterization changes`
-- **ADR link(s)**: `TBD`
-- **Decision provenance captured**: `no; capture after Phase 2 decisions`
+- **Parameterization change present**: `proposed; no runtime delta in Phase 2`
+- **ADR required**: `yes before Phase 3 implementation`
+- **ADR link(s)**: [ADR-0043](../../adrs/ADR-0043-eu-esdac-soil-quality-contract.md)
+- **Decision provenance captured**: `proposed; EU soil maintainer approval is
+  required before Phase 3 merge`
 
 Reference: `docs/standards/parameterization-adr-standard.md`.
 
@@ -262,17 +262,20 @@ Reference: `docs/standards/parameterization-adr-standard.md`.
 
 ## Hardening and Callus Softening
 
-- **Failure signature(s)**: generated EU disturbed soil contains zero-valued
-  parameters, non-finite values, missing/invalid horizons, non-monotonic
-  depths, or silently degraded Ksat; exact signatures are pending Phase 0.
+- **Failure signature(s)**: the Phase 1 fixture reproduces zero-valued STU
+  subsoil parameters, non-increasing cumulative depths (`1200 -> 600` and
+  `1200 -> 400`), missing depth classes, all-missing Ksat coverage, and
+  `TypeError`, `KeyError`, and `RDIOutOfBoundsException` builder failures.
 - **Related prior hardening efforts**: the hardening lifecycle standard and
   the SSURGO intelligent fallback study listed above.
-- **Health signals**: confirmed invalid profiles reproduced by tests; invalid
-  `.sol` output count; surfaced per-location diagnostics; successful valid
-  control builds; downstream disturbed-build success rate.
-- **Danger signals**: valid locations rejected; silent fallback rate rises;
-  every source gap becomes a generic soil; worker failures lose TopoAZ context;
-  complexity or runtime grows without improved evidence.
+- **Health signals**: confirmed invalid profiles reproduced by tests; 59
+  invalid horizon-order outputs in the 1,000-cell pilot; surfaced
+  per-location diagnostics; successful valid and degraded controls; downstream
+  disturbed-build success rate.
+- **Danger signals**: valid locations rejected; degraded cases silently
+  accepted; silent fallback rate rises; every source gap becomes a generic
+  soil; worker failures lose TopoAZ context; complexity or runtime grows
+  without improved evidence.
 - **Observation window**: 14–30 days after production deployment, if a
   production behavior change is made.
 - **Temporary calluses introduced**: none at scaffold time. Any later
