@@ -159,8 +159,17 @@ and an independent subagent review has every finding dispositioned.
 
 Exercise the generated base soil through EU disturbed transformations and
 verify that validation does not reject valid disturbed states or reintroduce
-zero/invalid parameters during conversion. Confirm generated run artifacts,
-not only in-memory objects, satisfy the soil-file contract.
+zero/invalid parameters during conversion. `validate_disturbed_soil_artifact`
+reparses each generated 9002 file with `WeppSoilUtil` and checks finite OFE and
+horizon values, positive and strictly ordered cumulative horizons,
+`0 <= wp <= fc <= 1`, positive Ksat, and expected `luse`/`stext` metadata.
+The fixture matrix covers a valid base, a degraded base whose source warning
+must remain visible, and a rejected base that must not produce a generic
+disturbed artifact. Deliberately mutated serialized water, depth, and Ksat
+fields provide negative controls. This phase validates the artifact contract
+without changing the general Disturbed controller write API; Phase 6 will
+decide whether the EU base quality result should be carried into runtime
+controller enforcement.
 
 **Exit gate:** base and disturbed paths pass the fixture matrix, including
   absent/empty/populated/supported-legacy source states where applicable.

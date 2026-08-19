@@ -49,6 +49,10 @@ plan and the companion tracker at every stopping point.
 - [x] (2026-08-19 22:18 UTC) Completed the independent subagent review and
   dispositioned all findings; the final review reported no remaining
   blocker/high/medium findings. Phase 4 is complete and Phase 5 is queued.
+- [x] (2026-08-19 22:43 UTC) Executed Phase 5 downstream validation: added a
+  canonical-parser artifact validator and replayed valid, degraded, and
+  rejected-base fixture cases through the 9002 disturbed transformation;
+  downstream tests passed (`6 passed`).
 - [x] (2026-08-19 21:39 UTC) Completed targeted, documentation, stub, and
   changed-file exception gates. The full suite reached 170 passed and 13
   skipped before an unrelated Docker CLI compose-contract failure.
@@ -59,7 +63,7 @@ plan and the companion tracker at every stopping point.
 - [x] Phase 3: define and test the pure validation/result/error contract.
 - [x] Phase 4: complete independent review disposition and final gates for the
   production hardening and diagnostics integration.
-- [ ] Phase 5: validate disturbed downstream generated artifacts.
+- [x] Phase 5: validate disturbed downstream generated artifacts.
 - [ ] Phase 6: complete review gates and observation plan.
 
 ## Surprises & Discoveries
@@ -121,6 +125,22 @@ plan and the companion tracker at every stopping point.
   Evidence: `pilot-0021-missing-landuse-metadata` replays with `usedom=0`,
   ordered depths, and finite output; it is classified as degraded rather than
   rejected.
+
+- Observation: The existing disturbed integration matrix runs WEPP but does
+  not independently inspect the serialized disturbed `.sol` contract. The
+  canonical `WeppSoilUtil` parser exposes the transformed 9002 metadata and
+  horizon values needed for that check.
+  Evidence: `tests/disturbed/test_disturbed_matrix.py` generated and ran
+  files without asserting parsed horizon ordering or water-content validity;
+  `tests/eu/soils/test_esdac_disturbed_downstream.py` now closes that fixture
+  gap for EU base soils.
+
+- Observation: `to_over9000()` may insert a 200 mm surface horizon when the
+  source top horizon is deeper than 200 mm. This is valid when the resulting
+  cumulative depths remain strictly increasing; it is not evidence of a
+  source-depth defect by itself.
+  Evidence: the valid Phase 1 control becomes `[200.0, 1200.0, 1500.0]` in
+  the reparsed 9002 artifact.
 
 ## Decision Log
 
@@ -187,6 +207,18 @@ plan and the companion tracker at every stopping point.
   operator diagnosis.
   Date/Author: 2026-08-19 / Codex under ratified ADR-0043.
 
+- Decision: Validate disturbed files after serialization by reparsing them
+  with `WeppSoilUtil`, and merge accepted-base diagnostics into the downstream
+  result.
+  Rationale: in-memory transformation state does not prove that the emitted
+  WEPP artifact can be read by the canonical parser. A degraded base remains
+  degraded with its source reason, while a rejected base returns its original
+  diagnostics plus an explicit downstream rejection rather than becoming a
+  generic soil. The check keeps the Phase 4 zero-value policy: only
+  nonrepresentable downstream values such as nonpositive Ksat are rejected;
+  valid zero flags and gravel values are not blanket-rejected.
+  Date/Author: 2026-08-19 / Codex under ratified ADR-0043.
+
 ## Outcomes & Retrospective
 
 Phase 1 confirmed that the reported classes are replayable without live
@@ -202,7 +234,11 @@ profiles before commit and retaining per-location evidence in
 `soil_quality.json`. Independent review found and closed
 report-serialization, malformed-shape, staging atomicity, duplicate-key, and
 STU normalization issues; the final review has no unresolved
-blocker/high/medium findings.
+blocker/high/medium findings. Phase 5 adds a canonical-parser downstream
+artifact validator: the valid control and degraded metadata case produce
+valid serialized 9002 transformations (with degradation retained), the
+rejected zero-profile produces no downstream artifact, and deliberately
+mutated water, depth, and Ksat fields are rejected after reparsing.
 
 ## Context and Orientation
 
@@ -337,10 +373,21 @@ versions can be recaptured without rewriting the contract tests.
 ### Phase 5: Disturbed downstream validation
 
 Feed valid generated base soils through the EU disturbed transformation path.
-Inspect the generated disturbed `.sol` with the canonical parser and verify
-finite parameters, valid water-content ordering, positive/ordered horizons,
-and expected disturbed metadata. Include a case where base-soil diagnostics
-are surfaced rather than converted into a silent generic disturbed soil.
+Write the transformed 9002 file, reparse it with `WeppSoilUtil`, and validate
+finite OFE/horizon parameters, positive and strictly ordered cumulative
+horizons, `0 <= wp <= fc <= 1`, positive Ksat, and expected `luse`/`stext`
+metadata through `validate_disturbed_soil_artifact()`. Replay the valid
+`pilot-0001-control` and degraded `pilot-0021-missing-landuse-metadata`
+cases, and pass the rejected `pilot-0014-zero-stu` result into the downstream
+boundary to prove its source diagnostics are preserved without a generic
+artifact. Mutated serialized water, depth, and Ksat values are negative
+controls for the parser boundary.
+
+The validator is an additive EU quality boundary and the Phase 5 fixture
+closeout does not change the general Disturbed controller's write API. Phase 6
+must decide whether to carry the EU base result into that controller for
+runtime enforcement; the current evidence establishes the generated-artifact
+contract first.
 
 ### Phase 6: Reviews, observation, and closeout
 
@@ -470,3 +517,9 @@ and final gates remain active.
 Revision note (2026-08-19 22:18 UTC): Completed the required independent
 subagent review and dispositioned every finding. Phase 4 is complete; Phase 5
 downstream generated-artifact validation is queued.
+
+Revision note (2026-08-19 22:43 UTC): Executed Phase 5. Added the
+canonical-parser downstream artifact validator, 9002 fixture replay coverage,
+negative serialized-parameter cases, and explicit rejected-base diagnostic
+propagation. Six downstream tests pass; Phase 6 review and runtime wiring
+decision remain.

@@ -7,10 +7,10 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-19 19:37 UTC
-**Current phase**: Phase 5 disturbed downstream validation (queued)
-**Last updated**: 2026-08-19 22:18 UTC
-**Next milestone**: Validate generated EU base soils through disturbed-soil
-transformations under the Phase 4 quality contract
+**Current phase**: Phase 6 review and observation planning
+**Last updated**: 2026-08-19 22:43 UTC
+**Next milestone**: Decide runtime propagation of EU base quality into the
+general Disturbed controller, then complete QA and closeout gates
 **Security impact**: `none`
 **Dedicated security review**: `no`
 **Security artifact**: N/A
@@ -28,13 +28,13 @@ transformations under the Phase 4 quality contract
 - [x] Implement the pure validation/result contract and fixture-backed
   diagnostics tests.
 - [x] Implement the approved validation boundary and diagnostics.
-- [ ] Validate disturbed downstream generated artifacts.
+- [x] Validate disturbed downstream generated artifacts.
 - [ ] Complete correctness, QA, docs, and observation gates.
 
 ### In Progress
 
-- [ ] Phase 5 readiness: exercise valid and degraded generated EU soils through
-  disturbed downstream transformations.
+- [ ] Phase 6 readiness: complete QA review, runtime-wiring disposition, and
+  observation plan.
 
 ### Blocked
 
@@ -77,6 +77,10 @@ None.
 - [x] Completed the independent Phase 4 subagent review; all findings were
   fixed or explicitly dispositioned, with no remaining blocker/high/medium
   findings (2026-08-19 22:18 UTC).
+- [x] Added the Phase 5 canonical-parser downstream validator and replayed
+  valid, degraded, and rejected-base cases through the 9002 disturbed
+  transformation; serialized water, depth, and Ksat negative controls pass
+  (6 downstream tests passed, 2026-08-19 22:43 UTC).
 
 ## Phase Gates
 
@@ -93,7 +97,8 @@ None.
   invalid profiles do not silently write in the production path; rejected
   batches leave a `soil_quality.json` report and no newly staged `.sol` files;
   independent review findings are dispositioned.
-- **Phase 5**: disturbed downstream artifacts remain valid and reproducible.
+- **Phase 5**: disturbed downstream artifacts remain valid and reproducible;
+  valid/degraded/rejected fixture cases and serialized negative controls pass.
 - **Phase 6**: review, observation, and documentation gates are complete.
 
 ## Timeline
@@ -119,11 +124,14 @@ None.
 - **2026-08-19 22:24 UTC** – Repository-wide gate stopped at the known Docker
   CLI incompatibility after `170 passed, 13 skipped`; the canary smoke test
   reports `unknown shorthand flag: 'f' in -f` before compose contract checks.
+- **2026-08-19 22:43 UTC** – Phase 5 downstream fixture validation completed;
+  the canonical-parser validator passed valid/degraded/rejected cases and
+  serialized water/depth/Ksat negative controls.
 - **Pending** – 50,000-sample campaign; deterministic fixture is accepted.
 - **Complete** – Quality contract and ADR-0043 ratified; Phase 4 production
   hardening implementation and focused tests completed.
-- **Pending** – Disturbed downstream validation, observation window, and
-  closeout.
+- **Complete** – Disturbed downstream validation and generated-artifact
+  contract replay.
 - **Pending** – Observation window and closeout completed.
 
 ## Decisions Log
@@ -223,9 +231,10 @@ operator diagnosis.
   files with non-increasing horizon depths. Ten screened controls built with
   no output-order issue.
 - **Post-change health signals**: seven-case fixture covers valid, degraded,
-  and rejected outcomes; 30 targeted EU hardening tests pass; valid/degraded
-  batches commit staged outputs and rejected batches retain a diagnostic report
-  without committing new `.sol` files.
+  and rejected outcomes; Phase 4 batch tests pass; Phase 5 reparsed 9002
+  artifacts for valid and degraded bases and rejected water/depth/Ksat
+  mutations; valid/degraded batches commit staged outputs and rejected batches
+  retain a diagnostic report without committing new `.sol` files.
 - **Danger signals observed**: quality checks currently emphasize file
   creation; invalid-source outcomes are not structured; source screening
   found STU zeros/missing values and missing depth classes; full builds are
@@ -237,11 +246,16 @@ operator diagnosis.
 
 ### Code Quality
 
-- [x] Targeted EU soil tests pass (`30 passed`, 2 deprecation warnings).
+- [x] Targeted EU soil tests pass (`37 passed`, 2 deprecation warnings;
+  Phase 4's focused suite had 30 before Phase 5 additions).
 - [ ] Full `wctl run-pytest tests --maxfail=1` passes before closeout. The
   Phase 3 run reached 170 passed and 13 skipped, then stopped at the unrelated
   Docker CLI failure in `tests/docker/test_canary_smoke_contract.py`:
   `docker compose` rejected `-f` with `unknown shorthand flag: 'f'`.
+- [x] `wctl check-test-stubs` passes. Direct `wctl run-stubtest
+  wepppy.eu.soils.esdac` remains blocked by pre-existing mypy build errors in
+  `wepppy/eu/soils/esdac/quality.py` (lines 207, 304, 315, 317, 326, 335),
+  before the new downstream module is checked.
 - [x] Changed-file broad-exception check passes.
 - [x] `git diff --check` passes.
 
@@ -261,9 +275,10 @@ operator diagnosis.
 - [x] Replay tests run without EU raster installation.
 - [x] Phase 3 pure contract tests run without EU raster installation.
 - [ ] Optional live raster capture/verification is recorded separately.
-- [ ] Generated `.sol` parser and downstream disturbed tests pass.
-- [ ] Absent, empty, populated, and supported-legacy states are covered where
-  applicable.
+- [x] Generated `.sol` parser and downstream disturbed tests pass.
+- [x] The matrix covers populated valid metadata, empty/degraded optional
+  metadata, a supported legacy 7778 base converted to 9002, and rejected
+  mandatory source state.
 
 ### Reviews and Observation
 
@@ -274,6 +289,26 @@ operator diagnosis.
 - [ ] Temporary calluses have owner and sunset criteria, or none are retained.
 
 ## Progress Notes
+
+### 2026-08-19 22:43 UTC: Phase 5 downstream artifact validation
+
+**Agent/Contributor**: Codex
+
+**Work completed**:
+
+- Added `wepppy/eu/soils/esdac/downstream.py` and its stub with a serialized
+  artifact validator using the canonical `WeppSoilUtil` parser.
+- Replayed `pilot-0001-control` and `pilot-0021-missing-landuse-metadata`
+  through `to_over9000(..., version=9002)` and verified the written files,
+  not only in-memory objects.
+- Preserved degraded source diagnostics and rejected the zero-profile case
+  before attempting to parse a missing downstream artifact.
+- Added water-order, cumulative-depth-order, and zero-Ksat serialized negative
+  controls. The downstream test file passes six tests.
+
+**Scope note**: The validator is additive and establishes the EU artifact
+contract. The general Disturbed controller does not yet receive the EU base
+quality carrier; Phase 6 must decide whether to add that runtime propagation.
 
 ### 2026-08-19 20:46 UTC: Phase 0 pilot evidence
 
