@@ -1,9 +1,10 @@
 # ADR-0043: EU ESDAC Soil Quality Contract
 
-**Status**: Proposed
+**Status**: Accepted
 **Date**: 2026-08-19
-**Review Date**: Before Phase 3 production implementation
+**Review Date**: 2026-08-19
 **Review Owner**: EU soil maintainer
+**Ratification**: User review confirmed; accepted for Phase 3 implementation
 
 ## Context
 
@@ -21,7 +22,7 @@ generic-soil fallback.
 
 ## Decision
 
-Adopt the following proposed Phase 3 contract:
+Adopt the following Phase 3 contract:
 
 1. Return `valid` when all source, derived, horizon, Ksat, and serialization
    invariants pass.
@@ -49,11 +50,11 @@ must preserve the worker location context.
 
 - **Decision venue**: EU disturbed-soil hardening work-package execution
   session, 2026-08-19, America/Los_Angeles.
-- **Participants present**: Codex; EU soil maintainer review required before
-  Phase 3 implementation.
-- **Decision owner(s)**: EU soil maintainer, to confirm the proposed
-  parameterization before Phase 3 merge.
-- **Implementer(s)**: Codex, subject to maintainer approval.
+- **Participants present**: User and Codex, 2026-08-19.
+- **Decision owner(s)**: EU soil maintainer.
+- **Implementer(s)**: Codex, subject to the accepted contract.
+- **Ratification**: User reviewed ADR-0043 and confirmed that it is
+  reasonable to ratify for Phase 3 implementation, 2026-08-19.
 
 ## Change Summary
 
@@ -61,7 +62,7 @@ Current behavior has no structured valid/degraded/rejected result and can
 silently write decreasing horizon depths or represent an all-missing Ksat
 profile with `0.001`.
 
-Proposed behavior adds a field-qualified quality contract. It does not yet
+Accepted behavior adds a field-qualified quality contract. It does not yet
 change runtime behavior, generated files, defaults, transfer functions, or
 fallback execution.
 
@@ -112,14 +113,14 @@ need an additive diagnostic path. Locations currently producing invalid files
 will become rejected or degraded with visible reasons rather than silently
 accepted.
 
-The proposed one-percentage tolerance and Ksat policy are scientific/workflow
+The one-percentage tolerance and Ksat policy are scientific/workflow
 parameterization decisions. If the EU soil maintainer changes them, this ADR
 must be amended before implementation.
 
 ## Risk and Rollback Notes
 
 Risk: legitimate edge profiles may be rejected if their source encoding falls
-outside the proposed contract. Phase 3 must retain the Phase 1 valid control,
+outside the accepted contract. Phase 3 must retain the Phase 1 valid control,
 add a valid-zero matrix, and report rejection counts as a guardrail. Rollback
 is to revert the Phase 3 validation boundary while preserving the fixture and
 diagnostic tests; do not restore silent fallback without a revised ADR.

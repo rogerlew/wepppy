@@ -7,7 +7,7 @@ parameterization ADR link or decision record, and final observation results.
 
 Do not place secrets, credentials, or complete external raster datasets here.
 
-The Phase 2 working contract is documented in
+The Phase 2 contract is documented in
 [quality-taxonomy.md](quality-taxonomy.md). Its parameterization decisions are
-proposed in [ADR-0043](../../../adrs/ADR-0043-eu-esdac-soil-quality-contract.md)
-and require EU soil maintainer approval before Phase 3 implementation.
+ratified in [ADR-0043](../../../adrs/ADR-0043-eu-esdac-soil-quality-contract.md)
+for Phase 3 implementation.

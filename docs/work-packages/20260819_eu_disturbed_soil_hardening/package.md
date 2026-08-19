@@ -132,7 +132,7 @@ build, are omitted with a surfaced report, or use an approved fallback. Add
 diagnostic context including coordinates, TopoAZ ID, source field, raw value,
 and reason. Avoid broad exception handling and silent fallback wrappers.
 
-**Exit gate:** the proposed behavior is demonstrated against all fixture
+**Exit gate:** the approved behavior is demonstrated against all fixture
 classes and preserves valid controls.
 
 ### Phase 4 — Production hardening implementation
@@ -194,11 +194,11 @@ explicitly recorded.
 
 ## Success Criteria
 
-- [ ] Captured real-location fixture contains provenance, source payloads,
+- [x] Captured real-location fixture contains provenance, source payloads,
   expected classifications, and a valid control.
-- [ ] Deterministic replay tests reproduce all confirmed failure signatures
+- [x] Deterministic replay tests reproduce all confirmed failure signatures
   without EU raster installation.
-- [ ] Quality invariants and the valid/degraded/rejected result contract are
+- [x] Quality invariants and the valid/degraded/rejected result contract are
   documented and fixture-backed.
 - [ ] Invalid or unrepresentable profiles cannot produce silent invalid `.sol`
   files.
@@ -209,11 +209,11 @@ explicitly recorded.
 
 ## Parameterization ADR Gate
 
-- **Parameterization change present**: `proposed; no runtime delta in Phase 2`
-- **ADR required**: `yes before Phase 3 implementation`
+- **Parameterization change present**: `accepted; no runtime delta in Phase 2`
+- **ADR required**: `yes; ratified before Phase 3 implementation`
 - **ADR link(s)**: [ADR-0043](../../adrs/ADR-0043-eu-esdac-soil-quality-contract.md)
-- **Decision provenance captured**: `proposed; EU soil maintainer approval is
-  required before Phase 3 merge`
+- **Decision provenance captured**: `yes; user review ratified ADR-0043 on
+  2026-08-19`
 
 Reference: `docs/standards/parameterization-adr-standard.md`.
 

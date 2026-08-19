@@ -7,10 +7,10 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-19 19:37 UTC
-**Current phase**: Phase 2 quality-contract review
-**Last updated**: 2026-08-19 21:04 UTC
-**Next milestone**: Approve ADR-0043 and the quality taxonomy before Phase 3
-production validation design
+**Current phase**: Phase 3 validation/result contract design (queued)
+**Last updated**: 2026-08-19 21:14 UTC
+**Next milestone**: Design the validation boundary and structured diagnostics
+under ratified ADR-0043
 **Security impact**: `none`
 **Dedicated security review**: `no`
 **Security artifact**: N/A
@@ -24,16 +24,15 @@ production validation design
 - [ ] Add Marta's cases later if coordinates or run artifacts become
   available.
 - [x] Add deterministic replay fixture and no-geodata test harness.
-- [x] Define the evidence-backed quality taxonomy and draft the
-  valid/degraded/rejected contract.
+- [x] Define and ratify the evidence-backed valid/degraded/rejected contract.
 - [ ] Implement the approved validation boundary and diagnostics.
 - [ ] Validate disturbed downstream generated artifacts.
 - [ ] Complete correctness, QA, docs, and observation gates.
 
 ### In Progress
 
-- [ ] Phase 2 contract review: approve the proposed taxonomy and ADR-0043;
-  no production behavior changes are authorized until approval.
+- [ ] Phase 3 readiness: design the validation/result/error boundary from
+  ratified ADR-0043; no production behavior changes are authorized yet.
 
 ### Blocked
 
@@ -64,6 +63,8 @@ None.
 - [x] Added the Phase 2 taxonomy, seven-case valid/degraded/rejected matrix,
   and proposed ADR-0043; replay tests pass without EU geodata
   (2026-08-19 21:04 UTC).
+- [x] User reviewed and ratified ADR-0043 for Phase 3 implementation; no
+  production behavior changed (2026-08-19 21:14 UTC).
 
 ## Phase Gates
 
@@ -92,8 +93,11 @@ None.
   completed; all six cases reproduce.
 - **2026-08-19 21:04 UTC** – Phase 2 taxonomy and proposed ADR-0043 drafted;
   the replay suite covers valid, degraded, and rejected outcomes.
-- **Pending** – 50,000-sample campaign and deterministic fixture accepted.
-- **Pending** – Quality contract approved.
+- **2026-08-19 21:14 UTC** – User ratified ADR-0043; Phase 2 is complete and
+  Phase 3 validation design is queued.
+- **Pending** – 50,000-sample campaign; deterministic fixture is accepted.
+- **Complete** – Quality contract and ADR-0043 ratified; production
+  implementation remains pending.
 - **Pending** – Production hardening implemented and validated.
 - **Pending** – Observation window and closeout completed.
 
@@ -157,8 +161,8 @@ missing evidence and prevent a generic fallback from masking source defects.
 The one-percentage texture tolerance, partial-Ksat policy, and depth-class
 handling are recorded in ADR-0043 because they affect model inputs.
 
-**Approval state**: Proposed. EU soil maintainer review is required before
-Phase 3 production implementation.
+**Approval state**: Ratified by the user on 2026-08-19. Phase 3 production
+implementation may proceed under ADR-0043.
 
 ## Risks and Issues
 
@@ -201,8 +205,7 @@ Phase 3 production implementation.
 - [ ] ESDAC module documentation describes quality outcomes and diagnostics.
 - [ ] User/operator documentation describes invalid-source behavior.
 - [ ] Package and changed docs pass `wctl doc-lint`.
-- [x] Proposed parameterization ADR-0043 is drafted; approval remains open
-  before Phase 3 implementation.
+- [x] Parameterization ADR-0043 is ratified for Phase 3 implementation.
 
 ### Testing
 
@@ -317,7 +320,7 @@ the captured cases to drive evidence-backed hardening.
 
 **From**: Codex
 **To**: User / next session
-**Date**: 2026-08-19 21:04 UTC
+**Date**: 2026-08-19 21:14 UTC
 
 **What's complete**:
 
@@ -325,12 +328,13 @@ the captured cases to drive evidence-backed hardening.
 - Initial source-review hypotheses and phase gates are recorded.
 - Phase 1 fixture and replay tests reproduce seven pilot cases without EU
   raster installation.
-- Phase 2 taxonomy and proposed ADR-0043 are documented; no runtime behavior
+- Phase 2 taxonomy and accepted ADR-0043 are documented; no runtime behavior
   has changed.
 
 **What's next**:
 
-1. Review and approve or amend the Phase 2 quality taxonomy and ADR-0043.
+1. Design the Phase 3 validation boundary and structured diagnostics under
+   ADR-0043.
 2. Decide and execute the 50,000-sample campaign if broader prevalence
    estimates are required.
 3. Implement the smallest validation boundary only after the contract and

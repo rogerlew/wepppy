@@ -1,6 +1,6 @@
 # EU ESDAC Soil Quality Taxonomy and Invariant Contract
 
-**Status**: Phase 2 working contract, proposed for Phase 3 implementation
+**Status**: Phase 2 contract ratified for Phase 3 implementation
 **Evidence**: [Phase 1 fixture](../../../../tests/eu/soils/fixtures/eu_disturbed_soil_phase1.json)
 **Related ADR**: [ADR-0043](../../../adrs/ADR-0043-eu-esdac-soil-quality-contract.md)
 
@@ -9,7 +9,7 @@
 This contract classifies the ESDAC-to-WEPP soil path at the first boundary
 where a location becomes unusable or loses provenance. It does not change the
 builder, add fallbacks, or repair historical `.sol` files. Phase 3 will add
-the validation boundary after this contract is approved.
+the validation boundary under the ratified contract.
 
 ## Evidence Classification
 
@@ -25,7 +25,7 @@ the validation boundary after this contract is approved.
 
 The `usedom=0` case is deliberately separated from physical invalidity. The
 current builder uses the nonforest albedo/initial-saturation branch when land
-use is unknown, so the proposed result is degraded with a warning rather than
+use is unknown, so the ratified result is degraded with a warning rather than
 rejected when all physical and structural checks pass.
 
 ## Invariants
@@ -110,8 +110,8 @@ the original exception class separately from the normalized reason code.
 
 The one-percentage texture balance tolerance, treatment of partial Ksat
 profiles, and treatment of supported depth-class fallbacks affect generated
-model inputs. They are recorded in ADR-0043 and must be approved before Phase
-3 production implementation. Phase 2 introduces no runtime behavior.
+model inputs. They are recorded in accepted ADR-0043 and must be preserved by
+Phase 3 production implementation. Phase 2 introduced no runtime behavior.
 
 The 50,000-cell search remains a discovery-scale decision separate from these
 invariants; the 1,000-cell pilot is sufficient to establish the fixture-backed
