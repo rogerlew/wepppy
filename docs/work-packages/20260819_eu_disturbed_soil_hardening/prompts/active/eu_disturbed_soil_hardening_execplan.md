@@ -384,18 +384,24 @@ artifact. Mutated serialized water, depth, and Ksat values are negative
 controls for the parser boundary.
 
 The validator is an additive EU quality boundary and the Phase 5 fixture
-closeout does not change the general Disturbed controller's write API. Phase 6
-must decide whether to carry the EU base result into that controller for
-runtime enforcement; the current evidence establishes the generated-artifact
-contract first.
+closeout does not change the general Disturbed controller's write API. The
+Phase 6 decision is now to carry the EU base result into the EU disturbed
+runtime path for enforcement; non-EU builders and legacy workflows remain
+outside this scope.
 
 ### Phase 6: Reviews, observation, and closeout
 
-Create correctness and QA review artifacts under `artifacts/`, disposition all
-medium/high findings, run the required targeted and repository gates, and
-record exact evidence in the tracker. If behavior is deployed, observe target
-error recurrence and valid-state rejection for 14–30 days. Any temporary
-compatibility branch must have an owner, review date, and sunset condition.
+Implement and review the EU-specific runtime downstream gate. Carry the
+per-location Phase 4 quality result into the Disturbed single-OFE and MOFE
+paths, write generated EU files to isolated temporary paths, reparse them with
+the canonical validator, and publish only accepted artifacts. Preserve base
+and downstream diagnostics in the typed error/report path; do not broaden the
+gate to non-EU soil builders. Add correctness and QA review artifacts under
+`artifacts/`, disposition all medium/high findings, run the required targeted
+and repository gates, and record exact evidence in the tracker. If behavior is
+deployed, observe target error recurrence and valid-state rejection for 14–30
+days. Any temporary compatibility branch must have an owner, review date, and
+sunset condition.
 
 ## Concrete Steps
 

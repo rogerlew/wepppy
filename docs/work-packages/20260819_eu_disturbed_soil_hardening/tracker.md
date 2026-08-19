@@ -8,9 +8,9 @@
 **Timezone**: UTC
 **Started**: 2026-08-19 19:37 UTC
 **Current phase**: Phase 6 review and observation planning
-**Last updated**: 2026-08-19 22:43 UTC
-**Next milestone**: Decide runtime propagation of EU base quality into the
-general Disturbed controller, then complete QA and closeout gates
+**Last updated**: 2026-08-19 22:59 UTC
+**Next milestone**: Implement and QA the EU-specific runtime downstream gate,
+then complete the observation and closeout gates
 **Security impact**: `none`
 **Dedicated security review**: `no`
 **Security artifact**: N/A
@@ -33,8 +33,8 @@ general Disturbed controller, then complete QA and closeout gates
 
 ### In Progress
 
-- [ ] Phase 6 readiness: complete QA review, runtime-wiring disposition, and
-  observation plan.
+- [ ] Phase 6 readiness: implement the EU-specific runtime gate, complete QA
+  review, and define the observation plan.
 
 ### Blocked
 
@@ -213,6 +213,42 @@ all-accepted batch.
 or enter the hillslope mapping; `soil_quality.json` remains available for
 operator diagnosis.
 
+### 2026-08-19 22:59 UTC: EU-specific runtime downstream gate
+
+**Context**: Phase 5 proves the serialized disturbed-artifact contract, but
+the validator is currently an additive fixture/QA boundary. The user selected
+runtime enforcement for EU ESDAC-derived soils within this package.
+
+**Options considered**:
+
+1. Keep the validator test-only — lowest compatibility risk, but invalid
+   downstream artifacts could still be published by a production run.
+2. Add an EU-specific runtime gate — carry the EU base quality result into the
+   Disturbed single-OFE and MOFE writers, validate before publication, and
+   preserve source plus downstream diagnostics.
+3. Gate every disturbed soil format and source — broader protection, but an
+   unnecessary compatibility surface for non-EU builders in this package.
+
+**Decision**: Option 2, the EU-specific runtime gate.
+
+**Normative boundary**:
+
+- EU ESDAC base profiles with `valid` or `degraded` quality may enter the
+  disturbed transformation; `rejected` profiles must not produce a generic
+  replacement soil.
+- Generated EU disturbed files are written to an isolated temporary path,
+  reparsed with the canonical parser, and published only after the downstream
+  contract passes.
+- Rejections retain the base quality diagnostics and add downstream reason
+  codes in an explicit typed error/report path.
+- Non-EU soil builders and their existing Disturbed behavior remain outside
+  this gate.
+
+**Rationale**: This closes the confirmed EU data-quality path while preserving
+  compatibility for unrelated builders and legacy disturbed workflows. A
+  missing EU quality carrier is a provenance/error condition to resolve during
+  implementation, not permission to silently treat the profile as generic.
+
 ## Risks and Issues
 
 | Risk | Severity | Likelihood | Mitigation | Status |
@@ -307,8 +343,8 @@ operator diagnosis.
   controls. The downstream test file passes six tests.
 
 **Scope note**: The validator is additive and establishes the EU artifact
-contract. The general Disturbed controller does not yet receive the EU base
-quality carrier; Phase 6 must decide whether to add that runtime propagation.
+contract. The Phase 6 decision now requires carrying the EU base quality
+carrier into the EU disturbed runtime path; implementation and QA remain open.
 
 ### 2026-08-19 20:46 UTC: Phase 0 pilot evidence
 

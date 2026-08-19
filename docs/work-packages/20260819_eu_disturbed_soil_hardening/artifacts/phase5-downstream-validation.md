@@ -15,5 +15,5 @@
 The negative controls mutate the serialized 9002 artifact after writing. The
 validator rejects water-content inversion, non-increasing cumulative depth,
 and zero Ksat after reparsing. The implementation is an additive EU quality
-boundary; runtime propagation of the EU base result into the general
-Disturbed controller remains a Phase 6 decision.
+boundary. Phase 6 will propagate the EU base result into the EU Disturbed
+runtime path; non-EU disturbed behavior remains outside this scope.

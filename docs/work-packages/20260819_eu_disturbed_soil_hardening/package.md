@@ -168,19 +168,23 @@ must remain visible, and a rejected base that must not produce a generic
 disturbed artifact. Deliberately mutated serialized water, depth, and Ksat
 fields provide negative controls. This phase validates the artifact contract
 without changing the general Disturbed controller write API; Phase 6 will
-decide whether the EU base quality result should be carried into runtime
-controller enforcement.
+carry the EU base quality result into the EU runtime controller gate while
+leaving non-EU disturbed behavior unchanged.
 
 **Exit gate:** base and disturbed paths pass the fixture matrix, including
   absent/empty/populated/supported-legacy source states where applicable.
 
 ### Phase 6 — Observation, review, and callus-softening plan
 
-Run the required correctness and QA reviews, capture baseline and post-change
-health signals, and define the observation window. Any temporary diagnostic,
-fallback, or retry behavior receives an owner and sunset criteria. Close only
-after review findings are dispositioned and documentation matches runtime
-behavior.
+Implement the selected EU-specific runtime gate: propagate the ESDAC
+per-location quality result into EU Disturbed single-OFE and MOFE generation,
+validate serialized outputs before publication, and preserve base plus
+downstream diagnostics without a generic fallback. Keep non-EU builders and
+legacy disturbed workflows outside the gate. Then run the required correctness
+and QA reviews, capture baseline and post-change health signals, and define
+the observation window. Any temporary diagnostic, fallback, or retry behavior
+receives an owner and sunset criteria. Close only after review findings are
+dispositioned and documentation matches runtime behavior.
 
 **Exit gate:** focused and repository validation are complete, evidence is
 linked, and any follow-up package or mitigation-retirement experiment is
