@@ -353,6 +353,24 @@ When resuming Kubernetes work:
 
 ## 🚧 In Progress
 
+### EU Disturbed Soil Building Data-Quality Hardening
+
+**Started**: 2026-08-19
+**Size**: Multi-phase investigation and hardening
+**Priority**: High
+**Security impact**: `none` at scaffold time
+**Link**: [docs/work-packages/20260819_eu_disturbed_soil_hardening/](docs/work-packages/20260819_eu_disturbed_soil_hardening/)
+**Description**: Search a seeded, stratified sample of the ESDAC raster
+footprint for zero-valued parameters or invalid horizons, then define and
+implement explicit validation and diagnostics without silently inventing
+replacement soil values. The package is currently in Phase 0 random-search
+design; live execution is pending matching EU geodata.
+**Next Steps**: Run the 1,000-sample pilot with
+`tools/eu_invalid_soil_search.py`, inspect the anomaly/build-failure rate, then
+scale to the 50,000-sample campaign and retain minimized replay fixtures.
+
+---
+
 ### WEPPcloud Private-Canary Image Compatibility
 
 **Started**: 2026-08-13
