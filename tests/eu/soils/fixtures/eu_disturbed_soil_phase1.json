@@ -1,0 +1,176 @@
+{
+  "schema_version": 1,
+  "campaign": "eu-invalid-soil-search",
+  "captured_at": "2026-08-19T20:46:00Z",
+  "source": {
+    "manifest_seed": 20260819,
+    "pilot_sample_count": 1000,
+    "screened_source": "ESDAC ESDB, ESDAC STU EU layers, EU SoilHydroGrids",
+    "capture_environment": "WEPPpy dev container with matching /geodata assets",
+    "selection": "one control plus representative source/output failure classes"
+  },
+  "cases": [
+    {
+      "case_id": "pilot-0001-control",
+      "source_capture": "production_query_replay_payload",
+      "provenance": {"sample_id": 1, "row": 242, "col": 4841, "lng": 23.55681303809423, "lat": 69.98905517560759},
+      "esdb": {
+        "fao90lev1": ["1", "PZ", "Podzol"],
+        "usedom": ["5", "5", "Forest, coppice"],
+        "textdepchg": ["5", "5", "No textural change between 20 and 120 cm depth"],
+        "il": ["1", "1", "No impermeable layer within 150 cm"],
+        "cec_top": ["2", "L", "Low ( < 15 cmol(+)/kg)"],
+        "cec_sub": ["2", "L", "Low ( < 15 cmol(+)/kg)"],
+        "dgh": ["2", "V", "Very deep ( > 120 cm)"],
+        "dimp": ["1", "D", "Deep ( > 80 cm)"],
+        "dr": ["1", "D", "Deep (80 - 120 cm)"]
+      },
+      "stu": {
+        "STU_EU_T_CLAY": 4.0, "STU_EU_S_CLAY": 4.0,
+        "STU_EU_T_SAND": 87.0, "STU_EU_S_SAND": 88.0,
+        "STU_EU_T_SILT": 9.0, "STU_EU_S_SILT": 8.0,
+        "STU_EU_T_OC": 2.18, "STU_EU_S_OC": 0.39,
+        "STU_EU_T_BD": 1.73, "STU_EU_S_BD": 1.74,
+        "STU_EU_T_GRAVEL": 3.0, "STU_EU_S_GRAVEL": 4.0
+      },
+      "hydrogrids": {"sl1": 2768.0, "sl2": 2768.0, "sl3": 2768.0, "sl4": 2768.0, "sl5": 56.0, "sl6": 56.0, "sl7": 56.0},
+      "expected_issues": [],
+      "expected_output": {"status": "built", "key": "PZ_5_5_1_L_L_V_D_D_4,9,87,2", "horizon_depths": [1200.0, 1500.0]}
+    },
+    {
+      "case_id": "pilot-0007-depth-order",
+      "source_capture": "production_query_replay_payload",
+      "provenance": {"sample_id": 7, "row": 226, "col": 5114, "lng": 30.43033652459702, "lat": 69.52113673277971},
+      "esdb": {
+        "fao90lev1": ["4", "HS", "Histosol"],
+        "usedom": ["0", "0", "No information"],
+        "textdepchg": ["5", "5", "No textural change between 20 and 120 cm depth"],
+        "il": ["3", "3", "Impermeable layer between 40 and 80 cm"],
+        "cec_top": ["1", "M", "Medium (15-40 cmol(+)/kg)"],
+        "cec_sub": ["1", "M", "Medium (15-40 cmol(+)/kg)"],
+        "dgh": ["2", "V", "Very deep ( > 120 cm)"],
+        "dimp": ["1", "D", "Deep ( > 80 cm)"],
+        "dr": ["2", "", "None"]
+      },
+      "stu": {
+        "STU_EU_T_CLAY": 21.0, "STU_EU_S_CLAY": 21.0,
+        "STU_EU_T_SAND": 18.0, "STU_EU_S_SAND": 18.0,
+        "STU_EU_T_SILT": 61.0, "STU_EU_S_SILT": 61.0,
+        "STU_EU_T_OC": 35.27, "STU_EU_S_OC": 39.16,
+        "STU_EU_T_BD": 0.26241124, "STU_EU_S_BD": 0.2327193,
+        "STU_EU_T_GRAVEL": 0.0, "STU_EU_S_GRAVEL": 0.0
+      },
+        "hydrogrids": {"sl1": 2768.0, "sl2": 2768.0, "sl3": 2768.0, "sl4": 2768.0, "sl5": 56.0, "sl6": 56.0, "sl7": 56.0},
+      "expected_issues": ["source.usedom.no_information", "output.horizon_depth_order"],
+      "expected_output": {"status": "built", "key": "HS_0_5_3_M_M_V_D__21,61,18,0", "horizon_depths": [1200.0, 600.0]}
+    },
+    {
+      "case_id": "pilot-0014-zero-stu",
+      "source_capture": "production_query_replay_payload",
+      "provenance": {"sample_id": 14, "row": 271, "col": 5468, "lng": 38.1245623018145, "lat": 68.03212725625757},
+      "esdb": {
+        "fao90lev1": ["8", "LP", "Leptosol"],
+        "usedom": ["0", "0", "No information"],
+        "textdepchg": ["5", "5", "No textural change between 20 and 120 cm depth"],
+        "il": ["4", "4", "Impermeable layer within 40 cm"],
+        "cec_top": ["2", "L", "Low ( < 15 cmol(+)/kg)"],
+        "cec_sub": ["1", "M", "Medium (15-40 cmol(+)/kg)"],
+        "dgh": ["2", "V", "Very deep ( > 120 cm)"],
+        "dimp": ["1", "D", "Deep ( > 80 cm)"],
+        "dr": ["4", "S", "Shallow ( < 40 cm)"]
+      },
+      "stu": {
+        "STU_EU_T_CLAY": 11.0, "STU_EU_S_CLAY": 0.0,
+        "STU_EU_T_SAND": 26.0, "STU_EU_S_SAND": 0.0,
+        "STU_EU_T_SILT": 63.0, "STU_EU_S_SILT": 0.0,
+        "STU_EU_T_OC": 1.149999976158142, "STU_EU_S_OC": 0.0,
+        "STU_EU_T_BD": 1.4700000286102295, "STU_EU_S_BD": 0.0,
+        "STU_EU_T_GRAVEL": 22.0, "STU_EU_S_GRAVEL": 0.0
+      },
+        "hydrogrids": {"sl1": 2768.0, "sl2": 2768.0, "sl3": 2768.0, "sl4": 2768.0, "sl5": 2124.0, "sl6": 2124.0, "sl7": 56.0},
+      "expected_issues": ["source.stu.sub_zero_values", "source.usedom.no_information", "output.horizon_depth_order"],
+      "expected_output": {"status": "built", "key": "LP_0_5_4_L_M_V_D_S_11,63,26,1", "horizon_depths": [1200.0, 400.0]}
+    },
+    {
+      "case_id": "pilot-0050-hydrogrids-out-of-bounds",
+      "source_capture": "pilot_source_screen_before_builder_exception",
+      "provenance": {"sample_id": 50, "row": 76, "col": 7355, "lng": 71.32433343969802, "lat": 58.878825989612515},
+      "esdb": {
+        "fao90lev1": ["12", "PD", "Podzoluvisol"],
+        "usedom": ["0", "0", "No information"],
+        "textdepchg": ["6", "6", "Textural change between 20 and 60 cm depth"],
+        "il": ["1", "1", "No impermeable layer within 150 cm"],
+        "cec_top": ["2", "L", "Low ( < 15 cmol(+)/kg)"],
+        "cec_sub": ["1", "M", "Medium (15-40 cmol(+)/kg)"],
+        "dgh": ["1", "M", "Moderate (40 - 80 cm)"],
+        "dimp": ["1", "D", "Deep ( > 80 cm)"],
+        "dr": ["5", "V", "Very deep ( > 120 cm)"]
+      },
+      "stu": {
+        "STU_EU_T_CLAY": 19.0, "STU_EU_S_CLAY": 24.0,
+        "STU_EU_T_SAND": 32.0, "STU_EU_S_SAND": 25.0,
+        "STU_EU_T_SILT": 49.0, "STU_EU_S_SILT": 51.0,
+        "STU_EU_T_OC": 2.2200000286102295, "STU_EU_S_OC": 0.5,
+        "STU_EU_T_BD": 1.399999976158142, "STU_EU_S_BD": 1.399999976158142,
+        "STU_EU_T_GRAVEL": 1.0, "STU_EU_S_GRAVEL": 4.0
+      },
+      "hydrogrids": {"sl1": null, "sl2": null, "sl3": null, "sl4": null, "sl5": null, "sl6": null, "sl7": null},
+      "expected_issues": ["source.hydrogrids.all_missing", "builder.exception"],
+      "expected_output": {"status": "exception", "error_type": "RDIOutOfBoundsException"}
+    },
+    {
+      "case_id": "pilot-0057-missing-depth-source",
+      "source_capture": "pilot_source_screen_before_builder_exception",
+      "provenance": {"sample_id": 57, "row": 503, "col": 4453, "lng": 13.146080614437453, "lat": 68.06344048122288},
+      "esdb": {
+        "fao90lev1": ["8", "LP", "Leptosol"],
+        "usedom": ["30", "30", "None"],
+        "textdepchg": ["0", "0", "No information"],
+        "il": ["0", "0", "No information"],
+        "cec_top": ["2", "L", "Low ( < 15 cmol(+)/kg)"],
+        "cec_sub": ["1", "M", "Medium (15-40 cmol(+)/kg)"],
+        "dgh": ["2", "V", "Very deep ( > 120 cm)"],
+        "dimp": ["1", "D", "Deep ( > 80 cm)"],
+        "dr": ["4", "S", "Shallow ( < 40 cm)"]
+      },
+      "stu": {
+        "STU_EU_T_CLAY": 9.0, "STU_EU_S_CLAY": 0.0,
+        "STU_EU_T_SAND": 73.0, "STU_EU_S_SAND": 0.0,
+        "STU_EU_T_SILT": 18.0, "STU_EU_S_SILT": 0.0,
+        "STU_EU_T_OC": 1.399999976158142, "STU_EU_S_OC": 0.0,
+        "STU_EU_T_BD": 1.590000033378601, "STU_EU_S_BD": 0.0,
+        "STU_EU_T_GRAVEL": 21.0, "STU_EU_S_GRAVEL": 0.0
+      },
+      "hydrogrids": {"sl1": 2768.0, "sl2": 2768.0, "sl3": 2768.0, "sl4": 2768.0, "sl5": 56.0, "sl6": 56.0, "sl7": 56.0},
+      "expected_issues": ["source.il.no_information", "source.textdepchg.no_information", "builder.exception"],
+      "expected_output": {"status": "exception", "error_type": "TypeError"}
+    },
+    {
+      "case_id": "pilot-0354-missing-rat-value",
+      "source_capture": "pilot_source_screen_before_builder_exception",
+      "provenance": {"sample_id": 354, "row": 1518, "col": 4609, "lng": 14.992116208989042, "lat": 58.84343474068093},
+      "esdb": {
+        "fao90lev1": ["11", "CM", "Cambisol"],
+        "usedom": ["3", "3", "Arable land, cereals"],
+        "textdepchg": ["0", "0", "No information"],
+        "il": ["1", "1", "No impermeable layer within 150 cm"],
+        "cec_top": ["2", "L", "Low ( < 15 cmol(+)/kg)"],
+        "cec_sub": ["1", "M", "Medium (15-40 cmol(+)/kg)"],
+        "dgh": ["2", "V", "Very deep ( > 120 cm)"],
+        "dimp": ["1", "D", "Deep ( > 80 cm)"],
+        "dr": ["1", "D", "Deep (80 - 120 cm)"]
+      },
+      "stu": {
+        "STU_EU_T_CLAY": 21.0, "STU_EU_S_CLAY": 20.0,
+        "STU_EU_T_SAND": 42.0, "STU_EU_S_SAND": 46.0,
+        "STU_EU_T_SILT": 37.0, "STU_EU_S_SILT": 34.0,
+        "STU_EU_T_OC": 1.3899999856948853, "STU_EU_S_OC": 0.6000000238418579,
+        "STU_EU_T_BD": 1.409999966621399, "STU_EU_S_BD": 1.4199999570846558,
+        "STU_EU_T_GRAVEL": 19.0, "STU_EU_S_GRAVEL": 26.0
+      },
+      "hydrogrids": {"sl1": 2768.0, "sl2": 2768.0, "sl3": 2768.0, "sl4": 2768.0, "sl5": 56.0, "sl6": 56.0, "sl7": 56.0},
+      "expected_issues": ["source.textdepchg.no_information", "builder.exception"],
+      "expected_output": {"status": "exception", "error_type": "KeyError"}
+    }
+  ]
+}

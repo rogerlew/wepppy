@@ -31,8 +31,11 @@ plan and the companion tracker at every stopping point.
   source screening flagged 641 locations; 596 suspicious builds completed,
   35 raised builder exceptions, 59 generated profiles had non-increasing
   horizon depths, and 10 controls built without output-order issues.
-- [ ] Phase 0: run the seeded random invalid-soil search and freeze evidence.
-- [ ] Phase 1: capture source payload fixture and deterministic replay harness.
+- [x] (2026-08-19 20:56 UTC) Captured six minimized pilot cases with source
+  payloads, provenance, expected outcomes, and a no-geodata replay harness;
+  the fixture suite passed (`7 passed`).
+- [ ] Phase 0 scale-up: decide whether to run the 50,000-sample campaign.
+- [x] Phase 1: capture source payload fixture and deterministic replay harness.
 - [ ] Phase 2: define and document evidence-backed quality invariants.
 - [ ] Phase 3: agree validation/result/error contract.
 - [ ] Phase 4: implement production hardening and diagnostics.
@@ -85,6 +88,14 @@ plan and the companion tracker at every stopping point.
   Evidence: the first campaign collector saw 606 such `AttributeError`
   results; the final collector records stable raw fields instead.
 
+- Observation: Direct raster-cell screening and the production query path can
+  select different cells on grids with different geometry or rounding. The
+  minimized fixture therefore uses production-query payloads for completed
+  builds and labels pre-exception screen payloads separately.
+  Evidence: sample 0001's screen payload differed from `ESDAC.query` until
+  the fixture was recaptured from the production query path; sample 0050
+  fails before a complete production payload exists.
+
 ## Decision Log
 
 - Decision: Create a captured source-payload fixture before changing builder
@@ -114,12 +125,22 @@ plan and the companion tracker at every stopping point.
   campaign-runner decision and does not change production behavior.
   Date/Author: 2026-08-19 / Codex.
 
+- Decision: Keep Phase 1 replay at the ESDAC query boundary and monkeypatch
+  only source providers in the test.
+  Rationale: this exercises the real `Horizon` construction and `.sol`
+  serialization while avoiding `/geodata`; it also preserves the exact
+  production categorical-key normalization and exception classes.
+  Date/Author: 2026-08-19 / Codex.
+
 ## Outcomes & Retrospective
 
-No implementation outcome exists yet. At each completed phase, summarize what
-was learned, which hypotheses were confirmed or rejected, and whether the next
-phase changed. At closeout, compare generated-output behavior against the
-purpose statement and record any follow-up package.
+Phase 1 confirmed that the reported classes are replayable without live
+rasters: source zeros can reach the current builder, cumulative horizons can
+be written in decreasing order, and source/provider failures surface as
+unstructured exceptions. The fixture also exposed a distinction between
+screen-cell payloads and production query payloads, which is now recorded as
+provenance rather than silently merged. Phase 2 is now the active step; no
+production validation or fallback behavior has changed.
 
 ## Context and Orientation
 

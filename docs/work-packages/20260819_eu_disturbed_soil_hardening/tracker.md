@@ -7,10 +7,10 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-19 19:37 UTC
-**Current phase**: Phase 0 evidence freeze
-**Last updated**: 2026-08-19 20:46 UTC
-**Next milestone**: Select minimized pilot cases and create the Phase 1
-source-payload replay fixture
+**Current phase**: Phase 2 quality taxonomy and invariant contract
+**Last updated**: 2026-08-19 20:56 UTC
+**Next milestone**: Classify fixture evidence into valid, degraded, and
+rejected outcomes before production validation changes
 **Security impact**: `none`
 **Dedicated security review**: `no`
 **Security artifact**: N/A
@@ -20,10 +20,10 @@ source-payload replay fixture
 ### Ready / Backlog
 
 - [ ] Scale to the 50,000-sample campaign after pilot performance review.
-- [ ] Select and minimize pilot cases for the Phase 1 fixture.
+- [x] Select and minimize pilot cases for the Phase 1 fixture.
 - [ ] Add Marta's cases later if coordinates or run artifacts become
   available.
-- [ ] Add deterministic replay fixture and no-geodata test harness.
+- [x] Add deterministic replay fixture and no-geodata test harness.
 - [ ] Define quality taxonomy and valid/degraded/rejected contract.
 - [ ] Implement the approved validation boundary and diagnostics.
 - [ ] Validate disturbed downstream generated artifacts.
@@ -31,8 +31,8 @@ source-payload replay fixture
 
 ### In Progress
 
-- [ ] Phase 0 random search: review pilot cases and approve the 50,000-sample
-  campaign scale-up.
+- [ ] Phase 0 scale-up: review whether the 50,000-sample campaign is needed
+  after the pilot prevalence and runtime evidence.
 
 ### Blocked
 
@@ -57,6 +57,9 @@ None.
 - [x] Captured source payloads and targeted builder outputs: 641 suspicious
   source records, 596 completed builds, 35 builder exceptions, 59 horizon
   depth-order findings, and 10 valid controls (2026-08-19 20:46 UTC).
+- [x] Added a six-case Phase 1 fixture with one control, two output-order
+  cases, a zero-valued STU case, and three builder exception classes; replay
+  tests pass without EU geodata (2026-08-19 20:56 UTC).
 
 ## Phase Gates
 
@@ -81,6 +84,8 @@ None.
   Marta's cases are optional supplemental evidence.
 - **2026-08-19 20:46 UTC** – 1,000-sample pilot and targeted builds completed;
   Phase 0 evidence review is pending.
+- **2026-08-19 20:56 UTC** – Phase 1 fixture and no-geodata replay harness
+  completed; all six cases reproduce.
 - **Pending** – 50,000-sample campaign and deterministic fixture accepted.
 - **Pending** – Quality contract approved.
 - **Pending** – Production hardening implemented and validated.
@@ -222,13 +227,15 @@ the pilot provides a performance and anomaly-rate checkpoint before scaling.
 
 **Next steps**:
 
-- Review the 35 exceptions and 59 depth-order cases, then minimize the
-  strongest examples into the no-geodata Phase 1 fixture.
+- Define field-level validity rules and valid/degraded/rejected outcomes from
+  the fixture evidence.
 - Decide whether the 50,000-sample campaign is warranted after reviewing the
   pilot's issue prevalence and runtime.
 
 **Test results**: `wctl run-pytest tests/eu/soils/test_invalid_soil_search.py`
-passed (`6 passed`, 2 deprecation warnings).
+passed (`6 passed`, 2 deprecation warnings); `wctl run-pytest
+tests/eu/soils/test_esdac_quality_fixture.py` passed (`7 passed`, 2
+deprecation warnings).
 
 ## Watch List
 
@@ -263,13 +270,16 @@ the captured cases to drive evidence-backed hardening.
 
 - Work-package scaffold and active ExecPlan are present.
 - Initial source-review hypotheses and phase gates are recorded.
+- Phase 1 fixture and replay tests reproduce six pilot cases without EU
+  raster installation.
 
 **What's next**:
 
-1. Review and minimize the pilot cases into a deterministic fixture.
-2. Add the no-geodata replay harness and quality taxonomy.
-3. Decide and execute the 50,000-sample campaign if the evidence review
+1. Define the Phase 2 quality taxonomy and outcome contract.
+2. Decide and execute the 50,000-sample campaign if the evidence review
    requires broader prevalence estimates.
+3. Implement the smallest validation boundary only after the contract and
+   parameterization decisions are recorded.
 
 **Context needed**:
 
