@@ -39,12 +39,18 @@ plan and the companion tracker at every stopping point.
   passed (`8 passed`).
 - [x] (2026-08-19 21:14 UTC) User reviewed and ratified ADR-0043; Phase 2 is
   complete and Phase 3 may proceed under the accepted contract.
+- [x] (2026-08-19 21:28 UTC) Implemented the pure Phase 3 validator/result
+  contract and fixture-backed diagnostics tests; targeted suite passed
+  (`22 passed`).
+- [x] (2026-08-19 21:39 UTC) Completed targeted, documentation, stub, and
+  changed-file exception gates. The full suite reached 170 passed and 13
+  skipped before an unrelated Docker CLI compose-contract failure.
 - [ ] Phase 0 scale-up: decide whether to run the 50,000-sample campaign.
 - [x] Phase 1: capture source payload fixture and deterministic replay harness.
 - [x] Phase 2: review and ratify the evidence-backed quality invariants and
   ADR-0043.
-- [ ] Phase 3: agree validation/result/error contract.
-- [ ] Phase 4: implement production hardening and diagnostics.
+- [x] Phase 3: define and test the pure validation/result/error contract.
+- [ ] Phase 4: integrate production hardening and diagnostics.
 - [ ] Phase 5: validate disturbed downstream generated artifacts.
 - [ ] Phase 6: complete review gates and observation plan.
 
@@ -153,6 +159,12 @@ plan and the companion tracker at every stopping point.
   on 2026-08-19.
   Date/Author: 2026-08-19 / User + Codex.
 
+- Decision: Keep Phase 3 pure and defer production wiring to Phase 4.
+  Rationale: the validator and diagnostic carrier can be tested against the
+  captured fixture without changing current builder behavior. This isolates
+  policy failures from multiprocessing and NoDb compatibility changes.
+  Date/Author: 2026-08-19 / User + Codex.
+
 ## Outcomes & Retrospective
 
 Phase 1 confirmed that the reported classes are replayable without live
@@ -161,8 +173,9 @@ be written in decreasing order, and source/provider failures surface as
 unstructured exceptions. The fixture also exposed a distinction between
 screen-cell payloads and production query payloads, which is now recorded as
 provenance rather than silently merged. Phase 2 ratified a seven-case
-valid/degraded/rejected contract and ADR-0043; no production validation or
-fallback behavior has changed.
+valid/degraded/rejected contract and ADR-0043. Phase 3 now provides a pure
+validator and diagnostic carrier with fixture-backed tests; production
+validation and fallback behavior remain unchanged until Phase 4.
 
 ## Context and Orientation
 
@@ -259,19 +272,20 @@ possible. A field that is mathematically valid but produces a zero WEPP
 parameter may still require a separate model-output policy; document that
 distinction explicitly.
 
-### Phase 3: Validation/result contract
+### Phase 3: Pure validation/result contract and observability design
 
-Choose one explicit outcome for each invalid class: valid, degraded with a
-warning and provenance, or rejected with structured reason codes. Preserve
-TopoAZ and coordinate context through multiprocessing. If a fallback is
-approved, specify its source, scope, reason, and observability; do not add a
-generic fallback merely to keep the worker pool alive.
+Define the pure per-location validator, result carrier, reason-code mapping,
+and batch rejection policy. Preserve TopoAZ and coordinate context in every
+diagnostic. Demonstrate valid, degraded, and rejected outcomes against the
+captured fixture without wiring the validator into production execution yet.
+If a fallback is approved, specify its source, scope, reason, and
+observability; do not add a generic fallback merely to keep the worker pool
+alive.
 
-Before implementation, update the package decision log and create the required
-parameterization ADR if any default, threshold, unit conversion, formula, or
-fallback heuristic changes.
+The ratified ADR-0043 is the policy input for this design. Phase 4 will wire
+the pure contract into the builder and worker aggregation.
 
-### Phase 4: Production implementation
+### Phase 4: Production integration
 
 Add the smallest explicit validation boundary to `esdac.py`, then update the
 worker/result aggregation only if needed to carry diagnostics. Validate before

@@ -43,8 +43,9 @@ Adopt the following Phase 3 contract:
    `0 <= wilting_point <= field_capacity <= 1` from ADR-0012.
 
 No production code changes are included in this ADR's Phase 2 commit. Phase 3
-must implement the contract at the narrowest source-to-horizon boundary and
-must preserve the worker location context.
+defines and tests the pure validation/result boundary and its location-aware
+diagnostics. Phase 4 wires that accepted contract into the ESDAC builder and
+worker aggregation without changing the quality policy.
 
 ## Decision Provenance
 

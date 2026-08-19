@@ -1,6 +1,6 @@
 # EU ESDAC Soil Quality Taxonomy and Invariant Contract
 
-**Status**: Phase 2 contract ratified for Phase 3 implementation
+**Status**: Phase 2 contract ratified; Phase 3 pure validator complete
 **Evidence**: [Phase 1 fixture](../../../../tests/eu/soils/fixtures/eu_disturbed_soil_phase1.json)
 **Related ADR**: [ADR-0043](../../../adrs/ADR-0043-eu-esdac-soil-quality-contract.md)
 
@@ -8,8 +8,9 @@
 
 This contract classifies the ESDAC-to-WEPP soil path at the first boundary
 where a location becomes unusable or loses provenance. It does not change the
-builder, add fallbacks, or repair historical `.sol` files. Phase 3 will add
-the validation boundary under the ratified contract.
+builder, add fallbacks, or repair historical `.sol` files. Phase 3 adds the
+pure validation boundary under the ratified contract; Phase 4 integrates it
+with production execution.
 
 ## Evidence Classification
 
@@ -111,8 +112,39 @@ the original exception class separately from the normalized reason code.
 The one-percentage texture balance tolerance, treatment of partial Ksat
 profiles, and treatment of supported depth-class fallbacks affect generated
 model inputs. They are recorded in accepted ADR-0043 and must be preserved by
-Phase 3 production implementation. Phase 2 introduced no runtime behavior.
+the Phase 3 pure contract and Phase 4 production integration. Phase 2
+introduced no runtime behavior.
 
 The 50,000-cell search remains a discovery-scale decision separate from these
 invariants; the 1,000-cell pilot is sufficient to establish the fixture-backed
 contract, but not to claim population-wide validity.
+
+## Phase 3 Pure Contract Implementation
+
+The pure validator is implemented in
+[`wepppy/eu/soils/esdac/quality.py`](../../../wepppy/eu/soils/esdac/quality.py)
+and is intentionally not wired into the production builder until Phase 4. Its
+public design is:
+
+- `SoilQualityContext` carries longitude, latitude, and optional TopoAZ ID.
+- `SoilQualityDiagnostic` carries a stable reason code, field, severity, raw
+  value, and optional original exception class.
+- `SoilQualityResult` carries `valid`, `degraded`, or `rejected`, the context,
+  and ordered diagnostics.
+- `merge_quality_results` combines source, horizon, and Ksat findings without
+  losing location context.
+
+The validator covers categorical/STU source values, positive and ordered
+horizon depths, finite serialized horizon values and water-content ordering,
+and all-missing/partial/nonpositive/nonfinite Ksat states. Provider failures
+are represented through the narrow `rejected_quality_result` helper so Phase 4
+can preserve the original exception class without adding a broad catch.
+
+Phase 4 integration policy is additive at the worker boundary: process all
+locations, return structured per-location outcomes, allow valid/degraded
+outputs to proceed, and aggregate rejected locations into an actionable batch
+failure before the NoDb caller commits a hillslope-to-soil mapping. Rejected
+locations must not receive a generic fallback or a usable `.sol`.
+
+Contract tests are in
+[`tests/eu/soils/test_esdac_quality_contract.py`](../../../../tests/eu/soils/test_esdac_quality_contract.py).

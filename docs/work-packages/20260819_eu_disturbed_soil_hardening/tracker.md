@@ -7,9 +7,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-19 19:37 UTC
-**Current phase**: Phase 3 validation/result contract design (queued)
-**Last updated**: 2026-08-19 21:14 UTC
-**Next milestone**: Design the validation boundary and structured diagnostics
+**Current phase**: Phase 4 production hardening integration (queued)
+**Last updated**: 2026-08-19 21:28 UTC
+**Next milestone**: Wire the pure validator into ESDAC and worker aggregation
 under ratified ADR-0043
 **Security impact**: `none`
 **Dedicated security review**: `no`
@@ -25,14 +25,16 @@ under ratified ADR-0043
   available.
 - [x] Add deterministic replay fixture and no-geodata test harness.
 - [x] Define and ratify the evidence-backed valid/degraded/rejected contract.
+- [x] Implement the pure validation/result contract and fixture-backed
+  diagnostics tests.
 - [ ] Implement the approved validation boundary and diagnostics.
 - [ ] Validate disturbed downstream generated artifacts.
 - [ ] Complete correctness, QA, docs, and observation gates.
 
 ### In Progress
 
-- [ ] Phase 3 readiness: design the validation/result/error boundary from
-  ratified ADR-0043; no production behavior changes are authorized yet.
+- [ ] Phase 4 readiness: integrate the pure validation/result boundary from
+  ratified ADR-0043; production behavior has not changed yet.
 
 ### Blocked
 
@@ -65,6 +67,9 @@ None.
   (2026-08-19 21:04 UTC).
 - [x] User reviewed and ratified ADR-0043 for Phase 3 implementation; no
   production behavior changed (2026-08-19 21:14 UTC).
+- [x] Added the pure Phase 3 validator, result carrier, diagnostic reason
+  codes, and fixture-backed tests; production integration remains pending
+  (2026-08-19 21:28 UTC).
 
 ## Phase Gates
 
@@ -75,10 +80,10 @@ None.
   valid control without `/geodata`.
 - **Phase 2**: every invariant is evidence-backed and valid zero values are
   distinguished from invalid source values.
-- **Phase 3**: proposed result contract preserves valid states and exposes
-  invalid-state diagnostics.
+- **Phase 3**: pure result contract preserves valid states and exposes
+  invalid-state diagnostics without production integration.
 - **Phase 4**: generated `.sol` output is finite, ordered, and contract-valid;
-  invalid profiles do not silently write.
+  invalid profiles do not silently write in the production path.
 - **Phase 5**: disturbed downstream artifacts remain valid and reproducible.
 - **Phase 6**: review, observation, and documentation gates are complete.
 
@@ -95,6 +100,8 @@ None.
   the replay suite covers valid, degraded, and rejected outcomes.
 - **2026-08-19 21:14 UTC** – User ratified ADR-0043; Phase 2 is complete and
   Phase 3 validation design is queued.
+- **2026-08-19 21:28 UTC** – Pure Phase 3 validator and contract tests
+  completed; Phase 4 production integration is queued.
 - **Pending** – 50,000-sample campaign; deterministic fixture is accepted.
 - **Complete** – Quality contract and ADR-0043 ratified; production
   implementation remains pending.
@@ -161,8 +168,8 @@ missing evidence and prevent a generic fallback from masking source defects.
 The one-percentage texture tolerance, partial-Ksat policy, and depth-class
 handling are recorded in ADR-0043 because they affect model inputs.
 
-**Approval state**: Ratified by the user on 2026-08-19. Phase 3 production
-implementation may proceed under ADR-0043.
+**Approval state**: Ratified by the user on 2026-08-19. Phase 4 production
+integration may proceed under ADR-0043.
 
 ## Risks and Issues
 
@@ -182,7 +189,8 @@ implementation may proceed under ADR-0043.
   files with non-increasing horizon depths. Ten screened controls built with
   no output-order issue.
 - **Post-change health signals**: seven-case fixture covers valid, degraded,
-  and rejected outcomes; replay tests pass with no runtime behavior change.
+  and rejected outcomes; 22 targeted Phase 0–3 tests pass; production runtime
+  behavior remains unchanged.
 - **Danger signals observed**: quality checks currently emphasize file
   creation; invalid-source outcomes are not structured; source screening
   found STU zeros/missing values and missing depth classes; full builds are
@@ -194,24 +202,27 @@ implementation may proceed under ADR-0043.
 
 ### Code Quality
 
-- [ ] Targeted EU soil tests pass.
-- [ ] Full `wctl run-pytest tests --maxfail=1` passes before closeout, or the
-  blocker is documented.
-- [ ] Changed-file broad-exception check passes.
-- [ ] `git diff --check` passes.
+- [x] Targeted EU soil tests pass (`22 passed`, 2 deprecation warnings).
+- [ ] Full `wctl run-pytest tests --maxfail=1` passes before closeout. The
+  Phase 3 run reached 170 passed and 13 skipped, then stopped at the unrelated
+  Docker CLI failure in `tests/docker/test_canary_smoke_contract.py`:
+  `docker compose` rejected `-f` with `unknown shorthand flag: 'f'`.
+- [x] Changed-file broad-exception check passes.
+- [x] `git diff --check` passes.
 
 ### Documentation
 
 - [ ] ESDAC module documentation describes quality outcomes and diagnostics.
 - [ ] User/operator documentation describes invalid-source behavior.
-- [ ] Package and changed docs pass `wctl doc-lint`.
+- [x] Package and changed docs pass `wctl doc-lint`.
 - [x] Parameterization ADR-0043 is ratified for Phase 3 implementation.
 
 ### Testing
 
 - [ ] Captured fixture includes valid, zero, missing/nodata, non-finite,
   malformed-texture, depth-order, and Ksat cases as supported by evidence.
-- [ ] Replay tests run without EU raster installation.
+- [x] Replay tests run without EU raster installation.
+- [x] Phase 3 pure contract tests run without EU raster installation.
 - [ ] Optional live raster capture/verification is recorded separately.
 - [ ] Generated `.sol` parser and downstream disturbed tests pass.
 - [ ] Absent, empty, populated, and supported-legacy states are covered where
@@ -293,6 +304,38 @@ phase (`6 passed`, 2 deprecation warnings).
 structured diagnostics. Decide separately whether the 50,000-sample campaign
 is warranted.
 
+### 2026-08-19 21:28 UTC: Phase 3 pure validation contract
+
+**Agent/Contributor**: Codex
+
+**Work completed**:
+
+- Added the pure ESDAC quality module with location-aware result and
+  diagnostic dataclasses.
+- Added source, horizon, water-content, depth-order, and Ksat validators with
+  the ratified valid/degraded/rejected policy.
+- Added fixture-backed classification tests plus valid-zero, provider-error,
+  water-order, partial-Ksat, and missing-depth contract cases.
+- Clarified that Phase 4, not Phase 3, wires the pure contract into the
+  production builder and multiprocessing aggregation.
+
+**Production status**: No builder, worker, or NoDb behavior changed.
+
+**Test results**: `wctl run-pytest
+tests/eu/soils/test_esdac_quality_contract.py
+tests/eu/soils/test_esdac_quality_fixture.py
+tests/eu/soils/test_invalid_soil_search.py` passed (`22 passed`, 2
+deprecation warnings).
+
+The repository gate `wctl run-pytest tests --maxfail=1` reached 170 passed and
+13 skipped before the Docker CLI compose-contract failure documented in the
+Code Quality checklist. Documentation lint passed for the package, ADR, and
+`PROJECT_TRACKER.md`; stub completeness also passed.
+
+**Next steps**: Integrate the result contract at the source-to-horizon and
+worker boundaries in Phase 4; decide separately whether the 50,000-sample
+campaign is warranted.
+
 ## Watch List
 
 - **Source-version drift**: ESDAC and SoilHydroGrids values must be captured
@@ -320,7 +363,7 @@ the captured cases to drive evidence-backed hardening.
 
 **From**: Codex
 **To**: User / next session
-**Date**: 2026-08-19 21:14 UTC
+**Date**: 2026-08-19 21:28 UTC
 
 **What's complete**:
 
@@ -330,10 +373,12 @@ the captured cases to drive evidence-backed hardening.
   raster installation.
 - Phase 2 taxonomy and accepted ADR-0043 are documented; no runtime behavior
   has changed.
+- Phase 3 pure validator and contract tests are complete; Phase 4 production
+  integration remains.
 
 **What's next**:
 
-1. Design the Phase 3 validation boundary and structured diagnostics under
+1. Integrate the Phase 3 validation boundary and structured diagnostics under
    ADR-0043.
 2. Decide and execute the 50,000-sample campaign if broader prevalence
    estimates are required.

@@ -124,20 +124,22 @@ structured reasons.
 requirement, or an explicit scientific decision. Any changed default,
 threshold, or fallback is recorded for the parameterization ADR gate.
 
-### Phase 3 — Minimal validation and observability design
+### Phase 3 — Pure validation/result contract and observability design
 
 Add the smallest pure validation boundary that can evaluate a captured source
-profile before `.sol` writing. Decide whether invalid locations fail the
-build, are omitted with a surfaced report, or use an approved fallback. Add
-diagnostic context including coordinates, TopoAZ ID, source field, raw value,
-and reason. Avoid broad exception handling and silent fallback wrappers.
+profile before `.sol` writing. Define the per-location result carrier,
+reason-code mapping, batch rejection policy, and diagnostic context including
+coordinates, TopoAZ ID, source field, raw value, and reason. Demonstrate the
+contract against the captured fixture without wiring it into production
+execution yet. Avoid broad exception handling and silent fallback wrappers.
 
-**Exit gate:** the approved behavior is demonstrated against all fixture
-classes and preserves valid controls.
+**Exit gate:** the pure validator and contract tests demonstrate all fixture
+classes, preserve valid controls, and document the additive worker/batch
+interface that Phase 4 will integrate.
 
-### Phase 4 — Production hardening implementation
+### Phase 4 — Production hardening integration
 
-Implement the approved validation/result contract in the ESDAC builder and,
+Wire the approved pure validation/result contract into the ESDAC builder and,
 if needed, the worker aggregation path. Ensure no invalid `.sol` is written,
 partial Ksat data is not silently misrepresented, and errors remain actionable
 for operators. Add focused regression coverage and update module/operator

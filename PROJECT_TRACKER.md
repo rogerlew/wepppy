@@ -363,11 +363,17 @@ When resuming Kubernetes work:
 **Description**: Search a seeded, stratified sample of the ESDAC raster
 footprint for zero-valued parameters or invalid horizons, then define and
 implement explicit validation and diagnostics without silently inventing
-replacement soil values. The package is currently in Phase 0 random-search
-design; live execution is pending matching EU geodata.
-**Next Steps**: Run the 1,000-sample pilot with
-`tools/eu_invalid_soil_search.py`, inspect the anomaly/build-failure rate, then
-scale to the 50,000-sample campaign and retain minimized replay fixtures.
+replacement soil values. The Phase 0 pilot, Phase 1 replay fixture, Phase 2
+quality contract, and Phase 3 pure validator are complete; production wiring
+remains in Phase 4.
+**Next Steps**: Integrate the pure validator into the ESDAC builder and worker
+aggregation, preserve TopoAZ/coordinate diagnostics, and prove that rejected
+locations cannot produce usable `.sol` files. Decide separately whether the
+50,000-sample discovery campaign is warranted.
+**Validation Notes**: Phase 3 targeted EU tests passed (`22 passed`); package,
+ADR, and tracker documentation lint passed; the full repository gate reached
+170 passed and 13 skipped before an unrelated Docker CLI compose-contract
+failure (`docker compose` rejected `-f`).
 
 ---
 
