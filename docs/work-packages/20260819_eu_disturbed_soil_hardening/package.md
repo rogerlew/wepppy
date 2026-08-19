@@ -142,11 +142,18 @@ interface that Phase 4 will integrate.
 Wire the approved pure validation/result contract into the ESDAC builder and,
 if needed, the worker aggregation path. Ensure no invalid `.sol` is written,
 partial Ksat data is not silently misrepresented, and errors remain actionable
-for operators. Add focused regression coverage and update module/operator
-documentation.
+for operators. The successful `ESDAC.build_wepp_soil` tuple remains backward
+compatible while its returned horizon carries the additive quality result.
+Workers return one structured result per location. The batch stages generated
+files per worker, commits them only when every location is accepted or
+degraded, and writes `soil_quality.json` with location, outcome, reason, raw
+evidence, exception, and soil-key fields. Add focused regression coverage and
+update module/operator documentation.
 
 **Exit gate:** targeted tests fail before the change and pass after it;
-generated `.sol` output contains only finite, ordered, contract-valid values.
+generated `.sol` output contains only finite, ordered, contract-valid values;
+rejected batches leave no newly staged `.sol` outputs in the final directory;
+and an independent subagent review has every finding dispositioned.
 
 ### Phase 5 — Disturbed downstream integration
 
@@ -202,7 +209,7 @@ explicitly recorded.
   without EU raster installation.
 - [x] Quality invariants and the valid/degraded/rejected result contract are
   documented and fixture-backed.
-- [ ] Invalid or unrepresentable profiles cannot produce silent invalid `.sol`
+- [x] Invalid or unrepresentable profiles cannot produce silent invalid `.sol`
   files.
 - [ ] Disturbed downstream generated artifacts pass the contract matrix.
 - [ ] Required correctness, QA, documentation, and validation gates pass.

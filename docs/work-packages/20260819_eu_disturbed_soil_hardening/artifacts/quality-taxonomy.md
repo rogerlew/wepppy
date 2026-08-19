@@ -1,6 +1,6 @@
 # EU ESDAC Soil Quality Taxonomy and Invariant Contract
 
-**Status**: Phase 2 contract ratified; Phase 3 pure validator complete
+**Status**: Phase 4 production integration and independent review complete
 **Evidence**: [Phase 1 fixture](../../../../tests/eu/soils/fixtures/eu_disturbed_soil_phase1.json)
 **Related ADR**: [ADR-0043](../../../adrs/ADR-0043-eu-esdac-soil-quality-contract.md)
 
@@ -123,8 +123,7 @@ contract, but not to claim population-wide validity.
 
 The pure validator is implemented in
 [`wepppy/eu/soils/esdac/quality.py`](../../../wepppy/eu/soils/esdac/quality.py)
-and is intentionally not wired into the production builder until Phase 4. Its
-public design is:
+and its public design is:
 
 - `SoilQualityContext` carries longitude, latitude, and optional TopoAZ ID.
 - `SoilQualityDiagnostic` carries a stable reason code, field, severity, raw
@@ -137,14 +136,39 @@ public design is:
 The validator covers categorical/STU source values, positive and ordered
 horizon depths, finite serialized horizon values and water-content ordering,
 and all-missing/partial/nonpositive/nonfinite Ksat states. Provider failures
-are represented through the narrow `rejected_quality_result` helper so Phase 4
-can preserve the original exception class without adding a broad catch.
+are represented through the narrow `rejected_quality_result` helper so
+production integration preserves the original exception class without adding
+a broad catch.
 
-Phase 4 integration policy is additive at the worker boundary: process all
-locations, return structured per-location outcomes, allow valid/degraded
-outputs to proceed, and aggregate rejected locations into an actionable batch
-failure before the NoDb caller commits a hillslope-to-soil mapping. Rejected
-locations must not receive a generic fallback or a usable `.sol`.
+## Phase 4 Production Integration
+
+`ESDAC.build_wepp_soil` validates categorical/STU source payloads before
+constructing horizons, validates derived horizon values before serialization,
+and validates SoilHydroGrids Ksat before writing output. Its successful return
+tuple remains `(key, horizon, description)` for existing callers; the returned
+top horizon also carries the additive `quality_result` attribute. An expected
+location-level failure raises `ESDACSoilBuildError` with the structured result
+and original provider exception class where applicable. No fallback depth or
+`0.001` all-missing-Ksat representation is produced.
+
+`build_esdac_soils` returns a `SoilBuildWorkerResult` for every location. The
+parent stages each worker's `.sol` in an isolated temporary directory, allows
+valid and degraded results to continue, and raises `ESDACSoilBatchError` when
+any location is rejected. Only an all-accepted batch moves staged files into
+the final directory, so rejected locations cannot leave newly generated
+`.sol` files behind or enter the NoDb mapping.
+
+Every batch writes an additive `soil_quality.json` report with schema version
+`1`, batch outcome, accepted/rejected counts, and one profile entry per input
+location. Each entry includes location/TopoAZ context, outcome, reason codes,
+diagnostics, raw evidence, exception type, and the resulting soil key when
+one exists. A rejected batch writes the report before raising so operators can
+identify the offending locations without parsing worker logs.
+
+Pre-commit collisions are also reported as rejected batch outcomes with stable
+codes such as `batch.duplicate_soil_key` and
+`batch.existing_soil_key_conflict`; they cannot silently reuse a divergent
+`.sol` file.
 
 Contract tests are in
 [`tests/eu/soils/test_esdac_quality_contract.py`](../../../../tests/eu/soils/test_esdac_quality_contract.py).

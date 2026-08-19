@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 
 import pytest
 
 from wepppy.eu.soils.esdac import ESDAC
 from wepppy.eu.soils.esdac import esdac as esdac_module
+from wepppy.eu.soils.esdac.quality import ESDACSoilBuildError
 from wepppy.eu.soils.eusoilhydrogrids import SoilHydroGrids
 from wepppy.all_your_base.geo.locationinfo import RDIOutOfBoundsException
 
@@ -98,31 +100,38 @@ def test_phase1_fixture_replays_builder_cases(
     case = _load_fixture()["cases"][case_index]
     expected = case["expected_output"]
 
-    if expected["status"] == "exception":
-        error_type = expected["error_type"]
+    if case["expected_quality"] == "rejected":
+        if expected.get("error_type"):
+            error_type = expected["error_type"]
 
-        def failing_query(_self, _lng, _lat, _attrs):
-            if error_type == "RDIOutOfBoundsException":
-                raise RDIOutOfBoundsException
-            if error_type == "TypeError":
-                raise TypeError("int() argument must be a string, a bytes-like object or None")
-            raise KeyError("")
+            def failing_query(_self, _lng, _lat, _attrs):
+                if error_type == "RDIOutOfBoundsException":
+                    raise RDIOutOfBoundsException
+                if error_type == "TypeError":
+                    raise TypeError("int() argument must be a string, a bytes-like object or None")
+                raise KeyError("")
 
-        monkeypatch.setattr(ESDAC, "query", failing_query)
-        with pytest.raises(
-            {"RDIOutOfBoundsException": RDIOutOfBoundsException,
-             "TypeError": TypeError,
-             "KeyError": KeyError}[error_type]
-        ):
+            monkeypatch.setattr(ESDAC, "query", failing_query)
+        else:
+            _patch_source_provider(monkeypatch, case)
+
+        with pytest.raises(ESDACSoilBuildError) as error:
             ESDAC().build_wepp_soil(
                 case["provenance"]["lng"],
                 case["provenance"]["lat"],
                 str(tmp_path),
             )
+        result = error.value.result
+        assert result.outcome == "rejected"
+        assert result.context.longitude == case["provenance"]["lng"]
+        assert result.context.latitude == case["provenance"]["lat"]
+        if expected.get("error_type"):
+            assert result.diagnostics[0].exception_type == expected["error_type"]
+        assert not list(tmp_path.glob("*.sol"))
         return
 
     _patch_source_provider(monkeypatch, case)
-    key, _horizon, _description = ESDAC().build_wepp_soil(
+    key, horizon, _description = ESDAC().build_wepp_soil(
         case["provenance"]["lng"],
         case["provenance"]["lat"],
         str(tmp_path),
@@ -131,10 +140,66 @@ def test_phase1_fixture_replays_builder_cases(
     sol_path = tmp_path / f"{key}.sol"
     assert sol_path.exists()
     assert key == expected["key"]
+    assert horizon.quality_result.outcome == case["expected_quality"]
+    if case["expected_quality"] == "degraded":
+        assert "source.usedom.no_information" in horizon.quality_result.reason_codes
     assert _horizon_depths(sol_path) == expected["horizon_depths"]
-    if "output.horizon_depth_order" in case["expected_issues"]:
-        depths = expected["horizon_depths"]
-        assert depths[1] <= depths[0]
-    else:
-        depths = expected["horizon_depths"]
-        assert depths[1] > depths[0]
+    assert expected["horizon_depths"][1] > expected["horizon_depths"][0]
+    numeric_rows: list[list[float]] = []
+    for line in sol_path.read_text(encoding="utf-8").splitlines():
+        tokens = line.split()
+        if len(tokens) != 11:
+            continue
+        try:
+            numeric_rows.append([float(token) for token in tokens])
+        except ValueError:
+            continue
+    assert numeric_rows
+    assert all(math.isfinite(value) for row in numeric_rows for value in row)
+
+
+def test_builder_rejects_malformed_hydrogrids_pairs(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    case = _load_fixture()["cases"][0]
+    _patch_source_provider(monkeypatch, case)
+    monkeypatch.setattr(
+        SoilHydroGrids,
+        "query",
+        lambda _self, _lng, _lat, _dataset: {"sl1": 10.0},
+    )
+
+    with pytest.raises(ESDACSoilBuildError) as error:
+        ESDAC().build_wepp_soil(
+            case["provenance"]["lng"],
+            case["provenance"]["lat"],
+            str(tmp_path),
+        )
+
+    assert error.value.result.reason_codes == ("source.hydrogrids.malformed",)
+    assert not list(tmp_path.glob("*.sol"))
+
+
+def test_builder_normalizes_numeric_stu_values_before_horizon_derivation(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    case = _load_fixture()["cases"][0]
+    _patch_source_provider(monkeypatch, case)
+    monkeypatch.setattr(
+        ESDAC,
+        "query_derived_db",
+        lambda _self, _lng, _lat, attrs: {
+            attr: str(case["stu"][attr]) for attr in attrs
+        },
+    )
+
+    key, horizon, _description = ESDAC().build_wepp_soil(
+        case["provenance"]["lng"],
+        case["provenance"]["lat"],
+        str(tmp_path),
+    )
+
+    assert horizon.quality_result.outcome == "valid"
+    assert (tmp_path / f"{key}.sol").exists()

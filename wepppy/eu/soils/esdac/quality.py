@@ -1,8 +1,8 @@
 """Pure quality validation and diagnostics for ESDAC soil profiles.
 
-Phase 3 keeps this module independent of the ESDAC builder. Phase 4 can wire
-these validators into source sampling, horizon derivation, and worker
-aggregation without changing the quality policy captured in ADR-0043.
+The validators remain independent of the ESDAC builder while Phase 4 wires
+their result contract into source sampling, horizon derivation, and worker
+aggregation under ADR-0043.
 """
 
 from __future__ import annotations
@@ -10,6 +10,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from math import isfinite
+from numbers import Integral, Real
 from typing import Literal
 
 
@@ -17,6 +18,31 @@ QualityOutcome = Literal["valid", "degraded", "rejected"]
 DiagnosticSeverity = Literal["warning", "error"]
 
 _MISSING = object()
+
+
+def _json_safe(value: object) -> object:
+    """Keep diagnostic evidence serializable, including non-finite floats."""
+    if isinstance(value, bool) or value is None or isinstance(value, str):
+        return value
+    if isinstance(value, Integral):
+        return int(value)
+    if isinstance(value, Real):
+        number = float(value)
+        return number if isfinite(number) else str(number)
+    if isinstance(value, (list, tuple)):
+        return [_json_safe(item) for item in value]
+    if isinstance(value, Mapping):
+        return {str(key): _json_safe(item) for key, item in value.items()}
+    item_method = getattr(value, "item", None)
+    if callable(item_method):
+        try:
+            item = item_method()
+        except (AttributeError, TypeError, ValueError):
+            pass
+        else:
+            if item is not value:
+                return _json_safe(item)
+    return value
 
 _CEC_ALIASES: dict[str, tuple[str, ...]] = {
     "cec_top": ("cec_top", "cectop"),
@@ -92,6 +118,39 @@ class SoilQualityResult:
         """Return unique reason codes in first-seen order."""
         return tuple(dict.fromkeys(diagnostic.code for diagnostic in self.diagnostics))
 
+    def as_dict(self) -> dict[str, object]:
+        """Return a JSON-safe quality report entry."""
+        return {
+            "outcome": self.outcome,
+            "longitude": _json_safe(self.context.longitude),
+            "latitude": _json_safe(self.context.latitude),
+            "topaz_id": _json_safe(self.context.topaz_id),
+            "reason_codes": list(self.reason_codes),
+            "diagnostics": [
+                {
+                    "code": diagnostic.code,
+                    "field": diagnostic.field,
+                    "severity": diagnostic.severity,
+                    "raw_value": _json_safe(diagnostic.raw_value),
+                    "exception_type": diagnostic.exception_type,
+                }
+                for diagnostic in self.diagnostics
+            ],
+        }
+
+
+class ESDACSoilBuildError(RuntimeError):
+    """Expected, location-specific rejection from one ESDAC soil build."""
+
+    def __init__(self, result: SoilQualityResult) -> None:
+        self.result = result
+        codes = ", ".join(result.reason_codes) or "unknown_quality_failure"
+        context = result.context
+        super().__init__(
+            f"EU soil rejected at ({context.longitude}, {context.latitude})"
+            f" for TopoAZ {context.topaz_id!r}: {codes}"
+        )
+
 
 def _result(
     context: SoilQualityContext,
@@ -112,6 +171,8 @@ def merge_quality_results(*results: SoilQualityResult) -> SoilQualityResult:
     if not results:
         raise ValueError("at least one quality result is required")
     context = results[0].context
+    if any(result.context != context for result in results[1:]):
+        raise ValueError("quality result contexts must match")
     diagnostics = tuple(
         diagnostic for result in results for diagnostic in result.diagnostics
     )
@@ -170,7 +231,7 @@ def _categorical_short(
             )
         )
         return None
-    if isinstance(value, (str, bytes)) or not isinstance(value, Sequence) or len(value) < 2:
+    if isinstance(value, (str, bytes)) or not isinstance(value, Sequence) or len(value) < 3:
         diagnostics.append(
             SoilQualityDiagnostic(
                 "source.categorical.malformed", field, "error", raw_value=value
@@ -224,7 +285,7 @@ def validate_esdac_source_profile(
                 )
             )
 
-    usedom = _categorical_short(esdb, "usedom", diagnostics=[])
+    usedom = _categorical_short(esdb, "usedom", diagnostics)
     if usedom is None or usedom == "0":
         diagnostics.append(
             SoilQualityDiagnostic(

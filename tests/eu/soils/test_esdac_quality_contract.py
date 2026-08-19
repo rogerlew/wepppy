@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 
 import pytest
@@ -199,3 +200,32 @@ def test_missing_depth_source_is_rejected_without_a_fallback() -> None:
 
     assert result.outcome == "rejected"
     assert result.reason_codes == ("horizon.depth_missing",)
+
+
+def test_malformed_landuse_payload_is_rejected_before_builder_indexing() -> None:
+    case = _load_fixture()["cases"][0]
+    esdb = dict(case["esdb"])
+    esdb["usedom"] = ("5", "5")
+
+    result = validate_esdac_source_profile(
+        _context(case),
+        esdb=esdb,
+        stu=case["stu"],
+    )
+
+    assert result.outcome == "rejected"
+    assert "source.categorical.malformed" in result.reason_codes
+
+
+def test_quality_report_evidence_is_json_safe_for_numpy_scalars() -> None:
+    numpy = pytest.importorskip("numpy")
+    result = rejected_quality_result(
+        SoilQualityContext(numpy.float32(13.1), numpy.float32(68.0)),
+        code="source.stu.nonfinite_value",
+        field="STU_EU_T_CLAY",
+        raw_value=numpy.float32(math.nan),
+    )
+
+    encoded = json.dumps(result.as_dict(), allow_nan=False)
+
+    assert '"raw_value": "nan"' in encoded

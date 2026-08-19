@@ -42,6 +42,13 @@ plan and the companion tracker at every stopping point.
 - [x] (2026-08-19 21:28 UTC) Implemented the pure Phase 3 validator/result
   contract and fixture-backed diagnostics tests; targeted suite passed
   (`22 passed`).
+- [x] (2026-08-19 22:02 UTC) Integrated Phase 4 validation into the builder,
+  added typed worker/batch outcomes, isolated staging, additive
+  `soil_quality.json` reports, and regression tests; the EU hardening suite
+  passed (`30 passed`).
+- [x] (2026-08-19 22:18 UTC) Completed the independent subagent review and
+  dispositioned all findings; the final review reported no remaining
+  blocker/high/medium findings. Phase 4 is complete and Phase 5 is queued.
 - [x] (2026-08-19 21:39 UTC) Completed targeted, documentation, stub, and
   changed-file exception gates. The full suite reached 170 passed and 13
   skipped before an unrelated Docker CLI compose-contract failure.
@@ -50,7 +57,8 @@ plan and the companion tracker at every stopping point.
 - [x] Phase 2: review and ratify the evidence-backed quality invariants and
   ADR-0043.
 - [x] Phase 3: define and test the pure validation/result/error contract.
-- [ ] Phase 4: integrate production hardening and diagnostics.
+- [x] Phase 4: complete independent review disposition and final gates for the
+  production hardening and diagnostics integration.
 - [ ] Phase 5: validate disturbed downstream generated artifacts.
 - [ ] Phase 6: complete review gates and observation plan.
 
@@ -165,6 +173,20 @@ plan and the companion tracker at every stopping point.
   policy failures from multiprocessing and NoDb compatibility changes.
   Date/Author: 2026-08-19 / User + Codex.
 
+- Decision: Preserve the successful single-location builder tuple and add
+  quality through the returned horizon attribute and typed worker result.
+  Rationale: existing direct callers retain `(key, horizon, description)`,
+  while the worker boundary gains explicit per-location diagnostics without
+  widening the NoDb mapping contract.
+  Date/Author: 2026-08-19 / Codex under ratified ADR-0043.
+
+- Decision: Stage each worker's `.sol` separately and commit only an
+  all-accepted batch.
+  Rationale: a rejected location must not leave partial current-batch output
+  or enter the hillslope mapping; `soil_quality.json` remains available for
+  operator diagnosis.
+  Date/Author: 2026-08-19 / Codex under ratified ADR-0043.
+
 ## Outcomes & Retrospective
 
 Phase 1 confirmed that the reported classes are replayable without live
@@ -173,9 +195,14 @@ be written in decreasing order, and source/provider failures surface as
 unstructured exceptions. The fixture also exposed a distinction between
 screen-cell payloads and production query payloads, which is now recorded as
 provenance rather than silently merged. Phase 2 ratified a seven-case
-valid/degraded/rejected contract and ADR-0043. Phase 3 now provides a pure
-validator and diagnostic carrier with fixture-backed tests; production
-validation and fallback behavior remain unchanged until Phase 4.
+valid/degraded/rejected contract and ADR-0043. Phase 3 provided a pure
+validator and diagnostic carrier. Phase 4 now wires that contract into the
+builder and batch worker, preserving the successful tuple while rejecting bad
+profiles before commit and retaining per-location evidence in
+`soil_quality.json`. Independent review found and closed
+report-serialization, malformed-shape, staging atomicity, duplicate-key, and
+STU normalization issues; the final review has no unresolved
+blocker/high/medium findings.
 
 ## Context and Orientation
 
@@ -293,9 +320,19 @@ writing the `.sol`. Ensure non-finite values, malformed texture balances,
 invalid depth ordering, and unrepresentable Ksat states cannot silently become
 valid-looking output. Use narrow exception types and preserve useful context.
 
-Add regression tests for every confirmed failure case and at least one valid
-case. Keep source sampling and validation separable so future raster versions
-can be recaptured without rewriting the contract tests.
+The successful single-location builder tuple remains `(key, horizon,
+description)`, with its additive quality result attached to the top horizon.
+Workers return a result for every input location, including expected rejection
+diagnostics. Each worker writes into an isolated staging directory. The parent
+commits staged `.sol` files and the additive `soil_quality.json` report only
+when all locations are valid or degraded; a rejected batch writes its report,
+discards staged files, and raises an actionable typed batch error before the
+NoDb mapping is returned.
+
+Add regression tests for every confirmed failure case, at least one valid and
+one degraded case, accepted/rejected staging behavior, and JSON report
+serialization. Keep source sampling and validation separable so future raster
+versions can be recaptured without rewriting the contract tests.
 
 ### Phase 5: Disturbed downstream validation
 
@@ -391,9 +428,11 @@ Planned artifacts:
 - correctness review and QA review artifacts;
 - final validation and observation summary.
 
-The package currently contains no production-output artifact because the local
-workspace does not have the EU raster installation. Search output must remain
-outside the repository until a reviewed, minimized fixture is selected.
+The package currently contains no committed live-raster production-output
+artifact because the local workspace does not have the EU raster installation.
+Deterministic Phase 4 tests cover staged output and report serialization;
+search output must remain outside the repository until a reviewed, minimized
+fixture is selected.
 
 ## Interfaces and Dependencies
 
@@ -422,3 +461,12 @@ invalid-soil search. Marta's cases remain supplemental evidence.
 
 Revision note (2026-08-19 19:47 UTC): Added and tested the manifest generator;
 live campaign execution remains pending matching EU raster assets.
+
+Revision note (2026-08-19 22:02 UTC): Executed Phase 4 production integration;
+the builder now rejects invalid profiles with structured diagnostics, batches
+stage output atomically, and persists `soil_quality.json`. Independent review
+and final gates remain active.
+
+Revision note (2026-08-19 22:18 UTC): Completed the required independent
+subagent review and dispositioned every finding. Phase 4 is complete; Phase 5
+downstream generated-artifact validation is queued.

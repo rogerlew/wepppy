@@ -7,10 +7,10 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-19 19:37 UTC
-**Current phase**: Phase 4 production hardening integration (queued)
-**Last updated**: 2026-08-19 21:28 UTC
-**Next milestone**: Wire the pure validator into ESDAC and worker aggregation
-under ratified ADR-0043
+**Current phase**: Phase 5 disturbed downstream validation (queued)
+**Last updated**: 2026-08-19 22:18 UTC
+**Next milestone**: Validate generated EU base soils through disturbed-soil
+transformations under the Phase 4 quality contract
 **Security impact**: `none`
 **Dedicated security review**: `no`
 **Security artifact**: N/A
@@ -27,14 +27,14 @@ under ratified ADR-0043
 - [x] Define and ratify the evidence-backed valid/degraded/rejected contract.
 - [x] Implement the pure validation/result contract and fixture-backed
   diagnostics tests.
-- [ ] Implement the approved validation boundary and diagnostics.
+- [x] Implement the approved validation boundary and diagnostics.
 - [ ] Validate disturbed downstream generated artifacts.
 - [ ] Complete correctness, QA, docs, and observation gates.
 
 ### In Progress
 
-- [ ] Phase 4 readiness: integrate the pure validation/result boundary from
-  ratified ADR-0043; production behavior has not changed yet.
+- [ ] Phase 5 readiness: exercise valid and degraded generated EU soils through
+  disturbed downstream transformations.
 
 ### Blocked
 
@@ -70,6 +70,13 @@ None.
 - [x] Added the pure Phase 3 validator, result carrier, diagnostic reason
   codes, and fixture-backed tests; production integration remains pending
   (2026-08-19 21:28 UTC).
+- [x] Integrated source, horizon, and Ksat validation into the ESDAC builder;
+  added typed worker/batch outcomes, per-worker staging, atomic report output,
+  and Phase 4 regression tests (`30 passed` across the EU hardening suite;
+  2026-08-19 22:02 UTC).
+- [x] Completed the independent Phase 4 subagent review; all findings were
+  fixed or explicitly dispositioned, with no remaining blocker/high/medium
+  findings (2026-08-19 22:18 UTC).
 
 ## Phase Gates
 
@@ -83,7 +90,9 @@ None.
 - **Phase 3**: pure result contract preserves valid states and exposes
   invalid-state diagnostics without production integration.
 - **Phase 4**: generated `.sol` output is finite, ordered, and contract-valid;
-  invalid profiles do not silently write in the production path.
+  invalid profiles do not silently write in the production path; rejected
+  batches leave a `soil_quality.json` report and no newly staged `.sol` files;
+  independent review findings are dispositioned.
 - **Phase 5**: disturbed downstream artifacts remain valid and reproducible.
 - **Phase 6**: review, observation, and documentation gates are complete.
 
@@ -102,10 +111,19 @@ None.
   Phase 3 validation design is queued.
 - **2026-08-19 21:28 UTC** – Pure Phase 3 validator and contract tests
   completed; Phase 4 production integration is queued.
+- **2026-08-19 22:02 UTC** – Phase 4 builder/worker integration and staged
+  batch-report tests completed; independent review and final gates are pending.
+- **2026-08-19 22:18 UTC** – Independent subagent review completed with no
+  unresolved blocker/high/medium findings; Phase 4 is complete and Phase 5 is
+  queued.
+- **2026-08-19 22:24 UTC** – Repository-wide gate stopped at the known Docker
+  CLI incompatibility after `170 passed, 13 skipped`; the canary smoke test
+  reports `unknown shorthand flag: 'f' in -f` before compose contract checks.
 - **Pending** – 50,000-sample campaign; deterministic fixture is accepted.
-- **Complete** – Quality contract and ADR-0043 ratified; production
-  implementation remains pending.
-- **Pending** – Production hardening implemented and validated.
+- **Complete** – Quality contract and ADR-0043 ratified; Phase 4 production
+  hardening implementation and focused tests completed.
+- **Pending** – Disturbed downstream validation, observation window, and
+  closeout.
 - **Pending** – Observation window and closeout completed.
 
 ## Decisions Log
@@ -171,6 +189,22 @@ handling are recorded in ADR-0043 because they affect model inputs.
 **Approval state**: Ratified by the user on 2026-08-19. Phase 4 production
 integration may proceed under ADR-0043.
 
+### 2026-08-19 22:02 UTC: Additive production integration
+
+**Decision**: Preserve the successful single-location builder tuple and add
+quality through the returned horizon attribute and typed worker result.
+
+**Rationale**: Existing direct callers retain `(key, horizon, description)`,
+while the worker boundary gains explicit per-location diagnostics without
+widening the NoDb mapping contract.
+
+**Decision**: Stage each worker's `.sol` separately and commit only an
+all-accepted batch.
+
+**Rationale**: A rejected location must not leave partial current-batch output
+or enter the hillslope mapping; `soil_quality.json` remains available for
+operator diagnosis.
+
 ## Risks and Issues
 
 | Risk | Severity | Likelihood | Mitigation | Status |
@@ -189,8 +223,9 @@ integration may proceed under ADR-0043.
   files with non-increasing horizon depths. Ten screened controls built with
   no output-order issue.
 - **Post-change health signals**: seven-case fixture covers valid, degraded,
-  and rejected outcomes; 22 targeted Phase 0–3 tests pass; production runtime
-  behavior remains unchanged.
+  and rejected outcomes; 30 targeted EU hardening tests pass; valid/degraded
+  batches commit staged outputs and rejected batches retain a diagnostic report
+  without committing new `.sol` files.
 - **Danger signals observed**: quality checks currently emphasize file
   creation; invalid-source outcomes are not structured; source screening
   found STU zeros/missing values and missing depth classes; full builds are
@@ -202,7 +237,7 @@ integration may proceed under ADR-0043.
 
 ### Code Quality
 
-- [x] Targeted EU soil tests pass (`22 passed`, 2 deprecation warnings).
+- [x] Targeted EU soil tests pass (`30 passed`, 2 deprecation warnings).
 - [ ] Full `wctl run-pytest tests --maxfail=1` passes before closeout. The
   Phase 3 run reached 170 passed and 13 skipped, then stopped at the unrelated
   Docker CLI failure in `tests/docker/test_canary_smoke_contract.py`:
@@ -212,8 +247,10 @@ integration may proceed under ADR-0043.
 
 ### Documentation
 
-- [ ] ESDAC module documentation describes quality outcomes and diagnostics.
-- [ ] User/operator documentation describes invalid-source behavior.
+- [x] ESDAC/work-package documentation describes quality outcomes, staging,
+  report output, and diagnostics.
+- [x] User/operator behavior is documented through the additive
+  `soil_quality.json` report and typed batch error contract.
 - [x] Package and changed docs pass `wctl doc-lint`.
 - [x] Parameterization ADR-0043 is ratified for Phase 3 implementation.
 
@@ -230,8 +267,8 @@ integration may proceed under ADR-0043.
 
 ### Reviews and Observation
 
-- [ ] Correctness review artifact completed with no unresolved medium/high
-  findings.
+- [x] Independent correctness subagent review artifact completed with no
+  unresolved medium/high findings.
 - [ ] QA review artifact completed with no unresolved medium/high findings.
 - [ ] Health/danger signals and observation window recorded.
 - [ ] Temporary calluses have owner and sunset criteria, or none are retained.
