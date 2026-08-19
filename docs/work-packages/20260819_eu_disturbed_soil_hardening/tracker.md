@@ -7,10 +7,10 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-19 19:37 UTC
-**Current phase**: Random invalid-soil search design
-**Last updated**: 2026-08-19 19:37 UTC
-**Next milestone**: Run a 1,000-sample pilot against the ESDAC raster footprint
-and inspect the anomaly rate
+**Current phase**: Phase 0 evidence freeze
+**Last updated**: 2026-08-19 20:46 UTC
+**Next milestone**: Select minimized pilot cases and create the Phase 1
+source-payload replay fixture
 **Security impact**: `none`
 **Dedicated security review**: `no`
 **Security artifact**: N/A
@@ -19,11 +19,8 @@ and inspect the anomaly rate
 
 ### Ready / Backlog
 
-- [ ] Locate the matching ESDAC, STU, and SoilHydroGrids raster installation.
-- [ ] Generate a deterministic 1,000-sample pilot manifest from the actual
-  ESDAC footprint.
-- [ ] Run the pilot source screen and full-build flagged samples.
 - [ ] Scale to the 50,000-sample campaign after pilot performance review.
+- [ ] Select and minimize pilot cases for the Phase 1 fixture.
 - [ ] Add Marta's cases later if coordinates or run artifacts become
   available.
 - [ ] Add deterministic replay fixture and no-geodata test harness.
@@ -34,13 +31,12 @@ and inspect the anomaly rate
 
 ### In Progress
 
-- [ ] Phase 0 random search: generate and screen a seeded coordinate/pixel
-  sample for invalid soils.
+- [ ] Phase 0 random search: review pilot cases and approve the 50,000-sample
+  campaign scale-up.
 
 ### Blocked
 
-- [ ] Search execution is blocked by missing EU raster assets in the current
-  workspace; the campaign must run where the matching geodata is installed.
+None.
 
 ### Done
 
@@ -54,7 +50,13 @@ and inspect the anomaly rate
 - [x] Reframed Phase 0 as a deterministic random invalid-soil search with a
   1,000-sample pilot and 50,000-sample target (2026-08-19 19:45 UTC).
 - [x] Added the deterministic raster-cell manifest generator and unit tests;
-  live execution remains blocked by missing EU geodata (2026-08-19 19:47 UTC).
+  valid-cell-only sampling was corrected after the first nodata-frame pilot
+  (2026-08-19 20:05 UTC).
+- [x] Ran the 1,000-sample pilot in the dev container using the installed
+  ESDAC/STU/SoilHydroGrids assets (2026-08-19 20:46 UTC).
+- [x] Captured source payloads and targeted builder outputs: 641 suspicious
+  source records, 596 completed builds, 35 builder exceptions, 59 horizon
+  depth-order findings, and 10 valid controls (2026-08-19 20:46 UTC).
 
 ## Phase Gates
 
@@ -77,7 +79,8 @@ and inspect the anomaly rate
 - **2026-08-19 19:37 UTC** – Package opened from EU soil-builder review.
 - **2026-08-19 19:45 UTC** – Phase 0 expanded to random invalid-soil search;
   Marta's cases are optional supplemental evidence.
-- **Pending** – 1,000-sample pilot run against matching EU geodata.
+- **2026-08-19 20:46 UTC** – 1,000-sample pilot and targeted builds completed;
+  Phase 0 evidence review is pending.
 - **Pending** – 50,000-sample campaign and deterministic fixture accepted.
 - **Pending** – Quality contract approved.
 - **Pending** – Production hardening implemented and validated.
@@ -139,12 +142,15 @@ the pilot provides a performance and anomaly-rate checkpoint before scaling.
 
 ## Hardening Signal Log
 
-- **Baseline health signals**: not yet quantified; current evidence is code
-  review plus the report of zero parameters and invalid horizons.
+- **Baseline health signals**: pilot source screen found 641 suspicious of
+  1,000 samples; targeted builds produced 35 exceptions and 59 generated
+  files with non-increasing horizon depths. Ten screened controls built with
+  no output-order issue.
 - **Post-change health signals**: pending fixture and implementation.
 - **Danger signals observed**: quality checks currently emphasize file
-  creation; invalid-source outcomes are not structured; broad random samples
-  may be too expensive if full builds precede screening.
+  creation; invalid-source outcomes are not structured; source screening
+  found STU zeros/missing values and missing depth classes; full builds are
+  materially slower than raster-cell screening.
 - **Temporary callus register**: none.
 - **Softening experiments**: not applicable during evidence freeze.
 
@@ -186,32 +192,43 @@ the pilot provides a performance and anomaly-rate checkpoint before scaling.
 
 ## Progress Notes
 
-### 2026-08-19 19:37 UTC: Package scaffold and initial source review
+### 2026-08-19 20:46 UTC: Phase 0 pilot evidence
 
 **Agent/Contributor**: Codex
 
 **Work completed**:
 
-- Reviewed `wepppy/eu/soils/esdac/esdac.py` and its direct dependencies.
-- Confirmed the existing EU test is optional and only checks file creation.
-- Recorded initial failure hypotheses and the evidence-first phase plan.
-- Added `package.md`, `tracker.md`, and the active ExecPlan.
-- Added `tools/eu_invalid_soil_search.py` and pure sampling tests that do not
-  require the EU raster installation.
+- Used the dev container's matching assets: 148 ESDB rasters, 85 STU layers,
+  and 56 SoilHydroGrids files.
+- Generated 1,000 unique, deterministic, valid-anchor-cell samples with seed
+  `20260819`.
+- Screened raw categorical, continuous, and Ksat source values, retaining
+  sample pixel provenance and coordinates.
+- Built all 641 source-suspicious samples plus 10 controls in isolated worker
+  processes and retained generated `.sol` files under the campaign output.
+- Found 59 built profiles with non-increasing cumulative horizon depths and
+  35 source/build failures (`TypeError`, `RDIOutOfBoundsException`, and
+  `KeyError`).
 
 **Blockers encountered**:
 
-- `/geodata/eu/ESDAC_ESDB_rasters`, `/geodata/eu/ESDAC_STU_EU_Layers`, and
-  EU SoilHydroGrids assets are not present in the current workspace, so live
-  reproduction must wait for an external run or fixture payload.
+- The first sampler included nodata cells because the anchor raster frame is
+  larger than its valid land footprint; this was corrected before the final
+  pilot. A second diagnostic bug swapped row/column order for grids with
+  different geometry; direct-vs-builder checks caught and corrected it.
+- The first evidence collector called the broken `Horizon.as_dict()` and
+  misclassified successful builds; the collector now records stable raw
+  horizon fields and generated-output checks.
 
 **Next steps**:
 
-- Locate matching EU geodata on a host where the campaign can run.
-- Begin Phase 0 with the 1,000-sample pilot.
+- Review the 35 exceptions and 59 depth-order cases, then minimize the
+  strongest examples into the no-geodata Phase 1 fixture.
+- Decide whether the 50,000-sample campaign is warranted after reviewing the
+  pilot's issue prevalence and runtime.
 
 **Test results**: `wctl run-pytest tests/eu/soils/test_invalid_soil_search.py`
-passed (`4 passed`); package and `PROJECT_TRACKER.md` documentation lint passed.
+passed (`6 passed`, 2 deprecation warnings).
 
 ## Watch List
 
@@ -240,7 +257,7 @@ the captured cases to drive evidence-backed hardening.
 
 **From**: Codex
 **To**: User / next session
-**Date**: 2026-08-19 19:37 UTC
+**Date**: 2026-08-19 20:46 UTC
 
 **What's complete**:
 
@@ -249,9 +266,10 @@ the captured cases to drive evidence-backed hardening.
 
 **What's next**:
 
-1. Locate matching EU geodata on a host where the campaign can run.
-2. Generate and run the 1,000-sample pilot.
-3. Scale to 50,000 samples, then add the deterministic fixture and replay test.
+1. Review and minimize the pilot cases into a deterministic fixture.
+2. Add the no-geodata replay harness and quality taxonomy.
+3. Decide and execute the 50,000-sample campaign if the evidence review
+   requires broader prevalence estimates.
 
 **Context needed**:
 

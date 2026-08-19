@@ -27,6 +27,10 @@ plan and the companion tracker at every stopping point.
   initial hardening hypotheses.
 - [x] (2026-08-19 19:47 UTC) Added the deterministic raster-cell manifest
   generator and pure sampling tests (`4 passed`).
+- [x] (2026-08-19 20:46 UTC) Executed the 1,000-sample valid-cell pilot:
+  source screening flagged 641 locations; 596 suspicious builds completed,
+  35 raised builder exceptions, 59 generated profiles had non-increasing
+  horizon depths, and 10 controls built without output-order issues.
 - [ ] Phase 0: run the seeded random invalid-soil search and freeze evidence.
 - [ ] Phase 1: capture source payload fixture and deterministic replay harness.
 - [ ] Phase 2: define and document evidence-backed quality invariants.
@@ -63,6 +67,24 @@ plan and the companion tracker at every stopping point.
   Evidence: `tests/eu/soils/test_invalid_soil_search.py` passes without
   `/geodata`; `build_manifest` resolves the anchor through `ESDAC.catalog`.
 
+- Observation: The installed anchor raster contains 10,121,083 valid cells
+  out of 41,250,000 frame cells, so sampling the raster frame directly would
+  overrepresent nodata/ocean cells.
+  Evidence: the pilot manifest records `valid_anchor_pixels_only: true` and
+  the source raster valid-cell count.
+
+- Observation: Pilot source screening found the reported failure shape in
+  real data: zero/missing STU values, missing depth classes, Ksat gaps, and
+  generated profiles with decreasing cumulative horizon depths.
+  Evidence: the campaign screen artifact reported 641 suspicious locations;
+  59 of their generated `.sol` files had `sol.horizon_depth_order`.
+
+- Observation: `Horizon.as_dict()` is not currently a safe evidence boundary;
+  it references a missing `wilting_point` attribute and can misclassify a
+  successful production build after the `.sol` is written.
+  Evidence: the first campaign collector saw 606 such `AttributeError`
+  results; the final collector records stable raw fields instead.
+
 ## Decision Log
 
 - Decision: Create a captured source-payload fixture before changing builder
@@ -83,6 +105,14 @@ plan and the companion tracker at every stopping point.
   classification would mask the failure and require an ungrounded scientific
   assumption.
   Date/Author: 2026-08-19 / User + Codex.
+
+- Decision: Run source screening by recorded raster cell and run targeted
+  builders in isolated processes.
+  Rationale: the anchor, STU, and HydroGrids rasters do not all share the
+  same geometry, so screening must transform once per source grid; GDAL-backed
+  builder instances are isolated to avoid thread contention. This is a
+  campaign-runner decision and does not change production behavior.
+  Date/Author: 2026-08-19 / Codex.
 
 ## Outcomes & Retrospective
 
