@@ -7,10 +7,10 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-19 19:37 UTC
-**Current phase**: Phase 6 review and observation planning
-**Last updated**: 2026-08-19 22:59 UTC
-**Next milestone**: Implement and QA the EU-specific runtime downstream gate,
-then complete the observation and closeout gates
+**Current phase**: Phase 6 post-implementation observation planning
+**Last updated**: 2026-08-19 23:59 UTC
+**Next milestone**: Deploy the hardened path, observe 14–30 days or 20 EU
+runs, and record the closeout evidence
 **Security impact**: `none`
 **Dedicated security review**: `no`
 **Security artifact**: N/A
@@ -29,12 +29,15 @@ then complete the observation and closeout gates
   diagnostics tests.
 - [x] Implement the approved validation boundary and diagnostics.
 - [x] Validate disturbed downstream generated artifacts.
-- [ ] Complete correctness, QA, docs, and observation gates.
+- [x] Complete correctness, QA, and documentation gates; observation is
+  explicitly pending post-deployment.
 
 ### In Progress
 
-- [ ] Phase 6 readiness: implement the EU-specific runtime gate, complete QA
+- [x] Phase 6 readiness: implement the EU-specific runtime gate, complete QA
   review, and define the observation plan.
+- [x] Phase 6 implementation: carry the ESDAC marker and per-location quality
+  report through single-OFE and MOFE publication boundaries.
 
 ### Blocked
 
@@ -81,6 +84,13 @@ None.
   valid, degraded, and rejected-base cases through the 9002 disturbed
   transformation; serialized water, depth, and Ksat negative controls pass
   (6 downstream tests passed, 2026-08-19 22:43 UTC).
+- [x] Executed Phase 6 EU-specific runtime gating: additive ESDAC provenance,
+  complete report coverage, `soil_key` binding, canonical single/MOFE output
+  validation, typed rejection, and operation-level rollback for both paths
+  (2026-08-19 23:42 UTC).
+- [x] Completed Phase 6 correctness review and QA disposition; all identified
+  P1/P2 findings were fixed and regression-tested. Observation remains open
+  until deployment.
 
 ## Phase Gates
 
@@ -132,6 +142,8 @@ None.
   hardening implementation and focused tests completed.
 - **Complete** – Disturbed downstream validation and generated-artifact
   contract replay.
+- **Complete for implementation** – Phase 6 runtime, review, QA, and
+  documentation gates; production observation remains pending.
 - **Pending** – Observation window and closeout completed.
 
 ## Decisions Log
@@ -245,9 +257,40 @@ runtime enforcement for EU ESDAC-derived soils within this package.
   this gate.
 
 **Rationale**: This closes the confirmed EU data-quality path while preserving
-  compatibility for unrelated builders and legacy disturbed workflows. A
-  missing EU quality carrier is a provenance/error condition to resolve during
-  implementation, not permission to silently treat the profile as generic.
+compatibility for unrelated builders and legacy disturbed workflows. A
+missing EU quality carrier is a provenance/error condition to resolve during
+implementation, not permission to silently treat the profile as generic.
+
+### 2026-08-19 23:09 UTC: Additive provenance carrier for runtime enforcement
+
+**Decision**: Add an optional persisted ESDAC provider marker to `Soils` and
+use the existing `soil_quality.json` file as the authoritative per-location
+quality carrier. Enforce the downstream gate only when the marker identifies an
+ESDAC build.
+
+**Compatibility plan**: Existing NoDb payloads default to an absent/`None`
+marker, and non-ESDAC builders keep their existing disturbed behavior. A
+marked ESDAC run with a missing, malformed, or incomplete quality report raises
+an explicit typed diagnostic rather than falling through to generic generation.
+No existing soil keys or report fields are renamed or removed.
+
+**Rationale**: Report presence alone cannot distinguish ESDAC from legacy EU or
+user-defined soil workflows. The additive marker makes the enforcement scope
+explicit while retaining the already persisted diagnostic evidence.
+
+### 2026-08-19 23:42 UTC: Runtime carrier completeness and rollback
+
+**Decision**: Treat report coverage, source-soil identity, and complete MOFE
+publication as runtime correctness boundaries. A marked ESDAC operation must
+preflight all required non-channel TopoAZ entries, match each report
+`soil_key` to the current base mapping, and restore the pre-operation `.sol`
+set if MOFE synthesis fails.
+
+**Rationale**: A readable but partial report can otherwise fail late, stale
+quality evidence can be applied to a remapped base soil, and a multi-file MOFE
+operation can leave a mixed result. The low-level report parser still permits
+an empty accepted profile list for carrier round-trip compatibility; runtime
+entry points require the locations they are about to process.
 
 ## Risks and Issues
 
@@ -270,13 +313,17 @@ runtime enforcement for EU ESDAC-derived soils within this package.
   and rejected outcomes; Phase 4 batch tests pass; Phase 5 reparsed 9002
   artifacts for valid and degraded bases and rejected water/depth/Ksat
   mutations; valid/degraded batches commit staged outputs and rejected batches
-  retain a diagnostic report without committing new `.sol` files.
+  retain a diagnostic report without committing new `.sol` files. Phase 6
+  adds complete report coverage, source-key binding, canonical runtime
+  publication, and single/MOFE rollback tests.
 - **Danger signals observed**: quality checks currently emphasize file
   creation; invalid-source outcomes are not structured; source screening
   found STU zeros/missing values and missing depth classes; full builds are
   materially slower than raster-cell screening.
 - **Temporary callus register**: none.
 - **Softening experiments**: not applicable during evidence freeze.
+- **Observation status**: pending deployment; observe 14–30 days or 20 EU
+  disturbed runs, whichever is later.
 
 ## Verification Checklist
 
@@ -285,12 +332,13 @@ runtime enforcement for EU ESDAC-derived soils within this package.
 - [x] Targeted EU soil tests pass (`37 passed`, 2 deprecation warnings;
   Phase 4's focused suite had 30 before Phase 5 additions).
 - [ ] Full `wctl run-pytest tests --maxfail=1` passes before closeout. The
-  Phase 3 run reached 170 passed and 13 skipped, then stopped at the unrelated
-  Docker CLI failure in `tests/docker/test_canary_smoke_contract.py`:
-  `docker compose` rejected `-f` with `unknown shorthand flag: 'f'`.
+  final-tree run reached `170 passed, 13 skipped, 9 warnings` in 265.05s, then
+  stopped at the unrelated Docker CLI failure in
+  `tests/docker/test_canary_smoke_contract.py`: `docker compose` rejected
+  `-f` with `unknown shorthand flag: 'f'`.
 - [x] `wctl check-test-stubs` passes. Direct `wctl run-stubtest
-  wepppy.eu.soils.esdac` remains blocked by pre-existing mypy build errors in
-  `wepppy/eu/soils/esdac/quality.py` (lines 207, 304, 315, 317, 326, 335),
+  wepppy.eu.soils.esdac` remains blocked by preexisting mypy build errors in
+  `wepppy/eu/soils/esdac/quality.py` (lines 211, 308, 319, 321, 330, 339),
   before the new downstream module is checked.
 - [x] Changed-file broad-exception check passes.
 - [x] `git diff --check` passes.
@@ -320,11 +368,45 @@ runtime enforcement for EU ESDAC-derived soils within this package.
 
 - [x] Independent correctness subagent review artifact completed with no
   unresolved medium/high findings.
-- [ ] QA review artifact completed with no unresolved medium/high findings.
-- [ ] Health/danger signals and observation window recorded.
-- [ ] Temporary calluses have owner and sunset criteria, or none are retained.
+- [x] QA review artifact completed with no unresolved medium/high findings.
+- [x] Health/danger signals and observation window recorded in
+  `artifacts/phase6-qa-review.md`; production observation is pending.
+- [x] No temporary calluses are retained.
 
 ## Progress Notes
+
+### 2026-08-19 23:42 UTC: Phase 6 runtime gate and closeout evidence
+
+**Agent/Contributor**: Codex, with independent review by Herschel
+
+**Work completed**:
+
+- Added the additive persisted `Soils.soil_source` marker with legacy payload
+  defaulting and exact ESDAC builder identity detection.
+- Added quality-report parsing, complete non-channel TopoAZ coverage checks,
+  accepted/degraded/rejected consistency checks, and `soil_key` binding.
+- Enforced canonical parse-before-publish for single-OFE and MOFE outputs;
+  reused outputs are revalidated and rejected bases cannot produce generic
+  replacements.
+- Added shared single/MOFE transaction rollback for preexisting and newly
+  created `.sol` files plus controller state, with persistence, stale-key,
+  incomplete-report, degraded-report, and reuse regressions.
+- Recorded independent correctness findings and all dispositions in
+  `artifacts/phase6-correctness-review.md`; QA evidence and the observation
+  window are in `artifacts/phase6-qa-review.md`.
+
+**Test results**: Final focused set passed (`50 passed, 2 warnings`). The
+combined EU/disturbed/root-Soils suite passed (`139 passed, 20 skipped, 2
+warnings`) before the final parser/rollback-only additions; the final focused
+set includes those additions. Stub completeness, broad-exception enforcement,
+Python compilation, and diff checks pass. Direct ESDAC stubtest remains blocked
+by preexisting mypy errors; full repository pytest remains blocked by the
+known Docker Compose CLI incompatibility.
+
+**Observation**: Deployment observation is pending. Watch for rejected-base
+fallbacks, publication without canonical validation, report coverage errors
+after publication, and temporary `.sol` leftovers for 14–30 days or 20 EU
+runs, whichever is later.
 
 ### 2026-08-19 22:43 UTC: Phase 5 downstream artifact validation
 

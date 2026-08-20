@@ -4,9 +4,21 @@ from pathlib import Path
 from typing import Union
 
 from .esdac import ESDAC, _attr_fmt
+from .downstream import (
+    ESDACDisturbedSoilBuildError,
+    ESDACSoilQualityReportError,
+    load_soil_quality_report,
+)
 from .quality import SoilQualityContext, SoilQualityResult
 
-__all__ = ["ESDAC", "_attr_fmt", "validate_disturbed_soil_artifact"]
+__all__ = [
+    "ESDAC",
+    "_attr_fmt",
+    "ESDACDisturbedSoilBuildError",
+    "ESDACSoilQualityReportError",
+    "load_soil_quality_report",
+    "validate_disturbed_soil_artifact",
+]
 
 def validate_disturbed_soil_artifact(
     soil_path: Union[str, Path],

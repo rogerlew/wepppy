@@ -9,6 +9,7 @@ non-finite values, invalid horizons, or missing disturbed metadata.
 
 from __future__ import annotations
 
+import json
 from collections.abc import Mapping, Sequence
 from math import isfinite
 from pathlib import Path
@@ -35,6 +36,285 @@ _HORIZON_FIELDS: tuple[str, ...] = (
     "cec",
     "rfg",
 )
+
+
+class ESDACSoilQualityReportError(RuntimeError):
+    """Raised when an ESDAC runtime quality report cannot identify a soil."""
+
+    def __init__(
+        self,
+        report_path: str | Path,
+        *,
+        code: str,
+        topaz_id: str | int | None = None,
+        detail: str | None = None,
+    ) -> None:
+        self.report_path = str(report_path)
+        self.code = code
+        self.topaz_id = topaz_id
+        self.detail = detail
+        location = f" for TopoAZ {topaz_id!r}" if topaz_id is not None else ""
+        suffix = f": {detail}" if detail else ""
+        super().__init__(
+            f"ESDAC soil quality report error{location}: {code}"
+            f" ({self.report_path}){suffix}"
+        )
+
+
+class ESDACDisturbedSoilBuildError(RuntimeError):
+    """Raised when a generated EU disturbed artifact fails its quality gate."""
+
+    def __init__(
+        self,
+        result: SoilQualityResult,
+        *,
+        artifact_path: str | Path,
+        quality_report_path: str | Path,
+    ) -> None:
+        self.result = result
+        self.artifact_path = str(artifact_path)
+        self.quality_report_path = str(quality_report_path)
+        context = result.context
+        codes = ", ".join(result.reason_codes) or "unknown_quality_failure"
+        super().__init__(
+            f"EU disturbed soil rejected at ({context.longitude}, {context.latitude})"
+            f" for TopoAZ {context.topaz_id!r}: {codes}"
+        )
+
+
+def _report_number(
+    value: object,
+    *,
+    report_path: str | Path,
+    topaz_id: str | int | None,
+    field: str,
+) -> float:
+    number = _number(value)
+    if number is None:
+        raise ESDACSoilQualityReportError(
+            report_path,
+            code="source.quality_report.nonfinite_context",
+            topaz_id=topaz_id,
+            detail=field,
+        )
+    return number
+
+
+def _quality_result_from_report_entry(
+    entry: object,
+    *,
+    report_path: str | Path,
+) -> SoilQualityResult:
+    if not isinstance(entry, Mapping):
+        raise ESDACSoilQualityReportError(
+            report_path,
+            code="source.quality_report.profile_malformed",
+        )
+
+    topaz_id = entry.get("topaz_id")
+    if topaz_id is None or isinstance(topaz_id, (dict, list, tuple)):
+        raise ESDACSoilQualityReportError(
+            report_path,
+            code="source.quality_report.topaz_id_missing",
+            topaz_id=topaz_id if isinstance(topaz_id, (str, int)) else None,
+        )
+
+    outcome = entry.get("outcome")
+    if outcome not in {"valid", "degraded", "rejected"}:
+        raise ESDACSoilQualityReportError(
+            report_path,
+            code="source.quality_report.outcome_invalid",
+            topaz_id=topaz_id if isinstance(topaz_id, (str, int)) else None,
+        )
+
+    soil_key = entry.get("soil_key")
+    if soil_key is not None and not isinstance(soil_key, str):
+        raise ESDACSoilQualityReportError(
+            report_path,
+            code="source.quality_report.soil_key_invalid",
+            topaz_id=topaz_id if isinstance(topaz_id, (str, int)) else None,
+        )
+    if outcome in {"valid", "degraded"} and not soil_key:
+        raise ESDACSoilQualityReportError(
+            report_path,
+            code="source.quality_report.soil_key_missing",
+            topaz_id=topaz_id if isinstance(topaz_id, (str, int)) else None,
+        )
+
+    if "diagnostics" not in entry:
+        raise ESDACSoilQualityReportError(
+            report_path,
+            code="source.quality_report.diagnostics_malformed",
+            topaz_id=topaz_id if isinstance(topaz_id, (str, int)) else None,
+        )
+    diagnostics_payload = entry["diagnostics"]
+    if (
+        isinstance(diagnostics_payload, (str, bytes))
+        or not isinstance(diagnostics_payload, Sequence)
+    ):
+        raise ESDACSoilQualityReportError(
+            report_path,
+            code="source.quality_report.diagnostics_malformed",
+            topaz_id=topaz_id if isinstance(topaz_id, (str, int)) else None,
+        )
+
+    diagnostics: list[SoilQualityDiagnostic] = []
+    for diagnostic_payload in diagnostics_payload:
+        if not isinstance(diagnostic_payload, Mapping):
+            raise ESDACSoilQualityReportError(
+                report_path,
+                code="source.quality_report.diagnostic_malformed",
+                topaz_id=topaz_id if isinstance(topaz_id, (str, int)) else None,
+            )
+        code = diagnostic_payload.get("code")
+        field = diagnostic_payload.get("field")
+        severity = diagnostic_payload.get("severity")
+        if (
+            not isinstance(code, str)
+            or not isinstance(field, str)
+            or severity not in {"warning", "error"}
+        ):
+            raise ESDACSoilQualityReportError(
+                report_path,
+                code="source.quality_report.diagnostic_invalid",
+                topaz_id=topaz_id if isinstance(topaz_id, (str, int)) else None,
+            )
+        exception_type = diagnostic_payload.get("exception_type")
+        if exception_type is not None and not isinstance(exception_type, str):
+            raise ESDACSoilQualityReportError(
+                report_path,
+                code="source.quality_report.diagnostic_invalid",
+                topaz_id=topaz_id if isinstance(topaz_id, (str, int)) else None,
+            )
+        diagnostics.append(
+            SoilQualityDiagnostic(
+                code,
+                field,
+                severity,
+                raw_value=diagnostic_payload.get("raw_value"),
+                exception_type=exception_type,
+            )
+        )
+
+    context = SoilQualityContext(
+        longitude=_report_number(
+            entry.get("longitude"),
+            report_path=report_path,
+            topaz_id=topaz_id if isinstance(topaz_id, (str, int)) else None,
+            field="longitude",
+        ),
+        latitude=_report_number(
+            entry.get("latitude"),
+            report_path=report_path,
+            topaz_id=topaz_id if isinstance(topaz_id, (str, int)) else None,
+            field="latitude",
+        ),
+        topaz_id=topaz_id,
+    )
+    result = SoilQualityResult(context, outcome, tuple(diagnostics), soil_key)
+    if result.outcome == "valid" and result.diagnostics:
+        raise ESDACSoilQualityReportError(
+            report_path,
+            code="source.quality_report.outcome_mismatch",
+            topaz_id=topaz_id if isinstance(topaz_id, (str, int)) else None,
+        )
+    if result.outcome == "degraded" and (
+        not result.diagnostics
+        or any(diagnostic.severity == "error" for diagnostic in result.diagnostics)
+    ):
+        raise ESDACSoilQualityReportError(
+            report_path,
+            code="source.quality_report.outcome_mismatch",
+            topaz_id=topaz_id if isinstance(topaz_id, (str, int)) else None,
+        )
+    if result.outcome == "rejected" and not any(
+        diagnostic.severity == "error" for diagnostic in result.diagnostics
+    ):
+        raise ESDACSoilQualityReportError(
+            report_path,
+            code="source.quality_report.outcome_mismatch",
+            topaz_id=topaz_id if isinstance(topaz_id, (str, int)) else None,
+        )
+    return result
+
+
+def load_soil_quality_report(
+    report_path: str | Path,
+) -> dict[str, SoilQualityResult]:
+    """Load and validate the additive Phase 4 ESDAC quality report."""
+    path = Path(report_path)
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError as exc:
+        raise ESDACSoilQualityReportError(
+            path,
+            code="source.quality_report.missing",
+        ) from exc
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ESDACSoilQualityReportError(
+            path,
+            code="source.quality_report.unreadable",
+            detail=type(exc).__name__,
+        ) from exc
+
+    if (
+        not isinstance(payload, Mapping)
+        or isinstance(payload.get("schema_version"), bool)
+        or payload.get("schema_version") != 1
+    ):
+        raise ESDACSoilQualityReportError(
+            path,
+            code="source.quality_report.schema_invalid",
+        )
+    if payload.get("batch_outcome") != "accepted":
+        raise ESDACSoilQualityReportError(
+            path,
+            code="source.quality_report.batch_not_accepted",
+        )
+    profiles = payload.get("profiles")
+    if (
+        isinstance(profiles, (str, bytes))
+        or not isinstance(profiles, Sequence)
+    ):
+        raise ESDACSoilQualityReportError(
+            path,
+            code="source.quality_report.profiles_missing",
+        )
+
+    results: dict[str, SoilQualityResult] = {}
+    for entry in profiles:
+        result = _quality_result_from_report_entry(entry, report_path=path)
+        key = str(result.context.topaz_id)
+        if key in results:
+            raise ESDACSoilQualityReportError(
+                path,
+                code="source.quality_report.duplicate_topaz_id",
+                topaz_id=result.context.topaz_id,
+            )
+        results[key] = result
+
+    accepted_count = payload.get("accepted_count")
+    rejected_count = payload.get("rejected_count")
+    if (
+        isinstance(accepted_count, bool)
+        or not isinstance(accepted_count, int)
+        or accepted_count < 0
+        or isinstance(rejected_count, bool)
+        or not isinstance(rejected_count, int)
+        or rejected_count < 0
+    ):
+        raise ESDACSoilQualityReportError(
+            path,
+            code="source.quality_report.counts_invalid",
+        )
+    actual_accepted = sum(result.accepted for result in results.values())
+    actual_rejected = sum(result.outcome == "rejected" for result in results.values())
+    if accepted_count != actual_accepted or rejected_count != actual_rejected:
+        raise ESDACSoilQualityReportError(
+            path,
+            code="source.quality_report.counts_mismatch",
+        )
+    return results
 
 
 def _number(value: object) -> float | None:

@@ -93,7 +93,7 @@ def _build_esdac_soil(kwargs: dict[str, Any]) -> SoilBuildWorkerResult:
         raise RuntimeError(
             "ESDAC.build_wepp_soil returned no SoilQualityResult on its horizon"
         )
-    quality = replace(quality, context=context)
+    quality = replace(quality, context=context, soil_key=key)
     result = SoilBuildWorkerResult(topaz_id, key, horizon, desc, quality)
     if status_channel is not None:
         StatusMessenger.publish(

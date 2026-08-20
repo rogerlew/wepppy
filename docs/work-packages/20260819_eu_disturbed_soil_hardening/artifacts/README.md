@@ -16,3 +16,8 @@ Phase 5 evidence is summarized in
 [phase5-downstream-validation.md](phase5-downstream-validation.md). The
 downstream validator reparses generated 9002 files with the canonical
 `WeppSoilUtil` parser and preserves degraded or rejected base diagnostics.
+
+Phase 6 correctness and QA evidence is recorded in
+[phase6-correctness-review.md](phase6-correctness-review.md) and
+[phase6-qa-review.md](phase6-qa-review.md). The QA artifact includes the
+repository/environment blockers and the post-deployment observation window.

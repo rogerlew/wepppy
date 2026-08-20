@@ -186,6 +186,14 @@ the observation window. Any temporary diagnostic, fallback, or retry behavior
 receives an owner and sunset criteria. Close only after review findings are
 dispositioned and documentation matches runtime behavior.
 
+The compatibility plan is additive: persist an optional ESDAC provider marker
+on `Soils` while retaining `soil_quality.json` as the per-location quality
+carrier. Existing NoDb payloads and non-ESDAC builders default to no marker and
+keep their current disturbed behavior. A marked ESDAC run with a missing,
+malformed, or incomplete quality report fails through a typed diagnostic rather
+than falling through to generic disturbed generation. No existing soil keys or
+quality-report fields are renamed or removed.
+
 **Exit gate:** focused and repository validation are complete, evidence is
 linked, and any follow-up package or mitigation-retirement experiment is
 explicitly recorded.
@@ -224,10 +232,11 @@ explicitly recorded.
   documented and fixture-backed.
 - [x] Invalid or unrepresentable profiles cannot produce silent invalid `.sol`
   files.
-- [ ] Disturbed downstream generated artifacts pass the contract matrix.
-- [ ] Required correctness, QA, documentation, and validation gates pass.
-- [ ] Observation window, health signals, danger signals, and any callus
-  sunset criteria are recorded.
+- [x] Disturbed downstream generated artifacts pass the contract matrix.
+- [x] Required correctness, QA, documentation, and validation gates pass;
+  known environment blockers are recorded in the QA artifact.
+- [x] Observation window, health signals, danger signals, and callus sunset
+  criteria are recorded; production observation remains pending deployment.
 
 ## Parameterization ADR Gate
 

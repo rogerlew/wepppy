@@ -56,6 +56,13 @@ plan and the companion tracker at every stopping point.
 - [x] (2026-08-19 21:39 UTC) Completed targeted, documentation, stub, and
   changed-file exception gates. The full suite reached 170 passed and 13
   skipped before an unrelated Docker CLI compose-contract failure.
+- [x] (2026-08-19 23:42 UTC) Executed Phase 6 runtime hardening. The additive
+  ESDAC provenance marker and per-location `soil_quality.json` carrier now
+  gate single-OFE and MOFE publication through temporary canonical-parser
+  validation, typed errors, complete coverage checks, soil-key binding, and
+  single/MOFE rollback. Persistence, reuse, rejected/malformed carrier, and rollback
+  regressions pass; correctness and QA artifacts are recorded. The production
+  observation window remains pending deployment.
 - [ ] Phase 0 scale-up: decide whether to run the 50,000-sample campaign.
 - [x] Phase 1: capture source payload fixture and deterministic replay harness.
 - [x] Phase 2: review and ratify the evidence-backed quality invariants and
@@ -64,7 +71,8 @@ plan and the companion tracker at every stopping point.
 - [x] Phase 4: complete independent review disposition and final gates for the
   production hardening and diagnostics integration.
 - [x] Phase 5: validate disturbed downstream generated artifacts.
-- [ ] Phase 6: complete review gates and observation plan.
+- [x] Phase 6: complete runtime review gates and observation plan; production
+  observation remains an explicitly tracked post-deployment activity.
 
 ## Surprises & Discoveries
 
@@ -142,6 +150,19 @@ plan and the companion tracker at every stopping point.
   Evidence: the valid Phase 1 control becomes `[200.0, 1200.0, 1500.0]` in
   the reparsed 9002 artifact.
 
+- Observation: Runtime enforcement needs more than report readability. A
+  marked run must prove complete TopoAZ coverage and bind each accepted result
+  to the current base `soil_key` before any output is published.
+  Evidence: independent Phase 6 review found lazy partial-report handling and
+  stale-key risk; coverage preflight, key matching, and regression tests now
+  close both paths.
+
+- Observation: MOFE generation can publish multiple segment artifacts before
+  synthesis completes. The runtime wrapper therefore snapshots existing `.sol`
+  files and rolls back the complete operation on failure.
+  Evidence: the Phase 6 rollback regression restores an overwritten existing
+  file and removes a newly created segment.
+
 ## Decision Log
 
 - Decision: Create a captured source-payload fixture before changing builder
@@ -176,6 +197,16 @@ plan and the companion tracker at every stopping point.
   Rationale: this exercises the real `Horizon` construction and `.sol`
   serialization while avoiding `/geodata`; it also preserves the exact
   production categorical-key normalization and exception classes.
+  Date/Author: 2026-08-19 / Codex.
+
+- Decision: Identify the production gate with an additive ESDAC provider marker
+  on `Soils`, and carry per-location quality through the existing
+  `soil_quality.json` report.
+  Rationale: report presence alone cannot distinguish an ESDAC run from a
+  legacy EU or user-defined soil workflow, while a persisted marker makes the
+  EU-specific boundary explicit. Existing NoDb payloads default to no marker;
+  a marked ESDAC run with a missing or malformed report fails explicitly rather
+  than silently bypassing validation.
   Date/Author: 2026-08-19 / Codex.
 
 - Decision: Adopt a three-state quality contract and field-qualified reason
@@ -219,6 +250,18 @@ plan and the companion tracker at every stopping point.
   valid zero flags and gravel values are not blanket-rejected.
   Date/Author: 2026-08-19 / Codex under ratified ADR-0043.
 
+- Decision: Treat report coverage, source-soil identity, and complete MOFE
+  publication as runtime correctness boundaries. A marked ESDAC operation
+  must preflight all required non-channel TopoAZ entries, match each report
+  `soil_key` to the current base mapping, and restore the pre-operation `.sol`
+  set if MOFE synthesis fails.
+  Rationale: A readable but partial report can otherwise fail late, stale
+  quality evidence can be applied to a remapped base soil, and a multi-file
+  MOFE operation can leave a mixed result. The low-level report parser still
+  permits an empty accepted profile list for carrier round-trip compatibility;
+  runtime entry points require the locations they are about to process.
+  Date/Author: 2026-08-19 / Codex under Phase 6 review.
+
 ## Outcomes & Retrospective
 
 Phase 1 confirmed that the reported classes are replayable without live
@@ -239,6 +282,15 @@ artifact validator: the valid control and degraded metadata case produce
 valid serialized 9002 transformations (with degradation retained), the
 rejected zero-profile produces no downstream artifact, and deliberately
 mutated water, depth, and Ksat fields are rejected after reparsing.
+
+Phase 6 carries the ESDAC quality result through the additive `Soils` provider
+marker into Disturbed single-OFE and MOFE runtime paths. Marked runs fail
+before generation on missing, malformed, incomplete, or stale quality
+carriers; valid and degraded results publish only after canonical parsing;
+rejected bases never receive a generic replacement; and MOFE failures restore
+the prior `.sol` set and controller state for both single-OFE and MOFE
+operations. The independent correctness review dispositioned all findings,
+and the QA artifact records the gates and the post-deployment observation plan.
 
 ## Context and Orientation
 
@@ -403,6 +455,17 @@ deployed, observe target error recurrence and valid-state rejection for 14–30
 days. Any temporary compatibility branch must have an owner, review date, and
 sunset condition.
 
+The compatibility plan for the runtime carrier is additive. `Soils` will gain
+an optional persisted provider marker that is set only by the ESDAC builder and
+defaults to absent/`None` for existing NoDb payloads and all other builders.
+The existing `soil_quality.json` report remains the authoritative per-location
+quality carrier; no user-visible soil keys or report fields are renamed or
+removed. Disturbed will enforce the gate only when that marker identifies an
+ESDAC build. If the marker is present but the report is missing, malformed, or
+does not contain the requested location, the EU path raises a typed diagnostic
+instead of falling through to generic disturbed behavior. Non-EU and legacy
+non-ESDAC paths retain their current behavior.
+
 ## Concrete Steps
 
 Until matching EU geodata is available, run only read-only discovery and
@@ -529,3 +592,12 @@ canonical-parser downstream artifact validator, 9002 fixture replay coverage,
 negative serialized-parameter cases, and explicit rejected-base diagnostic
 propagation. Six downstream tests pass; Phase 6 review and runtime wiring
 decision remain.
+
+Revision note (2026-08-19 23:59 UTC): Executed Phase 6. Added the additive
+ESDAC provenance marker, quality-report parser and coverage/key checks,
+single-OFE/MOFE runtime validation, single/MOFE rollback, structural carrier
+checks, persistence regressions,
+independent correctness review disposition, QA evidence, and the
+post-deployment observation plan. Full repository validation remains blocked
+by the known local Docker Compose CLI incompatibility; direct ESDAC stubtest
+remains blocked by preexisting quality.py mypy errors.

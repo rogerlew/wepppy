@@ -107,6 +107,7 @@ class SoilQualityResult:
     context: SoilQualityContext
     outcome: QualityOutcome
     diagnostics: tuple[SoilQualityDiagnostic, ...] = ()
+    soil_key: str | None = None
 
     @property
     def accepted(self) -> bool:
@@ -125,6 +126,7 @@ class SoilQualityResult:
             "longitude": _json_safe(self.context.longitude),
             "latitude": _json_safe(self.context.latitude),
             "topaz_id": _json_safe(self.context.topaz_id),
+            "soil_key": self.soil_key,
             "reason_codes": list(self.reason_codes),
             "diagnostics": [
                 {
@@ -155,6 +157,8 @@ class ESDACSoilBuildError(RuntimeError):
 def _result(
     context: SoilQualityContext,
     diagnostics: Sequence[SoilQualityDiagnostic],
+    *,
+    soil_key: str | None = None,
 ) -> SoilQualityResult:
     diagnostics_tuple = tuple(diagnostics)
     if any(diagnostic.severity == "error" for diagnostic in diagnostics_tuple):
@@ -163,7 +167,7 @@ def _result(
         outcome = "degraded"
     else:
         outcome = "valid"
-    return SoilQualityResult(context, outcome, diagnostics_tuple)
+    return SoilQualityResult(context, outcome, diagnostics_tuple, soil_key)
 
 
 def merge_quality_results(*results: SoilQualityResult) -> SoilQualityResult:
@@ -176,7 +180,7 @@ def merge_quality_results(*results: SoilQualityResult) -> SoilQualityResult:
     diagnostics = tuple(
         diagnostic for result in results for diagnostic in result.diagnostics
     )
-    return _result(context, diagnostics)
+    return _result(context, diagnostics, soil_key=results[0].soil_key)
 
 
 def rejected_quality_result(
