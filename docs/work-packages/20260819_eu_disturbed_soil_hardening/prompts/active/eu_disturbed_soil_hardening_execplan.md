@@ -63,6 +63,12 @@ plan and the companion tracker at every stopping point.
   single/MOFE rollback. Persistence, reuse, rejected/malformed carrier, and rollback
   regressions pass; correctness and QA artifacts are recorded. The production
   observation window remains pending deployment.
+- [x] (2026-08-20 00:16 UTC) Replayed the seeded 1,000-cell Phase 0 campaign
+  after hardening through the direct ESDAC builder. The source screen selected
+  631 suspicious locations and 20 controls; 345 profiles passed serialized
+  horizon checks and 306 returned structured rejection diagnostics. No
+  successful profile had non-finite values or invalid depth order. The run
+  intentionally stopped below the NoDb/WEPPcloud integration boundary.
 - [ ] Phase 0 scale-up: decide whether to run the 50,000-sample campaign.
 - [x] Phase 1: capture source payload fixture and deterministic replay harness.
 - [x] Phase 2: review and ratify the evidence-backed quality invariants and
@@ -90,11 +96,11 @@ plan and the companion tracker at every stopping point.
   Evidence: `esdac.py` tests only `h1.depth <= 0`; it never requires
   `h1.depth > h0.depth`.
 
-- Observation: The current local workspace lacks the EU raster directories,
-  so the existing live integration test cannot provide deterministic incident
-  reproduction here.
-  Evidence: the test is guarded by directory existence and the directories
-  are absent in the current environment.
+- Observation: The host working tree does not expose the EU raster directories
+  directly, but the compose-managed `weppcloud` development container does.
+  Evidence: the live campaign completed through `wctl` using the installed
+  ESDAC, STU, and SoilHydroGrids assets; direct host execution remains
+  environment-dependent.
 
 - Observation: The sampling manifest can be tested without importing or
   opening the EU rasters, but manifest generation itself correctly depends on
@@ -162,6 +168,13 @@ plan and the companion tracker at every stopping point.
   files and rolls back the complete operation on failure.
   Evidence: the Phase 6 rollback regression restores an overwritten existing
   file and removes a newly created segment.
+
+- Observation: After hardening, the direct 1,000-cell replay converts the
+  previously observed invalid-depth outputs into explicit rejection results.
+  Evidence: 14 `horizon.depth_order` diagnostics were returned, while all 345
+  successful `.sol` files were finite and strictly depth-ordered; eight
+  successful profiles had only a zero `smr` value, which remains a permitted
+  physical value under ADR-0043.
 
 ## Decision Log
 
@@ -291,6 +304,13 @@ rejected bases never receive a generic replacement; and MOFE failures restore
 the prior `.sol` set and controller state for both single-OFE and MOFE
 operations. The independent correctness review dispositioned all findings,
 and the QA artifact records the gates and the post-deployment observation plan.
+
+The post-hardening Phase 0 replay provides a direct-builder health checkpoint:
+345 targeted profiles serialized as finite, ordered two-horizon files, while
+306 source or profile defects were rejected with location-specific diagnostics.
+The campaign is intentionally not an integration test; NoDb, Disturbed, and
+WEPPcloud behavior remains covered by the focused suites and deployment
+observation plan.
 
 ## Context and Orientation
 
@@ -545,10 +565,11 @@ Planned artifacts:
 - final validation and observation summary.
 
 The package currently contains no committed live-raster production-output
-artifact because the local workspace does not have the EU raster installation.
-Deterministic Phase 4 tests cover staged output and report serialization;
-search output must remain outside the repository until a reviewed, minimized
-fixture is selected.
+artifact. The compose-managed development container has the matching EU
+rasters for campaign execution, but the generated manifest, source payloads,
+and `.sol` files remain in container `/tmp` until a reviewed, minimized
+fixture is selected. Deterministic Phase 4 tests cover staged output and
+report serialization.
 
 ## Interfaces and Dependencies
 
@@ -601,3 +622,10 @@ independent correctness review disposition, QA evidence, and the
 post-deployment observation plan. Full repository validation remains blocked
 by the known local Docker Compose CLI incompatibility; direct ESDAC stubtest
 remains blocked by preexisting quality.py mypy errors.
+
+Revision note (2026-08-20 00:16 UTC): Replayed the seeded 1,000-cell Phase 0
+campaign after hardening through the direct ESDAC builder. The run targeted
+631 suspicious cells plus 20 controls, emitted 345 finite and ordered `.sol`
+files, and returned 306 structured rejections. No NoDb or WEPPcloud
+integration was exercised; the campaign evidence is recorded in
+`artifacts/phase0-post-hardening-1000-run.md`.

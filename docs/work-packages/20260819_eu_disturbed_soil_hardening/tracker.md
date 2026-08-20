@@ -8,7 +8,7 @@
 **Timezone**: UTC
 **Started**: 2026-08-19 19:37 UTC
 **Current phase**: Phase 6 post-implementation observation planning
-**Last updated**: 2026-08-19 23:59 UTC
+**Last updated**: 2026-08-20 00:16 UTC
 **Next milestone**: Deploy the hardened path, observe 14–30 days or 20 EU
 runs, and record the closeout evidence
 **Security impact**: `none`
@@ -62,6 +62,11 @@ None.
 - [x] Captured source payloads and targeted builder outputs: 641 suspicious
   source records, 596 completed builds, 35 builder exceptions, 59 horizon
   depth-order findings, and 10 valid controls (2026-08-19 20:46 UTC).
+- [x] Replayed the same seeded 1,000-cell campaign after hardening: 631
+  source-suspicious locations plus 20 controls were targeted; 345 `.sol`
+  files were valid and 306 locations returned structured
+  `ESDACSoilBuildError` diagnostics. No successful output had non-finite or
+  invalid-depth horizons (2026-08-20 00:16 UTC).
 - [x] Added a six-case Phase 1 fixture with one control, two output-order
   cases, a zero-valued STU case, and three builder exception classes; replay
   tests pass without EU geodata (2026-08-19 20:56 UTC).
@@ -137,6 +142,11 @@ None.
 - **2026-08-19 22:43 UTC** – Phase 5 downstream fixture validation completed;
   the canonical-parser validator passed valid/degraded/rejected cases and
   serialized water/depth/Ksat negative controls.
+- **2026-08-20 00:16 UTC** – Replayed the seeded 1,000-cell Phase 0 campaign
+  after hardening. The source screen selected 631 suspicious locations and 20
+  controls; 345 direct builds passed serialized horizon checks and 306 were
+  rejected with structured diagnostics. This run did not exercise NoDb or
+  WEPPcloud integration.
 - **Pending** – 50,000-sample campaign; deterministic fixture is accepted.
 - **Complete** – Quality contract and ADR-0043 ratified; Phase 4 production
   hardening implementation and focused tests completed.
@@ -315,7 +325,10 @@ entry points require the locations they are about to process.
   mutations; valid/degraded batches commit staged outputs and rejected batches
   retain a diagnostic report without committing new `.sol` files. Phase 6
   adds complete report coverage, source-key binding, canonical runtime
-  publication, and single/MOFE rollback tests.
+  publication, and single/MOFE rollback tests. The post-hardening direct
+  builder replay rejected 306 targeted locations explicitly and emitted 345
+  finite, ordered profiles; detailed evidence is in
+  `artifacts/phase0-post-hardening-1000-run.md`.
 - **Danger signals observed**: quality checks currently emphasize file
   creation; invalid-source outcomes are not structured; source screening
   found STU zeros/missing values and missing depth classes; full builds are
