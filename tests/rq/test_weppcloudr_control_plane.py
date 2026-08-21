@@ -225,7 +225,7 @@ def _controller(maximum: int = 2, now: list[float] | None = None):
     )
 
 
-def test_job_spec_is_fixed_hardened_and_run_wd_scoped() -> None:
+def test_job_spec_is_fixed_hardened_and_uses_root_squash_safe_mount() -> None:
     request = _request()
 
     spec, digest = build_job_spec(
@@ -251,6 +251,7 @@ def test_job_spec_is_fixed_hardened_and_run_wd_scoped() -> None:
     assert "fsGroup" not in pod["securityContext"]
     assert container["image"] == f"ghcr.io/open-wepp/weppcloudr@{IMAGE}"
     assert container["workingDir"] == request.run_root
+    assert container["args"][0] == "/wc1/.weppcloudr/requests/job-1.json"
     assert container["securityContext"] == {
         "allowPrivilegeEscalation": False,
         "readOnlyRootFilesystem": True,
@@ -258,6 +259,13 @@ def test_job_spec_is_fixed_hardened_and_run_wd_scoped() -> None:
         "seccompProfile": {"type": "RuntimeDefault"},
     }
     assert container["args"][-1] == "3"
+    assert container["volumeMounts"][0] == {
+        "name": "run",
+        "mountPath": "/wc1",
+    }
+    assert all("subPath" not in mount for mount in container["volumeMounts"])
+    assert [volume["name"] for volume in pod["volumes"]].count("run") == 1
+    assert "request" not in [volume["name"] for volume in pod["volumes"]]
     assert len(digest) == 64
 
 
@@ -310,7 +318,7 @@ def test_job_spec_rejects_unapproved_or_escaping_run_paths(
         )
 
 
-def test_job_spec_uses_explicit_pvc_mapping() -> None:
+def test_job_spec_validates_explicit_pvc_mapping_without_kubelet_subpaths() -> None:
     request = _request()
     spec, _digest = build_job_spec(
         request,
@@ -321,8 +329,9 @@ def test_job_spec_uses_explicit_pvc_mapping() -> None:
         request_subpath=".weppcloudr/requests/request.json",
     )
 
-    run_mount = spec["spec"]["template"]["spec"]["containers"][0]["volumeMounts"][0]
-    assert run_mount["subPath"] == "runs/ru/run-1"
+    container = spec["spec"]["template"]["spec"]["containers"][0]
+    assert container["workingDir"] == "/wc1/runs/ru/run-1"
+    assert container["volumeMounts"][0] == {"name": "run", "mountPath": "/wc1"}
 
 
 def test_submit_creates_once_binds_uid_and_reuses_receipt() -> None:
