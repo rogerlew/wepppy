@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-08-13
+**Last Updated**: 2026-08-21
 **Active Packages**: 25
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -74,6 +74,34 @@ Feedback mechanisms:
 ---
 
 ## 📋 Backlog
+
+### Climate Multiple-Build Finalize Lock
+
+**Proposed**: 2026-08-21
+
+**Size**: Medium (1-2 focused sessions plus review)
+
+**Priority**: High
+
+**Security impact**: `high` (RQ worker subprocess, run-tree persistence, and
+NoDb concurrency ownership)
+
+**Link**: [docs/work-packages/20260820_climate_finalize_lock/](docs/work-packages/20260820_climate_finalize_lock/)
+
+**Description**: Refactor GridMET and Daymet multiple-interpolated climate
+builds into an explicit collect-then-finalize pattern. Expensive work executes
+outside the Climate NoDb lock; a short finalizer reloads durable state,
+preserves unrelated rewrites, rejects relevant input changes, and commits only
+derived output fields without weakening stale-write detection.
+
+**Origin**: openWEPP canary job
+`a2d23f26-8386-433a-9df7-d5f3a03c8d96` completed GridMET/CLIGEN generation
+but failed its final same-size stale write on 2026-08-21.
+
+**Next Steps**: Ratify the minimal contract checkpoint, then add failing
+GridMET and Daymet interleaving regressions before implementation.
+
+---
 
 ### SBS USGS Section 508 Palette Adoption
 **Status**: In Progress — corrective contract checkpoint review
