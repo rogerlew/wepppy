@@ -380,6 +380,19 @@ def build_job_spec(
                 # fails during container init even though UID 1000 can access it.
                 # The renderer consumes absolute paths from the signed request.
                 "workingDir": "/tmp",
+                "env": [
+                    {
+                        "name": "TEMPLATE_ROOT",
+                        "value": "/srv/weppcloudr/templates/scripts/users/chinmay",
+                    },
+                    {
+                        "name": "DEVAL_TEMPLATE",
+                        "value": (
+                            "/srv/weppcloudr/templates/scripts/users/chinmay/"
+                            "new_report.Rmd"
+                        ),
+                    },
+                ],
                 "securityContext": hardened_container_security,
                 "resources": {
                     "requests": {
