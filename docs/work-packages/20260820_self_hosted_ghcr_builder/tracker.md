@@ -6,17 +6,16 @@
 
 **Started**: 2026-08-21
 
-**Current phase**: Implementation and integration complete / independent review pending
+**Current phase**: Closed
 
-**Next milestone**: Independent correctness and security review
+**Next milestone**: Canary deployment is tracked separately
 
 **Security impact**: `high`
 
 ## Task Board
 
-### Ready / Backlog
+### Follow-up
 
-- [ ] Complete independent correctness and security reviews.
 - [ ] Upgrade pinned Actions before GitHub removes the Node 20 compatibility
   shim.
 - [ ] Monitor the non-fatal BuildKit local-cache lock diagnostics and revise
@@ -40,6 +39,17 @@
   passed again (2026-08-21).
 - [x] Recorded the repeat digest and post-build cache/disk footprint
   (2026-08-21).
+- [x] Completed independent review; removed `remote-ci` from `runner-01` and
+  proved no pull-request selector can match its remaining labels (2026-08-21).
+- [x] Hardened cache parent/path canonicalization, ownership, mode, directory,
+  and symlink checks (2026-08-21).
+- [x] Proved corrupt-LFS, unavailable-builder, and failed-build negative paths
+  directly (2026-08-21).
+- [x] Cleared the previously shared BuildKit cache and completed hardened run
+  [32457043609](https://github.com/rogerlew/wepppy/actions/runs/32457043609)
+  with cache promotion and digest reporting (2026-08-21).
+- [x] Completed independent re-review with no unresolved medium/high findings
+  (2026-08-21).
 
 ## Decisions
 
@@ -59,7 +69,7 @@
 | Untrusted PR code executes on persistent runner | High | No PR trigger; dedicated label; review workflow changes | Mitigated |
 | Missing/corrupt cached LFS object enters image | High | Fetch current SHA, `git lfs fsck`, tracked-asset verifier | Mitigated |
 | Concurrent builds corrupt local cache rotation | Medium | Workflow-level non-cancelling concurrency group | Mitigated |
-| Cache fills 98 GB root filesystem | Medium | Record baseline; inspect disk after integration build | Open |
+| Cache fills 98 GB root filesystem | Medium | Record baseline and post-build use; monitor routinely | Mitigated; 73 GB free |
 | Runner loss blocks publication | Medium | Revert to GitHub-hosted runner or prepare runner-02 | Accepted |
 | Pinned Actions still target Node 20 | Low | GitHub currently forces Node 24; upgrade pins before compatibility removal | Open |
 | BuildKit local exporter emits transient layer-lock diagnostics | Low | Both builds, cache promotion, and repeat reuse succeeded; monitor | Open |
@@ -79,3 +89,16 @@
 - [x] Repeat published
   `sha256:fdc600987cc1d2e5a04a13b566a328b33555beb314b65c1d212c21e83e702960`.
 - [x] Post-build cache is 2.6 GB BuildKit plus 1.2 GB LFS; root has 73 GB free.
+- [x] API readback shows `runner-01` has no `remote-ci` or `homelab` label.
+- [x] Parsed all `pull_request` and `pull_request_target` selectors; none can
+  match `runner-01`'s remaining labels.
+- [x] Disposable corrupted LFS object produced `corruptObject` and exit 1.
+- [x] Missing-label run 32455822980 remained queued with zero steps and no
+  fallback runner.
+- [x] Forced-failure run 32455885190 skipped cache promotion; the prior cache
+  index remained `13f98ae12e8fec7cd8a757bbedb056dd442337280b2791037ad6073282b99d49`.
+- [x] Fresh-cache run 32456245898 exposed an overly strict first-promotion
+  check; commit `151f6a821` corrected it before closure.
+- [x] Final run 32457043609 passed all steps, retained cache mode `0700`, and
+  published
+  `sha256:02e57f4e1a47dc315d3f01fe6b1ce86e7bec6b7d05b6b8e04f4b5b39a7089593`.

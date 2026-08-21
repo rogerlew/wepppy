@@ -1,6 +1,6 @@
 # Self-Hosted GHCR Builder
 
-**Status**: Open - implementation and integration complete; independent review pending (2026-08-21)
+**Status**: Closed (2026-08-21)
 **Timezone**: UTC
 
 ## Overview
@@ -40,7 +40,7 @@ objects and changed build layers.
 - [x] Static workflow and runner-side cache-path validation pass.
 - [x] A trusted integration publication succeeds after the Climate finalizer.
 - [x] A second no-source-change build demonstrates LFS and BuildKit reuse.
-- [ ] No unresolved medium/high correctness or security findings remain.
+- [x] No unresolved medium/high correctness or security findings remain.
 
 ## Security Impact and Review Gate
 
@@ -77,6 +77,17 @@ objects and changed build layers.
   `sha256:fdc600987cc1d2e5a04a13b566a328b33555beb314b65c1d212c21e83e702960`.
 - Post-build cache footprint: 2.6 GB BuildKit plus 1.2 GB LFS; runner root
   filesystem has 73 GB free (22% used).
+- Independent review initially found that `runner-01` could also accept
+  pull-request jobs through its `remote-ci` label. The label was removed, all
+  PR selectors were checked against the remaining labels, the potentially
+  exposed BuildKit cache was discarded, and a clean trusted image was built.
+- Final hardened run
+  [32457043609](https://github.com/rogerlew/wepppy/actions/runs/32457043609)
+  passed end to end at source `151f6a8216068b61dcc769c5b5bdae3f5fcc127e`.
+  It published immutable digest
+  `sha256:02e57f4e1a47dc315d3f01fe6b1ce86e7bec6b7d05b6b8e04f4b5b39a7089593`.
+- Direct negative tests proved corrupt LFS rejection, no runner fallback when
+  the dedicated label is absent, and no cache promotion after a failed build.
 - Rollback: restore `runs-on: ubuntu-24.04` and remove the local cache options;
   removing the GitHub runner label is independently reversible.
 
@@ -90,3 +101,11 @@ objects and changed build layers.
 - `.github/workflows/publish-weppcloud-image.yml`
 - `.github/workflows/AGENTS.md`
 - `tools/verify_lfs_materialized.py`
+
+## Closure Summary
+
+The dedicated builder, persistent verified LFS store, guarded BuildKit cache,
+trusted trigger boundary, negative-path evidence, and final publication are
+complete. Independent correctness and security review found no unresolved
+medium/high findings. Node 20 Action compatibility and routine cache-capacity
+monitoring remain low-priority operational follow-ups.

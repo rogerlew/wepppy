@@ -381,33 +381,6 @@ When resuming Kubernetes work:
 
 ## 🚧 In Progress
 
-### Self-Hosted GHCR Builder
-
-**Started**: 2026-08-21
-
-**Size**: Small-Medium
-
-**Priority**: High
-
-**Security impact**: `high` (persistent self-hosted runner with GHCR package-write permission)
-
-**Link**: [docs/work-packages/20260820_self_hosted_ghcr_builder/](docs/work-packages/20260820_self_hosted_ghcr_builder/)
-
-**Description**: Route trusted WEPPcloud common-image publication to
-`runner-01`, reuse a locally seeded LFS object store, and retain BuildKit layers
-between builds. Public pull-request jobs remain excluded from the dedicated
-runner label.
-
-**Progress**: The merged Climate finalizer source was published successfully on
-`runner-01`; a same-source repeat reduced runtime from 10m05s to 4m39s while
-reusing all expensive BuildKit layers and the persistent LFS object store.
-
-**Next Steps**: Complete independent correctness/security review, upgrade the
-pinned Actions before Node 20 compatibility is removed, and monitor the
-non-fatal BuildKit local-cache lock diagnostics.
-
----
-
 ### EU Disturbed Soil Building Data-Quality Hardening
 
 **Started**: 2026-08-19
@@ -1088,6 +1061,22 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### Self-Hosted GHCR Builder
+
+**Completed**: 2026-08-21
+**Status**: ✅ **COMPLETE**
+**Security impact**: `high`
+**Link**: [docs/work-packages/20260820_self_hosted_ghcr_builder/](docs/work-packages/20260820_self_hosted_ghcr_builder/)
+
+**Summary**: Dedicated `runner-01` to trusted GHCR publication with persistent
+verified LFS and guarded BuildKit caches. Independent review found and
+remediated unintended pull-request eligibility, discarded the exposed cache,
+and required direct negative-path evidence. Hardened run 32457043609 passed and
+published a digest-qualified image. Node 20 Action upgrades and routine cache
+monitoring remain low-priority follow-ups.
+
+---
 
 ### RQ Job ID Canonicalization and Dashboard Compatibility
 
