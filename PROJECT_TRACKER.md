@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-08-21
-**Active Packages**: 26
+**Active Packages**: 27
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 25 packages (above target range; calculated from the 25 package entries in the In Progress section)
+**Current WIP**: 26 packages (above target range; calculated from the 26 package entries in the In Progress section)
 
 ### 3. Manage Flow
 Monitor how long packages spend in each column:
@@ -353,6 +353,32 @@ When resuming Kubernetes work:
 
 ## 🚧 In Progress
 
+### WEPPcloudR Execution Backend Refactor
+
+**Started**: 2026-08-21
+
+**Size**: Large (3-6 focused sessions plus independent review)
+
+**Priority**: High
+
+**Security impact**: `high` (RQ execution, subprocess/file boundaries, future
+Kubernetes authority, cancellation, and logging)
+
+**Link**: [docs/work-packages/20260821_weppcloudr_execution_backend_refactor/](docs/work-packages/20260821_weppcloudr_execution_backend_refactor/)
+
+**Description**: Implement the deployment-neutral WEPPcloudR render contract
+behind explicit Docker-exec and Kubernetes-Job backends while preserving the
+current Compose topology and mounts. Repository-side Kubernetes orchestration
+and one-shot renderer interfaces are included; image building and deployment
+are a separate package.
+
+**Status**: Package, active ExecPlan, and pending review gates scaffolded;
+implementation has not started. Closure requires an authorized forest
+development-stack restart and successful Docker-exec DEVAL render for
+`branching-hubbub/disturbed9002_wbt` with before/after mount evidence.
+
+---
+
 ### Direct OpenFileGDB Cutover
 
 **Started**: 2026-08-21
@@ -581,7 +607,7 @@ authentication tokens from logs, restore persistent security logging under
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 23 packages (calculated from the In Progress section)
+**Current WIP Count**: 24 packages (calculated from the In Progress section)
 
 ### SSURGO Intelligent Fallback Empirical Study
 **Started**: 2026-07-21
