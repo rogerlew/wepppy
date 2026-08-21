@@ -50,6 +50,9 @@ The script:
 
 - `runner-01` is the dedicated persistent common-image builder and carries the
   custom `ghcr-builder` label.
+- Do not assign `remote-ci`, `homelab`, or another general workload label to
+  `runner-01`. Its only custom workload labels are `wepppy` and
+  `ghcr-builder`; no pull-request workflow may match the complete label set.
 - The runner keeps Git LFS objects in `/home/roger/.cache/wepppy-lfs` and local
   BuildKit exports in `/home/roger/.cache/wepppy-buildx`.
 - Keep public-repository pull-request jobs off this label. The publishing

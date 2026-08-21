@@ -35,9 +35,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          test "$(realpath -e /home/roger/.cache)" = "/home/roger/.cache"
+          test "$(stat -c '%U:%a' /home/roger/.cache)" = "$(id -un):700"
           test ! -L "${WEPPPY_LFS_STORAGE}"
           mkdir -p "${WEPPPY_LFS_STORAGE}/objects"
           chmod 700 "${WEPPPY_LFS_STORAGE}"
+          test "$(realpath -e "${WEPPPY_LFS_STORAGE}")" = "${WEPPPY_LFS_STORAGE}"
           test "$(stat -c '%U' "${WEPPPY_LFS_STORAGE}")" = "$(id -un)"
 
       - name: Check out the dispatched source commit
@@ -82,8 +85,16 @@ jobs:
           set -euo pipefail
           test "${WEPPPY_BUILDX_CACHE}" = "/home/roger/.cache/wepppy-buildx"
           test "${WEPPPY_BUILDX_CACHE_NEXT}" = "/home/roger/.cache/wepppy-buildx-next"
-          test ! -L "${WEPPPY_BUILDX_CACHE}"
-          test ! -L "${WEPPPY_BUILDX_CACHE_NEXT}"
+          test "$(realpath -e /home/roger/.cache)" = "/home/roger/.cache"
+          test "$(stat -c '%U:%a' /home/roger/.cache)" = "$(id -un):700"
+          for cache_path in "${WEPPPY_BUILDX_CACHE}" "${WEPPPY_BUILDX_CACHE_NEXT}"; do
+            if test -e "${cache_path}" || test -L "${cache_path}"; then
+              test -d "${cache_path}"
+              test ! -L "${cache_path}"
+              test "$(realpath -e "${cache_path}")" = "${cache_path}"
+              test "$(stat -c '%U' "${cache_path}")" = "$(id -un)"
+            fi
+          done
           rm -rf -- "${WEPPPY_BUILDX_CACHE_NEXT}"
           if test -f "${WEPPPY_BUILDX_CACHE}/index.json"; then
             echo "cache-from=type=local,src=${WEPPPY_BUILDX_CACHE}" >> "${GITHUB_OUTPUT}"
@@ -125,10 +136,18 @@ jobs:
           set -euo pipefail
           test -d "${WEPPPY_BUILDX_CACHE_NEXT}"
           test "${WEPPPY_BUILDX_CACHE}" = "/home/roger/.cache/wepppy-buildx"
-          test ! -L "${WEPPPY_BUILDX_CACHE}"
-          test ! -L "${WEPPPY_BUILDX_CACHE_NEXT}"
+          test "${WEPPPY_BUILDX_CACHE_NEXT}" = "/home/roger/.cache/wepppy-buildx-next"
+          test "$(realpath -e /home/roger/.cache)" = "/home/roger/.cache"
+          test "$(stat -c '%U:%a' /home/roger/.cache)" = "$(id -un):700"
+          for cache_path in "${WEPPPY_BUILDX_CACHE}" "${WEPPPY_BUILDX_CACHE_NEXT}"; do
+            test -d "${cache_path}"
+            test ! -L "${cache_path}"
+            test "$(realpath -e "${cache_path}")" = "${cache_path}"
+            test "$(stat -c '%U' "${cache_path}")" = "$(id -un)"
+          done
           rm -rf -- "${WEPPPY_BUILDX_CACHE}"
           mv -- "${WEPPPY_BUILDX_CACHE_NEXT}" "${WEPPPY_BUILDX_CACHE}"
+          chmod 700 "${WEPPPY_BUILDX_CACHE}"
 
       - name: Report immutable image digest
         shell: bash
