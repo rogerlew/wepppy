@@ -363,8 +363,14 @@ def build_job_spec(
                 "name": "renderer",
                 "image": renderer_image,
                 "imagePullPolicy": "IfNotPresent",
-                "command": ["Rscript", "/srv/weppcloudr/render-request-v1.R"],
+                "command": ["/bin/sh", "-c"],
                 "args": [
+                    (
+                        'cd -- "$1" && exec Rscript '
+                        '/srv/weppcloudr/render-request-v1.R "$2" "$3" "$4"'
+                    ),
+                    "weppcloudr-entrypoint",
+                    request.run_root,
                     "/run/weppcloudr/request.json",
                     request_digest,
                     str(fencing_generation),

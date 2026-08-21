@@ -251,7 +251,18 @@ def test_job_spec_is_fixed_hardened_and_uses_root_squash_safe_mount() -> None:
     assert "fsGroup" not in pod["securityContext"]
     assert container["image"] == f"ghcr.io/open-wepp/weppcloudr@{IMAGE}"
     assert container["workingDir"] == "/tmp"
-    assert container["args"][0] == "/run/weppcloudr/request.json"
+    assert container["command"] == ["/bin/sh", "-c"]
+    assert container["args"] == [
+        (
+            'cd -- "$1" && exec Rscript '
+            '/srv/weppcloudr/render-request-v1.R "$2" "$3" "$4"'
+        ),
+        "weppcloudr-entrypoint",
+        request.run_root,
+        "/run/weppcloudr/request.json",
+        request.digest,
+        "3",
+    ]
     assert container["securityContext"] == {
         "allowPrivilegeEscalation": False,
         "readOnlyRootFilesystem": True,
