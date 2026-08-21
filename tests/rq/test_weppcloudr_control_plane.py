@@ -243,6 +243,12 @@ def test_job_spec_is_fixed_hardened_and_run_wd_scoped() -> None:
     assert job["backoffLimit"] == 0
     assert "ttlSecondsAfterFinished" not in job
     assert pod["automountServiceAccountToken"] is False
+    assert pod["securityContext"] == {
+        "runAsNonRoot": True,
+        "runAsUser": 1000,
+        "runAsGroup": 993,
+    }
+    assert "fsGroup" not in pod["securityContext"]
     assert container["image"] == f"ghcr.io/open-wepp/weppcloudr@{IMAGE}"
     assert container["workingDir"] == request.run_root
     assert container["securityContext"] == {
