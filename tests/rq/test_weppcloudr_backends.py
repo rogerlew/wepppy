@@ -332,6 +332,23 @@ def test_one_shot_renderer_has_strict_fixed_request_contract() -> None:
     assert "Sys.readlink(final_output) !=" not in source
 
 
+def test_weppcloudr_uses_checksum_pinned_local_fontawesome() -> None:
+    dockerfile = (REPO_ROOT / "weppcloudR/Dockerfile").read_text(encoding="utf-8")
+    renderer = (REPO_ROOT / "weppcloudR/plumber.R").read_text(encoding="utf-8")
+    templates = list((REPO_ROOT / "weppcloudR/templates").rglob("*.Rmd"))
+
+    expected = "8cb270b4d9485a93b31df98113fda8723ffc067fa7bfa90cedd47b76f7b10be1"
+    assert expected in dockerfile
+    assert expected in renderer
+    assert "/srv/weppcloudr/vendor/fontawesome/5.3.1/all.js" in renderer
+    assert "use_fontawesome = FALSE" in renderer
+    assert "local_fontawesome_header" in renderer
+    assert all(
+        "use_fontawesome: true" not in path.read_text(encoding="utf-8")
+        for path in templates
+    )
+
+
 def test_fenced_publisher_preserves_foreign_staging_file_and_retry_succeeds(
     tmp_path: Path,
 ) -> None:

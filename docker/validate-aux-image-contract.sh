@@ -84,6 +84,12 @@ case "${service}" in
     curl -fsS "http://127.0.0.1:${host_port}/cap/assets/widget.js" >/dev/null
     ;;
   weppcloudr)
+    fontawesome_digest=$(
+      docker run --rm --network none --entrypoint sha256sum "${image}" \
+        /srv/weppcloudr/vendor/fontawesome/5.3.1/all.js \
+        | awk '{print $1}'
+    )
+    [[ "${fontawesome_digest}" == "8cb270b4d9485a93b31df98113fda8723ffc067fa7bfa90cedd47b76f7b10be1" ]]
     docker run -d --name "${container}" --read-only \
       --tmpfs /tmp:rw,nosuid,nodev \
       --tmpfs /opt/weppcloudr/renv/cache:rw,nosuid,nodev \

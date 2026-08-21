@@ -5,7 +5,7 @@ output:
   cleanrmd::html_document_clean:
     theme: axist
     mathjax: default
-    use_fontawesome: true
+    use_fontawesome: false
     toc: true
     toc_float: true
 params:
@@ -505,4 +505,3 @@ merged_daily_df %>%
 # wbmap
 # wbtab
 ```
-

@@ -17,6 +17,41 @@ PROFILE_PLAYBACK_FORK_ROOT <- Sys.getenv("PROFILE_PLAYBACK_FORK_ROOT", file.path
 PROFILE_PLAYBACK_ARCHIVE_ROOT <- Sys.getenv("PROFILE_PLAYBACK_ARCHIVE_ROOT", file.path(PROFILE_PLAYBACK_BASE, "archive"))
 TEMPLATE_ROOT <- Sys.getenv("TEMPLATE_ROOT", "/srv/weppcloudr/templates")
 DEFAULT_TEMPLATE <- Sys.getenv("DEVAL_TEMPLATE", file.path(TEMPLATE_ROOT, "new_report.Rmd"))
+FONTAWESOME_JS <- Sys.getenv(
+  "FONTAWESOME_JS",
+  "/srv/weppcloudr/vendor/fontawesome/5.3.1/all.js"
+)
+FONTAWESOME_SHA256 <- "8cb270b4d9485a93b31df98113fda8723ffc067fa7bfa90cedd47b76f7b10be1"
+
+fontawesome_header <- function() {
+  if (!file.exists(FONTAWESOME_JS) || file.info(FONTAWESOME_JS)$isdir) {
+    stop("vendored Font Awesome asset is unavailable")
+  }
+  link_target <- Sys.readlink(FONTAWESOME_JS)
+  if (!is.na(link_target) && nzchar(link_target)) {
+    stop("vendored Font Awesome asset must not be a symlink")
+  }
+  digest_output <- system2(
+    "sha256sum",
+    shQuote(FONTAWESOME_JS),
+    stdout = TRUE,
+    stderr = TRUE
+  )
+  if (!is.null(attr(digest_output, "status")) && attr(digest_output, "status") != 0L) {
+    stop("could not verify vendored Font Awesome asset")
+  }
+  digest <- strsplit(digest_output[[1L]], "[[:space:]]+")[[1L]][[1L]]
+  if (!identical(digest, FONTAWESOME_SHA256)) {
+    stop("vendored Font Awesome asset checksum mismatch")
+  }
+  header <- tempfile(pattern = "fontawesome-5.3.1-", fileext = ".html")
+  writeLines(
+    c("<script>", readLines(FONTAWESOME_JS, warn = FALSE), "</script>"),
+    header,
+    useBytes = TRUE
+  )
+  header
+}
 
 resolve_batch_run_root <- function(batch_name, runid) {
   batch_dir <- file.path(BATCH_ROOT, batch_name)
@@ -268,6 +303,8 @@ render_deval <- function(run_path, runid, config = NULL, skip_cache = FALSE, par
     append_log("INFO", glue("Cache bypass requested for run {runid}; regenerating report"))
   }
   append_log("INFO", glue("Starting render for run {runid}"))
+  local_fontawesome_header <- fontawesome_header()
+  on.exit(unlink(local_fontawesome_header, force = TRUE), add = TRUE)
   render_target <- output_file
   publish_after_render <- is.null(output_file_override)
   if (publish_after_render) {
@@ -285,6 +322,10 @@ render_deval <- function(run_path, runid, config = NULL, skip_cache = FALSE, par
         params = params,
         output_file = render_target,
         output_dir = dirname(render_target),
+        output_options = list(
+          use_fontawesome = FALSE,
+          includes = list(in_header = local_fontawesome_header)
+        ),
         # The production image has a read-only root filesystem. Keep all knit
         # intermediates in the pod-local writable tmpfs; only the fenced final
         # artifact is published to the run directory.
