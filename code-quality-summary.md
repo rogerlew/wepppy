@@ -1,7 +1,7 @@
 # Code Quality Observability Report
 
 - Mode: `observe-only` (non-blocking)
-- Generated (UTC): `2026-08-09T06:09:46Z`
+- Generated (UTC): `2026-08-21T19:47:43Z`
 - Base ref: `origin/master`
 
 ## Threshold Bands
@@ -27,8 +27,8 @@
 
 | Distribution | Count | p50 | p75 | p90 | p95 | p99 | Max |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| `python_prod_file_sloc` | 952 | 124.0 | 300.25 | 679.9 | 985.15 | 2007.33 | 5697.0 |
-| `python_prod_max_function_len` | 770 | 58.0 | 109.0 | 182.0 | 238.75 | 355.1 | 2126.0 |
+| `python_prod_file_sloc` | 957 | 126.0 | 308.0 | 679.4 | 983.4 | 2051.64 | 5697.0 |
+| `python_prod_max_function_len` | 775 | 59.0 | 109.0 | 182.0 | 241.3 | 378.78 | 2126.0 |
 | `python_prod_max_cc` | 0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 |
 | `js_source_file_sloc` | 201 | 252.0 | 572.0 | 1238.0 | 1586.0 | 2426.0 | 2835.0 |
 | `js_source_max_cc` | 201 | 6.0 | 21.0 | 33.0 | 44.0 | 86.0 | 155.0 |
@@ -48,9 +48,9 @@ _No changed-file analysis available (base ref missing or no analyzable files cha
 | `tests/weppcloud/routes/test_pure_controls_render.py` | 3549 |
 | `tests/nodb/mods/test_features_export_service.py` | 3251 |
 | `tests/nodb/mods/test_roads_controller.py` | 3240 |
-| `wepppy/nodb/mods/features_export/service.py` | 3022 |
+| `wepppy/nodb/mods/features_export/service.py` | 3026 |
 | `tests/nodb/mods/test_omni.py` | 2929 |
-| `wepppy/rq/project_rq.py` | 2690 |
+| `wepppy/rq/project_rq.py` | 2695 |
 | `wepppy/wepp/management/managements.py` | 2548 |
 | `wepppy/nodb/core/wepp.py` | 2430 |
 
@@ -65,9 +65,9 @@ _No changed-file analysis available (base ref missing or no analyzable files cha
 | `wepppy/nodb/mods/path_ce/data_prep.py` | 541 |
 | `wepppy/wepp/fuzzing/single_ofe_stratified_campaign.py` | 528 |
 | `wepppy/microservices/rq_engine/orchestration_read_routes.py` | 460 |
+| `wepppy/eu/soils/esdac/esdac.py` | 389 |
 | `wepppy/nodb/mods/ash_transport/neris_ash_model.py` | 381 |
-| `wepppy/nodb/core/landuse.py` | 362 |
-| `wepppy/rq/wepp_rq_pipeline.py` | 352 |
+| `wepppy/nodb/mods/disturbed/disturbed.py` | 378 |
 
 ### `python_max_cc_top20`
 

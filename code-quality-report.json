@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-08-09T06:09:46Z",
+  "generated_at_utc": "2026-08-21T19:47:43Z",
   "mode": "observe-only",
   "base_ref": "origin/master",
   "thresholds": {
@@ -37,21 +37,21 @@
   },
   "overall": {
     "python_prod_file_sloc": {
-      "count": 952.0,
-      "p50": 124.0,
-      "p75": 300.25,
-      "p90": 679.9,
-      "p95": 985.15,
-      "p99": 2007.33,
+      "count": 957.0,
+      "p50": 126.0,
+      "p75": 308.0,
+      "p90": 679.4,
+      "p95": 983.4,
+      "p99": 2051.64,
       "max": 5697.0
     },
     "python_prod_max_function_len": {
-      "count": 770.0,
-      "p50": 58.0,
+      "count": 775.0,
+      "p50": 59.0,
       "p75": 109.0,
       "p90": 182.0,
-      "p95": 238.75,
-      "p99": 355.1,
+      "p95": 241.3,
+      "p99": 378.78,
       "max": 2126.0
     },
     "python_prod_max_cc": {
@@ -106,7 +106,7 @@
       },
       {
         "path": "wepppy/nodb/mods/features_export/service.py",
-        "value": 3022.0
+        "value": 3026.0
       },
       {
         "path": "tests/nodb/mods/test_omni.py",
@@ -114,7 +114,7 @@
       },
       {
         "path": "wepppy/rq/project_rq.py",
-        "value": 2690.0
+        "value": 2695.0
       },
       {
         "path": "wepppy/wepp/management/managements.py",
@@ -123,6 +123,10 @@
       {
         "path": "wepppy/nodb/core/wepp.py",
         "value": 2430.0
+      },
+      {
+        "path": "wepppy/nodb/mods/disturbed/disturbed.py",
+        "value": 2345.0
       },
       {
         "path": "wepppy/climates/cligen/cligen.py",
@@ -149,20 +153,16 @@
         "value": 1999.0
       },
       {
+        "path": "wepppy/nodb/core/soils.py",
+        "value": 1959.0
+      },
+      {
         "path": "tests/microservices/test_browse_auth_routes.py",
         "value": 1951.0
       },
       {
-        "path": "wepppy/nodb/core/soils.py",
-        "value": 1943.0
-      },
-      {
-        "path": "wepppy/nodb/mods/disturbed/disturbed.py",
-        "value": 1939.0
-      },
-      {
-        "path": "wepppy/nodb/core/landuse.py",
-        "value": 1899.0
+        "path": "tests/rq/test_project_rq_fork.py",
+        "value": 1921.0
       }
     ],
     "python_max_function_len_top20": [
@@ -195,8 +195,16 @@
         "value": 460.0
       },
       {
+        "path": "wepppy/eu/soils/esdac/esdac.py",
+        "value": 389.0
+      },
+      {
         "path": "wepppy/nodb/mods/ash_transport/neris_ash_model.py",
         "value": 381.0
+      },
+      {
+        "path": "wepppy/nodb/mods/disturbed/disturbed.py",
+        "value": 378.0
       },
       {
         "path": "wepppy/nodb/core/landuse.py",
@@ -223,10 +231,6 @@
         "value": 320.0
       },
       {
-        "path": "wepppy/nodb/mods/disturbed/disturbed.py",
-        "value": 314.0
-      },
-      {
         "path": "wepppy/weppcloud/routes/weppcloud_site.py",
         "value": 312.0
       },
@@ -241,10 +245,6 @@
       {
         "path": "wepppy/nodb/mods/ash_transport/ashpost.py",
         "value": 301.0
-      },
-      {
-        "path": "wepppy/nodb/mods/rusle/k_integration.py",
-        "value": 300.0
       }
     ],
     "python_max_cc_top20": [],

@@ -1,8 +1,8 @@
 # WEPPcloudR Execution Backend Refactor Tracker
 
-**Status**: In Progress — scaffolded; implementation not started
-**Last updated**: 2026-08-21 18:04 UTC
-**Active ExecPlan**: [prompts/active/weppcloudr_execution_backend_refactor_execplan.md](prompts/active/weppcloudr_execution_backend_refactor_execplan.md)
+**Status**: Complete — repository scope and forest Compose proof passed
+**Last updated**: 2026-08-21 21:05 UTC
+**Completed ExecPlan**: [prompts/completed/weppcloudr_execution_backend_refactor_execplan.md](prompts/completed/weppcloudr_execution_backend_refactor_execplan.md)
 
 ## Scope Guardrails
 
@@ -17,14 +17,15 @@
 
 - [x] Canonical execution contract ratified.
 - [x] Work package and active ExecPlan scaffolded.
-- [ ] Capture baseline Compose source/rendered mounts and focused test behavior.
-- [ ] Refactor shared request validation and the Compose backend.
-- [ ] Implement repository-side Kubernetes Job orchestration and one-shot R
+- [x] Capture baseline Compose source/rendered mounts and focused test behavior.
+- [x] Refactor shared request validation and the Compose backend.
+- [x] Implement repository-side Kubernetes Job orchestration and one-shot R
   renderer surfaces with deterministic tests.
-- [ ] Update RQ graph/catalog, stubs, and operator/developer documentation.
-- [ ] Pass focused and broad validation gates.
-- [ ] Complete independent correctness, QA, and security reviews.
-- [ ] Restart the authorized forest development stack and capture successful
+- [x] Update RQ graph/catalog, stubs, and operator/developer documentation.
+- [x] Pass focused/package validation gates and run the broad suite through the
+  documented unrelated baseline stops.
+- [x] Complete independent correctness, QA, and security reviews.
+- [x] Restart the authorized forest development stack and capture successful
   Docker-exec DEVAL evidence for the designated run.
 
 ## Decisions
@@ -45,30 +46,31 @@
 
 | Risk | Control | State |
 |---|---|---|
-| Compose render regression | Characterization tests plus authorized forest proof | Open |
-| Mount or working-directory drift | Source and rendered-mount snapshots before/after | Open |
-| Backend fallback crosses trust boundary | Explicit enum and fail-closed selection tests | Open |
-| Stale completion overwrites newer output | Lock/fencing and receipt-state tests | Open |
-| Paths escape the run WD through symlinks | Canonical path validation with expected PUP coverage | Open |
+| Compose render regression | Characterization tests plus authorized forest proof | Controlled |
+| Mount or working-directory drift | Source and rendered-mount snapshots before/after | Controlled |
+| Backend fallback crosses trust boundary | Explicit enum and fail-closed selection tests | Controlled |
+| Stale completion overwrites newer output | Lock/fencing and receipt-state tests | Controlled |
+| Paths escape the run WD through symlinks | Canonical path validation with expected PUP coverage | Controlled |
 | Kubernetes code is mistaken for deployed capability | Separate acceptance language and follow-up package | Controlled |
-| Forest has overlapping local changes | Read-only preflight; stop on overlap | Open |
+| Forest has overlapping local changes | Read-only preflight; no deployment-file overlap found | Controlled |
 
 ## Validation Ledger
 
 | Gate | Evidence | Status |
 |---|---|---|
-| Focused pytest | `tests/rq/test_weppcloudr_rq.py`, route coverage | Pending |
-| RQ dependency graph | `wctl check-rq-graph` | Pending |
-| Stubs/API | targeted stub checks and `wctl check-test-stubs` | Pending |
-| Broad pytest | `wctl run-pytest tests --maxfail=1` | Pending |
-| Exception policy | changed-file broad-exception enforcement | Pending |
-| Documentation | package and affected docs lint | Pending |
-| Correctness review | `artifacts/2026-08-21_correctness_review.md` | Pending |
-| QA review | `artifacts/2026-08-21_qa_review.md` | Pending |
-| Security review | `artifacts/2026-08-21_security_review.md` | Pending |
-| Forest Compose integration | job, logs, artifact, backend, and mount evidence | Pending |
+| Focused pytest | 139 focused tests | Pass |
+| RQ dependency graph | `wctl check-rq-graph` | Pass |
+| Stubs/API | three stubtests and `wctl check-test-stubs` | Pass |
+| Broad pytest | Package tests passed; rerun reached 4,593 passed / 61 skipped before unrelated Topanga cwd failure; canonical run stops earlier at nested-Compose canary | Baseline-limited |
+| Exception policy | changed-file broad-exception enforcement | Pass |
+| Documentation | package and affected docs lint | Pass |
+| Correctness review | `artifacts/2026-08-21_correctness_review.md` | Pass |
+| QA review | `artifacts/2026-08-21_qa_review.md` | Pass |
+| Security review | `artifacts/2026-08-21_security_review.md` | Pass |
+| Forest Compose integration | `artifacts/2026-08-21_forest_compose_integration.md` | Pass |
 
-## Blockers
+## Deferred Deployment Boundary
 
-None at scaffold time. Live Kubernetes validation is intentionally deferred and
-is not a blocker for this package's defined scope.
+Live Kubernetes validation and deployment adapters are intentionally deferred
+and were not blockers for this package's defined repository scope.
+`kubernetes-job` remains disabled until that separate package completes.

@@ -36,6 +36,22 @@ Environment variables:
   R Markdown report and returns HTML. Automatically creates
   `<run>/export/WEPPcloudR/` when absent.
 
+## One-shot renderer
+
+Kubernetes Jobs use `render-request-v1.R`, not the Plumber entrypoint. The
+controller mounts one immutable request at `/run/weppcloudr/request.json`,
+passes its independently trusted SHA-256 digest, and starts the process with
+the canonical run WD as its working directory. The script rejects unknown
+fields, mismatched paths/digests, and invalid identifiers, renders to a
+generation-unique temporary file, then atomically publishes the final HTML.
+
+The source is included in the standalone WEPPcloudR image, but this repository
+change does not build, publish, or deploy that image. The Kubernetes deployment
+must provide the reviewed fixed entrypoint, read-only root filesystem,
+run-scoped PVC mount, read-only geodata, resource/security context, and disabled
+service-account token described by
+`docs/schemas/weppcloudr-render-execution-contract.md`.
+
 ## Next Steps
 
 - Implement JWT validation when the Flask redirect starts forwarding

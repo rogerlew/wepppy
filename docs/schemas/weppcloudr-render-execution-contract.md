@@ -206,6 +206,10 @@ authority.
   timestamps, and bounded-log references. A same-RQ-ID requeue resumes
   reconciliation only. A terminal renderer failure is not automatically
   retried; a new render attempt receives a new RQ job ID.
+- Receipt-to-RQ event delivery MUST be durably acknowledged only after the
+  event sink accepts the exact receipt state. A cleaned receipt with an
+  unacknowledged event remains reaper-eligible, so a delivery outage cannot
+  lose terminal or stop coordination and cannot starve later receipts.
 
 ### Storage and Paths
 

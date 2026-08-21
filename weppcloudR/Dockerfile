@@ -46,6 +46,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libproj-dev \
         libudunits2-dev \
         libsqlite3-dev \
+        python3 \
     && rm -rf /var/lib/apt/lists/*
 
 # Install R packages directly from RSPM. The current pak release no longer
@@ -61,7 +62,8 @@ RUN R -q -e "options(repos = c(CRAN = Sys.getenv('RSPM'))); install.packages(c( 
 
 WORKDIR /srv/weppcloudr
 
-COPY weppcloudR/plumber.R weppcloudR/docker-entrypoint.R /srv/weppcloudr/
+COPY weppcloudR/plumber.R weppcloudR/docker-entrypoint.R weppcloudR/render-compose-request.R weppcloudR/render-request-v1.R weppcloudR/publish_fenced.py /srv/weppcloudr/
+RUN chmod 0555 /srv/weppcloudr/publish_fenced.py
 COPY weppcloudR/templates /srv/weppcloudr/templates
 
 RUN groupadd --gid "${APP_GID}" weppcloudr && \

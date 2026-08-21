@@ -398,6 +398,37 @@ def test_canceljob_accepts_valid_token(monkeypatch: pytest.MonkeyPatch) -> None:
     assert response.json() == {"status": "ok", "job_id": "job-3"}
 
 
+@pytest.mark.parametrize("code", ["cleanup_pending", "cleanup_timeout"])
+def test_canceljob_reports_kubernetes_cleanup_state_as_conflict(
+    monkeypatch: pytest.MonkeyPatch,
+    code: str,
+) -> None:
+    monkeypatch.setattr(rq_auth, "_check_revocation", lambda jti: None)
+    token = _issue_rq_token(
+        monkeypatch,
+        extra_claims={"token_class": "service", "runs": ["run-1"]},
+    )
+    monkeypatch.setattr(
+        job_routes,
+        "get_wepppy_rq_job_info",
+        lambda job_id: {"job_id": job_id, "status": "started", "runid": "run-1"},
+    )
+    monkeypatch.setattr(
+        job_routes,
+        "cancel_jobs",
+        lambda _job_id, **_kwargs: {"error": "cleanup incomplete", "code": code},
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/canceljob/job-k8s",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+
+    assert response.status_code == 409
+    assert response.json()["error"]["code"] == code
+
+
 @pytest.mark.parametrize(
     ("roles", "allow_started"),
     [([], False), (["Admin"], True), (["Root"], True), ([{"name": "Admin"}], True)],

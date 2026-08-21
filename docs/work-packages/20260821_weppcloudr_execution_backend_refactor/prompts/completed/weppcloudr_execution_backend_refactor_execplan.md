@@ -21,15 +21,17 @@ forest run after restarting only its development stack.
   pending review gates.
 - [x] (2026-08-21) Ratify the canonical execution contract at commit
   `946f14518` and record review dispositions.
-- [ ] Capture baseline implementation, tests, Compose configuration, and mount
+- [x] (2026-08-21) Capture baseline implementation, tests, Compose configuration, and mount
   evidence before edits.
-- [ ] Implement the shared request boundary and behavior-preserving
+- [x] (2026-08-21) Implement the shared request boundary and behavior-preserving
   `docker-exec` adapter.
-- [ ] Implement repository-side `kubernetes-job` orchestration, receipt/state
+- [x] (2026-08-21) Implement repository-side `kubernetes-job` orchestration, receipt/state
   handling, and the strict one-shot renderer surface.
-- [ ] Update tests, RQ catalog, stubs, configuration, and documentation.
-- [ ] Complete correctness, QA, and security review with findings dispositioned.
-- [ ] Execute and document the authorized forest Compose integration proof.
+- [x] (2026-08-21) Update tests, RQ catalog, stubs, configuration, and documentation.
+- [x] (2026-08-21) Complete correctness, QA, and security review with findings
+  dispositioned.
+- [x] (2026-08-21 19:27 UTC) Execute and document the authorized forest Compose
+  integration proof.
 
 Kubernetes container building, publication, manifest application, and live
 cluster testing are not milestones in this plan.
@@ -47,6 +49,15 @@ cluster testing are not milestones in this plan.
 - A Kubernetes implementation can be unit/integration tested in-repository,
   but it is not deployable evidence until a digest-pinned image and cluster
   manifests are built and validated by the follow-up package.
+- The first forest render exposed a real cross-container permission mismatch:
+  the root-owned artifact was `0640` and unreadable by the worker. Explicit
+  `0644` publication fixed the serving contract; the second render passed.
+- Event delivery needs its own durable acknowledgment after cleanup. Otherwise
+  a transient sink outage can strand a cleaned receipt outside the reaper even
+  when reconciliation itself is isolated per receipt.
+- The canonical broad suite cannot run its Compose CLI canary from inside the
+  test container because that environment has no nested `docker compose -f`.
+  A rerun excluding only that environment-specific test is recorded separately.
 
 ## Decision Log
 
@@ -63,10 +74,25 @@ cluster testing are not milestones in this plan.
 - **2026-08-21 — TTL planning value.** Use 20 minutes after result collection as
   the initial configuration target, inside the operator's 10–20 minute range.
   Do not imply this is deployed by this package.
+- **2026-08-21 — Publish through a fenced staging file.** Render into `/tmp`,
+  copy under the run-scoped fence using no-follow directory descriptors, and
+  atomically rename a mode-`0644` artifact. Track staging ownership so cleanup
+  never removes another invocation's file.
+- **2026-08-21 — Acknowledge receipt events durably.** Cleaned receipts remain
+  reaper-eligible until the exact state event is accepted and acknowledged;
+  sink failures are isolated so later receipts continue.
 
 ## Outcomes & Retrospective
 
-Pending implementation and integrated validation.
+Repository implementation and the authorized Compose integration are complete.
+The explicit Docker adapter retained the existing stack and mounts; the forest
+render completed in about 16 seconds and produced a 14,077,008-byte HTML report.
+The Kubernetes request, Job-spec, receipt/reaper, cancellation, and one-shot R
+surfaces are deterministic and tested, but no image or cluster deployment was
+built or validated. Correctness, QA, and security gates all passed. The broad
+suite passed every package test and reached 4,593 passes before an unrelated
+pre-existing Topanga cwd-dependent test stopped the run; the canonical broad
+command also has a documented nested-Compose environment stop.
 
 ## Context and Orientation
 

@@ -224,3 +224,78 @@ def test_cancel_dispatch_parent_marks_request_under_shared_lock(
     assert parent.meta["cancel_requested"] is True
     assert events == [("lock", "enter"), ("parent", "saved"), ("lock", "exit")]
     assert child.cancel_calls == 1
+
+
+@pytest.mark.parametrize(
+    ("cleanup_state", "expected_status", "stop_expected"),
+    [
+        ("deleting", "accepted", False),
+        ("complete", "ok", True),
+    ],
+)
+def test_kubernetes_render_cancellation_waits_for_owned_pod_absence(
+    monkeypatch: pytest.MonkeyPatch,
+    cleanup_state: str,
+    expected_status: str,
+    stop_expected: bool,
+) -> None:
+    class Job(_FakeJob):
+        origin = "weppcloudr-render"
+        func_name = "wepppy.rq.weppcloudr_rq.render_deval_details_rq"
+        kwargs = {
+            "backend": "kubernetes-job",
+            "control_plane_url": "https://render-controller",
+            "control_plane_token_file": "/token",
+        }
+
+    job = Job("job-k8s", "started", {"render_request_digest": "a" * 64})
+    _patch_job(monkeypatch, job)
+
+    class _Client:
+        def __init__(self, endpoint, token_file):
+            assert endpoint == "https://render-controller"
+            assert str(token_file) == "/token"
+
+        def cancel(self, job_id, request_digest):
+            assert job_id == "job-k8s"
+            assert request_digest == "a" * 64
+            return {
+                "rq_job_id": job_id,
+                "request_digest": request_digest,
+                "cleanup_state": cleanup_state,
+            }
+
+    stops: list[str] = []
+    monkeypatch.setattr(cancel_job, "HttpRenderControlPlaneClient", _Client)
+    monkeypatch.setattr(
+        cancel_job,
+        "send_stop_job_command",
+        lambda _connection, job_id: stops.append(job_id),
+    )
+
+    result = cancel_job.cancel_jobs("job-k8s")
+
+    assert result["status"] == expected_status
+    assert stops == (["job-k8s"] if stop_expected else [])
+    assert job.meta["render_cleanup_state"] == cleanup_state
+
+
+def test_kubernetes_render_without_durable_receipt_fails_closed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class Job(_FakeJob):
+        origin = "weppcloudr-render"
+        func_name = "wepppy.rq.weppcloudr_rq.render_deval_details_rq"
+        kwargs = {"backend": "kubernetes-job"}
+
+    job = Job("job-k8s", "started")
+    _patch_job(monkeypatch, job)
+    monkeypatch.setattr(
+        cancel_job,
+        "send_stop_job_command",
+        lambda *_args: pytest.fail("workhorse must not stop before durable cleanup"),
+    )
+
+    result = cancel_job.cancel_jobs("job-k8s")
+
+    assert result["code"] == "cleanup_pending"

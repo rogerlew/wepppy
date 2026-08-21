@@ -353,32 +353,6 @@ When resuming Kubernetes work:
 
 ## 🚧 In Progress
 
-### WEPPcloudR Execution Backend Refactor
-
-**Started**: 2026-08-21
-
-**Size**: Large (3-6 focused sessions plus independent review)
-
-**Priority**: High
-
-**Security impact**: `high` (RQ execution, subprocess/file boundaries, future
-Kubernetes authority, cancellation, and logging)
-
-**Link**: [docs/work-packages/20260821_weppcloudr_execution_backend_refactor/](docs/work-packages/20260821_weppcloudr_execution_backend_refactor/)
-
-**Description**: Implement the deployment-neutral WEPPcloudR render contract
-behind explicit Docker-exec and Kubernetes-Job backends while preserving the
-current Compose topology and mounts. Repository-side Kubernetes orchestration
-and one-shot renderer interfaces are included; image building and deployment
-are a separate package.
-
-**Status**: Package, active ExecPlan, and pending review gates scaffolded;
-implementation has not started. Closure requires an authorized forest
-development-stack restart and successful Docker-exec DEVAL render for
-`branching-hubbub/disturbed9002_wbt` with before/after mount evidence.
-
----
-
 ### Direct OpenFileGDB Cutover
 
 **Started**: 2026-08-21
@@ -1085,6 +1059,21 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### WEPPcloudR Execution Backend Refactor
+
+**Completed**: 2026-08-21
+**Status**: ✅ **COMPLETE** for repository scope
+**Security impact**: `high`
+**Link**: [docs/work-packages/20260821_weppcloudr_execution_backend_refactor/](docs/work-packages/20260821_weppcloudr_execution_backend_refactor/)
+
+**Summary**: Added explicit Docker-exec and Kubernetes-Job render boundaries,
+durable reconciliation/cancellation/fencing contracts, and a strict one-shot R
+entrypoint while preserving Compose topology and mounts. The authorized forest
+Docker-exec render and all independent reviews passed. Kubernetes image build
+and cluster deployment remain a separate package.
+
+---
 
 ### RQ Job ID Canonicalization and Dashboard Compatibility
 

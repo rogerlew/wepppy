@@ -1,6 +1,6 @@
 # WEPPcloudR Execution Backend Refactor
 
-**Status**: Open (2026-08-21)
+**Status**: In final review (2026-08-21)
 **Timezone**: UTC
 
 ## Overview
@@ -90,21 +90,21 @@ to a separate package.
 
 ## Success Criteria
 
-- [ ] Backend selection is explicit and fails closed; Kubernetes never falls
+- [x] Backend selection is explicit and fails closed; Kubernetes never falls
   back to Docker and Compose defaults remain compatible.
-- [ ] Compose files have byte-for-byte unchanged `weppcloudr` and worker mount
+- [x] Compose files have byte-for-byte unchanged `weppcloudr` and worker mount
   definitions relative to package start.
-- [ ] Existing and new Compose-focused unit/integration tests pass.
-- [ ] Kubernetes orchestration behavior required by the canonical contract is
+- [x] Existing and new Compose-focused unit/integration tests pass.
+- [x] Kubernetes orchestration behavior required by the canonical contract is
   implemented and deterministically tested without claiming cluster deployment.
-- [ ] RQ graph/catalog, stubs, configuration, operator, and module docs match
+- [x] RQ graph/catalog, stubs, configuration, operator, and module docs match
   the implemented interfaces.
-- [ ] Independent correctness, QA, and security reviews have no unresolved
+- [x] Independent correctness, QA, and security reviews have no unresolved
   medium/high findings.
-- [ ] After an authorized forest development-stack restart, the designated
+- [x] After an authorized forest development-stack restart, the designated
   DEVAL report completes through Docker exec, produces a valid HTML artifact,
   and retains the established mounts.
-- [ ] No Kubernetes image build, publication, manifest apply, or deployment is
+- [x] No Kubernetes image build, publication, manifest apply, or deployment is
   performed by this package.
 
 ## Parameterization ADR Gate

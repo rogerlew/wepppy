@@ -8,19 +8,95 @@ from types import SimpleNamespace
 import pytest
 
 import wepppy.rq.weppcloudr_rq as weppcloudr_rq
+from wepppy.rq.weppcloudr_backends import KubernetesRenderError
 from wepppy.rq.weppcloudr_rq import (
     WeppcloudRError,
     _assert_no_retired_root_resources,
-    _build_render_deval_expression,
+    _disable_job_retries,
+    _record_kubernetes_error,
+    _validate_run_paths,
+    _write_command_logs,
     render_deval_details_rq,
 )
 
 pytestmark = pytest.mark.unit
 
 
+@pytest.fixture(autouse=True)
+def _approve_test_run_root(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("WEPPCLOUDR_RUN_ROOTS", str(tmp_path))
+
+
 def test_render_deval_details_rq_accepts_legacy_parquet_overrides_kwarg() -> None:
     signature = inspect.signature(render_deval_details_rq)
     assert "parquet_overrides" in signature.parameters
+
+
+def test_kubernetes_retry_helpers_preserve_only_transient_api_retries() -> None:
+    job = SimpleNamespace(
+        id="job-1",
+        meta={"error": "stale", "error_id": "stale"},
+        retries_left=2,
+        save_meta=lambda: None,
+        save=lambda: None,
+    )
+
+    _record_kubernetes_error(
+        job,
+        KubernetesRenderError("weppcloudr_k8s_api_unavailable", "unavailable"),
+    )
+    assert job.retries_left == 2
+    assert "error" not in job.meta
+    assert "error_id" not in job.meta
+
+    exhausted = SimpleNamespace(
+        id="job-exhausted",
+        meta={},
+        retries_left=0,
+        save_meta=lambda: None,
+        save=lambda: None,
+    )
+    _record_kubernetes_error(
+        exhausted,
+        KubernetesRenderError("weppcloudr_k8s_api_unavailable", "unavailable"),
+    )
+    assert exhausted.meta["error"] == {
+        "code": "weppcloudr_k8s_api_unavailable",
+        "message": "WEPPcloudR render failed.",
+    }
+    assert exhausted.meta["error_id"] == "job-exhausted"
+
+    _record_kubernetes_error(
+        job,
+        KubernetesRenderError("weppcloudr_k8s_oom_killed", "terminal"),
+    )
+    assert job.retries_left == 0
+    assert job.meta["error"]["code"] == "weppcloudr_k8s_oom_killed"
+
+    job.retries_left = 3
+    _disable_job_retries(job)
+    assert job.retries_left == 0
+
+
+def test_kubernetes_legacy_job_without_run_root_disables_retry(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    job = SimpleNamespace(
+        id="job-legacy",
+        meta={},
+        retries_left=3,
+        save_meta=lambda: None,
+        save=lambda: None,
+    )
+    monkeypatch.setattr(weppcloudr_rq, "get_current_job", lambda: job)
+    monkeypatch.setattr(weppcloudr_rq.StatusMessenger, "publish", lambda *_args: None)
+
+    with pytest.raises(WeppcloudRError, match="rejects legacy jobs"):
+        render_deval_details_rq(
+            "run-1", "cfg", str(tmp_path), backend="kubernetes-job"
+        )
+
+    assert job.retries_left == 0
 
 
 def test_assert_no_retired_root_resources_allows_clean_directory(tmp_path: Path) -> None:
@@ -47,13 +123,76 @@ def test_assert_no_retired_root_resources_rejects_mixed_canonical_and_sidecar_st
         _assert_no_retired_root_resources(tmp_path)
 
 
-def test_build_render_deval_expression_uses_stable_render_signature() -> None:
-    expression = _build_render_deval_expression("{}")
+def test_command_logs_are_bounded_sanitized_and_protected(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.setenv("WEPPCLOUDR_LOG_MAX_BYTES", "1024")
+    log_dir = tmp_path / "_logs" / "weppcloudr"
+    log_dir.mkdir(parents=True)
 
-    assert "render_deval(payload$run_path, payload$runid, payload$config," in expression
-    assert "skip_cache = payload$skip_cache" in expression
-    assert "parquet_overrides" not in expression
-    assert "do.call(" not in expression
+    _write_command_logs(tmp_path, "job-1", "prefix\x00" + "x" * 2048, "ok")
+
+    stdout = log_dir / "render_deval_job-1.stdout"
+    assert stdout.stat().st_size <= 1024
+    assert stdout.read_text(encoding="utf-8").startswith("[WEPPcloudR log truncated")
+    assert "\x00" not in stdout.read_text(encoding="utf-8")
+    assert stdout.stat().st_mode & 0o777 == 0o660
+
+
+def test_command_log_byte_cap_is_exact_for_unicode(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.setenv("WEPPCLOUDR_LOG_MAX_BYTES", "1024")
+    log_dir = tmp_path / "_logs" / "weppcloudr"
+    log_dir.mkdir(parents=True)
+
+    _write_command_logs(tmp_path, "job-1", "🙂" * 1024, "€" * 1024)
+
+    for suffix in ("stdout", "stderr"):
+        assert (log_dir / f"render_deval_job-1.{suffix}").stat().st_size <= 1024
+
+
+def test_run_path_validation_preserves_pup_links_to_parent(tmp_path: Path) -> None:
+    run_root = tmp_path / "run"
+    active_root = run_root / "_pups" / "shared"
+    resource = run_root / "watershed"
+    resource.mkdir(parents=True)
+    active_root.mkdir(parents=True)
+    (active_root / "watershed").symlink_to(resource, target_is_directory=True)
+
+    actual_run_root, actual_active_root = _validate_run_paths(
+        str(run_root), str(active_root)
+    )
+
+    assert actual_run_root == run_root
+    assert actual_active_root == active_root
+    assert (actual_active_root / "watershed").resolve() == resource
+
+
+def test_unknown_backend_fails_without_docker_fallback(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.setattr(
+        weppcloudr_rq,
+        "get_current_job",
+        lambda: SimpleNamespace(id="job-unknown"),
+    )
+    monkeypatch.setattr(weppcloudr_rq.StatusMessenger, "publish", lambda *_args: None)
+    monkeypatch.setattr(
+        weppcloudr_rq,
+        "list_existing_retired_root_resources",
+        lambda _path: [],
+    )
+    monkeypatch.setattr(
+        weppcloudr_rq.subprocess,
+        "run",
+        lambda *_args, **_kwargs: pytest.fail("Docker fallback is forbidden"),
+    )
+
+    with pytest.raises(WeppcloudRError, match="Unknown WEPPcloudR execution backend"):
+        render_deval_details_rq(
+            "run-1", "cfg", str(tmp_path), run_root=str(tmp_path), backend="unknown"
+        )
 
 
 def test_render_deval_details_rq_runs_container_and_publishes_completion(
@@ -99,18 +238,26 @@ def test_render_deval_details_rq_runs_container_and_publishes_completion(
 
     assert result == str(output_path)
     command, kwargs = commands[0]
-    assert command[:4] == ["docker", "exec", "renderer", "Rscript"]
-    assert '"run_path": "' + str(tmp_path) + '"' in command[-1]
-    assert '"runid": "run-1"' in command[-1]
-    assert '"config": "cfg"' in command[-1]
-    assert '"skip_cache": true' in command[-1]
+    assert command == [
+        "docker",
+        "exec",
+        "-i",
+        "renderer",
+        "Rscript",
+        "/srv/weppcloudr/render-compose-request.R",
+    ]
+    payload = kwargs.pop("input")
+    assert '"run_path": "' + str(tmp_path) + '"' in payload
+    assert '"runid": "run-1"' in payload
+    assert '"config": "cfg"' in payload
+    assert '"skip_cache": true' in payload
     assert kwargs == {
         "check": False,
         "capture_output": True,
         "text": True,
         "timeout": 42,
     }
-    assert (output_path.parent / "render_deval_job-1.stdout").read_text(
+    assert (tmp_path / "_logs" / "weppcloudr" / "render_deval_job-1.stdout").read_text(
         encoding="utf-8"
     ) == "rendered"
     assert messages[0][0] == "run-1:weppcloudr"
@@ -150,7 +297,7 @@ def test_render_deval_details_rq_records_failure_and_raises(
         ),
     )
 
-    with pytest.raises(WeppcloudRError, match="R failed"):
+    with pytest.raises(WeppcloudRError, match="exit 7"):
         render_deval_details_rq("run-1", "cfg", str(tmp_path))
 
     assert "STARTED" in messages[0]
@@ -181,6 +328,12 @@ def test_render_deval_details_rq_rejects_symlink_escape(
         export_parent.mkdir()
     if symlink_name == "WEPPcloudR":
         (export_parent / symlink_name).symlink_to(outside, target_is_directory=True)
+    elif symlink_name.startswith("render_deval_"):
+        export_dir = export_parent / "WEPPcloudR"
+        export_dir.mkdir()
+        log_dir = tmp_path / "_logs" / "weppcloudr"
+        log_dir.mkdir(parents=True)
+        (log_dir / symlink_name).symlink_to(outside / "target")
     elif symlink_name != "export":
         export_dir = export_parent / "WEPPcloudR"
         export_dir.mkdir()
