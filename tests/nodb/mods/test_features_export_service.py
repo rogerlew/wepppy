@@ -3576,7 +3576,7 @@ def test_publish_profile_execution_artifacts_dual_profile_co_creates_geodatabase
         )
 
     monkeypatch.setattr(service, "prepare_export_submission", _fake_prepare_export_submission)
-    monkeypatch.setattr(service.f_esri, "has_f_esri", True)
+    monkeypatch.setattr(service, "openfilegdb_create_available", lambda: True)
 
     def _fake_convert_gpkg_to_gdb(gpkg_path: str, gdb_path: str, zip_output: bool = True) -> None:
         assert Path(gpkg_path) == source_gpkg_path
@@ -3586,7 +3586,7 @@ def test_publish_profile_execution_artifacts_dual_profile_co_creates_geodatabase
         with zipfile.ZipFile(gdb_dir.with_suffix(".gdb.zip"), "w") as zip_handle:
             zip_handle.writestr("features_export.gdb/table.gdbtable", b"co-created-gdb-bytes")
 
-    monkeypatch.setattr(service.f_esri, "c2c_gpkg_to_gdb", _fake_convert_gpkg_to_gdb)
+    monkeypatch.setattr(service, "convert_geopackage_to_openfilegdb", _fake_convert_gpkg_to_gdb)
 
     source_artifact_relpath = source_zip_path.relative_to(tmp_path).as_posix()
     published_entries = service.publish_profile_execution_artifacts(

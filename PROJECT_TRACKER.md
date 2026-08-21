@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-08-13
-**Active Packages**: 25
+**Last Updated**: 2026-08-21
+**Active Packages**: 26
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 24 packages (above target range; calculated from the 24 package entries in the In Progress section)
+**Current WIP**: 25 packages (above target range; calculated from the 25 package entries in the In Progress section)
 
 ### 3. Manage Flow
 Monitor how long packages spend in each column:
@@ -352,6 +352,32 @@ When resuming Kubernetes work:
 ---
 
 ## 🚧 In Progress
+
+### Direct OpenFileGDB Cutover
+
+**Started**: 2026-08-21
+
+**Size**: Medium
+
+**Priority**: High
+
+**Security impact**: `high` (worker subprocess/file generation and deployment
+wiring; dedicated review required)
+
+**Link**: [docs/work-packages/20260821_openfilegdb_cutover/](docs/work-packages/20260821_openfilegdb_cutover/)
+
+**Description**: Direct GDAL 3.10.3 `OpenFileGDB` conversion is implemented
+with explicit capability checks, bounded subprocess execution, cleanup,
+permissions, first-level `.gdb` ZIP layout, and real readback coverage. The
+Esri SDK image, sidecar, compatibility modules, Compose dependencies, vendor
+paths, CI input, host setup, and deployment clone have been removed while the
+legacy `f_esri` request alias remains supported.
+
+**Status**: Implementation and local validation complete; independent reviews,
+forest rollout, and separately authorized production/Kubernetes promotion
+remain.
+
+---
 
 ### EU Disturbed Soil Building Data-Quality Hardening
 

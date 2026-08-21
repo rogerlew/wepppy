@@ -11,7 +11,7 @@ The Fork/Archive Serial Queue Isolation package defines
 `rq-worker-fork-archive` in `docker-compose.prod.wepp3.yml`. Wepp3 already
 has the production NFS mount and otherwise runs no containers. The service must
 start alone, consume only `fork-archive`, and have no dependency on `rq-worker`,
-`rq-worker-batch`, `f-esri`, or `weppcloudr`. The wepp2 worker compose does not
+`rq-worker-batch`, or `weppcloudr`. The wepp2 worker compose does not
 define it, and the wepp1 override forces its inherited service scale to zero.
 The service runs as numeric identity `1002:130`, matching ownership of the
 production `/wc1/runs` tree. Do not replace this with wepp3's host-local

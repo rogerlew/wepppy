@@ -15,12 +15,6 @@ wgs84_wkt: str
 resample_methods: tuple[str, ...]
 
 
-def has_f_esri() -> bool: ...
-
-
-def f_esri_gpkg_to_gdb(gpkg_fn: PathType, gdb_fn: PathType) -> None: ...
-
-
 def utm_raster_transform(
     wgs_extent: Sequence[float],
     src_fn: PathType,

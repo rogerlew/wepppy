@@ -101,7 +101,6 @@ _Scanned root_: `wepppy`
 - [x] `wepppy/export/arc_export.py`
 - [x] `wepppy/export/ermit_input.py`
 - [x] `wepppy/export/export.py`
-- [ ] `wepppy/f_esri/__init__.py`
 - [ ] `wepppy/io_wait.py`
 - [ ] `wepppy/landcover/__init__.py`
 - [ ] `wepppy/landcover/emapr/__init__.py`

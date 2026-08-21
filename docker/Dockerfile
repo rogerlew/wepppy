@@ -23,8 +23,6 @@ ARG APP_UID=1000
 ARG APP_GID=1000
 
 # External repositories that historically lived beside the working tree.
-ARG F_ESRI_REPO=https://github.com/rogerlew/f-esri.git
-ARG F_ESRI_REF=main
 ARG WBT_REPO=https://github.com/rogerlew/weppcloud-wbt.git
 ARG WBT_REF=master
 ARG WEPPCLOUD2_REPO=https://github.com/wepp-in-the-woods/weppcloud2.git
@@ -150,12 +148,10 @@ RUN set -euxo pipefail; \
         rm -rf "${dest}/.git"; \
     }; \
     clone_repo "${WEPPCLOUD2_REF}" "${WEPPCLOUD2_REPO}" /opt/vendor/weppcloud2; \
-    clone_repo "${F_ESRI_REF}" "${F_ESRI_REPO}" /opt/vendor/f-esri; \
     clone_repo "${WBT_REF}" "${WBT_REPO}" /opt/vendor/weppcloud-wbt; \
     clone_repo "${WEPPPYO3_REF}" "${WEPPPYO3_REPO}" /opt/vendor/wepppyo3; \
-    rm -rf /workdir/weppcloud2 /workdir/f-esri /workdir/weppcloud-wbt /workdir/wepppyo3; \
+    rm -rf /workdir/weppcloud2 /workdir/weppcloud-wbt /workdir/wepppyo3; \
     ln -s /opt/vendor/weppcloud2 /workdir/weppcloud2; \
-    ln -s /opt/vendor/f-esri /workdir/f-esri; \
     ln -s /opt/vendor/weppcloud-wbt /workdir/weppcloud-wbt; \
     ln -s /opt/vendor/wepppyo3 /workdir/wepppyo3
 
@@ -169,7 +165,6 @@ RUN set -euxo pipefail; \
     printf "/workdir/wepppy/services/cao/src/\n" > "${SITE_PACKAGES}/cao.pth"; \
     printf "/workdir/weppcloud2/\n" > "${SITE_PACKAGES}/weppcloud2.pth"; \
     printf "/workdir/weppcloud-wbt/WBT/\n" > "${SITE_PACKAGES}/wbt.pth"; \
-    printf "/workdir/f-esri/\n" > "${SITE_PACKAGES}/f_esri.pth"; \
     printf "/workdir/wepppyo3/release/linux/py312/\n" > "${SITE_PACKAGES}/wepppyo3.pth"
 
 # Quarto CLI for PATH-CE HTML report rendering (in-worker; ADR-0023 / D1).

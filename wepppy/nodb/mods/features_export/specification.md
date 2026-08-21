@@ -22,12 +22,18 @@ User-facing dataset labels and output layer names must prioritize established WE
 - `csv` (single-layer geometryless tabular format)
 - `kmz` (single-layer format)
 - `geopackage` (multi-layer container format)
-- `geodatabase` (multi-layer FileGDB container via `f_esri`)
+- `geodatabase` (multi-layer FileGDB container via GDAL `OpenFileGDB`)
 
 Format token contract:
 - Canonical request token is `geodatabase`.
 - Backward-compatible alias `f_esri` is accepted and normalized to `geodatabase`.
 - FileGDB payload member extension remains `.gdb.zip` inside the final download bundle.
+- Geodatabase creation explicitly selects GDAL's built-in `OpenFileGDB` driver;
+  `FileGDB` is not an accepted creation-driver alias because GDAL 3.10 still
+  resolves it to the optional Esri SDK driver.
+- OpenFileGDB uses its default broad ArcGIS compatibility mode. Integer64
+  source fields may therefore be represented as Float64 in the FileGDB output;
+  the writer does not set the ArcGIS Pro 3.2+ compatibility option.
 
 Packaging rules:
 - All format downloads are `.zip` artifacts.
@@ -910,7 +916,9 @@ WP-3: Format writers, packaging, and manifest generation (completed 2026-03-26)
   - `tests/nodb/mods/test_features_export_manifest.py`
 - Contract clarification: writer inputs are explicitly pre-resolved and payload-driven (`ResolvedExportPlan` + per-layer `PreparedLayerPayload` mapping keyed by `output_layer_id`); WP-3 does not resolve or extract source datasets.
 - Contract clarification: single-layer formats (`geojson|geoparquet|kmz`) write deterministic one-file-per-layer outputs and return one deterministic zip bundle; multi-layer formats return one container artifact per request.
-- Contract clarification: geodatabase writer uses the canonical `f_esri` gpkg conversion boundary and fails explicitly when backend capability is unavailable.
+- Contract clarification: geodatabase writer directly invokes bounded
+  `ogr2ogr -f OpenFileGDB` conversion in the worker runtime and fails explicitly
+  when the built-in driver lacks vector-create capability.
 - Contract clarification: geopackage artifacts must be valid SQLite/GPKG containers (not synthesized JSON payload bytes); geodatabase staging gpkg input must use the same container contract.
 - Contract clarification: geopackage writer output must be GDAL/OGR-readable for downstream conversion boundaries; implementation uses the GDAL `GPKG` driver and supports both spatial feature payloads and aspatial fallback payloads for interoperability.
 - Contract clarification: feature-layer field synthesis must retain null-only properties as nullable columns while preserving numeric field typing for non-null numeric properties.

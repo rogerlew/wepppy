@@ -294,7 +294,6 @@ wctl docker compose config
 | `caddy`        | Reverse proxy + TLS terminator (dev: HTTP only) | 8080 | Serves static assets and forwards to upstream services. |
 | Legacy profiles (`elevationquery`, `metquery`, `wmesque`, `wmesque2`) | Optional legacy web services | 8002, 8004, 8003, 8030 | Activated via `--profile legacy`. |
 | `webpush`      | Placeholder container for future WebPush service | — | No-op until implemented. |
-| `f-esri`       | Auxiliary image for ESRI tooling | — | Stays idle (`tail -f /dev/null`). |
 
 ### Scaling rq-worker-batch
 

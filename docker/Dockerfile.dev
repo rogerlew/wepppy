@@ -137,7 +137,6 @@ RUN SITE_PACKAGES="$(/opt/venv/bin/python -c 'import site, sys; sys.stdout.write
     printf '/workdir/wepppy/services/cao/src/\n' > "${SITE_PACKAGES}/cao.pth" && \
     printf '/workdir/weppcloud2/\n' > "${SITE_PACKAGES}/weppcloud2.pth" && \
     printf '/workdir/weppcloud-wbt/WBT/\n/opt/vendor/weppcloud-wbt/WBT/\n' > "${SITE_PACKAGES}/wbt.pth" && \
-    printf '/workdir/f-esri/\n' > "${SITE_PACKAGES}/f_esri.pth" && \
     printf '/workdir/wepppyo3/release/linux/py312/\n/opt/vendor/wepppyo3/release/linux/py312/\n' > "${SITE_PACKAGES}/wepppyo3.pth"
     
 # Vendor Rosetta directly from GitHub into site-packages, including LFS assets.

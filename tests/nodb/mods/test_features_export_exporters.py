@@ -367,7 +367,7 @@ def test_geopackage_writer_keeps_null_only_property_columns(tmp_path: Path, cata
     assert "INT" in column_types["count"]
 
 
-def test_geodatabase_writer_uses_f_esri_conversion_boundary(tmp_path: Path, catalog) -> None:
+def test_geodatabase_writer_uses_openfilegdb_conversion_boundary(tmp_path: Path, catalog) -> None:
     plan = _resolved_plan(catalog, "geodatabase")
     request = ExportWriterRequest(
         plan=plan,
@@ -504,7 +504,7 @@ def test_geodatabase_writer_fails_explicitly_when_backend_unavailable(
     )
 
     writer = GeodatabaseExportWriter(backend_available=lambda: False)
-    with pytest.raises(ExportBackendCapabilityError, match="f_esri backend capability"):
+    with pytest.raises(ExportBackendCapabilityError, match="OpenFileGDB vector-create capability"):
         writer.write(request)
 
 

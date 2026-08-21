@@ -34,17 +34,6 @@ class TestImports(unittest.TestCase):
         except ModuleNotFoundError:
             self.skipTest("weppcloud2 package not installed in this environment")
 
-    def test_f_esri(self):
-        try:
-            import f_esri  # noqa: F401
-        except ModuleNotFoundError:
-            self.skipTest("f_esri package not installed in this environment")
-
-    def test_f_esri_has_f_esri(self):
-        from wepppy.all_your_base.geo import has_f_esri
-        res = has_f_esri()
-        self.assertTrue(res)
-
     def test_wepppyo3(self):
         try:
             import wepppyo3  # noqa: F401

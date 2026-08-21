@@ -19,7 +19,6 @@ import duckdb
 import geopandas as gpd
 import pandas as pd
 
-from wepppy import f_esri
 from wepppy.nodb.core import Watershed
 from wepppy.nodb.mods.ag_fields import AgFields
 from wepppy.nodb.unitizer import Unitizer
@@ -69,6 +68,10 @@ from .exporters import (
     get_export_writer,
 )
 from .exporters.packaging import package_files_as_zip
+from .exporters.geodatabase import (
+    convert_geopackage_to_openfilegdb,
+    openfilegdb_create_available,
+)
 from .geometry_carriers import attach_geometry_once, build_canonical_geometry_carrier
 from .identity_columns import normalize_identity_output_columns
 from .join_planner import JOIN_KEY_COLUMN, MaterializationContractError
@@ -570,9 +573,10 @@ def co_create_post_wepp_geodatabase_artifact(
     if not isinstance(source_job_id, str) or not source_job_id:
         raise FeaturesExportServiceError("source_job_id must be a non-empty string.", status_code=500)
 
-    if not f_esri.has_f_esri:
+    if not openfilegdb_create_available():
         raise FeaturesExportServiceError(
-            "Geodatabase co-creation requires f_esri backend capability, but it is unavailable.",
+            "Geodatabase co-creation requires GDAL OpenFileGDB vector-create "
+            "capability, but it is unavailable.",
             status_code=409,
             code="export_backend_unavailable",
         )
@@ -594,11 +598,11 @@ def co_create_post_wepp_geodatabase_artifact(
     if gdb_zip_path.exists() and gdb_zip_path.is_file():
         gdb_zip_path.unlink()
 
-    f_esri.c2c_gpkg_to_gdb(str(gpkg_path), str(gdb_container_path), zip_output=True)
+    convert_geopackage_to_openfilegdb(str(gpkg_path), str(gdb_container_path))
 
     if not gdb_zip_path.is_file():
         raise FeaturesExportServiceError(
-            "f_esri conversion did not produce expected FileGDB archive.",
+            "OpenFileGDB conversion did not produce expected FileGDB archive.",
             status_code=500,
             code="artifact_missing",
             details=f"Missing geodatabase archive at {gdb_zip_path}.",

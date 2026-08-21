@@ -68,7 +68,6 @@ jobs:
             UV_INSTALLER_URL=https://astral.sh/uv/0.12.3/install.sh
             ROSETTA_REF=1c22335ee0e4055f45adb3e597e5bf49cd9a2c88
             WEPPCLOUD2_REF=7c92e33cd6c6b8d33732edd943f9840834d88b34
-            F_ESRI_REF=fe3bac7b297a33d5aacc083c434bc5637a0d8604
             WBT_REF=314d15d68344890b43045e5325776a2841b0b1ca
             WEPPPYO3_REF=ab91fc519195e95b8908922aba5036bcbae07f21
             APP_USER=roger
