@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-08-21
-**Active Packages**: 25
+**Active Packages**: 26
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 24 packages (above target range; calculated from the 24 package entries in the In Progress section)
+**Current WIP**: 25 packages (above target range; calculated from the package entries in the In Progress section)
 
 ### 3. Manage Flow
 Monitor how long packages spend in each column:
@@ -380,6 +380,29 @@ When resuming Kubernetes work:
 ---
 
 ## 🚧 In Progress
+
+### Self-Hosted GHCR Builder
+
+**Started**: 2026-08-21
+
+**Size**: Small-Medium
+
+**Priority**: High
+
+**Security impact**: `high` (persistent self-hosted runner with GHCR package-write permission)
+
+**Link**: [docs/work-packages/20260820_self_hosted_ghcr_builder/](docs/work-packages/20260820_self_hosted_ghcr_builder/)
+
+**Description**: Route trusted WEPPcloud common-image publication to
+`runner-01`, reuse a locally seeded LFS object store, and retain BuildKit layers
+between builds. Public pull-request jobs remain excluded from the dedicated
+runner label.
+
+**Next Steps**: Complete static and independent security review now; defer the
+first publication and repeat-build cache proof until the Climate finalizer is
+ready for integration.
+
+---
 
 ### EU Disturbed Soil Building Data-Quality Hardening
 
