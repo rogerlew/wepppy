@@ -250,7 +250,7 @@ def test_job_spec_is_fixed_hardened_and_uses_root_squash_safe_mount() -> None:
     }
     assert "fsGroup" not in pod["securityContext"]
     assert container["image"] == f"ghcr.io/open-wepp/weppcloudr@{IMAGE}"
-    assert container["workingDir"] == request.run_root
+    assert container["workingDir"] == "/tmp"
     assert container["args"][0] == "/wc1/.weppcloudr/requests/job-1.json"
     assert container["securityContext"] == {
         "allowPrivilegeEscalation": False,
@@ -330,7 +330,7 @@ def test_job_spec_validates_explicit_pvc_mapping_without_kubelet_subpaths() -> N
     )
 
     container = spec["spec"]["template"]["spec"]["containers"][0]
-    assert container["workingDir"] == "/wc1/runs/ru/run-1"
+    assert container["workingDir"] == "/tmp"
     assert container["volumeMounts"][0] == {"name": "run", "mountPath": "/wc1"}
 
 

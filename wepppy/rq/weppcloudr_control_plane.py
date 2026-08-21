@@ -340,7 +340,11 @@ def build_job_spec(
                     request_digest,
                     str(fencing_generation),
                 ],
-                "workingDir": request.run_root,
+                # OCI runtime prepares workingDir before switching to the
+                # application UID. A protected root-squashed NFS path therefore
+                # fails during container init even though UID 1000 can access it.
+                # The renderer consumes absolute paths from the signed request.
+                "workingDir": "/tmp",
                 "securityContext": {
                     "allowPrivilegeEscalation": False,
                     "readOnlyRootFilesystem": True,
