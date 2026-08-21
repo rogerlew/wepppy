@@ -296,6 +296,14 @@ def build_job_spec(
         raise KubernetesRenderError(
             "weppcloudr_k8s_admission_rejected", "invalid request PVC subPath"
         )
+    # Preserve the allowlisted run-root admission check even though the NFS
+    # volume is mounted without a Kubernetes subPath. Talos kubelet runs
+    # subPath preparation as root; root_squash maps that identity to nobody and
+    # rejects protected WEPPcloud directory traversal before the container can
+    # start. The short-lived, immutable renderer therefore receives the same
+    # /wc1 volume boundary as existing WEPPcloud workers and remains confined
+    # by its fixed request, tokenless identity, and no-egress policy.
+    _pvc_subpath(request, config)
     labels = {
         "app.kubernetes.io/name": "weppcloudr-render",
         "weppcloud.org/rq-id-hash": hashlib.sha256(
@@ -328,7 +336,7 @@ def build_job_spec(
                 "imagePullPolicy": "IfNotPresent",
                 "command": ["Rscript", "/srv/weppcloudr/render-request-v1.R"],
                 "args": [
-                    "/run/weppcloudr/request.json",
+                    f"/wc1/{request_subpath}",
                     request_digest,
                     str(fencing_generation),
                 ],
@@ -349,14 +357,7 @@ def build_job_spec(
                 "volumeMounts": [
                     {
                         "name": "run",
-                        "mountPath": request.run_root,
-                        "subPath": _pvc_subpath(request, config),
-                    },
-                    {
-                        "name": "request",
-                        "mountPath": "/run/weppcloudr/request.json",
-                        "subPath": request_subpath,
-                        "readOnly": True,
+                        "mountPath": "/wc1",
                     },
                     {"name": "geodata", "mountPath": "/geodata", "readOnly": True},
                     {"name": "tmp", "mountPath": "/tmp"},
@@ -365,7 +366,6 @@ def build_job_spec(
         ],
         "volumes": [
             {"name": "run", "persistentVolumeClaim": {"claimName": config.run_pvc}},
-            {"name": "request", "persistentVolumeClaim": {"claimName": config.run_pvc}},
             {
                 "name": "geodata",
                 "persistentVolumeClaim": {"claimName": config.geodata_pvc, "readOnly": True},
