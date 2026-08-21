@@ -285,6 +285,10 @@ render_deval <- function(run_path, runid, config = NULL, skip_cache = FALSE, par
         params = params,
         output_file = render_target,
         output_dir = dirname(render_target),
+        # The production image has a read-only root filesystem. Keep all knit
+        # intermediates in the pod-local writable tmpfs; only the fenced final
+        # artifact is published to the run directory.
+        intermediates_dir = tempdir(),
         envir = new.env(parent = globalenv())
       )
       if (publish_after_render && !file.rename(render_target, output_file)) {
