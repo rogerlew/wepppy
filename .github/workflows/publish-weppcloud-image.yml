@@ -20,6 +20,17 @@ jobs:
     steps:
       - name: Check out the dispatched source commit
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          lfs: true
+
+      - name: Materialize and verify every Git LFS asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          git lfs install --local
+          git lfs pull --include="*" --exclude=""
+          git lfs checkout
+          python3 tools/verify_lfs_materialized.py --tracked
 
       - name: Derive immutable image coordinates
         id: image
@@ -55,7 +66,7 @@ jobs:
             STATIC_BUILDER_IMAGE=node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
             RUNTIME_BASE_IMAGE=python:3.12-slim@sha256:229a2c5bfa27522db7815ea81f9bed70af17ccb9de9fc7ad142b1877b5830d36
             UV_INSTALLER_URL=https://astral.sh/uv/0.12.3/install.sh
-            ROSETTA_REF=471c6e9434cfc30035d591387ad933f842a27983
+            ROSETTA_REF=1c22335ee0e4055f45adb3e597e5bf49cd9a2c88
             WEPPCLOUD2_REF=7c92e33cd6c6b8d33732edd943f9840834d88b34
             F_ESRI_REF=fe3bac7b297a33d5aacc083c434bc5637a0d8604
             WBT_REF=314d15d68344890b43045e5325776a2841b0b1ca
