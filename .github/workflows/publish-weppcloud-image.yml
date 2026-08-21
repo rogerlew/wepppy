@@ -139,12 +139,16 @@ jobs:
           test "${WEPPPY_BUILDX_CACHE_NEXT}" = "/home/roger/.cache/wepppy-buildx-next"
           test "$(realpath -e /home/roger/.cache)" = "/home/roger/.cache"
           test "$(stat -c '%U:%a' /home/roger/.cache)" = "$(id -un):700"
-          for cache_path in "${WEPPPY_BUILDX_CACHE}" "${WEPPPY_BUILDX_CACHE_NEXT}"; do
-            test -d "${cache_path}"
-            test ! -L "${cache_path}"
-            test "$(realpath -e "${cache_path}")" = "${cache_path}"
-            test "$(stat -c '%U' "${cache_path}")" = "$(id -un)"
-          done
+          if test -e "${WEPPPY_BUILDX_CACHE}" || test -L "${WEPPPY_BUILDX_CACHE}"; then
+            test -d "${WEPPPY_BUILDX_CACHE}"
+            test ! -L "${WEPPPY_BUILDX_CACHE}"
+            test "$(realpath -e "${WEPPPY_BUILDX_CACHE}")" = "${WEPPPY_BUILDX_CACHE}"
+            test "$(stat -c '%U' "${WEPPPY_BUILDX_CACHE}")" = "$(id -un)"
+          fi
+          test -d "${WEPPPY_BUILDX_CACHE_NEXT}"
+          test ! -L "${WEPPPY_BUILDX_CACHE_NEXT}"
+          test "$(realpath -e "${WEPPPY_BUILDX_CACHE_NEXT}")" = "${WEPPPY_BUILDX_CACHE_NEXT}"
+          test "$(stat -c '%U' "${WEPPPY_BUILDX_CACHE_NEXT}")" = "$(id -un)"
           rm -rf -- "${WEPPPY_BUILDX_CACHE}"
           mv -- "${WEPPPY_BUILDX_CACHE_NEXT}" "${WEPPPY_BUILDX_CACHE}"
           chmod 700 "${WEPPPY_BUILDX_CACHE}"
