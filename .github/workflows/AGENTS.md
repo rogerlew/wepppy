@@ -46,6 +46,24 @@ The script:
 
 ## Available Resources
 
+### Trusted GHCR Image Builder
+
+- `runner-01` is the dedicated persistent common-image builder and carries the
+  custom `ghcr-builder` label.
+- Do not assign `remote-ci`, `homelab`, or another general workload label to
+  `runner-01`. Its only custom workload labels are `wepppy` and
+  `ghcr-builder`; no pull-request workflow may match the complete label set.
+- The runner keeps Git LFS objects in `/home/roger/.cache/wepppy-lfs` and local
+  BuildKit exports in `/home/roger/.cache/wepppy-buildx`.
+- Keep public-repository pull-request jobs off this label. The publishing
+  workflow may run only for trusted `master` pushes or explicit manual
+  dispatches.
+- Seed the LFS cache from an already verified local checkout when rebuilding or
+  replacing the runner. Missing object IDs may then be fetched from GitHub and
+  must pass `git lfs fsck` plus `tools/verify_lfs_materialized.py --tracked`.
+- Do not add `actions/cache` for LFS objects: that stores the cache in GitHub
+  infrastructure and does not remove Git LFS download accounting.
+
 ### CodeQL Action Source Code
 
 **Location:** `/workdir/codeql-action`
@@ -71,7 +89,7 @@ The complete source code for the `github/codeql-action` repository is available 
 
 ## Further Reading
 
-- **CI/CD Strategy:** `docs/dev-notes/cicd-strategy.md` - Comprehensive CI/CD planning and implementation guide
+- **GHCR image package:** `docs/work-packages/20260813_weppcloud_private_canary_image/`
 - **CodeQL Action Repository:** `/workdir/codeql-action` - Full source code for reference
 - **GitHub Actions Documentation:** https://docs.github.com/en/actions
 - **SARIF Specification:** https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.html

@@ -9,6 +9,7 @@ import pytest
 
 import wepppy.nodb.core.climate as climate_module
 from wepppy.nodb.core.climate import Climate
+from wepppy.nodb.core.climate_multiple_build import ClimateMultipleBuildResult
 
 pytestmark = pytest.mark.unit
 
@@ -18,6 +19,22 @@ def _new_detached_climate(tmp_path: Path, logger_name: str) -> Climate:
     climate.wd = str(tmp_path)
     climate.logger = logging.getLogger(logger_name)
     climate._logger = climate.logger
+    climate._observed_start_year = 2001
+    climate._observed_end_year = 2002
+    climate._climatestation = "station-x"
+    climate._cligen_db = "legacy"
+    climate._adjust_mx_pt5 = False
+    climate._silent_pass_observed_quality_guard = True
+    climate._use_gridmet_wind_when_applicable = False
+    climate._climate_mode = 9
+    climate._climate_spatialmode = 2
+    climate.refresh_calls = 0
+
+    def _refresh_multiple_build_state():
+        climate.refresh_calls += 1
+        return climate
+
+    climate._refresh_multiple_build_state = _refresh_multiple_build_state
     return climate
 
 
@@ -188,11 +205,21 @@ def test_gridmet_multiple_build_delegates_to_service(
         *,
         build_observed_gridmet_interpolated_fn,
         ncpu: int,
-    ) -> bool:
+        inputs,
+    ) -> ClimateMultipleBuildResult:
         captured["instance"] = instance
         captured["build_fn"] = build_observed_gridmet_interpolated_fn
         captured["ncpu"] = ncpu
-        return False
+        captured["inputs"] = inputs
+        return ClimateMultipleBuildResult(
+            monthlies=[1.0] * 12,
+            cli_fn="wepp.cli",
+            par_fn="station.par",
+            sub_par_fns={},
+            sub_cli_fns={},
+            input_years=2,
+            quality_guard_bypassed=False,
+        )
 
     climate.locked = types.MethodType(_noop_locked, climate)
     climate.set_attrs = _set_attrs
@@ -204,6 +231,7 @@ def test_gridmet_multiple_build_delegates_to_service(
     assert captured["attrs"] == {"mode": "gridmet"}
     assert captured["build_fn"] is climate_module.build_observed_gridmet_interpolated
     assert captured["ncpu"] == climate_module.NCPU
+    assert climate.refresh_calls == 1
 
 
 def test_gridmet_single_build_uses_normalized_observed_year_bounds(
@@ -546,8 +574,16 @@ def test_gridmet_multiple_build_publishes_warning_state_from_service(
     def _set_attrs(attrs):
         captured["attrs"] = attrs
 
-    def _fake_build(*_args, **_kwargs) -> bool:
-        return True
+    def _fake_build(*_args, **_kwargs):
+        return ClimateMultipleBuildResult(
+            monthlies=[1.0] * 12,
+            cli_fn="wepp.cli",
+            par_fn="station.par",
+            sub_par_fns={},
+            sub_cli_fns={},
+            input_years=2,
+            quality_guard_bypassed=True,
+        )
 
     climate.locked = types.MethodType(_noop_locked, climate)
     climate.set_attrs = _set_attrs

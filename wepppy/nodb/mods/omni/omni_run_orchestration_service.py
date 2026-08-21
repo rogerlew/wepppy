@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import time
 from os.path import join as _join
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
@@ -206,8 +207,18 @@ class OmniRunOrchestrationService:
         omni: "Omni",
         scenario_def: "ScenarioDef",
     ) -> tuple[str, str]:
-        import os
+        """Run one scenario without changing the caller's process CWD."""
+        previous_cwd = os.getcwd()
+        try:
+            return self._run_omni_scenario(omni, scenario_def)
+        finally:
+            os.chdir(previous_cwd)
 
+    def _run_omni_scenario(
+        self,
+        omni: "Omni",
+        scenario_def: "ScenarioDef",
+    ) -> tuple[str, str]:
         from wepppy.nodb.core import Climate, Landuse, Soils, Wepp
         from wepppy.nodb.mods.disturbed import Disturbed
         from wepppy.nodb.mods.omni.omni import (

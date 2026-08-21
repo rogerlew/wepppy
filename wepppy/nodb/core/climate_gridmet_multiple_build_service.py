@@ -9,6 +9,10 @@ import numpy as np
 import pandas as pd
 
 from wepppy.climates.cligen import ClimateFile, Cligen, CligenStationsManager
+from wepppy.nodb.core.climate_multiple_build import (
+    ClimateMultipleBuildInputs,
+    ClimateMultipleBuildResult,
+)
 
 if TYPE_CHECKING:
     from wepppy.nodb.core.climate import Climate
@@ -23,7 +27,8 @@ class ClimateGridmetMultipleBuildService:
         *,
         build_observed_gridmet_interpolated_fn: Callable[..., tuple[str, bool]],
         ncpu: int,
-    ) -> bool:
+        inputs: ClimateMultipleBuildInputs | None = None,
+    ) -> ClimateMultipleBuildResult:
         (
             measure_enum,
             retrieve_nc,
@@ -37,12 +42,29 @@ class ClimateGridmetMultipleBuildService:
 
         watershed = climate.watershed_instance
         ws_lng, ws_lat = watershed.centroid
-        cli_dir = climate.cli_dir
-        start_year, end_year = climate._require_observed_year_bounds_for_build()
-        climate._input_years = end_year - start_year + 1
+        if inputs is None:
+            start_year, end_year = climate._require_observed_year_bounds_for_build()
+            cli_dir = climate.cli_dir
+            cligen_db = climate.cligen_db
+            climatestation = climate.climatestation
+            adjust_mx_pt5 = getattr(climate, "adjust_mx_pt5", False)
+            silent_pass_observed_quality_guard = getattr(
+                climate,
+                "silent_pass_observed_quality_guard",
+                True,
+            )
+        else:
+            start_year = inputs.observed_start_year
+            end_year = inputs.observed_end_year
+            cli_dir = inputs.cli_dir
+            cligen_db = inputs.cligen_db
+            climatestation = inputs.climatestation
+            adjust_mx_pt5 = inputs.adjust_mx_pt5
+            silent_pass_observed_quality_guard = inputs.silent_pass_observed_quality_guard
+        input_years = end_year - start_year + 1
 
-        station_manager = CligenStationsManager(version=climate.cligen_db)
-        station_meta = station_manager.get_station_fromid(climate.climatestation)
+        station_manager = CligenStationsManager(version=cligen_db)
+        station_meta = station_manager.get_station_fromid(climatestation)
         par_fn = station_meta.par
         cligen = Cligen(station_meta, wd=cli_dir)
 
@@ -97,15 +119,20 @@ class ClimateGridmetMultipleBuildService:
             cli_dir=cli_dir,
             build_observed_gridmet_interpolated_fn=build_observed_gridmet_interpolated_fn,
             ncpu=ncpu,
+            adjust_mx_pt5=adjust_mx_pt5,
+            silent_pass_observed_quality_guard=silent_pass_observed_quality_guard,
         )
 
         climate_file = ClimateFile(_join(cli_dir, cli_fn))
-        climate.monthlies = climate_file.calc_monthlies()
-        climate.cli_fn = cli_fn
-        climate.par_fn = par_fn
-        climate.sub_par_fns = sub_par_fns
-        climate.sub_cli_fns = sub_cli_fns
-        return any_quality_guard_bypassed
+        return ClimateMultipleBuildResult(
+            monthlies=climate_file.calc_monthlies(),
+            cli_fn=cli_fn,
+            par_fn=par_fn,
+            sub_par_fns=sub_par_fns,
+            sub_cli_fns=sub_cli_fns,
+            input_years=input_years,
+            quality_guard_bypassed=any_quality_guard_bypassed,
+        )
 
     @staticmethod
     def _load_gridmet_client_functions() -> tuple[Any, Any, Any, Any, Any]:
@@ -331,7 +358,14 @@ class ClimateGridmetMultipleBuildService:
         cli_dir: str,
         build_observed_gridmet_interpolated_fn: Callable[..., tuple[str, bool]],
         ncpu: int,
+        adjust_mx_pt5: bool | None = None,
+        silent_pass_observed_quality_guard: bool | None = None,
     ) -> tuple[dict[Any, str], dict[Any, str], str, bool]:
+        if adjust_mx_pt5 is None:
+            adjust_mx_pt5 = climate.adjust_mx_pt5
+        if silent_pass_observed_quality_guard is None:
+            silent_pass_observed_quality_guard = climate.silent_pass_observed_quality_guard
+
         sub_par_fns: dict[Any, str] = {}
         sub_cli_fns: dict[Any, str] = {}
         cli_fn = "wepp.cli"
@@ -357,8 +391,8 @@ class ClimateGridmetMultipleBuildService:
                         cli_dir,
                         _cli_fn,
                         _prn_fn,
-                        adjust_mx_pt5=climate.adjust_mx_pt5,
-                        silent_pass_observed_quality_guard=climate.silent_pass_observed_quality_guard,
+                        adjust_mx_pt5=adjust_mx_pt5,
+                        silent_pass_observed_quality_guard=silent_pass_observed_quality_guard,
                     )
                 )
 
@@ -379,8 +413,8 @@ class ClimateGridmetMultipleBuildService:
                     cli_dir,
                     cli_fn,
                     ws_prn_fn,
-                    adjust_mx_pt5=climate.adjust_mx_pt5,
-                    silent_pass_observed_quality_guard=climate.silent_pass_observed_quality_guard,
+                    adjust_mx_pt5=adjust_mx_pt5,
+                    silent_pass_observed_quality_guard=silent_pass_observed_quality_guard,
                 )
             )
 

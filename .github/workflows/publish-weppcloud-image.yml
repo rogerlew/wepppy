@@ -10,14 +10,39 @@ permissions:
   contents: read
   packages: write
 
+concurrency:
+  group: publish-weppcloud-image
+  cancel-in-progress: false
+
 jobs:
   publish:
-    runs-on: ubuntu-24.04
+    runs-on:
+      - self-hosted
+      - Linux
+      - X64
+      - ghcr-builder
+    env:
+      GIT_LFS_SKIP_SMUDGE: "1"
+      WEPPPY_LFS_STORAGE: /home/roger/.cache/wepppy-lfs
+      WEPPPY_BUILDX_CACHE: /home/roger/.cache/wepppy-buildx
+      WEPPPY_BUILDX_CACHE_NEXT: /home/roger/.cache/wepppy-buildx-next
     outputs:
       image: ${{ steps.image.outputs.name }}
       tag: ${{ steps.image.outputs.tag }}
       digest: ${{ steps.build.outputs.digest }}
     steps:
+      - name: Prepare the persistent local Git LFS object store
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(realpath -e /home/roger/.cache)" = "/home/roger/.cache"
+          test "$(stat -c '%U:%a' /home/roger/.cache)" = "$(id -un):700"
+          test ! -L "${WEPPPY_LFS_STORAGE}"
+          mkdir -p "${WEPPPY_LFS_STORAGE}/objects"
+          chmod 700 "${WEPPPY_LFS_STORAGE}"
+          test "$(realpath -e "${WEPPPY_LFS_STORAGE}")" = "${WEPPPY_LFS_STORAGE}"
+          test "$(stat -c '%U' "${WEPPPY_LFS_STORAGE}")" = "$(id -un)"
+
       - name: Check out the dispatched source commit
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
@@ -30,6 +55,17 @@ jobs:
           git lfs install --local
           git lfs pull --include="*" --exclude=""
           git lfs checkout
+          python3 tools/verify_lfs_materialized.py --tracked
+
+      - name: Materialize and verify every Git LFS asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          git lfs install --local
+          git config --local lfs.storage "${WEPPPY_LFS_STORAGE}"
+          git lfs fetch origin "${GITHUB_SHA}"
+          git lfs checkout
+          git lfs fsck
           python3 tools/verify_lfs_materialized.py --tracked
 
       - name: Derive immutable image coordinates
@@ -53,6 +89,30 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
 
+      - name: Prepare the persistent local BuildKit cache export
+        id: build-cache
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${WEPPPY_BUILDX_CACHE}" = "/home/roger/.cache/wepppy-buildx"
+          test "${WEPPPY_BUILDX_CACHE_NEXT}" = "/home/roger/.cache/wepppy-buildx-next"
+          test "$(realpath -e /home/roger/.cache)" = "/home/roger/.cache"
+          test "$(stat -c '%U:%a' /home/roger/.cache)" = "$(id -un):700"
+          for cache_path in "${WEPPPY_BUILDX_CACHE}" "${WEPPPY_BUILDX_CACHE_NEXT}"; do
+            if test -e "${cache_path}" || test -L "${cache_path}"; then
+              test -d "${cache_path}"
+              test ! -L "${cache_path}"
+              test "$(realpath -e "${cache_path}")" = "${cache_path}"
+              test "$(stat -c '%U' "${cache_path}")" = "$(id -un)"
+            fi
+          done
+          rm -rf -- "${WEPPPY_BUILDX_CACHE_NEXT}"
+          if test -f "${WEPPPY_BUILDX_CACHE}/index.json"; then
+            echo "cache-from=type=local,src=${WEPPPY_BUILDX_CACHE}" >> "${GITHUB_OUTPUT}"
+          else
+            echo "cache-from=" >> "${GITHUB_OUTPUT}"
+          fi
+
       - name: Build and push the existing common runtime image
         id: build
         uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
@@ -62,6 +122,8 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: ${{ steps.image.outputs.ref }}
+          cache-from: ${{ steps.build-cache.outputs.cache-from }}
+          cache-to: type=local,dest=${{ env.WEPPPY_BUILDX_CACHE_NEXT }},mode=max
           build-args: |
             STATIC_BUILDER_IMAGE=node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
             RUNTIME_BASE_IMAGE=python:3.12-slim@sha256:229a2c5bfa27522db7815ea81f9bed70af17ccb9de9fc7ad142b1877b5830d36
@@ -77,6 +139,29 @@ jobs:
           labels: |
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+
+      - name: Promote the successful BuildKit cache export
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -d "${WEPPPY_BUILDX_CACHE_NEXT}"
+          test "${WEPPPY_BUILDX_CACHE}" = "/home/roger/.cache/wepppy-buildx"
+          test "${WEPPPY_BUILDX_CACHE_NEXT}" = "/home/roger/.cache/wepppy-buildx-next"
+          test "$(realpath -e /home/roger/.cache)" = "/home/roger/.cache"
+          test "$(stat -c '%U:%a' /home/roger/.cache)" = "$(id -un):700"
+          if test -e "${WEPPPY_BUILDX_CACHE}" || test -L "${WEPPPY_BUILDX_CACHE}"; then
+            test -d "${WEPPPY_BUILDX_CACHE}"
+            test ! -L "${WEPPPY_BUILDX_CACHE}"
+            test "$(realpath -e "${WEPPPY_BUILDX_CACHE}")" = "${WEPPPY_BUILDX_CACHE}"
+            test "$(stat -c '%U' "${WEPPPY_BUILDX_CACHE}")" = "$(id -un)"
+          fi
+          test -d "${WEPPPY_BUILDX_CACHE_NEXT}"
+          test ! -L "${WEPPPY_BUILDX_CACHE_NEXT}"
+          test "$(realpath -e "${WEPPPY_BUILDX_CACHE_NEXT}")" = "${WEPPPY_BUILDX_CACHE_NEXT}"
+          test "$(stat -c '%U' "${WEPPPY_BUILDX_CACHE_NEXT}")" = "$(id -un)"
+          rm -rf -- "${WEPPPY_BUILDX_CACHE}"
+          mv -- "${WEPPPY_BUILDX_CACHE_NEXT}" "${WEPPPY_BUILDX_CACHE}"
+          chmod 700 "${WEPPPY_BUILDX_CACHE}"
 
       - name: Report immutable image digest
         shell: bash

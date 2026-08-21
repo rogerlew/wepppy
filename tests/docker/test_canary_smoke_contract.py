@@ -16,6 +16,26 @@ WORKFLOW_FILE = REPO_ROOT / ".github" / "workflows" / "publish-weppcloud-image.y
 FULL_SHA = re.compile(r"^[0-9a-f]{40}$")
 
 
+def _require_docker_compose() -> None:
+    """Skip local contract validation when Docker Compose v2 is unavailable."""
+
+    try:
+        result = subprocess.run(
+            ["docker", "compose", "version"],
+            cwd=REPO_ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+    except OSError as exc:
+        pytest.skip(f"Docker Compose v2 is unavailable in this environment: {exc}")
+
+    if result.returncode != 0:
+        detail = (result.stderr or result.stdout).strip().splitlines()
+        reason = detail[-1] if detail else "the Docker Compose capability probe failed"
+        pytest.skip(f"Docker Compose v2 is unavailable in this environment: {reason}")
+
+
 def _smoke_environment() -> dict[str, str]:
     return {
         **os.environ,
@@ -27,7 +47,9 @@ def _smoke_environment() -> dict[str, str]:
     }
 
 
+@pytest.mark.requires_docker
 def test_compose_contract_renders_only_minimum_isolated_services() -> None:
+    _require_docker_compose()
     result = subprocess.run(
         ["docker", "compose", "-f", str(COMPOSE_FILE), "config", "--format", "json"],
         cwd=REPO_ROOT,

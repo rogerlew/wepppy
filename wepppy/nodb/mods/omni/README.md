@@ -398,6 +398,12 @@ wepppy/weppcloud/templates/controls/
 7. **Reporting**: `Omni.scenarios_report()` concatenates per-scenario output files into a unified DataFrame
 8. **Dependency updates**: SHA1 hashes of dependency outputs are stored; subsequent runs skip unchanged scenarios
 
+Scenario execution may temporarily use the scenario working directory for
+legacy relative-path operations, but `OmniRunOrchestrationService` restores the
+caller process's current working directory before returning or re-raising. Tests
+and callers should still resolve repository-owned artifacts from explicit root
+paths rather than relying on process CWD.
+
 ### Treatment Build + WEPP Prep Workflow (Per Scenario)
 
 1. `run_omni_scenario_rq()` loads `Omni` and calls `omni.run_omni_scenario(scenario_def)`.

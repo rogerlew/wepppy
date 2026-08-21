@@ -99,6 +99,7 @@ class _ClimateStub:
         self.dump_called = False
         self.year_bounds_calls = 0
         self.quality_guard_bypass_published: list[bool] = []
+        self.refresh_calls = 0
 
     @contextlib.contextmanager
     def locked(self):
@@ -126,6 +127,10 @@ class _ClimateStub:
             self.quality_guard_bypass_published.append(bool(args[0]))
             return
         self.quality_guard_bypass_published.append(False)
+
+    def _refresh_multiple_build_state(self):
+        self.refresh_calls += 1
+        return self
 
 
 class _MonthliesClimateFile:
@@ -922,3 +927,42 @@ def test_run_observed_daymet_multiple_build_sets_final_outputs(
     assert climate.sub_par_fns == {"1": "a.prn"}
     assert climate.sub_cli_fns == {"1": "a.cli"}
     assert climate.quality_guard_bypass_published == [True]
+    assert climate.refresh_calls == 1
+
+
+def test_run_observed_daymet_multiple_build_collection_failure_does_not_finalize(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    climate = _ClimateStub(tmp_path)
+
+    monkeypatch.setattr(
+        helper_module,
+        "_prepare_daymet_multiple_context",
+        lambda *_args, **_kwargs: (
+            climate.watershed_instance,
+            -120.5,
+            45.5,
+            climate.cli_dir,
+            2001,
+            2002,
+            "ws.par",
+            object(),
+        ),
+    )
+    monkeypatch.setattr(helper_module, "_build_daymet_hillslope_locations", lambda *_args: {"ws": {}})
+
+    def _fail_collection(*_args, **_kwargs):
+        raise RuntimeError("collection failed")
+
+    monkeypatch.setattr(helper_module, "_interpolate_daymet_hillslope_series", _fail_collection)
+
+    with pytest.raises(RuntimeError, match="collection failed"):
+        helper_module.run_observed_daymet_multiple_build(climate)
+
+    assert climate.monthlies is None
+    assert climate.cli_fn is None
+    assert climate.par_fn is None
+    assert climate.sub_par_fns is None
+    assert climate.sub_cli_fns is None
+    assert climate.quality_guard_bypass_published == []

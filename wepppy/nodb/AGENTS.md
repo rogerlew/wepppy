@@ -84,6 +84,10 @@ Canonical behavioral contract:
 * The authoritative requirements and rationale are in
   `docs/schemas/nodb-persistence-concurrency-contract.md` under "Writer
   Ownership and Mutation Topology."
+* Long-running derived builders may collect outside the lock and finalize only
+  after fresh hydration, explicit relevant-input comparison, and allowlisted
+  derived-field application. Conflicts must be explicit; generic whole-object
+  merging is not permitted.
 
 ## Cache Refresh Semantics
 

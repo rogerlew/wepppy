@@ -22,6 +22,7 @@ __all__ = [
     'NoClimateStationSelectedError',
     'ClimateModeIsUndefinedError',
     'ClimateNoDbLockedException',
+    'ClimateMultipleBuildSupersededError',
     'ClimateStationMode',
     'ClimateMode',
     'ClimateSpatialMode',
@@ -66,6 +67,10 @@ class ClimateModeIsUndefinedError(Exception):
     def __init__(self) -> None: ...
 
 class ClimateNoDbLockedException(Exception): ...
+
+class ClimateMultipleBuildSupersededError(RuntimeError):
+    changed_fields: Tuple[str, ...]
+    def __init__(self, changed_fields: Tuple[str, ...]) -> None: ...
 
 class ClimateStationMode(IntEnum):
     FindClosestAtRuntime = -1

@@ -82,6 +82,12 @@ coverage demonstrating that representative interleavings do not lose unrelated
 updates. See the authoritative contract's "Writer Ownership and Mutation
 Topology" section for the normative requirements.
 
+Long-running derived builders may use the collect-then-finalize variant: snapshot
+the inputs that determine the result, collect outside the lock, then rehydrate
+durable state under a short finalizer lock. The finalizer rejects changed
+relevant inputs and applies only an explicit derived-field allowlist; it does
+not merge a stale whole-controller object.
+
 ## WEPP Hillslope Timeout Policy
 
 Continuous hillslope runs use the default 60-second `wepp_runner.run_hillslope` timeout for single-OFE projects. MOFE projects route continuous hillslope execution through `WeppRunService` with a 300-second timeout because each WEPP invocation can route many OFEs for one hillslope. The timeout appears in the service log line as `Running Hillslopes with max_workers=..., timeout=...s` and is passed unchanged to the runner so timeout errors continue to report the command, run file, error file, attempts, and last observed WEPP output.

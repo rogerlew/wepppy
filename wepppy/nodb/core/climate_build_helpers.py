@@ -42,6 +42,12 @@ from wepppy.climates.prism.daily_client import (
 from wepppy.query_engine.activate import update_catalog_entry
 from wepppyo3.climate import calculate_p_annual_monthlies as pyo3_cli_calculate_annual_monthlies
 from wepppyo3.climate import cli_revision as pyo3_cli_revision
+from wepppy.nodb.core.climate_multiple_build import (
+    ClimateMultipleBuildInputs,
+    ClimateMultipleBuildResult,
+    capture_multiple_build_inputs,
+    finalize_multiple_build,
+)
 
 if TYPE_CHECKING:
     from wepppy.nodb.core.climate import Climate
@@ -1261,16 +1267,26 @@ def run_mod_build(
             climate.sub_cli_fns = sub_cli_fns
 
 
-def _prepare_daymet_multiple_context(climate: "Climate") -> tuple[Any, float, float, str, int, int, str, Cligen]:
+def _prepare_daymet_multiple_context(
+    climate: "Climate",
+    inputs: ClimateMultipleBuildInputs | None = None,
+) -> tuple[Any, float, float, str, int, int, str, Cligen]:
     watershed = climate.watershed_instance
     ws_lng, ws_lat = watershed.centroid
-    cli_dir = climate.cli_dir
-    start_year, end_year = climate._require_observed_year_bounds_for_build()
+    if inputs is None:
+        start_year, end_year = climate._require_observed_year_bounds_for_build()
+        cli_dir = climate.cli_dir
+        cligen_db = climate.cligen_db
+        climatestation = climate.climatestation
+    else:
+        start_year = inputs.observed_start_year
+        end_year = inputs.observed_end_year
+        cli_dir = inputs.cli_dir
+        cligen_db = inputs.cligen_db
+        climatestation = inputs.climatestation
     assert end_year <= climate.daymet_last_available_year, end_year
-    climate._input_years = end_year - start_year + 1
 
-    station_manager = CligenStationsManager(version=climate.cligen_db)
-    climatestation = climate.climatestation
+    station_manager = CligenStationsManager(version=cligen_db)
     station_meta = station_manager.get_station_fromid(climatestation)
     par_fn = station_meta.par
     cligen = Cligen(station_meta, wd=cli_dir)
@@ -1285,14 +1301,20 @@ def _build_daymet_hillslope_locations(watershed: Any, ws_lng: float, ws_lat: flo
     return hillslope_locations
 
 
-def _interpolate_daymet_hillslope_series(climate: "Climate", cli_dir: str, hillslope_locations: dict[str, dict[str, float]]) -> None:
+def _interpolate_daymet_hillslope_series(
+    climate: "Climate",
+    cli_dir: str,
+    hillslope_locations: dict[str, dict[str, float]],
+    start_year: int,
+    end_year: int,
+) -> None:
     from wepppy.climates.daymet.daymet_singlelocation_client import interpolate_daily_timeseries
 
     with climate.timed("  interpolating daymet grids"):
         interpolate_daily_timeseries(
             hillslope_locations,
-            climate.observed_start_year,
-            climate.observed_end_year,
+            start_year,
+            end_year,
             output_dir=cli_dir,
             output_type="prn parquet",
             logger=climate.logger,
@@ -1305,8 +1327,11 @@ def _resolve_daymet_wind(
     ws_lat: float,
     start_year: int,
     end_year: int,
+    use_gridmet_wind_when_applicable: bool | None = None,
 ) -> tuple[Optional[Any], Optional[Any]]:
-    if not climate.use_gridmet_wind_when_applicable:
+    if use_gridmet_wind_when_applicable is None:
+        use_gridmet_wind_when_applicable = climate.use_gridmet_wind_when_applicable
+    if not use_gridmet_wind_when_applicable:
         return None, None
 
     with climate.timed("  retrieving gridmet wind"):
@@ -1333,7 +1358,14 @@ def _submit_daymet_futures(
     cli_dir: str,
     wind_vs: Optional[Any],
     wind_dir: Optional[Any],
+    adjust_mx_pt5: bool | None = None,
+    silent_pass_observed_quality_guard: bool | None = None,
 ) -> tuple[list[Any], dict[str, str], dict[str, str], str]:
+    if adjust_mx_pt5 is None:
+        adjust_mx_pt5 = climate.adjust_mx_pt5
+    if silent_pass_observed_quality_guard is None:
+        silent_pass_observed_quality_guard = climate.silent_pass_observed_quality_guard
+
     futures: list[Any] = []
     sub_par_fns: dict[str, str] = {}
     sub_cli_fns: dict[str, str] = {}
@@ -1357,8 +1389,8 @@ def _submit_daymet_futures(
                 prn_fn,
                 wind_vs=wind_vs,
                 wind_dir=wind_dir,
-                adjust_mx_pt5=climate.adjust_mx_pt5,
-                silent_pass_observed_quality_guard=climate.silent_pass_observed_quality_guard,
+                adjust_mx_pt5=adjust_mx_pt5,
+                silent_pass_observed_quality_guard=silent_pass_observed_quality_guard,
             )
         )
         sub_par_fns[topaz_id] = prn_fn
@@ -1381,8 +1413,8 @@ def _submit_daymet_futures(
             ws_prn_fn,
             wind_vs=wind_vs,
             wind_dir=wind_dir,
-            adjust_mx_pt5=climate.adjust_mx_pt5,
-            silent_pass_observed_quality_guard=climate.silent_pass_observed_quality_guard,
+            adjust_mx_pt5=adjust_mx_pt5,
+            silent_pass_observed_quality_guard=silent_pass_observed_quality_guard,
         )
     )
 
@@ -1423,19 +1455,25 @@ def _wait_for_daymet_futures(climate: "Climate", futures: list[Any], executor: P
 
 
 def _finalize_daymet_multiple_build(
-    climate: "Climate",
     cli_dir: str,
     cli_fn: str,
     par_fn: str,
     sub_par_fns: dict[str, str],
     sub_cli_fns: dict[str, str],
-) -> None:
+    *,
+    input_years: int,
+    quality_guard_bypassed: bool,
+) -> ClimateMultipleBuildResult:
     climate_file = ClimateFile(_join(cli_dir, cli_fn))
-    climate.monthlies = climate_file.calc_monthlies()
-    climate.cli_fn = cli_fn
-    climate.par_fn = par_fn
-    climate.sub_par_fns = sub_par_fns
-    climate.sub_cli_fns = sub_cli_fns
+    return ClimateMultipleBuildResult(
+        monthlies=climate_file.calc_monthlies(),
+        cli_fn=cli_fn,
+        par_fn=par_fn,
+        sub_par_fns=sub_par_fns,
+        sub_cli_fns=sub_cli_fns,
+        input_years=input_years,
+        quality_guard_bypassed=quality_guard_bypassed,
+    )
 
 
 def run_observed_daymet_multiple_build(
@@ -1443,50 +1481,64 @@ def run_observed_daymet_multiple_build(
     verbose: bool = False,
     attrs: Optional[dict[str, Any]] = None,
 ) -> bool:
-    with climate.locked():
-        climate.set_attrs(attrs)
-        climate.logger.info("  running _build_climate_observed_daymet_multiple")
+    climate.set_attrs(attrs)
+    climate.logger.info("  running _build_climate_observed_daymet_multiple")
+    snapshot = capture_multiple_build_inputs(climate)
 
-        (
+    (
+        watershed,
+        ws_lng,
+        ws_lat,
+        cli_dir,
+        start_year,
+        end_year,
+        par_fn,
+        cligen,
+    ) = _prepare_daymet_multiple_context(climate, snapshot)
+    hillslope_locations = _build_daymet_hillslope_locations(watershed, ws_lng, ws_lat)
+    _interpolate_daymet_hillslope_series(
+        climate,
+        cli_dir,
+        hillslope_locations,
+        start_year,
+        end_year,
+    )
+    wind_vs, wind_dir = _resolve_daymet_wind(
+        climate,
+        ws_lng,
+        ws_lat,
+        start_year,
+        end_year,
+        snapshot.use_gridmet_wind_when_applicable,
+    )
+    cligen.stage_station_parameter_file()
+
+    with ProcessPoolExecutor(max_workers=_resolve_daymet_worker_count()) as executor:
+        futures, sub_par_fns, sub_cli_fns, cli_fn = _submit_daymet_futures(
+            climate,
+            executor,
             watershed,
+            cligen,
             ws_lng,
             ws_lat,
-            cli_dir,
             start_year,
             end_year,
-            par_fn,
-            cligen,
-        ) = _prepare_daymet_multiple_context(climate)
-        hillslope_locations = _build_daymet_hillslope_locations(watershed, ws_lng, ws_lat)
-        _interpolate_daymet_hillslope_series(climate, cli_dir, hillslope_locations)
-        wind_vs, wind_dir = _resolve_daymet_wind(climate, ws_lng, ws_lat, start_year, end_year)
-        cligen.stage_station_parameter_file()
-
-        with ProcessPoolExecutor(max_workers=_resolve_daymet_worker_count()) as executor:
-            futures, sub_par_fns, sub_cli_fns, cli_fn = _submit_daymet_futures(
-                climate,
-                executor,
-                watershed,
-                cligen,
-                ws_lng,
-                ws_lat,
-                start_year,
-                end_year,
-                cli_dir,
-                wind_vs,
-                wind_dir,
-            )
-            any_quality_guard_bypassed = _wait_for_daymet_futures(climate, futures, executor)
-
-        _finalize_daymet_multiple_build(
-            climate,
             cli_dir,
-            cli_fn,
-            par_fn,
-            sub_par_fns,
-            sub_cli_fns,
+            wind_vs,
+            wind_dir,
+            adjust_mx_pt5=snapshot.adjust_mx_pt5,
+            silent_pass_observed_quality_guard=snapshot.silent_pass_observed_quality_guard,
         )
-        climate._publish_quality_guard_bypass_warning_if_needed(
-            quality_guard_bypassed=any_quality_guard_bypassed
-        )
-        return any_quality_guard_bypassed
+        any_quality_guard_bypassed = _wait_for_daymet_futures(climate, futures, executor)
+
+    result = _finalize_daymet_multiple_build(
+        cli_dir,
+        cli_fn,
+        par_fn,
+        sub_par_fns,
+        sub_cli_fns,
+        input_years=end_year - start_year + 1,
+        quality_guard_bypassed=any_quality_guard_bypassed,
+    )
+    finalize_multiple_build(climate, snapshot, result)
+    return result.quality_guard_bypassed

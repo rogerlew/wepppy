@@ -46,6 +46,28 @@ This pattern keeps expensive work outside the shared commit path and makes
 writer ownership observable. It is preferred, not mandatory: some workflows
 cannot defer every state change to one writer.
 
+### Long-running collect-then-finalize pattern
+
+A long-running workflow MAY snapshot the persisted inputs that determine its
+derived outputs, collect those outputs without holding the NoDb lock, and then
+finalize them in a short lock transaction. The finalizer MUST rehydrate the
+current durable controller while holding the lock and compare every relevant
+input in the snapshot with the refreshed state before publishing results.
+
+- If a relevant input changed, the finalizer MUST return or raise an explicit
+  conflict/superseded outcome and MUST NOT publish the collected outputs.
+- If relevant inputs are unchanged, the finalizer MUST apply an explicit
+  allowlist of collected derived fields only; it MUST preserve unrelated fields
+  from the refreshed controller.
+- The collected result MUST NOT be a serialized whole-controller mutation base,
+  and the finalizer MUST NOT perform a generic automatic object merge.
+- Collection failure MUST leave the NoDb controller unmodified; the finalizer
+  remains the sole persistence boundary for collected derived state.
+
+This pattern is a specialized form of the bounded read-modify-write
+transaction above. It does not weaken stale-write detection and does not
+authorize retrying `dump()` on a stale object.
+
 ### Permitted multiple-writer pattern
 
 Multiple processes or jobs MAY mutate the same NoDb file when a single writer

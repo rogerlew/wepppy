@@ -13,6 +13,7 @@ import wepppy.climates.gridmet.client as gridmet_client
 from wepppy.nodb.core.climate_gridmet_multiple_build_service import (
     ClimateGridmetMultipleBuildService,
 )
+from wepppy.nodb.core.climate_multiple_build import ClimateMultipleBuildResult
 
 pytestmark = pytest.mark.unit
 
@@ -366,14 +367,16 @@ def test_gridmet_build_stages_station_before_cli_worker_pool(
         _require_observed_year_bounds_for_build=lambda: (2026, 2026),
     )
 
-    assert (
-        service.build(
-            climate,
-            build_observed_gridmet_interpolated_fn=lambda *_args, **_kwargs: ("ws", False),
-            ncpu=2,
-        )
-        is False
+    result = service.build(
+        climate,
+        build_observed_gridmet_interpolated_fn=lambda *_args, **_kwargs: ("ws", False),
+        ncpu=2,
     )
+    assert isinstance(result, ClimateMultipleBuildResult)
+    assert result.quality_guard_bypassed is False
+    assert result.input_years == 1
+    assert not hasattr(climate, "monthlies")
+    assert not hasattr(climate, "cli_fn")
     assert events == ["stage", "pool"]
 
 
