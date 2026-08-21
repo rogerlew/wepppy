@@ -8,7 +8,7 @@ output:
     fig_caption: true
     theme: axist
     mathjax: default
-    use_fontawesome: true
+    use_fontawesome: false
     toc: true
 params:
   proj_runid: default

@@ -373,6 +373,11 @@ until bounded reconnect/reconciliation fails.
   NetworkPolicies. Only documented storage traffic needed by the PVC provider
   MAY be allowed. Kubernetes API, cloud metadata, unrelated cluster services,
   and external egress MUST remain denied.
+- Report templates and renderer dependencies MUST NOT fetch JavaScript, CSS,
+  fonts, or other presentation assets at runtime. Required assets MUST be
+  versioned and checksum-pinned into the immutable renderer image, retain their
+  applicable license notices, and be embedded into the self-contained report
+  from that local copy.
 - Routine rendering MUST NOT use Kubernetes `pods/exec`. Pod exec grants
   arbitrary command execution, bypasses per-render scheduling and resource
   accounting, and cannot be restricted by standard RBAC to the approved R
