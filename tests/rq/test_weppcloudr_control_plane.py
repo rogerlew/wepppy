@@ -251,6 +251,16 @@ def test_job_spec_is_fixed_hardened_and_uses_root_squash_safe_mount() -> None:
     assert "fsGroup" not in pod["securityContext"]
     assert container["image"] == f"ghcr.io/open-wepp/weppcloudr@{IMAGE}"
     assert container["workingDir"] == "/tmp"
+    assert container["env"] == [
+        {
+            "name": "TEMPLATE_ROOT",
+            "value": "/srv/weppcloudr/templates/scripts/users/chinmay",
+        },
+        {
+            "name": "DEVAL_TEMPLATE",
+            "value": "/srv/weppcloudr/templates/scripts/users/chinmay/new_report.Rmd",
+        },
+    ]
     assert container["command"] == ["/bin/sh", "-c"]
     assert container["args"] == [
         (
