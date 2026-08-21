@@ -225,18 +225,21 @@ build_error_diagnostics <- function(err) {
   ))
 }
 
-render_deval <- function(run_path, runid, config = NULL, skip_cache = FALSE, parquet_overrides = NULL) {
+render_deval <- function(run_path, runid, config = NULL, skip_cache = FALSE, parquet_overrides = NULL, output_file_override = NULL) {
   template_path <- DEFAULT_TEMPLATE
   if (!file.exists(template_path)) {
-    log_warn("Template {template_path} not found; returning placeholder HTML")
-    return("<html><body><h3>DEVAL report template missing</h3></body></html>")
+    stop(glue("DEVAL report template not found: {template_path}"))
   }
   previous_overrides <- getOption("weppcloudr_parquet_overrides", NULL)
   options(weppcloudr_parquet_overrides = parquet_overrides)
   on.exit(options(weppcloudr_parquet_overrides = previous_overrides), add = TRUE)
   output_dir <- file.path(run_path, "export", "WEPPcloudR")
   dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
-  output_file <- file.path(output_dir, glue("deval_{runid}.htm"))
+  output_file <- if (is.null(output_file_override)) {
+    file.path(output_dir, glue("deval_{runid}.htm"))
+  } else {
+    output_file_override
+  }
   anchor_runid <- if (!is.null(runid) && nzchar(runid)) runid else "unknown-run"
   anchor_path <- if (!is.null(config) && nzchar(config)) {
     glue("/weppcloud/runs/{anchor_runid}/{config}")
@@ -249,10 +252,12 @@ render_deval <- function(run_path, runid, config = NULL, skip_cache = FALSE, par
     proj_run_label = anchor_runid
   )
   log_info("Rendering DEVAL report", runid = runid, config = config, template = template_path, output = output_file)
-  log_path <- file.path(output_dir, "render.log")
   append_log <- function(level, message) {
-    line <- sprintf("%s [%s] %s\n", format(Sys.time(), tz = "UTC", usetz = TRUE), level, message)
-    cat(line, file = log_path, append = TRUE)
+    if (identical(level, "ERROR")) {
+      log_error(message, runid = runid, config = config)
+    } else {
+      log_info(message, runid = runid, config = config)
+    }
   }
   append_log("INFO", glue("Checking render cache for run {runid}"))
   if (!skip_cache && file.exists(output_file)) {
@@ -263,15 +268,28 @@ render_deval <- function(run_path, runid, config = NULL, skip_cache = FALSE, par
     append_log("INFO", glue("Cache bypass requested for run {runid}; regenerating report"))
   }
   append_log("INFO", glue("Starting render for run {runid}"))
+  render_target <- output_file
+  publish_after_render <- is.null(output_file_override)
+  if (publish_after_render) {
+    render_target <- tempfile(
+      pattern = paste0(".deval_", runid, "."),
+      tmpdir = output_dir,
+      fileext = ".tmp.htm"
+    )
+    on.exit(unlink(render_target, force = TRUE), add = TRUE)
+  }
   tryCatch(
     {
       rmarkdown::render(
         input = template_path,
         params = params,
-        output_file = output_file,
-        output_dir = output_dir,
+        output_file = render_target,
+        output_dir = dirname(render_target),
         envir = new.env(parent = globalenv())
       )
+      if (publish_after_render && !file.rename(render_target, output_file)) {
+        stop("atomic DEVAL report publication failed")
+      }
       append_log("INFO", glue("Render succeeded for run {runid}"))
       readChar(output_file, file.info(output_file)$size, useBytes = TRUE)
     },

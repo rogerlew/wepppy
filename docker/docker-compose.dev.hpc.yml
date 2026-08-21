@@ -581,25 +581,6 @@ services:
         tail -f /dev/null
     profiles: ["webpush"]
 
-  f-esri:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile.f-esri
-    image: wepppy-f-esri
-    container_name: wepppy-f-esri
-    init: true
-    user: "${UID:-1000}:${GID:-993}"
-    working_dir: /workdir/wepppy
-    command: ["tail", "-f", "/dev/null"]
-    volumes:
-      - ../:/workdir/wepppy
-      - ../../rosetta:/workdir/rosetta
-      - ../../peridot:/workdir/peridot
-      - ../../weppcloud-wbt:/workdir/weppcloud-wbt
-      - ../../wepppyo3:/workdir/wepppyo3
-      - /tank/wc1:/wc1
-      - /tank/geodata:/geodata
-
   redis:
     image: redis:latest
     container_name: wepppy-redis

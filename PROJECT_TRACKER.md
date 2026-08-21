@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-08-21
-**Active Packages**: 26
+**Active Packages**: 27
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 25 packages (above target range; calculated from the package entries in the In Progress section)
+**Current WIP**: 26 packages (above target range; calculated from the 26 package entries in the In Progress section)
 
 ### 3. Manage Flow
 Monitor how long packages spend in each column:
@@ -381,6 +381,32 @@ When resuming Kubernetes work:
 
 ## 🚧 In Progress
 
+### Direct OpenFileGDB Cutover
+
+**Started**: 2026-08-21
+
+**Size**: Medium
+
+**Priority**: High
+
+**Security impact**: `high` (worker subprocess/file generation and deployment
+wiring; dedicated review required)
+
+**Link**: [docs/work-packages/20260821_openfilegdb_cutover/](docs/work-packages/20260821_openfilegdb_cutover/)
+
+**Description**: Direct GDAL 3.10.3 `OpenFileGDB` conversion is implemented
+with explicit capability checks, bounded subprocess execution, cleanup,
+permissions, first-level `.gdb` ZIP layout, and real readback coverage. The
+Esri SDK image, sidecar, compatibility modules, Compose dependencies, vendor
+paths, CI input, host setup, and deployment clone have been removed while the
+legacy `f_esri` request alias remains supported.
+
+**Status**: Implementation and local validation complete; independent reviews,
+forest rollout, and separately authorized production/Kubernetes promotion
+remain.
+
+---
+
 ### EU Disturbed Soil Building Data-Quality Hardening
 
 **Started**: 2026-08-19
@@ -583,7 +609,7 @@ authentication tokens from logs, restore persistent security logging under
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 23 packages (calculated from the In Progress section)
+**Current WIP Count**: 24 packages (calculated from the In Progress section)
 
 ### SSURGO Intelligent Fallback Empirical Study
 **Started**: 2026-07-21
@@ -1075,6 +1101,21 @@ remediated unintended pull-request eligibility, discarded the exposed cache,
 and required direct negative-path evidence. Hardened run 32457043609 passed and
 published a digest-qualified image. Node 20 Action upgrades and routine cache
 monitoring remain low-priority follow-ups.
+
+---
+
+### WEPPcloudR Execution Backend Refactor
+
+**Completed**: 2026-08-21
+**Status**: ✅ **COMPLETE** for repository scope
+**Security impact**: `high`
+**Link**: [docs/work-packages/20260821_weppcloudr_execution_backend_refactor/](docs/work-packages/20260821_weppcloudr_execution_backend_refactor/)
+
+**Summary**: Added explicit Docker-exec and Kubernetes-Job render boundaries,
+durable reconciliation/cancellation/fencing contracts, and a strict one-shot R
+entrypoint while preserving Compose topology and mounts. The authorized forest
+Docker-exec render and all independent reviews passed. Kubernetes image build
+and cluster deployment remain a separate package.
 
 ---
 

@@ -3,6 +3,7 @@ import json
 import io
 
 import pathlib
+import stat
 from pathlib import Path
 from subprocess import Popen, PIPE
 from urllib.parse import quote
@@ -20,13 +21,15 @@ from flask import Response, abort, Blueprint, current_app, request, render_templ
 from flask_security import current_user
 from werkzeug.exceptions import HTTPException
 
-from rq import Queue
+from rq import Queue, Retry
 from rq.exceptions import NoSuchJobError
 from rq.job import Job
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.redis_prep import RedisPrep
 from wepppy.rq.weppcloudr_rq import render_deval_details_rq
+from wepppy.rq.job_id import new_rq_job_id
+from wepppy.rq.weppcloudr_backends import RenderRequest, validate_request
 
 from wepppy.weppcloud.utils.helpers import authorize, get_wd, exception_factory, url_for_run
 from wepppy.weppcloud.utils.cap_guard import requires_cap
@@ -416,7 +419,18 @@ def _enqueue_deval_job(
             if prep:
                 _clear_tracked_job(prep, job_key)
 
-        job_kwargs = {'skip_cache': bool(skip_cache)}
+        backend = current_app.config.get(
+            'WEPPCLOUDR_EXECUTION_BACKEND',
+            os.getenv('WEPPCLOUDR_EXECUTION_BACKEND', 'docker-exec'),
+        )
+        if backend not in {'docker-exec', 'kubernetes-job'}:
+            raise RuntimeError(f"Unknown WEPPcloudR execution backend: {backend!r}")
+
+        job_kwargs = {
+            'skip_cache': bool(skip_cache),
+            'run_root': str(ctx.run_root),
+            'backend': backend,
+        }
 
         container_name = current_app.config.get('WEPPCLOUDR_CONTAINER')
         if container_name:
@@ -426,15 +440,88 @@ def _enqueue_deval_job(
         if docker_timeout:
             job_kwargs['timeout'] = docker_timeout
 
+        if backend == 'kubernetes-job':
+            k8s_options = {
+                'control_plane_url': current_app.config.get(
+                    'WEPPCLOUDR_K8S_CONTROL_PLANE_URL'
+                ) or os.getenv('WEPPCLOUDR_K8S_CONTROL_PLANE_URL'),
+                'control_plane_token_file': current_app.config.get(
+                    'WEPPCLOUDR_K8S_IDENTITY_TOKEN_FILE'
+                ) or os.getenv('WEPPCLOUDR_K8S_IDENTITY_TOKEN_FILE'),
+                'control_plane_namespace': current_app.config.get(
+                    'WEPPCLOUDR_K8S_NAMESPACE'
+                ) or os.getenv('WEPPCLOUDR_K8S_NAMESPACE'),
+                'renderer_image_digest': current_app.config.get('WEPPCLOUDR_K8S_IMAGE')
+                or os.getenv('WEPPCLOUDR_K8S_IMAGE'),
+                'deployment_revision': current_app.config.get(
+                    'WEPPCLOUDR_DEPLOYMENT_REVISION'
+                ) or os.getenv('WEPPCLOUDR_DEPLOYMENT_REVISION'),
+            }
+            job_kwargs.update(
+                (key, value) for key, value in k8s_options.items() if value is not None
+            )
+
         job_timeout = current_app.config.get('WEPPCLOUDR_JOB_TIMEOUT', current_app.config.get('WEPPCLOUDR_TIMEOUT', 3600))
 
-        queue = Queue(connection=redis_conn)
+        if backend == 'kubernetes-job':
+            active_deadline = int(
+                current_app.config.get('WEPPCLOUDR_K8S_ACTIVE_DEADLINE')
+                or os.getenv('WEPPCLOUDR_K8S_ACTIVE_DEADLINE', '600')
+            )
+            terminal_budget = int(
+                current_app.config.get('WEPPCLOUDR_K8S_TERMINAL_BUDGET')
+                or os.getenv('WEPPCLOUDR_K8S_TERMINAL_BUDGET', '120')
+            )
+            if active_deadline <= 0 or terminal_budget <= 0:
+                raise RuntimeError('WEPPcloudR Kubernetes timeouts must be positive')
+            if int(job_timeout) < active_deadline + terminal_budget:
+                raise RuntimeError(
+                    'WEPPCLOUDR_JOB_TIMEOUT must be at least the Kubernetes active '
+                    'deadline plus terminal budget'
+                )
+            job_kwargs['timeout'] = active_deadline + terminal_budget
+
+        queue_name = current_app.config.get('WEPPCLOUDR_K8S_QUEUE') or os.getenv(
+            'WEPPCLOUDR_K8S_QUEUE', 'weppcloudr'
+        )
+        queue = (
+            Queue(name=queue_name, connection=redis_conn)
+            if backend == 'kubernetes-job'
+            else Queue(connection=redis_conn)
+        )
+        enqueue_options = {}
+        if backend == 'kubernetes-job':
+            job_id = new_rq_job_id()
+            request_snapshot = RenderRequest(
+                schema_version=1,
+                rq_job_id=job_id,
+                runid=runid,
+                config=config,
+                run_root=str(ctx.run_root),
+                active_root=str(ctx.active_root),
+                skip_cache=bool(skip_cache),
+                correlation_id=job_id,
+                deployment_revision=str(job_kwargs.get('deployment_revision') or ''),
+                renderer_image_digest=str(job_kwargs.get('renderer_image_digest') or ''),
+            )
+            validate_request(request_snapshot)
+            enqueue_options = {
+                'job_id': job_id,
+                'meta': {
+                    'render_backend': 'kubernetes-job',
+                    'render_request_digest': request_snapshot.digest,
+                    'render_cleanup_state': 'not-created',
+                    'cancel_requested': False,
+                },
+            }
         job = queue.enqueue_call(
             func=render_deval_details_rq,
             args=(runid, config, str(ctx.active_root)),
             kwargs=job_kwargs,
             timeout=job_timeout,
+            retry=(Retry(max=3, interval=[10, 30, 60]) if backend == 'kubernetes-job' else None),
             description=f"Render Deval-In-The-Details report for {runid}/{config}",
+            **enqueue_options,
         )
 
         if prep:
@@ -511,8 +598,35 @@ def _determine_job(
         return _enqueue_deval_job(ctx, runid, config, skip_cache=skip_cache)
 
 
-def _serve_deval_file(path: Path) -> Response:
-    content = path.read_bytes()
+def _serve_deval_file(path: Path, active_root: Path) -> Response:
+    root_fd = os.open(active_root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    try:
+        export_fd = os.open(
+            "export", os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=root_fd
+        )
+        try:
+            report_fd = os.open(
+                "WEPPcloudR",
+                os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW,
+                dir_fd=export_fd,
+            )
+            try:
+                artifact_fd = os.open(
+                    path.name, os.O_RDONLY | os.O_NOFOLLOW, dir_fd=report_fd
+                )
+                try:
+                    if not stat.S_ISREG(os.fstat(artifact_fd).st_mode):
+                        abort(404, description="DEVAL report artifact is not regular")
+                    with os.fdopen(artifact_fd, "rb", closefd=False) as artifact:
+                        content = artifact.read()
+                finally:
+                    os.close(artifact_fd)
+            finally:
+                os.close(report_fd)
+        finally:
+            os.close(export_fd)
+    finally:
+        os.close(root_fd)
     response = Response(content, mimetype='text/html')
     response.headers['Content-Length'] = str(len(content))
     response.headers.setdefault('Cache-Control', 'no-store, max-age=0, must-revalidate')
@@ -541,7 +655,7 @@ def deval_details(runid, config):
 
     # Serve the cached file when no active job is running (unless skip-cache was requested).
     if not skip_cache and output_path.exists() and job_status not in ACTIVE_JOB_STATUSES:
-        return _serve_deval_file(output_path)
+        return _serve_deval_file(output_path, ctx.active_root)
 
     refresh_kwargs = {'runid': runid, 'config': config}
     if ctx.pup_relpath:

@@ -167,8 +167,6 @@ services:
     environment:
       <<: *wepppy-env
       PERIDOT_CPU: "4"
-  f-esri:
-    volumes: *wepp1-volumes
   scheduler:
     <<: *wepppy-image
     environment:

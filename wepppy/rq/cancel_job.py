@@ -3,6 +3,8 @@ from __future__ import annotations
 """Utilities for canceling RQ jobs (and their dependency tree) from workers or CLIs."""
 
 import json
+import os
+from pathlib import Path
 from typing import Dict
 
 import redis
@@ -17,6 +19,10 @@ from wepppy.config.redis_settings import (
     redis_connection_kwargs,
     redis_host,
 )
+from wepppy.rq.weppcloudr_backends import (
+    BackendError,
+    HttpRenderControlPlaneClient,
+)
 
 REDIS_HOST: str = redis_host()
 RQ_DB: int = int(RedisDB.RQ)
@@ -24,6 +30,66 @@ _FORK_ARCHIVE_STARTED_FORBIDDEN = {
     "error": "Started fork/archive jobs require Admin or Root",
     "code": "forbidden",
 }
+_WEPPCLOUDR_TASK = "wepppy.rq.weppcloudr_rq.render_deval_details_rq"
+
+
+def _cancel_kubernetes_render(job: Job) -> Dict[str, str] | None:
+    """Persist render cancellation before allowing the RQ workhorse to stop."""
+    if job.func_name != _WEPPCLOUDR_TASK or job.kwargs.get("backend") != "kubernetes-job":
+        return None
+    request_digest = job.meta.get("render_request_digest")
+    if not isinstance(request_digest, str):
+        return {
+            "error": "Kubernetes render cancellation state is not yet durable",
+            "code": "cleanup_pending",
+        }
+    endpoint = job.kwargs.get("control_plane_url") or os.getenv(
+        "WEPPCLOUDR_K8S_CONTROL_PLANE_URL"
+    )
+    token_file = job.kwargs.get("control_plane_token_file") or os.getenv(
+        "WEPPCLOUDR_K8S_IDENTITY_TOKEN_FILE"
+    )
+    if not isinstance(endpoint, str) or not isinstance(token_file, str):
+        return {
+            "error": "Kubernetes render cancellation control plane is unavailable",
+            "code": "cleanup_pending",
+        }
+    job.meta["cancel_requested"] = True
+    job.meta["render_cleanup_state"] = "deleting"
+    job.save_meta()
+    try:
+        receipt = HttpRenderControlPlaneClient(endpoint, Path(token_file)).cancel(
+            job.id, request_digest
+        )
+    except (BackendError, OSError) as exc:
+        job.meta["render_cleanup_state"] = "cleanup_timeout"
+        job.save_meta()
+        return {"error": str(exc), "code": "cleanup_timeout"}
+    if receipt.get("rq_job_id") != job.id or receipt.get("request_digest") != request_digest:
+        job.meta["render_cleanup_state"] = "cleanup_timeout"
+        job.save_meta()
+        return {
+            "error": "Kubernetes render cancellation receipt identity mismatch",
+            "code": "cleanup_timeout",
+        }
+    cleanup_state = receipt.get("cleanup_state")
+    if cleanup_state not in {"deleting", "complete", "cleanup_timeout"}:
+        job.meta["render_cleanup_state"] = "cleanup_timeout"
+        job.save_meta()
+        return {
+            "error": "Kubernetes render controller returned invalid cleanup state",
+            "code": "cleanup_timeout",
+        }
+    job.meta["render_cleanup_state"] = cleanup_state
+    job.save_meta()
+    if cleanup_state == "complete":
+        return None
+    if cleanup_state == "deleting":
+        return {"status": "accepted", "code": "cleanup_pending"}
+    return {
+        "error": "Kubernetes render cleanup exceeded its grace period",
+        "code": "cleanup_timeout",
+    }
 
 
 def _cancel_job_recursive_unlocked(job: Job, redis_conn: redis.Redis) -> None:
@@ -105,6 +171,10 @@ def cancel_jobs(job_id: str, *, allow_started_fork_archive: bool = True) -> Dict
             if job.get_status() != "queued":
                 return dict(_FORK_ARCHIVE_STARTED_FORBIDDEN)
             return _cancel_queued_fork_archive(job, redis_conn)
+
+        render_cancellation = _cancel_kubernetes_render(job)
+        if render_cancellation is not None:
+            return render_cancellation
 
         _cancel_job_recursive(job, redis_conn)
         return {"status": "ok"}

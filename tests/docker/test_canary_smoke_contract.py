@@ -107,7 +107,6 @@ def test_workflow_has_minimum_permissions_immutable_tags_and_pinned_actions() ->
     for build_arg in (
         "ROSETTA_REF",
         "WEPPCLOUD2_REF",
-        "F_ESRI_REF",
         "WBT_REF",
         "WEPPPYO3_REF",
     ):
