@@ -1,6 +1,6 @@
 # Self-Hosted GHCR Builder
 
-**Status**: Open (2026-08-21)
+**Status**: Open - implementation and integration complete; independent review pending (2026-08-21)
 **Timezone**: UTC
 
 ## Overview
@@ -28,7 +28,6 @@ objects and changed build layers.
 
 ### Explicitly Out of Scope
 
-- Running the first integration image build before the Climate finalizer lands.
 - Allowing pull-request jobs on the persistent builder.
 - Moving auxiliary-image workflows or general CI to this runner.
 - Sharing caches between `runner-01` and `runner-02`.
@@ -39,8 +38,8 @@ objects and changed build layers.
 - [x] Its LFS cache is seeded from a verified local checkout without GitHub LFS
   transfer.
 - [x] Static workflow and runner-side cache-path validation pass.
-- [ ] A trusted integration publication succeeds after the Climate finalizer.
-- [ ] A second no-source-change build demonstrates LFS and BuildKit reuse.
+- [x] A trusted integration publication succeeds after the Climate finalizer.
+- [x] A second no-source-change build demonstrates LFS and BuildKit reuse.
 - [ ] No unresolved medium/high correctness or security findings remain.
 
 ## Security Impact and Review Gate
@@ -64,6 +63,20 @@ objects and changed build layers.
   `0 B/s` from the seeded store; `git lfs fsck` and the repository verifier
   passed.
 - Runner root filesystem: 98 GB with 78 GB free before the first build.
+- Integration run
+  [32454213155](https://github.com/rogerlew/wepppy/actions/runs/32454213155)
+  published source `78cb5cfeca5db7528cb34e638ceb5c203cdc5a00` in 10m05s.
+- Same-source repeat run
+  [32454946601](https://github.com/rogerlew/wepppy/actions/runs/32454946601)
+  completed in 4m39s. All expensive dependency, vendoring, static-build, and
+  runtime-image steps reported `CACHED`; 639 tracked LFS files passed both
+  verification gates from the persistent 1.2 GB object store.
+- Current commit tag:
+  `ghcr.io/rogerlew/wepppy:sha-78cb5cfeca5db7528cb34e638ceb5c203cdc5a00`;
+  repeat-build digest:
+  `sha256:fdc600987cc1d2e5a04a13b566a328b33555beb314b65c1d212c21e83e702960`.
+- Post-build cache footprint: 2.6 GB BuildKit plus 1.2 GB LFS; runner root
+  filesystem has 73 GB free (22% used).
 - Rollback: restore `runs-on: ubuntu-24.04` and remove the local cache options;
   removing the GitHub runner label is independently reversible.
 

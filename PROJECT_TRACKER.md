@@ -398,9 +398,13 @@ When resuming Kubernetes work:
 between builds. Public pull-request jobs remain excluded from the dedicated
 runner label.
 
-**Next Steps**: Complete static and independent security review now; defer the
-first publication and repeat-build cache proof until the Climate finalizer is
-ready for integration.
+**Progress**: The merged Climate finalizer source was published successfully on
+`runner-01`; a same-source repeat reduced runtime from 10m05s to 4m39s while
+reusing all expensive BuildKit layers and the persistent LFS object store.
+
+**Next Steps**: Complete independent correctness/security review, upgrade the
+pinned Actions before Node 20 compatibility is removed, and monitor the
+non-fatal BuildKit local-cache lock diagnostics.
 
 ---
 

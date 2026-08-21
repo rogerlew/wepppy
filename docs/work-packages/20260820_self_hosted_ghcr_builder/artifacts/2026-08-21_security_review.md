@@ -5,7 +5,8 @@
 - **Package**: `docs/work-packages/20260820_self_hosted_ghcr_builder/`
 - **Reviewer**: Pending independent reviewer
 - **Scope**: Persistent runner trust, package write token, caches, and cleanup
-- **Commit context**: Pre-integration configuration
+- **Commit context**: Integration evidence through source
+  `78cb5cfeca5db7528cb34e638ceb5c203cdc5a00`
 
 ## Security Triage
 
@@ -33,5 +34,14 @@
 
 ## Verdict
 
-- **Gate status**: fail pending independent review and integration evidence
-- **Release recommendation**: hold integration acceptance
+- **Gate status**: fail pending independent review; integration evidence is complete
+- **Release recommendation**: hold package closure until independent review
+
+## Integration Evidence
+
+- Both trusted manual-dispatch runs used only the dedicated `ghcr-builder`
+  runner and repository-scoped `GITHUB_TOKEN`.
+- The fixed cache-path ownership and symlink checks passed before both builds;
+  cache promotion completed after each successful image push.
+- No credential material appears in the reviewed logs.
+- Repeat-build cache reuse succeeded with 73 GB free after completion.

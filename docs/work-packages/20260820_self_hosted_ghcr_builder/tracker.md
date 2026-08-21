@@ -6,9 +6,9 @@
 
 **Started**: 2026-08-21
 
-**Current phase**: Configuration complete / integration deferred
+**Current phase**: Implementation and integration complete / independent review pending
 
-**Next milestone**: Integration publication after Climate finalizer completion
+**Next milestone**: Independent correctness and security review
 
 **Security impact**: `high`
 
@@ -17,12 +17,10 @@
 ### Ready / Backlog
 
 - [ ] Complete independent correctness and security reviews.
-- [ ] Run the deferred trusted integration publication.
-- [ ] Repeat the build and record cache-hit/LFS-transfer evidence.
-
-### Blocked
-
-- [ ] Integration publication waits for the Climate finalizer implementation.
+- [ ] Upgrade pinned Actions before GitHub removes the Node 20 compatibility
+  shim.
+- [ ] Monitor the non-fatal BuildKit local-cache lock diagnostics and revise
+  cache export only if they become job failures or prevent reuse.
 
 ### Done
 
@@ -33,6 +31,15 @@
 - [x] Parsed workflow YAML and exercised fresh-cache selection safely (2026-08-21).
 - [x] Materialized 639 tracked LFS files at `0 B/s`; both LFS verification
   gates passed (2026-08-21).
+- [x] Published the merged Climate finalizer source in trusted run
+  [32454213155](https://github.com/rogerlew/wepppy/actions/runs/32454213155)
+  (10m05s, 2026-08-21).
+- [x] Repeated the identical-source build in run
+  [32454946601](https://github.com/rogerlew/wepppy/actions/runs/32454946601)
+  (4m39s); all expensive build layers reported `CACHED` and LFS verification
+  passed again (2026-08-21).
+- [x] Recorded the repeat digest and post-build cache/disk footprint
+  (2026-08-21).
 
 ## Decisions
 
@@ -54,6 +61,8 @@
 | Concurrent builds corrupt local cache rotation | Medium | Workflow-level non-cancelling concurrency group | Mitigated |
 | Cache fills 98 GB root filesystem | Medium | Record baseline; inspect disk after integration build | Open |
 | Runner loss blocks publication | Medium | Revert to GitHub-hosted runner or prepare runner-02 | Accepted |
+| Pinned Actions still target Node 20 | Low | GitHub currently forces Node 24; upgrade pins before compatibility removal | Open |
+| BuildKit local exporter emits transient layer-lock diagnostics | Low | Both builds, cache promotion, and repeat reuse succeeded; monitor | Open |
 
 ## Validation
 
@@ -63,4 +72,10 @@
 - [x] Workflow YAML parses and `git diff --check` passes.
 - [x] Fresh BuildKit cache selection emits an empty `cache-from` safely.
 - [x] Runner-side LFS materialization and both verification gates pass.
-- [ ] Integration and repeat-build evidence recorded.
+- [x] Integration and repeat-build evidence recorded.
+- [x] First build completed in 10m05s; same-source repeat completed in 4m39s.
+- [x] Repeat imported the local cache manifest and reported `CACHED` for all
+  expensive dependency, vendoring, static-build, and runtime-image steps.
+- [x] Repeat published
+  `sha256:fdc600987cc1d2e5a04a13b566a328b33555beb314b65c1d212c21e83e702960`.
+- [x] Post-build cache is 2.6 GB BuildKit plus 1.2 GB LFS; root has 73 GB free.
