@@ -9,6 +9,14 @@ fail <- function(message, status = 2L) {
   quit(save = "no", status = status, runLast = FALSE)
 }
 
+# Sys.readlink() returns NA for some nonexistent paths. Treat only a
+# non-missing, non-empty target as a symlink so a not-yet-published artifact
+# does not turn a boolean safety check into NA.
+is_symlink <- function(path) {
+  target <- Sys.readlink(path)
+  !is.na(target) && nzchar(target)
+}
+
 main <- function() {
 args <- commandArgs(trailingOnly = TRUE)
 if (length(args) != 3L) {
@@ -26,7 +34,7 @@ if (!identical(request_path, "/run/weppcloudr/request.json")) {
 if (!grepl("^[0-9a-f]{64}$", trusted_digest)) {
   fail("invalid trusted request digest")
 }
-if (!file.exists(request_path) || file.info(request_path)$isdir || Sys.readlink(request_path) != "") {
+if (!file.exists(request_path) || file.info(request_path)$isdir || is_symlink(request_path)) {
   fail("request is missing or is not a regular non-symlink file")
 }
 if (file.info(request_path)$size > 16384L) {
@@ -121,7 +129,7 @@ if (!identical(normalizePath(getwd(), winslash = "/", mustWork = TRUE), run_root
 
 source("/srv/weppcloudr/plumber.R")
 output_dir <- file.path(active_root, "export", "WEPPcloudR")
-if (Sys.readlink(file.path(active_root, "export")) != "" || Sys.readlink(output_dir) != "") {
+if (is_symlink(file.path(active_root, "export")) || is_symlink(output_dir)) {
   fail("output path contains a symlink")
 }
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
@@ -133,7 +141,7 @@ fence_file <- file.path(
   paste0("deval_", request$runid, ".fence")
 )
 read_fence <- function() {
-  if (!file.exists(fence_file) || Sys.readlink(fence_file) != "") {
+  if (!file.exists(fence_file) || is_symlink(fence_file)) {
     fail("trusted fencing record is unavailable")
   }
   value <- suppressWarnings(as.integer(trimws(readLines(fence_file, n = 1L, warn = FALSE))))
@@ -177,7 +185,7 @@ parse_artifact_identity <- function(output) {
   if (is.na(size) || size < 1) fail("fenced artifact helper returned invalid size")
   list(digest = result[[1L]], size = size)
 }
-if (!request$skip_cache && file.exists(final_output) && Sys.readlink(final_output) == "") {
+if (!request$skip_cache && file.exists(final_output) && !is_symlink(final_output)) {
   cached_status <- system2(
     "python3",
     args = c(
@@ -209,13 +217,13 @@ invisible(render_deval(
   skip_cache = TRUE,
   output_file_override = temporary_output
 ))
-if (!file.exists(temporary_output) || Sys.readlink(temporary_output) != "") {
+if (!file.exists(temporary_output) || is_symlink(temporary_output)) {
   fail("renderer did not produce a regular temporary artifact")
 }
 output_dir_now <- normalizePath(output_dir, winslash = "/", mustWork = TRUE)
 if (!identical(output_dir_now, file.path(active_root, "export", "WEPPcloudR")) ||
-    Sys.readlink(file.path(active_root, "export")) != "" || Sys.readlink(output_dir) != "" ||
-    Sys.readlink(final_output) != "") {
+    is_symlink(file.path(active_root, "export")) || is_symlink(output_dir) ||
+    is_symlink(final_output)) {
   fail("output path changed before publication")
 }
 publication_status <- system2(

@@ -328,6 +328,8 @@ def test_one_shot_renderer_has_strict_fixed_request_contract() -> None:
     assert "sha256sum" in source
     assert 'system2(\n  "python3"' in source
     assert "/srv/weppcloudr/publish_fenced.py" in source
+    assert "!is.na(target) && nzchar(target)" in source
+    assert "Sys.readlink(final_output) !=" not in source
 
 
 def test_fenced_publisher_preserves_foreign_staging_file_and_retry_succeeds(
