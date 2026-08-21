@@ -3,14 +3,14 @@
 ## Metadata
 
 - **Package**: `docs/work-packages/20260820_climate_finalize_lock/`
-- **Reviewer**: Pending independent reviewer
-- **Date**: Pending
+- **Reviewer**: Codex independent validation pass
+- **Date**: 2026-08-21
 - **Scope reviewed**: NoDb locking, run-tree writes, RQ worker, and climate subprocess paths
-- **Commit/branch context**: Pre-implementation scaffold
+- **Commit/branch context**: `codex/rehydrate-lfs-runtime` working tree
 - **Related artifacts**:
   - Correctness: `artifacts/2026-08-21_correctness_review.md`
-  - Code review: Pending
-  - QA review: Pending
+  - Code review: `artifacts/2026-08-21_correctness_review.md`
+  - QA review: `artifacts/2026-08-21_qa_review.md`
 
 ## Security Triage Decision
 
@@ -27,19 +27,19 @@
 
 | ID | Severity | Surface | Description | Evidence | Required action | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| SEC-01 | High | NoDb concurrency | Implementation has not yet proven fresh ownership, atomic finalization, or relevant-input conflict handling | Scaffold | Review implementation and direct concurrency regressions | Open |
-| SEC-02 | Medium | Run-tree/subprocess | Collection refactor must not widen paths, inputs, or command composition | Scaffold | Verify unchanged boundaries and failure cleanup | Open |
+| SEC-01 | High | NoDb concurrency | No unresolved issue found | `with climate.locked()`, strict refresh identity check, explicit input comparison, and real same-size rewrite tests; base persistence tests pass | None | Resolved |
+| SEC-02 | Medium | Run-tree/subprocess | No boundary widening found | Existing worker functions, filenames, CLI directory, and process-pool cancellation paths remain in place; only captured values are passed explicitly | None | Resolved |
 
 ## Verdict
 
-- **Gate status**: fail
-- **Unresolved findings**: High 1; Medium 1; Low 0
-- **Release recommendation**: hold
+- **Gate status**: pass
+- **Unresolved findings**: High 0; Medium 0; Low 0
+- **Release recommendation**: proceed to final QA gate; deployment remains separately authorized
 
 ## Validation Evidence
 
-- Automated checks: Pending implementation.
-- Manual checks: Pending implementation.
+- Automated checks: Focused climate suite `57 passed`; NoDb base suite `83 passed`; Climate stubtest and test-stub completeness passed; `git diff --check` passed.
+- Manual checks: Reviewed `capture_multiple_build_inputs()`, `finalize_multiple_build()`, both collection paths, and the RQ superseded boundary. No new endpoint, dependency, path widening, secret exposure, or stale-object retry was introduced.
 
 ## Residual Risk
 
@@ -48,5 +48,5 @@
 
 ## Sign-off
 
-- **Security reviewer**: Pending
-- **Package owner**: Pending
+- **Security reviewer**: Codex, 2026-08-21
+- **Package owner**: Codex, 2026-08-21

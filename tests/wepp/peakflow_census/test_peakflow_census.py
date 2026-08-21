@@ -31,6 +31,11 @@ from wepppy.wepp.peakflow_census.pairing import pair_events
 from wepppy.wepp.peakflow_census.planning import plan_trials, trial_plan_from_dict
 from wepppy.wepp.peakflow_census.validation import validate_phase2a_evidence, validate_plan
 
+REPO_ROOT = Path(__file__).resolve().parents[3]
+TOPANGA_PREP_ARTIFACTS = REPO_ROOT / "docs/work-packages/20260808_peakflow_topanga_census_prep/artifacts"
+TOPANGA_TRIAL_PLAN = TOPANGA_PREP_ARTIFACTS / "topanga-trial-plan.json"
+
+
 def _manifest(tmp_path: Path, scenarios: list[Path], *, selected: list[int] | None = None) -> Path:
     evidence = tmp_path / "evidence"
     evidence.mkdir(exist_ok=True)
@@ -136,7 +141,7 @@ def test_cover_that_cannot_realize_both_directions_is_excluded(tmp_path: Path) -
 
 @pytest.mark.integration
 def test_topanga_pilot_selection_plans_same_64_trials(tmp_path: Path) -> None:
-    manifest_path = Path("docs/work-packages/20260808_peakflow_topanga_census_prep/artifacts/topanga-study-manifest.json")
+    manifest_path = TOPANGA_PREP_ARTIFACTS / "topanga-study-manifest.json"
     if not Path("/wc1/runs/ha/hand-to-mouth-drought/wepp/runs").exists():
         pytest.skip("Topanga authority is not mounted")
     raw = json.loads(manifest_path.read_text())
@@ -317,9 +322,7 @@ def test_staged_bundle_is_hash_bound_and_required_for_execution(tmp_path: Path) 
 
 @pytest.mark.unit
 def test_complete_terminal_rejects_mutation_tampering(tmp_path: Path) -> None:
-    frozen = trial_plan_from_dict(json.loads(Path(
-        "docs/work-packages/20260808_peakflow_topanga_census_prep/artifacts/topanga-trial-plan.json"
-    ).read_text()))
+    frozen = trial_plan_from_dict(json.loads(TOPANGA_TRIAL_PLAN.read_text()))
     plan = replace(frozen, evidence_root=str(tmp_path / "evidence"))
     trial = next(item for item in plan.trials if item.eligibility == "eligible")
     trial_root = Path(plan.evidence_root) / trial.evidence_locator
@@ -361,9 +364,7 @@ def test_complete_terminal_rejects_mutation_tampering(tmp_path: Path) -> None:
 
 @pytest.mark.unit
 def test_denominator_grains_include_exclusions_and_immutable_parquet(tmp_path: Path) -> None:
-    plan = trial_plan_from_dict(json.loads(Path(
-        "docs/work-packages/20260808_peakflow_topanga_census_prep/artifacts/topanga-trial-plan.json"
-    ).read_text()))
+    plan = trial_plan_from_dict(json.loads(TOPANGA_TRIAL_PLAN.read_text()))
     selection = build_execution_selection(plan, "f" * 64)
     pairs = pd.DataFrame([{"trial_id": selection.trial_ids[0], "candidate": True}])
     grains = _denominator_grains(plan, selection, pairs, pairs)
@@ -381,9 +382,7 @@ def test_denominator_grains_include_exclusions_and_immutable_parquet(tmp_path: P
 
 @pytest.mark.unit
 def test_ledger_root_rejects_symlinked_parent(tmp_path: Path) -> None:
-    frozen = trial_plan_from_dict(json.loads(Path(
-        "docs/work-packages/20260808_peakflow_topanga_census_prep/artifacts/topanga-trial-plan.json"
-    ).read_text()))
+    frozen = trial_plan_from_dict(json.loads(TOPANGA_TRIAL_PLAN.read_text()))
     evidence = tmp_path / "evidence"
     plan = replace(frozen, evidence_root=str(evidence))
     plan_root = evidence / plan.plan_id

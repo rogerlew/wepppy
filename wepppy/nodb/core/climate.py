@@ -132,6 +132,11 @@ from wepppy.nodb.core.climate_build_router import ClimateBuildRouter
 from wepppy.nodb.core.climate_gridmet_multiple_build_service import (
     ClimateGridmetMultipleBuildService,
 )
+from wepppy.nodb.core.climate_multiple_build import (
+    ClimateMultipleBuildSupersededError,
+    capture_multiple_build_inputs,
+    finalize_multiple_build,
+)
 from wepppy.nodb.core.climate_input_parser import ClimateInputParsingService
 from wepppy.nodb.core.climate_mode_build_services import ClimateModeBuildServices
 from wepppy.nodb.core.climate_scaling_service import ClimateScalingService
@@ -178,6 +183,7 @@ __all__ = [
     'NoClimateStationSelectedError',
     'ClimateModeIsUndefinedError',
     'ClimateNoDbLockedException',
+    'ClimateMultipleBuildSupersededError',
     'ClimateStationMode',
     'ClimateMode',
     'ClimateSpatialMode',
@@ -1302,6 +1308,16 @@ class Climate(NoDbBase):
 
     def build(self, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None) -> None:
         _CLIMATE_BUILD_ROUTER.build(self, verbose=verbose, attrs=attrs)
+
+    def _refresh_multiple_build_state(self) -> "Climate":
+        """Refresh this locked singleton from durable state for finalization."""
+        refreshed = type(self).getInstance(self.wd)
+        if refreshed is not self:
+            raise RuntimeError(
+                "multiple-interpolated climate finalization could not refresh "
+                "the locked Climate singleton"
+            )
+        return refreshed
         
     def _scale_precip(self, scale_factor: float) -> None:
         _CLIMATE_SCALING_SERVICE.scale_precip(self, scale_factor)
@@ -1482,17 +1498,16 @@ class Climate(NoDbBase):
             self.par_fn = par_fn
 
     def _build_climate_observed_gridmet_multiple(self, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None) -> None:
-        with self.locked():
-            self.set_attrs(attrs)
-            self.logger.info('  running _build_climate_observed_gridmet_multiple')
-            quality_guard_bypassed = _CLIMATE_GRIDMET_MULTIPLE_BUILD_SERVICE.build(
-                self,
-                build_observed_gridmet_interpolated_fn=build_observed_gridmet_interpolated,
-                ncpu=NCPU,
-            )
-            self._publish_quality_guard_bypass_warning_if_needed(
-                quality_guard_bypassed=quality_guard_bypassed
-            )
+        self.set_attrs(attrs)
+        self.logger.info('  running _build_climate_observed_gridmet_multiple')
+        snapshot = capture_multiple_build_inputs(self)
+        result = _CLIMATE_GRIDMET_MULTIPLE_BUILD_SERVICE.build(
+            self,
+            build_observed_gridmet_interpolated_fn=build_observed_gridmet_interpolated,
+            ncpu=NCPU,
+            inputs=snapshot,
+        )
+        finalize_multiple_build(self, snapshot, result)
 
     def _build_climate_observed_daymet_multiple(self, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None) -> None:
         run_observed_daymet_multiple_build(

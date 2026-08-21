@@ -260,6 +260,13 @@ chmod 600 docker/secrets/*
 ## wctl (weppcloud control)
 `wctl` is the supported wrapper for `docker compose` (see `wctl/install.sh`). It merges `docker/defaults.env` plus optional `docker/.env` + host overrides, escapes `$` for Compose interpolation, and sets `WEPPPY_ENV_FILE` for `env_file:` wiring.
 
+The Docker Compose v2 plugin is an expected prerequisite for Compose-backed
+tests and local stack operations. Some `wctl run-pytest` environments provide
+the Docker CLI inside `weppcloud` without the Compose plugin; in that case the
+canary contract test explicitly skips with an environment reason. This is an
+expected capability difference, not a canary contract failure. Run the test on
+the host or in a runner with `docker compose version` available to exercise it.
+
 One-time install (pins the default compose file for the host):
 
 ```bash
@@ -409,6 +416,7 @@ If you want shells inside the containers to show `www-data@...` instead of `I ha
 - **Permission denied when writing to bind-mounted directories** — double-check `UID`/`GID` in `docker/.env` and recreate containers. Existing files created with old ids may need a `chown`.
 - **`I have no name!` shell prompt** — indicates the uid lacks an `/etc/passwd` entry. Adjust the Dockerfile if cosmetic prompts matter.
 - **Redis connection errors on startup** — the microservices depend on Redis; ensure `redis` comes up cleanly, that keyspace notifications include `Kh`, or restart dependent containers (`docker compose ... restart status preflight browse`).
+- **Docker Compose unavailable in a test environment** — the canary contract test skips when `docker compose version` is unavailable (for example, when the container has the Docker CLI but not the Compose v2 plugin). Install or expose the Compose v2 plugin to run that contract check; this is an expected environment limitation for the skipped run.
 - **`ModuleNotFoundError: No module named 'wepppyo3'` at weppcloud boot** — dev images now vendor a fallback `wepppyo3` release at `/opt/vendor/wepppyo3/release/linux/py312` and the `weppcloud` entrypoint logs the active import path. If logs show the fallback path, the bind mount (`../../wepppyo3:/workdir/wepppyo3`) is missing or incomplete; restore that repo path and restart.
 - **`ModuleNotFoundError: No module named 'whitebox_tools'` at weppcloud boot** — dev images now vendor a fallback WBT module at `/opt/vendor/weppcloud-wbt/WBT/whitebox_tools.py` and the `weppcloud` entrypoint logs the active import path. If logs show the fallback path, the bind mount (`../../weppcloud-wbt:/workdir/weppcloud-wbt`) is missing or incomplete; restore that repo path and restart.
 - **Worker pools crash trying to connect to `redis:6379`** — `docker-compose.prod.worker.yml` does not run a `redis` service. Prefer the secrets-as-files contract: set `RQ_REDIS_URL=redis://<redis_host>:6379/9` and provide `docker/secrets/redis_password`. Use inline-password URLs in `docker/.env` only as a legacy fallback for pre-secrets stacks. Use `wctl rq-info` to confirm workers registered.

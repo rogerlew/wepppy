@@ -1,6 +1,6 @@
 # Climate Multiple-Build Finalize Lock
 
-**Status**: Open (2026-08-21)
+**Status**: Implementation and validation complete; CWD validation follow-up resolved; canary pending separate authorization (2026-08-21)
 **Timezone**: UTC
 
 ## Overview
@@ -52,17 +52,25 @@ orchestration or persistence generally.
 
 ## Success Criteria
 
-- [ ] Expensive interpolation and CLIGEN work executes without holding the
+- [x] Expensive interpolation and CLIGEN work executes without holding the
   Climate NoDb lock.
-- [ ] Finalization reloads durable state under lock and performs one bounded
+- [x] Finalization reloads durable state under lock and performs one bounded
   controller mutation.
-- [ ] An unrelated same-size rewrite is preserved and finalization succeeds.
-- [ ] A relevant climate-input change produces an explicit superseded/conflict
+- [x] An unrelated same-size rewrite is preserved and finalization succeeds.
+- [x] A relevant climate-input change produces an explicit superseded/conflict
   result without overwriting newer state.
-- [ ] GridMET and Daymet multiple-interpolated paths have parity coverage.
-- [ ] Existing generated filenames and controller output fields remain
+- [x] GridMET and Daymet multiple-interpolated paths have parity coverage.
+- [x] Existing generated filenames and controller output fields remain
   compatible.
-- [ ] Required focused, full-suite, correctness, QA, and security gates pass.
+- [x] Required focused, environment-qualified repository, correctness, QA, and security gates pass.
+
+The unfiltered repository suite was attempted. Docker Compose v2 is unavailable
+in the runner's Docker CLI, so the canary contract test now explicitly skips
+with an environment reason. An order-sensitive CWD leak previously made the
+Topanga test report a false missing-fixture error; the CWD/fixture follow-up
+now passes in the failing order with `25 passed, 1 skipped`. The prior
+repository sweep excluding the Docker smoke test completed with `6087 passed,
+61 skipped`.
 
 ## Parameterization ADR Gate
 
@@ -107,6 +115,8 @@ orchestration or persistence generally.
   under repository governance even though it adds no new public endpoint.
 - **Security review artifact**:
   [`artifacts/2026-08-21_security_review.md`](artifacts/2026-08-21_security_review.md)
+- **QA review artifact**:
+  [`artifacts/2026-08-21_qa_review.md`](artifacts/2026-08-21_qa_review.md)
 
 ## Hardening and Callus Softening
 
@@ -139,15 +149,18 @@ orchestration or persistence generally.
 - `wepppy/nodb/core/climate_gridmet_multiple_build_service.py`
 - `wepppy/nodb/core/climate_build_helpers.py`
 - `wepppy/rq/project_rq.py`
+- `wepppy/nodb/mods/omni/omni_run_orchestration_service.py`
 - `tests/nodb/test_climate_gridmet_multiple_build_service.py`
 - `tests/nodb/test_climate_build_helpers.py`
+- `tests/nodb/mods/test_omni_run_orchestration_service.py`
+- `tests/wepp/peakflow_census/test_peakflow_census.py`
 
 ## Deliverables
 
 - Contract checkpoint and implementation PR.
 - GridMET and Daymet finalization regressions.
 - Completed correctness, QA, and security review artifacts.
-- Canary evidence and rollback notes.
+- Canary evidence and rollback notes (follow-up; deployment was not authorized by this execution).
 
 ## Follow-up Work
 

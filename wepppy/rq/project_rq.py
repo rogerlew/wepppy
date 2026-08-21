@@ -68,6 +68,7 @@ from wepppy.nodb.core import (
     WatershedCentroidStateError,
     Wepp,
 )
+from wepppy.nodb.core.climate import ClimateMultipleBuildSupersededError
 from wepppy.nodb.core.watershed_errors import (
     WATERSHED_BOUNDARY_TOUCH_MESSAGE,
     WatershedBoundaryTouchesEdgeError,
@@ -2368,6 +2369,16 @@ def build_climate_rq(runid: str) -> None:
 
         prep = RedisPrep.getInstance(wd)
         prep.timestamp(TaskEnum.build_climate)
+    except ClimateMultipleBuildSupersededError as exc:
+        _logger.warning(
+            "Climate build superseded before finalization",
+            extra={"runid": runid, "job_id": getattr(job, "id", None)},
+        )
+        StatusMessenger.publish(
+            status_channel,
+            f'rq:{job.id} SUPERSEDED {func_name}({runid}): {exc}',
+        )
+        raise
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq.py:916", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})

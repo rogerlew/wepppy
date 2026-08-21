@@ -17,6 +17,9 @@ def pytest_configure(config) -> None:
     config.addinivalue_line("markers", "nodb: NoDb controller and locking tests")
     config.addinivalue_line("markers", "slow: Tests with timing dependencies (>2s)")
     config.addinivalue_line("markers", "requires_network: Tests that reach external services")
+    config.addinivalue_line(
+        "markers", "requires_docker: Tests that require Docker or Docker Compose tooling"
+    )
 
 
 @pytest.fixture(autouse=True)
