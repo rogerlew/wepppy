@@ -316,6 +316,15 @@ def build_job_spec(
         "weppcloud.org/deployment-revision": request.deployment_revision,
         "weppcloud.org/renderer-image-digest": request.renderer_image_digest,
     }
+    renderer_image = (
+        f"{config.renderer_image_repository}@{config.renderer_image_digest}"
+    )
+    hardened_container_security = {
+        "allowPrivilegeEscalation": False,
+        "readOnlyRootFilesystem": True,
+        "capabilities": {"drop": ["ALL"]},
+        "seccompProfile": {"type": "RuntimeDefault"},
+    }
     pod_spec: dict[str, object] = {
         "automountServiceAccountToken": False,
         "serviceAccountName": config.service_account,
@@ -329,14 +338,34 @@ def build_job_spec(
             "runAsUser": 1000,
             "runAsGroup": 993,
         },
+        "initContainers": [
+            {
+                "name": "stage-request",
+                "image": renderer_image,
+                "imagePullPolicy": "IfNotPresent",
+                "command": ["cp"],
+                "args": [f"/wc1/{request_subpath}", "/request/request.json"],
+                "workingDir": "/tmp",
+                "securityContext": hardened_container_security,
+                "resources": {
+                    "requests": {"cpu": "10m", "memory": "16Mi"},
+                    "limits": {"cpu": "100m", "memory": "64Mi"},
+                },
+                "volumeMounts": [
+                    {"name": "run", "mountPath": "/wc1", "readOnly": True},
+                    {"name": "request", "mountPath": "/request"},
+                    {"name": "tmp", "mountPath": "/tmp"},
+                ],
+            }
+        ],
         "containers": [
             {
                 "name": "renderer",
-                "image": f"{config.renderer_image_repository}@{config.renderer_image_digest}",
+                "image": renderer_image,
                 "imagePullPolicy": "IfNotPresent",
                 "command": ["Rscript", "/srv/weppcloudr/render-request-v1.R"],
                 "args": [
-                    f"/wc1/{request_subpath}",
+                    "/run/weppcloudr/request.json",
                     request_digest,
                     str(fencing_generation),
                 ],
@@ -345,12 +374,7 @@ def build_job_spec(
                 # fails during container init even though UID 1000 can access it.
                 # The renderer consumes absolute paths from the signed request.
                 "workingDir": "/tmp",
-                "securityContext": {
-                    "allowPrivilegeEscalation": False,
-                    "readOnlyRootFilesystem": True,
-                    "capabilities": {"drop": ["ALL"]},
-                    "seccompProfile": {"type": "RuntimeDefault"},
-                },
+                "securityContext": hardened_container_security,
                 "resources": {
                     "requests": {
                         "cpu": config.cpu_request,
@@ -363,6 +387,11 @@ def build_job_spec(
                         "name": "run",
                         "mountPath": "/wc1",
                     },
+                    {
+                        "name": "request",
+                        "mountPath": "/run/weppcloudr",
+                        "readOnly": True,
+                    },
                     {"name": "geodata", "mountPath": "/geodata", "readOnly": True},
                     {"name": "tmp", "mountPath": "/tmp"},
                 ],
@@ -370,6 +399,7 @@ def build_job_spec(
         ],
         "volumes": [
             {"name": "run", "persistentVolumeClaim": {"claimName": config.run_pvc}},
+            {"name": "request", "emptyDir": {"sizeLimit": "1Mi"}},
             {
                 "name": "geodata",
                 "persistentVolumeClaim": {"claimName": config.geodata_pvc, "readOnly": True},

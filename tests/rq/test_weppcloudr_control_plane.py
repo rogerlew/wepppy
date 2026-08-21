@@ -251,7 +251,7 @@ def test_job_spec_is_fixed_hardened_and_uses_root_squash_safe_mount() -> None:
     assert "fsGroup" not in pod["securityContext"]
     assert container["image"] == f"ghcr.io/open-wepp/weppcloudr@{IMAGE}"
     assert container["workingDir"] == "/tmp"
-    assert container["args"][0] == "/wc1/.weppcloudr/requests/job-1.json"
+    assert container["args"][0] == "/run/weppcloudr/request.json"
     assert container["securityContext"] == {
         "allowPrivilegeEscalation": False,
         "readOnlyRootFilesystem": True,
@@ -265,7 +265,20 @@ def test_job_spec_is_fixed_hardened_and_uses_root_squash_safe_mount() -> None:
     }
     assert all("subPath" not in mount for mount in container["volumeMounts"])
     assert [volume["name"] for volume in pod["volumes"]].count("run") == 1
-    assert "request" not in [volume["name"] for volume in pod["volumes"]]
+    request_volume = next(
+        volume for volume in pod["volumes"] if volume["name"] == "request"
+    )
+    assert request_volume == {"name": "request", "emptyDir": {"sizeLimit": "1Mi"}}
+    init = pod["initContainers"][0]
+    assert init["image"] == container["image"]
+    assert init["command"] == ["cp"]
+    assert init["args"] == [
+        "/wc1/.weppcloudr/requests/job-1.json",
+        "/request/request.json",
+    ]
+    assert init["workingDir"] == "/tmp"
+    assert init["securityContext"] == container["securityContext"]
+    assert all("subPath" not in mount for mount in init["volumeMounts"])
     assert len(digest) == 64
 
 
