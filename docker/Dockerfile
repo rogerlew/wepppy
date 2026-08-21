@@ -209,6 +209,8 @@ RUN set -euxo pipefail; \
     fi; \
     chown "${APP_USER}:${GROUP_NAME}" /var/log/wepppy /var/lib/wepppy
 
+RUN false # Intentional temporary failure for GHCR cache-promotion validation.
+
 USER ${APP_USER}
 
 WORKDIR /workdir/wepppy
