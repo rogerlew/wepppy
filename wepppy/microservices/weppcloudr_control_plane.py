@@ -262,17 +262,18 @@ class RedisReceiptStore:
     def _atomic_write(path: Path, payload: bytes, mode: int) -> None:
         temporary = path.with_name(f".{path.name}.{secrets.token_hex(8)}.tmp")
         descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, mode)
+        completed = False
         try:
             remaining = memoryview(payload)
             while remaining:
                 remaining = remaining[os.write(descriptor, remaining) :]
             os.fsync(descriptor)
             os.fchmod(descriptor, mode)
-        except BaseException:
-            temporary.unlink(missing_ok=True)
-            raise
+            completed = True
         finally:
             os.close(descriptor)
+            if not completed:
+                temporary.unlink(missing_ok=True)
         os.replace(temporary, path)
 
 
@@ -516,7 +517,14 @@ def create_app() -> FastAPI:
             while True:
                 try:
                     control.reap()
-                except Exception:
+                except (
+                    KubernetesRenderError,
+                    OSError,
+                    TypeError,
+                    ValueError,
+                    redis.RedisError,
+                    requests.RequestException,
+                ):
                     _LOGGER.exception("WEPPcloudR reconciliation loop failed")
                 time.sleep(5)
         threading.Thread(target=loop, name="weppcloudr-reaper", daemon=True).start()
