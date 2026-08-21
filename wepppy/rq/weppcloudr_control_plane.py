@@ -312,7 +312,15 @@ def build_job_spec(
         "automountServiceAccountToken": False,
         "serviceAccountName": config.service_account,
         "restartPolicy": "Never",
-        "securityContext": {"runAsNonRoot": True, "fsGroup": 993},
+        # The retained NFS exports are root-squashed.  A pod-level fsGroup asks
+        # kubelet to recursively mutate the mounted run tree and fails before
+        # the renderer starts.  Match the established WEPPcloud workload
+        # identity directly instead.
+        "securityContext": {
+            "runAsNonRoot": True,
+            "runAsUser": 1000,
+            "runAsGroup": 993,
+        },
         "containers": [
             {
                 "name": "renderer",
