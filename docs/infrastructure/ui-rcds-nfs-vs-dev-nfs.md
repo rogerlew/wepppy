@@ -62,6 +62,29 @@ delete_benchmark_results
 - root=/tmp/delete-test files=3100 dirs=30 size_mb=12.11 create_s=0.461 delete_s=0.082 rewrite_s=4.847 sync_s=0.003
 ```
 
+### Home-lab `hpc-nfs` local ZFS backend
+
+The canonical benchmark was run directly on the home-lab NFS server (`hpc`,
+also referred to operationally as `hpc-nfs`) on 2026-08-21 UTC. The ZFS target
+was `/tank/kubernetes/benchmarks/delete-test-20260821T0233Z`; `/tmp` provided
+the same-host comparison. All flush options were enabled.
+
+```text
+delete_benchmark_results
+- root=/tank/kubernetes/benchmarks/delete-test-20260821T0233Z files=3100 dirs=30 size_mb=12.11 create_s=0.372 delete_s=0.075 rewrite_s=0.381 sync_s=0.013
+- root=/tmp/delete-test-20260821T0233Z files=3100 dirs=30 size_mb=12.11 create_s=0.230 delete_s=0.018 rewrite_s=0.238 sync_s=0.004
+```
+
+The server was effectively idle during the run. Its active NFS-facing
+interface was `eno1` at `10.20.0.40/24`, negotiated at `1000 Mb/s`; the two
+other server interfaces (`ens5f0` and `ens5f1`) were down with no carrier. Both
+benchmark trees were removed successfully after the run.
+
+This is a local ZFS-backend floor, not an NFS client benchmark: because the
+script ran on the server, these timings exclude the NFS protocol, client mount
+behavior, and 1 GbE network path. A cluster-client run against an exported
+path is required to characterize the end-to-end Kubernetes NFS experience.
+
 ## Comparison (baseline production / forest.local dev)
 
 Ratios (production time ÷ forest.local time):
@@ -90,9 +113,31 @@ Ratios (production time ÷ wepp2 time):
 
 ## Notes / Takeaways
 
-- This benchmark is dominated by metadata ops and stable-write latency (especially with `--fsync-files` / `--fsync-dirs`), not bandwidth; 10 GbE does not guarantee good small-file performance.
+- This benchmark is dominated by metadata ops and stable-write latency (especially with `--fsync-files` / `--fsync-dirs`), not bandwidth; a fast link does not guarantee good small-file performance.
 - Treat `sync_s` as a “system dirtiness / background IO” indicator, not a per-path metric.
 - For a heavier profile, bump `--files-per-dir` and/or `--dir-depth` (expect NFS to degrade faster than local FS).
+
+## Current RCDS WEPP1-to-NAS link (2026-08-20)
+
+The RCDS physical path between WEPP1 and the production NAS must now be treated
+as **1 GbE**, not 10 GbE. RCDS replaced the former 10 GbE switch in the recent
+past and the replacement left this NFS path at 1 GbE. Any earlier description
+of WEPP1 having a 10 GbE connection to the NAS is historical and no longer
+describes the effective physical topology.
+
+Checks from `wepp1` confirmed that:
+
+- `/geodata` is mounted from `nas.rocket.net:/wepp` using NFSv4.2;
+- `nas.rocket.net` resolved to `192.168.100.102` during the check; and
+- traffic to that address routes through `ens192` from `192.168.100.237`.
+
+The WEPP1 guest reports `ens192` as `10000 Mb/s`, but WEPP1 is a VMware virtual
+machine and that value is the virtual NIC link rate. It does not reveal the
+physical switch-port rate or prove 10 GbE end-to-end connectivity to the NAS.
+The guest observation is therefore compatible with, and must not override,
+the current 1 GbE physical-path inventory. A switch-side port inspection or a
+controlled end-to-end throughput test would be needed to independently measure
+the physical bottleneck from inside RCDS infrastructure.
 
 ## Production Incident: Stale NFS Handle During WEPP Watershed Close (2026-04-27)
 

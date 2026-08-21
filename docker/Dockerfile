@@ -121,6 +121,12 @@ RUN mkdir -p /workdir /opt/vendor /var/log/wepppy /var/lib/wepppy && \
 # Bring the application source into the image.
 COPY . /workdir/wepppy
 
+# The release checkout must contain real LFS objects, never pointer stubs. This
+# repeats the workflow gate inside the image build so local and alternate
+# builders fail closed as well.
+RUN python3 /workdir/wepppy/tools/verify_lfs_materialized.py \
+        --scan-root /workdir/wepppy
+
 # Copy pre-built static vendor assets generated in the Node stage.
 COPY --from=static-builder /app/dist/vendor/ /workdir/wepppy/wepppy/weppcloud/static/vendor/
 # Copy archive console bundle into static/js.
@@ -138,8 +144,9 @@ RUN set -euxo pipefail; \
             popd >/dev/null; \
         }; \
         pushd "${dest}" >/dev/null; \
-        git lfs pull || true; \
+        git lfs pull --include="*" --exclude=""; \
         popd >/dev/null; \
+        python3 /workdir/wepppy/tools/verify_lfs_materialized.py --scan-root "${dest}"; \
         rm -rf "${dest}/.git"; \
     }; \
     clone_repo "${WEPPCLOUD2_REF}" "${WEPPCLOUD2_REPO}" /opt/vendor/weppcloud2; \

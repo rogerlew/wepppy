@@ -45,6 +45,9 @@ This package delivers the non-live WEPPpy half of the private WEPPcloud canary: 
 - [x] Existing production Compose files are byte-for-byte unchanged.
 - [x] Lint/tests and a secret-sensitive diff review pass.
 - [x] A ready-for-review PR records the source SHA, image tag/digest, validation, and blockers.
+- [ ] A replacement common-runtime image is built only after all tracked Git
+  LFS objects are materialized and the copied image tree passes the pointer
+  scan added after the 2026-08-20 climate-station incident.
 
 ## Parameterization ADR Gate
 
@@ -100,3 +103,7 @@ This package delivers the non-live WEPPpy half of the private WEPPcloud canary: 
 ## Follow-up Work
 
 - Kubernetes manifests, live apply, production promotion, and worker compatibility remain separately governed and unauthorized here.
+- The originally published digest contains Git LFS pointer stubs, including the
+  Cligen station catalog. It must not be promoted further. Publish and validate
+  a replacement digest using the fail-closed LFS gates before resuming climate
+  integration testing.

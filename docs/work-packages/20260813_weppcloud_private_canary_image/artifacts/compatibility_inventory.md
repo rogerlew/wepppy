@@ -47,6 +47,32 @@ The GitHub workflow builds repository context `.` with `docker/Dockerfile` for `
 
 The publication run pinned the Dockerfile frontend, both base images, uv `0.12.3`, and all five sibling Git repositories. The exact inputs are recorded in `.github/workflows/publish-weppcloud-image.yml`. Debian package indexes and DuckDB's downloaded `spatial` extension remain externally resolved, so independently repeated builds are not guaranteed byte-identical. The published artifact itself is immutable at `ghcr.io/rogerlew/wepppy@sha256:ee92666229df8fdffe4b06b1dff2cfd0e9e06823ada59915c8b492d8a468eb51`.
 
+### Git LFS hydration correction (2026-08-20)
+
+The original publication workflow checked out source without hydrating Git LFS.
+The resulting image copied pointer stubs into the runtime tree. In particular,
+`wepppy/climates/cligen/2015_stations.db` was a 131-byte pointer rather than the
+356,352-byte SQLite catalog. WEPPpy consequently entered its development
+fallback and selected `tests/neverland_.par` (Lewiston) for a Lake Tahoe run.
+The original digest is therefore invalid for climate-station selection and must
+not be promoted further.
+
+The corrected publication contract is fail-closed at two boundaries:
+
+1. GitHub Actions explicitly enables Git LFS, runs `git lfs install --local`,
+   pulls and checks out every tracked object, and verifies every path reported
+   by `git lfs ls-files` before invoking BuildKit.
+2. `docker/Dockerfile` scans the copied repository tree for pointer headers and
+   fails the build if any remain. Vendored sibling repositories now use a hard
+   `git lfs pull` and receive the same copied-tree scan; LFS download failure is
+   no longer ignored.
+
+At correction time the repository inventory contained 639 LFS objects totaling
+approximately 1.26 GB. A complete local hydration and checkout succeeded, all
+639 tracked paths passed verification, and the hydrated Cligen catalog opened
+as SQLite with 2,765 station rows. A new immutable digest still must be
+published and deployed before climate integration testing resumes.
+
 GitHub Actions run `31739217249` built source `ed1b538df02a8db0d709257ea9dacc330c56b9d9`, pushed tag `ghcr.io/rogerlew/wepppy:sha-ed1b538df02a8db0d709257ea9dacc330c56b9d9`, and reported digest `sha256:ee92666229df8fdffe4b06b1dff2cfd0e9e06823ada59915c8b492d8a468eb51`. An authenticated digest pull succeeded. An unauthenticated manifest request returned HTTP 401, demonstrating that the package was not publicly readable without changing repository or package settings.
 
 ## Protected-file non-mutation evidence
