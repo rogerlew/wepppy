@@ -72,7 +72,7 @@
 - Preserve "Own the Stack": prefer extending owned components over adding external dependencies that duplicate existing capability.
 
 ## Repository Contracts
-- Canonical RQ response and error payload contract: `docs/schemas/rq-response-contract.md`.
+- Canonical RQ response/error contract: `docs/schemas/rq-response-contract.md`; WEPPcloudR render execution: `docs/schemas/weppcloudr-render-execution-contract.md`.
 - Canonical CSRF contract for browser/session boundaries: `docs/schemas/weppcloud-csrf-contract.md`.
 - Canonical WEPP output scope contract (baseline vs roads): `docs/schemas/output-scope-contract.md`.
 - Canonical NoDb persistence/concurrency contract: `docs/schemas/nodb-persistence-concurrency-contract.md`.

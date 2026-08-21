@@ -1,6 +1,6 @@
 # wepppy.rq
 > Redis Queue (RQ) workers plus task modules that orchestrate every WEPPcloud background workflow—from DEM prep and WEPP runs to Omni scenarios and CAO/Ash agents.  
-> **See also:** `docs/prompt_templates/module_documentation_workflow.prompt.md` for the documentation standards applied here and `AGENTS.md` for repository-wide task conventions.
+> **See also:** `docs/prompt_templates/module_documentation_workflow.prompt.md` for the documentation standards applied here, `AGENTS.md` for repository-wide task conventions, and `docs/schemas/weppcloudr-render-execution-contract.md` for the deployment-neutral DEVAL render boundary.
 
 ## Overview
 - Encapsulates the Redis-backed job system that powers WEPPcloud. Each module exports RQ-safe helpers that lock NoDb controllers, publish granular StatusMessenger updates, and emit structured `job.meta` so the UI can render progress trees.
