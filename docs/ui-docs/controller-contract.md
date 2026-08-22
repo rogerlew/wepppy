@@ -83,6 +83,12 @@
   - domain status endpoint (for controllers that expose one),
   - `/rq-engine/api/jobstatus/<job_id>` polling state.
 - **Stale-lock reconciliation:** if a local active-task latch exists when the user queues work, reconcile once with the authoritative status endpoint before rejecting the action. If status is terminal/non-running (`finished`, `failed`, `stopped`, `canceled`, `not_found`, `idle`), clear the stale local latch and retry queueing once.
+- **Deferred is replaceable:** `deferred` must never disable a controller command
+  or require the user to find a separate cancellation action. Display the old
+  job status/link, stop indefinite polling, and permit an ordinary submission.
+  The server owns cancellation and dependency detachment of the superseded
+  deferred job before it records the replacement. `queued`, `started`, and
+  `scheduled` retain their existing active/disabled behavior.
 - **Split hint vs. status:** Reserve the job hint element for the RQ dashboard link only. Use a separate `<p>` in the status panel meta (e.g., `#<control>_message`) for human-readable status/errors so the link is never overwritten by `"py/state"` or other payloads.
 - **Clear before enqueue:** When handling a run click, immediately clear status text and stacktrace content before posting so stale errors disappear. Do not clear the job hint if a job id is present—`set_rq_job_id` will refresh it.
 

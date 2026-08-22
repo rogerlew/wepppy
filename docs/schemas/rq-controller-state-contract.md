@@ -517,6 +517,11 @@ remain historical references and are not the normative target profile.
   - `canceled`
 - Non-terminal statuses:
   - `queued`, `started`, `deferred`, `scheduled`
+- `deferred` remains a raw non-terminal RQ status, but it is an interactive
+  retry boundary. Shared WEPPcloud controllers display the status and job link,
+  stop indefinite polling, enable the ordinary command, and let the authorized
+  submission endpoint conditionally cancel the superseded deferred workflow.
+  `queued`, `started`, and `scheduled` continue polling and remain active.
 - Terminal success status:
   - `finished`
 - Terminal failure statuses:

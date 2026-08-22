@@ -1,13 +1,13 @@
 # Pure UI Contract Child Package Register
 
-**Register version**: 1.6 sequential controller-test execution
-**Last updated**: 2026-08-07 UTC
+**Register version**: 1.7 sequential controller-test execution
+**Last updated**: 2026-08-21 UTC
 **Authority**: Stable IDs define bounded inventory. They do not require a
 registry platform or make shared/governance packages prerequisites for testing
 one controller.
 **Total**: 77 core inventory boundaries plus 1 registered domain amendment: 4
 governance, 5 bounded remediations, 39 run-domain, 9 shared-foundation, and 20
-non-run/stateful surface packages, plus SBS-A11Y-01.
+non-run/stateful surface packages, plus SBS-A11Y-01 and SURF-20A.
 GOV-00 is the existing umbrella at
 `docs/work-packages/20260716_pure_ui_contract_standardization_c/`; GOV-00A is the
 closed convention child at
@@ -28,6 +28,8 @@ SURF-19A is the operator-authorized bounded canonical-Parquet inventory bridge
 at `docs/work-packages/20260505_run_statistics_ledger/`.
 SBS-A11Y-01 is the operator-authorized bounded canonical SBS palette enhancement
 at `docs/work-packages/20260807_sbs_section508_palette/`.
+SURF-20A is the operator-authorized bounded deferred-job retry remediation at
+`docs/work-packages/20260821_deferred_job_retry_recovery/`.
 
 ## Boundary and Review Rules
 
@@ -142,6 +144,15 @@ confirmation, and a standalone ancestor. It composes only DOM-04B SBS map
 presentation and DOM-23 SBS classification/export behavior, and cannot advance
 or close either owner.
 
+`GOV-00A-M1J` is the separately closable bounded-remediation governance
+milestone only for SURF-20A. It requires dual review, disposition, post-fix
+confirmation, and a standalone ancestor. It borrows SHR-03A, every DOM owner
+with a persisted user-facing RQ hint, and SURF-02A/B, SURF-03/04/08/18 only for
+the exact exhaustive source matrix in the SURF-20A contract decision. It also
+borrows the previously unregistered Culvert batch/retry/finalize controller
+surface without claiming that surface is otherwise audited or verified. It
+cannot advance or close any borrowed owner.
+
 Dependency shorthand expands exactly as follows:
 
 - `SHR-01..04B` = SHR-01, SHR-02, SHR-03A, SHR-03B, SHR-04A, SHR-04B.
@@ -219,6 +230,7 @@ DOM-05 field. Its evidence is inherited by DOM-05 without advancing that owner.
 | SURF-03A | `20260803_fork_archive_serial_queue` | SURF-03, SURF-04, SURF-07, SURF-17 | Route top-level fork, archive-create, and restore to one `fork-archive` queue; one consumer in dev/Forest and sole production consumer on otherwise-idle wepp3; queued-wait/execution-time-state guidance; queued authorized-user cancellation but Admin/Root-only cancellation after start; restore dispatch lock recheck; queue visibility, graph/catalog, drain-first rollout/rollback, and focused evidence only | `high`: queue/deployment wiring, cancellation authorization, public/CAP fork, authenticated destructive restore, run-tree I/O, and privileged job telemetry | GOV-00A-M1G checkpoint review |
 | SURF-04B | `20260806_fork_skip_omni_reset` | SURF-04, SURF-04A, DOM-25A, DOM-25B | Add one default-false fork option across the fork template/JS/console route, rq-engine fork schema/route, `project_rq`/`project_rq_fork`, Omni facade/stub, readiness, tests, fork/Omni docs, and RQ catalog; exclude exactly the two Omni scenario/contrast collection nodes; recreate empty real collections; rewrite only destination Omni persisted/artifact/cache/lock state after identity rewrite; remove exactly the two Omni RedisPrep timestamps; invalidate copied query-engine catalog/cache; preserve legacy jobs, unrelated timestamps/datasets/controllers, auth, source model state, and queue topology. Excludes all other controllers, parameterization, data schemas, auth/CSRF/ownership, queue choice/topology, source cleanup, and automatic Omni rebuild | `high`: public fork input, RQ mixed-version boundary, run-tree omission/reset, NoDb/RedisPrep/query-catalog integrity | contract amendment review; execution explicitly authorized by operator on 2026-08-06 |
 | SURF-19A | `20260505_run_statistics_ledger` | Newly registered generated statistics/landing-map output boundary | Replace only `compile_dot_logs` per-run `.slp`/ash globs with fixed canonical Parquet footer reads; preserve generated field names; define current-artifact count semantics; decouple count absence from centroid/location/project eligibility; stage `access.csv`, `runid-locations.json`, `run_counts.csv`, and `runs_counter.json` as one candidate and retain last-good outputs on registered systemic-failure thresholds. Excludes dot-log discovery, TTL semantics, routes/shapes/auth, Parquet schemas, queue topology/timeouts, historical ledger implementation, and other statistics behavior | `high`: public stats and landing-map generated values plus NAS file reads | GOV-00A-M1H checkpoint review; exact matrix approved by Roger Lew 2026-08-07 |
+| SURF-20A | `20260821_deferred_job_retry_recovery` | SHR-03A, all persisted-hint DOM owners, SURF-02A/B, SURF-03/04/08/18, and the newly borrowed Culvert batch surface | Apply deferred-as-replaceable only to the exhaustive backend/frontend matrix in `20260821_deferred_job_retry_recovery/artifacts/deferred_retry_surface_matrix.md`; conditionally cancel/detach safely associated deferred workflow graphs, pre-save the replacement ID, then enqueue it; preserve queued/started/scheduled protection, auth, queue topology, dependency construction, payloads, algorithms, outputs, and schemas | `high`: authenticated submission mutates RQ registry/dependency state before replacement enqueue | GOV-00A-M1J checkpoint final rereview; exact behavior approved by operator 2026-08-21 |
 
 DOM-05A is an operator-approved intended behavior amendment, not a conformance
 fix and not a reopening of REM-05. Its contract, ADR, dual reviews, security

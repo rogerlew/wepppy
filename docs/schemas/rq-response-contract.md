@@ -369,15 +369,37 @@ projection above.
   setup flow before retrying `run-wepp` endpoints.
 - WEPP submissions are single-flight per run across `run-wepp`,
   `run-wepp-watershed`, `prep-wepp-watershed`, and their no-prep variants.
-  The submission guard MUST treat queued, started, scheduled, or still-viable
-  deferred descendants of the recorded orchestration job as active even after
-  that short-lived orchestration job has finished. A terminal failed, stopped,
-  or canceled descendant makes deferred jobs that depend on the failed
-  workflow non-viable; those stranded deferred jobs MUST NOT permanently block
-  a retry. If any descendant remains queued, started, or scheduled, the
-  workflow remains active regardless of failures elsewhere in its tree. A
+  The submission guard MUST treat queued, started, or scheduled descendants of
+  the recorded orchestration job as active even after that short-lived
+  orchestration job has finished. Deferred jobs are replaceable and MUST NOT
+  block a retry, regardless of whether their dependency chain appears viable.
+  Under the endpoint's submission lock, retry MUST conditionally cancel and
+  detach every safely associated deferred node in the superseded workflow
+  before recording replacement work. If any
+  descendant remains queued, started, or scheduled, the workflow remains
+  active regardless of failures or deferred jobs elsewhere in its tree. A
   conflicting submission returns the existing HTTP `409` single-flight error
   and does not enqueue another WEPP workflow.
+- Across all mutable WEPPcloud controller endpoints, `deferred` is a retryable
+  RQ state. It MUST NOT produce a submission conflict or require a separate
+  user cancellation action. Before enqueueing replacement work, the server
+  MUST verify the candidate's canonical run/batch identity, expected operation
+  family and queue origin, and workflow lineage. It MUST reconcile the complete
+  associated workflow under the endpoint's submission lock. Any queued,
+  started, or scheduled node remains a conflict. The server MUST use a
+  conditional Redis transaction over current RQ status plus affected registry
+  and dependency keys to remove every associated deferred node from its
+  deferred registry, detach prerequisite/dependent membership, clear dependency
+  state, and cancel it. A concurrent status transition aborts cleanup and
+  retries reconciliation; it MUST NOT cancel newly queued or started work.
+  Cleanup MUST be idempotent. Existing run-access, ownership, and authorization
+  checks remain before job lookup or mutation. Missing and terminal hints remain
+  retryable. Ambiguous, copied, cross-run, cross-operation, or mismatched-origin
+  jobs MUST NOT be mutated. Endpoints that expose multiple operations over one
+  mutable resource MUST define a conflict family: safely associated deferred
+  operations in that family are superseded together, while an ambiguous or
+  unauthorized job that could affect the same resource remains a conflict and
+  MUST NOT be ignored while replacement work starts.
 - Canonical error payload:
 ```json
 {
