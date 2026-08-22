@@ -79,6 +79,9 @@ def make_redis_conn(recorder: RQRecorder, label: str = "redis-conn"):
 
             return _Lock()
 
+        def hget(self, _name: str, _key: str) -> None:
+            return None
+
     return _RedisConn()
 
 

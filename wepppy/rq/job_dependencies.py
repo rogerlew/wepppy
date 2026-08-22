@@ -139,6 +139,7 @@ def reconcile_deferred_workflow(
     *,
     connection: Any,
     association: Callable[[Job], bool],
+    root_association: Callable[[Job], bool] | None = None,
     max_attempts: int = _MAX_RECONCILE_ATTEMPTS,
     lease_checkpoint: Callable[[], None] | None = None,
 ) -> DeferredWorkflowReconciliation:
@@ -183,6 +184,13 @@ def reconcile_deferred_workflow(
                             restart = True
                             break
                         return DeferredWorkflowReconciliation("missing")
+                    continue
+                if (
+                    job_id == normalized_root_id
+                    and root_association is not None
+                    and not root_association(job)
+                ):
+                    mismatch = True
                     continue
                 if not association(job):
                     mismatch = True

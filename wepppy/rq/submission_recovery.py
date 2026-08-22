@@ -33,6 +33,9 @@ class RqEnqueueVerificationError(RuntimeError):
 _HELD_LIFECYCLES: ContextVar[dict[str, "SubmissionLease"]] = ContextVar(
     "rq_submission_held_lifecycles", default={}
 )
+_LIFECYCLE_LOCK_DIR = os.getenv(
+    "WEPPCLOUD_RQ_LIFECYCLE_LOCK_DIR", "/wc1/runs/.rq-lifecycle-locks"
+)
 
 
 def checkpoint_run_lifecycle(runid: str) -> None:
@@ -121,6 +124,7 @@ def rq_submission_lock(
     *,
     lifecycle_key: str,
     lifecycle_type: str = "run",
+    blocking_timeout: float = 10,
 ) -> Iterator[SubmissionLease]:
     """Hold the owner-safe admission lock for a submission transaction."""
     resource = str(resource_key)
@@ -146,15 +150,21 @@ def rq_submission_lock(
     lifecycle_fd: int | None = None
     try:
         for lock in locks:
-            if not lock.acquire(blocking=True, blocking_timeout=10):
+            if blocking_timeout > 0:
+                acquired_lock = lock.acquire(
+                    blocking=True, blocking_timeout=blocking_timeout
+                )
+            else:
+                acquired_lock = lock.acquire(blocking=False)
+            if not acquired_lock:
                 raise RqSubmissionConflict("Another submission is already in progress.")
             acquired.append(lock)
         if lifecycle_type == "run" and not already_held:
-            lifecycle_dir = "/wc1/runs/.rq-lifecycle-locks"
+            lifecycle_dir = _LIFECYCLE_LOCK_DIR
             os.makedirs(lifecycle_dir, exist_ok=True)
             lifecycle_path = os.path.join(lifecycle_dir, lifecycle_digest)
             lifecycle_fd = os.open(lifecycle_path, os.O_CREAT | os.O_RDWR, 0o600)
-            deadline = time.monotonic() + 10
+            deadline = time.monotonic() + max(0, blocking_timeout)
             while True:
                 try:
                     fcntl.flock(lifecycle_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -285,12 +295,22 @@ def prepare_redisprep_job_id(
             )
             and (not origins or str(job.origin) in origins)
         )
+        root_association = lambda job: (
+            _job_targets_run(job, runid, arg_index=root_run_arg_index)
+            and str(job.func_name) in root_func_names
+            and (
+                not expected_root_module
+                or str(job.func_name).rpartition(".")[0] == expected_root_module
+            )
+            and (not origins or str(job.origin) in origins)
+        )
         if lease_checkpoint is not None:
             lease_checkpoint()
         result = reconcile_deferred_workflow(
             str(prior_job_id),
             connection=connection,
             association=association or default_association,
+            root_association=root_association,
             lease_checkpoint=lease_checkpoint,
         )
         if result.state == "active":

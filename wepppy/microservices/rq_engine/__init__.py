@@ -102,6 +102,7 @@ async def run_mutation_lifecycle_middleware(request: Request, call_next):
                 redis_conn,
                 f"{runid}:request",
                 lifecycle_key=runid,
+                blocking_timeout=0,
             ) as lease:
                 original_receive = request._receive
 

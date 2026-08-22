@@ -1251,6 +1251,11 @@ def test_archive_clears_stale_job_id_when_lookup_fails(
     monkeypatch.setattr(fork_archive_routes, "_exists", lambda path: True)
     monkeypatch.setattr(fork_archive_routes, "lock_statuses", lambda runid: {})
     monkeypatch.setattr(fork_archive_routes.Job, "fetch", lambda *args, **kwargs: (_ for _ in ()).throw(NoSuchJobError("missing")))
+    monkeypatch.setattr(
+        fork_archive_routes,
+        "reconcile_deferred_workflow",
+        lambda *_args, **_kwargs: SimpleNamespace(state="missing", job_ids=()),
+    )
 
     _stub_queue(monkeypatch, job_id="job-100")
     prep = _stub_prep(monkeypatch, archive_job_id="stale-job")
@@ -1353,6 +1358,11 @@ def test_restore_clears_stale_job_id_before_enqueue(
     monkeypatch.setattr(fork_archive_routes, "_exists", lambda path: True)
     monkeypatch.setattr(fork_archive_routes, "lock_statuses", lambda runid: {})
     monkeypatch.setattr(fork_archive_routes.Job, "fetch", lambda *args, **kwargs: (_ for _ in ()).throw(NoSuchJobError("missing")))
+    monkeypatch.setattr(
+        fork_archive_routes,
+        "reconcile_deferred_workflow",
+        lambda *_args, **_kwargs: SimpleNamespace(state="missing", job_ids=()),
+    )
 
     constructor_calls = _stub_queue(monkeypatch, job_id="job-restore")
     prep = _stub_prep(monkeypatch, archive_job_id="stale-restore")

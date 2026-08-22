@@ -30,6 +30,7 @@ def rq_submission_lock(
     *,
     lifecycle_key: str,
     lifecycle_type: str = ...,
+    blocking_timeout: float = ...,
 ) -> AbstractContextManager[SubmissionLease]: ...
 def prepare_redisprep_job_id(
     prep: RedisPrep,

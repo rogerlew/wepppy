@@ -7,6 +7,11 @@ from wepppy.rq import submission_recovery
 pytestmark = pytest.mark.unit
 
 
+@pytest.fixture(autouse=True)
+def isolated_lifecycle_locks(tmp_path, monkeypatch):
+    monkeypatch.setattr(submission_recovery, "_LIFECYCLE_LOCK_DIR", str(tmp_path))
+
+
 class _Lock:
     def __init__(self, events):
         self.events = events
@@ -166,3 +171,31 @@ def test_enqueue_checkpoints_lease_before_enqueue(monkeypatch):
         "unlock",
         "unlock",
     ]
+
+
+def test_submission_lock_can_fail_fast_without_blocking() -> None:
+    acquire_kwargs = []
+
+    class BusyLock(_Lock):
+        def acquire(self, **kwargs):
+            acquire_kwargs.append(kwargs)
+            return False
+
+    class Connection:
+        def lock(self, _name, **_kwargs):
+            return BusyLock([])
+
+    with pytest.raises(
+        submission_recovery.RqSubmissionConflict,
+        match="Another submission is already in progress",
+    ):
+        with submission_recovery.rq_submission_lock(
+            Connection(),
+            "run-1:request",
+            lifecycle_key="run-1",
+            lifecycle_type="batch",
+            blocking_timeout=0,
+        ):
+            pytest.fail("busy lock must not enter")
+
+    assert acquire_kwargs == [{"blocking": False}]
