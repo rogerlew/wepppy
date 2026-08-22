@@ -16,8 +16,14 @@ from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.mods.path_ce import PathCostEffective
 from wepppy.nodb.redis_prep import RedisPrep
+from wepppy.rq.job_id import new_rq_job_id
+from wepppy.rq.submission_recovery import (
+    RqSubmissionConflict,
+    prepare_redisprep_job_id,
+    rq_submission_lock,
+)
 from wepppy.rq.path_ce_rq import TIMEOUT, run_path_cost_effective_rq
-from wepppy.weppcloud.utils.helpers import authorize_and_handle_with_exception_factory
+from wepppy.weppcloud.utils.helpers import authorize_and_handle_with_exception_factory, run_lifecycle_mutation
 from .project_bp import set_project_mod_state
 
 path_ce_bp = Blueprint("path_ce", __name__)
@@ -71,6 +77,8 @@ def _build_config_payload(raw: Dict[str, Any]) -> Dict[str, Any]:
     "/runs/<string:runid>/<config>/tasks/path_cost_effective_enable",
     methods=["GET"],
 )
+@authorize_and_handle_with_exception_factory
+@run_lifecycle_mutation
 def enable_path_cost_effective(runid: str, config: str):
     authorize(runid, config)
     try:
@@ -107,7 +115,7 @@ def _active_path_ce_job_id(wd: str, redis_conn: "redis.Redis") -> Optional[str]:
         job = Job.fetch(job_id, connection=redis_conn)
     except NoSuchJobError:
         return None
-    if job.get_status(refresh=False) in ("queued", "started", "deferred", "scheduled"):
+    if job.get_status(refresh=False) in ("queued", "started", "scheduled"):
         return job_id
     return None
 
@@ -209,17 +217,46 @@ def run_path_cost_effective(runid: str, config: str) -> Response:
         return error_factory("PATH Cost-Effective requires an SBS map. Upload or configure one in Disturbed before running.")
 
     with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
-        active_job_id = _active_path_ce_job_id(wd, redis_conn)
-        if active_job_id is not None:
-            return error_factory(
-                f"A PATH Cost-Effective run is already in progress (job {active_job_id}). "
-                f"Wait for it to finish before starting another."
+        try:
+            lock_context = rq_submission_lock(redis_conn, f"{runid}:path_ce", lifecycle_key=runid)
+            lease = lock_context.__enter__()
+        except RqSubmissionConflict as exc:
+            return error_factory(str(exc))
+        try:
+            active_job_id = _active_path_ce_job_id(wd, redis_conn)
+            if active_job_id is not None:
+                return error_factory(
+                    f"A PATH Cost-Effective run is already in progress (job {active_job_id}). "
+                    f"Wait for it to finish before starting another."
+                )
+            prep = RedisPrep.getInstance(wd)
+            replacement_job_id = new_rq_job_id()
+            try:
+                prepare_redisprep_job_id(
+                    prep,
+                    job_key="run_path_ce",
+                    replacement_job_id=replacement_job_id,
+                    connection=redis_conn,
+                    runid=runid,
+                    expected_root_module=run_path_cost_effective_rq.__module__,
+                    expected_root_func_name=(
+                        f"{run_path_cost_effective_rq.__module__}."
+                        f"{run_path_cost_effective_rq.__qualname__}"
+                    ),
+                    allowed_origins=("default",),
+                    lease_checkpoint=lease.checkpoint,
+                )
+            except RqSubmissionConflict as exc:
+                return error_factory(str(exc))
+            queue = Queue(connection=redis_conn)
+            lease.checkpoint()
+            job = queue.enqueue_call(
+                func=run_path_cost_effective_rq,
+                args=(runid,),
+                timeout=TIMEOUT,
+                job_id=replacement_job_id,
             )
-        queue = Queue(connection=redis_conn)
-        job = queue.enqueue_call(
-            func=run_path_cost_effective_rq,
-            args=(runid,),
-            timeout=TIMEOUT,
-        )
+        finally:
+            lock_context.__exit__(None, None, None)
 
     return jsonify({"job_id": job.id})

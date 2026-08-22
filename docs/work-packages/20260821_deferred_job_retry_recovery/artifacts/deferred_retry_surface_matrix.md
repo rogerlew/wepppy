@@ -53,6 +53,9 @@ step. There is no post-enqueue hint write and no emergency persistence path.
 | DOM-29 | `polaris_routes.py` | RedisPrep POLARIS hint consumed by RUSLE | Run ID and POLARIS operation/origin |
 | SURF-03/04 | `fork_archive_routes.py`; `weppcloud/routes/archive_dashboard/archive_dashboard.py` | Fork hint, archive hint/claim, dependent finalizer | Authorized source/destination run identity and `fork-archive` origin. Archive create/restore/delete conflicts are one resource family; fork lineage is separate unless it targets the same locked destination |
 | SURF-08 | `migration_routes.py`; `run_sync_routes.py` | RedisPrep migration hint and deferred migration child | Run ID, migration/sync operation family, origin, lineage |
+| Bootstrap enable | `weppcloud/bootstrap/enable_jobs.py`; `wepppy/rq/wepp_rq.py::bootstrap_enable_rq` | Durable Bootstrap enable receipt and git-lock token | Run ID, exact enable operation/origin; deferred receipt is canceled and its exact old lock token released before replacement |
+| Project deletion | `weppcloud/routes/nodb_api/project_bp.py::delete_run`; `wepppy/rq/project_rq.py::delete_run_rq` | RedisPrep `delete_run_rq` hint | Authorized run ID and exact delete operation/origin |
+| Interchange migration | `weppcloud/routes/nodb_api/interchange_bp.py`; `wepppy/rq/interchange_rq.py::run_interchange_migration` | RedisPrep `run_interchange_migration` hint | Authorized run ID and exact migration operation/origin |
 | SURF-18 | `weppcloud/routes/weppcloudr.py` | Parent-owned DEVAL hint and existing job metadata | Run/config, DEVAL operation/origin, lineage |
 
 The following RedisPrep hint writers enqueue independent jobs with no current
@@ -79,6 +82,7 @@ deferred prior receipt is canceled before replacement.
 | SURF-03/04 | Archive/fork controller/template active projections and tests | Deferred is not presented as running; server cleanup remains authoritative |
 | Culvert batch surface | Culvert batch/retry/finalize client or dashboard state and focused tests | Deferred graph never blocks retry/finalize UI; replacement response becomes the tracked receipt |
 | DOM-02 | Project readonly controller/action tests | Deferred readonly receipt does not disable the ordinary readonly submission |
+| Bootstrap enable | `controllers_js/bootstrap_control.js` and tests | Deferred enable receipt stops polling, clears the UI latch, and leaves the normal enable action retryable |
 
 The RQ job dashboard is diagnostic, not a submission controller, and continues
 to display deferred as raw nonterminal status. Orchestration/readiness schema

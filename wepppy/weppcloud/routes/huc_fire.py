@@ -7,6 +7,8 @@ from ._common import *  # noqa: F401,F403
 
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.weppcloud.utils import auth_tokens
+from wepppy.rq.submission_recovery import checkpoint_run_lifecycle
+from wepppy.weppcloud.utils.helpers import run_lifecycle_mutation
 
 huc_fire_bp = Blueprint('huc_fire', __name__)
 
@@ -69,6 +71,7 @@ def huc_fire():
 # noinspection PyBroadException
 @huc_fire_bp.route('/runs/<string:runid>/<config>/resources/huc.json')
 @authorize_and_handle_with_exception_factory
+@run_lifecycle_mutation
 def huc(runid, config):
 
     ctx = load_run_context(runid, config)
@@ -85,6 +88,7 @@ def huc(runid, config):
     response = request.get(url)
     geojson_data = response.json()
 
+    checkpoint_run_lifecycle(runid)
     with open(_join(disturbed.disturbed_dir, 'huc.json'), 'w') as fp:
         json.dump(geojson_data, fp)
 

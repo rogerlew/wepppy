@@ -40,6 +40,7 @@ from wepppy.rq.features_export_rq import (
 )
 from wepppy.rq.ermit_export_rq import run_ermit_export_rq
 from wepppy.rq.job_info import get_wepppy_rq_job_info
+from wepppy.rq.submission_recovery import RqSubmissionConflict, enqueue_tracked_rq_job
 from wepppy.runtime_paths.errors import NoDirError
 from wepppy.weppcloud.utils.helpers import get_wd
 
@@ -263,21 +264,18 @@ def _features_export_download_url(runid: str, config: str, job_id: str) -> str:
 
 
 def _enqueue_ermit_export_job(*, runid: str, config: str, wd: str) -> str:
+    prep = RedisPrep.getInstance(wd)
     with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
         queue = Queue(connection=redis_conn)
-        job = queue.enqueue_call(
+        job = enqueue_tracked_rq_job(
+            queue,
             run_ermit_export_rq,
-            (runid, config, wd),
+            prep=prep,
+            job_key="ermit_export",
+            runid=runid,
+            args=(runid, config, wd),
             timeout=RQ_TIMEOUT,
         )
-
-    prep = RedisPrep.tryGetInstance(wd)
-    if prep is not None:
-        try:
-            prep.set_rq_job_id("ermit_export", job.id)
-        except Exception:
-            # Boundary catch: metadata persistence must not mask successful enqueue.
-            logger.warning("ERMiT export: failed to persist rq job id", exc_info=True)
     return str(job.id)
 
 
@@ -367,13 +365,19 @@ def _enqueue_features_export_job(
 
     with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
         queue = Queue(connection=redis_conn)
-        job = queue.enqueue_call(
+        job = enqueue_tracked_rq_job(
+            queue,
             target_func,
-            (runid, config, payload, wd),
+            prep=prep,
+            job_key="features_export",
+            runid=runid,
+            args=(runid, config, payload, wd),
             timeout=RQ_TIMEOUT,
+            allowed_root_funcs=(
+                run_features_export_rq,
+                run_features_export_cache_hit_rq,
+            ),
         )
-
-    prep.set_rq_job_id("features_export", job.id)
     return str(job.id), cache_hit_eligible
 
 
@@ -466,6 +470,8 @@ async def export_ermit_submit(runid: str, config: str, request: Request):
             },
             status_code=202,
         )
+    except RqSubmissionConflict as exc:
+        return error_response(str(exc), status_code=409, code="job_active")
     except FileNotFoundError as exc:
         return error_response(str(exc), status_code=404, code="not_found")
     except Exception as exc:  # broad-except: boundary contract
@@ -793,6 +799,8 @@ async def export_features_submit(runid: str, config: str, request: Request):
             },
             status_code=202,
         )
+    except RqSubmissionConflict as exc:
+        return error_response(str(exc), status_code=409, code="job_active")
     except FeaturesExportValidationError as exc:
         return JSONResponse(exc.to_error_payload(), status_code=exc.status_code)
     except FeaturesExportServiceError as exc:

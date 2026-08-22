@@ -12,6 +12,15 @@ TIMEOUT: int
 logger: logging.Logger
 send_discord_message: Callable[[str], None] | None
 
+def reconcile_deferred_batch_jobs(
+    batch_name: str,
+    *,
+    redis_conn: Any,
+    exclude_job_ids: set[str] | None = ...,
+    lease_checkpoint: Callable[[], None] | None = ...,
+    _watch_attempt: int = ...,
+) -> list[str]: ...
+
 def run_batch_rq(batch_name: str) -> dict[str, Any]: ...
 
 def delete_batch_rq(batch_name: str) -> dict[str, Any]: ...

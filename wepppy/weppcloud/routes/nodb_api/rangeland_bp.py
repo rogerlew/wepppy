@@ -10,6 +10,7 @@ from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.rangeland_cover import RangelandCover
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.rq.project_rq import TIMEOUT, build_rangeland_cover_rq
+from wepppy.rq.submission_recovery import RqSubmissionConflict, enqueue_tracked_rq_job
 
 from wepppy.weppcloud.utils.helpers import handle_with_exception_factory
 from wepppy.weppcloud.utils.cap_guard import requires_cap
@@ -192,7 +193,7 @@ def task_modify_rangeland_cover(runid, config):
         if invalid_id:
             message = f'Topaz ID {invalid_id} is not available.'
         return exception_factory(message, runid=runid)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/rangeland_bp.py:195", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Failed to modify rangeland cover.', runid=runid)
@@ -237,7 +238,7 @@ def task_build_rangeland_cover(runid, config):
 
     try:
         RangelandCover.getInstance(wd)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/rangeland_bp.py:238", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Building RangelandCover Failed', runid=runid)
@@ -249,13 +250,18 @@ def task_build_rangeland_cover(runid, config):
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(
+            job = enqueue_tracked_rq_job(
+                q,
                 build_rangeland_cover_rq,
-                (runid, rap_year, default_covers),
+                prep=prep,
+                job_key='build_rangeland_cover_rq',
+                runid=runid,
+                args=(runid, rap_year, default_covers),
                 timeout=TIMEOUT,
             )
-        prep.set_rq_job_id('build_rangeland_cover_rq', job.id)
-    except Exception:
+    except RqSubmissionConflict as exc:
+        return error_factory(str(exc), status_code=409)
+    except Exception:  # broad-except: boundary contract
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/rangeland_bp.py:254", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Building RangelandCover Failed', runid=runid)

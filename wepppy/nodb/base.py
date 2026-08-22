@@ -78,6 +78,7 @@ Warning:
 from __future__ import annotations
 
 import functools
+import hashlib
 import importlib
 import inspect
 import multiprocessing as mp
@@ -98,6 +99,8 @@ import os
 __all__ = [
     'NoDbAlreadyLockedError',
     'NoDbStaleWriteError',
+    'NoDbRunReplacingError',
+    'run_replacement_guard',
     'redis_nodb_cache_client',
     'redis_status_client',
     'redis_log_level_client',
@@ -164,6 +167,71 @@ class NoDbAlreadyLockedError(Exception):
 class NoDbStaleWriteError(RuntimeError):
     """Raised when dump() would overwrite a newer on-disk NoDb payload."""
     pass
+
+
+class NoDbRunReplacingError(NoDbAlreadyLockedError):
+    """Raised when a destructive run replacement fences new mutations."""
+
+
+def _run_replacement_lock_key(runid: str) -> str:
+    digest = hashlib.sha256(f"run\0{runid}".encode("utf-8")).hexdigest()
+    return f"nodb:run-replacement:{digest}"
+
+
+@contextmanager
+def run_replacement_guard(runid: str) -> Generator[Any, None, None]:
+    """Fence new NoDb mutations while a partial run is replaced."""
+    lock_client = _ensure_redis_lock_client()
+    replacement_lock = lock_client.lock(
+        _run_replacement_lock_key(runid),
+        timeout=120,
+        blocking_timeout=10,
+        thread_local=False,
+    )
+    if not replacement_lock.acquire(blocking=True, blocking_timeout=10):
+        raise NoDbRunReplacingError("Run replacement is already in progress.")
+    stop_renewal = threading.Event()
+    lost = threading.Event()
+
+    class ReplacementLease:
+        def checkpoint(self) -> None:
+            if lost.is_set():
+                raise NoDbRunReplacingError("Run replacement lock expired.")
+            try:
+                renewed = replacement_lock.extend(120, replace_ttl=True)
+            except (redis.exceptions.LockError, redis.exceptions.RedisError) as exc:
+                lost.set()
+                raise NoDbRunReplacingError("Run replacement lock expired.") from exc
+            if not renewed:
+                lost.set()
+                raise NoDbRunReplacingError("Run replacement lock expired.")
+
+    def renew() -> None:
+        while not stop_renewal.wait(30):
+            try:
+                if not replacement_lock.extend(120, replace_ttl=True):
+                    lost.set()
+                    return
+            except (redis.exceptions.LockError, redis.exceptions.RedisError):
+                lost.set()
+                return
+
+    renewer = threading.Thread(
+        target=renew,
+        name=f"run-replacement-{runid}",
+        daemon=True,
+    )
+    renewer.start()
+    try:
+        yield ReplacementLease()
+    finally:
+        stop_renewal.set()
+        renewer.join(timeout=1)
+        try:
+            replacement_lock.release()
+        except (redis.exceptions.LockError, redis.exceptions.RedisError):
+            # Redis locks use owner-token compare-and-delete on release.
+            pass
 
 from wepppy.all_your_base import isfloat, isint, isbool
 from .redis_prep import RedisPrep
@@ -2181,6 +2249,10 @@ class NoDbBase(object):
 
         lock_client = _ensure_redis_lock_client()
 
+        replacement_key = _run_replacement_lock_key(self.runid)
+        if lock_client.get(replacement_key) is not None:
+            raise NoDbRunReplacingError('Run replacement is in progress.')
+
         ttl_seconds = LOCK_DEFAULT_TTL if ttl is None else max(1, int(ttl))
         lock_key = self._distributed_lock_key
 
@@ -2199,6 +2271,18 @@ class NoDbBase(object):
                 if existing_token:
                     message += f' (token={existing_token})'
             raise NoDbAlreadyLockedError(message)
+
+        # Close the check/acquire race with run replacement: a replacement
+        # either sees this NoDb lock or this mutation backs out before writing.
+        if lock_client.get(replacement_key) is not None:
+            lock_client.eval(
+                "if redis.call('get', KEYS[1]) == ARGV[1] then "
+                "return redis.call('del', KEYS[1]) else return 0 end",
+                1,
+                lock_key,
+                payload,
+            )
+            raise NoDbRunReplacingError('Run replacement is in progress.')
 
         lock_client.hset(self.runid, self._file_lock_key, 'true')
         _set_local_lock_token(self, token)
@@ -2224,7 +2308,18 @@ class NoDbBase(object):
             if stored_token is not None and stored_token != local_token:
                 raise RuntimeError('unlock() called with non-matching token; use flag "-f" to force release')
 
-        lock_client.delete(lock_key)
+        if force:
+            lock_client.delete(lock_key)
+        else:
+            removed = lock_client.eval(
+                "if redis.call('get', KEYS[1]) == ARGV[1] then "
+                "return redis.call('del', KEYS[1]) else return 0 end",
+                1,
+                lock_key,
+                stored_payload,
+            )
+            if not removed:
+                raise RuntimeError('unlock() lost ownership before release')
         lock_client.hset(self.runid, self._file_lock_key, 'false')
         _set_local_lock_token(self, None)
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import inspect
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, Optional
 
 import redis
 from rq import get_current_job
@@ -18,11 +18,12 @@ from wepppy.nodb.mods.roads import Roads
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.nodb.status_messenger import StatusMessenger
 from wepppy.rq.exception_logging import with_exception_logging
+from wepppy.rq.job_dependencies import reconcile_deferred_workflow
 from wepppy.weppcloud.utils.helpers import get_wd
 
 TIMEOUT: int = 43_200
 ROADS_RQ_JOB_KEYS: tuple[str, str] = ("run_roads_prepare_rq", "run_roads_rq")
-ACTIVE_RQ_JOB_STATUSES: frozenset[str] = frozenset({"queued", "started", "deferred", "scheduled"})
+ACTIVE_RQ_JOB_STATUSES: frozenset[str] = frozenset({"queued", "started", "scheduled"})
 ROADS_SUBMIT_LOCK_TTL_SECONDS: int = 30
 ROADS_RUNTIME_LOCK_TTL_SECONDS: int = max(TIMEOUT, 600)
 
@@ -113,6 +114,49 @@ def ensure_no_active_roads_job(runid: str, prep: Optional[RedisPrep], redis_conn
         "Roads job already active for this run "
         f"(key={active_job['key']}, job_id={active_job['job_id']}, status={active_job['status']})."
     )
+
+
+def _roads_job_targets_run(job: Job, runid: str) -> bool:
+    metadata = job.meta if isinstance(job.meta, dict) else {}
+    metadata_runid = str(metadata.get("runid") or "").strip()
+    if metadata_runid and metadata_runid != runid:
+        return False
+    args = list(job.args or [])
+    func_name = str(job.func_name)
+    allowed_funcs = {
+        f"{run_roads_prepare_rq.__module__}.{run_roads_prepare_rq.__qualname__}",
+        f"{run_roads_rq.__module__}.{run_roads_rq.__qualname__}",
+    }
+    return (
+        bool(args)
+        and str(args[0]) == runid
+        and func_name in allowed_funcs
+        and str(job.origin) == "default"
+    )
+
+
+def reconcile_deferred_roads_jobs(
+    runid: str,
+    prep: Optional[RedisPrep],
+    redis_conn: redis.Redis,
+    lease_checkpoint: Callable[[], None] | None = None,
+) -> None:
+    if prep is None:
+        return
+    for key in ROADS_RQ_JOB_KEYS:
+        job_id = prep.get_rq_job_id(key)
+        if not job_id:
+            continue
+        result = reconcile_deferred_workflow(
+            job_id,
+            connection=redis_conn,
+            association=lambda job: _roads_job_targets_run(job, runid),
+            lease_checkpoint=lease_checkpoint,
+        )
+        if result.state in {"active", "mismatch"}:
+            raise RoadsSingleFlightConflict(
+                f"Roads job cannot be replaced (key={key}, job_id={job_id}, state={result.state})."
+            )
 
 
 def _ensure_roads_controller(wd: str, cfg_fn: str) -> Roads:

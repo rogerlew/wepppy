@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from contextlib import nullcontext
 from types import SimpleNamespace
 
 import pytest
@@ -111,6 +112,12 @@ def _stub_queue(
         def __init__(self, id_value: str) -> None:
             self.id = id_value
 
+        def save(self, pipeline=None) -> None:
+            return None
+
+        def register_dependency(self, pipeline=None) -> None:
+            return None
+
     class DummyQueue:
         def __init__(self, *args, **kwargs) -> None:
             self._job_ids: list[str] = list(captured.get("job_ids", [job_id]))
@@ -124,6 +131,18 @@ def _stub_queue(
             captured["kwargs"] = kwargs
             return DummyJob(next_job_id)
 
+        def create_job(self, *args, **kwargs):
+            call_index = len(captured.setdefault("calls", []))
+            next_job_id = self._job_ids[min(call_index, len(self._job_ids) - 1)]
+            call = {**kwargs, "args": args, "kwargs": kwargs, "job_id": next_job_id}
+            captured["calls"].append(call)
+            captured["args"] = args
+            captured["kwargs"] = kwargs
+            return DummyJob(next_job_id)
+
+        def _enqueue_job(self, job, pipeline=None):
+            return job
+
     class DummyRedis:
         def __enter__(self):
             return self
@@ -131,8 +150,21 @@ def _stub_queue(
         def __exit__(self, exc_type, exc, tb):
             return False
 
+        def pipeline(self):
+            return SimpleNamespace(execute=lambda: [])
+
     monkeypatch.setattr(geneva_routes, "Queue", DummyQueue)
     monkeypatch.setattr(geneva_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(
+        geneva_routes,
+        "rq_submission_lock",
+        lambda *args, **kwargs: nullcontext(SimpleNamespace(checkpoint=lambda: None)),
+    )
+    monkeypatch.setattr(
+        geneva_routes,
+        "new_rq_job_id",
+        lambda: str(captured["job_ids"][0]),
+    )
     return captured
 
 
@@ -287,7 +319,7 @@ def test_run_workflow_enqueues_chained_jobs_with_forced_rebuild(
     assert prep_state["removed"] == [TaskEnum.run_geneva]
 
 
-def test_run_workflow_returns_accepted_when_mark_job_queued_is_lock_contended(
+def test_run_workflow_does_not_enqueue_when_job_hint_cannot_be_saved(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     _stub_auth(monkeypatch)
@@ -327,10 +359,9 @@ def test_run_workflow_returns_accepted_when_mark_job_queued_is_lock_contended(
             },
         )
 
-    assert response.status_code == 202
-    assert response.json()["job_id"] == "geneva-prepare-1"
-    assert len(captured["calls"]) == 3
-    assert stub.mark_attempts == 2
+    assert response.status_code == 500
+    assert len(captured.get("calls", [])) == 0
+    assert stub.mark_attempts == 1
     assert prep_state["removed"] == [TaskEnum.run_geneva]
 
 

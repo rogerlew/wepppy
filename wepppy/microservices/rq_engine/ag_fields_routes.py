@@ -40,6 +40,8 @@ from wepppy.nodb.mods.ag_fields.routing_schemes import (
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.rq.auth_actor import current_auth_actor
 from wepppy.rq.job_id import new_rq_job_id
+from wepppy.rq.job_dependencies import reconcile_deferred_workflow
+from wepppy.rq.submission_recovery import RqSubmissionConflict, rq_submission_lock
 from wepppy.rq.ag_fields_rq import (
     AGFIELDS_BUILD_SUBFIELDS_JOB_KEY,
     AGFIELDS_PLANTDB_JOB_KEY,
@@ -49,6 +51,7 @@ from wepppy.rq.ag_fields_rq import (
     AGFIELDS_SUITE_DISPATCH_LOCK_PREFIX,
     AGFIELDS_RUN_WEPP_JOB_KEY,
     build_ag_fields_subfields_rq,
+    finalize_ag_fields_watershed_suite_rq,
     process_ag_fields_plant_db_rq,
     run_ag_fields_watershed_rq,
     run_ag_fields_watershed_suite_rq,
@@ -71,7 +74,7 @@ RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
 RQ_READ_SCOPES = ["rq:status"]
 AGFIELDS_SUBMIT_LOCK_TTL_SECONDS = 30
-ACTIVE_RQ_JOB_STATUSES = {"queued", "started", "deferred", "scheduled"}
+ACTIVE_RQ_JOB_STATUSES = {"queued", "started", "scheduled"}
 TERMINAL_RQ_JOB_STATUSES = {
     "canceled",
     "cancelled",
@@ -81,6 +84,14 @@ TERMINAL_RQ_JOB_STATUSES = {
     "stopped",
 }
 AGFIELDS_CURRENT_WATERSHED_JOB_KEYS = tuple(AGFIELDS_RUN_WATERSHED_JOB_KEYS.values())
+AGFIELDS_ALL_JOB_KEYS = (
+    AGFIELDS_RUN_WATERSHED_SUITE_JOB_KEY,
+    AGFIELDS_BUILD_SUBFIELDS_JOB_KEY,
+    AGFIELDS_PLANTDB_JOB_KEY,
+    AGFIELDS_RUN_WEPP_JOB_KEY,
+    *AGFIELDS_CURRENT_WATERSHED_JOB_KEYS,
+    AGFIELDS_RUN_WATERSHED_JOB_KEY,
+)
 
 AGFIELDS_BOUNDARY_ALLOWED_EXTENSIONS = ("geojson", "json")
 AGFIELDS_BOUNDARY_MAX_BYTES = 10 * 1024 * 1024
@@ -141,21 +152,21 @@ def _enqueue_job(
     args: tuple[Any, ...],
 ) -> JSONResponse:
     runid = str(args[0])
-    submit_owner = f"{job_key}:{uuid4().hex}"
-    submit_lock_key = f"agfields:submit_lock:{runid}"
     prep = RedisPrep.getInstance(wd)
     with redis.Redis(
-        **redis_connection_kwargs(RedisDB.LOCK, decode_responses=True)
+        **redis_connection_kwargs(RedisDB.RQ, decode_responses=True)
     ) as lock_conn:
-        if not lock_conn.set(
-            submit_lock_key,
-            submit_owner,
-            nx=True,
-            ex=AGFIELDS_SUBMIT_LOCK_TTL_SECONDS,
-        ):
-            raise AgFieldsJobConflict("Another AgFields submission is in progress for this run.")
+        try:
+            lock_context = rq_submission_lock(lock_conn, f"{runid}:agfields", lifecycle_key=runid)
+            lease = lock_context.__enter__()
+        except RqSubmissionConflict as exc:
+            raise AgFieldsJobConflict(str(exc)) from exc
         try:
             with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
+                _reconcile_deferred_agfields_jobs(
+                    prep, redis_conn, runid, lease_checkpoint=lease.checkpoint
+                )
+                lease.checkpoint()
                 active = _find_active_job(prep, redis_conn)
                 if active is not None:
                     raise AgFieldsJobConflict(
@@ -165,19 +176,17 @@ def _enqueue_job(
                 if job_key != AGFIELDS_RUN_WATERSHED_JOB_KEY:
                     prep.remove_timestamp(TaskEnum.run_ag_fields)
                 queue = Queue(connection=redis_conn)
-                job = queue.enqueue_call(func, args, timeout=RQ_TIMEOUT)
-                prep.set_rq_job_id(job_key, job.id)
-        finally:
-            try:
-                if lock_conn.get(submit_lock_key) == submit_owner:
-                    lock_conn.delete(submit_lock_key)
-            except redis.RedisError as exc:
-                logger.warning(
-                    "AgFields submit lock release failed for %s: %s",
-                    runid,
-                    exc,
-                    extra={"runid": runid, "job_key": job_key},
+                replacement_job_id = new_rq_job_id()
+                prep.set_rq_job_id(job_key, replacement_job_id)
+                lease.checkpoint()
+                job = queue.enqueue_call(
+                    func,
+                    args,
+                    timeout=RQ_TIMEOUT,
+                    job_id=replacement_job_id,
                 )
+        finally:
+            lock_context.__exit__(None, None, None)
     return JSONResponse({"job_id": job.id}, status_code=202)
 
 
@@ -188,25 +197,25 @@ def _enqueue_watershed_jobs(
     max_workers: int | None,
 ) -> JSONResponse:
     """Enqueue one direct scheme or one parent with children and a finalizer."""
-    submit_owner = f"agfields_run_watershed:{uuid4().hex}"
-    submit_lock_key = f"agfields:submit_lock:{runid}"
     prep = RedisPrep.getInstance(wd)
     ag_fields = AgFields.getInstance(wd)
     job_ids: dict[str, str]
     root_job_id: str
     finalizer_job_id: str | None = None
     with redis.Redis(
-        **redis_connection_kwargs(RedisDB.LOCK, decode_responses=True)
+        **redis_connection_kwargs(RedisDB.RQ, decode_responses=True)
     ) as lock_conn:
-        if not lock_conn.set(
-            submit_lock_key,
-            submit_owner,
-            nx=True,
-            ex=AGFIELDS_SUBMIT_LOCK_TTL_SECONDS,
-        ):
-            raise AgFieldsJobConflict("Another AgFields submission is in progress for this run.")
+        try:
+            lock_context = rq_submission_lock(lock_conn, f"{runid}:agfields", lifecycle_key=runid)
+            lease = lock_context.__enter__()
+        except RqSubmissionConflict as exc:
+            raise AgFieldsJobConflict(str(exc)) from exc
         try:
             with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
+                _reconcile_deferred_agfields_jobs(
+                    prep, redis_conn, runid, lease_checkpoint=lease.checkpoint
+                )
+                lease.checkpoint()
                 active = _find_active_job(prep, redis_conn)
                 if active is not None:
                     raise AgFieldsJobConflict(
@@ -236,6 +245,7 @@ def _enqueue_watershed_jobs(
                     if scheme is AgFieldsRoutingScheme.CONCEPT_2:
                         prep.set_rq_job_id(AGFIELDS_RUN_WATERSHED_JOB_KEY, job_id)
                     ag_fields.set_watershed_integration_job_ids(planned_job_ids)
+                    lease.checkpoint()
                     queue.enqueue_call(
                         run_ag_fields_watershed_rq,
                         args=(runid, max_workers, scheme.value),
@@ -260,6 +270,8 @@ def _enqueue_watershed_jobs(
                     auth_actor = current_auth_actor()
                     if auth_actor is not None:
                         parent_meta["auth_actor"] = auth_actor
+                    prep.set_rq_job_id(AGFIELDS_RUN_WATERSHED_SUITE_JOB_KEY, parent_job_id)
+                    lease.checkpoint()
                     parent_job = queue.enqueue_call(
                         run_ag_fields_watershed_suite_rq,
                         args=(runid, max_workers, planned_job_ids, finalizer_job_id),
@@ -267,20 +279,10 @@ def _enqueue_watershed_jobs(
                         job_id=parent_job_id,
                         meta=parent_meta,
                     )
-                    prep.set_rq_job_id(AGFIELDS_RUN_WATERSHED_SUITE_JOB_KEY, parent_job.id)
                     root_job_id = parent_job.id
                 job_ids = planned_job_ids
         finally:
-            try:
-                if lock_conn.get(submit_lock_key) == submit_owner:
-                    lock_conn.delete(submit_lock_key)
-            except redis.RedisError as exc:
-                logger.warning(
-                    "AgFields watershed submit lock release failed for %s: %s",
-                    runid,
-                    exc,
-                    extra={"runid": runid},
-                )
+            lock_context.__exit__(None, None, None)
     response_payload = {"job_id": root_job_id, "job_ids": job_ids}
     if finalizer_job_id is not None:
         response_payload["finalizer_job_id"] = finalizer_job_id
@@ -299,15 +301,55 @@ def _mapping_summary(ag_fields: AgFields) -> dict[str, Any]:
     }
 
 
+def _agfields_job_targets_run(job: Job, runid: str) -> bool:
+    metadata = job.meta if isinstance(job.meta, dict) else {}
+    metadata_runid = str(metadata.get("runid") or "").strip()
+    if metadata_runid and metadata_runid != runid:
+        return False
+    args = list(job.args or [])
+    allowed_funcs = {
+        f"{func.__module__}.{func.__qualname__}"
+        for func in (
+            build_ag_fields_subfields_rq,
+            process_ag_fields_plant_db_rq,
+            run_ag_fields_watershed_rq,
+            run_ag_fields_watershed_suite_rq,
+            finalize_ag_fields_watershed_suite_rq,
+            run_ag_fields_wepp_rq,
+        )
+    }
+    return (
+        bool(args)
+        and str(args[0]) == runid
+        and str(job.func_name) in allowed_funcs
+        and str(job.origin) == "default"
+    )
+
+
+def _reconcile_deferred_agfields_jobs(
+    prep: RedisPrep,
+    redis_conn: redis.Redis,
+    runid: str,
+    lease_checkpoint: Callable[[], None] | None = None,
+) -> None:
+    for key in AGFIELDS_ALL_JOB_KEYS:
+        job_id = prep.get_rq_job_id(key)
+        if not job_id:
+            continue
+        result = reconcile_deferred_workflow(
+            job_id,
+            connection=redis_conn,
+            association=lambda job: _agfields_job_targets_run(job, runid),
+            lease_checkpoint=lease_checkpoint,
+        )
+        if result.state in {"active", "mismatch"}:
+            raise AgFieldsJobConflict(
+                f"AgFields job cannot be replaced (key={key}, job_id={job_id}, state={result.state})."
+            )
+
+
 def _find_active_job(prep: RedisPrep, redis_conn: redis.Redis) -> dict[str, str] | None:
-    for key in (
-        AGFIELDS_RUN_WATERSHED_SUITE_JOB_KEY,
-        AGFIELDS_BUILD_SUBFIELDS_JOB_KEY,
-        AGFIELDS_PLANTDB_JOB_KEY,
-        AGFIELDS_RUN_WEPP_JOB_KEY,
-        *AGFIELDS_CURRENT_WATERSHED_JOB_KEYS,
-        AGFIELDS_RUN_WATERSHED_JOB_KEY,
-    ):
+    for key in AGFIELDS_ALL_JOB_KEYS:
         job_id = prep.get_rq_job_id(key)
         if job_id is None:
             continue

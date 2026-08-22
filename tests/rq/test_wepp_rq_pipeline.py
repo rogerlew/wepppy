@@ -10,6 +10,12 @@ from rq.job import Dependency, JobStatus
 pytestmark = pytest.mark.unit
 
 
+@pytest.fixture(autouse=True)
+def _deterministic_job_ids(monkeypatch: pytest.MonkeyPatch) -> None:
+    counter = iter(range(1, 100))
+    monkeypatch.setattr(pipeline, "new_rq_job_id", lambda: f"job-{next(counter)}")
+
+
 class _DummyQueue:
     def __init__(self) -> None:
         self.calls: list[dict[str, object]] = []
@@ -21,8 +27,9 @@ class _DummyQueue:
         kwargs=None,
         timeout=None,
         depends_on=None,
+        job_id=None,
     ):
-        job = SimpleNamespace(id=f"job-{len(self.calls) + 1}", get_status=lambda refresh=True: JobStatus.QUEUED)
+        job = SimpleNamespace(id=job_id or f"job-{len(self.calls) + 1}", get_status=lambda refresh=True: JobStatus.QUEUED)
         self.calls.append(
             {
                 "func": func,
@@ -30,6 +37,7 @@ class _DummyQueue:
                 "kwargs": kwargs,
                 "timeout": timeout,
                 "depends_on": depends_on,
+                "job_id": job_id,
                 "job": job,
             }
         )
@@ -52,6 +60,25 @@ def _make_parent_job() -> SimpleNamespace:
 
     parent_job.save = _save  # type: ignore[attr-defined]
     return parent_job
+
+
+def test_parent_lineage_is_saved_before_child_enqueue() -> None:
+    q = _DummyQueue()
+    parent_job = SimpleNamespace(meta={})
+
+    def fail_save() -> None:
+        assert parent_job.meta["jobs:6,func:_log_complete_rq"] == "job-1"
+        raise OSError("save failed")
+
+    parent_job.save = fail_save
+    with pytest.raises(OSError, match="save failed"):
+        pipeline.enqueue_log_complete(
+            q,
+            parent_job,
+            "run-1",
+            tasks=SimpleNamespace(_log_complete_rq=object()),
+        )
+    assert q.calls == []
 
 
 def test_enqueue_log_complete_tracks_meta_and_kwargs() -> None:

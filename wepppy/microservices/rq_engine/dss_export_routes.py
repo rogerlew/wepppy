@@ -13,6 +13,7 @@ from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.core import Watershed, Wepp
 from wepppy.nodb.redis_prep import RedisPrep
 from wepppy.rq.wepp_rq import post_dss_export_rq
+from wepppy.rq.submission_recovery import RqSubmissionConflict, enqueue_tracked_rq_job
 from wepppy.topo.peridot.flowpath import PeridotChannel
 from wepppy.wepp.interchange.dss_dates import format_dss_date, parse_dss_date
 from wepppy.weppcloud.utils.helpers import get_wd
@@ -73,7 +74,7 @@ async def post_dss_export(runid: str, config: str, request: Request) -> JSONResp
         authorize_run_access(claims, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine post-dss-export auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
@@ -187,10 +188,19 @@ async def post_dss_export(runid: str, config: str, request: Request) -> JSONResp
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(post_dss_export_rq, (runid,), timeout=RQ_TIMEOUT)
-            prep.set_rq_job_id("post_dss_export_rq", job.id)
+            job = enqueue_tracked_rq_job(
+                q,
+                post_dss_export_rq,
+                prep=prep,
+                job_key="post_dss_export_rq",
+                runid=runid,
+                args=(runid,),
+                timeout=RQ_TIMEOUT,
+            )
         return JSONResponse({"job_id": job.id})
-    except Exception:
+    except RqSubmissionConflict as exc:
+        return error_response(str(exc), status_code=409, code="job_active")
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine post-dss-export enqueue failed")
         return error_response_with_traceback("Error Handling Request")
 

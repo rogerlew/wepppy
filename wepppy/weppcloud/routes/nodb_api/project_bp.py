@@ -18,11 +18,18 @@ from sqlalchemy import func
 from wepppy.nodb.core import Ron
 from wepppy.nodb.base import NoDbBase, clear_nodb_file_cache, iter_nodb_mods_subclasses
 from wepppy.nodb.core import Watershed
+from wepppy.nodb.redis_prep import RedisPrep
+from wepppy.rq.submission_recovery import (
+    RqSubmissionConflict,
+    checkpoint_run_lifecycle,
+    enqueue_tracked_rq_job,
+    rq_submission_lock,
+)
 
 from wepppy.weppcloud.utils.helpers import (
     success_factory, error_factory, exception_factory,
     get_run_owners_lazy, get_user_models, authorize, 
-    authorize_and_handle_with_exception_factory
+    authorize_and_handle_with_exception_factory, run_lifecycle_mutation
 ) 
 from wepppy.weppcloud.feature_registry.runtime import (
     backend_matches_requirement,
@@ -217,29 +224,34 @@ def set_project_mod_state(runid: str, config: str, mod_name: str, enabled: bool)
     if spec is None:
         raise ValueError(f"Unknown module '{mod_name}'.")
 
-    ctx = load_run_context(runid, config)
-    wd = str(ctx.active_root)
-    ron = Ron.getInstance(wd)
-    cfg_fn = f"{config}.cfg"
-    active_mods = set(ron.mods or [])
+    with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn, rq_submission_lock(
+        redis_conn,
+        f"{runid}:set-mod",
+        lifecycle_key=runid,
+    ):
+        ctx = load_run_context(runid, config)
+        wd = str(ctx.active_root)
+        ron = Ron.getInstance(wd)
+        cfg_fn = f"{config}.cfg"
+        active_mods = set(ron.mods or [])
 
-    if enabled:
-        _validate_feature_enable_preconditions(
-            spec=spec,
-            active_mods=active_mods,
-            wd=wd,
-        )
-        changed = _enable_mod_for_run(ron, wd, cfg_fn, mod_name)
-    else:
-        changed = _disable_mod_for_run(ron, wd, mod_name)
+        if enabled:
+            _validate_feature_enable_preconditions(
+                spec=spec,
+                active_mods=active_mods,
+                wd=wd,
+            )
+            changed = _enable_mod_for_run(ron, wd, cfg_fn, mod_name)
+        else:
+            changed = _disable_mod_for_run(ron, wd, mod_name)
 
-    return {
-        "mod": mod_name,
-        "enabled": enabled,
-        "changed": bool(changed),
-        "mods": list(ron.mods or []),
-        "label": spec.label,
-    }
+        return {
+            "mod": mod_name,
+            "enabled": enabled,
+            "changed": bool(changed),
+            "mods": list(ron.mods or []),
+            "label": spec.label,
+        }
 
 
 @project_bp.route('/runs/<string:runid>/<config>/tasks/clear_locks', methods=['POST'])
@@ -274,6 +286,7 @@ def clear_nodb_cache(runid, config):
 @project_bp.route('/runs/<string:runid>/<config>/tasks/delete', methods=['POST'])
 @project_bp.route('/runs/<string:runid>/<config>/tasks/delete/', methods=['POST'])
 @login_required
+@authorize_and_handle_with_exception_factory
 def delete_run(runid, config):
     authorize(runid, config)
     ctx = load_run_context(runid, config)
@@ -305,7 +318,15 @@ def delete_run(runid, config):
 
         with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
             queue = Queue(connection=redis_conn)
-            job = queue.enqueue_call(delete_run_rq, (runid, wd), timeout=TIMEOUT)
+            job = enqueue_tracked_rq_job(
+                queue,
+                delete_run_rq,
+                prep=RedisPrep.getInstance(wd),
+                job_key="delete_run_rq",
+                runid=runid,
+                args=(runid, wd),
+                timeout=TIMEOUT,
+            )
     except Exception:  # broad-except: boundary contract
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/project_bp.py:233", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
@@ -317,6 +338,7 @@ def delete_run(runid, config):
 @project_bp.route('/runs/<string:runid>/<config>/meta/subcatchments.WGS.json')
 @project_bp.route('/runs/<string:runid>/<config>/meta/subcatchments.WGS.json/')
 @authorize_and_handle_with_exception_factory
+@run_lifecycle_mutation
 def meta_subcatchmets_wgs(runid, config):
     from wepppy.export import arc_export
     ctx = load_run_context(runid, config)
@@ -333,6 +355,7 @@ def meta_subcatchmets_wgs(runid, config):
 
 @project_bp.route('/runs/<string:runid>/<config>/tasks/adduser/', methods=['POST'])
 @login_required
+@authorize_and_handle_with_exception_factory
 def task_adduser(runid, config):
     authorize(runid, config)
     load_run_context(runid, config)
@@ -407,6 +430,7 @@ def task_adduser(runid, config):
 
 @project_bp.route('/runs/<string:runid>/<config>/tasks/removeuser/', methods=['POST'])
 @login_required
+@authorize_and_handle_with_exception_factory
 def task_removeuser(runid, config):
     authorize(runid, config)
     load_run_context(runid, config)
@@ -509,6 +533,7 @@ def resources_subcatchments_geojson(runid, config):
 
 @project_bp.route('/runs/<string:runid>/<config>/resources/bound.json')
 @authorize_and_handle_with_exception_factory
+@run_lifecycle_mutation
 def resources_bounds_geojson(runid, config, simplify=False):
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
@@ -540,6 +565,7 @@ def resources_bounds_geojson(runid, config, simplify=False):
     else:
         js['name'] = name
 
+    checkpoint_run_lifecycle(runid)
     with open(fn2, 'w') as fp:
         json.dump(js, fp)
 
@@ -652,12 +678,23 @@ def task_set_readonly(runid, config):
         return error_factory('state must be boolean')
 
     try:
-        load_run_context(runid, config)
+        ctx = load_run_context(runid, config)
         desired_state = bool(state)
+        prep = RedisPrep.getInstance(str(ctx.active_root))
 
         with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
             queue = Queue(connection=redis_conn)
-            job = queue.enqueue_call(set_run_readonly_rq, (runid, desired_state), timeout=TIMEOUT)
+            job = enqueue_tracked_rq_job(
+                queue,
+                set_run_readonly_rq,
+                prep=prep,
+                job_key='set_readonly',
+                runid=runid,
+                args=(runid, desired_state),
+                timeout=TIMEOUT,
+            )
+    except RqSubmissionConflict as exc:
+        return error_factory(str(exc), status_code=409)
     except Exception:  # broad-except: boundary contract
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/project_bp.py:559", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})

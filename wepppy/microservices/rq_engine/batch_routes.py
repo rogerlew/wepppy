@@ -11,7 +11,9 @@ from rq import Queue
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.batch_runner import BatchRunner
-from wepppy.rq.batch_rq import _active_batch_job_summaries, delete_batch_rq, run_batch_rq
+from wepppy.rq.batch_rq import delete_batch_rq, reconcile_deferred_batch_jobs, run_batch_rq
+from wepppy.rq.job_id import new_rq_job_id
+from wepppy.rq.submission_recovery import RqSubmissionConflict, rq_submission_lock
 
 from .auth import AuthError, require_jwt, require_roles
 from .responses import error_response, error_response_with_traceback, validation_error_response
@@ -80,26 +82,38 @@ def run_batch(batch_name: str, request: Request) -> JSONResponse:
     try:
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
-            active_jobs = _active_batch_job_summaries(batch_name, redis_conn=redis_conn)
-            if active_jobs:
-                detail = _format_active_jobs_detail(active_jobs)
-                return error_response(
-                    f"Batch cannot be run while jobs are active. {detail}",
-                    status_code=409,
-                    code="batch_busy",
-                    details=detail,
+            with rq_submission_lock(redis_conn, f"batch:{batch_name}", lifecycle_key=batch_name, lifecycle_type="batch") as lease:
+                active_jobs = reconcile_deferred_batch_jobs(
+                    batch_name,
+                    redis_conn=redis_conn,
+                    lease_checkpoint=lease.checkpoint,
                 )
+                lease.checkpoint()
+                if active_jobs:
+                    detail = _format_active_jobs_detail(active_jobs)
+                    return error_response(
+                        f"Batch cannot be run while jobs are active. {detail}",
+                        status_code=409,
+                        code="batch_busy",
+                        details=detail,
+                    )
 
-            q = Queue("batch", connection=redis_conn)
-            job = q.enqueue_call(run_batch_rq, (batch_name,), timeout=RQ_TIMEOUT)
+                replacement_job_id = new_rq_job_id()
+                batch_runner.set_rq_job_id("run_batch_rq", replacement_job_id)
+                redis_conn.set(f"rq:batch:receipt:{batch_name}", replacement_job_id)
+                lease.checkpoint()
+                q = Queue("batch", connection=redis_conn)
+                job = q.enqueue_call(
+                    run_batch_rq,
+                    (batch_name,),
+                    timeout=RQ_TIMEOUT,
+                    job_id=replacement_job_id,
+                )
+    except RqSubmissionConflict as exc:
+        return error_response(str(exc), status_code=409, code="batch_busy")
     except Exception:
         logger.exception("rq-engine run-batch enqueue failed")
         return error_response_with_traceback("Failed to enqueue batch run")
-
-    try:
-        batch_runner.set_rq_job_id("run_batch_rq", job.id)
-    except Exception:
-        logger.warning("rq-engine run-batch: failed to persist job id", exc_info=True)
 
     return JSONResponse(
         {
@@ -136,30 +150,44 @@ def delete_batch(batch_name: str, request: Request) -> JSONResponse:
     try:
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
-            active_jobs = _active_batch_job_summaries(batch_name, redis_conn=redis_conn)
-            if active_jobs:
-                detail = _format_active_jobs_detail(active_jobs)
-                return error_response(
-                    f"Batch cannot be deleted while jobs are active. {detail}",
-                    status_code=409,
-                    code="batch_busy",
-                    details=detail,
+            with rq_submission_lock(redis_conn, f"batch:{batch_name}", lifecycle_key=batch_name, lifecycle_type="batch") as lease:
+                active_jobs = reconcile_deferred_batch_jobs(
+                    batch_name,
+                    redis_conn=redis_conn,
+                    lease_checkpoint=lease.checkpoint,
                 )
+                lease.checkpoint()
+                if active_jobs:
+                    detail = _format_active_jobs_detail(active_jobs)
+                    return error_response(
+                        f"Batch cannot be deleted while jobs are active. {detail}",
+                        status_code=409,
+                        code="batch_busy",
+                        details=detail,
+                    )
 
-            q = Queue("batch", connection=redis_conn)
-            job = q.enqueue_call(delete_batch_rq, (batch_name,), timeout=RQ_TIMEOUT)
+                replacement_job_id = new_rq_job_id()
+                try:
+                    batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
+                    batch_runner.set_rq_job_id("delete_batch_rq", replacement_job_id)
+                except FileNotFoundError:
+                    redis_conn.set(
+                        f"rq:batch:receipt:{batch_name}",
+                        replacement_job_id,
+                    )
+                lease.checkpoint()
+                q = Queue("batch", connection=redis_conn)
+                job = q.enqueue_call(
+                    delete_batch_rq,
+                    (batch_name,),
+                    timeout=RQ_TIMEOUT,
+                    job_id=replacement_job_id,
+                )
+    except RqSubmissionConflict as exc:
+        return error_response(str(exc), status_code=409, code="batch_busy")
     except Exception:
         logger.exception("rq-engine delete-batch enqueue failed")
         return error_response_with_traceback("Failed to enqueue batch delete")
-
-    try:
-        batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
-        batch_runner.set_rq_job_id("delete_batch_rq", job.id)
-    except FileNotFoundError:
-        # A missing batch is a no-op at worker time; job remains valid and idempotent.
-        pass
-    except Exception:
-        logger.warning("rq-engine delete-batch: failed to persist job id", exc_info=True)
 
     return JSONResponse(
         {

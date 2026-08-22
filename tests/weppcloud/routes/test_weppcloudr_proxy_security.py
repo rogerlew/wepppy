@@ -144,10 +144,10 @@ def test_weppcloudr_proxy_authorized_request_executes(monkeypatch: pytest.Monkey
     )
 
     class _FakePopen:
-        def __init__(self, cmd, stdout=None, stderr=None):
+        def __init__(self, cmd, stdout=None, stderr=None, **_kwargs):
             self.cmd = cmd
 
-        def communicate(self):
+        def communicate(self, **_kwargs):
             args_index = self.cmd.index("--args")
             output_file = Path(self.cmd[args_index + 3])
             output_file.write_text("<html>ok</html>", encoding="utf-8")
@@ -193,10 +193,10 @@ def test_weppcloudr_proxy_rmd_command_uses_args_without_ws_interpolation(
     captured_cmd: list[str] = []
 
     class _FakePopen:
-        def __init__(self, cmd, stdout=None, stderr=None):
+        def __init__(self, cmd, stdout=None, stderr=None, **_kwargs):
             captured_cmd[:] = cmd
 
-        def communicate(self):
+        def communicate(self, **_kwargs):
             args_index = captured_cmd.index("--args")
             output_file = Path(captured_cmd[args_index + 3])
             output_file.write_text("<html>ok</html>", encoding="utf-8")
@@ -215,3 +215,15 @@ def test_weppcloudr_proxy_rmd_command_uses_args_without_ws_interpolation(
     assert "INJECT_MARKER" not in captured_cmd[2]
     assert captured_cmd[args_index + 1] == str(script_path)
     assert captured_cmd[args_index + 3].endswith("report.Rmd.htm")
+
+
+def test_viz_rmd_command_passes_hostile_runid_only_as_argument() -> None:
+    module = _load_module()
+    hostile_runid = 'fork\"); system("touch /tmp/marker"); #'
+
+    command = module._viz_rmd_command(
+        "/scripts/report.Rmd", hostile_runid, "report", "/run/export/viz"
+    )
+
+    assert hostile_runid not in command[2]
+    assert command[command.index("--args") + 2] == hostile_runid

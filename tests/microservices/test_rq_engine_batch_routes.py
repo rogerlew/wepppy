@@ -9,6 +9,17 @@ from wepppy.microservices.rq_engine import batch_routes
 pytestmark = pytest.mark.microservice
 
 
+class _DummyLock:
+    def acquire(self, **kwargs) -> bool:
+        return True
+
+    def release(self) -> None:
+        return None
+
+    def extend(self, *args, **kwargs) -> bool:
+        return True
+
+
 def test_run_batch_requires_admin_role(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         batch_routes,
@@ -61,6 +72,10 @@ def test_run_batch_invalid_name_returns_400(monkeypatch: pytest.MonkeyPatch) -> 
 
 
 def test_run_batch_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
+    class DummyBatchRunner:
+        def set_rq_job_id(self, key: str, job_id: str) -> None:
+            assert (key, job_id) == ("run_batch_rq", "job-123")
+
     class DummyJob:
         id = "job-123"
 
@@ -72,6 +87,11 @@ def test_run_batch_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
             return DummyJob()
 
     class DummyRedis:
+        def set(self, *args, **kwargs): return True
+
+        def lock(self, *args, **kwargs):
+            return _DummyLock()
+
         def __enter__(self):
             return self
 
@@ -86,14 +106,15 @@ def test_run_batch_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         batch_routes.BatchRunner,
         "getInstanceFromBatchName",
-        lambda batch_name: object(),
+        lambda batch_name: DummyBatchRunner(),
     )
+    monkeypatch.setattr(batch_routes, "new_rq_job_id", lambda: "job-123")
     monkeypatch.setattr(batch_routes, "Queue", DummyQueue)
     monkeypatch.setattr(batch_routes.redis, "Redis", lambda **kwargs: DummyRedis())
     monkeypatch.setattr(
         batch_routes,
-        "_active_batch_job_summaries",
-        lambda batch_name, redis_conn=None: [],
+        "reconcile_deferred_batch_jobs",
+        lambda batch_name, redis_conn=None, **_kwargs: [],
     )
 
     with TestClient(rq_engine.app) as client:
@@ -117,11 +138,16 @@ def test_run_batch_busy_returns_409(monkeypatch: pytest.MonkeyPatch) -> None:
     )
     monkeypatch.setattr(
         batch_routes,
-        "_active_batch_job_summaries",
-        lambda batch_name, redis_conn=None: ["job-1:started:run_batch_rq"],
+        "reconcile_deferred_batch_jobs",
+        lambda batch_name, redis_conn=None, **_kwargs: ["job-1:started:run_batch_rq"],
     )
 
     class DummyRedis:
+        def set(self, *args, **kwargs): return True
+
+        def lock(self, *args, **kwargs):
+            return _DummyLock()
+
         def __enter__(self):
             return self
 
@@ -178,11 +204,16 @@ def test_delete_batch_busy_returns_409(monkeypatch: pytest.MonkeyPatch) -> None:
     )
     monkeypatch.setattr(
         batch_routes,
-        "_active_batch_job_summaries",
-        lambda batch_name, redis_conn=None: ["job-1:started:run_batch_rq"],
+        "reconcile_deferred_batch_jobs",
+        lambda batch_name, redis_conn=None, **_kwargs: ["job-1:started:run_batch_rq"],
     )
 
     class DummyRedis:
+        def set(self, *args, **kwargs): return True
+
+        def lock(self, *args, **kwargs):
+            return _DummyLock()
+
         def __enter__(self):
             return self
 
@@ -212,6 +243,11 @@ def test_delete_batch_missing_batch_still_enqueues_job(monkeypatch: pytest.Monke
             return DummyJob()
 
     class DummyRedis:
+        def set(self, *args, **kwargs): return True
+
+        def lock(self, *args, **kwargs):
+            return _DummyLock()
+
         def __enter__(self):
             return self
 
@@ -225,8 +261,8 @@ def test_delete_batch_missing_batch_still_enqueues_job(monkeypatch: pytest.Monke
     )
     monkeypatch.setattr(
         batch_routes,
-        "_active_batch_job_summaries",
-        lambda batch_name, redis_conn=None: [],
+        "reconcile_deferred_batch_jobs",
+        lambda batch_name, redis_conn=None, **_kwargs: [],
     )
     monkeypatch.setattr(
         batch_routes.BatchRunner,
@@ -261,6 +297,11 @@ def test_delete_batch_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
             return DummyJob()
 
     class DummyRedis:
+        def set(self, *args, **kwargs): return True
+
+        def lock(self, *args, **kwargs):
+            return _DummyLock()
+
         def __enter__(self):
             return self
 
@@ -274,14 +315,15 @@ def test_delete_batch_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
     )
     monkeypatch.setattr(
         batch_routes,
-        "_active_batch_job_summaries",
-        lambda batch_name, redis_conn=None: [],
+        "reconcile_deferred_batch_jobs",
+        lambda batch_name, redis_conn=None, **_kwargs: [],
     )
     monkeypatch.setattr(
         batch_routes.BatchRunner,
         "getInstanceFromBatchName",
         lambda batch_name: DummyBatchRunner(),
     )
+    monkeypatch.setattr(batch_routes, "new_rq_job_id", lambda: "job-123")
     monkeypatch.setattr(batch_routes, "Queue", DummyQueue)
     monkeypatch.setattr(batch_routes.redis, "Redis", lambda **kwargs: DummyRedis())
 

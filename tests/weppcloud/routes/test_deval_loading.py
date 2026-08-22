@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from importlib import import_module
+from inspect import unwrap
+from contextlib import nullcontext
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -86,7 +88,11 @@ def test_determine_job_enqueues_when_cache_and_active_job_are_absent(
         config="cfg",
         pup_relpath=None,
     )
-    monkeypatch.setattr(deval_module, "_resolve_prep", lambda _ctx: None)
+    prep = SimpleNamespace(
+        get_rq_job_id=lambda _key: None,
+        set_rq_job_id=lambda key, value: captured.update(prep_key=key, prep_job_id=value),
+    )
+    monkeypatch.setattr(deval_module, "_resolve_prep", lambda _ctx: prep)
     monkeypatch.setattr(deval_module.redis, "Redis", _RedisContext)
     monkeypatch.setattr(deval_module, "redis_connection_kwargs", lambda *_args: {})
     monkeypatch.setattr(
@@ -172,7 +178,7 @@ def test_determine_job_replaces_foreign_tracked_job(
         "cfg",
         skip_cache=False,
     ) == ("replacement-job", "queued")
-    assert cleared == [(prep, "deval_details:cfg:shared")]
+    assert cleared == []
 
 
 @pytest.mark.parametrize(
@@ -260,15 +266,25 @@ def test_enqueue_deval_job_passes_exact_active_root_and_options(
     class _Queue:
         def __init__(self, *, connection: object) -> None:
             captured["connection"] = connection
+            self.name = "default"
 
         def enqueue_call(self, **kwargs: object) -> SimpleNamespace:
             captured.update(kwargs)
             return SimpleNamespace(id="job-new")
 
-    monkeypatch.setattr(deval_module, "_resolve_prep", lambda _ctx: None)
+    prep = SimpleNamespace(
+        get_rq_job_id=lambda _key: None,
+        set_rq_job_id=lambda key, value: captured.update(prep_key=key, prep_job_id=value),
+    )
+    monkeypatch.setattr(deval_module, "_resolve_prep", lambda _ctx: prep)
     monkeypatch.setattr(deval_module.redis, "Redis", _RedisContext)
     monkeypatch.setattr(deval_module, "redis_connection_kwargs", lambda *_args: {})
     monkeypatch.setattr(deval_module, "Queue", _Queue)
+    monkeypatch.setattr(
+        deval_module,
+        "rq_submission_lock",
+        lambda *args, **kwargs: nullcontext(SimpleNamespace(checkpoint=lambda: None)),
+    )
 
     app = Flask(__name__)
     app.config.update(
@@ -314,15 +330,25 @@ def test_enqueue_deval_job_uses_dedicated_kubernetes_queue_and_contract_options(
         def __init__(self, *, name: str, connection: object) -> None:
             captured["queue_name"] = name
             captured["connection"] = connection
+            self.name = name
 
         def enqueue_call(self, **kwargs: object) -> SimpleNamespace:
             captured.update(kwargs)
             return SimpleNamespace(id="job-k8s")
 
-    monkeypatch.setattr(deval_module, "_resolve_prep", lambda _ctx: None)
+    prep = SimpleNamespace(
+        get_rq_job_id=lambda _key: None,
+        set_rq_job_id=lambda key, value: captured.update(prep_key=key, prep_job_id=value),
+    )
+    monkeypatch.setattr(deval_module, "_resolve_prep", lambda _ctx: prep)
     monkeypatch.setattr(deval_module.redis, "Redis", _RedisContext)
     monkeypatch.setattr(deval_module, "redis_connection_kwargs", lambda *_args: {})
     monkeypatch.setattr(deval_module, "Queue", _Queue)
+    monkeypatch.setattr(
+        deval_module,
+        "rq_submission_lock",
+        lambda *args, **kwargs: nullcontext(SimpleNamespace(checkpoint=lambda: None)),
+    )
     monkeypatch.setattr(deval_module, "new_rq_job_id", lambda: "render-job-id")
 
     app = Flask(__name__)
@@ -399,7 +425,7 @@ def test_deval_route_authorizes_before_interchange_or_enqueue(
     app = Flask(__name__)
     with app.test_request_context("/runs/run-1/cfg/report/deval_details"):
         with pytest.raises(Forbidden):
-            deval_module.deval_details.__wrapped__("run-1", "cfg")
+            unwrap(deval_module.deval_details)("run-1", "cfg")
 
 
 def test_deval_route_requires_cap_before_authorization_for_anonymous_user(
@@ -495,12 +521,12 @@ def test_deval_route_rejects_symlinked_report_directory(
     )
     monkeypatch.setattr(deval_module, "authorize", lambda *_args: None)
     monkeypatch.setattr(deval_module, "load_run_context", lambda *_args: ctx)
-    monkeypatch.setattr(deval_module, "_ensure_interchange", lambda _ctx: None)
+    monkeypatch.setattr(deval_module, "_ensure_interchange", lambda *_args: None)
 
     app = Flask(__name__)
     with app.test_request_context("/runs/run-1/cfg/report/deval_details"):
         with pytest.raises(NotFound, match="DEVAL report path is invalid"):
-            deval_module.deval_details.__wrapped__("run-1", "cfg")
+            unwrap(deval_module.deval_details)("run-1", "cfg")
 
 
 def test_deval_route_serves_cached_report_without_enqueue(
@@ -518,7 +544,7 @@ def test_deval_route_serves_cached_report_without_enqueue(
     output.write_text("<h1>cached report</h1>", encoding="utf-8")
     monkeypatch.setattr(deval_module, "load_run_context", lambda *_args: ctx)
     monkeypatch.setattr(deval_module, "authorize", lambda *_args: None)
-    monkeypatch.setattr(deval_module, "_ensure_interchange", lambda _ctx: None)
+    monkeypatch.setattr(deval_module, "_ensure_interchange", lambda *_args: None)
     monkeypatch.setattr(
         deval_module,
         "_determine_job",
@@ -527,7 +553,7 @@ def test_deval_route_serves_cached_report_without_enqueue(
 
     app = Flask(__name__)
     with app.test_request_context("/runs/run-1/cfg/report/deval_details"):
-        response = deval_module.deval_details.__wrapped__("run-1", "cfg")
+        response = unwrap(deval_module.deval_details)("run-1", "cfg")
 
     assert response.status_code == 200
     assert response.get_data(as_text=True) == "<h1>cached report</h1>"
@@ -548,7 +574,7 @@ def test_deval_route_renders_loading_context_and_preserves_pup_refresh(
     )
     monkeypatch.setattr(deval_module, "load_run_context", lambda *_args: ctx)
     monkeypatch.setattr(deval_module, "authorize", lambda *_args: None)
-    monkeypatch.setattr(deval_module, "_ensure_interchange", lambda _ctx: None)
+    monkeypatch.setattr(deval_module, "_ensure_interchange", lambda *_args: None)
     monkeypatch.setattr(
         deval_module,
         "_determine_job",
@@ -574,7 +600,7 @@ def test_deval_route_renders_loading_context_and_preserves_pup_refresh(
     with app.test_request_context(
         "/runs/run-1/cfg/report/deval_details?no-cache=1&pup=pup-a"
     ):
-        response = deval_module.deval_details.__wrapped__("run-1", "cfg")
+        response = unwrap(deval_module.deval_details)("run-1", "cfg")
 
     assert response.status_code == 202
     assert response.headers["Cache-Control"] == "no-store, max-age=0, must-revalidate"

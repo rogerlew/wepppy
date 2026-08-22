@@ -498,6 +498,17 @@ var BootstrapControl = (function () {
             renderState();
         }
 
+        function handleEnableRetryable() {
+            if (!state.enablePending) {
+                return;
+            }
+            state.enablePending = false;
+            state.enabled = false;
+            clearEnableJobTracking();
+            setAlert("info", "Bootstrap initialization was deferred. Retry Enable to replace it.");
+            renderState();
+        }
+
         function enableBootstrap() {
             setAlert("info", "Enabling Bootstrap...");
             return http.postJson(url_for_run("bootstrap/enable"), {}, { form: formElement })
@@ -744,6 +755,8 @@ var BootstrapControl = (function () {
             var detail = payload && payload.detail ? payload.detail : payload || null;
             if (normalized === EVENTS.enableCompleted) {
                 handleEnableCompletion(detail);
+            } else if (normalized === "JOB:RETRYABLE") {
+                handleEnableRetryable(detail);
             } else if (normalized === EVENTS.jobError.toUpperCase()) {
                 handleEnableFailure(detail);
             }

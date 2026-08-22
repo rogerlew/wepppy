@@ -374,6 +374,22 @@ def test_enqueue_job_serializes_submission_and_persists_job_hint(
         def delete(self, key):
             events.append(("unlock", key))
 
+        def lock(self, key, **_kwargs):
+            outer = self
+
+            class Lock:
+                def acquire(self, **_kwargs):
+                    events.append(("lock", key, True, 120))
+                    return True
+
+                def extend(self, *args, **kwargs):
+                    return True
+
+                def release(self):
+                    events.append(("unlock", key))
+
+            return Lock()
+
     class DummyRqRedis:
         def __enter__(self):
             return self
@@ -381,13 +397,16 @@ def test_enqueue_job_serializes_submission_and_persists_job_hint(
         def __exit__(self, exc_type, exc, tb):
             return False
 
+        def lock(self, key, **kwargs):
+            return lock_redis.lock(key, **kwargs)
+
     class DummyQueue:
         def __init__(self, connection):
             assert isinstance(connection, DummyRqRedis)
 
-        def enqueue_call(self, func, args, timeout):
-            events.append(("enqueue", func, args, timeout))
-            return SimpleNamespace(id="job-queued")
+        def enqueue_call(self, func, args, timeout, job_id):
+            events.append(("enqueue", func, args, timeout, job_id))
+            return SimpleNamespace(id=job_id)
 
     lock_redis = DummyLockRedis()
     rq_redis = DummyRqRedis()
@@ -412,13 +431,16 @@ def test_enqueue_job_serializes_submission_and_persists_job_hint(
     )
 
     assert response.status_code == 202
-    assert ("hint", "agfields_build_subfields", "job-queued") in events
+    hint_event = next(event for event in events if event[0] == "hint")
+    enqueue_event = next(event for event in events if event[0] == "enqueue")
+    assert hint_event[:2] == ("hint", "agfields_build_subfields")
+    assert hint_event[2] == enqueue_event[4]
     assert ("preflight-remove", ag_fields_routes.TaskEnum.run_ag_fields) in events
     assert events.index(("preflight-remove", ag_fields_routes.TaskEnum.run_ag_fields)) < next(
         index for index, event in enumerate(events) if event[0] == "enqueue"
     )
-    assert ("unlock", "agfields:submit_lock:demo") in events
-    assert next(event for event in events if event[0] == "lock")[3] == 30
+    assert ("unlock", "rq:submission:demo:agfields") in events
+    assert next(event for event in events if event[0] == "lock")[3] == 120
 
 
 def test_enqueue_watershed_jobs_queues_one_run_all_parent_with_planned_children(
@@ -458,6 +480,13 @@ def test_enqueue_watershed_jobs_queues_one_run_all_parent_with_planned_children(
 
         def delete(self, key):
             events.append(("unlock", key))
+
+        def lock(self, key, **_kwargs):
+            class Lock:
+                def acquire(self, **_kwargs): return True
+                def extend(self, *args, **kwargs): return True
+                def release(self): events.append(("unlock", key))
+            return Lock()
 
     class DummyQueue:
         def __init__(self, connection):
@@ -553,6 +582,13 @@ def test_enqueue_watershed_jobs_keeps_single_concept_2_as_direct_job(
 
         def delete(self, key):
             events.append(("unlock", key))
+
+        def lock(self, key, **_kwargs):
+            class Lock:
+                def acquire(self, **_kwargs): return True
+                def extend(self, *args, **kwargs): return True
+                def release(self): events.append(("unlock", key))
+            return Lock()
 
     class DummyQueue:
         def __init__(self, connection):
@@ -901,12 +937,8 @@ def test_suite_parent_remains_active_from_recursive_child_status(
     active_job = ag_fields_routes._find_active_job(DummyPrep(), DummyRedis())
 
     assert job_ids["agfields_run_watershed_suite"] == "suite-parent"
-    assert active["agfields_run_watershed_suite"] == "suite-parent"
-    assert active_job == {
-        "key": "agfields_run_watershed_suite",
-        "job_id": "suite-parent",
-        "status": "deferred",
-    }
+    assert active["agfields_run_watershed_suite"] is None
+    assert active_job is None
 
 
 def test_run_and_clear_watershed_routes_use_fixed_additive_surface(

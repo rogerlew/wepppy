@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import logging
 import os
-import time
-import uuid
 
 import redis
 from fastapi import APIRouter, Request
@@ -14,15 +12,16 @@ from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.base import NoDbAlreadyLockedError
 from wepppy.nodb.core import Ron, Soils, Watershed, Wepp
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+from wepppy.rq.job_id import new_rq_job_id
 from wepppy.rq.wepp_rq import (
     WeppSingleFlightConflict,
-    acquire_wepp_submit_lock,
     ensure_no_active_wepp_job,
     prep_wepp_watershed_rq,
-    release_wepp_submit_lock,
+    reconcile_deferred_wepp_jobs,
     run_wepp_rq,
     run_wepp_watershed_rq,
 )
+from wepppy.rq.submission_recovery import RqSubmissionConflict, rq_submission_lock
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
@@ -160,30 +159,37 @@ async def _handle_run_wepp_request(
 
     try:
         prep = RedisPrep.getInstance(wd)
-        submit_owner = f"{job_key}:{int(time.time() * 1000)}:{uuid.uuid4().hex}"
-        if not acquire_wepp_submit_lock(runid, submit_owner):
-            raise WeppSingleFlightConflict("WEPP enqueue already in progress for this run.")
-
         job = None
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
-        try:
-            with redis.Redis(**conn_kwargs) as redis_conn:
+        with redis.Redis(**conn_kwargs) as redis_conn:
+            try:
+                lock_context = rq_submission_lock(redis_conn, f"{runid}:wepp", lifecycle_key=runid)
+                lease = lock_context.__enter__()
+            except RqSubmissionConflict as exc:
+                raise WeppSingleFlightConflict(str(exc)) from exc
+            try:
+                reconcile_deferred_wepp_jobs(
+                    runid, prep, redis_conn, lease_checkpoint=lease.checkpoint
+                )
+                lease.checkpoint()
                 ensure_no_active_wepp_job(runid, prep, redis_conn)
                 prep.remove_timestamp(TaskEnum.run_wepp_hillslopes)
                 prep.remove_timestamp(TaskEnum.run_wepp_watershed)
                 prep.remove_timestamp(TaskEnum.run_omni_scenarios)
                 prep.remove_timestamp(TaskEnum.run_path_cost_effective)
                 q = Queue(connection=redis_conn)
-                job = q.enqueue_call(job_fn, (runid,), timeout=RQ_TIMEOUT)
-                prep.set_rq_job_id(job_key, job.id)
-                _persist_wepp_job_hint(wepp, job_id=str(job.id), job_key=job_key)
-        finally:
-            try:
-                release_wepp_submit_lock(runid, submit_owner)
-            except (redis.RedisError, RuntimeError):
-                if job is None:
-                    raise
-                logger.exception("rq-engine run-wepp submit-lock release failed after enqueue")
+                replacement_job_id = new_rq_job_id()
+                prep.set_rq_job_id(job_key, replacement_job_id)
+                _persist_wepp_job_hint(wepp, job_id=replacement_job_id, job_key=job_key)
+                lease.checkpoint()
+                job = q.enqueue_call(
+                    job_fn,
+                    (runid,),
+                    timeout=RQ_TIMEOUT,
+                    job_id=replacement_job_id,
+                )
+            finally:
+                lock_context.__exit__(None, None, None)
         if job is None:
             raise RuntimeError("WEPP enqueue returned no job object")
         return JSONResponse({"job_id": job.id})

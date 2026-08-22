@@ -1,6 +1,12 @@
 from __future__ import annotations
 
+import re
+
+import redis
 from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+
+from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 
 from wepppy.observability.correlation import (
     CORRELATION_ID_HEADER,
@@ -9,6 +15,7 @@ from wepppy.observability.correlation import (
     reset_correlation_id,
 )
 from wepppy.rq.auth_actor import install_rq_auth_actor_hook
+from wepppy.rq.submission_recovery import RqSubmissionConflict, rq_submission_lock
 
 from .batch_routes import router as batch_router
 from .ag_fields_routes import router as ag_fields_router
@@ -53,6 +60,72 @@ from .ash_routes import router as ash_router
 app = FastAPI(title="WEPPcloud RQ Engine", version="0.1.0")
 install_correlation_log_record_factory()
 install_rq_auth_actor_hook()
+
+_RUN_MUTATION_PATH = re.compile(r"^/api/runs/([^/]+)(?:/|$)")
+_LIFECYCLE_REDIS_CLIENT = redis.Redis
+
+
+def _verify_lifecycle_bearer(request: Request) -> None:
+    from .auth import require_jwt
+
+    require_jwt(request)
+
+
+@app.middleware("http")
+async def run_mutation_lifecycle_middleware(request: Request, call_next):
+    if request.method not in {"POST", "PUT", "PATCH", "DELETE"}:
+        return await call_next(request)
+    match = _RUN_MUTATION_PATH.match(request.url.path)
+    if match is None:
+        return await call_next(request)
+    authorization = request.headers.get("Authorization", "").strip()
+    if not authorization:
+        # Anonymous requests never receive the fence; ordinary routes reject
+        # them, while the CAPTCHA-gated fork endpoint owns its target fence.
+        return await call_next(request)
+    if request.url.path.rstrip("/").endswith("/fork"):
+        return await call_next(request)
+    from .auth import AuthError
+
+    try:
+        _verify_lifecycle_bearer(request)
+    except AuthError as exc:
+        from .responses import error_response
+
+        return error_response(
+            exc.message, status_code=exc.status_code, code=exc.code
+        )
+    runid = match.group(1)
+    with _LIFECYCLE_REDIS_CLIENT(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
+        try:
+            with rq_submission_lock(
+                redis_conn,
+                f"{runid}:request",
+                lifecycle_key=runid,
+            ) as lease:
+                original_receive = request._receive
+
+                async def lifecycle_checked_receive():
+                    lease.checkpoint()
+                    message = await original_receive()
+                    lease.checkpoint()
+                    return message
+
+                request._receive = lifecycle_checked_receive
+                return await call_next(request)
+        except RqSubmissionConflict as exc:
+            from .responses import error_response
+
+            return error_response(
+                str(exc), status_code=409, code="job_active"
+            )
+        except (OSError, redis.RedisError):
+            from .responses import error_response_with_traceback
+
+            return error_response_with_traceback(
+                "Submission admission is temporarily unavailable",
+                status_code=503,
+            )
 
 
 @app.middleware("http")

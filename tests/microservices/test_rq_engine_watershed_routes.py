@@ -20,6 +20,12 @@ import wepppy.weppcloud.user_preferences as preferences_module
 pytestmark = pytest.mark.microservice
 
 
+class _DummySubmissionLock:
+    def acquire(self, **kwargs): return True
+    def extend(self, *args, **kwargs): return True
+    def release(self): return None
+
+
 def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(watershed_routes, "require_jwt", lambda request, required_scopes=None: {})
     monkeypatch.setattr(watershed_routes, "authorize_run_access", lambda claims, runid: None)
@@ -31,17 +37,19 @@ def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> None:
+    from wepppy.rq import submission_recovery
     class DummyJob:
         id = job_id
 
     class DummyQueue:
         def __init__(self, *args, **kwargs) -> None:
-            pass
+            self.connection = kwargs["connection"]
 
         def enqueue_call(self, *args, **kwargs):
             return DummyJob()
 
     class DummyRedis:
+        def lock(self, *args, **kwargs): return _DummySubmissionLock()
         def __enter__(self):
             return self
 
@@ -50,10 +58,12 @@ def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> 
 
     monkeypatch.setattr(watershed_routes, "Queue", DummyQueue)
     monkeypatch.setattr(watershed_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(submission_recovery, "new_rq_job_id", lambda: job_id)
 
 
 def _stub_prep(monkeypatch: pytest.MonkeyPatch) -> None:
     class DummyPrep:
+        def get_rq_job_id(self, key): return None
         def remove_timestamp(self, *args, **kwargs) -> None:
             return None
 
@@ -98,7 +108,7 @@ def _install_wbt_submission_harness(
 
     class DummyQueue:
         def __init__(self, *args, **kwargs) -> None:
-            pass
+            self.connection = kwargs["connection"]
 
         def enqueue_call(self, func, args, **kwargs):
             captured.append(
@@ -111,6 +121,7 @@ def _install_wbt_submission_harness(
             return DummyJob()
 
     class DummyRedis:
+        def lock(self, *args, **kwargs): return _DummySubmissionLock()
         def __enter__(self):
             return self
 
@@ -356,7 +367,7 @@ def test_fetch_dem_bounds_only_derives_center_and_zoom(monkeypatch: pytest.Monke
 
     class DummyQueue:
         def __init__(self, *args, **kwargs) -> None:
-            pass
+            self.connection = kwargs["connection"]
 
         def enqueue_call(self, func, args, **kwargs):
             enqueue["called"] = True
@@ -365,6 +376,8 @@ def test_fetch_dem_bounds_only_derives_center_and_zoom(monkeypatch: pytest.Monke
             return DummyJob()
 
     class DummyRedis:
+        def lock(self, *args, **kwargs): return _DummySubmissionLock()
+
         def __enter__(self):
             return self
 
@@ -1020,7 +1033,7 @@ def test_build_subcatchments_snapshots_initiating_users_boundary_preference(
 
     class DummyQueue:
         def __init__(self, *args, **kwargs) -> None:
-            pass
+            self.connection = kwargs["connection"]
 
         def enqueue_call(self, func, args, **kwargs):
             captured.append(
@@ -1033,6 +1046,8 @@ def test_build_subcatchments_snapshots_initiating_users_boundary_preference(
             return DummyJob()
 
     class DummyRedis:
+        def lock(self, *args, **kwargs): return _DummySubmissionLock()
+
         def __enter__(self):
             return self
 
@@ -1090,6 +1105,7 @@ def test_build_subcatchments_snapshots_initiating_users_boundary_preference(
         },
     )
     assert captured[0]["meta"] == {
+        "runid": "shared-run",
         watershed_routes.WBT_BOUNDARY_POLICY_SNAPSHOT_KEY: {
             "schema_version": 1,
             "runid": "shared-run",
@@ -1110,6 +1126,7 @@ def test_build_subcatchments_snapshots_initiating_users_boundary_preference(
         },
     )
     assert captured[1]["meta"] == {
+        "runid": "shared-run",
         watershed_routes.WBT_BOUNDARY_POLICY_SNAPSHOT_KEY: {
             "schema_version": 1,
             "runid": "shared-run",
@@ -1186,7 +1203,7 @@ def test_build_subcatchments_non_account_identity_uses_project_policy(
 
     assert response.status_code == 200
     assert captured[0]["args"] == ("fallback-run", {}, None)
-    assert captured[0]["meta"] is None
+    assert captured[0]["meta"] == {"runid": "fallback-run"}
     assert watershed.persist_calls == 0
 
 
@@ -1765,12 +1782,14 @@ def test_fetch_dem_returns_400_for_minimum_channel_length_exception(
 
     class DummyQueue:
         def __init__(self, *args, **kwargs) -> None:
-            pass
+            self.connection = kwargs["connection"]
 
         def enqueue_call(self, *args, **kwargs):
             raise watershed_routes.MinimumChannelLengthTooShortError()
 
     class DummyRedis:
+        def lock(self, *args, **kwargs): return _DummySubmissionLock()
+
         def __enter__(self):
             return self
 
@@ -1873,12 +1892,14 @@ def test_build_subcatchments_returns_400_for_boundary_touches_edge_exception(
 
     class DummyQueue:
         def __init__(self, *args, **kwargs) -> None:
-            pass
+            self.connection = kwargs["connection"]
 
         def enqueue_call(self, *args, **kwargs):
             raise watershed_routes.WatershedBoundaryTouchesEdgeError()
 
     class DummyRedis:
+        def lock(self, *args, **kwargs): return _DummySubmissionLock()
+
         def __enter__(self):
             return self
 

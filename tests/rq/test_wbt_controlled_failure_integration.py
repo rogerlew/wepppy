@@ -7,6 +7,7 @@ import uuid
 import pytest
 import redis
 from rq import Queue, SimpleWorker, get_current_job
+from rq.exceptions import NoSuchJobError
 from rq.job import Job
 from rq.registry import (
     CanceledJobRegistry,
@@ -18,6 +19,7 @@ TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
 import wepppy.microservices.rq_engine as rq_engine
 import wepppy.rq.job_info as job_info_module
+import wepppy.rq.job_dependencies as job_dependencies_module
 import wepppy.rq.project_rq as project_rq
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.core.watershed_errors import (
@@ -25,6 +27,7 @@ from wepppy.nodb.core.watershed_errors import (
     WatershedBoundaryTouchesEdgeError,
 )
 from wepppy.rq.project_rq import _cancel_deferred_job
+from wepppy.rq.job_dependencies import reconcile_deferred_workflow
 from wepppy.rq.rq_worker import WepppyRqWorker
 from wepppy.rq.job_info import get_wepppy_rq_job_info
 
@@ -145,6 +148,339 @@ def test_cancel_deferred_job_cleans_registry_and_dependency_sets(
         ).get_job_ids()
     finally:
         for candidate in (dependent, parent):
+            try:
+                candidate.delete(remove_from_queue=True)
+            except Exception:
+                pass
+
+
+def test_reconcile_deferred_workflow_cancels_and_detaches_complete_graph(
+    rq_connection,
+) -> None:
+    queue_name = f"deferred-retry-{uuid.uuid4().hex}"
+    queue = Queue(queue_name, connection=rq_connection)
+    parent = queue.enqueue(_noop_job, meta={"runid": "run-1"})
+    dependent = queue.enqueue(
+        _noop_job,
+        depends_on=parent,
+        meta={"runid": "run-1"},
+    )
+    parent.set_status("failed")
+
+    try:
+        result = reconcile_deferred_workflow(
+            dependent.id,
+            connection=rq_connection,
+            association=lambda job: job.meta.get("runid") == "run-1",
+        )
+
+        dependent.refresh()
+        refreshed_parent = Job.fetch(parent.id, connection=rq_connection)
+        assert result.state == "canceled"
+        assert dependent.get_status(refresh=True) == "canceled"
+        assert dependent.id not in DeferredJobRegistry(
+            queue_name,
+            connection=rq_connection,
+        ).get_job_ids()
+        assert dependent.dependency_ids == []
+        assert dependent.dependent_ids == []
+        assert dependent.id not in refreshed_parent.dependent_ids
+    finally:
+        for candidate in (dependent, parent):
+            try:
+                candidate.delete(remove_from_queue=True)
+            except Exception:
+                pass
+        queue.delete(delete_jobs=True)
+
+
+def test_reconcile_deferred_workflow_follows_serialized_metadata_links(
+    rq_connection,
+) -> None:
+    queue_name = f"deferred-meta-retry-{uuid.uuid4().hex}"
+    queue = Queue(queue_name, connection=rq_connection)
+    root = queue.enqueue(_noop_job, meta={"runid": "run-meta"})
+    child = queue.enqueue(_noop_job, meta={"runid": "run-meta"})
+    root.meta["jobs:0,func:child"] = child.id
+    root.save_meta()
+    root.set_status("failed")
+    child.set_status("deferred")
+    DeferredJobRegistry(queue_name, connection=rq_connection).add(child)
+
+    try:
+        result = reconcile_deferred_workflow(
+            root.id,
+            connection=rq_connection,
+            association=lambda job: job.meta.get("runid") == "run-meta",
+        )
+
+        child.refresh()
+        assert result.state == "canceled"
+        assert result.job_ids == (child.id,)
+        assert child.get_status(refresh=True) == "canceled"
+        assert child.id not in DeferredJobRegistry(
+            queue_name,
+            connection=rq_connection,
+        ).get_job_ids()
+    finally:
+        for candidate in (child, root):
+            try:
+                candidate.delete(remove_from_queue=True)
+            except Exception:
+                pass
+        queue.delete(delete_jobs=True)
+
+
+def test_reconcile_deferred_workflow_observes_deferred_to_queued_race(
+    rq_connection, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    queue_name = f"deferred-promotion-{uuid.uuid4().hex}"
+    queue = Queue(queue_name, connection=rq_connection)
+    root = queue.enqueue(_noop_job, meta={"runid": "race-run"})
+    child = queue.enqueue(_noop_job, meta={"runid": "race-run"})
+    root.meta["jobs:0,func:child"] = child.id
+    root.save_meta()
+    root.set_status("failed")
+    child.set_status("deferred")
+    DeferredJobRegistry(queue_name, connection=rq_connection).add(child)
+    original_snapshot = job_dependencies_module._snapshot_linked_job_ids
+    promoted = False
+
+    def _promoting_snapshot(pipeline, job):
+        nonlocal promoted
+        if not promoted:
+            promoted = True
+            child.set_status("queued")
+        return original_snapshot(pipeline, job)
+
+    monkeypatch.setattr(
+        job_dependencies_module, "_snapshot_linked_job_ids", _promoting_snapshot
+    )
+    try:
+        result = reconcile_deferred_workflow(
+            root.id,
+            connection=rq_connection,
+            association=lambda job: job.meta.get("runid") == "race-run",
+        )
+        assert result.state == "active"
+        assert child.get_status(refresh=True) == "queued"
+    finally:
+        for candidate in (child, root):
+            try:
+                candidate.delete(remove_from_queue=True)
+            except Exception:
+                pass
+        queue.delete(delete_jobs=True)
+
+
+def test_reconcile_deferred_workflow_contains_association_change_after_watched_fetch(
+    rq_connection, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    queue_name = f"deferred-association-race-{uuid.uuid4().hex}"
+    queue = Queue(queue_name, connection=rq_connection)
+    child = queue.enqueue(_noop_job, meta={"runid": "owned-run"})
+    child.set_status("deferred")
+    DeferredJobRegistry(queue_name, connection=rq_connection).add(child)
+    original_fetch = job_dependencies_module.Job.fetch
+    changed = False
+
+    def fetch_then_change(job_id, connection):
+        nonlocal changed
+        watched_snapshot = original_fetch(job_id, connection=connection)
+        if not changed and str(job_id) == child.id:
+            changed = True
+            attacker = original_fetch(job_id, connection=connection)
+            attacker.meta["runid"] = "other-run"
+            attacker.save_meta()
+        return watched_snapshot
+
+    monkeypatch.setattr(job_dependencies_module.Job, "fetch", fetch_then_change)
+    try:
+        result = reconcile_deferred_workflow(
+            child.id,
+            connection=rq_connection,
+            association=lambda job: job.meta.get("runid") == "owned-run",
+        )
+
+        child.refresh()
+        assert result.state == "mismatch"
+        assert child.get_status(refresh=True) == "deferred"
+    finally:
+        try:
+            child.delete(remove_from_queue=True)
+        except Exception:
+            pass
+        queue.delete(delete_jobs=True)
+
+
+def test_reconcile_deferred_workflow_retries_root_created_after_missing_fetch(
+    rq_connection, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    queue_name = f"deferred-missing-race-{uuid.uuid4().hex}"
+    queue = Queue(queue_name, connection=rq_connection)
+    root_id = f"late-{uuid.uuid4().hex}"
+    original_fetch = job_dependencies_module.Job.fetch
+    injected = False
+
+    def missing_then_create(job_id, connection):
+        nonlocal injected
+        if not injected and str(job_id) == root_id:
+            injected = True
+            queue.enqueue(_noop_job, job_id=root_id, meta={"runid": "late-run"})
+            raise NoSuchJobError
+        return original_fetch(job_id, connection=connection)
+
+    monkeypatch.setattr(job_dependencies_module.Job, "fetch", missing_then_create)
+    try:
+        result = reconcile_deferred_workflow(
+            root_id,
+            connection=rq_connection,
+            association=lambda job: job.meta.get("runid") == "late-run",
+        )
+
+        assert result.state == "active"
+        assert result.job_ids == (root_id,)
+    finally:
+        try:
+            original_fetch(root_id, connection=rq_connection).delete(remove_from_queue=True)
+        except NoSuchJobError:
+            pass
+        queue.delete(delete_jobs=True)
+
+
+def test_reconcile_deferred_workflow_rejects_inserted_hostile_edge(
+    rq_connection, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    queue_name = f"deferred-edge-race-{uuid.uuid4().hex}"
+    queue = Queue(queue_name, connection=rq_connection)
+    root = queue.enqueue(_noop_job, meta={"runid": "owned-run"})
+    child = queue.enqueue(_noop_job, meta={"runid": "owned-run"})
+    hostile = queue.enqueue(_noop_job, meta={"runid": "other-run"})
+    root.meta["jobs:0,func:child"] = child.id
+    root.save_meta()
+    root.set_status("failed")
+    child.set_status("deferred")
+    DeferredJobRegistry(queue_name, connection=rq_connection).add(child)
+    original_snapshot = job_dependencies_module._snapshot_linked_job_ids
+    inserted = False
+
+    def _inserting_snapshot(pipeline, job):
+        nonlocal inserted
+        if not inserted:
+            inserted = True
+            root.meta["jobs:1,func:hostile"] = hostile.id
+            root.save_meta()
+        return original_snapshot(pipeline, job)
+
+    monkeypatch.setattr(
+        job_dependencies_module, "_snapshot_linked_job_ids", _inserting_snapshot
+    )
+    try:
+        result = reconcile_deferred_workflow(
+            root.id,
+            connection=rq_connection,
+            association=lambda job: job.meta.get("runid") == "owned-run",
+        )
+        assert result.state == "mismatch"
+        assert child.get_status(refresh=True) == "deferred"
+    finally:
+        for candidate in (hostile, child, root):
+            try:
+                candidate.delete(remove_from_queue=True)
+            except Exception:
+                pass
+        queue.delete(delete_jobs=True)
+
+
+@pytest.mark.parametrize("promoted_status", ["queued", "started"])
+def test_reconcile_deferred_workflow_watch_aborts_late_promotion(
+    rq_connection,
+    monkeypatch: pytest.MonkeyPatch,
+    promoted_status: str,
+) -> None:
+    queue_name = f"deferred-watch-{uuid.uuid4().hex}"
+    queue = Queue(queue_name, connection=rq_connection)
+    parent = queue.enqueue(_noop_job, meta={"runid": "watch-run"})
+    child = queue.enqueue(
+        _noop_job, depends_on=parent, meta={"runid": "watch-run"}
+    )
+    parent.set_status("failed")
+    original_pipeline_factory = rq_connection.pipeline
+    promoted = False
+
+    class _PromotionPipeline:
+        def __init__(self, pipeline):
+            self._pipeline = pipeline
+
+        def __enter__(self):
+            self._pipeline.__enter__()
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return self._pipeline.__exit__(exc_type, exc, tb)
+
+        def __getattr__(self, name):
+            return getattr(self._pipeline, name)
+
+        def execute(self):
+            nonlocal promoted
+            if not promoted:
+                promoted = True
+                child.set_status(promoted_status)
+            return self._pipeline.execute()
+
+    monkeypatch.setattr(
+        rq_connection,
+        "pipeline",
+        lambda *args, **kwargs: _PromotionPipeline(
+            original_pipeline_factory(*args, **kwargs)
+        ),
+    )
+    try:
+        result = reconcile_deferred_workflow(
+            child.id,
+            connection=rq_connection,
+            association=lambda job: job.meta.get("runid") == "watch-run",
+        )
+        assert result.state == "active"
+        assert child.get_status(refresh=True) == promoted_status
+    finally:
+        for candidate in (child, parent):
+            try:
+                candidate.delete(remove_from_queue=True)
+            except Exception:
+                pass
+        queue.delete(delete_jobs=True)
+
+
+def test_reconcile_deferred_workflow_cancels_multilevel_metadata_graph(
+    rq_connection,
+) -> None:
+    queue_name = f"deferred-multilevel-{uuid.uuid4().hex}"
+    queue = Queue(queue_name, connection=rq_connection)
+    root = queue.enqueue(_noop_job, meta={"runid": "tree-run"})
+    middle = queue.enqueue(_noop_job, meta={"runid": "tree-run"})
+    leaf = queue.enqueue(_noop_job, meta={"runid": "tree-run"})
+    root.meta["jobs:0,func:middle"] = middle.id
+    middle.meta["jobs:0,func:leaf"] = leaf.id
+    root.save_meta()
+    middle.save_meta()
+    root.set_status("failed")
+    for candidate in (middle, leaf):
+        candidate.set_status("deferred")
+        DeferredJobRegistry(queue_name, connection=rq_connection).add(candidate)
+    try:
+        result = reconcile_deferred_workflow(
+            root.id,
+            connection=rq_connection,
+            association=lambda job: job.meta.get("runid") == "tree-run",
+        )
+        assert result.state == "canceled"
+        assert set(result.job_ids) == {middle.id, leaf.id}
+        assert middle.get_status(refresh=True) == "canceled"
+        assert leaf.get_status(refresh=True) == "canceled"
+    finally:
+        for candidate in (leaf, middle, root):
             try:
                 candidate.delete(remove_from_queue=True)
             except Exception:

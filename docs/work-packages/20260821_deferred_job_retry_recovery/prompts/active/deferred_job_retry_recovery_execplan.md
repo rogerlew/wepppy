@@ -18,10 +18,10 @@ unsafe duplicates.
 - [x] (2026-08-21 UTC) Confirmed the prior WEPP-only viability fix and inventoried other deferred-as-active guards.
 - [x] (2026-08-21 UTC) Received explicit operator approval for the broad no-friction behavior and standalone contract commit.
 - [x] (2026-08-21 UTC) Completed two independent checkpoint reviews, dispositions, and post-fix confirmations with no remaining High/Medium findings.
-- [ ] Commit the approved documentation-only ancestor.
-- [ ] Implement and test shared deferred cleanup and backend guard adoption.
-- [ ] Implement and test shared controller retry behavior; rebuild generated assets.
-- [ ] Run focused/broad validation and finish independent implementation reviews.
+- [x] (2026-08-21 UTC) Committed the approved documentation-only ancestor as `cfcb8aa33`.
+- [x] (2026-08-22 UTC) Implemented shared deferred cleanup and adopted it across generic and specialized backend guards, including cross-surface lock families.
+- [x] (2026-08-21 UTC) Implemented shared controller retry behavior, added focused Jest evidence, and rebuilt generated assets in the WEPPcloud container.
+- [ ] Run the repository-wide pytest gate and finish independent implementation reviews. Focused backend, RQ, frontend, graph, stub, docs, and exception gates pass.
 
 ## Surprises & Discoveries
 
@@ -43,6 +43,17 @@ unsafe duplicates.
   promoting a deferred job after the status read and before cancellation.
   Evidence: both independent checkpoint reviewers required a watched
   compare-and-mutate transaction and direct transition-race evidence.
+- Observation: Existing route tests frequently used queue doubles without a
+  Redis connection and asserted post-enqueue hint writes. Pre-enqueue durable
+  receipts and admission locks deliberately expose those stale test doubles.
+  Evidence: the first broad microservice run reached 482 passing tests before
+  stopping on 20 focused failures, primarily missing `Queue.connection`/lock
+  behavior and old deferred-as-active expectations.
+- Observation: Fork, Batch+Omni, Watershed, and SWAT roots create descendants
+  outside their root function. Exact association therefore requires finite
+  cross-function lineage allowlists rather than run ID or module matching.
+  Evidence: post-implementation correctness review and the regenerated static
+  RQ dependency graph on 2026-08-22.
 
 ## Decision Log
 
@@ -61,10 +72,19 @@ unsafe duplicates.
   Rationale: Submission locks do not serialize worker/RQ promotion, and stale or
   copied hints must never authorize cross-run cancellation.
   Date/Author: 2026-08-21, Codex after independent reviews.
+- Decision: The replacement job ID is preallocated and durably recorded before
+  enqueue; persistence failure aborts submission.
+  Rationale: This removes the enqueue-to-hint orphan window that made recovery
+  unreliable and ensures every accepted receipt is the exact enqueued ID.
+  Date/Author: 2026-08-21, Codex.
 
 ## Outcomes & Retrospective
 
-Pending implementation and validation.
+Implementation is complete and focused gates pass. The shared admission path
+now renews an owner-safe lease while traversing watched dependency graphs,
+pre-saves the exact replacement receipt, and treats only queued, started, and
+scheduled work as active. The final repository-wide test and independent
+implementation-review gates remain before this package can be closed.
 
 ## Context and Orientation
 

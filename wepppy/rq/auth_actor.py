@@ -10,6 +10,8 @@ from typing import Any, Mapping
 
 import redis
 from rq import Queue, get_current_job
+from rq.exceptions import NoSuchJobError
+from rq.job import Job
 
 from wepppy.observability.correlation import current_correlation_id, normalize_correlation_id
 
@@ -133,7 +135,34 @@ def install_rq_auth_actor_hook() -> None:
         def wrapper(self, *args, **kwargs):
             depth_token = _ENQUEUE_TRACE_DEPTH.set(_ENQUEUE_TRACE_DEPTH.get() + 1)
             try:
-                job = func(self, *args, **kwargs)
+                try:
+                    job = func(self, *args, **kwargs)
+                except redis.exceptions.RedisError:
+                    job_id = kwargs.get("job_id")
+                    target_func = kwargs.get("func") or (args[0] if args else None)
+                    if method_name != "enqueue_call" or not job_id or target_func is None:
+                        raise
+                    try:
+                        committed = Job.fetch(str(job_id), connection=self.connection)
+                    except NoSuchJobError:
+                        raise
+                    except redis.exceptions.RedisError as exc:
+                        from wepppy.rq.submission_recovery import RqEnqueueVerificationError
+
+                        raise RqEnqueueVerificationError(
+                            "Unable to verify whether the planned job was committed."
+                        ) from exc
+                    expected_name = f"{target_func.__module__}.{target_func.__qualname__}"
+                    expected_args = tuple(kwargs.get("args") or (args[1] if len(args) > 1 else ()))
+                    expected_kwargs = dict(kwargs.get("kwargs") or (args[2] if len(args) > 2 else {}))
+                    if (
+                        str(committed.func_name) != expected_name
+                        or str(committed.origin) != str(self.name)
+                        or tuple(committed.args or ()) != expected_args
+                        or dict(committed.kwargs or {}) != expected_kwargs
+                    ):
+                        raise
+                    job = committed
                 actor = _AUTH_ACTOR.get()
                 correlation_id = normalize_correlation_id(current_correlation_id())
                 if job is not None:

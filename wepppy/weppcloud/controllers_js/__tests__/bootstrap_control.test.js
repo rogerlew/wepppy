@@ -199,4 +199,23 @@ describe("BootstrapControl", () => {
         expect(httpMock.getJson).not.toHaveBeenCalledWith("bootstrap/current-ref");
         expect(httpMock.getJson).not.toHaveBeenCalledWith("bootstrap/commits");
     });
+
+    test("enables ordinary retry when the Bootstrap job is deferred", async () => {
+        document
+            .querySelector('[data-bootstrap-action="enable"]')
+            .dispatchEvent(new MouseEvent("click", { bubbles: true }));
+        await flushPromises();
+
+        controller.triggerEvent("job:retryable", {
+            source: "poll",
+            job_id: "job-enable-1",
+            status: "deferred"
+        });
+        await flushPromises();
+
+        expect(baseInstance.set_rq_job_id).toHaveBeenLastCalledWith(expect.any(Object), null);
+        expect(document.querySelector('[data-bootstrap-action="enable"]').disabled).toBe(false);
+        expect(document.querySelector("[data-bootstrap-message-body]").textContent)
+            .toContain("Retry Enable");
+    });
 });

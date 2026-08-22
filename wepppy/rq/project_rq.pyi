@@ -66,6 +66,7 @@ def build_channels_rq(
     stream_pruning_method: Optional[str],
     wbt_fill_or_breach: Optional[str],
     wbt_blc_dist: Optional[int],
+    root_job_id: Optional[str] = ...,
 ) -> None: ...
 
 def fetch_dem_and_build_channels_rq(
@@ -136,7 +137,12 @@ def build_rusle_rq(runid: str, payload: Mapping[str, Any] | None = ...) -> None:
 def build_treatments_rq(runid: str) -> None: ...
 def fetch_and_align_polaris_rq(runid: str, payload: Mapping[str, Any] | None = ...) -> None: ...
 
-def _finish_fork_rq(runid: str) -> None: ...
+def _finish_fork_rq(
+    runid: str,
+    fork_target_runid: str | None = ...,
+    dependency_job_id: str | None = ...,
+    root_fork_job_id: str | None = ...,
+) -> None: ...
 
 def _clean_env_for_system_tools() -> dict[str, str]: ...
 
@@ -145,6 +151,7 @@ def fork_rq(
     new_runid: str,
     undisturbify: bool = ...,
     skip_wepp_runs_output: bool = ...,
+    skip_omni_scenarios_contrasts: bool = ...,
 ) -> None: ...
 
 def archive_rq(runid: str, comment: Optional[str] = ...) -> None: ...

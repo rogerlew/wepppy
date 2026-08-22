@@ -4,16 +4,15 @@ import hashlib
 import json
 import logging
 import os
-import time
-from typing import Any, Mapping
+from typing import Any, Callable, Mapping
 
 import redis
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from rq import Queue
+from rq.job import JobStatus
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
-from wepppy.nodb.base import NoDbAlreadyLockedError
 from wepppy.nodb.mods.geneva import Geneva, GenevaNoDbError, GenevaValidationError
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.rq.geneva_rq import (
@@ -22,6 +21,10 @@ from wepppy.rq.geneva_rq import (
     run_geneva_prepare_hrus_rq,
     run_geneva_run_batch_rq,
 )
+from wepppy.rq.job_id import new_rq_job_id
+from wepppy.rq.auth_actor import current_auth_actor
+from wepppy.observability.correlation import current_correlation_id, normalize_correlation_id
+from wepppy.rq.submission_recovery import recover_committed_enqueue, rq_submission_lock
 from wepppy.weppcloud.utils.auth_tokens import get_jwt_config
 from wepppy.weppcloud.utils.helpers import get_wd
 
@@ -31,6 +34,7 @@ from .payloads import parse_request_payload
 from .responses import error_response
 from wepppy.rq.job_dependencies import (
     failure_tolerant_depends_on,
+    reconcile_deferred_workflow,
     release_deferred_job_if_ready,
 )
 
@@ -210,36 +214,42 @@ def _normalize_workflow_request(geneva: Geneva, payload: Mapping[str, Any]) -> d
     }
 
 
-def _best_effort_mark_job_queued(
+def _prepare_geneva_job(
     *,
+    redis_conn: redis.Redis,
     geneva: Geneva,
     runid: str,
     config: str,
     job_id: str,
     status_message: str,
-    action_name: str,
+    lease_checkpoint: Callable[[], None] | None = None,
 ) -> None:
-    for attempt in range(1, GENEVA_STATE_LOCK_RETRY_ATTEMPTS + 1):
-        try:
-            geneva.mark_job_queued(job_id, status_message=status_message)
-            return
-        except NoDbAlreadyLockedError as exc:
-            if attempt >= GENEVA_STATE_LOCK_RETRY_ATTEMPTS:
-                logger.warning(
-                    "rq-engine Geneva queued-state update skipped after lock retries: %s (%s)",
-                    action_name,
-                    exc,
-                    extra={"runid": runid, "config": config, "job_id": job_id},
-                )
-                return
-            logger.info(
-                "rq-engine Geneva state lock busy while queuing %s; retrying (%d/%d)",
-                action_name,
-                attempt,
-                GENEVA_STATE_LOCK_RETRY_ATTEMPTS,
-                extra={"runid": runid, "config": config, "job_id": job_id},
+    active_job_id = geneva.state_payload().get("active_job_id")
+    if active_job_id:
+        result = reconcile_deferred_workflow(
+            str(active_job_id),
+            connection=redis_conn,
+            association=lambda candidate: (
+                tuple(candidate.args or ())[:2] == (runid, config)
+                and str(candidate.origin) == "default"
+                and str(candidate.func_name) in {
+                    f"{func.__module__}.{func.__qualname__}"
+                    for func in (
+                        run_geneva_prepare_hrus_rq,
+                        run_geneva_build_frequency_panel_rq,
+                        run_geneva_run_batch_rq,
+                    )
+                }
+            ),
+            lease_checkpoint=lease_checkpoint,
+        )
+        if result.state in {"active", "mismatch"}:
+            raise GenevaNoDbError(
+                "A Geneva job is already active.",
+                code="geneva_job_active",
+                status_code=409,
             )
-            time.sleep(GENEVA_STATE_LOCK_RETRY_SECONDS)
+    geneva.mark_job_queued(job_id, status_message=status_message)
 
 
 def _enqueue_geneva_job(
@@ -251,23 +261,29 @@ def _enqueue_geneva_job(
     geneva: Geneva,
     queued_status_message: str,
 ) -> dict[str, str]:
-    with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
+    with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn, rq_submission_lock(
+        redis_conn, f"{runid}:geneva", lifecycle_key=runid
+    ) as lease:
         queue = Queue(connection=redis_conn)
+        job_id = new_rq_job_id()
+        _prepare_geneva_job(
+            redis_conn=redis_conn,
+            geneva=geneva,
+            runid=runid,
+            config=config,
+            job_id=job_id,
+            status_message=queued_status_message,
+            lease_checkpoint=lease.checkpoint,
+        )
+        lease.checkpoint()
         job = queue.enqueue_call(
             func=func,
             args=(runid, config, dict(payload)),
             timeout=GENEVA_RQ_TIMEOUT,
+            job_id=job_id,
         )
 
     job_id = str(job.id)
-    _best_effort_mark_job_queued(
-        geneva=geneva,
-        runid=runid,
-        config=config,
-        job_id=job_id,
-        status_message=queued_status_message,
-        action_name=getattr(func, "__name__", "geneva_enqueue"),
-    )
     return {
         "job_id": job_id,
         "status_url": f"/rq-engine/api/jobstatus/{job_id}",
@@ -286,42 +302,78 @@ def _enqueue_geneva_workflow_jobs(
     panel_payload = dict(payload.get("panel", {}))
     run_batch_payload = dict(payload.get("run_batch", {}))
 
-    with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
+    with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn, rq_submission_lock(
+        redis_conn, f"{runid}:geneva", lifecycle_key=runid
+    ) as lease:
         queue = Queue(connection=redis_conn)
-        prepare_job = queue.enqueue_call(
+        prepare_job_id = new_rq_job_id()
+        queued_message = (
+            "Geneva workflow queued. Preparing HRUs, building frequency panel, "
+            "then running Geneva batch."
+        )
+        _prepare_geneva_job(
+            redis_conn=redis_conn,
+            geneva=geneva,
+            runid=runid,
+            config=config,
+            job_id=prepare_job_id,
+            status_message=queued_message,
+            lease_checkpoint=lease.checkpoint,
+        )
+        lease.checkpoint()
+        job_meta: dict[str, Any] = {"runid": runid}
+        auth_actor = current_auth_actor()
+        if auth_actor is not None:
+            job_meta["auth_actor"] = auth_actor
+        correlation_id = normalize_correlation_id(current_correlation_id())
+        if correlation_id is not None:
+            job_meta["correlation_id"] = correlation_id
+        prepare_job = queue.create_job(
             func=run_geneva_prepare_hrus_rq,
             args=(runid, config, prepare_payload),
             timeout=GENEVA_RQ_TIMEOUT,
+            job_id=prepare_job_id,
+            meta=job_meta,
         )
-        panel_job = queue.enqueue_call(
+        panel_job = queue.create_job(
             func=run_geneva_build_frequency_panel_rq,
             args=(runid, config, panel_payload),
             timeout=GENEVA_RQ_TIMEOUT,
             depends_on=failure_tolerant_depends_on(prepare_job),
+            job_id=new_rq_job_id(),
+            status=JobStatus.DEFERRED,
+            meta=job_meta,
         )
-        release_deferred_job_if_ready(queue, panel_job)
-        run_batch_job = queue.enqueue_call(
+        run_batch_job = queue.create_job(
             func=run_geneva_run_batch_rq,
             args=(runid, config, run_batch_payload),
             timeout=GENEVA_RQ_TIMEOUT,
             depends_on=failure_tolerant_depends_on(panel_job),
+            job_id=new_rq_job_id(),
+            status=JobStatus.DEFERRED,
+            meta=job_meta,
         )
-        release_deferred_job_if_ready(queue, run_batch_job)
+        pipeline = redis_conn.pipeline()
+        queue._enqueue_job(prepare_job, pipeline=pipeline)
+        panel_job.save(pipeline=pipeline)
+        panel_job.register_dependency(pipeline=pipeline)
+        run_batch_job.save(pipeline=pipeline)
+        run_batch_job.register_dependency(pipeline=pipeline)
+        try:
+            pipeline.execute()
+        except redis.RedisError:
+            recovered = (
+                recover_committed_enqueue(redis_conn, prepare_job.id, func=run_geneva_prepare_hrus_rq, runid=runid, origin=str(queue.name), args=(runid, config, prepare_payload)),
+                recover_committed_enqueue(redis_conn, panel_job.id, func=run_geneva_build_frequency_panel_rq, runid=runid, origin=str(queue.name), args=(runid, config, panel_payload)),
+                recover_committed_enqueue(redis_conn, run_batch_job.id, func=run_geneva_run_batch_rq, runid=runid, origin=str(queue.name), args=(runid, config, run_batch_payload)),
+            )
+            if not all(recovered):
+                raise
+            prepare_job, panel_job, run_batch_job = recovered
 
     prepare_job_id = str(prepare_job.id)
     panel_job_id = str(panel_job.id)
     run_batch_job_id = str(run_batch_job.id)
-    _best_effort_mark_job_queued(
-        geneva=geneva,
-        runid=runid,
-        config=config,
-        job_id=prepare_job_id,
-        status_message=(
-            "Geneva workflow queued. Preparing HRUs, building frequency panel, "
-            "then running Geneva batch."
-        ),
-        action_name="run_geneva_workflow",
-    )
     return {
         "job_id": prepare_job_id,
         "job_ids": {

@@ -16,10 +16,11 @@ import socket
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Tuple, List, Optional
+from typing import Any, Callable, Tuple, List, Optional
 
 import redis
 from rq import Queue, get_current_job
+from rq.exceptions import NoSuchJobError
 from rq.job import Dependency, Job, JobStatus
 from rq.registry import DeferredJobRegistry, ScheduledJobRegistry, StartedJobRegistry
 from wepppy.config.redis_settings import (
@@ -27,6 +28,8 @@ from wepppy.config.redis_settings import (
     redis_connection_kwargs,
     redis_host,
 )
+from wepppy.rq.job_id import new_rq_job_id
+from wepppy.rq.submission_recovery import rq_submission_lock
 
 from wepppy.weppcloud.utils.helpers import get_wd
 
@@ -39,7 +42,10 @@ from wepppy.nodb.base import (
 from wepppy.nodb.batch_runner import BatchRunner
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.nodb.status_messenger import StatusMessenger
-from wepppy.rq.job_dependencies import release_deferred_job_if_ready
+from wepppy.rq.job_dependencies import (
+    reconcile_deferred_workflow,
+    release_deferred_job_if_ready,
+)
 from wepppy.rq.omni_rq import run_omni_scenarios_rq
 from wepppy.topo.watershed_collection import WatershedFeature
 try:
@@ -182,21 +188,50 @@ def _cleanup_batch_run_cache_and_locks(runid: str) -> None:
 
 
 def _job_targets_batch(job: Job, batch_name: str) -> bool:
+    allowed_funcs = {
+        f"{__name__}.delete_batch_rq",
+        f"{__name__}.run_batch_rq",
+        f"{__name__}.run_batch_watershed_rq",
+        f"{__name__}._final_batch_complete_rq",
+        "wepppy.rq.omni_rq.run_omni_scenarios_rq",
+        "wepppy.rq.omni_rq.run_omni_scenario_rq",
+        "wepppy.rq.omni_rq._compile_hillslope_summaries_rq",
+        "wepppy.rq.omni_rq._finalize_omni_scenarios_rq",
+    }
+    if str(job.func_name) not in allowed_funcs or str(job.origin) != "batch":
+        return False
     meta = job.meta if isinstance(job.meta, dict) else {}
     raw_runid = meta.get("runid")
     runid = str(raw_runid).strip() if raw_runid is not None else ""
-    if runid == batch_name:
-        return True
-    if runid.startswith(f"batch;;{batch_name};;"):
-        return True
-
     args = list(job.args or [])
-    if args:
-        first_arg = args[0]
-        if isinstance(first_arg, str) and first_arg == batch_name:
-            return True
+    if not args or not isinstance(args[0], str):
+        return False
+    arg_matches = args[0] == batch_name or args[0].startswith(
+        f"batch;;{batch_name};;"
+    )
+    meta_matches = not runid or runid == batch_name or runid.startswith(
+        f"batch;;{batch_name};;"
+    )
+    return arg_matches and meta_matches
 
-    return False
+
+def _job_plausibly_targets_batch(job: Job, batch_name: str) -> bool:
+    meta = job.meta if isinstance(job.meta, dict) else {}
+    raw_runid = meta.get("runid")
+    runid = str(raw_runid).strip() if raw_runid is not None else ""
+    args = list(job.args or [])
+    arg_matches = bool(
+        args
+        and isinstance(args[0], str)
+        and (
+            args[0] == batch_name
+            or args[0].startswith(f"batch;;{batch_name};;")
+        )
+    )
+    meta_matches = runid == batch_name or runid.startswith(
+        f"batch;;{batch_name};;"
+    )
+    return arg_matches or meta_matches
 
 
 def _active_batch_job_summaries(
@@ -206,7 +241,7 @@ def _active_batch_job_summaries(
     exclude_job_ids: set[str] | None = None,
     max_jobs: int = 25,
 ) -> list[str]:
-    """Return active job summaries for a batch (queued/started/deferred/scheduled)."""
+    """Return active job summaries for a batch (queued/started/scheduled)."""
     if max_jobs <= 0:
         return []
 
@@ -270,6 +305,127 @@ def _format_active_jobs_text(active_jobs: list[str]) -> str:
     if len(active_jobs) > 5:
         active_jobs_text += f" (+{len(active_jobs) - 5} more)"
     return active_jobs_text
+
+
+def reconcile_deferred_batch_jobs(
+    batch_name: str,
+    *,
+    redis_conn: redis.Redis,
+    exclude_job_ids: set[str] | None = None,
+    lease_checkpoint: Callable[[], None] | None = None,
+    _watch_attempt: int = 0,
+) -> list[str]:
+    """Cancel deferred jobs for one batch and return executable conflicts."""
+    excluded = set(exclude_job_ids or set())
+    queue = Queue("batch", connection=redis_conn)
+    started_registry = StartedJobRegistry(queue=queue)
+    deferred_registry = DeferredJobRegistry(queue=queue)
+    scheduled_registry = ScheduledJobRegistry(queue=queue)
+    pipeline = redis_conn.pipeline()
+    pipeline.watch(
+        queue.key,
+        queue.intermediate_queue_key,
+        started_registry.key,
+        deferred_registry.key,
+        scheduled_registry.key,
+    )
+    registry_members = (
+        queue.get_job_ids(),
+        redis_conn.lrange(queue.intermediate_queue_key, 0, -1),
+        started_registry.get_job_ids(),
+        deferred_registry.get_job_ids(),
+        scheduled_registry.get_job_ids(),
+    )
+    persisted_job_ids: set[str] = set()
+    receipt_job_id = redis_conn.get(f"rq:batch:receipt:{batch_name}")
+    if isinstance(receipt_job_id, bytes):
+        receipt_job_id = receipt_job_id.decode("utf-8")
+    if receipt_job_id:
+        persisted_job_ids.add(str(receipt_job_id))
+    try:
+        batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
+    except FileNotFoundError:
+        batch_runner = None
+    if batch_runner is not None:
+        receipt_map = batch_runner.rq_job_ids
+        for task_name in (
+            "run_batch_rq",
+            "delete_batch_rq",
+            "final_batch_complete_rq",
+        ):
+            persisted_job_id = receipt_map.get(task_name)
+            if persisted_job_id:
+                persisted_job_ids.add(str(persisted_job_id))
+    discovered_job_ids = {
+        raw_job_id.decode("utf-8") if isinstance(raw_job_id, bytes) else str(raw_job_id)
+        for job_ids in registry_members
+        for raw_job_id in job_ids
+    } | persisted_job_ids
+    if discovered_job_ids:
+        pipeline.watch(*(Job.key_for(job_id) for job_id in discovered_job_ids))
+    candidates: dict[str, Job] = {}
+    for job_ids, persisted in (
+        *((job_ids, False) for job_ids in registry_members),
+        (persisted_job_ids, True),
+    ):
+        for raw_job_id in job_ids:
+            if lease_checkpoint is not None:
+                lease_checkpoint()
+            job_id = (
+                raw_job_id.decode("utf-8")
+                if isinstance(raw_job_id, bytes)
+                else str(raw_job_id)
+            )
+            if not job_id or job_id in excluded or job_id in candidates:
+                continue
+            try:
+                job = Job.fetch(job_id, connection=redis_conn)
+            except NoSuchJobError:
+                continue
+            if _job_targets_batch(job, batch_name):
+                candidates[job_id] = job
+            elif persisted or _job_plausibly_targets_batch(job, batch_name):
+                return [f"{job_id}:mismatch"]
+
+    active: list[str] = []
+    for job in candidates.values():
+        if lease_checkpoint is not None:
+            lease_checkpoint()
+        raw_status = job.get_status(refresh=False)
+        status = str(getattr(raw_status, "value", raw_status)).lower()
+        if status in {"queued", "started", "scheduled"}:
+            active.append(f"{job.id}:{status}")
+    pipeline.multi()
+    pipeline.ping()
+    try:
+        pipeline.execute()
+    except redis.WatchError:
+        if _watch_attempt >= 4:
+            return ["inventory:changed"]
+        return reconcile_deferred_batch_jobs(
+            batch_name,
+            redis_conn=redis_conn,
+            exclude_job_ids=excluded,
+            lease_checkpoint=lease_checkpoint,
+            _watch_attempt=_watch_attempt + 1,
+        )
+    finally:
+        pipeline.reset()
+    if active:
+        return active
+
+    for job in candidates.values():
+        if lease_checkpoint is not None:
+            lease_checkpoint()
+        result = reconcile_deferred_workflow(
+            str(job.id),
+            connection=redis_conn,
+            association=lambda candidate: _job_targets_batch(candidate, batch_name),
+            lease_checkpoint=lease_checkpoint,
+        )
+        if result.state in {"active", "mismatch"}:
+            return [f"{job.id}:{result.state}"]
+    return []
 
 
 def _release_deferred_finalizer_if_ready(queue: Queue, final_job: Job) -> None:
@@ -457,16 +613,24 @@ def run_batch_rq(batch_name: str) -> dict[str, Any]:
 
             for wf in selected_features:
                 runid = str(wf.runid)
-                child_job = q.enqueue_call(
-                    func=run_batch_watershed_rq,
-                    args=[batch_name, wf],
-                    timeout=TIMEOUT,
-                )
-                child_job.meta['runid'] = f'batch;;{batch_name};;{runid}'
-                child_job.save()
+                child_runid = f'batch;;{batch_name};;{runid}'
+                child_job_id = new_rq_job_id()
                 if job is not None:
-                    job.meta[f'jobs:0,runid:{runid}'] = child_job.id
+                    job.meta[f'jobs:0,runid:{runid}'] = child_job_id
                     job.save()
+                with rq_submission_lock(
+                    redis_conn,
+                    f"{child_runid}:batch-child",
+                    lifecycle_key=child_runid,
+                ) as lease:
+                    lease.checkpoint()
+                    child_job = q.enqueue_call(
+                        func=run_batch_watershed_rq,
+                        args=[batch_name, wf],
+                        timeout=TIMEOUT,
+                        job_id=child_job_id,
+                        meta={'runid': child_runid},
+                    )
                 watershed_jobs.append(child_job)
 
             # RQ otherwise leaves dependents deferred when any dependency fails.

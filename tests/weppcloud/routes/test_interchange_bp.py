@@ -47,6 +47,7 @@ def interchange_client(
         "load_run_context",
         lambda runid, config: dispatched.setdefault("context", (runid, config)),
     )
+    monkeypatch.setattr(interchange_module, "get_wd", lambda runid: f"/runs/{runid}")
 
     helpers = __import__("wepppy.weppcloud.utils.helpers", fromlist=["authorize"])
     monkeypatch.setattr(helpers, "authorize", lambda runid, config, require_owner=False: None)
@@ -56,6 +57,11 @@ def interchange_client(
     monkeypatch.setattr(interchange_module, "Queue", queue_cls)
     redis_client_cls = env.redis_client_class()
     monkeypatch.setattr(interchange_module.redis, "Redis", redis_client_cls)
+    monkeypatch.setattr(
+        interchange_module.RedisPrep,
+        "getInstance",
+        lambda wd: env.redis_prep_class(wd),
+    )
 
     with app.test_client() as client:
         yield client, dispatched, env
@@ -71,10 +77,9 @@ def test_migrate_default_interchange_enqueues_job(interchange_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload == {"job_id": "job-123"}
-
     assert dispatched["context"] == (RUN_ID, CONFIG)
     queue_call = env.recorder.queue_calls[0]
+    assert payload == {"job_id": queue_call.job.id}
     assert queue_call.args == (RUN_ID, "subdir")
     assert queue_call.func is interchange_module.run_interchange_migration
     assert queue_call.timeout == interchange_module.TIMEOUT

@@ -16,7 +16,13 @@ from rq.job import Job
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.redis_prep import RedisPrep
-from wepppy.weppcloud.utils.helpers import authorize, exception_factory, url_for_run
+from wepppy.weppcloud.utils.helpers import (
+    authorize,
+    authorize_and_handle_with_exception_factory,
+    exception_factory,
+    run_lifecycle_mutation,
+    url_for_run,
+)
 
 from .._run_context import load_run_context
 
@@ -24,7 +30,7 @@ from .._run_context import load_run_context
 archive_bp = Blueprint('archive', __name__, template_folder='templates')
 
 
-_RUNNING_ARCHIVE_JOB_STATUSES = {'queued', 'started', 'deferred', 'scheduled'}
+_RUNNING_ARCHIVE_JOB_STATUSES = {'queued', 'started', 'scheduled'}
 
 
 def _resolve_archive_job_state(prep: RedisPrep) -> tuple[bool, str | None]:
@@ -48,7 +54,6 @@ def _resolve_archive_job_state(prep: RedisPrep) -> tuple[bool, str | None]:
     if status in _RUNNING_ARCHIVE_JOB_STATUSES:
         return True, archive_job_id
 
-    prep.clear_archive_job_id()
     return False, None
 
 
@@ -67,6 +72,8 @@ def rq_archive_dashboard(runid, config):
 
 @archive_bp.route('/runs/<string:runid>/<string:config>/rq-archive-dashboard/archives', strict_slashes=False)
 @login_required
+@authorize_and_handle_with_exception_factory
+@run_lifecycle_mutation
 def rq_archive_list(runid, config):
     authorize(runid, config)
     try:

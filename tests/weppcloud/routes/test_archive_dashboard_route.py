@@ -35,7 +35,7 @@ def archive_dashboard_env(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(archive_dashboard_module.redis, "Redis", lambda **kwargs: _RedisStub())
 
 
-def test_resolve_archive_job_state_clears_stale_job_id(
+def test_resolve_archive_job_state_does_not_clear_stale_job_id(
     archive_dashboard_env,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -50,8 +50,8 @@ def test_resolve_archive_job_state_clears_stale_job_id(
 
     assert in_progress is False
     assert job_id is None
-    assert prep.clear_calls == 1
-    assert prep.archive_job_id is None
+    assert prep.clear_calls == 0
+    assert prep.archive_job_id == "stale-job"
 
 
 def test_resolve_archive_job_state_preserves_active_job_id(

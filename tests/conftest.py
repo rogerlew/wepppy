@@ -143,6 +143,28 @@ def _install_redis_stub():
             self.published.append((channel, message))
             return 1
 
+        def lock(self, name, **kwargs):
+            class RecordingLock:
+                def acquire(self, **acquire_kwargs):
+                    return True
+
+                def extend(self, additional_time, **extend_kwargs):
+                    return True
+
+                def release(self):
+                    return None
+
+            return RecordingLock()
+
+        def close(self):
+            return None
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
     redis_module.Redis = RecordingRedis
 
     try:

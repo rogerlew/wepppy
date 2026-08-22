@@ -12,6 +12,7 @@ from rq import Queue
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.rq.project_rq import build_rusle_rq
+from wepppy.rq.submission_recovery import RqSubmissionConflict, enqueue_tracked_rq_job
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
@@ -81,18 +82,23 @@ async def build_rusle(runid: str, config: str, request: Request) -> JSONResponse
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(
+            job = enqueue_tracked_rq_job(
+                q,
                 build_rusle_rq,
-                (runid,),
+                prep=prep,
+                job_key="build_rusle_rq",
+                runid=runid,
+                args=(runid,),
                 kwargs=job_kwargs,
                 timeout=RQ_TIMEOUT,
             )
-            prep.set_rq_job_id("build_rusle_rq", job.id)
 
         response_payload: dict[str, Any] = {"job_id": job.id}
         if job_payload:
             response_payload["payload"] = job_payload
         return JSONResponse(response_payload)
+    except RqSubmissionConflict as exc:
+        return error_response(str(exc), status_code=409, code="conflict")
     except Exception:
         logger.exception("rq-engine build-rusle enqueue failed")
         return error_response_with_traceback("Error Building RUSLE")

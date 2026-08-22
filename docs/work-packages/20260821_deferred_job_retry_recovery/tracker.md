@@ -2,22 +2,24 @@
 
 ## Status
 
-**Phase**: Contract checkpoint approved; standalone ancestor pending
-**Last updated**: 2026-08-21 UTC
+**Phase**: Final validation and implementation review
+**Last updated**: 2026-08-22 UTC
 
 ## Task Board
 
 ### In Progress
 
-- [ ] Commit the approved SURF-20A / GOV-00A-M1J documentation-only ancestor.
+- [ ] Complete the repository-wide pytest gate and independent implementation reviews.
 
 ### Pending
 
-- [ ] Add the shared deferred-job reaping primitive with direct Redis/RQ evidence.
-- [ ] Update every in-scope backend admission/cache guard.
-- [ ] Make shared controller buttons retryable on `deferred` and rebuild assets.
-- [ ] Add focused regression coverage and run quality gates.
+- [x] Add the shared deferred-job reaping primitive with direct Redis/RQ evidence.
+- [x] Update every in-scope backend admission/cache guard.
+- [x] Make shared controller buttons retryable on `deferred` and rebuild assets.
+- [x] Add focused regression coverage and run focused quality gates.
 - [ ] Complete correctness, security, code, and QA review.
+- [ ] Add explicit manifest-driven state/failure evidence for every matrix row;
+  correctness review treats shared-helper coverage alone as insufficient.
 
 ### Blocked
 
@@ -46,3 +48,6 @@
   security/governance evidence were incomplete. All are accepted; corrected
   checkpoint received both post-fix approvals with no remaining High/Medium
   findings on 2026-08-21.
+- Final security review exposed and drove closure of pre-WATCH association and
+  late-receipt-creation races; job identity is now watched before association,
+  and missing receipts are validated transactionally before replacement.

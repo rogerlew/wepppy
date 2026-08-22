@@ -1,11 +1,15 @@
 import os
 import json
 import io
+from contextlib import ExitStack
+from functools import wraps
 
 import pathlib
+import signal
+import time
 import stat
 from pathlib import Path
-from subprocess import Popen, PIPE
+from subprocess import PIPE, Popen, TimeoutExpired
 from urllib.parse import quote
 
 from typing import Optional
@@ -17,7 +21,7 @@ from os.path import abspath, basename
 
 import redis
 
-from flask import Response, abort, Blueprint, current_app, request, render_template, url_for
+from flask import Response, abort, Blueprint, current_app, has_app_context, request, render_template, url_for
 from flask_security import current_user
 from werkzeug.exceptions import HTTPException
 
@@ -29,9 +33,22 @@ from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.redis_prep import RedisPrep
 from wepppy.rq.weppcloudr_rq import render_deval_details_rq
 from wepppy.rq.job_id import new_rq_job_id
+from wepppy.rq.submission_recovery import (
+    RqSubmissionConflict,
+    checkpoint_run_lifecycle,
+    prepare_redisprep_job_id,
+    rq_submission_lock,
+)
 from wepppy.rq.weppcloudr_backends import RenderRequest, validate_request
 
-from wepppy.weppcloud.utils.helpers import authorize, get_wd, exception_factory, url_for_run
+from wepppy.weppcloud.utils.helpers import (
+    authorize,
+    authorize_and_handle_with_exception_factory,
+    exception_factory,
+    get_wd,
+    run_lifecycle_mutation,
+    url_for_run,
+)
 from wepppy.weppcloud.utils.cap_guard import requires_cap
 
 from wepppy.nodb.core import Ron, Wepp, Watershed
@@ -52,12 +69,89 @@ R_PROXY_RMD_RENDER_EXPR = (
     'ws <- jsonlite::fromJSON(ws_json, simplifyVector = FALSE); '
     'rmarkdown::render(input_file, params=list(ws=ws), output_file=output_file, output_dir=output_dir)'
 )
+VIZ_RMD_RENDER_EXPR = (
+    'args <- commandArgs(TRUE); '
+    'if (length(args) != 4) stop("expected 4 args"); '
+    'rmarkdown::render(args[1], params=list(proj_runid=args[2]), '
+    'output_file=args[3], output_dir=args[4])'
+)
+
+
+def _viz_rmd_command(rscript: str, runid: str, routine: str, output_dir: str) -> list[str]:
+    return [
+        'R',
+        '-e',
+        f'library("rmarkdown"); {VIZ_RMD_RENDER_EXPR}',
+        '--args',
+        rscript,
+        runid,
+        f'{routine}.htm',
+        output_dir,
+    ]
 
 
 weppcloudr_bp = Blueprint('weppcloud', __name__)
 
+
+def _fence_public_run_mutation(func):
+    @wraps(func)
+    def wrapper(runid, config, *args, **kwargs):
+        authorize(runid, config)
+        with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
+            try:
+                with rq_submission_lock(
+                    redis_conn,
+                    f"{runid}:weppcloudr-render:request",
+                    lifecycle_key=runid,
+                ):
+                    return func(runid, config, *args, **kwargs)
+            except RqSubmissionConflict as exc:
+                return exception_factory(str(exc), runid=runid, status_code=409)
+    return wrapper
+
+
+def _run_render_process(cmd, runids):
+    process = Popen(cmd, stdout=PIPE, stderr=PIPE, start_new_session=True)
+    max_runtime = int(
+        current_app.config.get("WEPPCLOUDR_INTERACTIVE_MAX_RUNTIME", 600)
+        if has_app_context()
+        else 600
+    )
+    deadline = time.monotonic() + max(1, max_runtime)
+    while True:
+        try:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutExpired(cmd, max_runtime)
+            output, errors = process.communicate(timeout=min(10, remaining))
+            break
+        except TimeoutExpired:
+            if time.monotonic() >= deadline:
+                os.killpg(process.pid, signal.SIGTERM)
+                try:
+                    process.communicate(timeout=5)
+                except TimeoutExpired:
+                    os.killpg(process.pid, signal.SIGKILL)
+                    process.communicate()
+                raise RuntimeError("Interactive render exceeded its time limit")
+            try:
+                for runid in runids:
+                    checkpoint_run_lifecycle(runid)
+            except RqSubmissionConflict:
+                os.killpg(process.pid, signal.SIGTERM)
+                try:
+                    process.communicate(timeout=5)
+                except TimeoutExpired:
+                    os.killpg(process.pid, signal.SIGKILL)
+                    process.communicate()
+                raise
+    for runid in runids:
+        checkpoint_run_lifecycle(runid)
+    return output, errors
+
 @weppcloudr_bp.route('/runs/<string:runid>/<config>/viz/<r_format>/<routine>')
 @weppcloudr_bp.route('/runs/<string:runid>/<config>/viz/<r_format>/<routine>/')
+@_fence_public_run_mutation
 def viz_r(runid, config, r_format, routine):
     from wepppy.weppcloud.app import get_run_owners
 
@@ -101,10 +195,9 @@ def viz_r(runid, config, r_format, routine):
         elif r_format.lower() == "rmd":
             rscript = _join(VIZ_RMARKDOWN_DIR, f'{routine}.Rmd')
             assert _exists(rscript)
-            cmd = ['R', '-e', f'library("rmarkdown"); rmarkdown::render("{rscript}", params=list(proj_runid="{runid}"), output_file="{routine}.htm", output_dir="{viz_export_dir}")']
+            cmd = _viz_rmd_command(rscript, runid, routine, viz_export_dir)
 
-        p = Popen(cmd, stdout=PIPE, stderr=PIPE)
-        output, errors = p.communicate()
+        output, errors = _run_render_process(cmd, (runid,))
         with open(_join(viz_export_dir, f'{routine}.stdout'), 'w') as fp:
             fp.write(output.decode('utf-8'))
         with open(_join(viz_export_dir, f'{routine}.stderr'), 'w') as fp:
@@ -183,6 +276,7 @@ def _parse_proxy_runids(values: list[str]) -> list[str]:
 
 @weppcloudr_bp.route('/runs/<string:runid>/<config>/WEPPcloudR/<routine>')
 @weppcloudr_bp.route('/runs/<string:runid>/<config>/WEPPcloudR/<routine>/')
+@_fence_public_run_mutation
 def weppcloudr(runid, config, routine):
     from wepppy.weppcloud.app import get_run_owners
 
@@ -263,8 +357,7 @@ def weppcloudr_runner(runid, config, routine, user, ctx: Optional[RunContext] = 
                     viz_export_dir,
                 ]
 
-            p = Popen(cmd, stdout=PIPE, stderr=PIPE)
-            output, errors = p.communicate()
+            output, errors = _run_render_process(cmd, (runid,))
             output = output.decode('utf-8')
             errors = errors.decode('utf-8')
             with open(_join(viz_export_dir, f'{routine}.stdout'), 'w') as fp:
@@ -302,16 +395,20 @@ def weppcloudr_runner(runid, config, routine, user, ctx: Optional[RunContext] = 
         return exception_factory('Error running script')
 
 
-def _ensure_interchange(ctx: RunContext) -> None:
+def _ensure_interchange(ctx: RunContext, runid: str) -> None:
     wd = str(ctx.active_root)
     try:
-        activate_query_engine(wd, run_interchange=True)
+        activate_query_engine(
+            wd,
+            run_interchange=True,
+            mutation_checkpoint=lambda: checkpoint_run_lifecycle(runid),
+        )
     except Exception:  # broad-except: boundary contract
         current_app.logger.exception("Interchange activation failed for %s", wd)
         raise
 
 
-ACTIVE_JOB_STATUSES = {'queued', 'started', 'deferred', 'scheduled'}
+ACTIVE_JOB_STATUSES = {'queued', 'started', 'scheduled'}
 
 
 def _deval_output_path(ctx: RunContext, runid: str) -> Path:
@@ -362,8 +459,19 @@ def _lookup_job_status(
         f"{render_deval_details_rq.__name__}"
     )
     args = tuple(job.args or ())
+    backend = current_app.config.get(
+        'WEPPCLOUDR_EXECUTION_BACKEND',
+        os.getenv('WEPPCLOUDR_EXECUTION_BACKEND', 'docker-exec'),
+    ) if has_app_context() else os.getenv('WEPPCLOUDR_EXECUTION_BACKEND', 'docker-exec')
+    expected_origin = (
+        (current_app.config.get('WEPPCLOUDR_K8S_QUEUE') if has_app_context() else None)
+        or os.getenv('WEPPCLOUDR_K8S_QUEUE', 'weppcloudr')
+        if backend == 'kubernetes-job'
+        else 'default'
+    )
     if (
         job.func_name != expected_func
+        or str(getattr(job, 'origin', 'default')) != str(expected_origin)
         or len(args) < 3
         or args[:3] != (runid, config, str(active_root))
     ):
@@ -392,19 +500,18 @@ def _enqueue_deval_job(
 ) -> tuple[str, str]:
     job_key = _deval_job_key(ctx)
     prep = _resolve_prep(ctx)
+    if prep is None:
+        raise RuntimeError("DEVAL submission receipt storage is unavailable")
     conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
 
-    with redis.Redis(**conn_kwargs) as redis_conn:
+    with redis.Redis(**conn_kwargs) as redis_conn, rq_submission_lock(
+        redis_conn, f"{runid}:deval:request", lifecycle_key=runid
+    ) as lease:
         existing_job_id: Optional[str] = None
         existing_status: Optional[str] = None
 
         if prep:
-            try:
-                existing_job_id = prep.get_rq_job_id(job_key)
-            except Exception:  # broad-except: boundary contract
-                # Boundary catch: preserve contract behavior while logging unexpected failures.
-                __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/weppcloudr.py:354", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
-                existing_job_id = None
+            existing_job_id = prep.get_rq_job_id(job_key)
 
         if existing_job_id:
             existing_status = _lookup_job_status(
@@ -416,9 +523,6 @@ def _enqueue_deval_job(
             )
             if existing_status in ACTIVE_JOB_STATUSES:
                 return existing_job_id, existing_status
-            if prep:
-                _clear_tracked_job(prep, job_key)
-
         backend = current_app.config.get(
             'WEPPCLOUDR_EXECUTION_BACKEND',
             os.getenv('WEPPCLOUDR_EXECUTION_BACKEND', 'docker-exec'),
@@ -489,9 +593,9 @@ def _enqueue_deval_job(
             if backend == 'kubernetes-job'
             else Queue(connection=redis_conn)
         )
-        enqueue_options = {}
+        job_id = new_rq_job_id()
+        enqueue_options = {'job_id': job_id}
         if backend == 'kubernetes-job':
-            job_id = new_rq_job_id()
             request_snapshot = RenderRequest(
                 schema_version=1,
                 rq_job_id=job_id,
@@ -514,6 +618,28 @@ def _enqueue_deval_job(
                     'cancel_requested': False,
                 },
             }
+        if prep:
+            prepare_redisprep_job_id(
+                prep,
+                job_key=job_key,
+                replacement_job_id=job_id,
+                connection=redis_conn,
+                runid=runid,
+                expected_root_module=render_deval_details_rq.__module__,
+                expected_root_func_name=(
+                    f"{render_deval_details_rq.__module__}.{render_deval_details_rq.__qualname__}"
+                ),
+                allowed_origins=(str(queue.name),),
+                association=lambda candidate: (
+                    str(candidate.func_name)
+                    == f"{render_deval_details_rq.__module__}.{render_deval_details_rq.__qualname__}"
+                    and str(candidate.origin) == str(queue.name)
+                    and tuple(candidate.args or ())
+                    == (runid, config, str(ctx.active_root))
+                ),
+                lease_checkpoint=lease.checkpoint,
+            )
+        lease.checkpoint()
         job = queue.enqueue_call(
             func=render_deval_details_rq,
             args=(runid, config, str(ctx.active_root)),
@@ -523,15 +649,6 @@ def _enqueue_deval_job(
             description=f"Render Deval-In-The-Details report for {runid}/{config}",
             **enqueue_options,
         )
-
-        if prep:
-            try:
-                prep.set_rq_job_id(job_key, job.id)
-            except Exception:  # broad-except: boundary contract
-                # Boundary catch: preserve contract behavior while logging unexpected failures.
-                __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/weppcloudr.py:388", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
-                # Persisting job metadata is best-effort.
-                pass
 
         return job.id, 'queued'
 
@@ -568,8 +685,6 @@ def _determine_job(
                 ctx.active_root,
             )
             if job_status in {'foreign', 'not_found'}:
-                if prep:
-                    _clear_tracked_job(prep, job_key)
                 job_id = None
                 job_status = None
         else:
@@ -591,9 +706,6 @@ def _determine_job(
         # No cached file; ensure a job is enqueued.
         if job_id and job_status in ACTIVE_JOB_STATUSES:
             return job_id, job_status
-
-        if job_id and job_status not in ACTIVE_JOB_STATUSES and prep:
-            _clear_tracked_job(prep, job_key)
 
         return _enqueue_deval_job(ctx, runid, config, skip_cache=skip_cache)
 
@@ -638,11 +750,14 @@ def _serve_deval_file(path: Path, active_root: Path) -> Response:
 @weppcloudr_bp.route('/runs/<string:runid>/<config>/report/deval_details')
 @weppcloudr_bp.route('/runs/<string:runid>/<config>/report/deval_details/')
 @requires_cap(gate_reason="Complete verification to view report details.")
+@authorize_and_handle_with_exception_factory
+@run_lifecycle_mutation
 def deval_details(runid, config):
     authorize(runid, config)
     ctx = load_run_context(runid, config)
     try:
-        _ensure_interchange(ctx)
+        checkpoint_run_lifecycle(runid)
+        _ensure_interchange(ctx, runid)
     except Exception:  # broad-except: boundary contract
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/weppcloudr.py:461", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
@@ -680,8 +795,34 @@ def deval_details(runid, config):
     return response
 
 
+def _fence_proxy_run_mutations(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            runids = _parse_proxy_runids(request.args.getlist('runids'))
+            for runid in runids:
+                authorize(runid, '__weppcloudr_proxy__')
+            with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn, ExitStack() as stack:
+                for runid in sorted(runids):
+                    stack.enter_context(
+                        rq_submission_lock(
+                            redis_conn,
+                            f"{runid}:weppcloudr-proxy:request",
+                            lifecycle_key=runid,
+                        )
+                    )
+                return func(*args, **kwargs)
+        except ValueError as exc:
+            return exception_factory(str(exc), status_code=400)
+        except RqSubmissionConflict as exc:
+            return exception_factory(str(exc), status_code=409)
+
+    return wrapper
+
+
 @weppcloudr_bp.route('/WEPPcloudR/proxy/<routine>', methods=['GET', 'POST'])
 @weppcloudr_bp.route('/WEPPcloudR/proxy/<routine>/', methods=['GET', 'POST'])
+@_fence_proxy_run_mutations
 def weppcloudr_proxy(routine):
     if not current_user.is_authenticated:
         abort(401, description="Authentication required")
@@ -691,9 +832,6 @@ def weppcloudr_proxy(routine):
         runids = _parse_proxy_runids(runids_raw)
     except ValueError as exc:
         abort(400, description=str(exc))
-
-    for runid in runids:
-        authorize(runid, '__weppcloudr_proxy__')
 
     from wepppy.weppcloud.app import user_datastore
     if not current_user.roles:
@@ -736,6 +874,8 @@ def weppcloudr_proxy(routine):
 
     wd = get_wd(runids[0]) 
     viz_export_dir = _join(wd, 'export/WEPPcloudR')
+    for runid in runids:
+        checkpoint_run_lifecycle(runid)
     if not _exists(viz_export_dir):
         os.mkdir(viz_export_dir)
         
@@ -763,8 +903,7 @@ def weppcloudr_proxy(routine):
                 viz_export_dir,
             ]
 
-        p = Popen(cmd, stdout=PIPE, stderr=PIPE)
-        output, errors = p.communicate()
+        output, errors = _run_render_process(cmd, runids)
         with open(_join(viz_export_dir, f'{routine}.stdout'), 'w') as fp:
             fp.write(output.decode('utf-8'))
         with open(_join(viz_export_dir, f'{routine}.stderr'), 'w') as fp:

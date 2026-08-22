@@ -28,6 +28,9 @@ from wepppy.rq.geneva_rq import (
     run_geneva_prepare_hrus_rq,
     run_geneva_run_batch_rq,
 )
+from wepppy.rq.job_dependencies import reconcile_deferred_workflow
+from wepppy.rq.job_id import new_rq_job_id
+from wepppy.rq.submission_recovery import rq_submission_lock
 from wepppy.weppcloud.utils.helpers import authorize_and_handle_with_exception_factory, url_for_run
 
 from .._common import (
@@ -220,16 +223,46 @@ def _enqueue_geneva_job(
     geneva: Geneva,
     queued_status_message: str,
 ) -> dict[str, str]:
-    with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
+    with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn, rq_submission_lock(
+        redis_conn, f"{runid}:geneva", lifecycle_key=runid
+    ) as lease:
+        active_job_id = geneva.state_payload().get("active_job_id")
+        if active_job_id:
+            result = reconcile_deferred_workflow(
+                str(active_job_id),
+                connection=redis_conn,
+                association=lambda candidate: (
+                    tuple(candidate.args or ())[:2] == (runid, config)
+                    and str(candidate.origin) == "default"
+                    and str(candidate.func_name) in {
+                        f"{func.__module__}.{func.__qualname__}"
+                        for func in (
+                            run_geneva_prepare_hrus_rq,
+                            run_geneva_build_frequency_panel_rq,
+                            run_geneva_run_batch_rq,
+                        )
+                    }
+                ),
+                lease_checkpoint=lease.checkpoint,
+            )
+            if result.state in {"active", "mismatch"}:
+                raise GenevaNoDbError(
+                    "A Geneva job is already active.",
+                    code="geneva_job_active",
+                    status_code=409,
+                )
         queue = Queue(connection=redis_conn)
+        job_id = new_rq_job_id()
+        geneva.mark_job_queued(job_id, status_message=queued_status_message)
+        lease.checkpoint()
         job = queue.enqueue_call(
             func=func,
             args=(runid, config, dict(payload)),
             timeout=GENEVA_RQ_TIMEOUT,
+            job_id=job_id,
         )
 
     job_id = str(job.id)
-    geneva.mark_job_queued(job_id, status_message=queued_status_message)
     return {
         "job_id": job_id,
         "status_url": f"/rq-engine/api/jobstatus/{job_id}",

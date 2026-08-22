@@ -120,6 +120,27 @@ describe("DEVAL loading inline contract", () => {
         );
     });
 
+    test("initial deferred status exposes retry without polling", async () => {
+        window.eval(inlineScript({ initialStatus: "deferred" }));
+        await jest.advanceTimersByTimeAsync(2400);
+
+        expect(window.fetch).not.toHaveBeenCalled();
+        expect(document.querySelector("#statusChip").dataset.state).toBe("deferred");
+        expect(document.querySelector("#errorPanel").hidden).toBe(false);
+    });
+
+    test("transition to deferred stops polling even when status repeats", async () => {
+        window.fetch.mockResolvedValue(jsonResponse({ status: "deferred" }));
+
+        window.eval(inlineScript({ initialStatus: "started" }));
+        await jest.advanceTimersByTimeAsync(800);
+        await jest.advanceTimersByTimeAsync(2400);
+
+        expect(window.fetch).toHaveBeenCalledTimes(1);
+        expect(document.querySelector("#statusChip").dataset.state).toBe("deferred");
+        expect(document.querySelector("#errorPanel").hidden).toBe(false);
+    });
+
     test("backs off 429 responses and stops after bounded ordinary errors", async () => {
         window.fetch
             .mockResolvedValueOnce(

@@ -18,6 +18,12 @@
   a permanent run lockout. All normal, watershed, prep-only, and no-prep WEPP
   entry points share this per-run guard.
 - **RedisPrep integration.** Project-scoped tasks update `RedisPrep` timestamps (`TaskEnum.*`) to keep the progress bars in sync with what actually ran. New tasks must cooperate with these timestamps to avoid double-running expensive steps.
+- **Deferred retry admission.** Controller submissions treat a recorded
+  `deferred` receipt as superseded rather than active. Admission verifies the
+  run and workflow lineage, cancels and detaches the complete deferred graph in
+  a watched Redis transaction, saves a preallocated replacement receipt, and
+  then enqueues that exact ID. Queued, started, and scheduled work still blocks
+  overlapping submission.
 - **Timeouts & observability.** Most jobs share a 12-hour timeout (43 200 s) to accommodate large WEPP runs. Modules fall back to deterministic logging (`cligen.log`, `render_deval_*.stderr`, etc.) so operators can debug failures outside of Redis.
 
 ## Module Guide

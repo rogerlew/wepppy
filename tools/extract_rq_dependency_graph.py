@@ -21,7 +21,7 @@ SOURCE_GLOBS: tuple[str, ...] = (
     "wepppy/weppcloud/bootstrap/*.py",
 )
 ENQUEUE_METHODS = {"create_job", "enqueue", "enqueue_call"}
-ENQUEUE_WRAPPER_FUNCTIONS = {"_enqueue", "enqueue_log_complete"}
+ENQUEUE_WRAPPER_FUNCTIONS = {"_enqueue", "enqueue_log_complete", "enqueue_tracked_rq_job"}
 _JOBS_STAGE_RE = re.compile(r"jobs:([^,]+)")
 
 
@@ -323,6 +323,16 @@ def _extract_enqueue_event_data(call: ast.Call) -> dict[str, Any] | None:
             "depends_on_expr": _keyword_value(call, "depends_on"),
             "method": "enqueue_log_complete_wrapper",
             "job_meta_stage": "jobs:6",
+        }
+    if function_name == "enqueue_tracked_rq_job":
+        target_expr = call.args[1] if len(call.args) > 1 else _keyword_value(call, "func")
+        return {
+            "queue_ref": _queue_ref_from_enqueue_wrapper(call),
+            "queue_name_expr": None,
+            "target_expr": target_expr,
+            "depends_on_expr": None,
+            "method": "tracked_enqueue_wrapper",
+            "job_meta_stage": None,
         }
 
     if not isinstance(call.func, ast.Attribute) or call.func.attr not in ENQUEUE_METHODS:

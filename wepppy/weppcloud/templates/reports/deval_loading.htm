@@ -36,8 +36,7 @@
       <strong>Rendering failed.</strong>
       <div id="errorMessage"></div>
       <p>
-        Retry from the run summary by selecting “Deval in the Details” again,
-        or force a rebuild with the <code>?no-cache=1</code> query parameter.
+        <a id="retryLink" class="pure-button pure-button-primary" href="{{ refresh_url }}">Retry render</a>
       </p>
     </div>
   </div>
@@ -57,9 +56,9 @@
   const initialStatus = {{ job_status|tojson }};
   const jobStatusPrimaryUrl = jobId ? `/rq-engine/api/jobstatus/${encodeURIComponent(jobId)}` : null;
   const refreshUrl = {{ refresh_url|tojson }};
-  const ACTIVE_STATES = new Set(["queued", "started", "deferred", "scheduled"]);
+  const ACTIVE_STATES = new Set(["queued", "started", "scheduled"]);
   const SUCCESS_STATES = new Set(["finished"]);
-  const FAILURE_STATES = new Set(["failed", "stopped", "canceled"]);
+  const FAILURE_STATES = new Set(["failed", "stopped", "canceled", "deferred"]);
   const statusChip = document.getElementById("statusChip");
   const errorPanel = document.getElementById("errorPanel");
   const errorMessage = document.getElementById("errorMessage");
@@ -219,17 +218,8 @@
         handleFailure("failed", "Response was missing job status.");
         return;
       }
-      if (state === lastState) {
-        scheduleNextPoll();
-        return;
-      }
-      lastState = state;
-      if (ACTIVE_STATES.has(state)) {
-        handleActive(state);
-        scheduleNextPoll();
-        return;
-      }
       if (FAILURE_STATES.has(state)) {
+        lastState = state;
         handleFailure(state, failureMessage(payload));
         if (pollTimer) {
           window.clearTimeout(pollTimer);
@@ -238,11 +228,22 @@
         return;
       }
       if (SUCCESS_STATES.has(state)) {
+        lastState = state;
         handleSuccess();
         if (pollTimer) {
           window.clearTimeout(pollTimer);
           pollTimer = null;
         }
+        return;
+      }
+      if (state === lastState) {
+        scheduleNextPoll();
+        return;
+      }
+      lastState = state;
+      if (ACTIVE_STATES.has(state)) {
+        handleActive(state);
+        scheduleNextPoll();
         return;
       }
       handleFailure("failed", `Unexpected job status: ${state}`);

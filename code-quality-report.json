@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-08-21T19:47:43Z",
+  "generated_at_utc": "2026-08-22T07:12:44Z",
   "mode": "observe-only",
   "base_ref": "origin/master",
   "thresholds": {
@@ -37,21 +37,21 @@
   },
   "overall": {
     "python_prod_file_sloc": {
-      "count": 957.0,
-      "p50": 126.0,
-      "p75": 308.0,
-      "p90": 679.4,
-      "p95": 983.4,
-      "p99": 2051.64,
+      "count": 959.0,
+      "p50": 127.0,
+      "p75": 315.0,
+      "p90": 680.8,
+      "p95": 989.8,
+      "p99": 2050.02,
       "max": 5697.0
     },
     "python_prod_max_function_len": {
-      "count": 775.0,
-      "p50": 59.0,
-      "p75": 109.0,
+      "count": 777.0,
+      "p50": 60.0,
+      "p75": 110.0,
       "p90": 182.0,
-      "p95": 241.3,
-      "p99": 378.78,
+      "p95": 241.2,
+      "p99": 378.72,
       "max": 2126.0
     },
     "python_prod_max_cc": {
@@ -283,7 +283,7 @@
       },
       {
         "path": "wepppy/weppcloud/controllers_js/control_base.js",
-        "value": 1727.0
+        "value": 1730.0
       },
       {
         "path": "wepppy/weppcloud/controllers_js/subcatchment_delineation.js",

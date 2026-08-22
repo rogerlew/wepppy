@@ -89,7 +89,12 @@ def path_ce_client(
 
     # no active prior job by default (dedup guard passes)
     monkeypatch.setattr(
-        path_ce_module, "RedisPrep", SimpleNamespace(tryGetInstance=lambda wd: None)
+        path_ce_module,
+        "RedisPrep",
+        SimpleNamespace(
+            tryGetInstance=lambda wd: None,
+            getInstance=rq_environment.redis_prep_class.getInstance,
+        ),
     )
 
     with app.test_client() as client:
@@ -231,11 +236,13 @@ def test_run_enqueues_job(path_ce_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["job_id"] == "job-321"
+    job_id = payload["job_id"]
 
     queue_call = rq_environment.recorder.queue_calls[0]
     assert queue_call.func is path_ce_module.run_path_cost_effective_rq
     assert queue_call.args == (RUN_ID,)
+    assert queue_call.job.id == job_id
+    assert rq_environment.redis_prep_class.getInstance(run_dir).job_ids["run_path_ce"] == job_id
 
 
 def test_run_persists_config_before_enqueue(path_ce_client):

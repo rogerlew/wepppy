@@ -12,20 +12,30 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from rq import Queue
 from rq.exceptions import NoSuchJobError
-from rq.job import Job
+from rq.job import Job, JobStatus
 from rq.registry import DeferredJobRegistry, FailedJobRegistry, FinishedJobRegistry, StartedJobRegistry
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.status_messenger import StatusMessenger
 from wepppy.rq.migrations_rq import migrations_rq
 from wepppy.rq.run_sync_rq import DEFAULT_TARGET_ROOT, STATUS_CHANNEL_SUFFIX, run_sync_rq
+from wepppy.rq.auth_actor import current_auth_actor
+from wepppy.observability.correlation import current_correlation_id, normalize_correlation_id
 
 from .auth import AuthError, require_jwt, require_roles
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
 from wepppy.rq.job_dependencies import (
     failure_tolerant_depends_on,
+    reconcile_deferred_workflow,
     release_deferred_job_if_ready,
+)
+from wepppy.rq.job_id import new_rq_job_id
+from wepppy.rq.submission_recovery import (
+    RqSubmissionConflict,
+    RqEnqueueVerificationError,
+    recover_committed_enqueue,
+    rq_submission_lock,
 )
 
 logger = logging.getLogger(__name__)
@@ -37,6 +47,8 @@ MIGRATIONS_TIMEOUT = int(os.getenv("RQ_ENGINE_MIGRATIONS_TIMEOUT", "7200"))
 SOURCE_RUN_TOKEN_TTL = int(os.getenv("RQ_ENGINE_SOURCE_RUN_TOKEN_TTL", "86400"))
 SOURCE_RUN_TOKEN_KEY_PREFIX = "rq:run-sync:source-token"
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
+RUN_SYNC_RECEIPT_KEY_PREFIX = "rq:run-sync:receipt"
+MIGRATION_SYNC_RECEIPT_KEY_PREFIX = "rq:migration-sync:receipt"
 
 
 @contextmanager
@@ -203,50 +215,151 @@ async def run_sync(request: Request) -> JSONResponse:
 
     try:
         with _redis_conn() as redis_conn:
-            queue = Queue(connection=redis_conn)
-            source_run_token_key = _store_source_run_token(redis_conn, source_run_token)
-            meta = {"source_run_token_key": source_run_token_key} if source_run_token_key else None
+            with rq_submission_lock(redis_conn, f"{runid}:migration-sync", lifecycle_key=runid) as lease:
+                queue = Queue(connection=redis_conn)
+                receipt_key = f"{RUN_SYNC_RECEIPT_KEY_PREFIX}:{runid}"
+                shared_receipt_key = f"{MIGRATION_SYNC_RECEIPT_KEY_PREFIX}:{runid}"
+                prior_job_ids = [
+                    redis_conn.get(shared_receipt_key),
+                    redis_conn.get(receipt_key),
+                ]
+                for prior_job_id in dict.fromkeys(prior_job_ids):
+                    if isinstance(prior_job_id, bytes):
+                        prior_job_id = prior_job_id.decode("utf-8")
+                    if not prior_job_id:
+                        continue
+                    result = reconcile_deferred_workflow(
+                        str(prior_job_id),
+                        connection=redis_conn,
+                        association=lambda candidate: (
+                            (
+                                str(getattr(candidate, "func_name", ""))
+                                == f"{run_sync_rq.__module__}.{run_sync_rq.__qualname__}"
+                                and tuple(candidate.args or ())[:1] == (runid,)
+                            )
+                            or (
+                                str(getattr(candidate, "func_name", ""))
+                                == f"{migrations_rq.__module__}.{migrations_rq.__qualname__}"
+                                and len(tuple(candidate.args or ())) > 1
+                                and tuple(candidate.args or ())[1] == runid
+                            )
+                        )
+                        and str(candidate.origin) == str(queue.name),
+                        lease_checkpoint=lease.checkpoint,
+                    )
+                    if result.state in {"active", "mismatch"}:
+                        raise RqSubmissionConflict("A run sync job is already active.")
+                    lease.checkpoint()
 
-            try:
-                sync_job = queue.enqueue_call(
-                    run_sync_rq,
-                    (runid, source_host, owner_email, target_root, config),
-                    timeout=RUN_SYNC_TIMEOUT,
-                    meta=meta,
-                )
-            except Exception:
-                _cleanup_source_run_token(redis_conn, source_run_token_key)
-                raise
+                sync_job_id = new_rq_job_id()
+                redis_conn.set(receipt_key, sync_job_id)
+                redis_conn.set(shared_receipt_key, sync_job_id)
+                lease.checkpoint()
+                source_run_token_key = _store_source_run_token(redis_conn, source_run_token)
+                meta = {"runid": runid}
+                auth_actor = current_auth_actor()
+                if auth_actor is not None:
+                    meta["auth_actor"] = auth_actor
+                correlation_id = normalize_correlation_id(current_correlation_id())
+                if correlation_id is not None:
+                    meta["correlation_id"] = correlation_id
+                if source_run_token_key:
+                    meta["source_run_token_key"] = source_run_token_key
 
-            jobs_info: Dict[str, Any] = {
-                "sync_job_id": sync_job.id,
-                "job_id": sync_job.id,
-            }
-            job_ids = [sync_job.id]
+                try:
+                    if run_migrations:
+                        sync_job = queue.create_job(
+                            run_sync_rq,
+                            (runid, source_host, owner_email, target_root, config),
+                            timeout=RUN_SYNC_TIMEOUT,
+                            meta=meta,
+                            job_id=sync_job_id,
+                        )
+                    else:
+                        sync_job = queue.enqueue_call(
+                            run_sync_rq,
+                            (runid, source_host, owner_email, target_root, config),
+                            timeout=RUN_SYNC_TIMEOUT,
+                            meta=meta,
+                            job_id=sync_job_id,
+                        )
+                except redis.RedisError:
+                    sync_job = recover_committed_enqueue(
+                        redis_conn, sync_job_id, func=run_sync_rq,
+                        runid=runid, origin=str(queue.name),
+                        args=(runid, source_host, owner_email, target_root, config),
+                    )
+                    if sync_job is None:
+                        _cleanup_source_run_token(redis_conn, source_run_token_key)
+                        raise
+                except RqEnqueueVerificationError:
+                    raise
+                except Exception:
+                    _cleanup_source_run_token(redis_conn, source_run_token_key)
+                    raise
 
-            if run_migrations:
-                prefix = str(runid)[:2].lower()
-                wd = f"{target_root}/{prefix}/{runid}"
+                jobs_info: Dict[str, Any] = {
+                    "sync_job_id": sync_job.id,
+                    "job_id": sync_job.id,
+                }
+                job_ids = [sync_job.id]
 
-                migration_job = queue.enqueue_call(
-                    migrations_rq,
-                    (wd, runid),
-                    {"archive_before": archive_before},
-                    timeout=MIGRATIONS_TIMEOUT,
-                    depends_on=failure_tolerant_depends_on(sync_job),
-                )
-                release_deferred_job_if_ready(queue, migration_job)
-                jobs_info["migration_job_id"] = migration_job.id
-                job_ids.append(migration_job.id)
-                jobs_info["job_ids"] = job_ids
+                if run_migrations:
+                    prefix = str(runid)[:2].lower()
+                    wd = f"{target_root}/{prefix}/{runid}"
+                    migration_job = queue.create_job(
+                        migrations_rq,
+                        (wd, runid),
+                        {"archive_before": archive_before},
+                        timeout=MIGRATIONS_TIMEOUT,
+                        depends_on=failure_tolerant_depends_on(sync_job),
+                        meta=meta,
+                        job_id=new_rq_job_id(),
+                        status=JobStatus.DEFERRED,
+                    )
+                    pipeline = redis_conn.pipeline()
+                    queue._enqueue_job(sync_job, pipeline=pipeline)
+                    migration_job.save(pipeline=pipeline)
+                    migration_job.register_dependency(pipeline=pipeline)
+                    try:
+                        pipeline.execute()
+                    except redis.RedisError:
+                        committed_sync = recover_committed_enqueue(
+                            redis_conn, sync_job.id, func=run_sync_rq,
+                            runid=runid, origin=str(queue.name),
+                            args=(runid, source_host, owner_email, target_root, config),
+                        )
+                        committed_migration = recover_committed_enqueue(
+                            redis_conn, migration_job.id, func=migrations_rq,
+                            runid=runid, origin=str(queue.name), run_arg_index=1,
+                            args=(wd, runid), kwargs={"archive_before": archive_before},
+                        )
+                        if committed_sync is None or committed_migration is None:
+                            _cleanup_source_run_token(redis_conn, source_run_token_key)
+                            raise
+                        sync_job = committed_sync
+                        migration_job = committed_migration
+                    except RqEnqueueVerificationError:
+                        raise
+                    except Exception:
+                        _cleanup_source_run_token(redis_conn, source_run_token_key)
+                        raise
+                    jobs_info["migration_job_id"] = migration_job.id
+                    job_ids.append(migration_job.id)
+                    jobs_info["job_ids"] = job_ids
+    except RqSubmissionConflict as exc:
+        return error_response(str(exc), status_code=409, code="job_active")
     except Exception:
         logger.exception("rq-engine run-sync enqueue failed")
         return error_response_with_traceback("Failed to enqueue run sync job", status_code=500)
 
-    StatusMessenger.publish(
-        f"{runid}:{STATUS_CHANNEL_SUFFIX}",
-        f"rq:{sync_job.id} ENQUEUED run_sync_rq({runid})",
-    )
+    try:
+        StatusMessenger.publish(
+            f"{runid}:{STATUS_CHANNEL_SUFFIX}",
+            f"rq:{sync_job.id} ENQUEUED run_sync_rq({runid})",
+        )
+    except redis.RedisError:
+        logger.warning("Status publish failed after run-sync enqueue for %s", runid, exc_info=True)
 
     return JSONResponse(jobs_info)
 

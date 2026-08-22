@@ -255,6 +255,10 @@ class CulvertsRunner(NoDbBase):
             else:
                 self._rq_job_ids.pop(key, None)
 
+    def get_rq_job_id(self, key: str) -> Optional[str]:
+        value = (self._rq_job_ids or {}).get(key)
+        return str(value) if value else None
+
     def _select_stream_sources_for_run(
         self,
         *,

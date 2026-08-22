@@ -54,12 +54,30 @@ def make_redis_conn(recorder: RQRecorder, label: str = "redis-conn"):
     """Return a context manager stub that records entry/exit."""
 
     class _RedisConn:
-        def __enter__(self) -> str:
+        def __init__(self) -> None:
+            self.label = label
+
+        def __enter__(self) -> "_RedisConn":
             recorder.redis_entries.append("enter")
-            return label
+            return self
 
         def __exit__(self, exc_type, exc, tb) -> None:  # type: ignore[override]
             recorder.redis_entries.append("exit")
+
+        def lock(self, name: str, **kwargs: Any):
+            recorder.redis_entries.append(("lock", name, kwargs))
+
+            class _Lock:
+                def acquire(self, **kwargs: Any) -> bool:
+                    return True
+
+                def release(self) -> None:
+                    return None
+
+                def extend(self, additional_time: int, **kwargs: Any) -> bool:
+                    return True
+
+            return _Lock()
 
     return _RedisConn()
 
@@ -92,7 +110,7 @@ def make_queue(recorder: RQRecorder, *, default_job_id: str = "job-123"):
             timeout: Optional[int] = None,
             **options: Any,
         ) -> JobStub:
-            job_id = recorder.next_job_id(default_job_id)
+            job_id = options.get("job_id") or recorder.next_job_id(default_job_id)
             job = JobStub(job_id)
             call_kwargs: Dict[str, Any] = dict(options)
             # Mirror RQ: always carry the provided kwargs (can be None)

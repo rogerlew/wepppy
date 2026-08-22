@@ -20,10 +20,16 @@ from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.runtime_paths.errors import NoDirError
 from wepppy.runtime_paths.fs import resolve as _nodir_resolve
 from wepppy.rq.omni_rq import (
+    _compile_hillslope_summaries_rq,
+    _finalize_omni_scenarios_rq,
+    _finalize_omni_contrasts_rq,
     delete_omni_contrasts_rq,
+    run_omni_scenario_rq,
     run_omni_contrasts_rq,
+    run_omni_contrast_rq,
     run_omni_scenarios_rq,
 )
+from wepppy.rq.submission_recovery import RqSubmissionConflict, enqueue_tracked_rq_job
 from wepppy.rq.wepp_rq_stage_helpers import recover_mixed_nodir_roots as _recover_mixed_nodir_roots
 from wepppy.weppcloud.utils.helpers import get_wd
 
@@ -619,8 +625,23 @@ async def _run_omni(
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue("batch", connection=redis_conn)
-            job = q.enqueue_call(run_omni_scenarios_rq, (runid,), timeout=RQ_TIMEOUT)
-            prep.set_rq_job_id("run_omni_rq", job.id)
+            job = enqueue_tracked_rq_job(
+                q,
+                run_omni_scenarios_rq,
+                prep=prep,
+                job_key="run_omni_rq",
+                runid=runid,
+                args=(runid,),
+                timeout=RQ_TIMEOUT,
+                allowed_origins=("batch",),
+                allowed_workflow_funcs=(
+                    run_omni_scenario_rq,
+                    _compile_hillslope_summaries_rq,
+                    _finalize_omni_scenarios_rq,
+                ),
+            )
+    except RqSubmissionConflict as exc:
+        return error_response(str(exc), status_code=409, code="job_active")
     except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine run-omni enqueue failed")
         return error_response("Error Handling Request", status_code=500)
@@ -743,8 +764,24 @@ async def _run_omni_contrasts(
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue("batch", connection=redis_conn)
-            job = q.enqueue_call(run_omni_contrasts_rq, (runid,), timeout=RQ_TIMEOUT)
-            prep.set_rq_job_id("run_omni_contrasts_rq", job.id)
+            job = enqueue_tracked_rq_job(
+                q,
+                run_omni_contrasts_rq,
+                prep=prep,
+                job_key="run_omni_contrasts_rq",
+                runid=runid,
+                args=(runid,),
+                timeout=RQ_TIMEOUT,
+                conflict_keys=("run_omni_contrasts_rq", "delete_omni_contrasts_rq"),
+                allowed_origins=("batch",),
+                allowed_root_funcs=(run_omni_contrasts_rq, delete_omni_contrasts_rq),
+                allowed_workflow_funcs=(
+                    run_omni_contrast_rq,
+                    _finalize_omni_contrasts_rq,
+                ),
+            )
+    except RqSubmissionConflict as exc:
+        return error_response(str(exc), status_code=409, code="job_active")
     except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine run-omni-contrasts enqueue failed")
         return error_response("Error Handling Request", status_code=500)
@@ -879,9 +916,31 @@ async def _delete_omni_contrasts(runid: str, config: str) -> JSONResponse:
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue("batch", connection=redis_conn)
-            job = q.enqueue_call(delete_omni_contrasts_rq, (runid,), timeout=RQ_TIMEOUT)
             if prep is not None:
-                prep.set_rq_job_id("delete_omni_contrasts_rq", job.id)
+                job = enqueue_tracked_rq_job(
+                    q,
+                    delete_omni_contrasts_rq,
+                    prep=prep,
+                    job_key="delete_omni_contrasts_rq",
+                    runid=runid,
+                    args=(runid,),
+                    timeout=RQ_TIMEOUT,
+                    conflict_keys=("run_omni_contrasts_rq", "delete_omni_contrasts_rq"),
+                    allowed_origins=("batch",),
+                    allowed_root_funcs=(run_omni_contrasts_rq, delete_omni_contrasts_rq),
+                    allowed_workflow_funcs=(
+                        run_omni_contrast_rq,
+                        _finalize_omni_contrasts_rq,
+                    ),
+                )
+            else:
+                return error_response(
+                    "Run state is unavailable; no delete job was submitted.",
+                    status_code=404,
+                    code="run_not_found",
+                )
+    except RqSubmissionConflict as exc:
+        return error_response(str(exc), status_code=409, code="job_active")
     except Exception as exc:  # broad-except: boundary contract
         logger.exception("rq-engine delete-omni-contrasts enqueue failed")
         return error_response_with_traceback(f"Error deleting omni contrasts: {exc}")

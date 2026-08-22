@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 import os
 from typing import Any, Mapping
-from uuid import uuid4
 
 import redis
 from fastapi import APIRouter, Request, status
@@ -18,6 +17,13 @@ from wepppy.nodb.core.ron import Ron
 from wepppy.nodb.redis_prep import RedisPrep
 from wepppy.nodb.status_messenger import StatusMessenger
 from wepppy.rq.job_id import new_rq_job_id
+from wepppy.rq.job_dependencies import reconcile_deferred_workflow
+from wepppy.rq.submission_recovery import (
+    RqSubmissionConflict,
+    prepare_redisprep_job_id,
+    rq_submission_lock,
+)
+from wepppy.rq.run_sync_rq import run_sync_rq
 from wepppy.rq.migrations_rq import migrations_rq
 from wepppy.weppcloud.utils.helpers import get_run_owners_lazy, get_wd
 
@@ -30,7 +36,7 @@ router = APIRouter()
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
 MIGRATION_JOB_KEY = "migrations"
-MIGRATION_SUBMIT_LOCK_TTL_SECONDS = 30
+MIGRATION_SYNC_RECEIPT_KEY_PREFIX = "rq:migration-sync:receipt"
 
 
 class MigrationJobConflict(RuntimeError):
@@ -102,34 +108,73 @@ def _enqueue_migration_job(
     was_readonly: bool,
     prep: RedisPrep,
 ) -> Job:
-    submit_owner = f"{MIGRATION_JOB_KEY}:{uuid4().hex}"
-    submit_lock_key = f"migrations:submit_lock:{runid}"
-    with redis.Redis(
-        **redis_connection_kwargs(RedisDB.LOCK, decode_responses=True)
-    ) as lock_conn:
-        if not lock_conn.set(
-            submit_lock_key,
-            submit_owner,
-            nx=True,
-            ex=MIGRATION_SUBMIT_LOCK_TTL_SECONDS,
-        ):
-            raise MigrationJobConflict("Another migration submission is in progress")
+    with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
         try:
-            with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
-                existing_job_id = prep.get_rq_job_ids().get(MIGRATION_JOB_KEY)
-                if existing_job_id:
-                    try:
-                        existing_job = Job.fetch(existing_job_id, connection=redis_conn)
-                        status_value = existing_job.get_status(refresh=True)
-                    except (NoSuchJobError, OSError, redis.exceptions.RedisError):
-                        status_value = None
-                    if status_value in {"queued", "started", "deferred", "scheduled"}:
-                        raise MigrationJobConflict(
-                            "A migration job is already running for this project"
-                        )
-
+            with rq_submission_lock(redis_conn, f"{runid}:migration-sync", lifecycle_key=runid) as lease:
                 job_id = new_rq_job_id()
-                prep.set_rq_job_id(MIGRATION_JOB_KEY, job_id)
+                shared_receipt_key = f"{MIGRATION_SYNC_RECEIPT_KEY_PREFIX}:{runid}"
+                shared_job_id = redis_conn.get(shared_receipt_key)
+                if isinstance(shared_job_id, bytes):
+                    shared_job_id = shared_job_id.decode("utf-8")
+                if shared_job_id:
+                    result = reconcile_deferred_workflow(
+                        str(shared_job_id),
+                        connection=redis_conn,
+                        association=lambda candidate: (
+                            (
+                                str(candidate.func_name)
+                                == f"{migrations_rq.__module__}.{migrations_rq.__qualname__}"
+                                and len(tuple(candidate.args or ())) > 1
+                                and str(tuple(candidate.args or ())[1]) == runid
+                            )
+                            or (
+                                str(candidate.func_name)
+                                == f"{run_sync_rq.__module__}.{run_sync_rq.__qualname__}"
+                                and tuple(candidate.args or ())[:1] == (runid,)
+                            )
+                        )
+                        and str(candidate.origin) == "default",
+                        lease_checkpoint=lease.checkpoint,
+                    )
+                    if result.state in {"active", "mismatch"}:
+                        raise MigrationJobConflict(
+                            "A migration or run sync job is already running for this project"
+                        )
+                    lease.checkpoint()
+                try:
+                    prepare_redisprep_job_id(
+                        prep,
+                        job_key=MIGRATION_JOB_KEY,
+                        replacement_job_id=job_id,
+                        connection=redis_conn,
+                        runid=runid,
+                        expected_root_module=migrations_rq.__module__,
+                        expected_root_func_name=(
+                            f"{migrations_rq.__module__}.{migrations_rq.__qualname__}"
+                        ),
+                        root_run_arg_index=1,
+                        association=lambda candidate: (
+                            (
+                                str(candidate.func_name)
+                                == f"{migrations_rq.__module__}.{migrations_rq.__qualname__}"
+                                and len(tuple(candidate.args or ())) > 1
+                                and str(tuple(candidate.args or ())[1]) == runid
+                            )
+                            or (
+                                str(candidate.func_name)
+                                == f"{run_sync_rq.__module__}.{run_sync_rq.__qualname__}"
+                                and tuple(candidate.args or ())[:1] == (runid,)
+                            )
+                        )
+                        and str(candidate.origin) == "default",
+                        lease_checkpoint=lease.checkpoint,
+                    )
+                except RqSubmissionConflict as exc:
+                    raise MigrationJobConflict(
+                        "A migration job is already running for this project"
+                    ) from exc
+                redis_conn.set(shared_receipt_key, job_id)
+                lease.checkpoint()
                 queue = Queue(connection=redis_conn)
                 job = queue.enqueue_call(
                     func=migrations_rq,
@@ -140,18 +185,11 @@ def _enqueue_migration_job(
                     },
                     timeout=RQ_TIMEOUT,
                     job_id=job_id,
+                    meta={"runid": runid},
                 )
                 return job
-        finally:
-            try:
-                if lock_conn.get(submit_lock_key) == submit_owner:
-                    lock_conn.delete(submit_lock_key)
-            except redis.exceptions.RedisError:
-                logger.warning(
-                    "rq-engine migration submit lock release failed",
-                    exc_info=True,
-                    extra={"runid": runid},
-                )
+        except RqSubmissionConflict as exc:
+            raise MigrationJobConflict("Another migration submission is in progress") from exc
 
 
 @router.post("/runs/{runid}/{config}/migrate-run")
@@ -161,7 +199,7 @@ async def migrate_run(runid: str, config: str, request: Request) -> JSONResponse
         _ensure_run_access(claims, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine migrate-run auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
@@ -216,14 +254,14 @@ async def migrate_run(runid: str, config: str, request: Request) -> JSONResponse
             )
         except MigrationJobConflict as exc:
             return error_response(str(exc), status_code=409)
-        except Exception as exc:
+        except Exception as exc:  # broad-except: boundary contract
             # API boundary: enqueue failure must return canonical rq-engine error payload.
             logger.exception("rq-engine migrate-run enqueue failed", extra={"runid": runid, "config": config})
             return error_response_with_traceback(
                 f"Failed to enqueue migration job: {exc}",
                 status_code=500,
             )
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine migrate-run failed")
         return error_response_with_traceback("Failed to enqueue migration job")
 

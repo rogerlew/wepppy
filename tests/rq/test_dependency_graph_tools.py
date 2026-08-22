@@ -148,6 +148,36 @@ def orchestrate(runid):
     assert [edge["enqueue_target"] for edge in edges] == ["_prep_rq", "_run_rq"]
     assert [edge["job_meta_stage"] for edge in edges] == ["jobs:0", "jobs:1"]
     assert edges[1]["depends_on"] == ["_prep_rq"]
+
+
+def test_dependency_graph_extractor_handles_tracked_enqueue_wrapper(tmp_path: Path) -> None:
+    source_file = tmp_path / "wepppy" / "rq" / "sample_tracked.py"
+    source_file.parent.mkdir(parents=True)
+    source_file.write_text(
+        """
+from rq import Queue
+
+
+def orchestrate(runid):
+    queue = Queue("batch", connection=redis_conn)
+    job = enqueue_tracked_rq_job(
+        queue,
+        _run_rq,
+        prep=prep,
+        job_key="run",
+        runid=runid,
+        args=(runid,),
+    )
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    edges = extract_dependency_edges(repo_root=tmp_path, source_files=[source_file])
+
+    assert len(edges) == 1
+    assert edges[0]["enqueue_target"] == "_run_rq"
+    assert edges[0]["queue_name"] == "batch"
     assert all(edge["source_function"] == "orchestrate" for edge in edges)
 
 

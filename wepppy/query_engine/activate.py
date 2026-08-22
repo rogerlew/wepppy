@@ -7,7 +7,7 @@ import logging
 import os
 from datetime import datetime, timezone
 from pathlib import Path
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 
 from wepppy.runtime_paths.parquet_sidecars import list_existing_retired_root_resources
 
@@ -128,6 +128,7 @@ def activate_query_engine(
     *,
     run_interchange: bool = True,
     force_refresh: bool = False,
+    mutation_checkpoint: Callable[[], None] | None = None,
 ) -> dict[str, object]:
     """Scan a working directory and build the query-engine catalog.
 
@@ -144,6 +145,8 @@ def activate_query_engine(
         PermissionError: If the working directory is flagged read-only.
     """
 
+    checkpoint = mutation_checkpoint or (lambda: None)
+    checkpoint()
     base = Path(wd).expanduser().resolve()
     if not base.exists():
         raise FileNotFoundError(base)
@@ -168,6 +171,7 @@ def activate_query_engine(
     if readonly:
         _raise_if_readonly(base)
 
+    checkpoint()
     query_engine_dir.mkdir(exist_ok=True)
     cache_dir = query_engine_dir / "cache"
     cache_dir.mkdir(exist_ok=True)
@@ -201,14 +205,17 @@ def activate_query_engine(
                 base,
                 exc_info=True,
             )
+        checkpoint()
         _ensure_interchange(
             base,
             pass_family=pass_family,
             start_year=start_year,
             is_single_storm=is_single_storm,
         )
+        checkpoint()
 
     catalog_entries = _build_catalog(base)
+    checkpoint()
 
     catalog: dict[str, object] = {
         "version": 1,
@@ -218,6 +225,7 @@ def activate_query_engine(
     }
 
     catalog_path = query_engine_dir / "catalog.json"
+    checkpoint()
     catalog_path.write_text(json.dumps(catalog, indent=2, sort_keys=True), encoding="utf-8")
 
     return catalog

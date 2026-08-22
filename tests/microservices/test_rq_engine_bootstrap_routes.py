@@ -42,6 +42,7 @@ def _stub_auth(monkeypatch: pytest.MonkeyPatch, *, claims: dict | None = None) -
 
 
 def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-1") -> None:
+    monkeypatch.setattr(bootstrap_routes, "new_rq_job_id", lambda: job_id)
     class DummyJob:
         id = job_id
 
@@ -53,6 +54,13 @@ def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-1") -> No
             return DummyJob()
 
     class DummyRedis:
+        def lock(self, *args, **kwargs):
+            class Lock:
+                def acquire(self, **_kwargs): return True
+                def extend(self, *args, **kwargs): return True
+                def release(self): return None
+            return Lock()
+
         def __enter__(self):
             return self
 
@@ -61,8 +69,6 @@ def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-1") -> No
 
     monkeypatch.setattr(bootstrap_routes, "Queue", DummyQueue)
     monkeypatch.setattr(bootstrap_routes.redis, "Redis", lambda **kwargs: DummyRedis())
-    monkeypatch.setattr(bootstrap_routes, "acquire_wepp_submit_lock", lambda _runid, _owner: True)
-    monkeypatch.setattr(bootstrap_routes, "release_wepp_submit_lock", lambda _runid, _owner: None)
     monkeypatch.setattr(bootstrap_routes, "ensure_no_active_wepp_job", lambda _runid, _prep, _redis_conn: None)
 
 
@@ -72,6 +78,9 @@ def _stub_prep(monkeypatch: pytest.MonkeyPatch, tasks: list[TaskEnum]) -> None:
             tasks.append(task)
 
         def set_rq_job_id(self, *args, **kwargs) -> None:
+            return None
+
+        def get_rq_job_id(self, key):
             return None
 
     monkeypatch.setattr(bootstrap_routes.RedisPrep, "getInstance", lambda wd: DummyPrep())
@@ -1020,8 +1029,6 @@ def test_bootstrap_wepp_noprep_returns_409_when_singleflight_conflict(
 
     monkeypatch.setattr(bootstrap_routes.Wepp, "getInstance", lambda wd: _make_dummy_bootstrap_wepp())
     monkeypatch.setattr(bootstrap_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
-    monkeypatch.setattr(bootstrap_routes, "acquire_wepp_submit_lock", lambda _runid, _owner: True)
-    monkeypatch.setattr(bootstrap_routes, "release_wepp_submit_lock", lambda _runid, _owner: None)
     monkeypatch.setattr(
         bootstrap_routes,
         "ensure_no_active_wepp_job",
@@ -1057,14 +1064,22 @@ def test_bootstrap_wepp_noprep_returns_409_when_submit_lock_busy(
 
     monkeypatch.setattr(bootstrap_routes.Wepp, "getInstance", lambda wd: _make_dummy_bootstrap_wepp())
     monkeypatch.setattr(bootstrap_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
-    monkeypatch.setattr(bootstrap_routes, "acquire_wepp_submit_lock", lambda _runid, _owner: False)
+    monkeypatch.setattr(
+        bootstrap_routes,
+        "rq_submission_lock",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            bootstrap_routes.RqSubmissionConflict(
+                "Another submission is already in progress."
+            )
+        ),
+    )
 
     with TestClient(rq_engine.app) as client:
         response = client.post(endpoint, json={})
 
     assert response.status_code == 409
     payload = response.json()
-    assert "enqueue already in progress" in payload["error"]["message"]
+    assert "already in progress" in payload["error"]["message"]
 
 
 def test_bootstrap_noprep_release_lock_failure_after_enqueue_returns_job_id(
@@ -1078,11 +1093,6 @@ def test_bootstrap_noprep_release_lock_failure_after_enqueue_returns_job_id(
 
     monkeypatch.setattr(bootstrap_routes.Wepp, "getInstance", lambda wd: _make_dummy_bootstrap_wepp())
     monkeypatch.setattr(bootstrap_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
-    monkeypatch.setattr(
-        bootstrap_routes,
-        "release_wepp_submit_lock",
-        lambda _runid, _owner: (_ for _ in ()).throw(RuntimeError("release failed")),
-    )
 
     with TestClient(rq_engine.app) as client:
         response = client.post("/api/runs/run-1/cfg/run-wepp-npprep", json={})

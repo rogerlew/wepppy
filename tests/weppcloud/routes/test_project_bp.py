@@ -117,6 +117,7 @@ def project_client(
     env = rq_environment
     queue_cls = env.queue_class(default_job_id="job-123")
     monkeypatch.setattr(project_module, "Queue", queue_cls)
+    monkeypatch.setattr(project_module, "RedisPrep", env.redis_prep_class)
 
     redis_client_cls = env.redis_client_class()
     monkeypatch.setattr(project_module.redis, "Redis", redis_client_cls)
@@ -250,10 +251,15 @@ def test_set_readonly_enqueues_background_job(project_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload == {"Content": {"readonly": True, "job_id": "job-123"}}
+    job_id = payload["Content"]["job_id"]
+    assert payload == {"Content": {"readonly": True, "job_id": job_id}}
 
     assert dispatched["redis_db"] == project_module.RedisDB.RQ
-    client_entry = next(entry for entry in env.recorder.redis_entries if isinstance(entry, tuple))
+    client_entry = next(
+        entry
+        for entry in env.recorder.redis_entries
+        if isinstance(entry, tuple) and entry[1] == {"url": "redis://test"}
+    )
     assert client_entry[1] == {"url": "redis://test"}
     queue_connection = env.recorder.queue_connections[0]
     assert getattr(queue_connection, "kwargs", {}) == {"url": "redis://test"}
@@ -263,6 +269,8 @@ def test_set_readonly_enqueues_background_job(project_client):
     assert queue_call.func is project_rq.set_run_readonly_rq
     assert queue_call.args == (RUN_ID, True)
     assert queue_call.timeout == 42
+    assert queue_call.job.id == job_id
+    assert env.redis_prep_class.getInstance(project_client[3]).job_ids["set_readonly"] == job_id
 
 
 def test_delete_run_enqueues_exact_context_and_marks_ttl(
@@ -298,10 +306,10 @@ def test_delete_run_enqueues_exact_context_and_marks_ttl(
     response = client.post(f"/runs/{RUN_ID}/{CONFIG}/tasks/delete/")
 
     assert response.status_code == 200
-    assert response.get_json() == {"Content": {"job_id": "job-123"}}
+    queue_call = env.recorder.queue_calls[0]
+    assert response.get_json() == {"Content": {"job_id": queue_call.job.id}}
     assert cleanup_calls == [run_dir]
     assert mark_calls == [(run_dir, "queued", "delete_request")]
-    queue_call = env.recorder.queue_calls[0]
     assert queue_call.func is delete_worker
     assert queue_call.args == (RUN_ID, run_dir)
     assert queue_call.timeout == 42

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import os
-import time
 
 import redis
 from fastapi import APIRouter, Request
@@ -11,14 +10,15 @@ from rq import Queue
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+from wepppy.rq.job_id import new_rq_job_id
 from wepppy.rq.roads_rq import (
     RoadsSingleFlightConflict,
-    acquire_roads_submit_lock,
     ensure_no_active_roads_job,
-    release_roads_submit_lock,
+    reconcile_deferred_roads_jobs,
     run_roads_prepare_rq,
     run_roads_rq,
 )
+from wepppy.rq.submission_recovery import RqSubmissionConflict, rq_submission_lock
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
@@ -37,24 +37,32 @@ def _enqueue_roads_job(runid: str, *, func, prep_key: str) -> str:
     wd = get_wd(runid)
     prep = RedisPrep.getInstance(wd)
 
-    submit_owner = f"{prep_key}:{int(time.time() * 1000)}"
-    if not acquire_roads_submit_lock(runid, submit_owner):
-        raise RoadsSingleFlightConflict("Roads enqueue already in progress for this run.")
-
-    try:
-        with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
+    with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
+        try:
+            lock_context = rq_submission_lock(redis_conn, f"{runid}:roads", lifecycle_key=runid)
+            lease = lock_context.__enter__()
+        except RqSubmissionConflict as exc:
+            raise RoadsSingleFlightConflict(str(exc)) from exc
+        try:
+            reconcile_deferred_roads_jobs(
+                runid, prep, redis_conn, lease_checkpoint=lease.checkpoint
+            )
+            lease.checkpoint()
             ensure_no_active_roads_job(runid, prep, redis_conn)
             prep.remove_timestamp(TaskEnum.run_roads)
             queue = Queue(connection=redis_conn)
+            replacement_job_id = new_rq_job_id()
+            prep.set_rq_job_id(prep_key, replacement_job_id)
+            lease.checkpoint()
             job = queue.enqueue_call(
                 func,
                 (runid,),
                 timeout=RQ_TIMEOUT,
+                job_id=replacement_job_id,
             )
-            prep.set_rq_job_id(prep_key, job.id)
-        return str(job.id)
-    finally:
-        release_roads_submit_lock(runid, submit_owner)
+            return str(job.id)
+        finally:
+            lock_context.__exit__(None, None, None)
 
 
 @router.post(

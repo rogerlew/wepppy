@@ -16,6 +16,7 @@ def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "roads-job-1"):
+    monkeypatch.setattr(roads_routes, "new_rq_job_id", lambda: job_id)
     captured: dict[str, object] = {}
 
     class DummyJob:
@@ -31,6 +32,13 @@ def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "roads-job-1")
             return DummyJob()
 
     class DummyRedis:
+        def lock(self, *args, **kwargs):
+            class Lock:
+                def acquire(self, **_kwargs): return True
+                def extend(self, *args, **kwargs): return True
+                def release(self): return None
+            return Lock()
+
         def __enter__(self):
             return self
 
@@ -46,6 +54,9 @@ def _stub_prep(monkeypatch: pytest.MonkeyPatch):
     state = {"removed": [], "jobs": []}
 
     class DummyPrep:
+        def get_rq_job_id(self, key):
+            return None
+
         def remove_timestamp(self, task) -> None:
             state["removed"].append(task)
 
@@ -60,8 +71,6 @@ def test_prepare_roads_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch)
     captured = _stub_queue(monkeypatch, job_id="roads-prepare-7")
     prep_state = _stub_prep(monkeypatch)
-    monkeypatch.setattr(roads_routes, "acquire_roads_submit_lock", lambda _runid, _owner: True)
-    monkeypatch.setattr(roads_routes, "release_roads_submit_lock", lambda _runid, _owner: None)
     monkeypatch.setattr(roads_routes, "ensure_no_active_roads_job", lambda _runid, _prep, _redis_conn: None)
     monkeypatch.setattr(roads_routes, "get_wd", lambda runid: "/tmp/run")
 
@@ -79,8 +88,6 @@ def test_run_roads_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch)
     captured = _stub_queue(monkeypatch, job_id="roads-run-9")
     prep_state = _stub_prep(monkeypatch)
-    monkeypatch.setattr(roads_routes, "acquire_roads_submit_lock", lambda _runid, _owner: True)
-    monkeypatch.setattr(roads_routes, "release_roads_submit_lock", lambda _runid, _owner: None)
     monkeypatch.setattr(roads_routes, "ensure_no_active_roads_job", lambda _runid, _prep, _redis_conn: None)
     monkeypatch.setattr(roads_routes, "get_wd", lambda runid: "/tmp/run")
 
@@ -98,8 +105,6 @@ def test_prepare_roads_returns_409_when_singleflight_conflict(monkeypatch: pytes
     _stub_auth(monkeypatch)
     _stub_queue(monkeypatch, job_id="roads-prepare-7")
     _stub_prep(monkeypatch)
-    monkeypatch.setattr(roads_routes, "acquire_roads_submit_lock", lambda _runid, _owner: True)
-    monkeypatch.setattr(roads_routes, "release_roads_submit_lock", lambda _runid, _owner: None)
     monkeypatch.setattr(
         roads_routes,
         "ensure_no_active_roads_job",

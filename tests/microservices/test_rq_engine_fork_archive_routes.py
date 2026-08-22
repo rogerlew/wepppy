@@ -97,6 +97,7 @@ def _stub_queue(
     job_id: str = "job-123",
     enqueue_calls: list[tuple[tuple[object, ...], dict[str, object]]] | None = None,
 ) -> list[tuple[tuple[object, ...], dict[str, object]]]:
+    monkeypatch.setattr(fork_archive_routes, "new_rq_job_id", lambda: job_id)
     constructor_calls: list[tuple[tuple[object, ...], dict[str, object]]] = []
     class DummyJob:
         id = job_id
@@ -111,6 +112,38 @@ def _stub_queue(
             return DummyJob()
 
     class DummyRedis:
+        values: dict[str, str] = {}
+        hashes: dict[str, dict[str, str]] = {}
+
+        def lock(self, *args, **kwargs):
+            class Lock:
+                def acquire(self, **_kwargs): return True
+                def extend(self, *args, **kwargs): return True
+                def release(self): return None
+            return Lock()
+
+        def get(self, key):
+            return self.values.get(key)
+
+        def set(self, key, value, **kwargs):
+            self.values[key] = value
+            return True
+
+        def hgetall(self, key):
+            return self.hashes.get(key, {})
+
+        def hget(self, key, field):
+            return self.hashes.get(key, {}).get(field)
+
+        def hset(self, key, mapping):
+            self.hashes[key] = dict(mapping)
+            return len(mapping)
+
+        def delete(self, key):
+            self.values.pop(key, None)
+            self.hashes.pop(key, None)
+            return 1
+
         def __enter__(self):
             return self
 
@@ -130,12 +163,20 @@ def _stub_prep(
     *,
     archive_job_id: str | None = None,
 ):
+    monkeypatch.setattr(
+        fork_archive_routes,
+        "_discover_legacy_fork_root",
+        lambda *args, **kwargs: None,
+    )
     class DummyPrep:
         def __init__(self) -> None:
             self.archive_job_id = archive_job_id
             self.clear_calls = 0
 
         def set_rq_job_id(self, *args, **kwargs) -> None:
+            return None
+
+        def get_rq_job_id(self, key):
             return None
 
         def get_archive_job_id(self) -> str | None:
@@ -182,10 +223,13 @@ def _patch_user_model_lookup(monkeypatch: pytest.MonkeyPatch, user, user_datasto
     class DummyUserModel:
         query = _DummyUserQuery(user)
 
+    class DummyRunModel:
+        query = _DummyUserQuery(None)
+
     monkeypatch.setattr(
         helpers_utils,
         "get_user_models",
-        lambda: (object(), DummyUserModel, user_datastore),
+        lambda: (DummyRunModel, DummyUserModel, user_datastore),
     )
 
 
@@ -196,7 +240,6 @@ def test_fork_requires_cap_for_anonymous(monkeypatch: pytest.MonkeyPatch, tmp_pa
     monkeypatch.setattr(fork_archive_routes, "_exists", lambda path: True)
     monkeypatch.setattr(fork_archive_routes, "_ensure_anonymous_access", lambda runid, wd: None)
     monkeypatch.setattr(fork_archive_routes, "get_run_owners_lazy", lambda runid: [])
-
     with TestClient(rq_engine.app) as client:
         response = client.post("/api/runs/run-1/cfg/fork")
 
@@ -211,7 +254,7 @@ def test_fork_requires_cap_for_anonymous_session_claims(
     run_dir = tmp_path / "run"
     run_dir.mkdir()
     monkeypatch.setattr(fork_archive_routes, "_resolve_bearer_claims", lambda request: {"token_class": "session"})
-    monkeypatch.setattr(fork_archive_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(fork_archive_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
     monkeypatch.setattr(fork_archive_routes, "get_wd", lambda runid: str(run_dir))
     monkeypatch.setattr(fork_archive_routes, "_exists", lambda path: True)
     monkeypatch.setattr(fork_archive_routes, "get_run_owners_lazy", lambda runid: [])
@@ -234,7 +277,7 @@ def test_fork_rejects_non_string_target_runid(monkeypatch: pytest.MonkeyPatch, t
     run_dir.mkdir()
 
     monkeypatch.setattr(fork_archive_routes, "_resolve_bearer_claims", lambda request: {"token_class": "user"})
-    monkeypatch.setattr(fork_archive_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(fork_archive_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
     monkeypatch.setattr(fork_archive_routes, "_resolve_user_from_claims", lambda claims: (None, None, None))
     monkeypatch.setattr(fork_archive_routes, "get_wd", lambda runid: str(run_dir))
     monkeypatch.setattr(fork_archive_routes, "_exists", lambda path: True)
@@ -260,7 +303,7 @@ def test_fork_enqueues_job(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
     new_dir = tmp_path / "new"
 
     monkeypatch.setattr(fork_archive_routes, "_resolve_bearer_claims", lambda request: {"token_class": "user"})
-    monkeypatch.setattr(fork_archive_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(fork_archive_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
     monkeypatch.setattr(fork_archive_routes, "get_wd", lambda runid: str(run_dir))
     monkeypatch.setattr(fork_archive_routes, "get_primary_wd", lambda runid: str(new_dir))
     monkeypatch.setattr(fork_archive_routes, "has_archive", lambda runid: False)
@@ -330,7 +373,27 @@ def test_fork_enqueues_job(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
     assert enqueue_args[0] is fork_archive_routes.fork_rq
     assert enqueue_args[1] == ("run-1", "new-run", True, True, True)
     assert "timeout" in enqueue_kwargs
-    assert str(UUID(str(enqueue_kwargs["job_id"]))) == enqueue_kwargs["job_id"]
+    assert enqueue_kwargs["job_id"] == payload["job_id"]
+
+
+def test_target_association_treats_metadata_as_authoritative() -> None:
+    job = SimpleNamespace(
+        meta={"runid": "source-run"},
+        args=("source-run", "target-run"),
+        func_name="wepppy.rq.interchange_rq.run_interchange_migration",
+        origin="default",
+    )
+    assert not fork_archive_routes._job_targets_destination(job, "target-run")
+
+
+def test_target_association_supports_legacy_migration_run_argument() -> None:
+    job = SimpleNamespace(
+        meta={},
+        args=("/wc1/runs/ta/target-run", "target-run"),
+        func_name="wepppy.rq.migrations_rq.migrations_rq",
+        origin="default",
+    )
+    assert fork_archive_routes._job_targets_destination(job, "target-run")
 
 
 @pytest.mark.parametrize(
@@ -586,7 +649,7 @@ def test_fork_rebinds_detached_users_before_adding_run_to_user(
         "_resolve_bearer_claims",
         lambda request: {"token_class": "user", "sub": "1", "email": "mdobre@example.com"},
     )
-    monkeypatch.setattr(fork_archive_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(fork_archive_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
     monkeypatch.setattr(fork_archive_routes, "get_wd", lambda runid: str(run_dir))
     monkeypatch.setattr(fork_archive_routes, "get_primary_wd", lambda runid: str(new_dir))
     monkeypatch.setattr(
@@ -638,6 +701,9 @@ def test_fork_rebinds_detached_users_before_adding_run_to_user(
     class DummyUserModel:
         query = DummyUserQuery(attached_user)
 
+    class DummyRunModel:
+        query = _DummyUserQuery(None)
+
     class DummyUserDatastore:
         def __init__(self) -> None:
             self.run_record = object()
@@ -673,7 +739,7 @@ def test_fork_rebinds_detached_users_before_adding_run_to_user(
     monkeypatch.setattr(
         helpers_utils,
         "get_user_models",
-        lambda: (object(), DummyUserModel, user_datastore),
+        lambda: (DummyRunModel, DummyUserModel, user_datastore),
     )
 
     _stub_queue(monkeypatch, job_id="job-detached")
@@ -725,6 +791,7 @@ def test_fork_failure_returns_stacktrace(monkeypatch: pytest.MonkeyPatch, tmp_pa
         raise RuntimeError("prep failed")
 
     monkeypatch.setattr(fork_archive_routes.RedisPrep, "getInstance", _raise_prep)
+    _stub_queue(monkeypatch)
 
     with TestClient(rq_engine.app) as client:
         response = client.post("/api/runs/run-1/cfg/fork", data={"undisturbify": "true"})
@@ -746,7 +813,7 @@ def test_fork_target_runid_bypasses_generate_runid(monkeypatch: pytest.MonkeyPat
     monkeypatch.setattr(
         fork_archive_routes,
         "_resolve_bearer_claims",
-        lambda request: {"token_class": "user", "email": "mdobre@example.com"},
+        lambda request: {"token_class": "service", "email": "mdobre@example.com"},
     )
     monkeypatch.setattr(fork_archive_routes, "authorize_run_access", lambda claims, runid: None)
     monkeypatch.setattr(
@@ -923,9 +990,9 @@ def test_fork_target_runid_refuses_overwrite_for_non_profile_run(
     monkeypatch.setattr(
         fork_archive_routes,
         "_resolve_bearer_claims",
-        lambda request: {"token_class": "user", "email": "mdobre@example.com"},
+        lambda request: {"token_class": "service", "email": "mdobre@example.com"},
     )
-    monkeypatch.setattr(fork_archive_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(fork_archive_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
     monkeypatch.setattr(
         fork_archive_routes,
         "get_wd",
@@ -933,11 +1000,12 @@ def test_fork_target_runid_refuses_overwrite_for_non_profile_run(
     )
     monkeypatch.setattr(fork_archive_routes, "_exists", lambda path: str(path) in {str(run_dir), str(target_dir)})
     monkeypatch.setattr(fork_archive_routes, "get_run_owners_lazy", lambda runid: [])
-
     class DummyRon:
         config_stem = "cfg"
 
     monkeypatch.setattr(fork_archive_routes.Ron, "getInstance", lambda wd: DummyRon())
+    _stub_queue(monkeypatch)
+    _stub_prep(monkeypatch)
 
     with TestClient(rq_engine.app) as client:
         response = client.post(
@@ -966,7 +1034,7 @@ def test_profile_fork_target_has_exclusive_job_claim_and_redis_namespace(
         "_resolve_bearer_claims",
         lambda request: {"token_class": "service"},
     )
-    monkeypatch.setattr(fork_archive_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(fork_archive_routes, "authorize_run_access", lambda claims, runid, **kwargs: None)
 
     def _get_wd(runid: str, prefer_active: bool = True) -> str:
         if runid == "run-1":
@@ -1000,6 +1068,31 @@ def test_profile_fork_target_has_exclusive_job_claim_and_redis_namespace(
             return DummyJob(str(kwargs["job_id"]))
 
     class DummyRedis:
+        values: dict[str, str] = {}
+        hashes: dict[str, dict[str, str]] = {}
+
+        def lock(self, *args, **kwargs):
+            class Lock:
+                def acquire(self, **_kwargs): return True
+                def extend(self, *args, **kwargs): return True
+                def release(self): return None
+            return Lock()
+
+        def get(self, key): return self.values.get(key)
+        def set(self, key, value, **kwargs):
+            self.values[key] = value
+            return True
+
+        def hgetall(self, key): return self.hashes.get(key, {})
+        def hget(self, key, field): return self.hashes.get(key, {}).get(field)
+        def hset(self, key, mapping):
+            self.hashes[key] = dict(mapping)
+            return len(mapping)
+        def delete(self, key):
+            self.values.pop(key, None)
+            self.hashes.pop(key, None)
+            return 1
+
         def __enter__(self):
             return self
 
@@ -1009,6 +1102,11 @@ def test_profile_fork_target_has_exclusive_job_claim_and_redis_namespace(
     monkeypatch.setattr(fork_archive_routes, "Queue", DummyQueue)
     monkeypatch.setattr(fork_archive_routes.redis, "Redis", lambda **kwargs: DummyRedis())
     monkeypatch.setattr(fork_archive_routes, "redis_connection_kwargs", lambda db: {})
+    monkeypatch.setattr(
+        fork_archive_routes,
+        "reconcile_deferred_workflow",
+        lambda *args, **kwargs: SimpleNamespace(state="active", job_ids=("active-fork",)),
+    )
 
     with TestClient(rq_engine.app) as client:
         first = client.post(
@@ -1030,32 +1128,27 @@ def test_profile_fork_target_has_exclusive_job_claim_and_redis_namespace(
     assert second.status_code == 409
 
 
-def test_canceled_wepp_dependency_reaps_deferred_profile_finalizer(
-    monkeypatch: pytest.MonkeyPatch,
+def test_profile_claim_recovery_uses_exact_watched_reconciliation(
+    monkeypatch: pytest.MonkeyPatch, tmp_path,
 ) -> None:
-    canceled: list[bool] = []
     published: list[tuple[str, str]] = []
-
-    class DummyRedis:
-        def __enter__(self):
-            return self
-
-        def __exit__(self, exc_type, exc, tb):
-            return False
-
     finalizer = SimpleNamespace(
-        dependency_ids=[b"rq:job:wepp-job"],
-        fetch_dependencies=lambda: [dependency],
-        meta={"fork_source_runid": "source-run"},
-        cancel=lambda enqueue_dependents=False: canceled.append(enqueue_dependents),
+        args=("source-run", "profile;;fork;;leaf", "wepp-job"),
+        func_name=(
+            f"{fork_archive_routes._finish_fork_rq.__module__}."
+            f"{fork_archive_routes._finish_fork_rq.__qualname__}"
+        ),
+        origin="default",
     )
-    dependency = SimpleNamespace(get_status=lambda refresh=True: "canceled")
-    monkeypatch.setattr(fork_archive_routes, "redis_connection_kwargs", lambda db: {})
-    monkeypatch.setattr(fork_archive_routes.redis, "Redis", lambda **kwargs: DummyRedis())
     monkeypatch.setattr(
         fork_archive_routes.Job,
         "fetch",
-        lambda job_id, connection: finalizer if job_id == "finalizer-job" else dependency,
+        lambda job_id, connection: finalizer,
+    )
+    monkeypatch.setattr(
+        fork_archive_routes,
+        "reconcile_deferred_workflow",
+        lambda job_id, **kwargs: SimpleNamespace(state="canceled"),
     )
     monkeypatch.setattr(
         fork_archive_routes.StatusMessenger,
@@ -1063,35 +1156,60 @@ def test_canceled_wepp_dependency_reaps_deferred_profile_finalizer(
         lambda channel, message: published.append((channel, message)),
     )
 
-    assert fork_archive_routes._recover_terminal_deferred_fork_finalizer("finalizer-job") is True
-    assert canceled == [False]
+    target_wd = tmp_path / "leaf"
+    claim_path = tmp_path / ".leaf.fork-claim"
+    claim_path.write_text("finalizer-job", encoding="utf-8")
+
+    assert fork_archive_routes._recover_stale_profile_fork_claim(
+        str(target_wd),
+        "profile;;fork;;leaf",
+        redis_conn=object(),
+        lease_checkpoint=lambda: None,
+    ) is True
+    assert not claim_path.exists()
     assert published == [("source-run:fork", "rq:finalizer-job TRIGGER   fork FORK_FAILED")]
 
 
-def test_missing_wepp_dependency_reaps_deferred_profile_finalizer(
+def test_target_replacement_reconciles_deferred_bootstrap_enable(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    canceled: list[bool] = []
-
-    class DummyRedis:
-        def __enter__(self):
-            return self
-
-        def __exit__(self, exc_type, exc, tb):
-            return False
-
-    finalizer = SimpleNamespace(
-        dependency_ids=[b"rq:job:expired-wepp-job"],
-        fetch_dependencies=lambda: [],
+    target_runid = "target-run"
+    bootstrap_job = SimpleNamespace(
+        func_name=(
+            f"{fork_archive_routes.bootstrap_enable_rq.__module__}."
+            f"{fork_archive_routes.bootstrap_enable_rq.__qualname__}"
+        ),
+        origin="default",
+        args=(target_runid,),
         meta={},
-        cancel=lambda enqueue_dependents=False: canceled.append(enqueue_dependents),
+        get_status=lambda refresh=True: "deferred",
     )
-    monkeypatch.setattr(fork_archive_routes, "redis_connection_kwargs", lambda db: {})
-    monkeypatch.setattr(fork_archive_routes.redis, "Redis", lambda **kwargs: DummyRedis())
-    monkeypatch.setattr(fork_archive_routes.Job, "fetch", lambda job_id, connection: finalizer)
+    inventories = iter((("bootstrap-job",), ()))
+    monkeypatch.setattr(
+        fork_archive_routes,
+        "_target_executable_job_ids",
+        lambda *_args, **_kwargs: next(inventories),
+    )
+    monkeypatch.setattr(
+        fork_archive_routes.Job,
+        "fetch",
+        lambda *_args, **_kwargs: bootstrap_job,
+    )
+    reconciled: list[str] = []
 
-    assert fork_archive_routes._recover_terminal_deferred_fork_finalizer("finalizer-job") is True
-    assert canceled == [False]
+    def reconcile(job_id, **kwargs):
+        assert kwargs["association"](bootstrap_job) is True
+        reconciled.append(job_id)
+        return SimpleNamespace(state="canceled")
+
+    monkeypatch.setattr(fork_archive_routes, "reconcile_deferred_workflow", reconcile)
+
+    conflicts = fork_archive_routes._reconcile_target_deferred_jobs(
+        object(), target_runid, lease_checkpoint=lambda: None
+    )
+
+    assert reconciled == ["bootstrap-job"]
+    assert conflicts == ()
 
 
 def test_archive_enqueues_job(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
@@ -1111,7 +1229,6 @@ def test_archive_enqueues_job(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None
     with TestClient(rq_engine.app) as client:
         response = client.post(
             "/api/runs/run-1/cfg/archive",
-            headers={"Authorization": "Bearer token"},
             json={"comment": "demo"},
         )
 
@@ -1142,14 +1259,13 @@ def test_archive_clears_stale_job_id_when_lookup_fails(
     with TestClient(rq_engine.app) as client:
         response = client.post(
             "/api/runs/run-1/cfg/archive",
-            headers={"Authorization": "Bearer token"},
             json={"comment": "demo"},
         )
 
     assert response.status_code == 200
     payload = response.json()
     assert payload["job_id"] == "job-100"
-    assert prep.clear_calls == 1
+    assert prep.clear_calls == 0
     assert prep.archive_job_id == "job-100"
 
 
@@ -1178,7 +1294,6 @@ def test_archive_returns_conflict_when_existing_job_is_running(
     with TestClient(rq_engine.app) as client:
         response = client.post(
             "/api/runs/run-1/cfg/archive",
-            headers={"Authorization": "Bearer token"},
             json={"comment": "demo"},
         )
 
@@ -1213,7 +1328,6 @@ def test_archive_preserves_job_id_when_status_lookup_errors(
     with TestClient(rq_engine.app) as client:
         response = client.post(
             "/api/runs/run-1/cfg/archive",
-            headers={"Authorization": "Bearer token"},
             json={"comment": "demo"},
         )
 
@@ -1247,13 +1361,12 @@ def test_restore_clears_stale_job_id_before_enqueue(
     with TestClient(rq_engine.app) as client:
         response = client.post(
             "/api/runs/run-1/cfg/restore-archive",
-            headers={"Authorization": "Bearer token"},
             json={"archive_name": "snapshot.zip"},
         )
 
     assert response.status_code == 200
     payload = response.json()
     assert payload["job_id"] == "job-restore"
-    assert prep.clear_calls == 1
+    assert prep.clear_calls == 0
     assert prep.archive_job_id == "job-restore"
     assert constructor_calls[0][0] == ("fork-archive",)

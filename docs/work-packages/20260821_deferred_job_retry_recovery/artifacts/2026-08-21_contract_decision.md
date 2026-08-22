@@ -36,6 +36,11 @@ endpoint:
    `DeferredJobRegistry`, removed from each prerequisite's dependent set,
    detached from deferred dependents, and cleared of dependency membership
    before replacement enqueue begins.
+   Every run-scoped admission also participates in a canonical run lifecycle
+   fence. Family locks still serialize same-operation receipts, while the
+   lifecycle fence prevents destructive destination recovery from racing any
+   other mutable controller submission for that run. Batch and culvert work
+   retain batch-scoped lifecycle fences.
 4. Cleanup is idempotent and conditional. It uses Redis optimistic locking over
    the job status/hash and affected registry/dependency keys, and commits only
    while every target remains exactly deferred. Concurrent promotion aborts and

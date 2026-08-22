@@ -47,7 +47,7 @@
   (function () {
     const submitUrl = {{ ermit_export_submit_url|tojson }};
     const sessionTokenUrl = {{ ermit_export_session_token_url|tojson }};
-    const ACTIVE_STATES = new Set(["queued", "started", "deferred", "scheduled"]);
+    const ACTIVE_STATES = new Set(["queued", "started", "scheduled"]);
     const FAILURE_STATES = new Set(["failed", "stopped", "canceled"]);
     const POLL_INTERVAL_MS = 1000;
     const SPINNER_FRAMES = ["|", "/", "-", "\\"];
@@ -196,6 +196,13 @@
         }
         if (FAILURE_STATES.has(state)) {
           showError(payload.exc_info || payload.description || "The ERMiT export job failed.");
+          return;
+        }
+        if (state === "deferred") {
+          setSpinner(false);
+          setState("deferred", "The prior workflow can be retried.", "attention");
+          errorMessage.textContent = "Retry Export will replace the deferred workflow.";
+          errorPanel.hidden = false;
           return;
         }
         setSpinner(false);

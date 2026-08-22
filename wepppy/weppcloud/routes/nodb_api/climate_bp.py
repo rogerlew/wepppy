@@ -7,7 +7,12 @@ from typing import Any, List, MutableMapping, Sequence
 
 from flask import Response
 
-from wepppy.weppcloud.utils.helpers import exception_factory, get_batch_root_dir, handle_with_exception_factory
+from wepppy.weppcloud.utils.helpers import (
+    authorize_and_handle_with_exception_factory,
+    exception_factory,
+    get_batch_root_dir,
+    handle_with_exception_factory,
+)
 
 from .._common import *  # noqa: F401,F403
 
@@ -163,6 +168,7 @@ def _load_atlas14_intensity(cli_dir: str) -> dict[str, Any] | None:
 
 
 @climate_bp.route('/runs/<string:runid>/<config>/tasks/set_climatestation_mode/', methods=['POST'])
+@authorize_and_handle_with_exception_factory
 def set_climatestation_mode(runid: str, config: str) -> Response:
     """Persist the requested climate station mode for the active run.
 
@@ -195,6 +201,7 @@ def set_climatestation_mode(runid: str, config: str) -> Response:
 
 
 @climate_bp.route('/runs/<string:runid>/<config>/tasks/set_climatestation/', methods=['POST'])
+@authorize_and_handle_with_exception_factory
 def set_climatestation(runid: str, config: str) -> Response:
     """Set the selected station identifier on the Climate controller.
 
@@ -296,6 +303,7 @@ def report_climate(runid: str, config: str) -> Response:
 
 
 @climate_bp.route('/runs/<string:runid>/<config>/tasks/set_climate_mode/', methods=['POST'])
+@authorize_and_handle_with_exception_factory
 def set_climate_mode(runid: str, config: str) -> Response:
     """Set the climate mode enum on the Climate controller.
 
@@ -339,6 +347,7 @@ def set_climate_mode(runid: str, config: str) -> Response:
 
 
 @climate_bp.route('/runs/<string:runid>/<config>/tasks/set_climate_spatialmode/', methods=['POST'])
+@authorize_and_handle_with_exception_factory
 def set_climate_spatialmode(runid: str, config: str) -> Response:
     """Set the spatial climate mode flag for the active run.
 
@@ -571,6 +580,7 @@ def view_climate_monthlies(runid: str, config: str) -> Response:
 
 @climate_bp.route('/runs/<string:runid>/<config>/tasks/set_use_gridmet_wind_when_applicable', methods=['POST'])
 @climate_bp.route('/runs/<string:runid>/<config>/tasks/set_use_gridmet_wind_when_applicable/', methods=['POST'])
+@authorize_and_handle_with_exception_factory
 def task_set_use_gridmet_wind_when_applicable(runid: str, config: str) -> Response:
     """Toggle the GridMET wind fallback for the climate controller.
 
@@ -607,6 +617,7 @@ def task_set_use_gridmet_wind_when_applicable(runid: str, config: str) -> Respon
 
 @climate_bp.route('/runs/<string:runid>/<config>/tasks/set_adjust_mx_pt5', methods=['POST'])
 @climate_bp.route('/runs/<string:runid>/<config>/tasks/set_adjust_mx_pt5/', methods=['POST'])
+@authorize_and_handle_with_exception_factory
 def task_set_adjust_mx_pt5(runid: str, config: str) -> Response:
     """Toggle MX .5 P scaling for the CLIGEN localization pipeline.
 
@@ -636,6 +647,7 @@ def task_set_adjust_mx_pt5(runid: str, config: str) -> Response:
 
 @climate_bp.route('/runs/<string:runid>/<config>/tasks/set_silent_pass_observed_quality_guard', methods=['POST'])
 @climate_bp.route('/runs/<string:runid>/<config>/tasks/set_silent_pass_observed_quality_guard/', methods=['POST'])
+@authorize_and_handle_with_exception_factory
 def task_set_silent_pass_observed_quality_guard(runid: str, config: str) -> Response:
     """Toggle silent-pass behavior for observed CLIGEN quality-guard failures.
 

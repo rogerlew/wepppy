@@ -14,6 +14,7 @@ from wepppy.microservices.rq_engine import auth as rq_auth
 from wepppy.microservices.rq_engine import culvert_routes
 from wepppy.microservices.shape_converter.archive_validation import ArchiveLimits
 from wepppy.weppcloud.utils import auth_tokens
+from wepppy.rq.submission_recovery import RqEnqueueVerificationError
 from tests.shape_converter.helpers.archive_builder import mark_zip_as_encrypted
 
 
@@ -319,6 +320,35 @@ def test_culvert_ingest_success(tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
     assert not (batch_root / "topo" / "netful.tif").exists()
 
 
+def test_culvert_ingest_preserves_staged_inputs_when_enqueue_is_unverified(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    culverts_root = tmp_path / "culverts"
+    monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
+    auth_headers = _auth_headers(monkeypatch)
+    seen: dict[str, str] = {}
+
+    def unverified_enqueue(batch_uuid: str) -> str:
+        seen["uuid"] = batch_uuid
+        raise RqEnqueueVerificationError("Unable to verify planned job.")
+
+    monkeypatch.setattr(culvert_routes, "_enqueue_culvert_batch_job", unverified_enqueue)
+
+    with _resolve_payload_zip().open("rb") as handle:
+        with TestClient(rq_engine.app) as client:
+            response = client.post(
+                "/api/culverts-wepp-batch/",
+                files={"payload.zip": ("payload.zip", handle, "application/zip")},
+                headers=auth_headers,
+            )
+
+    assert response.status_code == 503
+    assert response.json()["error"]["code"] == "enqueue_unverified"
+    batch_root = culverts_root / seen["uuid"]
+    assert batch_root.is_dir()
+    assert (batch_root / "batch_metadata.json").is_file()
+
+
 def test_culvert_submit_browse_token_downloads_batch_skeleton_zip(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -374,7 +404,7 @@ def test_culvert_retry_success_returns_browse_token(
     culverts_root = tmp_path / "culverts"
     monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
     auth_headers = _auth_headers(monkeypatch, scopes=["culvert:batch:retry"])
-    batch_uuid = "culvert-retry-1234"
+    batch_uuid = "5a1604ba-736c-4e07-9d2e-939bf1e9b33e"
     point_id = "42"
 
     batch_root = culverts_root / batch_uuid
@@ -403,7 +433,7 @@ def test_culvert_retry_success_returns_browse_token(
 
     seen: dict[str, str] = {}
 
-    def fake_enqueue(batch: str, point: str) -> str:
+    def fake_enqueue(batch: str, point: str, **_kwargs: object) -> str:
         seen["batch_uuid"] = batch
         seen["point_id"] = point
         return "job-456"
@@ -439,7 +469,7 @@ def test_culvert_finalize_success_returns_browse_token(
     culverts_root = tmp_path / "culverts"
     monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
     auth_headers = _auth_headers(monkeypatch, scopes=["culvert:batch:retry"])
-    batch_uuid = "culvert-finalize-1234"
+    batch_uuid = "a083a90e-28be-43eb-ae0e-9bf43ae8ff72"
 
     batch_root = culverts_root / batch_uuid
     batch_root.mkdir(parents=True, exist_ok=True)
@@ -483,15 +513,16 @@ def test_culvert_finalize_missing_batch_returns_404(
     monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
     auth_headers = _auth_headers(monkeypatch, scopes=["culvert:batch:retry"])
 
+    batch_uuid = "67f297e0-9084-4a1b-a110-e6788721fcde"
     with TestClient(rq_engine.app) as client:
         response = client.post(
-            "/api/culverts-wepp-batch/missing-batch/finalize",
+            f"/api/culverts-wepp-batch/{batch_uuid}/finalize",
             headers=auth_headers,
         )
 
     assert response.status_code == 404
     payload = response.json()
-    assert payload["error"]["message"] == "Batch not found: missing-batch"
+    assert payload["error"]["message"] == f"Batch not found: {batch_uuid}"
 
 
 def test_culvert_ingest_missing_files_returns_400(

@@ -192,7 +192,7 @@ def test_run_omni_scenarios_rq_concurrency_uses_helper_outputs_for_dependency_me
             assert name == "batch"
             self.connection = connection
 
-        def enqueue_call(self, func, args=(), kwargs=None, timeout=None, depends_on=None):
+        def enqueue_call(self, func, args=(), kwargs=None, timeout=None, depends_on=None, job_id=None):
             job = _child_job_stub(f"child-{len(enqueue_calls) + 1}")
             enqueue_calls.append(
                 {
@@ -716,7 +716,7 @@ def test_run_omni_contrasts_rq_reruns_hillslopes_for_deduped_scenarios_when_dele
             assert name == "batch"
             self.connection = connection
 
-        def enqueue_call(self, func, args=(), kwargs=None, timeout=None, depends_on=None):
+        def enqueue_call(self, func, args=(), kwargs=None, timeout=None, depends_on=None, job_id=None):
             job = _child_job_stub(f"child-{len(enqueue_calls) + 1}")
             enqueue_calls.append(
                 {
@@ -894,7 +894,7 @@ def test_run_omni_contrasts_rq_does_not_rerun_hillslopes_when_delete_disabled(
             assert name == "batch"
             self.connection = connection
 
-        def enqueue_call(self, func, args=(), kwargs=None, timeout=None, depends_on=None):
+        def enqueue_call(self, func, args=(), kwargs=None, timeout=None, depends_on=None, job_id=None):
             job = _child_job_stub(f"child-{len(enqueue_calls) + 1}")
             enqueue_calls.append(
                 {
@@ -1116,4 +1116,3 @@ def test_finalize_omni_scenarios_rq_timestamps_and_triggers(
     assert prep.timestamps == [omni_rq.TaskEnum.run_omni_scenarios]
     assert any("TRIGGER omni OMNI_SCENARIO_RUN_TASK_COMPLETED" in message for _, message in published)
     assert any("TRIGGER omni END_BROADCAST" in message for _, message in published)
-

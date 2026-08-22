@@ -1025,4 +1025,13 @@ describe("AgFields controller", () => {
             "/rq-engine/api/runs/demo-run/cfg/agfields/sub-fields.geojson",
         );
     });
+
+    test("deferred tracked job rehydrates authoritative active IDs", async () => {
+        controller.hydrate = jest.fn(() => Promise.resolve({ active_job_ids: {} }));
+
+        controller.triggerEvent("job:retryable", { status: "deferred", job_id: "active-1" });
+        await flushPromises();
+
+        expect(controller.hydrate).toHaveBeenCalledWith({ force: true });
+    });
 });

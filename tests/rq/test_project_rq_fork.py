@@ -538,7 +538,9 @@ def test_fork_finalizer_failed_dependency_emits_failure_and_releases_claim(
 
     published: list[str] = []
     released: list[tuple[str, str, str]] = []
-    finalizer_job = SimpleNamespace(id="finalizer-job", connection=object())
+    finalizer_job = SimpleNamespace(
+        id="finalizer-job", connection=SimpleNamespace(eval=lambda *_args: 1)
+    )
     dependency_job = SimpleNamespace(get_status=lambda refresh=True: project.JobStatus.FAILED)
     monkeypatch.setattr(project, "get_current_job", lambda: finalizer_job)
     monkeypatch.setattr(project, "get_wd", lambda runid, **kwargs: "/source")
@@ -1094,7 +1096,13 @@ def test_clean_env_for_system_tools_uses_sanitized_path(monkeypatch: pytest.Monk
 def test_fork_rq_undisturbify_enqueues_finish_job(monkeypatch: pytest.MonkeyPatch) -> None:
     import wepppy.rq.project_rq as project
 
-    monkeypatch.setattr(project, "get_current_job", lambda: SimpleNamespace(id="job-fork"))
+    worker_job = SimpleNamespace(
+        id="job-fork",
+        connection=SimpleNamespace(eval=lambda *_args: 1),
+        meta={},
+        save=lambda: None,
+    )
+    monkeypatch.setattr(project, "get_current_job", lambda: worker_job)
     monkeypatch.setattr(project.StatusMessenger, "publish", lambda _channel, _message: None)
     monkeypatch.setattr(project, "_reset_forked_run_job_markers", lambda *_args, **_kwargs: None)
     monkeypatch.setattr(
@@ -1140,7 +1148,7 @@ def test_fork_rq_undisturbify_enqueues_finish_job(monkeypatch: pytest.MonkeyPatc
     assert len(enqueue_calls) == 1
     func, args, depends_on, finalizer_job_id = enqueue_calls[0]
     assert func is project._finish_fork_rq
-    assert args == ["source-run", "new-run", "wepp-job"]
+    assert args == ["source-run", "new-run", "wepp-job", "job-fork"]
     assert depends_on.dependencies == ["wepp-job"]
     assert depends_on.allow_failure is True
     assert isinstance(finalizer_job_id, str) and finalizer_job_id
@@ -1155,7 +1163,13 @@ def test_fork_rq_reports_ttl_import_failures(
     import wepppy.rq.project_rq as project
 
     published: list[str] = []
-    monkeypatch.setattr(project, "get_current_job", lambda: SimpleNamespace(id="job-fork-ttl"))
+    monkeypatch.setattr(
+        project,
+        "get_current_job",
+        lambda: SimpleNamespace(
+            id="job-fork-ttl", connection=SimpleNamespace(eval=lambda *_args: 1)
+        ),
+    )
     monkeypatch.setattr(project.StatusMessenger, "publish", lambda _channel, message: published.append(message))
     monkeypatch.setattr(project, "_reset_forked_run_job_markers", lambda *_args, **_kwargs: None)
 
@@ -1193,7 +1207,13 @@ def test_fork_rq_skip_omni_completes_when_child_workspace_is_absent(
     destination = tmp_path / "destination"
     destination.mkdir()
     published: list[str] = []
-    monkeypatch.setattr(project, "get_current_job", lambda: SimpleNamespace(id="job-empty-omni"))
+    monkeypatch.setattr(
+        project,
+        "get_current_job",
+        lambda: SimpleNamespace(
+            id="job-empty-omni", connection=SimpleNamespace(eval=lambda *_args: 1)
+        ),
+    )
     monkeypatch.setattr(project.StatusMessenger, "publish", lambda _channel, message: published.append(message))
     monkeypatch.setattr(project, "get_primary_wd", lambda _runid: str(destination))
     monkeypatch.setattr(
@@ -1253,7 +1273,13 @@ def test_fork_rq_skip_omni_completes_when_child_workspace_is_absent(
 def test_fork_rq_uses_wrapper_helper_aliases(monkeypatch: pytest.MonkeyPatch) -> None:
     import wepppy.rq.project_rq as project
 
-    monkeypatch.setattr(project, "get_current_job", lambda: SimpleNamespace(id="job-fork-aliases"))
+    monkeypatch.setattr(
+        project,
+        "get_current_job",
+        lambda: SimpleNamespace(
+            id="job-fork-aliases", connection=SimpleNamespace(eval=lambda *_args: 1)
+        ),
+    )
     monkeypatch.setattr(project.StatusMessenger, "publish", lambda _channel, _message: None)
     monkeypatch.setattr(project, "_reset_forked_run_job_markers", lambda *_args, **_kwargs: None)
 
@@ -1359,7 +1385,13 @@ def test_fork_rq_invokes_reset_markers_with_new_run_context(monkeypatch: pytest.
     import wepppy.rq.project_rq as project
 
     reset_calls: list[tuple[str, str, str]] = []
-    monkeypatch.setattr(project, "get_current_job", lambda: SimpleNamespace(id="job-fork-reset"))
+    monkeypatch.setattr(
+        project,
+        "get_current_job",
+        lambda: SimpleNamespace(
+            id="job-fork-reset", connection=SimpleNamespace(eval=lambda *_args: 1)
+        ),
+    )
     monkeypatch.setattr(project.StatusMessenger, "publish", lambda _channel, _message: None)
     monkeypatch.setattr(
         project._fork_helpers,
@@ -1383,7 +1415,13 @@ def test_fork_rq_reset_marker_failure_emits_fork_failed(
     import wepppy.rq.project_rq as project
 
     published: list[str] = []
-    monkeypatch.setattr(project, "get_current_job", lambda: SimpleNamespace(id="job-fork-reset-fail"))
+    monkeypatch.setattr(
+        project,
+        "get_current_job",
+        lambda: SimpleNamespace(
+            id="job-fork-reset-fail", connection=SimpleNamespace(eval=lambda *_args: 1)
+        ),
+    )
     monkeypatch.setattr(project.StatusMessenger, "publish", lambda _channel, message: published.append(message))
     monkeypatch.setattr(
         project._fork_helpers,

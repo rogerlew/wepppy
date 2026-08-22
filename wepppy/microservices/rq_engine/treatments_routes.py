@@ -19,6 +19,7 @@ from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.runtime_paths.errors import NoDirError
 from wepppy.runtime_paths.fs import resolve as _nodir_resolve
 from wepppy.rq.project_rq import build_treatments_rq
+from wepppy.rq.submission_recovery import RqSubmissionConflict, enqueue_tracked_rq_job
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
@@ -181,9 +182,18 @@ async def build_treatments(runid: str, config: str, request: Request) -> JSONRes
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(build_treatments_rq, (runid,), timeout=RQ_TIMEOUT)
-            prep.set_rq_job_id("build_treatments_rq", job.id)
+            job = enqueue_tracked_rq_job(
+                q,
+                build_treatments_rq,
+                prep=prep,
+                job_key="build_treatments_rq",
+                runid=runid,
+                args=(runid,),
+                timeout=RQ_TIMEOUT,
+            )
         return JSONResponse({"job_id": job.id})
+    except RqSubmissionConflict as exc:
+        return error_response(str(exc), status_code=409, code="job_active")
     except WatershedNotAbstractedError as exc:
         return error_response(
             exc.__name__ or "Watershed Not Abstracted Error",

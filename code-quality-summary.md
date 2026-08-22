@@ -1,7 +1,7 @@
 # Code Quality Observability Report
 
 - Mode: `observe-only` (non-blocking)
-- Generated (UTC): `2026-08-21T19:47:43Z`
+- Generated (UTC): `2026-08-22T07:12:44Z`
 - Base ref: `origin/master`
 
 ## Threshold Bands
@@ -27,8 +27,8 @@
 
 | Distribution | Count | p50 | p75 | p90 | p95 | p99 | Max |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| `python_prod_file_sloc` | 957 | 126.0 | 308.0 | 679.4 | 983.4 | 2051.64 | 5697.0 |
-| `python_prod_max_function_len` | 775 | 59.0 | 109.0 | 182.0 | 241.3 | 378.78 | 2126.0 |
+| `python_prod_file_sloc` | 959 | 127.0 | 315.0 | 680.8 | 989.8 | 2050.02 | 5697.0 |
+| `python_prod_max_function_len` | 777 | 60.0 | 110.0 | 182.0 | 241.2 | 378.72 | 2126.0 |
 | `python_prod_max_cc` | 0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 |
 | `js_source_file_sloc` | 201 | 252.0 | 572.0 | 1238.0 | 1586.0 | 2426.0 | 2835.0 |
 | `js_source_max_cc` | 201 | 6.0 | 21.0 | 33.0 | 44.0 | 86.0 | 155.0 |
@@ -85,7 +85,7 @@ _No entries._
 | `wepppy/weppcloud/controllers_js/batch_runner.js` | 1911 |
 | `wepppy/weppcloud/controllers_js/channel_gl.js` | 1873 |
 | `wepppy/weppcloud/controllers_js/geneva_summary_report.js` | 1747 |
-| `wepppy/weppcloud/controllers_js/control_base.js` | 1727 |
+| `wepppy/weppcloud/controllers_js/control_base.js` | 1730 |
 | `wepppy/weppcloud/controllers_js/subcatchment_delineation.js` | 1636 |
 
 ### `js_max_cc_top20`

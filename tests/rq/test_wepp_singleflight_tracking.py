@@ -74,7 +74,7 @@ def test_rq_job_status_enum_is_normalized(monkeypatch: pytest.MonkeyPatch) -> No
     assert active == {"key": "run_wepp_rq", "job_id": root.id, "status": "started"}
 
 
-def test_viable_deferred_descendant_blocks_submission(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_viable_deferred_descendant_does_not_block_submission(monkeypatch: pytest.MonkeyPatch) -> None:
     root = _FakeJob("root", "finished", {"jobs:1,func:run": "run", "jobs:6,func:final": "final"})
     run = _FakeJob("run", "finished")
     final = _FakeJob("final", "deferred", dependency_ids=[f"rq:job:{run.id}".encode()])
@@ -85,11 +85,7 @@ def test_viable_deferred_descendant_blocks_submission(monkeypatch: pytest.Monkey
         redis_conn,
     )
 
-    assert active == {
-        "key": "run_wepp_watershed_rq",
-        "job_id": final.id,
-        "status": "deferred",
-    }
+    assert active is None
 
 
 @pytest.mark.parametrize("failed_status", ["failed", "stopped", "canceled"])
@@ -154,7 +150,7 @@ def test_nested_active_descendant_is_tracked(monkeypatch: pytest.MonkeyPatch) ->
     assert active == {"key": "run_wepp_rq", "job_id": leaf.id, "status": "scheduled"}
 
 
-def test_unrelated_failure_does_not_strand_viable_deferred_branch(
+def test_unrelated_failure_does_not_make_deferred_branch_active(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     root = _FakeJob(
@@ -180,11 +176,7 @@ def test_unrelated_failure_does_not_strand_viable_deferred_branch(
         redis_conn,
     )
 
-    assert active == {
-        "key": "run_wepp_watershed_rq",
-        "job_id": deferred.id,
-        "status": "deferred",
-    }
+    assert active is None
 
 
 def test_missing_child_record_does_not_block_retry(monkeypatch: pytest.MonkeyPatch) -> None:

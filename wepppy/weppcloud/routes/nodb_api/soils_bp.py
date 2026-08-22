@@ -19,12 +19,14 @@ from .._common import (
 from wepppy.nodb.core import Soils, SoilsMode
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.weppcloud.utils.cap_guard import requires_cap
+from wepppy.weppcloud.utils.helpers import authorize_and_handle_with_exception_factory
 
 
 soils_bp = Blueprint('soils', __name__)
 
 
 @soils_bp.route('/runs/<string:runid>/<config>/tasks/set_soil_mode/', methods=['POST'])
+@authorize_and_handle_with_exception_factory
 def set_soil_mode(runid: str, config: str) -> Response:
     """Persist soil mode selections for the active run."""
     payload = parse_request_payload(request)
@@ -111,6 +113,7 @@ def report_soils(runid: str, config: str) -> Response:
 
 @soils_bp.route('/runs/<string:runid>/<config>/tasks/set_soils_ksflag', methods=['POST'])
 @soils_bp.route('/runs/<string:runid>/<config>/tasks/set_soils_ksflag/', methods=['POST'])
+@authorize_and_handle_with_exception_factory
 def task_set_soils_ksflag(runid: str, config: str) -> Response:
     payload = parse_request_payload(request, boolean_fields={'ksflag'})
     state = payload.get('ksflag', None)
@@ -133,6 +136,7 @@ def task_set_soils_ksflag(runid: str, config: str) -> Response:
 
 @soils_bp.route('/runs/<string:runid>/<config>/tasks/set_disturbed_sol_ver', methods=['POST'])
 @soils_bp.route('/runs/<string:runid>/<config>/tasks/set_disturbed_sol_ver/', methods=['POST'])
+@authorize_and_handle_with_exception_factory
 def task_set_disturbed_sol_ver(runid: str, config: str) -> Response:
     payload = parse_request_payload(request)
     state_raw = payload.get('sol_ver', None)

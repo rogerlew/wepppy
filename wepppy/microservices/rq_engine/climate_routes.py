@@ -21,7 +21,8 @@ from wepppy.nodb.core import (
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.runtime_paths.errors import NoDirError
 from wepppy.runtime_paths.fs import resolve as _nodir_resolve
-from wepppy.rq.project_rq import build_climate_rq
+from wepppy.rq.project_rq import build_climate_rq, upload_cli_rq
+from wepppy.rq.submission_recovery import RqSubmissionConflict, enqueue_tracked_rq_job
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
@@ -439,14 +440,21 @@ async def build_climate(runid: str, config: str, request: Request) -> JSONRespon
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(
+            job = enqueue_tracked_rq_job(
+                q,
                 build_climate_rq,
-                (runid,),
+                prep=prep,
+                job_key="build_climate_rq",
+                runid=runid,
+                args=(runid,),
                 timeout=RQ_TIMEOUT,
                 meta={"build_payload": copy.deepcopy(payload)},
+                conflict_keys=("build_climate_rq", "upload_cli_rq"),
+                allowed_root_funcs=(build_climate_rq, upload_cli_rq),
             )
-            prep.set_rq_job_id("build_climate_rq", job.id)
         return JSONResponse({"job_id": job.id})
+    except RqSubmissionConflict as exc:
+        return error_response(str(exc), status_code=409, code="conflict")
     except (
         NoClimateStationSelectedError,
         ClimateModeIsUndefinedError,

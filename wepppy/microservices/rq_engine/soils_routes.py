@@ -16,6 +16,7 @@ from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.runtime_paths.errors import NoDirError
 from wepppy.runtime_paths.fs import resolve as _nodir_resolve
 from wepppy.rq.project_rq import build_soils_rq
+from wepppy.rq.submission_recovery import RqSubmissionConflict, enqueue_tracked_rq_job
 from wepppy.soils.ssurgo import NoValidSoilsException
 from wepppy.weppcloud.utils.helpers import get_wd
 
@@ -148,9 +149,18 @@ async def build_soils(runid: str, config: str, request: Request) -> JSONResponse
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(build_soils_rq, (runid,), timeout=RQ_TIMEOUT)
-            prep.set_rq_job_id("build_soils_rq", job.id)
+            job = enqueue_tracked_rq_job(
+                q,
+                build_soils_rq,
+                prep=prep,
+                job_key="build_soils_rq",
+                runid=runid,
+                args=(runid,),
+                timeout=RQ_TIMEOUT,
+            )
         return JSONResponse({"job_id": job.id})
+    except RqSubmissionConflict as exc:
+        return error_response(str(exc), status_code=409, code="conflict")
     except (NoValidSoilsException, WatershedNotAbstractedError) as exc:
         return error_response(
             exc.__name__ or "Building Soil Failed",

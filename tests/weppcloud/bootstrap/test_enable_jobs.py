@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import json
+from types import SimpleNamespace
 
 import pytest
 
 from wepppy.weppcloud.bootstrap import enable_jobs
 from wepppy.weppcloud.bootstrap.enable_jobs import BootstrapLockBusyError
 from wepppy.weppcloud.bootstrap.git_lock import bootstrap_enable_job_key, bootstrap_git_lock_key
+from wepppy.rq.submission_recovery import RqEnqueueVerificationError
 
 pytestmark = pytest.mark.unit
 
@@ -80,6 +82,12 @@ def test_enqueue_bootstrap_enable_returns_existing_job_when_dedupe_key_present(
     monkeypatch.setattr(enable_jobs, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
     monkeypatch.setattr(enable_jobs.Wepp, "getInstance", lambda wd: type("W", (), {"bootstrap_enabled": False})())
     monkeypatch.setattr(enable_jobs.redis, "Redis", lambda **kwargs: DummyRedis(store))
+    monkeypatch.setattr(enable_jobs.Job, "fetch", lambda *args, **kwargs: SimpleNamespace(kwargs={}))
+    monkeypatch.setattr(
+        enable_jobs,
+        "reconcile_deferred_workflow",
+        lambda *args, **kwargs: SimpleNamespace(state="active"),
+    )
 
     payload, status_code = enable_jobs.enqueue_bootstrap_enable("run-1", actor="user:1")
 
@@ -119,6 +127,7 @@ def test_enqueue_bootstrap_enable_sets_dedupe_key_and_enqueues(monkeypatch: pyte
     monkeypatch.setattr(enable_jobs.Wepp, "getInstance", lambda wd: type("W", (), {"bootstrap_enabled": False})())
     monkeypatch.setattr(enable_jobs.redis, "Redis", lambda **kwargs: dummy_redis)
     monkeypatch.setattr(enable_jobs, "Queue", DummyQueue)
+    monkeypatch.setattr(enable_jobs, "new_rq_job_id", lambda: "job-77")
 
     payload, status_code = enable_jobs.enqueue_bootstrap_enable("run-1", actor="user:1")
 
@@ -165,3 +174,82 @@ def test_enqueue_bootstrap_enable_extends_ttls_for_long_rq_timeout(
     assert dedupe_entries
     _, dedupe_ttl = dedupe_entries[-1]
     assert dedupe_ttl == 7500
+
+
+def test_enqueue_bootstrap_enable_replaces_deferred_and_releases_old_token(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    old_lock = json.dumps({"token": "old-token"})
+    store = {
+        bootstrap_enable_job_key("run-1"): "old-job",
+        bootstrap_git_lock_key("run-1"): old_lock,
+    }
+    redis_conn = DummyRedis(store)
+    monkeypatch.setattr(enable_jobs, "get_wd", lambda *_args, **_kwargs: "/tmp/run")
+    monkeypatch.setattr(
+        enable_jobs.Wepp,
+        "getInstance",
+        lambda _wd: SimpleNamespace(bootstrap_enabled=False),
+    )
+    monkeypatch.setattr(enable_jobs.redis, "Redis", lambda **_kwargs: redis_conn)
+    monkeypatch.setattr(
+        enable_jobs.Job,
+        "fetch",
+        lambda *_args, **_kwargs: SimpleNamespace(kwargs={"lock_token": "old-token"}),
+    )
+    monkeypatch.setattr(
+        enable_jobs,
+        "reconcile_deferred_workflow",
+        lambda *_args, **_kwargs: SimpleNamespace(state="canceled"),
+    )
+    monkeypatch.setattr(enable_jobs, "new_rq_job_id", lambda: "replacement-job")
+
+    class QueueStub:
+        name = "default"
+
+        def __init__(self, **_kwargs):
+            pass
+
+        def enqueue_call(self, *_args, **_kwargs):
+            return SimpleNamespace(id="replacement-job")
+
+    monkeypatch.setattr(enable_jobs, "Queue", QueueStub)
+
+    payload, status = enable_jobs.enqueue_bootstrap_enable("run-1", actor="user:1")
+
+    assert status == 202
+    assert payload["job_id"] == "replacement-job"
+    assert store[bootstrap_enable_job_key("run-1")] == "replacement-job"
+    assert store[bootstrap_git_lock_key("run-1")] != old_lock
+
+
+def test_enqueue_bootstrap_enable_preserves_receipt_and_lock_when_commit_unknown(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    store: dict[str, str] = {}
+    redis_conn = DummyRedis(store)
+    monkeypatch.setattr(enable_jobs, "get_wd", lambda *_args, **_kwargs: "/tmp/run")
+    monkeypatch.setattr(
+        enable_jobs.Wepp,
+        "getInstance",
+        lambda _wd: SimpleNamespace(bootstrap_enabled=False),
+    )
+    monkeypatch.setattr(enable_jobs.redis, "Redis", lambda **_kwargs: redis_conn)
+    monkeypatch.setattr(enable_jobs, "new_rq_job_id", lambda: "planned-job")
+
+    class QueueStub:
+        name = "default"
+
+        def __init__(self, **_kwargs):
+            pass
+
+        def enqueue_call(self, *_args, **_kwargs):
+            raise RqEnqueueVerificationError("commit unknown")
+
+    monkeypatch.setattr(enable_jobs, "Queue", QueueStub)
+
+    with pytest.raises(RqEnqueueVerificationError, match="commit unknown"):
+        enable_jobs.enqueue_bootstrap_enable("run-1", actor="user:1")
+
+    assert store[bootstrap_enable_job_key("run-1")] == "planned-job"
+    assert bootstrap_git_lock_key("run-1") in store

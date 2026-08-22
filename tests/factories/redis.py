@@ -60,6 +60,9 @@ def make_redis_prep(
             if recorder is not None:
                 recorder.redis_entries.append(f"job:{key}:{job_id}")
 
+        def get_rq_job_id(self, key: str) -> Optional[str]:
+            return self.state.job_ids.get(key)
+
         # Convenience mirror to minimise test churn
         @property
         def removed(self) -> List[Any]:
@@ -91,5 +94,23 @@ def make_redis_client(recorder: Optional[RQRecorder] = None):
         def __exit__(self, exc_type, exc, tb) -> None:  # type: ignore[override]
             return None
 
-    return RedisClientStub
+        def lock(self, name: str, **kwargs: Any):
+            if recorder is not None:
+                recorder.redis_entries.append(("lock", name, kwargs))
 
+            class _Lock:
+                def acquire(self, **kwargs: Any) -> bool:
+                    return True
+
+                def release(self) -> None:
+                    return None
+
+                def extend(self, additional_time: int, **kwargs: Any) -> bool:
+                    return True
+
+            return _Lock()
+
+        def hget(self, name: str, key: str) -> None:
+            return None
+
+    return RedisClientStub

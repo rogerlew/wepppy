@@ -20,6 +20,7 @@ def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> None:
+    monkeypatch.setattr(wepp_routes, "new_rq_job_id", lambda: job_id)
     class DummyJob:
         id = job_id
 
@@ -31,6 +32,13 @@ def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> 
             return DummyJob()
 
     class DummyRedis:
+        def lock(self, *args, **kwargs):
+            class Lock:
+                def acquire(self, **_kwargs): return True
+                def extend(self, *args, **kwargs): return True
+                def release(self): return None
+            return Lock()
+
         def __enter__(self):
             return self
 
@@ -39,8 +47,6 @@ def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> 
 
     monkeypatch.setattr(wepp_routes, "Queue", DummyQueue)
     monkeypatch.setattr(wepp_routes.redis, "Redis", lambda **kwargs: DummyRedis())
-    monkeypatch.setattr(wepp_routes, "acquire_wepp_submit_lock", lambda _runid, _owner: True)
-    monkeypatch.setattr(wepp_routes, "release_wepp_submit_lock", lambda _runid, _owner: None)
     monkeypatch.setattr(wepp_routes, "ensure_no_active_wepp_job", lambda _runid, _prep, _redis_conn: None)
 
 
@@ -53,6 +59,9 @@ def _stub_prep(monkeypatch: pytest.MonkeyPatch) -> None:
             return None
 
         def set_rq_job_id(self, *args, **kwargs) -> None:
+            return None
+
+        def get_rq_job_id(self, key):
             return None
 
     monkeypatch.setattr(wepp_routes.RedisPrep, "getInstance", lambda wd: DummyPrep())
@@ -75,6 +84,9 @@ def _stub_wepp_stack(
             return None
 
         def set_rq_job_id(self, *args, **kwargs) -> None:
+            return None
+
+        def get_rq_job_id(self, key):
             return None
 
     monkeypatch.setattr(wepp_routes.RedisPrep, "getInstance", lambda wd: ReadyPrep())
@@ -1152,8 +1164,6 @@ def test_wepp_endpoints_return_409_when_singleflight_conflict(
     _stub_prep(monkeypatch)
     _stub_wepp_stack(monkeypatch)
     monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
-    monkeypatch.setattr(wepp_routes, "acquire_wepp_submit_lock", lambda _runid, _owner: True)
-    monkeypatch.setattr(wepp_routes, "release_wepp_submit_lock", lambda _runid, _owner: None)
     monkeypatch.setattr(
         wepp_routes,
         "ensure_no_active_wepp_job",
@@ -1187,14 +1197,20 @@ def test_wepp_endpoints_return_409_when_submit_lock_is_busy(
     _stub_prep(monkeypatch)
     _stub_wepp_stack(monkeypatch)
     monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
-    monkeypatch.setattr(wepp_routes, "acquire_wepp_submit_lock", lambda _runid, _owner: False)
+    monkeypatch.setattr(
+        wepp_routes,
+        "rq_submission_lock",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            wepp_routes.RqSubmissionConflict("Another submission is already in progress.")
+        ),
+    )
 
     with TestClient(rq_engine.app) as client:
         response = client.post(endpoint, json={})
 
     assert response.status_code == 409
     payload = response.json()
-    assert "enqueue already in progress" in payload["error"]["message"]
+    assert "already in progress" in payload["error"]["message"]
 
 
 @pytest.mark.parametrize(
@@ -1232,11 +1248,6 @@ def test_run_wepp_release_lock_failure_after_enqueue_returns_job_id(
     _stub_prep(monkeypatch)
     _stub_wepp_stack(monkeypatch)
     monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
-    monkeypatch.setattr(
-        wepp_routes,
-        "release_wepp_submit_lock",
-        lambda _runid, _owner: (_ for _ in ()).throw(RuntimeError("release failed")),
-    )
 
     with TestClient(rq_engine.app) as client:
         response = client.post("/api/runs/run-1/cfg/run-wepp", json={})

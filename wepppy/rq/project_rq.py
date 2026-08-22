@@ -43,6 +43,7 @@ from wepppy.config.redis_settings import (
     redis_host,
 )
 from wepppy.rq.job_id import new_rq_job_id
+from wepppy.rq.submission_recovery import RqEnqueueVerificationError
 from wepppy.weppcloud.utils.helpers import get_wd, get_primary_wd
 from wepppy.weppcloud.user_preferences import (
     WBT_BOUNDARY_POLICY_SNAPSHOT_KEY,
@@ -2590,11 +2591,47 @@ def run_rhem_rq(runid: str, *, payload: Optional[Mapping[str, Any]] = None) -> N
 # Fork Functions
 # see docs/ui-docs/weppcloud-project-forking.md for fork console + backend architecture
 
+def _set_fork_destination_outcome(
+    connection: Any,
+    source_runid: str,
+    target_runid: str,
+    expected_root_job_id: str,
+    state: str,
+) -> None:
+    planned_key = f"rq:fork:planned:{target_runid}"
+    connection.eval(
+        """
+        if redis.call('HGET', KEYS[1], 'job_id') ~= ARGV[1]
+           or redis.call('HGET', KEYS[1], 'source_runid') ~= ARGV[2]
+           or redis.call('HGET', KEYS[1], 'target_runid') ~= ARGV[3] then
+            return 0
+        end
+        local current = redis.call('HGET', KEYS[1], 'state') or 'planned'
+        local desired = ARGV[4]
+        if current == 'succeeded' then return 0 end
+        if desired == 'enqueued' and current ~= 'planned' then return 0 end
+        if desired == 'running'
+           and current ~= 'planned' and current ~= 'enqueued' then return 0 end
+        if desired == 'waiting_finalizer'
+           and current ~= 'planned' and current ~= 'enqueued'
+           and current ~= 'running' then return 0 end
+        redis.call('HSET', KEYS[1], 'state', ARGV[4])
+        return 1
+        """,
+        1,
+        planned_key,
+        str(expected_root_job_id),
+        source_runid,
+        target_runid,
+        state,
+    )
+
 @with_exception_logging
 def _finish_fork_rq(
     runid: str,
     fork_target_runid: str | None = None,
     dependency_job_id: str | None = None,
+    root_fork_job_id: str | None = None,
 ) -> None:
     """Emit fork completion messages once dependent jobs finish."""
     func_name = "_finish_fork_rq"
@@ -2615,11 +2652,27 @@ def _finish_fork_rq(
         StatusMessenger.publish(status_channel, 'Running WEPP... done\n')
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   fork FORK_COMPLETE')
+        if fork_target_runid:
+            _set_fork_destination_outcome(
+                job.connection,
+                runid,
+                fork_target_runid,
+                str(root_fork_job_id or job.id),
+                "succeeded",
+            )
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq.py:1113", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   fork FORK_FAILED')
+        if fork_target_runid:
+            _set_fork_destination_outcome(
+                job.connection,
+                runid,
+                fork_target_runid,
+                str(root_fork_job_id or job.id),
+                "failed",
+            )
         raise
     finally:
         if fork_target_runid:
@@ -2805,6 +2858,15 @@ def fork_rq(
     try:
         new_wd = _resolve_fork_destination_wd(new_runid)
         _verify_profile_fork_claim(new_runid, new_wd, job.id)
+        try:
+            _set_fork_destination_outcome(
+                job.connection, runid, new_runid, str(job.id), "running"
+            )
+        except redis.RedisError:
+            logging.getLogger(__name__).warning(
+                "Could not update fork destination outcome at worker start",
+                exc_info=True,
+            )
         StatusMessenger.publish(
             status_channel, f'rq:{job.id} STARTED {func_name}({runid})'
         )
@@ -2877,18 +2939,27 @@ def fork_rq(
                     finalizer_job_id,
                 )
                 finalizer_enqueued = False
+                finalizer_commit_unknown = False
                 try:
-                    finalizer_job = q.enqueue(
-                        _finish_fork_rq,
-                        args=[runid, new_runid, final_wepp_job.id],
-                        depends_on=Dependency(
-                            jobs=[final_wepp_job.id],
-                            allow_failure=True,
-                        ),
-                        job_id=finalizer_job_id,
-                        meta={"fork_source_runid": runid},
-                    )
+                    try:
+                        finalizer_job = q.enqueue(
+                            _finish_fork_rq,
+                            args=[runid, new_runid, final_wepp_job.id, job.id],
+                            depends_on=Dependency(
+                                jobs=[final_wepp_job.id],
+                                allow_failure=True,
+                            ),
+                            job_id=finalizer_job_id,
+                            meta={"fork_source_runid": runid},
+                        )
+                    except RqEnqueueVerificationError:
+                        finalizer_commit_unknown = True
+                        profile_claim_deferred = new_runid.startswith("profile;;")
+                        raise
                     finalizer_enqueued = True
+                    job.meta["jobs:0,func:run_wepp_rq"] = final_wepp_job.id
+                    job.meta["jobs:1,func:_finish_fork_rq"] = finalizer_job.id
+                    job.save()
                     profile_claim_deferred = new_runid.startswith("profile;;")
                     try:
                         _release_failure_tolerant_fork_finalizer(q, finalizer_job)
@@ -2899,23 +2970,36 @@ def fork_rq(
                             exc_info=True,
                         )
                 finally:
-                    if not finalizer_enqueued:
-                        _transfer_profile_fork_claim(
+                    if not finalizer_enqueued and not finalizer_commit_unknown:
+                        _release_profile_fork_claim(
                             new_runid,
                             new_wd,
                             finalizer_job_id,
-                            final_wepp_job.id,
                         )
-                        profile_claim_deferred = new_runid.startswith("profile;;")
         else:
             StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
             StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   fork FORK_COMPLETE')
+            _set_fork_destination_outcome(
+                job.connection, runid, new_runid, str(job.id), "succeeded"
+            )
 
-    except Exception:
+        if undisturbify:
+            _set_fork_destination_outcome(
+                job.connection,
+                runid,
+                new_runid,
+                str(job.id),
+                "waiting_finalizer",
+            )
+
+    except Exception:  # broad-except: worker boundary contract
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq.py:1173", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   fork FORK_FAILED')
+        _set_fork_destination_outcome(
+            job.connection, runid, new_runid, str(job.id), "failed"
+        )
         raise
     finally:
         if new_wd and not profile_claim_deferred:
