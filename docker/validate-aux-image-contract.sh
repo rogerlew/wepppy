@@ -2,7 +2,7 @@
 set -euo pipefail
 
 if [[ $# -ne 3 ]]; then
-  echo "usage: $0 <status|preflight|cap|weppcloudr> <image> <expected-revision>" >&2
+  echo "usage: $0 <status|preflight|cap|weppcloudr|fcgiwrap> <image> <expected-revision>" >&2
   exit 2
 fi
 
@@ -98,6 +98,17 @@ case "${service}" in
       "${image}" >/dev/null
     host_port=$(docker port "${container}" 8050/tcp | awk -F: 'END {print $NF}')
     wait_for_url "http://127.0.0.1:${host_port}/healthz"
+    ;;
+  fcgiwrap)
+    docker run --rm --network none --entrypoint /bin/sh "${image}" -lc '
+      set -eu
+      test "$(id -u)" = 1000
+      test "$(id -g)" = 993
+      test -x /usr/sbin/fcgiwrap
+      test -x /usr/bin/spawn-fcgi
+      test -x /usr/lib/git-core/git-http-backend
+      test "$(git config --system --get safe.directory)" = "*"
+    '
     ;;
   *)
     echo "unsupported service: ${service}" >&2

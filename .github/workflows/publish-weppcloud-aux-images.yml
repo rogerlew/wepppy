@@ -27,6 +27,13 @@ jobs:
           - service: weppcloudr
             image: weppcloudr
             dockerfile: weppcloudR/Dockerfile
+            build_args: ""
+          - service: fcgiwrap
+            image: wepppy-fcgiwrap
+            dockerfile: docker/Dockerfile.fcgiwrap
+            build_args: |
+              BASE_IMAGE=ghcr.io/rogerlew/wepppy@sha256:09614f07800bc4158df2fe0900370a39e0f5f960f536528716c2516d6fdb1920
+              APP_USER=roger
     steps:
       - name: Check out the dispatched source commit
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
@@ -65,6 +72,7 @@ jobs:
           labels: |
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+          build-args: ${{ matrix.build_args }}
 
       - name: Validate runtime contract before publication
         shell: bash
