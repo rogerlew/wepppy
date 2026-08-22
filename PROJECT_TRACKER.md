@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-08-21
-**Active Packages**: 27
+**Last Updated**: 2026-08-22
+**Active Packages**: 28
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -74,6 +74,25 @@ Feedback mechanisms:
 ---
 
 ## 📋 Backlog
+
+### Bootstrap Git Maintenance
+
+**Status**: In Progress
+
+**Proposed**: 2026-08-22
+
+**Priority**: High
+
+**Security impact**: `high` (RQ worker subprocess and shared-NFS Git object
+maintenance)
+
+**Link**: [docs/work-packages/20260821_bootstrap_git_maintenance/](docs/work-packages/20260821_bootstrap_git_maintenance/)
+
+**Description**: Pack newly enabled Bootstrap repositories under the existing
+run-scoped Git lock, using `WEPPPY_NCPU` as the Git pack-thread ceiling and
+retaining conservative prune grace periods.
+
+---
 
 ### Climate Multiple-Build Finalize Lock
 
