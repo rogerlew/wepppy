@@ -4,22 +4,14 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-22 04:45 UTC
-**Current phase**: Review and deployment
-**Last updated**: 2026-08-22 04:55 UTC
-**Next milestone**: merge, publish, and canary benchmark
+**Current phase**: Closed
+**Last updated**: 2026-08-22 05:10 UTC
+**Next milestone**: none; periodic maintenance is explicitly deferred
 **Security impact**: high
 **Dedicated security review**: yes
 **Security artifact**: `artifacts/20260822_security_review.md`
 
 ## Task Board
-
-### In Progress
-
-- [ ] Merge, publish, and validate on the private canary.
-
-### Ready / Backlog
-
-- [ ] Benchmark a post-maintenance clone and close the package.
 
 ### Done
 
@@ -27,6 +19,11 @@
 - [x] Add command-budget, real-repository preservation, and failure-order
   regression tests (2026-08-22 04:52 UTC).
 - [x] Complete correctness and security reviews (2026-08-22 04:55 UTC).
+- [x] Merge PR 630 and publish immutable runtime image (2026-08-22 05:02 UTC).
+- [x] Deploy seven default/batch RQ workers via openWEPP PR 128
+  (2026-08-22 05:06 UTC).
+- [x] Maintain and benchmark the validation repository; close package
+  (2026-08-22 05:10 UTC).
 
 ## Decisions Log
 
@@ -56,3 +53,14 @@ do not change production Compose values.
 - Targeted pytest regressions are authored but were not executed locally because
   the iMac and `dev-01` do not currently have the WEPPpy test environment. Do not
   record them as passing until a compatible test runner executes them.
+- The common runtime workflow run `32552889160` rehydrated and verified all LFS
+  assets and published digest `9cb4fed5...aaecf` from merge `e94ead9d`.
+- Before rollout, both queues were empty and all eight registered workers were
+  idle. Seven replacement default/batch Pods became Ready with zero restarts;
+  fork/archive and unrelated workloads retained their prior digest.
+- Live maintenance on `manly-systematization` acquired and released the existing
+  Bootstrap lock, completed in 27.990 seconds, produced one pack, and preserved
+  HEAD, tree, and working-status fingerprints.
+- A disposable authenticated clone completed in 4.65 seconds at approximately
+  35 MiB/s; Git reported `pack-reused 1153 (from 1)`. The prior clone took 70.8
+  seconds after transport tuning and 215-220 seconds before that tuning.

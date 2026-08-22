@@ -22,7 +22,7 @@
 | State | Required behavior | Evidence |
 | --- | --- | --- |
 | Repository absent | initialize, commit, hook, maintain, enable | source ordering plus authored regression |
-| Repository initialized but enable retrying | repeat safe initialization boundary and maintain | idempotent Git command design; canary validation pending |
+| Repository initialized but enable retrying | repeat safe initialization boundary and maintain | idempotent Git command design plus successful live maintenance of an existing repository |
 | Empty initial managed paths | allow empty commit and maintain | existing `--allow-empty` contract retained |
 | Populated managed paths | pack objects without changing refs/content | direct Git test preserved commit and tree SHA and created pack/bitmap |
 | Invalid CPU budget at process startup | existing WEPPpy startup validation fails explicitly | existing `NCPU` contract |
@@ -32,11 +32,10 @@
 | ID | Severity | Description | Required action | Status |
 | --- | --- | --- | --- | --- |
 | COR-01 | High | Maintenance must not mark Bootstrap enabled before successful completion. | Verify call ordering and failure propagation. | Resolved by explicit ordering and authored failure regression |
-| COR-02 | Medium | Maintenance must preserve refs and tracked content. | Direct repository test and live before/after evidence. | Resolved for pre-apply by direct repository SHA preservation; live evidence remains a package exit criterion |
+| COR-02 | Medium | Maintenance must preserve refs and tracked content. | Direct repository test and live before/after evidence. | Resolved: live HEAD, tree, and working-status fingerprints were unchanged |
 
 ## Verdict
 
 - **Gate status**: pass
 - **Unresolved findings**: High 0; Medium 0; Low 0
-- **Release recommendation**: ship to the private pre-production canary and
-  retain live preservation/clone evidence as the package closeout gate
+- **Release recommendation**: shipped and validated; close package

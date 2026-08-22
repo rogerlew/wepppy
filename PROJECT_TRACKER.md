@@ -75,25 +75,6 @@ Feedback mechanisms:
 
 ## 📋 Backlog
 
-### Bootstrap Git Maintenance
-
-**Status**: In Progress
-
-**Proposed**: 2026-08-22
-
-**Priority**: High
-
-**Security impact**: `high` (RQ worker subprocess and shared-NFS Git object
-maintenance)
-
-**Link**: [docs/work-packages/20260821_bootstrap_git_maintenance/](docs/work-packages/20260821_bootstrap_git_maintenance/)
-
-**Description**: Pack newly enabled Bootstrap repositories under the existing
-run-scoped Git lock, using `WEPPPY_NCPU` as the Git pack-thread ceiling and
-retaining conservative prune grace periods.
-
----
-
 ### Climate Multiple-Build Finalize Lock
 
 **Proposed**: 2026-08-21
@@ -1106,6 +1087,21 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### Bootstrap Git Maintenance
+
+**Completed**: 2026-08-22
+**Status**: ✅ **COMPLETE**
+**Security impact**: `high`
+**Link**: [docs/work-packages/20260821_bootstrap_git_maintenance/](docs/work-packages/20260821_bootstrap_git_maintenance/)
+
+**Summary**: Initial Bootstrap enable now packs repository objects and writes
+reachability bitmaps under the existing Git lock, using `WEPPPY_NCPU` as the
+thread ceiling and retaining conservative prune grace periods. Live canary
+maintenance preserved repository fingerprints and reduced clone time from 70.8
+seconds to 4.65 seconds through pack reuse.
+
+---
 
 ### Self-Hosted GHCR Builder
 
