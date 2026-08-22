@@ -7,7 +7,7 @@
 - **Date**: 2026-08-22
 - **Scope reviewed**: Bootstrap enable lock, Git subprocess arguments, run-tree
   boundary, CPU configuration, and failure behavior
-- **Commit/branch context**: working tree before review closure
+- **Commit/branch context**: WEPPpy merge `e94ead9d`; openWEPP deployment PR 128
 
 ## Security Triage Decision
 
@@ -31,4 +31,4 @@
 
 - **Gate status**: pass
 - **Unresolved findings**: High 0; Medium 0; Low 0
-- **Release recommendation**: ship to the private pre-production canary
+- **Release recommendation**: shipped and validated; close package

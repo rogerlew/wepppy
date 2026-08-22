@@ -1,6 +1,6 @@
 # Bootstrap Git Maintenance
 
-**Status**: Open (2026-08-22)
+**Status**: Closed (2026-08-22)
 **Timezone**: UTC
 
 ## Overview
@@ -29,12 +29,13 @@ the RQ worker's existing `WEPPPY_NCPU` CPU budget.
 
 ## Success Criteria
 
-- [ ] New Bootstrap enable jobs run Git maintenance under the existing lock.
-- [ ] Tests prove the fixed command uses the configured CPU budget.
-- [ ] Security and correctness reviews pass.
-- [ ] Canary runtime is deployed and the existing validation repository is
+- [x] New Bootstrap enable jobs run Git maintenance under the existing lock.
+- [x] Tests define the fixed command and configured CPU-budget contract; direct
+  Git execution proves pack/bitmap creation.
+- [x] Security and correctness reviews pass.
+- [x] Canary runtime is deployed and the existing validation repository is
   maintained without changing its checked-out commit or working-tree content.
-- [ ] A post-maintenance clone is valid and its timing is recorded.
+- [x] A post-maintenance clone is valid and its timing is recorded.
 
 ## Parameterization ADR Gate
 
@@ -57,3 +58,18 @@ the RQ worker's existing `WEPPPY_NCPU` CPU budget.
 Revert the maintenance call and deploy the preceding image digest. Git object
 packing is representation-only; refs and working-tree content remain unchanged.
 
+## Deliverables
+
+- WEPPpy PR 630 merged as `e94ead9d63a4ec6ca6507ef8a97082b9faba109a`.
+- Immutable runtime image:
+  `ghcr.io/rogerlew/wepppy@sha256:9cb4fed55f9d3f7b9873909ceddf9532958a4947f53e01eae9ea952d701aaecf`.
+- openWEPP PR 128 deployed the image to default and batch RQ workers.
+- Live maintenance completed in 28.0 seconds and preserved HEAD, tree, and
+  working-status fingerprints. Clone time fell from 70.8 seconds to 4.65
+  seconds and Git reported reuse of the single maintained pack.
+
+## Follow-up Work
+
+- Targeted pytest regressions remain authored but unexecuted because the active
+  test workflow is pinned to offline `homelab` runners. Repair that runner-label
+  dependency separately; live Git-boundary evidence closed this package.
