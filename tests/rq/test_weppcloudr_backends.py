@@ -342,7 +342,8 @@ def test_weppcloudr_uses_checksum_pinned_local_fontawesome() -> None:
     assert expected in renderer
     assert "/srv/weppcloudr/vendor/fontawesome/5.3.1/all.js" in renderer
     assert "use_fontawesome = FALSE" in renderer
-    assert "local_fontawesome_header" in renderer
+    assert "embed_vendored_fontawesome(render_target)" in renderer
+    assert 'grepl("use.fontawesome.com", html, fixed = TRUE)' in renderer
     assert all(
         "use_fontawesome: true" not in path.read_text(encoding="utf-8")
         for path in templates
