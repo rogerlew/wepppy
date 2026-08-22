@@ -668,6 +668,12 @@ Use Redis DB 0 (`RedisDB.LOCK`) as the authoritative lock backend.
 - **Default TTL:** 900 seconds for short operations (`checkout`, `auto_commit`)
 - **Enable lock TTL:** `max(BOOTSTRAP_GIT_LOCK_TTL_SECONDS, RQ_ENGINE_RQ_TIMEOUT + 300)`
 - **Enable dedupe TTL:** `max(BOOTSTRAP_ENABLE_JOB_TTL_SECONDS, RQ_ENGINE_RQ_TIMEOUT + 300)`
+- **Initial repository maintenance:** after the initial Bootstrap commit and
+  hook installation, the enable job runs `git gc` while it still owns the
+  run-scoped Git lock. Git pack concurrency is capped by `WEPPPY_NCPU`, matching
+  the RQ worker CPU budget, and bitmap generation is enabled to accelerate
+  subsequent smart-HTTP clone/fetch negotiation. Normal Git prune grace periods
+  are retained; maintenance does not use immediate pruning.
 - **Renewal:** not currently implemented; long enable operations use the computed
   timeout-aligned TTL values above.
 - **Release:** compare-and-delete Lua script (delete only if token matches)

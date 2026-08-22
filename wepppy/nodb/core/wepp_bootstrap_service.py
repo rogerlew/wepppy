@@ -7,6 +7,8 @@ from os.path import exists as _exists
 from os.path import join as _join
 from typing import TYPE_CHECKING
 
+from wepppy.all_your_base import NCPU
+
 if TYPE_CHECKING:
     from wepppy.nodb.core.wepp import Wepp
 
@@ -83,6 +85,26 @@ class WeppBootstrapService:
             handle.write("\n".join(hook_lines))
         os.chmod(hook_path, 0o755)
 
+    def optimize_bootstrap_repository(self, wepp: "Wepp") -> None:
+        """Pack Bootstrap objects using the deployment CPU budget.
+
+        Bootstrap enable runs while holding the run-scoped Git lock. Normal
+        ``git gc`` keeps Git's conservative prune grace period, so concurrent
+        read-only clones cannot lose recently created objects.
+        """
+        threads = max(1, int(NCPU))
+        self.run_git(
+            wepp,
+            [
+                "-c",
+                f"pack.threads={threads}",
+                "-c",
+                "repack.writeBitmaps=true",
+                "gc",
+            ],
+        )
+        wepp.logger.info("Optimized Bootstrap repository with %d Git pack threads", threads)
+
     def init_bootstrap(self, wepp: "Wepp") -> None:
         if not wepp._bootstrap_repo_exists():
             try:
@@ -109,6 +131,7 @@ class WeppBootstrapService:
         self.run_git(wepp, ["commit", "--allow-empty", "-m", "Bootstrap: initial input state"])
 
         self.install_bootstrap_hook(wepp)
+        self.optimize_bootstrap_repository(wepp)
 
         wepp.bootstrap_enabled = True
 
