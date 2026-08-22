@@ -58,6 +58,18 @@ from .responses import error_response, error_response_with_traceback
 
 logger = logging.getLogger(__name__)
 
+
+class ArchiveAdmissionUnavailable(RuntimeError):
+    """Archive receipt reconciliation or enqueue storage is unavailable."""
+
+
+@contextmanager
+def _archive_admission_boundary():
+    try:
+        yield
+    except (OSError, redis.RedisError) as exc:
+        raise ArchiveAdmissionUnavailable from exc
+
 router = APIRouter()
 
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
@@ -356,6 +368,7 @@ def _reconcile_target_deferred_jobs(
             candidate_id,
             connection=redis_conn,
             association=belongs_to_target,
+            root_association=belongs_to_target,
             lease_checkpoint=lease_checkpoint,
         )
     return _target_executable_job_ids(redis_conn, target_runid)
@@ -438,6 +451,13 @@ def _recover_stale_profile_fork_claim(
             connection=redis_conn,
             association=lambda candidate: _fork_job_belongs_to_lineage(
                 candidate, source_runid, target_runid
+            ),
+            root_association=lambda candidate: (
+                str(candidate.func_name)
+                == f"{_finish_fork_rq.__module__}.{_finish_fork_rq.__qualname__}"
+                and str(candidate.origin) == "default"
+                and tuple(candidate.args or ())[:2]
+                == (source_runid, target_runid)
             ),
             lease_checkpoint=lease_checkpoint,
         )
@@ -562,6 +582,12 @@ def _reconcile_archive_receipt(
         prior_job_id,
         connection=redis_conn,
         association=lambda candidate: (
+            bool(candidate.args)
+            and str(candidate.args[0]) == runid
+            and str(candidate.origin) == FORK_ARCHIVE_QUEUE
+            and str(candidate.func_name) in allowed_functions
+        ),
+        root_association=lambda candidate: (
             bool(candidate.args)
             and str(candidate.args[0]) == runid
             and str(candidate.origin) == FORK_ARCHIVE_QUEUE
@@ -964,6 +990,9 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
                 str(prior_job_id),
                 connection=redis_conn,
                 association=lambda candidate: _fork_job_belongs_to_lineage(
+                    candidate, runid, new_runid
+                ),
+                root_association=lambda candidate: _fork_root_belongs_to_destination(
                     candidate, runid, new_runid
                 ),
                 lease_checkpoint=lease.checkpoint,
@@ -1406,7 +1435,7 @@ async def archive_run(runid: str, config: str, request: Request) -> JSONResponse
             )
 
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
-        with redis.Redis(**conn_kwargs) as redis_conn, rq_submission_lock(
+        with _archive_admission_boundary(), redis.Redis(**conn_kwargs) as redis_conn, rq_submission_lock(
             redis_conn, f"{runid}:archive", lifecycle_key=runid
         ) as lease:
             queue = Queue(FORK_ARCHIVE_QUEUE, connection=redis_conn)
@@ -1433,6 +1462,11 @@ async def archive_run(runid: str, config: str, request: Request) -> JSONResponse
         except redis.RedisError:
             logger.warning("Status publish failed after archive enqueue for %s", runid, exc_info=True)
         return JSONResponse({"job_id": job.id})
+    except RqSubmissionConflict as exc:
+        return error_response(str(exc), status_code=409, code="conflict")
+    except ArchiveAdmissionUnavailable:
+        logger.exception("rq-engine archive admission unavailable")
+        return error_response("Submission admission is temporarily unavailable", status_code=503, code="service_unavailable")
     except Exception:
         logger.exception("rq-engine archive enqueue failed")
         return error_response_with_traceback("Error enqueueing archive job", status_code=500)
@@ -1500,7 +1534,7 @@ async def restore_archive(runid: str, config: str, request: Request) -> JSONResp
             )
 
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
-        with redis.Redis(**conn_kwargs) as redis_conn, rq_submission_lock(
+        with _archive_admission_boundary(), redis.Redis(**conn_kwargs) as redis_conn, rq_submission_lock(
             redis_conn, f"{runid}:archive", lifecycle_key=runid
         ) as lease:
             queue = Queue(FORK_ARCHIVE_QUEUE, connection=redis_conn)
@@ -1531,6 +1565,11 @@ async def restore_archive(runid: str, config: str, request: Request) -> JSONResp
             logger.warning("Status publish failed after restore enqueue for %s", runid, exc_info=True)
 
         return JSONResponse({"job_id": job.id})
+    except RqSubmissionConflict as exc:
+        return error_response(str(exc), status_code=409, code="conflict")
+    except ArchiveAdmissionUnavailable:
+        logger.exception("rq-engine restore admission unavailable")
+        return error_response("Submission admission is temporarily unavailable", status_code=503, code="service_unavailable")
     except Exception:
         logger.exception("rq-engine restore enqueue failed")
         return error_response_with_traceback("Error enqueueing restore job", status_code=500)
@@ -1598,7 +1637,7 @@ async def delete_archive(runid: str, config: str, request: Request) -> JSONRespo
             )
 
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
-        with redis.Redis(**conn_kwargs) as redis_conn, rq_submission_lock(
+        with _archive_admission_boundary(), redis.Redis(**conn_kwargs) as redis_conn, rq_submission_lock(
             redis_conn, f"{runid}:archive", lifecycle_key=runid
         ) as lease:
             state = _reconcile_archive_receipt(
@@ -1615,6 +1654,15 @@ async def delete_archive(runid: str, config: str, request: Request) -> JSONRespo
         StatusMessenger.publish(f"{runid}:archive", f"Archive deleted: {archive_name}")
 
         return JSONResponse({})
+    except RqSubmissionConflict as exc:
+        return error_response(str(exc), status_code=409, code="conflict")
+    except ArchiveAdmissionUnavailable:
+        logger.exception("rq-engine delete-archive admission unavailable")
+        return error_response(
+            "Submission admission is temporarily unavailable",
+            status_code=503,
+            code="service_unavailable",
+        )
     except Exception:
         logger.exception("rq-engine delete-archive failed")
         return error_response_with_traceback("Error deleting archive", status_code=500)

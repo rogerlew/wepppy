@@ -16,7 +16,11 @@ from wepppy.nodb.redis_prep import RedisPrep
 from wepppy.rq.job_id import new_rq_job_id
 from wepppy.rq.swat_rq import _build_swat_inputs_rq, _run_swat_rq, run_swat_rq
 from wepppy.rq.submission_recovery import RqSubmissionConflict, rq_submission_lock
-from wepppy.rq.wepp_rq import ensure_no_active_wepp_job, reconcile_deferred_wepp_jobs
+from wepppy.rq.wepp_rq import (
+    WeppSingleFlightConflict,
+    ensure_no_active_wepp_job,
+    reconcile_deferred_wepp_jobs,
+)
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
@@ -80,9 +84,6 @@ async def run_swat(runid: str, config: str, request: Request) -> JSONResponse:
 
         ron = Ron.getInstance(wd)
         mods = ron.mods or []
-        if "swat" in mods:
-            swat = Swat.getInstance(wd)
-            swat.parse_inputs(payload)
 
         prep = RedisPrep.getInstance(wd)
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
@@ -92,6 +93,9 @@ async def run_swat(runid: str, config: str, request: Request) -> JSONResponse:
                     runid, prep, redis_conn, lease_checkpoint=lease.checkpoint
                 )
                 ensure_no_active_wepp_job(runid, prep, redis_conn)
+                if "swat" in mods:
+                    swat = Swat.getInstance(wd)
+                    swat.parse_inputs(payload)
                 replacement_job_id = new_rq_job_id()
                 prep.set_rq_job_id("run_swat_rq", replacement_job_id)
                 lease.checkpoint()
@@ -103,7 +107,7 @@ async def run_swat(runid: str, config: str, request: Request) -> JSONResponse:
                     job_id=replacement_job_id,
                 )
         return JSONResponse({"job_id": job.id})
-    except RqSubmissionConflict as exc:
+    except (RqSubmissionConflict, WeppSingleFlightConflict) as exc:
         return error_response(str(exc), status_code=409, code="job_active")
     except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine run-swat enqueue failed")

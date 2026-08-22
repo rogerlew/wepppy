@@ -195,7 +195,7 @@ async def _handle_run_wepp_request(
         return JSONResponse({"job_id": job.id})
     except WeppSingleFlightConflict as exc:
         return error_response(str(exc), status_code=409, code="conflict")
-    except redis.RedisError:
+    except (OSError, redis.RedisError):
         logger.exception("rq-engine run-wepp enqueue failed")
         return error_response_with_traceback("Error Handling Request")
     except RuntimeError:

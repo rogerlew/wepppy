@@ -24,7 +24,11 @@ from wepppy.rq.geneva_rq import (
 from wepppy.rq.job_id import new_rq_job_id
 from wepppy.rq.auth_actor import current_auth_actor
 from wepppy.observability.correlation import current_correlation_id, normalize_correlation_id
-from wepppy.rq.submission_recovery import recover_committed_enqueue, rq_submission_lock
+from wepppy.rq.submission_recovery import (
+    RqSubmissionConflict,
+    recover_committed_enqueue,
+    rq_submission_lock,
+)
 from wepppy.weppcloud.utils.auth_tokens import get_jwt_config
 from wepppy.weppcloud.utils.helpers import get_wd
 
@@ -47,6 +51,17 @@ DEFAULT_DEPLOYMENT_REVISION = "dev"
 DEPLOYMENT_REVISION_ENV = "RQ_ENGINE_DEPLOYMENT_REVISION"
 GENEVA_READ_ALLOWED_SCOPES = frozenset({"rq:read", "rq:status"})
 GENEVA_ENQUEUE_SCOPES = ("rq:enqueue",)
+
+
+class GenevaAdmissionUnavailable(RuntimeError):
+    """Geneva receipt reconciliation or enqueue storage is unavailable."""
+
+
+def _run_admission(operation: Callable[[], dict[str, Any]]) -> dict[str, Any]:
+    try:
+        return operation()
+    except (OSError, redis.RedisError) as exc:
+        raise GenevaAdmissionUnavailable from exc
 GENEVA_STATE_DOMAIN = "orchestration"
 GENEVA_STATE_LOCK_RETRY_ATTEMPTS = 3
 GENEVA_STATE_LOCK_RETRY_SECONDS = 0.2
@@ -230,6 +245,18 @@ def _prepare_geneva_job(
             str(active_job_id),
             connection=redis_conn,
             association=lambda candidate: (
+                tuple(candidate.args or ())[:2] == (runid, config)
+                and str(candidate.origin) == "default"
+                and str(candidate.func_name) in {
+                    f"{func.__module__}.{func.__qualname__}"
+                    for func in (
+                        run_geneva_prepare_hrus_rq,
+                        run_geneva_build_frequency_panel_rq,
+                        run_geneva_run_batch_rq,
+                    )
+                }
+            ),
+            root_association=lambda candidate: (
                 tuple(candidate.args or ())[:2] == (runid, config)
                 and str(candidate.origin) == "default"
                 and str(candidate.func_name) in {
@@ -492,17 +519,26 @@ async def prepare_hrus(runid: str, config: str, request: Request) -> JSONRespons
         geneva = _ensure_geneva_controller(runid, config)
         geneva.assert_task_guardrails()
         _invalidate_geneva_preflight_timestamp(runid)
-        submission = _enqueue_geneva_job(
+        submission = _run_admission(lambda: _enqueue_geneva_job(
             runid=runid,
             config=config,
             payload=normalized_payload,
             func=run_geneva_prepare_hrus_rq,
             geneva=geneva,
             queued_status_message="Geneva HRU preparation queued.",
-        )
+        ))
         return JSONResponse(submission, status_code=202)
     except GenevaNoDbError as exc:
         return _geneva_error_response(exc)
+    except RqSubmissionConflict as exc:
+        return error_response(str(exc), status_code=409, code="conflict")
+    except GenevaAdmissionUnavailable:
+        logger.exception("rq-engine Geneva prepare admission unavailable")
+        return error_response(
+            "Submission admission is temporarily unavailable",
+            status_code=503,
+            code="service_unavailable",
+        )
     except Exception:  # broad-except: boundary contract with sanitized response
         logger.exception("rq-engine Geneva prepare enqueue failed", extra={"runid": runid, "config": config})
         return _internal_error_response(
@@ -549,17 +585,22 @@ async def build_frequency_panel(runid: str, config: str, request: Request) -> JS
         normalized_payload = geneva.frequency_panel_service.normalize_request(payload)
         geneva.assert_task_guardrails()
         _invalidate_geneva_preflight_timestamp(runid)
-        submission = _enqueue_geneva_job(
+        submission = _run_admission(lambda: _enqueue_geneva_job(
             runid=runid,
             config=config,
             payload=normalized_payload,
             func=run_geneva_build_frequency_panel_rq,
             geneva=geneva,
             queued_status_message="Geneva frequency panel build queued.",
-        )
+        ))
         return JSONResponse(submission, status_code=202)
     except GenevaNoDbError as exc:
         return _geneva_error_response(exc)
+    except RqSubmissionConflict as exc:
+        return error_response(str(exc), status_code=409, code="conflict")
+    except GenevaAdmissionUnavailable:
+        logger.exception("rq-engine Geneva frequency-panel admission unavailable")
+        return error_response("Submission admission is temporarily unavailable", status_code=503, code="service_unavailable")
     except Exception:  # broad-except: boundary contract with sanitized response
         logger.exception(
             "rq-engine Geneva frequency-panel enqueue failed",
@@ -608,17 +649,22 @@ async def run_batch(runid: str, config: str, request: Request) -> JSONResponse:
         geneva = _ensure_geneva_controller(runid, config)
         geneva.batch_run_service.validate_request(geneva, payload)
         geneva.assert_task_guardrails()
-        submission = _enqueue_geneva_job(
+        submission = _run_admission(lambda: _enqueue_geneva_job(
             runid=runid,
             config=config,
             payload=payload,
             func=run_geneva_run_batch_rq,
             geneva=geneva,
             queued_status_message="Geneva batch run queued.",
-        )
+        ))
         return JSONResponse(submission, status_code=202)
     except GenevaNoDbError as exc:
         return _geneva_error_response(exc)
+    except RqSubmissionConflict as exc:
+        return error_response(str(exc), status_code=409, code="conflict")
+    except GenevaAdmissionUnavailable:
+        logger.exception("rq-engine Geneva run-batch admission unavailable")
+        return error_response("Submission admission is temporarily unavailable", status_code=503, code="service_unavailable")
     except Exception:  # broad-except: boundary contract with sanitized response
         logger.exception("rq-engine Geneva run-batch enqueue failed", extra={"runid": runid, "config": config})
         return _internal_error_response(
@@ -665,15 +711,20 @@ async def run_workflow(runid: str, config: str, request: Request) -> JSONRespons
         normalized_payload = _normalize_workflow_request(geneva, payload)
         geneva.assert_task_guardrails()
         _invalidate_geneva_preflight_timestamp(runid)
-        submission = _enqueue_geneva_workflow_jobs(
+        submission = _run_admission(lambda: _enqueue_geneva_workflow_jobs(
             runid=runid,
             config=config,
             payload=normalized_payload,
             geneva=geneva,
-        )
+        ))
         return JSONResponse(submission, status_code=202)
     except GenevaNoDbError as exc:
         return _geneva_error_response(exc)
+    except RqSubmissionConflict as exc:
+        return error_response(str(exc), status_code=409, code="conflict")
+    except GenevaAdmissionUnavailable:
+        logger.exception("rq-engine Geneva workflow admission unavailable")
+        return error_response("Submission admission is temporarily unavailable", status_code=503, code="service_unavailable")
     except Exception:  # broad-except: boundary contract with sanitized response
         logger.exception("rq-engine Geneva run-workflow enqueue failed", extra={"runid": runid, "config": config})
         return _internal_error_response(

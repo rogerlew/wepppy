@@ -314,6 +314,7 @@ def _extract_enqueue_event_data(call: ast.Call) -> dict[str, Any] | None:
             "depends_on_expr": _keyword_value(call, "depends_on"),
             "method": "enqueue_wrapper",
             "job_meta_stage": stage,
+            "job_id_expr": _keyword_value(call, "job_id"),
         }
     if function_name == "enqueue_log_complete":
         return {
@@ -323,6 +324,7 @@ def _extract_enqueue_event_data(call: ast.Call) -> dict[str, Any] | None:
             "depends_on_expr": _keyword_value(call, "depends_on"),
             "method": "enqueue_log_complete_wrapper",
             "job_meta_stage": "jobs:6",
+            "job_id_expr": _keyword_value(call, "job_id"),
         }
     if function_name == "enqueue_tracked_rq_job":
         target_expr = call.args[1] if len(call.args) > 1 else _keyword_value(call, "func")
@@ -333,6 +335,7 @@ def _extract_enqueue_event_data(call: ast.Call) -> dict[str, Any] | None:
             "depends_on_expr": None,
             "method": "tracked_enqueue_wrapper",
             "job_meta_stage": None,
+            "job_id_expr": _keyword_value(call, "job_id"),
         }
 
     if not isinstance(call.func, ast.Attribute) or call.func.attr not in ENQUEUE_METHODS:
@@ -345,6 +348,7 @@ def _extract_enqueue_event_data(call: ast.Call) -> dict[str, Any] | None:
         "depends_on_expr": _keyword_value(call, "depends_on"),
         "method": call.func.attr,
         "job_meta_stage": None,
+        "job_id_expr": _keyword_value(call, "job_id"),
     }
 
 
@@ -359,17 +363,21 @@ def _extract_stage_assignment(
     if target.value.attr != "meta":
         return None
 
-    if not isinstance(value, ast.Attribute):
-        return None
-    if value.attr != "id":
-        return None
-    if not isinstance(value.value, ast.Name):
+    if isinstance(value, ast.Name):
+        job_reference = value.id
+    elif (
+        isinstance(value, ast.Attribute)
+        and value.attr == "id"
+        and isinstance(value.value, ast.Name)
+    ):
+        job_reference = value.value.id
+    else:
         return None
 
     stage = _extract_stage_from_meta_key(target.slice)
     if stage is None:
         return None
-    return value.value.id, stage
+    return job_reference, stage
 
 
 def _assign_name_target(node: ast.Assign | ast.AnnAssign) -> str | None:
@@ -595,6 +603,7 @@ def _extract_module_edges(*, module_path: Path, repo_root: Path) -> list[_EdgeRe
         job_bindings: dict[str, str] = {}
         function_edges: list[_EdgeRecord] = []
         edge_indices_by_var: dict[str, list[int]] = {}
+        planned_stages_by_job_id_var: dict[str, str] = {}
 
         for event in events:
             if event.kind == "queue_bind":
@@ -665,6 +674,14 @@ def _extract_module_edges(*, module_path: Path, repo_root: Path) -> list[_EdgeRe
                     notes=target_notes,
                     job_var=event.data.get("job_var"),
                 )
+                job_id_expr = event.data.get("job_id_expr")
+                if (
+                    edge.job_meta_stage is None
+                    and isinstance(job_id_expr, ast.Name)
+                ):
+                    edge.job_meta_stage = planned_stages_by_job_id_var.get(
+                        job_id_expr.id
+                    )
                 function_edges.append(edge)
                 edge_index = len(function_edges) - 1
 
@@ -677,6 +694,8 @@ def _extract_module_edges(*, module_path: Path, repo_root: Path) -> list[_EdgeRe
             if event.kind == "meta_stage":
                 job_var = event.data["job_var"]
                 indices = edge_indices_by_var.get(job_var, [])
+                if not indices:
+                    planned_stages_by_job_id_var[job_var] = event.data["stage"]
                 for index in reversed(indices):
                     edge = function_edges[index]
                     if edge.job_meta_stage is None and edge.source_lineno <= event.lineno:

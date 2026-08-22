@@ -11,9 +11,15 @@ from wepppy.microservices.rq_engine import ag_fields_routes
 from wepppy.microservices.rq_engine import culvert_routes
 from wepppy.microservices.rq_engine import roads_routes
 from wepppy.rq import roads_rq, wepp_rq
+from wepppy.rq import submission_recovery
 from wepppy.weppcloud.routes.nodb_api import roads_bp
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.fixture(autouse=True)
+def isolated_lifecycle_locks(tmp_path, monkeypatch):
+    monkeypatch.setattr(submission_recovery, "_LIFECYCLE_LOCK_DIR", str(tmp_path))
 
 WEPP_ALLOWED_NAMES = (
     "run_ss_batch_hillslope_rq", "run_hillslope_rq", "run_watershed_rq",
@@ -120,8 +126,13 @@ def _qualified_func(case: ReconcilerCase, short_name: str) -> str:
     return f"{case.module.__name__}.{short_name}"
 
 
-def _candidate(case: ReconcilerCase, mismatch: str | None = None):
-    func_name = _allowed_func(case)
+def _candidate(
+    case: ReconcilerCase,
+    mismatch: str | None = None,
+    *,
+    func_name: str | None = None,
+):
+    func_name = func_name or _allowed_func(case)
     origin = "default"
     args = ("run-1",)
     if mismatch == "cross-run":
@@ -182,6 +193,26 @@ def test_specialized_reconciler_clears_deferred_family(case: ReconcilerCase, mon
 
     def reconcile(job_id, **kwargs):
         assert kwargs["association"](_candidate(case)) is True
+        key = next(key for key, value in prep.job_ids.items() if value == job_id)
+        if case.module is ag_fields_routes:
+            root_func = ag_fields_routes.AGFIELDS_ROOT_FUNCTION_BY_JOB_KEY[key]
+            root_name = f"{root_func.__module__}.{root_func.__qualname__}"
+        else:
+            root_name = _qualified_func(case, key)
+        assert kwargs["root_association"](
+            _candidate(case, func_name=root_name)
+        ) is True
+        if case.module is wepp_rq:
+            descendant_name = _qualified_func(case, "_prep_multi_ofe_rq")
+        elif case.module is ag_fields_routes:
+            descendant = ag_fields_routes.finalize_ag_fields_watershed_suite_rq
+            descendant_name = f"{descendant.__module__}.{descendant.__qualname__}"
+        else:
+            descendant_name = None
+        if descendant_name is not None:
+            descendant_candidate = _candidate(case, func_name=descendant_name)
+            assert kwargs["association"](descendant_candidate) is True
+            assert kwargs["root_association"](descendant_candidate) is False
         reconciled.append(job_id)
         return SimpleNamespace(state="canceled", job_ids=(job_id,))
 
@@ -231,29 +262,56 @@ class _CulvertRunner:
         self.rq_job_ids[key] = job_id
 
 
-def _culvert_candidate(mismatch: str | None = None):
-    func_name = (
-        f"{culvert_routes.run_culvert_batch_rq.__module__}."
-        f"{culvert_routes.run_culvert_batch_rq.__qualname__}"
-    )
+CULVERT_OPERATIONS = (
+    (
+        "run_culvert_batch_rq",
+        culvert_routes.run_culvert_batch_rq,
+        [CULVERT_UUID],
+    ),
+    (
+        "run_culvert_run_rq",
+        culvert_routes.run_culvert_run_rq,
+        [f"culvert;;{CULVERT_UUID};;point-1", CULVERT_UUID, "point-1"],
+    ),
+    (
+        "run_culvert_batch_finalize_rq",
+        culvert_routes.run_culvert_batch_finalize_rq,
+        [CULVERT_UUID],
+    ),
+)
+
+
+def _culvert_candidate(func: Callable[..., Any], args: list[str], mismatch: str | None = None):
+    func_name = f"{func.__module__}.{func.__qualname__}"
     origin = "batch"
-    args = (CULVERT_UUID,)
+    candidate_args = tuple(args)
     meta = {"culvert_batch_uuid": CULVERT_UUID}
     if mismatch == "cross-run":
-        args = ("22222222-2222-4222-8222-222222222222",)
+        candidate_args = ("22222222-2222-4222-8222-222222222222",)
     elif mismatch == "wrong-operation":
         func_name = "wepppy.rq.project_rq.build_soils_rq"
     elif mismatch == "wrong-origin":
         origin = "default"
     elif mismatch == "hostile-lineage":
         func_name = "wepppy.rq.culvert_rq.unrelated_culvert_rq"
-    return SimpleNamespace(func_name=func_name, origin=origin, args=args, meta=meta)
+    return SimpleNamespace(func_name=func_name, origin=origin, args=candidate_args, meta=meta)
 
 
-def _invoke_culvert(monkeypatch: pytest.MonkeyPatch, *, state: str, failure: str | None = None):
+def _invoke_culvert(
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    operation: tuple[str, Callable[..., Any], list[str]] = CULVERT_OPERATIONS[0],
+    state: str,
+    failure: str | None = None,
+    observer: dict[str, Any] | None = None,
+):
+    job_key, func, args = operation
     runner = _CulvertRunner(fail_save=failure == "hint-save")
+    runner.rq_job_ids = {job_key: "old-culvert"}
     connection = _CulvertConnection()
     enqueued: list[dict[str, Any]] = []
+    if observer is not None:
+        observer.update(runner=runner, enqueued=enqueued, job_key=job_key)
     monkeypatch.setattr(culvert_routes.redis, "Redis", lambda **_kwargs: connection)
     monkeypatch.setattr(culvert_routes, "_culvert_runner", lambda _uuid: runner)
     monkeypatch.setattr(culvert_routes, "new_rq_job_id", lambda: "replacement-culvert")
@@ -261,7 +319,7 @@ def _invoke_culvert(monkeypatch: pytest.MonkeyPatch, *, state: str, failure: str
     def reconcile(*_args, **kwargs):
         if failure == "cleanup":
             raise RedisError("culvert cleanup failed")
-        candidate = _culvert_candidate(state if state in {
+        candidate = _culvert_candidate(func, args, state if state in {
             "cross-run", "wrong-operation", "wrong-origin", "hostile-lineage"
         } else None)
         associated = kwargs["association"](candidate)
@@ -269,6 +327,15 @@ def _invoke_culvert(monkeypatch: pytest.MonkeyPatch, *, state: str, failure: str
             assert associated is False
             return SimpleNamespace(state="mismatch", job_ids=(state,))
         assert associated is True
+        assert kwargs["root_association"](candidate) is True
+        descendant = SimpleNamespace(
+            func_name="wepppy.rq.culvert_rq._final_culvert_batch_complete_rq",
+            origin="batch",
+            args=(CULVERT_UUID,),
+            meta={"culvert_batch_uuid": CULVERT_UUID},
+        )
+        assert kwargs["association"](descendant) is True
+        assert kwargs["root_association"](descendant) is False
         return SimpleNamespace(state=state, job_ids=("old-culvert",))
 
     class QueueStub:
@@ -285,43 +352,88 @@ def _invoke_culvert(monkeypatch: pytest.MonkeyPatch, *, state: str, failure: str
     monkeypatch.setattr(culvert_routes, "Queue", QueueStub)
     result = culvert_routes._enqueue_culvert_job(
         CULVERT_UUID,
-        job_key="run_culvert_batch_rq",
-        func=culvert_routes.run_culvert_batch_rq,
-        args=[CULVERT_UUID],
+        job_key=job_key,
+        func=func,
+        args=args,
         meta={"culvert_batch_uuid": CULVERT_UUID},
     )
     return result, runner, enqueued
 
 
 @pytest.mark.parametrize("status", ("queued", "started", "scheduled"))
+@pytest.mark.parametrize("operation", CULVERT_OPERATIONS, ids=lambda item: item[0])
 def test_culvert_actual_producer_preserves_active_states(
-    status: str, monkeypatch: pytest.MonkeyPatch
+    operation, status: str, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     with pytest.raises(culvert_routes.RqSubmissionConflict):
-        _invoke_culvert(monkeypatch, state="active")
+        _invoke_culvert(monkeypatch, operation=operation, state="active")
 
 
 @pytest.mark.parametrize("mismatch", ("cross-run", "wrong-operation", "wrong-origin", "hostile-lineage"))
+@pytest.mark.parametrize("operation", CULVERT_OPERATIONS, ids=lambda item: item[0])
 def test_culvert_actual_producer_contains_foreign_candidates(
-    mismatch: str, monkeypatch: pytest.MonkeyPatch
+    operation, mismatch: str, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     with pytest.raises(culvert_routes.RqSubmissionConflict):
-        _invoke_culvert(monkeypatch, state=mismatch)
+        _invoke_culvert(monkeypatch, operation=operation, state=mismatch)
 
 
-def test_culvert_actual_producer_replaces_deferred_exactly(monkeypatch: pytest.MonkeyPatch) -> None:
-    result, runner, enqueued = _invoke_culvert(monkeypatch, state="canceled")
+@pytest.mark.parametrize("operation", CULVERT_OPERATIONS, ids=lambda item: item[0])
+def test_culvert_actual_producer_replaces_deferred_exactly(
+    operation, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    result, runner, enqueued = _invoke_culvert(
+        monkeypatch, operation=operation, state="canceled"
+    )
     assert result == "replacement-culvert"
-    assert runner.rq_job_ids["run_culvert_batch_rq"] == "replacement-culvert"
+    assert runner.rq_job_ids[operation[0]] == "replacement-culvert"
     assert enqueued[0]["job_id"] == "replacement-culvert"
 
 
 @pytest.mark.parametrize("failure", ("cleanup", "hint-save", "enqueue"))
+@pytest.mark.parametrize("operation", CULVERT_OPERATIONS, ids=lambda item: item[0])
 def test_culvert_actual_producer_partial_failures(
-    failure: str, monkeypatch: pytest.MonkeyPatch
+    operation, failure: str, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    observer: dict[str, Any] = {}
     with pytest.raises((OSError, RedisError)):
-        _invoke_culvert(monkeypatch, state="canceled", failure=failure)
+        _invoke_culvert(
+            monkeypatch,
+            operation=operation,
+            state="canceled",
+            failure=failure,
+            observer=observer,
+        )
+    runner = observer["runner"]
+    enqueued = observer["enqueued"]
+    job_key = observer["job_key"]
+    if failure in {"cleanup", "hint-save"}:
+        assert runner.rq_job_ids[job_key] == "old-culvert"
+        assert enqueued == []
+    else:
+        assert runner.rq_job_ids[job_key] == "replacement-culvert"
+        assert enqueued[0]["job_id"] == "replacement-culvert"
+
+
+def test_culvert_actual_producer_fails_closed_on_unknown_receipt_key(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    connection = _CulvertConnection()
+    runner = _CulvertRunner()
+    runner.rq_job_ids = {"legacy_unknown_rq": "unknown-job"}
+    monkeypatch.setattr(culvert_routes.redis, "Redis", lambda **_kwargs: connection)
+    monkeypatch.setattr(culvert_routes, "_culvert_runner", lambda _uuid: runner)
+
+    with pytest.raises(culvert_routes.RqSubmissionConflict, match="could not be verified"):
+        culvert_routes._enqueue_culvert_job(
+            CULVERT_UUID,
+            job_key="run_culvert_batch_rq",
+            func=culvert_routes.run_culvert_batch_rq,
+            args=[CULVERT_UUID],
+            meta={"culvert_batch_uuid": CULVERT_UUID},
+        )
+
+    assert runner.rq_job_ids == {"legacy_unknown_rq": "unknown-job"}
 
 
 @pytest.mark.parametrize("module", (roads_routes, roads_bp), ids=("fastapi", "flask"))

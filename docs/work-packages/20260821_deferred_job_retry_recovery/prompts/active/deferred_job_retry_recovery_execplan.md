@@ -21,7 +21,7 @@ unsafe duplicates.
 - [x] (2026-08-21 UTC) Committed the approved documentation-only ancestor as `cfcb8aa33`.
 - [x] (2026-08-22 UTC) Implemented shared deferred cleanup and adopted it across generic and specialized backend guards, including cross-surface lock families.
 - [x] (2026-08-21 UTC) Implemented shared controller retry behavior, added focused Jest evidence, and rebuilt generated assets in the WEPPcloud container.
-- [ ] Run the repository-wide pytest gate and finish independent implementation reviews. Focused backend, RQ, frontend, graph, stub, docs, and exception gates pass.
+- [x] (2026-08-22 UTC) Completed the repository-wide pytest gate and independent implementation reviews with no remaining High/Medium findings.
 
 ## Surprises & Discoveries
 
@@ -54,6 +54,17 @@ unsafe duplicates.
   cross-function lineage allowlists rather than run ID or module matching.
   Evidence: post-implementation correctness review and the regenerated static
   RQ dependency graph on 2026-08-22.
+- Observation: SWAT parsed and persisted request inputs before single-flight
+  admission, so a request rejected as active could still mutate the running
+  workflow's inputs.
+  Evidence: final security review traced `swat_routes.run_swat`; parsing now
+  occurs only after reconciliation and active-job rejection under the lock.
+- Observation: Bootstrap's ambiguous-enqueue recovery originally retained a
+  random lock token that could not be reconstructed when the planned RQ job was
+  confirmed missing.
+  Evidence: `tests/weppcloud/bootstrap/test_enable_jobs.py` now covers both the
+  planned-ID token scheme and legacy terminal-job tokens without deleting a
+  successor owner's lock.
 
 ## Decision Log
 
@@ -77,14 +88,40 @@ unsafe duplicates.
   Rationale: This removes the enqueue-to-hint orphan window that made recovery
   unreliable and ensures every accepted receipt is the exact enqueued ID.
   Date/Author: 2026-08-21, Codex.
+- Decision: Bootstrap enable uses its preallocated job ID as its opaque git-lock
+  token while retaining compatibility with tokens fetched from legacy jobs.
+  Rationale: A confirmed-missing ambiguous enqueue can then clear only its own
+  correlated stale lock, while compare-and-delete preserves a newer owner.
+  Date/Author: 2026-08-22, Codex after final correctness/security review.
+- Decision: Do not delete an uncorrelated legacy Bootstrap lock when its RQ job
+  record is missing.
+  Rationale: Legacy lock and receipt TTLs are identical, the lock is created
+  first, supported enqueue failures release it, and terminal/canceled records
+  retain the token. A receipt outliving a random-token lock is therefore the
+  supported expiry order; the inverse requires out-of-band deletion or corrupt
+  state, where guessing ownership would risk deleting a successor's lock.
+  Date/Author: 2026-08-22, Codex during compatibility review.
+- Decision: Validate identical tracked-job controllers through one exhaustive
+  shared-admission suite plus a production-policy manifest, reserving full
+  producer adapters for specialized state owners and destructive ordering.
+  Rationale: Repeating the same mocked endpoint transaction for every thin
+  wrapper does not exercise additional production logic; extracting every call
+  site's real policy keeps coverage finite and explicit while focused adapters
+  cover genuinely distinct behavior.
+  Date/Author: 2026-08-22, Codex during final validation.
 
 ## Outcomes & Retrospective
 
-Implementation is complete and focused gates pass. The shared admission path
-now renews an owner-safe lease while traversing watched dependency graphs,
-pre-saves the exact replacement receipt, and treats only queued, started, and
-scheduled work as active. The final repository-wide test and independent
-implementation-review gates remain before this package can be closed.
+Implementation and validation are complete. The shared admission path renews an
+owner-safe lease while traversing watched dependency graphs, pre-saves the exact
+replacement receipt, and treats only queued, started, and scheduled work as
+active. Deferred graphs are canceled and detached before an exact-ID replacement
+is enqueued. Specialized Batch, Culvert, Roads, WEPP/SWAT, AgFields, Bootstrap,
+fork/archive, Geneva, migration/run-sync, Path CE, and DEVAL paths retain their
+resource-specific containment and ordering. The final unified Python gate
+passed 6,636 tests with 62 skips and 12 passing subtests; frontend, graph, stub,
+documentation, and broad-exception gates also pass. Independent correctness,
+security, code, and QA reviews report no remaining High/Medium runtime findings.
 
 ## Context and Orientation
 
@@ -136,14 +173,17 @@ Work from `/home/workdir/wepppy`.
 An RQ graph constructed with unfinished dependencies must initially contain
 deferred nodes. Shared cleanup must leave every associated deferred node
 canceled, absent from `DeferredJobRegistry`, absent from parent/dependent sets,
-and unable to execute. Deferred-to-queued/started races must abort cleanup. Each
-backend matrix row must pre-save and enqueue the same replacement ID after a
-deferred prior receipt, retain conflict for queued/started/scheduled work,
-reject cross-run/operation/origin/lineage candidates, and satisfy cleanup,
-hint-save, and enqueue failure behavior. Each frontend matrix row must display
-deferred without indefinite polling or disabled submission and must track the
-new response ID after retry. No matrix row may be called representative or
-implicitly covered.
+and unable to execute. Deferred-to-queued/started races must abort cleanup.
+Validation is layered: the shared admission primitive proves exact replacement,
+queued/started/scheduled protection, four-way containment, and cleanup/hint/
+enqueue failure behavior; a production-bound manifest names every ordinary
+controller call site and extracts its actual policy; specialized state owners
+execute their production reconciler or admission boundary with focused spanning
+tests. Custom inventory or destructive paths additionally require producer-level
+ordering evidence. Each frontend matrix row must display deferred without
+indefinite polling or disabled submission and must track the new response ID
+after retry. No backend or frontend row may be unnamed or inferred from an
+unlisted representative.
 
 ## Idempotence and Recovery
 

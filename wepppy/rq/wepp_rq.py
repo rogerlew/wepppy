@@ -407,6 +407,10 @@ def reconcile_deferred_wepp_jobs(
             job_id,
             connection=redis_conn,
             association=lambda job: _wepp_job_targets_run(job, runid),
+            root_association=lambda job, expected_key=key: (
+                _wepp_job_targets_run(job, runid)
+                and str(job.func_name).rpartition(".")[2] == expected_key
+            ),
             lease_checkpoint=lease_checkpoint,
         )
         if result.state == "active":

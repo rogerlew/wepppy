@@ -223,6 +223,20 @@ async def run_sync(request: Request) -> JSONResponse:
                     redis_conn.get(shared_receipt_key),
                     redis_conn.get(receipt_key),
                 ]
+                def belongs_to_migration_sync(candidate: Job) -> bool:
+                    return (
+                        (
+                            str(getattr(candidate, "func_name", ""))
+                            == f"{run_sync_rq.__module__}.{run_sync_rq.__qualname__}"
+                            and tuple(candidate.args or ())[:1] == (runid,)
+                        )
+                        or (
+                            str(getattr(candidate, "func_name", ""))
+                            == f"{migrations_rq.__module__}.{migrations_rq.__qualname__}"
+                            and len(tuple(candidate.args or ())) > 1
+                            and tuple(candidate.args or ())[1] == runid
+                        )
+                    ) and str(candidate.origin) == str(queue.name)
                 for prior_job_id in dict.fromkeys(prior_job_ids):
                     if isinstance(prior_job_id, bytes):
                         prior_job_id = prior_job_id.decode("utf-8")
@@ -231,20 +245,8 @@ async def run_sync(request: Request) -> JSONResponse:
                     result = reconcile_deferred_workflow(
                         str(prior_job_id),
                         connection=redis_conn,
-                        association=lambda candidate: (
-                            (
-                                str(getattr(candidate, "func_name", ""))
-                                == f"{run_sync_rq.__module__}.{run_sync_rq.__qualname__}"
-                                and tuple(candidate.args or ())[:1] == (runid,)
-                            )
-                            or (
-                                str(getattr(candidate, "func_name", ""))
-                                == f"{migrations_rq.__module__}.{migrations_rq.__qualname__}"
-                                and len(tuple(candidate.args or ())) > 1
-                                and tuple(candidate.args or ())[1] == runid
-                            )
-                        )
-                        and str(candidate.origin) == str(queue.name),
+                        association=belongs_to_migration_sync,
+                        root_association=belongs_to_migration_sync,
                         lease_checkpoint=lease.checkpoint,
                     )
                     if result.state in {"active", "mismatch"}:

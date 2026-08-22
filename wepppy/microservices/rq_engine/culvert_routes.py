@@ -66,6 +66,11 @@ CULVERT_JOB_KEYS = (
     "run_culvert_run_rq",
     "run_culvert_batch_finalize_rq",
 )
+CULVERT_ROOT_FUNCTION_BY_JOB_KEY = {
+    "run_culvert_batch_rq": run_culvert_batch_rq,
+    "run_culvert_run_rq": run_culvert_run_rq,
+    "run_culvert_batch_finalize_rq": run_culvert_batch_finalize_rq,
+}
 
 
 def _culvert_job_belongs_to_batch(job: Job, batch_uuid: str) -> bool:
@@ -154,12 +159,29 @@ def _enqueue_culvert_job(
         with rq_submission_lock(redis_conn, f"culvert:{batch_uuid}", lifecycle_key=batch_uuid, lifecycle_type="culvert") as lease:
             # Read the persisted receipt map only after admission is serialized.
             runner = _culvert_runner(batch_uuid)
-            for prior_job_id in dict.fromkeys(runner.rq_job_ids.values()):
+            roots_by_job_id: dict[str, set[str]] = {}
+            for prior_key, prior_job_id in runner.rq_job_ids.items():
+                root_func = CULVERT_ROOT_FUNCTION_BY_JOB_KEY.get(prior_key)
+                if not prior_job_id:
+                    continue
+                if root_func is None:
+                    raise RqSubmissionConflict(
+                        "Culvert receipt operation could not be verified "
+                        f"(key={prior_key})."
+                    )
+                roots_by_job_id.setdefault(str(prior_job_id), set()).add(
+                    f"{root_func.__module__}.{root_func.__qualname__}"
+                )
+            for prior_job_id, allowed_root_funcs in roots_by_job_id.items():
                 result = reconcile_deferred_workflow(
                     str(prior_job_id),
                     connection=redis_conn,
                     association=lambda candidate: _culvert_job_belongs_to_batch(
                         candidate, batch_uuid
+                    ),
+                    root_association=lambda candidate, allowed=allowed_root_funcs: (
+                        _culvert_job_belongs_to_batch(candidate, batch_uuid)
+                        and str(candidate.func_name) in allowed
                     ),
                     lease_checkpoint=lease.checkpoint,
                 )

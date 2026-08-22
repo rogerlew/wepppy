@@ -1,5 +1,6 @@
 import contextlib
 import asyncio
+import os
 from types import SimpleNamespace
 from uuid import UUID
 
@@ -1238,6 +1239,56 @@ def test_archive_enqueues_job(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None
     assert constructor_calls[0][0] == ("fork-archive",)
 
 
+@pytest.mark.parametrize(
+    ("error", "status_code", "code"),
+    (
+        (fork_archive_routes.RqSubmissionConflict("busy"), 409, "conflict"),
+        (OSError("lock storage offline"), 503, "service_unavailable"),
+    ),
+)
+def test_archive_maps_admission_failures(
+    error: Exception,
+    status_code: int,
+    code: str,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+) -> None:
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+    monkeypatch.setattr(
+        fork_archive_routes, "require_jwt", lambda _request, required_scopes=None: {}
+    )
+    monkeypatch.setattr(
+        fork_archive_routes, "authorize_run_access", lambda _claims, _runid: None
+    )
+    monkeypatch.setattr(fork_archive_routes, "get_wd", lambda _runid: str(run_dir))
+    monkeypatch.setattr(fork_archive_routes, "_exists", lambda _path: True)
+    monkeypatch.setattr(fork_archive_routes, "lock_statuses", lambda _runid: {})
+    _stub_queue(monkeypatch)
+    _stub_prep(monkeypatch)
+
+    class FailingAdmission:
+        def __enter__(self):
+            raise error
+
+        def __exit__(self, *_args):
+            return False
+
+    monkeypatch.setattr(
+        fork_archive_routes,
+        "rq_submission_lock",
+        lambda *_args, **_kwargs: FailingAdmission(),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/archive", json={"comment": "demo"}
+        )
+
+    assert response.status_code == status_code
+    assert response.json()["error"]["code"] == code
+
+
 def test_archive_clears_stale_job_id_when_lookup_fails(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path,
@@ -1380,3 +1431,194 @@ def test_restore_clears_stale_job_id_before_enqueue(
     assert prep.clear_calls == 0
     assert prep.archive_job_id == "job-restore"
     assert constructor_calls[0][0] == ("fork-archive",)
+
+
+@pytest.mark.parametrize(
+    ("state", "cleanup_error", "expected_status", "should_delete"),
+    (
+        ("canceled", None, 200, True),
+        ("active", None, 400, False),
+        ("mismatch", None, 400, False),
+        (None, RuntimeError("cleanup failed"), 500, False),
+    ),
+)
+def test_delete_archive_reconciles_before_destructive_mutation(
+    state: str | None,
+    cleanup_error: Exception | None,
+    expected_status: int,
+    should_delete: bool,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+) -> None:
+    run_dir = tmp_path / "run"
+    archives_dir = run_dir / "archives"
+    archives_dir.mkdir(parents=True)
+    archive_path = archives_dir / "snapshot.zip"
+    archive_path.write_bytes(b"archive")
+    events: list[str] = []
+
+    monkeypatch.setattr(fork_archive_routes, "require_jwt", lambda *_args, **_kwargs: {})
+    monkeypatch.setattr(fork_archive_routes, "authorize_run_access", lambda *_args: None)
+    monkeypatch.setattr(fork_archive_routes, "get_wd", lambda _runid: str(run_dir))
+    monkeypatch.setattr(fork_archive_routes, "_exists", os.path.exists)
+    monkeypatch.setattr(fork_archive_routes, "lock_statuses", lambda _runid: {})
+    monkeypatch.setattr(fork_archive_routes, "_archive_job_in_progress", lambda _prep: False)
+    monkeypatch.setattr(fork_archive_routes.StatusMessenger, "publish", lambda *_args: None)
+    _stub_queue(monkeypatch)
+    prep = _stub_prep(monkeypatch, archive_job_id="old-archive")
+    prep.clear_archive_job_id = lambda: events.append("clear-receipt")
+
+    def reconcile(*_args, **_kwargs):
+        events.append("reconcile")
+        if cleanup_error is not None:
+            raise cleanup_error
+        return state
+
+    monkeypatch.setattr(fork_archive_routes, "_reconcile_archive_receipt", reconcile)
+    real_remove = os.remove
+
+    def remove(path):
+        events.append("remove")
+        real_remove(path)
+
+    monkeypatch.setattr(fork_archive_routes.os, "remove", remove)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/delete-archive",
+            json={"archive_name": "snapshot.zip"},
+        )
+
+    assert response.status_code == expected_status
+    assert (not archive_path.exists()) is should_delete
+    if should_delete:
+        assert events == ["reconcile", "remove", "clear-receipt"]
+    else:
+        assert events == ["reconcile"]
+
+
+def test_fork_existing_target_reconciles_and_records_before_replacement(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+) -> None:
+    source_dir = tmp_path / "source"
+    target_dir = tmp_path / "target"
+    source_dir.mkdir()
+    target_dir.mkdir()
+    (target_dir / "old.txt").write_text("old", encoding="utf-8")
+    events: list[str] = []
+    receipt_key = (
+        f"{fork_archive_routes.FORK_DESTINATION_RECEIPT_KEY_PREFIX}:target-run"
+    )
+
+    monkeypatch.setattr(
+        fork_archive_routes,
+        "_resolve_bearer_claims",
+        lambda _request: {"token_class": "service", "sub": "operator"},
+    )
+    monkeypatch.setattr(fork_archive_routes, "authorize_run_access", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(
+        fork_archive_routes,
+        "get_wd",
+        lambda runid, prefer_active=True: (
+            str(source_dir) if runid == "source-run" else str(target_dir)
+        ),
+    )
+    monkeypatch.setattr(fork_archive_routes, "_exists", os.path.exists)
+    monkeypatch.setattr(fork_archive_routes, "get_run_owners_lazy", lambda _runid: [])
+    monkeypatch.setattr(fork_archive_routes, "lock_statuses", lambda _runid: {})
+    monkeypatch.setattr(
+        fork_archive_routes.Ron,
+        "getInstance",
+        lambda _wd: SimpleNamespace(config_stem="cfg"),
+    )
+    monkeypatch.setattr(fork_archive_routes, "new_rq_job_id", lambda: "replacement-fork")
+    monkeypatch.setattr(fork_archive_routes.StatusMessenger, "publish", lambda *_args: None)
+
+    class Lease:
+        def checkpoint(self): return None
+
+    class Boundary:
+        def __enter__(self): return Lease()
+        def __exit__(self, *_args): return False
+
+    monkeypatch.setattr(fork_archive_routes, "rq_submission_lock", lambda *_args, **_kwargs: Boundary())
+    monkeypatch.setattr(fork_archive_routes, "run_replacement_guard", lambda *_args, **_kwargs: Boundary())
+
+    class Redis:
+        def __init__(self):
+            self.values = {receipt_key: "old-fork"}
+            self.hashes: dict[str, dict[str, str]] = {}
+        def __enter__(self): return self
+        def __exit__(self, *_args): return False
+        def get(self, key): return self.values.get(key)
+        def set(self, key, value, **_kwargs):
+            self.values[key] = value
+            if key == receipt_key and value == "replacement-fork": events.append("receipt")
+            return True
+        def hgetall(self, key): return self.hashes.get(key, {})
+        def hset(self, key, mapping):
+            self.hashes[key] = dict(mapping)
+            events.append("planned")
+            return len(mapping)
+
+    redis_conn = Redis()
+    monkeypatch.setattr(fork_archive_routes.redis, "Redis", lambda **_kwargs: redis_conn)
+    old_root = SimpleNamespace(
+        func_name=f"{fork_archive_routes.fork_rq.__module__}.{fork_archive_routes.fork_rq.__qualname__}",
+        origin=fork_archive_routes.FORK_ARCHIVE_QUEUE,
+        args=("source-run", "target-run"),
+    )
+    monkeypatch.setattr(fork_archive_routes.Job, "fetch", lambda *_args, **_kwargs: old_root)
+    monkeypatch.setattr(
+        fork_archive_routes,
+        "reconcile_deferred_workflow",
+        lambda *_args, **_kwargs: (events.append("reconcile") or SimpleNamespace(state="canceled", job_ids=("old-fork",))),
+    )
+    monkeypatch.setattr(
+        fork_archive_routes,
+        "reconcile_deferred_wepp_jobs",
+        lambda *_args, **_kwargs: events.append("target-wepp-reconcile"),
+    )
+    monkeypatch.setattr(fork_archive_routes, "ensure_no_active_wepp_job", lambda *_args: None)
+    monkeypatch.setattr(
+        fork_archive_routes,
+        "_reconcile_target_deferred_jobs",
+        lambda *_args, **_kwargs: (events.append("target-reconcile") or ()),
+    )
+
+    class Prep:
+        def get_rq_job_id(self, _key): return None
+        def get_rq_job_ids(self): return {}
+        def set_rq_job_id(self, _key, _job_id): events.append("source-hint")
+
+    monkeypatch.setattr(fork_archive_routes.RedisPrep, "getInstance", lambda _wd: Prep())
+    real_replace = os.replace
+
+    def replace(source, destination):
+        events.append("replace")
+        real_replace(source, destination)
+
+    monkeypatch.setattr(fork_archive_routes.os, "replace", replace)
+
+    class Queue:
+        def __init__(self, *_args, **_kwargs): pass
+        def enqueue_call(self, *_args, **kwargs):
+            events.append("enqueue")
+            return SimpleNamespace(id=kwargs["job_id"])
+
+    monkeypatch.setattr(fork_archive_routes, "Queue", Queue)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/source-run/cfg/fork",
+            headers={"Authorization": "Bearer token"},
+            json={"target_runid": "target-run", "undisturbify": False},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["job_id"] == "replacement-fork"
+    assert events.index("reconcile") < events.index("planned")
+    assert events.index("planned") < events.index("replace")
+    assert events.index("replace") < events.index("enqueue")
+    assert not (target_dir / "old.txt").exists()

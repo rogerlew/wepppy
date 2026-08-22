@@ -421,6 +421,9 @@ def reconcile_deferred_batch_jobs(
             str(job.id),
             connection=redis_conn,
             association=lambda candidate: _job_targets_batch(candidate, batch_name),
+            root_association=lambda candidate: _job_targets_batch(
+                candidate, batch_name
+            ),
             lease_checkpoint=lease_checkpoint,
         )
         if result.state in {"active", "mismatch"}:

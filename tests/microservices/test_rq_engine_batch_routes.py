@@ -333,3 +333,111 @@ def test_delete_batch_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
     assert response.status_code == 202
     payload = response.json()
     assert payload["job_id"] == "job-123"
+
+
+@pytest.mark.parametrize(
+    ("path", "receipt_key", "success_code"),
+    (
+        ("run-batch", "run_batch_rq", 200),
+        ("delete-batch", "delete_batch_rq", 202),
+    ),
+)
+@pytest.mark.parametrize("prior_state", ("deferred", "queued", "started", "scheduled"))
+def test_batch_actual_producers_apply_deferred_and_active_contract(
+    path: str,
+    receipt_key: str,
+    success_code: int,
+    prior_state: str,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    events: list[tuple] = []
+
+    class Runner:
+        def set_rq_job_id(self, key, job_id):
+            events.append(("hint", key, job_id))
+
+    class Redis:
+        def __enter__(self): return self
+        def __exit__(self, *_args): return False
+        def lock(self, *_args, **_kwargs): return _DummyLock()
+        def set(self, key, value): events.append(("redis-hint", key, value))
+
+    class Queue:
+        def __init__(self, *_args, **_kwargs): pass
+        def enqueue_call(self, *_args, **kwargs):
+            events.append(("enqueue", kwargs["job_id"]))
+            return type("Job", (), {"id": kwargs["job_id"]})()
+
+    monkeypatch.setattr(batch_routes, "require_jwt", lambda *_args, **_kwargs: {"roles": ["Admin"]})
+    monkeypatch.setattr(batch_routes.BatchRunner, "getInstanceFromBatchName", lambda _name: Runner())
+    monkeypatch.setattr(batch_routes.redis, "Redis", lambda **_kwargs: Redis())
+    monkeypatch.setattr(batch_routes, "Queue", Queue)
+    monkeypatch.setattr(batch_routes, "new_rq_job_id", lambda: "replacement-batch")
+    monkeypatch.setattr(
+        batch_routes,
+        "reconcile_deferred_batch_jobs",
+        lambda *_args, **_kwargs: (
+            [] if prior_state == "deferred" else [f"old-job:{prior_state}"]
+        ),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(f"/api/batch/_/demo/{path}")
+
+    if prior_state == "deferred":
+        assert response.status_code == success_code
+        assert ("hint", receipt_key, "replacement-batch") in events
+        assert ("enqueue", "replacement-batch") in events
+    else:
+        assert response.status_code == 409
+        assert not any(event[0] in {"hint", "enqueue"} for event in events)
+
+
+@pytest.mark.parametrize("path", ("run-batch", "delete-batch"))
+@pytest.mark.parametrize("failure", ("cleanup", "hint-save", "enqueue"))
+def test_batch_actual_producer_failure_postconditions(
+    path: str, failure: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    events: list[tuple] = []
+
+    class Runner:
+        def set_rq_job_id(self, key, job_id):
+            if failure == "hint-save":
+                raise OSError("receipt save failed")
+            events.append(("hint", key, job_id))
+
+    class Redis:
+        def __enter__(self): return self
+        def __exit__(self, *_args): return False
+        def lock(self, *_args, **_kwargs): return _DummyLock()
+        def set(self, key, value): events.append(("redis-hint", key, value))
+
+    class Queue:
+        def __init__(self, *_args, **_kwargs): pass
+        def enqueue_call(self, *_args, **kwargs):
+            events.append(("enqueue", kwargs["job_id"]))
+            if failure == "enqueue":
+                raise batch_routes.redis.RedisError("enqueue failed")
+            return type("Job", (), {"id": kwargs["job_id"]})()
+
+    monkeypatch.setattr(batch_routes, "require_jwt", lambda *_args, **_kwargs: {"roles": ["Admin"]})
+    monkeypatch.setattr(batch_routes.BatchRunner, "getInstanceFromBatchName", lambda _name: Runner())
+    monkeypatch.setattr(batch_routes.redis, "Redis", lambda **_kwargs: Redis())
+    monkeypatch.setattr(batch_routes, "Queue", Queue)
+    monkeypatch.setattr(batch_routes, "new_rq_job_id", lambda: "replacement-batch")
+
+    def reconcile(*_args, **_kwargs):
+        if failure == "cleanup":
+            raise batch_routes.redis.RedisError("cleanup failed")
+        return []
+
+    monkeypatch.setattr(batch_routes, "reconcile_deferred_batch_jobs", reconcile)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(f"/api/batch/_/demo/{path}")
+
+    assert response.status_code == 500
+    if failure in {"cleanup", "hint-save"}:
+        assert not any(event[0] == "enqueue" for event in events)
+    else:
+        assert ("enqueue", "replacement-batch") in events

@@ -243,6 +243,18 @@ def _enqueue_geneva_job(
                         )
                     }
                 ),
+                root_association=lambda candidate: (
+                    tuple(candidate.args or ())[:2] == (runid, config)
+                    and str(candidate.origin) == "default"
+                    and str(candidate.func_name) in {
+                        f"{func.__module__}.{func.__qualname__}"
+                        for func in (
+                            run_geneva_prepare_hrus_rq,
+                            run_geneva_build_frequency_panel_rq,
+                            run_geneva_run_batch_rq,
+                        )
+                    }
+                ),
                 lease_checkpoint=lease.checkpoint,
             )
             if result.state in {"active", "mismatch"}:

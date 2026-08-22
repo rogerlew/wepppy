@@ -180,6 +180,42 @@ def _stub_prep(monkeypatch: pytest.MonkeyPatch) -> dict[str, list[object]]:
     return state
 
 
+@pytest.mark.parametrize(
+    ("error", "status_code", "code"),
+    (
+        (geneva_routes.RqSubmissionConflict("busy"), 409, "conflict"),
+        (geneva_routes.redis.RedisError("offline"), 503, "service_unavailable"),
+    ),
+)
+def test_prepare_hrus_maps_admission_failures(
+    error: Exception,
+    status_code: int,
+    code: str,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_prep(monkeypatch)
+    monkeypatch.setattr(
+        geneva_routes,
+        "_ensure_geneva_controller",
+        lambda _runid, _config: _GenevaRouteStub(),
+    )
+    monkeypatch.setattr(
+        geneva_routes,
+        "_enqueue_geneva_job",
+        lambda **_kwargs: (_ for _ in ()).throw(error),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/geneva/prepare-hrus",
+            json={"schema_version": 1, "force_rebuild": False},
+        )
+
+    assert response.status_code == status_code
+    assert response.json()["error"]["code"] == code
+
+
 def test_prepare_hrus_enqueues_job_with_canonical_submission_envelope(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

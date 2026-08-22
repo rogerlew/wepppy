@@ -161,7 +161,8 @@ def _names_from_expr(expr: ast.AST | None, imports: dict[str, str]) -> tuple[str
 
 
 def _production_policy(case: SurfaceCase) -> ProductionPolicy:
-    tree = ast.parse(Path(case.source).read_text(encoding="utf-8"))
+    repo_root = Path(__file__).resolve().parents[2]
+    tree = ast.parse((repo_root / case.source).read_text(encoding="utf-8"))
     imports = _import_names(tree)
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call) or getattr(node.func, "id", None) != "enqueue_tracked_rq_job":

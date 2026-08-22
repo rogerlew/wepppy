@@ -250,7 +250,7 @@ async def bootstrap_enable(runid: str, config: str, request: Request) -> JSONRes
         return JSONResponse(result.payload, status_code=result.status_code)
     except BootstrapOperationError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except redis.RedisError:
+    except (OSError, redis.RedisError):
         logger.exception("rq-engine bootstrap-enable enqueue failed")
         return error_response("Error Handling Request", status_code=500)
     except RuntimeError:
@@ -290,7 +290,7 @@ async def bootstrap_mint_token(runid: str, config: str, request: Request) -> JSO
         return JSONResponse(result.payload, status_code=result.status_code)
     except BootstrapOperationError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except redis.RedisError:
+    except (OSError, redis.RedisError):
         logger.exception("rq-engine bootstrap mint-token failed")
         return error_response("Error Handling Request", status_code=500)
     except RuntimeError:
@@ -326,7 +326,7 @@ async def bootstrap_commits(runid: str, config: str, request: Request) -> JSONRe
         return JSONResponse(result.payload, status_code=result.status_code)
     except BootstrapOperationError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except redis.RedisError:
+    except (OSError, redis.RedisError):
         logger.exception("rq-engine bootstrap commits failed")
         return error_response("Error Handling Request", status_code=500)
     except RuntimeError:
@@ -489,7 +489,7 @@ async def run_wepp_npprep(runid: str, config: str, request: Request) -> JSONResp
         return error_response(str(exc), status_code=400)
     except WeppSingleFlightConflict as exc:
         return error_response(str(exc), status_code=409, code="conflict")
-    except redis.RedisError:
+    except (OSError, redis.RedisError):
         logger.exception("rq-engine run-wepp-npprep enqueue failed")
         return error_response("Error Handling Request", status_code=500)
     except RuntimeError:
@@ -569,7 +569,7 @@ async def run_wepp_watershed_noprep(runid: str, config: str, request: Request) -
         return error_response(str(exc), status_code=400)
     except WeppSingleFlightConflict as exc:
         return error_response(str(exc), status_code=409, code="conflict")
-    except redis.RedisError:
+    except (OSError, redis.RedisError):
         logger.exception("rq-engine run-wepp-watershed-no-prep enqueue failed")
         return error_response("Error Handling Request", status_code=500)
     except RuntimeError:
@@ -614,7 +614,9 @@ async def run_swat_noprep(runid: str, config: str, request: Request) -> JSONResp
         )
     except ValueError as exc:
         return error_response(str(exc), status_code=400)
-    except redis.RedisError:
+    except (RqSubmissionConflict, WeppSingleFlightConflict) as exc:
+        return error_response(str(exc), status_code=409, code="job_active")
+    except (OSError, redis.RedisError):
         logger.exception("rq-engine run-swat-noprep enqueue failed")
         return error_response("Error Handling Request", status_code=500)
     except RuntimeError:

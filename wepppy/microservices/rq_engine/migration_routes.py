@@ -116,24 +116,26 @@ def _enqueue_migration_job(
                 shared_job_id = redis_conn.get(shared_receipt_key)
                 if isinstance(shared_job_id, bytes):
                     shared_job_id = shared_job_id.decode("utf-8")
+                def belongs_to_migration_sync(candidate: Job) -> bool:
+                    return (
+                        (
+                            str(candidate.func_name)
+                            == f"{migrations_rq.__module__}.{migrations_rq.__qualname__}"
+                            and len(tuple(candidate.args or ())) > 1
+                            and str(tuple(candidate.args or ())[1]) == runid
+                        )
+                        or (
+                            str(candidate.func_name)
+                            == f"{run_sync_rq.__module__}.{run_sync_rq.__qualname__}"
+                            and tuple(candidate.args or ())[:1] == (runid,)
+                        )
+                    ) and str(candidate.origin) == "default"
                 if shared_job_id:
                     result = reconcile_deferred_workflow(
                         str(shared_job_id),
                         connection=redis_conn,
-                        association=lambda candidate: (
-                            (
-                                str(candidate.func_name)
-                                == f"{migrations_rq.__module__}.{migrations_rq.__qualname__}"
-                                and len(tuple(candidate.args or ())) > 1
-                                and str(tuple(candidate.args or ())[1]) == runid
-                            )
-                            or (
-                                str(candidate.func_name)
-                                == f"{run_sync_rq.__module__}.{run_sync_rq.__qualname__}"
-                                and tuple(candidate.args or ())[:1] == (runid,)
-                            )
-                        )
-                        and str(candidate.origin) == "default",
+                        association=belongs_to_migration_sync,
+                        root_association=belongs_to_migration_sync,
                         lease_checkpoint=lease.checkpoint,
                     )
                     if result.state in {"active", "mismatch"}:

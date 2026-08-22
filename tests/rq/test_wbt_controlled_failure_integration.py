@@ -172,6 +172,7 @@ def test_reconcile_deferred_workflow_cancels_and_detaches_complete_graph(
             dependent.id,
             connection=rq_connection,
             association=lambda job: job.meta.get("runid") == "run-1",
+            root_association=lambda job: job.meta.get("runid") == "run-1",
         )
 
         dependent.refresh()
@@ -212,6 +213,7 @@ def test_reconcile_deferred_workflow_follows_serialized_metadata_links(
             root.id,
             connection=rq_connection,
             association=lambda job: job.meta.get("runid") == "run-meta",
+            root_association=lambda job: job.meta.get("runid") == "run-meta",
         )
 
         child.refresh()
@@ -221,6 +223,41 @@ def test_reconcile_deferred_workflow_follows_serialized_metadata_links(
         assert child.id not in DeferredJobRegistry(
             queue_name,
             connection=rq_connection,
+        ).get_job_ids()
+    finally:
+        for candidate in (child, root):
+            try:
+                candidate.delete(remove_from_queue=True)
+            except Exception:
+                pass
+        queue.delete(delete_jobs=True)
+
+
+def test_reconcile_deferred_workflow_rejects_allowed_descendant_as_receipt_root(
+    rq_connection,
+) -> None:
+    queue_name = f"deferred-child-receipt-{uuid.uuid4().hex}"
+    queue = Queue(queue_name, connection=rq_connection)
+    root = queue.enqueue(_noop_job, meta={"runid": "root-run", "role": "root"})
+    child = queue.enqueue(
+        _noop_job,
+        depends_on=root,
+        meta={"runid": "root-run", "role": "child"},
+    )
+    root.set_status("failed")
+
+    try:
+        result = reconcile_deferred_workflow(
+            child.id,
+            connection=rq_connection,
+            association=lambda job: job.meta.get("runid") == "root-run",
+            root_association=lambda job: job.meta.get("role") == "root",
+        )
+
+        assert result.state == "mismatch"
+        assert child.get_status(refresh=True) == "deferred"
+        assert child.id in DeferredJobRegistry(
+            queue_name, connection=rq_connection
         ).get_job_ids()
     finally:
         for candidate in (child, root):
@@ -261,6 +298,7 @@ def test_reconcile_deferred_workflow_observes_deferred_to_queued_race(
             root.id,
             connection=rq_connection,
             association=lambda job: job.meta.get("runid") == "race-run",
+            root_association=lambda job: job.meta.get("runid") == "race-run",
         )
         assert result.state == "active"
         assert child.get_status(refresh=True) == "queued"
@@ -300,6 +338,7 @@ def test_reconcile_deferred_workflow_contains_association_change_after_watched_f
             child.id,
             connection=rq_connection,
             association=lambda job: job.meta.get("runid") == "owned-run",
+            root_association=lambda job: job.meta.get("runid") == "owned-run",
         )
 
         child.refresh()
@@ -336,6 +375,7 @@ def test_reconcile_deferred_workflow_retries_root_created_after_missing_fetch(
             root_id,
             connection=rq_connection,
             association=lambda job: job.meta.get("runid") == "late-run",
+            root_association=lambda job: job.meta.get("runid") == "late-run",
         )
 
         assert result.state == "active"
@@ -344,6 +384,34 @@ def test_reconcile_deferred_workflow_retries_root_created_after_missing_fetch(
         try:
             original_fetch(root_id, connection=rq_connection).delete(remove_from_queue=True)
         except NoSuchJobError:
+            pass
+        queue.delete(delete_jobs=True)
+
+
+@pytest.mark.parametrize("active_status", ["queued", "started", "scheduled"])
+def test_reconcile_deferred_workflow_classifies_every_real_active_status(
+    rq_connection,
+    active_status: str,
+) -> None:
+    queue_name = f"deferred-active-{uuid.uuid4().hex}"
+    queue = Queue(queue_name, connection=rq_connection)
+    job = queue.enqueue(_noop_job, meta={"runid": "active-run"})
+    job.set_status(active_status)
+    try:
+        result = reconcile_deferred_workflow(
+            job.id,
+            connection=rq_connection,
+            association=lambda candidate: candidate.meta.get("runid") == "active-run",
+            root_association=lambda candidate: candidate.meta.get("runid") == "active-run",
+        )
+
+        assert result.state == "active"
+        assert result.job_ids == (job.id,)
+        assert job.get_status(refresh=True) == active_status
+    finally:
+        try:
+            job.delete(remove_from_queue=True)
+        except Exception:
             pass
         queue.delete(delete_jobs=True)
 
@@ -380,6 +448,7 @@ def test_reconcile_deferred_workflow_rejects_inserted_hostile_edge(
             root.id,
             connection=rq_connection,
             association=lambda job: job.meta.get("runid") == "owned-run",
+            root_association=lambda job: job.meta.get("runid") == "owned-run",
         )
         assert result.state == "mismatch"
         assert child.get_status(refresh=True) == "deferred"
@@ -441,6 +510,7 @@ def test_reconcile_deferred_workflow_watch_aborts_late_promotion(
             child.id,
             connection=rq_connection,
             association=lambda job: job.meta.get("runid") == "watch-run",
+            root_association=lambda job: job.meta.get("runid") == "watch-run",
         )
         assert result.state == "active"
         assert child.get_status(refresh=True) == promoted_status
@@ -474,6 +544,7 @@ def test_reconcile_deferred_workflow_cancels_multilevel_metadata_graph(
             root.id,
             connection=rq_connection,
             association=lambda job: job.meta.get("runid") == "tree-run",
+            root_association=lambda job: job.meta.get("runid") == "tree-run",
         )
         assert result.state == "canceled"
         assert set(result.job_ids) == {middle.id, leaf.id}

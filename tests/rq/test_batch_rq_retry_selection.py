@@ -958,6 +958,13 @@ class _DummyJob:
 
 
 class _DummyRedis:
+    def lock(self, *_args, **_kwargs):
+        return SimpleNamespace(
+            acquire=lambda **_kwargs: True,
+            extend=lambda *_args, **_kwargs: True,
+            release=lambda: None,
+        )
+
     def __enter__(self):
         return self
 
@@ -1093,14 +1100,17 @@ def test_run_batch_rq_enqueues_only_retry_eligible_features(
         def __init__(self, name: str, connection=None) -> None:
             assert name == "batch"
 
-        def enqueue_call(self, func, args=(), timeout=None, depends_on=None):
-            job = _DummyJob(f"job-{len(enqueue_calls) + 1}")
+        def enqueue_call(
+            self, func, args=(), timeout=None, depends_on=None, job_id=None, meta=None
+        ):
+            job = _DummyJob(job_id or f"job-{len(enqueue_calls) + 1}")
             enqueue_calls.append(
                 {
                     "func": func,
                     "args": args,
                     "timeout": timeout,
                     "depends_on": depends_on,
+                    "meta": meta,
                     "job": job,
                 }
             )
@@ -1180,9 +1190,13 @@ def test_run_batch_rq_full_rerun_enqueues_all_features(
         def __init__(self, name: str, connection=None) -> None:
             assert name == "batch"
 
-        def enqueue_call(self, func, args=(), timeout=None, depends_on=None):
-            job = _DummyJob(f"job-{len(enqueue_calls) + 1}")
-            enqueue_calls.append({"func": func, "args": args, "job": job})
+        def enqueue_call(
+            self, func, args=(), timeout=None, depends_on=None, job_id=None, meta=None
+        ):
+            job = _DummyJob(job_id or f"job-{len(enqueue_calls) + 1}")
+            enqueue_calls.append(
+                {"func": func, "args": args, "job": job, "meta": meta}
+            )
             return job
 
     monkeypatch.setattr(batch_rq, "Queue", _Queue)

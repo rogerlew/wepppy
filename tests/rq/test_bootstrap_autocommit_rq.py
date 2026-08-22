@@ -47,8 +47,13 @@ def _stub_rq_queue(monkeypatch: pytest.MonkeyPatch, module) -> list[dict[str, ob
             kwargs=None,
             timeout=None,
             depends_on=None,
+            job_id=None,
+            meta=None,
         ):
-            job = SimpleNamespace(id=f"job-{len(calls) + 1}", get_status=lambda refresh=True: JobStatus.QUEUED)
+            job = SimpleNamespace(
+                id=job_id or f"job-{len(calls) + 1}",
+                get_status=lambda refresh=True: JobStatus.QUEUED,
+            )
             calls.append(
                 {
                     "func": func,
@@ -56,6 +61,7 @@ def _stub_rq_queue(monkeypatch: pytest.MonkeyPatch, module) -> list[dict[str, ob
                     "kwargs": kwargs,
                     "timeout": timeout,
                     "depends_on": depends_on,
+                    "meta": meta,
                     "job": job,
                 }
             )

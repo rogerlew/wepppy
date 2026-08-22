@@ -22,7 +22,7 @@ def reconcile_deferred_workflow(
     *,
     connection: Any,
     association: Callable[[Job], bool],
-    root_association: Callable[[Job], bool] | None = ...,
+    root_association: Callable[[Job], bool],
     max_attempts: int = ...,
     lease_checkpoint: Callable[[], None] | None = ...,
 ) -> DeferredWorkflowReconciliation: ...

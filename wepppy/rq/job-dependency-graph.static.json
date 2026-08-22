@@ -6,7 +6,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_job",
-    "source_lineno": 182,
+    "source_lineno": 193,
     "source_module": "wepppy/microservices/rq_engine/ag_fields_routes.py"
   },
   {
@@ -16,7 +16,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_watershed_jobs",
-    "source_lineno": 249,
+    "source_lineno": 260,
     "source_module": "wepppy/microservices/rq_engine/ag_fields_routes.py"
   },
   {
@@ -26,7 +26,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_watershed_jobs",
-    "source_lineno": 275,
+    "source_lineno": 286,
     "source_module": "wepppy/microservices/rq_engine/ag_fields_routes.py"
   },
   {
@@ -86,7 +86,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "_enqueue_culvert_job",
-    "source_lineno": 177,
+    "source_lineno": 199,
     "source_module": "wepppy/microservices/rq_engine/culvert_routes.py"
   },
   {
@@ -146,7 +146,7 @@
     "notes": [],
     "queue_name": "fork-archive",
     "source_function": "archive_run",
-    "source_lineno": 1425,
+    "source_lineno": 1454,
     "source_module": "wepppy/microservices/rq_engine/fork_archive_routes.py"
   },
   {
@@ -156,7 +156,7 @@
     "notes": [],
     "queue_name": "fork-archive",
     "source_function": "fork_project",
-    "source_lineno": 1309,
+    "source_lineno": 1338,
     "source_module": "wepppy/microservices/rq_engine/fork_archive_routes.py"
   },
   {
@@ -166,7 +166,7 @@
     "notes": [],
     "queue_name": "fork-archive",
     "source_function": "restore_archive",
-    "source_lineno": 1519,
+    "source_lineno": 1553,
     "source_module": "wepppy/microservices/rq_engine/fork_archive_routes.py"
   },
   {
@@ -176,7 +176,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_geneva_job",
-    "source_lineno": 279,
+    "source_lineno": 306,
     "source_module": "wepppy/microservices/rq_engine/geneva_routes.py"
   },
   {
@@ -186,7 +186,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_geneva_workflow_jobs",
-    "source_lineno": 331,
+    "source_lineno": 358,
     "source_module": "wepppy/microservices/rq_engine/geneva_routes.py"
   },
   {
@@ -198,7 +198,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_geneva_workflow_jobs",
-    "source_lineno": 338,
+    "source_lineno": 365,
     "source_module": "wepppy/microservices/rq_engine/geneva_routes.py"
   },
   {
@@ -210,7 +210,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_geneva_workflow_jobs",
-    "source_lineno": 347,
+    "source_lineno": 374,
     "source_module": "wepppy/microservices/rq_engine/geneva_routes.py"
   },
   {
@@ -250,7 +250,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_migration_job",
-    "source_lineno": 179,
+    "source_lineno": 181,
     "source_module": "wepppy/microservices/rq_engine/migration_routes.py"
   },
   {
@@ -340,7 +340,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "run_sync",
-    "source_lineno": 271,
+    "source_lineno": 273,
     "source_module": "wepppy/microservices/rq_engine/run_sync_routes.py"
   },
   {
@@ -350,7 +350,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "run_sync",
-    "source_lineno": 279,
+    "source_lineno": 281,
     "source_module": "wepppy/microservices/rq_engine/run_sync_routes.py"
   },
   {
@@ -362,7 +362,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "run_sync",
-    "source_lineno": 310,
+    "source_lineno": 312,
     "source_module": "wepppy/microservices/rq_engine/run_sync_routes.py"
   },
   {
@@ -392,7 +392,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "run_swat",
-    "source_lineno": 99,
+    "source_lineno": 103,
     "source_module": "wepppy/microservices/rq_engine/swat_routes.py"
   },
   {
@@ -482,11 +482,11 @@
   {
     "depends_on": [],
     "enqueue_target": "run_batch_watershed_rq",
-    "job_meta_stage": null,
+    "job_meta_stage": "jobs:0",
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_batch_rq",
-    "source_lineno": 627,
+    "source_lineno": 630,
     "source_module": "wepppy/rq/batch_rq.py"
   },
   {
@@ -498,7 +498,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_batch_rq",
-    "source_lineno": 645,
+    "source_lineno": 648,
     "source_module": "wepppy/rq/batch_rq.py"
   },
   {
@@ -528,7 +528,7 @@
       "_failure_tolerant_depends_on(batch_depends)"
     ],
     "enqueue_target": "run_omni_contrast_rq",
-    "job_meta_stage": null,
+    "job_meta_stage": "jobs:contrast",
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_omni_contrasts_rq",
@@ -540,7 +540,7 @@
       "_failure_tolerant_depends_on(batch_depends)"
     ],
     "enqueue_target": "_finalize_omni_contrasts_rq",
-    "job_meta_stage": null,
+    "job_meta_stage": "jobs:finalize",
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_omni_contrasts_rq",
@@ -550,7 +550,7 @@
   {
     "depends_on": [],
     "enqueue_target": "run_omni_scenario_rq",
-    "job_meta_stage": null,
+    "job_meta_stage": "jobs:0",
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_omni_scenarios_rq",
@@ -562,7 +562,7 @@
       "_failure_tolerant_depends_on(stage1_jobs)"
     ],
     "enqueue_target": "run_omni_scenario_rq",
-    "job_meta_stage": null,
+    "job_meta_stage": "jobs:1",
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_omni_scenarios_rq",
@@ -574,7 +574,7 @@
       "_failure_tolerant_depends_on(compile_depends)"
     ],
     "enqueue_target": "_compile_hillslope_summaries_rq",
-    "job_meta_stage": null,
+    "job_meta_stage": "jobs:2",
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_omni_scenarios_rq",
@@ -586,7 +586,7 @@
       "_failure_tolerant_depends_on([compile_job])"
     ],
     "enqueue_target": "_finalize_omni_scenarios_rq",
-    "job_meta_stage": null,
+    "job_meta_stage": "jobs:3",
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_omni_scenarios_rq",
@@ -602,7 +602,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_serial_subcatchment_tree",
-    "source_lineno": 729,
+    "source_lineno": 730,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -614,7 +614,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_serial_subcatchment_tree",
-    "source_lineno": 737,
+    "source_lineno": 738,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -624,7 +624,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 1549,
+    "source_lineno": 1550,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -634,7 +634,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 1565,
+    "source_lineno": 1566,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -646,7 +646,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 1573,
+    "source_lineno": 1574,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -658,7 +658,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fork_rq",
-    "source_lineno": 2934,
+    "source_lineno": 2945,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -700,7 +700,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "run_wepp_watershed_noprep_rq",
-    "source_lineno": 1095,
+    "source_lineno": 1099,
     "source_module": "wepppy/rq/wepp_rq.py"
   },
   {
@@ -710,7 +710,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "run_wepp_watershed_rq",
-    "source_lineno": 948,
+    "source_lineno": 952,
     "source_module": "wepppy/rq/wepp_rq.py"
   },
   {
@@ -1583,7 +1583,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_bootstrap_enable",
-    "source_lineno": 108,
+    "source_lineno": 122,
     "source_module": "wepppy/weppcloud/bootstrap/enable_jobs.py"
   },
   {
@@ -1593,7 +1593,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_geneva_job",
-    "source_lineno": 258,
+    "source_lineno": 270,
     "source_module": "wepppy/weppcloud/routes/nodb_api/geneva_bp.py"
   },
   {

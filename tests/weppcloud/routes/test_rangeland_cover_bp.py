@@ -82,7 +82,7 @@ def rangeland_client(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
             return SimpleNamespace(
                 acquire=lambda **kwargs: True,
                 release=lambda: None,
-                extend=lambda additional_time: True,
+                extend=lambda additional_time, **_kwargs: True,
             )
 
     class FakeQueue:

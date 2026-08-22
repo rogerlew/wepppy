@@ -1171,3 +1171,85 @@ def test_run_wepp_rejects_unknown_binary(route_context, monkeypatch: pytest.Monk
 
     assert response.status_code == 400
     assert response.json()["error"]["message"] == "Unknown WEPP executable: ../../not-a-wepp-binary"
+
+
+@pytest.mark.parametrize("producer", ("simple", "direct", "suite"))
+@pytest.mark.parametrize("failure", ("cleanup", "hint-save", "enqueue"))
+def test_agfields_actual_producer_failure_postconditions(
+    producer: str, failure: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    events: list[tuple] = []
+
+    class Prep:
+        def get_rq_job_id(self, _key): return None
+        def remove_timestamp(self, _task): return None
+        def set_rq_job_id(self, key, job_id):
+            if failure == "hint-save":
+                raise OSError("receipt save failed")
+            events.append(("hint", key, job_id))
+
+    class Controller:
+        def set_watershed_integration_job_ids(self, ids):
+            events.append(("state", dict(ids)))
+
+    class Redis:
+        def __enter__(self): return self
+        def __exit__(self, *_args): return False
+        def lock(self, *_args, **_kwargs):
+            class Lock:
+                def acquire(self, **_kwargs): return True
+                def extend(self, *_args, **_kwargs): return True
+                def release(self): return None
+            return Lock()
+
+    class Queue:
+        def __init__(self, *_args, **_kwargs): pass
+        def enqueue_call(self, *_args, **kwargs):
+            events.append(("enqueue", kwargs["job_id"]))
+            if failure == "enqueue":
+                raise ag_fields_routes.redis.RedisError("enqueue failed")
+            return SimpleNamespace(id=kwargs["job_id"])
+
+    monkeypatch.setattr(ag_fields_routes.RedisPrep, "getInstance", lambda _wd: Prep())
+    monkeypatch.setattr(ag_fields_routes.AgFields, "getInstance", lambda _wd: Controller())
+    monkeypatch.setattr(ag_fields_routes.redis, "Redis", lambda **_kwargs: Redis())
+    monkeypatch.setattr(ag_fields_routes, "Queue", Queue)
+    monkeypatch.setattr(ag_fields_routes, "_find_active_job", lambda *_args: None)
+    monkeypatch.setattr(
+        ag_fields_routes,
+        "_reconcile_interrupted_watershed_jobs",
+        lambda *_args: {
+            scheme.value: {"status": "not_run"}
+            for scheme in ag_fields_routes.AgFieldsRoutingScheme
+        },
+    )
+
+    def reconcile(*_args, **_kwargs):
+        if failure == "cleanup":
+            raise ag_fields_routes.redis.RedisError("cleanup failed")
+
+    monkeypatch.setattr(ag_fields_routes, "_reconcile_deferred_agfields_jobs", reconcile)
+
+    with pytest.raises((OSError, ag_fields_routes.redis.RedisError)):
+        if producer == "simple":
+            ag_fields_routes._enqueue_job(
+                "/runs/demo",
+                ag_fields_routes.AGFIELDS_BUILD_SUBFIELDS_JOB_KEY,
+                ag_fields_routes.build_ag_fields_subfields_rq,
+                ("demo", 0.0),
+            )
+        else:
+            schemes = (
+                (ag_fields_routes.AgFieldsRoutingScheme.CONCEPT_2,)
+                if producer == "direct"
+                else tuple(ag_fields_routes.AgFieldsRoutingScheme)
+            )
+            ag_fields_routes._enqueue_watershed_jobs(
+                "/runs/demo", "demo", schemes, 4
+            )
+
+    if failure in {"cleanup", "hint-save"}:
+        assert not any(event[0] == "enqueue" for event in events)
+    else:
+        assert any(event[0] == "hint" for event in events)
+        assert any(event[0] == "enqueue" for event in events)

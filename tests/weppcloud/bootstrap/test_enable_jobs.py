@@ -252,4 +252,100 @@ def test_enqueue_bootstrap_enable_preserves_receipt_and_lock_when_commit_unknown
         enable_jobs.enqueue_bootstrap_enable("run-1", actor="user:1")
 
     assert store[bootstrap_enable_job_key("run-1")] == "planned-job"
-    assert bootstrap_git_lock_key("run-1") in store
+    assert json.loads(store[bootstrap_git_lock_key("run-1")])["token"] == "planned-job"
+
+
+def test_enqueue_bootstrap_enable_recovers_missing_commit_unknown_lock_owner_safely(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    store: dict[str, str] = {
+        bootstrap_enable_job_key("run-1"): "planned-job",
+        bootstrap_git_lock_key("run-1"): json.dumps({"token": "planned-job"}),
+    }
+    redis_conn = DummyRedis(store)
+    monkeypatch.setattr(enable_jobs, "get_wd", lambda *_args, **_kwargs: "/tmp/run")
+    monkeypatch.setattr(
+        enable_jobs.Wepp,
+        "getInstance",
+        lambda _wd: SimpleNamespace(bootstrap_enabled=False),
+    )
+    monkeypatch.setattr(enable_jobs.redis, "Redis", lambda **_kwargs: redis_conn)
+    monkeypatch.setattr(
+        enable_jobs.Job,
+        "fetch",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(enable_jobs.NoSuchJobError),
+    )
+    monkeypatch.setattr(
+        enable_jobs,
+        "reconcile_deferred_workflow",
+        lambda *_args, **_kwargs: SimpleNamespace(state="missing"),
+    )
+    monkeypatch.setattr(enable_jobs, "new_rq_job_id", lambda: "replacement-job")
+
+    class QueueStub:
+        name = "default"
+
+        def __init__(self, **_kwargs): pass
+        def enqueue_call(self, *_args, **_kwargs):
+            return SimpleNamespace(id="replacement-job")
+
+    monkeypatch.setattr(enable_jobs, "Queue", QueueStub)
+
+    payload, status = enable_jobs.enqueue_bootstrap_enable("run-1", actor="user:1")
+
+    assert status == 202
+    assert payload["job_id"] == "replacement-job"
+    assert store[bootstrap_enable_job_key("run-1")] == "replacement-job"
+    assert json.loads(store[bootstrap_git_lock_key("run-1")])["token"] == "replacement-job"
+
+    # A stale receipt must not delete a lock already replaced by another owner.
+    store[bootstrap_enable_job_key("run-1")] = "planned-job"
+    store[bootstrap_git_lock_key("run-1")] = json.dumps({"token": "newer-owner"})
+    with pytest.raises(BootstrapLockBusyError, match="bootstrap lock busy"):
+        enable_jobs.enqueue_bootstrap_enable("run-1", actor="user:1")
+    assert json.loads(store[bootstrap_git_lock_key("run-1")])["token"] == "newer-owner"
+
+
+def test_enqueue_bootstrap_enable_releases_terminal_legacy_lock_token(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    store = {
+        bootstrap_enable_job_key("run-1"): "legacy-job",
+        bootstrap_git_lock_key("run-1"): json.dumps({"token": "legacy-random-token"}),
+    }
+    redis_conn = DummyRedis(store)
+    monkeypatch.setattr(enable_jobs, "get_wd", lambda *_args, **_kwargs: "/tmp/run")
+    monkeypatch.setattr(
+        enable_jobs.Wepp,
+        "getInstance",
+        lambda _wd: SimpleNamespace(bootstrap_enabled=False),
+    )
+    monkeypatch.setattr(enable_jobs.redis, "Redis", lambda **_kwargs: redis_conn)
+    monkeypatch.setattr(
+        enable_jobs.Job,
+        "fetch",
+        lambda *_args, **_kwargs: SimpleNamespace(
+            kwargs={"lock_token": "legacy-random-token"}
+        ),
+    )
+    monkeypatch.setattr(
+        enable_jobs,
+        "reconcile_deferred_workflow",
+        lambda *_args, **_kwargs: SimpleNamespace(state="terminal"),
+    )
+    monkeypatch.setattr(enable_jobs, "new_rq_job_id", lambda: "replacement-job")
+
+    class QueueStub:
+        name = "default"
+
+        def __init__(self, **_kwargs): pass
+        def enqueue_call(self, *_args, **_kwargs):
+            return SimpleNamespace(id="replacement-job")
+
+    monkeypatch.setattr(enable_jobs, "Queue", QueueStub)
+
+    payload, status = enable_jobs.enqueue_bootstrap_enable("run-1", actor="user:1")
+
+    assert status == 202
+    assert payload["job_id"] == "replacement-job"
+    assert json.loads(store[bootstrap_git_lock_key("run-1")])["token"] == "replacement-job"

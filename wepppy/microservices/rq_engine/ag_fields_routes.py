@@ -92,6 +92,17 @@ AGFIELDS_ALL_JOB_KEYS = (
     *AGFIELDS_CURRENT_WATERSHED_JOB_KEYS,
     AGFIELDS_RUN_WATERSHED_JOB_KEY,
 )
+AGFIELDS_ROOT_FUNCTION_BY_JOB_KEY = {
+    AGFIELDS_RUN_WATERSHED_SUITE_JOB_KEY: run_ag_fields_watershed_suite_rq,
+    AGFIELDS_BUILD_SUBFIELDS_JOB_KEY: build_ag_fields_subfields_rq,
+    AGFIELDS_PLANTDB_JOB_KEY: process_ag_fields_plant_db_rq,
+    AGFIELDS_RUN_WEPP_JOB_KEY: run_ag_fields_wepp_rq,
+    **{
+        key: run_ag_fields_watershed_rq
+        for key in AGFIELDS_CURRENT_WATERSHED_JOB_KEYS
+    },
+    AGFIELDS_RUN_WATERSHED_JOB_KEY: run_ag_fields_watershed_rq,
+}
 
 AGFIELDS_BOUNDARY_ALLOWED_EXTENSIONS = ("geojson", "json")
 AGFIELDS_BOUNDARY_MAX_BYTES = 10 * 1024 * 1024
@@ -340,6 +351,13 @@ def _reconcile_deferred_agfields_jobs(
             job_id,
             connection=redis_conn,
             association=lambda job: _agfields_job_targets_run(job, runid),
+            root_association=lambda job, expected_func=(
+                AGFIELDS_ROOT_FUNCTION_BY_JOB_KEY[key]
+            ): (
+                _agfields_job_targets_run(job, runid)
+                and str(job.func_name)
+                == f"{expected_func.__module__}.{expected_func.__qualname__}"
+            ),
             lease_checkpoint=lease_checkpoint,
         )
         if result.state in {"active", "mismatch"}:

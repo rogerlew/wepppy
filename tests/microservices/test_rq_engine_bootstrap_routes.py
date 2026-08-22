@@ -11,13 +11,75 @@ from tests.microservices._wepp_payload_doubles import GroupedSoilsDummy, Grouped
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import auth as rq_auth
 from wepppy.microservices.rq_engine import bootstrap_routes
+from wepppy.microservices.rq_engine import swat_routes
 from wepppy.microservices.rq_engine import wepp_run_payload
 from wepppy.nodb.base import NoDbAlreadyLockedError
 from wepppy.nodb.redis_prep import TaskEnum
+from wepppy.rq.wepp_rq import WeppSingleFlightConflict
 from wepppy.weppcloud.bootstrap.api_shared import BootstrapOperationError, BootstrapOperationResult
 from wepppy.weppcloud.utils import auth_tokens
 
 pytestmark = pytest.mark.microservice
+
+
+@pytest.mark.parametrize("endpoint", ["run-swat", "run-swat-noprep"])
+def test_swat_active_wepp_conflict_returns_409_without_enqueue(
+    monkeypatch: pytest.MonkeyPatch,
+    endpoint: str,
+) -> None:
+    module = swat_routes if endpoint == "run-swat" else bootstrap_routes
+    monkeypatch.setattr(module, "require_jwt", lambda *_args, **_kwargs: {"sub": "7"})
+    monkeypatch.setattr(module, "authorize_run_access", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(module, "get_wd", lambda *_args, **_kwargs: "/tmp/run")
+    monkeypatch.setattr(module.RedisPrep, "getInstance", lambda _wd: object())
+    if module is swat_routes:
+        monkeypatch.setattr(module.Ron, "getInstance", lambda _wd: type("Ron", (), {"mods": ["swat"]})())
+        monkeypatch.setattr(
+            module.Swat,
+            "getInstance",
+            lambda _wd: type(
+                "Swat",
+                (),
+                {"parse_inputs": lambda *_args: pytest.fail("conflict must not mutate SWAT inputs")},
+            )(),
+        )
+    else:
+        monkeypatch.setattr(
+            module.Wepp,
+            "getInstance",
+            lambda _wd: type("Wepp", (), {"bootstrap_enabled": True})(),
+        )
+
+    class DummyRedis:
+        def lock(self, *_args, **_kwargs):
+            class Lock:
+                def acquire(self, **_kwargs): return True
+                def extend(self, *_args, **_kwargs): return True
+                def release(self): return None
+            return Lock()
+
+        def __enter__(self): return self
+        def __exit__(self, *_args): return False
+
+    monkeypatch.setattr(module.redis, "Redis", lambda **_kwargs: DummyRedis())
+    monkeypatch.setattr(
+        module,
+        "reconcile_deferred_wepp_jobs",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            WeppSingleFlightConflict("WEPP workflow already active")
+        ),
+    )
+    monkeypatch.setattr(
+        module.Queue,
+        "enqueue_call",
+        lambda *_args, **_kwargs: pytest.fail("active conflict must not enqueue"),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(f"/api/runs/run-1/cfg/{endpoint}", json={})
+
+    assert response.status_code == 409
+    assert response.json()["error"]["code"] == "job_active"
 
 
 def _stub_auth(monkeypatch: pytest.MonkeyPatch, *, claims: dict | None = None) -> None:
@@ -507,6 +569,75 @@ def test_bootstrap_run_swat_noprep_persists_job_hint_to_wepp_nodb(
     assert dummy_wepp.persist_job_hint_calls == [
         {"job_id": "job-swat-501", "job_key": "run_swat_noprep_rq"}
     ]
+
+
+@pytest.mark.parametrize(
+    "endpoint",
+    (
+        "/api/runs/run-1/cfg/run-wepp-npprep",
+        "/api/runs/run-1/cfg/run-wepp-watershed-no-prep",
+        "/api/runs/run-1/cfg/run-swat-noprep",
+    ),
+)
+@pytest.mark.parametrize("failure", ("cleanup", "hint-save", "enqueue"))
+def test_bootstrap_noprep_actual_producer_failure_postconditions(
+    endpoint: str, failure: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    events: list[tuple] = []
+    _stub_auth(monkeypatch)
+    dummy_wepp = _make_dummy_bootstrap_wepp()
+    monkeypatch.setattr(bootstrap_routes.Wepp, "getInstance", lambda _wd: dummy_wepp)
+    monkeypatch.setattr(
+        bootstrap_routes, "get_wd", lambda _runid, prefer_active=False: "/tmp/run"
+    )
+
+    class Prep:
+        def get_rq_job_id(self, _key): return None
+        def remove_timestamp(self, _task): return None
+        def set_rq_job_id(self, key, job_id):
+            if failure == "hint-save":
+                raise OSError("receipt save failed")
+            events.append(("hint", key, job_id))
+
+    class Redis:
+        def __enter__(self): return self
+        def __exit__(self, *_args): return False
+        def lock(self, *_args, **_kwargs):
+            class Lock:
+                def acquire(self, **_kwargs): return True
+                def extend(self, *_args, **_kwargs): return True
+                def release(self): return None
+            return Lock()
+
+    class Queue:
+        def __init__(self, *_args, **_kwargs): pass
+        def enqueue_call(self, *_args, **kwargs):
+            events.append(("enqueue", kwargs["job_id"]))
+            if failure == "enqueue":
+                raise bootstrap_routes.redis.RedisError("enqueue failed")
+            return type("Job", (), {"id": kwargs["job_id"]})()
+
+    monkeypatch.setattr(bootstrap_routes.RedisPrep, "getInstance", lambda _wd: Prep())
+    monkeypatch.setattr(bootstrap_routes.redis, "Redis", lambda **_kwargs: Redis())
+    monkeypatch.setattr(bootstrap_routes, "Queue", Queue)
+    monkeypatch.setattr(bootstrap_routes, "new_rq_job_id", lambda: "replacement-noprep")
+    monkeypatch.setattr(bootstrap_routes, "ensure_no_active_wepp_job", lambda *_args: None)
+
+    def reconcile(*_args, **_kwargs):
+        if failure == "cleanup":
+            raise bootstrap_routes.redis.RedisError("cleanup failed")
+
+    monkeypatch.setattr(bootstrap_routes, "reconcile_deferred_wepp_jobs", reconcile)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(endpoint, json={})
+
+    assert response.status_code == 500
+    if failure in {"cleanup", "hint-save"}:
+        assert not any(event[0] == "enqueue" for event in events)
+    else:
+        assert any(event[0] == "hint" for event in events)
+        assert any(event[0] == "enqueue" for event in events)
 
 
 def test_bootstrap_run_wepp_noprep_job_hint_persist_failure_after_enqueue_returns_job_id(

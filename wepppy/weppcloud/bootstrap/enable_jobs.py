@@ -69,6 +69,12 @@ def enqueue_bootstrap_enable(runid: str, *, actor: str) -> tuple[dict[str, Any],
                     and str(candidate.origin) == "default"
                     and tuple(candidate.args or ())[:1] == (runid,)
                 ),
+                root_association=lambda candidate: (
+                    str(candidate.func_name)
+                    == f"{bootstrap_enable_rq.__module__}.{bootstrap_enable_rq.__qualname__}"
+                    and str(candidate.origin) == "default"
+                    and tuple(candidate.args or ())[:1] == (runid,)
+                ),
             )
             if result.state in {"active", "mismatch"}:
                 return (
@@ -80,23 +86,31 @@ def enqueue_bootstrap_enable(runid: str, *, actor: str) -> tuple[dict[str, Any],
                     },
                     202,
                 )
-            if result.state == "canceled" and prior_lock_token:
+            if result.state in {"canceled", "terminal"} and prior_lock_token:
                 release_bootstrap_git_lock(
                     lock_conn, runid=runid, token=str(prior_lock_token)
                 )
+            elif result.state in {"missing", "terminal"}:
+                # New enable submissions use their planned job ID as the
+                # opaque lock token. This compare-and-delete clears only the
+                # lock correlated with the stale receipt; a newer owner wins.
+                release_bootstrap_git_lock(
+                    lock_conn, runid=runid, token=active_job_id
+                )
 
+        job_id = new_rq_job_id()
         lock = acquire_bootstrap_git_lock(
             lock_conn,
             runid=runid,
             operation="enable",
             actor=actor,
             ttl_seconds=_bootstrap_enable_lock_ttl_seconds(),
+            token=job_id,
         )
         if lock is None:
             raise BootstrapLockBusyError("bootstrap lock busy")
 
         try:
-            job_id = new_rq_job_id()
             set_bootstrap_enable_job_id(
                 lock_conn,
                 runid=runid,

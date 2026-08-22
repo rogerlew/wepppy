@@ -209,7 +209,7 @@ describe("run migration status inline contract", () => {
         expect(document.querySelector("#btn-text").textContent).toBe("Retry Migrations");
     });
 
-    test.each(["stopped", "canceled", "not_found"])(
+    test.each(["deferred", "stopped", "canceled", "not_found"])(
         "stops polling and enables retry for %s",
         async (status) => {
             window.WCHttp = {

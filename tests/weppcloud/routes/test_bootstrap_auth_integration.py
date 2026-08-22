@@ -145,6 +145,8 @@ def auth_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
     app.register_blueprint(bootstrap_module.bootstrap_bp)
 
     monkeypatch.setattr(bootstrap_module, "authorize", lambda runid, config: None)
+    helpers_module = importlib.import_module("wepppy.weppcloud.utils.helpers")
+    monkeypatch.setattr(helpers_module, "authorize", lambda runid, config: None)
     monkeypatch.setattr(
         bootstrap_module,
         "enable_bootstrap_operation",
