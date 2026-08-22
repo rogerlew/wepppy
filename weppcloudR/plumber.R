@@ -23,7 +23,7 @@ FONTAWESOME_JS <- Sys.getenv(
 )
 FONTAWESOME_SHA256 <- "8cb270b4d9485a93b31df98113fda8723ffc067fa7bfa90cedd47b76f7b10be1"
 
-fontawesome_header <- function() {
+vendored_fontawesome_script <- function() {
   if (!file.exists(FONTAWESOME_JS) || file.info(FONTAWESOME_JS)$isdir) {
     stop("vendored Font Awesome asset is unavailable")
   }
@@ -44,13 +44,36 @@ fontawesome_header <- function() {
   if (!identical(digest, FONTAWESOME_SHA256)) {
     stop("vendored Font Awesome asset checksum mismatch")
   }
-  header <- tempfile(pattern = "fontawesome-5.3.1-", fileext = ".html")
-  writeLines(
-    c("<script>", readLines(FONTAWESOME_JS, warn = FALSE), "</script>"),
-    header,
+  paste0(
+    "<script>\n",
+    readChar(FONTAWESOME_JS, file.info(FONTAWESOME_JS)$size, useBytes = TRUE),
+    "\n</script>\n"
+  )
+}
+
+embed_vendored_fontawesome <- function(output_file) {
+  if (!file.exists(output_file) || file.info(output_file)$isdir) {
+    stop("rendered report is unavailable for Font Awesome embedding")
+  }
+  html <- readChar(output_file, file.info(output_file)$size, useBytes = TRUE)
+  if (grepl("use.fontawesome.com", html, fixed = TRUE)) {
+    stop("rendered report retains a remote Font Awesome dependency")
+  }
+  parts <- strsplit(html, "</head>", fixed = TRUE)[[1L]]
+  if (length(parts) != 2L) {
+    stop("rendered report does not contain exactly one closing head element")
+  }
+  staged <- paste0(output_file, ".fontawesome")
+  on.exit(unlink(staged, force = TRUE), add = TRUE)
+  writeChar(
+    paste0(parts[[1L]], vendored_fontawesome_script(), "</head>", parts[[2L]]),
+    staged,
+    eos = NULL,
     useBytes = TRUE
   )
-  header
+  if (!file.rename(staged, output_file)) {
+    stop("could not atomically embed vendored Font Awesome asset")
+  }
 }
 
 resolve_batch_run_root <- function(batch_name, runid) {
@@ -303,8 +326,6 @@ render_deval <- function(run_path, runid, config = NULL, skip_cache = FALSE, par
     append_log("INFO", glue("Cache bypass requested for run {runid}; regenerating report"))
   }
   append_log("INFO", glue("Starting render for run {runid}"))
-  local_fontawesome_header <- fontawesome_header()
-  on.exit(unlink(local_fontawesome_header, force = TRUE), add = TRUE)
   render_target <- output_file
   publish_after_render <- is.null(output_file_override)
   if (publish_after_render) {
@@ -322,16 +343,14 @@ render_deval <- function(run_path, runid, config = NULL, skip_cache = FALSE, par
         params = params,
         output_file = render_target,
         output_dir = dirname(render_target),
-        output_options = list(
-          use_fontawesome = FALSE,
-          includes = list(in_header = local_fontawesome_header)
-        ),
+        output_options = list(use_fontawesome = FALSE),
         # The production image has a read-only root filesystem. Keep all knit
         # intermediates in the pod-local writable tmpfs; only the fenced final
         # artifact is published to the run directory.
         intermediates_dir = tempdir(),
         envir = new.env(parent = globalenv())
       )
+      embed_vendored_fontawesome(render_target)
       if (publish_after_render && !file.rename(render_target, output_file)) {
         stop("atomic DEVAL report publication failed")
       }
