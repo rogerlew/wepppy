@@ -22,8 +22,17 @@ unsafe duplicates.
 - [x] (2026-08-22 UTC) Implemented shared deferred cleanup and adopted it across generic and specialized backend guards, including cross-surface lock families.
 - [x] (2026-08-21 UTC) Implemented shared controller retry behavior, added focused Jest evidence, and rebuilt generated assets in the WEPPcloud container.
 - [x] (2026-08-22 UTC) Completed the repository-wide pytest gate and independent implementation reviews with no remaining High/Medium findings.
+- [ ] (2026-08-23 UTC) Correct the discovered dependency regression: strict
+  executable stages must stop after required-parent failure while ordinary
+  submission remains the no-friction deferred-graph recovery action.
 
 ## Surprises & Discoveries
+
+- Observation: Live WEPP job `5af82b08-f1af-4180-8613-9917d53ac3f0`
+  disproved the global failure-tolerant dependency design. Missing soils failed
+  stage 0, but `allow_failure=True` released transitive executable stages that
+  waited for or consumed nonexistent outputs.
+  Evidence: the live job tree and commit `9022acba6`.
 
 - Observation: The prior fix was behaving as designed, but its design conflicts
   with the newly required invariant because it intentionally blocks a deferred
@@ -67,6 +76,14 @@ unsafe duplicates.
   successor owner's lock.
 
 ## Decision Log
+
+- Decision: Restore strict dependencies for every required-output stage; retain
+  failure tolerance only for explicitly reviewed terminal observers/finalizers
+  and the enumerated AgFields/Omni-contrast independent-work serialization edges.
+  Rationale: Dependency correctness and deferred retry recovery are independent.
+  The established replacement transaction solves user lockout without running
+  invalid downstream work.
+  Date/Author: 2026-08-23, operator and Codex.
 
 - Decision: Deferred is retryable everywhere; queued, started, and scheduled
   remain active.
@@ -112,7 +129,9 @@ unsafe duplicates.
 
 ## Outcomes & Retrospective
 
-Implementation and validation are complete. The shared admission path renews an
+The original deferred-retry implementation and validation completed, but this
+package reopened on 2026-08-23 after a live run exposed the global failure-
+tolerant dependency regression. The shared admission path renews an
 owner-safe lease while traversing watched dependency graphs, pre-saves the exact
 replacement receipt, and treats only queued, started, and scheduled work as
 active. Deferred graphs are canceled and detached before an exact-ID replacement
@@ -120,8 +139,8 @@ is enqueued. Specialized Batch, Culvert, Roads, WEPP/SWAT, AgFields, Bootstrap,
 fork/archive, Geneva, migration/run-sync, Path CE, and DEVAL paths retain their
 resource-specific containment and ordering. The final unified Python gate
 passed 6,636 tests with 62 skips and 12 passing subtests; frontend, graph, stub,
-documentation, and broad-exception gates also pass. Independent correctness,
-security, code, and QA reviews report no remaining High/Medium runtime findings.
+documentation, and broad-exception gates also passed for the original scope.
+Those reviews do not approve the reopened corrective dependency work.
 
 ## Context and Orientation
 
@@ -136,6 +155,16 @@ modules will invoke it. `wepppy/weppcloud/controllers_js/control_base.js` will
 own the shared browser rule.
 
 ## Plan of Work
+
+For the corrective milestone, first ratify
+`artifacts/dependency_edge_matrix.md`, aggregate status precedence, and the
+mixed-version cutover in a standalone reviewed documentation ancestor. Then add
+failing direct RQ tests for strict dependencies, each retained tolerant
+finalizer, WEPP/Omni transitive stopping, and failed-over-blocked-deferred
+aggregation. Change only the classified enqueue sites and aggregation priority.
+Regenerate the RQ graph, execute each family's production admission retry test,
+restart the local producers/workers at one revision, run live strict-failure and
+ordinary-retry smokes, and complete correctness/security review before commit.
 
 First ratify the cross-cutting contract and review it in a documentation-only
 ancestor. Then add a helper that uses Redis optimistic locking to cancel only a
@@ -167,8 +196,23 @@ Work from `/home/workdir/wepppy`.
    `wctl run-npm lint`, `wctl run-npm test`, targeted `wctl run-pytest`,
    `wctl check-rq-graph`, documentation lint, and the substantive-code broad
    pytest gate.
+5. Commit the reviewed dependency/aggregate/cutover checkpoint alone. Implement
+   the edge matrix and aggregate precedence, regenerate graph artifacts, restart
+   the local stack at one revision, execute the two live smokes, run focused and
+   broad gates, obtain independent implementation reviews, update this plan and
+   the tracker, then commit and push.
 
 ## Validation and Acceptance
+
+Corrective acceptance additionally requires every row in
+`artifacts/dependency_edge_matrix.md` to execute its classification. No
+required-output dependent starts after failure. Only named direct finalizers and
+the two named independent serialization families may tolerate `failed`;
+stopped/canceled/missing prerequisites are not automatically releasable for
+either class. With no queued/started/scheduled member, failed outranks blocked
+deferred descendants; viable deferred-only trees remain deferred and retryable.
+Mixed-version evidence must show all local producers/workers restarted from the
+correction revision.
 
 An RQ graph constructed with unfinished dependencies must initially contain
 deferred nodes. Shared cleanup must leave every associated deferred node
@@ -200,9 +244,9 @@ development or test commands.
 
 ## Artifacts and Notes
 
-The starting implementation revision is `80e621164`. `PROJECT_TRACKER.md` was
-already modified by the user before this package; package updates must preserve
-that unrelated change.
+The original starting implementation revision is `80e621164`; the corrective
+milestone starts at `4197be09d`. Live evidence is job
+`5af82b08-f1af-4180-8613-9917d53ac3f0`. Preserve unrelated user changes.
 
 ## Interfaces and Dependencies
 
@@ -213,3 +257,89 @@ result (`canceled`, `active`, `terminal`, `missing`, or `mismatch`). It uses RQ
 and Redis `WATCH`/transaction retries. Callers hold a route/domain submission
 lock while reconciling the full associated graph and enqueueing replacement
 work. Batch routes add one bounded lock keyed by validated batch name.
+
+The corrective milestone limits `failure_tolerant_depends_on` and
+`release_deferred_job_if_ready` to the named tolerant finalizers and the two
+named independent serialization families in `artifacts/dependency_edge_matrix.md`.
+Their tests include the predecessor-failed-before-dependent-registration race.
+Required-output edges pass ordinary
+`depends_on`. `wepppy.rq.job_info.get_wepppy_rq_job_status` applies active
+executable work, then terminal failure, then viable deferred precedence.
+
+## Corrective command runbook (revision 2026-08-23)
+
+Write and run focused evidence with:
+
+    wctl run-pytest tests/rq/test_job_dependencies.py tests/rq/test_wepp_rq_pipeline.py tests/rq/test_culvert_rq_pipeline.py
+    wctl run-pytest tests/rq/test_project_rq_fork.py tests/rq/test_project_rq.py tests/rq/test_swat_rq.py
+    wctl run-pytest tests/rq/test_omni_rq.py tests/rq/test_ag_fields_rq.py tests/rq/test_batch_rq_retry_selection.py
+    wctl run-pytest tests/microservices/test_rq_engine_geneva_routes.py tests/microservices/test_rq_engine_run_sync_routes.py
+    wctl run-pytest tests/rq/test_job_info.py tests/rq/test_submission_recovery.py
+    wctl check-rq-graph
+
+Before the local cutover, stop HTTP producers while leaving workers available to
+drain already accepted work:
+
+    wctl docker stop weppcloud rq-engine scheduler
+    wctl rq-info
+
+Do not continue until `wctl rq-info` reports zero queued and started jobs on
+`default`, `batch`, and `fork-archive`. Run this separate read-only scheduled-
+registry check and require `0` for all three queues:
+
+    wctl docker run --rm --no-deps weppcloud python - <<'PY'
+    import redis
+    from rq.registry import ScheduledJobRegistry
+    from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+    with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as connection:
+        for queue_name in ('default', 'batch', 'fork-archive'):
+            print(queue_name, ScheduledJobRegistry(queue_name, connection=connection).count)
+    PY
+
+Deferred legacy trees may remain;
+they are never promoted or rewritten by deployment and are recoverable only by
+an authenticated ordinary resubmission after restart. Immediately before worker
+stop, rerun both `wctl rq-info` and the scheduled-registry command; any nonzero
+queued, started, or scheduled count aborts cutover. Then stop workers and restart
+every producer/worker from the same working-tree revision:
+
+    wctl docker stop rq-worker rq-worker-batch rq-worker-fork-archive
+    wctl docker up -d --force-recreate weppcloud rq-engine scheduler rq-worker rq-worker-batch rq-worker-fork-archive
+    wctl rq-info
+
+Use the local operator-created missing-soils fixture `soft-boiled-copying` with
+config `disturbed9002_wbt` for the exact developer cutover smoke. This is not an
+autonomous API-operator runbook: it uses the trusted local `wctl` service-token
+issuer and does not amend API-only bootstrap obligations.
+
+    export RQ_DEP_SMOKE_TOKEN="$(wctl issue-auth-token dependency-smoke -s rq:enqueue -s rq:status --runs soft-boiled-copying --audience rq-engine --expires-in 900 --claim token_class=service --json | jq -r .token)"
+    curl -fsS -o /tmp/dependency-smoke-submit.json -w '%{http_code}\n' -H "Authorization: Bearer $RQ_DEP_SMOKE_TOKEN" -H 'Content-Type: application/json' -d '{}' http://localhost/rq-engine/api/runs/soft-boiled-copying/disturbed9002_wbt/run-wepp | tee /tmp/dependency-smoke-submit.status
+    test "$(cat /tmp/dependency-smoke-submit.status)" = 200
+    export RQ_DEP_SMOKE_JOB_ID="$(jq -r .job_id /tmp/dependency-smoke-submit.json)"
+    curl -fsS -H "Authorization: Bearer $RQ_DEP_SMOKE_TOKEN" "http://localhost/rq-engine/api/jobinfo/$RQ_DEP_SMOKE_JOB_ID" | tee /tmp/dependency-smoke-tree.json
+    curl -fsS -H "Authorization: Bearer $RQ_DEP_SMOKE_TOKEN" "http://localhost/rq-engine/api/jobstatus/$RQ_DEP_SMOKE_JOB_ID" | tee /tmp/dependency-smoke-status.json
+    jq -e '.status == "failed"' /tmp/dependency-smoke-status.json
+    jq -e '((.children["0"] | map(select(.description | contains("_prep_remaining_rq")))) + [.children | to_entries[] | select(.key != "0") | .value[]]) as $jobs | (($jobs | length) > 0 and all($jobs[]; .status == "deferred" and .started_at == null))' /tmp/dependency-smoke-tree.json
+
+Poll both GET commands until the first missing-soils prep failure appears. The
+strict smoke passes only when every stage after stage 0, plus stage-0
+`_prep_remaining_rq`, remains deferred with `started_at=null`, aggregate status
+is failed, and no missing-artifact cascade appears. Execute the retry:
+
+    curl -fsS -o /tmp/dependency-smoke-retry.json -w '%{http_code}\n' -H "Authorization: Bearer $RQ_DEP_SMOKE_TOKEN" -H 'Content-Type: application/json' -d '{}' http://localhost/rq-engine/api/runs/soft-boiled-copying/disturbed9002_wbt/run-wepp | tee /tmp/dependency-smoke-retry.status
+    test "$(cat /tmp/dependency-smoke-retry.status)" = 200
+    export RQ_DEP_SMOKE_RETRY_JOB_ID="$(jq -r .job_id /tmp/dependency-smoke-retry.json)"
+    test -n "$RQ_DEP_SMOKE_RETRY_JOB_ID" && test "$RQ_DEP_SMOKE_RETRY_JOB_ID" != "$RQ_DEP_SMOKE_JOB_ID"
+    curl -fsS -H "Authorization: Bearer $RQ_DEP_SMOKE_TOKEN" "http://localhost/rq-engine/api/jobstatus/$RQ_DEP_SMOKE_RETRY_JOB_ID" | tee /tmp/dependency-smoke-retry-status.json
+    jq -e '.status == "queued" or .status == "started"' /tmp/dependency-smoke-retry-status.json
+
+Direct RQ tests, rather than the endpoint projection, prove registry/dependency
+detachment. Record UTC timestamp, method, path, HTTP status, both job IDs, and
+redacted tree summaries in the tracker; never record the token. Then unset both
+token and job-ID variables.
+
+Rollback validation first runs `wctl docker config --quiet`. An actual
+rollback, if needed, repeats the producer stop, zero-active-work drain, worker
+stop, and same-revision recreation sequence at the chosen prior revision. Never
+switch revisions or recreate only part of the producer/worker set while work is
+active.

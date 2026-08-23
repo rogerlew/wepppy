@@ -24,10 +24,19 @@ helper, verified controller/workflow association, graph-wide deferred cleanup,
 exact job-id hint replacement, focused tests, generated controller assets, RQ
 catalog validation, and user/developer documentation.
 
-Excluded are authorization, CSRF, queue selection, dependency construction,
-worker algorithms, queued/started/scheduled single-flight behavior, explicit
-user cancellation endpoints, job-dashboard aggregation, and production job
-mutation during development.
+The 2026-08-23 correction additionally includes the finite dependency and
+aggregate-status boundary in `artifacts/dependency_edge_matrix.md`: dependency
+construction in WEPP, Culvert, Geneva, run-sync/migrations, WBT watershed,
+DEM/channel build, SWAT, Omni, AgFields, and Batch; registered-tree status
+aggregation in `wepppy/rq/job_info.py`; Fork rerun finalization; mixed-version
+rollout; and their direct
+RQ, route/admission, and controller regression evidence. It borrows only the
+named dependency edges and polling rule from those workflow owners.
+
+Excluded are authorization, CSRF, queue selection, worker algorithms,
+queued/started/scheduled single-flight behavior, explicit
+user cancellation endpoints, job-dashboard fields other than registered-tree
+status precedence, and production job mutation during development.
 
 ## Success Criteria
 

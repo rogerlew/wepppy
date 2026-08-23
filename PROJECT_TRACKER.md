@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-08-22
+**Last Updated**: 2026-08-23
 **Active Packages**: 28
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -380,6 +380,27 @@ When resuming Kubernetes work:
 ---
 
 ## 🚧 In Progress
+
+### Deferred Job Retry Dependency Correction
+
+**Started**: 2026-08-23
+
+**Priority**: Critical
+
+**Security impact**: `high` (cross-workflow RQ dependency and authenticated
+deferred-graph reconciliation)
+
+**Link**: [docs/work-packages/20260821_deferred_job_retry_recovery/](docs/work-packages/20260821_deferred_job_retry_recovery/)
+
+**Description**: Restore strict required-output dependency semantics after a
+live missing-soils WEPP run proved that global `allow_failure` wiring releases
+invalid downstream work. Preserve no-friction retry through the ratified
+ordinary-submission deferred cleanup. Also correct aggregate failed-over-
+blocked-deferred status and define an atomic producer/worker cutover.
+
+**Status**: Corrective contract checkpoint under independent review.
+
+---
 
 ### Direct OpenFileGDB Cutover
 

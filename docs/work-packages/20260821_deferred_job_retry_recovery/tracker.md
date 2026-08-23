@@ -2,14 +2,20 @@
 
 ## Status
 
-**Phase**: Complete
-**Last updated**: 2026-08-22 UTC
+**Phase**: Dependency regression correction in progress
+**Last updated**: 2026-08-23 UTC
 
 ## Task Board
 
 ### In Progress
 
-- None.
+- [ ] Ratify strict required-output dependency semantics while retaining
+  automatic deferred-graph replacement, explicit terminal finalizers, and only
+  the enumerated AgFields/Omni-contrast independent serialization edges.
+- [x] Complete dual corrective checkpoint reviews and disposition with no
+  remaining High/Medium findings.
+- [ ] Restore conforming dependency wiring, regenerate graph artifacts, and
+  complete focused, broad, and independent review gates.
 
 ### Pending
 
@@ -27,6 +33,13 @@
   remains read-only unless the operator separately authorizes a mutation.
 
 ## Decisions
+
+- **2026-08-23 UTC** — After live job `5af82b08-f1af-4180-8613-9917d53ac3f0`
+  demonstrated a cascade over absent soils, the operator explicitly classified
+  downstream execution after required-parent failure as a regression. Strict
+  required-output dependencies and frictionless deferred retry are separate,
+  simultaneous requirements; failure tolerance is limited to explicit terminal
+  observers/finalizers and the two enumerated independent serialization families.
 
 - **2026-08-21 UTC** — The operator explicitly required one broad invariant:
   deferred jobs never add user friction, never block resubmission, and are

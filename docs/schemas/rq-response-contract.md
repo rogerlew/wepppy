@@ -123,9 +123,12 @@ Landuse first-class route notes (2026-04-24):
 ## Job polling responses
 - Job status (jobstatus):
   - `{job_id, runid, status, started_at, ended_at, progress?, queue?, conditioning_diagnostics?, error?, error_id?}`
-  - For registered trees, any queued/started/deferred/scheduled descendant keeps
-    the aggregate non-terminal. Failed/stopped/canceled takes precedence only
-    after no descendant remains active.
+  - For registered trees, any queued, started, or scheduled descendant keeps
+    the aggregate non-terminal. Once none remains, failed, stopped, or canceled
+    takes precedence over descendants deferred because a strict prerequisite
+    failed. A viable deferred-only tree remains `deferred`. A failed aggregate
+    may have partial progress and no aggregate `ended_at` while blocked deferred
+    jobs remain never-started; clients treat failed status as the retry boundary.
   - `progress` is the existing aggregate job-count object. Its runtime behavior
     is unchanged; the field is listed here to correct the stale summary above.
   - `queue` is an optional advisory snapshot. When present its exact shape is:
@@ -400,6 +403,19 @@ projection above.
   operations in that family are superseded together, while an ambiguous or
   unauthorized job that could affect the same resource remains a conflict and
   MUST NOT be ignored while replacement work starts.
+- RQ dependency edges are strict by default. A job that consumes or transforms
+  an upstream job's outputs MUST NOT run unless every required dependency
+  finishes successfully. Failure-tolerant dependency edges are permitted only
+  for edges explicitly enumerated by the owning dependency-edge contract: a
+  terminal observer/finalizer that aggregates outcomes, publishes terminal
+  status, or performs failure-safe cleanup without consuming failed required
+  output; or an independent-work resource-serialization edge whose predecessor
+  supplies no required output to its dependent. A failed strict
+  dependency may therefore leave never-started descendants in raw `deferred`
+  state; ordinary resubmission MUST reconcile and cancel that obsolete deferred
+  graph under the rules above before enqueueing its replacement. Implementations
+  MUST NOT release executable downstream stages merely to make the old workflow
+  terminal.
 - Canonical error payload:
 ```json
 {
