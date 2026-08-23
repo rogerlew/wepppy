@@ -4,7 +4,11 @@ This is the exhaustive SURF-20A dependency-construction boundary. `Strict`
 means ordinary RQ dependency semantics. `Tolerant finalizer` and `Tolerant
 serialization` permit `Dependency(allow_failure=True)` only for `finished` and
 `failed` prerequisites. A named finalizer consumes no required model output; a
-named serialization edge connects independent work solely to bound resource use.
+named serialization edge connects independent work to bound resource use or
+serialize same-resource mutation ownership. WBT request serialization protects
+mutation ownership: the later request reconstructs and validates required state
+under the existing admission and directory-root locks and must not consume a
+partially failed predecessor mutation as required output.
 
 | Owner / source | Dependent edge | Class | Output contract and regression |
 | --- | --- | --- | --- |
@@ -12,7 +16,8 @@ named serialization edge connects independent work solely to bound resource use.
 | Culvert `wepppy/rq/culvert_rq_pipeline.py` | `run_culvert_run_rq[]` to `_final_culvert_batch_complete_rq` | Tolerant finalizer | Aggregates direct child outcomes without consuming failed model files. Failed-child/finalizer test. |
 | Geneva `wepppy/microservices/rq_engine/geneva_routes.py` | `prepare_hrus` to `build_frequency_panel` to `run_batch` | Strict | Each stage consumes predecessor artifacts. Production admission failure/deferred/retry test. |
 | Run sync `wepppy/microservices/rq_engine/run_sync_routes.py` | `run_sync_rq` to `migrations_rq` | Strict | Migration consumes the synchronized run tree. Production admission failure/deferred/retry test. |
-| WBT `wepppy/rq/project_rq.py::_enqueue_serial_subcatchment_tree` | Prior tail to next `build_subcatchments_rq`; build to `abstract_watershed_rq` | Strict | Serialization and abstraction require successful prior/build state. Existing controlled validation/apply failures retain canonical failure-safe cancellation of the never-started abstraction child; other failures naturally leave it deferred. Prove canceled/deferred descendants never start and admission retry remains safe. |
+| WBT `wepppy/rq/project_rq.py::_enqueue_serial_subcatchment_tree` | Prior request tail to next `build_subcatchments_rq` | Tolerant serialization | Separate user submissions do not consume each other's outputs; the edge serializes mutation ownership. Prove an earlier failed request can release the later independently valid build. |
+| WBT same source | `build_subcatchments_rq` to `abstract_watershed_rq` | Strict | Abstraction requires the successful build state. Existing controlled validation/apply failures retain canonical failure-safe cancellation of the never-started abstraction child; other failures naturally leave it deferred. Prove canceled/deferred descendants never start and admission retry remains safe. |
 | Channels `wepppy/rq/project_rq.py::fetch_dem_and_build_channels_rq` | `fetch_dem_rq` to `build_channels_rq` | Strict | Channel build consumes fetched DEM. Failed-fetch and production retry test. |
 | SWAT `wepppy/rq/swat_rq.py::run_swat_rq` | `_build_swat_inputs_rq` to `_run_swat_rq` | Strict | Execution consumes `TxtInOut`. Failed-build plus authenticated retry test. |
 | Omni scenarios `wepppy/rq/omni_rq.py::run_omni_scenarios_rq` | Stage 1 to stage 2; last scenario stage to compile; compile to finalize | Strict | Later stages require a complete scenario result/summary set. Transitive stop plus admission retry test. |

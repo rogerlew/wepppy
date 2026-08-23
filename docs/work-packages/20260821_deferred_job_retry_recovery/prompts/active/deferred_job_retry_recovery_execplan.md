@@ -25,6 +25,9 @@ unsafe duplicates.
 - [ ] (2026-08-23 UTC) Correct the discovered dependency regression: strict
   executable stages must stop after required-parent failure while ordinary
   submission remains the no-friction deferred-graph recovery action.
+- [x] (2026-08-23 UTC) Ratify the narrow WBT addendum discovered by focused
+  real-RQ evidence: prior request tails serialize mutation ownership and remain
+  tolerant; each build-to-abstraction edge is strict.
 
 ## Surprises & Discoveries
 
@@ -33,6 +36,10 @@ unsafe duplicates.
   stage 0, but `allow_failure=True` released transitive executable stages that
   waited for or consumed nonexistent outputs.
   Evidence: the live job tree and commit `9022acba6`.
+- Observation: The existing real-RQ same-run WBT test failed when prior request
+  serialization was made strict: an earlier controlled failure prevented a later
+  independently valid request from acquiring mutation ownership.
+  Evidence: `test_same_run_policy_trees_serialize_through_abstraction`.
 
 - Observation: The prior fix was behaving as designed, but its design conflicts
   with the newly required invariant because it intentionally blocks a deferred
@@ -79,11 +86,20 @@ unsafe duplicates.
 
 - Decision: Restore strict dependencies for every required-output stage; retain
   failure tolerance only for explicitly reviewed terminal observers/finalizers
-  and the enumerated AgFields/Omni-contrast independent-work serialization edges.
+  and the enumerated AgFields and Omni-contrast serialization edges.
   Rationale: Dependency correctness and deferred retry recovery are independent.
   The established replacement transaction solves user lockout without running
   invalid downstream work.
   Date/Author: 2026-08-23, operator and Codex.
+
+- Decision: Retain failure tolerance from a prior WBT request tail to the next
+  request's build, while making each request's build-to-abstraction edge strict.
+  Rationale: Focused real-RQ validation proved the prior-tail edge serializes
+  same-run mutation ownership between independent requests; making it strict
+  stranded a valid later request after an earlier controlled failure. The later
+  request reconstructs state under the admission and directory-root locks.
+  Date/Author: 2026-08-23, Codex; approved by fresh independent correctness and
+  security review in `artifacts/2026-08-23_wbt_serialization_addendum_review_disposition.md`.
 
 - Decision: Deferred is retryable everywhere; queued, started, and scheduled
   remain active.
@@ -207,7 +223,7 @@ Work from `/home/workdir/wepppy`.
 Corrective acceptance additionally requires every row in
 `artifacts/dependency_edge_matrix.md` to execute its classification. No
 required-output dependent starts after failure. Only named direct finalizers and
-the two named independent serialization families may tolerate `failed`;
+the three named independent serialization families may tolerate `failed`;
 stopped/canceled/missing prerequisites are not automatically releasable for
 either class. With no queued/started/scheduled member, failed outranks blocked
 deferred descendants; viable deferred-only trees remain deferred and retryable.
@@ -258,10 +274,11 @@ and Redis `WATCH`/transaction retries. Callers hold a route/domain submission
 lock while reconciling the full associated graph and enqueueing replacement
 work. Batch routes add one bounded lock keyed by validated batch name.
 
-The corrective milestone limits `failure_tolerant_depends_on` and
-`release_deferred_job_if_ready` to the named tolerant finalizers and the two
-named independent serialization families in `artifacts/dependency_edge_matrix.md`.
-Their tests include the predecessor-failed-before-dependent-registration race.
+The corrective milestone limits failure-tolerant dependency construction and
+eager release to the named finalizers and three named serialization families in
+`artifacts/dependency_edge_matrix.md`. AgFields and Omni use the shared eager-
+release helper; transactional WBT admission handles its prior-tail race inside
+the existing watched registration/reconciliation boundary.
 Required-output edges pass ordinary
 `depends_on`. `wepppy.rq.job_info.get_wepppy_rq_job_status` applies active
 executable work, then terminal failure, then viable deferred precedence.

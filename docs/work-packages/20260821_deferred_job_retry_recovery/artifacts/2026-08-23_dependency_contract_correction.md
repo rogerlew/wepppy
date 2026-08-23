@@ -26,7 +26,7 @@ does not require executable descendants of a failed prerequisite to run.
 1. Dependency edges are strict by default. A stage that consumes or transforms
    upstream output runs only after every required dependency succeeds.
 2. `allow_failure=True` is limited to the named terminal observers/finalizers
-   and the two enumerated independent-work resource-serialization families in
+   and the three enumerated independent-work/request serialization families in
    `artifacts/dependency_edge_matrix.md`. None consumes failed required output.
 3. A failed strict dependency may leave downstream jobs deferred. This is an
    expected never-started state, not permission to execute them.
@@ -38,9 +38,13 @@ does not require executable descendants of a failed prerequisite to run.
 
 The exact edge dispositions and mixed-version policy are normative in
 `artifacts/dependency_edge_matrix.md`.
-The operator's 2026-08-23 approval covers the two exact independent-work
-serialization exceptions in that matrix: AgFields routing schemes and Omni
-contrast batches. It does not authorize other executable tolerant edges.
+The operator's 2026-08-23 approval established the strict required-output and
+frictionless retry invariants. AgFields routing schemes and Omni contrast
+batches were the two exceptions known at that checkpoint. Focused real-RQ
+validation subsequently identified consecutive WBT subcatchment submissions as
+an existing independent-request serialization edge; the addendum is subject to
+fresh correctness and security review and does not authorize any other
+executable tolerant edge.
 
 ## Valid-State Matrix
 

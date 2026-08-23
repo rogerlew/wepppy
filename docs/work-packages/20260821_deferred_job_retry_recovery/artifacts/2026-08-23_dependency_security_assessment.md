@@ -36,6 +36,12 @@ graph cancellation, association, locking, and replacement receipt persistence.
   output; Fork additionally proves profile-claim release on failed WEPP.
 - AgFields and Omni contrast serialization tests prove predecessor output is not
   passed to or loaded by the independent dependent.
+- WBT prior-request serialization protects shared mutation ownership rather than
+  transferring outputs. A failed predecessor may leave partial run state, so the
+  later request must reacquire the existing admission/directory-root locks,
+  reconstruct and validate required state, and never assume predecessor success.
+  Focused real-RQ evidence covers failure-first ordering, lock-serialized later
+  execution, and the strict build-to-abstraction child remaining never-started.
 - Each strict family proves a failed prerequisite cannot execute its dependent,
   followed by a production admission retry that clears only its associated
   deferred graph.

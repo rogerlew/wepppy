@@ -409,8 +409,8 @@ projection above.
   for edges explicitly enumerated by the owning dependency-edge contract: a
   terminal observer/finalizer that aggregates outcomes, publishes terminal
   status, or performs failure-safe cleanup without consuming failed required
-  output; or an independent-work resource-serialization edge whose predecessor
-  supplies no required output to its dependent. A failed strict
+  output; or an independent-work/request resource-serialization edge whose
+  predecessor supplies no required output to its dependent. A failed strict
   dependency may therefore leave never-started descendants in raw `deferred`
   state; ordinary resubmission MUST reconcile and cancel that obsolete deferred
   graph under the rules above before enqueueing its replacement. Implementations

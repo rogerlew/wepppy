@@ -11,9 +11,11 @@
 
 - [ ] Ratify strict required-output dependency semantics while retaining
   automatic deferred-graph replacement, explicit terminal finalizers, and only
-  the enumerated AgFields/Omni-contrast independent serialization edges.
+  the enumerated AgFields, Omni-contrast, and WBT-request serialization edges.
 - [x] Complete dual corrective checkpoint reviews and disposition with no
   remaining High/Medium findings.
+- [x] Complete fresh dual review and disposition for the WBT request-
+  serialization addendum discovered during focused implementation validation.
 - [ ] Restore conforming dependency wiring, regenerate graph artifacts, and
   complete focused, broad, and independent review gates.
 
@@ -39,7 +41,14 @@
   downstream execution after required-parent failure as a regression. Strict
   required-output dependencies and frictionless deferred retry are separate,
   simultaneous requirements; failure tolerance is limited to explicit terminal
-  observers/finalizers and the two enumerated independent serialization families.
+  observers/finalizers and reviewed independent serialization edges.
+
+- **2026-08-23 UTC** — Focused real-RQ validation identified a third existing
+  serialization family: a prior WBT request tail serializes same-run mutation
+  ownership for the next independent request. Codex classified that prior-tail
+  edge as tolerant and the request's build-to-abstraction edge as strict,
+  approved by fresh independent correctness and security review with no
+  remaining High or Medium findings.
 
 - **2026-08-21 UTC** — The operator explicitly required one broad invariant:
   deferred jobs never add user friction, never block resubmission, and are
