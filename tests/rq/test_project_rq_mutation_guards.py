@@ -66,6 +66,9 @@ def _record_prep_timestamps(monkeypatch: pytest.MonkeyPatch, events: list[tuple]
         def timestamp(self, task) -> None:
             events.append(("timestamp", task))
 
+        def remove_timestamp(self, task) -> None:
+            events.append(("remove_timestamp", task))
+
         def get_rq_job_id(self, _key: str):
             return "job-guard"
 
@@ -137,6 +140,59 @@ def test_build_subcatchments_rq_records_controlled_boundary_error_and_stops_depe
     assert job.meta["error_id"]
     assert canceled == [dependent]
     assert any("EXCEPTION build_subcatchments_rq(demo)" in message for message in messages)
+
+
+def test_build_subcatchments_rq_applies_canonical_update_clamping_inside_worker(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    _stub_rq_context(monkeypatch, tmp_path)
+    monkeypatch.setattr(
+        project_rq,
+        "get_current_job",
+        lambda: SimpleNamespace(id="build", meta={}),
+    )
+    monkeypatch.setattr(project_rq, "clear_nodb_file_cache", lambda *args, **kwargs: None)
+    monkeypatch.setattr(project_rq, "wait_for_path", lambda *args, **kwargs: None)
+    monkeypatch.setattr(
+        project_rq,
+        "_run_with_directory_root_lock",
+        lambda _wd, _root, callback, **kwargs: callback(),
+    )
+    removed: list[object] = []
+    monkeypatch.setattr(
+        project_rq.RedisPrep,
+        "getInstance",
+        lambda wd: SimpleNamespace(
+            remove_timestamp=lambda task: removed.append(task),
+        ),
+    )
+
+    class _Watershed:
+        delineation_backend_is_topaz = False
+        delineation_backend_is_wbt = True
+        edge_hillslopes: list[int] = []
+        wbt_boundary_touch_behavior = "warn"
+        subwta = str(tmp_path / "subwta.tif")
+        logger = SimpleNamespace()
+        mofe_max_ofes = 7
+
+        def apply_build_subcatchment_updates(self, **updates) -> None:
+            self.mofe_max_ofes = min(19, max(1, int(updates["mofe_max_ofes"])))
+
+        def build_subcatchments(self, *, boundary_touch_behavior=None) -> None:
+            return None
+
+    watershed = _Watershed()
+    monkeypatch.setattr(project_rq.Watershed, "getInstance", lambda wd: watershed)
+
+    project_rq.build_subcatchments_rq("demo", {"mofe_max_ofes": 42})
+
+    assert watershed.mofe_max_ofes == 19
+    assert removed == [
+        project_rq.TaskEnum.abstract_watershed,
+        project_rq.TaskEnum.build_subcatchments,
+    ]
 
 
 @pytest.mark.parametrize(
@@ -314,6 +370,8 @@ def test_fetch_dem_and_build_channels_rq_clears_watershed_cache_before_enqueue(
         project_rq.FETCH_DEM_AND_BUILD_CHANNELS_CHILD_TIMEOUT,
         project_rq.TOPAZ_BUILD_CHANNELS_CHILD_TIMEOUT_MINIMUM,
     ]
+    assert enqueue_events[0][3] is None
+    assert enqueue_events[1][3] == "child-0"
     assert current_job.meta["jobs:0,func:fetch_dem_rq"] == "child-0"
     assert current_job.meta["jobs:1,func:build_channels_rq"] == "child-1"
     assert dummy_watershed.uploaded_dem_filename is None

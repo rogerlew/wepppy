@@ -472,77 +472,35 @@ def test_run_watershed_suite_registers_serial_children_and_allow_failure_finaliz
 def test_release_deferred_job_if_ready_enqueues_met_dependency(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    removed = []
-
-    class DummyRegistry:
-        def __init__(self, queue):
-            self.queue = queue
-
-        def remove(self, job):
-            removed.append(job)
-
-    class DummyJob:
-        _dependency_ids = ["upstream"]
-
-        def get_status(self, refresh=True):
-            return ag_fields_rq.JobStatus.DEFERRED
-
-        def dependencies_are_met(self):
-            return True
-
-    class DummyQueue:
-        def __init__(self):
-            self.enqueued = []
-
-        def _enqueue_job(self, job):
-            self.enqueued.append(job)
-
-    monkeypatch.setattr(job_dependencies, "DeferredJobRegistry", DummyRegistry)
-    queue = DummyQueue()
-    job = DummyJob()
+    calls = []
+    monkeypatch.setattr(
+        ag_fields_rq,
+        "release_deferred_job_if_ready",
+        lambda queue, job: calls.append((queue, job)),
+    )
+    queue = object()
+    job = object()
 
     ag_fields_rq._release_deferred_job_if_ready(queue, job)
 
-    assert removed == [job]
-    assert queue.enqueued == [job]
+    assert calls == [(queue, job)]
 
 
 def test_release_deferred_job_if_ready_keeps_unmet_dependency_deferred(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    removed = []
-
-    class DummyRegistry:
-        def __init__(self, queue):
-            self.queue = queue
-
-        def remove(self, job):
-            removed.append(job)
-
-    class DummyJob:
-        _dependency_ids = ["upstream"]
-
-        def get_status(self, refresh=True):
-            return ag_fields_rq.JobStatus.DEFERRED
-
-        def dependencies_are_met(self):
-            return False
-
-    class DummyQueue:
-        def __init__(self):
-            self.enqueued = []
-
-        def _enqueue_job(self, job):
-            self.enqueued.append(job)
-
-    monkeypatch.setattr(job_dependencies, "DeferredJobRegistry", DummyRegistry)
-    queue = DummyQueue()
-    job = DummyJob()
+    calls = []
+    monkeypatch.setattr(
+        ag_fields_rq,
+        "release_deferred_job_if_ready",
+        lambda queue, job: calls.append((queue, job)),
+    )
+    queue = object()
+    job = object()
 
     ag_fields_rq._release_deferred_job_if_ready(queue, job)
 
-    assert removed == []
-    assert queue.enqueued == []
+    assert calls == [(queue, job)]
 
 
 def test_suite_dispatch_refresh_preserves_concurrent_cancellation_marker(

@@ -216,7 +216,8 @@ def recursive_get_job_details(
     ]
     failed_children = [detail for detail in child_details if detail.get("status") == "failed"]
     if failed_children:
-        job_info["status"] = "failed"
+        if job_info.get("status") not in {"queued", "started", "scheduled"}:
+            job_info["status"] = "failed"
         controlled_child = next(
             (detail for detail in failed_children if isinstance(detail.get("error"), dict)),
             None,
@@ -410,7 +411,7 @@ def get_wepppy_rq_job_status(job_id: str) -> Dict[str, Any]:
 
         # Active descendants keep a job tree non-terminal. Once every job is
         # terminal, any descendant failure determines the aggregate outcome.
-        status_priority = ['started', 'queued', 'deferred', 'scheduled', 'failed', 'stopped', 'canceled']
+        status_priority = ['started', 'queued', 'scheduled', 'failed', 'stopped', 'canceled', 'deferred']
         aggregated_status = 'finished'  # Default to finished
         for status in status_priority:
             if status in statuses:

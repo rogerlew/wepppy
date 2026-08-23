@@ -25,11 +25,7 @@ from wepppy.observability.correlation import current_correlation_id, normalize_c
 from .auth import AuthError, require_jwt, require_roles
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
-from wepppy.rq.job_dependencies import (
-    failure_tolerant_depends_on,
-    reconcile_deferred_workflow,
-    release_deferred_job_if_ready,
-)
+from wepppy.rq.job_dependencies import reconcile_deferred_workflow
 from wepppy.rq.job_id import new_rq_job_id
 from wepppy.rq.submission_recovery import (
     RqSubmissionConflict,
@@ -314,7 +310,7 @@ async def run_sync(request: Request) -> JSONResponse:
                         (wd, runid),
                         {"archive_before": archive_before},
                         timeout=MIGRATIONS_TIMEOUT,
-                        depends_on=failure_tolerant_depends_on(sync_job),
+                        depends_on=sync_job,
                         meta=meta,
                         job_id=new_rq_job_id(),
                         status=JobStatus.DEFERRED,

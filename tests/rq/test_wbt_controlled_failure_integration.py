@@ -8,7 +8,7 @@ import pytest
 import redis
 from rq import Queue, SimpleWorker, get_current_job
 from rq.exceptions import NoSuchJobError
-from rq.job import Job
+from rq.job import Dependency, Job
 from rq.registry import (
     CanceledJobRegistry,
     DeferredJobRegistry,
@@ -36,6 +36,14 @@ pytestmark = pytest.mark.integration
 
 def _noop_job() -> None:
     return None
+
+
+def _fail_required_prerequisite() -> None:
+    raise RuntimeError("required prerequisite failed")
+
+
+def _must_not_execute_after_failure() -> None:
+    raise AssertionError("strict dependent executed after prerequisite failure")
 
 
 def _controlled_boundary_failure_job() -> None:
@@ -119,6 +127,58 @@ def rq_connection():
     except redis.RedisError as exc:
         pytest.skip(f"compose Redis is unavailable: {exc}")
     return connection
+
+
+def test_real_rq_strict_dependency_never_executes_after_failure(
+    rq_connection,
+) -> None:
+    queue = Queue(f"strict-dependency-{uuid.uuid4().hex}", connection=rq_connection)
+    parent = queue.enqueue(_fail_required_prerequisite)
+    dependent = queue.enqueue(_must_not_execute_after_failure, depends_on=parent)
+    try:
+        worker = _InlineWepppyWorker([queue], connection=rq_connection)
+        worker.work(burst=True, logging_level="WARNING")
+
+        assert parent.get_status(refresh=True) == "failed"
+        assert dependent.get_status(refresh=True) == "deferred"
+        assert dependent.started_at is None
+    finally:
+        dependent.cancel(enqueue_dependents=False)
+        dependent.delete()
+        parent.delete()
+        queue.delete(delete_jobs=True)
+
+
+@pytest.mark.parametrize("register_dependent_after_failure", [False, True])
+def test_real_rq_tolerant_dependency_releases_for_both_registration_orders(
+    rq_connection,
+    register_dependent_after_failure: bool,
+) -> None:
+    queue = Queue(f"tolerant-dependency-{uuid.uuid4().hex}", connection=rq_connection)
+    parent = queue.enqueue(_fail_required_prerequisite)
+    dependent: Job | None = None
+    try:
+        worker = _InlineWepppyWorker([queue], connection=rq_connection)
+        if register_dependent_after_failure:
+            worker.work(burst=True, logging_level="WARNING")
+            assert parent.get_status(refresh=True) == "failed"
+
+        dependent = queue.enqueue(
+            _noop_job,
+            depends_on=Dependency(jobs=[parent], allow_failure=True),
+        )
+        if register_dependent_after_failure:
+            job_dependencies_module.release_deferred_job_if_ready(queue, dependent)
+
+        worker.work(burst=True, logging_level="WARNING")
+
+        assert parent.get_status(refresh=True) == "failed"
+        assert dependent.get_status(refresh=True) == "finished"
+    finally:
+        if dependent is not None:
+            dependent.delete()
+        parent.delete()
+        queue.delete(delete_jobs=True)
 
 
 def test_cancel_deferred_job_cleans_registry_and_dependency_sets(
@@ -226,6 +286,53 @@ def test_reconcile_deferred_workflow_follows_serialized_metadata_links(
         ).get_job_ids()
     finally:
         for candidate in (child, root):
+            try:
+                candidate.delete(remove_from_queue=True)
+            except Exception:
+                pass
+        queue.delete(delete_jobs=True)
+
+
+def test_reconcile_deferred_workflow_stops_at_external_serialization_edge(
+    rq_connection,
+) -> None:
+    queue_name = f"wbt-root-boundary-{uuid.uuid4().hex}"
+    queue = Queue(queue_name, connection=rq_connection)
+    prior_build = queue.enqueue(
+        _noop_job,
+        meta={"runid": "run-wbt", "wbt_subcatchment_admission_root": "root-1"},
+    )
+    root = queue.enqueue(_noop_job, meta={"runid": "run-wbt", "role": "root"})
+    build = queue.enqueue(
+        _noop_job,
+        depends_on=prior_build,
+        meta={
+            "runid": "run-wbt",
+            "wbt_subcatchment_admission_root": root.id,
+            "wbt_subcatchment_admission_previous": prior_build.id,
+        },
+    )
+    root.meta["jobs:0,func:build_subcatchments_rq"] = build.id
+    root.save_meta()
+    root.set_status("failed")
+
+    try:
+        result = reconcile_deferred_workflow(
+            root.id,
+            connection=rq_connection,
+            association=lambda job: job.meta.get("runid") == "run-wbt",
+            root_association=lambda job: job.meta.get("role") == "root",
+            excluded_dependency_job_ids=lambda job: (
+                job.meta.get("wbt_subcatchment_admission_previous"),
+            ),
+        )
+
+        assert result.state == "canceled"
+        assert build.get_status(refresh=True) == "canceled"
+        assert prior_build.get_status(refresh=True) == "queued"
+        assert prior_build.id in queue.get_job_ids()
+    finally:
+        for candidate in (build, root, prior_build):
             try:
                 candidate.delete(remove_from_queue=True)
             except Exception:
@@ -803,6 +910,79 @@ def test_same_run_policy_trees_serialize_through_abstraction(
         queue.delete(delete_jobs=True)
 
 
+def test_retry_splices_canceled_tail_back_to_active_predecessor(
+    rq_connection,
+) -> None:
+    queue_name = f"wbt-tail-splice-{uuid.uuid4().hex}"
+    runid = f"tail-splice-{uuid.uuid4().hex}"
+    queue = Queue(queue_name, connection=rq_connection)
+    jobs: list[Job] = []
+    parents: list[Job] = []
+
+    def _tree() -> tuple[Job, Job, Job]:
+        parent = queue.create_job(
+            _noop_job,
+            meta={"runid": runid, "role": "root"},
+        )
+        parent.save()
+        build, receipt = project_rq._enqueue_serial_subcatchment_tree(
+            rq_connection,
+            queue,
+            runid=runid,
+            updates={},
+            boundary_policy=None,
+            child_meta={"runid": runid},
+            receipt_meta={"runid": runid},
+            parent_job=parent,
+        )
+        parents.append(parent)
+        jobs.extend((build, receipt))
+        return parent, build, receipt
+
+    try:
+        _parent_a, build_a, _receipt_a = _tree()
+        parent_b, build_b, _receipt_b = _tree()
+        assert build_b.get_status(refresh=True) == "deferred"
+        assert {
+            dependency_id.decode().removeprefix("rq:job:")
+            if isinstance(dependency_id, bytes)
+            else str(dependency_id).removeprefix("rq:job:")
+            for dependency_id in build_b.dependency_ids
+        } == {build_a.id}
+
+        parent_b.set_status("failed")
+        result = reconcile_deferred_workflow(
+            parent_b.id,
+            connection=rq_connection,
+            association=lambda job: job.meta.get("runid") == runid,
+            root_association=lambda job: job.meta.get("role") == "root",
+            excluded_dependency_job_ids=lambda job: (
+                job.meta.get(project_rq._WBT_ADMISSION_PREVIOUS_KEY),
+            ),
+        )
+        assert result.state == "canceled"
+        assert build_b.get_status(refresh=True) == "canceled"
+        assert build_a.get_status(refresh=True) == "queued"
+
+        _parent_c, build_c, _receipt_c = _tree()
+        assert build_c.get_status(refresh=True) == "deferred"
+        assert {
+            dependency_id.decode().removeprefix("rq:job:")
+            if isinstance(dependency_id, bytes)
+            else str(dependency_id).removeprefix("rq:job:")
+            for dependency_id in build_c.dependency_ids
+        } == {build_a.id}
+        assert build_c.meta[project_rq._WBT_ADMISSION_PREVIOUS_KEY] == build_a.id
+    finally:
+        rq_connection.delete(project_rq._subcatchment_tail_key(runid))
+        for candidate in (*jobs, *parents):
+            try:
+                candidate.delete(remove_from_queue=True)
+            except Exception:
+                pass
+        queue.delete(delete_jobs=True)
+
+
 def test_complete_child_uses_snapshot_and_extended_nodir_lock(
     rq_connection,
     monkeypatch: pytest.MonkeyPatch,
@@ -843,6 +1023,9 @@ def test_complete_child_uses_snapshot_and_extended_nodir_lock(
 
         def __init__(self) -> None:
             self.ready = False
+
+        def persist_wbt_boundary_touch_config_behavior(self) -> None:
+            events.append("persist-policy")
 
         def build_subcatchments(self, *, boundary_touch_behavior=None) -> None:
             policy = str(boundary_touch_behavior)
@@ -897,7 +1080,7 @@ def test_complete_child_uses_snapshot_and_extended_nodir_lock(
             True,
         )
 
-        assert events == ["build:warn", "abstract:warn"]
+        assert events == ["persist-policy", "build:warn", "abstract:warn"]
         assert watershed.ready is True
         assert watershed.wbt_boundary_touch_behavior == "warn"
         assert watershed.wbt_boundary_touch_config_behavior == "warn"
@@ -959,7 +1142,14 @@ def test_admission_discards_terminal_stale_tail(
         "build_subcatchments_rq",
         _serial_policy_build_job,
     )
-    prior = queue.enqueue(_noop_job)
+    prior = queue.enqueue(
+        _serial_policy_build_job,
+        runid,
+        {},
+        {"effective_policy": "warn"},
+        True,
+        meta={project_rq._WBT_ADMISSION_ROOT_KEY: "prior-root"},
+    )
     worker = _InlineWepppyWorker(
         [queue],
         connection=rq_connection,
@@ -1015,13 +1205,21 @@ def test_admission_discards_terminal_stale_tail(
 
 def test_admission_rejects_nonterminal_tail_outside_execution_registries(
     rq_connection,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     queue_name = f"surf14a-orphan-tail-{uuid.uuid4().hex}"
     runid = f"orphan-tail-{uuid.uuid4().hex}"
     queue = Queue(queue_name, connection=rq_connection)
+    monkeypatch.setattr(
+        project_rq,
+        "build_subcatchments_rq",
+        _serial_policy_build_job,
+    )
     prior = queue.create_job(
-        _noop_job,
+        _serial_policy_build_job,
+        args=(runid, {}, {"effective_policy": "warn"}, True),
         job_id=f"orphan-{uuid.uuid4().hex}",
+        meta={project_rq._WBT_ADMISSION_ROOT_KEY: "prior-root"},
     )
     prior.set_status(project_rq.JobStatus.STARTED)
     prior.save()
@@ -1204,7 +1402,7 @@ def test_exact_tree_rejects_canceled_receipt_dependency_residue(
         rq_connection.sadd(receipt.dependencies_key, build.id)
         rq_connection.sadd(build.dependents_key, receipt.id)
         parent.refresh()
-        with pytest.raises(RuntimeError, match="stale dependency"):
+        with pytest.raises(RuntimeError, match="stale completion-receipt link"):
             project_rq._enqueue_serial_subcatchment_tree(
                 rq_connection,
                 queue,
@@ -1755,9 +1953,19 @@ def test_policy_apply_failure_cancels_receipt_and_leaves_no_dependency_residue(
         monkeypatch.setattr(
             project_rq,
             "get_wd",
-            lambda _runid: (_ for _ in ()).throw(
+            lambda _runid: "/tmp/wbt-policy-apply-failure",
+        )
+        monkeypatch.setattr(
+            project_rq.Watershed,
+            "getInstance",
+            lambda _wd: (_ for _ in ()).throw(
                 FileNotFoundError("watershed root unavailable")
             ),
+        )
+        monkeypatch.setattr(
+            project_rq,
+            "_run_with_directory_root_lock",
+            lambda _wd, _root, callback, **_kwargs: callback(),
         )
         monkeypatch.setattr(
             project_rq.StatusMessenger,

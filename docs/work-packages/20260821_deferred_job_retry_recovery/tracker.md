@@ -2,21 +2,21 @@
 
 ## Status
 
-**Phase**: Dependency regression correction in progress
+**Phase**: Dependency regression correction complete
 **Last updated**: 2026-08-23 UTC
 
 ## Task Board
 
 ### In Progress
 
-- [ ] Ratify strict required-output dependency semantics while retaining
+- [x] Ratify strict required-output dependency semantics while retaining
   automatic deferred-graph replacement, explicit terminal finalizers, and only
   the enumerated AgFields, Omni-contrast, and WBT-request serialization edges.
 - [x] Complete dual corrective checkpoint reviews and disposition with no
   remaining High/Medium findings.
 - [x] Complete fresh dual review and disposition for the WBT request-
   serialization addendum discovered during focused implementation validation.
-- [ ] Restore conforming dependency wiring, regenerate graph artifacts, and
+- [x] Restore conforming dependency wiring, regenerate graph artifacts, and
   complete focused, broad, and independent review gates.
 
 ### Pending
@@ -77,3 +77,37 @@
   frontend tests, the RQ dependency graph gate, stub checks, documentation lint,
   and changed-file broad-exception enforcement. All four implementation reviews
   closed with no remaining High/Medium runtime findings.
+
+## Corrective evidence — 2026-08-23 UTC
+
+- Focused dependency/controller validation: 165 passed; the added SWAT strict-
+  dependency assertion passed separately; `wctl check-rq-graph` passed with 143
+  generated edges.
+- Same-revision local cutover occurred only after `wctl rq-info` reported zero
+  queued/executing jobs and 11 idle workers across all three queues.
+- `POST /api/runs/soft-boiled-copying/disturbed9002_wbt/run-wepp` returned
+  replacement `06c141e3-ef3f-4dfb-98fd-9d650135a732`. Missing soils failed
+  `_prep_managements_rq`; 13 downstream jobs remained deferred with
+  `started_at=null`.
+- Repeating the ordinary POST returned distinct replacement
+  `18cd9c41-039f-482e-904f-e5edb0182a80` and canceled all 13 never-started
+  deferred jobs from the superseded tree. The replacement reproduced one
+  required-stage failure, three independent prep successes, and 13
+  never-started deferred descendants.
+- Final-tree validation passed 6,663 tests with 63 skips in 894.99 seconds.
+  Focused real-RQ coverage includes strict and tolerant dependency behavior,
+  Batch-to-Omni cleanup, WBT external-tail containment and retry splicing, and
+  atomic eager finalizer release. The 143-edge graph, stub, broad-exception,
+  and diff gates passed.
+- Final same-working-tree cutover completed at 2026-08-23T20:19:51Z after
+  zero queued/executing jobs, 11 idle workers, and empty scheduled registries
+  for `default`, `batch`, and `fork-archive`. The restarted services were
+  `weppcloud`, `rq-engine`, `scheduler`, and all three RQ worker families;
+  `docker compose config --quiet` validated the rollback configuration.
+- `POST /api/runs/soft-boiled-copying/disturbed9002_wbt/run-wepp` returned HTTP
+  200 and job `a3dfef60-e322-4cb1-96ac-bc1d863a1819`. Its missing-soils tree
+  reached aggregate `failed` with 13 deferred jobs, all never-started.
+  Repeating the same ordinary POST returned HTTP 200 and distinct job
+  `e19371e4-63c7-4832-a262-b589900c72d6`; the original tree's 13 deferred jobs
+  became canceled without manual cancellation, and the replacement entered
+  `started`. The short-lived service token was removed after validation.

@@ -22,7 +22,7 @@ unsafe duplicates.
 - [x] (2026-08-22 UTC) Implemented shared deferred cleanup and adopted it across generic and specialized backend guards, including cross-surface lock families.
 - [x] (2026-08-21 UTC) Implemented shared controller retry behavior, added focused Jest evidence, and rebuilt generated assets in the WEPPcloud container.
 - [x] (2026-08-22 UTC) Completed the repository-wide pytest gate and independent implementation reviews with no remaining High/Medium findings.
-- [ ] (2026-08-23 UTC) Correct the discovered dependency regression: strict
+- [x] (2026-08-23 UTC) Correct the discovered dependency regression: strict
   executable stages must stop after required-parent failure while ordinary
   submission remains the no-friction deferred-graph recovery action.
 - [x] (2026-08-23 UTC) Ratify the narrow WBT addendum discovered by focused
@@ -158,6 +158,19 @@ passed 6,636 tests with 62 skips and 12 passing subtests; frontend, graph, stub,
 documentation, and broad-exception gates also passed for the original scope.
 Those reviews do not approve the reopened corrective dependency work.
 
+The corrective implementation restores ordinary strict dependencies for every
+required-output edge while retaining only the matrix's named tolerant
+finalizers and serialization edges. After a same-revision local stack restart,
+missing-soils WEPP job `18cd9c41-039f-482e-904f-e5edb0182a80` failed in
+`_prep_managements_rq`; all 13 downstream jobs remained deferred and
+never-started. Ordinary resubmission canceled all 13 deferred jobs from prior
+tree `06c141e3-ef3f-4dfb-98fd-9d650135a732` and returned a distinct replacement
+without manual cancellation. Focused validation covers strict owners, real-RQ
+WBT serialization/retry, Batch-to-Omni cleanup, atomic tolerant-finalizer
+release, and status precedence; the graph contains 143 edges. The final-tree
+repository suite passed 6,663 tests with 63 skips in 894.99 seconds. Stub,
+graph, broad-exception, and diff checks also passed.
+
 ## Context and Orientation
 
 RQ stores dependency-blocked jobs in a deferred registry. WEPPcloud also saves
@@ -224,8 +237,9 @@ Corrective acceptance additionally requires every row in
 `artifacts/dependency_edge_matrix.md` to execute its classification. No
 required-output dependent starts after failure. Only named direct finalizers and
 the three named independent serialization families may tolerate `failed`;
-stopped/canceled/missing prerequisites are not automatically releasable for
-either class. With no queued/started/scheduled member, failed outranks blocked
+  present stopped/canceled prerequisites are not releasable, and manual eager
+  release fails closed on missing/malformed records. Native RQ observer fan-out
+  retains its result-TTL behavior. With no queued/started/scheduled member, failed outranks blocked
 deferred descendants; viable deferred-only trees remain deferred and retryable.
 Mixed-version evidence must show all local producers/workers restarted from the
 correction revision.
@@ -288,7 +302,7 @@ executable work, then terminal failure, then viable deferred precedence.
 Write and run focused evidence with:
 
     wctl run-pytest tests/rq/test_job_dependencies.py tests/rq/test_wepp_rq_pipeline.py tests/rq/test_culvert_rq_pipeline.py
-    wctl run-pytest tests/rq/test_project_rq_fork.py tests/rq/test_project_rq.py tests/rq/test_swat_rq.py
+    wctl run-pytest tests/rq/test_project_rq_fork.py tests/rq/test_project_rq_mutation_guards.py tests/rq/test_bootstrap_autocommit_rq.py
     wctl run-pytest tests/rq/test_omni_rq.py tests/rq/test_ag_fields_rq.py tests/rq/test_batch_rq_retry_selection.py
     wctl run-pytest tests/microservices/test_rq_engine_geneva_routes.py tests/microservices/test_rq_engine_run_sync_routes.py
     wctl run-pytest tests/rq/test_job_info.py tests/rq/test_submission_recovery.py

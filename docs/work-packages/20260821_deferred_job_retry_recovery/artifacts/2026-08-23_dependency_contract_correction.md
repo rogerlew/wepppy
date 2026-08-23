@@ -57,8 +57,10 @@ executable tolerant edge.
 - Explicit tolerant finalizer or serialization edge whose direct prerequisites
   are all `finished` or `failed`: it may run and must not consume unavailable
   model outputs.
-- A stopped, canceled, missing, expired, or malformed tolerant prerequisite is
-  not released by RQ's failure-tolerant flag; recovery uses ordinary submission.
+- A present stopped or canceled tolerant prerequisite is not releasable. Manual
+  eager release additionally requires exact, present `finished`/`failed`
+  prerequisite records. Native RQ terminal-observer fan-out retains its
+  one-week result-TTL behavior when an earlier successful record has expired.
 - User resubmits after failure: the established SURF-20A admission transaction
   cancels and detaches all safely associated deferred nodes, then records and
   enqueues the exact replacement receipt.

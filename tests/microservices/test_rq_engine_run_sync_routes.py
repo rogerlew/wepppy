@@ -17,7 +17,9 @@ class _DummyLease:
         return None
 
 
-def _stub_queue(monkeypatch: pytest.MonkeyPatch) -> None:
+def _stub_queue(monkeypatch: pytest.MonkeyPatch) -> list[dict[str, object]]:
+    enqueue_calls: list[dict[str, object]] = []
+
     class DummyJob:
         def __init__(self, job_id: str) -> None:
             self.id = job_id
@@ -35,10 +37,12 @@ def _stub_queue(monkeypatch: pytest.MonkeyPatch) -> None:
             pass
 
         def enqueue_call(self, *args, **kwargs):
+            enqueue_calls.append(kwargs)
             DummyQueue.counter += 1
             return DummyJob(kwargs.get("job_id") or f"job-{DummyQueue.counter}")
 
         def create_job(self, *args, **kwargs):
+            enqueue_calls.append(kwargs)
             DummyQueue.counter += 1
             requested = kwargs.get("job_id")
             job_id = requested if DummyQueue.counter == 1 else f"job-{DummyQueue.counter}"
@@ -73,6 +77,7 @@ def _stub_queue(monkeypatch: pytest.MonkeyPatch) -> None:
         lambda *args, **kwargs: nullcontext(_DummyLease()),
     )
     monkeypatch.setattr(run_sync_routes, "new_rq_job_id", lambda: "job-1")
+    return enqueue_calls
 
 
 def test_run_sync_requires_admin(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -96,7 +101,7 @@ def test_run_sync_enqueues_jobs(monkeypatch: pytest.MonkeyPatch) -> None:
         "require_jwt",
         lambda request, required_scopes=None: {"roles": ["Admin"]},
     )
-    _stub_queue(monkeypatch)
+    enqueue_calls = _stub_queue(monkeypatch)
     monkeypatch.setattr(run_sync_routes.StatusMessenger, "publish", lambda *args, **kwargs: None)
 
     with TestClient(rq_engine.app) as client:
@@ -110,6 +115,7 @@ def test_run_sync_enqueues_jobs(monkeypatch: pytest.MonkeyPatch) -> None:
     assert payload["sync_job_id"] == "job-1"
     assert payload["migration_job_id"] == "job-2"
     assert payload["job_ids"] == ["job-1", "job-2"]
+    assert enqueue_calls[1]["depends_on"].id == payload["sync_job_id"]
 
 
 def test_run_sync_passes_source_run_token_to_worker(monkeypatch: pytest.MonkeyPatch) -> None:

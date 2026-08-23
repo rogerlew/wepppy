@@ -32,6 +32,62 @@ def _job_func():
     return None
 
 
+def test_prepare_binds_workflow_descendants_to_recorded_root(monkeypatch):
+    prior_id = "recorded-root"
+    func_name = f"{_job_func.__module__}.{_job_func.__qualname__}"
+    root = SimpleNamespace(
+        id=prior_id,
+        args=("run-1",),
+        meta={"runid": "run-1"},
+        func_name=func_name,
+        origin="default",
+    )
+    owned_child = SimpleNamespace(
+        id="owned-child",
+        args=("run-1",),
+        meta={
+            "runid": "run-1",
+            "wbt_subcatchment_admission_root": prior_id,
+        },
+        func_name=func_name,
+        origin="default",
+    )
+    foreign_child = SimpleNamespace(
+        id="foreign-child",
+        args=("run-1",),
+        meta={
+            "runid": "run-1",
+            "wbt_subcatchment_admission_root": "another-root",
+        },
+        func_name=func_name,
+        origin="default",
+    )
+
+    def _reconcile(_root_id, **kwargs):
+        assert kwargs["root_association"](root)
+        assert kwargs["association"](root)
+        assert kwargs["association"](owned_child)
+        assert not kwargs["association"](foreign_child)
+        return SimpleNamespace(state="missing", job_ids=())
+
+    monkeypatch.setattr(submission_recovery, "reconcile_deferred_workflow", _reconcile)
+    prep = SimpleNamespace(
+        get_rq_job_id=lambda _key: prior_id,
+        set_rq_job_id=lambda _key, _value: None,
+    )
+    submission_recovery.prepare_redisprep_job_id(
+        prep,
+        job_key="wbt",
+        replacement_job_id="replacement",
+        connection=object(),
+        runid="run-1",
+        allowed_origins=("default",),
+        expected_root_func_name=func_name,
+        allowed_workflow_func_names=(func_name,),
+        workflow_root_meta_key="wbt_subcatchment_admission_root",
+    )
+
+
 def test_enqueue_tracks_preallocated_id_before_enqueue(monkeypatch):
     events = []
 

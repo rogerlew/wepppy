@@ -243,9 +243,9 @@ def test_get_job_status_progress_updated_at_uses_latest_seen_timestamp(
 
 @pytest.mark.parametrize(
     ("second_child_status", "expected_status"),
-    [("started", "started"), ("finished", "failed")],
+    [("started", "started"), ("finished", "failed"), ("deferred", "failed")],
 )
-def test_get_job_status_keeps_failed_allow_failure_tree_nonterminal_until_children_finish(
+def test_get_job_status_prioritizes_active_work_then_failure_then_blocked_deferred(
     monkeypatch: pytest.MonkeyPatch,
     second_child_status: str,
     expected_status: str,

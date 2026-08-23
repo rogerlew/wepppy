@@ -5,10 +5,6 @@ from typing import Any, Callable, Optional
 from rq import Queue
 from rq.job import Job
 
-from wepppy.rq.job_dependencies import (
-    failure_tolerant_depends_on,
-    release_deferred_job_if_ready,
-)
 from wepppy.rq.job_id import new_rq_job_id
 
 
@@ -44,10 +40,9 @@ def _enqueue(
         args=args,
         kwargs=kwargs,
         timeout=timeout,
-        depends_on=failure_tolerant_depends_on(depends_on),
+        depends_on=depends_on,
         job_id=child_job_id,
     )
-    release_deferred_job_if_ready(q, child_job)
     return child_job
 
 

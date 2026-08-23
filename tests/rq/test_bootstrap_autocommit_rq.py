@@ -749,6 +749,31 @@ def test_run_swat_rq_clears_scoped_cache_before_hydration(monkeypatch: pytest.Mo
     assert call_order == [("clear", "swat.nodb"), ("get_instance", "swat.nodb")]
 
 
+def test_run_swat_rq_keeps_execution_dependency_strict(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = _stub_rq_queue(monkeypatch, swat_rq)
+    parent = SimpleNamespace(id="parent", meta={}, save=lambda: None)
+    monkeypatch.setattr(swat_rq, "get_current_job", lambda: parent)
+    monkeypatch.setattr(swat_rq, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(swat_rq.StatusMessenger, "publish", lambda channel, message: None)
+    monkeypatch.setattr(
+        swat_rq.Wepp,
+        "getInstance",
+        lambda wd: SimpleNamespace(
+            islocked=lambda: False,
+            ensure_bootstrap_main=lambda: None,
+            mods=["swat"],
+        ),
+    )
+
+    final_job = swat_rq.run_swat_rq("ab-run")
+
+    assert len(calls) == 2
+    assert calls[1]["depends_on"] is calls[0]["job"]
+    assert final_job is calls[1]["job"]
+
+
 def test_run_swat_interchange_rq_clears_scoped_cache_before_hydration(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

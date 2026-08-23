@@ -1,13 +1,26 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
-
+import uuid
 import pytest
+import redis
+from rq import Queue
 from rq.job import Dependency, JobStatus
 
 import wepppy.rq.job_dependencies as job_dependencies
+from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 
-pytestmark = pytest.mark.unit
+pytestmark = pytest.mark.integration
+
+
+@pytest.fixture
+def rq_connection():
+    connection = redis.StrictRedis(**redis_connection_kwargs(RedisDB.RQ))
+    try:
+        connection.ping()
+    except redis.RedisError as exc:
+        pytest.skip(f"compose Redis is unavailable: {exc}")
+    return connection
 
 
 def _job(job_id: str) -> SimpleNamespace:
@@ -48,84 +61,62 @@ def test_failure_tolerant_depends_on_returns_none_when_empty() -> None:
     assert job_dependencies.failure_tolerant_depends_on([None]) is None
 
 
-class _Registry:
-    instances: list["_Registry"] = []
-
-    def __init__(self, queue) -> None:
-        self.queue = queue
-        self.removed: list[object] = []
-        _Registry.instances.append(self)
-
-    def remove(self, job) -> None:
-        self.removed.append(job)
+def _noop() -> None:
+    return None
 
 
-class _Queue:
-    def __init__(self) -> None:
-        self.enqueued: list[object] = []
-
-    def _enqueue_job(self, job) -> None:
-        self.enqueued.append(job)
-
-
-class _DeferredJob:
-    def __init__(self, met: bool) -> None:
-        self._met = met
-        self._dependency_ids = ["upstream"]
-
-    def get_status(self, refresh: bool = True):
-        return JobStatus.DEFERRED
-
-    def dependencies_are_met(self) -> bool:
-        return self._met
-
-
-@pytest.fixture(autouse=True)
-def _reset_registry(monkeypatch: pytest.MonkeyPatch):
-    _Registry.instances = []
-    monkeypatch.setattr(job_dependencies, "DeferredJobRegistry", _Registry)
-
-
-def test_release_deferred_job_if_ready_enqueues_met_dependencies() -> None:
-    queue = _Queue()
-    deferred_job = _DeferredJob(met=True)
-
-    job_dependencies.release_deferred_job_if_ready(queue, deferred_job)
-
-    assert _Registry.instances[0].removed == [deferred_job]
-    assert queue.enqueued == [deferred_job]
-
-
-def test_release_deferred_job_if_ready_keeps_unmet_dependencies_deferred() -> None:
-    queue = _Queue()
-
-    job_dependencies.release_deferred_job_if_ready(queue, _DeferredJob(met=False))
-
-    assert _Registry.instances == []
-    assert queue.enqueued == []
-
-
-def test_release_deferred_job_if_ready_ignores_non_deferred_jobs() -> None:
-    queue = _Queue()
-    queued_job = SimpleNamespace(
-        _dependency_ids=["upstream"],
-        get_status=lambda refresh=True: JobStatus.QUEUED,
-        dependencies_are_met=lambda: True,
+@pytest.mark.parametrize(
+    ("dependency_status", "expected_status"),
+    [
+        (JobStatus.FAILED, JobStatus.QUEUED),
+        (JobStatus.CANCELED, JobStatus.DEFERRED),
+        (JobStatus.STOPPED, JobStatus.DEFERRED),
+    ],
+)
+def test_release_deferred_job_if_ready_requires_finished_or_failed_dependencies(
+    rq_connection,
+    dependency_status: JobStatus,
+    expected_status: JobStatus,
+) -> None:
+    queue = Queue(f"dependency-release-{uuid.uuid4().hex}", connection=rq_connection)
+    dependency = queue.create_job(_noop)
+    dependency.set_status(dependency_status)
+    dependency.save()
+    deferred_job = queue.enqueue(
+        _noop,
+        depends_on=Dependency(jobs=[dependency], allow_failure=True),
     )
+    try:
+        assert deferred_job.get_status(refresh=True) == JobStatus.DEFERRED
+        job_dependencies.release_deferred_job_if_ready(queue, deferred_job)
+        assert deferred_job.get_status(refresh=True) == expected_status
+        if expected_status == JobStatus.QUEUED:
+            assert deferred_job.id not in dependency.dependent_ids
+            assert rq_connection.smembers(deferred_job.dependencies_key) == set()
+    finally:
+        deferred_job.delete(remove_from_queue=True)
+        dependency.delete(remove_from_queue=True)
+        queue.delete(delete_jobs=True)
 
-    job_dependencies.release_deferred_job_if_ready(queue, queued_job)
 
-    assert _Registry.instances == []
-    assert queue.enqueued == []
+def test_release_deferred_job_if_ready_rejects_missing_dependency(rq_connection) -> None:
+    queue = Queue(f"dependency-missing-{uuid.uuid4().hex}", connection=rq_connection)
+    dependency = queue.create_job(_noop)
+    dependency.set_status(JobStatus.FAILED)
+    dependency.save()
+    deferred_job = queue.enqueue(
+        _noop,
+        depends_on=Dependency(jobs=[dependency], allow_failure=True),
+    )
+    dependency.delete(remove_from_queue=True)
+    try:
+        job_dependencies.release_deferred_job_if_ready(queue, deferred_job)
+        assert deferred_job.get_status(refresh=True) == JobStatus.DEFERRED
+    finally:
+        deferred_job.delete(remove_from_queue=True)
+        queue.delete(delete_jobs=True)
 
 
 def test_release_deferred_job_if_ready_skips_jobs_without_dependencies() -> None:
-    queue = _Queue()
     independent = SimpleNamespace(_dependency_ids=[])
-
-    # No get_status attribute: proves the dependency-less short circuit fires
-    # before any Redis round-trip.
-    job_dependencies.release_deferred_job_if_ready(queue, independent)
-
-    assert _Registry.instances == []
-    assert queue.enqueued == []
+    job_dependencies.release_deferred_job_if_ready(SimpleNamespace(), independent)

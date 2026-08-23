@@ -1,4 +1,4 @@
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from typing import Any, Literal
 from dataclasses import dataclass
 
@@ -23,6 +23,7 @@ def reconcile_deferred_workflow(
     connection: Any,
     association: Callable[[Job], bool],
     root_association: Callable[[Job], bool],
+    excluded_dependency_job_ids: Callable[[Job], Iterable[str]] | None = ...,
     max_attempts: int = ...,
     lease_checkpoint: Callable[[], None] | None = ...,
 ) -> DeferredWorkflowReconciliation: ...

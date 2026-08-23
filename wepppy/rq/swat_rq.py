@@ -13,10 +13,6 @@ from wepppy.nodb.status_messenger import StatusMessenger
 from wepppy.rq.exception_logging import with_exception_logging
 from wepppy.weppcloud.bootstrap.git_lock import acquire_bootstrap_git_lock, release_bootstrap_git_lock
 from wepppy.weppcloud.utils.helpers import get_wd
-from wepppy.rq.job_dependencies import (
-    failure_tolerant_depends_on,
-    release_deferred_job_if_ready,
-)
 
 REDIS_HOST: str = redis_host()
 RQ_DB: int = int(RedisDB.RQ)
@@ -80,9 +76,8 @@ def run_swat_rq(runid: str) -> Job:
                 _run_swat_rq,
                 (runid,),
                 timeout=TIMEOUT,
-                depends_on=failure_tolerant_depends_on(job_build),
+                depends_on=job_build,
             )
-            release_deferred_job_if_ready(q, job_run)
             job.meta["jobs:1,func:_run_swat_rq"] = job_run.id
             job.save()
 

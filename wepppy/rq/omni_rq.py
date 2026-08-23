@@ -671,7 +671,7 @@ def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
                 )
                 stage1_jobs.append(child_job)
 
-            depends_on_stage2 = _failure_tolerant_depends_on(stage1_jobs)
+            depends_on_stage2 = stage1_jobs or None
             for task in stage2_tasks:
                 child_job_id = new_rq_job_id()
                 job.meta[f"jobs:1,scenario:{task['scenario_name']}"] = child_job_id
@@ -689,7 +689,6 @@ def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
                     job_id=child_job_id,
                 )
                 stage2_jobs.append(child_job)
-                _release_deferred_job_if_ready(q, child_job)
 
             compile_depends: List[Job] = stage2_jobs or stage1_jobs
             compile_job_id = new_rq_job_id()
@@ -699,10 +698,9 @@ def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
                 func=_compile_hillslope_summaries_rq,
                 args=[runid],
                 timeout=TIMEOUT,
-                depends_on=_failure_tolerant_depends_on(compile_depends),
+                depends_on=compile_depends,
                 job_id=compile_job_id,
             )
-            _release_deferred_job_if_ready(q, compile_job)
 
             final_job_id = new_rq_job_id()
             job.meta['jobs:3,func:_finalize_omni_scenarios_rq'] = final_job_id
@@ -711,10 +709,9 @@ def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
                 func=_finalize_omni_scenarios_rq,
                 args=[runid],
                 timeout=TIMEOUT,
-                depends_on=_failure_tolerant_depends_on([compile_job]),
+                depends_on=compile_job,
                 job_id=final_job_id,
             )
-            _release_deferred_job_if_ready(q, final_job)
 
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
         return final_job

@@ -48,6 +48,8 @@ def prepare_redisprep_job_id(
     allowed_workflow_modules: Iterable[str] | None = ...,
     root_run_arg_index: int = ...,
     association: Callable[[Job], bool] | None = ...,
+    excluded_dependency_job_ids: Callable[[Job], Iterable[str]] | None = ...,
+    workflow_root_meta_key: str | None = ...,
     lease_checkpoint: Callable[[], None] | None = ...,
 ) -> None: ...
 def enqueue_tracked_rq_job(
@@ -66,4 +68,6 @@ def enqueue_tracked_rq_job(
     allowed_root_funcs: Iterable[Any] | None = ...,
     allowed_workflow_funcs: Iterable[Any] | None = ...,
     allowed_workflow_modules: Iterable[str] | None = ...,
+    excluded_dependency_job_ids: Callable[[Job], Iterable[str]] | None = ...,
+    workflow_root_meta_key: str | None = ...,
 ) -> Job: ...

@@ -176,7 +176,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_geneva_job",
-    "source_lineno": 306,
+    "source_lineno": 302,
     "source_module": "wepppy/microservices/rq_engine/geneva_routes.py"
   },
   {
@@ -186,31 +186,31 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_geneva_workflow_jobs",
-    "source_lineno": 358,
+    "source_lineno": 354,
     "source_module": "wepppy/microservices/rq_engine/geneva_routes.py"
   },
   {
     "depends_on": [
-      "failure_tolerant_depends_on(prepare_job)"
+      "run_geneva_prepare_hrus_rq"
     ],
     "enqueue_target": "run_geneva_build_frequency_panel_rq",
     "job_meta_stage": null,
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_geneva_workflow_jobs",
-    "source_lineno": 365,
+    "source_lineno": 361,
     "source_module": "wepppy/microservices/rq_engine/geneva_routes.py"
   },
   {
     "depends_on": [
-      "failure_tolerant_depends_on(panel_job)"
+      "run_geneva_build_frequency_panel_rq"
     ],
     "enqueue_target": "run_geneva_run_batch_rq",
     "job_meta_stage": null,
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_geneva_workflow_jobs",
-    "source_lineno": 374,
+    "source_lineno": 370,
     "source_module": "wepppy/microservices/rq_engine/geneva_routes.py"
   },
   {
@@ -340,7 +340,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "run_sync",
-    "source_lineno": 273,
+    "source_lineno": 269,
     "source_module": "wepppy/microservices/rq_engine/run_sync_routes.py"
   },
   {
@@ -350,19 +350,19 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "run_sync",
-    "source_lineno": 281,
+    "source_lineno": 277,
     "source_module": "wepppy/microservices/rq_engine/run_sync_routes.py"
   },
   {
     "depends_on": [
-      "failure_tolerant_depends_on(sync_job)"
+      "run_sync_rq"
     ],
     "enqueue_target": "migrations_rq",
     "job_meta_stage": null,
     "notes": [],
     "queue_name": "default",
     "source_function": "run_sync",
-    "source_lineno": 312,
+    "source_lineno": 308,
     "source_module": "wepppy/microservices/rq_engine/run_sync_routes.py"
   },
   {
@@ -422,7 +422,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "build_subcatchments_and_abstract_watershed",
-    "source_lineno": 1101,
+    "source_lineno": 1097,
     "source_module": "wepppy/microservices/rq_engine/watershed_routes.py"
   },
   {
@@ -508,7 +508,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "enqueue_culvert_batch_jobs",
-    "source_lineno": 70,
+    "source_lineno": 76,
     "source_module": "wepppy/rq/culvert_rq_pipeline.py"
   },
   {
@@ -520,7 +520,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "enqueue_culvert_batch_jobs",
-    "source_lineno": 88,
+    "source_lineno": 94,
     "source_module": "wepppy/rq/culvert_rq_pipeline.py"
   },
   {
@@ -532,7 +532,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_omni_contrasts_rq",
-    "source_lineno": 852,
+    "source_lineno": 849,
     "source_module": "wepppy/rq/omni_rq.py"
   },
   {
@@ -544,7 +544,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_omni_contrasts_rq",
-    "source_lineno": 867,
+    "source_lineno": 864,
     "source_module": "wepppy/rq/omni_rq.py"
   },
   {
@@ -559,7 +559,7 @@
   },
   {
     "depends_on": [
-      "_failure_tolerant_depends_on(stage1_jobs)"
+      "run_omni_scenario_rq"
     ],
     "enqueue_target": "run_omni_scenario_rq",
     "job_meta_stage": "jobs:1",
@@ -571,26 +571,26 @@
   },
   {
     "depends_on": [
-      "_failure_tolerant_depends_on(compile_depends)"
+      "run_omni_scenario_rq"
     ],
     "enqueue_target": "_compile_hillslope_summaries_rq",
     "job_meta_stage": "jobs:2",
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_omni_scenarios_rq",
-    "source_lineno": 698,
+    "source_lineno": 697,
     "source_module": "wepppy/rq/omni_rq.py"
   },
   {
     "depends_on": [
-      "_failure_tolerant_depends_on([compile_job])"
+      "_compile_hillslope_summaries_rq"
     ],
     "enqueue_target": "_finalize_omni_scenarios_rq",
     "job_meta_stage": "jobs:3",
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_omni_scenarios_rq",
-    "source_lineno": 710,
+    "source_lineno": 708,
     "source_module": "wepppy/rq/omni_rq.py"
   },
   {
@@ -602,19 +602,19 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_serial_subcatchment_tree",
-    "source_lineno": 730,
+    "source_lineno": 764,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
     "depends_on": [
-      "failure_tolerant_depends_on(child)"
+      "build_subcatchments_rq"
     ],
     "enqueue_target": "abstract_watershed_rq",
     "job_meta_stage": null,
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_serial_subcatchment_tree",
-    "source_lineno": 738,
+    "source_lineno": 772,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -624,7 +624,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 1550,
+    "source_lineno": 1581,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -634,19 +634,19 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 1566,
+    "source_lineno": 1597,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
     "depends_on": [
-      "failure_tolerant_depends_on(ajob)"
+      "fetch_dem_rq"
     ],
     "enqueue_target": "build_channels_rq",
     "job_meta_stage": "jobs:1",
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 1574,
+    "source_lineno": 1605,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -658,7 +658,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fork_rq",
-    "source_lineno": 2945,
+    "source_lineno": 2941,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -668,7 +668,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "run_swat_noprep_rq",
-    "source_lineno": 123,
+    "source_lineno": 118,
     "source_module": "wepppy/rq/swat_rq.py"
   },
   {
@@ -678,19 +678,19 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "run_swat_rq",
-    "source_lineno": 75,
+    "source_lineno": 71,
     "source_module": "wepppy/rq/swat_rq.py"
   },
   {
     "depends_on": [
-      "failure_tolerant_depends_on(job_build)"
+      "_build_swat_inputs_rq"
     ],
     "enqueue_target": "_run_swat_rq",
     "job_meta_stage": "jobs:1",
     "notes": [],
     "queue_name": "default",
     "source_function": "run_swat_rq",
-    "source_lineno": 79,
+    "source_lineno": 75,
     "source_module": "wepppy/rq/swat_rq.py"
   },
   {
@@ -722,7 +722,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_log_prep_complete",
-    "source_lineno": 83,
+    "source_lineno": 78,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -732,7 +732,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_watershed_noprep_pipeline",
-    "source_lineno": 913,
+    "source_lineno": 908,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -742,7 +742,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_watershed_noprep_pipeline",
-    "source_lineno": 925,
+    "source_lineno": 920,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -755,7 +755,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_watershed_noprep_pipeline",
-    "source_lineno": 938,
+    "source_lineno": 933,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -768,7 +768,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_watershed_noprep_pipeline",
-    "source_lineno": 951,
+    "source_lineno": 946,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -781,7 +781,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_watershed_noprep_pipeline",
-    "source_lineno": 965,
+    "source_lineno": 960,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -793,7 +793,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_watershed_noprep_pipeline",
-    "source_lineno": 978,
+    "source_lineno": 973,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -808,7 +808,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_watershed_noprep_pipeline",
-    "source_lineno": 992,
+    "source_lineno": 987,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -824,7 +824,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_watershed_noprep_pipeline",
-    "source_lineno": 1004,
+    "source_lineno": 999,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -834,7 +834,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_watershed_pipeline",
-    "source_lineno": 773,
+    "source_lineno": 768,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -846,7 +846,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_watershed_pipeline",
-    "source_lineno": 787,
+    "source_lineno": 782,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -858,7 +858,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_watershed_pipeline",
-    "source_lineno": 800,
+    "source_lineno": 795,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -872,7 +872,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_watershed_pipeline",
-    "source_lineno": 814,
+    "source_lineno": 809,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -886,7 +886,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_watershed_pipeline",
-    "source_lineno": 827,
+    "source_lineno": 822,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -900,7 +900,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_watershed_pipeline",
-    "source_lineno": 841,
+    "source_lineno": 836,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -912,7 +912,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_watershed_pipeline",
-    "source_lineno": 854,
+    "source_lineno": 849,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -927,7 +927,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_watershed_pipeline",
-    "source_lineno": 868,
+    "source_lineno": 863,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -943,7 +943,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_watershed_pipeline",
-    "source_lineno": 880,
+    "source_lineno": 875,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -953,7 +953,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_noprep_pipeline",
-    "source_lineno": 560,
+    "source_lineno": 555,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -965,7 +965,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_noprep_pipeline",
-    "source_lineno": 569,
+    "source_lineno": 564,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -977,7 +977,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_noprep_pipeline",
-    "source_lineno": 581,
+    "source_lineno": 576,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -989,7 +989,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_noprep_pipeline",
-    "source_lineno": 602,
+    "source_lineno": 597,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1001,7 +1001,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_noprep_pipeline",
-    "source_lineno": 615,
+    "source_lineno": 610,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1015,7 +1015,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_noprep_pipeline",
-    "source_lineno": 628,
+    "source_lineno": 623,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1029,7 +1029,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_noprep_pipeline",
-    "source_lineno": 641,
+    "source_lineno": 636,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1044,7 +1044,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_noprep_pipeline",
-    "source_lineno": 656,
+    "source_lineno": 651,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1058,7 +1058,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_noprep_pipeline",
-    "source_lineno": 669,
+    "source_lineno": 664,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1071,7 +1071,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_noprep_pipeline",
-    "source_lineno": 680,
+    "source_lineno": 675,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1084,7 +1084,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_noprep_pipeline",
-    "source_lineno": 693,
+    "source_lineno": 688,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1097,7 +1097,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_noprep_pipeline",
-    "source_lineno": 708,
+    "source_lineno": 703,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1114,7 +1114,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_noprep_pipeline",
-    "source_lineno": 721,
+    "source_lineno": 716,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1131,7 +1131,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_noprep_pipeline",
-    "source_lineno": 734,
+    "source_lineno": 729,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1153,7 +1153,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_noprep_pipeline",
-    "source_lineno": 752,
+    "source_lineno": 747,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1163,7 +1163,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_pipeline",
-    "source_lineno": 107,
+    "source_lineno": 102,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1173,7 +1173,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_pipeline",
-    "source_lineno": 118,
+    "source_lineno": 113,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1183,7 +1183,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_pipeline",
-    "source_lineno": 128,
+    "source_lineno": 123,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1193,7 +1193,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_pipeline",
-    "source_lineno": 137,
+    "source_lineno": 132,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1203,7 +1203,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_pipeline",
-    "source_lineno": 148,
+    "source_lineno": 143,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1219,7 +1219,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_pipeline",
-    "source_lineno": 158,
+    "source_lineno": 153,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1231,7 +1231,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_pipeline",
-    "source_lineno": 168,
+    "source_lineno": 163,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1243,7 +1243,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_pipeline",
-    "source_lineno": 181,
+    "source_lineno": 176,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1256,7 +1256,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_pipeline",
-    "source_lineno": 208,
+    "source_lineno": 203,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1268,7 +1268,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_pipeline",
-    "source_lineno": 217,
+    "source_lineno": 212,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1281,7 +1281,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_pipeline",
-    "source_lineno": 230,
+    "source_lineno": 225,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1293,7 +1293,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_pipeline",
-    "source_lineno": 241,
+    "source_lineno": 236,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1306,7 +1306,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_pipeline",
-    "source_lineno": 255,
+    "source_lineno": 250,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1318,7 +1318,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_pipeline",
-    "source_lineno": 264,
+    "source_lineno": 259,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1330,7 +1330,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_pipeline",
-    "source_lineno": 281,
+    "source_lineno": 276,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1342,7 +1342,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_pipeline",
-    "source_lineno": 294,
+    "source_lineno": 289,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1356,7 +1356,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_pipeline",
-    "source_lineno": 307,
+    "source_lineno": 302,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1370,7 +1370,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_pipeline",
-    "source_lineno": 320,
+    "source_lineno": 315,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1385,7 +1385,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_pipeline",
-    "source_lineno": 336,
+    "source_lineno": 331,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1399,7 +1399,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_pipeline",
-    "source_lineno": 349,
+    "source_lineno": 344,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1412,7 +1412,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_pipeline",
-    "source_lineno": 360,
+    "source_lineno": 355,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1425,7 +1425,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_pipeline",
-    "source_lineno": 373,
+    "source_lineno": 368,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1438,7 +1438,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_pipeline",
-    "source_lineno": 388,
+    "source_lineno": 383,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1455,7 +1455,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_pipeline",
-    "source_lineno": 401,
+    "source_lineno": 396,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1472,7 +1472,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_pipeline",
-    "source_lineno": 414,
+    "source_lineno": 409,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1495,7 +1495,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_pipeline",
-    "source_lineno": 435,
+    "source_lineno": 430,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1505,7 +1505,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_prep_only_pipeline",
-    "source_lineno": 461,
+    "source_lineno": 456,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1515,7 +1515,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_prep_only_pipeline",
-    "source_lineno": 472,
+    "source_lineno": 467,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1525,7 +1525,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_prep_only_pipeline",
-    "source_lineno": 482,
+    "source_lineno": 477,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1535,7 +1535,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_prep_only_pipeline",
-    "source_lineno": 492,
+    "source_lineno": 487,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1545,7 +1545,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_prep_only_pipeline",
-    "source_lineno": 503,
+    "source_lineno": 498,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1561,7 +1561,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_prep_only_pipeline",
-    "source_lineno": 513,
+    "source_lineno": 508,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {
@@ -1573,7 +1573,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "enqueue_wepp_prep_only_pipeline",
-    "source_lineno": 523,
+    "source_lineno": 518,
     "source_module": "wepppy/rq/wepp_rq_pipeline.py"
   },
   {

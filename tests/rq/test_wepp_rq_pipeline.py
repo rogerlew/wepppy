@@ -45,11 +45,16 @@ class _DummyQueue:
 
 
 def _assert_depends_on(call: dict, expected_ids: list[str]) -> None:
-    """Every pipeline edge is a failure-tolerant Dependency over these job ids."""
+    """Every WEPP pipeline edge is strict over the expected job ids."""
     dependency = call["depends_on"]
-    assert isinstance(dependency, Dependency)
-    assert dependency.dependencies == expected_ids
-    assert dependency.allow_failure is True
+    if isinstance(dependency, Dependency):
+        assert dependency.allow_failure is False
+        actual_ids = dependency.dependencies
+    elif isinstance(dependency, (list, tuple)):
+        actual_ids = [job.id for job in dependency]
+    else:
+        actual_ids = [dependency.id]
+    assert actual_ids == expected_ids
 
 
 def _make_parent_job() -> SimpleNamespace:

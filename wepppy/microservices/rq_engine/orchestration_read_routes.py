@@ -763,17 +763,26 @@ def _effective_job_status(job_info: Mapping[str, Any]) -> str | None:
     if not child_nodes:
         return root_status
 
-    child_statuses = [status for status in (_normalize_job_status(node.get("status")) for node in child_nodes) if status]
-    if not child_statuses:
+    statuses = [
+        status
+        for status in (
+            root_status,
+            *(_normalize_job_status(node.get("status")) for node in child_nodes),
+        )
+        if status
+    ]
+    if not statuses:
         return root_status
 
-    if any(status in _FAILED_JOB_STATUSES for status in child_statuses):
-        return "failed"
-    if any(status == "canceled" for status in child_statuses):
-        return "canceled"
-    if any(status in _NON_TERMINAL_JOB_STATUSES for status in child_statuses):
+    if any(status in {"queued", "started", "scheduled"} for status in statuses):
         return "started"
-    if all(status in _TERMINAL_OUTCOMES for status in child_statuses):
+    if any(status in _FAILED_JOB_STATUSES for status in statuses):
+        return "failed"
+    if any(status == "canceled" for status in statuses):
+        return "canceled"
+    if any(status in _NON_TERMINAL_JOB_STATUSES for status in statuses):
+        return "started"
+    if all(status in _TERMINAL_OUTCOMES for status in statuses):
         return "finished"
     return root_status
 

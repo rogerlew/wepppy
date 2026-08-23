@@ -264,6 +264,8 @@ def prepare_redisprep_job_id(
     allowed_workflow_modules: Iterable[str] | None = None,
     root_run_arg_index: int = 0,
     association: Callable[[Job], bool] | None = None,
+    workflow_root_meta_key: str | None = None,
+    excluded_dependency_job_ids: Callable[[Job], Iterable[str]] | None = None,
     lease_checkpoint: Callable[[], None] | None = None,
 ) -> None:
     """Reap deferred prior receipts, then persist a preallocated replacement ID."""
@@ -304,13 +306,26 @@ def prepare_redisprep_job_id(
             )
             and (not origins or str(job.origin) in origins)
         )
+        association_policy = association or default_association
+        if workflow_root_meta_key:
+            unbound_association = association_policy
+            expected_workflow_root = str(prior_job_id)
+            association_policy = lambda job: (
+                unbound_association(job)
+                and (
+                    str(job.id) == expected_workflow_root
+                    or str((job.meta or {}).get(workflow_root_meta_key) or "")
+                    == expected_workflow_root
+                )
+            )
         if lease_checkpoint is not None:
             lease_checkpoint()
         result = reconcile_deferred_workflow(
             str(prior_job_id),
             connection=connection,
-            association=association or default_association,
+            association=association_policy,
             root_association=root_association,
+            excluded_dependency_job_ids=excluded_dependency_job_ids,
             lease_checkpoint=lease_checkpoint,
         )
         if result.state == "active":
@@ -342,6 +357,8 @@ def enqueue_tracked_rq_job(
     allowed_root_funcs: Iterable[Any] | None = None,
     allowed_workflow_funcs: Iterable[Any] | None = None,
     allowed_workflow_modules: Iterable[str] | None = None,
+    excluded_dependency_job_ids: Callable[[Job], Iterable[str]] | None = None,
+    workflow_root_meta_key: str | None = None,
 ) -> Job:
     """Pre-save a replacement receipt and enqueue that exact RQ job id."""
     keys = tuple(dict.fromkeys(conflict_keys or (job_key,)))
@@ -369,6 +386,8 @@ def enqueue_tracked_rq_job(
                 for candidate in (allowed_workflow_funcs or ())
             ),
             allowed_workflow_modules=allowed_workflow_modules,
+            excluded_dependency_job_ids=excluded_dependency_job_ids,
+            workflow_root_meta_key=workflow_root_meta_key,
             lease_checkpoint=lease.checkpoint,
         )
         lease.checkpoint()

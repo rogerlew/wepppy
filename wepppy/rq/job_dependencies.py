@@ -1,22 +1,12 @@
-"""Failure-tolerant RQ dependency wiring.
+"""RQ dependency and deferred-workflow recovery helpers.
 
-RQ holds a dependent job in ``deferred`` until ``Job.dependencies_are_met``
-returns True, and that check only accepts ``FINISHED`` unless the edge was
-built with ``allow_failure``. A bare ``depends_on`` therefore strands every
-downstream job permanently the first time an upstream job fails -- the
-dependent is never released, never expires, and never reaches a terminal
-state.
-
-That is how ~9,800 zombie jobs accumulated on the ``batch`` and ``default``
-queues. It also breaks the completion contract: stage tails such as
-``_log_complete_rq`` and the Omni finalizers stamp ``RedisPrep`` and emit
-``END_BROADCAST``, so a stranded tail leaves the UI status stream open
-forever and the batch "jobs are active" guard permanently tripped.
-
-Pipelines route their edges through :func:`failure_tolerant_depends_on` so a
-failed upstream job still releases its dependents, which then run over
-whatever succeeded or fail terminally on their own missing inputs. Either way
-the pipeline reaches a terminal state and the tail runs.
+Required-output dependency edges use ordinary strict RQ dependencies: a failed
+prerequisite must never release executable downstream work. The failure-
+tolerant helpers in this module are limited to explicitly reviewed terminal
+finalizers and independent resource-serialization edges. Controller retries use
+``reconcile_deferred_workflow`` to cancel and detach obsolete never-started
+graphs before enqueueing replacement work, so strict dependencies do not create
+user-facing lockout.
 """
 
 from __future__ import annotations
@@ -97,10 +87,23 @@ def _snapshot_linked_job_ids(pipeline: Any, job: Job) -> set[str]:
     return linked
 
 
+def _job_dependency_ids(job: Job) -> set[str]:
+    dependency_prefix = Job.redis_job_namespace_prefix
+    dependency_ids: set[str] = set()
+    for raw_job_id in job.dependency_ids:
+        job_id = raw_job_id.decode("utf-8") if isinstance(raw_job_id, bytes) else str(raw_job_id)
+        if job_id.startswith(dependency_prefix):
+            job_id = job_id[len(dependency_prefix):]
+        if job_id:
+            dependency_ids.add(job_id)
+    return dependency_ids
+
+
 def _collect_workflow_jobs(
     root_job: Job,
     *,
     association: Callable[[Job], bool],
+    excluded_dependency_job_ids: Callable[[Job], Iterable[str]] | None = None,
     lease_checkpoint: Callable[[], None] | None = None,
 ) -> tuple[list[Job], bool, dict[str, set[str]]]:
     jobs: list[Job] = []
@@ -122,6 +125,13 @@ def _collect_workflow_jobs(
             continue
         jobs.append(job)
         linked_job_ids = _linked_job_ids(job)
+        if excluded_dependency_job_ids is not None:
+            excluded_ids = {
+                str(job_id)
+                for job_id in excluded_dependency_job_ids(job)
+                if job_id
+            }
+            linked_job_ids.difference_update(excluded_ids & _job_dependency_ids(job))
         adjacency[job_id] = linked_job_ids
         for linked_job_id in linked_job_ids:
             if linked_job_id in seen:
@@ -140,6 +150,7 @@ def reconcile_deferred_workflow(
     connection: Any,
     association: Callable[[Job], bool],
     root_association: Callable[[Job], bool],
+    excluded_dependency_job_ids: Callable[[Job], Iterable[str]] | None = None,
     max_attempts: int = _MAX_RECONCILE_ATTEMPTS,
     lease_checkpoint: Callable[[], None] | None = None,
 ) -> DeferredWorkflowReconciliation:
@@ -202,7 +213,30 @@ def reconcile_deferred_workflow(
                     job_class=job.__class__,
                     serializer=job.serializer,
                 ).key)
-                pending.extend(_snapshot_linked_job_ids(pipeline, job) - seen)
+                linked_job_ids = _snapshot_linked_job_ids(pipeline, job)
+                if excluded_dependency_job_ids is not None:
+                    excluded_ids = {
+                        str(linked_id)
+                        for linked_id in excluded_dependency_job_ids(job)
+                        if linked_id
+                    }
+                    stored_dependency_ids: set[str] = set()
+                    for raw_id in pipeline.smembers(job.dependencies_key):
+                        dependency_id = (
+                            raw_id.decode("utf-8")
+                            if isinstance(raw_id, bytes)
+                            else str(raw_id)
+                        )
+                        if dependency_id.startswith(Job.redis_job_namespace_prefix):
+                            dependency_id = dependency_id[
+                                len(Job.redis_job_namespace_prefix):
+                            ]
+                        if dependency_id:
+                            stored_dependency_ids.add(dependency_id)
+                    linked_job_ids.difference_update(
+                        excluded_ids & stored_dependency_ids
+                    )
+                pending.extend(linked_job_ids - seen)
 
             if restart:
                 continue
@@ -303,6 +337,7 @@ def reconcile_deferred_workflow(
     jobs, mismatch, _adjacency = _collect_workflow_jobs(
         root_job,
         association=association,
+        excluded_dependency_job_ids=excluded_dependency_job_ids,
         lease_checkpoint=lease_checkpoint,
     )
     if mismatch:
@@ -336,13 +371,13 @@ def _dependency_id(candidate: Any) -> Optional[str]:
 
 
 def failure_tolerant_depends_on(depends_on: Any) -> Optional[Dependency]:
-    """Normalize a ``depends_on`` value into a failure-tolerant ``Dependency``.
+    """Build an explicitly authorized failure-tolerant ``Dependency``.
 
     Accepts whatever the enqueue sites already pass -- ``None``, a single
     ``Job``, a job id, an iterable of either, or an existing ``Dependency``
-    (returned unchanged so explicit per-edge wiring still wins). Returns
-    ``None`` when there is nothing to depend on, so callers can pass the
-    result straight through to ``Queue.enqueue_call``.
+    (returned unchanged so explicit per-edge wiring still wins). Callers must
+    be one of the reviewed finalizer or independent-serialization sites; this
+    helper is not the default for required-output pipeline edges.
     """
     if depends_on is None:
         return None
@@ -374,10 +409,58 @@ def release_deferred_job_if_ready(queue: Queue, deferred_job: Job) -> None:
     """
     if not getattr(deferred_job, "_dependency_ids", None):
         return
-    if deferred_job.get_status(refresh=True) != JobStatus.DEFERRED:
-        return
-    if not deferred_job.dependencies_are_met():
-        return
+    pipeline = queue.connection.pipeline()
+    while True:
+        try:
+            pipeline.watch(deferred_job.key, deferred_job.dependencies_key)
+            deferred_job.refresh()
+            if deferred_job.get_status(refresh=False) != JobStatus.DEFERRED:
+                return
 
-    DeferredJobRegistry(queue=queue).remove(deferred_job)
-    queue._enqueue_job(deferred_job)
+            stored_ids = {
+                dependency_id.decode()
+                if isinstance(dependency_id, bytes)
+                else str(dependency_id)
+                for dependency_id in pipeline.smembers(deferred_job.dependencies_key)
+            }
+            expected_ids = {
+                dependency_id.decode()
+                if isinstance(dependency_id, bytes)
+                else str(dependency_id)
+                for dependency_id in deferred_job._dependency_ids
+            }
+            if not expected_ids or stored_ids != expected_ids:
+                return
+
+            dependency_keys = [Job.key_for(dependency_id) for dependency_id in expected_ids]
+            dependent_set_keys = [
+                Job.dependents_key_for(dependency_id) for dependency_id in expected_ids
+            ]
+            pipeline.watch(*dependency_keys, *dependent_set_keys)
+            dependencies = Job.fetch_many(
+                sorted(expected_ids),
+                connection=queue.connection,
+                serializer=deferred_job.serializer,
+            )
+            if any(dependency is None for dependency in dependencies):
+                return
+            statuses = {
+                dependency.get_status(refresh=True)
+                for dependency in dependencies
+                if dependency is not None
+            }
+            if not statuses.issubset({JobStatus.FINISHED, JobStatus.FAILED}):
+                return
+
+            pipeline.multi()
+            for dependents_key in dependent_set_keys:
+                pipeline.srem(dependents_key, deferred_job.id)
+            pipeline.delete(deferred_job.dependencies_key)
+            DeferredJobRegistry(queue=queue).remove(deferred_job, pipeline=pipeline)
+            queue._enqueue_job(deferred_job, pipeline=pipeline)
+            pipeline.execute()
+            return
+        except WatchError:
+            continue
+        finally:
+            pipeline.reset()

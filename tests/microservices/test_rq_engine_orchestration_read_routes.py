@@ -507,6 +507,25 @@ def test_effective_job_status_prioritizes_failure_over_non_terminal_children() -
     assert orchestration_read_routes._effective_job_status(job_info) == "failed"
 
 
+def test_effective_job_status_prioritizes_active_work_over_failure() -> None:
+    job_info = {
+        "status": "finished",
+        "children": {
+            "0": [{"status": "failed", "children": {}}],
+            "1": [{"status": "queued", "children": {}}],
+        },
+    }
+    assert orchestration_read_routes._effective_job_status(job_info) == "started"
+
+
+def test_effective_job_status_prioritizes_active_root_over_failed_child() -> None:
+    job_info = {
+        "status": "started",
+        "children": {"0": [{"status": "failed", "children": {}}]},
+    }
+    assert orchestration_read_routes._effective_job_status(job_info) == "started"
+
+
 def test_effective_job_ended_at_uses_latest_child_completion() -> None:
     job_info = {
         "status": "finished",

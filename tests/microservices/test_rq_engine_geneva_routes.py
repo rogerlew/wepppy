@@ -84,11 +84,14 @@ class _GenevaRouteStub:
 
 
 def _assert_depends_on(call: dict, expected_ids: list[str]) -> None:
-    """Geneva chains its jobs with failure-tolerant Dependency edges."""
+    """Geneva chains required-output jobs with strict dependency edges."""
     dependency = call["depends_on"]
-    assert isinstance(dependency, Dependency)
-    assert dependency.dependencies == expected_ids
-    assert dependency.allow_failure is True
+    if isinstance(dependency, Dependency):
+        assert dependency.allow_failure is False
+        actual_ids = dependency.dependencies
+    else:
+        actual_ids = [dependency.id]
+    assert actual_ids == expected_ids
 
 
 def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:

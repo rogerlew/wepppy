@@ -43,6 +43,7 @@ from wepppy.config.redis_settings import (
     redis_host,
 )
 from wepppy.rq.job_id import new_rq_job_id
+from wepppy.rq.job_dependencies import release_deferred_job_if_ready
 from wepppy.rq.submission_recovery import RqEnqueueVerificationError
 from wepppy.weppcloud.utils.helpers import get_wd, get_primary_wd
 from wepppy.weppcloud.user_preferences import (
@@ -99,10 +100,6 @@ from . import project_rq_archive as _archive_helpers
 from . import project_rq_delete as _delete_helpers
 from . import project_rq_fork as _fork_helpers
 from .wepp_rq import run_wepp_rq
-from wepppy.rq.job_dependencies import (
-    failure_tolerant_depends_on,
-    release_deferred_job_if_ready,
-)
 
 _hostname = socket.gethostname()
 _logger = logging.getLogger(__name__)
@@ -570,9 +567,9 @@ def _load_exact_subcatchment_tree(
     }:
         raise RuntimeError("WBT completion receipt has an unsupported status.")
     if receipt_status != JobStatus.DEFERRED:
-        if receipt_dependencies:
+        if receipt_dependencies not in (set(), {build.id}):
             raise RuntimeError(
-                "WBT completion receipt retains a stale dependency."
+                "WBT completion receipt has an unexpected dependency."
             )
         if receipt.id in build.dependent_ids:
             raise RuntimeError(
@@ -601,8 +598,9 @@ def _load_exact_subcatchment_tree(
     }:
         raise RuntimeError("WBT build has an unsupported status.")
     if build_status != JobStatus.DEFERRED:
-        if build_dependencies:
-            raise RuntimeError("WBT build retains a stale prior dependency.")
+        expected_build_dependencies = set() if previous_id is None else {previous_id}
+        if build_dependencies not in (set(), expected_build_dependencies):
+            raise RuntimeError("WBT build has an unexpected prior dependency.")
         if previous_id is not None:
             previous = _fetch_job_or_none(previous_id, redis_conn)
             if previous is not None and build.id in previous.dependent_ids:
@@ -632,6 +630,19 @@ def _register_deferred_job(job: Job, pipeline) -> None:
     job.register_dependency(pipeline=pipeline)
     job.save(pipeline=pipeline)
     job.cleanup(ttl=job.ttl, pipeline=pipeline)
+
+
+def _is_wbt_serialized_build(job: Job, *, runid: str, origin: str) -> bool:
+    metadata = job.meta if isinstance(job.meta, dict) else {}
+    args = tuple(job.args or ())
+    return (
+        str(job.origin) == origin
+        and str(job.func_name)
+        == f"{build_subcatchments_rq.__module__}.{build_subcatchments_rq.__qualname__}"
+        and bool(args)
+        and str(args[0]) == runid
+        and bool(str(metadata.get(_WBT_ADMISSION_ROOT_KEY) or "").strip())
+    )
 
 
 def _enqueue_serial_subcatchment_tree(
@@ -675,19 +686,41 @@ def _enqueue_serial_subcatchment_tree(
             pipeline.watch(tail_key, parent_job.key)
             previous_tail_id = _decode_redis_text(pipeline.get(tail_key))
             previous_tail = _fetch_job_or_none(previous_tail_id, redis_conn)
-            if previous_tail is not None:
+            visited_tail_ids: set[str] = set()
+            while previous_tail is not None:
+                if previous_tail.id in visited_tail_ids:
+                    raise RuntimeError(
+                        "WBT subcatchment admission found a cyclic prior-tail chain."
+                    )
+                visited_tail_ids.add(previous_tail.id)
                 pipeline.watch(previous_tail.key)
                 previous_tail.refresh()
+                if not _is_wbt_serialized_build(
+                    previous_tail,
+                    runid=runid,
+                    origin=queue.name,
+                ):
+                    raise RuntimeError(
+                        "WBT subcatchment admission tail is not an associated "
+                        "serialized build."
+                    )
                 if _is_terminal_job(previous_tail):
-                    previous_tail_id = None
-                    previous_tail = None
-                else:
-                    location_keys = _active_job_location_keys(previous_tail)
-                    if location_keys:
-                        pipeline.watch(*location_keys)
+                    predecessor_id = previous_tail.meta.get(
+                        _WBT_ADMISSION_PREVIOUS_KEY
+                    )
+                    previous_tail_id = (
+                        str(predecessor_id).strip() if predecessor_id else None
+                    )
+                    previous_tail = _fetch_job_or_none(
+                        previous_tail_id,
+                        redis_conn,
+                    )
+                    continue
+                location_keys = _active_job_location_keys(previous_tail)
+                if location_keys:
+                    pipeline.watch(*location_keys)
                 if (
-                    previous_tail is not None
-                    and not _active_job_has_execution_location(previous_tail)
+                    not _active_job_has_execution_location(previous_tail)
                 ):
                     # Validate that the watched tail/job remained unchanged
                     # before diagnosing an orphan instead of a live transition.
@@ -698,7 +731,8 @@ def _enqueue_serial_subcatchment_tree(
                         "WBT subcatchment admission found a nonterminal "
                         "tail outside every valid execution registry."
                     )
-            else:
+                break
+            if previous_tail is None:
                 previous_tail_id = None
 
             dependency = (
@@ -739,10 +773,7 @@ def _enqueue_serial_subcatchment_tree(
                 abstract_watershed_rq,
                 args=(runid, True),
                 timeout=TIMEOUT,
-                # Failure tolerant so a failed build still releases the receipt.
-                # No release_deferred_job_if_ready here: this runs inside the
-                # admission WATCH/MULTI, which registers deferral explicitly.
-                depends_on=failure_tolerant_depends_on(child),
+                depends_on=child,
                 job_id=receipt_id,
                 meta=registered_receipt_meta,
             )
@@ -1583,9 +1614,8 @@ def fetch_dem_and_build_channels_rq(
                         job.id,
                     ),
                     timeout=build_channels_timeout,
-                    depends_on=failure_tolerant_depends_on(ajob),
+                    depends_on=ajob,
                 )
-                release_deferred_job_if_ready(q, bjob)
                 job.meta['jobs:1,func:build_channels_rq'] = bjob.id
                 job.save()
         
@@ -1699,7 +1729,6 @@ def build_subcatchments_rq(
     Raises:
         Exception: Propagates failures from watershed delineation.
     """
-    phase = {"wbt_started": False}
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -1725,28 +1754,18 @@ def build_subcatchments_rq(
             )
             if watershed.delineation_backend_is_topaz:
                 clear_nodb_file_cache(runid, pup_relpath="topaz.nodb")
+            prep = RedisPrep.getInstance(wd)
+            prep.remove_timestamp(TaskEnum.abstract_watershed)
+            prep.remove_timestamp(TaskEnum.build_subcatchments)
+            if snapshot is not None:
+                watershed.persist_wbt_boundary_touch_config_behavior()
             if updates:
                 try:
-                    with watershed.locked():
-                        if 'clip_hillslopes' in updates:
-                            watershed._clip_hillslopes = bool(updates['clip_hillslopes'])  # type: ignore[attr-defined]
-                        if 'walk_flowpaths' in updates:
-                            watershed._walk_flowpaths = bool(updates['walk_flowpaths'])  # type: ignore[attr-defined]
-                        if 'clip_hillslope_length' in updates:
-                            watershed._clip_hillslope_length = float(updates['clip_hillslope_length'])  # type: ignore[attr-defined]
-                        if 'mofe_target_length' in updates:
-                            watershed._mofe_target_length = float(updates['mofe_target_length'])  # type: ignore[attr-defined]
-                        if 'mofe_buffer' in updates:
-                            watershed._mofe_buffer = bool(updates['mofe_buffer'])  # type: ignore[attr-defined]
-                        if 'mofe_buffer_length' in updates:
-                            watershed._mofe_buffer_length = float(updates['mofe_buffer_length'])  # type: ignore[attr-defined]
-                        if 'bieger2015_widths' in updates:
-                            watershed._bieger2015_widths = bool(updates['bieger2015_widths'])  # type: ignore[attr-defined]
+                    watershed.apply_build_subcatchment_updates(**updates)
                 except (OSError, RuntimeError, ValueError) as exc:
                     raise WbtBoundaryPolicyApplyError(
                         "Could not apply subcatchment execution settings."
                     ) from exc
-            phase["wbt_started"] = True
             watershed.build_subcatchments(
                 boundary_touch_behavior=execution_policy,
             )
@@ -1848,29 +1867,11 @@ def build_subcatchments_rq(
             f'{WATERSHED_BOUNDARY_TOUCH_MESSAGE}',
         )
         raise
-    except Exception as exc:
-        if boundary_policy is not None and not phase["wbt_started"]:
-            apply_exc = WbtBoundaryPolicyApplyError(
-                "WBT policy application failed before delineation."
-            )
-            _record_wbt_policy_failure(
-                job,
-                runid=runid,
-                code="wbt_boundary_policy_apply_failed",
-                message=WBT_BOUNDARY_POLICY_APPLY_FAILED_MESSAGE,
-                cancel_dependents=True,
-            )
-            StatusMessenger.publish(
-                status_channel,
-                f'rq:{job.id} EXCEPTION {func_name}({runid}) '
-                f'{WBT_BOUNDARY_POLICY_APPLY_FAILED_MESSAGE}',
-            )
-            raise apply_exc from exc
-        if abstract_after_build:
-            _cancel_policy_dependents(job)
+    except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq.py:691", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
-        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        if "job" in locals() and "status_channel" in locals() and "func_name" in locals():
+            StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 @with_exception_logging
 def abstract_watershed_rq(
@@ -2833,12 +2834,7 @@ def _transfer_profile_fork_claim(
 
 
 def _release_failure_tolerant_fork_finalizer(queue: Queue, finalizer_job: Job) -> None:
-    if finalizer_job.get_status(refresh=True) != JobStatus.DEFERRED:
-        return
-    if not finalizer_job.dependencies_are_met():
-        return
-    DeferredJobRegistry(queue=queue).remove(finalizer_job)
-    queue._enqueue_job(finalizer_job)
+    release_deferred_job_if_ready(queue, finalizer_job)
 
 
 @with_exception_logging

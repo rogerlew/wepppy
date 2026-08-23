@@ -36,11 +36,7 @@ from .auth import AuthError, _normalize_scopes, authorize_run_access, require_jw
 from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response
-from wepppy.rq.job_dependencies import (
-    failure_tolerant_depends_on,
-    reconcile_deferred_workflow,
-    release_deferred_job_if_ready,
-)
+from wepppy.rq.job_dependencies import reconcile_deferred_workflow
 
 logger = logging.getLogger(__name__)
 
@@ -366,7 +362,7 @@ def _enqueue_geneva_workflow_jobs(
             func=run_geneva_build_frequency_panel_rq,
             args=(runid, config, panel_payload),
             timeout=GENEVA_RQ_TIMEOUT,
-            depends_on=failure_tolerant_depends_on(prepare_job),
+            depends_on=prepare_job,
             job_id=new_rq_job_id(),
             status=JobStatus.DEFERRED,
             meta=job_meta,
@@ -375,7 +371,7 @@ def _enqueue_geneva_workflow_jobs(
             func=run_geneva_run_batch_rq,
             args=(runid, config, run_batch_payload),
             timeout=GENEVA_RQ_TIMEOUT,
-            depends_on=failure_tolerant_depends_on(panel_job),
+            depends_on=panel_job,
             job_id=new_rq_job_id(),
             status=JobStatus.DEFERRED,
             meta=job_meta,

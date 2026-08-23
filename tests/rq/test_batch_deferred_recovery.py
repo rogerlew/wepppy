@@ -6,12 +6,13 @@ import uuid
 import pytest
 import redis
 from rq import Queue
-from rq.job import Job, JobStatus
+from rq.job import Dependency, Job, JobStatus
 from rq.registry import DeferredJobRegistry
 
 from wepppy.rq import batch_rq
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
-from wepppy.rq.omni_rq import run_omni_scenarios_rq
+from wepppy.rq.job_dependencies import failure_tolerant_depends_on
+from wepppy.rq.omni_rq import _finalize_omni_scenarios_rq, run_omni_scenarios_rq
 
 
 pytestmark = pytest.mark.integration
@@ -44,8 +45,24 @@ def test_batch_recovery_uses_persisted_root_and_cancels_omni_descendant(
         depends_on=root,
         meta={"runid": runid},
     )
+    omni_receipt = queue.enqueue(
+        _finalize_omni_scenarios_rq,
+        runid,
+        depends_on=failure_tolerant_depends_on(child),
+        meta={"runid": runid},
+    )
+    batch_finalizer = queue.enqueue(
+        batch_rq._final_batch_complete_rq,
+        batch_name,
+        depends_on=failure_tolerant_depends_on(omni_receipt),
+        meta={"runid": batch_name},
+    )
     root.meta["jobs:0,func:run_omni_scenarios_rq"] = child.id
+    child.meta["jobs:3,func:_finalize_omni_scenarios_rq"] = omni_receipt.id
+    child.save_meta()
+    root.meta["jobs:1,func:_final_batch_complete_rq"] = batch_finalizer.id
     root.save_meta()
+    queue.remove(root)
     root.set_status("failed")
     monkeypatch.setattr(
         batch_rq.BatchRunner,
@@ -53,7 +70,7 @@ def test_batch_recovery_uses_persisted_root_and_cancels_omni_descendant(
         lambda _name: SimpleNamespace(
             rq_job_ids={
                 "run_batch_rq": root.id,
-                "final_batch_complete_rq": child.id,
+                "final_batch_complete_rq": batch_finalizer.id,
             }
         ),
     )
@@ -65,13 +82,16 @@ def test_batch_recovery_uses_persisted_root_and_cancels_omni_descendant(
         )
 
         child.refresh()
+        omni_receipt.refresh()
+        batch_finalizer.refresh()
         assert conflicts == []
         assert child.get_status(refresh=True) == "canceled"
-        assert child.id not in DeferredJobRegistry(
-            "batch", connection=rq_connection
-        ).get_job_ids()
+        assert omni_receipt.get_status(refresh=True) == "canceled"
+        assert batch_finalizer.get_status(refresh=True) == "canceled"
+        deferred_ids = DeferredJobRegistry("batch", connection=rq_connection).get_job_ids()
+        assert {child.id, omni_receipt.id, batch_finalizer.id}.isdisjoint(deferred_ids)
     finally:
-        for candidate in (child, root):
+        for candidate in (batch_finalizer, omni_receipt, child, root):
             try:
                 Job.fetch(candidate.id, connection=rq_connection).delete(
                     remove_from_queue=True

@@ -1030,7 +1030,6 @@ async def build_subcatchments_and_abstract_watershed(
                     boundary_argument,
                     expected_runid=runid,
                 )
-                watershed.persist_wbt_boundary_touch_config_behavior()
             except (ValueError, WbtBoundaryPolicySnapshotError):
                 error_id = __import__("uuid").uuid4().hex
                 logger.exception(
@@ -1086,14 +1085,11 @@ async def build_subcatchments_and_abstract_watershed(
             if value is not None:
                 updates["bieger2015_widths"] = value
 
-        watershed.apply_build_subcatchment_updates(**updates)
-
         if is_batch_context:
+            watershed.apply_build_subcatchment_updates(**updates)
             return JSONResponse({"message": "Set subcatchment inputs for batch processing"})
 
         prep = RedisPrep.getInstance(wd)
-        prep.remove_timestamp(TaskEnum.abstract_watershed)
-        prep.remove_timestamp(TaskEnum.build_subcatchments)
 
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
@@ -1104,7 +1100,7 @@ async def build_subcatchments_and_abstract_watershed(
                 prep=prep,
                 job_key="build_subcatchments_and_abstract_watershed_rq",
                 runid=runid,
-                args=(runid, {}, boundary_argument),
+                args=(runid, updates, boundary_argument),
                 timeout=RQ_TIMEOUT,
                 meta=(
                     {WBT_BOUNDARY_POLICY_SNAPSHOT_KEY: boundary_snapshot.to_meta()}
@@ -1115,6 +1111,10 @@ async def build_subcatchments_and_abstract_watershed(
                     build_subcatchments_rq,
                     abstract_watershed_rq,
                 ),
+                excluded_dependency_job_ids=lambda candidate: (
+                    candidate.meta.get("wbt_subcatchment_admission_previous"),
+                ),
+                workflow_root_meta_key="wbt_subcatchment_admission_root",
             )
         return JSONResponse({"job_id": job.id})
     except RqSubmissionConflict as exc:

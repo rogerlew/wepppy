@@ -41,9 +41,12 @@ partially failed predecessor mutation as required output.
   failures. Both deferred and canceled outcomes remain never-started.
 - Tolerant finalizer or serialization prerequisites all `finished` or `failed`:
   RQ may release the dependent.
-- Any tolerant-finalizer or serialization prerequisite stopped, canceled,
-  missing, expired, or malformed: do not claim automatic release; recover
-  through ordinary retry.
+- Any present tolerant-finalizer or serialization prerequisite stopped or
+  canceled blocks release. The explicit eager-release helper also fails closed
+  on missing or malformed prerequisite records and exact-cardinality mismatch.
+  Native RQ fan-out may release a terminal observer after an earlier successful
+  prerequisite record expires; production workers retain those records for one
+  week, and observers must not consume model outputs.
 - Failed plus blocked-deferred registered tree, with no queued/started/scheduled
   member: aggregate is `failed`; a viable deferred-only tree is `deferred`.
 - Legacy jobs retain their persisted `allow_dependency_failures` value. Source

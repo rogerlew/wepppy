@@ -131,7 +131,7 @@ def test_init_bootstrap_does_not_enable_when_maintenance_fails(
     run_root = tmp_path / "ab-run"
     run_root.mkdir()
     wepp = _make_detached_wepp(run_root)
-    wepp.bootstrap_enabled = False
+    wepp._bootstrap_enabled = False
     wepp.logger = type("Logger", (), {"info": lambda *args: None})()
     wepp._bootstrap_repo_exists = lambda: True
     wepp._bootstrap_git_dir = lambda: str(run_root / ".git")
