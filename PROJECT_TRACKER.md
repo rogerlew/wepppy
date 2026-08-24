@@ -75,6 +75,30 @@ Feedback mechanisms:
 
 ## 📋 Backlog
 
+### Seamless WEPPcloud Session Cookie Namespace Migration
+
+**Proposed**: 2026-08-23
+
+**Size**: Medium-High (contract checkpoint, two service adapters, staged live rollout)
+
+**Priority**: Critical
+
+**Security impact**: `high` (signed session credential selection and migration)
+
+**Link**: [docs/work-packages/20260823_session_cookie_namespace_migration/](docs/work-packages/20260823_session_cookie_namespace_migration/)
+
+**Description**: Replace Flask's collision-prone generic `session` cookie with
+`weppcloud_session` through an identity-safe dual-read migration. Preserve the
+same Redis SID and active session state, support Flask/rq-engine mixed versions,
+and require no user logout, login, or site-data clearing. Never delete an
+unowned generic legacy cookie or select across ambiguous identities.
+
+**Next Steps**: Complete independent correctness, security, operations, and
+UX/governance reviews; disposition findings; obtain operator acceptance; and
+commit the contract checkpoint before implementation.
+
+---
+
 ### Climate Multiple-Build Finalize Lock
 
 **Proposed**: 2026-08-21
@@ -1108,6 +1132,22 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### Recorder CSRF Transport Repair
+
+**Completed**: 2026-08-23
+**Status**: ✅ **COMPLETE**
+**Security impact**: `high`
+**Link**: [docs/work-packages/20260823_recorder_csrf_transport/](docs/work-packages/20260823_recorder_csrf_transport/)
+
+**Summary**: Replaced the broken recorder Beacon path with fail-closed,
+same-origin-only credentialed Fetch carrying `X-CSRFToken`, and preserved
+singleton JSON event arrays at the Flask boundary. Hostile endpoint and real
+session-mismatch regressions pass; independent correctness and security reviews
+closed with no unresolved findings. A post-deployment Safari console smoke is
+the only remaining operational confirmation.
+
+---
 
 ### Bootstrap Git Maintenance
 
