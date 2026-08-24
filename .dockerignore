@@ -5,7 +5,9 @@
 .pytest_cache
 __pycache__
 *.pyc
-docs
+docs/*
+!docs/adrs
+!docs/adrs/**
 papers
 tests
 wepppy/_tests
