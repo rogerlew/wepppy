@@ -68,6 +68,8 @@
 - [x] Passed controlled late-response fencing against live Bearhive Redis: the
   old SID was not recreated, its tombstone persisted, and the late response
   expired the owned cookie.
+- [x] Passed derivative credential revocation: rq-engine rejected an unexpired
+  session JWT after logout based on the live four-day SID tombstone.
 
 ## Decisions Pending Acceptance
 

@@ -73,6 +73,11 @@ restart.
   and wrote the revocation tombstone, then request A resumed and returned HTTP
   200. Its late save did not recreate the Redis session, preserved the
   tombstone, and expired the owned cookie. Temporary canary state was removed.
+- The operator replayed a previously valid, unexpired rq-engine session JWT
+  after logout. rq-engine rejected it with the canonical unauthorized error and
+  the message `Session token has been revoked.`; Redis independently showed the
+  SID tombstone with approximately the full four-day TTL. No token or error ID
+  was retained in evidence.
 - Focused migration/configuration/rq-engine regression suite: 118 passed.
 - Repository-wide Python regression suite: 6,684 passed, 63 skipped.
 - Full frontend suite: 105 suites and 773 tests passed; frontend lint passed.
