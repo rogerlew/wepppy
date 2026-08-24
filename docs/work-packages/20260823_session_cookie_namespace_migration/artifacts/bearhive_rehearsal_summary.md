@@ -31,6 +31,10 @@ restart.
   `__Host-weppcloud_session` with the identical signed SID, retained valid CSRF
   state for the rq-engine-token POST, showed no login prompt, and issued no
   remember cookie (Playwright: 1 passed).
+- Operator-observed heartbeat on the supplied Bearhive run passed in the
+  migrated browser session: `POST /weppcloud/api/session/heartbeat` returned
+  HTTP 204, carried `__Host-weppcloud_session` and `X-CSRFToken`, did not
+  redirect to login, and did not issue a remember cookie.
 - Focused migration/configuration/rq-engine regression suite: 118 passed.
 - Repository-wide Python regression suite: 6,684 passed, 63 skipped.
 - Full frontend suite: 105 suites and 773 tests passed; frontend lint passed.

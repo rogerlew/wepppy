@@ -45,6 +45,8 @@
   and runs-dashboard Playwright probes (2 passed).
 - [x] Passed authenticated no-remember legacy-session continuity across an
   actual WEPPcloud restart with identical SID and valid CSRF state.
+- [x] Captured operator verification of the migrated session heartbeat: HTTP
+  204 with owned cookie and CSRF header, no login redirect or remember cookie.
 
 ## Decisions Pending Acceptance
 
