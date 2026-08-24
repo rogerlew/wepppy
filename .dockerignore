@@ -1,6 +1,14 @@
 .docker-data
 .git
+.venv
 .mypy_cache
 .pytest_cache
 __pycache__
 *.pyc
+docs
+papers
+tests
+wepppy/_tests
+wepppy/weppcloud/static-src/node_modules
+wepppy/weppcloud/static-src/playwright-report
+wepppy/weppcloud/static-src/test-results
