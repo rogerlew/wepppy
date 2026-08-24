@@ -15,7 +15,10 @@ the responsible operator. Chat history is not rollout evidence.
 - [x] ADR-0044 accepted for Bearhive rehearsal.
 - [x] Contract checkpoint committed as standalone ancestor `9f52eb879`.
 - [ ] Every blocking review finding closed and dispositioned.
-- [ ] Migration-aware rescue image built, pinned by digest, and tested.
+- [ ] Migration-aware rescue image built, pinned by registry digest, and tested.
+      Bearhive passed with local image ID
+      `sha256:cad002e6aa36e79bfecb48475abe876eaac8b90cf901bc5796fa1d73950e4b18`;
+      registry publication remains a production gate.
 - [ ] Production web and rq-engine instance inventory captured.
 - [ ] Redis DB 11 connectivity and persistence verified; no flush/rekey planned.
 - [x] Parser bounds, logout fence, payload failures, and duplicate semantics
@@ -63,8 +66,8 @@ They never contain cookies, SIDs, user IDs, CSRF values, or remember tokens.
 - [x] Exercise concurrent tabs, logout/reset, and late-response fencing.
 - [ ] Exercise rq-engine token minting before and after cookie adoption.
 - [ ] Complete Safari, Firefox, Chromium, and Edge canaries.
-- [ ] Rehearse rescue-image recovery. Reader-first mixed-version activation is
-      verified.
+- [x] Rehearse rescue-image recovery. Reader-first mixed-version activation and
+      recovery to a packaged, source-independent rescue image are verified.
 
 Evidence: `artifacts/bearhive_rehearsal_summary.md`. Unchecked gates remain
 required; the private-run recorder probe was authorization-limited and is not
@@ -145,7 +148,30 @@ the pinned migration-aware rescue image and keeps the new cookie name active.
 
 Pinned rescue digest:
 
-    Pending
+    Bearhive local image ID: sha256:cad002e6aa36e79bfecb48475abe876eaac8b90cf901bc5796fa1d73950e4b18
+    Source commit: 42cf8319625a
+    Production registry digest: Pending
+
+Bearhive rehearsal, 2026-08-24 18:39Z–18:52Z:
+
+- Built the production Dockerfile as `wepppy:session-rescue-42cf8319625a`.
+- Replaced only web and rq-engine with the final rescue image using
+  `--no-build --no-deps --force-recreate`; Redis was not restarted during the
+  successful attempt and DB 11 remained populated.
+- Confirmed both services used the pinned image ID, had no source-tree bind
+  mount, read both cookie names, and wrote `__Host-weppcloud_session`.
+- Passed web/rq health, authenticated profile, CSRF-backed login/logout,
+  remember opt-out, and direct rq-engine session-token canaries (3 Playwright
+  tests passed).
+- Restored the normal activated Bearhive deployment with a targeted,
+  dependency-free web/rq-engine recreation.
+
+Two failed attempts exposed and corrected image packaging defects before the
+successful rehearsal: runtime source ownership prevented the entrypoint bundle
+build, and excluding all documentation omitted ADR files required by feature
+registry startup validation. The first command also demonstrated that
+`--force-recreate` without `--no-deps` unnecessarily recreates Redis and
+Postgres; the canonical rescue command must include `--no-deps`.
 
 ## Phase 4 — Observation and Legacy Retirement
 

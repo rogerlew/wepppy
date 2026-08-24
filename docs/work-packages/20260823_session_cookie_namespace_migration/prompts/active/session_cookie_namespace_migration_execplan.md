@@ -50,6 +50,12 @@ mixed-version rollout.
 - [x] (2026-08-24 18:30Z) Passed the direct rq-engine cookie-authenticated
   session-token mint on the private Bearhive rehearsal run (HTTP 200 and scoped
   browse cookie issued).
+- [x] (2026-08-24 18:52Z) Built and rehearsed rollback to packaged rescue image
+  `sha256:cad002e6aa36e79bfecb48475abe876eaac8b90cf901bc5796fa1d73950e4b18`
+  from commit `42cf8319625a`. Both services ran without source binds and passed
+  health, authentication/logout, remember opt-out, and direct rq-engine mint
+  canaries. The rehearsal corrected image source ownership and required-ADR
+  packaging, then restored the normal Bearhive deployment with `--no-deps`.
 
 ## Surprises & Discoveries
 

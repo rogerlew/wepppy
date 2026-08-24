@@ -5,7 +5,7 @@
 **Started**: 2026-08-23 21:45Z
 **Current phase**: Bearhive rehearsal implementation
 **Last updated**: 2026-08-24 18:25Z
-**Next milestone**: Complete direct rq-engine mint and rollback/rescue rehearsal gates.
+**Next milestone**: Complete remaining browser/state gates and publish the production rescue digest.
 
 ## Task Board
 
@@ -79,6 +79,10 @@
   Compose parity.
 - [x] Passed a direct post-activation rq-engine session-token mint through
   same-origin browser cookie authentication on the private rehearsal run.
+- [x] Built and exercised a source-independent rescue image on Bearhive, fixed
+  two image packaging defects found by the rehearsal, passed authenticated and
+  rq-engine canaries, and restored the normal deployment without dependency
+  recreation.
 
 ## Decisions Pending Acceptance
 
