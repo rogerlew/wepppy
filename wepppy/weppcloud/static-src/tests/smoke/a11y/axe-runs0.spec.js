@@ -29,6 +29,10 @@ const migrationRestartWaitMs = Math.min(
   Math.max(Number.parseInt(process.env.SMOKE_SESSION_MIGRATION_RESTART_WAIT_MS || '0', 10) || 0, 0),
   60000
 );
+const mixedVersionActivationWaitMs = Math.min(
+  Math.max(Number.parseInt(process.env.SMOKE_MIXED_VERSION_ACTIVATION_WAIT_MS || '0', 10) || 0, 0),
+  60000
+);
 
 const sitePrefix = (() => {
   const hasSmokePrefix = Object.prototype.hasOwnProperty.call(process.env, 'SMOKE_SITE_PREFIX');
@@ -926,6 +930,72 @@ test.describe('axe accessibility smoke', () => {
     );
     expect(optOutPrimary, 'opt-out login must issue a primary session').toBeTruthy();
     expect(optOutPrimary.value).not.toBe(rememberedPrimary.value);
+  });
+
+  test('reader-first legacy writer survives owned-cookie activation', async ({ page }) => {
+    test.skip(
+      mixedVersionActivationWaitMs <= 0,
+      'set SMOKE_MIXED_VERSION_ACTIVATION_WAIT_MS to run the coordinated activation canary'
+    );
+    await page.setExtraHTTPHeaders(forwardedProtoHeader);
+    const loginResult = await ensureAgentSession(page, { remember: false });
+    expect(loginResult.authenticated, loginResult.reason).toBe(true);
+
+    const readerFirstCookies = await page.context().cookies();
+    const legacyWriterCookie = readerFirstCookies.find(
+      (cookie) => cookie.name === 'session' && cookie.path === '/'
+    );
+    expect(legacyWriterCookie, 'reader-first phase must continue writing session').toBeTruthy();
+    expect(
+      readerFirstCookies.some((cookie) => cookie.name === '__Host-weppcloud_session')
+    ).toBe(false);
+    expect(readerFirstCookies.some((cookie) => cookie.name === 'remember_token')).toBe(false);
+
+    if (mixedVersionActivationWaitMs > 0) {
+      console.log(
+        `[migration-canary] waiting ${mixedVersionActivationWaitMs}ms for owned-cookie activation`
+      );
+      await page.waitForTimeout(mixedVersionActivationWaitMs);
+    }
+
+    const profileReady = await ensureProfilePageReady(page);
+    expect(profileReady.ready, profileReady.reason).toBe(true);
+    const probe = await probeAuthenticatedSession(page);
+    expect(probe.authenticated, probe.reason).toBe(true);
+    const activatedCookies = await page.context().cookies();
+    const ownedCookie = activatedCookies.find(
+      (cookie) => cookie.name === '__Host-weppcloud_session'
+    );
+    expect(ownedCookie, 'activation must issue the owned cookie').toBeTruthy();
+    expect(ownedCookie.value).toBe(legacyWriterCookie.value);
+    expect(activatedCookies.some((cookie) => cookie.name === 'remember_token')).toBe(false);
+  });
+
+  test('activated session mints directly through rq-engine cookie auth', async ({ page }) => {
+    await page.setExtraHTTPHeaders(forwardedProtoHeader);
+    const loginResult = await ensureAgentSession(page, { remember: false });
+    expect(loginResult.authenticated, loginResult.reason).toBe(true);
+
+    const runUrl = new URL(buildUrl(targetRunPath));
+    const match = runUrl.pathname.match(/\/runs\/([^/]+)\/([^/]+)\/?$/);
+    test.skip(!match, 'SMOKE_RUN_PATH must identify a run and configuration');
+    const endpoint = withSitePrefix(
+      `/rq-engine/api/runs/${encodeURIComponent(match[1])}/${encodeURIComponent(match[2])}/session-token`
+    ).replace(`${sitePrefix}/rq-engine`, '/rq-engine');
+    const result = await page.evaluate(async (url) => {
+      const response = await fetch(url, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: '{}',
+      });
+      return { status: response.status, body: await response.text() };
+    }, endpoint);
+
+    expect(result.status, result.body).toBe(200);
+    expect((await page.context().cookies()).some(
+      (cookie) => cookie.name === 'wepp_browse_jwt'
+    )).toBe(true);
   });
 
   test('axe accessibility scan for runs0 dashboard', async ({ page }) => {

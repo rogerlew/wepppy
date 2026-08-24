@@ -79,6 +79,11 @@
   principals, multiple live anonymous sessions, corrupt payload, Redis error,
   or missing Redis record for the authoritative SID MUST fail closed and MUST
   NOT authorize a later candidate.
+- Reader precedence and writer name MUST be independently configurable during
+  staged rollout. Reader-first deployment MUST prefer
+  `__Host-weppcloud_session` while continuing to write `session`; activation
+  changes only the writer to `__Host-weppcloud_session`. Flask and rq-engine
+  MUST retain identical primary/legacy reader configuration in both phases.
 - A migrated session MUST retain its SID and complete Redis payload. A signed
   SID whose Redis record is absent MUST be discarded and MUST NOT seed a new
   session; any recovery receives a fresh unpredictable SID.

@@ -27,7 +27,7 @@ from wepppy.weppcloud.user_preferences import (
     validate_creation_values,
 )
 
-from .auth import AuthError, _check_revocation, require_jwt
+from .auth import AuthError, _check_revocation, _check_session_revocation, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response
@@ -144,6 +144,10 @@ def _require_rq_token(token: str, *, required_scopes: Sequence[str]) -> Mapping[
         raise AuthError(f"Invalid token: {exc}") from exc
 
     _check_revocation(str(claims.get("jti") or ""))
+    if str(claims.get("token_class") or "").strip().lower() == "session":
+        _check_session_revocation(
+            str(claims.get("session_id") or claims.get("sub") or "")
+        )
 
     scope_separator = auth_tokens.get_jwt_config().scope_separator
     scopes = _normalize_scopes(claims.get("scope"), scope_separator)
@@ -169,9 +173,7 @@ def _claims_from_session_cookie(request: Request) -> Mapping[str, Any]:
     if not session_routes._is_same_origin_cookie_request(request):
         raise AuthError("Cross-origin request blocked.", status_code=403, code="forbidden")
 
-    session_id = session_routes._resolve_session_id_from_cookie(request)
-    session_routes._session_exists(session_id)
-    payload = session_routes._session_payload(session_id)
+    _session_id, payload = session_routes._resolve_session_from_cookie(request)
     user_id, roles = session_routes._identity_from_session_payload(payload)
     if user_id is None:
         raise AuthError("Session expired or invalid", status_code=401, code="unauthorized")

@@ -4,8 +4,8 @@
 
 **Started**: 2026-08-23 21:45Z
 **Current phase**: Bearhive rehearsal implementation
-**Last updated**: 2026-08-24 00:45Z
-**Next milestone**: Complete authenticated browser and rollback rehearsal gates.
+**Last updated**: 2026-08-24 18:25Z
+**Next milestone**: Complete direct rq-engine mint and rollback/rescue rehearsal gates.
 
 ## Task Board
 
@@ -70,6 +70,15 @@
   expired the owned cookie.
 - [x] Passed derivative credential revocation: rq-engine rejected an unexpired
   session JWT after logout based on the live four-day SID tombstone.
+- [x] Passed reader-first mixed-version activation: web/rq-engine read priority
+  stayed owned while the writer changed from legacy to owned, preserving SID,
+  authentication, CSRF state, and remember opt-out.
+- [x] Closed mixed-version review findings: distinct owned-cookie retirement on
+  reader-first invalidation/rotation, migration-aware project creation,
+  session-token SID revocation, opt-in activation smoke, and production/HPC
+  Compose parity.
+- [x] Passed a direct post-activation rq-engine session-token mint through
+  same-origin browser cookie authentication on the private rehearsal run.
 
 ## Decisions Pending Acceptance
 

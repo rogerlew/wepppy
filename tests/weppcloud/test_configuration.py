@@ -66,6 +66,7 @@ def test_config_app_uses_uidaho_mail_defaults_when_zoho_is_unset(
 ) -> None:
     monkeypatch.delenv("SESSION_COOKIE_SAMESITE", raising=False)
     monkeypatch.delenv("SESSION_COOKIE_NAME", raising=False)
+    monkeypatch.delenv("SESSION_COOKIE_PRIMARY_NAME", raising=False)
     monkeypatch.delenv("SESSION_COOKIE_LEGACY_NAME", raising=False)
     monkeypatch.delenv("SESSION_COOKIE_MIGRATION_ENABLED", raising=False)
     app = _build_configured_app(monkeypatch)
@@ -87,6 +88,7 @@ def test_config_app_uses_uidaho_mail_defaults_when_zoho_is_unset(
     )
     assert app.config["SESSION_COOKIE_SAMESITE"] == "Lax"
     assert app.config["SESSION_COOKIE_NAME"] == "session"
+    assert app.config["SESSION_COOKIE_PRIMARY_NAME"] == "session"
     assert app.config["SESSION_COOKIE_LEGACY_NAME"] == "session"
     assert app.config["SESSION_COOKIE_MIGRATION_ENABLED"] is False
     assert app.config["SESSION_REFRESH_EACH_REQUEST"] is True
@@ -107,11 +109,27 @@ def test_config_app_accepts_secure_host_cookie_migration_profile(
     app = _build_configured_app(monkeypatch)
 
     assert app.config["SESSION_COOKIE_NAME"] == "__Host-weppcloud_session"
+    assert app.config["SESSION_COOKIE_PRIMARY_NAME"] == "__Host-weppcloud_session"
     assert app.config["SESSION_COOKIE_PATH"] == "/"
     assert app.config["SESSION_COOKIE_DOMAIN"] is None
     assert app.config["SESSION_COOKIE_SECURE"] is True
     assert app.config["SESSION_COOKIE_HTTPONLY"] is True
     assert app.config["SESSION_COOKIE_MIGRATION_ENABLED"] is True
+
+
+def test_config_app_supports_reader_first_legacy_writer(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("SESSION_COOKIE_NAME", "session")
+    monkeypatch.setenv("SESSION_COOKIE_PRIMARY_NAME", "__Host-weppcloud_session")
+    monkeypatch.setenv("SESSION_COOKIE_LEGACY_NAME", "session")
+    monkeypatch.setenv("SESSION_COOKIE_MIGRATION_ENABLED", "true")
+
+    app = _build_configured_app(monkeypatch)
+
+    assert app.config["SESSION_COOKIE_NAME"] == "session"
+    assert app.config["SESSION_COOKIE_PRIMARY_NAME"] == "__Host-weppcloud_session"
+    assert app.config["SESSION_COOKIE_LEGACY_NAME"] == "session"
 
 
 @pytest.mark.parametrize(

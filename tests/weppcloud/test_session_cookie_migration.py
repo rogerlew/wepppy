@@ -154,6 +154,93 @@ def test_primary_presence_blocks_legacy_downgrade(migration_app):
     assert not loaded
 
 
+def test_reader_first_profile_reads_owned_cookie_but_writes_legacy_name(migration_app):
+    app, redis, interface = migration_app
+    app.config["SESSION_COOKIE_NAME"] = "session"
+    app.session_cookie_name = "session"
+    app.config["SESSION_COOKIE_PRIMARY_NAME"] = "__Host-weppcloud_session"
+    _store(redis, "owned", {"_user_id": "7", "csrf_token": "token"})
+    cookie = f"__Host-weppcloud_session={_signed(interface, app, 'owned')}"
+
+    with app.test_request_context("/", headers={"Cookie": cookie}):
+        loaded = interface.open_session(app, request)
+    response = app.response_class()
+    interface.save_session(app, loaded, response)
+
+    assert loaded.sid == "owned"
+    assert loaded["csrf_token"] == "token"
+    assert any(
+        header.startswith("session=")
+        for header in response.headers.getlist("Set-Cookie")
+    )
+
+
+def test_reader_first_rotation_expires_owned_cookie_and_writes_legacy(migration_app):
+    app, redis, interface = migration_app
+    app.config["SESSION_COOKIE_NAME"] = "session"
+    app.session_cookie_name = "session"
+    app.config["SESSION_COOKIE_PRIMARY_NAME"] = "__Host-weppcloud_session"
+    _store(redis, "anonymous", {"csrf_token": "token"})
+    cookie = f"__Host-weppcloud_session={_signed(interface, app, 'anonymous')}"
+
+    with app.test_request_context("/", headers={"Cookie": cookie}):
+        loaded = interface.open_session(app, request)
+    loaded["_user_id"] = "7"
+    response = app.response_class()
+    interface.save_session(app, loaded, response)
+
+    headers = response.headers.getlist("Set-Cookie")
+    assert any(header.startswith("session=") and "Max-Age=0" not in header for header in headers)
+    assert any(
+        header.startswith("__Host-weppcloud_session=") and "Max-Age=0" in header
+        for header in headers
+    )
+
+
+def test_reader_first_rejected_primary_is_expired(migration_app):
+    app, _redis, interface = migration_app
+    app.config["SESSION_COOKIE_NAME"] = "session"
+    app.session_cookie_name = "session"
+    app.config["SESSION_COOKIE_PRIMARY_NAME"] = "__Host-weppcloud_session"
+
+    with app.test_request_context(
+        "/", headers={"Cookie": "__Host-weppcloud_session=invalid"}
+    ):
+        loaded = interface.open_session(app, request)
+    response = app.response_class()
+    interface.save_session(app, loaded, response)
+
+    assert any(
+        header.startswith("__Host-weppcloud_session=") and "Max-Age=0" in header
+        for header in response.headers.getlist("Set-Cookie")
+    )
+
+
+def test_reader_first_rejected_primary_with_new_csrf_state_is_expired(migration_app):
+    app, _redis, interface = migration_app
+    app.config["SESSION_COOKIE_NAME"] = "session"
+    app.session_cookie_name = "session"
+    app.config["SESSION_COOKIE_PRIMARY_NAME"] = "__Host-weppcloud_session"
+
+    with app.test_request_context(
+        "/", headers={"Cookie": "__Host-weppcloud_session=invalid"}
+    ):
+        loaded = interface.open_session(app, request)
+    loaded["csrf_token"] = "rendered-token"
+    response = app.response_class()
+    interface.save_session(app, loaded, response)
+
+    headers = response.headers.getlist("Set-Cookie")
+    assert any(header.startswith("session=") and "Max-Age=0" not in header for header in headers)
+    assert any(
+        header.startswith("__Host-weppcloud_session=")
+        and "Path=/" in header
+        and "Secure" in header
+        and "Max-Age=0" in header
+        for header in headers
+    )
+
+
 def test_missing_authoritative_sid_does_not_scan_to_later_live_sid(migration_app):
     app, redis, interface = migration_app
     _store(redis, "later", {"_user_id": "7"})

@@ -222,6 +222,28 @@ class MigratingRedisSessionInterface(RedisSessionInterface):
         session._wepp_original_user_id = session.get("_user_id")
         return session
 
+    def _delete_primary_cookie_if_distinct(
+        self, app: Any, response: Any, *, domain: str, path: str
+    ) -> None:
+        primary_name = app.config.get(
+            "SESSION_COOKIE_PRIMARY_NAME", app.config["SESSION_COOKIE_NAME"]
+        )
+        if primary_name == app.session_cookie_name:
+            return
+        primary_is_host_owned = primary_name.startswith("__Host-")
+        response.delete_cookie(
+            primary_name,
+            domain=None if primary_is_host_owned else domain,
+            path="/" if primary_is_host_owned else path,
+            secure=True if primary_is_host_owned else self.get_cookie_secure(app),
+            httponly=self.get_cookie_httponly(app),
+            samesite=(
+                self.get_cookie_samesite(app)
+                if self.has_same_site_capability
+                else None
+            ),
+        )
+
     def open_session(self, app: Any, request: Any) -> Any:
         if not app.config.get("SESSION_COOKIE_MIGRATION_ENABLED", False):
             return super().open_session(app, request)
@@ -229,7 +251,9 @@ class MigratingRedisSessionInterface(RedisSessionInterface):
         try:
             selected = select_session(
                 raw_headers,
-                primary_name=app.config["SESSION_COOKIE_NAME"],
+                primary_name=app.config.get(
+                    "SESSION_COOKIE_PRIMARY_NAME", app.config["SESSION_COOKIE_NAME"]
+                ),
                 legacy_name=app.config["SESSION_COOKIE_LEGACY_NAME"],
                 unsign=lambda value: self._unsign(app, value),
                 load=self._load_payload,
@@ -250,9 +274,11 @@ class MigratingRedisSessionInterface(RedisSessionInterface):
                     "_session_migration_conflict": True,
                     "_remember": "clear",
                 }
-            return self._track_original_principal(
+            session = self._track_original_principal(
                 self.session_class(initial, sid=sid, permanent=self.permanent)
             )
+            session._wepp_clear_primary_cookie = True
+            return session
         if selected is None:
             sid = self._generate_sid()
             return self._track_original_principal(
@@ -280,6 +306,13 @@ class MigratingRedisSessionInterface(RedisSessionInterface):
             if session.modified:
                 self.redis.delete(self.key_prefix + session.sid)
                 response.delete_cookie(app.session_cookie_name, domain=domain, path=path)
+                self._delete_primary_cookie_if_distinct(
+                    app, response, domain=domain, path=path
+                )
+            elif getattr(session, "_wepp_clear_primary_cookie", False):
+                self._delete_primary_cookie_if_distinct(
+                    app, response, domain=domain, path=path
+                )
             return None
 
         serialized = self.serializer.dumps(dict(session))
@@ -313,6 +346,9 @@ class MigratingRedisSessionInterface(RedisSessionInterface):
             )
             if not rotated:
                 response.delete_cookie(app.session_cookie_name, domain=domain, path=path)
+                self._delete_primary_cookie_if_distinct(
+                    app, response, domain=domain, path=path
+                )
                 response.delete_cookie(
                     app.config.get("REMEMBER_COOKIE_NAME", "remember_token"),
                     domain=app.config.get("REMEMBER_COOKIE_DOMAIN"),
@@ -320,6 +356,9 @@ class MigratingRedisSessionInterface(RedisSessionInterface):
                 )
                 return None
             session.sid = new_sid
+            self._delete_primary_cookie_if_distinct(
+                app, response, domain=domain, path=path
+            )
 
         saved = self.redis.eval(
             """
@@ -338,6 +377,9 @@ class MigratingRedisSessionInterface(RedisSessionInterface):
         )
         if not saved:
             response.delete_cookie(app.session_cookie_name, domain=domain, path=path)
+            self._delete_primary_cookie_if_distinct(
+                app, response, domain=domain, path=path
+            )
             response.delete_cookie(
                 app.config.get("REMEMBER_COOKIE_NAME", "remember_token"),
                 domain=app.config.get("REMEMBER_COOKIE_DOMAIN"),
@@ -353,6 +395,10 @@ class MigratingRedisSessionInterface(RedisSessionInterface):
             cookie_value = self._get_signer(app).sign(want_bytes(session.sid))
         if isinstance(cookie_value, bytes):
             cookie_value = cookie_value.decode("utf-8")
+        if getattr(session, "_wepp_clear_primary_cookie", False):
+            self._delete_primary_cookie_if_distinct(
+                app, response, domain=domain, path=path
+            )
         cookie_kwargs = {
             "expires": self.get_expiration_time(app, session),
             "httponly": self.get_cookie_httponly(app),
@@ -379,6 +425,9 @@ def revoke_presented_sessions(app: Any, request: Any) -> int:
         sids = presented_signed_sids(
             raw_headers,
             names=(
+                app.config.get(
+                    "SESSION_COOKIE_PRIMARY_NAME", app.config["SESSION_COOKIE_NAME"]
+                ),
                 app.config["SESSION_COOKIE_NAME"],
                 app.config["SESSION_COOKIE_LEGACY_NAME"],
             ),

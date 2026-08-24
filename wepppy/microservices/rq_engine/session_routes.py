@@ -100,12 +100,34 @@ def _session_cookie_name() -> str:
     return os.getenv("SESSION_COOKIE_NAME", "session")
 
 
+def _primary_session_cookie_name() -> str:
+    return os.getenv("SESSION_COOKIE_PRIMARY_NAME", _session_cookie_name())
+
+
 def _legacy_session_cookie_name() -> str:
     return os.getenv("SESSION_COOKIE_LEGACY_NAME", "session")
 
 
 def _session_cookie_migration_enabled() -> bool:
     return _bool_env("SESSION_COOKIE_MIGRATION_ENABLED", default=False)
+
+
+def validate_session_cookie_profile() -> None:
+    if not _session_cookie_migration_enabled():
+        return
+    profile = (
+        _session_cookie_name(),
+        _primary_session_cookie_name(),
+        _legacy_session_cookie_name(),
+    )
+    if profile not in {
+        ("session", "__Host-weppcloud_session", "session"),
+        ("__Host-weppcloud_session", "__Host-weppcloud_session", "session"),
+    }:
+        raise RuntimeError(
+            "Session cookie migration settings must match the ratified "
+            "reader-first or activated profile"
+        )
 
 
 def _session_use_signer() -> bool:
@@ -210,6 +232,7 @@ def _raw_cookie_headers(request: Request) -> list[bytes]:
 
 
 def _resolve_session_from_cookie(request: Request) -> tuple[str, Mapping[str, Any]]:
+    validate_session_cookie_profile()
     if not _session_cookie_migration_enabled():
         session_id = _resolve_session_id_from_cookie(request)
         _session_exists(session_id)
@@ -242,7 +265,7 @@ def _resolve_session_from_cookie(request: Request) -> tuple[str, Mapping[str, An
     try:
         selected = select_session(
             _raw_cookie_headers(request),
-            primary_name=_session_cookie_name(),
+            primary_name=_primary_session_cookie_name(),
             legacy_name=_legacy_session_cookie_name(),
             unsign=_unsign_session_id_for_selection,
             load=load_payload,

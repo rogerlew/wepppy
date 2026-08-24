@@ -72,7 +72,10 @@ Consolidated configuration surfaces discovered from:
 | `REMEMBER_COOKIE_SECURE` | `python: true` | `wepppy.weppcloud.configuration` | Remember-me cookie `Secure` attribute. |
 | `REMEMBER_COOKIE_HTTPONLY` | `python: true` | `wepppy.weppcloud.configuration` | Remember-me cookie `HttpOnly` attribute. |
 | `REMEMBER_COOKIE_REFRESH_EACH_REQUEST` | `python: false` | `wepppy.weppcloud.configuration` | Refresh remember-me cookie each request. |
-| `SESSION_COOKIE_NAME` | `python: session` | `wepppy.microservices.rq_engine.session_routes` | Cookie name used to read the Flask session ID. |
+| `SESSION_COOKIE_NAME` | `python: session` | `wepppy.weppcloud.configuration`; `wepppy.microservices.rq_engine.session_routes` | Cookie name written by Flask. Keep `session` during reader-first deployment, then activate `__Host-weppcloud_session`. |
+| `SESSION_COOKIE_PRIMARY_NAME` | `python: SESSION_COOKIE_NAME` | `wepppy.weppcloud.configuration`; `wepppy.microservices.rq_engine.session_routes` | Highest-precedence session cookie read by Flask and rq-engine. Set to `__Host-weppcloud_session` throughout reader-first and activation phases. |
+| `SESSION_COOKIE_LEGACY_NAME` | `python: session` | `wepppy.weppcloud.configuration`; `wepppy.microservices.rq_engine.session_routes` | Fallback session cookie read during the bounded migration window. |
+| `SESSION_COOKIE_MIGRATION_ENABLED` | `python: false` | `wepppy.weppcloud.configuration`; `wepppy.microservices.rq_engine.session_routes` | Enables bounded primary/legacy cookie selection and migration fencing. |
 | `SESSION_USE_SIGNER` | `python: true` | `wepppy.microservices.rq_engine.session_routes` | Whether to unsign the Flask session cookie (`itsdangerous` signer). |
 | `SESSION_KEY_PREFIX` | `python: session:` | `wepppy.microservices.rq_engine.session_routes` | Redis key prefix for server-side Flask sessions. |
 | `WEPP_BROWSE_JWT_COOKIE_NAME` | `python: wepp_browse_jwt` | `wepppy.microservices.rq_engine.session_routes` | Base name for per-run browse JWT cookies. |

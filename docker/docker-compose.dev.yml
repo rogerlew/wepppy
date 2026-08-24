@@ -100,9 +100,10 @@ services:
     environment:
       <<: *wepppy-env
       SECRET_KEY_FILE: /run/secrets/flask_secret_key
-      SESSION_COOKIE_NAME: __Host-weppcloud_session
-      SESSION_COOKIE_LEGACY_NAME: session
-      SESSION_COOKIE_MIGRATION_ENABLED: "true"
+      SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME:-__Host-weppcloud_session}
+      SESSION_COOKIE_PRIMARY_NAME: ${SESSION_COOKIE_PRIMARY_NAME:-__Host-weppcloud_session}
+      SESSION_COOKIE_LEGACY_NAME: ${SESSION_COOKIE_LEGACY_NAME:-session}
+      SESSION_COOKIE_MIGRATION_ENABLED: ${SESSION_COOKIE_MIGRATION_ENABLED:-true}
       SECURITY_PASSWORD_SALT_FILE: /run/secrets/flask_security_password_salt
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
       WEPP_AUTH_JWT_SECRETS_FILE: /run/secrets/wepp_auth_jwt_secrets
@@ -547,9 +548,10 @@ services:
     environment:
       <<: *wepppy-env
       SECRET_KEY_FILE: /run/secrets/flask_secret_key
-      SESSION_COOKIE_NAME: __Host-weppcloud_session
-      SESSION_COOKIE_LEGACY_NAME: session
-      SESSION_COOKIE_MIGRATION_ENABLED: "true"
+      SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME:-__Host-weppcloud_session}
+      SESSION_COOKIE_PRIMARY_NAME: ${SESSION_COOKIE_PRIMARY_NAME:-__Host-weppcloud_session}
+      SESSION_COOKIE_LEGACY_NAME: ${SESSION_COOKIE_LEGACY_NAME:-session}
+      SESSION_COOKIE_MIGRATION_ENABLED: ${SESSION_COOKIE_MIGRATION_ENABLED:-true}
       SECURITY_PASSWORD_SALT_FILE: /run/secrets/flask_security_password_salt
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
       WEPP_AUTH_JWT_SECRETS_FILE: /run/secrets/wepp_auth_jwt_secrets

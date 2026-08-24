@@ -2,7 +2,7 @@
 
 **Environment**: `https://wc.bearhive.duckdns.org` (development/test)
 **Production impact**: None; `wepp.cloud` was not changed
-**Status**: Partial pass; authenticated browser and recovery gates remain
+**Status**: Mixed-version activation passed; rollback/rescue rehearsal remains
 
 ## Deployment
 
@@ -78,6 +78,25 @@ restart.
   the message `Session token has been revoked.`; Redis independently showed the
   SID tombstone with approximately the full four-day TTL. No token or error ID
   was retained in evidence.
+- Mixed-version activation passed in a controlled no-remember browser. In the
+  reader-first phase, web and rq-engine preferred the owned name while
+  WEPPcloud continued writing `session`. After both services were recreated
+  with the owned writer, the same browser loaded its authenticated profile,
+  completed the CSRF-protected token probe, and received
+  `__Host-weppcloud_session` with the identical signed SID and no remember
+  cookie (Playwright: 1 passed). Redis and workers were not restarted.
+- Post-rehearsal review found and closed two mixed-version edge paths before
+  handoff: a reader-first writer now expires a distinct authoritative owned
+  cookie during SID rotation, logout, reset, and fail-closed repair; rq-engine
+  project creation now uses the shared migration-aware cookie selector and
+  applies SID tombstones to session-class tokens.
+- The one-time activation browser canary is explicitly opt-in so ordinary
+  post-activation smoke runs remain repeatable. Production and HPC Compose
+  surfaces expose the same web/rq-engine migration variables as Bearhive.
+- A post-activation browser canary authenticated without remember-me and
+  directly posted to rq-engine's cookie-authenticated `session-token` endpoint
+  for the operator-selected private run. It returned HTTP 200 and issued the
+  run-scoped browse JWT cookie (Playwright: 1 passed).
 - Focused migration/configuration/rq-engine regression suite: 118 passed.
 - Repository-wide Python regression suite: 6,684 passed, 63 skipped.
 - Full frontend suite: 105 suites and 773 tests passed; frontend lint passed.
@@ -93,10 +112,7 @@ restart.
 
 - Authenticated browser continuity with remember disabled across Chromium,
   Firefox, Safari, and Edge.
-- Real browser first-request form/CSRF, heartbeat, recorder, and rq-engine token
-  mint on an operator-controlled run.
-- Logout/reset and concurrent late-response behavior through the live routes.
-- Mixed-version activation and migration-aware rescue-image recovery.
+- Migration-aware rescue-image recovery and rollback rehearsal.
 
 Local password login was temporarily enabled for the controlled Bearhive
 rehearsal. The smoke harness's post-login probe was corrected to use a

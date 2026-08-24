@@ -39,6 +39,17 @@ mixed-version rollout.
   Bearhive rehearsal; production evidence gates remain open.
 - [x] (2026-08-24 17:20Z) Passed live logout/reset, concurrent-tab propagation,
   and a controlled late-response race against Bearhive Redis.
+- [x] (2026-08-24 18:15Z) Passed Bearhive reader-first to owned-writer
+  activation with identical SID, authenticated/CSRF continuity, and no Redis or
+  worker restart.
+- [x] (2026-08-24 18:25Z) Closed activation review defects by retiring a
+  distinct owned primary during reader-first invalidation/rotation, routing
+  rq-engine project cookie auth through the shared selector, enforcing SID
+  tombstones on project session tokens, gating the one-time smoke canary, and
+  wiring production/HPC Compose parity.
+- [x] (2026-08-24 18:30Z) Passed the direct rq-engine cookie-authenticated
+  session-token mint on the private Bearhive rehearsal run (HTTP 200 and scoped
+  browse cookie issued).
 
 ## Surprises & Discoveries
 
@@ -104,6 +115,14 @@ mixed-version rollout.
   a session-fixation primitive, and logout must invalidate every derivative
   session JWT for its maximum lifetime.
   Date/Author: 2026-08-24 / Codex, after independent security review.
+
+- Decision: Configure primary read precedence independently from the cookie
+  writer during staged rollout.
+  Rationale: Reader-first deployment must prefer an already-present owned
+  cookie while continuing to write the legacy name; coupling read priority to
+  the writer makes the ratified two-phase sequence impossible and can downgrade
+  browsers that already carry both names.
+  Date/Author: 2026-08-24 / Codex, discovered during Bearhive activation rehearsal.
 
 ## Outcomes & Retrospective
 

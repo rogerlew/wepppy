@@ -63,7 +63,8 @@ They never contain cookies, SIDs, user IDs, CSRF values, or remember tokens.
 - [x] Exercise concurrent tabs, logout/reset, and late-response fencing.
 - [ ] Exercise rq-engine token minting before and after cookie adoption.
 - [ ] Complete Safari, Firefox, Chromium, and Edge canaries.
-- [ ] Rehearse activation and rescue-image recovery.
+- [ ] Rehearse rescue-image recovery. Reader-first mixed-version activation is
+      verified.
 
 Evidence: `artifacts/bearhive_rehearsal_summary.md`. Unchecked gates remain
 required; the private-run recorder probe was authorization-limited and is not

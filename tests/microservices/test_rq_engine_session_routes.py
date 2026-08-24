@@ -189,6 +189,29 @@ def test_migration_cookie_reader_primary_presence_blocks_legacy_fallback(
     assert exc_info.value.status_code == 401
 
 
+def test_migration_cookie_reader_uses_separate_primary_read_name(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    secret = "migration-secret"
+    payload = {"_user_id": "42", "csrf_token": "token"}
+    redis_client = _MigrationRedisClient({"session:owned": pickle.dumps(payload)})
+    monkeypatch.setattr(session_routes.redis, "Redis", lambda **kwargs: redis_client)
+    monkeypatch.setattr(session_routes, "_secret_key", lambda: secret)
+    monkeypatch.setenv("SESSION_COOKIE_NAME", "session")
+    monkeypatch.setenv("SESSION_COOKIE_PRIMARY_NAME", "__Host-weppcloud_session")
+    monkeypatch.setenv("SESSION_COOKIE_LEGACY_NAME", "session")
+    monkeypatch.setenv("SESSION_COOKIE_MIGRATION_ENABLED", "true")
+    request = _raw_cookie_request(
+        f"__Host-weppcloud_session={_signed_session_cookie(secret, 'owned')}; "
+        "session=unrelated"
+    )
+
+    sid, selected_payload = session_routes._resolve_session_from_cookie(request)
+
+    assert sid == "owned"
+    assert selected_payload == payload
+
+
 def test_session_payload_accepts_benign_pickled_mapping(monkeypatch: pytest.MonkeyPatch) -> None:
     expected_payload = {"_user_id": "42", "_roles_mask": ["User"], "_fresh": True}
     redis_client = _DummyRedisSessionPayloadClient(pickle.dumps(expected_payload))
