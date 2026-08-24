@@ -61,6 +61,8 @@
   opt-in issues the cookie and opt-out leaves it absent.
 - [x] Captured operator confirmation of the OAuth remembered-login and logout
   lifecycle on Bearhive.
+- [x] Passed Browser Session Reset: logout/session rotation, signed-out private
+  run denial, and authorized access restored after normal login.
 
 ## Decisions Pending Acceptance
 

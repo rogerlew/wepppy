@@ -60,6 +60,10 @@ restart.
 - The operator confirmed the OAuth lifecycle behaves as designed: successful
   OAuth login carries remembered-login state and logout clears it before a new
   OAuth login. No credential values were recorded.
+- The operator exercised Browser Session Reset on Bearhive. Reset logged the
+  browser out and rotated the owned and presented legacy session state; the
+  private run returned the expected signed-out 404, and signing in normally
+  restored authorized access. No manual site-data clearing was required.
 - Focused migration/configuration/rq-engine regression suite: 118 passed.
 - Repository-wide Python regression suite: 6,684 passed, 63 skipped.
 - Full frontend suite: 105 suites and 773 tests passed; frontend lint passed.
