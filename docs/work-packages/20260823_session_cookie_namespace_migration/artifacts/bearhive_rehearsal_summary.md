@@ -49,6 +49,11 @@ restart.
 - Operator inspection confirmed that `__Host-weppcloud_session` rotates across
   logout and subsequent login. Legacy generic cookies remained present as
   designed, and no cookie values were retained in rehearsal evidence.
+- A live browser lifecycle canary verified remembered login issues the remember
+  cookie, logout removes it before any subsequent login and rotates the primary
+  SID, and an explicit remember-me opt-out login does not reissue it
+  (Playwright: 1 passed). The canary's CAP solver was also corrected to handle
+  the accepted one-hex-character difficulty target.
 - Focused migration/configuration/rq-engine regression suite: 118 passed.
 - Repository-wide Python regression suite: 6,684 passed, 63 skipped.
 - Full frontend suite: 105 suites and 773 tests passed; frontend lint passed.

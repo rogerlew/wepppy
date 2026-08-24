@@ -323,11 +323,10 @@ function buildCapPairs(challengePayload) {
 }
 
 function solvePowNonce(salt, targetHex) {
-  const target = Buffer.from(targetHex, 'hex');
   let nonce = 0;
   while (true) {
-    const digest = createHash('sha256').update(`${salt}${nonce}`, 'utf8').digest();
-    if (digest.subarray(0, target.length).equals(target)) {
+    const digestHex = createHash('sha256').update(`${salt}${nonce}`, 'utf8').digest('hex');
+    if (digestHex.startsWith(targetHex)) {
       return nonce;
     }
     nonce += 1;
@@ -894,6 +893,39 @@ test.describe('axe accessibility smoke', () => {
     expect(migrated, 'legacy adoption must issue the owned primary cookie').toBeTruthy();
     expect(migrated.value).toBe(primary.value);
     expect(cookiesAfterMigration.some((cookie) => cookie.name === 'remember_token')).toBe(false);
+  });
+
+  test('logout clears remember cookie before opt-out login', async ({ page }) => {
+    await page.setExtraHTTPHeaders(forwardedProtoHeader);
+    const rememberedLogin = await ensureAgentSession(page, { remember: true });
+    expect(rememberedLogin.authenticated, rememberedLogin.reason).toBe(true);
+
+    const rememberedCookies = await page.context().cookies();
+    const rememberedPrimary = rememberedCookies.find(
+      (cookie) => cookie.name === '__Host-weppcloud_session'
+    );
+    expect(rememberedPrimary, 'remembered login must issue a primary session').toBeTruthy();
+    expect(rememberedCookies.some((cookie) => cookie.name === 'remember_token')).toBe(true);
+
+    await page.goto(buildUrl(withSitePrefix('/logout')), { waitUntil: 'networkidle' });
+    const loggedOutCookies = await page.context().cookies();
+    expect(loggedOutCookies.some((cookie) => cookie.name === 'remember_token')).toBe(false);
+    const loggedOutPrimary = loggedOutCookies.find(
+      (cookie) => cookie.name === '__Host-weppcloud_session'
+    );
+    if (loggedOutPrimary) {
+      expect(loggedOutPrimary.value).not.toBe(rememberedPrimary.value);
+    }
+
+    const optOutLogin = await ensureAgentSession(page, { remember: false });
+    expect(optOutLogin.authenticated, optOutLogin.reason).toBe(true);
+    const optOutCookies = await page.context().cookies();
+    expect(optOutCookies.some((cookie) => cookie.name === 'remember_token')).toBe(false);
+    const optOutPrimary = optOutCookies.find(
+      (cookie) => cookie.name === '__Host-weppcloud_session'
+    );
+    expect(optOutPrimary, 'opt-out login must issue a primary session').toBeTruthy();
+    expect(optOutPrimary.value).not.toBe(rememberedPrimary.value);
   });
 
   test('axe accessibility scan for runs0 dashboard', async ({ page }) => {

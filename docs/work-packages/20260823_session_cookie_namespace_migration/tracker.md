@@ -55,6 +55,8 @@
   WebSocket hiccups did not interrupt polling or tested workflows.
 - [x] Confirmed the owned primary session cookie rotates across logout/login;
   no credential values were recorded.
+- [x] Passed live remembered-login -> logout -> opt-out-login lifecycle: logout
+  clears remember before re-login and opt-out does not reissue it.
 
 ## Decisions Pending Acceptance
 
