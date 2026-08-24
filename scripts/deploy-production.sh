@@ -1,6 +1,6 @@
 #!/bin/bash
 # Production Deployment Script for WEPPcloud
-# Usage: ./scripts/deploy-production.sh [--skip-pull] [--skip-build] [--skip-themes] [--flush-rq-db|--no-flush-rq-db] [--skip-docker-prune] [--docker-prune-volumes]
+# Usage: ./scripts/deploy-production.sh [--targeted-web] [--skip-pull] [--skip-build] [--skip-themes] [--flush-rq-db|--no-flush-rq-db] [--skip-docker-prune] [--docker-prune-volumes]
 # The installed wctl preset selects full production, worker-pool, or the
 # dedicated wepp3 fork/archive deployment automatically.
 
@@ -258,10 +258,16 @@ FLUSH_RQ_DB_EXPLICIT=false
 REQUIRE_RQ_REDIS=false
 SKIP_DOCKER_PRUNE=false
 DOCKER_PRUNE_VOLUMES=false
+TARGETED_WEB=false
 HEALTHCHECK_URL="${HEALTHCHECK_URL:-}"
+RQ_ENGINE_HEALTHCHECK_URL="${RQ_ENGINE_HEALTHCHECK_URL:-}"
 
 while [[ $# -gt 0 ]]; do
     case $1 in
+        --targeted-web)
+            TARGETED_WEB=true
+            shift
+            ;;
         --skip-pull)
             SKIP_PULL=true
             shift
@@ -298,7 +304,7 @@ while [[ $# -gt 0 ]]; do
             ;;
         *)
             echo "Unknown option: $1"
-            echo "Usage: $0 [--skip-pull] [--skip-build] [--skip-themes] [--flush-rq-db|--no-flush-rq-db] [--require-rq-redis] [--skip-docker-prune] [--docker-prune-volumes]"
+            echo "Usage: $0 [--targeted-web] [--skip-pull] [--skip-build] [--skip-themes] [--flush-rq-db|--no-flush-rq-db] [--require-rq-redis] [--skip-docker-prune] [--docker-prune-volumes]"
             exit 1
             ;;
     esac
@@ -351,11 +357,26 @@ configure_deploy_topology() {
         echo "  Reinstall the intended wctl preset before deploying." >&2
         exit 1
     fi
+
+    if [ "${TARGETED_WEB}" = true ]; then
+        if [ "${DEPLOY_MODE}" != "full" ] \
+            || ! echo "${COMPOSE_SERVICES}" | grep -q "^rq-engine$"; then
+            echo "✗ --targeted-web requires a full stack containing weppcloud and rq-engine." >&2
+            exit 1
+        fi
+        BUILD_SERVICES=(weppcloud rq-engine)
+    fi
 }
 
 configure_deploy_topology
 
 validate_deploy_topology() {
+    if [ "${TARGETED_WEB}" = true ] && [ "${FLUSH_RQ_DB}" = true ]; then
+        echo "✗ --targeted-web cannot be combined with --flush-rq-db." >&2
+        echo "  Targeted web deployment must leave Redis and workers untouched." >&2
+        exit 1
+    fi
+
     if [ "${IS_WEPP3_FORK_ARCHIVE}" = true ] && [ "${FLUSH_RQ_DB}" = true ]; then
         echo "✗ Refusing --flush-rq-db on the dedicated wepp3 worker deployment." >&2
         echo "  Redis DB 9 is shared production state and is not owned by wepp3." >&2
@@ -380,6 +401,9 @@ echo "WEPPcloud Production Deployment"
 echo "============================================"
 echo "Project root: ${PROJECT_ROOT}"
 echo "Mode: ${DEPLOY_MODE}"
+if [ "${TARGETED_WEB}" = true ]; then
+    echo "Scope: targeted weppcloud + rq-engine recreation; dependencies remain running"
+fi
 echo "Timestamp: $(date --iso-8601=seconds)"
 echo ""
 
@@ -422,7 +446,9 @@ fi
 # Compose removes the container: the worker stops dequeuing first and any job
 # already running is allowed to finish, closing the check-then-stop race.
 echo ">>> Step 3: Stopping services..."
-if [ "${IS_WEPP3_FORK_ARCHIVE}" = true ] \
+if [ "${TARGETED_WEB}" = true ]; then
+    echo "    Skipping stack shutdown; workers and dependencies remain running."
+elif [ "${IS_WEPP3_FORK_ARCHIVE}" = true ] \
     && wctl docker compose ps --status running --services 2>/dev/null \
         | grep -q '^rq-worker-fork-archive$'; then
     FORK_ARCHIVE_STOP_TIMEOUT_SECONDS="${FORK_ARCHIVE_STOP_TIMEOUT_SECONDS:-216000}"
@@ -434,11 +460,13 @@ if [ "${IS_WEPP3_FORK_ARCHIVE}" = true ] \
         docker compose stop --timeout "${FORK_ARCHIVE_STOP_TIMEOUT_SECONDS}" \
         rq-worker-fork-archive
 fi
-run_wctl_with_retry \
-    "${WCTL_COMPOSE_TIMEOUT_SECONDS}" \
-    "${WCTL_COMPOSE_RETRIES}" \
-    "${WCTL_COMPOSE_RETRY_DELAY_SECONDS}" \
-    down
+if [ "${TARGETED_WEB}" = false ]; then
+    run_wctl_with_retry \
+        "${WCTL_COMPOSE_TIMEOUT_SECONDS}" \
+        "${WCTL_COMPOSE_RETRIES}" \
+        "${WCTL_COMPOSE_RETRY_DELAY_SECONDS}" \
+        down
+fi
 echo ""
 
 # Flush RQ Redis DB 9 (optional, default off)
@@ -529,11 +557,19 @@ fi
 
 # Start services
 echo ">>> Step 5: Starting services..."
-run_wctl_with_retry \
-    "${WCTL_COMPOSE_TIMEOUT_SECONDS}" \
-    "${WCTL_COMPOSE_RETRIES}" \
-    "${WCTL_COMPOSE_RETRY_DELAY_SECONDS}" \
-    up -d
+if [ "${TARGETED_WEB}" = true ]; then
+    run_wctl_with_retry \
+        "${WCTL_COMPOSE_TIMEOUT_SECONDS}" \
+        "${WCTL_COMPOSE_RETRIES}" \
+        "${WCTL_COMPOSE_RETRY_DELAY_SECONDS}" \
+        docker compose up -d --no-deps --force-recreate weppcloud rq-engine
+else
+    run_wctl_with_retry \
+        "${WCTL_COMPOSE_TIMEOUT_SECONDS}" \
+        "${WCTL_COMPOSE_RETRIES}" \
+        "${WCTL_COMPOSE_RETRY_DELAY_SECONDS}" \
+        up -d
+fi
 echo ""
 
 # Wait for health check
@@ -582,6 +618,26 @@ if [ "${HAS_WEPPCLOUD}" = true ]; then
         echo "  Waiting for WEPPcloud to be ready (attempt ${ATTEMPT}/${MAX_ATTEMPTS})..."
         sleep 2
     done
+
+    if [ "${TARGETED_WEB}" = true ]; then
+        if [ -z "${RQ_ENGINE_HEALTHCHECK_URL}" ]; then
+            case "${HEALTHCHECK_URL}" in
+                */weppcloud/health)
+                    RQ_ENGINE_HEALTHCHECK_URL="${HEALTHCHECK_URL%/weppcloud/health}/rq-engine/health"
+                    ;;
+                *)
+                    echo "✗ Set RQ_ENGINE_HEALTHCHECK_URL when HEALTHCHECK_URL does not end in /weppcloud/health." >&2
+                    exit 1
+                    ;;
+            esac
+        fi
+        echo "    RQ-engine health check URL: ${RQ_ENGINE_HEALTHCHECK_URL}"
+        if ! curl --connect-timeout 5 --max-time 10 -fsS "${RQ_ENGINE_HEALTHCHECK_URL}" > /dev/null; then
+            echo "✗ rq-engine health check failed" >&2
+            exit 1
+        fi
+        echo "✓ rq-engine is healthy"
+    fi
 else
     echo ">>> Step 6: Skipping WEPPcloud health check (worker stack detected)..."
     if [ "${IS_WEPP3_FORK_ARCHIVE}" = true ]; then
@@ -618,7 +674,10 @@ else
     fi
 fi
 
-if [ "${IS_WEPP3_FORK_ARCHIVE}" = true ]; then
+if [ "${TARGETED_WEB}" = true ]; then
+    echo ""
+    echo ">>> Step 7: Skipping broad Docker runtime prune after targeted deployment"
+elif [ "${IS_WEPP3_FORK_ARCHIVE}" = true ]; then
     echo ""
     echo ">>> Step 7: Skipping broad Docker runtime prune on the dedicated wepp3 host"
     echo "    Build cache was pruned after the image build; unrelated host images are left intact."

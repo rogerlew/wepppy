@@ -4,8 +4,8 @@
 
 **Started**: 2026-08-23 21:45Z
 **Current phase**: Bearhive rehearsal implementation
-**Last updated**: 2026-08-24 18:25Z
-**Next milestone**: Complete remaining browser/state gates and canonical deploy-script rollback rehearsal.
+**Last updated**: 2026-08-24 19:37Z
+**Next milestone**: Validate targeted web deployment on forest1, then complete remaining browser/state gates.
 
 ## Task Board
 
@@ -13,6 +13,8 @@
 
 - [ ] Complete production inventory, thresholds, and executable commands in
   `artifacts/rollout_runbook.md`.
+- [ ] Add and validate the canonical targeted `weppcloud`/`rq-engine` deploy
+  mode on forest1 without restarting workers or stateful dependencies.
 - [ ] Complete authenticated browser, logout/reset, mixed-version, and rollback
   rehearsal evidence.
 

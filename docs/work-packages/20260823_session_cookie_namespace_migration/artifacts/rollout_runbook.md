@@ -15,9 +15,10 @@ the responsible operator. Chat history is not rollout evidence.
 - [x] ADR-0044 accepted for Bearhive rehearsal.
 - [x] Contract checkpoint committed as standalone ancestor `9f52eb879`.
 - [ ] Every blocking review finding closed and dispositioned.
-- [ ] Migration-aware rescue Git revision tested through the canonical
-      `scripts/deploy-production.sh` workflow. The packaged-image boot test is
-      useful evidence, but it is not a deployment-script rehearsal.
+- [ ] Reader-first configuration recovery tested through
+      `scripts/deploy-production.sh --targeted-web --no-flush-rq-db`. The
+      packaged-image boot test is useful evidence, but it is not a deployment
+      rehearsal.
 - [ ] Production web and rq-engine instance inventory captured.
 - [ ] Redis DB 11 connectivity and persistence verified; no flush/rekey planned.
 - [x] Parser bounds, logout fence, payload failures, and duplicate semantics
@@ -72,19 +73,27 @@ Evidence: `artifacts/bearhive_rehearsal_summary.md`. Unchecked gates remain
 required; the private-run recorder probe was authorization-limited and is not
 recorded as a pass.
 
-## Phase 1 — Production Shadow Observation
+## Phase 1 — Production Reader-First Deployment
 
-Deploy read-only candidate classification to every `wepp.cloud` consumer while
-retaining existing session selection and continuing to write `session`.
+Deploy the migration-aware code to `wepp1` while continuing to write `session`.
+Only `weppcloud` and `rq-engine` consume browser sessions; `wepp2` and `wepp3`
+are outside this rollout and remain untouched.
 
-- [ ] Capture pre-deploy instance inventory and digest.
-- [ ] Deploy shadow-capable web and rq-engine images.
-- [ ] Verify every instance digest and rendered session configuration.
-- [ ] Confirm all instances still write `session`.
-- [ ] Observe for the ratified interval.
+- [ ] Verify host identity, clean Git state, effective full-stack topology, and
+      current `weppcloud`/`rq-engine` container IDs.
+- [ ] Confirm the production profile is reader-first: writer `session`, primary
+      reader `__Host-weppcloud_session`, legacy reader `session`, migration on.
+- [ ] Pull and deploy with
+      `./scripts/deploy-production.sh --targeted-web --no-flush-rq-db`.
+- [ ] Prove Redis, PostgreSQL, Caddy, scheduler, and every RQ worker retained
+      their pre-deploy container IDs and active jobs were not interrupted.
+- [ ] Verify both rebuilt services use the expected Git revision and effective
+      reader-first configuration.
+- [ ] Run authenticated, anonymous, private-run, CSRF, and token-bridge
+      canaries, then observe for the ratified interval.
 - [ ] Quantify recoverable, signed-missing, corrupt, and conflicting cases.
 - [ ] Confirm metrics contain no credential or identity material.
-- [ ] Approve, hold, or revise the migration contract from observed evidence.
+- [ ] Approve or hold activation from observed evidence.
 
 Execution ledger:
 
@@ -92,34 +101,18 @@ Execution ledger:
 | --- | --- | --- | --- | --- |
 |  |  |  |  |  |
 
-## Phase 2 — Production Reader-First Deployment
-
-Deploy active dual-read migration support everywhere while still writing the
-legacy name. This phase must complete before the cookie-name activation.
-
-- [ ] Deploy migration-aware rq-engine consumers.
-- [ ] Deploy migration-aware web consumers.
-- [ ] Verify every instance understands primary and legacy names.
-- [ ] Verify every instance still writes `session`.
-- [ ] Run authenticated, anonymous, private-run, and token-bridge canaries.
-- [ ] Prove the rescue revision through `scripts/deploy-production.sh` against
-      current production configuration.
-- [ ] Confirm no legacy-only process remains.
-
-Execution ledger:
-
-| UTC | Operator | Action/command | Digest/config evidence | Result |
-| --- | --- | --- | --- | --- |
-|  |  |  |  |  |
-
-## Phase 3 — Production Cookie Activation
+## Phase 2 — Production Cookie Activation
 
 Activate `__Host-weppcloud_session` for all `wepp.cloud` web writers without
 overlap with legacy-only processes. Do not stop, flush, copy, or rekey Redis.
 
 - [ ] Record final go/no-go decision and operator.
 - [ ] Verify exact cookie invariants: Secure, HttpOnly, Path `/`, no Domain.
-- [ ] Activate the new writer configuration.
+- [ ] Change only the wepp1 writer setting to
+      `SESSION_COOKIE_NAME=__Host-weppcloud_session`.
+- [ ] Deploy with
+      `./scripts/deploy-production.sh --targeted-web --skip-pull --no-flush-rq-db`.
+- [ ] Prove non-target service container IDs did not change.
 - [ ] Verify all web process digests and effective configuration.
 - [ ] Confirm legacy SIDs retain the same Redis keys and payloads.
 - [ ] Run first-request POST, recorder, heartbeat, CAP, OAuth, logout/reset,
@@ -134,27 +127,35 @@ Execution ledger:
 | --- | --- | --- | --- | --- |
 |  |  |  |  |  |
 
-## Rescue Procedure
+## Recovery Procedure
 
-Rollback to a legacy-only revision is prohibited after activation. Recovery
-uses a pinned migration-aware Git revision and the existing production deploy
-script while keeping the new cookie name active. Do not substitute an ad hoc
-Compose or registry workflow.
+The first recovery action is configuration rollback, not source rollback.
+Restore the reader-first writer value `session` while keeping migration enabled
+and both readers configured. Browsers carrying either cookie remain usable and
+retain the same Redis SID. A legacy-only source revision is prohibited after
+activation.
 
 - [ ] Stop further promotion/change activity.
 - [ ] Preserve Redis DB 11 and capture value-free health evidence.
 - [ ] Record the current production Git revision and effective cookie profile.
-- [ ] Check out the pinned rescue revision in a clean worktree.
-- [ ] Run `./scripts/deploy-production.sh --skip-pull --no-flush-rq-db` with the
-      installed production `wctl` preset.
-- [ ] Verify the locally built services read both names and write the new name.
+- [ ] Restore `SESSION_COOKIE_NAME=session` without changing the primary or
+      legacy reader settings.
+- [ ] Run
+      `./scripts/deploy-production.sh --targeted-web --skip-pull --no-flush-rq-db`.
+- [ ] Verify both names remain readable, responses write `session`, and all
+      non-target services retained their container IDs.
 - [ ] Run authentication, CSRF, logout, and rq-engine canaries.
 - [ ] Record incident linkage, exact commands, timestamps, and results.
 
-Pinned rescue revision:
+If the application code itself must be recovered, deploy only a reviewed,
+migration-aware Git revision through the same targeted mode. Keep the desired
+reader-first or activated cookie profile explicit. Never deploy legacy-only
+code once any browser may hold only the owned cookie.
+
+Known migration-aware revision:
 
     Git commit: 42cf8319625a
-    Deploy entry point: ./scripts/deploy-production.sh
+    Deploy entry point: ./scripts/deploy-production.sh --targeted-web
     Required Redis policy: --no-flush-rq-db
 
 Bearhive packaged-image boot test, 2026-08-24 18:39Z–18:52Z:

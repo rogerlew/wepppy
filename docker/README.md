@@ -45,6 +45,19 @@ topology and deploys only `rq-worker-fork-archive`:
 ./scripts/deploy-production.sh
 ```
 
+For a web-boundary hotfix that changes only WEPPcloud and rq-engine, use the
+targeted mode. It pulls and builds normally, rebuilds static assets, and
+recreates only those two services with `--no-deps`; Redis, PostgreSQL, Caddy,
+schedulers, and RQ workers remain running:
+
+```bash
+./scripts/deploy-production.sh --targeted-web --no-flush-rq-db
+```
+
+The mode is accepted only for a full Compose topology containing both
+`weppcloud` and `rq-engine`. It rejects `--flush-rq-db`, verifies both public
+health endpoints, and skips the broad runtime prune.
+
 The script restarts itself when a pull updates its implementation and validates
 the post-pull Compose topology before building. It fails closed when an active
 worker-only wctl preset does not expose a supported service set.

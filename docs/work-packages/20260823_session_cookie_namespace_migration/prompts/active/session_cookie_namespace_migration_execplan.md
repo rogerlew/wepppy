@@ -57,8 +57,9 @@ mixed-version rollout.
   canaries. The test corrected image source ownership and required-ADR
   packaging, then restored the normal Bearhive deployment.
 - [ ] Rehearse rollback from the migration-aware Git revision through
-  `scripts/deploy-production.sh`. The ad hoc Compose image boot does not satisfy
-  this gate and must not be treated as a production deployment precedent.
+  `scripts/deploy-production.sh --targeted-web`. The ad hoc Compose image boot
+  does not satisfy this gate and must not be treated as a production deployment
+  precedent.
 
 ## Surprises & Discoveries
 
@@ -133,6 +134,14 @@ mixed-version rollout.
   browsers that already carry both names.
   Date/Author: 2026-08-24 / Codex, discovered during Bearhive activation rehearsal.
 
+- Decision: Deploy this browser-session change only to `wepp1` and recreate
+  only `weppcloud` and `rq-engine`.
+  Rationale: Those are the only production services that consume browser
+  session cookies. Deploying worker-only `wepp2` or fork/archive-only `wepp3`,
+  or restarting unrelated wepp1 services, adds risk without exercising the
+  changed boundary.
+  Date/Author: 2026-08-24 / WEPPcloud operator and Codex.
+
 ## Outcomes & Retrospective
 
 Bearhive now runs the dual-read, primary-write configuration. Focused Python
@@ -167,10 +176,16 @@ session naturally emits the new cookie. Add equivalent rq-engine selection for
 the session-token bridge. Configure every relevant Compose service with the
 same new/legacy names and add startup checks against drift.
 
-Deploy reader support to every `wepp.cloud` web and rq-engine instance while
-still writing `session`, then cut over all production web workers without
-overlapping legacy-only and new Gunicorn generations. Prove the supported version
-matrix and that rollback retains the migration reader. Finish with live
+Add a guarded `--targeted-web` mode to `scripts/deploy-production.sh`. It must
+retain the script's safe fast-forward pull, local no-cache build, static asset
+build, retries, and health checks, but replace only `weppcloud` and `rq-engine`
+with `docker compose up -d --no-deps --force-recreate`. It must reject worker-only
+topologies and Redis flushing, and it must leave every other service running.
+
+Deploy reader support on `wepp1` while still writing `session`, then change only
+the writer configuration and repeat the targeted deployment. Do not deploy
+wepp2 or wepp3. Prove the supported version matrix and that restoring the
+reader-first writer configuration retains both cookie populations. Finish with live
 authenticated canaries in Safari, Chromium, and Firefox that exercise page
 render, heartbeat, recorder, and rq-engine token mint without a login prompt.
 
@@ -204,6 +219,9 @@ session. Rollback keeps both cookie populations usable.
 Migration is idempotent because presence of the new cookie blocks downgrade and
 the Redis SID is not copied. Repeated requests merely refresh the same session.
 Rollback retains dual-read compatibility and does not delete either cookie.
+The first rollback is configuration-only: restore `SESSION_COOKIE_NAME=session`
+and run the targeted deploy with `--skip-pull --no-flush-rq-db`. Source recovery
+may use only a known migration-aware revision and the same targeted mode.
 
 ## Artifacts and Notes
 

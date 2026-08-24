@@ -170,3 +170,21 @@ def test_production_deploy_script_supports_guarded_wepp3_mode() -> None:
     assert 'REGISTERED_FORK_ARCHIVE_WORKERS}" != "1:1"' in deploy_script
     assert "rq-info --service rq-worker-fork-archive --detail" in deploy_script
     assert "Skipping broad Docker runtime prune on the dedicated wepp3 host" in deploy_script
+
+
+def test_production_deploy_script_supports_targeted_web_mode() -> None:
+    deploy_script = (_REPO_ROOT / "scripts" / "deploy-production.sh").read_text(
+        encoding="utf-8"
+    )
+
+    assert "--targeted-web" in deploy_script
+    assert "BUILD_SERVICES=(weppcloud rq-engine)" in deploy_script
+    assert "--targeted-web requires a full stack" in deploy_script
+    assert "--targeted-web cannot be combined with --flush-rq-db" in deploy_script
+    assert "Skipping stack shutdown; workers and dependencies remain running" in deploy_script
+    assert (
+        "docker compose up -d --no-deps --force-recreate weppcloud rq-engine"
+        in deploy_script
+    )
+    assert "RQ_ENGINE_HEALTHCHECK_URL" in deploy_script
+    assert "Skipping broad Docker runtime prune after targeted deployment" in deploy_script
