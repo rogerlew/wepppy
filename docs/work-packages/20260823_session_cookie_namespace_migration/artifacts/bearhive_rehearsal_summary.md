@@ -25,6 +25,12 @@ restart.
   before a correctly signed, Redis-backed legacy cookie. The response was HTTP
   200 and issued `__Host-weppcloud_session` with the exact existing SID.
 - The issued cookie was Secure, root-path scoped, and had no Domain attribute.
+- A credentialed browser login explicitly disabled remember-me, retained only
+  the signed legacy `session` cookie, and waited while WEPPcloud restarted. The
+  next authenticated profile load adopted the legacy state, issued
+  `__Host-weppcloud_session` with the identical signed SID, retained valid CSRF
+  state for the rq-engine-token POST, showed no login prompt, and issued no
+  remember cookie (Playwright: 1 passed).
 - Focused migration/configuration/rq-engine regression suite: 118 passed.
 - Repository-wide Python regression suite: 6,684 passed, 63 skipped.
 - Full frontend suite: 105 suites and 773 tests passed; frontend lint passed.

@@ -43,6 +43,8 @@
 - [x] Closed independent security and QA code gates for Bearhive rehearsal.
 - [x] Temporarily enabled Bearhive local login and passed authenticated profile
   and runs-dashboard Playwright probes (2 passed).
+- [x] Passed authenticated no-remember legacy-session continuity across an
+  actual WEPPcloud restart with identical SID and valid CSRF state.
 
 ## Decisions Pending Acceptance
 

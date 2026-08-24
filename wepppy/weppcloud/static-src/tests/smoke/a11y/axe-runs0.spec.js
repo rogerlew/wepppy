@@ -25,6 +25,10 @@ const requireAgentCredentials = ['1', 'true', 'yes'].includes(
   String(process.env.SMOKE_AGENT_REQUIRED || '').trim().toLowerCase()
 );
 const agentCredentialsFileOverride = process.env.SMOKE_AGENT_CREDENTIALS_FILE || '';
+const migrationRestartWaitMs = Math.min(
+  Math.max(Number.parseInt(process.env.SMOKE_SESSION_MIGRATION_RESTART_WAIT_MS || '0', 10) || 0, 0),
+  60000
+);
 
 const sitePrefix = (() => {
   const hasSmokePrefix = Object.prototype.hasOwnProperty.call(process.env, 'SMOKE_SITE_PREFIX');
@@ -394,7 +398,7 @@ async function completeLoginCapIfPresent(page, loginForm) {
   return { verified: true, reason: 'Login CAP challenge completed.' };
 }
 
-async function ensureAgentSession(page) {
+async function ensureAgentSession(page, { remember = true } = {}) {
   if (!agentCredentials) {
     return {
       authenticated: false,
@@ -435,7 +439,11 @@ async function ensureAgentSession(page) {
 
   const rememberField = loginForm.locator('input[name="remember"]');
   if ((await rememberField.count()) > 0) {
-    await rememberField.check({ force: true });
+    if (remember) {
+      await rememberField.check({ force: true });
+    } else {
+      await rememberField.uncheck({ force: true });
+    }
   }
 
   const capResult = await completeLoginCapIfPresent(page, loginForm);
@@ -847,6 +855,45 @@ test.describe('axe accessibility smoke', () => {
 
     const entry = await runAxeScan(page, 'weppcloud-profile');
     console.log(`[axe] ${entry.pageId}: ${entry.violationCount} violations`);
+  });
+
+  test('legacy session migration preserves authenticated SID without remember cookie', async ({ page }) => {
+    await page.setExtraHTTPHeaders(forwardedProtoHeader);
+    const loginResult = await ensureAgentSession(page, { remember: false });
+    expect(loginResult.authenticated, loginResult.reason).toBe(true);
+
+    const cookiesAfterLogin = await page.context().cookies();
+    const primary = cookiesAfterLogin.find((cookie) => cookie.name === '__Host-weppcloud_session');
+    expect(primary, 'login must issue the owned primary session cookie').toBeTruthy();
+    expect(cookiesAfterLogin.some((cookie) => cookie.name === 'remember_token')).toBe(false);
+
+    await page.context().clearCookies({ name: '__Host-weppcloud_session' });
+    await page.context().addCookies([{
+      name: 'session',
+      value: primary.value,
+      url: new URL(buildUrl(withSitePrefix('/'))).origin,
+      secure: true,
+      httpOnly: true,
+      sameSite: primary.sameSite,
+    }]);
+    if (migrationRestartWaitMs > 0) {
+      console.log(`[migration-canary] waiting ${migrationRestartWaitMs}ms for WEPPcloud restart`);
+      await page.waitForTimeout(migrationRestartWaitMs);
+    }
+
+    const profileReady = await ensureProfilePageReady(page);
+    expect(profileReady.ready, profileReady.reason).toBe(true);
+    await expect(page.locator('.wc-profile')).toBeVisible();
+    const probe = await probeAuthenticatedSession(page);
+    expect(probe.authenticated, probe.reason).toBe(true);
+
+    const cookiesAfterMigration = await page.context().cookies();
+    const migrated = cookiesAfterMigration.find(
+      (cookie) => cookie.name === '__Host-weppcloud_session'
+    );
+    expect(migrated, 'legacy adoption must issue the owned primary cookie').toBeTruthy();
+    expect(migrated.value).toBe(primary.value);
+    expect(cookiesAfterMigration.some((cookie) => cookie.name === 'remember_token')).toBe(false);
   });
 
   test('axe accessibility scan for runs0 dashboard', async ({ page }) => {
