@@ -57,6 +57,9 @@ restart.
 - The operator independently confirmed the same password-login behavior in a
   real Bearhive browser: unchecked remember-me produced no remember cookie,
   while checked remember-me issued one. No credential values were recorded.
+- The operator confirmed the OAuth lifecycle behaves as designed: successful
+  OAuth login carries remembered-login state and logout clears it before a new
+  OAuth login. No credential values were recorded.
 - Focused migration/configuration/rq-engine regression suite: 118 passed.
 - Repository-wide Python regression suite: 6,684 passed, 63 skipped.
 - Full frontend suite: 105 suites and 773 tests passed; frontend lint passed.

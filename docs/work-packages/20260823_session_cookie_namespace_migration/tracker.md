@@ -59,6 +59,8 @@
   clears remember before re-login and opt-out does not reissue it.
 - [x] Captured independent operator confirmation that password-login remember
   opt-in issues the cookie and opt-out leaves it absent.
+- [x] Captured operator confirmation of the OAuth remembered-login and logout
+  lifecycle on Bearhive.
 
 ## Decisions Pending Acceptance
 
