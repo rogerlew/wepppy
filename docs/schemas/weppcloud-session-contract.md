@@ -82,10 +82,17 @@
 - A migrated session MUST retain its SID and complete Redis payload. A signed
   SID whose Redis record is absent MUST be discarded and MUST NOT seed a new
   session; any recovery receives a fresh unpredictable SID.
+- When an anonymous session becomes authenticated, the server MUST atomically
+  rotate its SID while preserving the session payload. If logout/reset has
+  already revoked the old SID, the promotion MUST fail closed, persist no new
+  session, and expire both the owned session and remember cookies.
 - Explicit logout and browser-state reset during migration MUST invalidate all
   bounded, correctly signed primary and legacy SIDs presented by that request.
   Revocation fencing MUST prevent late concurrent responses from recreating a
-  revoked SID. Generic legacy browser cookies MUST NOT be broadly deleted.
+  revoked SID. SID tombstones MUST outlive every derivative session credential
+  (currently four days), and every `token_class=session` authorization check
+  MUST reject a tombstoned SID. Generic legacy browser cookies MUST NOT be
+  broadly deleted.
 - Cookie parsing and migration telemetry MUST be bounded and value-free.
   Rejection MUST occur rather than truncation. Logs and metrics MUST NOT contain
   raw cookies, SIDs, principals, CSRF values, or remember tokens.

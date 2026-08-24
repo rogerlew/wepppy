@@ -23,10 +23,20 @@ mixed-version rollout.
   blocking findings in `artifacts/review_disposition.md`.
 - [x] (2026-08-23 23:15Z) Ratified ambiguity detection, logout fencing, and
   two-phase deployment/rollback for Bearhive rehearsal implementation.
-- [ ] Obtain operator acceptance and commit the contract checkpoint ancestor.
-- [ ] Implement shared parsing/selection and Flask/rq-engine adapters.
+- [x] (2026-08-23 23:30Z) Committed the ratified contract checkpoint as
+  `9f52eb879`.
+- [x] (2026-08-24 00:35Z) Implemented bounded shared selection, Flask and
+  rq-engine adapters, logout fencing, token revocation, and authentication SID
+  rotation.
+- [x] (2026-08-24 00:45Z) Deployed the migration configuration to Bearhive web
+  and rq-engine services without restarting Redis or workers; health and live
+  duplicate-legacy adoption passed.
 - [ ] Execute regression, mixed-version, rollback, browser, and canary gates.
-- [ ] Close reviews and package.
+- [x] (2026-08-24 02:05Z) Passed the repository-wide Python suite (6,684
+  passed, 63 skipped), frontend suite (105 suites/773 tests), lint, stub, broad
+  exception, and documentation gates.
+- [x] (2026-08-24 02:05Z) Closed independent security and QA code gates for
+  Bearhive rehearsal; production evidence gates remain open.
 
 ## Surprises & Discoveries
 
@@ -44,6 +54,12 @@ mixed-version rollout.
   Starlette's parsed cookie mapping chooses the last.
   Evidence: Framework probes and current adapters demonstrate divergent
   selection for the same raw Cookie header.
+
+- Observation: Logout fencing must cover derivative session JWTs, not only the
+  Redis session payload, because issued run tokens can remain valid for four
+  days.
+  Evidence: Security review traced `token_class=session` authorization paths;
+  the implementation now checks the SID tombstone centrally.
 
 ## Decision Log
 
@@ -80,12 +96,22 @@ mixed-version rollout.
   production controls should reflect the actual operator boundary.
   Date/Author: 2026-08-23 / WEPPcloud operator.
 
+- Decision: Rotate the SID atomically when an anonymous session becomes
+  authenticated, and retain the old SID tombstone for four days.
+  Rationale: Migration must not turn a sibling-origin signed anonymous SID into
+  a session-fixation primitive, and logout must invalidate every derivative
+  session JWT for its maximum lifetime.
+  Date/Author: 2026-08-24 / Codex, after independent security review.
+
 ## Outcomes & Retrospective
 
-Planning review found three blocking gaps: cross-principal duplicate handling,
-logout/reset resurrection, and mixed-worker rollback safety. Proposed controls
-are recorded in `artifacts/review_disposition.md`. No production implementation
-has begun, and the package is not authorized for deployment.
+Bearhive now runs the dual-read, primary-write configuration. Focused Python
+tests, the repository-wide regression suite, frontend tests, health checks, and
+a live duplicate legacy-cookie adoption probe pass. Cross-principal ambiguity,
+over-bound remembered-login recovery, logout/reset resurrection,
+derivative session-token revocation, and authentication fixation controls are
+implemented. Production remains untouched; authenticated browser canaries and
+mixed-version/rollback rehearsal evidence remain before a production gate.
 
 ## Context and Orientation
 

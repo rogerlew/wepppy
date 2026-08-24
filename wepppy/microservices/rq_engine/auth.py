@@ -236,11 +236,30 @@ def _check_session_marker(session_id: str, runid: str) -> None:
         raise AuthError("Session token missing required identifiers", status_code=403, code="forbidden")
 
     key = f"auth:session:run:{runid}:{session_id}"
+    _check_session_revocation(session_id)
     conn_kwargs = redis_connection_kwargs(RedisDB.SESSION)
     with redis.Redis(**conn_kwargs) as redis_conn:
         if not redis_conn.exists(key):
             raise AuthError(
                 "Session token invalid or expired. Reload the page to continue.",
+                status_code=401,
+                code="unauthorized",
+            )
+
+
+def _check_session_revocation(session_id: str) -> None:
+    if not session_id:
+        raise AuthError(
+            "Session token missing session identifier",
+            status_code=403,
+            code="forbidden",
+        )
+    revoked_key = f"auth:session:revoked:{session_id}"
+    conn_kwargs = redis_connection_kwargs(RedisDB.SESSION)
+    with redis.Redis(**conn_kwargs) as redis_conn:
+        if redis_conn.exists(revoked_key):
+            raise AuthError(
+                "Session token has been revoked.",
                 status_code=401,
                 code="unauthorized",
             )
@@ -333,6 +352,10 @@ def require_jwt(
         raise AuthError(f"Invalid token: {exc}") from exc
 
     _check_revocation(str(claims.get("jti") or ""))
+    if str(claims.get("token_class") or "").strip().lower() == "session":
+        _check_session_revocation(
+            str(claims.get("session_id") or claims.get("sub") or "")
+        )
 
     scope_separator = get_jwt_config().scope_separator
     scopes = _normalize_scopes(claims.get("scope"), scope_separator)

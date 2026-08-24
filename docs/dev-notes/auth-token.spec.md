@@ -295,7 +295,12 @@ If validation fails a `JWTDecodeError` is raised.
   - Redis DB: `RedisDB.SESSION` (11).
   - Key format: `auth:session:run:<runid>:<session_id>`.
   - TTL: 4 days; refresh on activity when practical.
-- rq-engine validates the JWT and requires the Redis marker to exist (fail closed).
+- Explicit logout/reset writes `auth:session:revoked:<session_id>` in the same
+  Redis DB for at least the longest session JWT/marker lifetime (currently four
+  days).
+- rq-engine validates the JWT, rejects a revoked session ID on every
+  `token_class=session` authorization path, and requires the run marker where
+  the endpoint contract is run-scoped (fail closed).
 
 ### Rotation playbook
 1. Generate a new secret and prepend it to `WEPP_AUTH_JWT_SECRETS`, keeping prior secrets after it.

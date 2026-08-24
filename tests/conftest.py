@@ -118,6 +118,9 @@ def _install_redis_stub():
         def get(self, key):
             return self.store.get(key)
 
+        def exists(self, key):
+            return int(key in self.store)
+
         def delete(self, key):
             self.store.pop(key, None)
 

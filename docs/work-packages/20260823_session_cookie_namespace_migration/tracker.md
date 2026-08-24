@@ -4,27 +4,22 @@
 
 **Started**: 2026-08-23 21:45Z
 **Current phase**: Bearhive rehearsal implementation
-**Last updated**: 2026-08-23 23:15Z
-**Next milestone**: Implement the accepted contract and focused regressions.
+**Last updated**: 2026-08-24 00:45Z
+**Next milestone**: Complete authenticated browser and rollback rehearsal gates.
 
 ## Task Board
 
 ### In Progress
 
-- [ ] Implement cross-principal detection, logout fencing, and reader-first
-  deployment support.
 - [ ] Complete production inventory, thresholds, and executable commands in
   `artifacts/rollout_runbook.md`.
+- [ ] Complete authenticated browser, logout/reset, mixed-version, and rollback
+  rehearsal evidence.
 
 ### Ready
 
-- [ ] Obtain explicit operator acceptance of the final contract checkpoint.
-- [ ] Commit the accepted checkpoint as a standalone ancestor.
-- [ ] Implement shared bounded cookie-candidate parsing and selection.
-- [ ] Implement Flask and rq-engine migration adapters.
-- [ ] Add configuration/docs and mixed-version rollout support.
 - [ ] Execute focused, broad, browser, and live-canary validation.
-- [ ] Complete final correctness, security, operations, UX, and QA reviews.
+- [ ] Complete final operations and UX reviews after remaining live evidence.
 
 ### Done
 
@@ -37,6 +32,15 @@
 - [x] Recorded severity-ranked findings and proposed dispositions.
 - [x] Scaffolded the phase-gated `wepp.cloud` production execution ledger.
 - [x] Ratified the three blocking contracts for Bearhive rehearsal.
+- [x] Committed the contract checkpoint as `9f52eb879`.
+- [x] Implemented shared bounded cookie selection and Flask/rq-engine adapters.
+- [x] Implemented cross-principal fail-closed recovery, logout/reset fencing,
+  four-day session-token revocation, and anonymous-to-authenticated SID rotation.
+- [x] Configured and restarted only Bearhive web and rq-engine services.
+- [x] Passed live health and duplicate legacy-cookie adoption probes.
+- [x] Passed 6,684 repository Python tests (63 skipped), 773 frontend tests,
+  lint, stub, broad-exception, and documentation gates.
+- [x] Closed independent security and QA code gates for Bearhive rehearsal.
 
 ## Decisions Pending Acceptance
 

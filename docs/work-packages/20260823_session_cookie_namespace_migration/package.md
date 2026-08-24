@@ -1,6 +1,6 @@
 # Seamless WEPPcloud Session Cookie Namespace Migration
 
-**Status**: Proposed; implementation blocked on review finding closure
+**Status**: Bearhive rehearsal in progress; production deployment prohibited
 
 ## Overview
 
@@ -93,4 +93,5 @@ security, governance/UX, operations, correctness, and QA reviews are mandatory.
 - `artifacts/regression_risk_register.md`
 - `artifacts/review_disposition.md`
 - `artifacts/rollout_runbook.md`
+- `artifacts/bearhive_rehearsal_summary.md`
 - `artifacts/final_validation_summary.md`

@@ -232,7 +232,11 @@ async function mirrorSecureAuthCookiesForHttp(page) {
   const rootUrl = new URL(buildUrl(withSitePrefix('/')));
   const cookies = await page.context().cookies();
   const mirrored = cookies
-    .filter((cookie) => (cookie.name === 'session' || cookie.name === 'remember_token') && cookie.secure)
+    .filter((cookie) => (
+      cookie.name === 'session'
+      || cookie.name === 'weppcloud_session'
+      || cookie.name === 'remember_token'
+    ) && cookie.secure)
     .map((cookie) => ({
       name: cookie.name,
       value: cookie.value,

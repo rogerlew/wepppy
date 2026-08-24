@@ -22,6 +22,12 @@ from wepppy.config.secrets import get_secret
 from wepppy.nodb.base import NoDbBase
 from wepppy.weppcloud.utils.helpers import get_run_owners_lazy, get_user_models, get_wd
 from wepppy.weppcloud.utils import auth_tokens
+from wepppy.weppcloud.session_migration import (
+    REVOCATION_KEY_PREFIX,
+    SessionSelectionError,
+    SessionStateError,
+    select_session,
+)
 from wepppy.weppcloud.utils.browse_cookie import (
     browse_cookie_name,
     browse_cookie_path,
@@ -94,8 +100,22 @@ def _session_cookie_name() -> str:
     return os.getenv("SESSION_COOKIE_NAME", "session")
 
 
+def _legacy_session_cookie_name() -> str:
+    return os.getenv("SESSION_COOKIE_LEGACY_NAME", "session")
+
+
+def _session_cookie_migration_enabled() -> bool:
+    return _bool_env("SESSION_COOKIE_MIGRATION_ENABLED", default=False)
+
+
 def _session_use_signer() -> bool:
-    return _bool_env("SESSION_USE_SIGNER", default=True)
+    enabled = _bool_env("SESSION_USE_SIGNER", default=True)
+    if not enabled:
+        raise AuthError(
+            "Signed browser sessions are required",
+            status_code=500,
+        )
+    return True
 
 
 def _secret_key() -> str:
@@ -113,6 +133,13 @@ def _unsign_session_id(raw_cookie: str) -> str:
         return signer.unsign(raw_cookie).decode("utf-8")
     except BadSignature as exc:
         raise AuthError("Invalid session cookie", status_code=401) from exc
+
+
+def _unsign_session_id_for_selection(raw_cookie: str) -> str:
+    if not _session_use_signer():
+        return raw_cookie
+    signer = Signer(_secret_key(), salt="flask-session", key_derivation="hmac")
+    return signer.unsign(raw_cookie).decode("utf-8")
 
 
 def _resolve_session_id_from_cookie(request: Request) -> str:
@@ -166,23 +193,85 @@ def _session_payload(session_id: str) -> Mapping[str, Any]:
     ) as exc:
         logger.warning(
             "rq-engine invalid session payload",
-            extra={"session_id": session_id, "error_type": type(exc).__name__},
+            extra={"error_type": type(exc).__name__},
         )
         raise AuthError("Invalid session payload", status_code=401) from exc
     if not isinstance(payload, Mapping):
         logger.warning(
             "rq-engine invalid session payload type",
-            extra={"session_id": session_id, "payload_type": type(payload).__name__},
+            extra={"payload_type": type(payload).__name__},
         )
         raise AuthError("Invalid session payload", status_code=401)
     return payload
 
 
+def _raw_cookie_headers(request: Request) -> list[bytes]:
+    return [value for key, value in request.scope.get("headers", ()) if key.lower() == b"cookie"]
+
+
+def _resolve_session_from_cookie(request: Request) -> tuple[str, Mapping[str, Any]]:
+    if not _session_cookie_migration_enabled():
+        session_id = _resolve_session_id_from_cookie(request)
+        _session_exists(session_id)
+        return session_id, _session_payload(session_id)
+
+    conn_kwargs = redis_connection_kwargs(RedisDB.SESSION)
+    redis_conn = redis.Redis(**conn_kwargs)
+    key_prefix = os.getenv("SESSION_KEY_PREFIX", SESSION_KEY_PREFIX)
+
+    def load_payload(session_id: str) -> Mapping[str, Any] | None:
+        raw_value = redis_conn.get(f"{key_prefix}{session_id}")
+        if raw_value is None:
+            return None
+        try:
+            payload = _restricted_session_payload_loads(raw_value)
+        except (
+            AttributeError,
+            EOFError,
+            ImportError,
+            IndexError,
+            TypeError,
+            ValueError,
+            pickle.UnpicklingError,
+        ) as exc:
+            raise SessionStateError("Invalid session payload") from exc
+        if not isinstance(payload, Mapping):
+            raise SessionStateError("Invalid session payload type")
+        return payload
+
+    try:
+        selected = select_session(
+            _raw_cookie_headers(request),
+            primary_name=_session_cookie_name(),
+            legacy_name=_legacy_session_cookie_name(),
+            unsign=_unsign_session_id_for_selection,
+            load=load_payload,
+            is_revoked=lambda sid: bool(redis_conn.exists(REVOCATION_KEY_PREFIX + sid)),
+        )
+    except SessionSelectionError as exc:
+        raise AuthError("Session expired or invalid", status_code=401) from exc
+    finally:
+        close_fn = getattr(redis_conn, "close", None)
+        if callable(close_fn):
+            close_fn()
+    if selected is None:
+        raise AuthError("Missing session cookie", status_code=401)
+    if selected.source == "legacy":
+        logger.info(
+            "rq-engine adopted legacy session cookie",
+            extra={
+                "migration_outcome": "legacy_adopted",
+                "invalid_signatures": selected.invalid_signatures,
+            },
+        )
+    return selected.sid, selected.payload
+
+
 def _session_not_authorized_message(request: Request, *, user_id: int | None) -> str:
     if user_id is None and request.cookies.get("remember_token"):
         return (
-            "Session not authorized for run. Your login session is stale. "
-            "Log out and sign in again, then retry."
+            "Session not authorized for run. Session state could not be "
+            "recovered automatically; retry from the current page."
         )
     return "Session not authorized for run"
 
@@ -888,9 +977,7 @@ async def issue_session_token(runid: str, config: str, request: Request) -> JSON
                     code="forbidden",
                 )
             try:
-                session_id = _resolve_session_id_from_cookie(request)
-                _session_exists(session_id)
-                session_payload = _session_payload(session_id)
+                session_id, session_payload = _resolve_session_from_cookie(request)
                 user_id, roles = _identity_from_session_payload(session_payload)
                 if not _session_user_authorized_for_run(runid, user_id, roles):
                     raise AuthError(

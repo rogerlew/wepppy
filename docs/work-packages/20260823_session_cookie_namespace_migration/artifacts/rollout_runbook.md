@@ -1,6 +1,6 @@
 # `wepp.cloud` Production Rollout Runbook
 
-**Status**: Draft; execution prohibited until contract blockers close
+**Status**: Bearhive rehearsal active; production execution prohibited
 **Production origin**: `https://wepp.cloud`
 **Development/test origins**: Bearhive deployments
 **State store**: Redis DB 11; preserve throughout rollout
@@ -12,13 +12,13 @@ the responsible operator. Chat history is not rollout evidence.
 
 ## Global Gates
 
-- [ ] ADR-0044 accepted.
-- [ ] Contract checkpoint committed as a standalone ancestor.
+- [x] ADR-0044 accepted for Bearhive rehearsal.
+- [x] Contract checkpoint committed as standalone ancestor `9f52eb879`.
 - [ ] Every blocking review finding closed and dispositioned.
 - [ ] Migration-aware rescue image built, pinned by digest, and tested.
 - [ ] Production web and rq-engine instance inventory captured.
 - [ ] Redis DB 11 connectivity and persistence verified; no flush/rekey planned.
-- [ ] Parser bounds, logout fence, payload failures, and duplicate semantics
+- [x] Parser bounds, logout fence, payload failures, and duplicate semantics
       ratified.
 - [ ] Focused, broad, browser, security, and mixed-version tests pass.
 - [ ] Production baselines and abort thresholds recorded below.
@@ -55,8 +55,8 @@ They never contain cookies, SIDs, user IDs, CSRF values, or remember tokens.
 
 ## Phase 0 — Bearhive Rehearsal
 
-- [ ] Deploy the candidate to development/test only.
-- [ ] Exercise invalid-before-valid duplicate legacy cookies.
+- [x] Deploy the candidate to development/test only.
+- [x] Exercise invalid-before-valid duplicate legacy cookies.
 - [ ] Exercise same-principal and cross-principal live candidates.
 - [ ] Exercise first-request form and `X-CSRFToken` POSTs.
 - [ ] Preserve anonymous CAP and in-flight OAuth state.
@@ -65,9 +65,9 @@ They never contain cookies, SIDs, user IDs, CSRF values, or remember tokens.
 - [ ] Complete Safari, Firefox, Chromium, and Edge canaries.
 - [ ] Rehearse activation and rescue-image recovery.
 
-Evidence:
-
-    Pending
+Evidence: `artifacts/bearhive_rehearsal_summary.md`. Unchecked gates remain
+required; the private-run recorder probe was authorization-limited and is not
+recorded as a pass.
 
 ## Phase 1 — Production Shadow Observation
 

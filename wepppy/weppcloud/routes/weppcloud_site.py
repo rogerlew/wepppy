@@ -837,6 +837,9 @@ def reset_browser_state():
         response.status_code = 403
         return response
 
+    from wepppy.weppcloud.session_migration import revoke_presented_sessions
+
+    revoke_presented_sessions(current_app, request)
     session.clear()
     session.modified = True
 

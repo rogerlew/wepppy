@@ -331,10 +331,28 @@ def config_app(app: Any):
     app.config["SESSION_USE_SIGNER"] = True
     app.config["SESSION_PERMANENT"] = False
     app.config["SESSION_KEY_PREFIX"] = "session:"
+    app.config["SESSION_COOKIE_NAME"] = os.getenv("SESSION_COOKIE_NAME", "session")
+    app.config["SESSION_COOKIE_LEGACY_NAME"] = os.getenv(
+        "SESSION_COOKIE_LEGACY_NAME", "session"
+    )
+    app.config["SESSION_COOKIE_MIGRATION_ENABLED"] = _get_env_bool(
+        "SESSION_COOKIE_MIGRATION_ENABLED", False
+    )
     app.config["SESSION_COOKIE_PATH"] = os.getenv("SESSION_COOKIE_PATH", "/")
+    app.config["SESSION_COOKIE_DOMAIN"] = os.getenv("SESSION_COOKIE_DOMAIN") or None
     app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=12)
     app.config["SESSION_COOKIE_SAMESITE"] = os.getenv("SESSION_COOKIE_SAMESITE", "Lax")
     app.config["SESSION_COOKIE_SECURE"] = True
+    app.config["SESSION_COOKIE_HTTPONLY"] = True
+    if app.config["SESSION_COOKIE_NAME"].startswith("__Host-"):
+        if (
+            not app.config["SESSION_COOKIE_SECURE"]
+            or app.config["SESSION_COOKIE_PATH"] != "/"
+            or app.config["SESSION_COOKIE_DOMAIN"] is not None
+        ):
+            raise ValueError(
+                "__Host- session cookies require Secure, Path=/, and no Domain"
+            )
     app.config["SESSION_REFRESH_EACH_REQUEST"] = _get_env_bool(
         "SESSION_REFRESH_EACH_REQUEST", True
     )
