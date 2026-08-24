@@ -212,19 +212,32 @@ async function probeAuthenticatedSession(page) {
     };
   }
 
-  const probeResponse = await page.request.post(buildUrl(withSitePrefix('/api/auth/rq-engine-token')), {
-    headers: csrfHeaders(csrfToken),
+  const probeResult = await page.evaluate(async ({ endpoint, token }) => {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'X-CSRFToken': token },
+    });
+    return {
+      ok: response.ok,
+      status: response.status,
+      statusText: response.statusText,
+      body: await response.text(),
+    };
+  }, {
+    endpoint: buildUrl(withSitePrefix('/api/auth/rq-engine-token')),
+    token: csrfToken,
   });
-  if (probeResponse.ok()) {
-    return { authenticated: true, status: probeResponse.status(), reason: 'authenticated' };
+  if (probeResult.ok) {
+    return { authenticated: true, status: probeResult.status, reason: 'authenticated' };
   }
 
-  const body = (await probeResponse.text()).trim();
+  const body = String(probeResult.body || '').trim();
   const bodyPreview = body ? ` Body: ${body.slice(0, 160)}` : '';
   return {
     authenticated: false,
-    status: probeResponse.status(),
-    reason: `auth probe failed (${probeResponse.status()} ${probeResponse.statusText()}).${bodyPreview}`,
+    status: probeResult.status,
+    reason: `auth probe failed (${probeResult.status} ${probeResult.statusText}).${bodyPreview}`,
   };
 }
 

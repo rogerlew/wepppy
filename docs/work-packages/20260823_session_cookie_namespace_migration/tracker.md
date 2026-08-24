@@ -41,6 +41,8 @@
 - [x] Passed 6,684 repository Python tests (63 skipped), 773 frontend tests,
   lint, stub, broad-exception, and documentation gates.
 - [x] Closed independent security and QA code gates for Bearhive rehearsal.
+- [x] Temporarily enabled Bearhive local login and passed authenticated profile
+  and runs-dashboard Playwright probes (2 passed).
 
 ## Decisions Pending Acceptance
 

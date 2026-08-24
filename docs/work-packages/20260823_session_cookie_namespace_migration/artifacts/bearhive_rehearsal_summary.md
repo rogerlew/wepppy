@@ -45,10 +45,13 @@ restart.
 - Logout/reset and concurrent late-response behavior through the live routes.
 - Mixed-version activation and migration-aware rescue-image recovery.
 
-The credentialed Playwright profile/dashboard probe was attempted with the
-gitignored `dev-agent` credentials. Both tests skipped because Bearhive did not
-render the local password form and the authentication probe returned HTTP 401;
-this is recorded as an evidence gap, not a pass or product regression.
+Local password login was temporarily enabled for the controlled Bearhive
+rehearsal. The smoke harness's post-login probe was corrected to use a
+credentialed same-origin browser Fetch rather than Playwright's API client,
+which lacked browser Origin/Fetch Metadata and was correctly rejected by the
+same-origin guard. The authenticated profile and runs-dashboard Playwright
+tests then passed (2 passed); the profile scan reported zero accessibility
+violations and the existing dashboard scan reported three.
 
 A recorder POST to the supplied private run reached private-run authorization
 rather than the recorder success response. It is intentionally not counted as
