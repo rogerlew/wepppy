@@ -64,6 +64,12 @@ mixed-version rollout.
   forest1. Only `weppcloud` and `rq-engine` rotated; workers, Redis, PostgreSQL,
   Caddy, and scheduler retained their exact container IDs. Both public health
   endpoints passed and effective configuration remained reader-first.
+- [x] (2026-08-24 20:24Z) Deployed reader-first revision `c4f509634` to wepp1
+  with targeted web mode after explicit approval to proceed alongside three
+  active jobs. Only `weppcloud` and `rq-engine` rotated; both worker services,
+  Redis, PostgreSQL, Caddy, and scheduler retained their container IDs. Both
+  public health endpoints passed and both consumers report the reader-first
+  profile.
 
 ## Surprises & Discoveries
 
@@ -93,6 +99,12 @@ mixed-version rollout.
   Evidence: The first forest1 targeted rehearsal produced two image IDs while
   both recreated services ultimately used one shared image. Targeted mode now
   builds the shared image once through `weppcloud`.
+
+- Observation: rq-engine needs the same bounded post-recreation health retry as
+  WEPPcloud.
+  Evidence: The first production probe returned HTTP 502 while Uvicorn workers
+  started; the endpoint returned HTTP 200 about six seconds later. The deploy
+  script now retries rq-engine health for the existing bounded interval.
 
 ## Decision Log
 

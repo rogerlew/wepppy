@@ -4,8 +4,8 @@
 
 **Started**: 2026-08-23 21:45Z
 **Current phase**: Bearhive rehearsal implementation
-**Last updated**: 2026-08-24 19:37Z
-**Next milestone**: Rehearse reader-first configuration recovery on forest1, then complete remaining browser/state gates.
+**Last updated**: 2026-08-24 20:24Z
+**Next milestone**: Run reader-first production canaries and observation, then rehearse configuration recovery before activation.
 
 ## Task Board
 
@@ -85,6 +85,10 @@
 - [x] Added and rehearsed targeted web deployment on forest1. Only `weppcloud`
   and `rq-engine` rotated; workers, Redis, PostgreSQL, Caddy, and scheduler kept
   their exact container IDs, and both public health endpoints passed.
+- [x] Deployed reader-first revision `c4f509634` to wepp1 with targeted mode.
+  Only web/rq-engine rotated; active worker jobs continued on unchanged worker
+  containers, all other recorded container IDs were unchanged, and both public
+  health endpoints passed.
 
 ## Decisions Pending Acceptance
 

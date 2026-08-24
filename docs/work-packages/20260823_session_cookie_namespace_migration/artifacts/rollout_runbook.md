@@ -79,15 +79,15 @@ Deploy the migration-aware code to `wepp1` while continuing to write `session`.
 Only `weppcloud` and `rq-engine` consume browser sessions; `wepp2` and `wepp3`
 are outside this rollout and remain untouched.
 
-- [ ] Verify host identity, clean Git state, effective full-stack topology, and
+- [x] Verify host identity, clean Git state, effective full-stack topology, and
       current `weppcloud`/`rq-engine` container IDs.
-- [ ] Confirm the production profile is reader-first: writer `session`, primary
+- [x] Confirm the production profile is reader-first: writer `session`, primary
       reader `__Host-weppcloud_session`, legacy reader `session`, migration on.
-- [ ] Pull and deploy with
+- [x] Pull and deploy with
       `./scripts/deploy-production.sh --targeted-web --no-flush-rq-db`.
-- [ ] Prove Redis, PostgreSQL, Caddy, scheduler, and every RQ worker retained
+- [x] Prove Redis, PostgreSQL, Caddy, scheduler, and every RQ worker retained
       their pre-deploy container IDs and active jobs were not interrupted.
-- [ ] Verify both rebuilt services use the expected Git revision and effective
+- [x] Verify both rebuilt services use the expected Git revision and effective
       reader-first configuration.
 - [ ] Run authenticated, anonymous, private-run, CSRF, and token-bridge
       canaries, then observe for the ratified interval.
@@ -99,7 +99,7 @@ Execution ledger:
 
 | UTC | Operator | Action/command | Digest/config evidence | Result |
 | --- | --- | --- | --- | --- |
-|  |  |  |  |  |
+| 2026-08-24 20:14–20:24Z | Codex, explicit operator approval | HTTPS fast-forward; `./scripts/deploy-production.sh --targeted-web --skip-pull --no-flush-rq-db` | Git `c4f509634`; writer `session`; primary `__Host-weppcloud_session`; legacy `session`; migration enabled | Targeted deployment passed. Web/rq-engine rotated; workers, Redis, PostgreSQL, Caddy, and scheduler IDs unchanged. Public health passed after transient rq-engine startup 502. Production canaries and observation remain. |
 
 ## Phase 2 — Production Cookie Activation
 

@@ -634,11 +634,20 @@ if [ "${HAS_WEPPCLOUD}" = true ]; then
             esac
         fi
         echo "    RQ-engine health check URL: ${RQ_ENGINE_HEALTHCHECK_URL}"
-        if ! curl --connect-timeout 5 --max-time 10 -fsS "${RQ_ENGINE_HEALTHCHECK_URL}" > /dev/null; then
-            echo "✗ rq-engine health check failed" >&2
-            exit 1
-        fi
-        echo "✓ rq-engine is healthy"
+        RQ_ENGINE_ATTEMPT=0
+        while [ "${RQ_ENGINE_ATTEMPT}" -lt "${MAX_ATTEMPTS}" ]; do
+            if curl --connect-timeout 5 --max-time 10 -fsS "${RQ_ENGINE_HEALTHCHECK_URL}" > /dev/null 2>&1; then
+                echo "✓ rq-engine is healthy"
+                break
+            fi
+            RQ_ENGINE_ATTEMPT=$((RQ_ENGINE_ATTEMPT + 1))
+            if [ "${RQ_ENGINE_ATTEMPT}" -eq "${MAX_ATTEMPTS}" ]; then
+                echo "✗ rq-engine health check failed after ${MAX_ATTEMPTS} attempts" >&2
+                exit 1
+            fi
+            echo "  Waiting for rq-engine to be ready (attempt ${RQ_ENGINE_ATTEMPT}/${MAX_ATTEMPTS})..."
+            sleep 2
+        done
     fi
 else
     echo ">>> Step 6: Skipping WEPPcloud health check (worker stack detected)..."

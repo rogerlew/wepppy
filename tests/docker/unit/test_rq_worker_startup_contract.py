@@ -188,4 +188,6 @@ def test_production_deploy_script_supports_targeted_web_mode() -> None:
         in deploy_script
     )
     assert "RQ_ENGINE_HEALTHCHECK_URL" in deploy_script
+    assert "Waiting for rq-engine to be ready" in deploy_script
+    assert "rq-engine health check failed after" in deploy_script
     assert "Skipping broad Docker runtime prune after targeted deployment" in deploy_script
