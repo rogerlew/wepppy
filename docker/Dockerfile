@@ -117,7 +117,7 @@ RUN mkdir -p /workdir /opt/vendor /var/log/wepppy /var/lib/wepppy && \
     chown -R root:root /workdir /opt/vendor /var/log/wepppy /var/lib/wepppy
 
 # Bring the application source into the image.
-COPY . /workdir/wepppy
+COPY --chown=${APP_UID}:${APP_GID} . /workdir/wepppy
 
 # The release checkout must contain real LFS objects, never pointer stubs. This
 # repeats the workflow gate inside the image build so local and alternate
