@@ -64,6 +64,10 @@ restart.
   browser out and rotated the owned and presented legacy session state; the
   private run returned the expected signed-out 404, and signing in normally
   restored authorized access. No manual site-data clearing was required.
+- The operator verified concurrent-tab logout propagation: logging out in one
+  tab signed out both tabs and the owned primary session rotated in both. This
+  closes the concurrent-tab gate but is not treated as proof of a response
+  completing after revocation.
 - Focused migration/configuration/rq-engine regression suite: 118 passed.
 - Repository-wide Python regression suite: 6,684 passed, 63 skipped.
 - Full frontend suite: 105 suites and 773 tests passed; frontend lint passed.

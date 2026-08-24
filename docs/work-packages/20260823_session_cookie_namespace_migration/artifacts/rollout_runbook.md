@@ -60,7 +60,7 @@ They never contain cookies, SIDs, user IDs, CSRF values, or remember tokens.
 - [ ] Exercise same-principal and cross-principal live candidates.
 - [ ] Exercise first-request form and `X-CSRFToken` POSTs.
 - [ ] Preserve anonymous CAP and in-flight OAuth state.
-- [ ] Exercise concurrent tabs and late-response fencing. Browser reset and
+- [ ] Exercise late-response fencing. Concurrent-tab logout, browser reset, and
       ordinary logout behavior are verified.
 - [ ] Exercise rq-engine token minting before and after cookie adoption.
 - [ ] Complete Safari, Firefox, Chromium, and Edge canaries.

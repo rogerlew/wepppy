@@ -63,6 +63,8 @@
   lifecycle on Bearhive.
 - [x] Passed Browser Session Reset: logout/session rotation, signed-out private
   run denial, and authorized access restored after normal login.
+- [x] Passed concurrent-tab logout propagation: both tabs signed out and the
+  owned primary session rotated.
 
 ## Decisions Pending Acceptance
 
