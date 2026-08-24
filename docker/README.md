@@ -46,9 +46,10 @@ topology and deploys only `rq-worker-fork-archive`:
 ```
 
 For a web-boundary hotfix that changes only WEPPcloud and rq-engine, use the
-targeted mode. It pulls and builds normally, rebuilds static assets, and
-recreates only those two services with `--no-deps`; Redis, PostgreSQL, Caddy,
-schedulers, and RQ workers remain running:
+targeted mode. It pulls and builds their shared `WEPPCLOUD_IMAGE` once through
+the `weppcloud` build definition, rebuilds static assets, and recreates both
+services with `--no-deps`; Redis, PostgreSQL, Caddy, schedulers, and RQ workers
+remain running:
 
 ```bash
 ./scripts/deploy-production.sh --targeted-web --no-flush-rq-db

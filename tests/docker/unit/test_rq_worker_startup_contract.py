@@ -178,7 +178,8 @@ def test_production_deploy_script_supports_targeted_web_mode() -> None:
     )
 
     assert "--targeted-web" in deploy_script
-    assert "BUILD_SERVICES=(weppcloud rq-engine)" in deploy_script
+    assert "BUILD_SERVICES=(weppcloud)" in deploy_script
+    assert "races two writes to the same tag" in deploy_script
     assert "--targeted-web requires a full stack" in deploy_script
     assert "--targeted-web cannot be combined with --flush-rq-db" in deploy_script
     assert "Skipping stack shutdown; workers and dependencies remain running" in deploy_script

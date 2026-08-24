@@ -60,6 +60,10 @@ mixed-version rollout.
   `scripts/deploy-production.sh --targeted-web`. The ad hoc Compose image boot
   does not satisfy this gate and must not be treated as a production deployment
   precedent.
+- [x] (2026-08-24 19:55Z) Rehearsed `--targeted-web` reader-first deployment on
+  forest1. Only `weppcloud` and `rq-engine` rotated; workers, Redis, PostgreSQL,
+  Caddy, and scheduler retained their exact container IDs. Both public health
+  endpoints passed and effective configuration remained reader-first.
 
 ## Surprises & Discoveries
 
@@ -83,6 +87,12 @@ mixed-version rollout.
   days.
   Evidence: Security review traced `token_class=session` authorization paths;
   the implementation now checks the SID tombstone centrally.
+
+- Observation: Building `weppcloud` and `rq-engine` together starts two builds
+  that race to publish the same `wepppy:latest` tag.
+  Evidence: The first forest1 targeted rehearsal produced two image IDs while
+  both recreated services ultimately used one shared image. Targeted mode now
+  builds the shared image once through `weppcloud`.
 
 ## Decision Log
 

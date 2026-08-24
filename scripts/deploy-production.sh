@@ -364,7 +364,9 @@ configure_deploy_topology() {
             echo "✗ --targeted-web requires a full stack containing weppcloud and rq-engine." >&2
             exit 1
         fi
-        BUILD_SERVICES=(weppcloud rq-engine)
+        # Both services resolve to the same WEPPCLOUD_IMAGE. Building both in
+        # one Compose invocation races two writes to the same tag.
+        BUILD_SERVICES=(weppcloud)
     fi
 }
 
