@@ -57,6 +57,8 @@
   no credential values were recorded.
 - [x] Passed live remembered-login -> logout -> opt-out-login lifecycle: logout
   clears remember before re-login and opt-out does not reissue it.
+- [x] Captured independent operator confirmation that password-login remember
+  opt-in issues the cookie and opt-out leaves it absent.
 
 ## Decisions Pending Acceptance
 
