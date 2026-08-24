@@ -42,6 +42,10 @@ restart.
 - Operator-observed job polling remained functional through both the run page
   and the job dashboard, confirming rq-engine token/status continuity for both
   browser consumers.
+- The operator reported no console authentication or CSRF errors. Two transient
+  WebSocket hiccups were observed; polling and the tested workflows remained
+  functional, so they are retained as a restart-era observation rather than
+  classified as a session-migration failure.
 - Focused migration/configuration/rq-engine regression suite: 118 passed.
 - Repository-wide Python regression suite: 6,684 passed, 63 skipped.
 - Full frontend suite: 105 suites and 773 tests passed; frontend lint passed.

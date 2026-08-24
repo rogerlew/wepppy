@@ -51,6 +51,8 @@
   an SBS upload completes through rq-engine on the migrated session.
 - [x] Captured operator verification that job polling works through both the
   run page and job dashboard.
+- [x] Captured clean authentication/CSRF console evidence; two transient
+  WebSocket hiccups did not interrupt polling or tested workflows.
 
 ## Decisions Pending Acceptance
 
