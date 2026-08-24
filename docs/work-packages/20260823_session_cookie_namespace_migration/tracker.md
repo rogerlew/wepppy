@@ -65,6 +65,9 @@
   run denial, and authorized access restored after normal login.
 - [x] Passed concurrent-tab logout propagation: both tabs signed out and the
   owned primary session rotated.
+- [x] Passed controlled late-response fencing against live Bearhive Redis: the
+  old SID was not recreated, its tombstone persisted, and the late response
+  expired the owned cookie.
 
 ## Decisions Pending Acceptance
 

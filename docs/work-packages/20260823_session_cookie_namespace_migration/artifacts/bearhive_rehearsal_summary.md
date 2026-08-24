@@ -68,6 +68,11 @@ restart.
   tab signed out both tabs and the owned primary session rotated in both. This
   closes the concurrent-tab gate but is not treated as proof of a response
   completing after revocation.
+- A controlled Bearhive canary used the live Flask session interface and Redis:
+  request A loaded an authenticated SID and paused, request B completed logout
+  and wrote the revocation tombstone, then request A resumed and returned HTTP
+  200. Its late save did not recreate the Redis session, preserved the
+  tombstone, and expired the owned cookie. Temporary canary state was removed.
 - Focused migration/configuration/rq-engine regression suite: 118 passed.
 - Repository-wide Python regression suite: 6,684 passed, 63 skipped.
 - Full frontend suite: 105 suites and 773 tests passed; frontend lint passed.

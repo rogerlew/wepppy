@@ -37,6 +37,8 @@ mixed-version rollout.
   exception, and documentation gates.
 - [x] (2026-08-24 02:05Z) Closed independent security and QA code gates for
   Bearhive rehearsal; production evidence gates remain open.
+- [x] (2026-08-24 17:20Z) Passed live logout/reset, concurrent-tab propagation,
+  and a controlled late-response race against Bearhive Redis.
 
 ## Surprises & Discoveries
 
