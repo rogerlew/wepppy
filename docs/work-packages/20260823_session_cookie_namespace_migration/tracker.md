@@ -49,6 +49,8 @@
   204 with owned cookie and CSRF header, no login redirect or remember cookie.
 - [x] Captured operator verification that recorder events return HTTP 204 and
   an SBS upload completes through rq-engine on the migrated session.
+- [x] Captured operator verification that job polling works through both the
+  run page and job dashboard.
 
 ## Decisions Pending Acceptance
 

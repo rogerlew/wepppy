@@ -39,6 +39,9 @@ restart.
   204, closing the triggering CSRF failure. An SBS upload also completed
   through rq-engine from that browser session, demonstrating the authenticated
   mutation path without a login prompt or browser-state reset.
+- Operator-observed job polling remained functional through both the run page
+  and the job dashboard, confirming rq-engine token/status continuity for both
+  browser consumers.
 - Focused migration/configuration/rq-engine regression suite: 118 passed.
 - Repository-wide Python regression suite: 6,684 passed, 63 skipped.
 - Full frontend suite: 105 suites and 773 tests passed; frontend lint passed.
