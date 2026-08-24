@@ -14,7 +14,7 @@ the checkpoint before implementation.
 | --- | --- | --- | --- |
 | Multiple live signed legacy SIDs | Wire order could silently choose the wrong account | Inspect bounded live candidates only for conflict detection; authorize only the first signed candidate when every live candidate has the same principal/state class; fail closed on authenticated-principal or authenticated/anonymous conflict | Contract ratified; implementation evidence pending |
 | Logout/reset resurrection | Removing the primary cookie can expose another live legacy session | On explicit logout/reset, boundedly validate and revoke every presented WEPPcloud-signed SID server-side without deleting generic browser cookies; fence late responses; test primary and legacy SIDs that differ | Contract ratified; implementation evidence pending |
-| Mixed workers and rollback | Legacy-only `wepp.cloud` workers cannot read newly issued sessions | Phase 1 deploy migration readers to every `wepp.cloud` web and rq-engine instance while still writing `session`; phase 2 flip all production writers with no legacy-only overlap; rollback only to a pinned migration-aware rescue image | Contract ratified; Bearhive rehearsal evidence pending |
+| Mixed workers and rollback | Legacy-only `wepp.cloud` workers cannot read newly issued sessions | Phase 1 deploy migration readers to every `wepp.cloud` web and rq-engine instance while still writing `session`; phase 2 flip all production writers with no legacy-only overlap; recover only from a pinned migration-aware Git revision through `scripts/deploy-production.sh` | Contract ratified; canonical deploy-script rehearsal pending |
 
 ## Medium Findings
 

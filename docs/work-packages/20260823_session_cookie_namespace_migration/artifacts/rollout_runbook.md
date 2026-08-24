@@ -6,7 +6,7 @@
 **State store**: Redis DB 11; preserve throughout rollout
 
 This document is the production execution ledger. Operators update it during
-the rollout with UTC timestamps, immutable image digests, rendered
+the rollout with UTC timestamps, Git revisions, locally built image IDs, rendered
 configuration evidence, commands used, metric snapshots, canary results, and
 the responsible operator. Chat history is not rollout evidence.
 
@@ -15,10 +15,9 @@ the responsible operator. Chat history is not rollout evidence.
 - [x] ADR-0044 accepted for Bearhive rehearsal.
 - [x] Contract checkpoint committed as standalone ancestor `9f52eb879`.
 - [ ] Every blocking review finding closed and dispositioned.
-- [ ] Migration-aware rescue image built, pinned by registry digest, and tested.
-      Bearhive passed with local image ID
-      `sha256:cad002e6aa36e79bfecb48475abe876eaac8b90cf901bc5796fa1d73950e4b18`;
-      registry publication remains a production gate.
+- [ ] Migration-aware rescue Git revision tested through the canonical
+      `scripts/deploy-production.sh` workflow. The packaged-image boot test is
+      useful evidence, but it is not a deployment-script rehearsal.
 - [ ] Production web and rq-engine instance inventory captured.
 - [ ] Redis DB 11 connectivity and persistence verified; no flush/rekey planned.
 - [x] Parser bounds, logout fence, payload failures, and duplicate semantics
@@ -66,8 +65,8 @@ They never contain cookies, SIDs, user IDs, CSRF values, or remember tokens.
 - [x] Exercise concurrent tabs, logout/reset, and late-response fencing.
 - [ ] Exercise rq-engine token minting before and after cookie adoption.
 - [ ] Complete Safari, Firefox, Chromium, and Edge canaries.
-- [x] Rehearse rescue-image recovery. Reader-first mixed-version activation and
-      recovery to a packaged, source-independent rescue image are verified.
+- [ ] Rehearse recovery from the migration-aware Git revision using
+      `scripts/deploy-production.sh` and the installed `wctl` preset.
 
 Evidence: `artifacts/bearhive_rehearsal_summary.md`. Unchecked gates remain
 required; the private-run recorder probe was authorization-limited and is not
@@ -103,7 +102,8 @@ legacy name. This phase must complete before the cookie-name activation.
 - [ ] Verify every instance understands primary and legacy names.
 - [ ] Verify every instance still writes `session`.
 - [ ] Run authenticated, anonymous, private-run, and token-bridge canaries.
-- [ ] Prove the pinned rescue image against current production configuration.
+- [ ] Prove the rescue revision through `scripts/deploy-production.sh` against
+      current production configuration.
 - [ ] Confirm no legacy-only process remains.
 
 Execution ledger:
@@ -136,23 +136,28 @@ Execution ledger:
 
 ## Rescue Procedure
 
-Rollback to a legacy-only image is prohibited after activation. Recovery uses
-the pinned migration-aware rescue image and keeps the new cookie name active.
+Rollback to a legacy-only revision is prohibited after activation. Recovery
+uses a pinned migration-aware Git revision and the existing production deploy
+script while keeping the new cookie name active. Do not substitute an ad hoc
+Compose or registry workflow.
 
 - [ ] Stop further promotion/change activity.
 - [ ] Preserve Redis DB 11 and capture value-free health evidence.
-- [ ] Replace affected services with the pinned rescue digest.
-- [ ] Verify the rescue image reads both names and writes the new name.
+- [ ] Record the current production Git revision and effective cookie profile.
+- [ ] Check out the pinned rescue revision in a clean worktree.
+- [ ] Run `./scripts/deploy-production.sh --skip-pull --no-flush-rq-db` with the
+      installed production `wctl` preset.
+- [ ] Verify the locally built services read both names and write the new name.
 - [ ] Run authentication, CSRF, logout, and rq-engine canaries.
 - [ ] Record incident linkage, exact commands, timestamps, and results.
 
-Pinned rescue digest:
+Pinned rescue revision:
 
-    Bearhive local image ID: sha256:cad002e6aa36e79bfecb48475abe876eaac8b90cf901bc5796fa1d73950e4b18
-    Source commit: 42cf8319625a
-    Production registry digest: Pending
+    Git commit: 42cf8319625a
+    Deploy entry point: ./scripts/deploy-production.sh
+    Required Redis policy: --no-flush-rq-db
 
-Bearhive rehearsal, 2026-08-24 18:39Z–18:52Z:
+Bearhive packaged-image boot test, 2026-08-24 18:39Z–18:52Z:
 
 - Built the production Dockerfile as `wepppy:session-rescue-42cf8319625a`.
 - Replaced only web and rq-engine with the final rescue image using
@@ -167,11 +172,12 @@ Bearhive rehearsal, 2026-08-24 18:39Z–18:52Z:
   dependency-free web/rq-engine recreation.
 
 Two failed attempts exposed and corrected image packaging defects before the
-successful rehearsal: runtime source ownership prevented the entrypoint bundle
+successful boot test: runtime source ownership prevented the entrypoint bundle
 build, and excluding all documentation omitted ADR files required by feature
 registry startup validation. The first command also demonstrated that
 `--force-recreate` without `--no-deps` unnecessarily recreates Redis and
-Postgres; the canonical rescue command must include `--no-deps`.
+Postgres. Neither command is a deployment precedent; the existing production
+deploy script owns service sequencing and Redis persistence policy.
 
 ## Phase 4 — Observation and Legacy Retirement
 

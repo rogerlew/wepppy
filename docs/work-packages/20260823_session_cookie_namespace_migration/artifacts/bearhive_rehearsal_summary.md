@@ -2,7 +2,7 @@
 
 **Environment**: `https://wc.bearhive.duckdns.org` (development/test)
 **Production impact**: None; `wepp.cloud` was not changed
-**Status**: Mixed-version activation and rescue-image rollback rehearsal passed
+**Status**: Mixed-version activation passed; deploy-script rollback rehearsal remains
 
 ## Deployment
 
@@ -97,14 +97,15 @@ restart.
   directly posted to rq-engine's cookie-authenticated `session-token` endpoint
   for the operator-selected private run. It returned HTTP 200 and issued the
   run-scoped browse JWT cookie (Playwright: 1 passed).
-- A production-Dockerfile rescue image was built from source commit
+- A production-Dockerfile packaging test built an image from source commit
   `42cf8319625a` and pinned locally as image ID
   `sha256:cad002e6aa36e79bfecb48475abe876eaac8b90cf901bc5796fa1d73950e4b18`.
   Web and rq-engine ran from that image without a source bind mount while
   retaining the activated dual-read/single-write configuration. Health,
   authenticated profile, logout/remember opt-out, and direct rq-engine token
   mint passed (3 Playwright tests). The normal activated Bearhive deployment
-  was restored afterward without recreating dependencies.
+  was restored afterwards. This proves packaged-image startup, not the canonical
+  production deployment workflow.
 - Focused migration/configuration/rq-engine regression suite: 118 passed.
 - Repository-wide Python regression suite: 6,684 passed, 63 skipped.
 - Full frontend suite: 105 suites and 773 tests passed; frontend lint passed.
@@ -120,8 +121,8 @@ restart.
 
 - Authenticated browser continuity with remember disabled across Chromium,
   Firefox, Safari, and Edge.
-- Publication and verification of the rescue artifact in the production image
-  registry; the Bearhive-local image rehearsal is complete.
+- Recovery from the pinned migration-aware Git revision through
+  `scripts/deploy-production.sh` and the installed `wctl` preset.
 
 Local password login was temporarily enabled for the controlled Bearhive
 rehearsal. The smoke harness's post-login probe was corrected to use a

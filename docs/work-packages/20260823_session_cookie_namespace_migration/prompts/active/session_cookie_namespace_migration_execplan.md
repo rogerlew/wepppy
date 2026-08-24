@@ -50,12 +50,15 @@ mixed-version rollout.
 - [x] (2026-08-24 18:30Z) Passed the direct rq-engine cookie-authenticated
   session-token mint on the private Bearhive rehearsal run (HTTP 200 and scoped
   browse cookie issued).
-- [x] (2026-08-24 18:52Z) Built and rehearsed rollback to packaged rescue image
+- [x] (2026-08-24 18:52Z) Built and boot-tested packaged image
   `sha256:cad002e6aa36e79bfecb48475abe876eaac8b90cf901bc5796fa1d73950e4b18`
   from commit `42cf8319625a`. Both services ran without source binds and passed
   health, authentication/logout, remember opt-out, and direct rq-engine mint
-  canaries. The rehearsal corrected image source ownership and required-ADR
-  packaging, then restored the normal Bearhive deployment with `--no-deps`.
+  canaries. The test corrected image source ownership and required-ADR
+  packaging, then restored the normal Bearhive deployment.
+- [ ] Rehearse rollback from the migration-aware Git revision through
+  `scripts/deploy-production.sh`. The ad hoc Compose image boot does not satisfy
+  this gate and must not be treated as a production deployment precedent.
 
 ## Surprises & Discoveries
 
@@ -206,8 +209,8 @@ Rollback retains dual-read compatibility and does not delete either cookie.
 
 ADR-0044, the contract checkpoint, and the regression risk register are the
 authoritative planning artifacts. `artifacts/rollout_runbook.md` is the
-production execution ledger and must contain immutable digests, exact commands,
-timestamps, evidence, and sign-offs as each phase executes.
+production execution ledger and must contain exact Git revisions, local image
+IDs, commands, timestamps, evidence, and sign-offs as each phase executes.
 
 ## Interfaces and Dependencies
 

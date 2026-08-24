@@ -20,7 +20,14 @@ contract explicitly requires that service.
 |-------------|------|--------|--------------|-------|
 | **Test Production** | `forest1.local` | `wc-prod.bearhive.duckdns.org` | `docker-compose.prod.yml` | Primary test production server |
 | **Development** | `forest.local` | `wc.bearhive.duckdns.org` | `docker-compose.dev.yml` | Development with bind mounts |
+| **WEPPcloud Production** | `wepp1`, `wepp2`, `wepp3` | `wepp.cloud` | Production Compose files selected by `wctl` | Host-local builds through `scripts/deploy-production.sh`; no registry dependency |
 | **Prod Worker Pool** | (separate worker host) | — | `docker-compose.prod.worker.yml` | Dedicated RQ workers connected to an external Redis (no Redis/Postgres services). |
+| **OpenWEPP** | Kubernetes cluster | `openwepp.org` | Kubernetes manifests | Registry-published images; separate deployment system from `wepp.cloud` |
+
+The deployment boundary is strict: `wepp.cloud` is Docker Compose and uses
+`scripts/deploy-production.sh`; `openwepp.org` is Kubernetes and may use the
+container registry. Do not introduce registry, manifest-digest, or GitOps
+requirements into a `wepp.cloud` rollout or recovery plan.
 
 The fork/archive serial queue uses `docker-compose.prod.wepp3.yml` on `wepp3`,
 which already has the production NFS mount and otherwise runs no
@@ -74,6 +81,10 @@ canonical `wepppyo3/release/linux/py312` artifact whenever the native
 interchange is intentionally refreshed.
 
 ### Commit-derived private image publication
+
+This section applies to the Kubernetes-based `openwepp.org` deployment and
+isolated image compatibility testing. It does not define or modify deployment
+for Docker Compose production on `wepp.cloud` (`wepp1`, `wepp2`, `wepp3`).
 
 `.github/workflows/publish-weppcloud-image.yml` is a manually dispatched,
 non-deploying workflow for the common `docker/Dockerfile` runtime. It publishes

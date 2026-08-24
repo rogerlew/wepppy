@@ -85,11 +85,11 @@
 - After queue wiring changes, manually validate against live job trees via `wepppy/rq/job_info.py` or the job dashboard.
 
 ## Environment Baseline
-- Assume Linux host with Docker, Docker Compose, and `wctl` installed.
 - Local virtualenv baseline: `/workdir/wepppy/.venv` is built from the same `requirements-uv.txt` used by `wepppy`.
-- Compose source of truth: `docker/docker-compose.dev.yml`.
-- Use `wctl` wrappers for tests, container exec, and local orchestration.
+- Compose source of truth is `docker/docker-compose.dev.yml`; use `wctl` wrappers for tests, container exec, and local orchestration.
 - Canonical run root is `/wc1/runs/`; check it first when debugging run data.
+- Deployment boundary: `wepp.cloud` (`wepp1`/`wepp2`/`wepp3`) uses Docker Compose via the installed `wctl` preset and `scripts/deploy-production.sh`; `openwepp.org` uses Kubernetes and may use registry-published images.
+- Before proposing or executing deployment/rollback mechanics, inspect the canonical deploy entry point and nearest docs; never invent parallel image, registry, or Compose workflows.
 
 ## Validation Entry Points
 - Iteration loop: `wctl run-pytest tests/<path or module>`
