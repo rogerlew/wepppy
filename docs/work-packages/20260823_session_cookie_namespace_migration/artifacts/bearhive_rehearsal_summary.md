@@ -46,6 +46,9 @@ restart.
   WebSocket hiccups were observed; polling and the tested workflows remained
   functional, so they are retained as a restart-era observation rather than
   classified as a session-migration failure.
+- Operator inspection confirmed that `__Host-weppcloud_session` rotates across
+  logout and subsequent login. Legacy generic cookies remained present as
+  designed, and no cookie values were retained in rehearsal evidence.
 - Focused migration/configuration/rq-engine regression suite: 118 passed.
 - Repository-wide Python regression suite: 6,684 passed, 63 skipped.
 - Full frontend suite: 105 suites and 773 tests passed; frontend lint passed.

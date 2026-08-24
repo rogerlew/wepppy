@@ -53,6 +53,8 @@
   run page and job dashboard.
 - [x] Captured clean authentication/CSRF console evidence; two transient
   WebSocket hiccups did not interrupt polling or tested workflows.
+- [x] Confirmed the owned primary session cookie rotates across logout/login;
+  no credential values were recorded.
 
 ## Decisions Pending Acceptance
 
