@@ -3,16 +3,16 @@
 ## Quick Status
 
 **Started**: 2026-08-23 21:45Z
-**Current phase**: ADR and contract-checkpoint review
-**Last updated**: 2026-08-23 21:45Z
-**Next milestone**: Revise and ratify the three blocking contract findings.
+**Current phase**: Bearhive rehearsal implementation
+**Last updated**: 2026-08-23 23:15Z
+**Next milestone**: Implement the accepted contract and focused regressions.
 
 ## Task Board
 
 ### In Progress
 
-- [ ] Resolve cross-principal ambiguity, logout fencing, and reader-first
-  deployment/rollback contracts.
+- [ ] Implement cross-principal detection, logout fencing, and reader-first
+  deployment support.
 - [ ] Complete production inventory, thresholds, and executable commands in
   `artifacts/rollout_runbook.md`.
 
@@ -36,6 +36,7 @@
 - [x] Completed independent correctness, security, operations, and UX reviews.
 - [x] Recorded severity-ranked findings and proposed dispositions.
 - [x] Scaffolded the phase-gated `wepp.cloud` production execution ledger.
+- [x] Ratified the three blocking contracts for Bearhive rehearsal.
 
 ## Decisions Pending Acceptance
 

@@ -1,6 +1,6 @@
-# Proposed Session Cookie Migration Contract Checkpoint
+# Accepted Session Cookie Migration Contract Checkpoint
 
-**Status**: Proposed; operator acceptance and independent review pending
+**Status**: Accepted for Bearhive rehearsal implementation
 **Date**: 2026-08-23
 **Security impact**: High
 
@@ -20,7 +20,8 @@ WEPPcloud uses `__Host-weppcloud_session` as its production-owned cookie. During
 approved compatibility window, Flask and rq-engine accept a validated legacy
 `session` cookie only when the new cookie is absent. Invalid signatures may be
 skipped, but the first correctly signed legacy SID is authoritative and later
-candidates cannot revive an absent Redis session. Adoption preserves the SID and Redis payload and
+candidates cannot authorize a different session. Later live payloads are
+inspected only for principal conflicts. Adoption preserves the SID and Redis payload and
 causes the normal Flask response to issue the new cookie. Ordinary migration
 does not delete the legacy cookie and requires no user logout, login, or site
 data clearing.
@@ -29,6 +30,9 @@ Any occurrence of the new name is authoritative and cannot downgrade to legacy.
 Migration occurs before authentication and CSRF hooks, so a first POST works.
 Candidate parsing is bounded and duplicate-aware. Production enforces Secure,
 Path `/`, and no Domain. Credential and identity values are never logged.
+Different principals, authenticated/anonymous conflicts, multiple anonymous
+sessions, missing/corrupt authoritative state, and Redis errors fail closed.
+Logout/reset invalidates every presented signed SID and fences late writes.
 
 ## Compatibility and Data Impact
 
@@ -45,7 +49,8 @@ inspection, or silent cross-account selection.
 
 ## Required Evidence Before Implementation
 
-- Operator acceptance of this exact matrix and ADR-0044.
+- Operator acceptance recorded by the 2026-08-23 instruction to execute the
+  Bearhive rehearsal changes.
 - Independent correctness, security, operations, and UX/governance reviews.
 - Disposition of every medium/high finding.
 - Standalone committed checkpoint ancestor before production code edits.

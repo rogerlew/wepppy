@@ -37,7 +37,7 @@
 ## Session Artifacts
 | Artifact | Authority | Storage | Primary Purpose |
 | --- | --- | --- | --- |
-| Flask login session (`session` cookie by default) | Flask + Flask-Session | Redis DB 11 (`session:<sid>`), persisted by default in stacks that run Redis | Authenticated browse state and server session data |
+| Flask login session (`__Host-weppcloud_session` on secure production; migration-aware) | Flask + Flask-Session | Redis DB 11 (`session:<sid>`), persisted by default in stacks that run Redis | Authenticated browse state and server session data |
 | Flask-Security remember-me token (`remember_token`) | Flask-Security | Browser cookie | Rehydrate login after Flask session expiry |
 | rq-engine browse JWT (`wepp_browse_jwt` by default) | rq-engine session endpoint | Browser HttpOnly cookie | Run-scoped JWT for browse/rq-engine interactions |
 | CAP verification marker (`cap_verified_at`) | WEPPcloud CAP guard | Flask session payload | Anonymous CAPTCHA gate cooldown window |
@@ -50,6 +50,10 @@
 - `PERMANENT_SESSION_LIFETIME` MUST be `12 hours`.
 - `SESSION_PERMANENT` MUST remain `False` unless this contract is revised.
 - `SESSION_COOKIE_SECURE` MUST be `True`.
+- The secure-host cookie name MUST default to `__Host-weppcloud_session`, with
+  Path `/`, no Domain, `HttpOnly`, and signing enabled. Startup MUST reject a
+  secure-host profile that violates those invariants. Explicit local HTTP
+  profiles MAY use `weppcloud_session`.
 - `SESSION_COOKIE_SAMESITE` MUST default to `Lax`; override via `SESSION_COOKIE_SAMESITE` is allowed.
 - OAuth login MUST call `login_user(..., remember=True)` so remember-me restoration remains available.
 - Password-login pages MUST render "Remember me on this device" selected by
@@ -65,6 +69,26 @@
   documentation MUST identify the effective value and its security/UX tradeoff.
 - Explicit logout MUST clear both session and remember cookies using their
   configured names, paths, domains, and security attributes.
+- During the legacy migration window, Flask and rq-engine MUST use identical,
+  bounded raw-Cookie selection semantics. Presence of any primary-name cookie
+  blocks fallback to legacy `session`. Within one name, invalid signatures MAY
+  be skipped; the first correctly signed SID is the only candidate that may be
+  authorized. Later signed, live payloads are inspected only for conflict
+  detection. Adoption is allowed only when all live candidates represent the
+  same authenticated principal. An authenticated/anonymous conflict, different
+  principals, multiple live anonymous sessions, corrupt payload, Redis error,
+  or missing Redis record for the authoritative SID MUST fail closed and MUST
+  NOT authorize a later candidate.
+- A migrated session MUST retain its SID and complete Redis payload. A signed
+  SID whose Redis record is absent MUST be discarded and MUST NOT seed a new
+  session; any recovery receives a fresh unpredictable SID.
+- Explicit logout and browser-state reset during migration MUST invalidate all
+  bounded, correctly signed primary and legacy SIDs presented by that request.
+  Revocation fencing MUST prevent late concurrent responses from recreating a
+  revoked SID. Generic legacy browser cookies MUST NOT be broadly deleted.
+- Cookie parsing and migration telemetry MUST be bounded and value-free.
+  Rejection MUST occur rather than truncation. Logs and metrics MUST NOT contain
+  raw cookies, SIDs, principals, CSRF values, or remember tokens.
 - Server-side Redis sessions MUST retain the rolling 12-hour inactivity window.
   Remembered login restores identity after that session expires or the browser
   session cookie is discarded.
@@ -92,6 +116,7 @@
 
 Source-of-truth implementation:
 - `wepppy/weppcloud/configuration.py`
+- `wepppy/weppcloud/session_migration.py`
 - `wepppy/weppcloud/routes/_security/oauth.py`
 
 ## Authentication Logging Contract
@@ -120,6 +145,13 @@ Source-of-truth implementation:
   - Existing session cookies will continue presenting the old session id, but the server will not find that id in the new DB index.
   - Result: users will be treated as logged out and must re-authenticate (remember-me may still rehydrate later depending on cookie state).
   - Any session DB index change MUST update this contract and MUST be coordinated across all session consumers (WEPPcloud + rq-engine marker paths).
+- Migration deployment on `wepp.cloud` MUST be reader-first: all web and
+  rq-engine consumers understand primary and legacy names while writers still
+  emit `session`; only then may all production web writers activate the primary
+  name without overlap with legacy-only workers. Rollback after activation MUST
+  use a pinned migration-aware image and MUST NOT dual-write `session`.
+- Bearhive origins are development/test rehearsal environments and are not
+  production cookie-continuity targets.
 
 ## rq-engine Session JWT Cookie Contract
 - Endpoint `POST /rq-engine/api/runs/{runid}/{config}/session-token` MUST:
@@ -196,6 +228,8 @@ The following suites MUST be updated when session contract behavior changes:
 - `tests/weppcloud/routes/test_rq_engine_token_api.py`
 - `tests/microservices/test_rq_engine_session_routes.py`
 - `tests/microservices/test_rq_engine_fork_archive_routes.py`
+- duplicate raw-cookie, migration, logout/reset fencing, first-request POST,
+  and corrupt/missing Redis session tests;
 - `wepppy/weppcloud/controllers_js/__tests__/session_heartbeat.test.js`
 - `wepppy/weppcloud/controllers_js/__tests__/console_smoke.test.js`
 

@@ -1,6 +1,6 @@
 # ADR-0044: Seamless WEPPcloud Session Cookie Namespace Migration
 
-Status: Proposed; implementation blocked by design review
+Status: Accepted for Bearhive rehearsal; production activation pending evidence
 
 Date: 2026-08-23
 
@@ -59,9 +59,13 @@ migration. Its domain/path ownership is ambiguous and it may belong to another
 application. Once a valid new cookie exists, all WEPPcloud consumers ignore the
 legacy name.
 
-No candidate after the first correctly signed legacy SID may authorize the
-request. No cookie value, signed SID, CSRF token, user ID, or remember token may
-be logged.
+No candidate after the first correctly signed SID may authorize the request.
+Later signed, live payloads are inspected only for conflict detection. Adoption
+requires one authenticated principal across all live candidates; different
+principals, authenticated/anonymous conflict, or multiple live anonymous
+sessions fail closed. Logout/reset invalidates all presented signed SIDs and
+uses a Redis revocation fence against late writes. No credential or identity
+value may be logged.
 
 The compatibility reader remains for at least one rolling Redis-session
 lifetime plus deployment skew. Retirement requires evidence that new-cookie

@@ -21,8 +21,8 @@ mixed-version rollout.
 - [x] (2026-08-23 21:45Z) Scaffolded package and initial regression-risk register.
 - [x] (2026-08-23 22:30Z) Completed independent design reviews and recorded
   blocking findings in `artifacts/review_disposition.md`.
-- [ ] Ratify revisions for ambiguity detection, logout fencing, and two-phase
-  deployment/rollback before implementation.
+- [x] (2026-08-23 23:15Z) Ratified ambiguity detection, logout fencing, and
+  two-phase deployment/rollback for Bearhive rehearsal implementation.
 - [ ] Obtain operator acceptance and commit the contract checkpoint ancestor.
 - [ ] Implement shared parsing/selection and Flask/rq-engine adapters.
 - [ ] Execute regression, mixed-version, rollback, browser, and canary gates.

@@ -195,6 +195,11 @@ If validation fails a `JWTDecodeError` is raised.
   run-scoped browse JWT cookie when rendering run pages.
 - Behavior:
   - Requires run authorization (public or owner).
+  - During browser-session cookie migration, rq-engine MUST use the canonical
+    bounded raw-cookie selector defined by the session contract. It MUST prefer
+    the primary name, block legacy fallback when that name is present, inspect
+    later live candidates only for principal conflicts, and never authorize an
+    alternate candidate.
   - Issues a session JWT (`token_class=session`) scoped to the run.
   - If a Flask login session is present, includes `user_id` and `roles` claims from Redis-backed session data.
   - Default session scopes: `rq:status`, `rq:enqueue`, `rq:export`.

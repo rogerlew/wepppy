@@ -1,7 +1,7 @@
 # Design Review Disposition
 
 **Date**: 2026-08-23
-**Gate**: Blocked; no implementation or deployment authorization
+**Gate**: Bearhive rehearsal implementation authorized; production blocked
 
 Independent correctness, security, operations, and UX/governance reviewers
 agree that namespacing plus SID-preserving migration is the right direction.
@@ -12,9 +12,9 @@ the checkpoint before implementation.
 
 | Finding | Risk | Proposed disposition | Status |
 | --- | --- | --- | --- |
-| Multiple live signed legacy SIDs | Wire order could silently choose the wrong account | Inspect bounded live candidates only for conflict detection; authorize only the first signed candidate when every live candidate has the same principal/state class; fail closed on authenticated-principal or authenticated/anonymous conflict | Open; contract revision required |
-| Logout/reset resurrection | Removing the primary cookie can expose another live legacy session | On explicit logout/reset, boundedly validate and revoke every presented WEPPcloud-signed SID server-side without deleting generic browser cookies; fence late responses; test primary and legacy SIDs that differ | Open; lifecycle design required |
-| Mixed workers and rollback | Legacy-only `wepp.cloud` workers cannot read newly issued sessions | Phase 1 deploy migration readers to every `wepp.cloud` web and rq-engine instance while still writing `session`; phase 2 flip all production writers with no legacy-only overlap; rollback only to a pinned migration-aware rescue image | Open; runbook and version matrix required |
+| Multiple live signed legacy SIDs | Wire order could silently choose the wrong account | Inspect bounded live candidates only for conflict detection; authorize only the first signed candidate when every live candidate has the same principal/state class; fail closed on authenticated-principal or authenticated/anonymous conflict | Contract ratified; implementation evidence pending |
+| Logout/reset resurrection | Removing the primary cookie can expose another live legacy session | On explicit logout/reset, boundedly validate and revoke every presented WEPPcloud-signed SID server-side without deleting generic browser cookies; fence late responses; test primary and legacy SIDs that differ | Contract ratified; implementation evidence pending |
+| Mixed workers and rollback | Legacy-only `wepp.cloud` workers cannot read newly issued sessions | Phase 1 deploy migration readers to every `wepp.cloud` web and rq-engine instance while still writing `session`; phase 2 flip all production writers with no legacy-only overlap; rollback only to a pinned migration-aware rescue image | Contract ratified; Bearhive rehearsal evidence pending |
 
 ## Medium Findings
 
