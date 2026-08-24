@@ -47,6 +47,8 @@
   actual WEPPcloud restart with identical SID and valid CSRF state.
 - [x] Captured operator verification of the migrated session heartbeat: HTTP
   204 with owned cookie and CSRF header, no login redirect or remember cookie.
+- [x] Captured operator verification that recorder events return HTTP 204 and
+  an SBS upload completes through rq-engine on the migrated session.
 
 ## Decisions Pending Acceptance
 

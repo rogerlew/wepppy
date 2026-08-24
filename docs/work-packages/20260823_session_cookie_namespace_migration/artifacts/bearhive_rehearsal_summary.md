@@ -35,6 +35,10 @@ restart.
   migrated browser session: `POST /weppcloud/api/session/heartbeat` returned
   HTTP 204, carried `__Host-weppcloud_session` and `X-CSRFToken`, did not
   redirect to login, and did not issue a remember cookie.
+- Operator-observed recorder requests on the same migrated run returned HTTP
+  204, closing the triggering CSRF failure. An SBS upload also completed
+  through rq-engine from that browser session, demonstrating the authenticated
+  mutation path without a login prompt or browser-state reset.
 - Focused migration/configuration/rq-engine regression suite: 118 passed.
 - Repository-wide Python regression suite: 6,684 passed, 63 skipped.
 - Full frontend suite: 105 suites and 773 tests passed; frontend lint passed.
