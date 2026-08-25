@@ -13,9 +13,9 @@ pytestmark = pytest.mark.unit
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 _DEPLOY = _REPO_ROOT / "scripts" / "deploy-production.sh"
-_RQ_SUSPEND = "from rq.suspension import is_suspended, suspend"
-_RQ_RENEW = "from rq.suspension import suspend"
-_RQ_RESUME = "from rq.suspension import resume"
+_RQ_SUSPEND = "# rq-fence-acquire"
+_RQ_RENEW = "# rq-fence-renew"
+_RQ_RESUME = "# rq-fence-resume"
 
 
 def _write_executable(path: Path, source: str) -> None:
@@ -45,8 +45,10 @@ def _run_deploy(
     rq_renew_hangs_once: bool = False,
     rq_heartbeat_failure: bool = False,
     rq_resume_failure: bool = False,
+    rq_resume_reply_lost: bool = False,
     rq_pre_suspended: bool = False,
     rq_competing_deploy: bool = False,
+    rq_acquire_reply_lost: bool = False,
     controller_backup_failure: bool = False,
     caddy_inspection_failure: bool = False,
     controller_build_failure: bool = False,
@@ -81,8 +83,12 @@ elif [[ "${args}" == *" ps "* && "${args}" == *" -q "* ]] \
     printf 'cid-%s\n' "${service}"
 elif [[ "${args}" == *"StartedJobRegistry"* ]]; then
     printf '0\n'
-elif [[ "${args}" == *"from rq.suspension import is_suspended, suspend"* ]]; then
+elif [[ "${args}" == *"# rq-fence-acquire"* ]]; then
     printf 'rq-token|acquire|%s\n' "${!#}" >> "${FAKE_COMMAND_LOG}"
+    if [ "${FAKE_RQ_ACQUIRE_REPLY_LOST:-0}" = 1 ] \
+        && mkdir "${FAKE_RQ_ACQUIRE_REPLY_MARKER}" 2>/dev/null; then
+        exit 124
+    fi
     if [ "${FAKE_RQ_COMPETING_DEPLOY:-0}" = 1 ]; then
         echo 'another deployment owns the RQ fence' >&2
         exit 79
@@ -92,7 +98,7 @@ elif [[ "${args}" == *"from rq.suspension import is_suspended, suspend"* ]]; the
         exit 80
     fi
     printf 'no\n'
-elif [[ "${args}" == *"from rq.suspension import suspend"* ]]; then
+elif [[ "${args}" == *"# rq-fence-renew"* ]]; then
     printf 'rq-token|renew|%s\n' "${!#}" >> "${FAKE_COMMAND_LOG}"
     : > "${FAKE_RENEWAL_SEEN}"
     renew_call_count=0
@@ -128,8 +134,7 @@ elif [[ "${args}" == *"from rq.suspension import is_suspended"* ]]; then
         done
         /bin/sleep 0.02
     fi
-    if [ "${FAKE_RQ_RENEW_TRANSIENT_FAILURE:-0}" = 1 ] \
-        || [ "${FAKE_RQ_RENEW_HANGS_ONCE:-0}" = 1 ]; then
+    if [ "${FAKE_RQ_RENEW_TRANSIENT_FAILURE:-0}" = 1 ]; then
         for _attempt in $(seq 1 200); do
             renew_call_count=0
             [ ! -f "${FAKE_RQ_RENEW_CALL_COUNT}" ] \
@@ -143,8 +148,12 @@ elif [[ "${args}" == *"from rq.suspension import is_suspended"* ]]; then
     else
         printf 'yes\n'
     fi
-elif [[ "${args}" == *"from rq.suspension import resume"* ]]; then
+elif [[ "${args}" == *"# rq-fence-resume"* ]]; then
     printf 'rq-token|resume|%s\n' "${!#}" >> "${FAKE_COMMAND_LOG}"
+    if [ "${FAKE_RQ_RESUME_REPLY_LOST:-0}" = 1 ] \
+        && mkdir "${FAKE_RQ_RESUME_REPLY_MARKER}" 2>/dev/null; then
+        exit 124
+    fi
     if [ "${FAKE_RQ_RESUME_FAILURE:-0}" = 1 ]; then
         exit 78
     fi
@@ -169,8 +178,11 @@ elif [[ "${args}" == *"docker compose run"* ]]; then
     :
 elif [[ "${args}" == *"docker compose exec -T cap"* ]]; then
     :
+elif [[ "${args}" == *"docker compose stop"* ]]; then
+    if [ "${FAKE_RQ_RENEW_HANGS_ONCE:-0}" = 1 ]; then
+        /bin/sleep 2
+    fi
 elif [[ "${args}" == *"build --no-cache"* ]] \
-    || [[ "${args}" == *"docker compose stop"* ]] \
     || [[ "${args}" == "up -d --force-recreate" || "${args}" == *" up -d"* ]] \
     || [[ "${args}" == "down" || "${args}" == *" down"* ]] \
     || [[ "${args}" == *" rq-info "* ]]; then
@@ -327,8 +339,10 @@ exec /bin/cp "$@"
             "FAKE_RQ_RENEW_HANGS_ONCE": "1" if rq_renew_hangs_once else "0",
             "FAKE_HEARTBEAT_FAILURE": "1" if rq_heartbeat_failure else "0",
             "FAKE_RQ_RESUME_FAILURE": "1" if rq_resume_failure else "0",
+            "FAKE_RQ_RESUME_REPLY_LOST": "1" if rq_resume_reply_lost else "0",
             "FAKE_RQ_PRE_SUSPENDED": "1" if rq_pre_suspended else "0",
             "FAKE_RQ_COMPETING_DEPLOY": "1" if rq_competing_deploy else "0",
+            "FAKE_RQ_ACQUIRE_REPLY_LOST": "1" if rq_acquire_reply_lost else "0",
             "FAKE_CONTROLLER_BACKUP_FAILURE": "1" if controller_backup_failure else "0",
             "FAKE_CADDY_INSPECTION_FAILURE": "1" if caddy_inspection_failure else "0",
             "FAKE_FENCE_ASSERT_COUNT": str(tmp_path / "fence-assert-count"),
@@ -337,6 +351,8 @@ exec /bin/cp "$@"
             "FAKE_RQ_RENEW_FAILURE_MARKER": str(tmp_path / "renew-failure-marker"),
             "FAKE_RQ_RENEW_HANG_MARKER": str(tmp_path / "renew-hang-marker"),
             "FAKE_RQ_RENEW_CALL_COUNT": str(tmp_path / "renew-call-count"),
+            "FAKE_RQ_ACQUIRE_REPLY_MARKER": str(tmp_path / "acquire-reply-marker"),
+            "FAKE_RQ_RESUME_REPLY_MARKER": str(tmp_path / "resume-reply-marker"),
             "RQ_FENCE_CONTROL_TIMEOUT_SECONDS": "0.1" if rq_renew_hangs_once else "10",
             "RQ_FENCE_RENEW_RETRIES": "1" if rq_heartbeat_failure else "20",
             "RQ_FENCE_RETRY_DELAY_SECONDS": "0.01",
@@ -621,6 +637,54 @@ def test_worker_renews_rq_fence_and_reasserts_it_before_resume(tmp_path: Path) -
         operation_tokens = _rq_tokens(commands, operation)
         assert operation_tokens
         assert set(operation_tokens) == {acquisition_token}
+    deploy_source = _DEPLOY.read_text(encoding="utf-8")
+    assert "redis.call('set', KEYS[2], '1', 'EX', ARGV[2])" in deploy_source
+    assert "redis.call('del', KEYS[2])" in deploy_source
+    assert "redis.call('del', KEYS[1])" in deploy_source
+
+
+def test_rq_acquisition_is_idempotent_after_committed_reply_loss(tmp_path: Path) -> None:
+    services = {
+        "rq-worker": _service("wepppy:test"),
+        "rq-worker-batch": _service("wepppy:test"),
+        "weppcloudr": _service("weppcloudr:test", build=False),
+    }
+    result, commands = _run_deploy(tmp_path, services, rq_acquire_reply_lost=True)
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    acquisition_tokens = _rq_tokens(commands, "acquire")
+    assert len(acquisition_tokens) == 2
+    assert len(set(acquisition_tokens)) == 1
+    assert _rq_tokens(commands, "resume") == [acquisition_tokens[0]]
+
+
+def test_rq_resume_is_idempotent_after_committed_reply_loss(tmp_path: Path) -> None:
+    services = {
+        "rq-worker": _service("wepppy:test"),
+        "rq-worker-batch": _service("wepppy:test"),
+        "weppcloudr": _service("weppcloudr:test", build=False),
+    }
+    result, commands = _run_deploy(tmp_path, services, rq_resume_reply_lost=True)
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    resume_tokens = _rq_tokens(commands, "resume")
+    assert len(resume_tokens) == 2
+    assert len(set(resume_tokens)) == 1
+    assert "Deployment complete!" in result.stdout
+
+
+def test_rq_acquisition_checks_resume_tombstone_before_creating_fence() -> None:
+    deploy_source = _DEPLOY.read_text(encoding="utf-8")
+    acquire_start = deploy_source.index("# rq-fence-acquire")
+    acquire_end = deploy_source.index("' \"${RQ_FENCE_TOKEN}\")", acquire_start)
+    acquire_program = deploy_source[acquire_start:acquire_end]
+
+    receipt_check = acquire_program.index("redis.call('get', KEYS[3])")
+    fence_publish = acquire_program.index("redis.call('set', KEYS[1]")
+    suspension_publish = acquire_program.index("redis.call('set', KEYS[2]")
+    assert receipt_check < fence_publish
+    assert receipt_check < suspension_publish
+    assert '"wepppy:deploy:rq-fence:resumed:" + token' in acquire_program
 
 
 def test_worker_tolerates_transient_rq_renewal_failure_during_recreation(
@@ -680,7 +744,7 @@ def test_worker_bounds_hung_renewal_and_uses_fallback_control_container(
     )
 
     assert result.returncode == 0, result.stdout + result.stderr
-    assert len(_positions(commands, _RQ_RENEW)) >= 3
+    assert len(_positions(commands, _RQ_RENEW)) >= 2
     assert "Deployment complete!" in result.stdout
 
 

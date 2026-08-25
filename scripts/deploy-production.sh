@@ -561,39 +561,36 @@ RQ_FENCE_RETRY_DELAY_SECONDS="${RQ_FENCE_RETRY_DELAY_SECONDS:-3}"
 run_rq_control_program() {
     local program="$1"
     shift
-    if ! wctl docker compose exec -T rq-worker /opt/venv/bin/python -c "${program}" "$@"; then
-        wctl docker compose run --rm --no-deps --entrypoint /opt/venv/bin/python \
-            rq-worker -c "${program}" "$@"
+    if ! timeout --foreground --kill-after=5 \
+        "${RQ_FENCE_CONTROL_TIMEOUT_SECONDS}" \
+        wctl docker compose exec -T rq-worker /opt/venv/bin/python -c \
+        "${program}" "$@"; then
+        timeout --foreground --kill-after=5 \
+            "${RQ_FENCE_CONTROL_TIMEOUT_SECONDS}" \
+            wctl docker compose run --rm --no-deps \
+            --entrypoint /opt/venv/bin/python rq-worker -c "${program}" "$@"
     fi
 }
 
 renew_rq_fence_once() {
     local program='
+# rq-fence-renew
 import redis
 import sys
-from rq.suspension import suspend
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 connection = redis.Redis(**redis_connection_kwargs(RedisDB.RQ))
-key = "wepppy:deploy:rq-fence"
 token = sys.argv[1]
 renewed = connection.eval(
-    "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('expire', KEYS[1], ARGV[2]) else return 0 end",
-    1, key, token, 3600,
+    "if redis.call('get', KEYS[1]) ~= ARGV[1] then return 0 end "
+    "redis.call('expire', KEYS[1], ARGV[2]) "
+    "redis.call('set', KEYS[2], '1', 'EX', ARGV[2]) "
+    "return 1",
+    2, "wepppy:deploy:rq-fence", "rq:suspended", token, 3600,
 )
 if renewed != 1:
     raise SystemExit("deployment fence ownership lost")
-suspend(connection, ttl=3600)
 '
-    if ! timeout --foreground --kill-after=5 \
-        "${RQ_FENCE_CONTROL_TIMEOUT_SECONDS}" \
-        wctl docker compose exec -T rq-worker /opt/venv/bin/python -c \
-        "${program}" "${RQ_FENCE_TOKEN}"; then
-        timeout --foreground --kill-after=5 \
-            "${RQ_FENCE_CONTROL_TIMEOUT_SECONDS}" \
-            wctl docker compose run --rm --no-deps \
-            --entrypoint /opt/venv/bin/python rq-worker -c \
-            "${program}" "${RQ_FENCE_TOKEN}"
-    fi
+    run_rq_control_program "${program}" "${RQ_FENCE_TOKEN}"
 }
 
 assert_rq_fence() {
@@ -622,20 +619,35 @@ suspend_rq_dequeue() {
         return 0
     fi
     RQ_FENCE_TOKEN="$(hostname)-$$-$(date +%s)"
-    RQ_WAS_SUSPENDED="$(wctl docker compose exec -T rq-worker /opt/venv/bin/python -c '
+    RQ_WAS_SUSPENDED="$(run_rq_control_program '
+# rq-fence-acquire
 import redis
 import sys
-from rq.suspension import is_suspended, suspend
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 connection = redis.Redis(**redis_connection_kwargs(RedisDB.RQ))
-key = "wepppy:deploy:rq-fence"
 token = sys.argv[1]
-if not connection.set(key, token, nx=True, ex=3600):
+result = connection.eval(
+    "if redis.call('get', KEYS[3]) == ARGV[1] then return 2 end "
+    "local owner = redis.call('get', KEYS[1]) "
+    "if owner then "
+    "  if owner ~= ARGV[1] then return -1 end "
+    "  redis.call('expire', KEYS[1], ARGV[2]) "
+    "  redis.call('set', KEYS[2], '1', 'EX', ARGV[2]) "
+    "  return 1 "
+    "end "
+    "if redis.call('exists', KEYS[2]) == 1 then return -2 end "
+    "redis.call('set', KEYS[1], ARGV[1], 'EX', ARGV[2]) "
+    "redis.call('set', KEYS[2], '1', 'EX', ARGV[2]) "
+    "return 1",
+    3, "wepppy:deploy:rq-fence", "rq:suspended",
+    "wepppy:deploy:rq-fence:resumed:" + token, token, 3600,
+)
+if result == -1:
     raise SystemExit("another deployment owns the RQ fence")
-if is_suspended(connection):
-    connection.delete(key)
+if result == -2:
     raise SystemExit("RQ is already suspended by an external operator")
-suspend(connection, ttl=3600)
+if result == 2:
+    raise SystemExit("deployment token was already resumed")
 print("no")
 ' "${RQ_FENCE_TOKEN}")"
     if [ "${RQ_WAS_SUSPENDED}" = "no" ]; then
@@ -696,16 +708,25 @@ resume_rq_if_owned() {
     fi
     if [ "${RQ_SUSPENDED_BY_DEPLOY}" = true ]; then
         RQ_RESUME_PROGRAM='
+# rq-fence-resume
 import redis
 import sys
-from rq.suspension import resume
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 connection = redis.Redis(**redis_connection_kwargs(RedisDB.RQ))
-key = "wepppy:deploy:rq-fence"
-if connection.get(key) != sys.argv[1].encode():
+result = connection.eval(
+    "if redis.call('get', KEYS[1]) == ARGV[1] then "
+    "  redis.call('del', KEYS[2]) "
+    "  redis.call('del', KEYS[1]) "
+    "  redis.call('set', KEYS[3], ARGV[1], 'EX', 3600) "
+    "  return 1 "
+    "end "
+    "if redis.call('get', KEYS[3]) == ARGV[1] then return 1 end "
+    "return 0",
+    3, "wepppy:deploy:rq-fence", "rq:suspended",
+    "wepppy:deploy:rq-fence:resumed:" + sys.argv[1], sys.argv[1],
+)
+if result != 1:
     raise SystemExit("deployment fence ownership lost before resume")
-resume(connection)
-connection.delete(key)
 '
         if ! run_rq_control_program "${RQ_RESUME_PROGRAM}" "${RQ_FENCE_TOKEN}"; then
             echo "✗ Failed to resume the deployment-owned global RQ suspension." >&2
