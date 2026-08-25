@@ -40,6 +40,7 @@ def _run_deploy(
     local_worker_registration_failure: bool = False,
     rq_fence_loss: bool = False,
     rq_renew_once: bool = False,
+    rq_renew_transient_failure: bool = False,
     rq_heartbeat_failure: bool = False,
     rq_resume_failure: bool = False,
     rq_pre_suspended: bool = False,
@@ -92,6 +93,10 @@ elif [[ "${args}" == *"from rq.suspension import is_suspended, suspend"* ]]; the
 elif [[ "${args}" == *"from rq.suspension import suspend"* ]]; then
     printf 'rq-token|renew|%s\n' "${!#}" >> "${FAKE_COMMAND_LOG}"
     : > "${FAKE_RENEWAL_SEEN}"
+    if [ "${FAKE_RQ_RENEW_TRANSIENT_FAILURE:-0}" = 1 ] \
+        && mkdir "${FAKE_RQ_RENEW_FAILURE_MARKER}" 2>/dev/null; then
+        exit 75
+    fi
     if [ "${FAKE_HEARTBEAT_FAILURE:-0}" = 1 ]; then
         exit 75
     fi
@@ -288,6 +293,9 @@ exec /bin/cp "$@"
             ),
             "FAKE_FENCE_LOSS": "1" if rq_fence_loss else "0",
             "FAKE_RENEW_ONCE": "1" if rq_renew_once else "0",
+            "FAKE_RQ_RENEW_TRANSIENT_FAILURE": (
+                "1" if rq_renew_transient_failure else "0"
+            ),
             "FAKE_HEARTBEAT_FAILURE": "1" if rq_heartbeat_failure else "0",
             "FAKE_RQ_RESUME_FAILURE": "1" if rq_resume_failure else "0",
             "FAKE_RQ_PRE_SUSPENDED": "1" if rq_pre_suspended else "0",
@@ -297,6 +305,7 @@ exec /bin/cp "$@"
             "FAKE_FENCE_ASSERT_COUNT": str(tmp_path / "fence-assert-count"),
             "FAKE_RENEWAL_SEEN": str(tmp_path / "renewal-seen"),
             "FAKE_RENEW_ONCE_MARKER": str(tmp_path / "renew-once-marker"),
+            "FAKE_RQ_RENEW_FAILURE_MARKER": str(tmp_path / "renew-failure-marker"),
             "FAKE_CONTROLLER_FAILURE": "1" if controller_build_failure else "0",
             "CAP_RUNTIME_VALIDATOR": str(cap_validator),
             "CAP_RUNTIME_PREPARER": str(cap_preparer),
@@ -578,6 +587,27 @@ def test_worker_renews_rq_fence_and_reasserts_it_before_resume(tmp_path: Path) -
         operation_tokens = _rq_tokens(commands, operation)
         assert operation_tokens
         assert set(operation_tokens) == {acquisition_token}
+
+
+def test_worker_tolerates_transient_rq_renewal_failure_during_recreation(
+    tmp_path: Path,
+) -> None:
+    services = {
+        "rq-worker": _service("wepppy:test"),
+        "rq-worker-batch": _service("wepppy:test"),
+        "weppcloudr": _service("weppcloudr:test", build=False),
+    }
+    result, commands = _run_deploy(
+        tmp_path,
+        services,
+        rq_renew_once=True,
+        rq_renew_transient_failure=True,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert len(_positions(commands, _RQ_RENEW)) >= 2
+    assert "Global RQ suspension heartbeat failed" not in result.stderr
+    assert "Deployment complete!" in result.stdout
 
 
 @pytest.mark.parametrize(

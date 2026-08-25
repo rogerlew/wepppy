@@ -637,7 +637,16 @@ print("no")
         while kill -0 "${deployment_pid}" 2>/dev/null; do
             sleep 30
             kill -0 "${deployment_pid}" 2>/dev/null || exit 0
-            if ! renew_rq_fence_once >/dev/null 2>&1; then
+            renewal_succeeded=false
+            for _attempt in $(seq 1 20); do
+                if renew_rq_fence_once >/dev/null 2>&1; then
+                    renewal_succeeded=true
+                    break
+                fi
+                kill -0 "${deployment_pid}" 2>/dev/null || exit 0
+                sleep 3
+            done
+            if [ "${renewal_succeeded}" != true ]; then
                 printf 'renewal failed\n' > "${RQ_FENCE_FAILURE_FILE}"
                 exit 1
             fi
