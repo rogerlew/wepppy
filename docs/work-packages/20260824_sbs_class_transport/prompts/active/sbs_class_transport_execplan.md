@@ -39,7 +39,8 @@ explicit compatibility limitation until re-validation.
   policy; ADR-0045 and the promoted SBS contract record that decision.
 - [x] (2026-08-25) Two independent post-correction reviews approved the
   checkpoint with no unresolved high/medium findings; disposition recorded.
-- [ ] Commit the corrected checkpoint as a standalone ancestor.
+- [x] (2026-08-25) Committed corrected checkpoint as standalone ancestor
+  `f79aef8fc2290526785a478ad8c490254648d25f` and recorded it in the tracker.
 - [ ] Milestone 2: producer totality and exact lookup.
 - [ ] Milestone 3: client decode, sentinel, legends, tooltip.
 - [ ] Milestone 4: consolidation and parity.

@@ -6,7 +6,8 @@
 **Started**: 2026-08-24 21:30 UTC  
 **Current phase**: Promoted-contract checkpoint review  
 **Last updated**: 2026-08-25 02:00 UTC  
-**Next milestone**: Commit the approved checkpoint ancestor  
+**Next milestone**: Implement producer totality and exact lookup  
+**Checkpoint ancestor**: `f79aef8fc2290526785a478ad8c490254648d25f`  
 **Security impact**: `low`; assessed from the actual changed surface  
 **Dedicated security review**: not required
 
@@ -35,7 +36,7 @@ and both map clients. No implementation has started.
 
 ### In Progress
 
-- [ ] Commit the approved checkpoint and record its revision.
+- [ ] Implement producer totality and exact lookup.
 
 ### Blocked
 
@@ -64,6 +65,8 @@ and both map clients. No implementation has started.
   contract-first and work-package lifecycle standards.
 - [x] Two independent post-fix reviews approved the promoted checkpoint with no
   unresolved high/medium findings.
+- [x] Committed standalone checkpoint ancestor
+  `f79aef8fc2290526785a478ad8c490254648d25f`.
 
 ## Current Risks and Decisions Needed
 
