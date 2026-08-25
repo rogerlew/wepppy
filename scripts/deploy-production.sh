@@ -553,6 +553,11 @@ RQ_FENCE_ACTIVE=false
 RQ_FENCE_HEARTBEAT_PID=""
 RQ_FENCE_FAILURE_FILE=""
 RQ_FENCE_TOKEN=""
+RQ_FENCE_SERIAL_LOCK=""
+RQ_FENCE_STOP_FILE=""
+RQ_FENCE_CONTROL_TIMEOUT_SECONDS="${RQ_FENCE_CONTROL_TIMEOUT_SECONDS:-10}"
+RQ_FENCE_RENEW_RETRIES="${RQ_FENCE_RENEW_RETRIES:-20}"
+RQ_FENCE_RETRY_DELAY_SECONDS="${RQ_FENCE_RETRY_DELAY_SECONDS:-3}"
 run_rq_control_program() {
     local program="$1"
     shift
@@ -563,7 +568,7 @@ run_rq_control_program() {
 }
 
 renew_rq_fence_once() {
-    run_rq_control_program '
+    local program='
 import redis
 import sys
 from rq.suspension import suspend
@@ -578,7 +583,17 @@ renewed = connection.eval(
 if renewed != 1:
     raise SystemExit("deployment fence ownership lost")
 suspend(connection, ttl=3600)
-' "${RQ_FENCE_TOKEN}"
+'
+    if ! timeout --foreground --kill-after=5 \
+        "${RQ_FENCE_CONTROL_TIMEOUT_SECONDS}" \
+        wctl docker compose exec -T rq-worker /opt/venv/bin/python -c \
+        "${program}" "${RQ_FENCE_TOKEN}"; then
+        timeout --foreground --kill-after=5 \
+            "${RQ_FENCE_CONTROL_TIMEOUT_SECONDS}" \
+            wctl docker compose run --rm --no-deps \
+            --entrypoint /opt/venv/bin/python rq-worker -c \
+            "${program}" "${RQ_FENCE_TOKEN}"
+    fi
 }
 
 assert_rq_fence() {
@@ -632,19 +647,28 @@ print("no")
     fi
     RQ_FENCE_ACTIVE=true
     RQ_FENCE_FAILURE_FILE="$(mktemp "${DEPLOY_STATE_DIR%/}/wepppy-rq-fence.XXXXXX")"
+    RQ_FENCE_SERIAL_LOCK="$(mktemp "${DEPLOY_STATE_DIR%/}/wepppy-rq-fence-lock.XXXXXX")"
+    RQ_FENCE_STOP_FILE="${RQ_FENCE_SERIAL_LOCK}.stop"
+    rm -f -- "${RQ_FENCE_STOP_FILE}"
     local deployment_pid="$$"
     (
         while kill -0 "${deployment_pid}" 2>/dev/null; do
+            [ ! -e "${RQ_FENCE_STOP_FILE}" ] || exit 0
             sleep 30
             kill -0 "${deployment_pid}" 2>/dev/null || exit 0
+            [ ! -e "${RQ_FENCE_STOP_FILE}" ] || exit 0
             renewal_succeeded=false
-            for _attempt in $(seq 1 20); do
-                if renew_rq_fence_once >/dev/null 2>&1; then
+            for _attempt in $(seq 1 "${RQ_FENCE_RENEW_RETRIES}"); do
+                if (
+                    flock -x 9
+                    [ ! -e "${RQ_FENCE_STOP_FILE}" ] || exit 0
+                    renew_rq_fence_once >/dev/null 2>&1
+                ) 9>"${RQ_FENCE_SERIAL_LOCK}"; then
                     renewal_succeeded=true
                     break
                 fi
                 kill -0 "${deployment_pid}" 2>/dev/null || exit 0
-                sleep 3
+                sleep "${RQ_FENCE_RETRY_DELAY_SECONDS}"
             done
             if [ "${renewal_succeeded}" != true ]; then
                 printf 'renewal failed\n' > "${RQ_FENCE_FAILURE_FILE}"
@@ -657,6 +681,19 @@ print("no")
 }
 
 resume_rq_if_owned() {
+    local rq_fence_lock_fd
+    local resume_failed=false
+    rq_fence_lock_fd=""
+    if [ -n "${RQ_FENCE_SERIAL_LOCK}" ]; then
+        : > "${RQ_FENCE_STOP_FILE}"
+        exec {rq_fence_lock_fd}>"${RQ_FENCE_SERIAL_LOCK}"
+        flock -x "${rq_fence_lock_fd}"
+    fi
+    if [ -n "${RQ_FENCE_HEARTBEAT_PID}" ]; then
+        kill "${RQ_FENCE_HEARTBEAT_PID}" 2>/dev/null || true
+        wait "${RQ_FENCE_HEARTBEAT_PID}" 2>/dev/null || true
+        RQ_FENCE_HEARTBEAT_PID=""
+    fi
     if [ "${RQ_SUSPENDED_BY_DEPLOY}" = true ]; then
         RQ_RESUME_PROGRAM='
 import redis
@@ -672,17 +709,25 @@ connection.delete(key)
 '
         if ! run_rq_control_program "${RQ_RESUME_PROGRAM}" "${RQ_FENCE_TOKEN}"; then
             echo "✗ Failed to resume the deployment-owned global RQ suspension." >&2
-            return 1
+            resume_failed=true
         fi
     fi
-    if [ -n "${RQ_FENCE_HEARTBEAT_PID}" ]; then
-        kill "${RQ_FENCE_HEARTBEAT_PID}" 2>/dev/null || true
-        wait "${RQ_FENCE_HEARTBEAT_PID}" 2>/dev/null || true
-        RQ_FENCE_HEARTBEAT_PID=""
+    if [ -n "${rq_fence_lock_fd}" ]; then
+        flock -u "${rq_fence_lock_fd}"
+        exec {rq_fence_lock_fd}>&-
     fi
+    [ "${resume_failed}" = false ] || return 1
     if [ -n "${RQ_FENCE_FAILURE_FILE}" ]; then
         rm -f -- "${RQ_FENCE_FAILURE_FILE}"
         RQ_FENCE_FAILURE_FILE=""
+    fi
+    if [ -n "${RQ_FENCE_SERIAL_LOCK}" ]; then
+        rm -f -- "${RQ_FENCE_SERIAL_LOCK}"
+        RQ_FENCE_SERIAL_LOCK=""
+    fi
+    if [ -n "${RQ_FENCE_STOP_FILE}" ]; then
+        rm -f -- "${RQ_FENCE_STOP_FILE}"
+        RQ_FENCE_STOP_FILE=""
     fi
     RQ_FENCE_ACTIVE=false
     if [ "${RQ_SUSPENDED_BY_DEPLOY}" != true ]; then

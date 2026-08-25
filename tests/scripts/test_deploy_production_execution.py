@@ -41,6 +41,8 @@ def _run_deploy(
     rq_fence_loss: bool = False,
     rq_renew_once: bool = False,
     rq_renew_transient_failure: bool = False,
+    rq_renew_block_at_resume: bool = False,
+    rq_renew_hangs_once: bool = False,
     rq_heartbeat_failure: bool = False,
     rq_resume_failure: bool = False,
     rq_pre_suspended: bool = False,
@@ -93,8 +95,21 @@ elif [[ "${args}" == *"from rq.suspension import is_suspended, suspend"* ]]; the
 elif [[ "${args}" == *"from rq.suspension import suspend"* ]]; then
     printf 'rq-token|renew|%s\n' "${!#}" >> "${FAKE_COMMAND_LOG}"
     : > "${FAKE_RENEWAL_SEEN}"
+    renew_call_count=0
+    [ ! -f "${FAKE_RQ_RENEW_CALL_COUNT}" ] \
+        || renew_call_count="$(cat "${FAKE_RQ_RENEW_CALL_COUNT}")"
+    renew_call_count=$((renew_call_count + 1))
+    printf '%s\n' "${renew_call_count}" > "${FAKE_RQ_RENEW_CALL_COUNT}"
+    if [ "${FAKE_RQ_RENEW_HANGS_ONCE:-0}" = 1 ] \
+        && [ "${renew_call_count}" -le 2 ]; then
+        /bin/sleep 5
+    fi
+    if [ "${FAKE_RQ_RENEW_BLOCK_AT_RESUME:-0}" = 1 ]; then
+        /bin/sleep 0.2
+        printf 'rq-token|renew-complete|%s\n' "${!#}" >> "${FAKE_COMMAND_LOG}"
+    fi
     if [ "${FAKE_RQ_RENEW_TRANSIENT_FAILURE:-0}" = 1 ] \
-        && mkdir "${FAKE_RQ_RENEW_FAILURE_MARKER}" 2>/dev/null; then
+        && [ "${renew_call_count}" -le 2 ]; then
         exit 75
     fi
     if [ "${FAKE_HEARTBEAT_FAILURE:-0}" = 1 ]; then
@@ -112,6 +127,16 @@ elif [[ "${args}" == *"from rq.suspension import is_suspended"* ]]; then
             /bin/sleep 0.01
         done
         /bin/sleep 0.02
+    fi
+    if [ "${FAKE_RQ_RENEW_TRANSIENT_FAILURE:-0}" = 1 ] \
+        || [ "${FAKE_RQ_RENEW_HANGS_ONCE:-0}" = 1 ]; then
+        for _attempt in $(seq 1 200); do
+            renew_call_count=0
+            [ ! -f "${FAKE_RQ_RENEW_CALL_COUNT}" ] \
+                || renew_call_count="$(cat "${FAKE_RQ_RENEW_CALL_COUNT}")"
+            [ "${renew_call_count}" -ge 3 ] && break
+            /bin/sleep 0.01
+        done
     fi
     if [ "${FAKE_FENCE_LOSS:-0}" = 1 ] && [ "${count}" -ge 2 ]; then
         printf 'no\n'
@@ -296,6 +321,10 @@ exec /bin/cp "$@"
             "FAKE_RQ_RENEW_TRANSIENT_FAILURE": (
                 "1" if rq_renew_transient_failure else "0"
             ),
+            "FAKE_RQ_RENEW_BLOCK_AT_RESUME": (
+                "1" if rq_renew_block_at_resume else "0"
+            ),
+            "FAKE_RQ_RENEW_HANGS_ONCE": "1" if rq_renew_hangs_once else "0",
             "FAKE_HEARTBEAT_FAILURE": "1" if rq_heartbeat_failure else "0",
             "FAKE_RQ_RESUME_FAILURE": "1" if rq_resume_failure else "0",
             "FAKE_RQ_PRE_SUSPENDED": "1" if rq_pre_suspended else "0",
@@ -306,6 +335,11 @@ exec /bin/cp "$@"
             "FAKE_RENEWAL_SEEN": str(tmp_path / "renewal-seen"),
             "FAKE_RENEW_ONCE_MARKER": str(tmp_path / "renew-once-marker"),
             "FAKE_RQ_RENEW_FAILURE_MARKER": str(tmp_path / "renew-failure-marker"),
+            "FAKE_RQ_RENEW_HANG_MARKER": str(tmp_path / "renew-hang-marker"),
+            "FAKE_RQ_RENEW_CALL_COUNT": str(tmp_path / "renew-call-count"),
+            "RQ_FENCE_CONTROL_TIMEOUT_SECONDS": "0.1" if rq_renew_hangs_once else "10",
+            "RQ_FENCE_RENEW_RETRIES": "1" if rq_heartbeat_failure else "20",
+            "RQ_FENCE_RETRY_DELAY_SECONDS": "0.01",
             "FAKE_CONTROLLER_FAILURE": "1" if controller_build_failure else "0",
             "CAP_RUNTIME_VALIDATOR": str(cap_validator),
             "CAP_RUNTIME_PREPARER": str(cap_preparer),
@@ -605,8 +639,48 @@ def test_worker_tolerates_transient_rq_renewal_failure_during_recreation(
     )
 
     assert result.returncode == 0, result.stdout + result.stderr
-    assert len(_positions(commands, _RQ_RENEW)) >= 2
+    assert len(_positions(commands, _RQ_RENEW)) >= 3
     assert "Global RQ suspension heartbeat failed" not in result.stderr
+    assert "Deployment complete!" in result.stdout
+
+
+def test_worker_joins_inflight_renewal_before_resuming_rq(tmp_path: Path) -> None:
+    services = {
+        "rq-worker": _service("wepppy:test"),
+        "rq-worker-batch": _service("wepppy:test"),
+        "weppcloudr": _service("weppcloudr:test", build=False),
+    }
+    result, commands = _run_deploy(
+        tmp_path,
+        services,
+        rq_renew_once=True,
+        rq_renew_block_at_resume=True,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    renewal_complete = _position(commands, "rq-token|renew-complete|")
+    resume = _position(commands, _RQ_RESUME)
+    assert renewal_complete < resume
+    assert not any(_RQ_RENEW in command for command in commands[resume + 1 :])
+
+
+def test_worker_bounds_hung_renewal_and_uses_fallback_control_container(
+    tmp_path: Path,
+) -> None:
+    services = {
+        "rq-worker": _service("wepppy:test"),
+        "rq-worker-batch": _service("wepppy:test"),
+        "weppcloudr": _service("weppcloudr:test", build=False),
+    }
+    result, commands = _run_deploy(
+        tmp_path,
+        services,
+        rq_renew_once=True,
+        rq_renew_hangs_once=True,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert len(_positions(commands, _RQ_RENEW)) >= 3
     assert "Deployment complete!" in result.stdout
 
 
