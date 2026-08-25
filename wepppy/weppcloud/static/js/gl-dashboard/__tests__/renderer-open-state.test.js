@@ -100,7 +100,7 @@ describe('gl-dashboard layer renderer', () => {
       watarLayers: [],
       rapLayers: [],
       openetLayers: [],
-      detectedLayers: [{ key: 'sbs', label: 'SBS Map', visible: true }],
+      detectedLayers: [{ key: 'sbs', label: 'SBS Map', visible: true, sbsUnassignedCount: 3 }],
       sbsColorShiftEnabled: false,
       rapCumulativeMode: false,
       weppStatistic: 'mean',
@@ -109,7 +109,17 @@ describe('gl-dashboard layer renderer', () => {
     const renderer = createLayerRenderer({
       getState: () => state,
       setValue: jest.fn(),
-      layerUtils: { getActiveLayersForLegend: () => state.detectedLayers },
+      layerUtils: {
+        getActiveLayersForLegend: () => state.detectedLayers,
+        getSbsLegendItems: (shifted, count) => [
+          { color: shifted ? 'rgb(0, 158, 115)' : 'rgb(0, 128, 128)', label: 'Unchanged / Unburned (130)' },
+          { color: shifted ? 'rgb(86, 180, 233)' : 'rgb(82, 204, 204)', label: 'Low Severity Burn (131)' },
+          { color: shifted ? 'rgb(240, 228, 66)' : 'rgb(255, 232, 32)', label: 'Moderate Severity Burn (132)' },
+          { color: shifted ? 'rgb(204, 121, 167)' : 'rgb(168, 0, 0)', label: 'High Severity Burn (133)' },
+          { color: 'rgb(128, 0, 152)', label: `Unassigned: ${count}` },
+          { color: '#FFFFFF', label: 'Masked / Unmappable (255)', masked: true },
+        ],
+      },
       domRefs: {
         layerListEl: document.createElement('ul'),
         layerEmptyEl: document.createElement('div'),
@@ -139,17 +149,18 @@ describe('gl-dashboard layer renderer', () => {
 
     renderer.updateLegendsPanel();
     let swatches = legendsContentEl.querySelectorAll('.gl-legend-categorical__swatch');
-    expect(swatches).toHaveLength(5);
+    expect(swatches).toHaveLength(6);
     expect(swatches[0].style.backgroundColor).toContain('0, 128, 128');
     expect(swatches[1].style.backgroundColor).toContain('82, 204, 204');
     expect(swatches[3].style.backgroundColor).toContain('168, 0, 0');
-    expect(swatches[4].style.border).toContain('1px solid');
+    expect(swatches[5].style.border).toContain('1px solid');
+    expect(legendsContentEl.textContent).toContain('Unassigned: 3');
     expect(legendsContentEl.textContent).toContain('Masked / Unmappable');
 
     state.sbsColorShiftEnabled = true;
     renderer.updateLegendsPanel();
     swatches = legendsContentEl.querySelectorAll('.gl-legend-categorical__swatch');
-    expect(swatches).toHaveLength(4);
+    expect(swatches).toHaveLength(6);
     expect(swatches[1].style.backgroundColor).toContain('86, 180, 233');
   });
 

@@ -1,10 +1,12 @@
 from contextlib import nullcontext
+from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
 import pytest
 
 from wepppy.nodb.mods.baer.baer import Baer
+from wepppy.nodb.mods.baer.sbs_map import SoilBurnSeverityMap
 from wepppy.nodb.mods.disturbed.disturbed import Disturbed
 
 
@@ -95,6 +97,7 @@ def test_baer_color_table_uses_usgs_rgba_and_transparent_nodata(tmp_path):
             (1, "Low Severity Burn", 1),
             (2, "Moderate Severity Burn", 1),
             (3, "High Severity Burn", 1),
+            (255, "No Data", 1),
         ],
         color_tbl_path=str(color_table_path),
     )
@@ -137,4 +140,44 @@ def test_baer_color_map_generation_requests_alpha(monkeypatch, tmp_path):
 
     Baer.build_color_map(controller)
 
-    assert commands[0][:5] == ["gdaldem", "color-relief", "-of", "VRT", "-alpha"]
+    assert commands[0][:6] == [
+        "gdaldem",
+        "color-relief",
+        "-of",
+        "VRT",
+        "-alpha",
+        "-exact_color_entry",
+    ]
+
+
+def test_disturbed_color_map_generation_requires_exact_lookup(monkeypatch, tmp_path):
+    commands = []
+
+    class _Process:
+        def __init__(self, cmd, **_kwargs):
+            commands.append(cmd)
+            Path(cmd[-1]).touch()
+
+        def wait(self):
+            return 0
+
+    monkeypatch.setattr("wepppy.nodb.mods.baer.sbs_map.Popen", _Process)
+    controller = SimpleNamespace(
+        _write_color_table=lambda path: Path(path).touch(),
+    )
+
+    SoilBurnSeverityMap.export_rgb_map(
+        controller,
+        str(tmp_path / "disturbed.wgs.tif"),
+        str(tmp_path / "disturbed.rgb.vrt"),
+        str(tmp_path / "disturbed.rgb.png"),
+    )
+
+    assert commands[0][:6] == [
+        "gdaldem",
+        "color-relief",
+        "-of",
+        "VRT",
+        "-alpha",
+        "-exact_color_entry",
+    ]

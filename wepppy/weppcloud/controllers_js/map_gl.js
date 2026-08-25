@@ -117,7 +117,7 @@ var MapController = (function () {
         var normalizeSbsColorMode = shared.normalizeSbsColorMode;
         var getSbsLegendItemsForMode = shared.getSbsLegendItemsForMode;
         var drawSbsImageToCanvas = shared.drawSbsImageToCanvas;
-        var buildShiftedSbsImage = shared.buildShiftedSbsImage;
+        var buildSbsDisplayImage = shared.buildSbsDisplayImage;
         var normalizeSbsBounds = shared.normalizeSbsBounds;
         var normalizeCenter = shared.normalizeCenter;
         var buildBoundsFallback = shared.buildBoundsFallback;
@@ -1763,7 +1763,7 @@ var MapController = (function () {
                 html += ""
                     + "<div class=\"wc-legend-item\">"
                     + "<span class=\"wc-legend-item__swatch\" style=\"--legend-color: " + escapeHtml(item.color) + ";" + (item.masked ? " border: 1px solid #333;" : "") + "\" aria-label=\"Color swatch for " + escapeHtml(item.label) + "\"></span>"
-                    + "<span class=\"wc-legend-item__label\">" + escapeHtml(item.label) + " (" + escapeHtml(item.key) + ")</span>"
+                    + "<span class=\"wc-legend-item__label\">" + escapeHtml(item.label) + " (" + escapeHtml(item.key) + ")" + (item.count !== undefined ? ": " + escapeHtml(item.count) : "") + "</span>"
                     + "</div>";
             });
             html += "</div>";
@@ -1778,7 +1778,10 @@ var MapController = (function () {
             if (sbsLayerController && typeof sbsLayerController.getColorMode === "function") {
                 mode = sbsLayerController.getColorMode();
             }
-            var html = buildSbsLegendHtml(getSbsLegendItemsForMode(mode));
+            var count = sbsLayerController && typeof sbsLayerController.getUnassignedCount === "function"
+                ? sbsLayerController.getUnassignedCount()
+                : 0;
+            var html = buildSbsLegendHtml(getSbsLegendItemsForMode(mode, count));
             sbsLegendElement.innerHTML = html;
             attachSbsOpacitySlider(sbsLegendElement);
             dom.show(sbsLegendElement);
@@ -1952,7 +1955,8 @@ var MapController = (function () {
             var currentColorMode = normalizeSbsColorMode(options.colorMode);
             var currentBounds = null;
             var currentImageStandard = null;
-            var currentImageShifted = null;
+            var currentDisplayImage = null;
+            var currentDisplayMode = null;
             var currentLayer = buildBitmapLayer(layerId, null, null, currentOpacity);
             currentLayer.options = { opacity: currentOpacity };
             var controller = {
@@ -1961,7 +1965,11 @@ var MapController = (function () {
                 setOpacity: setOpacity,
                 getOpacity: getOpacity,
                 setColorMode: setColorMode,
-                getColorMode: getColorMode
+                getColorMode: getColorMode,
+                reset: reset,
+                getUnassignedCount: function () {
+                    return currentLayer && Number(currentLayer.sbsUnassignedCount) || 0;
+                }
             };
 
             function replaceLayer(nextLayer) {
@@ -2017,25 +2025,39 @@ var MapController = (function () {
             }
 
             function resolveDisplayImage() {
-                if (currentColorMode !== SBS_COLOR_MODES.SHIFTED) {
-                    return currentImageStandard;
+                if (currentImageStandard === null) {
+                    return null;
                 }
-                if (currentImageShifted === null && currentImageStandard !== null) {
-                    currentImageShifted = buildShiftedSbsImage(currentImageStandard);
+                if (currentDisplayImage === null || currentDisplayMode !== currentColorMode) {
+                    currentDisplayImage = buildSbsDisplayImage(currentImageStandard, currentColorMode);
+                    currentDisplayMode = currentColorMode;
                 }
-                return currentImageShifted || currentImageStandard;
+                return currentDisplayImage;
+            }
+
+            function reset() {
+                currentBounds = null;
+                currentImageStandard = null;
+                currentDisplayImage = null;
+                currentDisplayMode = null;
+                currentLayer.sbsUnassignedCount = 0;
             }
 
             function setOpacity(next) {
                 currentOpacity = clampOpacity(next);
-                var nextLayer = buildBitmapLayer(layerId, resolveDisplayImage(), currentBounds, currentOpacity);
+                var displayImage = resolveDisplayImage();
+                var nextLayer = buildBitmapLayer(layerId, displayImage, currentBounds, currentOpacity);
+                nextLayer.sbsUnassignedCount = displayImage && Number(displayImage.sbsUnassignedCount) || 0;
                 replaceLayer(nextLayer);
             }
 
             function setColorMode(nextMode) {
                 currentColorMode = normalizeSbsColorMode(nextMode);
-                var nextLayer = buildBitmapLayer(layerId, resolveDisplayImage(), currentBounds, currentOpacity);
+                var displayImage = resolveDisplayImage();
+                var nextLayer = buildBitmapLayer(layerId, displayImage, currentBounds, currentOpacity);
+                nextLayer.sbsUnassignedCount = displayImage && Number(displayImage.sbsUnassignedCount) || 0;
                 replaceLayer(nextLayer);
+                loadSbsLegend();
             }
 
             function refresh(urlInput) {
@@ -2090,10 +2112,17 @@ var MapController = (function () {
                         }
                         activeImageAbort = null;
                         currentBounds = bounds;
-                        currentImageStandard = drawSbsImageToCanvas(image) || image;
-                        currentImageShifted = null;
-                        var nextLayer = buildBitmapLayer(layerId, resolveDisplayImage(), bounds, currentOpacity);
+                        currentImageStandard = drawSbsImageToCanvas(image);
+                        if (!currentImageStandard) {
+                            throw new Error("Unable to create SBS source canvas.");
+                        }
+                        currentDisplayImage = null;
+                        currentDisplayMode = null;
+                        var displayImage = resolveDisplayImage();
+                        var nextLayer = buildBitmapLayer(layerId, displayImage, bounds, currentOpacity);
+                        nextLayer.sbsUnassignedCount = displayImage && Number(displayImage.sbsUnassignedCount) || 0;
                         replaceLayer(nextLayer);
+                        loadSbsLegend();
                         return data;
                     });
                 }).catch(function (error) {
@@ -2248,6 +2277,7 @@ var MapController = (function () {
 
         function handleOverlayRemoved(layer) {
             if (layer === map.sbs_layer) {
+                sbsLayerController.reset();
                 clearSbsLegend();
             }
         }
@@ -2389,7 +2419,10 @@ var MapController = (function () {
                     map.loadSbsMap();
                 } else if (map.sbs_layer && map.hasLayer(map.sbs_layer)) {
                     map.removeLayer(map.sbs_layer);
+                    sbsLayerController.reset();
+                    clearSbsLegend();
                 } else {
+                    sbsLayerController.reset();
                     clearSbsLegend();
                 }
             });

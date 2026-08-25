@@ -44,29 +44,23 @@ var WCMapGlShared = (function () {
         STANDARD: "standard",
         SHIFTED: "shifted"
     };
-    var SBS_LEGEND_ITEMS_STANDARD = [
-        { key: 130, label: "Unchanged / Unburned", color: "#008080" },
-        { key: 131, label: "Low Severity Burn", color: "#52CCCC" },
-        { key: 132, label: "Moderate Severity Burn", color: "#FFE820" },
-        { key: 133, label: "High Severity Burn", color: "#A80000" },
-        { key: 255, label: "Masked / Unmappable", color: "#FFFFFF", masked: true }
-    ];
-    var SBS_LEGEND_ITEMS_SHIFTED = [
-        { key: 130, label: "No Burn", color: "#009E73" },
-        { key: 131, label: "Low Severity Burn", color: "#56B4E9" },
-        { key: 132, label: "Moderate Severity Burn", color: "#F0E442" },
-        { key: 133, label: "High Severity Burn", color: "#CC79A7" }
-    ];
-    var SBS_STANDARD_TO_SHIFTED_RGB = {
-        "0_128_128": [0, 158, 115],
-        "82_204_204": [86, 180, 233],
-        "255_232_32": [240, 228, 66],
-        "168_0_0": [204, 121, 167],
-        "0_115_74": [0, 158, 115],
-        "77_230_0": [86, 180, 233],
-        "255_255_0": [240, 228, 66],
-        "255_0_0": [204, 121, 167]
+    var SBS_CLASS_DEFINITIONS = {
+        130: { label: "Unchanged / Unburned", standard: [0, 128, 128], shifted: [0, 158, 115] },
+        131: { label: "Low Severity Burn", standard: [82, 204, 204], shifted: [86, 180, 233] },
+        132: { label: "Moderate Severity Burn", standard: [255, 232, 32], shifted: [240, 228, 66] },
+        133: { label: "High Severity Burn", standard: [168, 0, 0], shifted: [204, 121, 167] }
     };
+    var SBS_UNASSIGNED_RGB = [128, 0, 152];
+    var SBS_RGB_TO_CLASS = {
+        "46_203_24": 130, "161_250_220": 131, "255_161_5": 132, "217_34_3": 133,
+        "0_115_74": 130, "77_230_0": 131, "255_255_0": 132, "255_0_0": 133,
+        "0_128_128": 130, "82_204_204": 131, "255_232_32": 132, "168_0_0": 133
+    };
+    var SBS_PACKED_RGB_TO_CLASS = Object.keys(SBS_RGB_TO_CLASS).reduce(function (lookup, key) {
+        var channels = key.split("_").map(Number);
+        lookup[(channels[0] << 16) | (channels[1] << 8) | channels[2]] = SBS_RGB_TO_CLASS[key];
+        return lookup;
+    }, {});
     var LEGEND_OPACITY_CONTAINER_ID = "baer-opacity-controls";
     var LEGEND_OPACITY_INPUT_ID = "baer-opacity-slider";
     var DEFAULT_ELEVATION_COOLDOWN_MS = 200;
@@ -436,22 +430,58 @@ var WCMapGlShared = (function () {
         return value === SBS_COLOR_MODES.SHIFTED ? SBS_COLOR_MODES.SHIFTED : SBS_COLOR_MODES.STANDARD;
     }
 
-    function getSbsLegendItemsForMode(mode) {
-        return normalizeSbsColorMode(mode) === SBS_COLOR_MODES.SHIFTED
-            ? SBS_LEGEND_ITEMS_SHIFTED
-            : SBS_LEGEND_ITEMS_STANDARD;
+    function rgbToHex(rgb) {
+        return "#" + rgb.map(function (value) {
+            return value.toString(16).padStart(2, "0");
+        }).join("").toUpperCase();
+    }
+
+    function getSbsLegendItemsForMode(mode, unassignedCount) {
+        var paletteKey = normalizeSbsColorMode(mode) === SBS_COLOR_MODES.SHIFTED ? "shifted" : "standard";
+        var items = Object.keys(SBS_CLASS_DEFINITIONS).map(function (key) {
+            var definition = SBS_CLASS_DEFINITIONS[key];
+            return { key: Number(key), label: definition.label, color: rgbToHex(definition[paletteKey]) };
+        });
+        items.push({ key: "unassigned", label: "Unassigned", color: rgbToHex(SBS_UNASSIGNED_RGB), count: Number(unassignedCount) || 0 });
+        items.push({ key: 255, label: "Masked / Unmappable", color: "#FFFFFF", masked: true });
+        return items;
     }
 
     function getSbsColorShiftKey(r, g, b) {
         return [r, g, b].join("_");
     }
 
+    function decodeSbsClass(r, g, b) {
+        return SBS_PACKED_RGB_TO_CLASS[(r << 16) | (g << 8) | b] || null;
+    }
+
     function mapSbsRgbForMode(r, g, b, mode) {
-        if (normalizeSbsColorMode(mode) !== SBS_COLOR_MODES.SHIFTED) {
-            return [r, g, b];
+        var classCode = decodeSbsClass(r, g, b);
+        if (classCode === null) {
+            return SBS_UNASSIGNED_RGB.slice();
         }
-        var mapped = SBS_STANDARD_TO_SHIFTED_RGB[getSbsColorShiftKey(r, g, b)];
-        return mapped || [r, g, b];
+        var paletteKey = normalizeSbsColorMode(mode) === SBS_COLOR_MODES.SHIFTED ? "shifted" : "standard";
+        return SBS_CLASS_DEFINITIONS[classCode][paletteKey].slice();
+    }
+
+    function recolorSbsPixels(data, mode) {
+        var paletteKey = normalizeSbsColorMode(mode) === SBS_COLOR_MODES.SHIFTED ? "shifted" : "standard";
+        var unassignedPixelCount = 0;
+        for (var i = 0; i < data.length; i += 4) {
+            if (data[i + 3] === 0) {
+                continue;
+            }
+            var classCode = decodeSbsClass(data[i], data[i + 1], data[i + 2]);
+            var mapped = classCode === null ? SBS_UNASSIGNED_RGB : SBS_CLASS_DEFINITIONS[classCode][paletteKey];
+            if (classCode === null) {
+                unassignedPixelCount += 1;
+            }
+            data[i] = mapped[0];
+            data[i + 1] = mapped[1];
+            data[i + 2] = mapped[2];
+            data[i + 3] = 255;
+        }
+        return unassignedPixelCount;
     }
 
     function drawSbsImageToCanvas(imageSource) {
@@ -478,28 +508,20 @@ var WCMapGlShared = (function () {
         return canvas;
     }
 
-    function buildShiftedSbsImage(imageSource) {
+    function buildSbsDisplayImage(imageSource, mode) {
         var baseCanvas = drawSbsImageToCanvas(imageSource);
         if (!baseCanvas) {
-            return imageSource;
+            throw new Error("Unable to create SBS decode canvas.");
         }
         var context = baseCanvas.getContext("2d");
         if (!context) {
-            return imageSource;
+            throw new Error("Unable to access SBS decode canvas context.");
         }
         var imageData = context.getImageData(0, 0, baseCanvas.width, baseCanvas.height);
         var data = imageData.data;
-        for (var i = 0; i < data.length; i += 4) {
-            var alpha = data[i + 3];
-            if (alpha === 0) {
-                continue;
-            }
-            var mapped = mapSbsRgbForMode(data[i], data[i + 1], data[i + 2], SBS_COLOR_MODES.SHIFTED);
-            data[i] = mapped[0];
-            data[i + 1] = mapped[1];
-            data[i + 2] = mapped[2];
-        }
+        var unassignedPixelCount = recolorSbsPixels(data, mode);
         context.putImageData(imageData, 0, 0);
+        baseCanvas.sbsUnassignedCount = unassignedPixelCount;
         return baseCanvas;
     }
 
@@ -615,7 +637,10 @@ var WCMapGlShared = (function () {
         normalizeSbsColorMode: normalizeSbsColorMode,
         getSbsLegendItemsForMode: getSbsLegendItemsForMode,
         drawSbsImageToCanvas: drawSbsImageToCanvas,
-        buildShiftedSbsImage: buildShiftedSbsImage,
+        decodeSbsClass: decodeSbsClass,
+        mapSbsRgbForMode: mapSbsRgbForMode,
+        recolorSbsPixels: recolorSbsPixels,
+        buildSbsDisplayImage: buildSbsDisplayImage,
         normalizeSbsBounds: normalizeSbsBounds,
         normalizeCenter: normalizeCenter,
         buildBoundsFallback: buildBoundsFallback,

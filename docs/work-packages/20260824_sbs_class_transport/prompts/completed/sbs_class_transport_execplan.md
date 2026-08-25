@@ -41,10 +41,18 @@ explicit compatibility limitation until re-validation.
   checkpoint with no unresolved high/medium findings; disposition recorded.
 - [x] (2026-08-25) Committed corrected checkpoint as standalone ancestor
   `f79aef8fc2290526785a478ad8c490254648d25f` and recorded it in the tracker.
-- [ ] Milestone 2: producer totality and exact lookup.
-- [ ] Milestone 3: client decode, sentinel, legends, tooltip.
-- [ ] Milestone 4: consolidation and parity.
-- [ ] Milestone 5: generated-output validation.
+- [x] (2026-08-25) Milestone 2: producer tables are total over source-valid
+  values and exact GDAL lookup is enabled on both VRT paths.
+- [x] (2026-08-25) Milestone 3: both clients decode all three known transport
+  generations, apply either display palette, count/reset Unassigned, and expose
+  decoded legend and tooltip semantics.
+- [x] (2026-08-25) Milestone 4: server legends share one definition and the
+  cross-client/Python parity test passes.
+- [x] (2026-08-25) Milestone 5: all three real-GDAL output paths, focused
+  producer/client suites, full frontend gates, docs gates, stubs, and the
+  4096×4096 performance bound pass. Repository-wide Python validation passed;
+  final correctness review findings were corrected and the reviewer approved
+  closure with no unresolved high/medium findings.
 
 ## Surprises & Discoveries
 
@@ -87,6 +95,13 @@ explicit compatibility limitation until re-validation.
 - `resources_baer_sbs` has no authorization decorator and never calls
   `authorize()`. Its route/auth behavior is unchanged and out of scope; any
   remediation requires a separate security-scoped package and current contract.
+- Exact color relief plus a numeric NoData entry and `nv` produces an invalid
+  VRT LUT in GDAL 3.10 because the generated lookup is no longer monotonic.
+  NoData is therefore represented exclusively by `nv`; totality applies to the
+  source-valid domain. A real VRT-to-PNG regression covers this constraint.
+- The first exact-RGB implementation exceeded the benchmark ceiling because it
+  allocated string keys in the per-pixel loop. Packing RGB into one integer
+  reduced the slowest new path to 0.650 times the old shifted decoder median.
 
 ## Decision Log
 
@@ -123,10 +138,23 @@ explicit compatibility limitation until re-validation.
   Rationale: uploaded rasters carry their own palettes and are classified by that
   table; removing it breaks every upload.
   Date/Author: 2026-08-24, Claude Code proposal adopted by Roger Lew.
+- Decision: emit NoData only through GDAL's `nv` color-table entry.
+  Rationale: a duplicate numeric NoData entry makes exact-mode VRT LUTs invalid;
+  excluding NoData preserves the intended total source-valid domain and yields
+  transparent NoData in all three generated-output tests.
+  Date/Author: 2026-08-25, Codex, based on executional GDAL evidence.
 
 ## Outcomes & Retrospective
 
-_Fill at closure._
+The package completed without adding a route, payload, migration, or historical
+artifact rewrite. Newly validated rasters now use exact, total class transport;
+both clients decode all known generations and expose Unassigned rather than
+passing stored RGB through. Real-GDAL coverage caught the subtle duplicate
+numeric-NoData/`nv` VRT failure before closure. Packed RGB lookup made the most
+expensive new decode path faster than the old shifted-only path while preserving
+the source-plus-one-destination memory bound. Final validation passed 6,697
+Python tests (63 skipped), 105 frontend suites / 778 tests, lint, stubs, docs,
+and independent correctness review.
 
 ## Context and Orientation
 

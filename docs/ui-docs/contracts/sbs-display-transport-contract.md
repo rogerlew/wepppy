@@ -1,7 +1,7 @@
 # SBS Display Transport Contract
 
 **Owner**: WEPPcloud SBS display and validate-time render paths  
-**Status**: Proposed by SBS-A11Y-02; implementation conformance pending  
+**Status**: Accepted and implemented by SBS-A11Y-02 (2026-08-25)
 **Security impact**: low; no request, authorization, persistence, or queue surface
 
 ## Purpose and Scope

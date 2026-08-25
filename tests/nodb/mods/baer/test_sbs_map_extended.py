@@ -12,12 +12,14 @@ import importlib
 import tempfile
 import unittest
 from collections import Counter
+from types import SimpleNamespace
 from unittest import mock
 
 import numpy as np
 from osgeo import gdal, osr
 from osgeo.gdalconst import GDT_Byte, GDT_Int16
 
+from wepppy.nodb.mods.baer.baer import Baer
 from wepppy.nodb.mods.baer.sbs_map import (
     SoilBurnSeverityMap,
     get_sbs_color_table,
@@ -568,7 +570,8 @@ class TestNonColorTableMaps(unittest.TestCase):
         sbs_map._write_color_table(color_table_path)
         with open(color_table_path) as fp:
             entries = {line.split(maxsplit=1)[0]: line.split(maxsplit=1)[1].strip() for line in fp}
-        self.assertEqual(entries['3'], '0 0 0 0')
+        self.assertNotIn('3', entries)
+        self.assertEqual(entries['nv'], '0 0 0 0')
 
         output_fn = os.path.join(self.temp_dir, '4class_nonseq_export.tif')
         sbs_map.export_4class_map(output_fn)
@@ -919,8 +922,98 @@ class TestSBSMapProperties(unittest.TestCase):
 
         with open(color_table_path) as fp:
             entries = {line.split(maxsplit=1)[0]: line.split(maxsplit=1)[1].strip() for line in fp}
-        self.assertEqual(entries['9'], '0 0 0 0')
+        self.assertNotIn('9', entries)
+        self.assertEqual(entries['nv'], '0 0 0 0')
         self.assertEqual(entries['0'], '0 128 128 255')
+
+    def test_breaks_export_rgb_map_keeps_valid_pixels_opaque(self):
+        filename = os.path.join(self.temp_dir, 'breaks_rgb_input.tif')
+        vrt_path = os.path.join(self.temp_dir, 'breaks_rgb.vrt')
+        png_path = os.path.join(self.temp_dir, 'breaks_rgb.png')
+        data = np.array([[0, 1, 2, 3, 9]], dtype=np.uint8)
+        GeoTiffTestHelper.create_geotiff(filename, data, nodata_val=9)
+
+        SoilBurnSeverityMap(filename, breaks=[0, 1, 2, 3]).export_rgb_map(
+            filename, vrt_path, png_path
+        )
+
+        output = gdal.Open(png_path)
+        alpha = output.GetRasterBand(4).ReadAsArray()[0]
+        output = None
+        np.testing.assert_array_equal(alpha, np.array([255, 255, 255, 255, 0]))
+
+    def test_baer_class_map_real_gdal_output_keeps_valid_pixels_opaque(self):
+        filename = os.path.join(self.temp_dir, 'baer_rgb_input.tif')
+        vrt_path = os.path.join(self.temp_dir, 'baer_rgb.vrt')
+        png_path = os.path.join(self.temp_dir, 'baer_rgb.png')
+        color_table_path = os.path.join(self.temp_dir, 'baer_colors.txt')
+        data = np.array([[0, 1, 2, 3, 9]], dtype=np.uint8)
+        GeoTiffTestHelper.create_geotiff(filename, data, nodata_val=9)
+        controller = SimpleNamespace(
+            breaks=[0, 1, 2, 3],
+            class_map=[
+                (0, 'No Burn', 1),
+                (1, 'Low Severity Burn', 1),
+                (2, 'Moderate Severity Burn', 1),
+                (3, 'High Severity Burn', 1),
+                (9, 'No Data', 1),
+            ],
+            color_tbl_path=color_table_path,
+            baer_wgs=filename,
+            baer_rgb=vrt_path,
+            baer_rgb_png=png_path,
+        )
+
+        Baer.write_color_table(controller)
+        Baer.build_color_map(controller)
+
+        output = gdal.Open(png_path)
+        alpha = output.GetRasterBand(4).ReadAsArray()[0]
+        output = None
+        np.testing.assert_array_equal(alpha, np.array([255, 255, 255, 255, 0]))
+
+    def test_color_table_writer_is_total_over_palette_and_observed_values(self):
+        filename = os.path.join(self.temp_dir, 'total_color_table_input.tif')
+        color_table_path = os.path.join(self.temp_dir, 'total_color_table.txt')
+        data = np.array([[0, 1, 2, 3, 7, 9, 15]], dtype=np.uint8)
+        color_table = GeoTiffTestHelper.create_current_usgs_sbs_color_table()
+        color_table.SetColorEntry(7, (1, 2, 3, 255))
+        GeoTiffTestHelper.create_geotiff(
+            filename,
+            data,
+            color_table=color_table,
+            nodata_val=9,
+        )
+
+        sbs_map = SoilBurnSeverityMap(filename)
+        # Model a sparse source table whose observed domain extends beyond the
+        # declared entries; GTiff expands byte palettes to 256 entries on read.
+        sbs_map.ct = {"unburned": [0], "low": [1, 9], "mod": [2], "high": [3]}
+        sbs_map.source_color_table_count = 10
+        sbs_map._write_color_table(color_table_path)
+
+        with open(color_table_path, encoding='utf-8') as fp:
+            entries = {line.split(maxsplit=1)[0]: line.split(maxsplit=1)[1].strip() for line in fp}
+        self.assertTrue({str(value) for value in range(10) if value != 9}.issubset(entries))
+        self.assertEqual(entries['7'], '128 0 152 255')
+        self.assertEqual(entries['15'], '128 0 152 255')
+        self.assertNotIn('9', entries)
+        self.assertEqual(entries['nv'], '0 0 0 0')
+
+        vrt_path = os.path.join(self.temp_dir, 'total_color_table.vrt')
+        png_path = os.path.join(self.temp_dir, 'total_color_table.png')
+        sbs_map.export_rgb_map(filename, vrt_path, png_path)
+        self.assertTrue(os.path.exists(vrt_path))
+        output = gdal.Open(png_path)
+        rgba = np.stack(
+            [output.GetRasterBand(index).ReadAsArray() for index in range(1, 5)],
+            axis=-1,
+        )
+        output = None
+        np.testing.assert_array_equal(rgba[0, 4], np.array([128, 0, 152, 255]))
+        np.testing.assert_array_equal(rgba[0, 6], np.array([128, 0, 152, 255]))
+        self.assertTrue(np.all(rgba[0, [0, 1, 2, 3, 4, 6], 3] == 255))
+        self.assertEqual(int(rgba[0, 5, 3]), 0)
 
 
 class TestSBSMapSanityCheck(unittest.TestCase):

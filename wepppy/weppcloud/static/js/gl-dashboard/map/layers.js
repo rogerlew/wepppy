@@ -43,16 +43,23 @@ const D8_DIRECTION_ICON_MAPPING = Object.freeze({
   arrow: { x: 0, y: 0, width: 64, height: 64, mask: true },
 });
 const D8_DIRECTION_ICON_ID = 'arrow';
-const SBS_STANDARD_TO_SHIFTED_RGB = Object.freeze({
-  '0_128_128': [0, 158, 115],
-  '82_204_204': [86, 180, 233],
-  '255_232_32': [240, 228, 66],
-  '168_0_0': [204, 121, 167],
-  '0_115_74': [0, 158, 115],
-  '77_230_0': [86, 180, 233],
-  '255_255_0': [240, 228, 66],
-  '255_0_0': [204, 121, 167],
+const SBS_CLASS_DEFINITIONS = Object.freeze({
+  130: Object.freeze({ label: 'Unchanged / Unburned', standard: [0, 128, 128], shifted: [0, 158, 115] }),
+  131: Object.freeze({ label: 'Low Severity Burn', standard: [82, 204, 204], shifted: [86, 180, 233] }),
+  132: Object.freeze({ label: 'Moderate Severity Burn', standard: [255, 232, 32], shifted: [240, 228, 66] }),
+  133: Object.freeze({ label: 'High Severity Burn', standard: [168, 0, 0], shifted: [204, 121, 167] }),
 });
+const SBS_UNASSIGNED_RGB = Object.freeze([128, 0, 152]);
+const SBS_RGB_TO_CLASS = Object.freeze({
+  '46_203_24': 130, '161_250_220': 131, '255_161_5': 132, '217_34_3': 133,
+  '0_115_74': 130, '77_230_0': 131, '255_255_0': 132, '255_0_0': 133,
+  '0_128_128': 130, '82_204_204': 131, '255_232_32': 132, '168_0_0': 133,
+});
+const SBS_PACKED_RGB_TO_CLASS = Object.freeze(Object.entries(SBS_RGB_TO_CLASS).reduce((lookup, [key, classCode]) => {
+  const channels = key.split('_').map(Number);
+  lookup[(channels[0] << 16) | (channels[1] << 8) | channels[2]] = classCode;
+  return lookup;
+}, {}));
 
 function resolveFeatureIdentity(props, state) {
   const topazId = resolveTopazIdFromProperties(props);
@@ -313,45 +320,78 @@ function getSbsRgbKey(r, g, b) {
 }
 
 function mapSbsRgbForDisplay(r, g, b, shifted) {
-  if (!shifted) return [r, g, b];
-  return SBS_STANDARD_TO_SHIFTED_RGB[getSbsRgbKey(r, g, b)] || [r, g, b];
+  const classCode = SBS_RGB_TO_CLASS[getSbsRgbKey(r, g, b)] || null;
+  if (classCode === null) return [...SBS_UNASSIGNED_RGB];
+  return [...SBS_CLASS_DEFINITIONS[classCode][shifted ? 'shifted' : 'standard']];
 }
 
-function getShiftedSbsCanvas(layer, shifted) {
-  if (!shifted || !layer || !layer.canvas) return layer && layer.canvas ? layer.canvas : null;
+function decodeSbsPixel(r, g, b) {
+  const classCode = SBS_PACKED_RGB_TO_CLASS[(r << 16) | (g << 8) | b] || null;
+  return classCode === null
+    ? { classCode: null, label: 'Unassigned', unassigned: true }
+    : { classCode, label: SBS_CLASS_DEFINITIONS[classCode].label, unassigned: false };
+}
+
+function getSbsLegendItems(shifted, unassignedCount = 0) {
+  const palette = shifted ? 'shifted' : 'standard';
+  const items = Object.entries(SBS_CLASS_DEFINITIONS).map(([key, definition]) => ({
+    key: Number(key),
+    color: `rgb(${definition[palette].join(', ')})`,
+    label: `${definition.label} (${key})`,
+  }));
+  items.push({ key: 'unassigned', color: 'rgb(128, 0, 152)', label: `Unassigned: ${Number(unassignedCount) || 0}` });
+  items.push({ key: 255, color: '#FFFFFF', label: 'Masked / Unmappable (255)', masked: true });
+  return items;
+}
+
+function recolorSbsPixels(data, shifted) {
+  const palette = shifted ? 'shifted' : 'standard';
+  let unassignedPixelCount = 0;
+  for (let i = 0; i < data.length; i += 4) {
+    if (data[i + 3] === 0) continue;
+    const classCode = SBS_PACKED_RGB_TO_CLASS[(data[i] << 16) | (data[i + 1] << 8) | data[i + 2]] || null;
+    const mapped = classCode === null ? SBS_UNASSIGNED_RGB : SBS_CLASS_DEFINITIONS[classCode][palette];
+    if (classCode === null) unassignedPixelCount += 1;
+    data[i] = mapped[0];
+    data[i + 1] = mapped[1];
+    data[i + 2] = mapped[2];
+    data[i + 3] = 255;
+  }
+  return unassignedPixelCount;
+}
+
+function getSbsDisplayCanvas(layer, shifted) {
+  if (!layer || !layer.canvas) return null;
 
   const sourceCanvas = layer.canvas;
   const sourceWidth = Number(sourceCanvas.width);
   const sourceHeight = Number(sourceCanvas.height);
   if (!Number.isFinite(sourceWidth) || !Number.isFinite(sourceHeight) || sourceWidth <= 0 || sourceHeight <= 0) {
-    return sourceCanvas;
+    throw new Error('Unable to decode SBS canvas with invalid dimensions.');
   }
   if (
-    layer._sbsShiftedCanvas &&
-    layer._sbsShiftedCanvas.width === sourceCanvas.width &&
-    layer._sbsShiftedCanvas.height === sourceCanvas.height
+    layer._sbsDisplayCanvas &&
+    layer._sbsDisplayMode === shifted &&
+    layer._sbsDisplayCanvas.width === sourceCanvas.width &&
+    layer._sbsDisplayCanvas.height === sourceCanvas.height
   ) {
-    return layer._sbsShiftedCanvas;
+    return layer._sbsDisplayCanvas;
   }
 
   const canvas = document.createElement('canvas');
   canvas.width = sourceCanvas.width;
   canvas.height = sourceCanvas.height;
   const ctx = canvas.getContext('2d');
-  if (!ctx) return sourceCanvas;
+  if (!ctx) throw new Error('Unable to access SBS decode canvas context.');
 
   ctx.drawImage(sourceCanvas, 0, 0);
   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
   const data = imageData.data;
-  for (let i = 0; i < data.length; i += 4) {
-    if (data[i + 3] === 0) continue;
-    const mapped = mapSbsRgbForDisplay(data[i], data[i + 1], data[i + 2], true);
-    data[i] = mapped[0];
-    data[i + 1] = mapped[1];
-    data[i + 2] = mapped[2];
-  }
+  const unassignedPixelCount = recolorSbsPixels(data, shifted);
   ctx.putImageData(imageData, 0, 0);
-  layer._sbsShiftedCanvas = canvas;
+  layer.sbsUnassignedCount = unassignedPixelCount;
+  layer._sbsDisplayCanvas = canvas;
+  layer._sbsDisplayMode = shifted;
   return canvas;
 }
 
@@ -1217,18 +1257,10 @@ export function createLayerUtils({
     if (xi < 0 || xi >= layer.width || yi < 0 || yi >= layer.height) return null;
     if (layer.sampleMode === 'rgba') {
       const base = (yi * layer.width + xi) * 4;
-      const shifted = layer.key === 'sbs' && !!getState().sbsColorShiftEnabled;
-      const mapped = mapSbsRgbForDisplay(
-        layer.values[base],
-        layer.values[base + 1],
-        layer.values[base + 2],
-        shifted,
-      );
-      const r = mapped[0];
-      const g = mapped[1];
-      const b = mapped[2];
       const a = layer.values[base + 3];
-      return `rgba(${r}, ${g}, ${b}, ${a})`;
+      if (a === 0) return null;
+      const decoded = decodeSbsPixel(layer.values[base], layer.values[base + 1], layer.values[base + 2]);
+      return decoded.unassigned ? 'Unassigned' : `${decoded.classCode}: ${decoded.label}`;
     }
     const idx = yi * layer.width + xi;
     const v = layer.values[idx];
@@ -1252,7 +1284,7 @@ export function createLayerUtils({
         }
         if (layer.canvas) {
           const image = layer.key === 'sbs'
-            ? getShiftedSbsCanvas(layer, sbsColorShift)
+            ? getSbsDisplayCanvas(layer, sbsColorShift)
             : layer.canvas;
           return new deck.BitmapLayer({
             id: `raster-${layer.key}`,
@@ -1635,6 +1667,9 @@ export function createLayerUtils({
     formatTooltip,
     getActiveLayersForLegend,
     getChannelLegendItems: buildChannelLegendItems,
+    getSbsLegendItems,
+    recolorSbsPixels,
+    getSbsDisplayCanvas,
     constants: { NLCD_COLORMAP, NLCD_LABELS, RAP_BAND_LABELS },
     helpers: {
       landuseValue,

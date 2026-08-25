@@ -105,12 +105,23 @@ ColorLookup: TypeAlias = dict[RGBColor, Optional[str]]
 HashableBreaks: TypeAlias = tuple[int | float, ...]
 HashableNoData: TypeAlias = Optional[tuple[int | float, ...]]
 
+SBS_UNASSIGNED_RGBA = (128, 0, 152, 255)
+SBS_DISPLAY_CLASSES: tuple[tuple[int, str, str], ...] = (
+    (130, "Unchanged / Unburned", "#008080"),
+    (131, "Low Severity Burn", "#52CCCC"),
+    (132, "Moderate Severity Burn", "#FFE820"),
+    (133, "High Severity Burn", "#A80000"),
+    (255, "Masked / Unmappable", "#FFFFFF"),
+)
+
 __all__ = [
     "classify",
     "ct_classify",
     "get_sbs_color_table",
     "sbs_map_sanity_check",
     "SoilBurnSeverityMap",
+    "SBS_DISPLAY_CLASSES",
+    "SBS_UNASSIGNED_RGBA",
 ]
 
 
@@ -778,6 +789,7 @@ class SoilBurnSeverityMap(LandcoverMap):
         ds = gdal.Open(fname)
         band = ds.GetRasterBand(1)
         raster_ct = band.GetRasterColorTable()
+        source_color_table_count = raster_ct.GetCount() if raster_ct is not None else 0
         if raster_ct is not None:
             for index in range(raster_ct.GetCount()):
                 entry = raster_ct.GetColorEntry(index)
@@ -844,6 +856,7 @@ class SoilBurnSeverityMap(LandcoverMap):
         self.fname = fname
         self.nodata_vals = nodata_list
         self.source_nodata_vals = source_nodata_list
+        self.source_color_table_count = source_color_table_count
         self._nodata_vals: Optional[list[int | float]] = None
 
     @property
@@ -1096,9 +1109,9 @@ class SoilBurnSeverityMap(LandcoverMap):
 
             with open(color_tbl_path, 'w') as fp:
                 for v, cnt in self.counts:
-                    k = 255 if v in self.source_nodata_vals else classify(
-                        v, breaks, nodata_vals, offset=130
-                    )
+                    if v in self.source_nodata_vals:
+                        continue
+                    k = classify(v, breaks, nodata_vals, offset=130)
                     fp.write('{} {}\n'.format(v, _map[str(k)]))
                 fp.write("nv 0 0 0 0\n")
         else:
@@ -1110,14 +1123,32 @@ class SoilBurnSeverityMap(LandcoverMap):
                 "high": "168 0 0 255",
             }
 
+            unassigned = " ".join(str(value) for value in SBS_UNASSIGNED_RGBA)
+
             d = {}
             for burn_class in ct:
                 color = _map[burn_class]
                 for px in ct[burn_class]:
                     d[int(px)] = color
-            for px in self.source_nodata_vals:
-                if isint(px):
-                    d[int(px)] = _map["nv"]
+            integer_nodata_values = {
+                int(px)
+                for px in self.source_nodata_vals
+                if isint(px)
+            }
+            for value in integer_nodata_values:
+                d.pop(value, None)
+
+            source_values = {
+                int(value)
+                for value, _count in self.counts
+                if isint(value)
+            }
+            for value in range(self.source_color_table_count):
+                if value not in integer_nodata_values:
+                    d.setdefault(value, unassigned)
+            for value in source_values:
+                if value not in integer_nodata_values:
+                    d.setdefault(value, unassigned)
 
             with open(color_tbl_path, 'w') as fp:
                 for v, color in sorted(d.items()):
@@ -1142,7 +1173,7 @@ class SoilBurnSeverityMap(LandcoverMap):
         if _exists(disturbed_rgb):
             os.remove(disturbed_rgb)
 
-        cmd = ['gdaldem', 'color-relief', '-of', 'VRT', '-alpha',
+        cmd = ['gdaldem', 'color-relief', '-of', 'VRT', '-alpha', '-exact_color_entry',
                wgs_fn, color_tbl_path, disturbed_rgb]
         p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
         p.wait()

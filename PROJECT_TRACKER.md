@@ -405,35 +405,6 @@ When resuming Kubernetes work:
 
 ## 🚧 In Progress
 
-### SBS Display Class Decoding
-
-**Started**: 2026-08-24
-
-**Size**: Medium
-
-**Priority**: High
-
-**Security impact**: `low` (the proposed delta changes an existing validate-time
-render path and client display logic; it adds no route, payload, persistence, or
-authorization surface)
-
-**Link**: [docs/work-packages/20260824_sbs_class_transport/](docs/work-packages/20260824_sbs_class_transport/)
-
-**Description**: Make newly validated SBS display rasters a total, exact class
-transport, then decode known historical palette generations in both map clients
-before applying the current display palette. Unassigned pixels remain visible
-and distinct from masked/NoData. Historical interpolated or clamped pixels are
-not fully recoverable without re-validation; the operator explicitly approved
-that compatibility policy.
-
-**Status**: **Promoted-contract checkpoint review.** Closed-package governance
-was promoted into current standards and an SBS contract outside the package.
-The operator approved the compatibility policy and ADR-0045 is accepted. Two
-post-correction reviews and a standalone checkpoint ancestor remain before
-implementation; no production code has been edited.
-
----
-
 ### Deferred Job Retry Dependency Correction
 
 **Started**: 2026-08-23
@@ -1161,6 +1132,25 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### SBS Display Class Decoding
+
+**Completed**: 2026-08-25
+**Status**: ✅ **COMPLETE**
+**Security impact**: `low`; no route, payload, persistence, or authorization
+surface changed
+**Link**: [docs/work-packages/20260824_sbs_class_transport/](docs/work-packages/20260824_sbs_class_transport/)
+
+**Summary**: Completed total, exact SBS class transport and unconditional class
+decoding in both map clients. Unassigned pixels are visible, counted, and
+distinct from masked NoData; Dashboard tooltips and both legends use decoded
+semantics. Historical compatibility, parity, all three real-GDAL output paths,
+and a reproducible 4096×4096 performance/memory benchmark are covered. Final
+gates passed: 6,697 Python tests (63 skipped), 105 frontend suites / 778 tests,
+lint, stubs, docs, and independent correctness review with no unresolved
+high/medium findings.
+
+---
 
 ### Recorder CSRF Transport Repair
 

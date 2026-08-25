@@ -79,7 +79,7 @@ from wepppy.nodb.core import (
 from wepppy.nodb.core.management_overrides import is_unburned_forest_disturbed_class
 from ...redis_prep import RedisPrep, TaskEnum
 from ...base import NoDbBase, TriggerEvents, createProcessPoolExecutor, nodb_setter
-from ..baer.sbs_map import SoilBurnSeverityMap
+from ..baer.sbs_map import SBS_DISPLAY_CLASSES, SoilBurnSeverityMap
 from .. import MODS_DIR, EXTENDED_MODS_DATA
 
 from wepppyo3.raster_characteristics import count_intersecting_raster_key_pairs
@@ -1211,17 +1211,7 @@ class Disturbed(NoDbBase):
 
     @property
     def legend(self) -> List[Tuple[int, str, str]]:
-        keys = [130, 131, 132, 133, 255]
-
-        descs = ['Unchanged / Unburned',
-                'Low Severity Burn',
-                'Moderate Severity Burn',
-                'High Severity Burn',
-                'Masked / Unmappable']
-
-        colors = ['#008080', '#52CCCC', '#FFE820', '#A80000', '#FFFFFF']
-
-        return list(zip(keys, descs, colors))
+        return list(SBS_DISPLAY_CLASSES)
 
     @property
     def sbs_wgs_n(self) -> int:

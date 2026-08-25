@@ -92,6 +92,15 @@ Optional acceleration:
 
 ## Color Table And Palette Contracts
 
+Validate-time display generation uses a total color-relief table and
+`-exact_color_entry`. For color-table inputs, the emitted table covers the union
+of source palette indices and observed source-valid values; missing assignments
+use opaque Unassigned `128 0 152 255`, while source NoData remains transparent.
+The RGB output is a class transport consumed by both browser clients, not the
+authoritative display palette. See
+`docs/ui-docs/contracts/sbs-display-transport-contract.md` for historical decode
+and compatibility semantics.
+
 **Source of truth:** if code and docs diverge, update both in the same change.
 
 Lookup map locations:

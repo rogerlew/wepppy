@@ -1,6 +1,6 @@
 # SBS Display Class Decoding and Dashboard Tooltip Correction
 
-**Status**: Proposed (2026-08-24) - scaffold cleanup / contract review
+**Status**: Completed (2026-08-25)
 **Timezone**: UTC
 **Package ID**: SBS-A11Y-02
 
@@ -101,27 +101,27 @@ palette revisions apply to every run on next load.
 
 ## Success Criteria
 
-- [ ] The produced color table has an entry for every palette index; unassigned
+- [x] The produced color table has an entry for every palette index; unassigned
   indices carry the sentinel.
-- [ ] A generated PNG's opaque RGB set is a subset of the decode domain, proven
+- [x] A generated PNG's opaque RGB set is a subset of the decode domain, proven
   on an adversarial source with values between assigned breaks. Removing
   `-exact_color_entry` fails the test.
-- [ ] No code path renders a stored SBS display RGB. The non-shifted passthrough
+- [x] No code path renders a stored SBS display RGB. The non-shifted passthrough
   and both `SBS_STANDARD_TO_SHIFTED_RGB` tables are deleted.
-- [ ] Known endpoint colors from generation-0, generation-A, and generation-B
+- [x] Known endpoint colors from generation-0, generation-A, and generation-B
   rasters render canonical colors in both clients and both modes, with stored
   bytes unchanged; between-break generation-0 pixels exercise the approved
   Unassigned compatibility loss.
-- [ ] Unassigned pixels render `#800098` at full alpha, are counted, and appear
+- [x] Unassigned pixels render `#800098` at full alpha, are counted, and appear
   as a labeled legend entry in both clients.
-- [ ] Unassigned is never rendered as a severity color nor as masked
+- [x] Unassigned is never rendered as a severity color nor as masked
   transparency.
-- [ ] GL Dashboard SBS tooltip reports class code and label, or `Unassigned`.
-- [ ] One server-side definition and one definition per separate client
+- [x] GL Dashboard SBS tooltip reports class code and label, or `Unassigned`.
+- [x] One server-side definition and one definition per separate client
   boundary; a cross-client/Python parity test fails if they disagree.
-- [ ] The blueprint registers no new route and `query/baer_wgs_map` payload shape
+- [x] The blueprint registers no new route and `query/baer_wgs_map` payload shape
   is unchanged from baseline.
-- [ ] SBS-A11Y-01 ingestion recognition fixtures pass unchanged.
+- [x] SBS-A11Y-01 ingestion recognition fixtures pass unchanged.
 
 ## Parameterization ADR Gate
 
@@ -175,12 +175,19 @@ Reference: `docs/standards/parameterization-adr-standard.md`
 - `docs/ui-docs/map-specification-and-behavior.md`
 - `docs/ui-docs/gl-dashboard.md`
 - `docs/ui-docs/contracts/sbs-display-transport-contract.md`
-- `prompts/active/sbs_class_transport_execplan.md`
+- `prompts/completed/sbs_class_transport_execplan.md`
 
 ## Deliverables
 
-_Fill at closure._
+- Total, exact validate-time SBS color transport with explicit Unassigned.
+- Class decoding and canonical recoloring in the run page and GL Dashboard.
+- Counted legends, decoded Dashboard tooltip, and server legend consolidation.
+- Cross-boundary parity, real-GDAL output, historical compatibility, lifecycle,
+  and performance/memory evidence.
 
 ## Follow-up Work
 
-_Fill at closure._
+- Authorization of `resources_baer_sbs` remains a separate security-scoped
+  concern; this package did not alter that route.
+- Existing interpolated and clamped artifacts remain fully correctable only by
+  user-initiated re-validation, as recorded in the durable contract.

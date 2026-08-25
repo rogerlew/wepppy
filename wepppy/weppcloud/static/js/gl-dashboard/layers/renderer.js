@@ -46,21 +46,6 @@ export function createLayerRenderer({
   } = constants || {};
   const comparisonMeasures = Array.isArray(COMPARISON_MEASURES) ? COMPARISON_MEASURES : [];
 
-  // SBS burn class colors and labels (matches map_gl.js / baer.py / disturbed.py)
-  const SBS_CLASSES_STANDARD = [
-    { color: '#008080', label: 'Unchanged / Unburned' },
-    { color: '#52CCCC', label: 'Low' },
-    { color: '#FFE820', label: 'Moderate' },
-    { color: '#A80000', label: 'High' },
-    { color: '#FFFFFF', label: 'Masked / Unmappable', masked: true },
-  ];
-  const SBS_CLASSES_SHIFTED = [
-    { color: '#009E73', label: 'Unburned' },
-    { color: '#56B4E9', label: 'Low' },
-    { color: '#F0E442', label: 'Moderate' },
-    { color: '#CC79A7', label: 'High' },
-  ];
-
   // Units for continuous layers
   const LAYER_UNITS = {
     cancov: '%',
@@ -1302,11 +1287,12 @@ export function createLayerRenderer({
     return container;
   }
 
-  function getSbsLegendClasses(state) {
-    if (state && state.sbsColorShiftEnabled) {
-      return SBS_CLASSES_SHIFTED;
-    }
-    return SBS_CLASSES_STANDARD;
+  function getSbsLegendClasses(state, layer) {
+    if (!layerUtils || typeof layerUtils.getSbsLegendItems !== 'function') return [];
+    return layerUtils.getSbsLegendItems(
+      !!(state && state.sbsColorShiftEnabled),
+      layer && layer.sbsUnassignedCount,
+    );
   }
 
   function renderContinuousLegend(minVal, maxVal, unit, colormap, editor = null) {
@@ -1547,7 +1533,7 @@ export function createLayerRenderer({
     }
 
     if (layer.key === 'sbs') {
-      section.appendChild(renderCategoricalLegend(getSbsLegendClasses(state)));
+      section.appendChild(renderCategoricalLegend(getSbsLegendClasses(state, layer)));
       return section;
     }
 

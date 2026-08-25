@@ -42,14 +42,6 @@ var Baer = (function () {
     var DEFAULT_OPACITY = 0.7;
     var LEGEND_OPACITY_CONTAINER_ID = "baer-opacity-controls";
     var LEGEND_OPACITY_INPUT_ID = "baer-opacity-slider";
-    var SBS_LEGEND_ITEMS = [
-        { key: 130, label: "Unchanged / Unburned", color: "#008080" },
-        { key: 131, label: "Low Severity Burn", color: "#52CCCC" },
-        { key: 132, label: "Moderate Severity Burn", color: "#FFE820" },
-        { key: 133, label: "High Severity Burn", color: "#A80000" },
-        { key: 255, label: "Masked / Unmappable", color: "#FFFFFF", masked: true }
-    ];
-
     function ensureHelpers() {
         var dom = window.WCDom;
         var forms = window.WCForms;
@@ -857,7 +849,7 @@ var Baer = (function () {
                 html += ""
                     + "<div class=\"wc-legend-item\">"
                     + "<span class=\"wc-legend-item__swatch\" style=\"--legend-color: " + escapeHtml(item.color) + ";" + (item.masked ? " border: 1px solid #333;" : "") + "\" aria-label=\"Color swatch for " + escapeHtml(item.label) + "\"></span>"
-                    + "<span class=\"wc-legend-item__label\">" + escapeHtml(item.label) + " (" + escapeHtml(item.key) + ")</span>"
+                    + "<span class=\"wc-legend-item__label\">" + escapeHtml(item.label) + " (" + escapeHtml(item.key) + ")" + (item.count !== undefined ? ": " + escapeHtml(item.count) : "") + "</span>"
                     + "</div>";
             });
             html += "</div>";
@@ -867,7 +859,11 @@ var Baer = (function () {
         function loadLegend() {
             var legend = dom.qs("#sbs_legend");
             if (legend) {
-                legend.innerHTML = buildSbsLegendHtml(SBS_LEGEND_ITEMS);
+                var shared = window.WCMapGlShared;
+                var items = shared && typeof shared.getSbsLegendItemsForMode === "function"
+                    ? shared.getSbsLegendItemsForMode("standard", 0)
+                    : [];
+                legend.innerHTML = buildSbsLegendHtml(items);
                 attachOpacitySlider(legend);
             }
             return Promise.resolve();

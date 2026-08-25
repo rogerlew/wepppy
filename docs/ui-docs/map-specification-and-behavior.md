@@ -290,6 +290,13 @@ Assumptions (historical; Phase 13 flips defaults):
   palette (`#008080`, `#52CCCC`, `#FFE820`, `#A80000`, `#FFFFFF`). The existing
   client-side color-shift mode remains available. Masked/unmappable pixels are transparent and
   the labeled white legend swatch has a dark boundary.
+- SBS display transport follows
+  `docs/ui-docs/contracts/sbs-display-transport-contract.md`. Both standard and
+  shifted modes decode known historical RGB endpoints to class before applying
+  the active palette. Unknown opaque pixels render as the labeled, counted
+  Unassigned state (`#800098`); alpha-zero pixels remain masked. Existing
+  historical interpolated or clamped pixels retain the compatibility limits in
+  that contract until re-validation.
 - Events: `baer:map:opacity` emitted on slider changes; SBS refresh emits `map:layer:refreshed`/`map:layer:error`.
 - Tests: Jest covers SBS legend show/hide + opacity slider updates; Playwright covers toggle visibility, slider updates, and empty-run behavior.
 

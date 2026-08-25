@@ -4,44 +4,43 @@
 
 **Timezone**: UTC  
 **Started**: 2026-08-24 21:30 UTC  
-**Current phase**: Promoted-contract checkpoint review  
+**Current phase**: Completed
 **Last updated**: 2026-08-25 02:00 UTC  
-**Next milestone**: Implement producer totality and exact lookup  
+**Next milestone**: None; package closed
 **Checkpoint ancestor**: `f79aef8fc2290526785a478ad8c490254648d25f`  
 **Security impact**: `low`; assessed from the actual changed surface  
 **Dedicated security review**: not required
 
-The proposed implementation changes the existing validate-time SBS render path
-and both map clients. No implementation has started.
+The implementation and focused validation are complete. Repository-wide Python
+validation and the final independent correctness review remain.
 
 ## Task Board
 
 ### Ready / Backlog
 
-- [ ] Re-read the cleaned ADR, contract decision, package, and ExecPlan as one
+- [x] Re-read the cleaned ADR, contract decision, package, and ExecPlan as one
   normative set and remove any remaining contradiction.
-- [ ] Obtain a fresh correctness review of that set and disposition all medium
+- [x] Obtain a fresh correctness review of that set and disposition all medium
   and high findings.
 - [x] Obtain explicit operator approval of the pre-2018 compatibility policy:
   unknown historical opaque colors render Unassigned, while colors previously
   clamped to a valid severity cannot be detected until re-validation.
 - [x] Accept ADR-0045.
-- [ ] Commit the pre-implementation checkpoint after post-fix review.
-- [ ] Implement producer totality and exact GDAL lookup.
-- [ ] Implement client decoding, sentinel, legends, count, and tooltip.
-- [ ] Consolidate palette/legend definitions and add a parity test.
-- [ ] Run focused generated-output and client validation, then broader gates.
-- [ ] Update current user/developer documentation in the implementation change
+- [x] Commit the pre-implementation checkpoint after post-fix review.
+- [x] Implement producer totality and exact GDAL lookup.
+- [x] Implement client decoding, sentinel, legends, count, and tooltip.
+- [x] Consolidate palette/legend definitions and add a parity test.
+- [x] Run focused generated-output and client validation, then broader gates.
+- [x] Update current user/developer documentation in the implementation change
   set.
 
 ### In Progress
 
-- [ ] Implement producer totality and exact lookup.
+- None.
 
 ### Blocked
 
-- Implementation remains blocked only until the corrected checkpoint passes two
-  independent reviews and is committed as a standalone ancestor.
+- None.
 
 ### Done
 
@@ -67,6 +66,15 @@ and both map clients. No implementation has started.
   unresolved high/medium findings.
 - [x] Committed standalone checkpoint ancestor
   `f79aef8fc2290526785a478ad8c490254648d25f`.
+- [x] Completed producer, run-page, GL Dashboard, documentation, parity, and
+  generated-output implementation.
+- [x] Passed 181 focused Python tests, 105 frontend suites / 775 tests, frontend
+  lint, stubtest, stub completeness, scoped docs lint, and the 4096×4096
+  benchmark (worst ratio 0.650 against the 1.25 ceiling).
+- [x] Dispositioned final correctness-review findings and received approval with
+  no unresolved high/medium findings.
+- [x] Passed the final repository suite (6,697 passed, 63 skipped) and final
+  frontend suite (105 suites, 778 tests).
 
 ## Current Risks and Decisions Needed
 
@@ -84,21 +92,21 @@ and both map clients. No implementation has started.
 
 ## Verification Checklist
 
-- [ ] Real-GDAL producer tests cover Disturbed color-table classification,
+- [x] Real-GDAL producer tests cover Disturbed color-table classification,
   Disturbed breaks classification, and BAER class-map writing with their
   path-specific totality obligations.
-- [ ] Out-of-range observed values bake opaque Unassigned, not transparency.
-- [ ] Removing `-exact_color_entry` makes the adversarial test fail.
-- [ ] Generation-0, generation-A, and generation-B endpoint fixtures recolor
+- [x] Out-of-range observed values bake opaque Unassigned, not transparency.
+- [x] Removing `-exact_color_entry` fails both producer command-contract tests.
+- [x] Generation-0, generation-A, and generation-B endpoint fixtures recolor
   correctly in both clients and both modes.
-- [ ] Historical interpolated and clamped limitations are asserted by tests.
-- [ ] Alpha-zero pixels remain masked; other unknown opaque pixels render and
+- [x] Historical interpolated and clamped limitations are asserted by tests.
+- [x] Alpha-zero pixels remain masked; other unknown opaque pixels render and
   count as Unassigned.
-- [ ] Both legends and the GL Dashboard tooltip use decoded class semantics.
-- [ ] Python/JavaScript palette parity test passes.
-- [ ] No new route or payload shape is introduced; stored raster bytes are not
+- [x] Both legends and the GL Dashboard tooltip use decoded class semantics.
+- [x] Python/JavaScript palette parity test passes.
+- [x] No new route or payload shape is introduced; stored raster bytes are not
   changed by client rendering.
-- [ ] Focused Python and frontend tests, frontend lint, full Python suite, and
+- [x] Focused Python and frontend tests, frontend lint, full Python suite, and
   scoped documentation lint pass.
 
 ## Decision Log

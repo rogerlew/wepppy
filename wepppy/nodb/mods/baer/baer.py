@@ -53,7 +53,7 @@ from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.soils.ssurgo import SoilSummary
 from wepppy.wepp.soils.utils import SoilReplacements, WeppSoilUtil, simple_texture
 
-from .sbs_map import SoilBurnSeverityMap
+from .sbs_map import SBS_DISPLAY_CLASSES, SoilBurnSeverityMap
 
 __all__ = [
     'BaerNoDbLockedException',
@@ -232,17 +232,7 @@ class Baer(NoDbBase):
 
     @property
     def legend(self) -> List[Tuple[int, str, str]]:
-        keys = [130, 131, 132, 133, 255]
-
-        descs = ['Unchanged / Unburned',
-                'Low Severity Burn',
-                'Moderate Severity Burn',
-                'High Severity Burn',
-                'Masked / Unmappable']
-
-        colors = ['#008080', '#52CCCC', '#FFE820', '#A80000', '#FFFFFF']
-
-        return list(zip(keys, descs, colors))
+        return list(SBS_DISPLAY_CLASSES)
 
     def write_color_table(self) -> None:
         breaks = self.breaks
@@ -258,6 +248,8 @@ class Baer(NoDbBase):
 
         with open(self.color_tbl_path, 'w') as fp:
             for v, k, c in self.class_map:
+                if k == 'No Data':
+                    continue
                 fp.write('{} {}\n'.format(v, _map[k]))
 
             fp.write("nv 255 255 255 0\n")
@@ -267,7 +259,7 @@ class Baer(NoDbBase):
         if _exists(baer_rgb):
             os.remove(baer_rgb)
 
-        cmd = ['gdaldem', 'color-relief', '-of', 'VRT', '-alpha',
+        cmd = ['gdaldem', 'color-relief', '-of', 'VRT', '-alpha', '-exact_color_entry',
                self.baer_wgs, self.color_tbl_path, baer_rgb]
         p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
         p.wait()
