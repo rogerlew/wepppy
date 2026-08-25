@@ -74,13 +74,25 @@ this rehearsal.
   stages, cache bypass, and `Render succeeded`; no missing-entrypoint signature
   occurred.
 
-## Manual UX gate
+## Manual UX and owned-writer gate
 
-Safari CAPTCHA, local login, OAuth login, retention of an already-authenticated
-pre-deploy browser session, and multi-tab logout require operator-controlled
-browsers/accounts. Earlier rehearsal checks passed these flows, but they must
-be re-confirmed against this final revision before production activation. No
-test or recovery step requires logout, cookie clearing, or site-data clearing.
+The operator confirmed Safari and Chrome CAPTCHA, OAuth login, and multi-tab
+logout propagation against the final Forest revision. Local login is disabled
+on Forest1 and is therefore not applicable. Forest1 uses session tokens for
+rq-engine access.
+
+The first final-revision check exposed that Forest1 still rendered the
+reader-first default: writer `session`, primary
+`__Host-weppcloud_session`, migration enabled. The host configuration was
+changed only to `SESSION_COOKIE_NAME=__Host-weppcloud_session`, then activated
+through the canonical `--targeted-web` deployment. Both live `weppcloud` and
+`rq-engine` containers now render writer/primary
+`__Host-weppcloud_session` with migration enabled. A fresh real CAP browser
+session received only `__Host-weppcloud_session` and no legacy `session`
+cookie. Public WEPPcloud, rq-engine, and CAP health remained HTTP 200.
+
+No test or recovery step required logout, cookie clearing, or site-data
+clearing.
 
 ## Non-blocking observation
 

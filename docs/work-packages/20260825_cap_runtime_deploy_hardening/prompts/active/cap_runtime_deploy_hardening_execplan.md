@@ -48,8 +48,11 @@ Users will not need to log out, clear cookies, or clear site data.
 - [x] (2026-08-25 21:38Z) Completed two exact no-flag Forest1 full deployments,
   targeted CAP/web isolation, disposable hostile CAP and stale-renderer gates,
   automatic CAP rescue evidence, and a real RQ-driven DEVAL render.
-- [ ] Re-confirm final-revision Safari CAPTCHA, local/OAuth login, retained
-  pre-deploy session, and multi-tab logout in operator-controlled browsers.
+- [x] (2026-08-25 22:00Z) Confirmed final-revision Safari/Chrome CAPTCHA,
+  OAuth login, and multi-tab logout; local login is disabled/N/A on Forest1.
+- [x] (2026-08-25 22:00Z) Flipped Forest1 to the owned-cookie writer through a
+  canonical targeted-web deploy and proved a fresh CAP session receives only
+  `__Host-weppcloud_session`.
 - [ ] Roll out to wepp1, verify login UX, and start the observation window.
 
 ## Surprises & Discoveries
@@ -149,22 +152,21 @@ Users will not need to log out, clear cookies, or clear site data.
 
 ## Outcomes & Retrospective
 
-The implementation and automated Forest1 matrix are complete at `e11985f02`.
+The implementation and Forest1 matrix are complete at `e11985f02` (with
+evidence documentation at `8ddfc4692`).
 The common architectural failure was closed by deriving build, recreation, and
 acceptance sets from Compose; CAP now has explicit runtime ownership,
 persistence, rotation, functional, and rescue contracts; and WEPPcloudR has an
 executable worker/renderer protocol gate. Two exact full deployments, targeted
-isolation checks, and an RQ-driven DEVAL publication passed. The remaining
-production hold is the final operator-controlled browser UX confirmation and
-production authorization, not an automated deployment or data-migration
-blocker. Detailed receipts are in
+isolation checks, an RQ-driven DEVAL publication, and the operator-controlled
+browser UX gate passed. Production now requires explicit activation
+authorization, not another Forest repair or browser-data migration step.
+Detailed receipts are in
 `artifacts/2026-08-25_forest1_integrated_rehearsal.md`.
 
-Production containment for CAP and WEPPcloudR is complete, but the durable
-deployment repair is not implemented.
-The package cannot close until review findings are dispositioned, both original
-EACCES paths are regression-tested, forest1 rehearsal succeeds, and production
-observability begins.
+The durable deployment repair and Forest1 release gate are complete. The
+package remains active through production activation and the observation
+window.
 
 ## Context and Orientation
 

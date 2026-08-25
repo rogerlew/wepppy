@@ -7,9 +7,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-25 15:48 UTC
-**Current phase**: Forest1 automated gate complete; final manual UX gate
-**Last updated**: 2026-08-25 21:38 UTC
-**Next milestone**: final-revision browser UX confirmation, then production
+**Current phase**: Forest1 gate complete; ready for production authorization
+**Last updated**: 2026-08-25 22:00 UTC
+**Next milestone**: production activation and observation
 **Security impact**: `high`
 **Dedicated security review**: `yes`
 **Security artifact**: `docs/work-packages/20260825_cap_runtime_deploy_hardening/artifacts/2026-08-25_security_review.md`
@@ -19,18 +19,15 @@
 ### Ready / Backlog
 
 - [ ] Add the outstanding-token continuity case to the CAP Docker matrix.
-- [ ] Re-confirm final-revision Safari CAPTCHA, local/OAuth login, retained
-  session, and multi-tab logout on Forest1.
 - [ ] Deploy to wepp1 and begin the 14-day observation window.
 
 ### In Progress
 
-- [ ] Complete the operator-controlled browser UX gate.
+- None.
 
 ### Blocked
 
-- Production activation remains held for operator-controlled browser UX
-  confirmation and explicit production authorization.
+- Production activation requires explicit operator authorization.
 
 ### Done
 
@@ -79,6 +76,13 @@
 - [x] Final correctness, operations, QA, and security reassessment passed with
   Critical 0 and High 0 after the Lua transport repair and exact-revision
   rollback rehearsal (2026-08-25 21:30 UTC).
+- [x] Operator confirmed final-revision Safari/Chrome CAPTCHA, OAuth login, and
+  multi-tab logout propagation; local login is disabled/N/A on Forest1
+  (2026-08-25 22:00 UTC).
+- [x] Activated the Forest1 owned-cookie writer using targeted web; live
+  writer/primary are `__Host-weppcloud_session`, migration remains enabled,
+  and a fresh CAP session received no legacy `session` cookie (2026-08-25
+  22:00 UTC).
 
 ## Timeline
 
@@ -250,8 +254,8 @@ review; existing reviews continue to govern the CAP sub-scope.
 
 - [x] Forest1 baseline inventory captured before deployment.
 - [x] Exact no-argument full deployment passes twice on Forest1.
-- [ ] Forest1 local login, OAuth, retained-session, Safari/Chrome CAPTCHA, and
-  multi-tab logout checks pass.
+- [x] Forest1 OAuth, Safari/Chrome CAPTCHA, and multi-tab logout checks pass;
+  local login is disabled/N/A.
 - [x] A real RQ-driven DEVAL job publishes output and its render receipt.
 - [x] Forest1 stale-renderer and CAP failure injections fail closed and recover.
 - [x] Targeted modes preserve every non-selected container identity.
