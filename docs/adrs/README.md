@@ -85,3 +85,4 @@ Each ADR should normally include:
 - `ADR-0041`: [Canonical USGS SBS Accessibility Palette](ADR-0041-sbs-usgs-section508-palette.md) (Accepted, 2026-08-07)
 - `ADR-0042`: [Peak-Flow Phase 2A Screening and Volume Floors](ADR-0042-peakflow-phase2a-screening-and-volume-floors.md) (Accepted, 2026-08-08)
 - `ADR-0044`: [Seamless WEPPcloud Session Cookie Namespace Migration](ADR-0044-seamless-weppcloud-session-cookie-namespace-migration.md) (Proposed, 2026-08-23)
+- `ADR-0045`: [SBS Display Class Decoding and the Unassigned State](ADR-0045-sbs-class-coded-display-transport.md) (Accepted, 2026-08-24)

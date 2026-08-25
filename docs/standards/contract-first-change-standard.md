@@ -9,44 +9,41 @@ explain behavior; they do not create normative intent.
 
 ## Canonical Authority
 
-A contract is current and canonical only when it is in one of these finite sets:
+A contract is current and canonical only when it lives outside
+`docs/work-packages/` in a repository-owned specification location. The finite
+canonical set for this standard is:
 
-1. Before GOV-00A convention cutover:
-   - `docs/schemas/rq-response-contract.md`;
-   - `docs/schemas/weppcloud-csrf-contract.md`;
-   - `docs/schemas/output-scope-contract.md`;
-   - `docs/schemas/nodb-persistence-concurrency-contract.md`;
-   - `wepppy/nodb/mods/features_export/specification.md`, section 11;
-   - `docs/ui-docs/controller-contract.md`, for shared runtime invariants only;
-   - `wepppy/weppcloud/feature_registry/specification.md` and
-     `wepppy/weppcloud/feature_registry/feature_registry.yaml`, for feature-menu
-     metadata, discoverability, authorization, prerequisites, and active-state
-     presentation;
-   - `docs/adrs/ADR-0001-time-limited-publication-embargo-for-omni-contrasts.md`,
-     for Omni Contrasts maturity, embargo, and disabled discoverability;
-   - an operator-approved contract-decision checkpoint in the registered child
-     package that owns the affected Pure UI obligation.
-2. After GOV-00A convention cutover:
-   - the cross-cutting contracts above;
-   - `docs/ui-docs/controller-contract.md`, for the tests-first controller
-     convention; and
-   - the controller-specific canonical contract or concise intent matrix cited
-     by the active registered child package.
+- `docs/schemas/*.md` and specifications explicitly named by the nearest
+  subsystem `AGENTS.md`;
+- `docs/ui-docs/controller-contract.md` for shared runtime invariants and the
+  tests-first controller convention;
+- controller/domain contracts under `docs/ui-docs/contracts/`;
+- `wepppy/weppcloud/feature_registry/specification.md` and
+  `wepppy/weppcloud/feature_registry/feature_registry.yaml` for feature-menu
+  metadata, discoverability, authorization, prerequisites, and active-state
+  presentation; and
+- accepted ADRs for the decision scope each ADR explicitly governs.
 
 This finite-set rule is exclusive only within this standard's Pure UI/UI-coupled
 scope. Outside it, current canonical specifications explicitly named by the
 nearest subsystem `AGENTS.md` remain normative and are not demoted by this
 standard.
 
-The GOV-00A package and child-package register govern ratification and ownership;
-they do not substitute for a domain behavior contract. Unlisted UI documents,
-migration inventories, archived work packages, and archived plans are evidence
-or historical rationale only. Current implementation is authoritative only for
-what is observed, never for what is intended.
+Work packages, including their registers, matrices, checkpoints, and plans, are
+transient execution records bound to their time and implementation context.
+They are never current canonical authority after closure. A closed package may
+be cited as provenance or historical evidence, but no active package or
+production implementation may depend on changing it.
 
-If no current canonical contract covers intended behavior, stop. Use the
-registered child package to create and ratify the contract before changing
-implementation.
+Before a package closes, every rule that remains applicable to the repository
+must be promoted into the canonical set above. Promotion copies the durable
+normative rule and concise rationale into the current contract; it does not
+reopen or amend the historical package. Current implementation is authoritative
+only for what is observed, never for what is intended.
+
+If no current canonical contract covers intended behavior, stop. Use the active
+work package to create or amend a contract outside `docs/work-packages/`, ratify
+it through the checkpoint below, and only then change implementation.
 
 ## Covered Implementation Boundary
 
@@ -93,7 +90,7 @@ for that boundary.
 For an intended behavior change, implementation files must not be edited until
 all of the following are complete:
 
-1. Create `artifacts/<date>_contract_decision.md` in the registered child package.
+1. Create `artifacts/<date>_contract_decision.md` in the active work package.
 2. Record the starting implementation revision, every applicable contract, the
    exact normative delta, rationale, compatibility impact, security impact,
    discrepancy classification, and proposed regression evidence.
@@ -102,8 +99,9 @@ all of the following are complete:
    pending; do not claim the intended behavior is already deployed.
 5. Obtain two independent read-only contract reviews and disposition their
    findings. An author cannot approve their own amendment.
-6. Commit the checkpoint, contract amendments, and review disposition as a
-   standalone ancestor commit. Record its revision in the child tracker.
+6. Commit the checkpoint, promoted/current contract amendments, and review
+   disposition as a standalone ancestor commit. Record its revision in the
+   active package tracker.
 
 Only after that ancestor commit exists may UI, route, NoDb, or RQ implementation
 work begin. The implementation commit may include regression tests and supporting
@@ -111,7 +109,7 @@ documentation, but it cannot retroactively manufacture the checkpoint. Final
 reviewers verify base revision, contract revision, commit ancestry, and review
 timestamps.
 
-If commit authority has not been granted for the child package, stop after the
+If commit authority has not been granted for the active package, stop after the
 accepted checkpoint is prepared and request that authority. Do not begin
 implementation merely because the checkpoint is present in an uncommitted diff.
 
@@ -121,50 +119,41 @@ operator approval.
 
 ## Bounded Cross-Owner Remediation
 
-A production defect may span more than one registered future owner before the
-normal dependency spine reaches those packages. The operator may authorize one
-bounded remediation package to borrow only the affected obligations without
-claiming those owner packages are executed, verified, or dependency-complete.
+A production defect may span more than one domain. The operator may authorize
+one bounded remediation package to change only the affected obligations without
+claiming unrelated domain work is executed, verified, or dependency-complete.
 This exception is for a concrete defect with a finite implementation and test
 surface; it is not a general way to start planned domain work early.
 
 Before the borrowed-boundary package becomes a canonical checkpoint, all of the
 following are required:
 
-1. GOV-00A registers a stable remediation id, the dated package, every borrowed
-   owner, exact source boundary, excluded behavior, and the operator's explicit
-   authorization.
-2. The remediation package lists every applicable contract, resolves conflicts,
-   and amends authoritative metadata in the checkpoint ancestor. It cross-links
-   the borrowed owners so their later audits inherit the decision and evidence.
-3. Security impact is the highest expected impact of any borrowed owner. A
-   formal security artifact is mandatory when any borrowed owner is `high`.
+1. The active package records a stable remediation id, every affected current
+   contract, the exact source boundary, excluded behavior, and the operator's
+   explicit authorization.
+2. The package resolves conflicts and amends every affected current contract in
+   the checkpoint ancestor. Closed package ownership labels do not confer or
+   inflate current scope.
+3. Security impact is assessed from the actual changed attack surface. A formal
+   security artifact is mandatory when that delta is `high`.
 4. Two independent read-only reviews assess authority, scope containment,
    security, compatibility, and regression evidence; the primary agent
    dispositions every finding.
-5. The checkpoint, contract/metadata amendments, GOV-00A registration, reviews,
-   and disposition are committed together as a standalone ancestor before
-   implementation files are edited.
+5. The checkpoint, current contract amendments, reviews, and disposition are
+   committed together as a standalone ancestor before implementation files are
+   edited.
 6. Implementation and final review remain limited to the registered defect.
    Queue wiring, model parameterization, data schemas, and unrelated owner
    behavior remain blocked unless explicitly included and separately governed.
 
-The remediation package closes only the registered defect. It does not advance
-the evidence grade or execution state of a borrowed owner. GOV-01 must later
-validate that the remediation decision and regression evidence are referenced
-by each borrowed owner's canonical contract.
-
-A GOV-00A governance amendment supporting one bounded remediation may close as
-an independently reviewed milestone before the rest of GOV-00A closes. The
-register must name that milestone as the remediation dependency, and the
-standalone ancestor must include the milestone decision, standard/register
-amendments, reviews, and disposition. Closing that milestone does not ratify or
-close the remaining GOV-00A controller-test convention deliverable.
+The remediation package closes only the recorded defect. Its durable decision
+and regression obligations remain in the promoted current contracts; the closed
+package remains provenance only.
 
 ## Bounded Cross-Owner Enhancements
 
 An operator may authorize one finite enhancement package that composes behavior
-owned by multiple registered packages before their normal audit sequence runs.
+across multiple current domain contracts.
 This path is for a concrete requested capability with a small, exact source and
 contract boundary. It is not permission to execute, close, or raise the evidence
 grade of the composed owners, bypass their unrelated dependencies, or redesign
@@ -173,32 +162,29 @@ their domains.
 Before a bounded cross-owner enhancement becomes a canonical checkpoint, all of
 the following are required:
 
-1. The child register assigns a stable amendment id, dated package, every
-   composed owner, exact normative and source boundary, exclusions, security
-   impact, and the operator's explicit authorization.
+1. The active package records a stable amendment id, every affected current
+   contract, exact normative and source boundary, exclusions, security impact,
+   and the operator's explicit authorization.
 2. The package records the starting revision, every applicable canonical
    contract, exact intended delta, compatibility and data impact, regression
    evidence, and observable generated-output acceptance where applicable.
 3. The operator explicitly approves the exact contract matrix and confirms that
    the package may compose the named owners without advancing or closing them.
-4. Security impact is the highest expected impact of any composed owner. A
-   dedicated security artifact is mandatory when any owner or changed surface
-   is `high`.
+4. Security impact is assessed from the actual changed attack surface. A
+   dedicated security artifact is mandatory when that delta is `high`.
 5. Two independent read-only reviews assess authority, scope containment,
    security, compatibility, and regression evidence; the primary agent
    dispositions every finding and obtains post-fix confirmation for resolved
    high or medium findings.
-6. The standard/register amendment, checkpoint, canonical matrix, reviews, and
-   disposition are committed together as a standalone ancestor before
-   implementation files are edited.
+6. The checkpoint, current canonical contracts, reviews, and disposition are
+   committed together as a standalone ancestor before implementation files are
+   edited.
 7. Implementation and final review remain limited to the registered
    enhancement. Unlisted parameterization, schemas, queue topology, auth,
    owners, and shared behavior remain blocked.
 
-The enhancement closes only its finite composition. Each composed owner later
-inherits the decision and evidence but retains its prior state and dependencies.
-GOV-01 must evaluate recurring enhancement use before any generalized workflow
-or enforcement is introduced.
+The enhancement closes only its finite composition. Durable behavior and
+regression obligations remain in current contracts outside the closed package.
 
 ## Conformance Fixes and Urgent Restoration
 

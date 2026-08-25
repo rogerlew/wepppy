@@ -54,7 +54,7 @@
 - Prefer the smallest fix that resolves the confirmed failing path; for mechanical refactors, preserve code structure (scope/indent/order) and change only the intended tokens.
 - For incident-driven hardening and mitigation-retirement work, follow `docs/standards/hardening-lifecycle-standard.md`.
 - State assumptions explicitly in change notes before broadening behavior.
-- Assume model memory is unreliable for requirements: do not rely on chat history as the only source of truth.
+- Do not rely on model memory or chat history as the only requirements source; closed work packages are immutable history, never living governance, so promote durable rules outside `docs/work-packages/` and amend the promotion later.
 - When user conversation establishes or changes behavior/UX/data contracts, update the authoritative spec/work-package doc in the same change.
 - Capture both normative contract and concise rationale (why this choice, what alternatives were rejected) for conversation-derived decisions.
 - In handoff notes, cite the exact file/section where the decision was documented.

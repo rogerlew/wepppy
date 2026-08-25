@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-08-23
-**Active Packages**: 28
+**Last Updated**: 2026-08-24
+**Active Packages**: 29
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -404,6 +404,35 @@ When resuming Kubernetes work:
 ---
 
 ## 🚧 In Progress
+
+### SBS Display Class Decoding
+
+**Started**: 2026-08-24
+
+**Size**: Medium
+
+**Priority**: High
+
+**Security impact**: `low` (the proposed delta changes an existing validate-time
+render path and client display logic; it adds no route, payload, persistence, or
+authorization surface)
+
+**Link**: [docs/work-packages/20260824_sbs_class_transport/](docs/work-packages/20260824_sbs_class_transport/)
+
+**Description**: Make newly validated SBS display rasters a total, exact class
+transport, then decode known historical palette generations in both map clients
+before applying the current display palette. Unassigned pixels remain visible
+and distinct from masked/NoData. Historical interpolated or clamped pixels are
+not fully recoverable without re-validation; the operator explicitly approved
+that compatibility policy.
+
+**Status**: **Promoted-contract checkpoint review.** Closed-package governance
+was promoted into current standards and an SBS contract outside the package.
+The operator approved the compatibility policy and ADR-0045 is accepted. Two
+post-correction reviews and a standalone checkpoint ancestor remain before
+implementation; no production code has been edited.
+
+---
 
 ### Deferred Job Retry Dependency Correction
 

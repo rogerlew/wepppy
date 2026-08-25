@@ -137,7 +137,19 @@ When a work package is complete:
    - Remove temporary files (traces, large debugging dumps)
    - Consolidate notes if valuable, or remove if redundant
 
+5. **Promote durable governance:**
+   - Move every still-applicable contract, policy, invariant, or ownership rule
+     into its canonical location outside `docs/work-packages/`.
+   - Update active references to point to the promoted document.
+   - Leave the closed package unchanged afterward; it is historical provenance,
+     not a living governance surface.
+
 **Do not delete closed packages.** They serve as historical reference for similar future work. If the directory grows unwieldy (>50 packages), consider moving packages older than 1 year to `docs/work-packages/archive/YYYY/`.
+
+Closed packages are immutable execution records. Do not amend their registers,
+matrices, trackers, or decisions to authorize later work. If later work needs a
+rule found only in a closed package, promote that rule to a current canonical
+document first.
 
 ## Referencing Work Packages
 
