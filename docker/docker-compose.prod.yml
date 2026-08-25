@@ -715,7 +715,7 @@ services:
       dockerfile: services/cap/Dockerfile
       args:
         CAP_REPO: ${CAP_REPO:-https://github.com/tiagozip/cap}
-        CAP_REF: ${CAP_REF:-main}
+        CAP_REF: ${CAP_REF:-e069d5e8174527f997167d45a65eb724ed0a607d}
     restart: unless-stopped
     secrets:
       - cap_secret
