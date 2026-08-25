@@ -21,6 +21,7 @@ def test_installer_captures_secret_before_compose_uid_probe_consumes_stdin(
     secret_dir = docker_dir / "secrets"
     bin_dir = tmp_path / "bin"
     secret_dir.mkdir(parents=True)
+    secret_dir.chmod(0o700)
     bin_dir.mkdir()
     installer = docker_dir / "install-cap-secret.sh"
     installer.write_bytes(_INSTALLER.read_bytes())
