@@ -50,6 +50,18 @@ command -v getfacl >/dev/null 2>&1 || {
     exit 1
 }
 
+# Capture stdin before invoking Compose. `docker compose run` may consume the
+# installer's inherited stdin while resolving consumer UIDs.
+STAGED="$(mktemp "${SECRET_DIR}/.cap_secret.XXXXXX")"
+setfacl -b "${STAGED}"
+chmod 0600 "${STAGED}"
+dd of="${STAGED}" status=none
+[ -s "${STAGED}" ] || {
+    echo "cap-secret-install: refusing an empty secret" >&2
+    exit 1
+}
+sync -f "${STAGED}"
+
 HOST_CAP_ACCOUNT="$(getent passwd "${CAP_UID}" || true)"
 if [ -n "${HOST_CAP_ACCOUNT}" ]; then
     HOST_CAP_NAME="${HOST_CAP_ACCOUNT%%:*}"
@@ -84,15 +96,6 @@ printf "%s\n" "${ALLOWED_UIDS[@]}" | grep -qx "${CAP_UID}" || {
     exit 1
 }
 
-STAGED="$(mktemp "${SECRET_DIR}/.cap_secret.XXXXXX")"
-setfacl -b "${STAGED}"
-chmod 0600 "${STAGED}"
-dd of="${STAGED}" status=none
-[ -s "${STAGED}" ] || {
-    echo "cap-secret-install: refusing an empty secret" >&2
-    exit 1
-}
-sync -f "${STAGED}"
 for consumer_uid in "${ALLOWED_UIDS[@]}"; do
     setfacl -m "u:${consumer_uid}:r" "${STAGED}"
 done
