@@ -405,6 +405,29 @@ When resuming Kubernetes work:
 
 ## 🚧 In Progress
 
+### Production Compose Deployment and CAP Runtime Hardening
+
+**Started**: 2026-08-25
+
+**Priority**: Critical
+
+**Security impact**: `high` (production secret permissions, container identity,
+persistent CAPTCHA state, and deployment wiring)
+
+**Link**: [docs/work-packages/20260825_cap_runtime_deploy_hardening/](docs/work-packages/20260825_cap_runtime_deploy_hardening/)
+
+**Description**: Repair the full-mode partial-build contract that recreated CAP
+with unmigrated runtime permissions and WEPPcloudR from a stale incompatible
+image. Add idempotent CAP migration, build/recreate parity, worker/renderer
+compatibility, every-service acceptance, and an exact-command integrated gate
+on Forest1. Incident: [production Compose partial-build deployment](docs/infrastructure/incident-2026-08-25-production-compose-partial-build.md).
+
+**Status**: CAP reviews completed and High findings dispositioned. Scope now
+includes the stale-WEPPcloudR failure; implementation, exact no-argument
+Forest1 rehearsal, and renewed independent review remain.
+
+---
+
 ### Deferred Job Retry Dependency Correction
 
 **Started**: 2026-08-23

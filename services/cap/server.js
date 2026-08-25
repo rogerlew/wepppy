@@ -8,6 +8,10 @@ const PORT = Number(process.env.CAP_PORT || process.env.PORT || 3000);
 const SITE_KEY = process.env.CAP_SITE_KEY;
 const SECRET_PATH = process.env.CAP_SECRET_FILE;
 let SECRET = process.env.CAP_SECRET;
+if (SECRET && SECRET_PATH) {
+  console.error("[cap] Configure CAP_SECRET_FILE or CAP_SECRET, not both");
+  process.exit(1);
+}
 if (!SECRET && SECRET_PATH) {
   try {
     SECRET = fs.readFileSync(SECRET_PATH, "utf8").trim();
@@ -16,6 +20,10 @@ if (!SECRET && SECRET_PATH) {
     process.exit(1);
   }
 }
+const currentSecret = () => {
+  if (!SECRET_PATH) return SECRET;
+  return fs.readFileSync(SECRET_PATH, "utf8").trim();
+};
 const CORS_ORIGIN = process.env.CAP_CORS_ORIGIN || "*";
 const DATA_DIR = process.env.CAP_DATA_DIR || "/var/lib/cap";
 const ASSET_ROOT = process.env.CAP_ASSET_ROOT || "/workdir/cap";
@@ -47,6 +55,37 @@ const requireFile = (label, filePath) => {
   }
 };
 
+const validatePersistence = (dataDir) => {
+  fs.mkdirSync(dataDir, { recursive: true });
+  const directory = fs.lstatSync(dataDir);
+  if (!directory.isDirectory() || directory.isSymbolicLink()) {
+    throw new Error(`CAP_DATA_DIR must be a real directory: ${dataDir}`);
+  }
+  fs.accessSync(dataDir, fs.constants.R_OK | fs.constants.W_OK | fs.constants.X_OK);
+
+  const ledgerPath = path.join(dataDir, "tokensList.json");
+  if (fs.existsSync(ledgerPath)) {
+    const ledger = fs.lstatSync(ledgerPath);
+    if (!ledger.isFile() || ledger.isSymbolicLink()) {
+      throw new Error(`CAP token ledger must be a regular file: ${ledgerPath}`);
+    }
+    fs.accessSync(ledgerPath, fs.constants.R_OK | fs.constants.W_OK);
+    const parsed = JSON.parse(fs.readFileSync(ledgerPath, "utf8"));
+    if (parsed === null || Array.isArray(parsed) || typeof parsed !== "object") {
+      throw new Error("CAP token ledger must contain a JSON object");
+    }
+  }
+
+  const probePath = path.join(dataDir, `.cap-write-probe-${process.pid}`);
+  const descriptor = fs.openSync(probePath, "wx", 0o600);
+  try {
+    fs.fsyncSync(descriptor);
+  } finally {
+    fs.closeSync(descriptor);
+    fs.unlinkSync(probePath);
+  }
+};
+
 requireEnv("CAP_SITE_KEY", SITE_KEY);
 requireEnv("CAP_SECRET (or CAP_SECRET_FILE)", SECRET);
 
@@ -55,7 +94,12 @@ requireFile("floating.js", FLOATING_PATH);
 requireFile("cap_wasm.js", WASM_JS_PATH);
 requireFile("cap_wasm_bg.wasm", WASM_BG_PATH);
 
-fs.mkdirSync(DATA_DIR, { recursive: true });
+try {
+  validatePersistence(DATA_DIR);
+} catch (error) {
+  console.error(`[cap] Persistence readiness failed for ${DATA_DIR}`, error);
+  process.exit(1);
+}
 
 const cap = new Cap({
   tokens_store_path: path.join(DATA_DIR, "tokensList.json"),
@@ -160,7 +204,15 @@ app.post("/cap/:siteKey/siteverify", async (req, res) => {
     res.status(400).json({ success: false, message: "Missing secret or response" });
     return;
   }
-  if (secret !== SECRET) {
+  let expectedSecret;
+  try {
+    expectedSecret = currentSecret();
+  } catch (error) {
+    console.error("[cap] Failed to reload CAP_SECRET_FILE", error);
+    res.status(500).json({ success: false });
+    return;
+  }
+  if (secret !== expectedSecret) {
     res.status(403).json({ success: false, message: "Invalid secret" });
     return;
   }

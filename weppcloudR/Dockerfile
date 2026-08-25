@@ -73,7 +73,7 @@ RUN mkdir -p /srv/weppcloudr/vendor/fontawesome/5.3.1 && \
     echo "${FONTAWESOME_SHA256}  /srv/weppcloudr/vendor/fontawesome/5.3.1/all.js" \
       | sha256sum -c -
 
-COPY weppcloudR/plumber.R weppcloudR/docker-entrypoint.R weppcloudR/render-compose-request.R weppcloudR/render-request-v1.R weppcloudR/publish_fenced.py /srv/weppcloudr/
+COPY weppcloudR/plumber.R weppcloudR/docker-entrypoint.R weppcloudR/render-compose-request.R weppcloudR/render-request-v1.R weppcloudR/publish_fenced.py weppcloudR/compose-protocol-version /srv/weppcloudr/
 RUN chmod 0555 /srv/weppcloudr/publish_fenced.py
 COPY weppcloudR/templates /srv/weppcloudr/templates
 

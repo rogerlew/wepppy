@@ -153,7 +153,7 @@ def test_production_deploy_script_supports_guarded_wepp3_mode() -> None:
     )
 
     assert 'DEPLOY_MODE="wepp3-fork-archive"' in deploy_script
-    assert "BUILD_SERVICES=(rq-worker-fork-archive)" in deploy_script
+    assert "compose_deploy_contract.py" in deploy_script
     assert "Unsupported production Compose topology; refusing to guess" in deploy_script
     assert "Deployment script changed during pull; restarting" in deploy_script
     assert 'exec "${SCRIPT_DIR}/deploy-production.sh" "${ORIGINAL_ARGS[@]}" --skip-pull' in deploy_script
@@ -179,6 +179,7 @@ def test_production_deploy_script_supports_targeted_web_mode() -> None:
 
     assert "--targeted-web" in deploy_script
     assert "BUILD_SERVICES=(weppcloud)" in deploy_script
+    assert "RECREATED_SERVICES=(weppcloud rq-engine)" in deploy_script
     assert "races two writes to the same tag" in deploy_script
     assert "--targeted-web requires a full stack" in deploy_script
     assert "--targeted-web cannot be combined with --flush-rq-db" in deploy_script
@@ -191,3 +192,20 @@ def test_production_deploy_script_supports_targeted_web_mode() -> None:
     assert "Waiting for rq-engine to be ready" in deploy_script
     assert "rq-engine health check failed after" in deploy_script
     assert "Skipping broad Docker runtime prune after targeted deployment" in deploy_script
+
+
+def test_cap_readiness_and_deployment_runtime_contracts_are_wired() -> None:
+    services = _load_yaml(_PROD_COMPOSE_PATH)["services"]
+    cap = services["cap"]
+    assert "/cap/health" in cap["healthcheck"]["test"][1]
+    assert services["caddy"]["depends_on"]["cap"]["condition"] == "service_healthy"
+
+    deploy_script = (_REPO_ROOT / "scripts" / "deploy-production.sh").read_text(
+        encoding="utf-8"
+    )
+    assert "validate-cap-runtime-contract.sh" in deploy_script
+    assert "prepare-cap-runtime.sh" in deploy_script
+    assert "validate-weppcloudr-runtime-contract.sh" in deploy_script
+    assert "cap-functional-canary" not in deploy_script
+    assert "services/cap/canary.js" in deploy_script
+    assert "CAP_RESCUE_FAILED" in deploy_script

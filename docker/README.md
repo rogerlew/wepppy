@@ -59,6 +59,27 @@ The mode is accepted only for a full Compose topology containing both
 `weppcloud` and `rq-engine`. It rejects `--flush-rq-db`, verifies both public
 health endpoints, and skips the broad runtime prune.
 
+For a CAP-only repair, use `--targeted-cap`. It preserves a host-local rescue
+tag for the running image, validates the candidate against disposable fresh,
+populated legacy, and malformed volumes, reapplies the fixed secret ACL,
+migrates only the CAP volume root and regular ledger, and recreates only CAP.
+Activation requires persistence readiness plus a complete
+challenge/redeem/siteverify canary. Failure automatically restores and
+revalidates the rescue image; the rescue tag is never pruned by this mode.
+The deploy is mutually exclusive through a repository-local host lock, and
+candidate canaries are time/work bounded.
+
+```bash
+./scripts/deploy-production.sh --targeted-cap --no-flush-rq-db
+```
+
+Plain full mode derives one build target for every distinct locally buildable
+image in the effective Compose topology. It must build `weppcloudr` whenever it
+will recreate it, validates the worker/renderer entrypoint contract before
+shutdown, and verifies every recreated long-running service before printing
+the success footer. `--print-plan` displays the build, recreate, and acceptance
+sets without pulling, building, stopping, or starting anything.
+
 The script restarts itself when a pull updates its implementation and validates
 the post-pull Compose topology before building. It fails closed when an active
 worker-only wctl preset does not expose a supported service set.
@@ -70,9 +91,14 @@ The test production server at `forest1.local` (accessible via `wc-prod.bearhive.
 ```bash
 cd /workdir/wepppy
 ./scripts/deploy-production.sh
-# Or manually:
-docker compose --env-file docker/.env -f docker/docker-compose.prod.yml up -d
 ```
+
+Forest1 release evidence must use that exact no-argument command twice. A
+targeted deploy is not a substitute. Between the two runs, verify interactive
+CAPTCHA in Safari and Chrome, local and OAuth login, continuity of a pre-deploy
+session, and a real RQ-submitted DEVAL render with its published artifact and
+receipt. Rehearse rollback and confirm targeted modes preserve non-selected
+container identities before production.
 
 Then explicitly start the profiled serial consumer on Forest:
 
@@ -175,8 +201,8 @@ WEPPcloud uses a single Redis instance with multiple logical databases (DBs). St
 | Environment | Redis service? | Persistence | DB9 flush-on-deploy | Notes |
 |---|---:|---|---|---|
 | Dev (`docker-compose.dev.yml`) | Yes | Enabled by default (entrypoint env knobs) | Off by default (manual) | Use a manual DB9 flush when you want a clean local RQ slate. |
-| Test-prod (`docker-compose.prod.yml`) | Yes | Enabled by default (entrypoint env knobs) | Off by default (opt-in) | `./scripts/deploy-production.sh` preserves DB9 unless `--flush-rq-db` is passed. |
-| wepp1 (`docker-compose.prod.yml` + `docker-compose.prod.wepp1.yml`) | Yes | Enabled by default (entrypoint env knobs) | Off by default (opt-in) | `./scripts/deploy-production.sh` preserves DB9 unless `--flush-rq-db` is passed. |
+| Test-prod (`docker-compose.prod.yml`) | Yes | Enabled by default (entrypoint env knobs) | Off | Deployment always preserves DB9; destructive queue maintenance is a separate fenced operation. |
+| wepp1 (`docker-compose.prod.yml` + `docker-compose.prod.wepp1.yml`) | Yes | Enabled by default (entrypoint env knobs) | Off | Deployment always preserves DB9; destructive queue maintenance is a separate fenced operation. |
 | Prod (`docker-compose.prod.yml` + host overrides) | Yes | Enabled by default (entrypoint env knobs) | Off by default (opt-in) | DB9 flush is always scoped to RQ only; never a full Redis wipe. |
 | Worker host (`docker-compose.prod.worker.yml`) | No | N/A (external Redis) | Off by default (opt-in) | Worker-only stacks must set `RQ_REDIS_URL` and do not manage Redis durability. |
 

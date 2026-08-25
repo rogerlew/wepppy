@@ -18,7 +18,7 @@ RUN apk add --no-cache git ca-certificates && \
 COPY services/cap/package.json services/cap/package-lock.json ./
 RUN npm ci --omit=dev
 
-COPY services/cap/server.js services/cap/config.js ./
+COPY services/cap/server.js services/cap/config.js services/cap/migrate-data.js services/cap/canary.js ./
 
 RUN addgroup -g 10001 -S cap && \
     adduser -u 10001 -S -D -H -G cap cap && \

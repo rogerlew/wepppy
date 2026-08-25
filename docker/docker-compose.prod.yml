@@ -733,6 +733,12 @@ services:
       - cap-data:/var/lib/cap
     expose:
       - "3000"
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3000/cap/health').then(r => { if (!r.ok) process.exit(1) }).catch(() => process.exit(1))\""]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
     networks:
       - backend
 
@@ -755,7 +761,7 @@ services:
       preflight:
         condition: service_started
       cap:
-        condition: service_started
+        condition: service_healthy
       browse:
         condition: service_started
       download:

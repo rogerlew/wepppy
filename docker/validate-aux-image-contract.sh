@@ -70,18 +70,7 @@ case "${service}" in
     wait_for_url "http://127.0.0.1:${host_port}/health"
     ;;
   cap)
-    docker run -d --name "${container}" --read-only \
-      --tmpfs /tmp:rw,noexec,nosuid,nodev \
-      --tmpfs /var/lib/cap:rw,nosuid,nodev \
-      -p 127.0.0.1::3000 \
-      -e CAP_SITE_KEY=contract-site \
-      -e CAP_SECRET=contract-only \
-      -e CAP_CORS_ORIGIN=https://canary.invalid \
-      -e CAP_ASSET_ROOT=/opt/cap \
-      "${image}" >/dev/null
-    host_port=$(docker port "${container}" 3000/tcp | awk -F: 'END {print $NF}')
-    wait_for_url "http://127.0.0.1:${host_port}/cap/health"
-    curl -fsS "http://127.0.0.1:${host_port}/cap/assets/widget.js" >/dev/null
+    "$(dirname "$0")/validate-cap-runtime-contract.sh" "${image}"
     ;;
   weppcloudr)
     fontawesome_digest=$(

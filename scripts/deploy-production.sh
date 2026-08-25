@@ -1,10 +1,10 @@
 #!/bin/bash
 # Production Deployment Script for WEPPcloud
-# Usage: ./scripts/deploy-production.sh [--targeted-web] [--skip-pull] [--skip-build] [--skip-themes] [--flush-rq-db|--no-flush-rq-db] [--skip-docker-prune] [--docker-prune-volumes]
+# Usage: ./scripts/deploy-production.sh [--targeted-web|--targeted-cap] [--print-plan] [--skip-pull] [--skip-build] [--skip-themes] [--flush-rq-db|--no-flush-rq-db] [--skip-docker-prune] [--docker-prune-volumes]
 # The installed wctl preset selects full production, worker-pool, or the
 # dedicated wepp3 fork/archive deployment automatically.
 
-set -euo pipefail
+set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
@@ -259,13 +259,30 @@ REQUIRE_RQ_REDIS=false
 SKIP_DOCKER_PRUNE=false
 DOCKER_PRUNE_VOLUMES=false
 TARGETED_WEB=false
+TARGETED_CAP=false
+PRINT_PLAN=false
 HEALTHCHECK_URL="${HEALTHCHECK_URL:-}"
 RQ_ENGINE_HEALTHCHECK_URL="${RQ_ENGINE_HEALTHCHECK_URL:-}"
+CAP_HEALTHCHECK_URL="${CAP_HEALTHCHECK_URL:-}"
+CAP_RUNTIME_VALIDATOR="${CAP_RUNTIME_VALIDATOR:-${PROJECT_ROOT}/docker/validate-cap-runtime-contract.sh}"
+CAP_RUNTIME_PREPARER="${CAP_RUNTIME_PREPARER:-${PROJECT_ROOT}/docker/prepare-cap-runtime.sh}"
+WEPPCLOUDR_RUNTIME_VALIDATOR="${WEPPCLOUDR_RUNTIME_VALIDATOR:-${PROJECT_ROOT}/docker/validate-weppcloudr-runtime-contract.sh}"
+CONTROLLERS_JS_BUILDER="${CONTROLLERS_JS_BUILDER:-${PROJECT_ROOT}/wepppy/weppcloud/controllers_js/build_controllers_js.py}"
+CONTROLLERS_JS_TARGET="${CONTROLLERS_JS_TARGET:-${PROJECT_ROOT}/wepppy/weppcloud/static/js/controllers-gl.js}"
+DEPLOY_STATE_DIR="${DEPLOY_STATE_DIR:-/var/tmp}"
 
 while [[ $# -gt 0 ]]; do
     case $1 in
         --targeted-web)
             TARGETED_WEB=true
+            shift
+            ;;
+        --targeted-cap)
+            TARGETED_CAP=true
+            shift
+            ;;
+        --print-plan)
+            PRINT_PLAN=true
             shift
             ;;
         --skip-pull)
@@ -304,7 +321,7 @@ while [[ $# -gt 0 ]]; do
             ;;
         *)
             echo "Unknown option: $1"
-            echo "Usage: $0 [--targeted-web] [--skip-pull] [--skip-build] [--skip-themes] [--flush-rq-db|--no-flush-rq-db] [--require-rq-redis] [--skip-docker-prune] [--docker-prune-volumes]"
+            echo "Usage: $0 [--targeted-web|--targeted-cap] [--print-plan] [--skip-pull] [--skip-build] [--skip-themes] [--flush-rq-db|--no-flush-rq-db] [--require-rq-redis] [--skip-docker-prune] [--docker-prune-volumes]"
             exit 1
             ;;
     esac
@@ -322,6 +339,10 @@ configure_deploy_topology() {
     )"
     HAS_WEPPCLOUD=false
     IS_WEPP3_FORK_ARCHIVE=false
+    ACTIVE_SERVICE_ARGS=()
+    while IFS= read -r service; do
+        [ -n "${service}" ] && ACTIVE_SERVICE_ARGS+=(--active-service "${service}")
+    done <<< "${COMPOSE_SERVICES}"
 
     if echo "${COMPOSE_SERVICES}" | grep -q "^weppcloud$"; then
         HAS_WEPPCLOUD=true
@@ -334,22 +355,12 @@ configure_deploy_topology() {
     if [ "${HAS_WEPPCLOUD}" = true ] \
         && echo "${COMPOSE_SERVICES}" | grep -q "^rq-worker$"; then
         DEPLOY_MODE="full"
-        BUILD_SERVICES=(weppcloud rq-worker)
-        # These services have their own images/build contexts; include them when present so
-        # a full deploy doesn't accidentally keep stale binaries when compose/env changes.
-        for svc in cap status preflight; do
-            if echo "${COMPOSE_SERVICES}" | grep -q "^${svc}$"; then
-                BUILD_SERVICES+=("${svc}")
-            fi
-        done
     elif [ "${IS_WEPP3_FORK_ARCHIVE}" = true ]; then
         DEPLOY_MODE="wepp3-fork-archive"
-        BUILD_SERVICES=(rq-worker-fork-archive)
     elif echo "${COMPOSE_SERVICES}" | grep -q "^rq-worker$" \
         && echo "${COMPOSE_SERVICES}" | grep -q "^rq-worker-batch$" \
         && echo "${COMPOSE_SERVICES}" | grep -q "^weppcloudr$"; then
         DEPLOY_MODE="worker"
-        BUILD_SERVICES=(rq-worker rq-worker-batch weppcloudr)
     else
         echo "✗ Unsupported production Compose topology; refusing to guess deployment services." >&2
         echo "  Effective services:" >&2
@@ -357,6 +368,27 @@ configure_deploy_topology() {
         echo "  Reinstall the intended wctl preset before deploying." >&2
         exit 1
     fi
+
+    BUILD_OUTPUT="$(
+        wctl docker compose config --format json \
+            | python3 "${SCRIPT_DIR}/compose_deploy_contract.py" \
+                build-services "${ACTIVE_SERVICE_ARGS[@]}"
+    )"
+    mapfile -t BUILD_SERVICES <<< "${BUILD_OUTPUT}"
+    EXPECTED_OUTPUT="$(
+        wctl docker compose config --format json \
+            | python3 "${SCRIPT_DIR}/compose_deploy_contract.py" \
+                expected-services "${ACTIVE_SERVICE_ARGS[@]}"
+    )"
+    mapfile -t EXPECTED_RUNNING_SERVICES <<< "${EXPECTED_OUTPUT}"
+    if [ "${DEPLOY_MODE}" = "full" ]; then
+        FILTERED_EXPECTED_SERVICES=()
+        for service in "${EXPECTED_RUNNING_SERVICES[@]}"; do
+            [ "${service}" = "rq-worker-fork-archive" ] || FILTERED_EXPECTED_SERVICES+=("${service}")
+        done
+        EXPECTED_RUNNING_SERVICES=("${FILTERED_EXPECTED_SERVICES[@]}")
+    fi
+    RECREATED_SERVICES=("${EXPECTED_RUNNING_SERVICES[@]}")
 
     if [ "${TARGETED_WEB}" = true ]; then
         if [ "${DEPLOY_MODE}" != "full" ] \
@@ -367,15 +399,43 @@ configure_deploy_topology() {
         # Both services resolve to the same WEPPCLOUD_IMAGE. Building both in
         # one Compose invocation races two writes to the same tag.
         BUILD_SERVICES=(weppcloud)
+        RECREATED_SERVICES=(weppcloud rq-engine)
+        EXPECTED_RUNNING_SERVICES=(weppcloud rq-engine)
+    fi
+
+    if [ "${TARGETED_CAP}" = true ]; then
+        if [ "${DEPLOY_MODE}" != "full" ] \
+            || ! echo "${COMPOSE_SERVICES}" | grep -q "^cap$"; then
+            echo "✗ --targeted-cap requires a full stack containing CAP." >&2
+            exit 1
+        fi
+        BUILD_SERVICES=(cap)
+        RECREATED_SERVICES=(cap)
+        EXPECTED_RUNNING_SERVICES=(cap)
     fi
 }
 
 configure_deploy_topology
 
 validate_deploy_topology() {
+    if [ "${FLUSH_RQ_DB}" = true ]; then
+        echo "✗ Deploy-time Redis flushing is incompatible with the global RQ cutover fence." >&2
+        echo "  Perform destructive queue maintenance as a separate, explicitly fenced operation." >&2
+        exit 1
+    fi
+    if [ "${TARGETED_WEB}" = true ] && [ "${TARGETED_CAP}" = true ]; then
+        echo "✗ --targeted-web and --targeted-cap are mutually exclusive." >&2
+        exit 1
+    fi
+
     if [ "${TARGETED_WEB}" = true ] && [ "${FLUSH_RQ_DB}" = true ]; then
         echo "✗ --targeted-web cannot be combined with --flush-rq-db." >&2
         echo "  Targeted web deployment must leave Redis and workers untouched." >&2
+        exit 1
+    fi
+
+    if [ "${TARGETED_CAP}" = true ] && [ "${FLUSH_RQ_DB}" = true ]; then
+        echo "✗ --targeted-cap cannot be combined with --flush-rq-db." >&2
         exit 1
     fi
 
@@ -398,6 +458,25 @@ validate_deploy_topology() {
     fi
 }
 
+if [ "${PRINT_PLAN}" = true ]; then
+    validate_deploy_topology
+    echo "mode=${DEPLOY_MODE}"
+    printf "build=%s\n" "${BUILD_SERVICES[*]}"
+    printf "recreate=%s\n" "${RECREATED_SERVICES[*]}"
+    printf "expected-running=%s\n" "${EXPECTED_RUNNING_SERVICES[*]}"
+    exit 0
+fi
+
+DEPLOY_LOCK_FILE="${DEPLOY_LOCK_FILE:-${PROJECT_ROOT}/.git/wepppy-production-deploy.lock}"
+if [ "${DEPLOY_LOCK_HELD_PID:-}" != "$$" ]; then
+    exec 9>"${DEPLOY_LOCK_FILE}"
+    if ! flock -n 9; then
+        echo "✗ Another deployment holds ${DEPLOY_LOCK_FILE}; refusing concurrent activation." >&2
+        exit 1
+    fi
+    export DEPLOY_LOCK_HELD_PID="$$"
+fi
+
 echo "============================================"
 echo "WEPPcloud Production Deployment"
 echo "============================================"
@@ -405,9 +484,20 @@ echo "Project root: ${PROJECT_ROOT}"
 echo "Mode: ${DEPLOY_MODE}"
 if [ "${TARGETED_WEB}" = true ]; then
     echo "Scope: targeted weppcloud + rq-engine recreation; dependencies remain running"
+elif [ "${TARGETED_CAP}" = true ]; then
+    echo "Scope: targeted CAP recreation; all other services remain running"
 fi
 echo "Timestamp: $(date --iso-8601=seconds)"
 echo ""
+
+# Capture the running topology before a pull can change Compose semantics.
+PRE_PULL_CAP_CONFIG=""
+if printf "%s\n" "${RECREATED_SERVICES[@]}" | grep -qx "cap" \
+    && [ -n "$(wctl docker compose ps -q cap)" ]; then
+    PRE_PULL_CAP_CONFIG="$(mktemp "${DEPLOY_STATE_DIR%/}/wepppy-cap-prepull-config.XXXXXX.yml")"
+    wctl docker compose config > "${PRE_PULL_CAP_CONFIG}"
+    chmod 0600 "${PRE_PULL_CAP_CONFIG}"
+fi
 
 # Git pull
 if [ "${SKIP_PULL}" = false ]; then
@@ -430,10 +520,311 @@ fi
 
 validate_deploy_topology
 
+if [ "${SKIP_BUILD}" = true ] && [ "${#BUILD_SERVICES[@]}" -gt 0 ]; then
+    echo "✗ --skip-build is unsafe when locally built services will be recreated." >&2
+    echo "  Build the candidate images or use --print-plan for a read-only inspection." >&2
+    exit 1
+fi
+
+assert_no_active_rq_jobs() {
+    if ! printf "%s\n" "${COMPOSE_SERVICES}" | grep -qx "rq-worker"; then
+        return 0
+    fi
+    echo "    Verifying no default or batch RQ jobs are executing..."
+    ACTIVE_RQ_JOBS="$(wctl docker compose exec -T rq-worker /opt/venv/bin/python -c '
+import redis
+from rq.registry import StartedJobRegistry
+from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+connection = redis.Redis(**redis_connection_kwargs(RedisDB.RQ))
+print(sum(len(StartedJobRegistry(name, connection=connection).get_job_ids()) for name in ("default", "batch")))
+')"
+    [[ "${ACTIVE_RQ_JOBS}" =~ ^[0-9]+$ ]] || {
+        echo "✗ Unable to determine active RQ job count." >&2
+        return 1
+    }
+    [ "${ACTIVE_RQ_JOBS}" -eq 0 ] || {
+        echo "✗ Refusing deployment while ${ACTIVE_RQ_JOBS} default/batch RQ jobs are executing." >&2
+        return 1
+    }
+}
+
+RQ_SUSPENDED_BY_DEPLOY=false
+RQ_FENCE_ACTIVE=false
+RQ_FENCE_HEARTBEAT_PID=""
+RQ_FENCE_FAILURE_FILE=""
+RQ_FENCE_TOKEN=""
+run_rq_control_program() {
+    local program="$1"
+    shift
+    if ! wctl docker compose exec -T rq-worker /opt/venv/bin/python -c "${program}" "$@"; then
+        wctl docker compose run --rm --no-deps --entrypoint /opt/venv/bin/python \
+            rq-worker -c "${program}" "$@"
+    fi
+}
+
+renew_rq_fence_once() {
+    run_rq_control_program '
+import redis
+import sys
+from rq.suspension import suspend
+from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+connection = redis.Redis(**redis_connection_kwargs(RedisDB.RQ))
+key = "wepppy:deploy:rq-fence"
+token = sys.argv[1]
+renewed = connection.eval(
+    "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('expire', KEYS[1], ARGV[2]) else return 0 end",
+    1, key, token, 3600,
+)
+if renewed != 1:
+    raise SystemExit("deployment fence ownership lost")
+suspend(connection, ttl=3600)
+' "${RQ_FENCE_TOKEN}"
+}
+
+assert_rq_fence() {
+    [ "${RQ_FENCE_ACTIVE}" = true ] || return 0
+    if [ -n "${RQ_FENCE_FAILURE_FILE}" ] && [ -s "${RQ_FENCE_FAILURE_FILE}" ]; then
+        echo "✗ Global RQ suspension heartbeat failed." >&2
+        return 1
+    fi
+    RQ_FENCE_STATE="$(run_rq_control_program '
+import redis
+import sys
+from rq.suspension import is_suspended
+from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+connection = redis.Redis(**redis_connection_kwargs(RedisDB.RQ))
+owned = connection.get("wepppy:deploy:rq-fence") == sys.argv[1].encode()
+print("yes" if owned and is_suspended(connection) else "no")
+' "${RQ_FENCE_TOKEN}")"
+    [ "${RQ_FENCE_STATE}" = "yes" ] || {
+        echo "✗ Global RQ suspension fence was lost." >&2
+        return 1
+    }
+}
+
+suspend_rq_dequeue() {
+    if ! printf "%s\n" "${COMPOSE_SERVICES}" | grep -qx "rq-worker"; then
+        return 0
+    fi
+    RQ_FENCE_TOKEN="$(hostname)-$$-$(date +%s)"
+    RQ_WAS_SUSPENDED="$(wctl docker compose exec -T rq-worker /opt/venv/bin/python -c '
+import redis
+import sys
+from rq.suspension import is_suspended, suspend
+from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+connection = redis.Redis(**redis_connection_kwargs(RedisDB.RQ))
+key = "wepppy:deploy:rq-fence"
+token = sys.argv[1]
+if not connection.set(key, token, nx=True, ex=3600):
+    raise SystemExit("another deployment owns the RQ fence")
+if is_suspended(connection):
+    connection.delete(key)
+    raise SystemExit("RQ is already suspended by an external operator")
+suspend(connection, ttl=3600)
+print("no")
+' "${RQ_FENCE_TOKEN}")"
+    if [ "${RQ_WAS_SUSPENDED}" = "no" ]; then
+        RQ_SUSPENDED_BY_DEPLOY=true
+        echo "    Suspended global RQ dequeue for deployment cutover."
+    else
+        echo "✗ Unable to establish the global RQ suspension fence." >&2
+        return 1
+    fi
+    RQ_FENCE_ACTIVE=true
+    RQ_FENCE_FAILURE_FILE="$(mktemp "${DEPLOY_STATE_DIR%/}/wepppy-rq-fence.XXXXXX")"
+    local deployment_pid="$$"
+    (
+        while kill -0 "${deployment_pid}" 2>/dev/null; do
+            sleep 30
+            kill -0 "${deployment_pid}" 2>/dev/null || exit 0
+            if ! renew_rq_fence_once >/dev/null 2>&1; then
+                printf 'renewal failed\n' > "${RQ_FENCE_FAILURE_FILE}"
+                exit 1
+            fi
+        done
+    ) &
+    RQ_FENCE_HEARTBEAT_PID="$!"
+    assert_rq_fence
+}
+
+resume_rq_if_owned() {
+    if [ "${RQ_SUSPENDED_BY_DEPLOY}" = true ]; then
+        RQ_RESUME_PROGRAM='
+import redis
+import sys
+from rq.suspension import resume
+from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+connection = redis.Redis(**redis_connection_kwargs(RedisDB.RQ))
+key = "wepppy:deploy:rq-fence"
+if connection.get(key) != sys.argv[1].encode():
+    raise SystemExit("deployment fence ownership lost before resume")
+resume(connection)
+connection.delete(key)
+'
+        if ! run_rq_control_program "${RQ_RESUME_PROGRAM}" "${RQ_FENCE_TOKEN}"; then
+            echo "✗ Failed to resume the deployment-owned global RQ suspension." >&2
+            return 1
+        fi
+    fi
+    if [ -n "${RQ_FENCE_HEARTBEAT_PID}" ]; then
+        kill "${RQ_FENCE_HEARTBEAT_PID}" 2>/dev/null || true
+        wait "${RQ_FENCE_HEARTBEAT_PID}" 2>/dev/null || true
+        RQ_FENCE_HEARTBEAT_PID=""
+    fi
+    if [ -n "${RQ_FENCE_FAILURE_FILE}" ]; then
+        rm -f -- "${RQ_FENCE_FAILURE_FILE}"
+        RQ_FENCE_FAILURE_FILE=""
+    fi
+    RQ_FENCE_ACTIVE=false
+    if [ "${RQ_SUSPENDED_BY_DEPLOY}" != true ]; then
+        return 0
+    fi
+    RQ_SUSPENDED_BY_DEPLOY=false
+    echo "    Resumed global RQ dequeue."
+}
+
+if [ "${TARGETED_WEB}" = false ] && [ "${TARGETED_CAP}" = false ]; then
+    assert_no_active_rq_jobs
+fi
+
+CAP_RESCUE_IMAGE=""
+CAP_RESCUE_CONFIG=""
+CAP_RESCUE_OVERRIDE=""
+CAP_ACTIVATION_STARTED=false
+STAGED_CONTROLLERS_JS=""
+BACKUP_CONTROLLERS_JS=""
+if printf "%s\n" "${RECREATED_SERVICES[@]}" | grep -qx "cap"; then
+    CURRENT_CAP_CONTAINER="$(wctl docker compose ps -q cap)"
+    if [ "${TARGETED_CAP}" = true ] && [ -z "${CURRENT_CAP_CONTAINER}" ]; then
+        echo "✗ Targeted CAP requires a currently running known-good CAP container." >&2
+        exit 1
+    fi
+    if [ -n "${CURRENT_CAP_CONTAINER}" ]; then
+        CURRENT_CAP_IMAGE_ID="$(docker inspect --format '{{.Image}}' "${CURRENT_CAP_CONTAINER}")"
+        CAP_RESCUE_IMAGE="wepppy-cap-rescue:$(date -u +%Y%m%dT%H%M%SZ)"
+        docker tag "${CURRENT_CAP_IMAGE_ID}" "${CAP_RESCUE_IMAGE}"
+        CAP_RESCUE_CONFIG="${PRE_PULL_CAP_CONFIG}"
+        [ -n "${CAP_RESCUE_CONFIG}" ] || CAP_RESCUE_CONFIG="$(mktemp "${DEPLOY_STATE_DIR%/}/wepppy-cap-rescue-config.XXXXXX.yml")"
+        CAP_RESCUE_OVERRIDE="$(mktemp "${DEPLOY_STATE_DIR%/}/wepppy-cap-rescue-override.XXXXXX.yml")"
+        [ -s "${CAP_RESCUE_CONFIG}" ] || wctl docker compose config > "${CAP_RESCUE_CONFIG}"
+        printf 'services:\n  cap:\n    image: %s\n' "${CAP_RESCUE_IMAGE}" > "${CAP_RESCUE_OVERRIDE}"
+        chmod 0600 "${CAP_RESCUE_CONFIG}" "${CAP_RESCUE_OVERRIDE}"
+        run_with_timeout 30 wctl docker compose exec -T cap node - < "${PROJECT_ROOT}/services/cap/canary.js"
+        echo "    Preserved known-good CAP rescue image: ${CAP_RESCUE_IMAGE}"
+        echo "    Preserved known-good rendered config: ${CAP_RESCUE_CONFIG}"
+    fi
+fi
+
+recover_targeted_cap() {
+    local original_exit="$?"
+    local recovery_exit="${original_exit}"
+    trap - ERR
+    if [ -n "${STAGED_CONTROLLERS_JS}" ]; then
+        rm -f -- "${STAGED_CONTROLLERS_JS}"
+        STAGED_CONTROLLERS_JS=""
+    fi
+    if [ -n "${BACKUP_CONTROLLERS_JS}" ] && [ -f "${BACKUP_CONTROLLERS_JS}" ]; then
+        mv -f -- "${BACKUP_CONTROLLERS_JS}" "${CONTROLLERS_JS_TARGET}"
+        BACKUP_CONTROLLERS_JS=""
+        echo "✓ Restored the pre-deploy controllers bundle" >&2
+    fi
+    if [ "${CAP_ACTIVATION_STARTED}" != true ] || [ -z "${CAP_RESCUE_IMAGE}" ]; then
+        if ! resume_rq_if_owned; then
+            echo "✗ RQ_RESUME_FAILED: the 3600-second suspension TTL remains as break-glass protection" >&2
+            recovery_exit=87
+        fi
+        return "${recovery_exit}"
+    fi
+    echo "✗ Candidate CAP activation failed; restoring ${CAP_RESCUE_IMAGE}" >&2
+    local recovered=false
+    if docker compose -f "${CAP_RESCUE_CONFIG}" -f "${CAP_RESCUE_OVERRIDE}" \
+        up -d --no-deps --force-recreate cap; then
+      for _recovery_attempt in $(seq 1 60); do
+        if run_with_timeout 30 docker compose -f "${CAP_RESCUE_CONFIG}" -f "${CAP_RESCUE_OVERRIDE}" \
+            exec -T cap node - < "${PROJECT_ROOT}/services/cap/canary.js"; then
+          recovered=true
+          break
+        fi
+        sleep 2
+      done
+    fi
+    if [ "${recovered}" = true ]; then
+        # Reconcile the public route as well: a full-stack activation may have
+        # replaced or interrupted Caddy before the candidate failed.
+        local rescue_caddy
+        if ! rescue_caddy="$(docker compose -f "${CAP_RESCUE_CONFIG}" -f "${CAP_RESCUE_OVERRIDE}" ps -q caddy)"; then
+            echo "✗ CAP_RESCUE_FAILED: unable to inspect Caddy" >&2
+            if ! resume_rq_if_owned; then return 87; fi
+            return 86
+        fi
+        if [ -z "${rescue_caddy}" ] \
+            || [ "$(docker inspect --format '{{.State.Running}}' "${rescue_caddy}" 2>/dev/null || true)" != "true" ]; then
+            if ! docker compose -f "${CAP_RESCUE_CONFIG}" -f "${CAP_RESCUE_OVERRIDE}" \
+                up -d --no-deps caddy >/dev/null; then
+                echo "✗ CAP_RESCUE_FAILED: unable to restore Caddy" >&2
+                if ! resume_rq_if_owned; then return 87; fi
+                return 86
+            fi
+        fi
+        local recovery_cap_url="${CAP_HEALTHCHECK_URL}"
+        local recovery_host=""
+        if [ -z "${recovery_cap_url}" ] && [ -f "${PROJECT_ROOT}/docker/.env" ]; then
+            recovery_host="$(read_env_value EXTERNAL_HOST "${PROJECT_ROOT}/docker/.env")"
+            if [ -n "${recovery_host}" ]; then
+                case "${recovery_host}" in
+                    http://*|https://*) recovery_cap_url="${recovery_host%/}/cap/health" ;;
+                    *) recovery_cap_url="https://${recovery_host}/cap/health" ;;
+                esac
+            fi
+        fi
+        if [ -n "${recovery_cap_url}" ]; then
+            for _external_attempt in $(seq 1 30); do
+                if curl --connect-timeout 5 --max-time 10 -fsS "${recovery_cap_url}" >/dev/null; then
+                    if ! resume_rq_if_owned; then
+                        echo "✗ RQ_RESUME_FAILED after CAP recovery" >&2
+                        return 87
+                    fi
+                    echo "✓ Known-good CAP rescue image restored; internal functional and public health passed" >&2
+                    return "${recovery_exit}"
+                fi
+                sleep 2
+            done
+            echo "✗ CAP_RESCUE_FAILED: public CAP route did not recover" >&2
+            if ! resume_rq_if_owned; then return 87; fi
+            return 86
+        fi
+        echo "✗ CAP_RESCUE_FAILED: no public CAP health URL could be resolved" >&2
+        if ! resume_rq_if_owned; then return 87; fi
+        return 86
+    else
+        echo "✗ CAP_RESCUE_FAILED: rescue image retained as ${CAP_RESCUE_IMAGE}" >&2
+        if ! resume_rq_if_owned; then return 87; fi
+        return 86
+    fi
+    return "${recovery_exit}"
+}
+trap recover_targeted_cap ERR
+trap 'echo "✗ Deployment interrupted" >&2; false' INT TERM
+
 # Build Docker images
 if [ "${SKIP_BUILD}" = false ]; then
     echo ">>> Step 2: Building Docker images..."
-    wctl build --no-cache "${BUILD_SERVICES[@]}"
+    BASE_BUILD_SERVICES=()
+    DEPENDENT_BUILD_SERVICES=()
+    for service in "${BUILD_SERVICES[@]}"; do
+        if [ "${service}" = "fcgiwrap" ]; then
+            DEPENDENT_BUILD_SERVICES+=("${service}")
+        else
+            BASE_BUILD_SERVICES+=("${service}")
+        fi
+    done
+    if [ "${#BASE_BUILD_SERVICES[@]}" -gt 0 ]; then
+        wctl build --no-cache "${BASE_BUILD_SERVICES[@]}"
+    fi
+    if [ "${#DEPENDENT_BUILD_SERVICES[@]}" -gt 0 ]; then
+        echo "    Building dependent images after the canonical wepppy base..."
+        wctl build --no-cache "${DEPENDENT_BUILD_SERVICES[@]}"
+    fi
     echo ""
     
     echo ">>> Step 2b: Pruning Docker build cache..."
@@ -444,12 +835,36 @@ else
     echo ""
 fi
 
+if printf "%s\n" "${BUILD_SERVICES[@]}" | grep -qx "weppcloudr"; then
+    WEPPCLOUDR_IMAGE="$(wctl docker compose config --format json | python3 -c 'import json,sys; c=json.load(sys.stdin); print(c["services"]["weppcloudr"]["image"])')"
+    WORKER_IMAGE="$(wctl docker compose config --format json | python3 -c 'import json,sys; c=json.load(sys.stdin); print(c["services"]["rq-worker"]["image"])')"
+    "${WEPPCLOUDR_RUNTIME_VALIDATOR}" "${WEPPCLOUDR_IMAGE}" "${WORKER_IMAGE}"
+fi
+
+if printf "%s\n" "${RECREATED_SERVICES[@]}" | grep -qx "cap"; then
+    CAP_IMAGE="$(wctl docker compose config --format json | python3 -c 'import json,sys; print(json.load(sys.stdin)["services"]["cap"]["image"])')"
+    "${CAP_RUNTIME_VALIDATOR}" "${CAP_IMAGE}"
+    "${CAP_RUNTIME_PREPARER}" --secret-only
+fi
+
 # Stop services. For wepp3, SIGTERM initiates an RQ warm shutdown before
 # Compose removes the container: the worker stops dequeuing first and any job
 # already running is allowed to finish, closing the check-then-stop race.
 echo ">>> Step 3: Stopping services..."
-if [ "${TARGETED_WEB}" = true ]; then
+if [ "${DEPLOY_MODE}" = "full" ] && [ "${FLUSH_RQ_DB}" = true ]; then
+    suspend_rq_dequeue
+    assert_no_active_rq_jobs
+    run_wctl_with_retry 216030 1 0 docker compose stop --timeout 216000 rq-worker rq-worker-batch
+fi
+if [ "${DEPLOY_MODE}" = "worker" ]; then
+    suspend_rq_dequeue
+    assert_no_active_rq_jobs
+    run_wctl_with_retry 216030 1 0 docker compose stop --timeout 216000 rq-worker rq-worker-batch
+fi
+if [ "${TARGETED_WEB}" = true ] || [ "${TARGETED_CAP}" = true ]; then
     echo "    Skipping stack shutdown; workers and dependencies remain running."
+elif [ "${DEPLOY_MODE}" = "full" ]; then
+    echo "    Skipping full-stack down; services will be force-recreated in place."
 elif [ "${IS_WEPP3_FORK_ARCHIVE}" = true ] \
     && wctl docker compose ps --status running --services 2>/dev/null \
         | grep -q '^rq-worker-fork-archive$'; then
@@ -462,7 +877,8 @@ elif [ "${IS_WEPP3_FORK_ARCHIVE}" = true ] \
         docker compose stop --timeout "${FORK_ARCHIVE_STOP_TIMEOUT_SECONDS}" \
         rq-worker-fork-archive
 fi
-if [ "${TARGETED_WEB}" = false ]; then
+if [ "${TARGETED_WEB}" = false ] && [ "${TARGETED_CAP}" = false ] \
+    && [ "${DEPLOY_MODE}" != "full" ]; then
     run_wctl_with_retry \
         "${WCTL_COMPOSE_TIMEOUT_SECONDS}" \
         "${WCTL_COMPOSE_RETRIES}" \
@@ -531,13 +947,14 @@ else
 fi
 
 # Build static assets (controllers and themes)
-if [ "${HAS_WEPPCLOUD}" = true ]; then
+if [ "${HAS_WEPPCLOUD}" = true ] && [ "${TARGETED_CAP}" = false ]; then
     echo ">>> Step 4: Building static assets..."
 
     # Build controllers-gl.js
     echo "    Building controllers-gl.js..."
-    python3 wepppy/weppcloud/controllers_js/build_controllers_js.py \
-        --output wepppy/weppcloud/static/js/controllers-gl.js
+    STAGED_CONTROLLERS_JS="$(mktemp "${CONTROLLERS_JS_TARGET}.deploy.XXXXXX")"
+    python3 "${CONTROLLERS_JS_BUILDER}" \
+        --output "${STAGED_CONTROLLERS_JS}"
 
     # Build themes
     if [ "${SKIP_THEMES}" = false ]; then
@@ -559,18 +976,58 @@ fi
 
 # Start services
 echo ">>> Step 5: Starting services..."
+if [ "${DEPLOY_MODE}" = "full" ] \
+    && [ "${TARGETED_WEB}" = false ] && [ "${TARGETED_CAP}" = false ] \
+    && [ "${FLUSH_RQ_DB}" = false ]; then
+    suspend_rq_dequeue
+    assert_no_active_rq_jobs
+    run_wctl_with_retry 216030 1 0 docker compose stop --timeout 216000 rq-worker rq-worker-batch
+fi
+assert_rq_fence
+if printf "%s\n" "${RECREATED_SERVICES[@]}" | grep -qx "cap"; then
+    # Keep login available through every build/static step.  The closed-ledger
+    # interval starts only immediately before migration and activation.
+    CAP_ACTIVATION_STARTED=true
+    run_wctl_with_retry \
+        "${WCTL_COMPOSE_TIMEOUT_SECONDS}" \
+        "${WCTL_COMPOSE_RETRIES}" \
+        "${WCTL_COMPOSE_RETRY_DELAY_SECONDS}" \
+        docker compose stop cap
+    "${CAP_RUNTIME_PREPARER}" --data-only
+fi
+if [ -n "${STAGED_CONTROLLERS_JS}" ]; then
+    CONTROLLERS_BACKUP_CANDIDATE="$(mktemp "${CONTROLLERS_JS_TARGET}.rollback.XXXXXX")"
+    if ! cp --preserve=mode,timestamps -- "${CONTROLLERS_JS_TARGET}" "${CONTROLLERS_BACKUP_CANDIDATE}"; then
+        rm -f -- "${CONTROLLERS_BACKUP_CANDIDATE}"
+        false
+    fi
+    BACKUP_CONTROLLERS_JS="${CONTROLLERS_BACKUP_CANDIDATE}"
+    mv -f -- "${STAGED_CONTROLLERS_JS}" "${CONTROLLERS_JS_TARGET}"
+    STAGED_CONTROLLERS_JS=""
+    echo "    Published controllers-gl.js atomically immediately before service cutover."
+fi
 if [ "${TARGETED_WEB}" = true ]; then
     run_wctl_with_retry \
         "${WCTL_COMPOSE_TIMEOUT_SECONDS}" \
         "${WCTL_COMPOSE_RETRIES}" \
         "${WCTL_COMPOSE_RETRY_DELAY_SECONDS}" \
         docker compose up -d --no-deps --force-recreate weppcloud rq-engine
-else
+elif [ "${TARGETED_CAP}" = true ]; then
+    CAP_ACTIVATION_STARTED=true
     run_wctl_with_retry \
         "${WCTL_COMPOSE_TIMEOUT_SECONDS}" \
         "${WCTL_COMPOSE_RETRIES}" \
         "${WCTL_COMPOSE_RETRY_DELAY_SECONDS}" \
-        up -d
+        docker compose up -d --no-deps --force-recreate cap
+else
+    if [ -n "${CAP_RESCUE_IMAGE}" ]; then
+        CAP_ACTIVATION_STARTED=true
+    fi
+    run_wctl_with_retry \
+        "${WCTL_COMPOSE_TIMEOUT_SECONDS}" \
+        "${WCTL_COMPOSE_RETRIES}" \
+        "${WCTL_COMPOSE_RETRY_DELAY_SECONDS}" \
+        up -d --force-recreate
 fi
 echo ""
 
@@ -615,13 +1072,13 @@ if [ "${HAS_WEPPCLOUD}" = true ]; then
         ATTEMPT=$((ATTEMPT + 1))
         if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
             echo "✗ WEPPcloud health check failed after ${MAX_ATTEMPTS} attempts"
-            exit 1
+            false
         fi
         echo "  Waiting for WEPPcloud to be ready (attempt ${ATTEMPT}/${MAX_ATTEMPTS})..."
         sleep 2
     done
 
-    if [ "${TARGETED_WEB}" = true ]; then
+    if printf "%s\n" "${RECREATED_SERVICES[@]}" | grep -qx "rq-engine"; then
         if [ -z "${RQ_ENGINE_HEALTHCHECK_URL}" ]; then
             case "${HEALTHCHECK_URL}" in
                 */weppcloud/health)
@@ -629,7 +1086,7 @@ if [ "${HAS_WEPPCLOUD}" = true ]; then
                     ;;
                 *)
                     echo "✗ Set RQ_ENGINE_HEALTHCHECK_URL when HEALTHCHECK_URL does not end in /weppcloud/health." >&2
-                    exit 1
+                    false
                     ;;
             esac
         fi
@@ -643,7 +1100,7 @@ if [ "${HAS_WEPPCLOUD}" = true ]; then
             RQ_ENGINE_ATTEMPT=$((RQ_ENGINE_ATTEMPT + 1))
             if [ "${RQ_ENGINE_ATTEMPT}" -eq "${MAX_ATTEMPTS}" ]; then
                 echo "✗ rq-engine health check failed after ${MAX_ATTEMPTS} attempts" >&2
-                exit 1
+                false
             fi
             echo "  Waiting for rq-engine to be ready (attempt ${RQ_ENGINE_ATTEMPT}/${MAX_ATTEMPTS})..."
             sleep 2
@@ -657,7 +1114,7 @@ else
         WORKER_GID="$(wctl docker compose exec -T rq-worker-fork-archive id -g)"
         if [ "${WORKER_UID}:${WORKER_GID}" != "1002:130" ]; then
             echo "✗ wepp3 worker identity is ${WORKER_UID}:${WORKER_GID}; expected 1002:130 for production NFS writes." >&2
-            exit 1
+            false
         fi
         REGISTERED_FORK_ARCHIVE_WORKERS=""
         for _attempt in $(seq 1 60); do
@@ -674,7 +1131,7 @@ else
         done
         if [ "${REGISTERED_FORK_ARCHIVE_WORKERS}" != "1:1" ]; then
             echo "✗ Expected one global/current-container fork-archive worker; found '${REGISTERED_FORK_ARCHIVE_WORKERS:-query failed}'." >&2
-            exit 1
+            false
         fi
         run_wctl_with_retry \
             "${WCTL_COMPOSE_TIMEOUT_SECONDS}" \
@@ -685,7 +1142,135 @@ else
     fi
 fi
 
-if [ "${TARGETED_WEB}" = true ]; then
+if printf "%s\n" "${RECREATED_SERVICES[@]}" | grep -qx "cap"; then
+    if [ -z "${CAP_HEALTHCHECK_URL}" ]; then
+        case "${HEALTHCHECK_URL}" in
+            */weppcloud/health)
+                CAP_HEALTHCHECK_URL="${HEALTHCHECK_URL%/weppcloud/health}/cap/health"
+                ;;
+            *)
+                echo "✗ Set CAP_HEALTHCHECK_URL when HEALTHCHECK_URL does not end in /weppcloud/health." >&2
+                false
+                ;;
+        esac
+    fi
+    echo "    CAP health check URL: ${CAP_HEALTHCHECK_URL}"
+    CAP_ATTEMPT=0
+    while [ "${CAP_ATTEMPT}" -lt "${MAX_ATTEMPTS:-30}" ]; do
+        if curl --connect-timeout 5 --max-time 10 -fsS "${CAP_HEALTHCHECK_URL}" >/dev/null 2>&1 \
+            && wctl docker compose exec -T cap node - < "${PROJECT_ROOT}/services/cap/canary.js"; then
+            echo "✓ CAP readiness and functional canary passed"
+            break
+        fi
+        CAP_ATTEMPT=$((CAP_ATTEMPT + 1))
+        if [ "${CAP_ATTEMPT}" -eq "${MAX_ATTEMPTS:-30}" ]; then
+            echo "✗ CAP readiness or challenge/redeem/siteverify canary failed" >&2
+            false
+        fi
+        sleep 2
+    done
+fi
+
+EXPECTED_SERVICE_ARGS=()
+for service in "${EXPECTED_RUNNING_SERVICES[@]}"; do
+    EXPECTED_SERVICE_ARGS+=(--expected-service "${service}")
+done
+echo "    Waiting for every recreated service to reach its accepted state..."
+SERVICE_STATE_ATTEMPT=0
+while [ "${SERVICE_STATE_ATTEMPT}" -lt 60 ]; do
+    PS_OUTPUT="$(wctl docker compose ps --all --format json)"
+    if printf "%s\n" "${PS_OUTPUT}" \
+        | python3 "${SCRIPT_DIR}/compose_deploy_contract.py" \
+            validate-ps "${EXPECTED_SERVICE_ARGS[@]}" 2>/dev/null; then
+        break
+    fi
+    SERVICE_STATE_ATTEMPT=$((SERVICE_STATE_ATTEMPT + 1))
+    if [ "${SERVICE_STATE_ATTEMPT}" -eq 60 ]; then
+        printf "%s\n" "${PS_OUTPUT}" \
+            | python3 "${SCRIPT_DIR}/compose_deploy_contract.py" \
+                validate-ps "${EXPECTED_SERVICE_ARGS[@]}"
+    fi
+    sleep 5
+done
+echo "✓ All recreated services are running and healthy where healthchecks exist"
+
+echo "    Verifying candidate image identity for locally built services..."
+CANDIDATE_IMAGE_ROWS="$(
+    wctl docker compose config --format json \
+        | python3 "${SCRIPT_DIR}/compose_deploy_contract.py" \
+            candidate-images "${EXPECTED_SERVICE_ARGS[@]}"
+)"
+while IFS=$'\t' read -r service image; do
+    [ -n "${service}" ] || continue
+    CANDIDATE_IMAGE_ID="$(docker image inspect --format '{{.Id}}' "${image}")"
+    while IFS= read -r container; do
+        [ -n "${container}" ] || continue
+        RUNNING_IMAGE_ID="$(docker inspect --format '{{.Image}}' "${container}")"
+        if [ "${RUNNING_IMAGE_ID}" != "${CANDIDATE_IMAGE_ID}" ]; then
+            echo "✗ ${service} is not running candidate image ${image}" >&2
+            false
+        fi
+    done < <(wctl docker compose ps -q "${service}")
+done <<< "${CANDIDATE_IMAGE_ROWS}"
+echo "✓ Every locally built recreated service runs its candidate image"
+
+echo "    Observing container identity and restart counts for 15 seconds..."
+STABILITY_BEFORE="$(
+    for service in "${EXPECTED_RUNNING_SERVICES[@]}"; do
+        while IFS= read -r container; do
+            [ -z "${container}" ] || docker inspect --format '{{.Id}} {{.RestartCount}}' "${container}"
+        done < <(wctl docker compose ps -q "${service}")
+    done | sort
+)"
+sleep 15
+STABILITY_AFTER="$(
+    for service in "${EXPECTED_RUNNING_SERVICES[@]}"; do
+        while IFS= read -r container; do
+            [ -z "${container}" ] || docker inspect --format '{{.Id}} {{.RestartCount}}' "${container}"
+        done < <(wctl docker compose ps -q "${service}")
+    done | sort
+)"
+[ "${STABILITY_BEFORE}" = "${STABILITY_AFTER}" ] || {
+    echo "✗ Container identity or restart count changed during stability observation." >&2
+    false
+}
+echo "✓ Recreated services remained stable"
+
+if printf "%s\n" "${COMPOSE_SERVICES}" | grep -qx "rq-worker"; then
+    DEFAULT_WORKER_HOSTNAME="$(wctl docker compose exec -T rq-worker hostname)"
+    BATCH_WORKER_HOSTNAME="$(wctl docker compose exec -T rq-worker-batch hostname)"
+    RQ_REGISTRATION="$(wctl docker compose exec -T rq-worker /opt/venv/bin/python -c '
+import redis
+import sys
+from rq import Worker
+from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+connection = redis.Redis(**redis_connection_kwargs(RedisDB.RQ))
+workers = [worker for worker in Worker.all(connection=connection) if connection.ttl(worker.key) > 0]
+print("{}:{}".format(
+    sum(worker.hostname == sys.argv[1] and "default" in worker.queue_names() for worker in workers),
+    sum(worker.hostname == sys.argv[2] and "batch" in worker.queue_names() for worker in workers),
+))
+' "${DEFAULT_WORKER_HOSTNAME}" "${BATCH_WORKER_HOSTNAME}")"
+    DEFAULT_WORKERS="${RQ_REGISTRATION%%:*}"
+    BATCH_WORKERS="${RQ_REGISTRATION##*:}"
+    [[ "${DEFAULT_WORKERS}" =~ ^[0-9]+$ && "${BATCH_WORKERS}" =~ ^[0-9]+$ ]] \
+        && [ "${DEFAULT_WORKERS}" -gt 0 ] && [ "${BATCH_WORKERS}" -gt 0 ] || {
+        echo "✗ RQ default/batch worker registration is incomplete: ${RQ_REGISTRATION}" >&2
+        false
+    }
+    echo "✓ RQ default/batch workers are registered"
+    assert_rq_fence
+fi
+
+resume_rq_if_owned
+
+if [ -n "${BACKUP_CONTROLLERS_JS}" ]; then
+    rm -f -- "${BACKUP_CONTROLLERS_JS}"
+    BACKUP_CONTROLLERS_JS=""
+fi
+
+if [ "${TARGETED_WEB}" = true ] || [ "${TARGETED_CAP}" = true ] \
+    || [ -n "${CAP_RESCUE_IMAGE}" ]; then
     echo ""
     echo ">>> Step 7: Skipping broad Docker runtime prune after targeted deployment"
 elif [ "${IS_WEPP3_FORK_ARCHIVE}" = true ]; then

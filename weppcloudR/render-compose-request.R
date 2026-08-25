@@ -41,6 +41,10 @@ fencing_generation <- suppressWarnings(as.integer(payload$fencing_generation))
 if (is.na(fencing_generation) || fencing_generation < 1L) {
   fail("Compose fencing generation is invalid")
 }
+if (identical(Sys.getenv("WEPPCLOUDR_CONTRACT_PROBE"), "1")) {
+  write(toJSON(list(protocol = 1L, accepted = TRUE), auto_unbox = TRUE), stdout())
+  quit(save = "no", status = 0L, runLast = FALSE)
+}
 
 run_path <- normalizePath(payload$run_path, winslash = "/", mustWork = TRUE)
 approved_roots <- strsplit(
