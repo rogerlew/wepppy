@@ -43,10 +43,13 @@ Users will not need to log out, clear cookies, or clear site data.
   receipt, and deliberately stale renderer rejection.
 - [x] (2026-08-25 18:05Z) Received PASS from renewed correctness, operations,
   QA, and security code gates: Critical 0, High 0.
-- [ ] Install the Forest1 host `acl` package; the deployment account lacks
-  non-interactive sudo authority.
-- [ ] Execute the forest1 integrated-test matrix, including two exact no-flag
-  full deployments and a real RQ-driven DEVAL render.
+- [x] (2026-08-25 21:38Z) Installed/verified the Forest1 `acl` prerequisite and
+  exact UID `10001` secret ACL.
+- [x] (2026-08-25 21:38Z) Completed two exact no-flag Forest1 full deployments,
+  targeted CAP/web isolation, disposable hostile CAP and stale-renderer gates,
+  automatic CAP rescue evidence, and a real RQ-driven DEVAL render.
+- [ ] Re-confirm final-revision Safari CAPTCHA, local/OAuth login, retained
+  pre-deploy session, and multi-tab logout in operator-controlled browsers.
 - [ ] Roll out to wepp1, verify login UX, and start the observation window.
 
 ## Surprises & Discoveries
@@ -89,6 +92,14 @@ Users will not need to log out, clear cookies, or clear site data.
   Evidence: local `compose ps --all` reports `status-build` and
   `preflight-build` exited successfully; acceptance excludes these deliberate
   non-long-running services rather than false-failing them.
+- Observation: the real Forest `wctl` transport removed single quotes embedded
+  in a Python `-c` payload even though mocked argv tests preserved them.
+  Evidence: Redis received `redis.call(get, ...)` and rejected the Lua before
+  acquisition; Lua long-bracket string literals survived the exact transport.
+- Observation: targeted web's no-cache image build can spend several minutes
+  in an unbounded shallow clone of `weppcloud-wbt`.
+  Evidence: the Forest build remained network-bound in `git clone` for about
+  four minutes before completing; no cutover occurred during that interval.
 
 ## Decision Log
 
@@ -137,6 +148,17 @@ Users will not need to log out, clear cookies, or clear site data.
   Date/Author: 2026-08-25 / Codex.
 
 ## Outcomes & Retrospective
+
+The implementation and automated Forest1 matrix are complete at `e11985f02`.
+The common architectural failure was closed by deriving build, recreation, and
+acceptance sets from Compose; CAP now has explicit runtime ownership,
+persistence, rotation, functional, and rescue contracts; and WEPPcloudR has an
+executable worker/renderer protocol gate. Two exact full deployments, targeted
+isolation checks, and an RQ-driven DEVAL publication passed. The remaining
+production hold is the final operator-controlled browser UX confirmation and
+production authorization, not an automated deployment or data-migration
+blocker. Detailed receipts are in
+`artifacts/2026-08-25_forest1_integrated_rehearsal.md`.
 
 Production containment for CAP and WEPPcloudR is complete, but the durable
 deployment repair is not implemented.

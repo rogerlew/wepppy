@@ -7,9 +7,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-25 15:48 UTC
-**Current phase**: Expanded review gate before Forest1 rehearsal
-**Last updated**: 2026-08-25 17:47 UTC
-**Next milestone**: clear renewed reviews, then execute Forest1 matrix
+**Current phase**: Forest1 automated gate complete; final manual UX gate
+**Last updated**: 2026-08-25 21:38 UTC
+**Next milestone**: final-revision browser UX confirmation, then production
 **Security impact**: `high`
 **Dedicated security review**: `yes`
 **Security artifact**: `docs/work-packages/20260825_cap_runtime_deploy_hardening/artifacts/2026-08-25_security_review.md`
@@ -19,18 +19,18 @@
 ### Ready / Backlog
 
 - [ ] Add the outstanding-token continuity case to the CAP Docker matrix.
-- [ ] Run the exact full-deploy integrated test and rollback twice on forest1.
+- [ ] Re-confirm final-revision Safari CAPTCHA, local/OAuth login, retained
+  session, and multi-tab logout on Forest1.
 - [ ] Deploy to wepp1 and begin the 14-day observation window.
 
 ### In Progress
 
-- [ ] Satisfy the Forest1 ACL prerequisite and execute the integrated matrix.
+- [ ] Complete the operator-controlled browser UX gate.
 
 ### Blocked
 
-- Forest1 lacks the required host `acl` package (`setfacl` and `getfacl`). The
-  deployment account cannot install it without interactive sudo. Install
-  `acl`, then re-run the exact-command rehearsal.
+- Production activation remains held for operator-controlled browser UX
+  confirmation and explicit production authorization.
 
 ### Done
 
@@ -63,6 +63,22 @@
 - [x] Passed renewed correctness, operations, QA, and security code gates with
   Critical 0 and High 0; deployment-mode suite 29 passed (2026-08-25 18:05
   UTC).
+- [x] Verified Forest1 ACL support and exact CAP secret ACL; fixed the real
+  `wctl` Python/Lua quoting boundary exposed before cutover (2026-08-25 20:40
+  UTC).
+- [x] Passed two exact no-argument full deployments, targeted CAP/web identity
+  isolation, hostile CAP/stale-renderer gates, and automatic CAP rescue on
+  Forest1 (2026-08-25 21:20 UTC).
+- [x] Completed the real browser CAP gate and RQ-driven DEVAL render; job
+  `d872b1f2-cff9-4658-8132-14ebe1bf11a2` finished and published a 12,155,360
+  byte report (2026-08-25 21:21 UTC).
+- [x] At exact `e11985f02`, stopped the newly recreated targeted CAP candidate;
+  deploy returned 1 without success, restored the rescue image and functional
+  canary, preserved all non-selected IDs and unsuspended RQ state, then passed
+  a clean targeted retry (2026-08-25 21:27 UTC).
+- [x] Final correctness, operations, QA, and security reassessment passed with
+  Critical 0 and High 0 after the Lua transport repair and exact-revision
+  rollback rehearsal (2026-08-25 21:30 UTC).
 
 ## Timeline
 
@@ -223,7 +239,7 @@ review; existing reviews continue to govern the CAP sub-scope.
 - [x] Empty CAP state tested.
 - [x] Populated supported legacy state tested without data loss.
 - [x] Malformed/hostile permission state fails explicitly.
-- [ ] Direct unmocked Compose boundary exercised (Forest1 gate).
+- [x] Direct unmocked Compose boundary exercised (Forest1 gate).
 - [x] Full-mode build targets cover every enabled locally buildable service it
   recreates.
 - [x] A deliberately stale renderer image fails before deploy success.
@@ -233,17 +249,17 @@ review; existing reviews continue to govern the CAP sub-scope.
 ### Deployment
 
 - [x] Forest1 baseline inventory captured before deployment.
-- [ ] Exact no-argument full deployment passes twice on Forest1.
+- [x] Exact no-argument full deployment passes twice on Forest1.
 - [ ] Forest1 local login, OAuth, retained-session, Safari/Chrome CAPTCHA, and
   multi-tab logout checks pass.
-- [ ] A real RQ-driven DEVAL job publishes output and its render receipt.
-- [ ] Forest1 stale-renderer and CAP failure injections fail closed and recover.
-- [ ] Targeted modes preserve every non-selected container identity.
-- [ ] Forest1 rollback and independent disposable-resource cleanup pass.
+- [x] A real RQ-driven DEVAL job publishes output and its render receipt.
+- [x] Forest1 stale-renderer and CAP failure injections fail closed and recover.
+- [x] Targeted modes preserve every non-selected container identity.
+- [x] Forest1 rollback and independent disposable-resource cleanup pass.
 - [ ] Full deploy that recreates CAP applies the same preflight/rescue contract,
   fails when CAP readiness is deliberately broken, and restores and revalidates
   known-good CAP before returning nonzero.
-- [ ] Targeted web deploy does not unnecessarily touch CAP.
+- [x] Targeted web deploy does not unnecessarily touch CAP.
 - [ ] wepp1 rollout preserves login/session UX and begins observation window.
 
 ## Progress Notes

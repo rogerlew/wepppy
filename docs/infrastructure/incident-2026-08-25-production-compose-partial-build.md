@@ -311,3 +311,8 @@ recur during the 14-day observation window.
 - `wepppy/rq/weppcloudr_backends.py`
 - `docs/work-packages/20260825_cap_runtime_deploy_hardening/package.md`
 - `docs/standards/hardening-lifecycle-standard.md`
+> **Forest1 rehearsal update (2026-08-25 21:38 UTC):** The durable repair at
+> `e11985f02` passed two exact full deployments, targeted-mode isolation, CAP
+> hostile-state and rescue checks, stale-renderer rejection, and a real
+> RQ-driven DEVAL publication. See
+> `docs/work-packages/20260825_cap_runtime_deploy_hardening/artifacts/2026-08-25_forest1_integrated_rehearsal.md`.
