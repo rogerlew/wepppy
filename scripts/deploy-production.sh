@@ -581,9 +581,9 @@ from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 connection = redis.Redis(**redis_connection_kwargs(RedisDB.RQ))
 token = sys.argv[1]
 renewed = connection.eval(
-    "if redis.call('get', KEYS[1]) ~= ARGV[1] then return 0 end "
-    "redis.call('expire', KEYS[1], ARGV[2]) "
-    "redis.call('set', KEYS[2], '1', 'EX', ARGV[2]) "
+    "if redis.call([[get]], KEYS[1]) ~= ARGV[1] then return 0 end "
+    "redis.call([[expire]], KEYS[1], ARGV[2]) "
+    "redis.call([[set]], KEYS[2], [[1]], [[EX]], ARGV[2]) "
     "return 1",
     2, "wepppy:deploy:rq-fence", "rq:suspended", token, 3600,
 )
@@ -627,17 +627,17 @@ from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 connection = redis.Redis(**redis_connection_kwargs(RedisDB.RQ))
 token = sys.argv[1]
 result = connection.eval(
-    "if redis.call('get', KEYS[3]) == ARGV[1] then return 2 end "
-    "local owner = redis.call('get', KEYS[1]) "
+    "if redis.call([[get]], KEYS[3]) == ARGV[1] then return 2 end "
+    "local owner = redis.call([[get]], KEYS[1]) "
     "if owner then "
     "  if owner ~= ARGV[1] then return -1 end "
-    "  redis.call('expire', KEYS[1], ARGV[2]) "
-    "  redis.call('set', KEYS[2], '1', 'EX', ARGV[2]) "
+    "  redis.call([[expire]], KEYS[1], ARGV[2]) "
+    "  redis.call([[set]], KEYS[2], [[1]], [[EX]], ARGV[2]) "
     "  return 1 "
     "end "
-    "if redis.call('exists', KEYS[2]) == 1 then return -2 end "
-    "redis.call('set', KEYS[1], ARGV[1], 'EX', ARGV[2]) "
-    "redis.call('set', KEYS[2], '1', 'EX', ARGV[2]) "
+    "if redis.call([[exists]], KEYS[2]) == 1 then return -2 end "
+    "redis.call([[set]], KEYS[1], ARGV[1], [[EX]], ARGV[2]) "
+    "redis.call([[set]], KEYS[2], [[1]], [[EX]], ARGV[2]) "
     "return 1",
     3, "wepppy:deploy:rq-fence", "rq:suspended",
     "wepppy:deploy:rq-fence:resumed:" + token, token, 3600,
@@ -714,13 +714,13 @@ import sys
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 connection = redis.Redis(**redis_connection_kwargs(RedisDB.RQ))
 result = connection.eval(
-    "if redis.call('get', KEYS[1]) == ARGV[1] then "
-    "  redis.call('del', KEYS[2]) "
-    "  redis.call('del', KEYS[1]) "
-    "  redis.call('set', KEYS[3], ARGV[1], 'EX', 3600) "
+    "if redis.call([[get]], KEYS[1]) == ARGV[1] then "
+    "  redis.call([[del]], KEYS[2]) "
+    "  redis.call([[del]], KEYS[1]) "
+    "  redis.call([[set]], KEYS[3], ARGV[1], [[EX]], 3600) "
     "  return 1 "
     "end "
-    "if redis.call('get', KEYS[3]) == ARGV[1] then return 1 end "
+    "if redis.call([[get]], KEYS[3]) == ARGV[1] then return 1 end "
     "return 0",
     3, "wepppy:deploy:rq-fence", "rq:suspended",
     "wepppy:deploy:rq-fence:resumed:" + sys.argv[1], sys.argv[1],

@@ -638,9 +638,9 @@ def test_worker_renews_rq_fence_and_reasserts_it_before_resume(tmp_path: Path) -
         assert operation_tokens
         assert set(operation_tokens) == {acquisition_token}
     deploy_source = _DEPLOY.read_text(encoding="utf-8")
-    assert "redis.call('set', KEYS[2], '1', 'EX', ARGV[2])" in deploy_source
-    assert "redis.call('del', KEYS[2])" in deploy_source
-    assert "redis.call('del', KEYS[1])" in deploy_source
+    assert "redis.call([[set]], KEYS[2], [[1]], [[EX]], ARGV[2])" in deploy_source
+    assert "redis.call([[del]], KEYS[2])" in deploy_source
+    assert "redis.call([[del]], KEYS[1])" in deploy_source
 
 
 def test_rq_acquisition_is_idempotent_after_committed_reply_loss(tmp_path: Path) -> None:
@@ -679,9 +679,9 @@ def test_rq_acquisition_checks_resume_tombstone_before_creating_fence() -> None:
     acquire_end = deploy_source.index("' \"${RQ_FENCE_TOKEN}\")", acquire_start)
     acquire_program = deploy_source[acquire_start:acquire_end]
 
-    receipt_check = acquire_program.index("redis.call('get', KEYS[3])")
-    fence_publish = acquire_program.index("redis.call('set', KEYS[1]")
-    suspension_publish = acquire_program.index("redis.call('set', KEYS[2]")
+    receipt_check = acquire_program.index("redis.call([[get]], KEYS[3])")
+    fence_publish = acquire_program.index("redis.call([[set]], KEYS[1]")
+    suspension_publish = acquire_program.index("redis.call([[set]], KEYS[2]")
     assert receipt_check < fence_publish
     assert receipt_check < suspension_publish
     assert '"wepppy:deploy:rq-fence:resumed:" + token' in acquire_program
