@@ -183,6 +183,7 @@ def describe_builder(registry: Registry | None = None) -> BuilderDescription:
             item.label,
             item.description,
             item.default_cellsize,
+            item.constraints,
         )
         for item in sorted(
             resolved_registry.components.values(),

@@ -1015,6 +1015,13 @@ def interfaces():
         return exception_factory()
 
 
+@weppcloud_site_bp.route('/config-builder/', strict_slashes=False)
+@login_required
+@handle_with_exception_factory
+def config_builder():
+    return render_template('config_builder.htm', user=current_user)
+
+
 @weppcloud_site_bp.route('/diagnostics/', strict_slashes=False)
 @handle_with_exception_factory
 def diagnostics():

@@ -137,6 +137,7 @@ class ComponentSummary:
     label: str
     description: str
     default_cellsize: int | None = None
+    constraints: ConstraintSet = ConstraintSet()
 
 
 @dataclass(frozen=True, slots=True)

@@ -96,7 +96,8 @@ class ComponentSummary:
     label: str
     description: str
     default_cellsize: int | None
-    def __init__(self, component_id: str, kind: str, label: str, description: str, default_cellsize: int | None = ...) -> None: ...
+    constraints: ConstraintSet
+    def __init__(self, component_id: str, kind: str, label: str, description: str, default_cellsize: int | None = ..., constraints: ConstraintSet = ...) -> None: ...
 
 @dataclass(frozen=True, slots=True)
 class BuilderDescription:

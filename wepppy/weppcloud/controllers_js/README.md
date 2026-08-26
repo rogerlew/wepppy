@@ -383,6 +383,18 @@ Keep this document updated when the bundling flow or controller contract changes
 - **Transport and map**: reads and mutations use the rq-engine session bearer token helpers. “Show on Map” registers `AgFields Sub-fields` through `MapController.addGeoJsonOverlay` with an authenticated `loadJson` callback and refreshes the registered layer after a rebuild.
 - **Testing**: `controllers_js/__tests__/ag_fields.test.js` covers pattern detection, snapshot gating, dynamic bootstrap, uploads, mapping validation, conflicts, and overlay auth. Run `wctl run-npm test -- ag_fields`, the map suite, the full frontend gates, and rebuild `controllers-gl.js` before handoff.
 
+## Config Builder
+
+`config_builder.js` owns the authenticated, non-run-scoped Config Builder page.
+It fetches `/rq-engine/api/project-config/builder` through
+`WCHttp.getRqEngineToken()`, derives every displayed stable ID from the returned
+component and constraint metadata, and posts exact validation and creation JSON.
+Only the validation response supplies review content. A schema `409` reloads
+the description and disables creation until another review. The controller
+keeps one cryptographic idempotency key per validated creation attempt and
+ignores duplicate clicks while a request is active. Jest coverage lives in
+`controllers_js/__tests__/config_builder.test.js`.
+
 ## Run-Scoped URL Construction (slug-first, no `pup=` injection)
 
 All API endpoints that operate within a run context **MUST** use `url_for_run()` from `utils.js`.

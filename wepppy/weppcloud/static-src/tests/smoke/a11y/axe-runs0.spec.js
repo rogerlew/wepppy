@@ -19,7 +19,9 @@ const configSlug = process.env.SMOKE_RUN_CONFIG || 'disturbed9002_wbt';
 const reportDir = process.env.AXE_OUTPUT_DIR || path.join('test-results', 'a11y');
 const axeTags = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 const disabledRules = ['color-contrast'];
-const forwardedProtoHeader = { 'X-Forwarded-Proto': 'https' };
+const forwardedProtoHeader = {
+  'X-Forwarded-Proto': new URL(baseURL).protocol.replace(':', ''),
+};
 const agentAccountLabel = process.env.SMOKE_AGENT_ACCOUNT_LABEL || 'dev-agent';
 const requireAgentCredentials = ['1', 'true', 'yes'].includes(
   String(process.env.SMOKE_AGENT_REQUIRED || '').trim().toLowerCase()
@@ -857,6 +859,33 @@ test.describe('axe accessibility smoke', () => {
     await expect(page.locator('.wc-profile')).toBeVisible();
 
     const entry = await runAxeScan(page, 'weppcloud-profile');
+    console.log(`[axe] ${entry.pageId}: ${entry.violationCount} violations`);
+  });
+
+  test('axe accessibility and reflow scan for authenticated config builder', async ({ page }) => {
+    await page.setExtraHTTPHeaders(forwardedProtoHeader);
+    const loginResult = await ensureAgentSession(page);
+    if (!loginResult.authenticated) {
+      test.skip(true, `Config Builder scan skipped: ${loginResult.reason}`);
+    }
+
+    await page.setViewportSize({ width: 640, height: 900 });
+    const builderUrl = buildUrl(withSitePrefix('/config-builder/'));
+    await page.goto(builderUrl, { waitUntil: 'networkidle' });
+    const builder = page.locator('[data-config-builder]');
+    await expect(builder).toBeVisible();
+    await expect(page.locator('[name="locale"] option')).not.toHaveCount(0);
+
+    const widths = await page.evaluate(() => ({
+      client: document.documentElement.clientWidth,
+      scroll: document.documentElement.scrollWidth,
+    }));
+    expect(widths.scroll).toBeLessThanOrEqual(widths.client);
+    await page.locator('[name="locale"]').focus();
+    await page.keyboard.press('Tab');
+    await expect(page.locator('[name="dem"]')).toBeFocused();
+
+    const entry = await runAxeScan(page, 'weppcloud-config-builder');
     console.log(`[axe] ${entry.pageId}: ${entry.violationCount} violations`);
   });
 

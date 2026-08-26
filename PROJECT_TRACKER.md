@@ -1156,6 +1156,22 @@ the remaining-run controller plan has no next controller milestone.
 
 ## ✅ Done
 
+### Project Config Builder UI (WP07) (2026-08-26)
+
+**Completed**: 2026-08-26
+**Security impact**: `high`
+**Initiative branch**: `feature/project-owned-config` (noncanonical)
+**Link**: [docs/work-packages/20260804_project_config_builder_ui/](docs/work-packages/20260804_project_config_builder_ui/)
+
+**Outcome**: Added the distinct authenticated one-page builder, registered
+dependency filtering, exact server review, role-described cell-size controls,
+stale and duplicate-submit guards, and accessible responsive behavior without
+changing named Interfaces. Full Python and JavaScript suites, authenticated
+axe/reflow/keyboard evidence, stubs, and dedicated correctness, security, and
+accessibility reviews pass. The WP06 writer remains default-off.
+
+---
+
 ### Project Config Registry and Serializer (WP03) (2026-08-26)
 
 **Completed**: 2026-08-26

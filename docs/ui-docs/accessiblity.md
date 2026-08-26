@@ -141,13 +141,24 @@ This validates `/weppcloud/landing/light/` against the installed WEPPcloud route
 - visible focus indication on each keyboard-focused link and control
 - the year filter staying out of the tab order while hidden and becoming focusable after the filter panel opens
 
+### 6) Config Builder accessibility
+
+The authenticated Config Builder uses native labelled selects and fieldsets,
+linked field errors, a focusable page-level alert, polite dynamic status, and a
+single-column narrow-viewport layout. Controller tests verify error focus,
+announcements, invalidated-choice removal, privileged-control visibility, and
+duplicate-submit blocking. The axe smoke suite includes an authenticated
+builder scan plus a 640-pixel reflow and keyboard-order check. WP07 evidence is
+recorded under
+`docs/work-packages/20260804_project_config_builder_ui/artifacts/`.
+
 ## Coverage-to-Requirement Map
 
 This table is an evidence map for engineering and release review. It is not a substitute for the criterion-by-criterion ACR/VPAT table.
 
 | Evidence source | Primary checks in repo | WCAG 2.1 / 2.0 criteria most directly exercised | Revised 508 / manual-method relation |
 | --- | --- | --- | --- |
-| `tests/weppcloud/routes/test_pure_controls_render.py` and `tests/weppcloud/routes/test_user_runs_admin_scope.py` | language metadata, iframe/title requirements, accessible names independent of placeholders, map semantics | 3.1.1, 1.1.1, 2.4.1, 3.3.2, 4.1.2 | Web-content conformance evidence under Revised 508's WCAG references; aligns with Trusted Tester / ICT Baseline checks for language, titles, labels, and name/role/value. |
+| `tests/weppcloud/routes/test_pure_controls_render.py`, `tests/weppcloud/routes/test_config_builder_ui.py`, and `tests/weppcloud/routes/test_user_runs_admin_scope.py` | language metadata, iframe/title requirements, accessible names and errors independent of placeholders, map semantics | 3.1.1, 1.1.1, 2.4.1, 3.3.1, 3.3.2, 4.1.2 | Web-content conformance evidence under Revised 508's WCAG references; aligns with Trusted Tester / ICT Baseline checks for language, titles, labels, errors, and name/role/value. |
 | `wepppy/weppcloud/controllers_js/__tests__/copytext.test.js` and `wepppy/weppcloud/controllers_js/__tests__/map_gl.test.js` | semantic buttons, modal accessible names, keyboard behavior for map-related UI | 2.1.1, 2.1.2, 2.4.3, 2.4.7, 4.1.2 | Supports software/web-application behavior checks typically confirmed with manual keyboard and assistive-technology testing. |
 | `wepppy/weppcloud/static-src/tests/smoke/theme-metrics.spec.js` | rendered text, control, and non-text contrast across the theme set | 1.4.3, 1.4.11 | Supplies repeatable contrast evidence for the validated theme set; manual review still needed for context-specific exceptions and real-page edge cases. |
 | `wepppy/weppcloud/static-src/tests/smoke/a11y/*.spec.js` | axe scans over representative anonymous and authenticated pages | partial structural coverage across 1.1.1, 1.3.1, 2.4.1, 2.4.6, 4.1.2 and related rules | Automated scan coverage only; Section 508 guidance requires manual confirmation for gaps and false positives/negatives. |

@@ -49,6 +49,8 @@ def test_description_and_validation_share_revision(client) -> None:
     assert description.status_code == 200
     body = description.json()
     assert body["config_token"] == "config"
+    locale = next(item for item in body["components"] if item["component_id"] == "continental-us")
+    assert locale["constraints"]["allowed_dem"] == ["usgs-ned1-2024", "usgs-ned13-2022"]
     validated = http.post("/api/project-config/builder/validate", json={"registry_revision": body["registry_revision"], "selections": selections()})
     assert validated.status_code == 200
     assert validated.json()["registry_revision"] == body["registry_revision"]
