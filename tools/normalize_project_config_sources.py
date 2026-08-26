@@ -16,7 +16,7 @@ from wepppy.project_config_serialization import normalize_source_text
 
 def source_paths() -> list[Path]:
     config_root = REPO_ROOT / "wepppy" / "nodb" / "configs"
-    return sorted([*config_root.glob("*.cfg"), config_root / "_defaults.toml"])
+    return sorted(config_root.glob("*.cfg"))
 
 
 def main() -> int:

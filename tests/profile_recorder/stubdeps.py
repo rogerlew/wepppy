@@ -199,7 +199,7 @@ def _install_stubs() -> None:
             return "/tmp"
 
         def _get_default_config_path() -> str:
-            return "/tmp/_defaults.toml"
+            return "/tmp/_defaults.cfg"
 
         nodb_base_stub.clear_locks = _clear_locks  # type: ignore[attr-defined]
         nodb_base_stub.get_config_dir = _get_config_dir  # type: ignore[attr-defined]

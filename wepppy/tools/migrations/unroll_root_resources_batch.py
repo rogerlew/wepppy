@@ -17,6 +17,8 @@ from time import perf_counter
 from typing import Any, Iterable, Literal
 from urllib.parse import parse_qsl
 
+from wepppy.nodb.base import resolve_defaults_path
+
 HostName = Literal["forest", "wepp1"]
 ModeName = Literal["dry-run", "apply"]
 
@@ -183,9 +185,7 @@ def resolve_apply_nodir(run_dir: Path) -> ApplyNoDirResolution:
                 message=f"invalid nodb:apply_nodir override: {exc}",
             )
 
-    defaults_path = run_dir / "_defaults.toml"
-    if not defaults_path.exists():
-        defaults_path = Path(__file__).resolve().parents[2] / "nodb" / "configs" / "_defaults.toml"
+    defaults_path = Path(resolve_defaults_path(run_dir))
     cfg_path = _resolve_config_path(run_dir, cfg_filename)
 
     parser = configparser.RawConfigParser()

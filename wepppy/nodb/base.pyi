@@ -12,6 +12,9 @@ import redis
 
 __all__ = [
     "NoDbAlreadyLockedError",
+    "NoDbStaleWriteError",
+    "NoDbRunReplacingError",
+    "run_replacement_guard",
     "redis_nodb_cache_client",
     "redis_status_client",
     "redis_log_level_client",
@@ -27,6 +30,8 @@ __all__ = [
     "try_redis_set_log_level",
     "createProcessPoolExecutor",
     "get_config_dir",
+    "get_default_config_path",
+    "resolve_defaults_path",
     "CaseSensitiveRawConfigParser",
     "get_configs",
     "get_legacy_configs",
@@ -43,6 +48,17 @@ __all__ = [
 
 class NoDbAlreadyLockedError(Exception):
     ...
+
+
+class NoDbStaleWriteError(RuntimeError):
+    ...
+
+
+class NoDbRunReplacingError(NoDbAlreadyLockedError):
+    ...
+
+
+def run_replacement_guard(runid: str) -> Generator[Any, None, None]: ...
 
 
 redis_nodb_cache_client: Optional[redis.StrictRedis]
@@ -85,6 +101,12 @@ def createProcessPoolExecutor(
 
 
 def get_config_dir() -> str: ...
+
+
+def get_default_config_path() -> str: ...
+
+
+def resolve_defaults_path(wd: str | Path | None = ...) -> str: ...
 
 
 class CaseSensitiveRawConfigParser(RawConfigParser):
@@ -202,6 +224,12 @@ class NoDbBase(object):
         runid: str,
         allow_nonexistent: bool = ...,
     ) -> Optional["NoDbBase"]: ...
+
+    @classmethod
+    def cleanup_all_instances(cls) -> None: ...
+
+    @classmethod
+    def cleanup_run_instances(cls, wd: str) -> int: ...
 
     @classmethod
     def tryGetInstance(
@@ -446,4 +474,9 @@ def clear_locks(runid: str, pup_relpath: Optional[str] = ...) -> list[str]: ...
 def lock_statuses(runid: str) -> defaultdict[str, bool]: ...
 
 
-def clear_nodb_file_cache(runid: str, pup_relpath: Optional[str] = ...) -> list[Path]: ...
+def clear_nodb_file_cache(
+    runid: str,
+    pup_relpath: Optional[str] = ...,
+    *,
+    wd_override: str | Path | None = ...,
+) -> list[Path]: ...

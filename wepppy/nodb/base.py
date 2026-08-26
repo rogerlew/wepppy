@@ -117,6 +117,7 @@ __all__ = [
     'createProcessPoolExecutor',
     'get_config_dir',
     'get_default_config_path',
+    'resolve_defaults_path',
     'CaseSensitiveRawConfigParser',
     'get_configs',
     'get_legacy_configs',
@@ -691,7 +692,8 @@ def createProcessPoolExecutor(
 
 _thisdir = os.path.dirname(__file__)
 _config_dir = _join(_thisdir, 'configs')
-_default_config = _join(_config_dir, '_defaults.toml')
+_default_config = _join(_config_dir, '_defaults.cfg')
+_legacy_default_config = _join(_config_dir, '_defaults.toml')
 
 
 def get_config_dir() -> str:
@@ -701,8 +703,29 @@ def get_config_dir() -> str:
 
 
 def get_default_config_path() -> str:
-    """Return the default configuration seed path."""
+    """Return the canonical shared defaults path, with legacy fallback."""
 
+    return resolve_defaults_path()
+
+
+def resolve_defaults_path(wd: Optional[os.PathLike[str] | str] = None) -> str:
+    """Resolve defaults using project-local then shared compatibility order."""
+
+    candidates: list[Path] = []
+    if wd is not None:
+        project_root = Path(wd)
+        candidates.extend(
+            (project_root / '_defaults.cfg', project_root / '_defaults.toml')
+        )
+    candidates.extend((Path(_default_config), Path(_legacy_default_config)))
+
+    for candidate in candidates:
+        if candidate.exists():
+            return str(candidate)
+
+    # Preserve the existing explicit failure boundary: the caller opens the
+    # canonical path and receives FileNotFoundError when neither shared name
+    # exists.
     return _default_config
 
 
@@ -722,7 +745,11 @@ class CaseSensitiveRawConfigParser(RawConfigParser):
 def get_configs() -> list[str]:
     """List available controller configuration basenames (``*.cfg`` files)."""
 
-    return [Path(fn).stem for fn in glob(_join(_config_dir, '*.cfg'))]
+    return [
+        Path(fn).stem
+        for fn in glob(_join(_config_dir, '*.cfg'))
+        if Path(fn).stem != '_defaults'
+    ]
 
 
 def get_legacy_configs() -> list[str]:
@@ -2498,10 +2525,7 @@ class NoDbBase(object):
         return str(fallback)
 
     def _resolve_defaults_path(self) -> str:
-        candidate = Path(self.wd) / Path(_default_config).name
-        if candidate.exists():
-            return str(candidate)
-        return _default_config
+        return resolve_defaults_path(self.wd)
 
     def _load_mods(self):
         config_parser = self._configparser

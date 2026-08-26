@@ -101,7 +101,7 @@ def test_source_normalization_rejects_duplicate_and_case_collisions(source: str)
 
 def test_active_source_corpus_is_lexically_normalized() -> None:
     config_root = REPO_ROOT / "wepppy" / "nodb" / "configs"
-    paths = sorted([*config_root.glob("*.cfg"), config_root / "_defaults.toml"])
+    paths = sorted(config_root.glob("*.cfg"))
 
     assert len(paths) == 129
     for path in paths:

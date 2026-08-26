@@ -1156,6 +1156,23 @@ the remaining-run controller plan has no next controller milestone.
 
 ## ✅ Done
 
+### Defaults CFG Compatibility (WP01) (2026-08-26)
+
+**Completed**: 2026-08-26
+**Security impact**: `low`
+**Initiative branch**: `feature/project-owned-config` (noncanonical)
+**Link**: [docs/work-packages/20260804_defaults_cfg_compatibility/](docs/work-packages/20260804_defaults_cfg_compatibility/)
+
+**Outcome**: Moved shared defaults to canonical `_defaults.cfg`, retained the
+old name as a relative symlink, and implemented project-local cfg/toml then
+shared cfg/toml precedence without changing values or config tokens. Prevented
+the canonical seed from entering the 128-preset catalog. Focused, NoDb, full
+repository, stub, docs, and running-development-stack gates pass. PC-02 is
+verified and PC-03 is locally verified; WP11 retains deployed Forest/rollback
+acceptance. No writer was enabled.
+
+---
+
 ### Project Configuration Source Normalization (WP00B) (2026-08-05)
 
 **Completed**: 2026-08-05
