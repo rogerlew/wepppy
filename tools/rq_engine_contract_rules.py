@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 SUCCESS_STATUS_OVERRIDES: dict[tuple[str, str], int] = {
+    ("POST", "/api/project-config/builder/create"): 201,
     ("POST", "/api/runs/{runid}/{config}/agfields/build-subfields"): 202,
     ("POST", "/api/runs/{runid}/{config}/agfields/plant-database"): 202,
     ("POST", "/api/runs/{runid}/{config}/agfields/run-wepp"): 202,
@@ -17,6 +18,8 @@ SUCCESS_STATUS_OVERRIDES: dict[tuple[str, str], int] = {
 }
 
 PATHS_REQUIRING_400 = {
+    "/api/project-config/builder/create",
+    "/api/project-config/builder/validate",
     "/api/culverts-wepp-batch/",
     "/api/culverts-wepp-batch/{batch_uuid}/retry/{point_id}",
     "/api/runs/{runid}/{config}/acquire-rap-ts",
@@ -102,6 +105,8 @@ PATHS_REQUIRING_404 = {
 }
 
 PATHS_REQUIRING_409 = {
+    "/api/project-config/builder/create",
+    "/api/project-config/builder/validate",
     "/api/runs/{runid}/{config}/agfields/clear-watershed",
     "/api/runs/{runid}/{config}/agfields/run-watershed",
     "/api/runs/{runid}/{config}/export/features",
@@ -130,6 +135,10 @@ PATHS_REQUIRING_428 = {
     "/api/runs/{runid}/{config}/landuse-map/save",
 }
 
+PATHS_REQUIRING_503 = {
+    "/api/project-config/builder/create",
+}
+
 
 def required_response_codes(method: str, path: str) -> set[int]:
     success_code = SUCCESS_STATUS_OVERRIDES.get((method, path), 200)
@@ -149,6 +158,8 @@ def required_response_codes(method: str, path: str) -> set[int]:
         required.add(415)
     if path in PATHS_REQUIRING_428:
         required.add(428)
+    if path in PATHS_REQUIRING_503:
+        required.add(503)
 
     return required
 

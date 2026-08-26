@@ -7,7 +7,7 @@ Guarded by:
 - `tools/check_route_contract_checklist.py` (checklist row parity + non-empty contract fields)
 - `tests/microservices/test_rq_engine_openapi_contract.py` (OpenAPI metadata/response contract + oversize budgets)
 
-- Total frozen routes covered: **114**
+- Total frozen routes covered: **117**
 
 Cutover reconciliation note (2026-04-11):
 - Row-8 contract cutover package
@@ -39,6 +39,10 @@ Contract reconciliation note (2026-07-15):
   three serial scheme children, and an additive finalizer waits for all three
   with failure allowed. Single-scheme execution remains direct.
 
+Inventory reconciliation note (2026-08-26):
+- Added contract rows for the authenticated synchronous project-config builder
+  description, validation, and default-off creation routes.
+
 ## Contract Matrix
 
 | Method | Path | Auth | Scope | Mutates | Execution | Required Responses | Contract Coverage |
@@ -53,6 +57,9 @@ Contract reconciliation note (2026-07-15):
 | `GET` | `/api/endpoints/{operation_id}/defaults` | JWT Bearer | rq:status or rq:read | read-only | sync | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_setup_discovery_routes.py` |
 | `GET` | `/api/endpoints/{operation_id}/errors` | JWT Bearer | rq:status or rq:read | read-only | sync | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_setup_discovery_routes.py` |
 | `GET` | `/api/endpoints/{operation_id}/schema` | JWT Bearer | rq:status or rq:read | read-only | sync | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_setup_discovery_routes.py` |
+| `GET` | `/api/project-config/builder` | JWT Bearer | rq:enqueue | read-only | sync no queue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_builder_routes.py` |
+| `POST` | `/api/project-config/builder/create` | JWT Bearer | rq:enqueue | mutating | sync no queue | `201, 400, 401, 403, 409, 500, 503` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_builder_routes.py` |
+| `POST` | `/api/project-config/builder/validate` | JWT Bearer | rq:enqueue | read-only | sync no queue | `200, 400, 401, 403, 409, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_builder_routes.py` |
 | `POST` | `/api/jobinfo` | Open by default (`RQ_ENGINE_POLL_AUTH_MODE`) | `rq:status` when auth mode validates JWT | read-only | sync | `200, 401, 403, 429, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_jobinfo.py` |
 | `GET` | `/api/jobinfo/{job_id}` | Open by default (`RQ_ENGINE_POLL_AUTH_MODE`) | `rq:status` when auth mode validates JWT | read-only | sync | `200, 401, 403, 404, 429, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_jobinfo.py` |
 | `GET` | `/api/jobstatus/{job_id}` | Open by default (`RQ_ENGINE_POLL_AUTH_MODE`) | `rq:status` when auth mode validates JWT | read-only | sync | `200, 401, 403, 404, 429, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_jobinfo.py` |

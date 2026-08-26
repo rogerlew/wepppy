@@ -5,9 +5,9 @@ Source-of-truth inventory captured directly from:
 - `wepppy/weppcloud/routes/bootstrap.py`
 
 Snapshot summary:
-- Total endpoints inventoried: **137**
-- Classification counts: **agent-facing 114**, **internal 17**, **ui-only 6**
-- Canonical owner counts: **rq-engine 134**, **Flask wrapper 3**
+- Total endpoints inventoried: **140**
+- Classification counts: **agent-facing 117**, **internal 17**, **ui-only 6**
+- Canonical owner counts: **rq-engine 137**, **Flask wrapper 3**
 
 Cutover reconciliation note (2026-04-11):
 - Row-8 contract cutover package
@@ -41,6 +41,11 @@ Contract reconciliation note (2026-07-15):
   allowed. Single-scheme topology, auth, scope, endpoint count, and fixed output
   roots are unchanged.
 
+Inventory reconciliation note (2026-08-26):
+- Added the authenticated project-config builder description, validation, and
+  synchronous creation endpoints. All three require `rq:enqueue`; creation is
+  default-off and always materializes the server-owned `config` token.
+
 ## Inventory Table
 
 | Method | Path | Module | Function | Classification | Owner | Auth | Scope | Mutates | Notes |
@@ -61,6 +66,9 @@ Contract reconciliation note (2026-07-15):
 | GET | `/api/endpoints/{operation_id}/defaults` | `wepppy/microservices/rq_engine/setup_discovery_routes.py` | `get_setup_endpoint_defaults` | agent-facing | rq-engine | JWT Bearer | `rq:status or rq:read` | read-only | Non-run-scoped setup defaults for one operation descriptor; returns canonical `404` for unknown operation IDs. |
 | GET | `/api/endpoints/{operation_id}/errors` | `wepppy/microservices/rq_engine/setup_discovery_routes.py` | `get_setup_endpoint_errors` | agent-facing | rq-engine | JWT Bearer | `rq:status or rq:read` | read-only | Non-run-scoped setup error taxonomy for one operation descriptor; returns canonical `404` for unknown operation IDs. |
 | GET | `/api/endpoints/{operation_id}/schema` | `wepppy/microservices/rq_engine/setup_discovery_routes.py` | `get_setup_endpoint_schema` | agent-facing | rq-engine | JWT Bearer | `rq:status or rq:read` | read-only | Non-run-scoped setup request schema + descriptor for one operation ID; returns canonical `404` for unknown operation IDs. |
+| GET | `/api/project-config/builder` | `wepppy/microservices/rq_engine/builder_routes.py` | `builder_description` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | read-only | Returns the registered builder vocabulary and opaque registry revision synchronously; no queue or writes. |
+| POST | `/api/project-config/builder/create` | `wepppy/microservices/rq_engine/builder_routes.py` | `create_builder_project` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Default-off synchronous project creation with server-owned `config` token, schema staleness checks, role-gated cell-size override, and idempotent cleanup. |
+| POST | `/api/project-config/builder/validate` | `wepppy/microservices/rq_engine/builder_routes.py` | `validate_builder` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | read-only | Resolves and reviews an exact complete builder proposal synchronously; stale schema revisions return `409`. |
 | POST | `/api/huc-fire/tasks/upload-sbs/` | `wepppy/microservices/rq_engine/upload_huc_fire_routes.py` | `upload_huc_fire_sbs` | internal | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Creates a new disturbed run synchronously from upload payload; no queue. |
 | POST | `/api/jobinfo` | `wepppy/microservices/rq_engine/job_routes.py` | `jobinfo_batch` | agent-facing | rq-engine | Open by default (`RQ_ENGINE_POLL_AUTH_MODE`) | `rq:status` when auth mode validates JWT | read-only | Polling remains open in default mode; optional/required JWT modes plus rate limiting + audit logging are now available. |
 | GET | `/api/jobinfo/{job_id}` | `wepppy/microservices/rq_engine/job_routes.py` | `jobinfo` | agent-facing | rq-engine | Open by default (`RQ_ENGINE_POLL_AUTH_MODE`) | `rq:status` when auth mode validates JWT | read-only | Polling remains open in default mode; optional/required JWT modes plus rate limiting + audit logging are now available. |
