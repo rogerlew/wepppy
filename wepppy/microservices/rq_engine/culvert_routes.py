@@ -8,16 +8,16 @@ import shutil
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 import redis
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from rq import Queue
+from rq.job import Job
 from starlette.datastructures import UploadFile
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
-from wepppy.nodb.culverts_runner import CulvertsRunner
 from wepppy.microservices.culvert_payload_validator import (
     ValidationIssue,
     format_validation_errors,
@@ -35,6 +35,14 @@ from wepppy.rq.culvert_rq import (
     run_culvert_batch_rq,
     run_culvert_run_rq,
 )
+from wepppy.nodb.culverts_runner import CulvertsRunner
+from wepppy.rq.job_dependencies import reconcile_deferred_workflow
+from wepppy.rq.job_id import new_rq_job_id
+from wepppy.rq.submission_recovery import (
+    RqEnqueueVerificationError,
+    RqSubmissionConflict,
+    rq_submission_lock,
+)
 from wepppy.weppcloud.utils import auth_tokens
 
 from .auth import AuthError, require_jwt
@@ -47,12 +55,155 @@ router = APIRouter()
 
 MAX_PAYLOAD_BYTES = 2 * 1024 * 1024 * 1024
 CULVERT_BROWSE_TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60
-CULVERT_BATCH_RQ_JOB_KEY = "run_culvert_batch_rq"
 CULVERT_ARCHIVE_LIMITS = ArchiveLimits(
     max_compressed_bytes=MAX_PAYLOAD_BYTES,
     max_uncompressed_bytes=6 * 1024 * 1024 * 1024,
     max_member_count=1200,
 )
+
+CULVERT_JOB_KEYS = (
+    "run_culvert_batch_rq",
+    "run_culvert_run_rq",
+    "run_culvert_batch_finalize_rq",
+)
+CULVERT_ROOT_FUNCTION_BY_JOB_KEY = {
+    "run_culvert_batch_rq": run_culvert_batch_rq,
+    "run_culvert_run_rq": run_culvert_run_rq,
+    "run_culvert_batch_finalize_rq": run_culvert_batch_finalize_rq,
+}
+
+
+def _culvert_job_belongs_to_batch(job: Job, batch_uuid: str) -> bool:
+    allowed_funcs = {
+        f"{func.__module__}.{func.__qualname__}"
+        for func in (
+            run_culvert_batch_rq,
+            run_culvert_run_rq,
+            run_culvert_batch_finalize_rq,
+        )
+    }
+    allowed_funcs.add("wepppy.rq.culvert_rq._final_culvert_batch_complete_rq")
+    if str(job.func_name) not in allowed_funcs or str(job.origin) != "batch":
+        return False
+    metadata = job.meta if isinstance(job.meta, dict) else {}
+    args = tuple(job.args or ())
+    canonical_arg_index = (
+        1
+        if str(job.func_name)
+        == f"{run_culvert_run_rq.__module__}.{run_culvert_run_rq.__qualname__}"
+        else 0
+    )
+    if len(args) <= canonical_arg_index or str(args[canonical_arg_index]) != batch_uuid:
+        return False
+    metadata_batch = str(metadata.get("culvert_batch_uuid") or "")
+    return not metadata_batch or metadata_batch == batch_uuid
+
+
+def _culvert_runner(batch_uuid: str) -> CulvertsRunner:
+    batch_root = _resolve_culverts_root() / batch_uuid
+    runner = CulvertsRunner.getInstance(str(batch_root), allow_nonexistent=True)
+    if runner is None:
+        runner = CulvertsRunner(str(batch_root), "culvert.cfg")
+    return runner
+
+
+def _canonical_batch_uuid(batch_uuid: str) -> str:
+    """Return the canonical UUID spelling accepted as one batch-root child."""
+    try:
+        canonical = str(uuid.UUID(batch_uuid))
+    except (AttributeError, ValueError) as exc:
+        raise ValueError("Invalid culvert batch UUID.") from exc
+    if canonical != batch_uuid:
+        raise ValueError("Invalid culvert batch UUID.")
+    return canonical
+
+
+def _culvert_run_dir(batch_root: Path, point_id: str) -> Path:
+    if (
+        not point_id
+        or point_id in {".", ".."}
+        or Path(point_id).name != point_id
+        or "/" in point_id
+        or "\\" in point_id
+    ):
+        raise ValueError("Invalid Point_ID")
+    if batch_root.is_symlink():
+        raise ValueError("Invalid batch directory")
+    canonical_batch_root = batch_root.resolve()
+    if canonical_batch_root.parent != _resolve_culverts_root():
+        raise ValueError("Invalid batch directory")
+    runs_entry = canonical_batch_root / "runs"
+    if runs_entry.is_symlink():
+        raise ValueError("Invalid runs directory")
+    runs_root = runs_entry.resolve()
+    if runs_root != runs_entry:
+        raise ValueError("Invalid runs directory")
+    run_dir = runs_root / point_id
+    if run_dir.parent != runs_root or (run_dir.exists() and run_dir.is_symlink()):
+        raise ValueError("Invalid Point_ID")
+    return run_dir
+
+
+def _enqueue_culvert_job(
+    batch_uuid: str,
+    *,
+    job_key: str,
+    func: Any,
+    args: list[str],
+    meta: dict[str, str],
+    before_enqueue: Callable[[], None] | None = None,
+) -> str:
+    batch_uuid = _canonical_batch_uuid(batch_uuid)
+    conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
+    with redis.Redis(**conn_kwargs) as redis_conn:
+        with rq_submission_lock(redis_conn, f"culvert:{batch_uuid}", lifecycle_key=batch_uuid, lifecycle_type="culvert") as lease:
+            # Read the persisted receipt map only after admission is serialized.
+            runner = _culvert_runner(batch_uuid)
+            roots_by_job_id: dict[str, set[str]] = {}
+            for prior_key, prior_job_id in runner.rq_job_ids.items():
+                root_func = CULVERT_ROOT_FUNCTION_BY_JOB_KEY.get(prior_key)
+                if not prior_job_id:
+                    continue
+                if root_func is None:
+                    raise RqSubmissionConflict(
+                        "Culvert receipt operation could not be verified "
+                        f"(key={prior_key})."
+                    )
+                roots_by_job_id.setdefault(str(prior_job_id), set()).add(
+                    f"{root_func.__module__}.{root_func.__qualname__}"
+                )
+            for prior_job_id, allowed_root_funcs in roots_by_job_id.items():
+                result = reconcile_deferred_workflow(
+                    str(prior_job_id),
+                    connection=redis_conn,
+                    association=lambda candidate: _culvert_job_belongs_to_batch(
+                        candidate, batch_uuid
+                    ),
+                    root_association=lambda candidate, allowed=allowed_root_funcs: (
+                        _culvert_job_belongs_to_batch(candidate, batch_uuid)
+                        and str(candidate.func_name) in allowed
+                    ),
+                    lease_checkpoint=lease.checkpoint,
+                )
+                if result.state in {"active", "mismatch"}:
+                    raise RqSubmissionConflict("A culvert batch job is already active.")
+                lease.checkpoint()
+            if before_enqueue is not None:
+                lease.checkpoint()
+                before_enqueue()
+                lease.checkpoint()
+            job_id = new_rq_job_id()
+            runner.set_rq_job_id(job_key, job_id)
+            lease.checkpoint()
+            queue = Queue("batch", connection=redis_conn)
+            job = queue.enqueue_call(
+                func=func,
+                args=args,
+                timeout=CULVERT_BATCH_TIMEOUT,
+                job_id=job_id,
+                meta=meta,
+            )
+            return str(job.id)
 
 
 def _mint_culvert_browse_token(batch_uuid: str, *, subject: str) -> dict[str, Any]:
@@ -190,17 +341,6 @@ async def culverts_wepp_batch(request: Request) -> JSONResponse:
         )
 
         job_id = _enqueue_culvert_batch_job(culvert_batch_uuid)
-        try:
-            runner = CulvertsRunner.getInstance(str(batch_root), allow_nonexistent=True)
-            if runner is None:
-                runner = CulvertsRunner(str(batch_root), "culvert.cfg")
-            runner.set_rq_job_id(CULVERT_BATCH_RQ_JOB_KEY, job_id)
-        except Exception:
-            logger.warning(
-                "rq-engine culvert batch: failed to persist parent job id for %s",
-                culvert_batch_uuid,
-                exc_info=True,
-            )
         status_url = f"/rq-engine/api/jobstatus/{job_id}"
         browse_token_payload = _mint_culvert_browse_token(
             culvert_batch_uuid,
@@ -216,6 +356,18 @@ async def culverts_wepp_batch(request: Request) -> JSONResponse:
                 "browse_token_expires_at": browse_claims.get("exp"),
             }
         )
+    except RqSubmissionConflict as exc:
+        shutil.rmtree(batch_root, ignore_errors=True)
+        return error_response(str(exc), status_code=409, code="conflict")
+    except RqEnqueueVerificationError as exc:
+        # The exact preallocated receipt may have committed. Preserve its staged
+        # inputs so either the worker or a subsequent reconciliation can proceed.
+        logger.warning(
+            "Culvert batch enqueue outcome could not be verified batch_uuid=%s",
+            culvert_batch_uuid,
+            exc_info=True,
+        )
+        return error_response(str(exc), status_code=503, code="enqueue_unverified")
     except Exception:
         shutil.rmtree(batch_root, ignore_errors=True)
         logger.exception("rq-engine culvert batch ingestion failed")
@@ -252,6 +404,10 @@ async def culverts_retry_run(
         logger.exception("rq-engine culvert retry auth failed")
         return error_response("Failed to authorize request", status_code=401, code="unauthorized")
 
+    try:
+        batch_uuid = _canonical_batch_uuid(batch_uuid)
+    except ValueError as exc:
+        return error_response(str(exc), status_code=404)
     culverts_root = _resolve_culverts_root()
     batch_root = culverts_root / batch_uuid
 
@@ -289,13 +445,28 @@ async def culverts_retry_run(
             status_code=404,
         )
 
-    # Clean up existing run directory for a fresh retry
-    run_dir = batch_root / "runs" / point_id
-    if run_dir.is_dir():
-        shutil.rmtree(run_dir, ignore_errors=True)
-        logger.info(f"Removed existing run directory for retry: {run_dir}")
+    try:
+        run_dir = _culvert_run_dir(batch_root, point_id)
+    except ValueError as exc:
+        return error_response(str(exc), status_code=400, code="validation_error")
 
-    job_id = _enqueue_culvert_run_job(batch_uuid, point_id)
+    def _clear_prior_run() -> None:
+        if run_dir.is_dir():
+            tombstone = run_dir.with_name(
+                f".{run_dir.name}.retry-{uuid.uuid4().hex}"
+            )
+            os.replace(run_dir, tombstone)
+            shutil.rmtree(tombstone, ignore_errors=True)
+            logger.info("Removed existing run directory for retry: %s", run_dir)
+
+    try:
+        job_id = _enqueue_culvert_run_job(
+            batch_uuid,
+            point_id,
+            before_enqueue=_clear_prior_run,
+        )
+    except RqSubmissionConflict as exc:
+        return error_response(str(exc), status_code=409, code="conflict")
     status_url = f"/rq-engine/api/jobstatus/{job_id}"
     browse_token_payload = _mint_culvert_browse_token(
         batch_uuid,
@@ -341,6 +512,10 @@ async def culverts_finalize_batch(batch_uuid: str, request: Request) -> JSONResp
         logger.exception("rq-engine culvert finalize auth failed")
         return error_response("Failed to authorize request", status_code=401, code="unauthorized")
 
+    try:
+        batch_uuid = _canonical_batch_uuid(batch_uuid)
+    except ValueError as exc:
+        return error_response(str(exc), status_code=404)
     culverts_root = _resolve_culverts_root()
     batch_root = culverts_root / batch_uuid
     if not batch_root.is_dir():
@@ -349,7 +524,10 @@ async def culverts_finalize_batch(batch_uuid: str, request: Request) -> JSONResp
             status_code=404,
         )
 
-    job_id = _enqueue_culvert_finalize_job(batch_uuid)
+    try:
+        job_id = _enqueue_culvert_finalize_job(batch_uuid)
+    except RqSubmissionConflict as exc:
+        return error_response(str(exc), status_code=409, code="conflict")
     status_url = f"/rq-engine/api/jobstatus/{job_id}"
     browse_token_payload = _mint_culvert_browse_token(
         batch_uuid,
@@ -367,37 +545,37 @@ async def culverts_finalize_batch(batch_uuid: str, request: Request) -> JSONResp
     )
 
 
-def _enqueue_culvert_run_job(culvert_batch_uuid: str, point_id: str) -> str:
+def _enqueue_culvert_run_job(
+    culvert_batch_uuid: str,
+    point_id: str,
+    *,
+    before_enqueue: Callable[[], None] | None = None,
+) -> str:
     """Enqueue a single culvert run job."""
-    conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
     runid = f"culvert;;{culvert_batch_uuid};;{point_id}"
-    with redis.Redis(**conn_kwargs) as redis_conn:
-        q = Queue("batch", connection=redis_conn)
-        job = q.enqueue_call(
-            func=run_culvert_run_rq,
-            args=[runid, culvert_batch_uuid, point_id],
-            timeout=CULVERT_BATCH_TIMEOUT,
-        )
-        job.meta["culvert_batch_uuid"] = culvert_batch_uuid
-        job.meta["point_id"] = point_id
-        job.meta["runid"] = runid
-        job.save()
-    return job.id
+    return _enqueue_culvert_job(
+        culvert_batch_uuid,
+        job_key="run_culvert_run_rq",
+        func=run_culvert_run_rq,
+        args=[runid, culvert_batch_uuid, point_id],
+        meta={
+            "culvert_batch_uuid": culvert_batch_uuid,
+            "point_id": point_id,
+            "runid": runid,
+        },
+        before_enqueue=before_enqueue,
+    )
 
 
 def _enqueue_culvert_finalize_job(culvert_batch_uuid: str) -> str:
     """Enqueue culvert batch finalizer to refresh summary artifacts."""
-    conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
-    with redis.Redis(**conn_kwargs) as redis_conn:
-        q = Queue("batch", connection=redis_conn)
-        job = q.enqueue_call(
-            func=run_culvert_batch_finalize_rq,
-            args=[culvert_batch_uuid],
-            timeout=CULVERT_BATCH_TIMEOUT,
-        )
-        job.meta["culvert_batch_uuid"] = culvert_batch_uuid
-        job.save()
-    return job.id
+    return _enqueue_culvert_job(
+        culvert_batch_uuid,
+        job_key="run_culvert_batch_finalize_rq",
+        func=run_culvert_batch_finalize_rq,
+        args=[culvert_batch_uuid],
+        meta={"culvert_batch_uuid": culvert_batch_uuid},
+    )
 
 
 def _resolve_culverts_root() -> Path:
@@ -547,17 +725,13 @@ def _write_batch_metadata(
 
 
 def _enqueue_culvert_batch_job(culvert_batch_uuid: str) -> str:
-    conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
-    with redis.Redis(**conn_kwargs) as redis_conn:
-        q = Queue("batch", connection=redis_conn)
-        job = q.enqueue_call(
-            func=run_culvert_batch_rq,
-            args=[culvert_batch_uuid],
-            timeout=CULVERT_BATCH_TIMEOUT,
-        )
-        job.meta["culvert_batch_uuid"] = culvert_batch_uuid
-        job.save()
-    return job.id
+    return _enqueue_culvert_job(
+        culvert_batch_uuid,
+        job_key="run_culvert_batch_rq",
+        func=run_culvert_batch_rq,
+        args=[culvert_batch_uuid],
+        meta={"culvert_batch_uuid": culvert_batch_uuid},
+    )
 
 
 __all__ = ["router"]

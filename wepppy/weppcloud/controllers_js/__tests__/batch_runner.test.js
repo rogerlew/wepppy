@@ -444,4 +444,24 @@ describe("BatchRunner controller", () => {
         );
         expect(document.getElementById("batch_runstate").textContent).toContain("demo");
     });
+
+    test("deferred job response releases both run and delete controls", () => {
+        controller.state.snapshot.resources = {
+            watershed_geojson: { filename: "demo.geojson" }
+        };
+        controller.state.validation = {
+            status: "ok",
+            summary: { is_valid: true }
+        };
+        baseInstance.should_disable_command_button.mockReturnValueOnce(true);
+        controller._renderRunControls();
+        expect(controller.runBatchButton.disabled).toBe(true);
+        expect(controller.deleteBatchButton.disabled).toBe(true);
+
+        baseInstance.should_disable_command_button.mockReturnValue(false);
+        controller.handle_job_status_response(controller, { status: "deferred" });
+
+        expect(controller.runBatchButton.disabled).toBe(false);
+        expect(controller.deleteBatchButton.disabled).toBe(false);
+    });
 });

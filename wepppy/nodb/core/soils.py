@@ -223,6 +223,7 @@ class Soils(NoDbBase):
             self.domsoil_d = None  # topaz_id keys
             self.ssurgo_domsoil_d = None
             self.raw_ssurgo_domsoil_d = None
+            self._soil_source = None
             self.ssurgo_substitution_d = {}
             self.ssurgo_candidate_shadow_d = {}
             self.ssurgo_candidate_preparation = {"status": "not_attempted", "affected_hillslopes": 0}
@@ -256,6 +257,8 @@ class Soils(NoDbBase):
             instance._clear_ssurgo_cache_on_rebuild = False
         if not hasattr(instance, "raw_ssurgo_domsoil_d"):
             instance.raw_ssurgo_domsoil_d = None
+        if not hasattr(instance, "_soil_source"):
+            instance._soil_source = None
         if (
             not hasattr(instance, "ssurgo_substitution_d")
             or instance.ssurgo_substitution_d is None
@@ -520,6 +523,11 @@ class Soils(NoDbBase):
             return False
         else:
             return self.domsoil_d is not None
+
+    @property
+    def soil_source(self) -> Optional[str]:
+        """Return the builder provenance for the current soil inventory."""
+        return getattr(self, "_soil_source", None)
 
     @property
     def soils_is_vrt(self) -> bool:
@@ -998,6 +1006,14 @@ class Soils(NoDbBase):
             self.domsoil_d = domsoil_d
             self.ssurgo_domsoil_d = deepcopy(domsoil_d)
             self.soils = soils
+            module_name = getattr(build_func, "__module__", "")
+            function_name = getattr(build_func, "__name__", "")
+            self._soil_source = (
+                "esdac"
+                if module_name == "wepppy.eu.soils"
+                and function_name == "build_esdac_soils"
+                else None
+            )
 
         self.logger.info('triggering SOILS_BUILD_COMPLETE')
         self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
@@ -1139,6 +1155,7 @@ class Soils(NoDbBase):
             self.domsoil_d = None
             self.ssurgo_domsoil_d = None
             self.raw_ssurgo_domsoil_d = None
+            self._soil_source = None
             self.ssurgo_substitution_d = {}
             self.ssurgo_candidate_preparation = {"status": "not_attempted", "affected_hillslopes": 0}
 

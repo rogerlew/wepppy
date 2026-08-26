@@ -1,0 +1,53 @@
+{
+  "event_id": "topanga-undisturbed-h106-1986-day046-bracket-high",
+  "payload_sha256": "ac9ed2842a7bf30dd7daea33ace7131863ecd910273d7c3b8f5bd35ac787d4af",
+  "post_surplus_forcing": [
+    {
+      "point_ordinal": 1,
+      "rate_m_s": 9.89727482192393e-07,
+      "time_s": 0.0
+    },
+    {
+      "point_ordinal": 2,
+      "rate_m_s": 0.0,
+      "time_s": 43920.0
+    }
+  ],
+  "pre_surplus_forcing": [
+    {
+      "end_s": 43920.0,
+      "interval_ordinal": 1,
+      "rate_m_s": 0.0,
+      "start_s": 0.0
+    }
+  ],
+  "production": {
+    "peak_m_s": 9.89727482192393e-07,
+    "selected_solver": "APPMTH"
+  },
+  "scalars": {
+    "alpha": 1.0334941148757935,
+    "calendar_year": 1986,
+    "effective_length_m": 111.4000015258789,
+    "forcing_max_post_surplus_m_s": 9.89727482192393e-07,
+    "hillslope_id": "106",
+    "m": 1.5,
+    "model_day": 46,
+    "ns": 1,
+    "ofe": 1,
+    "positive_excess_duration_s": 0.0,
+    "remax_pre_surplus_m_s": 7.450987737911419e-08,
+    "run_id": "phase2a-3b5778d7c9171311-bracket-high",
+    "runoff_post_reconciliation_m": 0.04346883296966553,
+    "runoff_pre_reconciliation_m": 0.0,
+    "solver_call_ordinal": 1,
+    "surdra_raw_m": 0.04346883296966553,
+    "surplus_added_rate_m_s": 9.89727482192393e-07,
+    "surplus_assignment_duration_s": 43920.0,
+    "surplus_assignment_mode": "storm",
+    "surplus_depth_m": 0.04346883296966553,
+    "tp2_s": 0.0
+  },
+  "schema_version": "1.0.0",
+  "source_build_id": "wepp-ea25ad79-gate21-observer"
+}

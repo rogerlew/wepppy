@@ -1,0 +1,48 @@
+{
+  "event_id": "topanga-undisturbed-h106-1986-day046-bracket-high",
+  "harmonized_forcing_diagnostic": {
+    "appmth": {
+      "equation_branch": "constant_or_out_of_domain",
+      "finite_result": true,
+      "qpstar": 1.0,
+      "tc": null,
+      "tstar": 0.05174684998788724,
+      "vave_m_s": 9.89727482192393e-07,
+      "vstar": 1.0,
+      "within_documented_qpstar_domain": true,
+      "within_documented_tstar_domain": false,
+      "within_documented_vstar_domain": true
+    },
+    "appmth_peak_m_s": 9.89727482192393e-07,
+    "forcing_integral_m": 0.0434688310178899,
+    "hdrive_final_routed_volume_fraction": 0.5311459898948669,
+    "hdrive_nq": 11,
+    "hdrive_nqt": 202,
+    "hdrive_peak_m_s": 9.904528042170568e-07,
+    "positive_support_duration_s": 43920.0
+  },
+  "hdrive_stopping_condition": "ns_plus_200_limit",
+  "legacy_input_replay": {
+    "appmth": {
+      "equation_branch": "constant_or_out_of_domain",
+      "finite_result": true,
+      "qpstar": 1.0,
+      "tc": null,
+      "tstar": 0.05174684921339944,
+      "vave_m_s": 9.897275266317287e-07,
+      "vstar": 13.283172130265223,
+      "within_documented_qpstar_domain": true,
+      "within_documented_tstar_domain": false,
+      "within_documented_vstar_domain": false
+    },
+    "appmth_peak_m_s": 9.89727482192393e-07,
+    "hdrive_final_routed_volume_fraction": 0.5311459302902222,
+    "hdrive_nq": 11,
+    "hdrive_nqt": 202,
+    "hdrive_peak_m_s": 9.904528042170568e-07
+  },
+  "packet_sha256": "ac9ed2842a7bf30dd7daea33ace7131863ecd910273d7c3b8f5bd35ac787d4af",
+  "replay_process": "standalone_peak_replay_executable",
+  "schema_version": "1.0.0",
+  "selected_method_delta_m_s": 0.0
+}

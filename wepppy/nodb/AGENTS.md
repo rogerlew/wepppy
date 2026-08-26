@@ -69,6 +69,26 @@ Canonical behavioral contract:
 * For TTL-sensitive tests, patch `LOCK_DEFAULT_TTL` or pass `ttl=` to `lock()`
   in targeted unit tests; do not assume additional TTL override helpers exist.
 
+## Writer Ownership
+
+* Prefer one writer per NoDb file during a concurrent orchestration phase.
+  Parallel workers should write per-run artifacts or RQ metadata, and a
+  dependency finalizer should consolidate them into shared NoDb state.
+* Multiple writers are allowed when a finalizer cannot own the updates. Keep
+  each write as a short transaction: acquire the lock, refresh durable state
+  while holding it, apply an idempotent mutation, dump, and unlock.
+* Different attributes or `_runs[run_id]` keys are not disjoint write scopes;
+  NoDb serializes and replaces the entire controller.
+* On `NoDbStaleWriteError`, discard the stale mutation base and reapply the
+  operation to freshly loaded state. Never retry by dumping the stale object.
+* The authoritative requirements and rationale are in
+  `docs/schemas/nodb-persistence-concurrency-contract.md` under "Writer
+  Ownership and Mutation Topology."
+* Long-running derived builders may collect outside the lock and finalize only
+  after fresh hydration, explicit relevant-input comparison, and allowlisted
+  derived-field application. Conflicts must be explicit; generic whole-object
+  merging is not permitted.
+
 ## Cache Refresh Semantics
 
 * Instances are cached per working directory. Cache reuse is gated by on-disk

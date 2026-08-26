@@ -213,9 +213,50 @@ Compatibility outputs:
 - `run_counts.csv`: preserve or explicitly supersede after consumer audit.
 - `runs_counter.json`: keep legacy keys such as `projects`, `hillruns`, and `ash_hillruns` during migration, but generate them from the new rollup and document their source mix.
 
+### Immediate Active-Inventory Bridge
+
+Until ledger-backed rollups replace current-run artifact inventory, the
+maintenance compiler uses only bounded canonical artifact reads:
+
+- `hillslopes` is the Parquet footer row count of
+  `watershed/hillslopes.parquet`.
+- `ash_hillslopes` is the Parquet footer row count of
+  `ash/post/hillslope_annuals.parquet`.
+- A missing canonical artifact contributes zero. A present but unreadable
+  artifact emits a run-scoped warning and contributes zero so an independent
+  damaged run does not abort global output generation.
+- The compiler must not enumerate `.slp`, ash CSV, or raw ash-output files as a
+  compatibility fallback.
+- Centroid/location eligibility and project counts do not depend on a positive
+  canonical-artifact count.
+- Candidate files are staged as one publication. Zero discovered logs cannot
+  replace any prior output; if logs exist, at least one watershed Parquet must
+  be readable; and 10 or more failed watershed or ash reads affecting at least
+  25 percent of discovered runs abort publication. A new empty destination
+  with no prior output may publish an initial empty set. On abort every
+  last-known-good output remains in place.
+- Sorted nonblocking locks on every configured output directory make the
+  compiler single-flight even when `run_locations_path` uses its supported
+  cross-directory override.
+  Candidate and backup names are generation-unique; promotion failure restores
+  every prior output before the job fails. A durable publication journal lets
+  the next locked invocation recover interruption or rollback failure, and
+  generation cleanup removes unpublished candidate files containing access data.
+
+This bridge preserves output field names and shapes, but intentionally does not
+preserve legacy values. The fields represent rows in current canonical
+artifacts, not historical executions. The ledger remains canonical for future
+historical and repeated-run totals. This decision is ratified in ADR-0040 and
+the 2026-08-07 contract-decision artifact.
+
 ## Compatibility Plan
 
-This package is additive. It must not rename or remove existing route keys in `/stats` during the first rollout. Existing consumers of `runs_counter.json` continue to work, but the implementation must document that:
+This package does not rename or remove existing route keys in `/stats`. During
+the immediate SURF-19A bridge, hillslope aggregate keys sum rows in current
+canonical run artifacts; project keys retain existing date/config eligibility
+independent of centroid or artifact presence. After the separately governed
+ledger migration, existing consumers of `runs_counter.json` continue to work,
+but meanings become:
 
 - `projects` means active project count in the compatibility view.
 - `hillruns` means historical WEPP hillslope execution count where runtime ledger data exists plus clearly labeled artifact-inferred minimums.

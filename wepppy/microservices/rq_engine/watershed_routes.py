@@ -33,10 +33,15 @@ from wepppy.runtime_paths.errors import NoDirError
 from wepppy.runtime_paths.fs import resolve as _nodir_resolve
 from wepppy.runtime_paths.thaw_freeze import maintenance_lock as nodir_maintenance_lock
 from wepppy.rq.project_rq import (
+    abstract_watershed_rq,
+    build_channels_rq,
+    build_subcatchments_rq,
     build_subcatchments_and_abstract_watershed_rq,
+    fetch_dem_rq,
     fetch_dem_and_build_channels_rq,
     set_outlet_rq,
 )
+from wepppy.rq.submission_recovery import RqSubmissionConflict, enqueue_tracked_rq_job
 from wepppy.weppcloud.utils.helpers import get_wd
 from wepppy.weppcloud.user_preferences import (
     PreferenceIdentityError,
@@ -756,9 +761,13 @@ async def fetch_dem_and_build_channels(
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(
+            job = enqueue_tracked_rq_job(
+                q,
                 fetch_dem_and_build_channels_rq,
-                (
+                prep=prep,
+                job_key="fetch_dem_and_build_channels_rq",
+                runid=runid,
+                args=(
                     runid,
                     extent,
                     center,
@@ -773,9 +782,11 @@ async def fetch_dem_and_build_channels(
                     map_object,
                 ),
                 timeout=FETCH_DEM_AND_BUILD_CHANNELS_TIMEOUT,
+                allowed_workflow_funcs=(fetch_dem_rq, build_channels_rq),
             )
-            prep.set_rq_job_id("fetch_dem_and_build_channels_rq", job.id)
         return JSONResponse({"job_id": job.id})
+    except RqSubmissionConflict as exc:
+        return error_response(str(exc), status_code=409, code="job_active")
     except MinimumChannelLengthTooShortError as exc:
         return error_response(
             exc.__class__.__name__ or "Minimum Channel Length TooShort Error",
@@ -868,13 +879,18 @@ async def set_outlet(runid: str, config: str, request: Request) -> JSONResponse:
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(
+            job = enqueue_tracked_rq_job(
+                q,
                 set_outlet_rq,
-                (runid, outlet_lng, outlet_lat),
+                prep=prep,
+                job_key="set_outlet_rq",
+                runid=runid,
+                args=(runid, outlet_lng, outlet_lat),
                 timeout=RQ_TIMEOUT,
             )
-            prep.set_rq_job_id("set_outlet_rq", job.id)
         return JSONResponse({"job_id": job.id})
+    except RqSubmissionConflict as exc:
+        return error_response(str(exc), status_code=409, code="job_active")
     except Exception as exc:  # broad-except: boundary contract
         nodir_response = _maybe_nodir_error_response(exc)
         if nodir_response is not None:
@@ -1014,7 +1030,6 @@ async def build_subcatchments_and_abstract_watershed(
                     boundary_argument,
                     expected_runid=runid,
                 )
-                watershed.persist_wbt_boundary_touch_config_behavior()
             except (ValueError, WbtBoundaryPolicySnapshotError):
                 error_id = __import__("uuid").uuid4().hex
                 logger.exception(
@@ -1070,30 +1085,40 @@ async def build_subcatchments_and_abstract_watershed(
             if value is not None:
                 updates["bieger2015_widths"] = value
 
-        watershed.apply_build_subcatchment_updates(**updates)
-
         if is_batch_context:
+            watershed.apply_build_subcatchment_updates(**updates)
             return JSONResponse({"message": "Set subcatchment inputs for batch processing"})
 
         prep = RedisPrep.getInstance(wd)
-        prep.remove_timestamp(TaskEnum.abstract_watershed)
-        prep.remove_timestamp(TaskEnum.build_subcatchments)
 
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(
+            job = enqueue_tracked_rq_job(
+                q,
                 build_subcatchments_and_abstract_watershed_rq,
-                (runid, {}, boundary_argument),
+                prep=prep,
+                job_key="build_subcatchments_and_abstract_watershed_rq",
+                runid=runid,
+                args=(runid, updates, boundary_argument),
                 timeout=RQ_TIMEOUT,
                 meta=(
                     {WBT_BOUNDARY_POLICY_SNAPSHOT_KEY: boundary_snapshot.to_meta()}
                     if boundary_snapshot is not None
                     else None
                 ),
+                allowed_workflow_funcs=(
+                    build_subcatchments_rq,
+                    abstract_watershed_rq,
+                ),
+                excluded_dependency_job_ids=lambda candidate: (
+                    candidate.meta.get("wbt_subcatchment_admission_previous"),
+                ),
+                workflow_root_meta_key="wbt_subcatchment_admission_root",
             )
-            prep.set_rq_job_id("build_subcatchments_and_abstract_watershed_rq", job.id)
         return JSONResponse({"job_id": job.id})
+    except RqSubmissionConflict as exc:
+        return error_response(str(exc), status_code=409, code="job_active")
     except WatershedBoundaryTouchesEdgeError as exc:
         return error_response(
             exc.__class__.__name__ or "Watershed Boundary Touches Edge Error",

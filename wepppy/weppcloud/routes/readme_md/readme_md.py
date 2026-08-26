@@ -22,9 +22,16 @@ from cmarkgfm import github_flavored_markdown_to_html as markdown_to_html  # pip
 from jinja2.sandbox import SandboxedEnvironment
 from jinja2 import nodes
 from werkzeug.exceptions import HTTPException
-from wepppy.weppcloud.utils.helpers import exception_factory, authorize, get_wd, url_for_run
+from wepppy.weppcloud.utils.helpers import (
+    authorize,
+    authorize_and_handle_with_exception_factory,
+    exception_factory,
+    get_wd,
+    url_for_run,
+)
 from wepppy.nodb.core import Ron
 from wepppy.nodb.base import _iter_nodb_subclasses
+from wepppy.rq.submission_recovery import checkpoint_run_lifecycle
 
 from .._run_context import RunContext, load_run_context
 
@@ -503,6 +510,7 @@ def readme_raw(runid, config):
         return exception_factory("Could not load README raw")
 
 @readme_bp.route("/runs/<string:runid>/<config>/readme/save", methods=["POST"])
+@authorize_and_handle_with_exception_factory
 def readme_save(runid, config):
     try:
         authorize(runid, config)
@@ -526,6 +534,7 @@ def readme_save(runid, config):
         ):
             abort(400, description="README save revision is invalid")
         identity_runid, scope = _editor_identity(runid, ctx)
+        checkpoint_run_lifecycle(runid)
         with _editor_mutation_guard(identity_runid, config, scope):
             lock_ok = _session_has_lock(
                 identity_runid, config, scope, client_uuid

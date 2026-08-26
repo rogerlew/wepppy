@@ -59,8 +59,9 @@ All commands mirror the legacy behavior, but now live under the Typer dispatcher
 - `wctl migrate-run` – run run-level migrations by run id (or `--wd` path) and skip already-migrated runs by default.
 - `wctl run-test-profile` / `run-fork-profile` / `run-archive-profile` – drive the profile playback FastAPI service, defaulting to the canonical `backed-globule` smoke profile when no overrides are supplied.
 - `wctl rq-info`: shows RQ stats for the default, batch, and fork-archive queues
-  (worker registry indexes are auto-healed before `rq info` runs). Use
-  `--service rq-worker-fork-archive` on the dedicated wepp3 host.
+  (worker registry indexes are auto-healed before `rq info` runs). It
+  automatically uses `rq-worker-fork-archive` on the dedicated wepp3 host;
+  `--service` remains available for explicit overrides.
 
 Every command supports `--help`, so discovery is as simple as `wctl run-pytest --help`.
 

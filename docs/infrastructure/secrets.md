@@ -99,6 +99,11 @@ This section is the Phase 0 “inventory” deliverable for the secrets migratio
   - `OPENET_API_KEY` authenticates requests to `openet-api.org` (OpenET monthly time-series API).
 - `CAP_SITE_KEY`:
   - Public “site key” used by browser clients. Do not store it as a secret file, but keep it adjacent to `CAP_SECRET` in deployment docs because operators often rotate them together.
+- `CAP_VERIFY_BASE_URL`:
+  - Optional non-secret server-only override for CAP verification. Keep
+    `CAP_BASE_URL=/cap` for browser assets while setting this to an internal
+    service URL such as `http://weppcloud-cap:3000/cap` in Kubernetes. Compose
+    behavior is unchanged when the override is absent.
 - `DATABASE_URL` / `SQLALCHEMY_DATABASE_URI`:
   - Treated as secret-bearing because they typically embed the DB password. Prefer composing them at runtime from non-secrets + `postgres_password` rather than storing them in env long-term.
 
@@ -171,6 +176,27 @@ python -c 'import secrets; print(secrets.token_urlsafe(64))' > secrets/flask_sec
 python -c 'import secrets; print(secrets.token_urlsafe(32))' > secrets/flask_security_password_salt
 chmod 600 secrets/*
 ```
+
+For CAP in Compose production, mode `0600` alone is insufficient because CAP
+runs as UID/GID `10001:10001` while the deployment account owns the bind-mounted
+file. Install the canonical secret, or repair a same-value replacement inode,
+atomically from standard input:
+
+```bash
+cd /workdir/wepppy
+./docker/install-cap-secret.sh < /secure/operator/source
+```
+
+The helper accepts no destination path or UID, stages the replacement in
+`docker/secrets/`, derives every effective Compose consumer UID, applies the
+exact allowlisted ACL, fsyncs it, and atomically renames it. It restores the
+previous inode if post-publication validation fails. It refuses a different
+secret value while CAP is running because bind mounts pin the mounted inode;
+for a real value rotation, stop every `cap_secret` consumer, install the new
+value, and run the deployment acceptance gates before reopening login. Never replace `cap_secret`
+with `cp` or shell redirection: POSIX ACLs belong to the inode and would be lost.
+Every CAP-recreating deployment revalidates this contract before stopping the
+known-good container.
 
 Operational check:
 - `docker compose config` must not contain secret values.

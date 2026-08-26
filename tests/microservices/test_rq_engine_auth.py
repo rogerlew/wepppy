@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 
 import pytest
+from starlette.requests import Request
 
 from wepppy.microservices.rq_engine import auth
 
@@ -105,6 +106,65 @@ def test_require_session_marker_returns_unauthorized_when_marker_missing(
     assert exc_info.value.status_code == 401
     assert exc_info.value.code == "unauthorized"
     assert "session token invalid or expired" in exc_info.value.message.lower()
+
+
+def test_require_session_marker_rejects_revoked_sid_even_when_run_marker_exists(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class RevokedRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def exists(self, key: str) -> bool:
+            return key == "auth:session:revoked:sid-1" or key.startswith(
+                "auth:session:run:"
+            )
+
+    monkeypatch.setattr(auth.redis, "Redis", lambda **kwargs: RevokedRedis())
+
+    with pytest.raises(auth.AuthError) as exc_info:
+        auth.require_session_marker(
+            {"token_class": "session", "session_id": "sid-1", "runid": "run-1"},
+            "run-1",
+        )
+
+    assert exc_info.value.status_code == 401
+    assert "revoked" in exc_info.value.message.lower()
+
+
+def test_require_jwt_checks_session_sid_revocation_before_scope_use(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    checked = []
+    request = Request(
+        {
+            "type": "http",
+            "method": "GET",
+            "path": "/api/jobstatus/1",
+            "headers": [(b"authorization", b"Bearer token")],
+        }
+    )
+    claims = {
+        "token_class": "session",
+        "session_id": "sid-1",
+        "sub": "sid-1",
+        "jti": "jti-1",
+        "scope": "rq:status",
+    }
+    monkeypatch.setattr(auth, "_extract_bearer_token", lambda _request: "token")
+    monkeypatch.setattr(auth, "decode_token", lambda token, audience=None: claims)
+    monkeypatch.setattr(auth, "_check_revocation", lambda jti: None)
+    monkeypatch.setattr(
+        auth, "_check_session_revocation", lambda sid: checked.append(sid)
+    )
+
+    resolved = auth.require_jwt(request, required_scopes=["rq:status"])
+
+    assert resolved == claims
+    assert checked == ["sid-1"]
 
 
 def test_require_roles_accepts_mixed_role_shapes() -> None:

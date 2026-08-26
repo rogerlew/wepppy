@@ -31,8 +31,6 @@ import rasterio.warp
 from rasterio.warp import reproject, Resampling, calculate_default_transform
 from numpy.typing import NDArray
 
-from wepppy import f_esri as _f_esri
-
 gdal.UseExceptions()
 
 SCRATCH_DIR = '/dev/shm'
@@ -56,8 +54,6 @@ __all__ = [
     "wgs84_proj4",
     "wgs84_wkt",
     "resample_methods",
-    "has_f_esri",
-    "f_esri_gpkg_to_gdb",
     "utm_raster_transform",
     "validate_srs",
     "utm_srid",
@@ -88,18 +84,6 @@ __all__ = [
 
 
 # https://github.com/rogerlew/gdal-grande
-
-
-def has_f_esri() -> bool:
-    """Return ``True`` when the optional ESRI tooling is installed."""
-
-    return _f_esri.has_f_esri()
-
-
-def f_esri_gpkg_to_gdb(gpkg_fn: PathType, gdb_fn: PathType) -> None:
-    """Convert a GeoPackage to FileGDB format using the ESRI helper."""
-
-    _f_esri.c2c_gpkg_to_gdb(gpkg_fn, gdb_fn)
 
 
 def utm_raster_transform(

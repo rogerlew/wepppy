@@ -11,7 +11,10 @@ from rq import Queue
 from .._common import Blueprint, error_factory, jsonify, load_run_context, request
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.rq.interchange_rq import TIMEOUT, run_interchange_migration
+from wepppy.nodb.redis_prep import RedisPrep
+from wepppy.rq.submission_recovery import enqueue_tracked_rq_job
 from wepppy.weppcloud.utils.helpers import authorize_and_handle_with_exception_factory
+from wepppy.weppcloud.utils.helpers import get_wd
 
 interchange_bp = Blueprint('interchange', __name__)
 
@@ -48,8 +51,12 @@ def _enqueue_interchange_job(runid: str, config: str, wepp_output_subpath: Optio
 
     with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
         queue = Queue(connection=redis_conn)
-        job = queue.enqueue_call(
-            func=run_interchange_migration,
+        job = enqueue_tracked_rq_job(
+            queue,
+            run_interchange_migration,
+            prep=RedisPrep.getInstance(get_wd(runid)),
+            job_key="run_interchange_migration",
+            runid=runid,
             args=(runid, subpath),
             timeout=TIMEOUT,
         )

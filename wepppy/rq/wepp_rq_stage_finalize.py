@@ -13,6 +13,7 @@ from wepppy.nodb.core import Ron, Wepp
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.nodb.status_messenger import StatusMessenger
 from wepppy.weppcloud.bootstrap.git_lock import (
+    BOOTSTRAP_GIT_LOCK_TTL_SECONDS,
     acquire_bootstrap_git_lock,
     release_bootstrap_git_lock,
 )
@@ -24,6 +25,7 @@ except (ModuleNotFoundError, ImportError):
     send_discord_message = None
 
 _LOGGER = logging.getLogger(__name__)
+_BOOTSTRAP_GIT_LOCK_CLEANUP_MARGIN_SECONDS = 300
 
 
 def _bootstrap_autocommit_actor(job: Job | None) -> str:
@@ -33,14 +35,33 @@ def _bootstrap_autocommit_actor(job: Job | None) -> str:
     return "rq:unknown:wepp:auto_commit"
 
 
-def _bootstrap_autocommit_with_lock(runid: str, wepp: Wepp, stage: str, *, actor: str) -> str | None:
+def _prep_autocommit_lock_ttl_seconds(job: Job | None) -> int:
+    timeout = getattr(job, "timeout", None)
+    if not isinstance(timeout, int):
+        return BOOTSTRAP_GIT_LOCK_TTL_SECONDS
+    return max(
+        BOOTSTRAP_GIT_LOCK_TTL_SECONDS,
+        timeout + _BOOTSTRAP_GIT_LOCK_CLEANUP_MARGIN_SECONDS,
+    )
+
+
+def _bootstrap_autocommit_with_lock(
+    runid: str,
+    wepp: Wepp,
+    stage: str,
+    *,
+    actor: str,
+    lock_ttl_seconds: int | None = None,
+) -> str | None:
     conn_kwargs = redis_connection_kwargs(RedisDB.LOCK)
     with redis.Redis(**conn_kwargs) as redis_conn:
+        lock_kwargs = {} if lock_ttl_seconds is None else {"ttl_seconds": lock_ttl_seconds}
         lock = acquire_bootstrap_git_lock(
             redis_conn,
             runid=runid,
             operation="auto_commit",
             actor=actor,
+            **lock_kwargs,
         )
         if lock is None:
             wepp.logger.warning("Skipped bootstrap auto-commit for %s: bootstrap lock busy", stage)
@@ -106,7 +127,7 @@ def _log_complete_rq(
 
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
-        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/wepp_rq_stage_finalize.py:107", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
+        __import__("logging").getLogger(__name__).exception("Boundary exception in _log_complete_rq", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
@@ -133,6 +154,7 @@ def _log_prep_complete_rq(
                 wepp,
                 commit_stage,
                 actor=_bootstrap_autocommit_actor(job),
+                lock_ttl_seconds=_prep_autocommit_lock_ttl_seconds(job),
             )
 
         if send_message is not None:
@@ -143,6 +165,6 @@ def _log_prep_complete_rq(
 
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
-        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/wepp_rq_stage_finalize.py:147", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
+        __import__("logging").getLogger(__name__).exception("Boundary exception in _log_prep_complete_rq", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise

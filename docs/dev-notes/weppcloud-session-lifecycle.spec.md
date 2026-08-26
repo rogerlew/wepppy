@@ -46,6 +46,19 @@
    - enforces private-run authorization from owner/role state.
 4. rq-engine issues run-scoped session JWT and sets HttpOnly browse cookie.
 
+### 5) Legacy cookie adoption
+
+1. Session loading runs before authentication, CSRF, and route hooks.
+2. A primary-name occurrence blocks legacy fallback.
+3. When primary is absent, the bounded legacy selector verifies signatures,
+   loads Redis payloads, and checks later live candidates only for principal
+   conflicts.
+4. One compatible authoritative session retains the same SID and complete
+   payload and is emitted under the primary name.
+5. Missing or corrupt authoritative state receives no alternate authorization;
+   any remember-based recovery uses a fresh SID.
+6. Logout/reset invalidates every presented signed SID and fences late writes.
+
 ## State and TTL Model
 | State Item | TTL/Refresh Behavior | Notes |
 | --- | --- | --- |
@@ -72,6 +85,8 @@
   - `SESSION_COOKIE_SAMESITE` default `Lax`.
   - `SESSION_COOKIE_SECURE=true`.
   - `PERMANENT_SESSION_LIFETIME=12h`.
+  - secure-host primary name `__Host-weppcloud_session`, Path `/`, no Domain,
+    HttpOnly, and signer enabled.
 - Validate endpoints:
   - `POST /weppcloud/api/auth/session-heartbeat` from authenticated tab should return `{ok:true,...}`.
   - Same endpoint from cross-origin should return `403`.

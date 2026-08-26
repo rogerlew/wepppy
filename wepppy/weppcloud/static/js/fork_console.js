@@ -186,8 +186,10 @@
     var rqEngineToken = (dataset.rqEngineToken || "").trim();
     var undisturbifyRaw = dataset.undisturbify;
     var skipWeppRunsOutputRaw = dataset.skipWeppRunsOutput;
+    var skipOmniScenariosContrastsRaw = dataset.skipOmniScenariosContrasts;
     var initialUndisturbify = false;
     var initialSkipWeppRunsOutput = false;
+    var initialSkipOmniScenariosContrasts = false;
     if (typeof undisturbifyRaw === "string") {
       initialUndisturbify = undisturbifyRaw.toLowerCase() === "true";
     } else if (typeof undisturbifyRaw !== "undefined") {
@@ -198,11 +200,17 @@
     } else if (typeof skipWeppRunsOutputRaw !== "undefined") {
       initialSkipWeppRunsOutput = Boolean(skipWeppRunsOutputRaw);
     }
+    if (typeof skipOmniScenariosContrastsRaw === "string") {
+      initialSkipOmniScenariosContrasts = skipOmniScenariosContrastsRaw.toLowerCase() === "true";
+    } else if (typeof skipOmniScenariosContrastsRaw !== "undefined") {
+      initialSkipOmniScenariosContrasts = Boolean(skipOmniScenariosContrastsRaw);
+    }
 
     var form = container.querySelector("#fork_form");
     var runIdInput = container.querySelector("#runid_input");
     var undisturbifyCheckbox = container.querySelector("#undisturbify_checkbox");
     var skipWeppRunsOutputCheckbox = container.querySelector("#skip_wepp_runs_output_checkbox");
+    var skipOmniScenariosContrastsCheckbox = container.querySelector("#skip_omni_scenarios_contrasts_checkbox");
     var submitButton = container.querySelector("#submit_button");
     var cancelButton = container.querySelector("#cancel_button");
     var consoleBlock = container.querySelector("#the_console");
@@ -968,6 +976,7 @@
       runId = submittedRunId;
       var undisturbify = undisturbifyCheckbox ? !!undisturbifyCheckbox.checked : false;
       var skipWeppRunsOutput = skipWeppRunsOutputCheckbox ? !!skipWeppRunsOutputCheckbox.checked : false;
+      var skipOmniScenariosContrasts = skipOmniScenariosContrastsCheckbox ? !!skipOmniScenariosContrastsCheckbox.checked : false;
 
       if (capRequired) {
         var capToken = getCapToken();
@@ -986,12 +995,12 @@
       }
 
       resetStatusLog();
-      appendStatus("Submitting fork job...");
 
       var forkUrl = origin + "/rq-engine/api/runs/" + runId + "/" + config + "/fork";
       var payload = new URLSearchParams({
         undisturbify: undisturbify ? "true" : "false",
-        skip_wepp_runs_output: skipWeppRunsOutput ? "true" : "false"
+        skip_wepp_runs_output: skipWeppRunsOutput ? "true" : "false",
+        skip_omni_scenarios_contrasts: skipOmniScenariosContrasts ? "true" : "false"
       });
       if (capRequired) {
         var verifiedToken = getCapToken();
@@ -1068,6 +1077,7 @@
           jobId = body.job_id || "";
           var undisturbifyFlag = body.undisturbify;
           var skipWeppRunsOutputFlag = body.skip_wepp_runs_output;
+          var skipOmniScenariosContrastsFlag = body.skip_omni_scenarios_contrasts;
 
           if (consoleBlock) {
             consoleBlock.dataset.state = "attention";
@@ -1077,6 +1087,8 @@
             consoleBlock.appendChild(document.createTextNode("Undisturbify: " + undisturbifyFlag));
             consoleBlock.appendChild(document.createElement("br"));
             consoleBlock.appendChild(document.createTextNode("Skip wepp/runs + wepp/output: " + skipWeppRunsOutputFlag));
+            consoleBlock.appendChild(document.createElement("br"));
+            consoleBlock.appendChild(document.createTextNode("Skip Omni Scenarios/Contrasts: " + skipOmniScenariosContrastsFlag));
           }
 
           if (submitButton) {
@@ -1088,6 +1100,7 @@
           }
 
           saveTrackedForkRecord();
+          appendStatus("Fork job is queued and waiting for the fork worker.");
           showTrackedJob(false);
         })
         .catch(function (err) {
@@ -1210,6 +1223,9 @@
     }
     if (skipWeppRunsOutputCheckbox) {
       skipWeppRunsOutputCheckbox.checked = initialSkipWeppRunsOutput;
+    }
+    if (skipOmniScenariosContrastsCheckbox) {
+      skipOmniScenariosContrastsCheckbox.checked = initialSkipOmniScenariosContrasts;
     }
     if (form) {
       form.addEventListener("submit", forkProject);

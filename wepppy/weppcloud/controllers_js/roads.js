@@ -1330,7 +1330,11 @@ var Roads = (function () {
         var baseTriggerEvent = controller.triggerEvent.bind(controller);
         controller.triggerEvent = function triggerEvent(eventName, payload) {
             var normalized = eventName ? String(eventName).toUpperCase() : "";
-            if (normalized === TASKS.prepare.completionEvent) {
+            if (normalized === "JOB:RETRYABLE") {
+                controller.disconnect_status_stream(controller);
+                clearActiveTaskState();
+                controller.set_rq_job_id(controller, null);
+            } else if (normalized === TASKS.prepare.completionEvent) {
                 markTaskCompleted("prepare", payload && payload.source ? payload.source : "trigger", payload || null);
             } else if (normalized === TASKS.run.completionEvent) {
                 markTaskCompleted("run", payload && payload.source ? payload.source : "trigger", payload || null);

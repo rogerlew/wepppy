@@ -195,6 +195,11 @@ If validation fails a `JWTDecodeError` is raised.
   run-scoped browse JWT cookie when rendering run pages.
 - Behavior:
   - Requires run authorization (public or owner).
+  - During browser-session cookie migration, rq-engine MUST use the canonical
+    bounded raw-cookie selector defined by the session contract. It MUST prefer
+    the primary name, block legacy fallback when that name is present, inspect
+    later live candidates only for principal conflicts, and never authorize an
+    alternate candidate.
   - Issues a session JWT (`token_class=session`) scoped to the run.
   - If a Flask login session is present, includes `user_id` and `roles` claims from Redis-backed session data.
   - Default session scopes: `rq:status`, `rq:enqueue`, `rq:export`.
@@ -290,7 +295,12 @@ If validation fails a `JWTDecodeError` is raised.
   - Redis DB: `RedisDB.SESSION` (11).
   - Key format: `auth:session:run:<runid>:<session_id>`.
   - TTL: 4 days; refresh on activity when practical.
-- rq-engine validates the JWT and requires the Redis marker to exist (fail closed).
+- Explicit logout/reset writes `auth:session:revoked:<session_id>` in the same
+  Redis DB for at least the longest session JWT/marker lifetime (currently four
+  days).
+- rq-engine validates the JWT, rejects a revoked session ID on every
+  `token_class=session` authorization path, and requires the run marker where
+  the endpoint contract is run-scoped (fail closed).
 
 ### Rotation playbook
 1. Generate a new secret and prepend it to `WEPP_AUTH_JWT_SECRETS`, keeping prior secrets after it.

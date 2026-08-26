@@ -17,6 +17,8 @@ from wepppy.weppcloud.utils.auth_tokens import (
 )
 from wepppy.weppcloud.utils.helpers import get_run_owners_lazy, get_wd
 
+_AUTH_REDIS_CLIENT = redis.Redis
+
 
 class AuthError(Exception):
     """Raised when JWT authentication fails."""
@@ -234,11 +236,30 @@ def _check_session_marker(session_id: str, runid: str) -> None:
         raise AuthError("Session token missing required identifiers", status_code=403, code="forbidden")
 
     key = f"auth:session:run:{runid}:{session_id}"
+    _check_session_revocation(session_id)
     conn_kwargs = redis_connection_kwargs(RedisDB.SESSION)
     with redis.Redis(**conn_kwargs) as redis_conn:
         if not redis_conn.exists(key):
             raise AuthError(
                 "Session token invalid or expired. Reload the page to continue.",
+                status_code=401,
+                code="unauthorized",
+            )
+
+
+def _check_session_revocation(session_id: str) -> None:
+    if not session_id:
+        raise AuthError(
+            "Session token missing session identifier",
+            status_code=403,
+            code="forbidden",
+        )
+    revoked_key = f"auth:session:revoked:{session_id}"
+    conn_kwargs = redis_connection_kwargs(RedisDB.SESSION)
+    with redis.Redis(**conn_kwargs) as redis_conn:
+        if redis_conn.exists(revoked_key):
+            raise AuthError(
+                "Session token has been revoked.",
                 status_code=401,
                 code="unauthorized",
             )
@@ -259,7 +280,12 @@ def require_session_marker(claims: Mapping[str, Any], runid: str) -> None:
     _check_session_marker(str(session_id), str(runid))
 
 
-def authorize_run_access(claims: Mapping[str, Any], runid: str) -> None:
+def authorize_run_access(
+    claims: Mapping[str, Any],
+    runid: str,
+    *,
+    allow_fork_preparing: bool = False,
+) -> None:
     if not runid:
         return
 
@@ -272,9 +298,13 @@ def authorize_run_access(claims: Mapping[str, Any], runid: str) -> None:
         )
     if normalized_token_class == "session":
         require_session_marker(claims, runid)
+        if not allow_fork_preparing:
+            _reject_fork_preparing_run(runid)
         return
     if normalized_token_class == "user":
         _authorize_user_claims(claims, runid)
+        if not allow_fork_preparing:
+            _reject_fork_preparing_run(runid)
         return
 
     run_claims = _normalize_list(claims.get("runs") or claims.get("runid"))
@@ -282,6 +312,26 @@ def authorize_run_access(claims: Mapping[str, Any], runid: str) -> None:
         raise AuthError("Token missing run scope", status_code=403, code="forbidden")
     if run_claims and str(runid) not in run_claims:
         raise AuthError("Token not authorized for run", status_code=403, code="forbidden")
+    if not allow_fork_preparing:
+        _reject_fork_preparing_run(runid)
+
+
+def _reject_fork_preparing_run(runid: str) -> None:
+    redis_conn = _AUTH_REDIS_CLIENT(**redis_connection_kwargs(RedisDB.RQ))
+    try:
+        state = redis_conn.hget(f"rq:fork:planned:{runid}", "state")
+    finally:
+        close = getattr(redis_conn, "close", None)
+        if callable(close):
+            close()
+    if isinstance(state, bytes):
+        state = state.decode("utf-8")
+    if state and str(state) != "succeeded":
+        raise AuthError(
+            "This project is still being prepared by a fork job.",
+            status_code=409,
+            code="job_active",
+        )
 
 
 def require_jwt(
@@ -302,6 +352,10 @@ def require_jwt(
         raise AuthError(f"Invalid token: {exc}") from exc
 
     _check_revocation(str(claims.get("jti") or ""))
+    if str(claims.get("token_class") or "").strip().lower() == "session":
+        _check_session_revocation(
+            str(claims.get("session_id") or claims.get("sub") or "")
+        )
 
     scope_separator = get_jwt_config().scope_separator
     scopes = _normalize_scopes(claims.get("scope"), scope_separator)

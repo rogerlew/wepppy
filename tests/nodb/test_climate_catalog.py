@@ -65,6 +65,12 @@ def climate_factory(tmp_path, monkeypatch, request):
         def delete(self, key):
             self._store.pop(key, None)
 
+        def eval(self, _script, _numkeys, key, expected):
+            if self._store.get(key) != expected:
+                return 0
+            self._store.pop(key, None)
+            return 1
+
         def hset(self, name, key, value):
             self._hash.setdefault(name, {})[key] = value
             return 1

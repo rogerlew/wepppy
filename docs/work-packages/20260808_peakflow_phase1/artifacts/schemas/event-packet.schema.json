@@ -1,0 +1,225 @@
+{
+  "$id": "https://github.com/rogerlew/wepppy/peakflow-phase1/schemas/event-packet.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "event_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "payload_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "post_surplus_forcing": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "point_ordinal": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "rate_m_s": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "time_s": {
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "point_ordinal",
+          "time_s",
+          "rate_m_s"
+        ],
+        "type": "object"
+      },
+      "minItems": 2,
+      "type": "array"
+    },
+    "pre_surplus_forcing": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "end_s": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "interval_ordinal": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "rate_m_s": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "start_s": {
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "interval_ordinal",
+          "start_s",
+          "end_s",
+          "rate_m_s"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "production": {
+      "additionalProperties": false,
+      "properties": {
+        "peak_m_s": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "selected_solver": {
+          "enum": [
+            "APPMTH",
+            "HDRIVE"
+          ]
+        }
+      },
+      "required": [
+        "selected_solver",
+        "peak_m_s"
+      ],
+      "type": "object"
+    },
+    "scalars": {
+      "additionalProperties": false,
+      "properties": {
+        "alpha": {
+          "type": "number"
+        },
+        "calendar_year": {
+          "type": "integer"
+        },
+        "effective_length_m": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "forcing_max_post_surplus_m_s": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "hillslope_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "m": {
+          "type": "number"
+        },
+        "model_day": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "ns": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "ofe": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "positive_excess_duration_s": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "remax_pre_surplus_m_s": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "run_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "runoff_post_reconciliation_m": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "runoff_pre_reconciliation_m": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "solver_call_ordinal": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "surdra_raw_m": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "surplus_added_rate_m_s": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "surplus_assignment_duration_s": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "surplus_assignment_mode": {
+          "enum": [
+            "none",
+            "positive_excess",
+            "storm",
+            "upstream",
+            "fallback_24h"
+          ]
+        },
+        "surplus_depth_m": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "tp2_s": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "calendar_year",
+        "model_day",
+        "run_id",
+        "hillslope_id",
+        "ofe",
+        "solver_call_ordinal",
+        "runoff_pre_reconciliation_m",
+        "runoff_post_reconciliation_m",
+        "surdra_raw_m",
+        "surplus_depth_m",
+        "positive_excess_duration_s",
+        "surplus_assignment_duration_s",
+        "surplus_assignment_mode",
+        "remax_pre_surplus_m_s",
+        "forcing_max_post_surplus_m_s",
+        "surplus_added_rate_m_s",
+        "tp2_s",
+        "alpha",
+        "m",
+        "effective_length_m",
+        "ns"
+      ],
+      "type": "object"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "source_build_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "event_id",
+    "source_build_id",
+    "payload_sha256",
+    "scalars",
+    "post_surplus_forcing",
+    "production"
+  ],
+  "title": "Event Packet",
+  "type": "object"
+}

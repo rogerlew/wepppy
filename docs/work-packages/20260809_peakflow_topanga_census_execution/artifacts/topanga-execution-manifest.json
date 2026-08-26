@@ -1,0 +1,15 @@
+{
+  "command": ".venv/bin/python tools/peakflow_census.py execute --plan docs/work-packages/20260808_peakflow_topanga_census_prep/artifacts/topanga-trial-plan.json --selection docs/work-packages/20260809_peakflow_topanga_census_execution/artifacts/topanga-execution-selection.json --input-snapshot docs/work-packages/20260809_peakflow_topanga_census_execution/artifacts/topanga-input-snapshot.json --workers 8 --progress /home/workdir/peakflow-topanga-census-evidence/b575fde4a28cf85f1d28e0dfff305472b5419fd9b3639d39dc437600617080de/progress.json",
+  "executable_sha256": "2ec15778df957f909da383df9e3e0c9b516688d367c11f0109c6012387c0731f",
+  "finished_at_utc": "2026-08-09T06:06:06Z",
+  "host": "forest",
+  "input_snapshot_file_sha256": "f8b7535ed276d386797c9f7fffba076ee63469e2d9ac0a3260a4531543467f4c",
+  "input_snapshot_id": "2006d278ede4da5157e9d344863a64cef746b879106cf17b16c87d9c9a80542d",
+  "plan_file_sha256": "32e6f5e99a77747fcdd93388302f2a5ffb496a87b764ac4505e09691955db756",
+  "plan_id": "b575fde4a28cf85f1d28e0dfff305472b5419fd9b3639d39dc437600617080de",
+  "schema_version": "1.0.0",
+  "selection_file_sha256": "c6184f452ff5d6202c8158a9a02f5c849e63082c5d6cc5a44a6f53a517438c20",
+  "selection_id": "2e450acbaa131c268fab70bd048480e1bc100990094071d74b432bf1579e3e3d",
+  "started_at_utc": "2026-08-09T05:52:25Z",
+  "workers": 8
+}

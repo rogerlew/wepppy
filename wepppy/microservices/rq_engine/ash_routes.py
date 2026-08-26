@@ -18,6 +18,7 @@ from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.runtime_paths.errors import NoDirError
 from wepppy.runtime_paths.fs import resolve as _nodir_resolve
 from wepppy.rq.project_rq import run_ash_rq
+from wepppy.rq.submission_recovery import RqSubmissionConflict, enqueue_tracked_rq_job
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
@@ -324,9 +325,13 @@ async def run_ash(runid: str, config: str, request: Request) -> JSONResponse:
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(
+            job = enqueue_tracked_rq_job(
+                q,
                 run_ash_rq,
-                (
+                prep=prep,
+                job_key="run_ash_rq",
+                runid=runid,
+                args=(
                     runid,
                     fire_date,
                     float(ini_white_ash_depth_mm),
@@ -334,9 +339,10 @@ async def run_ash(runid: str, config: str, request: Request) -> JSONResponse:
                 ),
                 timeout=RQ_TIMEOUT,
             )
-            prep.set_rq_job_id("run_ash_rq", job.id)
 
         return JSONResponse({"job_id": job.id})
+    except RqSubmissionConflict as exc:
+        return error_response(str(exc), status_code=409, code="conflict")
     except Exception as exc:  # broad-except: boundary contract
         nodir_response = _maybe_nodir_error_response(exc)
         if nodir_response is not None:

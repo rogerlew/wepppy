@@ -58,6 +58,7 @@ from wepppy.weppcloud._context_processors import register_context_processors
 from wepppy.weppcloud._config_app import config_app
 from wepppy.weppcloud._config_logging import config_logging
 from wepppy.weppcloud.auth_forms import ExtendedLoginForm, ExtendedRegisterForm
+from wepppy.weppcloud.session_migration import MigratingRedisSessionInterface
 
 config_logging(logging.INFO)
 logger = logging.getLogger(__name__)
@@ -512,6 +513,9 @@ session_manager = Session(app)
 
 # Ensure Flask-Session always provides string cookie values; Werkzeug 3+ rejects bytes.
 if isinstance(app.session_interface, RedisSessionInterface):
+    app.session_interface = MigratingRedisSessionInterface.from_interface(
+        app.session_interface
+    )
     original_save_session = app.session_interface.save_session
 
     def _save_session_with_str_cookies(self, flask_app, session, response):

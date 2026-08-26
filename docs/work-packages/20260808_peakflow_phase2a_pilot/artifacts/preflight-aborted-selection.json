@@ -1,0 +1,11 @@
+{
+  "aborted_before_candidate_screening": true,
+  "completed_trial_manifests": 11,
+  "disposition": "superseded_by_cover_probe_feasibility_preregistration",
+  "evidence_locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/mutations",
+  "reason": "Hill 1 has inrcov and rilcov equal to 1.00; the requested +0.01 probe would clip and was rejected.",
+  "schema_version": "1.0.0",
+  "screened_mutation_outcomes": false,
+  "superseding_selection_id": "3b5778d7c9171311",
+  "superseded_hillslopes": [106, 84, 1, 103, 35, 31, 8, 91]
+}

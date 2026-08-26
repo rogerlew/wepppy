@@ -24,7 +24,7 @@ Path: `services/cap/server.js`
 ### Environment
 Required:
 - `CAP_SITE_KEY` (public key)
-- `CAP_SECRET` (private key)
+- `CAP_SECRET_FILE` (production file path; `/run/secrets/cap_secret`)
 
 Optional:
 - `CAP_PORT` (default `3000`)
@@ -45,7 +45,19 @@ curl -H 'X-Forwarded-Proto: https' http://localhost:8080/cap/health
 ```
 
 ### Production Asset Mount
-Production compose mounts `/workdir/cap` into the cap container and sets `CAP_ASSET_ROOT=/workdir/cap`. This is required because the server hard-fails on missing widget/wasm assets. If you want to remove the host mount, bake assets into the image or point `CAP_ASSET_ROOT` at a vendored asset path.
+The production image pins and embeds the upstream Cap.js assets under
+`/opt/cap`; Compose sets `CAP_ASSET_ROOT=/opt/cap`. Production does not depend
+on a host `/workdir/cap` mount.
+
+Before listening, `services/cap/server.js` proves that `/var/lib/cap` is a real
+writable directory, validates an existing `tokensList.json` as a writable
+regular JSON-object file, and performs a create/fsync/remove probe. Failure is
+fatal rather than falling back to in-memory state. Compose health therefore
+represents persistence readiness, and Caddy waits for that health check.
+
+The deployment gate runs `services/cap/canary.js` inside the container. It
+creates and solves a minimum-difficulty challenge, redeems it, and verifies the
+result without exposing the secret or token.
 
 ## Flask Template Wiring
 The interfaces route passes these template vars:
@@ -166,3 +178,6 @@ Operational notes:
 - If the widget stays hidden: do not add CSS that forces `display:none` on `cap-widget`.
 - If assets 404: check `CAP_BASE_URL`, `CAP_ASSET_BASE_URL`, and Caddy routing.
 - Console errors: look for `[cap floating] "<selector>" doesn't exist`.
+- A restarting CAP with `Persistence readiness failed` indicates an unreadable,
+  malformed, or unwritable ledger. Do not delete the ledger. Run the canonical
+  deployment preflight/migration and preserve its checksum receipt.

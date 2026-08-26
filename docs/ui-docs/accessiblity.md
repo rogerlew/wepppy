@@ -59,6 +59,16 @@ External references:
 
 ## Current Coverage (Already in Repo)
 
+### SBS burn-severity maps
+
+Run-page and GL Dashboard soil burn severity maps use the current interagency
+CVD-friendly palette: unchanged/unburned `#008080`, low `#52CCCC`, moderate
+`#FFE820`, high `#A80000`, and masked/unmappable `#FFFFFF`. Legends retain text
+labels for every class, and the white masked swatch has a dark boundary. This
+is the non-shifted palette; the existing optional color-shifted view remains
+available. Masked map pixels are transparent. This is a targeted color-vision accessibility
+improvement and not a standalone Section 508 or WCAG conformance claim.
+
 ### 1) Template and route semantics (pytest)
 
 Use targeted route tests as first-line structural checks:

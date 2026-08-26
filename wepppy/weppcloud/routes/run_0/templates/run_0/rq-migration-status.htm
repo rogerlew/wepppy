@@ -561,7 +561,7 @@ function resolveMigrationStatusLabel(status) {
     case 'failed':
       return 'Migration failed.';
     case 'deferred':
-      return 'Job deferred...';
+      return 'Migration could not start because a prerequisite failed. Retry is available.';
     case 'scheduled':
       return 'Job scheduled...';
     case 'canceled':
@@ -809,6 +809,9 @@ async function pollStatus(jobId, statusUrl) {
       stopPolling();
       const jobInfo = await fetchJobInfo(jobId);
       onMigrationComplete(jobInfo ? jobInfo.result : null);
+    } else if (statusValue === 'deferred') {
+      stopPolling();
+      onMigrationFailed('A prerequisite failed before migration could start. Submit again to retry.');
     } else if (statusValue === 'failed' || statusValue === 'stopped' || statusValue === 'canceled') {
       stopPolling();
       const jobInfo = await fetchJobInfo(jobId);

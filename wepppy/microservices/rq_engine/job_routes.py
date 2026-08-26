@@ -499,6 +499,12 @@ def canceljob(job_id: str, request: Request):
                     status_code=403,
                     code="forbidden",
                 )
+            if payload.get("code") in {"cleanup_pending", "cleanup_timeout"}:
+                return error_response(
+                    payload["error"],
+                    status_code=409,
+                    code=str(payload["code"]),
+                )
             return error_response(
                 payload["error"],
                 status_code=404,

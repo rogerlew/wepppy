@@ -60,6 +60,15 @@ def _open_optional_fork_dir(name: str, *, dir_fd: int) -> int | None:
         return None
 
 
+def _open_or_create_fork_dir(name: str, *, dir_fd: int) -> int:
+    """Create one missing reset ancestor, then open it without following links."""
+    try:
+        os.mkdir(name, dir_fd=dir_fd)
+    except FileExistsError:
+        pass
+    return _open_fork_dir(name, dir_fd=dir_fd)
+
+
 def _open_fork_chain(root_fd: int, parts: tuple[str, ...]) -> tuple[int, list[int]]:
     parent_fd = root_fd
     opened: list[int] = []
@@ -275,6 +284,8 @@ def _normalize_fork_omni_links(new_wd: str, *, skip_wepp_runs_output: bool = Fal
                     raise ValueError(f"Invalid Omni {collection} child name: {child_name!r}")
                 child_stat = os.stat(child_name, dir_fd=collection_fd, follow_symlinks=False)
                 if stat.S_ISREG(child_stat.st_mode) and child_name in _OMNI_COLLECTION_METADATA:
+                    continue
+                if child_name.startswith("."):
                     continue
                 if not stat.S_ISDIR(child_stat.st_mode):
                     raise NotADirectoryError(
@@ -564,12 +575,22 @@ def _build_fork_rsync_cmd(
     *,
     undisturbify: bool,
     skip_wepp_runs_output: bool = False,
+    skip_omni_scenarios_contrasts: bool = False,
 ) -> list[str]:
-    cmd = ["rsync", "-a", "--stats"]
+    cmd = ["rsync", "-a", "--stats", "--exclude", "/.redisprep-run-id"]
     skip_wepp_copy = undisturbify or skip_wepp_runs_output
     # Archive staging artifacts are ephemeral and should not be synced into forked runs.
     if skip_wepp_copy:
         cmd.extend(["--exclude", "wepp/runs", "--exclude", "wepp/output"])
+    if skip_omni_scenarios_contrasts:
+        cmd.extend(
+            [
+                "--exclude",
+                "/_pups/omni/scenarios",
+                "--exclude",
+                "/_pups/omni/contrasts",
+            ]
+        )
     cmd.extend([".", run_right])
     return cmd
 
@@ -577,6 +598,43 @@ def _build_fork_rsync_cmd(
 def _ensure_wepp_run_and_output_dirs(new_wd: str) -> None:
     os.makedirs(os.path.join(new_wd, "wepp", "runs"), exist_ok=True)
     os.makedirs(os.path.join(new_wd, "wepp", "output"), exist_ok=True)
+
+
+def _write_fork_redisprep_namespace(new_wd: str, new_runid: str) -> None:
+    """Atomically persist a destination-owned profile Redis namespace marker."""
+    if not new_runid.startswith("profile;;"):
+        return
+    parts = new_runid.split(";;")
+    if len(parts) != 3 or parts[:2] != ["profile", "fork"] or not parts[2]:
+        raise ValueError(f"Invalid profile fork target: {new_runid}")
+    root_fd = os.open(new_wd, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    temp_name = f".redisprep-run-id.tmp-{os.getpid()}"
+    try:
+        temp_fd = os.open(
+            temp_name,
+            os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+            0o600,
+            dir_fd=root_fd,
+        )
+        try:
+            payload = new_runid.encode("utf-8")
+            written = 0
+            while written < len(payload):
+                count = os.write(temp_fd, payload[written:])
+                if count <= 0:
+                    raise OSError("Short write while persisting RedisPrep namespace")
+                written += count
+            os.fsync(temp_fd)
+        finally:
+            os.close(temp_fd)
+        os.replace(temp_name, ".redisprep-run-id", src_dir_fd=root_fd, dst_dir_fd=root_fd)
+        os.fsync(root_fd)
+    finally:
+        try:
+            os.unlink(temp_name, dir_fd=root_fd)
+        except FileNotFoundError:
+            pass
+        os.close(root_fd)
 
 
 def _normalize_interactive_fork_nodb_identity(
@@ -811,23 +869,138 @@ def _clear_query_engine_catalog_cache(
     status_channel: str,
     publish_status: Callable[[str, str], None],
 ) -> None:
-    query_engine_root = os.path.join(run_wd, "_query_engine")
-    catalog_path = os.path.join(query_engine_root, "catalog.json")
-    cache_dir = os.path.join(query_engine_root, "cache")
-
     publish_status(status_channel, "Clearing query engine catalog cache...\n")
     removed = False
-    if os.path.isdir(cache_dir):
-        shutil.rmtree(cache_dir)
-        removed = True
-    if os.path.isfile(catalog_path):
-        os.remove(catalog_path)
-        removed = True
+    root_fd = _open_fork_dir(run_wd)
+    query_fd = None
+    try:
+        query_fd = _open_optional_fork_dir("_query_engine", dir_fd=root_fd)
+        if query_fd is not None:
+            for name, expected in (("cache", "dir"), ("catalog.json", "file")):
+                try:
+                    entry_stat = os.stat(name, dir_fd=query_fd, follow_symlinks=False)
+                except FileNotFoundError:
+                    continue
+                is_expected = (
+                    stat.S_ISDIR(entry_stat.st_mode)
+                    if expected == "dir"
+                    else stat.S_ISREG(entry_stat.st_mode)
+                )
+                if not is_expected:
+                    raise ValueError(
+                        f"Fork query-engine {name} must be a regular non-symlink {expected}"
+                    )
+                if expected == "dir":
+                    shutil.rmtree(name, dir_fd=query_fd)
+                else:
+                    os.unlink(name, dir_fd=query_fd)
+                removed = True
+    finally:
+        if query_fd is not None:
+            os.close(query_fd)
+        os.close(root_fd)
 
     if removed:
         publish_status(status_channel, "Clearing query engine catalog cache... done.\n")
         return
     publish_status(status_channel, "No query engine catalog cache artifacts to clear.\n")
+
+
+def _require_regular_fork_file(run_wd: str, name: str) -> None:
+    root_fd = _open_fork_dir(run_wd)
+    try:
+        entry_stat = os.stat(name, dir_fd=root_fd, follow_symlinks=False)
+        if not stat.S_ISREG(entry_stat.st_mode):
+            raise ValueError(f"Fork destination {name} must be a regular non-symlink file")
+    finally:
+        os.close(root_fd)
+
+
+def _rewrite_fork_redisprep_dump(run_wd: str) -> dict[str, Any]:
+    """Atomically reset copied RedisPrep metadata without following paths."""
+    root_fd = _open_fork_dir(run_wd)
+    source_fd = None
+    temp_fd = None
+    temp_name = f".redisprep.dump.{secrets.token_hex(8)}.tmp"
+    try:
+        flags = os.O_RDONLY
+        if hasattr(os, "O_NOFOLLOW"):
+            flags |= os.O_NOFOLLOW
+        source_fd = os.open("redisprep.dump", flags, dir_fd=root_fd)
+        source_stat = os.fstat(source_fd)
+        if not stat.S_ISREG(source_stat.st_mode):
+            raise ValueError("Fork destination redisprep.dump must be a regular non-symlink file")
+        with os.fdopen(source_fd, "r", encoding="utf-8") as stream:
+            source_fd = None
+            payload = json.load(stream)
+        if not isinstance(payload, dict):
+            raise ValueError("Fork destination redisprep.dump must contain an object")
+
+        payload.pop(f"timestamps:run_omni_scenarios", None)
+        payload.pop(f"timestamps:run_omni_contrasts", None)
+        payload.pop("archive:job_id", None)
+        for key in tuple(payload):
+            if str(key).startswith("rq:"):
+                payload.pop(key, None)
+        payload["attrs:loaded"] = "true"
+
+        temp_fd = os.open(
+            temp_name,
+            os.O_WRONLY | os.O_CREAT | os.O_EXCL,
+            0o600,
+            dir_fd=root_fd,
+        )
+        encoded = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        written = 0
+        while written < len(encoded):
+            count = os.write(temp_fd, encoded[written:])
+            if count <= 0:
+                raise OSError("Short write while persisting fork RedisPrep metadata")
+            written += count
+        os.fsync(temp_fd)
+        os.close(temp_fd)
+        temp_fd = None
+        os.replace(temp_name, "redisprep.dump", src_dir_fd=root_fd, dst_dir_fd=root_fd)
+        return payload
+    finally:
+        if source_fd is not None:
+            os.close(source_fd)
+        if temp_fd is not None:
+            os.close(temp_fd)
+        try:
+            os.unlink(temp_name, dir_fd=root_fd)
+        except FileNotFoundError:
+            pass
+        os.close(root_fd)
+
+
+def _replace_fork_dir_with_empty(parent_fd: int, name: str) -> None:
+    try:
+        entry_stat = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+    except FileNotFoundError:
+        os.mkdir(name, dir_fd=parent_fd)
+        return
+    if not stat.S_ISDIR(entry_stat.st_mode):
+        raise ValueError(f"Fork Omni reset target {name} must be a real directory")
+    shutil.rmtree(name, dir_fd=parent_fd)
+    os.mkdir(name, dir_fd=parent_fd)
+
+
+def _reset_fork_omni_directories(run_wd: str) -> None:
+    root_fd = _open_fork_dir(run_wd)
+    opened: list[int] = []
+    try:
+        pups_fd = _open_or_create_fork_dir("_pups", dir_fd=root_fd)
+        opened.append(pups_fd)
+        omni_fd = _open_or_create_fork_dir("omni", dir_fd=pups_fd)
+        opened.append(omni_fd)
+        _replace_fork_dir_with_empty(omni_fd, "scenarios")
+        _replace_fork_dir_with_empty(omni_fd, "contrasts")
+        _replace_fork_dir_with_empty(root_fd, "omni")
+    finally:
+        for fd in reversed(opened):
+            os.close(fd)
+        os.close(root_fd)
 
 
 def _stream_reader(stream: TextIO, output_tail: deque[str]) -> None:
@@ -919,6 +1092,7 @@ def prepare_fork_run(
     *,
     undisturbify: bool,
     skip_wepp_runs_output: bool = False,
+    skip_omni_scenarios_contrasts: bool = False,
     status_channel: str,
     publish_status: Callable[[str, str], None],
     get_wd: Callable[[str], str],
@@ -932,11 +1106,12 @@ def prepare_fork_run(
     format_ttl_failure: Callable[[Exception], str] | None = None,
     mutate_root_fn: Callable[..., Any] | None = None,
     clear_nodb_cache_fn: Callable[..., Any] | None = None,
-    build_rsync_cmd: Callable[[str, bool, bool], list[str]] = (
-        lambda run_right, undisturbify, skip_wepp_runs_output: _build_fork_rsync_cmd(
+    build_rsync_cmd: Callable[[str, bool, bool, bool], list[str]] = (
+        lambda run_right, undisturbify, skip_wepp_runs_output, skip_omni: _build_fork_rsync_cmd(
             run_right,
             undisturbify=undisturbify,
             skip_wepp_runs_output=skip_wepp_runs_output,
+            skip_omni_scenarios_contrasts=skip_omni,
         )
     ),
     clean_env_for_system_tools: Callable[[], dict[str, str]] = _clean_env_for_system_tools,
@@ -976,7 +1151,12 @@ def prepare_fork_run(
         raise FileNotFoundError(error_msg)
 
     skip_wepp_copy = undisturbify or skip_wepp_runs_output
-    cmd = build_rsync_cmd(run_right, undisturbify, skip_wepp_runs_output)
+    cmd = build_rsync_cmd(
+        run_right,
+        undisturbify,
+        skip_wepp_runs_output,
+        skip_omni_scenarios_contrasts,
+    )
 
     _cmd = " ".join(cmd)
     publish_status(status_channel, f"Running cmd: {_cmd}")
@@ -992,6 +1172,8 @@ def prepare_fork_run(
         env=env,
     )
     publish_status(status_channel, "Copying project files... done.")
+
+    _write_fork_redisprep_namespace(new_wd, new_runid)
 
     normalize_started_at = time.monotonic()
     normalized_omni_links = _normalize_fork_omni_links(
@@ -1103,6 +1285,10 @@ def prepare_fork_run(
 
     publish_status(status_channel, "Cleanup locks, READONLY, PUBLIC... done.\n")
 
+    if skip_omni_scenarios_contrasts:
+        _require_regular_fork_file(new_wd, "omni.nodb")
+        _require_regular_fork_file(new_wd, "redisprep.dump")
+
     if initialize_ttl is not None:
         try:
             initialize_ttl(new_wd)
@@ -1139,11 +1325,12 @@ def prepare_fork_run(
             status_channel=status_channel,
             publish_status=publish_status,
         )
-        _clear_query_engine_catalog_cache(
-            new_wd,
-            status_channel=status_channel,
-            publish_status=publish_status,
-        )
+        if not skip_omni_scenarios_contrasts:
+            _clear_query_engine_catalog_cache(
+                new_wd,
+                status_channel=status_channel,
+                publish_status=publish_status,
+            )
 
         publish_status(status_channel, "Undisturbifying Project...\n")
         clear_nodb_cache_fn(new_runid, pup_relpath="ron.nodb")

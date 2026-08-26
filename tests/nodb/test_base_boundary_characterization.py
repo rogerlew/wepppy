@@ -34,6 +34,12 @@ class _RedisStub:
     def delete(self, key: str):
         self._kv.pop(key, None)
 
+    def eval(self, _script: str, _numkeys: int, key: str, expected: str):
+        if self._kv.get(key) != expected:
+            return 0
+        self._kv.pop(key, None)
+        return 1
+
     def hset(self, name: str, key: str, value: str):
         bucket = self._hash.setdefault(name, {})
         bucket[key] = value

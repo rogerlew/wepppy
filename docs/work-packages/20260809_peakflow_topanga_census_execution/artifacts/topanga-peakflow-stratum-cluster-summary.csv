@@ -1,0 +1,5 @@
+scenario,definition,event_rows,baseline_peak_q25_mm_h,baseline_peak_median_mm_h,baseline_peak_q75_mm_h,baseline_peak_geometric_mean_mm_h
+undisturbed,ksat_incongruent_central_band,4177,49.5750086,73.8861163,102.919163,63.6515773
+burned,ksat_incongruent_central_band,8651,25.9391262,39.1739344,50.8813282,33.7974377
+undisturbed,absolute_fractional_peak_change_gt25pct,832,4.51650288,37.0618029,98.5812036,21.2424022
+burned,absolute_fractional_peak_change_gt25pct,1500,1.54061897,10.4211977,38.8939469,8.37114335

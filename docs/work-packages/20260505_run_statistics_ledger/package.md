@@ -11,6 +11,9 @@ The goal is to make project counts by configuration, WEPP hillslope run counts, 
 
 ## Objectives
 
+- Restore `compile_dot_logs_rq` operationally by replacing per-run legacy file
+  enumeration with canonical Parquet footer counts.
+
 - Define a durable PostgreSQL-backed statistics event ledger so completed execution counts survive 90-day rolling TTL deletion.
 - Count repeated WEPP hillslope runs and repeated WATAR ash runs as execution events, not as current output-file counts.
 - Keep active project counts by configuration tied to active, non-deleted projects while preserving historical execution totals.
@@ -41,10 +44,13 @@ The goal is to make project counts by configuration, WEPP hillslope run counts, 
 
 - **Primary**: WEPPcloud operators and maintainers who report usage and capacity metrics.
 - **Reviewers**: WEPPcloud route/RQ maintainers, NoDb/WEPP runtime maintainers, and WATAR ash maintainers.
-- **Security Reviewer**: Optional unless scope expands into public route behavior or additional data exposure.
+- **Security Reviewer**: Required for SURF-19A because generated values feed public routes and the landing map.
 - **Informed**: Users who consume `/stats`, landing-map data, or historical usage summaries.
 
 ## Success Criteria
+
+- [ ] `compile_dot_logs` performs no per-run `.slp`, ash CSV, or raw ash-output
+  enumeration and obtains current inventory from canonical Parquet footers.
 
 - [ ] `compile_dot_logs` or its successor produces active project counts by config from active projects only.
 - [ ] Completed WEPP hillslope runs are appended once per successful `WeppRunService.run_hillslopes()` invocation and repeated runs are summed.
@@ -81,22 +87,44 @@ The goal is to make project counts by configuration, WEPP hillslope run counts, 
 
 ## Security Impact and Review Gate
 
-- **Security impact triage**: `low`
-- **Dedicated security review required**: `no`
-- **Triage rationale**: The base package writes internal aggregate statistics and runtime events. The ledger must avoid email, IP address, owner id, or other personally identifying fields. A dedicated security artifact becomes required if implementation changes public route access, exposes raw ledger events, changes auth/session behavior, or adds new external egress.
-- **Security review artifact**: `N/A`
+- **Security impact triage**: `high` for bounded SURF-19A; future ledger milestones re-triage separately.
+- **Dedicated security review required**: `yes`
+- **Triage rationale**: SURF-19A changes values consumed by public statistics routes and the landing map while preserving route shapes, auth, and exposure.
+- **Security review artifact**: `artifacts/2026-08-07_checkpoint_ops_security_review.md`
 
 ## Hardening and Callus Softening
 
-- **Failure signature(s)**: Interface text reported `2469 projects and 1,043,759 hillslopes (0 WATAR hillslopes) ran since January 1, 2024` on wepp1. Investigation showed the date was a hard-coded exclusive cutoff, hillslopes were current `.slp` file counts, and WATAR was a legacy artifact glob rather than a runtime count.
-- **Related prior hardening efforts**: None.
-- **Health signals**: Project totals by config match active non-deleted projects; repeated hillslope/WATAR runs increase execution totals; deleted projects disappear from active counts but historical events remain.
-- **Danger signals**: Runtime hooks slow model execution, the database writer path adds queue instability, ledger rows contain PII, backfill fabricates repeated-run counts, or compatibility outputs silently change meaning without docs.
+- **Failure signature(s)**: wepp1 job `7aa39c98-de7c-4298-8d5f-35e3784775e4` raised `JobTimeoutException: Task exceeded maximum timeout value (36000 seconds)` while enumerating `wepp/runs/*.slp`, after running from 02:10:26 through 12:10:26 UTC on 2026-08-07.
+- **Scope boundary**: Replace the two per-run count globs and contain invalid global publication without refactoring dot-log discovery, TTL, Ron, Watershed, routes, or the future ledger.
+- **Hypothesis**: Footer-only counts eliminate unbounded per-hillslope NAS metadata work and complete within the existing timeout while preserving last-known-good outputs under systemic failure.
+- **Related prior hardening efforts**: ADR-0039/DOM-14A uses measured production evidence and bounded recovery; SURF-19A removes the unbounded work rather than increasing its timeout.
+- **Health signals**: zero legacy per-run count scans; representative compile completes; canonical read/warning counters are logged; expected projects remain in locations and project counts.
+- **Danger signals**: repeat timeout, systemic guard trip, implausible count collapse, widespread warnings, partial publication, or location/project loss caused only by missing counts.
 - **Observation window**: 14 days after production rollout.
-- **Temporary calluses introduced**: Keep legacy `runs_counter.json` keys during migration.
-- **Callus softening hypothesis**: After consumers move to the richer rollup, legacy counter keys and any stale UI copy can be removed under a separate cleanup package.
+- **Temporary calluses introduced**: systemic publication guard and stable legacy keys during migration.
+- **Publication support**: a nonblocking output-directory file lock prevents
+  overlapping compilers; generation-unique candidates and backups restore the
+  complete prior set on promotion failure. A durable journal supports
+  next-invocation recovery after interruption, and failure cleanup removes
+  unpublished access-data candidates.
+- **Sunset owner and due date**: Roger Lew / WEPPcloud operator records a
+  keep-reduce-remove decision 14 calendar days after SURF-19A activation.
+- **Systemic-guard sunset criteria**: Keep the guard if it trips, any correlated
+  canonical-read failure occurs, or output totals are not yet stable. Reduce or
+  remove it only through a reviewed follow-up with 14 clean days, representative
+  canary evidence, and equivalent last-good publication protection.
+- **Legacy-key sunset criteria**: Keep keys until every direct file and `/stats`
+  consumer is inventoried and migrated. Remove only in a separately approved
+  consumer-migration package with route/output regressions.
+- **Callus softening hypothesis**: After consumers move to the richer rollup,
+  legacy counter keys and stale UI copy can be removed; the systemic guard may
+  be simplified only if the ledger publication path provides equivalent
+  fail-closed behavior.
 
 ## References
+
+- [Canonical Parquet inventory decision](artifacts/2026-08-07_canonical_parquet_inventory_contract_decision.md) - Incident bridge and approved compatibility delta.
+- [ADR-0040](../../adrs/ADR-0040-canonical-parquet-counts-for-run-inventory.md) - Count-source and missing-artifact decision.
 
 - [spec.md](spec.md) - Normative statistics contract, data model, backfill plan, compatibility plan, and regression plan.
 - [prompts/active/run_statistics_ledger_execplan.md](prompts/active/run_statistics_ledger_execplan.md) - Active implementation plan.

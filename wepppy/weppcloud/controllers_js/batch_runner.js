@@ -2034,6 +2034,10 @@ var BatchRunner = (function () {
             ctrl.handle_job_status_response = function (self, data) {
                 baseHandleJobStatusResponse.call(ctrl, self, data);
                 if (self === ctrl) {
+                    var statusValue = data && data.status ? String(data.status).toLowerCase() : "";
+                    if (statusValue === "deferred") {
+                        renderRunControls({ preserveMessage: false, preserveDeleteMessage: true });
+                    }
                     refreshRunstate();
                 }
             };

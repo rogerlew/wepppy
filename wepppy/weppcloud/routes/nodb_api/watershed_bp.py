@@ -15,7 +15,7 @@ from wepppy.topo.wbt.wbt_topaz_emulator import (
     load_conditioning_diagnostics,
 )
 from wepppy.topo.watershed_abstraction import ChannelRoutingError
-from wepppy.weppcloud.utils.helpers import authorize, authorize_and_handle_with_exception_factory
+from wepppy.weppcloud.utils.helpers import authorize, authorize_and_handle_with_exception_factory, run_lifecycle_mutation
 from wepppy.weppcloud.utils.cap_guard import requires_cap
 
 watershed_bp = Blueprint('watershed', __name__)
@@ -337,6 +337,7 @@ def query_watershed_summary(runid, config):
 
 @watershed_bp.route('/runs/<string:runid>/<config>/tasks/abstract_watershed/', methods=['GET', 'POST'])
 @authorize_and_handle_with_exception_factory
+@run_lifecycle_mutation
 def task_abstract_watershed(runid, config):
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)

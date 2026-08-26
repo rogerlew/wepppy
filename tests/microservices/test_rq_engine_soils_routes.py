@@ -21,17 +21,23 @@ def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> None:
+    from wepppy.rq import submission_recovery
+    class DummyLock:
+        def acquire(self, **kwargs): return True
+        def extend(self, *args, **kwargs): return True
+        def release(self): return None
     class DummyJob:
         id = job_id
 
     class DummyQueue:
         def __init__(self, *args, **kwargs) -> None:
-            pass
+            self.connection = kwargs["connection"]
 
         def enqueue_call(self, *args, **kwargs):
             return DummyJob()
 
     class DummyRedis:
+        def lock(self, *args, **kwargs): return DummyLock()
         def __enter__(self):
             return self
 
@@ -40,12 +46,14 @@ def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> 
 
     monkeypatch.setattr(soils_routes, "Queue", DummyQueue)
     monkeypatch.setattr(soils_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(submission_recovery, "new_rq_job_id", lambda: job_id)
 
 
 def _stub_prep(monkeypatch: pytest.MonkeyPatch) -> dict[str, list[object]]:
     state: dict[str, list[object]] = {"removed": [], "jobs": []}
 
     class DummyPrep:
+        def get_rq_job_id(self, key): return None
         def remove_timestamp(self, task, *args, **kwargs) -> None:
             state["removed"].append(task)
 

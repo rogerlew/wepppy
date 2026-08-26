@@ -1,0 +1,31 @@
+{
+  "lanes": [
+    {
+      "chan_out": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/candidate-h106-low-interval/runs/chan.out",
+      "chanwb_out": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/candidate-h106-low-interval/runs/chanwb.out",
+      "hbp_tree_sha256": "594a16bf30949de6485ef0d46a52d595fc8512a059b88cd1ffc9d06c29892b9f",
+      "lane_id": "candidate-h106-low-interval",
+      "returncode": 0,
+      "runtime_s": 175.3598242169246,
+      "schema_version": "1.0.0",
+      "status": "complete",
+      "stderr": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/candidate-h106-low-interval/runs/stderr.log",
+      "stdout": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/candidate-h106-low-interval/runs/stdout.log"
+    },
+    {
+      "chan_out": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/candidate-h106-high-interval/runs/chan.out",
+      "chanwb_out": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/candidate-h106-high-interval/runs/chanwb.out",
+      "hbp_tree_sha256": "362a008b9d13c2da2368b2bbd610c8d31068245880f5208b6727f7997fd2af98",
+      "lane_id": "candidate-h106-high-interval",
+      "returncode": 0,
+      "runtime_s": 176.15271234698594,
+      "schema_version": "1.0.0",
+      "status": "complete",
+      "stderr": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/candidate-h106-high-interval/runs/stderr.log",
+      "stdout": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/candidate-h106-high-interval/runs/stdout.log"
+    }
+  ],
+  "pilot_id": "8162d509d69cb4da",
+  "schema_version": "1.0.0",
+  "selection_id": "3b5778d7c9171311"
+}

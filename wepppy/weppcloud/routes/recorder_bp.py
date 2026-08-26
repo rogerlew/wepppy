@@ -31,7 +31,12 @@ def _normalise_events(payload: Dict[str, Any]) -> List[Dict[str, Any]]:
 @recorder_bp.route("/runs/<runid>/<config>/recorder/events", methods=["POST"])
 @authorize_and_handle_with_exception_factory
 def recorder_events(runid: str, config: str) -> Response:
-    payload = parse_request_payload(request, trim_strings=False)
+    raw_json = request.get_json(silent=True)
+    payload = (
+        raw_json
+        if isinstance(raw_json, dict)
+        else parse_request_payload(request, trim_strings=False)
+    )
     if not isinstance(payload, dict):
         return jsonify({"error": "Expected JSON object payload"}), 400
 

@@ -159,7 +159,7 @@ def test_get_job_status_progress_updated_at_uses_stable_unknown_when_no_timestam
     monkeypatch.setattr(
         job_info,
         "recursive_get_job_details",
-        lambda job, redis_conn, now: {
+        lambda job, redis_conn, now, **kwargs: {
             "job_id": "root",
             "runid": "run-1",
             "status": "queued",
@@ -203,7 +203,7 @@ def test_get_job_status_progress_updated_at_uses_latest_seen_timestamp(
     monkeypatch.setattr(
         job_info,
         "recursive_get_job_details",
-        lambda job, redis_conn, now: {
+        lambda job, redis_conn, now, **kwargs: {
             "job_id": "root",
             "runid": "run-1",
             "status": "started",
@@ -243,9 +243,9 @@ def test_get_job_status_progress_updated_at_uses_latest_seen_timestamp(
 
 @pytest.mark.parametrize(
     ("second_child_status", "expected_status"),
-    [("started", "started"), ("finished", "failed")],
+    [("started", "started"), ("finished", "failed"), ("deferred", "failed")],
 )
-def test_get_job_status_keeps_failed_allow_failure_tree_nonterminal_until_children_finish(
+def test_get_job_status_prioritizes_active_work_then_failure_then_blocked_deferred(
     monkeypatch: pytest.MonkeyPatch,
     second_child_status: str,
     expected_status: str,
@@ -267,7 +267,7 @@ def test_get_job_status_keeps_failed_allow_failure_tree_nonterminal_until_childr
     monkeypatch.setattr(
         job_info,
         "recursive_get_job_details",
-        lambda job, redis_conn, now: {
+        lambda job, redis_conn, now, **kwargs: {
             "job_id": "root",
             "runid": "run-1",
             "status": "finished",
@@ -354,7 +354,7 @@ def test_terminal_required_conditioning_diagnostics_fail_closed(
     monkeypatch.setattr(
         job_info,
         "recursive_get_job_details",
-        lambda job, redis_conn, now: {
+        lambda job, redis_conn, now, **kwargs: {
             "job_id": "root",
             "runid": "run-1",
             "status": "finished",

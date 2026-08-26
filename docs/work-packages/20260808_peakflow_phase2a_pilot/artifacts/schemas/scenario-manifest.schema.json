@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "observer_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "scenarios": {
+      "additionalProperties": {
+        "required": [
+          "authority",
+          "input_tree_sha256",
+          "hillslope_count"
+        ],
+        "type": "object"
+      },
+      "required": [
+        "burned",
+        "undisturbed"
+      ],
+      "type": "object"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "source_commit": {
+      "const": "ea25ad79ef7dab20206bca095b2958786f5ae317"
+    }
+  },
+  "required": [
+    "schema_version",
+    "source_commit",
+    "observer_sha256",
+    "scenarios"
+  ],
+  "type": "object"
+}

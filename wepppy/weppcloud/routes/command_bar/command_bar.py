@@ -32,7 +32,8 @@ from wepppy.nodb.base import (
     try_redis_set_log_level,
 )
 from wepppy.runtime_paths import clear_runtime_locks, runtime_lock_statuses
-from wepppy.weppcloud.utils.helpers import authorize
+from wepppy.weppcloud.utils.helpers import authorize, authorize_and_handle_with_exception_factory
+from wepppy.rq.submission_recovery import checkpoint_run_lifecycle
 from wepppy.weppcloud.utils import auth_tokens
 from wepppy.weppcloud.utils.auth_tokens import JWTConfigurationError
 
@@ -246,6 +247,7 @@ def _build_mcp_markdown(
 
 
 @command_bar_bp.route('/runs/<string:runid>/<config>/command_bar/query_engine_mcp_token', methods=['POST'])
+@authorize_and_handle_with_exception_factory
 def issue_query_engine_mcp_token(runid, config):
     authorize(runid, config)
     authentication_error = _authenticated_user_error()
@@ -307,6 +309,7 @@ def issue_query_engine_mcp_token(runid, config):
     instructions_path = Path(context.active_root) / instructions_relpath
 
     try:
+        checkpoint_run_lifecycle(runid)
         instructions_path.parent.mkdir(parents=True, exist_ok=True)
         instructions_path.write_text(markdown_body, encoding="utf-8")
     except OSError as exc:  # pragma: no cover - defensive logging

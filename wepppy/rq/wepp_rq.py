@@ -92,6 +92,7 @@ from . import wepp_rq_stage_finalize as _stage_finalize
 from . import wepp_rq_stage_helpers as _stage_helpers
 from . import wepp_rq_stage_post as _stage_post
 from . import wepp_rq_stage_prep as _stage_prep
+from .job_dependencies import reconcile_deferred_workflow
 from wepppy.rq.swat_rq import _build_swat_inputs_rq, _run_swat_rq
 from wepppy.weppcloud.bootstrap.git_lock import (
     acquire_bootstrap_git_lock,
@@ -117,8 +118,10 @@ WEPP_RQ_JOB_KEYS: tuple[str, ...] = (
     "prep_wepp_watershed_rq",
     "run_wepp_noprep_rq",
     "run_wepp_watershed_noprep_rq",
+    "run_swat_noprep_rq",
+    "run_swat_rq",
 )
-ACTIVE_RQ_JOB_STATUSES: frozenset[str] = frozenset({"queued", "started", "deferred", "scheduled"})
+ACTIVE_RQ_JOB_STATUSES: frozenset[str] = frozenset({"queued", "started", "scheduled"})
 EXECUTABLE_RQ_JOB_STATUSES: frozenset[str] = frozenset({"queued", "started", "scheduled"})
 FAILED_RQ_JOB_STATUSES: frozenset[str] = frozenset({"failed", "stopped", "canceled"})
 WEPP_SUBMIT_LOCK_TTL_SECONDS: int = 30
@@ -315,17 +318,10 @@ def _active_wepp_tree_job(root_job: Job, redis_conn: redis.Redis) -> Job | None:
     if _rq_job_status(root_job) in ACTIVE_RQ_JOB_STATUSES:
         return root_job
 
-    deferred_jobs: list[Job] = []
     for linked_job in _iter_linked_rq_jobs(root_job, redis_conn):
         status = _rq_job_status(linked_job)
         if status in EXECUTABLE_RQ_JOB_STATUSES:
             return linked_job
-        if status == "deferred":
-            deferred_jobs.append(linked_job)
-
-    for deferred_job in deferred_jobs:
-        if _deferred_rq_job_is_viable(deferred_job, redis_conn):
-            return deferred_job
 
     return None
 
@@ -350,6 +346,83 @@ def get_active_wepp_job(prep: RedisPrep | None, redis_conn: redis.Redis) -> dict
                 "status": _rq_job_status(active_job),
             }
     return None
+
+
+def _wepp_job_targets_run(job: Job, runid: str) -> bool:
+    metadata = job.meta if isinstance(job.meta, dict) else {}
+    metadata_runid = str(metadata.get("runid") or "").strip()
+    if metadata_runid and metadata_runid != runid:
+        return False
+    args = list(job.args or [])
+    allowed_names = {
+        "run_ss_batch_hillslope_rq", "run_hillslope_rq", "run_watershed_rq",
+        "run_ss_batch_watershed_rq", "run_wepp_rq", "run_wepp_noprep_rq",
+        "run_wepp_watershed_rq", "prep_wepp_watershed_rq",
+        "run_wepp_watershed_noprep_rq", "_prep_multi_ofe_rq",
+        "_prep_slopes_rq", "_run_hillslopes_rq", "_prep_managements_rq",
+        "_prep_soils_rq", "_prep_climates_rq", "_prep_remaining_rq",
+        "_prep_watershed_rq", "_post_run_cleanup_out_rq",
+        "_analyze_return_periods_rq", "_build_hillslope_interchange_rq",
+        "_build_totalwatsed3_rq", "_run_hillslope_watbal_rq",
+        "_post_prep_details_rq", "_post_watershed_interchange_rq",
+        "_post_legacy_arc_export_rq", "_post_gpkg_export_rq",
+        "post_dss_export_rq", "_post_make_loss_grid_rq", "_log_complete_rq",
+        "_log_prep_complete_rq",
+    }
+    func_name = str(job.func_name)
+    module_name, _, short_name = func_name.rpartition(".")
+    return (
+        bool(args)
+        and str(args[0]) == runid
+        and (
+            (module_name == __name__ and short_name in allowed_names)
+            or (
+                module_name == "wepppy.rq.swat_rq"
+                and short_name in {
+                    "run_swat_rq",
+                    "run_swat_noprep_rq",
+                    "_build_swat_inputs_rq",
+                    "_run_swat_rq",
+                }
+            )
+        )
+        and str(job.origin) == "default"
+    )
+
+
+def reconcile_deferred_wepp_jobs(
+    runid: str,
+    prep: RedisPrep | None,
+    redis_conn: redis.Redis,
+    lease_checkpoint: Callable[[], None] | None = None,
+) -> None:
+    """Cancel superseded deferred WEPP graphs before replacement admission."""
+    if prep is None:
+        return
+    for key in WEPP_RQ_JOB_KEYS:
+        job_id = prep.get_rq_job_id(key)
+        if not job_id:
+            continue
+        result = reconcile_deferred_workflow(
+            job_id,
+            connection=redis_conn,
+            association=lambda job: _wepp_job_targets_run(job, runid),
+            root_association=lambda job, expected_key=key: (
+                _wepp_job_targets_run(job, runid)
+                and str(job.func_name).rpartition(".")[2] == expected_key
+            ),
+            lease_checkpoint=lease_checkpoint,
+        )
+        if result.state == "active":
+            raise WeppSingleFlightConflict(
+                "WEPP job already active for this run "
+                f"(key={key}, job_id={result.job_ids[0]}, status=active)."
+            )
+        if result.state == "mismatch":
+            raise WeppSingleFlightConflict(
+                "WEPP job association could not be verified for this run "
+                f"(key={key}, job_id={job_id})."
+            )
 
 
 def ensure_no_active_wepp_job(runid: str, prep: RedisPrep | None, redis_conn: redis.Redis) -> None:

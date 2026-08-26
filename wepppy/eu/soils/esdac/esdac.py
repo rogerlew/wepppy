@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from datetime import datetime
 from glob import glob
 import json
@@ -13,9 +13,19 @@ from os.path import join as _join
 from os.path import split as _split
 
 from wepppy.all_your_base.geo import RasterDatasetInterpolator
+from wepppy.all_your_base.geo.locationinfo import RDIOutOfBoundsException
 
 from wepppy.wepp.soils import HorizonMixin
 from wepppy.eu.soils.eusoilhydrogrids import SoilHydroGrids
+from .quality import (
+    ESDACSoilBuildError,
+    SoilQualityContext,
+    merge_quality_results,
+    rejected_quality_result,
+    validate_esdac_source_profile,
+    validate_horizon_profile,
+    validate_ksat_profile,
+)
 
 
 _esdac_esdb_raster_dir: Final[str] = "/geodata/eu/ESDAC_ESDB_rasters/"  # 1km
@@ -229,6 +239,27 @@ def _attr_fmt(attr: str) -> str:
     return _attr
 
 
+def _horizon_quality_payload(horizon: Horizon) -> dict[str, object]:
+    """Expose exactly the derived values that the builder serializes."""
+    return {
+        "depth": horizon.depth,
+        "bd": horizon.bd,
+        "ks": horizon.ks,
+        "anisotropy": horizon.anisotropy,
+        "field_capacity": horizon.field_cap,
+        "wilting_point": horizon.wilt_pt,
+        "sand": horizon.sand,
+        "clay": horizon.clay,
+        "silt": horizon.vfs,
+        "om": horizon.om,
+        "cec": horizon.cec,
+        "smr": horizon.smr,
+        "interrill": horizon.interrill,
+        "rill": horizon.rill,
+        "shear": horizon.shear,
+    }
+
+
 class ESDAC:
     """High-level accessor for the ESDAC ESDB rasters and derived STU layers."""
 
@@ -338,28 +369,115 @@ class ESDAC:
         Returns:
             A tuple containing the soil key, the top horizon metadata, and a
             human-readable description string.
+
+        Raises:
+            ESDACSoilBuildError: If source, derived horizon, Ksat, or
+                serialization invariants reject this location. The exception
+                carries the structured location quality result.
         """
-        d_esdb = self.query(lng, lat, ('fao90lev1', 'usedom', 'textdepchg', 'il', 'cec_top', 'cec_sub', 'dgh', 'dimp', 'dr'))
+        context = SoilQualityContext(longitude=lng, latitude=lat)
+        try:
+            d_esdb = self.query(
+                lng,
+                lat,
+                (
+                    'fao90lev1', 'usedom', 'textdepchg', 'il', 'cec_top',
+                    'cec_sub', 'dgh', 'dimp', 'dr',
+                ),
+            )
+        except (KeyError, TypeError, ValueError, RDIOutOfBoundsException) as exc:
+            raise ESDACSoilBuildError(
+                rejected_quality_result(
+                    context,
+                    code="source.categorical.lookup_failed",
+                    field="esdb",
+                    exception=exc,
+                )
+            ) from exc
+
+        try:
+            d_stu = self.query_derived_db(lng, lat,
+                ('STU_EU_T_CLAY',   'STU_EU_S_CLAY',
+                 'STU_EU_T_SAND',   'STU_EU_S_SAND',
+                 'STU_EU_T_SILT',   'STU_EU_S_SILT',
+                 'STU_EU_T_OC',     'STU_EU_S_OC',
+                 'STU_EU_T_BD',     'STU_EU_S_BD',
+                 'STU_EU_T_GRAVEL', 'STU_EU_S_GRAVEL'))
+        except (KeyError, TypeError, ValueError, RDIOutOfBoundsException) as exc:
+            raise ESDACSoilBuildError(
+                rejected_quality_result(
+                    context,
+                    code="source.stu.provider_unavailable",
+                    field="stu",
+                    exception=exc,
+                )
+            ) from exc
+
+        source_quality = validate_esdac_source_profile(
+            context,
+            esdb=d_esdb,
+            stu=d_stu,
+        )
+        if source_quality.outcome == "rejected":
+            raise ESDACSoilBuildError(source_quality)
+
         cec_top_class = d_esdb['cectop'][1]
         cec_sub_class = d_esdb['cecsub'][1]
 
         texdepchg_short = d_esdb['textdepchg'][1]
-        solthk0 = _texdepchg_short_to_depth_mm[texdepchg_short]
+        solthk0 = _texdepchg_short_to_depth_mm.get(texdepchg_short)
         if solthk0 is None:
-            solthk0 = 200
+            raise ESDACSoilBuildError(
+                rejected_quality_result(
+                    context,
+                    code=(
+                        "source.textdepchg.no_information"
+                        if texdepchg_short == "0"
+                        else "source.textdepchg.unsupported"
+                    ),
+                    field="textdepchg",
+                    raw_value=texdepchg_short,
+                )
+            )
 
         il = d_esdb['il'][1]
-        solthk1 = _il_short_to_depth_mm[il]
+        solthk1 = _il_short_to_depth_mm.get(il)
         if solthk1 is None:
-            solthk1 = 400
+            raise ESDACSoilBuildError(
+                rejected_quality_result(
+                    context,
+                    code=(
+                        "source.il.no_information"
+                        if il == "0"
+                        else "source.il.unsupported"
+                    ),
+                    field="il",
+                    raw_value=il,
+                )
+            )
 
-        d_stu = self.query_derived_db(lng, lat, 
-            ('STU_EU_T_CLAY',   'STU_EU_S_CLAY',
-             'STU_EU_T_SAND',   'STU_EU_S_SAND',
-             'STU_EU_T_SILT',   'STU_EU_S_SILT',
-             'STU_EU_T_OC',     'STU_EU_S_OC',
-             'STU_EU_T_BD',     'STU_EU_S_BD',
-             'STU_EU_T_GRAVEL', 'STU_EU_S_GRAVEL'))
+        normalized_stu = dict(d_stu)
+        for field in (
+            'STU_EU_T_CLAY', 'STU_EU_S_CLAY',
+            'STU_EU_T_SAND', 'STU_EU_S_SAND',
+            'STU_EU_T_SILT', 'STU_EU_S_SILT',
+            'STU_EU_T_OC', 'STU_EU_S_OC',
+            'STU_EU_T_BD', 'STU_EU_S_BD',
+            'STU_EU_T_GRAVEL', 'STU_EU_S_GRAVEL',
+        ):
+            try:
+                normalized_stu[field] = float(d_stu[field])
+            except (KeyError, TypeError, ValueError, OverflowError) as exc:
+                raise ESDACSoilBuildError(
+                    rejected_quality_result(
+                        context,
+                        code="source.stu.malformed",
+                        field=field,
+                        exception=exc,
+                        raw_value=d_stu.get(field),
+                    )
+                ) from exc
+        d_stu = normalized_stu
 
         h0 = Horizon(clay=d_stu['STU_EU_T_CLAY'], 
                      sand=d_stu['STU_EU_T_SAND'], 
@@ -378,6 +496,13 @@ class ESDAC:
                      gravel=d_stu['STU_EU_S_GRAVEL'], 
                      _cec=cec_sub_class, 
                      depth=solthk1)
+
+        horizon_quality = validate_horizon_profile(
+            context,
+            (_horizon_quality_payload(h0), _horizon_quality_payload(h1)),
+        )
+        if horizon_quality.outcome == "rejected":
+            raise ESDACSoilBuildError(horizon_quality)
 
         s = ['7778',
              '#',
@@ -433,8 +558,81 @@ class ESDAC:
         s.append(f'#    salb = {salb}')
         s.append(f'#    ini_sat = {ini_sat}')
 
-        soil_hydro = SoilHydroGrids()
-        ks = soil_hydro.query(lng, lat, 'KS')
+        try:
+            soil_hydro = SoilHydroGrids()
+            ks = soil_hydro.query(lng, lat, 'KS')
+        except (KeyError, TypeError, ValueError, FileNotFoundError, RDIOutOfBoundsException) as exc:
+            raise ESDACSoilBuildError(
+                rejected_quality_result(
+                    context,
+                    code="source.hydrogrids.provider_unavailable",
+                    field="hydrogrids",
+                    exception=exc,
+                )
+            ) from exc
+
+        if not isinstance(ks, Mapping):
+            raise ESDACSoilBuildError(
+                rejected_quality_result(
+                    context,
+                    code="source.hydrogrids.malformed",
+                    field="hydrogrids",
+                    raw_value=type(ks).__name__,
+                )
+            )
+        normalized_ks: dict[object, tuple[object, float | None]] = {}
+        for code, raw_value in ks.items():
+            if (
+                isinstance(raw_value, (str, bytes))
+                or not isinstance(raw_value, Sequence)
+                or len(raw_value) != 2
+            ):
+                raise ESDACSoilBuildError(
+                    rejected_quality_result(
+                        context,
+                        code="source.hydrogrids.malformed",
+                        field="hydrogrids",
+                        raw_value="depth_ksat_pairs_required",
+                    )
+                )
+            depth, raw_ksat = raw_value
+            if raw_ksat is None:
+                normalized_ks[code] = (depth, None)
+                continue
+            try:
+                normalized_ks[code] = (depth, float(raw_ksat))
+            except (TypeError, ValueError, OverflowError) as exc:
+                raise ESDACSoilBuildError(
+                    rejected_quality_result(
+                        context,
+                        code="source.hydrogrids.malformed",
+                        field=f"hydrogrids[{code}]",
+                        exception=exc,
+                        raw_value=raw_ksat,
+                    )
+                ) from exc
+
+        try:
+            ksat_quality = validate_ksat_profile(context, normalized_ks)
+        except (TypeError, ValueError) as exc:
+            raise ESDACSoilBuildError(
+                rejected_quality_result(
+                    context,
+                    code="source.hydrogrids.malformed",
+                    field="hydrogrids",
+                    exception=exc,
+                )
+            ) from exc
+        if ksat_quality.outcome == "rejected":
+            raise ESDACSoilBuildError(ksat_quality)
+
+        quality_result = merge_quality_results(
+            source_quality,
+            horizon_quality,
+            ksat_quality,
+        )
+        h0.quality_result = quality_result
+
         ksat_min = 1e38
         ksat_last = None 
         res_lyr_i = None
@@ -444,7 +642,7 @@ class ESDAC:
         s.append('#')
         s.append('#  Code\tDepth\tksat')
         s.append('#  ' + '-' * 120)
-        for i, (code, (_depth, _ks)) in enumerate(ks.items()):
+        for i, (code, (_depth, _ks)) in enumerate(normalized_ks.items()):
             if _ks is None:
                 _ksat = None
             else:
@@ -464,7 +662,13 @@ class ESDAC:
             ksat_last = _ksat
 
         if ksat_last is None:
-            ksat_last = 0.001
+            raise ESDACSoilBuildError(
+                rejected_quality_result(
+                    context,
+                    code="source.hydrogrids.all_missing",
+                    field="hydrogrids",
+                )
+            )
 
         s.append('#')
         s.append(f'#  res_lyr_ksat_threshold = {res_lyr_ksat_threshold}')

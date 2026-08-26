@@ -5,6 +5,7 @@ from types import SimpleNamespace
 import pytest
 
 import wepppy.rq.culvert_rq_pipeline as pipeline
+from rq.job import Dependency, JobStatus
 
 pytestmark = pytest.mark.unit
 
@@ -17,6 +18,10 @@ class _DummyJob:
 
     def save(self) -> None:
         self.saves += 1
+
+    def get_status(self, refresh: bool = True):
+        # Never deferred, so release_deferred_job_if_ready is a no-op here.
+        return JobStatus.QUEUED
 
 
 class _DummyQueue:
@@ -92,8 +97,9 @@ def test_enqueue_culvert_batch_jobs_tracks_stage_meta_dependencies_and_child_met
     assert second_call["depends_on"] is None
 
     final_depends_on = final_call["depends_on"]
-    assert isinstance(final_depends_on, list)
-    assert [job.id for job in final_depends_on] == ["job-1", "job-2"]
+    assert isinstance(final_depends_on, Dependency)
+    assert final_depends_on.dependencies == ["job-1", "job-2"]
+    assert final_depends_on.allow_failure is True
 
     first_child = first_call["job"]
     second_child = second_call["job"]

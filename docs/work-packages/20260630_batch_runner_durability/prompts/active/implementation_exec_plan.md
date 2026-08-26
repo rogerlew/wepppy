@@ -26,6 +26,7 @@ The observable behavior is that a second Run Batch submission for a partially co
 - [x] (2026-06-30 23:08 UTC) Fixed parent Run Batch result serialization by returning a summary dict instead of an RQ `Job`.
 - [x] (2026-06-30 23:51 UTC) Hardened watershed retries against interrupted hillslope interchange outputs.
 - [x] (2026-07-01 19:54 UTC) Hardened retries against stale cloned base climate attributes by detecting `_base/climate.nodb` drift, enqueueing affected leaves, resyncing critical climate config fields, and invalidating climate/downstream timestamps.
+- [x] (2026-08-05 23:19 UTC) Corrected false base-climate drift for stations resolved under `FindClosestAtRuntime`; focused and full tests passed, and independent review findings were fixed and confirmed resolved.
 
 ## Surprises & Discoveries
 
@@ -53,6 +54,10 @@ The observable behavior is that a second Run Batch submission for a partially co
   Evidence: `OR,WA-101` failed missing `H.wat.parquet` with `H.soil.parquet.tmp` present; `OR,WA-102` failed missing `H.pass.parquet` with `H.pass.parquet.tmp` present. Both had `run_wepp_hillslopes` set and `run_wepp_watershed` missing.
 - Observation: Existing leaves can carry stale cloned climate configuration even after an operator fixes `_base`.
   Evidence: On 2026-07-01, `nasa-roses-202606-psbs` leaves failed with `ValueError: observed_start_year must be an integer year, got empty string` after observed years were set on the base project; a leaf initialized before that fix still had empty `_observed_start_year` and `_observed_end_year`.
+- Observation: The climate drift rule compares declarative base station policy with resolved per-leaf runtime state as literal JSON values.
+  Evidence: On 2026-08-04, all 93 `nasa-roses-202606-psbs` leaves reported drift for `_climatestation` and `_climatestation_mode`; the unchanged base held `null` plus `FindClosestAtRuntime` (`-1`), while climate builds had legitimately persisted a station ID plus `Closest` (`0`).
+- Observation: Climate station modes have verified current and legacy jsonpickle representations in persisted NoDb files.
+  Evidence: Current jsonpickle emits a two-element `py/reduce` with type `wepppy.nodb.core.climate.ClimateStationMode`; the repository's `feverish-lamp` fixture uses a five-element representation with legacy type `wepppy.nodb.climate.ClimateStationMode` and three null trailing fields.
 
 ## Decision Log
 
@@ -89,10 +94,15 @@ The observable behavior is that a second Run Batch submission for a partially co
 - Decision: Resync only critical climate configuration fields from `_base/climate.nodb` into existing leaves, and invalidate only climate/downstream timestamps.
   Rationale: The confirmed stale path is a cloned climate configuration defect. Copying generated climate outputs would risk moving base-run artifacts into a leaf, and clearing DEM/watershed/landuse/soils timestamps would waste work unrelated to climate year bounds. Broader landuse, soils, WEPP, Ron, and watershed resync rules require separate confirmed incidents and artifact-compatibility tests.
   Date/Author: 2026-07-01 19:54 UTC / Codex.
+- Decision: Accept a resolved leaf station as equivalent to the base runtime-selection policy only for the exact `null`/`FindClosestAtRuntime` to non-empty station/`Closest` lifecycle.
+  Rationale: Runtime selection is required to vary by watershed and must not invalidate completed tasks by itself. Narrow pair matching preserves drift detection when the operator explicitly selects a station or when leaf station state does not match the supported runtime-resolution lifecycle.
+  Date/Author: 2026-08-05 22:57 UTC / Codex, explicitly authorized by the operator as a production-defect fix.
 
 ## Outcomes & Retrospective
 
 Local implementation is complete after dual-agent review disposition and local retry hardening. The batch runner now classifies leaf runs, skips completed old-style leaves by default, handles absent optional RAP/OpenET controllers, rejects unsafe generated leaf IDs, preserves explicit full rerun through `Remove existing files`, writes success metadata with best-effort task diagnostics, rejects active duplicate submissions at both route and worker boundaries, clears stale child NoDb locks before reused-leaf retries, clears exact selected-leaf path-scoped runtime locks before child enqueue, ensures hillslope interchange before watershed retries, detects and repairs stale base climate configuration in existing leaves, returns a serializable parent summary, and publishes final failed/incomplete/missing/invalid counts. Focused RQ, runtime-path, rq-engine route, and batch endpoint tests pass. Production rollout remains pending, and changed-file broad exception enforcement still flags existing broad boundary catches in touched files.
+
+The 2026-08-05 follow-up fixes a false-positive within climate drift detection: a leaf station legitimately resolved under the base `FindClosestAtRuntime` policy is now accepted as equivalent runtime state. The comparison recognizes verified current, legacy, and raw-integer station-mode formats and rejects unknown structures as drift. Independent review raised two medium serialization findings; both were fixed and confirmed resolved with no new findings. The focused suite passed 29 tests, the full Python suite passed 5,839 tests with 61 skips, documentation lint passed, and the changed-file broad-exception delta is zero. Production deployment and recovery remain pending operator actions.
 
 ## Context and Orientation
 
@@ -112,7 +122,7 @@ Terms used in this plan:
 - A "complete leaf" is a leaf whose run directory exists and whose enabled tasks are all timestamped in `RedisPrep`.
 - "Terminal metadata" means `runs/<leaf_runid>/run_metadata.json`. The implementation should write it for both success and failure.
 - "Retry eligible" means Run Batch should enqueue the leaf in default mode because it is missing, incomplete, or has a current unsuperseded failure.
-- "Base project attribute drift" means a critical configuration field in an existing leaf's NoDb file differs from the same field in `_base`. The current implemented drift rule covers `climate.nodb` configuration only, not generated climate artifacts.
+- "Base project attribute drift" means a critical configuration field in an existing leaf's NoDb file differs from the same field in `_base`. The current implemented drift rule covers `climate.nodb` configuration only, not generated climate artifacts. A station resolved from the base `FindClosestAtRuntime` policy is equivalent runtime state rather than drift.
 
 ## Plan of Work
 

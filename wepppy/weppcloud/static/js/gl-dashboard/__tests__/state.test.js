@@ -16,6 +16,12 @@ afterEach(() => {
 });
 
 describe('gl-dashboard state subscriptions', () => {
+  it('retains the SBS color-shift preference in initialized state', () => {
+    window.__GL_DASHBOARD_STATE__.sbsColorShiftEnabled = true;
+    initState({ sbsColorShiftEnabled: true, weppStatistic: 'mean' });
+    expect(getState().sbsColorShiftEnabled).toBe(true);
+  });
+
   it('notifies subscribers with changed keys for setValue', () => {
     const calls = [];
     const unsubscribe = subscribe(['weppStatistic'], (state, changedKeys) => {

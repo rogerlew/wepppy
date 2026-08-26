@@ -6,6 +6,13 @@
 
 ## Overview
 
+`Omni.reset_for_fork()` is the controller-owned reset used by checked fork
+jobs. It preserves destination identity and configuration while restoring all
+persisted Omni-owned fields to fresh-controller state in one canonical
+lock/dump transaction. Fork orchestration separately recreates empty child and
+aggregate directories; the operation never mutates the source controller and
+does not rebuild Omni outputs.
+
 Omni helps land managers and hydrologists answer critical post-fire planning questions:
 
 - **"What if we apply mulch at 1 ton/acre to high-severity burned areas?"**
@@ -390,6 +397,12 @@ wepppy/weppcloud/templates/controls/
 6. **WEPP execution**: Scenario workspace calls `Wepp.prep_hillslopes()`, `Wepp.run_hillslopes()`, interchange generation, `Wepp.prep_watershed()`, and `Wepp.run_watershed()`
 7. **Reporting**: `Omni.scenarios_report()` concatenates per-scenario output files into a unified DataFrame
 8. **Dependency updates**: SHA1 hashes of dependency outputs are stored; subsequent runs skip unchanged scenarios
+
+Scenario execution may temporarily use the scenario working directory for
+legacy relative-path operations, but `OmniRunOrchestrationService` restores the
+caller process's current working directory before returning or re-raising. Tests
+and callers should still resolve repository-owned artifacts from explicit root
+paths rather than relying on process CWD.
 
 ### Treatment Build + WEPP Prep Workflow (Per Scenario)
 

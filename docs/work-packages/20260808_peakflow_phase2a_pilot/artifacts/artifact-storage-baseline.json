@@ -1,0 +1,23 @@
+{
+  "artifacts": [
+    {
+      "bytes": 69010,
+      "format": "parquet",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/baseline-inventory.parquet",
+      "name": "baseline-inventory.parquet",
+      "retention": "retain",
+      "sha256": "9a0cde542e0c8b18286080ad4138a5a9f9057493749477f1f8a74f7abedf428f"
+    },
+    {
+      "bytes": 3076554,
+      "format": "parquet",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/baseline-events.parquet",
+      "name": "baseline-events.parquet",
+      "retention": "retain",
+      "sha256": "8ea085f8bcbb8b3d16f96fb4df7bb0750727cf7f4dea7e83135f717ee805b0ee"
+    }
+  ],
+  "external_root": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da",
+  "pilot_id": "8162d509d69cb4da",
+  "schema_version": "1.0.0"
+}

@@ -1,0 +1,34 @@
+{
+  "event": "1986-02-15",
+  "lanes": {
+    "baseline": {
+      "antecedent_profile_water_mm": 211.1,
+      "effective_intensity_mm_h": 39.115,
+      "effective_surface_ksat_mm_h": 35.0,
+      "precip_mm": 64.7,
+      "production_peak_mm_h": 3.563,
+      "rectangular_effective_duration_h": 12.2,
+      "runoff_post_reconciliation_mm": 43.466
+    },
+    "dense-canopy": {
+      "antecedent_profile_water_mm": 206.02,
+      "effective_intensity_mm_h": 39.115,
+      "effective_surface_ksat_mm_h": 35.0,
+      "precip_mm": 64.7,
+      "production_peak_mm_h": 294.416,
+      "rectangular_effective_duration_h": 0.15,
+      "runoff_post_reconciliation_mm": 44.053
+    },
+    "lower-ground-cover": {
+      "antecedent_profile_water_mm": 211.45,
+      "effective_intensity_mm_h": 39.115,
+      "effective_surface_ksat_mm_h": 35.0,
+      "precip_mm": 64.7,
+      "production_peak_mm_h": 312.292,
+      "rectangular_effective_duration_h": 0.139,
+      "runoff_post_reconciliation_mm": 43.408
+    }
+  },
+  "mechanism_status": "mechanism_unresolved",
+  "status": "pass"
+}

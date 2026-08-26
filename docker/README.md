@@ -5,6 +5,10 @@
 This guide covers both the development (`docker-compose.dev.yml`) and production (`docker-compose.prod.yml`) Docker Compose stacks for WEPPcloud.
 It also covers the production worker pool stack (`docker-compose.prod.worker.yml`) used on dedicated RQ worker hosts.
 
+The canonical web-process startup, minimum configuration, and secret inventory
+is documented in
+[`docs/infrastructure/weppcloud-web-runtime-contract.md`](../docs/infrastructure/weppcloud-web-runtime-contract.md).
+
 `docker-compose.dev.hpc.yml` is a legacy configuration that is being
 repurposed. It is not a supported WEPPcloud development or worker deployment
 target; do not extend new worker topology into it unless its replacement
@@ -16,7 +20,14 @@ contract explicitly requires that service.
 |-------------|------|--------|--------------|-------|
 | **Test Production** | `forest1.local` | `wc-prod.bearhive.duckdns.org` | `docker-compose.prod.yml` | Primary test production server |
 | **Development** | `forest.local` | `wc.bearhive.duckdns.org` | `docker-compose.dev.yml` | Development with bind mounts |
+| **WEPPcloud Production** | `wepp1`, `wepp2`, `wepp3` | `wepp.cloud` | Production Compose files selected by `wctl` | Host-local builds through `scripts/deploy-production.sh`; no registry dependency |
 | **Prod Worker Pool** | (separate worker host) | — | `docker-compose.prod.worker.yml` | Dedicated RQ workers connected to an external Redis (no Redis/Postgres services). |
+| **OpenWEPP** | Kubernetes cluster | `openwepp.org` | Kubernetes manifests | Registry-published images; separate deployment system from `wepp.cloud` |
+
+The deployment boundary is strict: `wepp.cloud` is Docker Compose and uses
+`scripts/deploy-production.sh`; `openwepp.org` is Kubernetes and may use the
+container registry. Do not introduce registry, manifest-digest, or GitOps
+requirements into a `wepp.cloud` rollout or recovery plan.
 
 The fork/archive serial queue uses `docker-compose.prod.wepp3.yml` on `wepp3`,
 which already has the production NFS mount and otherwise runs no
@@ -25,6 +36,54 @@ for behavioral parity; wepp1 and wepp2 must not consume the production serial
 queue. Track rollout evidence in the
 [Fork/Archive Serial Queue Isolation work package](../docs/work-packages/20260803_fork_archive_serial_queue/package.md).
 
+Install the wepp3 preset once, then use the same production deploy entry point
+as the other production hosts. It auto-detects the dedicated single-service
+topology and deploys only `rq-worker-fork-archive`:
+
+```bash
+./wctl/install.sh wepp3
+./scripts/deploy-production.sh
+```
+
+For a web-boundary hotfix that changes only WEPPcloud and rq-engine, use the
+targeted mode. It pulls and builds their shared `WEPPCLOUD_IMAGE` once through
+the `weppcloud` build definition, rebuilds static assets, and recreates both
+services with `--no-deps`; Redis, PostgreSQL, Caddy, schedulers, and RQ workers
+remain running:
+
+```bash
+./scripts/deploy-production.sh --targeted-web --no-flush-rq-db
+```
+
+The mode is accepted only for a full Compose topology containing both
+`weppcloud` and `rq-engine`. It rejects `--flush-rq-db`, verifies both public
+health endpoints, and skips the broad runtime prune.
+
+For a CAP-only repair, use `--targeted-cap`. It preserves a host-local rescue
+tag for the running image, validates the candidate against disposable fresh,
+populated legacy, and malformed volumes, reapplies the fixed secret ACL,
+migrates only the CAP volume root and regular ledger, and recreates only CAP.
+Activation requires persistence readiness plus a complete
+challenge/redeem/siteverify canary. Failure automatically restores and
+revalidates the rescue image; the rescue tag is never pruned by this mode.
+The deploy is mutually exclusive through a repository-local host lock, and
+candidate canaries are time/work bounded.
+
+```bash
+./scripts/deploy-production.sh --targeted-cap --no-flush-rq-db
+```
+
+Plain full mode derives one build target for every distinct locally buildable
+image in the effective Compose topology. It must build `weppcloudr` whenever it
+will recreate it, validates the worker/renderer entrypoint contract before
+shutdown, and verifies every recreated long-running service before printing
+the success footer. `--print-plan` displays the build, recreate, and acceptance
+sets without pulling, building, stopping, or starting anything.
+
+The script restarts itself when a pull updates its implementation and validates
+the post-pull Compose topology before building. It fails closed when an active
+worker-only wctl preset does not expose a supported service set.
+
 ### Test Production (forest1.local)
 
 The test production server at `forest1.local` (accessible via `wc-prod.bearhive.duckdns.org`) should **always** use the production compose file:
@@ -32,9 +91,14 @@ The test production server at `forest1.local` (accessible via `wc-prod.bearhive.
 ```bash
 cd /workdir/wepppy
 ./scripts/deploy-production.sh
-# Or manually:
-docker compose --env-file docker/.env -f docker/docker-compose.prod.yml up -d
 ```
+
+Forest1 release evidence must use that exact no-argument command twice. A
+targeted deploy is not a substitute. Between the two runs, verify interactive
+CAPTCHA in Safari and Chrome, local and OAuth login, continuity of a pre-deploy
+session, and a real RQ-submitted DEVAL render with its published artifact and
+receipt. Rehearse rollback and confirm targeted modes preserve non-selected
+container identities before production.
 
 Then explicitly start the profiled serial consumer on Forest:
 
@@ -46,13 +110,43 @@ docker compose --env-file docker/.env -f docker/docker-compose.prod.yml --profil
 - Runs `docker builder prune -af` after builds (build cache/layers only).
 - Runs `docker system prune -a -f` at the end of deploy (unused images, stopped containers, and unused networks).
 - Does **not** prune volumes unless explicitly requested with `--docker-prune-volumes`.
-- Use `--skip-docker-prune` to disable the end-of-deploy runtime prune.
+- Use `--skip-docker-prune` to disable the end-of-deploy runtime prune. The dedicated wepp3
+  fork/archive deployment always skips the broad runtime prune; its build cache is still
+  pruned immediately after the image build.
 
 Production Python services also fail startup unless the vendored
 `wepppyo3.wepp_interchange` shared object matches the SHA-256 pinned in
 `docker/wepppyo3-interchange-preflight.py`. Update that pin together with the
 canonical `wepppyo3/release/linux/py312` artifact whenever the native
 interchange is intentionally refreshed.
+
+### Commit-derived private image publication
+
+This section applies to the Kubernetes-based `openwepp.org` deployment and
+isolated image compatibility testing. It does not define or modify deployment
+for Docker Compose production on `wepp.cloud` (`wepp1`, `wepp2`, `wepp3`).
+
+`.github/workflows/publish-weppcloud-image.yml` is a manually dispatched,
+non-deploying workflow for the common `docker/Dockerfile` runtime. It publishes
+`ghcr.io/<owner>/wepppy:sha-<full-source-SHA>` with repository-token permissions
+limited to `contents: read` and `packages: write`, then reports the immutable
+manifest digest. Consumers must pin `ghcr.io/<owner>/wepppy@sha256:<digest>`;
+the commit tag is provenance metadata, not a deployment pin.
+
+The Dockerfile keeps its existing branch/tag defaults for normal Compose
+builds, but exposes base-image, uv-installer, Rosetta, and sibling-repository
+build arguments. The publication workflow supplies immutable base digests,
+versioned installer URL, and full Git SHAs through those arguments. This does
+not change any production Compose default. Review the exact current pins and
+remaining external-build limits in
+`docs/work-packages/20260813_weppcloud_private_canary_image/artifacts/compatibility_inventory.md`.
+
+`docker/docker-compose.canary-smoke.yml` is an isolated compatibility harness,
+not a deployment file. It contains only Caddy, WEPPcloud, and ephemeral Redis,
+binds Caddy to loopback, and requires synthetic smoke inputs plus an exact
+commit-tagged or digest-pinned WEPPcloud image. Always use the explicit project
+name `weppcloud-canary-smoke`; never layer this file onto a production Compose
+stack.
 
 ### Production Worker Pool (Dedicated RQ Hosts)
 
@@ -107,8 +201,8 @@ WEPPcloud uses a single Redis instance with multiple logical databases (DBs). St
 | Environment | Redis service? | Persistence | DB9 flush-on-deploy | Notes |
 |---|---:|---|---|---|
 | Dev (`docker-compose.dev.yml`) | Yes | Enabled by default (entrypoint env knobs) | Off by default (manual) | Use a manual DB9 flush when you want a clean local RQ slate. |
-| Test-prod (`docker-compose.prod.yml`) | Yes | Enabled by default (entrypoint env knobs) | Off by default (opt-in) | `./scripts/deploy-production.sh` preserves DB9 unless `--flush-rq-db` is passed. |
-| wepp1 (`docker-compose.prod.yml` + `docker-compose.prod.wepp1.yml`) | Yes | Enabled by default (entrypoint env knobs) | Off by default (opt-in) | `./scripts/deploy-production.sh` preserves DB9 unless `--flush-rq-db` is passed. |
+| Test-prod (`docker-compose.prod.yml`) | Yes | Enabled by default (entrypoint env knobs) | Off | Deployment always preserves DB9; destructive queue maintenance is a separate fenced operation. |
+| wepp1 (`docker-compose.prod.yml` + `docker-compose.prod.wepp1.yml`) | Yes | Enabled by default (entrypoint env knobs) | Off | Deployment always preserves DB9; destructive queue maintenance is a separate fenced operation. |
 | Prod (`docker-compose.prod.yml` + host overrides) | Yes | Enabled by default (entrypoint env knobs) | Off by default (opt-in) | DB9 flush is always scoped to RQ only; never a full Redis wipe. |
 | Worker host (`docker-compose.prod.worker.yml`) | No | N/A (external Redis) | Off by default (opt-in) | Worker-only stacks must set `RQ_REDIS_URL` and do not manage Redis durability. |
 
@@ -217,6 +311,13 @@ chmod 600 docker/secrets/*
 ## wctl (weppcloud control)
 `wctl` is the supported wrapper for `docker compose` (see `wctl/install.sh`). It merges `docker/defaults.env` plus optional `docker/.env` + host overrides, escapes `$` for Compose interpolation, and sets `WEPPPY_ENV_FILE` for `env_file:` wiring.
 
+The Docker Compose v2 plugin is an expected prerequisite for Compose-backed
+tests and local stack operations. Some `wctl run-pytest` environments provide
+the Docker CLI inside `weppcloud` without the Compose plugin; in that case the
+canary contract test explicitly skips with an environment reason. This is an
+expected capability difference, not a canary contract failure. Run the test on
+the host or in a runner with `docker compose version` available to exercise it.
+
 One-time install (pins the default compose file for the host):
 
 ```bash
@@ -251,7 +352,6 @@ wctl docker compose config
 | `caddy`        | Reverse proxy + TLS terminator (dev: HTTP only) | 8080 | Serves static assets and forwards to upstream services. |
 | Legacy profiles (`elevationquery`, `metquery`, `wmesque`, `wmesque2`) | Optional legacy web services | 8002, 8004, 8003, 8030 | Activated via `--profile legacy`. |
 | `webpush`      | Placeholder container for future WebPush service | — | No-op until implemented. |
-| `f-esri`       | Auxiliary image for ESRI tooling | — | Stays idle (`tail -f /dev/null`). |
 
 ### Scaling rq-worker-batch
 
@@ -318,6 +418,14 @@ docker rm wepppy-rq-worker-batch-2
 ## Runtime User and Group
 The shared Compose anchor sets `user: "${UID:-1000}:${GID:-993}"`, so by default every service runs as `roger` (uid `1000`) and `docker` (gid `993`). Adjust `docker/.env` if your host uses different ids or you prefer to inherit the active shell user.
 
+The dedicated wepp3 worker is pinned to the production NFS identity
+`1002:130`. Its host secret remains mode `0600` and must grant uid 1002 a read
+ACL (`sudo setfacl -m u:1002:r docker/secrets/redis_password`); the production
+deploy script checks this before disrupting the running worker.
+The wepp3 compose also follows the worker-pool Discord import contract by
+mounting `${DISCORD_BOT_TOKEN_FILE:-/dev/null}` at weppcloud2's fixed token
+path, so shared RQ modules remain importable when notifications are disabled.
+
 ### Switching to `www-data:webgroup`
 1. Confirm the ids on the host:  
    ```bash
@@ -358,6 +466,7 @@ If you want shells inside the containers to show `www-data@...` instead of `I ha
 - **Permission denied when writing to bind-mounted directories** — double-check `UID`/`GID` in `docker/.env` and recreate containers. Existing files created with old ids may need a `chown`.
 - **`I have no name!` shell prompt** — indicates the uid lacks an `/etc/passwd` entry. Adjust the Dockerfile if cosmetic prompts matter.
 - **Redis connection errors on startup** — the microservices depend on Redis; ensure `redis` comes up cleanly, that keyspace notifications include `Kh`, or restart dependent containers (`docker compose ... restart status preflight browse`).
+- **Docker Compose unavailable in a test environment** — the canary contract test skips when `docker compose version` is unavailable (for example, when the container has the Docker CLI but not the Compose v2 plugin). Install or expose the Compose v2 plugin to run that contract check; this is an expected environment limitation for the skipped run.
 - **`ModuleNotFoundError: No module named 'wepppyo3'` at weppcloud boot** — dev images now vendor a fallback `wepppyo3` release at `/opt/vendor/wepppyo3/release/linux/py312` and the `weppcloud` entrypoint logs the active import path. If logs show the fallback path, the bind mount (`../../wepppyo3:/workdir/wepppyo3`) is missing or incomplete; restore that repo path and restart.
 - **`ModuleNotFoundError: No module named 'whitebox_tools'` at weppcloud boot** — dev images now vendor a fallback WBT module at `/opt/vendor/weppcloud-wbt/WBT/whitebox_tools.py` and the `weppcloud` entrypoint logs the active import path. If logs show the fallback path, the bind mount (`../../weppcloud-wbt:/workdir/weppcloud-wbt`) is missing or incomplete; restore that repo path and restart.
 - **Worker pools crash trying to connect to `redis:6379`** — `docker-compose.prod.worker.yml` does not run a `redis` service. Prefer the secrets-as-files contract: set `RQ_REDIS_URL=redis://<redis_host>:6379/9` and provide `docker/secrets/redis_password`. Use inline-password URLs in `docker/.env` only as a legacy fallback for pre-secrets stacks. Use `wctl rq-info` to confirm workers registered.

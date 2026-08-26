@@ -14,6 +14,7 @@ from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.runtime_paths.errors import NoDirError
 from wepppy.runtime_paths.fs import resolve as _nodir_resolve
 from wepppy.rq.project_rq import run_debris_flow_rq
+from wepppy.rq.submission_recovery import RqSubmissionConflict, enqueue_tracked_rq_job
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
@@ -132,14 +133,19 @@ async def run_debris_flow(runid: str, config: str, request: Request) -> JSONResp
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(
+            job = enqueue_tracked_rq_job(
+                q,
                 run_debris_flow_rq,
-                (runid,),
+                prep=prep,
+                job_key="run_debris_flow_rq",
+                runid=runid,
+                args=(runid,),
                 kwargs=job_kwargs,
                 timeout=RQ_TIMEOUT,
             )
-            prep.set_rq_job_id("run_debris_flow_rq", job.id)
         return JSONResponse({"job_id": job.id})
+    except RqSubmissionConflict as exc:
+        return error_response(str(exc), status_code=409, code="conflict")
     except Exception as exc:  # broad-except: boundary contract
         nodir_response = _maybe_nodir_error_response(exc)
         if nodir_response is not None:

@@ -1,0 +1,5 @@
+classification,matched_event_rows,unburned_baseline_peak_q25_mm_h,unburned_baseline_peak_median_mm_h,unburned_baseline_peak_q75_mm_h,burned_baseline_peak_q25_mm_h,burned_baseline_peak_median_mm_h,burned_baseline_peak_q75_mm_h,median_burned_to_unburned_baseline_peak_ratio
+neither_incongruent,32578,2.13952765,5.36970747,34.9747139,3.9426684,22.9994454,44.1231437,1.08341412
+both_incongruent,1164,52.7859217,81.4625415,116.316286,38.5806332,46.4910167,58.4456488,0.73755396
+burned_only_incongruent,7204,4.32021011,8.8167144,18.6260508,25.621687,38.1408419,50.2469786,4.10564999
+unburned_only_incongruent,2998,47.3149275,71.8964948,98.2200843,33.7096776,43.7894769,57.5166523,0.673765569

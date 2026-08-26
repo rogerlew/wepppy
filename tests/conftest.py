@@ -17,6 +17,9 @@ def pytest_configure(config) -> None:
     config.addinivalue_line("markers", "nodb: NoDb controller and locking tests")
     config.addinivalue_line("markers", "slow: Tests with timing dependencies (>2s)")
     config.addinivalue_line("markers", "requires_network: Tests that reach external services")
+    config.addinivalue_line(
+        "markers", "requires_docker: Tests that require Docker or Docker Compose tooling"
+    )
 
 
 @pytest.fixture(autouse=True)
@@ -115,6 +118,9 @@ def _install_redis_stub():
         def get(self, key):
             return self.store.get(key)
 
+        def exists(self, key):
+            return int(key in self.store)
+
         def delete(self, key):
             self.store.pop(key, None)
 
@@ -139,6 +145,28 @@ def _install_redis_stub():
         def publish(self, channel, message):
             self.published.append((channel, message))
             return 1
+
+        def lock(self, name, **kwargs):
+            class RecordingLock:
+                def acquire(self, **acquire_kwargs):
+                    return True
+
+                def extend(self, additional_time, **extend_kwargs):
+                    return True
+
+                def release(self):
+                    return None
+
+            return RecordingLock()
+
+        def close(self):
+            return None
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
 
     redis_module.Redis = RecordingRedis
 

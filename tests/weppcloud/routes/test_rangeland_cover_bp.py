@@ -9,6 +9,7 @@ from flask import Flask
 
 import wepppy.weppcloud.routes.nodb_api.rangeland_bp as rangeland_module
 import wepppy.weppcloud.routes.nodb_api.rangeland_cover_bp as cover_module
+import wepppy.rq.submission_recovery as submission_recovery_module
 from tests.factories.singleton import LockedMixin, singleton_factory
 
 pytestmark = pytest.mark.routes
@@ -77,12 +78,19 @@ def rangeland_client(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
         def __exit__(self, exc_type, exc, tb):
             return False
 
+        def lock(self, name, **kwargs):
+            return SimpleNamespace(
+                acquire=lambda **kwargs: True,
+                release=lambda: None,
+                extend=lambda additional_time, **_kwargs: True,
+            )
+
     class FakeQueue:
         def __init__(self, connection=None):
             self.connection = connection
 
-        def enqueue_call(self, func, args=(), kwargs=None, timeout=None):
-            job_id = f"job-{len(queue_calls) + 1}"
+        def enqueue_call(self, func, args=(), kwargs=None, timeout=None, job_id=None, **options):
+            job_id = job_id or f"job-{len(queue_calls) + 1}"
             job = SimpleNamespace(id=job_id)
             queue_calls.append({
                 "func": func,
@@ -101,8 +109,18 @@ def rangeland_client(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     def set_rq_job_id(key, job_id):
         prep_stub.job_ids[key] = job_id
 
+    def get_rq_job_id(key):
+        return prep_stub.job_ids.get(key)
+
     prep_stub.remove_timestamp = remove_timestamp
     prep_stub.set_rq_job_id = set_rq_job_id
+    prep_stub.get_rq_job_id = get_rq_job_id
+
+    monkeypatch.setattr(
+        submission_recovery_module,
+        "new_rq_job_id",
+        lambda: f"job-{len(queue_calls) + 1}",
+    )
 
     monkeypatch.setattr(rangeland_module, "redis_connection_kwargs", lambda db: {})
     monkeypatch.setattr(rangeland_module, "redis", SimpleNamespace(Redis=lambda **_: FakeRedis()))

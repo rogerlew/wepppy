@@ -66,6 +66,35 @@ describe("controlBase job status error handling", () => {
         expect(button.disabled).toBe(true);
     });
 
+    test("deferred status stops polling and enables ordinary resubmission", () => {
+        const deferredBase = window.controlBase();
+        deferredBase.command_btn_id = "btn_run";
+        deferredBase.rq_job = document.getElementById("rq_job");
+        deferredBase.rq_job_id = "job-deferred";
+        deferredBase.rq_job_status = { status: "deferred" };
+
+        deferredBase.update_command_button_state(deferredBase);
+
+        expect(deferredBase.should_continue_polling(deferredBase, "deferred")).toBe(false);
+        expect(deferredBase.should_disable_command_button(deferredBase)).toBe(false);
+        expect(button.disabled).toBe(false);
+    });
+
+    test("deferred status dispatches the retryable lifecycle event", () => {
+        const retryable = jest.fn();
+        base.form = document.body;
+        base.form.addEventListener("job:retryable", retryable);
+        base.rq_job_id = "job-deferred";
+
+        base.handle_job_status_response(base, { status: "deferred", job_id: "job-deferred" });
+
+        expect(retryable).toHaveBeenCalledTimes(1);
+        expect(retryable.mock.calls[0][0].detail).toEqual(expect.objectContaining({
+            status: "deferred",
+            job_id: "job-deferred"
+        }));
+    });
+
     test("renders error detail in job status panel", () => {
         base.rq_job_id = "job-1";
 

@@ -11,7 +11,8 @@ emitting status updates for the front-end while coordinating NoDb controllers.
 import errno
 import base64
 import copy
-from contextlib import ExitStack
+from contextlib import ExitStack, contextmanager
+import fcntl
 import hashlib
 import inspect
 import logging
@@ -41,7 +42,9 @@ from wepppy.config.redis_settings import (
     redis_connection_kwargs,
     redis_host,
 )
-
+from wepppy.rq.job_id import new_rq_job_id
+from wepppy.rq.job_dependencies import release_deferred_job_if_ready
+from wepppy.rq.submission_recovery import RqEnqueueVerificationError
 from wepppy.weppcloud.utils.helpers import get_wd, get_primary_wd
 from wepppy.weppcloud.user_preferences import (
     WBT_BOUNDARY_POLICY_SNAPSHOT_KEY,
@@ -67,6 +70,7 @@ from wepppy.nodb.core import (
     WatershedCentroidStateError,
     Wepp,
 )
+from wepppy.nodb.core.climate import ClimateMultipleBuildSupersededError
 from wepppy.nodb.core.watershed_errors import (
     WATERSHED_BOUNDARY_TOUCH_MESSAGE,
     WatershedBoundaryTouchesEdgeError,
@@ -76,6 +80,7 @@ from wepppy.topo.wbt import (
     WbtUnresolvedDepressionsError,
 )
 from wepppy.nodb.mods.disturbed import Disturbed
+from wepppy.nodb.mods.omni import Omni
 from wepppy.nodb.mods.ash_transport import Ash
 from wepppy.nodb.mods.debris_flow import DebrisFlow
 from wepppy.nodb.mods.rangeland_cover import RangelandCover
@@ -562,9 +567,9 @@ def _load_exact_subcatchment_tree(
     }:
         raise RuntimeError("WBT completion receipt has an unsupported status.")
     if receipt_status != JobStatus.DEFERRED:
-        if receipt_dependencies:
+        if receipt_dependencies not in (set(), {build.id}):
             raise RuntimeError(
-                "WBT completion receipt retains a stale dependency."
+                "WBT completion receipt has an unexpected dependency."
             )
         if receipt.id in build.dependent_ids:
             raise RuntimeError(
@@ -593,8 +598,9 @@ def _load_exact_subcatchment_tree(
     }:
         raise RuntimeError("WBT build has an unsupported status.")
     if build_status != JobStatus.DEFERRED:
-        if build_dependencies:
-            raise RuntimeError("WBT build retains a stale prior dependency.")
+        expected_build_dependencies = set() if previous_id is None else {previous_id}
+        if build_dependencies not in (set(), expected_build_dependencies):
+            raise RuntimeError("WBT build has an unexpected prior dependency.")
         if previous_id is not None:
             previous = _fetch_job_or_none(previous_id, redis_conn)
             if previous is not None and build.id in previous.dependent_ids:
@@ -624,6 +630,19 @@ def _register_deferred_job(job: Job, pipeline) -> None:
     job.register_dependency(pipeline=pipeline)
     job.save(pipeline=pipeline)
     job.cleanup(ttl=job.ttl, pipeline=pipeline)
+
+
+def _is_wbt_serialized_build(job: Job, *, runid: str, origin: str) -> bool:
+    metadata = job.meta if isinstance(job.meta, dict) else {}
+    args = tuple(job.args or ())
+    return (
+        str(job.origin) == origin
+        and str(job.func_name)
+        == f"{build_subcatchments_rq.__module__}.{build_subcatchments_rq.__qualname__}"
+        and bool(args)
+        and str(args[0]) == runid
+        and bool(str(metadata.get(_WBT_ADMISSION_ROOT_KEY) or "").strip())
+    )
 
 
 def _enqueue_serial_subcatchment_tree(
@@ -657,8 +676,8 @@ def _enqueue_serial_subcatchment_tree(
     if existing is not None:
         return existing
 
-    child_id = uuid.uuid4().hex
-    receipt_id = uuid.uuid4().hex
+    child_id = new_rq_job_id()
+    receipt_id = new_rq_job_id()
     original_parent_meta = dict(parent_job.meta)
 
     for attempt in range(WBT_SUBCATCHMENT_ADMISSION_RETRY_ATTEMPTS):
@@ -667,19 +686,41 @@ def _enqueue_serial_subcatchment_tree(
             pipeline.watch(tail_key, parent_job.key)
             previous_tail_id = _decode_redis_text(pipeline.get(tail_key))
             previous_tail = _fetch_job_or_none(previous_tail_id, redis_conn)
-            if previous_tail is not None:
+            visited_tail_ids: set[str] = set()
+            while previous_tail is not None:
+                if previous_tail.id in visited_tail_ids:
+                    raise RuntimeError(
+                        "WBT subcatchment admission found a cyclic prior-tail chain."
+                    )
+                visited_tail_ids.add(previous_tail.id)
                 pipeline.watch(previous_tail.key)
                 previous_tail.refresh()
+                if not _is_wbt_serialized_build(
+                    previous_tail,
+                    runid=runid,
+                    origin=queue.name,
+                ):
+                    raise RuntimeError(
+                        "WBT subcatchment admission tail is not an associated "
+                        "serialized build."
+                    )
                 if _is_terminal_job(previous_tail):
-                    previous_tail_id = None
-                    previous_tail = None
-                else:
-                    location_keys = _active_job_location_keys(previous_tail)
-                    if location_keys:
-                        pipeline.watch(*location_keys)
+                    predecessor_id = previous_tail.meta.get(
+                        _WBT_ADMISSION_PREVIOUS_KEY
+                    )
+                    previous_tail_id = (
+                        str(predecessor_id).strip() if predecessor_id else None
+                    )
+                    previous_tail = _fetch_job_or_none(
+                        previous_tail_id,
+                        redis_conn,
+                    )
+                    continue
+                location_keys = _active_job_location_keys(previous_tail)
+                if location_keys:
+                    pipeline.watch(*location_keys)
                 if (
-                    previous_tail is not None
-                    and not _active_job_has_execution_location(previous_tail)
+                    not _active_job_has_execution_location(previous_tail)
                 ):
                     # Validate that the watched tail/job remained unchanged
                     # before diagnosing an orphan instead of a live transition.
@@ -690,7 +731,8 @@ def _enqueue_serial_subcatchment_tree(
                         "WBT subcatchment admission found a nonterminal "
                         "tail outside every valid execution registry."
                     )
-            else:
+                break
+            if previous_tail is None:
                 previous_tail_id = None
 
             dependency = (
@@ -1687,7 +1729,6 @@ def build_subcatchments_rq(
     Raises:
         Exception: Propagates failures from watershed delineation.
     """
-    phase = {"wbt_started": False}
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -1713,28 +1754,18 @@ def build_subcatchments_rq(
             )
             if watershed.delineation_backend_is_topaz:
                 clear_nodb_file_cache(runid, pup_relpath="topaz.nodb")
+            prep = RedisPrep.getInstance(wd)
+            prep.remove_timestamp(TaskEnum.abstract_watershed)
+            prep.remove_timestamp(TaskEnum.build_subcatchments)
+            if snapshot is not None:
+                watershed.persist_wbt_boundary_touch_config_behavior()
             if updates:
                 try:
-                    with watershed.locked():
-                        if 'clip_hillslopes' in updates:
-                            watershed._clip_hillslopes = bool(updates['clip_hillslopes'])  # type: ignore[attr-defined]
-                        if 'walk_flowpaths' in updates:
-                            watershed._walk_flowpaths = bool(updates['walk_flowpaths'])  # type: ignore[attr-defined]
-                        if 'clip_hillslope_length' in updates:
-                            watershed._clip_hillslope_length = float(updates['clip_hillslope_length'])  # type: ignore[attr-defined]
-                        if 'mofe_target_length' in updates:
-                            watershed._mofe_target_length = float(updates['mofe_target_length'])  # type: ignore[attr-defined]
-                        if 'mofe_buffer' in updates:
-                            watershed._mofe_buffer = bool(updates['mofe_buffer'])  # type: ignore[attr-defined]
-                        if 'mofe_buffer_length' in updates:
-                            watershed._mofe_buffer_length = float(updates['mofe_buffer_length'])  # type: ignore[attr-defined]
-                        if 'bieger2015_widths' in updates:
-                            watershed._bieger2015_widths = bool(updates['bieger2015_widths'])  # type: ignore[attr-defined]
+                    watershed.apply_build_subcatchment_updates(**updates)
                 except (OSError, RuntimeError, ValueError) as exc:
                     raise WbtBoundaryPolicyApplyError(
                         "Could not apply subcatchment execution settings."
                     ) from exc
-            phase["wbt_started"] = True
             watershed.build_subcatchments(
                 boundary_touch_behavior=execution_policy,
             )
@@ -1836,29 +1867,11 @@ def build_subcatchments_rq(
             f'{WATERSHED_BOUNDARY_TOUCH_MESSAGE}',
         )
         raise
-    except Exception as exc:
-        if boundary_policy is not None and not phase["wbt_started"]:
-            apply_exc = WbtBoundaryPolicyApplyError(
-                "WBT policy application failed before delineation."
-            )
-            _record_wbt_policy_failure(
-                job,
-                runid=runid,
-                code="wbt_boundary_policy_apply_failed",
-                message=WBT_BOUNDARY_POLICY_APPLY_FAILED_MESSAGE,
-                cancel_dependents=True,
-            )
-            StatusMessenger.publish(
-                status_channel,
-                f'rq:{job.id} EXCEPTION {func_name}({runid}) '
-                f'{WBT_BOUNDARY_POLICY_APPLY_FAILED_MESSAGE}',
-            )
-            raise apply_exc from exc
-        if abstract_after_build:
-            _cancel_policy_dependents(job)
+    except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq.py:691", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
-        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        if "job" in locals() and "status_channel" in locals() and "func_name" in locals():
+            StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 @with_exception_logging
 def abstract_watershed_rq(
@@ -2358,6 +2371,16 @@ def build_climate_rq(runid: str) -> None:
 
         prep = RedisPrep.getInstance(wd)
         prep.timestamp(TaskEnum.build_climate)
+    except ClimateMultipleBuildSupersededError as exc:
+        _logger.warning(
+            "Climate build superseded before finalization",
+            extra={"runid": runid, "job_id": getattr(job, "id", None)},
+        )
+        StatusMessenger.publish(
+            status_channel,
+            f'rq:{job.id} SUPERSEDED {func_name}({runid}): {exc}',
+        )
+        raise
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq.py:916", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
@@ -2569,36 +2592,116 @@ def run_rhem_rq(runid: str, *, payload: Optional[Mapping[str, Any]] = None) -> N
 # Fork Functions
 # see docs/ui-docs/weppcloud-project-forking.md for fork console + backend architecture
 
+def _set_fork_destination_outcome(
+    connection: Any,
+    source_runid: str,
+    target_runid: str,
+    expected_root_job_id: str,
+    state: str,
+) -> None:
+    planned_key = f"rq:fork:planned:{target_runid}"
+    connection.eval(
+        """
+        if redis.call('HGET', KEYS[1], 'job_id') ~= ARGV[1]
+           or redis.call('HGET', KEYS[1], 'source_runid') ~= ARGV[2]
+           or redis.call('HGET', KEYS[1], 'target_runid') ~= ARGV[3] then
+            return 0
+        end
+        local current = redis.call('HGET', KEYS[1], 'state') or 'planned'
+        local desired = ARGV[4]
+        if current == 'succeeded' then return 0 end
+        if desired == 'enqueued' and current ~= 'planned' then return 0 end
+        if desired == 'running'
+           and current ~= 'planned' and current ~= 'enqueued' then return 0 end
+        if desired == 'waiting_finalizer'
+           and current ~= 'planned' and current ~= 'enqueued'
+           and current ~= 'running' then return 0 end
+        redis.call('HSET', KEYS[1], 'state', ARGV[4])
+        return 1
+        """,
+        1,
+        planned_key,
+        str(expected_root_job_id),
+        source_runid,
+        target_runid,
+        state,
+    )
+
 @with_exception_logging
-def _finish_fork_rq(runid: str) -> None:
+def _finish_fork_rq(
+    runid: str,
+    fork_target_runid: str | None = None,
+    dependency_job_id: str | None = None,
+    root_fork_job_id: str | None = None,
+) -> None:
     """Emit fork completion messages once dependent jobs finish."""
+    func_name = "_finish_fork_rq"
+    status_channel = f'{runid}:fork'
     try:
         job = get_current_job()
         wd = get_wd(runid)
-        func_name = inspect.currentframe().f_code.co_name
-        status_channel = f'{runid}:fork'
+        if fork_target_runid:
+            target_wd = _resolve_fork_destination_wd(fork_target_runid)
+            _verify_profile_fork_claim(fork_target_runid, target_wd, job.id)
+        if dependency_job_id:
+            dependency_job = Job.fetch(dependency_job_id, connection=job.connection)
+            dependency_status = dependency_job.get_status(refresh=True)
+            if dependency_status not in {JobStatus.FINISHED, JobStatus.FINISHED.value}:
+                raise RuntimeError(
+                    f"Fork WEPP dependency {dependency_job_id} ended as {dependency_status}"
+                )
         StatusMessenger.publish(status_channel, 'Running WEPP... done\n')
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   fork FORK_COMPLETE')
+        if fork_target_runid:
+            _set_fork_destination_outcome(
+                job.connection,
+                runid,
+                fork_target_runid,
+                str(root_fork_job_id or job.id),
+                "succeeded",
+            )
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq.py:1113", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   fork FORK_FAILED')
+        if fork_target_runid:
+            _set_fork_destination_outcome(
+                job.connection,
+                runid,
+                fork_target_runid,
+                str(root_fork_job_id or job.id),
+                "failed",
+            )
         raise
+    finally:
+        if fork_target_runid:
+            target_wd = _resolve_fork_destination_wd(fork_target_runid)
+            _release_profile_fork_claim(
+                fork_target_runid,
+                target_wd,
+                job.id,
+            )
 
 
-def _reset_forked_run_job_markers(new_runid: str, new_wd: str, status_channel: str) -> None:
+def _reset_forked_run_job_markers(
+    new_runid: str,
+    new_wd: str,
+    status_channel: str,
+    *,
+    reset_redisprep: bool = True,
+) -> None:
     """Clear inherited async job markers from a newly forked run."""
     StatusMessenger.publish(status_channel, "Clearing inherited job markers...\n")
 
-    clear_nodb_file_cache(new_runid, pup_relpath="wepp.nodb")
+    clear_nodb_file_cache(new_runid, pup_relpath="wepp.nodb", wd_override=new_wd)
     clear_locks(new_runid, pup_relpath="wepp.nodb")
     wepp = Wepp.tryGetInstance(new_wd)
     if wepp is not None:
         wepp.persist_job_hint(job_id=None, job_key=None)
 
-    prep = RedisPrep.tryGetInstance(new_wd)
+    prep = RedisPrep.tryGetInstance(new_wd) if reset_redisprep else None
     if prep is not None:
         queued_job_keys = tuple(prep.get_rq_job_ids().keys())
         for key in queued_job_keys:
@@ -2612,37 +2715,190 @@ def _reset_forked_run_job_markers(new_runid: str, new_wd: str, status_channel: s
     StatusMessenger.publish(status_channel, "Clearing inherited job markers... done.\n")
 
 
+def _reset_forked_omni(new_runid: str, new_wd: str, status_channel: str) -> None:
+    """Reset destination-only Omni controller and lifecycle metadata."""
+    StatusMessenger.publish(status_channel, "Resetting forked Omni state...\n")
+    clear_nodb_file_cache(new_runid, pup_relpath="omni.nodb", wd_override=new_wd)
+    omni = Omni.getInstance(new_wd)
+    omni.reset_for_fork()
+    clear_nodb_file_cache(new_runid, pup_relpath="omni.nodb", wd_override=new_wd)
+    Omni.load_detached(new_wd)
+
+    redisprep_payload = _fork_helpers._rewrite_fork_redisprep_dump(new_wd)
+    prep = RedisPrep(new_wd)
+    prep.redis.delete(prep.run_id)
+    for key, value in redisprep_payload.items():
+        prep.redis.hset(prep.run_id, key, value)
+
+    _fork_helpers._reset_fork_omni_directories(new_wd)
+    _fork_helpers._clear_query_engine_catalog_cache(
+        new_wd,
+        status_channel=status_channel,
+        publish_status=StatusMessenger.publish,
+    )
+    StatusMessenger.publish(status_channel, "Resetting forked Omni state... done.\n")
+
+
+def _resolve_fork_destination_wd(target_runid: str) -> str:
+    if target_runid.startswith("profile;;"):
+        parts = target_runid.split(";;")
+        if len(parts) != 3 or parts[:2] != ["profile", "fork"] or not parts[2]:
+            raise ValueError(f"Invalid profile fork target: {target_runid}")
+        target_wd = get_wd(target_runid, prefer_active=False)
+        profile_root = os.path.realpath(
+            os.path.dirname(get_wd("profile;;fork;;__root_probe__", prefer_active=False))
+        )
+        resolved_target = os.path.realpath(target_wd)
+        if os.path.dirname(resolved_target) != profile_root:
+            raise ValueError(f"Profile fork target escaped its root: {target_runid}")
+        return resolved_target
+    return get_primary_wd(target_runid)
+
+
+def _profile_fork_claim_path(target_wd: str) -> str:
+    target = target_wd.rstrip("/")
+    return os.path.join(os.path.dirname(target), f".{os.path.basename(target)}.fork-claim")
+
+
+@contextmanager
+def _profile_fork_claim_lock(target_wd: str):
+    lock_path = f"{_profile_fork_claim_path(target_wd)}.lock"
+    lock_fd = os.open(lock_path, os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW, 0o600)
+    try:
+        fcntl.flock(lock_fd, fcntl.LOCK_EX)
+        yield
+    finally:
+        fcntl.flock(lock_fd, fcntl.LOCK_UN)
+        os.close(lock_fd)
+
+
+def _verify_profile_fork_claim(target_runid: str, target_wd: str, job_id: str) -> None:
+    if not target_runid.startswith("profile;;"):
+        return
+    with _profile_fork_claim_lock(target_wd):
+        with open(_profile_fork_claim_path(target_wd), encoding="utf-8") as claim_file:
+            if claim_file.read().strip() != job_id:
+                raise RuntimeError(f"Fork destination is not owned by job {job_id}")
+
+
+def _release_profile_fork_claim(target_runid: str, target_wd: str, job_id: str) -> None:
+    if not target_runid.startswith("profile;;"):
+        return
+    with _profile_fork_claim_lock(target_wd):
+        claim_path = _profile_fork_claim_path(target_wd)
+        try:
+            with open(claim_path, encoding="utf-8") as claim_file:
+                if claim_file.read().strip() != job_id:
+                    return
+            os.unlink(claim_path)
+        except FileNotFoundError:
+            return
+
+
+def _transfer_profile_fork_claim(
+    target_runid: str,
+    target_wd: str,
+    current_job_id: str,
+    next_job_id: str,
+) -> None:
+    if not target_runid.startswith("profile;;"):
+        return
+    with _profile_fork_claim_lock(target_wd):
+        claim_path = _profile_fork_claim_path(target_wd)
+        with open(claim_path, encoding="utf-8") as claim_file:
+            if claim_file.read().strip() != current_job_id:
+                raise RuntimeError(f"Fork destination is not owned by job {current_job_id}")
+        temp_path = os.path.join(
+            os.path.dirname(claim_path),
+            f".{os.path.basename(claim_path)}.{os.getpid()}.tmp",
+        )
+        temp_fd = os.open(temp_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
+        try:
+            payload = next_job_id.encode("utf-8")
+            written = 0
+            while written < len(payload):
+                count = os.write(temp_fd, payload[written:])
+                if count <= 0:
+                    raise OSError("Short write while transferring fork claim")
+                written += count
+            os.fsync(temp_fd)
+        finally:
+            os.close(temp_fd)
+        try:
+            os.replace(temp_path, claim_path)
+        finally:
+            try:
+                os.unlink(temp_path)
+            except FileNotFoundError:
+                pass
+
+
+def _release_failure_tolerant_fork_finalizer(queue: Queue, finalizer_job: Job) -> None:
+    release_deferred_job_if_ready(queue, finalizer_job)
+
+
 @with_exception_logging
 def fork_rq(
     runid: str,
     new_runid: str,
     undisturbify: bool = False,
     skip_wepp_runs_output: bool = False,
+    skip_omni_scenarios_contrasts: bool = False,
 ) -> None:
     job = get_current_job()
     func_name = inspect.currentframe().f_code.co_name
     status_channel = f'{runid}:fork'
 
+    new_wd = ""
+    profile_claim_deferred = False
     try:
+        new_wd = _resolve_fork_destination_wd(new_runid)
+        _verify_profile_fork_claim(new_runid, new_wd, job.id)
+        try:
+            _set_fork_destination_outcome(
+                job.connection, runid, new_runid, str(job.id), "running"
+            )
+        except redis.RedisError:
+            logging.getLogger(__name__).warning(
+                "Could not update fork destination outcome at worker start",
+                exc_info=True,
+            )
         StatusMessenger.publish(
             status_channel, f'rq:{job.id} STARTED {func_name}({runid})'
         )
         StatusMessenger.publish(status_channel, f'undisturbify: {undisturbify}')
         StatusMessenger.publish(status_channel, f'skip_wepp_runs_output: {skip_wepp_runs_output}')
+        if skip_omni_scenarios_contrasts:
+            StatusMessenger.publish(status_channel, 'skip_omni_scenarios_contrasts: True')
 
         def _initialize_ttl(wd: str) -> None:
             from wepppy.weppcloud.utils.run_ttl import initialize_ttl
             initialize_ttl(wd)
+
+        def _fork_rsync_command(
+            run_right: str,
+            fork_undisturbify: bool,
+            fork_skip_wepp: bool,
+            fork_skip_omni: bool = False,
+        ) -> list[str]:
+            kwargs = {
+                "undisturbify": fork_undisturbify,
+                "skip_wepp_runs_output": fork_skip_wepp,
+            }
+            if fork_skip_omni:
+                kwargs["skip_omni_scenarios_contrasts"] = True
+            return _build_fork_rsync_cmd(run_right, **kwargs)
 
         new_wd = _fork_helpers.prepare_fork_run(
             runid,
             new_runid,
             undisturbify=undisturbify,
             skip_wepp_runs_output=skip_wepp_runs_output,
+            skip_omni_scenarios_contrasts=skip_omni_scenarios_contrasts,
             status_channel=status_channel,
             publish_status=StatusMessenger.publish,
             get_wd=get_wd,
-            get_primary_wd=get_primary_wd,
+            get_primary_wd=_resolve_fork_destination_wd,
             wait_for_paths=wait_for_paths,
             ron_cls=Ron,
             disturbed_cls=Disturbed,
@@ -2650,14 +2906,19 @@ def fork_rq(
             soils_cls=Soils,
             initialize_ttl=_initialize_ttl,
             format_ttl_failure=lambda exc: f'rq:{job.id} STATUS TTL initialization failed ({exc})',
-            build_rsync_cmd=lambda run_right, _undisturbify, _skip_wepp_runs_output: _build_fork_rsync_cmd(
-                run_right,
-                undisturbify=_undisturbify,
-                skip_wepp_runs_output=_skip_wepp_runs_output,
-            ),
+            build_rsync_cmd=_fork_rsync_command,
             clean_env_for_system_tools=_clean_env_for_system_tools,
         )
-        _reset_forked_run_job_markers(new_runid, new_wd, status_channel)
+        if skip_omni_scenarios_contrasts:
+            _reset_forked_omni(new_runid, new_wd, status_channel)
+            _reset_forked_run_job_markers(
+                new_runid,
+                new_wd,
+                status_channel,
+                reset_redisprep=False,
+            )
+        else:
+            _reset_forked_run_job_markers(new_runid, new_wd, status_channel)
 
         if undisturbify:
             StatusMessenger.publish(status_channel, 'Rerunning WEPP...\n')
@@ -2666,21 +2927,79 @@ def fork_rq(
             conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
             with redis.Redis(**conn_kwargs) as redis_conn:
                 q = Queue(connection=redis_conn)
-                q.enqueue(
-                    _finish_fork_rq,
-                    args=[runid],
-                    depends_on=final_wepp_job,
+                finalizer_job_id = new_rq_job_id()
+                _transfer_profile_fork_claim(
+                    new_runid,
+                    new_wd,
+                    job.id,
+                    finalizer_job_id,
                 )
+                finalizer_enqueued = False
+                finalizer_commit_unknown = False
+                try:
+                    try:
+                        finalizer_job = q.enqueue(
+                            _finish_fork_rq,
+                            args=[runid, new_runid, final_wepp_job.id, job.id],
+                            depends_on=Dependency(
+                                jobs=[final_wepp_job.id],
+                                allow_failure=True,
+                            ),
+                            job_id=finalizer_job_id,
+                            meta={"fork_source_runid": runid},
+                        )
+                    except RqEnqueueVerificationError:
+                        finalizer_commit_unknown = True
+                        profile_claim_deferred = new_runid.startswith("profile;;")
+                        raise
+                    finalizer_enqueued = True
+                    job.meta["jobs:0,func:run_wepp_rq"] = final_wepp_job.id
+                    job.meta["jobs:1,func:_finish_fork_rq"] = finalizer_job.id
+                    job.save()
+                    profile_claim_deferred = new_runid.startswith("profile;;")
+                    try:
+                        _release_failure_tolerant_fork_finalizer(q, finalizer_job)
+                    except (redis.RedisError, InvalidJobOperation, NoSuchJobError):
+                        logging.getLogger(__name__).warning(
+                            "Could not eagerly release fork finalizer %s; stale-claim recovery remains active",
+                            finalizer_job_id,
+                            exc_info=True,
+                        )
+                finally:
+                    if not finalizer_enqueued and not finalizer_commit_unknown:
+                        _release_profile_fork_claim(
+                            new_runid,
+                            new_wd,
+                            finalizer_job_id,
+                        )
         else:
             StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
             StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   fork FORK_COMPLETE')
+            _set_fork_destination_outcome(
+                job.connection, runid, new_runid, str(job.id), "succeeded"
+            )
 
-    except Exception:
+        if undisturbify:
+            _set_fork_destination_outcome(
+                job.connection,
+                runid,
+                new_runid,
+                str(job.id),
+                "waiting_finalizer",
+            )
+
+    except Exception:  # broad-except: worker boundary contract
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq.py:1173", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   fork FORK_FAILED')
+        _set_fork_destination_outcome(
+            job.connection, runid, new_runid, str(job.id), "failed"
+        )
         raise
+    finally:
+        if new_wd and not profile_claim_deferred:
+            _release_profile_fork_claim(new_runid, new_wd, job.id)
 
 
 @with_exception_logging

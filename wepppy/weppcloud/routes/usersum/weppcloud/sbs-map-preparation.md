@@ -1,5 +1,19 @@
 # SBS Map Preparation
 
+## Supported burn-severity colors
+
+WEPPcloud recognizes the current interagency color-table values:
+
+- Unchanged / unburned: `#008080`
+- Low severity: `#52CCCC`
+- Moderate severity: `#FFE820`
+- High severity: `#A80000`
+- Masked / unmappable: `#FFFFFF`
+
+Masked/unmappable cells are treated as NoData and appear transparent on maps.
+Earlier supported SBS palettes remain readable. Colors must match a recognized
+RGB value exactly; WEPPcloud does not guess a class from a similar color.
+
 Use this page to prepare a soil burn severity (SBS) raster for upload to WEPPcloud. It explains the raster styles WEPPcloud accepts, the safest preparation workflow, and the validation problems that most often block an upload.
 
 ## What This Page Helps You Do
@@ -51,10 +65,10 @@ These RGB values are currently recognized on the color-table upload path.
 
 | Severity class | Commonly auto-recognized RGB values |
 | --- | --- |
-| No burn or unburned | `0,100,0`, `0,0,0`, `0,115,74`, `0,158,115`, `0,175,166` |
-| Low | `102,204,204`, `102,205,205`, `115,255,223`, `127,255,212`, `0,255,255`, `77,230,0`, `86,180,233` |
+| No burn or unburned | `0,100,0`, `0,0,0`, `0,115,74`, `0,128,128`, `0,158,115`, `0,175,166` |
+| Low | `102,204,204`, `102,205,205`, `115,255,223`, `127,255,212`, `0,255,255`, `77,230,0`, `82,204,204`, `86,180,233` |
 | Moderate | `255,255,0`, `255,232,32`, `240,228,66` |
-| High | `204,121,167`, `255,0,0` |
+| High | `168,0,0`, `204,121,167`, `255,0,0` |
 
 If your raster uses a different green, cyan, yellow, magenta, or red than the values above, do not assume it will be assigned correctly automatically. Check the color-to-class mapping in the interface and fix it there if needed.
 
@@ -73,16 +87,11 @@ This is the traditional palette and is a good default when you want a familiar b
 | Moderate | `255,255,0` | `#FFFF00` |
 | High | `255,0,0` | `#FF0000` |
 
-### Recommended color-shifted palette
+### Canonical interagency palette
 
-This palette keeps the same class meanings but uses more separated colors that are easier to distinguish in some displays and accessibility contexts.
-
-| Severity class | RGB | Hex |
-| --- | --- | --- |
-| No burn or unburned | `0,158,115` | `#009E73` |
-| Low | `86,180,233` | `#56B4E9` |
-| Moderate | `240,228,66` | `#F0E442` |
-| High | `204,121,167` | `#CC79A7` |
+Use the current values listed at the top of this page for new color tables.
+WEPPcloud uses those same colors for non-shifted exports, legends, and map
+imagery. The optional **Apply Color Shift** control remains available.
 
 ## Recommended Workflow
 

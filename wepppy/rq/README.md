@@ -1,6 +1,6 @@
 # wepppy.rq
 > Redis Queue (RQ) workers plus task modules that orchestrate every WEPPcloud background workflow—from DEM prep and WEPP runs to Omni scenarios and CAO/Ash agents.  
-> **See also:** `docs/prompt_templates/module_documentation_workflow.prompt.md` for the documentation standards applied here and `AGENTS.md` for repository-wide task conventions.
+> **See also:** `docs/prompt_templates/module_documentation_workflow.prompt.md` for the documentation standards applied here, `AGENTS.md` for repository-wide task conventions, and `docs/schemas/weppcloudr-render-execution-contract.md` for the deployment-neutral DEVAL render boundary.
 
 ## Overview
 - Encapsulates the Redis-backed job system that powers WEPPcloud. Each module exports RQ-safe helpers that lock NoDb controllers, publish granular StatusMessenger updates, and emit structured `job.meta` so the UI can render progress trees.
@@ -18,6 +18,12 @@
   a permanent run lockout. All normal, watershed, prep-only, and no-prep WEPP
   entry points share this per-run guard.
 - **RedisPrep integration.** Project-scoped tasks update `RedisPrep` timestamps (`TaskEnum.*`) to keep the progress bars in sync with what actually ran. New tasks must cooperate with these timestamps to avoid double-running expensive steps.
+- **Deferred retry admission.** Controller submissions treat a recorded
+  `deferred` receipt as superseded rather than active. Admission verifies the
+  run and workflow lineage, cancels and detaches the complete deferred graph in
+  a watched Redis transaction, saves a preallocated replacement receipt, and
+  then enqueues that exact ID. Queued, started, and scheduled work still blocks
+  overlapping submission.
 - **Timeouts & observability.** Most jobs share a 12-hour timeout (43 200 s) to accommodate large WEPP runs. Modules fall back to deterministic logging (`cligen.log`, `render_deval_*.stderr`, etc.) so operators can debug failures outside of Redis.
 
 ## Module Guide
@@ -31,12 +37,23 @@
 | `path_ce_rq.py / path_ce_rq.pyi` | `run_path_cost_effective_rq` | Runs the PATH cost-effective optimization flow and timestamps the result in `RedisPrep`. |
 | `land_and_soil_rq.py / land_and_soil_rq.pyi` | `land_and_soil_rq` | Builds landuse/soils extracts for arbitrary extents, bundles them via `tar -I pigz`, returns the archive path. |
 | `interchange_rq.py / interchange_rq.pyi` | `run_interchange_migration` | Generates WEPP interchange products (hillslope + watershed) and TotalWatSed summaries once the required outputs exist. |
-| `weppcloudr_rq.py / weppcloudr_rq.pyi` | `render_deval_details_rq` | Bridges WEPPcloud runs to the R-based reporting container, handling NoDir parquet sidecar discovery, signature-compatible `render_deval(...)` invocation across container versions, caching, docker exec orchestration, and log capture. |
+| `weppcloudr_rq.py`, `weppcloudr_backends.py` | `render_deval_details_rq`, `DockerExecBackend`, `KubernetesJobBackend` | Validates run-scoped DEVAL requests and selects either the existing Compose Docker-exec adapter or an authenticated Kubernetes render-control-plane client. |
 | `agent_rq.py / agent_rq.pyi` | `spawn_wojak_session` | Starts CAO/Ash (Codex Agent Orchestrator) sessions for Wojak, stores JWT/environment metadata in Redis, and kicks off bootstrap scripts. |
 | `job_info.py / job_info.pyi` | `get_wepppy_rq_job_info`, `get_wepppy_rq_job_status` | Recursively inspects job trees for UI diagnostics (elapsed time, child states, aggregated status). |
 | `cancel_job.py / cancel_job.pyi` | `cancel_jobs` | Stops a job plus all descendants by replaying the stored `job.meta["jobs:*"]` hierarchy. |
 
 > **Note:** Every runtime module ships with a `.pyi` sibling. When adding new public helpers, update both files and run `wctl run-stubtest wepppy.rq.<module>` to keep the stubs honest.
+
+### Job-status queue snapshot
+
+`get_wepppy_rq_job_status()` may add an optional top-level `queue` object to a
+successful status response. It is an advisory, current snapshot of the
+one-based Redis-list position of the earliest queued member in the requested
+registered job tree. The object contains `name`, `rank`, `jobs_ahead`,
+`position_job_id`, `basis`, and `observed_at`; it is omitted for terminal or
+non-queued trees, missing or mixed queue origins, and normal Redis/status
+races. The traversal reads one ordered queue list per status calculation and
+does not expose unrelated job metadata or fabricate a cross-queue rank.
 
 ## Quick Start / Examples
 ### Run a worker locally
@@ -61,6 +78,11 @@ job = q.enqueue(run_watershed_rq, 'my-runid', wepp_bin='wepp_250915')
 print("queued job", job.id)
 ```
 - Jobs automatically log to `<run>/rq.log` and publish to `<runid>:wepp`.
+- Generate preallocated RQ job IDs with
+  `wepppy.rq.job_id.new_rq_job_id()`. It returns the canonical hyphenated
+  `str(uuid4())` representation used by RQ itself. Never use `uuid4().hex` for
+  an RQ job ID. Treat stored IDs as opaque exact strings when linking jobs,
+  building URLs, or polling; legacy bare-hex IDs must not be reformatted.
 - Store dependent job ids in `job.meta['jobs:<order>,...]` if you need cascading cancellation.
 
 ### Inspect or cancel a job tree
@@ -74,6 +96,34 @@ cancel_jobs(job.id)
 - `cancel_jobs` walks the stored metadata and issues `send_stop_job_command` for running descendants before calling `Job.cancel()` on queued ones.
 
 ## Developer Notes
+
+### WEPPcloudR execution backends
+
+`WEPPCLOUDR_EXECUTION_BACKEND` accepts only `docker-exec` (the migration
+default) or `kubernetes-job`. Compose keeps the existing `weppcloudr` container,
+Docker socket, and mount topology; its command timeout is
+`WEPPCLOUDR_COMMAND_TIMEOUT`. Both backends receive canonical `run_root` and
+`active_root` values, retain protected bounded diagnostics under
+`<active_root>/_logs/weppcloudr/`, and verify the final regular HTML artifact.
+
+The Kubernetes selection uses the dedicated queue named by
+`WEPPCLOUDR_K8S_QUEUE` (default `weppcloudr`). It requires an HTTPS internal
+controller endpoint in `WEPPCLOUDR_K8S_CONTROL_PLANE_URL`, a workload-identity
+token file in `WEPPCLOUDR_K8S_IDENTITY_TOKEN_FILE`, a digest-pinned image in
+`WEPPCLOUDR_K8S_IMAGE`, the exact receipt namespace in
+`WEPPCLOUDR_K8S_NAMESPACE`, and `WEPPCLOUDR_DEPLOYMENT_REVISION`. Workers submit a
+strict request-v1 document and reconcile receipts; they never receive
+Kubernetes credentials or arbitrary image/command/volume controls.
+
+`WEPPCLOUDR_K8S_ACTIVE_DEADLINE` defaults to 600 seconds and
+`WEPPCLOUDR_K8S_TERMINAL_BUDGET` defaults to 120 seconds. The outer
+`WEPPCLOUDR_JOB_TIMEOUT` must cover their sum. The controller/deployment owns
+pending timeout, hard admission, PVC mapping, resources, cancellation grace,
+and the 1200-second post-collection TTL. This refactor supplies the pure,
+injectable controller state machine, but not its durable-store, Kubernetes API,
+or authenticated HTTP deployment adapters. Keep `kubernetes-job` disabled until
+the separately reviewed deployment supplies and operates those controls.
+
 - **Task structure.** Follow the established pattern: resolve `job = get_current_job()`, compute a status channel (`f"{runid}:panel"`), call `StatusMessenger.publish` for STARTED/COMPLETED/EXCEPTION, and `raise` so the worker records the failure. Timeouts default to 12 hours—set `timeout=TIMEOUT` when enqueuing child jobs.
 - **RedisPrep timestamps.** When a task materially advances a `TaskEnum`, call `prep.remove_timestamp(...)` just before the work starts and `prep.timestamp(...)` once it finishes. This keeps the dashboard in sync and prevents accidental short-circuiting the next time the run resumes.
 - **Job dependencies.** Parent tasks (batch, omni, project) should save child job ids in `job.meta['jobs:{order},runid:{child_runid}] = child_job.id`. The ordering string is arbitrary but should remain stable so `cancel_job` and `job_info` can display the tree predictably.

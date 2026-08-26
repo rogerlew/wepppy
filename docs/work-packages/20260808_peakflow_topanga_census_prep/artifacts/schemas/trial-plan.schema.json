@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "evidence_root": {"type": "string"},
+    "executable": {"type": "object"},
+    "input_authorities": {"minItems": 1, "type": "array"},
+    "manifest_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+    "plan_id": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+    "schema_version": {"const": "1.0.0"},
+    "site": {"type": "string"},
+    "study_id": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+    "totals": {"type": "object"},
+    "trials": {"minItems": 1, "type": "array"}
+  },
+  "required": ["schema_version", "study_id", "plan_id", "site", "manifest_sha256", "input_authorities", "executable", "evidence_root", "trials", "totals"],
+  "type": "object"
+}

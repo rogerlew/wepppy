@@ -47,7 +47,6 @@ PTH_ENTRIES=(
   "wepp_runner.pth:${WORKDIR_ROOT}/wepppy2/"
   "weppcloud2.pth:${WORKDIR_ROOT}/weppcloud2/"
   "wbt.pth:${WORKDIR_ROOT}/weppcloud-wbt/WBT/"
-  "f_esri.pth:${WORKDIR_ROOT}/f-esri/"
   "wepppyo3.pth:${WORKDIR_ROOT}/wepppyo3/release/linux/py312/"
 )
 

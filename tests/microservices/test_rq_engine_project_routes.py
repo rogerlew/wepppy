@@ -591,6 +591,58 @@ def test_create_accepts_session_cookie_auth_without_rq_token(
     assert owner_calls["user_id"] == 42
 
 
+def test_cookie_claims_use_migration_aware_session_selector(monkeypatch):
+    request = object()
+    payload = {"_user_id": "42", "roles": ["User"]}
+    from wepppy.microservices.rq_engine import session_routes
+
+    monkeypatch.setattr(
+        session_routes,
+        "_is_same_origin_cookie_request",
+        lambda candidate: candidate is request,
+    )
+    monkeypatch.setattr(
+        session_routes,
+        "_resolve_session_from_cookie",
+        lambda candidate: ("owned-sid", payload),
+    )
+    monkeypatch.setattr(
+        session_routes,
+        "_resolve_session_id_from_cookie",
+        lambda _request: (_ for _ in ()).throw(AssertionError("legacy-only selector used")),
+    )
+
+    claims = project_routes._claims_from_session_cookie(request)
+
+    assert claims["sub"] == "42"
+
+
+def test_rq_token_rejects_revoked_session_sid(monkeypatch):
+    monkeypatch.setenv("WEPP_AUTH_JWT_SECRET", "unit-test-secret")
+    auth_tokens.get_jwt_config.cache_clear()
+    token = auth_tokens.issue_token(
+        "revoked-sid",
+        scopes=["rq:enqueue"],
+        audience="rq-engine",
+        extra_claims={
+            "jti": "session-jti",
+            "token_class": "session",
+            "session_id": "revoked-sid",
+        },
+    )["token"]
+    monkeypatch.setattr(project_routes, "_check_revocation", lambda _jti: None)
+    monkeypatch.setattr(
+        project_routes,
+        "_check_session_revocation",
+        lambda sid: (_ for _ in ()).throw(project_routes.AuthError("Session token has been revoked."))
+        if sid == "revoked-sid"
+        else None,
+    )
+
+    with pytest.raises(project_routes.AuthError, match="revoked"):
+        project_routes._require_rq_token(token, required_scopes=["rq:enqueue"])
+
+
 def test_create_does_not_enable_default_nodir_roots_marker_without_opt_in(
     create_client,
     monkeypatch: pytest.MonkeyPatch,

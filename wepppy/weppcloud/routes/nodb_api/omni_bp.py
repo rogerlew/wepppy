@@ -3,6 +3,7 @@
 import traceback
 
 from .._common import *  # noqa: F401,F403
+from wepppy.weppcloud.utils.helpers import run_lifecycle_mutation
 
 from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.omni import Omni
@@ -163,6 +164,7 @@ def get_scenario_run_state(runid, config):
 
 
 @omni_bp.route('/runs/<string:runid>/<config>/api/omni/delete_scenarios', methods=['POST'])
+@authorize_and_handle_with_exception_factory
 def delete_scenarios(runid, config):
     authorize(runid, config)
     try:
@@ -184,6 +186,8 @@ def delete_scenarios(runid, config):
 
 
 @omni_bp.route('/runs/<string:runid>/<config>/tasks/omni_migration')
+@authorize_and_handle_with_exception_factory
+@run_lifecycle_mutation
 def omni_migration(runid, config):
     authorize(runid, config)
     try:

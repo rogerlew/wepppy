@@ -239,7 +239,12 @@ class WepppyRqWorker(Worker):
             job.meta["exc_string"] = sanitized
             job.save_meta()
         else:
-            super().handle_job_failure(job, queue, started_job_registry)
+            super().handle_job_failure(
+                job,
+                queue,
+                started_job_registry,
+                exc_string=exc_string,
+            )
         if isinstance(job.meta, dict):
             try:
                 from wepppy.rq.project_rq import (

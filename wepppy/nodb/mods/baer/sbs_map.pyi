@@ -12,6 +12,8 @@ RGBColor: TypeAlias = Tuple[int, int, int]
 ColorIndexMap: TypeAlias = dict[Literal["unburned", "low", "mod", "high"], list[int]]
 ColorCounts: TypeAlias = list[tuple[int, int]]
 ColorLookup: TypeAlias = dict[RGBColor, Optional[str]]
+SBS_UNASSIGNED_RGBA: tuple[int, int, int, int]
+SBS_DISPLAY_CLASSES: tuple[tuple[int, str, str], ...]
 
 __all__ = [
     "classify",
@@ -19,6 +21,8 @@ __all__ = [
     "get_sbs_color_table",
     "sbs_map_sanity_check",
     "SoilBurnSeverityMap",
+    "SBS_DISPLAY_CLASSES",
+    "SBS_UNASSIGNED_RGBA",
 ]
 
 
@@ -57,6 +61,8 @@ class SoilBurnSeverityMap(LandcoverMap):
     breaks: Optional[Sequence[int | float]]
     fname: str
     nodata_vals: Sequence[int | float]
+    source_nodata_vals: Sequence[int | float]
+    source_color_table_count: int
 
     def __init__(
         self,
@@ -81,6 +87,9 @@ class SoilBurnSeverityMap(LandcoverMap):
 
     @property
     def data(self) -> NDArray[np.uint8]: ...
+
+    @property
+    def source_valid_mask(self) -> NDArray[np.bool_]: ...
 
     def export_wgs_map(self, fn: str) -> list[list[float]]: ...
 

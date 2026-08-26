@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from contextlib import contextmanager
 from pathlib import Path
@@ -11,6 +12,7 @@ import wepppy.rq.batch_rq as batch_rq
 from wepppy.nodb import batch_runner as batch_runner_module
 from wepppy.nodb.batch_runner import BatchRunner
 from wepppy.nodb.redis_prep import TaskEnum
+import wepppy.rq.job_dependencies as job_dependencies
 
 
 pytestmark = pytest.mark.unit
@@ -95,6 +97,33 @@ def _write_climate_state(path: Path, *, observed_start_year, observed_end_year) 
         ),
         encoding="utf-8",
     )
+
+
+def _set_climate_station_state(
+    path: Path,
+    *,
+    mode: int,
+    station: str | None,
+    serialization: str = "current",
+) -> None:
+    state = json.loads(path.read_text(encoding="utf-8"))
+    if serialization == "raw":
+        state["_climatestation_mode"] = mode
+    else:
+        mode_type = {
+            "current": "wepppy.nodb.core.climate.ClimateStationMode",
+            "foreign": "example.ForeignMode",
+            "legacy": "wepppy.nodb.climate.ClimateStationMode",
+        }[serialization]
+        reduce_payload = [
+            {"py/type": mode_type},
+            {"py/tuple": [mode]},
+        ]
+        if serialization == "legacy":
+            reduce_payload.extend((None, None, None))
+        state["_climatestation_mode"] = {"py/reduce": reduce_payload}
+    state["_climatestation"] = station
+    path.write_text(json.dumps(state), encoding="utf-8")
 
 
 def test_batch_directory_root_lock_uses_effective_path_scope(
@@ -407,6 +436,178 @@ def test_classify_batch_run_state_ignores_leaf_generated_cligen_seed(
     assert state["base_sync_changed_attributes"] == []
 
 
+def test_classify_batch_run_state_accepts_runtime_resolved_climate_station(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runner = _runner(tmp_path, monkeypatch)
+    all_tasks = (
+        TaskEnum.fetch_dem,
+        TaskEnum.build_climate,
+        TaskEnum.run_wepp_hillslopes,
+        TaskEnum.run_wepp_watershed,
+    )
+    _set_timestamps(runner, "complete-with-runtime-station", all_tasks)
+    run_dir = Path(runner.batch_runs_dir) / "complete-with-runtime-station"
+    base_climate = Path(runner.base_wd) / "climate.nodb"
+    leaf_climate = run_dir / "climate.nodb"
+    _write_climate_state(base_climate, observed_start_year=1985, observed_end_year=2024)
+    _write_climate_state(leaf_climate, observed_start_year=1985, observed_end_year=2024)
+    _set_climate_station_state(base_climate, mode=-1, station=None)
+    _set_climate_station_state(leaf_climate, mode=0, station="or350897")
+
+    state = runner.classify_batch_run_state(_feature("complete-with-runtime-station"))
+
+    assert state["status"] == "complete"
+    assert state["retry_eligible"] is False
+    assert state["base_sync_changed_attributes"] == []
+
+
+@pytest.mark.parametrize("serialization", ("legacy", "raw"))
+def test_classify_batch_run_state_accepts_compatible_runtime_station_modes(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    serialization: str,
+) -> None:
+    runner = _runner(tmp_path, monkeypatch)
+    all_tasks = (
+        TaskEnum.fetch_dem,
+        TaskEnum.build_climate,
+        TaskEnum.run_wepp_hillslopes,
+        TaskEnum.run_wepp_watershed,
+    )
+    leaf = f"complete-with-{serialization}-station-mode"
+    _set_timestamps(runner, leaf, all_tasks)
+    run_dir = Path(runner.batch_runs_dir) / leaf
+    base_climate = Path(runner.base_wd) / "climate.nodb"
+    leaf_climate = run_dir / "climate.nodb"
+    _write_climate_state(base_climate, observed_start_year=1985, observed_end_year=2024)
+    _write_climate_state(leaf_climate, observed_start_year=1985, observed_end_year=2024)
+    _set_climate_station_state(
+        base_climate,
+        mode=-1,
+        station=None,
+        serialization=serialization,
+    )
+    _set_climate_station_state(
+        leaf_climate,
+        mode=0,
+        station="or350897",
+        serialization=serialization,
+    )
+
+    state = runner.classify_batch_run_state(_feature(leaf))
+
+    assert state["status"] == "complete"
+    assert state["retry_eligible"] is False
+    assert state["base_sync_changed_attributes"] == []
+
+
+def test_classify_batch_run_state_rejects_foreign_runtime_station_mode(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runner = _runner(tmp_path, monkeypatch)
+    all_tasks = (
+        TaskEnum.fetch_dem,
+        TaskEnum.build_climate,
+        TaskEnum.run_wepp_hillslopes,
+        TaskEnum.run_wepp_watershed,
+    )
+    leaf = "stale-foreign-station-mode"
+    _set_timestamps(runner, leaf, all_tasks)
+    run_dir = Path(runner.batch_runs_dir) / leaf
+    base_climate = Path(runner.base_wd) / "climate.nodb"
+    leaf_climate = run_dir / "climate.nodb"
+    _write_climate_state(base_climate, observed_start_year=1985, observed_end_year=2024)
+    _write_climate_state(leaf_climate, observed_start_year=1985, observed_end_year=2024)
+    _set_climate_station_state(base_climate, mode=-1, station=None)
+    _set_climate_station_state(
+        leaf_climate,
+        mode=0,
+        station="or350897",
+        serialization="foreign",
+    )
+
+    state = runner.classify_batch_run_state(_feature(leaf))
+
+    assert state["status"] == "incomplete"
+    assert state["retry_reason"] == "base_project_attributes_changed"
+    assert {
+        (change["file"], change["attribute"])
+        for change in state["base_sync_changed_attributes"]
+    } == {
+        ("climate.nodb", "_climatestation"),
+        ("climate.nodb", "_climatestation_mode"),
+    }
+
+
+def test_resync_preserves_runtime_resolved_climate_station_and_timestamps(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runner = _runner(tmp_path, monkeypatch)
+    run_dir = Path(runner.batch_runs_dir) / "runtime-station"
+    run_dir.mkdir(parents=True)
+    base_climate = Path(runner.base_wd) / "climate.nodb"
+    leaf_climate = run_dir / "climate.nodb"
+    _write_climate_state(base_climate, observed_start_year=1985, observed_end_year=2024)
+    _write_climate_state(leaf_climate, observed_start_year=1985, observed_end_year=2024)
+    _set_climate_station_state(base_climate, mode=-1, station=None)
+    _set_climate_station_state(leaf_climate, mode=0, station="or350897")
+    original_timestamps = {
+        TaskEnum.fetch_dem.value: 1,
+        TaskEnum.build_climate.value: 2,
+        TaskEnum.run_wepp_hillslopes.value: 3,
+        TaskEnum.run_wepp_watershed.value: 4,
+        TaskEnum.run_watar.value: 5,
+        TaskEnum.run_omni_scenarios.value: 6,
+    }
+    _FakeRedisPrep.timestamps_by_wd[str(run_dir)] = original_timestamps.copy()
+
+    result = runner.resync_base_project_attributes(
+        str(run_dir),
+        _FakeRedisPrep(str(run_dir)),
+        batch_runner_module.logging.getLogger("test.runtime_station_resync"),
+    )
+
+    leaf_state = json.loads(leaf_climate.read_text(encoding="utf-8"))
+    assert leaf_state["_climatestation"] == "or350897"
+    assert leaf_state["_climatestation_mode"]["py/reduce"][1]["py/tuple"] == [0]
+    assert result == {"changed_attributes": [], "errors": [], "invalidated_tasks": []}
+    assert _FakeRedisPrep.timestamps_by_wd[str(run_dir)] == original_timestamps
+
+
+def test_classify_batch_run_state_detects_explicit_climate_station_change(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runner = _runner(tmp_path, monkeypatch)
+    all_tasks = (
+        TaskEnum.fetch_dem,
+        TaskEnum.build_climate,
+        TaskEnum.run_wepp_hillslopes,
+        TaskEnum.run_wepp_watershed,
+    )
+    _set_timestamps(runner, "stale-explicit-station", all_tasks)
+    run_dir = Path(runner.batch_runs_dir) / "stale-explicit-station"
+    base_climate = Path(runner.base_wd) / "climate.nodb"
+    leaf_climate = run_dir / "climate.nodb"
+    _write_climate_state(base_climate, observed_start_year=1985, observed_end_year=2024)
+    _write_climate_state(leaf_climate, observed_start_year=1985, observed_end_year=2024)
+    _set_climate_station_state(base_climate, mode=0, station="station-a")
+    _set_climate_station_state(leaf_climate, mode=0, station="station-b")
+
+    state = runner.classify_batch_run_state(_feature("stale-explicit-station"))
+
+    assert state["status"] == "incomplete"
+    assert state["retry_reason"] == "base_project_attributes_changed"
+    assert {
+        (change["file"], change["attribute"])
+        for change in state["base_sync_changed_attributes"]
+    } == {("climate.nodb", "_climatestation")}
+
+
 def test_run_batch_project_resyncs_base_climate_and_invalidates_downstream_timestamps(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -455,6 +656,108 @@ def test_run_batch_project_resyncs_base_climate_and_invalidates_downstream_times
     assert state["_observed_end_year"] == 2024
     timestamps = _FakeRedisPrep.timestamps_by_wd[str(run_dir)]
     assert timestamps == {TaskEnum.fetch_dem.value: 1}
+
+
+def test_run_batch_project_watar_only_reuses_runtime_resolved_climate_and_wepp(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runner = _runner(tmp_path, monkeypatch)
+    for task in runner.DEFAULT_TASKS:
+        runner._run_directives[task] = task is TaskEnum.run_watar
+
+    leaf = "watar-only-runtime-station"
+    run_dir = Path(runner.batch_runs_dir) / leaf
+    run_dir.mkdir(parents=True)
+    base_climate = Path(runner.base_wd) / "climate.nodb"
+    leaf_climate = run_dir / "climate.nodb"
+    _write_climate_state(base_climate, observed_start_year=1986, observed_end_year=2024)
+    _write_climate_state(leaf_climate, observed_start_year=1986, observed_end_year=2024)
+    _set_climate_station_state(base_climate, mode=-1, station=None)
+    _set_climate_station_state(leaf_climate, mode=0, station="or350897")
+
+    interchange = run_dir / "wepp" / "output" / "interchange"
+    interchange.mkdir(parents=True)
+    for name in ("H.pass.parquet", "H.wat.parquet", "totalwatsed3.parquet"):
+        (interchange / name).write_bytes(f"persisted-{name}".encode())
+    wepp_output = run_dir / "wepp" / "output" / "loss_pw0.out"
+    wepp_output.write_text("persisted WEPP output\n", encoding="utf-8")
+
+    original_timestamps = {
+        TaskEnum.build_climate.value: 10,
+        TaskEnum.run_wepp_hillslopes.value: 20,
+        TaskEnum.run_wepp_watershed.value: 30,
+    }
+    _FakeRedisPrep.timestamps_by_wd[str(run_dir)] = original_timestamps.copy()
+
+    def _digest(path: Path) -> str:
+        return hashlib.sha256(path.read_bytes()).hexdigest()
+
+    evidence_paths = (leaf_climate, wepp_output, *(interchange.iterdir()))
+    before = {path: _digest(path) for path in evidence_paths}
+    ash_calls: list[tuple[str, float, float]] = []
+
+    def _run_ash(fire_date: str, white_depth: float, black_depth: float) -> None:
+        ash_calls.append((fire_date, white_depth, black_depth))
+        _FakeRedisPrep.timestamps_by_wd[str(run_dir)][TaskEnum.run_watar.value] = 40
+
+    ash = SimpleNamespace(
+        fire_date="9/12",
+        ini_white_ash_depth_mm=2.5,
+        ini_black_ash_depth_mm=4.5,
+        run_ash=_run_ash,
+    )
+    climate = SimpleNamespace(is_single_storm=False)
+    wepp = SimpleNamespace(wepp_interchange_dir=str(interchange))
+    inert = SimpleNamespace()
+
+    monkeypatch.setattr(
+        batch_runner_module,
+        "get_wd",
+        lambda runid: str(Path(runner.batch_runs_dir) / runid.split(";;")[-1]),
+    )
+    monkeypatch.setattr(batch_runner_module, "_clear_batch_leaf_nodb_state", lambda *_args: ())
+    monkeypatch.setattr(
+        runner,
+        "_get_run_logger",
+        lambda _runid: batch_runner_module.logging.getLogger("test.watar_only"),
+    )
+    monkeypatch.setattr(batch_runner_module.Ron, "getInstance", lambda _wd: inert)
+    monkeypatch.setattr(batch_runner_module.Watershed, "getInstance", lambda _wd: inert)
+    monkeypatch.setattr(batch_runner_module.Landuse, "getInstance", lambda _wd: inert)
+    monkeypatch.setattr(batch_runner_module.Soils, "getInstance", lambda _wd: inert)
+    monkeypatch.setattr(batch_runner_module.Climate, "getInstance", lambda _wd: climate)
+    monkeypatch.setattr(batch_runner_module.Wepp, "getInstance", lambda _wd: wepp)
+    monkeypatch.setattr(batch_runner_module.RAP_TS, "tryGetInstance", lambda _wd: None)
+    monkeypatch.setattr(batch_runner_module.OpenET_TS, "tryGetInstance", lambda _wd: None)
+    monkeypatch.setattr(batch_runner_module.Ash, "tryGetInstance", lambda _wd: ash)
+    for helper_name in (
+        "ensure_hillslope_interchange",
+        "ensure_totalwatsed3",
+        "ensure_watershed_interchange",
+    ):
+        monkeypatch.setattr(
+            batch_runner_module,
+            helper_name,
+            lambda *_args, **_kwargs: None,
+        )
+    monkeypatch.setattr(
+        batch_runner_module,
+        "_run_with_directory_roots_lock",
+        lambda _wd, _roots, callback, *, purpose: callback(),
+    )
+
+    runner.run_batch_project(_feature(leaf))
+
+    assert ash_calls == [("9/12", 2.5, 4.5)]
+    assert {path: _digest(path) for path in evidence_paths} == before
+    assert _FakeRedisPrep.timestamps_by_wd[str(run_dir)] == {
+        **original_timestamps,
+        TaskEnum.run_watar.value: 40,
+    }
+    leaf_state = json.loads(leaf_climate.read_text(encoding="utf-8"))
+    assert leaf_state["_climatestation"] == "or350897"
+    assert leaf_state["_climatestation_mode"]["py/reduce"][1]["py/tuple"] == [0]
 
 
 def test_clear_retry_runtime_locks_uses_child_path_scope(
@@ -655,6 +958,13 @@ class _DummyJob:
 
 
 class _DummyRedis:
+    def lock(self, *_args, **_kwargs):
+        return SimpleNamespace(
+            acquire=lambda **_kwargs: True,
+            extend=lambda *_args, **_kwargs: True,
+            release=lambda: None,
+        )
+
     def __enter__(self):
         return self
 
@@ -665,72 +975,35 @@ class _DummyRedis:
 def test_release_deferred_finalizer_if_ready_enqueues_met_dependencies(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    removed_jobs: list[object] = []
-
-    class _Registry:
-        def __init__(self, queue) -> None:
-            self.queue = queue
-
-        def remove(self, job) -> None:
-            removed_jobs.append(job)
-
-    class _FinalJob:
-        def get_status(self, refresh: bool = True):
-            return batch_rq.JobStatus.DEFERRED
-
-        def dependencies_are_met(self) -> bool:
-            return True
-
-    class _Queue:
-        def __init__(self) -> None:
-            self.enqueued: list[object] = []
-
-        def _enqueue_job(self, job) -> None:
-            self.enqueued.append(job)
-
-    monkeypatch.setattr(batch_rq, "DeferredJobRegistry", _Registry)
-    queue = _Queue()
-    final_job = _FinalJob()
+    calls: list[tuple[object, object]] = []
+    monkeypatch.setattr(
+        batch_rq,
+        "release_deferred_job_if_ready",
+        lambda queue, job: calls.append((queue, job)),
+    )
+    queue = object()
+    final_job = object()
 
     batch_rq._release_deferred_finalizer_if_ready(queue, final_job)
 
-    assert removed_jobs == [final_job]
-    assert queue.enqueued == [final_job]
+    assert calls == [(queue, final_job)]
 
 
 def test_release_deferred_finalizer_if_ready_keeps_unmet_dependencies_deferred(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    removed_jobs: list[object] = []
+    calls: list[tuple[object, object]] = []
+    monkeypatch.setattr(
+        batch_rq,
+        "release_deferred_job_if_ready",
+        lambda queue, job: calls.append((queue, job)),
+    )
+    queue = object()
+    final_job = object()
 
-    class _Registry:
-        def __init__(self, queue) -> None:
-            self.queue = queue
+    batch_rq._release_deferred_finalizer_if_ready(queue, final_job)
 
-        def remove(self, job) -> None:
-            removed_jobs.append(job)
-
-    class _FinalJob:
-        def get_status(self, refresh: bool = True):
-            return batch_rq.JobStatus.DEFERRED
-
-        def dependencies_are_met(self) -> bool:
-            return False
-
-    class _Queue:
-        def __init__(self) -> None:
-            self.enqueued: list[object] = []
-
-        def _enqueue_job(self, job) -> None:
-            self.enqueued.append(job)
-
-    monkeypatch.setattr(batch_rq, "DeferredJobRegistry", _Registry)
-    queue = _Queue()
-
-    batch_rq._release_deferred_finalizer_if_ready(queue, _FinalJob())
-
-    assert removed_jobs == []
-    assert queue.enqueued == []
+    assert calls == [(queue, final_job)]
 
 
 def test_run_batch_rq_enqueues_only_retry_eligible_features(
@@ -786,14 +1059,17 @@ def test_run_batch_rq_enqueues_only_retry_eligible_features(
         def __init__(self, name: str, connection=None) -> None:
             assert name == "batch"
 
-        def enqueue_call(self, func, args=(), timeout=None, depends_on=None):
-            job = _DummyJob(f"job-{len(enqueue_calls) + 1}")
+        def enqueue_call(
+            self, func, args=(), timeout=None, depends_on=None, job_id=None, meta=None
+        ):
+            job = _DummyJob(job_id or f"job-{len(enqueue_calls) + 1}")
             enqueue_calls.append(
                 {
                     "func": func,
                     "args": args,
                     "timeout": timeout,
                     "depends_on": depends_on,
+                    "meta": meta,
                     "job": job,
                 }
             )
@@ -873,9 +1149,13 @@ def test_run_batch_rq_full_rerun_enqueues_all_features(
         def __init__(self, name: str, connection=None) -> None:
             assert name == "batch"
 
-        def enqueue_call(self, func, args=(), timeout=None, depends_on=None):
-            job = _DummyJob(f"job-{len(enqueue_calls) + 1}")
-            enqueue_calls.append({"func": func, "args": args, "job": job})
+        def enqueue_call(
+            self, func, args=(), timeout=None, depends_on=None, job_id=None, meta=None
+        ):
+            job = _DummyJob(job_id or f"job-{len(enqueue_calls) + 1}")
+            enqueue_calls.append(
+                {"func": func, "args": args, "job": job, "meta": meta}
+            )
             return job
 
     monkeypatch.setattr(batch_rq, "Queue", _Queue)
@@ -1009,6 +1289,58 @@ def test_run_batch_watershed_rq_writes_success_metadata(
     assert metadata["rq_job_id"] == "job-leaf"
     assert "error" not in metadata
     assert metadata["task_status"][TaskEnum.fetch_dem.value] == 1
+
+
+def test_run_batch_watershed_rq_writes_failed_metadata_and_returns_false(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    run_dir = tmp_path / "WA-40"
+    run_dir.mkdir(parents=True)
+    published: list[str] = []
+
+    monkeypatch.setattr(batch_rq, "get_current_job", lambda: _DummyJob("job-failed-leaf"))
+    monkeypatch.setattr(batch_rq, "get_wd", lambda _runid: str(run_dir))
+    monkeypatch.setattr(
+        batch_rq.StatusMessenger,
+        "publish",
+        lambda _channel, message: published.append(message),
+    )
+
+    class _Runner:
+        base_wd = str(tmp_path / "_base")
+        rq_job_ids: dict[str, str] = {}
+
+        def run_batch_project(self, watershed_feature, job_id=None):
+            raise RuntimeError(
+                "WATAR requires completed WEPP tasks: run_wepp_hillslopes, "
+                "run_wepp_watershed"
+            )
+
+    monkeypatch.setattr(
+        batch_rq.BatchRunner,
+        "getInstanceFromBatchName",
+        lambda _batch_name: _Runner(),
+    )
+    monkeypatch.setattr(batch_rq.RedisPrep, "getInstance", _FakeRedisPrep.getInstance)
+    _FakeRedisPrep.timestamps_by_wd[str(run_dir)] = {}
+
+    status, elapsed = batch_rq.run_batch_watershed_rq("demo", _feature("WA-40"))
+
+    assert status is False
+    assert elapsed >= 0
+    metadata = json.loads((run_dir / "run_metadata.json").read_text(encoding="utf-8"))
+    assert metadata["status"] == "failed"
+    assert metadata["error"] == {
+        "type": "RuntimeError",
+        "message": (
+            "WATAR requires completed WEPP tasks: run_wepp_hillslopes, "
+            "run_wepp_watershed"
+        ),
+    }
+    assert metadata["rq_job_id"] == "job-failed-leaf"
+    assert any("EXCEPTION_JSON" in message for message in published)
+    assert any("BATCH_WATERSHED_TASK_COMPLETED" in message for message in published)
 
 
 def test_run_batch_watershed_rq_task_status_failure_is_metadata_warning(

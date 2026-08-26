@@ -108,6 +108,8 @@ def test_export_ermit_propagates_nodir_errors(tmp_path: Path, monkeypatch: pytes
 
 
 def test_export_ermit_submit_enqueues_rq_job(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    from wepppy.rq import submission_recovery
+
     runid = "run-export-ermit-submit"
     run_root = tmp_path / runid
     run_root.mkdir()
@@ -115,7 +117,22 @@ def test_export_ermit_submit_enqueues_rq_job(tmp_path: Path, monkeypatch: pytest
 
     _stub_auth(monkeypatch)
     monkeypatch.setattr(export_routes, "get_wd", lambda runid, prefer_active=False: str(run_root))
-    monkeypatch.setattr(export_routes.RedisPrep, "tryGetInstance", lambda wd: None)
+    class DummyPrep:
+        def get_rq_job_id(self, key):
+            return None
+
+        def set_rq_job_id(self, key, job_id):
+            return None
+
+    monkeypatch.setattr(export_routes.RedisPrep, "getInstance", lambda wd: DummyPrep())
+
+    class DummyLock:
+        def acquire(self, **kwargs):
+            return True
+        def extend(self, *args, **kwargs): return True
+
+        def release(self):
+            return None
 
     class DummyRedis:
         def __init__(self, **_kwargs):
@@ -127,11 +144,14 @@ def test_export_ermit_submit_enqueues_rq_job(tmp_path: Path, monkeypatch: pytest
         def __exit__(self, exc_type, exc, tb):
             return False
 
+        def lock(self, *args, **kwargs):
+            return DummyLock()
+
     class DummyQueue:
         def __init__(self, connection):
             self.connection = connection
 
-        def enqueue_call(self, func, args, timeout):
+        def enqueue_call(self, func, args, timeout, job_id, **kwargs):
             enqueued["func"] = func
             enqueued["args"] = args
             enqueued["timeout"] = timeout
@@ -139,6 +159,7 @@ def test_export_ermit_submit_enqueues_rq_job(tmp_path: Path, monkeypatch: pytest
 
     monkeypatch.setattr(export_routes.redis, "Redis", DummyRedis)
     monkeypatch.setattr(export_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(submission_recovery, "new_rq_job_id", lambda: "ermit-job-1")
 
     with TestClient(rq_engine.app) as client:
         response = client.post(f"/api/runs/{runid}/cfg/export/ermit")

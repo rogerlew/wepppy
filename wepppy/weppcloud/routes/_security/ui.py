@@ -11,8 +11,10 @@ from .._common import (
     render_template,
 )
 from flask import request, session
+from flask_login import logout_user
 from flask_login.utils import decode_cookie
 from flask_security import url_for_security
+from wepppy.weppcloud.session_migration import revoke_presented_sessions
 
 
 security_bp = Blueprint("security_ui", __name__)
@@ -21,6 +23,11 @@ security_bp = Blueprint("security_ui", __name__)
 @security_bp.before_app_request
 def refresh_presented_remember_cookie():
     """Refresh only a valid remember credential already carried by the browser."""
+    if session.pop("_session_migration_conflict", False):
+        logout_user()
+        session["_remember"] = "clear"
+        return
+
     if (
         request.method == "POST"
         and request.endpoint in {"security.login", "security_ui.login"}
@@ -48,6 +55,7 @@ def refresh_presented_remember_cookie():
 def clear_logged_out_session(response):
     """Expire server-side session state after Flask-Security handles logout."""
     if request.endpoint == "security.logout":
+        revoke_presented_sessions(current_app, request)
         session.clear()
         session["_remember"] = "clear"
         response.delete_cookie(

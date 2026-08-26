@@ -13,7 +13,14 @@ from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.swat import Swat
 from wepppy.nodb.mods.swat.print_prt import mask_from_flags
 from wepppy.nodb.redis_prep import RedisPrep
-from wepppy.rq.swat_rq import run_swat_rq
+from wepppy.rq.job_id import new_rq_job_id
+from wepppy.rq.swat_rq import _build_swat_inputs_rq, _run_swat_rq, run_swat_rq
+from wepppy.rq.submission_recovery import RqSubmissionConflict, rq_submission_lock
+from wepppy.rq.wepp_rq import (
+    WeppSingleFlightConflict,
+    ensure_no_active_wepp_job,
+    reconcile_deferred_wepp_jobs,
+)
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
@@ -67,7 +74,7 @@ async def run_swat(runid: str, config: str, request: Request) -> JSONResponse:
         authorize_run_access(claims, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine run-swat auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
@@ -77,18 +84,32 @@ async def run_swat(runid: str, config: str, request: Request) -> JSONResponse:
 
         ron = Ron.getInstance(wd)
         mods = ron.mods or []
-        if "swat" in mods:
-            swat = Swat.getInstance(wd)
-            swat.parse_inputs(payload)
 
         prep = RedisPrep.getInstance(wd)
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
-            q = Queue(connection=redis_conn)
-            job = q.enqueue_call(run_swat_rq, (runid,), timeout=RQ_TIMEOUT)
-            prep.set_rq_job_id("run_swat_rq", job.id)
+            with rq_submission_lock(redis_conn, f"{runid}:wepp", lifecycle_key=runid) as lease:
+                reconcile_deferred_wepp_jobs(
+                    runid, prep, redis_conn, lease_checkpoint=lease.checkpoint
+                )
+                ensure_no_active_wepp_job(runid, prep, redis_conn)
+                if "swat" in mods:
+                    swat = Swat.getInstance(wd)
+                    swat.parse_inputs(payload)
+                replacement_job_id = new_rq_job_id()
+                prep.set_rq_job_id("run_swat_rq", replacement_job_id)
+                lease.checkpoint()
+                q = Queue(connection=redis_conn)
+                job = q.enqueue_call(
+                    run_swat_rq,
+                    (runid,),
+                    timeout=RQ_TIMEOUT,
+                    job_id=replacement_job_id,
+                )
         return JSONResponse({"job_id": job.id})
-    except Exception:
+    except (RqSubmissionConflict, WeppSingleFlightConflict) as exc:
+        return error_response(str(exc), status_code=409, code="job_active")
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine run-swat enqueue failed")
         return error_response_with_traceback("Error Handling Request")
 
@@ -116,7 +137,7 @@ async def update_swat_print_prt(runid: str, config: str, request: Request) -> JS
         authorize_run_access(claims, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine swat print.prt auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
@@ -156,7 +177,7 @@ async def update_swat_print_prt(runid: str, config: str, request: Request) -> JS
         )
     except ValueError as exc:
         return error_response(str(exc), status_code=400)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine swat print.prt update failed")
         return error_response_with_traceback("Error Handling Request")
 
@@ -184,7 +205,7 @@ async def update_swat_print_prt_meta(runid: str, config: str, request: Request) 
         authorize_run_access(claims, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine swat print.prt meta auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
@@ -214,7 +235,7 @@ async def update_swat_print_prt_meta(runid: str, config: str, request: Request) 
                 setattr(swat.print_prt, key, int(value))
 
         return JSONResponse(updates)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine swat print.prt meta update failed")
         return error_response_with_traceback("Error Handling Request")
 

@@ -1,0 +1,39 @@
+{
+  "$id": "https://github.com/rogerlew/wepppy/peakflow-phase1/schemas/layer-state.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "event_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "frozen_water_mm": {
+      "minimum": 0,
+      "type": "number"
+    },
+    "layer": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "saturation_fraction": {
+      "minimum": 0,
+      "type": "number"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "water_mm": {
+      "minimum": 0,
+      "type": "number"
+    }
+  },
+  "required": [
+    "schema_version",
+    "event_id",
+    "layer",
+    "water_mm",
+    "saturation_fraction"
+  ],
+  "title": "Layer State",
+  "type": "object"
+}

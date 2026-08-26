@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import subprocess
-from typing import List
+from typing import List, Optional
 
 import typer
 
 from ..context import CLIContext
-from ..docker import compose_exec
+from ..docker import compose_exec, compose_service_names
 from ..util import quote_args
 
 _RQ_BINARY = "/opt/venv/bin/rq"
@@ -147,6 +147,19 @@ def _compose_rq_info_command(extra_args: List[str]) -> str:
     )
 
 
+def _resolve_rq_service(context: CLIContext, requested_service: Optional[str]) -> str:
+    if requested_service:
+        return requested_service
+
+    services = set(compose_service_names(context))
+    if "rq-worker" in services:
+        return "rq-worker"
+    if "rq-worker-fork-archive" in services:
+        return "rq-worker-fork-archive"
+    # Preserve the historical Docker error for incomplete/custom topologies.
+    return "rq-worker"
+
+
 def register(app: typer.Typer) -> None:
     @app.command(
         "rq-info",
@@ -165,13 +178,17 @@ def register(app: typer.Typer) -> None:
             "--detail-limit",
             help="Maximum jobs per state and queue for --detail (0 for unlimited).",
         ),
-        service: str = typer.Option(
-            "rq-worker",
+        service: Optional[str] = typer.Option(
+            None,
             "--service",
-            help="Compose service in which to run RQ inspection.",
+            help=(
+                "Compose service in which to run RQ inspection. Defaults to rq-worker, "
+                "or rq-worker-fork-archive when it is the dedicated topology."
+            ),
         ),
     ) -> None:
         context = _context(ctx)
+        service = _resolve_rq_service(context, service)
         command = _compose_rq_info_command(list(ctx.args))
         result = compose_exec(context, service, command, check=False)
         if result.returncode != 0:

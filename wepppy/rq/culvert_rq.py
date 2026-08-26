@@ -190,15 +190,7 @@ def run_culvert_batch_rq(culvert_batch_uuid: str) -> Job:
     if runner is None:
         runner = CulvertsRunner(str(batch_root), "culvert.cfg")
     if job is not None:
-        try:
-            runner.set_rq_job_id(CULVERT_BATCH_RQ_JOB_KEY, job.id)
-        except Exception as exc:
-            logger.warning(
-                "culvert_batch %s: failed to persist parent job id %s - %s",
-                culvert_batch_uuid,
-                job.id,
-                exc,
-            )
+        runner.set_rq_job_id(CULVERT_BATCH_RQ_JOB_KEY, job.id)
 
     _attach_batch_logger(runner)
     logger.info(f"culvert_batch {culvert_batch_uuid}: starting")
@@ -333,6 +325,27 @@ def run_culvert_batch_rq(culvert_batch_uuid: str) -> Job:
                 CULVERT_BATCH_LOCK_RETRY_ATTEMPTS,
             )
             time.sleep(CULVERT_BATCH_LOCK_RETRY_SECONDS)
+        except NoDbStaleWriteError as exc:
+            if attempt >= CULVERT_BATCH_LOCK_RETRY_ATTEMPTS:
+                raise
+            refreshed_runner = CulvertsRunner.getInstance(
+                str(batch_root), allow_nonexistent=True
+            )
+            if refreshed_runner is None:
+                raise FileNotFoundError(
+                    f"Culvert batch runner disappeared during stale refresh: {batch_root}"
+                ) from exc
+            runner = refreshed_runner
+            run_config = runner._resolve_run_config(model_parameters)
+            _attach_batch_logger(runner)
+            logger.warning(
+                "culvert_batch %s: stale runner state before initial update; "
+                "refreshed and retrying (%d/%d)",
+                culvert_batch_uuid,
+                attempt,
+                CULVERT_BATCH_LOCK_RETRY_ATTEMPTS,
+            )
+            time.sleep(CULVERT_BATCH_LOCK_RETRY_SECONDS)
 
     base_wd = runner._ensure_base_project()
     if base_wd is None:
@@ -433,7 +446,14 @@ def run_culvert_run_rq(
 
     runner = CulvertsRunner.getInstance(str(batch_root), allow_nonexistent=True)
     if runner is None:
-        runner = CulvertsRunner(str(batch_root), "culvert.cfg")
+        raise FileNotFoundError(
+            f"Culvert batch runner was not initialized by the parent: {batch_root}"
+        )
+    if runner.culvert_batch_uuid != culvert_batch_uuid:
+        raise ValueError(
+            "Culvert batch runner UUID does not match child task: "
+            f"{runner.culvert_batch_uuid!r} != {culvert_batch_uuid!r}"
+        )
 
     _attach_batch_logger(runner)
     logger.info(f"culvert_run {culvert_batch_uuid}/{run_id}: starting")
@@ -448,14 +468,6 @@ def run_culvert_run_rq(
     buffer_px = runner.contains_point_buffer_px
     if buffer_m is None and buffer_px > 0 and cellsize_m is not None:
         buffer_m = float(buffer_px) * cellsize_m
-
-    # Note: We skip locking here because run_culvert_batch_rq already
-    # initialized the shared runner state. Acquiring a lock would cause
-    # contention when multiple workers process runs in parallel.
-    if runner.culvert_batch_uuid is None:
-        with runner.locked():
-            if runner.culvert_batch_uuid is None:
-                runner._culvert_batch_uuid = culvert_batch_uuid
 
     watersheds_path = runner._resolve_payload_path(
         payload_metadata,
@@ -580,48 +592,6 @@ def run_culvert_run_rq(
         nlcd_db_override=nlcd_db_override,
         minimum_watershed_area_m2=runner.minimum_watershed_area_m2,
     )
-    if job is not None:
-        job_created = job.created_at.isoformat() if job.created_at else None
-        try:
-            job_status = job.get_status()
-        except Exception:
-            # Boundary catch: preserve contract behavior while logging unexpected failures.
-            __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/culvert_rq.py:518", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
-            job_status = None
-        if job_status == "started":
-            job_status = "finished"
-        max_tries = 5
-        for attempt in range(max_tries):
-            try:
-                with runner.locked():
-                    run_record = runner._runs.get(run_id, {})
-                    run_record.setdefault("runid", run_id)
-                    run_record.setdefault("point_id", run_id)
-                    run_record.setdefault("wd", str(run_wd))
-                    run_record["job_status"] = job_status
-                    run_record["job_created"] = job_created
-                    runner._runs[run_id] = run_record
-            except NoDbAlreadyLockedError as exc:
-                if attempt + 1 == max_tries:
-                    logger.warning(
-                        "culvert_run %s/%s: failed to update job metadata after %d retries - %s",
-                        culvert_batch_uuid,
-                        run_id,
-                        max_tries,
-                        exc,
-                    )
-                    break
-                time.sleep(1.0)
-            except Exception as exc:
-                logger.warning(
-                    "culvert_run %s/%s: failed to update job metadata - %s",
-                    culvert_batch_uuid,
-                    run_id,
-                    exc,
-                )
-                break
-            else:
-                break
 
     return status
 
@@ -695,6 +665,8 @@ def _final_culvert_batch_complete_rq(culvert_batch_uuid: str) -> dict[str, Any]:
     failed = 0
     skipped_no_outlet = 0
     for run_id, record in runs.items():
+        for key in ("status", "error", "validation_metrics"):
+            record.pop(key, None)
         run_wd = Path(record.get("wd") or (batch_root / "runs" / run_id))
         metadata_path = run_wd / "run_metadata.json"
         if metadata_path.is_file():
@@ -736,6 +708,8 @@ def _final_culvert_batch_complete_rq(culvert_batch_uuid: str) -> dict[str, Any]:
     with runner.locked():
         for run_id, record in runs.items():
             run_record = runner._runs.get(run_id, {})
+            for key in ("status", "error", "validation_metrics"):
+                run_record.pop(key, None)
             run_record.update(record)
             runner._runs[run_id] = run_record
         runner._completed_at = datetime.now(timezone.utc).isoformat()
@@ -1634,39 +1608,6 @@ def _record_validation_failure(
     if wepppy_version is not None:
         run_metadata["wepppy_version"] = wepppy_version
     _write_run_metadata(run_wd / "run_metadata.json", run_metadata)
-
-    max_tries = 5
-    for attempt in range(max_tries):
-        try:
-            with runner.locked():
-                run_record = runner._runs.get(run_id, {})
-                run_record.setdefault("runid", run_id)
-                run_record.setdefault("point_id", run_id)
-                run_record.setdefault("wd", str(run_wd))
-                run_record["status"] = "failed"
-                run_record["error"] = error_payload
-                runner._runs[run_id] = run_record
-        except NoDbAlreadyLockedError as exc:
-            if attempt + 1 == max_tries:
-                logger.warning(
-                    "culvert_run %s/%s: failed to persist validation error after %d retries - %s",
-                    culvert_batch_uuid,
-                    run_id,
-                    max_tries,
-                    exc,
-                )
-                break
-            time.sleep(1.0)
-        except Exception as exc:
-            logger.warning(
-                "culvert_run %s/%s: failed to persist validation error - %s",
-                culvert_batch_uuid,
-                run_id,
-                exc,
-            )
-            break
-        else:
-            break
 
     logger.warning(
         "culvert_run %s/%s: validation failed - %s",

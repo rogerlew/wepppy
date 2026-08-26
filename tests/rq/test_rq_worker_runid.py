@@ -71,3 +71,31 @@ def test_perform_job_allows_jobs_without_runid(monkeypatch: pytest.MonkeyPatch) 
     assert job.saved is True
     assert "runid" not in job.meta
     assert isinstance(job.meta["pid"], int)
+
+
+def test_handle_job_failure_preserves_rq_exception_string(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    worker = object.__new__(WepppyRqWorker)
+    captured: dict[str, Any] = {}
+
+    def _handle_job_failure(
+        _self: object,
+        _job: object,
+        _queue: object,
+        _registry: object,
+        *,
+        exc_string: str,
+    ) -> None:
+        captured["exc_string"] = exc_string
+
+    monkeypatch.setattr(rq.Worker, "handle_job_failure", _handle_job_failure)
+    monkeypatch.setattr(
+        "wepppy.rq.rq_worker.StatusMessenger.publish",
+        lambda _channel, _message: 0,
+    )
+    job = _DummyJob("job-failed")
+
+    worker.handle_job_failure(job, object(), object(), exc_string="original traceback")
+
+    assert captured["exc_string"] == "original traceback"

@@ -116,6 +116,10 @@ services:
       ZOHO_NOREPLY_EMAIL_PASSWORD_FILE: /run/secrets/zoho_noreply_email_password
       OPENTOPOGRAPHY_API_KEY_FILE: /run/secrets/opentopography_api_key
       CLIMATE_ENGINE_API_KEY_FILE: /run/secrets/climate_engine_api_key
+      SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME:-__Host-weppcloud_session}
+      SESSION_COOKIE_PRIMARY_NAME: ${SESSION_COOKIE_PRIMARY_NAME:-__Host-weppcloud_session}
+      SESSION_COOKIE_LEGACY_NAME: ${SESSION_COOKIE_LEGACY_NAME:-session}
+      SESSION_COOKIE_MIGRATION_ENABLED: ${SESSION_COOKIE_MIGRATION_ENABLED:-true}
       PLAYWRIGHT_BROWSERS_PATH: /workdir/wepppy/weppcloud/static-src/.playwright-browsers
       PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS: "1"
 
@@ -460,6 +464,10 @@ services:
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
       WEPP_AUTH_JWT_SECRETS_FILE: /run/secrets/wepp_auth_jwt_secrets
       CAP_SECRET_FILE: /run/secrets/cap_secret
+      SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME:-__Host-weppcloud_session}
+      SESSION_COOKIE_PRIMARY_NAME: ${SESSION_COOKIE_PRIMARY_NAME:-__Host-weppcloud_session}
+      SESSION_COOKIE_LEGACY_NAME: ${SESSION_COOKIE_LEGACY_NAME:-session}
+      SESSION_COOKIE_MIGRATION_ENABLED: ${SESSION_COOKIE_MIGRATION_ENABLED:-true}
     command:
       - uvicorn
       - wepppy.microservices.rq_engine:app
@@ -580,25 +588,6 @@ services:
         echo "webpush service placeholder – update command once implementation is available.";
         tail -f /dev/null
     profiles: ["webpush"]
-
-  f-esri:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile.f-esri
-    image: wepppy-f-esri
-    container_name: wepppy-f-esri
-    init: true
-    user: "${UID:-1000}:${GID:-993}"
-    working_dir: /workdir/wepppy
-    command: ["tail", "-f", "/dev/null"]
-    volumes:
-      - ../:/workdir/wepppy
-      - ../../rosetta:/workdir/rosetta
-      - ../../peridot:/workdir/peridot
-      - ../../weppcloud-wbt:/workdir/weppcloud-wbt
-      - ../../wepppyo3:/workdir/wepppyo3
-      - /tank/wc1:/wc1
-      - /tank/geodata:/geodata
 
   redis:
     image: redis:latest

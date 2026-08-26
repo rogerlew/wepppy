@@ -18,7 +18,7 @@ pytestmark = pytest.mark.unit
 
 def test_pass_family_follows_selected_binary_release_sidecars() -> None:
     wepp = object.__new__(Wepp)
-    wepp._wepp_bin = "wepp_260727"
+    wepp._wepp_bin = "wepp_260726"
     wepp._pass_family = "legacy_ascii"
 
     assert wepp.pass_family == "hbp"

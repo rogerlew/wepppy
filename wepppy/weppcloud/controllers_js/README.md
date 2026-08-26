@@ -89,7 +89,7 @@ controller.bootstrap = function bootstrap(context) {
 - **`events.js` (`window.WCEvents`)** — Lightweight event emitter factory with `on/off/once/emit`, DOM bridge (`emitDom`), piping (`forward`), and `useEventMap` for opt-in event name validation during development.
 - **`forms.js` (`window.WCForms`)** — Form serialization compatible with jQuery semantics (`serializeForm`, `serializeFields`, `formToJSON`), value hydration (`applyValues`), and CSRF discovery (`findCsrfToken`). Checkboxes become booleans for object/JSON formats and remain URL encoded for query strings.
 - **`http.js` (`window.WCHttp`)** — Fetch wrapper that handles `site_prefix`, query params, timeout cancellation, CSRF propagation, and rich error reporting via `HttpError`. Convenience helpers `getJson`, `postJson`, and `postForm` encapsulate the common call patterns used across controllers. **All controller network requests must flow through `WCHttp` (or its helpers) so global interceptors, audit logging, and recorder tooling can observe traffic consistently.**
-- **`recorder_interceptor.js`** — Wraps `WCHttp.request` to emit recorder events before/after each backend call. Controllers do not interact with it directly, but the file must load immediately after `http.js` so audit capture stays reliable.
+- **`recorder_interceptor.js`** — Wraps `WCHttp.request` to emit recorder events before/after each backend call. Recorder batches use credentialed same-origin `fetch` with `keepalive` and the `X-CSRFToken` discovered through `WCHttp`; do not use `sendBeacon` for this CSRF-protected Flask route because Beacon cannot attach the required header reliably. Controllers do not interact with the interceptor directly, but the file must load immediately after `http.js` so audit capture stays reliable.
 
 Controllers should destructure what they need from the globals:
 
@@ -189,7 +189,10 @@ Bundled modules remain global so legacy controllers can incrementally migrate aw
 3. Classify rate limits by status first: treat `HTTP 429` as rate-limited even if payload parsing fails; use payload checks (`error.code=rate_limited`, canonical message) as fallback.
 4. Keep `baseIntervalMs` and `activeIntervalMs` separate; on 429 use bounded exponential backoff (`active = min(max(active*2, base), 30000)`), and reset `active` to `base` after the next successful poll.
 5. Keep polling during rate-limited and transient transport errors, while keeping user feedback visible (for example, `Retrying in Xs`).
-6. Stop polling only on terminal states (`finished`, `failed`, `stopped`, `canceled`, `not_found`) or explicit endpoint-specific max-error policy.
+6. Stop polling on terminal states (`finished`, `failed`, `stopped`, `canceled`,
+   `not_found`) and on `deferred`. A deferred receipt remains visible for
+   diagnostics but is retryable: the command stays enabled and the submission
+   endpoint atomically removes the superseded deferred workflow before enqueue.
 ## Views and DOM Contract
 - The HTML that controllers operate on lives under `wepppy/weppcloud/templates/controls/`. Each control has its own template (Pure variants such as `wepp_pure.htm`, `landuse_pure.htm`, etc.) and they extend the markup defined in `_pure_base.htm` (legacy `_base.htm` remains only for archived Bootstrap views).
 - `_pure_base.htm` defines the canonical form structure: `#status`, `#info`, `#rq_job`, `#stacktrace`, `#preflight_status`, and other fields that the JS expects. As long as new controls keep those IDs, `controlBase` can update the UI without per-controller duplication. Legacy `_base.htm` persists only for archived Bootstrap-era controls.

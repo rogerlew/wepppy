@@ -1,0 +1,44 @@
+{
+  "candidate_events": 11506,
+  "candidate_trials": 1027,
+  "event_pairs": 225654,
+  "external_evidence_bytes": 10231850560,
+  "external_evidence_files": 25356,
+  "input_snapshot_id": "2006d278ede4da5157e9d344863a64cef746b879106cf17b16c87d9c9a80542d",
+  "ledgers": {
+    "candidate-events.parquet": {
+      "bytes": 636673,
+      "sha256": "27f635c3718f235acf087b2354d1603be63c20080a8edd817393f6da1b2b73a3"
+    },
+    "denominator-ledger.json": {
+      "bytes": 3513,
+      "sha256": "ddbb12fbcbf45a423bd23b7a1054858cb85bee41d5159f4e5b518057436b6d62"
+    },
+    "event-pairs.parquet": {
+      "bytes": 7426392,
+      "sha256": "a5b5fab3aad38b1e5ad3b0d691a75070cbfa35c5d4a9baae3ae7ddc366bf4701"
+    },
+    "prevalence-summary-v2.json": {
+      "bytes": 3513,
+      "sha256": "ddbb12fbcbf45a423bd23b7a1054858cb85bee41d5159f4e5b518057436b6d62"
+    },
+    "storage-manifest-v2.json": {
+      "artifacts": 24265,
+      "bytes": 10455166,
+      "sha256": "2701ba390eb0297e79f040ced832d9eec114ec6bbb0fac0b715fbb317f15b905"
+    },
+    "terminal-ledger.parquet": {
+      "bytes": 262164,
+      "sha256": "e4698097a4667f538788edb38391070fa69c7c06f8069edaafe976f7fd2def72"
+    }
+  },
+  "plan_id": "b575fde4a28cf85f1d28e0dfff305472b5419fd9b3639d39dc437600617080de",
+  "schema_version": "1.0.0",
+  "selection_id": "2e450acbaa131c268fab70bd048480e1bc100990094071d74b432bf1579e3e3d",
+  "summary_id": "e5348e2e26adafc2fb858c0b96d8b5f7bb4dc1821e0f878f376c904a9d47f547",
+  "terminal_counts": {
+    "complete": 1088,
+    "failed": 0,
+    "stopped": 0
+  }
+}

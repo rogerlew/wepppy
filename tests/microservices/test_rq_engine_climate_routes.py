@@ -23,7 +23,17 @@ def _stub_queue(
     *,
     job_id: str = "job-123",
 ) -> dict[str, list[object]]:
+    from wepppy.rq import submission_recovery
+
     state: dict[str, list[object]] = {"calls": [], "jobs": []}
+
+    class DummyLock:
+        def acquire(self, **kwargs):
+            return True
+        def extend(self, *args, **kwargs): return True
+
+        def release(self):
+            return None
 
     class DummyJob:
         def __init__(self) -> None:
@@ -32,7 +42,7 @@ def _stub_queue(
 
     class DummyQueue:
         def __init__(self, *args, **kwargs) -> None:
-            pass
+            self.connection = kwargs["connection"]
 
         def enqueue_call(self, *args, **kwargs):
             state["calls"].append((args, kwargs))
@@ -43,6 +53,9 @@ def _stub_queue(
             return job
 
     class DummyRedis:
+        def lock(self, *args, **kwargs):
+            return DummyLock()
+
         def __enter__(self):
             return self
 
@@ -51,6 +64,7 @@ def _stub_queue(
 
     monkeypatch.setattr(climate_routes, "Queue", DummyQueue)
     monkeypatch.setattr(climate_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(submission_recovery, "new_rq_job_id", lambda: job_id)
     return state
 
 
@@ -58,6 +72,9 @@ def _stub_prep(monkeypatch: pytest.MonkeyPatch):
     state = {"removed": [], "jobs": []}
 
     class DummyPrep:
+        def get_rq_job_id(self, key):
+            return None
+
         def remove_timestamp(self, task, *args, **kwargs) -> None:
             state["removed"].append(task)
 
@@ -164,11 +181,17 @@ def test_build_climate_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
     assert prep_state["jobs"] == [("build_climate_rq", "job-88")]
     enqueue_args, enqueue_kwargs = queue_state["calls"][0]
     assert enqueue_args[0] is climate_routes.build_climate_rq
-    assert enqueue_args[1] == ("run-1",)
+    assert enqueue_kwargs["args"] == ("run-1",)
     assert "kwargs" not in enqueue_kwargs
-    assert enqueue_kwargs["meta"] == {"build_payload": request_payload}
+    assert enqueue_kwargs["meta"] == {
+        "build_payload": request_payload,
+        "runid": "run-1",
+    }
     queued_job = queue_state["jobs"][0]
-    assert getattr(queued_job, "meta") == {"build_payload": request_payload}
+    assert getattr(queued_job, "meta") == {
+        "build_payload": request_payload,
+        "runid": "run-1",
+    }
 
 
 def test_build_climate_propagates_nodir_preflight_errors(monkeypatch: pytest.MonkeyPatch) -> None:

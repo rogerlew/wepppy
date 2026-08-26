@@ -1374,7 +1374,11 @@ class Landuse(NoDbBase):
         with open(_join(frac_dir, 'fractionals.json'), 'w') as fp:
             json.dump(frac_d, fp, indent=2)
 
-    def _build_multiple_ofe(self) -> None:
+    def _build_multiple_ofe(
+        self,
+        *,
+        domlc_mofe_override: Optional[Mapping[str, Mapping[str, Any]]] = None,
+    ) -> None:
         from wepppy.nodb.mods.disturbed import Disturbed
 
         wd = self.wd
@@ -1386,7 +1390,15 @@ class Landuse(NoDbBase):
         else:
             _land_soil_replacements_d = None
 
-        if wepppyo3 is None:
+        if domlc_mofe_override is not None:
+            domlc_d = {
+                str(topaz_id): {
+                    str(mofe_id): str(dom)
+                    for mofe_id, dom in ofe_map.items()
+                }
+                for topaz_id, ofe_map in domlc_mofe_override.items()
+            }
+        elif wepppyo3 is None:
             lc = LandcoverMap(self.lc_fn)
             domlc_d = lc.build_lcgrid(watershed.subwta, watershed.mofe_map)
         else:
@@ -1416,7 +1428,7 @@ class Landuse(NoDbBase):
             burn_grass = disturbed.burn_grass
             sbs = disturbed.get_sbs()
 
-            if sbs is not None:
+            if sbs is not None and domlc_mofe_override is None:
                 self.logger.info('Applying burn severities to landuse by multiple OFE')
 
                 wait_s = get_peridot_input_wait_s()

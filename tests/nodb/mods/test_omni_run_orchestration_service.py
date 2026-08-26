@@ -378,8 +378,10 @@ def test_run_omni_scenario_defers_hillslope_source_deletion_until_after_watershe
     monkeypatch.setitem(sys.modules, "wepppy.nodb.mods.omni.omni", omni_module)
 
     omni = _OmniScenarioRunStub()
+    previous_cwd = Path.cwd()
     scenario_wd_result, scenario_name = service.run_omni_scenario(omni, {"type": "uniform_low"})
 
+    assert Path.cwd() == previous_cwd
     assert scenario_wd_result == str(scenario_wd)
     assert scenario_name == "uniform_low"
     assert mode_calls == [("uniform_low", str(scenario_wd))]
@@ -394,6 +396,25 @@ def test_run_omni_scenario_defers_hillslope_source_deletion_until_after_watershe
     assert wepp_stub.calls[:3] == ["prep_hillslopes", "run_hillslopes", "prep_watershed"]
     assert wepp_stub.calls[-1] == "run_watershed"
     assert cleanup_calls == [wepp_stub]
+
+
+def test_run_omni_scenario_restores_cwd_when_scenario_fails(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = OmniRunOrchestrationService()
+    previous_cwd = Path.cwd()
+
+    def _fail_after_chdir(_omni, _scenario_def):
+        os.chdir(tmp_path)
+        raise RuntimeError("scenario failed")
+
+    monkeypatch.setattr(service, "_run_omni_scenario", _fail_after_chdir)
+
+    with pytest.raises(RuntimeError, match="scenario failed"):
+        service.run_omni_scenario(object(), {})
+
+    assert Path.cwd() == previous_cwd
 
 
 def test_run_omni_scenarios_skip_and_execute_persist_state(

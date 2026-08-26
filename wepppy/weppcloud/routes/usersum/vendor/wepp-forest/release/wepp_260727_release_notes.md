@@ -1,5 +1,14 @@
 # WEPP 260727 Release Notes
 
+Status: Withdrawn from the WEPPpy vendor set on 2026-08-05.
+
+The release remains documented for historical provenance, but its watershed
+and hillslope binaries and sidecars are no longer distributed by WEPPpy. The
+sidecar contract selects HBP output exclusively; those files cannot be merged
+with legacy flat-file pass inputs used by workflows such as AgFields
+integrated-watershed assembly. Persisted projects must explicitly select a
+compatible installed binary and regenerate dependent pass artifacts.
+
 ## Summary
 
 WEPP `260727` corrects hillslope-area indexing in direct-HBP watershed runs.

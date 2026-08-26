@@ -14,17 +14,23 @@ from __future__ import annotations
 
 import argparse
 import csv
+import fcntl
 import json
 import logging
 import os
 import sys
 import time
+import uuid
 from collections import Counter
+from contextlib import ExitStack, contextmanager
 from dataclasses import dataclass
 from datetime import datetime
 from glob import glob
 from pathlib import Path
-from typing import Iterable, Optional
+from typing import Iterable, Iterator, Optional
+
+import pyarrow as pa
+import pyarrow.parquet as pq
 
 from wepppy.nodb import Ron, Watershed
 
@@ -78,6 +84,16 @@ class RunMetrics:
     access_count: int
     last_accessed: Optional[datetime]
     first_accessed: Optional[datetime]
+
+
+@dataclass
+class ArtifactHealth:
+    watershed_readable: int = 0
+    watershed_missing: int = 0
+    watershed_errors: int = 0
+    ash_readable: int = 0
+    ash_missing: int = 0
+    ash_errors: int = 0
 
 
 def _log_info(logger: Optional[logging.Logger], message: str, *args: object) -> None:
@@ -203,10 +219,59 @@ def _parse_access_line(line: str) -> Optional[tuple[str, str, datetime]]:
     return email, ip, timestamp
 
 
+def _parquet_row_count(
+    path: Path,
+    runid: str,
+    artifact: str,
+    health: ArtifactHealth,
+    *,
+    logger: Optional[logging.Logger] = None,
+) -> int:
+    try:
+        path.stat()
+    except FileNotFoundError:
+        setattr(health, f"{artifact}_missing", getattr(health, f"{artifact}_missing") + 1)
+        return 0
+    except OSError as exc:
+        setattr(health, f"{artifact}_errors", getattr(health, f"{artifact}_errors") + 1)
+        _log_warning(logger, "failed to stat %s parquet for %s (%s): %s", artifact, runid, path, exc)
+        return 0
+
+    try:
+        row_count = pq.ParquetFile(path).metadata.num_rows
+    except (FileNotFoundError, OSError, pa.ArrowException) as exc:
+        setattr(health, f"{artifact}_errors", getattr(health, f"{artifact}_errors") + 1)
+        _log_warning(logger, "failed to read %s parquet for %s (%s): %s", artifact, runid, path, exc)
+        return 0
+
+    setattr(health, f"{artifact}_readable", getattr(health, f"{artifact}_readable") + 1)
+    return row_count
+
+
+def _validate_artifact_health(log_count: int, health: ArtifactHealth) -> None:
+    if log_count == 0:
+        return
+    if health.watershed_readable == 0:
+        raise RuntimeError("refusing to publish: no watershed hillslopes parquet was readable")
+
+    if health.watershed_errors >= 10 and health.watershed_errors / log_count >= 0.25:
+        raise RuntimeError(
+            "refusing to publish: systemic watershed parquet errors "
+            f"({health.watershed_errors}/{log_count} runs)"
+        )
+
+    if health.ash_errors >= 10 and health.ash_errors / log_count >= 0.25:
+        raise RuntimeError(
+            "refusing to publish: systemic ash parquet errors "
+            f"({health.ash_errors}/{log_count} runs)"
+        )
+
+
 def _load_run_metadata(
     run_dir: Path,
     runid: str,
     *,
+    artifact_health: Optional[ArtifactHealth] = None,
     logger: Optional[logging.Logger] = None,
 ) -> tuple[Optional[str], Optional[bool], int, int, Optional[float], Optional[float]]:
     config = None
@@ -219,27 +284,31 @@ def _load_run_metadata(
     except Exception as exc:
         _log_warning(logger, "failed to load Ron for %s (%s): %s", runid, run_dir, exc)
 
-    try:
-        hillslopes = len(glob(str(run_dir / "wepp" / "runs" / "*.slp")))
-    except OSError as exc:
-        _log_warning(logger, "failed to scan hillslopes for %s (%s): %s", runid, run_dir, exc)
-        hillslopes = 0
-    try:
-        ash_hillslopes = len(glob(str(run_dir / "ash" / "*ash.csv")))
-    except OSError as exc:
-        _log_warning(logger, "failed to scan ash hillslopes for %s (%s): %s", runid, run_dir, exc)
-        ash_hillslopes = 0
+    health = artifact_health if artifact_health is not None else ArtifactHealth()
+    hillslopes = _parquet_row_count(
+        run_dir / "watershed" / "hillslopes.parquet",
+        runid,
+        "watershed",
+        health,
+        logger=logger,
+    )
+    ash_hillslopes = _parquet_row_count(
+        run_dir / "ash" / "post" / "hillslope_annuals.parquet",
+        runid,
+        "ash",
+        health,
+        logger=logger,
+    )
 
     centroid_longitude: Optional[float] = None
     centroid_latitude: Optional[float] = None
-    if hillslopes > 0:
-        try:
-            watershed = Watershed.getInstance(str(run_dir))
-            centroid = watershed.centroid
-            if centroid is not None:
-                centroid_longitude, centroid_latitude = centroid
-        except Exception as exc:
-            _log_warning(logger, "failed to load centroid for %s (%s): %s", runid, run_dir, exc)
+    try:
+        watershed = Watershed.getInstance(str(run_dir))
+        centroid = watershed.centroid
+        if centroid is not None:
+            centroid_longitude, centroid_latitude = centroid
+    except Exception as exc:
+        _log_warning(logger, "failed to load centroid for %s (%s): %s", runid, run_dir, exc)
 
     return config, has_sbs, hillslopes, ash_hillslopes, centroid_longitude, centroid_latitude
 
@@ -276,7 +345,133 @@ def _write_csv(path: Path, rows: list[list[object]], header: list[str]) -> None:
     tmp_path.replace(path)
 
 
-def compile_dot_logs(
+def _candidate_path(path: Path, generation_id: str) -> Path:
+    return path.with_name(f"{path.name}.candidate.{generation_id}")
+
+
+@contextmanager
+def _compile_lock(output_dir: Path) -> Iterator[None]:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    lock_path = output_dir / ".compile_dot_logs.lock"
+    with lock_path.open("a+", encoding="utf-8") as lock_handle:
+        try:
+            fcntl.flock(lock_handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as exc:
+            raise RuntimeError("compile_dot_logs is already running for this output directory") from exc
+        try:
+            yield
+        finally:
+            fcntl.flock(lock_handle.fileno(), fcntl.LOCK_UN)
+
+
+@contextmanager
+def _compile_locks(output_dirs: Iterable[Path]) -> Iterator[None]:
+    unique_dirs = sorted({path.resolve() for path in output_dirs}, key=str)
+    with ExitStack() as stack:
+        for output_dir in unique_dirs:
+            stack.enter_context(_compile_lock(output_dir))
+        yield
+
+
+def _publish_candidates(
+    publications: tuple[tuple[Path, Path], ...],
+    generation_id: str,
+    *,
+    logger: Optional[logging.Logger] = None,
+) -> None:
+    output_dir = publications[0][1].parent
+    journal_path = output_dir / f".compile_dot_logs.publish.{generation_id}.json"
+    publication_states = [
+        {"candidate": str(candidate), "target": str(target), "existed": target.exists()}
+        for candidate, target in publications
+    ]
+    _write_json(
+        journal_path,
+        {"publications": publication_states},
+    )
+    backups = {
+        Path(state["target"]): Path(state["target"]).with_name(
+            f"{Path(state['target']).name}.last-good.{generation_id}"
+        )
+        for state in publication_states
+        if state["existed"]
+    }
+    try:
+        for candidate, target in publications:
+            backup = backups.get(target)
+            if backup is not None:
+                target.replace(backup)
+            candidate.replace(target)
+    except Exception as promotion_exc:
+        # Transaction boundary: RQ timeouts are Exception subclasses and must
+        # leave a durable journal if any rollback operation also fails.
+        rollback_error: Optional[OSError] = None
+        for _candidate, target in reversed(publications):
+            backup = backups.get(target)
+            try:
+                if backup is not None and backup.exists():
+                    backup.replace(target)
+                elif backup is None:
+                    target.unlink(missing_ok=True)
+            except OSError as exc:
+                rollback_error = rollback_error or exc
+        if rollback_error is None:
+            journal_path.unlink(missing_ok=True)
+        raise promotion_exc
+    finally:
+        for candidate, _target in publications:
+            candidate.unlink(missing_ok=True)
+
+    journal_path.unlink(missing_ok=True)
+    for backup in backups.values():
+        try:
+            backup.unlink(missing_ok=True)
+        except OSError as exc:
+            _log_warning(logger, "failed to remove publication backup %s: %s", backup, exc)
+
+
+def _recover_interrupted_publications(
+    output_dirs: Iterable[Path],
+    *,
+    logger: Optional[logging.Logger] = None,
+) -> None:
+    resolved_output_dirs = {output_dir.resolve() for output_dir in output_dirs}
+    for output_dir in resolved_output_dirs:
+        for journal_path in output_dir.glob(".compile_dot_logs.publish.*.json"):
+            _recover_publication_journal(journal_path, resolved_output_dirs, logger=logger)
+
+
+def _recover_publication_journal(
+    journal_path: Path,
+    resolved_output_dirs: set[Path],
+    *,
+    logger: Optional[logging.Logger] = None,
+) -> None:
+        with journal_path.open("r", encoding="utf-8") as handle:
+            payload = json.load(handle)
+        for publication in payload.get("publications", []):
+            candidate = Path(publication["candidate"])
+            target = Path(publication["target"])
+            if candidate.parent.resolve() not in resolved_output_dirs or target.parent.resolve() not in resolved_output_dirs:
+                raise RuntimeError(f"unsafe compile_dot_logs publication journal path in {journal_path}")
+            generation_id = journal_path.name.removeprefix(".compile_dot_logs.publish.").removesuffix(".json")
+            backup = target.with_name(f"{target.name}.last-good.{generation_id}")
+            if backup.exists():
+                backup.replace(target)
+            elif not publication["existed"]:
+                target.unlink(missing_ok=True)
+            candidate.unlink(missing_ok=True)
+        journal_path.unlink(missing_ok=True)
+        _log_warning(logger, "recovered interrupted compile_dot_logs publication %s", journal_path)
+
+
+def _cleanup_generation_files(output_dirs: Iterable[Path], generation_id: str) -> None:
+    for output_dir in {path.resolve() for path in output_dirs}:
+        for path in output_dir.glob(f"*.candidate.{generation_id}*"):
+            path.unlink(missing_ok=True)
+
+
+def _compile_dot_logs_locked(
     *,
     access_log_path: Optional[str] = None,
     run_locations_path: Optional[str] = None,
@@ -284,6 +479,7 @@ def compile_dot_logs(
     legacy_roots: Optional[list[str]] = None,
     logger: Optional[logging.Logger] = None,
     progress_every: int = DEFAULT_PROGRESS_EVERY,
+    generation_id: str,
 ) -> dict[str, int]:
     started_at = time.perf_counter()
     access_path = _resolve_access_log_path(access_log_path)
@@ -313,25 +509,30 @@ def compile_dot_logs(
         discover_elapsed,
     )
 
+    output_paths = (access_path, run_locations_path, runs_counter_path, run_counts_path)
+    if not logs and any(path.exists() for path in output_paths):
+        raise RuntimeError("refusing to replace existing outputs after zero-log discovery")
+
     run_metrics: dict[str, RunMetrics] = {}
     access_rows_count = 0
+    artifact_health = ArtifactHealth()
 
     parse_started_at = time.perf_counter()
     access_path.parent.mkdir(parents=True, exist_ok=True)
-    access_tmp_path = access_path.with_name(access_path.name + ".tmp")
-    with access_tmp_path.open('w', newline='', encoding='utf-8') as access_handle:
+    access_candidate_path = _candidate_path(access_path, generation_id)
+    with access_candidate_path.open('w', newline='', encoding='utf-8') as access_handle:
         access_writer = csv.writer(access_handle)
         access_writer.writerow(ACCESS_LOG_HEADER)
 
         for index, log in enumerate(logs, start=1):
-            config, has_sbs, hillslopes, ash_hillslopes, centroid_longitude, centroid_latitude = _load_run_metadata(
-                log.run_dir,
-                log.runid,
-                logger=logger,
-            )
-
             metrics = run_metrics.get(log.runid)
             if metrics is None:
+                config, has_sbs, hillslopes, ash_hillslopes, centroid_longitude, centroid_latitude = _load_run_metadata(
+                    log.run_dir,
+                    log.runid,
+                    artifact_health=artifact_health,
+                    logger=logger,
+                )
                 metrics = RunMetrics(
                     runid=log.runid,
                     run_name=_derive_run_name(log.runid),
@@ -362,12 +563,12 @@ def compile_dot_logs(
                             metrics.first_accessed = timestamp
                         access_writer.writerow([
                             log.runid,
-                            config,
-                            has_sbs,
-                            hillslopes,
-                            ash_hillslopes,
-                            centroid_longitude,
-                            centroid_latitude,
+                            metrics.config,
+                            metrics.has_sbs,
+                            metrics.hillslopes,
+                            metrics.ash_hillslopes,
+                            metrics.centroid_longitude,
+                            metrics.centroid_latitude,
                             timestamp.year,
                             email,
                             ip,
@@ -388,14 +589,25 @@ def compile_dot_logs(
                     time.perf_counter() - parse_started_at,
                 )
 
-    access_tmp_path.replace(access_path)
     parse_elapsed = time.perf_counter() - parse_started_at
     _log_info(
         logger,
-        "compile_dot_logs wrote access.csv rows=%d in %.1fs",
+        "compile_dot_logs staged access.csv rows=%d in %.1fs",
         access_rows_count,
         parse_elapsed,
     )
+
+    _log_info(
+        logger,
+        "compile_dot_logs artifact health: watershed_readable=%d watershed_missing=%d watershed_errors=%d ash_readable=%d ash_missing=%d ash_errors=%d",
+        artifact_health.watershed_readable,
+        artifact_health.watershed_missing,
+        artifact_health.watershed_errors,
+        artifact_health.ash_readable,
+        artifact_health.ash_missing,
+        artifact_health.ash_errors,
+    )
+    _validate_artifact_health(len(run_metrics), artifact_health)
 
     try:
         from wepppy.weppcloud.utils.run_ttl import read_ttl_state, touch_ttl, DELETE_STATE_ACTIVE
@@ -424,23 +636,6 @@ def compile_dot_logs(
             except Exception as exc:
                 _log_warning(logger, "failed to read TTL for %s: %s", metrics.runid, exc)
 
-        if metrics.centroid_longitude is None or metrics.centroid_latitude is None:
-            continue
-
-        last_accessed = _format_datetime(metrics.last_accessed)
-        run_locations.append({
-            "runid": metrics.runid,
-            "run_name": metrics.run_name,
-            "coordinates": [metrics.centroid_longitude, metrics.centroid_latitude],
-            "config": metrics.config,
-            "year": metrics.last_accessed.year if metrics.last_accessed else None,
-            "has_sbs": bool(metrics.has_sbs) if metrics.has_sbs is not None else False,
-            "hillslopes": metrics.hillslopes,
-            "ash_hillslopes": metrics.ash_hillslopes,
-            "access_count": metrics.access_count,
-            "last_accessed": last_accessed,
-        })
-
         first_access = metrics.first_accessed
         if metrics.config and first_access and first_access > datetime(2024, 1, 1):
             config = metrics.config.split('?')[0]
@@ -467,6 +662,23 @@ def compile_dot_logs(
             runs_counter['hillruns'] += metrics.hillslopes
             runs_counter['ash_hillruns'] += metrics.ash_hillslopes
 
+        if metrics.centroid_longitude is None or metrics.centroid_latitude is None:
+            continue
+
+        last_accessed = _format_datetime(metrics.last_accessed)
+        run_locations.append({
+            "runid": metrics.runid,
+            "run_name": metrics.run_name,
+            "coordinates": [metrics.centroid_longitude, metrics.centroid_latitude],
+            "config": metrics.config,
+            "year": metrics.last_accessed.year if metrics.last_accessed else None,
+            "has_sbs": bool(metrics.has_sbs) if metrics.has_sbs is not None else False,
+            "hillslopes": metrics.hillslopes,
+            "ash_hillslopes": metrics.ash_hillslopes,
+            "access_count": metrics.access_count,
+            "last_accessed": last_accessed,
+        })
+
         if progress_every > 0 and index % progress_every == 0:
             _log_info(
                 logger,
@@ -478,8 +690,11 @@ def compile_dot_logs(
             )
 
     run_locations.sort(key=lambda entry: entry.get("last_accessed") or "", reverse=True)
-    _write_json(run_locations_path, run_locations)
-    _write_json(runs_counter_path, runs_counter)
+    run_locations_candidate_path = _candidate_path(run_locations_path, generation_id)
+    runs_counter_candidate_path = _candidate_path(runs_counter_path, generation_id)
+    run_counts_candidate_path = _candidate_path(run_counts_path, generation_id)
+    _write_json(run_locations_candidate_path, run_locations)
+    _write_json(runs_counter_candidate_path, runs_counter)
 
     run_counts_rows = [
         [
@@ -494,10 +709,17 @@ def compile_dot_logs(
     ]
     run_counts_rows.sort(key=lambda row: row[0])
     _write_csv(
-        run_counts_path,
+        run_counts_candidate_path,
         run_counts_rows,
         header=RUN_COUNTS_HEADER,
     )
+
+    _publish_candidates((
+        (access_candidate_path, access_path),
+        (run_locations_candidate_path, run_locations_path),
+        (runs_counter_candidate_path, runs_counter_path),
+        (run_counts_candidate_path, run_counts_path),
+    ), generation_id, logger=logger)
 
     build_elapsed = time.perf_counter() - build_started_at
     total_elapsed = time.perf_counter() - started_at
@@ -520,6 +742,35 @@ def compile_dot_logs(
         "run_locations": len(run_locations),
         "runs": len(run_metrics),
     }
+
+
+def compile_dot_logs(
+    *,
+    access_log_path: Optional[str] = None,
+    run_locations_path: Optional[str] = None,
+    run_roots: Optional[list[str]] = None,
+    legacy_roots: Optional[list[str]] = None,
+    logger: Optional[logging.Logger] = None,
+    progress_every: int = DEFAULT_PROGRESS_EVERY,
+) -> dict[str, int]:
+    access_path = _resolve_access_log_path(access_log_path)
+    locations_path = _resolve_run_locations_path(access_path, run_locations_path)
+    output_dirs = {access_path.parent, locations_path.parent}
+    generation_id = uuid.uuid4().hex
+    with _compile_locks(output_dirs):
+        _recover_interrupted_publications(output_dirs, logger=logger)
+        try:
+            return _compile_dot_logs_locked(
+                access_log_path=str(access_path),
+                run_locations_path=str(locations_path),
+                run_roots=run_roots,
+                legacy_roots=legacy_roots,
+                logger=logger,
+                progress_every=progress_every,
+                generation_id=generation_id,
+            )
+        finally:
+            _cleanup_generation_files(output_dirs, generation_id)
 
 
 def main() -> None:

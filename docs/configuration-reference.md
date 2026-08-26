@@ -72,7 +72,10 @@ Consolidated configuration surfaces discovered from:
 | `REMEMBER_COOKIE_SECURE` | `python: true` | `wepppy.weppcloud.configuration` | Remember-me cookie `Secure` attribute. |
 | `REMEMBER_COOKIE_HTTPONLY` | `python: true` | `wepppy.weppcloud.configuration` | Remember-me cookie `HttpOnly` attribute. |
 | `REMEMBER_COOKIE_REFRESH_EACH_REQUEST` | `python: false` | `wepppy.weppcloud.configuration` | Refresh remember-me cookie each request. |
-| `SESSION_COOKIE_NAME` | `python: session` | `wepppy.microservices.rq_engine.session_routes` | Cookie name used to read the Flask session ID. |
+| `SESSION_COOKIE_NAME` | `python: session` | `wepppy.weppcloud.configuration`; `wepppy.microservices.rq_engine.session_routes` | Cookie name written by Flask. Keep `session` during reader-first deployment, then activate `__Host-weppcloud_session`. |
+| `SESSION_COOKIE_PRIMARY_NAME` | `python: SESSION_COOKIE_NAME` | `wepppy.weppcloud.configuration`; `wepppy.microservices.rq_engine.session_routes` | Highest-precedence session cookie read by Flask and rq-engine. Set to `__Host-weppcloud_session` throughout reader-first and activation phases. |
+| `SESSION_COOKIE_LEGACY_NAME` | `python: session` | `wepppy.weppcloud.configuration`; `wepppy.microservices.rq_engine.session_routes` | Fallback session cookie read during the bounded migration window. |
+| `SESSION_COOKIE_MIGRATION_ENABLED` | `python: false` | `wepppy.weppcloud.configuration`; `wepppy.microservices.rq_engine.session_routes` | Enables bounded primary/legacy cookie selection and migration fencing. |
 | `SESSION_USE_SIGNER` | `python: true` | `wepppy.microservices.rq_engine.session_routes` | Whether to unsign the Flask session cookie (`itsdangerous` signer). |
 | `SESSION_KEY_PREFIX` | `python: session:` | `wepppy.microservices.rq_engine.session_routes` | Redis key prefix for server-side Flask sessions. |
 | `WEPP_BROWSE_JWT_COOKIE_NAME` | `python: wepp_browse_jwt` | `wepppy.microservices.rq_engine.session_routes` | Base name for per-run browse JWT cookies. |
@@ -186,6 +189,8 @@ Consolidated configuration surfaces discovered from:
 | Variable / Surface | Default | Used by | Description |
 |---|---:|---|---|
 | `WEPPPY_LOCK_TTL_SECONDS` | `python: 21600` | `wepppy.nodb.base` | Default distributed lock TTL in seconds (applies to NoDb locking). |
+| `OPENFILEGDB_COMMAND_TIMEOUT` | `python: 1800` | `wepppy.nodb.mods.features_export` | Maximum seconds allowed for direct GeoPackage-to-OpenFileGDB conversion. |
+| `FEATURES_EXPORT_OGR2OGR_BINARY` | `python: ogr2ogr` | `wepppy.nodb.mods.features_export` | Executable used for direct OpenFileGDB conversion. |
 | `WEPP_NODIR_DEFAULT_NEW_RUNS` | `python: true` | `wepppy.nodir.mutations` | Global gate for seeding `WD/.nodir/default_archive_roots.json`; false disables marker creation even when config opts in. |
 | `[nodb].apply_nodir` (`wepppy/nodb/configs/*.cfg`) | `_defaults.toml: false` | `wepppy.microservices.rq_engine.project_routes`; `wepppy.microservices.rq_engine.upload_huc_fire_routes`; `wepppy.weppcloud.routes.test_bp` | Per-config opt-in for default NoDir marker seeding during run creation. |
 | `wepppy/nodb/configs/*.cfg` | — | `wepppy.nodb.base` | NoDb controller configuration basenames (`get_configs()`). |
@@ -228,7 +233,6 @@ use `--write` only when intentionally normalizing those tracked sources.
 | `METQUERY_PORT` | `compose(prod): 8004` | compose(prod): `metquery` | Host port mapping for metquery service. |
 | `WMESQUE_PORT` | `compose(prod): 8003` | compose(prod): `wmesque` | Host port mapping for wmesque service. |
 | `WMESQUE2_PORT` | `compose(prod): 8030` | compose(prod): `wmesque2` | Host port mapping for wmesque2 service. |
-| `F_ESRI_IMAGE` | `compose(prod): wepppy-f-esri:latest` | compose (image selection; `f-esri`) | f-esri image tag override. |
 | `WEPPCLOUD_STATUS_IMAGE` | `compose(prod): wepppy-status:latest` | compose(prod): `status` | status service image tag override. |
 | `WEPPCLOUD_PREFLIGHT_IMAGE` | `compose(prod): wepppy-preflight:latest` | compose(prod): `preflight` | preflight service image tag override. |
 | `WEPPCLOUDR_IMAGE` | `compose(prod): weppcloudr:latest` | compose(prod): `weppcloudr` | weppcloudr image tag override. |

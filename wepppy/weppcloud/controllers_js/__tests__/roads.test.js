@@ -352,6 +352,23 @@ describe("Roads controller", () => {
         );
     });
 
+    test("deferred tracked job clears the client latch and permits retry", async () => {
+        await roads.runRoads();
+        await Promise.resolve();
+
+        roads.triggerEvent("job:retryable", { status: "deferred", job_id: "roads-job-1" });
+        await roads.prepareSegments();
+        await Promise.resolve();
+
+        expect(baseInstance.disconnect_status_stream).toHaveBeenCalled();
+        expect(httpMock.request).toHaveBeenCalledTimes(2);
+        expect(httpMock.request).toHaveBeenNthCalledWith(
+            2,
+            "/runs/test-run/test-config/tasks/roads/prepare_segments",
+            expect.objectContaining({ method: "POST", form: expect.any(HTMLFormElement) })
+        );
+    });
+
     test("completion events must match active job id", async () => {
         await roads.runRoads();
         await Promise.resolve();

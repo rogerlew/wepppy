@@ -33,6 +33,22 @@ def run_compose(context: CLIContext, args: Sequence[str], check: bool = True) ->
     )
 
 
+def compose_service_names(context: CLIContext) -> tuple[str, ...]:
+    """Return service names from the effective Compose topology."""
+    args = ["config", "--services"]
+    command = _compose_prefix(context) + args
+    context.logger.info("docker compose %s", _format_args(args))
+    result = subprocess.run(
+        command,
+        check=True,
+        cwd=str(context.project_dir),
+        env=context.environment,
+        capture_output=True,
+        text=True,
+    )
+    return tuple(line.strip() for line in result.stdout.splitlines() if line.strip())
+
+
 def compose_exec(
     context: CLIContext,
     service: str,

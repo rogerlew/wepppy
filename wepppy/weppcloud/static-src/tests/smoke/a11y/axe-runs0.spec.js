@@ -25,6 +25,14 @@ const requireAgentCredentials = ['1', 'true', 'yes'].includes(
   String(process.env.SMOKE_AGENT_REQUIRED || '').trim().toLowerCase()
 );
 const agentCredentialsFileOverride = process.env.SMOKE_AGENT_CREDENTIALS_FILE || '';
+const migrationRestartWaitMs = Math.min(
+  Math.max(Number.parseInt(process.env.SMOKE_SESSION_MIGRATION_RESTART_WAIT_MS || '0', 10) || 0, 0),
+  60000
+);
+const mixedVersionActivationWaitMs = Math.min(
+  Math.max(Number.parseInt(process.env.SMOKE_MIXED_VERSION_ACTIVATION_WAIT_MS || '0', 10) || 0, 0),
+  60000
+);
 
 const sitePrefix = (() => {
   const hasSmokePrefix = Object.prototype.hasOwnProperty.call(process.env, 'SMOKE_SITE_PREFIX');
@@ -212,19 +220,32 @@ async function probeAuthenticatedSession(page) {
     };
   }
 
-  const probeResponse = await page.request.post(buildUrl(withSitePrefix('/api/auth/rq-engine-token')), {
-    headers: csrfHeaders(csrfToken),
+  const probeResult = await page.evaluate(async ({ endpoint, token }) => {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'X-CSRFToken': token },
+    });
+    return {
+      ok: response.ok,
+      status: response.status,
+      statusText: response.statusText,
+      body: await response.text(),
+    };
+  }, {
+    endpoint: buildUrl(withSitePrefix('/api/auth/rq-engine-token')),
+    token: csrfToken,
   });
-  if (probeResponse.ok()) {
-    return { authenticated: true, status: probeResponse.status(), reason: 'authenticated' };
+  if (probeResult.ok) {
+    return { authenticated: true, status: probeResult.status, reason: 'authenticated' };
   }
 
-  const body = (await probeResponse.text()).trim();
+  const body = String(probeResult.body || '').trim();
   const bodyPreview = body ? ` Body: ${body.slice(0, 160)}` : '';
   return {
     authenticated: false,
-    status: probeResponse.status(),
-    reason: `auth probe failed (${probeResponse.status()} ${probeResponse.statusText()}).${bodyPreview}`,
+    status: probeResult.status,
+    reason: `auth probe failed (${probeResult.status} ${probeResult.statusText}).${bodyPreview}`,
   };
 }
 
@@ -232,7 +253,11 @@ async function mirrorSecureAuthCookiesForHttp(page) {
   const rootUrl = new URL(buildUrl(withSitePrefix('/')));
   const cookies = await page.context().cookies();
   const mirrored = cookies
-    .filter((cookie) => (cookie.name === 'session' || cookie.name === 'remember_token') && cookie.secure)
+    .filter((cookie) => (
+      cookie.name === 'session'
+      || cookie.name === 'weppcloud_session'
+      || cookie.name === 'remember_token'
+    ) && cookie.secure)
     .map((cookie) => ({
       name: cookie.name,
       value: cookie.value,
@@ -302,11 +327,10 @@ function buildCapPairs(challengePayload) {
 }
 
 function solvePowNonce(salt, targetHex) {
-  const target = Buffer.from(targetHex, 'hex');
   let nonce = 0;
   while (true) {
-    const digest = createHash('sha256').update(`${salt}${nonce}`, 'utf8').digest();
-    if (digest.subarray(0, target.length).equals(target)) {
+    const digestHex = createHash('sha256').update(`${salt}${nonce}`, 'utf8').digest('hex');
+    if (digestHex.startsWith(targetHex)) {
       return nonce;
     }
     nonce += 1;
@@ -377,7 +401,7 @@ async function completeLoginCapIfPresent(page, loginForm) {
   return { verified: true, reason: 'Login CAP challenge completed.' };
 }
 
-async function ensureAgentSession(page) {
+async function ensureAgentSession(page, { remember = true } = {}) {
   if (!agentCredentials) {
     return {
       authenticated: false,
@@ -418,7 +442,11 @@ async function ensureAgentSession(page) {
 
   const rememberField = loginForm.locator('input[name="remember"]');
   if ((await rememberField.count()) > 0) {
-    await rememberField.check({ force: true });
+    if (remember) {
+      await rememberField.check({ force: true });
+    } else {
+      await rememberField.uncheck({ force: true });
+    }
   }
 
   const capResult = await completeLoginCapIfPresent(page, loginForm);
@@ -830,6 +858,144 @@ test.describe('axe accessibility smoke', () => {
 
     const entry = await runAxeScan(page, 'weppcloud-profile');
     console.log(`[axe] ${entry.pageId}: ${entry.violationCount} violations`);
+  });
+
+  test('legacy session migration preserves authenticated SID without remember cookie', async ({ page }) => {
+    await page.setExtraHTTPHeaders(forwardedProtoHeader);
+    const loginResult = await ensureAgentSession(page, { remember: false });
+    expect(loginResult.authenticated, loginResult.reason).toBe(true);
+
+    const cookiesAfterLogin = await page.context().cookies();
+    const primary = cookiesAfterLogin.find((cookie) => cookie.name === '__Host-weppcloud_session');
+    expect(primary, 'login must issue the owned primary session cookie').toBeTruthy();
+    expect(cookiesAfterLogin.some((cookie) => cookie.name === 'remember_token')).toBe(false);
+
+    await page.context().clearCookies({ name: '__Host-weppcloud_session' });
+    await page.context().addCookies([{
+      name: 'session',
+      value: primary.value,
+      url: new URL(buildUrl(withSitePrefix('/'))).origin,
+      secure: true,
+      httpOnly: true,
+      sameSite: primary.sameSite,
+    }]);
+    if (migrationRestartWaitMs > 0) {
+      console.log(`[migration-canary] waiting ${migrationRestartWaitMs}ms for WEPPcloud restart`);
+      await page.waitForTimeout(migrationRestartWaitMs);
+    }
+
+    const profileReady = await ensureProfilePageReady(page);
+    expect(profileReady.ready, profileReady.reason).toBe(true);
+    await expect(page.locator('.wc-profile')).toBeVisible();
+    const probe = await probeAuthenticatedSession(page);
+    expect(probe.authenticated, probe.reason).toBe(true);
+
+    const cookiesAfterMigration = await page.context().cookies();
+    const migrated = cookiesAfterMigration.find(
+      (cookie) => cookie.name === '__Host-weppcloud_session'
+    );
+    expect(migrated, 'legacy adoption must issue the owned primary cookie').toBeTruthy();
+    expect(migrated.value).toBe(primary.value);
+    expect(cookiesAfterMigration.some((cookie) => cookie.name === 'remember_token')).toBe(false);
+  });
+
+  test('logout clears remember cookie before opt-out login', async ({ page }) => {
+    await page.setExtraHTTPHeaders(forwardedProtoHeader);
+    const rememberedLogin = await ensureAgentSession(page, { remember: true });
+    expect(rememberedLogin.authenticated, rememberedLogin.reason).toBe(true);
+
+    const rememberedCookies = await page.context().cookies();
+    const rememberedPrimary = rememberedCookies.find(
+      (cookie) => cookie.name === '__Host-weppcloud_session'
+    );
+    expect(rememberedPrimary, 'remembered login must issue a primary session').toBeTruthy();
+    expect(rememberedCookies.some((cookie) => cookie.name === 'remember_token')).toBe(true);
+
+    await page.goto(buildUrl(withSitePrefix('/logout')), { waitUntil: 'networkidle' });
+    const loggedOutCookies = await page.context().cookies();
+    expect(loggedOutCookies.some((cookie) => cookie.name === 'remember_token')).toBe(false);
+    const loggedOutPrimary = loggedOutCookies.find(
+      (cookie) => cookie.name === '__Host-weppcloud_session'
+    );
+    if (loggedOutPrimary) {
+      expect(loggedOutPrimary.value).not.toBe(rememberedPrimary.value);
+    }
+
+    const optOutLogin = await ensureAgentSession(page, { remember: false });
+    expect(optOutLogin.authenticated, optOutLogin.reason).toBe(true);
+    const optOutCookies = await page.context().cookies();
+    expect(optOutCookies.some((cookie) => cookie.name === 'remember_token')).toBe(false);
+    const optOutPrimary = optOutCookies.find(
+      (cookie) => cookie.name === '__Host-weppcloud_session'
+    );
+    expect(optOutPrimary, 'opt-out login must issue a primary session').toBeTruthy();
+    expect(optOutPrimary.value).not.toBe(rememberedPrimary.value);
+  });
+
+  test('reader-first legacy writer survives owned-cookie activation', async ({ page }) => {
+    test.skip(
+      mixedVersionActivationWaitMs <= 0,
+      'set SMOKE_MIXED_VERSION_ACTIVATION_WAIT_MS to run the coordinated activation canary'
+    );
+    await page.setExtraHTTPHeaders(forwardedProtoHeader);
+    const loginResult = await ensureAgentSession(page, { remember: false });
+    expect(loginResult.authenticated, loginResult.reason).toBe(true);
+
+    const readerFirstCookies = await page.context().cookies();
+    const legacyWriterCookie = readerFirstCookies.find(
+      (cookie) => cookie.name === 'session' && cookie.path === '/'
+    );
+    expect(legacyWriterCookie, 'reader-first phase must continue writing session').toBeTruthy();
+    expect(
+      readerFirstCookies.some((cookie) => cookie.name === '__Host-weppcloud_session')
+    ).toBe(false);
+    expect(readerFirstCookies.some((cookie) => cookie.name === 'remember_token')).toBe(false);
+
+    if (mixedVersionActivationWaitMs > 0) {
+      console.log(
+        `[migration-canary] waiting ${mixedVersionActivationWaitMs}ms for owned-cookie activation`
+      );
+      await page.waitForTimeout(mixedVersionActivationWaitMs);
+    }
+
+    const profileReady = await ensureProfilePageReady(page);
+    expect(profileReady.ready, profileReady.reason).toBe(true);
+    const probe = await probeAuthenticatedSession(page);
+    expect(probe.authenticated, probe.reason).toBe(true);
+    const activatedCookies = await page.context().cookies();
+    const ownedCookie = activatedCookies.find(
+      (cookie) => cookie.name === '__Host-weppcloud_session'
+    );
+    expect(ownedCookie, 'activation must issue the owned cookie').toBeTruthy();
+    expect(ownedCookie.value).toBe(legacyWriterCookie.value);
+    expect(activatedCookies.some((cookie) => cookie.name === 'remember_token')).toBe(false);
+  });
+
+  test('activated session mints directly through rq-engine cookie auth', async ({ page }) => {
+    await page.setExtraHTTPHeaders(forwardedProtoHeader);
+    const loginResult = await ensureAgentSession(page, { remember: false });
+    expect(loginResult.authenticated, loginResult.reason).toBe(true);
+
+    const runUrl = new URL(buildUrl(targetRunPath));
+    const match = runUrl.pathname.match(/\/runs\/([^/]+)\/([^/]+)\/?$/);
+    test.skip(!match, 'SMOKE_RUN_PATH must identify a run and configuration');
+    const endpoint = withSitePrefix(
+      `/rq-engine/api/runs/${encodeURIComponent(match[1])}/${encodeURIComponent(match[2])}/session-token`
+    ).replace(`${sitePrefix}/rq-engine`, '/rq-engine');
+    const result = await page.evaluate(async (url) => {
+      const response = await fetch(url, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: '{}',
+      });
+      return { status: response.status, body: await response.text() };
+    }, endpoint);
+
+    expect(result.status, result.body).toBe(200);
+    expect((await page.context().cookies()).some(
+      (cookie) => cookie.name === 'wepp_browse_jwt'
+    )).toBe(true);
   });
 
   test('axe accessibility scan for runs0 dashboard', async ({ page }) => {

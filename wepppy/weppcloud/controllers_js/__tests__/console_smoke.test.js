@@ -485,6 +485,7 @@ describe("Fork console smoke", () => {
                      data-config="cfg"
                      data-undisturbify="false"
                      data-skip-wepp-runs-output="false"
+                     data-skip-omni-scenarios-contrasts="false"
                      hidden></div>
                 <div id="fork_status_panel">
                     <div id="fork_status_log" data-status-log></div>
@@ -495,6 +496,7 @@ describe("Fork console smoke", () => {
                     <input id="runid_input" value="demo-run" />
                     <input id="undisturbify_checkbox" type="checkbox" />
                     <input id="skip_wepp_runs_output_checkbox" type="checkbox" />
+                    <input id="skip_omni_scenarios_contrasts_checkbox" type="checkbox" />
                     <button id="submit_button" type="submit">Fork project</button>
                     <button id="cancel_button" type="button" hidden>Cancel</button>
                 </form>
@@ -548,10 +550,13 @@ describe("Fork console smoke", () => {
                 "Content-Type": "application/x-www-form-urlencoded",
                 Authorization: "Bearer session-token",
             },
-            body: "undisturbify=false&skip_wepp_runs_output=false",
+            body: "undisturbify=false&skip_wepp_runs_output=false&skip_omni_scenarios_contrasts=false",
         });
 
-        expect(statusStreamInstance.append).toHaveBeenCalledWith("Submitting fork job...");
+        expect(statusStreamInstance.append).toHaveBeenCalledWith(
+            "Fork job is queued and waiting for the fork worker."
+        );
+        expect(statusStreamInstance.append).not.toHaveBeenCalledWith("Submitting fork job...");
      
         const consoleBlock = document.getElementById("the_console");
         expect(consoleBlock.dataset.state).toBe("attention");
@@ -579,6 +584,55 @@ describe("Fork console smoke", () => {
         }));
     });
 
+    test("replaces submitting text with queued guidance only after acceptance", async () => {
+        let resolveForkRequest;
+        const pendingForkResponse = new Promise((resolve) => {
+            resolveForkRequest = resolve;
+        });
+        fetchMock.mockImplementation((url) => {
+            if (url === "http://localhost/rq-engine/api/runs/demo-run/cfg/session-token") {
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve({ token: "session-token" }),
+                });
+            }
+            if (url === "http://localhost/rq-engine/api/runs/demo-run/cfg/fork") {
+                return pendingForkResponse;
+            }
+            return Promise.reject(new Error(`Unexpected fetch: ${url}`));
+        });
+
+        document.getElementById("fork_form").dispatchEvent(
+            new Event("submit", { bubbles: true, cancelable: true })
+        );
+        await flushPromises();
+
+        expect(document.getElementById("the_console").textContent).toBe("Submitting fork job...");
+        expect(statusStreamInstance.append).not.toHaveBeenCalledWith(
+            "Fork job is queued and waiting for the fork worker."
+        );
+
+        resolveForkRequest({
+            ok: true,
+            text: () => Promise.resolve(JSON.stringify({
+                job_id: "job-456",
+                new_runid: "demo-run-new",
+                undisturbify: false,
+                skip_wepp_runs_output: false,
+                skip_omni_scenarios_contrasts: false,
+            })),
+        });
+        await flushPromises();
+
+        expect(document.getElementById("the_console").textContent).toContain(
+            "New runid: demo-run-new"
+        );
+        expect(statusStreamInstance.append).toHaveBeenCalledWith(
+            "Fork job is queued and waiting for the fork worker."
+        );
+        expect(statusStreamInstance.append).not.toHaveBeenCalledWith("Submitting fork job...");
+    });
+
     test("propagates rendered true option defaults into the exact submit payload", async () => {
         document.body.innerHTML = `
             <section data-controller="fork-console">
@@ -587,6 +641,7 @@ describe("Fork console smoke", () => {
                      data-config="cfg"
                      data-undisturbify="true"
                      data-skip-wepp-runs-output="true"
+                     data-skip-omni-scenarios-contrasts="true"
                      hidden></div>
                 <div id="fork_status_panel"><div id="fork_status_log"></div></div>
                 <div id="fork_stacktrace_panel"><pre data-stacktrace-body></pre></div>
@@ -594,6 +649,7 @@ describe("Fork console smoke", () => {
                     <input id="runid_input" value="demo-run" />
                     <input id="undisturbify_checkbox" type="checkbox" />
                     <input id="skip_wepp_runs_output_checkbox" type="checkbox" />
+                    <input id="skip_omni_scenarios_contrasts_checkbox" type="checkbox" />
                     <button id="submit_button" type="submit">Fork project</button>
                     <button id="cancel_button" type="button" hidden>Cancel</button>
                 </form>
@@ -608,6 +664,7 @@ describe("Fork console smoke", () => {
 
         expect(document.getElementById("undisturbify_checkbox").checked).toBe(true);
         expect(document.getElementById("skip_wepp_runs_output_checkbox").checked).toBe(true);
+        expect(document.getElementById("skip_omni_scenarios_contrasts_checkbox").checked).toBe(true);
 
         document.getElementById("fork_form").dispatchEvent(
             new Event("submit", { bubbles: true, cancelable: true })
@@ -615,7 +672,7 @@ describe("Fork console smoke", () => {
         await flushPromises();
 
         expect(fetchMock.mock.calls[1][1].body).toBe(
-            "undisturbify=true&skip_wepp_runs_output=true"
+            "undisturbify=true&skip_wepp_runs_output=true&skip_omni_scenarios_contrasts=true"
         );
     });
 
@@ -705,7 +762,7 @@ describe("Fork console smoke", () => {
         );
         expect(fetchMock.mock.calls[0][1]).toMatchObject({
             method: "POST",
-            body: "undisturbify=false&skip_wepp_runs_output=true&cap_token=%3Ccap-token%3E",
+            body: "undisturbify=false&skip_wepp_runs_output=true&skip_omni_scenarios_contrasts=false&cap_token=%3Ccap-token%3E",
         });
     });
 
@@ -1079,7 +1136,7 @@ describe("Fork console smoke", () => {
                 "Content-Type": "application/x-www-form-urlencoded",
                 Authorization: "Bearer rq-token-123",
             },
-            body: "undisturbify=false&skip_wepp_runs_output=false",
+            body: "undisturbify=false&skip_wepp_runs_output=false&skip_omni_scenarios_contrasts=false",
         });
     });
 

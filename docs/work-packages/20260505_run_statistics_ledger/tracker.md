@@ -6,12 +6,15 @@
 
 **Timezone**: UTC  
 **Started**: 2026-05-05 20:26 UTC  
-**Current phase**: Documentation consistency audit complete; implementation pending  
-**Last updated**: 2026-05-05 23:06 UTC  
-**Next milestone**: Implement Postgres ledger writer and focused backfill tests  
-**Security impact**: `low`  
-**Dedicated security review**: `no`  
-**Security artifact**: `N/A`
+**Current phase**: Canonical-Parquet incident bridge implementation validation
+**Last updated**: 2026-08-07 UTC
+**Next milestone**: Commit implementation and run production canary
+**Security impact**: `high` for SURF-19A
+**Dedicated security review**: `yes`
+**Security artifact**: `artifacts/2026-08-07_checkpoint_ops_security_review.md`
+**Incident owner**: Roger Lew; implementation owner: Codex
+**Checkpoint state**: Dual post-fix review passed; standalone ancestor pending
+**Sunset review**: Roger Lew records keep/reduce/remove at activation + 14 calendar days
 
 ## Task Board
 
@@ -27,13 +30,20 @@
 
 ### In Progress
 
-- [ ] None.
+- [x] Replace per-run `.slp` and ash globs with canonical Parquet footer reads.
+- [x] Enforce single-flight publication and rollback every promotion failure.
+- [x] Close dual checkpoint review and commit standalone ancestor `64db4e554`.
 
 ### Blocked
 
 - [ ] None.
 
 ### Done
+
+- [x] Completed independent correctness and operations/security implementation reviews with no remaining high/medium findings (2026-08-07 UTC).
+- [x] Passed 29 focused tests and the full repository suite: 5,929 passed, 61 skipped (2026-08-07 UTC).
+- [x] Diagnosed production job `7aa39c98-de7c-4298-8d5f-35e3784775e4` timing out after 36,000 seconds in the per-run `.slp` glob (2026-08-07 UTC).
+- [x] Recorded operator approval to use canonical Parquet counts without legacy parity (2026-08-07 UTC).
 
 - [x] Removed unreliable reported statistics from the `/interfaces/` template in the current worktree before this package was created (2026-05-05 20:10 UTC).
 - [x] Investigated wepp1 counter semantics and confirmed the old numbers came from active run-directory file counts plus a hard-coded post-2024 cutoff (2026-05-05 20:20 UTC).
@@ -43,6 +53,8 @@
 
 ## Timeline
 
+- **2026-08-07 UTC** - Ten-hour production timeout attributed to per-run `.slp` enumeration; canonical-Parquet incident bridge authorized.
+
 - **2026-05-05 20:10 UTC** - Interface statistics removed from local implementation because current counters were misleading.
 - **2026-05-05 20:20 UTC** - Current counter semantics documented from `compile_dot_logs.py` and wepp1 observations.
 - **2026-05-05 20:26 UTC** - Work package and draft contract created.
@@ -50,6 +62,14 @@
 - **2026-05-05 23:05 UTC** - Documentation consistency audit aligned endpoint migration scope and validation tracking across package docs and `PROJECT_TRACKER.md`.
 
 ## Decisions Log
+
+### 2026-08-07 UTC: Use canonical Parquet footers for active inventory
+
+**Context**: NAS directory enumeration caused `compile_dot_logs_rq` to exhaust a ten-hour timeout.
+
+**Decision**: Count rows from `watershed/hillslopes.parquet` and `ash/post/hillslope_annuals.parquet`; do not retain legacy file-scan fallbacks.
+
+**Impact**: Output shapes stay stable, values intentionally change to bounded current canonical-artifact inventory, and the future ledger remains responsible for historical execution totals.
 
 ### 2026-05-05 20:26 UTC: Split active project inventory from historical execution counts
 
@@ -112,6 +132,8 @@
 | Backfill consumers mistake artifact-inferred counts for exact history | Medium | Medium | Include source-quality fields in canonical outputs and compatibility docs | Open |
 | Compatibility counters change semantics unexpectedly | Medium | Medium | Preserve keys, document semantics, and add route tests | Open |
 | Database migration or index design causes write latency | Medium | Medium | Keep schema narrow, add focused indexes only, benchmark insertion in targeted tests | Open |
+| Zero discovery or correlated Parquet failures replace good public outputs | High | Low | Stage all outputs; apply zero-discovery, readable-watershed, and 10/25% per-artifact guards before publication | Open |
+| Temporary guard or legacy keys outlive evidence/consumers | Medium | Medium | Roger Lew owns activation+14-day guard review; legacy keys require consumer inventory and separate migration | Open |
 
 ## Verification Checklist
 
@@ -130,6 +152,10 @@
 
 ### Code and Tests
 
+- [x] SURF-19A footer-only and ignored-legacy-file tests pass.
+- [x] Missing, corrupt, racing, warning, zero-discovery, and watershed/ash systemic-containment tests pass.
+- [x] Location, project aggregation, TTL, single-flight, and all-output promotion-rollback tests pass.
+
 - [ ] Ledger module unit tests pass.
 - [ ] Backfill idempotence tests pass.
 - [ ] WEPP hillslope repeated-run regression passes.
@@ -138,6 +164,12 @@
 - [ ] Existing stats route compatibility tests pass.
 
 ### Deployment
+
+- [ ] Baseline recorded: 36,000-second timeout, zero completed output, failing job `7aa39c98-de7c-4298-8d5f-35e3784775e4`.
+- [ ] Fenced production canary duration, readable/missing/error counts, guard state, and output totals recorded.
+- [ ] Post-change signal: representative compiler completes below 36,000 seconds with no partial publication.
+- [ ] Activation + 14 days: Roger Lew records guard keep/reduce/remove against trips, warnings, stable totals, and canary evidence.
+- [ ] Legacy-key removal remains blocked until consumer inventory and a separately approved migration are complete.
 
 - [ ] Dry-run backfill report reviewed on production-like data.
 - [ ] Runtime append behavior observed after rollout.

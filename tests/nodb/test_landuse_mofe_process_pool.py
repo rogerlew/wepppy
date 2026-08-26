@@ -245,6 +245,31 @@ def test_build_multiple_ofe_process_pool_success_path(
     assert (run_dir / "landuse" / "hill_102.mofe.man").read_text(encoding="utf-8") == "102\n"
 
 
+def test_build_multiple_ofe_uses_explicit_treated_assignments(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    original = {"101": {"1": "forest-dom", "2": "shrub-dom"}}
+    treated = {"101": {"1": "treated-dom", "2": "shrub-dom"}}
+    managements = _make_managements()
+    managements["treated-dom"] = _ManagementSummaryStub("treated-dom", "thinning_40_75")
+    landuse, run_dir = _make_landuse_fixture(
+        tmp_path,
+        monkeypatch,
+        run_name="treated-override",
+        domlc_d=original,
+        managements=managements,
+    )
+    monkeypatch.setattr(landuse_module, "_write_mofe_management_file_task", _write_task_snapshot)
+
+    landuse._build_multiple_ofe(domlc_mofe_override=treated)
+
+    generated = (run_dir / "landuse" / "hill_101.mofe.man").read_text(encoding="utf-8")
+    assert "dom=treated-dom" in generated
+    assert "dom=forest-dom" not in generated
+    assert landuse.domlc_mofe_d == treated
+
+
 def test_build_multiple_ofe_retries_spawn_failure_with_fork_pool(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

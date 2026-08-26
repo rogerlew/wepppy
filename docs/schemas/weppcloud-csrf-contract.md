@@ -150,6 +150,13 @@ directly; it MUST NOT invent a session-domain fallback for an unset remember
 domain. Tests MUST cover both unset domains and distinct session/remember
 domains.
 
+During the session-cookie migration window, reset MUST also invalidate every
+bounded, correctly signed WEPPcloud primary or legacy SID presented by the
+request in Redis and install the canonical revocation fence. This is
+server-side invalidation, not ownership of the generic browser cookie. Reset
+MUST NOT synthesize or emit deletion headers for legacy `session` domain/path
+variants. A late response MUST NOT recreate a fenced SID.
+
 ## Browser Client Requirements
 - Browser mutation requests SHOULD use `WCHttp.request(...)` or its helpers so CSRF headers are attached consistently.
 - Raw `fetch(...)` mutation calls MUST attach `X-CSRFToken` when they target CSRF-protected Flask routes.

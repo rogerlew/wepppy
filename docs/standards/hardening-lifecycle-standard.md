@@ -38,6 +38,11 @@ Capture concrete failure evidence before coding:
 - incident signature text (exact error class/message),
 - user/operator-visible impact.
 
+Capture the valid-state baseline that reached the failure. Explicitly classify
+whether relevant resources were absent, empty, populated, legacy, or malformed.
+Normal absence or a never-used optional feature is a product state, not an
+attack case.
+
 Write a one-sentence scope boundary:
 
 - "Fix confirmed failure path X without broad refactor Y."
@@ -72,6 +77,8 @@ For each hardening change, record:
 - **Hypothesis**: "If we change A, then signal B should improve within window W."
 - **Primary health signal(s)**: recurrence rate, error class frequency, queue backlog recovery time, operator retries, etc.
 - **Guardrail signal(s)**: latency, startup time, false-positive retries, config complexity, flake rate.
+- **Valid-state guardrail(s)**: false rejection or new user-visible exceptions
+  for absent, empty, populated, and supported legacy states.
 - **Observation window**: default 14-30 days unless package states otherwise.
 
 ### 4) Implementation and Validation Gates (Required)
@@ -82,10 +89,15 @@ Hardening changes must be minimal and explicit:
 - add regression tests for exact failure mode,
 - add contract/config tests when infra behavior is changed,
 - preserve auth/security/locking boundaries.
+- prove security and containment controls do not interfere with valid user
+  states.
 
 Required gates:
 
 - targeted tests for touched surfaces,
+- a direct, unmocked regression at the boundary that produced the incident,
+- a valid-state matrix covering absent, empty, populated, supported legacy,
+  and hostile states where applicable,
 - pre-handoff sanity (`wctl run-pytest tests --maxfail=1`) unless blocked (document blocker),
 - independent code review and QA review for medium/high-risk packages,
 - dedicated security review artifact when security impact triage is `high`.
@@ -140,6 +152,9 @@ Use these signals to evaluate whether hardening is healthy.
 - same incident signature reappears after "hardening",
 - knobs/retries/delays increase without owners or sunset dates,
 - silent fallback paths mask root causes,
+- safety controls reject expected absence or other valid user states,
+- review evidence covers hostile states but omits the zero-data or never-used
+  feature path,
 - docs drift from compose/runtime behavior,
 - complexity rises without measurable reliability gain,
 - mitigations accumulate but are never retired.

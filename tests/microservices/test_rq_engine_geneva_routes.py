@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from contextlib import nullcontext
 from types import SimpleNamespace
 
 import pytest
@@ -11,6 +12,7 @@ from wepppy.microservices.rq_engine import geneva_routes
 from wepppy.nodb.base import NoDbAlreadyLockedError
 from wepppy.nodb.mods.geneva.errors import GenevaValidationError
 from wepppy.nodb.redis_prep import TaskEnum
+from rq.job import Dependency
 
 
 pytestmark = pytest.mark.microservice
@@ -81,6 +83,17 @@ class _GenevaRouteStub:
         }
 
 
+def _assert_depends_on(call: dict, expected_ids: list[str]) -> None:
+    """Geneva chains required-output jobs with strict dependency edges."""
+    dependency = call["depends_on"]
+    if isinstance(dependency, Dependency):
+        assert dependency.allow_failure is False
+        actual_ids = dependency.dependencies
+    else:
+        actual_ids = [dependency.id]
+    assert actual_ids == expected_ids
+
+
 def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         geneva_routes,
@@ -102,6 +115,12 @@ def _stub_queue(
         def __init__(self, id_value: str) -> None:
             self.id = id_value
 
+        def save(self, pipeline=None) -> None:
+            return None
+
+        def register_dependency(self, pipeline=None) -> None:
+            return None
+
     class DummyQueue:
         def __init__(self, *args, **kwargs) -> None:
             self._job_ids: list[str] = list(captured.get("job_ids", [job_id]))
@@ -115,6 +134,18 @@ def _stub_queue(
             captured["kwargs"] = kwargs
             return DummyJob(next_job_id)
 
+        def create_job(self, *args, **kwargs):
+            call_index = len(captured.setdefault("calls", []))
+            next_job_id = self._job_ids[min(call_index, len(self._job_ids) - 1)]
+            call = {**kwargs, "args": args, "kwargs": kwargs, "job_id": next_job_id}
+            captured["calls"].append(call)
+            captured["args"] = args
+            captured["kwargs"] = kwargs
+            return DummyJob(next_job_id)
+
+        def _enqueue_job(self, job, pipeline=None):
+            return job
+
     class DummyRedis:
         def __enter__(self):
             return self
@@ -122,8 +153,21 @@ def _stub_queue(
         def __exit__(self, exc_type, exc, tb):
             return False
 
+        def pipeline(self):
+            return SimpleNamespace(execute=lambda: [])
+
     monkeypatch.setattr(geneva_routes, "Queue", DummyQueue)
     monkeypatch.setattr(geneva_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(
+        geneva_routes,
+        "rq_submission_lock",
+        lambda *args, **kwargs: nullcontext(SimpleNamespace(checkpoint=lambda: None)),
+    )
+    monkeypatch.setattr(
+        geneva_routes,
+        "new_rq_job_id",
+        lambda: str(captured["job_ids"][0]),
+    )
     return captured
 
 
@@ -137,6 +181,42 @@ def _stub_prep(monkeypatch: pytest.MonkeyPatch) -> dict[str, list[object]]:
     monkeypatch.setattr(geneva_routes, "get_wd", lambda runid: f"/tmp/{runid}")
     monkeypatch.setattr(geneva_routes.RedisPrep, "getInstance", lambda wd: DummyPrep())
     return state
+
+
+@pytest.mark.parametrize(
+    ("error", "status_code", "code"),
+    (
+        (geneva_routes.RqSubmissionConflict("busy"), 409, "conflict"),
+        (geneva_routes.redis.RedisError("offline"), 503, "service_unavailable"),
+    ),
+)
+def test_prepare_hrus_maps_admission_failures(
+    error: Exception,
+    status_code: int,
+    code: str,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_prep(monkeypatch)
+    monkeypatch.setattr(
+        geneva_routes,
+        "_ensure_geneva_controller",
+        lambda _runid, _config: _GenevaRouteStub(),
+    )
+    monkeypatch.setattr(
+        geneva_routes,
+        "_enqueue_geneva_job",
+        lambda **_kwargs: (_ for _ in ()).throw(error),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/geneva/prepare-hrus",
+            json={"schema_version": 1, "force_rebuild": False},
+        )
+
+    assert response.status_code == status_code
+    assert response.json()["error"]["code"] == code
 
 
 def test_prepare_hrus_enqueues_job_with_canonical_submission_envelope(
@@ -243,7 +323,7 @@ def test_run_workflow_enqueues_chained_jobs_with_forced_rebuild(
 
     panel_call = calls[1]["kwargs"]
     assert panel_call["func"] is geneva_routes.run_geneva_build_frequency_panel_rq
-    assert panel_call["depends_on"].id == "geneva-prepare-1"
+    _assert_depends_on(panel_call, ["geneva-prepare-1"])
     assert panel_call["args"] == (
         "run-1",
         "cfg",
@@ -258,7 +338,7 @@ def test_run_workflow_enqueues_chained_jobs_with_forced_rebuild(
 
     run_call = calls[2]["kwargs"]
     assert run_call["func"] is geneva_routes.run_geneva_run_batch_rq
-    assert run_call["depends_on"].id == "geneva-panel-2"
+    _assert_depends_on(run_call, ["geneva-panel-2"])
     assert run_call["args"] == (
         "run-1",
         "cfg",
@@ -278,7 +358,7 @@ def test_run_workflow_enqueues_chained_jobs_with_forced_rebuild(
     assert prep_state["removed"] == [TaskEnum.run_geneva]
 
 
-def test_run_workflow_returns_accepted_when_mark_job_queued_is_lock_contended(
+def test_run_workflow_does_not_enqueue_when_job_hint_cannot_be_saved(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     _stub_auth(monkeypatch)
@@ -318,10 +398,9 @@ def test_run_workflow_returns_accepted_when_mark_job_queued_is_lock_contended(
             },
         )
 
-    assert response.status_code == 202
-    assert response.json()["job_id"] == "geneva-prepare-1"
-    assert len(captured["calls"]) == 3
-    assert stub.mark_attempts == 2
+    assert response.status_code == 500
+    assert len(captured.get("calls", [])) == 0
+    assert stub.mark_attempts == 1
     assert prep_state["removed"] == [TaskEnum.run_geneva]
 
 

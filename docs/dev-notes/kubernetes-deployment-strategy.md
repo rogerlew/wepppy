@@ -25,9 +25,13 @@ This is a one-time project to optimize the underlying codebase and data storage.
 
 ---
 
-### **3\. Production Architecture: Kubernetes (The On-Prem Stack) 🚀**
+### **3\. openwepp.org Architecture: Kubernetes (The On-Prem Stack) 🚀**
 
-This is the core of the deployment strategy. It translates the Docker Compose services into a resilient, scalable, and manageable on-premise Kubernetes cluster.
+This strategy applies to `openwepp.org`. It translates services into a
+resilient, scalable, and manageable on-premise Kubernetes cluster. It does not
+replace or describe `wepp.cloud`: production hosts `wepp1`, `wepp2`, and
+`wepp3` remain Docker Compose deployments operated through
+`scripts/deploy-production.sh` and host-local builds.
 
 #### **Core Services**
 

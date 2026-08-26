@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import os
-import time
 from pathlib import Path
 from typing import Any, Dict
 
@@ -16,15 +15,16 @@ from wepppy.microservices.upload_boundary import UploadBoundaryError, write_stre
 from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.roads import Roads
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+from wepppy.rq.job_id import new_rq_job_id
 from wepppy.rq.roads_rq import (
     TIMEOUT,
     RoadsSingleFlightConflict,
-    acquire_roads_submit_lock,
     ensure_no_active_roads_job,
-    release_roads_submit_lock,
+    reconcile_deferred_roads_jobs,
     run_roads_prepare_rq,
     run_roads_rq,
 )
+from wepppy.rq.submission_recovery import RqSubmissionConflict, rq_submission_lock
 from wepppy.weppcloud.utils.cap_guard import requires_cap
 from wepppy.weppcloud.utils.helpers import (
     authorize_and_handle_with_exception_factory,
@@ -48,10 +48,12 @@ def _ensure_roads_controller(wd: str, cfg_fn: str) -> Roads:
 
 def _sync_roads_enabled_state(wd: str, cfg_fn: str) -> Roads:
     ron = Ron.getInstance(wd)
-    controller = _ensure_roads_controller(wd, cfg_fn)
+    controller = Roads.tryGetInstance(wd)
+    if controller is None:
+        raise FileNotFoundError("Roads controller has not been initialized")
     should_enable = "roads" in (ron.mods or [])
     if controller.enabled != should_enable:
-        controller.set_enabled(should_enable)
+        raise RuntimeError("Roads enabled state is inconsistent with project modules")
     return controller
 
 
@@ -379,18 +381,31 @@ def _enqueue_roads_job(runid: str, *, func, prep_key: str) -> Dict[str, Any]:
     wd = get_wd(runid)
     prep = RedisPrep.getInstance(wd)
 
-    submit_owner = f"{prep_key}:{int(time.time() * 1000)}"
-    if not acquire_roads_submit_lock(runid, submit_owner):
-        raise RoadsSingleFlightConflict("Roads enqueue already in progress for this run.")
-    try:
-        with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
+    with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
+        try:
+            lock_context = rq_submission_lock(redis_conn, f"{runid}:roads", lifecycle_key=runid)
+            lease = lock_context.__enter__()
+        except RqSubmissionConflict as exc:
+            raise RoadsSingleFlightConflict(str(exc)) from exc
+        try:
+            reconcile_deferred_roads_jobs(
+                runid, prep, redis_conn, lease_checkpoint=lease.checkpoint
+            )
+            lease.checkpoint()
             ensure_no_active_roads_job(runid, prep, redis_conn)
             queue = Queue(connection=redis_conn)
-            job = queue.enqueue_call(func=func, args=(runid,), timeout=TIMEOUT)
-            prep.set_rq_job_id(prep_key, job.id)
-        return {"job_id": job.id}
-    finally:
-        release_roads_submit_lock(runid, submit_owner)
+            replacement_job_id = new_rq_job_id()
+            prep.set_rq_job_id(prep_key, replacement_job_id)
+            lease.checkpoint()
+            job = queue.enqueue_call(
+                func=func,
+                args=(runid,),
+                timeout=TIMEOUT,
+                job_id=replacement_job_id,
+            )
+            return {"job_id": job.id}
+        finally:
+            lock_context.__exit__(None, None, None)
 
 
 @roads_bp.route("/runs/<string:runid>/<config>/tasks/roads/prepare_segments", methods=["POST"])

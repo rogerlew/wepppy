@@ -271,8 +271,6 @@ def roads_client(
 
     conn_factory = rq_environment.redis_conn_factory(label="roads-redis")
     monkeypatch.setattr(roads_module.redis, "Redis", lambda **kwargs: conn_factory())
-    monkeypatch.setattr(roads_module, "acquire_roads_submit_lock", lambda _runid, _owner: True)
-    monkeypatch.setattr(roads_module, "release_roads_submit_lock", lambda _runid, _owner: None)
     monkeypatch.setattr(roads_module, "ensure_no_active_roads_job", lambda _runid, _prep, _redis_conn: None)
 
     queue_class = rq_environment.queue_class(default_job_id="roads-job-1")
@@ -305,10 +303,17 @@ def roads_client(
         def set_rq_job_id(self, key: str, job_id: str) -> None:
             self.job_ids.append((key, job_id))
 
+        def get_rq_job_id(self, key: str) -> str | None:
+            return next(
+                (job_id for saved_key, job_id in reversed(self.job_ids) if saved_key == key),
+                None,
+            )
+
         def remove_timestamp(self, task) -> None:
             self.removed.append(task)
 
     monkeypatch.setattr(roads_module, "RedisPrep", RedisPrepStub)
+    RoadsStub.getInstance(str(run_dir)).set_enabled(True)
 
     with app.test_client() as client:
         yield client, RoadsStub, RonStub, RedisPrepStub, rq_environment, str(run_dir)
@@ -504,20 +509,22 @@ def test_prepare_and_run_enqueue_jobs(roads_client):
     client, _RoadsStub, _RonStub, RedisPrepStub, rq_environment, run_dir = roads_client
 
     prepare_response = client.post(f"/runs/{RUN_ID}/{CONFIG}/tasks/roads/prepare_segments")
+    prep = RedisPrepStub.tryGetInstance(run_dir)
+    prepare_receipts = list(prep.job_ids)
+    prep.job_ids.clear()
     run_response = client.post(f"/runs/{RUN_ID}/{CONFIG}/tasks/roads/run")
 
     assert prepare_response.status_code == 200
     assert run_response.status_code == 200
-    assert prepare_response.get_json()["job_id"] == "roads-job-1"
-    assert run_response.get_json()["job_id"] == "roads-job-1"
+    prepare_job_id = prepare_response.get_json()["job_id"]
+    run_job_id = run_response.get_json()["job_id"]
 
     funcs = [call.func for call in rq_environment.recorder.queue_calls]
     assert funcs == [roads_module.run_roads_prepare_rq, roads_module.run_roads_rq]
 
-    prep = RedisPrepStub.tryGetInstance(run_dir)
+    assert prepare_receipts == [("run_roads_prepare_rq", prepare_job_id)]
     assert prep.job_ids == [
-        ("run_roads_prepare_rq", "roads-job-1"),
-        ("run_roads_rq", "roads-job-1"),
+        ("run_roads_rq", run_job_id),
     ]
 
 
@@ -542,9 +549,10 @@ def test_prepare_segments_returns_409_when_roads_job_active(
 
 
 def test_roads_routes_require_mod_enabled(roads_client):
-    client, _RoadsStub, RonStub, *_rest = roads_client
+    client, RoadsStub, RonStub, *_rest = roads_client
     run_dir = _rest[-1]
     RonStub.getInstance(run_dir).mods = []
+    RoadsStub.getInstance(run_dir).set_enabled(False)
 
     response = client.post(
         f"/runs/{RUN_ID}/{CONFIG}/tasks/roads/set_params",

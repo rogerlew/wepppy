@@ -39,12 +39,14 @@ import csv
 import json
 import hashlib
 import shutil
+import sys
 import tempfile
 import inspect
 import logging
 import time
 from collections import Counter
 from datetime import datetime, timezone
+from pathlib import Path
 from subprocess import Popen, PIPE
 from os.path import join as _join
 from os.path import exists as _exists
@@ -77,7 +79,7 @@ from wepppy.nodb.core import (
 from wepppy.nodb.core.management_overrides import is_unburned_forest_disturbed_class
 from ...redis_prep import RedisPrep, TaskEnum
 from ...base import NoDbBase, TriggerEvents, createProcessPoolExecutor, nodb_setter
-from ..baer.sbs_map import SoilBurnSeverityMap
+from ..baer.sbs_map import SBS_DISPLAY_CLASSES, SoilBurnSeverityMap
 from .. import MODS_DIR, EXTENDED_MODS_DATA
 
 from wepppyo3.raster_characteristics import count_intersecting_raster_key_pairs
@@ -587,8 +589,288 @@ def _build_disturbed_mofe_soil(task_args: Dict[str, Any]) -> Tuple[str, float]:
             version=task_args['sol_ver'],
         )
 
-    new.write(task_args['output_path'])
+    _publish_disturbed_soil_artifact(
+        new.write,
+        task_args['output_path'],
+        base_quality=task_args.get('base_quality'),
+        quality_report_path=task_args.get('quality_report_path'),
+        expected_datver=task_args['sol_ver'],
+        expected_luse=(
+            replacement_values.get('luse')
+            if replacement_values is not None
+            else None
+        ),
+        expected_stext=(
+            replacement_values.get('stext')
+            if replacement_values is not None
+            else None
+        ),
+    )
     return task_args['disturbed_mukey'], round(time.time() - started, 3)
+
+
+def _load_eu_quality_report(soils_instance: Any) -> Optional[Tuple[Path, Dict[str, Any]]]:
+    """Load the ESDAC quality carrier only for an identified ESDAC inventory."""
+    if getattr(soils_instance, 'soil_source', None) != 'esdac':
+        return None
+
+    from wepppy.eu.soils.esdac import load_soil_quality_report
+
+    report_path = Path(soils_instance.soils_dir) / 'soil_quality.json'
+    return report_path, load_soil_quality_report(report_path)
+
+
+def _quality_for_topaz(
+    quality_report: Tuple[Path, Dict[str, Any]],
+    topaz_id: str | int,
+    *,
+    expected_soil_key: str | None = None,
+) -> Any:
+    report_path, results = quality_report
+    result = results.get(str(topaz_id))
+    if result is None:
+        from wepppy.eu.soils.esdac import ESDACSoilQualityReportError
+
+        raise ESDACSoilQualityReportError(
+            report_path,
+            code='source.quality_report.location_missing',
+            topaz_id=topaz_id,
+        )
+    if expected_soil_key is not None and result.soil_key != str(expected_soil_key):
+        from wepppy.eu.soils.esdac import ESDACSoilQualityReportError
+
+        raise ESDACSoilQualityReportError(
+            report_path,
+            code='source.quality_report.soil_key_mismatch',
+            topaz_id=topaz_id,
+            detail=f'expected {expected_soil_key!r}, got {result.soil_key!r}',
+        )
+    return result
+
+
+def _validate_eu_quality_coverage(
+    quality_report: Tuple[Path, Dict[str, Any]],
+    topaz_ids: Sequence[str | int],
+    *,
+    expected_soil_keys: Dict[str | int, str] | None = None,
+) -> None:
+    """Require quality evidence before a marked EU run can publish output."""
+    report_path, results = quality_report
+    missing = [topaz_id for topaz_id in topaz_ids if str(topaz_id) not in results]
+    if missing:
+        from wepppy.eu.soils.esdac import ESDACSoilQualityReportError
+
+        raise ESDACSoilQualityReportError(
+            report_path,
+            code='source.quality_report.coverage_incomplete',
+            detail=f'missing TopoAZ IDs: {", ".join(map(str, missing))}',
+        )
+    if expected_soil_keys is not None:
+        for topaz_id in topaz_ids:
+            result = results[str(topaz_id)]
+            expected_soil_key = expected_soil_keys[topaz_id]
+            if result.soil_key != str(expected_soil_key):
+                from wepppy.eu.soils.esdac import ESDACSoilQualityReportError
+
+                raise ESDACSoilQualityReportError(
+                    report_path,
+                    code='source.quality_report.soil_key_mismatch',
+                    topaz_id=topaz_id,
+                    detail=f'expected {expected_soil_key!r}, got {result.soil_key!r}',
+                )
+
+
+def _run_disturbed_soil_transaction(
+    soils_instance: Any,
+    operation: Any,
+    *,
+    backup_prefix: str,
+    logger: Any,
+) -> None:
+    """Run a soil publication operation with artifact and NoDb rollback."""
+    soils_dir = Path(soils_instance.soils_dir)
+    soils_dir.mkdir(parents=True, exist_ok=True)
+    existing_sol_paths = set(soils_dir.glob('*.sol'))
+    original_domsoil_d = dict(soils_instance.domsoil_d)
+    original_soils = dict(soils_instance.soils)
+    original_soil_metrics = {
+        key: (
+            getattr(summary, 'area', 0.0),
+            getattr(summary, 'pct_coverage', 0.0),
+        )
+        for key, summary in original_soils.items()
+    }
+    backup_dir = Path(tempfile.mkdtemp(prefix=backup_prefix, dir=soils_dir))
+    backups: Dict[Path, Path] = {}
+    for path in soils_dir.glob('*.sol'):
+        backup_path = backup_dir / path.name
+        shutil.copy2(path, backup_path)
+        backups[path] = backup_path
+
+    try:
+        operation()
+    finally:
+        original_error = sys.exc_info()[1]
+        rollback_errors: list[BaseException] = []
+        if original_error is not None:
+            for path in set(soils_dir.glob('*.sol')) - existing_sol_paths:
+                try:
+                    path.unlink(missing_ok=True)
+                except OSError as exc:
+                    rollback_errors.append(exc)
+            for target_path, backup_path in backups.items():
+                try:
+                    shutil.copy2(backup_path, target_path)
+                except OSError as exc:
+                    rollback_errors.append(exc)
+
+            def _restore_state() -> None:
+                soils_instance.domsoil_d = dict(original_domsoil_d)
+                soils_instance.soils = dict(original_soils)
+                for key, (area, pct_coverage) in original_soil_metrics.items():
+                    summary = original_soils[key]
+                    summary.area = area
+                    summary.pct_coverage = pct_coverage
+
+            locked = getattr(soils_instance, 'locked', None)
+            try:
+                if callable(locked):
+                    with locked():
+                        _restore_state()
+                else:
+                    _restore_state()
+            except (AttributeError, OSError, RuntimeError) as exc:
+                rollback_errors.append(exc)
+
+        shutil.rmtree(backup_dir, ignore_errors=True)
+        if original_error is not None and rollback_errors:
+            logger.error(
+                'Disturbed soil rollback failed after %s: %s',
+                type(original_error).__name__,
+                '; '.join(str(error) for error in rollback_errors),
+            )
+            raise RuntimeError(
+                f'Disturbed soil rollback failed while handling '
+                f'{type(original_error).__name__}'
+            ) from rollback_errors[0]
+
+
+def _publish_disturbed_soil_artifact(
+    writer: Any,
+    output_path: str,
+    *,
+    base_quality: Any = None,
+    quality_report_path: Path | str | None = None,
+    expected_datver: int | float | None = None,
+    expected_luse: str | None = None,
+    expected_stext: str | None = None,
+) -> None:
+    """Write, validate, and publish one disturbed soil artifact."""
+    if base_quality is None:
+        writer(output_path)
+        return
+
+    from wepppy.eu.soils.esdac import (
+        ESDACDisturbedSoilBuildError,
+        validate_disturbed_soil_artifact,
+    )
+
+    target = Path(output_path)
+    report_path = Path(quality_report_path) if quality_report_path is not None else target
+    if not base_quality.accepted:
+        result = validate_disturbed_soil_artifact(
+            target,
+            context=base_quality.context,
+            expected_datver=expected_datver,
+            expected_luse=expected_luse,
+            expected_stext=expected_stext,
+            base_quality=base_quality,
+        )
+        raise ESDACDisturbedSoilBuildError(
+            result,
+            artifact_path=target,
+            quality_report_path=report_path,
+        )
+
+    target.parent.mkdir(parents=True, exist_ok=True)
+    fd, temporary_path = tempfile.mkstemp(
+        prefix=f'.{target.name}.',
+        suffix='.sol',
+        dir=target.parent,
+    )
+    os.close(fd)
+    try:
+        writer(temporary_path)
+        result = validate_disturbed_soil_artifact(
+            temporary_path,
+            context=base_quality.context,
+            expected_datver=expected_datver,
+            expected_luse=expected_luse,
+            expected_stext=expected_stext,
+            base_quality=base_quality,
+        )
+        if not result.accepted:
+            raise ESDACDisturbedSoilBuildError(
+                result,
+                artifact_path=target,
+                quality_report_path=report_path,
+            )
+        os.replace(temporary_path, target)
+    finally:
+        if os.path.exists(temporary_path):
+            os.remove(temporary_path)
+
+
+def _validate_existing_eu_soil_artifact(
+    artifact_path: str | Path,
+    *,
+    base_quality: Any,
+    quality_report_path: Path | str,
+    expected_datver: int | float | None = None,
+    expected_luse: str | None = None,
+    expected_stext: str | None = None,
+) -> None:
+    """Revalidate an already-published artifact before reusing it."""
+    from wepppy.eu.soils.esdac import (
+        ESDACDisturbedSoilBuildError,
+        validate_disturbed_soil_artifact,
+    )
+
+    path = Path(artifact_path)
+    result = validate_disturbed_soil_artifact(
+        path,
+        context=base_quality.context,
+        expected_datver=expected_datver,
+        expected_luse=expected_luse,
+        expected_stext=expected_stext,
+        base_quality=base_quality,
+    )
+    if not result.accepted:
+        raise ESDACDisturbedSoilBuildError(
+            result,
+            artifact_path=path,
+            quality_report_path=quality_report_path,
+        )
+
+
+def _publish_disturbed_soil_copy(
+    source_path: str,
+    output_path: str,
+    *,
+    base_quality: Any = None,
+    quality_report_path: Path | str | None = None,
+) -> None:
+    """Copy a management-supplied soil through the EU gate when applicable."""
+    if base_quality is None:
+        shutil.copyfile(source_path, output_path)
+        return
+
+    _publish_disturbed_soil_artifact(
+        lambda temporary_path: shutil.copyfile(source_path, temporary_path),
+        output_path,
+        base_quality=base_quality,
+        quality_report_path=quality_report_path,
+    )
 
 
 class DisturbedNoDbLockedException(Exception):
@@ -929,16 +1211,7 @@ class Disturbed(NoDbBase):
 
     @property
     def legend(self) -> List[Tuple[int, str, str]]:
-        keys = [130, 131, 132, 133]
-
-        descs = ['No Burn',
-                'Low Severity Burn',
-                'Moderate Severity Burn',
-                'High Severity Burn']
-
-        colors = ['#00734A', '#4DE600', '#FFFF00', '#FF0000']
-
-        return list(zip(keys, descs, colors))
+        return list(SBS_DISPLAY_CLASSES)
 
     @property
     def sbs_wgs_n(self) -> int:
@@ -1873,6 +2146,15 @@ class Disturbed(NoDbBase):
         )
 
     def modify_mofe_soils(self) -> None:
+        """Generate MOFE soils with rollback for a failed operation."""
+        _run_disturbed_soil_transaction(
+            self.soils_instance,
+            self._modify_mofe_soils_impl,
+            backup_prefix='.disturbed-mofe-backup-',
+            logger=self.logger,
+        )
+
+    def _modify_mofe_soils_impl(self) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}()')
 
@@ -1887,6 +2169,24 @@ class Disturbed(NoDbBase):
         recompute_wp_fc_using_rosetta_on_bd_override = bool(
             getattr(soils, 'rosetta_wc_fc_from_disturbed_bd_override', False)
         )
+        eu_quality_report = _load_eu_quality_report(soils)
+        eu_quality_report_path = (
+            eu_quality_report[0] if eu_quality_report is not None else None
+        )
+        if eu_quality_report is not None:
+            _validate_eu_quality_coverage(
+                eu_quality_report,
+                [
+                    topaz_id
+                    for topaz_id in soils.domsoil_d
+                    if not str(topaz_id).endswith('4')
+                ],
+                expected_soil_keys={
+                    topaz_id: str(soils.domsoil_d[topaz_id])
+                    for topaz_id in soils.domsoil_d
+                    if not str(topaz_id).endswith('4')
+                },
+            )
 
         soils.logger.info(f'Disturbed::modify_mofe_soils, sol_ver: {sol_ver}')
 
@@ -1912,6 +2212,16 @@ class Disturbed(NoDbBase):
                 _soil = soils.soils[mukey]
                 clay = _soil.clay
                 sand = _soil.sand
+
+                base_quality = (
+                    _quality_for_topaz(
+                        eu_quality_report,
+                        topaz_id,
+                        expected_soil_key=str(mukey),
+                    )
+                    if eu_quality_report is not None
+                    else None
+                )
 
                 assert isfloat(clay), clay
                 assert isfloat(sand), sand
@@ -1978,9 +2288,28 @@ class Disturbed(NoDbBase):
                                 ),
                                 desc=f'{_soil.desc} - {man.disturbed_class}',
                                 meta_fn=_soil.meta_fn,
+                                base_quality=base_quality,
+                                quality_report_path=eu_quality_report_path,
                             )
                         )
                         planned_soil_keys.add(disturbed_mukey)
+                    elif base_quality is not None:
+                        _validate_existing_eu_soil_artifact(
+                            output_path,
+                            base_quality=base_quality,
+                            quality_report_path=eu_quality_report_path,
+                            expected_datver=sol_ver,
+                            expected_luse=(
+                                replacements.get('luse')
+                                if replacements is not None
+                                else None
+                            ),
+                            expected_stext=(
+                                replacements.get('stext')
+                                if replacements is not None
+                                else None
+                            ),
+                        )
 
                     desc.append(f'{man.disturbed_class}')
                     stack.append(output_path)
@@ -1989,6 +2318,7 @@ class Disturbed(NoDbBase):
                 hillslope_plans.append(
                     dict(
                         topaz_id=topaz_id,
+                        base_soil_key=mukey,
                         key=key,
                         sol_fn=f'{key}.sol',
                         stack=stack,
@@ -2123,7 +2453,23 @@ class Disturbed(NoDbBase):
         for idx, hillslope_plan in enumerate(hillslope_plans, start=1):
             with self.timed('  Generating MOFE soil file with SoilMultipleOfeSynth'):
                 mofe_synth = SoilMultipleOfeSynth(stack=hillslope_plan['stack'])
-                mofe_synth.write(_join(soils.soils_dir, hillslope_plan['sol_fn']))
+                output_path = _join(soils.soils_dir, hillslope_plan['sol_fn'])
+                base_quality = (
+                    _quality_for_topaz(
+                        eu_quality_report,
+                        hillslope_plan['topaz_id'],
+                        expected_soil_key=str(hillslope_plan['base_soil_key']),
+                    )
+                    if eu_quality_report is not None
+                    else None
+                )
+                _publish_disturbed_soil_artifact(
+                    mofe_synth.write,
+                    output_path,
+                    base_quality=base_quality,
+                    quality_report_path=eu_quality_report_path,
+                    expected_datver=sol_ver,
+                )
 
             self.logger.debug(
                 '  (%s/%s) Generated MOFE soil file for topaz_id=%s',
@@ -2192,7 +2538,9 @@ class Disturbed(NoDbBase):
         topaz_id: str, 
         landuse_instance: 'Landuse', 
         soils_instance: 'Soils', 
-        _land_soil_replacements_d: Dict[Tuple[str, str], Dict[str, Any]]
+        _land_soil_replacements_d: Dict[Tuple[str, str], Dict[str, Any]],
+        *,
+        eu_quality_report: Optional[Tuple[Path, Dict[str, Any]]] = None,
     ) -> str:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}(topaz_id={topaz_id})')
@@ -2206,6 +2554,20 @@ class Disturbed(NoDbBase):
         recompute_wp_fc_using_rosetta_on_bd_override = bool(
             getattr(soils_instance, 'rosetta_wc_fc_from_disturbed_bd_override', False)
         )
+        if eu_quality_report is None:
+            eu_quality_report = _load_eu_quality_report(soils_instance)
+        base_quality = (
+            _quality_for_topaz(
+                eu_quality_report,
+                topaz_id,
+                expected_soil_key=str(mukey),
+            )
+            if eu_quality_report is not None
+            else None
+        )
+        quality_report_path = (
+            eu_quality_report[0] if eu_quality_report is not None else None
+        )
 
         soils_instance.logger.info(f'  Disturbed:: Disturbed.modify_soil(topaz_id={topaz_id}, mukey={mukey}, dom={dom})')
 
@@ -2217,7 +2579,18 @@ class Disturbed(NoDbBase):
             new_sol_path = _join(soils_instance.soils_dir, sol_fn)
 
             if not _exists(new_sol_path):
-                shutil.copyfile(man.sol_path, new_sol_path)
+                _publish_disturbed_soil_copy(
+                    man.sol_path,
+                    new_sol_path,
+                    base_quality=base_quality,
+                    quality_report_path=quality_report_path,
+                )
+            elif base_quality is not None:
+                _validate_existing_eu_soil_artifact(
+                    new_sol_path,
+                    base_quality=base_quality,
+                    quality_report_path=quality_report_path,
+                )
 
             if disturbed_mukey not in soils_instance.soils:
                 soils_instance.soils[disturbed_mukey] = SoilSummary(mukey=disturbed_mukey,
@@ -2248,11 +2621,11 @@ class Disturbed(NoDbBase):
                 return mukey
 
             disturbed_mukey = f'{mukey}-{texid}-{man.disturbed_class}'
+            disturbed_fn = disturbed_mukey + '.sol'
+            replacements = dict(_land_soil_replacements_d[key])
 
             if disturbed_mukey not in soils_instance.soils:
                 self.logger.info(f'  Generating disturbed soil for topaz_id: {topaz_id}, mukey: {mukey}, dom: {dom}, disturbed_mukey: {disturbed_mukey}')
-                disturbed_fn = disturbed_mukey + '.sol'
-                replacements = dict(_land_soil_replacements_d[key])
 
                 if 'fire' in man.disturbed_class:
                     _h0_max_om = self.h0_max_om
@@ -2286,7 +2659,16 @@ class Disturbed(NoDbBase):
                         version=sol_ver,
                     )
 
-                new.write(_join(soils_instance.soils_dir, disturbed_fn))
+                output_path = _join(soils_instance.soils_dir, disturbed_fn)
+                _publish_disturbed_soil_artifact(
+                    new.write,
+                    output_path,
+                    base_quality=base_quality,
+                    quality_report_path=quality_report_path,
+                    expected_datver=sol_ver,
+                    expected_luse=replacements.get('luse'),
+                    expected_stext=replacements.get('stext'),
+                )
 
                 desc = f'{_soil.desc} - {man.disturbed_class}'
                 soils_instance.soils[disturbed_mukey] = SoilSummary(mukey=disturbed_mukey,
@@ -2295,11 +2677,29 @@ class Disturbed(NoDbBase):
                                                             desc=desc,
                                                             meta_fn=_soil.meta_fn,
                                                             build_date=str(datetime.now()))
+            elif base_quality is not None:
+                _validate_existing_eu_soil_artifact(
+                    _join(soils_instance.soils_dir, disturbed_fn),
+                    base_quality=base_quality,
+                    quality_report_path=quality_report_path,
+                    expected_datver=sol_ver,
+                    expected_luse=replacements.get('luse'),
+                    expected_stext=replacements.get('stext'),
+                )
 
         assert disturbed_mukey is not None, (topaz_id, mukey, dom)
         return disturbed_mukey
 
     def modify_soils(self) -> None:
+        """Generate single-OFE soils with rollback for a failed operation."""
+        _run_disturbed_soil_transaction(
+            self.soils_instance,
+            self._modify_soils_impl,
+            backup_prefix='.disturbed-single-backup-',
+            logger=self.logger,
+        )
+
+    def _modify_soils_impl(self) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}()')
 
@@ -2308,6 +2708,21 @@ class Disturbed(NoDbBase):
         soils = self.soils_instance
         watershed = self.watershed_instance
         _land_soil_replacements_d = self.land_soil_replacements_d
+        eu_quality_report = _load_eu_quality_report(soils)
+        if eu_quality_report is not None:
+            _validate_eu_quality_coverage(
+                eu_quality_report,
+                [
+                    topaz_id
+                    for topaz_id in soils.domsoil_d
+                    if (int(topaz_id) - 4) % 10 != 0
+                ],
+                expected_soil_keys={
+                    topaz_id: str(soils.domsoil_d[topaz_id])
+                    for topaz_id in soils.domsoil_d
+                    if (int(topaz_id) - 4) % 10 != 0
+                },
+            )
 
         soils.logger.info(f'Disturbed::  Disturbed.modify_soils, sol_ver: {self.sol_ver}')
 
@@ -2322,7 +2737,21 @@ class Disturbed(NoDbBase):
                 if (int(topaz_id) - 4) % 10 == 0:
                     continue
 
-                disturbed_mukey = self.modify_soil(str(topaz_id), landuse, soils, _land_soil_replacements_d)
+                if eu_quality_report is None:
+                    disturbed_mukey = self.modify_soil(
+                        str(topaz_id),
+                        landuse,
+                        soils,
+                        _land_soil_replacements_d,
+                    )
+                else:
+                    disturbed_mukey = self.modify_soil(
+                        str(topaz_id),
+                        landuse,
+                        soils,
+                        _land_soil_replacements_d,
+                        eu_quality_report=eu_quality_report,
+                    )
                 assert disturbed_mukey is not None, topaz_id
 
                 soils.domsoil_d[topaz_id] = disturbed_mukey
@@ -2365,15 +2794,24 @@ class Disturbed(NoDbBase):
                 assert sbs.data.shape == bounds.shape, [sbs.data.shape, bounds.shape]
 
 
-                c = Counter(sbs.data[np.where(bounds == 1.0)])
+                eligible = (bounds == 1.0) & sbs.source_valid_mask
+                c = Counter(sbs.data[eligible])
 
                 total_px = float(sum(c.values()))
 
                 # todo: calcuate based on disturbed burn classes
-                self.sbs_coverage = {
-                                     'noburn': c[130] / total_px,
-                                     'low': c[131] / total_px,
-                                     'moderate': c[132] / total_px,
-                                     'high': c[133] / total_px
-                                     }
+                if total_px == 0.0:
+                    self.sbs_coverage = {
+                        'noburn': 0.0,
+                        'low': 0.0,
+                        'moderate': 0.0,
+                        'high': 0.0,
+                    }
+                else:
+                    self.sbs_coverage = {
+                                         'noburn': c[130] / total_px,
+                                         'low': c[131] / total_px,
+                                         'moderate': c[132] / total_px,
+                                         'high': c[133] / total_px
+                                         }
         

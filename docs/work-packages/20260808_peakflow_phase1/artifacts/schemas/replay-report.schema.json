@@ -1,0 +1,237 @@
+{
+  "$id": "https://github.com/rogerlew/wepppy/peakflow-phase1/schemas/replay-report.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "event_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "harmonized_forcing_diagnostic": {
+      "additionalProperties": false,
+      "properties": {
+        "appmth": {
+          "additionalProperties": false,
+          "properties": {
+            "equation_branch": {
+              "enum": [
+                "partial_equilibrium",
+                "quasi_equilibrium_a",
+                "quasi_equilibrium_b",
+                "constant_or_out_of_domain"
+              ]
+            },
+            "finite_result": {
+              "type": "boolean"
+            },
+            "qpstar": {
+              "type": "number"
+            },
+            "tc": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "tstar": {
+              "type": "number"
+            },
+            "vave_m_s": {
+              "minimum": 0,
+              "type": "number"
+            },
+            "vstar": {
+              "type": "number"
+            },
+            "within_documented_qpstar_domain": {
+              "type": "boolean"
+            },
+            "within_documented_tstar_domain": {
+              "type": "boolean"
+            },
+            "within_documented_vstar_domain": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "vave_m_s",
+            "vstar",
+            "tstar",
+            "tc",
+            "qpstar",
+            "equation_branch",
+            "within_documented_vstar_domain",
+            "within_documented_tstar_domain",
+            "within_documented_qpstar_domain",
+            "finite_result"
+          ],
+          "type": "object"
+        },
+        "appmth_peak_m_s": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "forcing_integral_m": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "hdrive_final_routed_volume_fraction": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "hdrive_nq": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "hdrive_nqt": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "hdrive_peak_m_s": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "positive_support_duration_s": {
+          "minimum": 0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "appmth_peak_m_s",
+        "hdrive_peak_m_s",
+        "hdrive_nqt",
+        "hdrive_nq",
+        "hdrive_final_routed_volume_fraction",
+        "appmth",
+        "forcing_integral_m",
+        "positive_support_duration_s"
+      ],
+      "type": "object"
+    },
+    "hdrive_stopping_condition": {
+      "enum": [
+        "95_percent_volume",
+        "ns_plus_200_limit",
+        "array_limit",
+        "iteration_limit"
+      ]
+    },
+    "legacy_input_replay": {
+      "additionalProperties": false,
+      "properties": {
+        "appmth": {
+          "additionalProperties": false,
+          "properties": {
+            "equation_branch": {
+              "enum": [
+                "partial_equilibrium",
+                "quasi_equilibrium_a",
+                "quasi_equilibrium_b",
+                "constant_or_out_of_domain"
+              ]
+            },
+            "finite_result": {
+              "type": "boolean"
+            },
+            "qpstar": {
+              "type": "number"
+            },
+            "tc": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "tstar": {
+              "type": "number"
+            },
+            "vave_m_s": {
+              "minimum": 0,
+              "type": "number"
+            },
+            "vstar": {
+              "type": "number"
+            },
+            "within_documented_qpstar_domain": {
+              "type": "boolean"
+            },
+            "within_documented_tstar_domain": {
+              "type": "boolean"
+            },
+            "within_documented_vstar_domain": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "vave_m_s",
+            "vstar",
+            "tstar",
+            "tc",
+            "qpstar",
+            "equation_branch",
+            "within_documented_vstar_domain",
+            "within_documented_tstar_domain",
+            "within_documented_qpstar_domain",
+            "finite_result"
+          ],
+          "type": "object"
+        },
+        "appmth_peak_m_s": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "hdrive_final_routed_volume_fraction": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "hdrive_nq": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "hdrive_nqt": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "hdrive_peak_m_s": {
+          "minimum": 0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "appmth_peak_m_s",
+        "hdrive_peak_m_s",
+        "hdrive_nqt",
+        "hdrive_nq",
+        "hdrive_final_routed_volume_fraction",
+        "appmth"
+      ],
+      "type": "object"
+    },
+    "packet_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "replay_process": {
+      "const": "standalone_peak_replay_executable"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "selected_method_delta_m_s": {
+      "minimum": 0,
+      "type": "number"
+    }
+  },
+  "required": [
+    "schema_version",
+    "event_id",
+    "packet_sha256",
+    "replay_process",
+    "selected_method_delta_m_s",
+    "legacy_input_replay",
+    "harmonized_forcing_diagnostic",
+    "hdrive_stopping_condition"
+  ],
+  "title": "Replay Report",
+  "type": "object"
+}

@@ -6,6 +6,7 @@ describe("Map GL controller", () => {
     let emittedEvents;
     let deckInstance;
     let mapElement;
+    let originalCanvasGetContext;
 
     beforeEach(async () => {
         jest.resetModules();
@@ -98,7 +99,13 @@ describe("Map GL controller", () => {
             isHttpError: jest.fn(() => false),
         };
 
-        global.createImageBitmap = jest.fn(() => Promise.resolve({}));
+        originalCanvasGetContext = HTMLCanvasElement.prototype.getContext;
+        HTMLCanvasElement.prototype.getContext = () => ({
+            drawImage: jest.fn(),
+            getImageData: () => ({ data: new Uint8ClampedArray([0, 0, 0, 0]) }),
+            putImageData: jest.fn(),
+        });
+        global.createImageBitmap = jest.fn(() => Promise.resolve({ width: 1, height: 1 }));
         if (global.window) {
             global.window.createImageBitmap = global.createImageBitmap;
         }
@@ -170,6 +177,7 @@ describe("Map GL controller", () => {
     });
 
     afterEach(() => {
+        HTMLCanvasElement.prototype.getContext = originalCanvasGetContext;
         delete global.deck;
         delete global.WCEvents;
         delete global.WCHttp;
@@ -548,7 +556,7 @@ describe("Map GL controller", () => {
         expect(legend.innerHTML).toContain("SBS Legend");
     });
 
-    test("SBS color shift toggle swaps legend palette", async () => {
+    test("SBS color shift toggle swaps between canonical and shifted palettes", async () => {
         const mapInstance = global.MapController.getInstance();
         mapInstance.addLayer(mapInstance.sbs_layer, { skipRefresh: true });
 
@@ -564,8 +572,10 @@ describe("Map GL controller", () => {
 
         const legend = document.getElementById("sbs_legend");
         const toggle = document.getElementById("sbs_color_shift_toggle");
-        expect(legend.innerHTML).toContain("#4DE600");
-        expect(legend.innerHTML).not.toContain("#56B4E9");
+        expect(legend.innerHTML).toContain("#008080");
+        expect(legend.innerHTML).toContain("#52CCCC");
+        expect(legend.innerHTML).toContain("Masked / Unmappable");
+        expect(legend.innerHTML).toContain("border: 1px solid #333");
 
         toggle.checked = true;
         toggle.dispatchEvent(new Event("change"));
@@ -574,7 +584,7 @@ describe("Map GL controller", () => {
 
         toggle.checked = false;
         toggle.dispatchEvent(new Event("change"));
-        expect(legend.innerHTML).toContain("#4DE600");
+        expect(legend.innerHTML).toContain("#52CCCC");
         expect(legend.innerHTML).not.toContain("#56B4E9");
     });
 
@@ -644,8 +654,10 @@ describe("Map GL controller", () => {
         const legend = document.getElementById("sbs_legend");
         expect(legend.hidden).toBe(false);
 
+        mapInstance.sbs_layer.sbsUnassignedCount = 7;
         mapInstance.removeLayer(mapInstance.sbs_layer);
 
+        expect(mapInstance.sbs_layer.sbsUnassignedCount).toBe(0);
         expect(legend.hidden).toBe(true);
         expect(legend.innerHTML).toBe("");
     });
@@ -1070,5 +1082,63 @@ describe("Map GL controller", () => {
 
         global.AbortController = originalAbortController;
         jest.useRealTimers();
+    });
+
+    test("decodes all historical SBS endpoint generations in both modes", () => {
+        const shared = window.WCMapGlShared;
+        const lows = [
+            [161, 250, 220],
+            [77, 230, 0],
+            [82, 204, 204],
+        ];
+
+        lows.forEach((rgb) => {
+            expect(shared.decodeSbsClass(...rgb)).toBe(131);
+            expect(shared.mapSbsRgbForMode(...rgb, "standard")).toEqual([82, 204, 204]);
+            expect(shared.mapSbsRgbForMode(...rgb, "shifted")).toEqual([86, 180, 233]);
+        });
+        expect(shared.decodeSbsClass(1, 2, 3)).toBeNull();
+        expect(shared.mapSbsRgbForMode(1, 2, 3, "standard")).toEqual([128, 0, 152]);
+    });
+
+    test("includes the Unassigned state and count in both SBS legends", () => {
+        const shared = window.WCMapGlShared;
+        ["standard", "shifted"].forEach((mode) => {
+            const items = shared.getSbsLegendItemsForMode(mode, 7);
+            expect(items).toHaveLength(6);
+            expect(items[4]).toMatchObject({ key: "unassigned", label: "Unassigned", color: "#800098", count: 7 });
+            expect(items[5]).toMatchObject({ key: 255, masked: true });
+        });
+    });
+
+    test("recolors without mutating source bytes and normalizes visible alpha", () => {
+        const shared = window.WCMapGlShared;
+        const source = new Uint8ClampedArray([
+            46, 203, 24, 64,
+            1, 2, 3, 12,
+            7, 8, 9, 0,
+            168, 0, 0, 255,
+        ]);
+        const stored = source.slice();
+        const display = source.slice();
+
+        expect(shared.recolorSbsPixels(display, "standard")).toBe(1);
+        expect(source).toEqual(stored);
+        expect(Array.from(display)).toEqual([
+            0, 128, 128, 255,
+            128, 0, 152, 255,
+            7, 8, 9, 0,
+            168, 0, 0, 255,
+        ]);
+    });
+
+    test("locks the approved pre-2018 interpolation and clamp compatibility outcomes", () => {
+        const shared = window.WCMapGlShared;
+        // Executional GDAL fixture: a between-break value baked to off-domain RGB.
+        expect(shared.decodeSbsClass(75, 71, 71)).toBeNull();
+        expect(shared.mapSbsRgbForMode(75, 71, 71, "standard")).toEqual([128, 0, 152]);
+        // Executional GDAL fixture: a value above the old table clamped to High.
+        expect(shared.decodeSbsClass(168, 0, 0)).toBe(133);
+        expect(shared.mapSbsRgbForMode(168, 0, 0, "shifted")).toEqual([204, 121, 167]);
     });
 });

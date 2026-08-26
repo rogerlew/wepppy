@@ -1,0 +1,7 @@
+p106.sol executable-data line 88, field 3:
+
+baseline-ksat20: 200.0 1.5 20 10.0 ...
+mutant-ksat35:   200.0 1.5 35 10.0 ...
+
+Interpretation: first-horizon saturated hydraulic conductivity changes from
+20 to 35 mm/h. No other input token differs.

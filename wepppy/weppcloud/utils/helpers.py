@@ -17,7 +17,7 @@ from os.path import split as _split
 from typing import Any, Callable, Optional, ParamSpec, TypeVar
 
 import redis
-from flask import Request, Response, abort, current_app, g, jsonify, make_response, url_for
+from flask import Request, Response, abort, current_app, g, jsonify, make_response, request, url_for
 from werkzeug.exceptions import HTTPException
 
 from wepppy.all_your_base.all_your_base import isint
@@ -870,8 +870,26 @@ def authorize_and_handle_with_exception_factory(
         try:
             # Authorize request before executing the route; aborts raise HTTPException.
             authorize(runid, config)
-            
-            # Execute the wrapped route once authorization succeeds.
+            if request.method in {"POST", "PUT", "PATCH", "DELETE"} or getattr(
+                func, "_requires_run_lifecycle_fence", False
+            ):
+                from wepppy.rq.submission_recovery import (
+                    RqSubmissionConflict,
+                    rq_submission_lock,
+                )
+
+                with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
+                    try:
+                        with rq_submission_lock(
+                            redis_conn,
+                            f"{runid}:request",
+                            lifecycle_key=runid,
+                        ):
+                            return func(runid, config, *args, **kwargs)
+                    except RqSubmissionConflict as exc:
+                        return error_factory(str(exc), status_code=409)
+
+            # Execute read-only requests once authorization succeeds.
             return func(runid, config, *args, **kwargs)
             
         except HTTPException:
@@ -895,6 +913,12 @@ def authorize_and_handle_with_exception_factory(
             )
             
     return wrapper
+
+
+def run_lifecycle_mutation(func: Callable[..., ResponseValue]) -> Callable[..., ResponseValue]:
+    """Mark a state-changing GET route for the canonical run lifecycle fence."""
+    setattr(func, "_requires_run_lifecycle_fence", True)
+    return func
 
 def handle_with_exception_factory(
     func: Callable[P, ResponseValue],

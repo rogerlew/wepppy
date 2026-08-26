@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-08-04
-**Active Packages**: 22
+**Last Updated**: 2026-08-24
+**Active Packages**: 29
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 19 packages (above target range)
+**Current WIP**: 26 packages (above target range; calculated from the 26 package entries in the In Progress section)
 
 ### 3. Manage Flow
 Monitor how long packages spend in each column:
@@ -74,6 +74,83 @@ Feedback mechanisms:
 ---
 
 ## 📋 Backlog
+
+### Seamless WEPPcloud Session Cookie Namespace Migration
+
+**Proposed**: 2026-08-23
+
+**Size**: Medium-High (contract checkpoint, two service adapters, staged live rollout)
+
+**Priority**: Critical
+
+**Security impact**: `high` (signed session credential selection and migration)
+
+**Link**: [docs/work-packages/20260823_session_cookie_namespace_migration/](docs/work-packages/20260823_session_cookie_namespace_migration/)
+
+**Description**: Replace Flask's collision-prone generic `session` cookie with
+`weppcloud_session` through an identity-safe dual-read migration. Preserve the
+same Redis SID and active session state, support Flask/rq-engine mixed versions,
+and require no user logout, login, or site-data clearing. Never delete an
+unowned generic legacy cookie or select across ambiguous identities.
+
+**Next Steps**: Complete independent correctness, security, operations, and
+UX/governance reviews; disposition findings; obtain operator acceptance; and
+commit the contract checkpoint before implementation.
+
+---
+
+### Climate Multiple-Build Finalize Lock
+
+**Proposed**: 2026-08-21
+
+**Size**: Medium (1-2 focused sessions plus review)
+
+**Priority**: High
+
+**Security impact**: `high` (RQ worker subprocess, run-tree persistence, and
+NoDb concurrency ownership)
+
+**Link**: [docs/work-packages/20260820_climate_finalize_lock/](docs/work-packages/20260820_climate_finalize_lock/)
+
+**Description**: Refactor GridMET and Daymet multiple-interpolated climate
+builds into an explicit collect-then-finalize pattern. Expensive work executes
+outside the Climate NoDb lock; a short finalizer reloads durable state,
+preserves unrelated rewrites, rejects relevant input changes, and commits only
+derived output fields without weakening stale-write detection.
+
+**Origin**: openWEPP canary job
+`a2d23f26-8386-433a-9df7-d5f3a03c8d96` completed GridMET/CLIGEN generation
+but failed its final same-size stale write on 2026-08-21.
+
+**Next Steps**: Ratify the minimal contract checkpoint, then add failing
+GridMET and Daymet interleaving regressions before implementation.
+
+---
+
+### SBS USGS Section 508 Palette Adoption
+**Status**: In Progress — corrective contract checkpoint review
+
+**Proposed**: 2026-08-07
+
+**Size**: Medium (3-5 focused sessions)
+
+**Priority**: High
+
+**Security impact**: `high` by inherited DOM-23 upload/file ownership
+
+**Link**: [docs/work-packages/20260807_sbs_section508_palette/](docs/work-packages/20260807_sbs_section508_palette/)
+**Description**: Update the non-shifted run-page and GL Dashboard SBS palette
+to the current interagency CVD-friendly colors while preserving the shifted
+modes and default shifted export. Explicit non-shifted exports use the new
+colors, and exact color-table recognition remains backward compatible. Includes
+ADR-0041, a contract-first checkpoint, generated-raster and
+Python/Rust parity evidence, accessibility validation, and an update to the
+public accessibility statement.
+
+**Next Steps**: Pass the corrective independent reviews, commit the corrected
+authority, then complete implementation validation.
+
+---
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
 
@@ -186,6 +263,12 @@ checkpoint before any production implementation edits.
 **Link**: [docs/work-packages/20260505_run_statistics_ledger/](docs/work-packages/20260505_run_statistics_ledger/)
 **Description**: Replace WEPPcloud usage counters derived from active run-directory file counts with a durable PostgreSQL statistics ledger for project counts by config, repeated WEPP hillslope run counts, and WATAR ash run counts.
 
+**Incident bridge**: SURF-19A/GOV-00A-M1H is in progress after wepp1 job
+`7aa39c98-de7c-4298-8d5f-35e3784775e4` exhausted 36,000 seconds inside a
+per-run `.slp` glob. It uses canonical Parquet footer counts, decouples
+locations/projects from count presence, and retains last-good outputs on
+systemic artifact failure.
+
 **Scope**:
 - Add a PostgreSQL statistics event ledger so historical execution counts survive 90-day TTL deletion and concurrent writers are transaction-safe.
 - Keep PostgreSQL as the source-of-truth ledger; Redis may be used only as an optional summary cache/materialization layer.
@@ -200,7 +283,7 @@ checkpoint before any production implementation edits.
 
 **Dependencies**: Initial spec and active ExecPlan are created; implementation is pending.
 
-**Next Steps**: Implement the ledger module and focused writer/backfill tests before wiring WEPP, WATAR, and TTL runtime hooks.
+**Next Steps**: Commit the reviewed SURF-19A checkpoint, implement and canary the footer-only incident bridge, then resume broader ledger milestones.
 
 ---
 
@@ -322,6 +405,140 @@ When resuming Kubernetes work:
 
 ## 🚧 In Progress
 
+### Production Compose Deployment and CAP Runtime Hardening
+
+**Started**: 2026-08-25
+
+**Priority**: Critical
+
+**Security impact**: `high` (production secret permissions, container identity,
+persistent CAPTCHA state, and deployment wiring)
+
+**Link**: [docs/work-packages/20260825_cap_runtime_deploy_hardening/](docs/work-packages/20260825_cap_runtime_deploy_hardening/)
+
+**Description**: Repair the full-mode partial-build contract that recreated CAP
+with unmigrated runtime permissions and WEPPcloudR from a stale incompatible
+image. Add idempotent CAP migration, build/recreate parity, worker/renderer
+compatibility, every-service acceptance, and an exact-command integrated gate
+on Forest1. Incident: [production Compose partial-build deployment](docs/infrastructure/incident-2026-08-25-production-compose-partial-build.md).
+
+**Status**: CAP reviews completed and High findings dispositioned. Scope now
+includes the stale-WEPPcloudR failure; implementation, exact no-argument
+Forest1 rehearsal, and renewed independent review remain.
+
+---
+
+### Deferred Job Retry Dependency Correction
+
+**Started**: 2026-08-23
+
+**Priority**: Critical
+
+**Security impact**: `high` (cross-workflow RQ dependency and authenticated
+deferred-graph reconciliation)
+
+**Link**: [docs/work-packages/20260821_deferred_job_retry_recovery/](docs/work-packages/20260821_deferred_job_retry_recovery/)
+
+**Description**: Restore strict required-output dependency semantics after a
+live missing-soils WEPP run proved that global `allow_failure` wiring releases
+invalid downstream work. Preserve no-friction retry through the ratified
+ordinary-submission deferred cleanup. Also correct aggregate failed-over-
+blocked-deferred status and define an atomic producer/worker cutover.
+
+**Status**: Corrective contract checkpoint under independent review.
+
+---
+
+### Direct OpenFileGDB Cutover
+
+**Started**: 2026-08-21
+
+**Size**: Medium
+
+**Priority**: High
+
+**Security impact**: `high` (worker subprocess/file generation and deployment
+wiring; dedicated review required)
+
+**Link**: [docs/work-packages/20260821_openfilegdb_cutover/](docs/work-packages/20260821_openfilegdb_cutover/)
+
+**Description**: Direct GDAL 3.10.3 `OpenFileGDB` conversion is implemented
+with explicit capability checks, bounded subprocess execution, cleanup,
+permissions, first-level `.gdb` ZIP layout, and real readback coverage. The
+Esri SDK image, sidecar, compatibility modules, Compose dependencies, vendor
+paths, CI input, host setup, and deployment clone have been removed while the
+legacy `f_esri` request alias remains supported.
+
+**Status**: Implementation and local validation complete; independent reviews,
+forest rollout, and separately authorized production/Kubernetes promotion
+remain.
+
+---
+
+### EU Disturbed Soil Building Data-Quality Hardening
+
+**Started**: 2026-08-19
+**Size**: Multi-phase investigation and hardening
+**Priority**: High
+**Security impact**: `none` at scaffold time
+**Link**: [docs/work-packages/20260819_eu_disturbed_soil_hardening/](docs/work-packages/20260819_eu_disturbed_soil_hardening/)
+**Description**: Search a seeded, stratified sample of the ESDAC raster
+footprint for zero-valued parameters or invalid horizons, then define and
+implement explicit validation and diagnostics without silently inventing
+replacement soil values. The Phase 0 pilot, Phase 1 replay fixture, Phase 2
+quality contract, and Phase 3 pure validator are complete; production wiring
+remains in Phase 4.
+**Next Steps**: Integrate the pure validator into the ESDAC builder and worker
+aggregation, preserve TopoAZ/coordinate diagnostics, and prove that rejected
+locations cannot produce usable `.sol` files. Decide separately whether the
+50,000-sample discovery campaign is warranted.
+**Validation Notes**: Phase 3 targeted EU tests passed (`22 passed`); package,
+ADR, and tracker documentation lint passed; the full repository gate reached
+170 passed and 13 skipped before an unrelated Docker CLI compose-contract
+failure (`docker compose` rejected `-f`).
+
+---
+
+### WEPPcloud Private-Canary Image Compatibility
+
+**Started**: 2026-08-13
+**Size**: Focused cross-cutting implementation
+**Priority**: High
+**Security impact**: `high` (private image publication and CI token authority)
+**Link**: [docs/work-packages/20260813_weppcloud_private_canary_image/](docs/work-packages/20260813_weppcloud_private_canary_image/)
+**Description**: Build the existing common runtime image with a commit-derived
+private GHCR reference and immutable digest, then prove an additive minimum
+Caddy + WEPPcloud + ephemeral Redis compatibility stack without changing or
+starting a production Compose deployment.
+**Next Steps**: Complete the inventory, local smoke build, security review, and
+GitHub Actions publication evidence; then open the ready-for-review PR.
+
+---
+
+### Peak-Flow Discontinuity Multi-Site Audit
+
+**Started**: 2026-08-08
+**Size**: Multi-phase investigation
+**Priority**: High
+**Security impact**: `high` for the active execution package's local path,
+subprocess, concurrency, and recovery surfaces
+**Security review**:
+[execution security artifact](docs/work-packages/20260809_peakflow_topanga_census_execution/artifacts/20260809_security_review.md)
+
+**Link**: [Topanga census execution](docs/work-packages/20260809_peakflow_topanga_census_execution/package.md)
+
+**Description**: The frozen Topanga local screening census completed all 1,088
+eligible mutation trials with zero failed or stopped terminals. Immutable
+aggregation produced 225,654 outer event rows and 11,506 screened candidate
+rows across 1,027 mutation trials, with all 32 preregistered exclusions retained
+in denominators. Scientific, code, QA, and security reviews passed.
+
+**Next Steps**: Use the completed local screening disposition to scope separately
+governed candidate adjudication and cross-site replication. Do not infer routing
+or downstream impact from the mutation-trial screening rates.
+
+---
+
 ### Fork/Archive Serial Queue Isolation (proposed SURF-03A)
 
 **Started**: 2026-08-03
@@ -338,6 +555,25 @@ review, and standalone ancestor are required before implementation.
 
 ---
 
+### Fork Omni Empty-State Conformance Fix (SURF-04B-C1)
+
+**Started**: 2026-08-10
+**Priority**: Critical
+**Security impact**: `high`
+**Link**: [docs/work-packages/20260810_fork_omni_empty_state_fix/](docs/work-packages/20260810_fork_omni_empty_state_fix/)
+**Description**: Restore the accepted checked-fork contract for sources that
+legitimately have no `_pups` Omni child workspace. Three wepp1 jobs failed with
+`FileNotFoundError('_pups')` because security-oriented directory verification
+incorrectly treated valid absence as corruption.
+**Status**: Closed 2026-08-11. Conformance patch, 102 focused RQ tests,
+review-governance amendments, and independent correctness/QA/security reviews
+all pass with no unresolved findings. Repository-wide validation was attempted;
+unrelated cwd and integration opt-in leakage blockers are documented with
+isolated-test evidence. No production mutation, retry, deployment, commit, or
+push was performed.
+
+---
+
 ### Omni Fork Symlink Retarget Hardening (SURF-04A)
 
 **Started**: 2026-08-02
@@ -346,7 +582,7 @@ review, and standalone ancestor are required before implementation.
 **Link**: [docs/work-packages/20260802_omni_fork_symlink_retarget_hardening/](docs/work-packages/20260802_omni_fork_symlink_retarget_hardening/)
 **Description**: Keep `rsync -a` while making recognized Omni links
 destination-relative and repairing inherited ancestor links after copy.
-**Status**: Reopened after production NFS compatibility failure.
+**Status**: Reopened after production NFS and legacy access-log compatibility failures.
 **Outcome**: Producers now create relative links and forks transactionally
 retarget the allowlisted legacy matrix without following old targets. Final
 validation passed (`5783 passed, 58 skipped`) with correctness, QA, and security
@@ -354,6 +590,10 @@ approval and no unresolved medium/high findings.
 Production fork job `c4a6e8cc-a2cf-48bc-9d77-e97e7727a53b` then proved
 `renameat2(RENAME_NOREPLACE)` unsupported by the NFSv4.2 run filesystem. The
 package is replacing that primitive and adding an actual-NFS parity gate.
+Production job `8dda9f7a-310f-4a16-8bae-501a2d0106d6` subsequently failed on
+the legacy regular Omni access-log sidecar `.mulch_15_sbs_map`. The bounded
+amendment skips dot-prefixed collection entries during link normalization;
+ordinary unexpected entries remain fail closed.
 
 ---
 
@@ -437,7 +677,7 @@ authentication tokens from logs, restore persistent security logging under
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 16 packages
+**Current WIP Count**: 24 packages (calculated from the In Progress section)
 
 ### SSURGO Intelligent Fallback Empirical Study
 **Started**: 2026-07-21
@@ -510,6 +750,10 @@ build through job completion before review.
 **Description**: Establish one evidence-backed contract standard and execute an iterative series of bounded work packages to audit every Pure UI controller from rendered fields through JavaScript payloads, route parsing, persistence, RQ behavior, and reload.
 
 **Current Status**:
+- [DOM-14A](docs/work-packages/20260728_wepp_core_ui_contract/) has an accepted,
+  dual-reviewed prep-completion timeout amendment pending implementation:
+  complete `wepp1` recovery measured 1,234.117 seconds, yielding a proposed
+  3,703-second RQ timeout and 4,003-second Git-lock lifetime.
 - [SHR-06](docs/work-packages/20260729_pure_ui_command_bar_contract/)
   closed with direct keyboard/history/request, privileged recovery, MCP
   secrecy, Wojak/StatusStream, and hostile-content evidence; repaired
@@ -956,7 +1200,224 @@ WP00A-WP13.
 **Next Steps**: Scaffold WP00A secret sanitization, WP00B source normalization,
 or WP01 defaults compatibility. Each successor must import its checklist task
 IDs and remain on the documented initiative branch.
+### SBS Display Class Decoding
 
+**Completed**: 2026-08-25
+**Status**: ✅ **COMPLETE**
+**Security impact**: `low`; no route, payload, persistence, or authorization
+surface changed
+**Link**: [docs/work-packages/20260824_sbs_class_transport/](docs/work-packages/20260824_sbs_class_transport/)
+
+**Summary**: Completed total, exact SBS class transport and unconditional class
+decoding in both map clients. Unassigned pixels are visible, counted, and
+distinct from masked NoData; Dashboard tooltips and both legends use decoded
+semantics. Historical compatibility, parity, all three real-GDAL output paths,
+and a reproducible 4096×4096 performance/memory benchmark are covered. Final
+gates passed: 6,697 Python tests (63 skipped), 105 frontend suites / 778 tests,
+lint, stubs, docs, and independent correctness review with no unresolved
+high/medium findings.
+
+---
+
+### Recorder CSRF Transport Repair
+
+**Completed**: 2026-08-23
+**Status**: ✅ **COMPLETE**
+**Security impact**: `high`
+**Link**: [docs/work-packages/20260823_recorder_csrf_transport/](docs/work-packages/20260823_recorder_csrf_transport/)
+
+**Summary**: Replaced the broken recorder Beacon path with fail-closed,
+same-origin-only credentialed Fetch carrying `X-CSRFToken`, and preserved
+singleton JSON event arrays at the Flask boundary. Hostile endpoint and real
+session-mismatch regressions pass; independent correctness and security reviews
+closed with no unresolved findings. A post-deployment Safari console smoke is
+the only remaining operational confirmation.
+
+---
+
+### Bootstrap Git Maintenance
+
+**Completed**: 2026-08-22
+**Status**: ✅ **COMPLETE**
+**Security impact**: `high`
+**Link**: [docs/work-packages/20260821_bootstrap_git_maintenance/](docs/work-packages/20260821_bootstrap_git_maintenance/)
+
+**Summary**: Initial Bootstrap enable now packs repository objects and writes
+reachability bitmaps under the existing Git lock, using `WEPPPY_NCPU` as the
+thread ceiling and retaining conservative prune grace periods. Live canary
+maintenance preserved repository fingerprints and reduced clone time from 70.8
+seconds to 4.65 seconds through pack reuse.
+
+---
+
+### Self-Hosted GHCR Builder
+
+**Completed**: 2026-08-21
+**Status**: ✅ **COMPLETE**
+**Security impact**: `high`
+**Link**: [docs/work-packages/20260820_self_hosted_ghcr_builder/](docs/work-packages/20260820_self_hosted_ghcr_builder/)
+
+**Summary**: Dedicated `runner-01` to trusted GHCR publication with persistent
+verified LFS and guarded BuildKit caches. Independent review found and
+remediated unintended pull-request eligibility, discarded the exposed cache,
+and required direct negative-path evidence. Hardened run 32457043609 passed and
+published a digest-qualified image. Node 20 Action upgrades and routine cache
+monitoring remain low-priority follow-ups.
+
+---
+
+### WEPPcloudR Execution Backend Refactor
+
+**Completed**: 2026-08-21
+**Status**: ✅ **COMPLETE** for repository scope
+**Security impact**: `high`
+**Link**: [docs/work-packages/20260821_weppcloudr_execution_backend_refactor/](docs/work-packages/20260821_weppcloudr_execution_backend_refactor/)
+
+**Summary**: Added explicit Docker-exec and Kubernetes-Job render boundaries,
+durable reconciliation/cancellation/fencing contracts, and a strict one-shot R
+entrypoint while preserving Compose topology and mounts. The authorized forest
+Docker-exec render and all independent reviews passed. Kubernetes image build
+and cluster deployment remain a separate package.
+
+---
+
+### RQ Job ID Canonicalization and Dashboard Compatibility
+
+**Completed**: 2026-08-08
+**Status**: ✅ **COMPLETE**
+**Security impact**: `low`
+**Link**: [docs/work-packages/20260808_rq_job_id_canonicalization/](docs/work-packages/20260808_rq_job_id_canonicalization/)
+
+**Summary**: Canonicalized new preallocated RQ UUID IDs to `str(uuid4())` and
+fixed the dashboard to preserve exact legacy bare-hex IDs.
+
+---
+
+### Topanga Peak-Flow Audit Phase 1
+
+**Completed**: 2026-08-08
+**Status**: ✅ **GATES 0–2 COMPLETE**
+**Security impact**: `none`
+**Link**: [docs/work-packages/20260808_peakflow_phase1/](docs/work-packages/20260808_peakflow_phase1/)
+
+**Summary**: Published versioned audit schemas; froze compact 1980 Ksat and
+1986 canopy/ground-cover fixtures; proved seven-file observational byte parity;
+captured immutable event packets; reproduced both selected peaks exactly in a
+separate legacy solver executable; and passed an inactive version-9002
+Ksat-factor negative control. Phase 2 remains blocked pending explicit review.
+
+---
+
+### RQ Jobstatus Advisory Queue Rank
+
+**Completed**: 2026-08-07
+**Status**: ✅ **COMPLETE**
+**Security impact**: `high`; dedicated code, QA, and security reviews recorded
+with no unresolved High/Medium findings
+**Link**: [docs/work-packages/20260807_rq_jobstatus_queue_rank/](docs/work-packages/20260807_rq_jobstatus_queue_rank/)
+**Summary**: Added the optional advisory `queue` snapshot to successful
+`GET /api/jobstatus/{job_id}` responses. The existing registered-tree traversal
+collects queued root/descendant candidates, and one same-origin ordered `batch`
+queue snapshot selects the earliest current position without exposing unrelated
+job metadata. Culvert roots can therefore report queued per-culvert children or
+the finalizer after fan-out. Auth modes, JWT issuance, browse-token scope,
+queue wiring, dependency edges, cancellation, and response status codes remain
+unchanged.
+
+**Commits**: checkpoint `7ce0cf524`, implementation `a416e7dd7`, review
+remediation `97141ba44` and `7b5c6d67a`; closure `4565ec00b`.
+
+**Validation Notes**:
+
+- Combined focused set: 105 passed; post-remediation implementation subset: 70
+  passed; Culvert regressions: 26 passed; OpenAPI: 10 passed.
+- Full repository suite: 5,961 passed, 61 skipped, 1,054 warnings.
+- RQ graph, endpoint inventory, route checklist, stubtest, broad-exception
+  enforcement, documentation lint, and diff checks passed.
+
+### Fork Skip Omni Scenarios/Contrasts and Reset
+
+**Completed**: 2026-08-06
+**Status**: ✅ **COMPLETE**
+**Security impact**: `high`; dedicated correctness, QA, and security reviews passed
+**Link**: [docs/work-packages/20260806_fork_skip_omni_reset/](docs/work-packages/20260806_fork_skip_omni_reset/)
+**Description**: Added an opt-in fork-console checkbox that excludes Omni
+scenario and contrast child projects while resetting destination Omni state,
+RedisPrep timestamps, and query-engine cache/catalog data coherently.
+
+**Outcome**:
+
+- Preserved existing behavior when the option is omitted or false.
+- Added exhaustive three-boolean UI/API/worker coverage and destination/source
+  invariants, including malicious symlink and live-lock handling.
+- Ratified contract checkpoint `82e47916f` before implementation commit
+  `3269f7e97` and closed all correctness, QA, and security findings.
+
+**Validation Notes**:
+
+- Focused backend and frontend gates passed.
+- Full repository suite passed (`5891 passed, 61 skipped`).
+- RQ graph, docs lint, and changed broad-exception enforcement passed.
+
+---
+
+### Batch Runner OMNI Selective Retry - Rejected (2026-08-06)
+
+**Lifecycle**: Backlog -> Rejected/Closed (2026-08-06)
+
+**Summary**: Rejected scenario-selective OMNI retry before checkpoint commit or
+implementation. The operator requires a complete OMNI scenario rerun because
+dependent scenarios, aggregates, and contrasts are too coupled to validate
+safely at the slow production multi-watershed iteration rate. No production
+code or state changed.
+
+**Link**: [docs/work-packages/20260806_batch_runner_omni_selective_retry/](docs/work-packages/20260806_batch_runner_omni_selective_retry/)
+
+---
+
+### Batch Runner WATAR-Only Retry Correctness (2026-08-06)
+
+**Lifecycle**: In Progress -> Done (2026-08-06)
+
+**Summary**: Confirmed the existing narrow runtime-station drift fix is correct
+and added complete WATAR-only leaf-path and durable-failure regressions. A
+disposable real-artifact run produced three WATAR and five AshPost parquets
+without changing climate/WEPP hashes or prerequisite timestamps. Focused,
+NoDb, and full Python validation passed; deployment and the production batch
+retry remain separately authorized operations.
+
+**Link**: [docs/work-packages/20260806_batch_runner_watar_only_retry/](docs/work-packages/20260806_batch_runner_watar_only_retry/)
+
+---
+
+### Batch OMNI Multi-OFE Treatment Propagation (2026-08-06)
+
+**Lifecycle**: In Progress -> Done (2026-08-06)
+
+**Summary**: Added segment-aware thinning, prescribed-fire, and mulch treatment
+propagation for Batch Runner OMNI multi-OFE projects. Eligible OFEs now update
+without overwriting unrelated segments, synthesized management and soil files
+are rebuilt, and regression evidence proves treated cover reaches generated
+`wepp/runs/*.man` inputs. Final validation passed 5,895 repository tests with 61
+skipped and 12 passing subtests.
+
+**Link**: [docs/work-packages/20260806_batch_omni_mofe_treatments/](docs/work-packages/20260806_batch_omni_mofe_treatments/)
+
+### Culvert NoDb Writer Hardening
+
+**Completed**: 2026-08-05
+**Security impact**: `high`
+**Link**: [docs/work-packages/20260805_culvert_nodb_writer_hardening/](docs/work-packages/20260805_culvert_nodb_writer_hardening/)
+**Outcome**: Restored deterministic parent/finalizer ownership of shared
+culvert batch state. The route no longer duplicates the parent receipt write,
+the parent rehydrates and retries bounded initial transactions, children write
+only run-local metadata, and the finalizer authoritatively replaces outcomes
+from those files. The strict stale-write guard remains unchanged. Focused
+validation passed (`43 passed`), the full suite passed (`5,842 passed`, `61
+skipped`), and independent correctness, QA, and high-impact security review
+closed with no unresolved findings.
+
+---
 ### Stevens Canyon Focal-Event Attribution
 
 **Completed**: 2026-08-04
@@ -1170,6 +1631,11 @@ linked from the page.
 Forest regenerated 587 matching-version HBP shards and watershed output;
 all 4,109 raw LOSS Hill rows and all 587 parquet areas are positive, and the
 baseline Omni hillslope summary compiles.
+
+**Withdrawal (2026-08-05)**: WEPPpy removed the `wepp_260727` watershed and
+hillslope pair plus sidecars. The release is HBP-only, and its pass files cannot
+be merged with legacy flat-file pass inputs used by AgFields integrated
+watershed assembly. Historical validation evidence remains intact.
 
 ---
 

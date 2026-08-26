@@ -600,8 +600,64 @@ def test_post_instance_loaded_backfills_ssurgo_fallback_provenance(
 
     assert result is instance
     assert instance.raw_ssurgo_domsoil_d is None
+    assert instance.soil_source is None
     assert instance.ssurgo_substitution_d == {}
     assert instance.ssurgo_candidate_shadow_d == {}
+
+
+@pytest.mark.parametrize(
+    ("module_name", "expected_source"),
+    (("wepppy.eu.soils", "esdac"), ("wepppy.au.soils", None)),
+)
+def test_identify_builder_records_and_persists_soil_source(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    module_name: str,
+    expected_source: str | None,
+) -> None:
+    class _Summary:
+        def __init__(self) -> None:
+            self.area = 0.0
+            self.pct_coverage = 0.0
+
+    class _Watershed:
+        sub_area = 1.0
+
+        @staticmethod
+        def centroid_hillslope_iter():
+            return [("101", (-6.3, 43.1))]
+
+        @staticmethod
+        def hillslope_area(_topaz_id: str) -> float:
+            return 1.0
+
+    def _build(_orders, _soils_dir, *, status_channel):
+        assert status_channel is None
+        return {"soil-1": _Summary()}, {"101": "soil-1"}
+
+    _build.__module__ = module_name
+    if expected_source == "esdac":
+        _build.__name__ = "build_esdac_soils"
+
+    soils = Soils.__new__(Soils)
+    soils.wd = str(tmp_path / "run")
+    soils.logger = logging.getLogger("tests.nodb.soils_source")
+    soils.locked = lambda: nullcontext()
+    soils.trigger = lambda *_args, **_kwargs: None
+
+    monkeypatch.setattr(Soils, "_status_channel", property(lambda _self: None))
+    monkeypatch.setattr(Soils, "watershed_instance", property(lambda _self: _Watershed()))
+    monkeypatch.setattr(Soils, "getInstance", classmethod(lambda _cls, _wd: soils))
+
+    soils._build_by_identify(_build)
+
+    assert soils.soil_source == expected_source
+
+    soils_nodb = Path(soils.wd) / Soils.filename
+    soils_nodb.parent.mkdir(parents=True, exist_ok=True)
+    soils_nodb.write_text(jsonpickle.encode(soils), encoding="utf-8")
+    restored = jsonpickle.decode(soils_nodb.read_text(encoding="utf-8"))
+    assert restored.soil_source == expected_source
 
 
 def test_build_from_map_db_refreshes_existing_run_local_sol_from_db(
@@ -913,3 +969,22 @@ def test_rosetta_bd_toggle_round_trips_through_soils_nodb(
 
     loaded_again = Soils.getInstance(str(wd), ignore_lock=True)
     assert loaded_again.rosetta_wc_fc_from_disturbed_bd_override is False
+
+
+def test_esdac_soil_source_round_trips_through_soils_nodb(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wd = tmp_path / "run"
+    wd.mkdir(parents=True, exist_ok=True)
+    monkeypatch.setattr("wepppy.nodb.base.redis_nodb_cache_client", None)
+
+    payload = Soils.__new__(Soils)
+    payload.wd = str(wd)
+    payload._config = "dummy.cfg"
+    payload._soil_source = "esdac"
+    (wd / Soils.filename).write_text(jsonpickle.encode(payload), encoding="utf-8")
+
+    loaded = Soils.getInstance(str(wd), ignore_lock=True)
+
+    assert loaded.soil_source == "esdac"

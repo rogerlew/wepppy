@@ -133,6 +133,10 @@ See `docs/infrastructure/secrets.md` for the authoritative inventory.
 | `TEST_SUPPORT_ENABLED` | `false` | Enable test support endpoints |
 | `DTALE_INTERNAL_TOKEN` | *(optional)* | Token for D-Tale integration |
 | `SESSION_COOKIE_SAMESITE` | `Lax` | Flask session cookie SameSite policy (`Lax`, `Strict`, or `None`) |
+| `SESSION_COOKIE_NAME` | `session` | Cookie name written by Flask; changed to `__Host-weppcloud_session` at activation |
+| `SESSION_COOKIE_PRIMARY_NAME` | `SESSION_COOKIE_NAME` | Highest-precedence cookie read by Flask and rq-engine during staged migration |
+| `SESSION_COOKIE_LEGACY_NAME` | `session` | Fallback cookie name during migration |
+| `SESSION_COOKIE_MIGRATION_ENABLED` | `false` | Enables bounded dual-name migration and revocation fencing |
 | `SESSION_REFRESH_EACH_REQUEST` | `true` | Refresh Flask session expiry on each request |
 | `REMEMBER_COOKIE_DAYS` | `90` | Rolling browser inactivity window for opted-in remember-me cookies |
 | `REMEMBER_COOKIE_SAMESITE` | `Lax` | Flask remember-me cookie SameSite policy |

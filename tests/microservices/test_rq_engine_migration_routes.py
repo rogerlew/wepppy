@@ -1,3 +1,5 @@
+from uuid import UUID
+
 import pytest
 
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
@@ -7,6 +9,17 @@ from wepppy.microservices.rq_engine import migration_routes
 
 
 pytestmark = pytest.mark.microservice
+
+
+class _DummyLock:
+    def acquire(self, **kwargs):
+        return True
+
+    def extend(self, *args, **kwargs):
+        return True
+
+    def release(self):
+        return None
 
 
 def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> None:
@@ -34,6 +47,9 @@ def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> 
         def close(self) -> None:
             return None
 
+        def lock(self, *args, **kwargs):
+            return _DummyLock()
+
         def set(self, key, value, **kwargs):
             if kwargs.get("nx") and key in self.values:
                 return False
@@ -52,6 +68,9 @@ def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> 
 
 def _stub_prep(monkeypatch: pytest.MonkeyPatch) -> None:
     class DummyPrep:
+        def get_rq_job_id(self, key):
+            return None
+
         def get_rq_job_ids(self) -> dict[str, str]:
             return {}
 
@@ -151,6 +170,7 @@ def test_migrate_run_allows_admin_without_run_claim(
     assert response.status_code == 202
     payload = response.json()
     assert payload["job_id"]
+    assert str(UUID(payload["job_id"])) == payload["job_id"]
     assert payload["status_url"] == f"/rq-engine/api/jobstatus/{payload['job_id']}"
     assert payload["result"]["was_readonly"] is True
 
@@ -275,12 +295,26 @@ def test_migrate_run_rejects_existing_active_job(
     monkeypatch.setattr(migration_routes, "get_wd", lambda runid: str(run_dir))
     monkeypatch.setattr(migration_routes, "lock_statuses", lambda runid: {})
     _stub_ron(monkeypatch)
+    monkeypatch.setattr(
+        migration_routes,
+        "prepare_redisprep_job_id",
+        lambda *args, **kwargs: (_ for _ in ()).throw(
+            migration_routes.RqSubmissionConflict("active")
+        ),
+    )
 
     class ActivePrep:
+        def get_rq_job_id(self, key: str):
+            return "active-job" if key == "migrations" else None
+
         def get_rq_job_ids(self) -> dict[str, str]:
             return {"migrations": "active-job"}
 
     class ActiveJob:
+        meta = {"runid": "run-1"}
+        args = ("run-1",)
+        origin = "default"
+
         def get_status(self, *, refresh: bool) -> str:
             assert refresh is True
             return "started"
@@ -294,6 +328,9 @@ def test_migrate_run_rejects_existing_active_job(
 
         def __exit__(self, exc_type, exc, tb):
             return False
+
+        def lock(self, *args, **kwargs):
+            return _DummyLock()
 
         def set(self, key, value, **kwargs):
             self.values[key] = value
@@ -351,6 +388,10 @@ def test_migrate_run_rejects_concurrent_submission_lock(
     _stub_ron(monkeypatch, readonly=True)
     _stub_prep(monkeypatch)
 
+    class BusySubmissionLock(_DummyLock):
+        def acquire(self, **kwargs):
+            return False
+
     class BusyLock:
         def __enter__(self):
             return self
@@ -360,6 +401,9 @@ def test_migrate_run_rejects_concurrent_submission_lock(
 
         def set(self, *args, **kwargs):
             return False
+
+        def lock(self, *args, **kwargs):
+            return BusySubmissionLock()
 
     monkeypatch.setattr(
         migration_routes.redis,
@@ -424,6 +468,9 @@ def test_migrate_run_does_not_enqueue_when_job_id_persistence_fails(
 
         def __exit__(self, exc_type, exc, tb):
             return False
+
+        def lock(self, *args, **kwargs):
+            return _DummyLock()
 
         def set(self, key, value, **kwargs):
             self.values[key] = value

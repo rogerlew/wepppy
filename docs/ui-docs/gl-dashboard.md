@@ -895,6 +895,19 @@ On Escape:
 **Rendering:** deck.gl BitmapLayer with RGBA array from canvas  
 **Examples:** landuse/nlcd.tif, soils/ssurgo.tif, BAER SBS map  
 
+The non-shifted SBS view uses the same interagency palette as the run-page map:
+unchanged/unburned `#008080`, low `#52CCCC`, moderate `#FFE820`, high `#A80000`,
+and masked/unmappable `#FFFFFF`. The existing Apply Color Shift control retains
+the alternate shifted palette. Masked pixels retain transparent alpha, and the
+legend identifies the white class with a dark-bordered swatch and text label.
+
+The SBS layer decodes stored RGB to class in both display modes before applying
+the selected palette, following
+`docs/ui-docs/contracts/sbs-display-transport-contract.md`. Unknown opaque
+pixels render `#800098` as Unassigned and are counted in the legend; transparent
+pixels remain masked. The hover tooltip reports class code and severity label,
+or `Unassigned`, instead of raw RGBA.
+
 **Load Process:**
 1. Fetch gdalinfo JSON to get bounds and dimensions
 2. Load GeoTIFF via `GeoTIFF.fromArrayBuffer()`

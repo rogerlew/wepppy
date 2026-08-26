@@ -23,6 +23,34 @@ def _noop_lock():
     yield
 
 
+def test_reset_for_fork_restores_complete_fresh_omni_state(omni_module, monkeypatch):
+    fresh = omni_module.Omni.__new__(omni_module.Omni)
+    fresh._reset_omni_owned_state()
+
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = "/runs/destination"
+    omni.locked = _noop_lock
+    omni._scenarios = [{"type": "thinning"}]
+    omni._contrast_names = ["copied"]
+    omni._contrast_labels = {"copied": "Copied"}
+    omni._contrast_pairs = [{"control": "a", "contrast": "b"}]
+    omni._scenario_dependency_tree = {"copied": {}}
+    omni._contrast_dependency_tree = {"copied": {}}
+    omni._scenario_run_state = [{"scenario": "copied"}]
+    omni._use_rq_job_pool_concurrency = False
+    omni._scenario_legacy_optional = "remove"
+    durable = omni_module.Omni.__new__(omni_module.Omni)
+    durable.__dict__.update(omni.__dict__)
+    monkeypatch.setattr(omni_module.Omni, "load_detached", lambda wd: durable)
+
+    omni.reset_for_fork()
+
+    for key, value in fresh.__dict__.items():
+        assert omni.__dict__[key] == value
+    assert "_use_rq_job_pool_concurrency" not in omni.__dict__
+    assert "_scenario_legacy_optional" not in omni.__dict__
+
+
 class Rect:
     def __init__(self, xmin, ymin, xmax, ymax):
         self.xmin = xmin
@@ -3312,7 +3340,7 @@ def test_run_contrast_skips_archives_and_inherits_parent_wepp_bin(
     def _get_wepp_instance(run_wd: str) -> DummyWepp:
         instance = wepp_instances.setdefault(run_wd, DummyWepp(run_wd))
         if Path(run_wd) == wd:
-            instance.wepp_bin = "wepp_260727"
+            instance.wepp_bin = "wepp_260803"
         return instance
 
     monkeypatch.setattr(nodb_core.Wepp, "getInstance", _get_wepp_instance)
@@ -3333,7 +3361,7 @@ def test_run_contrast_skips_archives_and_inherits_parent_wepp_bin(
     assert list((new_wd / "landuse").iterdir()) == []
     assert (new_wd / "soils").is_dir()
     assert list((new_wd / "soils").iterdir()) == []
-    assert wepp_instances[str(new_wd)].wepp_bin == "wepp_260727"
+    assert wepp_instances[str(new_wd)].wepp_bin == "wepp_260803"
 
 def test_run_contrast_copies_directory_landuse_and_soils(tmp_path: Path, omni_module, monkeypatch):
     wd = tmp_path / "run"

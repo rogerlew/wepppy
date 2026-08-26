@@ -65,6 +65,10 @@ def test_config_app_uses_uidaho_mail_defaults_when_zoho_is_unset(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.delenv("SESSION_COOKIE_SAMESITE", raising=False)
+    monkeypatch.delenv("SESSION_COOKIE_NAME", raising=False)
+    monkeypatch.delenv("SESSION_COOKIE_PRIMARY_NAME", raising=False)
+    monkeypatch.delenv("SESSION_COOKIE_LEGACY_NAME", raising=False)
+    monkeypatch.delenv("SESSION_COOKIE_MIGRATION_ENABLED", raising=False)
     app = _build_configured_app(monkeypatch)
 
     assert app.config["MAIL_SERVER"] == "mx.uidaho.edu"
@@ -83,12 +87,65 @@ def test_config_app_uses_uidaho_mail_defaults_when_zoho_is_unset(
         == "Your WEPPcloud password was changed"
     )
     assert app.config["SESSION_COOKIE_SAMESITE"] == "Lax"
+    assert app.config["SESSION_COOKIE_NAME"] == "session"
+    assert app.config["SESSION_COOKIE_PRIMARY_NAME"] == "session"
+    assert app.config["SESSION_COOKIE_LEGACY_NAME"] == "session"
+    assert app.config["SESSION_COOKIE_MIGRATION_ENABLED"] is False
     assert app.config["SESSION_REFRESH_EACH_REQUEST"] is True
     assert app.config["REMEMBER_COOKIE_DURATION"] == timedelta(days=90)
     assert app.config["REMEMBER_COOKIE_SECURE"] is True
     assert app.config["REMEMBER_COOKIE_HTTPONLY"] is True
     assert app.config["REMEMBER_COOKIE_SAMESITE"] == "Lax"
     assert app.config["REMEMBER_COOKIE_REFRESH_EACH_REQUEST"] is False
+
+
+def test_config_app_accepts_secure_host_cookie_migration_profile(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("SESSION_COOKIE_NAME", "__Host-weppcloud_session")
+    monkeypatch.setenv("SESSION_COOKIE_LEGACY_NAME", "session")
+    monkeypatch.setenv("SESSION_COOKIE_MIGRATION_ENABLED", "true")
+
+    app = _build_configured_app(monkeypatch)
+
+    assert app.config["SESSION_COOKIE_NAME"] == "__Host-weppcloud_session"
+    assert app.config["SESSION_COOKIE_PRIMARY_NAME"] == "__Host-weppcloud_session"
+    assert app.config["SESSION_COOKIE_PATH"] == "/"
+    assert app.config["SESSION_COOKIE_DOMAIN"] is None
+    assert app.config["SESSION_COOKIE_SECURE"] is True
+    assert app.config["SESSION_COOKIE_HTTPONLY"] is True
+    assert app.config["SESSION_COOKIE_MIGRATION_ENABLED"] is True
+
+
+def test_config_app_supports_reader_first_legacy_writer(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("SESSION_COOKIE_NAME", "session")
+    monkeypatch.setenv("SESSION_COOKIE_PRIMARY_NAME", "__Host-weppcloud_session")
+    monkeypatch.setenv("SESSION_COOKIE_LEGACY_NAME", "session")
+    monkeypatch.setenv("SESSION_COOKIE_MIGRATION_ENABLED", "true")
+
+    app = _build_configured_app(monkeypatch)
+
+    assert app.config["SESSION_COOKIE_NAME"] == "session"
+    assert app.config["SESSION_COOKIE_PRIMARY_NAME"] == "__Host-weppcloud_session"
+    assert app.config["SESSION_COOKIE_LEGACY_NAME"] == "session"
+
+
+@pytest.mark.parametrize(
+    ("env_name", "env_value"),
+    [("SESSION_COOKIE_PATH", "/weppcloud"), ("SESSION_COOKIE_DOMAIN", ".wepp.cloud")],
+)
+def test_config_app_rejects_invalid_secure_host_cookie_profile(
+    monkeypatch: pytest.MonkeyPatch,
+    env_name: str,
+    env_value: str,
+) -> None:
+    monkeypatch.setenv("SESSION_COOKIE_NAME", "__Host-weppcloud_session")
+    monkeypatch.setenv(env_name, env_value)
+
+    with pytest.raises(ValueError, match="__Host-"):
+        _build_configured_app(monkeypatch)
 
 
 @pytest.mark.parametrize("site_prefix", ["/weppcloud", "/alternate-mount"])

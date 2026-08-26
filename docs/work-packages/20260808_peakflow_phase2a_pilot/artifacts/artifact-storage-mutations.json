@@ -1,0 +1,23 @@
+{
+  "artifacts": [
+    {
+      "bytes": 145054,
+      "format": "parquet",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/terminal-ledger.parquet",
+      "name": "terminal-ledger.parquet",
+      "retention": "retain",
+      "sha256": "e7990c67cfcd0fd4de264459960a403ef46a40ffdba49e103bf106e71d248ccd"
+    },
+    {
+      "bytes": 428960,
+      "format": "parquet",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/event-pairs.parquet",
+      "name": "event-pairs.parquet",
+      "retention": "retain",
+      "sha256": "c5a82b3387c31b7563e5a679661f210857d9b5af5f63b56526b1f8426474fdfe"
+    }
+  ],
+  "external_root": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da",
+  "pilot_id": "8162d509d69cb4da",
+  "schema_version": "1.0.0"
+}

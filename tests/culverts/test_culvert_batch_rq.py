@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from contextlib import contextmanager
+from copy import copy
 import json
 from pathlib import Path
 
@@ -130,6 +131,8 @@ def test_culvert_batch_topo_sequence(tmp_path: Path, monkeypatch: pytest.MonkeyP
 
     monkeypatch.setattr(culvert_rq_module.redis, "Redis", _DummyRedis)
     monkeypatch.setattr(culvert_rq_module, "Queue", _DummyQueue)
+    parent_job = _DummyJob("parent-job-123")
+    monkeypatch.setattr(culvert_rq_module, "get_current_job", lambda: parent_job)
     monkeypatch.setattr(
         CulvertsRunner,
         "_ensure_base_project",
@@ -145,6 +148,9 @@ def test_culvert_batch_topo_sequence(tmp_path: Path, monkeypatch: pytest.MonkeyP
     run_culvert_batch_rq(batch_uuid)
 
     assert calls == ["generate", "prune_short", "prune_order", "chnjnt", "chnjnt"]
+    runner = CulvertsRunner.getInstance(str(batch_root))
+    assert runner is not None
+    assert runner.rq_job_ids[culvert_rq_module.CULVERT_BATCH_RQ_JOB_KEY] == parent_job.id
 
 
 def test_culvert_batch_order_reduction_map_mode(
@@ -340,6 +346,113 @@ def test_culvert_batch_retries_runner_lock_before_state_update(
 
     assert lock_attempts["count"] >= 2
     assert culvert_rq_module.CULVERT_BATCH_LOCK_RETRY_SECONDS in sleeps
+
+
+@pytest.mark.parametrize(
+    "persistent_stale",
+    [False, True],
+    ids=["recovers", "exhausts"],
+)
+def test_culvert_batch_refreshes_stale_runner_before_initial_state_update(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    persistent_stale: bool,
+) -> None:
+    culverts_root = tmp_path / "culverts"
+    monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
+
+    batch_uuid = "batch-initial-stale-retry"
+    batch_root = culverts_root / batch_uuid
+    topo_dir = batch_root / "topo"
+    culverts_dir = batch_root / "culverts"
+    topo_dir.mkdir(parents=True)
+    culverts_dir.mkdir(parents=True)
+
+    (topo_dir / "breached_filled_DEM_UTM.tif").write_bytes(b"dem")
+    (topo_dir / "streams.tif").write_bytes(b"streams")
+    (culverts_dir / "watersheds.geojson").write_text(
+        json.dumps({"type": "FeatureCollection", "features": []}),
+        encoding="utf-8",
+    )
+    payload_metadata = {
+        "dem": {"path": "topo/breached_filled_DEM_UTM.tif"},
+        "streams": {"path": "topo/streams.tif"},
+        "watersheds": {"path": "culverts/watersheds.geojson"},
+    }
+    model_parameters = {
+        "schema_version": "culvert-model-params-v1",
+        "base_project_runid": "batch;;culvert_base;;_base",
+    }
+    (batch_root / "metadata.json").write_text(
+        json.dumps(payload_metadata), encoding="utf-8"
+    )
+    (batch_root / "model-parameters.json").write_text(
+        json.dumps(model_parameters), encoding="utf-8"
+    )
+
+    monkeypatch.setattr(culvert_rq_module, "_generate_batch_topo", lambda *a, **k: None)
+    monkeypatch.setattr(culvert_rq_module, "_prune_short_streams", lambda *a, **k: None)
+    monkeypatch.setattr(culvert_rq_module, "_prune_stream_order", lambda *a, **k: None)
+    monkeypatch.setattr(culvert_rq_module, "_generate_stream_junctions", lambda *a, **k: None)
+    monkeypatch.setattr(culvert_rq_module.redis, "Redis", _DummyRedis)
+    monkeypatch.setattr(culvert_rq_module, "Queue", _DummyQueue)
+    monkeypatch.setattr(
+        culvert_rq_module,
+        "_ensure_batch_landuse_soils",
+        lambda **_kwargs: (Path("nlcd.tif"), Path("ssurgo.tif")),
+    )
+
+    class _DummyDataset:
+        def GetGeoTransform(self) -> tuple[float, float, float, float, float, float]:
+            return (0.0, 10.0, 0.0, 0.0, 0.0, -10.0)
+
+    monkeypatch.setattr(culvert_rq_module.gdal, "Open", lambda *a, **k: _DummyDataset())
+
+    stale_runner = CulvertsRunner(str(batch_root), "culvert.cfg")
+    refreshed_runner = copy(stale_runner)
+    get_instance_calls = {"count": 0}
+
+    def _get_instance(*_args, **_kwargs):
+        get_instance_calls["count"] += 1
+        if get_instance_calls["count"] == 1:
+            return stale_runner
+        return refreshed_runner
+
+    monkeypatch.setattr(CulvertsRunner, "getInstance", _get_instance)
+    monkeypatch.setattr(
+        CulvertsRunner,
+        "_ensure_base_project",
+        lambda self: str(tmp_path / "base"),
+    )
+    monkeypatch.setattr(CulvertsRunner, "_load_run_ids", lambda self, path: [])
+
+    @contextmanager
+    def _stale_on_dump(*_args, **_kwargs):
+        yield
+        raise NoDbStaleWriteError("simulated stale initial state")
+
+    monkeypatch.setattr(stale_runner, "locked", _stale_on_dump)
+    if persistent_stale:
+        monkeypatch.setattr(refreshed_runner, "locked", _stale_on_dump)
+
+    sleeps: list[float] = []
+    monkeypatch.setattr(
+        culvert_rq_module.time,
+        "sleep",
+        lambda seconds: sleeps.append(float(seconds)),
+    )
+
+    if persistent_stale:
+        with pytest.raises(NoDbStaleWriteError, match="simulated stale initial state"):
+            run_culvert_batch_rq(batch_uuid)
+        assert get_instance_calls["count"] == culvert_rq_module.CULVERT_BATCH_LOCK_RETRY_ATTEMPTS
+        assert len(sleeps) == culvert_rq_module.CULVERT_BATCH_LOCK_RETRY_ATTEMPTS - 1
+    else:
+        run_culvert_batch_rq(batch_uuid)
+        assert get_instance_calls["count"] >= 2
+        assert refreshed_runner.culvert_batch_uuid == batch_uuid
+        assert refreshed_runner.payload_metadata == payload_metadata
+        assert culvert_rq_module.CULVERT_BATCH_LOCK_RETRY_SECONDS in sleeps
 
 
 def test_culvert_batch_retries_stale_runner_state_when_recording_job_ids(

@@ -5,6 +5,8 @@ from typing import Any, Callable, Optional
 from rq import Queue
 from rq.job import Job
 
+from wepppy.rq.job_id import new_rq_job_id
+
 
 def _delete_after_interchange_enabled(*, wepp: Any, climate: Any) -> bool:
     value = getattr(wepp, "delete_after_interchange", None)
@@ -30,14 +32,18 @@ def _enqueue(
     timeout: Any = None,
     depends_on: Any = None,
 ) -> Job:
+    child_job_id = new_rq_job_id()
+    parent_job.meta[key] = child_job_id
+    parent_job.save()
     child_job = q.enqueue_call(
         func=func,
         args=args,
         kwargs=kwargs,
         timeout=timeout,
         depends_on=depends_on,
+        job_id=child_job_id,
     )
-    return _record_enqueue(parent_job, key, child_job)
+    return child_job
 
 
 def enqueue_log_complete(

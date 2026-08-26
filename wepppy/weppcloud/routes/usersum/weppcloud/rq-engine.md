@@ -57,8 +57,14 @@ Common scopes:
 - `rq:export` for export routes.
 - `bootstrap:*` scopes for Bootstrap operations.
 
-Polling routes are currently open by default in WEPPcloud policy, but this can
-be tightened with environment settings.
+Polling routes are open by default and governed by `RQ_ENGINE_POLL_AUTH_MODE`:
+`open` accepts anonymous polling, `token_optional` accepts anonymous polling but
+validates a supplied bearer token, and `required` requires a bearer token with
+`rq:status`. Successful `jobstatus` responses may include an optional advisory
+`queue` snapshot for the next queued member of the requested registered tree.
+It is a current queue-list observation, not an ETA; clients must continue to
+use `status` as the lifecycle authority and must not treat an omitted snapshot
+as job failure.
 
 Admin debugging routes require bearer JWT + admin role:
 - `GET /rq-engine/api/admin/recently-completed-jobs`

@@ -255,6 +255,10 @@ class CulvertsRunner(NoDbBase):
             else:
                 self._rq_job_ids.pop(key, None)
 
+    def get_rq_job_id(self, key: str) -> Optional[str]:
+        value = (self._rq_job_ids or {}).get(key)
+        return str(value) if value else None
+
     def _select_stream_sources_for_run(
         self,
         *,
@@ -434,19 +438,6 @@ class CulvertsRunner(NoDbBase):
                 as_cropped_vrt=use_vrt,
             )
 
-            created_at = datetime.now(timezone.utc).isoformat()
-            with self.locked():
-                run_record = self._runs.get(run_id, {})
-                if "created_at" not in run_record:
-                    run_record["created_at"] = created_at
-                run_record.update(
-                    {
-                        "runid": run_id,
-                        "point_id": run_id,
-                        "wd": run_wd,
-                    }
-                )
-                self._runs[run_id] = run_record
             return
         if _exists(run_wd):
             if not os.path.isdir(run_wd):
@@ -521,22 +512,6 @@ class CulvertsRunner(NoDbBase):
             chnjnt_src=chnjnt_src,
             as_cropped_vrt=use_vrt,
         )
-
-        created_at = datetime.now(timezone.utc).isoformat()
-        # Note: We skip locking here because in batch processing, each worker
-        # handles a unique run_id and the orchestrator tracks runs via job
-        # metadata. Locking would cause contention when multiple workers
-        # process runs in parallel.
-        run_record = self._runs.get(run_id, {})
-        run_record.update(
-            {
-                "runid": run_id,
-                "point_id": run_id,
-                "wd": run_wd,
-                "created_at": created_at,
-            }
-        )
-        self._runs[run_id] = run_record
 
     def _set_run_map(
         self,

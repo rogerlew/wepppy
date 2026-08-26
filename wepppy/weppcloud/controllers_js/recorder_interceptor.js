@@ -92,14 +92,15 @@
             return buildRunScopedEndpoint(endpoint);
         }
 
-        function normaliseBlob(payload) {
-            if (typeof payload !== "string") {
-                return payload;
+        function isSameOriginEndpoint(endpoint) {
+            var origin = global.location && global.location.origin;
+            if (!origin || typeof global.URL !== "function") {
+                return false;
             }
             try {
-                return new Blob([payload], { type: "application/json" });
+                return new global.URL(endpoint, origin + "/").origin === origin;
             } catch (err) {
-                return payload;
+                return false;
             }
         }
 
@@ -120,55 +121,32 @@
             return "";
         }
 
-        function buildBeaconPayload(payload) {
-            if (typeof global.FormData !== "function") {
-                return null;
+        function send(payload) {
+            var endpoint = getEndpoint();
+            if (!isSameOriginEndpoint(endpoint)) {
+                return;
             }
             var csrfToken = resolveCsrfToken();
-            if (!csrfToken) {
-                return null;
+            if (!csrfToken || typeof global.fetch !== "function") {
+                return;
             }
             try {
-                var formData = new global.FormData();
-                formData.append("csrf_token", csrfToken);
-                formData.append("events", payload);
-                return formData;
-            } catch (err) {
-                return null;
-            }
-        }
-
-        function send(payload) {
-            if (typeof navigator !== "undefined" && navigator.sendBeacon) {
-                var beaconPayload = buildBeaconPayload(payload);
-                if (beaconPayload) {
-                    try {
-                        if (navigator.sendBeacon(getEndpoint(), beaconPayload)) {
-                            return;
-                        }
-                    } catch (err) {
-                        /* noop */
-                    }
-                }
-            }
-
-            if (typeof global.fetch === "function") {
-                try {
-                    global.fetch(getEndpoint(), {
-                        method: "POST",
-                        credentials: "same-origin",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: payload,
-                        keepalive: true,
-                        __skipRecorder: true
-                    }).catch(function () {
-                        /* noop */
-                    });
-                } catch (err) {
+                global.fetch(endpoint, {
+                    method: "POST",
+                    mode: "same-origin",
+                    credentials: "same-origin",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": csrfToken
+                    },
+                    body: payload,
+                    keepalive: true,
+                    __skipRecorder: true
+                }).catch(function () {
                     /* noop */
-                }
+                });
+            } catch (err) {
+                /* noop */
             }
         }
 

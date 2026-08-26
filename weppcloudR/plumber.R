@@ -17,6 +17,64 @@ PROFILE_PLAYBACK_FORK_ROOT <- Sys.getenv("PROFILE_PLAYBACK_FORK_ROOT", file.path
 PROFILE_PLAYBACK_ARCHIVE_ROOT <- Sys.getenv("PROFILE_PLAYBACK_ARCHIVE_ROOT", file.path(PROFILE_PLAYBACK_BASE, "archive"))
 TEMPLATE_ROOT <- Sys.getenv("TEMPLATE_ROOT", "/srv/weppcloudr/templates")
 DEFAULT_TEMPLATE <- Sys.getenv("DEVAL_TEMPLATE", file.path(TEMPLATE_ROOT, "new_report.Rmd"))
+FONTAWESOME_JS <- Sys.getenv(
+  "FONTAWESOME_JS",
+  "/srv/weppcloudr/vendor/fontawesome/5.3.1/all.js"
+)
+FONTAWESOME_SHA256 <- "8cb270b4d9485a93b31df98113fda8723ffc067fa7bfa90cedd47b76f7b10be1"
+
+vendored_fontawesome_script <- function() {
+  if (!file.exists(FONTAWESOME_JS) || file.info(FONTAWESOME_JS)$isdir) {
+    stop("vendored Font Awesome asset is unavailable")
+  }
+  link_target <- Sys.readlink(FONTAWESOME_JS)
+  if (!is.na(link_target) && nzchar(link_target)) {
+    stop("vendored Font Awesome asset must not be a symlink")
+  }
+  digest_output <- system2(
+    "sha256sum",
+    shQuote(FONTAWESOME_JS),
+    stdout = TRUE,
+    stderr = TRUE
+  )
+  if (!is.null(attr(digest_output, "status")) && attr(digest_output, "status") != 0L) {
+    stop("could not verify vendored Font Awesome asset")
+  }
+  digest <- strsplit(digest_output[[1L]], "[[:space:]]+")[[1L]][[1L]]
+  if (!identical(digest, FONTAWESOME_SHA256)) {
+    stop("vendored Font Awesome asset checksum mismatch")
+  }
+  paste0(
+    "<script>\n",
+    readChar(FONTAWESOME_JS, file.info(FONTAWESOME_JS)$size, useBytes = TRUE),
+    "\n</script>\n"
+  )
+}
+
+embed_vendored_fontawesome <- function(output_file) {
+  if (!file.exists(output_file) || file.info(output_file)$isdir) {
+    stop("rendered report is unavailable for Font Awesome embedding")
+  }
+  html <- readChar(output_file, file.info(output_file)$size, useBytes = TRUE)
+  if (grepl("use.fontawesome.com", html, fixed = TRUE)) {
+    stop("rendered report retains a remote Font Awesome dependency")
+  }
+  parts <- strsplit(html, "</head>", fixed = TRUE)[[1L]]
+  if (length(parts) != 2L) {
+    stop("rendered report does not contain exactly one closing head element")
+  }
+  staged <- paste0(output_file, ".fontawesome")
+  on.exit(unlink(staged, force = TRUE), add = TRUE)
+  writeChar(
+    paste0(parts[[1L]], vendored_fontawesome_script(), "</head>", parts[[2L]]),
+    staged,
+    eos = NULL,
+    useBytes = TRUE
+  )
+  if (!file.rename(staged, output_file)) {
+    stop("could not atomically embed vendored Font Awesome asset")
+  }
+}
 
 resolve_batch_run_root <- function(batch_name, runid) {
   batch_dir <- file.path(BATCH_ROOT, batch_name)
@@ -225,18 +283,21 @@ build_error_diagnostics <- function(err) {
   ))
 }
 
-render_deval <- function(run_path, runid, config = NULL, skip_cache = FALSE, parquet_overrides = NULL) {
+render_deval <- function(run_path, runid, config = NULL, skip_cache = FALSE, parquet_overrides = NULL, output_file_override = NULL) {
   template_path <- DEFAULT_TEMPLATE
   if (!file.exists(template_path)) {
-    log_warn("Template {template_path} not found; returning placeholder HTML")
-    return("<html><body><h3>DEVAL report template missing</h3></body></html>")
+    stop(glue("DEVAL report template not found: {template_path}"))
   }
   previous_overrides <- getOption("weppcloudr_parquet_overrides", NULL)
   options(weppcloudr_parquet_overrides = parquet_overrides)
   on.exit(options(weppcloudr_parquet_overrides = previous_overrides), add = TRUE)
   output_dir <- file.path(run_path, "export", "WEPPcloudR")
   dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
-  output_file <- file.path(output_dir, glue("deval_{runid}.htm"))
+  output_file <- if (is.null(output_file_override)) {
+    file.path(output_dir, glue("deval_{runid}.htm"))
+  } else {
+    output_file_override
+  }
   anchor_runid <- if (!is.null(runid) && nzchar(runid)) runid else "unknown-run"
   anchor_path <- if (!is.null(config) && nzchar(config)) {
     glue("/weppcloud/runs/{anchor_runid}/{config}")
@@ -249,10 +310,12 @@ render_deval <- function(run_path, runid, config = NULL, skip_cache = FALSE, par
     proj_run_label = anchor_runid
   )
   log_info("Rendering DEVAL report", runid = runid, config = config, template = template_path, output = output_file)
-  log_path <- file.path(output_dir, "render.log")
   append_log <- function(level, message) {
-    line <- sprintf("%s [%s] %s\n", format(Sys.time(), tz = "UTC", usetz = TRUE), level, message)
-    cat(line, file = log_path, append = TRUE)
+    if (identical(level, "ERROR")) {
+      log_error(message, runid = runid, config = config)
+    } else {
+      log_info(message, runid = runid, config = config)
+    }
   }
   append_log("INFO", glue("Checking render cache for run {runid}"))
   if (!skip_cache && file.exists(output_file)) {
@@ -263,15 +326,34 @@ render_deval <- function(run_path, runid, config = NULL, skip_cache = FALSE, par
     append_log("INFO", glue("Cache bypass requested for run {runid}; regenerating report"))
   }
   append_log("INFO", glue("Starting render for run {runid}"))
+  render_target <- output_file
+  publish_after_render <- is.null(output_file_override)
+  if (publish_after_render) {
+    render_target <- tempfile(
+      pattern = paste0(".deval_", runid, "."),
+      tmpdir = output_dir,
+      fileext = ".tmp.htm"
+    )
+    on.exit(unlink(render_target, force = TRUE), add = TRUE)
+  }
   tryCatch(
     {
       rmarkdown::render(
         input = template_path,
         params = params,
-        output_file = output_file,
-        output_dir = output_dir,
+        output_file = render_target,
+        output_dir = dirname(render_target),
+        output_options = list(use_fontawesome = FALSE),
+        # The production image has a read-only root filesystem. Keep all knit
+        # intermediates in the pod-local writable tmpfs; only the fenced final
+        # artifact is published to the run directory.
+        intermediates_dir = tempdir(),
         envir = new.env(parent = globalenv())
       )
+      embed_vendored_fontawesome(render_target)
+      if (publish_after_render && !file.rename(render_target, output_file)) {
+        stop("atomic DEVAL report publication failed")
+      }
       append_log("INFO", glue("Render succeeded for run {runid}"))
       readChar(output_file, file.info(output_file)$size, useBytes = TRUE)
     },

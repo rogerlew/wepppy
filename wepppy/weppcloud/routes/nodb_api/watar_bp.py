@@ -28,7 +28,7 @@ from wepppy.nodb.mods.ash_transport import Ash, AshPost
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.runtime_paths.errors import NoDirError
 from wepppy.runtime_paths.wepp_inputs import with_input_file_path
-from wepppy.weppcloud.utils.helpers import get_run_owners_lazy, get_user_models, authorize, parse_rec_intervals
+from wepppy.weppcloud.utils.helpers import get_run_owners_lazy, get_user_models, authorize, parse_rec_intervals, run_lifecycle_mutation
 from wepppy.wepp.interchange.hill_wat_interchange import load_hill_wat_dataframe
 
 from wepppy.wepp.reports import HillSummaryReport, ChannelSummaryReport, OutletSummaryReport
@@ -40,6 +40,7 @@ watar_bp = Blueprint('watar', __name__)
 @watar_bp.route('/runs/<string:runid>/<config>/hillslope/<topaz_id>/ash')
 @watar_bp.route('/runs/<string:runid>/<config>/hillslope/<topaz_id>/ash/')
 @authorize_and_handle_with_exception_factory
+@run_lifecycle_mutation
 def hillslope0_ash(runid, config, topaz_id):
     assert config is not None
 

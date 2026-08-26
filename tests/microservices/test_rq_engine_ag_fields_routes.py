@@ -374,6 +374,22 @@ def test_enqueue_job_serializes_submission_and_persists_job_hint(
         def delete(self, key):
             events.append(("unlock", key))
 
+        def lock(self, key, **_kwargs):
+            outer = self
+
+            class Lock:
+                def acquire(self, **_kwargs):
+                    events.append(("lock", key, True, 120))
+                    return True
+
+                def extend(self, *args, **kwargs):
+                    return True
+
+                def release(self):
+                    events.append(("unlock", key))
+
+            return Lock()
+
     class DummyRqRedis:
         def __enter__(self):
             return self
@@ -381,13 +397,16 @@ def test_enqueue_job_serializes_submission_and_persists_job_hint(
         def __exit__(self, exc_type, exc, tb):
             return False
 
+        def lock(self, key, **kwargs):
+            return lock_redis.lock(key, **kwargs)
+
     class DummyQueue:
         def __init__(self, connection):
             assert isinstance(connection, DummyRqRedis)
 
-        def enqueue_call(self, func, args, timeout):
-            events.append(("enqueue", func, args, timeout))
-            return SimpleNamespace(id="job-queued")
+        def enqueue_call(self, func, args, timeout, job_id):
+            events.append(("enqueue", func, args, timeout, job_id))
+            return SimpleNamespace(id=job_id)
 
     lock_redis = DummyLockRedis()
     rq_redis = DummyRqRedis()
@@ -412,13 +431,16 @@ def test_enqueue_job_serializes_submission_and_persists_job_hint(
     )
 
     assert response.status_code == 202
-    assert ("hint", "agfields_build_subfields", "job-queued") in events
+    hint_event = next(event for event in events if event[0] == "hint")
+    enqueue_event = next(event for event in events if event[0] == "enqueue")
+    assert hint_event[:2] == ("hint", "agfields_build_subfields")
+    assert hint_event[2] == enqueue_event[4]
     assert ("preflight-remove", ag_fields_routes.TaskEnum.run_ag_fields) in events
     assert events.index(("preflight-remove", ag_fields_routes.TaskEnum.run_ag_fields)) < next(
         index for index, event in enumerate(events) if event[0] == "enqueue"
     )
-    assert ("unlock", "agfields:submit_lock:demo") in events
-    assert next(event for event in events if event[0] == "lock")[3] == 30
+    assert ("unlock", "rq:submission:demo:agfields") in events
+    assert next(event for event in events if event[0] == "lock")[3] == 120
 
 
 def test_enqueue_watershed_jobs_queues_one_run_all_parent_with_planned_children(
@@ -458,6 +480,13 @@ def test_enqueue_watershed_jobs_queues_one_run_all_parent_with_planned_children(
 
         def delete(self, key):
             events.append(("unlock", key))
+
+        def lock(self, key, **_kwargs):
+            class Lock:
+                def acquire(self, **_kwargs): return True
+                def extend(self, *args, **kwargs): return True
+                def release(self): events.append(("unlock", key))
+            return Lock()
 
     class DummyQueue:
         def __init__(self, connection):
@@ -553,6 +582,13 @@ def test_enqueue_watershed_jobs_keeps_single_concept_2_as_direct_job(
 
         def delete(self, key):
             events.append(("unlock", key))
+
+        def lock(self, key, **_kwargs):
+            class Lock:
+                def acquire(self, **_kwargs): return True
+                def extend(self, *args, **kwargs): return True
+                def release(self): events.append(("unlock", key))
+            return Lock()
 
     class DummyQueue:
         def __init__(self, connection):
@@ -901,12 +937,8 @@ def test_suite_parent_remains_active_from_recursive_child_status(
     active_job = ag_fields_routes._find_active_job(DummyPrep(), DummyRedis())
 
     assert job_ids["agfields_run_watershed_suite"] == "suite-parent"
-    assert active["agfields_run_watershed_suite"] == "suite-parent"
-    assert active_job == {
-        "key": "agfields_run_watershed_suite",
-        "job_id": "suite-parent",
-        "status": "deferred",
-    }
+    assert active["agfields_run_watershed_suite"] is None
+    assert active_job is None
 
 
 def test_run_and_clear_watershed_routes_use_fixed_additive_surface(
@@ -1139,3 +1171,85 @@ def test_run_wepp_rejects_unknown_binary(route_context, monkeypatch: pytest.Monk
 
     assert response.status_code == 400
     assert response.json()["error"]["message"] == "Unknown WEPP executable: ../../not-a-wepp-binary"
+
+
+@pytest.mark.parametrize("producer", ("simple", "direct", "suite"))
+@pytest.mark.parametrize("failure", ("cleanup", "hint-save", "enqueue"))
+def test_agfields_actual_producer_failure_postconditions(
+    producer: str, failure: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    events: list[tuple] = []
+
+    class Prep:
+        def get_rq_job_id(self, _key): return None
+        def remove_timestamp(self, _task): return None
+        def set_rq_job_id(self, key, job_id):
+            if failure == "hint-save":
+                raise OSError("receipt save failed")
+            events.append(("hint", key, job_id))
+
+    class Controller:
+        def set_watershed_integration_job_ids(self, ids):
+            events.append(("state", dict(ids)))
+
+    class Redis:
+        def __enter__(self): return self
+        def __exit__(self, *_args): return False
+        def lock(self, *_args, **_kwargs):
+            class Lock:
+                def acquire(self, **_kwargs): return True
+                def extend(self, *_args, **_kwargs): return True
+                def release(self): return None
+            return Lock()
+
+    class Queue:
+        def __init__(self, *_args, **_kwargs): pass
+        def enqueue_call(self, *_args, **kwargs):
+            events.append(("enqueue", kwargs["job_id"]))
+            if failure == "enqueue":
+                raise ag_fields_routes.redis.RedisError("enqueue failed")
+            return SimpleNamespace(id=kwargs["job_id"])
+
+    monkeypatch.setattr(ag_fields_routes.RedisPrep, "getInstance", lambda _wd: Prep())
+    monkeypatch.setattr(ag_fields_routes.AgFields, "getInstance", lambda _wd: Controller())
+    monkeypatch.setattr(ag_fields_routes.redis, "Redis", lambda **_kwargs: Redis())
+    monkeypatch.setattr(ag_fields_routes, "Queue", Queue)
+    monkeypatch.setattr(ag_fields_routes, "_find_active_job", lambda *_args: None)
+    monkeypatch.setattr(
+        ag_fields_routes,
+        "_reconcile_interrupted_watershed_jobs",
+        lambda *_args: {
+            scheme.value: {"status": "not_run"}
+            for scheme in ag_fields_routes.AgFieldsRoutingScheme
+        },
+    )
+
+    def reconcile(*_args, **_kwargs):
+        if failure == "cleanup":
+            raise ag_fields_routes.redis.RedisError("cleanup failed")
+
+    monkeypatch.setattr(ag_fields_routes, "_reconcile_deferred_agfields_jobs", reconcile)
+
+    with pytest.raises((OSError, ag_fields_routes.redis.RedisError)):
+        if producer == "simple":
+            ag_fields_routes._enqueue_job(
+                "/runs/demo",
+                ag_fields_routes.AGFIELDS_BUILD_SUBFIELDS_JOB_KEY,
+                ag_fields_routes.build_ag_fields_subfields_rq,
+                ("demo", 0.0),
+            )
+        else:
+            schemes = (
+                (ag_fields_routes.AgFieldsRoutingScheme.CONCEPT_2,)
+                if producer == "direct"
+                else tuple(ag_fields_routes.AgFieldsRoutingScheme)
+            )
+            ag_fields_routes._enqueue_watershed_jobs(
+                "/runs/demo", "demo", schemes, 4
+            )
+
+    if failure in {"cleanup", "hint-save"}:
+        assert not any(event[0] == "enqueue" for event in events)
+    else:
+        assert any(event[0] == "hint" for event in events)
+        assert any(event[0] == "enqueue" for event in events)

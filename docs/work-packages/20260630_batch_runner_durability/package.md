@@ -15,6 +15,7 @@ On 2026-07-01, production batch `nasa-roses-202606-psbs` exposed a second stale-
 - Add an active-batch guard so duplicate Run Batch submissions cannot overlap queued/started/deferred/scheduled batch work.
 - Expose enough batch run state for the UI/API and operators to explain which leaves will rerun and why.
 - Resync critical base climate attributes into already-initialized leaves and invalidate only climate-dependent tasks when those attributes change.
+- Treat a station resolved under the base `FindClosestAtRuntime` policy as valid per-leaf runtime state, while continuing to resync explicit base station-policy changes.
 
 ## Scope
 
@@ -57,6 +58,7 @@ On 2026-07-01, production batch `nasa-roses-202606-psbs` exposed a second stale-
 - [x] Active queued/started/deferred/scheduled batch jobs block a new Run Batch submission with an explicit conflict response.
 - [x] Tests and docs cover the `wepp1` failure mode: empty observed climate years, lock conflicts after cancellation, and later failed WEPP hillslope runs.
 - [x] Existing leaves whose cloned climate settings drift from `_base/climate.nodb` are retry eligible and have `build_climate`, RAP/OpenET, WEPP, and Omni scenario timestamps invalidated after resync.
+- [x] Runtime-resolved leaf station IDs do not create false climate drift or invalidate completed downstream tasks when the base remains configured for `FindClosestAtRuntime`.
 
 ## Parameterization ADR Gate
 - **Parameterization change present**: no
@@ -111,6 +113,7 @@ Reference: `docs/standards/parameterization-adr-standard.md`
 - `tests/microservices/test_rq_engine_batch_routes.py` - current RQ Engine batch route coverage.
 - `docs/work-packages/20260630_batch_runner_durability/artifacts/wepp1_exception_evidence_20260630.md` - production evidence captured during scoping.
 - `docs/work-packages/20260630_batch_runner_durability/artifacts/2026-06-30_dual_agent_review_disposition.md` - independent review findings and dispositions.
+- `docs/work-packages/20260630_batch_runner_durability/artifacts/2026-08-05_runtime_station_drift_review_disposition.md` - review and post-fix disposition for runtime-resolved climate station drift.
 
 ## Deliverables
 - Durable per-leaf status classifier and retry-eligibility report in `wepppy/nodb/batch_runner.py`.

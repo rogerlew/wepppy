@@ -10,18 +10,18 @@ The NoDb module replaces traditional relational databases with a constellation o
 
 - **Serializes to JSON** - Human-readable `.nodb` files in the working directory
 - **Caches in Redis** - 72-hour TTL in DB 13 for instant hydration
-- **Distributed locking** - Redis-backed locks (DB 0) prevent concurrent mutations
+- **Distributed locking** - Redis-backed locks (DB 0) serialize participating commit sections
 - **Singleton per process** - `getInstance(wd)` reuses a per-process cached object for repeated calls in the same worker process
 - **Structured telemetry** - Per-controller log files (`<wd>/<controller>.log`) and Redis pub/sub (DB 2)
 
-Instead of SQL queries, developers interact with rich Python objects that expose domain-specific methods and properties. Redis provides coarse-grained locking and caching so these objects can be quickly deserialized and shared across workers and RQ tasks without conflicts.
+Instead of SQL queries, developers interact with rich Python objects that expose domain-specific methods and properties. Redis provides coarse-grained locking and caching, while durable-state refresh and stale-write rejection protect whole-object commits across workers and RQ tasks.
 
 **Why NoDb?**
 - **Portability** - Zip a run directory and move it anywhere
 - **Schema flexibility** - Add attributes without migrations
 - **Developer ergonomics** - Python methods instead of SQL queries
 - **Crash safety** - Redis caching with disk fallback
-- **Distributed coordination** - Multi-worker safe via Redis locks
+- **Distributed coordination** - Redis locks, durable refresh, and stale-write rejection coordinate participating writers
 
 **Tradeoffs:**
 - No relational queries or foreign keys
@@ -50,38 +50,43 @@ When extending NoDb, prefer these utilities over bespoke implementations—custo
 
 If this README and implementation behavior diverge, treat the schema contract as authoritative and update this README in the same change set.
 
-## Lock Contention and Retry Pattern
+## Writer Ownership, Contention, and Retry
 
-Multi-worker tasks (RQ, API workers) can collide on the same NoDb lock. When
-`with controller.locked():` cannot acquire the Redis lock, `NoDbAlreadyLockedError`
-is raised. Use a short retry loop with backoff for lightweight metadata writes.
-Avoid keeping locks open across long-running operations.
+Prefer one writer per NoDb file during a concurrent orchestration phase. For
+parallel RQ work, each worker should write its own per-run artifact and use RQ
+metadata for live job state. A dependency finalizer should merge those results
+into the shared controller after workers reach terminal states.
 
-Example pattern:
+Different attributes or dictionary keys are not independent write scopes. A
+NoDb dump replaces the whole serialized controller, so two workers updating
+different `_runs[run_id]` entries can still lose one another's changes if they
+commit from independently hydrated objects.
 
-```python
-from wepppy.nodb.base import NoDbAlreadyLockedError
-import time
+Multiple writers are permitted when a single writer or finalizer is
+impractical. Use this transaction shape for every shared mutation:
 
-max_tries = 5
-for attempt in range(max_tries):
-    try:
-        controller = Controller.getInstance(wd)
-        with controller.locked():
-            controller.some_field = value
-    except NoDbAlreadyLockedError:
-        if attempt + 1 == max_tries:
-            logger.warning("NoDb lock busy after %d retries", max_tries)
-            break
-        time.sleep(1.0)
-    else:
-        break
-```
+1. Complete expensive work outside the lock.
+2. Acquire the distributed lock.
+3. Refresh the controller from durable state while holding the lock.
+4. Apply a small, idempotent mutation that preserves unrelated fields.
+5. Atomically dump and unlock.
 
-Guidelines:
-- Keep lock scope minimal; do I/O outside the lock when possible.
-- For optional metadata (job IDs, timestamps), log and skip after retries.
-- For critical state changes, bubble the exception so the caller can fail fast.
+Use bounded backoff for `NoDbAlreadyLockedError`. On
+`NoDbStaleWriteError`, discard the stale mutation base, reload current durable
+state, and reapply the entire operation; never retry `dump()` on the stale
+object. If the update cannot be safely merged or reapplied, fail explicitly.
+
+Keep locks out of model execution, raster processing, remote requests, and
+other long-running work. Multi-writer paths require concurrency regression
+coverage demonstrating that representative interleavings do not lose unrelated
+updates. See the authoritative contract's "Writer Ownership and Mutation
+Topology" section for the normative requirements.
+
+Long-running derived builders may use the collect-then-finalize variant: snapshot
+the inputs that determine the result, collect outside the lock, then rehydrate
+durable state under a short finalizer lock. The finalizer rejects changed
+relevant inputs and applies only an explicit derived-field allowlist; it does
+not merge a stale whole-controller object.
 
 ## WEPP Hillslope Timeout Policy
 

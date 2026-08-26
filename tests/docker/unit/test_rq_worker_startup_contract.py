@@ -123,8 +123,21 @@ def test_fork_archive_worker_topology_is_single_process_and_host_scoped() -> Non
     assert set(wepp3_services) == {"rq-worker-fork-archive"}
     wepp3_worker = wepp3_services["rq-worker-fork-archive"]
     assert "rq-worker-startup.sh 1 fork-archive" in _command_block(wepp3_worker)
+    assert wepp3_worker["user"] == "1002:130"
+    assert wepp3_worker["build"]["args"]["APP_UID"] == "1002"
+    assert wepp3_worker["build"]["args"]["APP_GID"] == "130"
+    assert wepp3_worker["stop_grace_period"] == "216000s"
     assert all("docker.sock" not in str(volume) for volume in wepp3_worker["volumes"])
-    assert wepp3_worker["secrets"] == ["redis_password"]
+    assert wepp3_worker["secrets"] == [
+        "redis_password",
+        {
+            "source": "discord_bot_token",
+            "target": "/opt/vendor/weppcloud2/weppcloud2/discord_bot/.bot_token",
+        },
+    ]
+    assert _load_yaml(_PROD_WEPP3_COMPOSE_PATH)["secrets"]["discord_bot_token"] == {
+        "file": "${DISCORD_BOT_TOKEN_FILE:-/dev/null}"
+    }
     assert wepp3_worker["volumes"] == ["/geodata/wc1:/wc1", "/geodata:/geodata:ro"]
 
     for path in (_PROD_WORKER_COMPOSE_PATH, _HPC_COMPOSE_PATH):
@@ -132,3 +145,67 @@ def test_fork_archive_worker_topology_is_single_process_and_host_scoped() -> Non
 
     wepp1_worker = _load_yaml(_PROD_WEPP1_COMPOSE_PATH)["services"]["rq-worker-fork-archive"]
     assert wepp1_worker == {"scale": 0}
+
+
+def test_production_deploy_script_supports_guarded_wepp3_mode() -> None:
+    deploy_script = (_REPO_ROOT / "scripts" / "deploy-production.sh").read_text(
+        encoding="utf-8"
+    )
+
+    assert 'DEPLOY_MODE="wepp3-fork-archive"' in deploy_script
+    assert "compose_deploy_contract.py" in deploy_script
+    assert "Unsupported production Compose topology; refusing to guess" in deploy_script
+    assert "Deployment script changed during pull; restarting" in deploy_script
+    assert 'exec "${SCRIPT_DIR}/deploy-production.sh" "${ORIGINAL_ARGS[@]}" --skip-pull' in deploy_script
+    assert deploy_script.count("configure_deploy_topology") >= 3
+    assert "test -r /run/secrets/redis_password" in deploy_script
+    assert "test -r /opt/vendor/weppcloud2/weppcloud2/discord_bot/.bot_token" in deploy_script
+    assert "If DISCORD_BOT_TOKEN_FILE is set" in deploy_script
+    assert "setfacl -m u:1002:r" in deploy_script
+    assert "docker compose stop --timeout" in deploy_script
+    assert "FORK_ARCHIVE_STOP_TIMEOUT_SECONDS" in deploy_script
+    assert '!= "1002:130"' in deploy_script
+    assert 'worker.hostname == socket.gethostname()' in deploy_script
+    assert 'connection.ttl(worker.key) > 0' in deploy_script
+    assert 'REGISTERED_FORK_ARCHIVE_WORKERS}" != "1:1"' in deploy_script
+    assert "rq-info --service rq-worker-fork-archive --detail" in deploy_script
+    assert "Skipping broad Docker runtime prune on the dedicated wepp3 host" in deploy_script
+
+
+def test_production_deploy_script_supports_targeted_web_mode() -> None:
+    deploy_script = (_REPO_ROOT / "scripts" / "deploy-production.sh").read_text(
+        encoding="utf-8"
+    )
+
+    assert "--targeted-web" in deploy_script
+    assert "BUILD_SERVICES=(weppcloud)" in deploy_script
+    assert "RECREATED_SERVICES=(weppcloud rq-engine)" in deploy_script
+    assert "races two writes to the same tag" in deploy_script
+    assert "--targeted-web requires a full stack" in deploy_script
+    assert "--targeted-web cannot be combined with --flush-rq-db" in deploy_script
+    assert "Skipping stack shutdown; workers and dependencies remain running" in deploy_script
+    assert (
+        "docker compose up -d --no-deps --force-recreate weppcloud rq-engine"
+        in deploy_script
+    )
+    assert "RQ_ENGINE_HEALTHCHECK_URL" in deploy_script
+    assert "Waiting for rq-engine to be ready" in deploy_script
+    assert "rq-engine health check failed after" in deploy_script
+    assert "Skipping broad Docker runtime prune after targeted deployment" in deploy_script
+
+
+def test_cap_readiness_and_deployment_runtime_contracts_are_wired() -> None:
+    services = _load_yaml(_PROD_COMPOSE_PATH)["services"]
+    cap = services["cap"]
+    assert "/cap/health" in cap["healthcheck"]["test"][1]
+    assert services["caddy"]["depends_on"]["cap"]["condition"] == "service_healthy"
+
+    deploy_script = (_REPO_ROOT / "scripts" / "deploy-production.sh").read_text(
+        encoding="utf-8"
+    )
+    assert "validate-cap-runtime-contract.sh" in deploy_script
+    assert "prepare-cap-runtime.sh" in deploy_script
+    assert "validate-weppcloudr-runtime-contract.sh" in deploy_script
+    assert "cap-functional-canary" not in deploy_script
+    assert "services/cap/canary.js" in deploy_script
+    assert "CAP_RESCUE_FAILED" in deploy_script

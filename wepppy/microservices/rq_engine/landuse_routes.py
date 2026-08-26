@@ -35,6 +35,7 @@ from wepppy.runtime_paths.errors import NoDirError
 from wepppy.runtime_paths.fs import resolve as _nodir_resolve
 from wepppy.runtime_paths.thaw_freeze import maintenance_lock as nodir_maintenance_lock
 from wepppy.rq.project_rq import build_landuse_rq, modify_landuse_mapping_rq
+from wepppy.rq.submission_recovery import RqSubmissionConflict, enqueue_tracked_rq_job
 from wepppy.wepp.management import ManagementMapLoadError
 from wepppy.wepp.management.managements import landuse_management_mapping_options
 from wepppy.microservices.upload_boundary import UploadBoundaryError
@@ -560,9 +561,18 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(build_landuse_rq, (runid,), timeout=RQ_TIMEOUT)
-            prep.set_rq_job_id("build_landuse_rq", job.id)
+            job = enqueue_tracked_rq_job(
+                q,
+                build_landuse_rq,
+                prep=prep,
+                job_key="build_landuse_rq",
+                runid=runid,
+                args=(runid,),
+                timeout=RQ_TIMEOUT,
+            )
         return JSONResponse({"job_id": job.id})
+    except RqSubmissionConflict as exc:
+        return error_response(str(exc), status_code=409, code="job_active")
     except WatershedNotAbstractedError as exc:
         return error_response(
             exc.__name__ or "Watershed Not Abstracted Error",
@@ -819,14 +829,19 @@ async def modify_landuse_mapping(runid: str, config: str, request: Request) -> J
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(
+            job = enqueue_tracked_rq_job(
+                q,
                 modify_landuse_mapping_rq,
-                (runid, mapping_edits),
+                prep=prep,
+                job_key="modify_landuse_mapping_rq",
+                runid=runid,
+                args=(runid, mapping_edits),
                 timeout=RQ_TIMEOUT,
             )
-            prep.set_rq_job_id("modify_landuse_mapping_rq", job.id)
 
         return JSONResponse({"job_id": job.id, "mapping_count": len(mapping_edits)})
+    except RqSubmissionConflict as exc:
+        return error_response(str(exc), status_code=409, code="job_active")
     except RunContextResolutionError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception as exc:  # broad-except: boundary contract

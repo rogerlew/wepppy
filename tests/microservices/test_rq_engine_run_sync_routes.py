@@ -1,3 +1,6 @@
+from contextlib import nullcontext
+from types import SimpleNamespace
+
 import pytest
 
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
@@ -9,10 +12,23 @@ from wepppy.microservices.rq_engine import run_sync_routes
 pytestmark = pytest.mark.microservice
 
 
-def _stub_queue(monkeypatch: pytest.MonkeyPatch) -> None:
+class _DummyLease:
+    def checkpoint(self) -> None:
+        return None
+
+
+def _stub_queue(monkeypatch: pytest.MonkeyPatch) -> list[dict[str, object]]:
+    enqueue_calls: list[dict[str, object]] = []
+
     class DummyJob:
         def __init__(self, job_id: str) -> None:
             self.id = job_id
+
+        def save(self, pipeline=None) -> None:
+            return None
+
+        def register_dependency(self, pipeline=None) -> None:
+            return None
 
     class DummyQueue:
         counter = 0
@@ -21,18 +37,47 @@ def _stub_queue(monkeypatch: pytest.MonkeyPatch) -> None:
             pass
 
         def enqueue_call(self, *args, **kwargs):
+            enqueue_calls.append(kwargs)
             DummyQueue.counter += 1
-            return DummyJob(f"job-{DummyQueue.counter}")
+            return DummyJob(kwargs.get("job_id") or f"job-{DummyQueue.counter}")
+
+        def create_job(self, *args, **kwargs):
+            enqueue_calls.append(kwargs)
+            DummyQueue.counter += 1
+            requested = kwargs.get("job_id")
+            job_id = requested if DummyQueue.counter == 1 else f"job-{DummyQueue.counter}"
+            return DummyJob(job_id)
+
+        def _enqueue_job(self, job, pipeline=None):
+            return job
 
         def get_job_ids(self):
             return []
 
     class DummyRedis:
+        values: dict[str, str] = {}
+
+        def get(self, key: str):
+            return self.values.get(key)
+
+        def set(self, key: str, value: str) -> None:
+            self.values[key] = value
+
         def close(self) -> None:
             return None
 
+        def pipeline(self):
+            return SimpleNamespace(execute=lambda: [])
+
     monkeypatch.setattr(run_sync_routes, "Queue", DummyQueue)
     monkeypatch.setattr(run_sync_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(
+        run_sync_routes,
+        "rq_submission_lock",
+        lambda *args, **kwargs: nullcontext(_DummyLease()),
+    )
+    monkeypatch.setattr(run_sync_routes, "new_rq_job_id", lambda: "job-1")
+    return enqueue_calls
 
 
 def test_run_sync_requires_admin(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -56,7 +101,7 @@ def test_run_sync_enqueues_jobs(monkeypatch: pytest.MonkeyPatch) -> None:
         "require_jwt",
         lambda request, required_scopes=None: {"roles": ["Admin"]},
     )
-    _stub_queue(monkeypatch)
+    enqueue_calls = _stub_queue(monkeypatch)
     monkeypatch.setattr(run_sync_routes.StatusMessenger, "publish", lambda *args, **kwargs: None)
 
     with TestClient(rq_engine.app) as client:
@@ -70,6 +115,7 @@ def test_run_sync_enqueues_jobs(monkeypatch: pytest.MonkeyPatch) -> None:
     assert payload["sync_job_id"] == "job-1"
     assert payload["migration_job_id"] == "job-2"
     assert payload["job_ids"] == ["job-1", "job-2"]
+    assert enqueue_calls[1]["depends_on"].id == payload["sync_job_id"]
 
 
 def test_run_sync_passes_source_run_token_to_worker(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -94,7 +140,7 @@ def test_run_sync_passes_source_run_token_to_worker(monkeypatch: pytest.MonkeyPa
         def enqueue_call(self, *args, **kwargs):
             enqueue_calls.append((args, kwargs))
             CapturingQueue.counter += 1
-            return DummyJob(f"job-{CapturingQueue.counter}")
+            return DummyJob(kwargs.get("job_id") or f"job-{CapturingQueue.counter}")
 
         def get_job_ids(self):
             return []
@@ -108,6 +154,12 @@ def test_run_sync_passes_source_run_token_to_worker(monkeypatch: pytest.MonkeyPa
             self.values[key] = value
             self.setex_calls.append((key, ttl, value))
 
+        def get(self, key: str):
+            return self.values.get(key)
+
+        def set(self, key: str, value: str) -> None:
+            self.values[key] = value
+
         def delete(self, key: str) -> int:
             return int(self.values.pop(key, None) is not None)
 
@@ -117,6 +169,12 @@ def test_run_sync_passes_source_run_token_to_worker(monkeypatch: pytest.MonkeyPa
     redis_conn = DummyRedis()
     monkeypatch.setattr(run_sync_routes, "Queue", CapturingQueue)
     monkeypatch.setattr(run_sync_routes.redis, "Redis", lambda **kwargs: redis_conn)
+    monkeypatch.setattr(
+        run_sync_routes,
+        "rq_submission_lock",
+            lambda *args, **kwargs: nullcontext(_DummyLease()),
+    )
+    monkeypatch.setattr(run_sync_routes, "new_rq_job_id", lambda: "job-1")
     monkeypatch.setattr(run_sync_routes.StatusMessenger, "publish", lambda *args, **kwargs: None)
 
     with TestClient(rq_engine.app) as client:

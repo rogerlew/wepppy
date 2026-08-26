@@ -108,6 +108,19 @@ shared-input links in a completed fork to resolve inside the destination. New
 links are relative; copied legacy links are normalized by role after rsync and
 before success. Unrelated links remain unchanged.
 
+## SURF-04B Skip-Omni Reset Amendment
+
+The operator-approved bounded enhancement at
+`../20260806_fork_skip_omni_reset/` adds one default-false fork option that
+omits the two Omni child-project collection nodes and establishes fresh
+destination-only Omni controller/artifact state before checked-job readiness.
+It also removes exactly the two inherited Omni RedisPrep completion timestamps
+and invalidates copied query-engine catalog/cache so removed artifacts are not
+advertised; unrelated lifecycle timestamps and datasets remain discoverable.
+It composes SURF-04, SURF-04A, DOM-25A, and DOM-25B without reopening or
+advancing them. Existing auth/CAP, default behavior, unrelated controllers,
+source state, queue topology, and legacy four-argument jobs remain unchanged.
+
 ## SURF-03A Fork/Archive Serial Queue Amendment
 
 The operator-approved bounded enhancement at
@@ -117,6 +130,10 @@ Static console guidance states that an accepted fork may wait and copies source
 state available when the worker begins. Existing destination creation and
 authorized catalog visibility before dispatch are retained; the console does
 not expose destination navigation until the existing readiness gate passes.
+The transient `Submitting fork job...` message applies only while the submission
+request is unresolved. After the API accepts the job, the status log states
+`Fork job is queued and waiting for the fork worker.` so queued serial work is
+not presented as an in-progress submission.
 
 Fork options, auth/CAP submission behavior, response and tracking storage,
 copy/identity rules, downstream undisturbify jobs, and terminal semantics remain

@@ -1,0 +1,284 @@
+{
+  "event_id": "topanga-h106-1980-02-14-ksat35",
+  "payload_sha256": "c39cd934279e17015658c73f141e0d35870f86377deae9b3018151082135a0e5",
+  "post_surplus_forcing": [
+    {
+      "point_ordinal": 1,
+      "rate_m_s": 1e-10,
+      "time_s": 0.0
+    },
+    {
+      "point_ordinal": 2,
+      "rate_m_s": 1e-10,
+      "time_s": 300.0
+    },
+    {
+      "point_ordinal": 3,
+      "rate_m_s": 1e-10,
+      "time_s": 600.0
+    },
+    {
+      "point_ordinal": 4,
+      "rate_m_s": 1e-10,
+      "time_s": 900.0
+    },
+    {
+      "point_ordinal": 5,
+      "rate_m_s": 1e-10,
+      "time_s": 1200.0
+    },
+    {
+      "point_ordinal": 6,
+      "rate_m_s": 1e-10,
+      "time_s": 1500.0
+    },
+    {
+      "point_ordinal": 7,
+      "rate_m_s": 1e-10,
+      "time_s": 1800.0
+    },
+    {
+      "point_ordinal": 8,
+      "rate_m_s": 1e-10,
+      "time_s": 2100.0
+    },
+    {
+      "point_ordinal": 9,
+      "rate_m_s": 1e-10,
+      "time_s": 2400.0
+    },
+    {
+      "point_ordinal": 10,
+      "rate_m_s": 1e-10,
+      "time_s": 2700.0
+    },
+    {
+      "point_ordinal": 11,
+      "rate_m_s": 1e-10,
+      "time_s": 3000.0
+    },
+    {
+      "point_ordinal": 12,
+      "rate_m_s": 2.2220189066501916e-05,
+      "time_s": 3203.641845703125
+    },
+    {
+      "point_ordinal": 13,
+      "rate_m_s": 2.240377511952829e-05,
+      "time_s": 3300.0
+    },
+    {
+      "point_ordinal": 14,
+      "rate_m_s": 2.2576607534574578e-05,
+      "time_s": 3600.0
+    },
+    {
+      "point_ordinal": 15,
+      "rate_m_s": 2.6142718070332194e-05,
+      "time_s": 3888.0
+    },
+    {
+      "point_ordinal": 16,
+      "rate_m_s": 2.6209552743239328e-05,
+      "time_s": 4200.0
+    },
+    {
+      "point_ordinal": 17,
+      "rate_m_s": 2.4215202756749932e-05,
+      "time_s": 4419.66357421875
+    },
+    {
+      "point_ordinal": 18,
+      "rate_m_s": 2.424639365017356e-05,
+      "time_s": 4500.0
+    },
+    {
+      "point_ordinal": 19,
+      "rate_m_s": 2.4282623144245008e-05,
+      "time_s": 4800.0
+    },
+    {
+      "point_ordinal": 20,
+      "rate_m_s": 1e-10,
+      "time_s": 5031.19091796875
+    },
+    {
+      "point_ordinal": 21,
+      "rate_m_s": 2.2293894517133594e-05,
+      "time_s": 5100.0
+    },
+    {
+      "point_ordinal": 22,
+      "rate_m_s": 2.2321123879009974e-05,
+      "time_s": 5400.0
+    },
+    {
+      "point_ordinal": 23,
+      "rate_m_s": 0.0,
+      "time_s": 5750.89013671875
+    }
+  ],
+  "pre_surplus_forcing": [
+    {
+      "end_s": 300.0,
+      "interval_ordinal": 1,
+      "rate_m_s": 0.0,
+      "start_s": 0.0
+    },
+    {
+      "end_s": 600.0,
+      "interval_ordinal": 2,
+      "rate_m_s": 0.0,
+      "start_s": 300.0
+    },
+    {
+      "end_s": 900.0,
+      "interval_ordinal": 3,
+      "rate_m_s": 0.0,
+      "start_s": 600.0
+    },
+    {
+      "end_s": 1200.0,
+      "interval_ordinal": 4,
+      "rate_m_s": 0.0,
+      "start_s": 900.0
+    },
+    {
+      "end_s": 1500.0,
+      "interval_ordinal": 5,
+      "rate_m_s": 0.0,
+      "start_s": 1200.0
+    },
+    {
+      "end_s": 1800.0,
+      "interval_ordinal": 6,
+      "rate_m_s": 0.0,
+      "start_s": 1500.0
+    },
+    {
+      "end_s": 2100.0,
+      "interval_ordinal": 7,
+      "rate_m_s": 0.0,
+      "start_s": 1800.0
+    },
+    {
+      "end_s": 2400.0,
+      "interval_ordinal": 8,
+      "rate_m_s": 0.0,
+      "start_s": 2100.0
+    },
+    {
+      "end_s": 2700.0,
+      "interval_ordinal": 9,
+      "rate_m_s": 0.0,
+      "start_s": 2400.0
+    },
+    {
+      "end_s": 3000.0,
+      "interval_ordinal": 10,
+      "rate_m_s": 0.0,
+      "start_s": 2700.0
+    },
+    {
+      "end_s": 3203.641845703125,
+      "interval_ordinal": 11,
+      "rate_m_s": 0.0,
+      "start_s": 3000.0
+    },
+    {
+      "end_s": 3300.0,
+      "interval_ordinal": 12,
+      "rate_m_s": 1.385093355565914e-06,
+      "start_s": 3203.641845703125
+    },
+    {
+      "end_s": 3600.0,
+      "interval_ordinal": 13,
+      "rate_m_s": 1.5686794085922884e-06,
+      "start_s": 3300.0
+    },
+    {
+      "end_s": 3888.0,
+      "interval_ordinal": 14,
+      "rate_m_s": 1.7415118236385752e-06,
+      "start_s": 3600.0
+    },
+    {
+      "end_s": 4200.0,
+      "interval_ordinal": 15,
+      "rate_m_s": 5.307622359396191e-06,
+      "start_s": 3888.0
+    },
+    {
+      "end_s": 4419.66357421875,
+      "interval_ordinal": 16,
+      "rate_m_s": 5.374457032303326e-06,
+      "start_s": 4200.0
+    },
+    {
+      "end_s": 4500.0,
+      "interval_ordinal": 17,
+      "rate_m_s": 3.3801070458139293e-06,
+      "start_s": 4419.66357421875
+    },
+    {
+      "end_s": 4800.0,
+      "interval_ordinal": 18,
+      "rate_m_s": 3.4112979392375564e-06,
+      "start_s": 4500.0
+    },
+    {
+      "end_s": 5031.19091796875,
+      "interval_ordinal": 19,
+      "rate_m_s": 3.4475274333090056e-06,
+      "start_s": 4800.0
+    },
+    {
+      "end_s": 5100.0,
+      "interval_ordinal": 20,
+      "rate_m_s": 0.0,
+      "start_s": 5031.19091796875
+    },
+    {
+      "end_s": 5400.0,
+      "interval_ordinal": 21,
+      "rate_m_s": 1.458798806197592e-06,
+      "start_s": 5100.0
+    },
+    {
+      "end_s": 5750.89013671875,
+      "interval_ordinal": 22,
+      "rate_m_s": 1.4860281680739718e-06,
+      "start_s": 5400.0
+    }
+  ],
+  "production": {
+    "peak_m_s": 2.5754497983143665e-05,
+    "selected_solver": "HDRIVE"
+  },
+  "scalars": {
+    "alpha": 1.2023683786392212,
+    "calendar_year": 1980,
+    "effective_length_m": 111.4000015258789,
+    "forcing_max_post_surplus_m_s": 2.6209552743239328e-05,
+    "hillslope_id": "106",
+    "m": 1.5,
+    "model_day": 45,
+    "ns": 22,
+    "ofe": 1,
+    "positive_excess_duration_s": 2478.439453125,
+    "remax_pre_surplus_m_s": 5.374457032303326e-06,
+    "run_id": "mutant-ksat35",
+    "runoff_post_reconciliation_m": 0.058631740510463715,
+    "runoff_pre_reconciliation_m": 0.006993219256401062,
+    "solver_call_ordinal": 1,
+    "surdra_raw_m": 0.05163852125406265,
+    "surplus_added_rate_m_s": 2.0835095710936002e-05,
+    "surplus_assignment_duration_s": 2478.439453125,
+    "surplus_assignment_mode": "positive_excess",
+    "surplus_depth_m": 0.05163852125406265,
+    "tp2_s": 5100.0
+  },
+  "schema_version": "1.0.0",
+  "source_build_id": "wepp-ea25ad79-gate21-observer"
+}

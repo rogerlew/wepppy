@@ -40,7 +40,7 @@
 - Standard location for active ExecPlans is `docs/work-packages/*/prompts/active/`.
 - Ad hoc ExecPlans may live under `docs/mini-work-packages/*.md` when explicitly designated by the user.
 - Current ad hoc active ExecPlan: `none`.
-- Current work-package active ExecPlans: Pure UI controller testing at `docs/work-packages/20260716_pure_ui_contract_standardization_c/prompts/active/pure_ui_contract_standardization_execplan.md`; SSURGO study at `docs/work-packages/20260721_ssurgo_intelligent_fallback_study/prompts/active/ssurgo_intelligent_fallback_empirical_study_execplan.md`.
+- Current work-package active ExecPlans: WEPPcloudR execution backend refactor at `docs/work-packages/20260821_weppcloudr_execution_backend_refactor/prompts/active/weppcloudr_execution_backend_refactor_execplan.md`; Pure UI controller testing at `docs/work-packages/20260716_pure_ui_contract_standardization_c/prompts/active/pure_ui_contract_standardization_execplan.md`; run-statistics ledger at `docs/work-packages/20260505_run_statistics_ledger/prompts/active/run_statistics_ledger_execplan.md`; SSURGO study at `docs/work-packages/20260721_ssurgo_intelligent_fallback_study/prompts/active/ssurgo_intelligent_fallback_empirical_study_execplan.md`.
 - Before authoring or revising an ExecPlan, read `docs/prompt_templates/codex_exec_plans.md`.
 - Active plans are living documents: keep `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` current.
 - When asked to run a plan end-to-end, proceed milestone by milestone without pausing for extra confirmation unless blocked by an external dependency.
@@ -54,7 +54,7 @@
 - Prefer the smallest fix that resolves the confirmed failing path; for mechanical refactors, preserve code structure (scope/indent/order) and change only the intended tokens.
 - For incident-driven hardening and mitigation-retirement work, follow `docs/standards/hardening-lifecycle-standard.md`.
 - State assumptions explicitly in change notes before broadening behavior.
-- Assume model memory is unreliable for requirements: do not rely on chat history as the only source of truth.
+- Do not rely on model memory or chat history as the only requirements source; closed work packages are immutable history, never living governance, so promote durable rules outside `docs/work-packages/` and amend the promotion later.
 - When user conversation establishes or changes behavior/UX/data contracts, update the authoritative spec/work-package doc in the same change.
 - Capture both normative contract and concise rationale (why this choice, what alternatives were rejected) for conversation-derived decisions.
 - In handoff notes, cite the exact file/section where the decision was documented.
@@ -72,7 +72,7 @@
 - Preserve "Own the Stack": prefer extending owned components over adding external dependencies that duplicate existing capability.
 
 ## Repository Contracts
-- Canonical RQ response and error payload contract: `docs/schemas/rq-response-contract.md`.
+- Canonical RQ response/error contract: `docs/schemas/rq-response-contract.md`; WEPPcloudR render execution: `docs/schemas/weppcloudr-render-execution-contract.md`.
 - Canonical CSRF contract for browser/session boundaries: `docs/schemas/weppcloud-csrf-contract.md`.
 - Canonical WEPP output scope contract (baseline vs roads): `docs/schemas/output-scope-contract.md`.
 - Canonical NoDb persistence/concurrency contract: `docs/schemas/nodb-persistence-concurrency-contract.md`.
@@ -85,11 +85,11 @@
 - After queue wiring changes, manually validate against live job trees via `wepppy/rq/job_info.py` or the job dashboard.
 
 ## Environment Baseline
-- Assume Linux host with Docker, Docker Compose, and `wctl` installed.
 - Local virtualenv baseline: `/workdir/wepppy/.venv` is built from the same `requirements-uv.txt` used by `wepppy`.
-- Compose source of truth: `docker/docker-compose.dev.yml`.
-- Use `wctl` wrappers for tests, container exec, and local orchestration.
+- Compose source of truth is `docker/docker-compose.dev.yml`; use `wctl` wrappers for tests, container exec, and local orchestration.
 - Canonical run root is `/wc1/runs/`; check it first when debugging run data.
+- Deployment boundary: `wepp.cloud` (`wepp1`/`wepp2`/`wepp3`) uses Docker Compose via the installed `wctl` preset and `scripts/deploy-production.sh`; `openwepp.org` uses Kubernetes and may use registry-published images.
+- Before proposing or executing deployment/rollback mechanics, inspect the canonical deploy entry point and nearest docs; never invent parallel image, registry, or Compose workflows.
 
 ## Validation Entry Points
 - Iteration loop: `wctl run-pytest tests/<path or module>`
@@ -120,7 +120,7 @@
 - NoDb facade/collaborator implementation standard: `docs/standards/nodb-facade-collaborator-pattern.md`
 - Vulture dead-code gate standard: `docs/standards/vulture-dead-code-gate-standard.md`
 - WBT release cutover reference (includes canonical `weppcloud-wbt` runbook link): `docs/dev-notes/weppcloud-wbt-release-cutover.md`
-- Docker/local secret conventions: `docker/secrets/README.md`
+- Docker/local secrets: `docker/secrets/README.md`; WEPPcloud web startup/minimum secret contract: `docs/infrastructure/weppcloud-web-runtime-contract.md`
 
 ## Subsystem Maps (Nearest AGENTS Wins)
 - WEPP binary vendoring and observability debugging: `wepp_runner/AGENTS.md`

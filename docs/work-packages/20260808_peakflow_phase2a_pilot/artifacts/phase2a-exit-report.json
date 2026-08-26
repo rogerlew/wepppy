@@ -1,0 +1,78 @@
+{
+  "adjudicated_known_positive": "undisturbed Hill 106, 1986 day 46",
+  "candidate_rows": 697,
+  "candidate_trials": 61,
+  "criteria": [
+    {
+      "criterion": "mutation_manifest_realization_terminal_and_input_diff",
+      "evidence": "mutation-terminal-summary.json",
+      "status": "pass"
+    },
+    {
+      "criterion": "outer_join_preserves_absence_distinct_from_zero",
+      "evidence": "mutation-terminal-summary.json and event-pairs.parquet",
+      "status": "pass"
+    },
+    {
+      "criterion": "real_observer_no_surplus_packet_validates",
+      "evidence": "event-packets/topanga-h031-1980-day045-no-surplus.json",
+      "status": "pass"
+    },
+    {
+      "criterion": "unmutated_hillslopes_unchanged",
+      "evidence": "routing-validation-summary.json and external route manifests",
+      "status": "pass"
+    },
+    {
+      "criterion": "offpath_channels_unchanged",
+      "evidence": "routing-trial-validation.csv",
+      "status": "fail"
+    },
+    {
+      "criterion": "every_changed_channel_record_is_on_declared_path",
+      "evidence": "routing-trial-validation.csv and routing-topology.json",
+      "status": "fail"
+    },
+    {
+      "criterion": "hydrograph_timestamps_nonnegative_flow_and_volume_consistency",
+      "evidence": "hydrograph-validation-summary.json and h106-1986-day046-volume-check.csv",
+      "status": "fail"
+    },
+    {
+      "criterion": "known_positive_adaptive_bracket_and_frozen_replay",
+      "evidence": "candidate-adjudication.json and h106-1986-day046-adaptive-bracket.csv",
+      "status": "pass"
+    },
+    {
+      "criterion": "storage_partitioning_and_retention_acceptable",
+      "evidence": "storage-runtime-projection.json and artifact-storage-*.json",
+      "status": "pass"
+    },
+    {
+      "criterion": "incomplete_hdrive_replays_stopped_and_dispositioned",
+      "evidence": "candidate-adjudication.json",
+      "status": "pass"
+    }
+  ],
+  "disposition": "withhold_full_topanga_census",
+  "full_census_authorized": false,
+  "pilot_id": "8162d509d69cb4da",
+  "requested_mutation_trials": 64,
+  "schema_version": "1.0.0",
+  "selected_hillslopes": [
+    106,
+    84,
+    8,
+    35,
+    31,
+    91,
+    85,
+    62
+  ],
+  "selection_id": "3b5778d7c9171311",
+  "smallest_remediation": [
+    "Remove shared/event-global channel transmission-loss effects so a one-hillslope HBP mutation cannot alter sibling off-path channels.",
+    "Make interval chan.out discharge integrate to the same authoritative outflow volume reported by chanwb.out, then rerun routing criteria 5-7."
+  ],
+  "terminal_mutation_trials": 64
+}

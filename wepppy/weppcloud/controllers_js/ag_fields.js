@@ -1383,7 +1383,7 @@ var AgFields = (function () {
                 }
                 return false;
             });
-            if (!matchingKey && normalized !== "JOB:ERROR") {
+            if (!matchingKey && normalized !== "JOB:ERROR" && normalized !== "JOB:RETRYABLE") {
                 return;
             }
             var jobId = payload && payload.job_id ? payload.job_id : controller.rq_job_id;

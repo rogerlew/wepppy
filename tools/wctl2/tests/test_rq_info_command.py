@@ -28,7 +28,13 @@ def _expected_rq_info_command(extra: str = "") -> str:
     return base
 
 
-def _run_command(monkeypatch: pytest.MonkeyPatch, temp_project, command_args):
+def _run_command(
+    monkeypatch: pytest.MonkeyPatch,
+    temp_project,
+    command_args,
+    *,
+    services=("rq-worker", "rq-worker-batch"),
+):
     runner = CliRunner()
     recorded: List[Tuple[str, str, bool, bool]] = []
 
@@ -37,6 +43,10 @@ def _run_command(monkeypatch: pytest.MonkeyPatch, temp_project, command_args):
         return DummyResult()
 
     monkeypatch.setattr("tools.wctl2.commands.rq.compose_exec", fake_compose_exec)
+    monkeypatch.setattr(
+        "tools.wctl2.commands.rq.compose_service_names",
+        lambda _context: services,
+    )
 
     result = runner.invoke(app, ["--project-dir", str(temp_project), *command_args])
     return result, recorded
@@ -167,3 +177,36 @@ def test_rq_info_targets_selected_service(monkeypatch: pytest.MonkeyPatch, temp_
         "rq-worker-fork-archive",
         "rq-worker-fork-archive",
     ]
+
+
+def test_rq_info_auto_targets_dedicated_fork_service(
+    monkeypatch: pytest.MonkeyPatch,
+    temp_project,
+) -> None:
+    result, recorded = _run_command(
+        monkeypatch,
+        temp_project,
+        ["rq-info", "--detail"],
+        services=("rq-worker-fork-archive",),
+    )
+
+    assert result.exit_code == 0
+    assert [call[0] for call in recorded] == [
+        "rq-worker-fork-archive",
+        "rq-worker-fork-archive",
+    ]
+
+
+def test_rq_info_explicit_service_overrides_topology(
+    monkeypatch: pytest.MonkeyPatch,
+    temp_project,
+) -> None:
+    result, recorded = _run_command(
+        monkeypatch,
+        temp_project,
+        ["rq-info", "--service", "custom-rq-worker"],
+        services=("rq-worker-fork-archive",),
+    )
+
+    assert result.exit_code == 0
+    assert [call[0] for call in recorded] == ["custom-rq-worker"]

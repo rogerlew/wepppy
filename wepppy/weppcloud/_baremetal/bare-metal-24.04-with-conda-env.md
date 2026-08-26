@@ -338,8 +338,10 @@ cargo clean
 cargo build --release
 ```
 
-19. f-esri for .gdb creation with gpkg export
-see https://github.com/rogerlew/f-esri
+19. FileGDB export
+Use the `OpenFileGDB` driver included with GDAL for direct GeoPackage-to-GDB
+conversion. Verify `ogrinfo --formats` reports `OpenFileGDB` with write/create
+support.
 
 20. discord bot 
 TODO

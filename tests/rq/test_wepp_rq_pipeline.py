@@ -5,8 +5,15 @@ from types import SimpleNamespace
 import pytest
 
 import wepppy.rq.wepp_rq_pipeline as pipeline
+from rq.job import Dependency, JobStatus
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.fixture(autouse=True)
+def _deterministic_job_ids(monkeypatch: pytest.MonkeyPatch) -> None:
+    counter = iter(range(1, 100))
+    monkeypatch.setattr(pipeline, "new_rq_job_id", lambda: f"job-{next(counter)}")
 
 
 class _DummyQueue:
@@ -20,8 +27,9 @@ class _DummyQueue:
         kwargs=None,
         timeout=None,
         depends_on=None,
+        job_id=None,
     ):
-        job = SimpleNamespace(id=f"job-{len(self.calls) + 1}")
+        job = SimpleNamespace(id=job_id or f"job-{len(self.calls) + 1}", get_status=lambda refresh=True: JobStatus.QUEUED)
         self.calls.append(
             {
                 "func": func,
@@ -29,10 +37,24 @@ class _DummyQueue:
                 "kwargs": kwargs,
                 "timeout": timeout,
                 "depends_on": depends_on,
+                "job_id": job_id,
                 "job": job,
             }
         )
         return job
+
+
+def _assert_depends_on(call: dict, expected_ids: list[str]) -> None:
+    """Every WEPP pipeline edge is strict over the expected job ids."""
+    dependency = call["depends_on"]
+    if isinstance(dependency, Dependency):
+        assert dependency.allow_failure is False
+        actual_ids = dependency.dependencies
+    elif isinstance(dependency, (list, tuple)):
+        actual_ids = [job.id for job in dependency]
+    else:
+        actual_ids = [dependency.id]
+    assert actual_ids == expected_ids
 
 
 def _make_parent_job() -> SimpleNamespace:
@@ -43,6 +65,25 @@ def _make_parent_job() -> SimpleNamespace:
 
     parent_job.save = _save  # type: ignore[attr-defined]
     return parent_job
+
+
+def test_parent_lineage_is_saved_before_child_enqueue() -> None:
+    q = _DummyQueue()
+    parent_job = SimpleNamespace(meta={})
+
+    def fail_save() -> None:
+        assert parent_job.meta["jobs:6,func:_log_complete_rq"] == "job-1"
+        raise OSError("save failed")
+
+    parent_job.save = fail_save
+    with pytest.raises(OSError, match="save failed"):
+        pipeline.enqueue_log_complete(
+            q,
+            parent_job,
+            "run-1",
+            tasks=SimpleNamespace(_log_complete_rq=object()),
+        )
+    assert q.calls == []
 
 
 def test_enqueue_log_complete_tracks_meta_and_kwargs() -> None:
@@ -177,11 +218,8 @@ def test_enqueue_wepp_pipeline_defers_swat_until_after_hillslope_interchange() -
     swat_build_call = next(call for call in q.calls if call["func"] is tasks._build_swat_inputs_rq)
     swat_run_call = next(call for call in q.calls if call["func"] is tasks._run_swat_rq)
 
-    swat_build_dependencies = swat_build_call["depends_on"]
-    assert isinstance(swat_build_dependencies, list)
-    assert len(swat_build_dependencies) == 1
-    assert swat_build_dependencies[0].id == hillslope_interchange_call["job"].id
-    assert swat_run_call["depends_on"].id == swat_build_call["job"].id
+    _assert_depends_on(swat_build_call, [hillslope_interchange_call["job"].id])
+    _assert_depends_on(swat_run_call, [swat_build_call["job"].id])
 
 
 def test_enqueue_wepp_pipeline_runs_swat_before_interchange_when_wepp_delete_enabled() -> None:
@@ -248,16 +286,11 @@ def test_enqueue_wepp_pipeline_runs_swat_before_interchange_when_wepp_delete_ena
         call for call in q.calls if call["func"] is tasks._build_hillslope_interchange_rq
     )
 
-    swat_build_dependencies = swat_build_call["depends_on"]
-    assert isinstance(swat_build_dependencies, list)
-    assert len(swat_build_dependencies) == 1
-    assert swat_build_dependencies[0].id == run_hillslopes_call["job"].id
-
-    interchange_dependencies = hillslope_interchange_call["depends_on"]
-    assert isinstance(interchange_dependencies, list)
-    assert len(interchange_dependencies) == 2
-    assert interchange_dependencies[0].id == run_hillslopes_call["job"].id
-    assert interchange_dependencies[1].id == swat_build_call["job"].id
+    _assert_depends_on(swat_build_call, [run_hillslopes_call["job"].id])
+    _assert_depends_on(
+        hillslope_interchange_call,
+        [run_hillslopes_call["job"].id, swat_build_call["job"].id],
+    )
 
 
 def test_enqueue_wepp_pipeline_post_watershed_interchange_waits_for_cleanup_and_hillslope() -> None:
@@ -325,11 +358,10 @@ def test_enqueue_wepp_pipeline_post_watershed_interchange_waits_for_cleanup_and_
         call for call in q.calls if call["func"] is tasks._post_watershed_interchange_rq
     )
 
-    post_dependencies = post_watershed_interchange_call["depends_on"]
-    assert isinstance(post_dependencies, list)
-    assert len(post_dependencies) == 2
-    assert post_dependencies[0].id == cleanup_call["job"].id
-    assert post_dependencies[1].id == hillslope_interchange_call["job"].id
+    _assert_depends_on(
+        post_watershed_interchange_call,
+        [cleanup_call["job"].id, hillslope_interchange_call["job"].id],
+    )
 
 
 def test_enqueue_watershed_pipeline_post_watershed_interchange_waits_for_cleanup() -> None:
@@ -374,7 +406,7 @@ def test_enqueue_watershed_pipeline_post_watershed_interchange_waits_for_cleanup
         call for call in q.calls if call["func"] is tasks._post_watershed_interchange_rq
     )
 
-    assert post_watershed_interchange_call["depends_on"].id == cleanup_call["job"].id
+    _assert_depends_on(post_watershed_interchange_call, [cleanup_call["job"].id])
 
 
 def test_enqueue_wepp_noprep_pipeline_post_watershed_interchange_waits_for_cleanup_and_hillslope() -> None:
@@ -431,11 +463,10 @@ def test_enqueue_wepp_noprep_pipeline_post_watershed_interchange_waits_for_clean
         call for call in q.calls if call["func"] is tasks._post_watershed_interchange_rq
     )
 
-    post_dependencies = post_watershed_interchange_call["depends_on"]
-    assert isinstance(post_dependencies, list)
-    assert len(post_dependencies) == 2
-    assert post_dependencies[0].id == cleanup_call["job"].id
-    assert post_dependencies[1].id == hillslope_interchange_call["job"].id
+    _assert_depends_on(
+        post_watershed_interchange_call,
+        [cleanup_call["job"].id, hillslope_interchange_call["job"].id],
+    )
 
 
 def test_enqueue_watershed_noprep_pipeline_post_watershed_interchange_waits_for_cleanup() -> None:
@@ -479,7 +510,7 @@ def test_enqueue_watershed_noprep_pipeline_post_watershed_interchange_waits_for_
         call for call in q.calls if call["func"] is tasks._post_watershed_interchange_rq
     )
 
-    assert post_watershed_interchange_call["depends_on"].id == cleanup_call["job"].id
+    _assert_depends_on(post_watershed_interchange_call, [cleanup_call["job"].id])
 
 
 def test_enqueue_wepp_prep_only_pipeline_skips_run_and_postrun_jobs() -> None:

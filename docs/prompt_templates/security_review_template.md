@@ -23,6 +23,8 @@
   - [Assumption 1]
   - [Assumption 2]
   - [Assumption 3]
+- **Valid states that controls must preserve**: [Absent/empty/populated/legacy
+  states from the correctness review]
 
 ## Findings
 
@@ -42,6 +44,20 @@ Risk acceptance authority: `Accepted-risk` requires security reviewer recommenda
 - **Release recommendation**: [ship/ship-with-conditions/hold]
 
 ## Surface Checks
+
+### 0) Valid-State Non-Interference and User Experience
+
+- [ ] The linked correctness review enumerates absent, empty, populated,
+  supported legacy, and hostile states.
+- [ ] Every security control preserves all valid states and their contracted
+  user-visible outcomes.
+- [ ] Expected absence of optional state is not rejected merely because a
+  containment helper expects a preexisting object.
+- [ ] Every new user-reachable exception is limited to a malformed or hostile
+  state, or is explicitly authorized by the canonical contract.
+- [ ] At least one direct, unmocked test exercises the changed security
+  boundary for both a valid state and a hostile state.
+- [ ] Security approval does not claim or replace correctness/UX approval.
 
 ### 1) Auth, Session, and Authorization
 

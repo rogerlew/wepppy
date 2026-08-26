@@ -10,9 +10,19 @@ import pytest
 from tests.factories.singleton import singleton_factory
 from wepppy.runtime_paths.errors import NoDirError
 
+from rq.job import Dependency, JobStatus
+
 import wepppy.rq.omni_rq as omni_rq
 
 pytestmark = pytest.mark.unit
+
+
+def _child_job_stub(job_id: str) -> SimpleNamespace:
+    """Enqueued-job stub whose status keeps `_release_deferred_job_if_ready` a no-op."""
+    return SimpleNamespace(
+        id=job_id,
+        get_status=lambda refresh=True: JobStatus.QUEUED,
+    )
 
 
 @pytest.fixture()
@@ -182,8 +192,8 @@ def test_run_omni_scenarios_rq_concurrency_uses_helper_outputs_for_dependency_me
             assert name == "batch"
             self.connection = connection
 
-        def enqueue_call(self, func, args=(), kwargs=None, timeout=None, depends_on=None):
-            job = SimpleNamespace(id=f"child-{len(enqueue_calls) + 1}")
+        def enqueue_call(self, func, args=(), kwargs=None, timeout=None, depends_on=None, job_id=None):
+            job = _child_job_stub(f"child-{len(enqueue_calls) + 1}")
             enqueue_calls.append(
                 {
                     "func": func,
@@ -262,18 +272,15 @@ def test_run_omni_scenarios_rq_concurrency_uses_helper_outputs_for_dependency_me
     assert stage2["kwargs"]["dependency_target"] == "key:uniform_low"
     assert stage2["kwargs"]["dependency_path"] == "/dep/uniform_low/loss_pw0.txt"
     assert stage2["kwargs"]["signature"] == "sig:mulch"
-    assert isinstance(stage2["depends_on"], list)
-    assert stage2["depends_on"][0].id == stage1["job"].id
+    assert [job.id for job in stage2["depends_on"]] == [stage1["job"].id]
 
     compile_job = enqueue_calls[2]
     assert compile_job["func"] is omni_rq._compile_hillslope_summaries_rq
-    assert isinstance(compile_job["depends_on"], list)
-    assert compile_job["depends_on"][0].id == stage2["job"].id
+    assert [job.id for job in compile_job["depends_on"]] == [stage2["job"].id]
 
     finalize_job = enqueue_calls[3]
     assert finalize_job["func"] is omni_rq._finalize_omni_scenarios_rq
-    assert isinstance(finalize_job["depends_on"], list)
-    assert finalize_job["depends_on"][0].id == compile_job["job"].id
+    assert finalize_job["depends_on"].id == compile_job["job"].id
 
     assert any(kind == "dependency_target" for kind, _ in omni.helper_calls)
     assert any(kind == "loss_path" for kind, _ in omni.helper_calls)
@@ -703,8 +710,8 @@ def test_run_omni_contrasts_rq_reruns_hillslopes_for_deduped_scenarios_when_dele
             assert name == "batch"
             self.connection = connection
 
-        def enqueue_call(self, func, args=(), kwargs=None, timeout=None, depends_on=None):
-            job = SimpleNamespace(id=f"child-{len(enqueue_calls) + 1}")
+        def enqueue_call(self, func, args=(), kwargs=None, timeout=None, depends_on=None, job_id=None):
+            job = _child_job_stub(f"child-{len(enqueue_calls) + 1}")
             enqueue_calls.append(
                 {
                     "func": func,
@@ -753,7 +760,7 @@ def test_run_omni_contrasts_rq_reruns_hillslopes_for_deduped_scenarios_when_dele
                 "undisturbed,2__to__mulch",
             ]
             self.contrast_dependency_tree: dict[str, dict[str, str]] = {}
-            self.contrast_batch_size = 2
+            self.contrast_batch_size = 1
             self.rq_job_pool_max_worker_per_scenario_task = 7
             self.sidecar_paths = {
                 1: str(tmp_path / "demo" / "_pups" / "omni" / "contrasts" / "1" / "sidecar.json"),
@@ -825,6 +832,15 @@ def test_run_omni_contrasts_rq_reruns_hillslopes_for_deduped_scenarios_when_dele
         expected_scenario_relpath += "/"
 
     assert result.id == "child-3"
+    assert enqueue_calls[0]["depends_on"] is None
+    second_batch_dependency = enqueue_calls[1]["depends_on"]
+    assert isinstance(second_batch_dependency, Dependency)
+    assert second_batch_dependency.allow_failure is True
+    assert second_batch_dependency.dependencies == [enqueue_calls[0]["job"].id]
+    finalizer_dependency = enqueue_calls[2]["depends_on"]
+    assert isinstance(finalizer_dependency, Dependency)
+    assert finalizer_dependency.allow_failure is True
+    assert finalizer_dependency.dependencies == [enqueue_calls[1]["job"].id]
     assert set(rerun_paths) == expected_rerun_paths
     assert len(rerun_paths) == 2
     assert rerun_event_positions
@@ -881,8 +897,8 @@ def test_run_omni_contrasts_rq_does_not_rerun_hillslopes_when_delete_disabled(
             assert name == "batch"
             self.connection = connection
 
-        def enqueue_call(self, func, args=(), kwargs=None, timeout=None, depends_on=None):
-            job = SimpleNamespace(id=f"child-{len(enqueue_calls) + 1}")
+        def enqueue_call(self, func, args=(), kwargs=None, timeout=None, depends_on=None, job_id=None):
+            job = _child_job_stub(f"child-{len(enqueue_calls) + 1}")
             enqueue_calls.append(
                 {
                     "func": func,

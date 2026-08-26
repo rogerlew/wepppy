@@ -61,6 +61,7 @@ def test_fork_console_route_propagates_query_defaults_and_authenticated_token(
         "config": "cfg",
         "undisturbify": expected_undisturbify,
         "skip_wepp_runs_output": expected_skip,
+        "skip_omni_scenarios_contrasts": False,
         "cap_base_url": "/cap",
         "cap_asset_base_url": "/cap/assets",
         "cap_site_key": "site-key",

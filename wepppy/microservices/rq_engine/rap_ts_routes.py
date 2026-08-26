@@ -13,6 +13,7 @@ from rq import Queue
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.rq.project_rq import fetch_and_analyze_rap_ts_rq
+from wepppy.rq.submission_recovery import RqSubmissionConflict, enqueue_tracked_rq_job
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
@@ -96,7 +97,7 @@ async def acquire_rap_ts(runid: str, config: str, request: Request) -> JSONRespo
         authorize_run_access(claims, runid)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine acquire-rap-ts auth failed")
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
@@ -147,14 +148,19 @@ async def acquire_rap_ts(runid: str, config: str, request: Request) -> JSONRespo
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(
+            job = enqueue_tracked_rq_job(
+                q,
                 fetch_and_analyze_rap_ts_rq,
-                (runid,),
+                prep=prep,
+                job_key="fetch_and_analyze_rap_ts_rq",
+                runid=runid,
+                args=(runid,),
                 kwargs={"payload": job_payload} if job_payload else {},
                 timeout=RQ_TIMEOUT,
             )
-            prep.set_rq_job_id("fetch_and_analyze_rap_ts_rq", job.id)
-    except Exception:
+    except RqSubmissionConflict as exc:
+        return error_response(str(exc), status_code=409, code="conflict")
+    except Exception:  # broad-except: boundary contract
         logger.exception("rq-engine acquire-rap-ts enqueue failed")
         return error_response_with_traceback("Error Running RAP_TS")
 

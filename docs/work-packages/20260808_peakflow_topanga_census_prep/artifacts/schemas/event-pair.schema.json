@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "baseline_event_present": {"type": "boolean"},
+    "candidate": {"type": "boolean"},
+    "day": {"type": "integer"},
+    "direction": {"enum": ["minus", "plus"]},
+    "family": {"enum": ["ksat", "cover"]},
+    "hillslope_id": {"type": "integer"},
+    "mutant_event_present": {"type": "boolean"},
+    "ofe": {"type": "integer"},
+    "ordinal": {"type": "integer"},
+    "peak_m_s_baseline": {"type": ["number", "null"]},
+    "peak_m_s_mutant": {"type": ["number", "null"]},
+    "scenario": {"type": "string"},
+    "trial_id": {"type": "string"},
+    "year": {"type": "integer"}
+  },
+  "required": ["trial_id", "scenario", "hillslope_id", "family", "direction", "year", "day", "ofe", "ordinal", "baseline_event_present", "mutant_event_present", "candidate"],
+  "type": "object"
+}

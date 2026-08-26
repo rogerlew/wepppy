@@ -3763,7 +3763,7 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                 execution_mode="async",
                 returns_job=True,
                 job_key="fork_rq",
-                required_fields=["job_id", "new_runid", "undisturbify", "skip_wepp_runs_output"],
+                required_fields=["job_id", "new_runid", "undisturbify", "skip_wepp_runs_output", "skip_omni_scenarios_contrasts"],
                 estimated_duration_bucket="fast",
                 estimated_duration_seconds=15,
                 mutates_controllers=[],
@@ -3793,6 +3793,10 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                             "type": "boolean",
                             "constraint_mode": "static",
                         },
+                        "skip_omni_scenarios_contrasts": {
+                            "type": "boolean",
+                            "constraint_mode": "static",
+                        },
                         "target_runid": {
                             "type": "string",
                             "constraint_mode": "static",
@@ -3806,12 +3810,12 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                 },
                 "responses": {
                     "success": {
-                        "required": ["job_id", "new_runid", "undisturbify", "skip_wepp_runs_output"]
+                        "required": ["job_id", "new_runid", "undisturbify", "skip_wepp_runs_output", "skip_omni_scenarios_contrasts"]
                     }
                 },
             },
             "defaults": {
-                "resolved_defaults": {"undisturbify": False, "skip_wepp_runs_output": False},
+                "resolved_defaults": {"undisturbify": False, "skip_wepp_runs_output": False, "skip_omni_scenarios_contrasts": False},
                 "defaults_context": _defaults_context(runtime),
             },
         },

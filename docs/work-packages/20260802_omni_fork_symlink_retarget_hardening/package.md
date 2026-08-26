@@ -25,6 +25,15 @@ returned `EINVAL` for `renameat2(RENAME_NOREPLACE)`. The package is reopened to
 remove that unsupported filesystem primitive without weakening no-clobber
 behavior.
 
+Production fork job `8dda9f7a-310f-4a16-8bae-501a2d0106d6` later failed on
+2026-08-06 with the exact signature
+`NotADirectoryError: Unsupported Omni scenarios child entry:
+.mulch_15_sbs_map`. The regular dot file is a legacy access-log sidecar for
+the real `mulch_15_sbs_map` child directory. This remediation simply skips
+all dot-prefixed collection entries during link normalization without opening
+or following them. Historical rsync/archive behavior and the privacy of copied
+access logs are separate surfaces and are unchanged by this patch.
+
 Included work preserves the current rsync command, creates relative links for
 allowlisted Omni shared inputs, rebuilds copied legacy links from their semantic
 destination location, validates containment, adds exact regressions, and
@@ -56,6 +65,11 @@ failure. Health means zero recognized links in a completed fork resolve outside
 it. Normalization is bounded to `_pups/omni/{scenarios,contrasts}` and records
 count/timing. The observation window is 30 days after any later deployment.
 
+For the access-log compatibility amendment, the hypothesis is that skipping
+dot-prefixed collection entries will eliminate the exact recurrence. The
+primary health signal is zero recurrences over 30 days after deployment. The
+guardrail is continued rejection of ordinary unexpected collection entries.
+
 ## Failure Signature and Hardening Hypothesis
 
 Exact signature:
@@ -76,6 +90,11 @@ operators own post-deployment wall-time and 30-day recurrence observation. No
 temporary retry, feature flag, delay, or compatibility callus is introduced;
 there is therefore no sunset item.
 
+The access-log baseline is one confirmed failed fork. Codex owns exact
+regression and review evidence; the WEPPcloud operator owns the 30-day
+production recurrence observation. This compatibility rule adds no temporary
+callus or sunset action.
+
 ## Parameterization ADR Gate
 
 - **Parameterization change present**: no.
@@ -90,3 +109,12 @@ there is therefore no sunset item.
 - `wepppy/rq/project_rq_fork.py`
 - `wepppy/nodb/mods/omni/omni_clone_contrast_service.py`
 - `wepppy/weppcloud/utils/helpers.py`
+
+## SURF-04B Skip-Omni Reset Amendment
+
+The bounded follow-up at `../20260806_fork_skip_omni_reset/` composes this
+package's checked fork-copy boundary with SURF-04 and DOM-25A/B. When explicitly
+selected, it excludes the two collection nodes themselves and creates fresh
+destination-only Omni state instead of normalizing copied child links. The
+unchecked SURF-04A normalization contract remains unchanged, and SURF-04A is
+not reopened or advanced.

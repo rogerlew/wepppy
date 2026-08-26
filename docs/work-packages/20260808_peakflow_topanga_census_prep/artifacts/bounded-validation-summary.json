@@ -1,0 +1,20 @@
+{
+  "changed_inputs": [
+    "p106.sol"
+  ],
+  "evidence_locator": "/home/workdir/peakflow-topanga-census-prep-validation/2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747/burned/h106/ksat-minus",
+  "hbp_sha256": "834d091cbc806e06bdd0b51659712dba35c95dfd5b257a982c8720176e233951",
+  "mutation": {
+    "expected_value": 19.8,
+    "realized_value": 19.8,
+    "requested_factor": 0.99,
+    "source_value": 20.0
+  },
+  "phase2a_hbp_sha256_match": true,
+  "phase2a_trace_sha256_match": true,
+  "plan_id": "2a19c6e0b1cef1b4bbcf0c50844f01a74393881e0c690d3f5816859352b9e747",
+  "schema_version": "1.0.0",
+  "status": "complete",
+  "trace_sha256": "21c35f595bda64fe7f27d5c156f9061e1dbfe1d363dae6aba89a203ead3da508",
+  "trial_id": "topanga-pilot-validation-burned-h106-ksat-minus-2a19c6e0b1ce"
+}

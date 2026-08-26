@@ -1,0 +1,1121 @@
+{
+  "artifact_count": 139,
+  "artifacts": [
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/baseline/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/baseline/runs/chan.out",
+      "retention": "retain",
+      "sha256": "93afaf7cd8be807dacce0e73958ddcf26bebcb150850f3a820987811022aca2d"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/baseline/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/baseline/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "a65308b2bff5ffbcfc4fc635d57b578db0f797fd1ae8d959a4306a8a29913064"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/baseline-repeat/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/baseline-repeat/runs/chan.out",
+      "retention": "retain",
+      "sha256": "93afaf7cd8be807dacce0e73958ddcf26bebcb150850f3a820987811022aca2d"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/baseline-repeat/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/baseline-repeat/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "a65308b2bff5ffbcfc4fc635d57b578db0f797fd1ae8d959a4306a8a29913064"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h008-cover-minus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h008-cover-minus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "280127962a07aab79c04046fcb13dc159222b7f4e5db5088ef05bf19dbae885d"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h008-cover-minus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h008-cover-minus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "16f3a59a99e424ef08fe7e183bf859d2e03bd3e23a8439117263f2d2a6198054"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h008-cover-plus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h008-cover-plus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "12aaad09ad3ee09bd552d66f2137174ee8808bb184e7c6c86c5dc5f3421ca849"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h008-cover-plus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h008-cover-plus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "464f762c5023901be62a54357f55a1c52bcb0c006167dcfc1c98112db4164221"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h008-ksat-minus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h008-ksat-minus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "62963a33a3e05f96c3d6e5480a8ded1b4f28fd3299b3112a905dac2dc2b8fa65"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h008-ksat-minus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h008-ksat-minus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "254ee7e8bde97ac490ec2cd09f1a747a0c749d5902b91f0452edd05e0494f1eb"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h008-ksat-plus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h008-ksat-plus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "579c1ec9781a3108ef9bdaf45490ea0e19f112127560d62762499cdab8e92c57"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h008-ksat-plus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h008-ksat-plus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "5544aa17fb7c69c5912105b1f2c307cc5794746c4b2ebae4c0ca03c252680e20"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h031-cover-minus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h031-cover-minus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "87bcc300d185b83922ed36f610278d062d3c0149b7e769f804257e9de3afee90"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h031-cover-minus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h031-cover-minus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "e038f27bf76adbac262dfe32c811b00d7d5a178858331ebfd852e90d438590c1"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h031-cover-plus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h031-cover-plus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "1adec3d9a862c511da53599c2c37376a000ca81cd216bc301266b280f5cb3e92"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h031-cover-plus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h031-cover-plus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "90c739f6d1c317a20f30d030e93832f50db0d1b468958a02108242d73a00cc33"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h031-ksat-minus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h031-ksat-minus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "7c6faa55e90eab19f73858fedfeb70597007be50152c04153fc5c2f8240ed27f"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h031-ksat-minus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h031-ksat-minus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "b2389913c660eba369cc2b5dee74f5254611c4d2a0898969830c02faca9b1966"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h031-ksat-plus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h031-ksat-plus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "dc53b7400332a12a2be069c2a9c84acc8cce3bd5ac897a40b3822a4b656047cc"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h031-ksat-plus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h031-ksat-plus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "db5f37baafe4e1bd58082614ee00630485ea05438d5da88004eb70e2ff685951"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h035-cover-minus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h035-cover-minus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "761e5c4ebbf1c114fb18a057d9dea38990082049038f96a8d14e0a7c6d9eb29f"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h035-cover-minus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h035-cover-minus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "6a852c7ec18cfccfb15be239fe0fc34a2a6c9d5ba8e53964abc71ad9969154da"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h035-cover-plus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h035-cover-plus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "4930425c4a48cc6a178dc4f9719a89d93daa064f1362618da9f9d8cef91b487b"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h035-cover-plus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h035-cover-plus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "c7ad96adffdb892b19dffd07f75e26c0a7b35c1c171f7ac954506743f1113197"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h035-ksat-minus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h035-ksat-minus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "b5d9f880bd1dd9a7fc5a9579bc1a8aa1aa328013a628f0d096e96ecb8ee2f767"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h035-ksat-minus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h035-ksat-minus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "0ee761503ecf8dd073bf5ba4d270e0545efa440dc22bc9f0ea8f0ebbf574de51"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h035-ksat-plus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h035-ksat-plus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "92d6802954242eea55b724e44cd8c9d5dbb7f5133be95fd03c410371cbb29a8c"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h035-ksat-plus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h035-ksat-plus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "38d5722254273196c40d30d02f66371f9b7d77708feeb9d423a485e45c771370"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h062-cover-minus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h062-cover-minus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "3cbfaef6974463c2b8d91146cb8596c1bcbfbf44b23cbe72d3305069a6d3aba2"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h062-cover-minus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h062-cover-minus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "1584ba06d8c48658e6d8c601d645229f8125ae647e11a02f1d9e20e459b20965"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h062-cover-plus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h062-cover-plus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "0da736b97959714aebd3f921d40d30f64de8dea2ce8cac86fe10a0dba4de1aad"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h062-cover-plus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h062-cover-plus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "45c71a3bcb80931d73e05f3a4c29d60306505126b09bcdc9c73e6aa63fd71512"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h062-ksat-minus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h062-ksat-minus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "5b661c3ac03a21a137517cffc352852b10941949253371e949c5dfef262d7d47"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h062-ksat-minus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h062-ksat-minus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "0b8741448e849b19c91f2232452a250e97a5b10e6080f145b336d2f159ee5da5"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h062-ksat-plus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h062-ksat-plus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "469f626ee5c9c8b979d1a2a0577d700a0cf08d64693b514f272a0987381b00c5"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h062-ksat-plus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h062-ksat-plus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "13eb82904a934c128c74e18524c1bd2e06c6838f45936fbd6491f06b73bbcec3"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h084-cover-minus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h084-cover-minus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "ccd84bb15d522e4bae5410bfeeeec561d138127df5111dcc9e675215c2d3e0c8"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h084-cover-minus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h084-cover-minus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "b292de85d0af93af79e67f1a9f117c2444d0474e7ceeba64f2ee2ade25ff72b0"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h084-cover-plus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h084-cover-plus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "c6b7719a676115ea8127c4319a4c751027a6324639e06cec17439cd88663bc3e"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h084-cover-plus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h084-cover-plus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "8482f7d90f1841ccd84b19a37260d510b3bf5ad115eedfee0d6a76af84b16fac"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h084-ksat-minus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h084-ksat-minus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "34f3a493b6f61a0bb634fbac62e220282c636e78106413ee80b31260817284ad"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h084-ksat-minus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h084-ksat-minus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "38f98c3fa5c85ce005dd88def11b887e7ba4353131738bc7af58f4e5ee4f3a8f"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h084-ksat-plus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h084-ksat-plus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "f48ab5431b5fad5addc683d0cd08fd82b7911ed0716a7277f47d265962c1b4b8"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h084-ksat-plus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h084-ksat-plus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "ab30bdcb5c65c87daec7f7ab314e9f002c6f1a939921b453eb25c4e9c9b253ae"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h085-cover-minus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h085-cover-minus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "f9e3921ccf0020378824eceb2e98665f553ec10ad7863e699cd0c825ffcd2d71"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h085-cover-minus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h085-cover-minus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "d90014f2604148f052862ccccda6eedbb8e0bc8ed6dc7296c32bd893eddbf26b"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h085-cover-plus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h085-cover-plus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "5b34d0544e0c22a4c427e7c974c5f1f1d6f18bc9dc39c23b75068ba6e8ec5f7b"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h085-cover-plus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h085-cover-plus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "fd7021dc57c190b24da90e610124b85e002a5f375dbea8b558823fe1a14586ef"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h085-ksat-minus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h085-ksat-minus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "d7c104e2e9f90b2c5a5af0f3c9d829df4e37f55023620728993f36278cb639a4"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h085-ksat-minus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h085-ksat-minus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "afce6ebb4d7320ceffc06ef0cd210df66ce2f2709fac8cb46491e77f71863b23"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h085-ksat-plus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h085-ksat-plus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "771fdd4b26aa0aa9d68cb198dd6ddbcd18760cc508464d51b40b3280797a4bbe"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h085-ksat-plus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h085-ksat-plus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "f09af645a80ef653c36d56bf4b23c79cbe9235fa8e93bd4a9dee2162243bb165"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h091-cover-minus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h091-cover-minus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "585ae182f2dddbfc249350aa2d4ec87c30687f4150a7d41dc70e1f9947989f3f"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h091-cover-minus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h091-cover-minus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "071a8833e8bc2291a6d3d667013bc68274941b74c2487b49991d952f89845ad7"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h091-cover-plus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h091-cover-plus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "9a408c57394fa00f0d8771a9bcde4db1770e6f35db71930a0f24ad21141bc016"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h091-cover-plus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h091-cover-plus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "327e70a6f292dd80125a8db02c76896fd9157fce3633e96bbe70ba1f75eb078c"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h091-ksat-minus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h091-ksat-minus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "64cf7a5299e1818f0eea13d95d4e3070c7f3e3ee9fe538ff27b413c3fef797fe"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h091-ksat-minus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h091-ksat-minus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "db9d0563685291e66877b6a9924ef6ae9f6e2cf44a25e098e4f6d274811217fa"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h091-ksat-plus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h091-ksat-plus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "5a61e47f685676b8839c28ad57b8a82bb4ce2af3178476f4e293dedc59a0fda4"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h091-ksat-plus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h091-ksat-plus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "0151071f80a45b7a027d5c9fe38cf0012cfc330ff0d8ee38a32bf2949f2c5bfd"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h106-cover-minus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h106-cover-minus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "8f2b421a818c1ab92750480cc4f56a56646faecdfee8f95faec630398f650c47"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h106-cover-minus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h106-cover-minus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "5ac26a9e8a0bf53fae3bf3bc9a387c9c4d77ecfcca87945e71d72db090fac04f"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h106-cover-plus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h106-cover-plus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "37ae3ee1dc5e0c05fc7812b5f783bae06f72f7ed250bf1585a7d4270edf97b28"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h106-cover-plus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h106-cover-plus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "57ba734789aec17933bd6ba3f7bece21628c9a51b60317751c06344a43a120bc"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h106-ksat-minus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h106-ksat-minus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "ad7b9c3182674033b29dbac546382016da01f97cf28020ab3a725520c1f12b65"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h106-ksat-minus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h106-ksat-minus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "449bbcec20d9b9fed2bfc91c3e37ef5f5052a41160e2db1530cfb5a4ef13bb6c"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h106-ksat-plus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h106-ksat-plus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "e06da7e16e32d6e3bfbe4aa2ea4f5717b34186744e949ba471881a6866593970"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/burned/burned-h106-ksat-plus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/burned/burned-h106-ksat-plus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "afb3b187d4273046a295d5a0290b9623c147bafffd06e785e96ed5f0e92a8c37"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/baseline/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/baseline/runs/chan.out",
+      "retention": "retain",
+      "sha256": "92418b664a984a50642f9f1aa1e742ae61c1dc19428361381b7ba462ac50a458"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/baseline/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/baseline/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "7610bb64bd6439ab77f3c1ccb43fa2770456caeeef12679db16e6939179c06ec"
+    },
+    {
+      "bytes": 1498310172,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/candidate-h106-high-interval/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/candidate-h106-high-interval/runs/chan.out",
+      "retention": "retain",
+      "sha256": "7c1463726683c02e783fd96d475169aa70710483776df8e5ffa3ac96c0f610d9"
+    },
+    {
+      "bytes": 24984776,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/candidate-h106-high-interval/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/candidate-h106-high-interval/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "5f4703d57307e38b4c705a5006dce8c13d163cd6268d315c89e6f1245b49c710"
+    },
+    {
+      "bytes": 1498310172,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/candidate-h106-low-interval/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/candidate-h106-low-interval/runs/chan.out",
+      "retention": "retain",
+      "sha256": "e1de738dd9109fbb63fcfc85ac77421aa8f45f0d0a898800ef21ed694926a0de"
+    },
+    {
+      "bytes": 24984776,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/candidate-h106-low-interval/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/candidate-h106-low-interval/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "06c2091efd59e460a03d876ea85fc3f167e92ac0a6324ead07ecb463e4744041"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h008-cover-minus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h008-cover-minus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "2ba183d9c705372c7b09b9d73129a08d25c7fb1ae958f52e5a5b285695bf5b94"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h008-cover-minus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h008-cover-minus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "7603ebd6eef260f4d83eb97f67141b3ee0123c1c3cb4c95e040549e4fa678693"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h008-cover-plus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h008-cover-plus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "9c320bf837a05bf191a3d4486cb538d1e66fa851d4ca31594d118ba0238a0f06"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h008-cover-plus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h008-cover-plus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "cf1b6cc69a0ad5f644ed1a0170e5093edc1194b1181d3c39a2224877c3324703"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h008-ksat-minus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h008-ksat-minus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "fe0eb9b70ab142fceb1f4e0f7acf069381916720b1ee975d3378bc94a54d7228"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h008-ksat-minus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h008-ksat-minus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "f312c75de8f782639f7c00f815c13352e9fdd7a88377f4d17776c9b0b68b1b25"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h008-ksat-plus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h008-ksat-plus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "6b849fb1ec9067af30b31b7570b96e35efc07422e94efbb3ee5d10c3655594ec"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h008-ksat-plus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h008-ksat-plus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "9efda1e95ccde72a068aea4a1b89cf74e3e8e69f895dbae60fc166a687bd05d9"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h031-cover-minus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h031-cover-minus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "585817ef24d9403c257209882665e6daa4421f1046c0fe0a7f7e4d76463082a2"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h031-cover-minus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h031-cover-minus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "6c912d78fc1e25705501ae5920ec09b5b1cd04c869bca637f8f913c8df8a2ace"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h031-cover-plus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h031-cover-plus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "8cd04565b52efbd732f2a622b8efef94479bd9312df9e2c27f0d2da77588b232"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h031-cover-plus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h031-cover-plus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "0be289568e73813e0f1c1d9af024b26de89c8ad4643fbcdfb64e14ced3013c9f"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h031-ksat-minus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h031-ksat-minus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "142e790bb83d9da41a1859803fd0b49ec6f122fd69aa25576bcc13145bcd31bd"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h031-ksat-minus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h031-ksat-minus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "c721776d0b223032f787f14c4f2e42fdba69f6fb255ef048b7b953b161c6d2cc"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h031-ksat-plus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h031-ksat-plus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "5cdcb7111532051b0debe450dd3ad8576c124619c16517aaa42f2496b09c5f52"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h031-ksat-plus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h031-ksat-plus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "354a5b41e8124474dbe7c1193006d3487dd435b475930dff3a08bf741e080be9"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h035-cover-minus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h035-cover-minus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "7772857f99197806359ccc10752051ef4d5a42e70c4e070f793cb79a099e7bde"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h035-cover-minus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h035-cover-minus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "5542e0443a7a138ea66d476568a75cd23eccd734413fe031bfcfb53b5df53706"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h035-cover-plus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h035-cover-plus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "0fbc53f4433bcaa583793278b1ddfe8d4a714bf13b386c5173693701a5b7d955"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h035-cover-plus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h035-cover-plus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "06c7d353c7cca1c69495894bc0b031b4809af81ebde16ece04f4d240e7908a53"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h035-ksat-minus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h035-ksat-minus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "31529f1e1041c9e74f56042fdc44ac29dfe6b4da7596d67317af7b410b55609a"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h035-ksat-minus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h035-ksat-minus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "6fcc7e221e947375b8a064c926b9f40d384c03fc6a5da87df3db73eb90ca150f"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h035-ksat-plus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h035-ksat-plus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "910377f9efd33069e36373536b4a7c801aba4a2d3b974cc7e564e45c892eafda"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h035-ksat-plus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h035-ksat-plus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "a94e4420b7e4ad08f48db2274c2f0c325841f2ceb060901d2822404f27da5048"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h062-cover-minus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h062-cover-minus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "7918a5f053f5516e4292e38c7880ad42366f88e76730620ff8456f0d238af590"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h062-cover-minus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h062-cover-minus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "34a9e1033289e966e40fff7d26875d8573c4fac279845f75abba8f0bbac037f2"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h062-cover-plus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h062-cover-plus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "0e3cbc681c45d8548dc6894615a1e43c3b85f760b0ea5d89fd70c3588a6de702"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h062-cover-plus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h062-cover-plus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "4d35fc664bfc7612aa4988516d2f6f1684d170da2cdab3c11ddfc2b150c5f8b3"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h062-ksat-minus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h062-ksat-minus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "bf6075339dcc6bda1d73c76744ad499a51b4b28a0fdb90dacc99e26b16221065"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h062-ksat-minus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h062-ksat-minus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "3b70048b508c7f298a3525bea815a553ed173ad73487d8e53d8793d814b416dc"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h062-ksat-plus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h062-ksat-plus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "4efa38024e7ab28f36db605e1a77fbcac3de33011942c238cd231fc39e824583"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h062-ksat-plus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h062-ksat-plus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "04c6e6fc50e99502bd05814b6889dbb9317b98e8988ea7dfd6ee0874c2675ff8"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h084-cover-minus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h084-cover-minus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "3c2b7684a442e4bf1685fa67f4b07455e22a9437f02df8d455448bfc85110244"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h084-cover-minus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h084-cover-minus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "8f142dffc1d9ed256521402537dfc78b65313cc4efa2fc51aee38ee41f96d8ca"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h084-cover-plus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h084-cover-plus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "e78540ea4fe181095ac155619a9780caf364c472d6fc4ec2259534d02c6a7835"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h084-cover-plus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h084-cover-plus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "12f259b4f7a9ad618f0812db31bf68bc0ce55379ed2915c8c5fd429b18426770"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h084-ksat-minus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h084-ksat-minus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "8295bd4cac829f5f6d7824e1cefecbc78ad9c4602c661d703caae9ca0550b6bd"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h084-ksat-minus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h084-ksat-minus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "3a402c1eb4850af8ed6d40972afa10b529e13d228d65a0956c17ccd74ea328a5"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h084-ksat-plus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h084-ksat-plus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "e1df0c95e72d978e1672dc2d146fde4a118eb1fe0376452772f4a82ae89c2ed3"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h084-ksat-plus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h084-ksat-plus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "863cce9e42e8318535d061677f8cf5c373c4c9378bceea29f600496f7ff5bf99"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h085-cover-minus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h085-cover-minus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "8b165bad4f8f83cdd131c2da202df2fb239e479af2a0d59b75148201b00c59a1"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h085-cover-minus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h085-cover-minus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "a9cc782263717719125770b7c545e8ac22cfb11474414a2d4de6788ce5790410"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h085-cover-plus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h085-cover-plus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "d31ceaedb5dd6dafc319173ec9ceb5e4a9bcbe96f12daacb34730aeb322e42bf"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h085-cover-plus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h085-cover-plus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "bd9a6063410c6d646430f1f4237e93807f35099f6dd8108ed04573289c4c5229"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h085-ksat-minus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h085-ksat-minus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "c24fe74a69009aa6f23b709229bd024806034b0966b926e7292c34c33ecbeb6f"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h085-ksat-minus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h085-ksat-minus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "988fe9ab1937ba4a404bf2857d226d0766c9e72a34e722022f8883cb4067dacf"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h085-ksat-plus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h085-ksat-plus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "015edca36614fe13a998106209ec0a1d64cdbdc509a482d644967ce64d85c4f5"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h085-ksat-plus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h085-ksat-plus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "cb33118598c8ba55175e238ea926a2c59a9e2146b6065d70907f9faa55062674"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h091-cover-minus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h091-cover-minus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "11d6e62fbe4d6fd016385a75e57b55ddb994fa41c8553edefc62c379890597fd"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h091-cover-minus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h091-cover-minus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "f92e708891d8c6e89ae1169bcabb27692e11878153d70e0aab203ad73c8be470"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h091-cover-plus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h091-cover-plus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "32427b069a502153f0b79aa77e9ed13554afb71529ce7c161c457cd074a12b70"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h091-cover-plus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h091-cover-plus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "2b68bad0a7eadfc7b75f624b1d9d95ca85a7950f1fb2f7eda0c1bf213f0c790c"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h091-ksat-minus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h091-ksat-minus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "a0e204d5e14f570c08ae570c61aa680b74509bb2834cb1049b82950fe7c9d154"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h091-ksat-minus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h091-ksat-minus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "58ff715b56fad93942a56f41c2391d715a21ef170e12836937955a7f1af57de5"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h091-ksat-plus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h091-ksat-plus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "55dc40401b35da1138924ef91f6185c38c2951626c42837797a6d5adaa19b59f"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h091-ksat-plus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h091-ksat-plus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "8fdf98ad16dc01f604bf2438145313b4f494abfbc8bd816220f15899fd4ef221"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h106-cover-minus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h106-cover-minus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "ae95206819729fe1344ef9033d1ff86762097937355fe50238fdda0189ff38b0"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h106-cover-minus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h106-cover-minus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "c6fbe4d154afc6f3347a01cf720cd067285e770589ab2410d5b4a793b1dfe222"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h106-cover-plus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h106-cover-plus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "96a7720994c593b2616febfb9b4aa0ca146d4db4fe1f1940192a449028440997"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h106-cover-plus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h106-cover-plus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "b9a983fed06a3d135800f3fd351154b2dd3d0c8cf29a5a637d8c7ce5a1657e72"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h106-ksat-minus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h106-ksat-minus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "c8cf01274d432cf8771de6b47902795c73ebd3b02e71732064c0457e581262be"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h106-ksat-minus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h106-ksat-minus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "77a196d902c9b2b4a75051826f77e9e247ef4aed7448817bcd0bf2c3e1d17155"
+    },
+    {
+      "bytes": 74196757,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h106-ksat-plus/runs/chan.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h106-ksat-plus/runs/chan.out",
+      "retention": "retain",
+      "sha256": "6747721fc63f4a94c5f1b620badcb25140be66be746e01a6c5f1ffd07fd81045"
+    },
+    {
+      "bytes": 152404400,
+      "format": "wepp-channel-text",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/routing/3b5778d7c9171311/undisturbed/undisturbed-h106-ksat-plus/runs/chanwb.out",
+      "name": "routing/3b5778d7c9171311/undisturbed/undisturbed-h106-ksat-plus/runs/chanwb.out",
+      "retention": "retain",
+      "sha256": "d77a955776a32b437712ca4d1f1ddea0eac7c4308449f0ea6b29c7c3e55dd70b"
+    },
+    {
+      "bytes": 6674,
+      "format": "parquet",
+      "locator": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da/hydrograph-h106-1986-day046.parquet",
+      "name": "hydrograph-h106-1986-day046.parquet",
+      "retention": "retain",
+      "sha256": "768edeafb2b51cb4602a805e3e3980dbb4f8659015f7c9b1f39ce52f4d4b47c9"
+    }
+  ],
+  "bytes": 18228874089,
+  "external_root": "/home/workdir/peakflow-phase2a-evidence/8162d509d69cb4da",
+  "pilot_id": "8162d509d69cb4da",
+  "schema_version": "1.0.0"
+}

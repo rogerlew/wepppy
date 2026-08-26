@@ -1,0 +1,18 @@
+{
+  "acceptable": true,
+  "acceptance_bounds": {
+    "raw_routing_bytes_max": 300000000000,
+    "wall_s_at_8_workers_max": 28800
+  },
+  "full_census_trials": 1120,
+  "partitioning": "scenario/selection_id/trial_id with immutable terminal manifests",
+  "pilot_id": "8162d509d69cb4da",
+  "pilot_trials": 64,
+  "projected_hillslope_runtime_s_sequential": 4660.654389580013,
+  "projected_raw_routing_bytes": 261724336335.0,
+  "projected_routing_runtime_s_sequential": 165904.40746238455,
+  "projected_routing_wall_s_at_8_workers": 20738.05093279807,
+  "retention": "raw external retain; compact schemas, ledgers, hashes, and summaries committed",
+  "scale_factor": 17.5,
+  "schema_version": "1.0.0"
+}

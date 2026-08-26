@@ -4,6 +4,7 @@
  */
 function controlBase() {
     const TERMINAL_JOB_STATUSES = new Set(["finished", "failed", "stopped", "canceled", "not_found"]);
+    const RETRYABLE_JOB_STATUSES = new Set(["deferred"]);
     const SUCCESS_JOB_STATUSES = new Set(["finished"]);
     const FAILURE_JOB_STATUSES = new Set(["failed", "stopped", "canceled", "not_found"]);
     const DEFAULT_POLL_INTERVAL_MS = 2000;
@@ -436,6 +437,22 @@ function controlBase() {
                 self.pushErrorStacktrace(self, error, status, errorPayload.error.message);
                 emitFailure();
             });
+    }
+
+    function maybeDispatchRetryable(self, statusObj, source) {
+        const status = statusObj && statusObj.status ? String(statusObj.status).toLowerCase() : null;
+        if (!self || !status || !RETRYABLE_JOB_STATUSES.has(status)) {
+            return;
+        }
+        try {
+            self.triggerEvent("job:retryable", {
+                job_id: self.rq_job_id || (statusObj && statusObj.job_id) || null,
+                status: status,
+                source: source || "poll"
+            });
+        } catch (err) {
+            console.warn("controlBase job:retryable dispatch error:", err);
+        }
     }
 
     function callAdapter(target, method, args) {
@@ -1177,7 +1194,8 @@ function controlBase() {
                 return true;
             }
 
-            return !TERMINAL_JOB_STATUSES.has(self.rq_job_status.status);
+            return !TERMINAL_JOB_STATUSES.has(self.rq_job_status.status)
+                && !RETRYABLE_JOB_STATUSES.has(self.rq_job_status.status);
         },
 
         update_command_button_state: function update_command_button_state(self) {
@@ -1297,6 +1315,7 @@ function controlBase() {
 
             maybeDispatchCompletion(self, self.rq_job_status, "poll");
             maybeDispatchFailure(self, self.rq_job_status, "poll");
+            maybeDispatchRetryable(self, self.rq_job_status, "poll");
 
             self.update_command_button_state(self);
         },
@@ -1445,7 +1464,8 @@ function controlBase() {
                 return true;
             }
 
-            return !TERMINAL_JOB_STATUSES.has(effectiveStatus);
+            return !TERMINAL_JOB_STATUSES.has(effectiveStatus)
+                && !RETRYABLE_JOB_STATUSES.has(effectiveStatus);
         },
 
         attach_status_stream: function attach_status_stream(self, options) {

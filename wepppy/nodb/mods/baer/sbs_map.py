@@ -46,6 +46,7 @@ _DEFAULT_COLOR_TO_SEVERITY: dict[RGBColor, str] = {
     (0, 115, 74): "unburned",
     (0, 158, 115): "unburned",
     (0, 175, 166): "unburned",
+    (0, 128, 128): "unburned",
     (102, 204, 204): "low",
     (102, 205, 205): "low",
     (115, 255, 223): "low",
@@ -53,11 +54,13 @@ _DEFAULT_COLOR_TO_SEVERITY: dict[RGBColor, str] = {
     (0, 255, 255): "low",
     (77, 230, 0): "low",
     (86, 180, 233): "low",
+    (82, 204, 204): "low",
     (255, 255, 0): "mod",
     (255, 232, 32): "mod",
     (240, 228, 66): "mod",
     (255, 0, 0): "high",
     (204, 121, 167): "high",
+    (168, 0, 0): "high",
 }
 
 _SBS_4CLASS_EXPORT_COLORS: dict[int, tuple[int, int, int, int]] = {
@@ -69,17 +72,19 @@ _SBS_4CLASS_EXPORT_COLORS: dict[int, tuple[int, int, int, int]] = {
 }
 
 _SBS_4CLASS_EXPORT_COLORS_LEGACY: dict[int, tuple[int, int, int, int]] = {
-    0: (0, 100, 0, 255),          # unburned
-    1: (127, 255, 212, 255),      # low
-    2: (255, 255, 0, 255),        # moderate
-    3: (255, 0, 0, 255),          # high
-    255: (255, 255, 255, 0),      # n/a
+    0: (0, 128, 128, 255),        # unchanged / unburned
+    1: (82, 204, 204, 255),       # low
+    2: (255, 232, 32, 255),       # moderate
+    3: (168, 0, 0, 255),          # high
+    255: (255, 255, 255, 0),      # masked / unmappable
 }
 
 _SBS_4CLASS_EXPORT_COLORS_BY_MODE: dict[ExportPaletteMode, dict[int, tuple[int, int, int, int]]] = {
     "shifted": _SBS_4CLASS_EXPORT_COLORS,
     "legacy": _SBS_4CLASS_EXPORT_COLORS_LEGACY,
 }
+
+_SBS_MASKED_COLORS: frozenset[RGBColor] = frozenset({(255, 255, 255)})
 
 try:
     from wepppyo3 import sbs_map as _rust_sbs_map
@@ -100,12 +105,23 @@ ColorLookup: TypeAlias = dict[RGBColor, Optional[str]]
 HashableBreaks: TypeAlias = tuple[int | float, ...]
 HashableNoData: TypeAlias = Optional[tuple[int | float, ...]]
 
+SBS_UNASSIGNED_RGBA = (128, 0, 152, 255)
+SBS_DISPLAY_CLASSES: tuple[tuple[int, str, str], ...] = (
+    (130, "Unchanged / Unburned", "#008080"),
+    (131, "Low Severity Burn", "#52CCCC"),
+    (132, "Moderate Severity Burn", "#FFE820"),
+    (133, "High Severity Burn", "#A80000"),
+    (255, "Masked / Unmappable", "#FFFFFF"),
+)
+
 __all__ = [
     "classify",
     "ct_classify",
     "get_sbs_color_table",
     "sbs_map_sanity_check",
     "SoilBurnSeverityMap",
+    "SBS_DISPLAY_CLASSES",
+    "SBS_UNASSIGNED_RGBA",
 ]
 
 
@@ -748,19 +764,19 @@ class SoilBurnSeverityMap(LandcoverMap):
         if isinstance(nodata_vals, str):
             raise ValueError("nodata_vals should be a None or list, not a string")
 
-        nodata_list: list[int | float]
-        if nodata_vals is None:
-            nodata_list = []
+        nodata_list = list(nodata_vals) if nodata_vals is not None else []
+        source_nodata_list = list(nodata_list)
 
-            ds = gdal.Open(fname)
-            band = ds.GetRasterBand(1)
-            _nodata = band.GetNoDataValue()
-            ds = None
-
-            if _nodata is not None:
-                nodata_list.append(int(_nodata) if isint(_nodata) else float(_nodata))
-        else:
-            nodata_list = list(nodata_vals)
+        ds = gdal.Open(fname)
+        band = ds.GetRasterBand(1)
+        _nodata = band.GetNoDataValue()
+        ds = None
+        if _nodata is not None:
+            band_nodata = int(_nodata) if isint(_nodata) else float(_nodata)
+            if band_nodata not in source_nodata_list:
+                source_nodata_list.append(band_nodata)
+            if band_nodata not in nodata_list:
+                nodata_list.append(band_nodata)
 
         assert _exists(fname)
 
@@ -770,6 +786,19 @@ class SoilBurnSeverityMap(LandcoverMap):
             color_to_severity_map=color_map,
             summary=summary,
         )
+        ds = gdal.Open(fname)
+        band = ds.GetRasterBand(1)
+        raster_ct = band.GetRasterColorTable()
+        source_color_table_count = raster_ct.GetCount() if raster_ct is not None else 0
+        if raster_ct is not None:
+            for index in range(raster_ct.GetCount()):
+                entry = raster_ct.GetColorEntry(index)
+                if entry is not None and tuple(int(v) for v in entry[:3]) in _SBS_MASKED_COLORS:
+                    if index not in nodata_list:
+                        nodata_list.append(index)
+                    if index not in source_nodata_list:
+                        source_nodata_list.append(index)
+        ds = None
         if ignore_ct:
             ct = None
 
@@ -809,6 +838,8 @@ class SoilBurnSeverityMap(LandcoverMap):
 
                 if max_val not in derived_breaks and not is256 and (max_val - 1) not in classes:
                     nodata_list.append(max_val)
+                    if max_val not in source_nodata_list:
+                        source_nodata_list.append(max_val)
                     sorted_classes.remove(max_val)
 
         else:
@@ -821,8 +852,11 @@ class SoilBurnSeverityMap(LandcoverMap):
         self.color_map: Optional[ColorLookup] = explicit_color_map
         self.breaks: Optional[Sequence[int | float]] = derived_breaks
         self._data: Optional[NDArray[np.uint8]] = None
+        self._source_valid_mask: Optional[NDArray[np.bool_]] = None
         self.fname = fname
         self.nodata_vals = nodata_list
+        self.source_nodata_vals = source_nodata_list
+        self.source_color_table_count = source_color_table_count
         self._nodata_vals: Optional[list[int | float]] = None
 
     @property
@@ -916,8 +950,9 @@ class SoilBurnSeverityMap(LandcoverMap):
             self._data = rust_data
             return rust_data
 
-        data, _transform, _proj = read_raster(fname, dtype=np.uint8)
-        n, m = data.shape
+        raw, _transform, _proj = read_raster(fname, dtype=np.float64)
+        data = np.empty(raw.shape, dtype=np.uint8)
+        n, m = raw.shape
 
         if ct is None:
             for brk in breaks:
@@ -926,16 +961,27 @@ class SoilBurnSeverityMap(LandcoverMap):
             assert breaks is not None, breaks
             for i in range(n):
                 for j in range(m):
-                    data[i, j] = classify(data[i, j], breaks, nodata_vals, offset=130)
+                    data[i, j] = classify(raw[i, j], breaks, nodata_vals, offset=130)
         else:
             for i in range(n):
                 for j in range(m):
                     data[i, j] = ct_classify(
-                        data[i, j], ct, offset=130, nodata_vals=nodata_vals
+                        raw[i, j], ct, offset=130, nodata_vals=nodata_vals
                     )
 
         self._data = data
         return data
+
+    @property
+    def source_valid_mask(self) -> NDArray[np.bool_]:
+        """Return cells that are eligible for SBS coverage summaries."""
+        if self._source_valid_mask is None:
+            raw, _transform, _proj = read_raster(self.fname, dtype=np.float64)
+            mask = np.ones(raw.shape, dtype=np.bool_)
+            for nodata_value in self.source_nodata_vals:
+                mask &= raw != nodata_value
+            self._source_valid_mask = mask
+        return self._source_valid_mask
 
     def export_wgs_map(self, fn: str) -> list[list[float]]:
         """Reproject the SBS raster to WGS84 for web display.
@@ -1055,31 +1101,54 @@ class SoilBurnSeverityMap(LandcoverMap):
 
             _map = {
                 "255": "0 0 0 0",
-                "130": "0 115 74 255",
-                "131": "77 230 0 255",
-                "132": "255 255 0 255",
-                "133": "255 0 0 255",
+                "130": "0 128 128 255",
+                "131": "82 204 204 255",
+                "132": "255 232 32 255",
+                "133": "168 0 0 255",
             }
 
             with open(color_tbl_path, 'w') as fp:
                 for v, cnt in self.counts:
+                    if v in self.source_nodata_vals:
+                        continue
                     k = classify(v, breaks, nodata_vals, offset=130)
                     fp.write('{} {}\n'.format(v, _map[str(k)]))
                 fp.write("nv 0 0 0 0\n")
         else:
             _map = {
                 "nv": "0 0 0 0",
-                "unburned": "0 115 74 255",
-                "low": "77 230 0 255",
-                "mod": "255 255 0 255",
-                "high": "255 0 0 255",
+                "unburned": "0 128 128 255",
+                "low": "82 204 204 255",
+                "mod": "255 232 32 255",
+                "high": "168 0 0 255",
             }
+
+            unassigned = " ".join(str(value) for value in SBS_UNASSIGNED_RGBA)
 
             d = {}
             for burn_class in ct:
                 color = _map[burn_class]
                 for px in ct[burn_class]:
                     d[int(px)] = color
+            integer_nodata_values = {
+                int(px)
+                for px in self.source_nodata_vals
+                if isint(px)
+            }
+            for value in integer_nodata_values:
+                d.pop(value, None)
+
+            source_values = {
+                int(value)
+                for value, _count in self.counts
+                if isint(value)
+            }
+            for value in range(self.source_color_table_count):
+                if value not in integer_nodata_values:
+                    d.setdefault(value, unassigned)
+            for value in source_values:
+                if value not in integer_nodata_values:
+                    d.setdefault(value, unassigned)
 
             with open(color_tbl_path, 'w') as fp:
                 for v, color in sorted(d.items()):
@@ -1104,7 +1173,7 @@ class SoilBurnSeverityMap(LandcoverMap):
         if _exists(disturbed_rgb):
             os.remove(disturbed_rgb)
 
-        cmd = ['gdaldem', 'color-relief', '-of', 'VRT', '-alpha',
+        cmd = ['gdaldem', 'color-relief', '-of', 'VRT', '-alpha', '-exact_color_entry',
                wgs_fn, color_tbl_path, disturbed_rgb]
         p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
         p.wait()
@@ -1135,7 +1204,9 @@ class SoilBurnSeverityMap(LandcoverMap):
             cellsize: Optional output cell size, inferred from the source when
                 omitted.
             export_palette: Palette to apply to classes ``0..3``. Supported
-                values are ``"shifted"`` (default) and ``"legacy"``.
+                values are ``"shifted"`` (default) and ``"legacy"``. The
+                legacy/non-shifted mode uses the current USGS Section 508
+                palette.
         """
         if cellsize is None:
             transform = self.transform
@@ -1146,7 +1217,7 @@ class SoilBurnSeverityMap(LandcoverMap):
 
         ct = self.ct
 
-        if _export_sbs_4class_rust(
+        if not self.source_nodata_vals and _export_sbs_4class_rust(
             fname,
             fn,
             breaks=self.breaks,
@@ -1157,18 +1228,20 @@ class SoilBurnSeverityMap(LandcoverMap):
             _apply_sbs_4class_export_palette(fn, export_palette)
             return
 
-        _data, transform, proj = read_raster(fname, dtype=np.uint8)
+        _data, transform, proj = read_raster(fname, dtype=np.float64)
         data = np.ones(_data.shape) * 255
         n, m = _data.shape
 
         if ct is None:
             for i in range(n):
                 for j in range(m):
-                    data[i, j] = classify(_data[i, j], self.breaks, self.nodata_vals)
+                    if _data[i, j] not in self.source_nodata_vals:
+                        data[i, j] = classify(_data[i, j], self.breaks, self.nodata_vals)
         else:
             for i in range(n):
                 for j in range(m):
-                    data[i, j] = ct_classify(_data[i, j], ct, nodata_vals=self.nodata_vals)
+                    if _data[i, j] not in self.source_nodata_vals:
+                        data[i, j] = ct_classify(_data[i, j], ct, nodata_vals=self.nodata_vals)
 
         src_ds = gdal.Open(fname)
         wkt = src_ds.GetProjection()

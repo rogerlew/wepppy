@@ -3,6 +3,7 @@ import os
 import pickle
 
 import pytest
+from itsdangerous import Signer
 
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
@@ -102,6 +103,113 @@ class _DummyRedisSessionPayloadClient:
 
     def close(self) -> None:
         self.closed = True
+
+    def exists(self, key: str) -> int:
+        self.seen_keys.append(key)
+        return 0
+
+
+class _MigrationRedisClient:
+    def __init__(self, values: dict[str, bytes]) -> None:
+        self.values = values
+        self.closed = False
+
+    def get(self, key: str) -> bytes | None:
+        return self.values.get(key)
+
+    def exists(self, key: str) -> int:
+        return int(key in self.values)
+
+    def close(self) -> None:
+        self.closed = True
+
+
+def _raw_cookie_request(raw_cookie: str):
+    scope = {
+        "type": "http",
+        "method": "POST",
+        "scheme": "https",
+        "path": "/api/runs/run-1/cfg/session-token",
+        "raw_path": b"/api/runs/run-1/cfg/session-token",
+        "query_string": b"",
+        "headers": [(b"cookie", raw_cookie.encode("latin-1"))],
+        "server": ("wepp.cloud", 443),
+        "client": ("127.0.0.1", 12345),
+    }
+    return session_routes.Request(scope)
+
+
+def _signed_session_cookie(secret: str, sid: str) -> str:
+    signer = Signer(secret, salt="flask-session", key_derivation="hmac")
+    return signer.sign(sid.encode()).decode()
+
+
+def test_migration_cookie_reader_skips_invalid_collision_and_preserves_payload(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    secret = "migration-secret"
+    payload = {"_user_id": "42", "csrf_token": "token"}
+    redis_client = _MigrationRedisClient({"session:good": pickle.dumps(payload)})
+    monkeypatch.setattr(session_routes.redis, "Redis", lambda **kwargs: redis_client)
+    monkeypatch.setattr(session_routes, "_secret_key", lambda: secret)
+    monkeypatch.setenv("SESSION_COOKIE_NAME", "__Host-weppcloud_session")
+    monkeypatch.setenv("SESSION_COOKIE_LEGACY_NAME", "session")
+    monkeypatch.setenv("SESSION_COOKIE_MIGRATION_ENABLED", "true")
+    request = _raw_cookie_request(
+        f"session=unrelated; session={_signed_session_cookie(secret, 'good')}"
+    )
+
+    sid, selected_payload = session_routes._resolve_session_from_cookie(request)
+
+    assert sid == "good"
+    assert selected_payload == payload
+    assert redis_client.closed is True
+
+
+def test_migration_cookie_reader_primary_presence_blocks_legacy_fallback(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    secret = "migration-secret"
+    redis_client = _MigrationRedisClient(
+        {"session:legacy": pickle.dumps({"_user_id": "42"})}
+    )
+    monkeypatch.setattr(session_routes.redis, "Redis", lambda **kwargs: redis_client)
+    monkeypatch.setattr(session_routes, "_secret_key", lambda: secret)
+    monkeypatch.setenv("SESSION_COOKIE_NAME", "__Host-weppcloud_session")
+    monkeypatch.setenv("SESSION_COOKIE_LEGACY_NAME", "session")
+    monkeypatch.setenv("SESSION_COOKIE_MIGRATION_ENABLED", "true")
+    request = _raw_cookie_request(
+        "__Host-weppcloud_session=invalid; "
+        f"session={_signed_session_cookie(secret, 'legacy')}"
+    )
+
+    with pytest.raises(session_routes.AuthError) as exc_info:
+        session_routes._resolve_session_from_cookie(request)
+
+    assert exc_info.value.status_code == 401
+
+
+def test_migration_cookie_reader_uses_separate_primary_read_name(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    secret = "migration-secret"
+    payload = {"_user_id": "42", "csrf_token": "token"}
+    redis_client = _MigrationRedisClient({"session:owned": pickle.dumps(payload)})
+    monkeypatch.setattr(session_routes.redis, "Redis", lambda **kwargs: redis_client)
+    monkeypatch.setattr(session_routes, "_secret_key", lambda: secret)
+    monkeypatch.setenv("SESSION_COOKIE_NAME", "session")
+    monkeypatch.setenv("SESSION_COOKIE_PRIMARY_NAME", "__Host-weppcloud_session")
+    monkeypatch.setenv("SESSION_COOKIE_LEGACY_NAME", "session")
+    monkeypatch.setenv("SESSION_COOKIE_MIGRATION_ENABLED", "true")
+    request = _raw_cookie_request(
+        f"__Host-weppcloud_session={_signed_session_cookie(secret, 'owned')}; "
+        "session=unrelated"
+    )
+
+    sid, selected_payload = session_routes._resolve_session_from_cookie(request)
+
+    assert sid == "owned"
+    assert selected_payload == payload
 
 
 def test_session_payload_accepts_benign_pickled_mapping(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -280,12 +388,10 @@ def test_session_token_rejects_service_token_without_run_scope(
 
 
 def test_session_token_issues_with_cookie(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(session_routes, "_resolve_session_id_from_cookie", lambda request: "sid-1")
-    monkeypatch.setattr(session_routes, "_session_exists", lambda session_id: None)
     monkeypatch.setattr(
         session_routes,
-        "_session_payload",
-        lambda session_id: {"_user_id": "42", "_roles_mask": ["User", "Root"]},
+        "_resolve_session_from_cookie",
+        lambda request: ("sid-1", {"_user_id": "42", "_roles_mask": ["User", "Root"]}),
     )
     monkeypatch.setattr(session_routes, "_session_user_authorized_for_run", lambda runid, user_id, roles: True)
     monkeypatch.setattr(session_routes, "_run_is_public", lambda runid: False)
@@ -457,12 +563,10 @@ def test_session_token_issues_with_cookie_when_session_user_id_is_fs_uniquifier(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     fs_uniquifier = "26f2d8c2055e413ba64392db32bc7c10"
-    monkeypatch.setattr(session_routes, "_resolve_session_id_from_cookie", lambda request: "sid-1")
-    monkeypatch.setattr(session_routes, "_session_exists", lambda session_id: None)
     monkeypatch.setattr(
         session_routes,
-        "_session_payload",
-        lambda session_id: {"_user_id": fs_uniquifier, "_roles_mask": ["User"]},
+        "_resolve_session_from_cookie",
+        lambda request: ("sid-1", {"_user_id": fs_uniquifier, "_roles_mask": ["User"]}),
     )
     monkeypatch.setattr(session_routes, "_resolve_user_id_from_fs_uniquifier", lambda raw: 1384)
     monkeypatch.setattr(session_routes, "_session_user_authorized_for_run", lambda runid, user_id, roles: True)
@@ -487,10 +591,10 @@ def test_session_token_issues_with_cookie_when_session_user_id_is_fs_uniquifier(
 def test_session_token_allows_public_run_without_cookie(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    def missing_cookie(_: object) -> str:
+    def missing_cookie(_: object):
         raise session_routes.AuthError("Missing session cookie", status_code=401)
 
-    monkeypatch.setattr(session_routes, "_resolve_session_id_from_cookie", missing_cookie)
+    monkeypatch.setattr(session_routes, "_resolve_session_from_cookie", missing_cookie)
     monkeypatch.setattr(session_routes, "_run_is_public", lambda runid: True)
     monkeypatch.setattr(session_routes, "_store_session_marker", lambda runid, session_id, ttl: None)
     monkeypatch.setenv("WEPP_AUTH_JWT_SECRET", "unit-test-secret")
@@ -597,9 +701,7 @@ def test_session_user_authorized_rejects_private_batch_run_without_owners(
 def test_session_token_private_run_requires_authenticated_cookie_session(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setattr(session_routes, "_resolve_session_id_from_cookie", lambda request: "sid-1")
-    monkeypatch.setattr(session_routes, "_session_exists", lambda session_id: None)
-    monkeypatch.setattr(session_routes, "_session_payload", lambda session_id: {})
+    monkeypatch.setattr(session_routes, "_resolve_session_from_cookie", lambda request: ("sid-1", {}))
     monkeypatch.setattr(
         session_routes,
         "_session_user_authorized_for_run",
@@ -622,12 +724,10 @@ def test_session_token_private_run_requires_authenticated_cookie_session(
     assert payload["error"]["message"] == "Session not authorized for run"
 
 
-def test_session_token_stale_remember_cookie_includes_relogin_guidance(
+def test_session_token_stale_remember_cookie_avoids_destructive_recovery_guidance(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setattr(session_routes, "_resolve_session_id_from_cookie", lambda request: "sid-1")
-    monkeypatch.setattr(session_routes, "_session_exists", lambda session_id: None)
-    monkeypatch.setattr(session_routes, "_session_payload", lambda session_id: {})
+    monkeypatch.setattr(session_routes, "_resolve_session_from_cookie", lambda request: ("sid-1", {}))
     monkeypatch.setattr(
         session_routes,
         "_session_user_authorized_for_run",
@@ -647,7 +747,8 @@ def test_session_token_stale_remember_cookie_includes_relogin_guidance(
     assert response.status_code == 401
     payload = response.json()
     assert payload["error"]["code"] == "unauthorized"
-    assert "Log out and sign in again, then retry." in payload["error"]["message"]
+    assert "retry from the current page" in payload["error"]["message"]
+    assert "Log out" not in payload["error"]["message"]
 
 
 def test_session_token_cookie_path_blocks_missing_origin_and_referer(

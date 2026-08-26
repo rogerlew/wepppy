@@ -24,6 +24,89 @@
 - Redis cache mirrors are performance accelerators and MUST be treated as non-authoritative mirrors.
 - Redis decode/write failures are handled as best-effort paths; Redis read/connect failures may still surface to callers unless explicitly guarded by the caller path.
 
+## Writer Ownership and Mutation Topology
+
+### Preferred single-writer or finalizer pattern
+
+- A workflow SHOULD designate one writer for each NoDb file during a concurrent
+  orchestration phase.
+- Parallel jobs SHOULD write disjoint per-job or per-run artifacts and record
+  live job state in RQ metadata. A dependency finalizer SHOULD read those
+  artifacts after the parallel jobs reach terminal states and perform the
+  consolidated NoDb update.
+- Updating different attributes or different keys in a controller dictionary
+  MUST NOT be treated as disjoint storage. A NoDb dump serializes and replaces
+  the whole controller payload, so independently hydrated writers can otherwise
+  overwrite unrelated changes.
+- Job identifiers or statuses that already have an authoritative orchestration
+  source SHOULD NOT be redundantly written to the same NoDb file by multiple
+  processes unless a compatibility contract requires the mirror.
+
+This pattern keeps expensive work outside the shared commit path and makes
+writer ownership observable. It is preferred, not mandatory: some workflows
+cannot defer every state change to one writer.
+
+### Long-running collect-then-finalize pattern
+
+A long-running workflow MAY snapshot the persisted inputs that determine its
+derived outputs, collect those outputs without holding the NoDb lock, and then
+finalize them in a short lock transaction. The finalizer MUST rehydrate the
+current durable controller while holding the lock and compare every relevant
+input in the snapshot with the refreshed state before publishing results.
+
+- If a relevant input changed, the finalizer MUST return or raise an explicit
+  conflict/superseded outcome and MUST NOT publish the collected outputs.
+- If relevant inputs are unchanged, the finalizer MUST apply an explicit
+  allowlist of collected derived fields only; it MUST preserve unrelated fields
+  from the refreshed controller.
+- The collected result MUST NOT be a serialized whole-controller mutation base,
+  and the finalizer MUST NOT perform a generic automatic object merge.
+- Collection failure MUST leave the NoDb controller unmodified; the finalizer
+  remains the sole persistence boundary for collected derived state.
+
+This pattern is a specialized form of the bounded read-modify-write
+transaction above. It does not weaken stale-write detection and does not
+authorize retrying `dump()` on a stale object.
+
+### Permitted multiple-writer pattern
+
+Multiple processes or jobs MAY mutate the same NoDb file when a single writer
+or finalizer is impractical. Each mutation MUST be implemented as a bounded,
+conflict-aware read-modify-write transaction:
+
+1. Perform expensive model execution, raster processing, remote access, and
+   other preparatory work without holding the NoDb lock.
+2. Acquire the distributed lock before establishing the persisted state that
+   will be used as the mutation base.
+3. Refresh or rehydrate the controller from the durable NoDb file while the
+   lock is held, then apply only the intended mutation while preserving all
+   unrelated fields from that refreshed state.
+4. Keep the mutation idempotent, or give it a stable operation identity, so the
+   entire transaction can be safely reapplied.
+5. Persist atomically and release the lock promptly.
+
+Multi-writer paths MUST also satisfy these failure rules:
+
+- `NoDbAlreadyLockedError` MAY trigger bounded retry with backoff.
+- `NoDbStaleWriteError` MUST discard the stale mutation base, reacquire the
+  lock, refresh durable state, and reapply the operation from the beginning.
+  Retrying `dump()` on the same stale object is prohibited.
+- A mutation that cannot preserve unrelated concurrent changes or cannot be
+  reapplied safely MUST fail explicitly instead of guessing at a merge.
+- Cache invalidation, atomic replace, and stale-write detection are safeguards;
+  none of them substitutes for explicit writer ownership and merge semantics.
+- Regression coverage for a multi-writer path MUST exercise representative
+  interleavings and prove that unrelated updates are not lost.
+
+### Decision rationale
+
+Single-writer aggregation is the default because it removes whole-object merge
+contention from parallel execution. An absolute multi-writer prohibition is
+rejected because some workflows require durable cross-process updates before a
+finalizer can run. Uncoordinated or best-effort multi-writer dumps are also
+rejected because locking the final dump does not repair a mutation based on an
+object hydrated before another writer committed.
+
 ## Distributed Lock Contract
 ### Keying and ownership
 - Lock key format MUST be `nodb-lock:<runid>:<relpath>`.

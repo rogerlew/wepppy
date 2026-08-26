@@ -167,4 +167,32 @@ describe("ERMiT export inline lifecycle", () => {
             headers: expect.objectContaining({ Authorization: "Bearer replacement-token" }),
         }));
     });
+
+    test("deferred status stops polling and exposes ordinary retry", async () => {
+        const fetchMock = jest.fn((url) => {
+            if (url === TOKEN_URL) {
+                return Promise.resolve(makeResponse({ token: "session-token" }));
+            }
+            if (url === SUBMIT_URL) {
+                return Promise.resolve(makeResponse({
+                    job_id: "ermit-job-1",
+                    status_url: STATUS_URL,
+                    download_url: DOWNLOAD_URL,
+                }, 202));
+            }
+            if (url === STATUS_URL) {
+                return Promise.resolve(makeResponse({ status: "deferred" }));
+            }
+            throw new Error("Unexpected fetch URL: " + url);
+        });
+        global.fetch = fetchMock;
+
+        window.eval(scriptSource);
+        await flushPromises();
+
+        expect(document.getElementById("ermitExportStatusChip").dataset.state).toBe("deferred");
+        expect(document.getElementById("ermitExportErrorPanel").hidden).toBe(false);
+        expect(document.getElementById("ermitExportRetry").disabled).toBe(false);
+        expect(fetchMock.mock.calls.filter(([url]) => url === STATUS_URL)).toHaveLength(1);
+    });
 });

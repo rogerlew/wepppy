@@ -84,6 +84,29 @@ Use existing RQ engine endpoints instead of custom status routes:
 - `/rq-engine/api/jobstatus/{job_id}`
 - `/rq-engine/api/jobinfo/{job_id}` (if richer metadata is needed)
 
+`jobstatus` is open by default and is governed by `RQ_ENGINE_POLL_AUTH_MODE`:
+`open` accepts anonymous polling, `token_optional` accepts anonymous polling
+but validates a supplied bearer token, and `required` requires a bearer token
+with `rq:status`. These modes and the existing polling rate limit are unchanged.
+
+Successful `jobstatus` responses may contain an optional advisory `queue`
+object. It reports the one-based current Redis-list rank of the earliest queued
+member in the requested registered job tree. A Culvert root that has already
+started or finished may therefore report a queued `jobs:*` per-culvert child or
+the dependent finalizer in `batch`; it does not have to report the root ID.
+The object contains `rank`, `jobs_ahead`, `name`, `position_job_id`, the exact
+`basis` value `next_queued_job_in_tree`, and UTC `observed_at`. Treat it as a
+current advisory snapshot, not an ETA or promise. It is optional and may be
+absent for terminal/started-only/deferred-only/scheduled-only trees, mixed or
+missing queue origins, or normal status/Redis races. Never infer failure or job
+loss from its absence, and continue using `status` as the lifecycle authority.
+
+The long-lived Culvert service JWT is the credential for submission, retry, and
+authenticated status polling; it includes `rq:status`. The short-lived
+returned `browse_token` is a separate batch-scoped token for artifact
+browse/download only. It is not a polling credential and is not given
+`rq:status`.
+
 ### Artifacts access (existing)
 Use the browse service for listing/downloading artifacts instead of a culvert-specific endpoint.
 
@@ -106,15 +129,18 @@ This is the concrete request-to-run flow in the current codebase (paths shown fo
 1. **API ingest + enqueue:** `wepppy/microservices/rq_engine/culvert_routes.py::culverts_wepp_batch`
    - validates payload, extracts ZIP, writes `batch_metadata.json`
    - enqueues RQ job `run_culvert_batch_rq(culvert_batch_uuid)`
+   - returns the parent RQ job ID without creating or mutating `culverts_runner.nodb`
 2. **Batch topo + fan-out:** `wepppy/rq/culvert_rq.py::run_culvert_batch_rq`
+   - creates/loads `CulvertsRunner` and persists the parent RQ job ID
    - generates `flovec.tif` + `netful.tif`
    - prunes short streams → builds Strahler order → prunes order (binary output on final pass)
    - regenerates `chnjnt.tif` and generates `chnjnt.streams.tif` for fallback streams
    - orders `run_ids` by descending watershed area (LPT)
    - enqueues per-run jobs `run_culvert_run_rq` with 1s delay between submissions (reduces VRT file contention)
 3. **Per-run setup:** `wepppy/rq/culvert_rq.py::run_culvert_run_rq`
-   - ensures `CulvertsRunner` exists and has `culvert_batch_uuid`
+   - requires the parent-initialized `CulvertsRunner` and matching `culvert_batch_uuid`
    - calls `CulvertsRunner.create_run_if_missing` to create/sync run dirs and symlinks
+   - writes results only to the run-local `run_metadata.json`; it does not mutate shared `_runs`
 4. **Stream selection per run:** `wepppy/nodb/culverts_runner.py::CulvertsRunner.create_run_if_missing`
    - rasterizes the watershed polygon to `dem/target_watershed.tif`
    - checks for stream pixels inside the watershed boundary
@@ -131,6 +157,14 @@ This is the concrete request-to-run flow in the current codebase (paths shown fo
 7. **Outlet + modeling:** `wepppy/rq/culvert_rq.py::_process_culvert_run`
    - `Watershed.find_outlet()` (uses `dem/target_watershed.tif` if already built)
    - subcatchments → abstraction → landuse/soils/climate → WEPP
+
+### Shared-state writer ownership
+
+- The rq-engine submit route owns upload staging, enqueue, and the immediate API response. RQ metadata and the response are the live receipt before the worker starts; the route does not write NoDb state after enqueue.
+- The parent worker is the only writer of its RQ receipt and planned child `job_id` records. Its initial shared-state transaction uses bounded lock retry and refreshes `CulvertsRunner` after `NoDbStaleWriteError` before retrying.
+- Parallel child workers own distinct `runs/<Point_ID>/` directories. They never create the shared runner, lock it, or mutate `_runs`; success and failure details are durable in each `run_metadata.json`.
+- The finalizer scans the run directories, merges `run_metadata.json` into `_runs`, and persists the shared summary in one locked transaction. RQ remains the live source for job status.
+- The NoDb generation guard remains mandatory. A stale write is retried only after rehydrating current state; it is never accepted as success.
 
 ## DEM symlink manager
 The `Ron` class gains a new method to handle preexisting DEMs without fetching or copying:
@@ -322,7 +356,7 @@ For each culvert (identified by `Point_ID`):
 - Generate consolidated artifacts at batch level.
 - Write `run_metadata.json` in each run with success/failure status.
 - Skeletonize per-run directories to the agreed allowlist.
-- Write `runs_manifest.md`, update `culverts_runner.nodb` with run/job metadata + summary (including status/error merged from `run_metadata.json`), and emit `weppcloud_run_skeletons.zip`.
+- Write `runs_manifest.md`, update `culverts_runner.nodb` with parent-planned job IDs plus finalizer-merged status/error and summary, and emit `weppcloud_run_skeletons.zip`.
 - Compute validation metrics (culvert/outlet UTM coords, distance, target watershed area, bounds area) and store them in `culverts_runner.nodb` + `runs_manifest.md`.
 
 ## Output artifacts (current)

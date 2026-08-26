@@ -1,0 +1,61 @@
+{
+  "evidence_root": "/home/workdir/peakflow-topanga-census-evidence",
+  "executable": {
+    "path": "/home/workdir/wepp-forest_260430_baseline/src/wepp_hill",
+    "sha256": "2ec15778df957f909da383df9e3e0c9b516688d367c11f0109c6012387c0731f"
+  },
+  "hillslope_discovery": {
+    "file_prefix": "p",
+    "run_dir": "runs",
+    "run_suffix": ".run"
+  },
+  "mutation_families": [
+    {
+      "directions": [
+        "minus",
+        "plus"
+      ],
+      "minus": 0.99,
+      "name": "ksat",
+      "plus": 1.01
+    },
+    {
+      "directions": [
+        "minus",
+        "plus"
+      ],
+      "minus": -0.01,
+      "name": "cover",
+      "plus": 0.01
+    }
+  ],
+  "population_exception": null,
+  "projections": {
+    "method": "Phase 2A retained mutation bytes and measured sequential hillslope runtime scaled per eligible trial",
+    "retained_bytes_per_eligible_trial": 14788557.125,
+    "runtime_s_per_eligible_trial": 4.161298562125011
+  },
+  "provenance": {
+    "observer_build_id": "wepp-ea25ad79-gate21-observer",
+    "source_commit": "ea25ad79ef7dab20206bca095b2958786f5ae317"
+  },
+  "scenarios": [
+    {
+      "authority": "/wc1/runs/ha/hand-to-mouth-drought/wepp",
+      "input_tree_sha256": "b0968d699147ef982888923985fcfd9e32330c576e5d9fbe61a0ed461d65a155",
+      "name": "burned"
+    },
+    {
+      "authority": "/wc1/runs/ha/hand-to-mouth-drought/_pups/omni/scenarios/undisturbed/wepp",
+      "input_tree_sha256": "58944cc4f378d473fe18d87101e579976a9cbd5a549cbed71f7372e033740b45",
+      "name": "undisturbed"
+    }
+  ],
+  "schema_version": "1.0.0",
+  "screening": {
+    "peak_floor_m_s": 1e-07,
+    "runoff_floor_m": 1e-05,
+    "surplus_rate_floor_m_s": 1e-08
+  },
+  "site": "topanga"
+}

@@ -30,6 +30,11 @@
 - [x] Implement and validate the transaction on the `/wc1` NFSv4.2 mount
   (`3 passed`; no temporary workspace residue).
 - [ ] Repeat final correctness, QA, and security gates.
+- [x] Capture access-log sidecar fork failure
+  `8dda9f7a-310f-4a16-8bae-501a2d0106d6` and amend the collection contract.
+- [x] Add an exact dot-sidecar regression.
+- [ ] Complete dual amendment review, standalone checkpoint, full validation,
+  and final disposition.
 
 ## Decisions
 
@@ -44,6 +49,9 @@
   are intentionally excluded; retain regular materialized files.
 - **2026-08-02 20:45 UTC** – Retain only the canonical collection metadata file
   `build_report.ndjson`; reject all other non-directory collection entries.
+- **2026-08-06 07:03 UTC** – Skip dot-prefixed collection entries during link
+  normalization regardless of type; preserve historical copy/archive behavior
+  and treat access-log privacy as a separate surface.
 
 ## Validation
 
@@ -56,7 +64,8 @@
 - [x] Live rq-engine fork/archive smoke: fork completed in `14.8065s` with 63
   valid target-relative Omni links; 282 MB archive completed in `103.636748s`.
 - [x] Historical pre-remediation full suite: `5783 passed, 58 skipped`.
-- [ ] Current post-remediation `wctl run-pytest tests --maxfail=1`.
+- [x] Current post-remediation full suite: `5844 passed, 61 skipped`.
+- [x] Access-log amendment focused suite: `65 passed`.
 - [x] Changed broad-exception enforcement, docs lint, and `git diff --check`.
 - [x] Missing-ancestor, relative-target, and multi-mode destination evidence in
   focused regression fixtures.
@@ -70,11 +79,21 @@
 - **2026-08-02 16:51 and 17:09 UTC** – Two archives failed on the inherited
   dangling `prescribed_fire/climate` link.
 - **2026-08-02 18:28 UTC** – Operator selected rsync-preserving fork hardening.
+- **2026-08-06 06:03 UTC** – Fork job
+  `8dda9f7a-310f-4a16-8bae-501a2d0106d6` failed on regular legacy sidecar
+  `scenarios/.mulch_15_sbs_map` after copying destination
+  `storied-centralism`.
+- **2026-08-06 PDT** – Operator directed the normalizer to skip these rare
+  legacy sidecars.
 
 Open risks are parent-swap/link escape, partial normalization, legacy `.nodir`
 compatibility, and wall-time regression. Codex owns automated containment and
 rollback evidence; the operator owns later Forest/production latency evidence.
 No temporary callus is registered.
+
+Access-log amendment baseline: one recurrence. Health is zero recurrence for
+30 days after deployment. The guardrail is continued rejection of ordinary
+unexpected collection entries.
 
 ### Reopen Note — 2026-08-02
 

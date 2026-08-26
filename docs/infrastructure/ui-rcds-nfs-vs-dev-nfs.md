@@ -62,6 +62,29 @@ delete_benchmark_results
 - root=/tmp/delete-test files=3100 dirs=30 size_mb=12.11 create_s=0.461 delete_s=0.082 rewrite_s=4.847 sync_s=0.003
 ```
 
+### Home-lab `hpc-nfs` local ZFS backend
+
+The canonical benchmark was run directly on the home-lab NFS server (`hpc`,
+also referred to operationally as `hpc-nfs`) on 2026-08-21 UTC. The ZFS target
+was `/tank/kubernetes/benchmarks/delete-test-20260821T0233Z`; `/tmp` provided
+the same-host comparison. All flush options were enabled.
+
+```text
+delete_benchmark_results
+- root=/tank/kubernetes/benchmarks/delete-test-20260821T0233Z files=3100 dirs=30 size_mb=12.11 create_s=0.372 delete_s=0.075 rewrite_s=0.381 sync_s=0.013
+- root=/tmp/delete-test-20260821T0233Z files=3100 dirs=30 size_mb=12.11 create_s=0.230 delete_s=0.018 rewrite_s=0.238 sync_s=0.004
+```
+
+The server was effectively idle during the run. Its active NFS-facing
+interface was `eno1` at `10.20.0.40/24`, negotiated at `1000 Mb/s`; the two
+other server interfaces (`ens5f0` and `ens5f1`) were down with no carrier. Both
+benchmark trees were removed successfully after the run.
+
+This is a local ZFS-backend floor, not an NFS client benchmark: because the
+script ran on the server, these timings exclude the NFS protocol, client mount
+behavior, and 1 GbE network path. A cluster-client run against an exported
+path is required to characterize the end-to-end Kubernetes NFS experience.
+
 ## Comparison (baseline production / forest.local dev)
 
 Ratios (production time ÷ forest.local time):
@@ -90,9 +113,31 @@ Ratios (production time ÷ wepp2 time):
 
 ## Notes / Takeaways
 
-- This benchmark is dominated by metadata ops and stable-write latency (especially with `--fsync-files` / `--fsync-dirs`), not bandwidth; 10 GbE does not guarantee good small-file performance.
+- This benchmark is dominated by metadata ops and stable-write latency (especially with `--fsync-files` / `--fsync-dirs`), not bandwidth; a fast link does not guarantee good small-file performance.
 - Treat `sync_s` as a “system dirtiness / background IO” indicator, not a per-path metric.
 - For a heavier profile, bump `--files-per-dir` and/or `--dir-depth` (expect NFS to degrade faster than local FS).
+
+## Current RCDS WEPP1-to-NAS link (2026-08-20)
+
+The RCDS physical path between WEPP1 and the production NAS must now be treated
+as **1 GbE**, not 10 GbE. RCDS replaced the former 10 GbE switch in the recent
+past and the replacement left this NFS path at 1 GbE. Any earlier description
+of WEPP1 having a 10 GbE connection to the NAS is historical and no longer
+describes the effective physical topology.
+
+Checks from `wepp1` confirmed that:
+
+- `/geodata` is mounted from `nas.rocket.net:/wepp` using NFSv4.2;
+- `nas.rocket.net` resolved to `192.168.100.102` during the check; and
+- traffic to that address routes through `ens192` from `192.168.100.237`.
+
+The WEPP1 guest reports `ens192` as `10000 Mb/s`, but WEPP1 is a VMware virtual
+machine and that value is the virtual NIC link rate. It does not reveal the
+physical switch-port rate or prove 10 GbE end-to-end connectivity to the NAS.
+The guest observation is therefore compatible with, and must not override,
+the current 1 GbE physical-path inventory. A switch-side port inspection or a
+controlled end-to-end throughput test would be needed to independently measure
+the physical bottleneck from inside RCDS infrastructure.
 
 ## Production Incident: Stale NFS Handle During WEPP Watershed Close (2026-04-27)
 
@@ -357,6 +402,48 @@ event to one otherwise-idle host; it does not make an uninterruptible NFS wait
 cancellable or justify a second worker. Use Redis queue inspection plus
 host-local process state, and fence wepp3 during recovery when the old process
 cannot be proven dead.
+
+## Production Incident: Stale NFS Handle During WEPP Watershed Close (2026-08-08)
+
+Job `081511ff-e854-4d60-ad19-fdef4f89971a` for run
+`mdobre-webbed-glue` failed on the production `wepp2` default worker while
+closing a WEPP watershed output stream:
+
+- RQ worker: `c7021dd8bf844dceb3e282b417875599`
+- Worker container: `6c2f64355f8b...` on `wepp2`
+  (`192.168.100.217`)
+- Started: `2026-08-08T02:52:12.409143Z`
+- Ended: `2026-08-08T03:08:56.959061Z`
+- Elapsed: `1004.549918` seconds
+- Run path: `/geodata/wc1/runs/md/mdobre-webbed-glue`
+  (container view: `/wc1/runs/md/mdobre-webbed-glue`)
+- Failure point: `wepp_runner/wepp_runner.py`,
+  `_close_stream_with_diagnostics()`, at `stream.close()`
+- Error: `OSError: [Errno 116] Stale file handle`
+
+The worker's run path was backed by the production NFSv4.2 mount:
+
+```text
+nas.rocket.net:/wepp on /geodata type nfs4
+rw,noatime,vers=4.2,hard,timeo=600,retrans=2,rsize=65536,wsize=65536,
+acregmax=30,acdirmin=5,clientaddr=192.168.100.217,addr=192.168.100.101
+```
+
+Redis `exc_info`, `job.meta["exc_string"]`, and the run-scoped
+`exceptions.log` contained the same stale-handle traceback. The run directory
+was accessible from both `wepp1` and `wepp2` during follow-up, and narrowly
+filtered kernel logs retained no matching NFS outage message for the failure
+window. The evidence therefore attributes the job failure to an NFS stale-file
+handle at the `wepp2` client/NAS filesystem boundary, but does not establish a
+NAS-wide outage or distinguish among a transient remount, NFS state-recovery
+event, export change, or server-side file replacement.
+
+Operational takeaway: classify `Errno 116` during WEPP stream close as an
+infrastructure/NFS failure rather than a model-computation failure unless
+separate model evidence exists. Because close/flush did not complete reliably,
+do not assume outputs are complete merely because files remain present. Verify
+required artifacts before retrying or consuming results. A currently readable
+run path shows recovery, not that the failed write was durable.
 
 ## Small-File Read/Write/Delete + Metadata Microbench (2026-02-10)
 

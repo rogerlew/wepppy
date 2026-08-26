@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 import os
 import ast
 import csv
@@ -282,6 +282,8 @@ class Treatments(NoDbBase):
 
         with landuse.locked():
             domlc_d = dict(landuse.domlc_d or {})
+            domlc_mofe_d = getattr(landuse, 'domlc_mofe_d', None)
+            has_mofe_assignments = isinstance(domlc_mofe_d, dict) and bool(domlc_mofe_d)
             for topaz_id, treatment_dom in treatments_domlc_d.items():
                 treatment = mapping[treatment_dom]['DisturbedClass']  # 'mulch_30', 'mulch_60', 'thinning_40_90', 'prescribed_fire'
                 dom = landuse.domlc_d[topaz_id]  # -> key from map
@@ -308,6 +310,48 @@ class Treatments(NoDbBase):
                 )
                 if new_dom is not None:
                     domlc_d[str(topaz_id)] = str(new_dom)
+
+                if not has_mofe_assignments:
+                    continue
+
+                topaz_mofe_d = domlc_mofe_d.get(str(topaz_id))
+                if not isinstance(topaz_mofe_d, dict):
+                    topaz_mofe_d = domlc_mofe_d.get(topaz_id)
+                if not isinstance(topaz_mofe_d, dict):
+                    continue
+
+                for mofe_id, mofe_dom in topaz_mofe_d.items():
+                    mofe_dom_key = str(mofe_dom)
+                    mofe_summary = landuse.managements.get(mofe_dom_key)
+                    if mofe_summary is None:
+                        raise KeyError(mofe_dom_key)
+                    mofe_disturbed_class = getattr(mofe_summary, 'disturbed_class', None)
+                    if 'mulch' in treatment:
+                        mofe_new_dom = self._apply_mulch(
+                            landuse,
+                            disturbed,
+                            str(topaz_id),
+                            treatment,
+                            mofe_summary,
+                            mofe_disturbed_class,
+                            assignments=topaz_mofe_d,
+                            assignment_id=mofe_id,
+                        )
+                    else:
+                        mofe_new_dom = self._resolve_mofe_treatment_dom(
+                            disturbed,
+                            treatment,
+                            mofe_disturbed_class,
+                        )
+                    if mofe_new_dom is None:
+                        continue
+                    mofe_new_dom = str(mofe_new_dom)
+                    topaz_mofe_d[mofe_id] = mofe_new_dom
+                    if mofe_new_dom not in landuse.managements:
+                        landuse.managements[mofe_new_dom] = get_management_summary(
+                            mofe_new_dom,
+                            landuse.mapping,
+                        )
             landuse.domlc_d = domlc_d
             missing_dom_keys = sorted(
                 {str(dom) for dom in domlc_d.values() if str(dom) not in landuse.managements}
@@ -357,13 +401,49 @@ class Treatments(NoDbBase):
                     new_man_summary.key = dom_key
                 landuse.managements[dom_key] = new_man_summary
 
+        if has_mofe_assignments:
+            landuse = Landuse.getInstance(self.wd)
+            landuse._build_multiple_ofe(domlc_mofe_override=landuse.domlc_mofe_d)
+            landuse = Landuse.getInstance(self.wd)
+            landuse.build_managements()
+
         land_soil_replacements_d = disturbed.land_soil_replacements_d
 
         soils = Soils.getInstance(self.wd)
         landuse.dump_landuse_parquet()
+        if has_mofe_assignments:
+            disturbed.modify_mofe_soils()
+            return
         with soils.locked():
             for topaz_id, treatment_dom in treatments_domlc_d.items():
                 self._modify_soil(landuse, soils, disturbed, topaz_id)
+
+    @staticmethod
+    def _resolve_mofe_treatment_dom(
+        disturbed_instance: Disturbed,
+        treatment: str,
+        disturbed_class: Optional[str],
+    ) -> Optional[str]:
+        """Resolve a treatment key for one OFE without mutating scalar landuse."""
+        if not isinstance(disturbed_class, str):
+            return None
+
+        disturbed_key_lookup = disturbed_instance.get_disturbed_key_lookup()
+        if 'prescribed_fire' in treatment:
+            if 'forest' in disturbed_class:
+                return str(disturbed_key_lookup['forest_prescribed_fire'])
+            if 'shrub' in disturbed_class:
+                return str(disturbed_key_lookup['shrub_prescribed_fire'])
+            if 'grass' in disturbed_class:
+                return str(disturbed_key_lookup['grass_prescribed_fire'])
+            return None
+
+        if 'thinning' in treatment:
+            if disturbed_class in {'forest', 'deciduous forest', 'mixed forest'}:
+                return str(disturbed_key_lookup[treatment])
+            return None
+
+        return None
 
 
     def _apply_treatment(
@@ -441,7 +521,10 @@ class Treatments(NoDbBase):
                      topaz_id: str, 
                      treatment: str, 
                      man_summary: ManagementSummary, 
-                     disturbed_class: str) -> Optional[str]:
+                     disturbed_class: str,
+                     *,
+                     assignments: Optional[Dict[Any, Any]] = None,
+                     assignment_id: Optional[Any] = None) -> Optional[str]:
         """
         Apply the mulch treatment to the hillslope.
         """
@@ -493,9 +576,11 @@ class Treatments(NoDbBase):
             new_man_summary.inrcov = new_inrcov
             new_man_summary.rilcov = new_rilcov
 
-            base_dom = landuse_instance.domlc_d[topaz_id]
+            target_assignments = landuse_instance.domlc_d if assignments is None else assignments
+            target_id = topaz_id if assignment_id is None else assignment_id
+            base_dom = target_assignments[target_id]
             new_dom = self._mulch_management_key(base_dom, treatment)
-            landuse_instance.domlc_d[topaz_id] = new_dom
+            target_assignments[target_id] = new_dom
             self.logger.info(f'  _apply_mulch: {topaz_id} -> {new_dom}\n')
 
             if new_dom not in landuse_instance.managements:

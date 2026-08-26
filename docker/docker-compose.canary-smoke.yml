@@ -1,0 +1,109 @@
+name: weppcloud-canary-smoke
+
+services:
+  redis:
+    image: redis:8.2.1-alpine@sha256:f887e6dacdcfa8e14af2f625fdf4474ff8c37dc36ce13b9e89e6e9a901f155ad
+    restart: "no"
+    environment:
+      REDIS_PASSWORD: ${WEPPCLOUD_SMOKE_REDIS_PASSWORD:?Set an ephemeral smoke Redis password}
+    command:
+      - /bin/sh
+      - -ec
+      - exec redis-server --save "" --appendonly no --requirepass "$${REDIS_PASSWORD}"
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$${REDIS_PASSWORD}\" ping 2>/dev/null | grep -qx PONG"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+    networks:
+      - canary
+
+  weppcloud:
+    image: ${WEPPCLOUD_SMOKE_IMAGE:?Set an exact commit-tagged or digest-pinned WEPPcloud image}
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        APP_USER: roger
+        APP_GROUP: docker
+        APP_UID: "1000"
+        APP_GID: "993"
+    restart: "no"
+    init: true
+    working_dir: /workdir/wepppy
+    environment:
+      PYTHONUNBUFFERED: "1"
+      MPLCONFIGDIR: /tmp/matplotlib
+      SITE_PREFIX: /weppcloud
+      WC1_DIR: /wc1
+      GEODATA_DIR: /geodata
+      REDIS_URL: redis://redis:6379/0
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${WEPPCLOUD_SMOKE_REDIS_PASSWORD:?Set an ephemeral smoke Redis password}
+      SECRET_KEY: ${WEPPCLOUD_SMOKE_SECRET_KEY:?Set an ephemeral smoke Flask key}
+      SECURITY_PASSWORD_SALT: ${WEPPCLOUD_SMOKE_PASSWORD_SALT:?Set an ephemeral smoke password salt}
+      AGENT_JWT_SECRET: ${WEPPCLOUD_SMOKE_AGENT_JWT_SECRET:?Set an ephemeral smoke agent JWT key}
+      SQLALCHEMY_DATABASE_URI: sqlite:////tmp/weppcloud-canary-smoke.db
+      ENABLE_LOCAL_LOGIN: "false"
+      GL_DASHBOARD_BATCH_ENABLED: "false"
+    command:
+      - gunicorn
+      - --workers
+      - "1"
+      - --threads
+      - "2"
+      - --timeout
+      - "120"
+      - --bind
+      - 0.0.0.0:8000
+      - --log-level
+      - info
+      - wepppy.weppcloud.app:app
+    expose:
+      - "8000"
+    tmpfs:
+      - /wc1:uid=1000,gid=993,mode=0770
+      - /geodata:uid=1000,gid=993,mode=0550
+    secrets:
+      - source: disabled-discord-token
+        target: /workdir/weppcloud2/weppcloud2/discord_bot/.bot_token
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8000/health >/dev/null"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 30s
+    networks:
+      - canary
+
+  caddy:
+    image: caddy:2.10.2-alpine@sha256:d8c17a862962def15cde69863a3a463f25a2664942eafd7bdbf050e9c3116b83
+    restart: "no"
+    ports:
+      - 127.0.0.1:${WEPPCLOUD_SMOKE_PORT:-18080}:8080
+    volumes:
+      - ./canary-smoke/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./canary-smoke/static:/srv/weppcloud/static:ro
+    depends_on:
+      weppcloud:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:8080/health | grep -qx OK"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    networks:
+      - canary
+      - edge
+
+networks:
+  canary:
+    internal: true
+  edge:
+
+secrets:
+  disabled-discord-token:
+    file: /dev/null

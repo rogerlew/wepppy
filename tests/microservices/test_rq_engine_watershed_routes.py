@@ -1,4 +1,5 @@
 import contextlib
+from types import SimpleNamespace
 import pytest
 import numpy as np
 from sqlalchemy.exc import SQLAlchemyError
@@ -20,6 +21,12 @@ import wepppy.weppcloud.user_preferences as preferences_module
 pytestmark = pytest.mark.microservice
 
 
+class _DummySubmissionLock:
+    def acquire(self, **kwargs): return True
+    def extend(self, *args, **kwargs): return True
+    def release(self): return None
+
+
 def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(watershed_routes, "require_jwt", lambda request, required_scopes=None: {})
     monkeypatch.setattr(watershed_routes, "authorize_run_access", lambda claims, runid: None)
@@ -30,18 +37,22 @@ def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:
     )
 
 
-def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> None:
+def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> list[dict]:
+    from wepppy.rq import submission_recovery
+    captured: list[dict] = []
     class DummyJob:
         id = job_id
 
     class DummyQueue:
         def __init__(self, *args, **kwargs) -> None:
-            pass
+            self.connection = kwargs["connection"]
 
         def enqueue_call(self, *args, **kwargs):
+            captured.append({"args": kwargs.get("args"), "meta": kwargs.get("meta")})
             return DummyJob()
 
     class DummyRedis:
+        def lock(self, *args, **kwargs): return _DummySubmissionLock()
         def __enter__(self):
             return self
 
@@ -50,10 +61,13 @@ def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> 
 
     monkeypatch.setattr(watershed_routes, "Queue", DummyQueue)
     monkeypatch.setattr(watershed_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(submission_recovery, "new_rq_job_id", lambda: job_id)
+    return captured
 
 
 def _stub_prep(monkeypatch: pytest.MonkeyPatch) -> None:
     class DummyPrep:
+        def get_rq_job_id(self, key): return None
         def remove_timestamp(self, *args, **kwargs) -> None:
             return None
 
@@ -98,7 +112,7 @@ def _install_wbt_submission_harness(
 
     class DummyQueue:
         def __init__(self, *args, **kwargs) -> None:
-            pass
+            self.connection = kwargs["connection"]
 
         def enqueue_call(self, func, args, **kwargs):
             captured.append(
@@ -111,6 +125,7 @@ def _install_wbt_submission_harness(
             return DummyJob()
 
     class DummyRedis:
+        def lock(self, *args, **kwargs): return _DummySubmissionLock()
         def __enter__(self):
             return self
 
@@ -356,7 +371,7 @@ def test_fetch_dem_bounds_only_derives_center_and_zoom(monkeypatch: pytest.Monke
 
     class DummyQueue:
         def __init__(self, *args, **kwargs) -> None:
-            pass
+            self.connection = kwargs["connection"]
 
         def enqueue_call(self, func, args, **kwargs):
             enqueue["called"] = True
@@ -365,6 +380,8 @@ def test_fetch_dem_bounds_only_derives_center_and_zoom(monkeypatch: pytest.Monke
             return DummyJob()
 
     class DummyRedis:
+        def lock(self, *args, **kwargs): return _DummySubmissionLock()
+
         def __enter__(self):
             return self
 
@@ -935,7 +952,7 @@ def test_validate_float_dem_accepts_float64(monkeypatch: pytest.MonkeyPatch, tmp
 
 def test_build_subcatchments_enqueues_job_and_caps_mofe_max_ofes(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch)
-    _stub_queue(monkeypatch, job_id="job-77")
+    captured = _stub_queue(monkeypatch, job_id="job-77")
     _stub_prep(monkeypatch)
     monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: "/tmp/run")
 
@@ -975,10 +992,11 @@ def test_build_subcatchments_enqueues_job_and_caps_mofe_max_ofes(monkeypatch: py
 
     assert response.status_code == 200
     assert response.json()["job_id"] == "job-77"
-    assert len(dummy_watershed.grouped_update_calls) == 1
-    assert dummy_watershed.grouped_update_calls[0]["clip_hillslopes"] is True
-    assert dummy_watershed.grouped_update_calls[0]["mofe_max_ofes"] == 42
-    assert dummy_watershed.mofe_max_ofes == 19
+    assert dummy_watershed.grouped_update_calls == []
+    assert captured[0]["args"][1] == {
+        "clip_hillslopes": True,
+        "mofe_max_ofes": 42,
+    }
 
 
 def test_build_subcatchments_snapshots_initiating_users_boundary_preference(
@@ -1020,7 +1038,7 @@ def test_build_subcatchments_snapshots_initiating_users_boundary_preference(
 
     class DummyQueue:
         def __init__(self, *args, **kwargs) -> None:
-            pass
+            self.connection = kwargs["connection"]
 
         def enqueue_call(self, func, args, **kwargs):
             captured.append(
@@ -1033,6 +1051,8 @@ def test_build_subcatchments_snapshots_initiating_users_boundary_preference(
             return DummyJob()
 
     class DummyRedis:
+        def lock(self, *args, **kwargs): return _DummySubmissionLock()
+
         def __enter__(self):
             return self
 
@@ -1082,7 +1102,7 @@ def test_build_subcatchments_snapshots_initiating_users_boundary_preference(
     assert second_response.status_code == 200
     assert captured[0]["args"] == (
         "shared-run",
-        {},
+        {"clip_hillslopes": True},
         {
             "schema_version": 1,
             "effective_policy": "error",
@@ -1090,6 +1110,7 @@ def test_build_subcatchments_snapshots_initiating_users_boundary_preference(
         },
     )
     assert captured[0]["meta"] == {
+        "runid": "shared-run",
         watershed_routes.WBT_BOUNDARY_POLICY_SNAPSHOT_KEY: {
             "schema_version": 1,
             "runid": "shared-run",
@@ -1102,7 +1123,7 @@ def test_build_subcatchments_snapshots_initiating_users_boundary_preference(
     }
     assert captured[1]["args"] == (
         "shared-run",
-        {},
+        {"clip_hillslopes": True},
         {
             "schema_version": 1,
             "effective_policy": "warn",
@@ -1110,6 +1131,7 @@ def test_build_subcatchments_snapshots_initiating_users_boundary_preference(
         },
     )
     assert captured[1]["meta"] == {
+        "runid": "shared-run",
         watershed_routes.WBT_BOUNDARY_POLICY_SNAPSHOT_KEY: {
             "schema_version": 1,
             "runid": "shared-run",
@@ -1123,7 +1145,8 @@ def test_build_subcatchments_snapshots_initiating_users_boundary_preference(
     assert captured[0]["args"][2]["effective_policy"] == "error"
     assert watershed.wbt_boundary_touch_behavior == "error"
     assert watershed.wbt_boundary_touch_config_behavior == "warn"
-    assert watershed.persist_calls == 2
+    assert watershed.persist_calls == 0
+    assert watershed.grouped_update_calls == []
 
 
 def test_build_subcatchments_snapshots_account_session_identity(
@@ -1157,7 +1180,7 @@ def test_build_subcatchments_snapshots_account_session_identity(
     assert captured[0]["meta"][
         watershed_routes.WBT_BOUNDARY_POLICY_SNAPSHOT_KEY
     ]["actor_user_id"] == 31
-    assert watershed.persist_calls == 1
+    assert watershed.persist_calls == 0
 
 
 @pytest.mark.parametrize(
@@ -1186,7 +1209,7 @@ def test_build_subcatchments_non_account_identity_uses_project_policy(
 
     assert response.status_code == 200
     assert captured[0]["args"] == ("fallback-run", {}, None)
-    assert captured[0]["meta"] is None
+    assert captured[0]["meta"] == {"runid": "fallback-run"}
     assert watershed.persist_calls == 0
 
 
@@ -1308,14 +1331,59 @@ def test_build_subcatchments_fresh_submission_refreshes_same_users_preference(
     assert captured[0]["args"][2]["effective_policy"] == "error"
     assert captured[1]["args"][2]["effective_policy"] == "warn"
     assert watershed.wbt_boundary_touch_behavior == "warn"
-    assert watershed.persist_calls == 2
+    assert watershed.persist_calls == 0
+
+
+def test_build_subcatchments_active_conflict_does_not_mutate_run_state(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured, watershed = _install_wbt_submission_harness(
+        monkeypatch,
+        claims={"token_class": "user", "sub": "52"},
+        resolver=lambda _claims: AccountPreferenceSnapshot(
+            actor_token_class="user",
+            user_id=52,
+            preferences=UserPreferenceValues("config", "warn"),
+        ),
+    )
+    removed_timestamps: list[object] = []
+    prep = SimpleNamespace(
+        remove_timestamp=lambda task: removed_timestamps.append(task),
+    )
+    monkeypatch.setattr(watershed_routes.RedisPrep, "getInstance", lambda wd: prep)
+    enqueue_kwargs: dict[str, object] = {}
+
+    def _reject_active(*args, **kwargs):
+        enqueue_kwargs.update(kwargs)
+        raise watershed_routes.RqSubmissionConflict("active")
+
+    monkeypatch.setattr(watershed_routes, "enqueue_tracked_rq_job", _reject_active)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/fresh-run/cfg/build-subcatchments-and-abstract-watershed",
+            json={"clip_hillslopes": True},
+        )
+
+    assert response.status_code == 409
+    assert response.json()["error"]["code"] == "job_active"
+    assert captured == []
+    assert watershed.persist_calls == 0
+    assert watershed.grouped_update_calls == []
+    assert removed_timestamps == []
+    assert enqueue_kwargs["args"][1] == {"clip_hillslopes": True}
+    boundary = enqueue_kwargs["excluded_dependency_job_ids"]
+    candidate = SimpleNamespace(
+        meta={"wbt_subcatchment_admission_previous": "prior-build"}
+    )
+    assert tuple(boundary(candidate)) == ("prior-build",)
 
 
 def test_build_subcatchments_forwards_all_grouped_update_fields_with_coercion(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     _stub_auth(monkeypatch)
-    _stub_queue(monkeypatch, job_id="job-grouped-fields")
+    captured = _stub_queue(monkeypatch, job_id="job-grouped-fields")
     _stub_prep(monkeypatch)
     monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: "/tmp/run")
 
@@ -1355,8 +1423,8 @@ def test_build_subcatchments_forwards_all_grouped_update_fields_with_coercion(
 
     assert response.status_code == 200
     assert response.json()["job_id"] == "job-grouped-fields"
-    assert len(dummy_watershed.grouped_update_calls) == 1
-    grouped_updates = dummy_watershed.grouped_update_calls[0]
+    assert dummy_watershed.grouped_update_calls == []
+    grouped_updates = captured[0]["args"][1]
     assert grouped_updates["clip_hillslopes"] is True
     assert grouped_updates["walk_flowpaths"] is False
     assert grouped_updates["clip_hillslope_length"] == pytest.approx(125.5)
@@ -1369,7 +1437,7 @@ def test_build_subcatchments_forwards_all_grouped_update_fields_with_coercion(
 
 def test_build_subcatchments_caps_mofe_max_ofes_floor_to_1(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch)
-    _stub_queue(monkeypatch, job_id="job-78")
+    captured = _stub_queue(monkeypatch, job_id="job-78")
     _stub_prep(monkeypatch)
     monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: "/tmp/run")
 
@@ -1401,14 +1469,13 @@ def test_build_subcatchments_caps_mofe_max_ofes_floor_to_1(monkeypatch: pytest.M
 
     assert response.status_code == 200
     assert response.json()["job_id"] == "job-78"
-    assert len(dummy_watershed.grouped_update_calls) == 1
-    assert dummy_watershed.grouped_update_calls[0]["mofe_max_ofes"] == 0
-    assert dummy_watershed.mofe_max_ofes == 1
+    assert dummy_watershed.grouped_update_calls == []
+    assert captured[0]["args"][1]["mofe_max_ofes"] == 0
 
 
 def test_build_subcatchments_ignores_non_finite_mofe_max_ofes(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch)
-    _stub_queue(monkeypatch, job_id="job-79")
+    captured = _stub_queue(monkeypatch, job_id="job-79")
     _stub_prep(monkeypatch)
     monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: "/tmp/run")
 
@@ -1441,8 +1508,8 @@ def test_build_subcatchments_ignores_non_finite_mofe_max_ofes(monkeypatch: pytes
 
     assert response.status_code == 200
     assert response.json()["job_id"] == "job-79"
-    assert len(dummy_watershed.grouped_update_calls) == 1
-    assert "mofe_max_ofes" not in dummy_watershed.grouped_update_calls[0]
+    assert dummy_watershed.grouped_update_calls == []
+    assert "mofe_max_ofes" not in captured[0]["args"][1]
     assert dummy_watershed.mofe_max_ofes == 7
 
 
@@ -1765,12 +1832,14 @@ def test_fetch_dem_returns_400_for_minimum_channel_length_exception(
 
     class DummyQueue:
         def __init__(self, *args, **kwargs) -> None:
-            pass
+            self.connection = kwargs["connection"]
 
         def enqueue_call(self, *args, **kwargs):
             raise watershed_routes.MinimumChannelLengthTooShortError()
 
     class DummyRedis:
+        def lock(self, *args, **kwargs): return _DummySubmissionLock()
+
         def __enter__(self):
             return self
 
@@ -1873,12 +1942,14 @@ def test_build_subcatchments_returns_400_for_boundary_touches_edge_exception(
 
     class DummyQueue:
         def __init__(self, *args, **kwargs) -> None:
-            pass
+            self.connection = kwargs["connection"]
 
         def enqueue_call(self, *args, **kwargs):
             raise watershed_routes.WatershedBoundaryTouchesEdgeError()
 
     class DummyRedis:
+        def lock(self, *args, **kwargs): return _DummySubmissionLock()
+
         def __enter__(self):
             return self
 

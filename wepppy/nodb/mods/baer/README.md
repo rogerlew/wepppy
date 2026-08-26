@@ -136,7 +136,9 @@ baer.modify_burn_class(breaks=[75, 109, 187, 255], nodata_vals="255")
 - **Persistence:** `Baer` is a NoDb controller stored as `wd/baer.nodb`, with raster artifacts under `wd/baer/`. Mutations must occur inside `with baer.locked():` or via `@nodb_setter` properties to preserve locking and serialization contracts.
 - **Input contract:** `Baer.validate(fn, ...)` expects `fn` to be a *filename* inside `baer.baer_dir`, not an arbitrary absolute path.
 - **SBS classification paths:** `sbs_map.py` supports breakpoint and color-table ingest. BAER’s landuse/soil remapping currently forces numeric classification (`ignore_ct=True`) using the breakpoints captured during `Baer.validate` / `modify_burn_class`.
-- **Palettes:** `sbs_map.py` defaults to an accessibility-oriented shifted palette for 4-class exports; BAER’s `legend` and overlay rendering use the legacy palette expected by older UI surfaces.
+- **Palette:** SBS ingestion and the non-shifted legends/display use the current
+  interagency palette. Historical exact RGB values remain accepted on input;
+  the optional display-time shifted palette and default shifted export remain.
 - **Tests:** Most coverage here is for SBS classification. Run:
 
   ```bash
@@ -154,4 +156,3 @@ baer.modify_burn_class(breaks=[75, 109, 187, 255], nodata_vals="255")
 - `wepppy/nodb/mods/baer/README.sbs_map.md`
 - `docs/ui-docs/control-ui-styling/sbs_controls_behavior.md` (UI mode semantics: upload vs. uniform)
 - `tests/nodb/mods/baer/README.md` (test suite map)
-

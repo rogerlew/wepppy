@@ -22,6 +22,11 @@ from wepppy.config.redis_settings import (
 
 from wepppy.weppcloud.utils.helpers import get_wd
 from wepppy.rq.exception_logging import with_exception_logging
+from wepppy.rq.job_dependencies import (
+    failure_tolerant_depends_on as _failure_tolerant_depends_on,
+    release_deferred_job_if_ready as _release_deferred_job_if_ready,
+)
+from wepppy.rq.job_id import new_rq_job_id
 
 from wepppy.nodb.base import clear_nodb_file_cache
 from wepppy.nodb.core import Wepp
@@ -650,6 +655,9 @@ def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
             q = Queue("batch", connection=redis_conn)
 
             for task in stage1_tasks:
+                child_job_id = new_rq_job_id()
+                job.meta[f"jobs:0,scenario:{task['scenario_name']}"] = child_job_id
+                job.save()
                 child_job = q.enqueue_call(
                     func=run_omni_scenario_rq,
                     args=[runid, task['scenario_def']],
@@ -659,13 +667,15 @@ def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
                         'signature': task['signature'],
                     },
                     timeout=TIMEOUT,
+                    job_id=child_job_id,
                 )
-                job.meta[f"jobs:0,scenario:{task['scenario_name']}"] = child_job.id
                 stage1_jobs.append(child_job)
-                job.save()
 
-            depends_on_stage2 = stage1_jobs if stage1_jobs else None
+            depends_on_stage2 = stage1_jobs or None
             for task in stage2_tasks:
+                child_job_id = new_rq_job_id()
+                job.meta[f"jobs:1,scenario:{task['scenario_name']}"] = child_job_id
+                job.save()
                 child_job = q.enqueue_call(
                     func=run_omni_scenario_rq,
                     args=[runid, task['scenario_def']],
@@ -676,30 +686,32 @@ def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
                     },
                     timeout=TIMEOUT,
                     depends_on=depends_on_stage2,
+                    job_id=child_job_id,
                 )
-                job.meta[f"jobs:1,scenario:{task['scenario_name']}"] = child_job.id
                 stage2_jobs.append(child_job)
-                job.save()
 
             compile_depends: List[Job] = stage2_jobs or stage1_jobs
+            compile_job_id = new_rq_job_id()
+            job.meta['jobs:2,func:_compile_hillslope_summaries_rq'] = compile_job_id
+            job.save()
             compile_job = q.enqueue_call(
                 func=_compile_hillslope_summaries_rq,
                 args=[runid],
                 timeout=TIMEOUT,
-                depends_on=compile_depends if compile_depends else None,
+                depends_on=compile_depends,
+                job_id=compile_job_id,
             )
-            job.meta['jobs:2,func:_compile_hillslope_summaries_rq'] = compile_job.id
-            job.save()
 
-            final_depends: List[Job] = [compile_job]
+            final_job_id = new_rq_job_id()
+            job.meta['jobs:3,func:_finalize_omni_scenarios_rq'] = final_job_id
+            job.save()
             final_job = q.enqueue_call(
                 func=_finalize_omni_scenarios_rq,
                 args=[runid],
                 timeout=TIMEOUT,
-                depends_on=final_depends,
+                depends_on=compile_job,
+                job_id=final_job_id,
             )
-            job.meta['jobs:3,func:_finalize_omni_scenarios_rq'] = final_job.id
-            job.save()
 
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
         return final_job
@@ -829,27 +841,34 @@ def run_omni_contrasts_rq(runid: str) -> Optional[Job]:
                 batch_size = 1
             for start in range(0, len(run_ids), batch_size):
                 batch_jobs: List[Job] = []
+                depends_on_batch = _failure_tolerant_depends_on(batch_depends)
                 for contrast_id in run_ids[start:start + batch_size]:
+                    child_job_id = new_rq_job_id()
+                    job.meta[f'jobs:contrast:{contrast_id}'] = child_job_id
+                    job.save()
                     child_job = q.enqueue_call(
                         func=run_omni_contrast_rq,
                         args=[runid, contrast_id],
                         timeout=TIMEOUT,
-                        depends_on=batch_depends,
+                        depends_on=depends_on_batch,
+                        job_id=child_job_id,
                     )
-                    job.meta[f'jobs:contrast:{contrast_id}'] = child_job.id
                     batch_jobs.append(child_job)
                     contrast_jobs.append(child_job)
-                    job.save()
+                    _release_deferred_job_if_ready(q, child_job)
                 batch_depends = batch_jobs
 
+            final_job_id = new_rq_job_id()
+            job.meta['jobs:finalize:_finalize_omni_contrasts_rq'] = final_job_id
+            job.save()
             final_job = q.enqueue_call(
                 func=_finalize_omni_contrasts_rq,
                 args=[runid],
                 timeout=TIMEOUT,
-                depends_on=batch_depends,
+                depends_on=_failure_tolerant_depends_on(batch_depends),
+                job_id=final_job_id,
             )
-            job.meta['jobs:finalize:_finalize_omni_contrasts_rq'] = final_job.id
-            job.save()
+            _release_deferred_job_if_ready(q, final_job)
 
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
         return final_job

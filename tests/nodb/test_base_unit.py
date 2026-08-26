@@ -14,6 +14,7 @@ import wepppy.nodb.base as base
 from wepppy.nodb.base import (
     NoDbAlreadyLockedError,
     NoDbBase,
+    NoDbRunReplacingError,
     clear_locks,
     clear_nodb_file_cache,
     lock_statuses,
@@ -64,6 +65,11 @@ class FakeRedis:
         self.store.pop(key, None)
         return int(existed)
 
+    def eval(self, script: str, key_count: int, key: str, expected: Any) -> int:
+        if self.get(key) != expected:
+            return 0
+        return self.delete(key)
+
     def hset(self, name: str, key: str, value: Any) -> int:
         bucket = self.hashes.setdefault(name, {})
         bucket[key] = value
@@ -84,6 +90,24 @@ class FakeRedis:
         for key in keys:
             if fnmatch.fnmatch(str(key), match):
                 yield key
+
+    def lock(self, name: str, **kwargs: Any):
+        redis_client = self
+
+        class FakeLock:
+            token = f"token:{name}"
+
+            def acquire(self, **acquire_kwargs: Any) -> bool:
+                return redis_client.set(name, self.token, nx=True)
+
+            def release(self) -> None:
+                if redis_client.get(name) != self.token:
+                    raise base.redis.exceptions.LockError("lock ownership changed")
+                redis_client.delete(name)
+
+            def extend(self, additional_time: int, **kwargs: Any) -> bool:
+                return redis_client.get(name) == self.token
+        return FakeLock()
 
 
 @pytest.fixture
@@ -279,6 +303,38 @@ def test_lock_conflict_raises(controller: DummyController) -> None:
             controller.lock()
     finally:
         controller.unlock(flag="-f")
+
+
+def test_run_replacement_guard_blocks_new_nodb_mutation(
+    controller: DummyController,
+) -> None:
+    with base.run_replacement_guard(controller.runid):
+        with pytest.raises(NoDbRunReplacingError):
+            controller.lock()
+
+    controller.lock()
+    controller.unlock()
+
+
+def test_nodb_lock_backs_out_when_replacement_starts_during_acquire(
+    controller: DummyController,
+    redis_env: SimpleNamespace,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    original_set = redis_env.lock.set
+    replacement_key = base._run_replacement_lock_key(controller.runid)
+
+    def start_replacement_after_lock(key: str, value: Any, *args: Any, **kwargs: Any) -> bool:
+        acquired = original_set(key, value, *args, **kwargs)
+        if key == controller._distributed_lock_key and acquired:
+            original_set(replacement_key, "replacement-token", nx=True)
+        return acquired
+
+    monkeypatch.setattr(redis_env.lock, "set", start_replacement_after_lock)
+
+    with pytest.raises(NoDbRunReplacingError):
+        controller.lock()
+    assert redis_env.lock.get(controller._distributed_lock_key) is None
 
 
 def test_unlock_requires_matching_token(controller: DummyController) -> None:

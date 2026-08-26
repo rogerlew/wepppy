@@ -2,13 +2,15 @@
 
 ## Preconditions
 
-- Docker stack is running (`redis`, `rq-worker`, and any batch workers if applicable).
+- A normal worker stack (`rq-worker`) or the dedicated wepp3 stack
+  (`rq-worker-fork-archive`) is running.
 - RQ workers are connected to Redis DB 9.
 
 ## Test Steps
 
 1. Run `wctl rq-info`.
-   - Confirm the log line shows `docker compose exec rq-worker bash -lc ...`.
+   - Confirm the log line targets `rq-worker` on a normal stack or
+     `rq-worker-fork-archive` on the dedicated wepp3 stack.
    - If Redis auth is enabled, confirm the command succeeds (no `Authentication required.` error) and the log does not echo raw credentials.
    - Confirm output lists all default queues (`default`, `batch`, and
      `fork-archive`).
@@ -25,7 +27,10 @@
 
 ## Pass Criteria
 
-- The command exits successfully and displays queue + worker stats for both queues.
+- The command exits successfully and displays queue + worker stats for all
+  three queues.
+- The command automatically targets the dedicated fork worker on wepp3 without
+  requiring `--service`.
 - Extra args (like `--interval 1`) are honored.
 - Interval mode (`--interval ...`) preserves native `rq info` refresh behavior.
 - Worker visibility is correct even if Redis worker registry set indexes were stale prior to running the command.

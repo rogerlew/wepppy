@@ -5,6 +5,10 @@ from typing import Any, Callable, Iterable, Optional
 
 from rq import Queue
 from rq.job import Job
+from wepppy.rq.job_dependencies import (
+    failure_tolerant_depends_on,
+    release_deferred_job_if_ready,
+)
 
 
 def _record_parent_meta(
@@ -31,6 +35,7 @@ def _enqueue(
     depends_on: Any = None,
     child_meta: Optional[dict[str, Any]] = None,
     queue_name: str | None = None,
+    allow_dependency_failure: bool = False,
 ) -> Job:
     del queue_name
     child_job = q.enqueue_call(
@@ -38,8 +43,14 @@ def _enqueue(
         args=args,
         kwargs=kwargs,
         timeout=timeout,
-        depends_on=depends_on,
+        depends_on=(
+            failure_tolerant_depends_on(depends_on)
+            if allow_dependency_failure
+            else depends_on
+        ),
     )
+    if allow_dependency_failure:
+        release_deferred_job_if_ready(q, child_job)
     if child_meta:
         child_job.meta.update(child_meta)
         child_job.save()
@@ -89,6 +100,7 @@ def enqueue_culvert_batch_jobs(
         timeout=timeout,
         queue_name="batch",
         depends_on=child_jobs if child_jobs else None,
+        allow_dependency_failure=True,
         child_meta={"culvert_batch_uuid": culvert_batch_uuid},
     )
     return final_job, queued_jobs

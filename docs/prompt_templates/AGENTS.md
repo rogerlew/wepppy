@@ -18,6 +18,8 @@
 - `package_template.md` — Structure for work package brief (scope, objectives, success criteria)
 - `tracker_template.md` — Living document for tracking progress, decisions, and handoffs
 - `prompt_template.md` — Standardized format for work package prompts with validation gates
+- `correctness_review_template.md` — Required valid-state, user-error, and
+  noninterference review artifact for production behavior and incident fixes
 - `security_review_template.md` — Dedicated security review artifact with surface-based checks and gating verdicts
 
 See `docs/work-packages/README.md` for guidance on when and how to use work package templates.

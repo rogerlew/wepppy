@@ -15,6 +15,8 @@ from wepppy.weppcloud.bootstrap.api_shared import (
     mint_bootstrap_token_operation,
     verify_forward_auth_context,
 )
+from wepppy.weppcloud.utils.helpers import authorize_and_handle_with_exception_factory
+from wepppy.rq.submission_recovery import checkpoint_run_lifecycle
 
 bootstrap_bp = Blueprint("bootstrap", __name__)
 
@@ -76,6 +78,7 @@ def verify_token():
 
 @bootstrap_bp.route("/runs/<string:runid>/<config>/bootstrap/enable", methods=["POST"])
 @login_required
+@authorize_and_handle_with_exception_factory
 def enable_bootstrap(runid: str, config: str):
     authorize(runid, config)
     try:
@@ -130,10 +133,12 @@ def bootstrap_commits(runid: str, config: str):
 
 @bootstrap_bp.route("/runs/<string:runid>/<config>/bootstrap/checkout", methods=["POST"])
 @login_required
+@authorize_and_handle_with_exception_factory
 def bootstrap_checkout(runid: str, config: str):
     authorize(runid, config)
     payload = request.json or {}
     try:
+        checkpoint_run_lifecycle(runid)
         result = bootstrap_checkout_operation(
             runid,
             sha=payload.get("sha"),

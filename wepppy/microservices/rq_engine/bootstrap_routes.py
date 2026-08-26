@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import logging
 import os
-import time
-import uuid
 from collections.abc import Sequence
 from typing import Any, Mapping
 
@@ -16,15 +14,16 @@ from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.base import NoDbAlreadyLockedError
 from wepppy.nodb.core import Wepp
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+from wepppy.rq.job_id import new_rq_job_id
 from wepppy.rq.swat_rq import run_swat_noprep_rq
 from wepppy.rq.wepp_rq import (
     WeppSingleFlightConflict,
-    acquire_wepp_submit_lock,
     ensure_no_active_wepp_job,
-    release_wepp_submit_lock,
+    reconcile_deferred_wepp_jobs,
     run_wepp_noprep_rq,
     run_wepp_watershed_noprep_rq,
 )
+from wepppy.rq.submission_recovery import RqSubmissionConflict, rq_submission_lock
 from wepppy.weppcloud.bootstrap.api_shared import (
     BootstrapOperationError,
     bootstrap_checkout_operation,
@@ -70,7 +69,7 @@ def _persist_wepp_job_hint(wepp: Wepp, *, job_id: str, job_key: str) -> None:
         # Boundary catch: enqueue already succeeded; keep response stable even
         # if NoDb hint persistence fails.
         logger.exception("rq-engine bootstrap enqueue failed to persist NoDb WEPP job hint")
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         # Boundary catch: enqueue already succeeded; keep response stable even
         # for unexpected post-enqueue persistence faults.
         logger.exception(
@@ -179,30 +178,40 @@ def _enqueue_no_prep_job(
     _ensure_bootstrap_enabled(resolved_wepp)
 
     prep = RedisPrep.getInstance(resolved_wd)
-    submit_owner = f"{job_key}:{int(time.time() * 1000)}:{uuid.uuid4().hex}"
-    if enforce_wepp_singleflight and not acquire_wepp_submit_lock(runid, submit_owner):
-        raise WeppSingleFlightConflict("WEPP enqueue already in progress for this run.")
-
     job = None
     conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
-    try:
-        with redis.Redis(**conn_kwargs) as redis_conn:
+    with redis.Redis(**conn_kwargs) as redis_conn:
+        try:
+            lock_context = rq_submission_lock(redis_conn, f"{runid}:wepp", lifecycle_key=runid)
+            lease = lock_context.__enter__()
+        except RqSubmissionConflict as exc:
+            raise WeppSingleFlightConflict(str(exc)) from exc
+        try:
             if enforce_wepp_singleflight:
+                reconcile_deferred_wepp_jobs(
+                    runid, prep, redis_conn, lease_checkpoint=lease.checkpoint
+                )
                 ensure_no_active_wepp_job(runid, prep, redis_conn)
+            lease.checkpoint()
             for task in reset_tasks:
                 prep.remove_timestamp(task)
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(job_fn, (runid,), timeout=RQ_TIMEOUT)
-            prep.set_rq_job_id(job_key, job.id)
-            _persist_wepp_job_hint(resolved_wepp, job_id=str(job.id), job_key=job_key)
-    finally:
-        if enforce_wepp_singleflight:
-            try:
-                release_wepp_submit_lock(runid, submit_owner)
-            except (redis.RedisError, RuntimeError):
-                if job is None:
-                    raise
-                logger.exception("rq-engine bootstrap submit-lock release failed after enqueue")
+            replacement_job_id = new_rq_job_id()
+            prep.set_rq_job_id(job_key, replacement_job_id)
+            _persist_wepp_job_hint(
+                resolved_wepp,
+                job_id=replacement_job_id,
+                job_key=job_key,
+            )
+            lease.checkpoint()
+            job = q.enqueue_call(
+                job_fn,
+                (runid,),
+                timeout=RQ_TIMEOUT,
+                job_id=replacement_job_id,
+            )
+        finally:
+            lock_context.__exit__(None, None, None)
     if job is None:
         raise RuntimeError("No-prep enqueue returned no job object")
     return JSONResponse({"job_id": job.id})
@@ -241,7 +250,7 @@ async def bootstrap_enable(runid: str, config: str, request: Request) -> JSONRes
         return JSONResponse(result.payload, status_code=result.status_code)
     except BootstrapOperationError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except redis.RedisError:
+    except (OSError, redis.RedisError):
         logger.exception("rq-engine bootstrap-enable enqueue failed")
         return error_response("Error Handling Request", status_code=500)
     except RuntimeError:
@@ -281,7 +290,7 @@ async def bootstrap_mint_token(runid: str, config: str, request: Request) -> JSO
         return JSONResponse(result.payload, status_code=result.status_code)
     except BootstrapOperationError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except redis.RedisError:
+    except (OSError, redis.RedisError):
         logger.exception("rq-engine bootstrap mint-token failed")
         return error_response("Error Handling Request", status_code=500)
     except RuntimeError:
@@ -317,7 +326,7 @@ async def bootstrap_commits(runid: str, config: str, request: Request) -> JSONRe
         return JSONResponse(result.payload, status_code=result.status_code)
     except BootstrapOperationError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
-    except redis.RedisError:
+    except (OSError, redis.RedisError):
         logger.exception("rq-engine bootstrap commits failed")
         return error_response("Error Handling Request", status_code=500)
     except RuntimeError:
@@ -480,7 +489,7 @@ async def run_wepp_npprep(runid: str, config: str, request: Request) -> JSONResp
         return error_response(str(exc), status_code=400)
     except WeppSingleFlightConflict as exc:
         return error_response(str(exc), status_code=409, code="conflict")
-    except redis.RedisError:
+    except (OSError, redis.RedisError):
         logger.exception("rq-engine run-wepp-npprep enqueue failed")
         return error_response("Error Handling Request", status_code=500)
     except RuntimeError:
@@ -560,7 +569,7 @@ async def run_wepp_watershed_noprep(runid: str, config: str, request: Request) -
         return error_response(str(exc), status_code=400)
     except WeppSingleFlightConflict as exc:
         return error_response(str(exc), status_code=409, code="conflict")
-    except redis.RedisError:
+    except (OSError, redis.RedisError):
         logger.exception("rq-engine run-wepp-watershed-no-prep enqueue failed")
         return error_response("Error Handling Request", status_code=500)
     except RuntimeError:
@@ -601,10 +610,13 @@ async def run_swat_noprep(runid: str, config: str, request: Request) -> JSONResp
             job_fn=run_swat_noprep_rq,
             job_key="run_swat_noprep_rq",
             reset_tasks=[],
+            enforce_wepp_singleflight=True,
         )
     except ValueError as exc:
         return error_response(str(exc), status_code=400)
-    except redis.RedisError:
+    except (RqSubmissionConflict, WeppSingleFlightConflict) as exc:
+        return error_response(str(exc), status_code=409, code="job_active")
+    except (OSError, redis.RedisError):
         logger.exception("rq-engine run-swat-noprep enqueue failed")
         return error_response("Error Handling Request", status_code=500)
     except RuntimeError:

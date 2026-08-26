@@ -25,19 +25,32 @@ def _stub_queue(
     job_id: str = "job-123",
     enqueued_args: list[tuple] | None = None,
 ) -> None:
+    from wepppy.rq import submission_recovery
+
+    class DummyLock:
+        def acquire(self, **kwargs):
+            return True
+        def extend(self, *args, **kwargs): return True
+
+        def release(self):
+            return None
+
     class DummyJob:
         id = job_id
 
     class DummyQueue:
         def __init__(self, *args, **kwargs) -> None:
-            pass
+            self.connection = kwargs["connection"]
 
         def enqueue_call(self, *args, **kwargs):
             if enqueued_args is not None:
-                enqueued_args.append(args[1])
+                enqueued_args.append(kwargs["args"])
             return DummyJob()
 
     class DummyRedis:
+        def lock(self, *args, **kwargs):
+            return DummyLock()
+
         def __enter__(self):
             return self
 
@@ -46,10 +59,14 @@ def _stub_queue(
 
     monkeypatch.setattr(ash_routes, "Queue", DummyQueue)
     monkeypatch.setattr(ash_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(submission_recovery, "new_rq_job_id", lambda: job_id)
 
 
 def _stub_prep(monkeypatch: pytest.MonkeyPatch) -> None:
     class DummyPrep:
+        def get_rq_job_id(self, key):
+            return None
+
         def remove_timestamp(self, *args, **kwargs) -> None:
             return None
 

@@ -16,6 +16,11 @@ def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123"):
+    from wepppy.rq import submission_recovery
+    class DummyLock:
+        def acquire(self, **kwargs): return True
+        def extend(self, *args, **kwargs): return True
+        def release(self): return None
     captured: dict[str, object] = {}
 
     class DummyJob:
@@ -23,7 +28,7 @@ def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123"):
 
     class DummyQueue:
         def __init__(self, *args, **kwargs) -> None:
-            pass
+            self.connection = kwargs["connection"]
 
         def enqueue_call(self, *args, **kwargs):
             captured["args"] = args
@@ -31,6 +36,7 @@ def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123"):
             return DummyJob()
 
     class DummyRedis:
+        def lock(self, *args, **kwargs): return DummyLock()
         def __enter__(self):
             return self
 
@@ -39,6 +45,7 @@ def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123"):
 
     monkeypatch.setattr(rusle_routes, "Queue", DummyQueue)
     monkeypatch.setattr(rusle_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(submission_recovery, "new_rq_job_id", lambda: job_id)
     return captured
 
 
@@ -46,6 +53,7 @@ def _stub_prep(monkeypatch: pytest.MonkeyPatch):
     state = {"removed": [], "jobs": []}
 
     class DummyPrep:
+        def get_rq_job_id(self, key): return None
         def remove_timestamp(self, task) -> None:
             state["removed"].append(task)
 
@@ -116,6 +124,6 @@ def test_build_rusle_enqueues_job_without_payload(monkeypatch: pytest.MonkeyPatc
     assert payload == {"job_id": "job-11"}
 
     enqueue_kwargs = captured["kwargs"]
-    assert enqueue_kwargs["kwargs"] is None
+    assert "kwargs" not in enqueue_kwargs
     assert prep_state["removed"] == [TaskEnum.build_rusle]
     assert prep_state["jobs"] == [("build_rusle_rq", "job-11")]

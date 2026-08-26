@@ -1,0 +1,49 @@
+{
+  "$id": "https://github.com/rogerlew/wepppy/peakflow-phase1/schemas/routing-response.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "downstream_ordinal": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "event_present": {
+      "type": "boolean"
+    },
+    "mutation_event_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "on_declared_downstream_path": {
+      "type": "boolean"
+    },
+    "peak_flow_m3_s": {
+      "minimum": 0,
+      "type": "number"
+    },
+    "peak_time_s": {
+      "minimum": 0,
+      "type": "number"
+    },
+    "reach_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "runoff_volume_m3": {
+      "minimum": 0,
+      "type": "number"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    }
+  },
+  "required": [
+    "schema_version",
+    "mutation_event_id",
+    "reach_id",
+    "downstream_ordinal",
+    "event_present"
+  ],
+  "title": "Routing Response",
+  "type": "object"
+}

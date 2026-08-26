@@ -954,8 +954,13 @@ def _perform_login(session: requests.Session, base_url: str, email: str, passwor
     post = session.post(login_url, data=payload, timeout=30, allow_redirects=False)
     if post.status_code not in (200, 302, 303):
         raise RuntimeError(f"HTTP {post.status_code}")
-    if "session" not in session.cookies:
-        raise RuntimeError(f"session cookie missing after login (cookies={session.cookies.get_dict()})")
+    session_cookie_names = {
+        "session",
+        "weppcloud_session",
+        "__Host-weppcloud_session",
+    }
+    if not any(name in session.cookies for name in session_cookie_names):
+        raise RuntimeError("WEPPcloud session cookie missing after login")
 
 
 def _log_auth_success(profile: str, base_url: str) -> None:
@@ -977,7 +982,12 @@ def _mirror_cookies(session: requests.Session, source_base: str, target_base: st
     if not source_host or not target_host or source_host == target_host:
         return
 
-    for name in ("session", "remember_token"):
+    for name in (
+        "session",
+        "weppcloud_session",
+        "__Host-weppcloud_session",
+        "remember_token",
+    ):
         value = session.cookies.get(name, domain=source_host)
         if value:
             session.cookies.set(name, value, domain=target_host, path="/")

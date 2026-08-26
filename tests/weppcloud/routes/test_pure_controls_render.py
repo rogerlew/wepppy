@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import itertools
 import re
 from pathlib import Path
 from types import SimpleNamespace
@@ -2560,18 +2561,16 @@ def test_cap_gate_renders_escaped_continuation_reason_and_runtime_config(
 
 
 @pytest.mark.parametrize(
-    ("authenticated", "undisturbify", "skip_wepp_runs_output"),
-    [
-        (True, False, False),
-        (True, True, True),
-        (False, False, True),
-    ],
+    ("authenticated", "undisturbify", "skip_wepp_runs_output", "skip_omni"),
+    [(True, *values) for values in itertools.product((False, True), repeat=3)]
+    + [(False, False, True, True)],
 )
 def test_fork_console_renders_exact_auth_cap_and_option_contract(
     jinja_env: Environment,
     authenticated: bool,
     undisturbify: bool,
     skip_wepp_runs_output: bool,
+    skip_omni: bool,
 ) -> None:
     current_user = SimpleNamespace(
         is_authenticated=authenticated,
@@ -2587,6 +2586,7 @@ def test_fork_console_renders_exact_auth_cap_and_option_contract(
         config='cfg"><script>alert(1)</script>',
         undisturbify=undisturbify,
         skip_wepp_runs_output=skip_wepp_runs_output,
+        skip_omni_scenarios_contrasts=skip_omni,
         rq_engine_token="<rq-token>" if authenticated else None,
         cap_base_url="/cap",
         cap_asset_base_url="/cap/assets",
@@ -2601,6 +2601,8 @@ def test_fork_console_renders_exact_auth_cap_and_option_contract(
     assert f'data-undisturbify="{expected_undisturbify}"' in rendered
     expected_skip = "true" if skip_wepp_runs_output else "false"
     assert f'data-skip-wepp-runs-output="{expected_skip}"' in rendered
+    expected_skip_omni = "true" if skip_omni else "false"
+    assert f'data-skip-omni-scenarios-contrasts="{expected_skip_omni}"' in rendered
     undisturbify_checked = re.search(
         r'<input\b[^>]*id="undisturbify_checkbox"[^>]*\bchecked\b',
         rendered,
@@ -2609,8 +2611,13 @@ def test_fork_console_renders_exact_auth_cap_and_option_contract(
         r'<input\b[^>]*id="skip_wepp_runs_output_checkbox"[^>]*\bchecked\b',
         rendered,
     )
+    skip_omni_checked = re.search(
+        r'<input\b[^>]*id="skip_omni_scenarios_contrasts_checkbox"[^>]*\bchecked\b',
+        rendered,
+    )
     assert bool(undisturbify_checked) is undisturbify
     assert bool(skip_checked) is skip_wepp_runs_output
+    assert bool(skip_omni_checked) is skip_omni
     if authenticated:
         assert 'data-rq-engine-token="&lt;rq-token&gt;"' in rendered
         assert 'data-cap-required="false"' in rendered
