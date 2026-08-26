@@ -1,0 +1,17 @@
+schema_version = 1
+id = "nlcd-2019"
+kind = "landuse"
+source_revision = "1"
+label = "NLCD 2019"
+description = "2019 National Land Cover Database."
+owns = ["landuse.nlcd_db"]
+overrides = ["landuse.nlcd_db"]
+
+[constraints]
+requires = ["continental-us"]
+conflicts = []
+
+[[writes]]
+section = "landuse"
+option = "nlcd_db"
+value = "nlcd/2019"

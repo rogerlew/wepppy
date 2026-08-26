@@ -1,0 +1,40 @@
+schema_version = 1
+id = "continental-us"
+kind = "locale"
+source_revision = "1"
+label = "Continental United States"
+description = "Deployment-owned defaults and builder choices for the continental United States."
+owns = ["general.locales", "map.center0", "map.zoom0", "unitizer.is_english"]
+overrides = ["unitizer.is_english"]
+
+[constraints]
+requires = []
+conflicts = []
+allowed_dem = ["usgs-ned1-2024", "usgs-ned13-2022"]
+allowed_delineation = ["topaz", "wbt"]
+allowed_representation = ["single-ofe"]
+allowed_soil = ["ssurgo-gnatsgso-2025"]
+allowed_landuse = ["nlcd-2019"]
+allowed_climate = ["vanilla_cligen", "prism_stochastic", "observed_daymet", "observed_gridmet"]
+allowed_mods = []
+allowed_capability_profiles = ["continental-us-capabilities"]
+
+[[writes]]
+section = "general"
+option = "locales"
+value = ["us"]
+
+[[writes]]
+section = "map"
+option = "center0"
+value = [40.0, -99.0]
+
+[[writes]]
+section = "map"
+option = "zoom0"
+value = 3
+
+[[writes]]
+section = "unitizer"
+option = "is_english"
+value = true

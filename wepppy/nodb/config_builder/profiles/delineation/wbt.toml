@@ -1,0 +1,42 @@
+schema_version = 1
+id = "wbt"
+kind = "delineation"
+source_revision = "1"
+label = "WhiteboxTools"
+description = "WhiteboxTools watershed delineation with current deployment settings."
+owns = ["watershed.delineation_backend", "watershed.wbt.boundary_touch_behavior", "watershed.wbt.mcl", "watershed.wbt.csa", "watershed.wbt.fill_or_breach", "watershed.wbt.breach_least_cost_dist"]
+overrides = ["watershed.delineation_backend"]
+
+[constraints]
+requires = ["continental-us"]
+conflicts = []
+
+[[writes]]
+section = "watershed"
+option = "delineation_backend"
+value = "wbt"
+
+[[writes]]
+section = "watershed.wbt"
+option = "boundary_touch_behavior"
+value = "warn"
+
+[[writes]]
+section = "watershed.wbt"
+option = "mcl"
+value = 100
+
+[[writes]]
+section = "watershed.wbt"
+option = "csa"
+value = 10
+
+[[writes]]
+section = "watershed.wbt"
+option = "fill_or_breach"
+value = "breach_least_cost"
+
+[[writes]]
+section = "watershed.wbt"
+option = "breach_least_cost_dist"
+value = 3000

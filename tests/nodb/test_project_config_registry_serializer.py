@@ -1,0 +1,334 @@
+from __future__ import annotations
+
+from dataclasses import replace
+from pathlib import Path
+import shutil
+
+import pytest
+
+from wepppy.nodb.config_builder import (
+    ALLOWED_CELL_SIZES,
+    BuilderConstraintError,
+    BuilderSelections,
+    ComponentDefinition,
+    ComponentKind,
+    ConfigWrite,
+    Registry,
+    RegistryError,
+    describe_builder,
+    load_registry,
+    resolve_builder_config,
+)
+from wepppy.nodb.config_builder.schema import ConstraintSet
+from wepppy.project_config_serialization import (
+    parse_config_text,
+    validate_canonical_config_text,
+)
+
+pytestmark = pytest.mark.unit
+
+EXPECTED_IDS = {
+    "continental-us",
+    "usgs-ned1-2024",
+    "usgs-ned13-2022",
+    "topaz",
+    "wbt",
+    "single-ofe",
+    "ssurgo-gnatsgso-2025",
+    "nlcd-2019",
+    "vanilla_cligen",
+    "prism_stochastic",
+    "observed_daymet",
+    "observed_gridmet",
+    "continental-us-capabilities",
+}
+
+
+def _selections(
+    dem: str = "usgs-ned1-2024",
+    backend: str = "topaz",
+    *,
+    climate: str = "vanilla_cligen",
+    mods: tuple[str, ...] = (),
+    cellsize: int | None = None,
+) -> BuilderSelections:
+    return BuilderSelections(
+        locale="continental-us",
+        dem=dem,
+        delineation_backend=backend,
+        watershed_representation="single-ofe",
+        soil="ssurgo-gnatsgso-2025",
+        landuse="nlcd-2019",
+        climate=climate,
+        mods=mods,
+        cellsize_override=cellsize,
+    )
+
+
+def _with_component(registry: Registry, component: ComponentDefinition) -> Registry:
+    components = dict(registry.components)
+    components[component.component_id] = component
+    return Registry.create(f"test-{registry.revision}", components)
+
+
+def _minimal_document(**replacements: str) -> str:
+    values = {
+        "schema": "1",
+        "id": '"test-mod"',
+        "kind": '"mod"',
+        "revision": '"1"',
+        "owns": "[]",
+        "overrides": "[]",
+        "writes": "[]",
+        "requires": "[]",
+        "conflicts": "[]",
+    }
+    values.update(replacements)
+    return (
+        f"schema_version = {values['schema']}\n"
+        f"id = {values['id']}\n"
+        f"kind = {values['kind']}\n"
+        f"source_revision = {values['revision']}\n"
+        'label = "Test"\n'
+        'description = "Test component."\n'
+        f"owns = {values['owns']}\n"
+        f"overrides = {values['overrides']}\n"
+        f"writes = {values['writes']}\n\n"
+        "[constraints]\n"
+        f"requires = {values['requires']}\n"
+        f"conflicts = {values['conflicts']}\n"
+    )
+
+
+def test_shipped_registry_is_real_toml_with_stable_ids_and_defaults() -> None:
+    registry = load_registry()
+
+    assert set(registry.components) == EXPECTED_IDS
+    assert registry.get("usgs-ned1-2024").default_cellsize == 30
+    assert registry.get("usgs-ned13-2022").default_cellsize == 10
+    assert all(component.schema_version == 1 for component in registry.components.values())
+    assert len(registry.revision) == 64
+
+
+@pytest.mark.parametrize("dem", ["usgs-ned1-2024", "usgs-ned13-2022"])
+@pytest.mark.parametrize("backend", ["topaz", "wbt"])
+def test_initial_local_matrix_resolves_to_canonical_bytes(dem: str, backend: str) -> None:
+    registry = load_registry()
+    first = resolve_builder_config(_selections(dem, backend), registry=registry)
+    second = resolve_builder_config(_selections(dem, backend), registry=registry)
+
+    assert first.config_bytes == second.config_bytes
+    assert validate_canonical_config_text(first.config_bytes.decode()) == parse_config_text(
+        first.config_bytes.decode()
+    )
+    assert first.config["config"]["flattened"] is True
+    assert first.config["general"]["dem_db"] == (
+        "ned1/2024" if dem == "usgs-ned1-2024" else "ned13/2022"
+    )
+    assert first.config["watershed"]["delineation_backend"] == backend
+    assert first.effective_cellsize == first.dem_default_cellsize
+    assert first.cellsize_source == "dem_default"
+
+
+@pytest.mark.parametrize("cellsize", ALLOWED_CELL_SIZES)
+def test_every_fixed_cellsize_override_is_accepted(cellsize: int) -> None:
+    result = resolve_builder_config(_selections(cellsize=cellsize))
+
+    assert result.effective_cellsize == cellsize
+    assert result.config["general"]["cellsize"] == cellsize
+    expected_source = "dem_default" if cellsize == 30 else "privileged_override"
+    assert result.cellsize_source == expected_source
+
+
+def test_composition_order_and_effective_writers_are_explicit() -> None:
+    result = resolve_builder_config(_selections(backend="wbt", climate="observed_daymet"))
+
+    assert [entry.component_id for entry in result.parent_chain] == [
+        "shared-defaults",
+        "continental-us",
+        "usgs-ned1-2024",
+        "wbt",
+        "single-ofe",
+        "ssurgo-gnatsgso-2025",
+        "nlcd-2019",
+        "observed_daymet",
+        "continental-us-capabilities",
+    ]
+    assert result.effective_writers[("general", "dem_db")] == "usgs-ned1-2024"
+    assert result.effective_writers[("watershed.wbt", "mcl")] == "wbt"
+    assert result.effective_writers[("general", "cellsize")] == "selection:cellsize"
+
+
+def test_undeclared_writeover_fails_and_declared_writeover_succeeds() -> None:
+    registry = load_registry()
+    topaz = registry.get("topaz")
+    hostile = _with_component(registry, replace(topaz, overrides=()))
+
+    with pytest.raises(BuilderConstraintError) as error:
+        resolve_builder_config(_selections(), registry=hostile)
+    assert (error.value.field, error.value.code) == (
+        "watershed.delineation_backend",
+        "undeclared_writeover",
+    )
+    assert resolve_builder_config(_selections(), registry=registry).config["watershed"][
+        "delineation_backend"
+    ] == "topaz"
+
+
+def test_registry_addition_does_not_enable_or_apply_a_mod() -> None:
+    registry = load_registry()
+    locale = registry.get("continental-us")
+    mod = ComponentDefinition(
+        component_id="test-mod",
+        kind=ComponentKind.MOD,
+        schema_version=1,
+        source_revision="1",
+        label="Test mod",
+        description="Test-only optional addition.",
+        owns=(("test", "enabled"),),
+        overrides=(),
+        writes=(ConfigWrite("test", "enabled", True),),
+        constraints=ConstraintSet(requires=("continental-us",)),
+    )
+    registry = _with_component(registry, mod)
+    registry = _with_component(
+        registry,
+        replace(
+            locale,
+            constraints=replace(locale.constraints, allowed_mods=("test-mod",)),
+        ),
+    )
+
+    dormant = resolve_builder_config(_selections(), registry=registry)
+    active = resolve_builder_config(_selections(mods=("test-mod",)), registry=registry)
+
+    assert "test" not in dormant.config
+    assert dormant.config["nodb"]["mods"] == []
+    assert active.config["test"]["enabled"] is True
+    assert active.config["nodb"]["mods"] == ["test-mod"]
+
+
+def test_resolution_is_independent_from_caller_base_mutation() -> None:
+    base = {"base": {"items": ["original"]}}
+    before = {"base": {"items": ["original"]}}
+    result = resolve_builder_config(_selections(), base_config=base, base_revision="base-1")
+
+    base["base"]["items"].append("later")
+    assert before == {"base": {"items": ["original"]}}
+    assert result.config["base"]["items"] == ["original"]
+    assert result.parent_chain[0].revision == "base-1"
+
+
+def test_description_is_deterministic_and_server_ready() -> None:
+    registry = load_registry()
+    first = describe_builder(registry)
+    second = describe_builder(registry)
+
+    assert first == second
+    assert first.schema_version == 1
+    assert first.registry_revision == registry.revision
+    assert first.allowed_cell_sizes == ALLOWED_CELL_SIZES
+    assert tuple(item.component_id for item in first.components) == tuple(
+        item.component_id
+        for item in sorted(
+            registry.components.values(),
+            key=lambda item: (list(ComponentKind).index(item.kind), item.component_id),
+        )
+    )
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("locale", "missing-locale"),
+        ("dem", "missing-dem"),
+        ("delineation_backend", "missing-backend"),
+        ("watershed_representation", "missing-representation"),
+        ("soil", "missing-soil"),
+        ("landuse", "missing-landuse"),
+        ("climate", "missing-climate"),
+        ("capability_profile", "missing-profile"),
+    ],
+)
+def test_excluded_ids_fail_without_fallback(field: str, value: str) -> None:
+    selections = replace(_selections(), **{field: value})
+
+    with pytest.raises(BuilderConstraintError) as error:
+        resolve_builder_config(selections)
+    assert error.value.field == field
+    assert error.value.code == "unknown_component"
+
+
+def test_builder_constraints_reject_invalid_sizes_and_mods() -> None:
+    with pytest.raises(BuilderConstraintError) as size_error:
+        resolve_builder_config(_selections(cellsize=20))
+    assert (size_error.value.field, size_error.value.code) == (
+        "cellsize_override",
+        "invalid_cellsize",
+    )
+
+    with pytest.raises(BuilderConstraintError) as mod_error:
+        resolve_builder_config(_selections(mods=("unregistered-mod",)))
+    assert (mod_error.value.field, mod_error.value.code) == ("mods", "unknown_component")
+
+
+def test_registry_revision_is_path_and_content_deterministic(tmp_path: Path) -> None:
+    source = Path(__file__).parents[2] / "wepppy" / "nodb" / "config_builder" / "profiles"
+    first_root = tmp_path / "first"
+    second_root = tmp_path / "second"
+    shutil.copytree(source, first_root)
+    shutil.copytree(source, second_root)
+
+    assert load_registry(first_root).revision == load_registry(second_root).revision
+    changed = second_root / "climate" / "vanilla-cligen.toml"
+    changed.write_text(changed.read_text() + "\n", encoding="utf-8")
+    assert load_registry(first_root).revision != load_registry(second_root).revision
+
+
+@pytest.mark.parametrize(
+    ("document", "match"),
+    [
+        ("not = [valid", "unable to parse TOML"),
+        (_minimal_document(schema="2"), "unsupported registry schema"),
+        (_minimal_document(id='"Invalid_ID"'), "invalid stable component ID"),
+        (_minimal_document(kind='"unknown"'), "unknown component kind"),
+        (
+            _minimal_document(owns='["test.value", "test.value"]'),
+            "owns contains duplicates",
+        ),
+        (_minimal_document(requires='["missing"]'), "unknown component reference"),
+        (
+            _minimal_document(requires='["test-mod"]', conflicts='["test-mod"]'),
+            "both required and conflicting",
+        ),
+    ],
+)
+def test_invalid_registry_documents_fail_atomically(
+    tmp_path: Path,
+    document: str,
+    match: str,
+) -> None:
+    (tmp_path / "component.toml").write_text(document, encoding="utf-8")
+
+    with pytest.raises(RegistryError, match=match):
+        load_registry(tmp_path)
+
+
+def test_undeclared_document_write_is_rejected(tmp_path: Path) -> None:
+    document = _minimal_document(owns="[]", writes="[]")
+    document = document.replace(
+        "writes = []",
+        '[[writes]]\nsection = "test"\noption = "enabled"\nvalue = true',
+    )
+    (tmp_path / "component.toml").write_text(document, encoding="utf-8")
+
+    with pytest.raises(RegistryError, match="not declared in owns"):
+        load_registry(tmp_path)
+
+
+def test_duplicate_component_ids_are_rejected(tmp_path: Path) -> None:
+    (tmp_path / "one.toml").write_text(_minimal_document(), encoding="utf-8")
+    (tmp_path / "two.toml").write_text(_minimal_document(), encoding="utf-8")
+
+    with pytest.raises(RegistryError, match="Duplicate or case-colliding"):
+        load_registry(tmp_path)

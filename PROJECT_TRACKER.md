@@ -1156,6 +1156,22 @@ the remaining-run controller plan has no next controller milestone.
 
 ## ✅ Done
 
+### Project Config Registry and Serializer (WP03) (2026-08-26)
+
+**Completed**: 2026-08-26
+**Security impact**: `low`
+**Initiative branch**: `feature/project-owned-config` (noncanonical)
+**Link**: [docs/work-packages/20260804_project_config_registry_serializer/](docs/work-packages/20260804_project_config_registry_serializer/)
+
+**Outcome**: Added a strict real-TOML registry, exact stable component IDs,
+the conservative continental-US source corpus, deterministic selection and
+declared writeover, immutable provenance/effective-writer records, and WP00B
+canonical bytes. The exact final suite passed with 6,864 tests and 63 skips.
+No writer or runtime surface was enabled; WP11 retains deployed Forest
+acceptance for all four locally eligible DEM/backend combinations.
+
+---
+
 ### Project-Owned Configuration Reader Foundation (WP02) (2026-08-26)
 
 **Completed**: 2026-08-26
