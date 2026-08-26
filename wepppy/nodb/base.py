@@ -158,6 +158,12 @@ from logging.handlers import QueueHandler, QueueListener
 import atexit
 from logging import FileHandler, StreamHandler
 from wepppy.nodb.status_messenger import StatusMessengerHandler
+from wepppy.nodb.project_config_reader import (
+    ProjectConfigStatus,
+    load_project_config,
+    log_project_config_warning,
+    project_config_reader_enabled,
+)
 
 
 class NoDbAlreadyLockedError(Exception):
@@ -912,15 +918,16 @@ class NoDbBase(object):
     def pup_relpath(self) -> Optional[str]:  # relative path to the parent or None
         if self.parent_wd is None:
             return None
-        
-        parent_wd = os.path.abspath(self.parent_wd)
-        wd = os.path.abspath(self.wd)
 
-        if wd.startswith(parent_wd):
-            relpath = os.path.relpath(wd, parent_wd)
-            return relpath
-        
-        return None
+        parent_wd = Path(self.parent_wd).resolve()
+        wd = Path(self.wd).resolve()
+        try:
+            relpath = wd.relative_to(parent_wd)
+        except ValueError:
+            return None
+        if relpath == Path('.'):
+            return None
+        return str(relpath)
 
     @property
     def is_omni_run(self) -> bool:
@@ -1077,6 +1084,8 @@ class NoDbBase(object):
         for attr in (
             'runid_logger',
             'logger',
+            '_project_config_status',
+            '_project_config_warning_keys',
             '_queue_handler',
             '_log_queue',
             '_queue_listener',
@@ -2480,6 +2489,31 @@ class NoDbBase(object):
 
     @property
     def _configparser(self):
+        if project_config_reader_enabled():
+            result = load_project_config(
+                wd=self.wd,
+                config_token=self._config,
+                parent_wd=self.parent_wd,
+                config_dir=_config_dir,
+                defaults_resolver=resolve_defaults_path,
+                parser_factory=CaseSensitiveRawConfigParser,
+                run_id=self.runid,
+            )
+            self._project_config_status = result.status
+            emitted = getattr(self, '_project_config_warning_keys', set())
+            for warning in result.status.warnings:
+                key = (
+                    warning.code,
+                    warning.config_filename,
+                    warning.declared_digest,
+                    warning.observed_digest,
+                )
+                if key not in emitted:
+                    log_project_config_warning(warning)
+                    emitted.add(key)
+            self._project_config_warning_keys = emitted
+            return result.parser
+
         _config = self._config.split('?')
 
         cfg = self._resolve_config_path(_config[0])
@@ -2505,6 +2539,16 @@ class NoDbBase(object):
             parser.read_dict(overrides_d)
 
         return parser
+
+    @property
+    def project_config_status(self) -> ProjectConfigStatus:
+        """Return read-only status from the latest project-config resolution."""
+
+        return getattr(
+            self,
+            '_project_config_status',
+            ProjectConfigStatus('legacy', self.wd, None, False, False),
+        )
 
     def _resolve_config_path(self, filename: str) -> str:
         path = Path(filename)

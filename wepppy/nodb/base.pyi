@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Callable, ClassVar, Concatenate, Generator, Iterator, Optional, ParamSpec, TypeVar
 
 import redis
+from wepppy.nodb.project_config_reader import ProjectConfigStatus
 
 __all__ = [
     "NoDbAlreadyLockedError",
@@ -181,6 +182,9 @@ class NoDbBase(object):
 
     @property
     def pup_relpath(self) -> Optional[str]: ...
+
+    @property
+    def project_config_status(self) -> ProjectConfigStatus: ...
 
     @property
     def is_omni_run(self) -> bool: ...

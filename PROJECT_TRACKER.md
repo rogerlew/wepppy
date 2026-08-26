@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-08-24
+**Last Updated**: 2026-08-26
 **Active Packages**: 29
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -1155,6 +1155,22 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### Project-Owned Configuration Reader Foundation (WP02) (2026-08-26)
+
+**Completed**: 2026-08-26
+**Security impact**: `high`
+**Initiative branch**: `feature/project-owned-config` (noncanonical)
+**Link**: [docs/work-packages/20260804_project_config_reader_foundation/](docs/work-packages/20260804_project_config_reader_foundation/)
+
+**Outcome**: Added the default-off central reader for flattened config schema
+v1, manifest degradation and digest status, and containment-validated nested
+authority while preserving exact legacy values and failures. No writer or
+read-triggered mutation exists. Focused, NoDb, exact final full-suite, stub,
+docs, security/correctness, and restarted-stack gates pass. WP04/WP06/WP09/
+WP10/WP11 retain real writer, UI, lifecycle, Forest, and rollback evidence.
+
+---
 
 ### Defaults CFG Compatibility (WP01) (2026-08-26)
 

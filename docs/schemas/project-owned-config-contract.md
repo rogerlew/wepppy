@@ -987,6 +987,20 @@ section 15. Confirm that serialized `.nodb` files retain their config token but
 do not embed either defaults filename. Validate new project creation, legacy
 project reopen, fork, archive, and restore locally.
 
+The compatibility reader is controlled by
+`WEPPPY_PROJECT_CONFIG_READER_ENABLED`. The variable is disabled when absent
+and accepts only explicit boolean values (`1/true/yes/on` or
+`0/false/no/off`, case-insensitive); ambiguous values fail explicitly. This
+reader flag is independent of every writer flag. Enabling it authorizes only
+the read-only resolution and warning behavior in sections 6 and 10 and MUST
+NOT create, repair, or amend a config or manifest. The reader remains off in
+deployment defaults until WP11 records mixed-version and rollback evidence.
+
+This default-off boundary was chosen so the exact reader can land and be tested
+before any writer produces project-owned artifacts. Default-on activation or a
+silent fallback for invalid flag values was rejected because either would
+bypass the roadmap's deployed-fleet acceptance gate.
+
 ### 14.3 Phase 3: Forest test-production integration gate
 
 The compatibility release MUST be deployed to the Forest test-production
