@@ -5,6 +5,7 @@
 **Initiative branch**: `feature/project-owned-config`
 **Canonical branch**: `master`
 **Promotion policy**: merge only at the roadmap promotion gate
+**Implementation revision**: `1bb9e49f4`
 
 ## Overview
 
@@ -93,6 +94,7 @@ and effective-writer tracking. The exact final suite passed with 6,864 tests
 and 63 skips. WP04 retains the first project writer; WP05/WP06 retain runtime
 description and authorization surfaces; WP11 retains deployed Forest
 acceptance for each of the four locally eligible DEM/backend combinations.
+Implementation is committed at `1bb9e49f4` on the initiative branch.
 
 ## Parameterization ADR Gate
 

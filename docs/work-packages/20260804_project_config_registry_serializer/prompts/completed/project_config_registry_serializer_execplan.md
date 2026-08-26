@@ -73,6 +73,7 @@ NoDb passed 1,740 with 26 skipped, and the exact final repository suite passed
 6,864 with 63 skipped. No writer, route, queue edge, feature flag, project
 directory, or generated run artifact was added. WP11 retains deployed Forest
 acceptance for each locally eligible matrix combination.
+The implementation revision is `1bb9e49f4`.
 
 ## Context and Orientation
 

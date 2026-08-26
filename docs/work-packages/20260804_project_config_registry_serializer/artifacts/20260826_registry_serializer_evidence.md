@@ -7,6 +7,7 @@ resolver. It adds no project writer, route, queue edge, runtime flag, or run
 artifact. The shipped registry has 13 real-TOML documents: one locale, two
 DEMs, two delineation backends, one watershed representation, one soil source,
 one land-use source, four climate sources, and one umbrella capability profile.
+The implementation revision is `1bb9e49f4`.
 
 The climate IDs retain the exact ratified underscore tokens:
 `vanilla_cligen`, `prism_stochastic`, `observed_daymet`, and

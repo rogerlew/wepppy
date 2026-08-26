@@ -14,6 +14,7 @@
 **Canonical branch**: `master`
 **Promotion policy**: merge only at the roadmap promotion gate
 **Starting revision**: `8ee87a2e65b57adcf8194a0a1dbdbd2efb902435`
+**Implementation revision**: `1bb9e49f4`
 **Upstream**: `origin/feature/project-owned-config`
 
 ## Task Board
@@ -146,6 +147,8 @@ WP05/WP06 expose and authorize it; WP11 validates deployed combinations.
 **Test results**: 60 focused passed; 1,740 NoDb passed and 26 skipped; exact
 final suite 6,864 passed and 63 skipped; stubtest/check-test-stubs/broad-
 exception/diff checks passed.
+
+**Implementation commit**: `1bb9e49f4`.
 
 ## Watch List
 
