@@ -13,6 +13,7 @@
 **Canonical branch**: `master`
 **Promotion policy**: merge only at the roadmap promotion gate
 **Starting revision**: `95a8c4394`
+**Implementation revision**: `140354fde`
 **Upstream**: `origin/feature/project-owned-config`
 **Upstream state at start**: ahead 2; WP03 not yet pushed
 
@@ -123,3 +124,5 @@ WP04 is complete with the writer dormant by default. Evidence is retained in
 `artifacts/20260826_preset_snapshot_evidence.md`, with separate correctness and
 high-impact security reviews. WP05 must populate stable capability IDs without
 inferring the continental-US profile for incompatible legacy presets.
+
+Implementation was committed as `140354fde`.

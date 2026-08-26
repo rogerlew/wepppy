@@ -26,3 +26,5 @@ The absent/false flag retains the legacy query-suffixed Ron input.
 WP05 owns adding stable capability IDs and making them authoritative. WP04 does
 not assign the continental-US capability profile to international or otherwise
 incompatible legacy presets by inference.
+
+Implementation revision: `140354fde`.
