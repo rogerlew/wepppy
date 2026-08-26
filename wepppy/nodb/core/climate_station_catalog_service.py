@@ -46,6 +46,11 @@ class ClimateStationCatalogService:
         locales = climate.locales or ()
         mods = climate.ron_instance.mods or []
         datasets = available_climate_datasets(locales, mods, include_hidden=include_hidden)
+        from wepppy.nodb.project_config_capabilities import capability_ids
+
+        allowed = capability_ids(climate, "climate_datasets")
+        if allowed is not None:
+            datasets = [dataset for dataset in datasets if dataset.catalog_id in allowed]
 
         constrained: List[Any] = []
         for dataset in datasets:
@@ -72,6 +77,11 @@ class ClimateStationCatalogService:
         locales = climate.locales or ()
         mods = climate.ron_instance.mods or []
         if not dataset.is_allowed_for(locales, mods, include_hidden=include_hidden):
+            return None
+        from wepppy.nodb.project_config_capabilities import capability_ids
+
+        allowed = capability_ids(climate, "climate_datasets")
+        if allowed is not None and dataset.catalog_id not in allowed:
             return None
 
         return self._apply_runtime_constraints(climate, dataset)

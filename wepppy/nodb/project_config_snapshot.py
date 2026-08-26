@@ -24,6 +24,7 @@ from wepppy.project_config_serialization import (
     parse_config_text,
     serialize_config,
 )
+from wepppy.nodb.project_config_capabilities import resolve_named_preset_capabilities
 
 __all__ = [
     "PRESET_WRITER_FLAG",
@@ -251,6 +252,7 @@ def resolve_preset_snapshot(
     config.setdefault("config", {}).update(
         {"flattened": True, "resolver_version": 1, "schema_version": 1}
     )
+    config["capabilities"] = resolve_named_preset_capabilities(config)
     config_bytes = serialize_config(config)
     assert_materialization_safe(config_bytes.decode("utf-8"))
     config_filename = f"{preset_id}.cfg"

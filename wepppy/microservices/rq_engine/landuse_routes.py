@@ -684,6 +684,10 @@ async def set_landuse_db(runid: str, config: str, request: Request) -> JSONRespo
         wd = _resolve_run_root_for_request(runid, request)
         _preflight_landuse_mutation_root(wd)
         landuse = Landuse.getInstance(wd)
+        from wepppy.nodb.project_config_capabilities import runtime_value_allowed
+
+        if not runtime_value_allowed(landuse, "landuse_datasets", str(db)):
+            return error_response("Landuse dataset is not supported by this project.", status_code=400, code="unsupported_capability")
         landuse.nlcd_db = str(db)
         return JSONResponse({"message": "Landuse database updated"})
     except RunContextResolutionError as exc:

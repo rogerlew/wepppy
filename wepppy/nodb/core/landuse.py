@@ -1887,7 +1887,13 @@ class Landuse(NoDbBase):
 
     @property
     def landcover_datasets(self) -> List[LanduseDataset]:
-        return [dataset for dataset in self.available_datasets if dataset.kind == "landcover"]
+        datasets = [dataset for dataset in self.available_datasets if dataset.kind == "landcover"]
+        from wepppy.nodb.project_config_capabilities import capability_ids
+
+        allowed = capability_ids(self, "landuse_datasets")
+        if allowed is not None:
+            datasets = [dataset for dataset in datasets if dataset.key in allowed]
+        return datasets
 
     @property
     def coverage_percentages(self) -> Tuple[float, ...]:

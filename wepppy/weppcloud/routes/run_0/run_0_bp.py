@@ -41,6 +41,7 @@ from wepppy.nodb.core import (
     Wepp,
 )
 from wepppy.nodb.unitizer import Unitizer
+from wepppy.nodb.project_config_capabilities import soil_capability_modes
 from wepppy.weppcloud.user_preferences import (
     PreferenceResolutionError,
     preference_resolution_error_response,
@@ -2005,6 +2006,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
         critical_shear_options=critical_shear_options,
         reveg_cover_transform_options=reveg_cover_transform_options,
         climate_catalog=climate.catalog_datasets_payload(include_hidden=True),
+        soil_capability_modes=soil_capability_modes(soils),
         precisions=wepppy.nodb.unitizer.precisions,
         run_id=runid,
         runid=runid,

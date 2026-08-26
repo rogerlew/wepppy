@@ -58,6 +58,13 @@ def test_every_named_preset_resolves_complete_canonical_safe_bytes() -> None:
             "resolver_version": 1,
             "schema_version": 1,
         }
+        assert parsed["capabilities"]["climate_datasets"]
+        assert parsed["capabilities"]["soil_builders"] == [
+            "gridded",
+            "single_mukey",
+            "single_database",
+        ]
+        assert parsed["capabilities"]["landuse_datasets"]
         assert manifest["source_preset"] == preset_id
         assert manifest["config"]["filename"] == f"{preset_id}.cfg"
         assert manifest["config"]["sha256"] == hashlib.sha256(candidate.config_bytes).hexdigest()

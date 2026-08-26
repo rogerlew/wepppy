@@ -17,6 +17,7 @@ from .._common import (
 )
 
 from wepppy.nodb.core import Soils, SoilsMode
+from wepppy.nodb.project_config_capabilities import SOIL_BUILDER_MODES, runtime_value_allowed
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.weppcloud.utils.cap_guard import requires_cap
 from wepppy.weppcloud.utils.helpers import authorize_and_handle_with_exception_factory
@@ -56,11 +57,13 @@ def set_soil_mode(runid: str, config: str) -> Response:
 
     try:
         soils = Soils.getInstance(wd)
+        if not runtime_value_allowed(soils, "soil_builders", mode, stable_to_runtime=SOIL_BUILDER_MODES):
+            return error_factory('Unsupported soil capability')
         soils.mode = SoilsMode(mode)
         if single_selection is not None:
             soils.single_selection = single_selection
         soils.single_dbselection = single_dbselection
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/soils_bp.py:61", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('error setting soils mode', runid=runid)
@@ -105,7 +108,7 @@ def report_soils(runid: str, config: str) -> Response:
             config=config,
             report=Soils.getInstance(wd).report,
         )
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/soils_bp.py:104", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Building Soil Failed', runid=runid)
@@ -126,7 +129,7 @@ def task_set_soils_ksflag(runid: str, config: str) -> Response:
         wd = str(ctx.active_root)
         soils = Soils.getInstance(wd)
         soils.ksflag = bool(state)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/soils_bp.py:122", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error setting state', runid=runid)
@@ -154,7 +157,7 @@ def task_set_disturbed_sol_ver(runid: str, config: str) -> Response:
         wd = str(ctx.active_root)
         disturbed = Disturbed.getInstance(wd)
         disturbed.sol_ver = state
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/soils_bp.py:147", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error setting state', runid=runid)
