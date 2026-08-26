@@ -5,6 +5,7 @@
 **Canonical branch**: `master`
 **Promotion policy**: merge only at the roadmap promotion gate
 **Starting revision**: `ceb10fc9686925f89288d4411c3d36cd9d6ccbaf`
+**Implementation revision**: `cb7698b28`
 
 ## Reader Inventory
 

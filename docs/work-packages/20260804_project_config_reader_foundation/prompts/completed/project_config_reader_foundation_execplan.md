@@ -184,3 +184,6 @@ legacy-failure compatibility correction.
 
 Plan revision note (2026-08-26 19:03 UTC): recorded the exact final-tree suite,
 closed all WP02-local gates, and prepared the plan for archival.
+
+Plan revision note (2026-08-26 19:05 UTC): recorded implementation revision
+`cb7698b28` in the closure artifacts.

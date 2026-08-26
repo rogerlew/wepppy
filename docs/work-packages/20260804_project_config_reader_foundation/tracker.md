@@ -14,7 +14,7 @@
 **Canonical branch**: `master`
 **Promotion policy**: merge only at the roadmap promotion gate
 **Starting revision**: `ceb10fc9686925f89288d4411c3d36cd9d6ccbaf`
-**Implementation revision**: recorded by closing commit and follow-up note
+**Implementation revision**: `cb7698b28`
 **Upstream**: `origin/feature/project-owned-config`
 
 ## Task Board
@@ -154,6 +154,8 @@ owned by its roadmap packages and does not activate WP02 code.
 
 ## Closure Handoff
 
+- **Feature-branch implementation revision**: `cb7698b28`, based on starting
+  revision `ceb10fc96`.
 - **Feature flag**: `WEPPPY_PROJECT_CONFIG_READER_ENABLED`, default off.
 - **Delivered interfaces**: `load_project_config()`, immutable
   `ProjectConfigStatus`, explicit schema/authority errors, and

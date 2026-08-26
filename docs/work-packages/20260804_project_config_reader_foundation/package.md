@@ -140,8 +140,7 @@ route, queue edge, or read-triggered mutation was added.
 `artifacts/2026-08-26_correctness_review.md`, and
 `artifacts/2026-08-26_security_review.md`.
 
-**Implementation revision**: recorded by the WP02 closing commit and follow-up
-revision note.
+**Implementation revision**: `cb7698b28`.
 
 **Promotion state**: implemented on `feature/project-owned-config`; the reader
 flag remains deployment-default-off and the work is neither Forest accepted nor
