@@ -10,6 +10,7 @@
 **Security impact**: `high`
 **Dedicated security review**: required
 **Starting revision**: `9d7956259`
+**Implementation revision**: `ad7d3b545`
 **Initiative branch**: `feature/project-owned-config`
 **Upstream state at start**: ahead 4
 
