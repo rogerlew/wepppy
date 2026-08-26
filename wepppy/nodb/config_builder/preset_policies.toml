@@ -1,0 +1,513 @@
+schema_version = 1
+
+[[presets]]
+id = "0-wbt"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "0"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "13"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "2006"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "ChileCayumanque"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "ag-fields"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "au-disturbed"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "au-fire"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "au"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "august_complex"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "baer-exp"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "baer-legacy"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "baer-rred"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "baer-ssurgo"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "baer"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "bc-ca-disturbed9002"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "beachie-fire"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "ca_disturbed"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "ca_hindcast"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "ca_hindcast_2015"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "ca_hindcast_2015_smallbasins"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "ca_hindcast_2016"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "ca_hindcast_2016_smallbasins"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "ca_hindcast_2017"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "ca_hindcast_2017_smallbasins"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "ca_hindcast_2018"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "canada-wbt-mofe"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "canada-wbt"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "canada"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "cda"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "cedar23"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "creek_fire"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "culvert"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "czu_region"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "disturbed-ak"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "disturbed-anu-ash"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "disturbed-caldor"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "disturbed-hi"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "disturbed-hubbar-brook-10m"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "disturbed-hubbar-brook-2m"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "disturbed-hubbar-brook"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "disturbed-mofe-us-rap-covers"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "disturbed-mofe"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "disturbed-tree-observed"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "disturbed-treecanopy"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "disturbed-us-rap-covers"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "disturbed-vi-10m-mofe"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "disturbed-vi"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "disturbed-wbt-profile"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "disturbed"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "disturbed10-oyster-creek"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "disturbed10"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "disturbed60"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "disturbed9002-10-mofe"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "disturbed9002-10m-wbt"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "disturbed9002-10m"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "disturbed9002-alexash"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "disturbed9002-mofe"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "disturbed9002-wbt-mofe"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "disturbed9002"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "disturbed9002_wbt"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "disturbed9003-10m"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "disturbed9003"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "dolan"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "earth"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "eu-75"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "eu-aragon-disturbed"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "eu-disturbed-50"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "eu-disturbed-75"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "eu-disturbed"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "eu-fire"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "eu-fire2"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "eu-schandau-disturbed"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "eu"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "fishfire-fire"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "fishfire"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "gaviota_2004_fire"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "general"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "lt-fire-future-snow"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "lt-fire-snow-caldor-tr"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "lt-fire-snow-caldor"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "lt-fire-snow"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "lt-wepp_347f3bd"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "lt-wepp_bd16b69-snow"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "lt-wepp_latest"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "lt"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "nigeria"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "omni"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "or-disturbed-beachie-fire"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "or-disturbed-holiday-fire"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "or-disturbed-riverside-fire"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "or-disturbed"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "oregon"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "palouse"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "palouse9002"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "portland-10-mofe"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "portland-disturbed-simfire-eagle"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "portland-disturbed-simfire-norse"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "portland-disturbed"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "portland-disturbed9003"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "portland-simfire-eagle-snow"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "portland-simfire-norse-snow"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "portland-snow"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "portland-wepp_347f3bd"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "portland-wepp_64bf5aa_snow"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "portland-wepp_bd16b69"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "portland-wepp_bd16b69_snow"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "portland"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "reveg-10m-mofe"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "reveg-mofe"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "reveg"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "rhem"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "rhem_rap"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "riverside-fire"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "salvage_logging"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "scu_lightning_complex"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "seattle-simfire-eagle-snow"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "seattle-simfire-norse-snow"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "seattle-snow-9002-simfire"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "seattle-snow-9002"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "seattle-snow"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "soberanes_fire"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "tenerife-5m-disturbed"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "tenerife-disturbed"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "us-ash"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "wepp-swat-wbt"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "whis_carr_fire"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]
+
+[[presets]]
+id = "yasin"
+overrides = ["general.dem_db", "unitizer.is_english", "watershed.delineation_backend", "nodb.apply_nodir"]

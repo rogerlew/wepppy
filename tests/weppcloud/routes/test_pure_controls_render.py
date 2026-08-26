@@ -2391,6 +2391,7 @@ def test_interfaces_template_renders_exact_anonymous_cap_creation_contract(
     assert 'name="unitizer:is_english" value="" data-unitizer-input' in rendered
     assert 'type="button"' in rendered
     assert 'data-run-action="/rq-engine/create/"' in rendered
+    assert "creation_idempotency_key" in rendered
     assert 'aria-disabled="true" disabled' in rendered
     assert '/cap/assets/widget.js' in rendered
     assert '/cap/assets/floating.js' in rendered

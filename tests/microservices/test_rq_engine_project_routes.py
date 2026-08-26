@@ -22,6 +22,25 @@ RUN_ID = "cap-run"
 CONFIG = "disturbed9002"
 
 
+class _FakeIdempotencyRedis:
+    def __init__(self) -> None:
+        self.values: dict[str, str] = {}
+
+    def set(self, key: str, value: str, *, nx: bool = False, xx: bool = False, ex: int) -> bool:
+        if nx and key in self.values:
+            return False
+        if xx and key not in self.values:
+            return False
+        self.values[key] = value
+        return True
+
+    def get(self, key: str) -> str | None:
+        return self.values.get(key)
+
+    def delete(self, key: str) -> int:
+        return int(self.values.pop(key, None) is not None)
+
+
 def _creation_actor() -> CreationActor:
     return CreationActor(
         user_id=42,
@@ -152,6 +171,87 @@ def test_create_api_alias_accepts_valid_cap_token(create_client, monkeypatch: py
     location = response.headers["Location"].rstrip("/")
     assert location.endswith(f"/weppcloud/runs/{RUN_ID}/{CONFIG}")
     assert captured["cfg"] == f"{CONFIG}.cfg"
+
+
+def test_flagged_create_materializes_before_ron_and_replays_original_redirect(
+    create_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, captured = create_client
+    idempotency = _FakeIdempotencyRedis()
+    ron_observation: dict[str, bool] = {}
+
+    monkeypatch.setenv("WEPPPY_PROJECT_CONFIG_PRESET_WRITER_ENABLED", "1")
+    monkeypatch.setenv("RQ_ENGINE_DEPLOYMENT_REVISION", "test-revision")
+    monkeypatch.setattr(project_routes, "_creation_idempotency_client", lambda: idempotency)
+    monkeypatch.setattr(
+        project_routes,
+        "_verify_cap_token",
+        lambda _request, _token: {"success": True},
+    )
+
+    class ObservingRon:
+        def __init__(self, wd: str, cfg: str) -> None:
+            captured["wd"] = wd
+            captured["cfg"] = cfg
+            run_root = Path(wd)
+            ron_observation["config"] = (run_root / f"{CONFIG}.cfg").is_file()
+            ron_observation["manifest"] = (run_root / "config-manifest.json").is_file()
+
+        def config_get_bool(self, _section: str, _option: str, default: bool | None = None) -> bool:
+            return bool(default)
+
+    monkeypatch.setattr(project_routes, "Ron", ObservingRon)
+    data = {
+        "config": CONFIG,
+        "cap_token": "good-token",
+        "creation_idempotency_key": "12345678-1234-4234-9234-123456789abc",
+        "unitizer:is_english": "true",
+    }
+    first = client.post("/create/", data=data, follow_redirects=False)
+    replay = client.post("/create/", data=data, follow_redirects=False)
+
+    assert first.status_code == replay.status_code == 303
+    assert first.headers["Location"] == replay.headers["Location"]
+    assert ron_observation == {"config": True, "manifest": True}
+    assert captured["cfg"] == f"{CONFIG}.cfg"
+    manifest = Path(captured["wd"]) / "config-manifest.json"
+    assert '"source_preset":"disturbed9002"' in manifest.read_text(encoding="utf-8")
+
+
+def test_flagged_create_same_key_different_input_conflicts(
+    create_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, _captured = create_client
+    idempotency = _FakeIdempotencyRedis()
+    monkeypatch.setenv("WEPPPY_PROJECT_CONFIG_PRESET_WRITER_ENABLED", "1")
+    monkeypatch.setattr(project_routes, "_creation_idempotency_client", lambda: idempotency)
+    monkeypatch.setattr(
+        project_routes,
+        "_verify_cap_token",
+        lambda _request, _token: {"success": True},
+    )
+    key = "abcdef12-1234-4234-9234-123456789abc"
+    first = client.post(
+        "/create/",
+        data={"config": CONFIG, "cap_token": "good", "creation_idempotency_key": key},
+        follow_redirects=False,
+    )
+    conflict = client.post(
+        "/create/",
+        data={
+            "config": CONFIG,
+            "cap_token": "good",
+            "creation_idempotency_key": key,
+            "watershed:delineation_backend": "wbt",
+        },
+        follow_redirects=False,
+    )
+
+    assert first.status_code == 303
+    assert conflict.status_code == 409
+    assert conflict.json()["error"]["code"] == "idempotency_key_conflict"
 
 
 def test_create_accepts_rq_token(create_client, monkeypatch: pytest.MonkeyPatch):
