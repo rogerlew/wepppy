@@ -3,6 +3,7 @@
 **Date**: 2026-08-26 17:41 UTC
 **Initiative branch**: `feature/project-owned-config`
 **Starting revision**: `c45726072`
+**Implementation revision**: `a5d0367d7`
 **Feature flags**: no project-owned config writer or update flag added/enabled
 
 ## Artifact and Reader Evidence

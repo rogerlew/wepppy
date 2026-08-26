@@ -145,6 +145,8 @@ closed the touched stub surface, and passed the full repository suite.
 `artifacts/2026-08-26_defaults_compatibility_evidence.md` and
 `artifacts/2026-08-26_correctness_review.md`.
 
+**Implementation revision**: `a5d0367d7`.
+
 **Promotion state**: implemented on `feature/project-owned-config`; not Forest
 accepted and not promoted to `master`. WP11 owns deployed Forest and rollback
 evidence.

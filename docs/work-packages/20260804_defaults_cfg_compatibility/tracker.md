@@ -14,6 +14,7 @@
 **Canonical branch**: `master`
 **Promotion policy**: merge only at the roadmap promotion gate
 **Starting revision**: `c45726072`
+**Implementation revision**: `a5d0367d7`
 **Upstream**: `origin/feature/project-owned-config`
 
 ## Task Board
@@ -154,8 +155,8 @@ merge validation (39 passed).
 
 ## Closure Handoff
 
-- **Feature-branch revision**: pending WP01 commit; starting revision
-  `c45726072`.
+- **Feature-branch implementation revision**: `a5d0367d7` based on starting
+  revision `c45726072`.
 - **Feature flags**: none added or enabled.
 - **Delivered interfaces**: `resolve_defaults_path()` and canonical
   `get_default_config_path()`.
