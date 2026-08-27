@@ -12,6 +12,7 @@ __all__ = [
     "ProjectConfigStatus",
     "ProjectConfigWarning",
     "load_project_config",
+    "project_config_manifest_source_kind",
     "project_config_reader_enabled",
 ]
 PROJECT_CONFIG_READER_FLAG: str
@@ -43,6 +44,7 @@ class ProjectConfigLoadResult:
     status: ProjectConfigStatus
 
 def project_config_reader_enabled(environ: dict[str, str] | None = ...) -> bool: ...
+def project_config_manifest_source_kind(authority_root: str | Path, config_filename: str, *, run_id: str = ...) -> str | None: ...
 def load_project_config(
     *,
     wd: str | Path,

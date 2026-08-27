@@ -58,6 +58,7 @@ def test_config_builder_template_has_one_page_accessible_contract(jinja_env: Env
     assert 'data-creation-url="/rq-engine/api/project-config/builder/create"' in rendered
     for field in (
         "locale", "dem", "delineation_backend", "watershed_representation",
+        "wepp_binary",
         "soil", "landuse", "climate",
     ):
         assert f'for="builder-{field}"' in rendered

@@ -33,6 +33,7 @@ class ComponentKind(str, Enum):
     DEM = "dem"
     DELINEATION = "delineation"
     REPRESENTATION = "representation"
+    WEPP_BINARY = "wepp_binary"
     MOD = "mod"
     SOIL = "soil"
     LANDUSE = "landuse"
@@ -58,6 +59,7 @@ class ConstraintSet:
     allowed_dem: tuple[str, ...] = ()
     allowed_delineation: tuple[str, ...] = ()
     allowed_representation: tuple[str, ...] = ()
+    allowed_wepp_binary: tuple[str, ...] = ()
     allowed_soil: tuple[str, ...] = ()
     allowed_landuse: tuple[str, ...] = ()
     allowed_climate: tuple[str, ...] = ()
@@ -115,6 +117,7 @@ class BuilderSelections:
     dem: str
     delineation_backend: str
     watershed_representation: str
+    wepp_binary: str
     soil: str
     landuse: str
     climate: str
@@ -146,6 +149,7 @@ class BuilderDescription:
     registry_revision: str
     components: tuple[ComponentSummary, ...]
     allowed_cell_sizes: tuple[int, ...]
+    default_selections: Mapping[str, str]
 
 
 @dataclass(frozen=True, slots=True)

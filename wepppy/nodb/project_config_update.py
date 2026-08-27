@@ -144,7 +144,7 @@ def _read_artifacts(root: Path) -> tuple[Path, bytes, bytes, dict[str, object]]:
 def _builder_selections(payload: Mapping[str, object]) -> BuilderSelections:
     required = (
         "locale", "dem", "delineation_backend", "watershed_representation",
-        "soil", "landuse", "climate", "capability_profile",
+        "wepp_binary", "soil", "landuse", "climate", "capability_profile",
     )
     if not all(isinstance(payload.get(key), str) and payload[key] for key in required):
         raise ConfigUpdateUnavailableError("Builder selections are incomplete")
@@ -160,6 +160,7 @@ def _builder_selections(payload: Mapping[str, object]) -> BuilderSelections:
         locale=str(payload["locale"]), dem=str(payload["dem"]),
         delineation_backend=str(payload["delineation_backend"]),
         watershed_representation=str(payload["watershed_representation"]),
+        wepp_binary=str(payload["wepp_binary"]),
         soil=str(payload["soil"]), landuse=str(payload["landuse"]),
         climate=str(payload["climate"]), mods=tuple(mods),
         capability_profile=str(payload["capability_profile"]),

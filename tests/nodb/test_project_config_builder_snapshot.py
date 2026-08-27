@@ -9,14 +9,14 @@ from wepppy.nodb.config_builder.resolver import BuilderConstraintError
 from wepppy.nodb.config_builder.snapshot import builder_writer_enabled, parse_builder_selections, resolve_builder_candidate
 from wepppy.project_config_serialization import parse_config_text
 from wepppy.nodb.base import CaseSensitiveRawConfigParser
-from wepppy.nodb.project_config_reader import load_project_config
+from wepppy.nodb.project_config_reader import load_project_config, project_config_manifest_source_kind
 from wepppy.nodb.project_config_snapshot import materialize_preset_snapshot
 
 pytestmark = pytest.mark.unit
 
 
 def _payload(**updates):
-    payload = {"locale": "continental-us", "dem": "usgs-ned13-2022", "delineation_backend": "wbt", "watershed_representation": "single-ofe", "soil": "ssurgo-gnatsgso-2025", "landuse": "nlcd-2019", "climate": "vanilla_cligen", "mods": []}
+    payload = {"locale": "continental-us", "dem": "usgs-ned13-2022", "delineation_backend": "wbt", "watershed_representation": "single-ofe", "wepp_binary": "wepp_260803", "soil": "ssurgo-gnatsgso-2025", "landuse": "nlcd-2019", "climate": "vanilla_cligen", "mods": []}
     payload.update(updates)
     return payload
 
@@ -34,9 +34,12 @@ def test_builder_candidate_has_fixed_token_manifest_and_review() -> None:
     manifest = json.loads(candidate.artifact.manifest_bytes)
     assert candidate.artifact.config_filename == "config.cfg"
     assert config["general"]["cellsize"] == 10
+    assert config["wepp"]["bin"] == "wepp_260803"
+    assert config["wepp"]["multi_ofe"] is False
     assert manifest["source_kind"] == "builder"
     assert manifest["source_preset"] is None
     assert manifest["selections"]["cellsize_source"] == "dem_default"
+    assert manifest["selections"]["wepp_binary"] == "wepp_260803"
     assert manifest["config"]["filename"] == "config.cfg"
     assert manifest["source_revision"] == "dev"
 
@@ -56,6 +59,10 @@ def test_builder_pair_reopens_without_shared_fallback(tmp_path, monkeypatch) -> 
     )
     assert result.status.mode == "flattened"
     assert result.status.manifest_valid is True
+    assert project_config_manifest_source_kind(tmp_path, "config.cfg") == "builder"
+
+    (tmp_path / "config-manifest.json").write_text("not-json\n", encoding="utf-8")
+    assert project_config_manifest_source_kind(tmp_path, "config.cfg") is None
 
 
 def test_payload_rejects_unknown_fields_and_invalid_cellsize() -> None:

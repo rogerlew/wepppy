@@ -29,6 +29,7 @@ from wepppy.project_config_serialization import (
 
 __all__ = [
     "ALLOWED_CELL_SIZES",
+    "DEFAULT_SELECTIONS",
     "BuilderConstraintError",
     "describe_builder",
     "resolve_builder_config",
@@ -41,12 +42,23 @@ _KIND_ORDER = {
     ComponentKind.DEM: 1,
     ComponentKind.DELINEATION: 2,
     ComponentKind.REPRESENTATION: 3,
-    ComponentKind.MOD: 4,
-    ComponentKind.SOIL: 5,
-    ComponentKind.LANDUSE: 6,
-    ComponentKind.CLIMATE: 7,
-    ComponentKind.CAPABILITY: 8,
+    ComponentKind.WEPP_BINARY: 4,
+    ComponentKind.MOD: 5,
+    ComponentKind.SOIL: 6,
+    ComponentKind.LANDUSE: 7,
+    ComponentKind.CLIMATE: 8,
+    ComponentKind.CAPABILITY: 9,
 }
+_KIND_FIELD = {
+    ComponentKind.DELINEATION: "delineation_backend",
+    ComponentKind.REPRESENTATION: "watershed_representation",
+    ComponentKind.WEPP_BINARY: "wepp_binary",
+}
+DEFAULT_SELECTIONS = MappingProxyType({
+    "delineation_backend": "wbt",
+    "watershed_representation": "single-ofe",
+    "wepp_binary": "wepp_260803",
+})
 
 
 class BuilderConstraintError(ValueError):
@@ -100,6 +112,12 @@ def _selection_chain(registry: Registry, selections: BuilderSelections) -> tuple
         ComponentKind.REPRESENTATION,
         "watershed_representation",
     )
+    wepp_binary = _component(
+        registry,
+        selections.wepp_binary,
+        ComponentKind.WEPP_BINARY,
+        "wepp_binary",
+    )
     soil = _component(registry, selections.soil, ComponentKind.SOIL, "soil")
     landuse = _component(registry, selections.landuse, ComponentKind.LANDUSE, "landuse")
     climate = _component(registry, selections.climate, ComponentKind.CLIMATE, "climate")
@@ -121,6 +139,7 @@ def _selection_chain(registry: Registry, selections: BuilderSelections) -> tuple
         representation.component_id,
         constraints.allowed_representation,
     )
+    _require_allowed("wepp_binary", wepp_binary.component_id, constraints.allowed_wepp_binary)
     _require_allowed("soil", soil.component_id, constraints.allowed_soil)
     _require_allowed("landuse", landuse.component_id, constraints.allowed_landuse)
     _require_allowed("climate", climate.component_id, constraints.allowed_climate)
@@ -138,20 +157,20 @@ def _selection_chain(registry: Registry, selections: BuilderSelections) -> tuple
         _require_allowed("mods", component_id, constraints.allowed_mods)
         mods.append(mod)
         seen_mods.add(component_id)
-    selected = (locale, dem, delineation, representation, *mods, soil, landuse, climate, capability)
+    selected = (locale, dem, delineation, representation, wepp_binary, *mods, soil, landuse, climate, capability)
     selected_ids = {item.component_id for item in selected}
     for component in selected:
         missing = set(component.constraints.requires) - selected_ids
         conflicts = set(component.constraints.conflicts) & selected_ids
         if missing:
             raise BuilderConstraintError(
-                component.kind.value,
+                _KIND_FIELD.get(component.kind, component.kind.value),
                 "missing_required_component",
                 f"{component.component_id!r} requires {sorted(missing)}",
             )
         if conflicts:
             raise BuilderConstraintError(
-                component.kind.value,
+                _KIND_FIELD.get(component.kind, component.kind.value),
                 "conflicting_component",
                 f"{component.component_id!r} conflicts with {sorted(conflicts)}",
             )
@@ -190,7 +209,13 @@ def describe_builder(registry: Registry | None = None) -> BuilderDescription:
             key=lambda item: (_KIND_ORDER[item.kind], item.component_id),
         )
     )
-    return BuilderDescription(1, resolved_registry.revision, summaries, ALLOWED_CELL_SIZES)
+    return BuilderDescription(
+        1,
+        resolved_registry.revision,
+        summaries,
+        ALLOWED_CELL_SIZES,
+        DEFAULT_SELECTIONS,
+    )
 
 
 def resolve_builder_config(

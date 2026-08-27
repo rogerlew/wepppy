@@ -1,0 +1,17 @@
+schema_version = 1
+id = "wepp_dcc52a6"
+kind = "wepp_binary"
+source_revision = "1"
+label = "WEPP dcc52a6 (legacy parity)"
+description = "Legacy-parity WEPP watershed and hillslope executable pair for Single OFE projects."
+owns = ["wepp.bin"]
+overrides = ["wepp.bin"]
+
+[constraints]
+requires = ["continental-us"]
+conflicts = ["multiple-ofe"]
+
+[[writes]]
+section = "wepp"
+option = "bin"
+value = "wepp_dcc52a6"

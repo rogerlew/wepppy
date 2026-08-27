@@ -6,6 +6,7 @@
         dem: "dem",
         delineation_backend: "delineation",
         watershed_representation: "representation",
+        wepp_binary: "wepp_binary",
         soil: "soil",
         landuse: "landuse",
         climate: "climate"
@@ -14,6 +15,7 @@
         dem: "allowed_dem",
         delineation_backend: "allowed_delineation",
         watershed_representation: "allowed_representation",
+        wepp_binary: "allowed_wepp_binary",
         soil: "allowed_soil",
         landuse: "allowed_landuse",
         climate: "allowed_climate"
@@ -26,6 +28,7 @@
         cellsize_source: "Cell-size source",
         delineation_backend: "Delineation backend",
         watershed_representation: "Watershed representation",
+        wepp_binary: "WEPP binary version",
         soil: "Soil method",
         landuse: "Land-cover source",
         climate: "Climate method",
@@ -112,16 +115,33 @@
             select.value = previous;
         }
         if (previous && select.value !== previous && announce) {
-            this.dom.setText(this.changeReason, "The previous " + select.labels[0].textContent + " choice is unavailable for the selected locale and was replaced with " + select.options[select.selectedIndex].text + ".");
+            this.dom.setText(this.changeReason, "The previous " + select.labels[0].textContent + " choice is incompatible with the current combination and was replaced with " + select.options[select.selectedIndex].text + ".");
         }
     };
 
-    ConfigBuilder.prototype._renderDependencies = function (announce) {
+    ConfigBuilder.prototype._renderDependencies = function (announce, changedField) {
         var locale = this._locale();
         var constraints = locale ? locale.constraints || {} : {};
         Object.keys(LOCALE_ALLOWED).forEach(function (field) {
+            if (field === "watershed_representation") { return; }
             this._setOptions(field, constraints[LOCALE_ALLOWED[field]] || [], announce);
         }, this);
+        var backend = this.form.elements.delineation_backend.value;
+        var binary = this.form.elements.wepp_binary.value;
+        var representationIds = (constraints.allowed_representation || []).filter(function (id) {
+            var component = this.components[id];
+            if (!component) { return false; }
+            var required = component.constraints ? component.constraints.requires || [] : [];
+            if (required.indexOf("wbt") !== -1 && backend !== "wbt") { return false; }
+            return changedField !== "wepp_binary" || required.indexOf("wepp_260803") === -1 || binary === "wepp_260803";
+        }, this);
+        this._setOptions("watershed_representation", representationIds, announce);
+        if (this.form.elements.watershed_representation.value === "multiple-ofe" && binary !== "wepp_260803") {
+            this.form.elements.wepp_binary.value = "wepp_260803";
+            if (announce) {
+                this.dom.setText(this.changeReason, "Multiple OFE requires WEPP 260803; the binary selection was updated.");
+            }
+        }
         this._renderMods(constraints.allowed_mods || [], announce);
         this._renderCellsize();
     };
@@ -175,6 +195,7 @@
             dem: this.form.elements.dem.value,
             delineation_backend: this.form.elements.delineation_backend.value,
             watershed_representation: this.form.elements.watershed_representation.value,
+            wepp_binary: this.form.elements.wepp_binary.value,
             soil: this.form.elements.soil.value,
             landuse: this.form.elements.landuse.value,
             climate: this.form.elements.climate.value,
@@ -332,7 +353,17 @@
             this.description.components.forEach(function (component) { this.components[component.component_id] = component; }, this);
             this._setOptions("locale", null, false);
             if (prior && this.components[prior.locale]) { this.form.elements.locale.value = prior.locale; }
-            this._renderDependencies(Boolean(preserve));
+            this._renderDependencies(Boolean(preserve), null);
+            if (!prior) {
+                Object.keys(this.description.default_selections || {}).forEach(function (field) {
+                    var select = this.form.elements[field];
+                    var value = this.description.default_selections[field];
+                    if (select && Array.prototype.some.call(select.options, function (option) { return option.value === value; })) {
+                        select.value = value;
+                    }
+                }, this);
+                this._renderDependencies(false, null);
+            }
             this.busy = false;
             this._setStatus("Registered choices loaded. Review selections to validate the complete configuration.", false);
             this._updateActions();
@@ -349,8 +380,8 @@
             this.creationKey = null;
             this.review.hidden = true;
             this._clearErrors();
-            if (event.target && event.target.name === "locale") {
-                this._renderDependencies(true);
+            if (event.target && ["locale", "delineation_backend", "watershed_representation", "wepp_binary"].indexOf(event.target.name) !== -1) {
+                this._renderDependencies(true, event.target.name);
             } else if (event.target && event.target.name === "dem") {
                 this._renderCellsize();
             }

@@ -21,7 +21,7 @@ __all__ = ["BUILDER_WRITER_FLAG", "BuilderCandidate", "builder_writer_enabled", 
 BUILDER_WRITER_FLAG = "WEPPPY_PROJECT_CONFIG_BUILDER_WRITER_ENABLED"
 _TRUE = frozenset({"1", "true", "yes", "on"})
 _FALSE = frozenset({"", "0", "false", "no", "off"})
-_REQUIRED = frozenset({"locale", "dem", "delineation_backend", "watershed_representation", "soil", "landuse", "climate"})
+_REQUIRED = frozenset({"locale", "dem", "delineation_backend", "watershed_representation", "wepp_binary", "soil", "landuse", "climate"})
 _OPTIONAL = frozenset({"mods", "capability_profile", "cellsize_override"})
 
 
@@ -66,7 +66,7 @@ def parse_builder_selections(payload: object) -> BuilderSelections:
         raise BuilderConstraintError("capability_profile", "invalid_type", "capability_profile must be a stable ID")
     return BuilderSelections(
         locale=payload["locale"], dem=payload["dem"], delineation_backend=payload["delineation_backend"],
-        watershed_representation=payload["watershed_representation"], soil=payload["soil"],
+        watershed_representation=payload["watershed_representation"], wepp_binary=payload["wepp_binary"], soil=payload["soil"],
         landuse=payload["landuse"], climate=payload["climate"], mods=tuple(mods),
         capability_profile=profile, cellsize_override=override,
     )
@@ -88,6 +88,7 @@ def resolve_builder_candidate(
         "cellsize": resolved.effective_cellsize, "cellsize_source": resolved.cellsize_source,
         "delineation_backend": selections.delineation_backend,
         "watershed_representation": selections.watershed_representation,
+        "wepp_binary": selections.wepp_binary,
         "soil": selections.soil, "landuse": selections.landuse, "climate": selections.climate,
         "mods": list(selections.mods),
         "capabilities": dict(resolved.config.get("capabilities", {})),

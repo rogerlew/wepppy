@@ -1,0 +1,17 @@
+schema_version = 1
+id = "wepp_260803"
+kind = "wepp_binary"
+source_revision = "1"
+label = "WEPP 260803"
+description = "Default Config Builder WEPP watershed and hillslope executable pair; supports Single and Multiple OFE."
+owns = ["wepp.bin"]
+overrides = ["wepp.bin"]
+
+[constraints]
+requires = ["continental-us"]
+conflicts = []
+
+[[writes]]
+section = "wepp"
+option = "bin"
+value = "wepp_260803"

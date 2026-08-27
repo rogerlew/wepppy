@@ -10,11 +10,11 @@ function description(canOverride = false) {
     const empty = {
         requires: [], conflicts: [], allowed_dem: [], allowed_delineation: [],
         allowed_representation: [], allowed_soil: [], allowed_landuse: [],
-        allowed_climate: [], allowed_mods: [], allowed_capability_profiles: []
+        allowed_wepp_binary: [], allowed_climate: [], allowed_mods: [], allowed_capability_profiles: []
     };
     const localeConstraints = Object.assign({}, empty, {
         allowed_dem: ["dem-a", "dem-b"], allowed_delineation: ["wbt"],
-        allowed_representation: ["single"], allowed_soil: ["soil"],
+        allowed_representation: ["single", "multiple-ofe"], allowed_wepp_binary: ["wepp_dcc52a6", "wepp_260803"], allowed_soil: ["soil"],
         allowed_landuse: ["land"], allowed_climate: ["climate"],
         allowed_capability_profiles: ["capabilities"]
     });
@@ -25,12 +25,14 @@ function description(canOverride = false) {
     return {
         schema_version: 1, registry_revision: "registry-1", can_override_cellsize: canOverride,
         allowed_cell_sizes: [1, 2, 5, 10, 25, 30, 90, 100], config_token: "config",
-        config_filename: "config.cfg",
+        config_filename: "config.cfg", default_selections: {delineation_backend: "wbt", watershed_representation: "single", wepp_binary: "wepp_260803"},
         components: [
             item("conus", "locale", "Continental US", {constraints: localeConstraints}),
             item("dem-a", "dem", "DEM A", {default_cellsize: 10}),
             item("dem-b", "dem", "DEM B", {default_cellsize: 30}),
             item("wbt", "delineation", "WBT"), item("single", "representation", "Single OFE"),
+            item("multiple-ofe", "representation", "Multiple OFE", {constraints: Object.assign({}, empty, {requires: ["conus", "wbt", "wepp_260803"]})}),
+            item("wepp_dcc52a6", "wepp_binary", "WEPP legacy"), item("wepp_260803", "wepp_binary", "WEPP 260803"),
             item("soil", "soil", "Soil"), item("land", "landuse", "Land cover"),
             item("climate", "climate", "Climate"), item("capabilities", "capability", "Capabilities")
         ]
@@ -41,7 +43,7 @@ function review() {
     return {
         locale: "conus", dem: "dem-a", dem_default_cellsize: 10, cellsize: 10,
         cellsize_source: "dem_default", delineation_backend: "wbt",
-        watershed_representation: "single", soil: "soil", landuse: "land",
+        watershed_representation: "single", wepp_binary: "wepp_260803", soil: "soil", landuse: "land",
         climate: "climate", mods: [], capabilities: {climate: ["station"]},
         config_filename: "config.cfg"
     };
@@ -51,7 +53,7 @@ function installDom() {
     document.body.innerHTML = `
       <div data-config-builder data-description-url="/describe" data-validation-url="/validate" data-creation-url="/create">
         <div data-builder-error-summary tabindex="-1" hidden><ul data-builder-error-list></ul></div>
-        <form data-builder-form>${["locale", "dem", "delineation_backend", "watershed_representation", "soil", "landuse", "climate"].map((field) => `
+        <form data-builder-form>${["locale", "dem", "delineation_backend", "watershed_representation", "wepp_binary", "soil", "landuse", "climate"].map((field) => `
           <label for="builder-${field}">${field}</label><select id="builder-${field}" name="${field}"></select>
           <p data-builder-field-error="${field}"></p>`).join("")}
           <p data-builder-cellsize></p>
@@ -110,7 +112,7 @@ describe("Config Builder controller", () => {
         expect(root.querySelector("[data-builder-create]").disabled).toBe(false);
         expect(http.request.mock.calls.at(-1)[1].json.selections).toEqual({
             locale: "conus", dem: "dem-a", delineation_backend: "wbt",
-            watershed_representation: "single", soil: "soil", landuse: "land",
+            watershed_representation: "single", wepp_binary: "wepp_260803", soil: "soil", landuse: "land",
             climate: "climate", mods: [], capability_profile: "capabilities"
         });
     });
@@ -129,8 +131,44 @@ describe("Config Builder controller", () => {
         controller._renderDependencies(true);
 
         expect(root.querySelector("[name=dem]").value).toBe("dem-b");
-        expect(root.querySelector("[data-builder-change-reason]").textContent).toContain("unavailable");
+        expect(root.querySelector("[data-builder-change-reason]").textContent).toContain("incompatible with the current combination");
         expect(controller._selections().dem).toBe("dem-b");
+    });
+
+    test("defaults to WBT and WEPP 260803 and clears Multiple OFE for incompatible changes", async () => {
+        const schema = description(false);
+        schema.components.push(Object.assign({}, schema.components.find((item) => item.component_id === "wbt"), {component_id: "topaz", label: "TOPAZ"}));
+        schema.components[0].constraints.allowed_delineation = ["topaz", "wbt"];
+        const http = {getRqEngineToken: jest.fn().mockResolvedValue("token"), request: jest.fn().mockResolvedValue({body: schema})};
+        const root = document.querySelector("[data-config-builder]");
+        const controller = new window.ConfigBuilder(root, dependencies(http));
+        await controller.init();
+
+        expect(root.querySelector("[name=delineation_backend]").value).toBe("wbt");
+        expect(root.querySelector("[name=wepp_binary]").value).toBe("wepp_260803");
+        expect([...root.querySelector("[name=watershed_representation]").options].map((option) => option.value)).toContain("multiple-ofe");
+
+        root.querySelector("[name=wepp_binary]").value = "wepp_dcc52a6";
+        root.querySelector("[name=watershed_representation]").value = "multiple-ofe";
+        root.querySelector("[name=watershed_representation]").dispatchEvent(new Event("change", {bubbles: true}));
+        await settle();
+        expect(root.querySelector("[name=wepp_binary]").value).toBe("wepp_260803");
+        expect(controller._selections().wepp_binary).toBe("wepp_260803");
+        expect(root.querySelector("[data-builder-change-reason]").textContent).toContain("Multiple OFE requires WEPP 260803");
+
+        root.querySelector("[name=watershed_representation]").value = "multiple-ofe";
+        controller._renderDependencies(true, "watershed_representation");
+        root.querySelector("[name=wepp_binary]").value = "wepp_dcc52a6";
+        controller._renderDependencies(true, "wepp_binary");
+        expect(root.querySelector("[name=watershed_representation]").value).toBe("single");
+        expect(controller._selections().watershed_representation).toBe("single");
+
+        root.querySelector("[name=wepp_binary]").value = "wepp_260803";
+        root.querySelector("[name=watershed_representation]").value = "multiple-ofe";
+        root.querySelector("[name=delineation_backend]").value = "topaz";
+        controller._renderDependencies(true, "delineation_backend");
+        expect(root.querySelector("[name=watershed_representation]").value).toBe("single");
+        expect(root.querySelector("[data-builder-change-reason]").textContent).toContain("incompatible with the current combination");
     });
 
     test("offers only fixed privileged overrides and clears intent at the DEM default", async () => {

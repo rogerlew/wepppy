@@ -42,6 +42,7 @@ from wepppy.nodb.core import (
 )
 from wepppy.nodb.unitizer import Unitizer
 from wepppy.nodb.project_config_capabilities import soil_capability_modes
+from wepppy.nodb.project_config_reader import project_config_manifest_source_kind
 from wepppy.weppcloud.user_preferences import (
     PreferenceResolutionError,
     preference_resolution_error_response,
@@ -106,6 +107,16 @@ DEFAULT_BROWSE_JWT_COOKIE_NAME = "wepp_browse_jwt"
 BROWSE_JWT_COOKIE_NAME_ENV = "WEPP_BROWSE_JWT_COOKIE_NAME"
 DEFAULT_SITE_PREFIX = "/weppcloud"
 _SYSTEM_LANDUSE_CUSTOM_MAPPING_RELPATH = "landuse/landuse_user_defined_mapping.json"
+
+
+def _resolve_run_config_maturity_label(config, wd, runid, run_config_spec):
+    label = config_maturity_badge(run_config_spec) if run_config_spec is not None else None
+    if (
+        config == "config"
+        and project_config_manifest_source_kind(wd, "config.cfg", run_id=runid) == "builder"
+    ):
+        return "Preview"
+    return label
 
 VAPID_PUBLIC_KEY = ''
 _VAPID_PATH = pathlib.Path('/workdir/weppcloud2/microservices/wepppush/vapid.json')
@@ -1946,8 +1957,11 @@ def _build_runs0_context(runid, config, playwright_load_all):
         for entry in feature_registry_entries
     }
     run_config_spec = config_registry_by_id().get(config)
-    run_config_maturity_label = (
-        config_maturity_badge(run_config_spec) if run_config_spec is not None else None
+    run_config_maturity_label = _resolve_run_config_maturity_label(
+        config,
+        wd,
+        runid,
+        run_config_spec,
     )
 
     features_export_catalog_payload = {}

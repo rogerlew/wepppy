@@ -87,7 +87,7 @@ async def builder_description(request: Request) -> JSONResponse:
     except RegistryError:
         logger.exception("builder description failed")
         return error_response("Builder registry is unavailable.", status_code=500, code="builder_registry_error")
-    return JSONResponse({"schema_version": description.schema_version, "registry_revision": description.registry_revision, "components": [asdict(item) for item in description.components], "allowed_cell_sizes": list(description.allowed_cell_sizes), "can_override_cellsize": _can_override(claims), "config_token": "config", "config_filename": "config.cfg"})
+    return JSONResponse({"schema_version": description.schema_version, "registry_revision": description.registry_revision, "components": [asdict(item) for item in description.components], "allowed_cell_sizes": list(description.allowed_cell_sizes), "default_selections": dict(description.default_selections), "can_override_cellsize": _can_override(claims), "config_token": "config", "config_filename": "config.cfg"})
 
 
 @router.post("/project-config/builder/validate", summary="Validate project config proposal", description="Requires JWT `rq:enqueue`; synchronously resolves a complete proposal with no queue or writes.", tags=["rq-engine", "project"], operation_id=rq_operation_id("validate_project_config_builder"), responses=agent_route_responses(success_code=200, success_description="Valid resolved proposal.", extra={400: "Validation failed. Returns the canonical error payload.", 409: "Stale schema. Returns the canonical error payload."}))

@@ -13,6 +13,7 @@ class ComponentKind(str, Enum):
     DEM = "dem"
     DELINEATION = "delineation"
     REPRESENTATION = "representation"
+    WEPP_BINARY = "wepp_binary"
     MOD = "mod"
     SOIL = "soil"
     LANDUSE = "landuse"
@@ -36,12 +37,13 @@ class ConstraintSet:
     allowed_dem: tuple[str, ...]
     allowed_delineation: tuple[str, ...]
     allowed_representation: tuple[str, ...]
+    allowed_wepp_binary: tuple[str, ...]
     allowed_soil: tuple[str, ...]
     allowed_landuse: tuple[str, ...]
     allowed_climate: tuple[str, ...]
     allowed_mods: tuple[str, ...]
     allowed_capability_profiles: tuple[str, ...]
-    def __init__(self, requires: tuple[str, ...] = ..., conflicts: tuple[str, ...] = ..., allowed_dem: tuple[str, ...] = ..., allowed_delineation: tuple[str, ...] = ..., allowed_representation: tuple[str, ...] = ..., allowed_soil: tuple[str, ...] = ..., allowed_landuse: tuple[str, ...] = ..., allowed_climate: tuple[str, ...] = ..., allowed_mods: tuple[str, ...] = ..., allowed_capability_profiles: tuple[str, ...] = ...) -> None: ...
+    def __init__(self, requires: tuple[str, ...] = ..., conflicts: tuple[str, ...] = ..., allowed_dem: tuple[str, ...] = ..., allowed_delineation: tuple[str, ...] = ..., allowed_representation: tuple[str, ...] = ..., allowed_wepp_binary: tuple[str, ...] = ..., allowed_soil: tuple[str, ...] = ..., allowed_landuse: tuple[str, ...] = ..., allowed_climate: tuple[str, ...] = ..., allowed_mods: tuple[str, ...] = ..., allowed_capability_profiles: tuple[str, ...] = ...) -> None: ...
 
 @dataclass(frozen=True, slots=True)
 class ComponentDefinition:
@@ -75,13 +77,14 @@ class BuilderSelections:
     dem: str
     delineation_backend: str
     watershed_representation: str
+    wepp_binary: str
     soil: str
     landuse: str
     climate: str
     mods: tuple[str, ...]
     capability_profile: str
     cellsize_override: int | None
-    def __init__(self, locale: str, dem: str, delineation_backend: str, watershed_representation: str, soil: str, landuse: str, climate: str, mods: tuple[str, ...] = ..., capability_profile: str = ..., cellsize_override: int | None = ...) -> None: ...
+    def __init__(self, locale: str, dem: str, delineation_backend: str, watershed_representation: str, wepp_binary: str, soil: str, landuse: str, climate: str, mods: tuple[str, ...] = ..., capability_profile: str = ..., cellsize_override: int | None = ...) -> None: ...
 
 @dataclass(frozen=True, slots=True)
 class ConfigProvenance:
@@ -105,7 +108,8 @@ class BuilderDescription:
     registry_revision: str
     components: tuple[ComponentSummary, ...]
     allowed_cell_sizes: tuple[int, ...]
-    def __init__(self, schema_version: int, registry_revision: str, components: tuple[ComponentSummary, ...], allowed_cell_sizes: tuple[int, ...]) -> None: ...
+    default_selections: Mapping[str, str]
+    def __init__(self, schema_version: int, registry_revision: str, components: tuple[ComponentSummary, ...], allowed_cell_sizes: tuple[int, ...], default_selections: Mapping[str, str]) -> None: ...
 
 @dataclass(frozen=True, slots=True)
 class ResolvedBuilderConfig:

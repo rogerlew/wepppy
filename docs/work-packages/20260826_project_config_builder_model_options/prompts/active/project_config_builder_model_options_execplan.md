@@ -13,11 +13,13 @@ are never offered as silently valid and are rejected by the server if submitted.
 ## Progress
 
 - [x] (2026-08-27 03:36 UTC) Scaffold package and proposed contract checkpoint.
-- [ ] Obtain and disposition two independent contract reviews.
-- [ ] Commit the contract checkpoint as a standalone ancestor.
-- [ ] Implement registry, resolver, snapshot, API, UI, and type-surface changes.
-- [ ] Add focused regression and generated-config evidence.
-- [ ] Run frontend, pytest, stub, documentation, and broad-exception gates.
+- [x] (2026-08-27 04:00 UTC) Obtain and disposition two independent contract reviews.
+- [x] (2026-08-27 04:00 UTC) Commit checkpoint `95559bc6f` as a standalone ancestor.
+- [x] (2026-08-27 04:20 UTC) Implement registry, resolver, snapshot, API, UI, maturity, and type-surface changes.
+- [x] (2026-08-27 04:30 UTC) Add focused regression, generated-config, legacy-manifest, and real binary execution evidence.
+- [ ] Run remaining Forest and broad validation (completed: npm, focused pytest,
+  stub, docs, broad exceptions; remaining: Forest gate and full pytest after an
+  unrelated environment-isolation failure).
 - [ ] Complete correctness review, update tracker, and close the package.
 
 ## Surprises & Discoveries
@@ -44,6 +46,12 @@ are never offered as silently valid and are rejected by the server if submitted.
 ## Outcomes & Retrospective
 
 Pending implementation.
+
+The bounded implementation is complete locally with explicit defaults,
+server-enforced tuples, persisted binary provenance, dependency-aware UI, and
+Preview maturity. Local direct model runs cover both registered executable
+pairs. Forest WBT Multiple OFE and the full ten-tuple acceptance gate remain
+pending, so the new registry must not be promoted to production.
 
 ## Context and Orientation
 

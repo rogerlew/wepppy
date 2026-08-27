@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import replace
 from pathlib import Path
 import shutil
+import subprocess
 
 import pytest
 
@@ -34,6 +35,9 @@ EXPECTED_IDS = {
     "topaz",
     "wbt",
     "single-ofe",
+    "multiple-ofe",
+    "wepp_dcc52a6",
+    "wepp_260803",
     "ssurgo-gnatsgso-2025",
     "nlcd-2019",
     "vanilla_cligen",
@@ -48,6 +52,8 @@ def _selections(
     dem: str = "usgs-ned1-2024",
     backend: str = "topaz",
     *,
+    representation: str = "single-ofe",
+    wepp_binary: str = "wepp_260803",
     climate: str = "vanilla_cligen",
     mods: tuple[str, ...] = (),
     cellsize: int | None = None,
@@ -56,7 +62,8 @@ def _selections(
         locale="continental-us",
         dem=dem,
         delineation_backend=backend,
-        watershed_representation="single-ofe",
+        watershed_representation=representation,
+        wepp_binary=wepp_binary,
         soil="ssurgo-gnatsgso-2025",
         landuse="nlcd-2019",
         climate=climate,
@@ -110,12 +117,55 @@ def test_shipped_registry_is_real_toml_with_stable_ids_and_defaults() -> None:
     assert len(registry.revision) == 64
 
 
+@pytest.mark.parametrize("binary_id", ["wepp_dcc52a6", "wepp_260803"])
+def test_registered_wepp_binary_pairs_execute_without_mocking(binary_id: str, tmp_path: Path) -> None:
+    bin_root = Path(__file__).parents[2] / "wepp_runner" / "bin"
+    fixture_root = Path(__file__).parents[1] / "wepp" / "interchange" / "fixtures" / "deductive-futurist" / "wepp" / "runs"
+    required = (
+        "p1.run", "p1.man", "p1.slp", "p1.cli", "p1.sol", "chan.inp",
+        "chntyp.txt", "gwcoeff.txt", "pmetpara.txt", "snow.txt", "wepp_ui.txt",
+    )
+    for suffix in ("", "_hill"):
+        binary = bin_root / f"{binary_id}{suffix}"
+        assert binary.is_file()
+        assert binary.stat().st_mode & 0o111
+        work_root = tmp_path / f"builder-{binary_id}{suffix}"
+        runs_dir = work_root / "runs"
+        (work_root / "output").mkdir(parents=True)
+        runs_dir.mkdir()
+        for filename in required:
+            shutil.copy2(fixture_root / filename, runs_dir / filename)
+        completed = subprocess.run(
+            [str(binary)],
+            input=(runs_dir / "p1.run").read_bytes(),
+            cwd=runs_dir,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=30,
+            check=False,
+        )
+        assert completed.returncode == 0, completed.stderr.decode(errors="replace")
+        assert b"WEPP COMPLETED HILLSLOPE SIMULATION SUCCESSFULLY" in completed.stdout
+
+
 @pytest.mark.parametrize("dem", ["usgs-ned1-2024", "usgs-ned13-2022"])
-@pytest.mark.parametrize("backend", ["topaz", "wbt"])
-def test_initial_local_matrix_resolves_to_canonical_bytes(dem: str, backend: str) -> None:
+@pytest.mark.parametrize(
+    ("backend", "representation", "wepp_binary"),
+    [
+        ("topaz", "single-ofe", "wepp_dcc52a6"),
+        ("topaz", "single-ofe", "wepp_260803"),
+        ("wbt", "single-ofe", "wepp_dcc52a6"),
+        ("wbt", "single-ofe", "wepp_260803"),
+        ("wbt", "multiple-ofe", "wepp_260803"),
+    ],
+)
+def test_initial_local_matrix_resolves_to_canonical_bytes(
+    dem: str, backend: str, representation: str, wepp_binary: str,
+) -> None:
     registry = load_registry()
-    first = resolve_builder_config(_selections(dem, backend), registry=registry)
-    second = resolve_builder_config(_selections(dem, backend), registry=registry)
+    selections = _selections(dem, backend, representation=representation, wepp_binary=wepp_binary)
+    first = resolve_builder_config(selections, registry=registry)
+    second = resolve_builder_config(selections, registry=registry)
 
     assert first.config_bytes == second.config_bytes
     assert validate_canonical_config_text(first.config_bytes.decode()) == parse_config_text(
@@ -126,6 +176,8 @@ def test_initial_local_matrix_resolves_to_canonical_bytes(dem: str, backend: str
         "ned1/2024" if dem == "usgs-ned1-2024" else "ned13/2022"
     )
     assert first.config["watershed"]["delineation_backend"] == backend
+    assert first.config["wepp"]["multi_ofe"] is (representation == "multiple-ofe")
+    assert first.config["wepp"]["bin"] == wepp_binary
     assert first.effective_cellsize == first.dem_default_cellsize
     assert first.cellsize_source == "dem_default"
 
@@ -149,6 +201,7 @@ def test_composition_order_and_effective_writers_are_explicit() -> None:
         "usgs-ned1-2024",
         "wbt",
         "single-ofe",
+        "wepp_260803",
         "ssurgo-gnatsgso-2025",
         "nlcd-2019",
         "observed_daymet",
@@ -156,6 +209,7 @@ def test_composition_order_and_effective_writers_are_explicit() -> None:
     ]
     assert result.effective_writers[("general", "dem_db")] == "usgs-ned1-2024"
     assert result.effective_writers[("watershed.wbt", "mcl")] == "wbt"
+    assert result.effective_writers[("wepp", "bin")] == "wepp_260803"
     assert result.effective_writers[("general", "cellsize")] == "selection:cellsize"
 
 
@@ -244,6 +298,7 @@ def test_description_is_deterministic_and_server_ready() -> None:
         ("dem", "missing-dem"),
         ("delineation_backend", "missing-backend"),
         ("watershed_representation", "missing-representation"),
+        ("wepp_binary", "missing-binary"),
         ("soil", "missing-soil"),
         ("landuse", "missing-landuse"),
         ("climate", "missing-climate"),
@@ -270,6 +325,19 @@ def test_builder_constraints_reject_invalid_sizes_and_mods() -> None:
     with pytest.raises(BuilderConstraintError) as mod_error:
         resolve_builder_config(_selections(mods=("unregistered-mod",)))
     assert (mod_error.value.field, mod_error.value.code) == ("mods", "unknown_component")
+
+
+@pytest.mark.parametrize(
+    "selections",
+    [
+        _selections("usgs-ned1-2024", "topaz", representation="multiple-ofe"),
+        _selections("usgs-ned1-2024", "wbt", representation="multiple-ofe", wepp_binary="wepp_dcc52a6"),
+    ],
+)
+def test_multiple_ofe_rejects_incompatible_backend_or_binary(selections: BuilderSelections) -> None:
+    with pytest.raises(BuilderConstraintError) as error:
+        resolve_builder_config(selections)
+    assert error.value.code in {"missing_required_component", "conflicting_component"}
 
 
 def test_registry_revision_is_path_and_content_deterministic(tmp_path: Path) -> None:

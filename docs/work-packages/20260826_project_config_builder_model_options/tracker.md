@@ -4,9 +4,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-27 03:36 UTC
-**Current phase**: Contract checkpoint
-**Last updated**: 2026-08-27 04:00 UTC
-**Next milestone**: Standalone checkpoint commit, then implementation
+**Current phase**: Implementation validation
+**Last updated**: 2026-08-27 04:30 UTC
+**Next milestone**: Final correctness disposition and Forest acceptance
 **Security impact**: `low`
 **Dedicated security review**: `no`
 **Parameterization ADR**: `docs/adrs/ADR-0046-config-builder-wbt-and-wepp-260803-defaults.md`
@@ -15,14 +15,11 @@
 
 ### In Progress
 
-- [ ] Complete and commit the contract-decision checkpoint.
+- [ ] Run the ten-tuple Forest acceptance gate, including WBT Multiple OFE.
 
 ### Ready / Backlog
 
-- [ ] Implement registered representation and binary components.
-- [ ] Wire dependent Builder availability and persistence.
-- [ ] Add backend, UI, serialization, and generated-config tests.
-- [ ] Complete correctness review and validation.
+- [ ] Re-run broad Python validation after correcting the unrelated test isolation failure.
 
 ### Blocked
 
@@ -32,6 +29,14 @@
 
 - [x] Recorded operator approval and scaffolded the package (2026-08-27 03:36 UTC).
 - [x] Corrected and passed two independent contract reviews (2026-08-27 04:00 UTC).
+- [x] Committed standalone checkpoint `95559bc6f` (2026-08-27 04:00 UTC).
+- [x] Implemented registered Multiple OFE and WEPP binary components (2026-08-27 04:20 UTC).
+- [x] Wired explicit WBT/`wepp_260803` defaults, dependency clearing, persistence,
+  and Preview run-header maturity (2026-08-27 04:20 UTC).
+- [x] Added generated-config, real binary execution, legacy-manifest, API, UI,
+  and maturity tests (2026-08-27 04:30 UTC).
+- [x] Passed independent implementation correctness review, conditional on
+  Forest acceptance before exposure (2026-08-27 04:30 UTC).
 
 ## Decisions Log
 
@@ -88,3 +93,20 @@ provenance entries.
 WhiteboxTools and `wepp_260803` as defaults, classified every Builder project as
 Preview, and confirmed governance-required reviewer delegation is standing
 authority.
+
+## Validation Evidence
+
+- Focused Python: 83 passed before review hardening; post-review focused sets
+  passed 53 tests plus the targeted legacy-manifest case.
+- Frontend focused: 7 passed; full frontend: 107 suites, 792 tests passed.
+- Frontend lint: passed.
+- Stubtest: schema, resolver, and project-config reader passed; stub inventory passed.
+- Broad-exception changed-file enforcement: passed with zero delta.
+- Real WEPP execution: both `wepp_dcc52a6` and `wepp_260803`, watershed and
+  hillslope binaries, completed the four-year `p1` fixture successfully.
+- Full Python suite stopped at 1 unrelated failure after 1,199 passed and 18
+  skipped: `test_create_accepts_valid_cap_token` inherited the dev stack's
+  enabled project-config writer and returned 400 instead of its expected 303.
+  The fixture now explicitly constructs the legacy writer-disabled state and
+  both affected creation tests pass; the full suite has not yet been re-run.
+- Forest ten-tuple and WBT Multiple OFE execution: pending; no exposure claimed.

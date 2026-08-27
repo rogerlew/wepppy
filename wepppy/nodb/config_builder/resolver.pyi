@@ -2,8 +2,9 @@ from typing import Mapping
 from wepppy.nodb.config_builder.schema import BuilderDescription, BuilderSelections, Registry, ResolvedBuilderConfig
 from wepppy.project_config_serialization import CanonicalValue
 
-__all__ = ["ALLOWED_CELL_SIZES", "BuilderConstraintError", "describe_builder", "resolve_builder_config"]
+__all__ = ["ALLOWED_CELL_SIZES", "DEFAULT_SELECTIONS", "BuilderConstraintError", "describe_builder", "resolve_builder_config"]
 ALLOWED_CELL_SIZES: tuple[int, ...]
+DEFAULT_SELECTIONS: Mapping[str, str]
 
 class BuilderConstraintError(ValueError):
     field: str

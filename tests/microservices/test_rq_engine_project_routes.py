@@ -99,6 +99,7 @@ def create_client(
     monkeypatch.setattr(project_routes, "Ron", DummyRon)
     monkeypatch.setattr(project_routes, "ensure_readme_on_create", lambda runid, config: None)
     monkeypatch.delenv("WEPP_NODIR_DEFAULT_NEW_RUNS", raising=False)
+    monkeypatch.delenv("WEPPPY_PROJECT_CONFIG_PRESET_WRITER_ENABLED", raising=False)
     monkeypatch.setenv("SITE_PREFIX", "/weppcloud")
 
     with TestClient(rq_engine.app) as client:

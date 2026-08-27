@@ -178,6 +178,7 @@ def test_builder_preview_uses_only_recorded_active_component_chain(tmp_path: Pat
     selections = BuilderSelections(
         locale="continental-us", dem="usgs-ned13-2022", delineation_backend="wbt",
         watershed_representation="single-ofe", soil="ssurgo-gnatsgso-2025",
+        wepp_binary="wepp_260803",
         landuse="nlcd-2019", climate="vanilla_cligen",
     )
     candidate = resolve_builder_candidate(
@@ -203,6 +204,60 @@ def test_builder_preview_uses_only_recorded_active_component_chain(tmp_path: Pat
 
     addition = next(item for item in preview.additions if (item.section, item.option) == (section, option))
     assert addition.source_id == expected_writer
+
+
+def test_pre_binary_builder_manifest_remains_runnable_but_update_unavailable(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config_bytes = serialize_config({
+        "config": {"flattened": True, "resolver_version": 1, "schema_version": 1},
+        "wepp": {"bin": "wepp_dcc52a6", "multi_ofe": False},
+    })
+    (tmp_path / "config.cfg").write_bytes(config_bytes)
+    manifest_path = tmp_path / "config-manifest.json"
+    manifest = {
+        "schema_version": 1,
+        "resolver_version": 1,
+        "source_kind": "builder",
+        "source_preset": None,
+        "source_revision": "pre-binary-builder",
+        "resolved_at": "2026-08-26T22:00:00Z",
+        "parent_chain": [
+            {"kind": "defaults", "id": "shared-defaults", "revision": "old-defaults"},
+            {"kind": "locale", "id": "continental-us", "revision": "1"},
+            {"kind": "dem", "id": "usgs-ned13-2022", "revision": "1"},
+            {"kind": "delineation", "id": "wbt", "revision": "1"},
+            {"kind": "representation", "id": "single-ofe", "revision": "1"},
+        ],
+        "selections": {
+            "locale": "continental-us", "dem": "usgs-ned13-2022",
+            "delineation_backend": "wbt", "watershed_representation": "single-ofe",
+            "soil": "ssurgo-gnatsgso-2025", "landuse": "nlcd-2019",
+            "climate": "vanilla_cligen", "capability_profile": "continental-us-capabilities",
+            "mods": [], "cellsize": 10, "cellsize_source": "dem_default",
+        },
+        "config": {"filename": "config.cfg", "sha256": hashlib.sha256(config_bytes).hexdigest()},
+        "amendments": [],
+    }
+    manifest_path.write_text(
+        json.dumps(manifest, sort_keys=True, separators=(",", ":")) + "\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setenv("WEPPPY_PROJECT_CONFIG_READER_ENABLED", "1")
+    loaded = load_project_config(
+        wd=tmp_path,
+        config_token="config",
+        parent_wd=None,
+        config_dir=tmp_path / "missing",
+        defaults_resolver=lambda _wd=None: str(tmp_path / "missing-defaults.cfg"),
+        parser_factory=RawConfigParser,
+        run_id="pre-binary-builder",
+    )
+    assert loaded.status.manifest_valid is True
+    assert loaded.parser.get("wepp", "bin") == '"wepp_dcc52a6"'
+    with pytest.raises(ConfigUpdateUnavailableError, match="selections are incomplete"):
+        preview_project_config_update(tmp_path)
 
 
 def test_invalid_recorded_chain_produces_no_preview_or_write(tmp_path: Path) -> None:

@@ -24,6 +24,7 @@ __all__ = [
     "ProjectConfigStatus",
     "ProjectConfigWarning",
     "load_project_config",
+    "project_config_manifest_source_kind",
     "project_config_reader_enabled",
 ]
 
@@ -91,6 +92,38 @@ def project_config_reader_enabled(environ: dict[str, str] | None = None) -> bool
         f"{PROJECT_CONFIG_READER_FLAG} must be one of "
         "1/true/yes/on or 0/false/no/off"
     )
+
+
+def project_config_manifest_source_kind(
+    authority_root: str | Path,
+    config_filename: str,
+    *,
+    run_id: str = "manifest-inspection",
+) -> str | None:
+    """Return a validated project-config manifest source kind, if present."""
+
+    root = Path(authority_root).resolve()
+    if Path(config_filename).name != config_filename:
+        return None
+    config_path = root / config_filename
+    try:
+        config_bytes = config_path.read_bytes()
+    except OSError:
+        return None
+    manifest_valid, _updates_enabled, _warnings = _manifest_status(
+        root,
+        config_path,
+        config_bytes,
+        run_id,
+    )
+    if not manifest_valid:
+        return None
+    try:
+        payload = json.loads((root / _MANIFEST_NAME).read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        return None
+    source_kind = payload.get("source_kind") if isinstance(payload, dict) else None
+    return source_kind if isinstance(source_kind, str) else None
 
 
 def _contained_parent(wd: Path, parent_wd: str | Path) -> Path:

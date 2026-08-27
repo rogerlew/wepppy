@@ -1,0 +1,17 @@
+schema_version = 1
+id = "multiple-ofe"
+kind = "representation"
+source_revision = "1"
+label = "Multiple OFE"
+description = "Multiple overland flow elements per hillslope; Config Builder Preview eligibility requires WhiteboxTools and WEPP 260803."
+owns = ["wepp.multi_ofe"]
+overrides = ["wepp.multi_ofe"]
+
+[constraints]
+requires = ["continental-us", "wbt", "wepp_260803"]
+conflicts = []
+
+[[writes]]
+section = "wepp"
+option = "multi_ofe"
+value = true

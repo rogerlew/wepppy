@@ -23,7 +23,7 @@ class FakeRedis:
 
 
 def selections(**updates):
-    value = {"locale": "continental-us", "dem": "usgs-ned13-2022", "delineation_backend": "wbt", "watershed_representation": "single-ofe", "soil": "ssurgo-gnatsgso-2025", "landuse": "nlcd-2019", "climate": "vanilla_cligen", "mods": []}
+    value = {"locale": "continental-us", "dem": "usgs-ned13-2022", "delineation_backend": "wbt", "watershed_representation": "single-ofe", "wepp_binary": "wepp_260803", "soil": "ssurgo-gnatsgso-2025", "landuse": "nlcd-2019", "climate": "vanilla_cligen", "mods": []}
     value.update(updates); return value
 
 
@@ -92,7 +92,8 @@ def test_named_role_override_and_replay_return_original_project(client, monkeypa
     assert replay.json()["run_id"] == first.json()["run_id"]
 
 
-def test_disabled_writer_creates_nothing(client) -> None:
+def test_disabled_writer_creates_nothing(client, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("WEPPPY_PROJECT_CONFIG_BUILDER_WRITER_ENABLED", raising=False)
     http, _claims, path, _idempotency = client
     revision = http.get("/api/project-config/builder").json()["registry_revision"]
     response = http.post("/api/project-config/builder/create", json={"registry_revision": revision, "creation_idempotency_key": "fedcba98-1234-4234-9234-123456789abc", "selections": selections()})
