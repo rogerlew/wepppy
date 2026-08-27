@@ -73,6 +73,34 @@ _V2_SPATIAL_RELATIONS = MappingProxyType({
     "observed_gridmet": _V2_SPATIAL_METHODS,
 })
 
+_CLIMATE_STATION_RELATIONS: Mapping[str, tuple[str, ...]] = MappingProxyType({
+    "vanilla_cligen": ("auto", "distance", "multi_factor"),
+    "prism_stochastic": ("auto", "distance", "multi_factor"),
+    "observed_daymet": ("auto", "distance", "multi_factor"),
+    "observed_gridmet": ("auto", "distance", "multi_factor"),
+    "eobs_modified": ("auto", "distance", "multi_factor", "eu_heuristic"),
+    "agdc": ("auto", "distance"),
+})
+_CLIMATE_SPATIAL_RELATIONS: Mapping[str, tuple[str, ...]] = MappingProxyType({
+    "vanilla_cligen": ("single", "multiple"),
+    "prism_stochastic": ("single", "multiple"),
+    "observed_daymet": ("single", "multiple", "interpolated"),
+    "observed_gridmet": ("single", "multiple", "interpolated"),
+    "eobs_modified": ("single", "multiple"),
+    "agdc": ("single", "multiple"),
+})
+_CLIMATE_STATION_DEFAULTS: Mapping[str, str] = MappingProxyType({
+    source: "auto" for source in _CLIMATE_STATION_RELATIONS
+})
+_CLIMATE_SPATIAL_DEFAULTS: Mapping[str, str] = MappingProxyType({
+    "vanilla_cligen": "single",
+    "prism_stochastic": "single",
+    "observed_daymet": "single",
+    "observed_gridmet": "single",
+    "eobs_modified": "multiple",
+    "agdc": "single",
+})
+
 
 @dataclass(frozen=True, slots=True)
 class _ProfileContract:
@@ -447,11 +475,31 @@ class CapabilityGraph:
         contract = _PROFILE_CONTRACTS.get(self.locale_profiles[0])
         if contract is None:
             raise CapabilityGraphError("locale_profiles contains an unknown domain ID")
+        expected_station_relations = {
+            source: _CLIMATE_STATION_RELATIONS[source]
+            for source in contract.climate_sources
+        }
+        expected_spatial_relations = {
+            source: _CLIMATE_SPATIAL_RELATIONS[source]
+            for source in contract.climate_sources
+        }
+        expected_station_methods = tuple(dict.fromkeys(
+            method
+            for source in contract.climate_sources
+            for method in expected_station_relations[source]
+        ))
+        expected_spatial_methods = tuple(dict.fromkeys(
+            method
+            for source in contract.climate_sources
+            for method in expected_spatial_relations[source]
+        ))
         expected_axes = {
             "locale_profiles": (contract.profile_id,),
             "dem_sources": contract.dem_sources,
             "climate_datasets": contract.climate_sources,
             "climate_station_databases": contract.climate_station_databases,
+            "climate_station_methods": expected_station_methods,
+            "climate_spatial_methods": expected_spatial_methods,
             "soil_datasets": contract.soil_sources,
             "soil_builders": (
                 _SOIL_BUILDERS if contract.profile_id == "continental-us" else ("gridded",)
@@ -467,6 +515,28 @@ class CapabilityGraph:
                 raise CapabilityGraphError(
                     f"{axis} is not authorized by the {contract.profile_id} Builder profile"
                 )
+        if dict(self.climate_station_methods_by_dataset) != expected_station_relations:
+            raise CapabilityGraphError(
+                f"climate station adjacency is not authorized by the {contract.profile_id} profile"
+            )
+        if dict(self.climate_spatial_methods_by_dataset) != expected_spatial_relations:
+            raise CapabilityGraphError(
+                f"climate spatial adjacency is not authorized by the {contract.profile_id} profile"
+            )
+        if dict(self.climate_station_defaults) != {
+            source: _CLIMATE_STATION_DEFAULTS[source]
+            for source in contract.climate_sources
+        }:
+            raise CapabilityGraphError(
+                f"climate station defaults are not authorized by the {contract.profile_id} profile"
+            )
+        if dict(self.climate_spatial_defaults) != {
+            source: _CLIMATE_SPATIAL_DEFAULTS[source]
+            for source in contract.climate_sources
+        }:
+            raise CapabilityGraphError(
+                f"climate spatial defaults are not authorized by the {contract.profile_id} profile"
+            )
         if dict(self.landuse_methods_by_dataset) != {
             source: _LANDUSE_METHODS for source in contract.landuse_sources
         }:
@@ -492,20 +562,14 @@ class CapabilityGraph:
             raise CapabilityGraphError(
                 f"soil builder defaults are not authorized by the {contract.profile_id} profile"
             )
-        expected_defaults = {
-            "locale_profile": contract.profile_id,
-            "dem_source": contract.default_dem,
-            "climate_dataset": "vanilla_cligen",
-            "climate_station_database": contract.default_station_database,
-            "soil_dataset": contract.default_soil,
-            "landuse_dataset": contract.default_landuse,
-            "delineation_backend": "wbt",
-            "watershed_representation": "single-ofe",
-            "wepp_binary": "wepp_260803",
+        expected_default_keys = {
+            "locale_profile", "dem_source", "climate_dataset",
+            "climate_station_database", "soil_dataset", "landuse_dataset",
+            "delineation_backend", "watershed_representation", "wepp_binary",
         }
-        if dict(self.defaults) != expected_defaults:
+        if set(self.defaults) != expected_default_keys:
             raise CapabilityGraphError(
-                f"capability defaults are not authorized by the {contract.profile_id} profile"
+                f"capability default keys are not authorized by the {contract.profile_id} profile"
             )
         self._validate_exact_shared_relations(contract.profile_id)
 
@@ -550,18 +614,13 @@ class CapabilityGraph:
             raise CapabilityGraphError(
                 "climate spatial defaults are not authorized by the continental-us profile"
             )
-        if dict(self.defaults) != {
-            "locale_profile": "continental-us",
-            "dem_source": "usgs-ned1-2024",
-            "climate_dataset": "vanilla_cligen",
-            "landuse_dataset": "nlcd-2019",
-            "soil_dataset": "ssurgo-gnatsgso-2025",
-            "delineation_backend": "wbt",
-            "watershed_representation": "single-ofe",
-            "wepp_binary": "wepp_260803",
+        if set(self.defaults) != {
+            "locale_profile", "dem_source", "climate_dataset", "landuse_dataset",
+            "soil_dataset", "delineation_backend", "watershed_representation",
+            "wepp_binary",
         }:
             raise CapabilityGraphError(
-                "capability defaults are not authorized by the continental-us profile"
+                "capability default keys are not authorized by the continental-us profile"
             )
         self._validate_exact_shared_relations("continental-us")
 

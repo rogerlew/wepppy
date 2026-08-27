@@ -18,7 +18,14 @@ from wepppy.nodb.config_builder.snapshot import builder_writer_enabled, parse_bu
 from wepppy.nodb.core import Ron
 from wepppy.nodb.project_config_snapshot import materialize_preset_snapshot
 from wepppy.weppcloud.routes.readme_md import ensure_readme_on_create
-from wepppy.weppcloud.user_preferences import PreferenceIdentityError, cleanup_new_run_directory, register_owned_run, resolve_creation_actor
+from wepppy.weppcloud.user_preferences import (
+    PreferenceIdentityError,
+    RunRegistrationReceipt,
+    cleanup_new_run_directory,
+    delete_registered_run,
+    register_owned_run,
+    resolve_creation_actor,
+)
 
 from .auth import AuthError, _normalize_roles, require_jwt
 from .creation_idempotency import CreationIdempotencyError, build_creation_fingerprint, complete_creation, reserve_creation
@@ -102,7 +109,13 @@ async def builder_description(request: Request) -> JSONResponse:
         logger.exception("builder description failed")
         return error_response(
             "Builder registry is unavailable.", status_code=500,
-            code="builder_registry_error", details=str(exc),
+            code="builder_registry_error", details=f"{type(exc).__name__}: {exc}",
+        )
+    except ValueError as exc:
+        logger.exception("builder description configuration failed")
+        return error_response(
+            "Builder registry is unavailable.", status_code=500,
+            code="builder_registry_error", details=f"{type(exc).__name__}: {exc}",
         )
     return JSONResponse({
         "schema_version": description.schema_version,
@@ -137,7 +150,14 @@ async def validate_builder(request: Request) -> JSONResponse:
     if auth_error is not None:
         return auth_error
     try:
-        candidate, _key, failure = _validated_candidate(await request.json(), claims or {}, creation=False)
+        payload = await request.json()
+    except ValueError as exc:
+        return error_response(
+            "Invalid builder request.", status_code=400, code="validation_error",
+            details=f"{type(exc).__name__}: {exc}",
+        )
+    try:
+        candidate, _key, failure = _validated_candidate(payload, claims or {}, creation=False)
         if failure is not None:
             return failure
         assert candidate is not None
@@ -155,10 +175,15 @@ async def validate_builder(request: Request) -> JSONResponse:
         logger.exception("builder validation failed")
         return error_response(
             "Builder registry is unavailable.", status_code=500,
-            code="builder_registry_error", details=str(exc),
+            code="builder_registry_error", details=f"{type(exc).__name__}: {exc}",
         )
-    except ValueError:
-        return error_response("Invalid builder request.", status_code=400, code="validation_error")
+    except ValueError as exc:
+        logger.exception("builder validation registry failed")
+        return error_response(
+            "Builder registry is unavailable.", status_code=500,
+            code="builder_registry_error",
+            details=f"{type(exc).__name__}: {exc}",
+        )
 
 
 @router.post("/project-config/builder/create", summary="Create project from builder", description="Requires JWT `rq:enqueue`; synchronously creates one fixed-token project with no queue.", tags=["rq-engine", "project"], operation_id=rq_operation_id("create_project_config_builder"), responses=agent_route_responses(success_code=201, success_description="Builder project created.", extra={400: "Validation failed. Returns the canonical error payload.", 409: "Stale or duplicate request. Returns the canonical error payload.", 503: "Creation unavailable. Returns the canonical error payload."}))
@@ -168,13 +193,28 @@ async def create_builder_project(request: Request) -> JSONResponse:
         return auth_error
     try:
         payload = await request.json()
+    except ValueError as exc:
+        return error_response(
+            "Invalid builder request.", status_code=400, code="validation_error",
+            details=f"{type(exc).__name__}: {exc}",
+        )
+    try:
         if not isinstance(payload, dict) or payload.get(
             "builder_description_schema_version"
         ) != _BUILDER_DESCRIPTION_SCHEMA_VERSION:
             raise _UnsupportedBuilderSchema(
                 "builder_description_schema_version must be 2; reload Config Builder and review selections"
             )
-        if not builder_writer_enabled():
+        try:
+            writer_enabled = builder_writer_enabled()
+        except ValueError as exc:
+            logger.exception("builder writer configuration is invalid")
+            return error_response(
+                "Builder creation configuration is invalid.", status_code=500,
+                code="builder_configuration_error",
+                details=f"{type(exc).__name__}: {exc}",
+            )
+        if not writer_enabled:
             return error_response("Builder creation is not enabled.", status_code=503, code="builder_writer_disabled")
         candidate, key, failure = _validated_candidate(payload, claims or {}, creation=True)
         if failure is not None:
@@ -193,11 +233,15 @@ async def create_builder_project(request: Request) -> JSONResponse:
         logger.exception("builder registry failed during creation")
         return error_response(
             "Builder registry is unavailable.", status_code=500,
-            code="builder_registry_error", details=str(exc),
+            code="builder_registry_error", details=f"{type(exc).__name__}: {exc}",
         )
-    except ValueError:
-        logger.exception("builder creation validation failed")
-        return error_response("Invalid builder request.", status_code=400, code="validation_error")
+    except ValueError as exc:
+        logger.exception("builder creation registry failed")
+        return error_response(
+            "Builder registry is unavailable.", status_code=500,
+            code="builder_registry_error",
+            details=f"{type(exc).__name__}: {exc}",
+        )
 
     try:
         actor = resolve_creation_actor(claims)
@@ -205,7 +249,7 @@ async def create_builder_project(request: Request) -> JSONResponse:
         logger.exception("builder project owner resolution failed")
         return error_response(
             "Could not resolve project owner.", status_code=500,
-            code="run_ownership_failed", details=str(exc),
+            code="run_ownership_failed", details=f"{type(exc).__name__}: {exc}",
         )
     fingerprint = build_creation_fingerprint(mode="builder", preset_id="config", normalized_overrides=dict(candidate.review), registry_revision=candidate.resolved.registry_revision)
     client = _creation_idempotency_client()
@@ -223,6 +267,7 @@ async def create_builder_project(request: Request) -> JSONResponse:
         return JSONResponse({"run_id": reservation.run_id, "location": reservation.location, "config_token": "config"}, status_code=200)
     runid = ""
     wd = ""
+    registration_receipt: RunRegistrationReceipt | None = None
     try:
         runid, wd = _create_run_dir(actor.email if actor else None)
         materialize_preset_snapshot(wd, candidate.artifact)
@@ -231,7 +276,7 @@ async def create_builder_project(request: Request) -> JSONResponse:
 
         initialize_ttl(wd)
         if actor is not None:
-            register_owned_run(runid, "config", actor.user_id)
+            registration_receipt = register_owned_run(runid, "config", actor.user_id)
         ensure_readme_on_create(runid, "config")
         location = _run_url(runid, "config")
         complete_creation(client, reservation, run_id=runid, location=location)
@@ -240,12 +285,29 @@ async def create_builder_project(request: Request) -> JSONResponse:
         return JSONResponse({"run_id": runid, "location": location, "config_token": "config"}, status_code=201)
     except Exception as exc:  # broad-except: creation boundary must clean partial runs and release reservations
         logger.exception("builder project initialization failed", extra={"runid": runid or None})
+        retry_safe = True
+        if registration_receipt is not None:
+            try:
+                delete_registered_run(registration_receipt)
+            except (PreferenceIdentityError, SQLAlchemyError):
+                retry_safe = False
+                logger.exception(
+                    "builder project ownership cleanup failed",
+                    extra={"runid": runid or None},
+                )
         if runid and wd:
             try:
                 cleanup_new_run_directory(runid, wd)
             except (OSError, redis.RedisError, RuntimeError, ValueError):
+                retry_safe = False
                 logger.exception("builder project cleanup failed", extra={"runid": runid})
-        _release_creation_safely(client, reservation)
+        if retry_safe:
+            _release_creation_safely(client, reservation)
+        else:
+            logger.error(
+                "builder project cleanup incomplete; retaining idempotency reservation",
+                extra={"runid": runid or None},
+            )
         return error_response(
             "Could not create builder project.",
             status_code=500,

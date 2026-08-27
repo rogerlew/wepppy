@@ -15,6 +15,7 @@ from wepppy.nodb.locales.capability_graph import (
 from wepppy.nodb.locales.climate_catalog import (
     CLIMATE_SPATIAL_METHOD_RUNTIME,
     CLIMATE_STATION_METHOD_RUNTIME,
+    get_climate_station_database,
 )
 from wepppy.nodb.locales.landuse_catalog import get_landcover_entry
 from wepppy.nodb.locales import available_climate_datasets, available_landuse_datasets
@@ -313,6 +314,14 @@ def capability_authority(config: CapabilityConfig) -> CapabilityGraph | None:
         graph.validate()
     except CapabilityGraphError as exc:
         raise ValueError(str(exc)) from exc
+    if version == CAPABILITY_SCHEMA_VERSION:
+        selected_station_database = graph.defaults["climate_station_database"]
+        station_database = get_climate_station_database(selected_station_database)
+        runtime_selector = _scalar(config, "climate", "cligen_db", None)
+        if station_database is None or runtime_selector != station_database.selector:
+            raise ValueError(
+                "climate.cligen_db does not match the stored climate-station database selection"
+            )
     return graph
 
 

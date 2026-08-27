@@ -24,6 +24,7 @@ from wepppy.nodb.config_builder.schema import (
 from wepppy.nodb.locales.capability_graph import (
     CAPABILITY_SCHEMA_VERSION,
     HISTORICAL_CAPABILITY_SCHEMA_VERSION,
+    CapabilityGraph,
     build_continental_us_capability_graph,
     build_locale_capability_graph,
 )
@@ -126,6 +127,7 @@ def _selection_chain(
     selections: BuilderSelections,
     *,
     capability_schema_version: int,
+    capability_graph: CapabilityGraph | None = None,
 ) -> tuple[ComponentDefinition, ...]:
     locale = _component(registry, selections.locale, ComponentKind.LOCALE, "locale")
     dem = _component(registry, selections.dem, ComponentKind.DEM, "dem")
@@ -164,7 +166,7 @@ def _selection_chain(
         ComponentKind.CAPABILITY,
         "capability_profile",
     )
-    graph = (
+    graph = capability_graph or (
         _historical_capability_graph_for_registry(registry)
         if capability_schema_version == HISTORICAL_CAPABILITY_SCHEMA_VERSION
         else _capability_graph_for_registry(registry, selections.locale)
@@ -370,6 +372,7 @@ def resolve_builder_config(
     base_config: Mapping[str, Mapping[str, CanonicalValue]] | None = None,
     base_revision: str | None = None,
     capability_schema_version: int = CAPABILITY_SCHEMA_VERSION,
+    capability_graph: CapabilityGraph | None = None,
 ) -> ResolvedBuilderConfig:
     """Resolve one supported selection into canonical bytes without file writes."""
 
@@ -389,6 +392,19 @@ def resolve_builder_config(
         raise BuilderConstraintError(
             "locale", "unsupported_combination", "Schema v2 is Continental-US only."
         )
+    if capability_graph is not None:
+        if capability_graph.schema_version != capability_schema_version:
+            raise BuilderConstraintError(
+                "capability_schema_version",
+                "unsupported_builder_schema",
+                "Stored capability graph version does not match the requested resolver version.",
+            )
+        if capability_graph.locale_profiles != (selections.locale,):
+            raise BuilderConstraintError(
+                "locale",
+                "unsupported_combination",
+                "Stored capability graph does not authorize the selected locale.",
+            )
     resolved_registry = load_registry() if registry is None else registry
     if base_config is None:
         defaults_bytes = _DEFAULTS_PATH.read_bytes()
@@ -406,10 +422,14 @@ def resolve_builder_config(
         resolved_registry,
         selections,
         capability_schema_version=capability_schema_version,
+        capability_graph=capability_graph,
     )
     for component in chain:
         if (
-            capability_schema_version == HISTORICAL_CAPABILITY_SCHEMA_VERSION
+            (
+                capability_schema_version == HISTORICAL_CAPABILITY_SCHEMA_VERSION
+                or capability_graph is not None
+            )
             and component.kind is ComponentKind.CAPABILITY
         ):
             continue
@@ -424,12 +444,15 @@ def resolve_builder_config(
             section[write.option] = _mutable_value(write.value)
             effective_writers[write.key] = component.component_id
 
-    graph = (
+    graph = capability_graph or (
         _historical_capability_graph_for_registry(resolved_registry)
         if capability_schema_version == HISTORICAL_CAPABILITY_SCHEMA_VERSION
         else _capability_graph_for_registry(resolved_registry, selections.locale)
     )
-    if capability_schema_version == HISTORICAL_CAPABILITY_SCHEMA_VERSION:
+    if (
+        capability_schema_version == HISTORICAL_CAPABILITY_SCHEMA_VERSION
+        or capability_graph is not None
+    ):
         for section_name, options in graph.as_config_sections().items():
             config[section_name] = deepcopy(options)
             for option_name in options:

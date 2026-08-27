@@ -18,7 +18,7 @@ function description(canOverride = false) {
         allowed_representation: ["single", "multiple-ofe"], allowed_wepp_binary: ["wepp_dcc52a6", "wepp_260803"], allowed_soil: ["soil"],
         allowed_landuse: ["land"], allowed_climate: ["climate"],
         allowed_climate_station_database: ["stations-2015"],
-        allowed_capability_profiles: ["capabilities"]
+        allowed_capability_profiles: ["continental-us-capabilities"]
     });
     const item = (component_id, kind, label, extra = {}) => Object.assign({
         component_id, kind, label, description: label + " help", default_cellsize: null,
@@ -27,7 +27,7 @@ function description(canOverride = false) {
     const graph = {
         capabilities: {
             schema_version: 3,
-            locale_profiles: ["conus"], dem_sources: ["dem-a", "dem-b"],
+            locale_profiles: ["continental-us"], dem_sources: ["dem-a", "dem-b"],
             delineation_backends: ["wbt"], watershed_representations: ["single", "multiple-ofe"],
             wepp_binaries: ["wepp_dcc52a6", "wepp_260803"], soil_datasets: ["soil"],
             landuse_datasets: ["land"], climate_datasets: ["climate"],
@@ -38,23 +38,23 @@ function description(canOverride = false) {
             ]
         },
         capability_defaults: {
-            locale_profile: "conus", dem_source: "dem-a", soil_dataset: "soil",
+            locale_profile: "continental-us", dem_source: "dem-a", soil_dataset: "soil",
             landuse_dataset: "land", climate_dataset: "climate",
             climate_station_database: "stations-2015", delineation_backend: "wbt",
             watershed_representation: "single", wepp_binary: "wepp_260803"
         }
     };
     const components = [
-        item("conus", "locale", "Continental US", {constraints: localeConstraints}),
+        item("continental-us", "locale", "Continental US", {constraints: localeConstraints}),
         item("dem-a", "dem", "DEM A", {default_cellsize: 10}),
         item("dem-b", "dem", "DEM B", {default_cellsize: 30}),
         item("wbt", "delineation", "WBT"), item("single", "representation", "Single OFE"),
-        item("multiple-ofe", "representation", "Multiple OFE", {constraints: Object.assign({}, empty, {requires: ["conus", "wbt", "wepp_260803"]})}),
+        item("multiple-ofe", "representation", "Multiple OFE", {constraints: Object.assign({}, empty, {requires: ["continental-us", "wbt", "wepp_260803"]})}),
         item("wepp_dcc52a6", "wepp_binary", "WEPP legacy"), item("wepp_260803", "wepp_binary", "WEPP 260803"),
         item("soil", "soil", "Soil"), item("land", "landuse", "Land cover"),
         item("climate", "climate", "Climate"),
         item("stations-2015", "climate_station_database", "2015"),
-        item("capabilities", "capability", "Capabilities")
+        item("continental-us-capabilities", "capability", "Capabilities")
     ];
     return {
         schema_version: 2, builder_description_schema_version: 2,
@@ -63,19 +63,71 @@ function description(canOverride = false) {
         config_filename: "config.cfg", default_selections: {delineation_backend: "wbt", watershed_representation: "single", wepp_binary: "wepp_260803"},
         capability_graph: graph,
         components,
-        capability_graphs_by_locale: {conus: graph},
-        components_by_locale: {conus: components}
+        capability_graphs_by_locale: {"continental-us": graph},
+        components_by_locale: {"continental-us": components}
     };
 }
 
 function review() {
     return {
-        locale: "conus", dem: "dem-a", dem_default_cellsize: 10, cellsize: 10,
+        locale: "continental-us", dem: "dem-a", dem_default_cellsize: 10, cellsize: 10,
         cellsize_source: "dem_default", delineation_backend: "wbt",
         watershed_representation: "single", wepp_binary: "wepp_260803", soil: "soil", landuse: "land",
         climate: "climate", climate_station_database: "stations-2015",
         mods: [], capabilities: {climate: ["station"]},
         config_filename: "config.cfg"
+    };
+}
+
+function addLocale(schema, spec) {
+    const baseLocale = schema.components_by_locale["continental-us"].find((item) => item.kind === "locale");
+    const constraints = Object.assign({}, baseLocale.constraints, {
+        allowed_dem: spec.dem,
+        allowed_soil: spec.soil,
+        allowed_landuse: spec.landuse,
+        allowed_climate: spec.climate,
+        allowed_climate_station_database: spec.stations,
+        allowed_capability_profiles: [spec.id + "-capabilities"]
+    });
+    const locale = Object.assign({}, baseLocale, {
+        component_id: spec.id,
+        label: spec.id,
+        constraints
+    });
+    const shared = schema.components_by_locale["continental-us"].filter((item) => [
+        "delineation", "representation", "wepp_binary"
+    ].includes(item.kind));
+    const component = (component_id, kind) => ({
+        component_id, kind, label: component_id, description: component_id,
+        default_cellsize: kind === "dem" ? 30 : null, constraints: {}
+    });
+    const population = [locale, ...shared];
+    [
+        [spec.dem, "dem"], [spec.soil, "soil"], [spec.landuse, "landuse"],
+        [spec.climate, "climate"], [spec.stations, "climate_station_database"]
+    ].forEach(([ids, kind]) => ids.forEach((id) => population.push(component(id, kind))));
+    population.push(component(spec.id + "-capabilities", "capability"));
+    schema.components_by_locale[spec.id] = population;
+    schema.capability_graphs_by_locale[spec.id] = {
+        capabilities: Object.assign({}, schema.capability_graphs_by_locale["continental-us"].capabilities, {
+            locale_profiles: [spec.id],
+            dem_sources: spec.dem,
+            soil_datasets: spec.soil,
+            landuse_datasets: spec.landuse,
+            climate_datasets: spec.climate,
+            climate_station_databases: spec.stations
+        }),
+        capability_defaults: {
+            locale_profile: spec.id,
+            dem_source: spec.dem[0],
+            soil_dataset: spec.soil[0],
+            landuse_dataset: spec.defaultLanduse,
+            climate_dataset: "vanilla_cligen",
+            climate_station_database: spec.stations[0],
+            delineation_backend: "wbt",
+            watershed_representation: "single",
+            wepp_binary: "wepp_260803"
+        }
     };
 }
 
@@ -141,9 +193,9 @@ describe("Config Builder controller", () => {
         expect(root.querySelector("[data-builder-review-list]").textContent).toContain("config.cfg");
         expect(root.querySelector("[data-builder-create]").disabled).toBe(false);
         expect(http.request.mock.calls.at(-1)[1].json.selections).toEqual({
-            locale: "conus", dem: "dem-a", delineation_backend: "wbt",
+            locale: "continental-us", dem: "dem-a", delineation_backend: "wbt",
             watershed_representation: "single", wepp_binary: "wepp_260803", soil: "soil", landuse: "land",
-            climate: "climate", mods: [], capability_profile: "capabilities",
+            climate: "climate", mods: [], capability_profile: "continental-us-capabilities",
             climate_station_database: "stations-2015"
         });
         expect(http.request.mock.calls.at(-1)[1].json.builder_description_schema_version).toBe(2);
@@ -155,7 +207,7 @@ describe("Config Builder controller", () => {
         const root = document.querySelector("[data-config-builder]");
         const controller = new window.ConfigBuilder(root, dependencies(http));
         await controller.init();
-        controller.description.capability_graphs_by_locale.conus.capabilities.dem_sources = ["dem-b"];
+        controller.description.capability_graphs_by_locale["continental-us"].capabilities.dem_sources = ["dem-b"];
         controller._renderDependencies(true);
 
         expect(root.querySelector("[name=dem]").value).toBe("dem-b");
@@ -165,7 +217,7 @@ describe("Config Builder controller", () => {
 
     test("switches locale authority and applies that profile's exact defaults", async () => {
         const schema = description(false);
-        const baseLocale = schema.components_by_locale.conus.find((item) => item.kind === "locale");
+        const baseLocale = schema.components_by_locale["continental-us"].find((item) => item.kind === "locale");
         const europeLocale = Object.assign({}, baseLocale, {
             component_id: "europe",
             label: "Europe",
@@ -187,12 +239,12 @@ describe("Config Builder controller", () => {
             {component_id: "stations-ghcn", kind: "climate_station_database", label: "GHCN", description: "GHCN", default_cellsize: null, constraints: {}},
             {component_id: "europe-capabilities", kind: "capability", label: "Europe capabilities", description: "Europe", default_cellsize: null, constraints: {}}
         ];
-        const shared = schema.components_by_locale.conus.filter((item) => [
+        const shared = schema.components_by_locale["continental-us"].filter((item) => [
             "delineation", "representation", "wepp_binary"
         ].includes(item.kind));
         schema.components_by_locale.europe = [europeLocale, ...shared, ...unique];
         schema.capability_graphs_by_locale.europe = {
-            capabilities: Object.assign({}, schema.capability_graphs_by_locale.conus.capabilities, {
+            capabilities: Object.assign({}, schema.capability_graphs_by_locale["continental-us"].capabilities, {
                 locale_profiles: ["europe"], dem_sources: ["eu-dem"],
                 soil_datasets: ["eu-soil"],
                 landuse_datasets: ["eu-land-1990", "eu-land-2018"],
@@ -225,13 +277,64 @@ describe("Config Builder controller", () => {
         expect(controller._selections().capability_profile).toBe("europe-capabilities");
     });
 
+    test("renders the authoritative dependent controls for every exposed locale", async () => {
+        const schema = description(false);
+        const profiles = [
+            {
+                id: "europe", dem: ["europe-eudem-v1-1"], soil: ["esdac-europe"],
+                landuse: ["corine-1990", "corine-2018"], defaultLanduse: "corine-2018",
+                climate: ["vanilla_cligen", "eobs_modified"], stations: ["cligen-stations-ghcn"]
+            },
+            {
+                id: "canada", dem: ["copernicus-dem-30"], soil: ["isric-global"],
+                landuse: ["c3s-landcover-2020", "c3s-landcover-2019"], defaultLanduse: "c3s-landcover-2020",
+                climate: ["vanilla_cligen", "observed_daymet"], stations: ["cligen-stations-ghcn"]
+            },
+            {
+                id: "australia", dem: ["australia-srtm-1s"], soil: ["asris-australia"],
+                landuse: ["australia-landuse-2010-2011"], defaultLanduse: "australia-landuse-2010-2011",
+                climate: ["vanilla_cligen", "agdc"], stations: ["cligen-stations-ghcn"]
+            },
+            {
+                id: "global-earth", dem: ["copernicus-dem-30"], soil: ["isric-global"],
+                landuse: ["c3s-landcover-2020", "c3s-landcover-2019"], defaultLanduse: "c3s-landcover-2020",
+                climate: ["vanilla_cligen"], stations: ["cligen-stations-ghcn"]
+            }
+        ];
+        profiles.forEach((profile) => addLocale(schema, profile));
+        const http = {
+            getRqEngineToken: jest.fn().mockResolvedValue("token"),
+            request: jest.fn().mockResolvedValue({body: schema})
+        };
+        const root = document.querySelector("[data-config-builder]");
+        const controller = new window.ConfigBuilder(root, dependencies(http));
+        await controller.init();
+
+        expect([...root.querySelector("[name=locale]").options].map((option) => option.value)).toEqual([
+            "continental-us", "europe", "canada", "australia", "global-earth"
+        ]);
+        for (const profile of profiles) {
+            root.querySelector("[name=locale]").value = profile.id;
+            root.querySelector("[name=locale]").dispatchEvent(new Event("change", {bubbles: true}));
+            await settle();
+            expect([...root.querySelector("[name=dem]").options].map((option) => option.value)).toEqual(profile.dem);
+            expect([...root.querySelector("[name=soil]").options].map((option) => option.value)).toEqual(profile.soil);
+            expect([...root.querySelector("[name=landuse]").options].map((option) => option.value)).toEqual(profile.landuse);
+            expect(root.querySelector("[name=landuse]").value).toBe(profile.defaultLanduse);
+            expect([...root.querySelector("[name=climate]").options].map((option) => option.value)).toEqual(profile.climate);
+            expect(root.querySelector("[name=climate]").value).toBe("vanilla_cligen");
+            expect([...root.querySelector("[name=climate_station_database]").options].map((option) => option.value)).toEqual(profile.stations);
+            expect(controller._selections().capability_profile).toBe(profile.id + "-capabilities");
+        }
+    });
+
     test("defaults to WBT and WEPP 260803 and filters invalid model tuples", async () => {
         const schema = description(false);
         const topaz = Object.assign({}, schema.components.find((item) => item.component_id === "wbt"), {component_id: "topaz", label: "TOPAZ"});
         schema.components.push(topaz);
-        schema.components_by_locale.conus.push(topaz);
-        schema.capability_graphs_by_locale.conus.capabilities.delineation_backends = ["topaz", "wbt"];
-        schema.capability_graphs_by_locale.conus.capabilities.allowed_model_tuples.push(
+        schema.components_by_locale["continental-us"].push(topaz);
+        schema.capability_graphs_by_locale["continental-us"].capabilities.delineation_backends = ["topaz", "wbt"];
+        schema.capability_graphs_by_locale["continental-us"].capabilities.allowed_model_tuples.push(
             "topaz|single|wepp_dcc52a6", "topaz|single|wepp_260803"
         );
         const http = {getRqEngineToken: jest.fn().mockResolvedValue("token"), request: jest.fn().mockResolvedValue({body: schema})};

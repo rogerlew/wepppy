@@ -115,15 +115,21 @@ def test_build_climate_parse_error(monkeypatch: pytest.MonkeyPatch) -> None:
     assert payload["errors"][0]["message"] == "Invalid climate field values."
 
 
+@pytest.mark.parametrize(
+    "profile_id",
+    ("continental-us", "europe", "canada", "australia", "global-earth"),
+)
 def test_build_climate_rejects_invalid_capability_authority_before_parse(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch, profile_id: str,
 ) -> None:
     _stub_auth(monkeypatch)
     monkeypatch.setattr(climate_routes, "get_wd", lambda runid: "/tmp/run")
     monkeypatch.setattr(
         climate_routes,
         "capability_authority",
-        lambda climate: (_ for _ in ()).throw(ValueError("partial capability graph")),
+        lambda climate: (_ for _ in ()).throw(
+            ValueError(f"partial {profile_id} capability graph")
+        ),
     )
 
     class DummyClimate:
@@ -139,7 +145,9 @@ def test_build_climate_rejects_invalid_capability_authority_before_parse(
         response = client.post("/api/runs/run-1/cfg/build-climate", json={})
 
     assert response.status_code == 409
-    assert response.json()["error"]["details"] == "partial capability graph"
+    assert response.json()["error"]["details"] == (
+        f"partial {profile_id} capability graph"
+    )
     assert controller.parse_calls == 0
 
 

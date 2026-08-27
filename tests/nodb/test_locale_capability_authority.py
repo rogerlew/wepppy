@@ -26,8 +26,10 @@ from wepppy.nodb.locales.climate_catalog import (
     CLIMATE_SPATIAL_METHOD_RUNTIME,
     CLIMATE_STATION_METHOD_RUNTIME,
     default_climate_provider_tokens,
+    get_climate_station_database,
 )
 from wepppy.nodb.locales.landuse_catalog import (
+    get_landcover_entry,
     landcover_catalog_id,
     landcover_catalog_revision,
 )
@@ -305,6 +307,10 @@ def test_schema_v3_profile_graphs_and_default_configs_match_authority(
     assert graph.defaults["delineation_backend"] == "wbt"
     assert graph.defaults["watershed_representation"] == "single-ofe"
     assert graph.defaults["wepp_binary"] == "wepp_260803"
+    profile = next(item for item in iter_locale_profiles() if item.profile_id == profile_id)
+    assert graph.dem_sources == profile.dem_sources
+    assert graph.soil_datasets == profile.soil_sources
+    assert graph.landuse_datasets == profile.landuse_sources
 
     defaults = graph.defaults
     resolved = resolve_builder_config(BuilderSelections(
@@ -320,11 +326,136 @@ def test_schema_v3_profile_graphs_and_default_configs_match_authority(
         capability_profile=f"{profile_id}-capabilities",
     ))
     assert resolved.config["general"]["locales"] == [runtime_token]
+    assert resolved.config["general"]["dem_db"] == DEM_SOURCE_RUNTIME[defaults["dem_source"]]
+    assert resolved.config["soils"]["ssurgo_db"] == SOIL_SOURCE_RUNTIME[defaults["soil_dataset"]]
+    landcover = get_landcover_entry(defaults["landuse_dataset"])
+    assert landcover is not None
+    assert resolved.config["landuse"]["nlcd_db"] == landcover.runtime_value
+    station_database = get_climate_station_database(defaults["climate_station_database"])
+    assert station_database is not None
+    assert resolved.config["climate"]["cligen_db"] == station_database.selector
     assert resolved.config["landuse"]["enable_landuse_change"] is True
     assert resolved.config["capabilities"]["schema_version"] == 3
     assert resolved.config["capability_defaults"]["climate_dataset"] == (
         "vanilla_cligen"
     )
+    stored_authority = capability_authority(
+        ParsedConfig(resolved.config_bytes.decode("utf-8"))
+    )
+    assert stored_authority is not None
+    assert stored_authority.locale_profiles == (profile_id,)
+
+
+@pytest.mark.parametrize(
+    "profile_id",
+    ("continental-us", "europe", "canada", "australia", "global-earth"),
+)
+def test_schema_v3_reader_rejects_hostile_climate_method_broadening(
+    profile_id: str,
+) -> None:
+    binary_ids = ("wepp_260803",)
+    graph = build_locale_capability_graph(
+        profile_id, binary_ids, _binary_revisions(binary_ids)
+    )
+    source = graph.climate_datasets[0]
+    hostile_relations = {
+        **graph.climate_station_methods_by_dataset,
+        source: (*graph.climate_station_methods_by_dataset[source], "user_defined"),
+    }
+    hostile = replace(
+        graph,
+        climate_station_methods=(*graph.climate_station_methods, "user_defined"),
+        climate_station_methods_by_dataset=MappingProxyType(hostile_relations),
+    )
+
+    with pytest.raises(CapabilityGraphError, match=r"climate[_ ]station"):
+        hostile.validate()
+
+
+@pytest.mark.parametrize(
+    "profile_id",
+    ("continental-us", "europe", "canada", "australia", "global-earth"),
+)
+def test_schema_v3_parser_rejects_hostile_climate_method_broadening(
+    profile_id: str,
+) -> None:
+    binary_ids = ("wepp_260803",)
+    graph = build_locale_capability_graph(
+        profile_id, binary_ids, _binary_revisions(binary_ids)
+    )
+    defaults = graph.defaults
+    resolved = resolve_builder_config(BuilderSelections(
+        locale=profile_id,
+        dem=defaults["dem_source"],
+        delineation_backend=defaults["delineation_backend"],
+        watershed_representation=defaults["watershed_representation"],
+        wepp_binary=defaults["wepp_binary"],
+        soil=defaults["soil_dataset"],
+        landuse=defaults["landuse_dataset"],
+        climate=defaults["climate_dataset"],
+        climate_station_database=defaults["climate_station_database"],
+        capability_profile=f"{profile_id}-capabilities",
+    ))
+    config = ParsedConfig(resolved.config_bytes.decode("utf-8"))
+    methods = ast.literal_eval(
+        config._configparser.get("capabilities", "climate_station_methods")
+    )
+    methods.append("user_defined")
+    config._configparser.set(
+        "capabilities", "climate_station_methods", repr(methods)
+    )
+    source = graph.climate_datasets[0]
+    relation = ast.literal_eval(
+        config._configparser.get("capabilities.climate_station_methods", source)
+    )
+    relation.append("user_defined")
+    config._configparser.set(
+        "capabilities.climate_station_methods", source, repr(relation)
+    )
+
+    with pytest.raises(ValueError, match=r"climate[_ ]station"):
+        capability_authority(config)
+
+
+@pytest.mark.parametrize(
+    ("stable_id", "selector"),
+    (
+        ("cligen-stations-legacy", "legacy"),
+        ("cligen-stations-2015", "2015_stations.db"),
+        ("cligen-stations-ghcn", "ghcn_stations.db"),
+    ),
+)
+def test_schema_v3_station_database_selection_is_bound_to_exact_runtime_selector(
+    stable_id: str, selector: str,
+) -> None:
+    selections = replace(_selections(), climate_station_database=stable_id)
+    resolved = resolve_builder_config(selections)
+    config = ParsedConfig(resolved.config_bytes.decode("utf-8"))
+
+    authority = capability_authority(config)
+
+    assert authority is not None
+    assert authority.defaults["climate_station_database"] == stable_id
+    assert config.config_get_raw("climate", "cligen_db") == f'"{selector}"'
+
+
+@pytest.mark.parametrize(
+    "hostile_selector",
+    (
+        "unknown-catalog",
+        "legacy-2015",
+        "tenerife_stations.db",
+        "au_stations.db",
+    ),
+)
+def test_schema_v3_station_database_runtime_mismatch_fails_closed(
+    hostile_selector: str,
+) -> None:
+    config = _resolved_parser()
+    config._configparser.set("climate", "cligen_db", f'"{hostile_selector}"')
+
+    with pytest.raises(ValueError, match="does not match"):
+        capability_authority(config)
 
 
 def test_model_tuple_matrix_covers_every_advertised_value_without_cross_product() -> None:

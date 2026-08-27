@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import ast
 from base64 import b64decode, b64encode
+from configparser import RawConfigParser
 from contextlib import contextmanager
 from copy import deepcopy
 from dataclasses import dataclass
@@ -19,6 +21,8 @@ from typing import Callable, Iterator, Mapping
 from wepppy.nodb.config_builder.registry import DEFAULT_PROFILES_ROOT, RegistryError, load_registry
 from wepppy.nodb.config_builder.resolver import BuilderConstraintError, resolve_builder_config
 from wepppy.nodb.config_builder.schema import BuilderSelections, Registry
+from wepppy.nodb.locales.capability_graph import CapabilityGraph
+from wepppy.nodb.project_config_capabilities import capability_authority
 from wepppy.nodb.project_config_snapshot import CONFIGS_ROOT, PresetPolicyError, load_preset_policies
 from wepppy.project_config_sanitization import ConfigMaterializationError, assert_materialization_safe, scan_manifest_text
 from wepppy.project_config_serialization import CanonicalConfigError, CanonicalValue, parse_config_text, serialize_config
@@ -45,6 +49,34 @@ JOURNAL_NAME = ".config-amendment.pending.json"
 LOCK_NAME = ".config-amendment.lock"
 _TRUE = frozenset({"1", "true", "yes", "on"})
 _FALSE = frozenset({"", "0", "false", "no", "off"})
+
+
+class _StoredCapabilityConfig:
+    """Adapt canonical project bytes to the stored-capability reader contract."""
+
+    def __init__(self, content: bytes) -> None:
+        parser = RawConfigParser(interpolation=None)
+        parser.optionxform = str
+        parser.read_string(content.decode("utf-8"))
+        self._configparser = parser
+
+    def config_get_raw(
+        self, section: str, option: str, default: object = None
+    ) -> object:
+        if not self._configparser.has_option(section, option):
+            return default
+        return self._configparser.get(section, option, raw=True)
+
+    def config_get_list(
+        self, section: str, option: str, default: object = None
+    ) -> object:
+        raw = self.config_get_raw(section, option, default)
+        if not isinstance(raw, str):
+            return raw
+        try:
+            return ast.literal_eval(raw)
+        except (SyntaxError, ValueError):
+            return raw
 
 
 class ConfigUpdateError(ValueError):
@@ -192,7 +224,11 @@ def _chain_entries(manifest: Mapping[str, object]) -> tuple[tuple[str, str, str]
 
 
 def _builder_target(
-    manifest: Mapping[str, object], registry: Registry, *, capability_schema_version: int,
+    manifest: Mapping[str, object],
+    registry: Registry,
+    *,
+    capability_schema_version: int,
+    capability_graph: CapabilityGraph | None,
 ) -> tuple[dict[str, dict[str, CanonicalValue]], dict[tuple[str, str], tuple[str, str]]]:
     selections = _builder_selections(
         manifest["selections"],  # type: ignore[arg-type,index]
@@ -202,6 +238,7 @@ def _builder_target(
         selections,
         registry=registry,
         capability_schema_version=capability_schema_version,
+        capability_graph=capability_graph,
     )
     recorded = tuple((kind, component_id) for kind, component_id, _revision in _chain_entries(manifest))
     current = tuple((item.kind, item.component_id) for item in resolved.parent_chain)
@@ -306,10 +343,19 @@ def preview_project_config_update(
                 raise ConfigUpdateUnavailableError(
                     "Stored Builder capability schema is unsupported"
                 )
+            try:
+                stored_graph = capability_authority(
+                    _StoredCapabilityConfig(config_bytes)
+                )
+            except (UnicodeError, ValueError) as exc:
+                raise ConfigUpdateUnavailableError(
+                    "Stored Builder capability authority is invalid"
+                ) from exc
             target, provenance = _builder_target(
                 manifest,
                 registry or load_registry(registry_root),
                 capability_schema_version=capability_schema_version,
+                capability_graph=stored_graph,
             )
         elif source_kind == "preset":
             target, provenance = _preset_target(manifest, Path(configs_root))

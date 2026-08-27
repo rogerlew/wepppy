@@ -515,11 +515,7 @@ def _synthesized_builder_components(
     ))
     for component_id in soil_ids:
         runtime_value = SOIL_SOURCE_RUNTIME[component_id]
-        writes = (
-            (ConfigWrite("soils", "ssurgo_db", runtime_value),)
-            if runtime_value is not None
-            else ()
-        )
+        writes = (ConfigWrite("soils", "ssurgo_db", runtime_value),)
         components[component_id] = ComponentDefinition(
             component_id=component_id,
             kind=ComponentKind.SOIL,
@@ -544,8 +540,7 @@ def _synthesized_builder_components(
         if entry is None:
             raise RegistryError(f"land-cover provider {component_id!r} is unavailable")
         writes_list = [ConfigWrite("landuse", "enable_landuse_change", True)]
-        if component_id != "australia-landuse-2010-2011":
-            writes_list.insert(0, ConfigWrite("landuse", "nlcd_db", entry.runtime_value))
+        writes_list.insert(0, ConfigWrite("landuse", "nlcd_db", entry.runtime_value))
         if component_id.startswith("c3s-landcover-"):
             writes_list.append(ConfigWrite("landuse", "mapping", "c3s-disturbed"))
         writes = tuple(writes_list)
