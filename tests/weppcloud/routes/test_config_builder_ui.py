@@ -72,11 +72,16 @@ def test_config_builder_template_has_one_page_accessible_contract(jinja_env: Env
     assert "config-manifest.json" in rendered
 
 
-def test_interfaces_template_keeps_named_creation_and_adds_distinct_builder_link(
+@pytest.mark.parametrize("role", ["PowerUser", "Dev", "Admin", "Root"])
+def test_interfaces_template_keeps_named_creation_and_poweruser_builder_menu_link(
     jinja_env: Environment,
+    role: str,
 ) -> None:
     template = jinja_env.get_template("interfaces.htm")
-    user = SimpleNamespace(is_authenticated=True, has_role=lambda _role: False)
+    user = SimpleNamespace(
+        is_authenticated=True,
+        has_role=lambda candidate: candidate == role,
+    )
     rendered = template.render(
         user=user,
         current_user=user,
@@ -93,5 +98,36 @@ def test_interfaces_template_keeps_named_creation_and_adds_distinct_builder_link
     )
 
     assert 'href="/config-builder/"' in rendered
+    assert ">\n          Config Builder\n        </a>" in rendered
+    assert 'id="config-builder-entry-heading"' not in rendered
     assert 'method="post" action="/rq-engine/create/"' in rendered
     assert 'name="config" value="disturbed9002"' in rendered
+
+
+@pytest.mark.parametrize("roles", [set(), {"User"}])
+def test_interfaces_template_hides_builder_discovery_from_ordinary_users(
+    jinja_env: Environment,
+    roles: set[str],
+) -> None:
+    template = jinja_env.get_template("interfaces.htm")
+    user = SimpleNamespace(
+        is_authenticated=True,
+        has_role=lambda role: role in roles,
+    )
+    rendered = template.render(
+        user=user,
+        current_user=user,
+        url_for=lambda endpoint, **values: (
+            "/config-builder/" if endpoint == "weppcloud_site.config_builder"
+            else f"/static/{values.get('filename', '')}" if endpoint == "static"
+            else f"/{endpoint}/"
+        ),
+        static_url=lambda path: f"/static/{path}",
+        visible_config_ids={"disturbed9002"},
+        config_registry_map={"disturbed9002": SimpleNamespace(id="disturbed9002")},
+        config_maturity_labels={"disturbed9002": "Stable"},
+        maturity_definition_href="/guide#maturity",
+    )
+
+    assert 'href="/config-builder/"' not in rendered
+    assert 'id="config-builder-entry-heading"' not in rendered

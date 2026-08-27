@@ -340,6 +340,33 @@ def test_create_payload_unit_override_wins_query(
     assert "unitizer:is_english=true" not in captured["cfg"]
 
 
+def test_create_transport_idempotency_key_is_not_a_runtime_override(
+    create_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, captured = create_client
+    monkeypatch.setattr(
+        project_routes,
+        "_verify_cap_token",
+        lambda _request, _token: {"success": True},
+    )
+
+    response = client.post(
+        "/create/",
+        data={
+            "config": CONFIG,
+            "cap_token": "good-token",
+            "creation_idempotency_key": "12345678-1234-4234-9234-123456789abc",
+            "unitizer:is_english": "true",
+        },
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 303
+    assert captured["cfg"].endswith("?unitizer:is_english=true")
+    assert "creation_idempotency_key" not in captured["cfg"]
+
+
 def test_create_invalid_explicit_unit_fails_before_run_directory(
     create_client,
     monkeypatch: pytest.MonkeyPatch,
@@ -412,6 +439,37 @@ def test_create_run_directory_failure_does_not_disclose_path(
     assert response.json()["error_id"]
     assert "/private/runs" not in response.text
     assert captured == {}
+
+
+def test_create_initialization_failure_returns_correlated_diagnostic(
+    create_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, _captured = create_client
+    monkeypatch.setattr(
+        project_routes,
+        "_verify_cap_token",
+        lambda _request, _token: {"success": True},
+    )
+    monkeypatch.setattr(
+        project_routes,
+        "Ron",
+        lambda _wd, _cfg: (_ for _ in ()).throw(ValueError("/private/run path")),
+    )
+
+    response = client.post(
+        "/create/",
+        data={"config": CONFIG, "cap_token": "good-token"},
+    )
+
+    payload = response.json()
+    assert response.status_code == 500
+    assert payload["error"]["code"] == "run_initialization_failed"
+    assert payload["error"]["details"] == (
+        f"Run initialization failed (ValueError). "
+        f"Search server logs for error_id {payload['error_id']}."
+    )
+    assert "/private/run" not in response.text
 
 
 @pytest.mark.parametrize("auth_path", ("bearer", "session", "expired_reauth"))

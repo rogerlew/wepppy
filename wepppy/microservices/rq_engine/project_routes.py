@@ -236,7 +236,7 @@ def _merge_creation_values(
 def _collect_overrides(data: Mapping[str, Any]) -> str:
     overrides: list[str] = []
     for key, value in data.items():
-        if key in {"cap_token", "rq_token", "config"}:
+        if key in _CREATE_TRANSPORT_FIELDS:
             continue
         if value is None or value == "":
             continue
@@ -564,7 +564,7 @@ async def create(request: Request) -> Response:
 
         try:
             Ron(wd, cfg)
-        except Exception:  # broad-except: boundary contract
+        except Exception as exc:  # broad-except: boundary contract
             error_id = _creation_error_id()
             _log_creation_exception("rq-engine create Ron failed", error_id)
             try:
@@ -578,6 +578,10 @@ async def create(request: Request) -> Response:
             return error_response(
                 "Could not create run",
                 code="run_initialization_failed",
+                details=(
+                    f"Run initialization failed ({type(exc).__name__}). "
+                    f"Search server logs for error_id {error_id}."
+                ),
                 error_id=error_id,
                 log_exception=False,
             )

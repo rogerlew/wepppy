@@ -35,6 +35,17 @@
          href="{{ url_for('weppcloud_site.diagnostics') }}">
         Diagnostics
       </a>
+      {% if current_user.is_authenticated and (
+        current_user.has_role('PowerUser')
+        or current_user.has_role('Dev')
+        or current_user.has_role('Admin')
+        or current_user.has_role('Root')
+      ) %}
+        <a class="pure-button pure-button-secondary"
+           href="{{ url_for('weppcloud_site.config_builder') }}">
+          Config Builder
+        </a>
+      {% endif %}
       {% if current_user.is_authenticated %}
         {% if current_user.has_role('Admin') or current_user.has_role('Root') %}
           <a class="pure-button pure-button-secondary"
@@ -240,18 +251,6 @@
   {% if not current_user.is_authenticated %}
   <section class="wc-login-bypass-banner" aria-label="Login bypass banner">
     <a href="{{ url_for('security.login', next=url_for('weppcloud_site.interfaces')) }}">Login</a> to Bypass Captchas
-  </section>
-  {% else %}
-  <section class="wc-panel" aria-labelledby="config-builder-entry-heading">
-    <h2 id="config-builder-entry-heading">Choose how to start</h2>
-    <p>
-      Build a project from registered components, or continue below with an
-      established named interface. The Config Builder does not change these
-      Interfaces or their project links.
-    </p>
-    <a class="pure-button pure-button-primary" href="{{ url_for('weppcloud_site.config_builder') }}">
-      Open Config Builder
-    </a>
   </section>
   {% endif %}
 
