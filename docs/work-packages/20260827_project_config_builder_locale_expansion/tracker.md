@@ -4,9 +4,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-27 15:40 UTC
-**Current phase**: Audit correction and Forest release gate
-**Last updated**: 2026-08-27 20:05 UTC
-**Next milestone**: governance acceptance, then reader-first Forest proof
+**Current phase**: Reader-first Forest release gate
+**Last updated**: 2026-08-27 20:10 UTC
+**Next milestone**: deploy the writer-disabled reader and record rollback floor
 **Security impact**: `high`
 **Dedicated security review**: `yes`
 **Security artifact**: `artifacts/20260827_security_review.md`
@@ -19,8 +19,8 @@ and production
 
 ### In Progress
 
-- [ ] Commit the accepted checkpoint-enumeration correction and obtain
-  governance re-review.
+- [ ] Deploy the accepted revision writer-disabled to exact host `forest` and
+  prove historical schema v2 plus all five schema-v3 profiles.
 
 ### Pending
 
@@ -63,6 +63,8 @@ None.
 - [x] Operator accepted the standalone correction adding
   `project_config_capabilities.py` as a stored-authority reader and
   `locales/__init__.py` as export-only, without rewriting history.
+- [x] Committed the standalone correction as `f6784420a`; independent
+  governance re-review marked it Ready with no remaining blockers.
 
 ## Decisions Log
 
@@ -139,5 +141,5 @@ authority source, authentication rule, or mutation path.
 - [x] Stub/API gates pass.
 - [x] Docs lint passes.
 - [x] Correctness and security findings are dispositioned.
-- [ ] Governance accepts the standalone checkpoint correction.
+- [x] Governance accepts exact standalone checkpoint correction `f6784420a`.
 - [ ] Exact-host `forest` acceptance is recorded.

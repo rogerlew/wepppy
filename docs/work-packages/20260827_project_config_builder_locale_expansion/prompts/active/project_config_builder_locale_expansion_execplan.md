@@ -49,7 +49,9 @@ and observed Daymet, defaults to Vanilla CLIGEN, and uses GHCN stations.
 - [x] (2026-08-27 20:05Z) Operator accepted the chronology-preserving
   checkpoint correction for the two omitted read/export consumers and required
   a scope-vs-changed-files gate in WP12.
-- [ ] Commit the audit correction and obtain governance re-review.
+- [x] (2026-08-27 20:10Z) Committed the audit correction as `f6784420a`;
+  independent governance re-review marked the exact commit Ready with no
+  remaining blockers.
 - [ ] Deploy the accepted revision to exact host `forest` without rebuilding and
   record real provider/run evidence.
 - [ ] Close the package, push, and hand the accepted revision to WP12.

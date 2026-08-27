@@ -62,5 +62,12 @@ authority, authentication, or mutation.
 
 The accepted correction is recorded in
 `20260827_checkpoint_scope_deviation.md` and carries a
-scope-vs-changed-files check into WP12. Governance re-review of the standalone
-correction commit remains required before any Forest restart.
+scope-vs-changed-files check into WP12.
+
+Independent governance re-review marked exact correction commit `f6784420a`
+Ready with no remaining blockers. The cumulative production changed-file set is
+covered by the accepted authority-source/consumer boundary, and the correction
+preserves operator authority and repository chronology. Forest may restart at
+the exact reviewed revision with creation disabled. Enabling creation remains
+gated on the historical-v2/five-profile-v3 reader proof and recorded rollback
+floor; production remains exclusively WP12 scope.

@@ -418,10 +418,9 @@ profiles alongside Continental US. Make each profile's typed data and climate-
 station database lists the sole Builder authority, with Vanilla CLIGEN available
 and selected by default in every locale and Canada using global datasets.
 
-**Status**: Candidate `b31eeb625` is correctness/security Ready and fully
-validated locally. An accepted checkpoint-enumeration correction and governance
-re-review precede reader-first acceptance on exact host `forest`; production
-remains reserved for WP12.
+**Status**: Candidate `b31eeb625` and audit correction `f6784420a` are
+correctness/security/governance Ready and fully validated locally. Reader-first
+acceptance on exact host `forest` is next; production remains reserved for WP12.
 
 ### Project Config Builder Model Options
 
