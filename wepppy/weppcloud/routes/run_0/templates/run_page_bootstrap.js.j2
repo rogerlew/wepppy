@@ -199,7 +199,8 @@
         },
         "ui": {
             "tocTaskEmojis": toc_task_emojis,
-            "disabledControllers": disabled_controllers
+            "disabledControllers": disabled_controllers,
+            "landuseModifyEnabled": show_landuse_modify
         }
     } | tojson }};
 
@@ -285,7 +286,9 @@
         add("outlet", typeof Outlet !== "undefined" ? Outlet : null);
         add("subcatchment", typeof SubcatchmentDelineation !== "undefined" ? SubcatchmentDelineation : null);
         add("landuse", typeof Landuse !== "undefined" ? Landuse : null);
-        add("landuseModify", typeof LanduseModify !== "undefined" ? LanduseModify : null);
+        if (context.ui && context.ui.landuseModifyEnabled) {
+            add("landuseModify", typeof LanduseModify !== "undefined" ? LanduseModify : null);
+        }
         add("soil", typeof Soil !== "undefined" ? Soil : null);
         add("climate", typeof Climate !== "undefined" ? Climate : null);
         add("observed", typeof Observed !== "undefined" ? Observed : null);

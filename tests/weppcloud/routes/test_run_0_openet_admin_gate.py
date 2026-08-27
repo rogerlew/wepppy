@@ -113,6 +113,7 @@ def _bootstrap_context(user_roles: set[str]) -> dict:
         "baer": None,
         "toc_task_emojis": {},
         "disabled_controllers": [],
+        "show_landuse_modify": False,
     }
 
 
@@ -448,6 +449,21 @@ def test_run_page_bootstrap_openet_flag_false_for_non_dev(run0_template_app) -> 
     with run0_template_app.app_context():
         js = render_template("run_page_bootstrap.js.j2", **context)
     assert _extract_openet_flag(js) == "false"
+
+
+@pytest.mark.parametrize("enabled", [False, True])
+def test_run_page_bootstrap_gates_landuse_modify_on_rendered_capability(
+    run0_template_app, enabled: bool
+) -> None:
+    context = _bootstrap_context(set())
+    context["show_landuse_modify"] = enabled
+
+    with run0_template_app.app_context():
+        js = render_template("run_page_bootstrap.js.j2", **context)
+
+    expected = "true" if enabled else "false"
+    assert re.search(rf'"landuseModifyEnabled"\s*:\s*{expected}', js)
+    assert "if (context.ui && context.ui.landuseModifyEnabled)" in js
 
 
 def test_run_page_bootstrap_openet_flag_true_for_dev(run0_template_app) -> None:

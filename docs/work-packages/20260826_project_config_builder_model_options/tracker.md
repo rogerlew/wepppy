@@ -36,6 +36,9 @@
 - [x] Corrected the browser rq-engine token issuer to include the signed numeric
   `user_id` claim alongside its opaque Flask-Security subject; restarted the
   Forest web service without rebuilding (2026-08-27 05:46 PDT).
+- [x] Aligned the run-page `landuseModify` controller bootstrap with the
+  server-rendered `enable_landuse_change` capability and added focused render
+  regression coverage (2026-08-27 05:51 UTC).
 - [x] Recorded operator approval and scaffolded the package (2026-08-27 03:36 UTC).
 - [x] Corrected and passed two independent contract reviews (2026-08-27 04:00 UTC).
 - [x] Committed standalone checkpoint `95559bc6f` (2026-08-27 04:00 UTC).
@@ -50,6 +53,16 @@
   6,962 passed and 63 skipped (2026-08-27 04:42 UTC).
 
 ## Decisions Log
+
+### 2026-08-27 05:51 UTC: Optional form capability gates controller bootstrap
+
+**Decision**: The run page serializes whether landuse modification is enabled,
+and bootstrap instantiates `LanduseModify` only when the matching form is
+rendered. The controller's required-form assertion remains strict.
+
+**Rationale**: Builder runs legitimately omit the form when
+`enable_landuse_change` is false. Unconditional controller creation violated
+the rendered-page contract and raised a bootstrap failure on every such run.
 
 ### 2026-08-27 05:42 PDT: Browser identity uses the numeric account claim
 

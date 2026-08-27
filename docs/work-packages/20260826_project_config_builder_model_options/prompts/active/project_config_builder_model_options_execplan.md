@@ -22,6 +22,9 @@ are never offered as silently valid and are rejected by the server if submitted.
   resolution and diagnostic Builder error details; targeted tests pass.
 - [x] (2026-08-27 05:46 PDT) Added the missing signed numeric `user_id` claim to
   browser rq-engine tokens and restarted the Forest web service.
+- [x] (2026-08-27 05:51 UTC) Repaired the run-page bootstrap contract so the
+  `landuseModify` controller is instantiated only when its server-rendered form
+  capability is enabled; focused render tests pass.
 
 - [x] (2026-08-27 03:36 UTC) Scaffold package and proposed contract checkpoint.
 - [x] (2026-08-27 04:00 UTC) Obtain and disposition two independent contract reviews.
@@ -45,6 +48,10 @@ are never offered as silently valid and are rejected by the server if submitted.
   remains unchanged.
 - The operator selected the deployed `wepp_260803` release, rather than the
   older documented minimum, as the default and Multiple OFE Builder binary.
+- Builder-created runs default `enable_landuse_change` to false. The map
+  correctly omitted the form, but the shared bootstrap still instantiated its
+  controller unconditionally and converted an intentional absence into a
+  page-level bootstrap failure.
 
 ## Decision Log
 
@@ -62,6 +69,12 @@ are never offered as silently valid and are rejected by the server if submitted.
   provider output, including `latest`, without a second Builder filter.
   Rationale: one provider owns availability; `wepp_260803` remains the explicit
   default and sole Multiple OFE binary.
+  Date/Author: 2026-08-27, Codex.
+- Decision: serialize the server-rendered landuse-modification capability in
+  run-page bootstrap data and gate `LanduseModify` on that same value.
+  Rationale: rendered markup and controller activation are one contract. The
+  controller retains its strict required-element check so a promised-but-missing
+  form remains observable rather than silently masked.
   Date/Author: 2026-08-27, Codex.
 
 ## Outcomes & Retrospective
