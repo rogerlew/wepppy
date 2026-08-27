@@ -14,16 +14,22 @@ production.
 
 - [x] (2026-08-26) Read the rollout contract, roadmap, WP01 handoff, deploy entry point, and Forest runbooks.
 - [x] (2026-08-26) Scaffold WP11 and record Forest-only safety/rollback scope.
-- [ ] Add default-off Compose flag passthrough and local contract tests.
-- [ ] Push and deploy the exact candidate revision to Forest twice.
-- [ ] Execute the complete deployed acceptance and rollback matrix.
-- [ ] Review evidence, archive, close, commit, and push.
+- [x] (2026-08-26) Add default-off Compose flag passthrough and local contract tests.
+- [x] (2026-08-26) Push and deploy the exact candidate revision to Forest twice.
+- [x] (2026-08-26) Execute deployed acceptance, restart/reopen, and historical-reader compatibility probes.
+- [x] (2026-08-26) Review evidence and prepare closure/archive; final gates and push follow.
 
 ## Surprises & Discoveries
 
 - Observation: the four Python feature flags are absent from production
   Compose's shared environment map.
   Evidence: `rg WEPPPY_PROJECT_CONFIG docker` returns no production wiring.
+- Observation: pre-feature `master` is not a writer-safe rollback target.
+  Evidence: `6af9ecdd6` has `_defaults.toml` but neither `_defaults.cfg` nor the
+  project-config reader; `cb7698b28` reopened three current artifacts.
+- Observation: the deployed-environment suite passed 148 tests, and persistent
+  artifacts survived restart, fork, archive, and restore.
+  Evidence: `artifacts/forest_acceptance_evidence.md`.
 
 ## Decision Log
 
@@ -33,10 +39,20 @@ production.
   an absent host value remains safe, and no tracked file carries environment-
   specific activation.
   Date/Author: 2026-08-26, Codex.
+- Decision: use `cb7698b28` as the supported reader-level rollback target and
+  defer a full-stack rollback until a pullable rollback ref exists.
+  Rationale: the canonical deploy cannot select a detached revision, and a
+  temporary remote branch is outside the established runbook.
+  Date/Author: 2026-08-26, Codex.
 
 ## Outcomes & Retrospective
 
-In progress.
+Forest accepted the candidate at the resolver/materializer, service topology,
+restart, lifecycle, and historical-reader compatibility layers. Two canonical
+full deployments passed. The package does not claim an authenticated browser/
+model smoke or full historical-stack rollback; both have explicit dispositions.
+Final local validation passed 6,941 tests with 63 skipped, plus focused tests,
+documentation lint, broad-exception enforcement, and Compose rendering.
 
 ## Context and Orientation
 
@@ -61,10 +77,11 @@ DEM/backend matrix, named preset, builder, climate/soil/land-use paths, update,
 restart, fork, archive, restore, and degraded-manifest behavior. Use disposable
 acceptance run IDs and record only safe summaries and hashes.
 
-Rehearse rollback to the recorded compatible `master` revision while the shared
-alias remains, verify the rollback reader/defaults contract, then restore the
-accepted candidate and rerun health/read probes. Run the canonical full deploy
-again for idempotence and retain exact service/revision evidence.
+Evaluate the prior `master` revision, select a compatible historical reader,
+and verify it against current artifacts while the shared alias remains. Run the
+canonical full deploy again for idempotence and retain exact service/revision
+evidence. Record a blocking disposition when a full historical service deploy
+cannot use the canonical pull workflow.
 
 ## Concrete Steps
 
@@ -104,4 +121,5 @@ and fork workers. The forest1 companion-worker skill applies only if the
 separate batch companion must be inspected; it is not a substitute for the
 main production stack workers.
 
-Plan revision note (2026-08-26): initial executable plan.
+Plan revision note (2026-08-26): initial executable plan; updated after Forest
+execution for the rollback-target correction and explicit dispositions.

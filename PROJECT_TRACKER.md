@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-08-26
-**Active Packages**: 30
+**Active Packages**: 29
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 26 packages (above target range; calculated from the 26 package entries in the In Progress section)
+**Current WIP**: 25 packages (above target range; calculated from the 25 package entries in the In Progress section)
 
 ### 3. Manage Flow
 Monitor how long packages spend in each column:
@@ -404,20 +404,6 @@ When resuming Kubernetes work:
 ---
 
 ## 🚧 In Progress
-
-### Project Config Forest Acceptance (WP11)
-
-**Started**: 2026-08-26
-
-**Priority/Security**: High / `high`
-
-**Link**: [docs/work-packages/20260804_project_config_forest_acceptance/](docs/work-packages/20260804_project_config_forest_acceptance/)
-
-**Description**: Deploy the default-off project-config stack to Forest and
-prove the compatibility, creation, update, lifecycle, restart, and rollback
-matrix before production cutover.
-
----
 
 ### Production Compose Deployment and CAP Runtime Hardening
 
@@ -1169,6 +1155,22 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### Project Config Forest Acceptance (WP11)
+
+**Completed**: 2026-08-26
+
+**Priority/Security**: High / `high`
+
+**Link**: [docs/work-packages/20260804_project_config_forest_acceptance/](docs/work-packages/20260804_project_config_forest_acceptance/)
+
+**Outcome**: Deployed the exact candidate twice through the canonical Forest
+workflow, activated readers before writers, passed 148 deployed-environment
+tests and persistent restart/lifecycle probes, and proved historical-reader
+compatibility. Authenticated model smoke and full-stack rollback remain explicit
+WP12-facing dispositions.
+
+---
 
 ### Project Config Lifecycle Integrity (WP10)
 
