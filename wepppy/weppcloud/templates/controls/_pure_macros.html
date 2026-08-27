@@ -659,8 +659,9 @@
 </div>
 {%- endmacro %}
 
-{% macro select_field(field_id, label, options, selected=None, help=None, attrs=None, error=None, extra_control_class=None, max_width='750px', field_name=None) -%}
+{% macro select_field(field_id, label, options, selected=None, help=None, attrs=None, error=None, extra_control_class=None, max_width='750px', field_name=None, disabled_values=None) -%}
 {% set attrs = attrs.copy() if attrs else {} %}
+{% set disabled_values = disabled_values or [] %}
 {% set help_id = field_id ~ "_help" %}
 {% set error_id = field_id ~ "_error" %}
 {% set describedby = [] %}
@@ -692,7 +693,7 @@
             {{ attr_key }}="{{ attr_val }}"
           {% endfor %}>
     {% for value, text in options %}
-    <option value="{{ value }}"{% if value == selected %} selected{% endif %}>{{ text }}</option>
+    <option value="{{ value }}"{% if value == selected %} selected{% endif %}{% if value in disabled_values %} disabled aria-disabled="true"{% endif %}>{{ text }}</option>
     {% endfor %}
   </select>
   {% if help %}

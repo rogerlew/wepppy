@@ -1,47 +1,13 @@
 schema_version = 1
 id = "continental-us-capabilities"
 kind = "capability"
-source_revision = "1"
+source_revision = "provider-v2"
 label = "Continental-US capabilities"
 description = "Resolved deployment capability lists for continental-US projects."
-owns = ["capabilities.dem_sources", "capabilities.delineation_backends", "capabilities.watershed_representations", "capabilities.soil_builders", "capabilities.landuse_datasets", "capabilities.climate_datasets", "capabilities.mods"]
+owns = []
 overrides = []
+writes = []
 
 [constraints]
 requires = ["continental-us"]
 conflicts = []
-
-[[writes]]
-section = "capabilities"
-option = "dem_sources"
-value = ["usgs-ned1-2024", "usgs-ned13-2022"]
-
-[[writes]]
-section = "capabilities"
-option = "delineation_backends"
-value = ["topaz", "wbt"]
-
-[[writes]]
-section = "capabilities"
-option = "watershed_representations"
-value = ["single-ofe", "multiple-ofe"]
-
-[[writes]]
-section = "capabilities"
-option = "soil_builders"
-value = ["ssurgo-gnatsgso-2025"]
-
-[[writes]]
-section = "capabilities"
-option = "landuse_datasets"
-value = ["nlcd-2019"]
-
-[[writes]]
-section = "capabilities"
-option = "climate_datasets"
-value = ["vanilla_cligen", "prism_stochastic", "observed_daymet", "observed_gridmet"]
-
-[[writes]]
-section = "capabilities"
-option = "mods"
-value = []

@@ -81,6 +81,11 @@ class ComponentDefinition:
     constraints: ConstraintSet
     default_cellsize: int | None = None
     source_path: str = ""
+    profile_classification: str | None = None
+    support_state: str | None = None
+    runtime_tokens: tuple[str, ...] = ()
+    base_profile_id: str | None = None
+    overlay_precedence: int | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -141,6 +146,11 @@ class ComponentSummary:
     description: str
     default_cellsize: int | None = None
     constraints: ConstraintSet = ConstraintSet()
+    profile_classification: str | None = None
+    support_state: str | None = None
+    runtime_tokens: tuple[str, ...] = ()
+    base_profile_id: str | None = None
+    overlay_precedence: int | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -150,6 +160,7 @@ class BuilderDescription:
     components: tuple[ComponentSummary, ...]
     allowed_cell_sizes: tuple[int, ...]
     default_selections: Mapping[str, str]
+    capability_graph: Mapping[str, Mapping[str, CanonicalValue]]
 
 
 @dataclass(frozen=True, slots=True)

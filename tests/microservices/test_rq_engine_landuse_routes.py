@@ -25,6 +25,13 @@ def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:
         lambda request, required_scopes=None: {"token_class": "service", "scope": "rq:enqueue rq:read"},
     )
     monkeypatch.setattr(landuse_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(landuse_routes, "capability_authority", lambda landuse: None)
+    monkeypatch.setattr(landuse_routes, "capability_default", lambda landuse, option: None)
+    monkeypatch.setattr(
+        landuse_routes,
+        "resolve_landuse_runtime_dataset",
+        lambda landuse, value: value,
+    )
 
 
 class _DummySubmissionLock:
@@ -131,6 +138,71 @@ def test_build_landuse_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
         landuse_routes.TaskEnum.run_geneva,
     ]
     assert prep_state["jobs"] == [("build_landuse_rq", "job-42")]
+
+
+def test_build_landuse_allows_exact_persisted_mode_omitted_from_v2_authority(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id="job-current")
+    _stub_prep(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(landuse_routes, "capability_default", lambda landuse, option: "nlcd-2019")
+    monkeypatch.setattr(
+        landuse_routes,
+        "landuse_capability_modes",
+        lambda landuse, dataset, representation: frozenset({0, 4}),
+    )
+
+    class DummyLanduse:
+        run_group = "default"
+        mods: set[str] = set()
+        mode = landuse_routes.LanduseMode(2)
+        multi_ofe = False
+        lc_dir = "/tmp"
+        lc_fn = "/tmp/lc.tif"
+
+        def parse_inputs(self, payload) -> None:
+            assert payload["mode"] == int(self.mode)
+
+    monkeypatch.setattr(landuse_routes.Landuse, "getInstance", lambda wd: DummyLanduse())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/build-landuse",
+            json={"mode": 2},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["job_id"] == "job-current"
+
+
+def test_build_landuse_rejects_invalid_capability_authority_before_parse(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(
+        landuse_routes,
+        "capability_authority",
+        lambda landuse: (_ for _ in ()).throw(ValueError("unknown capability axis")),
+    )
+
+    class DummyLanduse:
+        parse_calls = 0
+
+        def parse_inputs(self, payload) -> None:
+            self.parse_calls += 1
+
+    controller = DummyLanduse()
+    monkeypatch.setattr(landuse_routes.Landuse, "getInstance", lambda wd: controller)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/build-landuse", json={})
+
+    assert response.status_code == 409
+    assert response.json()["error"]["details"] == "unknown capability axis"
+    assert controller.parse_calls == 0
 
 
 def test_build_landuse_rejects_single_mode_for_mofe(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -462,6 +534,80 @@ def test_set_landuse_mode_rejects_single_mode_for_mofe(
     assert controller.grouped_update_calls == []
 
 
+def test_set_landuse_mode_rejects_stored_graph_mismatch_before_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
+    monkeypatch.setattr(landuse_routes, "_preflight_landuse_mutation_root", lambda wd: None)
+    monkeypatch.setattr(landuse_routes, "capability_default", lambda landuse, option: "nlcd-2019")
+    monkeypatch.setattr(
+        landuse_routes,
+        "landuse_capability_modes",
+        lambda landuse, dataset, representation: frozenset({0, 4}),
+    )
+
+    class DummyLanduse:
+        multi_ofe = True
+
+        def __init__(self) -> None:
+            self.grouped_update_calls: list[dict[str, object]] = []
+
+        def apply_set_landuse_mode_updates(self, **kwargs) -> None:
+            self.grouped_update_calls.append(kwargs)
+
+    controller = DummyLanduse()
+    monkeypatch.setattr(landuse_routes.Landuse, "getInstance", lambda wd: controller)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/set-landuse-mode",
+            json={"mode": int(landuse_routes.LanduseMode.Single), "landuse_single_selection": "42"},
+        )
+
+    assert response.status_code == 400
+    assert response.json()["errors"][0]["field"] == "mode"
+    assert controller.grouped_update_calls == []
+
+
+def test_set_landuse_mode_reports_invalid_authority_before_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
+    monkeypatch.setattr(landuse_routes, "_preflight_landuse_mutation_root", lambda wd: None)
+    monkeypatch.setattr(
+        landuse_routes,
+        "capability_authority",
+        lambda landuse: (_ for _ in ()).throw(ValueError("unsupported capability schema version")),
+    )
+
+    class DummyLanduse:
+        multi_ofe = False
+
+        def __init__(self) -> None:
+            self.grouped_update_calls: list[dict[str, object]] = []
+
+        def apply_set_landuse_mode_updates(self, **kwargs) -> None:
+            self.grouped_update_calls.append(kwargs)
+
+    controller = DummyLanduse()
+    monkeypatch.setattr(landuse_routes.Landuse, "getInstance", lambda wd: controller)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/set-landuse-mode",
+            json={"mode": int(landuse_routes.LanduseMode.Gridded)},
+        )
+
+    assert response.status_code == 409
+    error = response.json()["error"]
+    assert error["code"] == "capability_authority_invalid"
+    assert error["message"] == "Project capability authority is invalid."
+    assert error["details"] == "unsupported capability schema version"
+    assert controller.grouped_update_calls == []
+
+
 def test_set_landuse_mode_requires_mode(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch)
     monkeypatch.setattr(landuse_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
@@ -554,6 +700,77 @@ def test_set_landuse_db_updates_controller(monkeypatch: pytest.MonkeyPatch) -> N
     assert response.status_code == 200
     assert response.json()["message"] == "Landuse database updated"
     assert controller.nlcd_db == "nlcd"
+
+
+def test_set_landuse_db_maps_stable_catalog_id_before_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
+    monkeypatch.setattr(landuse_routes, "_preflight_landuse_mutation_root", lambda wd: None)
+    monkeypatch.setattr(
+        landuse_routes,
+        "resolve_landuse_runtime_dataset",
+        lambda landuse, value: "nlcd/2019" if value == "nlcd-2019" else None,
+    )
+
+    class DummyLanduse:
+        nlcd_db = None
+
+    controller = DummyLanduse()
+    monkeypatch.setattr(landuse_routes.Landuse, "getInstance", lambda wd: controller)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/set-landuse-db",
+            json={"landuse_db": "nlcd-2019"},
+        )
+
+    assert response.status_code == 200
+    assert controller.nlcd_db == "nlcd/2019"
+
+
+def test_set_landuse_db_reports_invalid_authority_before_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
+    monkeypatch.setattr(landuse_routes, "_preflight_landuse_mutation_root", lambda wd: None)
+    monkeypatch.setattr(
+        landuse_routes,
+        "capability_authority",
+        lambda landuse: (_ for _ in ()).throw(ValueError("unsupported capability schema version")),
+    )
+
+    class DummyLanduse:
+        def __init__(self) -> None:
+            self._nlcd_db = None
+            self.write_count = 0
+
+        @property
+        def nlcd_db(self):
+            return self._nlcd_db
+
+        @nlcd_db.setter
+        def nlcd_db(self, value) -> None:
+            self.write_count += 1
+            self._nlcd_db = value
+
+    controller = DummyLanduse()
+    monkeypatch.setattr(landuse_routes.Landuse, "getInstance", lambda wd: controller)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/set-landuse-db",
+            json={"landuse_db": "nlcd-2019"},
+        )
+
+    assert response.status_code == 409
+    error = response.json()["error"]
+    assert error["code"] == "capability_authority_invalid"
+    assert error["message"] == "Project capability authority is invalid."
+    assert error["details"] == "unsupported capability schema version"
+    assert controller.write_count == 0
 
 
 def test_set_landuse_db_maps_nodb_lock_conflict(

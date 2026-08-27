@@ -1,5 +1,6 @@
 import contextlib
 import json
+from types import SimpleNamespace
 
 import pytest
 
@@ -76,6 +77,12 @@ def _stub_wepp_stack(
     watershed_has_subcatchments: bool = True,
     capture: dict[str, object] | None = None,
 ) -> None:
+    monkeypatch.setattr(wepp_run_payload, "capability_authority", lambda config: None)
+    monkeypatch.setattr(
+        wepp_run_payload,
+        "runtime_value_allowed",
+        lambda config, option, value: True,
+    )
     class ReadyPrep:
         def __getitem__(self, key):
             return "2026-07-30T00:00:00Z"
@@ -96,6 +103,7 @@ def _stub_wepp_stack(
 
     class DummyWepp:
         run_group = ""
+        wepp_bin = "wepp_current"
         dss_excluded_channel_orders = [1, 2]
         _run_wepp_ui = True
         _run_wepp_watershed = True
@@ -787,6 +795,150 @@ def test_run_wepp_propagates_channel_options_to_swat_when_enabled(
     assert swat_payload["channel_critical_shear"] == 6.25
     assert swat_payload["channel_erodibility"] == 0.00002
     assert swat_payload["minimum_channel_width_m"] == 0.5
+
+
+def test_run_wepp_rejects_binary_outside_stored_graph_before_controller_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch)
+    _stub_prep(monkeypatch)
+    capture: dict[str, object] = {}
+    _stub_wepp_stack(monkeypatch, capture=capture)
+    monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(
+        wepp_run_payload,
+        "runtime_value_allowed",
+        lambda config, option, value: value == "wepp_260803",
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-wepp",
+            json={"wepp_bin": "wepp_not_authorized"},
+        )
+
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "unsupported_capability"
+    assert "parse_payload" not in capture
+
+
+def test_run_wepp_allows_exact_persisted_binary_omitted_from_v2_authority(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch)
+    _stub_prep(monkeypatch)
+    capture: dict[str, object] = {}
+    _stub_wepp_stack(monkeypatch, capture=capture)
+    monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(
+        wepp_run_payload,
+        "runtime_value_allowed",
+        lambda config, option, value: False,
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-wepp",
+            json={"wepp_bin": "wepp_current"},
+        )
+
+    assert response.status_code == 200
+    assert "parse_payload" in capture
+
+
+def test_run_wepp_rejects_axis_advertised_binary_outside_current_model_tuple(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch)
+    _stub_prep(monkeypatch)
+    capture: dict[str, object] = {}
+    _stub_wepp_stack(monkeypatch, capture=capture)
+    monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
+    authority = SimpleNamespace(
+        defaults={"delineation_backend": "wbt"},
+        allowed_model_tuples=("wbt|multiple-ofe|wepp_260803",),
+    )
+    monkeypatch.setattr(wepp_run_payload, "capability_authority", lambda config: authority)
+    monkeypatch.setattr(
+        wepp_run_payload,
+        "runtime_value_allowed",
+        lambda config, option, value: value in {"wepp_260803", "wepp_dcc52a6"},
+    )
+    capture["wepp"].wepp_bin = "wepp_260803"
+    capture["wepp"].multi_ofe = True
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-wepp",
+            json={"wepp_bin": "wepp_dcc52a6"},
+        )
+
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "unsupported_capability"
+    assert "allowed_model_tuples" in response.json()["error"]["details"]
+    assert "parse_payload" not in capture
+
+
+def test_run_wepp_v2_uses_stored_tuple_without_live_provider_lookup(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch)
+    _stub_prep(monkeypatch)
+    capture: dict[str, object] = {}
+    _stub_wepp_stack(monkeypatch, capture=capture)
+    monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
+    authority = SimpleNamespace(
+        defaults={"delineation_backend": "wbt"},
+        allowed_model_tuples=(
+            "wbt|multiple-ofe|wepp_260803",
+            "wbt|multiple-ofe|wepp_stored_only",
+        ),
+    )
+    monkeypatch.setattr(wepp_run_payload, "capability_authority", lambda config: authority)
+    monkeypatch.setattr(
+        wepp_run_payload,
+        "runtime_value_allowed",
+        lambda config, option, value: value in {"wepp_260803", "wepp_stored_only"},
+    )
+    capture["wepp"].wepp_bin = "wepp_260803"
+    capture["wepp"].multi_ofe = True
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-wepp",
+            json={"wepp_bin": "wepp_stored_only"},
+        )
+
+    assert response.status_code == 200
+    assert "parse_payload" in capture
+
+
+def test_run_wepp_rejects_invalid_capability_authority_before_controller_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch)
+    _stub_prep(monkeypatch)
+    capture: dict[str, object] = {}
+    _stub_wepp_stack(monkeypatch, capture=capture)
+    monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(
+        wepp_run_payload,
+        "capability_authority",
+        lambda config: (_ for _ in ()).throw(ValueError("newer capability schema")),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/run-wepp", json={})
+
+    assert response.status_code == 409
+    assert response.json()["error"]["code"] == "capability_authority_invalid"
+    assert response.json()["error"]["details"] == "newer capability schema"
+    assert "parse_payload" not in capture
 
 
 def test_run_wepp_revegetation_scenario_loads_cover_transform(

@@ -873,6 +873,8 @@ labels or raw enum values. An illustrative section is:
 ```ini
 [capabilities]
 schema_version = 2
+locale_profiles = ["continental-us"]
+dem_sources = ["usgs-ned1-2024", "usgs-ned13-2022"]
 climate_datasets = ["vanilla_cligen", "prism_stochastic", "observed_gridmet"]
 climate_station_methods = ["auto", "distance", "multi_factor"]
 climate_spatial_methods = ["single", "multiple", "interpolated"]
@@ -885,6 +887,9 @@ watershed_representations = ["single-ofe", "multiple-ofe"]
 wepp_binaries = ["wepp_260803"]
 mods = []
 allowed_model_tuples = ["topaz|single-ofe|wepp_260803", "wbt|single-ofe|wepp_260803", "wbt|multiple-ofe|wepp_260803"]
+
+[capabilities.wepp_binary_revisions]
+wepp_260803 = "provider-v1:watershed=<sha256>:hillslope=<sha256>"
 
 [capabilities.climate_station_methods]
 vanilla_cligen = ["auto", "distance", "multi_factor"]
@@ -927,6 +932,8 @@ ssurgo-gnatsgso-2025 = "gridded"
 [capabilities.mod_conflicts]
 
 [capability_defaults]
+locale_profile = "continental-us"
+dem_source = "usgs-ned1-2024"
 climate_dataset = "vanilla_cligen"
 landuse_dataset = "nlcd-2019"
 soil_dataset = "ssurgo-gnatsgso-2025"
@@ -966,6 +973,14 @@ limited by the stable-ID grammar and serialized capability sections to 4 MiB.
 These invariants are checked before description, creation, view rendering,
 mutation, or enqueue.
 
+`capabilities.wepp_binary_revisions` keys MUST exhaust `wepp_binaries`. Each
+value MUST bind the ordered watershed and hillslope executable SHA-256 role
+identities using the closed
+`provider-v1:watershed=<sha256>:hillslope=<sha256>` form. These identities MUST
+contribute to `provider_revision`, the capability component revision, and the
+manifest parent chain. Changing any advertised role target therefore changes
+stored provenance even when its binary ID is not the selected default.
+
 `landuse_methods_by_representation` keys MUST exhaust
 `watershed_representations`; each value MUST be a non-empty subset of
 `landuse_methods`. A run's current representation intersects this relation with
@@ -986,6 +1001,10 @@ For flattened projects:
   and watershed backend/representation choices from those resolved axes.
 - Every paired mutation or build endpoint MUST validate a newly submitted value
   against the same stable IDs before NoDb mutation or enqueue.
+- Run-scoped rq-engine controller schemas, templates/defaults, aggregated
+  endpoint operation documents, pipeline, and readiness metadata MUST report
+  only the stored authority. They MUST NOT repopulate an omitted choice from a
+  current provider listing.
 
 Capability compatibility is versioned as follows:
 
@@ -1226,7 +1245,10 @@ The UI contract depends on these stable error codes:
 - `stale_config_preview` (`409`);
 - `config_update_unavailable` (`409`);
 - `config_update_in_progress` (`409`); and
-- `unsupported_config_schema` (`409`).
+- `unsupported_config_schema` (`409`); and
+- `capability_authority_invalid` (`409`) with diagnostic `details` when a
+  created run's schema-v2 graph is malformed, partial, contradictory, or newer
+  than the reader.
 
 Bearer-authenticated rq-engine calls remain outside the browser CSRF boundary.
 Cookie-backed calls MUST follow the canonical same-origin/CSRF contract. Exact

@@ -596,3 +596,59 @@ def test_orchestration_routes_internal_failures_return_canonical_500(
     _assert_canonical_error(pipeline_response.json())
     assert readiness_response.status_code == 500
     _assert_canonical_error(readiness_response.json())
+
+
+def test_orchestration_routes_return_diagnostic_409_for_invalid_capability_authority(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch, "rq:status")
+
+    def _invalid(runid: str, config: str) -> dict[str, Any]:
+        raise orchestration_read_routes.CapabilityAuthorityInvalidError("partial graph")
+
+    monkeypatch.setattr(orchestration_read_routes, "_load_runtime_state", _invalid)
+
+    with TestClient(rq_engine.app) as client:
+        pipeline_response = client.get(PIPELINE_PATH)
+        readiness_response = client.get(READINESS_PATH)
+
+    assert pipeline_response.status_code == 409
+    _assert_canonical_error(pipeline_response.json(), code="capability_authority_invalid")
+    assert pipeline_response.json()["error"]["details"] == "partial graph"
+    assert readiness_response.status_code == 409
+    _assert_canonical_error(readiness_response.json(), code="capability_authority_invalid")
+
+
+def test_pipeline_and_readiness_report_only_stored_model_capabilities(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch, "rq:read")
+    runtime = _sample_baseline_runtime_state()
+    runtime["capabilities"] = {
+        "schema_version": 2,
+        "provider_revision": "a" * 64,
+        "delineation_backends": ["wbt"],
+        "watershed_representations": ["single-ofe", "multiple-ofe"],
+        "wepp_binaries": ["wepp_260803"],
+        "allowed_model_tuples": [
+            "wbt|single-ofe|wepp_260803",
+            "wbt|multiple-ofe|wepp_260803",
+        ],
+        "defaults": {
+            "delineation_backend": "wbt",
+            "watershed_representation": "single-ofe",
+            "wepp_binary": "wepp_260803",
+        },
+    }
+    monkeypatch.setattr(
+        orchestration_read_routes,
+        "_load_runtime_state",
+        lambda runid, config: deepcopy(runtime),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        pipeline = client.get(PIPELINE_PATH).json()
+        readiness = client.get(READINESS_PATH).json()
+
+    assert pipeline["capabilities"] == runtime["capabilities"]
+    assert readiness["run"]["capabilities"] == runtime["capabilities"]

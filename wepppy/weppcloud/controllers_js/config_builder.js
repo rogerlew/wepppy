@@ -11,15 +11,6 @@
         landuse: "landuse",
         climate: "climate"
     };
-    var LOCALE_ALLOWED = {
-        dem: "allowed_dem",
-        delineation_backend: "allowed_delineation",
-        watershed_representation: "allowed_representation",
-        wepp_binary: "allowed_wepp_binary",
-        soil: "allowed_soil",
-        landuse: "allowed_landuse",
-        climate: "allowed_climate"
-    };
     var REVIEW_LABELS = {
         locale: "Locale",
         dem: "Elevation source",
@@ -29,9 +20,9 @@
         delineation_backend: "Delineation backend",
         watershed_representation: "Watershed representation",
         wepp_binary: "WEPP binary version",
-        soil: "Soil method",
-        landuse: "Land-cover source",
-        climate: "Climate method",
+        soil: "Soil dataset",
+        landuse: "Land-cover dataset",
+        climate: "Climate dataset",
         mods: "Initialized modules",
         capabilities: "Derived capabilities",
         config_filename: "Runtime filename"
@@ -97,12 +88,29 @@
         return select && this.components[select.value] ? this.components[select.value] : null;
     };
 
+    ConfigBuilder.prototype._graphAxis = function (name) {
+        var graph = this.description && this.description.capability_graph;
+        var axes = graph && graph.capabilities;
+        return axes && Array.isArray(axes[name]) ? axes[name].slice() : [];
+    };
+
+    ConfigBuilder.prototype._modelTuples = function () {
+        return this._graphAxis("allowed_model_tuples").map(function (token) {
+            var parts = token.split("|");
+            return {backend: parts[0], representation: parts[1], binary: parts[2]};
+        }).filter(function (item) {
+            return item.backend && item.representation && item.binary;
+        });
+    };
+
     ConfigBuilder.prototype._setOptions = function (field, allowedIds, announce) {
         var select = this.form.elements[field];
         var previous = select.value;
-        var options = this._byKind(FIELD_KIND[field]).filter(function (component) {
-            return !allowedIds || allowedIds.indexOf(component.component_id) !== -1;
-        });
+        var options = allowedIds ? allowedIds.map(function (componentId) {
+            return this.components[componentId];
+        }, this).filter(function (component) {
+            return component && component.kind === FIELD_KIND[field];
+        }) : this._byKind(FIELD_KIND[field]);
         select.replaceChildren();
         options.forEach(function (component) {
             var option = global.document.createElement("option");
@@ -120,29 +128,41 @@
     };
 
     ConfigBuilder.prototype._renderDependencies = function (announce, changedField) {
-        var locale = this._locale();
-        var constraints = locale ? locale.constraints || {} : {};
-        Object.keys(LOCALE_ALLOWED).forEach(function (field) {
-            if (field === "watershed_representation") { return; }
-            this._setOptions(field, constraints[LOCALE_ALLOWED[field]] || [], announce);
+        void changedField;
+        var graphAxes = {
+            dem: "dem_sources",
+            soil: "soil_datasets",
+            landuse: "landuse_datasets",
+            climate: "climate_datasets"
+        };
+        Object.keys(graphAxes).forEach(function (field) {
+            this._setOptions(field, this._graphAxis(graphAxes[field]), announce);
         }, this);
+
+        var tuples = this._modelTuples();
         var backend = this.form.elements.delineation_backend.value;
         var binary = this.form.elements.wepp_binary.value;
-        var representationIds = (constraints.allowed_representation || []).filter(function (id) {
-            var component = this.components[id];
-            if (!component) { return false; }
-            var required = component.constraints ? component.constraints.requires || [] : [];
-            if (required.indexOf("wbt") !== -1 && backend !== "wbt") { return false; }
-            return changedField !== "wepp_binary" || required.indexOf("wepp_260803") === -1 || binary === "wepp_260803";
-        }, this);
+        var representationIds = this._graphAxis("watershed_representations").filter(function (id) {
+            return tuples.some(function (item) {
+                return item.backend === backend && item.binary === binary && item.representation === id;
+            });
+        });
         this._setOptions("watershed_representation", representationIds, announce);
-        if (this.form.elements.watershed_representation.value === "multiple-ofe" && binary !== "wepp_260803") {
-            this.form.elements.wepp_binary.value = "wepp_260803";
-            if (announce) {
-                this.dom.setText(this.changeReason, "Multiple OFE requires WEPP 260803; the binary selection was updated.");
-            }
-        }
-        this._renderMods(constraints.allowed_mods || [], announce);
+        var representation = this.form.elements.watershed_representation.value;
+        var binaryIds = this._graphAxis("wepp_binaries").filter(function (id) {
+            return tuples.some(function (item) {
+                return item.backend === backend && item.representation === representation && item.binary === id;
+            });
+        });
+        this._setOptions("wepp_binary", binaryIds, announce);
+        binary = this.form.elements.wepp_binary.value;
+        var backendIds = this._graphAxis("delineation_backends").filter(function (id) {
+            return tuples.some(function (item) {
+                return item.backend === id && item.representation === representation && item.binary === binary;
+            });
+        });
+        this._setOptions("delineation_backend", backendIds, announce);
+        this._renderMods(this._graphAxis("mods"), announce);
         this._renderCellsize();
     };
 
@@ -352,18 +372,26 @@
             this.components = {};
             this.description.components.forEach(function (component) { this.components[component.component_id] = component; }, this);
             this._setOptions("locale", null, false);
-            if (prior && this.components[prior.locale]) { this.form.elements.locale.value = prior.locale; }
+            [
+                ["dem", "dem_sources"],
+                ["delineation_backend", "delineation_backends"],
+                ["watershed_representation", "watershed_representations"],
+                ["wepp_binary", "wepp_binaries"],
+                ["soil", "soil_datasets"],
+                ["landuse", "landuse_datasets"],
+                ["climate", "climate_datasets"]
+            ].forEach(function (entry) {
+                this._setOptions(entry[0], this._graphAxis(entry[1]), false);
+            }, this);
+            var requested = prior || this.description.default_selections || {};
+            Object.keys(requested).forEach(function (field) {
+                var select = this.form.elements[field];
+                var value = requested[field];
+                if (select && Array.prototype.some.call(select.options, function (option) { return option.value === value; })) {
+                    select.value = value;
+                }
+            }, this);
             this._renderDependencies(Boolean(preserve), null);
-            if (!prior) {
-                Object.keys(this.description.default_selections || {}).forEach(function (field) {
-                    var select = this.form.elements[field];
-                    var value = this.description.default_selections[field];
-                    if (select && Array.prototype.some.call(select.options, function (option) { return option.value === value; })) {
-                        select.value = value;
-                    }
-                }, this);
-                this._renderDependencies(false, null);
-            }
             this.busy = false;
             this._setStatus("Registered choices loaded. Review selections to validate the complete configuration.", false);
             this._updateActions();

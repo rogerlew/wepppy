@@ -25,18 +25,18 @@ registry, rename durable component IDs, or promote the branch to production.
 
 ## Success Criteria
 
-- [ ] Every runtime locale token in shipped configs and domain catalogs maps to
+- [x] Every runtime locale token in shipped configs and domain catalogs maps to
   exactly one canonical base, overlay, or explicit non-Builder family/support
   disposition.
-- [ ] `continental-us` conforms to the same canonical schema as every profile.
-- [ ] Locale/component dependency closure is deterministic and rejects unknown,
+- [x] `continental-us` conforms to the same canonical schema as every profile.
+- [x] Locale/component dependency closure is deterministic and rejects unknown,
   contradictory, or empty required capability sets.
-- [ ] Flattened configs distinguish climate datasets/methods, landuse
+- [x] Flattened configs distinguish climate datasets/methods, landuse
   datasets/methods, soil datasets/builders, and watershed choices.
-- [ ] Climate radios, landuse options, soil modes, and watershed controls are
+- [x] Climate radios, landuse options, soil modes, and watershed controls are
   rendered from the resolved run authority.
-- [ ] Paired server endpoints reject newly submitted hidden choices.
-- [ ] Legacy and already-persisted selections preserve their contracted behavior.
+- [x] Paired server endpoints reject newly submitted hidden choices.
+- [x] Legacy and already-persisted selections preserve their contracted behavior.
 - [ ] Forest proves every advertised provider and every Builder-exposed base
   and overlay, with representative execution for each provider/method family.
 

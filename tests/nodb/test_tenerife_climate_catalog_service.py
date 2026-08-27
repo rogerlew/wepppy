@@ -22,6 +22,22 @@ class _ClimateStub:
         self.ron_instance = types.SimpleNamespace(mods=list(mods))
         self.uses_tenerife_station_catalog = uses_tenerife_station_catalog
 
+    def config_get_raw(
+        self,
+        _section: str,
+        _option: str,
+        default: object = None,
+    ) -> object:
+        return default
+
+    def config_get_list(
+        self,
+        _section: str,
+        _option: str,
+        default: object = None,
+    ) -> object:
+        return default
+
 
 def test_tenerife_available_catalog_is_runtime_constrained() -> None:
     service = ClimateStationCatalogService()

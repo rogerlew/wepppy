@@ -95,11 +95,16 @@ The soil stable-ID/runtime/state mappings are `ssurgo-gnatsgso-2025` ->
 `MODS_DIR/locations/turkey/data/soil_.asc` (all `supported_non_builder`).
 `none-soil-provider` -> explicit `None` is `inventory_only`.
 
-The exact stable-ID/runtime/support mapping for all 164 unique landcover values
+The exact stable-ID/runtime/support mapping for all 163 unique landcover values
 is enumerated in `20260827_landcover_inventory.md`. The Australia catalog is
 explicitly empty. The canonical landcover provider must synthesize the same
 stable IDs, runtime mappings, source revision, and provider digest; no second
 hand-maintained allowlist may omit catalog values.
+
+Tenerife's shipped config spells the runtime value
+`eu/corine_landcover/2018`; the provider's canonical identity is
+`eu/CORINE_LandCover/2018`. Both spellings resolve explicitly to stable ID
+`corine-2018`, while provider serialization retains the canonical spelling.
 
 Climate `builder_exposed` datasets are `vanilla_cligen`, `prism_stochastic`,
 `observed_daymet`, and `observed_gridmet`. `dep_nexrad`, `future_cmip5`,

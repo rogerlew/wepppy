@@ -21,6 +21,7 @@ from wepppy.nodb.config_builder.schema import (
     RegistryValue,
     ResolvedBuilderConfig,
 )
+from wepppy.nodb.locales.capability_graph import build_continental_us_capability_graph
 from wepppy.project_config_serialization import (
     CanonicalValue,
     parse_config_text,
@@ -59,6 +60,14 @@ DEFAULT_SELECTIONS = MappingProxyType({
     "watershed_representation": "single-ofe",
     "wepp_binary": "wepp_260803",
 })
+
+
+def _capability_graph_for_registry(registry: Registry):
+    binary_components = registry.by_kind(ComponentKind.WEPP_BINARY)
+    return build_continental_us_capability_graph(
+        tuple(item.component_id for item in binary_components),
+        {item.component_id: item.source_revision for item in binary_components},
+    )
 
 
 class BuilderConstraintError(ValueError):
@@ -127,6 +136,29 @@ def _selection_chain(registry: Registry, selections: BuilderSelections) -> tuple
         ComponentKind.CAPABILITY,
         "capability_profile",
     )
+    graph = _capability_graph_for_registry(registry)
+    graph_axes = (
+        ("locale", selections.locale, graph.locale_profiles),
+        ("dem", selections.dem, graph.dem_sources),
+        ("soil", selections.soil, graph.soil_datasets),
+        ("landuse", selections.landuse, graph.landuse_datasets),
+        ("climate", selections.climate, graph.climate_datasets),
+    )
+    for field, selected_id, allowed_ids in graph_axes:
+        _require_allowed(field, selected_id, allowed_ids)
+    model_tuple = "|".join(
+        (
+            selections.delineation_backend,
+            selections.watershed_representation,
+            selections.wepp_binary,
+        )
+    )
+    if model_tuple not in graph.allowed_model_tuples:
+        raise BuilderConstraintError(
+            "watershed_representation",
+            "unsupported_combination",
+            "The selected delineation, watershed representation, and WEPP binary are incompatible.",
+        )
     constraints = locale.constraints
     _require_allowed("dem", dem.component_id, constraints.allowed_dem)
     _require_allowed(
@@ -203,18 +235,30 @@ def describe_builder(registry: Registry | None = None) -> BuilderDescription:
             item.description,
             item.default_cellsize,
             item.constraints,
+            item.profile_classification,
+            item.support_state,
+            item.runtime_tokens,
+            item.base_profile_id,
+            item.overlay_precedence,
         )
         for item in sorted(
             resolved_registry.components.values(),
             key=lambda item: (_KIND_ORDER[item.kind], item.component_id),
         )
     )
+    graph = _capability_graph_for_registry(resolved_registry)
     return BuilderDescription(
         1,
         resolved_registry.revision,
         summaries,
         ALLOWED_CELL_SIZES,
         DEFAULT_SELECTIONS,
+        MappingProxyType(
+            {
+                section: MappingProxyType(dict(options))
+                for section, options in graph.as_config_sections().items()
+            }
+        ),
     )
 
 
@@ -253,6 +297,10 @@ def resolve_builder_config(
             section[write.option] = _mutable_value(write.value)
             effective_writers[write.key] = component.component_id
 
+    graph = _capability_graph_for_registry(resolved_registry)
+    for section_name in graph.as_config_sections():
+        config.setdefault(section_name, {})
+
     dem = next(item for item in chain if item.kind is ComponentKind.DEM)
     if dem.default_cellsize not in ALLOWED_CELL_SIZES:
         raise BuilderConstraintError("dem", "invalid_dem_default", "DEM default cell size is not allowlisted")
@@ -275,6 +323,14 @@ def resolve_builder_config(
         (("config", "schema_version"), 1, "resolver-v1"),
         (("general", "cellsize"), effective_cellsize, "selection:cellsize"),
         (("nodb", "mods"), list(selections.mods), "selection:mods"),
+        (("capability_defaults", "locale_profile"), selections.locale, "selection:locale"),
+        (("capability_defaults", "dem_source"), selections.dem, "selection:dem"),
+        (("capability_defaults", "climate_dataset"), selections.climate, "selection:climate"),
+        (("capability_defaults", "soil_dataset"), selections.soil, "selection:soil"),
+        (("capability_defaults", "landuse_dataset"), selections.landuse, "selection:landuse"),
+        (("capability_defaults", "delineation_backend"), selections.delineation_backend, "selection:delineation"),
+        (("capability_defaults", "watershed_representation"), selections.watershed_representation, "selection:representation"),
+        (("capability_defaults", "wepp_binary"), selections.wepp_binary, "selection:wepp_binary"),
     )
     for (section_name, option_name), value, writer in explicit_writes:
         config.setdefault(section_name, {})[option_name] = deepcopy(value)

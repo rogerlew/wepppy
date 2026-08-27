@@ -18,6 +18,12 @@ from .._common import *  # noqa: F401,F403
 
 from wepppy.climates.cligen import StationMeta
 from wepppy.nodb.core.climate import Climate, ClimateStationMode
+from wepppy.nodb.project_config_capabilities import (
+    capability_authority,
+    capability_default,
+    climate_spatial_capability_modes,
+    climate_station_capability_modes,
+)
 from wepppy.weppcloud.utils.cap_guard import requires_cap
 
 StationOption = MutableMapping[str, Any]
@@ -189,6 +195,19 @@ def set_climatestation_mode(runid: str, config: str) -> Response:
 
     wd = get_wd(runid)
     climate = Climate.getInstance(wd)
+    dataset_id = climate.catalog_id or capability_default(climate, "climate_dataset")
+    allowed_modes = (
+        climate_station_capability_modes(climate, dataset_id)
+        if dataset_id is not None
+        else None
+    )
+    if allowed_modes is not None and mode not in allowed_modes:
+        return error_factory(
+            'Climate station method is not supported by this project.',
+            status_code=400,
+            code='unsupported_capability',
+            details=f'Unsupported climate station method: {mode}',
+        )
 
     try:
         climate.climatestation_mode = ClimateStationMode(int(mode))
@@ -329,14 +348,55 @@ def set_climate_mode(runid: str, config: str) -> Response:
 
     wd = get_wd(runid)
     climate = Climate.getInstance(wd)
+    authority = capability_authority(climate)
+    if authority is not None and mode is not None and not catalog_id:
+        return error_factory(
+            'Climate catalog id is required for this project.',
+            status_code=400,
+            code='missing_capability_id',
+            details='catalog_id is required when selecting a schema-v2 climate dataset.',
+        )
+    dataset = None
+    if catalog_id:
+        dataset = climate._resolve_catalog_dataset(str(catalog_id), include_hidden=True)
+        if dataset is None:
+            return error_factory(
+                'Climate dataset is not supported by this project.',
+                status_code=400,
+                code='unsupported_capability',
+                details=f'Unsupported climate catalog id: {catalog_id}',
+            )
+        allowed_dataset_ids = (
+            set(authority.climate_datasets)
+            if authority is not None and hasattr(authority, 'climate_datasets')
+            else None
+        )
+        if (
+            allowed_dataset_ids is not None
+            and str(catalog_id) not in allowed_dataset_ids
+            and str(catalog_id) != str(climate.catalog_id or '')
+        ):
+            return error_factory(
+                'Climate dataset is not supported by this project.',
+                status_code=400,
+                code='unsupported_capability',
+                details=f'Unsupported capabilities.climate_datasets value: {catalog_id}',
+            )
+        if mode is not None and int(dataset.climate_mode) != mode:
+            return error_factory(
+                'Climate mode does not match the selected dataset.',
+                status_code=400,
+                code='capability_mismatch',
+                details=(
+                    f'Climate catalog {catalog_id} uses mode {int(dataset.climate_mode)}, '
+                    f'not submitted mode {mode}.'
+                ),
+            )
 
     try:
         if mode is not None:
             climate.climate_mode = mode
-        if catalog_id:
-            dataset = climate._resolve_catalog_dataset(str(catalog_id), include_hidden=True)
-            if dataset is None:
-                return exception_factory('Unknown climate catalog id', runid=runid)
+        if dataset is not None:
             climate.catalog_id = dataset.catalog_id
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
@@ -367,6 +427,19 @@ def set_climate_spatialmode(runid: str, config: str) -> Response:
 
     wd = get_wd(runid)
     climate = Climate.getInstance(wd)
+    dataset_id = climate.catalog_id or capability_default(climate, "climate_dataset")
+    allowed_modes = (
+        climate_spatial_capability_modes(climate, dataset_id)
+        if dataset_id is not None
+        else None
+    )
+    if allowed_modes is not None and spatialmode not in allowed_modes:
+        return error_factory(
+            'Climate spatial method is not supported by this project.',
+            status_code=400,
+            code='unsupported_capability',
+            details=f'Unsupported climate spatial method: {spatialmode}',
+        )
 
     try:
         climate.climate_spatialmode = spatialmode

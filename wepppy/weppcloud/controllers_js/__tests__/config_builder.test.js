@@ -26,6 +26,18 @@ function description(canOverride = false) {
         schema_version: 1, registry_revision: "registry-1", can_override_cellsize: canOverride,
         allowed_cell_sizes: [1, 2, 5, 10, 25, 30, 90, 100], config_token: "config",
         config_filename: "config.cfg", default_selections: {delineation_backend: "wbt", watershed_representation: "single", wepp_binary: "wepp_260803"},
+        capability_graph: {
+            capabilities: {
+                locale_profiles: ["conus"], dem_sources: ["dem-a", "dem-b"],
+                delineation_backends: ["wbt"], watershed_representations: ["single", "multiple-ofe"],
+                wepp_binaries: ["wepp_dcc52a6", "wepp_260803"], soil_datasets: ["soil"],
+                landuse_datasets: ["land"], climate_datasets: ["climate"], mods: [],
+                allowed_model_tuples: [
+                    "wbt|single|wepp_dcc52a6", "wbt|single|wepp_260803",
+                    "wbt|multiple-ofe|wepp_260803"
+                ]
+            }
+        },
         components: [
             item("conus", "locale", "Continental US", {constraints: localeConstraints}),
             item("dem-a", "dem", "DEM A", {default_cellsize: 10}),
@@ -117,17 +129,13 @@ describe("Config Builder controller", () => {
         });
     });
 
-    test("clears an invalidated downstream value visibly and never submits it", async () => {
+    test("clears an invalidated graph value visibly and never submits it", async () => {
         const schema = description(false);
-        const secondLocale = Object.assign({}, schema.components[0], {
-            component_id: "limited", label: "Limited", constraints: Object.assign({}, schema.components[0].constraints, {allowed_dem: ["dem-b"]})
-        });
-        schema.components.push(secondLocale);
         const http = {getRqEngineToken: jest.fn().mockResolvedValue("token"), request: jest.fn().mockResolvedValue({body: schema})};
         const root = document.querySelector("[data-config-builder]");
         const controller = new window.ConfigBuilder(root, dependencies(http));
         await controller.init();
-        root.querySelector("[name=locale]").value = "limited";
+        controller.description.capability_graph.capabilities.dem_sources = ["dem-b"];
         controller._renderDependencies(true);
 
         expect(root.querySelector("[name=dem]").value).toBe("dem-b");
@@ -135,10 +143,13 @@ describe("Config Builder controller", () => {
         expect(controller._selections().dem).toBe("dem-b");
     });
 
-    test("defaults to WBT and WEPP 260803 and clears Multiple OFE for incompatible changes", async () => {
+    test("defaults to WBT and WEPP 260803 and filters invalid model tuples", async () => {
         const schema = description(false);
         schema.components.push(Object.assign({}, schema.components.find((item) => item.component_id === "wbt"), {component_id: "topaz", label: "TOPAZ"}));
-        schema.components[0].constraints.allowed_delineation = ["topaz", "wbt"];
+        schema.capability_graph.capabilities.delineation_backends = ["topaz", "wbt"];
+        schema.capability_graph.capabilities.allowed_model_tuples.push(
+            "topaz|single|wepp_dcc52a6", "topaz|single|wepp_260803"
+        );
         const http = {getRqEngineToken: jest.fn().mockResolvedValue("token"), request: jest.fn().mockResolvedValue({body: schema})};
         const root = document.querySelector("[data-config-builder]");
         const controller = new window.ConfigBuilder(root, dependencies(http));
@@ -148,27 +159,18 @@ describe("Config Builder controller", () => {
         expect(root.querySelector("[name=wepp_binary]").value).toBe("wepp_260803");
         expect([...root.querySelector("[name=watershed_representation]").options].map((option) => option.value)).toContain("multiple-ofe");
 
-        root.querySelector("[name=wepp_binary]").value = "wepp_dcc52a6";
         root.querySelector("[name=watershed_representation]").value = "multiple-ofe";
         root.querySelector("[name=watershed_representation]").dispatchEvent(new Event("change", {bubbles: true}));
         await settle();
         expect(root.querySelector("[name=wepp_binary]").value).toBe("wepp_260803");
         expect(controller._selections().wepp_binary).toBe("wepp_260803");
-        expect(root.querySelector("[data-builder-change-reason]").textContent).toContain("Multiple OFE requires WEPP 260803");
+        expect([...root.querySelector("[name=wepp_binary]").options].map((option) => option.value)).toEqual(["wepp_260803"]);
+        expect([...root.querySelector("[name=delineation_backend]").options].map((option) => option.value)).toEqual(["wbt"]);
 
-        root.querySelector("[name=watershed_representation]").value = "multiple-ofe";
+        root.querySelector("[name=watershed_representation]").value = "single";
         controller._renderDependencies(true, "watershed_representation");
-        root.querySelector("[name=wepp_binary]").value = "wepp_dcc52a6";
-        controller._renderDependencies(true, "wepp_binary");
-        expect(root.querySelector("[name=watershed_representation]").value).toBe("single");
-        expect(controller._selections().watershed_representation).toBe("single");
-
-        root.querySelector("[name=wepp_binary]").value = "wepp_260803";
-        root.querySelector("[name=watershed_representation]").value = "multiple-ofe";
-        root.querySelector("[name=delineation_backend]").value = "topaz";
-        controller._renderDependencies(true, "delineation_backend");
-        expect(root.querySelector("[name=watershed_representation]").value).toBe("single");
-        expect(root.querySelector("[data-builder-change-reason]").textContent).toContain("incompatible with the current combination");
+        expect([...root.querySelector("[name=wepp_binary]").options].map((option) => option.value)).toEqual(["wepp_dcc52a6", "wepp_260803"]);
+        expect([...root.querySelector("[name=delineation_backend]").options].map((option) => option.value)).toEqual(["topaz", "wbt"]);
     });
 
     test("offers only fixed privileged overrides and clears intent at the DEM default", async () => {

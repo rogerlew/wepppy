@@ -1,7 +1,7 @@
 schema_version = 1
 id = "multiple-ofe"
 kind = "representation"
-source_revision = "1"
+source_revision = "wepp-representation-contract-v1:multiple-ofe"
 label = "Multiple OFE"
 description = "Multiple overland flow elements per hillslope; Config Builder Preview eligibility requires WhiteboxTools and WEPP 260803."
 owns = ["wepp.multi_ofe"]

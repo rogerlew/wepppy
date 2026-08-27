@@ -1,7 +1,7 @@
 schema_version = 1
 id = "single-ofe"
 kind = "representation"
-source_revision = "1"
+source_revision = "wepp-representation-contract-v1:single-ofe"
 label = "Single OFE"
 description = "One overland flow element per hillslope."
 owns = ["wepp.multi_ofe"]

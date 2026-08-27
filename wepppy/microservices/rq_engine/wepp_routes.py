@@ -142,7 +142,7 @@ async def _handle_run_wepp_request(
     except WeppRunPayloadValidationError as exc:
         return error_response(
             str(exc),
-            status_code=400,
+            status_code=409 if exc.code == "capability_authority_invalid" else 400,
             code=exc.code,
             details=exc.details,
         )
@@ -218,11 +218,7 @@ async def _handle_run_wepp_request(
         success_description="WEPP inputs accepted; returns batch update message or enqueued `job_id`.",
         extra={
             400: "WEPP payload validation failed. Returns the canonical error payload.",
-            409: (
-                "WEPP lock contention, payload-input lock contention, or invalid watershed "
-                "abstraction state. "
-                "Returns the canonical error payload."
-            ),
+            409: "WEPP lock, watershed-state, or stored-capability conflict.",
         },
     ),
 )
@@ -263,11 +259,7 @@ async def run_wepp(runid: str, config: str, request: Request) -> JSONResponse:
         ),
         extra={
             400: "WEPP payload validation failed. Returns the canonical error payload.",
-            409: (
-                "WEPP lock contention, payload-input lock contention, or invalid watershed "
-                "abstraction state. "
-                "Returns the canonical error payload."
-            ),
+            409: "WEPP lock, watershed-state, or stored-capability conflict.",
         },
     ),
 )

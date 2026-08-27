@@ -439,7 +439,11 @@ def test_builder_constraints_reject_invalid_sizes_and_mods() -> None:
 def test_multiple_ofe_rejects_incompatible_backend_or_binary(selections: BuilderSelections) -> None:
     with pytest.raises(BuilderConstraintError) as error:
         resolve_builder_config(selections)
-    assert error.value.code in {"missing_required_component", "conflicting_component"}
+    assert error.value.code in {
+        "missing_required_component",
+        "conflicting_component",
+        "unsupported_combination",
+    }
 
 
 def test_registry_revision_is_path_and_content_deterministic(tmp_path: Path) -> None:

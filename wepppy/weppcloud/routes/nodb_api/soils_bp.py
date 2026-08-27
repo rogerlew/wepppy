@@ -17,7 +17,7 @@ from .._common import (
 )
 
 from wepppy.nodb.core import Soils, SoilsMode
-from wepppy.nodb.project_config_capabilities import SOIL_BUILDER_MODES, runtime_value_allowed
+from wepppy.nodb.project_config_capabilities import soil_capability_modes
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.weppcloud.utils.cap_guard import requires_cap
 from wepppy.weppcloud.utils.helpers import authorize_and_handle_with_exception_factory
@@ -57,8 +57,14 @@ def set_soil_mode(runid: str, config: str) -> Response:
 
     try:
         soils = Soils.getInstance(wd)
-        if not runtime_value_allowed(soils, "soil_builders", mode, stable_to_runtime=SOIL_BUILDER_MODES):
-            return error_factory('Unsupported soil capability')
+        allowed_modes = soil_capability_modes(soils)
+        if allowed_modes is not None and mode not in allowed_modes:
+            return error_factory(
+                'Soil builder is not supported by this project.',
+                status_code=400,
+                code='unsupported_capability',
+                details=f'Unsupported soil builder mode: {mode}',
+            )
         soils.mode = SoilsMode(mode)
         if single_selection is not None:
             soils.single_selection = single_selection

@@ -5,7 +5,13 @@ from types import SimpleNamespace
 
 import pytest
 
-from wepppy.nodb.core.climate import CLIMATE_MAX_YEARS, ClimateMode, ClimateSpatialMode
+from wepppy.nodb.core.climate import (
+    CLIMATE_MAX_YEARS,
+    Climate,
+    ClimateMode,
+    ClimateSpatialMode,
+    ClimateStationMode,
+)
 from wepppy.nodb.core.climate_input_parser import ClimateInputParsingService
 
 pytestmark = pytest.mark.unit
@@ -111,6 +117,10 @@ def test_parse_inputs_rejects_invalid_catalog_spatial_mode() -> None:
     with pytest.raises(ValueError):
         parser.parse_inputs(climate, payload)
 
+    assert climate._catalog_id is None
+    assert climate._climate_mode == ClimateMode.Undefined
+    assert climate._climate_spatialmode == ClimateSpatialMode.Single
+
 
 def test_parse_inputs_vanilla_checks_input_year_bounds() -> None:
     parser = ClimateInputParsingService()
@@ -121,6 +131,29 @@ def test_parse_inputs_vanilla_checks_input_year_bounds() -> None:
 
     with pytest.raises(AssertionError):
         parser.parse_inputs(climate, payload)
+
+    assert climate._catalog_id is None
+    assert climate._climate_mode == ClimateMode.Undefined
+    assert climate._input_years is None
+
+
+def test_legacy_tenerife_parse_rejects_forbidden_station_mode_without_mutation() -> None:
+    parser = ClimateInputParsingService()
+
+    class _TenerifeClimate(_DummyClimate):
+        uses_tenerife_station_catalog = True
+        _validate_station_catalog_constraints = Climate._validate_station_catalog_constraints
+
+    climate = _TenerifeClimate()
+    climate._climatestation_mode = ClimateStationMode.FindClosestAtRuntime
+    payload = _payload()
+    payload["climate_mode"] = str(int(ClimateMode.Vanilla))
+    payload["climatestation_mode"] = str(int(ClimateStationMode.Heuristic))
+
+    with pytest.raises(ValueError, match="Tenerife station catalog"):
+        parser.parse_inputs(climate, payload)
+
+    assert climate._climatestation_mode == ClimateStationMode.FindClosestAtRuntime
 
 
 def test_parse_inputs_rejects_deprecated_single_storm_modes() -> None:

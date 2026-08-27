@@ -9,8 +9,16 @@ TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import orchestration_read_routes, schema_defaults_routes
+from wepppy.nodb.locales import build_continental_us_capability_graph
 
 pytestmark = pytest.mark.microservice
+
+
+def _binary_revisions(binary_ids: tuple[str, ...]) -> dict[str, str]:
+    return {
+        binary_id: f"provider-v1:watershed={'a' * 64}:hillslope={'b' * 64}"
+        for binary_id in binary_ids
+    }
 
 RUNID = "run-1"
 CONFIG = "disturbed9002_wbt"
@@ -54,6 +62,7 @@ def _sample_runtime(
     initial_sat: float | None = 0.75,
     clear_ssurgo_cache_on_rebuild: bool = False,
     disturbed_sol_ver: float | None = 2018.0,
+    capability_graph=None,
 ) -> schema_defaults_routes.RuntimeState:
     return schema_defaults_routes.RuntimeState(
         runid=RUNID,
@@ -69,21 +78,30 @@ def _sample_runtime(
             "climate_built": True,
             "climate_mode_code": 11,
             "climate_mode": "gridmet_prism",
+            "climate_catalog_id": "observed_gridmet",
+            "climate_station_mode_code": -1,
+            "climate_spatial_mode_code": 0,
             "climate_has_station": True,
             "landuse_built": True,
             "landuse_mode": "nlcd",
+            "landuse_mode_code": 0,
             "soils_built": True,
             "soils_mode": "ssurgo",
+            "soils_mode_code": 0,
             "initial_sat": initial_sat,
             "clear_ssurgo_cache_on_rebuild": clear_ssurgo_cache_on_rebuild,
             "wepp_has_run": False,
+            "wepp_binary": "wepp_260803",
             "disturbed_enabled": disturbed_enabled,
             "sbs_upload_supported": sbs_upload_supported,
             "disturbed_sbs_uploaded": True,
             "disturbed_sol_ver": disturbed_sol_ver,
+            "watershed_representation": "multiple-ofe",
+            "delineation_backend": "wbt",
         },
         generated_at="2026-04-10T22:13:00Z",
         run_state_revision="runstate:run-1:deadbeefcafe",
+        capability_graph=capability_graph,
     )
 
 
@@ -294,8 +312,16 @@ def test_controller_schema_hints_templates_payloads(monkeypatch: pytest.MonkeyPa
         assert fields["climate_mode"]["constraint_mode"] == "run_resolved"
         assert fields["climatestation"]["available_if"] == {"field": "climate_mode", "op": "in", "value": [2, 6]}
         assert fields["climatestation"]["required_if"] == {"field": "climate_mode", "op": "in", "value": [2, 6]}
-        assert fields["observed_start_year"]["required_if"] == {"field": "climate_mode", "op": "in", "value": [2, 11]}
-        assert fields["observed_end_year"]["required_if"] == {"field": "climate_mode", "op": "in", "value": [2, 11]}
+        assert fields["observed_start_year"]["required_if"] == {
+            "field": "climate_mode",
+            "op": "in",
+            "value": [2, 9, 11],
+        }
+        assert fields["observed_end_year"]["required_if"] == {
+            "field": "climate_mode",
+            "op": "in",
+            "value": [2, 9, 11],
+        }
         assert fields["future_start_year"]["required_if"] == {"field": "climate_mode", "op": "eq", "value": 3}
         assert fields["future_end_year"]["required_if"] == {"field": "climate_mode", "op": "eq", "value": 3}
 
@@ -663,7 +689,7 @@ def test_build_climate_schema_includes_future_window_fields(monkeypatch: pytest.
     assert request_fields["observed_start_year"]["required_if"] == {
         "field": "climate_mode",
         "op": "in",
-        "value": [2, 11],
+        "value": [2, 9, 11],
     }
     assert request_fields["future_start_year"]["required_if"] == {
         "field": "climate_mode",
@@ -1095,6 +1121,183 @@ def test_schema_defaults_routes_return_404_for_config_mismatch(monkeypatch: pyte
 
     assert response.status_code == 404
     _assert_canonical_error(response.json(), code="not_found")
+
+
+def test_schema_defaults_routes_return_diagnostic_409_for_invalid_capability_authority(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch, "rq:status")
+
+    def _invalid(runid: str, config: str) -> schema_defaults_routes.RuntimeState:
+        raise schema_defaults_routes.CapabilityAuthorityInvalidError("unknown model method")
+
+    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", _invalid)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get(CONTROLLER_SCHEMA_PATH)
+
+    assert response.status_code == 409
+    _assert_canonical_error(response.json(), code="capability_authority_invalid")
+    assert response.json()["error"]["details"] == "unknown model method"
+
+
+def test_schema_v2_discovery_uses_only_stored_graph_options(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch, "rq:read")
+    binary_ids = ("wepp_260803", "wepp_dcc52a6")
+    graph = build_continental_us_capability_graph(
+        binary_ids, _binary_revisions(binary_ids)
+    )
+    monkeypatch.setattr(
+        schema_defaults_routes,
+        "_load_runtime_state",
+        lambda runid, config: _sample_runtime(capability_graph=graph),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        climate = client.get(CONTROLLER_SCHEMA_PATH).json()["fields"]
+        climate_templates = client.get(CONTROLLER_TEMPLATES_PATH).json()
+        landuse = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/controllers/landuse/schema"
+        ).json()["fields"]
+        soils = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/controllers/soils/schema"
+        ).json()["fields"]
+        build_climate = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_build_climate/schema"
+        ).json()["request"]["properties"]
+        build_climate_doc = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_build_climate/schema"
+        ).json()
+        wepp_schema = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/controllers/wepp/schema"
+        ).json()
+        run_wepp_schema = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_run_wepp/schema"
+        ).json()
+        set_landuse_mode = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_set_landuse_mode/schema"
+        ).json()["request"]["properties"]
+        set_landuse_db = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_set_landuse_db/schema"
+        ).json()["request"]["properties"]
+
+    assert climate["climate_mode"]["enum"] == [0, 5, 9, 11]
+    assert climate["climate_catalog_id"]["enum"] == [
+        "vanilla_cligen", "prism_stochastic", "observed_daymet", "observed_gridmet"
+    ]
+    assert climate["climate_station_method"]["enum"] == [
+        "auto", "distance", "multi_factor"
+    ]
+    assert climate["climate_spatial_method"]["allowed_by_climate_catalog_id"][
+        "observed_daymet"
+    ] == ["single", "multiple", "interpolated"]
+    assert climate_templates["run_resolved_defaults"]["climate_mode"] == 11
+    assert [item["template_id"] for item in climate_templates["templates"]] == [
+        "default_run_resolved"
+    ]
+    assert build_climate["climate_mode"]["enum"] == [0, 5, 9, 11]
+    assert build_climate["climate_catalog_id"]["enum"] == [
+        "vanilla_cligen", "prism_stochastic", "observed_daymet", "observed_gridmet"
+    ]
+    assert build_climate["climate_catalog_id"]["runtime_mode_by_value"][
+        "observed_daymet"
+    ] == 9
+    assert build_climate["climate_spatial_method"]["runtime_mapping"][
+        "interpolated"
+    ] == 2
+    assert build_climate["climate_spatialmode"]["enum"] == [0, 1, 2]
+    assert build_climate_doc["capability_authority"]["climate_station_methods"] == [
+        "auto", "distance", "multi_factor"
+    ]
+    assert landuse["landuse_mode"]["enum"] == ["gridded", "upload"]
+    assert set_landuse_mode["mode"]["enum"] == [0, 4]
+    assert set_landuse_db["landuse_db"]["enum"] == ["nlcd-2019"]
+    assert soils["soils_mode"]["enum"] == [
+        "gridded",
+        "single_mukey",
+        "single_database",
+    ]
+    assert wepp_schema["fields"]["wepp_bin"]["enum"] == ["wepp_260803"]
+    assert wepp_schema["model_authority"]["allowed_model_tuples"]
+    assert run_wepp_schema["request"]["properties"]["wepp_bin"]["enum"] == [
+        "wepp_260803"
+    ]
+
+
+def test_schema_v2_discovery_preserves_relationship_invalid_current_climate_method(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch, "rq:read")
+    binary_ids = ("wepp_260803",)
+    graph = build_continental_us_capability_graph(
+        binary_ids, _binary_revisions(binary_ids)
+    )
+    runtime = _sample_runtime(capability_graph=graph)
+    runtime.states.update(
+        {
+            "climate_catalog_id": "vanilla_cligen",
+            "climate_mode_code": 0,
+            "climate_station_mode_code": -1,
+            "climate_spatial_mode_code": 2,
+        }
+    )
+    monkeypatch.setattr(
+        schema_defaults_routes,
+        "_load_runtime_state",
+        lambda runid, config: runtime,
+    )
+
+    with TestClient(rq_engine.app) as client:
+        fields = client.get(CONTROLLER_SCHEMA_PATH).json()["fields"]
+        defaults = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_build_climate/defaults"
+        ).json()["resolved_defaults"]
+
+    spatial = fields["climate_spatial_method"]
+    assert spatial["current_value"] == "interpolated"
+    assert spatial["current_value_authorized"] is False
+    assert spatial["disabled_values"] == ["interpolated"]
+    assert spatial["enum_available"] == ["single", "multiple"]
+    assert defaults["climate_spatial_method"] == "interpolated"
+    assert defaults["climate_spatialmode"] == 2
+
+
+def test_schema_v2_new_run_defaults_catalog_and_runtime_mode_consistently(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch, "rq:read")
+    binary_ids = ("wepp_260803",)
+    graph = build_continental_us_capability_graph(
+        binary_ids, _binary_revisions(binary_ids)
+    )
+    runtime = _sample_runtime(capability_graph=graph)
+    runtime.states.update(
+        {
+            "climate_catalog_id": None,
+            "climate_mode_code": -1,
+            "climate_station_mode_code": None,
+            "climate_spatial_mode_code": None,
+        }
+    )
+    monkeypatch.setattr(
+        schema_defaults_routes,
+        "_load_runtime_state",
+        lambda runid, config: runtime,
+    )
+
+    with TestClient(rq_engine.app) as client:
+        defaults = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_build_climate/defaults"
+        ).json()["resolved_defaults"]
+
+    assert defaults["climate_catalog_id"] == graph.defaults["climate_dataset"]
+    assert defaults["climate_mode"] == 0
+    assert defaults["climate_station_method"] == "auto"
+    assert defaults["climate_spatial_method"] == "single"
+    assert defaults["climatestation_mode"] == -1
+    assert defaults["climate_spatialmode"] == 0
 
 
 @pytest.mark.parametrize(

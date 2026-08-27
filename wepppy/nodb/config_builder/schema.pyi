@@ -59,7 +59,12 @@ class ComponentDefinition:
     constraints: ConstraintSet
     default_cellsize: int | None
     source_path: str
-    def __init__(self, component_id: str, kind: ComponentKind, schema_version: int, source_revision: str, label: str, description: str, owns: tuple[ConfigKey, ...], overrides: tuple[ConfigKey, ...], writes: tuple[ConfigWrite, ...], constraints: ConstraintSet, default_cellsize: int | None = ..., source_path: str = ...) -> None: ...
+    profile_classification: str | None
+    support_state: str | None
+    runtime_tokens: tuple[str, ...]
+    base_profile_id: str | None
+    overlay_precedence: int | None
+    def __init__(self, component_id: str, kind: ComponentKind, schema_version: int, source_revision: str, label: str, description: str, owns: tuple[ConfigKey, ...], overrides: tuple[ConfigKey, ...], writes: tuple[ConfigWrite, ...], constraints: ConstraintSet, default_cellsize: int | None = ..., source_path: str = ..., profile_classification: str | None = ..., support_state: str | None = ..., runtime_tokens: tuple[str, ...] = ..., base_profile_id: str | None = ..., overlay_precedence: int | None = ...) -> None: ...
 
 @dataclass(frozen=True, slots=True)
 class Registry:
@@ -100,7 +105,12 @@ class ComponentSummary:
     description: str
     default_cellsize: int | None
     constraints: ConstraintSet
-    def __init__(self, component_id: str, kind: str, label: str, description: str, default_cellsize: int | None = ..., constraints: ConstraintSet = ...) -> None: ...
+    profile_classification: str | None
+    support_state: str | None
+    runtime_tokens: tuple[str, ...]
+    base_profile_id: str | None
+    overlay_precedence: int | None
+    def __init__(self, component_id: str, kind: str, label: str, description: str, default_cellsize: int | None = ..., constraints: ConstraintSet = ..., profile_classification: str | None = ..., support_state: str | None = ..., runtime_tokens: tuple[str, ...] = ..., base_profile_id: str | None = ..., overlay_precedence: int | None = ...) -> None: ...
 
 @dataclass(frozen=True, slots=True)
 class BuilderDescription:
@@ -109,7 +119,8 @@ class BuilderDescription:
     components: tuple[ComponentSummary, ...]
     allowed_cell_sizes: tuple[int, ...]
     default_selections: Mapping[str, str]
-    def __init__(self, schema_version: int, registry_revision: str, components: tuple[ComponentSummary, ...], allowed_cell_sizes: tuple[int, ...], default_selections: Mapping[str, str]) -> None: ...
+    capability_graph: Mapping[str, Mapping[str, CanonicalValue]]
+    def __init__(self, schema_version: int, registry_revision: str, components: tuple[ComponentSummary, ...], allowed_cell_sizes: tuple[int, ...], default_selections: Mapping[str, str], capability_graph: Mapping[str, Mapping[str, CanonicalValue]]) -> None: ...
 
 @dataclass(frozen=True, slots=True)
 class ResolvedBuilderConfig:

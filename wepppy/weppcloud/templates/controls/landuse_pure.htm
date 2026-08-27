@@ -50,6 +50,18 @@
     "attrs": {"class": "disable-readonly", "data-landuse-mode": "4", "data-landuse-role": "mode"}
   }
 ] %}
+{% if landuse_method_modes is defined and landuse_method_modes is not none %}
+  {% set filtered_modes = namespace(values=[]) %}
+  {% for option in mode_options %}
+    {% if option.value | int in landuse_method_modes or option.value | int == current_mode %}
+      {% if option.value | int == current_mode and option.value | int not in landuse_method_modes %}
+        {% set _ = option.update({'disabled': true}) %}
+      {% endif %}
+      {% set filtered_modes.values = filtered_modes.values + [option] %}
+    {% endif %}
+  {% endfor %}
+  {% set mode_options = filtered_modes.values %}
+{% endif %}
 
 {% set landcover_ns = namespace(options=[]) %}
 {% for dataset in landcover_datasets if landcover_datasets is defined %}
@@ -96,6 +108,7 @@
          "Select landcover dataset",
          landcover_ns.options,
          selected=landuse.nlcd_db,
+         disabled_values=disabled_landcover_datasets,
          help="Choose the raster catalog used when landuse is determined per hillslope.",
          attrs={"data-landuse-role": "db"},
          extra_control_class="disable-readonly"

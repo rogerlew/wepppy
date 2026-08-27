@@ -3,7 +3,7 @@
 {% from "shared/console_macros.htm" import button_row %}
 
 {% set catalog = climate_catalog or [] %}
-{% set ns = namespace(selected=climate.catalog_id, selected_dataset=None, options=[]) %}
+{% set ns = namespace(selected=climate.catalog_id or climate_default_catalog_id, selected_dataset=None, options=[]) %}
 {% set deprecated_single_storm_modes = [4, 14, 15] %}
 
 {% for dataset in catalog %}
@@ -31,7 +31,7 @@
       "value": dataset.catalog_id,
       "selected": dataset.catalog_id == ns.selected,
       "description": dataset.description,
-      "disabled": (not dataset.ui_exposed) and (dataset.catalog_id != ns.selected),
+      "disabled": dataset.current_selection_disabled or ((not dataset.ui_exposed) and (dataset.catalog_id != ns.selected)),
       "group": dataset.group or 'Other',
       "group_hint": dataset.group_hint or '',
       "attrs": {
@@ -210,6 +210,18 @@
       "attrs": {"class": "disable-readonly", "data-mode-value": "4", "data-climate-action": "station-mode"}
     }
   ] %}
+  {% if selected_dataset %}
+    {% set filtered_station_modes = namespace(values=[]) %}
+    {% for option in station_mode_options %}
+      {% if option.value | int in selected_dataset.station_modes or option.value | int == selected_station_mode %}
+        {% if option.value | int == selected_station_mode and option.value | int not in selected_dataset.station_modes %}
+          {% set _ = option.update({'disabled': true}) %}
+        {% endif %}
+        {% set filtered_station_modes.values = filtered_station_modes.values + [option] %}
+      {% endif %}
+    {% endfor %}
+    {% set station_mode_options = filtered_station_modes.values %}
+  {% endif %}
 
   <section class="wc-stack" id="climate_station_section" data-climate-element="station">
     {{ ui.radio_group(
@@ -296,6 +308,18 @@
       }
     }
   ] %}
+  {% if selected_dataset %}
+    {% set filtered_spatial_modes = namespace(values=[]) %}
+    {% for option in spatial_mode_options %}
+      {% if option.value | int in selected_dataset.spatial_modes or option.value | int == spatial_mode %}
+        {% if option.value | int == spatial_mode and option.value | int not in selected_dataset.spatial_modes %}
+          {% set _ = option.update({'disabled': true}) %}
+        {% endif %}
+        {% set filtered_spatial_modes.values = filtered_spatial_modes.values + [option] %}
+      {% endif %}
+    {% endfor %}
+    {% set spatial_mode_options = filtered_spatial_modes.values %}
+  {% endif %}
 
   <section class="wc-stack" id="climate_spatialmode_controls" data-climate-section="spatial_mode">
     {{ ui.radio_group(

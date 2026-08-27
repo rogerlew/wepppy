@@ -30,6 +30,12 @@ from wepppy.nodb.core import (
 )
 from wepppy.nodb.core.landuse import MOFE_SINGLE_LANDUSE_MESSAGE
 from wepppy.nodb.mods.disturbed import Disturbed
+from wepppy.nodb.project_config_capabilities import (
+    capability_authority,
+    capability_default,
+    landuse_capability_modes,
+    resolve_landuse_runtime_dataset,
+)
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.runtime_paths.errors import NoDirError
 from wepppy.runtime_paths.fs import resolve as _nodir_resolve
@@ -52,7 +58,7 @@ from .auth import (
 )
 from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
-from .responses import error_response
+from .responses import error_response, validation_error_response
 from .upload_helpers import UploadError, save_upload_file
 
 logger = logging.getLogger(__name__)
@@ -73,6 +79,25 @@ LANDUSE_USER_DEFINED_MAX_BYTES = 500 * 1024 * 1024
 LANDUSE_MAPPING_MAX_KEY_LENGTH = 128
 LANDUSE_MAPPING_BATCH_MAX_EDITS = 500
 LANDUSE_MAPPING_CONTROL_CHAR_RE = re.compile(r"[\x00-\x1f\x7f]")
+
+
+def _capability_mode_error(landuse: Landuse, mode: LanduseMode) -> JSONResponse | None:
+    dataset = capability_default(landuse, "landuse_dataset")
+    if dataset is None:
+        return None
+    representation = "multiple-ofe" if bool(getattr(landuse, "multi_ofe", False)) else "single-ofe"
+    allowed = landuse_capability_modes(landuse, dataset, representation)
+    if allowed is None or mode.value in allowed:
+        return None
+    return validation_error_response(
+        [
+            {
+                "field": "mode",
+                "code": "unsupported_capability",
+                "message": "Landuse method is not supported by this project.",
+            }
+        ]
+    )
 NODB_LOCK_CONFLICT_CLIENT_MESSAGE = "Run inputs are currently locked; retry shortly."
 
 
@@ -412,6 +437,7 @@ def _validate_mofe_landuse_mode_for_build(landuse: Any) -> JSONResponse | None:
         success_description="Landuse inputs accepted; returns batch update message or enqueued `job_id`.",
         extra={
             400: "Landuse validation/business-rule error (including upload validation). Returns the canonical error payload.",
+            409: "Invalid stored project capability authority; no mutation.",
         },
     ),
 )
@@ -430,6 +456,15 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
         wd = _resolve_run_root_for_request(runid, request)
         _preflight_landuse_mutation_root(wd)
         landuse = Landuse.getInstance(wd)
+        try:
+            capability_authority(landuse)
+        except ValueError as exc:
+            return error_response(
+                "Project capability authority is invalid.",
+                status_code=409,
+                code="capability_authority_invalid",
+                details=str(exc),
+            )
 
         payload = await parse_request_payload(
             request,
@@ -445,6 +480,19 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
             if isinstance(value, (list, tuple)):
                 return value[0] if value else None
             return value
+
+        requested_mode_raw = _first(payload.get("mode"))
+        if requested_mode_raw is None:
+            requested_mode = landuse.mode
+        else:
+            try:
+                requested_mode = LanduseMode(int(requested_mode_raw))
+            except (TypeError, ValueError):
+                return error_response("Invalid landuse mode", status_code=400)
+        if requested_mode != landuse.mode:
+            capability_error = _capability_mode_error(landuse, requested_mode)
+            if capability_error is not None:
+                return capability_error
 
         mode_error = _validate_mofe_landuse_mode_for_build(landuse)
         if mode_error is not None:
@@ -600,7 +648,10 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
     responses=agent_route_responses(
         success_code=200,
         success_description="Landuse mode metadata updated.",
-        extra={400: "Invalid mode payload. Returns the canonical error payload."},
+        extra={
+            400: "Invalid mode payload.",
+            409: "Invalid capability authority.",
+        },
     ),
 )
 async def set_landuse_mode(runid: str, config: str, request: Request) -> JSONResponse:
@@ -629,6 +680,18 @@ async def set_landuse_mode(runid: str, config: str, request: Request) -> JSONRes
         wd = _resolve_run_root_for_request(runid, request)
         _preflight_landuse_mutation_root(wd)
         landuse = Landuse.getInstance(wd)
+        try:
+            capability_authority(landuse)
+        except ValueError as exc:
+            return error_response(
+                "Project capability authority is invalid.",
+                status_code=409,
+                code="capability_authority_invalid",
+                details=str(exc),
+            )
+        capability_error = _capability_mode_error(landuse, mode)
+        if capability_error is not None:
+            return capability_error
         if mode == LanduseMode.Single and bool(getattr(landuse, "multi_ofe", False)):
             return error_response(MOFE_SINGLE_LANDUSE_MESSAGE, status_code=400, code="invalid_landuse_mode")
         if mode == LanduseMode.Single and single_selection is None:
@@ -660,7 +723,10 @@ async def set_landuse_mode(runid: str, config: str, request: Request) -> JSONRes
     responses=agent_route_responses(
         success_code=200,
         success_description="Landuse database metadata updated.",
-        extra={400: "Invalid landuse database payload. Returns the canonical error payload."},
+        extra={
+            400: "Invalid landuse database payload.",
+            409: "Invalid capability authority.",
+        },
     ),
 )
 async def set_landuse_db(runid: str, config: str, request: Request) -> JSONResponse:
@@ -684,11 +750,19 @@ async def set_landuse_db(runid: str, config: str, request: Request) -> JSONRespo
         wd = _resolve_run_root_for_request(runid, request)
         _preflight_landuse_mutation_root(wd)
         landuse = Landuse.getInstance(wd)
-        from wepppy.nodb.project_config_capabilities import runtime_value_allowed
-
-        if not runtime_value_allowed(landuse, "landuse_datasets", str(db)):
+        try:
+            capability_authority(landuse)
+        except ValueError as exc:
+            return error_response(
+                "Project capability authority is invalid.",
+                status_code=409,
+                code="capability_authority_invalid",
+                details=str(exc),
+            )
+        runtime_db = resolve_landuse_runtime_dataset(landuse, str(db))
+        if runtime_db is None:
             return error_response("Landuse dataset is not supported by this project.", status_code=400, code="unsupported_capability")
-        landuse.nlcd_db = str(db)
+        landuse.nlcd_db = runtime_db
         return JSONResponse({"message": "Landuse database updated"})
     except RunContextResolutionError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)

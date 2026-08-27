@@ -1,7 +1,7 @@
 schema_version = 1
 id = "observed_gridmet"
 kind = "climate"
-source_revision = "1"
+source_revision = "climate-catalog-v1:observed_gridmet"
 label = "Observed gridMET"
 description = "Observed gridMET climate source."
 owns = []

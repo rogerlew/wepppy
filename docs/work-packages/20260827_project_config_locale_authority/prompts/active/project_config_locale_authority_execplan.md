@@ -25,11 +25,23 @@ profile graph rather than through unrelated template and catalog conditionals.
   matrix, exact boundary, and security checkpoint.
 - [x] (2026-08-27 07:14 UTC) Complete independent correctness, governance, and
   high-impact security review of the checkpoint; all returned Ready.
-- [ ] Implement canonical locale profiles and dependency resolution.
-- [ ] Expand the flattened capability contract and normalize `continental-us`.
-- [ ] Wire climate, landuse, soil, and watershed presentation/submission parity.
-- [ ] Add generated matrix and compatibility evidence.
-- [ ] Pass correctness, security, quality, and Forest acceptance gates.
+- [x] (2026-08-27 09:02 UTC) Implement 16 canonical locale profiles, complete
+  climate/landcover providers, stable runtime mappings, and dependency graph.
+- [x] (2026-08-27 09:02 UTC) Emit and fail-closed validate complete schema-v2
+  authority; normalize stable profile `continental-us` to runtime token `us`.
+- [x] (2026-08-27 09:02 UTC) Wire Builder, run views, Flask/RQ mutations,
+  discovery schemas/defaults, pipeline, and readiness to stored authority.
+- [x] (2026-08-27 09:02 UTC) Add generated-config round-trip, hostile graph,
+  compatibility, discovery, no-mutation, and frontend dependency evidence.
+- [x] (2026-08-27 12:59 UTC) Pass the 533-test touched Python matrix, 220-test
+  authority subset, 71-test Builder matrix, frontend lint and 107-suite/792-test
+  suite, stubtest/stub completeness, broad-exception, and RQ contract guards.
+- [x] (2026-08-27 12:59 UTC) Receive Ready dispositions from independent implementation correctness,
+  contract correctness, security, and governance re-reviews.
+- [x] (2026-08-27 12:59 UTC) Pass the full Python suite: 7,034 passed and 63
+  skipped; all five seeded isolation iterations also passed.
+- [ ] Complete the file-isolation audit after its unrelated profile-recorder
+  collection/JSON-serialization tool failure, and pass Forest acceptance.
 - [ ] Close WP12B and hand the accepted revision to WP12.
 
 ## Surprises & Discoveries
@@ -54,6 +66,40 @@ profile graph rather than through unrelated template and catalog conditionals.
   backend/representation/binary dependencies.
   Evidence: reviewers demonstrated that the union authorizes invalid
   cross-products once run pages are prohibited from reading the live registry.
+- Observation: the live landcover provider contains 163 values, not the 164
+  recorded at checkpoint. Its eMapR range ends at 1984; 1983 was an inventory
+  transcription error and was removed rather than invented as runtime support.
+- Observation: Tenerife uses lowercase runtime spelling
+  `eu/corine_landcover/2018`, while the catalog provider uses
+  `eu/CORINE_LandCover/2018`.
+  Resolution: both map explicitly to `corine-2018`; provider serialization
+  keeps the canonical catalog spelling.
+- Observation: canonical serialization preserves empty sections, but the
+  capability component's write list could not create the two empty mod
+  relation sections.
+  Resolution: the resolver materializes every graph section before canonical
+  serialization, and the v2 reader requires both empty sections.
+- Observation: first implementation review exposed that validating graph shape
+  alone did not prevent raw numeric climate modes from bypassing stable dataset
+  authority, and that discovery built some relationship metadata without
+  returning it from the public schema routes.
+  Resolution: schema-v2 climate changes now require a stable catalog identity,
+  validate mode/method agreement before mutation, restore parser state on
+  validation failure, and publish stable climate/model relationships through
+  controller and endpoint discovery.
+- Observation: stored schema-v2 validation initially consulted the current
+  locale and climate catalogs, which could invalidate an older stored graph
+  after a compatible catalog addition.
+  Resolution: validation now uses immutable schema-v2 grammar and profile
+  constants; only new graph construction consults live providers.
+- Observation: the isolation checker passed all five seeded suites, then its
+  parallel file audit aborted while collecting an unrelated profile-recorder
+  test because a Flask stub lacked `Request`; the worker then attempted to
+  JSON-serialize a function object and failed to emit a result payload.
+  Resolution: record the seeded pass and the incomplete file audit separately.
+  Every WP12B project-config/locale-authority file reported `Isolated OK`
+  before the tool aborted; the overall isolation gate is not represented as a
+  pass.
 
 ## Decision Log
 
@@ -79,11 +125,32 @@ profile graph rather than through unrelated template and catalog conditionals.
   Rationale: per-project authority must preserve relationships and remain
   backward compatible without live-registry fallback.
   Date/Author: 2026-08-27, Codex.
+- Decision: standalone contract checkpoint `4a975657f` is the implementation
+  ancestor.
+  Rationale: contract-first review completed before production-path edits.
+  Date/Author: 2026-08-27, Codex and independent reviewers.
+- Decision: historical v2 graph validation is bound to immutable schema-v2
+  rules, not exact live-catalog contents.
+  Rationale: creation may use the current provider registry, but rollback and
+  stored-run reads must remain independent of later compatible catalog edits.
+  Date/Author: 2026-08-27, Codex and independent security reviewer.
 
 ## Outcomes & Retrospective
 
-Pending implementation. WP12 remains blocked until the generated matrix and
-representative Forest provider flows pass.
+Implementation is complete and the focused and full local gates pass. The typed locale
+catalog now classifies all 16 shipped profiles, `continental-us` maps to runtime
+token `us`, the complete provider definition identities and WEPP role revisions
+are bound into schema-v2 authority, and views/discovery/mutations consume that
+stored authority. First implementation review materially strengthened the
+climate preflight, graph hostile-input validation, v1 compatibility, tuple-aware
+WEPP enforcement, diagnostic errors, snapshot-independent rendering, and
+snapshot-independent validation.
+
+All independent reviews are Ready. The full Python suite passed with 7,034
+tests and 63 skips, and all five isolation seeds passed. The file-isolation
+audit remains incomplete because of an unrelated profile-recorder/tooling
+failure, and representative Forest provider flows are still required before
+WP12B closes. WP12 remains blocked.
 
 ## Context and Orientation
 
@@ -191,4 +258,6 @@ and stable-to-runtime method maps. `project_config_capabilities.py` remains the
 single run-scoped adapter used by templates and server routes. No new external
 dependency is permitted.
 
-Plan revision note (2026-08-27): initial WP12B scaffold and contract checkpoint.
+Plan revision note (2026-08-27 12:59 UTC): implementation, independent review,
+focused/full suites, and all seeded isolation iterations complete. The
+file-isolation audit tool failure and Forest evidence remain open.

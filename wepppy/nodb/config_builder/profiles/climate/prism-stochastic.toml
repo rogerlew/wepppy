@@ -1,7 +1,7 @@
 schema_version = 1
 id = "prism_stochastic"
 kind = "climate"
-source_revision = "1"
+source_revision = "climate-catalog-v1:prism_stochastic"
 label = "PRISM stochastic"
 description = "PRISM-conditioned stochastic climate source."
 owns = []

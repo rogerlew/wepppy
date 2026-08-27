@@ -50,6 +50,11 @@ def test_description_and_validation_share_revision(client) -> None:
     assert description.status_code == 200
     body = description.json()
     assert body["config_token"] == "config"
+    graph = body["capability_graph"]
+    assert graph["capabilities"]["schema_version"] == 2
+    assert graph["capabilities"]["locale_profiles"] == ["continental-us"]
+    assert graph["capability_defaults"]["delineation_backend"] == "wbt"
+    assert graph["capability_defaults"]["wepp_binary"] == "wepp_260803"
     locale = next(item for item in body["components"] if item["component_id"] == "continental-us")
     assert locale["constraints"]["allowed_dem"] == ["usgs-ned1-2024", "usgs-ned13-2022"]
     binaries = [

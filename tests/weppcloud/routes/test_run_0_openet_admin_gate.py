@@ -616,6 +616,48 @@ def test_build_runs0_context_gates_ag_fields_by_registry_role(run0_module) -> No
     assert "'ag_fields' in mods_list" in visibility_block.group(0)
 
 
+def test_schema_v2_wepp_options_use_only_stored_tuple_authority(
+    run0_module,
+) -> None:
+    authority = SimpleNamespace(
+        wepp_binaries=("wepp_stored_only", "wepp_other"),
+        allowed_model_tuples=("wbt|single-ofe|wepp_stored_only",),
+    )
+
+    options, disabled = run0_module._stored_wepp_binary_options(
+        authority,
+        "wbt",
+        "single-ofe",
+        "wepp_stored_only",
+    )
+
+    assert options == [("wepp_stored_only", "wepp_stored_only")]
+    assert disabled == []
+
+
+def test_schema_v1_wepp_options_enforce_present_coarse_axis(run0_module) -> None:
+    class Config:
+        def config_get_raw(self, section, option, default=None):
+            if (section, option) == ("capabilities", "wepp_binaries"):
+                return '["wepp_v1_only"]'
+            return default
+
+        def config_get_list(self, section, option, default=None):
+            if (section, option) == ("capabilities", "wepp_binaries"):
+                return ["wepp_v1_only"]
+            return default
+
+    options, disabled = run0_module._v1_wepp_binary_options(
+        Config(), "wepp_persisted_omitted"
+    )
+
+    assert options == [
+        ("wepp_v1_only", "wepp_v1_only"),
+        ("wepp_persisted_omitted", "wepp_persisted_omitted"),
+    ]
+    assert disabled == ["wepp_persisted_omitted"]
+
+
 @pytest.mark.parametrize(
     (
         "mods",

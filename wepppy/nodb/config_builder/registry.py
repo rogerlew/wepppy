@@ -19,6 +19,16 @@ from wepppy.nodb.config_builder.schema import (
     Registry,
     RegistryValue,
 )
+from wepppy.nodb.locales.capability_graph import build_continental_us_capability_graph
+from wepppy.nodb.locales.climate_catalog import (
+    climate_catalog_revision,
+    default_climate_provider_tokens,
+)
+from wepppy.nodb.locales.landuse_catalog import landcover_catalog_revision
+from wepppy.nodb.locales.locale_profiles import (
+    get_locale_profile,
+    locale_catalog_revision,
+)
 from wepppy.project_config_serialization import CanonicalScalar
 from wepp_runner.wepp_runner import (
     get_linux_wepp_bin_opts,
@@ -54,6 +64,11 @@ _ALLOWED_ROOT_FIELDS = frozenset(
         "owns",
         "overrides",
         "default_cellsize",
+        "profile_classification",
+        "support_state",
+        "runtime_tokens",
+        "base_profile_id",
+        "overlay_precedence",
         "constraints",
         "writes",
     }
@@ -186,6 +201,38 @@ def _parse_document(source: Path, root: Path) -> ComponentDefinition:
             raise RegistryError(f"{source}: default_cellsize is valid only for DEM integers")
     elif kind is ComponentKind.DEM:
         raise RegistryError(f"{source}: DEM components require default_cellsize")
+    profile_classification = payload.get("profile_classification")
+    support_state = payload.get("support_state")
+    runtime_tokens_raw = payload.get("runtime_tokens", [])
+    base_profile_id = payload.get("base_profile_id")
+    overlay_precedence = payload.get("overlay_precedence")
+    if kind is ComponentKind.LOCALE:
+        profile_classification = _string(
+            profile_classification, "profile_classification", source
+        )
+        support_state = _string(support_state, "support_state", source)
+        runtime_tokens = _string_tuple(runtime_tokens_raw, "runtime_tokens", source)
+        if not runtime_tokens:
+            raise RegistryError(f"{source}: runtime_tokens must not be empty")
+        if base_profile_id is not None:
+            base_profile_id = _string(base_profile_id, "base_profile_id", source)
+        if overlay_precedence is not None and (
+            isinstance(overlay_precedence, bool) or not isinstance(overlay_precedence, int)
+        ):
+            raise RegistryError(f"{source}: overlay_precedence must be an integer")
+    else:
+        if any(
+            value is not None and value != []
+            for value in (
+                profile_classification,
+                support_state,
+                payload.get("runtime_tokens"),
+                base_profile_id,
+                overlay_precedence,
+            )
+        ):
+            raise RegistryError(f"{source}: locale profile fields are valid only for locale components")
+        runtime_tokens = ()
     return ComponentDefinition(
         component_id=component_id,
         kind=kind,
@@ -199,6 +246,11 @@ def _parse_document(source: Path, root: Path) -> ComponentDefinition:
         constraints=_parse_constraints(payload.get("constraints"), source),
         default_cellsize=default_cellsize,
         source_path=source.relative_to(root).as_posix(),
+        profile_classification=profile_classification,
+        support_state=support_state,
+        runtime_tokens=runtime_tokens,
+        base_profile_id=base_profile_id,
+        overlay_precedence=overlay_precedence,
     )
 
 
@@ -309,11 +361,10 @@ def _provider_wepp_components() -> tuple[ComponentDefinition, ...]:
                 source_revision=source_revision,
                 label=binary_id,
                 description="WEPP binary supplied by the runtime binary provider.",
-                owns=(("wepp", "bin"), ("capabilities", "wepp_binaries")),
+                owns=(("wepp", "bin"),),
                 overrides=(("wepp", "bin"),),
                 writes=(
                     ConfigWrite("wepp", "bin", binary_id),
-                    ConfigWrite("capabilities", "wepp_binaries", binary_ids),
                 ),
                 constraints=ConstraintSet(requires=("continental-us",)),
                 source_path=f"provider://wepp_binary/{binary_id}",
@@ -373,5 +424,54 @@ def load_registry(root: str | Path = DEFAULT_PROFILES_ROOT) -> Registry:
             allowed_wepp_binary=tuple(item.component_id for item in provider_components),
         ),
     )
+    canonical_locale = get_locale_profile("continental-us")
+    if canonical_locale is None:
+        raise RegistryError("canonical continental-us locale profile is missing")
+    if (
+        locale.profile_classification != canonical_locale.classification.value
+        or locale.support_state != canonical_locale.support_state.value
+        or locale.runtime_tokens != (canonical_locale.runtime_token,)
+        or locale.base_profile_id != canonical_locale.base_profile_id
+        or locale.overlay_precedence != canonical_locale.overlay_precedence
+    ):
+        raise RegistryError("continental-us TOML does not match the canonical locale profile")
+
+    graph = build_continental_us_capability_graph(
+        tuple(item.component_id for item in provider_components),
+        {item.component_id: item.source_revision for item in provider_components},
+    )
+    climate_revision = climate_catalog_revision(default_climate_provider_tokens())
+    landcover_revision = landcover_catalog_revision()
+    for component_id, component in tuple(components.items()):
+        if component.kind is ComponentKind.CLIMATE:
+            components[component_id] = replace(
+                component,
+                source_revision=f"provider-v1:{climate_revision}:{component_id}",
+            )
+        elif component.kind is ComponentKind.LANDUSE:
+            components[component_id] = replace(
+                component,
+                source_revision=f"provider-v1:{landcover_revision}:{component_id}",
+            )
+    capability = components.get("continental-us-capabilities")
+    if capability is None or capability.kind is not ComponentKind.CAPABILITY:
+        raise RegistryError("continental-us capability component is missing")
+    graph_sections = graph.as_config_sections()
+    graph_writes = tuple(
+        ConfigWrite(section, option, _registry_value(value, f"{section}.{option}", profiles_root))
+        for section, options in graph_sections.items()
+        for option, value in options.items()
+    )
+    components[capability.component_id] = replace(
+        capability,
+        source_revision=f"provider-v2:{graph.provider_revision}",
+        owns=tuple(write.key for write in graph_writes),
+        overrides=(),
+        writes=graph_writes,
+    )
+    digest.update(locale_catalog_revision().encode("ascii"))
+    digest.update(b"\0")
+    digest.update(graph.provider_revision.encode("ascii"))
+    digest.update(b"\0")
     _validate_references(components)
     return Registry.create(digest.hexdigest(), components)

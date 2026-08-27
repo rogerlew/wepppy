@@ -1,9 +1,12 @@
 schema_version = 1
 id = "continental-us"
 kind = "locale"
-source_revision = "1"
+source_revision = "locale-profile-WP12B-1"
 label = "Continental United States"
 description = "Deployment-owned defaults and builder choices for the continental United States."
+profile_classification = "base"
+support_state = "builder_exposed"
+runtime_tokens = ["us"]
 owns = ["general.locales", "map.center0", "map.zoom0", "unitizer.is_english"]
 overrides = ["unitizer.is_english"]
 

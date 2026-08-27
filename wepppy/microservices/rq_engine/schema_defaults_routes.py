@@ -22,7 +22,19 @@ from wepppy.nodb.mods.features_export import (
     resolve_download_artifact_path,
 )
 from wepppy.nodb.core import Climate, Landuse, Ron, Soils, Watershed, Wepp
+from wepppy.nodb.locales.capability_graph import CapabilityGraph
+from wepppy.nodb.locales.climate_catalog import (
+    CLIMATE_SPATIAL_METHOD_RUNTIME,
+    CLIMATE_STATION_METHOD_RUNTIME,
+    iter_climate_datasets,
+)
 from wepppy.nodb.mods.disturbed import Disturbed
+from wepppy.nodb.project_config_capabilities import (
+    LANDUSE_METHOD_MODES,
+    SOIL_BUILDER_MODES,
+    capability_authority,
+    capability_ids,
+)
 from wepppy.nodb.redis_prep import RedisPrep
 from wepppy.rq.job_info import get_wepppy_rq_job_info
 from wepppy.weppcloud.utils.auth_tokens import get_jwt_config
@@ -66,6 +78,10 @@ class RunConfigMismatchError(ValueError):
     """Raised when a run exists but the requested config token does not match run config."""
 
 
+class CapabilityAuthorityInvalidError(ValueError):
+    """Raised when stored run capability authority cannot be used for discovery."""
+
+
 @dataclass(frozen=True)
 class RuntimeState:
     runid: str
@@ -75,6 +91,8 @@ class RuntimeState:
     states: Mapping[str, Any]
     generated_at: str
     run_state_revision: str
+    capability_graph: CapabilityGraph | None = None
+    v1_capabilities: Mapping[str, tuple[str, ...]] | None = None
 
 
 def _utc_timestamp() -> str:
@@ -370,20 +388,27 @@ def _load_runtime_state(runid: str, config: str) -> RuntimeState:
         "watershed_mcl": watershed_mcl,
         "watershed_stream_pruning_method": watershed_stream_pruning_method,
         "delineation_backend": delineation_backend,
+        "watershed_representation": "multiple-ofe" if bool(getattr(landuse, "multi_ofe", False)) else "single-ofe",
         "climate_built": bool(getattr(climate, "has_climate", False)),
         "climate_mode_code": _enum_int(getattr(climate, "climate_mode", None)),
         "climate_mode": _enum_name(getattr(climate, "climate_mode", None)),
+        "climate_catalog_id": str(getattr(climate, "catalog_id", "") or "").strip() or None,
+        "climate_station_mode_code": _enum_int(getattr(climate, "climatestation_mode", None)),
+        "climate_spatial_mode_code": _enum_int(getattr(climate, "climate_spatialmode", None)),
         "climate_has_station": bool(getattr(climate, "has_station", False)),
         "climate_station_required": climate_station_required,
         "landuse_built": bool(getattr(landuse, "has_landuse", False)),
         "landuse_mode": _enum_name(getattr(landuse, "mode", None)),
+        "landuse_mode_code": _enum_int(getattr(landuse, "mode", None)),
         "soils_built": bool(getattr(soils, "has_soils", False)),
         "soils_mode": _enum_name(getattr(soils, "mode", None)),
+        "soils_mode_code": _enum_int(getattr(soils, "mode", None)),
         "initial_sat": initial_sat,
         "clear_ssurgo_cache_on_rebuild": bool(
             getattr(soils, "clear_ssurgo_cache_on_rebuild", False)
         ),
         "wepp_has_run": bool(getattr(wepp, "has_run", False)),
+        "wepp_binary": str(getattr(wepp, "wepp_bin", "") or "").strip() or None,
         "disturbed_enabled": disturbed_enabled,
         "sbs_upload_supported": sbs_upload_supported,
         "disturbed_sbs_uploaded": bool(getattr(prep, "has_sbs", False)),
@@ -396,6 +421,37 @@ def _load_runtime_state(runid: str, config: str) -> RuntimeState:
         "uploaded_dem_filename": uploaded_dem_filename,
     }
 
+    try:
+        capability_graph = capability_authority(wepp)
+    except ValueError as exc:
+        raise CapabilityAuthorityInvalidError(str(exc)) from exc
+    v1_capabilities: dict[str, tuple[str, ...]] | None = None
+    if capability_graph is None:
+        discovered_v1: dict[str, tuple[str, ...]] = {}
+        for axis in (
+            "climate_datasets",
+            "climate_station_methods",
+            "climate_spatial_methods",
+            "landuse_datasets",
+            "landuse_methods",
+            "soil_datasets",
+            "soil_builders",
+            "delineation_backends",
+            "watershed_representations",
+            "wepp_binaries",
+            "mods",
+        ):
+            try:
+                values = capability_ids(wepp, axis)
+            except ValueError as exc:
+                raise CapabilityAuthorityInvalidError(str(exc)) from exc
+            if values is not None:
+                raw = wepp.config_get_list("capabilities", axis, None)
+                assert isinstance(raw, (list, tuple))
+                discovered_v1[axis] = tuple(str(item).strip() for item in raw)
+        if discovered_v1:
+            v1_capabilities = discovered_v1
+
     generated_at = _utc_timestamp()
     snapshot_fallback_updated_at = _runtime_snapshot_updated_at(
         runid=runid,
@@ -406,6 +462,10 @@ def _load_runtime_state(runid: str, config: str) -> RuntimeState:
         "active_mods": list(active_mods),
         "region": region,
         "states": states,
+        "capability_provider_revision": (
+            capability_graph.provider_revision if capability_graph is not None else None
+        ),
+        "v1_capabilities": v1_capabilities,
         "snapshot_fallback_updated_at": snapshot_fallback_updated_at,
     }
     run_state_revision = _compute_run_state_revision(runid, revision_source)
@@ -417,6 +477,8 @@ def _load_runtime_state(runid: str, config: str) -> RuntimeState:
         active_mods=active_mods,
         region=region,
         states=states,
+        capability_graph=capability_graph,
+        v1_capabilities=v1_capabilities,
         generated_at=generated_at,
         run_state_revision=run_state_revision,
     )
@@ -655,10 +717,41 @@ def _controller_defaults(controller: str, runtime: RuntimeState) -> dict[str, An
     default_climate_mode = 11 if disturbed_enabled else 0
 
     if controller == "climate":
-        resolved_mode = climate_mode if climate_mode is not None else default_climate_mode
+        available_modes = _available_climate_modes(runtime)
+        if runtime.capability_graph is not None:
+            graph = runtime.capability_graph
+            current_catalog_id = str(runtime.states.get("climate_catalog_id") or "").strip()
+            selected_catalog_id = current_catalog_id or graph.defaults["climate_dataset"]
+            graph_default = _climate_mode_for_dataset(selected_catalog_id)
+            resolved_mode = graph_default if graph_default is not None else climate_mode
+            if resolved_mode is None:
+                resolved_mode = default_climate_mode
+        else:
+            resolved_mode = climate_mode if climate_mode in available_modes else default_climate_mode
         defaults: dict[str, Any] = {
             "climate_mode": resolved_mode,
         }
+        if runtime.capability_graph is not None:
+            graph = runtime.capability_graph
+            defaults["climate_catalog_id"] = selected_catalog_id
+            station_method = _stable_runtime_state(
+                runtime, "climate_station_mode_code", _CLIMATE_STATION_STABLE_BY_RUNTIME
+            )
+            spatial_method = _stable_runtime_state(
+                runtime, "climate_spatial_mode_code", _CLIMATE_SPATIAL_STABLE_BY_RUNTIME
+            )
+            if selected_catalog_id in graph.climate_datasets:
+                station_method = station_method or graph.climate_station_defaults[selected_catalog_id]
+                spatial_method = spatial_method or graph.climate_spatial_defaults[selected_catalog_id]
+                defaults["climate_station_method"] = station_method
+                defaults["climate_spatial_method"] = spatial_method
+                defaults["climatestation_mode"] = CLIMATE_STATION_METHOD_RUNTIME[station_method]
+                defaults["climate_spatialmode"] = CLIMATE_SPATIAL_METHOD_RUNTIME[spatial_method]
+            else:
+                if station_method is not None:
+                    defaults["climate_station_method"] = station_method
+                if spatial_method is not None:
+                    defaults["climate_spatial_method"] = spatial_method
         if resolved_mode == 3:
             defaults.update(
                 {
@@ -675,12 +768,29 @@ def _controller_defaults(controller: str, runtime: RuntimeState) -> dict[str, An
             )
         return defaults
     if controller == "landuse":
+        if runtime.capability_graph is not None:
+            graph = runtime.capability_graph
+            dataset = graph.defaults["landuse_dataset"]
+            current = _stable_runtime_state(
+                runtime, "landuse_mode_code", _LANDUSE_STABLE_BY_RUNTIME
+            )
+            default = graph.landuse_method_defaults[dataset]
+            return {"landuse_mode": current or default}
         return {
             "landuse_mode": runtime.states.get("landuse_mode") or "nlcd",
         }
     if controller == "soils":
+        if runtime.capability_graph is not None:
+            graph = runtime.capability_graph
+            dataset = graph.defaults["soil_dataset"]
+            current = _stable_runtime_state(
+                runtime, "soils_mode_code", _SOILS_STABLE_BY_RUNTIME
+            )
+            soils_mode = current or graph.soil_builder_defaults[dataset]
+        else:
+            soils_mode = runtime.states.get("soils_mode") or "ssurgo"
         defaults = {
-            "soils_mode": runtime.states.get("soils_mode") or "ssurgo",
+            "soils_mode": soils_mode,
         }
         if disturbed_enabled:
             defaults["sol_ver"] = _default_disturbed_sol_ver(runtime)
@@ -688,10 +798,24 @@ def _controller_defaults(controller: str, runtime: RuntimeState) -> dict[str, An
     if controller == "watershed":
         return _resolved_watershed_defaults(runtime)
     if controller == "wepp":
-        return {
+        defaults = {
             "clip_soils": disturbed_enabled,
             "clip_soils_depth": 25.0,
         }
+        if runtime.capability_graph is not None:
+            graph = runtime.capability_graph
+            defaults.update({
+                "delineation_backend": (
+                    runtime.states.get("delineation_backend")
+                    or graph.defaults["delineation_backend"]
+                ),
+                "watershed_representation": (
+                    runtime.states.get("watershed_representation")
+                    or graph.defaults["watershed_representation"]
+                ),
+                "wepp_bin": runtime.states.get("wepp_binary") or graph.defaults["wepp_binary"],
+            })
+        return defaults
     if controller == "disturbed":
         return {
             "sol_ver": _default_disturbed_sol_ver(runtime),
@@ -711,27 +835,128 @@ def _controller_schema(controller: str, runtime: RuntimeState) -> dict[str, Any]
 
     if controller == "climate":
         available_modes = _available_climate_modes(runtime)
+        graph = runtime.capability_graph
+        current_mode = runtime.states.get("climate_mode_code")
+        current_catalog_id = str(runtime.states.get("climate_catalog_id") or "").strip() or None
+
+        fields: dict[str, Any] = {
+            "climate_mode": {
+                "type": "integer",
+                "required": True,
+                "constraint_mode": "run_resolved",
+                "constraint_source": "controller_state",
+                "resolved_at": resolved_at,
+                "enum": (
+                    available_modes
+                    if graph is not None or runtime.v1_capabilities is not None
+                    else [0, 2, 3, 5, 6, 11]
+                ),
+                "enum_available": available_modes,
+                "enum_labels": {
+                    "0": "Synthetic CLIGEN",
+                    "2": "Observed station",
+                    "3": "Future CMIP5",
+                    "5": "Stochastic PRISM",
+                    "6": "Observed database",
+                    "9": "Observed DAYMET",
+                    "11": "Observed GRIDMET",
+                },
+                **(
+                    {
+                        "current_value": current_mode,
+                        "current_value_authorized": current_mode in available_modes,
+                        "disabled_values": (
+                            [current_mode] if current_mode not in available_modes else []
+                        ),
+                    }
+                    if graph is not None and current_mode is not None
+                    else {}
+                ),
+            },
+        }
+        if graph is not None:
+            selected_catalog_id = current_catalog_id or graph.defaults["climate_dataset"]
+            current_station_method = _stable_runtime_state(
+                runtime, "climate_station_mode_code", _CLIMATE_STATION_STABLE_BY_RUNTIME
+            )
+            current_spatial_method = _stable_runtime_state(
+                runtime, "climate_spatial_mode_code", _CLIMATE_SPATIAL_STABLE_BY_RUNTIME
+            )
+            allowed_station_methods = graph.climate_station_methods_by_dataset.get(
+                selected_catalog_id, ()
+            )
+            allowed_spatial_methods = graph.climate_spatial_methods_by_dataset.get(
+                selected_catalog_id, ()
+            )
+            fields.update({
+                "climate_catalog_id": {
+                    "type": "string",
+                    "required": True,
+                    "constraint_mode": "run_resolved",
+                    "constraint_source": "project_capability_graph",
+                    "resolved_at": resolved_at,
+                    "enum": list(graph.climate_datasets),
+                    "enum_available": list(graph.climate_datasets),
+                    "current_value": current_catalog_id,
+                    "current_value_authorized": current_catalog_id in graph.climate_datasets,
+                    "disabled_values": (
+                        [current_catalog_id]
+                        if current_catalog_id and current_catalog_id not in graph.climate_datasets
+                        else []
+                    ),
+                },
+                "climate_station_method": {
+                    "type": "string",
+                    "required": True,
+                    "constraint_mode": "run_resolved",
+                    "constraint_source": "project_capability_graph",
+                    "resolved_at": resolved_at,
+                    "enum": list(graph.climate_station_methods),
+                    "enum_available": list(allowed_station_methods),
+                    "current_value": current_station_method,
+                    "current_value_authorized": current_station_method in allowed_station_methods,
+                    "disabled_values": (
+                        [current_station_method]
+                        if current_station_method
+                        and current_station_method not in allowed_station_methods
+                        else []
+                    ),
+                    "allowed_by_climate_catalog_id": {
+                        key: list(value)
+                        for key, value in graph.climate_station_methods_by_dataset.items()
+                    },
+                    "defaults_by_climate_catalog_id": dict(graph.climate_station_defaults),
+                    "runtime_mapping": dict(CLIMATE_STATION_METHOD_RUNTIME),
+                },
+                "climate_spatial_method": {
+                    "type": "string",
+                    "required": True,
+                    "constraint_mode": "run_resolved",
+                    "constraint_source": "project_capability_graph",
+                    "resolved_at": resolved_at,
+                    "enum": list(graph.climate_spatial_methods),
+                    "enum_available": list(allowed_spatial_methods),
+                    "current_value": current_spatial_method,
+                    "current_value_authorized": current_spatial_method in allowed_spatial_methods,
+                    "disabled_values": (
+                        [current_spatial_method]
+                        if current_spatial_method
+                        and current_spatial_method not in allowed_spatial_methods
+                        else []
+                    ),
+                    "allowed_by_climate_catalog_id": {
+                        key: list(value)
+                        for key, value in graph.climate_spatial_methods_by_dataset.items()
+                    },
+                    "defaults_by_climate_catalog_id": dict(graph.climate_spatial_defaults),
+                    "runtime_mapping": dict(CLIMATE_SPATIAL_METHOD_RUNTIME),
+                },
+            })
 
         return {
             "schema_version": 1,
             "fields": {
-                "climate_mode": {
-                    "type": "integer",
-                    "required": True,
-                    "constraint_mode": "run_resolved",
-                    "constraint_source": "controller_state",
-                    "resolved_at": resolved_at,
-                    "enum": [0, 2, 3, 5, 6, 11],
-                    "enum_available": available_modes,
-                    "enum_labels": {
-                        "0": "Synthetic CLIGEN",
-                        "2": "Observed station",
-                        "3": "Future CMIP5",
-                        "5": "Stochastic PRISM",
-                        "6": "Observed database",
-                        "11": "GridMet+PRISM",
-                    },
-                },
+                **fields,
                 "climatestation": {
                     "type": "string",
                     "required": False,
@@ -746,14 +971,14 @@ def _controller_schema(controller: str, runtime: RuntimeState) -> dict[str, Any]
                     "minimum": 1900,
                     "maximum": 2100,
                     "constraint_mode": "static",
-                    "required_if": _predicate("climate_mode", "in", [2, 11]),
+                    "required_if": _predicate("climate_mode", "in", [2, 9, 11]),
                 },
                 "observed_end_year": {
                     "type": "integer",
                     "minimum": 1900,
                     "maximum": 2100,
                     "constraint_mode": "static",
-                    "required_if": _predicate("climate_mode", "in", [2, 11]),
+                    "required_if": _predicate("climate_mode", "in", [2, 9, 11]),
                 },
                 "future_start_year": {
                     "type": "integer",
@@ -773,10 +998,18 @@ def _controller_schema(controller: str, runtime: RuntimeState) -> dict[str, Any]
         }
 
     if controller == "landuse":
-        modes = ["nlcd", "custom"]
-        if disturbed_enabled:
-            modes.append("disturbed")
+        if runtime.capability_graph is not None or (
+            runtime.v1_capabilities and "landuse_methods" in runtime.v1_capabilities
+        ):
+            modes = _available_landuse_method_ids(runtime)
+        else:
+            modes = ["nlcd", "custom"]
+            if disturbed_enabled:
+                modes.append("disturbed")
 
+        current_landuse_mode = _stable_runtime_state(
+            runtime, "landuse_mode_code", _LANDUSE_STABLE_BY_RUNTIME
+        )
         return {
             "schema_version": 1,
             "fields": {
@@ -788,6 +1021,19 @@ def _controller_schema(controller: str, runtime: RuntimeState) -> dict[str, Any]
                     "resolved_at": resolved_at,
                     "enum": sorted(modes),
                     "enum_available": sorted(modes),
+                    **(
+                        {
+                            "current_value": current_landuse_mode,
+                            "current_value_authorized": current_landuse_mode in modes,
+                            "disabled_values": (
+                                [current_landuse_mode]
+                                if current_landuse_mode not in modes
+                                else []
+                            ),
+                        }
+                        if runtime.capability_graph is not None and current_landuse_mode is not None
+                        else {}
+                    ),
                 },
                 "cover_transform_uploaded": {
                     "type": "boolean",
@@ -801,7 +1047,10 @@ def _controller_schema(controller: str, runtime: RuntimeState) -> dict[str, Any]
         }
 
     if controller == "soils":
-        soils_modes = _supported_soils_modes()
+        soils_modes = _supported_soils_modes(runtime)
+        current_soils_mode = _stable_runtime_state(
+            runtime, "soils_mode_code", _SOILS_STABLE_BY_RUNTIME
+        )
         return {
             "schema_version": 1,
             "fields": {
@@ -811,6 +1060,19 @@ def _controller_schema(controller: str, runtime: RuntimeState) -> dict[str, Any]
                     "constraint_mode": "static",
                     "enum": soils_modes,
                     "enum_available": soils_modes,
+                    **(
+                        {
+                            "current_value": current_soils_mode,
+                            "current_value_authorized": current_soils_mode in soils_modes,
+                            "disabled_values": (
+                                [current_soils_mode]
+                                if current_soils_mode not in soils_modes
+                                else []
+                            ),
+                        }
+                        if runtime.capability_graph is not None and current_soils_mode is not None
+                        else {}
+                    ),
                 },
                 "sol_ver": {
                     "type": "number",
@@ -861,29 +1123,69 @@ def _controller_schema(controller: str, runtime: RuntimeState) -> dict[str, Any]
         }
 
     if controller == "wepp":
-        return {
-            "schema_version": 1,
-            "fields": {
-                "clip_soils": {
-                    "type": "boolean",
-                    "required": False,
-                    "constraint_mode": "static",
-                },
-                "clip_soils_depth": {
-                    "type": "number",
-                    "minimum": 0.0,
-                    "required": False,
-                    "constraint_mode": "static",
-                    "available_if": _predicate("clip_soils", "eq", True),
-                    "required_if": _predicate("clip_soils", "eq", True),
-                },
-                "initial_sat": {
-                    "type": "number",
-                    "required": False,
-                    "constraint_mode": "static",
-                },
+        fields = {
+            "clip_soils": {
+                "type": "boolean",
+                "required": False,
+                "constraint_mode": "static",
+            },
+            "clip_soils_depth": {
+                "type": "number",
+                "minimum": 0.0,
+                "required": False,
+                "constraint_mode": "static",
+                "available_if": _predicate("clip_soils", "eq", True),
+                "required_if": _predicate("clip_soils", "eq", True),
+            },
+            "initial_sat": {
+                "type": "number",
+                "required": False,
+                "constraint_mode": "static",
             },
         }
+        graph = runtime.capability_graph
+        if graph is not None:
+            allowed_binaries = _model_tuple_binaries_for_runtime(runtime)
+            current_binary = str(runtime.states.get("wepp_binary") or "").strip() or None
+            fields["wepp_bin"] = {
+                "type": "string",
+                "required": False,
+                "constraint_mode": "run_resolved",
+                "constraint_source": "project_capability_graph",
+                "resolved_at": resolved_at,
+                "enum": allowed_binaries,
+                "enum_available": allowed_binaries,
+                "current_value": current_binary,
+                "current_value_authorized": current_binary in allowed_binaries,
+                "disabled_values": (
+                    [current_binary]
+                    if current_binary and current_binary not in allowed_binaries
+                    else []
+                ),
+            }
+        elif runtime.v1_capabilities and "wepp_binaries" in runtime.v1_capabilities:
+            allowed_binaries = list(runtime.v1_capabilities["wepp_binaries"])
+            fields["wepp_bin"] = {
+                "type": "string",
+                "required": False,
+                "constraint_mode": "run_resolved",
+                "constraint_source": "project_capability_axis_v1",
+                "resolved_at": resolved_at,
+                "enum": allowed_binaries,
+                "enum_available": allowed_binaries,
+            }
+        result = {
+            "schema_version": 1,
+            "fields": fields,
+        }
+        if graph is not None:
+            result["model_authority"] = {
+                "delineation_backends": list(graph.delineation_backends),
+                "watershed_representations": list(graph.watershed_representations),
+                "wepp_binaries": list(graph.wepp_binaries),
+                "allowed_model_tuples": list(graph.allowed_model_tuples),
+            }
+        return result
 
     if controller == "disturbed":
         return {
@@ -1065,7 +1367,9 @@ def _controller_templates(controller: str, runtime: RuntimeState) -> dict[str, A
                 "parameters": copy.deepcopy(run_defaults),
                 "sufficient_without_overrides": True,
             },
-            {
+        ]
+        if 2 in _available_climate_modes(runtime):
+            templates.append({
                 "template_id": "observed_station_required",
                 "display_name": "Observed station climate",
                 "applicability": {
@@ -1080,8 +1384,7 @@ def _controller_templates(controller: str, runtime: RuntimeState) -> dict[str, A
                 },
                 "sufficient_without_overrides": False,
                 "missing_required_fields": ["climatestation"],
-            },
-        ]
+            })
     else:
         templates = [
             {
@@ -1310,6 +1613,8 @@ def _build_operation_docs_snapshot(
                 operation_docs=operation_docs,
             ),
         }
+        if "capability_authority" in schema:
+            snapshot[operation_id]["capability_authority"] = schema["capability_authority"]
     return snapshot
 
 
@@ -1592,7 +1897,97 @@ def _build_outputs_payload(runtime: RuntimeState) -> dict[str, Any]:
     }
 
 
+def _climate_mode_for_dataset(catalog_id: str) -> int | None:
+    for descriptor in iter_climate_datasets():
+        if descriptor.catalog_id == catalog_id:
+            return descriptor.climate_mode
+    return None
+
+
+_LANDUSE_STABLE_BY_RUNTIME = {value: key for key, value in LANDUSE_METHOD_MODES.items()}
+_SOILS_STABLE_BY_RUNTIME = {value: key for key, value in SOIL_BUILDER_MODES.items()}
+_CLIMATE_STATION_STABLE_BY_RUNTIME = {
+    value: key for key, value in CLIMATE_STATION_METHOD_RUNTIME.items()
+}
+_CLIMATE_SPATIAL_STABLE_BY_RUNTIME = {
+    value: key for key, value in CLIMATE_SPATIAL_METHOD_RUNTIME.items()
+}
+
+
+def _stable_runtime_state(
+    runtime: RuntimeState,
+    code_key: str,
+    stable_by_runtime: Mapping[int, str],
+) -> str | None:
+    raw = runtime.states.get(code_key)
+    try:
+        code = int(raw) if raw is not None else None
+    except (TypeError, ValueError):
+        return None
+    return stable_by_runtime.get(code) if code is not None else None
+
+
+def _model_tuple_binaries_for_runtime(runtime: RuntimeState) -> list[str]:
+    graph = runtime.capability_graph
+    if graph is None:
+        return []
+    backend = str(
+        runtime.states.get("delineation_backend") or graph.defaults["delineation_backend"]
+    ).lower()
+    representation = str(
+        runtime.states.get("watershed_representation")
+        or graph.defaults["watershed_representation"]
+    )
+    prefix = f"{backend}|{representation}|"
+    return [
+        token[len(prefix):]
+        for token in graph.allowed_model_tuples
+        if token.startswith(prefix)
+    ]
+
+
+def _operation_capability_authority(runtime: RuntimeState) -> dict[str, Any] | None:
+    graph = runtime.capability_graph
+    if graph is None:
+        return None
+    return {
+        "schema_version": graph.schema_version,
+        "provider_revision": graph.provider_revision,
+        "climate_datasets": list(graph.climate_datasets),
+        "climate_station_methods": list(graph.climate_station_methods),
+        "climate_spatial_methods": list(graph.climate_spatial_methods),
+        "climate_station_methods_by_dataset": {
+            key: list(value) for key, value in graph.climate_station_methods_by_dataset.items()
+        },
+        "climate_spatial_methods_by_dataset": {
+            key: list(value) for key, value in graph.climate_spatial_methods_by_dataset.items()
+        },
+        "climate_station_defaults": dict(graph.climate_station_defaults),
+        "climate_spatial_defaults": dict(graph.climate_spatial_defaults),
+        "delineation_backends": list(graph.delineation_backends),
+        "watershed_representations": list(graph.watershed_representations),
+        "wepp_binaries": list(graph.wepp_binaries),
+        "allowed_model_tuples": list(graph.allowed_model_tuples),
+        "defaults": dict(graph.defaults),
+    }
+
+
 def _available_climate_modes(runtime: RuntimeState) -> list[int]:
+    if runtime.capability_graph is not None:
+        modes = [
+            mode
+            for catalog_id in runtime.capability_graph.climate_datasets
+            if (mode := _climate_mode_for_dataset(catalog_id)) is not None
+        ]
+        return list(dict.fromkeys(modes))
+    if runtime.v1_capabilities and "climate_datasets" in runtime.v1_capabilities:
+        modes = [
+            mode
+            for catalog_id in runtime.v1_capabilities["climate_datasets"]
+            if (mode := _climate_mode_for_dataset(catalog_id)) is not None
+        ]
+        return list(dict.fromkeys(modes))
+
     modes = [0, 5, 6, 11]
     if bool(runtime.states.get("climate_has_station", False)):
         modes.insert(1, 2)
@@ -1623,7 +2018,36 @@ def _available_climate_modes(runtime: RuntimeState) -> list[int]:
     return modes
 
 
-def _supported_soils_modes() -> list[str]:
+def _available_landuse_method_ids(runtime: RuntimeState) -> list[str]:
+    graph = runtime.capability_graph
+    if graph is None:
+        if runtime.v1_capabilities and "landuse_methods" in runtime.v1_capabilities:
+            return list(runtime.v1_capabilities["landuse_methods"])
+        return []
+    dataset = graph.defaults["landuse_dataset"]
+    representation = str(runtime.states.get("watershed_representation") or "single-ofe")
+    representation_methods = set(graph.landuse_methods_by_representation[representation])
+    return [
+        method
+        for method in graph.landuse_methods_by_dataset[dataset]
+        if method in representation_methods
+    ]
+
+
+def _available_landuse_mode_values(runtime: RuntimeState) -> list[int]:
+    return [
+        LANDUSE_METHOD_MODES[method]
+        for method in _available_landuse_method_ids(runtime)
+        if method in LANDUSE_METHOD_MODES
+    ]
+
+
+def _supported_soils_modes(runtime: RuntimeState) -> list[str]:
+    if runtime.capability_graph is not None:
+        graph = runtime.capability_graph
+        return list(graph.soil_builders_by_dataset[graph.defaults["soil_dataset"]])
+    if runtime.v1_capabilities and "soil_builders" in runtime.v1_capabilities:
+        return list(runtime.v1_capabilities["soil_builders"])
     return ["ssurgo", "statsgo"]
 
 
@@ -1728,7 +2152,7 @@ def _geospatial_payload(runtime: RuntimeState) -> dict[str, Any]:
 
     climate_modes = _available_climate_modes(runtime)
 
-    soils_modes_available = _supported_soils_modes()
+    soils_modes_available = _supported_soils_modes(runtime)
 
     sol_ver_available = _disturbed_sol_ver_options(runtime)
 
@@ -2609,15 +3033,94 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
             ),
             "schema": {
                 "schema_version": 1,
+                **(
+                    {"capability_authority": _operation_capability_authority(runtime)}
+                    if runtime.capability_graph is not None
+                    else {}
+                ),
                 "request": {
                     "type": "object",
                     "properties": {
+                        **(
+                            {
+                                "climate_catalog_id": {
+                                    "type": "string",
+                                    "constraint_mode": "run_resolved",
+                                    "constraint_source": "project_capability_graph",
+                                    "resolved_at": runtime.generated_at,
+                                    "enum": list(runtime.capability_graph.climate_datasets),
+                                    "required_for_new_selection": True,
+                                    "runtime_mode_by_value": {
+                                        catalog_id: _climate_mode_for_dataset(catalog_id)
+                                        for catalog_id in runtime.capability_graph.climate_datasets
+                                    },
+                                },
+                                "climate_station_method": {
+                                    "type": "string",
+                                    "constraint_mode": "run_resolved",
+                                    "constraint_source": "project_capability_graph",
+                                    "enum": list(runtime.capability_graph.climate_station_methods),
+                                    "allowed_by_climate_catalog_id": {
+                                        key: list(value)
+                                        for key, value in runtime.capability_graph.climate_station_methods_by_dataset.items()
+                                    },
+                                    "runtime_mapping": dict(CLIMATE_STATION_METHOD_RUNTIME),
+                                },
+                                "climate_spatial_method": {
+                                    "type": "string",
+                                    "constraint_mode": "run_resolved",
+                                    "constraint_source": "project_capability_graph",
+                                    "enum": list(runtime.capability_graph.climate_spatial_methods),
+                                    "allowed_by_climate_catalog_id": {
+                                        key: list(value)
+                                        for key, value in runtime.capability_graph.climate_spatial_methods_by_dataset.items()
+                                    },
+                                    "runtime_mapping": dict(CLIMATE_SPATIAL_METHOD_RUNTIME),
+                                },
+                                "climatestation_mode": {
+                                    "type": "integer",
+                                    "constraint_mode": "run_resolved",
+                                    "enum": list(dict.fromkeys(CLIMATE_STATION_METHOD_RUNTIME.values())),
+                                },
+                                "climate_spatialmode": {
+                                    "type": "integer",
+                                    "constraint_mode": "run_resolved",
+                                    "enum": list(dict.fromkeys(CLIMATE_SPATIAL_METHOD_RUNTIME.values())),
+                                },
+                            }
+                            if runtime.capability_graph is not None
+                            else (
+                                {
+                                    "climate_catalog_id": {
+                                        "type": "string",
+                                        "constraint_mode": "run_resolved",
+                                        "constraint_source": "project_capability_axis_v1",
+                                        "resolved_at": runtime.generated_at,
+                                        "enum": list(
+                                            runtime.v1_capabilities["climate_datasets"]
+                                        ),
+                                    },
+                                }
+                                if runtime.v1_capabilities
+                                and "climate_datasets" in runtime.v1_capabilities
+                                else {}
+                            )
+                        ),
                         "climate_mode": {
                             "type": "integer",
                             "constraint_mode": "run_resolved",
                             "constraint_source": "controller_state",
                             "resolved_at": runtime.generated_at,
-                            "enum": [0, 2, 3, 5, 6, 11],
+                            "enum": (
+                                _available_climate_modes(runtime)
+                                if runtime.capability_graph is not None
+                                or (
+                                    runtime.v1_capabilities
+                                    and "climate_datasets" in runtime.v1_capabilities
+                                )
+                                else [0, 2, 3, 5, 6, 11]
+                            ),
+                            "enum_available": _available_climate_modes(runtime),
                         },
                         "climatestation": {
                             "type": "string",
@@ -2631,14 +3134,14 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                             "minimum": 1900,
                             "maximum": 2100,
                             "constraint_mode": "static",
-                            "required_if": _predicate("climate_mode", "in", [2, 11]),
+                            "required_if": _predicate("climate_mode", "in", [2, 9, 11]),
                         },
                         "observed_end_year": {
                             "type": "integer",
                             "minimum": 1900,
                             "maximum": 2100,
                             "constraint_mode": "static",
-                            "required_if": _predicate("climate_mode", "in", [2, 11]),
+                            "required_if": _predicate("climate_mode", "in", [2, 9, 11]),
                         },
                         "future_start_year": {
                             "type": "integer",
@@ -2761,7 +3264,14 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                     "properties": {
                         "mode": {
                             "type": "integer",
-                            "constraint_mode": "static",
+                            "constraint_mode": "run_resolved",
+                            "constraint_source": "project_capability_graph",
+                            "resolved_at": runtime.generated_at,
+                            **(
+                                {"enum": _available_landuse_mode_values(runtime)}
+                                if runtime.capability_graph is not None
+                                else {}
+                            ),
                         },
                         "landuse_single_selection": {
                             "type": "string",
@@ -2806,7 +3316,18 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                     "properties": {
                         "landuse_db": {
                             "type": "string",
-                            "constraint_mode": "static",
+                            "constraint_mode": (
+                                "run_resolved" if runtime.capability_graph is not None else "static"
+                            ),
+                            **(
+                                {
+                                    "constraint_source": "project_capability_graph",
+                                    "resolved_at": runtime.generated_at,
+                                    "enum": list(runtime.capability_graph.landuse_datasets),
+                                }
+                                if runtime.capability_graph is not None
+                                else {}
+                            ),
                         },
                     },
                     "required": ["landuse_db"],
@@ -3364,9 +3885,40 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
             ),
             "schema": {
                 "schema_version": 1,
+                **(
+                    {"capability_authority": _operation_capability_authority(runtime)}
+                    if runtime.capability_graph is not None
+                    else {}
+                ),
                 "request": {
                     "type": "object",
                     "properties": {
+                        **(
+                            {
+                                "wepp_bin": {
+                                    "type": "string",
+                                    "constraint_mode": "run_resolved",
+                                    "constraint_source": "project_capability_graph",
+                                    "resolved_at": runtime.generated_at,
+                                    "enum": _model_tuple_binaries_for_runtime(runtime),
+                                },
+                            }
+                            if runtime.capability_graph is not None
+                            else (
+                                {
+                                    "wepp_bin": {
+                                        "type": "string",
+                                        "constraint_mode": "run_resolved",
+                                        "constraint_source": "project_capability_axis_v1",
+                                        "resolved_at": runtime.generated_at,
+                                        "enum": list(runtime.v1_capabilities["wepp_binaries"]),
+                                    },
+                                }
+                                if runtime.v1_capabilities
+                                and "wepp_binaries" in runtime.v1_capabilities
+                                else {}
+                            )
+                        ),
                         "clip_soils": {
                             "type": "boolean",
                             "constraint_mode": "static",
@@ -3418,9 +3970,40 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
             ),
             "schema": {
                 "schema_version": 1,
+                **(
+                    {"capability_authority": _operation_capability_authority(runtime)}
+                    if runtime.capability_graph is not None
+                    else {}
+                ),
                 "request": {
                     "type": "object",
                     "properties": {
+                        **(
+                            {
+                                "wepp_bin": {
+                                    "type": "string",
+                                    "constraint_mode": "run_resolved",
+                                    "constraint_source": "project_capability_graph",
+                                    "resolved_at": runtime.generated_at,
+                                    "enum": _model_tuple_binaries_for_runtime(runtime),
+                                },
+                            }
+                            if runtime.capability_graph is not None
+                            else (
+                                {
+                                    "wepp_bin": {
+                                        "type": "string",
+                                        "constraint_mode": "run_resolved",
+                                        "constraint_source": "project_capability_axis_v1",
+                                        "resolved_at": runtime.generated_at,
+                                        "enum": list(runtime.v1_capabilities["wepp_binaries"]),
+                                    },
+                                }
+                                if runtime.v1_capabilities
+                                and "wepp_binaries" in runtime.v1_capabilities
+                                else {}
+                            )
+                        ),
                         "clip_soils": {
                             "type": "boolean",
                             "constraint_mode": "static",
@@ -3910,7 +4493,10 @@ def _resolve_controller(controller: str, runtime: RuntimeState) -> str | None:
     responses=agent_route_responses(
         success_code=200,
         success_description="Geospatial metadata returned.",
-        extra={404: "Run not found. Returns the canonical error payload."},
+        extra={
+            404: "Run not found. Returns the canonical error payload.",
+            409: "Invalid stored project capability authority.",
+        },
     ),
 )
 def get_geospatial_metadata(runid: str, config: str, request: Request) -> JSONResponse:
@@ -3928,6 +4514,13 @@ def get_geospatial_metadata(runid: str, config: str, request: Request) -> JSONRe
         return error_response("Run not found", status_code=404, code="not_found")
     except RunConfigMismatchError:
         return error_response("Run not found", status_code=404, code="not_found")
+    except CapabilityAuthorityInvalidError as exc:
+        return error_response(
+            "Project capability authority is invalid.",
+            status_code=409,
+            code="capability_authority_invalid",
+            details=str(exc),
+        )
     except Exception:  # broad-except: route boundary contract
         logger.exception("rq-engine geospatial-metadata state load failed")
         return error_response("Error Handling Request", status_code=500)
@@ -3977,7 +4570,10 @@ def get_geospatial_metadata(runid: str, config: str, request: Request) -> JSONRe
     responses=agent_route_responses(
         success_code=200,
         success_description="Controller catalog returned.",
-        extra={404: "Run not found. Returns the canonical error payload."},
+        extra={
+            404: "Run not found. Returns the canonical error payload.",
+            409: "Invalid stored project capability authority.",
+        },
     ),
 )
 def list_controllers(runid: str, config: str, request: Request) -> JSONResponse:
@@ -3995,6 +4591,13 @@ def list_controllers(runid: str, config: str, request: Request) -> JSONResponse:
         return error_response("Run not found", status_code=404, code="not_found")
     except RunConfigMismatchError:
         return error_response("Run not found", status_code=404, code="not_found")
+    except CapabilityAuthorityInvalidError as exc:
+        return error_response(
+            "Project capability authority is invalid.",
+            status_code=409,
+            code="capability_authority_invalid",
+            details=str(exc),
+        )
     except Exception:  # broad-except: route boundary contract
         logger.exception("rq-engine controllers state load failed")
         return error_response("Error Handling Request", status_code=500)
@@ -4031,7 +4634,10 @@ def list_controllers(runid: str, config: str, request: Request) -> JSONResponse:
     responses=agent_route_responses(
         success_code=200,
         success_description="Controller schema returned.",
-        extra={404: "Run or controller not found. Returns the canonical error payload."},
+        extra={
+            404: "Run or controller not found. Returns the canonical error payload.",
+            409: "Invalid stored project capability authority.",
+        },
     ),
 )
 def get_controller_schema(runid: str, config: str, controller: str, request: Request) -> JSONResponse:
@@ -4049,6 +4655,13 @@ def get_controller_schema(runid: str, config: str, controller: str, request: Req
         return error_response("Run not found", status_code=404, code="not_found")
     except RunConfigMismatchError:
         return error_response("Run not found", status_code=404, code="not_found")
+    except CapabilityAuthorityInvalidError as exc:
+        return error_response(
+            "Project capability authority is invalid.",
+            status_code=409,
+            code="capability_authority_invalid",
+            details=str(exc),
+        )
     except Exception:  # broad-except: route boundary contract
         logger.exception("rq-engine controller schema state load failed")
         return error_response("Error Handling Request", status_code=500)
@@ -4072,6 +4685,8 @@ def get_controller_schema(runid: str, config: str, controller: str, request: Req
                 "fields": controller_schema["fields"],
             }
         )
+        if "model_authority" in controller_schema:
+            payload["model_authority"] = controller_schema["model_authority"]
         return JSONResponse(payload)
     except Exception:  # broad-except: route boundary contract
         logger.exception("rq-engine controller schema failed")
@@ -4090,7 +4705,10 @@ def get_controller_schema(runid: str, config: str, controller: str, request: Req
     responses=agent_route_responses(
         success_code=200,
         success_description="Controller hints returned.",
-        extra={404: "Run or controller not found. Returns the canonical error payload."},
+        extra={
+            404: "Run or controller not found. Returns the canonical error payload.",
+            409: "Invalid stored project capability authority.",
+        },
     ),
 )
 def get_controller_hints(runid: str, config: str, controller: str, request: Request) -> JSONResponse:
@@ -4108,6 +4726,13 @@ def get_controller_hints(runid: str, config: str, controller: str, request: Requ
         return error_response("Run not found", status_code=404, code="not_found")
     except RunConfigMismatchError:
         return error_response("Run not found", status_code=404, code="not_found")
+    except CapabilityAuthorityInvalidError as exc:
+        return error_response(
+            "Project capability authority is invalid.",
+            status_code=409,
+            code="capability_authority_invalid",
+            details=str(exc),
+        )
     except Exception:  # broad-except: route boundary contract
         logger.exception("rq-engine controller hints state load failed")
         return error_response("Error Handling Request", status_code=500)
@@ -4153,7 +4778,10 @@ def get_controller_hints(runid: str, config: str, controller: str, request: Requ
     responses=agent_route_responses(
         success_code=200,
         success_description="Controller templates returned.",
-        extra={404: "Run or controller not found. Returns the canonical error payload."},
+        extra={
+            404: "Run or controller not found. Returns the canonical error payload.",
+            409: "Invalid stored project capability authority.",
+        },
     ),
 )
 def get_controller_templates(runid: str, config: str, controller: str, request: Request) -> JSONResponse:
@@ -4171,6 +4799,13 @@ def get_controller_templates(runid: str, config: str, controller: str, request: 
         return error_response("Run not found", status_code=404, code="not_found")
     except RunConfigMismatchError:
         return error_response("Run not found", status_code=404, code="not_found")
+    except CapabilityAuthorityInvalidError as exc:
+        return error_response(
+            "Project capability authority is invalid.",
+            status_code=409,
+            code="capability_authority_invalid",
+            details=str(exc),
+        )
     except Exception:  # broad-except: route boundary contract
         logger.exception("rq-engine controller templates state load failed")
         return error_response("Error Handling Request", status_code=500)
@@ -4213,7 +4848,10 @@ def get_controller_templates(runid: str, config: str, controller: str, request: 
     responses=agent_route_responses(
         success_code=200,
         success_description="Run-scoped endpoint catalog returned.",
-        extra={404: "Run not found. Returns the canonical error payload."},
+        extra={
+            404: "Run not found. Returns the canonical error payload.",
+            409: "Invalid stored project capability authority.",
+        },
     ),
 )
 def list_run_endpoints(
@@ -4242,6 +4880,13 @@ def list_run_endpoints(
         return error_response("Run not found", status_code=404, code="not_found")
     except RunConfigMismatchError:
         return error_response("Run not found", status_code=404, code="not_found")
+    except CapabilityAuthorityInvalidError as exc:
+        return error_response(
+            "Project capability authority is invalid.",
+            status_code=409,
+            code="capability_authority_invalid",
+            details=str(exc),
+        )
     except Exception:  # broad-except: route boundary contract
         logger.exception("rq-engine run-endpoints state load failed")
         return error_response("Error Handling Request", status_code=500)
@@ -4275,7 +4920,10 @@ def list_run_endpoints(
     responses=agent_route_responses(
         success_code=200,
         success_description="Run operation schema returned.",
-        extra={404: "Run or operation not found. Returns the canonical error payload."},
+        extra={
+            404: "Run or operation not found. Returns the canonical error payload.",
+            409: "Invalid stored project capability authority.",
+        },
     ),
 )
 def get_run_endpoint_schema(runid: str, config: str, operation_id: str, request: Request) -> JSONResponse:
@@ -4293,6 +4941,13 @@ def get_run_endpoint_schema(runid: str, config: str, operation_id: str, request:
         return error_response("Run not found", status_code=404, code="not_found")
     except RunConfigMismatchError:
         return error_response("Run not found", status_code=404, code="not_found")
+    except CapabilityAuthorityInvalidError as exc:
+        return error_response(
+            "Project capability authority is invalid.",
+            status_code=409,
+            code="capability_authority_invalid",
+            details=str(exc),
+        )
     except Exception:  # broad-except: route boundary contract
         logger.exception("rq-engine run-endpoint schema state load failed")
         return error_response("Error Handling Request", status_code=500)
@@ -4323,6 +4978,8 @@ def get_run_endpoint_schema(runid: str, config: str, operation_id: str, request:
                 "responses": schema["responses"],
             }
         )
+        if "capability_authority" in schema:
+            payload["capability_authority"] = schema["capability_authority"]
         return JSONResponse(payload)
     except Exception:  # broad-except: route boundary contract
         logger.exception("rq-engine run-endpoint schema failed")
@@ -4341,7 +4998,10 @@ def get_run_endpoint_schema(runid: str, config: str, operation_id: str, request:
     responses=agent_route_responses(
         success_code=200,
         success_description="Run operation defaults returned.",
-        extra={404: "Run or operation not found. Returns the canonical error payload."},
+        extra={
+            404: "Run or operation not found. Returns the canonical error payload.",
+            409: "Invalid stored project capability authority.",
+        },
     ),
 )
 def get_run_endpoint_defaults(runid: str, config: str, operation_id: str, request: Request) -> JSONResponse:
@@ -4359,6 +5019,13 @@ def get_run_endpoint_defaults(runid: str, config: str, operation_id: str, reques
         return error_response("Run not found", status_code=404, code="not_found")
     except RunConfigMismatchError:
         return error_response("Run not found", status_code=404, code="not_found")
+    except CapabilityAuthorityInvalidError as exc:
+        return error_response(
+            "Project capability authority is invalid.",
+            status_code=409,
+            code="capability_authority_invalid",
+            details=str(exc),
+        )
     except Exception:  # broad-except: route boundary contract
         logger.exception("rq-engine run-endpoint defaults state load failed")
         return error_response("Error Handling Request", status_code=500)
@@ -4403,7 +5070,10 @@ def get_run_endpoint_defaults(runid: str, config: str, operation_id: str, reques
     responses=agent_route_responses(
         success_code=200,
         success_description="Run operation error catalog returned.",
-        extra={404: "Run or operation not found. Returns the canonical error payload."},
+        extra={
+            404: "Run or operation not found. Returns the canonical error payload.",
+            409: "Invalid stored project capability authority.",
+        },
     ),
 )
 def get_run_endpoint_errors(runid: str, config: str, operation_id: str, request: Request) -> JSONResponse:
@@ -4421,6 +5091,13 @@ def get_run_endpoint_errors(runid: str, config: str, operation_id: str, request:
         return error_response("Run not found", status_code=404, code="not_found")
     except RunConfigMismatchError:
         return error_response("Run not found", status_code=404, code="not_found")
+    except CapabilityAuthorityInvalidError as exc:
+        return error_response(
+            "Project capability authority is invalid.",
+            status_code=409,
+            code="capability_authority_invalid",
+            details=str(exc),
+        )
     except Exception:  # broad-except: route boundary contract
         logger.exception("rq-engine run-endpoint errors state load failed")
         return error_response("Error Handling Request", status_code=500)
@@ -4463,7 +5140,10 @@ def get_run_endpoint_errors(runid: str, config: str, operation_id: str, request:
     responses=agent_route_responses(
         success_code=200,
         success_description="Run outputs snapshot returned.",
-        extra={404: "Run not found. Returns the canonical error payload."},
+        extra={
+            404: "Run not found. Returns the canonical error payload.",
+            409: "Invalid stored project capability authority.",
+        },
     ),
 )
 def get_outputs(runid: str, config: str, request: Request) -> JSONResponse:
@@ -4481,6 +5161,13 @@ def get_outputs(runid: str, config: str, request: Request) -> JSONResponse:
         return error_response("Run not found", status_code=404, code="not_found")
     except RunConfigMismatchError:
         return error_response("Run not found", status_code=404, code="not_found")
+    except CapabilityAuthorityInvalidError as exc:
+        return error_response(
+            "Project capability authority is invalid.",
+            status_code=409,
+            code="capability_authority_invalid",
+            details=str(exc),
+        )
     except Exception:  # broad-except: route boundary contract
         logger.exception("rq-engine outputs state load failed")
         return error_response("Error Handling Request", status_code=500)

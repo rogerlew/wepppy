@@ -20,6 +20,8 @@ class _Station:
 
 
 class _DummyClimate:
+    uses_tenerife_station_catalog = False
+
     def __init__(self) -> None:
         self._locked = False
         self._closest_stations = None
@@ -125,6 +127,10 @@ def test_climatestation_meta_prefers_user_defined_metadata() -> None:
 def test_resolve_catalog_dataset_respects_locale_access(monkeypatch: pytest.MonkeyPatch) -> None:
     service = ClimateStationCatalogService()
     climate = _DummyClimate()
+    monkeypatch.setattr(
+        "wepppy.nodb.project_config_capabilities.capability_authority",
+        lambda _climate: None,
+    )
 
     dataset = SimpleNamespace(
         catalog_id="prism_stochastic",
@@ -134,3 +140,21 @@ def test_resolve_catalog_dataset_respects_locale_access(monkeypatch: pytest.Monk
     monkeypatch.setattr("wepppy.nodb.locales.get_climate_dataset", lambda catalog_id: dataset)
 
     assert service.resolve_catalog_dataset(climate, "prism_stochastic") is None
+
+
+def test_resolve_catalog_dataset_allows_exact_persisted_v2_selection(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = ClimateStationCatalogService()
+    climate = _DummyClimate()
+    climate._catalog_id = "vanilla_cligen"
+    monkeypatch.setattr(
+        "wepppy.nodb.project_config_capabilities.capability_authority",
+        lambda _climate: SimpleNamespace(climate_datasets=("prism_stochastic",)),
+    )
+
+    dataset = service.resolve_catalog_dataset(climate, "vanilla_cligen")
+
+    assert dataset is not None
+    assert dataset.catalog_id == "vanilla_cligen"
+    assert service.resolve_catalog_dataset(climate, "observed_gridmet") is None

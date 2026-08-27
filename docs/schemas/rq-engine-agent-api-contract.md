@@ -270,12 +270,27 @@ Climate-parse validation contract:
    For `fork-archive` origin jobs, non-Admin/Root callers may cancel only while
    the job remains queued; dispatch handoff or started state returns `403`.
 
+For runs with project capability schema v2, run-scoped controller schemas,
+templates/defaults, aggregated operation documents, pipeline, and readiness
+metadata expose only the authority stored in that run's flattened config.
+Clients MUST treat these run-scoped enums and model tuples as authoritative;
+the current global provider catalog cannot broaden an existing run. Legacy runs
+without capability authority retain their existing discovery behavior.
+The climate, landuse, and soils build endpoints and the WEPP run endpoint MUST
+return `409 capability_authority_invalid` with diagnostic `error.details`
+before mutation or enqueue when stored schema-v2 authority is malformed,
+partial, contradictory, or unsupported.
+
 ## Climate Build Ordering (Operator Replication)
 For API-only replication flows, climate setup is order-sensitive:
 1. Run discovery first and read operation docs from
    `GET /api/runs/{runid}/{config}/endpoints?include_operation_docs=true`.
-2. Resolve `climate_mode` explicitly before `build-climate`.
-   - If source run mode is known, send that mode as an integer code.
+2. Resolve `climate_catalog_id` and its derived `climate_mode` explicitly before
+   `build-climate`.
+   - For schema-v2 runs, send the stable catalog ID advertised by run-scoped
+     discovery. A numeric mode alone cannot authorize a new selection.
+   - Send the catalog's integer mode for compatibility and mode/catalog
+     agreement validation.
    - Do not blindly replay `resolved_defaults` when it reports `-1`
      (`ClimateMode.Undefined`).
 3. If you do not want auto station selection, set station behavior before
@@ -297,8 +312,11 @@ Notes:
 - For deterministic station targeting, persist station selection with
   `tasks/set_climatestation_mode` + `tasks/set_climatestation` before
   `build-climate`.
-- `climate_mode` in rq-engine `build-climate` payloads is currently parsed as
-  an integer code (string aliases are not part of this route contract).
+- `climate_mode` in rq-engine `build-climate` payloads is parsed as an integer
+  code (string aliases are not part of this route contract). Schema-v2 runs
+  additionally require `climate_catalog_id` for a new selection; omission is
+  accepted only for an ordinary rebuild of the exact persisted current dataset
+  and mode.
 - Advanced climate toggles such as `use_gridmet_wind_when_applicable` and
   `adjust_mx_pt5` are also pre-build task mutations.
 

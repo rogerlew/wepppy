@@ -14,6 +14,7 @@ from fastapi.responses import JSONResponse
 
 from wepppy.nodb.core import Climate, Landuse, Ron, Soils, Watershed, Wepp
 from wepppy.nodb.mods.disturbed import Disturbed
+from wepppy.nodb.project_config_capabilities import capability_authority
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.rq.job_info import get_wepppy_rq_jobs_info
 from wepppy.weppcloud.utils.auth_tokens import get_jwt_config
@@ -37,6 +38,10 @@ RUN_STATE_DOMAIN_ORCHESTRATION = "orchestration"
 
 class RunConfigMismatchError(ValueError):
     """Raised when a run exists but the requested config path token is not the run's config."""
+
+
+class CapabilityAuthorityInvalidError(ValueError):
+    """Raised when stored run capability authority cannot be used for orchestration reads."""
 
 
 @dataclass(frozen=True)
@@ -646,6 +651,11 @@ def _load_runtime_state(runid: str, config: str) -> dict[str, Any]:
         "soils_built": bool(getattr(soils, "has_soils")),
         "soils_mode": _enum_name(getattr(soils, "mode")),
         "wepp_has_run": bool(getattr(wepp, "has_run")),
+        "delineation_backend": _enum_name(getattr(watershed, "delineation_backend", None)),
+        "watershed_representation": (
+            "multiple-ofe" if bool(getattr(landuse, "multi_ofe", False)) else "single-ofe"
+        ),
+        "wepp_binary": str(getattr(wepp, "wepp_bin", "") or "").strip() or None,
         "disturbed_enabled": disturbed_enabled,
         "disturbed_sbs_uploaded": bool(getattr(prep, "has_sbs")),
         "disturbed_sol_ver_selected": disturbed_sol_ver_selected,
@@ -700,11 +710,28 @@ def _load_runtime_state(runid: str, config: str) -> dict[str, Any]:
                 if ended_ts is not None:
                     step_completion_ts[step_id] = ended_ts
 
+    try:
+        capability_graph = capability_authority(wepp)
+    except ValueError as exc:
+        raise CapabilityAuthorityInvalidError(str(exc)) from exc
+    capabilities = None
+    if capability_graph is not None:
+        capabilities = {
+            "schema_version": capability_graph.schema_version,
+            "provider_revision": capability_graph.provider_revision,
+            "delineation_backends": list(capability_graph.delineation_backends),
+            "watershed_representations": list(capability_graph.watershed_representations),
+            "wepp_binaries": list(capability_graph.wepp_binaries),
+            "allowed_model_tuples": list(capability_graph.allowed_model_tuples),
+            "defaults": dict(capability_graph.defaults),
+        }
+
     return {
         "runid": runid,
         "config": config,
         "active_mods": active_mods,
         "states": states,
+        "capabilities": capabilities,
         "step_completion_ts": step_completion_ts,
         "step_job": step_job,
         "generated_at": _utc_now_iso(),
@@ -1275,6 +1302,11 @@ def _compute_payloads(runtime: Mapping[str, Any]) -> tuple[dict[str, Any], dict[
             "runid": runid,
             "config": config,
             "active_mods": list(active_mods),
+            **(
+                {"capabilities": runtime["capabilities"]}
+                if runtime.get("capabilities") is not None
+                else {}
+            ),
             "recent_invalidations": ordered_recent_invalidations,
             "steps": step_payloads,
         }
@@ -1293,6 +1325,11 @@ def _compute_payloads(runtime: Mapping[str, Any]) -> tuple[dict[str, Any], dict[
             "run": {
                 "has_dem": bool(states.get("has_dem", False)),
                 "mods": list(active_mods),
+                **(
+                    {"capabilities": runtime["capabilities"]}
+                    if runtime.get("capabilities") is not None
+                    else {}
+                ),
             },
             "watershed": {
                 "channels_built": bool(states.get("watershed_has_channels", False)),
@@ -1346,7 +1383,10 @@ def _compute_payloads(runtime: Mapping[str, Any]) -> tuple[dict[str, Any], dict[
     responses=agent_route_responses(
         success_code=200,
         success_description="Pipeline payload returned.",
-        extra={404: "Run not found. Returns the canonical error payload."},
+        extra={
+            404: "Run not found. Returns the canonical error payload.",
+            409: "Invalid stored project capability authority.",
+        },
     ),
 )
 def get_pipeline(runid: str, config: str, request: Request) -> JSONResponse:
@@ -1364,6 +1404,13 @@ def get_pipeline(runid: str, config: str, request: Request) -> JSONResponse:
         return error_response("Run not found", status_code=404, code="not_found")
     except RunConfigMismatchError:
         return error_response("Run not found", status_code=404, code="not_found")
+    except CapabilityAuthorityInvalidError as exc:
+        return error_response(
+            "Project capability authority is invalid.",
+            status_code=409,
+            code="capability_authority_invalid",
+            details=str(exc),
+        )
     except Exception:  # broad-except: route boundary contract
         logger.exception("rq-engine pipeline state load failed")
         return error_response("Error Handling Request", status_code=500)
@@ -1388,7 +1435,10 @@ def get_pipeline(runid: str, config: str, request: Request) -> JSONResponse:
     responses=agent_route_responses(
         success_code=200,
         success_description="Readiness payload returned.",
-        extra={404: "Run not found. Returns the canonical error payload."},
+        extra={
+            404: "Run not found. Returns the canonical error payload.",
+            409: "Invalid stored project capability authority.",
+        },
     ),
 )
 def get_readiness(runid: str, config: str, request: Request) -> JSONResponse:
@@ -1406,6 +1456,13 @@ def get_readiness(runid: str, config: str, request: Request) -> JSONResponse:
         return error_response("Run not found", status_code=404, code="not_found")
     except RunConfigMismatchError:
         return error_response("Run not found", status_code=404, code="not_found")
+    except CapabilityAuthorityInvalidError as exc:
+        return error_response(
+            "Project capability authority is invalid.",
+            status_code=409,
+            code="capability_authority_invalid",
+            details=str(exc),
+        )
     except Exception:  # broad-except: route boundary contract
         logger.exception("rq-engine readiness state load failed")
         return error_response("Error Handling Request", status_code=500)

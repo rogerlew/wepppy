@@ -1,7 +1,7 @@
 schema_version = 1
 id = "wbt"
 kind = "delineation"
-source_revision = "1"
+source_revision = "weppcloud-wbt-adapter-v1:wbt"
 label = "WhiteboxTools"
 description = "WhiteboxTools watershed delineation with current deployment settings."
 owns = ["watershed.delineation_backend", "watershed.wbt.boundary_touch_behavior", "watershed.wbt.mcl", "watershed.wbt.csa", "watershed.wbt.fill_or_breach", "watershed.wbt.breach_least_cost_dist"]

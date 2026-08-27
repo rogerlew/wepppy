@@ -41,7 +41,13 @@ from wepppy.nodb.core import (
     Wepp,
 )
 from wepppy.nodb.unitizer import Unitizer
-from wepppy.nodb.project_config_capabilities import soil_capability_modes
+from wepppy.nodb.locales import get_climate_dataset
+from wepppy.nodb.project_config_capabilities import (
+    capability_ids,
+    capability_authority,
+    landuse_capability_modes,
+    soil_capability_modes,
+)
 from wepppy.nodb.project_config_reader import project_config_manifest_source_kind
 from wepppy.weppcloud.user_preferences import (
     PreferenceResolutionError,
@@ -1736,6 +1742,45 @@ def _log_access(wd, current_user, ip):
         fp.write('{},{},{}\n'.format(email, ip, datetime.now()))
 
 
+def _stored_wepp_binary_options(authority, backend, representation, current_binary):
+    """Return tuple-authorized v2 options without consulting the live provider."""
+
+    prefix = f"{backend}|{representation}|"
+    tuple_binaries = tuple(
+        token[len(prefix):]
+        for token in authority.allowed_model_tuples
+        if token.startswith(prefix)
+    )
+    allowed = set(tuple_binaries)
+    options = [
+        (binary_id, binary_id)
+        for binary_id in authority.wepp_binaries
+        if binary_id in allowed
+    ]
+    disabled = []
+    if current_binary and current_binary not in allowed:
+        options.append((current_binary, current_binary))
+        disabled.append(current_binary)
+    return options, disabled
+
+
+def _v1_wepp_binary_options(config, current_binary):
+    """Return present schema-v1 coarse-axis options, or ``None`` for legacy."""
+
+    allowed = capability_ids(config, "wepp_binaries")
+    if allowed is None:
+        return None
+    raw = config.config_get_list("capabilities", "wepp_binaries", None)
+    if not isinstance(raw, (list, tuple)):
+        raise ValueError("capabilities.wepp_binaries must be a string list")
+    options = [(str(binary_id), str(binary_id)) for binary_id in raw]
+    disabled = []
+    if current_binary and current_binary not in allowed:
+        options.append((current_binary, current_binary))
+        disabled.append(current_binary)
+    return options, disabled
+
+
 def _build_runs0_context(runid, config, playwright_load_all):
     global VAPID_PUBLIC_KEY
     from wepppy.nodb.mods.revegetation import Revegetation
@@ -1866,7 +1911,69 @@ def _build_runs0_context(runid, config, playwright_load_all):
         ("20-yr_PartialRecovery.csv", "20-Year Partial Recovery"),
         ("user_cover_transform", "User-Defined Transform")
     ]
-    wepp_bin_options = [(opt, opt) for opt in get_linux_wepp_bin_opts()]
+    disabled_wepp_bin_options = []
+    run_capability_authority = capability_authority(wepp)
+    if run_capability_authority is None:
+        v1_options = _v1_wepp_binary_options(wepp, wepp.wepp_bin)
+        if v1_options is None:
+            wepp_bin_options = [(opt, opt) for opt in get_linux_wepp_bin_opts()]
+        else:
+            wepp_bin_options, disabled_wepp_bin_options = v1_options
+    else:
+        backend_value = getattr(watershed, "delineation_backend", None)
+        backend_name = getattr(backend_value, "name", backend_value)
+        delineation_backend = str(backend_name or "").strip().lower()
+        if not delineation_backend:
+            delineation_backend = run_capability_authority.defaults["delineation_backend"]
+        watershed_representation = (
+            "multiple-ofe" if wepp.multi_ofe else "single-ofe"
+        )
+        current_wepp_bin = wepp.wepp_bin
+        wepp_bin_options, disabled_wepp_bin_options = _stored_wepp_binary_options(
+            run_capability_authority,
+            delineation_backend,
+            watershed_representation,
+            current_wepp_bin,
+        )
+    landuse_method_modes = None
+    climate_default_catalog_id = None
+    climate_catalog = climate.catalog_datasets_payload(include_hidden=True)
+    landcover_datasets = landuse.landcover_datasets
+    disabled_landcover_datasets = []
+    if run_capability_authority is not None:
+        climate_default_catalog_id = run_capability_authority.defaults["climate_dataset"]
+        landuse_method_modes = landuse_capability_modes(
+            landuse,
+            run_capability_authority.defaults["landuse_dataset"],
+            "multiple-ofe" if wepp.multi_ofe else "single-ofe",
+        )
+        current_catalog_id = climate.catalog_id
+        if (
+            current_catalog_id
+            and current_catalog_id not in run_capability_authority.climate_datasets
+        ):
+            current_descriptor = get_climate_dataset(current_catalog_id)
+            if current_descriptor is not None:
+                current_payload = current_descriptor.to_mapping()
+                current_payload["current_selection_disabled"] = True
+                climate_catalog.append(current_payload)
+        current_landcover = landuse.nlcd_db
+        if current_landcover:
+            allowed_landcover_ids = set(run_capability_authority.landuse_datasets)
+            current_descriptor = next(
+                (
+                    item
+                    for item in landuse.available_datasets
+                    if item.kind == "landcover" and item.key == current_landcover
+                ),
+                None,
+            )
+            if (
+                current_descriptor is not None
+                and current_descriptor.catalog_id not in allowed_landcover_ids
+            ):
+                landcover_datasets.append(current_descriptor)
+                disabled_landcover_datasets.append(current_descriptor.key)
 
     _log_access(base_wd, current_user, request.remote_addr)
     timestamp = datetime.now()
@@ -2011,15 +2118,19 @@ def _build_runs0_context(runid, config, playwright_load_all):
         swat_print_prt_meta=swat_print_prt_meta,
         rq_job_ids=rq_job_ids,
         landuseoptions=landuseoptions,
-        landcover_datasets=landuse.landcover_datasets,
+        landcover_datasets=landcover_datasets,
+        disabled_landcover_datasets=disabled_landcover_datasets,
         landuse_report_rows=landuse_report_context['report_rows'],
         landuse_dataset_options=landuse_report_context['dataset_options'],
+        landuse_method_modes=landuse_method_modes,
+        disabled_wepp_bin_options=disabled_wepp_bin_options,
         landuse_coverage_percentages=landuse_report_context['coverage_percentages'],
         landuse_management_mapping_options=landuse_management_mapping_options,
         soildboptions=soildboptions,
         critical_shear_options=critical_shear_options,
         reveg_cover_transform_options=reveg_cover_transform_options,
-        climate_catalog=climate.catalog_datasets_payload(include_hidden=True),
+        climate_catalog=climate_catalog,
+        climate_default_catalog_id=climate_default_catalog_id,
         soil_capability_modes=soil_capability_modes(soils),
         precisions=wepppy.nodb.unitizer.precisions,
         run_id=runid,

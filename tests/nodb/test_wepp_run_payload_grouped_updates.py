@@ -14,6 +14,15 @@ from wepppy.nodb.core.watershed import Watershed
 pytestmark = pytest.mark.unit
 
 
+@pytest.fixture(autouse=True)
+def _legacy_capability_authority(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        wepp_run_payload_module,
+        "capability_authority",
+        lambda config: None,
+    )
+
+
 class _LockRecorder:
     def __init__(self) -> None:
         self.calls = 0

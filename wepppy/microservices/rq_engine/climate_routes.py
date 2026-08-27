@@ -19,6 +19,13 @@ from wepppy.nodb.core import (
     WatershedNotAbstractedError,
 )
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+from wepppy.nodb.core.climate_input_parser import PERSISTED_CURRENT_SPATIAL_CARVEOUT
+from wepppy.nodb.project_config_capabilities import capability_authority
+from wepppy.nodb.locales.climate_catalog import (
+    CLIMATE_SPATIAL_METHOD_RUNTIME,
+    CLIMATE_STATION_METHOD_RUNTIME,
+    get_climate_dataset,
+)
 from wepppy.runtime_paths.errors import NoDirError
 from wepppy.runtime_paths.fs import resolve as _nodir_resolve
 from wepppy.rq.project_rq import build_climate_rq, upload_cli_rq
@@ -376,6 +383,233 @@ def _validate_observed_year_bounds_before_enqueue(climate: Climate) -> None:
         climate._require_observed_year_bounds_for_build()
 
 
+def _validate_v2_climate_selection(
+    climate: Climate,
+    authority,
+    payload: dict[str, object],
+) -> JSONResponse | None:
+    """Validate stable dataset/spatial choices before ``parse_inputs`` mutates NoDb."""
+
+    submitted_catalog_id_raw = payload.get("climate_catalog_id") or payload.get("catalog_id")
+    submitted_catalog_id = (
+        str(submitted_catalog_id_raw).strip() if submitted_catalog_id_raw not in (None, "") else None
+    )
+    current_catalog_id = str(getattr(climate, "catalog_id", "") or "").strip() or None
+    raw_mode = payload.get("climate_mode")
+
+    if submitted_catalog_id is None:
+        current_descriptor = (
+            get_climate_dataset(current_catalog_id) if current_catalog_id is not None else None
+        )
+        try:
+            submitted_mode = int(raw_mode) if raw_mode not in (None, "") else None
+        except (TypeError, ValueError):
+            submitted_mode = None
+        if (
+            current_descriptor is None
+            or submitted_mode is None
+            or submitted_mode != int(current_descriptor.climate_mode)
+        ):
+            return error_response(
+                "Climate catalog id is required for this project.",
+                status_code=400,
+                code="missing_capability_id",
+                details=(
+                    "climate_catalog_id is required when selecting a schema-v2 climate dataset; "
+                    "a raw climate_mode cannot authorize a different selection."
+                ),
+            )
+        # Ordinary rebuild of the exact persisted current selection. Preserve
+        # its stable identity instead of letting the parser clear it.
+        submitted_catalog_id = current_catalog_id
+        payload["climate_catalog_id"] = current_catalog_id
+
+    descriptor = get_climate_dataset(submitted_catalog_id)
+    if descriptor is None:
+        return error_response(
+            "Climate dataset is not supported by this project.",
+            status_code=400,
+            code="unsupported_capability",
+            details=f"Unknown climate catalog id: {submitted_catalog_id}",
+        )
+    is_exact_current = submitted_catalog_id == current_catalog_id
+    if submitted_catalog_id not in authority.climate_datasets and not is_exact_current:
+        return error_response(
+            "Climate dataset is not supported by this project.",
+            status_code=400,
+            code="unsupported_capability",
+            details=f"Unsupported capabilities.climate_datasets value: {submitted_catalog_id}",
+        )
+    if raw_mode not in (None, ""):
+        try:
+            submitted_mode = int(raw_mode)
+        except (TypeError, ValueError):
+            submitted_mode = None
+        if submitted_mode != int(descriptor.climate_mode):
+            return error_response(
+                "Climate mode does not match the selected dataset.",
+                status_code=400,
+                code="capability_mismatch",
+                details=(
+                    f"Climate catalog {submitted_catalog_id} uses mode "
+                    f"{int(descriptor.climate_mode)}, not submitted mode {raw_mode}."
+                ),
+            )
+
+    current_station_mode_raw = getattr(climate, "climatestation_mode", None)
+    try:
+        current_station_mode = int(current_station_mode_raw)
+    except (TypeError, ValueError):
+        current_station_mode = None
+    submitted_station_method_raw = payload.get("climate_station_method")
+    if submitted_station_method_raw not in (None, ""):
+        submitted_station_method = str(submitted_station_method_raw).strip()
+        submitted_station_mode = CLIMATE_STATION_METHOD_RUNTIME.get(submitted_station_method)
+        allowed_station_methods = authority.climate_station_methods_by_dataset.get(
+            submitted_catalog_id, ()
+        )
+        if submitted_station_mode is None or (
+            submitted_station_method not in allowed_station_methods and not (
+            is_exact_current and submitted_station_mode == current_station_mode
+            )
+        ):
+            return error_response(
+                "Climate station method is not supported by this project.",
+                status_code=400,
+                code="unsupported_capability",
+                details=f"Unsupported climate station method: {submitted_station_method}",
+            )
+        raw_numeric_station = payload.get("climatestation_mode")
+        if raw_numeric_station not in (None, ""):
+            try:
+                numeric_station = int(raw_numeric_station)
+            except (TypeError, ValueError):
+                numeric_station = None
+            if numeric_station != submitted_station_mode:
+                return error_response(
+                    "Climate station method values do not agree.",
+                    status_code=400,
+                    code="capability_mismatch",
+                    details="climate_station_method does not match climatestation_mode.",
+                )
+        payload["climatestation_mode"] = submitted_station_mode
+    elif payload.get("climatestation_mode") in (None, ""):
+        if is_exact_current and current_station_mode is not None:
+            payload["climatestation_mode"] = current_station_mode
+        else:
+            default_station_method = authority.climate_station_defaults[submitted_catalog_id]
+            payload["climatestation_mode"] = CLIMATE_STATION_METHOD_RUNTIME[
+                default_station_method
+            ]
+    else:
+        try:
+            submitted_station_mode = int(payload["climatestation_mode"])
+        except (TypeError, ValueError):
+            submitted_station_mode = None
+        allowed_station_modes = {
+            CLIMATE_STATION_METHOD_RUNTIME[stable_id]
+            for stable_id in authority.climate_station_methods_by_dataset.get(
+                submitted_catalog_id, ()
+            )
+        }
+        if submitted_station_mode not in allowed_station_modes and not (
+            is_exact_current and submitted_station_mode == current_station_mode
+        ):
+            return error_response(
+                "Climate station method is not supported by this project.",
+                status_code=400,
+                code="unsupported_capability",
+                details=f"Unsupported climate station mode: {payload['climatestation_mode']}",
+            )
+
+    submitted_spatial_method_raw = payload.get("climate_spatial_method")
+    if submitted_spatial_method_raw not in (None, ""):
+        submitted_spatial_method = str(submitted_spatial_method_raw).strip()
+        submitted_spatial_mode = CLIMATE_SPATIAL_METHOD_RUNTIME.get(submitted_spatial_method)
+        allowed_spatial_methods = authority.climate_spatial_methods_by_dataset.get(
+            submitted_catalog_id, ()
+        )
+        if submitted_spatial_mode is None or submitted_spatial_method not in allowed_spatial_methods:
+            current_spatial_raw = getattr(climate, "climate_spatialmode", None)
+            try:
+                current_spatial = int(current_spatial_raw)
+            except (TypeError, ValueError):
+                current_spatial = None
+            if submitted_spatial_mode is None or not (
+                is_exact_current and submitted_spatial_mode == current_spatial
+            ):
+                return error_response(
+                    "Climate spatial method is not supported by this project.",
+                    status_code=400,
+                    code="unsupported_capability",
+                    details=f"Unsupported climate spatial method: {submitted_spatial_method}",
+                )
+        raw_numeric_spatial = payload.get("climate_spatialmode")
+        if raw_numeric_spatial not in (None, ""):
+            try:
+                numeric_spatial = int(raw_numeric_spatial)
+            except (TypeError, ValueError):
+                numeric_spatial = None
+            if numeric_spatial != submitted_spatial_mode:
+                return error_response(
+                    "Climate spatial method values do not agree.",
+                    status_code=400,
+                    code="capability_mismatch",
+                    details="climate_spatial_method does not match climate_spatialmode.",
+                )
+        payload["climate_spatialmode"] = submitted_spatial_mode
+
+    raw_spatial_mode = payload.get("climate_spatialmode")
+    if raw_spatial_mode in (None, ""):
+        current_spatial_raw = getattr(climate, "climate_spatialmode", None)
+        try:
+            current_spatial = int(current_spatial_raw)
+        except (TypeError, ValueError):
+            current_spatial = None
+        if is_exact_current and current_spatial is not None:
+            payload["climate_spatialmode"] = current_spatial
+        else:
+            default_spatial_method = authority.climate_spatial_defaults[submitted_catalog_id]
+            payload["climate_spatialmode"] = CLIMATE_SPATIAL_METHOD_RUNTIME[
+                default_spatial_method
+            ]
+        raw_spatial_mode = payload["climate_spatialmode"]
+    if raw_spatial_mode not in (None, ""):
+        try:
+            spatial_mode = int(raw_spatial_mode)
+        except (TypeError, ValueError):
+            spatial_mode = None
+        allowed_spatial_modes = {
+            CLIMATE_SPATIAL_METHOD_RUNTIME[stable_id]
+            for stable_id in authority.climate_spatial_methods_by_dataset.get(
+                submitted_catalog_id, ()
+            )
+        }
+        current_spatial_mode_raw = getattr(climate, "climate_spatialmode", None)
+        try:
+            current_spatial_mode = int(current_spatial_mode_raw)
+        except (TypeError, ValueError):
+            current_spatial_mode = None
+        if spatial_mode not in allowed_spatial_modes and not (
+            is_exact_current and spatial_mode == current_spatial_mode
+        ):
+            return error_response(
+                "Climate spatial method is not supported by this project.",
+                status_code=400,
+                code="unsupported_capability",
+                details=f"Unsupported climate spatial method: {raw_spatial_mode}",
+            )
+        if (
+            spatial_mode not in allowed_spatial_modes
+            and is_exact_current
+            and spatial_mode == current_spatial_mode
+        ):
+            payload["_persisted_current_spatial_carveout"] = (
+                PERSISTED_CURRENT_SPATIAL_CARVEOUT
+            )
+    return None
+
+
 @router.post(
     "/runs/{runid}/{config}/build-climate",
     summary="Build climate inputs",
@@ -390,6 +624,7 @@ def _validate_observed_year_bounds_before_enqueue(climate: Climate) -> None:
         success_description="Climate inputs accepted; returns batch update message or enqueued `job_id`.",
         extra={
             400: "Climate input validation or climate precondition failed. Returns the canonical error payload.",
+            409: "Invalid stored project capability authority; no mutation.",
         },
     ),
 )
@@ -409,7 +644,20 @@ async def build_climate(runid: str, config: str, request: Request) -> JSONRespon
     try:
         _require_directory_root(wd, "climate")
         climate = Climate.getInstance(wd)
+        try:
+            authority = capability_authority(climate)
+        except ValueError as exc:
+            return error_response(
+                "Project capability authority is invalid.",
+                status_code=409,
+                code="capability_authority_invalid",
+                details=str(exc),
+            )
         payload = await parse_request_payload(request)
+        if authority is not None:
+            capability_response = _validate_v2_climate_selection(climate, authority, payload)
+            if capability_response is not None:
+                return capability_response
         climate.parse_inputs(payload)
         _validate_observed_year_bounds_before_enqueue(climate)
     except (AssertionError, KeyError, TypeError, ValueError) as exc:

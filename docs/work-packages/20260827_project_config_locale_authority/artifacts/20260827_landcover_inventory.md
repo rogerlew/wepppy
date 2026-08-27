@@ -7,6 +7,10 @@ letters, digits, and hyphens. Duplicate runtime values reused by a regional
 catalog retain one stable ID. Any source value absent from this table fails the
 inventory gate.
 
+The executable provider boundary contains 163 unique values. The eMapR source
+uses `range(2017, 1983, -1)`, so 1984 is the last included year; 1983 is not a
+provider value.
+
 | Stable ID | Runtime value | Current support state | Source |
 | --- | --- | --- | --- |
 | `nlcd-ever-forest-2024` | `nlcd/ever_forest/2024` | `supported_non_builder` | default catalog |
@@ -123,7 +127,6 @@ inventory gate.
 | `emapr-vote-1986` | `islay.ceoas.oregonstate.edu/v1/landcover/vote/1986` | `supported_non_builder` | default catalog |
 | `emapr-vote-1985` | `islay.ceoas.oregonstate.edu/v1/landcover/vote/1985` | `supported_non_builder` | default catalog |
 | `emapr-vote-1984` | `islay.ceoas.oregonstate.edu/v1/landcover/vote/1984` | `supported_non_builder` | default catalog |
-| `emapr-vote-1983` | `islay.ceoas.oregonstate.edu/v1/landcover/vote/1983` | `supported_non_builder` | default catalog |
 | `chile-cayumanque-landuse` | `locales/ChileCayumanque/landuse` | `supported_non_builder` | Chile Cayumanque |
 | `alaska-nlcd-2001` | `alaska/nlcd/2001` | `supported_non_builder` | Alaska |
 | `alaska-nlcd-2011` | `alaska/nlcd/2011` | `supported_non_builder` | Alaska |
@@ -178,4 +181,3 @@ The Australia catalog is explicitly empty. It is represented as an unresolved
 profile dependency rather than as an omitted dataset. `nlcd-2019` is the only
 currently `builder_exposed` landcover value; every other row is explicitly
 `supported_non_builder` until its profile/provider evidence is accepted.
-

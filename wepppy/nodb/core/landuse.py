@@ -1888,11 +1888,19 @@ class Landuse(NoDbBase):
     @property
     def landcover_datasets(self) -> List[LanduseDataset]:
         datasets = [dataset for dataset in self.available_datasets if dataset.kind == "landcover"]
-        from wepppy.nodb.project_config_capabilities import capability_ids
+        from wepppy.nodb.project_config_capabilities import capability_authority, capability_ids
 
-        allowed = capability_ids(self, "landuse_datasets")
-        if allowed is not None:
-            datasets = [dataset for dataset in datasets if dataset.key in allowed]
+        authority = capability_authority(self)
+        if authority is not None:
+            datasets = [
+                dataset
+                for dataset in datasets
+                if dataset.catalog_id in authority.landuse_datasets
+            ]
+        else:
+            allowed = capability_ids(self, "landuse_datasets")
+            if allowed is not None:
+                datasets = [dataset for dataset in datasets if dataset.key in allowed]
         return datasets
 
     @property

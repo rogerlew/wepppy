@@ -18,6 +18,7 @@ def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:
         "getInstance",
         lambda wd: type("RonStub", (), {"config_stem": "cfg"})(),
     )
+    monkeypatch.setattr(soils_routes, "capability_authority", lambda soils: None)
 
 
 def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> None:
@@ -113,6 +114,41 @@ def test_build_soils_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
         soils_routes.TaskEnum.run_geneva,
     ]
     assert prep_state["jobs"] == [("build_soils_rq", "job-77")]
+
+
+def test_build_soils_rejects_invalid_capability_authority_before_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    prep_state = _stub_prep(monkeypatch)
+    monkeypatch.setattr(soils_routes, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(
+        soils_routes,
+        "capability_authority",
+        lambda soils: (_ for _ in ()).throw(ValueError("missing capability relation")),
+    )
+
+    class DummySoils:
+        initial_sat = "unchanged"
+        clear_ssurgo_cache_on_rebuild = "unchanged"
+
+    soils = DummySoils()
+    monkeypatch.setattr(soils_routes.Soils, "getInstance", lambda wd: soils)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/build-soils",
+            json={"initial_sat": 0.42},
+        )
+
+    assert response.status_code == 409
+    assert response.json()["error"] == {
+        "message": "Project capability authority is invalid.",
+        "details": "missing capability relation",
+        "code": "capability_authority_invalid",
+    }
+    assert soils.initial_sat == "unchanged"
+    assert prep_state == {"removed": [], "jobs": []}
 
 
 def test_build_soils_persists_cache_clear_option_for_batch(

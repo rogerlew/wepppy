@@ -68,8 +68,12 @@ def climate_client(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
             self.climate_mode = ClimateMode.Vanilla
             self.catalog_id = "dataset_a"
             self._datasets = {
-                "dataset_a": SimpleNamespace(catalog_id="dataset_a"),
-                "dataset_b": SimpleNamespace(catalog_id="dataset_b")
+                "dataset_a": SimpleNamespace(
+                    catalog_id="dataset_a", climate_mode=int(ClimateMode.Vanilla)
+                ),
+                "dataset_b": SimpleNamespace(
+                    catalog_id="dataset_b", climate_mode=int(ClimateMode.Future)
+                ),
             }
 
         @classmethod
@@ -96,6 +100,14 @@ def climate_client(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
             return self._datasets.get(catalog_id)
 
     monkeypatch.setattr(climate_module, "Climate", DummyClimate)
+    monkeypatch.setattr(climate_module, "capability_authority", lambda climate: None)
+    monkeypatch.setattr(climate_module, "capability_default", lambda climate, option: None)
+    monkeypatch.setattr(
+        climate_module, "climate_station_capability_modes", lambda climate, dataset: None
+    )
+    monkeypatch.setattr(
+        climate_module, "climate_spatial_capability_modes", lambda climate, dataset: None
+    )
 
     DummyClimate._instances.clear()
 
@@ -179,6 +191,67 @@ def test_set_climate_spatialmode_accepts_json(climate_client):
 
     controller = climate_cls.getInstance(str(run_dir))
     assert controller.climate_spatialmode == 1
+
+
+def test_station_method_outside_stored_graph_is_rejected_before_mutation(
+    climate_client, monkeypatch: pytest.MonkeyPatch,
+):
+    client, climate_cls, run_dir = climate_client
+    monkeypatch.setattr(
+        climate_module,
+        "climate_station_capability_modes",
+        lambda climate, dataset: frozenset({int(climate_module.ClimateStationMode.Closest)}),
+    )
+    controller = climate_cls.getInstance(str(run_dir))
+    before = controller.climatestation_mode
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_climatestation_mode/",
+        json={"mode": int(climate_module.ClimateStationMode.EUHeuristic)},
+    )
+
+    assert response.status_code >= 400
+    assert controller.climatestation_mode == before
+
+
+def test_spatial_method_outside_stored_graph_is_rejected_before_mutation(
+    climate_client, monkeypatch: pytest.MonkeyPatch,
+):
+    client, climate_cls, run_dir = climate_client
+    monkeypatch.setattr(
+        climate_module,
+        "climate_spatial_capability_modes",
+        lambda climate, dataset: frozenset({0}),
+    )
+    controller = climate_cls.getInstance(str(run_dir))
+    controller.climate_spatialmode = 0
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_climate_spatialmode/",
+        json={"spatialmode": 1},
+    )
+
+    assert response.status_code >= 400
+    assert controller.climate_spatialmode == 0
+
+
+def test_schema_v2_climate_selection_requires_stable_catalog_id_before_mutation(
+    climate_client, monkeypatch: pytest.MonkeyPatch,
+):
+    client, climate_cls, run_dir = climate_client
+    monkeypatch.setattr(
+        climate_module, "capability_authority", lambda climate: SimpleNamespace(schema_version=2)
+    )
+    controller = climate_cls.getInstance(str(run_dir))
+    before = controller.climate_mode
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_climate_mode/",
+        json={"mode": int(ClimateMode.Future)},
+    )
+
+    assert response.status_code >= 400
+    assert controller.climate_mode == before
 
 
 def test_view_closest_stations_generates_options(climate_client):

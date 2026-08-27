@@ -60,3 +60,17 @@ reader-first rollback gate, closed v2 graph grammar and limits, exact endpoint
 access/control ordering, and deterministic provider identities. No high or
 medium findings remain. The preserved undecorated climate GET behavior is
 explicit residual risk and receives no new mutation authority.
+
+## Implementation Re-review
+
+The independent implementation security review initially retained two medium
+findings. Stored schema-v2 validation still consulted live locale/climate
+catalogs, and malformed authority on `set-landuse-mode` and `set-landuse-db`
+fell through to generic 500 responses.
+
+Both are closed. Historical graph validation now uses immutable schema-v2
+rules and has a regression that forbids live-catalog access. Both landuse
+mutation routes validate authority before mutation and return diagnostic
+`409 capability_authority_invalid` responses with `details=str(exc)`; paired
+tests assert no mutation. The reviewer returned **READY** with no residual high
+or medium findings after 97 focused tests passed.

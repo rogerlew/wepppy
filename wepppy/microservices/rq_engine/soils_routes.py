@@ -12,6 +12,7 @@ from rq import Queue
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.core import Ron, Soils, WatershedNotAbstractedError
 from wepppy.nodb.mods.disturbed import Disturbed
+from wepppy.nodb.project_config_capabilities import capability_authority
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.runtime_paths.errors import NoDirError
 from wepppy.runtime_paths.fs import resolve as _nodir_resolve
@@ -95,7 +96,7 @@ def _config_mismatch_response(wd: str, config: str) -> JSONResponse | None:
         success_description="Soils inputs accepted; returns batch update message or enqueued `job_id`.",
         extra={
             400: "Soils validation or precondition failed. Returns the canonical error payload.",
-            409: "Run config mismatch. Returns canonical `run_config_mismatch` without mutation.",
+            409: "Run config or stored capability conflict; no mutation.",
         },
     ),
 )
@@ -117,10 +118,6 @@ async def build_soils(runid: str, config: str, request: Request) -> JSONResponse
         if mismatch_response is not None:
             return mismatch_response
 
-        prep = RedisPrep.getInstance(wd)
-        prep.remove_timestamp(TaskEnum.build_soils)
-        prep.remove_timestamp(TaskEnum.run_geneva)
-
         payload = await parse_request_payload(
             request,
             boolean_fields={"clear_ssurgo_cache_on_rebuild"},
@@ -131,6 +128,20 @@ async def build_soils(runid: str, config: str, request: Request) -> JSONResponse
             return error_response("initial_sat must be numeric", status_code=400)
 
         soils = Soils.getInstance(wd)
+        try:
+            capability_authority(soils)
+        except ValueError as exc:
+            return error_response(
+                "Project capability authority is invalid.",
+                status_code=409,
+                code="capability_authority_invalid",
+                details=str(exc),
+            )
+
+        prep = RedisPrep.getInstance(wd)
+        prep.remove_timestamp(TaskEnum.build_soils)
+        prep.remove_timestamp(TaskEnum.run_geneva)
+
         soils.initial_sat = initial_sat
         soils.clear_ssurgo_cache_on_rebuild = bool(
             payload.get("clear_ssurgo_cache_on_rebuild", False)
