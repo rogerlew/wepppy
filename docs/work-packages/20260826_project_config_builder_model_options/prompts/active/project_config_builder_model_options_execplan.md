@@ -17,9 +17,8 @@ are never offered as silently valid and are rejected by the server if submitted.
 - [x] (2026-08-27 04:00 UTC) Commit checkpoint `95559bc6f` as a standalone ancestor.
 - [x] (2026-08-27 04:20 UTC) Implement registry, resolver, snapshot, API, UI, maturity, and type-surface changes.
 - [x] (2026-08-27 04:30 UTC) Add focused regression, generated-config, legacy-manifest, and real binary execution evidence.
-- [ ] Run remaining Forest and broad validation (completed: npm, focused pytest,
-  stub, docs, broad exceptions; remaining: Forest gate and full pytest after an
-  unrelated environment-isolation failure).
+- [ ] Run remaining Forest validation (completed: npm, focused and full pytest,
+  stub, docs, broad exceptions; full pytest: 6,962 passed and 63 skipped).
 - [ ] Complete correctness review, update tracker, and close the package.
 
 ## Surprises & Discoveries

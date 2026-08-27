@@ -5,8 +5,8 @@
 **Timezone**: UTC
 **Started**: 2026-08-27 03:36 UTC
 **Current phase**: Implementation validation
-**Last updated**: 2026-08-27 04:30 UTC
-**Next milestone**: Final correctness disposition and Forest acceptance
+**Last updated**: 2026-08-27 04:42 UTC
+**Next milestone**: Forest acceptance
 **Security impact**: `low`
 **Dedicated security review**: `no`
 **Parameterization ADR**: `docs/adrs/ADR-0046-config-builder-wbt-and-wepp-260803-defaults.md`
@@ -16,10 +16,6 @@
 ### In Progress
 
 - [ ] Run the ten-tuple Forest acceptance gate, including WBT Multiple OFE.
-
-### Ready / Backlog
-
-- [ ] Re-run broad Python validation after correcting the unrelated test isolation failure.
 
 ### Blocked
 
@@ -37,6 +33,8 @@
   and maturity tests (2026-08-27 04:30 UTC).
 - [x] Passed independent implementation correctness review, conditional on
   Forest acceptance before exposure (2026-08-27 04:30 UTC).
+- [x] Passed the full Python suite after isolating the project-creation fixture:
+  6,962 passed and 63 skipped (2026-08-27 04:42 UTC).
 
 ## Decisions Log
 
@@ -104,9 +102,7 @@ authority.
 - Broad-exception changed-file enforcement: passed with zero delta.
 - Real WEPP execution: both `wepp_dcc52a6` and `wepp_260803`, watershed and
   hillslope binaries, completed the four-year `p1` fixture successfully.
-- Full Python suite stopped at 1 unrelated failure after 1,199 passed and 18
-  skipped: `test_create_accepts_valid_cap_token` inherited the dev stack's
-  enabled project-config writer and returned 400 instead of its expected 303.
-  The fixture now explicitly constructs the legacy writer-disabled state and
-  both affected creation tests pass; the full suite has not yet been re-run.
+- Full Python suite: 6,962 passed and 63 skipped in 678.16 seconds. The rerun
+  passed after the project-creation fixture was made independent of the dev
+  stack's enabled project-config writer flag.
 - Forest ten-tuple and WBT Multiple OFE execution: pending; no exposure claimed.
