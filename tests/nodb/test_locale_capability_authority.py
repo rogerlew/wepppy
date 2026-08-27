@@ -12,6 +12,7 @@ import pytest
 from wepp_runner.wepp_runner import get_linux_wepp_bin_opts
 import wepppy.nodb.locales.capability_graph as capability_graph_module
 from wepppy.nodb.config_builder import BuilderSelections, resolve_builder_config
+from wepppy.nodb.config_builder.registry import load_registry
 from wepppy.nodb.locales import (
     CapabilityGraphError,
     LocaleClassification,
@@ -327,10 +328,13 @@ def test_schema_v3_profile_graphs_and_default_configs_match_authority(
     ))
     assert resolved.config["general"]["locales"] == [runtime_token]
     assert resolved.config["general"]["dem_db"] == DEM_SOURCE_RUNTIME[defaults["dem_source"]]
-    assert resolved.config["soils"]["ssurgo_db"] == SOIL_SOURCE_RUNTIME[defaults["soil_dataset"]]
+    soil_runtime = SOIL_SOURCE_RUNTIME[defaults["soil_dataset"]]
+    if soil_runtime is not None:
+        assert resolved.config["soils"]["ssurgo_db"] == soil_runtime
     landcover = get_landcover_entry(defaults["landuse_dataset"])
     assert landcover is not None
-    assert resolved.config["landuse"]["nlcd_db"] == landcover.runtime_value
+    if profile_id != "australia":
+        assert resolved.config["landuse"]["nlcd_db"] == landcover.runtime_value
     station_database = get_climate_station_database(defaults["climate_station_database"])
     assert station_database is not None
     assert resolved.config["climate"]["cligen_db"] == station_database.selector
@@ -344,6 +348,19 @@ def test_schema_v3_profile_graphs_and_default_configs_match_authority(
     )
     assert stored_authority is not None
     assert stored_authority.locale_profiles == (profile_id,)
+
+
+def test_locale_dispatched_providers_do_not_own_runtime_selector_writes() -> None:
+    components = load_registry().components
+
+    for soil_id in ("esdac-europe", "asris-australia"):
+        component = components[soil_id]
+        assert ("soils", "ssurgo_db") not in component.owns
+        assert all(write.key != ("soils", "ssurgo_db") for write in component.writes)
+
+    australia = components["australia-landuse-2010-2011"]
+    assert ("landuse", "nlcd_db") not in australia.owns
+    assert all(write.key != ("landuse", "nlcd_db") for write in australia.writes)
 
 
 @pytest.mark.parametrize(

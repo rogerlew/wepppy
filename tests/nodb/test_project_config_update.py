@@ -174,6 +174,19 @@ def _historical_v2_builder_project(tmp_path: Path) -> tuple[Path, Path]:
     return config_path, manifest_path
 
 
+def _rewrite_historical_config(
+    config_path: Path, manifest_path: Path, config: dict[str, dict[str, object]],
+) -> None:
+    config_bytes = serialize_config(config)
+    config_path.write_bytes(config_bytes)
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["config"]["sha256"] = hashlib.sha256(config_bytes).hexdigest()
+    manifest_path.write_text(
+        json.dumps(manifest, sort_keys=True, separators=(",", ":")) + "\n",
+        encoding="utf-8",
+    )
+
+
 def _old_preset_project(tmp_path: Path) -> tuple[Path, tuple[str, str]]:
     candidate = resolve_preset_snapshot(
         "disturbed9002_wbt",
@@ -406,6 +419,51 @@ def test_frozen_pre_wp12c_v2_reopens_previews_and_applies_without_recomposition(
     assert resulting_manifest["parent_chain"] == _HISTORICAL_V2_PARENT_CHAIN
 
 
+def test_schema_v1_builder_authority_blocks_preview_before_registry_resolution(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config_path, manifest_path = _historical_v2_builder_project(tmp_path)
+    config = parse_config_text(config_path.read_text(encoding="utf-8"))
+    del config["capabilities"]["schema_version"]
+    _rewrite_historical_config(config_path, manifest_path, config)
+    before = (config_path.read_bytes(), manifest_path.read_bytes())
+    monkeypatch.setattr(
+        "wepppy.nodb.project_config_update.load_registry",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            AssertionError("schema-v1 update consulted the live registry")
+        ),
+    )
+
+    with pytest.raises(ConfigUpdateUnavailableError, match="Legacy/schema-v1"):
+        preview_project_config_update(tmp_path)
+
+    assert (config_path.read_bytes(), manifest_path.read_bytes()) == before
+
+
+def test_legacy_builder_without_capabilities_blocks_preview_before_registry_resolution(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config_path, manifest_path = _historical_v2_builder_project(tmp_path)
+    config = parse_config_text(config_path.read_text(encoding="utf-8"))
+    config = {
+        section: options for section, options in config.items()
+        if section != "capability_defaults" and not section.startswith("capabilities")
+    }
+    _rewrite_historical_config(config_path, manifest_path, config)
+    before = (config_path.read_bytes(), manifest_path.read_bytes())
+    monkeypatch.setattr(
+        "wepppy.nodb.project_config_update.load_registry",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            AssertionError("legacy update consulted the live registry")
+        ),
+    )
+
+    with pytest.raises(ConfigUpdateUnavailableError, match="Legacy/schema-v1"):
+        preview_project_config_update(tmp_path)
+
+    assert (config_path.read_bytes(), manifest_path.read_bytes()) == before
+
+
 def test_schema_v3_update_uses_stored_graph_and_never_recomposes_capabilities(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -536,7 +594,7 @@ def test_pre_binary_builder_manifest_remains_runnable_but_update_unavailable(
     )
     assert loaded.status.manifest_valid is True
     assert loaded.parser.get("wepp", "bin") == '"wepp_dcc52a6"'
-    with pytest.raises(ConfigUpdateUnavailableError, match="selections are incomplete"):
+    with pytest.raises(ConfigUpdateUnavailableError, match="Legacy/schema-v1"):
         preview_project_config_update(tmp_path)
 
 

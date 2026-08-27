@@ -333,8 +333,12 @@ def preview_project_config_update(
     try:
         if source_kind == "builder":
             capability_schema_version = current.get("capabilities", {}).get(
-                "schema_version", 2
+                "schema_version"
             )
+            if capability_schema_version is None:
+                raise ConfigUpdateUnavailableError(
+                    "Legacy/schema-v1 Builder capability authority does not support updates"
+                )
             if (
                 isinstance(capability_schema_version, bool)
                 or not isinstance(capability_schema_version, int)
