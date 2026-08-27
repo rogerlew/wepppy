@@ -52,8 +52,15 @@ and observed Daymet, defaults to Vanilla CLIGEN, and uses GHCN stations.
 - [x] (2026-08-27 20:10Z) Committed the audit correction as `f6784420a`;
   independent governance re-review marked the exact commit Ready with no
   remaining blockers.
-- [ ] Deploy the accepted revision to exact host `forest` without rebuilding and
-  record real provider/run evidence.
+- [x] (2026-08-27 20:15Z) Recreated only Forest `weppcloud` and `rq-engine`
+  without building, forced the Builder writer off, passed 14 deployed-reader
+  matrix tests, and proved the authenticated create boundary returns canonical
+  writer-disabled `503`.
+- [x] (2026-08-27 20:15Z) Recorded exact revision `187a856d4` as the minimum
+  post-create rollback floor after all five v3 profiles and historical v2
+  passed on the deployed reader.
+- [ ] Enable the Builder writer on exact host `forest` and record authenticated
+  create/reopen plus real provider/run evidence.
 - [ ] Close the package, push, and hand the accepted revision to WP12.
 
 ## Surprises & Discoveries

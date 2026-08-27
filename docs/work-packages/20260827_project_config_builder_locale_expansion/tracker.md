@@ -4,9 +4,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-27 15:40 UTC
-**Current phase**: Reader-first Forest release gate
-**Last updated**: 2026-08-27 20:10 UTC
-**Next milestone**: deploy the writer-disabled reader and record rollback floor
+**Current phase**: Forest writer/provider acceptance
+**Last updated**: 2026-08-27 20:15 UTC
+**Next milestone**: enable the Forest writer and execute the live profile matrix
 **Security impact**: `high`
 **Dedicated security review**: `yes`
 **Security artifact**: `artifacts/20260827_security_review.md`
@@ -19,8 +19,8 @@ and production
 
 ### In Progress
 
-- [ ] Deploy the accepted revision writer-disabled to exact host `forest` and
-  prove historical schema v2 plus all five schema-v3 profiles.
+- [ ] Enable the Builder writer on exact host `forest` and execute authenticated
+  create/reopen plus real provider evidence.
 
 ### Pending
 
@@ -65,6 +65,13 @@ None.
   `locales/__init__.py` as export-only, without rewriting history.
 - [x] Committed the standalone correction as `f6784420a`; independent
   governance re-review marked it Ready with no remaining blockers.
+- [x] Recreated only Forest `weppcloud` and `rq-engine` writer-disabled with
+  `--no-build --no-deps`, verified exact HEAD `187a856d4` and both health
+  endpoints, and passed the 14-case deployed-reader matrix.
+- [x] Authenticated Builder description exposed exactly five locale graphs;
+  writer-disabled creation returned canonical `503 builder_writer_disabled`.
+- [x] Recorded exact revision `187a856d4` as the minimum post-create rollback
+  floor before enabling creation.
 
 ## Decisions Log
 
@@ -127,7 +134,7 @@ authority source, authentication rule, or mutation path.
 | Risk | Severity | Mitigation | Status |
 | --- | --- | --- | --- |
 | Provider exists in code but is absent on Forest | High | Presence/health and real execution gate every advertised provider | Open |
-| New graph reader breaks stored Continental-US v2 configs | High | Immutable profile contracts and historical round-trip fixtures | Open |
+| New graph reader breaks stored Continental-US v2 configs | High | Immutable profile contracts and historical round-trip fixtures | Closed at rollback floor `187a856d4` |
 | UI and server select different locale graphs | High | One description payload plus paired frontend/API rejection tests | Open |
 | Canada runtime token falls through US-specific behavior | High | Direct generated-config and created-run execution evidence | Open |
 | Concurrent CLIGEN requests mix database rows and PAR roots | High | Instance-local resolver state plus direct real concurrent Legacy/2015/GHCN isolation test | Open |
