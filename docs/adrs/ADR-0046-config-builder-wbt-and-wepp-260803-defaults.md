@@ -1,11 +1,12 @@
-# ADR: Config Builder WBT and WEPP 260803 Defaults
+# ADR: Config Builder Model and Landuse-Modification Defaults
 
 Status: Accepted
 Date: 2026-08-27
 
 ## Decision Provenance
 
-- **Decision Venue**: active Codex development session, 2026-08-27 04:00 UTC.
+- **Decision Venue**: active Codex development sessions, 2026-08-27 04:00 UTC
+  and 2026-08-27 06:00 UTC.
 - **Participants Present**: project operator and Codex.
 - **Decision Owner**: project operator.
 - **Implementer**: Codex.
@@ -23,7 +24,9 @@ Previously, new Builder configs inherited TOPAZ and `wepp_dcc52a6` and had no
 explicit binary selection. After this decision, new Builder configs explicitly
 default to WhiteboxTools and `wepp_260803`; Single OFE remains the default
 representation, while Multiple OFE is available only with that backend/binary
-pair.
+pair. Builder configs previously inherited
+`landuse.enable_landuse_change = false` from shared defaults; new Builder
+configs now explicitly set it to `true` through the selected landuse component.
 
 ## Decision
 
@@ -38,6 +41,10 @@ Every Config Builder project is classified Preview. This maturity label
 communicates that the expanded model-input matrix has not completed production
 promotion.
 
+New Config Builder projects also enable landuse modification. The selected
+landuse component owns and writes this Builder-scoped value. Existing projects,
+shared defaults, and Interfaces presets are not migrated or changed.
+
 ## Rationale
 
 The operator selected the deployed WhiteboxTools and `wepp_260803` path as the
@@ -45,6 +52,11 @@ default for new Builder work. Explicit registered defaults make the choice
 reviewable and persist it in `config.cfg` and `config-manifest.json`. Binary
 availability intentionally follows the canonical runtime provider, while the
 default never follows provider or lexical ordering.
+
+The Builder is intended to expose its configured landuse workflow, including
+post-delineation landuse edits. Writing the capability in the registered
+landuse component makes that behavior explicit in generated configuration and
+component provenance without broadening the shared default.
 
 ## Alternatives Considered
 
@@ -54,6 +66,10 @@ hard-coded Builder binary allowlist was initially selected, then superseded by
 the operator's requirement that Builder use the complete canonical provider
 list. Inferring a compatible binary after submission remains rejected because
 silent model-selection substitution would obscure provenance.
+
+Keeping landuse modification disabled was rejected because it unnecessarily
+hides the Builder run-page editing workflow. Changing shared `_defaults.cfg`
+was rejected because it would alter unrelated legacy and Interfaces configs.
 
 ## Evidence
 
@@ -82,8 +98,14 @@ creation. It does not rewrite flattened configs already created with
 remediation. Failure of executable, preparation, or representative-run evidence
 blocks exposure and retains the previous Builder implementation.
 
+Landuse modification changes only the availability of an explicit user action;
+it does not rewrite landuse automatically. Rollback changes the registered
+landuse component value back to false for future Builder projects and does not
+rewrite existing flattened configs.
+
 ## Consequences
 
 New Builder projects intentionally differ from the former inherited defaults.
 Tests must assert the defaults directly and must not derive them from registry
-ordering. Existing runs and Interfaces presets preserve their recorded behavior.
+ordering. They also expose the Modify Landuse control. Existing runs and
+Interfaces presets preserve their recorded behavior.

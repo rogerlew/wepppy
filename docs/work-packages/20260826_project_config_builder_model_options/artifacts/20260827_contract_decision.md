@@ -22,7 +22,9 @@ and the WEPP binary is `wepp_260803`. `single-ofe` remains valid with `topaz` or
 explicit defaults. Builder submissions explicitly select a WEPP binary, server
 validation enforces the complete tuple, and generated `config.cfg` files persist
 `[wepp] multi_ofe` and `[wepp] bin`. Every Builder-created project is presented
-as Preview in the run header.
+as Preview in the run header. New Builder configs explicitly persist
+`[landuse] enable_landuse_change = true`; the selected landuse component owns
+that key, and the run page exposes its Modify Landuse control.
 
 The initial binary registry contains `wepp_dcc52a6` and `wepp_260803` only.
 Runtime filesystem discovery does not broaden the Builder registry.
@@ -49,6 +51,10 @@ path separators; validation confirms matching executable watershed and
 hillslope binaries before registry exposure. The selected allowlisted ID later
 reaches the existing executable resolver, but authentication, CSRF, CAP, and
 queue boundaries do not change. Security impact is low.
+
+The landuse-modification default is scoped to Builder output. Shared defaults
+and Interfaces presets remain unchanged, and enabling the control performs no
+automatic landuse mutation.
 
 Removing a binary from the registry prevents new selection and does not rewrite
 already flattened projects. Withdrawing it from existing projects requires a

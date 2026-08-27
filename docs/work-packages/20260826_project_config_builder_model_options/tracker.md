@@ -39,6 +39,8 @@
 - [x] Aligned the run-page `landuseModify` controller bootstrap with the
   server-rendered `enable_landuse_change` capability and added focused render
   regression coverage (2026-08-27 05:51 UTC).
+- [x] Ratified `landuse.enable_landuse_change = true` as a Builder-scoped
+  default, with no migration or shared-default change (2026-08-27 06:00 UTC).
 - [x] Recorded operator approval and scaffolded the package (2026-08-27 03:36 UTC).
 - [x] Corrected and passed two independent contract reviews (2026-08-27 04:00 UTC).
 - [x] Committed standalone checkpoint `95559bc6f` (2026-08-27 04:00 UTC).
@@ -53,6 +55,16 @@
   6,962 passed and 63 skipped (2026-08-27 04:42 UTC).
 
 ## Decisions Log
+
+### 2026-08-27 06:00 UTC: Builder enables landuse modification
+
+**Decision**: New Builder configs explicitly set
+`landuse.enable_landuse_change = true` through the selected landuse component.
+Existing runs, shared defaults, and Interfaces presets remain unchanged.
+
+**Rationale**: Builder runs should expose post-delineation landuse editing. A
+component-owned write keeps the behavior explicit and provenance-bearing while
+avoiding an unrelated global-default change.
 
 ### 2026-08-27 05:51 UTC: Optional form capability gates controller bootstrap
 

@@ -25,6 +25,9 @@ are never offered as silently valid and are rejected by the server if submitted.
 - [x] (2026-08-27 05:51 UTC) Repaired the run-page bootstrap contract so the
   `landuseModify` controller is instantiated only when its server-rendered form
   capability is enabled; focused render tests pass.
+- [x] (2026-08-27 06:00 UTC) Operator selected
+  `landuse.enable_landuse_change = true` for new Builder configs; amended the
+  contract and parameterization ADR before implementation.
 
 - [x] (2026-08-27 03:36 UTC) Scaffold package and proposed contract checkpoint.
 - [x] (2026-08-27 04:00 UTC) Obtain and disposition two independent contract reviews.
@@ -76,6 +79,11 @@ are never offered as silently valid and are rejected by the server if submitted.
   controller retains its strict required-element check so a promised-but-missing
   form remains observable rather than silently masked.
   Date/Author: 2026-08-27, Codex.
+- Decision: new Builder configs enable landuse modification through an explicit
+  write owned by the selected landuse component.
+  Rationale: the Builder should expose post-delineation landuse editing without
+  changing shared defaults, legacy runs, or Interfaces presets.
+  Date/Author: 2026-08-27, project operator and Codex.
 
 ## Outcomes & Retrospective
 
