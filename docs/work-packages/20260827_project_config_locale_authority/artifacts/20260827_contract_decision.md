@@ -4,7 +4,7 @@
 **Starting revision**: `5cd18e61763430863d703d6f56454c1f00fcb2e1`
 **Operator approval**: Explicit WP12B instruction in the 2026-08-27 Codex session
 **Implementation conformance**: Implemented and independently reviewed Ready;
-Forest acceptance pending
+Forest acceptance Ready
 
 The operator's instruction explicitly authorizes this bounded package to compose
 the climate, landuse, soil, watershed, binary-provider, template, Flask/RQ, and

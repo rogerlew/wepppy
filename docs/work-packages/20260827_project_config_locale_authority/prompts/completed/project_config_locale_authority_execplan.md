@@ -1,5 +1,10 @@
 # Make locale dependencies authoritative for Builder and run views
 
+**Outcome**: Completed 2026-08-27. Revision `3e8d0d09b` implements the typed
+locale dependency authority and passed independent review, full local
+validation, and exact-host Forest acceptance. The accepted implementation is
+handed to WP12; production was not changed.
+
 This ExecPlan is a living document maintained under
 `docs/prompt_templates/codex_exec_plans.md`. The sections `Progress`,
 `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` must
@@ -40,9 +45,12 @@ profile graph rather than through unrelated template and catalog conditionals.
   contract correctness, security, and governance re-reviews.
 - [x] (2026-08-27 12:59 UTC) Pass the full Python suite: 7,034 passed and 63
   skipped; all five seeded isolation iterations also passed.
-- [ ] Complete the file-isolation audit after its unrelated profile-recorder
-  collection/JSON-serialization tool failure, and pass Forest acceptance.
-- [ ] Close WP12B and hand the accepted revision to WP12.
+- [x] (2026-08-27 13:13 UTC) Pass Forest acceptance on exact host `forest` for
+  revision `3e8d0d09bcf5`; record deployed providers, real execution, Builder
+  creation/reopen, stored discovery, and invalid no-mutation evidence.
+- [x] (2026-08-27 13:13 UTC) Disposition the unrelated file-isolation auditor
+  failure without claiming an overall pass, close WP12B, and hand the accepted
+  revision to WP12.
 
 ## Surprises & Discoveries
 
@@ -100,6 +108,22 @@ profile graph rather than through unrelated template and catalog conditionals.
   Every WP12B project-config/locale-authority file reported `Isolated OK`
   before the tool aborted; the overall isolation gate is not represented as a
   pass.
+- Observation: `continental-us` is the only `builder_exposed` profile, so one
+  successful Forest creation covers the complete WP12B profile population.
+  Evidence: live registry description returned one locale component and run
+  `matted-smooth` materialized stable profile `continental-us` as runtime `us`.
+- Observation: all 72 WEPP provider values resolved both execution roles on
+  Forest, yielding 144 valid role paths and 99 distinct executable files.
+  Evidence: no role target was missing or non-executable; direct default
+  watershed and hillslope smoke runs both completed 100 simulation years.
+- Observation: the directly invoked TerrainProcessor BLC integration helper
+  requests no fill without fail-on-unresolved and therefore conflicts with the
+  diagnostics safety contract; after that failure, WBT working-directory state
+  also contaminated the next relative-path test.
+  Evidence: the production BLC path failed closed with 377 unresolved
+  depressions on the fixture, while direct WBT fill delineation, installed
+  WBT TopazCondition, standalone GDAL conversion, and direct TOPAZ channel
+  generation all completed. WP12 retains real-project BLC/MOFE acceptance.
 
 ## Decision Log
 
@@ -134,10 +158,16 @@ profile graph rather than through unrelated template and catalog conditionals.
   Rationale: creation may use the current provider registry, but rollback and
   stored-run reads must remain independent of later compatible catalog edits.
   Date/Author: 2026-08-27, Codex and independent security reviewer.
+- Decision: close WP12B after representative provider-family execution and
+  complete deployed-provider presence, while retaining the contract's wider
+  per-binary/full-project operational matrix for WP12 production acceptance.
+  Rationale: WP12B proves locale authority and all currently Builder-exposed
+  profiles; the operator explicitly reserved production deployment for WP12.
+  Date/Author: 2026-08-27, project operator and Codex.
 
 ## Outcomes & Retrospective
 
-Implementation is complete and the focused and full local gates pass. The typed locale
+Implementation and Forest acceptance are complete. The typed locale
 catalog now classifies all 16 shipped profiles, `continental-us` maps to runtime
 token `us`, the complete provider definition identities and WEPP role revisions
 are bound into schema-v2 authority, and views/discovery/mutations consume that
@@ -147,10 +177,22 @@ WEPP enforcement, diagnostic errors, snapshot-independent rendering, and
 snapshot-independent validation.
 
 All independent reviews are Ready. The full Python suite passed with 7,034
-tests and 63 skips, and all five isolation seeds passed. The file-isolation
-audit remains incomplete because of an unrelated profile-recorder/tooling
-failure, and representative Forest provider flows are still required before
-WP12B closes. WP12 remains blocked.
+tests and 63 skips, and all five isolation seeds passed. On Forest, revision
+`3e8d0d09bcf5` created and reopened `matted-smooth`, proved the stable/runtime
+locale normalization, returned stored-authority discovery, rejected an invalid
+landuse selection without mutation, verified every advertised provider, and
+passed representative real GDAL, WBT, and WEPP executions.
+
+The representative terrain matrix used successful WBT fill and TOPAZ channel
+execution. A BLC attempt on the fixture failed closed with 377 unresolved
+depressions, as designed. The directly invoked TerrainProcessor BLC test has
+an argument/diagnostics mismatch and leaked WBT working-directory state after
+failure; both are recorded as follow-up rather than hidden as passing evidence.
+
+The repository-wide file-isolation audit remains incomplete because of the
+unrelated profile-recorder/tooling failure and is not represented as a pass;
+all WP12B modules reported isolated success before the abort. WP12B is closed
+and handed to WP12. Production was not changed and remains gated by WP12.
 
 ## Context and Orientation
 
@@ -258,6 +300,7 @@ and stable-to-runtime method maps. `project_config_capabilities.py` remains the
 single run-scoped adapter used by templates and server routes. No new external
 dependency is permitted.
 
-Plan revision note (2026-08-27 12:59 UTC): implementation, independent review,
-focused/full suites, and all seeded isolation iterations complete. The
-file-isolation audit tool failure and Forest evidence remain open.
+Plan revision note (2026-08-27 13:13 UTC): Forest acceptance is recorded at
+exact host/revision, the unrelated isolation-tool defect is explicitly
+dispositioned without a false pass claim, and WP12B is complete for WP12
+handoff.

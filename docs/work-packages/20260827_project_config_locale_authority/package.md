@@ -1,9 +1,10 @@
 # Project Config Locale and View Authority (WP12B)
 
-**Status**: Active (2026-08-27)
+**Status**: Closed 2026-08-27
 **Timezone**: UTC
 **Initiative branch**: `feature/project-owned-config`
-**Production gate**: WP12 remains blocked until this package closes
+**Production gate**: WP12 owns production promotion; WP12B did not deploy to
+production
 
 ## Overview
 
@@ -37,8 +38,24 @@ registry, rename durable component IDs, or promote the branch to production.
   rendered from the resolved run authority.
 - [x] Paired server endpoints reject newly submitted hidden choices.
 - [x] Legacy and already-persisted selections preserve their contracted behavior.
-- [ ] Forest proves every advertised provider and every Builder-exposed base
+- [x] Forest proves every advertised provider and every Builder-exposed base
   and overlay, with representative execution for each provider/method family.
+
+## Closure Summary
+
+WP12B shipped the typed 16-profile inventory, immutable schema-v2 capability
+graph, complete climate/landcover/WEPP provider authority, normalized
+`continental-us` -> runtime `us` mapping, and stored-authority rendering,
+discovery, and mutation enforcement. Contract checkpoint `4a975657f` and
+implementation revision `3e8d0d09b` passed independent correctness,
+governance, and security review plus local and Forest acceptance.
+
+Forest acceptance is recorded in
+`artifacts/20260827_forest_acceptance.md`. The unrelated repository-wide
+file-isolation checker defect is retained as a tooling follow-up; all WP12B
+modules passed its file checks before the abort, all five seeded orders passed,
+and the complete Python suite passed. WP12 owns production promotion and the
+wider production-acceptance matrix; no production deployment occurred here.
 
 ## Parameterization ADR Gate
 

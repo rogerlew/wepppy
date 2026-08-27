@@ -65,5 +65,14 @@ with the WP12B implementation diff applied:
   file reported `Isolated OK` before the checker aborted. The overall
   file-isolation audit is not claimed as passing.
 
-Forest deployed-provider presence and representative execution are still
-pending. None is represented here as completed evidence.
+## Forest result
+
+Exact host `forest` ran revision `3e8d0d09bcf5` without an image build. The
+registry exposed one Builder profile and 72 WEPP binaries. Builder run
+`matted-smooth` was created and reopened with durable profile
+`continental-us`, runtime locale `us`, and complete schema-v2 stored authority.
+All advertised providers passed deployed presence/health checks; real GDAL,
+WBT, and default watershed/hillslope WEPP executions passed. A direct invalid
+landuse selection returned diagnostic HTTP 400 without state mutation. Full
+transcripts and revision identities are recorded in
+`20260827_forest_acceptance.md`.
