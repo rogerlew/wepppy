@@ -28,10 +28,11 @@ pair.
 ## Decision
 
 New Config Builder projects default to WhiteboxTools (`wbt`), Single OFE, and
-`wepp_260803`. The initial binary choices are `wepp_dcc52a6` and
-`wepp_260803`. Multiple OFE is a conservative Builder V1 option available only
-with WhiteboxTools and `wepp_260803`. Existing projects and shared Interfaces
-presets are not migrated or changed.
+`wepp_260803`. Binary choices are the complete list returned by the canonical
+runtime provider `wepp_runner.wepp_runner.get_linux_wepp_bin_opts()`. Multiple
+OFE is a conservative Builder V1 option available only with WhiteboxTools and
+`wepp_260803`. Existing projects and shared Interfaces presets are not migrated
+or changed.
 
 Every Config Builder project is classified Preview. This maturity label
 communicates that the expanded model-input matrix has not completed production
@@ -41,34 +42,39 @@ promotion.
 
 The operator selected the deployed WhiteboxTools and `wepp_260803` path as the
 default for new Builder work. Explicit registered defaults make the choice
-reviewable, persist it in `config.cfg` and `config-manifest.json`, and prevent
-host filesystem contents or lexical ordering from changing model behavior.
+reviewable and persist it in `config.cfg` and `config-manifest.json`. Binary
+availability intentionally follows the canonical runtime provider, while the
+default never follows provider or lexical ordering.
 
 ## Alternatives Considered
 
 Keeping TOPAZ and `wepp_dcc52a6` as defaults was rejected because it does not
-match the operator-selected path for new Builder projects. Exposing every
-installed executable was rejected because historical and experimental files
-are not a curated compatibility contract. Inferring a compatible binary after
-submission was rejected because silent model-selection substitution would
-obscure provenance.
+match the operator-selected path for new Builder projects. A separate
+hard-coded Builder binary allowlist was initially selected, then superseded by
+the operator's requirement that Builder use the complete canonical provider
+list. Inferring a compatible binary after submission remains rejected because
+silent model-selection substitution would obscure provenance.
 
 ## Evidence
 
 - Contract checkpoint:
   `docs/work-packages/20260826_project_config_builder_model_options/artifacts/20260827_contract_decision.md`.
-- Existing deployed binary pair:
-  `wepp_runner/bin/wepp_260803` and `wepp_runner/bin/wepp_260803_hill`.
-- Required acceptance evidence: direct execution of both registered binary
-  pairs, a Forest WBT Multiple OFE preparation/run with `wepp_260803`, and a
-  Forest Single OFE run with each exposed binary before registry exposure.
+- Canonical availability provider:
+  `wepp_runner.wepp_runner.get_linux_wepp_bin_opts()`.
+- Required acceptance evidence: direct role resolution and representative
+  execution for every provider-exposed binary, a Forest WBT Multiple OFE
+  preparation/run with `wepp_260803`, and a Forest Single OFE run with each
+  exposed binary before registry exposure.
 
 ## Risk and Rollback Notes
 
 Different WEPP binaries can produce different scientific outputs. WhiteboxTools
 and TOPAZ can also delineate different watershed geometry. Preview maturity,
-explicit review text, immutable manifest provenance, and the Forest execution
-matrix make that difference observable.
+explicit review text, manifest provenance, and the Forest execution matrix make
+that difference observable. The provider's `latest` entry is intentionally a
+mutable alias: its resolved target is recorded at creation, but future runs may
+resolve a newer target. Users requiring immutable-release reproducibility must
+select a concrete binary value.
 
 Rollback removes the new registry defaults and choices for future Builder
 creation. It does not rewrite flattened configs already created with

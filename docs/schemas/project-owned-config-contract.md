@@ -339,26 +339,55 @@ route tokens. The initial matrix is:
 | DEM | `usgs-ned1-2024`: `dem_db = "ned1/2024"`, default 30 m; `usgs-ned13-2022`: `dem_db = "ned13/2022"`, default 10 m |
 | Delineation | `topaz`; `wbt` |
 | Representation | `single-ofe`: `[wepp] multi_ofe = false`; `multiple-ofe`: `[wepp] multi_ofe = true`, exposed by Builder V1 only with `wbt` and `wepp_260803` |
-| WEPP binary | `wepp_dcc52a6`: legacy-parity binary for Single OFE; `wepp_260803`: default Builder binary, available for Single or Multiple OFE |
+| WEPP binary | Every value returned by `wepp_runner.wepp_runner.get_linux_wepp_bin_opts()`; `wepp_260803` is the default and the only value eligible for Multiple OFE |
 | Soils | `ssurgo-gnatsgso-2025`: `soils_db = "ssurgo/gNATSGSO/2025"`, existing gridded mode |
 | Land use | `nlcd-2019`: `landuse_db = "nlcd/2019"`, existing gridded mode and general mapping |
 | Climate | `vanilla_cligen`; `prism_stochastic`; `observed_daymet`; `observed_gridmet` |
 | Mods | none |
 
-The ten supported tuples are the cross-product of two DEMs with: TOPAZ, Single
-OFE, and either binary (four tuples); WBT, Single OFE, and either binary (four
-tuples); and WBT, Multiple OFE, and `wepp_260803` (two tuples). They are eligible
-only after all ten pass the Forest create/reopen/delineate/build gate and the
-execution evidence in section 15. Dataset and binary identifiers MUST be
-verified against deployed services, mounts, and executable pairs at that gate.
-Failure removes the affected tuple from the initial registry rather than
-causing an inferred substitution.
+The supported Single OFE tuples are the cross-product of two DEMs, both
+delineation backends, and every binary returned by the canonical provider on
+that deployment. WBT, Multiple OFE, and `wepp_260803` adds two tuples. Provider
+output is deployment availability, not a promise that different hosts expose
+identical historical binaries. Dataset and binary identifiers MUST be verified
+against deployed services, mounts, and role-resolved executables at the Forest
+gate.
+A provider-supplied value that cannot pass the required gate makes Builder
+binary availability fail explicitly until the provider or deployed binary set
+is corrected. Builder MUST NOT filter individual provider values through a
+second availability list or inferred substitution.
 
 Builder V1 defaults to `wbt`, `single-ofe`, and `wepp_260803`. The WBT-only
 Multiple OFE rule is a conservative Builder eligibility policy, not a statement
 that legacy TOPAZ MOFE presets are technically invalid. Those existing presets
 remain unchanged. The Builder MUST NOT infer defaults from lexical component
 ordering.
+
+The Builder MUST obtain its WEPP binary choices from
+`get_linux_wepp_bin_opts()` when loading the runtime registry, without a second
+hard-coded binary allowlist. It MUST preserve the provider's complete unique
+set, including the provider's `latest` alias. Labels MUST be the provider value
+or a neutral humanization of it; they MUST NOT add lifecycle annotations such
+as "legacy parity" that the provider does not supply. If the configured default
+is absent, Builder description and creation MUST fail explicitly rather than
+silently selecting another binary.
+
+For every provider value, the registry MUST resolve the watershed and hillslope
+roles exactly as the WEPP runner does and compute a SHA-256 digest of the bytes
+of each resolved executable. The ordered pair of role names and digests is the
+component's target identity. This definition also applies when `latest` is a
+regular executable rather than a symlink. A missing, unreadable, non-regular,
+or non-executable role target invalidates Builder binary availability
+atomically; the loader MUST NOT omit only that value.
+
+The complete unique provider output and every component target identity MUST
+participate in the opaque `registry_revision`. If either changes between
+description and creation, creation MUST return the standard stale-schema 409
+without creating a project, and the user must reload and review the new list.
+Selecting `latest` intentionally records and writes the mutable alias, while
+the manifest component revision records its creation-time target identity. A
+later run may therefore execute a newer provider target; immutable-release
+reproducibility requires selecting a concrete provider value.
 
 TauDEM, alternate soil/land-use modes, event/upload/future climate modes,
 and optional NoDb mods are deferred from the initial matrix. They require
@@ -676,9 +705,10 @@ type.
 
 Registered builder components and profiles MUST be declarative, real TOML
 documents parsed with Python's `tomllib` (or its supported compatibility
-equivalent). They are source definitions for the builder and resolver; they are
-not runtime NoDb configuration files. The generated, flattened project-owned
-configuration remains INI-style `.cfg` as defined in section 5.
+equivalent), except for the bounded WEPP-binary provider exception below. They
+are source definitions for the builder and resolver; they are not runtime NoDb
+configuration files. The generated, flattened project-owned configuration
+remains INI-style `.cfg` as defined in section 5.
 
 The registry SHOULD use a structure equivalent to:
 
@@ -704,6 +734,17 @@ registry MUST validate every document before exposing it to the builder or
 resolver. Invalid IDs, unknown references, undeclared writes, malformed values,
 or contradictory constraints MUST fail explicitly; they MUST NOT be ignored or
 repaired through implicit defaults.
+
+WEPP binary components are the sole runtime-provider exception. The trusted
+registry loader MUST synthesize exactly one typed `wepp_binary` component for
+each unique value returned by `get_linux_wepp_bin_opts()`; it MUST NOT read a
+second binary ID allowlist from TOML. Each synthesized definition uses the
+provider value as its stable component ID and `[wepp] bin` write, declares a
+provider schema revision, and participates in the registry digest exactly like
+a TOML component. The `latest` definition additionally records its resolved
+target identity in its source revision. Empty output, an invalid component ID,
+an unavailable `wepp_260803` default, or an unusable provider value invalidates
+the registry atomically. Non-binary components remain TOML-only.
 
 The config-builder core owns:
 
@@ -1177,9 +1218,9 @@ Implementation is not conformant until tests demonstrate:
   parent chain, and updates never infer a replacement profile;
 - builder combinations validate locale/DEM/cell-size/backend/representation/
   WEPP-binary/mod constraints;
-- all initial continental-US DEM/backend/representation/binary combinations
-  pass the Forest gate before they are exposed; this includes direct unmocked
-  presence and execution checks for both watershed/hillslope binary pairs, a
+- all continental-US DEM/backend/representation/binary combinations pass the
+  Forest gate before they are exposed; this includes direct unmocked role
+  resolution and representative execution for every provider-exposed binary, a
   representative WBT Multiple OFE preparation and run with `wepp_260803`, and a
   Single OFE run with each exposed binary;
 - nested/PUP controllers without a child-local config resolve the validated
@@ -1241,5 +1282,8 @@ Implementation sequencing, requirement ownership, cross-package leakage, and
 handoff evidence are defined in the companion
 [`Project-Owned Configuration Implementation Roadmap`](project-owned-config-implementation-roadmap.md).
 
-An evidence failure removes or delays the affected builder combination; it does
-not authorize an inferred fallback or a change to Interfaces presets.
+For non-provider components, an evidence failure removes or delays the affected
+builder combination. Failure of any provider-supplied WEPP binary invalidates
+Builder binary availability as a whole until the provider or deployment is
+corrected. Neither case authorizes an inferred fallback or a change to
+Interfaces presets.

@@ -5,8 +5,8 @@
 **Timezone**: UTC
 **Started**: 2026-08-27 03:36 UTC
 **Current phase**: Implementation validation
-**Last updated**: 2026-08-27 04:42 UTC
-**Next milestone**: Forest acceptance
+**Last updated**: 2026-08-27 05:10 UTC
+**Next milestone**: Binary-provider contract checkpoint
 **Security impact**: `low`
 **Dedicated security review**: `no`
 **Parameterization ADR**: `docs/adrs/ADR-0046-config-builder-wbt-and-wepp-260803-defaults.md`
@@ -15,7 +15,10 @@
 
 ### In Progress
 
-- [ ] Run the ten-tuple Forest acceptance gate, including WBT Multiple OFE.
+- [ ] Ratify the complete default-provider WEPP binary list and remove the
+  lifecycle annotation.
+- [ ] Run the provider-wide Forest role/execution acceptance gate, including
+  WBT Multiple OFE.
 
 ### Blocked
 
@@ -23,6 +26,8 @@
 
 ### Done
 
+- [x] Passed two independent binary-provider contract reviews and prepared the
+  standalone checkpoint (2026-08-27 05:25 UTC).
 - [x] Recorded operator approval and scaffolded the package (2026-08-27 03:36 UTC).
 - [x] Corrected and passed two independent contract reviews (2026-08-27 04:00 UTC).
 - [x] Committed standalone checkpoint `95559bc6f` (2026-08-27 04:00 UTC).
@@ -38,13 +43,23 @@
 
 ## Decisions Log
 
+### 2026-08-27 05:10 UTC: Canonical provider owns binary availability
+
+**Decision**: Supersede the two-entry Builder binary allowlist. Expose the
+complete unique output of `get_linux_wepp_bin_opts()`, retain `wepp_260803` as
+the explicit default and sole Multiple OFE binary, and remove the "legacy
+parity" annotation.
+
+**Rationale**: The operator designated the existing default WEPP binary-list
+provider as the single availability authority. Builder must not maintain a
+second, divergent list.
+
 ### 2026-08-27 03:36 UTC: Registered compatibility, not filesystem discovery
 
-**Decision**: Treat WEPP binaries as versioned registry components. The initial
-set is `wepp_dcc52a6` for legacy parity and `wepp_260803` as the default for new
-Builder projects. Multiple OFE requires both WhiteboxTools and `wepp_260803`;
-Single OFE supports either binary and either delineation backend. WhiteboxTools
-is the default backend.
+**Decision**: Treat WEPP binaries as versioned registry components. This
+two-entry availability decision was superseded on 2026-08-27 by the canonical
+provider decision above. Multiple OFE requires both WhiteboxTools and
+`wepp_260803`; WhiteboxTools is the default backend.
 
 **Rationale**: Registry-backed choices preserve deterministic schema revisions,
 provenance, and server validation. Enumerating every executable present on one
@@ -105,4 +120,5 @@ authority.
 - Full Python suite: 6,962 passed and 63 skipped in 678.16 seconds. The rerun
   passed after the project-creation fixture was made independent of the dev
   stack's enabled project-config writer flag.
-- Forest ten-tuple and WBT Multiple OFE execution: pending; no exposure claimed.
+- Forest provider-wide role/execution and WBT Multiple OFE execution: pending;
+  no exposure claimed.

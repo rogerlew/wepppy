@@ -12,6 +12,10 @@ are never offered as silently valid and are rejected by the server if submitted.
 
 ## Progress
 
+- [x] (2026-08-27 05:25 UTC) Ratified the default binary-list provider as the
+  sole Builder availability authority and passed independent correctness and
+  governance contract reviews.
+
 - [x] (2026-08-27 03:36 UTC) Scaffold package and proposed contract checkpoint.
 - [x] (2026-08-27 04:00 UTC) Obtain and disposition two independent contract reviews.
 - [x] (2026-08-27 04:00 UTC) Commit checkpoint `95559bc6f` as a standalone ancestor.
@@ -19,13 +23,15 @@ are never offered as silently valid and are rejected by the server if submitted.
 - [x] (2026-08-27 04:30 UTC) Add focused regression, generated-config, legacy-manifest, and real binary execution evidence.
 - [ ] Run remaining Forest validation (completed: npm, focused and full pytest,
   stub, docs, broad exceptions; full pytest: 6,962 passed and 63 skipped).
+- [ ] Ratify and implement the operator-superseding complete binary-provider
+  availability contract.
 - [ ] Complete correctness review, update tracker, and close the package.
 
 ## Surprises & Discoveries
 
-- The installed binary directory contains many historical and experimental
-  executables, while the Builder registry is deterministic and deployment-owned.
-  Filesystem discovery is therefore unsuitable as the Builder allowlist.
+- The original two-entry allowlist was superseded by the operator's designation
+  of `get_linux_wepp_bin_opts()` as the canonical Builder availability source.
+  Availability is deployment-dependent while defaults remain fixed.
 - The operator selected the deployed `wepp_260803` release, rather than the
   older documented minimum, as the default and Multiple OFE Builder binary.
 
@@ -41,16 +47,21 @@ are never offered as silently valid and are rejected by the server if submitted.
   Rationale: Builder has not crossed its production promotion gate, while the
   immutable legacy parent chain cannot truthfully acquire a binary component.
   Date/Author: 2026-08-27, Codex.
+- Decision: supersede the two-entry allowlist with the complete canonical
+  provider output, including `latest`, without a second Builder filter.
+  Rationale: one provider owns availability; `wepp_260803` remains the explicit
+  default and sole Multiple OFE binary.
+  Date/Author: 2026-08-27, Codex.
 
 ## Outcomes & Retrospective
 
 Pending implementation.
 
-The bounded implementation is complete locally with explicit defaults,
+The initial bounded implementation is complete locally with explicit defaults,
 server-enforced tuples, persisted binary provenance, dependency-aware UI, and
-Preview maturity. Local direct model runs cover both registered executable
-pairs. Forest WBT Multiple OFE and the full ten-tuple acceptance gate remain
-pending, so the new registry must not be promoted to production.
+Preview maturity. The provider-list supersession is pending implementation.
+Forest WBT Multiple OFE and provider-wide execution acceptance remain pending,
+so the new registry must not be promoted to production.
 
 ## Context and Orientation
 
@@ -63,9 +74,10 @@ render and submit server-described selections.
 
 ## Plan of Work
 
-After the standalone contract checkpoint, add a WEPP-binary component kind and
-constraint field, two binary profiles, and a Multiple OFE representation
-profile. Extend locale/capability definitions and resolver validation so
+After the superseding standalone contract checkpoint, generate WEPP-binary
+components from the canonical provider, incorporate provider state in the
+registry revision, and retain the Multiple OFE representation profile. Extend
+locale/capability definitions and resolver validation so
 component requirements enforce WBT and the compatible binary. Add the required
 payload field, provenance, review serialization, template control, and client
 dependency handling. Derive Preview maturity for the fixed Builder config token
@@ -85,15 +97,17 @@ and `bin = "wepp_260803"` for the valid Multiple OFE tuple. Direct resolver and
 API tests must reject TOPAZ plus Multiple OFE and Multiple OFE plus
 `wepp_dcc52a6`. Browser tests must exercise backend and binary changes in both
 directions and observe invalid downstream values cleared with an announced
-reason. Unmocked binary-pair smoke checks and a representative Forest WBT MOFE
-prep/run are required before exposure. Finish with canonical frontend and
-repository gates proportional to the touched surface.
+reason. Unmocked role resolution and representative execution for every exposed
+binary, plus a representative Forest WBT MOFE prep/run, are required before
+exposure. Finish with canonical frontend and repository gates proportional to
+the touched surface.
 
 ## Idempotence and Recovery
 
-Registry edits are additive and deterministic. Reverting the implementation
-commit restores the prior Builder while leaving the ancestor contract decision
-visible. No run migration or destructive operation occurs.
+Registry generation is deterministic for a fixed provider state and the opaque
+revision changes with provider output or `latest` target identity. Reverting the
+implementation commit restores the prior Builder. No run migration or
+destructive operation occurs.
 
 ## Artifacts and Notes
 
