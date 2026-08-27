@@ -33,6 +33,9 @@
 - [x] Corrected Forest browser-token ownership resolution to prefer the numeric
   `user_id` claim over an opaque `sub`, and made Builder registry/ownership
   error details diagnostic (2026-08-27 05:42 PDT).
+- [x] Corrected the browser rq-engine token issuer to include the signed numeric
+  `user_id` claim alongside its opaque Flask-Security subject; restarted the
+  Forest web service without rebuilding (2026-08-27 05:46 PDT).
 - [x] Recorded operator approval and scaffolded the package (2026-08-27 03:36 UTC).
 - [x] Corrected and passed two independent contract reviews (2026-08-27 04:00 UTC).
 - [x] Committed standalone checkpoint `95559bc6f` (2026-08-27 04:00 UTC).
@@ -58,6 +61,11 @@ exception message in the canonical diagnostic `details` field.
 **Rationale**: Forest browser JWTs carry an opaque `sub` and a separate numeric
 `user_id`; treating the subject as the database key blocked project ownership
 resolution and hid the actionable cause from the response.
+
+**Correction**: The first Forest retry proved the browser token issuer did not
+yet emit `user_id`; only the opaque Flask-Security `get_id()` value was present.
+The issuer now signs both identities. Existing cached page tokens require a
+page reload so the browser requests the corrected token.
 
 ### 2026-08-27 05:10 UTC: Canonical provider owns binary availability
 

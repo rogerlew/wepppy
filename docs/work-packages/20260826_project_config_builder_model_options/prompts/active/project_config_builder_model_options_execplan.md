@@ -20,6 +20,8 @@ are never offered as silently valid and are rejected by the server if submitted.
   lint, and broad-exception gates pass.
 - [x] (2026-08-27 05:42 PDT) Corrected Forest browser-token ownership identity
   resolution and diagnostic Builder error details; targeted tests pass.
+- [x] (2026-08-27 05:46 PDT) Added the missing signed numeric `user_id` claim to
+  browser rq-engine tokens and restarted the Forest web service.
 
 - [x] (2026-08-27 03:36 UTC) Scaffold package and proposed contract checkpoint.
 - [x] (2026-08-27 04:00 UTC) Obtain and disposition two independent contract reviews.

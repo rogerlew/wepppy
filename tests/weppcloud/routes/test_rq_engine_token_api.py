@@ -179,7 +179,7 @@ def test_issue_rq_engine_token_uses_expected_claims(monkeypatch: pytest.MonkeyPa
 
         @staticmethod
         def get_id() -> str:
-            return "42"
+            return "opaque-security-subject"
 
     monkeypatch.setattr(
         weppcloud_site_module,
@@ -200,12 +200,13 @@ def test_issue_rq_engine_token_uses_expected_claims(monkeypatch: pytest.MonkeyPa
     token = weppcloud_site_module._issue_rq_engine_token()
 
     assert token == "issued-token"
-    assert captured["subject"] == "42"
+    assert captured["subject"] == "opaque-security-subject"
     kwargs = captured["kwargs"]
     assert kwargs["scopes"] == ["rq:enqueue", "rq:status", "rq:export"]
     assert kwargs["audience"] == "rq-engine"
     extra_claims = kwargs["extra_claims"]
     assert extra_claims["token_class"] == "user"
+    assert extra_claims["user_id"] == 42
     assert extra_claims["email"] == "user@example.com"
     assert extra_claims["roles"] == ["Admin", "Hydrologist"]
     assert isinstance(extra_claims["jti"], str)
