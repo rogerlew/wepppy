@@ -170,6 +170,15 @@ unless explicit `menu_min_role` discoverability applies.
 Registry validation/load failures are treated as fatal for page render in MVP
 (surface returns exception response rather than partial render).
 
+The reserved project-owned Config Builder token `config` is not a shared
+Interfaces preset and MUST NOT be added to `config_registry.yaml`. When a run
+uses token `config` and its valid root `config-manifest.json` declares
+`source_kind=builder`, the run header MUST present Preview maturity. Missing or
+malformed manifest state does not invent Builder provenance. Every
+Builder-created project remains Preview regardless of its selected backend,
+representation, or WEPP binary until a separately ratified promotion changes
+this rule.
+
 When a feature is visible:
 
 - enable toggle by default

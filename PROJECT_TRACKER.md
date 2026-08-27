@@ -405,6 +405,24 @@ When resuming Kubernetes work:
 
 ## 🚧 In Progress
 
+### Project Config Builder Model Options
+
+**Started**: 2026-08-27
+
+**Priority**: High
+
+**Security impact**: `low`
+
+**Link**: [docs/work-packages/20260826_project_config_builder_model_options/](docs/work-packages/20260826_project_config_builder_model_options/)
+
+**Description**: Add WhiteboxTools-only Multiple OFE representation and an
+explicit registered WEPP binary version to project-owned Config Builder
+creation, with server-enforced compatibility and persisted provenance.
+
+**Status**: Contract checkpoint corrected after first review; second independent review pending.
+
+---
+
 ### Production Compose Deployment and CAP Runtime Hardening
 
 **Started**: 2026-08-25

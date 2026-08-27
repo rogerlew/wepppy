@@ -313,14 +313,16 @@ configuration keys. Its initial component model MUST cover:
   size;
 - an authorized cell-size override from the closed set defined in section 7.5;
 - delineation backend, initially TOPAZ or WBT;
-- watershed representation, initially conventional/single-OFE; and
+- watershed representation, initially single-OFE or WhiteboxTools-dependent
+  Multiple OFE;
+- a registered WEPP binary version compatible with the selected representation;
 - additional mods after they are registered beyond the initial family; and
 - resolved climate, soil, land-cover, and related capability profiles.
 
 The builder MUST validate the complete combination before creating the project.
 It MUST reject incompatible selections with a field-addressable explanation and
 MUST NOT silently substitute a different locale, DEM, cell size, backend,
-representation, capability, or mod.
+representation, WEPP binary, capability, or mod.
 
 Component sources are creation-time inputs. They MUST NOT become runtime
 dependencies of the generated project.
@@ -336,19 +338,29 @@ route tokens. The initial matrix is:
 | Locale | `continental-us`: explicit `[general] locales = ["us"]` and existing continental-US units/map behavior |
 | DEM | `usgs-ned1-2024`: `dem_db = "ned1/2024"`, default 30 m; `usgs-ned13-2022`: `dem_db = "ned13/2022"`, default 10 m |
 | Delineation | `topaz`; `wbt` |
-| Representation | `single-ofe`: `[wepp] multi_ofe = false` |
+| Representation | `single-ofe`: `[wepp] multi_ofe = false`; `multiple-ofe`: `[wepp] multi_ofe = true`, exposed by Builder V1 only with `wbt` and `wepp_260803` |
+| WEPP binary | `wepp_dcc52a6`: legacy-parity binary for Single OFE; `wepp_260803`: default Builder binary, available for Single or Multiple OFE |
 | Soils | `ssurgo-gnatsgso-2025`: `soils_db = "ssurgo/gNATSGSO/2025"`, existing gridded mode |
 | Land use | `nlcd-2019`: `landuse_db = "nlcd/2019"`, existing gridded mode and general mapping |
 | Climate | `vanilla_cligen`; `prism_stochastic`; `observed_daymet`; `observed_gridmet` |
 | Mods | none |
 
-The cross-product of the two DEMs and two delineation backends is eligible only
-after all four combinations pass the Forest create/reopen/delineate/build gate.
-Dataset identifiers MUST be verified against the deployed services and mounts
-at that gate. Failure of one combination removes that combination from the
-initial registry rather than causing an inferred substitution.
+The ten supported tuples are the cross-product of two DEMs with: TOPAZ, Single
+OFE, and either binary (four tuples); WBT, Single OFE, and either binary (four
+tuples); and WBT, Multiple OFE, and `wepp_260803` (two tuples). They are eligible
+only after all ten pass the Forest create/reopen/delineate/build gate and the
+execution evidence in section 15. Dataset and binary identifiers MUST be
+verified against deployed services, mounts, and executable pairs at that gate.
+Failure removes the affected tuple from the initial registry rather than
+causing an inferred substitution.
 
-TauDEM, MOFE, alternate soil/land-use modes, event/upload/future climate modes,
+Builder V1 defaults to `wbt`, `single-ofe`, and `wepp_260803`. The WBT-only
+Multiple OFE rule is a conservative Builder eligibility policy, not a statement
+that legacy TOPAZ MOFE presets are technically invalid. Those existing presets
+remain unchanged. The Builder MUST NOT infer defaults from lexical component
+ordering.
+
+TauDEM, alternate soil/land-use modes, event/upload/future climate modes,
 and optional NoDb mods are deferred from the initial matrix. They require
 separate registered definitions and representative validation before becoming
 builder-visible. This does not remove or change any Interfaces preset that
@@ -361,8 +373,8 @@ Builder-created projects MUST use the reserved config token `config` and the
 fixed project-owned filename `config.cfg`.
 
 The builder MUST NOT derive the filename or route token from selected locale,
-DEM, cell size, backend, representation, mods, a user-supplied project name, or
-the config digest. Those values may change in vocabulary or presentation while
+DEM, cell size, backend, representation, WEPP binary, mods, a user-supplied
+project name, or the config digest. Those values may change in vocabulary or presentation while
 the project's route identity must remain stable.
 
 `config` is reserved for builder-created projects and MUST NOT be registered as
@@ -416,8 +428,11 @@ The initial builder MUST present server-described controls for:
 3. the cell size associated with the selected DEM and, for authorized users,
    an optional override;
 4. delineation backend, initially TOPAZ or WBT;
-5. watershed representation, initially conventional/single-OFE; and
-6. optional mods when at least one is registered for the resolved combination.
+5. watershed representation, initially Single OFE or Multiple OFE when
+   WhiteboxTools is selected;
+6. WEPP binary version from the registered releases compatible with the
+   selected representation; and
+7. optional mods when at least one is registered for the resolved combination.
 
 Labels MUST be human-readable while submitted values use stable registered
 component IDs. Technical details such as dataset keys MAY be shown as secondary
@@ -430,8 +445,12 @@ help but MUST NOT replace understandable labels.
 - Selecting a locale MUST limit DEM, cell-size, capability, and mod choices to
   those supported by that locale.
 - Selecting a DEM MUST set and display that DEM's associated default cell size.
-- Backend, representation, and mod choices MUST update dependent availability
-  when their registered constraints require it.
+- Backend, representation, WEPP binary, and mod choices MUST update dependent
+  availability when their registered constraints require it. Multiple OFE MUST
+  be available only with WhiteboxTools and `wepp_260803`. Changing the backend
+  from WBT MUST visibly clear Multiple OFE. Changing the binary away from
+  `wepp_260803` MUST visibly clear Multiple OFE. Selecting Multiple OFE MUST
+  visibly select its sole compatible binary rather than retain an invalid value.
 - The UI MUST NOT merely hide an invalid submitted value and allow it to remain
   in the payload.
 - When an upstream change invalidates a downstream selection, the UI MUST clear
@@ -465,7 +484,8 @@ invent or broaden capability lists.
   missing, validation is pending, or the server reports an invalid
   combination.
 - Before creation, the UI MUST present a review summary containing the locale,
-  DEM, cell size, backend, representation, mods, and derived capabilities.
+  DEM, cell size, backend, representation, WEPP binary version, mods, and
+  derived capabilities.
 - The review MUST state that the generated runtime filename is `config.cfg` and
   that the complete selections and provenance will be recorded in
   `config-manifest.json`.
@@ -607,9 +627,10 @@ Composition MUST be deterministic and schema-driven. The conceptual order is:
 3. terrain and DEM component;
 4. delineation backend component;
 5. watershed representation component;
-6. selected mod components;
-7. capability profile; and
-8. explicit builder selections or supported named-preset overrides.
+6. WEPP binary component;
+7. selected mod components;
+8. capability profile; and
+9. explicit builder selections or supported named-preset overrides.
 
 This order preserves the current build-chain writeover model. Components are
 ordered contributors, not exclusive option owners. A later applicable layer
@@ -671,6 +692,7 @@ wepppy/nodb/config_builder/
     dem/
     delineation/
     representation/
+    wepp_binary/
     capabilities/
     mods/
 ```
@@ -697,12 +719,15 @@ Subsystem/domain owners own the declarative definitions for their behavior:
 
 - locale and DEM/data-source maintainers own locale and terrain definitions;
 - watershed maintainers own delineation and representation definitions;
+- WEPP binary release maintainers own registered binary definitions and their
+  representation compatibility;
 - climate, soils, and land-cover maintainers own their capability catalogs; and
 - each NoDb mod owner owns that mod's component definition and constraints.
 
 Locale profiles compose allowed component and capability IDs and locale-level
 constraints. They MUST NOT duplicate the runtime settings owned by the
-referenced DEM, backend, representation, capability, or mod components. Shared
+referenced DEM, backend, representation, WEPP binary, capability, or mod
+components. Shared
 named `.cfg` presets remain owned by the existing Interfaces creation path and
 are not converted into registry profiles merely to support the builder.
 
@@ -780,6 +805,7 @@ following common fields; none are optional unless explicitly shown as nullable:
     "cellsize_source": "dem_default",
     "delineation_backend": "wbt",
     "watershed_representation": "single-ofe",
+    "wepp_binary": "wepp_260803",
     "mods": []
   },
   "config": {
@@ -803,6 +829,13 @@ The required common fields are:
 Builder creation MUST set `source_kind` to `builder`, set `source_preset` to
 JSON `null`, record all submitted and derived selections shown in the example,
 and record the ordered registered component chain.
+
+Builder manifests created before the WEPP-binary component was registered are
+not migrated. They remain valid for project loading and model execution, but
+configuration-update availability, preview, and apply MUST report unavailable
+because their immutable parent chain cannot be re-resolved to the expanded
+component chain. The implementation MUST test a real pre-change schema-v1
+manifest and MUST NOT synthesize a binary component from its flattened config.
 
 Named-preset creation MUST set `source_kind` to `preset`, set `source_preset`
 to the preset basename, and record an ordered parent chain containing shared
@@ -1142,10 +1175,13 @@ Implementation is not conformant until tests demonstrate:
   missing section/options through the merge-only build-chain amendment;
 - preset projects and their forks retain the recorded defaults/preset/override
   parent chain, and updates never infer a replacement profile;
-- builder combinations validate locale/DEM/cell-size/backend/representation/mod
-  constraints;
-- all four initial continental-US DEM/backend combinations pass the Forest gate
-  before they are exposed;
+- builder combinations validate locale/DEM/cell-size/backend/representation/
+  WEPP-binary/mod constraints;
+- all initial continental-US DEM/backend/representation/binary combinations
+  pass the Forest gate before they are exposed; this includes direct unmocked
+  presence and execution checks for both watershed/hillslope binary pairs, a
+  representative WBT Multiple OFE preparation and run with `wepp_260803`, and a
+  Single OFE run with each exposed binary;
 - nested/PUP controllers without a child-local config resolve the validated
   top-level project config before shared fallback, while preexisting legacy
   child-local configs retain precedence;
