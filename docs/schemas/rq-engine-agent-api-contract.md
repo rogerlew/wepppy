@@ -81,6 +81,33 @@ Core scopes used by agent-facing routes:
 | `culvert:batch:retry` | Culvert batch retry endpoint. |
 
 Bootstrap routes do not accept `rq:enqueue` as a substitute for `bootstrap:*`.
+
+### Project Config Builder description
+
+The authenticated Builder description response reports
+`builder_description_schema_version = 2`. Its singular `capability_graph` and
+top-level `components` retain the frozen historical Continental-US schema-v2
+response shape for read-only parsing compatibility. They are not a WP12C
+creation contract. The authoritative `capability_graphs_by_locale` object is
+keyed by `continental-us`, `europe`, `canada`, `australia`, and `global-earth`;
+every value is one complete project-owned config schema-v3 capability graph.
+`components_by_locale` contains each matching complete component population.
+Clients select the graph using the locale stable ID and MUST NOT union graph
+axes. The server performs the same locale-keyed selection during validation and
+creation. The registry revision covers both complete mappings.
+
+Validation and creation requests MUST submit
+`builder_description_schema_version = 2` and a schema-v3
+`climate_station_database` selection. A client that omits either field or sends
+an unsupported description version receives `409 unsupported_builder_schema`
+before directory creation or NoDb mutation. Therefore legacy clients may parse
+the singular compatibility members but cannot create a WP12C run.
+
+Schema-v3 Builder selections include `climate_station_database`. Its value is a
+stable component ID from the selected locale graph, separate from the climate
+dataset ID. The server revalidates it and materializes the component's exact
+`climate.cligen_db` value. Cross-locale or unknown station-database IDs return a
+field-addressable 4xx before creation.
 - Controller-state cutover package
   `20260410_rq_controller_state_contract_cutover` closed on 2026-04-11 with
   auth-scope parity evidence and keeps `rq:status` + `rq:read` compatibility
@@ -270,7 +297,7 @@ Climate-parse validation contract:
    For `fork-archive` origin jobs, non-Admin/Root callers may cancel only while
    the job remains queued; dispatch handoff or started state returns `403`.
 
-For runs with project capability schema v2, run-scoped controller schemas,
+For runs with project capability schema v2 or v3, run-scoped controller schemas,
 templates/defaults, aggregated operation documents, pipeline, and readiness
 metadata expose only the authority stored in that run's flattened config.
 Clients MUST treat these run-scoped enums and model tuples as authoritative;
@@ -278,7 +305,7 @@ the current global provider catalog cannot broaden an existing run. Legacy runs
 without capability authority retain their existing discovery behavior.
 The climate, landuse, and soils build endpoints and the WEPP run endpoint MUST
 return `409 capability_authority_invalid` with diagnostic `error.details`
-before mutation or enqueue when stored schema-v2 authority is malformed,
+before mutation or enqueue when stored schema-v2/schema-v3 authority is malformed,
 partial, contradictory, or unsupported.
 
 ## Climate Build Ordering (Operator Replication)
@@ -287,16 +314,19 @@ For API-only replication flows, climate setup is order-sensitive:
    `GET /api/runs/{runid}/{config}/endpoints?include_operation_docs=true`.
 2. Resolve `climate_catalog_id` and its derived `climate_mode` explicitly before
    `build-climate`.
-   - For schema-v2 runs, send the stable catalog ID advertised by run-scoped
+   - For schema-v2/schema-v3 runs, send the stable catalog ID advertised by run-scoped
      discovery. A numeric mode alone cannot authorize a new selection.
    - Send the catalog's integer mode for compatibility and mode/catalog
      agreement validation.
    - Do not blindly replay `resolved_defaults` when it reports `-1`
      (`ClimateMode.Undefined`).
-3. If you do not want auto station selection, set station behavior before
-   `build-climate`:
-   - `POST /weppcloud/runs/{runid}/{config}/tasks/set_climatestation_mode/`
-   - `POST /weppcloud/runs/{runid}/{config}/tasks/set_climatestation/`
+3. Set station and spatial behavior atomically in `build-climate` using the
+   run-scoped discovery fields `climate_station_method` and
+   `climate_spatial_method`. Send their numeric compatibility fields
+   `climatestation_mode` and `climate_spatialmode` when an older caller requires
+   them; if both stable and numeric forms are present, they MUST agree. Legacy
+   pre-build station mutation routes remain compatibility paths, not a
+   requirement for new clients.
 4. Send years and scaling parameters in the `build-climate` request payload
    (not as separate pre-build mutations):
    - years: `observed_start_year`, `observed_end_year`,
@@ -308,13 +338,13 @@ For API-only replication flows, climate setup is order-sensitive:
    `GET /api/jobstatus/{job_id}` to terminal state.
 
 Notes:
-- `climatestation_mode` is not a documented `build-climate` request field.
-- For deterministic station targeting, persist station selection with
-  `tasks/set_climatestation_mode` + `tasks/set_climatestation` before
-  `build-climate`.
+- Stable station/spatial method fields are authoritative for a new schema-v2/schema-v3
+  selection. Numeric compatibility fields are accepted atomically and must map
+  to the same stable IDs when both forms are sent.
 - `climate_mode` in rq-engine `build-climate` payloads is parsed as an integer
-  code (string aliases are not part of this route contract). Schema-v2 runs
-  additionally require `climate_catalog_id` for a new selection; omission is
+  code (string aliases are not part of this route contract). Schema-v2 and
+  schema-v3 runs additionally require `climate_catalog_id` for a new selection;
+  omission is
   accepted only for an ordinary rebuild of the exact persisted current dataset
   and mode.
 - Advanced climate toggles such as `use_gridmet_wind_when_applicable` and

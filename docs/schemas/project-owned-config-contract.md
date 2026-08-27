@@ -318,6 +318,7 @@ configuration keys. Its initial component model MUST cover:
 - a registered WEPP binary version compatible with the selected representation;
 - additional mods after they are registered beyond the initial family; and
 - resolved climate, soil, land-cover, and related capability profiles.
+- a locale-supported CLIGEN climate-station database.
 
 The builder MUST validate the complete combination before creating the project.
 It MUST reject incompatible selections with a field-addressable explanation and
@@ -343,6 +344,7 @@ route tokens. The initial matrix is:
 | Soils | `ssurgo-gnatsgso-2025`: `soils_db = "ssurgo/gNATSGSO/2025"`, existing gridded mode |
 | Land use | `nlcd-2019`: `landuse_db = "nlcd/2019"`, existing gridded mode and general mapping |
 | Climate | `vanilla_cligen`; `prism_stochastic`; `observed_daymet`; `observed_gridmet` |
+| Climate station database | `cligen-stations-legacy`; `cligen-stations-2015`; `cligen-stations-ghcn` |
 | Mods | none |
 
 The supported Single OFE tuples are the cross-product of two DEMs, both
@@ -362,6 +364,13 @@ Multiple OFE rule is a conservative Builder eligibility policy, not a statement
 that legacy TOPAZ MOFE presets are technically invalid. Those existing presets
 remain unchanged. The Builder MUST NOT infer defaults from lexical component
 ordering.
+
+WP12C adds four Builder families without changing this historical V1 matrix.
+The complete exposed base-profile set is `continental-us`, `europe`, `canada`,
+`australia`, and `global-earth`. Every generated configuration remains Preview.
+The exact dataset and default matrix is maintained by the current canonical
+locale profiles under section 7.2.2 and ADR-0047; specialized bases and overlays
+remain unavailable unless a later approved amendment exposes them.
 
 #### 7.2.2 Comprehensive locale and dependency authority
 
@@ -392,10 +401,12 @@ two base authorities.
 locale token is `us`. Normalization MUST NOT rename that component or rewrite
 existing manifests. Specialized tokens such as municipal, watershed, or
 research-area overlays MUST NOT be treated as interchangeable base locales.
+`canada` is the durable stable ID and runtime token for Canada-wide Builder
+creation. It MUST NOT alias `global-earth` or `british-columbia`/`bc-ca`.
 
 The registry MUST track dependencies between locale, DEM, delineation,
-representation, WEPP binary, climate dataset and methods, soil dataset and
-builder, landuse dataset and methods, and mods. The dependency language MUST be
+representation, WEPP binary, climate dataset, climate-station database and
+methods, soil dataset and builder, landuse dataset and methods, and mods. The dependency language MUST be
 typed and closed; component documents MUST NOT contain executable expressions.
 Only profiles with explicit Builder support and completed deployment evidence
 may be offered for creation. Evidence MUST bind the profile/component IDs,
@@ -405,14 +416,49 @@ representation, binary, and mod value referenced by the closed inventory source
 boundary MUST have one support disposition. Inventory generation MUST fail on
 an undispositioned value.
 
+Each canonical profile MUST own closed `dem_sources`, `soil_sources`,
+`landuse_sources`, `climate_sources`, and `climate_station_databases` lists. For
+Builder presentation and submission, those profile lists are the sole dataset authorization source;
+catalog-wide support state, component-global flags, template conditionals, and
+frontend lists MUST NOT add a value. In particular, the Land-cover dataset
+control and its server validator MUST derive only from the selected profile's
+`landuse_sources`.
+
+The WP12C Builder matrix is:
+
+| Stable profile | Runtime token | DEM | Soil | Land cover | Climate | Station DB | Data defaults |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `continental-us` | `us` | NED1 2024; NED1/3 2022 | SSURGO/gNATSGO 2025 | NLCD 2019 | Vanilla CLIGEN; PRISM stochastic; observed Daymet; observed gridMET | Legacy; 2015; GHCN | NED1 2024; SSURGO/gNATSGO 2025; NLCD 2019; Vanilla CLIGEN; 2015 |
+| `europe` | `eu` | EUDEM v1.1 | ESDAC | CORINE 1990, 2000, 2006, 2012, 2018 | Vanilla CLIGEN; E-OBS | GHCN | EUDEM v1.1; ESDAC; CORINE 2018; Vanilla CLIGEN; GHCN |
+| `canada` | `canada` | Copernicus DEM 30 m | ISRIC global | C3S 1992-2020 | Vanilla CLIGEN; observed Daymet | GHCN | Copernicus DEM; ISRIC; C3S 2020; Vanilla CLIGEN; GHCN |
+| `australia` | `au` | Australia SRTM 1 second | ASRIS | Australia 2010-2011 | Vanilla CLIGEN; AGDC | GHCN | SRTM; ASRIS; Australia 2010-2011; Vanilla CLIGEN; GHCN |
+| `global-earth` | `earth` | Copernicus DEM 30 m | ISRIC global | C3S 1992-2020 | Vanilla CLIGEN | GHCN | Copernicus DEM; ISRIC; C3S 2020; Vanilla CLIGEN; GHCN |
+
+Stable IDs and exact runtime mappings for this matrix are domain-owned and
+recorded in ADR-0047. Canada MUST use only the listed global terrain, soil, and
+land-cover datasets; Canada CDEM and Canada Land Cover 2020 remain outside this
+Builder profile. Vanilla CLIGEN MUST be available for every exposed locale.
+Vanilla CLIGEN is the climate-mode default for every exposed locale. E-OBS,
+Daymet, and AGDC remain explicit regional choices and are never selected
+implicitly. Continental US exposes Legacy, 2015, and GHCN station databases and
+defaults to 2015; every other exposed locale exposes and defaults only to GHCN.
+
+The station-database stable/runtime mappings are
+`cligen-stations-legacy` -> `legacy`, `cligen-stations-2015` ->
+`2015_stations.db`, and `cligen-stations-ghcn` -> `ghcn_stations.db`. The
+selected component writes `[climate] cligen_db`, participates in the registry
+digest and manifest chain, and is stored as both a capability axis and a
+capability default.
+
 The closed inventory boundary is every top-level
 `wepppy/nodb/configs/*.cfg`, the legacy config corpus exercised by compatibility
 tests, `wepppy/nodb/locales/climate_catalog.py`,
 `wepppy/nodb/locales/landuse_catalog.py`, the climate/landuse/soil/watershed and
-WEPP run controls plus their mutation/discovery routes, and the canonical WEPP
-binary provider. Test fixtures, archived work packages, and generated docs
-indexes are excluded. Domain specifications own each stable-ID/runtime mapping;
-the omission gate compares those definitions to this source boundary.
+WEPP run controls plus their mutation/discovery routes,
+`wepppy/climates/cligen/cligen.py`, and the canonical WEPP binary provider. Test
+fixtures, archived work packages, and generated docs indexes are excluded.
+Domain specifications own each stable-ID/runtime mapping; the omission gate
+compares those definitions to this source boundary.
 
 `builder_exposed` requires complete mandatory axes, graph closure, and
 revision-bound provider evidence and permits Builder presentation/creation.
@@ -427,12 +473,17 @@ mandatory `mods` axis, which MUST be serialized and MAY be empty.
 present-and-empty exactly when `mods` is empty; otherwise their keys MUST
 exhaust `mods`. Per-mod `mod_conflicts` values MAY be empty. A profile with an
 unresolved mandatory axis remains
-`supported_non_builder` or `inventory_only` and MUST NOT emit schema v2.
+`supported_non_builder` or `inventory_only` and MUST NOT emit a Builder
+capability graph. WP12B schema-v2 graphs retain their complete historical
+contract. WP12C `builder_exposed` profiles MUST emit schema v3 with every v2
+axis/relation plus the mandatory climate-station database axis/default.
 
 Every provider-backed definition MUST contribute a deterministic SHA-256
 identity to the registry revision and manifest chain. DEM identity includes its
 exact database/URI token and adapter revision; climate identity includes its
 normalized descriptor, configured database/version token, and adapter revision;
+CLIGEN station-database identity includes its stable component ID, exact manager
+selector, and resolver adapter revision; it MUST NOT include a deployment path;
 soil identity includes its runtime or contained raster token, dataset/version,
 and adapter revision; landcover identity is over ordered normalized stable ID,
 runtime value, label, locale group, support state, and adapter revision; WEPP
@@ -445,6 +496,29 @@ Builder views consume the current validated registry. A created run's views and
 mutation/build endpoints consume only the resolved capability authority stored
 in its flattened config. They MUST NOT consult the current registry to broaden
 or restrict an existing run.
+
+Builder description schema version 2 MUST provide a complete schema-v3
+capability graph keyed by each exposed stable locale ID. Validation and
+resolution MUST select the submitted locale's graph and MUST NOT validate
+against a union of locale axes. The response MUST include
+`builder_description_schema_version = 2`.
+
+The singular `capability_graph` response member remains the frozen historical
+Continental-US schema-v2 graph, and the top-level `components` member remains
+its historical Continental-US component population. These two members provide
+read-only response-parsing compatibility only; they cannot express the mandatory
+schema-v3 Climate Station Database selection. The
+`capability_graphs_by_locale` and `components_by_locale` members are
+authoritative for description-schema-v2 clients and contain schema-v3 graphs
+and complete component populations for all exposed profiles. A new client MUST
+read both locale-keyed members and submit
+`builder_description_schema_version = 2` with validation and creation. A create
+or validation client that omits that version, submits a different version, or
+omits `climate_station_database` MUST receive `409
+unsupported_builder_schema` before directory creation or NoDb mutation. Old
+clients may continue to parse the compatibility response but cannot create
+WP12C runs. An absent locale graph, an unknown graph key, or a dataset selected
+from a different locale MUST fail before run creation or mutation.
 
 The Builder MUST obtain its WEPP binary choices from
 `get_linux_wepp_bin_opts()` when loading the runtime registry, without a second
@@ -543,8 +617,12 @@ The initial builder MUST present server-described controls for:
 5. watershed representation, initially Single OFE or Multiple OFE when
    WhiteboxTools is selected;
 6. WEPP binary version from the registered releases compatible with the
-   selected representation; and
-7. optional mods when at least one is registered for the resolved combination.
+   selected representation;
+7. climate mode, including Vanilla CLIGEN for every locale;
+8. Climate Station Database, separately from climate mode;
+9. soil dataset;
+10. Land-cover dataset; and
+11. optional mods when at least one is registered for the resolved combination.
 
 Labels MUST be human-readable while submitted values use stable registered
 component IDs. Technical details such as dataset keys MAY be shown as secondary
@@ -554,8 +632,9 @@ help but MUST NOT replace understandable labels.
 
 - The server-provided builder schema and validation response are authoritative
   for available values, defaults, requirements, and conflicts.
-- Selecting a locale MUST limit DEM, cell-size, capability, and mod choices to
-  those supported by that locale.
+- Selecting a locale MUST limit DEM, cell-size, climate mode, Climate Station
+  Database, soil, Land-cover, capability, and mod choices to those supported by
+  that locale.
 - Selecting a DEM MUST set and display that DEM's associated default cell size.
 - Backend, representation, WEPP binary, and mod choices MUST update dependent
   availability when their registered constraints require it. Multiple OFE MUST
@@ -578,6 +657,7 @@ The builder MUST show a reviewable summary of the resolved capabilities before
 creation, including at least:
 
 - climate datasets/methods that will be available;
+- the selected Climate Station Database;
 - soil-building methods that will be available;
 - land-cover choices when more than one is relevant; and
 - initialized mods and material limitations introduced by the combination.
@@ -596,8 +676,8 @@ invent or broaden capability lists.
   missing, validation is pending, or the server reports an invalid
   combination.
 - Before creation, the UI MUST present a review summary containing the locale,
-  DEM, cell size, backend, representation, WEPP binary version, mods, and
-  derived capabilities.
+  DEM, cell size, backend, representation, WEPP binary version, climate mode,
+  Climate Station Database, soil, Land-cover, mods, and derived capabilities.
 - The review MUST state that the generated runtime filename is `config.cfg` and
   that the complete selections and provenance will be recorded in
   `config-manifest.json`.
@@ -614,6 +694,16 @@ invent or broaden capability lists.
   current, the server MUST create no project and return canonical `409
   stale_builder_schema`; the UI MUST reload the schema and require the user to
   review the resolved summary again.
+- Builder description MUST report `builder_description_schema_version = 2` and
+  include `capability_graphs_by_locale` as specified in section 7.2.2. Its
+  singular `capability_graph` is the frozen historical Continental-US
+  schema-v2 compatibility member.
+- Builder description MUST include `components_by_locale`; top-level
+  `components` is the matching historical Continental-US-only compatibility
+  population.
+- Validation and creation MUST require
+  `builder_description_schema_version = 2`. Missing or unsupported description
+  versions fail with `409 unsupported_builder_schema` before mutation.
 - Submission MUST use the existing authenticated project-creation security
   boundary, including its CSRF/CAP/session behavior as applicable.
 - The Create action MUST prevent accidental duplicate submissions while a
@@ -788,7 +878,7 @@ type.
 
 Registered builder components and profiles MUST be declarative, real TOML
 documents parsed with Python's `tomllib` (or its supported compatibility
-equivalent), except for the bounded WEPP-binary provider exception below. They
+equivalent), except for the bounded trusted-provider exceptions below. They
 are source definitions for the builder and resolver; they are not runtime NoDb
 configuration files. The generated, flattened project-owned configuration
 remains INI-style `.cfg` as defined in section 5.
@@ -818,7 +908,7 @@ resolver. Invalid IDs, unknown references, undeclared writes, malformed values,
 or contradictory constraints MUST fail explicitly; they MUST NOT be ignored or
 repaired through implicit defaults.
 
-WEPP binary components are the sole runtime-provider exception. The trusted
+WEPP binary components are one runtime-provider exception. The trusted
 registry loader MUST synthesize exactly one typed `wepp_binary` component for
 each unique value returned by `get_linux_wepp_bin_opts()`; it MUST NOT read a
 second binary ID allowlist from TOML. Each synthesized definition uses the
@@ -827,7 +917,27 @@ provider schema revision, records its resolved role target identity in its
 source revision, and participates in the registry digest exactly like a TOML
 component. Empty output, an invalid component ID, an unavailable `wepp_260803`
 default, or an unusable provider value invalidates the registry atomically.
-Non-binary components remain TOML-only.
+The canonical typed locale, DEM, soil, land-cover, and climate authorities are
+the second bounded exception. The trusted registry loader MAY synthesize their
+Builder components directly so a large dataset family such as C3S is not copied
+into parallel TOML allowlists. It MUST synthesize only IDs referenced by an
+explicitly `builder_exposed` profile, preserve each domain-owned runtime value
+and source revision, generate deterministic component writes and constraints,
+and include every definition in the registry digest. Unknown IDs, missing
+runtime mappings, or partial profile closure invalidate the registry atomically.
+No other non-binary component may be synthesized without a later contract
+amendment.
+
+For this exception, the complete executable source boundary is
+`wepppy/nodb/locales/locale_profiles.py`, `climate_catalog.py`, and
+`landuse_catalog.py`, plus canonical WEPP provider functions in
+`wepp_runner/wepp_runner.py`. `LocaleProfile` objects themselves MAY be
+synthesized into locale components; they need not be copied to TOML. Their
+profile source revision, exact runtime token, locale-owned deterministic writes,
+and ordered data IDs MUST enter the registry digest. The config-builder owns
+composition; the named locale/data domain modules own identities, runtime
+mappings, and defaults. Shared presets, archived packages, test fixtures,
+filesystem discovery, UI labels, and frontend code are excluded from authority.
 
 The config-builder core owns:
 
@@ -865,6 +975,24 @@ current source revisions used for later updates. Updates resolve the current
 definition registered under each stable ID; the registry is not required to
 retain executable historical definitions.
 
+For schema-v2 and schema-v3 graphs, a compatible addition to a live profile does not alter
+the validity of a previously complete stored graph. The reader MUST maintain an
+append-only set of immutable structural profile contracts. Creation uses only
+the current contract; stored validation matches the graph's complete axes,
+adjacency, defaults, and model policy against one frozen historical contract.
+The graph itself supplies the discriminating structure; `provider_revision`
+remains provider provenance and is not a mutable live-registry lookup key.
+Removing or broadening a historical contract is incompatible and requires a
+new stored capability schema.
+
+Frozen structural equality applies to locale, dataset, method, adjacency, and
+default axes. The WEPP provider axis is intentionally dynamic and is validated
+by immutable shape/policy instead: stable binary ID grammar, role-resolved
+digest grammar, exhaustive binary revision keys, Single-OFE TOPAZ/WBT tuples
+for every stored binary, and exactly one Multiple-OFE tuple,
+`wbt|multiple-ofe|wepp_260803`. A stored graph does not need to match the
+current provider's binary population.
+
 ## 9. Capability Contract
 
 The resolved config MUST record stable semantic identifiers rather than UI
@@ -872,10 +1000,11 @@ labels or raw enum values. An illustrative section is:
 
 ```ini
 [capabilities]
-schema_version = 2
+schema_version = 3
 locale_profiles = ["continental-us"]
 dem_sources = ["usgs-ned1-2024", "usgs-ned13-2022"]
-climate_datasets = ["vanilla_cligen", "prism_stochastic", "observed_gridmet"]
+climate_datasets = ["vanilla_cligen", "prism_stochastic", "observed_daymet", "observed_gridmet"]
+climate_station_databases = ["cligen-stations-legacy", "cligen-stations-2015", "cligen-stations-ghcn"]
 climate_station_methods = ["auto", "distance", "multi_factor"]
 climate_spatial_methods = ["single", "multiple", "interpolated"]
 soil_datasets = ["ssurgo-gnatsgso-2025"]
@@ -894,21 +1023,25 @@ wepp_260803 = "provider-v1:watershed=<sha256>:hillslope=<sha256>"
 [capabilities.climate_station_methods]
 vanilla_cligen = ["auto", "distance", "multi_factor"]
 prism_stochastic = ["auto", "distance", "multi_factor"]
+observed_daymet = ["auto", "distance", "multi_factor"]
 observed_gridmet = ["auto", "distance", "multi_factor"]
 
 [capabilities.climate_spatial_methods]
 vanilla_cligen = ["single", "multiple"]
 prism_stochastic = ["single", "multiple"]
+observed_daymet = ["single", "multiple", "interpolated"]
 observed_gridmet = ["single", "multiple", "interpolated"]
 
 [capabilities.climate_station_defaults]
 vanilla_cligen = "auto"
 prism_stochastic = "auto"
+observed_daymet = "auto"
 observed_gridmet = "auto"
 
 [capabilities.climate_spatial_defaults]
 vanilla_cligen = "single"
 prism_stochastic = "single"
+observed_daymet = "single"
 observed_gridmet = "single"
 
 [capabilities.landuse_methods]
@@ -935,6 +1068,7 @@ ssurgo-gnatsgso-2025 = "gridded"
 locale_profile = "continental-us"
 dem_source = "usgs-ned1-2024"
 climate_dataset = "vanilla_cligen"
+climate_station_database = "cligen-stations-2015"
 landuse_dataset = "nlcd-2019"
 soil_dataset = "ssurgo-gnatsgso-2025"
 delineation_backend = "wbt"
@@ -972,6 +1106,15 @@ v2. Each axis, relation, and tuple list is limited to 4096 unique IDs; IDs are
 limited by the stable-ID grammar and serialized capability sections to 4 MiB.
 These invariants are checked before description, creation, view rendering,
 mutation, or enqueue.
+
+Schema v3 inherits every schema-v2 axis, relation, closure, size, and
+fail-closed invariant and adds mandatory `climate_station_databases` plus
+`capability_defaults.climate_station_database`. The default MUST be a member of
+the axis. Climate-station database IDs use the same stable-ID grammar and the
+selected component owns the exact `climate.cligen_db` write. Schema-v3 creation
+MUST NOT infer that selection from locale, climate dataset, shared defaults, or
+the current runtime catalog. `climate_station_database` is also an allowed mod
+relation axis in schema v3.
 
 `capabilities.wepp_binary_revisions` keys MUST exhaust `wepp_binaries`. Each
 value MUST bind the ordered watershed and hillslope executable SHA-256 role
@@ -1014,8 +1157,11 @@ Capability compatibility is versioned as follows:
 - a present-empty or malformed mandatory v1 axis is an explicit configuration
   error; optional v1 axes such as `mods` MAY be present-empty;
 - schema v2 requires every mandatory axis, relation, tuple set, and default;
-  missing, empty, malformed, contradictory, partial, or newer authority fails
+  missing, empty, malformed, contradictory, or partial authority fails
   explicitly without consulting the current registry;
+- schema v3 requires the complete schema-v2 graph plus the station-database
+  axis/default; missing, empty, malformed, contradictory, partial, or newer
+  authority fails explicitly without consulting the current registry;
 - an already persisted current selection omitted from authority remains visible
   but disabled for reselection, and an ordinary build may consume it; a newly
   submitted different unsupported value fails before mutation or enqueue; and
@@ -1026,6 +1172,18 @@ Schema v1 retains its established coarse-axis authority. WP12B contracts only
 the compatibility behavior listed above for current persisted values and new
 submissions; it does not reinterpret model routing or rewrite persisted state.
 The v2 graph rules MUST NOT be retroactively inferred for v1.
+
+Configuration-update availability, preview, and apply for a historical
+schema-v2 Builder run MUST resolve its original parent chain with the frozen
+schema-v2 resolver contract. They MUST preserve the original v2 graph and
+manifest selection shape, MUST NOT synthesize a Climate Station Database
+component or selection, and MUST NOT recompose the run through a current
+schema-v3 locale graph. A v2 update may add only attributes authorized by that
+v2 parent chain and the existing merge-only update contract. If the frozen v2
+chain is unavailable, update availability MUST report unavailable without
+altering project bytes. Schema-v3 updates use the corresponding frozen v3
+resolver contract and retain the selected station-database component in the
+manifest parent chain.
 
 Legacy projects without resolved capabilities MUST retain their current locale,
 mod, catalog, and route behavior.
@@ -1059,6 +1217,10 @@ following common fields; none are optional unless explicitly shown as nullable:
     "delineation_backend": "wbt",
     "watershed_representation": "single-ofe",
     "wepp_binary": "wepp_260803",
+    "climate": "vanilla_cligen",
+    "climate_station_database": "cligen-stations-2015",
+    "soil": "ssurgo-gnatsgso-2025",
+    "landuse": "nlcd-2019",
     "mods": []
   },
   "config": {
@@ -1242,13 +1404,14 @@ The UI contract depends on these stable error codes:
 - `idempotency_key_conflict` (`409`);
 - `creation_in_progress` (`409`);
 - `stale_builder_schema` (`409`);
+- `unsupported_builder_schema` (`409`);
 - `stale_config_preview` (`409`);
 - `config_update_unavailable` (`409`);
 - `config_update_in_progress` (`409`); and
 - `unsupported_config_schema` (`409`); and
 - `capability_authority_invalid` (`409`) with diagnostic `details` when a
-  created run's schema-v2 graph is malformed, partial, contradictory, or newer
-  than the reader.
+  created run's schema-v2/schema-v3 graph is malformed, partial, contradictory,
+  or newer than the reader.
 
 Bearer-authenticated rq-engine calls remain outside the browser CSRF boundary.
 Cookie-backed calls MUST follow the canonical same-origin/CSRF contract. Exact
@@ -1444,6 +1607,19 @@ Implementation is not conformant until tests demonstrate:
 - the Interfaces path remains present and retains its original config tokens;
 - builder controls expose only server-described stable IDs and dependent
   choices;
+- Builder description exposes exactly one complete graph for each approved
+  locale, dependent controls switch to the selected graph, and server
+  validation rejects every cross-locale dataset choice without creating a run;
+- every locale offers Vanilla CLIGEN; Continental US exposes exactly Legacy,
+  2015, and GHCN station databases while Europe, Canada, Australia, and Earth
+  expose only GHCN; generated configs contain the selected exact `cligen_db`;
+- Europe, Canada, Australia, and Global Earth generated configs contain their
+  exact runtime locale/data-provider writes and data defaults; Canada uses the
+  `canada` token, global terrain/soil/land-cover sources, offers observed
+  Daymet, and defaults to Vanilla CLIGEN;
+- historical Continental-US schema-v2 bytes validate and reopen unchanged;
+  every WP12C project stores a complete schema-v3 graph, and stored validation
+  for every profile remains independent of the live registry;
 - each DEM supplies an allowed default cell size from
   `1, 2, 5, 10, 25, 30, 90, 100`;
 - ordinary users see the derived cell size but cannot submit an override;
@@ -1482,8 +1658,16 @@ Implementation is not conformant until tests demonstrate:
 - capability v2 rejects missing, empty mandatory, malformed, orphan, duplicate,
   non-exhaustive, out-of-axis, invalid-default, invalid-tuple, and invalid-mod
   relations, while valid adjacency/default closure is byte-stable;
+- capability v3 passes complete graphs for every exposed locale and rejects a
+  missing/empty station-database axis or default plus every v2 hostile shape;
 - absent, v1 partial, v1 optional-empty, v1 hostile, v2 complete, v2 partial,
-  v2 hostile, and newer capability schemas follow the section-9 state matrix;
+  v2 hostile, v3 complete, v3 partial, v3 hostile, and newer capability schemas
+  follow the section-9 state matrix;
+- historical schema-v2 update availability/preview/apply uses its frozen v2
+  parent chain and never adds a station-database selection or changes v2 bytes;
+- description-schema-v2 clients create with locale-keyed schema-v3 members,
+  while old clients may parse the frozen US compatibility members but receive
+  `unsupported_builder_schema` before validation or creation mutation;
 - every inventoried Builder/rq-engine/run-page discovery surface and paired
   mutation/build endpoint derives availability from the same stored graph and
   an invalid request causes neither NoDb mutation nor enqueue;
@@ -1495,10 +1679,14 @@ Implementation is not conformant until tests demonstrate:
   execution evidence and invalid graph edges are exercised directly;
 - baseline differential fixtures pass before legacy locale conditionals are
   removed; and
-- a v2-reader deployment runs with v2 writing disabled before creation begins;
-  rollback to a pre-v2 reader is allowed only while no v2 project exists, and
-  after v2 creation every supported rollback revision must enforce v2 without
-  broadening its graph or changing project bytes.
+- a v3-capable reader deployment runs with schema-v3 writing disabled before
+  WP12C creation begins and proves all five v3 fixtures plus historical v2;
+  rollback to a schema-v2-only reader is allowed only while no v3 project
+  exists, and after v3 creation every supported rollback revision must enforce
+  v2 and v3 without broadening either graph or changing project bytes; and
+- a direct concurrent Legacy/2015/GHCN resolver test uses real station metadata
+  and proves every returned `StationMeta.parpath` stays under the selected
+  database's owned PAR root.
 
 At least one representative project MUST be exercised through create, reopen,
 fork, archive, and restore before production rollout.

@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-08-26
-**Active Packages**: 29
+**Last Updated**: 2026-08-27
+**Active Packages**: 30
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -404,6 +404,22 @@ When resuming Kubernetes work:
 ---
 
 ## 🚧 In Progress
+
+### Project Config Builder Locale Expansion (WP12C)
+
+**Started**: 2026-08-27
+
+**Priority/Security**: Critical / `high`
+
+**Link**: [docs/work-packages/20260827_project_config_builder_locale_expansion/](docs/work-packages/20260827_project_config_builder_locale_expansion/)
+
+**Scope**: Expose the canonical Europe, Canada, Australia, and Global Earth
+profiles alongside Continental US. Make each profile's typed data and climate-
+station database lists the sole Builder authority, with Vanilla CLIGEN available
+and selected by default in every locale and Canada using global datasets.
+
+**Status**: Contract checkpoint in progress; production remains reserved for
+WP12.
 
 ### Project Config Builder Model Options
 
