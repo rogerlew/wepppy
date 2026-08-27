@@ -5,7 +5,7 @@
 **Initiative / canonical branch**: `feature/project-owned-config` / `master`
 **Promotion policy**: WP12C may push the initiative branch and deploy only to
 host `forest`; WP12 owns canonical merge and production
-**Checkpoint**: pending standalone commit
+**Checkpoint**: `bb1745fd8`
 **Disposition**: Ready; no unresolved blocking contract findings
 
 ## First Review Findings

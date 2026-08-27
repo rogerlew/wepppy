@@ -4,9 +4,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-27 15:40 UTC
-**Current phase**: Broad validation and implementation review
-**Last updated**: 2026-08-27 19:00 UTC
-**Next milestone**: accept the candidate revision through review and Forest
+**Current phase**: Audit correction and Forest release gate
+**Last updated**: 2026-08-27 20:05 UTC
+**Next milestone**: governance acceptance, then reader-first Forest proof
 **Security impact**: `high`
 **Dedicated security review**: `yes`
 **Security artifact**: `artifacts/20260827_security_review.md`
@@ -19,7 +19,8 @@ and production
 
 ### In Progress
 
-- [ ] Pass independent implementation/security reviews.
+- [ ] Commit the accepted checkpoint-enumeration correction and obtain
+  governance re-review.
 
 ### Pending
 
@@ -52,6 +53,16 @@ None.
 - [x] Added locale-selected API/UI graphs and schema-v2 client negotiation.
 - [x] Added direct historical, hostile-state, cross-locale, frontend, and real
   concurrent SQLite/PAR CLIGEN tests; all focused gates pass.
+- [x] Closed legacy/schema-v1 live-registry update synthesis and restored
+  ADR-0047 locale-dispatched component ownership in `b31eeb625`.
+- [x] Correctness and security independently marked exact candidate
+  `b31eeb625` Ready with no unresolved High or Medium findings.
+- [x] Passed the final full Python suite (7,080 passed, 63 skipped), frontend
+  suite (107 suites / 794 tests), lint, stubs, broad-exception enforcement,
+  diff, and dead-code gates.
+- [x] Operator accepted the standalone correction adding
+  `project_config_capabilities.py` as a stored-authority reader and
+  `locales/__init__.py` as export-only, without rewriting history.
 
 ## Decisions Log
 
@@ -98,6 +109,17 @@ observed modes require explicit selection.
 **Rationale**: Climate generation mode and the station-statistics catalog are
 different choices and must not be conflated or inferred from one another.
 
+### 2026-08-27 20:05 UTC: Preserve the checkpoint correction chronology
+
+**Decision**: Keep checkpoint `bb1745fd8` and every implementation commit
+unchanged. Record its omission of two bounded consumers in a standalone audit
+artifact and require WP12 to compare the ratified boundary with the actual
+changed-file set.
+
+**Rationale**: Retrofitting the original checkpoint would falsely imply the
+operator ratified an enumeration that was not present. The two files add no
+authority source, authentication rule, or mutation path.
+
 ## Risks and Issues
 
 | Risk | Severity | Mitigation | Status |
@@ -112,9 +134,10 @@ different choices and must not be conflated or inferred from one another.
 ## Verification Checklist
 
 - [x] Focused Python tests pass.
-- [x] Full Python suite passes (7,043 passed, 63 skipped).
-- [x] Frontend lint and tests pass (107 suites, 793 tests).
+- [x] Full Python suite passes (7,080 passed, 63 skipped).
+- [x] Frontend lint and tests pass (107 suites, 794 tests).
 - [x] Stub/API gates pass.
 - [x] Docs lint passes.
-- [ ] Correctness, governance, and security findings are dispositioned.
+- [x] Correctness and security findings are dispositioned.
+- [ ] Governance accepts the standalone checkpoint correction.
 - [ ] Exact-host `forest` acceptance is recorded.

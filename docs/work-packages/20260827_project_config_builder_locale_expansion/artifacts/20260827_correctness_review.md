@@ -6,10 +6,11 @@
 - **Initiative / canonical branch**: `feature/project-owned-config` / `master`
 - **Promotion policy**: WP12C pushes the initiative branch and deploys only to
   host `forest`; WP12 owns canonical merge and production
-- **Reviewer**: pending independent reviewer
+- **Reviewer**: Aquinas (`implementation_correctness_review`)
 - **Date**: 2026-08-27
-- **Scope reviewed**: pending implementation
-- **Commit/branch context**: contract checkpoint pending
+- **Scope reviewed**: implementation from checkpoint `bb1745fd8` through
+  candidate `b31eeb625`
+- **Commit/branch context**: `feature/project-owned-config` at `b31eeb625`
 - **Canonical contracts**: project-owned config sections 7.2.2, 7.4, 9, and 15
 
 ## User Outcome
@@ -74,18 +75,42 @@ unavailable and preserves project bytes.
   have required behavior.
 - [ ] Direct unmocked evidence exists for every changed persistence/provider
   boundary.
-- [ ] Paired UI/server evidence proves valid-state noninterference and hostile
+- [x] Paired UI/server evidence proves valid-state noninterference and hostile
   rejection.
-- [ ] Locale-keyed graph and component mappings have paired compatibility,
+- [x] Locale-keyed graph and component mappings have paired compatibility,
   missing-member, and cross-locale tests.
-- [ ] Independent reviewer has dispositioned all findings.
+- [x] Independent reviewer has dispositioned all findings.
 
 ## Findings
 
-No implementation findings can be closed before the standalone checkpoint and
-implementation revision exist.
+The first implementation review found that stored v3 climate structure was not
+fully frozen, updates could recompose capabilities from the live registry,
+station IDs were not bound to exact runtime selectors, and post-registration
+failure could leave an orphaned SQL Run row. Remediation `9fd8b556b` closed
+those paths with exact graph validation, stored-graph update resolution,
+selector binding, and compensating registration cleanup.
+
+Re-review found two blocking compatibility defects. Legacy/schema-v1 Builder
+update preview could still synthesize current capability authority, and
+remediation had made locale-dispatched ESDAC/ASRIS and Australian land-cover
+components claim selector writes forbidden by ADR-0047. Candidate `b31eeb625`
+rejects legacy/schema-v1 updates before registry resolution and without writes,
+and restores exact component ownership with direct regressions.
+
+The reviewer confirmed that inherited shared defaults remain valid flattened
+values; no unsupported deletion/tombstone semantic is needed. The five-profile
+backend and route matrices cover complete authority, while the frontend fixture
+is intentionally an interaction fixture rather than a second data catalog.
+Live provider execution remains a mandatory Forest acceptance gate.
+
+The reviewer also confirmed the accepted scope correction:
+`locales/__init__.py` is export-only, while the changed schema-v2/v3 paths in
+`project_config_capabilities.py` are side-effect-free stored-authority readers
+that cannot broaden stored axes, authentication, or mutation.
 
 ## Verdict
 
-- **Gate status**: fail (implementation and independent review pending)
-- **Release recommendation**: hold
+- **Gate status**: pass at exact candidate `b31eeb625`
+- **Unresolved findings**: High 0; Medium 0
+- **Release recommendation**: Ready for writer-disabled, reader-first Forest
+  acceptance; creation remains gated on that proof

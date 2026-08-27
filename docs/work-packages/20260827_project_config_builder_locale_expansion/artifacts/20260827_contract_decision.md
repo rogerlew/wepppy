@@ -20,7 +20,8 @@ GHCN for the other profiles. The operator then explicitly selected Vanilla
 CLIGEN as the default for every profile. This sequence plus the explicit
 ratification approves the combined matrix, compatibility, source-boundary, and
 rollback amendment.
-**Implementation conformance**: pending
+**Implementation conformance**: candidate `b31eeb625` is independently
+correctness/security Ready; Forest acceptance remains pending
 
 ## Applicable Canonical Contracts
 
@@ -44,13 +45,22 @@ PAR-root resolution. Changed implementation consumers are exactly
 `wepppy/nodb/locales/capability_graph.py`;
 `wepppy/nodb/config_builder/schema.py`, `registry.py`, `resolver.py`, and
 `snapshot.py`; `wepppy/nodb/project_config_update.py`;
+`wepppy/nodb/project_config_capabilities.py` as the side-effect-free stored
+schema-v2/v3 authority reader;
 `wepppy/microservices/rq_engine/builder_routes.py`,
-`climate_routes.py`, and `schema_defaults_routes.py`; and
+`climate_routes.py`, and `schema_defaults_routes.py`;
+`wepppy/nodb/locales/__init__.py` as export-only package wiring; and
 `wepppy/weppcloud/controllers_js/config_builder.js` plus
 `wepppy/weppcloud/templates/config_builder.htm`. Their `.pyi` files and focused
 tests are in validation scope. The config-builder registry owns deterministic
 typed-component synthesis and composition. Routes and frontend consume only
 that registry/stored-run authority and cannot broaden it.
+
+The two consumers above were absent from the ratified checkpoint's supposedly
+exact enumeration. The chronology-preserving correction, operator acceptance,
+independent control confirmation, and WP12 prevention step are recorded in
+`20260827_checkpoint_scope_deviation.md`. They add no authority source or
+normative behavior and do not rewrite checkpoint `bb1745fd8`.
 
 Shared preset files remain compatibility evidence, not Builder authority.
 Archived work packages, fixtures, labels, filesystem discovery, and frontend

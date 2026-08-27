@@ -39,10 +39,17 @@ and observed Daymet, defaults to Vanilla CLIGEN, and uses GHCN stations.
   select the graph for the chosen locale.
 - [x] (2026-08-27 18:39Z) Focused Python and JavaScript tests prove historical
   and hostile stored-graph behavior, cross-locale rejection, and API/UI parity.
-- [x] (2026-08-27 19:00Z) Passed the complete local Python gate (7,043 passed,
-  63 skipped), frontend lint and all 107 suites / 793 tests, stubs, docs,
-  exception enforcement, compile, and dead-code checks.
-- [ ] Obtain and disposition independent implementation reviews.
+- [x] (2026-08-27 20:00Z) Closed two review-discovered compatibility defects:
+  legacy/schema-v1 update synthesis and locale-dispatched provider ownership.
+  Correctness and security independently marked exact candidate `b31eeb625`
+  Ready with no unresolved High or Medium findings.
+- [x] (2026-08-27 20:00Z) Passed the final complete Python gate (7,080 passed,
+  63 skipped), frontend lint and all 107 suites / 794 tests, stubs, exception
+  enforcement, diff checks, and dead-code checks.
+- [x] (2026-08-27 20:05Z) Operator accepted the chronology-preserving
+  checkpoint correction for the two omitted read/export consumers and required
+  a scope-vs-changed-files gate in WP12.
+- [ ] Commit the audit correction and obtain governance re-review.
 - [ ] Deploy the accepted revision to exact host `forest` without rebuilding and
   record real provider/run evidence.
 - [ ] Close the package, push, and hand the accepted revision to WP12.
@@ -80,6 +87,19 @@ and observed Daymet, defaults to Vanilla CLIGEN, and uses GHCN stations.
   `tests/nodb/test_climate_catalog.py`; the corrected contract assertion and
   complete rerun pass.
 
+- Observation: the checkpoint's exact changed-consumer enumeration omitted
+  `project_config_capabilities.py` and `locales/__init__.py`, although both were
+  necessary implementation consumers.
+  Evidence: `git diff --name-only bb1745fd8..280cf7e84` and
+  `artifacts/20260827_checkpoint_scope_deviation.md`.
+
+- Observation: final review found legacy/schema-v1 Builder update preview could
+  consult the live registry and synthesize a modern graph, and a remediation
+  had made ESDAC/ASRIS and Australian land cover claim runtime selector writes
+  contrary to ADR-0047.
+  Evidence: both paths are closed in `b31eeb625`, with no-write and exact
+  component-ownership regressions.
+
 ## Decision Log
 
 - Decision: Use capability schema version 3 for WP12C and retain the schema-v2
@@ -103,19 +123,30 @@ and observed Daymet, defaults to Vanilla CLIGEN, and uses GHCN stations.
   second source of truth.
   Date/Author: 2026-08-27 / project operator and Codex.
 
+- Decision: Preserve checkpoint `bb1745fd8` and record its incomplete consumer
+  enumeration in a standalone correction rather than rewriting history.
+  Rationale: the omitted files are bounded read/export consumers, but an exact
+  ratification must retain truthful chronology. WP12 will compare the complete
+  changed-file set with the accepted boundary before promotion.
+  Date/Author: 2026-08-27 / project operator and Codex.
+
 ## Outcomes & Retrospective
 
-The package is open. No implementation or deployment has occurred yet.
+The implementation candidate is complete at `b31eeb625`, independently Ready,
+and fully validated locally. No WP12C Forest restart or expanded-profile run has
+occurred yet. The package remains open for the accepted audit correction,
+governance confirmation, reader-first rollback-floor proof, and live Forest
+provider/create/reopen evidence.
 
 ## Context and Orientation
 
 WP12B introduced the canonical locale inventory in
 `wepppy/nodb/locales/locale_profiles.py`, provider catalogs in
 `climate_catalog.py` and `landuse_catalog.py`, and immutable schema-v2 graphs in
-`capability_graph.py`. `wepppy/nodb/config_builder/registry.py` loads static TOML
-components plus dynamic WEPP binaries. `resolver.py` currently always constructs
-the Continental-US graph. The frontend controller at
-`wepppy/weppcloud/controllers_js/config_builder.js` also reads one global graph.
+`capability_graph.py`. WP12C now builds closed schema-v3 graphs for five profiles,
+stores the selected graph in each new run, and makes both the resolver and
+frontend select the locale-keyed graph. Historical schema-v2 authority remains
+frozen and schema-v1/legacy update preview fails before live registry loading.
 
 A capability graph is the complete set of data/method choices and the adjacency
 rules between them. A provider-backed component is a deterministic Builder
