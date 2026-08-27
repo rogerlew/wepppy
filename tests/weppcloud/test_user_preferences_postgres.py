@@ -321,6 +321,15 @@ def test_postgres_identity_binding_and_owned_run_receipt(postgres_user) -> None:
         {"token_class": "user", "sub": str(user_id), "email": email}
     )
     assert numeric is not None and numeric.user_id == user_id
+    opaque_subject = resolve_creation_actor(
+        {
+            "token_class": "user",
+            "sub": fs_uniquifier,
+            "user_id": str(user_id),
+            "email": email,
+        }
+    )
+    assert opaque_subject is not None and opaque_subject.user_id == user_id
     with pytest.raises(PreferenceIdentityError):
         resolve_creation_actor(
             {"token_class": "user", "sub": fs_uniquifier, "email": email}

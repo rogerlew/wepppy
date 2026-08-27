@@ -84,9 +84,12 @@ async def builder_description(request: Request) -> JSONResponse:
     assert claims is not None
     try:
         description = describe_builder()
-    except RegistryError:
+    except RegistryError as exc:
         logger.exception("builder description failed")
-        return error_response("Builder registry is unavailable.", status_code=500, code="builder_registry_error")
+        return error_response(
+            "Builder registry is unavailable.", status_code=500,
+            code="builder_registry_error", details=str(exc),
+        )
     return JSONResponse({"schema_version": description.schema_version, "registry_revision": description.registry_revision, "components": [asdict(item) for item in description.components], "allowed_cell_sizes": list(description.allowed_cell_sizes), "default_selections": dict(description.default_selections), "can_override_cellsize": _can_override(claims), "config_token": "config", "config_filename": "config.cfg"})
 
 
@@ -103,9 +106,12 @@ async def validate_builder(request: Request) -> JSONResponse:
         return JSONResponse({"valid": True, "registry_revision": candidate.resolved.registry_revision, "review": dict(candidate.review)})
     except BuilderConstraintError as exc:
         return _field_error(exc)
-    except RegistryError:
+    except RegistryError as exc:
         logger.exception("builder validation failed")
-        return error_response("Builder registry is unavailable.", status_code=500, code="builder_registry_error")
+        return error_response(
+            "Builder registry is unavailable.", status_code=500,
+            code="builder_registry_error", details=str(exc),
+        )
     except ValueError:
         return error_response("Invalid builder request.", status_code=400, code="validation_error")
 
@@ -125,17 +131,24 @@ async def create_builder_project(request: Request) -> JSONResponse:
         assert candidate is not None and key is not None
     except BuilderConstraintError as exc:
         return _field_error(exc)
-    except RegistryError:
+    except RegistryError as exc:
         logger.exception("builder registry failed during creation")
-        return error_response("Builder registry is unavailable.", status_code=500, code="builder_registry_error")
+        return error_response(
+            "Builder registry is unavailable.", status_code=500,
+            code="builder_registry_error", details=str(exc),
+        )
     except ValueError:
         logger.exception("builder creation validation failed")
         return error_response("Invalid builder request.", status_code=400, code="validation_error")
 
     try:
         actor = resolve_creation_actor(claims)
-    except (PreferenceIdentityError, SQLAlchemyError):
-        return error_response("Could not resolve project owner.", status_code=500, code="run_ownership_failed")
+    except (PreferenceIdentityError, SQLAlchemyError) as exc:
+        logger.exception("builder project owner resolution failed")
+        return error_response(
+            "Could not resolve project owner.", status_code=500,
+            code="run_ownership_failed", details=str(exc),
+        )
     fingerprint = build_creation_fingerprint(mode="builder", preset_id="config", normalized_overrides=dict(candidate.review), registry_revision=candidate.resolved.registry_revision)
     client = _creation_idempotency_client()
     try:

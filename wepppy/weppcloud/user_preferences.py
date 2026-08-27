@@ -174,6 +174,11 @@ def _positive_user_id(raw: Any) -> int:
     return user_id
 
 
+def _user_id_from_claims(claims: Mapping[str, Any]) -> int:
+    """Resolve the numeric account ID while allowing an opaque JWT subject."""
+    return _positive_user_id(claims.get("user_id") or claims.get("sub"))
+
+
 def _application_context():
     from flask import has_app_context
     from wepppy.weppcloud.app import app
@@ -260,7 +265,7 @@ def resolve_creation_actor(
     if not claims or str(claims.get("token_class") or "").strip() != "user":
         return None
 
-    user_id = _positive_user_id(claims.get("sub"))
+    user_id = _user_id_from_claims(claims)
 
     from wepppy.weppcloud.app import User, db
 
@@ -309,7 +314,7 @@ def resolve_account_preferences(
     if actor_token_class in {"service", "mcp"}:
         return None
     if actor_token_class == "user":
-        user_id = _positive_user_id(claims.get("sub"))
+        user_id = _user_id_from_claims(claims)
     elif actor_token_class == "session":
         if "user_id" not in claims:
             return None

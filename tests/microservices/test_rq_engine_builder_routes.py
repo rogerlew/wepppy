@@ -65,6 +65,49 @@ def test_description_and_validation_share_revision(client) -> None:
     assert validated.json()["review"]["config_filename"] == "config.cfg"
 
 
+def test_registry_failure_returns_diagnostic_details(client, monkeypatch) -> None:
+    http, _claims, _path, _idempotency = client
+    monkeypatch.setattr(
+        builder_routes,
+        "describe_builder",
+        lambda: (_ for _ in ()).throw(builder_routes.RegistryError("missing binary role")),
+    )
+
+    response = http.get("/api/project-config/builder")
+
+    assert response.status_code == 500
+    assert response.json()["error"] == {
+        "message": "Builder registry is unavailable.",
+        "details": "missing binary role",
+        "code": "builder_registry_error",
+    }
+
+
+def test_owner_failure_returns_diagnostic_details(client, monkeypatch) -> None:
+    http, _claims, _path, _idempotency = client
+    monkeypatch.setenv("WEPPPY_PROJECT_CONFIG_BUILDER_WRITER_ENABLED", "1")
+    monkeypatch.setattr(
+        builder_routes,
+        "resolve_creation_actor",
+        lambda _claims: (_ for _ in ()).throw(
+            builder_routes.PreferenceIdentityError("Account identity is invalid.")
+        ),
+    )
+    revision = http.get("/api/project-config/builder").json()["registry_revision"]
+
+    response = http.post(
+        "/api/project-config/builder/create",
+        json={
+            "registry_revision": revision,
+            "creation_idempotency_key": "12345678-1234-4234-9234-123456789abc",
+            "selections": selections(),
+        },
+    )
+
+    assert response.status_code == 500
+    assert response.json()["error"]["details"] == "Account identity is invalid."
+
+
 def test_stale_revision_and_ordinary_override_fail(client) -> None:
     http, claims, _path, _idempotency = client
     stale = http.post("/api/project-config/builder/validate", json={"registry_revision": "stale", "selections": selections()})

@@ -30,6 +30,9 @@
   role-digest provenance; focused code and static gates pass (2026-08-27 05:55 UTC).
 - [x] Passed independent binary-provider implementation correctness review
   (2026-08-27 06:05 UTC).
+- [x] Corrected Forest browser-token ownership resolution to prefer the numeric
+  `user_id` claim over an opaque `sub`, and made Builder registry/ownership
+  error details diagnostic (2026-08-27 05:42 PDT).
 - [x] Recorded operator approval and scaffolded the package (2026-08-27 03:36 UTC).
 - [x] Corrected and passed two independent contract reviews (2026-08-27 04:00 UTC).
 - [x] Committed standalone checkpoint `95559bc6f` (2026-08-27 04:00 UTC).
@@ -44,6 +47,17 @@
   6,962 passed and 63 skipped (2026-08-27 04:42 UTC).
 
 ## Decisions Log
+
+### 2026-08-27 05:42 PDT: Browser identity uses the numeric account claim
+
+**Decision**: Account-backed creation and preference lookup use `user_id` when
+present and retain numeric `sub` compatibility. Opaque session/account subjects
+are not coerced into database IDs. Builder boundary errors preserve their safe
+exception message in the canonical diagnostic `details` field.
+
+**Rationale**: Forest browser JWTs carry an opaque `sub` and a separate numeric
+`user_id`; treating the subject as the database key blocked project ownership
+resolution and hid the actionable cause from the response.
 
 ### 2026-08-27 05:10 UTC: Canonical provider owns binary availability
 
