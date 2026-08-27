@@ -98,6 +98,24 @@ failed jobs remain combined tables with a Queue column.
 3. `rq-engine` runs with checked-out commit inputs.
 4. Poll and review outputs in WEPPcloud.
 
+### 4. Project-owned config update backend
+
+The project config update API is dormant unless
+`WEPPPY_PROJECT_CONFIG_UPDATE_ENABLED` is explicitly enabled. Availability is
+a read-only run-access check. Preview and apply additionally require the
+current project owner or an Admin/Root user. Apply accepts the exact opaque
+`preview_id` and one reviewed `{section, option}` trigger, then returns a
+single asynchronous `job_id`. The worker rechecks the actor's authority before
+adding all missing registered values; it never overwrites existing values.
+
+- `GET /rq-engine/api/runs/{runid}/{config}/project-config/update-availability`
+- `GET /rq-engine/api/runs/{runid}/{config}/project-config/update-preview`
+- `POST /rq-engine/api/runs/{runid}/{config}/project-config/update-apply`
+
+Clients must refresh after `stale_config_preview`, wait for the active job
+after `config_update_in_progress`, and treat `config_update_unavailable` as a
+non-mutating refusal.
+
 ## Error Handling Expectations
 rq-engine uses a canonical error payload:
 

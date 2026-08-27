@@ -14,6 +14,7 @@ SUCCESS_STATUS_OVERRIDES: dict[tuple[str, str], int] = {
     ("POST", "/api/runs/{runid}/{config}/geneva/prepare-hrus"): 202,
     ("POST", "/api/runs/{runid}/{config}/geneva/run-batch"): 202,
     ("POST", "/api/runs/{runid}/{config}/geneva/run-workflow"): 202,
+    ("POST", "/api/runs/{runid}/{config}/project-config/update-apply"): 202,
     ("POST", "/create/"): 303,
 }
 
@@ -46,6 +47,7 @@ PATHS_REQUIRING_400 = {
     "/api/runs/{runid}/{config}/geneva/run-workflow",
     "/api/runs/{runid}/{config}/post-dss-export-rq",
     "/api/runs/{runid}/{config}/prep-wepp-watershed",
+    "/api/runs/{runid}/{config}/project-config/update-apply",
     "/api/runs/{runid}/{config}/restore-archive",
     "/api/runs/{runid}/{config}/run-ash",
     "/api/runs/{runid}/{config}/run-debris-flow",
@@ -114,6 +116,8 @@ PATHS_REQUIRING_409 = {
     "/api/runs/{runid}/{config}/export/features/published/{profile}/download",
     "/api/runs/{runid}/{config}/bootstrap/checkout",
     "/api/runs/{runid}/{config}/bootstrap/enable",
+    "/api/runs/{runid}/{config}/project-config/update-apply",
+    "/api/runs/{runid}/{config}/project-config/update-preview",
 }
 
 PATHS_REQUIRING_429 = {

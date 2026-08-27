@@ -5,9 +5,9 @@ Source-of-truth inventory captured directly from:
 - `wepppy/weppcloud/routes/bootstrap.py`
 
 Snapshot summary:
-- Total endpoints inventoried: **140**
-- Classification counts: **agent-facing 117**, **internal 17**, **ui-only 6**
-- Canonical owner counts: **rq-engine 137**, **Flask wrapper 3**
+- Total endpoints inventoried: **143**
+- Classification counts: **agent-facing 120**, **internal 17**, **ui-only 6**
+- Canonical owner counts: **rq-engine 140**, **Flask wrapper 3**
 
 Cutover reconciliation note (2026-04-11):
 - Row-8 contract cutover package
@@ -45,6 +45,9 @@ Inventory reconciliation note (2026-08-26):
 - Added the authenticated project-config builder description, validation, and
   synchronous creation endpoints. All three require `rq:enqueue`; creation is
   default-off and always materializes the server-owned `config` token.
+- Added project-config update availability, owner/Admin/Root preview, and
+  asynchronous apply endpoints. The first two are synchronous and read-only;
+  apply is default-off and enqueues one reauthorizing merge-only worker.
 
 ## Inventory Table
 
@@ -162,6 +165,9 @@ Inventory reconciliation note (2026-08-26):
 | POST | `/api/runs/{runid}/{config}/run-omni-contrasts-dry-run` | `wepppy/microservices/rq_engine/omni_routes.py` | `run_omni_contrasts_dry_run` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | read-only | Run access check: `authorize_run_access`. Dry-run endpoint; returns contrast report in `result`; no queue. |
 | POST | `/api/runs/{runid}/{config}/geneva/prepare-hrus` | `wepppy/microservices/rq_engine/geneva_routes.py` | `prepare_hrus` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Validates Geneva prepare payload and enqueues async job; returns canonical submission envelope with `job_id` and `status_url`. |
 | POST | `/api/runs/{runid}/{config}/prepare-roads` | `wepppy/microservices/rq_engine/roads_routes.py` | `prepare_roads` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; clears stale `run_roads` timestamp and returns `job_id`. |
+| GET | `/api/runs/{runid}/{config}/project-config/update-availability` | `wepppy/microservices/rq_engine/project_config_update_routes.py` | `update_availability` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | read-only | Run read access check; default-off synchronous availability only, with no project write or queue. |
+| GET | `/api/runs/{runid}/{config}/project-config/update-preview` | `wepppy/microservices/rq_engine/project_config_update_routes.py` | `update_preview` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | read-only | Owner/Admin/Root-only complete merge preview with opaque identity; no project write or queue. |
+| POST | `/api/runs/{runid}/{config}/project-config/update-apply` | `wepppy/microservices/rq_engine/project_config_update_routes.py` | `update_apply` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Owner/Admin/Root-only explicit apply; rejects stale/active previews and returns `202` with one worker-reauthorized RQ `job_id`. |
 | POST | `/api/runs/{runid}/{config}/geneva/run-batch` | `wepppy/microservices/rq_engine/geneva_routes.py` | `run_batch` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Validates Geneva run request and enqueues async job; returns canonical submission envelope with `job_id` and `status_url`. |
 | POST | `/api/runs/{runid}/{config}/geneva/run-workflow` | `wepppy/microservices/rq_engine/geneva_routes.py` | `run_workflow` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Validates normalized chained request (prepare -> panel -> batch), enqueues workflow jobs, and returns `job_id`/`job_ids`. |
 | POST | `/api/runs/{runid}/{config}/run-rhem` | `wepppy/microservices/rq_engine/rhem_routes.py` | `run_rhem` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |

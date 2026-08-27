@@ -285,9 +285,13 @@ def load_project_config(
     parser_factory: Callable[..., RawConfigParser],
     run_id: str,
 ) -> ProjectConfigLoadResult:
-    """Load flattened or legacy configuration without writing project files."""
+    """Load project configuration, recovering only a recorded pending amendment."""
 
     working_root = Path(wd).resolve()
+    if (working_root / ".config-amendment.pending.json").exists():
+        from wepppy.nodb.project_config_update import recover_project_config_update
+
+        recover_project_config_update(working_root)
     raw_token_path = Path(config_token.split("?", 1)[0])
     if not raw_token_path.suffix:
         raw_token_path = raw_token_path.with_suffix(".cfg")
@@ -314,6 +318,10 @@ def load_project_config(
                     "Nested working directories cannot own flattened project configs"
                 )
         else:
+            if (parent_root / ".config-amendment.pending.json").exists():
+                from wepppy.nodb.project_config_update import recover_project_config_update
+
+                recover_project_config_update(parent_root)
             authority_root = parent_root
             candidate = parent_root / filename
 

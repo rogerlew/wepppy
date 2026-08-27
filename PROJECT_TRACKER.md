@@ -1156,6 +1156,21 @@ the remaining-run controller plan has no next controller milestone.
 
 ## ✅ Done
 
+### Project Config Update Backend (WP08)
+
+**Completed**: 2026-08-26
+
+**Link**: [docs/work-packages/20260804_project_config_update_backend/](docs/work-packages/20260804_project_config_update_backend/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-08-26)
+
+**Summary**: Delivered the default-off project-owned-config update backend:
+read-only complete previews, owner/Admin/Root apply, worker reauthorization,
+opaque stale-preview protection, merge-only provenance, and lock/journal crash
+recovery. The full suite passed (`6925 passed, 63 skipped`).
+
+---
+
 ### Project Config Builder UI (WP07) (2026-08-26)
 
 **Completed**: 2026-08-26

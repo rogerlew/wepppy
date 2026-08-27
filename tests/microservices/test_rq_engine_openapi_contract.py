@@ -18,10 +18,11 @@ INVENTORY_FILE = Path(
     "docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md"
 )
 
-MAX_OPENAPI_CANONICAL_BYTES = 141_000
+# Includes the three contract-required project config update operations added by WP08.
+MAX_OPENAPI_CANONICAL_BYTES = 144_000
 MAX_FROZEN_SUMMARY_CHARS = 72
 MAX_FROZEN_DESCRIPTION_CHARS = 280
-MAX_FROZEN_METADATA_TOTAL_CHARS = 21_600
+MAX_FROZEN_METADATA_TOTAL_CHARS = 21_900
 _CORRELATION_HEADER = "X-Correlation-ID"
 _CORRELATION_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")
 
@@ -98,8 +99,8 @@ def _canonical_size_bytes(payload: dict) -> int:
 
 
 def test_frozen_agent_route_count_is_expected(_frozen_agent_routes: list[tuple[str, str]]) -> None:
-    assert len(_frozen_agent_routes) == 117
-    assert len(set(_frozen_agent_routes)) == 117
+    assert len(_frozen_agent_routes) == 120
+    assert len(set(_frozen_agent_routes)) == 120
 
 
 def test_frozen_agent_routes_exist_in_openapi(

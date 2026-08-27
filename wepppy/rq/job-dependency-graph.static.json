@@ -230,7 +230,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "modify_landuse_mapping",
-    "source_lineno": 832,
+    "source_lineno": 836,
     "source_module": "wepppy/microservices/rq_engine/landuse_routes.py"
   },
   {
@@ -302,6 +302,18 @@
     "source_function": "acquire_polaris",
     "source_lineno": 79,
     "source_module": "wepppy/microservices/rq_engine/polaris_routes.py"
+  },
+  {
+    "depends_on": [],
+    "enqueue_target": "<unknown>",
+    "job_meta_stage": null,
+    "notes": [
+      "missing enqueue target"
+    ],
+    "queue_name": "default",
+    "source_function": "update_apply",
+    "source_lineno": 184,
+    "source_module": "wepppy/microservices/rq_engine/project_config_update_routes.py"
   },
   {
     "depends_on": [],

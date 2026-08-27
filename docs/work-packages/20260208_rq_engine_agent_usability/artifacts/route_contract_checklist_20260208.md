@@ -7,7 +7,7 @@ Guarded by:
 - `tools/check_route_contract_checklist.py` (checklist row parity + non-empty contract fields)
 - `tests/microservices/test_rq_engine_openapi_contract.py` (OpenAPI metadata/response contract + oversize budgets)
 
-- Total frozen routes covered: **117**
+- Total frozen routes covered: **120**
 
 Cutover reconciliation note (2026-04-11):
 - Row-8 contract cutover package
@@ -42,6 +42,8 @@ Contract reconciliation note (2026-07-15):
 Inventory reconciliation note (2026-08-26):
 - Added contract rows for the authenticated synchronous project-config builder
   description, validation, and default-off creation routes.
+- Added the default-off project-owned-config availability and preview reads and
+  the owner/Admin/Root asynchronous apply route.
 
 ## Contract Matrix
 
@@ -134,6 +136,9 @@ Inventory reconciliation note (2026-08-26):
 | `GET` | `/api/runs/{runid}/{config}/geospatial-metadata` | JWT Bearer | rq:status or rq:read | read-only | sync | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_geospatial_upload_metadata_routes.py` |
 | `GET` | `/api/runs/{runid}/{config}/outputs` | JWT Bearer | rq:status or rq:read | read-only | sync | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_errors_progress_outputs_routes.py` |
 | `GET` | `/api/runs/{runid}/{config}/pipeline` | JWT Bearer | rq:status or rq:read | read-only | sync | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_orchestration_read_routes.py` |
+| `GET` | `/api/runs/{runid}/{config}/project-config/update-availability` | JWT Bearer | rq:enqueue | read-only | sync no queue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_project_config_update_routes.py` |
+| `GET` | `/api/runs/{runid}/{config}/project-config/update-preview` | JWT Bearer; owner/Admin/Root | rq:enqueue | read-only | sync no queue | `200, 401, 403, 409, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_project_config_update_routes.py` |
+| `POST` | `/api/runs/{runid}/{config}/project-config/update-apply` | JWT Bearer; owner/Admin/Root | rq:enqueue | mutating | async enqueue | `202, 400, 401, 403, 409, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_project_config_update_routes.py` |
 | `POST` | `/api/runs/{runid}/{config}/post-dss-export-rq` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `POST` | `/api/runs/{runid}/{config}/prep-wepp-watershed` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `GET` | `/api/runs/{runid}/{config}/readiness` | JWT Bearer | rq:status or rq:read | read-only | sync | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_orchestration_read_routes.py` |
