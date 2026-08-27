@@ -4,7 +4,7 @@ kind = "capability"
 source_revision = "1"
 label = "Continental-US capabilities"
 description = "Resolved deployment capability lists for continental-US projects."
-owns = ["capabilities.dem_sources", "capabilities.delineation_backends", "capabilities.watershed_representations", "capabilities.wepp_binaries", "capabilities.soil_builders", "capabilities.landuse_datasets", "capabilities.climate_datasets", "capabilities.mods"]
+owns = ["capabilities.dem_sources", "capabilities.delineation_backends", "capabilities.watershed_representations", "capabilities.soil_builders", "capabilities.landuse_datasets", "capabilities.climate_datasets", "capabilities.mods"]
 overrides = []
 
 [constraints]
@@ -25,11 +25,6 @@ value = ["topaz", "wbt"]
 section = "capabilities"
 option = "watershed_representations"
 value = ["single-ofe", "multiple-ofe"]
-
-[[writes]]
-section = "capabilities"
-option = "wepp_binaries"
-value = ["wepp_dcc52a6", "wepp_260803"]
 
 [[writes]]
 section = "capabilities"

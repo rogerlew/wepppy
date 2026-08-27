@@ -8,6 +8,7 @@ TestClient = pytest.importorskip("fastapi.testclient").TestClient
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import builder_routes
 from wepppy.weppcloud.user_preferences import CreationActor
+from wepp_runner.wepp_runner import get_linux_wepp_bin_opts
 
 pytestmark = pytest.mark.microservice
 
@@ -51,6 +52,13 @@ def test_description_and_validation_share_revision(client) -> None:
     assert body["config_token"] == "config"
     locale = next(item for item in body["components"] if item["component_id"] == "continental-us")
     assert locale["constraints"]["allowed_dem"] == ["usgs-ned1-2024", "usgs-ned13-2022"]
+    binaries = [
+        item for item in body["components"] if item["kind"] == "wepp_binary"
+    ]
+    assert [item["component_id"] for item in binaries] == sorted(
+        set(get_linux_wepp_bin_opts())
+    )
+    assert all(item["label"] == item["component_id"] for item in binaries)
     validated = http.post("/api/project-config/builder/validate", json={"registry_revision": body["registry_revision"], "selections": selections()})
     assert validated.status_code == 200
     assert validated.json()["registry_revision"] == body["registry_revision"]

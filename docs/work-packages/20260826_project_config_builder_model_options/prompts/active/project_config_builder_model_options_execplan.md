@@ -15,6 +15,9 @@ are never offered as silently valid and are rejected by the server if submitted.
 - [x] (2026-08-27 05:25 UTC) Ratified the default binary-list provider as the
   sole Builder availability authority and passed independent correctness and
   governance contract reviews.
+- [x] (2026-08-27 05:55 UTC) Synthesized all provider binary components with
+  neutral labels and role-digest provenance; focused Python, API, UI, stub,
+  lint, and broad-exception gates pass.
 
 - [x] (2026-08-27 03:36 UTC) Scaffold package and proposed contract checkpoint.
 - [x] (2026-08-27 04:00 UTC) Obtain and disposition two independent contract reviews.
@@ -23,7 +26,7 @@ are never offered as silently valid and are rejected by the server if submitted.
 - [x] (2026-08-27 04:30 UTC) Add focused regression, generated-config, legacy-manifest, and real binary execution evidence.
 - [ ] Run remaining Forest validation (completed: npm, focused and full pytest,
   stub, docs, broad exceptions; full pytest: 6,962 passed and 63 skipped).
-- [ ] Ratify and implement the operator-superseding complete binary-provider
+- [x] Ratify and implement the operator-superseding complete binary-provider
   availability contract.
 - [ ] Complete correctness review, update tracker, and close the package.
 
@@ -32,6 +35,10 @@ are never offered as silently valid and are rejected by the server if submitted.
 - The original two-entry allowlist was superseded by the operator's designation
   of `get_linux_wepp_bin_opts()` as the canonical Builder availability source.
   Availability is deployment-dependent while defaults remain fixed.
+- The current provider exposes 72 unique IDs. Some historical binaries fail
+  modern invocation-time provenance checks, so registry role selection is
+  separated from invocation-time validation; the runner's execution safeguard
+  remains unchanged.
 - The operator selected the deployed `wepp_260803` release, rather than the
   older documented minimum, as the default and Multiple OFE Builder binary.
 

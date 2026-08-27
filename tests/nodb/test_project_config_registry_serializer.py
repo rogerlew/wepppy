@@ -7,6 +7,7 @@ import subprocess
 
 import pytest
 
+import wepppy.nodb.config_builder.registry as registry_module
 from wepppy.nodb.config_builder import (
     ALLOWED_CELL_SIZES,
     BuilderConstraintError,
@@ -25,6 +26,7 @@ from wepppy.project_config_serialization import (
     parse_config_text,
     validate_canonical_config_text,
 )
+from wepp_runner.wepp_runner import get_linux_wepp_bin_opts
 
 pytestmark = pytest.mark.unit
 
@@ -36,8 +38,6 @@ EXPECTED_IDS = {
     "wbt",
     "single-ofe",
     "multiple-ofe",
-    "wepp_dcc52a6",
-    "wepp_260803",
     "ssurgo-gnatsgso-2025",
     "nlcd-2019",
     "vanilla_cligen",
@@ -107,14 +107,116 @@ def _minimal_document(**replacements: str) -> str:
     )
 
 
+def _provider_fixture_paths(tmp_path: Path, binary_ids: tuple[str, ...]) -> dict[str, tuple[str, str]]:
+    paths: dict[str, tuple[str, str]] = {}
+    for binary_id in binary_ids:
+        watershed = tmp_path / binary_id
+        hillslope = tmp_path / f"{binary_id}_hill"
+        watershed.write_bytes(f"watershed:{binary_id}".encode())
+        hillslope.write_bytes(f"hillslope:{binary_id}".encode())
+        watershed.chmod(0o755)
+        hillslope.chmod(0o755)
+        paths[binary_id] = (str(watershed), str(hillslope))
+    return paths
+
+
 def test_shipped_registry_is_real_toml_with_stable_ids_and_defaults() -> None:
     registry = load_registry()
+    provider_ids = set(get_linux_wepp_bin_opts())
 
-    assert set(registry.components) == EXPECTED_IDS
+    assert set(registry.components) == EXPECTED_IDS | provider_ids
     assert registry.get("usgs-ned1-2024").default_cellsize == 30
     assert registry.get("usgs-ned13-2022").default_cellsize == 10
     assert all(component.schema_version == 1 for component in registry.components.values())
     assert len(registry.revision) == 64
+
+
+def test_shipped_registry_exposes_complete_provider_list_with_neutral_labels() -> None:
+    registry = load_registry()
+    provider_ids = tuple(dict.fromkeys(get_linux_wepp_bin_opts()))
+    binaries = registry.by_kind(ComponentKind.WEPP_BINARY)
+
+    assert tuple(component.component_id for component in binaries) == tuple(sorted(provider_ids))
+    assert tuple(component.label for component in binaries) == tuple(sorted(provider_ids))
+    assert all("legacy parity" not in component.label.casefold() for component in binaries)
+    assert registry.get("wepp_260803").writes[0] == ConfigWrite(
+        "wepp", "bin", "wepp_260803"
+    )
+    resolved = resolve_builder_config(_selections(), registry=registry)
+    assert resolved.config["capabilities"]["wepp_binaries"] == list(provider_ids)
+
+
+def test_provider_values_are_deduplicated_without_a_second_allowlist(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    binary_ids = ("wepp_260803", "latest")
+    paths = _provider_fixture_paths(tmp_path, binary_ids)
+    monkeypatch.setattr(
+        registry_module,
+        "get_linux_wepp_bin_opts",
+        lambda: ["wepp_260803", "latest", "wepp_260803"],
+    )
+    monkeypatch.setattr(
+        registry_module,
+        "get_linux_wepp_bin_role_paths",
+        lambda binary_id: paths[binary_id],
+    )
+
+    registry = load_registry()
+
+    assert tuple(item.component_id for item in registry.by_kind(ComponentKind.WEPP_BINARY)) == (
+        "latest",
+        "wepp_260803",
+    )
+    assert registry.get("continental-us").constraints.allowed_wepp_binary == (
+        "wepp_260803",
+        "latest",
+    )
+
+
+def test_provider_failure_is_atomic(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    paths = _provider_fixture_paths(tmp_path, ("wepp_260803",))
+    monkeypatch.setattr(
+        registry_module,
+        "get_linux_wepp_bin_opts",
+        lambda: ["wepp_260803", "wepp_broken"],
+    )
+    monkeypatch.setattr(
+        registry_module,
+        "get_linux_wepp_bin_role_paths",
+        lambda binary_id: paths.get(binary_id, (str(tmp_path / "missing"),) * 2),
+    )
+
+    with pytest.raises(RegistryError, match="unusable watershed executable"):
+        load_registry()
+
+
+def test_provider_role_identity_changes_registry_revision_and_manifest_provenance(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    binary_ids = ("wepp_260803", "latest")
+    paths = _provider_fixture_paths(tmp_path, binary_ids)
+    monkeypatch.setattr(registry_module, "get_linux_wepp_bin_opts", lambda: list(binary_ids))
+    monkeypatch.setattr(
+        registry_module,
+        "get_linux_wepp_bin_role_paths",
+        lambda binary_id: paths[binary_id],
+    )
+    first = load_registry()
+    selected = resolve_builder_config(_selections(wepp_binary="latest"), registry=first)
+    latest_revision = first.get("latest").source_revision
+
+    assert selected.config["wepp"]["bin"] == "latest"
+    assert next(item.revision for item in selected.parent_chain if item.component_id == "latest") == latest_revision
+
+    replacement = tmp_path / "latest-replacement"
+    replacement.write_bytes(b"replacement latest watershed")
+    replacement.chmod(0o755)
+    paths["latest"] = (str(replacement), paths["latest"][1])
+    second = load_registry()
+
+    assert second.revision != first.revision
+    assert second.get("latest").source_revision != latest_revision
 
 
 @pytest.mark.parametrize("binary_id", ["wepp_dcc52a6", "wepp_260803"])

@@ -740,11 +740,11 @@ registry loader MUST synthesize exactly one typed `wepp_binary` component for
 each unique value returned by `get_linux_wepp_bin_opts()`; it MUST NOT read a
 second binary ID allowlist from TOML. Each synthesized definition uses the
 provider value as its stable component ID and `[wepp] bin` write, declares a
-provider schema revision, and participates in the registry digest exactly like
-a TOML component. The `latest` definition additionally records its resolved
-target identity in its source revision. Empty output, an invalid component ID,
-an unavailable `wepp_260803` default, or an unusable provider value invalidates
-the registry atomically. Non-binary components remain TOML-only.
+provider schema revision, records its resolved role target identity in its
+source revision, and participates in the registry digest exactly like a TOML
+component. Empty output, an invalid component ID, an unavailable `wepp_260803`
+default, or an unusable provider value invalidates the registry atomically.
+Non-binary components remain TOML-only.
 
 The config-builder core owns:
 

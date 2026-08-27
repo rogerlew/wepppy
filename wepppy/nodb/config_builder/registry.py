@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from dataclasses import replace
 import hashlib
+import os
 from pathlib import Path
 import re
 import tomllib
@@ -18,6 +20,10 @@ from wepppy.nodb.config_builder.schema import (
     RegistryValue,
 )
 from wepppy.project_config_serialization import CanonicalScalar
+from wepp_runner.wepp_runner import (
+    get_linux_wepp_bin_opts,
+    get_linux_wepp_bin_role_paths,
+)
 
 __all__ = ["DEFAULT_PROFILES_ROOT", "RegistryError", "load_registry"]
 
@@ -52,6 +58,8 @@ _ALLOWED_ROOT_FIELDS = frozenset(
         "writes",
     }
 )
+_DEFAULT_WEPP_BINARY = "wepp_260803"
+_EXECUTABLE_DIGEST_CACHE: dict[tuple[str, int, int, int, int], str] = {}
 
 
 class RegistryError(ValueError):
@@ -234,6 +242,86 @@ def _validate_references(components: Mapping[str, ComponentDefinition]) -> None:
             )
 
 
+def _executable_sha256(path_text: str, binary_id: str, role: str) -> str:
+    path = Path(path_text)
+    if not path.is_file() or not os.access(path, os.R_OK | os.X_OK):
+        raise RegistryError(
+            f"WEPP binary provider value {binary_id!r} has unusable {role} executable {path}"
+        )
+    try:
+        stat = path.stat()
+        cache_key = (
+            str(path.resolve()), stat.st_ino, stat.st_size, stat.st_mtime_ns,
+            stat.st_ctime_ns,
+        )
+        cached = _EXECUTABLE_DIGEST_CACHE.get(cache_key)
+        if cached is not None:
+            return cached
+        digest = hashlib.sha256()
+        with path.open("rb") as stream:
+            for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                digest.update(chunk)
+    except OSError as exc:
+        raise RegistryError(
+            f"WEPP binary provider value {binary_id!r} has unreadable {role} executable {path}"
+        ) from exc
+    identity = digest.hexdigest()
+    _EXECUTABLE_DIGEST_CACHE[cache_key] = identity
+    return identity
+
+
+def _provider_wepp_components() -> tuple[ComponentDefinition, ...]:
+    try:
+        provider_values = get_linux_wepp_bin_opts()
+    except (OSError, RuntimeError, ValueError) as exc:
+        raise RegistryError("WEPP binary provider failed") from exc
+    if not isinstance(provider_values, (list, tuple)):
+        raise RegistryError("WEPP binary provider must return a list or tuple")
+
+    binary_ids = tuple(dict.fromkeys(provider_values))
+    if not binary_ids:
+        raise RegistryError("WEPP binary provider returned no values")
+    if _DEFAULT_WEPP_BINARY not in binary_ids:
+        raise RegistryError(
+            f"WEPP binary provider is missing required default {_DEFAULT_WEPP_BINARY!r}"
+        )
+
+    components: list[ComponentDefinition] = []
+    for binary_id in binary_ids:
+        if not isinstance(binary_id, str) or _ID_RE.fullmatch(binary_id) is None:
+            raise RegistryError(f"WEPP binary provider returned invalid component ID {binary_id!r}")
+        try:
+            watershed_path, hillslope_path = get_linux_wepp_bin_role_paths(binary_id)
+        except (OSError, RuntimeError, ValueError) as exc:
+            raise RegistryError(
+                f"WEPP binary provider value {binary_id!r} could not resolve executable roles"
+            ) from exc
+        watershed_digest = _executable_sha256(watershed_path, binary_id, "watershed")
+        hillslope_digest = _executable_sha256(hillslope_path, binary_id, "hillslope")
+        source_revision = (
+            f"provider-v1:watershed={watershed_digest}:hillslope={hillslope_digest}"
+        )
+        components.append(
+            ComponentDefinition(
+                component_id=binary_id,
+                kind=ComponentKind.WEPP_BINARY,
+                schema_version=1,
+                source_revision=source_revision,
+                label=binary_id,
+                description="WEPP binary supplied by the runtime binary provider.",
+                owns=(("wepp", "bin"), ("capabilities", "wepp_binaries")),
+                overrides=(("wepp", "bin"),),
+                writes=(
+                    ConfigWrite("wepp", "bin", binary_id),
+                    ConfigWrite("capabilities", "wepp_binaries", binary_ids),
+                ),
+                constraints=ConstraintSet(requires=("continental-us",)),
+                source_path=f"provider://wepp_binary/{binary_id}",
+            )
+        )
+    return tuple(components)
+
+
 def load_registry(root: str | Path = DEFAULT_PROFILES_ROOT) -> Registry:
     """Load and atomically validate every component document below ``root``."""
 
@@ -259,5 +347,31 @@ def load_registry(root: str | Path = DEFAULT_PROFILES_ROOT) -> Registry:
             )
         components[component.component_id] = component
         folded_ids[folded] = component.component_id
+    if "continental-us" not in components:
+        _validate_references(components)
+    provider_components = _provider_wepp_components()
+    for component in provider_components:
+        folded = component.component_id.casefold()
+        if folded in folded_ids:
+            raise RegistryError(
+                f"Duplicate or case-colliding component IDs: {folded_ids[folded]!r}, "
+                f"{component.component_id!r}"
+            )
+        components[component.component_id] = component
+        folded_ids[folded] = component.component_id
+        digest.update(component.component_id.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(component.source_revision.encode("ascii"))
+        digest.update(b"\0")
+    locale = components.get("continental-us")
+    if locale is None or locale.kind is not ComponentKind.LOCALE:
+        raise RegistryError("WEPP binary provider requires the continental-us locale")
+    components[locale.component_id] = replace(
+        locale,
+        constraints=replace(
+            locale.constraints,
+            allowed_wepp_binary=tuple(item.component_id for item in provider_components),
+        ),
+    )
     _validate_references(components)
     return Registry.create(digest.hexdigest(), components)

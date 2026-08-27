@@ -5,8 +5,8 @@
 **Timezone**: UTC
 **Started**: 2026-08-27 03:36 UTC
 **Current phase**: Implementation validation
-**Last updated**: 2026-08-27 05:10 UTC
-**Next milestone**: Binary-provider contract checkpoint
+**Last updated**: 2026-08-27 05:55 UTC
+**Next milestone**: Provider-wide Forest acceptance
 **Security impact**: `low`
 **Dedicated security review**: `no`
 **Parameterization ADR**: `docs/adrs/ADR-0046-config-builder-wbt-and-wepp-260803-defaults.md`
@@ -15,8 +15,6 @@
 
 ### In Progress
 
-- [ ] Ratify the complete default-provider WEPP binary list and remove the
-  lifecycle annotation.
 - [ ] Run the provider-wide Forest role/execution acceptance gate, including
   WBT Multiple OFE.
 
@@ -28,6 +26,10 @@
 
 - [x] Passed two independent binary-provider contract reviews and prepared the
   standalone checkpoint (2026-08-27 05:25 UTC).
+- [x] Implemented all 72 current provider values with neutral labels and
+  role-digest provenance; focused code and static gates pass (2026-08-27 05:55 UTC).
+- [x] Passed independent binary-provider implementation correctness review
+  (2026-08-27 06:05 UTC).
 - [x] Recorded operator approval and scaffolded the package (2026-08-27 03:36 UTC).
 - [x] Corrected and passed two independent contract reviews (2026-08-27 04:00 UTC).
 - [x] Committed standalone checkpoint `95559bc6f` (2026-08-27 04:00 UTC).
