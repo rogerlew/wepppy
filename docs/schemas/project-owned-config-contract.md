@@ -392,7 +392,12 @@ validation state, and errors remain discoverable and keyboard accessible.
 #### Entry and orientation
 
 - Project creation MUST present Config Builder as a distinct choice from the
-  existing Interfaces path.
+  existing Interfaces path. On the Interfaces page, that choice MUST appear as
+  a **Config Builder** link in the **More** menu and MUST NOT add a separate
+  content panel. The link is discoverable only to the canonical power-user
+  audience (`PowerUser`, `Dev`, `Admin`, or `Root`); ordinary and anonymous
+  users MUST NOT see it. This discovery rule does not replace route or API
+  authorization.
 - The builder MUST explain that it creates a project-owned `config.cfg` that
   users do not edit. Changing builder selections later requires creating a new
   project; registered missing attributes may be added through the explicit
