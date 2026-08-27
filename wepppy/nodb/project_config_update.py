@@ -34,6 +34,7 @@ __all__ = [
     "apply_project_config_update",
     "preview_project_config_update",
     "project_config_digest_warning",
+    "project_config_lifecycle_guard",
     "project_config_update_enabled",
     "recover_project_config_update",
 ]
@@ -409,6 +410,16 @@ def recover_project_config_update(working_directory: str | Path) -> bool:
         return False
     with _amendment_lock(root):
         return _recover_locked(root)
+
+
+@contextmanager
+def project_config_lifecycle_guard(working_directory: str | Path) -> Iterator[None]:
+    """Recover and hold the amendment lock across one lifecycle operation."""
+
+    root = Path(working_directory)
+    with _amendment_lock(root):
+        _recover_locked(root)
+        yield
 
 
 def apply_project_config_update(

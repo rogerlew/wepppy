@@ -10,6 +10,7 @@ import sys
 import types
 from pathlib import Path
 from types import SimpleNamespace
+from contextlib import contextmanager
 
 import pytest
 
@@ -1407,6 +1408,67 @@ def test_fork_rq_invokes_reset_markers_with_new_run_context(monkeypatch: pytest.
     project.fork_rq("source-run", "new-run", undisturbify=False)
 
     assert reset_calls == [("new-run", "/tmp/new-run-wd", "source-run:fork")]
+
+
+def test_fork_rq_holds_top_level_config_guard_while_copying_owned_bytes(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import wepppy.rq.project_rq as project
+
+    parent = tmp_path / "source"
+    child = parent / "_pups" / "omni" / "scenarios" / "treated"
+    target = tmp_path / "target"
+    child.mkdir(parents=True)
+    config_bytes = b"[project]\nconfig_schema = 1\n"
+    manifest_bytes = b'{"schema_version":1}\n'
+    (parent / "owned.cfg").write_bytes(config_bytes)
+    (parent / "config-manifest.json").write_bytes(manifest_bytes)
+    composite = "source;;omni;;treated"
+    active = {"value": False}
+    guarded: list[Path] = []
+
+    monkeypatch.setattr(
+        project,
+        "get_current_job",
+        lambda: SimpleNamespace(
+            id="job-fork-config", connection=SimpleNamespace(eval=lambda *_args: 1)
+        ),
+    )
+    monkeypatch.setattr(project.StatusMessenger, "publish", lambda *_args: None)
+    monkeypatch.setattr(
+        project,
+        "get_wd",
+        lambda runid: str(child if runid == composite else parent),
+    )
+
+    @contextmanager
+    def _guard(path):
+        guarded.append(Path(path))
+        active["value"] = True
+        try:
+            yield
+        finally:
+            active["value"] = False
+
+    def _copy(*_args, **_kwargs):
+        assert active["value"] is True
+        target.mkdir()
+        (target / "owned.cfg").write_bytes((parent / "owned.cfg").read_bytes())
+        (target / "config-manifest.json").write_bytes(
+            (parent / "config-manifest.json").read_bytes()
+        )
+        return str(target)
+
+    monkeypatch.setattr(project, "project_config_lifecycle_guard", _guard)
+    monkeypatch.setattr(project._fork_helpers, "prepare_fork_run", _copy)
+    monkeypatch.setattr(project, "_reset_forked_run_job_markers", lambda *_args: None)
+
+    project.fork_rq(composite, "target", undisturbify=False)
+
+    assert guarded == [parent]
+    assert (target / "owned.cfg").read_bytes() == config_bytes
+    assert (target / "config-manifest.json").read_bytes() == manifest_bytes
 
 
 def test_fork_rq_reset_marker_failure_emits_fork_failed(

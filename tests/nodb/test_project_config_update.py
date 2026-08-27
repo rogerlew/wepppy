@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeoutError
 from configparser import RawConfigParser
 import hashlib
 import json
@@ -21,6 +21,7 @@ from wepppy.nodb.project_config_update import (
     apply_project_config_update,
     preview_project_config_update,
     project_config_digest_warning,
+    project_config_lifecycle_guard,
     project_config_update_enabled,
     recover_project_config_update,
     ConfigUpdateUnavailableError,
@@ -237,6 +238,28 @@ def test_concurrent_applies_produce_one_amendment(tmp_path: Path) -> None:
     assert sum(item is not None for item in outcomes) == 1
     manifest = json.loads((tmp_path / "config-manifest.json").read_text(encoding="utf-8"))
     assert len(manifest["amendments"]) == 1
+
+
+def test_lifecycle_guard_blocks_update_until_copy_window_finishes(tmp_path: Path) -> None:
+    _config_path, target = _old_preset_project(tmp_path)
+    preview = preview_project_config_update(tmp_path)
+
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        with project_config_lifecycle_guard(tmp_path):
+            future = executor.submit(
+                apply_project_config_update,
+                tmp_path,
+                preview.preview_id or "",
+                trigger_section=target[0],
+                trigger_option=target[1],
+                application_revision="wp10-test",
+            )
+            with pytest.raises(FutureTimeoutError):
+                future.result(timeout=0.1)
+        result = future.result(timeout=5)
+
+    assert result.applied is True
+    assert not (tmp_path / JOURNAL_NAME).exists()
 
 
 def test_reader_recovers_interrupted_replacement_before_serving(tmp_path: Path) -> None:

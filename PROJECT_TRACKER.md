@@ -1156,6 +1156,22 @@ the remaining-run controller plan has no next controller milestone.
 
 ## ✅ Done
 
+### Project Config Lifecycle Integrity (WP10)
+
+**Completed**: 2026-08-26
+
+**Link**: [docs/work-packages/20260804_project_config_lifecycle_integrity/](docs/work-packages/20260804_project_config_lifecycle_integrity/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-08-26)
+
+**Summary**: Integrated the existing config amendment lock and deterministic
+recovery with fork, archive, and restore; excluded transaction-only artifacts;
+preserved config/manifest bytes; and verified nested authority, legacy fallback,
+degraded manifests, secret scanning, and concurrent-update exclusion. The full
+suite passed (`6935 passed, 63 skipped`).
+
+---
+
 ### Project Config Update UI (WP09)
 
 **Completed**: 2026-08-26

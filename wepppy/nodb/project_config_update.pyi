@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Callable, Mapping
+from typing import Callable, ContextManager, Mapping
 from wepppy.nodb.config_builder.schema import Registry
 
 CONFIG_UPDATE_FLAG: str
@@ -41,6 +41,7 @@ class ConfigUpdateResult:
 
 def project_config_update_enabled(environ: Mapping[str, str] | None = ...) -> bool: ...
 def project_config_digest_warning(working_directory: str | Path) -> bool: ...
+def project_config_lifecycle_guard(working_directory: str | Path) -> ContextManager[None]: ...
 def preview_project_config_update(working_directory: str | Path, *, registry: Registry | None = ..., registry_root: str | Path = ..., configs_root: str | Path = ...) -> ConfigUpdatePreview: ...
 def recover_project_config_update(working_directory: str | Path) -> bool: ...
 def apply_project_config_update(working_directory: str | Path, preview_id: str, *, trigger_section: str, trigger_option: str, application_revision: str, registry: Registry | None = ..., registry_root: str | Path = ..., configs_root: str | Path = ..., resolved_at: datetime | None = ..., fault_hook: Callable[[str], None] | None = ...) -> ConfigUpdateResult: ...
@@ -56,6 +57,7 @@ __all__ = [
     "apply_project_config_update",
     "preview_project_config_update",
     "project_config_digest_warning",
+    "project_config_lifecycle_guard",
     "project_config_update_enabled",
     "recover_project_config_update",
 ]

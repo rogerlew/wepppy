@@ -90,6 +90,7 @@ from wepppy.nodb.mods.polaris import Polaris
 from wepppy.nodb.mods.rap import RAP_TS
 from wepppy.nodb.mods.rusle import Rusle
 from wepppy.nodb.mods.treatments import Treatments
+from wepppy.nodb.project_config_update import project_config_lifecycle_guard
 
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.nodb.status_messenger import StatusMessenger
@@ -191,7 +192,20 @@ def _archive_runtime() -> _archive_helpers.ArchiveRuntime:
         publish_status=StatusMessenger.publish,
         disk_usage=shutil.disk_usage,
         zip_file_cls=zipfile.ZipFile,
+        project_config_lifecycle_guard=project_config_lifecycle_guard,
+        project_config_authority_wd=_project_config_authority_wd,
     )
+
+
+def _project_config_authority_runid(runid: str) -> str:
+    parts = str(runid).split(";;")
+    if len(parts) >= 3 and parts[-2] in {"omni", "omni-contrast"} and parts[-1]:
+        return ";;".join(parts[:-2])
+    return runid
+
+
+def _project_config_authority_wd(runid: str) -> str:
+    return get_wd(_project_config_authority_runid(runid))
 
 
 def _require_directory_root(wd: str, root: str) -> None:
@@ -2889,26 +2903,27 @@ def fork_rq(
                 kwargs["skip_omni_scenarios_contrasts"] = True
             return _build_fork_rsync_cmd(run_right, **kwargs)
 
-        new_wd = _fork_helpers.prepare_fork_run(
-            runid,
-            new_runid,
-            undisturbify=undisturbify,
-            skip_wepp_runs_output=skip_wepp_runs_output,
-            skip_omni_scenarios_contrasts=skip_omni_scenarios_contrasts,
-            status_channel=status_channel,
-            publish_status=StatusMessenger.publish,
-            get_wd=get_wd,
-            get_primary_wd=_resolve_fork_destination_wd,
-            wait_for_paths=wait_for_paths,
-            ron_cls=Ron,
-            disturbed_cls=Disturbed,
-            landuse_cls=Landuse,
-            soils_cls=Soils,
-            initialize_ttl=_initialize_ttl,
-            format_ttl_failure=lambda exc: f'rq:{job.id} STATUS TTL initialization failed ({exc})',
-            build_rsync_cmd=_fork_rsync_command,
-            clean_env_for_system_tools=_clean_env_for_system_tools,
-        )
+        with project_config_lifecycle_guard(_project_config_authority_wd(runid)):
+            new_wd = _fork_helpers.prepare_fork_run(
+                runid,
+                new_runid,
+                undisturbify=undisturbify,
+                skip_wepp_runs_output=skip_wepp_runs_output,
+                skip_omni_scenarios_contrasts=skip_omni_scenarios_contrasts,
+                status_channel=status_channel,
+                publish_status=StatusMessenger.publish,
+                get_wd=get_wd,
+                get_primary_wd=_resolve_fork_destination_wd,
+                wait_for_paths=wait_for_paths,
+                ron_cls=Ron,
+                disturbed_cls=Disturbed,
+                landuse_cls=Landuse,
+                soils_cls=Soils,
+                initialize_ttl=_initialize_ttl,
+                format_ttl_failure=lambda exc: f'rq:{job.id} STATUS TTL initialization failed ({exc})',
+                build_rsync_cmd=_fork_rsync_command,
+                clean_env_for_system_tools=_clean_env_for_system_tools,
+            )
         if skip_omni_scenarios_contrasts:
             _reset_forked_omni(new_runid, new_wd, status_channel)
             _reset_forked_run_job_markers(
