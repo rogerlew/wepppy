@@ -152,6 +152,17 @@ builder scan plus a 640-pixel reflow and keyboard-order check. WP07 evidence is
 recorded under
 `docs/work-packages/20260804_project_config_builder_ui/artifacts/`.
 
+### 7) Project config update accessibility
+
+The shared run header contains a hidden-by-default project-config update state.
+When the read-only backend reports an available merge, the notice opens a
+labelled and described modal using the canonical focus trap and focus return.
+The complete additions table has a caption and scoped column headers; dynamic
+preview, queue, completion, and error states use polite status or alert
+semantics. Apply remains disabled until a complete preview is rendered and
+while a job is active. WP09 evidence is recorded under
+`docs/work-packages/20260804_project_config_update_ui/artifacts/`.
+
 ## Coverage-to-Requirement Map
 
 This table is an evidence map for engineering and release review. It is not a substitute for the criterion-by-criterion ACR/VPAT table.

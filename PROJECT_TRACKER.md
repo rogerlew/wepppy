@@ -1156,6 +1156,22 @@ the remaining-run controller plan has no next controller milestone.
 
 ## ✅ Done
 
+### Project Config Update UI (WP09)
+
+**Completed**: 2026-08-26
+
+**Link**: [docs/work-packages/20260804_project_config_update_ui/](docs/work-packages/20260804_project_config_update_ui/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-08-26)
+
+**Summary**: Delivered the default-off run-header availability and digest
+warning, accessible complete merge-only preview, explicit apply/job/error flow,
+and nested-run linkage to top-level config authority. The full Python suite
+passed (`6927 passed, 63 skipped`); frontend and focused accessibility gates
+are recorded in the package validation artifact.
+
+---
+
 ### Project Config Update Backend (WP08)
 
 **Completed**: 2026-08-26

@@ -116,6 +116,13 @@ Clients must refresh after `stale_config_preview`, wait for the active job
 after `config_update_in_progress`, and treat `config_update_unavailable` as a
 non-mutating refusal.
 
+On run pages, this API is progressive enhancement in the shared header. A
+read-only page-load check reveals an update notice, a nonblocking provenance
+digest warning, or both. Opening the notice loads the complete additions table;
+nothing is applied until the user selects **Apply all additions**. The panel
+then reports the queued job through its terminal state. Nested Omni pages link
+to the top-level project's config authority rather than creating child updates.
+
 ## Error Handling Expectations
 rq-engine uses a canonical error payload:
 

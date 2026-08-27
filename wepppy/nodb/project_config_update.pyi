@@ -28,6 +28,8 @@ class ConfigUpdatePreview:
     additions: tuple[ConfigUpdateAddition, ...]
     config_filename: str
     current_digest: str
+    declared_digest: str | None
+    digest_warning: bool
 
 @dataclass(frozen=True, slots=True)
 class ConfigUpdateResult:
@@ -38,6 +40,7 @@ class ConfigUpdateResult:
     additions: tuple[ConfigUpdateAddition, ...]
 
 def project_config_update_enabled(environ: Mapping[str, str] | None = ...) -> bool: ...
+def project_config_digest_warning(working_directory: str | Path) -> bool: ...
 def preview_project_config_update(working_directory: str | Path, *, registry: Registry | None = ..., registry_root: str | Path = ..., configs_root: str | Path = ...) -> ConfigUpdatePreview: ...
 def recover_project_config_update(working_directory: str | Path) -> bool: ...
 def apply_project_config_update(working_directory: str | Path, preview_id: str, *, trigger_section: str, trigger_option: str, application_revision: str, registry: Registry | None = ..., registry_root: str | Path = ..., configs_root: str | Path = ..., resolved_at: datetime | None = ..., fault_hook: Callable[[str], None] | None = ...) -> ConfigUpdateResult: ...
@@ -52,6 +55,7 @@ __all__ = [
     "StaleConfigPreviewError",
     "apply_project_config_update",
     "preview_project_config_update",
+    "project_config_digest_warning",
     "project_config_update_enabled",
     "recover_project_config_update",
 ]

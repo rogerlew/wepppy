@@ -47,6 +47,25 @@
         </span>
         {% endif %}
       </div>
+      <div class="wc-project-config-update"
+           data-project-config-update
+           data-availability-url="{{ url_for_run('project-config/update-availability', runid=view_runid, config=view_config, prefix='/rq-engine/api') }}"
+           data-preview-url="{{ url_for_run('project-config/update-preview', runid=view_runid, config=view_config, prefix='/rq-engine/api') }}"
+           data-apply-url="{{ url_for_run('project-config/update-apply', runid=view_runid, config=view_config, prefix='/rq-engine/api') }}"
+           hidden>
+        <button type="button"
+                class="pure-button pure-button-secondary wc-project-config-update__notice"
+                data-project-config-update-open
+                data-modal-open="projectConfigUpdateModal">
+          Configuration update available
+        </button>
+        <p class="wc-project-config-update__warning"
+           data-project-config-digest-warning
+           role="status"
+           hidden>
+          Configuration provenance warning: this project's current configuration differs from its recorded digest. Existing work remains available.
+        </p>
+      </div>
       <div class="wc-run-header__content">
         <div class="wc-run-header__fields">
           {{ header_text_field(
@@ -241,6 +260,55 @@
     </div>
   </div>
 </header>
+<div class="wc-modal" id="projectConfigUpdateModal" data-modal hidden>
+  <div class="wc-modal__overlay" data-modal-dismiss></div>
+  <section class="wc-modal__dialog wc-project-config-update__dialog"
+           role="dialog"
+           aria-modal="true"
+           aria-labelledby="projectConfigUpdateTitle"
+           aria-describedby="projectConfigUpdateDescription">
+    <header class="wc-modal__header">
+      <h2 class="wc-modal__title" id="projectConfigUpdateTitle">Review configuration update</h2>
+      <button type="button"
+              class="wc-modal__close"
+              data-modal-dismiss
+              aria-label="Close configuration update review">&times;</button>
+    </header>
+    <div class="wc-modal__body">
+      <p id="projectConfigUpdateDescription">
+        Version 1 adds all missing registered attributes shown below. It does not overwrite or remove existing values.
+      </p>
+      <p class="wc-alert wc-alert--danger"
+         data-project-config-update-error
+         role="alert"
+         tabindex="-1"
+         hidden></p>
+      <p data-project-config-update-status role="status" aria-live="polite" tabindex="-1">
+        Open this panel to load the current preview.
+      </p>
+      <div class="wc-table-scroll" data-project-config-update-review hidden>
+        <table class="pure-table pure-table-bordered">
+          <caption>Attributes that will be added</caption>
+          <thead>
+            <tr>
+              <th scope="col">Section</th>
+              <th scope="col">Option</th>
+              <th scope="col">Value</th>
+              <th scope="col">Source</th>
+              <th scope="col">Source revision</th>
+            </tr>
+          </thead>
+          <tbody data-project-config-update-rows></tbody>
+        </table>
+      </div>
+    </div>
+    <footer class="wc-modal__footer">
+      <button type="button" class="pure-button" data-project-config-update-refresh>Refresh preview</button>
+      <button type="button" class="pure-button pure-button-primary" data-project-config-update-apply disabled>Apply all additions</button>
+      <button type="button" class="pure-button" data-modal-dismiss>Cancel</button>
+    </footer>
+  </section>
+</div>
 <script>
   "use strict";
   var pup_relpath = {{ pup_relpath | tojson }};

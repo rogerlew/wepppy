@@ -19,6 +19,7 @@ from wepppy.nodb.project_config_update import (
     ConfigUpdateUnavailableError,
     StaleConfigPreviewError,
     preview_project_config_update,
+    project_config_digest_warning,
     project_config_update_enabled,
 )
 from wepppy.rq.job_id import new_rq_job_id
@@ -52,8 +53,15 @@ def _authorize(request: Request, runid: str, *, mutation: bool) -> tuple[Mapping
         return None, error_response(exc.message, status_code=exc.status_code, code=exc.code)
 
 
+def _authority_runid(runid: str) -> str:
+    parts = str(runid).split(";;")
+    if len(parts) >= 3 and parts[-2] in {"omni", "omni-contrast"} and parts[-1]:
+        return ";;".join(parts[:-2])
+    return runid
+
+
 def _preview(runid: str, config: str):
-    result = preview_project_config_update(get_wd(runid))
+    result = preview_project_config_update(get_wd(_authority_runid(runid)))
     if Path(result.config_filename).stem != Path(config).stem:
         raise ConfigUpdateUnavailableError("Route config does not identify the project-owned config")
     return result
@@ -65,6 +73,7 @@ def _preview_payload(result) -> dict[str, object]:
         "preview_id": result.preview_id,
         "config_filename": result.config_filename,
         "current_digest": result.current_digest,
+        "digest_warning": result.digest_warning,
         "additions": [asdict(item) for item in result.additions],
     }
 
@@ -81,11 +90,25 @@ async def update_availability(runid: str, config: str, request: Request) -> JSON
     _claims, failure = _authorize(request, runid, mutation=False)
     if failure is not None:
         return failure
+    authority_wd = get_wd(_authority_runid(runid))
+    try:
+        digest_warning = project_config_digest_warning(authority_wd)
+    except ConfigUpdateError:
+        digest_warning = False
     if not project_config_update_enabled():
-        return JSONResponse({"available": False, "reason": "updates_disabled"})
+        return JSONResponse({
+            "available": False,
+            "preview_id": None,
+            "digest_warning": digest_warning,
+            "reason": "updates_disabled",
+        })
     try:
         preview = _preview(runid, config)
-        return JSONResponse({"available": preview.available})
+        return JSONResponse({
+            "available": preview.available,
+            "preview_id": preview.preview_id,
+            "digest_warning": preview.digest_warning,
+        })
     except ConfigUpdateError:
         return JSONResponse({"available": False, "reason": "config_update_unavailable"})
 
@@ -181,7 +204,7 @@ async def update_apply(runid: str, config: str, request: Request) -> JSONRespons
                 status_code=409,
                 code="config_update_unavailable",
             )
-        job_id = _enqueue(runid, config, preview_id, section, option)
+        job_id = _enqueue(_authority_runid(runid), config, preview_id, section, option)
         return JSONResponse({"job_id": job_id}, status_code=202)
     except StaleConfigPreviewError as exc:
         return error_response(str(exc), status_code=409, code="stale_config_preview")

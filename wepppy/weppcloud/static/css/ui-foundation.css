@@ -1574,6 +1574,37 @@ h5:first-child {
   flex-wrap: wrap;
 }
 
+.wc-project-config-update {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--wc-space-2);
+  align-items: center;
+  margin-block: var(--wc-space-2);
+}
+
+.wc-project-config-update[hidden],
+.wc-project-config-update__warning[hidden] {
+  display: none;
+}
+
+.wc-project-config-update__warning {
+  margin: 0;
+  max-width: 70ch;
+}
+
+.wc-project-config-update__dialog {
+  max-width: min(72rem, calc(100vw - 2rem));
+}
+
+.wc-project-config-update__dialog .wc-table-scroll {
+  overflow-x: auto;
+}
+
+.wc-project-config-update__dialog td {
+  overflow-wrap: anywhere;
+  vertical-align: top;
+}
+
 .wc-run-header__descriptor {
   font-size: 1rem;
   font-weight: 600;

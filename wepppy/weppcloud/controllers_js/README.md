@@ -122,6 +122,15 @@ Bundled modules remain global so legacy controllers can incrementally migrate aw
 
 ### Project Controller Contract (2024 refresh)
 
+`project_config_update.js` separately enhances the shared run header. It makes
+one authenticated, read-only availability request at page load, exposes a
+nonblocking digest warning, and loads the complete merge-only preview only when
+the user opens the labelled modal. Apply sends the server-issued opaque preview
+ID plus one reviewed trigger through `WCHttp.requestWithSessionToken`, prevents
+duplicate submission, and polls canonical rq-engine job status. Table content
+is rendered with `textContent`; authorization and freshness remain
+server-enforced.
+
 ### Climate Controller Reference (2024 helper migration)
 - **DOM contract**: templates expose `data-climate-action` hooks on radios, checkboxes, selects, and buttons plus `data-climate-section` / `data-precip-section` wrappers for conditional panels. Hidden inputs tagged with `data-climate-field` mirror controller state (`climate_catalog_id`, `climate_mode`). Catalog metadata ships via `<script id="climate_catalog_data" type="application/json">` so the controller can hydrate offline datasets without extra requests.
 - **Event surface**: `Climate.getInstance().events = WCEvents.useEventMap([...])` emits `climate:dataset:changed`, `climate:dataset:mode`, `climate:station:mode`, `climate:station:selected`, `climate:station:list:loading`, `climate:station:list:loaded`, `climate:build:started`, `climate:build:completed`, `climate:build:failed`, `climate:precip:mode`, `climate:upload:completed`, `climate:upload:failed`, `climate:gridmet:updated`, `climate:mxpt5:updated`, and `climate:silent-pass-observed-quality-guard:updated`. Subscribe instead of scraping DOM so status dashboards and RRED tooling stay decoupled.

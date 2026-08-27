@@ -33,6 +33,7 @@ __all__ = [
     "StaleConfigPreviewError",
     "apply_project_config_update",
     "preview_project_config_update",
+    "project_config_digest_warning",
     "project_config_update_enabled",
     "recover_project_config_update",
 ]
@@ -73,6 +74,8 @@ class ConfigUpdatePreview:
     additions: tuple[ConfigUpdateAddition, ...]
     config_filename: str
     current_digest: str
+    declared_digest: str | None
+    digest_warning: bool
 
 
 @dataclass(frozen=True, slots=True)
@@ -92,6 +95,15 @@ def project_config_update_enabled(environ: Mapping[str, str] | None = None) -> b
     if raw in _FALSE:
         return False
     raise ValueError(f"{CONFIG_UPDATE_FLAG} must be a strict boolean")
+
+
+def project_config_digest_warning(working_directory: str | Path) -> bool:
+    """Return digest-mismatch state without resolving update sources or writing."""
+
+    _path, config_bytes, _manifest_bytes, manifest = _read_artifacts(Path(working_directory))
+    config_meta = manifest.get("config")
+    declared = config_meta.get("sha256") if isinstance(config_meta, dict) else None
+    return isinstance(declared, str) and declared != _sha256(config_bytes)
 
 
 def _sha256(content: bytes) -> str:
@@ -281,9 +293,14 @@ def preview_project_config_update(
     except (BuilderConstraintError, RegistryError, PresetPolicyError, ConfigMaterializationError, CanonicalConfigError) as exc:
         raise ConfigUpdateUnavailableError("Registered project config update sources are invalid") from exc
     result = tuple(additions)
+    config_meta = manifest.get("config")
+    declared_digest = config_meta.get("sha256") if isinstance(config_meta, dict) else None
+    declared_digest = declared_digest if isinstance(declared_digest, str) else None
+    current_digest = _sha256(config_bytes)
     return ConfigUpdatePreview(
         bool(result), _preview_id(config_bytes, manifest_bytes, result) if result else None,
-        result, config_path.name, _sha256(config_bytes),
+        result, config_path.name, current_digest, declared_digest,
+        bool(declared_digest and declared_digest != current_digest),
     )
 
 

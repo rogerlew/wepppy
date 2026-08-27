@@ -2334,6 +2334,34 @@ def test_run_header_hides_team_public_readonly_for_anonymous(jinja_env: Environm
     assert 'id="checkbox_public"' not in rendered
 
 
+def test_run_header_project_config_update_modal_is_accessible_and_dormant(
+    jinja_env: Environment,
+) -> None:
+    template = jinja_env.get_template("header/_run_header_fixed.htm")
+    auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
+    request = SimpleNamespace(view_args={"runid": "parent;;omni;;child", "config": "config"})
+
+    rendered = template.render(user=auth_user, current_user=auth_user, request=request)
+
+    for token in (
+        "data-project-config-update",
+        "data-project-config-update-open",
+        'id="projectConfigUpdateModal"',
+        'role="dialog"',
+        'aria-modal="true"',
+        'aria-labelledby="projectConfigUpdateTitle"',
+        'aria-describedby="projectConfigUpdateDescription"',
+        "Version 1 adds all missing registered attributes",
+        'data-project-config-update-status role="status" aria-live="polite"',
+        'data-project-config-update-error',
+        '<th scope="col">Section</th>',
+        '<th scope="col">Source revision</th>',
+    ):
+        assert token in rendered
+    assert 'data-project-config-update\n' in rendered
+    assert 'data-modal hidden' in rendered
+
+
 def test_interfaces_template_shows_login_bypass_banner_for_anonymous_user(jinja_env: Environment) -> None:
     template = jinja_env.get_template("interfaces.htm")
     anon_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=False)

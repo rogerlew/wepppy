@@ -20,6 +20,7 @@ from wepppy.nodb.project_config_update import (
     StaleConfigPreviewError,
     apply_project_config_update,
     preview_project_config_update,
+    project_config_digest_warning,
     project_config_update_enabled,
     recover_project_config_update,
     ConfigUpdateUnavailableError,
@@ -80,6 +81,8 @@ def test_preview_is_read_only_and_lists_complete_registered_delta(tmp_path: Path
 
     assert preview.available is True
     assert preview.preview_id and preview.preview_id.startswith("pcu1-")
+    assert preview.digest_warning is False
+    assert preview.declared_digest == preview.current_digest
     assert [(item.section, item.option) for item in preview.additions] == [target]
     assert preview.additions[0].source_id in {"shared-defaults", "disturbed9002_wbt"}
     assert _snapshot(tmp_path) == before
@@ -127,6 +130,9 @@ def test_digest_mismatch_is_recorded_from_actual_config_not_blocked(tmp_path: Pa
     )
     actual_prior = hashlib.sha256(config_path.read_bytes()).hexdigest()
     preview = preview_project_config_update(tmp_path)
+    assert preview.digest_warning is True
+    assert preview.declared_digest == "0" * 64
+    assert project_config_digest_warning(tmp_path) is True
 
     result = apply_project_config_update(
         tmp_path, preview.preview_id or "", trigger_section=target[0],

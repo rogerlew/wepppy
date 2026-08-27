@@ -44,7 +44,7 @@ def client(monkeypatch: pytest.MonkeyPatch):
     claims = {"token_class": "user", "sub": "42"}
     preview = ConfigUpdatePreview(
         True, "pcu1-preview", (ConfigUpdateAddition("new", "option", "true", "preset", "rev-2"),),
-        "config.cfg", "a" * 64,
+        "config.cfg", "a" * 64, "b" * 64, True,
     )
     redis_client = FakeRedis()
     FakeQueue.calls = []
@@ -53,6 +53,7 @@ def client(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(routes, "authorize_run_mutation", lambda *_a, **_k: None)
     monkeypatch.setattr(routes, "get_wd", lambda _runid: "/wc1/runs/run-1")
     monkeypatch.setattr(routes, "preview_project_config_update", lambda _wd: preview)
+    monkeypatch.setattr(routes, "project_config_digest_warning", lambda _wd: True)
     monkeypatch.setattr(routes, "project_config_update_enabled", lambda: True)
     monkeypatch.setattr(routes.redis, "Redis", lambda **_kwargs: redis_client)
     monkeypatch.setattr(routes, "Queue", FakeQueue)
@@ -67,9 +68,14 @@ def test_availability_and_preview_are_synchronous_and_complete(client) -> None:
     response = http.get("/api/runs/run-1/config/project-config/update-preview")
 
     assert availability.status_code == 200
-    assert availability.json() == {"available": True}
+    assert availability.json() == {
+        "available": True,
+        "preview_id": preview.preview_id,
+        "digest_warning": True,
+    }
     assert response.status_code == 200
     assert response.json()["preview_id"] == preview.preview_id
+    assert response.json()["digest_warning"] is True
     assert response.json()["additions"] == [{
         "section": "new", "option": "option", "value": "true",
         "source_id": "preset", "source_revision": "rev-2",
@@ -117,6 +123,33 @@ def test_disabled_backend_returns_no_availability_and_no_enqueue(client, monkeyp
     monkeypatch.setattr(routes, "project_config_update_enabled", lambda: False)
     availability = http.get("/api/runs/run-1/config/project-config/update-availability")
     apply = http.post("/api/runs/run-1/config/project-config/update-apply", json={})
-    assert availability.json() == {"available": False, "reason": "updates_disabled"}
+    assert availability.json() == {
+        "available": False,
+        "preview_id": None,
+        "digest_warning": True,
+        "reason": "updates_disabled",
+    }
     assert apply.status_code == 409
     assert FakeQueue.calls == []
+
+
+def test_nested_omni_route_uses_top_level_config_authority(client, monkeypatch: pytest.MonkeyPatch) -> None:
+    http, _claims, preview, _redis = client
+    resolved: list[str] = []
+    monkeypatch.setattr(routes, "get_wd", lambda runid: resolved.append(runid) or "/wc1/runs/run-1")
+
+    response = http.get(
+        "/api/runs/run-1;;omni;;scenario-a/config/project-config/update-preview"
+    )
+    apply = http.post(
+        "/api/runs/run-1;;omni;;scenario-a/config/project-config/update-apply",
+        json={
+            "preview_id": preview.preview_id,
+            "trigger": {"section": "new", "option": "option"},
+        },
+    )
+
+    assert response.status_code == 200
+    assert apply.status_code == 202
+    assert resolved == ["run-1", "run-1"]
+    assert FakeQueue.calls[0]["args"][0] == "run-1"
