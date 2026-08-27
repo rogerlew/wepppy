@@ -23,8 +23,9 @@ def test_available_climate_datasets_default_locale():
 def test_available_climate_datasets_ghcn_only_locale():
     datasets = available_climate_datasets(["au"], [])
     catalog_ids = {dataset.catalog_id for dataset in datasets}
-    # Only Vanilla + single-storm style options should remain for GHCN-only locales.
+    # Australia keeps its regional AGDC source alongside CLIGEN/storm inputs.
     assert catalog_ids == {
+        "agdc",
         "vanilla_cligen",
         "single_storm",
         "single_storm_batch",

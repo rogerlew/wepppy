@@ -8,6 +8,7 @@ from typing import Mapping, Protocol
 
 from wepppy.nodb.locales.capability_graph import (
     CAPABILITY_SCHEMA_VERSION,
+    HISTORICAL_CAPABILITY_SCHEMA_VERSION,
     CapabilityGraph,
     CapabilityGraphError,
 )
@@ -65,6 +66,11 @@ _MANDATORY_V2_AXES = (
     "wepp_binaries",
     "mods",
     "allowed_model_tuples",
+)
+_MANDATORY_V3_AXES = (
+    *_MANDATORY_V2_AXES[:3],
+    "climate_station_databases",
+    *_MANDATORY_V2_AXES[3:],
 )
 _V2_RELATION_SECTIONS = (
     "capabilities.climate_station_methods",
@@ -143,7 +149,7 @@ def _section_options(config: CapabilityConfig, section: str) -> tuple[str, ...] 
     return None
 
 
-def _validate_v2_section_inventory(config: CapabilityConfig) -> None:
+def _validate_section_inventory(config: CapabilityConfig, version: int) -> None:
     parser = getattr(config, "_configparser", None)
     if parser is None or not hasattr(parser, "sections"):
         return
@@ -157,7 +163,12 @@ def _validate_v2_section_inventory(config: CapabilityConfig) -> None:
         raise ValueError("schema-v2 capability sections must be complete and contain no unknown sections")
 
     observed_options = set(parser.options("capabilities"))
-    expected_options = {"schema_version", "provider_revision", *_MANDATORY_V2_AXES}
+    mandatory_axes = (
+        _MANDATORY_V3_AXES
+        if version == CAPABILITY_SCHEMA_VERSION
+        else _MANDATORY_V2_AXES
+    )
+    expected_options = {"schema_version", "provider_revision", *mandatory_axes}
     if observed_options != expected_options:
         raise ValueError("capabilities keys must be complete and contain no unknown axes")
 
@@ -206,15 +217,20 @@ def _defaults(
 
 
 def capability_authority(config: CapabilityConfig) -> CapabilityGraph | None:
-    """Return and validate schema-v2 authority, or ``None`` for legacy/v1."""
+    """Return validated schema-v2/v3 authority, or ``None`` for legacy/v1."""
 
     version = _schema_version(config)
     if version is None:
         return None
-    if version != CAPABILITY_SCHEMA_VERSION:
+    if version not in {HISTORICAL_CAPABILITY_SCHEMA_VERSION, CAPABILITY_SCHEMA_VERSION}:
         raise ValueError(f"unsupported capabilities.schema_version: {version}")
-    _validate_v2_section_inventory(config)
-    axes = {option: _ordered_axis(config, option) for option in _MANDATORY_V2_AXES}
+    _validate_section_inventory(config, version)
+    mandatory_axes = (
+        _MANDATORY_V3_AXES
+        if version == CAPABILITY_SCHEMA_VERSION
+        else _MANDATORY_V2_AXES
+    )
+    axes = {option: _ordered_axis(config, option) for option in mandatory_axes}
     mods = axes["mods"]
     provider_revision = _scalar(config, "capabilities", "provider_revision", None)
     if (
@@ -228,6 +244,7 @@ def capability_authority(config: CapabilityConfig) -> CapabilityGraph | None:
         locale_profiles=axes["locale_profiles"],
         dem_sources=axes["dem_sources"],
         climate_datasets=axes["climate_datasets"],
+        climate_station_databases=axes.get("climate_station_databases", ()),
         climate_station_methods=axes["climate_station_methods"],
         climate_spatial_methods=axes["climate_spatial_methods"],
         soil_datasets=axes["soil_datasets"],
@@ -282,6 +299,7 @@ def capability_authority(config: CapabilityConfig) -> CapabilityGraph | None:
                 "locale_profile",
                 "dem_source",
                 "climate_dataset",
+                *(("climate_station_database",) if version == CAPABILITY_SCHEMA_VERSION else ()),
                 "landuse_dataset",
                 "soil_dataset",
                 "delineation_backend",

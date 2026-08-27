@@ -29,11 +29,20 @@ CLIMATE_SPATIAL_METHOD_RUNTIME: Mapping[str, int] = MappingProxyType(
 _STATION_METHOD_BY_RUNTIME = {value: key for key, value in CLIMATE_STATION_METHOD_RUNTIME.items()}
 _SPATIAL_METHOD_BY_RUNTIME = {value: key for key, value in CLIMATE_SPATIAL_METHOD_RUNTIME.items()}
 _BUILDER_EXPOSED_DATASETS = frozenset(
-    {"vanilla_cligen", "prism_stochastic", "observed_daymet", "observed_gridmet"}
+    {
+        "vanilla_cligen",
+        "prism_stochastic",
+        "observed_daymet",
+        "observed_gridmet",
+        "eobs_modified",
+        "agdc",
+    }
 )
 _SUPPORTED_NON_BUILDER_DATASETS = frozenset(
-    {"dep_nexrad", "future_cmip5", "user_defined_cli", "eobs_modified"}
+    {"dep_nexrad", "future_cmip5", "user_defined_cli"}
 )
+
+CLIMATE_STATION_DATABASE_ADAPTER_REVISION = "cligen-station-resolver-v2"
 
 
 @dataclass(frozen=True)
@@ -113,7 +122,6 @@ class ClimateDataset:
             "metadata": dict(self.metadata),
             "ui_exposed": self.ui_exposed,
         }
-
     def is_allowed_for(self, locales: Iterable[str], mods: Iterable[str], include_hidden: bool = False) -> bool:
         """Return True when dataset should be offered for the supplied context."""
         if not include_hidden and not self.ui_exposed:
@@ -134,6 +142,22 @@ class ClimateDataset:
             return False
 
         return True
+
+
+@dataclass(frozen=True, slots=True)
+class ClimateStationDatabase:
+    """Stable Builder identity for one CLIGEN station catalog selector."""
+
+    catalog_id: str
+    selector: str
+    label: str
+
+
+_CLIMATE_STATION_DATABASES: Tuple[ClimateStationDatabase, ...] = (
+    ClimateStationDatabase("cligen-stations-legacy", "legacy", "Legacy"),
+    ClimateStationDatabase("cligen-stations-2015", "2015_stations.db", "2015"),
+    ClimateStationDatabase("cligen-stations-ghcn", "ghcn_stations.db", "GHCN"),
+)
 
 
 _CLIMATE_DATASETS: Tuple[ClimateDataset, ...] = (
@@ -314,14 +338,13 @@ _CLIMATE_DATASETS: Tuple[ClimateDataset, ...] = (
         climate_mode=10,
         label='AGDC (Australia)',
         description='Australia Gridded Climate datasets.',
-        help_text='Backend support only; UI exposure pending future requirements.',
+        help_text='Observed gridded climate source for Australian runs.',
         group='Observed',
         group_hint='Model validation; historical disturbance analysis',
         allowed_locales=("au",),
         spatial_modes=(0, 1),
         default_spatial_mode=0,
         station_modes=(-1, 0),
-        ui_exposed=False,
     ),
 )
 
@@ -364,6 +387,23 @@ def get_climate_dataset(catalog_id: str) -> Optional[ClimateDataset]:
     return _catalog_by_id().get(catalog_id)
 
 
+@lru_cache(maxsize=1)
+def _station_database_by_id() -> Mapping[str, ClimateStationDatabase]:
+    return {database.catalog_id: database for database in _CLIMATE_STATION_DATABASES}
+
+
+def iter_climate_station_databases() -> Tuple[ClimateStationDatabase, ...]:
+    """Return the closed Builder CLIGEN station-database inventory."""
+
+    return _CLIMATE_STATION_DATABASES
+
+
+def get_climate_station_database(catalog_id: str) -> Optional[ClimateStationDatabase]:
+    """Return one CLIGEN station-database descriptor by stable ID."""
+
+    return _station_database_by_id().get(catalog_id)
+
+
 CLIMATE_PROVIDER_ADAPTER_REVISION = "climate-input-parser-v1"
 _CLIMATE_PROVIDER_OPTIONS = (
     "cligen_db",
@@ -399,6 +439,15 @@ def climate_catalog_revision(
         "datasets": [dataset.to_mapping() for dataset in _CLIMATE_DATASETS],
         "station_runtime": dict(CLIMATE_STATION_METHOD_RUNTIME),
         "spatial_runtime": dict(CLIMATE_SPATIAL_METHOD_RUNTIME),
+        "station_databases": [
+            {
+                "id": database.catalog_id,
+                "selector": database.selector,
+                "label": database.label,
+            }
+            for database in _CLIMATE_STATION_DATABASES
+        ],
+        "station_database_adapter_revision": CLIMATE_STATION_DATABASE_ADAPTER_REVISION,
         "configured_tokens": dict(configured_tokens),
         "adapter_revision": adapter_revision,
     }
@@ -408,6 +457,8 @@ def climate_catalog_revision(
 
 __all__ = [
     "ClimateDataset",
+    "ClimateStationDatabase",
+    "CLIMATE_STATION_DATABASE_ADAPTER_REVISION",
     "CLIMATE_SPATIAL_METHOD_RUNTIME",
     "CLIMATE_STATION_METHOD_RUNTIME",
     "CLIMATE_PROVIDER_ADAPTER_REVISION",
@@ -415,5 +466,7 @@ __all__ = [
     "climate_catalog_revision",
     "default_climate_provider_tokens",
     "get_climate_dataset",
+    "get_climate_station_database",
     "iter_climate_datasets",
+    "iter_climate_station_databases",
 ]

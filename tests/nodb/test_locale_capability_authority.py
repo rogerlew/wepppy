@@ -17,6 +17,7 @@ from wepppy.nodb.locales import (
     LocaleClassification,
     LocaleSupportState,
     build_continental_us_capability_graph,
+    build_locale_capability_graph,
     iter_landcover_catalog,
     iter_locale_profiles,
     resolve_locale_composition,
@@ -92,6 +93,11 @@ def _resolved_parser() -> ParsedConfig:
     return ParsedConfig(resolved.config_bytes.decode("utf-8"))
 
 
+def _historical_parser() -> ParsedConfig:
+    resolved = resolve_builder_config(_selections(), capability_schema_version=2)
+    return ParsedConfig(resolved.config_bytes.decode("utf-8"))
+
+
 def test_locale_catalog_classifies_every_shipped_runtime_token() -> None:
     profiles = iter_locale_profiles()
     known_tokens = {profile.runtime_token.casefold() for profile in profiles}
@@ -102,9 +108,10 @@ def test_locale_catalog_classifies_every_shipped_runtime_token() -> None:
         if match:
             observed_tokens.update(str(item).casefold() for item in ast.literal_eval(match.group(1)))
 
-    assert observed_tokens == known_tokens
-    assert len(profiles) == 16
-    assert sum(profile.support_state is LocaleSupportState.BUILDER_EXPOSED for profile in profiles) == 1
+    assert observed_tokens <= known_tokens
+    assert known_tokens - observed_tokens == {"canada"}
+    assert len(profiles) == 17
+    assert sum(profile.support_state is LocaleSupportState.BUILDER_EXPOSED for profile in profiles) == 5
     assert next(
         profile for profile in profiles if profile.classification is LocaleClassification.NON_BUILDER_FAMILY
     ).profile_id == "rhem"
@@ -180,26 +187,143 @@ def test_landcover_catalog_is_complete_and_uses_canonical_runtime_aliases() -> N
     catalog = iter_landcover_catalog()
     by_id = {entry.catalog_id: entry for entry in catalog}
 
-    assert len(catalog) == 163
+    assert len(catalog) == 164
     assert "emapr-vote-1984" in by_id
     assert "emapr-vote-1983" not in by_id
     assert by_id["corine-2018"].runtime_value == "eu/CORINE_LandCover/2018"
+    assert by_id["australia-landuse-2010-2011"].runtime_value == (
+        "au/landuse_201011/lu10v5ua"
+    )
     assert by_id["nlcd-2019"].support_state == "builder_exposed"
 
 
-def test_generated_config_round_trips_as_complete_schema_v2_authority() -> None:
+def test_generated_config_round_trips_as_complete_schema_v3_authority() -> None:
     authority = capability_authority(_resolved_parser())
 
     assert authority is not None
-    assert authority.schema_version == 2
+    assert authority.schema_version == 3
     assert authority.locale_profiles == ("continental-us",)
     assert authority.defaults["locale_profile"] == "continental-us"
     assert authority.defaults["delineation_backend"] == "wbt"
     assert authority.defaults["wepp_binary"] == "wepp_260803"
+    assert authority.climate_station_databases == (
+        "cligen-stations-legacy",
+        "cligen-stations-2015",
+        "cligen-stations-ghcn",
+    )
+    assert authority.defaults["climate_station_database"] == "cligen-stations-2015"
     assert authority.wepp_binaries == tuple(dict.fromkeys(get_linux_wepp_bin_opts()))
     assert authority.landuse_methods_by_representation["multiple-ofe"] == (
         "gridded",
         "upload",
+    )
+
+
+def test_historical_schema_v2_round_trip_never_adds_station_database_axis() -> None:
+    resolved = resolve_builder_config(_selections(), capability_schema_version=2)
+    authority = capability_authority(ParsedConfig(resolved.config_bytes.decode("utf-8")))
+
+    assert authority is not None
+    assert authority.schema_version == 2
+    assert authority.climate_station_databases == ()
+    assert "climate_station_databases" not in authority.as_config_sections()["capabilities"]
+    assert "climate_station_database" not in authority.defaults
+
+
+@pytest.mark.parametrize(
+    (
+        "profile_id",
+        "runtime_token",
+        "climates",
+        "station_databases",
+        "default_landuse",
+    ),
+    (
+        (
+            "continental-us",
+            "us",
+            (
+                "vanilla_cligen",
+                "prism_stochastic",
+                "observed_daymet",
+                "observed_gridmet",
+            ),
+            (
+                "cligen-stations-legacy",
+                "cligen-stations-2015",
+                "cligen-stations-ghcn",
+            ),
+            "nlcd-2019",
+        ),
+        (
+            "europe",
+            "eu",
+            ("vanilla_cligen", "eobs_modified"),
+            ("cligen-stations-ghcn",),
+            "corine-2018",
+        ),
+        (
+            "canada",
+            "canada",
+            ("vanilla_cligen", "observed_daymet"),
+            ("cligen-stations-ghcn",),
+            "c3s-landcover-2020",
+        ),
+        (
+            "australia",
+            "au",
+            ("vanilla_cligen", "agdc"),
+            ("cligen-stations-ghcn",),
+            "australia-landuse-2010-2011",
+        ),
+        (
+            "global-earth",
+            "earth",
+            ("vanilla_cligen",),
+            ("cligen-stations-ghcn",),
+            "c3s-landcover-2020",
+        ),
+    ),
+)
+def test_schema_v3_profile_graphs_and_default_configs_match_authority(
+    profile_id: str,
+    runtime_token: str,
+    climates: tuple[str, ...],
+    station_databases: tuple[str, ...],
+    default_landuse: str,
+) -> None:
+    binary_ids = ("wepp_260803", "latest")
+    graph = build_locale_capability_graph(
+        profile_id, binary_ids, _binary_revisions(binary_ids)
+    )
+
+    assert graph.schema_version == 3
+    assert graph.climate_datasets == climates
+    assert graph.climate_station_databases == station_databases
+    assert graph.defaults["climate_dataset"] == "vanilla_cligen"
+    assert graph.defaults["landuse_dataset"] == default_landuse
+    assert graph.defaults["delineation_backend"] == "wbt"
+    assert graph.defaults["watershed_representation"] == "single-ofe"
+    assert graph.defaults["wepp_binary"] == "wepp_260803"
+
+    defaults = graph.defaults
+    resolved = resolve_builder_config(BuilderSelections(
+        locale=profile_id,
+        dem=defaults["dem_source"],
+        delineation_backend=defaults["delineation_backend"],
+        watershed_representation=defaults["watershed_representation"],
+        wepp_binary=defaults["wepp_binary"],
+        soil=defaults["soil_dataset"],
+        landuse=defaults["landuse_dataset"],
+        climate=defaults["climate_dataset"],
+        climate_station_database=defaults["climate_station_database"],
+        capability_profile=f"{profile_id}-capabilities",
+    ))
+    assert resolved.config["general"]["locales"] == [runtime_token]
+    assert resolved.config["landuse"]["enable_landuse_change"] is True
+    assert resolved.config["capabilities"]["schema_version"] == 3
+    assert resolved.config["capability_defaults"]["climate_dataset"] == (
+        "vanilla_cligen"
     )
 
 
@@ -319,7 +443,7 @@ def test_mod_dependency_tokens_use_closed_axis_and_target_grammar(
             ),
             "must not contain duplicates",
         ),
-        (lambda parser: parser.set("capabilities", "schema_version", "3"), "unsupported"),
+        (lambda parser: parser.set("capabilities", "schema_version", "3"), "complete"),
         (
             lambda parser: parser.set("capabilities", "provider_revision", '"' + "A" * 64 + '"'),
             "SHA-256",
@@ -333,7 +457,7 @@ def test_mod_dependency_tokens_use_closed_axis_and_target_grammar(
     ],
 )
 def test_schema_v2_hostile_mutations_fail_closed(mutation, message: str) -> None:
-    config = _resolved_parser()
+    config = _historical_parser()
     mutation(config._configparser)
 
     with pytest.raises(ValueError, match=message):
@@ -395,7 +519,7 @@ def test_schema_v2_reader_rejects_closed_domain_dataset_ids(
     relation_sections: tuple[str, ...],
     default_key: str,
 ) -> None:
-    config = _resolved_parser()
+    config = _historical_parser()
     parser = config._configparser
     parser.set("capabilities", axis, f'["{hostile_id}"]')
     parser.set("capability_defaults", default_key, f'"{hostile_id}"')
@@ -406,7 +530,7 @@ def test_schema_v2_reader_rejects_closed_domain_dataset_ids(
             parser.remove_option(section, option)
         parser.set(section, hostile_id, value)
 
-    with pytest.raises(ValueError, match=f"{axis} contains an unknown domain ID"):
+    with pytest.raises(ValueError, match=f"{axis} is not authorized"):
         capability_authority(config)
 
 
@@ -416,7 +540,7 @@ def test_graph_rejects_known_non_builder_values_and_incompatible_edges() -> None
         binary_ids, _binary_revisions(binary_ids)
     )
 
-    with pytest.raises(CapabilityGraphError, match="unknown domain ID"):
+    with pytest.raises(CapabilityGraphError, match="not authorized"):
         replace(
             graph,
             dem_sources=("australia-srtm-1s",),

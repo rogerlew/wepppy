@@ -21,7 +21,17 @@ __all__ = ["BUILDER_WRITER_FLAG", "BuilderCandidate", "builder_writer_enabled", 
 BUILDER_WRITER_FLAG = "WEPPPY_PROJECT_CONFIG_BUILDER_WRITER_ENABLED"
 _TRUE = frozenset({"1", "true", "yes", "on"})
 _FALSE = frozenset({"", "0", "false", "no", "off"})
-_REQUIRED = frozenset({"locale", "dem", "delineation_backend", "watershed_representation", "wepp_binary", "soil", "landuse", "climate"})
+_REQUIRED = frozenset({
+    "locale",
+    "dem",
+    "delineation_backend",
+    "watershed_representation",
+    "wepp_binary",
+    "soil",
+    "landuse",
+    "climate",
+    "climate_station_database",
+})
 _OPTIONAL = frozenset({"mods", "capability_profile", "cellsize_override"})
 
 
@@ -61,13 +71,14 @@ def parse_builder_selections(payload: object) -> BuilderSelections:
     override = payload.get("cellsize_override")
     if override is not None and (isinstance(override, bool) or not isinstance(override, int)):
         raise BuilderConstraintError("cellsize_override", "invalid_type", "cellsize_override must be an integer")
-    profile = payload.get("capability_profile", "continental-us-capabilities")
+    profile = payload.get("capability_profile", f"{payload['locale']}-capabilities")
     if not isinstance(profile, str) or not profile:
         raise BuilderConstraintError("capability_profile", "invalid_type", "capability_profile must be a stable ID")
     return BuilderSelections(
         locale=payload["locale"], dem=payload["dem"], delineation_backend=payload["delineation_backend"],
         watershed_representation=payload["watershed_representation"], wepp_binary=payload["wepp_binary"], soil=payload["soil"],
-        landuse=payload["landuse"], climate=payload["climate"], mods=tuple(mods),
+        landuse=payload["landuse"], climate=payload["climate"],
+        climate_station_database=payload["climate_station_database"], mods=tuple(mods),
         capability_profile=profile, cellsize_override=override,
     )
 
@@ -90,6 +101,7 @@ def resolve_builder_candidate(
         "watershed_representation": selections.watershed_representation,
         "wepp_binary": selections.wepp_binary,
         "soil": selections.soil, "landuse": selections.landuse, "climate": selections.climate,
+        "climate_station_database": selections.climate_station_database,
         "mods": list(selections.mods),
         "capabilities": dict(resolved.config.get("capabilities", {})),
         "config_filename": "config.cfg",

@@ -21,7 +21,12 @@ from wepppy.nodb.config_builder.schema import (
     RegistryValue,
     ResolvedBuilderConfig,
 )
-from wepppy.nodb.locales.capability_graph import build_continental_us_capability_graph
+from wepppy.nodb.locales.capability_graph import (
+    CAPABILITY_SCHEMA_VERSION,
+    HISTORICAL_CAPABILITY_SCHEMA_VERSION,
+    build_continental_us_capability_graph,
+    build_locale_capability_graph,
+)
 from wepppy.project_config_serialization import (
     CanonicalValue,
     parse_config_text,
@@ -48,7 +53,8 @@ _KIND_ORDER = {
     ComponentKind.SOIL: 6,
     ComponentKind.LANDUSE: 7,
     ComponentKind.CLIMATE: 8,
-    ComponentKind.CAPABILITY: 9,
+    ComponentKind.CLIMATE_STATION_DATABASE: 9,
+    ComponentKind.CAPABILITY: 10,
 }
 _KIND_FIELD = {
     ComponentKind.DELINEATION: "delineation_backend",
@@ -62,7 +68,16 @@ DEFAULT_SELECTIONS = MappingProxyType({
 })
 
 
-def _capability_graph_for_registry(registry: Registry):
+def _capability_graph_for_registry(registry: Registry, locale_id: str):
+    binary_components = registry.by_kind(ComponentKind.WEPP_BINARY)
+    return build_locale_capability_graph(
+        locale_id,
+        tuple(item.component_id for item in binary_components),
+        {item.component_id: item.source_revision for item in binary_components},
+    )
+
+
+def _historical_capability_graph_for_registry(registry: Registry):
     binary_components = registry.by_kind(ComponentKind.WEPP_BINARY)
     return build_continental_us_capability_graph(
         tuple(item.component_id for item in binary_components),
@@ -106,7 +121,12 @@ def _require_allowed(field: str, selected: str, allowed: tuple[str, ...]) -> Non
         )
 
 
-def _selection_chain(registry: Registry, selections: BuilderSelections) -> tuple[ComponentDefinition, ...]:
+def _selection_chain(
+    registry: Registry,
+    selections: BuilderSelections,
+    *,
+    capability_schema_version: int,
+) -> tuple[ComponentDefinition, ...]:
     locale = _component(registry, selections.locale, ComponentKind.LOCALE, "locale")
     dem = _component(registry, selections.dem, ComponentKind.DEM, "dem")
     delineation = _component(
@@ -130,13 +150,25 @@ def _selection_chain(registry: Registry, selections: BuilderSelections) -> tuple
     soil = _component(registry, selections.soil, ComponentKind.SOIL, "soil")
     landuse = _component(registry, selections.landuse, ComponentKind.LANDUSE, "landuse")
     climate = _component(registry, selections.climate, ComponentKind.CLIMATE, "climate")
+    climate_station_database = None
+    if capability_schema_version == CAPABILITY_SCHEMA_VERSION:
+        climate_station_database = _component(
+            registry,
+            selections.climate_station_database,
+            ComponentKind.CLIMATE_STATION_DATABASE,
+            "climate_station_database",
+        )
     capability = _component(
         registry,
         selections.capability_profile,
         ComponentKind.CAPABILITY,
         "capability_profile",
     )
-    graph = _capability_graph_for_registry(registry)
+    graph = (
+        _historical_capability_graph_for_registry(registry)
+        if capability_schema_version == HISTORICAL_CAPABILITY_SCHEMA_VERSION
+        else _capability_graph_for_registry(registry, selections.locale)
+    )
     graph_axes = (
         ("locale", selections.locale, graph.locale_profiles),
         ("dem", selections.dem, graph.dem_sources),
@@ -144,6 +176,12 @@ def _selection_chain(registry: Registry, selections: BuilderSelections) -> tuple
         ("landuse", selections.landuse, graph.landuse_datasets),
         ("climate", selections.climate, graph.climate_datasets),
     )
+    if climate_station_database is not None:
+        graph_axes += ((
+            "climate_station_database",
+            selections.climate_station_database,
+            graph.climate_station_databases,
+        ),)
     for field, selected_id, allowed_ids in graph_axes:
         _require_allowed(field, selected_id, allowed_ids)
     model_tuple = "|".join(
@@ -175,6 +213,12 @@ def _selection_chain(registry: Registry, selections: BuilderSelections) -> tuple
     _require_allowed("soil", soil.component_id, constraints.allowed_soil)
     _require_allowed("landuse", landuse.component_id, constraints.allowed_landuse)
     _require_allowed("climate", climate.component_id, constraints.allowed_climate)
+    if climate_station_database is not None:
+        _require_allowed(
+            "climate_station_database",
+            climate_station_database.component_id,
+            constraints.allowed_climate_station_database,
+        )
     _require_allowed(
         "capability_profile",
         capability.component_id,
@@ -189,7 +233,19 @@ def _selection_chain(registry: Registry, selections: BuilderSelections) -> tuple
         _require_allowed("mods", component_id, constraints.allowed_mods)
         mods.append(mod)
         seen_mods.add(component_id)
-    selected = (locale, dem, delineation, representation, wepp_binary, *mods, soil, landuse, climate, capability)
+    selected = (
+        locale,
+        dem,
+        delineation,
+        representation,
+        wepp_binary,
+        *mods,
+        soil,
+        landuse,
+        climate,
+        *((climate_station_database,) if climate_station_database is not None else ()),
+        capability,
+    )
     selected_ids = {item.component_id for item in selected}
     for component in selected:
         missing = set(component.constraints.requires) - selected_ids
@@ -227,8 +283,8 @@ def describe_builder(registry: Registry | None = None) -> BuilderDescription:
     """Return a deterministic, immutable description for server consumers."""
 
     resolved_registry = load_registry() if registry is None else registry
-    summaries = tuple(
-        ComponentSummary(
+    all_summaries = {
+        item.component_id: ComponentSummary(
             item.component_id,
             item.kind.value,
             item.label,
@@ -241,24 +297,69 @@ def describe_builder(registry: Registry | None = None) -> BuilderDescription:
             item.base_profile_id,
             item.overlay_precedence,
         )
-        for item in sorted(
-            resolved_registry.components.values(),
-            key=lambda item: (_KIND_ORDER[item.kind], item.component_id),
+        for item in resolved_registry.components.values()
+    }
+
+    def summaries_for(locale_id: str, *, historical: bool = False) -> tuple[ComponentSummary, ...]:
+        graph = (
+            _historical_capability_graph_for_registry(resolved_registry)
+            if historical
+            else _capability_graph_for_registry(resolved_registry, locale_id)
         )
-    )
-    graph = _capability_graph_for_registry(resolved_registry)
+        component_ids = {
+            locale_id,
+            *graph.dem_sources,
+            *graph.soil_datasets,
+            *graph.landuse_datasets,
+            *graph.climate_datasets,
+            *graph.climate_station_databases,
+            *graph.delineation_backends,
+            *graph.watershed_representations,
+            *graph.wepp_binaries,
+            f"{locale_id}-capabilities",
+        }
+        return tuple(
+            all_summaries[component_id]
+            for component_id in sorted(
+                component_ids,
+                key=lambda value: (
+                    _KIND_ORDER[resolved_registry.components[value].kind], value
+                ),
+            )
+        )
+
+    compatibility_summaries = summaries_for("continental-us", historical=True)
+    graphs = {
+        locale_id: _capability_graph_for_registry(resolved_registry, locale_id)
+        for locale_id in (
+            "continental-us", "europe", "canada", "australia", "global-earth"
+        )
+    }
+    components_by_locale = MappingProxyType({
+        locale_id: summaries_for(locale_id) for locale_id in graphs
+    })
+    graph_mappings = MappingProxyType({
+        locale_id: MappingProxyType({
+            section: MappingProxyType(dict(options))
+            for section, options in graph.as_config_sections().items()
+        })
+        for locale_id, graph in graphs.items()
+    })
+    historical_graph = _historical_capability_graph_for_registry(resolved_registry)
     return BuilderDescription(
-        1,
+        2,
         resolved_registry.revision,
-        summaries,
+        compatibility_summaries,
         ALLOWED_CELL_SIZES,
         DEFAULT_SELECTIONS,
         MappingProxyType(
             {
                 section: MappingProxyType(dict(options))
-                for section, options in graph.as_config_sections().items()
+                for section, options in historical_graph.as_config_sections().items()
             }
         ),
+        components_by_locale,
+        graph_mappings,
     )
 
 
@@ -268,9 +369,26 @@ def resolve_builder_config(
     registry: Registry | None = None,
     base_config: Mapping[str, Mapping[str, CanonicalValue]] | None = None,
     base_revision: str | None = None,
+    capability_schema_version: int = CAPABILITY_SCHEMA_VERSION,
 ) -> ResolvedBuilderConfig:
     """Resolve one supported selection into canonical bytes without file writes."""
 
+    if capability_schema_version not in {
+        HISTORICAL_CAPABILITY_SCHEMA_VERSION,
+        CAPABILITY_SCHEMA_VERSION,
+    }:
+        raise BuilderConstraintError(
+            "capability_schema_version",
+            "unsupported_builder_schema",
+            "Unsupported capability schema version.",
+        )
+    if (
+        capability_schema_version == HISTORICAL_CAPABILITY_SCHEMA_VERSION
+        and selections.locale != "continental-us"
+    ):
+        raise BuilderConstraintError(
+            "locale", "unsupported_combination", "Schema v2 is Continental-US only."
+        )
     resolved_registry = load_registry() if registry is None else registry
     if base_config is None:
         defaults_bytes = _DEFAULTS_PATH.read_bytes()
@@ -284,8 +402,17 @@ def resolve_builder_config(
         for section, options in config.items()
         for option in options
     }
-    chain = _selection_chain(resolved_registry, selections)
+    chain = _selection_chain(
+        resolved_registry,
+        selections,
+        capability_schema_version=capability_schema_version,
+    )
     for component in chain:
+        if (
+            capability_schema_version == HISTORICAL_CAPABILITY_SCHEMA_VERSION
+            and component.kind is ComponentKind.CAPABILITY
+        ):
+            continue
         for write in component.writes:
             section = config.setdefault(write.section, {})
             if write.option in section and write.key not in component.overrides:
@@ -297,9 +424,19 @@ def resolve_builder_config(
             section[write.option] = _mutable_value(write.value)
             effective_writers[write.key] = component.component_id
 
-    graph = _capability_graph_for_registry(resolved_registry)
-    for section_name in graph.as_config_sections():
-        config.setdefault(section_name, {})
+    graph = (
+        _historical_capability_graph_for_registry(resolved_registry)
+        if capability_schema_version == HISTORICAL_CAPABILITY_SCHEMA_VERSION
+        else _capability_graph_for_registry(resolved_registry, selections.locale)
+    )
+    if capability_schema_version == HISTORICAL_CAPABILITY_SCHEMA_VERSION:
+        for section_name, options in graph.as_config_sections().items():
+            config[section_name] = deepcopy(options)
+            for option_name in options:
+                effective_writers[(section_name, option_name)] = selections.capability_profile
+    else:
+        for section_name in graph.as_config_sections():
+            config.setdefault(section_name, {})
 
     dem = next(item for item in chain if item.kind is ComponentKind.DEM)
     if dem.default_cellsize not in ALLOWED_CELL_SIZES:
@@ -332,6 +469,12 @@ def resolve_builder_config(
         (("capability_defaults", "watershed_representation"), selections.watershed_representation, "selection:representation"),
         (("capability_defaults", "wepp_binary"), selections.wepp_binary, "selection:wepp_binary"),
     )
+    if capability_schema_version == CAPABILITY_SCHEMA_VERSION:
+        explicit_writes += ((
+            ("capability_defaults", "climate_station_database"),
+            selections.climate_station_database,
+            "selection:climate_station_database",
+        ),)
     for (section_name, option_name), value, writer in explicit_writes:
         config.setdefault(section_name, {})[option_name] = deepcopy(value)
         effective_writers[(section_name, option_name)] = writer

@@ -1,9 +1,7 @@
 """Canonical locale profile identities and composition rules.
 
-This module classifies the complete shipped runtime-locale token boundary.  It
-does not make every classified profile Builder-selectable: support state is an
-explicit property, and only ``continental-us`` currently closes the complete
-Builder dependency graph.
+This module classifies the complete shipped runtime-locale token boundary and
+owns the closed dataset axes for every Builder-exposed profile.
 """
 
 from __future__ import annotations
@@ -15,6 +13,10 @@ import json
 from types import MappingProxyType
 from typing import Iterable, Mapping
 
+from wepppy.nodb.locales.climate_catalog import (
+    get_climate_dataset,
+    get_climate_station_database,
+)
 from wepppy.nodb.locales.landuse_catalog import get_landcover_entry
 
 __all__ = [
@@ -54,6 +56,8 @@ SOIL_SOURCE_RUNTIME: Mapping[str, str | None] = MappingProxyType({
     "hawaii-ssurgo": "hawaii/ssurgo",
     "usvi-soils": "locales/virgin_islands/soils",
     "isric-global": "isric",
+    "esdac-europe": None,
+    "asris-australia": None,
     "chile-soils": "chile",
     "portland-soils": "portland/soils",
     "chile-cayumanque-soils-map": "locales/ChileCayumanque/soils",
@@ -109,6 +113,8 @@ class LocaleProfile:
     dem_sources: tuple[str, ...] = ()
     soil_sources: tuple[str, ...] = ()
     landuse_sources: tuple[str, ...] = ()
+    climate_sources: tuple[str, ...] = ()
+    climate_station_databases: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -137,6 +143,8 @@ def _profile(
     dem_sources: tuple[str, ...] = (),
     soil_sources: tuple[str, ...] = (),
     landuse_sources: tuple[str, ...] = (),
+    climate_sources: tuple[str, ...] = (),
+    climate_station_databases: tuple[str, ...] = (),
 ) -> LocaleProfile:
     return LocaleProfile(
         profile_id=profile_id,
@@ -144,12 +152,14 @@ def _profile(
         runtime_token=runtime_token,
         classification=classification,
         support_state=support_state,
-        source_revision="WP12B-1",
+        source_revision="WP12C-1",
         base_profile_id=base_profile_id,
         overlay_precedence=overlay_precedence,
         dem_sources=dem_sources,
         soil_sources=soil_sources,
         landuse_sources=landuse_sources,
+        climate_sources=climate_sources,
+        climate_station_databases=climate_station_databases,
     )
 
 
@@ -160,6 +170,12 @@ _PROFILES = (
         dem_sources=("usgs-ned1-2024", "usgs-ned13-2022"),
         soil_sources=("ssurgo-gnatsgso-2025",),
         landuse_sources=("nlcd-2019",),
+        climate_sources=(
+            "vanilla_cligen", "prism_stochastic", "observed_daymet", "observed_gridmet",
+        ),
+        climate_station_databases=(
+            "cligen-stations-legacy", "cligen-stations-2015", "cligen-stations-ghcn",
+        ),
     ),
     _profile(
         "alaska", "Alaska", "alaska", LocaleClassification.BASE,
@@ -182,20 +198,36 @@ _PROFILES = (
     ),
     _profile(
         "europe", "Europe", "eu", LocaleClassification.BASE,
-        LocaleSupportState.SUPPORTED_NON_BUILDER,
-        dem_sources=("europe-eudem-v1-1", "aragon-mdt"),
+        LocaleSupportState.BUILDER_EXPOSED,
+        dem_sources=("europe-eudem-v1-1",),
+        soil_sources=("esdac-europe",),
         landuse_sources=("corine-1990", "corine-2000", "corine-2006", "corine-2012", "corine-2018"),
+        climate_sources=("vanilla_cligen", "eobs_modified"),
+        climate_station_databases=("cligen-stations-ghcn",),
+    ),
+    _profile(
+        "canada", "Canada", "canada", LocaleClassification.BASE,
+        LocaleSupportState.BUILDER_EXPOSED,
+        dem_sources=("copernicus-dem-30",), soil_sources=("isric-global",),
+        landuse_sources=_C3S_LANDUSE_IDS,
+        climate_sources=("vanilla_cligen", "observed_daymet"),
+        climate_station_databases=("cligen-stations-ghcn",),
     ),
     _profile(
         "australia", "Australia", "au", LocaleClassification.BASE,
-        LocaleSupportState.SUPPORTED_NON_BUILDER,
-        dem_sources=("australia-srtm-1s",),
+        LocaleSupportState.BUILDER_EXPOSED,
+        dem_sources=("australia-srtm-1s",), soil_sources=("asris-australia",),
+        landuse_sources=("australia-landuse-2010-2011",),
+        climate_sources=("vanilla_cligen", "agdc"),
+        climate_station_databases=("cligen-stations-ghcn",),
     ),
     _profile(
         "global-earth", "Global Earth", "earth", LocaleClassification.BASE,
-        LocaleSupportState.SUPPORTED_NON_BUILDER,
+        LocaleSupportState.BUILDER_EXPOSED,
         dem_sources=("copernicus-dem-30",), soil_sources=("isric-global",),
         landuse_sources=_C3S_LANDUSE_IDS,
+        climate_sources=("vanilla_cligen",),
+        climate_station_databases=("cligen-stations-ghcn",),
     ),
     _profile(
         "nigeria", "Nigeria", "nigeria", LocaleClassification.BASE,
@@ -290,7 +322,21 @@ def _validate_catalog() -> None:
             source for source in profile.landuse_sources
             if get_landcover_entry(source) is None
         }
-        if unknown_dem or unknown_soil or unknown_landuse:
+        unknown_climate = {
+            source for source in profile.climate_sources
+            if get_climate_dataset(source) is None
+        }
+        unknown_station_databases = {
+            source for source in profile.climate_station_databases
+            if get_climate_station_database(source) is None
+        }
+        if (
+            unknown_dem
+            or unknown_soil
+            or unknown_landuse
+            or unknown_climate
+            or unknown_station_databases
+        ):
             raise RuntimeError(
                 f"locale profile {profile.profile_id!r} references unknown data sources"
             )
@@ -368,6 +414,8 @@ def locale_catalog_revision() -> str:
             "dem_sources": item.dem_sources,
             "soil_sources": item.soil_sources,
             "landuse_sources": item.landuse_sources,
+            "climate_sources": item.climate_sources,
+            "climate_station_databases": item.climate_station_databases,
         }
         for item in _PROFILES
     ]

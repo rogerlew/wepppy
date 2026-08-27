@@ -4,9 +4,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-27 15:40 UTC
-**Current phase**: Standalone contract checkpoint commit
-**Last updated**: 2026-08-27 18:05 UTC
-**Next milestone**: standalone checkpoint commit
+**Current phase**: Broad validation and implementation review
+**Last updated**: 2026-08-27 19:00 UTC
+**Next milestone**: accept the candidate revision through review and Forest
 **Security impact**: `high`
 **Dedicated security review**: `yes`
 **Security artifact**: `artifacts/20260827_security_review.md`
@@ -19,17 +19,10 @@ and production
 
 ### In Progress
 
-- [ ] Commit the standalone contract checkpoint.
+- [ ] Pass independent implementation/security reviews.
 
 ### Pending
 
-- [ ] Commit the standalone contract checkpoint before implementation.
-- [ ] Implement typed climate authority and complete Europe/Canada/Australia/
-  Earth profile data.
-- [ ] Generate locale/data components and a validated graph per profile.
-- [ ] Update Builder API/UI selection and validation to use the selected graph.
-- [ ] Add direct backend/frontend compatibility and hostile-state tests.
-- [ ] Pass local gates and independent implementation/security reviews.
 - [ ] Deploy without rebuilding to exact host `forest` and prove all advertised
   providers plus one created/reopened run per newly exposed profile.
 - [ ] Close WP12C and hand the accepted revision to WP12.
@@ -52,6 +45,13 @@ None.
   blocking or high/medium findings.
 - [x] Governance contract re-review is Ready with no remaining blockers; both
   independent contract reviews are complete.
+- [x] Committed the ratified standalone contract checkpoint as `bb1745fd8`
+  before beginning implementation.
+- [x] Implemented complete typed climate/station authority and provider-backed
+  locale/data/capability components for all five profiles.
+- [x] Added locale-selected API/UI graphs and schema-v2 client negotiation.
+- [x] Added direct historical, hostile-state, cross-locale, frontend, and real
+  concurrent SQLite/PAR CLIGEN tests; all focused gates pass.
 
 ## Decisions Log
 
@@ -111,10 +111,10 @@ different choices and must not be conflated or inferred from one another.
 
 ## Verification Checklist
 
-- [ ] Focused Python tests pass.
-- [ ] Full Python suite passes.
-- [ ] Frontend lint and tests pass.
-- [ ] Stub/API gates pass.
-- [ ] Docs lint passes.
+- [x] Focused Python tests pass.
+- [x] Full Python suite passes (7,043 passed, 63 skipped).
+- [x] Frontend lint and tests pass (107 suites, 793 tests).
+- [x] Stub/API gates pass.
+- [x] Docs lint passes.
 - [ ] Correctness, governance, and security findings are dispositioned.
 - [ ] Exact-host `forest` acceptance is recorded.

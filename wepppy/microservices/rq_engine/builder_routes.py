@@ -30,6 +30,11 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 _SCOPES = ["rq:enqueue"]
 _OVERRIDE_ROLES = frozenset({"poweruser", "admin", "root"})
+_BUILDER_DESCRIPTION_SCHEMA_VERSION = 2
+
+
+class _UnsupportedBuilderSchema(ValueError):
+    """Raised before registry resolution when a client cannot express WP12C."""
 
 
 def _authorize(request: Request) -> tuple[Mapping[str, Any] | None, JSONResponse | None]:
@@ -50,7 +55,16 @@ def _field_error(exc: BuilderConstraintError) -> JSONResponse:
 def _parse_body(payload: object, *, creation: bool) -> tuple[str, object, str | None]:
     if not isinstance(payload, dict):
         raise BuilderConstraintError("request", "invalid_type", "Request must be an object")
-    expected = {"registry_revision", "selections"}
+    version = payload.get("builder_description_schema_version")
+    if version != _BUILDER_DESCRIPTION_SCHEMA_VERSION:
+        raise _UnsupportedBuilderSchema(
+            "builder_description_schema_version must be 2; reload Config Builder and review selections"
+        )
+    expected = {
+        "builder_description_schema_version",
+        "registry_revision",
+        "selections",
+    }
     if creation:
         expected.add("creation_idempotency_key")
     unknown = set(payload) - expected
@@ -90,7 +104,31 @@ async def builder_description(request: Request) -> JSONResponse:
             "Builder registry is unavailable.", status_code=500,
             code="builder_registry_error", details=str(exc),
         )
-    return JSONResponse({"schema_version": description.schema_version, "registry_revision": description.registry_revision, "components": [asdict(item) for item in description.components], "allowed_cell_sizes": list(description.allowed_cell_sizes), "default_selections": dict(description.default_selections), "capability_graph": {section: dict(options) for section, options in description.capability_graph.items()}, "can_override_cellsize": _can_override(claims), "config_token": "config", "config_filename": "config.cfg"})
+    return JSONResponse({
+        "schema_version": description.schema_version,
+        "builder_description_schema_version": description.schema_version,
+        "registry_revision": description.registry_revision,
+        "components": [asdict(item) for item in description.components],
+        "components_by_locale": {
+            locale_id: [asdict(item) for item in components]
+            for locale_id, components in description.components_by_locale.items()
+        },
+        "allowed_cell_sizes": list(description.allowed_cell_sizes),
+        "default_selections": dict(description.default_selections),
+        "capability_graph": {
+            section: dict(options)
+            for section, options in description.capability_graph.items()
+        },
+        "capability_graphs_by_locale": {
+            locale_id: {
+                section: dict(options) for section, options in graph.items()
+            }
+            for locale_id, graph in description.capability_graphs_by_locale.items()
+        },
+        "can_override_cellsize": _can_override(claims),
+        "config_token": "config",
+        "config_filename": "config.cfg",
+    })
 
 
 @router.post("/project-config/builder/validate", summary="Validate project config proposal", description="Requires JWT `rq:enqueue`; synchronously resolves a complete proposal with no queue or writes.", tags=["rq-engine", "project"], operation_id=rq_operation_id("validate_project_config_builder"), responses=agent_route_responses(success_code=200, success_description="Valid resolved proposal.", extra={400: "Validation failed. Returns the canonical error payload.", 409: "Stale schema. Returns the canonical error payload."}))
@@ -106,6 +144,13 @@ async def validate_builder(request: Request) -> JSONResponse:
         return JSONResponse({"valid": True, "registry_revision": candidate.resolved.registry_revision, "review": dict(candidate.review)})
     except BuilderConstraintError as exc:
         return _field_error(exc)
+    except _UnsupportedBuilderSchema as exc:
+        return error_response(
+            "Builder client schema is unsupported.",
+            status_code=409,
+            code="unsupported_builder_schema",
+            details=str(exc),
+        )
     except RegistryError as exc:
         logger.exception("builder validation failed")
         return error_response(
@@ -122,15 +167,28 @@ async def create_builder_project(request: Request) -> JSONResponse:
     if auth_error is not None:
         return auth_error
     try:
+        payload = await request.json()
+        if not isinstance(payload, dict) or payload.get(
+            "builder_description_schema_version"
+        ) != _BUILDER_DESCRIPTION_SCHEMA_VERSION:
+            raise _UnsupportedBuilderSchema(
+                "builder_description_schema_version must be 2; reload Config Builder and review selections"
+            )
         if not builder_writer_enabled():
             return error_response("Builder creation is not enabled.", status_code=503, code="builder_writer_disabled")
-        payload = await request.json()
         candidate, key, failure = _validated_candidate(payload, claims or {}, creation=True)
         if failure is not None:
             return failure
         assert candidate is not None and key is not None
     except BuilderConstraintError as exc:
         return _field_error(exc)
+    except _UnsupportedBuilderSchema as exc:
+        return error_response(
+            "Builder client schema is unsupported.",
+            status_code=409,
+            code="unsupported_builder_schema",
+            details=str(exc),
+        )
     except RegistryError as exc:
         logger.exception("builder registry failed during creation")
         return error_response(
@@ -180,7 +238,7 @@ async def create_builder_project(request: Request) -> JSONResponse:
         if candidate.resolved.cellsize_source == "privileged_override":
             logger.info("builder privileged cell-size override", extra={"actor_user_id": actor.user_id if actor else None, "runid": runid})
         return JSONResponse({"run_id": runid, "location": location, "config_token": "config"}, status_code=201)
-    except Exception:  # broad-except: creation boundary must clean partial runs and release reservations
+    except Exception as exc:  # broad-except: creation boundary must clean partial runs and release reservations
         logger.exception("builder project initialization failed", extra={"runid": runid or None})
         if runid and wd:
             try:
@@ -188,7 +246,12 @@ async def create_builder_project(request: Request) -> JSONResponse:
             except (OSError, redis.RedisError, RuntimeError, ValueError):
                 logger.exception("builder project cleanup failed", extra={"runid": runid})
         _release_creation_safely(client, reservation)
-        return error_response("Could not create builder project.", status_code=500, code="run_initialization_failed")
+        return error_response(
+            "Could not create builder project.",
+            status_code=500,
+            code="run_initialization_failed",
+            details=f"{type(exc).__name__}: {exc}",
+        )
 
 
 __all__ = ["router"]

@@ -58,7 +58,9 @@ _STATIC_LANDCOVER_DATASETS: Dict[str, List[Tuple[str, str]]] = {
         ("eu/CORINE_LandCover/2012", "CORINE 2012"),
         ("eu/CORINE_LandCover/2018", "CORINE 2018"),
     ],
-    "au": [],
+    "au": [
+        ("au/landuse_201011/lu10v5ua", "Australia Land Use 2010-2011"),
+    ],
     "earth": [
         (f"locales/earth/C3Slandcover/{year}", f"C3Slandcover/{year}")
         for year in range(2020, 1991, -1)
@@ -92,8 +94,21 @@ _LANDCOVER_SPECIAL_IDS: Mapping[str, str] = {
     "hawaii/nlcd/wepp_31131a7": "hawaii-nlcd-wepp-31131a7",
     "ca/canadalandcover2020": "canada-landcover-2020",
     "portland/nlcd": "portland-nlcd",
+    "au/landuse_201011/lu10v5ua": "australia-landuse-2010-2011",
 }
-LANDCOVER_PROVIDER_ADAPTER_REVISION = "landuse-catalog-adapter-v1"
+LANDCOVER_PROVIDER_ADAPTER_REVISION = "landuse-catalog-adapter-v2"
+_BUILDER_EXPOSED_LANDCOVER_IDS = frozenset(
+    {
+        "nlcd-2019",
+        "corine-1990",
+        "corine-2000",
+        "corine-2006",
+        "corine-2012",
+        "corine-2018",
+        "australia-landuse-2010-2011",
+        *(f"c3s-landcover-{year}" for year in range(1992, 2021)),
+    }
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -159,7 +174,11 @@ def iter_landcover_catalog() -> Tuple[LandcoverCatalogEntry, ...]:
             catalog_id=catalog_id,
             runtime_value=runtime_value,
             label=label,
-            support_state=("builder_exposed" if catalog_id == "nlcd-2019" else "supported_non_builder"),
+            support_state=(
+                "builder_exposed"
+                if catalog_id in _BUILDER_EXPOSED_LANDCOVER_IDS
+                else "supported_non_builder"
+            ),
         )
         for catalog_id, (runtime_value, label) in sorted(values.items())
     )
@@ -317,7 +336,7 @@ def available_landuse_datasets(
             catalog_id=landcover_catalog_id(value),
             support_state=(
                 "builder_exposed"
-                if landcover_catalog_id(value) == "nlcd-2019"
+                if landcover_catalog_id(value) in _BUILDER_EXPOSED_LANDCOVER_IDS
                 else "supported_non_builder"
             ),
         )

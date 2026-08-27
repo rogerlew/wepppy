@@ -45,6 +45,32 @@ EXPECTED_IDS = {
     "observed_daymet",
     "observed_gridmet",
     "continental-us-capabilities",
+    "europe",
+    "canada",
+    "australia",
+    "global-earth",
+    "europe-capabilities",
+    "canada-capabilities",
+    "australia-capabilities",
+    "global-earth-capabilities",
+    "europe-eudem-v1-1",
+    "copernicus-dem-30",
+    "australia-srtm-1s",
+    "esdac-europe",
+    "isric-global",
+    "asris-australia",
+    "eobs_modified",
+    "agdc",
+    "cligen-stations-legacy",
+    "cligen-stations-2015",
+    "cligen-stations-ghcn",
+    "australia-landuse-2010-2011",
+    "corine-1990",
+    "corine-2000",
+    "corine-2006",
+    "corine-2012",
+    "corine-2018",
+    *(f"c3s-landcover-{year}" for year in range(1992, 2021)),
 }
 
 
@@ -307,6 +333,7 @@ def test_composition_order_and_effective_writers_are_explicit() -> None:
         "ssurgo-gnatsgso-2025",
         "nlcd-2019",
         "observed_daymet",
+        "cligen-stations-2015",
         "continental-us-capabilities",
     ]
     assert result.effective_writers[("general", "dem_db")] == "usgs-ned1-2024"
@@ -381,15 +408,17 @@ def test_description_is_deterministic_and_server_ready() -> None:
     second = describe_builder(registry)
 
     assert first == second
-    assert first.schema_version == 1
+    assert first.schema_version == 2
     assert first.registry_revision == registry.revision
     assert first.allowed_cell_sizes == ALLOWED_CELL_SIZES
-    assert tuple(item.component_id for item in first.components) == tuple(
-        item.component_id
-        for item in sorted(
-            registry.components.values(),
-            key=lambda item: (list(ComponentKind).index(item.kind), item.component_id),
-        )
+    assert set(first.capability_graphs_by_locale) == {
+        "continental-us", "europe", "canada", "australia", "global-earth"
+    }
+    assert set(first.components_by_locale) == set(first.capability_graphs_by_locale)
+    assert first.capability_graph["capabilities"]["schema_version"] == 2
+    assert all(
+        graph["capabilities"]["schema_version"] == 3
+        for graph in first.capability_graphs_by_locale.values()
     )
 
 
@@ -404,6 +433,7 @@ def test_description_is_deterministic_and_server_ready() -> None:
         ("soil", "missing-soil"),
         ("landuse", "missing-landuse"),
         ("climate", "missing-climate"),
+        ("climate_station_database", "missing-station-database"),
         ("capability_profile", "missing-profile"),
     ],
 )

@@ -27,13 +27,22 @@ and observed Daymet, defaults to Vanilla CLIGEN, and uses GHCN stations.
 - [x] (2026-08-27 15:40Z) Scoped the exact five-profile set and Canada policy.
 - [x] (2026-08-27 18:03Z) Ratified canonical contract amendments; correctness
   security, and governance re-reviews are Ready with no blocking findings.
-- [ ] Commit the standalone contract checkpoint.
-- [ ] Implement typed profile climate sources and provider-backed components.
-- [ ] Implement and serialize a validated graph for every exposed profile.
-- [ ] Make Builder description, dependent controls, validation, and resolution
+- [x] (2026-08-27 18:12Z) Committed the ratified standalone contract
+  checkpoint as `bb1745fd8`; it is the ancestor of all WP12C implementation
+  work.
+- [x] (2026-08-27 18:39Z) Implemented typed profile climate/station sources,
+  adapter-bound provider components, and instance-local CLIGEN catalogs.
+- [x] (2026-08-27 18:39Z) Implemented and serialized validated schema-v3 graphs
+  for all five exposed profiles while retaining the historical v2 reader.
+- [x] (2026-08-27 18:39Z) Made Builder description, dependent controls,
+  validation, and resolution
   select the graph for the chosen locale.
-- [ ] Prove historical and hostile stored-graph behavior plus API/UI parity.
-- [ ] Pass local validation and independent implementation reviews.
+- [x] (2026-08-27 18:39Z) Focused Python and JavaScript tests prove historical
+  and hostile stored-graph behavior, cross-locale rejection, and API/UI parity.
+- [x] (2026-08-27 19:00Z) Passed the complete local Python gate (7,043 passed,
+  63 skipped), frontend lint and all 107 suites / 793 tests, stubs, docs,
+  exception enforcement, compile, and dead-code checks.
+- [ ] Obtain and disposition independent implementation reviews.
 - [ ] Deploy the accepted revision to exact host `forest` without rebuilding and
   record real provider/run evidence.
 - [ ] Close the package, push, and hand the accepted revision to WP12.
@@ -56,6 +65,20 @@ and observed Daymet, defaults to Vanilla CLIGEN, and uses GHCN stations.
   rows from one database with paths under another root.
   Evidence: `wepppy/climates/cligen/cligen.py` assigns module globals in the
   manager constructor and `StationMeta` reads the global root later.
+
+- Observation: the shipped GHCN `all_years` PAR entries may be symlinks into
+  the 30-year catalog, so the concurrency test must compare the resolved
+  instance root and selected file identity rather than assume every lexical
+  path remains below `all_years` after canonicalization.
+  Evidence: the direct SQLite/PAR test in
+  `tests/climates/test_cligen_station_catalog_isolation.py`.
+
+- Observation: the full suite retained a pre-WP12C assertion that Australia
+  exposes no AGDC climate source even though the ratified matrix explicitly
+  includes AGDC.
+  Evidence: the first broad run stopped in
+  `tests/nodb/test_climate_catalog.py`; the corrected contract assertion and
+  complete rerun pass.
 
 ## Decision Log
 

@@ -396,13 +396,16 @@ Keep this document updated when the bundling flow or controller contract changes
 
 `config_builder.js` owns the authenticated, non-run-scoped Config Builder page.
 It fetches `/rq-engine/api/project-config/builder` through
-`WCHttp.getRqEngineToken()`, derives every displayed stable ID from the returned
-component and constraint metadata, and posts exact validation and creation JSON.
-Only the validation response supplies review content. A schema `409` reloads
-the description and disables creation until another review. The controller
-keeps one cryptographic idempotency key per validated creation attempt and
-ignores duplicate clicks while a request is active. Jest coverage lives in
-`controllers_js/__tests__/config_builder.test.js`.
+`WCHttp.getRqEngineToken()` and requires Builder description schema v2. The
+selected locale chooses both `capability_graphs_by_locale` and
+`components_by_locale`; those server descriptions are the sole source of DEM,
+soil, land-cover, climate, and CLIGEN station-database options and defaults.
+The controller posts the description version with exact validation and
+creation JSON. Only the validation response supplies review content. A schema
+`409` reloads the description and disables creation until another review. The
+controller keeps one cryptographic idempotency key per validated creation
+attempt and ignores duplicate clicks while a request is active. Jest coverage
+lives in `controllers_js/__tests__/config_builder.test.js`.
 
 ## Run-Scoped URL Construction (slug-first, no `pup=` injection)
 

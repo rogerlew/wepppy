@@ -142,8 +142,6 @@ def _load_fallback_station_data(
     bbox: Tuple[float, float, float, float] | None,
 ) -> tuple[str, list["StationMeta"], dict[str, str]] | None:
     """Load the neverland fallback station bundle when Git LFS assets are missing."""
-    global _stations_dir
-
     fallback_dir = _join(_thisdir, 'tests')
     fallback_par = _join(fallback_dir, 'neverland_.par')
     if not _exists(fallback_par):
@@ -168,7 +166,7 @@ def _load_fallback_station_data(
 
     stations = []
     for row in fallback_rows:
-        station = StationMeta(*row)
+        station = StationMeta(*row, station_root=fallback_dir)
         if bbox is None:
             stations.append(station)
             continue
@@ -182,8 +180,29 @@ def _load_fallback_station_data(
         "KS": "Kansas",
     }
 
-    _stations_dir = fallback_dir
     return fallback_dir, stations, fallback_states
+
+
+def _resolve_station_catalog(version: Union[str, int, None]) -> tuple[str, str]:
+    """Resolve a catalog selector to one instance-local DB/PAR-root pair."""
+
+    selector = "2015" if version is None else str(version).casefold()
+    if "legacy" in selector:
+        return _join(_thisdir, "stations.db"), _join(_thisdir, "stations")
+    if "2015" in selector:
+        return _join(_thisdir, "2015_stations.db"), _join(_thisdir, "2015_par_files")
+    if "au" in selector:
+        return _join(_thisdir, "au_stations.db"), _join(_thisdir, "au_par_files")
+    if "tenerife" in selector:
+        return _join(_thisdir, "tenerife_stations.db"), _join(_thisdir, "tenerife_par_files")
+    if "ghcn" in selector:
+        return (
+            _join(_thisdir, "ghcn_stations.db"),
+            _join(_thisdir, "GHCN_Intl_Stations", "all_years"),
+        )
+    if "chile" in selector:
+        return _join(_thisdir, "chile.db"), _join(_thisdir, "chile")
+    return _db, _stations_dir
 
 
 def _try_rebuild_tenerife_station_catalog() -> bool:
@@ -1592,7 +1611,8 @@ class Station:
 class StationMeta:
     """Lightweight metadata object backing station searches and exports."""
     def __init__(self, state, desc, par, latitude, longitude, years, _type,
-                 elevation, tp5, tp6, annual_ppt, _distance=None):
+                 elevation, tp5, tp6, annual_ppt, _distance=None, *,
+                 station_root: str | None = None):
         """Initialize a metadata record parsed from the station SQLite catalog.
 
         Args:
@@ -1634,7 +1654,7 @@ class StationMeta:
         self.desc = desc.split(str(self.id))[0].strip()
 
         if par0 == '':
-            self.parpath = _join(_stations_dir, par)
+            self.parpath = _join(station_root or _stations_dir, par)
         else:
             self.parpath = par
 
@@ -1768,47 +1788,28 @@ class CligenStationsManager:
                 stations during the initial query.
         """
 
-        # connect to sqlite3 db
-        global _db, _stations_dir
-
-        if 'legacy' in str(version):
-            _db = _join(_thisdir, 'stations.db')
-            _stations_dir = _join(_thisdir, 'stations')
-
-        if '2015' in str(version):
-            _db = _join(_thisdir, '2015_stations.db')
-            _stations_dir = _join(_thisdir, '2015_par_files')
-
-        if 'au' in str(version):
-            _db = _join(_thisdir, 'au_stations.db')
-            _stations_dir = _join(_thisdir, 'au_par_files')
-
-        if 'tenerife' in str(version):
-            _db = _join(_thisdir, 'tenerife_stations.db')
-            _stations_dir = _join(_thisdir, 'tenerife_par_files')
-
-        if 'ghcn' in str(version):
-            _db = _join(_thisdir, 'ghcn_stations.db')
-            _stations_dir = _join(_thisdir, 'GHCN_Intl_Stations', 'all_years')
-
-        if 'chile' in str(version):
-            _db = _join(_thisdir, 'chile.db')
-            _stations_dir = _join(_thisdir, 'chile')
+        self.db_path, self.stations_dir = _resolve_station_catalog(version)
 
         try:
-            station_rows, state_rows = _query_station_db(_db, bbox)
-            self.stations = [StationMeta(*row) for row in station_rows]
+            station_rows, state_rows = _query_station_db(self.db_path, bbox)
+            self.stations = [
+                StationMeta(*row, station_root=self.stations_dir) for row in station_rows
+            ]
             self.states = {row[0]: row[1] for row in state_rows}
         except (sqlite3.DatabaseError, sqlite3.OperationalError, AssertionError):
             if "tenerife" in str(version) and _try_rebuild_tenerife_station_catalog():
-                station_rows, state_rows = _query_station_db(_db, bbox)
-                self.stations = [StationMeta(*row) for row in station_rows]
+                station_rows, state_rows = _query_station_db(self.db_path, bbox)
+                self.stations = [
+                    StationMeta(*row, station_root=self.stations_dir)
+                    for row in station_rows
+                ]
                 self.states = {row[0]: row[1] for row in state_rows}
                 return
             fallback = _load_fallback_station_data(bbox)
             if fallback is None:
                 raise
-            _, stations, states = fallback
+            fallback_root, stations, states = fallback
+            self.stations_dir = fallback_root
             self.stations = stations
             self.states = states
 

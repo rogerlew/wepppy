@@ -16,7 +16,7 @@ pytestmark = pytest.mark.unit
 
 
 def _payload(**updates):
-    payload = {"locale": "continental-us", "dem": "usgs-ned13-2022", "delineation_backend": "wbt", "watershed_representation": "single-ofe", "wepp_binary": "wepp_260803", "soil": "ssurgo-gnatsgso-2025", "landuse": "nlcd-2019", "climate": "vanilla_cligen", "mods": []}
+    payload = {"locale": "continental-us", "dem": "usgs-ned13-2022", "delineation_backend": "wbt", "watershed_representation": "single-ofe", "wepp_binary": "wepp_260803", "soil": "ssurgo-gnatsgso-2025", "landuse": "nlcd-2019", "climate": "vanilla_cligen", "climate_station_database": "cligen-stations-2015", "mods": []}
     payload.update(updates)
     return payload
 
@@ -40,6 +40,7 @@ def test_builder_candidate_has_fixed_token_manifest_and_review() -> None:
     assert manifest["source_preset"] is None
     assert manifest["selections"]["cellsize_source"] == "dem_default"
     assert manifest["selections"]["wepp_binary"] == "wepp_260803"
+    assert manifest["selections"]["climate_station_database"] == "cligen-stations-2015"
     assert manifest["config"]["filename"] == "config.cfg"
     assert manifest["source_revision"] == "dev"
 

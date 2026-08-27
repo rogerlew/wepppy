@@ -9,7 +9,8 @@
         wepp_binary: "wepp_binary",
         soil: "soil",
         landuse: "landuse",
-        climate: "climate"
+        climate: "climate",
+        climate_station_database: "climate_station_database"
     };
     var REVIEW_LABELS = {
         locale: "Locale",
@@ -23,6 +24,7 @@
         soil: "Soil dataset",
         landuse: "Land-cover dataset",
         climate: "Climate dataset",
+        climate_station_database: "Climate Station Database",
         mods: "Initialized modules",
         capabilities: "Derived capabilities",
         config_filename: "Runtime filename"
@@ -51,6 +53,7 @@
         this.modsOptions = root.querySelector("[data-builder-mod-options]");
         this.description = null;
         this.components = {};
+        this.localeComponents = {};
         this.validatedReview = null;
         this.busy = false;
         this.validationSequence = 0;
@@ -89,9 +92,30 @@
     };
 
     ConfigBuilder.prototype._graphAxis = function (name) {
-        var graph = this.description && this.description.capability_graph;
+        var locale = this.form.elements.locale && this.form.elements.locale.value;
+        var graphs = this.description && this.description.capability_graphs_by_locale;
+        var graph = graphs && graphs[locale];
         var axes = graph && graph.capabilities;
         return axes && Array.isArray(axes[name]) ? axes[name].slice() : [];
+    };
+
+    ConfigBuilder.prototype._graphDefaults = function () {
+        var locale = this.form.elements.locale && this.form.elements.locale.value;
+        var graphs = this.description && this.description.capability_graphs_by_locale;
+        var graph = graphs && graphs[locale];
+        return graph && graph.capability_defaults ? graph.capability_defaults : {};
+    };
+
+    ConfigBuilder.prototype._activateLocale = function (localeId) {
+        var populations = this.description && this.description.components_by_locale;
+        var population = populations && populations[localeId];
+        if (!Array.isArray(population)) {
+            throw new Error("Builder description has no component population for locale " + localeId + ".");
+        }
+        this.components = Object.assign({}, this.localeComponents);
+        population.forEach(function (component) {
+            this.components[component.component_id] = component;
+        }, this);
     };
 
     ConfigBuilder.prototype._modelTuples = function () {
@@ -128,16 +152,37 @@
     };
 
     ConfigBuilder.prototype._renderDependencies = function (announce, changedField) {
-        void changedField;
+        var localeId = this.form.elements.locale.value;
+        this._activateLocale(localeId);
         var graphAxes = {
             dem: "dem_sources",
             soil: "soil_datasets",
             landuse: "landuse_datasets",
-            climate: "climate_datasets"
+            climate: "climate_datasets",
+            climate_station_database: "climate_station_databases"
         };
         Object.keys(graphAxes).forEach(function (field) {
             this._setOptions(field, this._graphAxis(graphAxes[field]), announce);
         }, this);
+        if (changedField === "locale") {
+            var graphDefaults = this._graphDefaults();
+            var defaultFields = {
+                dem: "dem_source",
+                soil: "soil_dataset",
+                landuse: "landuse_dataset",
+                climate: "climate_dataset",
+                climate_station_database: "climate_station_database"
+            };
+            Object.keys(defaultFields).forEach(function (field) {
+                var value = graphDefaults[defaultFields[field]];
+                var select = this.form.elements[field];
+                if (value && Array.prototype.some.call(select.options, function (option) {
+                    return option.value === value;
+                })) {
+                    select.value = value;
+                }
+            }, this);
+        }
 
         var tuples = this._modelTuples();
         var backend = this.form.elements.delineation_backend.value;
@@ -219,6 +264,7 @@
             soil: this.form.elements.soil.value,
             landuse: this.form.elements.landuse.value,
             climate: this.form.elements.climate.value,
+            climate_station_database: this.form.elements.climate_station_database.value,
             mods: Array.prototype.slice.call(this.modsOptions.querySelectorAll("input:checked")).map(function (input) { return input.value; }),
             capability_profile: capabilityIds[0] || ""
         };
@@ -302,7 +348,11 @@
         this._updateActions();
         return this._request(this.root.dataset.validationUrl, {
             method: "POST",
-            json: {registry_revision: this.description.registry_revision, selections: this._selections()},
+            json: {
+                builder_description_schema_version: this.description.builder_description_schema_version,
+                registry_revision: this.description.registry_revision,
+                selections: this._selections()
+            },
             form: this.form
         }).then(function (result) {
             if (sequence !== this.validationSequence) { return; }
@@ -340,7 +390,12 @@
         this._updateActions();
         return this._request(this.root.dataset.creationUrl, {
             method: "POST",
-            json: {registry_revision: this.description.registry_revision, selections: this._selections(), creation_idempotency_key: this.creationKey},
+            json: {
+                builder_description_schema_version: this.description.builder_description_schema_version,
+                registry_revision: this.description.registry_revision,
+                selections: this._selections(),
+                creation_idempotency_key: this.creationKey
+            },
             form: this.form
         }).then(function (result) {
             this._setStatus("Project " + result.body.run_id + " was created. Opening it now…", true);
@@ -369,9 +424,32 @@
         return this._request(this.root.dataset.descriptionUrl).then(function (result) {
             var prior = preserve && this.description ? this._selections() : null;
             this.description = result.body;
-            this.components = {};
-            this.description.components.forEach(function (component) { this.components[component.component_id] = component; }, this);
+            if (
+                this.description.builder_description_schema_version !== 2
+                || !this.description.components_by_locale
+                || !this.description.capability_graphs_by_locale
+            ) {
+                throw new Error("Builder description schema version 2 is required.");
+            }
+            this.localeComponents = {};
+            Object.keys(this.description.components_by_locale).forEach(function (localeId) {
+                var localeComponent = this.description.components_by_locale[localeId].find(function (component) {
+                    return component.kind === "locale" && component.component_id === localeId;
+                });
+                if (!localeComponent || !this.description.capability_graphs_by_locale[localeId]) {
+                    throw new Error("Builder locale authority is incomplete for " + localeId + ".");
+                }
+                this.localeComponents[localeId] = localeComponent;
+            }, this);
+            var initialLocale = prior && prior.locale && this.localeComponents[prior.locale]
+                ? prior.locale
+                : (this.localeComponents["continental-us"]
+                    ? "continental-us"
+                    : Object.keys(this.localeComponents)[0]);
+            this._activateLocale(initialLocale);
             this._setOptions("locale", null, false);
+            this.form.elements.locale.value = initialLocale;
+            this._activateLocale(initialLocale);
             [
                 ["dem", "dem_sources"],
                 ["delineation_backend", "delineation_backends"],
@@ -379,7 +457,8 @@
                 ["wepp_binary", "wepp_binaries"],
                 ["soil", "soil_datasets"],
                 ["landuse", "landuse_datasets"],
-                ["climate", "climate_datasets"]
+                ["climate", "climate_datasets"],
+                ["climate_station_database", "climate_station_databases"]
             ].forEach(function (entry) {
                 this._setOptions(entry[0], this._graphAxis(entry[1]), false);
             }, this);
@@ -391,7 +470,7 @@
                     select.value = value;
                 }
             }, this);
-            this._renderDependencies(Boolean(preserve), null);
+            this._renderDependencies(Boolean(preserve), preserve ? null : "locale");
             this.busy = false;
             this._setStatus("Registered choices loaded. Review selections to validate the complete configuration.", false);
             this._updateActions();

@@ -24,8 +24,12 @@ class FakeRedis:
 
 
 def selections(**updates):
-    value = {"locale": "continental-us", "dem": "usgs-ned13-2022", "delineation_backend": "wbt", "watershed_representation": "single-ofe", "wepp_binary": "wepp_260803", "soil": "ssurgo-gnatsgso-2025", "landuse": "nlcd-2019", "climate": "vanilla_cligen", "mods": []}
+    value = {"locale": "continental-us", "dem": "usgs-ned13-2022", "delineation_backend": "wbt", "watershed_representation": "single-ofe", "wepp_binary": "wepp_260803", "soil": "ssurgo-gnatsgso-2025", "landuse": "nlcd-2019", "climate": "vanilla_cligen", "climate_station_database": "cligen-stations-2015", "mods": []}
     value.update(updates); return value
+
+
+def request_body(**values):
+    return {"builder_description_schema_version": 2, **values}
 
 
 @pytest.fixture()
@@ -50,6 +54,11 @@ def test_description_and_validation_share_revision(client) -> None:
     assert description.status_code == 200
     body = description.json()
     assert body["config_token"] == "config"
+    assert body["builder_description_schema_version"] == 2
+    assert set(body["capability_graphs_by_locale"]) == {
+        "continental-us", "europe", "canada", "australia", "global-earth"
+    }
+    assert set(body["components_by_locale"]) == set(body["capability_graphs_by_locale"])
     graph = body["capability_graph"]
     assert graph["capabilities"]["schema_version"] == 2
     assert graph["capabilities"]["locale_profiles"] == ["continental-us"]
@@ -64,7 +73,7 @@ def test_description_and_validation_share_revision(client) -> None:
         set(get_linux_wepp_bin_opts())
     )
     assert all(item["label"] == item["component_id"] for item in binaries)
-    validated = http.post("/api/project-config/builder/validate", json={"registry_revision": body["registry_revision"], "selections": selections()})
+    validated = http.post("/api/project-config/builder/validate", json=request_body(registry_revision=body["registry_revision"], selections=selections()))
     assert validated.status_code == 200
     assert validated.json()["registry_revision"] == body["registry_revision"]
     assert validated.json()["review"]["config_filename"] == "config.cfg"
@@ -102,11 +111,11 @@ def test_owner_failure_returns_diagnostic_details(client, monkeypatch) -> None:
 
     response = http.post(
         "/api/project-config/builder/create",
-        json={
-            "registry_revision": revision,
-            "creation_idempotency_key": "12345678-1234-4234-9234-123456789abc",
-            "selections": selections(),
-        },
+        json=request_body(
+            registry_revision=revision,
+            creation_idempotency_key="12345678-1234-4234-9234-123456789abc",
+            selections=selections(),
+        ),
     )
 
     assert response.status_code == 500
@@ -115,12 +124,12 @@ def test_owner_failure_returns_diagnostic_details(client, monkeypatch) -> None:
 
 def test_stale_revision_and_ordinary_override_fail(client) -> None:
     http, claims, _path, _idempotency = client
-    stale = http.post("/api/project-config/builder/validate", json={"registry_revision": "stale", "selections": selections()})
+    stale = http.post("/api/project-config/builder/validate", json=request_body(registry_revision="stale", selections=selections()))
     assert stale.status_code == 409
     assert stale.json()["error"]["code"] == "stale_builder_schema"
     revision = http.get("/api/project-config/builder").json()["registry_revision"]
     claims["roles"] = ["User"]
-    forbidden = http.post("/api/project-config/builder/validate", json={"registry_revision": revision, "selections": selections(cellsize_override=30)})
+    forbidden = http.post("/api/project-config/builder/validate", json=request_body(registry_revision=revision, selections=selections(cellsize_override=30)))
     assert forbidden.status_code == 403
 
 
@@ -128,7 +137,7 @@ def test_enabled_creation_writes_fixed_pair(client, monkeypatch) -> None:
     http, _claims, path, _idempotency = client
     monkeypatch.setenv("WEPPPY_PROJECT_CONFIG_BUILDER_WRITER_ENABLED", "1")
     revision = http.get("/api/project-config/builder").json()["registry_revision"]
-    response = http.post("/api/project-config/builder/create", json={"registry_revision": revision, "creation_idempotency_key": "12345678-1234-4234-9234-123456789abc", "selections": selections()})
+    response = http.post("/api/project-config/builder/create", json=request_body(registry_revision=revision, creation_idempotency_key="12345678-1234-4234-9234-123456789abc", selections=selections()))
     assert response.status_code == 201
     assert response.json()["config_token"] == "config"
     assert (path / "config.cfg").is_file()
@@ -140,7 +149,7 @@ def test_named_role_override_and_replay_return_original_project(client, monkeypa
     claims["roles"] = [{"name": "ADMIN"}]
     monkeypatch.setenv("WEPPPY_PROJECT_CONFIG_BUILDER_WRITER_ENABLED", "1")
     revision = http.get("/api/project-config/builder").json()["registry_revision"]
-    body = {"registry_revision": revision, "creation_idempotency_key": "abcdef12-1234-4234-9234-123456789abc", "selections": selections(cellsize_override=30)}
+    body = request_body(registry_revision=revision, creation_idempotency_key="abcdef12-1234-4234-9234-123456789abc", selections=selections(cellsize_override=30))
     first = http.post("/api/project-config/builder/create", json=body)
     replay = http.post("/api/project-config/builder/create", json=body)
     assert first.status_code == 201
@@ -152,8 +161,41 @@ def test_disabled_writer_creates_nothing(client, monkeypatch: pytest.MonkeyPatch
     monkeypatch.delenv("WEPPPY_PROJECT_CONFIG_BUILDER_WRITER_ENABLED", raising=False)
     http, _claims, path, _idempotency = client
     revision = http.get("/api/project-config/builder").json()["registry_revision"]
-    response = http.post("/api/project-config/builder/create", json={"registry_revision": revision, "creation_idempotency_key": "fedcba98-1234-4234-9234-123456789abc", "selections": selections()})
+    response = http.post("/api/project-config/builder/create", json=request_body(registry_revision=revision, creation_idempotency_key="fedcba98-1234-4234-9234-123456789abc", selections=selections()))
     assert response.status_code == 503
+    assert list(path.iterdir()) == []
+
+
+def test_old_client_and_cross_locale_selection_fail_before_creation(client) -> None:
+    http, _claims, path, _idempotency = client
+    revision = http.get("/api/project-config/builder").json()["registry_revision"]
+    old_client = http.post(
+        "/api/project-config/builder/create",
+        json={
+            "registry_revision": revision,
+            "creation_idempotency_key": "01234567-1234-4234-9234-123456789abc",
+            "selections": selections(),
+        },
+    )
+    assert old_client.status_code == 409
+    assert old_client.json()["error"]["code"] == "unsupported_builder_schema"
+    assert "must be 2" in old_client.json()["error"]["details"]
+
+    cross_locale = http.post(
+        "/api/project-config/builder/validate",
+        json=request_body(
+            registry_revision=revision,
+            selections=selections(
+                locale="europe",
+                capability_profile="europe-capabilities",
+                climate_station_database="cligen-stations-ghcn",
+            ),
+        ),
+    )
+    assert cross_locale.status_code == 400
+    error = cross_locale.json()["errors"][0]
+    assert error["field"] == "dem"
+    assert error["code"] == "unsupported_combination"
     assert list(path.iterdir()) == []
 
 
@@ -170,9 +212,10 @@ def test_unexpected_initialization_failure_cleans_run_and_reservation(client, mo
 
     monkeypatch.setattr(builder_routes, "cleanup_new_run_directory", cleanup)
     revision = http.get("/api/project-config/builder").json()["registry_revision"]
-    response = http.post("/api/project-config/builder/create", json={"registry_revision": revision, "creation_idempotency_key": "deadbeef-1234-4234-9234-123456789abc", "selections": selections()})
+    response = http.post("/api/project-config/builder/create", json=request_body(registry_revision=revision, creation_idempotency_key="deadbeef-1234-4234-9234-123456789abc", selections=selections()))
     assert response.status_code == 500
     assert response.json()["error"]["code"] == "run_initialization_failed"
+    assert response.json()["error"]["details"] == "LookupError: boom"
     assert cleaned == [("builder-run", str(path))]
     assert list(path.iterdir()) == []
     assert idempotency.values == {}

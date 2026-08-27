@@ -38,6 +38,7 @@ class ComponentKind(str, Enum):
     SOIL = "soil"
     LANDUSE = "landuse"
     CLIMATE = "climate"
+    CLIMATE_STATION_DATABASE = "climate_station_database"
     CAPABILITY = "capability"
 
 
@@ -63,6 +64,7 @@ class ConstraintSet:
     allowed_soil: tuple[str, ...] = ()
     allowed_landuse: tuple[str, ...] = ()
     allowed_climate: tuple[str, ...] = ()
+    allowed_climate_station_database: tuple[str, ...] = ()
     allowed_mods: tuple[str, ...] = ()
     allowed_capability_profiles: tuple[str, ...] = ()
 
@@ -126,6 +128,7 @@ class BuilderSelections:
     soil: str
     landuse: str
     climate: str
+    climate_station_database: str = "cligen-stations-2015"
     mods: tuple[str, ...] = ()
     capability_profile: str = "continental-us-capabilities"
     cellsize_override: int | None = None
@@ -161,6 +164,10 @@ class BuilderDescription:
     allowed_cell_sizes: tuple[int, ...]
     default_selections: Mapping[str, str]
     capability_graph: Mapping[str, Mapping[str, CanonicalValue]]
+    components_by_locale: Mapping[str, tuple[ComponentSummary, ...]]
+    capability_graphs_by_locale: Mapping[
+        str, Mapping[str, Mapping[str, CanonicalValue]]
+    ]
 
 
 @dataclass(frozen=True, slots=True)

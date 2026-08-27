@@ -15,10 +15,13 @@ from .climate_catalog import (
     CLIMATE_SPATIAL_METHOD_RUNTIME,
     CLIMATE_STATION_METHOD_RUNTIME,
     ClimateDataset,
+    ClimateStationDatabase,
     available_climate_datasets,
     climate_catalog_revision,
     get_climate_dataset,
+    get_climate_station_database,
     iter_climate_datasets,
+    iter_climate_station_databases,
 )
 from .locale_profiles import (
     LocaleClassification,
@@ -33,9 +36,11 @@ from .locale_profiles import (
 )
 from .capability_graph import (
     CAPABILITY_SCHEMA_VERSION,
+    HISTORICAL_CAPABILITY_SCHEMA_VERSION,
     CapabilityGraph,
     CapabilityGraphError,
     build_continental_us_capability_graph,
+    build_locale_capability_graph,
 )
 
 __all__ = [
@@ -47,12 +52,15 @@ __all__ = [
     "landcover_catalog_id",
     "landcover_catalog_revision",
     "ClimateDataset",
+    "ClimateStationDatabase",
     "CLIMATE_SPATIAL_METHOD_RUNTIME",
     "CLIMATE_STATION_METHOD_RUNTIME",
     "available_climate_datasets",
     "climate_catalog_revision",
     "get_climate_dataset",
+    "get_climate_station_database",
     "iter_climate_datasets",
+    "iter_climate_station_databases",
     "LocaleClassification",
     "LocaleComposition",
     "LocaleProfile",
@@ -63,7 +71,9 @@ __all__ = [
     "locale_catalog_revision",
     "resolve_locale_composition",
     "CAPABILITY_SCHEMA_VERSION",
+    "HISTORICAL_CAPABILITY_SCHEMA_VERSION",
     "CapabilityGraph",
     "CapabilityGraphError",
     "build_continental_us_capability_graph",
+    "build_locale_capability_graph",
 ]

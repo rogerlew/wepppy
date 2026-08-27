@@ -141,13 +141,20 @@ def _read_artifacts(root: Path) -> tuple[Path, bytes, bytes, dict[str, object]]:
     return config_path, config_bytes, manifest_bytes, manifest
 
 
-def _builder_selections(payload: Mapping[str, object]) -> BuilderSelections:
+def _builder_selections(
+    payload: Mapping[str, object], *, capability_schema_version: int
+) -> BuilderSelections:
     required = (
         "locale", "dem", "delineation_backend", "watershed_representation",
         "wepp_binary", "soil", "landuse", "climate", "capability_profile",
     )
     if not all(isinstance(payload.get(key), str) and payload[key] for key in required):
         raise ConfigUpdateUnavailableError("Builder selections are incomplete")
+    station_database = payload.get("climate_station_database")
+    if capability_schema_version >= 3 and (
+        not isinstance(station_database, str) or not station_database
+    ):
+        raise ConfigUpdateUnavailableError("Builder station-database selection is incomplete")
     mods = payload.get("mods", [])
     if not isinstance(mods, list) or not all(isinstance(item, str) for item in mods):
         raise ConfigUpdateUnavailableError("Builder mod selections are invalid")
@@ -163,6 +170,10 @@ def _builder_selections(payload: Mapping[str, object]) -> BuilderSelections:
         wepp_binary=str(payload["wepp_binary"]),
         soil=str(payload["soil"]), landuse=str(payload["landuse"]),
         climate=str(payload["climate"]), mods=tuple(mods),
+        climate_station_database=(
+            str(station_database) if isinstance(station_database, str)
+            else "cligen-stations-2015"
+        ),
         capability_profile=str(payload["capability_profile"]),
         cellsize_override=override,
     )
@@ -181,10 +192,17 @@ def _chain_entries(manifest: Mapping[str, object]) -> tuple[tuple[str, str, str]
 
 
 def _builder_target(
-    manifest: Mapping[str, object], registry: Registry,
+    manifest: Mapping[str, object], registry: Registry, *, capability_schema_version: int,
 ) -> tuple[dict[str, dict[str, CanonicalValue]], dict[tuple[str, str], tuple[str, str]]]:
-    selections = _builder_selections(manifest["selections"])  # type: ignore[arg-type,index]
-    resolved = resolve_builder_config(selections, registry=registry)
+    selections = _builder_selections(
+        manifest["selections"],  # type: ignore[arg-type,index]
+        capability_schema_version=capability_schema_version,
+    )
+    resolved = resolve_builder_config(
+        selections,
+        registry=registry,
+        capability_schema_version=capability_schema_version,
+    )
     recorded = tuple((kind, component_id) for kind, component_id, _revision in _chain_entries(manifest))
     current = tuple((item.kind, item.component_id) for item in resolved.parent_chain)
     if recorded != current:
@@ -277,7 +295,22 @@ def preview_project_config_update(
     source_kind = manifest.get("source_kind")
     try:
         if source_kind == "builder":
-            target, provenance = _builder_target(manifest, registry or load_registry(registry_root))
+            capability_schema_version = current.get("capabilities", {}).get(
+                "schema_version", 2
+            )
+            if (
+                isinstance(capability_schema_version, bool)
+                or not isinstance(capability_schema_version, int)
+                or capability_schema_version not in {2, 3}
+            ):
+                raise ConfigUpdateUnavailableError(
+                    "Stored Builder capability schema is unsupported"
+                )
+            target, provenance = _builder_target(
+                manifest,
+                registry or load_registry(registry_root),
+                capability_schema_version=capability_schema_version,
+            )
         elif source_kind == "preset":
             target, provenance = _preset_target(manifest, Path(configs_root))
         else:

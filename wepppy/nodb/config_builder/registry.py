@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import replace
 import hashlib
+import json
 import os
 from pathlib import Path
 import re
@@ -19,13 +20,24 @@ from wepppy.nodb.config_builder.schema import (
     Registry,
     RegistryValue,
 )
-from wepppy.nodb.locales.capability_graph import build_continental_us_capability_graph
-from wepppy.nodb.locales.climate_catalog import (
-    climate_catalog_revision,
-    default_climate_provider_tokens,
+from wepppy.nodb.locales.capability_graph import (
+    CapabilityGraph,
+    build_locale_capability_graph,
 )
-from wepppy.nodb.locales.landuse_catalog import landcover_catalog_revision
+from wepppy.nodb.locales.climate_catalog import (
+    CLIMATE_PROVIDER_ADAPTER_REVISION,
+    CLIMATE_STATION_DATABASE_ADAPTER_REVISION,
+    get_climate_dataset,
+    get_climate_station_database,
+)
+from wepppy.nodb.locales.landuse_catalog import (
+    LANDCOVER_PROVIDER_ADAPTER_REVISION,
+    get_landcover_entry,
+)
 from wepppy.nodb.locales.locale_profiles import (
+    DEM_SOURCE_RUNTIME,
+    SOIL_SOURCE_RUNTIME,
+    LocaleProfile,
     get_locale_profile,
     locale_catalog_revision,
 )
@@ -38,6 +50,8 @@ from wepp_runner.wepp_runner import (
 __all__ = ["DEFAULT_PROFILES_ROOT", "RegistryError", "load_registry"]
 
 DEFAULT_PROFILES_ROOT = Path(__file__).with_name("profiles")
+_DEM_PROVIDER_ADAPTER_REVISION = "dem-database-adapter-v1"
+_SOIL_PROVIDER_ADAPTER_REVISION = "soils-builder-runtime-map-v2"
 _ID_RE = re.compile(r"^[a-z][a-z0-9]*(?:[-_][a-z0-9]+)*$")
 _NAME_RE = re.compile(r"^[A-Za-z0-9_.-]+$")
 _CONSTRAINT_FIELDS = (
@@ -50,6 +64,7 @@ _CONSTRAINT_FIELDS = (
     "allowed_soil",
     "allowed_landuse",
     "allowed_climate",
+    "allowed_climate_station_database",
     "allowed_mods",
     "allowed_capability_profiles",
 )
@@ -74,6 +89,33 @@ _ALLOWED_ROOT_FIELDS = frozenset(
     }
 )
 _DEFAULT_WEPP_BINARY = "wepp_260803"
+_BUILDER_PROFILE_IDS = (
+    "continental-us",
+    "europe",
+    "canada",
+    "australia",
+    "global-earth",
+)
+_DEM_METADATA = {
+    "usgs-ned1-2024": ("USGS NED 1 arc-second (2024)", 30),
+    "usgs-ned13-2022": ("USGS NED 1/3 arc-second (2022)", 10),
+    "europe-eudem-v1-1": ("EUDEM v1.1", 25),
+    "copernicus-dem-30": ("Copernicus DEM 30 m", 30),
+    "australia-srtm-1s": ("Australia SRTM 1 second", 30),
+}
+_SOIL_LABELS = {
+    "ssurgo-gnatsgso-2025": "SSURGO/gNATSGO 2025",
+    "esdac-europe": "ESDAC",
+    "isric-global": "ISRIC global",
+    "asris-australia": "ASRIS",
+}
+_LOCALE_VIEW = {
+    "continental-us": ((40.0, -99.0), 3, True),
+    "europe": ((50.0, 10.5), 4, False),
+    "canada": ((40.0, -99.0), 3, False),
+    "australia": ((-27.0, 133.5), 4, False),
+    "global-earth": ((40.0, -99.0), 3, False),
+}
 _EXECUTABLE_DIGEST_CACHE: dict[tuple[str, int, int, int, int], str] = {}
 
 
@@ -366,11 +408,245 @@ def _provider_wepp_components() -> tuple[ComponentDefinition, ...]:
                 writes=(
                     ConfigWrite("wepp", "bin", binary_id),
                 ),
-                constraints=ConstraintSet(requires=("continental-us",)),
+                constraints=ConstraintSet(),
                 source_path=f"provider://wepp_binary/{binary_id}",
             )
         )
     return tuple(components)
+
+
+def _component_revision(kind: str, component_id: str, runtime_value: object) -> str:
+    payload = json.dumps(
+        {"kind": kind, "id": component_id, "runtime": runtime_value},
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    return f"provider-v1:{hashlib.sha256(payload.encode('utf-8')).hexdigest()}"
+
+
+def _builder_profiles() -> tuple[LocaleProfile, ...]:
+    profiles = []
+    for profile_id in _BUILDER_PROFILE_IDS:
+        profile = get_locale_profile(profile_id)
+        if profile is None or profile.support_state.value != "builder_exposed":
+            raise RegistryError(f"canonical Builder locale {profile_id!r} is unavailable")
+        profiles.append(profile)
+    return tuple(profiles)
+
+
+def _synthesized_builder_components(
+    provider_components: tuple[ComponentDefinition, ...],
+) -> tuple[dict[str, ComponentDefinition], dict[str, CapabilityGraph]]:
+    profiles = _builder_profiles()
+    binary_ids = tuple(item.component_id for item in provider_components)
+    binary_revisions = {
+        item.component_id: item.source_revision for item in provider_components
+    }
+    graphs = {
+        profile.profile_id: build_locale_capability_graph(
+            profile.profile_id, binary_ids, binary_revisions
+        )
+        for profile in profiles
+    }
+    components: dict[str, ComponentDefinition] = {}
+
+    for profile in profiles:
+        center, zoom, is_english = _LOCALE_VIEW[profile.profile_id]
+        writes = (
+            ConfigWrite("general", "locales", (profile.runtime_token,)),
+            ConfigWrite("map", "center0", center),
+            ConfigWrite("map", "zoom0", zoom),
+            ConfigWrite("unitizer", "is_english", is_english),
+        )
+        components[profile.profile_id] = ComponentDefinition(
+            component_id=profile.profile_id,
+            kind=ComponentKind.LOCALE,
+            schema_version=1,
+            source_revision=f"locale-profile-{profile.source_revision}",
+            label=profile.label,
+            description=f"Authoritative Config Builder profile for {profile.label}.",
+            owns=tuple(write.key for write in writes),
+            overrides=(("unitizer", "is_english"),),
+            writes=writes,
+            constraints=ConstraintSet(
+                allowed_dem=profile.dem_sources,
+                allowed_delineation=("topaz", "wbt"),
+                allowed_representation=("single-ofe", "multiple-ofe"),
+                allowed_wepp_binary=binary_ids,
+                allowed_soil=profile.soil_sources,
+                allowed_landuse=profile.landuse_sources,
+                allowed_climate=profile.climate_sources,
+                allowed_climate_station_database=profile.climate_station_databases,
+                allowed_capability_profiles=(f"{profile.profile_id}-capabilities",),
+            ),
+            source_path=f"provider://locale/{profile.profile_id}",
+            profile_classification=profile.classification.value,
+            support_state=profile.support_state.value,
+            runtime_tokens=(profile.runtime_token,),
+            base_profile_id=profile.base_profile_id,
+            overlay_precedence=profile.overlay_precedence,
+        )
+
+    dem_ids = tuple(dict.fromkeys(
+        source for profile in profiles for source in profile.dem_sources
+    ))
+    for component_id in dem_ids:
+        label, cellsize = _DEM_METADATA[component_id]
+        runtime_value = DEM_SOURCE_RUNTIME[component_id]
+        components[component_id] = ComponentDefinition(
+            component_id=component_id,
+            kind=ComponentKind.DEM,
+            schema_version=1,
+            source_revision=_component_revision(
+                "dem", component_id, (runtime_value, _DEM_PROVIDER_ADAPTER_REVISION)
+            ),
+            label=label,
+            description=f"Terrain source {label}.",
+            owns=(("general", "dem_db"),),
+            overrides=(("general", "dem_db"),),
+            writes=(ConfigWrite("general", "dem_db", runtime_value),),
+            constraints=ConstraintSet(),
+            default_cellsize=cellsize,
+            source_path=f"provider://dem/{component_id}",
+        )
+
+    soil_ids = tuple(dict.fromkeys(
+        source for profile in profiles for source in profile.soil_sources
+    ))
+    for component_id in soil_ids:
+        runtime_value = SOIL_SOURCE_RUNTIME[component_id]
+        writes = (
+            (ConfigWrite("soils", "ssurgo_db", runtime_value),)
+            if runtime_value is not None
+            else ()
+        )
+        components[component_id] = ComponentDefinition(
+            component_id=component_id,
+            kind=ComponentKind.SOIL,
+            schema_version=1,
+            source_revision=_component_revision(
+                "soil", component_id, (runtime_value, _SOIL_PROVIDER_ADAPTER_REVISION)
+            ),
+            label=_SOIL_LABELS[component_id],
+            description=f"Soil source {_SOIL_LABELS[component_id]}.",
+            owns=tuple(write.key for write in writes),
+            overrides=tuple(write.key for write in writes),
+            writes=writes,
+            constraints=ConstraintSet(),
+            source_path=f"provider://soil/{component_id}",
+        )
+
+    landuse_ids = tuple(dict.fromkeys(
+        source for profile in profiles for source in profile.landuse_sources
+    ))
+    for component_id in landuse_ids:
+        entry = get_landcover_entry(component_id)
+        if entry is None:
+            raise RegistryError(f"land-cover provider {component_id!r} is unavailable")
+        writes_list = [ConfigWrite("landuse", "enable_landuse_change", True)]
+        if component_id != "australia-landuse-2010-2011":
+            writes_list.insert(0, ConfigWrite("landuse", "nlcd_db", entry.runtime_value))
+        if component_id.startswith("c3s-landcover-"):
+            writes_list.append(ConfigWrite("landuse", "mapping", "c3s-disturbed"))
+        writes = tuple(writes_list)
+        components[component_id] = ComponentDefinition(
+            component_id=component_id,
+            kind=ComponentKind.LANDUSE,
+            schema_version=1,
+            source_revision=_component_revision(
+                "landuse",
+                component_id,
+                (
+                    entry.runtime_value,
+                    entry.support_state,
+                    LANDCOVER_PROVIDER_ADAPTER_REVISION,
+                ),
+            ),
+            label=entry.label,
+            description=f"Land-cover source {entry.label}.",
+            owns=tuple(write.key for write in writes),
+            overrides=tuple(write.key for write in writes),
+            writes=writes,
+            constraints=ConstraintSet(),
+            source_path=f"provider://landuse/{component_id}",
+        )
+
+    climate_ids = tuple(dict.fromkeys(
+        source for profile in profiles for source in profile.climate_sources
+    ))
+    for component_id in climate_ids:
+        dataset = get_climate_dataset(component_id)
+        if dataset is None:
+            raise RegistryError(f"climate provider {component_id!r} is unavailable")
+        components[component_id] = ComponentDefinition(
+            component_id=component_id,
+            kind=ComponentKind.CLIMATE,
+            schema_version=1,
+            source_revision=_component_revision(
+                "climate",
+                component_id,
+                (dataset.to_mapping(), CLIMATE_PROVIDER_ADAPTER_REVISION),
+            ),
+            label=dataset.label,
+            description=dataset.description,
+            owns=(),
+            overrides=(),
+            writes=(),
+            constraints=ConstraintSet(),
+            source_path=f"provider://climate/{component_id}",
+        )
+
+    station_ids = tuple(dict.fromkeys(
+        source for profile in profiles for source in profile.climate_station_databases
+    ))
+    for component_id in station_ids:
+        database = get_climate_station_database(component_id)
+        if database is None:
+            raise RegistryError(f"station database provider {component_id!r} is unavailable")
+        components[component_id] = ComponentDefinition(
+            component_id=component_id,
+            kind=ComponentKind.CLIMATE_STATION_DATABASE,
+            schema_version=1,
+            source_revision=_component_revision(
+                "climate_station_database",
+                component_id,
+                (database.selector, CLIMATE_STATION_DATABASE_ADAPTER_REVISION),
+            ),
+            label=database.label,
+            description=f"CLIGEN {database.label} station database.",
+            owns=(("climate", "cligen_db"),),
+            overrides=(("climate", "cligen_db"),),
+            writes=(ConfigWrite("climate", "cligen_db", database.selector),),
+            constraints=ConstraintSet(),
+            source_path=f"provider://climate_station_database/{component_id}",
+        )
+
+    for profile in profiles:
+        graph = graphs[profile.profile_id]
+        graph_writes = tuple(
+            ConfigWrite(
+                section,
+                option,
+                _registry_value(value, f"{section}.{option}", DEFAULT_PROFILES_ROOT),
+            )
+            for section, options in graph.as_config_sections().items()
+            for option, value in options.items()
+        )
+        component_id = f"{profile.profile_id}-capabilities"
+        components[component_id] = ComponentDefinition(
+            component_id=component_id,
+            kind=ComponentKind.CAPABILITY,
+            schema_version=1,
+            source_revision=f"provider-v3:{graph.provider_revision}",
+            label=f"{profile.label} capabilities",
+            description=f"Resolved capability graph for {profile.label} projects.",
+            owns=tuple(write.key for write in graph_writes),
+            overrides=(),
+            writes=graph_writes,
+            constraints=ConstraintSet(requires=(profile.profile_id,)),
+            source_path=f"provider://capability/{component_id}",
+        )
+    return components, graphs
 
 
 def load_registry(root: str | Path = DEFAULT_PROFILES_ROOT) -> Registry:
@@ -414,64 +690,42 @@ def load_registry(root: str | Path = DEFAULT_PROFILES_ROOT) -> Registry:
         digest.update(b"\0")
         digest.update(component.source_revision.encode("ascii"))
         digest.update(b"\0")
-    locale = components.get("continental-us")
-    if locale is None or locale.kind is not ComponentKind.LOCALE:
-        raise RegistryError("WEPP binary provider requires the continental-us locale")
-    components[locale.component_id] = replace(
-        locale,
-        constraints=replace(
-            locale.constraints,
-            allowed_wepp_binary=tuple(item.component_id for item in provider_components),
-        ),
-    )
-    canonical_locale = get_locale_profile("continental-us")
-    if canonical_locale is None:
-        raise RegistryError("canonical continental-us locale profile is missing")
-    if (
-        locale.profile_classification != canonical_locale.classification.value
-        or locale.support_state != canonical_locale.support_state.value
-        or locale.runtime_tokens != (canonical_locale.runtime_token,)
-        or locale.base_profile_id != canonical_locale.base_profile_id
-        or locale.overlay_precedence != canonical_locale.overlay_precedence
-    ):
-        raise RegistryError("continental-us TOML does not match the canonical locale profile")
+    if "continental-us" not in components:
+        raise RegistryError("WEPP binary provider requires the Builder profile registry")
 
-    graph = build_continental_us_capability_graph(
-        tuple(item.component_id for item in provider_components),
-        {item.component_id: item.source_revision for item in provider_components},
-    )
-    climate_revision = climate_catalog_revision(default_climate_provider_tokens())
-    landcover_revision = landcover_catalog_revision()
-    for component_id, component in tuple(components.items()):
-        if component.kind is ComponentKind.CLIMATE:
-            components[component_id] = replace(
-                component,
-                source_revision=f"provider-v1:{climate_revision}:{component_id}",
+    synthesized, graphs = _synthesized_builder_components(provider_components)
+    for component_id, component in synthesized.items():
+        existing = components.get(component_id)
+        if existing is not None and existing.kind is not component.kind:
+            raise RegistryError(
+                f"component {component_id!r} conflicts with its typed provider kind"
             )
-        elif component.kind is ComponentKind.LANDUSE:
-            components[component_id] = replace(
-                component,
-                source_revision=f"provider-v1:{landcover_revision}:{component_id}",
-            )
-    capability = components.get("continental-us-capabilities")
-    if capability is None or capability.kind is not ComponentKind.CAPABILITY:
-        raise RegistryError("continental-us capability component is missing")
-    graph_sections = graph.as_config_sections()
-    graph_writes = tuple(
-        ConfigWrite(section, option, _registry_value(value, f"{section}.{option}", profiles_root))
-        for section, options in graph_sections.items()
-        for option, value in options.items()
-    )
-    components[capability.component_id] = replace(
-        capability,
-        source_revision=f"provider-v2:{graph.provider_revision}",
-        owns=tuple(write.key for write in graph_writes),
-        overrides=(),
-        writes=graph_writes,
-    )
+        components[component_id] = component
+        digest.update(component_id.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(component.source_revision.encode("ascii"))
+        digest.update(b"\0")
+
+    for component_id in ("topaz", "wbt", "single-ofe", "multiple-ofe"):
+        component = components.get(component_id)
+        if component is None:
+            raise RegistryError(f"shared Builder component {component_id!r} is missing")
+        retained_requires = tuple(
+            item for item in component.constraints.requires
+            if item not in _BUILDER_PROFILE_IDS
+        )
+        components[component_id] = replace(
+            component,
+            constraints=replace(component.constraints, requires=retained_requires),
+        )
+
     digest.update(locale_catalog_revision().encode("ascii"))
     digest.update(b"\0")
-    digest.update(graph.provider_revision.encode("ascii"))
-    digest.update(b"\0")
+    for profile_id in _BUILDER_PROFILE_IDS:
+        graph = graphs[profile_id]
+        digest.update(profile_id.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(graph.provider_revision.encode("ascii"))
+        digest.update(b"\0")
     _validate_references(components)
     return Registry.create(digest.hexdigest(), components)
