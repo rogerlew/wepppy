@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-08-26
-**Active Packages**: 29
+**Active Packages**: 30
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -404,6 +404,20 @@ When resuming Kubernetes work:
 ---
 
 ## 🚧 In Progress
+
+### Project Config Forest Acceptance (WP11)
+
+**Started**: 2026-08-26
+
+**Priority/Security**: High / `high`
+
+**Link**: [docs/work-packages/20260804_project_config_forest_acceptance/](docs/work-packages/20260804_project_config_forest_acceptance/)
+
+**Description**: Deploy the default-off project-config stack to Forest and
+prove the compatibility, creation, update, lifecycle, restart, and rollback
+matrix before production cutover.
+
+---
 
 ### Production Compose Deployment and CAP Runtime Hardening
 
