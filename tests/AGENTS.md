@@ -174,6 +174,13 @@ app.register_blueprint(climate_module.climate_bp)
 - Deterministic tests only—no reliance on system locale, timezone, or network.
 - Keep runtimes fast: integration tests should wrap heavy processes in fixtures that cache generated artifacts.
 - Record common gotchas and required fixtures here for future agents.
+- Never mock GDAL executables merely to assert command construction or touched
+  output paths. Tests claiming GDAL integration or raster conversion coverage
+  must invoke the real executable through `wctl`, open the produced artifacts,
+  and assert relevant raster semantics such as dimensions, bands, projection,
+  nodata, palette, or pixel values. Mocking remains acceptable only for a
+  deliberately injected non-GDAL boundary failure and must not be presented as
+  evidence that a GDAL workflow works.
 
 ---
 
