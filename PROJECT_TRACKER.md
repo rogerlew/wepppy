@@ -405,6 +405,25 @@ When resuming Kubernetes work:
 
 ## 🚧 In Progress
 
+### Project Config Locale and View Authority (WP12B)
+
+**Started**: 2026-08-27
+
+**Priority**: Critical
+
+**Security impact**: `high`
+
+**Link**: [docs/work-packages/20260827_project_config_locale_authority/](docs/work-packages/20260827_project_config_locale_authority/)
+
+**Description**: Normalize every shipped locale/dataset/method dependency into
+a versioned project capability graph that is authoritative for Builder choices,
+run-page controls, and paired mutation routes.
+
+**Status**: Contract checkpoint blocked on independent review disposition;
+WP12 production promotion is blocked on WP12B closure.
+
+---
+
 ### Project Config Builder Model Options
 
 **Started**: 2026-08-27

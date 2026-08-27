@@ -363,6 +363,89 @@ that legacy TOPAZ MOFE presets are technically invalid. Those existing presets
 remain unchanged. The Builder MUST NOT infer defaults from lexical component
 ordering.
 
+#### 7.2.2 Comprehensive locale and dependency authority
+
+Before initial production promotion, the registry MUST classify every runtime locale token used by shipped
+configs or domain catalogs as a canonical base profile, an overlay profile, or
+an explicitly non-Builder model family. A profile MUST declare a durable stable
+ID, its exact runtime locale tokens, classification, support/exposure state,
+referenced component IDs, and resolved capability IDs. Unknown tokens,
+duplicate base authority, cyclic overlays, unknown references, contradictory
+requirements, and empty mandatory capability axes MUST invalidate the registry.
+
+Profile classification MUST be one of `base`, `overlay`, or
+`non_builder_family`. Support state MUST be one of `builder_exposed`,
+`supported_non_builder`, `inventory_only`, or `non_applicable`. Geographic
+profile composition is exactly one base plus zero or more overlays. Each
+overlay MUST reference exactly one compatible base; overlay ordering and write
+precedence MUST be explicit and unique. A `non_builder_family` does not
+participate in base/overlay composition and MUST be `non_applicable` to Builder.
+Cycles and duplicate precedence invalidate the registry.
+
+Runtime tokens retain their exact canonical spelling in generated config.
+Lookup MAY use an explicit alias table and Unicode casefolding, but alias and
+canonical-token casefold collisions MUST invalidate the registry. A locale
+token tuple has one ordered canonical composition; no token or tuple may map to
+two base authorities.
+
+`continental-us` remains the durable stable ID for the profile whose runtime
+locale token is `us`. Normalization MUST NOT rename that component or rewrite
+existing manifests. Specialized tokens such as municipal, watershed, or
+research-area overlays MUST NOT be treated as interchangeable base locales.
+
+The registry MUST track dependencies between locale, DEM, delineation,
+representation, WEPP binary, climate dataset and methods, soil dataset and
+builder, landuse dataset and methods, and mods. The dependency language MUST be
+typed and closed; component documents MUST NOT contain executable expressions.
+Only profiles with explicit Builder support and completed deployment evidence
+may be offered for creation. Evidence MUST bind the profile/component IDs,
+source revisions, registry revision, provider revisions, deployment revision,
+and observation date. Every DEM, climate, soil, landuse, method, backend,
+representation, binary, and mod value referenced by the closed inventory source
+boundary MUST have one support disposition. Inventory generation MUST fail on
+an undispositioned value.
+
+The closed inventory boundary is every top-level
+`wepppy/nodb/configs/*.cfg`, the legacy config corpus exercised by compatibility
+tests, `wepppy/nodb/locales/climate_catalog.py`,
+`wepppy/nodb/locales/landuse_catalog.py`, the climate/landuse/soil/watershed and
+WEPP run controls plus their mutation/discovery routes, and the canonical WEPP
+binary provider. Test fixtures, archived work packages, and generated docs
+indexes are excluded. Domain specifications own each stable-ID/runtime mapping;
+the omission gate compares those definitions to this source boundary.
+
+`builder_exposed` requires complete mandatory axes, graph closure, and
+revision-bound provider evidence and permits Builder presentation/creation.
+`supported_non_builder` records supported Interfaces/catalog behavior but does
+not permit Builder presentation and need not claim a valid Builder
+cross-product. `inventory_only` records discovery without authorizing new
+presentation, capability snapshot authority, or mutation. `non_applicable`
+excludes the value from the WEPP Builder domain. For `builder_exposed`, all axes
+and relations in capability schema v2 are mandatory and non-empty except the
+mandatory `mods` axis, which MUST be serialized and MAY be empty.
+`mod_requires` and `mod_conflicts` MUST both be
+present-and-empty exactly when `mods` is empty; otherwise their keys MUST
+exhaust `mods`. Per-mod `mod_conflicts` values MAY be empty. A profile with an
+unresolved mandatory axis remains
+`supported_non_builder` or `inventory_only` and MUST NOT emit schema v2.
+
+Every provider-backed definition MUST contribute a deterministic SHA-256
+identity to the registry revision and manifest chain. DEM identity includes its
+exact database/URI token and adapter revision; climate identity includes its
+normalized descriptor, configured database/version token, and adapter revision;
+soil identity includes its runtime or contained raster token, dataset/version,
+and adapter revision; landcover identity is over ordered normalized stable ID,
+runtime value, label, locale group, support state, and adapter revision; WEPP
+binary identity remains the role-resolved executable digests. Forest evidence
+adds successful provider metadata/coverage/lookup probes, observation time, and
+deployment revision. Secrets and unrestricted filesystem paths MUST NOT enter
+either identity.
+
+Builder views consume the current validated registry. A created run's views and
+mutation/build endpoints consume only the resolved capability authority stored
+in its flattened config. They MUST NOT consult the current registry to broaden
+or restrict an existing run.
+
 The Builder MUST obtain its WEPP binary choices from
 `get_linux_wepp_bin_opts()` when loading the runtime registry, without a second
 hard-coded binary allowlist. It MUST preserve the provider's complete unique
@@ -789,14 +872,107 @@ labels or raw enum values. An illustrative section is:
 
 ```ini
 [capabilities]
+schema_version = 2
 climate_datasets = ["vanilla_cligen", "prism_stochastic", "observed_gridmet"]
+climate_station_methods = ["auto", "distance", "multi_factor"]
+climate_spatial_methods = ["single", "multiple", "interpolated"]
+soil_datasets = ["ssurgo-gnatsgso-2025"]
 soil_builders = ["gridded", "single_mukey", "single_database"]
-landuse_datasets = ["nlcd-2021"]
+landuse_datasets = ["nlcd-2019"]
+landuse_methods = ["gridded", "single", "upload"]
+delineation_backends = ["topaz", "wbt"]
+watershed_representations = ["single-ofe", "multiple-ofe"]
+wepp_binaries = ["wepp_260803"]
+mods = []
+allowed_model_tuples = ["topaz|single-ofe|wepp_260803", "wbt|single-ofe|wepp_260803", "wbt|multiple-ofe|wepp_260803"]
+
+[capabilities.climate_station_methods]
+vanilla_cligen = ["auto", "distance", "multi_factor"]
+prism_stochastic = ["auto", "distance", "multi_factor"]
+observed_gridmet = ["auto", "distance", "multi_factor"]
+
+[capabilities.climate_spatial_methods]
+vanilla_cligen = ["single", "multiple"]
+prism_stochastic = ["single", "multiple"]
+observed_gridmet = ["single", "multiple", "interpolated"]
+
+[capabilities.climate_station_defaults]
+vanilla_cligen = "auto"
+prism_stochastic = "auto"
+observed_gridmet = "auto"
+
+[capabilities.climate_spatial_defaults]
+vanilla_cligen = "single"
+prism_stochastic = "single"
+observed_gridmet = "single"
+
+[capabilities.landuse_methods]
+nlcd-2019 = ["gridded", "single", "upload"]
+
+[capabilities.landuse_method_defaults]
+nlcd-2019 = "gridded"
+
+[capabilities.landuse_methods_by_representation]
+single-ofe = ["gridded", "single", "upload"]
+multiple-ofe = ["gridded", "upload"]
+
+[capabilities.soil_builders]
+ssurgo-gnatsgso-2025 = ["gridded", "single_mukey", "single_database"]
+
+[capabilities.soil_builder_defaults]
+ssurgo-gnatsgso-2025 = "gridded"
+
+[capabilities.mod_requires]
+
+[capabilities.mod_conflicts]
+
+[capability_defaults]
+climate_dataset = "vanilla_cligen"
+landuse_dataset = "nlcd-2019"
+soil_dataset = "ssurgo-gnatsgso-2025"
+delineation_backend = "wbt"
+watershed_representation = "single-ofe"
+wepp_binary = "wepp_260803"
 ```
 
 Climate capabilities MUST use climate catalog IDs, not numeric
 `ClimateMode` values. Soil capabilities MUST introduce stable IDs rather than
 using `SoilsMode` integers because existing enum values include aliases.
+Station, spatial, landuse, soil, delineation, and representation methods MUST
+likewise use stable semantic IDs with an explicit domain-owned runtime mapping.
+Schema v2 MUST persist dataset-to-method adjacency, allowed
+backend/representation/binary tuples, representation-to-landuse-method
+adjacency, mod-conditioned edges, and defaults. Axis unions alone MUST NOT
+authorize a cross-product. Compound tuple serialization
+uses `|`, which is forbidden in component IDs; readers MUST validate all tuple
+members against their axes.
+Relation section keys MUST exhaust the corresponding dataset/mod axis. Each
+adjacency value MUST be a non-empty subset of the target method axis, except
+that `mod_conflicts` MAY contain an empty list. Each per-source default MUST be
+a member of that source's adjacency list. Relation sections MUST reject orphan
+keys, missing keys, duplicate values, unknown axes, and values outside their
+axes. Every model tuple member MUST exist in its axis, every advertised axis
+value MUST participate in at least one valid tuple where applicable, and the
+global defaults MUST identify one advertised valid tuple. Stable IDs MUST match
+the closed ASCII grammar `[a-z][a-z0-9_-]{0,127}`; therefore `:` and `|` cannot
+occur in them. Mod relation tokens use the closed `<axis>:<stable-id>` grammar.
+The only permitted relation axes are `climate_dataset`,
+`climate_station_method`, `climate_spatial_method`, `landuse_dataset`,
+`landuse_method`, `soil_dataset`, `soil_builder`, `delineation_backend`,
+`watershed_representation`, `wepp_binary`, and `mod`.
+Unknown relation axes, missing mod keys, and invalid targets invalidate schema
+v2. Each axis, relation, and tuple list is limited to 4096 unique IDs; IDs are
+limited by the stable-ID grammar and serialized capability sections to 4 MiB.
+These invariants are checked before description, creation, view rendering,
+mutation, or enqueue.
+
+`landuse_methods_by_representation` keys MUST exhaust
+`watershed_representations`; each value MUST be a non-empty subset of
+`landuse_methods`. A run's current representation intersects this relation with
+the selected landuse dataset adjacency before presentation or mutation. In
+particular, `multiple-ofe` authorizes `gridded` and `upload`; `single` MUST be
+rejected before mutation or enqueue even when present in the project-wide
+landuse-method union.
 
 For flattened projects:
 
@@ -805,15 +981,32 @@ For flattened projects:
   resolved capability section.
 - A hidden UI option MUST NOT remain invokable as an unsupported backend
   selection.
+- Dataset and method axes MUST be resolved separately. Templates MUST render
+  climate station/spatial radios, landuse modes/datasets, soil modes/datasets,
+  and watershed backend/representation choices from those resolved axes.
+- Every paired mutation or build endpoint MUST validate a newly submitted value
+  against the same stable IDs before NoDb mutation or enqueue.
 
-Version 1 intentionally makes no contract for how a capability selection that
-was persisted before this contract influences current-state visibility,
-rebuild eligibility, or model routing. Those paths use several established
-mechanisms, and normalizing them in this package would create disproportionate
-regression risk. Implementations MUST preserve their existing behavior unless
-a separately scoped and ratified contract changes it. The requirements above
-govern newly presented and newly submitted selections only; they MUST NOT be
-used as authority to refactor or reject a preexisting persisted selection.
+Capability compatibility is versioned as follows:
+
+- no capability section means legacy locale/catalog behavior;
+- capability keys without `schema_version` are schema v1, and only present v1
+  axes restrict behavior; missing WP12B axes retain legacy behavior;
+- a present-empty or malformed mandatory v1 axis is an explicit configuration
+  error; optional v1 axes such as `mods` MAY be present-empty;
+- schema v2 requires every mandatory axis, relation, tuple set, and default;
+  missing, empty, malformed, contradictory, partial, or newer authority fails
+  explicitly without consulting the current registry;
+- an already persisted current selection omitted from authority remains visible
+  but disabled for reselection, and an ordinary build may consume it; a newly
+  submitted different unsupported value fails before mutation or enqueue; and
+- merge-only update MUST NOT add WP12B axes to a v1 or legacy project because
+  doing so would invent capabilities prohibited by section 5.1.
+
+Schema v1 retains its established coarse-axis authority. WP12B contracts only
+the compatibility behavior listed above for current persisted values and new
+submissions; it does not reinterpret model routing or rewrite persisted state.
+The v2 graph rules MUST NOT be retroactively inferred for v1.
 
 Legacy projects without resolved capabilities MUST retain their current locale,
 mod, catalog, and route behavior.
@@ -1259,6 +1452,31 @@ Implementation is not conformant until tests demonstrate:
   feature flags are enabled; and
 - the sanitization gate rejects secret-bearing generated config or manifest
   content before it can enter a project root or archive.
+- the closed locale/dataset/method/provider inventory fails on every omitted or
+  undispositioned source value and validates every stable-ID/runtime mapping;
+- profile validation rejects duplicate/casefold-colliding tokens, multiple
+  bases, incompatible overlays, precedence collisions, cycles, and profiles
+  whose support state lacks its required axes/evidence;
+- capability v2 rejects missing, empty mandatory, malformed, orphan, duplicate,
+  non-exhaustive, out-of-axis, invalid-default, invalid-tuple, and invalid-mod
+  relations, while valid adjacency/default closure is byte-stable;
+- absent, v1 partial, v1 optional-empty, v1 hostile, v2 complete, v2 partial,
+  v2 hostile, and newer capability schemas follow the section-9 state matrix;
+- every inventoried Builder/rq-engine/run-page discovery surface and paired
+  mutation/build endpoint derives availability from the same stored graph and
+  an invalid request causes neither NoDb mutation nor enqueue;
+- every provider/dataset advertised by a `builder_exposed` profile has
+  presence/health evidence bound to registry, provider, and deployment
+  revisions, and every Builder-exposed base and overlay has Forest creation
+  evidence;
+- every distinct exposed provider/method family has representative unmocked
+  execution evidence and invalid graph edges are exercised directly;
+- baseline differential fixtures pass before legacy locale conditionals are
+  removed; and
+- a v2-reader deployment runs with v2 writing disabled before creation begins;
+  rollback to a pre-v2 reader is allowed only while no v2 project exists, and
+  after v2 creation every supported rollback revision must enforce v2 without
+  broadening its graph or changing project bytes.
 
 At least one representative project MUST be exercised through create, reopen,
 fork, archive, and restore before production rollout.

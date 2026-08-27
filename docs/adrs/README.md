@@ -87,3 +87,4 @@ Each ADR should normally include:
 - `ADR-0044`: [Seamless WEPPcloud Session Cookie Namespace Migration](ADR-0044-seamless-weppcloud-session-cookie-namespace-migration.md) (Proposed, 2026-08-23)
 - `ADR-0045`: [SBS Display Class Decoding and the Unassigned State](ADR-0045-sbs-class-coded-display-transport.md) (Accepted, 2026-08-24)
 - `ADR-0046`: [Config Builder WBT and WEPP 260803 Defaults](ADR-0046-config-builder-wbt-and-wepp-260803-defaults.md) (Accepted, 2026-08-27)
+- `ADR-0047`: [Project Config Locale and View Authority](ADR-0047-project-config-locale-authority.md) (Accepted, 2026-08-27)
