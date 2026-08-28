@@ -203,6 +203,10 @@ migrated.
   updates, add rendered and Jest regressions, pass scoped and complete gates,
   and obtain independent implementation correctness READY with High 0, Medium
   0, and Low 0.
+- [x] (2026-08-28 23:34Z) Path-stage only the exact amendment-7 implementation,
+  tests, documentation, and review evidence and commit reviewed implementation
+  revision `64055eadb57534bc7b8093179d0f5212cbde7f88`, leaving every prerecorded
+  dirty path excluded.
 
 ## Surprises & Discoveries
 
@@ -490,17 +494,19 @@ from WP12D.
 
 Bounded amendment `PC-13/WP12D-20260828-7` is ratified, checkpointed as
 `8a15b963c26a4d9201e238610bfdbbf1734c77a6`, and implemented within its exact
-source boundary. The established run page now renders the exact route `runid`
-as its document title and Project name/scenario saves and clears do not mutate
-that identity; their persistence, fields, events, and notifications remain.
-Focused Project Jest passes 54 tests, rendered title coverage passes 3 tests,
-the complete frontend passes 820 tests across 107 suites, Pure controls pass
-158 tests, WEPPcloud routes pass 1,070 tests, and the repository-wide Python
-gate passes 7,272 tests with 63 skipped. Frontend lint, generated-bundle parity,
-documentation, and diff gates pass. Independent implementation correctness is
-READY with High 0, Medium 0, and Low 0. WP07, PC-13, WP12D, and WP12 remain
-unchanged; no push, merge, Forest deployment, or production deployment is part
-of amendment 7, and WP12 retains exclusive merge and production authority.
+source boundary at reviewed revision
+`64055eadb57534bc7b8093179d0f5212cbde7f88`. The established run page now
+renders the exact route `runid` as its document title and Project name/scenario
+saves and clears do not mutate that identity; their persistence, fields,
+events, and notifications remain. Focused Project Jest passes 54 tests,
+rendered title coverage passes 3 tests, the complete frontend passes 820 tests
+across 107 suites, Pure controls pass 158 tests, WEPPcloud routes pass 1,070
+tests, and the repository-wide Python gate passes 7,272 tests with 63 skipped.
+Frontend lint, generated-bundle parity, documentation, and diff gates pass.
+Independent implementation correctness is READY with High 0, Medium 0, and Low
+0. WP07, PC-13, WP12D, and WP12 remain unchanged; no push, merge, Forest
+deployment, or production deployment is part of amendment 7, and WP12 retains
+exclusive merge and production authority.
 
 ## Context and Orientation
 

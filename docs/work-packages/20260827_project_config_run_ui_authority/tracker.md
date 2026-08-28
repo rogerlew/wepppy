@@ -4,10 +4,10 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-27 20:31 UTC
-**Current phase**: amendment 7 local implementation complete
-**Last updated**: 2026-08-28 23:31 UTC
-**Next milestone**: path-stage the exact amendment-7 implementation and return
-the unchanged owners to WP12 handoff; merge and production remain reserved
+**Current phase**: amendment 7 ready for WP12 handoff
+**Last updated**: 2026-08-28 23:34 UTC
+**Next milestone**: WP12 scope comparison and promotion; merge and production
+remain reserved
 **Package security impact**: `high` (historical WP12D scope)
 **Amendment 6 security impact**: `low`
 **Amendment 6 dedicated security review**: `not required`; no new input,
@@ -84,8 +84,9 @@ PC-24 owns `.cfg` locale normalization and run-UI authority parity.
 ### Ready / Handoff
 
 - [x] Amendment 7 implementation and its complete validation are ready for an
-  exact local checkpoint and WP12 handoff; no push or deployment is authorized
-  (2026-08-28 23:31 UTC).
+  exact WP12 handoff at reviewed revision
+  `64055eadb57534bc7b8093179d0f5212cbde7f88`; no push or deployment is
+  authorized (2026-08-28 23:34 UTC).
 - [x] Amendment 6 implementation correctness is independently READY with High
   0 / Medium 0 / Low 0; WP07, PC-13, WP12D, and WP12 status remains unchanged,
   and no push or deployment is authorized (2026-08-28 20:42 UTC).
@@ -102,6 +103,10 @@ PC-24 owns `.cfg` locale normalization and run-UI authority parity.
 
 ### Done
 
+- [x] Path-staged only the exact amendment-7 source, tests, documentation, and
+  implementation review evidence and committed revision
+  `64055eadb57534bc7b8093179d0f5212cbde7f88`; every prerecorded unrelated
+  dirty path remained excluded (2026-08-28 23:34 UTC).
 - [x] Passed 54 focused Project tests, 3 rendered title tests, 820 complete
   frontend tests across 107 suites, 158 Pure controls tests, 1,070 WEPPcloud
   route tests, and the repository-wide Python gate with 7,272 passed and 63
