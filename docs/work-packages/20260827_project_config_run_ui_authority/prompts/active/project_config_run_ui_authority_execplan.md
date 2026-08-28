@@ -179,7 +179,9 @@ migrated.
 - [x] (2026-08-28 20:42Z) Pass 18 focused and 817 complete frontend tests, 8
   targeted and 7,269 complete Python tests with 63 skipped, frontend lint,
   generated-bundle parity, documentation, and diff gates; obtain independent
-  implementation correctness READY with High 0, Medium 0, and Low 0.
+  implementation correctness READY with High 0, Medium 0, and Low 0, and commit
+  the exact reviewed implementation as
+  `091eaf11f6cf47b9751c857f3de5719be564e313`.
 
 ## Surprises & Discoveries
 
@@ -445,9 +447,12 @@ the latest hydrated or changed proposal validates automatically without moving
 focus, stale registry reloads preserve or visibly replace selections, and an
 active Create request cannot be duplicated through a concurrent form change.
 Its focused and complete gates pass, and independent implementation correctness
-review is READY with no findings. WP07, PC-13, WP12D, and WP12 retain their
-existing status; parent WP12 retains the scope comparison, merge, and production
-promotion gates. Production deployment remains excluded from WP12D.
+review is READY with no findings. Reviewed implementation revision
+`091eaf11f6cf47b9751c857f3de5719be564e313` contains only the ratified source,
+test, documentation, and package-evidence boundary. WP07, PC-13, WP12D, and
+WP12 retain their existing status; parent WP12 retains the scope comparison,
+merge, and production promotion gates. Production deployment remains excluded
+from WP12D.
 
 ## Context and Orientation
 

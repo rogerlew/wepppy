@@ -78,7 +78,8 @@ PC-24 owns `.cfg` locale normalization and run-UI authority parity.
 - [x] Removed the manual Config Builder Review Selections action; initial
   hydration, user changes, and successful stale-registry reloads now validate
   automatically, with latest-response, diagnostics, focus, replacement, and
-  active-Create isolation regressions (2026-08-28 20:42 UTC).
+  active-Create isolation regressions; exact reviewed implementation revision
+  is `091eaf11f6cf47b9751c857f3de5719be564e313` (2026-08-28 20:42 UTC).
 - [x] Passed 18 focused and 817 complete frontend tests, frontend lint, 8
   targeted rendered-template tests, the complete Python gate with 7,269 passed
   and 63 skipped, generated-bundle parity, scoped documentation lint, and diff
