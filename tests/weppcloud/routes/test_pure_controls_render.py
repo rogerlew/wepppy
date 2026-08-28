@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib
 import json
 import itertools
 import re
@@ -760,6 +761,252 @@ def test_climate_template_renders_catalog_station_and_build_contract(
     assert 'data-climate-action="build"' in rendered
     assert 'id="hint_build_climate"' in rendered
     assert 'id="climate_status_panel"' in rendered
+
+
+def test_run_context_renders_outside_axis_climate_with_ordinary_landcover(
+    jinja_env: Environment,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    run0_module = importlib.import_module(
+        "wepppy.weppcloud.routes.run_0.run_0_bp"
+    )
+    authority = SimpleNamespace(
+        defaults={"landuse_dataset": "nlcd-2019"},
+        landuse_datasets=("nlcd-2019",),
+        climate_datasets=("vanilla-cligen",),
+    )
+    landcover = SimpleNamespace(
+        kind="landcover",
+        key="nlcd/2024",
+        catalog_id="nlcd-2019",
+        label="NLCD",
+        description=None,
+        management_file=None,
+    )
+    landuse = SimpleNamespace(
+        mode=SimpleNamespace(value=0),
+        nlcd_db="nlcd/2024",
+        available_datasets=[landcover],
+        single_selection="42",
+        mofe_buffer_selection="42",
+        user_defined_landcover_fn=None,
+        mapping="disturbed",
+    )
+    climate = SimpleNamespace(
+        catalog_id="retired-climate",
+        climate_mode=SimpleNamespace(value=5),
+        climatestation_mode=SimpleNamespace(value=5),
+        climate_spatialmode=SimpleNamespace(value=0),
+        uses_tenerife_station_catalog=False,
+        is_single_storm=False,
+        datasetMap={},
+        input_years=30,
+        observed_start_year=1981,
+        observed_end_year=2024,
+        future_start_year=2030,
+        future_end_year=2060,
+        cli_fn=None,
+        orig_cli_fn=None,
+        climate_daily_temp_ds="null",
+        use_gridmet_wind_when_applicable=True,
+        adjust_mx_pt5=False,
+        silent_pass_observed_quality_guard=False,
+        precip_scaling_mode=SimpleNamespace(value=0),
+        precip_scale_factor=None,
+        precip_monthly_scale_factors=None,
+        precip_scale_reference=None,
+        precip_scale_factor_map=None,
+    )
+    retired_payload = {
+        "catalog_id": "retired-climate",
+        "label": "Retired climate",
+        "description": "Persisted current selection",
+        "help_text": "",
+        "group": "Stochastic",
+        "group_hint": "",
+        "climate_mode": 5,
+        "station_modes": [-1, 0, 1],
+        "default_station_mode": 0,
+        "spatial_modes": [0, 1, 2],
+        "default_spatial_mode": 1,
+        "ui_exposed": False,
+    }
+    monkeypatch.setattr(
+        run0_module,
+        "get_climate_dataset",
+        lambda _catalog_id: SimpleNamespace(
+            to_mapping=lambda: dict(retired_payload)
+        ),
+    )
+    monkeypatch.setattr(
+        run0_module,
+        "landuse_capability_modes",
+        lambda *_args: frozenset({0}),
+    )
+    climate_catalog = [{
+        "catalog_id": "vanilla-cligen",
+        "label": "Vanilla CLIGEN",
+        "description": "",
+        "help_text": "",
+        "group": "Stochastic",
+        "group_hint": "",
+        "climate_mode": 0,
+        "ui_exposed": True,
+    }]
+    landcover_datasets = [landcover]
+
+    landuse_modes, disabled_landcover = (
+        run0_module._apply_current_dataset_compatibility(
+            authority,
+            landuse,
+            climate,
+            climate_catalog,
+            landcover_datasets,
+            "single-ofe",
+        )
+    )
+
+    climate_html = jinja_env.get_template("controls/climate_pure.htm").render(
+        climate=climate,
+        climate_catalog=climate_catalog,
+    )
+    landuse_html = jinja_env.get_template("controls/landuse_pure.htm").render(
+        landuse=landuse,
+        landuseoptions=[{"Key": "42", "Description": "Forest"}],
+        landuse_management_mapping_options=[{
+            "Key": "disturbed", "Description": "Disturbed",
+        }],
+        landcover_datasets=landcover_datasets,
+        disabled_landcover_datasets=disabled_landcover,
+        landuse_method_modes=landuse_modes,
+        wepp=SimpleNamespace(multi_ofe=False),
+        ron=SimpleNamespace(mods=set()),
+    )
+
+    retired_option = re.search(
+        r'id="climate_dataset_retired-climate"[^>]*>', climate_html
+    )
+    assert retired_option is not None
+    assert "checked" in retired_option.group(0)
+    assert "disabled" in retired_option.group(0)
+    mesonet_option = re.search(r'id="climatestation_mode5"[^>]*>', climate_html)
+    assert mesonet_option is not None
+    assert "checked" in mesonet_option.group(0)
+    assert "disabled" in mesonet_option.group(0)
+    assert 'id="climatestation_mode_auto"' not in climate_html
+    assert 'id="climatestation_mode0"' not in climate_html
+    assert 'id="climatestation_mode1"' not in climate_html
+    assert 'id="climate_spatialmode0"' in climate_html
+    assert 'id="climate_spatialmode1"' not in climate_html
+    assert 'id="climate_spatialmode2"' not in climate_html
+    build_button = re.search(r'id="btn_build_climate"[^>]*>', climate_html)
+    assert build_button is not None
+    assert "disabled" not in build_button.group(0)
+    assert landcover_datasets == [landcover]
+    assert disabled_landcover == []
+    assert 'option value="nlcd/2024" selected' in landuse_html
+
+    climate.catalog_id = "vanilla-cligen"
+    climate.climatestation_mode = SimpleNamespace(value=1)
+    climate.climate_spatialmode = SimpleNamespace(value=2)
+    authorized_catalog = [{
+        **retired_payload,
+        "catalog_id": "vanilla-cligen",
+        "label": "Vanilla CLIGEN",
+        "station_modes": [-1, 0],
+        "spatial_modes": [0, 1],
+        "ui_exposed": True,
+    }]
+    run0_module._apply_current_dataset_compatibility(
+        authority,
+        landuse,
+        climate,
+        authorized_catalog,
+        landcover_datasets,
+        "single-ofe",
+    )
+    relationship_html = jinja_env.get_template(
+        "controls/climate_pure.htm"
+    ).render(climate=climate, climate_catalog=authorized_catalog)
+
+    assert authorized_catalog[0]["station_modes"] == [-1, 0, 1]
+    assert authorized_catalog[0]["disabled_station_modes"] == [1]
+    relationship_station = re.search(
+        r'id="climatestation_mode1"[^>]*>', relationship_html
+    )
+    assert relationship_station is not None
+    assert "checked" in relationship_station.group(0)
+    assert "disabled" in relationship_station.group(0)
+    relationship_spatial = re.search(
+        r'id="climate_spatialmode2"[^>]*>', relationship_html
+    )
+    assert relationship_spatial is not None
+    assert "checked" in relationship_spatial.group(0)
+    assert "disabled" in relationship_spatial.group(0)
+
+
+def test_run_context_renders_outside_locale_current_landcover_disabled(
+    jinja_env: Environment,
+) -> None:
+    run0_module = importlib.import_module(
+        "wepppy.weppcloud.routes.run_0.run_0_bp"
+    )
+    authority = SimpleNamespace(
+        defaults={"landuse_dataset": "nlcd-2019"},
+        landuse_datasets=("nlcd-2019",),
+        climate_datasets=("vanilla-cligen",),
+    )
+    allowed_landcover = SimpleNamespace(
+        kind="landcover",
+        key="nlcd/2024",
+        catalog_id="nlcd-2024",
+        label="NLCD",
+        description=None,
+        management_file=None,
+    )
+    current_runtime = "eu/CORINE_LandCover/2018"
+    landuse = SimpleNamespace(
+        mode=SimpleNamespace(value=0),
+        nlcd_db=current_runtime,
+        available_datasets=[allowed_landcover],
+        single_selection="42",
+        mofe_buffer_selection="42",
+        user_defined_landcover_fn=None,
+        mapping="disturbed",
+    )
+    landcover_datasets = [allowed_landcover]
+
+    landuse_modes, disabled_landcover = (
+        run0_module._apply_current_dataset_compatibility(
+            authority,
+            landuse,
+            SimpleNamespace(catalog_id="vanilla-cligen"),
+            [],
+            landcover_datasets,
+            "single-ofe",
+        )
+    )
+    rendered = jinja_env.get_template("controls/landuse_pure.htm").render(
+        landuse=landuse,
+        landuseoptions=[{"Key": "42", "Description": "Forest"}],
+        landuse_management_mapping_options=[{
+            "Key": "disturbed", "Description": "Disturbed",
+        }],
+        landcover_datasets=landcover_datasets,
+        disabled_landcover_datasets=disabled_landcover,
+        landuse_method_modes=landuse_modes,
+        wepp=SimpleNamespace(multi_ofe=False),
+        ron=SimpleNamespace(mods=set()),
+    )
+
+    current_option = re.search(
+        r'<option value="eu/CORINE_LandCover/2018"[^>]*>', rendered
+    )
+    assert current_option is not None
+    assert "selected" in current_option.group(0)
+    assert "disabled" in current_option.group(0)
+    assert disabled_landcover == [current_runtime]
+    assert [item.key for item in landcover_datasets].count(current_runtime) == 1
 
 
 def test_climate_template_renders_upload_and_scaling_contract(
@@ -2351,11 +2598,14 @@ def test_run_header_project_config_update_modal_is_accessible_and_dormant(
         'aria-modal="true"',
         'aria-labelledby="projectConfigUpdateTitle"',
         'aria-describedby="projectConfigUpdateDescription"',
-        "Version 1 adds all missing registered attributes",
+        "Review every configuration addition and capability-authority change",
         'data-project-config-update-status role="status" aria-live="polite"',
         'data-project-config-update-error',
         '<th scope="col">Section</th>',
         '<th scope="col">Source revision</th>',
+        "Capability-authority changes",
+        'type="checkbox" data-project-config-update-acknowledgment-checkbox',
+        "I understand that refreshing capability authority changes this project's modeling envelope, diminishes strict provenance continuity with its original configuration, and may expose Preview or otherwise unstable features.",
     ):
         assert token in rendered
     assert 'data-project-config-update\n' in rendered

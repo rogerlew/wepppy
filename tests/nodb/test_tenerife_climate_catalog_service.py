@@ -24,18 +24,22 @@ class _ClimateStub:
 
     def config_get_raw(
         self,
-        _section: str,
-        _option: str,
+        section: str,
+        option: str,
         default: object = None,
     ) -> object:
+        if (section, option) == ("general", "locales"):
+            return repr(self.locales)
         return default
 
     def config_get_list(
         self,
-        _section: str,
-        _option: str,
+        section: str,
+        option: str,
         default: object = None,
     ) -> object:
+        if (section, option) == ("general", "locales"):
+            return list(self.locales)
         return default
 
 

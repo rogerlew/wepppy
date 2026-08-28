@@ -19,7 +19,11 @@ pytestmark = pytest.mark.microservice
 def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(climate_routes, "require_jwt", lambda request, required_scopes=None: {})
     monkeypatch.setattr(climate_routes, "authorize_run_access", lambda claims, runid: None)
-    monkeypatch.setattr(climate_routes, "capability_authority", lambda climate: None)
+    monkeypatch.setattr(
+        climate_routes,
+        "resolve_run_capability_authority",
+        lambda climate: SimpleNamespace(graph=None),
+    )
 
 
 def _stub_queue(
@@ -126,7 +130,7 @@ def test_build_climate_rejects_invalid_capability_authority_before_parse(
     monkeypatch.setattr(climate_routes, "get_wd", lambda runid: "/tmp/run")
     monkeypatch.setattr(
         climate_routes,
-        "capability_authority",
+        "resolve_run_capability_authority",
         lambda climate: (_ for _ in ()).throw(
             ValueError(f"partial {profile_id} capability graph")
         ),
@@ -160,7 +164,11 @@ def test_build_climate_rejects_raw_hidden_mode_under_valid_v2_authority_before_m
         climate_datasets=("vanilla_cligen",),
         climate_spatial_methods_by_dataset={"vanilla_cligen": ("single",)},
     )
-    monkeypatch.setattr(climate_routes, "capability_authority", lambda climate: authority)
+    monkeypatch.setattr(
+        climate_routes,
+        "resolve_run_capability_authority",
+        lambda climate: SimpleNamespace(graph=authority),
+    )
 
     class DummyClimate:
         catalog_id = "vanilla_cligen"
@@ -197,7 +205,11 @@ def test_build_climate_rejects_different_unsupported_catalog_before_mutation(
         climate_datasets=("vanilla_cligen",),
         climate_spatial_methods_by_dataset={"vanilla_cligen": ("single",)},
     )
-    monkeypatch.setattr(climate_routes, "capability_authority", lambda climate: authority)
+    monkeypatch.setattr(
+        climate_routes,
+        "resolve_run_capability_authority",
+        lambda climate: SimpleNamespace(graph=authority),
+    )
 
     class DummyClimate:
         catalog_id = "vanilla_cligen"

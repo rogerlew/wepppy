@@ -20,6 +20,7 @@ from wepppy.nodb.locales import (
     LocaleSupportState,
     build_continental_us_capability_graph,
     build_locale_capability_graph,
+    get_locale_profile,
     iter_landcover_catalog,
     iter_locale_profiles,
     resolve_locale_composition,
@@ -113,12 +114,82 @@ def test_locale_catalog_classifies_every_shipped_runtime_token() -> None:
             observed_tokens.update(str(item).casefold() for item in ast.literal_eval(match.group(1)))
 
     assert observed_tokens <= known_tokens
-    assert known_tokens - observed_tokens == {"canada"}
-    assert len(profiles) == 17
+    assert known_tokens == observed_tokens
+    assert len(profiles) == 18
     assert sum(profile.support_state is LocaleSupportState.BUILDER_EXPOSED for profile in profiles) == 5
     assert next(
         profile for profile in profiles if profile.classification is LocaleClassification.NON_BUILDER_FAMILY
     ).profile_id == "rhem"
+
+
+def test_all_named_configs_resolve_one_canonical_locale_composition() -> None:
+    configs_root = Path("wepppy/nodb/configs")
+    defaults = configparser.ConfigParser(interpolation=None, strict=False)
+    defaults.read(configs_root / "_defaults.cfg", encoding="utf-8")
+    config_paths = sorted(
+        path for path in configs_root.glob("*.cfg") if path.name != "_defaults.cfg"
+    )
+
+    assert len(config_paths) == 128
+    for config_path in config_paths:
+        parser = configparser.ConfigParser(interpolation=None, strict=False)
+        parser.read_dict({section: dict(defaults[section]) for section in defaults.sections()})
+        parser.read(config_path, encoding="utf-8")
+        tokens = ast.literal_eval(parser.get("general", "locales"))
+        if tokens == ["rhem"]:
+            assert config_path.name in {"rhem.cfg", "rhem_rap.cfg"}
+        else:
+            composition = resolve_locale_composition(tokens)
+            assert composition.runtime_tokens, config_path.name
+
+
+def test_ratified_config_locale_normalization_is_exact() -> None:
+    configs_root = Path("wepppy/nodb/configs")
+    expected = {
+        "_defaults.cfg": ["us"],
+        "0.cfg": ["us"],
+        "13.cfg": ["us"],
+        "baer.cfg": ["us"],
+        "reveg.cfg": ["us"],
+        "reveg-mofe.cfg": ["us"],
+        "reveg-10m-mofe.cfg": ["us"],
+        "general.cfg": ["us"],
+        "canada.cfg": ["canada"],
+        "canada-wbt.cfg": ["canada"],
+        "canada-wbt-mofe.cfg": ["canada"],
+        "portland-10-mofe.cfg": ["us", "portland"],
+        "portland-disturbed.cfg": ["us", "portland"],
+        "portland-disturbed9003.cfg": ["us", "portland"],
+        "portland-disturbed-simfire-eagle.cfg": ["us", "portland"],
+        "portland-disturbed-simfire-norse.cfg": ["us", "portland"],
+        "rhem_rap.cfg": ["rhem"],
+        "yasin.cfg": ["turkey"],
+        "tenerife-disturbed.cfg": ["eu", "tenerife"],
+        "tenerife-5m-disturbed.cfg": ["eu", "tenerife"],
+    }
+
+    for filename, tokens in expected.items():
+        parser = configparser.ConfigParser(interpolation=None, strict=False)
+        parser.read(configs_root / filename, encoding="utf-8")
+        assert ast.literal_eval(parser.get("general", "locales")) == tokens
+
+
+def test_turkey_profile_is_classification_only_wp12d_authority() -> None:
+    profile = get_locale_profile("turkey")
+
+    assert profile is not None
+    assert profile.label == "Turkey"
+    assert profile.runtime_token == "turkey"
+    assert profile.classification is LocaleClassification.BASE
+    assert profile.support_state is LocaleSupportState.SUPPORTED_NON_BUILDER
+    assert profile.source_revision == "WP12D-1"
+    assert profile.base_profile_id is None
+    assert profile.overlay_precedence is None
+    assert profile.dem_sources == ()
+    assert profile.soil_sources == ()
+    assert profile.landuse_sources == ()
+    assert profile.climate_sources == ()
+    assert profile.climate_station_databases == ()
 
 
 def test_shipped_config_data_and_dependency_boundaries_are_closed() -> None:

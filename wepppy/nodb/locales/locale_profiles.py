@@ -145,6 +145,7 @@ def _profile(
     landuse_sources: tuple[str, ...] = (),
     climate_sources: tuple[str, ...] = (),
     climate_station_databases: tuple[str, ...] = (),
+    source_revision: str = "WP12C-1",
 ) -> LocaleProfile:
     return LocaleProfile(
         profile_id=profile_id,
@@ -152,7 +153,7 @@ def _profile(
         runtime_token=runtime_token,
         classification=classification,
         support_state=support_state,
-        source_revision="WP12C-1",
+        source_revision=source_revision,
         base_profile_id=base_profile_id,
         overlay_precedence=overlay_precedence,
         dem_sources=dem_sources,
@@ -228,6 +229,11 @@ _PROFILES = (
         landuse_sources=_C3S_LANDUSE_IDS,
         climate_sources=("vanilla_cligen",),
         climate_station_databases=("cligen-stations-ghcn",),
+    ),
+    _profile(
+        "turkey", "Turkey", "turkey", LocaleClassification.BASE,
+        LocaleSupportState.SUPPORTED_NON_BUILDER,
+        source_revision="WP12D-1",
     ),
     _profile(
         "nigeria", "Nigeria", "nigeria", LocaleClassification.BASE,

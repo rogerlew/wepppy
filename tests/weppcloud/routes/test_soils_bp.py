@@ -118,6 +118,26 @@ def test_set_soil_mode_rejects_stored_graph_mismatch_before_mutation(
     assert controller.mode == soils_module.SoilsMode.Gridded
 
 
+def test_set_soil_mode_allows_exact_current_mode_outside_authority(
+    soils_client, monkeypatch: pytest.MonkeyPatch,
+):
+    client, DummySoils, _, run_dir = soils_client
+    monkeypatch.setattr(
+        soils_module,
+        "soil_capability_modes",
+        lambda _soils: frozenset({int(soils_module.SoilsMode.Single)}),
+    )
+    controller = DummySoils.getInstance(run_dir)
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_soil_mode/",
+        json={"mode": int(controller.mode)},
+    )
+
+    assert response.status_code == 200
+    assert controller.mode == soils_module.SoilsMode.Gridded
+
+
 def test_task_set_soils_ksflag_sets_boolean(soils_client):
     client, DummySoils, _, run_dir = soils_client
 

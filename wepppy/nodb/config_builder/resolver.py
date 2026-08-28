@@ -8,7 +8,7 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import Mapping
 
-from wepppy.nodb.config_builder.registry import load_registry
+from wepppy.nodb.config_builder.registry import DEFAULT_PROFILES_ROOT, load_registry
 from wepppy.nodb.config_builder.schema import (
     BuilderDescription,
     BuilderSelections,
@@ -39,6 +39,7 @@ __all__ = [
     "DEFAULT_SELECTIONS",
     "BuilderConstraintError",
     "describe_builder",
+    "resolve_builder_capability_graph",
     "resolve_builder_config",
 ]
 
@@ -111,6 +112,25 @@ def _component(
             f"Component {component_id!r} is not a {kind.value}",
         )
     return component
+
+
+def resolve_builder_capability_graph(
+    locale_id: str,
+    *,
+    registry: Registry | None = None,
+    registry_root: str | Path = DEFAULT_PROFILES_ROOT,
+) -> CapabilityGraph:
+    """Return the canonical current Builder graph for one exposed locale."""
+
+    resolved_registry = load_registry(registry_root) if registry is None else registry
+    locale = _component(resolved_registry, locale_id, ComponentKind.LOCALE, "locale")
+    if locale.support_state != "builder_exposed":
+        raise BuilderConstraintError(
+            "locale",
+            "unsupported_combination",
+            f"{locale_id!r} is not exposed by Config Builder.",
+        )
+    return _capability_graph_for_registry(resolved_registry, locale_id)
 
 
 def _require_allowed(field: str, selected: str, allowed: tuple[str, ...]) -> None:
@@ -306,7 +326,7 @@ def describe_builder(registry: Registry | None = None) -> BuilderDescription:
         graph = (
             _historical_capability_graph_for_registry(resolved_registry)
             if historical
-            else _capability_graph_for_registry(resolved_registry, locale_id)
+            else resolve_builder_capability_graph(locale_id, registry=resolved_registry)
         )
         component_ids = {
             locale_id,
@@ -332,7 +352,7 @@ def describe_builder(registry: Registry | None = None) -> BuilderDescription:
 
     compatibility_summaries = summaries_for("continental-us", historical=True)
     graphs = {
-        locale_id: _capability_graph_for_registry(resolved_registry, locale_id)
+        locale_id: resolve_builder_capability_graph(locale_id, registry=resolved_registry)
         for locale_id in (
             "continental-us", "europe", "canada", "australia", "global-earth"
         )
@@ -447,7 +467,7 @@ def resolve_builder_config(
     graph = capability_graph or (
         _historical_capability_graph_for_registry(resolved_registry)
         if capability_schema_version == HISTORICAL_CAPABILITY_SCHEMA_VERSION
-        else _capability_graph_for_registry(resolved_registry, selections.locale)
+        else resolve_builder_capability_graph(selections.locale, registry=resolved_registry)
     )
     if (
         capability_schema_version == HISTORICAL_CAPABILITY_SCHEMA_VERSION

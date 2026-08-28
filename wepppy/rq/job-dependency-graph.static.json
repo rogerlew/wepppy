@@ -76,7 +76,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "build_climate",
-    "source_lineno": 443,
+    "source_lineno": 712,
     "source_module": "wepppy/microservices/rq_engine/climate_routes.py"
   },
   {
@@ -220,7 +220,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "build_landuse",
-    "source_lineno": 564,
+    "source_lineno": 755,
     "source_module": "wepppy/microservices/rq_engine/landuse_routes.py"
   },
   {
@@ -230,7 +230,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "modify_landuse_mapping",
-    "source_lineno": 836,
+    "source_lineno": 1043,
     "source_module": "wepppy/microservices/rq_engine/landuse_routes.py"
   },
   {
@@ -310,9 +310,9 @@
     "notes": [
       "missing enqueue target"
     ],
-    "queue_name": "unknown",
+    "queue_name": "default",
     "source_function": "update_apply",
-    "source_lineno": 207,
+    "source_lineno": 692,
     "source_module": "wepppy/microservices/rq_engine/project_config_update_routes.py"
   },
   {
@@ -394,7 +394,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "build_soils",
-    "source_lineno": 152,
+    "source_lineno": 234,
     "source_module": "wepppy/microservices/rq_engine/soils_routes.py"
   },
   {

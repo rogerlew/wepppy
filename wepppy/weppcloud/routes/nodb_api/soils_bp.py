@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import uuid
+
 from flask import Response
 
 from .._common import (
@@ -17,7 +19,12 @@ from .._common import (
 )
 
 from wepppy.nodb.core import Soils, SoilsMode
-from wepppy.nodb.project_config_capabilities import soil_capability_modes
+from wepppy.nodb.project_config_capabilities import (
+    BuilderRegistryUnavailableError,
+    CapabilityAuthorityInvalidError,
+    LocaleAuthorityInvalidError,
+    soil_capability_modes,
+)
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.weppcloud.utils.cap_guard import requires_cap
 from wepppy.weppcloud.utils.helpers import authorize_and_handle_with_exception_factory
@@ -58,7 +65,11 @@ def set_soil_mode(runid: str, config: str) -> Response:
     try:
         soils = Soils.getInstance(wd)
         allowed_modes = soil_capability_modes(soils)
-        if allowed_modes is not None and mode not in allowed_modes:
+        if (
+            allowed_modes is not None
+            and mode != int(soils.mode)
+            and mode not in allowed_modes
+        ):
             return error_factory(
                 'Soil builder is not supported by this project.',
                 status_code=400,
@@ -69,6 +80,32 @@ def set_soil_mode(runid: str, config: str) -> Response:
         if single_selection is not None:
             soils.single_selection = single_selection
         soils.single_dbselection = single_dbselection
+    except LocaleAuthorityInvalidError as exc:
+        return error_factory(
+            "Run locale authority is invalid.",
+            status_code=409,
+            code="locale_authority_invalid",
+            details=str(exc),
+            error_id=uuid.uuid4().hex,
+        )
+    except CapabilityAuthorityInvalidError as exc:
+        return error_factory(
+            "Project capability authority is invalid.",
+            status_code=409,
+            code="capability_authority_invalid",
+            details=str(exc),
+            error_id=uuid.uuid4().hex,
+        )
+    except BuilderRegistryUnavailableError as exc:
+        response = error_factory(
+            "Builder registry is unavailable.",
+            status_code=503,
+            code="builder_registry_error",
+            details=str(exc),
+            error_id=uuid.uuid4().hex,
+        )
+        response.headers["Retry-After"] = "5"
+        return response
     except Exception:  # broad-except: boundary contract
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/soils_bp.py:61", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})

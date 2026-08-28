@@ -46,10 +46,35 @@ migrated.
   reviews, commit and push exact revision `80f4810b7`, and validate real
   schema-v2/v3 reopen on `forest` without rebuilding or exposing a refresh
   writer.
-- [ ] Write failing inventory, legacy reopen, stored isolation, and paired
-  boundary tests.
-- [ ] Implement exact config normalization and authority composition.
-- [ ] Pass focused/full gates and independent correctness/security reviews.
+- [x] (2026-08-28 01:28Z) Write and pass inventory, legacy reopen, stored
+  isolation, paired-boundary, additive/capability/combined refresh,
+  acknowledgment, atomicity, recovery, and accessibility tests.
+- [x] (2026-08-28 01:28Z) Implement exact config normalization, public Builder
+  graph hotpath, stored-or-legacy authority composition, scoped consumers, and
+  the acknowledged selection-preserving schema-v3 refresh transaction/UI.
+- [x] (2026-08-28 02:05Z) Pass the complete Python gate with 7,110 tests
+  passed and 63 skipped, plus focused frontend, lint, stub, exception, Vulture,
+  diff, documentation, and RQ-graph gates.
+- [x] (2026-08-28 02:45Z) Final correctness review confirmed live legacy
+  authority must remain scoped to landuse, soil, and climate; keep legacy WEPP
+  presentation/submission compatibility without expanding the source boundary.
+- [x] (2026-08-28 03:33Z) Close the final review findings with complete
+  selection-bearing refresh validation, strict durable amendment/recovery
+  validation, native landuse/soil pre-mutation enforcement, diagnostic UI
+  transport, exact OpenAPI models, and route-bound application revision.
+- [x] (2026-08-28 03:33Z) Pass a clean complete Python gate with 7,147 tests
+  passed and 63 skipped, the complete 801-test frontend suite, and the final
+  lint, stub, exception, Vulture, diff, documentation, and RQ-graph gates.
+- [x] (2026-08-28 05:32Z) Resolve all final correctness/security findings and
+  obtain independent READY implementation reviews with no remaining in-scope
+  High, Medium, or Low findings.
+- [x] (2026-08-28 05:40Z) Bind terminal and immediate-recovered success to an
+  immutable apply-time preview digest pair, and persist the climate catalog /
+  mode relation under one NoDb lock with locked-snapshot concurrency and
+  fault-rollback evidence.
+- [x] (2026-08-28 05:32Z) Pass the final complete Python gate with 7,218 tests
+  passed and 63 skipped, the complete 808-test frontend suite, and lint, stub,
+  exception, Vulture, diff, documentation, and RQ-graph gates.
 - [ ] Push and validate exact candidate on `forest`; hand it to WP12 without
   production deployment.
 
@@ -94,6 +119,36 @@ migrated.
   graphs therefore retain their historical structural identities.
   Evidence: normalized structural payload comparison and the checked-in
   `wepppy/nodb/locales/capability_structures/catalog.json`.
+- Observation: provider/source revisions in the selected Builder parent chain
+  may change even when serialized capability sections do not.
+  Evidence: refresh identity comparison now treats a selected-chain-only delta
+  as an auditable manifest refresh with an unchanged config digest.
+- Observation: code-quality telemetry classifies the expanded
+  `project_config_update.py` as yellow by size/function length but reports no
+  blocking threshold because the gate is observe-only.
+  Evidence: `tools/code_quality_observability.py --base-ref origin/master` on
+  2026-08-28; the bounded ratified writer remains in the already listed module
+  instead of introducing an unratified production file.
+- Observation: the WEPP run mutation path intentionally retains stored-only
+  authority for legacy compatibility, while the first UI implementation used
+  the resolved live graph for its WEPP binary options.
+  Evidence: final correctness review against the ratified surface matrix; the
+  fix is to separate scoped live domain authority from stored WEPP presentation
+  inside the already-listed run route.
+- Observation: the first final full-suite attempt stopped when an unrelated
+  Climate test could not manufacture its timing-sensitive same-size rewrite
+  fixture; that exact test passed immediately in isolation and in the clean
+  complete rerun without a code change.
+  Evidence: isolated one-test pass followed by 7,147 passed and 63 skipped in
+  the complete rerun on 2026-08-28.
+- Observation: structurally valid terminal job diagnostics are insufficient
+  unless their prior/resulting digests equal the retained reviewed preview.
+  Evidence: final security review found and closed a mismatched-pair success
+  path; the browser now leaves that outcome indeterminate.
+- Observation: a route that validates climate dataset and method as one
+  authority relation must also persist them as one lock-scoped transaction.
+  Evidence: deterministic concurrent writes plus an injected second-field
+  fault now prove rollback restores the complete pair current at lock entry.
 
 ## Decision Log
 
@@ -151,6 +206,11 @@ migrated.
   Rationale: old graphs must survive future map additions, and rollback code
   must understand every structure a writer can persist.
   Date/Author: 2026-08-27, Codex.
+- Decision: Treat a changed selected parent chain as a refresh even when the
+  complete capability-section serialization is unchanged.
+  Rationale: the manifest must record current selected-source provenance; an
+  empty config delta must not conceal that explicit acknowledged discontinuity.
+  Date/Author: 2026-08-28, Codex.
 
 ## Outcomes & Retrospective
 
@@ -159,7 +219,17 @@ commit `596ff5758ca83e6077b97f953431c2c881219840`. The append-only structural
 reader floor is implemented with the refresh writer absent and has passed its
 local focused gates, independent reviews, and exact-host `forest` acceptance.
 Revision `80f4810b7be59d90a64b4771f587eb360987a820` is the recorded WP12D
-rollback floor; failing behavior evidence and the bounded writer remain.
+rollback floor. The bounded writer, exact locale normalization, paired runtime
+authority, accessible acknowledgment, and idempotent reconciliation are now
+implemented locally. Success is bound to an immutable apply-time digest pair,
+and climate catalog/mode persistence is one lock-scoped, rollback-safe
+transaction. The update-specific frontend suite passes 19 tests; the complete
+frontend suite passes 808 tests across 107 suites; frontend lint, stubs,
+Vulture, changed-file broad-exception enforcement, diff checks, and the RQ
+graph pass. The final complete Python suite passes with 7,218 tests passed and
+63 skipped. Independent correctness and security reviews are READY with no
+remaining in-scope finding. Commit/push and exact-host writer acceptance
+remain; production deployment remains excluded.
 
 ## Context and Orientation
 

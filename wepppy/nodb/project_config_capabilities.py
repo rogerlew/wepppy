@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import ast
+from dataclasses import dataclass
+from enum import Enum
 from types import MappingProxyType
 from typing import Mapping, Protocol
 
@@ -19,11 +21,29 @@ from wepppy.nodb.locales.climate_catalog import (
 )
 from wepppy.nodb.locales.landuse_catalog import get_landcover_entry
 from wepppy.nodb.locales import available_climate_datasets, available_landuse_datasets
+from wepppy.nodb.locales import (
+    LocaleClassification,
+    LocaleProfileError,
+    LocaleSupportState,
+    get_locale_profile,
+    resolve_locale_composition,
+)
+from wepppy.nodb.config_builder.registry import RegistryError
+from wepppy.nodb.config_builder.resolver import (
+    BuilderConstraintError,
+    resolve_builder_capability_graph,
+)
+from wepppy.nodb.config_builder.schema import Registry
 from wepppy.project_config_serialization import CanonicalValue
 
 __all__ = [
     "CapabilityConfig",
     "LANDUSE_METHOD_MODES",
+    "BuilderRegistryUnavailableError",
+    "CapabilityAuthorityInvalidError",
+    "LocaleAuthorityInvalidError",
+    "RunCapabilityAuthority",
+    "RunCapabilityMode",
     "SOIL_BUILDER_MODES",
     "capability_authority",
     "capability_default",
@@ -36,6 +56,7 @@ __all__ = [
     "model_tuple_binaries",
     "resolve_landuse_runtime_dataset",
     "resolve_named_preset_capabilities",
+    "resolve_run_capability_authority",
     "runtime_value_allowed",
     "soil_capability_modes",
 ]
@@ -44,6 +65,34 @@ __all__ = [
 class CapabilityConfig(Protocol):
     def config_get_list(self, section: str, option: str, default: object = ...) -> object: ...
     def config_get_raw(self, section: str, option: str, default: object = ...) -> object: ...
+
+
+class RunCapabilityMode(str, Enum):
+    """Runtime capability-authority mode selected from effective config."""
+
+    STORED = "stored"
+    LEGACY_BUILDER = "legacy_builder"
+    COMPATIBILITY = "compatibility"
+
+
+@dataclass(frozen=True, slots=True)
+class RunCapabilityAuthority:
+    mode: RunCapabilityMode
+    graph: CapabilityGraph | None
+    runtime_tokens: tuple[str, ...]
+    locale_profile: str | None
+
+
+class LocaleAuthorityInvalidError(ValueError):
+    """Raised when a non-flattened effective locale composition is invalid."""
+
+
+class BuilderRegistryUnavailableError(RuntimeError):
+    """Raised when live legacy authority requires an unavailable registry."""
+
+
+class CapabilityAuthorityInvalidError(ValueError):
+    """Raised when a flattened stored capability graph is invalid."""
 
 
 SOIL_BUILDER_MODES: Mapping[str, int] = MappingProxyType(
@@ -325,6 +374,99 @@ def capability_authority(config: CapabilityConfig) -> CapabilityGraph | None:
     return graph
 
 
+def resolve_run_capability_authority(
+    config: CapabilityConfig,
+    *,
+    registry: Registry | None = None,
+) -> RunCapabilityAuthority:
+    """Compose stored authority with effective-config legacy locale authority."""
+
+    flattened = _scalar(config, "config", "flattened", False)
+    if isinstance(flattened, str) and flattened.casefold() in {"true", "false"}:
+        flattened = flattened.casefold() == "true"
+    if flattened is True:
+        version = _schema_version(config)
+        if version in {None, 1}:
+            return RunCapabilityAuthority(
+                RunCapabilityMode.COMPATIBILITY,
+                None,
+                (),
+                None,
+            )
+        try:
+            graph = capability_authority(config)
+        except ValueError as exc:
+            raise CapabilityAuthorityInvalidError(str(exc)) from exc
+        assert graph is not None
+        runtime_tokens: list[str] = []
+        for profile_id in graph.locale_profiles:
+            profile = get_locale_profile(profile_id)
+            if profile is None:
+                raise CapabilityAuthorityInvalidError(
+                    f"stored capability graph references unknown locale profile {profile_id!r}"
+                )
+            runtime_tokens.append(profile.runtime_token)
+        return RunCapabilityAuthority(
+            RunCapabilityMode.STORED,
+            graph,
+            tuple(runtime_tokens),
+            graph.locale_profiles[0],
+        )
+    if flattened is not False:
+        raise LocaleAuthorityInvalidError("config.flattened must be a boolean")
+
+    raw_locales = config.config_get_raw("general", "locales", None)
+    if raw_locales is None:
+        tokens = ("us",)
+    else:
+        parsed = config.config_get_list("general", "locales", None)
+        if (
+            not isinstance(parsed, (list, tuple))
+            or not parsed
+            or not all(isinstance(item, str) and item.strip() for item in parsed)
+        ):
+            raise LocaleAuthorityInvalidError(
+                "general.locales must be a non-empty list of locale tokens"
+            )
+        tokens = tuple(item.strip() for item in parsed)
+
+    if len(tokens) == 1 and tokens[0].casefold() == "rhem":
+        return RunCapabilityAuthority(
+            RunCapabilityMode.COMPATIBILITY,
+            None,
+            tokens,
+            "rhem",
+        )
+    try:
+        composition = resolve_locale_composition(tokens)
+    except LocaleProfileError as exc:
+        raise LocaleAuthorityInvalidError(str(exc)) from exc
+    base = composition.base
+    if (
+        not composition.overlays
+        and base.classification is LocaleClassification.BASE
+        and base.support_state is LocaleSupportState.BUILDER_EXPOSED
+    ):
+        try:
+            graph = resolve_builder_capability_graph(base.profile_id, registry=registry)
+        except (BuilderConstraintError, RegistryError, CapabilityGraphError) as exc:
+            raise BuilderRegistryUnavailableError(
+                f"Builder registry could not resolve locale {base.profile_id!r}: {exc}"
+            ) from exc
+        return RunCapabilityAuthority(
+            RunCapabilityMode.LEGACY_BUILDER,
+            graph,
+            composition.runtime_tokens,
+            base.profile_id,
+        )
+    return RunCapabilityAuthority(
+        RunCapabilityMode.COMPATIBILITY,
+        None,
+        composition.runtime_tokens,
+        base.profile_id,
+    )
+
+
 def capability_default(config: CapabilityConfig, option: str) -> str | None:
     authority = capability_authority(config)
     return None if authority is None else authority.defaults.get(option)
@@ -383,7 +525,7 @@ def soil_capability_modes(
     *,
     soil_dataset: str | None = None,
 ) -> frozenset[int] | None:
-    authority = capability_authority(config)
+    authority = resolve_run_capability_authority(config).graph
     if authority is None:
         allowed = capability_ids(config, "soil_builders")
         if allowed is None:
@@ -398,7 +540,7 @@ def climate_station_capability_modes(
     config: CapabilityConfig,
     climate_dataset: str,
 ) -> frozenset[int] | None:
-    authority = capability_authority(config)
+    authority = resolve_run_capability_authority(config).graph
     if authority is None:
         return None
     return frozenset(
@@ -411,7 +553,7 @@ def climate_spatial_capability_modes(
     config: CapabilityConfig,
     climate_dataset: str,
 ) -> frozenset[int] | None:
-    authority = capability_authority(config)
+    authority = resolve_run_capability_authority(config).graph
     if authority is None:
         return None
     return frozenset(
@@ -425,7 +567,7 @@ def landuse_capability_modes(
     landuse_dataset: str,
     watershed_representation: str,
 ) -> frozenset[int] | None:
-    authority = capability_authority(config)
+    authority = resolve_run_capability_authority(config).graph
     if authority is None:
         return None
     dataset_methods = set(authority.landuse_methods_by_dataset.get(landuse_dataset, ()))
@@ -440,7 +582,7 @@ def landuse_capability_modes(
 
 
 def landuse_runtime_dataset_allowed(config: CapabilityConfig, runtime_value: str) -> bool:
-    authority = capability_authority(config)
+    authority = resolve_run_capability_authority(config).graph
     if authority is None:
         return runtime_value_allowed(config, "landuse_datasets", runtime_value)
     return any(
@@ -455,7 +597,7 @@ def resolve_landuse_runtime_dataset(
 ) -> str | None:
     """Map an allowed stable catalog ID or legacy runtime token to its runtime value."""
 
-    authority = capability_authority(config)
+    authority = resolve_run_capability_authority(config).graph
     if authority is None:
         allowed = capability_ids(config, "landuse_datasets")
         if allowed is None:

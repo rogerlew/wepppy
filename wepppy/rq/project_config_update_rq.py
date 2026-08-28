@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 from typing import Any, Mapping
 
 import redis
@@ -34,8 +33,11 @@ def run_project_config_update_rq(
     runid: str,
     config: str,
     preview_id: str,
-    trigger_section: str,
-    trigger_option: str,
+    application_revision: str,
+    trigger_section: str | None,
+    trigger_option: str | None,
+    capability_acknowledgment_accepted: bool = False,
+    capability_acknowledgment_revision: str | None = None,
 ) -> dict[str, Any]:
     """Reauthorize the submitter and apply the complete reviewed delta."""
 
@@ -45,22 +47,21 @@ def run_project_config_update_rq(
     actor: Mapping[str, Any] = metadata.get("auth_actor", {}) if isinstance(metadata, dict) else {}
     try:
         authorize_run_mutation(actor, runid)
-        revision = str(os.getenv("RQ_ENGINE_DEPLOYMENT_REVISION") or "dev").strip() or "dev"
         result = apply_project_config_update(
             get_wd(runid),
             preview_id,
             trigger_section=trigger_section,
             trigger_option=trigger_option,
-            application_revision=revision,
+            application_revision=application_revision,
+            capability_acknowledgment_accepted=capability_acknowledgment_accepted,
+            capability_acknowledgment_revision=capability_acknowledgment_revision,
         )
         return {
-            "runid": runid,
-            "config": config,
             "applied": result.applied,
+            "recovered": result.recovered,
             "sequence": result.sequence,
             "prior_digest": result.prior_digest,
             "resulting_digest": result.resulting_digest,
-            "added_count": len(result.additions),
         }
     except AuthError:
         raise

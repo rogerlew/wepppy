@@ -341,6 +341,26 @@ def test_create_payload_unit_override_wins_query(
     assert "unitizer:is_english=true" not in captured["cfg"]
 
 
+def test_create_rejects_locale_override_before_run_publication(
+    create_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, captured = create_client
+    token = _issue_token(monkeypatch)
+    monkeypatch.setattr(project_routes, "_check_revocation", lambda _jti: None)
+
+    response = client.post(
+        '/create/?general:locales=["eu"]',
+        data={"config": CONFIG, "rq_token": token},
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "project_config_validation_failed"
+    assert "general.locales" in response.json()["error"]["details"]
+    assert "cfg" not in captured
+
+
 def test_create_transport_idempotency_key_is_not_a_runtime_override(
     create_client,
     monkeypatch: pytest.MonkeyPatch,

@@ -300,6 +300,10 @@ def _legacy_result(
         for override in parts[1].split("&"):
             key, value = override.split("=")
             section, name = key.split(":")
+            if (section.casefold(), name.casefold()) == ("general", "locales"):
+                raise ProjectConfigAuthorityError(
+                    "Legacy config overrides may not set general.locales"
+                )
             overrides.setdefault(section, {})[name] = value
         parser.read_dict(overrides)
     return ProjectConfigLoadResult(

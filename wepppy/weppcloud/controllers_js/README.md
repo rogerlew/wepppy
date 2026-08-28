@@ -124,12 +124,19 @@ Bundled modules remain global so legacy controllers can incrementally migrate aw
 
 `project_config_update.js` separately enhances the shared run header. It makes
 one authenticated, read-only availability request at page load, exposes a
-nonblocking digest warning, and loads the complete merge-only preview only when
-the user opens the labelled modal. Apply sends the server-issued opaque preview
-ID plus one reviewed trigger through `WCHttp.requestWithSessionToken`, prevents
-duplicate submission, and polls canonical rq-engine job status. Table content
-is rendered with `textContent`; authorization and freshness remain
-server-enforced.
+nonblocking digest warning, and loads the complete additive/capability preview
+only when the user opens the labelled modal. Additive updates send one reviewed
+trigger. An eligible schema-v3 Builder capability refresh shows the complete
+same-locale delta and keeps Apply disabled until the exact warning is checked;
+the checkbox resets on preview, error, close, and success. Apply sends the
+server-issued opaque preview ID and preview-shaped acknowledgment through
+`WCHttp.requestWithSessionToken`, prevents duplicate submission, and polls
+canonical rq-engine job status. Terminal failures recheck read-only availability
+to distinguish not-applied, committed/recovered, and indeterminate outcomes.
+Table and diagnostic content is rendered with `textContent`. Canonical server
+`details` and `error_id` remain visible in the modal, while availability-time
+registry failures remain visible in the run header rather than hiding the
+control. Authorization, acknowledgment, and freshness remain server-enforced.
 
 ### Climate Controller Reference (2024 helper migration)
 - **DOM contract**: templates expose `data-climate-action` hooks on radios, checkboxes, selects, and buttons plus `data-climate-section` / `data-precip-section` wrappers for conditional panels. Hidden inputs tagged with `data-climate-field` mirror controller state (`climate_catalog_id`, `climate_mode`). Catalog metadata ships via `<script id="climate_catalog_data" type="application/json">` so the controller can hydrate offline datasets without extra requests.

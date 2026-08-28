@@ -1169,7 +1169,14 @@ class Soils(NoDbBase):
             from wepppy.nodb.core.watershed import WatershedNotAbstractedError
             raise WatershedNotAbstractedError()
 
-        if 'ChileCayumanque' in self.locales:
+        from wepppy.nodb.project_config_capabilities import (
+            resolve_run_capability_authority,
+        )
+
+        run_authority = resolve_run_capability_authority(self)
+        effective_locales = run_authority.runtime_tokens or tuple(self.locales or ())
+
+        if 'ChileCayumanque' in effective_locales:
             self.logger.info('  Locale: ChileCayumanque')
             self.build_chile(initial_sat=initial_sat, ksflag=ksflag)
         elif self.soils_map is not None:
@@ -1183,11 +1190,11 @@ class Soils(NoDbBase):
             if self.ssurgo_db == 'isric':
                 self.logger.info('    Using ISRIC database')
                 self.build_isric(initial_sat=initial_sat, ksflag=ksflag)
-            elif 'eu' in self.locales:
+            elif 'eu' in effective_locales:
                 self.logger.info('    Using ESDAC database')
                 from wepppy.eu.soils import build_esdac_soils
                 self._build_by_identify(build_esdac_soils)
-            elif 'au' in self.locales:
+            elif 'au' in effective_locales:
                 self.logger.info('    Using ASRIS database')
                 from wepppy.au.soils import build_asris_soils
                 self._build_by_identify(build_asris_soils)

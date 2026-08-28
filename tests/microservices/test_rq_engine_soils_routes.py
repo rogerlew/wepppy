@@ -18,7 +18,11 @@ def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:
         "getInstance",
         lambda wd: type("RonStub", (), {"config_stem": "cfg"})(),
     )
-    monkeypatch.setattr(soils_routes, "capability_authority", lambda soils: None)
+    monkeypatch.setattr(
+        soils_routes,
+        "soil_capability_modes",
+        lambda soils: None,
+    )
 
 
 def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> None:
@@ -124,7 +128,7 @@ def test_build_soils_rejects_invalid_capability_authority_before_mutation(
     monkeypatch.setattr(soils_routes, "get_wd", lambda runid: "/tmp/run")
     monkeypatch.setattr(
         soils_routes,
-        "capability_authority",
+        "soil_capability_modes",
         lambda soils: (_ for _ in ()).throw(ValueError("missing capability relation")),
     )
 
@@ -147,6 +151,142 @@ def test_build_soils_rejects_invalid_capability_authority_before_mutation(
         "details": "missing capability relation",
         "code": "capability_authority_invalid",
     }
+    assert soils.initial_sat == "unchanged"
+    assert prep_state == {"removed": [], "jobs": []}
+
+
+def test_build_soils_rejects_hostile_native_mode_before_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    prep_state = _stub_prep(monkeypatch)
+    monkeypatch.setattr(soils_routes, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(
+        soils_routes, "soil_capability_modes", lambda _soils: frozenset({0})
+    )
+
+    class DummySoils:
+        run_group = "default"
+        mods: set[str] = set()
+        mode = soils_routes.SoilsMode.Gridded
+        initial_sat = "unchanged"
+        clear_ssurgo_cache_on_rebuild = "unchanged"
+
+    soils = DummySoils()
+    monkeypatch.setattr(soils_routes.Soils, "getInstance", lambda _wd: soils)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/build-soils",
+            json={"initial_sat": 0.42, "soil_mode": int(soils_routes.SoilsMode.Single)},
+        )
+
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "unsupported_capability"
+    assert soils.initial_sat == "unchanged"
+    assert soils.clear_ssurgo_cache_on_rebuild == "unchanged"
+    assert prep_state == {"removed": [], "jobs": []}
+
+
+def test_build_soils_allows_exact_current_mode_outside_live_axis(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id="job-current-soil")
+    prep_state = _stub_prep(monkeypatch)
+    monkeypatch.setattr(soils_routes, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(
+        soils_routes, "soil_capability_modes", lambda _soils: frozenset({0})
+    )
+
+    class DummySoils:
+        run_group = "default"
+        mods: set[str] = set()
+        mode = soils_routes.SoilsMode.Single
+        initial_sat = None
+        clear_ssurgo_cache_on_rebuild = None
+
+    soils = DummySoils()
+    monkeypatch.setattr(soils_routes.Soils, "getInstance", lambda _wd: soils)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/build-soils",
+            json={"initial_sat": 0.42, "soil_mode": int(soils_routes.SoilsMode.Single)},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["job_id"] == "job-current-soil"
+    assert prep_state["removed"]
+
+
+def test_build_soils_persists_authorized_different_mode(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id="job-changed-soil")
+    _stub_prep(monkeypatch)
+    monkeypatch.setattr(soils_routes, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(
+        soils_routes, "soil_capability_modes", lambda _soils: frozenset({0, 2})
+    )
+
+    class DummySoils:
+        run_group = "default"
+        mods: set[str] = set()
+        mode = soils_routes.SoilsMode.SingleDb
+        initial_sat = None
+        clear_ssurgo_cache_on_rebuild = None
+
+    soils = DummySoils()
+    monkeypatch.setattr(soils_routes.Soils, "getInstance", lambda _wd: soils)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/build-soils",
+            json={"initial_sat": 0.42, "soil_mode": int(soils_routes.SoilsMode.Gridded)},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["job_id"] == "job-changed-soil"
+    assert soils.mode == soils_routes.SoilsMode.Gridded
+
+
+def test_build_soils_rejects_disagreeing_mode_aliases_before_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    prep_state = _stub_prep(monkeypatch)
+    monkeypatch.setattr(soils_routes, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(
+        soils_routes, "soil_capability_modes", lambda _soils: frozenset({0, 2})
+    )
+
+    class DummySoils:
+        run_group = "default"
+        mods: set[str] = set()
+        mode = soils_routes.SoilsMode.SingleDb
+        initial_sat = "unchanged"
+        clear_ssurgo_cache_on_rebuild = "unchanged"
+
+    soils = DummySoils()
+    monkeypatch.setattr(soils_routes.Soils, "getInstance", lambda _wd: soils)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/build-soils",
+            json={
+                "initial_sat": 0.42,
+                "soil_mode": int(soils_routes.SoilsMode.Gridded),
+                "mode": int(soils_routes.SoilsMode.SingleDb),
+            },
+        )
+
+    assert response.status_code == 400
+    assert response.json()["error"]["message"] == (
+        "soil_mode and mode must identify the same soil builder"
+    )
+    assert soils.mode == soils_routes.SoilsMode.SingleDb
     assert soils.initial_sat == "unchanged"
     assert prep_state == {"removed": [], "jobs": []}
 

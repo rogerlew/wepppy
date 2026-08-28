@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+from dataclasses import replace
 import re
+from types import MappingProxyType, SimpleNamespace
 from typing import Any
 
 import pytest
@@ -8,8 +10,10 @@ import pytest
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
 import wepppy.microservices.rq_engine as rq_engine
+import wepppy.nodb.config_builder.resolver as builder_resolver_module
 from wepppy.microservices.rq_engine import orchestration_read_routes, schema_defaults_routes
 from wepppy.nodb.locales import build_continental_us_capability_graph
+from wepppy.nodb.locales.capability_graph import CapabilityGraphError
 
 pytestmark = pytest.mark.microservice
 
@@ -102,6 +106,7 @@ def _sample_runtime(
         generated_at="2026-04-10T22:13:00Z",
         run_state_revision="runstate:run-1:deadbeefcafe",
         capability_graph=capability_graph,
+        model_capability_graph=capability_graph,
     )
 
 
@@ -743,6 +748,70 @@ def test_list_run_endpoints_can_include_operation_docs_snapshot(
     assert isinstance(climate_doc["errors"], list)
 
 
+@pytest.mark.parametrize(
+    "operation_id",
+    (
+        "rq_engine_build_climate",
+        "rq_engine_build_landuse",
+        "rq_engine_build_soils",
+    ),
+)
+def test_domain_operation_error_catalog_matches_mutation_diagnostics(
+    monkeypatch: pytest.MonkeyPatch,
+    operation_id: str,
+) -> None:
+    _stub_auth(monkeypatch, "rq:read")
+    graph = build_continental_us_capability_graph(
+        ("wepp_260803",), _binary_revisions(("wepp_260803",))
+    )
+    monkeypatch.setattr(
+        schema_defaults_routes,
+        "_load_runtime_state",
+        lambda runid, config: _sample_runtime(capability_graph=graph),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        direct = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/endpoints/{operation_id}/errors"
+        ).json()["errors"]
+        aggregate = client.get(
+            f"{RUN_ENDPOINTS_PATH}?include_operation_docs=true"
+        ).json()["operation_docs"][operation_id]["errors"]
+
+    assert aggregate == direct
+    by_code = {row["error_code"]: row for row in direct}
+    assert by_code["unsupported_capability"]["http_statuses"] == [400]
+    assert by_code["capability_authority_invalid"]["http_statuses"] == [409]
+    assert by_code["locale_authority_invalid"]["http_statuses"] == [409]
+    assert by_code["builder_registry_error"]["http_statuses"] == [503]
+
+
+def test_operation_errors_return_live_registry_diagnostic_503(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch, "rq:read")
+
+    def unavailable(_runid: str, _config: str):
+        raise schema_defaults_routes.CapabilityAuthorityInvalidError(
+            "live registry failed",
+            code="builder_registry_error",
+            status_code=503,
+            message="Builder registry is unavailable.",
+        )
+
+    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", unavailable)
+    with TestClient(rq_engine.app) as client:
+        response = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/endpoints/"
+            "rq_engine_build_climate/errors"
+        )
+
+    assert response.status_code == 503
+    assert response.json()["error"]["code"] == "builder_registry_error"
+    assert response.json()["error"]["details"] == "live registry failed"
+    assert response.headers["Retry-After"] == "5"
+
+
 def test_list_run_endpoints_rejects_invalid_include_operation_docs_value(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -1141,6 +1210,48 @@ def test_schema_defaults_routes_return_diagnostic_409_for_invalid_capability_aut
     assert response.json()["error"]["details"] == "unknown model method"
 
 
+def test_schema_defaults_classifies_live_graph_failure_as_registry_503(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch, "rq:read")
+
+    class LegacyConfig:
+        def config_get_bool(self, _section, _option, default=False):
+            return default
+
+        def config_get_raw(self, section, option, default=None):
+            if (section, option) == ("general", "locales"):
+                return '["us"]'
+            return default
+
+        def config_get_list(self, section, option, default=None):
+            if (section, option) == ("general", "locales"):
+                return ["us"]
+            return default
+
+    monkeypatch.setattr(
+        builder_resolver_module,
+        "build_locale_capability_graph",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            CapabilityGraphError("live provider graph failed validation")
+        ),
+    )
+
+    def load(_runid, _config):
+        schema_defaults_routes._resolve_runtime_capability_graphs(LegacyConfig())
+        raise AssertionError("unreachable")
+
+    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", load)
+    with TestClient(rq_engine.app) as client:
+        response = client.get(CONTROLLERS_PATH)
+
+    assert response.status_code == 503
+    assert response.json()["error"]["code"] == "builder_registry_error"
+    assert "live provider graph failed validation" in response.json()["error"]["details"]
+    assert response.json()["error_id"]
+    assert response.headers["Retry-After"] == "5"
+
+
 def test_schema_v2_discovery_uses_only_stored_graph_options(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -1226,6 +1337,262 @@ def test_schema_v2_discovery_uses_only_stored_graph_options(
     ]
 
 
+def test_legacy_live_domain_discovery_does_not_broaden_wepp_model_authority(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch, "rq:read")
+    graph = build_continental_us_capability_graph(
+        ("wepp_260803",), _binary_revisions(("wepp_260803",))
+    )
+    runtime = replace(
+        _sample_runtime(capability_graph=graph),
+        model_capability_graph=None,
+    )
+    monkeypatch.setattr(
+        schema_defaults_routes,
+        "_load_runtime_state",
+        lambda runid, config: runtime,
+    )
+
+    with TestClient(rq_engine.app) as client:
+        climate_schema = client.get(CONTROLLER_SCHEMA_PATH).json()
+        landuse_schema = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/controllers/landuse/schema"
+        ).json()
+        wepp_schema = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/controllers/wepp/schema"
+        ).json()
+        wepp_defaults = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/controllers/wepp/templates"
+        ).json()["run_resolved_defaults"]
+        run_wepp_schema = client.get(RUN_ENDPOINT_SCHEMA_PATH).json()
+        run_watershed_schema = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/endpoints/"
+            "rq_engine_run_wepp_watershed/schema"
+        ).json()
+
+    assert climate_schema["fields"]["climate_catalog_id"]["enum"]
+    assert landuse_schema["fields"]["landuse_mode"]["enum"]
+    assert "wepp_bin" not in wepp_schema["fields"]
+    assert "model_authority" not in wepp_schema
+    assert set(wepp_defaults) == {"clip_soils", "clip_soils_depth"}
+    assert "capability_authority" not in run_wepp_schema
+    assert "wepp_bin" not in run_wepp_schema["request"]["properties"]
+    assert "capability_authority" not in run_watershed_schema
+    assert "wepp_bin" not in run_watershed_schema["request"]["properties"]
+
+
+def test_schema_v1_compatibility_preserves_present_wepp_axis_without_live_registry(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    resolved = SimpleNamespace(
+        mode=schema_defaults_routes.RunCapabilityMode.COMPATIBILITY,
+        graph=None,
+    )
+    monkeypatch.setattr(
+        schema_defaults_routes,
+        "resolve_run_capability_authority",
+        lambda _config: resolved,
+    )
+    monkeypatch.setattr(
+        schema_defaults_routes,
+        "capability_authority",
+        lambda _config: (_ for _ in ()).throw(
+            AssertionError("schema-v1 compatibility consulted stored graph reader")
+        ),
+    )
+    assert schema_defaults_routes._resolve_runtime_capability_graphs(object()) == (
+        None,
+        None,
+    )
+
+    _stub_auth(monkeypatch, "rq:read")
+    runtime = replace(
+        _sample_runtime(capability_graph=None),
+        model_capability_graph=None,
+        v1_capabilities=MappingProxyType({
+            "wepp_binaries": ("wepp_260803",),
+            "climate_datasets": ("vanilla_cligen",),
+        }),
+    )
+    monkeypatch.setattr(
+        schema_defaults_routes,
+        "_load_runtime_state",
+        lambda runid, config: runtime,
+    )
+
+    with TestClient(rq_engine.app) as client:
+        wepp_schema = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/controllers/wepp/schema"
+        ).json()
+        build_climate = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_build_climate/schema"
+        ).json()["request"]["properties"]
+
+    assert wepp_schema["fields"]["wepp_bin"]["enum"] == ["wepp_260803"]
+    assert build_climate["climate_catalog_id"]["enum"] == ["vanilla_cligen"]
+
+
+def test_landuse_discovery_uses_current_dataset_adjacency_and_outside_current(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch, "rq:read")
+    baseline = build_continental_us_capability_graph(
+        ("wepp_260803",), _binary_revisions(("wepp_260803",))
+    )
+    graph = replace(
+        baseline,
+        landuse_datasets=("nlcd-2019", "corine-2018"),
+        landuse_methods_by_dataset=MappingProxyType({
+            "nlcd-2019": ("gridded",),
+            "corine-2018": ("upload",),
+        }),
+        landuse_method_defaults=MappingProxyType({
+            "nlcd-2019": "gridded",
+            "corine-2018": "upload",
+        }),
+    )
+    runtime = _sample_runtime(capability_graph=graph)
+    runtime.states.update({
+        "landuse_runtime_dataset": "eu/CORINE_LandCover/2018",
+        "landuse_catalog_id": "corine-2018",
+        "landuse_mode_code": 4,
+    })
+    monkeypatch.setattr(
+        schema_defaults_routes,
+        "_load_runtime_state",
+        lambda runid, config: runtime,
+    )
+
+    with TestClient(rq_engine.app) as client:
+        current_schema = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/controllers/landuse/schema"
+        ).json()
+        current_templates = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/controllers/landuse/templates"
+        ).json()
+        current_set_mode = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/endpoints/"
+            "rq_engine_set_landuse_mode/schema"
+        ).json()
+        current_build = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/endpoints/"
+            "rq_engine_build_landuse/schema"
+        ).json()
+
+    assert current_schema["fields"]["landuse_db"]["current_value"] == "corine-2018"
+    assert current_schema["fields"]["landuse_mode"]["enum"] == ["upload"]
+    assert current_schema["fields"]["landuse_mode"]["enum_available"] == ["upload"]
+    assert current_templates["run_resolved_defaults"]["landuse_mode"] == "upload"
+    assert current_set_mode["request"]["properties"]["mode"]["enum"] == [4]
+    assert current_build["request"]["properties"]["landuse_db"]["current_value"] == "corine-2018"
+    assert current_build["request"]["properties"]["landuse_mode"]["enum"] == [4]
+
+    runtime.states.update({
+        "landuse_runtime_dataset": "retired/runtime",
+        "landuse_catalog_id": None,
+        "landuse_mode_code": 0,
+    })
+    with TestClient(rq_engine.app) as client:
+        outside_schema = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/controllers/landuse/schema"
+        ).json()
+        outside_set_mode = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/endpoints/"
+            "rq_engine_set_landuse_mode/schema"
+        ).json()
+        outside_set_db = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/endpoints/"
+            "rq_engine_set_landuse_db/schema"
+        ).json()
+        outside_build = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/endpoints/"
+            "rq_engine_build_landuse/schema"
+        ).json()
+
+    mode_field = outside_schema["fields"]["landuse_mode"]
+    assert mode_field["enum"] == ["gridded"]
+    assert mode_field["enum_available"] == []
+    assert mode_field["current_value"] == "gridded"
+    assert mode_field["current_value_authorized"] is False
+    assert mode_field["disabled_values"] == ["gridded"]
+    assert outside_set_mode["request"]["properties"]["mode"]["enum"] == [0]
+    assert outside_set_mode["request"]["properties"]["mode"]["enum_available"] == []
+    dataset_field = outside_set_db["request"]["properties"]["landuse_db"]
+    assert dataset_field["enum"] == [
+        "nlcd-2019", "corine-2018", "retired/runtime"
+    ]
+    assert dataset_field["enum"].count("retired/runtime") == 1
+    assert "retired/runtime" not in dataset_field["enum_available"]
+    assert dataset_field["current_value"] == "retired/runtime"
+    assert dataset_field["current_value_authorized"] is False
+    assert dataset_field["disabled_values"] == ["retired/runtime"]
+    build_fields = outside_build["request"]["properties"]
+    assert build_fields["landuse_db"] == dataset_field
+    assert build_fields["landuse_mode"]["enum"] == [0]
+    assert build_fields["landuse_mode"]["enum_available"] == []
+    assert build_fields["landuse_mode"]["current_value_authorized"] is False
+
+
+def test_soil_discovery_exposes_native_mode_and_outside_current_parity(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch, "rq:read")
+    baseline = build_continental_us_capability_graph(
+        ("wepp_260803",), _binary_revisions(("wepp_260803",))
+    )
+    dataset = baseline.defaults["soil_dataset"]
+    graph = replace(
+        baseline,
+        soil_builders_by_dataset=MappingProxyType({dataset: ("gridded",)}),
+        soil_builder_defaults=MappingProxyType({dataset: "gridded"}),
+    )
+    runtime = _sample_runtime(capability_graph=graph)
+    runtime.states["soils_mode_code"] = 2
+    monkeypatch.setattr(
+        schema_defaults_routes,
+        "_load_runtime_state",
+        lambda runid, config: runtime,
+    )
+
+    with TestClient(rq_engine.app) as client:
+        controller = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/controllers/soils/schema"
+        ).json()["fields"]
+        templates = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/controllers/soils/templates"
+        ).json()["run_resolved_defaults"]
+        build_schema = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_build_soils/schema"
+        ).json()["request"]["properties"]
+        build_defaults = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_build_soils/defaults"
+        ).json()["resolved_defaults"]
+        aggregate = client.get(
+            f"{RUN_ENDPOINTS_PATH}?include_operation_docs=true"
+        ).json()["operation_docs"]["rq_engine_build_soils"]
+
+    native = controller["soil_mode"]
+    assert controller["soils_mode"]["alias_of"] == "soil_mode"
+    assert native["enum"] == ["gridded", "single_database"]
+    assert native["enum_available"] == ["gridded"]
+    assert native["current_value"] == "single_database"
+    assert native["current_value_authorized"] is False
+    assert native["disabled_values"] == ["single_database"]
+    assert templates["soil_mode"] == "single_database"
+    assert templates["soils_mode"] == "single_database"
+    assert build_schema["soil_mode"]["enum"] == [0, 2]
+    assert build_schema["soil_mode"]["enum_available"] == [0]
+    assert build_schema["soil_mode"]["current_value"] == 2
+    assert build_schema["soil_mode"]["current_value_authorized"] is False
+    assert build_schema["soil_mode"]["disabled_values"] == [2]
+    assert build_schema["mode"]["alias_of"] == "soil_mode"
+    assert build_defaults["soil_mode"] == 2
+    assert build_defaults["mode"] == 2
+    assert aggregate["request"]["properties"] == build_schema
+    assert aggregate["resolved_defaults"] == build_defaults
+
+
 def test_schema_v2_discovery_preserves_relationship_invalid_current_climate_method(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -1234,12 +1601,23 @@ def test_schema_v2_discovery_preserves_relationship_invalid_current_climate_meth
     graph = build_continental_us_capability_graph(
         binary_ids, _binary_revisions(binary_ids)
     )
+    graph = replace(
+        graph,
+        climate_station_methods_by_dataset=MappingProxyType({
+            **graph.climate_station_methods_by_dataset,
+            "vanilla_cligen": ("auto",),
+        }),
+        climate_spatial_methods_by_dataset=MappingProxyType({
+            **graph.climate_spatial_methods_by_dataset,
+            "vanilla_cligen": ("single", "multiple"),
+        }),
+    )
     runtime = _sample_runtime(capability_graph=graph)
     runtime.states.update(
         {
             "climate_catalog_id": "vanilla_cligen",
             "climate_mode_code": 0,
-            "climate_station_mode_code": -1,
+            "climate_station_mode_code": 0,
             "climate_spatial_mode_code": 2,
         }
     )
@@ -1254,7 +1632,18 @@ def test_schema_v2_discovery_preserves_relationship_invalid_current_climate_meth
         defaults = client.get(
             f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_build_climate/defaults"
         ).json()["resolved_defaults"]
+        build_schema = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_build_climate/schema"
+        ).json()["request"]["properties"]
+        operation_doc = client.get(
+            f"{RUN_ENDPOINTS_PATH}?include_operation_docs=true"
+        ).json()["operation_docs"]["rq_engine_build_climate"]
 
+    station = fields["climate_station_method"]
+    assert station["current_value"] == "distance"
+    assert station["current_value_authorized"] is False
+    assert station["disabled_values"] == ["distance"]
+    assert station["enum_available"] == ["auto"]
     spatial = fields["climate_spatial_method"]
     assert spatial["current_value"] == "interpolated"
     assert spatial["current_value_authorized"] is False
@@ -1262,6 +1651,73 @@ def test_schema_v2_discovery_preserves_relationship_invalid_current_climate_meth
     assert spatial["enum_available"] == ["single", "multiple"]
     assert defaults["climate_spatial_method"] == "interpolated"
     assert defaults["climate_spatialmode"] == 2
+    assert build_schema["climate_station_method"] == station
+    assert build_schema["climate_spatial_method"] == spatial
+    assert build_schema["climatestation_mode"]["enum_available"] == [-1]
+    assert build_schema["climatestation_mode"]["current_value"] == 0
+    assert build_schema["climatestation_mode"]["disabled_values"] == [0]
+    assert build_schema["climate_spatialmode"]["enum_available"] == [0, 1]
+    assert build_schema["climate_spatialmode"]["current_value"] == 2
+    assert build_schema["climate_spatialmode"]["disabled_values"] == [2]
+    assert operation_doc["request"]["properties"] == build_schema
+    assert operation_doc["resolved_defaults"] == defaults
+
+
+def test_build_climate_discovery_preserves_outside_axis_current_dataset(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch, "rq:read")
+    graph = build_continental_us_capability_graph(
+        ("wepp_260803",), _binary_revisions(("wepp_260803",))
+    )
+    runtime = _sample_runtime(capability_graph=graph)
+    runtime.states.update({
+        "climate_catalog_id": "retired-climate",
+        "climate_mode_code": 0,
+        "climate_station_mode_code": 0,
+        "climate_spatial_mode_code": 2,
+    })
+    monkeypatch.setattr(
+        schema_defaults_routes,
+        "_load_runtime_state",
+        lambda runid, config: runtime,
+    )
+
+    with TestClient(rq_engine.app) as client:
+        schema = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_build_climate/schema"
+        ).json()["request"]["properties"]
+        defaults = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_build_climate/defaults"
+        ).json()["resolved_defaults"]
+        operation_doc = client.get(
+            f"{RUN_ENDPOINTS_PATH}?include_operation_docs=true"
+        ).json()["operation_docs"]["rq_engine_build_climate"]
+
+    dataset = schema["climate_catalog_id"]
+    assert dataset["enum"].count("retired-climate") == 1
+    assert "retired-climate" not in dataset["enum_available"]
+    assert dataset["current_value"] == "retired-climate"
+    assert dataset["current_value_authorized"] is False
+    assert dataset["disabled_values"] == ["retired-climate"]
+    assert schema["climate_station_method"]["enum_available"] == []
+    assert schema["climate_station_method"]["current_value"] == "distance"
+    assert schema["climate_station_method"]["current_value_authorized"] is False
+    assert schema["climate_spatial_method"]["enum_available"] == []
+    assert schema["climate_spatial_method"]["current_value"] == "interpolated"
+    assert defaults["climate_catalog_id"] == "retired-climate"
+    assert operation_doc["request"]["properties"] == schema
+    assert operation_doc["resolved_defaults"] == defaults
+
+    runtime.states["climate_station_mode_code"] = 5
+    with TestClient(rq_engine.app) as client:
+        mesonet = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_build_climate/schema"
+        ).json()["request"]["properties"]["climatestation_mode"]
+    assert mesonet["current_value"] == 5
+    assert mesonet["current_value_authorized"] is False
+    assert mesonet["disabled_values"] == [5]
+    assert 5 in mesonet["enum"]
 
 
 def test_schema_v2_new_run_defaults_catalog_and_runtime_mode_consistently(

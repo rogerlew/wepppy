@@ -852,6 +852,41 @@ class Landuse(NoDbBase):
                     self._single_man = snapshot_single_man
                 raise
 
+    def apply_build_landuse_selection_updates(
+        self,
+        *,
+        nlcd_db: Optional[str] = None,
+        mode: Optional[Any] = None,
+    ) -> None:
+        """Persist the build dataset and method in one lock scope."""
+
+        if nlcd_db is None and mode is None:
+            return
+
+        with self.locked():
+            missing = object()
+            snapshot_nlcd_db = getattr(self, "_nlcd_db", missing)
+            snapshot_mode = getattr(self, "_mode", missing)
+            try:
+                if mode is not None:
+                    self.validate_landuse_mode_for_mofe(mode)
+                    self._set_mode_value(mode)
+                if nlcd_db is not None:
+                    self._nlcd_db = nlcd_db
+            except ValueError:
+                if snapshot_nlcd_db is missing:
+                    if hasattr(self, "_nlcd_db"):
+                        delattr(self, "_nlcd_db")
+                else:
+                    self._nlcd_db = snapshot_nlcd_db
+
+                if snapshot_mode is missing:
+                    if hasattr(self, "_mode"):
+                        delattr(self, "_mode")
+                else:
+                    self._mode = snapshot_mode
+                raise
+
     @property
     def single_man(self) -> Optional[Any]:
         """
@@ -1198,6 +1233,13 @@ class Landuse(NoDbBase):
 
         self.validate_landuse_mode_for_mofe()
 
+        from wepppy.nodb.project_config_capabilities import (
+            resolve_run_capability_authority,
+        )
+
+        run_authority = resolve_run_capability_authority(self)
+        effective_locales = run_authority.runtime_tokens or tuple(self.locales or ())
+
         if self._mode in [LanduseMode.RRED_Burned, LanduseMode.RRED_Unburned]:
             from wepppy.nodb.mods.rred import Rred
             rred = Rred.getInstance(wd)
@@ -1212,7 +1254,7 @@ class Landuse(NoDbBase):
             if self._mode == LanduseMode.UserDefined:
                 self._build_NLCD(retrieve_nlcd=False)
             elif self._mode == LanduseMode.Gridded:
-                if 'au' in self.locales:
+                if 'au' in effective_locales:
                     self._build_lu10v5ua()
                 else:
                     self._build_NLCD(retrieve_nlcd=retrieve_nlcd)
@@ -1878,8 +1920,14 @@ class Landuse(NoDbBase):
     @property
     def available_datasets(self) -> List[LanduseDataset]:
         mapping = self._resolve_effective_mapping_reference(self.mapping)
+        from wepppy.nodb.project_config_capabilities import (
+            resolve_run_capability_authority,
+        )
+
+        run_authority = resolve_run_capability_authority(self)
+        effective_locales = run_authority.runtime_tokens or tuple(self.locales or ())
         try:
-            return available_landuse_datasets(mapping, self.mods, self.locales)
+            return available_landuse_datasets(mapping, self.mods, effective_locales)
         except ManagementMapLoadError as exc:
             if self.custom_mapping_relpath:
                 raise self._coerce_custom_mapping_load_error(exc) from exc
@@ -1888,9 +1936,12 @@ class Landuse(NoDbBase):
     @property
     def landcover_datasets(self) -> List[LanduseDataset]:
         datasets = [dataset for dataset in self.available_datasets if dataset.kind == "landcover"]
-        from wepppy.nodb.project_config_capabilities import capability_authority, capability_ids
+        from wepppy.nodb.project_config_capabilities import (
+            capability_ids,
+            resolve_run_capability_authority,
+        )
 
-        authority = capability_authority(self)
+        authority = resolve_run_capability_authority(self).graph
         if authority is not None:
             datasets = [
                 dataset

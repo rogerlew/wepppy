@@ -1,0 +1,133 @@
+# WP12D Writer Implementation Correctness Review
+
+**Amendment**: `PC-24/WP12D-20260827-3`
+**Review status**: READY
+**Review type**: fresh independent post-remediation implementation review
+**Reviewer**: independent `implementation_correctness_review` agent
+**Review completed**: 2026-08-28 UTC
+**Reader-floor base**: `80f4810b7be59d90a64b4771f587eb360987a820`
+**Candidate worktree HEAD**: `5eb451a7640fa3148a8872dd74f3756d8c88e7ce`
+
+The review object is the exact uncommitted WP12D writer candidate over the
+reader floor at review completion. It excludes only the unrelated dirty paths
+recorded in the tracker and validation-generated code-quality reports.
+
+## Verdict
+
+READY for exact-host Forest writer acceptance. No unresolved in-scope
+correctness findings remain: High 0; Medium 0; Low 0.
+
+This disposition does not authorize production. Production remains reserved
+to the parent WP12 promotion gate after WP12D Forest acceptance.
+
+## Canonical Basis and Boundary
+
+The candidate was reviewed against:
+
+- `docs/schemas/project-owned-config-contract.md`, including the schema-v3
+  authority, exact-current, update, atomicity, recovery, diagnostics, and
+  evidence requirements;
+- `20260827_contract_decision.md`, amendment
+  `PC-24/WP12D-20260827-3`;
+- `20260827_surface_matrix.md`; and
+- the active WP12D ExecPlan and tracker.
+
+Every in-scope implementation change remains within the ratified source and
+consumer list. `project_config_capabilities.py` composes frozen stored
+authority with the deliberately bounded live legacy authority; it does not
+broaden authorization or mutation. Stored schema-v2/schema-v3 reads remain
+independent of live Builder-registry drift. The WEPP model presentation path
+retains its stored-only and historical compatibility policy, while the live
+legacy expansion remains confined to the ratified landuse, soil, and climate
+consumers. The Config Builder/Interfaces navigation and feature-registry
+ownership non-change assertions remain intact.
+
+## Findings and Disposition
+
+The implementation review initially found fail-closed and parity gaps in the
+candidate. The reviewed candidate closes all of them:
+
+- durable preview, manifest, amendment, result, and journal shapes are exact;
+  canonical digests, amendment sequence, config/manifest congruence, and
+  recovery commit points are revalidated before writes;
+- capability and combined refresh preserve every selection-bearing runtime
+  value, require the exact preview-bound acknowledgment, resolve application
+  revision once, and fail before reservation on stale or malformed state;
+- stored authority supplies canonical runtime locale tokens to the scoped
+  Australia/Europe hot paths even when flattened `general.locales` is
+  incongruent, while schema-v1/no-capability compatibility remains unchanged;
+- landuse, soil, and climate presentation, RQ discovery, Flask/RQ mutation,
+  operation documents, pipeline, and readiness use the same resolved graph;
+- outside-axis current datasets and methods remain visible exactly once as
+  disabled values and may be resubmitted unchanged, while different
+  unsupported values fail before controller mutation, timestamps, files, or
+  enqueue;
+- landuse and climate dataset/method aliases must agree, paired selections are
+  validated together, and changed selections persist only after validation;
+- invalid locale and unavailable-registry responses preserve auth precedence
+  and expose diagnostic `details`, `error_id`, and `Retry-After: 5` where
+  required; and
+- browser terminal success validates the exact RQ result, distinguishes normal
+  and recovered commits, reports indeterminate malformed/unavailable outcomes,
+  inserts diagnostics through `textContent`, and resets acknowledgment state.
+
+## Final Security-Closure Delta Recheck
+
+The independent reviewer rechecked the exact current candidate after the final
+security closures. The recheck found one Medium mutable-preview defect, which
+is closed in the reviewed candidate. No delta correctness findings remain:
+High 0; Medium 0; Low 0.
+
+`project_config_update.js` now captures an immutable apply-time
+`preview_id`/prior-digest/resulting-digest snapshot before asynchronous work.
+Recursive polling, terminal success, failure reconciliation, and immediate
+recovered HTTP success all use that snapshot rather than mutable visible
+preview state. A pending-job regression replaces visible preview B while job A
+is unresolved and proves job A is evaluated only against snapshot A. Matching
+normal/recovered results succeed; malformed, unavailable, or mismatched results
+remain indeterminate without hiding the update control.
+
+The Flask climate dataset/mode boundary now repeats capability authorization
+inside one NoDb lock, snapshots both fields after lock acquisition, validates
+the runtime mode constraints, and persists the pair in one dump. If the second
+field assignment fails, both fields are restored before the lock unwinds. The
+concurrent fault regression proves rollback restores the pair current at lock
+acquisition rather than a stale pre-lock snapshot.
+
+The reviewer reran 32 climate route tests and 19 `project_config_update` Jest
+tests for this delta; all passed. Frontend ESLint also passed.
+
+## Validation Evidence
+
+The package records a clean full run of 7,218 Python tests with 63 skipped and
+107 frontend suites with 808 tests, plus lint, stubtests, test-stub checks,
+broad-exception enforcement, vulture, documentation, diff, and synchronized RQ
+graph gates.
+
+The independent reviewer additionally ran:
+
+- 500 focused Python tests spanning stored/live authority, hot-path dispatch,
+  run-page/Flask presentation, paired climate/landuse/soil mutation, RQ
+  discovery/orchestration, update routes, and the update worker: all passed;
+- 259 focused Python tests spanning update persistence/recovery, locale
+  authority, reader compatibility, exact OpenAPI, and run-page authorization:
+  all passed;
+- 19 `project_config_update` Jest tests: all passed;
+- frontend ESLint: passed;
+- `wctl check-rq-graph`: passed; and
+- `git diff --check` against the reader-floor base: passed.
+
+## Residual Acceptance Boundary
+
+Forest remains the required live-system gate. It must exercise the canonical
+five-locale matrix, all three Continental US station databases, one real
+acknowledged eligible schema-v3 refresh, reopen, and rollback to the recorded
+reader floor with byte-for-byte config/manifest preservation. The generated
+`controllers-gl.js` bundle is rebuilt by the image/startup workflow and must be
+confirmed current during that deployment. Those are deployment acceptance
+steps, not unresolved implementation findings.
+
+The dedicated implementation security review is recorded separately in
+`20260827_security_review.md`. Its preexisting out-of-scope archive-descendant
+hardening observation remains outside the ratified WP12D changed-consumer set
+and does not change this correctness disposition.

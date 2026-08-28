@@ -65,6 +65,10 @@
            hidden>
           Configuration provenance warning: this project's current configuration differs from its recorded digest. Existing work remains available.
         </p>
+        <p class="wc-alert wc-alert--danger"
+           data-project-config-update-availability-error
+           role="alert"
+           hidden></p>
       </div>
       <div class="wc-run-header__content">
         <div class="wc-run-header__fields">
@@ -276,7 +280,7 @@
     </header>
     <div class="wc-modal__body">
       <p id="projectConfigUpdateDescription">
-        Version 1 adds all missing registered attributes shown below. It does not overwrite or remove existing values.
+        Review every configuration addition and capability-authority change before applying this update.
       </p>
       <p class="wc-alert wc-alert--danger"
          data-project-config-update-error
@@ -286,7 +290,8 @@
       <p data-project-config-update-status role="status" aria-live="polite" tabindex="-1">
         Open this panel to load the current preview.
       </p>
-      <div class="wc-table-scroll" data-project-config-update-review hidden>
+      <div data-project-config-update-review hidden>
+        <div class="wc-table-scroll" data-project-config-update-additions>
         <table class="pure-table pure-table-bordered">
           <caption>Attributes that will be added</caption>
           <thead>
@@ -300,11 +305,51 @@
           </thead>
           <tbody data-project-config-update-rows></tbody>
         </table>
+        </div>
+        <div class="wc-table-scroll" data-project-config-update-capability-changes hidden>
+          <table class="pure-table pure-table-bordered">
+            <caption>Capability-authority changes</caption>
+            <thead>
+              <tr>
+                <th scope="col">Section</th>
+                <th scope="col">Option</th>
+                <th scope="col">Change</th>
+                <th scope="col">Before</th>
+                <th scope="col">After</th>
+                <th scope="col">Added IDs</th>
+                <th scope="col">Removed IDs</th>
+                <th scope="col">Added support</th>
+              </tr>
+            </thead>
+            <tbody data-project-config-update-capability-rows></tbody>
+          </table>
+        </div>
+        <div class="wc-table-scroll" data-project-config-update-capability-details hidden>
+          <table class="pure-table pure-table-bordered">
+            <caption>Preserved selections and prior/resulting capability provenance</caption>
+            <thead>
+              <tr>
+                <th scope="col">Scope</th>
+                <th scope="col">Field</th>
+                <th scope="col">Value</th>
+              </tr>
+            </thead>
+            <tbody data-project-config-update-capability-detail-rows></tbody>
+          </table>
+        </div>
+        <div class="wc-alert wc-alert--warning"
+             data-project-config-update-acknowledgment
+             hidden>
+          <label>
+            <input type="checkbox" data-project-config-update-acknowledgment-checkbox>
+            I understand that refreshing capability authority changes this project's modeling envelope, diminishes strict provenance continuity with its original configuration, and may expose Preview or otherwise unstable features.
+          </label>
+        </div>
       </div>
     </div>
     <footer class="wc-modal__footer">
       <button type="button" class="pure-button" data-project-config-update-refresh>Refresh preview</button>
-      <button type="button" class="pure-button pure-button-primary" data-project-config-update-apply disabled>Apply all additions</button>
+      <button type="button" class="pure-button pure-button-primary" data-project-config-update-apply disabled>Apply reviewed update</button>
       <button type="button" class="pure-button" data-modal-dismiss>Cancel</button>
     </footer>
   </section>

@@ -115,4 +115,187 @@ WP12D.
 
 - **Security reviewer**: independent `wp12b_security_contract_review` agent,
   READY
+
 - **Package owner disposition**: accepted; no findings to remediate
+
+## WP12D Writer Implementation Security Disposition
+
+### Revision binding
+
+- **Review completed**: 2026-08-28 03:45 UTC
+- **Reader-floor base**: `80f4810b7be59d90a64b4771f587eb360987a820`
+- **Candidate worktree HEAD**: `5eb451a7640fa3148a8872dd74f3756d8c88e7ce`
+- **Review object**: the exact uncommitted WP12D writer candidate over that
+  reader floor, excluding only the unrelated dirty paths recorded in the
+  tracker and validation-generated code-quality reports
+
+### Findings
+
+No in-scope security findings remain: High 0; Medium 0; Low 0.
+
+The review initially reproduced one recovery defect: a contract-permitted
+preexisting manifest digest mismatch could strand an accepted update after a
+crash. The final candidate closes it by treating the prior declared digest as
+warning-only provenance while requiring the resulting manifest digest to match
+the resulting config. Direct real-filesystem tests now recover successfully
+after both the config-replacement and manifest-replacement fault points.
+
+One preexisting Low defense-in-depth residual remains outside the ratified
+WP12D changed-consumer set. `wepppy/rq/project_rq_archive.py` excludes the exact
+root transaction filenames, but its helper does not exclude descendants such
+as `.config-amendment.pending.json/payload`. A hostile archive can therefore
+restore a directory at the journal filename and make later recovery fail
+diagnostically until an operator removes it. The file is unchanged from the
+reader-floor base, the WP12D writer never creates such a descendant, and the
+real journal is recovered and removed under the lifecycle lock before archive
+creation. This is a bounded availability-hardening follow-up, not a PC-24
+conformance blocker. Changing that archive consumer requires its own contract
+amendment and ratification; descendant exclusion should be added and tested in
+that follow-up. No in-scope WP12D risk acceptance is required.
+
+### Security evidence
+
+The final review confirmed:
+
+- JWT scope, run access, and owner/Admin/Root mutation authorization precede
+  locale, registry, preview, or recovery authority resolution; the worker
+  reauthorizes the captured actor before mutation;
+- capability and combined requests require the exact initially unchecked,
+  preview-bound acknowledgment before Redis reservation or enqueue, and stale
+  preview precedence does not permit request-shape or acknowledgment bypass;
+- schema-v3 refresh eligibility is fail-closed on Builder source, same-locale
+  runtime/profile/default/selection/cell-size/source/runtime congruence,
+  complete stored authority, and append-only reader-floor-known structural
+  identity;
+- the route resolves one application revision and passes that exact immutable
+  value to the worker; worker environment drift cannot alter durable
+  provenance;
+- complete config, manifest, journal, amendment, and canonical serialization
+  bounds are preflighted under the project lock before reservation, and the
+  worker reuses the same serializer;
+- pending-journal hashes, base64 payloads, sizes, paths, manifest schemas,
+  amendment kinds/shapes/sequences, canonical JSON values, and resulting config
+  digest are validated before recovery writes; malformed and unreadable
+  journals leave target files unchanged;
+- hostile native climate, landuse, and soils dataset/method fields are checked
+  against the same run authority before controller parsing, timestamp removal,
+  file mutation, or enqueue, while the bounded exact-current carveout cannot
+  authorize a different hidden value;
+- availability, preview, apply-accepted, and apply-recovered OpenAPI responses
+  use closed typed schemas; the apply request has three closed variants for
+  additive, capability-only, and combined updates;
+- browser diagnostics insert server details and error IDs only through
+  `textContent`, and acknowledgment state resets on preview, error, modal close,
+  Escape, and successful apply;
+- the amendment contains no actor identity, credentials, config contents, or
+  new path, upload, subprocess, network-egress, or queue-dependency surface; and
+- rollback readability is anchored to the recorded reader floor. Forest
+  rollback occurs only after the accepted refresh job is terminal, then proves
+  the refreshed config and manifest reopen byte-for-byte unchanged.
+
+The package records the full validation result as Python 7147 passed/63
+skipped, frontend 107 suites/801 tests, with lint, stubs, broad-exception,
+vulture, diff, documentation, and RQ graph gates green. The reviewer reran 73
+focused security tests covering update persistence/recovery, route
+authorization and reservation ordering, worker reauthorization, exact OpenAPI
+schemas, hostile landuse input, and soils authority; all passed. Targeted
+`git diff --check` also passed.
+
+### Final verdict
+
+- **Gate status**: `pass` for exact-host Forest writer exposure
+- **Unresolved in-scope findings**: High 0; Medium 0; Low 0
+- **Residual follow-up**: one preexisting out-of-scope Low archive descendant
+  exclusion hardening item, nonblocking for PC-24 and Forest
+- **Release recommendation**: READY for the contracted Forest
+  refresh/reopen/reader-floor rollback acceptance only; production remains
+  unauthorized by WP12D
+- **Security reviewer**: independent `wp12b_security_contract_review` agent,
+  READY
+
+## WP12D Post-READY Security Delta Recheck
+
+### Revision binding
+
+- **Review completed**: 2026-08-28 05:41 UTC
+- **Reader-floor base**: `80f4810b7be59d90a64b4771f587eb360987a820`
+- **Candidate worktree HEAD**: `5eb451a7640fa3148a8872dd74f3756d8c88e7ce`
+- **Delta reviewed**: the uncommitted changes after the writer disposition above,
+  including terminal job diagnostics, paired soils/landuse/climate mutations,
+  update reconciliation and error transport, stored runtime-locale dispatch, and
+  exact endpoint/OpenAPI parity
+
+### Findings and closure
+
+The delta recheck found three Medium integrity defects. All are closed in the
+reviewed worktree. No High, Medium, or Low in-scope finding remains.
+
+1. Terminal `/jobinfo` success initially accepted any syntactically valid digest
+   pair. A well-formed result for a different transition could therefore clear
+   the reviewed acknowledgment, hide the update action, and be presented as the
+   reviewed commit. The controller now requires the terminal prior/resulting
+   digests to equal the retained preview's current/resulting digests exactly.
+   A mismatch remains indeterminate and does not clear the open or acknowledgment
+   state. The generated `controllers-gl.js` contains the same check.
+2. Flask climate selection initially validated one `(catalog_id, mode)` relation
+   but persisted it through two independent NoDb setter transactions. Concurrent
+   authorized requests could interleave into a pair that no request validated.
+   The final route-local implementation re-resolves authority and exact-current
+   eligibility under one `Climate.locked()` transaction, validates the enum and
+   station constraints, and writes or rolls back the complete pair. Its rollback
+   snapshot is taken after lock acquisition, so a waiting request cannot capture
+   an in-flight partial pair. Deterministic two-thread normal and injected
+   second-field-fault tests prove serialization and complete-pair rollback.
+   This closure changes only the already ratified `climate_bp.py` consumer; it
+   does not broaden the exact implementation source boundary or require an
+   amendment for `core/climate.py`.
+3. The first terminal-result remediation still read the mutable controller
+   preview after enqueue. Loading a newer preview while the earlier job was
+   pending could therefore rebind terminal success or failure reconciliation to
+   the wrong reviewed transition. Apply now captures a frozen object containing
+   the exact submitted preview ID and current/resulting digests, and passes that
+   same object through every recursive poll, terminal result, and failure
+   reconciliation path. Immediate recovered HTTP results use the same exact
+   congruence predicate. A later rendered preview cannot redefine the pending
+   job's authority context; mismatched results remain indeterminate without
+   clearing the update action or acknowledgment.
+
+The remaining delta surfaces are security-preserving:
+
+- authorization still precedes project-config status/recovery/registry work,
+  and malformed recovery state returns diagnostic `409 config_update_unavailable`
+  before Redis reservation or enqueue;
+- recovery diagnostics expose bounded state classifications, not config bytes,
+  paths, credentials, or actor identity;
+- landuse dataset/method persistence uses one grouped NoDb transaction, soils
+  and landuse aliases must agree before mutation, and unsupported native fields
+  fail before controller parsing, timestamp removal, file mutation, or enqueue;
+- schema-v2/v3 runtime locale dispatch derives canonical tokens from validated
+  stored locale-profile IDs and does not consult mutable flattened locale text;
+- stored graphs remain the run authority independent of live registry drift;
+- Flask climate alias disagreement, missing pairs, cross-profile values, and
+  stale exact-current values fail before mutation; and
+- apply request variants and availability, preview, accepted, and recovered
+  responses remain closed and exactly represented in OpenAPI.
+
+### Verification evidence
+
+- 327 focused Python tests covering update routes/recovery, the worker, climate,
+  landuse, soils, stored authority, operation documents, and exact OpenAPI:
+  passed.
+- 52 post-remediation Flask/rq-engine climate tests, including both deterministic
+  concurrency regressions: passed.
+- Focused project-config update controller suite: 19 passed.
+- Full frontend suite: 107 suites and 808 tests passed.
+- Frontend lint and `git diff --check`: passed.
+
+### Delta verdict
+
+- **Gate status**: `pass` for exact-host Forest writer exposure
+- **Unresolved in-scope findings**: High 0; Medium 0; Low 0
+- **Residual follow-up**: the preexisting out-of-scope Low archive-descendant
+  exclusion item recorded above remains unchanged
+- **Release recommendation**: READY for contracted Forest acceptance only;
+  production remains unauthorized by WP12D
+- **Security reviewer**: independent `wp12b_security_contract_review` agent,
+  READY

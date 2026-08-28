@@ -3,6 +3,7 @@ from contextlib import contextmanager
 import json
 from io import BytesIO
 from pathlib import Path
+from types import SimpleNamespace
 import zipfile
 
 import pytest
@@ -25,8 +26,11 @@ def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:
         lambda request, required_scopes=None: {"token_class": "service", "scope": "rq:enqueue rq:read"},
     )
     monkeypatch.setattr(landuse_routes, "authorize_run_access", lambda claims, runid: None)
-    monkeypatch.setattr(landuse_routes, "capability_authority", lambda landuse: None)
-    monkeypatch.setattr(landuse_routes, "capability_default", lambda landuse, option: None)
+    monkeypatch.setattr(
+        landuse_routes,
+        "resolve_run_capability_authority",
+        lambda landuse: SimpleNamespace(graph=None),
+    )
     monkeypatch.setattr(
         landuse_routes,
         "resolve_landuse_runtime_dataset",
@@ -147,7 +151,6 @@ def test_build_landuse_allows_exact_persisted_mode_omitted_from_v2_authority(
     _stub_queue(monkeypatch, job_id="job-current")
     _stub_prep(monkeypatch)
     monkeypatch.setattr(landuse_routes, "get_wd", lambda runid: "/tmp/run")
-    monkeypatch.setattr(landuse_routes, "capability_default", lambda landuse, option: "nlcd-2019")
     monkeypatch.setattr(
         landuse_routes,
         "landuse_capability_modes",
@@ -184,7 +187,7 @@ def test_build_landuse_rejects_invalid_capability_authority_before_parse(
     monkeypatch.setattr(landuse_routes, "get_wd", lambda runid: "/tmp/run")
     monkeypatch.setattr(
         landuse_routes,
-        "capability_authority",
+        "resolve_run_capability_authority",
         lambda landuse: (_ for _ in ()).throw(ValueError("unknown capability axis")),
     )
 
@@ -540,7 +543,16 @@ def test_set_landuse_mode_rejects_stored_graph_mismatch_before_mutation(
     _stub_auth(monkeypatch)
     monkeypatch.setattr(landuse_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
     monkeypatch.setattr(landuse_routes, "_preflight_landuse_mutation_root", lambda wd: None)
-    monkeypatch.setattr(landuse_routes, "capability_default", lambda landuse, option: "nlcd-2019")
+    monkeypatch.setattr(
+        landuse_routes,
+        "resolve_run_capability_authority",
+        lambda _landuse: SimpleNamespace(
+            graph=SimpleNamespace(
+                defaults={"landuse_dataset": "nlcd-2019"},
+                landuse_datasets=("nlcd-2019",),
+            )
+        ),
+    )
     monkeypatch.setattr(
         landuse_routes,
         "landuse_capability_modes",
@@ -566,8 +578,296 @@ def test_set_landuse_mode_rejects_stored_graph_mismatch_before_mutation(
         )
 
     assert response.status_code == 400
-    assert response.json()["errors"][0]["field"] == "mode"
+    assert response.json()["errors"][0]["field"] == "landuse_mode"
     assert controller.grouped_update_calls == []
+
+
+@pytest.mark.parametrize(
+    "payload",
+    (
+        {"landuse_mode": int(landuse_routes.LanduseMode.Single)},
+        {"landuse_db": "corine-2018"},
+    ),
+)
+def test_build_landuse_rejects_hostile_native_form_fields_before_prep(
+    monkeypatch: pytest.MonkeyPatch,
+    payload: dict[str, object],
+) -> None:
+    _stub_auth(monkeypatch)
+    prep_state = _stub_prep(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid: "/tmp/run")
+    graph = SimpleNamespace(
+        defaults={"landuse_dataset": "nlcd-2019"},
+        landuse_datasets=("nlcd-2019",),
+    )
+    monkeypatch.setattr(
+        landuse_routes,
+        "resolve_run_capability_authority",
+        lambda _landuse: SimpleNamespace(graph=graph),
+    )
+    monkeypatch.setattr(
+        landuse_routes,
+        "landuse_capability_modes",
+        lambda *_args: frozenset({int(landuse_routes.LanduseMode.Gridded)}),
+    )
+    monkeypatch.setattr(
+        landuse_routes,
+        "resolve_landuse_runtime_dataset",
+        lambda _landuse, value: "nlcd/2019" if value in {"nlcd-2019", "nlcd/2019"} else None,
+    )
+    parsed: list[bool] = []
+
+    class DummyLanduse:
+        run_group = "default"
+        mods: set[str] = set()
+        mode = landuse_routes.LanduseMode.Gridded
+        multi_ofe = False
+        nlcd_db = "nlcd/2019"
+
+        def parse_inputs(self, _payload) -> None:
+            parsed.append(True)
+
+    monkeypatch.setattr(
+        landuse_routes.Landuse, "getInstance", lambda _wd: DummyLanduse()
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/build-landuse", json=payload
+        )
+
+    assert response.status_code == 400
+    assert parsed == []
+    assert prep_state == {"removed": [], "jobs": []}
+
+
+def test_build_landuse_uses_current_authorized_dataset_method_adjacency(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    prep_state = _stub_prep(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid: "/tmp/run")
+    graph = SimpleNamespace(
+        defaults={"landuse_dataset": "nlcd-2019"},
+        landuse_datasets=("nlcd-2019", "corine-2018"),
+    )
+    monkeypatch.setattr(
+        landuse_routes,
+        "resolve_run_capability_authority",
+        lambda _landuse: SimpleNamespace(graph=graph),
+    )
+    monkeypatch.setattr(
+        landuse_routes,
+        "resolve_landuse_runtime_dataset",
+        lambda _landuse, _value: None,
+    )
+
+    def modes(_landuse, dataset, _representation):
+        assert dataset == "corine-2018"
+        return frozenset({int(landuse_routes.LanduseMode.UserDefined)})
+
+    monkeypatch.setattr(landuse_routes, "landuse_capability_modes", modes)
+
+    class DummyLanduse:
+        run_group = "default"
+        mods: set[str] = set()
+        mode = landuse_routes.LanduseMode.Gridded
+        multi_ofe = False
+        nlcd_db = "eu/CORINE_LandCover/2018"
+
+        def parse_inputs(self, _payload) -> None:
+            raise AssertionError("unsupported method reached controller parsing")
+
+    monkeypatch.setattr(
+        landuse_routes.Landuse, "getInstance", lambda _wd: DummyLanduse()
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/build-landuse",
+            json={"landuse_mode": int(landuse_routes.LanduseMode.Single)},
+        )
+
+    assert response.status_code == 400
+    assert prep_state == {"removed": [], "jobs": []}
+
+
+def test_build_landuse_persists_authorized_dataset_method_pair(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id="job-landuse-pair")
+    prep_state = _stub_prep(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid: "/tmp/run")
+    graph = SimpleNamespace(
+        defaults={"landuse_dataset": "nlcd-2019"},
+        landuse_datasets=("nlcd-2019", "corine-2018"),
+    )
+    monkeypatch.setattr(
+        landuse_routes,
+        "resolve_run_capability_authority",
+        lambda _landuse: SimpleNamespace(graph=graph),
+    )
+    monkeypatch.setattr(
+        landuse_routes,
+        "landuse_capability_modes",
+        lambda _landuse, dataset, _representation: (
+            frozenset({int(landuse_routes.LanduseMode.Single)})
+            if dataset == "corine-2018"
+            else frozenset({int(landuse_routes.LanduseMode.Gridded)})
+        ),
+    )
+
+    class DummyLanduse:
+        run_group = "default"
+        mods: set[str] = set()
+        mode = landuse_routes.LanduseMode.Gridded
+        multi_ofe = False
+        nlcd_db = "nlcd/2019"
+        lc_dir = "/tmp"
+        lc_fn = "/tmp/lc.tif"
+
+        def parse_inputs(self, _payload) -> None:
+            return None
+
+        def apply_build_landuse_selection_updates(self, *, nlcd_db, mode) -> None:
+            self.nlcd_db = nlcd_db
+            self.mode = mode
+
+    controller = DummyLanduse()
+    monkeypatch.setattr(
+        landuse_routes.Landuse, "getInstance", lambda _wd: controller
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/build-landuse",
+            json={
+                "landuse_db": "corine-2018",
+                "landuse_mode": int(landuse_routes.LanduseMode.Single),
+            },
+        )
+
+    assert response.status_code == 200
+    assert response.json()["job_id"] == "job-landuse-pair"
+    assert controller.nlcd_db == "eu/CORINE_LandCover/2018"
+    assert controller.mode == landuse_routes.LanduseMode.Single
+    assert prep_state["removed"]
+
+
+def test_build_landuse_rejects_invalid_submitted_pair_before_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    prep_state = _stub_prep(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid: "/tmp/run")
+    graph = SimpleNamespace(
+        defaults={"landuse_dataset": "nlcd-2019"},
+        landuse_datasets=("nlcd-2019", "corine-2018"),
+    )
+    monkeypatch.setattr(
+        landuse_routes,
+        "resolve_run_capability_authority",
+        lambda _landuse: SimpleNamespace(graph=graph),
+    )
+    monkeypatch.setattr(
+        landuse_routes,
+        "landuse_capability_modes",
+        lambda _landuse, dataset, _representation: (
+            frozenset({int(landuse_routes.LanduseMode.UserDefined)})
+            if dataset == "corine-2018"
+            else frozenset({int(landuse_routes.LanduseMode.Gridded)})
+        ),
+    )
+
+    class DummyLanduse:
+        run_group = "default"
+        mods: set[str] = set()
+        mode = landuse_routes.LanduseMode.Gridded
+        multi_ofe = False
+        nlcd_db = "nlcd/2019"
+        parse_calls = 0
+        selection_calls = 0
+
+        def parse_inputs(self, _payload) -> None:
+            self.parse_calls += 1
+
+        def apply_build_landuse_selection_updates(self, **_kwargs) -> None:
+            self.selection_calls += 1
+
+    controller = DummyLanduse()
+    monkeypatch.setattr(
+        landuse_routes.Landuse, "getInstance", lambda _wd: controller
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/build-landuse",
+            json={
+                "landuse_db": "corine-2018",
+                "landuse_mode": int(landuse_routes.LanduseMode.Single),
+            },
+        )
+
+    assert response.status_code == 400
+    assert response.json()["errors"][0]["code"] == "unsupported_capability"
+    assert controller.nlcd_db == "nlcd/2019"
+    assert controller.mode == landuse_routes.LanduseMode.Gridded
+    assert controller.parse_calls == 0
+    assert controller.selection_calls == 0
+    assert prep_state == {"removed": [], "jobs": []}
+
+
+def test_build_landuse_allows_exact_current_dataset_and_mode_outside_live_axis(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id="job-current-landuse")
+    prep_state = _stub_prep(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid: "/tmp/run")
+    graph = SimpleNamespace(
+        defaults={"landuse_dataset": "nlcd-2019"},
+        landuse_datasets=("nlcd-2019",),
+    )
+    monkeypatch.setattr(
+        landuse_routes,
+        "resolve_run_capability_authority",
+        lambda _landuse: SimpleNamespace(graph=graph),
+    )
+    monkeypatch.setattr(
+        landuse_routes,
+        "resolve_landuse_runtime_dataset",
+        lambda _landuse, _value: None,
+    )
+
+    class DummyLanduse:
+        run_group = "default"
+        mods: set[str] = set()
+        mode = landuse_routes.LanduseMode.Single
+        multi_ofe = False
+        nlcd_db = "eu/CORINE_LandCover/2018"
+        lc_dir = "/tmp"
+        lc_fn = "/tmp/lc.tif"
+
+        def parse_inputs(self, _payload) -> None:
+            return None
+
+    monkeypatch.setattr(
+        landuse_routes.Landuse, "getInstance", lambda _wd: DummyLanduse()
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/build-landuse",
+            json={
+                "landuse_db": "corine-2018",
+                "landuse_mode": int(landuse_routes.LanduseMode.Single),
+            },
+        )
+
+    assert response.status_code == 200
+    assert response.json()["job_id"] == "job-current-landuse"
+    assert prep_state["removed"]
 
 
 def test_set_landuse_mode_reports_invalid_authority_before_mutation(
@@ -578,7 +878,7 @@ def test_set_landuse_mode_reports_invalid_authority_before_mutation(
     monkeypatch.setattr(landuse_routes, "_preflight_landuse_mutation_root", lambda wd: None)
     monkeypatch.setattr(
         landuse_routes,
-        "capability_authority",
+        "resolve_run_capability_authority",
         lambda landuse: (_ for _ in ()).throw(ValueError("unsupported capability schema version")),
     )
 
@@ -738,7 +1038,7 @@ def test_set_landuse_db_reports_invalid_authority_before_mutation(
     monkeypatch.setattr(landuse_routes, "_preflight_landuse_mutation_root", lambda wd: None)
     monkeypatch.setattr(
         landuse_routes,
-        "capability_authority",
+        "resolve_run_capability_authority",
         lambda landuse: (_ for _ in ()).throw(ValueError("unsupported capability schema version")),
     )
 

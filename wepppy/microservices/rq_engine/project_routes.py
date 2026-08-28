@@ -411,6 +411,16 @@ async def create(request: Request) -> Response:
                 )
 
     merged_values = _merge_creation_values(payload, request.query_params)
+    if any(
+        str(key).strip().casefold() in {"general:locales", "general.locales"}
+        for key in merged_values
+    ):
+        return error_response(
+            "Locale is owned by the selected configuration.",
+            status_code=400,
+            code="project_config_validation_failed",
+            details="Legacy creation overrides may not set general.locales.",
+        )
     try:
         creation_values = validate_creation_values(merged_values)
     except PreferenceValidationError:

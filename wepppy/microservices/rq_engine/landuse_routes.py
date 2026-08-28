@@ -30,11 +30,14 @@ from wepppy.nodb.core import (
 )
 from wepppy.nodb.core.landuse import MOFE_SINGLE_LANDUSE_MESSAGE
 from wepppy.nodb.mods.disturbed import Disturbed
+from wepppy.nodb.locales.landuse_catalog import get_landcover_entry, landcover_catalog_id
+from wepppy.nodb.locales.capability_graph import CapabilityGraph
 from wepppy.nodb.project_config_capabilities import (
-    capability_authority,
-    capability_default,
+    BuilderRegistryUnavailableError,
+    LocaleAuthorityInvalidError,
     landuse_capability_modes,
     resolve_landuse_runtime_dataset,
+    resolve_run_capability_authority,
 )
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.runtime_paths.errors import NoDirError
@@ -81,10 +84,65 @@ LANDUSE_MAPPING_BATCH_MAX_EDITS = 500
 LANDUSE_MAPPING_CONTROL_CHAR_RE = re.compile(r"[\x00-\x1f\x7f]")
 
 
-def _capability_mode_error(landuse: Landuse, mode: LanduseMode) -> JSONResponse | None:
-    dataset = capability_default(landuse, "landuse_dataset")
-    if dataset is None:
+def _run_authority(landuse: Landuse) -> tuple[CapabilityGraph | None, JSONResponse | None]:
+    try:
+        return resolve_run_capability_authority(landuse).graph, None
+    except LocaleAuthorityInvalidError as exc:
+        return None, error_response(
+            "Run locale authority is invalid.",
+            status_code=409,
+            code="locale_authority_invalid",
+            details=str(exc),
+        )
+    except BuilderRegistryUnavailableError as exc:
+        response = error_response(
+            "Builder registry is unavailable.",
+            status_code=503,
+            code="builder_registry_error",
+            details=str(exc),
+        )
+        response.headers["Retry-After"] = "5"
+        return None, response
+    except ValueError as exc:
+        return None, error_response(
+            "Project capability authority is invalid.",
+            status_code=409,
+            code="capability_authority_invalid",
+            details=str(exc),
+        )
+    return None, None
+
+
+def _capability_mode_error(
+    landuse: Landuse,
+    mode: LanduseMode,
+    authority: CapabilityGraph | None,
+    runtime_dataset: str | None = None,
+) -> JSONResponse | None:
+    if authority is None:
         return None
+    current_runtime = str(getattr(landuse, "nlcd_db", "") or "").strip()
+    selected_runtime = str(runtime_dataset or current_runtime).strip()
+    current_entry = None
+    if selected_runtime:
+        try:
+            current_entry = get_landcover_entry(landcover_catalog_id(selected_runtime))
+        except ValueError:
+            current_entry = None
+    if not selected_runtime:
+        dataset = authority.defaults["landuse_dataset"]
+    elif current_entry is not None and current_entry.catalog_id in authority.landuse_datasets:
+        dataset = current_entry.catalog_id
+    else:
+        if selected_runtime == current_runtime and mode == landuse.mode:
+            return None
+        return validation_error_response(
+            [{
+                "field": "landuse_mode",
+                "code": "unsupported_capability",
+                "message": "Landuse method is not supported by this project.",
+            }]
+        )
     representation = "multiple-ofe" if bool(getattr(landuse, "multi_ofe", False)) else "single-ofe"
     allowed = landuse_capability_modes(landuse, dataset, representation)
     if allowed is None or mode.value in allowed:
@@ -92,12 +150,42 @@ def _capability_mode_error(landuse: Landuse, mode: LanduseMode) -> JSONResponse 
     return validation_error_response(
         [
             {
-                "field": "mode",
+                "field": "landuse_mode",
                 "code": "unsupported_capability",
                 "message": "Landuse method is not supported by this project.",
             }
         ]
     )
+
+
+def _requested_landuse_runtime(
+    landuse: Landuse,
+    value: object,
+    authority: CapabilityGraph | None,
+) -> str | None:
+    submitted = str(value)
+    if authority is None:
+        resolved = resolve_landuse_runtime_dataset(landuse, submitted)
+    elif submitted in authority.landuse_datasets:
+        entry = get_landcover_entry(submitted)
+        resolved = None if entry is None else entry.runtime_value
+    else:
+        resolved = next(
+            (
+                entry.runtime_value
+                for stable_id in authority.landuse_datasets
+                if (entry := get_landcover_entry(stable_id)) is not None
+                and entry.runtime_value == submitted
+            ),
+            None,
+        )
+    if resolved is not None:
+        return resolved
+    current = str(getattr(landuse, "nlcd_db", "") or "")
+    entry = get_landcover_entry(submitted)
+    if submitted == current or (entry is not None and entry.runtime_value == current):
+        return current
+    return None
 NODB_LOCK_CONFLICT_CLIENT_MESSAGE = "Run inputs are currently locked; retry shortly."
 
 
@@ -408,13 +496,17 @@ def _validate_effective_mapping(landuse: Landuse) -> JSONResponse | None:
     return None
 
 
-def _validate_mofe_landuse_mode_for_build(landuse: Any) -> JSONResponse | None:
+def _validate_mofe_landuse_mode_for_build(
+    landuse: Any,
+    mode: LanduseMode | None = None,
+) -> JSONResponse | None:
     validator = getattr(landuse, "validate_landuse_mode_for_mofe", None)
     try:
         if callable(validator):
-            validator()
+            validator(mode)
         elif (
-            getattr(landuse, "mode", None) == LanduseMode.Single
+            (mode if mode is not None else getattr(landuse, "mode", None))
+            == LanduseMode.Single
             and bool(getattr(landuse, "multi_ofe", False))
         ):
             raise ValueError(MOFE_SINGLE_LANDUSE_MESSAGE)
@@ -437,7 +529,8 @@ def _validate_mofe_landuse_mode_for_build(landuse: Any) -> JSONResponse | None:
         success_description="Landuse inputs accepted; returns batch update message or enqueued `job_id`.",
         extra={
             400: "Landuse validation/business-rule error (including upload validation). Returns the canonical error payload.",
-            409: "Invalid stored project capability authority; no mutation.",
+            409: "Invalid project capability or locale authority; no mutation.",
+            503: "Builder registry is unavailable; retry after the advertised interval.",
         },
     ),
 )
@@ -456,15 +549,9 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
         wd = _resolve_run_root_for_request(runid, request)
         _preflight_landuse_mutation_root(wd)
         landuse = Landuse.getInstance(wd)
-        try:
-            capability_authority(landuse)
-        except ValueError as exc:
-            return error_response(
-                "Project capability authority is invalid.",
-                status_code=409,
-                code="capability_authority_invalid",
-                details=str(exc),
-            )
+        authority, authority_error = _run_authority(landuse)
+        if authority_error is not None:
+            return authority_error
 
         payload = await parse_request_payload(
             request,
@@ -481,22 +568,72 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
                 return value[0] if value else None
             return value
 
-        requested_mode_raw = _first(payload.get("mode"))
-        if requested_mode_raw is None:
+        requested_db_raw = _first(payload.get("landuse_db"))
+        requested_runtime_db = None
+        if requested_db_raw is not None:
+            requested_runtime_db = _requested_landuse_runtime(
+                landuse, requested_db_raw, authority
+            )
+            if requested_runtime_db is None:
+                return error_response(
+                    "Landuse dataset is not supported by this project.",
+                    status_code=400,
+                    code="unsupported_capability",
+                )
+
+        landuse_mode_raw = _first(payload.get("landuse_mode"))
+        mode_alias_raw = _first(payload.get("mode"))
+        if landuse_mode_raw is None and mode_alias_raw is None:
             requested_mode = landuse.mode
         else:
             try:
-                requested_mode = LanduseMode(int(requested_mode_raw))
+                landuse_mode = (
+                    LanduseMode(int(landuse_mode_raw))
+                    if landuse_mode_raw is not None
+                    else None
+                )
+                mode_alias = (
+                    LanduseMode(int(mode_alias_raw))
+                    if mode_alias_raw is not None
+                    else None
+                )
             except (TypeError, ValueError):
                 return error_response("Invalid landuse mode", status_code=400)
-        if requested_mode != landuse.mode:
-            capability_error = _capability_mode_error(landuse, requested_mode)
+            if (
+                landuse_mode is not None
+                and mode_alias is not None
+                and landuse_mode != mode_alias
+            ):
+                return error_response(
+                    "landuse_mode and mode must identify the same landuse method",
+                    status_code=400,
+                )
+            requested_mode = (
+                landuse_mode if landuse_mode is not None else mode_alias
+            )
+            assert requested_mode is not None
+        if requested_runtime_db is not None or requested_mode != landuse.mode:
+            capability_error = _capability_mode_error(
+                landuse,
+                requested_mode,
+                authority,
+                runtime_dataset=requested_runtime_db,
+            )
             if capability_error is not None:
                 return capability_error
 
-        mode_error = _validate_mofe_landuse_mode_for_build(landuse)
+        mode_error = _validate_mofe_landuse_mode_for_build(landuse, requested_mode)
         if mode_error is not None:
             return mode_error
+
+        try:
+            mapping = _normalize_landuse_mapping_selection(
+                _first(payload.get("landuse_management_mapping_selection"))
+            )
+        except ValueError as exc:
+            return error_response(
+                str(exc), status_code=400, code="invalid_mapping_selection"
+            )
 
         try:
             landuse.parse_inputs(payload)
@@ -517,12 +654,7 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
                 burn_grass=bool(burn_grass_value),
             )
 
-        try:
-            mapping = _normalize_landuse_mapping_selection(_first(payload.get("landuse_management_mapping_selection")))
-        except ValueError as exc:
-            return error_response(str(exc), status_code=400, code="invalid_mapping_selection")
-
-        if landuse.mode == LanduseMode.UserDefined:
+        if requested_mode == LanduseMode.UserDefined:
             from wepppy.all_your_base.geo import raster_stacker
 
             watershed = Watershed.getInstance(wd)
@@ -599,6 +731,17 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
         if mapping_error is not None:
             return mapping_error
 
+        selection_changed = (
+            requested_runtime_db is not None
+            and requested_runtime_db
+            != str(getattr(landuse, "nlcd_db", "") or "")
+        ) or requested_mode != landuse.mode
+        if selection_changed:
+            landuse.apply_build_landuse_selection_updates(
+                nlcd_db=requested_runtime_db,
+                mode=requested_mode,
+            )
+
         if landuse.run_group == "batch":
             return JSONResponse({"message": "Set landuse inputs for batch processing"})
 
@@ -650,7 +793,8 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
         success_description="Landuse mode metadata updated.",
         extra={
             400: "Invalid mode payload.",
-            409: "Invalid capability authority.",
+            409: "Invalid project capability or locale authority.",
+            503: "Builder registry is unavailable; retry after the advertised interval.",
         },
     ),
 )
@@ -680,16 +824,10 @@ async def set_landuse_mode(runid: str, config: str, request: Request) -> JSONRes
         wd = _resolve_run_root_for_request(runid, request)
         _preflight_landuse_mutation_root(wd)
         landuse = Landuse.getInstance(wd)
-        try:
-            capability_authority(landuse)
-        except ValueError as exc:
-            return error_response(
-                "Project capability authority is invalid.",
-                status_code=409,
-                code="capability_authority_invalid",
-                details=str(exc),
-            )
-        capability_error = _capability_mode_error(landuse, mode)
+        authority, authority_error = _run_authority(landuse)
+        if authority_error is not None:
+            return authority_error
+        capability_error = _capability_mode_error(landuse, mode, authority)
         if capability_error is not None:
             return capability_error
         if mode == LanduseMode.Single and bool(getattr(landuse, "multi_ofe", False)):
@@ -725,7 +863,8 @@ async def set_landuse_mode(runid: str, config: str, request: Request) -> JSONRes
         success_description="Landuse database metadata updated.",
         extra={
             400: "Invalid landuse database payload.",
-            409: "Invalid capability authority.",
+            409: "Invalid project capability or locale authority.",
+            503: "Builder registry is unavailable; retry after the advertised interval.",
         },
     ),
 )
@@ -750,16 +889,10 @@ async def set_landuse_db(runid: str, config: str, request: Request) -> JSONRespo
         wd = _resolve_run_root_for_request(runid, request)
         _preflight_landuse_mutation_root(wd)
         landuse = Landuse.getInstance(wd)
-        try:
-            capability_authority(landuse)
-        except ValueError as exc:
-            return error_response(
-                "Project capability authority is invalid.",
-                status_code=409,
-                code="capability_authority_invalid",
-                details=str(exc),
-            )
-        runtime_db = resolve_landuse_runtime_dataset(landuse, str(db))
+        authority, authority_error = _run_authority(landuse)
+        if authority_error is not None:
+            return authority_error
+        runtime_db = _requested_landuse_runtime(landuse, db, authority)
         if runtime_db is None:
             return error_response("Landuse dataset is not supported by this project.", status_code=400, code="unsupported_capability")
         landuse.nlcd_db = runtime_db

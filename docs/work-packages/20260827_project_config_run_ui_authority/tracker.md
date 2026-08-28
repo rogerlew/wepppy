@@ -4,10 +4,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-27 20:31 UTC
-**Current phase**: failing behavior evidence and bounded writer implementation
-**Last updated**: 2026-08-28 00:41 UTC
-**Next milestone**: write the full inventory/authority/refresh regression
-matrix before implementation
+**Current phase**: candidate commit and exact-host Forest acceptance
+**Last updated**: 2026-08-28 05:40 UTC
+**Next milestone**: commit/push the reviewed candidate and deploy it to `forest`
 **Security impact**: `high`
 **Dedicated security review**: `yes`
 **Security artifact**: `artifacts/20260827_security_review.md`
@@ -27,22 +26,71 @@ PC-24 owns `.cfg` locale normalization and run-UI authority parity.
 
 ### In Progress
 
-- [ ] Write failing full-config inventory, legacy/stored authority, paired
-  boundary, and acknowledged-refresh tests.
+- [ ] Commit and push the reviewed candidate, then validate it on exact host
+  `forest` without an image build.
 
 ### Ready / Backlog
 
-- [ ] Apply exact `.cfg` normalization and bounded resolver/consumer changes.
-- [ ] Run focused/full gates and independent correctness/security reviews.
 - [ ] Push and validate exact candidate on `forest`; hand off to WP12 without
   production deployment.
 
 ### Blocked
 
-- [ ] Forest writer exposure remains blocked until implementation, focused and
-  broad gates, and fresh correctness/security reviews are complete.
+- [ ] Production deployment remains reserved to parent WP12 after WP12D Forest
+  acceptance.
 
 ### Done
+
+- [x] Obtained final independent correctness and security READY verdicts with
+  no remaining in-scope High, Medium, or Low findings; production remains
+  unauthorized (2026-08-28 05:32 UTC).
+- [x] Bound terminal and immediate-recovered success to the immutable
+  apply-time preview digest pair; a later UI refresh cannot change the outcome
+  authority, and mismatched diagnostics remain indeterminate
+  (2026-08-28 05:40 UTC).
+- [x] Made the Flask climate catalog/mode relation one lock-scoped transaction
+  with locked revalidation, locked snapshots, rollback, and deterministic
+  normal/concurrent-fault evidence (2026-08-28 05:32 UTC).
+- [x] Passed the final 7,281-item Python collection with 7,218 passed and 63
+  skipped in 12 minutes 32 seconds, plus all 107 frontend suites / 808 tests,
+  frontend lint, test-stub completeness, Vulture, changed-file broad-exception
+  enforcement, diff checks, and the synchronized RQ graph
+  (2026-08-28 05:32 UTC).
+- [x] Closed final-review findings with complete selection-bearing refresh
+  checks, strict durable amendment/result/manifest/journal validation, native
+  landuse/soil pre-mutation authority enforcement, stored-only legacy WEPP
+  presentation, diagnostic UI errors, exact OpenAPI response/request models,
+  and route-bound worker revision provenance (2026-08-28 03:33 UTC).
+- [x] Passed the clean full 7,210-item Python collection with 7,147 passed and
+  63 skipped in 12 minutes 20 seconds; the only first-attempt anomaly was an
+  unrelated timing-sensitive Climate fixture that passed immediately in
+  isolation and in the clean complete rerun (2026-08-28 03:33 UTC).
+- [x] Passed all 107 frontend suites with 801 tests, frontend lint, affected
+  stubtests, test-stub completeness, Vulture, changed-file broad-exception
+  enforcement, diff, documentation, and synchronized RQ graph gates
+  (2026-08-28 03:33 UTC).
+- [x] Passed the full 7,172-item Python collection with 7,110 passed and 63
+  skipped in 12 minutes 20 seconds; the suite includes all affected NoDb, RQ,
+  WEPPcloud route, and template contracts (2026-08-28 02:05 UTC).
+- [x] Passed the complete 797-test frontend suite, frontend lint, affected
+  stubs, test-stub completeness, Vulture, changed-file broad-exception
+  enforcement, diff, documentation, and synchronized RQ graph gates
+  (2026-08-28 02:05 UTC).
+- [x] Implemented exact 128-config locale normalization, the public Builder
+  graph hotpath, stored/frozen versus live-legacy resolution, scoped landuse /
+  soil / climate consumers, and paired Flask/RQ/schema/orchestration authority
+  (2026-08-28 01:28 UTC).
+- [x] Implemented complete additive/capability/combined previews, exact
+  pre-reservation acknowledgment, selection-preserving schema-v3 refresh,
+  reversible manifest identity/delta, atomic journal recovery, latest-preview
+  idempotency, and availability reconciliation fields (2026-08-28 01:28 UTC).
+- [x] Implemented and tested the accessible native-checkbox warning, disabled
+  Apply state, reset lifecycle, delta table, and terminal pair reconciliation;
+  updated controller and accessibility guidance (2026-08-28 01:28 UTC).
+- [x] Passed 450 affected Python tests, 95 schema/orchestration tests, 8 focused
+  frontend tests, frontend lint, 152 template tests, project-update stubtest,
+  test-stub completeness, broad-exception enforcement, documentation lint,
+  diff check, and synchronized RQ graph checks (2026-08-28 01:28 UTC).
 
 - [x] Obtained independent reader-floor correctness and security READY verdicts
   with no High, Medium, or Low findings; the sole nonblocking test-quality gap
@@ -222,32 +270,32 @@ claimed to understand future structural graphs.
 
 ## Verification Checklist
 
-- [ ] Full named-config effective-locale inventory and malformed-state tests.
-- [ ] Five legacy Builder-profile UI/API/build parity suites.
-- [ ] Stored schema-v2/v3 drift isolation and schema-v1/non-Builder/overlay
+- [x] Full named-config effective-locale inventory and malformed-state tests.
+- [x] Five legacy Builder-profile UI/API/build parity suites.
+- [x] Stored schema-v2/v3 drift isolation and schema-v1/non-Builder/overlay
   compatibility suites.
-- [ ] Flattened no-capability/schema-v1 absent, empty, unknown, valid-locale,
+- [x] Flattened no-capability/schema-v1 absent, empty, unknown, valid-locale,
   and present-axis fixtures with no live-registry consultation.
-- [ ] Exact Turkey profile serialization/catalog revision and `yasin` reopen
+- [x] Exact Turkey profile serialization/catalog revision and `yasin` reopen
   behavior.
-- [ ] Shared locale-to-graph hotpath across Builder creation, legacy live
+- [x] Shared locale-to-graph hotpath across Builder creation, legacy live
   authority, capability-refresh preview, and apply.
-- [ ] Accessible acknowledgment UI and direct-API enforcement for
+- [x] Accessible acknowledgment UI and direct-API enforcement for
   additive-only, capability-only, and combined update previews.
-- [ ] Atomic graph replacement, reversible manifest delta, crash recovery, and
+- [x] Atomic graph replacement, reversible manifest delta, crash recovery, and
   pre-reservation rejection evidence.
-- [ ] Selection-preserving refresh and removed/incompatible-selection refusal
+- [x] Selection-preserving refresh and removed/incompatible-selection refusal
   with no config, manifest, reservation, or queue side effects.
-- [ ] Current production identities plus a test-only genuine two-identity
+- [x] Current production identities plus a test-only genuine two-identity
   structural transition; prove `280cf7e84` and current share one identity.
-- [ ] Fault evidence on both sides of config replacement plus terminal job/UI
+- [x] Fault evidence on both sides of config replacement plus terminal job/UI
   reconciliation of the recovered pair.
-- [ ] Historical last-update inference and exact latest-preview idempotent
+- [x] Historical last-update inference and exact latest-preview idempotent
   HTTP/RQ retry results without duplicate amendments.
-- [ ] Direct exact-current positives and no-mutation rejection negatives.
-- [ ] Frontend link/page non-change assertions and standard frontend gates.
-- [ ] Full Python, stubs, broad exceptions, vulture, diff, and docs gates.
-- [ ] Binding correctness/governance/security checkpoint reviews and final
+- [x] Direct exact-current positives and no-mutation rejection negatives.
+- [x] Frontend link/page non-change assertions and focused frontend gates.
+- [x] Full Python, stubs, broad exceptions, vulture, diff, and docs gates.
+- [x] Binding correctness/governance/security checkpoint reviews and final
   correctness/security implementation reviews have no unresolved High or
   Medium.
 - [ ] Exact-host `forest` legacy/stored acceptance without image rebuild.

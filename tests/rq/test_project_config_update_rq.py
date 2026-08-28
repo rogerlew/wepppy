@@ -15,23 +15,35 @@ def test_worker_reauthorizes_current_actor_before_apply(monkeypatch: pytest.Monk
     job = SimpleNamespace(id="job-1", meta={"auth_actor": actor})
     calls: list[tuple] = []
     released: list[tuple[str, str]] = []
+    apply_kwargs: dict[str, object] = {}
     result = SimpleNamespace(
         applied=True, sequence=2, prior_digest="a" * 64,
-        resulting_digest="b" * 64, additions=(1, 2),
+        resulting_digest="b" * 64, additions=(1, 2), recovered=False,
+        update_kind="additive",
     )
     monkeypatch.setattr(update_rq, "get_current_job", lambda: job)
+    monkeypatch.setenv("RQ_ENGINE_DEPLOYMENT_REVISION", "different-worker-revision")
     monkeypatch.setattr(update_rq, "authorize_run_mutation", lambda current, runid: calls.append((current, runid)))
     monkeypatch.setattr(update_rq, "get_wd", lambda runid: f"/wc1/runs/{runid}")
-    monkeypatch.setattr(update_rq, "apply_project_config_update", lambda *args, **kwargs: result)
+    def apply(*_args, **kwargs):
+        apply_kwargs.update(kwargs)
+        return result
+    monkeypatch.setattr(update_rq, "apply_project_config_update", apply)
     monkeypatch.setattr(update_rq, "_release_active", lambda runid, job_id: released.append((runid, job_id)))
 
     payload = update_rq.run_project_config_update_rq(
-        "run-1", "config", "pcu1-preview", "new", "option"
+        "run-1", "config", "pcu1-preview", "route-revision", "new", "option"
     )
 
     assert calls == [(actor, "run-1")]
-    assert payload["added_count"] == 2
-    assert payload["sequence"] == 2
+    assert payload == {
+        "applied": True,
+        "recovered": False,
+        "sequence": 2,
+        "prior_digest": "a" * 64,
+        "resulting_digest": "b" * 64,
+    }
+    assert apply_kwargs["application_revision"] == "route-revision"
     assert released == [("run-1", "job-1")]
 
 
@@ -50,7 +62,7 @@ def test_worker_authority_loss_prevents_mutation_and_releases_singleflight(monke
 
     with pytest.raises(AuthError, match="ownership changed"):
         update_rq.run_project_config_update_rq(
-            "run-1", "config", "pcu1-preview", "new", "option"
+            "run-1", "config", "pcu1-preview", "route-revision", "new", "option"
         )
 
     assert applied == []

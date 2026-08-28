@@ -20,7 +20,11 @@ from wepppy.nodb.core import (
 )
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.nodb.core.climate_input_parser import PERSISTED_CURRENT_SPATIAL_CARVEOUT
-from wepppy.nodb.project_config_capabilities import capability_authority
+from wepppy.nodb.project_config_capabilities import (
+    BuilderRegistryUnavailableError,
+    LocaleAuthorityInvalidError,
+    resolve_run_capability_authority,
+)
 from wepppy.nodb.locales.climate_catalog import (
     CLIMATE_SPATIAL_METHOD_RUNTIME,
     CLIMATE_STATION_METHOD_RUNTIME,
@@ -624,7 +628,8 @@ def _validate_v2_climate_selection(
         success_description="Climate inputs accepted; returns batch update message or enqueued `job_id`.",
         extra={
             400: "Climate input validation or climate precondition failed. Returns the canonical error payload.",
-            409: "Invalid stored project capability authority; no mutation.",
+            409: "Invalid project capability or locale authority; no mutation.",
+            503: "Builder registry is unavailable; retry after the advertised interval.",
         },
     ),
 )
@@ -645,7 +650,23 @@ async def build_climate(runid: str, config: str, request: Request) -> JSONRespon
         _require_directory_root(wd, "climate")
         climate = Climate.getInstance(wd)
         try:
-            authority = capability_authority(climate)
+            authority = resolve_run_capability_authority(climate).graph
+        except LocaleAuthorityInvalidError as exc:
+            return error_response(
+                "Run locale authority is invalid.",
+                status_code=409,
+                code="locale_authority_invalid",
+                details=str(exc),
+            )
+        except BuilderRegistryUnavailableError as exc:
+            response = error_response(
+                "Builder registry is unavailable.",
+                status_code=503,
+                code="builder_registry_error",
+                details=str(exc),
+            )
+            response.headers["Retry-After"] = "5"
+            return response
         except ValueError as exc:
             return error_response(
                 "Project capability authority is invalid.",

@@ -9,13 +9,54 @@ from types import SimpleNamespace
 import jsonpickle
 import pytest
 
-from wepppy.nodb.core.soils import Soils
+from wepppy.nodb.core.soils import Soils, SoilsMode
 
 pytestmark = pytest.mark.unit
 
 
 class _StopBuild(Exception):
     """Sentinel used to stop _build_gridded after pre-retrieve assertions."""
+
+
+def test_stored_australia_runtime_token_overrides_incongruent_soils_locales(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class _AustralianDispatch(Exception):
+        pass
+
+    class _SoilsStub:
+        wd = str(tmp_path)
+        soils_dir = str(tmp_path / "soils")
+        class_name = "Soils"
+        logger = logging.getLogger("tests.nodb.soils_stored_locale")
+        _mode = SoilsMode.Gridded
+        mode = SoilsMode.Gridded
+        locales = ["us"]
+        watershed_instance = SimpleNamespace(is_abstracted=True)
+        soils_map = None
+        config_stem = "builder"
+        ssurgo_db = "asris"
+
+        @staticmethod
+        def locked():
+            return nullcontext()
+
+        @staticmethod
+        def _build_by_identify(_builder) -> None:
+            raise _AustralianDispatch()
+
+        @staticmethod
+        def _build_gridded(*_args, **_kwargs) -> None:
+            pytest.fail("used incongruent Continental-US soils dispatch")
+
+    monkeypatch.setattr(
+        "wepppy.nodb.project_config_capabilities.resolve_run_capability_authority",
+        lambda _soils: SimpleNamespace(graph=object(), runtime_tokens=("au",)),
+    )
+
+    with pytest.raises(_AustralianDispatch):
+        Soils.build(_SoilsStub())
 
 
 def test_build_gridded_creates_soils_dir_before_retrieve(

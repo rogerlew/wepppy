@@ -208,13 +208,20 @@
       "value": "4",
       "selected": selected_station_mode == 4,
       "attrs": {"class": "disable-readonly", "data-mode-value": "4", "data-climate-action": "station-mode"}
+    },
+    {
+      "id": "climatestation_mode5",
+      "label": "Iowa Mesonet",
+      "value": "5",
+      "selected": selected_station_mode == 5,
+      "attrs": {"class": "disable-readonly", "data-mode-value": "5", "data-climate-action": "station-mode"}
     }
   ] %}
   {% if selected_dataset %}
     {% set filtered_station_modes = namespace(values=[]) %}
     {% for option in station_mode_options %}
       {% if option.value | int in selected_dataset.station_modes or option.value | int == selected_station_mode %}
-        {% if option.value | int == selected_station_mode and option.value | int not in selected_dataset.station_modes %}
+        {% if option.value | int in (selected_dataset.disabled_station_modes or []) %}
           {% set _ = option.update({'disabled': true}) %}
         {% endif %}
         {% set filtered_station_modes.values = filtered_station_modes.values + [option] %}
@@ -312,7 +319,7 @@
     {% set filtered_spatial_modes = namespace(values=[]) %}
     {% for option in spatial_mode_options %}
       {% if option.value | int in selected_dataset.spatial_modes or option.value | int == spatial_mode %}
-        {% if option.value | int == spatial_mode and option.value | int not in selected_dataset.spatial_modes %}
+        {% if option.value | int in (selected_dataset.disabled_spatial_modes or []) %}
           {% set _ = option.update({'disabled': true}) %}
         {% endif %}
         {% set filtered_spatial_modes.values = filtered_spatial_modes.values + [option] %}

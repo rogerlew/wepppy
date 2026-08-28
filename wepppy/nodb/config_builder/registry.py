@@ -466,7 +466,10 @@ def _synthesized_builder_components(
             label=profile.label,
             description=f"Authoritative Config Builder profile for {profile.label}.",
             owns=tuple(write.key for write in writes),
-            overrides=(("unitizer", "is_english"),),
+            overrides=(
+                ("general", "locales"),
+                ("unitizer", "is_english"),
+            ),
             writes=writes,
             constraints=ConstraintSet(
                 allowed_dem=profile.dem_sources,
@@ -569,6 +572,7 @@ def _synthesized_builder_components(
             writes=writes,
             constraints=ConstraintSet(),
             source_path=f"provider://landuse/{component_id}",
+            support_state=entry.support_state,
         )
 
     climate_ids = tuple(dict.fromkeys(
@@ -594,6 +598,7 @@ def _synthesized_builder_components(
             writes=(),
             constraints=ConstraintSet(),
             source_path=f"provider://climate/{component_id}",
+            support_state=dataset.support_state,
         )
 
     station_ids = tuple(dict.fromkeys(
@@ -653,7 +658,10 @@ def load_registry(root: str | Path = DEFAULT_PROFILES_ROOT) -> Registry:
     """Load and atomically validate every component document below ``root``."""
 
     profiles_root = Path(root)
-    sources = sorted(profiles_root.rglob("*.toml"))
+    try:
+        sources = sorted(profiles_root.rglob("*.toml"))
+    except OSError as exc:
+        raise RegistryError(f"{profiles_root}: component inventory is unavailable: {exc}") from exc
     if not sources:
         raise RegistryError(f"{profiles_root}: no component documents found")
     components: dict[str, ComponentDefinition] = {}
@@ -661,12 +669,15 @@ def load_registry(root: str | Path = DEFAULT_PROFILES_ROOT) -> Registry:
     digest = hashlib.sha256()
     for source in sources:
         relative = source.relative_to(profiles_root).as_posix()
-        source_bytes = source.read_bytes()
+        try:
+            source_bytes = source.read_bytes()
+            component = _parse_document(source, profiles_root)
+        except OSError as exc:
+            raise RegistryError(f"{source}: component document is unavailable: {exc}") from exc
         digest.update(relative.encode("utf-8"))
         digest.update(b"\0")
         digest.update(source_bytes)
         digest.update(b"\0")
-        component = _parse_document(source, profiles_root)
         folded = component.component_id.casefold()
         if folded in folded_ids:
             raise RegistryError(

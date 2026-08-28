@@ -272,6 +272,18 @@ def test_enabled_legacy_reader_preserves_malformed_override_exception(
         _load(root, shared, token="preset?values:source=a=b")
 
 
+def test_legacy_reader_rejects_locale_override_before_config_load(
+    roots: tuple[Path, Path]
+) -> None:
+    root, shared = roots
+
+    with pytest.raises(
+        ProjectConfigAuthorityError,
+        match="may not set general.locales",
+    ):
+        _load(root, shared, token='preset?general:locales=["eu"]')
+
+
 def test_enabled_legacy_reader_preserves_absolute_config_path(
     roots: tuple[Path, Path], tmp_path: Path
 ) -> None:

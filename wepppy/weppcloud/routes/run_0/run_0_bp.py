@@ -20,6 +20,7 @@ except ModuleNotFoundError:  # pragma: no cover - runtime image normally include
 
 import redis
 from itsdangerous import BadSignature, Signer
+from markupsafe import escape
 
 from .._common import *  # noqa: F401,F403
 from flask import current_app, session
@@ -41,11 +42,22 @@ from wepppy.nodb.core import (
     Wepp,
 )
 from wepppy.nodb.unitizer import Unitizer
-from wepppy.nodb.locales import get_climate_dataset
+from wepppy.nodb.locales import (
+    CLIMATE_SPATIAL_METHOD_RUNTIME,
+    CLIMATE_STATION_METHOD_RUNTIME,
+    LanduseDataset,
+    get_climate_dataset,
+    get_landcover_entry,
+    landcover_catalog_id,
+)
 from wepppy.nodb.project_config_capabilities import (
-    capability_ids,
+    BuilderRegistryUnavailableError,
+    CapabilityAuthorityInvalidError,
+    LocaleAuthorityInvalidError,
     capability_authority,
+    capability_ids,
     landuse_capability_modes,
+    resolve_run_capability_authority,
     soil_capability_modes,
 )
 from wepppy.nodb.project_config_reader import project_config_manifest_source_kind
@@ -1764,6 +1776,19 @@ def _stored_wepp_binary_options(authority, backend, representation, current_bina
     return options, disabled
 
 
+def _wepp_presentation_authority(config):
+    """Keep legacy WEPP controls outside WP12D's live locale-authority scope."""
+
+    if not bool(config.config_get_bool("config", "flattened", False)):
+        return None
+    schema_version = config.config_get_raw(
+        "capabilities", "schema_version", None
+    )
+    if schema_version in (None, 1, "1"):
+        return None
+    return capability_authority(config)
+
+
 def _v1_wepp_binary_options(config, current_binary):
     """Return present schema-v1 coarse-axis options, or ``None`` for legacy."""
 
@@ -1779,6 +1804,177 @@ def _v1_wepp_binary_options(config, current_binary):
         options.append((current_binary, current_binary))
         disabled.append(current_binary)
     return options, disabled
+
+
+def _landuse_method_modes_for_current(
+    authority,
+    landuse,
+    representation: str,
+    current_descriptor,
+):
+    current_runtime = str(getattr(landuse, "nlcd_db", "") or "").strip()
+    if not current_runtime:
+        return landuse_capability_modes(
+            landuse, authority.defaults["landuse_dataset"], representation
+        )
+    if (
+        current_descriptor is not None
+        and current_descriptor.catalog_id in authority.landuse_datasets
+    ):
+        return landuse_capability_modes(
+            landuse, current_descriptor.catalog_id, representation
+        )
+    return frozenset({int(getattr(landuse.mode, "value", landuse.mode))})
+
+
+def _apply_current_dataset_compatibility(
+    authority,
+    landuse,
+    climate,
+    climate_catalog,
+    landcover_datasets,
+    representation: str,
+):
+    """Add exact outside-axis current options without crossing dataset types."""
+
+    current_landcover = landuse.nlcd_db
+    current_landcover_descriptor = next(
+        (
+            item
+            for item in landuse.available_datasets
+            if item.kind == "landcover" and item.key == current_landcover
+        ),
+        None,
+    )
+    if current_landcover and current_landcover_descriptor is None:
+        try:
+            current_landcover_catalog_id = landcover_catalog_id(current_landcover)
+        except ValueError:
+            current_landcover_catalog_id = None
+        catalog_entry = (
+            get_landcover_entry(current_landcover_catalog_id)
+            if current_landcover_catalog_id is not None
+            else None
+        )
+        current_landcover_descriptor = LanduseDataset(
+            key=current_landcover,
+            description=(catalog_entry.label if catalog_entry is not None else current_landcover),
+            management_file="",
+            metadata={},
+            kind="landcover",
+            catalog_id=current_landcover_catalog_id,
+            support_state=(
+                catalog_entry.support_state if catalog_entry is not None else None
+            ),
+        )
+    landuse_method_modes = _landuse_method_modes_for_current(
+        authority,
+        landuse,
+        representation,
+        current_landcover_descriptor,
+    )
+
+    current_climate_catalog_id = climate.catalog_id
+    if (
+        current_climate_catalog_id
+        and current_climate_catalog_id not in authority.climate_datasets
+    ):
+        current_climate_descriptor = get_climate_dataset(current_climate_catalog_id)
+        if current_climate_descriptor is not None:
+            current_station_mode = int(
+                getattr(climate.climatestation_mode, "value", climate.climatestation_mode)
+            )
+            current_spatial_mode = int(
+                getattr(climate.climate_spatialmode, "value", climate.climate_spatialmode)
+            )
+            station_method_id = next(
+                (
+                    method_id
+                    for method_id, runtime_value in CLIMATE_STATION_METHOD_RUNTIME.items()
+                    if runtime_value == current_station_mode
+                ),
+                None,
+            )
+            spatial_method_id = next(
+                (
+                    method_id
+                    for method_id, runtime_value in CLIMATE_SPATIAL_METHOD_RUNTIME.items()
+                    if runtime_value == current_spatial_mode
+                ),
+                None,
+            )
+            current_payload = current_climate_descriptor.to_mapping()
+            current_payload.update({
+                "station_modes": [current_station_mode],
+                "default_station_mode": current_station_mode,
+                "disabled_station_modes": [current_station_mode],
+                "spatial_modes": [current_spatial_mode],
+                "default_spatial_mode": current_spatial_mode,
+                "disabled_spatial_modes": [current_spatial_mode],
+                "current_selection_disabled": True,
+            })
+            if station_method_id is not None:
+                current_payload.update({
+                    "station_method_ids": [station_method_id],
+                    "default_station_method_id": station_method_id,
+                })
+            if spatial_method_id is not None:
+                current_payload.update({
+                    "spatial_method_ids": [spatial_method_id],
+                    "default_spatial_method_id": spatial_method_id,
+                })
+            for payload in climate_catalog:
+                if payload.get("catalog_id") == current_climate_catalog_id:
+                    payload.update(current_payload)
+                    break
+            else:
+                climate_catalog.append(current_payload)
+
+    current_climate_payload = next(
+        (
+            payload
+            for payload in climate_catalog
+            if payload.get("catalog_id") == current_climate_catalog_id
+        ),
+        None,
+    )
+    if current_climate_payload is not None:
+        current_station_mode = int(
+            getattr(climate.climatestation_mode, "value", climate.climatestation_mode)
+        )
+        current_spatial_mode = int(
+            getattr(climate.climate_spatialmode, "value", climate.climate_spatialmode)
+        )
+        station_modes = list(current_climate_payload.get("station_modes") or [])
+        spatial_modes = list(current_climate_payload.get("spatial_modes") or [])
+        if current_station_mode not in station_modes:
+            current_climate_payload["station_modes"] = [
+                *station_modes, current_station_mode,
+            ]
+            current_climate_payload["disabled_station_modes"] = [
+                current_station_mode
+            ]
+        if current_spatial_mode not in spatial_modes:
+            current_climate_payload["spatial_modes"] = [
+                *spatial_modes, current_spatial_mode,
+            ]
+            current_climate_payload["disabled_spatial_modes"] = [
+                current_spatial_mode
+            ]
+
+    disabled_landcover_datasets = []
+    if (
+        current_landcover
+        and current_landcover_descriptor is not None
+        and current_landcover_descriptor.catalog_id not in authority.landuse_datasets
+    ):
+        if all(
+            item.key != current_landcover_descriptor.key
+            for item in landcover_datasets
+        ):
+            landcover_datasets.append(current_landcover_descriptor)
+        disabled_landcover_datasets.append(current_landcover_descriptor.key)
+    return landuse_method_modes, disabled_landcover_datasets
 
 
 def _build_runs0_context(runid, config, playwright_load_all):
@@ -1912,8 +2108,9 @@ def _build_runs0_context(runid, config, playwright_load_all):
         ("user_cover_transform", "User-Defined Transform")
     ]
     disabled_wepp_bin_options = []
-    run_capability_authority = capability_authority(wepp)
-    if run_capability_authority is None:
+    run_capability_authority = resolve_run_capability_authority(wepp).graph
+    stored_wepp_authority = _wepp_presentation_authority(wepp)
+    if stored_wepp_authority is None:
         v1_options = _v1_wepp_binary_options(wepp, wepp.wepp_bin)
         if v1_options is None:
             wepp_bin_options = [(opt, opt) for opt in get_linux_wepp_bin_opts()]
@@ -1924,13 +2121,13 @@ def _build_runs0_context(runid, config, playwright_load_all):
         backend_name = getattr(backend_value, "name", backend_value)
         delineation_backend = str(backend_name or "").strip().lower()
         if not delineation_backend:
-            delineation_backend = run_capability_authority.defaults["delineation_backend"]
+            delineation_backend = stored_wepp_authority.defaults["delineation_backend"]
         watershed_representation = (
             "multiple-ofe" if wepp.multi_ofe else "single-ofe"
         )
         current_wepp_bin = wepp.wepp_bin
         wepp_bin_options, disabled_wepp_bin_options = _stored_wepp_binary_options(
-            run_capability_authority,
+            stored_wepp_authority,
             delineation_backend,
             watershed_representation,
             current_wepp_bin,
@@ -1942,38 +2139,16 @@ def _build_runs0_context(runid, config, playwright_load_all):
     disabled_landcover_datasets = []
     if run_capability_authority is not None:
         climate_default_catalog_id = run_capability_authority.defaults["climate_dataset"]
-        landuse_method_modes = landuse_capability_modes(
-            landuse,
-            run_capability_authority.defaults["landuse_dataset"],
-            "multiple-ofe" if wepp.multi_ofe else "single-ofe",
-        )
-        current_catalog_id = climate.catalog_id
-        if (
-            current_catalog_id
-            and current_catalog_id not in run_capability_authority.climate_datasets
-        ):
-            current_descriptor = get_climate_dataset(current_catalog_id)
-            if current_descriptor is not None:
-                current_payload = current_descriptor.to_mapping()
-                current_payload["current_selection_disabled"] = True
-                climate_catalog.append(current_payload)
-        current_landcover = landuse.nlcd_db
-        if current_landcover:
-            allowed_landcover_ids = set(run_capability_authority.landuse_datasets)
-            current_descriptor = next(
-                (
-                    item
-                    for item in landuse.available_datasets
-                    if item.kind == "landcover" and item.key == current_landcover
-                ),
-                None,
+        landuse_method_modes, disabled_landcover_datasets = (
+            _apply_current_dataset_compatibility(
+                run_capability_authority,
+                landuse,
+                climate,
+                climate_catalog,
+                landcover_datasets,
+                "multiple-ofe" if wepp.multi_ofe else "single-ofe",
             )
-            if (
-                current_descriptor is not None
-                and current_descriptor.catalog_id not in allowed_landcover_ids
-            ):
-                landcover_datasets.append(current_descriptor)
-                disabled_landcover_datasets.append(current_descriptor.key)
+        )
 
     _log_access(base_wd, current_user, request.remote_addr)
     timestamp = datetime.now()
@@ -2228,6 +2403,32 @@ def runs0(runid, config):
         raise
     except PreferenceResolutionError:
         return preference_resolution_error_response(runid)
+    except LocaleAuthorityInvalidError as exc:
+        return _render_run_authority_error_page(
+            runid,
+            config,
+            status=409,
+            code="locale_authority_invalid",
+            details=str(exc),
+        )
+    except CapabilityAuthorityInvalidError as exc:
+        return _render_run_authority_error_page(
+            runid,
+            config,
+            status=409,
+            code="capability_authority_invalid",
+            details=str(exc),
+        )
+    except BuilderRegistryUnavailableError as exc:
+        response = _render_run_authority_error_page(
+            runid,
+            config,
+            status=503,
+            code="builder_registry_error",
+            details=str(exc),
+        )
+        response.headers["Retry-After"] = "5"
+        return response
     except Exception as exc:
         stacktrace = traceback.format_exc()
         # Reuse exception_factory for logging + run exception log side effects.
@@ -2445,6 +2646,31 @@ def _render_run_internal_error_page(runid: str, config: str, stacktrace: str) ->
         "stacktrace": stacktrace,
     }
     return make_response(render_template("errors/run_0_internal_error.htm", **context), 500)
+
+
+def _render_run_authority_error_page(
+    runid: str,
+    config: str,
+    *,
+    status: int,
+    code: str,
+    details: str,
+) -> Response:
+    error_id = uuid.uuid4().hex
+    escaped_runid = escape(runid)
+    escaped_config = escape(config)
+    escaped_code = escape(code)
+    escaped_details = escape(details)
+    escaped_error_id = escape(error_id)
+    body = f"""<!doctype html>
+<html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"robots\"
+content=\"noindex,nofollow,noarchive\"><title>{status} - Run authority error</title></head>
+<body><main><h1>{status} - Run authority error</h1>
+<p>Run <code>{escaped_runid}</code> (config <code>{escaped_config}</code>) could not load.</p>
+<p>Error code: <code>{escaped_code}</code></p>
+<p>Error ID: <code>{escaped_error_id}</code></p>
+<h2>Diagnostic details</h2><pre>{escaped_details}</pre></main></body></html>"""
+    return make_response(body, status)
 
 
 @run_0_bp.app_errorhandler(403)
