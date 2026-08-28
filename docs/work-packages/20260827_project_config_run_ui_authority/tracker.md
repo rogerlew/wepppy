@@ -4,10 +4,11 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-27 20:31 UTC
-**Current phase**: candidate commit and exact-host Forest acceptance
-**Last updated**: 2026-08-28 07:02 UTC
-**Next milestone**: commit/push the Forest worker hotfix and complete exact-host
-writer/reader-floor rollback acceptance
+**Current phase**: Forest technically accepted / scope audit ratification
+pending
+**Last updated**: 2026-08-28 07:12 UTC
+**Next milestone**: exact ratification of `PC-24/WP12D-20260828-4`, then parent
+WP12 promotion review; production remains reserved
 **Security impact**: `high`
 **Dedicated security review**: `yes`
 **Security artifact**: `artifacts/20260827_security_review.md`
@@ -27,12 +28,13 @@ PC-24 owns `.cfg` locale normalization and run-UI authority parity.
 
 ### In Progress
 
-- [ ] Commit and push the reviewed candidate, then validate it on exact host
-  `forest` without an image build.
+- [ ] Obtain exact operator ratification of audit-only amendment
+  `PC-24/WP12D-20260828-4`.
 
 ### Ready / Backlog
 
-- [ ] Push and validate exact candidate on `forest`; hand off to WP12 without
+- [ ] Carry the exact scope comparison and technically accepted candidate into
+  WP12 without
   production deployment.
 
 ### Blocked
@@ -42,6 +44,25 @@ PC-24 owns `.cfg` locale normalization and run-UI authority parity.
 
 ### Done
 
+- [x] Pushed exact candidate `588608f1a`, restored it on exact host `forest`
+  without rebuilding image `6ac7e7103046`, and confirmed both health endpoints
+  return HTTP 200 (2026-08-28 07:08 UTC).
+- [x] Completed authenticated acknowledged refresh job
+  `b591cd8b-18b4-4005-ae2e-8edec2d7f594` with the exact reviewed config digest
+  transition `92ed9605…0948` to `f41b0672…d7ca`; post-update authenticated
+  availability is settled and retains amendment sequence 1
+  (2026-08-28 07:08 UTC).
+- [x] Reopened the refreshed schema-v3 run under exact reader floor `80f4810b7`
+  with the update writer disabled, proved config/manifest hashes unchanged,
+  restored candidate `588608f1a`, and removed the temporary rollback worktree
+  and override (2026-08-28 07:08 UTC).
+- [x] Recorded exact-host writer and rollback evidence in
+  `artifacts/20260828_writer_forest_acceptance.md`
+  (2026-08-28 07:08 UTC).
+- [x] Compared checkpoint-to-candidate changed files with the ratified exact
+  source boundary and documented three required but unlisted support paths in
+  `artifacts/20260828_scope_audit_correction.md`; no unrelated dirty path was
+  staged (2026-08-28 07:12 UTC).
 - [x] Committed/pushed implementation revision `d000b0cc4`, recreated
   `weppcloud`, `rq-engine`, and `rq-worker` on exact host `forest` without an
   image build, and completed an authenticated real-run update preview
@@ -342,11 +363,12 @@ claimed to understand future structural graphs.
 - [x] Binding correctness/governance/security checkpoint reviews and final
   correctness/security implementation reviews have no unresolved High or
   Medium.
-- [ ] Exact-host `forest` legacy/stored acceptance without image rebuild.
-- [ ] Exact-host `forest` acknowledged schema-v3 refresh/reopen acceptance and
+- [x] Exact-host `forest` legacy/stored acceptance without image rebuild.
+- [x] Exact-host `forest` acknowledged schema-v3 refresh/reopen acceptance and
   rollback to the recorded WP12D reader floor proving the refreshed config and
   manifest remain readable and unchanged.
-- [ ] Scope-vs-changed-files comparison carried into WP12.
+- [ ] Scope-vs-changed-files comparison carried into WP12 after exact operator
+  ratification of `PC-24/WP12D-20260828-4`.
 
 ## Exact Dirty-Path Exclusions
 

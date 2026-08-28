@@ -1,6 +1,7 @@
 # Project Config Run UI Authority (WP12D)
 
-**Status**: Reader floor accepted on Forest / implementation active (2026-08-28)
+**Status**: Forest technically accepted / scope audit ratification pending
+(2026-08-28)
 **Timezone**: UTC
 Initiative branch: feature/project-owned-config
 Canonical branch: master
@@ -74,26 +75,26 @@ schema-v3 project. Interfaces navigation remains unchanged.
 
 ## Success Criteria
 
-- [ ] The row-level 128-config inventory matches actual effective config and
+- [x] The row-level 128-config inventory matches actual effective config and
   every row resolves to its ratified authority mode.
-- [ ] Both Config Builder links and the Interfaces page remain unchanged.
-- [ ] Five recognized legacy base locales render and enforce their live Builder
+- [x] Both Config Builder links and the Interfaces page remain unchanged.
+- [x] Five recognized legacy base locales render and enforce their live Builder
   graph while stored schema-v2/v3 runs remain unaffected by registry drift.
-- [ ] Eligible complete schema-v3 projects expose current capabilities only
+- [x] Eligible complete schema-v3 projects expose current capabilities only
   after an exact preview-bound acknowledgment and atomic manifest-recorded
   refresh; schema-v2 refresh remains unavailable.
-- [ ] Refresh preserves existing project selection defaults and runtime
+- [x] Refresh preserves existing project selection defaults and runtime
   selectors exactly, and becomes unavailable rather than substituting a value
   when a preserved selection is incompatible with the current envelope.
-- [ ] Only congruent schema-v3 Builder-source projects may refresh; preset
+- [x] Only congruent schema-v3 Builder-source projects may refresh; preset
   sources, schema-v2, and locale/selection mismatches remain unavailable.
-- [ ] The writer candidate is rollback-safe to a recorded WP12D reader floor
+- [x] The writer candidate is rollback-safe to a recorded WP12D reader floor
   that understands every structural identity the writer can persist.
-- [ ] Stale persisted locale state does not override effective `.cfg` locale
+- [x] Stale persisted locale state does not override effective `.cfg` locale
   and no run file is rewritten during reopen.
-- [ ] Current outside-authority state remains observable and exactly rebuildable
+- [x] Current outside-authority state remains observable and exactly rebuildable
   while authorized recovery choices remain selectable.
-- [ ] Frontend/Python/full-suite, documentation, correctness, security, and
+- [x] Frontend/Python/full-suite, documentation, correctness, security, and
   Forest gates pass.
 
 ## Parameterization ADR Gate

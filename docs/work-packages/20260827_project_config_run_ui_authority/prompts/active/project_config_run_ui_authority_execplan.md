@@ -112,7 +112,13 @@ migrated.
 - [x] (2026-08-28 07:02Z) Pass the final exact complete Python gate with
   7,221 tests passed and 63 skipped, plus an independently rerun combined
   post-apply settlement test and refreshed static/documentation gates.
-- [ ] Push and validate exact candidate on `forest`; hand it to WP12 without
+- [x] (2026-08-28 07:08Z) Push and validate exact candidate `588608f1a` on
+  `forest`, complete authenticated acknowledged apply and settled availability,
+  roll back to reader floor `80f4810b7` without changing refreshed run bytes,
+  and restore the candidate without production deployment.
+- [ ] Ratify audit-only amendment `PC-24/WP12D-20260828-4`, record the exact
+  scope-vs-changed-files comparison, and hand the technically accepted
+  candidate to WP12.
   production deployment.
 
 ## Surprises & Discoveries
@@ -296,9 +302,12 @@ Vulture, changed-file broad-exception enforcement, diff checks, and the RQ
 graph pass. After the Forest worker-load, identity-handoff, and provenance-
 settlement corrections, the exact complete Python suite passes with 7,221
 tests passed and 63 skipped. Independent correctness and security reviews are
-READY with no remaining in-scope finding. Settlement-fix commit/push and exact-
-host reader-floor rollback acceptance remain; production deployment remains
-excluded.
+READY with no remaining in-scope finding. Exact-host authenticated writer,
+settled availability, reader-floor rollback, byte-preservation, and candidate-
+restore acceptance pass on unchanged image `6ac7e7103046`. The final scope
+audit found three required but unlisted support paths and is durably proposed
+as audit-only amendment `PC-24/WP12D-20260828-4`. Parent WP12 handoff waits for
+exact operator ratification; production deployment remains excluded.
 
 ## Context and Orientation
 
