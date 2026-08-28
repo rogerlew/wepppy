@@ -173,26 +173,6 @@ var Project = (function () {
         });
     }
 
-    function updateTitleWithName(nameValue) {
-        try {
-            var parts = (document.title || "").split(" - ");
-            var baseTitle = parts[0] || document.title || "";
-            document.title = baseTitle + " - " + (nameValue || "Untitled");
-        } catch (err) {
-            console.warn("Failed to update document title with project name", err);
-        }
-    }
-
-    function updateTitleWithScenario(scenarioValue) {
-        try {
-            var parts = (document.title || "").split(" - ");
-            var baseTitle = parts[0] || document.title || "";
-            document.title = baseTitle + " - " + (scenarioValue || "");
-        } catch (err) {
-            console.warn("Failed to update document title with scenario", err);
-        }
-    }
-
     function notifyError(message, error) {
         var safeMessage = sanitizeModDiagnosticLine(message || "Error");
         if (error) {
@@ -1288,7 +1268,6 @@ var Project = (function () {
                     state.name = savedName;
                     project._currentName = savedName;
                     syncFieldValue(dom, NAME_SELECTOR, savedName);
-                    updateTitleWithName(savedName);
                     if (options.notify !== false) {
                         var displayName = savedName || "Untitled";
                         project.notifyCommandBar('Saved project name to "' + displayName + '"');
@@ -1376,7 +1355,6 @@ var Project = (function () {
                     state.scenario = savedScenario;
                     project._currentScenario = savedScenario;
                     syncFieldValue(dom, SCENARIO_SELECTOR, savedScenario);
-                    updateTitleWithScenario(savedScenario);
                     if (options.notify !== false) {
                         var message = savedScenario ? ('Saved scenario to "' + savedScenario + '"') : "Cleared scenario";
                         project.notifyCommandBar(message);

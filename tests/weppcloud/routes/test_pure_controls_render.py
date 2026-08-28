@@ -5,11 +5,12 @@ import hashlib
 import json
 import itertools
 import re
+from html import unescape
 from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
-from jinja2 import DebugUndefined, Environment, FileSystemLoader
+from jinja2 import DebugUndefined, Environment, FileSystemLoader, select_autoescape
 
 from wepppy.weppcloud.feature_registry.runtime import (
     config_maturity_badge,
@@ -3570,6 +3571,74 @@ def test_runs0_template_places_rusle_after_wepp_sections() -> None:
     wepp_section_index = source.index('<section id="wepp" class="wc-stack">')
     rusle_section_index = source.index('<div data-mod-section="rusle"')
     assert wepp_section_index < rusle_section_index
+
+
+def _render_runs0_title(
+    jinja_env: Environment,
+    *,
+    runid: str,
+    configname: str | None,
+    name: str | None,
+    current_runid: str,
+) -> str:
+    escaped_env = jinja_env.overlay(
+        autoescape=select_autoescape(
+            enabled_extensions=("htm", "html"),
+            default_for_string=True,
+        )
+    )
+    template = escaped_env.get_template("runs0_pure.htm")
+    context = template.new_context(
+        {
+            "runid": runid,
+            "ron": SimpleNamespace(configname=configname, name=name),
+            "current_ron": SimpleNamespace(runid=current_runid),
+        }
+    )
+    return "".join(template.blocks["title"](context))
+
+
+@pytest.mark.parametrize(
+    ("configname", "name", "current_runid"),
+    [
+        (None, None, "route-run"),
+        ("legacy-config", "Project Display Name", "nested-pup-run"),
+    ],
+)
+def test_runs0_title_is_exact_route_runid_for_all_metadata_states(
+    jinja_env: Environment,
+    configname: str | None,
+    name: str | None,
+    current_runid: str,
+) -> None:
+    title = _render_runs0_title(
+        jinja_env,
+        runid="route-run",
+        configname=configname,
+        name=name,
+        current_runid=current_runid,
+    )
+
+    assert title == "route-run"
+    assert "None" not in title
+    assert "legacy-config" not in title
+    assert "Project Display Name" not in title
+
+
+def test_runs0_title_autoescapes_html_significant_runid(
+    jinja_env: Environment,
+) -> None:
+    title = _render_runs0_title(
+        jinja_env,
+        runid='<route&"run">',
+        configname="legacy-config",
+        name="Project Display Name",
+        current_runid="nested-pup-run",
+    )
+
+    assert title == "&lt;route&amp;&#34;run&#34;&gt;"
+    assert unescape(title) == '<route&"run">'
+    assert "<route" not in title
 
 
 def test_runs0_template_places_roads_after_debris_flow() -> None:

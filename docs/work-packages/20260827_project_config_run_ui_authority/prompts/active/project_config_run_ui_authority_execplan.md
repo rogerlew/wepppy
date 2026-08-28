@@ -198,13 +198,20 @@ migrated.
 - [x] (2026-08-28 23:11Z) Commit amendment 7 as standalone documentation-only
   checkpoint `8a15b963c26a4d9201e238610bfdbbf1734c77a6` and verify its ancestry before
   any implementation or test edit.
-- [ ] Make the established run page title exactly the route `runid` throughout
-  initial render and Project controller name/scenario updates, add rendered and
-  Jest regressions, pass scoped gates, and obtain independent implementation
-  correctness review.
+- [x] (2026-08-28 23:31Z) Make the established run page title exactly the route
+  `runid` throughout initial render and Project controller name/scenario
+  updates, add rendered and Jest regressions, pass scoped and complete gates,
+  and obtain independent implementation correctness READY with High 0, Medium
+  0, and Low 0.
 
 ## Surprises & Discoveries
 
+- Observation: rebuilding the generated controller bundle with host `python3`
+  failed because that interpreter lacks Jinja2, while the canonical
+  `wctl exec weppcloud python` build completed and produced the expected source
+  parity.
+  Evidence: the amendment-7 build attempt and successful canonical container
+  rebuild on 2026-08-28; the executable plan now names the container command.
 - Observation: Config Builder already validates every user-originated form
   change, but programmatic option/default hydration emits no `change` event.
   Evidence: `ConfigBuilder.init()` calls `validate(false)` from its delegated
@@ -481,10 +488,19 @@ WP12 retain their existing status; parent WP12 retains the scope comparison,
 merge, and production promotion gates. Production deployment remains excluded
 from WP12D.
 
-Bounded amendment `PC-13/WP12D-20260828-7` is documented and implementation is
-pending its required reviewed standalone contract checkpoint. It changes only
-the established run page's render-time document identity; no project data,
-route, configuration resolution, merge, or deployment behavior is in scope.
+Bounded amendment `PC-13/WP12D-20260828-7` is ratified, checkpointed as
+`8a15b963c26a4d9201e238610bfdbbf1734c77a6`, and implemented within its exact
+source boundary. The established run page now renders the exact route `runid`
+as its document title and Project name/scenario saves and clears do not mutate
+that identity; their persistence, fields, events, and notifications remain.
+Focused Project Jest passes 54 tests, rendered title coverage passes 3 tests,
+the complete frontend passes 820 tests across 107 suites, Pure controls pass
+158 tests, WEPPcloud routes pass 1,070 tests, and the repository-wide Python
+gate passes 7,272 tests with 63 skipped. Frontend lint, generated-bundle parity,
+documentation, and diff gates pass. Independent implementation correctness is
+READY with High 0, Medium 0, and Low 0. WP07, PC-13, WP12D, and WP12 remain
+unchanged; no push, merge, Forest deployment, or production deployment is part
+of amendment 7, and WP12 retains exclusive merge and production authority.
 
 ## Context and Orientation
 
@@ -709,7 +725,7 @@ For amendment 6, after its standalone checkpoint is an ancestor, iterate with:
     wctl run-npm test -- config_builder
     wctl run-pytest tests/weppcloud/routes/test_config_builder_ui.py
     wctl run-npm lint
-    python wepppy/weppcloud/controllers_js/build_controllers_js.py
+    wctl exec weppcloud python wepppy/weppcloud/controllers_js/build_controllers_js.py
 
 Then run `wctl run-npm test`, `wctl run-pytest tests --maxfail=1`,
 `git diff --check`, and `wctl doc-lint --path` separately for the canonical
@@ -723,7 +739,7 @@ implementation. Iterate with:
 
     wctl run-npm test -- project
     wctl run-pytest tests/weppcloud/routes/test_pure_controls_render.py -k runs0_title --maxfail=1
-    python wepppy/weppcloud/controllers_js/build_controllers_js.py
+    wctl exec weppcloud python wepppy/weppcloud/controllers_js/build_controllers_js.py
     wctl run-npm lint
 
 Then run `wctl run-npm test`, the complete focused

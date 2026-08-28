@@ -232,6 +232,7 @@ control. Authorization, acknowledgment, and freshness remain server-enforced.
 ## Project Controller Modernization
 - `project.js` now consumes `WCDom`, `WCHttp`, and `WCForms` exclusively—jQuery hooks have been replaced with delegated listeners that target `data-project-field`, `data-project-toggle`, and `data-project-action` attributes in the header and power-user templates. Update templates with those attributes instead of inline `on*` handlers when expanding the control.
 - Command bar feedback and unitizer integration are still exposed through `Project.getInstance()`, but outbound network calls flow through `WCHttp.postForm`/`postJson`, enabling native Promise semantics and shared error handling.
+- The established run page owns its document title as the exact route `runid`. Project name and scenario saves update their fields, events, and command-bar feedback but must not mutate `document.title`.
 - Regression coverage lives in `controllers_js/__tests__/project.test.js`. Run it via `wctl run-npm test` (wrapper for `npm --prefix wepppy/weppcloud/static-src test`). The suite verifies name/scenario saves, debounce behavior, and failure handling so future refactors can rely on automated guardrails.
 - Style checks: `wctl run-npm lint` lints `controllers_js/**/*.js`; `wctl run-npm check` runs lint followed by Jest in one step.
 
