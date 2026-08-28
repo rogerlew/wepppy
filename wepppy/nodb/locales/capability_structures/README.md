@@ -10,6 +10,13 @@ contract amendment, fixture, reader-first Forest deployment, and rollback
 evidence before a writer may persist it. Test-only evolution belongs in an
 isolated in-memory catalog and must never be added here.
 
+PC-24/WP12D amendment 5 appends one schema-v3 identity for each of the five
+Builder locales. Those identities add the ratified climate envelopes and, for
+Continental US, the complete annual NLCD, NLCD Ever Forest, and eMapR vote
+land-cover envelope. The prior schema-v3 identities remain readable. The first
+reader revision is recorded immediately after the standalone reader-floor
+commit, before any writer or locale-profile change.
+
 The structural payload includes locale, non-runtime axes, relations,
 per-dataset method defaults, and normalized backend/representation pairs. It
 excludes project `capability_defaults`, provider/binary provenance, the binary

@@ -30,6 +30,7 @@ from wepppy.nodb.locales.climate_catalog import (
     CLIMATE_STATION_METHOD_RUNTIME,
     default_climate_provider_tokens,
     get_climate_station_database,
+    iter_climate_datasets,
 )
 from wepppy.nodb.locales.landuse_catalog import (
     get_landcover_entry,
@@ -58,6 +59,86 @@ def _binary_revisions(binary_ids: tuple[str, ...]) -> dict[str, str]:
         binary_id: f"provider-v1:watershed={'a' * 64}:hillslope={'b' * 64}"
         for binary_id in binary_ids
     }
+
+
+_AMENDMENT5_CLIMATE_DATASETS = {
+    "continental-us": (
+        "vanilla_cligen",
+        "prism_stochastic",
+        "observed_daymet",
+        "observed_gridmet",
+        "dep_nexrad",
+        "future_cmip5",
+        "user_defined_cli",
+    ),
+    "europe": ("vanilla_cligen", "eobs_modified", "user_defined_cli"),
+    "canada": ("vanilla_cligen", "observed_daymet", "user_defined_cli"),
+    "australia": ("vanilla_cligen", "agdc", "user_defined_cli"),
+    "global-earth": ("vanilla_cligen", "user_defined_cli"),
+}
+_AMENDMENT5_STRUCTURE_HASHES = {
+    "continental-us": "3151e7e11be97967b32b887c6832b5286d252bf9b85841b889d5dcfbb24a8faf",
+    "europe": "18eda2d24f57be54993d2f0b609c59de6c26a17632d8653cc62b5a926e66f2c7",
+    "canada": "07f733c2b13589ac637fc898859b8e3eac4902199606a2580796eec47765d7b4",
+    "australia": "1fd066a9e5bef26373414988d9f98e04fb84a8d0d08f7af280eef7cb1779a497",
+    "global-earth": "b1bbcd60e71b65064455da3abaacdb239a433bafe08c46854a2ffcfc9c50de92",
+}
+
+
+def _amendment5_reader_fixture(profile_id: str):
+    binary_ids = ("wepp_260803",)
+    baseline = build_locale_capability_graph(
+        profile_id,
+        binary_ids,
+        _binary_revisions(binary_ids),
+    )
+    climate_by_id = {item.catalog_id: item for item in iter_climate_datasets()}
+    climate_ids = _AMENDMENT5_CLIMATE_DATASETS[profile_id]
+    station_relations = {
+        source: climate_by_id[source].station_method_ids for source in climate_ids
+    }
+    spatial_relations = {
+        source: climate_by_id[source].spatial_method_ids for source in climate_ids
+    }
+    changes = {
+        "climate_datasets": climate_ids,
+        "climate_station_methods": tuple(dict.fromkeys(
+            method
+            for source in climate_ids
+            for method in station_relations[source]
+        )),
+        "climate_spatial_methods": tuple(dict.fromkeys(
+            method
+            for source in climate_ids
+            for method in spatial_relations[source]
+        )),
+        "climate_station_methods_by_dataset": MappingProxyType(station_relations),
+        "climate_spatial_methods_by_dataset": MappingProxyType(spatial_relations),
+        "climate_station_defaults": MappingProxyType({
+            source: climate_by_id[source].default_station_method_id
+            for source in climate_ids
+        }),
+        "climate_spatial_defaults": MappingProxyType({
+            source: climate_by_id[source].default_spatial_method_id
+            for source in climate_ids
+        }),
+    }
+    if profile_id == "continental-us":
+        landuse_ids = tuple(
+            [f"nlcd-ever-forest-{year}" for year in range(2024, 1984, -1)]
+            + [f"nlcd-{year}" for year in range(2024, 1984, -1)]
+            + [f"emapr-vote-{year}" for year in range(2017, 1983, -1)]
+        )
+        changes.update({
+            "landuse_datasets": landuse_ids,
+            "landuse_methods_by_dataset": MappingProxyType({
+                source: ("gridded", "single", "upload") for source in landuse_ids
+            }),
+            "landuse_method_defaults": MappingProxyType({
+                source: "gridded" for source in landuse_ids
+            }),
+        })
+    return replace(baseline, **changes)
 
 
 class ParsedConfig:
@@ -632,10 +713,11 @@ def test_production_structure_catalog_retains_payload_hash_and_reader_provenance
         for record in by_hash.values()
     ]
 
-    assert len(records) == 6
+    assert len(records) == 11
     assert {record.first_reader_revision for record in records} == {
         "3e8d0d09b",
         "280cf7e84",
+        "pending-amendment5-reader-floor",
     }
     assert all(
         hashlib.sha256(
@@ -643,6 +725,52 @@ def test_production_structure_catalog_retains_payload_hash_and_reader_provenance
         ).hexdigest() == record.structure_sha256
         for record in records
     )
+
+
+@pytest.mark.parametrize(
+    ("profile_id", "prior_sha256"),
+    (
+        ("continental-us", "5296d3519d578164b6a5874a820991c935b394e5336aba41fe3e8f8d0dd4e29b"),
+        ("europe", "c05b6a66f823f69cf8f1d44b69c206da1dc9449b278662c680248a3f3b755aeb"),
+        ("canada", "dd7f7cdb0d861a159df64a4806ee5585f0208b93982990e30974055b1f2a41e7"),
+        ("australia", "bb4bdde8740d689aa378bcf744a942d997b9c69cdc445d80be07c749635efc9a"),
+        ("global-earth", "db1c185cf6b5def23064752847f585f3522c0b971460d9c688b424cb04c706ae"),
+    ),
+)
+def test_amendment5_reader_floor_accepts_prior_and_new_structures(
+    profile_id: str,
+    prior_sha256: str,
+) -> None:
+    records = capability_graph_module._PRODUCTION_STRUCTURE_CATALOG[(3, profile_id)]
+    evolved = _amendment5_reader_fixture(profile_id)
+
+    assert set(records) == {prior_sha256, _AMENDMENT5_STRUCTURE_HASHES[profile_id]}
+    assert capability_graph_module.capability_structure_sha256(evolved) == (
+        _AMENDMENT5_STRUCTURE_HASHES[profile_id]
+    )
+    evolved.validate()
+
+
+def test_amendment5_reader_floor_does_not_advance_runtime_writer() -> None:
+    binary_ids = ("wepp_260803",)
+    emitted = {
+        profile_id: capability_graph_module.capability_structure_sha256(
+            build_locale_capability_graph(
+                profile_id,
+                binary_ids,
+                _binary_revisions(binary_ids),
+            )
+        )
+        for profile_id in _AMENDMENT5_CLIMATE_DATASETS
+    }
+
+    assert emitted == {
+        "continental-us": "5296d3519d578164b6a5874a820991c935b394e5336aba41fe3e8f8d0dd4e29b",
+        "europe": "c05b6a66f823f69cf8f1d44b69c206da1dc9449b278662c680248a3f3b755aeb",
+        "canada": "dd7f7cdb0d861a159df64a4806ee5585f0208b93982990e30974055b1f2a41e7",
+        "australia": "bb4bdde8740d689aa378bcf744a942d997b9c69cdc445d80be07c749635efc9a",
+        "global-earth": "db1c185cf6b5def23064752847f585f3522c0b971460d9c688b424cb04c706ae",
+    }
 
 
 def test_structure_identity_excludes_project_defaults_and_provider_binary_state() -> None:

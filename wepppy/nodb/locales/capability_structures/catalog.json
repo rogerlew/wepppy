@@ -1261,6 +1261,1976 @@
         "schema_version": 3
       },
       "structure_sha256": "db1c185cf6b5def23064752847f585f3522c0b971460d9c688b424cb04c706ae"
+    },
+    {
+      "first_reader_revision": "pending-amendment5-reader-floor",
+      "payload": {
+        "schema_version": 3,
+        "locale_profile": "continental-us",
+        "axes": {
+          "dem_sources": [
+            "usgs-ned1-2024",
+            "usgs-ned13-2022"
+          ],
+          "climate_datasets": [
+            "vanilla_cligen",
+            "prism_stochastic",
+            "observed_daymet",
+            "observed_gridmet",
+            "dep_nexrad",
+            "future_cmip5",
+            "user_defined_cli"
+          ],
+          "climate_station_databases": [
+            "cligen-stations-legacy",
+            "cligen-stations-2015",
+            "cligen-stations-ghcn"
+          ],
+          "climate_station_methods": [
+            "auto",
+            "distance",
+            "multi_factor",
+            "user_defined"
+          ],
+          "climate_spatial_methods": [
+            "single",
+            "multiple",
+            "interpolated"
+          ],
+          "soil_datasets": [
+            "ssurgo-gnatsgso-2025"
+          ],
+          "soil_builders": [
+            "gridded",
+            "single_mukey",
+            "single_database"
+          ],
+          "landuse_datasets": [
+            "nlcd-ever-forest-2024",
+            "nlcd-ever-forest-2023",
+            "nlcd-ever-forest-2022",
+            "nlcd-ever-forest-2021",
+            "nlcd-ever-forest-2020",
+            "nlcd-ever-forest-2019",
+            "nlcd-ever-forest-2018",
+            "nlcd-ever-forest-2017",
+            "nlcd-ever-forest-2016",
+            "nlcd-ever-forest-2015",
+            "nlcd-ever-forest-2014",
+            "nlcd-ever-forest-2013",
+            "nlcd-ever-forest-2012",
+            "nlcd-ever-forest-2011",
+            "nlcd-ever-forest-2010",
+            "nlcd-ever-forest-2009",
+            "nlcd-ever-forest-2008",
+            "nlcd-ever-forest-2007",
+            "nlcd-ever-forest-2006",
+            "nlcd-ever-forest-2005",
+            "nlcd-ever-forest-2004",
+            "nlcd-ever-forest-2003",
+            "nlcd-ever-forest-2002",
+            "nlcd-ever-forest-2001",
+            "nlcd-ever-forest-2000",
+            "nlcd-ever-forest-1999",
+            "nlcd-ever-forest-1998",
+            "nlcd-ever-forest-1997",
+            "nlcd-ever-forest-1996",
+            "nlcd-ever-forest-1995",
+            "nlcd-ever-forest-1994",
+            "nlcd-ever-forest-1993",
+            "nlcd-ever-forest-1992",
+            "nlcd-ever-forest-1991",
+            "nlcd-ever-forest-1990",
+            "nlcd-ever-forest-1989",
+            "nlcd-ever-forest-1988",
+            "nlcd-ever-forest-1987",
+            "nlcd-ever-forest-1986",
+            "nlcd-ever-forest-1985",
+            "nlcd-2024",
+            "nlcd-2023",
+            "nlcd-2022",
+            "nlcd-2021",
+            "nlcd-2020",
+            "nlcd-2019",
+            "nlcd-2018",
+            "nlcd-2017",
+            "nlcd-2016",
+            "nlcd-2015",
+            "nlcd-2014",
+            "nlcd-2013",
+            "nlcd-2012",
+            "nlcd-2011",
+            "nlcd-2010",
+            "nlcd-2009",
+            "nlcd-2008",
+            "nlcd-2007",
+            "nlcd-2006",
+            "nlcd-2005",
+            "nlcd-2004",
+            "nlcd-2003",
+            "nlcd-2002",
+            "nlcd-2001",
+            "nlcd-2000",
+            "nlcd-1999",
+            "nlcd-1998",
+            "nlcd-1997",
+            "nlcd-1996",
+            "nlcd-1995",
+            "nlcd-1994",
+            "nlcd-1993",
+            "nlcd-1992",
+            "nlcd-1991",
+            "nlcd-1990",
+            "nlcd-1989",
+            "nlcd-1988",
+            "nlcd-1987",
+            "nlcd-1986",
+            "nlcd-1985",
+            "emapr-vote-2017",
+            "emapr-vote-2016",
+            "emapr-vote-2015",
+            "emapr-vote-2014",
+            "emapr-vote-2013",
+            "emapr-vote-2012",
+            "emapr-vote-2011",
+            "emapr-vote-2010",
+            "emapr-vote-2009",
+            "emapr-vote-2008",
+            "emapr-vote-2007",
+            "emapr-vote-2006",
+            "emapr-vote-2005",
+            "emapr-vote-2004",
+            "emapr-vote-2003",
+            "emapr-vote-2002",
+            "emapr-vote-2001",
+            "emapr-vote-2000",
+            "emapr-vote-1999",
+            "emapr-vote-1998",
+            "emapr-vote-1997",
+            "emapr-vote-1996",
+            "emapr-vote-1995",
+            "emapr-vote-1994",
+            "emapr-vote-1993",
+            "emapr-vote-1992",
+            "emapr-vote-1991",
+            "emapr-vote-1990",
+            "emapr-vote-1989",
+            "emapr-vote-1988",
+            "emapr-vote-1987",
+            "emapr-vote-1986",
+            "emapr-vote-1985",
+            "emapr-vote-1984"
+          ],
+          "landuse_methods": [
+            "gridded",
+            "single",
+            "upload"
+          ],
+          "delineation_backends": [
+            "topaz",
+            "wbt"
+          ],
+          "watershed_representations": [
+            "single-ofe",
+            "multiple-ofe"
+          ],
+          "mods": []
+        },
+        "relations": {
+          "climate_station_methods": {
+            "vanilla_cligen": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ],
+            "prism_stochastic": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ],
+            "observed_daymet": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ],
+            "observed_gridmet": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ],
+            "dep_nexrad": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ],
+            "future_cmip5": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ],
+            "user_defined_cli": [
+              "user_defined"
+            ]
+          },
+          "climate_spatial_methods": {
+            "vanilla_cligen": [
+              "single",
+              "multiple"
+            ],
+            "prism_stochastic": [
+              "single",
+              "multiple"
+            ],
+            "observed_daymet": [
+              "single",
+              "multiple",
+              "interpolated"
+            ],
+            "observed_gridmet": [
+              "single",
+              "multiple",
+              "interpolated"
+            ],
+            "dep_nexrad": [
+              "single",
+              "multiple"
+            ],
+            "future_cmip5": [
+              "single",
+              "multiple"
+            ],
+            "user_defined_cli": [
+              "single",
+              "multiple"
+            ]
+          },
+          "landuse_methods": {
+            "nlcd-ever-forest-2024": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2023": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2022": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2021": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2020": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2019": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2018": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2017": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2016": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2015": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2014": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2013": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2012": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2011": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2010": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2009": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2008": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2007": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2006": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2005": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2004": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2003": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2002": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2001": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-2000": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-1999": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-1998": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-1997": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-1996": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-1995": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-1994": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-1993": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-1992": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-1991": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-1990": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-1989": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-1988": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-1987": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-1986": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-ever-forest-1985": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2024": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2023": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2022": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2021": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2020": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2019": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2018": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2017": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2016": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2015": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2014": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2013": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2012": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2011": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2010": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2009": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2008": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2007": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2006": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2005": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2004": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2003": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2002": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2001": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-2000": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-1999": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-1998": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-1997": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-1996": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-1995": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-1994": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-1993": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-1992": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-1991": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-1990": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-1989": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-1988": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-1987": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-1986": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "nlcd-1985": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2017": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2016": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2015": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2014": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2013": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2012": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2011": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2010": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2009": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2008": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2007": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2006": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2005": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2004": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2003": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2002": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2001": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-2000": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-1999": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-1998": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-1997": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-1996": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-1995": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-1994": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-1993": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-1992": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-1991": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-1990": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-1989": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-1988": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-1987": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-1986": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-1985": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "emapr-vote-1984": [
+              "gridded",
+              "single",
+              "upload"
+            ]
+          },
+          "landuse_methods_by_representation": {
+            "single-ofe": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "multiple-ofe": [
+              "gridded",
+              "upload"
+            ]
+          },
+          "soil_builders": {
+            "ssurgo-gnatsgso-2025": [
+              "gridded",
+              "single_mukey",
+              "single_database"
+            ]
+          },
+          "mod_requires": {},
+          "mod_conflicts": {}
+        },
+        "method_defaults": {
+          "climate_station": {
+            "vanilla_cligen": "auto",
+            "prism_stochastic": "auto",
+            "observed_daymet": "auto",
+            "observed_gridmet": "auto",
+            "dep_nexrad": "auto",
+            "future_cmip5": "auto",
+            "user_defined_cli": "user_defined"
+          },
+          "climate_spatial": {
+            "vanilla_cligen": "single",
+            "prism_stochastic": "single",
+            "observed_daymet": "single",
+            "observed_gridmet": "single",
+            "dep_nexrad": "single",
+            "future_cmip5": "single",
+            "user_defined_cli": "single"
+          },
+          "landuse": {
+            "nlcd-ever-forest-2024": "gridded",
+            "nlcd-ever-forest-2023": "gridded",
+            "nlcd-ever-forest-2022": "gridded",
+            "nlcd-ever-forest-2021": "gridded",
+            "nlcd-ever-forest-2020": "gridded",
+            "nlcd-ever-forest-2019": "gridded",
+            "nlcd-ever-forest-2018": "gridded",
+            "nlcd-ever-forest-2017": "gridded",
+            "nlcd-ever-forest-2016": "gridded",
+            "nlcd-ever-forest-2015": "gridded",
+            "nlcd-ever-forest-2014": "gridded",
+            "nlcd-ever-forest-2013": "gridded",
+            "nlcd-ever-forest-2012": "gridded",
+            "nlcd-ever-forest-2011": "gridded",
+            "nlcd-ever-forest-2010": "gridded",
+            "nlcd-ever-forest-2009": "gridded",
+            "nlcd-ever-forest-2008": "gridded",
+            "nlcd-ever-forest-2007": "gridded",
+            "nlcd-ever-forest-2006": "gridded",
+            "nlcd-ever-forest-2005": "gridded",
+            "nlcd-ever-forest-2004": "gridded",
+            "nlcd-ever-forest-2003": "gridded",
+            "nlcd-ever-forest-2002": "gridded",
+            "nlcd-ever-forest-2001": "gridded",
+            "nlcd-ever-forest-2000": "gridded",
+            "nlcd-ever-forest-1999": "gridded",
+            "nlcd-ever-forest-1998": "gridded",
+            "nlcd-ever-forest-1997": "gridded",
+            "nlcd-ever-forest-1996": "gridded",
+            "nlcd-ever-forest-1995": "gridded",
+            "nlcd-ever-forest-1994": "gridded",
+            "nlcd-ever-forest-1993": "gridded",
+            "nlcd-ever-forest-1992": "gridded",
+            "nlcd-ever-forest-1991": "gridded",
+            "nlcd-ever-forest-1990": "gridded",
+            "nlcd-ever-forest-1989": "gridded",
+            "nlcd-ever-forest-1988": "gridded",
+            "nlcd-ever-forest-1987": "gridded",
+            "nlcd-ever-forest-1986": "gridded",
+            "nlcd-ever-forest-1985": "gridded",
+            "nlcd-2024": "gridded",
+            "nlcd-2023": "gridded",
+            "nlcd-2022": "gridded",
+            "nlcd-2021": "gridded",
+            "nlcd-2020": "gridded",
+            "nlcd-2019": "gridded",
+            "nlcd-2018": "gridded",
+            "nlcd-2017": "gridded",
+            "nlcd-2016": "gridded",
+            "nlcd-2015": "gridded",
+            "nlcd-2014": "gridded",
+            "nlcd-2013": "gridded",
+            "nlcd-2012": "gridded",
+            "nlcd-2011": "gridded",
+            "nlcd-2010": "gridded",
+            "nlcd-2009": "gridded",
+            "nlcd-2008": "gridded",
+            "nlcd-2007": "gridded",
+            "nlcd-2006": "gridded",
+            "nlcd-2005": "gridded",
+            "nlcd-2004": "gridded",
+            "nlcd-2003": "gridded",
+            "nlcd-2002": "gridded",
+            "nlcd-2001": "gridded",
+            "nlcd-2000": "gridded",
+            "nlcd-1999": "gridded",
+            "nlcd-1998": "gridded",
+            "nlcd-1997": "gridded",
+            "nlcd-1996": "gridded",
+            "nlcd-1995": "gridded",
+            "nlcd-1994": "gridded",
+            "nlcd-1993": "gridded",
+            "nlcd-1992": "gridded",
+            "nlcd-1991": "gridded",
+            "nlcd-1990": "gridded",
+            "nlcd-1989": "gridded",
+            "nlcd-1988": "gridded",
+            "nlcd-1987": "gridded",
+            "nlcd-1986": "gridded",
+            "nlcd-1985": "gridded",
+            "emapr-vote-2017": "gridded",
+            "emapr-vote-2016": "gridded",
+            "emapr-vote-2015": "gridded",
+            "emapr-vote-2014": "gridded",
+            "emapr-vote-2013": "gridded",
+            "emapr-vote-2012": "gridded",
+            "emapr-vote-2011": "gridded",
+            "emapr-vote-2010": "gridded",
+            "emapr-vote-2009": "gridded",
+            "emapr-vote-2008": "gridded",
+            "emapr-vote-2007": "gridded",
+            "emapr-vote-2006": "gridded",
+            "emapr-vote-2005": "gridded",
+            "emapr-vote-2004": "gridded",
+            "emapr-vote-2003": "gridded",
+            "emapr-vote-2002": "gridded",
+            "emapr-vote-2001": "gridded",
+            "emapr-vote-2000": "gridded",
+            "emapr-vote-1999": "gridded",
+            "emapr-vote-1998": "gridded",
+            "emapr-vote-1997": "gridded",
+            "emapr-vote-1996": "gridded",
+            "emapr-vote-1995": "gridded",
+            "emapr-vote-1994": "gridded",
+            "emapr-vote-1993": "gridded",
+            "emapr-vote-1992": "gridded",
+            "emapr-vote-1991": "gridded",
+            "emapr-vote-1990": "gridded",
+            "emapr-vote-1989": "gridded",
+            "emapr-vote-1988": "gridded",
+            "emapr-vote-1987": "gridded",
+            "emapr-vote-1986": "gridded",
+            "emapr-vote-1985": "gridded",
+            "emapr-vote-1984": "gridded"
+          },
+          "soil": {
+            "ssurgo-gnatsgso-2025": "gridded"
+          }
+        },
+        "allowed_model_pairs": [
+          [
+            "topaz",
+            "single-ofe"
+          ],
+          [
+            "wbt",
+            "multiple-ofe"
+          ],
+          [
+            "wbt",
+            "single-ofe"
+          ]
+        ]
+      },
+      "structure_sha256": "3151e7e11be97967b32b887c6832b5286d252bf9b85841b889d5dcfbb24a8faf"
+    },
+    {
+      "first_reader_revision": "pending-amendment5-reader-floor",
+      "payload": {
+        "schema_version": 3,
+        "locale_profile": "europe",
+        "axes": {
+          "dem_sources": [
+            "europe-eudem-v1-1"
+          ],
+          "climate_datasets": [
+            "vanilla_cligen",
+            "eobs_modified",
+            "user_defined_cli"
+          ],
+          "climate_station_databases": [
+            "cligen-stations-ghcn"
+          ],
+          "climate_station_methods": [
+            "auto",
+            "distance",
+            "multi_factor",
+            "eu_heuristic",
+            "user_defined"
+          ],
+          "climate_spatial_methods": [
+            "single",
+            "multiple"
+          ],
+          "soil_datasets": [
+            "esdac-europe"
+          ],
+          "soil_builders": [
+            "gridded"
+          ],
+          "landuse_datasets": [
+            "corine-1990",
+            "corine-2000",
+            "corine-2006",
+            "corine-2012",
+            "corine-2018"
+          ],
+          "landuse_methods": [
+            "gridded",
+            "single",
+            "upload"
+          ],
+          "delineation_backends": [
+            "topaz",
+            "wbt"
+          ],
+          "watershed_representations": [
+            "single-ofe",
+            "multiple-ofe"
+          ],
+          "mods": []
+        },
+        "relations": {
+          "climate_station_methods": {
+            "vanilla_cligen": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ],
+            "eobs_modified": [
+              "auto",
+              "distance",
+              "multi_factor",
+              "eu_heuristic"
+            ],
+            "user_defined_cli": [
+              "user_defined"
+            ]
+          },
+          "climate_spatial_methods": {
+            "vanilla_cligen": [
+              "single",
+              "multiple"
+            ],
+            "eobs_modified": [
+              "single",
+              "multiple"
+            ],
+            "user_defined_cli": [
+              "single",
+              "multiple"
+            ]
+          },
+          "landuse_methods": {
+            "corine-1990": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "corine-2000": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "corine-2006": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "corine-2012": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "corine-2018": [
+              "gridded",
+              "single",
+              "upload"
+            ]
+          },
+          "landuse_methods_by_representation": {
+            "single-ofe": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "multiple-ofe": [
+              "gridded",
+              "upload"
+            ]
+          },
+          "soil_builders": {
+            "esdac-europe": [
+              "gridded"
+            ]
+          },
+          "mod_requires": {},
+          "mod_conflicts": {}
+        },
+        "method_defaults": {
+          "climate_station": {
+            "vanilla_cligen": "auto",
+            "eobs_modified": "auto",
+            "user_defined_cli": "user_defined"
+          },
+          "climate_spatial": {
+            "vanilla_cligen": "single",
+            "eobs_modified": "multiple",
+            "user_defined_cli": "single"
+          },
+          "landuse": {
+            "corine-1990": "gridded",
+            "corine-2000": "gridded",
+            "corine-2006": "gridded",
+            "corine-2012": "gridded",
+            "corine-2018": "gridded"
+          },
+          "soil": {
+            "esdac-europe": "gridded"
+          }
+        },
+        "allowed_model_pairs": [
+          [
+            "topaz",
+            "single-ofe"
+          ],
+          [
+            "wbt",
+            "multiple-ofe"
+          ],
+          [
+            "wbt",
+            "single-ofe"
+          ]
+        ]
+      },
+      "structure_sha256": "18eda2d24f57be54993d2f0b609c59de6c26a17632d8653cc62b5a926e66f2c7"
+    },
+    {
+      "first_reader_revision": "pending-amendment5-reader-floor",
+      "payload": {
+        "schema_version": 3,
+        "locale_profile": "canada",
+        "axes": {
+          "dem_sources": [
+            "copernicus-dem-30"
+          ],
+          "climate_datasets": [
+            "vanilla_cligen",
+            "observed_daymet",
+            "user_defined_cli"
+          ],
+          "climate_station_databases": [
+            "cligen-stations-ghcn"
+          ],
+          "climate_station_methods": [
+            "auto",
+            "distance",
+            "multi_factor",
+            "user_defined"
+          ],
+          "climate_spatial_methods": [
+            "single",
+            "multiple",
+            "interpolated"
+          ],
+          "soil_datasets": [
+            "isric-global"
+          ],
+          "soil_builders": [
+            "gridded"
+          ],
+          "landuse_datasets": [
+            "c3s-landcover-2020",
+            "c3s-landcover-2019",
+            "c3s-landcover-2018",
+            "c3s-landcover-2017",
+            "c3s-landcover-2016",
+            "c3s-landcover-2015",
+            "c3s-landcover-2014",
+            "c3s-landcover-2013",
+            "c3s-landcover-2012",
+            "c3s-landcover-2011",
+            "c3s-landcover-2010",
+            "c3s-landcover-2009",
+            "c3s-landcover-2008",
+            "c3s-landcover-2007",
+            "c3s-landcover-2006",
+            "c3s-landcover-2005",
+            "c3s-landcover-2004",
+            "c3s-landcover-2003",
+            "c3s-landcover-2002",
+            "c3s-landcover-2001",
+            "c3s-landcover-2000",
+            "c3s-landcover-1999",
+            "c3s-landcover-1998",
+            "c3s-landcover-1997",
+            "c3s-landcover-1996",
+            "c3s-landcover-1995",
+            "c3s-landcover-1994",
+            "c3s-landcover-1993",
+            "c3s-landcover-1992"
+          ],
+          "landuse_methods": [
+            "gridded",
+            "single",
+            "upload"
+          ],
+          "delineation_backends": [
+            "topaz",
+            "wbt"
+          ],
+          "watershed_representations": [
+            "single-ofe",
+            "multiple-ofe"
+          ],
+          "mods": []
+        },
+        "relations": {
+          "climate_station_methods": {
+            "vanilla_cligen": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ],
+            "observed_daymet": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ],
+            "user_defined_cli": [
+              "user_defined"
+            ]
+          },
+          "climate_spatial_methods": {
+            "vanilla_cligen": [
+              "single",
+              "multiple"
+            ],
+            "observed_daymet": [
+              "single",
+              "multiple",
+              "interpolated"
+            ],
+            "user_defined_cli": [
+              "single",
+              "multiple"
+            ]
+          },
+          "landuse_methods": {
+            "c3s-landcover-2020": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2019": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2018": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2017": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2016": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2015": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2014": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2013": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2012": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2011": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2010": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2009": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2008": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2007": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2006": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2005": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2004": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2003": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2002": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2001": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2000": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-1999": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-1998": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-1997": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-1996": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-1995": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-1994": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-1993": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-1992": [
+              "gridded",
+              "single",
+              "upload"
+            ]
+          },
+          "landuse_methods_by_representation": {
+            "single-ofe": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "multiple-ofe": [
+              "gridded",
+              "upload"
+            ]
+          },
+          "soil_builders": {
+            "isric-global": [
+              "gridded"
+            ]
+          },
+          "mod_requires": {},
+          "mod_conflicts": {}
+        },
+        "method_defaults": {
+          "climate_station": {
+            "vanilla_cligen": "auto",
+            "observed_daymet": "auto",
+            "user_defined_cli": "user_defined"
+          },
+          "climate_spatial": {
+            "vanilla_cligen": "single",
+            "observed_daymet": "single",
+            "user_defined_cli": "single"
+          },
+          "landuse": {
+            "c3s-landcover-2020": "gridded",
+            "c3s-landcover-2019": "gridded",
+            "c3s-landcover-2018": "gridded",
+            "c3s-landcover-2017": "gridded",
+            "c3s-landcover-2016": "gridded",
+            "c3s-landcover-2015": "gridded",
+            "c3s-landcover-2014": "gridded",
+            "c3s-landcover-2013": "gridded",
+            "c3s-landcover-2012": "gridded",
+            "c3s-landcover-2011": "gridded",
+            "c3s-landcover-2010": "gridded",
+            "c3s-landcover-2009": "gridded",
+            "c3s-landcover-2008": "gridded",
+            "c3s-landcover-2007": "gridded",
+            "c3s-landcover-2006": "gridded",
+            "c3s-landcover-2005": "gridded",
+            "c3s-landcover-2004": "gridded",
+            "c3s-landcover-2003": "gridded",
+            "c3s-landcover-2002": "gridded",
+            "c3s-landcover-2001": "gridded",
+            "c3s-landcover-2000": "gridded",
+            "c3s-landcover-1999": "gridded",
+            "c3s-landcover-1998": "gridded",
+            "c3s-landcover-1997": "gridded",
+            "c3s-landcover-1996": "gridded",
+            "c3s-landcover-1995": "gridded",
+            "c3s-landcover-1994": "gridded",
+            "c3s-landcover-1993": "gridded",
+            "c3s-landcover-1992": "gridded"
+          },
+          "soil": {
+            "isric-global": "gridded"
+          }
+        },
+        "allowed_model_pairs": [
+          [
+            "topaz",
+            "single-ofe"
+          ],
+          [
+            "wbt",
+            "multiple-ofe"
+          ],
+          [
+            "wbt",
+            "single-ofe"
+          ]
+        ]
+      },
+      "structure_sha256": "07f733c2b13589ac637fc898859b8e3eac4902199606a2580796eec47765d7b4"
+    },
+    {
+      "first_reader_revision": "pending-amendment5-reader-floor",
+      "payload": {
+        "schema_version": 3,
+        "locale_profile": "australia",
+        "axes": {
+          "dem_sources": [
+            "australia-srtm-1s"
+          ],
+          "climate_datasets": [
+            "vanilla_cligen",
+            "agdc",
+            "user_defined_cli"
+          ],
+          "climate_station_databases": [
+            "cligen-stations-ghcn"
+          ],
+          "climate_station_methods": [
+            "auto",
+            "distance",
+            "multi_factor",
+            "user_defined"
+          ],
+          "climate_spatial_methods": [
+            "single",
+            "multiple"
+          ],
+          "soil_datasets": [
+            "asris-australia"
+          ],
+          "soil_builders": [
+            "gridded"
+          ],
+          "landuse_datasets": [
+            "australia-landuse-2010-2011"
+          ],
+          "landuse_methods": [
+            "gridded",
+            "single",
+            "upload"
+          ],
+          "delineation_backends": [
+            "topaz",
+            "wbt"
+          ],
+          "watershed_representations": [
+            "single-ofe",
+            "multiple-ofe"
+          ],
+          "mods": []
+        },
+        "relations": {
+          "climate_station_methods": {
+            "vanilla_cligen": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ],
+            "agdc": [
+              "auto",
+              "distance"
+            ],
+            "user_defined_cli": [
+              "user_defined"
+            ]
+          },
+          "climate_spatial_methods": {
+            "vanilla_cligen": [
+              "single",
+              "multiple"
+            ],
+            "agdc": [
+              "single",
+              "multiple"
+            ],
+            "user_defined_cli": [
+              "single",
+              "multiple"
+            ]
+          },
+          "landuse_methods": {
+            "australia-landuse-2010-2011": [
+              "gridded",
+              "single",
+              "upload"
+            ]
+          },
+          "landuse_methods_by_representation": {
+            "single-ofe": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "multiple-ofe": [
+              "gridded",
+              "upload"
+            ]
+          },
+          "soil_builders": {
+            "asris-australia": [
+              "gridded"
+            ]
+          },
+          "mod_requires": {},
+          "mod_conflicts": {}
+        },
+        "method_defaults": {
+          "climate_station": {
+            "vanilla_cligen": "auto",
+            "agdc": "auto",
+            "user_defined_cli": "user_defined"
+          },
+          "climate_spatial": {
+            "vanilla_cligen": "single",
+            "agdc": "single",
+            "user_defined_cli": "single"
+          },
+          "landuse": {
+            "australia-landuse-2010-2011": "gridded"
+          },
+          "soil": {
+            "asris-australia": "gridded"
+          }
+        },
+        "allowed_model_pairs": [
+          [
+            "topaz",
+            "single-ofe"
+          ],
+          [
+            "wbt",
+            "multiple-ofe"
+          ],
+          [
+            "wbt",
+            "single-ofe"
+          ]
+        ]
+      },
+      "structure_sha256": "1fd066a9e5bef26373414988d9f98e04fb84a8d0d08f7af280eef7cb1779a497"
+    },
+    {
+      "first_reader_revision": "pending-amendment5-reader-floor",
+      "payload": {
+        "schema_version": 3,
+        "locale_profile": "global-earth",
+        "axes": {
+          "dem_sources": [
+            "copernicus-dem-30"
+          ],
+          "climate_datasets": [
+            "vanilla_cligen",
+            "user_defined_cli"
+          ],
+          "climate_station_databases": [
+            "cligen-stations-ghcn"
+          ],
+          "climate_station_methods": [
+            "auto",
+            "distance",
+            "multi_factor",
+            "user_defined"
+          ],
+          "climate_spatial_methods": [
+            "single",
+            "multiple"
+          ],
+          "soil_datasets": [
+            "isric-global"
+          ],
+          "soil_builders": [
+            "gridded"
+          ],
+          "landuse_datasets": [
+            "c3s-landcover-2020",
+            "c3s-landcover-2019",
+            "c3s-landcover-2018",
+            "c3s-landcover-2017",
+            "c3s-landcover-2016",
+            "c3s-landcover-2015",
+            "c3s-landcover-2014",
+            "c3s-landcover-2013",
+            "c3s-landcover-2012",
+            "c3s-landcover-2011",
+            "c3s-landcover-2010",
+            "c3s-landcover-2009",
+            "c3s-landcover-2008",
+            "c3s-landcover-2007",
+            "c3s-landcover-2006",
+            "c3s-landcover-2005",
+            "c3s-landcover-2004",
+            "c3s-landcover-2003",
+            "c3s-landcover-2002",
+            "c3s-landcover-2001",
+            "c3s-landcover-2000",
+            "c3s-landcover-1999",
+            "c3s-landcover-1998",
+            "c3s-landcover-1997",
+            "c3s-landcover-1996",
+            "c3s-landcover-1995",
+            "c3s-landcover-1994",
+            "c3s-landcover-1993",
+            "c3s-landcover-1992"
+          ],
+          "landuse_methods": [
+            "gridded",
+            "single",
+            "upload"
+          ],
+          "delineation_backends": [
+            "topaz",
+            "wbt"
+          ],
+          "watershed_representations": [
+            "single-ofe",
+            "multiple-ofe"
+          ],
+          "mods": []
+        },
+        "relations": {
+          "climate_station_methods": {
+            "vanilla_cligen": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ],
+            "user_defined_cli": [
+              "user_defined"
+            ]
+          },
+          "climate_spatial_methods": {
+            "vanilla_cligen": [
+              "single",
+              "multiple"
+            ],
+            "user_defined_cli": [
+              "single",
+              "multiple"
+            ]
+          },
+          "landuse_methods": {
+            "c3s-landcover-2020": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2019": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2018": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2017": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2016": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2015": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2014": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2013": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2012": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2011": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2010": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2009": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2008": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2007": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2006": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2005": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2004": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2003": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2002": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2001": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2000": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-1999": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-1998": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-1997": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-1996": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-1995": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-1994": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-1993": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-1992": [
+              "gridded",
+              "single",
+              "upload"
+            ]
+          },
+          "landuse_methods_by_representation": {
+            "single-ofe": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "multiple-ofe": [
+              "gridded",
+              "upload"
+            ]
+          },
+          "soil_builders": {
+            "isric-global": [
+              "gridded"
+            ]
+          },
+          "mod_requires": {},
+          "mod_conflicts": {}
+        },
+        "method_defaults": {
+          "climate_station": {
+            "vanilla_cligen": "auto",
+            "user_defined_cli": "user_defined"
+          },
+          "climate_spatial": {
+            "vanilla_cligen": "single",
+            "user_defined_cli": "single"
+          },
+          "landuse": {
+            "c3s-landcover-2020": "gridded",
+            "c3s-landcover-2019": "gridded",
+            "c3s-landcover-2018": "gridded",
+            "c3s-landcover-2017": "gridded",
+            "c3s-landcover-2016": "gridded",
+            "c3s-landcover-2015": "gridded",
+            "c3s-landcover-2014": "gridded",
+            "c3s-landcover-2013": "gridded",
+            "c3s-landcover-2012": "gridded",
+            "c3s-landcover-2011": "gridded",
+            "c3s-landcover-2010": "gridded",
+            "c3s-landcover-2009": "gridded",
+            "c3s-landcover-2008": "gridded",
+            "c3s-landcover-2007": "gridded",
+            "c3s-landcover-2006": "gridded",
+            "c3s-landcover-2005": "gridded",
+            "c3s-landcover-2004": "gridded",
+            "c3s-landcover-2003": "gridded",
+            "c3s-landcover-2002": "gridded",
+            "c3s-landcover-2001": "gridded",
+            "c3s-landcover-2000": "gridded",
+            "c3s-landcover-1999": "gridded",
+            "c3s-landcover-1998": "gridded",
+            "c3s-landcover-1997": "gridded",
+            "c3s-landcover-1996": "gridded",
+            "c3s-landcover-1995": "gridded",
+            "c3s-landcover-1994": "gridded",
+            "c3s-landcover-1993": "gridded",
+            "c3s-landcover-1992": "gridded"
+          },
+          "soil": {
+            "isric-global": "gridded"
+          }
+        },
+        "allowed_model_pairs": [
+          [
+            "topaz",
+            "single-ofe"
+          ],
+          [
+            "wbt",
+            "multiple-ofe"
+          ],
+          [
+            "wbt",
+            "single-ofe"
+          ]
+        ]
+      },
+      "structure_sha256": "b1bbcd60e71b65064455da3abaacdb239a433bafe08c46854a2ffcfc9c50de92"
     }
   ]
 }
