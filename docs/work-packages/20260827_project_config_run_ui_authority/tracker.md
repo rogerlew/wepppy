@@ -5,9 +5,9 @@
 **Timezone**: UTC
 **Started**: 2026-08-27 20:31 UTC
 **Current phase**: amendment 5 Forest candidate acceptance
-**Last updated**: 2026-08-28 18:16 UTC
-**Next milestone**: commit and push the reviewed writer checkpoint, then
-validate and roll back the exact-host Forest candidate; production remains reserved
+**Last updated**: 2026-08-28 18:18 UTC
+**Next milestone**: push the reviewed writer checkpoint, then validate and
+roll back the exact-host Forest candidate; production remains reserved
 **Security impact**: `high`
 **Dedicated security review**: `yes`
 **Security artifacts**: `artifacts/20260827_security_review.md` and
@@ -56,6 +56,10 @@ PC-24 owns `.cfg` locale normalization and run-UI authority parity.
 
 ### Done
 
+- [x] Path-staged the exact ratified production/test boundary plus package
+  evidence and committed standalone writer checkpoint `1e30f7705`; the staged
+  comparison contained no excluded or pre-recorded dirty path
+  (2026-08-28 18:18 UTC).
 - [x] Implemented all five corrected locale graph writers while retaining
   every prior stored identity, strict current-parent schema-v1 named-preset
   climate/land-cover projection, graph-authoritative climate upload gating,

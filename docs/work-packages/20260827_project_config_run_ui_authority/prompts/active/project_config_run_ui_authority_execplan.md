@@ -151,8 +151,11 @@ migrated.
   with 63 skipped, 808 frontend tests, lint, stub, exception, Vulture, diff,
   and documentation gates; obtain independent correctness and security READY
   implementation reviews with no High, Medium, or Low findings.
-- [ ] Commit and push the standalone amendment-5 writer checkpoint, then
-  complete exact-host `forest` candidate/rollback acceptance.
+- [x] (2026-08-28 18:18Z) Path-stage and commit the standalone amendment-5
+  writer checkpoint as `1e30f7705`, with every production/test path inside
+  the ratified exact boundary and all pre-recorded dirty paths excluded.
+- [ ] Push the writer checkpoint, then complete exact-host `forest`
+  candidate/rollback acceptance.
 
 ## Surprises & Discoveries
 
