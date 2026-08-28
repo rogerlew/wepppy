@@ -1,7 +1,8 @@
 # WP12D Contract Decision
 
 **Amendment ID**: `PC-24/WP12D-20260827-3`
-**Status**: ratified; canonical checkpoint in progress
+**Status**: ratified; canonical checkpoint `596ff5758`
+**Scope audit amendment**: `PC-24/WP12D-20260828-4`, ratified 2026-08-28
 **Starting revision**: `5e04e0da9a23dd676e171f1857e14fa38cc9dfbe`
 **Starting upstream revision**: `origin/feature/project-owned-config` at the
 same revision
@@ -486,6 +487,11 @@ Allowed implementation consumers are:
 - `wepppy/nodb/locales/capability_graph.py` for the append-only schema-v3
   structural-identity allowlist, deterministic structure hash, and separated
   internal/structural validation;
+- `wepppy/nodb/locales/__init__.py` only to reexport the ratified capability
+  structure helpers, without owning a runtime decision, plus
+  `wepppy/nodb/locales/capability_structures/README.md` and
+  `capability_structures/catalog.json` for the append-only reader-floor
+  structure authority and its maintenance contract;
 - `wepppy/nodb/project_config_capabilities.py` and its stub for the explicit
   stored-or-legacy run-authority resolver and matching domain helpers;
 - `wepppy/nodb/project_config_reader.py` and its stub, plus
@@ -519,7 +525,12 @@ Allowed implementation consumers are:
   `soils_routes.py` for the paired build/set boundaries; and
 - `wepppy/microservices/rq_engine/schema_defaults_routes.py` and
   `orchestration_read_routes.py` for run endpoint schemas/defaults/errors,
-  aggregated operation documents, pipeline, and readiness parity.
+  aggregated operation documents, pipeline, and readiness parity; and
+- `wepppy/microservices/rq_engine/auth.py`, with regression coverage in
+  `tests/microservices/test_rq_engine_auth.py`, only for the Forest-required
+  identity handoff that prefers the existing signed numeric `user_id` claim
+  and retains numeric `sub` fallback without broadening authentication or
+  authorization.
 
 The enqueue signature change also requires synchronized
 `wepppy/rq/job-dependencies-catalog.md` and
@@ -532,10 +543,24 @@ non-change assertions. Discovering a required unlisted implementation file
 stops WP12D and requires amendment plus operator re-ratification.
 
 Unlisted route behavior, model execution, data providers, defaults other than
-`general.locales`, queue topology/dependency edges, auth, uploads, and
+`general.locales`, queue topology/dependency edges, authentication or
+authorization changes beyond the exact identity handoff above, uploads, and
 migrations are excluded.
 The exact unrelated dirty-path exclusions remain recorded in the tracker and
 active ExecPlan and must never be staged.
+
+### Ratified scope-audit correction
+
+The post-implementation comparison from documentation checkpoint `596ff5758`
+through technical Forest candidate `588608f1a` found only the three support
+entries added above: the export-only locale package initializer, the checked-in
+append-only capability-structure authority and maintenance contract, and the
+bounded RQ identity handoff with its regression test. The project operator
+ratified audit-only amendment `PC-24/WP12D-20260828-4` exactly as documented on
+2026-08-28, preserving every existing commit and requiring parent WP12 to
+carry and repeat the comparison before canonical merge or production
+promotion. The authoritative audit record is
+`artifacts/20260828_scope_audit_correction.md`.
 
 ## Compatibility and Parameterization
 
@@ -709,3 +734,8 @@ operator authorized the standalone canonical checkpoint and subsequent
 implementation. No config or implementation file may be edited before the
 canonical amendments, independent binding reviews, disposition, and standalone
 ancestor checkpoint commit.
+
+Audit-only amendment `PC-24/WP12D-20260828-4` was ratified exactly as
+documented by the project operator on 2026-08-28. It corrects the bounded
+support-file inventory, preserves all existing commits and evidence, and adds
+no new behavior or production authority.

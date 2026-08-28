@@ -4,11 +4,10 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-27 20:31 UTC
-**Current phase**: Forest technically accepted / scope audit ratification
-pending
-**Last updated**: 2026-08-28 07:12 UTC
-**Next milestone**: exact ratification of `PC-24/WP12D-20260828-4`, then parent
-WP12 promotion review; production remains reserved
+**Current phase**: Forest accepted / ready for parent WP12 handoff
+**Last updated**: 2026-08-28 09:54 UTC
+**Next milestone**: parent WP12 promotion review with the ratified scope audit;
+production remains reserved
 **Security impact**: `high`
 **Dedicated security review**: `yes`
 **Security artifact**: `artifacts/20260827_security_review.md`
@@ -28,14 +27,12 @@ PC-24 owns `.cfg` locale normalization and run-UI authority parity.
 
 ### In Progress
 
-- [ ] Obtain exact operator ratification of audit-only amendment
-  `PC-24/WP12D-20260828-4`.
+- None. WP12D is accepted and ready for parent WP12.
 
-### Ready / Backlog
+### Ready / Handoff
 
-- [ ] Carry the exact scope comparison and technically accepted candidate into
-  WP12 without
-  production deployment.
+- [x] Carry the exact scope comparison and technically accepted candidate into
+  the authoritative WP12 roadmap gate without production deployment.
 
 ### Blocked
 
@@ -44,6 +41,10 @@ PC-24 owns `.cfg` locale normalization and run-UI authority parity.
 
 ### Done
 
+- [x] Operator explicitly ratified audit-only amendment
+  `PC-24/WP12D-20260828-4` exactly as documented, preserving all existing
+  commits; the correction is authoritative and its comparison is now a parent
+  WP12 gate (2026-08-28 09:54 UTC).
 - [x] Pushed exact candidate `588608f1a`, restored it on exact host `forest`
   without rebuilding image `6ac7e7103046`, and confirmed both health endpoints
   return HTTP 200 (2026-08-28 07:08 UTC).
@@ -367,7 +368,7 @@ claimed to understand future structural graphs.
 - [x] Exact-host `forest` acknowledged schema-v3 refresh/reopen acceptance and
   rollback to the recorded WP12D reader floor proving the refreshed config and
   manifest remain readable and unchanged.
-- [ ] Scope-vs-changed-files comparison carried into WP12 after exact operator
+- [x] Scope-vs-changed-files comparison carried into WP12 after exact operator
   ratification of `PC-24/WP12D-20260828-4`.
 
 ## Exact Dirty-Path Exclusions

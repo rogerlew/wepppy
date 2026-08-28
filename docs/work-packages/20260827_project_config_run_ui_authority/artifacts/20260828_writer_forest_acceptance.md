@@ -106,7 +106,8 @@ The temporary worktree and override were removed.
 - Frontend lint, test stubs, Vulture, changed-file broad-exception enforcement,
   RQ dependency graph, documentation lint, and diff checks: passed.
 
-WP12D is technically accepted on `forest`. Parent WP12 handoff awaits exact
-ratification of scope audit correction `PC-24/WP12D-20260828-4`, documented in
-`20260828_scope_audit_correction.md`. This artifact does not authorize merge to
-`master` or production deployment.
+WP12D is accepted on `forest`. The operator ratified scope audit correction
+`PC-24/WP12D-20260828-4`, documented in
+`20260828_scope_audit_correction.md`; parent WP12 must repeat that comparison
+before promotion. This artifact does not authorize merge to `master` or
+production deployment.

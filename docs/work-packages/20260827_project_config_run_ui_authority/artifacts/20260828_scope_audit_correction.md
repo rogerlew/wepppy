@@ -1,8 +1,8 @@
-# Proposed WP12D scope audit correction
+# Ratified WP12D scope audit correction
 
 **Amendment**: `PC-24/WP12D-20260828-4`
 
-**Status**: proposed; exact operator ratification required
+**Status**: ratified by the project operator on 2026-08-28
 
 **Audit range**: documentation checkpoint `596ff5758` through technical Forest
 candidate `588608f1a`
@@ -46,9 +46,9 @@ unchanged by WP12D.
 
 ## Exact correction
 
-Upon exact operator ratification, amendment `PC-24/WP12D-20260828-4` adds only
-the three entries above to WP12D's changed-consumer/support list. It preserves
-all existing commits and evidence, including:
+Amendment `PC-24/WP12D-20260828-4` adds only the three entries above to
+WP12D's changed-consumer/support list. It preserves all existing commits and
+evidence, including:
 
 - reader floor `80f4810b7`;
 - worker-load hotfix `326f2138c`;
@@ -66,10 +66,15 @@ READY with High 0, Medium 0, and Low 0. Security confirmed that malformed or
 missing numeric identity remains fail-closed, PowerUser is not promoted, and
 public job information does not expose queued actor metadata.
 
-## Ratification text
+## Ratification record
 
-The required exact operator action is:
+The project operator ratified the correction exactly as documented on
+2026-08-28 with this statement:
 
 > I explicitly ratify amendment PC-24/WP12D-20260828-4 exactly as currently
 > documented, preserving all existing commits and carrying this scope audit
 > into WP12.
+
+This record closes the WP12D scope exception. Parent WP12 must retain this
+artifact and repeat the scope-versus-changed-files comparison before canonical
+merge or production promotion.

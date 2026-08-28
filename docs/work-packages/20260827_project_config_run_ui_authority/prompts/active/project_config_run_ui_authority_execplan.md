@@ -116,10 +116,10 @@ migrated.
   `forest`, complete authenticated acknowledged apply and settled availability,
   roll back to reader floor `80f4810b7` without changing refreshed run bytes,
   and restore the candidate without production deployment.
-- [ ] Ratify audit-only amendment `PC-24/WP12D-20260828-4`, record the exact
-  scope-vs-changed-files comparison, and hand the technically accepted
-  candidate to WP12.
-  production deployment.
+- [x] (2026-08-28 09:54Z) Ratify audit-only amendment
+  `PC-24/WP12D-20260828-4`, record the exact scope-vs-changed-files comparison,
+  and carry the technically accepted candidate into the authoritative WP12
+  roadmap gate without production deployment.
 
 ## Surprises & Discoveries
 
@@ -284,6 +284,12 @@ migrated.
   Rationale: the manifest must record current selected-source provenance; an
   empty config delta must not conceal that explicit acknowledged discontinuity.
   Date/Author: 2026-08-28, Codex.
+- Decision: Accept the post-implementation scope audit as an inventory-only
+  amendment and make its comparison a mandatory parent WP12 promotion gate.
+  Rationale: the three added entries are directly required support surfaces
+  for already reviewed behavior; preserving chronology and repeating the audit
+  at promotion is more accurate than rewriting existing commits or evidence.
+  Date/Author: 2026-08-28, operator/Codex.
 
 ## Outcomes & Retrospective
 
@@ -305,9 +311,12 @@ tests passed and 63 skipped. Independent correctness and security reviews are
 READY with no remaining in-scope finding. Exact-host authenticated writer,
 settled availability, reader-floor rollback, byte-preservation, and candidate-
 restore acceptance pass on unchanged image `6ac7e7103046`. The final scope
-audit found three required but unlisted support paths and is durably proposed
-as audit-only amendment `PC-24/WP12D-20260828-4`. Parent WP12 handoff waits for
-exact operator ratification; production deployment remains excluded.
+audit found three required but unlisted support entries. The operator ratified
+audit-only amendment `PC-24/WP12D-20260828-4` exactly as documented, preserving
+all existing commits. WP12D is Forest-accepted and ready for parent WP12;
+the authoritative roadmap now requires WP12 to retain and repeat the scope
+comparison before canonical merge or production promotion. Production
+deployment remains excluded from WP12D.
 
 ## Context and Orientation
 
@@ -554,3 +563,9 @@ Plan revision note (2026-08-27): final correctness disposition adds exact
 delta/provenance encoding, append-only schema-v3 structure identities, Builder-
 source locale/selection congruence, existing transaction commit semantics, and
 a WP12D reader floor without the refresh writer for safe rollback.
+
+Plan revision note (2026-08-28): exact operator ratification of audit-only
+amendment `PC-24/WP12D-20260828-4` adds the export-only locale package surface,
+append-only capability-structure authority, and bounded signed-identity
+handoff to the audited support inventory. Existing commits are preserved, and
+parent WP12 must repeat the comparison before merge or production promotion.

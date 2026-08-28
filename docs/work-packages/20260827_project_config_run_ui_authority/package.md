@@ -1,7 +1,6 @@
 # Project Config Run UI Authority (WP12D)
 
-**Status**: Forest technically accepted / scope audit ratification pending
-(2026-08-28)
+**Status**: Forest accepted / ready for WP12 handoff (2026-08-28)
 **Timezone**: UTC
 Initiative branch: feature/project-owned-config
 Canonical branch: master
@@ -57,6 +56,9 @@ schema-v3 project. Interfaces navigation remains unchanged.
   transaction, and manifest record for explicit same-locale graph replacement.
 - Generated fixtures, direct legacy reopen evidence, correctness/security
   reviews, and exact-host Forest acceptance.
+- Ratified audit-only correction `PC-24/WP12D-20260828-4` for the export-only
+  locale package surface, append-only capability-structure authority, and
+  bounded signed-identity handoff required by Forest execution.
 
 ### Explicitly Out of Scope
 
@@ -66,7 +68,8 @@ schema-v3 project. Interfaces navigation remains unchanged.
 - Changing the global `NoDbBase.locales` property or locale-sensitive consumers
   outside the enumerated landuse, soil, and climate modules.
 - Changing providers, scientific algorithms, dataset lists, model defaults,
-  queue topology, auth, or production.
+  queue topology, authentication/authorization beyond the ratified identity
+  handoff, or production.
 - Synthesizing Builder graphs for non-Builder bases, overlays, or RHEM.
 - Applying new locale validation or live Builder authority to flattened
   no-capability or schema-v1 projects.
@@ -114,6 +117,10 @@ schema-v3 project. Interfaces navigation remains unchanged.
 - **Overlap rule**: WP12D does not claim or replace WP12C's pending Forest
   writer/provider/create/reopen acceptance.
 - **Blocks**: WP12 production cutover.
+- **Handoff gate**: WP12 must retain
+  `artifacts/20260828_scope_audit_correction.md` and repeat its
+  scope-versus-changed-files comparison before canonical merge or production
+  promotion.
 
 ## Security Impact and Review Gate
 
@@ -134,6 +141,8 @@ schema-v3 project. Interfaces navigation remains unchanged.
 - `artifacts/20260827_amendment3_advisory_governance_review.md`
 - `artifacts/20260827_binding_correctness_review.md`
 - `artifacts/20260827_binding_governance_review.md`
+- `artifacts/20260828_scope_audit_correction.md`
+- `artifacts/20260828_writer_forest_acceptance.md`
 - `docs/schemas/project-owned-config-contract.md`
 - `docs/schemas/project-owned-config-implementation-roadmap.md`
 - `docs/schemas/rq-controller-state-contract.md`
