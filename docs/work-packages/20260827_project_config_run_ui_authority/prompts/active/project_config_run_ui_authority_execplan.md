@@ -154,8 +154,15 @@ migrated.
 - [x] (2026-08-28 18:18Z) Path-stage and commit the standalone amendment-5
   writer checkpoint as `1e30f7705`, with every production/test path inside
   the ratified exact boundary and all pre-recorded dirty paths excluded.
-- [ ] Push the writer checkpoint, then complete exact-host `forest`
-  candidate/rollback acceptance.
+- [x] (2026-08-28 18:42Z) Push candidate `09ad4fbde`, deploy only the exact
+  `forest` development stack without rebuilding image `6ac7e7103046`, and
+  validate the five exact graph identities plus the real Europe preset.
+- [x] (2026-08-28 18:42Z) Pass unmocked DEP NEXRAD, Future CMIP5,
+  User-Defined CLI, all-114-land-cover availability, and representative annual
+  NLCD, Ever Forest, and eMapR full-build gates.
+- [x] (2026-08-28 18:42Z) Apply an acknowledged schema-v3 refresh to an
+  isolated run copy, reopen its new identity under reader floor `83165fd1b`
+  with byte-identical config/manifest, and restore the healthy candidate.
 
 ## Surprises & Discoveries
 
@@ -397,11 +404,14 @@ settled availability, reader-floor rollback, byte-preservation, and candidate-
 restore acceptance pass on unchanged image `6ac7e7103046`. The final scope
 audit found three required but unlisted support entries. The operator ratified
 audit-only amendment `PC-24/WP12D-20260828-4` exactly as documented, preserving
-all existing commits. That candidate was Forest-accepted, but the demonstrated
-climate/land-cover discrepancy reopens WP12D under proposed amendment 5. Parent
-WP12 promotion is blocked until the correction has its standalone checkpoint,
-reader-first implementation, reviews, and exact-host Forest acceptance.
-Production deployment remains excluded from WP12D.
+all existing commits. Amendment 5 is now ratified, reader-first, independently
+reviewed, committed, and accepted on exact host `forest`. Candidate
+`09ad4fbde` passed the real Europe preset, all five graph identities, unmocked
+climate providers, all 114 U.S. land-cover availability checks, representative
+full land-cover builds, acknowledged refresh, reader-floor rollback, byte
+preservation, and candidate restore on the unchanged image. WP12D is complete;
+parent WP12 retains the scope comparison, merge, and production promotion
+gates. Production deployment remains excluded from WP12D.
 
 ## Context and Orientation
 

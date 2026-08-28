@@ -4,10 +4,10 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-27 20:31 UTC
-**Current phase**: amendment 5 Forest candidate acceptance
-**Last updated**: 2026-08-28 18:18 UTC
-**Next milestone**: push the reviewed writer checkpoint, then validate and
-roll back the exact-host Forest candidate; production remains reserved
+**Current phase**: amendment 5 accepted; WP12 handoff
+**Last updated**: 2026-08-28 18:42 UTC
+**Next milestone**: carry both exact scope audits and the accepted candidate
+into parent WP12; merge and production remain reserved
 **Security impact**: `high`
 **Dedicated security review**: `yes`
 **Security artifacts**: `artifacts/20260827_security_review.md` and
@@ -41,12 +41,12 @@ PC-24 owns `.cfg` locale normalization and run-UI authority parity.
   land-cover default/envelope separation (2026-08-28 18:16 UTC).
 - [x] Complete focused/full validation and binding correctness/security
   implementation reviews (2026-08-28 18:16 UTC; H0/M0/L0).
-- [ ] Complete exact-host `forest` reader/writer/rollback acceptance without
-  an image build.
+- [x] Complete exact-host `forest` reader/writer/rollback acceptance without
+  an image build (2026-08-28 18:42 UTC).
 
 ### Ready / Handoff
 
-- [ ] Carry the amendment-4 and amendment-5 exact scope comparisons and the
+- [x] Carry the amendment-4 and amendment-5 exact scope comparisons and the
   newly accepted candidate into WP12 without production deployment.
 
 ### Blocked
@@ -56,6 +56,22 @@ PC-24 owns `.cfg` locale normalization and run-UI authority parity.
 
 ### Done
 
+- [x] Pushed and deployed exact candidate `09ad4fbde` only to `forest`, kept
+  image `6ac7e7103046`, and restored all three healthy development services
+  after the reader-floor exercise (2026-08-28 18:42 UTC).
+- [x] Verified the real `closing-plump/eu-disturbed` preset exposes exactly
+  Vanilla, E-OBS Modified, and User-Defined climate plus five CORINE maps;
+  emitted all five new stored identities from the live registry
+  (2026-08-28 18:42 UTC).
+- [x] Passed real unmocked DEP NEXRAD, Future CMIP5, and User-Defined CLI
+  builds; validated live availability for all 114 U.S. land-cover years; and
+  completed full annual NLCD, Ever Forest, and eMapR builds
+  (2026-08-28 18:42 UTC).
+- [x] Applied acknowledged refresh sequence 2 to an isolated schema-v3 copy,
+  reopened new identity `3151e7…8faf` under exact reader floor `83165fd1b`
+  with byte-identical config/manifest, and restored the candidate. Evidence is
+  in `artifacts/20260828_amendment5_writer_forest_acceptance.md`
+  (2026-08-28 18:42 UTC).
 - [x] Path-staged the exact ratified production/test boundary plus package
   evidence and committed standalone writer checkpoint `1e30f7705`; the staged
   comparison contained no excluded or pre-recorded dirty path
