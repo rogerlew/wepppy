@@ -299,3 +299,67 @@ The remaining delta surfaces are security-preserving:
   production remains unauthorized by WP12D
 - **Security reviewer**: independent `wp12b_security_contract_review` agent,
   READY
+
+## WP12D Forest Fresh-Worker Security Delta Recheck
+
+### Revision binding
+
+- **Review completed**: 2026-08-28 06:04 UTC
+- **Reader-floor base**: `80f4810b7be59d90a64b4771f587eb360987a820`
+- **Candidate worktree HEAD**: `5eb451a7640fa3148a8872dd74f3756d8c88e7ce`
+- **Delta reviewed**: the same-name lazy authorization wrapper in
+  `wepppy/rq/project_config_update_rq.py`, the real fresh-interpreter RQ task
+  resolution regression, worker authorization ordering, and failed-job Redis
+  reservation cleanup
+
+### Findings and security analysis
+
+No High or Medium security finding remains. The Forest failure occurred while a
+fresh RQ process resolved the task, before task execution. The recorded config
+and manifest remained byte-for-byte unchanged, and the operator removed only
+the failed job's exact reservation value. The import-cycle correction does not
+move authorization later in the mutation path: the worker calls the canonical
+rq-engine `authorize_run_mutation` implementation before `get_wd` or
+`apply_project_config_update`. A missing, malformed, stale, or no-longer-owning
+captured actor therefore fails closed before any project-file mutation, while
+the worker `finally` boundary still attempts reservation release on
+authorization or apply failure.
+
+The lazy wrapper contains no permissive import fallback, catches no
+authorization exception, accepts no client-selected module or callable, and
+does not change task arguments, actor metadata, queue topology, filesystem
+paths, diagnostics, or the project transaction. A fresh-interpreter regression
+resolves the task through `rq.utils.import_attribute`, which exercises the
+failed RQ loading boundary without relying on modules already loaded by pytest.
+An independent container check also invoked the lazy canonical binding in a
+fresh process and proved that a non-user actor raises the canonical
+authorization error.
+
+The prior Low Redis reservation race is closed. Release now sends one fixed Lua
+script to Redis and passes the run-scoped key and expected job ID only through
+`KEYS` and `ARGV`. Redis compares the current value and deletes it in the same
+server-side operation. There is no interval in which an expired reservation can
+be replaced after a matching read but before deletion, and neither the run ID
+nor job ID can alter the executed script. The regression proves that a
+replacement reservation is preserved and the exact matching reservation is
+removed.
+
+### Verification evidence
+
+- Worker and project-config update-route suites: 20 tests passed, including the
+  real fresh-interpreter task resolution, authorization-loss/no-mutation, and
+  atomic replacement-preservation and failure-path release regressions.
+- Independent fresh-process lazy authorization invocation: canonical
+  `AuthError` raised for a disallowed token class.
+- `git diff --check`: passed.
+
+### Delta verdict
+
+- **Gate status**: `pass` for exact-host Forest writer exposure
+- **Unresolved in-scope findings**: High 0; Medium 0; Low 0
+- **Residual follow-up**: the preexisting out-of-scope Low archive-descendant
+  exclusion item remains unchanged
+- **Release recommendation**: READY for contracted Forest acceptance only;
+  production remains unauthorized by WP12D
+- **Security reviewer**: independent `wp12b_security_contract_review` agent,
+  READY

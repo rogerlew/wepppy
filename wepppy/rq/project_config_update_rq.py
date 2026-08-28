@@ -8,7 +8,6 @@ import redis
 from rq import get_current_job
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
-from wepppy.microservices.rq_engine.auth import AuthError, authorize_run_mutation
 from wepppy.nodb.project_config_update import apply_project_config_update
 from wepppy.rq.exception_logging import with_exception_logging
 from wepppy.weppcloud.utils.helpers import get_wd
@@ -18,14 +17,24 @@ __all__ = ["CONFIG_UPDATE_ACTIVE_PREFIX", "run_project_config_update_rq"]
 CONFIG_UPDATE_ACTIVE_PREFIX = "rq:project-config-update:active:"
 
 
+def authorize_run_mutation(actor: Mapping[str, Any], runid: str) -> Any:
+    """Import rq-engine authorization lazily so a fresh RQ worker can load this task."""
+
+    from wepppy.microservices.rq_engine.auth import authorize_run_mutation as authorize
+
+    return authorize(actor, runid)
+
+
 def _release_active(runid: str, job_id: str) -> None:
     key = f"{CONFIG_UPDATE_ACTIVE_PREFIX}{runid}"
     with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
-        current = redis_conn.get(key)
-        if isinstance(current, bytes):
-            current = current.decode("utf-8")
-        if str(current or "") == job_id:
-            redis_conn.delete(key)
+        redis_conn.eval(
+            "if redis.call('get', KEYS[1]) == ARGV[1] then "
+            "return redis.call('del', KEYS[1]) else return 0 end",
+            1,
+            key,
+            job_id,
+        )
 
 
 @with_exception_logging
@@ -63,7 +72,5 @@ def run_project_config_update_rq(
             "prior_digest": result.prior_digest,
             "resulting_digest": result.resulting_digest,
         }
-    except AuthError:
-        raise
     finally:
         _release_active(runid, job_id)

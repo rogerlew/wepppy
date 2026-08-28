@@ -75,6 +75,19 @@ migrated.
 - [x] (2026-08-28 05:32Z) Pass the final complete Python gate with 7,218 tests
   passed and 63 skipped, the complete 808-test frontend suite, and lint, stub,
   exception, Vulture, diff, documentation, and RQ-graph gates.
+- [x] (2026-08-28 05:48Z) Commit and push the reviewed implementation as
+  `d000b0cc4`, deploy that exact revision to `forest` without rebuilding the
+  unchanged image, and complete an authenticated real-run refresh preview.
+- [x] (2026-08-28 06:05Z) Diagnose the first acknowledged Forest apply before
+  mutation as a fresh-worker circular import, preserve byte-identical run
+  config/manifest state, and close it with lazy authorization import plus an
+  atomic Redis compare-delete for single-flight release.
+- [x] (2026-08-28 06:05Z) Pass 20 focused worker/route tests, fresh-process task
+  resolution, live Forest Redis replacement-reservation evidence, and renewed
+  independent correctness/security reviews with High 0, Medium 0, and Low 0.
+- [x] (2026-08-28 06:13Z) Pass the exact hotfix complete Python gate with
+  7,220 tests passed and 63 skipped, plus the refreshed stub, exception,
+  Vulture, diff, documentation, and RQ-graph gates.
 - [ ] Push and validate exact candidate on `forest`; hand it to WP12 without
   production deployment.
 
@@ -149,6 +162,19 @@ migrated.
   authority relation must also persist them as one lock-scoped transaction.
   Evidence: deterministic concurrent writes plus an injected second-field
   fault now prove rollback restores the complete pair current at lock entry.
+- Observation: importing `rq_engine.auth` from an RQ task at module load enters
+  `rq_engine.__init__`, which registers the project-config route and imports the
+  partially initialized task module again; already-running processes concealed
+  the cycle, while a fresh Forest worker exposed it before task execution.
+  Evidence: failed Forest job `d2db892f-7715-45e3-a955-ca86bb2246c9`, a
+  fresh-process `rq.utils.import_attribute` regression, and successful live
+  worker resolution after moving authorization import to the call boundary.
+- Observation: releasing a single-flight reservation with separate Redis
+  `GET` and `DELETE` operations can delete a replacement reservation if the
+  original key expires between them.
+  Evidence: the security re-review identified the race; one Lua compare-delete
+  now preserves a replacement in both deterministic tests and live Forest
+  Redis execution.
 
 ## Decision Log
 
@@ -226,10 +252,11 @@ and climate catalog/mode persistence is one lock-scoped, rollback-safe
 transaction. The update-specific frontend suite passes 19 tests; the complete
 frontend suite passes 808 tests across 107 suites; frontend lint, stubs,
 Vulture, changed-file broad-exception enforcement, diff checks, and the RQ
-graph pass. The final complete Python suite passes with 7,218 tests passed and
-63 skipped. Independent correctness and security reviews are READY with no
-remaining in-scope finding. Commit/push and exact-host writer acceptance
-remain; production deployment remains excluded.
+graph pass. After the Forest worker-load correction, the exact complete Python
+suite passes with 7,220 tests passed and 63 skipped. Independent correctness
+and security reviews are READY with no remaining in-scope finding. Hotfix
+commit/push and exact-host writer/reader-floor acceptance remain; production
+deployment remains excluded.
 
 ## Context and Orientation
 

@@ -97,6 +97,32 @@ acquisition rather than a stale pre-lock snapshot.
 The reviewer reran 32 climate route tests and 19 `project_config_update` Jest
 tests for this delta; all passed. Frontend ESLint also passed.
 
+## Forest Fresh-Worker Import Delta Recheck
+
+Forest acceptance exposed a circular import before the RQ task could execute:
+the worker module imported rq-engine authorization at module load while
+rq-engine package initialization imported the worker route. The failed attempt
+did not change config or manifest bytes, and its reservation was removed by an
+exact compare-and-delete.
+
+The reviewed worker now keeps a same-name lazy authorization wrapper. A fresh
+RQ process can import the task without initializing rq-engine routes; the
+fully loaded task imports and executes canonical mutation authorization before
+any project update. The `finally` boundary now uses one single-key Redis Lua
+operation to compare the stored reservation with the terminating job ID and
+delete only on equality. TTL expiry followed by a replacement reservation
+therefore cannot be clobbered by a split read/delete race. This change is
+confined to the ratified worker module and does not alter task arguments, queue
+topology, authorization semantics, or update persistence.
+
+A real fresh-interpreter subprocess regression resolves the task through
+`rq.utils.import_attribute`, preventing the already-imported test process from
+masking the cycle. The package also records a successful live fresh rq-worker
+import. The independent reviewer reran the worker and update-route suites:
+20 tests passed, including authorization-loss/no-mutation, matching
+reservation deletion, and preservation of an atomically replaced reservation.
+No delta correctness findings remain: High 0; Medium 0; Low 0.
+
 ## Validation Evidence
 
 The package records a clean full run of 7,218 Python tests with 63 skipped and

@@ -5,8 +5,9 @@
 **Timezone**: UTC
 **Started**: 2026-08-27 20:31 UTC
 **Current phase**: candidate commit and exact-host Forest acceptance
-**Last updated**: 2026-08-28 05:40 UTC
-**Next milestone**: commit/push the reviewed candidate and deploy it to `forest`
+**Last updated**: 2026-08-28 06:13 UTC
+**Next milestone**: commit/push the Forest worker hotfix and complete exact-host
+writer/reader-floor rollback acceptance
 **Security impact**: `high`
 **Dedicated security review**: `yes`
 **Security artifact**: `artifacts/20260827_security_review.md`
@@ -41,6 +42,23 @@ PC-24 owns `.cfg` locale normalization and run-UI authority parity.
 
 ### Done
 
+- [x] Committed/pushed implementation revision `d000b0cc4`, recreated
+  `weppcloud`, `rq-engine`, and `rq-worker` on exact host `forest` without an
+  image build, and completed an authenticated real-run update preview
+  (2026-08-28 05:48 UTC).
+- [x] Confirmed the first acknowledged apply failed before task execution due
+  to a fresh-worker circular import; the target config and manifest remained
+  byte-identical and the compare-checked failed-job reservation was released
+  (2026-08-28 05:52 UTC).
+- [x] Broke the worker import cycle at the authorization call boundary, made
+  single-flight release an atomic Redis compare-delete, passed 20 focused
+  worker/route tests plus live worker/import/Redis evidence, and obtained
+  renewed correctness/security READY verdicts with no High, Medium, or Low
+  findings (2026-08-28 06:05 UTC).
+- [x] Passed the exact 7,283-item hotfix Python collection with 7,220 passed
+  and 63 skipped in 12 minutes 54 seconds, plus refreshed test-stub, Vulture,
+  changed-file broad-exception, diff, documentation, and RQ-graph gates
+  (2026-08-28 06:13 UTC).
 - [x] Obtained final independent correctness and security READY verdicts with
   no remaining in-scope High, Medium, or Low findings; production remains
   unauthorized (2026-08-28 05:32 UTC).
