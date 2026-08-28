@@ -4,10 +4,10 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-27 20:31 UTC
-**Current phase**: structural reader-floor implementation review
-**Last updated**: 2026-08-28 00:35 UTC
-**Next milestone**: commit, push, and validate the writer-absent reader floor on
-`forest`
+**Current phase**: failing behavior evidence and bounded writer implementation
+**Last updated**: 2026-08-28 00:41 UTC
+**Next milestone**: write the full inventory/authority/refresh regression
+matrix before implementation
 **Security impact**: `high`
 **Dedicated security review**: `yes`
 **Security artifact**: `artifacts/20260827_security_review.md`
@@ -27,13 +27,11 @@ PC-24 owns `.cfg` locale normalization and run-UI authority parity.
 
 ### In Progress
 
-- [ ] Close independent correctness/security review of the append-only
-  structural reader floor, then commit and validate it on `forest` with the
-  capability-refresh writer absent.
+- [ ] Write failing full-config inventory, legacy/stored authority, paired
+  boundary, and acknowledged-refresh tests.
 
 ### Ready / Backlog
 
-- [ ] Write failing full-config inventory and legacy/stored authority tests.
 - [ ] Apply exact `.cfg` normalization and bounded resolver/consumer changes.
 - [ ] Run focused/full gates and independent correctness/security reviews.
 - [ ] Push and validate exact candidate on `forest`; hand off to WP12 without
@@ -41,11 +39,25 @@ PC-24 owns `.cfg` locale normalization and run-UI authority parity.
 
 ### Blocked
 
-- [ ] Capability-refresh writer implementation and exposure are blocked until
-  the exact WP12D reader-floor revision is recorded and accepted on `forest`.
+- [ ] Forest writer exposure remains blocked until implementation, focused and
+  broad gates, and fresh correctness/security reviews are complete.
 
 ### Done
 
+- [x] Obtained independent reader-floor correctness and security READY verdicts
+  with no High, Medium, or Low findings; the sole nonblocking test-quality gap
+  was closed through full-pipeline isolated-catalog validation (2026-08-28
+  00:36 UTC).
+- [x] Committed and pushed the structural reader floor as
+  `80f4810b7be59d90a64b4771f587eb360987a820` (2026-08-28 00:37 UTC).
+- [x] Recreated only `weppcloud` and `rq-engine` on exact host `forest` without
+  an image build, proved both services healthy on the unchanged image digest,
+  and confirmed the capability-refresh writer remains absent (2026-08-28
+  00:41 UTC).
+- [x] Reopened real historical schema-v2 `matted-smooth` and schema-v3
+  `biomedical-sharp` through the production stored-authority reader on
+  `forest`; both retained their checked-in structural identities, and the
+  post-restart structural selection passed 10 tests (2026-08-28 00:41 UTC).
 - [x] Committed the ratified canonical documentation-only checkpoint as
   `596ff5758ca83e6077b97f953431c2c881219840` before any WP12D implementation
   edit (2026-08-28 00:16 UTC).

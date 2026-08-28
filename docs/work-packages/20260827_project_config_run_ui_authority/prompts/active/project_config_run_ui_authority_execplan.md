@@ -42,8 +42,10 @@ migrated.
   as `596ff5758ca83e6077b97f953431c2c881219840`.
 - [x] (2026-08-28 00:35Z) Implement and locally validate the append-only
   structural reader floor while keeping the capability-refresh writer absent.
-- [ ] Close reader-floor correctness/security review, commit its exact
-  revision, and validate it on `forest` before writer implementation.
+- [x] (2026-08-28 00:41Z) Obtain Ready reader-floor correctness/security
+  reviews, commit and push exact revision `80f4810b7`, and validate real
+  schema-v2/v3 reopen on `forest` without rebuilding or exposing a refresh
+  writer.
 - [ ] Write failing inventory, legacy reopen, stored isolation, and paired
   boundary tests.
 - [ ] Implement exact config normalization and authority composition.
@@ -155,8 +157,9 @@ migrated.
 Amendment 3 is ratified and its canonical documentation-only checkpoint is
 commit `596ff5758ca83e6077b97f953431c2c881219840`. The append-only structural
 reader floor is implemented with the refresh writer absent and has passed its
-local focused gates. Independent reader-floor reviews and exact-host `forest`
-acceptance remain before writer implementation.
+local focused gates, independent reviews, and exact-host `forest` acceptance.
+Revision `80f4810b7be59d90a64b4771f587eb360987a820` is the recorded WP12D
+rollback floor; failing behavior evidence and the bounded writer remain.
 
 ## Context and Orientation
 
