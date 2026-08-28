@@ -4,14 +4,18 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-27 20:31 UTC
-**Current phase**: amendment 6 WP12 handoff
-**Last updated**: 2026-08-28 20:42 UTC
-**Next milestone**: parent WP12 scope comparison and promotion gate; merge and
+**Current phase**: amendment 7 binding contract review
+**Last updated**: 2026-08-28 23:06 UTC
+**Next milestone**: obtain post-ratification READY reviews and commit amendment
+7's standalone contract checkpoint before its bounded implementation; merge and
 production remain reserved
 **Package security impact**: `high` (historical WP12D scope)
 **Amendment 6 security impact**: `low`
 **Amendment 6 dedicated security review**: `not required`; no new input,
 authorization, persistence, filesystem, or queue boundary
+**Amendment 7 security impact**: `low`
+**Amendment 7 dedicated security review**: `not required`; render-time title
+identity only, with no new input or authorization boundary
 **Historical dedicated security review**: `yes`
 **Security artifacts**: `artifacts/20260827_security_review.md` and
 `artifacts/20260828_amendment5_security_contract_review.md`
@@ -31,6 +35,25 @@ PC-24 owns `.cfg` locale normalization and run-UI authority parity.
 
 ### In Progress
 
+- [x] Record operator-approved amendment `PC-13/WP12D-20260828-7`, the exact
+  run-title rule, valid-state matrix, security/data impact, regression evidence,
+  and source boundary (2026-08-28 21:32 UTC).
+- [x] Resolve all technical correctness/governance findings; both independent
+  reviews are READY FOR RATIFICATION, with only amendment-specific exact
+  operator ratification pending (2026-08-28 21:44 UTC).
+- [x] Obtain exact operator ratification of amendment 7's corrected complete-
+  lifetime matrix, bounded cross-owner composition, unchanged owner statuses,
+  standalone checkpoint/implementation, and WP12 merge/production reservation
+  (2026-08-28 23:06 UTC).
+- [x] Obtain binding correctness and governance READY reviews with every
+  finding closed and High 0 / Medium 0 / Low 0 unresolved findings
+  (2026-08-28 23:10 UTC).
+- [ ] Obtain exact operator ratification of the corrected complete-lifetime
+  matrix, post-correction correctness/governance READY reviews, and commit the
+  standalone documentation-only amendment-7 checkpoint.
+- [ ] Implement the exact `runid` title identity in the template and remove live
+  Project controller title mutations; add rendered/Jest regressions, pass scoped
+  gates, and return the unchanged owners to WP12 handoff.
 - [x] Obtain exact operator ratification allowing WP12D to carry the finite
   WP07/PC-13 boundary without advancing or closing WP07, PC-13, WP12D, or WP12;
   preserve WP12's exclusive merge and production authority (2026-08-28 19:59

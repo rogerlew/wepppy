@@ -965,6 +965,24 @@ crashed initialization MUST never be published as ready. Existing scoped
 cleanup MAY remove its newly allocated directory; an undisclosed orphan is an
 operator cleanup concern, not a resumable project.
 
+### 7.7 Run page document identity
+
+The established run page's HTML document title MUST be exactly the
+route-resolved `runid` for the complete page lifetime. It MUST NOT derive title
+content from a legacy config name, config token, config filename, project
+display name, scenario, locale, current nested/PUP controller identity, or
+stored capability metadata. Saving, clearing, or otherwise changing a project
+display name or scenario MUST NOT mutate the document title. Missing metadata
+MUST NOT expose `None`, `Untitled`, or an empty suffix in the title.
+
+This rule applies equally to named-preset, project-local, and flattened
+project-owned configurations. The run ID is required route identity; config
+names, project names, and scenarios are optional metadata and are not document
+identity. Invalid or path-dangerous run IDs remain rejected by the existing
+route boundary. Values that reach HTML rendering remain subject to the existing
+Jinja autoescaping boundary. The title is not persisted and does not rewrite
+project files or provenance.
+
 ## 8. Composition and Precedence
 
 Composition MUST be deterministic and schema-driven. The conceptual order is:

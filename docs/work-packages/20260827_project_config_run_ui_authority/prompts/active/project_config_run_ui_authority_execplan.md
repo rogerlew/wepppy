@@ -182,6 +182,25 @@ migrated.
   implementation correctness READY with High 0, Medium 0, and Low 0, and commit
   the exact reviewed implementation as
   `091eaf11f6cf47b9751c857f3de5719be564e313`.
+- [x] (2026-08-28 21:32Z) Record the project-owned-config run-title defect,
+  operator approval, valid-state matrix, exact boundary, and canonical title
+  rule in bounded amendment `PC-13/WP12D-20260828-7`.
+- [x] (2026-08-28 21:44Z) Resolve title-lifetime, suffix ambiguity,
+  route/escaping, live Project controller, nested/PUP, source-boundary, and
+  executable-plan review findings; correctness and governance are technically
+  READY FOR RATIFICATION with only exact operator ratification pending.
+- [x] (2026-08-28 23:06Z) Obtain exact operator ratification of amendment 7,
+  including bounded cross-owner authority, unchanged owner statuses, standalone
+  checkpoint/implementation authority, and WP12's exclusive merge/production
+  authority.
+- [x] (2026-08-28 23:10Z) Obtain binding correctness and governance READY
+  reviews with High 0, Medium 0, and Low 0 unresolved findings.
+- [ ] Commit amendment 7 as a standalone documentation-only ancestor and verify
+  its ancestry before any implementation or test edit.
+- [ ] Make the established run page title exactly the route `runid` throughout
+  initial render and Project controller name/scenario updates, add rendered and
+  Jest regressions, pass scoped gates, and obtain independent implementation
+  correctness review.
 
 ## Surprises & Discoveries
 
@@ -413,6 +432,13 @@ migrated.
   because programmatic hydration does not emit `change`; the review authority
   is the server summary, not the button.
   Date/Author: 2026-08-28, operator/Codex; explicitly approved 19:44 UTC.
+- Decision: Use the exact route `runid` as the established run page's complete
+  document-title identity throughout the page lifetime; config, project-name,
+  scenario, and nested/PUP controller metadata never alter it.
+  Rationale: every run page has a route-resolved run ID, while project-owned
+  configs legitimately lack the legacy config-name metadata that currently
+  renders as `None`.
+  Date/Author: 2026-08-28, operator/Codex; explicitly approved 21:32 UTC.
 
 ## Outcomes & Retrospective
 
@@ -453,6 +479,11 @@ test, documentation, and package-evidence boundary. WP07, PC-13, WP12D, and
 WP12 retain their existing status; parent WP12 retains the scope comparison,
 merge, and production promotion gates. Production deployment remains excluded
 from WP12D.
+
+Bounded amendment `PC-13/WP12D-20260828-7` is documented and implementation is
+pending its required reviewed standalone contract checkpoint. It changes only
+the established run page's render-time document identity; no project data,
+route, configuration resolution, merge, or deployment behavior is in scope.
 
 ## Context and Orientation
 
@@ -563,6 +594,29 @@ obtain one independent implementation correctness review, and return the
 package to WP12 handoff without pushing, deploying, merging, or touching
 production.
 
+The bounded amendment-7 continuation starts exactly at
+`5bb8676bb5b6dca2a71d9bb84f658f9bdf0811e6`. First record the observed
+config-name/`None` title discrepancy, promote the exact run-ID-first rule into
+canonical section 7.7, obtain operator ratification of the completed amendment
+matrix and unchanged owner statuses, close independent correctness and
+governance reviews, and commit the documentation-only checkpoint as a
+standalone ancestor. No template or test edit may precede that commit.
+
+After the checkpoint, add failing rendered-title evidence against the actual
+`runs0_pure.htm` title block. Cover a project-owned run with
+`ron.configname = None` and no display name, plus a legacy config name with a
+populated project display name and a differing nested/PUP current controller.
+Add an autoescape-enabled HTML-significant title case and failing Project
+controller evidence for successful name/scenario saves and clears. Then replace
+the template title with exact `runid` and remove only the two Project controller
+title-mutation helpers/calls, retaining name/scenario persistence, events,
+notifications, and field updates. Rebuild the generated bundle; run focused and
+complete frontend plus broader WEPPcloud route gates; run scoped documentation
+and diff checks; compare changed files with the exact boundary; and obtain one
+independent implementation correctness review. Return the unchanged owners to
+WP12 handoff without deployment, merge, or production action. A push requires a
+separate operator request.
+
 ## Milestones
 
 Milestone 1 produces the amendment-5 standalone contract checkpoint descended
@@ -608,6 +662,19 @@ rendered-template, generated-bundle, and diagnostic evidence; complete frontend
 lint/tests; targeted template pytest; scoped docs/diff gates; and an independent
 implementation correctness review. It ends at WP12 handoff with no deployment.
 
+Milestone 6 is the bounded amendment-7 run-title correction. Its first output is
+a documentation-only checkpoint descended from `5bb8676bb`, with exact operator
+ratification, READY correctness/governance reviews, and no template, controller,
+generated-bundle, or test edit. Its second output makes the established run page
+title exactly the route `runid` throughout initial render and successful
+project-name/scenario updates. Acceptance requires actual Jinja title-block
+regressions for absent, populated, nested/PUP, and autoescaped metadata states;
+Project controller save/clear regressions; focused and complete frontend gates;
+the focused run-control and broader WEPPcloud route suites; generated-bundle
+parity; scoped documentation/diff gates; exact changed-file containment; and an
+independent implementation correctness review. It ends at WP12 handoff with no
+push, deployment, merge, or production action.
+
 ## Concrete Steps
 
 Work from `/home/workdir/wepppy`.
@@ -648,6 +715,25 @@ Then run `wctl run-npm test`, `wctl run-pytest tests --maxfail=1`,
 contract, amendment decision/reviews, active ExecPlan, tracker, and controller
 README. Compare all changed paths to the exact amendment-6 boundary before
 handoff. Do not push or deploy this amendment in this milestone.
+
+For amendment 7, record and verify its standalone checkpoint as an ancestor,
+then write the failing rendered-title and Project controller regressions before
+implementation. Iterate with:
+
+    wctl run-npm test -- project
+    wctl run-pytest tests/weppcloud/routes/test_pure_controls_render.py -k runs0_title --maxfail=1
+    python wepppy/weppcloud/controllers_js/build_controllers_js.py
+    wctl run-npm lint
+
+Then run `wctl run-npm test`, the complete focused
+`tests/weppcloud/routes/test_pure_controls_render.py` suite, and
+`wctl run-pytest tests/weppcloud/routes --maxfail=1`. Run `git diff --check` and
+scoped `wctl doc-lint --path` for the canonical contract, amendment
+decision/reviews, active ExecPlan, tracker, and controller README. Verify
+generated-bundle parity and compare every changed path with the exact
+amendment-7 boundary. Obtain one independent implementation correctness review.
+Do not push, deploy, merge, touch production, or advance any owner in this
+milestone.
 
 The exact preexisting dirty paths excluded from every WP12D stage are:
 
@@ -719,6 +805,17 @@ retain its exact diagnostic. Unsupported version, absent locale maps, missing
 locale authority, and dependency-rendering failure must issue zero validation
 requests. The rendered template and controller must contain no Review Selections
 action or dead hook while review, errors, status, and Create remain accessible.
+
+For amendment 7, the actual `runs0_pure.htm` title block must render exactly the
+route `runid` when config name, project name, or current nested/PUP controller
+identity is absent, populated, or different. Autoescape-enabled evidence must
+encode HTML-significant values and preserve their exact decoded text without
+raw executable markup. Successful Project controller saves and clears of name
+or scenario must preserve existing persistence, field, event, and notification
+behavior while leaving the title unchanged. Source and rebuilt bundle must
+contain no Project controller document-title mutation. The exact changed-file
+comparison must contain only the ratified boundary, and the final independent
+implementation correctness review must be READY before WP12 handoff.
 
 ## Idempotence and Recovery
 
