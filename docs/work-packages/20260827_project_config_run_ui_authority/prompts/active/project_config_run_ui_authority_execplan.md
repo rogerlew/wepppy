@@ -134,7 +134,9 @@ migrated.
   preserving all commits/identities and reserving merge/production to WP12.
 - [x] (2026-08-28 16:35Z) Obtain fresh binding correctness, governance, and
   security READY reviews with security High 0 / Medium 0 / Low 0.
-- [ ] Commit amendment 5's standalone canonical checkpoint.
+- [x] (2026-08-28 16:36Z) Commit amendment 5's standalone canonical checkpoint
+  as `baea9616df255d336807d0a91adf7be8f99367fe` and verify it is the ancestor
+  before implementation.
 - [ ] Implement and validate an amendment-5 reader floor before its graph
   writer, then complete local and exact-host `forest` acceptance.
 

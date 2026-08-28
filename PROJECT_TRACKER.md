@@ -429,10 +429,10 @@ WP12.
 accepted and Forest-validated. The demonstrated Europe/schema-v1 and land-cover
 envelope defect reopened WP12D under amendment
 `PC-24/WP12D-20260828-5`, exactly ratified on 2026-08-28 16:29 UTC. Amendment-5
-implementation and config edits are blocked until fresh binding correctness,
-governance, and security reviews and a new standalone checkpoint descended
-from baseline `0ad76c547145bbe323148bac73410ff9cfcd01ef`. Its append-only reader
-floor must pass exact-host `forest` before any new graph writer is exposed.
+binding correctness/governance/security reviews are READY and standalone
+checkpoint `baea9616df255d336807d0a91adf7be8f99367fe` descends from baseline
+`0ad76c547145bbe323148bac73410ff9cfcd01ef`. Its append-only reader floor must
+pass exact-host `forest` before any new graph writer is exposed.
 Parent WP12 retains merge and every production action.
 
 ### Project Config Builder Locale Expansion (WP12C)

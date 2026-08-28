@@ -2,7 +2,8 @@
 
 **Amendment ID**: `PC-24/WP12D-20260828-5`
 **Status**: ratified exactly by the operator, 2026-08-28 16:29 UTC; binding
-correctness/governance/security READY; standalone checkpoint pending
+correctness/governance/security READY; standalone checkpoint
+`baea9616df255d336807d0a91adf7be8f99367fe`
 **Starting revision**: `0ad76c547145bbe323148bac73410ff9cfcd01ef`
 **Initiative branch**: `feature/project-owned-config`
 **Canonical branch**: `master`

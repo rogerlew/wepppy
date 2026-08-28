@@ -1,6 +1,6 @@
 # Project Config Run UI Authority (WP12D)
 
-**Status**: Amendment 5 ratified/reviewed; checkpoint pending (2026-08-28)
+**Status**: Amendment 5 checkpoint complete; reader floor next (2026-08-28)
 **Timezone**: UTC
 Initiative branch: feature/project-owned-config
 Canonical branch: master

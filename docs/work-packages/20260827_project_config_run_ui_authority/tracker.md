@@ -4,10 +4,10 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-27 20:31 UTC
-**Current phase**: amendment 5 documentation-only checkpoint
-**Last updated**: 2026-08-28 16:35 UTC
-**Next milestone**: exact path-staged documentation-only checkpoint; production
-remains reserved
+**Current phase**: amendment 5 structural reader floor
+**Last updated**: 2026-08-28 16:36 UTC
+**Next milestone**: append the five ratified identities without changing graph
+writers, then review and validate exact-host Forest; production remains reserved
 **Security impact**: `high`
 **Dedicated security review**: `yes`
 **Security artifacts**: `artifacts/20260827_security_review.md` and pending
@@ -32,7 +32,9 @@ PC-24 owns `.cfg` locale normalization and run-UI authority parity.
   advisory contract reviews (2026-08-28 16:29 UTC).
 - [x] Obtain fresh binding correctness, governance, and security READY reviews
   (2026-08-28 16:35 UTC; security H0/M0/L0).
-- [ ] Commit the standalone amendment-5 contract checkpoint.
+- [x] Commit standalone amendment-5 contract checkpoint
+  `baea9616df255d336807d0a91adf7be8f99367fe` and verify it is the current
+  implementation ancestor (2026-08-28 16:36 UTC).
 - [ ] Add all five resulting schema-v3 structural identities to a standalone
   reader floor and prove prior-identity compatibility.
 - [ ] Implement the corrected locale graph, schema-v1 preset projection, and
@@ -56,6 +58,10 @@ PC-24 owns `.cfg` locale normalization and run-UI authority parity.
 
 ### Done
 
+- [x] Exact path-staged documentation-only checkpoint
+  `baea9616df255d336807d0a91adf7be8f99367fe` contains ratification, canonical
+  promotion, and binding review evidence with no production/test/config edit
+  (2026-08-28 16:36 UTC).
 - [x] Operator exactly ratified amendment `PC-24/WP12D-20260828-5`, authorized
   its standalone checkpoint and implementation, preserved existing commits and
   stored identities, and reserved merge/production to WP12
