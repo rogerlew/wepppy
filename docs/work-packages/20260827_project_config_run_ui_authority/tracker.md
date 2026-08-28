@@ -4,11 +4,11 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-27 20:31 UTC
-**Current phase**: amendment 7 binding contract review
-**Last updated**: 2026-08-28 23:06 UTC
-**Next milestone**: obtain post-ratification READY reviews and commit amendment
-7's standalone contract checkpoint before its bounded implementation; merge and
-production remain reserved
+**Current phase**: amendment 7 implementation
+**Last updated**: 2026-08-28 23:11 UTC
+**Next milestone**: implement and validate amendment 7 from standalone contract
+checkpoint `8a15b963c26a4d9201e238610bfdbbf1734c77a6`; merge and production remain
+reserved
 **Package security impact**: `high` (historical WP12D scope)
 **Amendment 6 security impact**: `low`
 **Amendment 6 dedicated security review**: `not required`; no new input,
@@ -48,6 +48,9 @@ PC-24 owns `.cfg` locale normalization and run-UI authority parity.
 - [x] Obtain binding correctness and governance READY reviews with every
   finding closed and High 0 / Medium 0 / Low 0 unresolved findings
   (2026-08-28 23:10 UTC).
+- [x] Commit exact six-document standalone amendment-7 checkpoint
+  `8a15b963c26a4d9201e238610bfdbbf1734c77a6` and verify no implementation,
+  test, README, or generated-bundle path preceded it (2026-08-28 23:11 UTC).
 - [ ] Obtain exact operator ratification of the corrected complete-lifetime
   matrix, post-correction correctness/governance READY reviews, and commit the
   standalone documentation-only amendment-7 checkpoint.

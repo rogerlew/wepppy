@@ -195,8 +195,9 @@ migrated.
   authority.
 - [x] (2026-08-28 23:10Z) Obtain binding correctness and governance READY
   reviews with High 0, Medium 0, and Low 0 unresolved findings.
-- [ ] Commit amendment 7 as a standalone documentation-only ancestor and verify
-  its ancestry before any implementation or test edit.
+- [x] (2026-08-28 23:11Z) Commit amendment 7 as standalone documentation-only
+  checkpoint `8a15b963c26a4d9201e238610bfdbbf1734c77a6` and verify its ancestry before
+  any implementation or test edit.
 - [ ] Make the established run page title exactly the route `runid` throughout
   initial render and Project controller name/scenario updates, add rendered and
   Jest regressions, pass scoped gates, and obtain independent implementation
