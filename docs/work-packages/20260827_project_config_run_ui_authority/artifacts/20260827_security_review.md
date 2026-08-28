@@ -423,3 +423,67 @@ without weakening that worker-time reauthorization boundary.
   production remains unauthorized by WP12D
 - **Security reviewer**: independent `wp12b_security_contract_review` agent,
   READY
+
+## WP12D Forest Provenance-Settlement Security Delta Recheck
+
+### Revision binding
+
+- **Review completed**: 2026-08-28 06:50 UTC
+- **Committed settlement base and candidate HEAD**:
+  `9248138749a8884f48529cad380d4519bfcd5ef2`
+- **Delta reviewed**: only `wepppy/nodb/project_config_update.py` and
+  `tests/nodb/test_project_config_update.py`
+
+### Findings and security analysis
+
+No High, Medium, or Low security finding remains. Current selected-chain
+provenance is now the `resulting.selected_parent_chain` of the newest durable
+`capability_refresh` or `combined` amendment, with immutable creation
+`parent_chain` used only when no such amendment exists. Later additive
+amendments do not change capability provenance and therefore do not displace the
+newest refresh result.
+
+The reader does not consume unchecked manifest content. `_read_artifacts`
+parses bounded config and manifest bytes, rejects unsafe manifest text and
+invalid config paths, and validates the complete amendment list before returning
+it to preview. Capability amendment validation requires a closed kind-specific
+shape, contiguous sequence, canonical timestamp, fixed resolver and
+acknowledgment revisions, SHA-256 identities, a closed prior/resulting identity
+shape, and a nonempty ordered chain of exact `{kind, id, revision}` string rows.
+Malformed, partial, unknown, or wrong-kind history fails diagnostically before
+preview, reservation, enqueue, or mutation. The helper deep-copies the validated
+chain and cannot modify durable history.
+
+This settlement does not weaken acknowledgment. Live stored-graph differences
+are computed independently as canonical capability-section changes; any such
+change still produces a capability-refresh preview requiring the exact
+preview-bound acknowledgment. Selected-chain comparison controls only whether a
+provenance discontinuity already recorded by an acknowledged refresh is
+advertised again. It can suppress only the repeated manifest-only refresh after
+that validated result is current. Registry resolution, stored capability
+authority, project selections, runtime mappings, and writer transaction inputs
+remain unchanged.
+
+The delta adds no authentication, path, subprocess, queue, network, diagnostic,
+personal-identity, or rollback surface. Historical manifests without a durable
+capability amendment retain their immutable creation-chain behavior.
+
+### Verification evidence
+
+- Package-focused affected evidence: 177 tests passed as recorded by the
+  implementation handoff.
+- Independent project-config update suite: 61 tests passed, including atomic
+  acknowledged refresh, malformed durable-amendment no-write readers, and
+  settled post-apply unavailability.
+- Documentation lint and `git diff --check`: passed.
+
+### Delta verdict
+
+- **Gate status**: `pass` for exact-host Forest writer exposure
+- **Unresolved in-scope findings**: High 0; Medium 0; Low 0
+- **Residual follow-up**: the preexisting out-of-scope Low archive-descendant
+  exclusion item remains unchanged
+- **Release recommendation**: READY for contracted Forest acceptance only;
+  production remains unauthorized by WP12D
+- **Security reviewer**: independent `wp12b_security_contract_review` agent,
+  READY

@@ -148,6 +148,36 @@ project-update route, and update-worker suite: 116 tests passed. `git diff
 --check` also passed for the two-file delta. No delta correctness findings
 remain: High 0; Medium 0; Low 0.
 
+## Forest Provenance-Settlement Delta Recheck
+
+Forest's successful acknowledged refresh exposed a post-commit availability
+defect: preview compared current selected component revisions only with the
+immutable Builder-creation `parent_chain`. The durable capability amendment
+already recorded the acknowledged discontinuity, but the same creation-to-
+current parent-chain delta therefore remained available after apply.
+
+The exact two-file delta over `924813874` now derives the current selected
+chain from the newest validated `capability_refresh` or `combined` amendment's
+`resulting.selected_parent_chain`. It walks amendment history newest-first,
+skips additive history, and retains the immutable creation chain as the
+no-refresh fallback. Artifact loading validates the complete durable amendment
+shape, identity, chain rows, sequence, and capability delta before this helper
+is reached. The original manifest `parent_chain`, selections, creation
+provenance, and prior amendment entries remain unchanged.
+
+The enhanced atomic-refresh regression proves the successful amendment and
+config digest settle the next preview to unavailable without removing the
+durable audit record. The independent reviewer reran the exact NoDb update,
+auth, browser-token, project-update route, and update-worker boundary: 177
+tests passed. `git diff --check` passed for the two-file delta. No delta
+correctness findings remain: High 0; Medium 0; Low 0.
+
+The previously noted combined-update test-granularity gap is closed without a
+production change. `test_schema_v3_combined_update_applies_one_amendment` now
+reopens preview after apply and asserts that availability is false and no
+capability refresh remains. The test passed independently (1 passed), directly
+covering settlement through the `combined` amendment branch.
+
 ## Validation Evidence
 
 The package records a clean full run of 7,218 Python tests with 63 skipped and

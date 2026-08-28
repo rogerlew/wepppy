@@ -5,7 +5,7 @@
 **Timezone**: UTC
 **Started**: 2026-08-27 20:31 UTC
 **Current phase**: candidate commit and exact-host Forest acceptance
-**Last updated**: 2026-08-28 06:45 UTC
+**Last updated**: 2026-08-28 07:02 UTC
 **Next milestone**: commit/push the Forest worker hotfix and complete exact-host
 writer/reader-floor rollback acceptance
 **Security impact**: `high`
@@ -72,6 +72,19 @@ PC-24 owns `.cfg` locale normalization and run-UI authority parity.
   previously documented unrelated same-size Climate fixture timing miss; that
   exact test passed immediately in isolation and in this complete rerun
   (2026-08-28 06:45 UTC).
+- [x] Deployed pushed identity revision `924813874` to exact host `forest`
+  without rebuilding; authenticated job
+  `b591cd8b-18b4-4005-ae2e-8edec2d7f594` finished with the reviewed digest
+  transition `92ed9605…0948` to `f41b0672…d7ca` (2026-08-28 06:49 UTC).
+- [x] Found the successful refresh still advertised a repeated manifest-only
+  refresh because preview ignored the append-only amendment's resulting
+  selected chain. Corrected current-provenance resolution with immutable
+  creation-chain fallback and passed 177 affected tests including post-apply
+  settlement (2026-08-28 06:55 UTC).
+- [x] Passed the final exact 7,284-item Python collection with 7,221 passed and
+  63 skipped in 12 minutes 49 seconds, plus an independent combined-settlement
+  rerun and refreshed exception, Vulture, stub, RQ-graph, diff, and
+  documentation gates (2026-08-28 07:02 UTC).
 - [x] Obtained final independent correctness and security READY verdicts with
   no remaining in-scope High, Medium, or Low findings; production remains
   unauthorized (2026-08-28 05:32 UTC).

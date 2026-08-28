@@ -100,6 +100,18 @@ migrated.
   with 7,221 tests passed and 63 skipped. A first attempt hit the previously
   documented unrelated same-size Climate fixture timing miss; that exact test
   passed immediately in isolation and in the clean complete rerun.
+- [x] (2026-08-28 06:49Z) Deploy pushed identity revision `924813874` to
+  `forest` without rebuilding and complete the authenticated acknowledged
+  refresh: job `b591cd8b-18b4-4005-ae2e-8edec2d7f594` finished with the exact
+  reviewed digest transition `92ed9605…0948` to `f41b0672…d7ca`.
+- [x] (2026-08-28 06:55Z) Diagnose recurring post-apply manifest-only
+  availability as comparison against immutable creation-chain revisions; use
+  the newest validated capability amendment's resulting selected chain as the
+  current baseline, retain creation-chain fallback, and pass 177 affected
+  tests including settled post-apply unavailability.
+- [x] (2026-08-28 07:02Z) Pass the final exact complete Python gate with
+  7,221 tests passed and 63 skipped, plus an independently rerun combined
+  post-apply settlement test and refreshed static/documentation gates.
 - [ ] Push and validate exact candidate on `forest`; hand it to WP12 without
   production deployment.
 
@@ -195,6 +207,15 @@ migrated.
   task with no `auth_actor`; the token-issuance contract already asserts an
   opaque subject plus numeric `user_id`, and the corrected sanitizer retains
   that identity while continuing to reject a token with neither numeric form.
+- Observation: capability refresh correctly preserves the original manifest
+  `parent_chain`, so comparing every later preview only to that creation-time
+  chain makes the already-recorded selected-chain discontinuity appear new
+  forever even when the stored graph and config are current.
+  Evidence: the successful Forest refresh produced identical prior/resulting
+  graph identities on its next preview but repeated only the old-to-current
+  selected-chain revisions. Recovery and availability now read the newest
+  validated capability amendment's `resulting.selected_parent_chain`, with the
+  immutable creation chain used only when no such amendment exists.
 
 ## Decision Log
 
@@ -272,11 +293,12 @@ and climate catalog/mode persistence is one lock-scoped, rollback-safe
 transaction. The update-specific frontend suite passes 19 tests; the complete
 frontend suite passes 808 tests across 107 suites; frontend lint, stubs,
 Vulture, changed-file broad-exception enforcement, diff checks, and the RQ
-graph pass. After the Forest worker-load and identity-handoff corrections, the
-exact complete Python suite passes with 7,221 tests passed and 63 skipped.
-Independent correctness and security reviews are READY with no remaining
-in-scope finding. Identity-fix commit/push and exact-host writer/reader-floor
-acceptance remain; production deployment remains excluded.
+graph pass. After the Forest worker-load, identity-handoff, and provenance-
+settlement corrections, the exact complete Python suite passes with 7,221
+tests passed and 63 skipped. Independent correctness and security reviews are
+READY with no remaining in-scope finding. Settlement-fix commit/push and exact-
+host reader-floor rollback acceptance remain; production deployment remains
+excluded.
 
 ## Context and Orientation
 

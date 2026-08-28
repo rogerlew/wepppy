@@ -709,6 +709,29 @@ def _selected_parent_chain(
     ]
 
 
+def _current_selected_parent_chain(
+    manifest: Mapping[str, object],
+) -> list[dict[str, str]]:
+    amendments = manifest.get("amendments")
+    if isinstance(amendments, list):
+        for amendment in reversed(amendments):
+            if not isinstance(amendment, dict) or amendment.get("kind") not in {
+                "capability_refresh",
+                "combined",
+            }:
+                continue
+            refresh = amendment.get("capability_refresh")
+            resulting = refresh.get("resulting") if isinstance(refresh, dict) else None
+            chain = (
+                resulting.get("selected_parent_chain")
+                if isinstance(resulting, dict)
+                else None
+            )
+            if isinstance(chain, list):
+                return deepcopy(chain)
+    return _selected_parent_chain(_chain_entries(manifest))
+
+
 def _canonical_ids(value: object) -> set[str]:
     if not isinstance(value, list):
         return set()
@@ -910,7 +933,7 @@ def _capability_refresh_payload(
     resulting_sections = _capability_sections(resulting_graph)
     changes = _capability_changes(prior_sections, resulting_sections, registry)
     runtime_locales = current.get("general", {}).get("locales")
-    prior_chain = _selected_parent_chain(_chain_entries(manifest))
+    prior_chain = _current_selected_parent_chain(manifest)
     resulting_chain = [
         {"kind": item.kind, "id": item.component_id, "revision": item.revision}
         for item in resolved_result.parent_chain

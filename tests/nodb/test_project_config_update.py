@@ -688,6 +688,10 @@ def test_schema_v3_capability_refresh_is_acknowledged_atomic_and_idempotent(
         "prior_sha256": preview.current_digest,
         "resulting_sha256": preview.resulting_digest,
     }
+    settled = preview_project_config_update(tmp_path)
+    assert settled.available is False
+    assert settled.capability_refresh is None
+    assert settled.current_digest == preview.resulting_digest
 
 
 def test_live_capability_graph_failure_is_registry_error_before_writes(
@@ -832,6 +836,9 @@ def test_schema_v3_combined_update_applies_one_amendment(
         "locale_profile", "locales", "preserved_project_selections",
         "acknowledgment_revision", "prior", "resulting", "changes",
     }
+    settled = preview_project_config_update(tmp_path)
+    assert settled.available is False
+    assert settled.capability_refresh is None
 
 
 def test_schema_v3_refresh_rejects_manifest_default_and_cellsize_incongruence(
