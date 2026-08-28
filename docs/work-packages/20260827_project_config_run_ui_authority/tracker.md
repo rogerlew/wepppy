@@ -4,11 +4,11 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-27 20:31 UTC
-**Current phase**: amendment 6 binding checkpoint confirmation
-**Last updated**: 2026-08-28 19:59 UTC
-**Next milestone**: obtain binding confirmation and commit the reviewed
-`PC-13/WP12D-20260828-6` checkpoint before implementation; merge and production
-remain reserved
+**Current phase**: amendment 6 implementation
+**Last updated**: 2026-08-28 20:03 UTC
+**Next milestone**: implement and validate the exact interaction boundary from
+checkpoint `8e62aefba55349ae2ee94c4faf27e83a99417dfa`; merge and production remain
+reserved
 **Package security impact**: `high` (historical WP12D scope)
 **Amendment 6 security impact**: `low`
 **Amendment 6 dedicated security review**: `not required`; no new input,
@@ -36,8 +36,9 @@ PC-24 owns `.cfg` locale normalization and run-UI authority parity.
   WP07/PC-13 boundary without advancing or closing WP07, PC-13, WP12D, or WP12;
   preserve WP12's exclusive merge and production authority (2026-08-28 19:59
   UTC).
-- [ ] Obtain two independent READY contract reviews, disposition findings, and
-  commit standalone amendment `PC-13/WP12D-20260828-6` before implementation.
+- [x] Obtain two independent READY contract reviews, disposition findings, and
+  commit standalone amendment `PC-13/WP12D-20260828-6` before implementation as
+  `8e62aefba55349ae2ee94c4faf27e83a99417dfa` (2026-08-28 20:03 UTC).
 - [ ] Remove Review Selections, automatically validate after successful option
   hydration and stale refresh, retain change validation, and pass focused gates.
 - [x] Ratify `PC-24/WP12D-20260828-5` exactly as documented after independent

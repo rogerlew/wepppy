@@ -173,6 +173,9 @@ migrated.
 - [x] (2026-08-28 19:59Z) Obtain exact operator cross-owner ratification of
   `PC-13/WP12D-20260828-6`, including standalone checkpoint/implementation
   authority and preservation of WP12's exclusive merge/production authority.
+- [x] (2026-08-28 20:03Z) Obtain binding correctness/governance READY verdicts
+  and commit the exact six-document standalone checkpoint as
+  `8e62aefba55349ae2ee94c4faf27e83a99417dfa` before implementation edits.
 
 ## Surprises & Discoveries
 
