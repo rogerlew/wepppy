@@ -163,9 +163,24 @@ migrated.
 - [x] (2026-08-28 18:42Z) Apply an acknowledged schema-v3 refresh to an
   isolated run copy, reopen its new identity under reader floor `83165fd1b`
   with byte-identical config/manifest, and restore the healthy candidate.
+- [ ] (2026-08-28 19:44Z) Complete bounded Builder UX amendment
+  `PC-13/WP12D-20260828-6`: commit its reviewed canonical checkpoint, remove the
+  redundant Review Selections action, validate once after option hydration,
+  retain change-triggered validation, and pass focused UI/documentation gates.
+- [x] (2026-08-28 19:58Z) Resolve all advisory correctness/governance findings;
+  both independent reviews report READY FOR RATIFICATION with High 0, Medium 0,
+  and Low 0 correctness findings.
+- [x] (2026-08-28 19:59Z) Obtain exact operator cross-owner ratification of
+  `PC-13/WP12D-20260828-6`, including standalone checkpoint/implementation
+  authority and preservation of WP12's exclusive merge/production authority.
 
 ## Surprises & Discoveries
 
+- Observation: Config Builder already validates every user-originated form
+  change, but programmatic option/default hydration emits no `change` event.
+  Evidence: `ConfigBuilder.init()` calls `validate(false)` from its delegated
+  change handler, while `loadDescription()` stops after `_renderDependencies()`
+  and enables the manual Review Selections action.
 - Observation: projecting only climate and landuse still leaked current soil,
   model, DEM, and locale defaults when the projected graph was composed into
   schema and orchestration documents; the consumers must filter both domains
@@ -381,6 +396,14 @@ migrated.
   Europe must not inherit modes merely because a coarse legacy catalog listed
   them.
   Date/Author: 2026-08-28, operator/Codex; exactly ratified 16:29 UTC.
+- Decision: Remove the general Review Selections action and automatically
+  validate the complete Builder proposal after registered options and defaults
+  finish loading; retain the existing automatic validation after every form
+  change and the server-resolved review/Create gate.
+  Rationale: the button duplicates change-triggered validation and exists only
+  because programmatic hydration does not emit `change`; the review authority
+  is the server summary, not the button.
+  Date/Author: 2026-08-28, operator/Codex; explicitly approved 19:44 UTC.
 
 ## Outcomes & Retrospective
 
@@ -411,7 +434,9 @@ climate providers, all 114 U.S. land-cover availability checks, representative
 full land-cover builds, acknowledged refresh, reader-floor rollback, byte
 preservation, and candidate restore on the unchanged image. WP12D is complete;
 parent WP12 retains the scope comparison, merge, and production promotion
-gates. Production deployment remains excluded from WP12D.
+gates. A bounded late PC-13 Builder interaction amendment is in progress and
+does not reopen locale/runtime authority or authorize production. Production
+deployment remains excluded from WP12D.
 
 ## Context and Orientation
 
@@ -500,6 +525,28 @@ reviews, compare every changed path with the ratified list, push, and validate
 the exact revision on exact host `forest` without rebuilding an image. WP12
 retains every merge-to-master and production action.
 
+The bounded amendment-6 continuation starts at
+`b772877c443ae21697a4eed5d51827cc806afc52`. First finish the decision and
+canonical section-7.4 delta, obtain explicit operator ratification that active
+WP12D may carry the WP07/PC-13 boundary without advancing any owner, close two
+independent contract reviews, and commit that documentation-only checkpoint as
+a standalone implementation ancestor. No controller, template, generated
+bundle, or test edit may precede that commit.
+
+After the checkpoint, add failing controller and rendered-template evidence.
+Cover one automatic validation after hydration, automatic validation after each
+change, out-of-order initial/change responses, focus preservation on success and
+failure, retry by later change, stale-registry selection/default behavior,
+change suppression and old-response invalidation during description reload,
+description/revalidation diagnostics, and zero validation for every failure in
+the existing hydration boundary. Then remove the manual action, invalidate old
+validation generations at description-load start, disable selection controls
+only while descriptions load, and validate after the complete hydrated proposal
+settles. Update the controller README and generated bundle, run the exact gates,
+obtain one independent implementation correctness review, and return the
+package to WP12 handoff without pushing, deploying, merging, or touching
+production.
+
 ## Milestones
 
 Milestone 1 produces the amendment-5 standalone contract checkpoint descended
@@ -535,6 +582,16 @@ build paths. It must validate every advertised expanded-US land-cover year and
 perform one real annual NLCD, NLCD Ever Forest, and eMapR vote fetch/build.
 Earlier evidence may be reused only when all bound revisions exactly match.
 
+Milestone 5 is the bounded amendment-6 interaction correction. Its first output
+is a documentation-only checkpoint descended from `b772877c4`, with exact
+operator ratification, READY correctness/governance contract reviews, and no
+implementation or test edits. Its second output removes Review Selections and
+automatically renders the latest server review after hydration or change.
+Acceptance requires direct race, stale-registry, retry, failure, focus,
+rendered-template, generated-bundle, and diagnostic evidence; complete frontend
+lint/tests; targeted template pytest; scoped docs/diff gates; and an independent
+implementation correctness review. It ends at WP12 handoff with no deployment.
+
 ## Concrete Steps
 
 Work from `/home/workdir/wepppy`.
@@ -562,6 +619,19 @@ Iterate with:
 Before handoff, run the full Python suite, affected stubs, broad-exception
 enforcement, vulture, `git diff --check`, scoped documentation lint, and exact
 Forest checks. Record counts and revisions in the tracker.
+
+For amendment 6, after its standalone checkpoint is an ancestor, iterate with:
+
+    wctl run-npm test -- config_builder
+    wctl run-pytest tests/weppcloud/routes/test_config_builder_ui.py
+    wctl run-npm lint
+    python wepppy/weppcloud/controllers_js/build_controllers_js.py
+
+Then run `wctl run-npm test`, `wctl run-pytest tests --maxfail=1`,
+`git diff --check`, and `wctl doc-lint --path` separately for the canonical
+contract, amendment decision/reviews, active ExecPlan, tracker, and controller
+README. Compare all changed paths to the exact amendment-6 boundary before
+handoff. Do not push or deploy this amendment in this milestone.
 
 The exact preexisting dirty paths excluded from every WP12D stage are:
 
@@ -618,6 +688,21 @@ results must not enqueue or append a duplicate amendment.
 Both Config Builder links must remain `/interfaces/`, and the Interfaces page
 must remain unfiltered. A different unsupported selection must fail before
 mutation or enqueue, while an unchanged exact-current build succeeds.
+
+For amendment 6, loading Config Builder must perform one description request and
+then one validation request without a click. The returned server review must
+render and Create must enable only for the latest proposal under the latest
+completed registry revision. A change while initial validation is pending must
+supersede the initial response without moving focus. Validation failure must
+retain selections, linked errors, diagnostic status, disabled Create, and
+focus; a later change must retry. During stale-registry reload, controls must be
+disabled, prior validation responses ignored, still-valid choices retained, and
+invalid choices set to current registered defaults with an announcement before
+one refreshed validation. Description-load or refreshed-validation failure must
+retain its exact diagnostic. Unsupported version, absent locale maps, missing
+locale authority, and dependency-rendering failure must issue zero validation
+requests. The rendered template and controller must contain no Review Selections
+action or dead hook while review, errors, status, and Create remain accessible.
 
 ## Idempotence and Recovery
 
@@ -687,3 +772,9 @@ Builder land-cover default from the complete locale envelope, and gives valid
 schema-v1 named presets a live climate/land-cover projection without rewriting
 their stored provenance. It requires exact ratification and a new reader-first
 Forest gate before implementation acceptance.
+
+Plan revision note (2026-08-28): bounded amendment
+`PC-13/WP12D-20260828-6` removes the redundant manual Builder validation action
+and adds one automatic validation only after registered options, defaults, and
+dependencies settle. It preserves the server review, Create gate, change-event
+validation, payloads, backend, stored identities, and production reservation.

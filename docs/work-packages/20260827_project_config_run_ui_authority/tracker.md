@@ -4,12 +4,16 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-27 20:31 UTC
-**Current phase**: amendment 5 accepted; WP12 handoff
-**Last updated**: 2026-08-28 18:42 UTC
-**Next milestone**: carry both exact scope audits and the accepted candidate
-into parent WP12; merge and production remain reserved
-**Security impact**: `high`
-**Dedicated security review**: `yes`
+**Current phase**: amendment 6 binding checkpoint confirmation
+**Last updated**: 2026-08-28 19:59 UTC
+**Next milestone**: obtain binding confirmation and commit the reviewed
+`PC-13/WP12D-20260828-6` checkpoint before implementation; merge and production
+remain reserved
+**Package security impact**: `high` (historical WP12D scope)
+**Amendment 6 security impact**: `low`
+**Amendment 6 dedicated security review**: `not required`; no new input,
+authorization, persistence, filesystem, or queue boundary
+**Historical dedicated security review**: `yes`
 **Security artifacts**: `artifacts/20260827_security_review.md` and
 `artifacts/20260828_amendment5_security_contract_review.md`
 **Parameterization ADR**: `docs/adrs/ADR-0047-project-config-locale-authority.md`
@@ -28,6 +32,14 @@ PC-24 owns `.cfg` locale normalization and run-UI authority parity.
 
 ### In Progress
 
+- [x] Obtain exact operator ratification allowing WP12D to carry the finite
+  WP07/PC-13 boundary without advancing or closing WP07, PC-13, WP12D, or WP12;
+  preserve WP12's exclusive merge and production authority (2026-08-28 19:59
+  UTC).
+- [ ] Obtain two independent READY contract reviews, disposition findings, and
+  commit standalone amendment `PC-13/WP12D-20260828-6` before implementation.
+- [ ] Remove Review Selections, automatically validate after successful option
+  hydration and stale refresh, retain change validation, and pass focused gates.
 - [x] Ratify `PC-24/WP12D-20260828-5` exactly as documented after independent
   advisory contract reviews (2026-08-28 16:29 UTC).
 - [x] Obtain fresh binding correctness, governance, and security READY reviews
@@ -46,6 +58,9 @@ PC-24 owns `.cfg` locale normalization and run-UI authority parity.
 
 ### Ready / Handoff
 
+- [x] Advisory correctness and governance re-reviews are READY FOR RATIFICATION;
+  correctness reports High 0 / Medium 0 / Low 0 and governance retains only the
+  deliberately pending exact operator ratification (2026-08-28 19:58 UTC).
 - [x] Carry the amendment-4 and amendment-5 exact scope comparisons and the
   newly accepted candidate into WP12 without production deployment.
 

@@ -790,6 +790,25 @@ invent or broaden capability lists.
 
 - Validation MUST run against the complete proposed combination, not only each
   field in isolation.
+- After a successful Builder-description response, the browser MUST populate
+  all registered options, apply locale defaults, resolve dependent choices, and
+  then automatically validate the complete proposal. Each subsequent
+  user-originated form change MUST automatically invalidate the prior review,
+  settle dependent choices, and validate the resulting complete proposal.
+- The Builder MUST NOT require or present a general-purpose Review Selections
+  action. The review is the server-resolved summary, not a separate manual
+  validation step. A stale-registry reload MUST use the same hydrate-then-
+  validate path.
+- Only the response for the latest complete proposal under the latest completed
+  Builder-description load may render review/errors or enable Create. Starting a
+  description load MUST invalidate pending validation responses and disable the
+  selection controls until that load succeeds or fails. A failed description
+  load MUST retain its diagnostic and MUST NOT start validation.
+- A stale-registry reload MUST preserve every still-registered selection. An
+  invalidated selection MUST use its current registered default, and the
+  replacement MUST be explained and announced before the refreshed complete
+  proposal is validated. A failed refreshed validation MUST retain its own
+  diagnostic and keep Create unavailable.
 - Field errors MUST be associated with their controls and a page-level summary
   MUST link or move focus to each invalid field.
 - The Create action MUST remain unavailable while required selections are
@@ -801,6 +820,11 @@ invent or broaden capability lists.
 - The review MUST state that the generated runtime filename is `config.cfg` and
   that the complete selections and provenance will be recorded in
   `config-manifest.json`.
+- Initial and change-triggered validation, whether successful or failed, MUST
+  NOT move focus. Validation failure MUST preserve the proposal and retain the
+  linked page summary, field associations, and live announcement. A form change
+  or page reload MAY retry a failed validation without adding a permanent manual
+  review control.
 - Advanced raw `.cfg` editing or arbitrary key/value injection is prohibited.
 
 #### Submission and completion
@@ -847,8 +871,9 @@ invent or broaden capability lists.
   assistive technology without moving focus unexpectedly.
 - Required, unavailable, selected, invalid, and completed states MUST not rely
   on color alone.
-- Focus MUST move to the error summary after failed validation and to a clear
-  creation-status target after submission.
+- Failed automatic validation MUST announce the linked error summary without
+  moving focus. Focus MUST move to a clear creation-status target after
+  submission.
 - The builder MUST remain usable at narrow viewport widths without horizontal
   scrolling for its primary controls and actions.
 - Help text and disabled-reason text MUST remain available at browser zoom up to
