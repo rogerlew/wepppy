@@ -717,7 +717,7 @@ def test_production_structure_catalog_retains_payload_hash_and_reader_provenance
     assert {record.first_reader_revision for record in records} == {
         "3e8d0d09b",
         "280cf7e84",
-        "pending-amendment5-reader-floor",
+        "d68d94816",
     }
     assert all(
         hashlib.sha256(

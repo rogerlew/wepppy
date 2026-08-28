@@ -1263,7 +1263,7 @@
       "structure_sha256": "db1c185cf6b5def23064752847f585f3522c0b971460d9c688b424cb04c706ae"
     },
     {
-      "first_reader_revision": "pending-amendment5-reader-floor",
+      "first_reader_revision": "d68d94816",
       "payload": {
         "schema_version": 3,
         "locale_profile": "continental-us",
@@ -2254,7 +2254,7 @@
       "structure_sha256": "3151e7e11be97967b32b887c6832b5286d252bf9b85841b889d5dcfbb24a8faf"
     },
     {
-      "first_reader_revision": "pending-amendment5-reader-floor",
+      "first_reader_revision": "d68d94816",
       "payload": {
         "schema_version": 3,
         "locale_profile": "europe",
@@ -2426,7 +2426,7 @@
       "structure_sha256": "18eda2d24f57be54993d2f0b609c59de6c26a17632d8653cc62b5a926e66f2c7"
     },
     {
-      "first_reader_revision": "pending-amendment5-reader-floor",
+      "first_reader_revision": "d68d94816",
       "payload": {
         "schema_version": 3,
         "locale_profile": "canada",
@@ -2766,7 +2766,7 @@
       "structure_sha256": "07f733c2b13589ac637fc898859b8e3eac4902199606a2580796eec47765d7b4"
     },
     {
-      "first_reader_revision": "pending-amendment5-reader-floor",
+      "first_reader_revision": "d68d94816",
       "payload": {
         "schema_version": 3,
         "locale_profile": "australia",
@@ -2907,7 +2907,7 @@
       "structure_sha256": "1fd066a9e5bef26373414988d9f98e04fb84a8d0d08f7af280eef7cb1779a497"
     },
     {
-      "first_reader_revision": "pending-amendment5-reader-floor",
+      "first_reader_revision": "d68d94816",
       "payload": {
         "schema_version": 3,
         "locale_profile": "global-earth",
