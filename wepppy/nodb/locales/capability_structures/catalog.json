@@ -1,0 +1,1266 @@
+{
+  "schema_version": 1,
+  "structures": [
+    {
+      "first_reader_revision": "3e8d0d09b",
+      "payload": {
+        "allowed_model_pairs": [
+          [
+            "topaz",
+            "single-ofe"
+          ],
+          [
+            "wbt",
+            "multiple-ofe"
+          ],
+          [
+            "wbt",
+            "single-ofe"
+          ]
+        ],
+        "axes": {
+          "climate_datasets": [
+            "vanilla_cligen",
+            "prism_stochastic",
+            "observed_daymet",
+            "observed_gridmet"
+          ],
+          "climate_spatial_methods": [
+            "single",
+            "multiple",
+            "interpolated"
+          ],
+          "climate_station_databases": [],
+          "climate_station_methods": [
+            "auto",
+            "distance",
+            "multi_factor"
+          ],
+          "delineation_backends": [
+            "topaz",
+            "wbt"
+          ],
+          "dem_sources": [
+            "usgs-ned1-2024",
+            "usgs-ned13-2022"
+          ],
+          "landuse_datasets": [
+            "nlcd-2019"
+          ],
+          "landuse_methods": [
+            "gridded",
+            "single",
+            "upload"
+          ],
+          "mods": [],
+          "soil_builders": [
+            "gridded",
+            "single_mukey",
+            "single_database"
+          ],
+          "soil_datasets": [
+            "ssurgo-gnatsgso-2025"
+          ],
+          "watershed_representations": [
+            "single-ofe",
+            "multiple-ofe"
+          ]
+        },
+        "locale_profile": "continental-us",
+        "method_defaults": {
+          "climate_spatial": {
+            "observed_daymet": "single",
+            "observed_gridmet": "single",
+            "prism_stochastic": "single",
+            "vanilla_cligen": "single"
+          },
+          "climate_station": {
+            "observed_daymet": "auto",
+            "observed_gridmet": "auto",
+            "prism_stochastic": "auto",
+            "vanilla_cligen": "auto"
+          },
+          "landuse": {
+            "nlcd-2019": "gridded"
+          },
+          "soil": {
+            "ssurgo-gnatsgso-2025": "gridded"
+          }
+        },
+        "relations": {
+          "climate_spatial_methods": {
+            "observed_daymet": [
+              "single",
+              "multiple",
+              "interpolated"
+            ],
+            "observed_gridmet": [
+              "single",
+              "multiple",
+              "interpolated"
+            ],
+            "prism_stochastic": [
+              "single",
+              "multiple"
+            ],
+            "vanilla_cligen": [
+              "single",
+              "multiple"
+            ]
+          },
+          "climate_station_methods": {
+            "observed_daymet": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ],
+            "observed_gridmet": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ],
+            "prism_stochastic": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ],
+            "vanilla_cligen": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ]
+          },
+          "landuse_methods": {
+            "nlcd-2019": [
+              "gridded",
+              "single",
+              "upload"
+            ]
+          },
+          "landuse_methods_by_representation": {
+            "multiple-ofe": [
+              "gridded",
+              "upload"
+            ],
+            "single-ofe": [
+              "gridded",
+              "single",
+              "upload"
+            ]
+          },
+          "mod_conflicts": {},
+          "mod_requires": {},
+          "soil_builders": {
+            "ssurgo-gnatsgso-2025": [
+              "gridded",
+              "single_mukey",
+              "single_database"
+            ]
+          }
+        },
+        "schema_version": 2
+      },
+      "structure_sha256": "aa548c9c4bc792b44fc89b97e2b71270d2bbf1002cc960aac005b6d52c351bc6"
+    },
+    {
+      "first_reader_revision": "280cf7e84",
+      "payload": {
+        "allowed_model_pairs": [
+          [
+            "topaz",
+            "single-ofe"
+          ],
+          [
+            "wbt",
+            "multiple-ofe"
+          ],
+          [
+            "wbt",
+            "single-ofe"
+          ]
+        ],
+        "axes": {
+          "climate_datasets": [
+            "vanilla_cligen",
+            "prism_stochastic",
+            "observed_daymet",
+            "observed_gridmet"
+          ],
+          "climate_spatial_methods": [
+            "single",
+            "multiple",
+            "interpolated"
+          ],
+          "climate_station_databases": [
+            "cligen-stations-legacy",
+            "cligen-stations-2015",
+            "cligen-stations-ghcn"
+          ],
+          "climate_station_methods": [
+            "auto",
+            "distance",
+            "multi_factor"
+          ],
+          "delineation_backends": [
+            "topaz",
+            "wbt"
+          ],
+          "dem_sources": [
+            "usgs-ned1-2024",
+            "usgs-ned13-2022"
+          ],
+          "landuse_datasets": [
+            "nlcd-2019"
+          ],
+          "landuse_methods": [
+            "gridded",
+            "single",
+            "upload"
+          ],
+          "mods": [],
+          "soil_builders": [
+            "gridded",
+            "single_mukey",
+            "single_database"
+          ],
+          "soil_datasets": [
+            "ssurgo-gnatsgso-2025"
+          ],
+          "watershed_representations": [
+            "single-ofe",
+            "multiple-ofe"
+          ]
+        },
+        "locale_profile": "continental-us",
+        "method_defaults": {
+          "climate_spatial": {
+            "observed_daymet": "single",
+            "observed_gridmet": "single",
+            "prism_stochastic": "single",
+            "vanilla_cligen": "single"
+          },
+          "climate_station": {
+            "observed_daymet": "auto",
+            "observed_gridmet": "auto",
+            "prism_stochastic": "auto",
+            "vanilla_cligen": "auto"
+          },
+          "landuse": {
+            "nlcd-2019": "gridded"
+          },
+          "soil": {
+            "ssurgo-gnatsgso-2025": "gridded"
+          }
+        },
+        "relations": {
+          "climate_spatial_methods": {
+            "observed_daymet": [
+              "single",
+              "multiple",
+              "interpolated"
+            ],
+            "observed_gridmet": [
+              "single",
+              "multiple",
+              "interpolated"
+            ],
+            "prism_stochastic": [
+              "single",
+              "multiple"
+            ],
+            "vanilla_cligen": [
+              "single",
+              "multiple"
+            ]
+          },
+          "climate_station_methods": {
+            "observed_daymet": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ],
+            "observed_gridmet": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ],
+            "prism_stochastic": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ],
+            "vanilla_cligen": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ]
+          },
+          "landuse_methods": {
+            "nlcd-2019": [
+              "gridded",
+              "single",
+              "upload"
+            ]
+          },
+          "landuse_methods_by_representation": {
+            "multiple-ofe": [
+              "gridded",
+              "upload"
+            ],
+            "single-ofe": [
+              "gridded",
+              "single",
+              "upload"
+            ]
+          },
+          "mod_conflicts": {},
+          "mod_requires": {},
+          "soil_builders": {
+            "ssurgo-gnatsgso-2025": [
+              "gridded",
+              "single_mukey",
+              "single_database"
+            ]
+          }
+        },
+        "schema_version": 3
+      },
+      "structure_sha256": "5296d3519d578164b6a5874a820991c935b394e5336aba41fe3e8f8d0dd4e29b"
+    },
+    {
+      "first_reader_revision": "280cf7e84",
+      "payload": {
+        "allowed_model_pairs": [
+          [
+            "topaz",
+            "single-ofe"
+          ],
+          [
+            "wbt",
+            "multiple-ofe"
+          ],
+          [
+            "wbt",
+            "single-ofe"
+          ]
+        ],
+        "axes": {
+          "climate_datasets": [
+            "vanilla_cligen",
+            "eobs_modified"
+          ],
+          "climate_spatial_methods": [
+            "single",
+            "multiple"
+          ],
+          "climate_station_databases": [
+            "cligen-stations-ghcn"
+          ],
+          "climate_station_methods": [
+            "auto",
+            "distance",
+            "multi_factor",
+            "eu_heuristic"
+          ],
+          "delineation_backends": [
+            "topaz",
+            "wbt"
+          ],
+          "dem_sources": [
+            "europe-eudem-v1-1"
+          ],
+          "landuse_datasets": [
+            "corine-1990",
+            "corine-2000",
+            "corine-2006",
+            "corine-2012",
+            "corine-2018"
+          ],
+          "landuse_methods": [
+            "gridded",
+            "single",
+            "upload"
+          ],
+          "mods": [],
+          "soil_builders": [
+            "gridded"
+          ],
+          "soil_datasets": [
+            "esdac-europe"
+          ],
+          "watershed_representations": [
+            "single-ofe",
+            "multiple-ofe"
+          ]
+        },
+        "locale_profile": "europe",
+        "method_defaults": {
+          "climate_spatial": {
+            "eobs_modified": "multiple",
+            "vanilla_cligen": "single"
+          },
+          "climate_station": {
+            "eobs_modified": "auto",
+            "vanilla_cligen": "auto"
+          },
+          "landuse": {
+            "corine-1990": "gridded",
+            "corine-2000": "gridded",
+            "corine-2006": "gridded",
+            "corine-2012": "gridded",
+            "corine-2018": "gridded"
+          },
+          "soil": {
+            "esdac-europe": "gridded"
+          }
+        },
+        "relations": {
+          "climate_spatial_methods": {
+            "eobs_modified": [
+              "single",
+              "multiple"
+            ],
+            "vanilla_cligen": [
+              "single",
+              "multiple"
+            ]
+          },
+          "climate_station_methods": {
+            "eobs_modified": [
+              "auto",
+              "distance",
+              "multi_factor",
+              "eu_heuristic"
+            ],
+            "vanilla_cligen": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ]
+          },
+          "landuse_methods": {
+            "corine-1990": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "corine-2000": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "corine-2006": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "corine-2012": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "corine-2018": [
+              "gridded",
+              "single",
+              "upload"
+            ]
+          },
+          "landuse_methods_by_representation": {
+            "multiple-ofe": [
+              "gridded",
+              "upload"
+            ],
+            "single-ofe": [
+              "gridded",
+              "single",
+              "upload"
+            ]
+          },
+          "mod_conflicts": {},
+          "mod_requires": {},
+          "soil_builders": {
+            "esdac-europe": [
+              "gridded"
+            ]
+          }
+        },
+        "schema_version": 3
+      },
+      "structure_sha256": "c05b6a66f823f69cf8f1d44b69c206da1dc9449b278662c680248a3f3b755aeb"
+    },
+    {
+      "first_reader_revision": "280cf7e84",
+      "payload": {
+        "allowed_model_pairs": [
+          [
+            "topaz",
+            "single-ofe"
+          ],
+          [
+            "wbt",
+            "multiple-ofe"
+          ],
+          [
+            "wbt",
+            "single-ofe"
+          ]
+        ],
+        "axes": {
+          "climate_datasets": [
+            "vanilla_cligen",
+            "observed_daymet"
+          ],
+          "climate_spatial_methods": [
+            "single",
+            "multiple",
+            "interpolated"
+          ],
+          "climate_station_databases": [
+            "cligen-stations-ghcn"
+          ],
+          "climate_station_methods": [
+            "auto",
+            "distance",
+            "multi_factor"
+          ],
+          "delineation_backends": [
+            "topaz",
+            "wbt"
+          ],
+          "dem_sources": [
+            "copernicus-dem-30"
+          ],
+          "landuse_datasets": [
+            "c3s-landcover-2020",
+            "c3s-landcover-2019",
+            "c3s-landcover-2018",
+            "c3s-landcover-2017",
+            "c3s-landcover-2016",
+            "c3s-landcover-2015",
+            "c3s-landcover-2014",
+            "c3s-landcover-2013",
+            "c3s-landcover-2012",
+            "c3s-landcover-2011",
+            "c3s-landcover-2010",
+            "c3s-landcover-2009",
+            "c3s-landcover-2008",
+            "c3s-landcover-2007",
+            "c3s-landcover-2006",
+            "c3s-landcover-2005",
+            "c3s-landcover-2004",
+            "c3s-landcover-2003",
+            "c3s-landcover-2002",
+            "c3s-landcover-2001",
+            "c3s-landcover-2000",
+            "c3s-landcover-1999",
+            "c3s-landcover-1998",
+            "c3s-landcover-1997",
+            "c3s-landcover-1996",
+            "c3s-landcover-1995",
+            "c3s-landcover-1994",
+            "c3s-landcover-1993",
+            "c3s-landcover-1992"
+          ],
+          "landuse_methods": [
+            "gridded",
+            "single",
+            "upload"
+          ],
+          "mods": [],
+          "soil_builders": [
+            "gridded"
+          ],
+          "soil_datasets": [
+            "isric-global"
+          ],
+          "watershed_representations": [
+            "single-ofe",
+            "multiple-ofe"
+          ]
+        },
+        "locale_profile": "canada",
+        "method_defaults": {
+          "climate_spatial": {
+            "observed_daymet": "single",
+            "vanilla_cligen": "single"
+          },
+          "climate_station": {
+            "observed_daymet": "auto",
+            "vanilla_cligen": "auto"
+          },
+          "landuse": {
+            "c3s-landcover-1992": "gridded",
+            "c3s-landcover-1993": "gridded",
+            "c3s-landcover-1994": "gridded",
+            "c3s-landcover-1995": "gridded",
+            "c3s-landcover-1996": "gridded",
+            "c3s-landcover-1997": "gridded",
+            "c3s-landcover-1998": "gridded",
+            "c3s-landcover-1999": "gridded",
+            "c3s-landcover-2000": "gridded",
+            "c3s-landcover-2001": "gridded",
+            "c3s-landcover-2002": "gridded",
+            "c3s-landcover-2003": "gridded",
+            "c3s-landcover-2004": "gridded",
+            "c3s-landcover-2005": "gridded",
+            "c3s-landcover-2006": "gridded",
+            "c3s-landcover-2007": "gridded",
+            "c3s-landcover-2008": "gridded",
+            "c3s-landcover-2009": "gridded",
+            "c3s-landcover-2010": "gridded",
+            "c3s-landcover-2011": "gridded",
+            "c3s-landcover-2012": "gridded",
+            "c3s-landcover-2013": "gridded",
+            "c3s-landcover-2014": "gridded",
+            "c3s-landcover-2015": "gridded",
+            "c3s-landcover-2016": "gridded",
+            "c3s-landcover-2017": "gridded",
+            "c3s-landcover-2018": "gridded",
+            "c3s-landcover-2019": "gridded",
+            "c3s-landcover-2020": "gridded"
+          },
+          "soil": {
+            "isric-global": "gridded"
+          }
+        },
+        "relations": {
+          "climate_spatial_methods": {
+            "observed_daymet": [
+              "single",
+              "multiple",
+              "interpolated"
+            ],
+            "vanilla_cligen": [
+              "single",
+              "multiple"
+            ]
+          },
+          "climate_station_methods": {
+            "observed_daymet": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ],
+            "vanilla_cligen": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ]
+          },
+          "landuse_methods": {
+            "c3s-landcover-1992": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-1993": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-1994": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-1995": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-1996": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-1997": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-1998": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-1999": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2000": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2001": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2002": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2003": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2004": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2005": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2006": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2007": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2008": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2009": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2010": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2011": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2012": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2013": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2014": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2015": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2016": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2017": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2018": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2019": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2020": [
+              "gridded",
+              "single",
+              "upload"
+            ]
+          },
+          "landuse_methods_by_representation": {
+            "multiple-ofe": [
+              "gridded",
+              "upload"
+            ],
+            "single-ofe": [
+              "gridded",
+              "single",
+              "upload"
+            ]
+          },
+          "mod_conflicts": {},
+          "mod_requires": {},
+          "soil_builders": {
+            "isric-global": [
+              "gridded"
+            ]
+          }
+        },
+        "schema_version": 3
+      },
+      "structure_sha256": "dd7f7cdb0d861a159df64a4806ee5585f0208b93982990e30974055b1f2a41e7"
+    },
+    {
+      "first_reader_revision": "280cf7e84",
+      "payload": {
+        "allowed_model_pairs": [
+          [
+            "topaz",
+            "single-ofe"
+          ],
+          [
+            "wbt",
+            "multiple-ofe"
+          ],
+          [
+            "wbt",
+            "single-ofe"
+          ]
+        ],
+        "axes": {
+          "climate_datasets": [
+            "vanilla_cligen",
+            "agdc"
+          ],
+          "climate_spatial_methods": [
+            "single",
+            "multiple"
+          ],
+          "climate_station_databases": [
+            "cligen-stations-ghcn"
+          ],
+          "climate_station_methods": [
+            "auto",
+            "distance",
+            "multi_factor"
+          ],
+          "delineation_backends": [
+            "topaz",
+            "wbt"
+          ],
+          "dem_sources": [
+            "australia-srtm-1s"
+          ],
+          "landuse_datasets": [
+            "australia-landuse-2010-2011"
+          ],
+          "landuse_methods": [
+            "gridded",
+            "single",
+            "upload"
+          ],
+          "mods": [],
+          "soil_builders": [
+            "gridded"
+          ],
+          "soil_datasets": [
+            "asris-australia"
+          ],
+          "watershed_representations": [
+            "single-ofe",
+            "multiple-ofe"
+          ]
+        },
+        "locale_profile": "australia",
+        "method_defaults": {
+          "climate_spatial": {
+            "agdc": "single",
+            "vanilla_cligen": "single"
+          },
+          "climate_station": {
+            "agdc": "auto",
+            "vanilla_cligen": "auto"
+          },
+          "landuse": {
+            "australia-landuse-2010-2011": "gridded"
+          },
+          "soil": {
+            "asris-australia": "gridded"
+          }
+        },
+        "relations": {
+          "climate_spatial_methods": {
+            "agdc": [
+              "single",
+              "multiple"
+            ],
+            "vanilla_cligen": [
+              "single",
+              "multiple"
+            ]
+          },
+          "climate_station_methods": {
+            "agdc": [
+              "auto",
+              "distance"
+            ],
+            "vanilla_cligen": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ]
+          },
+          "landuse_methods": {
+            "australia-landuse-2010-2011": [
+              "gridded",
+              "single",
+              "upload"
+            ]
+          },
+          "landuse_methods_by_representation": {
+            "multiple-ofe": [
+              "gridded",
+              "upload"
+            ],
+            "single-ofe": [
+              "gridded",
+              "single",
+              "upload"
+            ]
+          },
+          "mod_conflicts": {},
+          "mod_requires": {},
+          "soil_builders": {
+            "asris-australia": [
+              "gridded"
+            ]
+          }
+        },
+        "schema_version": 3
+      },
+      "structure_sha256": "bb4bdde8740d689aa378bcf744a942d997b9c69cdc445d80be07c749635efc9a"
+    },
+    {
+      "first_reader_revision": "280cf7e84",
+      "payload": {
+        "allowed_model_pairs": [
+          [
+            "topaz",
+            "single-ofe"
+          ],
+          [
+            "wbt",
+            "multiple-ofe"
+          ],
+          [
+            "wbt",
+            "single-ofe"
+          ]
+        ],
+        "axes": {
+          "climate_datasets": [
+            "vanilla_cligen"
+          ],
+          "climate_spatial_methods": [
+            "single",
+            "multiple"
+          ],
+          "climate_station_databases": [
+            "cligen-stations-ghcn"
+          ],
+          "climate_station_methods": [
+            "auto",
+            "distance",
+            "multi_factor"
+          ],
+          "delineation_backends": [
+            "topaz",
+            "wbt"
+          ],
+          "dem_sources": [
+            "copernicus-dem-30"
+          ],
+          "landuse_datasets": [
+            "c3s-landcover-2020",
+            "c3s-landcover-2019",
+            "c3s-landcover-2018",
+            "c3s-landcover-2017",
+            "c3s-landcover-2016",
+            "c3s-landcover-2015",
+            "c3s-landcover-2014",
+            "c3s-landcover-2013",
+            "c3s-landcover-2012",
+            "c3s-landcover-2011",
+            "c3s-landcover-2010",
+            "c3s-landcover-2009",
+            "c3s-landcover-2008",
+            "c3s-landcover-2007",
+            "c3s-landcover-2006",
+            "c3s-landcover-2005",
+            "c3s-landcover-2004",
+            "c3s-landcover-2003",
+            "c3s-landcover-2002",
+            "c3s-landcover-2001",
+            "c3s-landcover-2000",
+            "c3s-landcover-1999",
+            "c3s-landcover-1998",
+            "c3s-landcover-1997",
+            "c3s-landcover-1996",
+            "c3s-landcover-1995",
+            "c3s-landcover-1994",
+            "c3s-landcover-1993",
+            "c3s-landcover-1992"
+          ],
+          "landuse_methods": [
+            "gridded",
+            "single",
+            "upload"
+          ],
+          "mods": [],
+          "soil_builders": [
+            "gridded"
+          ],
+          "soil_datasets": [
+            "isric-global"
+          ],
+          "watershed_representations": [
+            "single-ofe",
+            "multiple-ofe"
+          ]
+        },
+        "locale_profile": "global-earth",
+        "method_defaults": {
+          "climate_spatial": {
+            "vanilla_cligen": "single"
+          },
+          "climate_station": {
+            "vanilla_cligen": "auto"
+          },
+          "landuse": {
+            "c3s-landcover-1992": "gridded",
+            "c3s-landcover-1993": "gridded",
+            "c3s-landcover-1994": "gridded",
+            "c3s-landcover-1995": "gridded",
+            "c3s-landcover-1996": "gridded",
+            "c3s-landcover-1997": "gridded",
+            "c3s-landcover-1998": "gridded",
+            "c3s-landcover-1999": "gridded",
+            "c3s-landcover-2000": "gridded",
+            "c3s-landcover-2001": "gridded",
+            "c3s-landcover-2002": "gridded",
+            "c3s-landcover-2003": "gridded",
+            "c3s-landcover-2004": "gridded",
+            "c3s-landcover-2005": "gridded",
+            "c3s-landcover-2006": "gridded",
+            "c3s-landcover-2007": "gridded",
+            "c3s-landcover-2008": "gridded",
+            "c3s-landcover-2009": "gridded",
+            "c3s-landcover-2010": "gridded",
+            "c3s-landcover-2011": "gridded",
+            "c3s-landcover-2012": "gridded",
+            "c3s-landcover-2013": "gridded",
+            "c3s-landcover-2014": "gridded",
+            "c3s-landcover-2015": "gridded",
+            "c3s-landcover-2016": "gridded",
+            "c3s-landcover-2017": "gridded",
+            "c3s-landcover-2018": "gridded",
+            "c3s-landcover-2019": "gridded",
+            "c3s-landcover-2020": "gridded"
+          },
+          "soil": {
+            "isric-global": "gridded"
+          }
+        },
+        "relations": {
+          "climate_spatial_methods": {
+            "vanilla_cligen": [
+              "single",
+              "multiple"
+            ]
+          },
+          "climate_station_methods": {
+            "vanilla_cligen": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ]
+          },
+          "landuse_methods": {
+            "c3s-landcover-1992": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-1993": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-1994": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-1995": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-1996": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-1997": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-1998": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-1999": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2000": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2001": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2002": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2003": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2004": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2005": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2006": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2007": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2008": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2009": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2010": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2011": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2012": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2013": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2014": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2015": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2016": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2017": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2018": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2019": [
+              "gridded",
+              "single",
+              "upload"
+            ],
+            "c3s-landcover-2020": [
+              "gridded",
+              "single",
+              "upload"
+            ]
+          },
+          "landuse_methods_by_representation": {
+            "multiple-ofe": [
+              "gridded",
+              "upload"
+            ],
+            "single-ofe": [
+              "gridded",
+              "single",
+              "upload"
+            ]
+          },
+          "mod_conflicts": {},
+          "mod_requires": {},
+          "soil_builders": {
+            "isric-global": [
+              "gridded"
+            ]
+          }
+        },
+        "schema_version": 3
+      },
+      "structure_sha256": "db1c185cf6b5def23064752847f585f3522c0b971460d9c688b424cb04c706ae"
+    }
+  ]
+}

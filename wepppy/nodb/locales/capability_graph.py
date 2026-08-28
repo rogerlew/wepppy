@@ -5,9 +5,10 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 import hashlib
 import json
+from pathlib import Path
 import re
 from types import MappingProxyType
-from typing import Mapping
+import typing
 
 from wepppy.nodb.locales.climate_catalog import (
     climate_catalog_revision,
@@ -30,6 +31,8 @@ __all__ = [
     "CapabilityGraphError",
     "build_continental_us_capability_graph",
     "build_locale_capability_graph",
+    "capability_structure_payload",
+    "capability_structure_sha256",
 ]
 
 HISTORICAL_CAPABILITY_SCHEMA_VERSION = 2
@@ -73,7 +76,7 @@ _V2_SPATIAL_RELATIONS = MappingProxyType({
     "observed_gridmet": _V2_SPATIAL_METHODS,
 })
 
-_CLIMATE_STATION_RELATIONS: Mapping[str, tuple[str, ...]] = MappingProxyType({
+_CLIMATE_STATION_RELATIONS: typing.Mapping[str, tuple[str, ...]] = MappingProxyType({
     "vanilla_cligen": ("auto", "distance", "multi_factor"),
     "prism_stochastic": ("auto", "distance", "multi_factor"),
     "observed_daymet": ("auto", "distance", "multi_factor"),
@@ -81,7 +84,7 @@ _CLIMATE_STATION_RELATIONS: Mapping[str, tuple[str, ...]] = MappingProxyType({
     "eobs_modified": ("auto", "distance", "multi_factor", "eu_heuristic"),
     "agdc": ("auto", "distance"),
 })
-_CLIMATE_SPATIAL_RELATIONS: Mapping[str, tuple[str, ...]] = MappingProxyType({
+_CLIMATE_SPATIAL_RELATIONS: typing.Mapping[str, tuple[str, ...]] = MappingProxyType({
     "vanilla_cligen": ("single", "multiple"),
     "prism_stochastic": ("single", "multiple"),
     "observed_daymet": ("single", "multiple", "interpolated"),
@@ -89,10 +92,10 @@ _CLIMATE_SPATIAL_RELATIONS: Mapping[str, tuple[str, ...]] = MappingProxyType({
     "eobs_modified": ("single", "multiple"),
     "agdc": ("single", "multiple"),
 })
-_CLIMATE_STATION_DEFAULTS: Mapping[str, str] = MappingProxyType({
+_CLIMATE_STATION_DEFAULTS: typing.Mapping[str, str] = MappingProxyType({
     source: "auto" for source in _CLIMATE_STATION_RELATIONS
 })
-_CLIMATE_SPATIAL_DEFAULTS: Mapping[str, str] = MappingProxyType({
+_CLIMATE_SPATIAL_DEFAULTS: typing.Mapping[str, str] = MappingProxyType({
     "vanilla_cligen": "single",
     "prism_stochastic": "single",
     "observed_daymet": "single",
@@ -117,7 +120,7 @@ class _ProfileContract:
 
 
 _C3S_IDS = tuple(f"c3s-landcover-{year}" for year in range(2020, 1991, -1))
-_PROFILE_CONTRACTS: Mapping[str, _ProfileContract] = MappingProxyType({
+_PROFILE_CONTRACTS: typing.Mapping[str, _ProfileContract] = MappingProxyType({
     "continental-us": _ProfileContract(
         "continental-us",
         ("usgs-ned1-2024", "usgs-ned13-2022"),
@@ -185,11 +188,26 @@ class CapabilityGraphError(ValueError):
     """Raised when a capability graph is partial or contradictory."""
 
 
-def _freeze_map(values: Mapping[str, tuple[str, ...]]) -> Mapping[str, tuple[str, ...]]:
+@dataclass(frozen=True, slots=True)
+class _CapabilityStructureRecord:
+    schema_version: int
+    locale_profile: str
+    structure_sha256: str
+    canonical_payload: str
+    first_reader_revision: str
+
+
+_StructureCatalog = typing.Mapping[
+    tuple[int, str],
+    typing.Mapping[str, _CapabilityStructureRecord],
+]
+
+
+def _freeze_map(values: typing.Mapping[str, tuple[str, ...]]) -> typing.Mapping[str, tuple[str, ...]]:
     return MappingProxyType({key: tuple(items) for key, items in values.items()})
 
 
-def _freeze_defaults(values: Mapping[str, str]) -> Mapping[str, str]:
+def _freeze_defaults(values: typing.Mapping[str, str]) -> typing.Mapping[str, str]:
     return MappingProxyType(dict(values))
 
 
@@ -209,21 +227,21 @@ class CapabilityGraph:
     delineation_backends: tuple[str, ...]
     watershed_representations: tuple[str, ...]
     wepp_binaries: tuple[str, ...]
-    wepp_binary_revisions: Mapping[str, str]
+    wepp_binary_revisions: typing.Mapping[str, str]
     mods: tuple[str, ...]
     allowed_model_tuples: tuple[str, ...]
-    climate_station_methods_by_dataset: Mapping[str, tuple[str, ...]]
-    climate_spatial_methods_by_dataset: Mapping[str, tuple[str, ...]]
-    climate_station_defaults: Mapping[str, str]
-    climate_spatial_defaults: Mapping[str, str]
-    landuse_methods_by_dataset: Mapping[str, tuple[str, ...]]
-    landuse_method_defaults: Mapping[str, str]
-    landuse_methods_by_representation: Mapping[str, tuple[str, ...]]
-    soil_builders_by_dataset: Mapping[str, tuple[str, ...]]
-    soil_builder_defaults: Mapping[str, str]
-    mod_requires: Mapping[str, tuple[str, ...]]
-    mod_conflicts: Mapping[str, tuple[str, ...]]
-    defaults: Mapping[str, str]
+    climate_station_methods_by_dataset: typing.Mapping[str, tuple[str, ...]]
+    climate_spatial_methods_by_dataset: typing.Mapping[str, tuple[str, ...]]
+    climate_station_defaults: typing.Mapping[str, str]
+    climate_spatial_defaults: typing.Mapping[str, str]
+    landuse_methods_by_dataset: typing.Mapping[str, tuple[str, ...]]
+    landuse_method_defaults: typing.Mapping[str, str]
+    landuse_methods_by_representation: typing.Mapping[str, tuple[str, ...]]
+    soil_builders_by_dataset: typing.Mapping[str, tuple[str, ...]]
+    soil_builder_defaults: typing.Mapping[str, str]
+    mod_requires: typing.Mapping[str, tuple[str, ...]]
+    mod_conflicts: typing.Mapping[str, tuple[str, ...]]
+    defaults: typing.Mapping[str, str]
     provider_revision: str
 
     def with_defaults(self, **updates: str) -> "CapabilityGraph":
@@ -323,14 +341,14 @@ class CapabilityGraph:
         )
         self._validate_mod_relations()
         self._validate_provider_and_model_policy()
-        for key, axis in (
+        for key, axis_values in (
             ("locale_profile", self.locale_profiles),
             ("dem_source", self.dem_sources),
             ("climate_dataset", self.climate_datasets),
             ("soil_dataset", self.soil_datasets),
             ("landuse_dataset", self.landuse_datasets),
         ):
-            if self.defaults.get(key) not in axis:
+            if self.defaults.get(key) not in axis_values:
                 raise CapabilityGraphError(f"capability default {key!r} is not advertised")
         if self.schema_version == CAPABILITY_SCHEMA_VERSION:
             if self.defaults.get("climate_station_database") not in self.climate_station_databases:
@@ -339,7 +357,16 @@ class CapabilityGraph:
                 )
         elif "climate_station_database" in self.defaults:
             raise CapabilityGraphError("schema-v2 must not contain a station-database default")
-        self._validate_builder_profile_contract()
+        expected_default_keys = {
+            "locale_profile", "dem_source", "climate_dataset", "soil_dataset",
+            "landuse_dataset", "delineation_backend", "watershed_representation",
+            "wepp_binary",
+        }
+        if self.schema_version == CAPABILITY_SCHEMA_VERSION:
+            expected_default_keys.add("climate_station_database")
+        if set(self.defaults) != expected_default_keys:
+            raise CapabilityGraphError("capability default keys do not match the schema")
+        _validate_cataloged_structure(self)
         serialized = json.dumps(self.as_config_sections(), sort_keys=True, separators=(",", ":"))
         if len(serialized.encode("utf-8")) > _MAX_SERIALIZED_BYTES:
             raise CapabilityGraphError("serialized capability graph exceeds 4 MiB")
@@ -347,7 +374,7 @@ class CapabilityGraph:
     @staticmethod
     def _validate_adjacency(
         name: str,
-        relation: Mapping[str, tuple[str, ...]],
+        relation: typing.Mapping[str, tuple[str, ...]],
         keys: tuple[str, ...],
         targets: tuple[str, ...],
     ) -> None:
@@ -365,8 +392,8 @@ class CapabilityGraph:
     @staticmethod
     def _validate_defaults(
         name: str,
-        defaults: Mapping[str, str],
-        relation: Mapping[str, tuple[str, ...]],
+        defaults: typing.Mapping[str, str],
+        relation: typing.Mapping[str, tuple[str, ...]],
     ) -> None:
         if set(defaults) != set(relation):
             raise CapabilityGraphError(f"{name} keys do not exhaust their source axis")
@@ -465,183 +492,14 @@ class CapabilityGraph:
         )
         if default_tuple not in allowed:
             raise CapabilityGraphError("capability defaults do not identify a valid model tuple")
-
-    def _validate_builder_profile_contract(self) -> None:
-        if self.schema_version == HISTORICAL_CAPABILITY_SCHEMA_VERSION:
-            self._validate_historical_v2_contract()
-            return
-        if len(self.locale_profiles) != 1:
-            raise CapabilityGraphError("schema-v3 graph must identify exactly one locale profile")
-        contract = _PROFILE_CONTRACTS.get(self.locale_profiles[0])
-        if contract is None:
-            raise CapabilityGraphError("locale_profiles contains an unknown domain ID")
-        expected_station_relations = {
-            source: _CLIMATE_STATION_RELATIONS[source]
-            for source in contract.climate_sources
-        }
-        expected_spatial_relations = {
-            source: _CLIMATE_SPATIAL_RELATIONS[source]
-            for source in contract.climate_sources
-        }
-        expected_station_methods = tuple(dict.fromkeys(
-            method
-            for source in contract.climate_sources
-            for method in expected_station_relations[source]
-        ))
-        expected_spatial_methods = tuple(dict.fromkeys(
-            method
-            for source in contract.climate_sources
-            for method in expected_spatial_relations[source]
-        ))
-        expected_axes = {
-            "locale_profiles": (contract.profile_id,),
-            "dem_sources": contract.dem_sources,
-            "climate_datasets": contract.climate_sources,
-            "climate_station_databases": contract.climate_station_databases,
-            "climate_station_methods": expected_station_methods,
-            "climate_spatial_methods": expected_spatial_methods,
-            "soil_datasets": contract.soil_sources,
-            "soil_builders": (
-                _SOIL_BUILDERS if contract.profile_id == "continental-us" else ("gridded",)
-            ),
-            "landuse_datasets": contract.landuse_sources,
-            "landuse_methods": _LANDUSE_METHODS,
-            "delineation_backends": _DELINEATION_BACKENDS,
-            "watershed_representations": _WATERSHED_REPRESENTATIONS,
-            "mods": (),
-        }
-        for axis, expected in expected_axes.items():
-            if tuple(getattr(self, axis)) != tuple(expected):
-                raise CapabilityGraphError(
-                    f"{axis} is not authorized by the {contract.profile_id} Builder profile"
-                )
-        if dict(self.climate_station_methods_by_dataset) != expected_station_relations:
-            raise CapabilityGraphError(
-                f"climate station adjacency is not authorized by the {contract.profile_id} profile"
-            )
-        if dict(self.climate_spatial_methods_by_dataset) != expected_spatial_relations:
-            raise CapabilityGraphError(
-                f"climate spatial adjacency is not authorized by the {contract.profile_id} profile"
-            )
-        if dict(self.climate_station_defaults) != {
-            source: _CLIMATE_STATION_DEFAULTS[source]
-            for source in contract.climate_sources
-        }:
-            raise CapabilityGraphError(
-                f"climate station defaults are not authorized by the {contract.profile_id} profile"
-            )
-        if dict(self.climate_spatial_defaults) != {
-            source: _CLIMATE_SPATIAL_DEFAULTS[source]
-            for source in contract.climate_sources
-        }:
-            raise CapabilityGraphError(
-                f"climate spatial defaults are not authorized by the {contract.profile_id} profile"
-            )
-        if dict(self.landuse_methods_by_dataset) != {
-            source: _LANDUSE_METHODS for source in contract.landuse_sources
-        }:
-            raise CapabilityGraphError(
-                f"landuse dataset adjacency is not authorized by the {contract.profile_id} profile"
-            )
-        if dict(self.landuse_method_defaults) != {
-            source: "gridded" for source in contract.landuse_sources
-        }:
-            raise CapabilityGraphError(
-                f"landuse method defaults are not authorized by the {contract.profile_id} profile"
-            )
-        soil_methods = expected_axes["soil_builders"]
-        if dict(self.soil_builders_by_dataset) != {
-            source: soil_methods for source in contract.soil_sources
-        }:
-            raise CapabilityGraphError(
-                f"soil builder adjacency is not authorized by the {contract.profile_id} profile"
-            )
-        if dict(self.soil_builder_defaults) != {
-            source: "gridded" for source in contract.soil_sources
-        }:
-            raise CapabilityGraphError(
-                f"soil builder defaults are not authorized by the {contract.profile_id} profile"
-            )
-        expected_default_keys = {
-            "locale_profile", "dem_source", "climate_dataset",
-            "climate_station_database", "soil_dataset", "landuse_dataset",
-            "delineation_backend", "watershed_representation", "wepp_binary",
-        }
-        if set(self.defaults) != expected_default_keys:
-            raise CapabilityGraphError(
-                f"capability default keys are not authorized by the {contract.profile_id} profile"
-            )
-        self._validate_exact_shared_relations(contract.profile_id)
-
-    def _validate_historical_v2_contract(self) -> None:
-        expected_axes = {
-            "locale_profiles": ("continental-us",),
-            "dem_sources": ("usgs-ned1-2024", "usgs-ned13-2022"),
-            "climate_datasets": _V2_CLIMATE_IDS,
-            "climate_station_databases": (),
-            "climate_station_methods": _V2_STATION_METHODS,
-            "climate_spatial_methods": _V2_SPATIAL_METHODS,
-            "soil_datasets": ("ssurgo-gnatsgso-2025",),
-            "soil_builders": _SOIL_BUILDERS,
-            "landuse_datasets": ("nlcd-2019",),
-            "landuse_methods": _LANDUSE_METHODS,
-            "delineation_backends": _DELINEATION_BACKENDS,
-            "watershed_representations": _WATERSHED_REPRESENTATIONS,
-            "mods": (),
-        }
-        for axis, expected in expected_axes.items():
-            if tuple(getattr(self, axis)) != tuple(expected):
-                raise CapabilityGraphError(
-                    f"{axis} is not authorized by the continental-us Builder profile"
-                )
-        if dict(self.climate_station_methods_by_dataset) != dict(_V2_STATION_RELATIONS):
-            raise CapabilityGraphError(
-                "climate station adjacency is not authorized by the continental-us profile"
-            )
-        if dict(self.climate_spatial_methods_by_dataset) != dict(_V2_SPATIAL_RELATIONS):
-            raise CapabilityGraphError(
-                "climate spatial adjacency is not authorized by the continental-us profile"
-            )
-        if dict(self.climate_station_defaults) != {
-            source: "auto" for source in _V2_CLIMATE_IDS
-        }:
-            raise CapabilityGraphError(
-                "climate station defaults are not authorized by the continental-us profile"
-            )
-        if dict(self.climate_spatial_defaults) != {
-            source: "single" for source in _V2_CLIMATE_IDS
-        }:
-            raise CapabilityGraphError(
-                "climate spatial defaults are not authorized by the continental-us profile"
-            )
-        if set(self.defaults) != {
-            "locale_profile", "dem_source", "climate_dataset", "landuse_dataset",
-            "soil_dataset", "delineation_backend", "watershed_representation",
-            "wepp_binary",
-        }:
-            raise CapabilityGraphError(
-                "capability default keys are not authorized by the continental-us profile"
-            )
-        self._validate_exact_shared_relations("continental-us")
-
-    def _validate_exact_shared_relations(self, profile_id: str) -> None:
-        if dict(self.landuse_methods_by_representation) != {
-            "single-ofe": _LANDUSE_METHODS,
-            "multiple-ofe": ("gridded", "upload"),
-        }:
-            raise CapabilityGraphError(
-                "landuse representation adjacency is not authorized by the Builder profile"
-            )
         expected_model = {
             (backend, "single-ofe", binary)
             for binary in self.wepp_binaries
             for backend in _DELINEATION_BACKENDS
         }
         expected_model.add(("wbt", "multiple-ofe", "wepp_260803"))
-        if {tuple(token.split("|")) for token in self.allowed_model_tuples} != expected_model:
-            raise CapabilityGraphError(
-                f"model tuple is not authorized by the {profile_id} Builder profile"
-            )
+        if allowed != expected_model:
+            raise CapabilityGraphError("model tuple set violates the Builder binary policy")
 
     def as_config_sections(self) -> dict[str, dict[str, CanonicalValue]]:
         """Return canonical config sections for project materialization."""
@@ -698,11 +556,189 @@ class CapabilityGraph:
         }
 
 
+def capability_structure_payload(graph: CapabilityGraph) -> dict[str, object]:
+    """Return the selection/provider-independent structural contract payload."""
+
+    allowed_model_pairs = sorted({
+        (backend, representation)
+        for backend, representation, _binary in (
+            tuple(token.split("|")) for token in graph.allowed_model_tuples
+        )
+    })
+    return {
+        "schema_version": graph.schema_version,
+        "locale_profile": graph.locale_profiles[0] if len(graph.locale_profiles) == 1 else "",
+        "axes": {
+            "dem_sources": list(graph.dem_sources),
+            "climate_datasets": list(graph.climate_datasets),
+            "climate_station_databases": list(graph.climate_station_databases),
+            "climate_station_methods": list(graph.climate_station_methods),
+            "climate_spatial_methods": list(graph.climate_spatial_methods),
+            "soil_datasets": list(graph.soil_datasets),
+            "soil_builders": list(graph.soil_builders),
+            "landuse_datasets": list(graph.landuse_datasets),
+            "landuse_methods": list(graph.landuse_methods),
+            "delineation_backends": list(graph.delineation_backends),
+            "watershed_representations": list(graph.watershed_representations),
+            "mods": list(graph.mods),
+        },
+        "relations": {
+            "climate_station_methods": {
+                key: list(values)
+                for key, values in graph.climate_station_methods_by_dataset.items()
+            },
+            "climate_spatial_methods": {
+                key: list(values)
+                for key, values in graph.climate_spatial_methods_by_dataset.items()
+            },
+            "landuse_methods": {
+                key: list(values) for key, values in graph.landuse_methods_by_dataset.items()
+            },
+            "landuse_methods_by_representation": {
+                key: list(values)
+                for key, values in graph.landuse_methods_by_representation.items()
+            },
+            "soil_builders": {
+                key: list(values) for key, values in graph.soil_builders_by_dataset.items()
+            },
+            "mod_requires": {
+                key: list(values) for key, values in graph.mod_requires.items()
+            },
+            "mod_conflicts": {
+                key: list(values) for key, values in graph.mod_conflicts.items()
+            },
+        },
+        "method_defaults": {
+            "climate_station": dict(graph.climate_station_defaults),
+            "climate_spatial": dict(graph.climate_spatial_defaults),
+            "landuse": dict(graph.landuse_method_defaults),
+            "soil": dict(graph.soil_builder_defaults),
+        },
+        "allowed_model_pairs": allowed_model_pairs,
+    }
+
+
+def _canonical_structure_payload(payload: typing.Mapping[str, object]) -> str:
+    return json.dumps(payload, sort_keys=True, separators=(",", ":"))
+
+
+def capability_structure_sha256(graph: CapabilityGraph) -> str:
+    """Return the deterministic structural identity for one capability graph."""
+
+    canonical = _canonical_structure_payload(capability_structure_payload(graph))
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def _structure_record(
+    payload: typing.Mapping[str, object],
+    *,
+    first_reader_revision: str,
+    expected_sha256: str | None = None,
+) -> _CapabilityStructureRecord:
+    schema_version = payload.get("schema_version")
+    locale_profile = payload.get("locale_profile")
+    if isinstance(schema_version, bool) or not isinstance(schema_version, int):
+        raise CapabilityGraphError("capability structure schema_version must be an integer")
+    if not isinstance(locale_profile, str) or _ID_RE.fullmatch(locale_profile) is None:
+        raise CapabilityGraphError("capability structure locale_profile must be a stable ID")
+    canonical = _canonical_structure_payload(payload)
+    calculated_sha256 = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+    if expected_sha256 is not None and expected_sha256 != calculated_sha256:
+        raise CapabilityGraphError("capability structure payload hash does not match its catalog")
+    return _CapabilityStructureRecord(
+        schema_version=schema_version,
+        locale_profile=locale_profile,
+        structure_sha256=calculated_sha256,
+        canonical_payload=canonical,
+        first_reader_revision=first_reader_revision,
+    )
+
+
+def _build_structure_catalog(
+    payloads: tuple[typing.Mapping[str, object], ...],
+) -> _StructureCatalog:
+    """Build an isolated catalog for structural-reader tests."""
+
+    mutable: dict[tuple[int, str], dict[str, _CapabilityStructureRecord]] = {}
+    for payload in payloads:
+        record = _structure_record(payload, first_reader_revision="test-only")
+        key = (record.schema_version, record.locale_profile)
+        records = mutable.setdefault(key, {})
+        if record.structure_sha256 in records:
+            raise CapabilityGraphError("duplicate capability structure identity")
+        records[record.structure_sha256] = record
+    return MappingProxyType({
+        key: MappingProxyType(records) for key, records in mutable.items()
+    })
+
+
+def _load_structure_catalog() -> _StructureCatalog:
+    catalog_path = Path(__file__).with_name("capability_structures") / "catalog.json"
+    raw = json.loads(catalog_path.read_text(encoding="utf-8"))
+    if not isinstance(raw, dict) or raw.get("schema_version") != 1:
+        raise CapabilityGraphError("unsupported capability structure catalog schema")
+    entries = raw.get("structures")
+    if not isinstance(entries, list) or not entries:
+        raise CapabilityGraphError("capability structure catalog must not be empty")
+
+    mutable: dict[tuple[int, str], dict[str, _CapabilityStructureRecord]] = {}
+    for entry in entries:
+        if not isinstance(entry, dict):
+            raise CapabilityGraphError("capability structure catalog entry must be an object")
+        payload = entry.get("payload")
+        expected_sha256 = entry.get("structure_sha256")
+        first_reader_revision = entry.get("first_reader_revision")
+        if (
+            not isinstance(payload, dict)
+            or not isinstance(expected_sha256, str)
+            or re.fullmatch(r"[0-9a-f]{64}", expected_sha256) is None
+            or not isinstance(first_reader_revision, str)
+            or not first_reader_revision
+        ):
+            raise CapabilityGraphError("capability structure catalog entry is malformed")
+        record = _structure_record(
+            payload,
+            first_reader_revision=first_reader_revision,
+            expected_sha256=expected_sha256,
+        )
+        key = (record.schema_version, record.locale_profile)
+        records = mutable.setdefault(key, {})
+        if record.structure_sha256 in records:
+            raise CapabilityGraphError("duplicate capability structure identity")
+        records[record.structure_sha256] = record
+    return MappingProxyType({
+        key: MappingProxyType(records) for key, records in mutable.items()
+    })
+
+
+def _validate_cataloged_structure(
+    graph: CapabilityGraph,
+    catalog: _StructureCatalog | None = None,
+) -> None:
+    selected_catalog = _PRODUCTION_STRUCTURE_CATALOG if catalog is None else catalog
+    if len(graph.locale_profiles) != 1:
+        raise CapabilityGraphError("capability graph must identify exactly one locale profile")
+    key = (graph.schema_version, graph.locale_profiles[0])
+    records = selected_catalog.get(key, {})
+    payload = capability_structure_payload(graph)
+    canonical = _canonical_structure_payload(payload)
+    structure_sha256 = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+    record = records.get(structure_sha256)
+    if record is None or record.canonical_payload != canonical:
+        raise CapabilityGraphError(
+            f"unknown capability structure for schema {graph.schema_version} "
+            f"locale {graph.locale_profiles[0]!r}"
+        )
+
+
+_PRODUCTION_STRUCTURE_CATALOG = _load_structure_catalog()
+
+
 def _provider_revision(
     profile_id: str,
     wepp_binaries: tuple[str, ...],
-    wepp_binary_revisions: Mapping[str, str],
-    climate_provider_tokens: Mapping[str, str] | None,
+    wepp_binary_revisions: typing.Mapping[str, str],
+    climate_provider_tokens: typing.Mapping[str, str] | None,
 ) -> str:
     profile = get_locale_profile(profile_id)
     if profile is None:
@@ -747,7 +783,7 @@ def _model_tuples(wepp_binaries: tuple[str, ...]) -> tuple[str, ...]:
 
 def _validate_wepp_provider(
     wepp_binaries: tuple[str, ...],
-    wepp_binary_revisions: Mapping[str, str],
+    wepp_binary_revisions: typing.Mapping[str, str],
 ) -> None:
     if not wepp_binaries or "wepp_260803" not in wepp_binaries:
         raise CapabilityGraphError("WEPP provider is missing required default wepp_260803")
@@ -757,9 +793,9 @@ def _validate_wepp_provider(
 
 def build_continental_us_capability_graph(
     wepp_binaries: tuple[str, ...],
-    wepp_binary_revisions: Mapping[str, str],
+    wepp_binary_revisions: typing.Mapping[str, str],
     *,
-    climate_provider_tokens: Mapping[str, str] | None = None,
+    climate_provider_tokens: typing.Mapping[str, str] | None = None,
 ) -> CapabilityGraph:
     """Build the frozen historical Continental-US schema-v2 graph."""
 
@@ -820,9 +856,9 @@ def build_continental_us_capability_graph(
 def build_locale_capability_graph(
     profile_id: str,
     wepp_binaries: tuple[str, ...],
-    wepp_binary_revisions: Mapping[str, str],
+    wepp_binary_revisions: typing.Mapping[str, str],
     *,
-    climate_provider_tokens: Mapping[str, str] | None = None,
+    climate_provider_tokens: typing.Mapping[str, str] | None = None,
 ) -> CapabilityGraph:
     """Build the current schema-v3 graph for one exposed locale profile."""
 

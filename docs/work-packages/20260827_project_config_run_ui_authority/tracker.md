@@ -4,9 +4,10 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-27 20:31 UTC
-**Current phase**: canonical checkpoint ready to commit
-**Last updated**: 2026-08-28 00:14 UTC
-**Next milestone**: standalone checkpoint commit
+**Current phase**: structural reader-floor implementation review
+**Last updated**: 2026-08-28 00:35 UTC
+**Next milestone**: commit, push, and validate the writer-absent reader floor on
+`forest`
 **Security impact**: `high`
 **Dedicated security review**: `yes`
 **Security artifact**: `artifacts/20260827_security_review.md`
@@ -26,7 +27,9 @@ PC-24 owns `.cfg` locale normalization and run-UI authority parity.
 
 ### In Progress
 
-- [ ] Commit the ratified canonical checkpoint as a standalone ancestor.
+- [ ] Close independent correctness/security review of the append-only
+  structural reader floor, then commit and validate it on `forest` with the
+  capability-refresh writer absent.
 
 ### Ready / Backlog
 
@@ -38,11 +41,21 @@ PC-24 owns `.cfg` locale normalization and run-UI authority parity.
 
 ### Blocked
 
-- [ ] Config and implementation edits are blocked until the standalone ancestor
-  checkpoint exists.
+- [ ] Capability-refresh writer implementation and exposure are blocked until
+  the exact WP12D reader-floor revision is recorded and accepted on `forest`.
 
 ### Done
 
+- [x] Committed the ratified canonical documentation-only checkpoint as
+  `596ff5758ca83e6077b97f953431c2c881219840` before any WP12D implementation
+  edit (2026-08-28 00:16 UTC).
+- [x] Implemented the writer-absent structural reader floor with checked-in,
+  append-only schema-v2/v3 structure payloads, hashes, and first-reader
+  provenance; current and `280cf7e84` schema-v3 structures share identities
+  (2026-08-28 00:35 UTC).
+- [x] Passed the reader-floor focused and affected suites (65 and 138 tests),
+  test-stub, stubtest, Vulture, broad-exception, docs, and diff gates
+  (2026-08-28 00:35 UTC).
 - [x] Inventoried all 128 named configs and identified 71 that currently omit
   a literal locale declaration (2026-08-27 21:18 UTC).
 - [x] Confirmed Builder creation already writes `[general] locales` and legacy

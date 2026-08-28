@@ -1,6 +1,6 @@
 # Project Config Run UI Authority (WP12D)
 
-**Status**: Ratified / checkpoint ready to commit (2026-08-28)
+**Status**: Ratified / structural reader floor in review (2026-08-28)
 **Timezone**: UTC
 Initiative branch: feature/project-owned-config
 Canonical branch: master

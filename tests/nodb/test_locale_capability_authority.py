@@ -3,6 +3,7 @@ from __future__ import annotations
 import ast
 import configparser
 from dataclasses import replace
+import hashlib
 from pathlib import Path
 import re
 from types import MappingProxyType
@@ -385,7 +386,7 @@ def test_schema_v3_reader_rejects_hostile_climate_method_broadening(
         climate_station_methods_by_dataset=MappingProxyType(hostile_relations),
     )
 
-    with pytest.raises(CapabilityGraphError, match=r"climate[_ ]station"):
+    with pytest.raises(CapabilityGraphError, match="unknown capability structure"):
         hostile.validate()
 
 
@@ -430,7 +431,7 @@ def test_schema_v3_parser_rejects_hostile_climate_method_broadening(
         "capabilities.climate_station_methods", source, repr(relation)
     )
 
-    with pytest.raises(ValueError, match=r"climate[_ ]station"):
+    with pytest.raises(ValueError, match="unknown capability structure"):
         capability_authority(config)
 
 
@@ -500,6 +501,155 @@ def test_stored_schema_v2_graph_validation_is_independent_of_live_catalogs(
     graph = build_continental_us_capability_graph(
         binary_ids,
         _binary_revisions(binary_ids),
+    )
+
+    def _live_catalog_access_is_forbidden(*_args, **_kwargs):
+        raise AssertionError("stored graph validation consulted a live catalog")
+
+    monkeypatch.setattr(
+        capability_graph_module,
+        "get_locale_profile",
+        _live_catalog_access_is_forbidden,
+    )
+    monkeypatch.setattr(
+        capability_graph_module,
+        "iter_climate_datasets",
+        _live_catalog_access_is_forbidden,
+    )
+
+    graph.validate()
+
+
+@pytest.mark.parametrize(
+    ("profile_id", "expected_sha256"),
+    (
+        ("continental-us", "5296d3519d578164b6a5874a820991c935b394e5336aba41fe3e8f8d0dd4e29b"),
+        ("europe", "c05b6a66f823f69cf8f1d44b69c206da1dc9449b278662c680248a3f3b755aeb"),
+        ("canada", "dd7f7cdb0d861a159df64a4806ee5585f0208b93982990e30974055b1f2a41e7"),
+        ("australia", "bb4bdde8740d689aa378bcf744a942d997b9c69cdc445d80be07c749635efc9a"),
+        ("global-earth", "db1c185cf6b5def23064752847f585f3522c0b971460d9c688b424cb04c706ae"),
+    ),
+)
+def test_schema_v3_current_graph_matches_280cf7e84_structure_identity(
+    profile_id: str,
+    expected_sha256: str,
+) -> None:
+    graph = build_locale_capability_graph(
+        profile_id,
+        ("wepp_260803",),
+        _binary_revisions(("wepp_260803",)),
+    )
+
+    assert capability_graph_module.capability_structure_sha256(graph) == expected_sha256
+
+
+def test_historical_schema_v2_has_frozen_structure_identity() -> None:
+    graph = build_continental_us_capability_graph(
+        ("wepp_260803",),
+        _binary_revisions(("wepp_260803",)),
+    )
+
+    assert capability_graph_module.capability_structure_sha256(graph) == (
+        "aa548c9c4bc792b44fc89b97e2b71270d2bbf1002cc960aac005b6d52c351bc6"
+    )
+
+
+def test_production_structure_catalog_retains_payload_hash_and_reader_provenance() -> None:
+    records = [
+        record
+        for by_hash in capability_graph_module._PRODUCTION_STRUCTURE_CATALOG.values()
+        for record in by_hash.values()
+    ]
+
+    assert len(records) == 6
+    assert {record.first_reader_revision for record in records} == {
+        "3e8d0d09b",
+        "280cf7e84",
+    }
+    assert all(
+        hashlib.sha256(
+            record.canonical_payload.encode("utf-8")
+        ).hexdigest() == record.structure_sha256
+        for record in records
+    )
+
+
+def test_structure_identity_excludes_project_defaults_and_provider_binary_state() -> None:
+    baseline = build_locale_capability_graph(
+        "continental-us",
+        ("wepp_260803",),
+        _binary_revisions(("wepp_260803",)),
+    )
+    binary_ids = ("wepp_260803", "wepp_test_reader_floor")
+    provider_changed = build_locale_capability_graph(
+        "continental-us",
+        binary_ids,
+        _binary_revisions(binary_ids),
+        climate_provider_tokens={
+            **default_climate_provider_tokens(),
+            "daymet_observed": "daymet/reader-floor-test",
+        },
+    )
+    selection_changed = baseline.with_defaults(
+        climate_dataset="observed_daymet",
+        climate_station_database="cligen-stations-ghcn",
+        delineation_backend="topaz",
+    )
+
+    assert len({
+        capability_graph_module.capability_structure_sha256(baseline),
+        capability_graph_module.capability_structure_sha256(provider_changed),
+        capability_graph_module.capability_structure_sha256(selection_changed),
+    }) == 1
+
+
+def test_test_only_append_only_catalog_proves_same_locale_structure_evolution(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    baseline = build_locale_capability_graph(
+        "continental-us",
+        ("wepp_260803",),
+        _binary_revisions(("wepp_260803",)),
+    )
+    evolved = replace(
+        baseline,
+        landuse_datasets=(*baseline.landuse_datasets, "nlcd-test-evolved"),
+        landuse_methods_by_dataset=MappingProxyType({
+            **baseline.landuse_methods_by_dataset,
+            "nlcd-test-evolved": ("gridded", "single", "upload"),
+        }),
+        landuse_method_defaults=MappingProxyType({
+            **baseline.landuse_method_defaults,
+            "nlcd-test-evolved": "gridded",
+        }),
+    )
+    baseline_payload = capability_graph_module.capability_structure_payload(baseline)
+    evolved_payload = capability_graph_module.capability_structure_payload(evolved)
+    test_catalog = capability_graph_module._build_structure_catalog(
+        (baseline_payload, evolved_payload)
+    )
+
+    assert capability_graph_module.capability_structure_sha256(baseline) != (
+        capability_graph_module.capability_structure_sha256(evolved)
+    )
+    with pytest.raises(CapabilityGraphError, match="unknown capability structure"):
+        evolved.validate()
+    monkeypatch.setattr(
+        capability_graph_module,
+        "_PRODUCTION_STRUCTURE_CATALOG",
+        test_catalog,
+    )
+    baseline.validate()
+    evolved.validate()
+
+
+def test_stored_schema_v3_structure_validation_does_not_consult_live_catalogs(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    graph = build_locale_capability_graph(
+        "europe",
+        ("wepp_260803",),
+        _binary_revisions(("wepp_260803",)),
     )
 
     def _live_catalog_access_is_forbidden(*_args, **_kwargs):
@@ -678,7 +828,7 @@ def test_schema_v2_reader_rejects_closed_domain_dataset_ids(
             parser.remove_option(section, option)
         parser.set(section, hostile_id, value)
 
-    with pytest.raises(ValueError, match=f"{axis} is not authorized"):
+    with pytest.raises(ValueError, match="unknown capability structure"):
         capability_authority(config)
 
 
@@ -688,7 +838,7 @@ def test_graph_rejects_known_non_builder_values_and_incompatible_edges() -> None
         binary_ids, _binary_revisions(binary_ids)
     )
 
-    with pytest.raises(CapabilityGraphError, match="not authorized"):
+    with pytest.raises(CapabilityGraphError, match="unknown capability structure"):
         replace(
             graph,
             dem_sources=("australia-srtm-1s",),
@@ -696,7 +846,7 @@ def test_graph_rejects_known_non_builder_values_and_incompatible_edges() -> None
         ).validate()
     with pytest.raises(CapabilityGraphError):
         replace(graph, climate_datasets=("future_cmip5",)).validate()
-    with pytest.raises(CapabilityGraphError, match="climate spatial adjacency"):
+    with pytest.raises(CapabilityGraphError, match="unknown capability structure"):
         replace(
             graph,
             climate_spatial_methods_by_dataset=MappingProxyType({
@@ -704,7 +854,7 @@ def test_graph_rejects_known_non_builder_values_and_incompatible_edges() -> None
                 "vanilla_cligen": ("single", "multiple", "interpolated"),
             }),
         ).validate()
-    with pytest.raises(CapabilityGraphError, match="landuse representation adjacency"):
+    with pytest.raises(CapabilityGraphError, match="unknown capability structure"):
         replace(
             graph,
             landuse_methods_by_representation=MappingProxyType({

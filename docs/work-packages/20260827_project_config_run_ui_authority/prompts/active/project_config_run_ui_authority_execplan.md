@@ -38,7 +38,12 @@ migrated.
 - [x] (2026-08-28 00:14Z) Amend canonical contracts/ADR and obtain binding
   correctness, governance, and security READY reviews with no unresolved High
   or Medium findings; correctness and security also reported no Low findings.
-- [ ] Commit the standalone checkpoint.
+- [x] (2026-08-28 00:16Z) Commit the standalone documentation-only checkpoint
+  as `596ff5758ca83e6077b97f953431c2c881219840`.
+- [x] (2026-08-28 00:35Z) Implement and locally validate the append-only
+  structural reader floor while keeping the capability-refresh writer absent.
+- [ ] Close reader-floor correctness/security review, commit its exact
+  revision, and validate it on `forest` before writer implementation.
 - [ ] Write failing inventory, legacy reopen, stored isolation, and paired
   boundary tests.
 - [ ] Implement exact config normalization and authority composition.
@@ -82,6 +87,11 @@ migrated.
   attributes and explicitly preserves every stored capability axis.
   Evidence: project-config contract section 5.1 and
   `project_config_update.py` stored-graph resolution.
+- Observation: no capability structure changed between source revision
+  `280cf7e84` and the ratified checkpoint; the current five schema-v3 locale
+  graphs therefore retain their historical structural identities.
+  Evidence: normalized structural payload comparison and the checked-in
+  `wepppy/nodb/locales/capability_structures/catalog.json`.
 
 ## Decision Log
 
@@ -142,10 +152,11 @@ migrated.
 
 ## Outcomes & Retrospective
 
-Amendment 3 is ratified and its canonical diff has passed binding correctness,
-governance, and security review. Config and implementation changes remain
-blocked only until that exact documentation-only diff is committed as the
-standalone checkpoint.
+Amendment 3 is ratified and its canonical documentation-only checkpoint is
+commit `596ff5758ca83e6077b97f953431c2c881219840`. The append-only structural
+reader floor is implemented with the refresh writer absent and has passed its
+local focused gates. Independent reader-floor reviews and exact-host `forest`
+acceptance remain before writer implementation.
 
 ## Context and Orientation
 

@@ -41,6 +41,8 @@ from .capability_graph import (
     CapabilityGraphError,
     build_continental_us_capability_graph,
     build_locale_capability_graph,
+    capability_structure_payload,
+    capability_structure_sha256,
 )
 
 __all__ = [
@@ -76,4 +78,6 @@ __all__ = [
     "CapabilityGraphError",
     "build_continental_us_capability_graph",
     "build_locale_capability_graph",
+    "capability_structure_payload",
+    "capability_structure_sha256",
 ]
