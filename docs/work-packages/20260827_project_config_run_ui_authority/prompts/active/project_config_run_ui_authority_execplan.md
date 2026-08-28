@@ -88,6 +88,18 @@ migrated.
 - [x] (2026-08-28 06:13Z) Pass the exact hotfix complete Python gate with
   7,220 tests passed and 63 skipped, plus the refreshed stub, exception,
   Vulture, diff, documentation, and RQ-graph gates.
+- [x] (2026-08-28 06:23Z) Deploy pushed hotfix `326f2138c` to exact host
+  `forest` without rebuilding, prove the worker task now enters fail-closed
+  authorization, and identify the browser-token actor sanitizer dropping its
+  existing signed numeric `user_id` when `sub` is intentionally opaque.
+- [x] (2026-08-28 06:25Z) Make sanitized user actors prefer the signed
+  `user_id` claim with the established numeric-`sub` fallback and pass 116
+  focused auth/token/route/worker tests; the failed apply again left config and
+  manifest byte-identical and released its reservation.
+- [x] (2026-08-28 06:45Z) Pass the exact identity-handoff complete Python gate
+  with 7,221 tests passed and 63 skipped. A first attempt hit the previously
+  documented unrelated same-size Climate fixture timing miss; that exact test
+  passed immediately in isolation and in the clean complete rerun.
 - [ ] Push and validate exact candidate on `forest`; hand it to WP12 without
   production deployment.
 
@@ -175,6 +187,14 @@ migrated.
   Evidence: the security re-review identified the race; one Lua compare-delete
   now preserves a replacement in both deterministic tests and live Forest
   Redis execution.
+- Observation: browser RQ tokens deliberately support an opaque subject while
+  carrying the canonical numeric account identity in the signed `user_id`
+  claim, but actor sanitization previously read only `sub` and therefore
+  omitted worker metadata for this supported token shape.
+  Evidence: Forest job `76bde759-ef34-4a27-83a8-cecf963f60b8` entered the
+  task with no `auth_actor`; the token-issuance contract already asserts an
+  opaque subject plus numeric `user_id`, and the corrected sanitizer retains
+  that identity while continuing to reject a token with neither numeric form.
 
 ## Decision Log
 
@@ -252,11 +272,11 @@ and climate catalog/mode persistence is one lock-scoped, rollback-safe
 transaction. The update-specific frontend suite passes 19 tests; the complete
 frontend suite passes 808 tests across 107 suites; frontend lint, stubs,
 Vulture, changed-file broad-exception enforcement, diff checks, and the RQ
-graph pass. After the Forest worker-load correction, the exact complete Python
-suite passes with 7,220 tests passed and 63 skipped. Independent correctness
-and security reviews are READY with no remaining in-scope finding. Hotfix
-commit/push and exact-host writer/reader-floor acceptance remain; production
-deployment remains excluded.
+graph pass. After the Forest worker-load and identity-handoff corrections, the
+exact complete Python suite passes with 7,221 tests passed and 63 skipped.
+Independent correctness and security reviews are READY with no remaining
+in-scope finding. Identity-fix commit/push and exact-host writer/reader-floor
+acceptance remain; production deployment remains excluded.
 
 ## Context and Orientation
 

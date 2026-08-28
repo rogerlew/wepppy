@@ -5,7 +5,7 @@
 **Timezone**: UTC
 **Started**: 2026-08-27 20:31 UTC
 **Current phase**: candidate commit and exact-host Forest acceptance
-**Last updated**: 2026-08-28 06:13 UTC
+**Last updated**: 2026-08-28 06:45 UTC
 **Next milestone**: commit/push the Forest worker hotfix and complete exact-host
 writer/reader-floor rollback acceptance
 **Security impact**: `high`
@@ -59,6 +59,19 @@ PC-24 owns `.cfg` locale normalization and run-UI authority parity.
   and 63 skipped in 12 minutes 54 seconds, plus refreshed test-stub, Vulture,
   changed-file broad-exception, diff, documentation, and RQ-graph gates
   (2026-08-28 06:13 UTC).
+- [x] Deployed pushed hotfix `326f2138c` on exact host `forest` with unchanged
+  image `6ac7e7103046`; the next apply proved fresh task loading and then failed
+  closed because the supported opaque-subject browser token had no queued
+  actor metadata (2026-08-28 06:23 UTC).
+- [x] Corrected actor sanitization to prefer the existing signed numeric
+  `user_id` claim with numeric-`sub` fallback, passed 116 focused
+  auth/token/route/worker tests, and verified the failed apply left both run
+  files byte-identical with no active reservation (2026-08-28 06:25 UTC).
+- [x] Passed the clean exact 7,284-item identity-handoff Python collection with
+  7,221 passed and 63 skipped in 12 minutes 43 seconds. A first attempt hit the
+  previously documented unrelated same-size Climate fixture timing miss; that
+  exact test passed immediately in isolation and in this complete rerun
+  (2026-08-28 06:45 UTC).
 - [x] Obtained final independent correctness and security READY verdicts with
   no remaining in-scope High, Medium, or Low findings; production remains
   unauthorized (2026-08-28 05:32 UTC).

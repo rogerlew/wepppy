@@ -390,6 +390,15 @@ def test_authorize_user_claims_allows_public_batch_run_without_owners(
     [
         ({"token_class": "user", "sub": "42"}, {"token_class": "user", "user_id": 42}),
         (
+            {
+                "token_class": "user",
+                "sub": "opaque-security-subject",
+                "user_id": 43,
+                "roles": ["Admin", "PowerUser"],
+            },
+            {"token_class": "user", "user_id": 43, "roles": ["admin"]},
+        ),
+        (
             {"token_class": "session", "session_id": "sid-1"},
             {"token_class": "session", "session_id": "sid-1"},
         ),

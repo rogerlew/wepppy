@@ -123,6 +123,31 @@ import. The independent reviewer reran the worker and update-route suites:
 reservation deletion, and preservation of an atomically replaced reservation.
 No delta correctness findings remain: High 0; Medium 0; Low 0.
 
+## Forest User-Identity Handoff Delta Recheck
+
+Forest acceptance exposed an identity handoff defect in the browser-issued
+user-token path: Flask-Login may use an intentionally opaque security subject,
+while the same signed token carries the canonical positive numeric `user_id`.
+The route accepted the verified token, but `_sanitize_auth_actor` considered
+only the opaque `sub`, omitted the worker actor, and therefore left the worker
+without the owner identity needed for its independent mutation authorization.
+
+The exact two-file delta over `326f2138c` now prefers the parsed signed
+`user_id` and falls back to a numeric `sub`. The actor remains deliberately
+minimal: it carries the user ID and only normalized Admin/Root roles;
+PowerUser and other roles are not promoted. Numeric-sub compatibility remains
+intact, and malformed identities still produce no actor. The downstream
+worker continues to reauthorize the retained identity against current run
+ownership or Admin/Root before mutation, so this repairs identity transport
+without changing the authorization policy.
+
+The added regression covers an opaque `sub`, numeric `user_id`, and mixed
+Admin/PowerUser roles, proving both numeric identity retention and privileged
+role filtering. The independent reviewer reran the exact auth, browser-token,
+project-update route, and update-worker suite: 116 tests passed. `git diff
+--check` also passed for the two-file delta. No delta correctness findings
+remain: High 0; Medium 0; Low 0.
+
 ## Validation Evidence
 
 The package records a clean full run of 7,218 Python tests with 63 skipped and

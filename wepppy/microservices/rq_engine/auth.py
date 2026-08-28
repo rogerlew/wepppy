@@ -132,7 +132,9 @@ def _sanitize_auth_actor(claims: Mapping[str, Any]) -> dict[str, Any] | None:
     actor: dict[str, Any] = {"token_class": token_class}
 
     if token_class == "user":
-        user_id = _parse_user_id(claims.get("sub"))
+        user_id = _parse_user_id(claims.get("user_id"))
+        if user_id is None:
+            user_id = _parse_user_id(claims.get("sub"))
         if user_id is None:
             return None
         actor["user_id"] = user_id

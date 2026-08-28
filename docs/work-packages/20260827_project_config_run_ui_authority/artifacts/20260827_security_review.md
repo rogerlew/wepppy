@@ -363,3 +363,63 @@ removed.
   production remains unauthorized by WP12D
 - **Security reviewer**: independent `wp12b_security_contract_review` agent,
   READY
+
+## WP12D Forest User-Identity Handoff Security Delta Recheck
+
+### Revision binding
+
+- **Review completed**: 2026-08-28 06:23 UTC
+- **Committed hotfix base and candidate HEAD**:
+  `326f2138cbd14ac4ba90dfa591f4575a94dabd98`
+- **Delta reviewed**: only `wepppy/microservices/rq_engine/auth.py` and
+  `tests/microservices/test_rq_engine_auth.py`
+
+### Findings and security analysis
+
+No High, Medium, or Low security finding remains. The actor sanitizer now reads
+the signed `user_id` claim first for `token_class=user` and retains numeric
+`sub` as the legacy fallback. This matches canonical token issuance, which
+requires a positive numeric user ID, places it in the signed JWT, and permits
+the signed subject to be opaque. It also matches request-time project mutation
+authorization, which already resolves `user_id` before `sub`; the route and
+worker therefore interpret the principal consistently.
+
+The new value is accepted only from verified JWT claims, not from an independent
+request payload or header field, queue arguments, or unsigned metadata. JWT
+signature, audience, revocation, and required-scope checks complete before actor
+sanitization. `_parse_user_id` rejects booleans, missing values, and non-integer
+text; if neither signed identity representation is numeric, no actor is
+installed and the worker authorization remains fail-closed. Actor serialization
+retains only token class, numeric user ID, and the intersection of signed roles
+with `admin` and `root`; PowerUser and other roles cannot become worker
+privilege.
+
+The handoff stores no email, opaque subject, bearer token, JWT ID, or other
+credential in job metadata. Public job-info output continues to redact
+`auth_actor`; the numeric actor is available only through existing privileged
+operational/audit surfaces. No durable config, manifest, amendment, path,
+queue-topology, or authorization-policy contract changes.
+
+Forest demonstrated the prior safe failure: request authorization succeeded,
+but the absent queued actor caused worker authorization to fail before mutation;
+config and manifest remained unchanged and the exact reservation was released.
+The corrected sanitizer supplies the already-authorized signed numeric identity
+without weakening that worker-time reauthorization boundary.
+
+### Verification evidence
+
+- Package-focused identity/authentication evidence: 116 tests passed as
+  recorded by the implementation handoff.
+- Independent rq-engine authentication suite: 38 tests passed.
+- Documentation lint and `git diff --check`: passed.
+
+### Delta verdict
+
+- **Gate status**: `pass` for exact-host Forest writer exposure
+- **Unresolved in-scope findings**: High 0; Medium 0; Low 0
+- **Residual follow-up**: the preexisting out-of-scope Low archive-descendant
+  exclusion item remains unchanged
+- **Release recommendation**: READY for contracted Forest acceptance only;
+  production remains unauthorized by WP12D
+- **Security reviewer**: independent `wp12b_security_contract_review` agent,
+  READY
