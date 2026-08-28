@@ -134,6 +134,7 @@ function addLocale(schema, spec) {
 function installDom() {
     document.body.innerHTML = `
       <div data-config-builder data-description-url="/describe" data-validation-url="/validate" data-creation-url="/create">
+        <button data-focus-sentinel>Focus sentinel</button>
         <div data-builder-error-summary tabindex="-1" hidden><ul data-builder-error-list></ul></div>
         <form data-builder-form>${["locale", "dem", "delineation_backend", "watershed_representation", "wepp_binary", "soil", "landuse", "climate", "climate_station_database"].map((field) => `
           <label for="builder-${field}">${field}</label><select id="builder-${field}" name="${field}"></select>
@@ -144,7 +145,7 @@ function installDom() {
           <p data-builder-change-reason></p>
         </form>
         <section data-builder-review hidden><dl data-builder-review-list></dl></section>
-        <button data-builder-validate disabled>Review</button><button data-builder-create disabled>Create</button>
+        <button data-builder-create disabled>Create</button>
         <p data-builder-status tabindex="-1"></p>
       </div>`;
 }
@@ -166,6 +167,25 @@ async function settle() {
     for (let index = 0; index < 12; index += 1) { await Promise.resolve(); }
 }
 
+function deferred() {
+    let resolve;
+    let reject;
+    const promise = new Promise((resolvePromise, rejectPromise) => {
+        resolve = resolvePromise;
+        reject = rejectPromise;
+    });
+    return {promise, resolve, reject};
+}
+
+function validatingHttp(schema, serverReview = review()) {
+    return {
+        getRqEngineToken: jest.fn().mockResolvedValue("token"),
+        request: jest.fn((url) => Promise.resolve({
+            body: url === "/describe" ? schema : {review: serverReview}
+        }))
+    };
+}
+
 describe("Config Builder controller", () => {
     beforeEach(() => {
         document.body.innerHTML = "";
@@ -184,9 +204,12 @@ describe("Config Builder controller", () => {
         };
         const root = document.querySelector("[data-config-builder]");
         const controller = new window.ConfigBuilder(root, dependencies(http));
+        const focusSentinel = root.querySelector("[data-focus-sentinel]");
+        focusSentinel.focus();
         await controller.init();
-        await controller.validate(true);
 
+        expect(http.request.mock.calls.map((call) => call[0])).toEqual(["/describe", "/validate"]);
+        expect(document.activeElement).toBe(focusSentinel);
         expect([...root.querySelector("[name=dem]").options].map((option) => option.value)).toEqual(["dem-a", "dem-b"]);
         expect(root.querySelector("[data-builder-override]").hidden).toBe(true);
         expect(controller.validatedReview).toEqual(serverReview);
@@ -203,7 +226,7 @@ describe("Config Builder controller", () => {
 
     test("clears an invalidated graph value visibly and never submits it", async () => {
         const schema = description(false);
-        const http = {getRqEngineToken: jest.fn().mockResolvedValue("token"), request: jest.fn().mockResolvedValue({body: schema})};
+        const http = validatingHttp(schema);
         const root = document.querySelector("[data-config-builder]");
         const controller = new window.ConfigBuilder(root, dependencies(http));
         await controller.init();
@@ -302,10 +325,7 @@ describe("Config Builder controller", () => {
             }
         ];
         profiles.forEach((profile) => addLocale(schema, profile));
-        const http = {
-            getRqEngineToken: jest.fn().mockResolvedValue("token"),
-            request: jest.fn().mockResolvedValue({body: schema})
-        };
+        const http = validatingHttp(schema);
         const root = document.querySelector("[data-config-builder]");
         const controller = new window.ConfigBuilder(root, dependencies(http));
         await controller.init();
@@ -337,7 +357,7 @@ describe("Config Builder controller", () => {
         schema.capability_graphs_by_locale["continental-us"].capabilities.allowed_model_tuples.push(
             "topaz|single|wepp_dcc52a6", "topaz|single|wepp_260803"
         );
-        const http = {getRqEngineToken: jest.fn().mockResolvedValue("token"), request: jest.fn().mockResolvedValue({body: schema})};
+        const http = validatingHttp(schema);
         const root = document.querySelector("[data-config-builder]");
         const controller = new window.ConfigBuilder(root, dependencies(http));
         await controller.init();
@@ -362,7 +382,7 @@ describe("Config Builder controller", () => {
 
     test("offers only fixed privileged overrides and clears intent at the DEM default", async () => {
         const schema = description(true);
-        const http = {getRqEngineToken: jest.fn().mockResolvedValue("token"), request: jest.fn().mockResolvedValue({body: schema})};
+        const http = validatingHttp(schema);
         const root = document.querySelector("[data-config-builder]");
         const controller = new window.ConfigBuilder(root, dependencies(http));
         await controller.init();
@@ -377,43 +397,187 @@ describe("Config Builder controller", () => {
         expect(controller._selections()).not.toHaveProperty("cellsize_override");
     });
 
-    test("focuses actionable validation errors and prevents duplicate active creation", async () => {
+    test("announces automatic validation errors without moving focus and retries on change", async () => {
         let rejectCreation;
         const creation = new Promise((_resolve, reject) => { rejectCreation = reject; });
         const schema = description(false);
+        let validations = 0;
         const http = {
             getRqEngineToken: jest.fn().mockResolvedValue("token"),
             request: jest.fn((url) => {
                 if (url === "/describe") { return Promise.resolve({body: schema}); }
                 if (url === "/validate") {
-                    const error = new Error("invalid");
-                    error.body = {errors: [{field: "dem", message: "Choose another DEM."}], error: {details: "Choose another DEM."}};
-                    return Promise.reject(error);
+                    validations += 1;
+                    if (validations === 1) {
+                        const error = new Error("invalid");
+                        error.body = {errors: [{field: "dem", message: "Choose another DEM."}], error: {details: "Choose another DEM."}};
+                        return Promise.reject(error);
+                    }
+                    return Promise.resolve({body: {review: review()}});
                 }
                 return creation;
             })
         };
         const root = document.querySelector("[data-config-builder]");
         const controller = new window.ConfigBuilder(root, dependencies(http));
+        const focusSentinel = root.querySelector("[data-focus-sentinel]");
+        focusSentinel.focus();
         await controller.init();
-        await controller.validate(true);
-        expect(document.activeElement).toBe(root.querySelector("[data-builder-error-summary]"));
-        expect(root.querySelector("[name=dem]").getAttribute("aria-invalid")).toBe("true");
 
-        controller.validatedReview = review();
-        controller.busy = false;
+        expect(document.activeElement).toBe(focusSentinel);
+        expect(root.querySelector("[name=dem]").getAttribute("aria-invalid")).toBe("true");
+        expect(root.querySelector("[data-builder-create]").disabled).toBe(true);
+
+        root.querySelector("[name=dem]").dispatchEvent(new Event("change", {bubbles: true}));
+        await settle();
+        expect(document.activeElement).toBe(focusSentinel);
+        expect(validations).toBe(2);
+        expect(controller.validatedReview).toEqual(review());
+        expect(root.querySelector("[data-builder-create]").disabled).toBe(false);
+
         const first = controller.create();
+        const creationKey = controller.creationKey;
         const second = controller.create();
+        root.querySelector("[name=dem]").value = "dem-b";
+        root.querySelector("[name=dem]").dispatchEvent(new Event("change", {bubbles: true}));
         await settle();
         expect(http.request.mock.calls.filter((call) => call[0] === "/create")).toHaveLength(1);
+        expect(validations).toBe(2);
+        expect(controller.creationKey).toBe(creationKey);
+        expect(root.querySelector("[data-builder-create]").disabled).toBe(true);
+        expect([...root.querySelectorAll("select, input")].every((control) => control.disabled)).toBe(true);
         rejectCreation(Object.assign(new Error("creation failed"), {body: {error: {details: "Try again."}}}));
         await first;
         await second;
+        expect([...root.querySelectorAll("select, input")].every((control) => !control.disabled)).toBe(true);
     });
 
-    test("reloads a stale schema and requires a fresh review without losing valid choices", async () => {
+    test("only the latest overlapping validation can render review or enable Create", async () => {
+        const schema = description(false);
+        const initialValidation = deferred();
+        const changedValidation = deferred();
+        let validations = 0;
+        const http = {
+            getRqEngineToken: jest.fn().mockResolvedValue("token"),
+            request: jest.fn((url) => {
+                if (url === "/describe") { return Promise.resolve({body: schema}); }
+                validations += 1;
+                return validations === 1 ? initialValidation.promise : changedValidation.promise;
+            })
+        };
+        const root = document.querySelector("[data-config-builder]");
+        const controller = new window.ConfigBuilder(root, dependencies(http));
+        const focusSentinel = root.querySelector("[data-focus-sentinel]");
+        focusSentinel.focus();
+        const initialization = controller.init();
+        await settle();
+
+        root.querySelector("[name=dem]").value = "dem-b";
+        root.querySelector("[name=dem]").dispatchEvent(new Event("change", {bubbles: true}));
+        await settle();
+        const changedReview = Object.assign({}, review(), {dem: "dem-b"});
+        changedValidation.resolve({body: {review: changedReview}});
+        await settle();
+
+        expect(controller.validatedReview).toEqual(changedReview);
+        expect(root.querySelector("[data-builder-create]").disabled).toBe(false);
+        expect(document.activeElement).toBe(focusSentinel);
+
+        initialValidation.resolve({body: {review: review()}});
+        await initialization;
+        expect(controller.validatedReview).toEqual(changedReview);
+        expect(root.querySelector("[data-builder-review-list]").textContent).toContain("dem-b");
+        expect(document.activeElement).toBe(focusSentinel);
+    });
+
+    test.each([
+        ["unsupported schema version", (schema) => { schema.builder_description_schema_version = 99; }],
+        ["absent locale maps", (schema) => { delete schema.components_by_locale; }],
+        ["missing locale authority", (schema) => {
+            schema.components_by_locale["continental-us"] = schema.components_by_locale["continental-us"].filter((item) => item.kind !== "locale");
+        }],
+        ["dependency rendering failure", (schema) => {
+            schema.can_override_cellsize = true;
+            schema.allowed_cell_sizes = null;
+        }]
+    ])("does not validate after %s", async (_label, mutate) => {
+        const schema = description(false);
+        mutate(schema);
+        const http = {
+            getRqEngineToken: jest.fn().mockResolvedValue("token"),
+            request: jest.fn((url) => Promise.resolve({body: url === "/describe" ? schema : {review: review()}}))
+        };
+        const root = document.querySelector("[data-config-builder]");
+        const controller = new window.ConfigBuilder(root, dependencies(http));
+
+        await controller.init();
+
+        expect(http.request.mock.calls.filter((call) => call[0] === "/validate")).toHaveLength(0);
+        expect(root.querySelector("[data-builder-create]").disabled).toBe(true);
+    });
+
+    test("invalidates old responses and disables selections during description reload", async () => {
         const firstSchema = description(false);
         const refreshedSchema = Object.assign({}, description(false), {registry_revision: "registry-2"});
+        const refreshedDescription = deferred();
+        const oldValidation = deferred();
+        let descriptions = 0;
+        let validations = 0;
+        const http = {
+            getRqEngineToken: jest.fn().mockResolvedValue("token"),
+            request: jest.fn((url) => {
+                if (url === "/describe") {
+                    descriptions += 1;
+                    return descriptions === 1
+                        ? Promise.resolve({body: firstSchema})
+                        : refreshedDescription.promise;
+                }
+                validations += 1;
+                if (validations === 1 || validations === 3) {
+                    return Promise.resolve({body: {review: review()}});
+                }
+                return oldValidation.promise;
+            })
+        };
+        const root = document.querySelector("[data-config-builder]");
+        const controller = new window.ConfigBuilder(root, dependencies(http));
+        await controller.init();
+
+        root.querySelector("[name=dem]").value = "dem-b";
+        root.querySelector("[name=dem]").dispatchEvent(new Event("change", {bubbles: true}));
+        await settle();
+        const reload = controller.loadDescription(true);
+        await settle();
+        expect([...root.querySelectorAll("select, input")].every((control) => control.disabled)).toBe(true);
+
+        oldValidation.resolve({body: {review: Object.assign({}, review(), {dem: "obsolete"})}});
+        await settle();
+        expect(controller.validatedReview).toBeNull();
+        expect(root.querySelector("[data-builder-create]").disabled).toBe(true);
+
+        refreshedDescription.resolve({body: refreshedSchema});
+        await reload;
+        expect([...root.querySelectorAll("select, input")].every((control) => !control.disabled)).toBe(true);
+        expect(controller.description.registry_revision).toBe("registry-2");
+        expect(controller.validatedReview).toEqual(review());
+        expect(http.request.mock.calls.at(-1)[1].json.registry_revision).toBe("registry-2");
+    });
+
+    test("reloads stale schema, applies refreshed defaults, and validates automatically", async () => {
+        const firstSchema = description(true);
+        const demC = {
+            component_id: "dem-c", kind: "dem", label: "DEM C", description: "DEM C help",
+            default_cellsize: 90, constraints: {}
+        };
+        firstSchema.components.push(demC);
+        firstSchema.capability_graphs_by_locale["continental-us"].capabilities.dem_sources = ["dem-a", "dem-b", "dem-c"];
+        firstSchema.capability_graphs_by_locale["continental-us"].capability_defaults.dem_source = "dem-c";
+        const refreshedSchema = Object.assign({}, description(true), {registry_revision: "registry-2"});
+        refreshedSchema.capability_graphs_by_locale["continental-us"].capabilities.dem_sources = ["dem-b", "dem-a"];
+        refreshedSchema.capability_graphs_by_locale["continental-us"].capability_defaults.dem_source = "dem-a";
+        refreshedSchema.capability_graphs_by_locale["continental-us"].capabilities.allowed_model_tuples = [
+            "wbt|single|wepp_dcc52a6", "wbt|single|wepp_260803"
+        ];
         let descriptions = 0;
         const http = {
             getRqEngineToken: jest.fn().mockResolvedValue("token"),
@@ -431,15 +595,129 @@ describe("Config Builder controller", () => {
         const root = document.querySelector("[data-config-builder]");
         const controller = new window.ConfigBuilder(root, dependencies(http));
         await controller.init();
-        await controller.validate(false);
+        expect(root.querySelector("[name=dem]").value).toBe("dem-c");
+        root.querySelector("[name=watershed_representation]").value = "multiple-ofe";
+        root.querySelector("[name=watershed_representation]").dispatchEvent(new Event("change", {bubbles: true}));
+        await settle();
+        root.querySelector("[name=cellsize_override]").value = "30";
+        root.querySelector("[name=cellsize_override]").dispatchEvent(new Event("change", {bubbles: true}));
+        await settle();
         await controller.create();
 
         expect(controller.description.registry_revision).toBe("registry-2");
         expect(controller._selections().dem).toBe("dem-a");
+        expect(controller._selections().watershed_representation).toBe("single");
+        expect(controller._selections().cellsize_override).toBe(30);
+        expect(controller.validatedReview).toEqual(review());
+        expect(root.querySelector("[data-builder-create]").disabled).toBe(false);
+        expect(document.activeElement).toBe(root.querySelector("[data-builder-status]"));
+        expect(root.querySelector("[data-builder-status]").textContent).toContain("refreshed configuration is valid");
+        expect(root.querySelector("[data-builder-change-reason]").textContent).toContain("DEM A");
+        expect(root.querySelector("[data-builder-change-reason]").textContent).not.toContain("DEM B");
+        expect(root.querySelector("[data-builder-change-reason]").textContent).toContain("Single OFE");
+        expect(http.request.mock.calls.at(-1)[1].json.registry_revision).toBe("registry-2");
+    });
+
+    test("announces a removed cell-size override and validates the DEM default", async () => {
+        const firstSchema = description(true);
+        const refreshedSchema = Object.assign({}, description(true), {
+            registry_revision: "registry-2",
+            allowed_cell_sizes: [1, 2, 5, 10]
+        });
+        let descriptions = 0;
+        const http = {
+            getRqEngineToken: jest.fn().mockResolvedValue("token"),
+            request: jest.fn((url) => {
+                if (url === "/describe") {
+                    descriptions += 1;
+                    return Promise.resolve({body: descriptions === 1 ? firstSchema : refreshedSchema});
+                }
+                return Promise.resolve({body: {review: review()}});
+            })
+        };
+        const root = document.querySelector("[data-config-builder]");
+        const controller = new window.ConfigBuilder(root, dependencies(http));
+        await controller.init();
+        root.querySelector("[name=cellsize_override]").value = "30";
+        root.querySelector("[name=cellsize_override]").dispatchEvent(new Event("change", {bubbles: true}));
+        await settle();
+
+        await controller.loadDescription(true);
+
+        expect(controller._selections()).not.toHaveProperty("cellsize_override");
+        expect(root.querySelector("[name=cellsize_override]").value).toBe("10");
+        expect(root.querySelector("[data-builder-change-reason]").textContent).toContain("Advanced cell-size override");
+        expect(root.querySelector("[data-builder-change-reason]").textContent).toContain("10 metres (registered DEM default)");
+        expect(http.request.mock.calls.at(-1)[1].json.registry_revision).toBe("registry-2");
+        expect(http.request.mock.calls.at(-1)[1].json.selections).not.toHaveProperty("cellsize_override");
+    });
+
+    test("retains a description reload diagnostic without validating old choices", async () => {
+        const schema = description(false);
+        let descriptions = 0;
+        const http = {
+            getRqEngineToken: jest.fn().mockResolvedValue("token"),
+            request: jest.fn((url) => {
+                if (url === "/describe") {
+                    descriptions += 1;
+                    if (descriptions === 1) { return Promise.resolve({body: schema}); }
+                    return Promise.reject({body: {error: {details: "Registry reload failed diagnostically."}}});
+                }
+                return Promise.resolve({body: {review: review()}});
+            })
+        };
+        const root = document.querySelector("[data-config-builder]");
+        const controller = new window.ConfigBuilder(root, dependencies(http));
+        await controller.init();
+        const validationCount = http.request.mock.calls.filter((call) => call[0] === "/validate").length;
+
+        await controller.loadDescription(true);
+
+        expect(http.request.mock.calls.filter((call) => call[0] === "/validate")).toHaveLength(validationCount);
+        expect(root.querySelector("[data-builder-status]").textContent).toBe("Registry reload failed diagnostically.");
+        expect(root.querySelector("[data-builder-create]").disabled).toBe(true);
+        expect([...root.querySelectorAll("select, input")].every((control) => control.disabled)).toBe(true);
+    });
+
+    test("retains a refreshed validation diagnostic after stale creation", async () => {
+        const firstSchema = description(false);
+        const refreshedSchema = Object.assign({}, description(false), {registry_revision: "registry-2"});
+        let descriptions = 0;
+        let validations = 0;
+        const http = {
+            getRqEngineToken: jest.fn().mockResolvedValue("token"),
+            request: jest.fn((url) => {
+                if (url === "/describe") {
+                    descriptions += 1;
+                    return Promise.resolve({body: descriptions === 1 ? firstSchema : refreshedSchema});
+                }
+                if (url === "/validate") {
+                    validations += 1;
+                    if (validations === 1) { return Promise.resolve({body: {review: review()}}); }
+                    return Promise.reject({
+                        body: {
+                            errors: [{field: "dem", message: "The refreshed DEM is invalid."}],
+                            error: {details: "Refreshed proposal failed diagnostically."}
+                        }
+                    });
+                }
+                return Promise.reject({
+                    status: 409,
+                    body: {error: {code: "stale_builder_schema", details: "Reload."}}
+                });
+            })
+        };
+        const root = document.querySelector("[data-config-builder]");
+        const controller = new window.ConfigBuilder(root, dependencies(http));
+        await controller.init();
+
+        await controller.create();
+
+        expect(controller.description.registry_revision).toBe("registry-2");
         expect(controller.validatedReview).toBeNull();
         expect(root.querySelector("[data-builder-create]").disabled).toBe(true);
-        expect(document.activeElement).toBe(root.querySelector("[data-builder-status]"));
-        expect(root.querySelector("[data-builder-status]").textContent).toContain("Review and validate");
+        expect(root.querySelector("[data-builder-status]").textContent).toBe("Refreshed proposal failed diagnostically.");
+        expect(root.querySelector("[name=dem]").getAttribute("aria-invalid")).toBe("true");
     });
 
     test("successful creation identifies the run and navigates to the server config location", async () => {
@@ -456,7 +734,6 @@ describe("Config Builder controller", () => {
         const root = document.querySelector("[data-config-builder]");
         const controller = new window.ConfigBuilder(root, dependencies(http, navigate));
         await controller.init();
-        await controller.validate(false);
         await controller.create();
 
         expect(navigate).toHaveBeenCalledWith("/runs/run-7/config/");

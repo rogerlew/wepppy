@@ -66,6 +66,10 @@ def test_config_builder_template_has_one_page_accessible_contract(jinja_env: Env
         assert f'data-builder-field-error="{field}"' in rendered
     assert 'data-builder-error-summary role="alert" tabindex="-1"' in rendered
     assert 'data-builder-status role="status" aria-live="polite" tabindex="-1"' in rendered
+    assert "Review selections" not in rendered
+    assert "data-builder-validate" not in rendered
+    assert 'data-builder-review hidden' in rendered
+    assert 'data-builder-create disabled' in rendered
     assert "@media (max-width: 48rem)" in rendered
     assert 'name="config"' not in rendered
     assert 'name="filename"' not in rendered

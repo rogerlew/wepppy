@@ -38,7 +38,6 @@
             global.location.assign(location);
         };
         this.form = root.querySelector("[data-builder-form]");
-        this.validateButton = root.querySelector("[data-builder-validate]");
         this.createButton = root.querySelector("[data-builder-create]");
         this.status = root.querySelector("[data-builder-status]");
         this.summary = root.querySelector("[data-builder-error-summary]");
@@ -57,6 +56,9 @@
         this.validatedReview = null;
         this.busy = false;
         this.validationSequence = 0;
+        this.descriptionSequence = 0;
+        this.descriptionLoading = false;
+        this.creating = false;
         this.creationKey = null;
     }
 
@@ -127,7 +129,7 @@
         });
     };
 
-    ConfigBuilder.prototype._setOptions = function (field, allowedIds, announce) {
+    ConfigBuilder.prototype._setOptions = function (field, allowedIds) {
         var select = this.form.elements[field];
         var previous = select.value;
         var options = allowedIds ? allowedIds.map(function (componentId) {
@@ -146,12 +148,50 @@
         if (previous && options.some(function (component) { return component.component_id === previous; })) {
             select.value = previous;
         }
-        if (previous && select.value !== previous && announce) {
-            this.dom.setText(this.changeReason, "The previous " + select.labels[0].textContent + " choice is incompatible with the current combination and was replaced with " + select.options[select.selectedIndex].text + ".");
+    };
+
+    ConfigBuilder.prototype._selectionSnapshot = function () {
+        var snapshot = {};
+        Object.keys(FIELD_KIND).forEach(function (field) {
+            var select = this.form.elements[field];
+            snapshot[field] = select ? select.value : "";
+        }, this);
+        snapshot.mods = Array.prototype.slice.call(this.modsOptions.querySelectorAll("input:checked")).map(function (input) {
+            return input.value;
+        });
+        return snapshot;
+    };
+
+    ConfigBuilder.prototype._announceReplacements = function (previous) {
+        var messages = [];
+        Object.keys(FIELD_KIND).forEach(function (field) {
+            var oldValue = previous && previous[field];
+            var select = this.form.elements[field];
+            if (!oldValue || !select || select.value === oldValue) { return; }
+            var selected = select.options[select.selectedIndex];
+            var replacement = selected ? selected.text : "no selection";
+            messages.push("The previous " + select.labels[0].textContent + " choice is incompatible with the current combination and was replaced with " + replacement + ".");
+        }, this);
+        var previousMods = previous && Array.isArray(previous.mods) ? previous.mods : [];
+        var currentMods = Array.prototype.slice.call(this.modsOptions.querySelectorAll("input:checked")).map(function (input) {
+            return input.value;
+        });
+        if (previousMods.some(function (id) { return currentMods.indexOf(id) === -1; })) {
+            messages.push("Unavailable optional modules were removed from the proposal.");
         }
+        if (
+            previous && Object.prototype.hasOwnProperty.call(previous, "cellsize_override")
+            && this._selections().cellsize_override !== previous.cellsize_override
+        ) {
+            var dem = this.components[this.form.elements.dem.value];
+            var defaultCellsize = dem ? String(dem.default_cellsize) + " metres (registered DEM default)" : "the registered DEM default";
+            messages.push("The previous Advanced cell-size override choice is incompatible with the current combination and was replaced with " + defaultCellsize + ".");
+        }
+        this.dom.setText(this.changeReason, messages.join(" "));
     };
 
     ConfigBuilder.prototype._renderDependencies = function (announce, changedField) {
+        var previous = this._selectionSnapshot();
         var localeId = this.form.elements.locale.value;
         this._activateLocale(localeId);
         var graphAxes = {
@@ -162,7 +202,7 @@
             climate_station_database: "climate_station_databases"
         };
         Object.keys(graphAxes).forEach(function (field) {
-            this._setOptions(field, this._graphAxis(graphAxes[field]), announce);
+            this._setOptions(field, this._graphAxis(graphAxes[field]));
         }, this);
         if (changedField === "locale") {
             var graphDefaults = this._graphDefaults();
@@ -192,23 +232,24 @@
                 return item.backend === backend && item.binary === binary && item.representation === id;
             });
         });
-        this._setOptions("watershed_representation", representationIds, announce);
+        this._setOptions("watershed_representation", representationIds);
         var representation = this.form.elements.watershed_representation.value;
         var binaryIds = this._graphAxis("wepp_binaries").filter(function (id) {
             return tuples.some(function (item) {
                 return item.backend === backend && item.representation === representation && item.binary === id;
             });
         });
-        this._setOptions("wepp_binary", binaryIds, announce);
+        this._setOptions("wepp_binary", binaryIds);
         binary = this.form.elements.wepp_binary.value;
         var backendIds = this._graphAxis("delineation_backends").filter(function (id) {
             return tuples.some(function (item) {
                 return item.backend === id && item.representation === representation && item.binary === binary;
             });
         });
-        this._setOptions("delineation_backend", backendIds, announce);
-        this._renderMods(this._graphAxis("mods"), announce);
+        this._setOptions("delineation_backend", backendIds);
+        this._renderMods(this._graphAxis("mods"), false);
         this._renderCellsize();
+        if (announce) { this._announceReplacements(previous); }
     };
 
     ConfigBuilder.prototype._renderMods = function (allowedIds, announce) {
@@ -333,11 +374,17 @@
     };
 
     ConfigBuilder.prototype._updateActions = function () {
-        this.validateButton.disabled = !this.description || this.busy;
         this.createButton.disabled = !this.validatedReview || this.busy;
     };
 
+    ConfigBuilder.prototype._setSelectionControlsDisabled = function (disabled) {
+        this.form.querySelectorAll("select, input").forEach(function (control) {
+            control.disabled = disabled;
+        });
+    };
+
     ConfigBuilder.prototype.validate = function (focusErrors) {
+        if (!this.description || this.descriptionLoading) { return Promise.resolve(); }
         var sequence = ++this.validationSequence;
         this.validatedReview = null;
         this.creationKey = null;
@@ -385,7 +432,9 @@
     ConfigBuilder.prototype.create = function () {
         if (this.busy || !this.validatedReview) { return Promise.resolve(); }
         this.creationKey = this.creationKey || this._newCreationKey();
+        this.creating = true;
         this.busy = true;
+        this._setSelectionControlsDisabled(true);
         this._setStatus("Creating project…", true);
         this._updateActions();
         return this._request(this.root.dataset.creationUrl, {
@@ -401,6 +450,7 @@
             this._setStatus("Project " + result.body.run_id + " was created. Opening it now…", true);
             this.navigate(result.body.location);
         }.bind(this)).catch(function (error) {
+            this.creating = false;
             this.busy = false;
             this._updateActions();
             if (error.status === 409 && error.body && error.body.error && error.body.error.code === "stale_builder_schema") {
@@ -408,9 +458,12 @@
                 this.review.hidden = true;
                 this.creationKey = null;
                 return this.loadDescription(true).then(function () {
-                    this._setStatus("Registered choices changed. Review and validate the refreshed selections before creating.", true);
+                    if (this.validatedReview) {
+                        this._setStatus("Registered choices changed. The refreshed configuration is valid and ready for review.", true);
+                    }
                 }.bind(this));
             }
+            this._setSelectionControlsDisabled(false);
             this._showErrors(error.body && error.body.errors, true);
             this._setStatus((error.body && error.body.error && error.body.error.details) || "Project creation failed; your selections were retained.", true);
             return undefined;
@@ -418,10 +471,18 @@
     };
 
     ConfigBuilder.prototype.loadDescription = function (preserve) {
+        var descriptionSequence = ++this.descriptionSequence;
+        ++this.validationSequence;
+        this.descriptionLoading = true;
         this.busy = true;
         this.validatedReview = null;
+        this.creationKey = null;
+        this.review.hidden = true;
+        this._clearErrors();
+        this._setSelectionControlsDisabled(true);
         this._updateActions();
         return this._request(this.root.dataset.descriptionUrl).then(function (result) {
+            if (descriptionSequence !== this.descriptionSequence) { return undefined; }
             var prior = preserve && this.description ? this._selections() : null;
             this.description = result.body;
             if (
@@ -447,7 +508,7 @@
                     ? "continental-us"
                     : Object.keys(this.localeComponents)[0]);
             this._activateLocale(initialLocale);
-            this._setOptions("locale", null, false);
+            this._setOptions("locale", null);
             this.form.elements.locale.value = initialLocale;
             this._activateLocale(initialLocale);
             [
@@ -460,29 +521,68 @@
                 ["climate", "climate_datasets"],
                 ["climate_station_database", "climate_station_databases"]
             ].forEach(function (entry) {
-                this._setOptions(entry[0], this._graphAxis(entry[1]), false);
+                this._setOptions(entry[0], this._graphAxis(entry[1]));
             }, this);
-            var requested = prior || this.description.default_selections || {};
-            Object.keys(requested).forEach(function (field) {
+            var graphDefaults = this._graphDefaults();
+            var defaults = Object.assign({}, this.description.default_selections || {}, {
+                dem: graphDefaults.dem_source,
+                soil: graphDefaults.soil_dataset,
+                landuse: graphDefaults.landuse_dataset,
+                climate: graphDefaults.climate_dataset,
+                climate_station_database: graphDefaults.climate_station_database,
+                delineation_backend: graphDefaults.delineation_backend,
+                watershed_representation: graphDefaults.watershed_representation,
+                wepp_binary: graphDefaults.wepp_binary
+            });
+            var priorModelIsValid = !prior || this._modelTuples().some(function (item) {
+                return item.backend === prior.delineation_backend
+                    && item.representation === prior.watershed_representation
+                    && item.binary === prior.wepp_binary;
+            });
+            var modelFields = ["delineation_backend", "watershed_representation", "wepp_binary"];
+            Object.keys(defaults).forEach(function (field) {
                 var select = this.form.elements[field];
-                var value = requested[field];
+                if (!select) { return; }
+                var requestedValue = prior && prior[field];
+                if (!priorModelIsValid && modelFields.indexOf(field) !== -1) {
+                    requestedValue = null;
+                }
+                var value = requestedValue || defaults[field];
+                if (requestedValue && !Array.prototype.some.call(select.options, function (option) { return option.value === requestedValue; })) {
+                    value = defaults[field];
+                }
                 if (select && Array.prototype.some.call(select.options, function (option) { return option.value === value; })) {
                     select.value = value;
                 }
             }, this);
-            this._renderDependencies(Boolean(preserve), preserve ? null : "locale");
+            this._renderDependencies(false, preserve ? null : "locale");
+            if (
+                prior && Object.prototype.hasOwnProperty.call(prior, "cellsize_override")
+                && this.description.can_override_cellsize
+                && this.description.allowed_cell_sizes.indexOf(prior.cellsize_override) !== -1
+            ) {
+                this.overrideSelect.value = String(prior.cellsize_override);
+            }
+            if (preserve) { this._announceReplacements(prior); }
+            this.descriptionLoading = false;
+            this._setSelectionControlsDisabled(false);
             this.busy = false;
-            this._setStatus("Registered choices loaded. Review selections to validate the complete configuration.", false);
             this._updateActions();
+            return this.validate(false);
         }.bind(this)).catch(function (error) {
+            if (descriptionSequence !== this.descriptionSequence) { return undefined; }
+            this.descriptionLoading = false;
             this.busy = false;
+            this._setSelectionControlsDisabled(true);
             this._setStatus((error.body && error.body.error && error.body.error.details) || "Registered choices could not be loaded.", true);
             this._updateActions();
+            return undefined;
         }.bind(this));
     };
 
     ConfigBuilder.prototype.init = function () {
         this.dom.delegate(this.form, "change", "select, input", function (event) {
+            if (this.descriptionLoading || this.creating) { return; }
             this.validatedReview = null;
             this.creationKey = null;
             this.review.hidden = true;
@@ -494,7 +594,6 @@
             }
             this.validate(false);
         }.bind(this));
-        this.validateButton.addEventListener("click", function () { this.validate(true); }.bind(this));
         this.createButton.addEventListener("click", function () { this.create(); }.bind(this));
         return this.loadDescription(false);
     };

@@ -4,11 +4,10 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-27 20:31 UTC
-**Current phase**: amendment 6 implementation
-**Last updated**: 2026-08-28 20:03 UTC
-**Next milestone**: implement and validate the exact interaction boundary from
-checkpoint `8e62aefba55349ae2ee94c4faf27e83a99417dfa`; merge and production remain
-reserved
+**Current phase**: amendment 6 WP12 handoff
+**Last updated**: 2026-08-28 20:42 UTC
+**Next milestone**: parent WP12 scope comparison and promotion gate; merge and
+production remain reserved
 **Package security impact**: `high` (historical WP12D scope)
 **Amendment 6 security impact**: `low`
 **Amendment 6 dedicated security review**: `not required`; no new input,
@@ -39,8 +38,9 @@ PC-24 owns `.cfg` locale normalization and run-UI authority parity.
 - [x] Obtain two independent READY contract reviews, disposition findings, and
   commit standalone amendment `PC-13/WP12D-20260828-6` before implementation as
   `8e62aefba55349ae2ee94c4faf27e83a99417dfa` (2026-08-28 20:03 UTC).
-- [ ] Remove Review Selections, automatically validate after successful option
-  hydration and stale refresh, retain change validation, and pass focused gates.
+- [x] Remove Review Selections, automatically validate after successful option
+  hydration and stale refresh, retain change validation, and pass focused gates
+  (2026-08-28 20:42 UTC).
 - [x] Ratify `PC-24/WP12D-20260828-5` exactly as documented after independent
   advisory contract reviews (2026-08-28 16:29 UTC).
 - [x] Obtain fresh binding correctness, governance, and security READY reviews
@@ -59,6 +59,9 @@ PC-24 owns `.cfg` locale normalization and run-UI authority parity.
 
 ### Ready / Handoff
 
+- [x] Amendment 6 implementation correctness is independently READY with High
+  0 / Medium 0 / Low 0; WP07, PC-13, WP12D, and WP12 status remains unchanged,
+  and no push or deployment is authorized (2026-08-28 20:42 UTC).
 - [x] Advisory correctness and governance re-reviews are READY FOR RATIFICATION;
   correctness reports High 0 / Medium 0 / Low 0 and governance retains only the
   deliberately pending exact operator ratification (2026-08-28 19:58 UTC).
@@ -72,6 +75,14 @@ PC-24 owns `.cfg` locale normalization and run-UI authority parity.
 
 ### Done
 
+- [x] Removed the manual Config Builder Review Selections action; initial
+  hydration, user changes, and successful stale-registry reloads now validate
+  automatically, with latest-response, diagnostics, focus, replacement, and
+  active-Create isolation regressions (2026-08-28 20:42 UTC).
+- [x] Passed 18 focused and 817 complete frontend tests, frontend lint, 8
+  targeted rendered-template tests, the complete Python gate with 7,269 passed
+  and 63 skipped, generated-bundle parity, scoped documentation lint, and diff
+  checks (2026-08-28 20:42 UTC).
 - [x] Pushed and deployed exact candidate `09ad4fbde` only to `forest`, kept
   image `6ac7e7103046`, and restored all three healthy development services
   after the reader-floor exercise (2026-08-28 18:42 UTC).

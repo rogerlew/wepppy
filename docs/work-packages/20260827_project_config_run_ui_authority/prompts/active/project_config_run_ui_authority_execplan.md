@@ -163,7 +163,7 @@ migrated.
 - [x] (2026-08-28 18:42Z) Apply an acknowledged schema-v3 refresh to an
   isolated run copy, reopen its new identity under reader floor `83165fd1b`
   with byte-identical config/manifest, and restore the healthy candidate.
-- [ ] (2026-08-28 19:44Z) Complete bounded Builder UX amendment
+- [x] (2026-08-28 20:42Z) Complete bounded Builder UX amendment
   `PC-13/WP12D-20260828-6`: commit its reviewed canonical checkpoint, remove the
   redundant Review Selections action, validate once after option hydration,
   retain change-triggered validation, and pass focused UI/documentation gates.
@@ -176,6 +176,10 @@ migrated.
 - [x] (2026-08-28 20:03Z) Obtain binding correctness/governance READY verdicts
   and commit the exact six-document standalone checkpoint as
   `8e62aefba55349ae2ee94c4faf27e83a99417dfa` before implementation edits.
+- [x] (2026-08-28 20:42Z) Pass 18 focused and 817 complete frontend tests, 8
+  targeted and 7,269 complete Python tests with 63 skipped, frontend lint,
+  generated-bundle parity, documentation, and diff gates; obtain independent
+  implementation correctness READY with High 0, Medium 0, and Low 0.
 
 ## Surprises & Discoveries
 
@@ -435,11 +439,15 @@ reviewed, committed, and accepted on exact host `forest`. Candidate
 `09ad4fbde` passed the real Europe preset, all five graph identities, unmocked
 climate providers, all 114 U.S. land-cover availability checks, representative
 full land-cover builds, acknowledged refresh, reader-floor rollback, byte
-preservation, and candidate restore on the unchanged image. WP12D is complete;
-parent WP12 retains the scope comparison, merge, and production promotion
-gates. A bounded late PC-13 Builder interaction amendment is in progress and
-does not reopen locale/runtime authority or authorize production. Production
-deployment remains excluded from WP12D.
+preservation, and candidate restore on the unchanged image. The bounded late
+PC-13 Builder interaction amendment is implemented: Review Selections is gone,
+the latest hydrated or changed proposal validates automatically without moving
+focus, stale registry reloads preserve or visibly replace selections, and an
+active Create request cannot be duplicated through a concurrent form change.
+Its focused and complete gates pass, and independent implementation correctness
+review is READY with no findings. WP07, PC-13, WP12D, and WP12 retain their
+existing status; parent WP12 retains the scope comparison, merge, and production
+promotion gates. Production deployment remains excluded from WP12D.
 
 ## Context and Orientation
 

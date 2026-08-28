@@ -408,11 +408,14 @@ selected locale chooses both `capability_graphs_by_locale` and
 `components_by_locale`; those server descriptions are the sole source of DEM,
 soil, land-cover, climate, and CLIGEN station-database options and defaults.
 The controller posts the description version with exact validation and
-creation JSON. Only the validation response supplies review content. A schema
-`409` reloads the description and disables creation until another review. The
-controller keeps one cryptographic idempotency key per validated creation
-attempt and ignores duplicate clicks while a request is active. Jest coverage
-lives in `controllers_js/__tests__/config_builder.test.js`.
+creation JSON. After description options/defaults settle, and after every user
+change, it automatically validates the complete proposal; only that latest
+validation response supplies review content or enables Create. A schema `409`
+disables selection controls while reloading, preserves compatible choices,
+applies registered defaults to invalidated choices, and automatically validates
+the refreshed proposal. The controller keeps one cryptographic idempotency key
+per validated creation attempt and ignores duplicate clicks while a request is
+active. Jest coverage lives in `controllers_js/__tests__/config_builder.test.js`.
 
 ## Run-Scoped URL Construction (slug-first, no `pup=` injection)
 
