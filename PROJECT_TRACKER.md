@@ -405,6 +405,29 @@ When resuming Kubernetes work:
 
 ## 🚧 In Progress
 
+### Project Config Run UI Authority (WP12D)
+
+**Started**: 2026-08-27
+
+**Priority/Security**: Critical / `high`
+
+**Link**: [docs/work-packages/20260827_project_config_run_ui_authority/](docs/work-packages/20260827_project_config_run_ui_authority/)
+
+**Scope**: Make effective `.cfg` locale authoritative without locale-bearing
+Interface links. Recognized legacy base profiles use the live Builder graph for
+landuse, soil, and climate controls; Builder schema-v2/v3 projects remain frozen
+to their stored graph. Congruent Builder-source schema-v3 projects may adopt a
+selection-preserving same-locale envelope refresh only after an authorized end
+user reviews and acknowledges the provenance/stability warning; schema-v2
+refresh is unavailable. Normalize exact Canada/Portland/RHEM/Tenerife/US config
+identity without silent migration; production remains reserved for WP12.
+
+**Status**: Amendment `PC-24/WP12D-20260827-3` was explicitly ratified on
+2026-08-27. Canonical contract amendments passed binding correctness,
+governance, and security review with no unresolved High or Medium findings.
+Config and implementation edits remain blocked until the standalone checkpoint
+commit exists.
+
 ### Project Config Builder Locale Expansion (WP12C)
 
 **Started**: 2026-08-27

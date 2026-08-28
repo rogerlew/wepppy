@@ -42,6 +42,36 @@
 - Use `WCHttp` and `url_for_run()` for every in-run endpoint (`rq-engine/api/*`, `tasks/*`, `query/*`, `resources/*`). Never hardcode `/weppcloud/...` or bare paths.
 - Include `form` when posting FormData so CSRF tokens are attached automatically.
 
+### Project-config run authority and refresh
+
+- Landuse, soil, and climate controls MUST render the resolved run authority
+  supplied by the server. Their controller payloads MUST submit the same stable
+  IDs; frontend catalogs MUST NOT broaden the server graph.
+- A persisted current value outside authority renders once as disabled current
+  state while every authorized recovery choice remains operable. An exact-
+  current rebuild may proceed; selecting a different unsupported value must
+  surface the server's diagnostic refusal.
+- The project-config update panel supports additive, capability-refresh, and
+  combined previews. It MUST render every delta row and preserved project
+  selection supplied by preview; availability alone MUST NOT expose or invent
+  the delta.
+- Capability refresh MUST show the server-provided exact versioned warning next
+  to a programmatically labeled, initially unchecked checkbox. Apply stays
+  disabled until checked. The checkbox resets on preview load, stale/error,
+  modal close, and success, and MUST NOT persist in local/session storage.
+- Apply payload shape follows preview: always `preview_id`; additive trigger
+  only when additions exist; acknowledgment only when a capability delta
+  exists. The controller MUST NOT retain an acknowledgment across a new
+  preview ID.
+- After terminal job failure, the controller rechecks availability and compares
+  preview prior/resulting digests with `current_digest` and `last_update`. It
+  announces exactly `not applied`, `committed/recovered`, or an explicit
+  indeterminate diagnostic instead of hiding a recovered commit behind a
+  generic failure.
+- An exact latest-preview idempotent HTTP 200 result is terminal success and
+  MUST NOT start polling for a nonexistent new job. HTTP 202 continues through
+  the normal redundant StatusStream/poll path.
+
 ### Field identity and round trip
 
 - DOM `id`, submitted `name`, option token, parser key, persisted attribute, and

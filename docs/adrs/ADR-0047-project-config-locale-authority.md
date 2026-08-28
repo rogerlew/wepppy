@@ -24,15 +24,17 @@ Previously, Builder had one partial locale family and flattened capabilities
 used coarse dataset lists. After WP12B, every shipped runtime locale token is
 classified by a canonical typed profile, supported Builder profiles resolve a
 complete dependency closure, and generated configs store separate stable
-dataset and method capability axes. Runtime views and paired mutation endpoints
-consume the stored per-project authority.
+dataset and method capability axes. Flattened schema-v2/schema-v3 runtime views
+and paired mutation endpoints consume the stored per-project authority.
 
 ## Decision
 
 Retain `continental-us` as a durable profile ID and normalize it to the same
 schema as every locale profile. Map profiles to existing runtime locale tokens;
 do not rename stable IDs to tokens. Use the current registry for Builder views
-and the flattened config for created-run views. Do not migrate existing runs.
+and the flattened config for created-run views. WP12D later adds the bounded
+non-flattened legacy live-authority and acknowledged-refresh exceptions without
+migrating existing runs.
 
 Only explicitly supported and Forest-validated profiles are Builder-selectable.
 Inventory-only or specialized profiles remain explicit but unavailable rather
@@ -48,8 +50,10 @@ radios and landuse/soil workflows accurately follow their selected inputs.
 ## Alternatives Considered
 
 Keeping template conditionals was rejected because hidden controls and server
-acceptance can diverge. Reading the live registry from run pages was rejected
-because registry revisions would retroactively change existing projects.
+acceptance can diverge. Reading the live registry implicitly from flattened run
+pages was rejected because registry revisions would retroactively change
+existing projects; WP12D preserves that rule while allowing non-flattened
+legacy pages and an explicit acknowledged stored-envelope refresh.
 Treating every shipped config token as a supported Builder locale was rejected
 because presets demonstrate deployed behavior but not a validated cross-product.
 
@@ -256,3 +260,111 @@ run mutation contain this risk. A candidate must first deploy with creation
 disabled and prove all five stored graph contracts. Only that proven revision
 or a newer compatible reader is a valid rollback target after the first
 expanded-profile project is created.
+
+## WP12D Decision Amendment - Effective Config and Refresh Authority
+
+### Decision Provenance
+
+- **Decision Venue**: active Codex development session, 2026-08-27 22:23 UTC.
+- **Participants Present**: project operator and Codex.
+- **Decision Owner**: project operator.
+- **Ratified Amendment**: `PC-24/WP12D-20260827-3`.
+- **Implementer**: Codex.
+
+### Change Summary
+
+Before this amendment, shipped configs could inherit or carry incomplete locale
+identity, recognized non-flattened runs used independent domain catalogs, and a
+flattened capability graph was permanently frozen. After this amendment, exact
+shipped configs resolve the normalized locale values below, five recognized
+legacy base locales share the current Builder authority for the scoped
+landuse/soil/climate surfaces, and eligible Builder-source schema-v3 projects
+may deliberately replace only their same-locale capability envelope after the
+versioned acknowledgment. Stored authority remains frozen by default and every
+project selection remains unchanged.
+
+### Decision
+
+Locale is executable configuration owned by effective `.cfg`, not Interface
+links, query state, registry labels, or persisted `Ron._locales`. Shared
+defaults supply historical Continental US. Exact Canada, Portland, RHEM,
+Tenerife, Turkey, established US, and general configs override or state their
+canonical composition. Legacy project-local configs retain explicit locale and
+receive non-persisting `["us"]` only when locale is absent; files are never
+rewritten.
+
+A recognized non-flattened single-base `us`, `eu`, `canada`, `au`, or `earth`
+run uses the current Builder graph for landuse, soil, and climate presentation,
+discovery, and submission. Flattened schema-v2/schema-v3 projects remain frozen
+to stored authority. Flattened no-capability/schema-v1 and non-Builder/overlay/
+RHEM modes retain their compatibility catalogs.
+
+An owner/Admin/Root user may explicitly refresh a congruent Builder-source
+schema-v3 project's same-locale capability envelope. The user must preview the
+complete delta and accept the versioned warning that strict provenance
+continuity is diminished and Preview/unstable features may be exposed. Refresh
+preserves all project selection defaults, mods, and the climate station runtime
+selector. If a selection no longer fits, refresh is unavailable rather than
+silently substituting the locale's current default. Schema-v2 and preset-source
+refresh remain unavailable.
+
+### Rationale and Rejected Alternatives
+
+Strictly immutable stored graphs maximize creation-time reproducibility but
+prevent an old project from deliberately adopting new maps or capabilities.
+Always-live stored authority maximizes on-demand access but silently changes
+modeling behavior and erases the distinction between creation and later use.
+The selected policy freezes by default, copies current authority only after an
+explicit versioned acknowledgment, appends a reversible provenance record, and
+freezes again.
+
+Locale-bearing Interface links were rejected because they create a second
+authority and do not help existing runs. Replacing project selections with
+current Builder defaults was rejected because it could silently change Daymet
+to Vanilla or alter the model tuple. Retaining an incompatible removed default
+inside the refreshed graph was rejected because it would invalidate graph
+closure. Silent migration, background refresh, and capability rollback UI were
+also rejected.
+
+### Parameterization and Structural Evolution
+
+The parameterization change is the explicit locale normalization: shared US;
+Canada token correction without changing its global datasets; canonical
+Portland/RHEM/Tenerife/Turkey identity; and the exact Turkey supported-non-
+Builder profile. Dataset lists, scientific formulas, provider algorithms, and
+Builder defaults do not change in WP12D.
+
+The exact old-to-new deltas are: shared `_defaults.cfg` absent to `['us']`;
+three Canada configs `['earth']` to `['canada']`; five Portland configs absent
+to `['us', 'portland']`; `rhem_rap.cfg` absent to `['rhem']`; `yasin.cfg`
+absent to `['turkey']`; and two Tenerife configs `['tenerife', 'eu']` to
+`['eu', 'tenerife']`. The seven named established/general US configs listed in
+the canonical contract change from absent to explicit `['us']`.
+
+Schema-v3 structure authorization is append-only. A deterministic structural
+hash includes axes, relations, and per-dataset method defaults but excludes
+project `capability_defaults`, dynamic provider/binary identity, and the binary
+member of model tuples. Current and `280cf7e84` share one production identity;
+WP12D uses a test-only distinct pair to prove evolution mechanics. The first
+real map-axis change requires its own ratified identities and reader-first
+Forest gate.
+
+### Risk, Evidence, and Rollback
+
+The main risks are broadening an old run through an unsafe fallback, resetting
+user selections, accepting an injected self-consistent graph, or rolling back
+to a reader that cannot understand a refreshed structure. Explicit 409/503
+diagnostics, selection-preserving validation, append-only known structures,
+auth-before-resolution, exact preview binding, journal recovery, and direct
+paired-boundary tests contain those risks.
+
+WP12D first deploys a reader floor with the refresh writer absent and existing
+additive behavior unchanged. Forest then validates the writer with a real
+provider/binary refresh and rolls back only to that compatible reader floor.
+Reader `187a856d4` is supported only before refresh exposure. Production remains
+owned by WP12.
+
+Evidence is recorded in
+`docs/work-packages/20260827_project_config_run_ui_authority/`, including the
+128-config inventory, surface matrix, ratified contract decision, binding
+reviews, regression results, and exact-host Forest acceptance evidence.

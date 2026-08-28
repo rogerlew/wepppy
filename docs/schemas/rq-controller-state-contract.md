@@ -1424,6 +1424,13 @@ value semantics where classification rasters are expected).
   - clients MUST treat transport-level retries as potentially non-idempotent and
     re-read `pipeline`/`readiness` before retrying.
 
+Project-config update apply has an additional preview-bound retry rule. Only
+the latest amendment's same non-null `preview_id` with matching current/result
+digest returns idempotent success; it returns HTTP 200 without enqueue. A
+different/null/non-latest ID is stale, and a matching ID with digest mismatch
+is diagnostically unavailable. Descriptors MUST advertise both the ordinary
+HTTP 202 `job_id` result and the exact HTTP 200 recovered-result shape.
+
 ## Operation Defaults Payload
 
 ```json
@@ -1815,6 +1822,56 @@ value semantics where classification rasters are expected).
   }
 }
 ```
+
+## Project Config Locale and Capability Authority
+
+For the landuse, soil, and climate operations changed by WP12D, controller
+schemas, endpoint schemas/defaults/errors, list-endpoint operation documents,
+pipeline, and readiness MUST derive choices from the same resolved run
+authority that paired mutations/builds enforce.
+
+Authority classification occurs before discovery:
+
+- complete flattened schema-v2/schema-v3 uses validated stored authority;
+- flattened no-capability/schema-v1 retains established compatibility without
+  live registry consultation;
+- non-flattened effective locale `us`, `eu`, `canada`, `au`, or `earth` uses
+  the matching current Builder graph; and
+- non-Builder, overlay, Turkey, and RHEM retain localized catalogs.
+
+Discovery MUST NOT advertise a stable/runtime value that mutation rejects. A
+different unsupported selection fails before NoDb mutation, timestamp removal,
+file write, or enqueue. One persisted outside-authority current value may be
+described as disabled exact-current and rebuilt unchanged.
+
+Invalid non-flattened locale advertises/returns `409 locale_authority_invalid`.
+A required unavailable Builder registry advertises/returns `503
+builder_registry_error` with `Retry-After: 5`. Both use canonical diagnostic
+`details` and `error_id`, and auth/run-access errors retain precedence.
+
+Project-config update availability is read-only and returns nullable
+`update_kind`, `acknowledgment_required`, `current_digest`, and nullable
+`last_update`; it never includes the graph delta. Preview returns complete
+additions, deterministic resulting digest, and nullable capability-refresh
+detail. Apply request shape follows the preview: `preview_id` always, trigger
+only for additions, and exact versioned acknowledgment only for a capability
+delta. Missing acknowledgment returns `400
+capability_refresh_acknowledgment_required`; drift returns `409
+stale_config_preview` before reservation.
+
+When non-null, `capability_refresh` MUST use the exact project-owned config
+contract section 13.1 schema: locale/profile tokens, preserved selections,
+acknowledgment, prior/resulting graph/structure/provider/binary/parent-chain
+identities, and typed sorted changes with null-preserving before/after and
+support-state metadata. Endpoint schemas/defaults/errors, operation documents,
+pipeline/readiness descriptors, and runtime payloads MUST preserve those exact
+required members, types, nulls, and deterministic ordering; an untyped object
+placeholder is insufficient.
+
+`last_update` is null or `{sequence, kind, preview_id, prior_sha256,
+resulting_sha256}` with historical missing kind/preview inferred as
+`additive`/JSON `null`. Terminal job failure is reconciled against these fields
+as not applied, committed/recovered, or explicitly indeterminate.
 
 ## Caching And Conditional Requests
 - Endpoints SHOULD return `ETag`.

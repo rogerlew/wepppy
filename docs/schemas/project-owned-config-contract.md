@@ -49,11 +49,13 @@ current shared-config behavior.
   reproducibility.
 - Automatically rewriting existing projects.
 - Providing a general fall-forward config migration engine.
-- Dynamically recomposing locale or component fragments whenever an existing
-  project is opened.
+- Automatically recomposing or refreshing a flattened project's stored locale
+  or capability envelope when it is opened. WP12D's non-flattened legacy live-
+  authority mode is the bounded exception.
 - Removing shared named configs or their legacy fallback path.
-- Standardizing how preexisting persisted capability selections affect UI
-  visibility, rebuild eligibility, or model routing.
+- Standardizing how preexisting persisted selections affect surfaces outside
+  WP12D's enumerated landuse, soil, and climate visibility/rebuild boundary or
+  changing model routing.
 
 ## 4. Terminology
 
@@ -174,8 +176,57 @@ applicable update and MUST NOT mutate the project. Once an added value is
 written, later source changes MUST NOT alter it. An additive update does not
 increment the config schema version.
 
-Overwrite and removal updates are reserved for a future contract. The version
-1 endpoint, preview, and job MUST reject them.
+Ordinary additive updates remain merge-only. The one bounded overwrite
+exception is an explicitly acknowledged capability-authority refresh for a
+complete schema-v3 Builder project. Schema-v2, schema-v1, no-capability,
+preset-source, overlay, specialized, RHEM, malformed, and incongruent projects
+MUST remain refresh-unavailable.
+
+A refresh MUST use the same public locale-to-graph resolver as Builder
+description/creation and recognized legacy live authority. It replaces only
+the current same-locale capability envelope: axes, relations, per-dataset
+method defaults, provider revision, binary revisions, and structural identity.
+It MUST preserve every `capability_defaults` value, `[nodb] mods`, and
+`[climate] cligen_db` exactly. Preserved selections MUST remain valid in the
+current envelope; otherwise preview returns `409 config_update_unavailable`
+with diagnostic stable IDs and performs no substitution, reservation, write,
+or enqueue.
+
+Refresh eligibility requires exact congruence between `[general] locales`, the
+one stored graph locale, `capability_defaults.locale_profile`, manifest
+`selections.locale`, manifest `selections.capability_profile`, and every
+selection-bearing manifest/config value. The manifest MUST have
+`source_kind = "builder"`. Locale never changes through refresh.
+
+Availability is read-only. Preview MUST bind the complete delta, current and
+resulting config digests, preserved project selections, warning revision, and
+prior/resulting graph identities to one opaque `preview_id`. Its
+`update_kind` is exactly `additive`, `capability_refresh`, or `combined`.
+The opaque ID's deterministic binding input is exactly the current config
+bytes, current manifest bytes, complete additions value, complete nullable
+`capability_refresh` object, and warning revision. Omitting any of these inputs
+is non-conformant.
+Capability or combined preview MUST display this exact initially unchecked
+acknowledgment:
+
+> I understand that refreshing capability authority changes this project's
+> modeling envelope, diminishes strict provenance continuity with its original
+> configuration, and may expose Preview or otherwise unstable features.
+
+Apply MUST remain disabled until checked. Browser and direct API apply MUST
+send `capability_acknowledgment = {"accepted": true, "revision":
+"PC-24-capability-refresh-v1"}` exactly when the preview has a capability
+delta. `preview_id` is always required. The additive `{section, option}`
+trigger is required only when additions exist. Missing, false, or mismatched
+acknowledgment fails with `400 capability_refresh_acknowledgment_required`
+before reservation. Config, manifest, graph, warning, or delta drift fails with
+`409 stale_config_preview`.
+
+The browser MUST reset acknowledgment on every preview load, stale/error
+response, modal close, and successful apply. No acknowledgment state is stored
+client-side. Refresh is never automatic, on-open, or background migration.
+Other overwrite, removal, locale-change, mod-change, backend-change, and
+representation-change updates remain outside this contract.
 
 ## 6. Resolution Modes
 
@@ -225,6 +276,15 @@ shared defaults.
 This mode preserves any existing manually or historically copied project-local
 configs.
 
+For non-flattened legacy run-control authority, locale is read from this exact
+effective defaults-plus-local chain rather than persisted `Ron._locales`.
+When the complete project-local chain omits `[general] locales`, the reader
+uses non-persisting compatibility value `["us"]`; it MUST NOT rewrite any run
+file. An explicit empty, unknown, duplicate, multiple-base, or incompatible
+composition fails with `409 locale_authority_invalid`. An explicit historical
+value remains authoritative, including a Canada project that explicitly says
+`["earth"]`.
+
 ### 6.3 Shared fallback mode
 
 When no project-local config exists, the loader MUST retain current behavior:
@@ -236,6 +296,23 @@ When no project-local config exists, the loader MUST retain current behavior:
 
 Missing or malformed shared files retain their existing explicit failure
 behavior. The new resolver MUST NOT mask those failures.
+
+Shared `_defaults.cfg` supplies historical `[general] locales = ["us"]`.
+Named configs override it for Canada, Portland, RHEM, Tenerife, Turkey, and
+other explicitly specialized compositions. The effective shared-defaults-plus-
+named-config locale is the non-flattened run's locale authority; link state,
+request query, config labels, feature-registry metadata, and persisted
+`Ron._locales` MUST NOT override it. Locale-bearing query/config-token creation
+overrides fail before directory publication or controller initialization with
+HTTP 400 `project_config_validation_failed` in the canonical envelope. This
+does not reject Config Builder's typed, server-validated locale selection,
+which writes `[general] locales` through the flattened resolver rather than a
+legacy query/config-token override.
+
+Flattened projects MUST be classified before this legacy locale path. A
+flattened config without capability authority and a schema-v1 project retain
+their existing compatibility behavior without new locale validation or live-
+registry consultation.
 
 ### 6.4 Nested project and PUP authority
 
@@ -302,6 +379,26 @@ rejected for flattened creation rather than silently persisted. Authentication,
 CAPTCHA, CSRF, routing, and transport fields are never configuration overrides.
 This narrowing applies only when the flattened writer is enabled; it MUST NOT
 silently change legacy project-creation behavior.
+
+Named configs own their runtime locale through effective `.cfg`, never through
+their Interface link. Shared defaults and shipped configs MUST use this exact
+normalization: shared `_defaults.cfg` and `0`, `13`, `baer`, `reveg`,
+`reveg-mofe`, `reveg-10m-mofe`, and `general` resolve to `["us"]`; the three
+Canada configs (`canada`, `canada-wbt`, and `canada-wbt-mofe`) resolve to
+`["canada"]`; `portland-10-mofe`, `portland-disturbed`,
+`portland-disturbed9003`, `portland-disturbed-simfire-eagle`, and
+`portland-disturbed-simfire-norse` resolve to `["us", "portland"]`;
+`rhem_rap` resolves to `["rhem"]`; `yasin` resolves to
+`["turkey"]`; and both Tenerife configs resolve in canonical base-first order
+`["eu", "tenerife"]`. The Canada change MUST NOT change its global DEM, soil,
+land-cover, climate, or station-database selections. These names refer to the
+corresponding `.cfg` files.
+
+The canonical Turkey profile has stable ID/runtime token `turkey`, label
+`Turkey`, base classification, `supported_non_builder` support, source revision
+`WP12D-1`, no overlay metadata, and empty closed Builder dataset axes. Yasin's
+fixed maps remain config-owned and `enable_landuse_change = false`; no Turkey
+Builder graph or invented dataset stable ID is permitted.
 
 ### 7.2 Builder creation
 
@@ -583,6 +680,14 @@ Interfaces page, its descriptions, and its named-config creation links MUST
 remain available. The builder MUST NOT replace, reinterpret, or redirect an
 Interfaces link.
 
+Both Config Builder return/navigation links MUST remain plain `/interfaces/`.
+The Interfaces page MUST NOT gain locale query grammar, locale filtering, card
+remapping, form fields, or locale-bearing config tokens. Its existing cards,
+role visibility, order, and actions remain unchanged. Builder creation still
+submits its typed selected locale and writes its runtime token into flattened
+`[general] locales`; that payload does not authorize locale-bearing established
+Interface links.
+
 Version 1 MUST use one page with clearly ordered sections. It MUST NOT use a
 multi-step wizard. Sections MAY be collapsible only when their controls,
 validation state, and errors remain discoverable and keyboard accessible.
@@ -598,8 +703,9 @@ validation state, and errors remain discoverable and keyboard accessible.
   authorization.
 - The builder MUST explain that it creates a project-owned `config.cfg` that
   users do not edit. Changing builder selections later requires creating a new
-  project; registered missing attributes may be added through the explicit
-  update flow described in section 5.1.
+  project; registered missing attributes and an eligible acknowledged same-
+  locale capability-envelope refresh may use section 5.1, but refresh never
+  substitutes project selections.
 - The UI MUST distinguish the project display name from the fixed config token
   `config`. Users MUST NOT enter or edit a config filename or route token.
 - Reloading or navigating back after a recoverable validation error SHOULD
@@ -975,23 +1081,40 @@ current source revisions used for later updates. Updates resolve the current
 definition registered under each stable ID; the registry is not required to
 retain executable historical definitions.
 
-For schema-v2 and schema-v3 graphs, a compatible addition to a live profile does not alter
-the validity of a previously complete stored graph. The reader MUST maintain an
-append-only set of immutable structural profile contracts. Creation uses only
-the current contract; stored validation matches the graph's complete axes,
-adjacency, defaults, and model policy against one frozen historical contract.
-The graph itself supplies the discriminating structure; `provider_revision`
-remains provider provenance and is not a mutable live-registry lookup key.
-Removing or broadening a historical contract is incompatible and requires a
-new stored capability schema.
+For schema-v2 and schema-v3 graphs, a compatible addition to a live profile
+does not alter the validity of a previously complete stored graph. The reader
+MUST maintain an append-only catalog of immutable canonical structural payloads
+and SHA-256 identities per locale. Creation uses only the current identity;
+stored validation accepts only a cataloged identity. An identity or payload is
+never redefined or removed. Unknown self-consistent graphs fail closed.
 
-Frozen structural equality applies to locale, dataset, method, adjacency, and
-default axes. The WEPP provider axis is intentionally dynamic and is validated
-by immutable shape/policy instead: stable binary ID grammar, role-resolved
-digest grammar, exhaustive binary revision keys, Single-OFE TOPAZ/WBT tuples
-for every stored binary, and exactly one Multiple-OFE tuple,
-`wbt|multiple-ofe|wepp_260803`. A stored graph does not need to match the
-current provider's binary population.
+The structural payload contains the locale ID; every non-runtime axis; all
+climate, landuse, soil, mod, and representation relations; all per-dataset
+method defaults; and normalized allowed delineation/representation pairs. It
+MUST exclude project selection defaults in `capability_defaults`,
+`provider_revision`, `wepp_binaries`, `wepp_binary_revisions`, and the binary
+member of model tuples. These exclusions distinguish immutable envelope/method-
+default structure from the user's creation selections. Ordinary graph
+validation still enforces all stored binary tuples and revisions.
+
+`structure_sha256` is SHA-256 over canonical sorted-key compact JSON encoded as
+UTF-8. The accepted catalog retains both payload and hash. Closed stable-ID
+vocabularies are the union of accepted payloads; a dataset/runtime catalog ID
+referenced by one is retirement-only unless a separately ratified compatibility
+plan replaces its runtime mapping.
+
+The initial production entries are the one structure per locale first shipped
+by `280cf7e84`; current code has the same identities. A test-only catalog MUST
+exercise a distinct same-locale old/new pair, but those identities are not
+production authority. The first real structural map/capability change requires
+a separately ratified append-only identity, direct fixture, reader-first
+deployment, and Forest evidence before its refresh writer is exposed.
+
+The WEPP provider axis remains dynamic and is validated by immutable shape and
+policy: stable binary ID grammar, role-resolved digest grammar, exhaustive
+binary revision keys, Single-OFE TOPAZ/WBT tuples for every stored binary, and
+exactly one Multiple-OFE tuple, `wbt|multiple-ofe|wepp_260803`. A stored graph
+does not need to match the current provider's binary population.
 
 ## 9. Capability Contract
 
@@ -1149,6 +1272,50 @@ For flattened projects:
   only the stored authority. They MUST NOT repopulate an omitted choice from a
   current provider listing.
 
+Run authority is selected in this order:
+
+1. a complete flattened schema-v2/schema-v3 graph is validated and remains the
+   stored presentation/submission authority, independent of live registry
+   drift until an eligible schema-v3 refresh commits;
+2. flattened no-capability and schema-v1 projects retain their established
+   compatibility behavior without new locale validation or live registry use;
+3. a non-flattened legacy run resolves effective `.cfg` locale. Exactly one of
+   `us`, `eu`, `canada`, `au`, or `earth` selects the current Builder graph for
+   `continental-us`, `europe`, `canada`, `australia`, or `global-earth`; and
+4. non-Builder bases, overlays, Turkey, and RHEM retain existing localized
+   catalogs without a synthesized Builder graph.
+
+Builder creation, recognized legacy resolution, refresh preview, and refresh
+apply MUST share one public server-side locale-to-graph resolver. A required
+live registry failure returns `503 builder_registry_error` with diagnostic
+details, error ID, and `Retry-After: 5`; it MUST NOT broaden to a fallback
+catalog. Invalid non-flattened locale returns `409 locale_authority_invalid`.
+Auth and run access checks occur first.
+
+These failures have the same three-boundary transport. HTML run-page requests
+render a diagnostic error page with the status, code, diagnostic details, and
+error ID. Flask JSON and rq-engine JSON use their canonical envelopes with the
+same status/code, diagnostic `details`, and `error_id`. Invalid locale is HTTP
+409 on all three boundaries. Registry unavailability is HTTP 503 with
+`Retry-After: 5` on HTML, Flask JSON, and rq-engine JSON. Authentication,
+authorization, run access, and ownership failures retain precedence over locale
+or registry resolution and MUST NOT be replaced by these diagnostics.
+
+Only the enumerated landuse, soil, and climate presentation/discovery/set/build
+consumers adopt this resolved run authority. Global `NoDbBase.locales`, other
+locale-sensitive controllers, advanced climate toggles, landuse edit/upload,
+soil `ksflag`, disturbed soil version, reports, and job lifecycle remain
+unchanged.
+
+An eligible refresh adopts current axes, relations, per-dataset method defaults,
+and provider/binary identities while preserving project `capability_defaults`,
+mods, and `climate.cligen_db`. Preview and manifest delta metadata record the
+canonical support state of added IDs; support state is not a stored graph axis.
+Persisted controller state
+outside a refreshed axis remains visible once as disabled current state and may
+be rebuilt unchanged, but cannot authorize a different unsupported value.
+Current Builder defaults MUST NOT replace project selections.
+
 Capability compatibility is versioned as follows:
 
 - no capability section means legacy locale/catalog behavior;
@@ -1185,8 +1352,11 @@ altering project bytes. Schema-v3 updates use the corresponding frozen v3
 resolver contract and retain the selected station-database component in the
 manifest parent chain.
 
-Legacy projects without resolved capabilities MUST retain their current locale,
-mod, catalog, and route behavior.
+Flattened no-capability/schema-v1 projects and non-Builder, overlay, Turkey, or
+RHEM compatibility modes retain their current locale, mod, catalog, and route
+behavior. The bounded exception is a recognized non-flattened legacy base in
+section 9, whose scoped landuse, soil, and climate surfaces use live Builder
+authority.
 
 ## 10. Manifest Contract
 
@@ -1291,8 +1461,59 @@ Each merge-only amendment MUST append one entry containing at least:
 - prior and resulting config SHA-256 digests; and
 - reason `missing_registered_attribute_merge`.
 
-Amendment history is append-only. It MUST NOT contain credentials or bearer
-tokens.
+Every new amendment entry MUST include `kind` equal to `additive`,
+`capability_refresh`, or `combined` and the opaque `preview_id`. Historical
+entries without `kind` are interpreted as `additive`; missing `preview_id` is
+JSON `null`. A capability or combined entry additionally records:
+
+- acknowledgment revision `PC-24-capability-refresh-v1`;
+- prior/resulting config SHA-256 and graph SHA-256 values;
+- prior/resulting `structure_sha256` and provider revisions;
+- exhaustive prior/resulting WEPP-binary revision objects;
+- ordered selected parent-chain `{kind, id, revision}` rows;
+- canonical preserved `capability_defaults`, mods, and `climate.cligen_db`;
+- one complete reversible changes list; and
+- application timestamp and application revision, without actor identity.
+
+Those conceptual values have one durable JSON layout. A capability-only entry
+has exactly these required top-level members: integer `sequence`, string
+`kind = "capability_refresh"`, non-null string `preview_id`, RFC 3339 UTC string
+`applied_at`, string `application_revision`, integer `resolver_version`,
+lowercase SHA-256 strings `prior_sha256` and `resulting_sha256`, and object
+`capability_refresh`. A combined entry uses `kind = "combined"`, the same
+members, and the existing additive trigger/additions/reason members. It MUST NOT
+encode a second capability delta elsewhere in the entry.
+
+Manifest `capability_refresh` has exactly `locale_profile`, `locales`,
+`preserved_project_selections`, `acknowledgment_revision`, `prior`, `resulting`,
+and `changes`. All except `acknowledgment_revision` reuse the exact member
+types, nesting, values, null handling, and ordering of preview
+`capability_refresh` in section 13.1. `acknowledgment_revision` is exactly
+`"PC-24-capability-refresh-v1"`; the preview-only `acknowledgment` object and
+warning text are not copied into the manifest. `prior_sha256` and
+`resulting_sha256` are the config digests, while the nested `prior`/`resulting`
+objects contain graph, structure, provider, binary, and selected-parent-chain
+identity. Recovery, availability, and idempotent replay MUST read this layout.
+
+Each change row has string `section` and `option`; `kind` equal to `added`,
+`removed`, or `changed`; canonical JSON `before` and `after` with JSON `null`
+for absence; lexically sorted `added_ids` and `removed_ids`; and
+`added_support` rows sorted by ID with exact `{id: string, support_state:
+string|null}` shape. Rows sort by `(section, option, kind)`. `graph_sha256` is
+SHA-256 over canonical project-config serialization of exactly the complete
+capability sections, including preserved `capability_defaults`.
+
+Prior provenance is limited to stored evidence: aggregate provider revision,
+complete stored binary revisions, selected parent-chain revisions, graph hash,
+and structure hash. It MUST NOT invent historical per-component revisions for
+unselected IDs. Resulting provenance records the corresponding current values.
+Canonical support state comes from the registry/provider catalog when defined
+and is JSON `null` otherwise; no synthetic maturity value is recorded.
+
+Refresh MUST leave original manifest `selections`, `parent_chain`, source
+identity, creation provenance, and prior amendments semantically unchanged. It
+appends one entry and updates `config.sha256`. Amendment history is append-only
+and MUST NOT contain credentials, bearer tokens, or personal identity.
 
 ## 11. Atomicity and Failure Behavior
 
@@ -1316,7 +1537,8 @@ Concurrent attempts to initialize the same project MUST use the existing
 project creation/NoDb concurrency boundary rather than inventing an unrelated
 lock.
 
-An additive amendment MUST use one project-scoped config amendment lock. Both
+Every additive, capability-refresh, or combined amendment MUST use one project-
+scoped config amendment lock. Both
 candidate files MUST be written and fsynced before replacement. Because two
 filesystem paths cannot be replaced by one POSIX rename, the implementation
 MUST use a small pending-amendment journal containing the expected prior and
@@ -1324,11 +1546,39 @@ resulting hashes. It then replaces the config, replaces the manifest, and
 removes the journal. A later reader MUST complete or roll back an interrupted
 transaction deterministically before serving configuration.
 
-Failure before commit leaves the prior config and manifest authoritative.
-Failure or process death between replacements MUST be recoverable from the
-journal without importing a newly changed build-chain value. Concurrent misses
-covered by the same resolved build-chain delta MUST produce at most one batch
-amendment entry.
+Before apply can reserve or enqueue, preview MUST validate the complete
+resulting config, manifest, pending-amendment journal, and every affected
+archive-member size against the existing format and size bounds. An oversized
+or otherwise invalid reversible record is diagnostically unavailable. The
+writer MUST NOT truncate the delta, omit required provenance, weaken existing
+validation, or rely on archive/export to discover the violation after commit.
+
+Before config replacement, recovery retains the prior config/manifest pair.
+After config replacement, recovery rolls the manifest forward to the complete
+result pair. After manifest replacement, it retains the result pair. Failure or
+process death MUST be recoverable from journal bytes without re-resolving a
+changed registry value. Concurrent requests for the same preview MUST produce
+at most one amendment entry.
+
+Rejection before Redis reservation has no queue or file side effect. Once
+accepted, the RQ job is observable history even if its worker fails. A retry is
+idempotent only when the latest amendment has the same non-null `preview_id`
+and the current config digest equals its `resulting_sha256`; it returns that
+result without reservation, enqueue, or another amendment. Null, different, or
+non-latest IDs use normal stale handling. A matching ID with digest mismatch
+fails `409 config_update_unavailable` diagnostically.
+
+Read-only availability MUST expose `current_digest` and `last_update` for
+outcome reconciliation. `last_update` is null or exact `{sequence, kind,
+preview_id, prior_sha256, resulting_sha256}`; historical missing kind/preview
+report `additive`/JSON `null`. `last_update` contains neither actor identity nor
+warning text. When updates are disabled or unavailable, `update_kind` MUST be
+JSON `null` and `acknowledgment_required` MUST be false; `current_digest` and
+`last_update` remain read-only reconciliation fields. After terminal failure,
+browser and direct
+clients compare these fields with the preview's prior/resulting digests and
+report `not applied`, `committed/recovered`, or an explicit indeterminate
+diagnostic. They MUST NOT hide a recovered commit behind a generic failure.
 
 ## 12. Fork, Archive, Restore, and Read-Only Behavior
 
@@ -1394,7 +1644,52 @@ All builder and update routes MUST use the canonical RQ response and error
 envelopes. Builder description/validation, update availability, and update
 preview are synchronous read operations. Builder creation remains synchronous
 as defined in section 7.6. Update apply is asynchronous and MUST return
-canonical `202` with `job_id`.
+canonical `202` with `job_id`, except an exact latest-preview idempotent replay
+of an already committed amendment returns HTTP 200 without enqueue and exactly
+`{applied: true, recovered: true, sequence: integer, prior_digest: string,
+resulting_digest: string}`. A normal RQ job result uses the same fields with
+`recovered: false`.
+
+Update availability additionally returns read-only `current_digest`, nullable
+`last_update`, nullable `update_kind`, and `acknowledgment_required`. Preview
+returns `current_digest`, deterministic `resulting_digest`, complete additions,
+nullable capability-refresh detail, and the exact update kind. Availability
+MUST NOT expose the graph delta.
+
+Preview `update_kind` is exactly `additive`, `capability_refresh`, or
+`combined`. `capability_refresh` is JSON `null` for `additive`; otherwise it is
+an object with exactly these typed members:
+
+- `locale_profile`: stable-ID string;
+- `locales`: the unchanged ordered runtime-token string list;
+- `preserved_project_selections`: exactly
+  `{capability_defaults: object, nodb: {mods: string[]}, climate:
+  {cligen_db: string}}`. `capability_defaults` has exactly the string members
+  `locale_profile`, `dem_source`, `climate_dataset`,
+  `climate_station_database`, `landuse_dataset`, `soil_dataset`,
+  `delineation_backend`, `watershed_representation`, and `wepp_binary`.
+  `mods` is the exact ordered stable-ID list from config; no set reordering or
+  inferred default is allowed. `cligen_db` is the exact configured manager
+  selector string;
+- `acknowledgment`: `{required: true, revision:
+  "PC-24-capability-refresh-v1", text: string}`, where `text` is the exact
+  warning in section 5.1;
+- `prior` and `resulting`: objects containing string `graph_sha256`, string
+  `structure_sha256`, string `provider_revision`,
+  `wepp_binary_revisions` as a stable-ID-to-revision string object, and
+  `selected_parent_chain` as an ordered list of exact
+  `{kind: string, id: string, revision: string}` objects; and
+- `changes`: a list sorted by `(section, option, kind)`. Each row is exactly
+  `{section: string, option: string, kind: "added"|"removed"|"changed",
+  before: canonical JSON value|null, after: canonical JSON value|null,
+  added_ids: string[], removed_ids: string[], added_support: object[]}`.
+  Both ID lists sort lexicographically. `added_support` sorts by ID and each row
+  is exactly `{id: string, support_state: string|null}`.
+
+The `graph_sha256`, `structure_sha256`, `changes`, preview-ID binding, and
+canonical JSON rules are exactly those in sections 5.1 and 8. Availability and
+all operation documents MUST describe this complete schema without weakening a
+required member to an untyped object.
 
 The UI contract depends on these stable error codes:
 
@@ -1406,8 +1701,11 @@ The UI contract depends on these stable error codes:
 - `stale_builder_schema` (`409`);
 - `unsupported_builder_schema` (`409`);
 - `stale_config_preview` (`409`);
+- `capability_refresh_acknowledgment_required` (`400`);
 - `config_update_unavailable` (`409`);
-- `config_update_in_progress` (`409`); and
+- `config_update_in_progress` (`409`);
+- `locale_authority_invalid` (`409`);
+- `builder_registry_error` (`503`) with `Retry-After: 5`;
 - `unsupported_config_schema` (`409`); and
 - `capability_authority_invalid` (`409`) with diagnostic `details` when a
   created run's schema-v2/schema-v3 graph is malformed, partial, contradictory,
@@ -1532,8 +1830,30 @@ After the defaults-name integration gate, continue in this order:
 
 There is no bulk backfill or general re-flattening. A shared config edit
 continues to affect legacy projects. Flattened projects stay pinned except when
-an authorized user previews and applies a merge-only update through the process
-in section 5.1.
+an authorized user previews and applies an additive update or eligible
+acknowledged capability refresh through section 5.1.
+
+### 14.6 WP12D locale authority and refresh rollout
+
+WP12D MUST first commit and deploy a standalone reader floor containing the
+append-only structural validator, with the capability-refresh writer absent and
+existing additive behavior unchanged. Exact host `forest` MUST prove the reader
+opens current schema-v3 identities, historical schema-v2, flattened
+compatibility modes, and representative legacy configs before the refresh
+writer is deployed.
+
+The writer candidate may then expose refresh on `forest`, apply and reopen one
+real provider/binary envelope refresh, and roll back to the recorded WP12D
+reader floor. The refreshed config and manifest MUST remain readable and byte-
+for-byte unchanged. Reader floor `187a856d4` is a rollback target only before
+WP12D refresh exposure and MUST NOT be used after a refresh commits.
+
+There is no distinct production map-axis transition in WP12D. The first real
+structural map/capability addition requires its actual prior/resulting
+identities, direct fixtures, a separately ratified reader-first amendment, and
+Forest evidence before its writer is exposed. WP12D may deploy only to exact
+host `forest` without rebuilding the source-mounted development image. WP12
+retains merge-to-master and every production action.
 
 ## 15. Required Regression Evidence
 
@@ -1686,7 +2006,61 @@ Implementation is not conformant until tests demonstrate:
   v2 and v3 without broadening either graph or changing project bytes; and
 - a direct concurrent Legacy/2015/GHCN resolver test uses real station metadata
   and proves every returned `StationMeta.parpath` stays under the selected
-  database's owned PAR root.
+  database's owned PAR root;
+- all 128 shipped named configs resolve through defaults to the exact canonical
+  locale inventory, including US, Canada, Portland, RHEM, Turkey, and Tenerife;
+- both Config Builder navigation links, every established Interfaces link/form,
+  card order, and config token remain plain and unchanged, while only Builder's
+  typed locale payload writes the selected flattened runtime token;
+- stale persisted `Ron._locales` cannot override effective config; project-
+  local `_defaults.cfg`/`_defaults.toml` chains cover absent, explicit-empty,
+  valid, invalid, and historical explicit locale without rewriting a file; and
+  locale-bearing legacy query/config-token overrides return exact HTTP 400
+  `project_config_validation_failed` before publication/initialization;
+- flattened no-capability/schema-v1 fixtures cover absent, empty, unknown, and
+  valid locale values with zero Builder-registry calls while preserving their
+  established compatibility/error behavior;
+- Turkey's exact `WP12D-1` supported-non-Builder profile serialization and
+  closed empty axes are fixture-locked, and `yasin.cfg` reopens with its fixed
+  map inputs and landuse change disabled without a synthesized Builder graph;
+- legacy shared and project-local runs for all five recognized base tokens use
+  the same live locale-to-graph resolver as Builder description/creation, while
+  flattened schema-v2/schema-v3 stored authority remains registry-independent;
+- flattened no-capability/schema-v1, non-Builder, overlay, Turkey, RHEM, and
+  explicit old Canada/Earth fixtures retain their contracted compatibility
+  behavior without run-file rewriting;
+- run-page controls, Flask routes, rq-engine schema/default/error documents,
+  operation documents, pipeline, readiness, and paired mutation/build routes
+  advertise and enforce the same landuse, soil, and climate authority;
+- invalid locale and unavailable-registry fixtures directly exercise HTML,
+  Flask JSON, and rq-engine JSON 409/503 transports, diagnostic
+  `details`/`error_id`, `Retry-After: 5`, auth precedence, and absence of a
+  partially rendered interactive run page;
+- direct unsupported selections fail before NoDb mutation, timestamp removal,
+  file write, or enqueue, while an unchanged exact-current build succeeds;
+- capability refresh is unavailable for schema-v2, preset-source schema-v3,
+  locale/profile/selection mismatches, and removed/incompatible preserved
+  selections, with diagnostic stable IDs and no substitution;
+- additive-only, capability-only, and combined preview/apply cover exact
+  update-kind, acknowledgment, JSON/null/sort/hash, stale, and payload-shape
+  contracts for browser and direct clients;
+- refresh preserves a non-Builder-default selection such as Daymet, every
+  primary default, mods, and `climate.cligen_db`, and records one complete
+  reversible amendment without changing creation provenance or personal data;
+- direct real-filesystem tests parse the exact capability/combined manifest
+  layout; reject oversized config, manifest, journal, and archive-member
+  candidates before reservation without truncation; and exercise valid writes
+  plus faults on both sides of the config-replacement commit point;
+- current production structure identities validate, `280cf7e84` and current
+  share the same identities, a test-only genuine two-identity transition proves
+  append-only evolution, and unknown self-consistent identities fail closed;
+- faults before/after config replacement prove prior-pair retention and result-
+  pair roll-forward; availability/UI reconcile terminal state; historical
+  amendment inference and latest-preview idempotent HTTP/RQ retry append no
+  duplicate amendment; and
+- exact-host Forest acceptance proves legacy/stored reopen, a real
+  provider/binary refresh, and rollback to the recorded WP12D reader floor
+  without image rebuild or production action.
 
 At least one representative project MUST be exercised through create, reopen,
 fork, archive, and restore before production rollout.

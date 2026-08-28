@@ -35,6 +35,14 @@ The registry authority lives here:
 
 The two YAML files above are the only hand-edited metadata sources.
 
+Locale and run capability authority are explicit non-owners of this registry.
+`config_registry.yaml` continues to own Interface visibility, maturity, role,
+backend, labels, and ordering only. It MUST NOT gain `locale_profile`, dataset
+availability, runtime locale tokens, or capability-graph metadata. Interface
+labels, filenames, links, and config tokens cannot supply or override effective
+`.cfg` locale. The Config Builder and project-config contracts own their typed
+locale/capability authority separately.
+
 ## Shared Enums (Both Registries)
 
 - `maturity`: `stable | preview | experimental | deprecated | internal`

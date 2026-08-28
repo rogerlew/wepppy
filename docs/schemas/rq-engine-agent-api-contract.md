@@ -108,6 +108,52 @@ stable component ID from the selected locale graph, separate from the climate
 dataset ID. The server revalidates it and materializes the component's exact
 `climate.cligen_db` value. Cross-locale or unknown station-database IDs return a
 field-addressable 4xx before creation.
+
+### Project Config Update and Capability Refresh
+
+The run-scoped update routes are:
+
+- `GET /api/runs/{runid}/{config}/project-config/update-availability`;
+- `GET /api/runs/{runid}/{config}/project-config/update-preview`; and
+- `POST /api/runs/{runid}/{config}/project-config/update-apply`.
+
+Availability requires run-read access and is non-mutating. Preview/apply require
+owner/Admin/Root mutation authority, and the worker reauthorizes. Availability
+returns `current_digest`, nullable `last_update`, nullable `update_kind`, and
+`acknowledgment_required` but no graph delta. Preview returns complete additions,
+deterministic `resulting_digest`, exact update kind, preserved project
+selections, and the complete capability delta when applicable.
+
+Disabled/unavailable state and `last_update` disclosure MUST match the project-
+owned config contract: null update kind, false acknowledgment requirement,
+read-only digest/reconciliation fields, and no actor identity or warning text.
+
+Preview `capability_refresh` is null for `additive`; otherwise it MUST reproduce
+the complete typed schema in project-owned config contract section 13.1:
+`locale_profile`, unchanged ordered `locales`,
+`preserved_project_selections`, exact `acknowledgment`, typed `prior` and
+`resulting` identity objects, and deterministically sorted typed `changes`.
+Clients MUST preserve JSON nulls, list order, lexicographic ID order, and
+`changes` order; they MUST NOT treat this object as an extensible untyped delta.
+
+Apply always sends `preview_id`. It sends `{section, option}` trigger only when
+additions exist and exact `{accepted: true, revision:
+"PC-24-capability-refresh-v1"}` capability acknowledgment only when the preview
+has a capability delta. Missing acknowledgment is `400
+capability_refresh_acknowledgment_required`; drift is `409
+stale_config_preview`; unavailable refresh is `409 config_update_unavailable`.
+These fail before reservation.
+
+Ordinary accepted apply returns HTTP 202 `job_id`. If the latest committed
+amendment has the same non-null preview ID and matching resulting digest, apply
+returns HTTP 200 without enqueue and exactly `{applied: true, recovered: true,
+sequence, prior_digest, resulting_digest}`. Historical latest amendments
+without kind/preview are reported as `additive`/JSON `null` and cannot match an
+idempotent replay.
+
+The endpoint's schema/defaults, operation document, OpenAPI representation, and
+runtime response MUST expose the same required members and types. A generic
+object placeholder is not contract-conformant.
 - Controller-state cutover package
   `20260410_rq_controller_state_contract_cutover` closed on 2026-04-11 with
   auth-scope parity evidence and keeps `rq:status` + `rq:read` compatibility
@@ -301,12 +347,27 @@ For runs with project capability schema v2 or v3, run-scoped controller schemas,
 templates/defaults, aggregated operation documents, pipeline, and readiness
 metadata expose only the authority stored in that run's flattened config.
 Clients MUST treat these run-scoped enums and model tuples as authoritative;
-the current global provider catalog cannot broaden an existing run. Legacy runs
-without capability authority retain their existing discovery behavior.
+the current global provider catalog cannot broaden an existing run. Flattened
+no-capability/schema-v1 and non-Builder/overlay/Turkey/RHEM compatibility modes
+retain their existing discovery behavior; the recognized non-flattened legacy
+base exception is defined below.
 The climate, landuse, and soils build endpoints and the WEPP run endpoint MUST
 return `409 capability_authority_invalid` with diagnostic `error.details`
 before mutation or enqueue when stored schema-v2/schema-v3 authority is malformed,
 partial, contradictory, or unsupported.
+
+For non-flattened legacy runs, effective `.cfg` locale `us`, `eu`, `canada`,
+`au`, or `earth` selects the matching current Builder graph for landuse, soil,
+and climate discovery and mutation. Other legacy compositions retain localized
+catalogs. `409 locale_authority_invalid` and `503 builder_registry_error` with
+`Retry-After: 5` are explicit diagnostic planning failures; agents MUST NOT
+substitute a global catalog. After a terminal config-update job failure, agents
+MUST compare the original preview digests with availability `current_digest`
+and `last_update` to classify not-applied versus committed/recovered state.
+
+A locale-bearing legacy query/config-token creation override returns HTTP 400
+`project_config_validation_failed` before publication or controller
+initialization. Config Builder's typed locale selection is not such an override.
 
 ## Climate Build Ordering (Operator Replication)
 For API-only replication flows, climate setup is order-sensitive:

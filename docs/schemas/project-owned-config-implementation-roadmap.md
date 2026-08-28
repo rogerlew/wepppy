@@ -57,12 +57,13 @@ pushes target that branch. Agents MUST NOT create a package-specific branch or
 merge package work into `master` unless this roadmap is amended by the operator.
 
 WP11 MUST deploy and record an exact commit from the feature branch for Forest
-acceptance. WP12 is the first promotion boundary: after all WP11 gates pass, it
-merges the reviewed feature-branch revision into `master` and deploys the
-resulting canonical revision to production. Before WP13 begins, the feature
-branch MUST be synchronized to that promoted `master` revision. WP13 performs
-shared-alias retirement on the same feature branch and uses a second reviewed
-merge into `master` for the later retirement release.
+acceptance. WP12 is the first promotion boundary: only after all WP11, WP12B,
+WP12C, and WP12D acceptance gates pass does it merge the reviewed feature-
+branch revision into `master` and deploy the resulting canonical revision to
+production. Before WP13 begins, the feature branch MUST be synchronized to that
+promoted `master` revision. WP13 performs shared-alias retirement on the same
+feature branch and uses a second reviewed merge into `master` for the later
+retirement release.
 
 A package may be complete on the feature branch while remaining unpromoted.
 Package status and evidence MUST distinguish `implemented on feature branch`,
@@ -124,6 +125,10 @@ never authorize silent contract drift.
 - User-initiated config updates remain disabled until WP08 preview/apply auth,
   locking, and recovery, WP09 UI review, and WP10 fork/archive consistency pass
   together.
+- WP12D capability refresh remains governed by the existing project-config
+  update enablement; it MUST NOT add another deployment feature flag. Its
+  structural reader lands first with the refresh writer absent, and refresh
+  becomes reachable only after the recorded reader-floor gate passes.
 - A package may merge dormant code behind a default-off server feature flag;
   merging dormant code is not production acceptance.
 
@@ -143,7 +148,7 @@ WP00R contract ratification/checklist
                                                                                          │
 WP04 preset writer ──────────────────────────────────────────────────────────────────────┴─> WP10 lifecycle integrity
 
-all WP00R-WP10 prerequisites ─> WP11 Forest acceptance ─> WP12B locale authority ─> WP12C Builder locale expansion ─> WP12 production cutover ─> WP13 alias retirement
+all WP00R-WP10 prerequisites ─> WP11 Forest acceptance ─> WP12B locale authority ─> WP12C Builder locale expansion ─> WP12D run UI authority/refresh ─> WP12 production cutover ─> WP13 alias retirement
 ```
 
 After WP00R, WP00A, WP00B, and WP01 may run in parallel. WP02 and WP03 may
@@ -170,7 +175,8 @@ No overlap changes the exit gates or closure ownership below.
 | WP11 | `20260804_project_config_forest_acceptance` | Deploy the complete default-off reader/writer stack to Forest; consume WP01 defaults evidence; validate mixed-version readers, all four initial DEM/backend combinations, named preset and builder flows, climate/soil/land-use paths, updates, restart, fork/archive/restore, rollback, and operator evidence. | WP00R, WP00A, WP00B, WP01, WP02, WP03, WP04, WP05, WP06, WP07, WP08, WP09, WP10 | High | Every contract regression item has evidence or an explicit blocking disposition; only validated combinations are enabled; deployed worker/revision and rollback-target compatibility are proven. |
 | WP12B | `20260827_project_config_locale_authority` | Normalize `continental-us` into a comprehensive typed locale/dependency graph; classify every shipped runtime locale token; separate dataset and method capability axes; make resolved per-project capabilities authoritative for climate, landuse, soil, and watershed presentation/submission; validate the generated matrix and real Forest providers. | WP05, WP07, WP11, `20260826_project_config_builder_model_options` | High | Every token is classified; every exposed profile and dependency closes deterministically; paired views/routes use the same stored IDs; legacy behavior is preserved; Forest evidence passes. |
 | WP12C | `20260827_project_config_builder_locale_expansion` | Expose Europe, Canada, Australia, and Global Earth alongside Continental US; make each typed profile the sole authority for DEM/soil/land-cover/climate/station-database choices; default every locale to Vanilla CLIGEN; add locale-keyed immutable schema-v3 graphs and instance-local CLIGEN station resolution; prove provider-backed creation on Forest. | WP12B, WP07, WP11 | High | Exactly five profiles are exposed; dependent UI/server choices match; historical v2 projects remain valid; real concurrent station resolution is isolated; every advertised provider and each new profile passes Forest evidence. |
-| WP12 | `20260804_project_config_production_cutover` | Merge the WP12C-accepted feature-branch revision into `master`; deploy that canonical revision; perform staged feature-flag enablement, health/danger observation, rollback verification, documentation/operator runbooks, and handoff of deployed/rollback revision inventory plus observation evidence. | WP11, WP12B, WP12C | High | The reviewed merge commit and production revision are recorded; production validation and observation pass; supported revisions read `_defaults.cfg`; project-owned writer/update flags are safely enabled; alias-retirement prerequisites are handed to WP13. |
+| WP12D | `20260827_project_config_run_ui_authority` | Normalize effective `.cfg` locale for all shipped configs; make five recognized legacy base profiles use the same current Builder graph across landuse/soil/climate view and mutation surfaces; preserve stored authority; add explicit selection-preserving schema-v3 capability refresh with provenance acknowledgment, append-only structural identities, exact transaction reconciliation, and a reader-first Forest gate. | WP12B, WP12C, WP07, WP11 | High | All 128 configs resolve canonically; legacy view/API/RQ authority matches Builder; stored schema-v2/v3 remains frozen by default; only congruent Builder schema-v3 refreshes after exact acknowledgment; current selections never reset; binding reviews, reader floor, tests, and exact-host Forest rollback evidence pass. |
+| WP12 | `20260804_project_config_production_cutover` | Merge the WP12D-accepted feature-branch revision into `master`; deploy that canonical revision; perform staged feature-flag enablement, health/danger observation, rollback verification, documentation/operator runbooks, and handoff of deployed/rollback revision inventory plus observation evidence. | WP11, WP12B, WP12C, WP12D | High | The reviewed merge commit and production revision are recorded; production validation and observation pass; supported revisions read `_defaults.cfg`; project-owned writer/update flags are safely enabled; alias-retirement prerequisites are handed to WP13. |
 | WP13 | `20260804_defaults_toml_alias_retirement` | Synchronize the feature branch to promoted `master`; revalidate deployed and supported rollback revisions in the next planned release; remove only the shared `_defaults.toml` symlink on the feature branch; retain project-local legacy-reader support; run the final audits; merge the reviewed retirement revision into `master`. | WP12 | High | The retirement merge and production revision are recorded; shared symlink is absent; project-local legacy `_defaults.toml` still resolves; every checklist item and PC row has an accepted closure state; roadmap is closed. |
 
 ## 5. Requirement Ownership Ledger
@@ -205,6 +211,7 @@ with one of the closure states in section 2.2.
 | PC-21 | Required regression evidence, synchronized user/operator/developer documentation, and complete initiative closure (sections 15-16 and repository standards) | WP13 | Every package | Per-package test/doc handoffs plus exhaustive normative-checklist audit, final ledger with no unowned/unresolved row, and broad pre-handoff gates. | Contracted |
 | PC-22 | Comprehensive canonical locale/dependency graph and resolved dataset/method authority for Builder and run views (sections 7.2.2 and 9) | WP12B | WP05, WP07, WP11, WP12 | Token inventory, registry closure tests, generated capability matrix, paired UI/server tests, legacy characterization, and Forest provider evidence. | Contracted |
 | PC-23 | Five-profile Builder expansion, profile-owned data/station-database authority, Vanilla CLIGEN defaults, versioned locale-keyed schema-v3 description graphs, instance-local CLIGEN station resolution, and Canada global-data/Daymet policy (sections 7.2.1-7.2.2, 7.4, 8.2, 9) | WP12C | WP07, WP11, WP12 | Contract reviews, generated profile matrix, cross-locale and description-version rejection tests, historical v2 fixtures/update behavior, real concurrent station isolation, paired UI/API tests, and real Forest provider/create/reopen evidence for each new profile. | Contracted |
+| PC-24 | Effective `.cfg` locale authority for legacy run controls plus explicit selection-preserving schema-v3 capability refresh, append-only structural identities, provenance acknowledgment, exact recovery/retry reconciliation, and reader-first rollback (sections 5.1, 6.2-6.3, 7.1, 7.4, 8-11, 13.1, 14.6, 15) | WP12D | WP05, WP07, WP08, WP09, WP11, WP12 | Ratified contract checkpoint, 128-config inventory, shared locale-to-graph tests, paired UI/API/RQ enforcement, refresh/recovery/security/accessibility evidence, reader-floor commit, and exact-host Forest provider-refresh/reopen/rollback proof. | Contracted |
 
 ## 6. Package Handoff Contract
 
@@ -271,7 +278,7 @@ result. A failed row blocks only the affected feature flag or builder
 combination when isolation is safe; it blocks the whole promotion when reader,
 manifest, security, archive consistency, or rollback safety is affected.
 
-WP12 owns production cutover, observation, and the explicit retirement handoff.
+WP12 owns production cutover only after WP12D acceptance, observation, and the explicit retirement handoff.
 It MUST leave the shared `_defaults.toml` symlink present and provide WP13 with
 the deployed/rollback revision inventory and observation evidence.
 
