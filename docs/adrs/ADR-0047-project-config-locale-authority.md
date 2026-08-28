@@ -50,10 +50,11 @@ radios and landuse/soil workflows accurately follow their selected inputs.
 ## Alternatives Considered
 
 Keeping template conditionals was rejected because hidden controls and server
-acceptance can diverge. Reading the live registry implicitly from flattened run
-pages was rejected because registry revisions would retroactively change
-existing projects; WP12D preserves that rule while allowing non-flattened
-legacy pages and an explicit acknowledged stored-envelope refresh.
+acceptance can diverge. Reading the live registry implicitly from complete
+schema-v2/schema-v3 flattened run pages was rejected because registry revisions
+would retroactively change stored authority; WP12D preserves that rule while
+allowing non-flattened legacy pages, the bounded schema-v1 preset climate/land-
+cover correction, and an explicit acknowledged stored-envelope refresh.
 Treating every shipped config token as a supported Builder locale was rejected
 because presets demonstrate deployed behavior but not a validated cross-product.
 
@@ -115,6 +116,10 @@ schema-v2 Continental-US stored bytes do not change. All new profiles,
 including Continental US, default to Vanilla CLIGEN in schema v3.
 
 ### Exact IDs and Runtime Mappings
+
+This table records the ratified WP12C creation matrix. Amendment 5 below
+supersedes only its climate and land-cover columns; its DEM, soil, station-
+database, viewport, and model-option values remain normative.
 
 | Profile | Data stable IDs | Runtime meaning | Default |
 | --- | --- | --- | --- |
@@ -296,8 +301,9 @@ rewritten.
 A recognized non-flattened single-base `us`, `eu`, `canada`, `au`, or `earth`
 run uses the current Builder graph for landuse, soil, and climate presentation,
 discovery, and submission. Flattened schema-v2/schema-v3 projects remain frozen
-to stored authority. Flattened no-capability/schema-v1 and non-Builder/overlay/
-RHEM modes retain their compatibility catalogs.
+to stored authority. Flattened no-capability, schema-v1 outside amendment 5's
+exact valid-preset climate/land-cover projection, and non-Builder/overlay/RHEM
+modes retain their compatibility catalogs.
 
 An owner/Admin/Root user may explicitly refresh a congruent Builder-source
 schema-v3 project's same-locale capability envelope. The user must preview the
@@ -368,3 +374,125 @@ Evidence is recorded in
 `docs/work-packages/20260827_project_config_run_ui_authority/`, including the
 128-config inventory, surface matrix, ratified contract decision, binding
 reviews, regression results, and exact-host Forest acceptance evidence.
+
+## WP12D Amendment 5 - Climate and Land-Cover Envelope Correction
+
+### Decision Provenance
+
+- **Decision Venue**: active Codex development session, 2026-08-28 10:00 UTC.
+- **Participants Present**: project operator and Codex.
+- **Decision Owner**: project operator.
+- **Ratified Amendment**: `PC-24/WP12D-20260828-5`, exactly ratified by the
+  operator on 2026-08-28 16:29 UTC.
+- **Implementer**: Codex after contract checkpoint.
+
+### Decision
+
+The current locale graph is the shared climate and land-cover hotpath for new
+Builder description/creation, recognized non-flattened legacy bases, explicit
+schema-v3 capability refresh, and valid flattened schema-v1 named presets. The
+schema-v1 projection is limited to climate and land cover, requires a valid
+preset manifest, byte-exact rematerialization from current server-owned parent
+sources and recorded allowlisted overrides, and exactly one congruent recognized
+Builder base locale, and never rewrites the run. Other schema-v1 axes and non-
+preset compatibility remain unchanged. Self-asserted project hashes and
+descriptive `source_revision` do not authenticate this classification.
+
+The exact climate envelopes are Continental US: Vanilla CLIGEN, PRISM,
+observed Daymet, observed gridMET, DEP NEXRAD Breakpoint, Future CMIP5, and
+User-Defined Climate; Europe: exactly Vanilla CLIGEN, E-OBS Modified (Europe),
+and User-Defined Climate; Canada: Vanilla CLIGEN, observed Daymet, and User-
+Defined Climate; Australia: Vanilla CLIGEN, AGDC, and User-Defined Climate; and
+Global Earth: Vanilla CLIGEN and User-Defined Climate. Vanilla remains every
+locale's default.
+
+The exact stable-ID/runtime-mode mapping is:
+
+| Stable climate ID | Runtime mode | Station methods | Spatial methods | Defaults | Additional contract |
+| --- | --- | --- | --- | --- | --- |
+| `vanilla_cligen` | 0 | `auto`, `distance`, `multi_factor` | `single`, `multiple` | `auto`; `single` | none |
+| `prism_stochastic` | 5 | `auto`, `distance`, `multi_factor` | `single`, `multiple` | `auto`; `single` | US only |
+| `observed_daymet` | 9 | `auto`, `distance`, `multi_factor` | `single`, `multiple`, `interpolated` | `auto`; `single` | US and Canada |
+| `observed_gridmet` | 11 | `auto`, `distance`, `multi_factor` | `single`, `multiple`, `interpolated` | `auto`; `single` | US only |
+| `dep_nexrad` | 13 | `auto`, `distance`, `multi_factor` | `single`, `multiple` | `auto`; `single` | US only; existing NEXRAD inputs |
+| `future_cmip5` | 3 | `auto`, `distance`, `multi_factor` | `single`, `multiple` | `auto`; `single` | US only; existing future-year inputs |
+| `user_defined_cli` | 12 | `user_defined` | `single`, `multiple` | `user_defined`; `single` | all five locales; `.cli` upload required |
+| `eobs_modified` | 8 | `auto`, `distance`, `multi_factor`, `eu_heuristic` | `single`, `multiple` | `auto`; `multiple` | Europe only |
+| `agdc` | 10 | `auto`, `distance` | `single`, `multiple` | `auto`; `single` | Australia only |
+
+The profile climate ID order is exactly: Continental US
+`vanilla_cligen`, `prism_stochastic`, `observed_daymet`,
+`observed_gridmet`, `dep_nexrad`, `future_cmip5`, `user_defined_cli`; Europe
+`vanilla_cligen`, `eobs_modified`, `user_defined_cli`; Canada
+`vanilla_cligen`, `observed_daymet`, `user_defined_cli`; Australia
+`vanilla_cligen`, `agdc`, `user_defined_cli`; and Global Earth
+`vanilla_cligen`, `user_defined_cli`.
+
+The Builder Land-cover selection sets `capability_defaults.landuse_dataset`
+and the runtime selection but does not restrict the stored graph or run
+control. Each graph carries its complete locale envelope: Continental US
+annual NLCD and NLCD Ever Forest for 1985-2024 plus eMapR vote for 1984-2017;
+Europe CORINE 1990/2000/2006/2012/2018; Canada and Global Earth C3S 1992-2020;
+and Australia Land Use 2010-2011. Canada token `canada` resolves C3S rather
+than the default US catalog.
+
+The exact land-cover stable-ID/runtime mapping is:
+
+- Continental US, in descending year order: `nlcd-ever-forest-<year>` to
+  `nlcd/ever_forest/<year>` for every year 2024 through 1985, then
+  `nlcd-<year>` to `nlcd/<year>` for every year 2024 through 1985, then
+  `emapr-vote-<year>` to
+  `islay.ceoas.oregonstate.edu/v1/landcover/vote/<year>` for every year 2017
+  through 1984;
+- Europe: `corine-<year>` to `eu/CORINE_LandCover/<year>` for years 1990,
+  2000, 2006, 2012, and 2018;
+- Canada and Global Earth: `c3s-landcover-<year>` to
+  `locales/earth/C3Slandcover/<year>` for every year 2020 through 1992; and
+- Australia: `australia-landuse-2010-2011` to
+  `au/landuse_201011/lu10v5ua`.
+
+Every listed land-cover ID permits `gridded`, `single`, and `upload` under
+Single OFE and `gridded` and `upload` under Multiple OFE; its method default is
+`gridded`. The Builder-selected ID remains the runtime/default selection but
+does not narrow these ordered profile axes.
+
+### Rationale and Rejected Alternatives
+
+Treating the Builder selection as a singleton capability conflates a project
+default with a locale constraint and prevents users from changing to another
+applicable map. Retaining the coarse schema-v1 climate list reproduces the
+opposite failure: Europe displays globally cataloged modes it cannot support.
+The selected policy makes locale graphs authoritative for both domains while
+preserving file provenance and every unrelated schema-v1 compatibility axis.
+Broad live projection for arbitrary schema-v1 projects, manifest-free
+classification, silent fallback on registry failure, migration, and run-file
+rewrites are rejected. Trusting a merely self-consistent manifest was also
+rejected: parent hashes and byte-exact canonical rematerialization bind
+eligibility to deployed sources. Source drift intentionally returns to
+compatibility rather than weakening this proof; an unreadable preset-policy
+corpus fails diagnostically instead of masquerading as an inactive preset.
+
+### Parameterization, Structure, and Rollback
+
+This amendment changes dataset parameterization and all five schema-v3
+structural identities; it does not change climate numeric modes, algorithms,
+providers, year bounds, upload validation, or the Vanilla default. The prior
+identities remain append-only valid. A standalone reader floor must register
+all resulting identities before any Builder or refresh writer emits them.
+Exact host `forest` must prove Europe schema-v1 projection and one new schema-
+v3 create/refresh/reopen/reader-floor rollback path. Merge and production
+remain reserved to WP12.
+
+### Amendment-Specific Evidence
+
+- Exact decision and state matrix:
+  `docs/work-packages/20260827_project_config_run_ui_authority/artifacts/20260828_climate_landcover_contract_decision.md`.
+- Runtime surface inventory:
+  `docs/work-packages/20260827_project_config_run_ui_authority/artifacts/20260827_surface_matrix.md`.
+- Pending independent correctness, governance, and security records:
+  `20260828_amendment5_contract_correctness_review.md`,
+  `20260828_amendment5_contract_governance_review.md`, and
+  `20260828_amendment5_security_contract_review.md` in that work package's
+  `artifacts/` directory.
+- Reader-floor and exact-host Forest evidence will be recorded in the tracker
+  and a dated amendment-5 acceptance artifact before implementation closure.

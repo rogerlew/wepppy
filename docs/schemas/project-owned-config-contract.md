@@ -310,9 +310,10 @@ which writes `[general] locales` through the flattened resolver rather than a
 legacy query/config-token override.
 
 Flattened projects MUST be classified before this legacy locale path. A
-flattened config without capability authority and a schema-v1 project retain
-their existing compatibility behavior without new locale validation or live-
-registry consultation.
+flattened config without capability authority and a schema-v1 project outside
+section 9's exact named-preset climate/land-cover exception retain their
+existing compatibility behavior without new locale validation or live-registry
+consultation.
 
 ### 6.4 Nested project and PUP authority
 
@@ -521,15 +522,21 @@ frontend lists MUST NOT add a value. In particular, the Land-cover dataset
 control and its server validator MUST derive only from the selected profile's
 `landuse_sources`.
 
-The WP12C Builder matrix is:
+The selected Builder Land-cover dataset is the project default and runtime
+selection. It MUST NOT narrow the profile's `landuse_sources`, the stored
+`capabilities.landuse_datasets`, or the run control to a singleton. Run
+presentation and submission use the complete locale-applicable land-cover
+envelope, subject only to the disabled exact-current carveout in section 9.
+
+The current schema-v3 Builder matrix is:
 
 | Stable profile | Runtime token | DEM | Soil | Land cover | Climate | Station DB | Data defaults |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `continental-us` | `us` | NED1 2024; NED1/3 2022 | SSURGO/gNATSGO 2025 | NLCD 2019 | Vanilla CLIGEN; PRISM stochastic; observed Daymet; observed gridMET | Legacy; 2015; GHCN | NED1 2024; SSURGO/gNATSGO 2025; NLCD 2019; Vanilla CLIGEN; 2015 |
-| `europe` | `eu` | EUDEM v1.1 | ESDAC | CORINE 1990, 2000, 2006, 2012, 2018 | Vanilla CLIGEN; E-OBS | GHCN | EUDEM v1.1; ESDAC; CORINE 2018; Vanilla CLIGEN; GHCN |
-| `canada` | `canada` | Copernicus DEM 30 m | ISRIC global | C3S 1992-2020 | Vanilla CLIGEN; observed Daymet | GHCN | Copernicus DEM; ISRIC; C3S 2020; Vanilla CLIGEN; GHCN |
-| `australia` | `au` | Australia SRTM 1 second | ASRIS | Australia 2010-2011 | Vanilla CLIGEN; AGDC | GHCN | SRTM; ASRIS; Australia 2010-2011; Vanilla CLIGEN; GHCN |
-| `global-earth` | `earth` | Copernicus DEM 30 m | ISRIC global | C3S 1992-2020 | Vanilla CLIGEN | GHCN | Copernicus DEM; ISRIC; C3S 2020; Vanilla CLIGEN; GHCN |
+| `continental-us` | `us` | NED1 2024; NED1/3 2022 | SSURGO/gNATSGO 2025 | annual NLCD and NLCD Ever Forest, 1985-2024; eMapR vote, 1984-2017 | Vanilla CLIGEN; PRISM stochastic; observed Daymet; observed gridMET; DEP NEXRAD Breakpoint; Future CMIP5; User-Defined Climate | Legacy; 2015; GHCN | NED1 2024; SSURGO/gNATSGO 2025; NLCD 2019; Vanilla CLIGEN; 2015 |
+| `europe` | `eu` | EUDEM v1.1 | ESDAC | CORINE 1990, 2000, 2006, 2012, 2018 | Vanilla CLIGEN; E-OBS Modified (Europe); User-Defined Climate | GHCN | EUDEM v1.1; ESDAC; CORINE 2018; Vanilla CLIGEN; GHCN |
+| `canada` | `canada` | Copernicus DEM 30 m | ISRIC global | C3S 1992-2020 | Vanilla CLIGEN; observed Daymet; User-Defined Climate | GHCN | Copernicus DEM; ISRIC; C3S 2020; Vanilla CLIGEN; GHCN |
+| `australia` | `au` | Australia SRTM 1 second | ASRIS | Australia 2010-2011 | Vanilla CLIGEN; AGDC; User-Defined Climate | GHCN | SRTM; ASRIS; Australia 2010-2011; Vanilla CLIGEN; GHCN |
+| `global-earth` | `earth` | Copernicus DEM 30 m | ISRIC global | C3S 1992-2020 | Vanilla CLIGEN; User-Defined Climate | GHCN | Copernicus DEM; ISRIC; C3S 2020; Vanilla CLIGEN; GHCN |
 
 Stable IDs and exact runtime mappings for this matrix are domain-owned and
 recorded in ADR-0047. Canada MUST use only the listed global terrain, soil, and
@@ -539,6 +546,10 @@ Vanilla CLIGEN is the climate-mode default for every exposed locale. E-OBS,
 Daymet, and AGDC remain explicit regional choices and are never selected
 implicitly. Continental US exposes Legacy, 2015, and GHCN station databases and
 defaults to 2015; every other exposed locale exposes and defaults only to GHCN.
+User-Defined Climate MUST be available for every exposed locale. Europe MUST
+expose exactly Vanilla CLIGEN, E-OBS Modified (Europe), and User-Defined Climate.
+The unchanged numeric runtime modes are 13 for DEP NEXRAD Breakpoint, 3 for
+Future CMIP5, and 12 for User-Defined Climate.
 
 The station-database stable/runtime mappings are
 `cligen-stations-legacy` -> `legacy`, `cligen-stations-2015` ->
@@ -643,12 +654,15 @@ the manifest component revision records its creation-time target identity. A
 later run may therefore execute a newer provider target; immutable-release
 reproducibility requires selecting a concrete provider value.
 
-TauDEM, alternate soil/land-use modes, event/upload/future climate modes,
-and optional NoDb mods are deferred from the initial matrix. They require
-separate registered definitions and representative validation before becoming
-builder-visible. This does not remove or change any Interfaces preset that
-already uses them. Later mod IDs SHOULD retain the exact stable tokens accepted
-by `[nodb] mods`; filesystem discovery alone MUST NOT register a mod.
+TauDEM, alternate soil/land-use methods, designed single-event climate modes,
+and optional NoDb mods remain deferred. Amendment 5 registers User-Defined
+Climate upload and US Future CMIP5 after their exact definitions and
+representative validation; they are no longer part of this deferral. Deferred
+values require separate registered definitions and representative validation
+before becoming builder-visible. This does not remove or change any Interfaces
+preset that already uses them. Later mod IDs SHOULD retain the exact stable
+tokens accepted by `[nodb] mods`; filesystem discovery alone MUST NOT register
+a mod.
 
 ### 7.3 Builder config naming
 
@@ -1119,7 +1133,10 @@ does not need to match the current provider's binary population.
 ## 9. Capability Contract
 
 The resolved config MUST record stable semantic identifiers rather than UI
-labels or raw enum values. An illustrative section is:
+labels or raw enum values. The following is a historical WP12C Continental-US
+schema-v3 example that remains valid stored authority; amendment 5 supersedes
+it for current Builder creation/refresh with the exact axes in section 7.2.2
+and ADR-0047:
 
 ```ini
 [capabilities]
@@ -1277,12 +1294,17 @@ Run authority is selected in this order:
 1. a complete flattened schema-v2/schema-v3 graph is validated and remains the
    stored presentation/submission authority, independent of live registry
    drift until an eligible schema-v3 refresh commits;
-2. flattened no-capability and schema-v1 projects retain their established
-   compatibility behavior without new locale validation or live registry use;
-3. a non-flattened legacy run resolves effective `.cfg` locale. Exactly one of
+2. a flattened schema-v1 project satisfying the projection-eligible preset
+   rules below and exactly one recognized Builder base locale resolves the current Builder graph for only
+   its climate and land-cover presentation/submission surfaces; its other v1
+   axes retain established compatibility behavior;
+3. other flattened no-capability and schema-v1 projects retain their
+   established compatibility behavior without new locale validation or live
+   registry use;
+4. a non-flattened legacy run resolves effective `.cfg` locale. Exactly one of
    `us`, `eu`, `canada`, `au`, or `earth` selects the current Builder graph for
    `continental-us`, `europe`, `canada`, `australia`, or `global-earth`; and
-4. non-Builder bases, overlays, Turkey, and RHEM retain existing localized
+5. non-Builder bases, overlays, Turkey, and RHEM retain existing localized
    catalogs without a synthesized Builder graph.
 
 Builder creation, recognized legacy resolution, refresh preview, and refresh
@@ -1316,11 +1338,19 @@ outside a refreshed axis remains visible once as disabled current state and may
 be rebuilt unchanged, but cannot authorize a different unsupported value.
 Current Builder defaults MUST NOT replace project selections.
 
+User-Defined Climate upload replaces content and is not an unchanged rebuild.
+Whenever graph authority is resolved, the upload-cli route MUST require
+`user_defined_cli` in the climate axis before multipart read/save, timestamp
+removal, reservation, or enqueue. An outside-authority current value does not
+authorize upload. A compatibility state with no graph retains its established
+upload behavior.
+
 Capability compatibility is versioned as follows:
 
 - no capability section means legacy locale/catalog behavior;
 - capability keys without `schema_version` are schema v1, and only present v1
-  axes restrict behavior; missing WP12B axes retain legacy behavior;
+  axes restrict behavior; missing WP12B axes retain legacy behavior except for
+  the valid named-preset climate/land-cover projection below;
 - a present-empty or malformed mandatory v1 axis is an explicit configuration
   error; optional v1 axes such as `mods` MAY be present-empty;
 - schema v2 requires every mandatory axis, relation, tuple set, and default;
@@ -1335,10 +1365,36 @@ Capability compatibility is versioned as follows:
 - merge-only update MUST NOT add WP12B axes to a v1 or legacy project because
   doing so would invent capabilities prohibited by section 5.1.
 
-Schema v1 retains its established coarse-axis authority. WP12B contracts only
-the compatibility behavior listed above for current persisted values and new
-submissions; it does not reinterpret model routing or rewrite persisted state.
-The v2 graph rules MUST NOT be retroactively inferred for v1.
+Schema v1 retains its established coarse-axis authority except for a bounded
+named-preset projection. A projection-eligible manifest with `source_kind =
+"preset"` and exactly one recognized Builder base locale uses the current
+locale graph for only climate and land-cover presentation, discovery, setter, and build
+authority. Stored v1 climate/landuse lists remain provenance evidence but do
+not broaden or narrow those two domains. Soil, model, mod, and every other v1
+axis retain existing behavior. The projection never rewrites the config,
+manifest, or NoDb state. The v2 graph rules MUST NOT otherwise be
+retroactively inferred for v1.
+
+For this exception, "valid" is intentionally narrower than warning-tolerant
+manifest loading. The declared config digest MUST equal current config bytes;
+`source_preset` MUST be an active canonical named-preset token and equal the
+config filename stem; `parent_chain` MUST be exactly
+`defaults/shared-defaults`, then `preset/<source_preset>`; each parent revision
+MUST equal SHA-256 of its current server-owned canonical source file; replaying
+the recorded allowlisted query overrides through the canonical preset snapshot
+resolver MUST reproduce current flattened config bytes exactly; and both the
+rematerialized and stored effective configs MUST contain the same exactly one
+recognized Builder base with no locale overlay. `source_revision` is descriptive
+provenance and MUST NOT authenticate eligibility.
+Absent, malformed, newer, digest-mismatched, non-preset, unknown/inactive-
+preset, filename-incongruent, chain-incongruent, parent-revision-drifted,
+override-invalid, rematerialization-mismatched, locale-incongruent, empty,
+unknown-locale, overlay, Turkey, or RHEM state retains schema-v1 compatibility
+with no registry call. An unavailable, malformed, or inconsistent canonical
+preset-policy corpus is not an unknown-preset fallback: after auth/run access,
+it fails with diagnostic HTTP 503 `builder_registry_error`, `Retry-After: 5`,
+and no multipart read/save, timestamp removal, reservation, mutation, or
+enqueue.
 
 Configuration-update availability, preview, and apply for a historical
 schema-v2 Builder run MUST resolve its original parent chain with the frozen
@@ -1352,11 +1408,12 @@ altering project bytes. Schema-v3 updates use the corresponding frozen v3
 resolver contract and retain the selected station-database component in the
 manifest parent chain.
 
-Flattened no-capability/schema-v1 projects and non-Builder, overlay, Turkey, or
-RHEM compatibility modes retain their current locale, mod, catalog, and route
-behavior. The bounded exception is a recognized non-flattened legacy base in
-section 9, whose scoped landuse, soil, and climate surfaces use live Builder
-authority.
+Flattened no-capability projects, schema-v1 projects outside the exact preset
+exception, and non-Builder, overlay, Turkey, or RHEM compatibility modes retain
+their current locale, mod, catalog, and route behavior. The bounded live-
+authority exceptions are a recognized non-flattened legacy base for landuse,
+soil, and climate and a valid recognized flattened schema-v1 preset for only
+climate and land cover.
 
 ## 10. Manifest Contract
 
@@ -1848,12 +1905,36 @@ reader floor. The refreshed config and manifest MUST remain readable and byte-
 for-byte unchanged. Reader floor `187a856d4` is a rollback target only before
 WP12D refresh exposure and MUST NOT be used after a refresh commits.
 
-There is no distinct production map-axis transition in WP12D. The first real
-structural map/capability addition requires its actual prior/resulting
-identities, direct fixtures, a separately ratified reader-first amendment, and
-Forest evidence before its writer is exposed. WP12D may deploy only to exact
+Before amendment `PC-24/WP12D-20260828-5`, WP12D had no distinct production
+map-axis transition. A real structural map/capability addition requires its
+actual prior/resulting identities, direct fixtures, a separately ratified
+reader-first amendment, and Forest evidence before its writer is exposed.
+WP12D may deploy only to exact
 host `forest` without rebuilding the source-mounted development image. WP12
 retains merge-to-master and every production action.
+
+Amendment `PC-24/WP12D-20260828-5` is that first real structural transition.
+It appends the resulting identities for all five schema-v3 locale graphs while
+retaining every prior schema-v3 identity and the historical schema-v2 graph.
+The exact prior-to-resulting identities are Continental US
+`5296d3519d578164b6a5874a820991c935b394e5336aba41fe3e8f8d0dd4e29b` to
+`3151e7e11be97967b32b887c6832b5286d252bf9b85841b889d5dcfbb24a8faf`,
+Europe `c05b6a66f823f69cf8f1d44b69c206da1dc9449b278662c680248a3f3b755aeb`
+to `18eda2d24f57be54993d2f0b609c59de6c26a17632d8653cc62b5a926e66f2c7`,
+Canada `dd7f7cdb0d861a159df64a4806ee5585f0208b93982990e30974055b1f2a41e7`
+to `07f733c2b13589ac637fc898859b8e3eac4902199606a2580796eec47765d7b4`,
+Australia `bb4bdde8740d689aa378bcf744a942d997b9c69cdc445d80be07c749635efc9a`
+to `1fd066a9e5bef26373414988d9f98e04fb84a8d0d08f7af280eef7cb1779a497`,
+and Global Earth
+`db1c185cf6b5def23064752847f585f3522c0b971460d9c688b424cb04c706ae`
+to `b1bbcd60e71b65064455da3abaacdb239a433bafe08c46854a2ffcfc9c50de92`.
+Its standalone reader floor MUST reopen every prior identity and recognize all
+five resulting identities before Builder description/creation or capability-
+refresh writers may emit them. Forest MUST then prove the exact Europe schema-
+v1 preset projection and one resulting schema-v3 create or refresh, reopen,
+and reader-floor rollback without changing run bytes. The exact identities and
+first-reader revision are recorded append-only in the capability-structure
+catalog and its direct fixtures.
 
 ## 15. Required Regression Evidence
 
@@ -2017,18 +2098,52 @@ Implementation is not conformant until tests demonstrate:
   valid, invalid, and historical explicit locale without rewriting a file; and
   locale-bearing legacy query/config-token overrides return exact HTTP 400
   `project_config_validation_failed` before publication/initialization;
-- flattened no-capability/schema-v1 fixtures cover absent, empty, unknown, and
-  valid locale values with zero Builder-registry calls while preserving their
-  established compatibility/error behavior;
+- flattened no-capability and schema-v1 non-preset/invalid-manifest fixtures
+  cover absent, empty, unknown, overlay, and non-Builder locale values with zero
+  Builder-registry calls while preserving compatibility/error behavior;
+- a valid schema-v1 named preset for each recognized base uses the current
+  climate and land-cover projections only, and a Europe fixture advertises,
+  renders, accepts, and enforces exactly Vanilla CLIGEN, E-OBS Modified
+  (Europe), and User-Defined Climate;
+- digest-mismatched-but-loadable, missing/unknown/inactive source-preset,
+  filename-incongruent, parent-chain-incongruent, and shape-valid forged-preset
+  schema-v1 manifests retain compatibility with zero registry calls and
+  preserve existing reader warnings;
+- a self-consistent project-local forgery with recomputed hashes fails byte-
+  exact canonical rematerialization; parent-source drift, forged/non-allowlisted
+  overrides, and rematerialized/stored locale mismatch also remain
+  compatibility-only; malformed/unavailable preset policy instead returns the
+  diagnostic 503 with no write, reservation, mutation, or enqueue;
+- the exact five-profile climate matrix, numeric modes, per-dataset method
+  relations, Vanilla defaults, and User-Defined upload requirements are
+  fixture-locked;
+- synthesized registry component equality and deterministic digest fixtures
+  exhaust every newly Builder-exposed climate and land-cover ID;
+- rq-engine Builder description fixtures expose the exact five graph envelopes,
+  and a non-default land-cover create fixture changes runtime/default selection
+  while persisting the complete locale graph;
+- each Builder Land-cover selection changes only runtime/default state while
+  the graph and run control retain the complete locale envelope, including the
+  full US catalog and Canada C3S rather than US datasets;
+- graph-authoritative upload-cli accepts only an advertised
+  `user_defined_cli`, while stored graphs without it fail before multipart
+  read/save, timestamp removal, reservation, or enqueue and no-graph
+  compatibility retains established behavior;
+- exact-candidate Forest evidence executes real, unmocked DEP NEXRAD, Future
+  CMIP5, and User-Defined `.cli` upload/validation/build paths; validates every
+  advertised year in the expanded US land-cover provider; and executes one
+  real annual NLCD, NLCD Ever Forest, and eMapR vote fetch/build. Prior evidence
+  may be reused only when registry, provider, and deployment revisions exactly
+  match the candidate;
 - Turkey's exact `WP12D-1` supported-non-Builder profile serialization and
   closed empty axes are fixture-locked, and `yasin.cfg` reopens with its fixed
   map inputs and landuse change disabled without a synthesized Builder graph;
 - legacy shared and project-local runs for all five recognized base tokens use
   the same live locale-to-graph resolver as Builder description/creation, while
   flattened schema-v2/schema-v3 stored authority remains registry-independent;
-- flattened no-capability/schema-v1, non-Builder, overlay, Turkey, RHEM, and
-  explicit old Canada/Earth fixtures retain their contracted compatibility
-  behavior without run-file rewriting;
+- flattened no-capability/schema-v1 states outside the exact preset exception,
+  non-Builder, overlay, Turkey, RHEM, and explicit old Canada/Earth fixtures
+  retain contracted compatibility behavior without run-file rewriting;
 - run-page controls, Flask routes, rq-engine schema/default/error documents,
   operation documents, pipeline, readiness, and paired mutation/build routes
   advertise and enforce the same landuse, soil, and climate authority;

@@ -47,6 +47,17 @@
 - Landuse, soil, and climate controls MUST render the resolved run authority
   supplied by the server. Their controller payloads MUST submit the same stable
   IDs; frontend catalogs MUST NOT broaden the server graph.
+- A Builder Land-cover dataset selection is the project default, not a
+  singleton allowlist. The landuse control MUST receive the complete selected-
+  locale envelope from the server and MUST NOT narrow it to the default.
+- A projection-eligible flattened schema-v1 named preset (exact config digest,
+  active filename-congruent preset identity, canonical two-entry parent chain
+  with current source hashes, byte-exact canonical rematerialization, and one
+  congruent recognized Builder base without locale overlay) uses current
+  locale authority for only climate and land cover. Europe
+  therefore renders exactly Vanilla CLIGEN, E-OBS Modified (Europe), and User-
+  Defined Climate. Frontend code MUST NOT re-add catalog-wide modes; all other
+  schema-v1 axes retain compatibility behavior.
 - A persisted current value outside authority renders once as disabled current
   state while every authorized recovery choice remains operable. An exact-
   current rebuild may proceed; selecting a different unsupported value must

@@ -120,6 +120,23 @@ migrated.
   `PC-24/WP12D-20260828-4`, record the exact scope-vs-changed-files comparison,
   and carry the technically accepted candidate into the authoritative WP12
   roadmap gate without production deployment.
+- [x] (2026-08-28) Reproduce the incomplete climate audit against
+  `closing-plump/eu-disturbed`: its valid flattened schema-v1 preset carries a
+  ten-mode coarse climate list that incorrectly broadens Europe.
+- [x] (2026-08-28) Draft amendment `PC-24/WP12D-20260828-5` with the corrected
+  five-locale climate matrix, complete locale land-cover envelopes, and bounded
+  schema-v1 named-preset climate/land-cover projection.
+- [x] (2026-08-28 10:45Z) Close advisory correctness/governance/security
+  findings and record independent READY verdicts with no remaining High,
+  Medium, or Low security findings and no remaining High/Medium contract
+  findings.
+- [x] (2026-08-28 16:29Z) Obtain exact operator ratification of amendment 5,
+  preserving all commits/identities and reserving merge/production to WP12.
+- [x] (2026-08-28 16:35Z) Obtain fresh binding correctness, governance, and
+  security READY reviews with security High 0 / Medium 0 / Low 0.
+- [ ] Commit amendment 5's standalone canonical checkpoint.
+- [ ] Implement and validate an amendment-5 reader floor before its graph
+  writer, then complete local and exact-host `forest` acceptance.
 
 ## Surprises & Discoveries
 
@@ -153,6 +170,23 @@ migrated.
   or carry old locale state that shared defaults cannot reach.
   Evidence: canonical capability compatibility rules and flattened snapshot
   loading.
+- Observation: `closing-plump/eu-disturbed` is a valid flattened schema-v1
+  named preset whose stored coarse climate axis contains ten modes, including
+  modes outside Europe; the existing compatibility rule therefore renders the
+  broad list exactly as stored.
+  Evidence: `/wc1/runs/cl/closing-plump/eu-disturbed.cfg`, its manifest, and
+  `climate.nodb` on 2026-08-28.
+- Observation: its manifest parent hashes still equal the current canonical
+  `_defaults.cfg` and `eu-disturbed.cfg`, and replay through the canonical
+  snapshot resolver reproduces its 2,606 config bytes exactly.
+  Evidence: read-only SHA-256 and `resolve_preset_snapshot` check on 2026-08-28.
+- Observation: the Builder graph currently conflates Continental-US land-cover
+  selection with its graph envelope (`nlcd-2019` only), while the canonical US
+  catalog contains 114 applicable annual NLCD, NLCD Ever Forest, and eMapR
+  datasets. Canada graph data uses C3S, but the live landuse locale priority
+  does not classify token `canada` and can fall through to US.
+  Evidence: `locale_profiles.py`, `capability_graph.py`, and
+  `landuse_catalog.py` on 2026-08-28.
 - Observation: the existing amendment transaction adds only missing registered
   attributes and explicitly preserves every stored capability axis.
   Evidence: project-config contract section 5.1 and
@@ -249,12 +283,14 @@ migrated.
   Rationale: this bounds runtime effects and keeps discovery, validation, and
   provider dispatch aligned in the requested domains.
   Date/Author: 2026-08-27, Codex.
-- Decision: Classify flattened projects before the new non-flattened legacy
-  locale path. No-capability/schema-v1 projects receive no new locale
-  validation and never consult the live Builder registry.
-  Rationale: preserve the versioned compatibility of historical snapshots and
-  every present valid v1 axis.
-  Date/Author: 2026-08-27, Codex.
+- Decision: Classify flattened projects before the non-flattened legacy locale
+  path. No-capability and schema-v1 projects remain compatibility-only except
+  that a valid named preset with exactly one recognized Builder base projects
+  current climate and land-cover authority.
+  Rationale: preserve every unrelated historical v1 axis while correcting the
+  demonstrated locale overexposure and using the same locale graph hotpath as
+  Builder creation.
+  Date/Author: 2026-08-28, Codex; supersedes the narrower 2026-08-27 decision.
 - Decision: Add Turkey as a classification-only supported-non-Builder base
   with source revision `WP12D-1` and empty closed dataset axes.
   Rationale: Yasin's fixed maps are config-owned inputs outside Builder
@@ -290,6 +326,13 @@ migrated.
   for already reviewed behavior; preserving chronology and repeating the audit
   at promotion is more accurate than rewriting existing commits or evidence.
   Date/Author: 2026-08-28, operator/Codex.
+- Decision: Treat Builder Land-cover selection as a default rather than a
+  capability restriction, and correct the climate matrix with DEP NEXRAD and
+  Future CMIP5 for US plus User-Defined Climate for every exposed locale.
+  Rationale: users must be able to change maps within the locale envelope, and
+  Europe must not inherit modes merely because a coarse legacy catalog listed
+  them.
+  Date/Author: 2026-08-28, operator/Codex; exactly ratified 16:29 UTC.
 
 ## Outcomes & Retrospective
 
@@ -313,10 +356,11 @@ settled availability, reader-floor rollback, byte-preservation, and candidate-
 restore acceptance pass on unchanged image `6ac7e7103046`. The final scope
 audit found three required but unlisted support entries. The operator ratified
 audit-only amendment `PC-24/WP12D-20260828-4` exactly as documented, preserving
-all existing commits. WP12D is Forest-accepted and ready for parent WP12;
-the authoritative roadmap now requires WP12 to retain and repeat the scope
-comparison before canonical merge or production promotion. Production
-deployment remains excluded from WP12D.
+all existing commits. That candidate was Forest-accepted, but the demonstrated
+climate/land-cover discrepancy reopens WP12D under proposed amendment 5. Parent
+WP12 promotion is blocked until the correction has its standalone checkpoint,
+reader-first implementation, reviews, and exact-host Forest acceptance.
+Production deployment remains excluded from WP12D.
 
 ## Context and Orientation
 
@@ -352,30 +396,34 @@ and config-token forms; the durable runtime locale written by Builder is
 
 ## Plan of Work
 
-First ratify amendment 3. Amend the exact canonical sections and ADR named in
-the decision artifact, obtain independent correctness, governance, and
-dedicated security reviews of that diff, resolve all High/Medium findings in
-their artifacts, and commit only governance/package documents as a standalone
-ancestor checkpoint.
+The current continuation starts from exact amendment-5 baseline
+`0ad76c547145bbe323148bac73410ff9cfcd01ef`; the amendment-3 checkpoint and
+reader-floor work described in earlier revisions is completed history and does
+not satisfy any amendment-5 gate. First close the finite decision/canonical
+diff, obtain advisory correctness/governance reviews, and request exact
+operator ratification. Then record the ratification time and obtain fresh
+binding correctness, governance, and dedicated security READY reviews in the
+three exact amendment-5 review artifacts. Commit only the authorized
+documentation as a new standalone checkpoint. Record its full revision and
+prove it is an ancestor before editing any amendment-5 production or test code.
 
-Then write the failing historical/current/unknown structure tests, implement,
-and review the append-only schema-v3 structural reader as a separate reader-
-floor commit with the capability-refresh writer absent and existing additive
-behavior unchanged.
-Deploy that exact reader floor to `forest` and prove it opens both the real
-current production identities and stored schema-v3 fixtures before implementing
-or exposing refresh writing. Prove `280cf7e84` and current share an identity,
-and use a test-only distinct structural pair for evolution mechanics. Record
-the reader floor's exact revision as the minimum rollback floor for the writer
-candidate.
+Next add failing prior/current/unknown structure tests and append all five
+ratified resulting identities in a standalone schema-v3 structural reader
+floor while leaving locale profiles, climate/land-cover catalogs, graph writers,
+and schema-v1 projection unchanged. Review and commit that floor separately.
+Deploy it to exact host `forest` and prove it opens historical schema-v2, every
+prior schema-v3 identity, and fixtures for all five resulting identities before
+implementing or exposing graph writing. Record its exact revision as the
+minimum rollback floor for the amendment-5 writer candidate.
 
 Next add failing evidence. Parse every named config after defaults; build
 legacy-style run fixtures for all five exposed bases and for no-capability
 flattened, non-Builder, overlay, Turkey, RHEM, schema-v1, schema-v2, and
 schema-v3 modes; include stale persisted locale and both project-local defaults
-filenames. For flattened no-capability/schema-v1, cover absent, empty, unknown,
-and valid locale and preserve present v1 axes without consulting the live
-registry. Assert Turkey's exact serialized profile/catalog revision and Yasin
+filenames. For flattened no-capability and non-preset/invalid schema-v1, cover
+absent, empty, unknown, and valid locale without consulting the live registry.
+For valid named presets, prove current climate/land-cover projection and
+preservation of every other v1 axis. Assert Turkey's exact serialized profile/catalog revision and Yasin
 fixed-map behavior. Prove links remain plain, locale overrides fail before
 publication, RQ discovery matches mutation, and direct unsupported submissions
 do not mutate or enqueue.
@@ -386,17 +434,15 @@ preview, and apply. Cover additive-only, capability-only, combined, invalid,
 stale, missing-acknowledgment, crash-recovery, exact-current, preserved-
 selection, and removed/incompatible-selection states before implementation.
 
-Then add the public Builder locale-graph reader and the stored-or-legacy run
-resolver. Normalize only the exact config files listed in the ratified
-decision, including Turkey's canonical supported-non-Builder identity. Update
-only the enumerated landuse/soil/climate core consumers, run context, paired
-routes, and RQ discovery to use the resolved authority. Leave global
-`NoDbBase.locales` unchanged. Preserve exact-current recovery and explicit
-409/503 diagnostics. Extend the project-config update modal/API/job/transaction
-to preview the complete graph delta, require the exact acknowledgment, replace
-the capability envelope atomically around unchanged project selections, and
-append a reversible provenance-discontinuity record. Refuse refresh rather
-than substituting current Builder defaults for incompatible selections.
+Then update the exact locale/climate/land-cover graph sources and bounded
+stored-or-live resolver. Keep the Builder-selected land-cover ID as runtime and
+`capability_defaults` state while serializing the complete locale envelope.
+Apply current climate/land-cover authority only to projection-eligible schema-
+v1 named presets and the already-ratified non-flattened/refresh hotpaths. Update
+only the exact production consumers in amendment 5. Leave global
+`NoDbBase.locales`, files on existing runs, other schema-v1 axes, schema-v2/v3
+stored-default authority, and exact-current recovery unchanged. Preserve
+explicit 409/503 diagnostics and selection-preserving acknowledged refresh.
 
 Finally run focused and broad gates, complete independent correctness/security
 reviews, compare every changed path with the ratified list, push, and validate
@@ -405,18 +451,18 @@ retains every merge-to-master and production action.
 
 ## Milestones
 
-Milestone 1 produces a standalone contract checkpoint. Acceptance requires the
-ratified canonical diff, Ready independent correctness/governance/security
-reviews, ADR-0047 amendment, and a commit containing no `.cfg` or
-implementation edits. The implementation candidate requires a fresh dedicated
-security review rather than reusing checkpoint approval.
+Milestone 1 produces the amendment-5 standalone contract checkpoint descended
+from `0ad76c547145bbe323148bac73410ff9cfcd01ef`. Acceptance requires exact
+operator ratification, Ready binding correctness/governance/security reviews,
+ADR-0047 and every canonical promotion target synchronized, and a commit
+containing no `.cfg`, production, or test-code edits. Its full revision is a
+mandatory ancestor of all later amendment-5 code.
 
-Milestone 2 produces the structural reader floor without a refresh writer.
-Acceptance requires append-only authorization for current production schema-v3
-structures, proof that `280cf7e84` shares the current identity, a test-only
-genuine two-identity evolution case, rejection of unknown structures, stored
-selection preservation, independent review, and exact-host Forest reopen
-evidence before refresh writing exists.
+Milestone 2 produces the amendment-5 structural reader floor without any
+amendment-5 graph writer. Acceptance requires append-only authorization for the
+five exact resulting identities, preservation of every prior production
+identity and historical schema-v2, rejection of unknown structures, independent
+review, and exact-host Forest reopen evidence before graph writing exists.
 
 Milestone 3 produces failing evidence and the bounded writer implementation.
 Acceptance requires the 128-row inventory to validate, five legacy profile
@@ -432,6 +478,11 @@ candidate, and exact-host Forest reopen/build evidence with no production
 action. Forest evidence must include an acknowledged schema-v3 refresh and
 reopen, followed by rollback to the recorded WP12D reader floor proving the
 refreshed config and manifest remain readable and byte-for-byte unchanged.
+It must bind exact registry/provider/deployment revisions and execute real,
+unmocked DEP NEXRAD, Future CMIP5, and User-Defined `.cli` upload/validation/
+build paths. It must validate every advertised expanded-US land-cover year and
+perform one real annual NLCD, NLCD Ever Forest, and eMapR vote fetch/build.
+Earlier evidence may be reused only when all bound revisions exactly match.
 
 ## Concrete Steps
 
@@ -441,15 +492,19 @@ Initiative branch: feature/project-owned-config
 Canonical branch: master
 Promotion policy: merge only at the roadmap promotion gate
 
-Starting/upstream revision is
-`5e04e0da9a23dd676e171f1857e14fa38cc9dfbe`; canonical merge base is
-`6af9ecdd63921189804c5e292114a97253914cbb`. Verify the standalone checkpoint is
-an ancestor before editing config or implementation files.
+The initiative's historical start is
+`5e04e0da9a23dd676e171f1857e14fa38cc9dfbe`; amendment 5 starts exactly at
+`0ad76c547145bbe323148bac73410ff9cfcd01ef`. Canonical merge base remains
+`6af9ecdd63921189804c5e292114a97253914cbb`. After ratification and binding
+reviews, record the new amendment-5 standalone checkpoint revision here and in
+the tracker. Verify that exact revision is an ancestor before editing any path
+in amendment 5's production or test-code source boundary; the old
+`596ff5758...` checkpoint does not satisfy this gate.
 
 Iterate with:
 
-    wctl run-pytest tests/nodb/test_locale_capability_authority.py tests/nodb/test_project_config_reader_unit.py tests/nodb/test_project_config_preset_snapshot.py tests/nodb/test_project_config_update.py tests/nodb/test_defaults_cfg_compatibility.py --maxfail=1
-    wctl run-pytest tests/weppcloud/routes/test_pure_controls_render.py tests/weppcloud/routes/test_climate_bp.py tests/weppcloud/routes/test_soils_bp.py tests/microservices/test_rq_engine_project_routes.py tests/microservices/test_rq_engine_project_config_update_routes.py tests/microservices/test_rq_engine_landuse_routes.py tests/microservices/test_rq_engine_climate_routes.py tests/microservices/test_rq_engine_soils_routes.py tests/microservices/test_rq_engine_schema_defaults_routes.py tests/microservices/test_rq_engine_orchestration_read_routes.py tests/rq/test_project_config_update_rq.py --maxfail=1
+    wctl run-pytest tests/nodb/test_locale_capability_authority.py tests/nodb/test_project_config_reader_foundation.py tests/nodb/test_project_config_registry_serializer.py tests/nodb/test_project_config_preset_snapshot.py tests/nodb/test_project_config_update.py tests/nodb/test_defaults_cfg_compatibility.py --maxfail=1
+    wctl run-pytest tests/weppcloud/routes/test_pure_controls_render.py tests/weppcloud/routes/test_climate_bp.py tests/weppcloud/routes/test_soils_bp.py tests/microservices/test_rq_engine_builder_routes.py tests/microservices/test_rq_engine_project_routes.py tests/microservices/test_rq_engine_project_config_update_routes.py tests/microservices/test_rq_engine_landuse_routes.py tests/microservices/test_rq_engine_climate_routes.py tests/microservices/test_rq_engine_soils_routes.py tests/microservices/test_rq_engine_schema_defaults_routes.py tests/microservices/test_rq_engine_orchestration_read_routes.py tests/rq/test_project_config_update_rq.py --maxfail=1
     wctl run-npm lint
     wctl run-npm test
 
@@ -459,9 +514,12 @@ Forest checks. Record counts and revisions in the tracker.
 
 The exact preexisting dirty paths excluded from every WP12D stage are:
 
+- `code-quality-report.json`;
+- `code-quality-summary.md`;
 - `docker/validate-cap-runtime-contract.sh`;
 - `docs/infrastructure/incident-2026-08-25-production-compose-partial-build.md`;
 - `docs/standards/hardening-lifecycle-standard.md`;
+- `docs/ui-docs/accessiblity.md`;
 - `docs/ui-docs/cap-js-captcha-auth.md`;
 - `docs/work-packages/20260823_session_cookie_namespace_migration/artifacts/rollout_runbook.md`;
 - `docs/work-packages/20260823_session_cookie_namespace_migration/prompts/active/session_cookie_namespace_migration_execplan.md`;
@@ -481,9 +539,11 @@ through acknowledged refresh; schema-v2 refresh remains unavailable.
 An old run with stale persisted locale must resolve its effective `.cfg`
 without modifying any file. Missing project-local locale must use the explicit
 compatibility value, while an explicit local value remains authoritative.
-No-capability flattened and schema-v1 fixtures must preserve existing behavior
-for absent, empty, unknown, and valid locale without live-registry access;
-present valid v1 axes remain restrictive. Non-Builder, overlay, Turkey, and
+No-capability flattened and schema-v1 states outside the exact valid-preset
+exception must preserve existing behavior for absent, empty, unknown, and
+valid locale without live-registry access. Valid presets must use only current
+climate/land-cover projection while present valid v1 axes otherwise remain
+restrictive. Non-Builder, overlay, Turkey, and
 RHEM fixtures must preserve existing behavior. RQ schemas/defaults/errors,
 operation documents, pipeline, and readiness must match paired mutation
 authority.
@@ -569,3 +629,10 @@ amendment `PC-24/WP12D-20260828-4` adds the export-only locale package surface,
 append-only capability-structure authority, and bounded signed-identity
 handoff to the audited support inventory. Existing commits are preserved, and
 parent WP12 must repeat the comparison before merge or production promotion.
+
+Plan revision note (2026-08-28): proposed amendment
+`PC-24/WP12D-20260828-5` corrects the five-locale climate matrix, separates a
+Builder land-cover default from the complete locale envelope, and gives valid
+schema-v1 named presets a live climate/land-cover projection without rewriting
+their stored provenance. It requires exact ratification and a new reader-first
+Forest gate before implementation acceptance.

@@ -4,13 +4,14 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-27 20:31 UTC
-**Current phase**: Forest accepted / ready for parent WP12 handoff
-**Last updated**: 2026-08-28 09:54 UTC
-**Next milestone**: parent WP12 promotion review with the ratified scope audit;
-production remains reserved
+**Current phase**: amendment 5 documentation-only checkpoint
+**Last updated**: 2026-08-28 16:35 UTC
+**Next milestone**: exact path-staged documentation-only checkpoint; production
+remains reserved
 **Security impact**: `high`
 **Dedicated security review**: `yes`
-**Security artifact**: `artifacts/20260827_security_review.md`
+**Security artifacts**: `artifacts/20260827_security_review.md` and pending
+`artifacts/20260828_amendment5_security_contract_review.md`
 **Parameterization ADR**: `docs/adrs/ADR-0047-project-config-locale-authority.md`
 Initiative branch: feature/project-owned-config
 Canonical branch: master
@@ -27,20 +28,42 @@ PC-24 owns `.cfg` locale normalization and run-UI authority parity.
 
 ### In Progress
 
-- None. WP12D is accepted and ready for parent WP12.
+- [x] Ratify `PC-24/WP12D-20260828-5` exactly as documented after independent
+  advisory contract reviews (2026-08-28 16:29 UTC).
+- [x] Obtain fresh binding correctness, governance, and security READY reviews
+  (2026-08-28 16:35 UTC; security H0/M0/L0).
+- [ ] Commit the standalone amendment-5 contract checkpoint.
+- [ ] Add all five resulting schema-v3 structural identities to a standalone
+  reader floor and prove prior-identity compatibility.
+- [ ] Implement the corrected locale graph, schema-v1 preset projection, and
+  land-cover default/envelope separation.
+- [ ] Complete focused/full validation, binding implementation reviews, and
+  exact-host `forest` reader/writer/rollback acceptance without an image build.
 
 ### Ready / Handoff
 
-- [x] Carry the exact scope comparison and technically accepted candidate into
-  the authoritative WP12 roadmap gate without production deployment.
+- [ ] Carry the amendment-4 and amendment-5 exact scope comparisons and the
+  newly accepted candidate into WP12 without production deployment.
 
 ### Blocked
 
+- [ ] Every amendment-5 production/test-code or `.cfg` edit is blocked until
+  the exact operator-ratified, binding-reviewed standalone checkpoint descended
+  from `0ad76c547145bbe323148bac73410ff9cfcd01ef` is recorded and verified as
+  its ancestor.
 - [ ] Production deployment remains reserved to parent WP12 after WP12D Forest
   acceptance.
 
 ### Done
 
+- [x] Operator exactly ratified amendment `PC-24/WP12D-20260828-5`, authorized
+  its standalone checkpoint and implementation, preserved existing commits and
+  stored identities, and reserved merge/production to WP12
+  (2026-08-28 16:29 UTC).
+- [x] Independent amendment-5 advisory correctness, governance, and fresh high-
+  impact security reviews are READY after closing every finding; ratification
+  was then pending and fresh binding reviews remained pending
+  (2026-08-28 10:45 UTC).
 - [x] Operator explicitly ratified audit-only amendment
   `PC-24/WP12D-20260828-4` exactly as documented, preserving all existing
   commits; the correction is authoritative and its comparison is now a parent
@@ -287,6 +310,12 @@ Only non-flattened legacy runs enter the new effective-`.cfg` locale path.
 **Rationale**: Historical flattened snapshots can legitimately omit locale,
 and schema-v1 present axes already have a versioned compatibility contract.
 
+**Amendment 5 correction (2026-08-28)**: No-capability and arbitrary schema-v1
+states keep this rule, but a valid named-preset manifest with exactly one
+recognized Builder base projects current climate and land-cover authority only.
+This corrects the demonstrated Europe overexposure without rewriting the run or
+changing other v1 axes.
+
 ### 2026-08-27 22:01 UTC: Stored authority may be explicitly refreshed
 
 **Decision**: Stored schema-v2/v3 authority remains frozen by default. For an
@@ -375,9 +404,12 @@ claimed to understand future structural graphs.
 
 The following preexisting dirty paths are unrelated and must never be staged:
 
+- `code-quality-report.json`;
+- `code-quality-summary.md`;
 - `docker/validate-cap-runtime-contract.sh`;
 - `docs/infrastructure/incident-2026-08-25-production-compose-partial-build.md`;
 - `docs/standards/hardening-lifecycle-standard.md`;
+- `docs/ui-docs/accessiblity.md`;
 - `docs/ui-docs/cap-js-captcha-auth.md`;
 - `docs/work-packages/20260823_session_cookie_namespace_migration/artifacts/rollout_runbook.md`;
 - `docs/work-packages/20260823_session_cookie_namespace_migration/prompts/active/session_cookie_namespace_migration_execplan.md`;

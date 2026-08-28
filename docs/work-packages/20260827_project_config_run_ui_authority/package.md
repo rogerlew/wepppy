@@ -1,6 +1,6 @@
 # Project Config Run UI Authority (WP12D)
 
-**Status**: Forest accepted / ready for WP12 handoff (2026-08-28)
+**Status**: Amendment 5 ratified/reviewed; checkpoint pending (2026-08-28)
 **Timezone**: UTC
 Initiative branch: feature/project-owned-config
 Canonical branch: master
@@ -30,8 +30,8 @@ schema-v3 project. Interfaces navigation remains unchanged.
   authority for both stored Builder projects and recognized legacy profiles.
 - Reopen old runs without rewriting them, preserve exact current selections,
   and keep flattened no-capability/schema-v1/non-Builder/overlay behavior
-  compatible without live-registry consultation for flattened compatibility
-  modes.
+  compatible except for the bounded live climate/land-cover projection of a
+  valid schema-v1 named preset.
 - Let project owners deliberately adopt current maps and capabilities through
   a preview-bound acknowledgment that records the provenance discontinuity
   and unstable-feature risk without replacing their project selections with
@@ -59,6 +59,10 @@ schema-v3 project. Interfaces navigation remains unchanged.
 - Ratified audit-only correction `PC-24/WP12D-20260828-4` for the export-only
   locale package surface, append-only capability-structure authority, and
   bounded signed-identity handoff required by Forest execution.
+- Ratified amendment `PC-24/WP12D-20260828-5` for the corrected five-locale
+  climate matrix, complete locale land-cover envelopes, and valid schema-v1
+  named-preset climate/land-cover projection. It requires binding reviews, a
+  standalone contract checkpoint, and another reader-first Forest gate.
 
 ### Explicitly Out of Scope
 
@@ -67,12 +71,14 @@ schema-v3 project. Interfaces navigation remains unchanged.
 - Migrating or rewriting any existing run or persisted NoDb file.
 - Changing the global `NoDbBase.locales` property or locale-sensitive consumers
   outside the enumerated landuse, soil, and climate modules.
-- Changing providers, scientific algorithms, dataset lists, model defaults,
-  queue topology, authentication/authorization beyond the ratified identity
-  handoff, or production.
+- Changing providers, scientific algorithms, model defaults, queue topology,
+  authentication/authorization beyond the ratified identity handoff, or
+  production. Dataset-list changes are limited to amendment 5's exact climate
+  matrix and land-cover envelopes.
 - Synthesizing Builder graphs for non-Builder bases, overlays, or RHEM.
 - Applying new locale validation or live Builder authority to flattened
-  no-capability or schema-v1 projects.
+  no-capability or schema-v1 projects outside amendment 5's exact valid-preset
+  climate/land-cover exception.
 - Silent/background graph refresh, locale changes through update, capability
   rollback, or claims of strict creation-time reproducibility after refresh.
 
@@ -83,6 +89,12 @@ schema-v3 project. Interfaces navigation remains unchanged.
 - [x] Both Config Builder links and the Interfaces page remain unchanged.
 - [x] Five recognized legacy base locales render and enforce their live Builder
   graph while stored schema-v2/v3 runs remain unaffected by registry drift.
+- [ ] Valid schema-v1 named presets project current climate and land-cover
+  authority only; Europe exposes exactly Vanilla, E-OBS Modified, and User-
+  Defined Climate without rewriting the run.
+- [ ] Every locale graph exposes amendment 5's exact climate matrix and
+  complete land-cover envelope; Builder selection changes the land-cover
+  default without restricting the run control.
 - [x] Eligible complete schema-v3 projects expose current capabilities only
   after an exact preview-bound acknowledgment and atomic manifest-recorded
   refresh; schema-v2 refresh remains unavailable.
@@ -91,23 +103,27 @@ schema-v3 project. Interfaces navigation remains unchanged.
   when a preserved selection is incompatible with the current envelope.
 - [x] Only congruent schema-v3 Builder-source projects may refresh; preset
   sources, schema-v2, and locale/selection mismatches remain unavailable.
-- [x] The writer candidate is rollback-safe to a recorded WP12D reader floor
-  that understands every structural identity the writer can persist.
+- [x] The amendment-3 writer candidate is rollback-safe to its recorded WP12D
+  reader floor.
+- [ ] The amendment-5 writer candidate is rollback-safe to a new reader floor
+  that understands all five resulting structural identities.
 - [x] Stale persisted locale state does not override effective `.cfg` locale
   and no run file is rewritten during reopen.
 - [x] Current outside-authority state remains observable and exactly rebuildable
   while authorized recovery choices remain selectable.
-- [x] Frontend/Python/full-suite, documentation, correctness, security, and
-  Forest gates pass.
+- [x] Amendment-3 frontend/Python/full-suite, documentation, correctness,
+  security, and Forest gates passed.
+- [ ] Fresh amendment-5 frontend/Python/full-suite, documentation, correctness,
+  security, and Forest gates pass.
 
 ## Parameterization ADR Gate
 
 - **Parameterization change present**: yes
 - **ADR required**: yes
 - **ADR**: `docs/adrs/ADR-0047-project-config-locale-authority.md`
-- **Decision provenance captured**: yes; the operator corrected the authority
-  model, accepted the on-demand/provenance tradeoff, and amendment
-  `PC-24/WP12D-20260827-3` records the exact values and warning.
+- **Decision provenance captured**: yes; amendment
+  `PC-24/WP12D-20260828-5` records the exact climate/land-cover correction and
+  was ratified exactly on 2026-08-28 16:29 UTC.
 
 ## Dependencies and Handoff
 
@@ -118,9 +134,9 @@ schema-v3 project. Interfaces navigation remains unchanged.
   writer/provider/create/reopen acceptance.
 - **Blocks**: WP12 production cutover.
 - **Handoff gate**: WP12 must retain
-  `artifacts/20260828_scope_audit_correction.md` and repeat its
-  scope-versus-changed-files comparison before canonical merge or production
-  promotion.
+  `artifacts/20260828_scope_audit_correction.md` plus amendment 5's final
+  scope-versus-changed-files comparison and repeat both before canonical merge
+  or production promotion.
 
 ## Security Impact and Review Gate
 
@@ -129,10 +145,16 @@ schema-v3 project. Interfaces navigation remains unchanged.
 - **Rationale**: untrusted config locale and run-scoped control submissions
   select executable providers, even though auth policy remains unchanged.
 - **Security artifact**: `artifacts/20260827_security_review.md`
+- **Amendment-5 security artifact**:
+  `artifacts/20260828_amendment5_security_contract_review.md` (binding READY)
 
 ## References
 
 - `artifacts/20260827_contract_decision.md`
+- `artifacts/20260828_climate_landcover_contract_decision.md`
+- `artifacts/20260828_amendment5_contract_correctness_review.md`
+- `artifacts/20260828_amendment5_contract_governance_review.md`
+- `artifacts/20260828_amendment5_security_contract_review.md`
 - `artifacts/20260827_surface_matrix.md`
 - `artifacts/20260827_config_locale_inventory.md`
 - `artifacts/20260827_amendment2_advisory_correctness_review.md`

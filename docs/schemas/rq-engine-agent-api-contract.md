@@ -348,20 +348,38 @@ templates/defaults, aggregated operation documents, pipeline, and readiness
 metadata expose only the authority stored in that run's flattened config.
 Clients MUST treat these run-scoped enums and model tuples as authoritative;
 the current global provider catalog cannot broaden an existing run. Flattened
-no-capability/schema-v1 and non-Builder/overlay/Turkey/RHEM compatibility modes
-retain their existing discovery behavior; the recognized non-flattened legacy
-base exception is defined below.
+no-capability and non-Builder/overlay/Turkey/RHEM compatibility modes retain
+their existing discovery behavior. Schema-v1 does too except when an exact-
+digest, active filename/parent-chain-congruent preset manifest with current
+parent hashes, byte-exact canonical rematerialization, and one congruent
+recognized Builder base without locale overlay select current locale authority
+for only climate and land cover. The recognized non-flattened
+legacy-base exception is defined below.
 The climate, landuse, and soils build endpoints and the WEPP run endpoint MUST
 return `409 capability_authority_invalid` with diagnostic `error.details`
 before mutation or enqueue when stored schema-v2/schema-v3 authority is malformed,
 partial, contradictory, or unsupported.
 
+For any run with resolved graph authority, `POST
+/api/runs/{runid}/{config}/tasks/upload-cli/` MUST require
+`user_defined_cli` in that graph before reading or saving multipart content,
+removing a timestamp, reserving, or enqueueing. Upload is a content replacement,
+not an exact-current rebuild, so an outside-authority current value does not
+authorize it. No-graph compatibility modes retain established upload behavior.
+
 For non-flattened legacy runs, effective `.cfg` locale `us`, `eu`, `canada`,
 `au`, or `earth` selects the matching current Builder graph for landuse, soil,
 and climate discovery and mutation. Other legacy compositions retain localized
-catalogs. `409 locale_authority_invalid` and `503 builder_registry_error` with
+catalogs. The exact climate datasets are US Vanilla/PRISM/Daymet/gridMET/DEP
+NEXRAD/Future CMIP5/User-Defined, Europe Vanilla/E-OBS/User-Defined, Canada
+Vanilla/Daymet/User-Defined, Australia Vanilla/AGDC/User-Defined, and Earth
+Vanilla/User-Defined. Builder Land-cover selection is a default only; discovery
+and mutation expose the complete locale land-cover envelope. `409
+locale_authority_invalid` and `503 builder_registry_error` with
 `Retry-After: 5` are explicit diagnostic planning failures; agents MUST NOT
-substitute a global catalog. After a terminal config-update job failure, agents
+substitute a global catalog. Unavailable, malformed, or inconsistent canonical
+preset policy also uses the diagnostic 503 after auth/run access and is never
+treated as an inactive-preset compatibility fallback. After a terminal config-update job failure, agents
 MUST compare the original preview digests with availability `current_digest`
 and `last_update` to classify not-applied versus committed/recovered state.
 

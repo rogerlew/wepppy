@@ -3,6 +3,11 @@
 **Amendment ID**: `PC-24/WP12D-20260827-3`
 **Status**: ratified; canonical checkpoint `596ff5758`
 **Scope audit amendment**: `PC-24/WP12D-20260828-4`, ratified 2026-08-28
+**Climate/land-cover amendment**: `PC-24/WP12D-20260828-5`, exactly ratified
+2026-08-28 16:29 UTC; it
+supersedes this artifact's schema-v1 compatibility rule only for the exact
+valid named-preset climate/land-cover projection and supersedes its affected
+climate/land-cover matrix and structural-transition statements.
 **Starting revision**: `5e04e0da9a23dd676e171f1857e14fa38cc9dfbe`
 **Starting upstream revision**: `origin/feature/project-owned-config` at the
 same revision

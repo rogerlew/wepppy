@@ -1833,16 +1833,33 @@ authority that paired mutations/builds enforce.
 Authority classification occurs before discovery:
 
 - complete flattened schema-v2/schema-v3 uses validated stored authority;
-- flattened no-capability/schema-v1 retains established compatibility without
-  live registry consultation;
+- projection-eligible flattened schema-v1 named presets with an exact config
+  digest, active filename/parent-chain-congruent identity and current source
+  hashes, byte-exact canonical rematerialization, and one congruent recognized
+  Builder base without locale overlay use current locale authority for only
+  climate and land cover;
+- flattened no-capability and other schema-v1 states retain established
+  compatibility without live registry consultation;
 - non-flattened effective locale `us`, `eu`, `canada`, `au`, or `earth` uses
   the matching current Builder graph; and
 - non-Builder, overlay, Turkey, and RHEM retain localized catalogs.
+
+The exact climate axes are US Vanilla/PRISM/Daymet/gridMET/DEP NEXRAD/Future
+CMIP5/User-Defined, Europe exactly Vanilla/E-OBS Modified/User-Defined, Canada
+Vanilla/Daymet/User-Defined, Australia Vanilla/AGDC/User-Defined, and Earth
+Vanilla/User-Defined. A Builder Land-cover selection sets the project default;
+it MUST NOT narrow discovery or mutation below the complete locale envelope.
 
 Discovery MUST NOT advertise a stable/runtime value that mutation rejects. A
 different unsupported selection fails before NoDb mutation, timestamp removal,
 file write, or enqueue. One persisted outside-authority current value may be
 described as disabled exact-current and rebuilt unchanged.
+
+User-Defined Climate upload is not an unchanged rebuild. When graph authority
+exists, `upload-cli` MUST require `user_defined_cli` in the resolved climate
+axis before multipart read/save, timestamp removal, reservation, or enqueue;
+outside-authority current state does not authorize replacement content. A no-
+graph compatibility state retains established upload behavior.
 
 Invalid non-flattened locale advertises/returns `409 locale_authority_invalid`.
 A required unavailable Builder registry advertises/returns `503

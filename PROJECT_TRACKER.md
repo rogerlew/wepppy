@@ -415,18 +415,25 @@ When resuming Kubernetes work:
 
 **Scope**: Make effective `.cfg` locale authoritative without locale-bearing
 Interface links. Recognized legacy base profiles use the live Builder graph for
-landuse, soil, and climate controls; Builder schema-v2/v3 projects remain frozen
-to their stored graph. Congruent Builder-source schema-v3 projects may adopt a
-selection-preserving same-locale envelope refresh only after an authorized end
-user reviews and acknowledges the provenance/stability warning; schema-v2
-refresh is unavailable. Normalize exact Canada/Portland/RHEM/Tenerife/US config
-identity without silent migration; production remains reserved for WP12.
+landuse, soil, and climate controls; projection-eligible schema-v1 named presets
+use it for climate and land cover only; Builder schema-v2/v3 projects remain
+frozen to their stored graph. Amendment 5 corrects the five-locale climate
+matrix and makes Builder Land-cover selection a default rather than a singleton
+capability. Congruent Builder-source schema-v3 projects may adopt a selection-
+preserving same-locale envelope refresh only after an authorized end user
+reviews and acknowledges the provenance/stability warning; schema-v2 refresh
+is unavailable. No migration is authorized; production remains reserved for
+WP12.
 
-**Status**: Amendment `PC-24/WP12D-20260827-3` was explicitly ratified on
-2026-08-27. Canonical contract amendments passed binding correctness,
-governance, and security review with no unresolved High or Medium findings.
-Config and implementation edits remain blocked until the standalone checkpoint
-commit exists.
+**Status**: Amendment `PC-24/WP12D-20260827-3` and audit correction 4 were
+accepted and Forest-validated. The demonstrated Europe/schema-v1 and land-cover
+envelope defect reopened WP12D under amendment
+`PC-24/WP12D-20260828-5`, exactly ratified on 2026-08-28 16:29 UTC. Amendment-5
+implementation and config edits are blocked until fresh binding correctness,
+governance, and security reviews and a new standalone checkpoint descended
+from baseline `0ad76c547145bbe323148bac73410ff9cfcd01ef`. Its append-only reader
+floor must pass exact-host `forest` before any new graph writer is exposed.
+Parent WP12 retains merge and every production action.
 
 ### Project Config Builder Locale Expansion (WP12C)
 
