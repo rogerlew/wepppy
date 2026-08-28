@@ -85,10 +85,18 @@ def _resolve_runtime_capability_graphs(config):
         if resolved.mode is RunCapabilityMode.STORED
         else None
     )
-    return resolved.graph, model_graph
+    return (
+        resolved.graph,
+        model_graph,
+        getattr(resolved, "projected_domains", frozenset()),
+    )
 
 
-def _runtime_capabilities(domain_graph, model_graph) -> dict[str, Any] | None:
+def _runtime_capabilities(
+    domain_graph,
+    model_graph,
+    projected_domains: frozenset[str] = frozenset(),
+) -> dict[str, Any] | None:
     """Serialize domain discovery without broadening model authority."""
 
     if domain_graph is None and model_graph is None:
@@ -134,6 +142,28 @@ def _runtime_capabilities(domain_graph, model_graph) -> dict[str, Any] | None:
             "soil_builder_defaults": dict(domain_graph.soil_builder_defaults),
         })
         capabilities["defaults"].update(domain_graph.defaults)
+        if projected_domains:
+            projected_default_keys: set[str] = set()
+            if "climate" in projected_domains:
+                projected_default_keys.update(
+                    {"climate_dataset", "climate_station_database"}
+                )
+            if "landuse" in projected_domains:
+                projected_default_keys.add("landuse_dataset")
+            if "soil" in projected_domains:
+                projected_default_keys.add("soil_dataset")
+            for key in tuple(capabilities["defaults"]):
+                if key not in projected_default_keys:
+                    capabilities["defaults"].pop(key)
+        if projected_domains and "soil" not in projected_domains:
+            for key in (
+                "soil_datasets",
+                "soil_builders",
+                "soil_builders_by_dataset",
+                "soil_builder_defaults",
+            ):
+                capabilities.pop(key, None)
+            capabilities["defaults"].pop("soil_dataset", None)
     if model_graph is not None:
         capabilities.update({
             "delineation_backends": list(model_graph.delineation_backends),
@@ -822,7 +852,7 @@ def _load_runtime_state(runid: str, config: str) -> dict[str, Any]:
                     step_completion_ts[step_id] = ended_ts
 
     try:
-        domain_capability_graph, model_capability_graph = (
+        domain_capability_graph, model_capability_graph, projected_domains = (
             _resolve_runtime_capability_graphs(wepp)
         )
     except LocaleAuthorityInvalidError as exc:
@@ -841,9 +871,11 @@ def _load_runtime_state(runid: str, config: str) -> dict[str, Any]:
     except ValueError as exc:
         raise CapabilityAuthorityInvalidError(str(exc)) from exc
     capabilities = _runtime_capabilities(
-        domain_capability_graph, model_capability_graph
+        domain_capability_graph,
+        model_capability_graph,
+        projected_domains,
     )
-    if capabilities is None:
+    if capabilities is None or projected_domains:
         discovered_v1: dict[str, list[str]] = {}
         for axis in (
             "climate_datasets",
@@ -866,8 +898,18 @@ def _load_runtime_state(runid: str, config: str) -> dict[str, Any]:
                 raw = wepp.config_get_list("capabilities", axis, None)
                 assert isinstance(raw, (list, tuple))
                 discovered_v1[axis] = [str(item).strip() for item in raw]
-        if discovered_v1:
+        if discovered_v1 and capabilities is None:
             capabilities = {"schema_version": 1, **discovered_v1}
+        elif discovered_v1 and capabilities is not None:
+            for axis, values in discovered_v1.items():
+                if axis not in {
+                    "climate_datasets",
+                    "climate_station_methods",
+                    "climate_spatial_methods",
+                    "landuse_datasets",
+                    "landuse_methods",
+                }:
+                    capabilities[axis] = values
 
     return {
         "runid": runid,

@@ -34,13 +34,14 @@ _BUILDER_EXPOSED_DATASETS = frozenset(
         "prism_stochastic",
         "observed_daymet",
         "observed_gridmet",
+        "dep_nexrad",
+        "future_cmip5",
+        "user_defined_cli",
         "eobs_modified",
         "agdc",
     }
 )
-_SUPPORTED_NON_BUILDER_DATASETS = frozenset(
-    {"dep_nexrad", "future_cmip5", "user_defined_cli"}
-)
+_SUPPORTED_NON_BUILDER_DATASETS: frozenset[str] = frozenset()
 
 CLIMATE_STATION_DATABASE_ADAPTER_REVISION = "cligen-station-resolver-v2"
 

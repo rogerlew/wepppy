@@ -24,6 +24,7 @@ __all__ = [
     "ProjectConfigStatus",
     "ProjectConfigWarning",
     "load_project_config",
+    "project_config_manifest_payload",
     "project_config_manifest_source_kind",
     "project_config_reader_enabled",
 ]
@@ -69,6 +70,7 @@ class ProjectConfigStatus:
     manifest_valid: bool
     updates_enabled: bool
     warnings: tuple[ProjectConfigWarning, ...] = ()
+    config_sha256: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -110,20 +112,36 @@ def project_config_manifest_source_kind(
         config_bytes = config_path.read_bytes()
     except OSError:
         return None
-    manifest_valid, _updates_enabled, _warnings = _manifest_status(
+    _ = run_id
+    payload = _validated_manifest_payload(root, config_path, config_bytes)
+    source_kind = payload.get("source_kind") if payload is not None else None
+    return source_kind if isinstance(source_kind, str) else None
+
+
+def project_config_manifest_payload(
+    authority_root: str | Path,
+    config_filename: str,
+    *,
+    require_exact_digest: bool = False,
+    run_id: str = "manifest-inspection",
+) -> dict[str, object] | None:
+    """Return one canonically validated manifest payload without trusting it."""
+
+    root = Path(authority_root).resolve()
+    if Path(config_filename).name != config_filename:
+        return None
+    config_path = root / config_filename
+    try:
+        config_bytes = config_path.read_bytes()
+    except OSError:
+        return None
+    _ = run_id
+    return _validated_manifest_payload(
         root,
         config_path,
         config_bytes,
-        run_id,
+        require_exact_digest=require_exact_digest,
     )
-    if not manifest_valid:
-        return None
-    try:
-        payload = json.loads((root / _MANIFEST_NAME).read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, json.JSONDecodeError):
-        return None
-    source_kind = payload.get("source_kind") if isinstance(payload, dict) else None
-    return source_kind if isinstance(source_kind, str) else None
 
 
 def _contained_parent(wd: Path, parent_wd: str | Path) -> Path:
@@ -143,10 +161,18 @@ def _contained_parent(wd: Path, parent_wd: str | Path) -> Path:
 
 
 def _read_parser(path: Path, parser_factory: Callable[..., RawConfigParser]) -> RawConfigParser:
-    parser = parser_factory(allow_no_value=True)
-    with path.open(encoding="utf-8") as stream:
-        parser.read_file(stream)
+    parser, _config_bytes = _read_parser_observation(path, parser_factory)
     return parser
+
+
+def _read_parser_observation(
+    path: Path,
+    parser_factory: Callable[..., RawConfigParser],
+) -> tuple[RawConfigParser, bytes]:
+    config_bytes = path.read_bytes()
+    parser = parser_factory(allow_no_value=True)
+    parser.read_string(config_bytes.decode("utf-8"), source=str(path))
+    return parser, config_bytes
 
 
 def _flattened_state(parser: RawConfigParser, filename: str) -> bool:
@@ -226,6 +252,43 @@ def _manifest_payload_is_valid(payload: object, filename: str) -> bool:
     if not isinstance(payload.get("amendments"), list):
         return False
     return True
+
+
+def _validated_manifest_payload(
+    authority_root: Path,
+    config_path: Path,
+    config_bytes: bytes,
+    *,
+    require_exact_digest: bool = False,
+) -> dict[str, object] | None:
+    """Read and validate one immutable-in-function manifest observation."""
+
+    manifest_path = authority_root / _MANIFEST_NAME
+    if (
+        not manifest_path.is_file()
+        or manifest_path.resolve().parent != authority_root.resolve()
+    ):
+        return None
+    try:
+        manifest_text = manifest_path.read_text(encoding="utf-8")
+    except (OSError, UnicodeError):
+        return None
+    if scan_manifest_text(manifest_text, source=_MANIFEST_NAME):
+        return None
+    try:
+        payload = json.loads(manifest_text)
+    except json.JSONDecodeError:
+        return None
+    if not _manifest_payload_is_valid(payload, config_path.name):
+        return None
+    assert isinstance(payload, dict)
+    if require_exact_digest:
+        config_payload = payload["config"]
+        assert isinstance(config_payload, dict)
+        declared = config_payload["sha256"]
+        if declared != hashlib.sha256(config_bytes).hexdigest():
+            return None
+    return dict(payload)
 
 
 def _manifest_status(
@@ -342,9 +405,13 @@ def load_project_config(
     candidate = child_candidate
 
     child_parser: RawConfigParser | None = None
+    child_config_bytes: bytes | None = None
     child_flattened = False
     if child_candidate.is_file():
-        child_parser = _read_parser(child_candidate, parser_factory)
+        child_parser, child_config_bytes = _read_parser_observation(
+            child_candidate,
+            parser_factory,
+        )
         child_flattened = _flattened_state(child_parser, filename)
 
     if parent_wd is not None:
@@ -363,22 +430,20 @@ def load_project_config(
             candidate = parent_root / filename
 
     if candidate.is_file():
-        parser = (
-            child_parser
-            if candidate == child_candidate and child_parser is not None
-            else _read_parser(candidate, parser_factory)
-        )
+        if (
+            candidate == child_candidate
+            and child_parser is not None
+            and child_config_bytes is not None
+        ):
+            parser = child_parser
+            config_bytes = child_config_bytes
+        else:
+            parser, config_bytes = _read_parser_observation(candidate, parser_factory)
         if _flattened_state(parser, filename):
             if candidate.resolve().parent != authority_root.resolve():
                 raise ProjectConfigAuthorityError(
                     "Flattened config must be a direct child of its authority root"
                 )
-            try:
-                config_bytes = candidate.read_bytes()
-            except OSError as exc:
-                raise ProjectConfigError(
-                    f"Unable to read configuration file {filename!r}"
-                ) from exc
             valid, updates_enabled, warnings = _manifest_status(
                 authority_root, candidate, config_bytes, run_id
             )
@@ -391,6 +456,7 @@ def load_project_config(
                     valid,
                     updates_enabled,
                     warnings,
+                    hashlib.sha256(config_bytes).hexdigest(),
                 ),
             )
         return _legacy_result(

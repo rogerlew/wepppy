@@ -12,7 +12,10 @@ TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import orchestration_read_routes
-from wepppy.nodb.locales import build_continental_us_capability_graph
+from wepppy.nodb.locales import (
+    build_continental_us_capability_graph,
+    build_locale_capability_graph,
+)
 
 pytestmark = pytest.mark.microservice
 
@@ -684,11 +687,12 @@ def test_legacy_live_domain_graph_is_published_without_model_authority(
         lambda candidate: None,
     )
 
-    domain_graph, model_graph = (
+    domain_graph, model_graph, projected_domains = (
         orchestration_read_routes._resolve_runtime_capability_graphs(config)
     )
     assert domain_graph is live_graph
     assert model_graph is None
+    assert projected_domains == frozenset()
     capabilities = orchestration_read_routes._runtime_capabilities(
         domain_graph, model_graph
     )
@@ -730,6 +734,41 @@ def test_stored_graph_publishes_domain_and_model_capabilities() -> None:
     assert capabilities["defaults"]["wepp_binary"] == "wepp_260803"
 
 
+def test_schema_v1_projection_publishes_only_climate_and_landuse_domains() -> None:
+    graph = build_locale_capability_graph(
+        "europe",
+        ("wepp_260803",),
+        _binary_revisions(("wepp_260803",)),
+    )
+
+    capabilities = orchestration_read_routes._runtime_capabilities(
+        graph,
+        None,
+        frozenset({"climate", "landuse"}),
+    )
+
+    assert capabilities is not None
+    assert capabilities["climate_datasets"] == [
+        "vanilla_cligen",
+        "eobs_modified",
+        "user_defined_cli",
+    ]
+    assert capabilities["landuse_datasets"] == [
+        "corine-1990",
+        "corine-2000",
+        "corine-2006",
+        "corine-2012",
+        "corine-2018",
+    ]
+    assert "soil_datasets" not in capabilities
+    assert "wepp_binaries" not in capabilities
+    assert capabilities["defaults"] == {
+        "climate_dataset": "vanilla_cligen",
+        "climate_station_database": "cligen-stations-ghcn",
+        "landuse_dataset": "corine-2018",
+    }
+
+
 def test_schema_v1_compatibility_pipeline_preserves_present_axes_without_registry(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -752,6 +791,7 @@ def test_schema_v1_compatibility_pipeline_preserves_present_axes_without_registr
     assert orchestration_read_routes._resolve_runtime_capability_graphs(object()) == (
         None,
         None,
+        frozenset(),
     )
 
     _stub_auth(monkeypatch, "rq:read")

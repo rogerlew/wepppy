@@ -12,7 +12,10 @@ TestClient = pytest.importorskip("fastapi.testclient").TestClient
 import wepppy.microservices.rq_engine as rq_engine
 import wepppy.nodb.config_builder.resolver as builder_resolver_module
 from wepppy.microservices.rq_engine import orchestration_read_routes, schema_defaults_routes
-from wepppy.nodb.locales import build_continental_us_capability_graph
+from wepppy.nodb.locales import (
+    build_continental_us_capability_graph,
+    build_locale_capability_graph,
+)
 from wepppy.nodb.locales.capability_graph import CapabilityGraphError
 
 pytestmark = pytest.mark.microservice
@@ -1382,6 +1385,77 @@ def test_legacy_live_domain_discovery_does_not_broaden_wepp_model_authority(
     assert "wepp_bin" not in run_watershed_schema["request"]["properties"]
 
 
+def test_schema_v1_projection_scopes_operation_authority_and_preserves_raw_axes(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch, "rq:read")
+    graph = build_locale_capability_graph(
+        "europe",
+        ("wepp_260803",),
+        _binary_revisions(("wepp_260803",)),
+    )
+    runtime = replace(
+        _sample_runtime(capability_graph=graph),
+        model_capability_graph=None,
+        v1_capabilities=MappingProxyType({
+            "soil_builders": ("gridded", "single_mukey", "single_database"),
+            "wepp_binaries": ("wepp_260803",),
+        }),
+        projected_domains=frozenset({"climate", "landuse"}),
+    )
+    runtime.states.update({
+        "climate_catalog_id": "vanilla_cligen",
+        "climate_mode_code": 0,
+        "landuse_catalog_id": "corine-1990",
+        "landuse_runtime_dataset": "eu/CORINE_LandCover/1990",
+        "landuse_mode_code": 0,
+    })
+    monkeypatch.setattr(
+        schema_defaults_routes,
+        "_load_runtime_state",
+        lambda runid, config: runtime,
+    )
+
+    with TestClient(rq_engine.app) as client:
+        climate = client.get(CONTROLLER_SCHEMA_PATH).json()["fields"]
+        landuse_db = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_set_landuse_db/schema"
+        ).json()["request"]["properties"]["landuse_db"]
+        soils = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/controllers/soils/schema"
+        ).json()["fields"]
+        wepp = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/controllers/wepp/schema"
+        ).json()["fields"]
+        build_climate = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_build_climate/schema"
+        ).json()
+
+    assert climate["climate_catalog_id"]["enum_available"] == [
+        "vanilla_cligen",
+        "eobs_modified",
+        "user_defined_cli",
+    ]
+    assert landuse_db["enum_available"] == [
+        "corine-1990",
+        "corine-2000",
+        "corine-2006",
+        "corine-2012",
+        "corine-2018",
+    ]
+    assert soils["soils_mode"]["enum_available"] == [
+        "gridded",
+        "single_mukey",
+        "single_database",
+    ]
+    assert wepp["wepp_bin"]["enum"] == ["wepp_260803"]
+    assert build_climate["capability_authority"]["defaults"] == {
+        "climate_dataset": "vanilla_cligen",
+        "climate_station_database": "cligen-stations-ghcn",
+        "landuse_dataset": "corine-2018",
+    }
+
+
 def test_schema_v1_compatibility_preserves_present_wepp_axis_without_live_registry(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -1404,6 +1478,7 @@ def test_schema_v1_compatibility_preserves_present_wepp_axis_without_live_regist
     assert schema_defaults_routes._resolve_runtime_capability_graphs(object()) == (
         None,
         None,
+        frozenset(),
     )
 
     _stub_auth(monkeypatch, "rq:read")

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib
+import hashlib
 import json
 import itertools
 import re
@@ -14,6 +15,13 @@ from wepppy.weppcloud.feature_registry.runtime import (
     config_maturity_badge,
     load_config_registry,
 )
+from wepppy.nodb.project_config_capabilities import resolve_run_capability_authority
+from wepppy.nodb.project_config_reader import ProjectConfigStatus
+from wepppy.nodb.project_config_snapshot import (
+    materialize_preset_snapshot,
+    resolve_preset_snapshot,
+)
+from wepppy.project_config_serialization import parse_config_text
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 TEMPLATE_ROOT = REPO_ROOT / "wepppy" / "weppcloud" / "templates"
@@ -51,6 +59,33 @@ PURE_TEMPLATES = [
 ]
 
 pytestmark = pytest.mark.routes
+
+
+def _eu_preset_authority(root: Path):
+    candidate = resolve_preset_snapshot(
+        "eu-disturbed",
+        {},
+        source_revision="test-revision",
+    )
+    materialize_preset_snapshot(root, candidate)
+    values = parse_config_text(candidate.config_bytes.decode("utf-8"))
+    config = SimpleNamespace(
+        project_config_status=ProjectConfigStatus(
+            "flattened",
+            str(root),
+            "eu-disturbed.cfg",
+            True,
+            True,
+            config_sha256=hashlib.sha256(candidate.config_bytes).hexdigest(),
+        ),
+        config_get_raw=lambda section, option, default=None: values.get(
+            section, {}
+        ).get(option, default),
+        config_get_list=lambda section, option, default=None: values.get(
+            section, {}
+        ).get(option, default),
+    )
+    return resolve_run_capability_authority(config)
 
 
 @pytest.fixture(scope="module")
@@ -761,6 +796,68 @@ def test_climate_template_renders_catalog_station_and_build_contract(
     assert 'data-climate-action="build"' in rendered
     assert 'id="hint_build_climate"' in rendered
     assert 'id="climate_status_panel"' in rendered
+
+
+def test_schema_v1_europe_preset_renders_exact_climate_radios(
+    jinja_env: Environment,
+    tmp_path: Path,
+) -> None:
+    from wepppy.nodb.locales import get_climate_dataset
+
+    authority = _eu_preset_authority(tmp_path)
+    assert authority.graph is not None
+    climate = SimpleNamespace(
+        catalog_id="vanilla_cligen",
+        climate_mode=SimpleNamespace(value=0),
+        climatestation_mode=SimpleNamespace(value=-1),
+        climate_spatialmode=SimpleNamespace(value=0),
+        uses_tenerife_station_catalog=False,
+        is_single_storm=False,
+        datasetMap={},
+        input_years=30,
+        observed_start_year=1981,
+        observed_end_year=2024,
+        future_start_year=2030,
+        future_end_year=2060,
+        cli_fn=None,
+        orig_cli_fn=None,
+        climate_daily_temp_ds="null",
+        use_gridmet_wind_when_applicable=False,
+        adjust_mx_pt5=False,
+        silent_pass_observed_quality_guard=False,
+        precip_scaling_mode=SimpleNamespace(value=0),
+        precip_scale_factor=None,
+        precip_monthly_scale_factors=None,
+        precip_scale_reference=None,
+        precip_scale_factor_map=None,
+    )
+    catalog = [
+        get_climate_dataset(catalog_id).to_mapping()
+        for catalog_id in authority.graph.climate_datasets
+    ]
+
+    rendered = jinja_env.get_template("controls/climate_pure.htm").render(
+        climate=climate,
+        climate_catalog=catalog,
+    )
+
+    rendered_ids = set(
+        re.findall(r'id="climate_dataset_(?!section)([^"]+)"', rendered)
+    )
+    assert rendered_ids == {
+        "vanilla_cligen",
+        "eobs_modified",
+        "user_defined_cli",
+    }
+    for excluded in (
+        "prism_stochastic",
+        "observed_daymet",
+        "observed_gridmet",
+        "dep_nexrad",
+        "future_cmip5",
+        "agdc",
+    ):
+        assert f'id="climate_dataset_{excluded}"' not in rendered
 
 
 def test_run_context_renders_outside_axis_climate_with_ordinary_landcover(

@@ -137,10 +137,46 @@ migrated.
 - [x] (2026-08-28 16:36Z) Commit amendment 5's standalone canonical checkpoint
   as `baea9616df255d336807d0a91adf7be8f99367fe` and verify it is the ancestor
   before implementation.
-- [ ] Implement and validate an amendment-5 reader floor before its graph
-  writer, then complete local and exact-host `forest` acceptance.
+- [x] (2026-08-28 17:03Z) Append and independently review the five exact
+  amendment-5 identities, commit reader floor `d68d94816`, record its first-
+  reader provenance in `83165fd1b`, and deploy that exact source revision to
+  `forest` without rebuilding.
+- [x] (2026-08-28 17:03Z) Reopen real historical schema-v2 and prior schema-v3
+  runs, prove all five live Builder writers still emit their prior identities,
+  and pass the 74-test reader suite on `forest`.
+- [x] (2026-08-28 18:16Z) Implement the amendment-5 graph writers, strict
+  schema-v1 named-preset climate/land-cover projection, and paired
+  presentation/mutation authority.
+- [x] (2026-08-28 18:16Z) Pass 584 focused and 7,269 complete Python tests
+  with 63 skipped, 808 frontend tests, lint, stub, exception, Vulture, diff,
+  and documentation gates; obtain independent correctness and security READY
+  implementation reviews with no High, Medium, or Low findings.
+- [ ] Commit and push the standalone amendment-5 writer checkpoint, then
+  complete exact-host `forest` candidate/rollback acceptance.
 
 ## Surprises & Discoveries
+
+- Observation: projecting only climate and landuse still leaked current soil,
+  model, DEM, and locale defaults when the projected graph was composed into
+  schema and orchestration documents; the consumers must filter both domains
+  and defaults at the projection boundary.
+  Evidence: schema/orchestration regression tests over materialized schema-v1
+  named presets on 2026-08-28.
+- Observation: preserving raw schema-v1 soil authority requires resolving the
+  stored soil branch before any live registry lookup; otherwise a climate/
+  landuse-only projection can make an unrelated soil read depend on the live
+  registry.
+  Evidence: zero-registry-access soil regression on 2026-08-28.
+- Observation: the manifest and flattened config must each be read as one
+  byte observation and carry the loaded digest through projection. Re-reading
+  either file during one resolution admits a time-of-check/time-of-use split.
+  Evidence: manifest/config mutation-between-read regressions on 2026-08-28.
+- Observation: the amendment-5 reader floor can coexist with the already
+  implemented acknowledged capability-refresh mechanism because all five live
+  locale graph writers remain on their prior identities until the later writer
+  commit.
+  Evidence: exact-host `forest` resolver readback under `83165fd1b` on
+  2026-08-28 17:03 UTC.
 
 - Observation: Builder locale selection already writes
   `[general] locales = [runtime_token]` into the flattened config.

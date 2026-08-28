@@ -4,13 +4,13 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-27 20:31 UTC
-**Current phase**: amendment 5 structural reader floor
-**Last updated**: 2026-08-28 16:36 UTC
-**Next milestone**: append the five ratified identities without changing graph
-writers, then review and validate exact-host Forest; production remains reserved
+**Current phase**: amendment 5 Forest candidate acceptance
+**Last updated**: 2026-08-28 18:16 UTC
+**Next milestone**: commit and push the reviewed writer checkpoint, then
+validate and roll back the exact-host Forest candidate; production remains reserved
 **Security impact**: `high`
 **Dedicated security review**: `yes`
-**Security artifacts**: `artifacts/20260827_security_review.md` and pending
+**Security artifacts**: `artifacts/20260827_security_review.md` and
 `artifacts/20260828_amendment5_security_contract_review.md`
 **Parameterization ADR**: `docs/adrs/ADR-0047-project-config-locale-authority.md`
 Initiative branch: feature/project-owned-config
@@ -35,12 +35,14 @@ PC-24 owns `.cfg` locale normalization and run-UI authority parity.
 - [x] Commit standalone amendment-5 contract checkpoint
   `baea9616df255d336807d0a91adf7be8f99367fe` and verify it is the current
   implementation ancestor (2026-08-28 16:36 UTC).
-- [ ] Add all five resulting schema-v3 structural identities to a standalone
-  reader floor and prove prior-identity compatibility.
-- [ ] Implement the corrected locale graph, schema-v1 preset projection, and
-  land-cover default/envelope separation.
-- [ ] Complete focused/full validation, binding implementation reviews, and
-  exact-host `forest` reader/writer/rollback acceptance without an image build.
+- [x] Add all five resulting schema-v3 structural identities to a standalone
+  reader floor and prove prior-identity compatibility (2026-08-28 17:03 UTC).
+- [x] Implement the corrected locale graph, schema-v1 preset projection, and
+  land-cover default/envelope separation (2026-08-28 18:16 UTC).
+- [x] Complete focused/full validation and binding correctness/security
+  implementation reviews (2026-08-28 18:16 UTC; H0/M0/L0).
+- [ ] Complete exact-host `forest` reader/writer/rollback acceptance without
+  an image build.
 
 ### Ready / Handoff
 
@@ -49,14 +51,41 @@ PC-24 owns `.cfg` locale normalization and run-UI authority parity.
 
 ### Blocked
 
-- [ ] Every amendment-5 production/test-code or `.cfg` edit is blocked until
-  the exact operator-ratified, binding-reviewed standalone checkpoint descended
-  from `0ad76c547145bbe323148bac73410ff9cfcd01ef` is recorded and verified as
-  its ancestor.
 - [ ] Production deployment remains reserved to parent WP12 after WP12D Forest
   acceptance.
 
 ### Done
+
+- [x] Implemented all five corrected locale graph writers while retaining
+  every prior stored identity, strict current-parent schema-v1 named-preset
+  climate/land-cover projection, graph-authoritative climate upload gating,
+  and exact projection scope in schema/orchestration consumers
+  (2026-08-28 18:16 UTC).
+- [x] Closed review-discovered manifest/config TOCTOU, projection-default
+  leakage, raw schema-v1 soil-registry coupling, provider error taxonomy, and
+  strict manifest-typing defects with direct regressions
+  (2026-08-28 18:16 UTC).
+- [x] Passed 584 focused and 7,269 complete Python tests with 63 skipped, 107
+  frontend suites with 808 tests, frontend lint, both public stubtests, test-
+  stub completeness, broad-exception enforcement, Vulture, diff, and docs
+  gates (2026-08-28 18:16 UTC).
+- [x] Independent amendment-5 correctness and high-impact security
+  implementation reviews are READY with no High, Medium, or Low findings;
+  exact-host Forest acceptance is the only remaining implementation risk
+  (2026-08-28 18:16 UTC).
+
+- [x] Committed standalone amendment-5 reader floor `d68d94816`, recorded its
+  first-reader provenance in `83165fd1b`, and pushed the branch without staging
+  any pre-recorded unrelated dirty path (2026-08-28 17:03 UTC).
+- [x] Obtained independent reader-floor correctness/security READY verdicts
+  with H0/M0/L0, passed 74 focused tests locally and in-container, and recorded
+  exact-host evidence in
+  `artifacts/20260828_amendment5_reader_floor_forest_acceptance.md`
+  (2026-08-28 17:03 UTC).
+- [x] Recreated only `weppcloud` and `rq-engine` on exact host `forest` with
+  `--no-build --no-deps`, retained image digest `6ac7e7103046`, reopened real
+  schema-v2/v3 runs, and proved every live locale writer remains on its prior
+  structure identity (2026-08-28 17:03 UTC).
 
 - [x] Exact path-staged documentation-only checkpoint
   `baea9616df255d336807d0a91adf7be8f99367fe` contains ratification, canonical

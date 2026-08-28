@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from contextlib import contextmanager
+import hashlib
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
@@ -11,6 +12,14 @@ import pytest
 pytest.importorskip("flask")
 from flask import Flask
 
+from wepppy.nodb.project_config_capabilities import resolve_run_capability_authority
+from wepppy.nodb.project_config_reader import ProjectConfigStatus
+from wepppy.nodb.project_config_snapshot import (
+    materialize_preset_snapshot,
+    resolve_preset_snapshot,
+)
+from wepppy.project_config_serialization import parse_config_text
+
 try:
     import wepppy.weppcloud.routes.nodb_api.climate_bp as climate_module
     from wepppy.nodb.core.climate import ClimateMode
@@ -20,6 +29,33 @@ except ImportError:
 RUN_ID = "test-run"
 CONFIG = "main"
 pytestmark = pytest.mark.routes
+
+
+def _eu_preset_authority(root: Path):
+    candidate = resolve_preset_snapshot(
+        "eu-disturbed",
+        {},
+        source_revision="test-revision",
+    )
+    materialize_preset_snapshot(root, candidate)
+    values = parse_config_text(candidate.config_bytes.decode("utf-8"))
+    config = SimpleNamespace(
+        project_config_status=ProjectConfigStatus(
+            "flattened",
+            str(root),
+            "eu-disturbed.cfg",
+            True,
+            True,
+            config_sha256=hashlib.sha256(candidate.config_bytes).hexdigest(),
+        ),
+        config_get_raw=lambda section, option, default=None: values.get(
+            section, {}
+        ).get(option, default),
+        config_get_list=lambda section, option, default=None: values.get(
+            section, {}
+        ).get(option, default),
+    )
+    return resolve_run_capability_authority(config)
 
 
 @pytest.fixture()
@@ -265,6 +301,63 @@ def test_stored_authority_accepts_complete_climate_dataset_mode_pair(
     assert response.status_code == 200
     assert controller.climate_mode == ClimateMode.Future
     assert controller.catalog_id == "dataset_b"
+
+
+def test_schema_v1_europe_preset_drives_flask_discovery_and_setter(
+    climate_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from wepppy.nodb.locales import get_climate_dataset
+
+    client, climate_cls, run_dir = climate_client
+    authority = _eu_preset_authority(run_dir)
+    assert authority.graph is not None
+    monkeypatch.setattr(
+        climate_module,
+        "resolve_run_capability_authority",
+        lambda _climate: authority,
+    )
+    controller = climate_cls.getInstance(str(run_dir))
+    controller._datasets.update({
+        catalog_id: get_climate_dataset(catalog_id)
+        for catalog_id in authority.graph.climate_datasets
+    })
+    controller.catalog_id = "vanilla_cligen"
+    controller.climate_mode = ClimateMode.Vanilla
+    controller.catalog_datasets_payload = lambda: [
+        get_climate_dataset(catalog_id).to_mapping()
+        for catalog_id in authority.graph.climate_datasets
+    ]
+
+    discovery = client.get(f"/runs/{RUN_ID}/{CONFIG}/query/climate_catalog")
+    user_defined = get_climate_dataset("user_defined_cli")
+    accepted = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_climate_mode/",
+        json={
+            "mode": int(user_defined.climate_mode),
+            "climate_catalog_id": "user_defined_cli",
+        },
+    )
+    prism = get_climate_dataset("prism_stochastic")
+    rejected = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_climate_mode/",
+        json={
+            "mode": int(prism.climate_mode),
+            "climate_catalog_id": "prism_stochastic",
+        },
+    )
+
+    assert discovery.status_code == 200
+    assert [item["catalog_id"] for item in discovery.get_json()] == [
+        "vanilla_cligen",
+        "eobs_modified",
+        "user_defined_cli",
+    ]
+    assert accepted.status_code == 200
+    assert controller.catalog_id == "user_defined_cli"
+    assert rejected.status_code == 400
+    assert rejected.get_json()["error"]["code"] == "unsupported_capability"
+    assert controller.catalog_id == "user_defined_cli"
 
 
 def test_climate_dataset_mode_pair_rolls_back_on_assignment_fault(

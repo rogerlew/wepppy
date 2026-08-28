@@ -47,6 +47,14 @@ def test_landcover_datasets_earth_locale():
     assert keys[-1] == "locales/earth/C3Slandcover/1992"
 
 
+def test_landcover_datasets_canada_use_global_c3s_not_us_fallback():
+    keys = _landcover_keys(["canada"])
+    assert len(keys) == 29
+    assert keys[0] == "locales/earth/C3Slandcover/2020"
+    assert keys[-1] == "locales/earth/C3Slandcover/1992"
+    assert all(not key.startswith("nlcd/") for key in keys)
+
+
 def test_management_catalog_excludes_null_and_dedups_by_description_management_pair(monkeypatch):
     def _fake_load_map(_mapping):
         return {

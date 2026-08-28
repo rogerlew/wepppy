@@ -12,6 +12,11 @@ from starlette.datastructures import UploadFile
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.core import Climate, Ron
+from wepppy.nodb.project_config_capabilities import (
+    BuilderRegistryUnavailableError,
+    LocaleAuthorityInvalidError,
+    resolve_run_capability_authority,
+)
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.runtime_paths.errors import NoDirError
 from wepppy.runtime_paths.fs import resolve as _nodir_resolve
@@ -107,6 +112,38 @@ async def upload_cli(runid: str, config: str, request: Request) -> JSONResponse:
         _require_directory_root(wd, "climate")
         Ron.getInstance(wd)
         climate = Climate.getInstance(wd)
+        try:
+            authority = resolve_run_capability_authority(climate).graph
+        except LocaleAuthorityInvalidError as exc:
+            return error_response(
+                "Run locale authority is invalid.",
+                status_code=409,
+                code="locale_authority_invalid",
+                details=str(exc),
+            )
+        except BuilderRegistryUnavailableError as exc:
+            response = error_response(
+                "Builder registry is unavailable.",
+                status_code=503,
+                code="builder_registry_error",
+                details=str(exc),
+            )
+            response.headers["Retry-After"] = "5"
+            return response
+        except ValueError as exc:
+            return error_response(
+                "Project capability authority is invalid.",
+                status_code=409,
+                code="capability_authority_invalid",
+                details=str(exc),
+            )
+        if authority is not None and "user_defined_cli" not in authority.climate_datasets:
+            return error_response(
+                "User-defined climate is not supported by this project.",
+                status_code=400,
+                code="unsupported_capability",
+                details="capabilities.climate_datasets does not allow user_defined_cli",
+            )
 
         form = await request.form()
         upload = _extract_upload(form, "input_upload_cli")

@@ -35,6 +35,7 @@ __all__ = [
     "load_preset_policies",
     "materialize_preset_snapshot",
     "preset_writer_enabled",
+    "resolve_preset_locale_projection",
     "resolve_preset_snapshot",
 ]
 
@@ -274,6 +275,146 @@ def resolve_preset_snapshot(
         MappingProxyType(dict(normalized)),
         source_revision,
     )
+
+
+def _single_builder_locale_profile(
+    config: Mapping[str, Mapping[str, CanonicalValue]],
+) -> str | None:
+    from wepppy.nodb.locales import (
+        LocaleClassification,
+        LocaleProfileError,
+        LocaleSupportState,
+        resolve_locale_composition,
+    )
+
+    raw = config.get("general", {}).get("locales")
+    if not isinstance(raw, list) or len(raw) != 1 or not isinstance(raw[0], str):
+        return None
+    try:
+        composition = resolve_locale_composition((raw[0],))
+    except LocaleProfileError:
+        return None
+    if (
+        composition.overlays
+        or composition.base.classification is not LocaleClassification.BASE
+        or composition.base.support_state is not LocaleSupportState.BUILDER_EXPOSED
+    ):
+        return None
+    return composition.base.profile_id
+
+
+def resolve_preset_locale_projection(
+    authority_root: str | Path,
+    config_filename: str,
+    *,
+    expected_config_sha256: str | None = None,
+) -> str | None:
+    """Authenticate one schema-v1 preset lineage and return its live locale."""
+
+    from wepppy.nodb.project_config_reader import project_config_manifest_payload
+
+    root = Path(authority_root).resolve()
+    if Path(config_filename).name != config_filename or not config_filename.endswith(".cfg"):
+        return None
+    payload = project_config_manifest_payload(
+        root,
+        config_filename,
+        require_exact_digest=True,
+    )
+    if payload is None or payload.get("source_kind") != "preset":
+        return None
+    preset_id = payload.get("source_preset")
+    if not isinstance(preset_id, str) or preset_id != Path(config_filename).stem:
+        return None
+    parent_chain = payload.get("parent_chain")
+    expected_parent_shape = (
+        isinstance(parent_chain, list)
+        and len(parent_chain) == 2
+        and parent_chain[0].get("kind") == "defaults"
+        and parent_chain[0].get("id") == "shared-defaults"
+        and parent_chain[1].get("kind") == "preset"
+        and parent_chain[1].get("id") == preset_id
+    )
+    if not expected_parent_shape:
+        return None
+
+    policies = load_preset_policies()
+    if preset_id not in policies:
+        return None
+
+    defaults_path = CONFIGS_ROOT / "_defaults.cfg"
+    preset_path = CONFIGS_ROOT / config_filename
+    try:
+        defaults_bytes = defaults_path.read_bytes()
+        preset_bytes = preset_path.read_bytes()
+        stored_bytes = (root / config_filename).read_bytes()
+    except OSError as exc:
+        raise PresetPolicyError("Canonical preset source is unavailable") from exc
+    if (
+        parent_chain[0].get("revision") != hashlib.sha256(defaults_bytes).hexdigest()
+        or parent_chain[1].get("revision") != hashlib.sha256(preset_bytes).hexdigest()
+    ):
+        return None
+    config_payload = payload.get("config")
+    if (
+        not isinstance(config_payload, dict)
+        or config_payload.get("sha256") != hashlib.sha256(stored_bytes).hexdigest()
+        or (
+            expected_config_sha256 is not None
+            and expected_config_sha256 != hashlib.sha256(stored_bytes).hexdigest()
+        )
+    ):
+        return None
+
+    selections = payload.get("selections")
+    if not isinstance(selections, dict) or set(selections) != {"overrides"}:
+        return None
+    recorded = selections.get("overrides")
+    if not isinstance(recorded, dict):
+        return None
+    overrides: dict[str, object] = {}
+    for key, value in recorded.items():
+        if (
+            not isinstance(key, str)
+            or not isinstance(value, dict)
+            or set(value) != {"source", "value"}
+            or value.get("source") != "query"
+        ):
+            return None
+        recorded_value = value.get("value")
+        validator = _OVERRIDE_VALIDATORS.get(key)
+        if validator is None:
+            return None
+        validator_kind, _allowed = validator
+        if validator_kind == "boolean" and not isinstance(recorded_value, bool):
+            return None
+        if validator_kind == "string" and not isinstance(recorded_value, str):
+            return None
+        if validator_kind == "boolean":
+            assert isinstance(recorded_value, bool)
+            overrides[key] = "true" if recorded_value else "false"
+        else:
+            overrides[key] = recorded_value
+    source_revision = payload.get("source_revision")
+    assert isinstance(source_revision, str)
+    try:
+        replay = resolve_preset_snapshot(
+            preset_id,
+            overrides,
+            source_revision=source_revision,
+            policies=policies,
+        )
+        stored_config = parse_config_text(stored_bytes.decode("utf-8"))
+        replay_config = parse_config_text(replay.config_bytes.decode("utf-8"))
+    except (PresetSnapshotError, UnicodeError, ValueError):
+        return None
+    if replay.config_bytes != stored_bytes:
+        return None
+    stored_profile = _single_builder_locale_profile(stored_config)
+    replay_profile = _single_builder_locale_profile(replay_config)
+    if stored_profile is None or stored_profile != replay_profile:
+        return None
+    return stored_profile
 
 
 def _write_temp(directory: Path, prefix: str, content: bytes) -> Path:

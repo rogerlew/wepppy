@@ -76,7 +76,7 @@ _LANDCOVER_LOCALE_PRIORITY: Tuple[Tuple[str, ...], ...] = (
     ("virgin_islands",),
     ("eu",),
     ("au",),
-    ("earth", "nigeria"),
+    ("earth", "canada", "nigeria"),
 )
 
 
@@ -99,7 +99,9 @@ _LANDCOVER_SPECIAL_IDS: Mapping[str, str] = {
 LANDCOVER_PROVIDER_ADAPTER_REVISION = "landuse-catalog-adapter-v2"
 _BUILDER_EXPOSED_LANDCOVER_IDS = frozenset(
     {
-        "nlcd-2019",
+        *(f"nlcd-ever-forest-{year}" for year in range(1985, 2025)),
+        *(f"nlcd-{year}" for year in range(1985, 2025)),
+        *(f"emapr-vote-{year}" for year in range(1984, 2018)),
         "corine-1990",
         "corine-2000",
         "corine-2006",
@@ -239,6 +241,15 @@ def _resolve_landcover_datasets(locales: Iterable[str]) -> List[Tuple[str, str]]
     return list(_STATIC_LANDCOVER_DATASETS["_default"])
 
 
+def landcover_catalog_ids_for_locales(locales: Iterable[str]) -> Tuple[str, ...]:
+    """Return the ordered locale-wide stable land-cover envelope."""
+
+    return tuple(
+        landcover_catalog_id(runtime_value)
+        for runtime_value, _label in _resolve_landcover_datasets(locales)
+    )
+
+
 @dataclass(frozen=True)
 class LanduseDataset:
     """Descriptor for an available landuse management dataset."""
@@ -352,6 +363,7 @@ __all__ = [
     "available_landuse_datasets",
     "get_landcover_entry",
     "iter_landcover_catalog",
+    "landcover_catalog_ids_for_locales",
     "landcover_catalog_id",
     "landcover_catalog_revision",
 ]

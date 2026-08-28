@@ -17,7 +17,10 @@ from wepppy.nodb.locales.climate_catalog import (
     get_climate_dataset,
     get_climate_station_database,
 )
-from wepppy.nodb.locales.landuse_catalog import get_landcover_entry
+from wepppy.nodb.locales.landuse_catalog import (
+    get_landcover_entry,
+    landcover_catalog_ids_for_locales,
+)
 
 __all__ = [
     "LocaleClassification",
@@ -75,6 +78,7 @@ SHIPPED_MOD_IDS = frozenset({
 })
 
 _C3S_LANDUSE_IDS = tuple(f"c3s-landcover-{year}" for year in range(2020, 1991, -1))
+_CONTINENTAL_US_LANDUSE_IDS = landcover_catalog_ids_for_locales(("us",))
 _OYSTER_CREEK_LANDUSE_IDS = (
     "nlcd-2023", "nlcd-2020", "nlcd-2016", "nlcd-2010", "nlcd-2006",
     "nlcd-2001", "nlcd-1996", "oyster-creek-1993", "oyster-creek-1982",
@@ -170,9 +174,10 @@ _PROFILES = (
         LocaleClassification.BASE, LocaleSupportState.BUILDER_EXPOSED,
         dem_sources=("usgs-ned1-2024", "usgs-ned13-2022"),
         soil_sources=("ssurgo-gnatsgso-2025",),
-        landuse_sources=("nlcd-2019",),
+        landuse_sources=_CONTINENTAL_US_LANDUSE_IDS,
         climate_sources=(
             "vanilla_cligen", "prism_stochastic", "observed_daymet", "observed_gridmet",
+            "dep_nexrad", "future_cmip5", "user_defined_cli",
         ),
         climate_station_databases=(
             "cligen-stations-legacy", "cligen-stations-2015", "cligen-stations-ghcn",
@@ -203,7 +208,7 @@ _PROFILES = (
         dem_sources=("europe-eudem-v1-1",),
         soil_sources=("esdac-europe",),
         landuse_sources=("corine-1990", "corine-2000", "corine-2006", "corine-2012", "corine-2018"),
-        climate_sources=("vanilla_cligen", "eobs_modified"),
+        climate_sources=("vanilla_cligen", "eobs_modified", "user_defined_cli"),
         climate_station_databases=("cligen-stations-ghcn",),
     ),
     _profile(
@@ -211,7 +216,7 @@ _PROFILES = (
         LocaleSupportState.BUILDER_EXPOSED,
         dem_sources=("copernicus-dem-30",), soil_sources=("isric-global",),
         landuse_sources=_C3S_LANDUSE_IDS,
-        climate_sources=("vanilla_cligen", "observed_daymet"),
+        climate_sources=("vanilla_cligen", "observed_daymet", "user_defined_cli"),
         climate_station_databases=("cligen-stations-ghcn",),
     ),
     _profile(
@@ -219,7 +224,7 @@ _PROFILES = (
         LocaleSupportState.BUILDER_EXPOSED,
         dem_sources=("australia-srtm-1s",), soil_sources=("asris-australia",),
         landuse_sources=("australia-landuse-2010-2011",),
-        climate_sources=("vanilla_cligen", "agdc"),
+        climate_sources=("vanilla_cligen", "agdc", "user_defined_cli"),
         climate_station_databases=("cligen-stations-ghcn",),
     ),
     _profile(
@@ -227,7 +232,7 @@ _PROFILES = (
         LocaleSupportState.BUILDER_EXPOSED,
         dem_sources=("copernicus-dem-30",), soil_sources=("isric-global",),
         landuse_sources=_C3S_LANDUSE_IDS,
-        climate_sources=("vanilla_cligen",),
+        climate_sources=("vanilla_cligen", "user_defined_cli"),
         climate_station_databases=("cligen-stations-ghcn",),
     ),
     _profile(

@@ -12,6 +12,7 @@ __all__ = [
     "ProjectConfigStatus",
     "ProjectConfigWarning",
     "load_project_config",
+    "project_config_manifest_payload",
     "project_config_manifest_source_kind",
     "project_config_reader_enabled",
 ]
@@ -37,6 +38,7 @@ class ProjectConfigStatus:
     manifest_valid: bool
     updates_enabled: bool
     warnings: tuple[ProjectConfigWarning, ...] = ...
+    config_sha256: str | None = ...
 
 @dataclass(frozen=True, slots=True)
 class ProjectConfigLoadResult:
@@ -44,6 +46,7 @@ class ProjectConfigLoadResult:
     status: ProjectConfigStatus
 
 def project_config_reader_enabled(environ: dict[str, str] | None = ...) -> bool: ...
+def project_config_manifest_payload(authority_root: str | Path, config_filename: str, *, require_exact_digest: bool = ..., run_id: str = ...) -> dict[str, object] | None: ...
 def project_config_manifest_source_kind(authority_root: str | Path, config_filename: str, *, run_id: str = ...) -> str | None: ...
 def load_project_config(
     *,

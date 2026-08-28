@@ -2,12 +2,16 @@ from __future__ import annotations
 
 import ast
 import configparser
+import hashlib
 from io import StringIO
+import json
+from pathlib import Path
 
 import pytest
 
 import wepppy.nodb.project_config_capabilities as capability_module
 import wepppy.nodb.config_builder.resolver as builder_resolver_module
+import wepppy.nodb.project_config_snapshot as snapshot_module
 from wepppy.nodb.config_builder import (
     BuilderConstraintError,
     BuilderSelections,
@@ -27,6 +31,7 @@ from wepppy.nodb.project_config_capabilities import (
     runtime_value_allowed,
     soil_capability_modes,
 )
+from wepppy.nodb.project_config_reader import ProjectConfigStatus, ProjectConfigWarning
 
 pytestmark = pytest.mark.unit
 
@@ -160,6 +165,296 @@ def test_flattened_v1_never_consults_live_registry(
     assert authority.mode is RunCapabilityMode.COMPATIBILITY
     assert authority.graph is None
     assert authority.runtime_tokens == ()
+
+
+def test_exact_schema_v1_named_preset_projects_only_climate_and_landuse(
+    tmp_path: Path,
+) -> None:
+    candidate = snapshot_module.resolve_preset_snapshot(
+        "eu-disturbed",
+        {},
+        source_revision="test-revision",
+    )
+    snapshot_module.materialize_preset_snapshot(tmp_path, candidate)
+    config = ParsedConfig(candidate.config_bytes.decode("utf-8"))
+    config.project_config_status = ProjectConfigStatus(
+        "flattened",
+        str(tmp_path),
+        "eu-disturbed.cfg",
+        True,
+        True,
+        config_sha256=hashlib.sha256(candidate.config_bytes).hexdigest(),
+    )
+
+    authority = resolve_run_capability_authority(config)
+
+    assert authority.mode is RunCapabilityMode.PRESET_PROJECTION
+    assert authority.locale_profile == "europe"
+    assert authority.runtime_tokens == ("eu",)
+    assert authority.projected_domains == frozenset({"climate", "landuse"})
+    assert authority.graph is not None
+    assert authority.graph.climate_datasets == (
+        "vanilla_cligen",
+        "eobs_modified",
+        "user_defined_cli",
+    )
+    assert authority.graph.landuse_datasets == (
+        "corine-1990",
+        "corine-2000",
+        "corine-2006",
+        "corine-2012",
+        "corine-2018",
+    )
+    assert soil_capability_modes(config) == frozenset({0, 1, 2})
+
+
+@pytest.mark.parametrize(
+    ("preset_id", "profile_id", "climate_ids", "landuse_count"),
+    [
+        (
+            "disturbed9002",
+            "continental-us",
+            (
+                "vanilla_cligen",
+                "prism_stochastic",
+                "observed_daymet",
+                "observed_gridmet",
+                "dep_nexrad",
+                "future_cmip5",
+                "user_defined_cli",
+            ),
+            114,
+        ),
+        (
+            "eu-disturbed",
+            "europe",
+            ("vanilla_cligen", "eobs_modified", "user_defined_cli"),
+            5,
+        ),
+        (
+            "canada",
+            "canada",
+            ("vanilla_cligen", "observed_daymet", "user_defined_cli"),
+            29,
+        ),
+        (
+            "au-disturbed",
+            "australia",
+            ("vanilla_cligen", "agdc", "user_defined_cli"),
+            1,
+        ),
+        (
+            "earth",
+            "global-earth",
+            ("vanilla_cligen", "user_defined_cli"),
+            29,
+        ),
+    ],
+)
+def test_all_five_schema_v1_named_locale_presets_project_current_domains(
+    tmp_path: Path,
+    preset_id: str,
+    profile_id: str,
+    climate_ids: tuple[str, ...],
+    landuse_count: int,
+) -> None:
+    candidate = snapshot_module.resolve_preset_snapshot(
+        preset_id,
+        {},
+        source_revision="test-revision",
+    )
+    snapshot_module.materialize_preset_snapshot(tmp_path, candidate)
+    config = ParsedConfig(candidate.config_bytes.decode("utf-8"))
+    config.project_config_status = ProjectConfigStatus(
+        "flattened",
+        str(tmp_path),
+        f"{preset_id}.cfg",
+        True,
+        True,
+        config_sha256=hashlib.sha256(candidate.config_bytes).hexdigest(),
+    )
+
+    authority = resolve_run_capability_authority(config)
+
+    assert authority.mode is RunCapabilityMode.PRESET_PROJECTION
+    assert authority.locale_profile == profile_id
+    assert authority.projected_domains == frozenset({"climate", "landuse"})
+    assert authority.graph is not None
+    assert authority.graph.climate_datasets == climate_ids
+    assert len(authority.graph.landuse_datasets) == landuse_count
+
+
+def test_schema_v1_digest_warning_stays_compatibility_without_projection(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config = ParsedConfig(
+        "[config]\nflattened = true\n"
+        "[capabilities]\nschema_version = 1\n"
+    )
+    config.project_config_status = ProjectConfigStatus(
+        "flattened",
+        "/tmp/not-consulted",
+        "eu-disturbed.cfg",
+        True,
+        True,
+        (ProjectConfigWarning("config_digest_mismatch", "run", "eu-disturbed.cfg"),),
+    )
+    monkeypatch.setattr(
+        snapshot_module,
+        "resolve_preset_locale_projection",
+        lambda *_args, **_kwargs: pytest.fail("digest mismatch consulted projection"),
+    )
+
+    authority = resolve_run_capability_authority(config)
+
+    assert authority.mode is RunCapabilityMode.COMPATIBILITY
+    assert authority.graph is None
+
+
+@pytest.mark.parametrize(
+    "hostile_case",
+    [
+        "unknown_preset",
+        "filename_mismatch",
+        "parent_chain_mismatch",
+        "non_allowlisted_override",
+        "stored_locale_mismatch",
+    ],
+)
+def test_hostile_schema_v1_preset_identity_retains_compatibility_without_registry(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    hostile_case: str,
+) -> None:
+    candidate = snapshot_module.resolve_preset_snapshot(
+        "eu-disturbed",
+        {},
+        source_revision="test-revision",
+    )
+    config_path, manifest_path = snapshot_module.materialize_preset_snapshot(
+        tmp_path,
+        candidate,
+    )
+    manifest = json.loads(manifest_path.read_bytes())
+    if hostile_case == "unknown_preset":
+        unknown_path = tmp_path / "unknown-preset.cfg"
+        config_path.rename(unknown_path)
+        config_path = unknown_path
+        manifest["source_preset"] = "unknown-preset"
+        manifest["parent_chain"][1]["id"] = "unknown-preset"
+        manifest["config"]["filename"] = config_path.name
+    elif hostile_case == "filename_mismatch":
+        manifest["source_preset"] = "earth"
+        manifest["parent_chain"][1]["id"] = "earth"
+    elif hostile_case == "parent_chain_mismatch":
+        manifest["parent_chain"][1]["id"] = "earth"
+    elif hostile_case == "non_allowlisted_override":
+        manifest["selections"]["overrides"] = {
+            "forged.option": {"source": "query", "value": "enabled"}
+        }
+    else:
+        forged_bytes = config_path.read_bytes().replace(b'["eu"]', b'["us"]')
+        config_path.write_bytes(forged_bytes)
+        manifest["config"]["sha256"] = hashlib.sha256(forged_bytes).hexdigest()
+    manifest_path.write_text(
+        json.dumps(manifest, sort_keys=True, separators=(",", ":")) + "\n",
+        encoding="utf-8",
+    )
+    config = ParsedConfig(config_path.read_text(encoding="utf-8"))
+    config.project_config_status = ProjectConfigStatus(
+        "flattened",
+        str(tmp_path),
+        config_path.name,
+        True,
+        True,
+        config_sha256=hashlib.sha256(config_path.read_bytes()).hexdigest(),
+    )
+    monkeypatch.setattr(
+        capability_module,
+        "resolve_builder_capability_graph",
+        lambda *_args, **_kwargs: pytest.fail(
+            f"{hostile_case} consulted the live registry"
+        ),
+    )
+
+    authority = resolve_run_capability_authority(config)
+
+    assert authority.mode is RunCapabilityMode.COMPATIBILITY
+    assert authority.graph is None
+
+
+def test_schema_v1_policy_failure_is_registry_unavailable(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config = ParsedConfig(
+        "[config]\nflattened = true\n"
+        "[capabilities]\nschema_version = 1\n"
+    )
+    config.project_config_status = ProjectConfigStatus(
+        "flattened",
+        "/tmp/policy-failure",
+        "eu-disturbed.cfg",
+        True,
+        True,
+        config_sha256="a" * 64,
+    )
+
+    def unavailable(*_args, **_kwargs):
+        raise snapshot_module.PresetPolicyError("policy corpus unavailable")
+
+    monkeypatch.setattr(snapshot_module, "resolve_preset_locale_projection", unavailable)
+
+    with pytest.raises(BuilderRegistryUnavailableError, match="policy corpus unavailable"):
+        resolve_run_capability_authority(config)
+
+
+def test_schema_v1_live_provider_value_error_is_registry_unavailable(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config = ParsedConfig(
+        "[config]\nflattened = true\n"
+        "[capabilities]\nschema_version = 1\n"
+    )
+    config.project_config_status = ProjectConfigStatus(
+        "flattened",
+        "/tmp/provider-failure",
+        "eu-disturbed.cfg",
+        True,
+        True,
+        config_sha256="a" * 64,
+    )
+    monkeypatch.setattr(
+        snapshot_module,
+        "resolve_preset_locale_projection",
+        lambda *_args, **_kwargs: "europe",
+    )
+    monkeypatch.setattr(
+        capability_module,
+        "resolve_builder_capability_graph",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            ValueError("climate provider defaults are incomplete")
+        ),
+    )
+
+    with pytest.raises(BuilderRegistryUnavailableError, match="provider defaults"):
+        resolve_run_capability_authority(config)
+
+
+def test_schema_v1_soil_modes_remain_raw_without_live_projection(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config = ParsedConfig(
+        "[config]\nflattened = true\n"
+        "[capabilities]\nschema_version = 1\n"
+        "soil_builders = ['gridded', 'single_database']\n"
+    )
+    monkeypatch.setattr(
+        capability_module,
+        "resolve_run_capability_authority",
+        lambda _config: pytest.fail("schema-v1 soil consulted live projection"),
+    )
+
+    assert soil_capability_modes(config) == frozenset({0, 2})
 
 
 def test_flattened_v3_uses_only_stored_graph(

@@ -114,7 +114,7 @@ def _run_authority_error_response(exc: CapabilityAuthorityInvalidError) -> JSONR
 
 def _resolve_runtime_capability_graphs(
     config,
-) -> tuple[CapabilityGraph | None, CapabilityGraph | None]:
+) -> tuple[CapabilityGraph | None, CapabilityGraph | None, frozenset[str]]:
     try:
         resolved = resolve_run_capability_authority(config)
         model_graph = (
@@ -122,7 +122,11 @@ def _resolve_runtime_capability_graphs(
             if resolved.mode is RunCapabilityMode.STORED
             else None
         )
-        return resolved.graph, model_graph
+        return (
+            resolved.graph,
+            model_graph,
+            getattr(resolved, "projected_domains", frozenset()),
+        )
     except LocaleAuthorityInvalidError as exc:
         raise CapabilityAuthorityInvalidError(
             str(exc),
@@ -152,6 +156,7 @@ class RuntimeState:
     capability_graph: CapabilityGraph | None = None
     model_capability_graph: CapabilityGraph | None = None
     v1_capabilities: Mapping[str, tuple[str, ...]] | None = None
+    projected_domains: frozenset[str] = frozenset()
 
 
 def _utc_timestamp() -> str:
@@ -491,9 +496,11 @@ def _load_runtime_state(runid: str, config: str) -> RuntimeState:
         "uploaded_dem_filename": uploaded_dem_filename,
     }
 
-    capability_graph, model_capability_graph = _resolve_runtime_capability_graphs(wepp)
+    capability_graph, model_capability_graph, projected_domains = (
+        _resolve_runtime_capability_graphs(wepp)
+    )
     v1_capabilities: dict[str, tuple[str, ...]] | None = None
-    if capability_graph is None:
+    if capability_graph is None or projected_domains:
         discovered_v1: dict[str, tuple[str, ...]] = {}
         for axis in (
             "climate_datasets",
@@ -538,6 +545,7 @@ def _load_runtime_state(runid: str, config: str) -> RuntimeState:
             else None
         ),
         "v1_capabilities": v1_capabilities,
+        "projected_domains": sorted(projected_domains),
         "snapshot_fallback_updated_at": snapshot_fallback_updated_at,
     }
     run_state_revision = _compute_run_state_revision(runid, revision_source)
@@ -552,6 +560,7 @@ def _load_runtime_state(runid: str, config: str) -> RuntimeState:
         capability_graph=capability_graph,
         model_capability_graph=model_capability_graph,
         v1_capabilities=v1_capabilities,
+        projected_domains=projected_domains,
         generated_at=generated_at,
         run_state_revision=run_state_revision,
     )
@@ -784,6 +793,17 @@ def _controller_names(runtime: RuntimeState) -> tuple[str, ...]:
     return tuple(sorted(names))
 
 
+def _domain_capability_graph(
+    runtime: RuntimeState,
+    domain: str,
+) -> CapabilityGraph | None:
+    if runtime.capability_graph is None:
+        return None
+    if runtime.projected_domains and domain not in runtime.projected_domains:
+        return None
+    return runtime.capability_graph
+
+
 def _controller_defaults(controller: str, runtime: RuntimeState) -> dict[str, Any]:
     disturbed_enabled = bool(runtime.states.get("disturbed_enabled", False))
     climate_mode = runtime.states.get("climate_mode_code")
@@ -865,8 +885,8 @@ def _controller_defaults(controller: str, runtime: RuntimeState) -> dict[str, An
             "landuse_mode": runtime.states.get("landuse_mode") or "nlcd",
         }
     if controller == "soils":
-        if runtime.capability_graph is not None:
-            graph = runtime.capability_graph
+        graph = _domain_capability_graph(runtime, "soil")
+        if graph is not None:
             dataset = graph.defaults["soil_dataset"]
             current = _stable_runtime_state(
                 runtime, "soils_mode_code", _SOILS_STABLE_BY_RUNTIME
@@ -2090,6 +2110,19 @@ def _operation_capability_authority(runtime: RuntimeState) -> dict[str, Any] | N
         "climate_spatial_defaults": dict(graph.climate_spatial_defaults),
         "defaults": dict(graph.defaults),
     }
+    if runtime.projected_domains:
+        projected_default_keys: set[str] = set()
+        if "climate" in runtime.projected_domains:
+            projected_default_keys.update(
+                {"climate_dataset", "climate_station_database"}
+            )
+        if "landuse" in runtime.projected_domains:
+            projected_default_keys.add("landuse_dataset")
+        if "soil" in runtime.projected_domains:
+            projected_default_keys.add("soil_dataset")
+        for key in tuple(authority["defaults"]):
+            if key not in projected_default_keys:
+                authority["defaults"].pop(key)
     model_graph = runtime.model_capability_graph
     if model_graph is None:
         for key in (
@@ -2370,8 +2403,8 @@ def _landuse_dataset_field(runtime: RuntimeState) -> dict[str, Any]:
 
 
 def _supported_soils_modes(runtime: RuntimeState) -> list[str]:
-    if runtime.capability_graph is not None:
-        graph = runtime.capability_graph
+    graph = _domain_capability_graph(runtime, "soil")
+    if graph is not None:
         return list(graph.soil_builders_by_dataset[graph.defaults["soil_dataset"]])
     if runtime.v1_capabilities and "soil_builders" in runtime.v1_capabilities:
         return list(runtime.v1_capabilities["soil_builders"])
@@ -2406,17 +2439,17 @@ def _soil_mode_field(
     current_authorized = current_id in allowed_ids if current_id is not None else False
     enum_values = _values(enum_ids)
     available_values = _values(allowed_ids)
+    graph = _domain_capability_graph(runtime, "soil")
     field: dict[str, Any] = {
         "type": "integer" if runtime_values else "string",
         "constraint_mode": (
-            "run_resolved" if runtime.capability_graph is not None else "static"
+            "run_resolved" if graph is not None else "static"
         ),
     }
     if enum_values or not runtime_values:
         field["enum"] = enum_values
         field["enum_available"] = available_values
-    if runtime.capability_graph is not None:
-        graph = runtime.capability_graph
+    if graph is not None:
         field.update({
             "constraint_source": "project_capability_graph",
             "resolved_at": runtime.generated_at,
@@ -2693,10 +2726,11 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
     climate_controller_fields = _controller_schema("climate", runtime)["fields"]
     build_soil_mode_field = _soil_mode_field(runtime, runtime_values=True)
     build_soil_mode_default = build_soil_mode_field.get("current_value")
-    if build_soil_mode_default is None and runtime.capability_graph is not None:
-        soil_dataset = runtime.capability_graph.defaults["soil_dataset"]
+    soil_graph = _domain_capability_graph(runtime, "soil")
+    if build_soil_mode_default is None and soil_graph is not None:
+        soil_dataset = soil_graph.defaults["soil_dataset"]
         build_soil_mode_default = SOIL_BUILDER_MODES[
-            runtime.capability_graph.soil_builder_defaults[soil_dataset]
+            soil_graph.soil_builder_defaults[soil_dataset]
         ]
 
     operations: dict[str, dict[str, Any]] = {

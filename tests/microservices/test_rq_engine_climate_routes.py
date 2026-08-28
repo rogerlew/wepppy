@@ -1,5 +1,7 @@
 import contextlib
 import copy
+import hashlib
+from pathlib import Path
 import pickle
 from types import SimpleNamespace
 
@@ -10,10 +12,44 @@ TestClient = pytest.importorskip("fastapi.testclient").TestClient
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import climate_routes
 from wepppy.nodb.core.climate_input_parser import ClimateInputParsingService
+from wepppy.nodb.project_config_capabilities import resolve_run_capability_authority
+from wepppy.nodb.project_config_reader import ProjectConfigStatus
+from wepppy.nodb.project_config_snapshot import (
+    materialize_preset_snapshot,
+    resolve_preset_snapshot,
+)
+from wepppy.project_config_serialization import parse_config_text
 from wepppy.runtime_paths.errors import NoDirError
 
 
 pytestmark = pytest.mark.microservice
+
+
+def _eu_preset_authority(root: Path):
+    candidate = resolve_preset_snapshot(
+        "eu-disturbed",
+        {},
+        source_revision="test-revision",
+    )
+    materialize_preset_snapshot(root, candidate)
+    values = parse_config_text(candidate.config_bytes.decode("utf-8"))
+    config = SimpleNamespace(
+        project_config_status=ProjectConfigStatus(
+            "flattened",
+            str(root),
+            "eu-disturbed.cfg",
+            True,
+            True,
+            config_sha256=hashlib.sha256(candidate.config_bytes).hexdigest(),
+        ),
+        config_get_raw=lambda section, option, default=None: values.get(
+            section, {}
+        ).get(option, default),
+        config_get_list=lambda section, option, default=None: values.get(
+            section, {}
+        ).get(option, default),
+    )
+    return resolve_run_capability_authority(config)
 
 
 def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -236,6 +272,68 @@ def test_build_climate_rejects_different_unsupported_catalog_before_mutation(
     assert response.status_code == 400
     assert response.json()["error"]["code"] == "unsupported_capability"
     assert controller.parse_calls == 0
+
+
+def test_schema_v1_europe_preset_drives_rq_acceptance_and_rejection(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    from wepppy.nodb.locales import get_climate_dataset
+
+    authority_root = tmp_path / "preset"
+    authority_root.mkdir()
+    authority = _eu_preset_authority(authority_root)
+    assert authority.graph is not None
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(climate_routes, "get_wd", lambda _runid: str(tmp_path))
+    monkeypatch.setattr(
+        climate_routes,
+        "resolve_run_capability_authority",
+        lambda _climate: authority,
+    )
+
+    class DummyClimate:
+        run_group = "batch"
+        catalog_id = "vanilla_cligen"
+        climatestation_mode = -1
+        climate_spatialmode = 0
+        climate_mode = 0
+        parse_calls = 0
+
+        def parse_inputs(self, _payload) -> None:
+            self.parse_calls += 1
+
+    controller = DummyClimate()
+    monkeypatch.setattr(
+        climate_routes.Climate,
+        "getInstance",
+        lambda _wd: controller,
+    )
+    user_defined = get_climate_dataset("user_defined_cli")
+    prism = get_climate_dataset("prism_stochastic")
+
+    with TestClient(rq_engine.app) as client:
+        accepted = client.post(
+            "/api/runs/run-1/cfg/build-climate",
+            json={
+                "climate_catalog_id": "user_defined_cli",
+                "climate_mode": int(user_defined.climate_mode),
+            },
+        )
+        rejected = client.post(
+            "/api/runs/run-1/cfg/build-climate",
+            json={
+                "climate_catalog_id": "prism_stochastic",
+                "climate_mode": int(prism.climate_mode),
+            },
+        )
+
+    assert accepted.status_code == 200
+    assert accepted.json()["message"] == "Set climate inputs for batch processing"
+    assert controller.parse_calls == 1
+    assert rejected.status_code == 400
+    assert rejected.json()["error"]["code"] == "unsupported_capability"
+    assert controller.parse_calls == 1
 
 
 def test_v2_climate_preflight_translates_stable_methods_to_parser_values() -> None:

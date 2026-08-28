@@ -62,12 +62,12 @@ class ClimateStationCatalogService:
             if allowed is not None:
                 datasets = [dataset for dataset in datasets if dataset.catalog_id in allowed]
         else:
-            allowed = set(authority.climate_datasets)
+            by_id = {dataset.catalog_id: dataset for dataset in iter_climate_datasets()}
             datasets = [
-                dataset
-                for dataset in iter_climate_datasets()
-                if dataset.catalog_id in allowed
-                and (include_hidden or dataset.ui_exposed)
+                by_id[catalog_id]
+                for catalog_id in authority.climate_datasets
+                if catalog_id in by_id
+                and (include_hidden or by_id[catalog_id].ui_exposed)
             ]
             datasets = [
                 replace(

@@ -39,11 +39,16 @@ EXPECTED_IDS = {
     "single-ofe",
     "multiple-ofe",
     "ssurgo-gnatsgso-2025",
-    "nlcd-2019",
+    *(f"nlcd-ever-forest-{year}" for year in range(1985, 2025)),
+    *(f"nlcd-{year}" for year in range(1985, 2025)),
+    *(f"emapr-vote-{year}" for year in range(1984, 2018)),
     "vanilla_cligen",
     "prism_stochastic",
     "observed_daymet",
     "observed_gridmet",
+    "dep_nexrad",
+    "future_cmip5",
+    "user_defined_cli",
     "continental-us-capabilities",
     "europe",
     "canada",
@@ -81,6 +86,7 @@ def _selections(
     representation: str = "single-ofe",
     wepp_binary: str = "wepp_260803",
     climate: str = "vanilla_cligen",
+    landuse: str = "nlcd-2019",
     mods: tuple[str, ...] = (),
     cellsize: int | None = None,
 ) -> BuilderSelections:
@@ -91,7 +97,7 @@ def _selections(
         watershed_representation=representation,
         wepp_binary=wepp_binary,
         soil="ssurgo-gnatsgso-2025",
-        landuse="nlcd-2019",
+        landuse=landuse,
         climate=climate,
         mods=mods,
         cellsize_override=cellsize,
@@ -420,6 +426,36 @@ def test_description_is_deterministic_and_server_ready() -> None:
         graph["capabilities"]["schema_version"] == 3
         for graph in first.capability_graphs_by_locale.values()
     )
+    assert first.capability_graphs_by_locale["continental-us"]["capabilities"][
+        "climate_datasets"
+    ] == [
+        "vanilla_cligen",
+        "prism_stochastic",
+        "observed_daymet",
+        "observed_gridmet",
+        "dep_nexrad",
+        "future_cmip5",
+        "user_defined_cli",
+    ]
+    assert first.capability_graphs_by_locale["europe"]["capabilities"][
+        "climate_datasets"
+    ] == ["vanilla_cligen", "eobs_modified", "user_defined_cli"]
+
+
+def test_landcover_selection_changes_default_without_narrowing_graph() -> None:
+    selected = "nlcd-ever-forest-2024"
+    resolved = resolve_builder_config(_selections(landuse=selected))
+
+    assert resolved.config["landuse"]["nlcd_db"] == "nlcd/ever_forest/2024"
+    assert resolved.config["capability_defaults"]["landuse_dataset"] == selected
+    assert len(resolved.config["capabilities"]["landuse_datasets"]) == 114
+    assert resolved.config["capabilities"]["landuse_datasets"][:3] == [
+        "nlcd-ever-forest-2024",
+        "nlcd-ever-forest-2023",
+        "nlcd-ever-forest-2022",
+    ]
+    assert "nlcd-2019" in resolved.config["capabilities"]["landuse_datasets"]
+    assert "emapr-vote-1984" in resolved.config["capabilities"]["landuse_datasets"]
 
 
 @pytest.mark.parametrize(

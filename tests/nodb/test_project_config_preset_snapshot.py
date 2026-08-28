@@ -165,6 +165,169 @@ def test_materialized_pair_reopens_through_wp02_reader_without_shared_fallback(
     assert scan_path(run_root) == ()
 
 
+def test_schema_v1_preset_projection_requires_exact_canonical_replay(
+    tmp_path: Path,
+) -> None:
+    candidate = snapshot.resolve_preset_snapshot(
+        "eu-disturbed",
+        {},
+        source_revision="descriptive-only",
+        resolved_at=FIXED_TIME,
+    )
+    snapshot.materialize_preset_snapshot(tmp_path, candidate)
+
+    assert snapshot.resolve_preset_locale_projection(
+        tmp_path,
+        "eu-disturbed.cfg",
+    ) == "europe"
+
+    manifest_path = tmp_path / "config-manifest.json"
+    manifest = json.loads(manifest_path.read_bytes())
+    manifest["source_revision"] = "changed-descriptive-provenance"
+    manifest_path.write_text(
+        json.dumps(manifest, sort_keys=True, separators=(",", ":")) + "\n",
+        encoding="utf-8",
+    )
+    assert snapshot.resolve_preset_locale_projection(
+        tmp_path,
+        "eu-disturbed.cfg",
+    ) == "europe"
+
+
+def test_schema_v1_preset_projection_replays_typed_boolean_overrides(
+    tmp_path: Path,
+) -> None:
+    candidate = snapshot.resolve_preset_snapshot(
+        "disturbed9002",
+        {"unitizer:is_english": "false", "nodb:apply_nodir": "true"},
+        source_revision="descriptive-only",
+        resolved_at=FIXED_TIME,
+    )
+    snapshot.materialize_preset_snapshot(tmp_path, candidate)
+
+    assert snapshot.resolve_preset_locale_projection(
+        tmp_path,
+        "disturbed9002.cfg",
+    ) == "continental-us"
+
+
+@pytest.mark.parametrize("forged_value", ["false", ["false"]])
+def test_schema_v1_preset_projection_rejects_forged_override_value_types(
+    tmp_path: Path,
+    forged_value: object,
+) -> None:
+    candidate = snapshot.resolve_preset_snapshot(
+        "disturbed9002",
+        {"unitizer:is_english": "false"},
+        source_revision="descriptive-only",
+        resolved_at=FIXED_TIME,
+    )
+    _config_path, manifest_path = snapshot.materialize_preset_snapshot(
+        tmp_path,
+        candidate,
+    )
+    manifest = json.loads(manifest_path.read_bytes())
+    manifest["selections"]["overrides"]["unitizer.is_english"]["value"] = forged_value
+    manifest_path.write_text(
+        json.dumps(manifest, sort_keys=True, separators=(",", ":")) + "\n",
+        encoding="utf-8",
+    )
+
+    assert snapshot.resolve_preset_locale_projection(
+        tmp_path,
+        "disturbed9002.cfg",
+    ) is None
+
+
+def test_schema_v1_preset_projection_rejects_drift_and_self_asserted_forgery(
+    tmp_path: Path,
+) -> None:
+    candidate = snapshot.resolve_preset_snapshot(
+        "eu-disturbed",
+        {},
+        source_revision="test-revision",
+        resolved_at=FIXED_TIME,
+    )
+    config_path, manifest_path = snapshot.materialize_preset_snapshot(tmp_path, candidate)
+    original_manifest = json.loads(manifest_path.read_bytes())
+
+    parent_drift = dict(original_manifest)
+    parent_drift["parent_chain"] = [
+        dict(parent) for parent in original_manifest["parent_chain"]
+    ]
+    parent_drift["parent_chain"][1]["revision"] = "0" * 64
+    manifest_path.write_text(
+        json.dumps(parent_drift, sort_keys=True, separators=(",", ":")) + "\n",
+        encoding="utf-8",
+    )
+    assert snapshot.resolve_preset_locale_projection(tmp_path, "eu-disturbed.cfg") is None
+
+    forged_bytes = config_path.read_bytes().replace(b'["eu"]', b'["us"]')
+    config_path.write_bytes(forged_bytes)
+    forged_manifest = dict(original_manifest)
+    forged_manifest["config"] = dict(original_manifest["config"])
+    forged_manifest["config"]["sha256"] = hashlib.sha256(forged_bytes).hexdigest()
+    manifest_path.write_text(
+        json.dumps(forged_manifest, sort_keys=True, separators=(",", ":")) + "\n",
+        encoding="utf-8",
+    )
+    assert snapshot.resolve_preset_locale_projection(tmp_path, "eu-disturbed.cfg") is None
+
+
+def test_schema_v1_preset_projection_rechecks_the_replayed_config_read(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    candidate = snapshot.resolve_preset_snapshot(
+        "eu-disturbed",
+        {},
+        source_revision="test-revision",
+        resolved_at=FIXED_TIME,
+    )
+    config_path, _manifest_path = snapshot.materialize_preset_snapshot(
+        tmp_path,
+        candidate,
+    )
+    original_read_bytes = Path.read_bytes
+    config_reads = 0
+
+    def swapping_read_bytes(path: Path) -> bytes:
+        nonlocal config_reads
+        if path == config_path:
+            config_reads += 1
+            if config_reads > 1:
+                return candidate.config_bytes.replace(b'["eu"]', b'["us"]')
+        return original_read_bytes(path)
+
+    monkeypatch.setattr(Path, "read_bytes", swapping_read_bytes)
+
+    assert snapshot.resolve_preset_locale_projection(
+        tmp_path,
+        "eu-disturbed.cfg",
+    ) is None
+    assert config_reads == 2
+
+
+def test_schema_v1_preset_projection_fails_when_policy_corpus_is_unavailable(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    candidate = snapshot.resolve_preset_snapshot(
+        "eu-disturbed",
+        {},
+        source_revision="test-revision",
+        resolved_at=FIXED_TIME,
+    )
+    snapshot.materialize_preset_snapshot(tmp_path, candidate)
+
+    def unavailable():
+        raise snapshot.PresetPolicyError("policy corpus unavailable")
+
+    monkeypatch.setattr(snapshot, "load_preset_policies", unavailable)
+    with pytest.raises(snapshot.PresetPolicyError, match="unavailable"):
+        snapshot.resolve_preset_locale_projection(tmp_path, "eu-disturbed.cfg")
+
+
 def test_materializer_refuses_overwrite_and_cleans_partial_pair(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     candidate = snapshot.resolve_preset_snapshot(
         "disturbed9002",

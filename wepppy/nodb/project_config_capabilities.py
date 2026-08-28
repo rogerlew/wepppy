@@ -72,6 +72,7 @@ class RunCapabilityMode(str, Enum):
 
     STORED = "stored"
     LEGACY_BUILDER = "legacy_builder"
+    PRESET_PROJECTION = "preset_projection"
     COMPATIBILITY = "compatibility"
 
 
@@ -81,6 +82,7 @@ class RunCapabilityAuthority:
     graph: CapabilityGraph | None
     runtime_tokens: tuple[str, ...]
     locale_profile: str | None
+    projected_domains: frozenset[str] = frozenset()
 
 
 class LocaleAuthorityInvalidError(ValueError):
@@ -387,6 +389,55 @@ def resolve_run_capability_authority(
     if flattened is True:
         version = _schema_version(config)
         if version in {None, 1}:
+            status = getattr(config, "project_config_status", None)
+            if (
+                status is not None
+                and status.mode == "flattened"
+                and status.manifest_valid
+                and not status.warnings
+                and status.authority_root
+                and status.config_filename
+                and status.config_sha256
+            ):
+                from wepppy.nodb.project_config_snapshot import (
+                    PresetPolicyError,
+                    resolve_preset_locale_projection,
+                )
+
+                try:
+                    profile_id = resolve_preset_locale_projection(
+                        status.authority_root,
+                        status.config_filename,
+                        expected_config_sha256=status.config_sha256,
+                    )
+                except PresetPolicyError as exc:
+                    raise BuilderRegistryUnavailableError(
+                        f"Builder preset policy is unavailable: {exc}"
+                    ) from exc
+                if profile_id is not None:
+                    try:
+                        graph = resolve_builder_capability_graph(
+                            profile_id,
+                            registry=registry,
+                        )
+                    except (
+                        BuilderConstraintError,
+                        RegistryError,
+                        CapabilityGraphError,
+                        ValueError,
+                    ) as exc:
+                        raise BuilderRegistryUnavailableError(
+                            f"Builder registry could not resolve locale {profile_id!r}: {exc}"
+                        ) from exc
+                    profile = get_locale_profile(profile_id)
+                    assert profile is not None
+                    return RunCapabilityAuthority(
+                        RunCapabilityMode.PRESET_PROJECTION,
+                        graph,
+                        (profile.runtime_token,),
+                        profile_id,
+                        frozenset({"climate", "landuse"}),
+                    )
             return RunCapabilityAuthority(
                 RunCapabilityMode.COMPATIBILITY,
                 None,
@@ -449,7 +500,12 @@ def resolve_run_capability_authority(
     ):
         try:
             graph = resolve_builder_capability_graph(base.profile_id, registry=registry)
-        except (BuilderConstraintError, RegistryError, CapabilityGraphError) as exc:
+        except (
+            BuilderConstraintError,
+            RegistryError,
+            CapabilityGraphError,
+            ValueError,
+        ) as exc:
             raise BuilderRegistryUnavailableError(
                 f"Builder registry could not resolve locale {base.profile_id!r}: {exc}"
             ) from exc
@@ -525,7 +581,15 @@ def soil_capability_modes(
     *,
     soil_dataset: str | None = None,
 ) -> frozenset[int] | None:
-    authority = resolve_run_capability_authority(config).graph
+    flattened = _scalar(config, "config", "flattened", False)
+    if isinstance(flattened, str) and flattened.casefold() in {"true", "false"}:
+        flattened = flattened.casefold() == "true"
+    schema_v1_compatibility = flattened is True and _schema_version(config) in {None, 1}
+    authority = (
+        None
+        if schema_v1_compatibility
+        else resolve_run_capability_authority(config).graph
+    )
     if authority is None:
         allowed = capability_ids(config, "soil_builders")
         if allowed is None:

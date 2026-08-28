@@ -7,6 +7,7 @@ import pytest
 
 from wepppy.nodb.core.climate import ClimateMode, ClimateStationMode
 from wepppy.nodb.core.climate_station_catalog_service import ClimateStationCatalogService
+from wepppy.nodb.config_builder.resolver import resolve_builder_capability_graph
 
 pytestmark = pytest.mark.unit
 
@@ -195,3 +196,20 @@ def test_resolve_catalog_dataset_allows_exact_persisted_v2_selection(
     assert dataset is not None
     assert dataset.catalog_id == "vanilla_cligen"
     assert service.resolve_catalog_dataset(climate, "observed_gridmet") is None
+
+
+def test_europe_graph_catalog_is_ordered_and_exact(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = ClimateStationCatalogService()
+    climate = _DummyClimate()
+    graph = resolve_builder_capability_graph("europe")
+    monkeypatch.setattr(
+        "wepppy.nodb.project_config_capabilities.resolve_run_capability_authority",
+        lambda _climate: SimpleNamespace(graph=graph, runtime_tokens=("eu",)),
+    )
+
+    assert [
+        dataset.catalog_id
+        for dataset in service.available_catalog_datasets(climate)
+    ] == ["vanilla_cligen", "eobs_modified", "user_defined_cli"]

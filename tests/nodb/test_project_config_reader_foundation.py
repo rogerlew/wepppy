@@ -14,6 +14,7 @@ from wepppy.nodb.project_config_reader import (
     ProjectConfigAuthorityError,
     ProjectConfigSchemaError,
     load_project_config,
+    project_config_manifest_payload,
     project_config_reader_enabled,
 )
 
@@ -97,6 +98,68 @@ def _load(
         parser_factory=base.CaseSensitiveRawConfigParser,
         run_id="fixture-run",
     )
+
+
+def test_manifest_payload_returns_the_exact_single_validated_read(
+    roots: tuple[Path, Path],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root, _shared = roots
+    config = root / "preset.cfg"
+    _write_config(config)
+    manifest = _write_manifest(root, config)
+    original_read_text = Path.read_text
+    reads = 0
+
+    def swapping_read_text(path: Path, *args, **kwargs) -> str:
+        nonlocal reads
+        if path == manifest:
+            reads += 1
+            if reads > 1:
+                return json.dumps({"source_kind": "builder"})
+        return original_read_text(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "read_text", swapping_read_text)
+
+    payload = project_config_manifest_payload(
+        root,
+        config.name,
+        require_exact_digest=True,
+    )
+
+    assert payload is not None
+    assert payload["source_kind"] == "preset"
+    assert reads == 1
+
+
+def test_flattened_parser_and_manifest_status_share_one_config_observation(
+    roots: tuple[Path, Path],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root, shared = roots
+    config = root / "preset.cfg"
+    _write_config(config, source="first-observation")
+    first_bytes = config.read_bytes()
+    _write_manifest(root, config)
+    second_bytes = first_bytes.replace(b"first-observation", b"later-observation")
+    original_read_bytes = Path.read_bytes
+    reads = 0
+
+    def swapping_read_bytes(path: Path) -> bytes:
+        nonlocal reads
+        if path == config:
+            reads += 1
+            return first_bytes if reads == 1 else second_bytes
+        return original_read_bytes(path)
+
+    monkeypatch.setattr(Path, "read_bytes", swapping_read_bytes)
+
+    result = _load(root, shared)
+
+    assert result.parser.get("values", "source") == "first-observation"
+    assert result.status.manifest_valid is True
+    assert result.status.config_sha256 == hashlib.sha256(first_bytes).hexdigest()
+    assert reads == 1
 
 
 @pytest.fixture

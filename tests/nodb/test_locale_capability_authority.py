@@ -403,6 +403,9 @@ def test_historical_schema_v2_round_trip_never_adds_station_database_axis() -> N
                 "prism_stochastic",
                 "observed_daymet",
                 "observed_gridmet",
+                "dep_nexrad",
+                "future_cmip5",
+                "user_defined_cli",
             ),
             (
                 "cligen-stations-legacy",
@@ -414,28 +417,28 @@ def test_historical_schema_v2_round_trip_never_adds_station_database_axis() -> N
         (
             "europe",
             "eu",
-            ("vanilla_cligen", "eobs_modified"),
+            ("vanilla_cligen", "eobs_modified", "user_defined_cli"),
             ("cligen-stations-ghcn",),
             "corine-2018",
         ),
         (
             "canada",
             "canada",
-            ("vanilla_cligen", "observed_daymet"),
+            ("vanilla_cligen", "observed_daymet", "user_defined_cli"),
             ("cligen-stations-ghcn",),
             "c3s-landcover-2020",
         ),
         (
             "australia",
             "au",
-            ("vanilla_cligen", "agdc"),
+            ("vanilla_cligen", "agdc", "user_defined_cli"),
             ("cligen-stations-ghcn",),
             "australia-landuse-2010-2011",
         ),
         (
             "global-earth",
             "earth",
-            ("vanilla_cligen",),
+            ("vanilla_cligen", "user_defined_cli"),
             ("cligen-stations-ghcn",),
             "c3s-landcover-2020",
         ),
@@ -530,11 +533,11 @@ def test_schema_v3_reader_rejects_hostile_climate_method_broadening(
     source = graph.climate_datasets[0]
     hostile_relations = {
         **graph.climate_station_methods_by_dataset,
-        source: (*graph.climate_station_methods_by_dataset[source], "user_defined"),
+        source: (*graph.climate_station_methods_by_dataset[source], "au_heuristic"),
     }
     hostile = replace(
         graph,
-        climate_station_methods=(*graph.climate_station_methods, "user_defined"),
+        climate_station_methods=(*graph.climate_station_methods, "au_heuristic"),
         climate_station_methods_by_dataset=MappingProxyType(hostile_relations),
     )
 
@@ -570,7 +573,7 @@ def test_schema_v3_parser_rejects_hostile_climate_method_broadening(
     methods = ast.literal_eval(
         config._configparser.get("capabilities", "climate_station_methods")
     )
-    methods.append("user_defined")
+    methods.append("au_heuristic")
     config._configparser.set(
         "capabilities", "climate_station_methods", repr(methods)
     )
@@ -578,7 +581,7 @@ def test_schema_v3_parser_rejects_hostile_climate_method_broadening(
     relation = ast.literal_eval(
         config._configparser.get("capabilities.climate_station_methods", source)
     )
-    relation.append("user_defined")
+    relation.append("au_heuristic")
     config._configparser.set(
         "capabilities.climate_station_methods", source, repr(relation)
     )
@@ -675,14 +678,14 @@ def test_stored_schema_v2_graph_validation_is_independent_of_live_catalogs(
 @pytest.mark.parametrize(
     ("profile_id", "expected_sha256"),
     (
-        ("continental-us", "5296d3519d578164b6a5874a820991c935b394e5336aba41fe3e8f8d0dd4e29b"),
-        ("europe", "c05b6a66f823f69cf8f1d44b69c206da1dc9449b278662c680248a3f3b755aeb"),
-        ("canada", "dd7f7cdb0d861a159df64a4806ee5585f0208b93982990e30974055b1f2a41e7"),
-        ("australia", "bb4bdde8740d689aa378bcf744a942d997b9c69cdc445d80be07c749635efc9a"),
-        ("global-earth", "db1c185cf6b5def23064752847f585f3522c0b971460d9c688b424cb04c706ae"),
+        ("continental-us", "3151e7e11be97967b32b887c6832b5286d252bf9b85841b889d5dcfbb24a8faf"),
+        ("europe", "18eda2d24f57be54993d2f0b609c59de6c26a17632d8653cc62b5a926e66f2c7"),
+        ("canada", "07f733c2b13589ac637fc898859b8e3eac4902199606a2580796eec47765d7b4"),
+        ("australia", "1fd066a9e5bef26373414988d9f98e04fb84a8d0d08f7af280eef7cb1779a497"),
+        ("global-earth", "b1bbcd60e71b65064455da3abaacdb239a433bafe08c46854a2ffcfc9c50de92"),
     ),
 )
-def test_schema_v3_current_graph_matches_280cf7e84_structure_identity(
+def test_schema_v3_current_graph_matches_amendment5_structure_identity(
     profile_id: str,
     expected_sha256: str,
 ) -> None:
@@ -751,7 +754,7 @@ def test_amendment5_reader_floor_accepts_prior_and_new_structures(
     evolved.validate()
 
 
-def test_amendment5_reader_floor_does_not_advance_runtime_writer() -> None:
+def test_amendment5_runtime_writer_emits_new_cataloged_structures() -> None:
     binary_ids = ("wepp_260803",)
     emitted = {
         profile_id: capability_graph_module.capability_structure_sha256(
@@ -764,13 +767,7 @@ def test_amendment5_reader_floor_does_not_advance_runtime_writer() -> None:
         for profile_id in _AMENDMENT5_CLIMATE_DATASETS
     }
 
-    assert emitted == {
-        "continental-us": "5296d3519d578164b6a5874a820991c935b394e5336aba41fe3e8f8d0dd4e29b",
-        "europe": "c05b6a66f823f69cf8f1d44b69c206da1dc9449b278662c680248a3f3b755aeb",
-        "canada": "dd7f7cdb0d861a159df64a4806ee5585f0208b93982990e30974055b1f2a41e7",
-        "australia": "bb4bdde8740d689aa378bcf744a942d997b9c69cdc445d80be07c749635efc9a",
-        "global-earth": "db1c185cf6b5def23064752847f585f3522c0b971460d9c688b424cb04c706ae",
-    }
+    assert emitted == _AMENDMENT5_STRUCTURE_HASHES
 
 
 def test_structure_identity_excludes_project_defaults_and_provider_binary_state() -> None:
@@ -1116,7 +1113,10 @@ def test_schema_v1_present_empty_mandatory_axis_is_invalid() -> None:
 
 def test_schema_v1_landuse_axis_restricts_runtime_resolution() -> None:
     config = ParsedConfig(
+        "[config]\n"
+        "flattened = true\n"
         "[capabilities]\n"
+        "schema_version = 1\n"
         'landuse_datasets = ["nlcd-2019"]\n'
     )
 

@@ -5,6 +5,8 @@
 **Review mode**: independent, read-only
 **Advisory verdict**: READY, 2026-08-28 10:45 UTC
 **Binding verdict**: READY, 2026-08-28 16:35 UTC; no correctness findings
+**Implementation verdict**: READY, 2026-08-28 18:16 UTC; High 0 / Medium 0 /
+Low 0
 
 ## Advisory disposition
 
@@ -38,3 +40,21 @@ ratified canonical diff against baseline
 advisory closures remain intact; no `wepppy/`, `tests/`, or `.cfg` path differs
 from baseline; unrelated dirty paths remain excluded; and the documentation-
 only checkpoint is safe with exact path staging.
+
+## Implementation disposition
+
+The initial implementation review identified one evidence gap: the Europe
+preset needed to exercise the production projection resolver through the
+actual presentation, Flask mutation, and RQ mutation consumers rather than
+only their shared lower-level helpers. The final tree closes that gap with a
+materialized `eu-disturbed` schema-v1 named preset and proves:
+
+- rendering exposes exactly Vanilla, E-OBS Modified (Europe), and User
+  Defined;
+- Flask discovery and mutation accept User Defined and reject PRISM; and
+- the RQ route accepts User Defined and rejects PRISM before mutation.
+
+The reviewer independently reran those three tests; all passed. The scoped
+diff check also passed. No production correctness finding remains. Exact-host
+`forest` acceptance is retained as a deployment gate rather than an
+implementation defect. Merge and production remain reserved to parent WP12.

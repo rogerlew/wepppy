@@ -9,6 +9,7 @@ from .landuse_catalog import (
     get_landcover_entry,
     iter_landcover_catalog,
     landcover_catalog_id,
+    landcover_catalog_ids_for_locales,
     landcover_catalog_revision,
 )
 from .climate_catalog import (
@@ -52,6 +53,7 @@ __all__ = [
     "get_landcover_entry",
     "iter_landcover_catalog",
     "landcover_catalog_id",
+    "landcover_catalog_ids_for_locales",
     "landcover_catalog_revision",
     "ClimateDataset",
     "ClimateStationDatabase",

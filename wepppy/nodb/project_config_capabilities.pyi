@@ -38,6 +38,7 @@ class CapabilityConfig(Protocol):
 class RunCapabilityMode(str, Enum):
     STORED = "stored"
     LEGACY_BUILDER = "legacy_builder"
+    PRESET_PROJECTION = "preset_projection"
     COMPATIBILITY = "compatibility"
     def __new__(cls, value: str) -> Self: ...
 
@@ -47,6 +48,7 @@ class RunCapabilityAuthority:
     graph: CapabilityGraph | None
     runtime_tokens: tuple[str, ...]
     locale_profile: str | None
+    projected_domains: frozenset[str] = ...
 
 class LocaleAuthorityInvalidError(ValueError): ...
 class BuilderRegistryUnavailableError(RuntimeError): ...
