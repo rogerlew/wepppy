@@ -69,6 +69,24 @@ plan and the companion tracker at every stopping point.
   horizon checks and 306 returned structured rejection diagnostics. No
   successful profile had non-finite values or invalid depth order. The run
   intentionally stopped below the NoDb/WEPPcloud integration boundary.
+- [x] (2026-08-28) Diagnosed deployed Forest RQ job
+  `893db465-9012-4489-ab1e-06b8ec73f461`: all 21 locations shared
+  `source.categorical.empty` for `fao90lev1`, but the batch traceback omitted
+  that reason and did not name the persisted quality report.
+- [x] (2026-08-28) Implemented and validated a bounded batch
+  exception/log/status summary. Eight unit tests and two actual-raster tests
+  pass, including a replay of the incident coordinate through the real ESDAC
+  batch builder.
+- [x] (2026-08-28) Proved interface conformance through the shared
+  `controlBase` polling path: `jobinfo.exc_info` places the complete ESDAC
+  terminal exception in Summary and the traceback in Details (`14 passed`).
+  No soil-specific UI branch or canonical behavior change was required.
+- [x] (2026-08-28) Dispositioned the independent correctness review's High
+  status-telemetry masking finding and Medium grouping finding. Redis publish
+  failures can no longer replace the typed ESDAC exception, and only rejection
+  errors are grouped by code/field with deterministic representative evidence.
+- [ ] (2026-08-28) Deploy the correction and confirm the next live rejection
+  is diagnosable without opening the report first.
 - [ ] Phase 0 scale-up: decide whether to run the 50,000-sample campaign.
 - [x] Phase 1: capture source payload fixture and deterministic replay harness.
 - [x] Phase 2: review and ratify the evidence-backed quality invariants and
@@ -176,6 +194,14 @@ plan and the companion tracker at every stopping point.
   successful profiles had only a zero `smr` value, which remains a permitted
   physical value under ADR-0043.
 
+- Observation: Structured diagnostics are not operationally observable when
+  the batch exception lists only rejected location IDs. Forest job
+  `893db465-9012-4489-ab1e-06b8ec73f461` retained the exact reason in
+  `soil_quality.json`, while its RQ traceback omitted both reason and report
+  filename.
+  Evidence: all 21 report entries contain `source.categorical.empty` for
+  `fao90lev1` with raw value `["24", "", "No information"]`.
+
 ## Decision Log
 
 - Decision: Create a captured source-payload fixture before changing builder
@@ -275,6 +301,15 @@ plan and the companion tracker at every stopping point.
   runtime entry points require the locations they are about to process.
   Date/Author: 2026-08-19 / Codex under Phase 6 review.
 
+- Decision: Duplicate a bounded diagnostic summary at the batch
+  exception/log/status boundary while keeping `soil_quality.json` as the full
+  authority.
+  Rationale: a failed RQ job must explain why it failed without requiring
+  filesystem archaeology, but large watersheds must not create unbounded log
+  payloads. The summary caps locations and grouped reasons, carries counts and
+  representative raw evidence, and makes no scientific-policy change.
+  Date/Author: 2026-08-28 / User + Codex during Phase 6 observation.
+
 ## Outcomes & Retrospective
 
 Phase 1 confirmed that the reported classes are replayable without live
@@ -311,6 +346,12 @@ The post-hardening Phase 0 replay provides a direct-builder health checkpoint:
 The campaign is intentionally not an integration test; NoDb, Disturbed, and
 WEPPcloud behavior remains covered by the focused suites and deployment
 observation plan.
+
+The first recorded Forest rejection during observation proved that the full
+quality carrier was durable but the RQ boundary was not self-diagnostic. The
+Phase 6 correction now mirrors a bounded reason summary and report filename
+into the exception, log, and status channel; the full report remains the
+source for per-location evidence. Live deployment confirmation remains open.
 
 ## Context and Orientation
 

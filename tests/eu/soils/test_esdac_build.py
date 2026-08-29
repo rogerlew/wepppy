@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -36,3 +37,37 @@ def test_esdac_build_generates_wepp_soil(tmp_path) -> None:
     assert description, "Description metadata should be populated"
     content = sol_path.read_text()
     assert "ESDAC ESDB Soil Parameters" in content
+
+
+def test_esdac_batch_rejection_reports_real_categorical_reason(tmp_path) -> None:
+    """Replay Forest job 893db465's first rejected raster location."""
+    pytest.importorskip("numpy")
+    from wepppy.eu.soils.soil_build import (
+        ESDACSoilBatchError,
+        build_esdac_soils,
+    )
+
+    output_dir = tmp_path / "soils"
+    with pytest.raises(ESDACSoilBatchError) as error:
+        build_esdac_soils(
+            [(73, (8.05301393718246, 50.16630252781121))],
+            str(output_dir),
+        )
+
+    message = str(error.value)
+    assert "source.categorical.empty[field=fao90lev1, count=1" in message
+    assert 'raw_value=["24","","No information"]' in message
+    assert "report: soil_quality.json" in message
+
+    report = json.loads((output_dir / "soil_quality.json").read_text())
+    assert report["batch_outcome"] == "rejected"
+    assert report["profiles"][0]["diagnostics"] == [
+        {
+            "code": "source.categorical.empty",
+            "exception_type": None,
+            "field": "fao90lev1",
+            "raw_value": ["24", "", "No information"],
+            "severity": "error",
+        }
+    ]
+    assert not list(output_dir.glob("*.sol"))

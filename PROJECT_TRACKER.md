@@ -550,17 +550,19 @@ remain.
 **Description**: Search a seeded, stratified sample of the ESDAC raster
 footprint for zero-valued parameters or invalid horizons, then define and
 implement explicit validation and diagnostics without silently inventing
-replacement soil values. The Phase 0 pilot, Phase 1 replay fixture, Phase 2
-quality contract, and Phase 3 pure validator are complete; production wiring
-remains in Phase 4.
-**Next Steps**: Integrate the pure validator into the ESDAC builder and worker
-aggregation, preserve TopoAZ/coordinate diagnostics, and prove that rejected
-locations cannot produce usable `.sol` files. Decide separately whether the
-50,000-sample discovery campaign is warranted.
-**Validation Notes**: Phase 3 targeted EU tests passed (`22 passed`); package,
-ADR, and tracker documentation lint passed; the full repository gate reached
-170 passed and 13 skipped before an unrelated Docker CLI compose-contract
-failure (`docker compose` rejected `-f`).
+replacement soil values. Phases 0–6 implemented the quality contract, staged
+batch commit, durable per-location report, downstream artifact gate, and
+single/MOFE runtime enforcement. Forest observation on 2026-08-28 exposed a
+batch-error observability gap: the report held the reason, but the RQ
+traceback listed only location IDs.
+**Next Steps**: Validate and deploy the bounded ESDAC exception/log/status
+summary, confirm it on the next rejected job, and continue the 14–30 day or
+20-run observation window. Decide separately whether the 50,000-sample
+discovery campaign is warranted.
+**Validation Notes**: The 2026-08-28 combined unit and actual-raster suite
+passed (`10 passed`), including replay of the incident coordinate through the
+real ESDAC batch builder; the full report remains authoritative and no
+scientific validation or fallback behavior changed.
 
 ---
 

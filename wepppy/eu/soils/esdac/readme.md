@@ -14,3 +14,15 @@ Each generated artifact is written to a temporary `.sol`, reparsed with the
 canonical WEPP soil parser, and atomically published only after the downstream
 contract passes. Non-EU and non-ESDAC disturbed workflows are outside this
 runtime gate.
+
+When a batch is rejected, `soil_quality.json` remains the complete diagnostic
+record. The raised error, application log, and run status channel also report
+a bounded summary containing representative TopoAZ IDs, grouped reason codes,
+fields, counts, raw values, and the report filename. This summary is intended
+for immediate operator diagnosis; consult the report for every affected
+location and all source evidence.
+
+The run interface obtains the failed job's traceback from `jobinfo`. Its soil
+control displays the terminal ESDAC batch diagnostic in Summary and retains
+the traceback in Details, so users do not need filesystem access to learn why
+the source locations were rejected.
