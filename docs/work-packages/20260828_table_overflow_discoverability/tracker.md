@@ -124,6 +124,8 @@ Post-correction independent confirmation is READY with no findings.
 - [x] Documentation lint passes for the checkpoint candidate.
 - [x] `git diff --check` passes.
 - [x] Independent correctness review passes (High 0, Medium 0, Low 0).
+- [x] Operator verified the deployed hint, Tab reachability, Arrow scrolling,
+  and Shift-wheel scrolling on Forest (2026-08-29).
 
 ## Progress Notes
 

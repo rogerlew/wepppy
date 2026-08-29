@@ -57,7 +57,14 @@ writers remains allowed, but reverting to a schema-v2-only reader does not.
 
 ## Writer and Provider Acceptance
 
-Pending. Builder creation may now be enabled on `forest` only. Closure still
-requires authenticated create/reopen evidence for each newly exposed profile,
+Partially accepted on 2026-08-29. The operator created projects for all five
+Builder locales and successfully delineated a watershed for each. The operator
+also validated the locale-specific landuse, soil, and climate option sets. A
+subsequent redeploy confirmed the corrected Australia Land Use 2010–2011
+selection, and legacy projects reopened and executed tasks successfully.
+
+Closure still requires explicit reopen evidence for each newly exposed profile,
 the three Continental-US station databases, and presence/health plus
-representative real execution for every advertised provider family.
+representative real execution for every advertised provider family. The
+operator evidence above must not be represented as successful landuse, soil,
+or climate builds unless those builds are separately executed and recorded.

@@ -86,3 +86,22 @@ source projects were not modified. The temporary run copies, detached reader-
 floor worktree, and Compose override were removed after evidence capture; the
 copies are reproducible from their unchanged source projects. This acceptance
 does not authorize merge or production deployment.
+
+## Operator five-locale workflow acceptance
+
+On 2026-08-29, the operator reported successful end-to-end interactive checks
+for all five Config Builder locales: Continental US, Europe, Canada, Australia,
+and Earth. For every locale, the operator created a project, delineated a
+watershed, and validated the locale-specific landuse, soil, and climate
+options. This supplies direct user-workflow evidence in addition to the
+registry, provider, and rollback evidence above.
+
+The observation is Forest integration acceptance only. It does not authorize
+merge or production deployment, which remain reserved to WP12.
+
+After redeploying the current feature branch, the operator additionally
+confirmed that the Australia run control selected Australia Land Use 2010–2011
+instead of inherited NLCD 2019. Legacy projects opened successfully and could
+submit and execute tasks. This closes the observed Australia presentation
+regression and supplies a direct compatibility smoke; it does not replace the
+remaining provider-family execution matrix.

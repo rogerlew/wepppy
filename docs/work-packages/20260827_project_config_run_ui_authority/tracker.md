@@ -83,6 +83,9 @@ PC-24 owns `.cfg` locale normalization and run-UI authority parity.
 
 ### Ready / Handoff
 
+- [x] Record operator acceptance that all five Builder locales successfully
+  created projects, delineated watersheds, and exposed the expected landuse,
+  soil, and climate options on Forest (2026-08-29).
 - [x] Correct the Australia run-control presentation to select the stored
   Builder `capability_defaults.landuse_dataset` instead of the inherited,
   non-authoritative `landuse.nlcd_db`; retain exact-current compatibility for
