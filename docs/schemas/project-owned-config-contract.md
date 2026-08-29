@@ -121,11 +121,13 @@ framework and does not silently re-flatten a project when it is opened.
 
 Page load MAY asynchronously call a read-only rq-engine availability endpoint.
 The check MUST NOT mutate the config or manifest. When an update is available,
-the run-page header MUST show a notice linking to an accessible modal panel.
+the run-page header MUST show a notice immediately after the Archive action,
+linking to an accessible modal panel.
 The panel MUST list every section, option, value, owning parent-chain source,
 and source revision that the merge would add. It MUST provide an explicit
 button to request the update and MUST explain that version 1 only adds missing
-attributes.
+attributes. The review dialog MUST provide a wide-table viewport, and its table
+headers and acknowledgment control MUST use the active WEPPcloud theme.
 
 The availability response MUST include an opaque preview identity. The
 authenticated apply endpoint MUST re-resolve and revalidate the update under

@@ -1582,6 +1582,10 @@ h5:first-child {
   margin-block: var(--wc-space-2);
 }
 
+.wc-run-header__actions > .wc-project-config-update {
+  margin-block: 0;
+}
+
 .wc-project-config-update[hidden],
 .wc-project-config-update__warning[hidden] {
   display: none;
@@ -1592,8 +1596,9 @@ h5:first-child {
   max-width: 70ch;
 }
 
-.wc-project-config-update__dialog {
-  max-width: min(72rem, calc(100vw - 2rem));
+.wc-modal__dialog.wc-project-config-update__dialog {
+  width: min(96rem, calc(100vw - 2rem));
+  max-width: none;
 }
 
 .wc-project-config-update__dialog .wc-table-scroll {
@@ -1603,6 +1608,21 @@ h5:first-child {
 .wc-project-config-update__dialog td {
   overflow-wrap: anywhere;
   vertical-align: top;
+}
+
+.wc-project-config-update__dialog .pure-table thead,
+.wc-project-config-update__dialog .pure-table thead th {
+  background: var(--wc-color-surface-alt);
+  color: var(--wc-color-text);
+  border-color: var(--wc-color-border);
+}
+
+.wc-project-config-update__dialog input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  appearance: auto;
+  accent-color: var(--wc-color-accent);
+  color-scheme: var(--wc-color-scheme);
 }
 
 .wc-run-header__descriptor {

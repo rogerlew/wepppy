@@ -47,29 +47,6 @@
         </span>
         {% endif %}
       </div>
-      <div class="wc-project-config-update"
-           data-project-config-update
-           data-availability-url="{{ url_for_run('project-config/update-availability', runid=view_runid, config=view_config, prefix='/rq-engine/api') }}"
-           data-preview-url="{{ url_for_run('project-config/update-preview', runid=view_runid, config=view_config, prefix='/rq-engine/api') }}"
-           data-apply-url="{{ url_for_run('project-config/update-apply', runid=view_runid, config=view_config, prefix='/rq-engine/api') }}"
-           hidden>
-        <button type="button"
-                class="pure-button pure-button-secondary wc-project-config-update__notice"
-                data-project-config-update-open
-                data-modal-open="projectConfigUpdateModal">
-          Configuration update available
-        </button>
-        <p class="wc-project-config-update__warning"
-           data-project-config-digest-warning
-           role="status"
-           hidden>
-          Configuration provenance warning: this project's current configuration differs from its recorded digest. Existing work remains available.
-        </p>
-        <p class="wc-alert wc-alert--danger"
-           data-project-config-update-availability-error
-           role="alert"
-           hidden></p>
-      </div>
       <div class="wc-run-header__content">
         <div class="wc-run-header__fields">
           {{ header_text_field(
@@ -117,6 +94,29 @@
             ARCHIVE
           </a>
           {% endif %}
+          <div class="wc-project-config-update"
+               data-project-config-update
+               data-availability-url="{{ url_for_run('project-config/update-availability', runid=view_runid, config=view_config, prefix='/rq-engine/api') }}"
+               data-preview-url="{{ url_for_run('project-config/update-preview', runid=view_runid, config=view_config, prefix='/rq-engine/api') }}"
+               data-apply-url="{{ url_for_run('project-config/update-apply', runid=view_runid, config=view_config, prefix='/rq-engine/api') }}"
+               hidden>
+            <button type="button"
+                    class="pure-button pure-button-secondary wc-project-config-update__notice"
+                    data-project-config-update-open
+                    data-modal-open="projectConfigUpdateModal">
+              Configuration update available
+            </button>
+            <p class="wc-project-config-update__warning"
+               data-project-config-digest-warning
+               role="status"
+               hidden>
+              Configuration provenance warning: this project's current configuration differs from its recorded digest. Existing work remains available.
+            </p>
+            <p class="wc-alert wc-alert--danger"
+               data-project-config-update-availability-error
+               role="alert"
+               hidden></p>
+          </div>
         </div>
         <div class="wc-run-header__right">
           <div class="wc-run-header__theme">

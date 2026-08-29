@@ -2839,6 +2839,7 @@ def test_run_header_project_config_update_modal_is_accessible_and_dormant(
         assert token in rendered
     assert 'data-project-config-update\n' in rendered
     assert 'data-modal hidden' in rendered
+    assert rendered.index("ARCHIVE") < rendered.index("data-project-config-update")
 
 
 def test_interfaces_template_shows_login_bypass_banner_for_anonymous_user(jinja_env: Environment) -> None:
