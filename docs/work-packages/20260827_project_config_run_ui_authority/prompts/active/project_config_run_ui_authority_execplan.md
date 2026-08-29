@@ -207,9 +207,20 @@ migrated.
   tests, documentation, and review evidence and commit reviewed implementation
   revision `64055eadb57534bc7b8093179d0f5212cbde7f88`, leaving every prerecorded
   dirty path excluded.
+- [x] (2026-08-29 02:24Z) Restore Australia run-control conformance by
+  presenting the stored Builder land-cover default instead of the inherited
+  US runtime selector; preserve other exact-current compatibility and pass all
+  160 run-control render tests.
 
 ## Surprises & Discoveries
 
+- Observation: Australia intentionally dispatches land-cover by locale and its
+  Builder component therefore does not overwrite the shared
+  `landuse.nlcd_db`; using that legacy field as the select's presentation value
+  exposed inherited NLCD 2019 even though the stored graph correctly selected
+  Australia Land Use 2010–2011.
+  Evidence: `/wc1/runs/ab/absurd-disputant/config.cfg` and the Australia
+  run-control regression added on 2026-08-29.
 - Observation: rebuilding the generated controller bundle with host `python3`
   failed because that interpreter lacks Jinja2, while the canonical
   `wctl exec weppcloud python` build completed and produced the expected source

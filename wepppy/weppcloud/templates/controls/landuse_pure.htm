@@ -2,6 +2,7 @@
 {% from "shared/console_macros.htm" import button_row %}
 
 {% set current_mode = landuse.mode.value if landuse.mode is not none else 0 %}
+{% set selected_landcover_dataset = selected_landcover_dataset if selected_landcover_dataset is defined else landuse.nlcd_db %}
 {% set single_landuse_disabled = wepp.multi_ofe %}
 {% set mofe_landuse_description = "MOFE projects require a gridded landuse map; Single landuse for watershed is disabled." if single_landuse_disabled else none %}
 
@@ -107,7 +108,7 @@
          "landuse_db",
          "Select landcover dataset",
          landcover_ns.options,
-         selected=landuse.nlcd_db,
+         selected=selected_landcover_dataset,
          disabled_values=disabled_landcover_datasets,
          help="Choose the raster catalog used when landuse is determined per hillslope.",
          attrs={"data-landuse-role": "db"},

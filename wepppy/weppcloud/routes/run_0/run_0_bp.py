@@ -1811,8 +1811,13 @@ def _landuse_method_modes_for_current(
     landuse,
     representation: str,
     current_descriptor,
+    current_runtime: str | None = None,
 ):
-    current_runtime = str(getattr(landuse, "nlcd_db", "") or "").strip()
+    current_runtime = str(
+        current_runtime
+        if current_runtime is not None
+        else getattr(landuse, "nlcd_db", "") or ""
+    ).strip()
     if not current_runtime:
         return landuse_capability_modes(
             landuse, authority.defaults["landuse_dataset"], representation
@@ -1837,7 +1842,13 @@ def _apply_current_dataset_compatibility(
 ):
     """Add exact outside-axis current options without crossing dataset types."""
 
-    current_landcover = landuse.nlcd_db
+    current_landcover = str(getattr(landuse, "nlcd_db", "") or "").strip()
+    if tuple(getattr(authority, "locale_profiles", ())) == ("australia",):
+        default_entry = get_landcover_entry(
+            authority.defaults["landuse_dataset"]
+        )
+        if default_entry is not None:
+            current_landcover = default_entry.runtime_value
     current_landcover_descriptor = next(
         (
             item
@@ -1872,6 +1883,7 @@ def _apply_current_dataset_compatibility(
         landuse,
         representation,
         current_landcover_descriptor,
+        current_landcover,
     )
 
     current_climate_catalog_id = climate.catalog_id
@@ -1974,7 +1986,7 @@ def _apply_current_dataset_compatibility(
         ):
             landcover_datasets.append(current_landcover_descriptor)
         disabled_landcover_datasets.append(current_landcover_descriptor.key)
-    return landuse_method_modes, disabled_landcover_datasets
+    return landuse_method_modes, disabled_landcover_datasets, current_landcover
 
 
 def _build_runs0_context(runid, config, playwright_load_all):
@@ -2137,9 +2149,14 @@ def _build_runs0_context(runid, config, playwright_load_all):
     climate_catalog = climate.catalog_datasets_payload(include_hidden=True)
     landcover_datasets = landuse.landcover_datasets
     disabled_landcover_datasets = []
+    selected_landcover_dataset = landuse.nlcd_db
     if run_capability_authority is not None:
         climate_default_catalog_id = run_capability_authority.defaults["climate_dataset"]
-        landuse_method_modes, disabled_landcover_datasets = (
+        (
+            landuse_method_modes,
+            disabled_landcover_datasets,
+            selected_landcover_dataset,
+        ) = (
             _apply_current_dataset_compatibility(
                 run_capability_authority,
                 landuse,
@@ -2297,6 +2314,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
         disabled_landcover_datasets=disabled_landcover_datasets,
         landuse_report_rows=landuse_report_context['report_rows'],
         landuse_dataset_options=landuse_report_context['dataset_options'],
+        selected_landcover_dataset=selected_landcover_dataset,
         landuse_method_modes=landuse_method_modes,
         disabled_wepp_bin_options=disabled_wepp_bin_options,
         landuse_coverage_percentages=landuse_report_context['coverage_percentages'],

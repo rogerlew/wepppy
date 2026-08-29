@@ -954,7 +954,7 @@ def test_run_context_renders_outside_axis_climate_with_ordinary_landcover(
     }]
     landcover_datasets = [landcover]
 
-    landuse_modes, disabled_landcover = (
+    landuse_modes, disabled_landcover, selected_landcover = (
         run0_module._apply_current_dataset_compatibility(
             authority,
             landuse,
@@ -978,6 +978,7 @@ def test_run_context_renders_outside_axis_climate_with_ordinary_landcover(
         landcover_datasets=landcover_datasets,
         disabled_landcover_datasets=disabled_landcover,
         landuse_method_modes=landuse_modes,
+        selected_landcover_dataset=selected_landcover,
         wepp=SimpleNamespace(multi_ofe=False),
         ron=SimpleNamespace(mods=set()),
     )
@@ -1075,7 +1076,7 @@ def test_run_context_renders_outside_locale_current_landcover_disabled(
     )
     landcover_datasets = [allowed_landcover]
 
-    landuse_modes, disabled_landcover = (
+    landuse_modes, disabled_landcover, selected_landcover = (
         run0_module._apply_current_dataset_compatibility(
             authority,
             landuse,
@@ -1094,6 +1095,7 @@ def test_run_context_renders_outside_locale_current_landcover_disabled(
         landcover_datasets=landcover_datasets,
         disabled_landcover_datasets=disabled_landcover,
         landuse_method_modes=landuse_modes,
+        selected_landcover_dataset=selected_landcover,
         wepp=SimpleNamespace(multi_ofe=False),
         ron=SimpleNamespace(mods=set()),
     )
@@ -1106,6 +1108,73 @@ def test_run_context_renders_outside_locale_current_landcover_disabled(
     assert "disabled" in current_option.group(0)
     assert disabled_landcover == [current_runtime]
     assert [item.key for item in landcover_datasets].count(current_runtime) == 1
+
+
+def test_australia_run_control_selects_stored_builder_landcover_default(
+    jinja_env: Environment,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    run0_module = importlib.import_module(
+        "wepppy.weppcloud.routes.run_0.run_0_bp"
+    )
+    authority = SimpleNamespace(
+        locale_profiles=("australia",),
+        defaults={"landuse_dataset": "australia-landuse-2010-2011"},
+        landuse_datasets=("australia-landuse-2010-2011",),
+        climate_datasets=("vanilla-cligen",),
+    )
+    australia_landcover = SimpleNamespace(
+        kind="landcover",
+        key="au/landuse_201011/lu10v5ua",
+        catalog_id="australia-landuse-2010-2011",
+        label="Australia Land Use 2010–2011",
+        description=None,
+        management_file=None,
+    )
+    landuse = SimpleNamespace(
+        mode=SimpleNamespace(value=0),
+        nlcd_db="nlcd/2019",
+        available_datasets=[australia_landcover],
+        single_selection="42",
+        mofe_buffer_selection="42",
+        user_defined_landcover_fn=None,
+        mapping="disturbed",
+    )
+    landcover_datasets = [australia_landcover]
+    monkeypatch.setattr(
+        run0_module,
+        "landuse_capability_modes",
+        lambda *_args: frozenset({0, 1, 4}),
+    )
+
+    landuse_modes, disabled_landcover, selected_landcover = (
+        run0_module._apply_current_dataset_compatibility(
+            authority,
+            landuse,
+            SimpleNamespace(catalog_id="vanilla-cligen"),
+            [],
+            landcover_datasets,
+            "single-ofe",
+        )
+    )
+    rendered = jinja_env.get_template("controls/landuse_pure.htm").render(
+        landuse=landuse,
+        landuseoptions=[{"Key": "42", "Description": "Forest"}],
+        landuse_management_mapping_options=[{
+            "Key": "disturbed", "Description": "Disturbed",
+        }],
+        landcover_datasets=landcover_datasets,
+        disabled_landcover_datasets=disabled_landcover,
+        landuse_method_modes=landuse_modes,
+        selected_landcover_dataset=selected_landcover,
+        wepp=SimpleNamespace(multi_ofe=False),
+        ron=SimpleNamespace(mods=set()),
+    )
+
+    assert selected_landcover == "au/landuse_201011/lu10v5ua"
+    assert disabled_landcover == []
+    assert 'option value="au/landuse_201011/lu10v5ua" selected' in rendered
+    assert 'option value="nlcd/2019"' not in rendered
 
 
 def test_climate_template_renders_upload_and_scaling_contract(

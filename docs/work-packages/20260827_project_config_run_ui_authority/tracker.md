@@ -4,8 +4,8 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-27 20:31 UTC
-**Current phase**: amendment 7 ready for WP12 handoff
-**Last updated**: 2026-08-28 23:34 UTC
+**Current phase**: amendment 7 plus locale-default conformance fix ready for WP12 handoff
+**Last updated**: 2026-08-29 02:24 UTC
 **Next milestone**: WP12 scope comparison and promotion; merge and production
 remain reserved
 **Package security impact**: `high` (historical WP12D scope)
@@ -83,6 +83,11 @@ PC-24 owns `.cfg` locale normalization and run-UI authority parity.
 
 ### Ready / Handoff
 
+- [x] Correct the Australia run-control presentation to select the stored
+  Builder `capability_defaults.landuse_dataset` instead of the inherited,
+  non-authoritative `landuse.nlcd_db`; retain exact-current compatibility for
+  other outside-axis runs and pass the complete 160-test render suite
+  (2026-08-29 02:24 UTC).
 - [x] Amendment 7 implementation and its complete validation are ready for an
   exact WP12 handoff at reviewed revision
   `64055eadb57534bc7b8093179d0f5212cbde7f88`; no push or deployment is
