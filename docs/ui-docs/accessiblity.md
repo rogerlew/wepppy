@@ -163,6 +163,20 @@ semantics. Apply remains disabled until a complete preview is rendered and
 while a job is active. WP09 evidence is recorded under
 `docs/work-packages/20260804_project_config_update_ui/artifacts/`.
 
+### 8) Horizontally overflowing data tables
+
+Accepted Pure UI behavior will progressively enhance the canonical
+`.wc-table-wrapper` only when its contents overflow horizontally. An overflowing
+wrapper will display concise input instructions, become a visibly focused
+keyboard region, and be re-evaluated after layout or dynamic-content changes. A
+fitting table will receive no generated hint or extra tab stop. Shared behavior
+must preserve authored focus and accessible-region semantics and must never
+alter table data or column layout. Implementation conformance is pending; the
+normative contract is
+`docs/ui-docs/contracts/table-overflow-discoverability-contract.md` and future
+validation evidence belongs under
+`docs/work-packages/20260828_table_overflow_discoverability/`.
+
 ## Coverage-to-Requirement Map
 
 This table is an evidence map for engineering and release review. It is not a substitute for the criterion-by-criterion ACR/VPAT table.

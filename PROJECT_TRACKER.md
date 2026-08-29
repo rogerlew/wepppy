@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-08-27
-**Active Packages**: 30
+**Last Updated**: 2026-08-29
+**Active Packages**: 31
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 25 packages (above target range; calculated from the 25 package entries in the In Progress section)
+**Current WIP**: 26 packages (above target range; calculated from the 26 package entries in the In Progress section)
 
 ### 3. Manage Flow
 Monitor how long packages spend in each column:
@@ -404,6 +404,25 @@ When resuming Kubernetes work:
 ---
 
 ## 🚧 In Progress
+
+### Table Overflow Discoverability and WEPP Slope Display Precision
+
+**Started**: 2026-08-29
+
+**Priority/Security**: High / `none`
+
+**Link**: [docs/work-packages/20260828_table_overflow_discoverability/](docs/work-packages/20260828_table_overflow_discoverability/)
+
+**Scope**: Enhance only horizontally overflowing `.wc-table-wrapper` regions
+with discoverability instructions, keyboard focus, accessible-region semantics,
+and lifecycle refresh behavior. Also display the exact `Slope` column in the
+WEPP Loss Summary hillslope and channel HTML tables with three decimal places,
+without changing report data, sorting keys, or CSV output.
+
+**Status**: Contract checkpoint correction and re-review in progress;
+implementation conformance pending.
+
+---
 
 ### Project Config Run UI Authority (WP12D)
 
