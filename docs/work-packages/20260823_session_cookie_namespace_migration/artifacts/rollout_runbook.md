@@ -1,6 +1,6 @@
 # `wepp.cloud` Production Rollout Runbook
 
-**Status**: Bearhive rehearsal active; production execution prohibited
+**Status**: Production owned-cookie writer active; observation in progress
 **Production origin**: `https://wepp.cloud`
 **Development/test origins**: Bearhive deployments
 **State store**: Redis DB 11; preserve throughout rollout
@@ -106,26 +106,28 @@ Execution ledger:
 Activate `__Host-weppcloud_session` for all `wepp.cloud` web writers without
 overlap with legacy-only processes. Do not stop, flush, copy, or rekey Redis.
 
-- [ ] Record final go/no-go decision and operator.
-- [ ] Verify exact cookie invariants: Secure, HttpOnly, Path `/`, no Domain.
-- [ ] Change only the wepp1 writer setting to
+- [x] Record final go/no-go decision and operator.
+- [x] Verify exact cookie invariants: Secure, HttpOnly, Path `/`, no Domain.
+- [x] Change only the wepp1 writer setting to
       `SESSION_COOKIE_NAME=__Host-weppcloud_session`.
-- [ ] Deploy with
+- [x] Deploy with
       `./scripts/deploy-production.sh --targeted-web --skip-pull --no-flush-rq-db`.
-- [ ] Prove non-target service container IDs did not change.
-- [ ] Verify all web process digests and effective configuration.
+- [x] Prove non-target service container IDs did not change.
+- [x] Verify all web process digests and effective configuration.
 - [ ] Confirm legacy SIDs retain the same Redis keys and payloads.
 - [ ] Run first-request POST, recorder, heartbeat, CAP, OAuth, logout/reset,
       concurrent-tab, and rq-engine canaries.
 - [ ] Confirm users with remember disabled retain valid active sessions.
 - [ ] Observe all abort signals for the ratified interval.
-- [ ] Declare activation healthy or execute the rescue procedure.
+- [x] Declare activation healthy or execute the rescue procedure.
 
 Execution ledger:
 
 | UTC | Operator | Action/command | Digest/config evidence | Result |
 | --- | --- | --- | --- | --- |
-|  |  |  |  |  |
+| 2026-08-25 02:13–02:20Z | Codex, operator-approved activation | Set only `SESSION_COOKIE_NAME=__Host-weppcloud_session`; `./scripts/deploy-production.sh --targeted-web --skip-pull --no-flush-rq-db` | Git `c4f509634`; writer/primary `__Host-weppcloud_session`; legacy `session`; migration enabled; image `sha256:4ad919f8edcc0c94fe88e3ef36c099235826843dc4f36f70003dcaa20c6b1c98` | Activation passed. Only web/rq-engine rotated; every non-target container ID remained unchanged. Web and rq-engine returned HTTP 200 after the bounded rq-engine startup delay. Immediate session/CSRF/Redis/5xx signals were zero. |
+| 2026-08-25 02:20–02:29Z | WEPPcloud operator and Codex | Existing-session production browser canary and post-canary log review | Hard refresh retained authentication; owned cookie present; heartbeat HTTP 204; recorder and rq-engine functional; cross-tab logout propagated; 2/2 observed session-token mints returned HTTP 200 | Critical continuity canaries passed without logout, login, or site-data clearing. Zero CSRF, conflict, Redis-session, or severe errors. One cross-tab logout-time migration rejection was duplicated across two log handlers; fencing succeeded, but the production formatter omitted its rejection class. |
+| 2026-08-25 02:29Z | WEPPcloud operator | Fresh authentication canary | Local and OAuth login functional with the owned-cookie writer | Activation declared healthy. Continue dual-reading and review telemetry/legacy usage at 2026-08-26 02:20Z before any retirement decision. |
 
 ## Recovery Procedure
 
