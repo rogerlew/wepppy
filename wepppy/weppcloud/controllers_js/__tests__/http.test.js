@@ -120,6 +120,32 @@ describe("WCHttp helpers", () => {
         expect(global.fetch.mock.calls[0][0]).toBe("/weppcloud/api/auth/rq-engine-token");
     });
 
+    test("requestWithUserToken sends the user token without probing with a session token", async () => {
+        document.body.dataset.sitePrefix = "/weppcloud";
+        global.fetch = jest.fn()
+            .mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                statusText: "OK",
+                headers: { get: () => "application/json" },
+                text: () => Promise.resolve(JSON.stringify({ token: "owner-token" }))
+            })
+            .mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                statusText: "OK",
+                headers: { get: () => "application/json" },
+                text: () => Promise.resolve(JSON.stringify({ available: true }))
+            });
+
+        await window.WCHttp.requestWithUserToken("/rq-engine/api/runs/run-1/cfg/project-config/update-preview");
+
+        expect(global.fetch).toHaveBeenCalledTimes(2);
+        expect(global.fetch.mock.calls[0][0]).toBe("/weppcloud/api/auth/rq-engine-token");
+        expect(global.fetch.mock.calls[1][0]).toBe("/rq-engine/api/runs/run-1/cfg/project-config/update-preview");
+        expect(global.fetch.mock.calls[1][1].headers.get("Authorization")).toBe("Bearer owner-token");
+    });
+
     test("postForm serializes payloads, propagates CSRF, and throws HttpError", async () => {
         document.head.innerHTML = `<meta name="csrf-token" content="token-head">`;
         global.fetch = jest.fn().mockResolvedValue({

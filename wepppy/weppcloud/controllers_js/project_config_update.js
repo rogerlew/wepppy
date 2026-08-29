@@ -62,6 +62,7 @@
         this.acknowledgment = this.modal.querySelector("[data-project-config-update-acknowledgment]");
         this.acknowledgmentCheckbox = this.modal.querySelector("[data-project-config-update-acknowledgment-checkbox]");
         this.refreshButton = this.modal.querySelector("[data-project-config-update-refresh]");
+        this.reloadButton = this.modal.querySelector("[data-project-config-update-reload]");
         this.applyButton = this.modal.querySelector("[data-project-config-update-apply]");
         this.preview = null;
         this.busy = false;
@@ -80,8 +81,23 @@
         return (hasRefresh || hasAdditions) && (!hasRefresh || this.acknowledgmentCheckbox.checked);
     };
 
+    ProjectConfigUpdate.prototype._hideReloadAction = function () {
+        this.reloadButton.hidden = true;
+        this.applyButton.hidden = false;
+    };
+
+    ProjectConfigUpdate.prototype._showReloadAction = function () {
+        this.applyButton.hidden = true;
+        this.reloadButton.hidden = false;
+        this.reloadButton.focus();
+    };
+
     ProjectConfigUpdate.prototype._request = function (url, options) {
         return this.http.requestWithSessionToken(url, options || {});
+    };
+
+    ProjectConfigUpdate.prototype._requestAsUser = function (url, options) {
+        return this.http.requestWithUserToken(url, options || {});
     };
 
     ProjectConfigUpdate.prototype._setStatus = function (message, focus) {
@@ -218,11 +234,12 @@
 
     ProjectConfigUpdate.prototype.loadPreview = function () {
         var self = this;
+        this._hideReloadAction();
         this._clearError();
         this._resetAcknowledgment();
         this.review.hidden = true;
         this._setStatus("Loading the complete configuration update preview…");
-        return this._request(this.root.dataset.previewUrl).then(function (result) {
+        return this._requestAsUser(this.root.dataset.previewUrl).then(function (result) {
             self._renderPreview(result.body || {});
         }).catch(function (error) {
             self.preview = null;
@@ -239,8 +256,9 @@
             if (reviewed && latest.preview_id === reviewed.preview_id &&
                     state.current_digest === reviewed.resulting_digest) {
                 self._clearError();
-                self._setStatus("Configuration update committed and was recovered. Reload the page to use it.", true);
+                self._setStatus("Configuration update committed and was recovered.", true);
                 self.openButton.hidden = true;
+                self._showReloadAction();
             } else if (reviewed && state.current_digest === reviewed.current_digest) {
                 self._clearError();
                 self._setStatus("Configuration update was not applied.", true);
@@ -272,13 +290,13 @@
             self._clearError();
             self.openButton.hidden = true;
             self._resetAcknowledgment();
+            self._showReloadAction();
             self._setStatus(
                 (result.recovered
                     ? "Configuration update committed and was recovered. "
                     : "Configuration update complete. ") +
                 "Sequence " + result.sequence + ". Prior digest " + result.prior_digest +
-                ". Resulting digest " + result.resulting_digest +
-                ". Reload the page to use the reviewed configuration.",
+                ". Resulting digest " + result.resulting_digest + ".",
                 true
             );
         }).catch(function (error) {
@@ -337,7 +355,7 @@
         this.applyButton.disabled = true;
         this._clearError();
         this._setStatus("Requesting the reviewed configuration update…");
-        return this._request(this.root.dataset.applyUrl, {
+        return this._requestAsUser(this.root.dataset.applyUrl, {
             method: "POST",
             json: payload
         }).then(function (result) {
@@ -355,11 +373,11 @@
                 }
                 self._resetAcknowledgment();
                 self.openButton.hidden = true;
+                self._showReloadAction();
                 self._setStatus(
                     "Configuration update was already committed and recovered. Sequence " +
                     resultBody.sequence + ". Prior digest " + resultBody.prior_digest +
-                    ". Resulting digest " + resultBody.resulting_digest +
-                    ". Reload the page to use it.",
+                    ". Resulting digest " + resultBody.resulting_digest + ".",
                     true
                 );
                 return;
@@ -381,6 +399,7 @@
         var self = this;
         this.openButton.addEventListener("click", function () { self.loadPreview(); });
         this.refreshButton.addEventListener("click", function () { self.loadPreview(); });
+        this.reloadButton.addEventListener("click", function () { global.location.reload(); });
         this.applyButton.addEventListener("click", function () { self.apply(); });
         this.acknowledgmentCheckbox.addEventListener("change", function () {
             self.applyButton.disabled = !self._canApply();

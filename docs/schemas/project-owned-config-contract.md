@@ -127,7 +127,9 @@ The panel MUST list every section, option, value, owning parent-chain source,
 and source revision that the merge would add. It MUST provide an explicit
 button to request the update and MUST explain that version 1 only adds missing
 attributes. The review dialog MUST provide a wide-table viewport, and its table
-headers and acknowledgment control MUST use the active WEPPcloud theme.
+captions, headers, and acknowledgment control MUST use the active WEPPcloud
+theme. After a verified successful or recovered apply, the dialog MUST replace
+the apply action with a primary `Reload run to continue` action.
 
 The availability response MUST include an opaque preview identity. The
 authenticated apply endpoint MUST re-resolve and revalidate the update under
@@ -1732,7 +1734,10 @@ asynchronous availability check is read-only. Preview and apply require
 an authenticated project owner or `Admin`/`Root`; ordinary public/ownerless run
 access is insufficient. Apply MUST recheck this authority both when enqueuing
 and when the worker begins execution, and it retains all existing
-read-only/public project restrictions. Service/session/MCP principals may
+read-only/public project restrictions. The browser MUST request preview and
+apply with its authenticated user token directly; it MUST NOT send a session
+token first and use an authorization failure as token-class discovery.
+Service/session/MCP principals may
 mutate only when the existing project-mutation contract explicitly grants it.
 
 Cell-size override authorization is an additional builder-specific privilege.

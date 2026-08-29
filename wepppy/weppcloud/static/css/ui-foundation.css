@@ -1617,6 +1617,11 @@ h5:first-child {
   border-color: var(--wc-color-border);
 }
 
+.wc-project-config-update__dialog .pure-table caption {
+  background: var(--wc-color-surface);
+  color: var(--wc-color-text);
+}
+
 .wc-project-config-update__dialog input[type="checkbox"] {
   width: 1rem;
   height: 1rem;

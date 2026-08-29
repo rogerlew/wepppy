@@ -409,6 +409,16 @@
             });
     }
 
+    function requestWithUserToken(url, options) {
+        var opts = options ? Object.assign({}, options) : {};
+        return getRqEngineToken().then(function (token) {
+            var headers = opts.headers ? Object.assign({}, opts.headers) : {};
+            headers.Authorization = "Bearer " + token;
+            opts.headers = headers;
+            return request(url, opts);
+        });
+    }
+
     function postJsonWithSessionToken(url, payload, options) {
         var opts = options ? Object.assign({}, options) : {};
         opts.method = opts.method || "POST";
@@ -913,6 +923,7 @@
     http.getJsonWithFallback = getJsonWithFallback;
     http.postJsonWithFallback = postJsonWithFallback;
     http.requestWithSessionToken = requestWithSessionToken;
+    http.requestWithUserToken = requestWithUserToken;
     http.postJsonWithSessionToken = postJsonWithSessionToken;
     http.HttpError = HttpError;
     http.isHttpError = isHttpError;

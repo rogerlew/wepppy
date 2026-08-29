@@ -4,6 +4,7 @@
 
 describe("Project config update controller", () => {
     let requestWithSessionToken;
+    let requestWithUserToken;
     let request;
 
     function fixture() {
@@ -28,6 +29,7 @@ describe("Project config update controller", () => {
               </div>
             </div>
             <button data-project-config-update-refresh></button>
+            <button data-project-config-update-reload hidden></button>
             <button data-project-config-update-apply disabled></button>
             <button data-modal-dismiss></button>
           </div>`;
@@ -54,6 +56,7 @@ describe("Project config update controller", () => {
             }
             return Promise.resolve({ body: { job_id: "job-1" } });
         });
+        requestWithUserToken = jest.fn((url, options) => requestWithSessionToken(url, options));
         request = jest.fn((url) => {
             if (url === "/rq-engine/api/jobstatus/job-1") {
                 return Promise.resolve({ body: { status: "finished" } });
@@ -69,7 +72,7 @@ describe("Project config update controller", () => {
             }
             return Promise.reject(new Error("unexpected request"));
         });
-        window.WCHttp = { requestWithSessionToken, request };
+        window.WCHttp = { requestWithSessionToken, requestWithUserToken, request };
         await import("../project_config_update.js");
         if (!window.ProjectConfigUpdate) {
             document.dispatchEvent(new Event("DOMContentLoaded"));
@@ -96,6 +99,8 @@ describe("Project config update controller", () => {
     test("opening renders the complete preview as text and enables explicit apply", async () => {
         await window.ProjectConfigUpdate.loadPreview();
 
+        expect(requestWithUserToken).toHaveBeenCalledWith("/preview", {});
+
         const cells = Array.from(document.querySelectorAll("[data-project-config-update-rows] td"));
         expect(cells.map((cell) => cell.textContent)).toEqual([
             "new<section>", "enabled", "true", "preset", "rev-2"
@@ -121,6 +126,9 @@ describe("Project config update controller", () => {
         expect(document.querySelector("[data-project-config-update-status]").textContent).toContain("Prior digest " + "a".repeat(64));
         expect(document.querySelector("[data-project-config-update-status]").textContent).toContain("Resulting digest " + "b".repeat(64));
         expect(document.querySelector("[data-project-config-update-status]").textContent).toContain("complete");
+        expect(document.querySelector("[data-project-config-update-status]").textContent).not.toContain("Reload the page");
+        expect(document.querySelector("[data-project-config-update-reload]").hidden).toBe(false);
+        expect(document.querySelector("[data-project-config-update-apply]").hidden).toBe(true);
     });
 
     test("terminal recovered success reports the established project pair", async () => {

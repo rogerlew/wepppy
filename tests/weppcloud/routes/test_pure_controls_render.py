@@ -2834,6 +2834,7 @@ def test_run_header_project_config_update_modal_is_accessible_and_dormant(
         '<th scope="col">Source revision</th>',
         "Capability-authority changes",
         'type="checkbox" data-project-config-update-acknowledgment-checkbox',
+        'data-project-config-update-reload hidden>Reload run to continue',
         "I understand that refreshing capability authority changes this project's modeling envelope, diminishes strict provenance continuity with its original configuration, and may expose Preview or otherwise unstable features.",
     ):
         assert token in rendered
