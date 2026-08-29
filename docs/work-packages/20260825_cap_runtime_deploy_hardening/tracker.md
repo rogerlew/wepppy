@@ -8,8 +8,8 @@
 **Timezone**: UTC
 **Started**: 2026-08-25 15:48 UTC
 **Current phase**: Forest1 gate complete; ready for production authorization
-**Last updated**: 2026-08-25 22:00 UTC
-**Next milestone**: production activation and observation
+**Last updated**: 2026-08-25 23:45 UTC
+**Next milestone**: production activation, bounded signal snapshot, and closeout
 **Security impact**: `high`
 **Dedicated security review**: `yes`
 **Security artifact**: `docs/work-packages/20260825_cap_runtime_deploy_hardening/artifacts/2026-08-25_security_review.md`
@@ -18,8 +18,7 @@
 
 ### Ready / Backlog
 
-- [ ] Add the outstanding-token continuity case to the CAP Docker matrix.
-- [ ] Deploy to wepp1 and begin the 14-day observation window.
+- [ ] Deploy to wepp1 and capture the bounded production signal snapshot.
 
 ### In Progress
 
@@ -83,6 +82,10 @@
   writer/primary are `__Host-weppcloud_session`, migration remains enabled,
   and a fresh CAP session received no legacy `session` cookie (2026-08-25
   22:00 UTC).
+- [x] Added and passed the production-image outstanding-token continuity gate:
+  a real pre-migration verification token survived root-owned ledger migration
+  and restart, verified exactly once, and left the ledger writable (2026-08-25
+  23:27 UTC).
 
 ## Timeline
 
@@ -185,6 +188,23 @@ a real RQ-driven DEVAL render before production.
 The expanded scope requires renewed correctness, operations, QA, and security
 review; existing reviews continue to govern the CAP sub-scope.
 
+### 2026-08-25 23:45 UTC: Use stateless recurrence-triggered observation
+
+**Context**: A 14-day closeout timer depends on durable scheduling and ownership
+that this package does not provide. It can be forgotten without improving CAP
+reliability.
+
+**Decision**: Replace the elapsed-time window with a bounded production rollout
+snapshot and durable recurrence triggers in the canonical CAP guide. Close the
+package after the rollout snapshot passes. Any later trigger creates a new
+incident/work package that cites and reassesses this hardening; closed package
+records remain immutable.
+
+**Impact**: No scheduled task or telemetry ledger is required for closeout.
+Rescue material is retained until replaced by a later successful CAP deploy,
+and migration/recovery paths require a separately reviewed softening package
+before removal.
+
 ## Risks and Issues
 
 | Risk | Severity | Likelihood | Mitigation | Status |
@@ -210,8 +230,8 @@ review; existing reviews continue to govern the CAP sub-scope.
 - **Post-containment renderer signals**: WEPPcloudR rebuilt on wepp1 and wepp2;
   required scripts exist and parse while workers remained running.
 - **Temporary callus register**: none.
-- **Softening experiments**: not eligible until the 14-day observation window
-  and review gates complete.
+- **Softening experiments**: require a new package with current production
+  evidence and review gates; elapsed time alone never makes removal eligible.
 
 ## Verification Checklist
 
@@ -242,6 +262,8 @@ review; existing reviews continue to govern the CAP sub-scope.
 - [x] Fresh/absent CAP state tested.
 - [x] Empty CAP state tested.
 - [x] Populated supported legacy state tested without data loss.
+- [x] A pre-migration outstanding token survives migration/restart, verifies
+  exactly once, and leaves the ledger writable.
 - [x] Malformed/hostile permission state fails explicitly.
 - [x] Direct unmocked Compose boundary exercised (Forest1 gate).
 - [x] Full-mode build targets cover every enabled locally buildable service it
@@ -264,7 +286,8 @@ review; existing reviews continue to govern the CAP sub-scope.
   fails when CAP readiness is deliberately broken, and restores and revalidates
   known-good CAP before returning nonzero.
 - [x] Targeted web deploy does not unnecessarily touch CAP.
-- [ ] wepp1 rollout preserves login/session UX and begins observation window.
+- [ ] wepp1 rollout preserves login/session UX and records the bounded health,
+  danger-signal, restart-count, and functional snapshot required for closeout.
 
 ## Progress Notes
 
@@ -332,9 +355,38 @@ the shared contracts, then execute the exact Forest1 matrix.
 **Test results**: incident report, all eight package Markdown files, and
 `PROJECT_TRACKER.md` pass `wctl doc-lint`; `git diff --check` passes.
 
+### 2026-08-25 23:27 UTC: Close outstanding-token continuity gap
+
+**Agent/Contributor**: Codex
+
+**Work completed**:
+
+- Extended the production CAP canary with bounded mint, verify, and
+  already-consumed verification modes.
+- Extended the mandatory Docker runtime matrix to mint a real token, stop CAP,
+  reproduce a root-owned legacy ledger, migrate twice, restart CAP, and verify
+  the exact preserved token once before proving replay rejection.
+- Ran the normal functional canary afterward to prove the migrated ledger
+  remained writable.
+
+**Blockers encountered**: none. An initial harness-helper return-propagation
+defect was corrected before the successful clean rerun.
+
+**Next steps**: deploy to wepp1, capture the bounded production signal
+snapshot, and close the package if all gates remain satisfied.
+
+**Test results**: CAP Node tests 3 passed; production CAP image rebuilt from
+scratch; `docker/validate-cap-runtime-contract.sh wepppy-cap-contract` passed
+the complete ACL, rotation, fresh, outstanding-token continuity, idempotent
+legacy, and hostile-state matrix.
+
 ## Watch List
 
-- **CAP EACCES recurrence**: query both confirmed signatures during observation.
+This is a durable recurrence-trigger list, not state that must be polled or
+maintained after package closure. Any match creates a new incident/work package
+that cites this package and reassesses the affected hardening assumptions.
+
+- **CAP EACCES recurrence**: capture either confirmed signature immediately.
 - **CAP restart count**: any nonzero increase after rollout is a rollback/review
   trigger.
 - **Login UX**: no workflow may require logout, cookie clearing, or site-data

@@ -59,12 +59,32 @@ async function main() {
   const siteKey = process.env.CAP_SITE_KEY;
   const secret = fs.readFileSync(process.env.CAP_SECRET_FILE, "utf8").trim();
   const base = `http://127.0.0.1:${process.env.CAP_PORT || process.env.PORT || 3000}/cap/${siteKey}`;
+  const mode = process.argv[2] || "full";
+
+  if (mode === "verify" || mode === "expect-invalid") {
+    const token = process.env.CAP_CANARY_TOKEN;
+    if (!token) throw new Error("CAP_CANARY_TOKEN is required for token verification");
+    const verified = await post(`${base}/siteverify`, { secret, response: token });
+    if (mode === "verify" && !verified.success) throw new Error("siteverify failed");
+    if (mode === "expect-invalid" && verified.success) {
+      throw new Error("siteverify unexpectedly accepted a consumed token");
+    }
+    console.log(mode === "verify" ? "cap-functional-canary: preserved token verified" :
+      "cap-functional-canary: consumed token rejected");
+    return;
+  }
+
+  if (mode !== "full" && mode !== "mint") throw new Error(`unknown canary mode: ${mode}`);
   const created = await post(`${base}/challenge`, {});
   const redeemed = await post(`${base}/redeem`, {
     token: created.token,
     solutions: solve(created.token, created.challenge),
   });
   if (!redeemed.success || !redeemed.token) throw new Error("challenge redemption failed");
+  if (mode === "mint") {
+    process.stdout.write(redeemed.token);
+    return;
+  }
   const verified = await post(`${base}/siteverify`, { secret, response: redeemed.token });
   if (!verified.success) throw new Error("siteverify failed");
   console.log("cap-functional-canary: challenge/redeem/siteverify passed");

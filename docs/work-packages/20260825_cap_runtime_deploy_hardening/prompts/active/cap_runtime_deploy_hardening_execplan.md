@@ -53,7 +53,11 @@ Users will not need to log out, clear cookies, or clear site data.
 - [x] (2026-08-25 22:00Z) Flipped Forest1 to the owned-cookie writer through a
   canonical targeted-web deploy and proved a fresh CAP session receives only
   `__Host-weppcloud_session`.
-- [ ] Roll out to wepp1, verify login UX, and start the observation window.
+- [x] (2026-08-25 23:27Z) Added and passed the production-image continuity
+  gate: a real outstanding token survived root-owned ledger migration and
+  restart, verified exactly once, and left persistence writable.
+- [ ] Roll out to wepp1, verify login UX, capture the bounded production signal
+  snapshot, and close the package if all gates remain satisfied.
 
 ## Surprises & Discoveries
 
@@ -103,6 +107,10 @@ Users will not need to log out, clear cookies, or clear site data.
   in an unbounded shallow clone of `weppcloud-wbt`.
   Evidence: the Forest build remained network-bound in `git clone` for about
   four minutes before completing; no cutover occurred during that interval.
+- Observation: checksum preservation plus a new post-migration canary does not
+  prove that CAP honored an already-issued token from the preserved ledger.
+  Evidence: the runtime matrix now carries the exact pre-migration token across
+  migration/restart and verifies both acceptance and one-time consumption.
 
 ## Decision Log
 
@@ -149,6 +157,12 @@ Users will not need to log out, clear cookies, or clear site data.
   Rationale: many WEPPcloud services intentionally share one image tag; building
   every service would race writes to that tag without improving coverage.
   Date/Author: 2026-08-25 / Codex.
+- Decision: use a stateless recurrence-triggered observation model instead of
+  holding the package open for 14 days.
+  Rationale: rollout evidence is immediately verifiable, while an unowned timer
+  is fragile state. Canonical recurrence triggers ensure a future CAP problem
+  starts a new incident that reassesses this hardening.
+  Date/Author: 2026-08-25 / operator direction and Codex.
 
 ## Outcomes & Retrospective
 
@@ -165,8 +179,11 @@ Detailed receipts are in
 `artifacts/2026-08-25_forest1_integrated_rehearsal.md`.
 
 The durable deployment repair and Forest1 release gate are complete. The
-package remains active through production activation and the observation
-window.
+package remains active through production activation and its bounded signal
+snapshot. It does not wait on an elapsed-time observation window: future danger
+signals create a new incident/work package that cites and reassesses this
+hardening. The outstanding-token continuity gap is also closed by the
+mandatory production-image Docker matrix.
 
 ## Context and Orientation
 
