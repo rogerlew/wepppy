@@ -405,25 +405,6 @@ When resuming Kubernetes work:
 
 ## 🚧 In Progress
 
-### Table Overflow Discoverability and WEPP Slope Display Precision
-
-**Started**: 2026-08-29
-
-**Priority/Security**: High / `none`
-
-**Link**: [docs/work-packages/20260828_table_overflow_discoverability/](docs/work-packages/20260828_table_overflow_discoverability/)
-
-**Scope**: Enhance only horizontally overflowing `.wc-table-wrapper` regions
-with discoverability instructions, keyboard focus, accessible-region semantics,
-and lifecycle refresh behavior. Also display the exact `Slope` column in the
-WEPP Loss Summary hillslope and channel HTML tables with three decimal places,
-without changing report data, sorting keys, or CSV output.
-
-**Status**: Contract checkpoint correction and re-review in progress;
-implementation conformance pending.
-
----
-
 ### Project Config Run UI Authority (WP12D)
 
 **Started**: 2026-08-27
@@ -1239,6 +1220,24 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### Table Overflow Discoverability and WEPP Slope Display Precision
+
+**Completed**: 2026-08-29
+
+**Priority/Security**: High / `none`
+
+**Link**: [docs/work-packages/20260828_table_overflow_discoverability/](docs/work-packages/20260828_table_overflow_discoverability/)
+
+**Outcome**: Overflowing `.wc-table-wrapper` regions now expose visible input
+instructions, keyboard focus, accessible-region semantics, and lifecycle
+refresh behavior through one shared enhancement. WEPP Loss Summary hillslope
+and channel `Slope` cells display three decimal places without changing raw
+sort keys or CSV output. Independent review is READY with no findings.
+
+**Lifecycle**: In Progress -> Done (2026-08-29)
+
+---
 
 ### Project Config Locale and View Authority (WP12B)
 

@@ -16,11 +16,11 @@ visible keyboard focus stop; a fitting table remains exactly as it was.
 - [x] (2026-08-29 01:25 UTC) Trace the WEPP summary and shared table contracts.
 - [x] (2026-08-29 01:25 UTC) Scaffold the package and document operator authority.
 - [x] (2026-08-29 01:38 UTC) Add exact three-decimal slope display scope.
-- [ ] Complete two independent read-only contract reviews and commit the checkpoint.
-- [ ] Implement the dependency-free shared browser behavior and CSS.
-- [ ] Add Jest, template/CSS, and rendered-browser regression coverage.
-- [ ] Run focused and broad proportional validation.
-- [ ] Complete independent correctness review and close the package.
+- [x] (2026-08-29 02:04 UTC) Complete two independent read-only contract reviews and commit checkpoint `a1db47377033431e77b96a8bda2f3da8c3f5ab92`.
+- [x] (2026-08-29 02:05 UTC) Implement the dependency-free shared browser behavior and CSS.
+- [x] (2026-08-29 02:05 UTC) Add Jest, template/CSS, and rendered-browser regression coverage.
+- [x] (2026-08-29 02:05 UTC) Run focused and broad validation successfully.
+- [x] (2026-08-29 02:16 UTC) Resolve review findings, receive READY with no findings, and close the package.
 
 ## Surprises & Discoveries
 
@@ -33,6 +33,9 @@ visible keyboard focus stop; a fitting table remains exactly as it was.
   Evidence: `static/css/ui-foundation.css` table component rules.
 - Observation: the shared wrapper is not focusable by default, so users cannot
   reliably reach it with Tab before using arrow keys.
+- Observation: production report headers are generator-backed, so templates
+  must materialize them before indexed column-identity lookup.
+  Evidence: final-review regression now mirrors `ReportBase.hdr` semantics.
 
 ## Decision Log
 
@@ -56,7 +59,12 @@ visible keyboard focus stop; a fitting table remains exactly as it was.
 
 ## Outcomes & Retrospective
 
-Pending implementation and validation.
+The shared Pure UI shell now enhances only measurably overflowing canonical
+wrappers. Focused Chromium evidence directly exercised Arrow and Shift-wheel
+movement, all five AA focus styles, 200-percent zoom, document containment, and
+Axe. WEPP summary slope cells use exact-header fixed three-decimal display while
+retaining raw sorting and CSV wiring. The full Python and frontend suites pass.
+Final independent review is READY with High 0, Medium 0, and Low 0.
 
 ## Context and Orientation
 

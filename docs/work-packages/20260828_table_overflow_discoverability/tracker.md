@@ -4,9 +4,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-29 01:25 UTC
-**Current phase**: Contract checkpoint
-**Last updated**: 2026-08-29 01:38 UTC
-**Next milestone**: Commit reviewed documentation-only checkpoint
+**Current phase**: Closed
+**Last updated**: 2026-08-29 02:16 UTC
+**Next milestone**: None; package complete
 **Security impact**: `none`
 **Dedicated security review**: no
 **Security artifact**: N/A
@@ -15,24 +15,25 @@
 
 ### Ready / Backlog
 
-- [ ] Implement shared progressive enhancement.
-- [ ] Implement exact three-decimal slope display in the two WEPP summary tables.
-- [ ] Add and run frontend, template, CSS, and browser regression tests.
-- [ ] Complete correctness review and package closeout.
+- None.
 
 ### In Progress
 
-- [ ] Obtain post-correction READY reviews and commit the documentation-only checkpoint.
+- None.
 
 ### Blocked
 
-- Implementation is blocked until corrected contract reviews are READY and the
-  standalone checkpoint is committed.
+- None.
 
 ### Done
 
 - [x] Inventory shared report/table rendering and current overflow behavior (2026-08-29 01:25 UTC).
 - [x] Record operator authority and bounded behavior contract (2026-08-29 01:25 UTC).
+- [x] Commit reviewed standalone checkpoint and verify ancestry (2026-08-29 02:04 UTC).
+- [x] Implement shared overflow-only progressive enhancement (2026-08-29 02:05 UTC).
+- [x] Implement exact three-decimal slope HTML display (2026-08-29 02:05 UTC).
+- [x] Pass focused and broad validation gates (2026-08-29 02:05 UTC).
+- [x] Resolve final-review findings and close the package (2026-08-29 02:16 UTC).
 
 ## Timeline
 
@@ -42,6 +43,12 @@
 - **2026-08-29 01:42 UTC** – Initial independent reviews returned HOLD; the
   package added a finite canonical contract, exact lifecycle/ARIA rules, exact
   path and dirty-hunk controls, exact browser gates, and the slope delta.
+- **2026-08-29 02:04 UTC** – Both corrected reviews were READY and standalone
+  checkpoint `a1db47377033431e77b96a8bda2f3da8c3f5ab92` was committed.
+- **2026-08-29 02:05 UTC** – Implementation and regression evidence completed;
+  final independent correctness review started.
+- **2026-08-29 02:16 UTC** – Final review READY with High 0, Medium 0, Low 0;
+  generator-backed headers and first-nonempty-heading behavior verified.
 
 ## Decisions Log
 
@@ -103,18 +110,20 @@ changing unrelated ratio-valued metrics.
   evidence plus theme-metrics validation of the shared focus token.
 - **A11Y-COR-06**: Resolved by moving the package entry to In Progress.
 
-Post-correction independent confirmation remains pending.
+Post-correction independent confirmation is READY with no findings.
 
 ## Verification Checklist
 
-- [ ] Focused Jest tests pass.
-- [ ] Frontend lint and full Jest suite pass.
-- [ ] Template/CSS contract tests pass.
-- [ ] Rendered browser verifies overflow, hint, focus, arrows, and no page overflow.
-- [ ] Axe scan reports no new violations.
-- [ ] Documentation lint passes.
-- [ ] `git diff --check` passes.
-- [ ] Independent correctness review passes.
+- [x] Focused Jest tests pass (`11 passed`).
+- [x] Frontend lint and full Jest suite pass (`828 passed`).
+- [x] Template/CSS contract tests pass (`162 passed`).
+- [x] Rendered browser verifies overflow, hint, focus, Arrow, Shift-wheel, zoom,
+  five AA themes, and no page overflow (`1 passed`).
+- [x] Focused Axe scan reports no violations.
+- [x] Full Python suite passes (`7279 passed, 63 skipped`).
+- [x] Documentation lint passes for the checkpoint candidate.
+- [x] `git diff --check` passes.
+- [x] Independent correctness review passes (High 0, Medium 0, Low 0).
 
 ## Progress Notes
 
@@ -129,5 +138,4 @@ Post-correction independent confirmation remains pending.
 
 **Next steps**:
 
-- Obtain the required independent documentation checkpoint reviews.
-- Commit the checkpoint, then implement and validate the exact behavior.
+- None; the package is closed. Push, merge, and deployment remain outside scope.

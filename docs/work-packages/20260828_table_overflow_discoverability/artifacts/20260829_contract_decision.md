@@ -3,7 +3,7 @@
 **Decision ID**: `A11Y-TABLE-20260829-1`
 **Recorded**: 2026-08-29 01:25 UTC
 **Starting implementation revision**: `75eb240c8dbffea6beb639c9707821d3d877ac2d`
-**Status**: Operator-authorized; implementation pending
+**Status**: Implemented, independently reviewed, and locally validated
 
 ## Authority
 

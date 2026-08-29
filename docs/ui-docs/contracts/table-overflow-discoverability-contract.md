@@ -1,6 +1,6 @@
 # Table Overflow Discoverability and WEPP Slope Display Contract
 
-**Status**: Accepted behavior; implementation conformance pending
+**Status**: Implemented and locally validated 2026-08-29
 **Decision provenance**: `A11Y-TABLE-20260829-1`
 **Authorized**: 2026-08-29 UTC by the WEPPcloud operator
 

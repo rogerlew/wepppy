@@ -165,14 +165,13 @@ while a job is active. WP09 evidence is recorded under
 
 ### 8) Horizontally overflowing data tables
 
-Accepted Pure UI behavior will progressively enhance the canonical
+Pure UI progressively enhances the canonical
 `.wc-table-wrapper` only when its contents overflow horizontally. An overflowing
-wrapper will display concise input instructions, become a visibly focused
-keyboard region, and be re-evaluated after layout or dynamic-content changes. A
-fitting table will receive no generated hint or extra tab stop. Shared behavior
+wrapper displays concise input instructions, becomes a visibly focused keyboard
+region, and is re-evaluated after layout or dynamic-content changes. A fitting
+table receives no generated hint or extra tab stop. Shared behavior
 must preserve authored focus and accessible-region semantics and must never
-alter table data or column layout. Implementation conformance is pending; the
-normative contract is
+alter table data or column layout. The normative contract is
 `docs/ui-docs/contracts/table-overflow-discoverability-contract.md` and future
 validation evidence belongs under
 `docs/work-packages/20260828_table_overflow_discoverability/`.

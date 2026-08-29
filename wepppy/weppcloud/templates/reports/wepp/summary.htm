@@ -25,9 +25,11 @@
   {% endif %}
 {%- endmacro %}
 
-{% macro render_table_value(value, units) -%}
+{% macro render_table_value(value, units, column_name=None) -%}
   {% if value in (None, '') %}
     &mdash;
+  {% elif column_name == 'Slope' and value is number %}
+    {{ '%.3f' | format(value | float) }}
   {% elif units %}
     {{ unitizer(value, units) | safe }}
   {% else %}
@@ -124,6 +126,7 @@
 {% endif %}
 
 {% if hill_rpt %}
+{% set hill_headers = hill_rpt.hdr|list %}
 <section class="wc-panel wc-stack">
   <header class="wc-stack">
     <h2 class="wc-heading__subtitle">Hillslope summary</h2>
@@ -134,7 +137,7 @@
     <table class="wc-table wc-table--dense wc-table--striped sortable" id="hill_summary_tbl">
       <thead>
         <tr>
-          {% for name in hill_rpt.hdr %}
+          {% for name in hill_headers %}
             <th scope="col">{{ name }}</th>
           {% endfor %}
         </tr>
@@ -149,7 +152,7 @@
         <tr>
           {% for value, units in row %}
             <td sorttable_customkey="{{ '' if value in (None, '') else value }}">
-              {{ render_table_value(value, units) }}
+              {{ render_table_value(value, units, hill_headers[loop.index0]) }}
             </td>
           {% endfor %}
         </tr>
@@ -170,6 +173,7 @@
 {% endif %}
 
 {% if chn_rpt %}
+{% set channel_headers = chn_rpt.hdr|list %}
 <section class="wc-panel wc-stack">
   <header class="wc-stack">
     <h2 class="wc-heading__subtitle">Channel summary</h2>
@@ -180,7 +184,7 @@
     <table class="wc-table wc-table--dense wc-table--striped sortable" id="channel_summary_tbl">
       <thead>
         <tr>
-          {% for name in chn_rpt.hdr %}
+          {% for name in channel_headers %}
             <th scope="col">{{ name }}</th>
           {% endfor %}
         </tr>
@@ -195,7 +199,7 @@
         <tr>
           {% for value, units in row %}
             <td sorttable_customkey="{{ '' if value in (None, '') else value }}">
-              {{ render_table_value(value, units) }}
+              {{ render_table_value(value, units, channel_headers[loop.index0]) }}
             </td>
           {% endfor %}
         </tr>

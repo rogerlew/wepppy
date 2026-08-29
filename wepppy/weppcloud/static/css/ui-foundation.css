@@ -4968,6 +4968,17 @@ body.wc-modal-open {
   background: var(--wc-color-surface);
 }
 
+.wc-table-overflow-hint {
+  margin: 0 0 var(--wc-space-xs);
+  color: var(--wc-color-text-muted);
+  font-size: var(--wc-font-size-sm);
+}
+
+.wc-table-wrapper[data-wc-horizontal-overflow="true"]:focus-visible {
+  outline: 2px solid var(--wc-color-accent);
+  outline-offset: 2px;
+}
+
 .wc-table {
   width: 100%;
   border-collapse: collapse;

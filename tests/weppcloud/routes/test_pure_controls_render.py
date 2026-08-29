@@ -395,6 +395,7 @@ def test_base_pure_renders_document_metadata_blocks_and_assets(jinja_env: Enviro
         "/static/js/theme.js",
         "/static/js/session_heartbeat.js",
         "/static/js/button_tab_order.js",
+        "/static/js/table_overflow_accessibility.js",
     ):
         assert token in rendered
 
@@ -2538,6 +2539,67 @@ def test_legacy_report_shell_renders_content_state_and_shared_runtime(
         assert token in rendered
     assert re.search(r'id="checkbox_readonly"[^>]*checked', rendered)
     assert re.search(r'id="checkbox_public"[^>]*checked', rendered)
+
+
+def test_wepp_loss_summary_formats_only_slope_cells_to_three_decimals(
+    jinja_env: Environment,
+) -> None:
+    class ReportRows(list):
+        def __init__(self, rows: list[list[tuple[object, str]]]) -> None:
+            super().__init__(rows)
+            self.units = ["ratio", "ratio"]
+
+        @property
+        def hdr(self):
+            return (header for header in ("Slope", "Other Ratio"))
+
+    hill_report = ReportRows(
+        [
+            [(1.23456, "ratio"), (0.333333, "ratio")],
+            [(0.0, "ratio"), (0.25, "ratio")],
+            [(None, "ratio"), (0.5, "ratio")],
+        ]
+    )
+    channel_report = ReportRows(
+        [
+            [(2.71828, "ratio"), (0.666667, "ratio")],
+            [(0.0, "ratio"), (0.75, "ratio")],
+            [(None, "ratio"), (1.0, "ratio")],
+        ]
+    )
+
+    rendered = jinja_env.get_template("reports/wepp/summary.htm").render(
+        out_rpt=None,
+        hill_rpt=hill_report,
+        chn_rpt=channel_report,
+        extraneous=False,
+        is_singlestorm=False,
+        output_scope="baseline",
+        unitizer=lambda value, units: f"unitized:{value}:{units}",
+        unitizer_units=lambda units: units,
+        url_for_run=lambda endpoint, **kwargs: (
+            f"/{endpoint}?format={kwargs.get('format', 'html')}"
+        ),
+    )
+
+    hill_table = rendered.split('id="hill_summary_tbl"', 1)[1].split("</table>", 1)[0]
+    channel_table = rendered.split('id="channel_summary_tbl"', 1)[1].split("</table>", 1)[0]
+
+    assert "1.235" in hill_table
+    assert "0.000" in hill_table
+    assert "2.718" in channel_table
+    assert "0.000" in channel_table
+    assert hill_table.count("&mdash;") == 1
+    assert channel_table.count("&mdash;") == 1
+    assert "unitized:0.333333:ratio" in hill_table
+    assert "unitized:0.666667:ratio" in channel_table
+    assert 'sorttable_customkey="1.23456"' in hill_table
+    assert 'sorttable_customkey="2.71828"' in channel_table
+    assert 'data-report-table="hillslopes"' in rendered
+    assert 'data-report-table="channels"' in rendered
+    assert rendered.count(
+        'data-report-url="/wepp.report_wepp_loss?format=csv"'
+    ) == 2
 
 
 def test_report_shell_consumer_inventory_has_explicit_content_blocks() -> None:

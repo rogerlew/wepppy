@@ -1,6 +1,6 @@
 # Table Overflow Discoverability
 
-**Status**: Open (2026-08-29)
+**Status**: Closed (2026-08-29)
 **Timezone**: UTC
 **Initiative branch**: `feature/project-owned-config`
 **Starting revision**: `75eb240c8dbffea6beb639c9707821d3d877ac2d`
@@ -55,15 +55,15 @@ precision to slope values in the WEPP Loss Summary hillslope and channel tables.
 
 ## Success Criteria
 
-- [ ] An overflowing wrapper displays navigation instructions and can receive keyboard focus.
-- [ ] Left and Right Arrow move the focused horizontal scroll region in a rendered browser.
-- [ ] A non-overflowing wrapper has no generated hint, role, or tab stop.
-- [ ] Authored `tabindex`, `role`, and accessible-description attributes are preserved.
-- [ ] Behavior updates after viewport/zoom changes and dynamically added wrapped tables.
-- [ ] Focused frontend, template, accessibility, and documentation gates pass.
-- [ ] Hillslope and channel slope cells display trailing zeros to exactly three
+- [x] An overflowing wrapper displays navigation instructions and can receive keyboard focus.
+- [x] Left/Right Arrow and Shift-wheel move the focused horizontal scroll region in a rendered browser.
+- [x] A non-overflowing wrapper has no generated hint, role, or tab stop.
+- [x] Authored `tabindex`, `role`, and accessible-description attributes are preserved.
+- [x] Behavior updates after viewport/zoom changes and dynamically added wrapped tables.
+- [x] Focused frontend, template, accessibility, and documentation gates pass.
+- [x] Hillslope and channel slope cells display trailing zeros to exactly three
   decimal places without changing sorting or CSV values.
-- [ ] Independent correctness review has no unresolved medium/high findings.
+- [x] Independent correctness review has no unresolved medium/high findings.
 
 ## Parameterization ADR Gate
 
@@ -93,3 +93,9 @@ precision to slope values in the WEPP Loss Summary hillslope and channel tables.
 - Shared table-overflow accessibility module and styling.
 - Regression tests and rendered-browser evidence.
 - Completed work-package tracker, execution plan, decision, and review artifacts.
+
+## Closure Notes
+
+The shared enhancement is implemented and locally validated. Independent final
+review is READY with High 0, Medium 0, and Low 0. No push, merge, deployment, or
+production action was part of this package.
