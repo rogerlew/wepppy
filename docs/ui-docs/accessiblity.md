@@ -155,13 +155,20 @@ recorded under
 ### 7) Project config update accessibility
 
 The shared run header contains a hidden-by-default project-config update state.
-When the read-only backend reports an available merge, the notice opens a
+When the read-only backend reports an available update, the notice opens a
 labelled and described modal using the canonical focus trap and focus return.
-The complete additions table has a caption and scoped column headers; dynamic
-preview, queue, completion, and error states use polite status or alert
-semantics. Apply remains disabled until a complete preview is rendered and
-while a job is active. WP09 evidence is recorded under
-`docs/work-packages/20260804_project_config_update_ui/artifacts/`.
+The complete additions and capability-change tables have captions and scoped
+column headers; dynamic preview, queue, completion, reconciliation, and error
+states use polite status or alert semantics. A capability refresh presents the
+exact provenance warning through a native labelled checkbox. Apply remains
+disabled until the complete preview is rendered and, for a refresh, until the
+checkbox is checked. A new preview, error, modal close, or successful apply
+clears that state. Diagnostic details and error IDs use alert text in the modal;
+availability-time registry failures use the run-header alert so the failure is
+not hidden with the update control. WP09 evidence is recorded under
+`docs/work-packages/20260804_project_config_update_ui/artifacts/`; WP12D's
+acknowledged-refresh contract and validation evidence are recorded under
+`docs/work-packages/20260827_project_config_run_ui_authority/`.
 
 ### 8) Horizontally overflowing data tables
 
