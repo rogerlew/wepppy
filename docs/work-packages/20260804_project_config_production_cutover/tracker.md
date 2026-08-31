@@ -2,13 +2,20 @@
 
 ## Quick Status
 
-**Timezone**: UTC  
-**Started**: 2026-08-31 16:06 UTC  
-**Current phase**: Final promotion audit  
-**Last updated**: 2026-08-31 16:06 UTC  
-**Next milestone**: Accept the exact merge boundary  
-**Security impact**: `high`  
-**Dedicated security review**: `yes`  
+**Timezone**: UTC
+
+**Started**: 2026-08-31 16:06 UTC
+
+**Current phase**: Final promotion audit
+
+**Last updated**: 2026-08-31 16:06 UTC
+
+**Next milestone**: Accept the exact merge boundary
+
+**Security impact**: `high`
+
+**Dedicated security review**: `yes`
+
 **Security artifact**:
 `artifacts/20260831_security_review.md`
 
@@ -26,15 +33,14 @@
 
 ### Ready / Backlog
 
-- [ ] Correct final diff-check findings and rerun affected documentation gates.
-- [ ] Complete final security/correctness promotion review.
 - [ ] Merge the accepted boundary to `master` and record the merge revision.
 - [ ] Deploy the canonical revision to production with staged flags.
 - [ ] Record health, danger, rollback, and WP13 handoff evidence.
 
 ### In Progress
 
-- [ ] Run the final automated promotion gates and complete promotion reviews.
+- [ ] Commit/push the final reviewed feature candidate and rerun final
+  documentation/diff checks.
 
 ### Blocked
 
@@ -52,6 +58,15 @@
   behavioral boundary (2026-08-31 16:18 UTC).
 - [x] Corrected the six historical Markdown EOF-blank-line findings without
   changing review content (2026-08-31 16:18 UTC).
+- [x] Passed the successful complete Python run with 7,280 passed and 63
+  skipped; passed 108 frontend suites/833 tests and lint (2026-08-31 16:55 UTC).
+- [x] Passed scoped stubs, stub completeness, broad exceptions, Vulture, and
+  focused preset/capability tests after correcting one missing public stub
+  export (2026-08-31 17:18 UTC).
+- [x] Regenerated source-line-only RQ graph drift and passed the 144-edge graph
+  check (2026-08-31 17:25 UTC).
+- [x] Completed correctness and dedicated security promotion reviews with no
+  unresolved findings (2026-08-31 17:35 UTC).
 
 ## Decisions Log
 
@@ -82,27 +97,27 @@ behavioral scope expansion requires explicit operator disposition.
 
 ### Code Quality
 
-- [ ] Complete Python suite passes.
-- [ ] Frontend tests and lint pass.
-- [ ] Applicable stub and test-hygiene gates are dispositioned.
-- [ ] `git diff --check` is clean.
+- [x] Complete Python suite passes.
+- [x] Frontend tests and lint pass.
+- [x] Applicable stub and test-hygiene gates are dispositioned.
+- [ ] `git diff --check` is clean at the final checkpoint.
 
 ### Security
 
 - [x] Security impact and dedicated review requirement recorded.
-- [ ] Security artifact is complete with no unresolved medium/high findings.
-- [ ] Auth, mutation, deployment, and rollback surfaces are reviewed.
+- [x] Security artifact is complete with no unresolved medium/high findings.
+- [x] Auth, mutation, deployment, and rollback surfaces are reviewed.
 
 ### Documentation
 
-- [ ] WP12 package, tracker, active ExecPlan, and evidence are current.
-- [ ] Scoped documentation lint passes.
+- [x] WP12 package, tracker, active ExecPlan, and evidence are current.
+- [ ] Scoped documentation lint passes at the final checkpoint.
 - [ ] Roadmap and `PROJECT_TRACKER.md` reflect promotion state.
 
 ### Testing and Deployment
 
 - [x] Forest user acceptance evidence is available from prerequisite packages.
-- [ ] Final automated gates pass at the accepted feature revision.
+- [x] Final runtime automated gates pass at the accepted feature revision.
 - [ ] Canonical merge revision is deployed to production.
 - [ ] Staged production smoke and rollback checks pass.
 
@@ -158,3 +173,28 @@ required by the changed-file inventory.
   hardening, Portland analytics removal, table accessibility, and final Forest
   evidence must receive explicit scope dispositions.
 - **WP13 boundary**: do not remove the shared `_defaults.toml` alias.
+
+### 2026-08-31 17:35 UTC: Pre-merge gates complete
+
+**Agent/Contributor**: Codex
+
+**Work completed**:
+
+- Recorded the complete automated gate results and honest failure dispositions.
+- Corrected the missing snapshot stub export and stale generated RQ source line.
+- Completed correctness and security promotion reviews with zero unresolved
+  findings.
+
+**Blockers encountered**:
+
+- The test-isolation tool defaults to five full unrandomized suite runs when no
+  plugin/target is supplied and provided no progress from its first worker; it
+  was stopped and dispositioned without claiming a pass.
+
+**Next steps**:
+
+- Commit and push the exact feature candidate.
+- Rerun final diff/docs gates and record the candidate.
+- Merge to `master`, then begin canonical production rollout.
+
+**Test results**: See `artifacts/20260831_validation.md`.

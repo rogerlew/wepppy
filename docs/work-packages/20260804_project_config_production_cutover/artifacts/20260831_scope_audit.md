@@ -1,10 +1,15 @@
 # WP12 final feature-branch scope audit
 
-**Audit date**: 2026-08-31  
-**Canonical merge base**: `6af9ecdd63921189804c5e292114a97253914cbb`  
-**Audited feature candidate**: `30b30b3c6e2cf99aba47cf8ea3c2b8988f8dc381`  
-**Initiative branch**: `feature/project-owned-config`  
-**Canonical branch**: `master`  
+**Audit date**: 2026-08-31
+
+**Canonical merge base**: `6af9ecdd63921189804c5e292114a97253914cbb`
+
+**Audited feature candidate**: `30b30b3c6e2cf99aba47cf8ea3c2b8988f8dc381`
+
+**Initiative branch**: `feature/project-owned-config`
+
+**Canonical branch**: `master`
+
 **Promotion policy**: merge only at the roadmap promotion gate
 
 ## Result
@@ -120,3 +125,12 @@ blank lines. The final candidate must rerun `git diff --check`, scoped docs
 lint, and the complete automated gates after the WP12 audit commit. Any new
 production/test path after this audit reopens the comparison before merge.
 
+The validation pass added one path after the initial audit:
+`wepppy/nodb/project_config_snapshot.pyi`. Its runtime module and
+`resolve_preset_locale_projection` behavior were already inside amendment 5's
+exact source boundary, but the public stub omitted that exported helper. Adding
+the exact runtime signature is an additive type-surface conformance correction,
+not a behavioral change. Direct snapshot/capability tests and runtime/stub
+comparisons pass. The generated RQ catalog/JSON paths were already in the
+accepted branch boundary; final validation refreshed only the unchanged
+`upload_cli_rq` enqueue source line. No dependency edge changed.

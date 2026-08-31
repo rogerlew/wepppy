@@ -22,8 +22,11 @@ and the shared `_defaults.toml` compatibility alias remains for WP13.
   comparisons with no unexplained production/test path.
 - [x] (2026-08-31 16:18 UTC) Disposition all later commits and correct six
   historical Markdown EOF-blank-line findings.
-- [ ] Run and record the complete automated promotion gates.
-- [ ] Complete final correctness and security promotion evidence.
+- [x] (2026-08-31 17:25 UTC) Run and record complete runtime, frontend,
+  stub/hygiene, exception, Vulture, RQ graph, and documentation promotion gates
+  with explicit dispositions.
+- [x] (2026-08-31 17:35 UTC) Complete final correctness and security promotion
+  evidence with no unresolved findings.
 - [ ] Merge the accepted feature revision to `master` and record the revision.
 - [ ] Deploy the canonical revision, stage flags, observe health, and verify
   rollback compatibility.
@@ -42,6 +45,18 @@ and the shared `_defaults.toml` compatibility alias remains for WP13.
   Markdown EOF-blank-line findings.
   Evidence: `git diff --check origin/master...HEAD` names only review artifacts
   in WP09 and the Builder model-options package.
+- Observation: final scoped stubtesting found the runtime-exported
+  `resolve_preset_locale_projection` absent from the public snapshot stub.
+  Evidence: stubtest reported two errors; after adding the exact signature,
+  snapshot/update stubtests and 54 direct tests passed.
+- Observation: the RQ graph contained the correct 144 edges but one stale
+  source line after upload-route expansion.
+  Evidence: regeneration changed only `upload_cli_rq` line 145 to 182 and the
+  follow-up graph check passed.
+- Observation: default test-isolation invocation performs five complete suites
+  without actual shuffling when no randomization plugin exists.
+  Evidence: the first worker remained active without progress for over four
+  minutes; WP12 stopped it and did not claim a pass.
 
 ## Decision Log
 
@@ -65,6 +80,10 @@ and production evidence.
 The repeated scope audits passed. Every later commit is either a ratified
 WP12D continuation or separately governed, explicitly accepted branch work.
 No contract amendment or selective-history release is required.
+
+The pre-merge automated and review gates pass. One additive public-stub defect
+and one generated RQ source-line drift were corrected and revalidated. Merge
+remains pending the exact final feature checkpoint and final docs/diff rerun.
 
 ## Context and Orientation
 
@@ -194,3 +213,7 @@ roadmap promotion contract after operator authorization.
 
 Plan revision note (2026-08-31 16:18 UTC): Recorded successful amendment 4/5
 scope repetition, post-amendment dispositions, and minimal diff-check repair.
+
+Plan revision note (2026-08-31 17:35 UTC): Recorded final validation,
+correctness/security review, stub and RQ evidence corrections, and explicit
+test-isolation tooling disposition.

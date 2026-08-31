@@ -424,7 +424,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "upload_cli",
-    "source_lineno": 145,
+    "source_lineno": 182,
     "source_module": "wepppy/microservices/rq_engine/upload_climate_routes.py"
   },
   {
