@@ -27,6 +27,7 @@
 - Verified local branch: `feature/project-owned-config`
 - Verified upstream: `origin/feature/project-owned-config`
 - Starting candidate: `30b30b3c6e2cf99aba47cf8ea3c2b8988f8dc381`
+- Validated pre-merge candidate: `039192492ffec38782893a603916a2e91918cfca`
 - Canonical merge base: `6af9ecdd63921189804c5e292114a97253914cbb`
 
 ## Task Board
@@ -39,8 +40,8 @@
 
 ### In Progress
 
-- [ ] Commit/push the final reviewed feature candidate and rerun final
-  documentation/diff checks.
+- [ ] Push the final reviewed feature candidate and merge the exact accepted
+  boundary to `master`.
 
 ### Blocked
 
@@ -67,6 +68,8 @@
   check (2026-08-31 17:25 UTC).
 - [x] Completed correctness and dedicated security promotion reviews with no
   unresolved findings (2026-08-31 17:35 UTC).
+- [x] Committed pre-merge candidate `039192492ffec38782893a603916a2e91918cfca`
+  and recorded its exact validation ancestry (2026-08-31 17:42 UTC).
 
 ## Decisions Log
 

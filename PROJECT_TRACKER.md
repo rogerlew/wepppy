@@ -419,9 +419,9 @@ the reviewed project-owned-config boundary, deploy the resulting canonical
 compatibility, and hand the exact revision inventory to WP13 while retaining
 the shared `_defaults.toml` alias.
 
-**Status**: WP12 is scaffolded at feature candidate `30b30b3c6`; final scope
-audit and promotion gates are in progress. No merge or production action has
-occurred.
+**Status**: Repeated scope audits and pre-merge gates pass at candidate
+`039192492`; final checkpoint/push and canonical merge are in progress. No
+production action has occurred.
 
 ### Project Config Run UI Authority (WP12D)
 

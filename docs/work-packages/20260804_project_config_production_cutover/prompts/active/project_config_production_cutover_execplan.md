@@ -27,6 +27,8 @@ and the shared `_defaults.toml` compatibility alias remains for WP13.
   with explicit dispositions.
 - [x] (2026-08-31 17:35 UTC) Complete final correctness and security promotion
   evidence with no unresolved findings.
+- [x] (2026-08-31 17:42 UTC) Commit exact validated pre-merge candidate
+  `039192492ffec38782893a603916a2e91918cfca`.
 - [ ] Merge the accepted feature revision to `master` and record the revision.
 - [ ] Deploy the canonical revision, stage flags, observe health, and verify
   rollback compatibility.
@@ -217,3 +219,6 @@ scope repetition, post-amendment dispositions, and minimal diff-check repair.
 Plan revision note (2026-08-31 17:35 UTC): Recorded final validation,
 correctness/security review, stub and RQ evidence corrections, and explicit
 test-isolation tooling disposition.
+
+Plan revision note (2026-08-31 17:42 UTC): Bound validation and repeated scope
+audit to exact pre-merge candidate `039192492ffec38782893a603916a2e91918cfca`.

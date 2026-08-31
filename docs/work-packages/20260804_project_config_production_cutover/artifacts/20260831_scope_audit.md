@@ -4,7 +4,9 @@
 
 **Canonical merge base**: `6af9ecdd63921189804c5e292114a97253914cbb`
 
-**Audited feature candidate**: `30b30b3c6e2cf99aba47cf8ea3c2b8988f8dc381`
+**Initial audited feature candidate**: `30b30b3c6e2cf99aba47cf8ea3c2b8988f8dc381`
+
+**Validated pre-merge candidate**: `039192492ffec38782893a603916a2e91918cfca`
 
 **Initiative branch**: `feature/project-owned-config`
 
@@ -134,3 +136,8 @@ not a behavioral change. Direct snapshot/capability tests and runtime/stub
 comparisons pass. The generated RQ catalog/JSON paths were already in the
 accepted branch boundary; final validation refreshed only the unchanged
 `upload_cli_rq` enqueue source line. No dependency edge changed.
+
+The validated candidate therefore adds only scaffold/audit/review evidence,
+the six content-neutral EOF corrections, the exact additive public stub, and
+the generated source-line/observability refreshes described above. The repeated
+scope result remains pass at `039192492ffec38782893a603916a2e91918cfca`.

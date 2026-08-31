@@ -2,9 +2,11 @@
 
 **Date**: 2026-08-31
 
-**Validated runtime candidate**: `85eb7d309` plus the bounded public-stub and
-generated RQ evidence corrections recorded below. The final documentation
-checkpoint will record the resulting exact feature revision before merge.
+**Validated runtime candidate**: `039192492ffec38782893a603916a2e91918cfca`.
+The complete Python/frontend runtime gates ran at ancestor `85eb7d309`; the
+only later code edit is the additive public-stub signature whose focused tests
+and runtime comparison are recorded below. The other later changes are
+generated RQ evidence, observability reports, and WP12 documentation.
 
 ## Automated gates
 
@@ -70,4 +72,3 @@ database isolation, legacy project reopening, capability refresh and rollback
 reader compatibility, table accessibility, and default-BLC Multiple-OFE
 execution. These are deployed acceptance results, not substitutes for the
 automated gates above.
-
