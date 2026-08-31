@@ -1,6 +1,6 @@
 # Project Config Builder Locale Expansion (WP12C)
 
-**Status**: Open (2026-08-27)
+**Status**: Complete; handed to WP12 (2026-08-29)
 **Timezone**: UTC
 **Initiative branch**: `feature/project-owned-config`
 **Canonical branch**: `master`
@@ -39,19 +39,19 @@ TerrainProcessor working-directory issue, or deploy to production.
 
 ## Success Criteria
 
-- [ ] Only the five approved base profiles are Builder-selectable.
-- [ ] Every exposed profile has complete DEM, soil, land-cover, climate,
+- [x] Only the five approved base profiles are Builder-selectable.
+- [x] Every exposed profile has complete DEM, soil, land-cover, climate,
   climate-station database, delineation, representation, and WEPP-binary
   capability closure.
-- [ ] `LocaleProfile.landuse_sources` is the sole Builder authority for the
+- [x] `LocaleProfile.landuse_sources` is the sole Builder authority for the
   Land-cover dataset options and server validation.
-- [ ] Canada resolves to runtime locale `canada`, uses only global terrain,
+- [x] Canada resolves to runtime locale `canada`, uses only global terrain,
   soil, and land-cover providers, offers Vanilla CLIGEN and observed Daymet,
   and defaults to Vanilla CLIGEN with GHCN stations.
-- [ ] Existing schema-v2 Continental-US projects reopen unchanged and all new
+- [x] Existing schema-v2 Continental-US projects reopen unchanged and all new
   schema-v3 projects remain Preview, self-contained, and live-registry
   independent.
-- [ ] Frontend, backend, compatibility, security, and real Forest acceptance
+- [x] Frontend, backend, compatibility, security, and real Forest acceptance
   gates pass before WP12C closes.
 
 ## Parameterization ADR Gate

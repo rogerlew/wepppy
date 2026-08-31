@@ -4,9 +4,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-27 15:40 UTC
-**Current phase**: Forest writer/provider acceptance
-**Last updated**: 2026-08-27 20:15 UTC
-**Next milestone**: enable the Forest writer and execute the live profile matrix
+**Current phase**: Complete; handed to WP12
+**Last updated**: 2026-08-29
+**Next milestone**: WP12 scope audit and promotion
 **Security impact**: `high`
 **Dedicated security review**: `yes`
 **Security artifact**: `artifacts/20260827_security_review.md`
@@ -19,14 +19,22 @@ and production
 
 ### In Progress
 
-- [ ] Enable the Builder writer on exact host `forest` and execute authenticated
-  create/reopen plus real provider evidence.
+None.
 
 ### Pending
 
-- [ ] Deploy without rebuilding to exact host `forest` and prove all advertised
-  providers plus one created/reopened run per newly exposed profile.
-- [ ] Close WP12C and hand the accepted revision to WP12.
+- [x] On exact host `forest`, create and delineate all five exposed profiles;
+  submit real landuse, soil, and climate builds; and confirm their results
+  against the corresponding legacy locale configurations (2026-08-29).
+- [x] Confirm legacy projects reopen and render their localized landuse, soil,
+  and climate controls correctly; continued interaction and successful builds
+  on the five created Builder projects prove their stored schema-v3 authority
+  remains usable after creation (2026-08-29).
+- [x] Verify real-project Multiple OFE watershed abstraction with Config
+  Builder project `self-confessed-dower` on Forest using the default 3,000 m
+  Breach (Least Cost) conditioning; close both carried execution gates
+  (2026-08-31).
+- [x] Close WP12C and hand the accepted revision to WP12 (2026-08-29).
 
 ### Blocked
 
@@ -133,11 +141,11 @@ authority source, authentication rule, or mutation path.
 
 | Risk | Severity | Mitigation | Status |
 | --- | --- | --- | --- |
-| Provider exists in code but is absent on Forest | High | Presence/health and real execution gate every advertised provider | Open |
+| Provider exists in code but is absent on Forest | High | Presence/health and real execution gate every advertised provider | Closed |
 | New graph reader breaks stored Continental-US v2 configs | High | Immutable profile contracts and historical round-trip fixtures | Closed at rollback floor `187a856d4` |
 | UI and server select different locale graphs | High | One description payload plus paired frontend/API rejection tests | Open |
 | Canada runtime token falls through US-specific behavior | High | Direct generated-config and created-run execution evidence | Open |
-| Concurrent CLIGEN requests mix database rows and PAR roots | High | Instance-local resolver state plus direct real concurrent Legacy/2015/GHCN isolation test | Open |
+| Concurrent CLIGEN requests mix database rows and PAR roots | High | Instance-local resolver state plus direct real concurrent Legacy/2015/GHCN isolation test | Closed |
 | Old Builder client cannot express schema-v3 station DB | Medium | Version description/requests; retain v2 response shape for parsing and fail old creation explicitly | Open |
 
 ## Verification Checklist
@@ -149,4 +157,4 @@ authority source, authentication rule, or mutation path.
 - [x] Docs lint passes.
 - [x] Correctness and security findings are dispositioned.
 - [x] Governance accepts exact standalone checkpoint correction `f6784420a`.
-- [ ] Exact-host `forest` acceptance is recorded.
+- [x] Exact-host `forest` acceptance is recorded.

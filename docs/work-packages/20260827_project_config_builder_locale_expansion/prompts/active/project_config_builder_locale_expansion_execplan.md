@@ -59,9 +59,16 @@ and observed Daymet, defaults to Vanilla CLIGEN, and uses GHCN stations.
 - [x] (2026-08-27 20:15Z) Recorded exact revision `187a856d4` as the minimum
   post-create rollback floor after all five v3 profiles and historical v2
   passed on the deployed reader.
-- [ ] Enable the Builder writer on exact host `forest` and record authenticated
-  create/reopen plus real provider/run evidence.
-- [ ] Close the package, push, and hand the accepted revision to WP12.
+- [x] (2026-08-29) On exact host `forest`, create and delineate all five
+  profiles, validate their locale-specific controls, and complete real landuse,
+  soil, and climate builds with results matching the legacy configurations.
+- [x] (2026-08-29) Confirm legacy projects reopen with correctly localized
+  controls, accept continued use of the created schema-v3 projects as durable
+  stored-authority evidence, close WP12C, and hand it to WP12.
+- [x] (2026-08-31) Record successful Multiple OFE watershed abstraction for
+  Forest Config Builder project `self-confessed-dower` using the default 3,000 m
+  BLC conditioning, closing both real-project execution gates carried from
+  WP12B.
 
 ## Surprises & Discoveries
 
@@ -141,11 +148,17 @@ and observed Daymet, defaults to Vanilla CLIGEN, and uses GHCN stations.
 
 ## Outcomes & Retrospective
 
-The implementation candidate is complete at `b31eeb625`, independently Ready,
-and fully validated locally. No WP12C Forest restart or expanded-profile run has
-occurred yet. The package remains open for the accepted audit correction,
-governance confirmation, reader-first rollback-floor proof, and live Forest
-provider/create/reopen evidence.
+WP12C is complete and handed to WP12. The reader-first rollback floor passed
+before writer activation. On Forest, the operator created and delineated all
+five profiles, validated their locale-specific controls, and completed real
+landuse, soil, and climate builds whose results matched the corresponding
+legacy configurations. Legacy projects reopened with correctly localized
+controls. The direct real concurrent Legacy/2015/GHCN catalog test and the
+operator-visible three-choice matrix close station-database acceptance. WP12
+also has direct operator evidence that `self-confessed-dower` completed
+Multiple OFE watershed abstraction with the default 3,000 m BLC conditioning.
+This closes both carried execution claims. WP12 retains the final scope audit,
+merge, and production authority.
 
 ## Context and Orientation
 
