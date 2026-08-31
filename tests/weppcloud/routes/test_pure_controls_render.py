@@ -1,18 +1,28 @@
 from __future__ import annotations
 
+import importlib
+import hashlib
 import json
 import itertools
 import re
+from html import unescape
 from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
-from jinja2 import DebugUndefined, Environment, FileSystemLoader
+from jinja2 import DebugUndefined, Environment, FileSystemLoader, select_autoescape
 
 from wepppy.weppcloud.feature_registry.runtime import (
     config_maturity_badge,
     load_config_registry,
 )
+from wepppy.nodb.project_config_capabilities import resolve_run_capability_authority
+from wepppy.nodb.project_config_reader import ProjectConfigStatus
+from wepppy.nodb.project_config_snapshot import (
+    materialize_preset_snapshot,
+    resolve_preset_snapshot,
+)
+from wepppy.project_config_serialization import parse_config_text
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 TEMPLATE_ROOT = REPO_ROOT / "wepppy" / "weppcloud" / "templates"
@@ -50,6 +60,33 @@ PURE_TEMPLATES = [
 ]
 
 pytestmark = pytest.mark.routes
+
+
+def _eu_preset_authority(root: Path):
+    candidate = resolve_preset_snapshot(
+        "eu-disturbed",
+        {},
+        source_revision="test-revision",
+    )
+    materialize_preset_snapshot(root, candidate)
+    values = parse_config_text(candidate.config_bytes.decode("utf-8"))
+    config = SimpleNamespace(
+        project_config_status=ProjectConfigStatus(
+            "flattened",
+            str(root),
+            "eu-disturbed.cfg",
+            True,
+            True,
+            config_sha256=hashlib.sha256(candidate.config_bytes).hexdigest(),
+        ),
+        config_get_raw=lambda section, option, default=None: values.get(
+            section, {}
+        ).get(option, default),
+        config_get_list=lambda section, option, default=None: values.get(
+            section, {}
+        ).get(option, default),
+    )
+    return resolve_run_capability_authority(config)
 
 
 @pytest.fixture(scope="module")
@@ -358,6 +395,7 @@ def test_base_pure_renders_document_metadata_blocks_and_assets(jinja_env: Enviro
         "/static/js/theme.js",
         "/static/js/session_heartbeat.js",
         "/static/js/button_tab_order.js",
+        "/static/js/table_overflow_accessibility.js",
     ):
         assert token in rendered
 
@@ -760,6 +798,383 @@ def test_climate_template_renders_catalog_station_and_build_contract(
     assert 'data-climate-action="build"' in rendered
     assert 'id="hint_build_climate"' in rendered
     assert 'id="climate_status_panel"' in rendered
+
+
+def test_schema_v1_europe_preset_renders_exact_climate_radios(
+    jinja_env: Environment,
+    tmp_path: Path,
+) -> None:
+    from wepppy.nodb.locales import get_climate_dataset
+
+    authority = _eu_preset_authority(tmp_path)
+    assert authority.graph is not None
+    climate = SimpleNamespace(
+        catalog_id="vanilla_cligen",
+        climate_mode=SimpleNamespace(value=0),
+        climatestation_mode=SimpleNamespace(value=-1),
+        climate_spatialmode=SimpleNamespace(value=0),
+        uses_tenerife_station_catalog=False,
+        is_single_storm=False,
+        datasetMap={},
+        input_years=30,
+        observed_start_year=1981,
+        observed_end_year=2024,
+        future_start_year=2030,
+        future_end_year=2060,
+        cli_fn=None,
+        orig_cli_fn=None,
+        climate_daily_temp_ds="null",
+        use_gridmet_wind_when_applicable=False,
+        adjust_mx_pt5=False,
+        silent_pass_observed_quality_guard=False,
+        precip_scaling_mode=SimpleNamespace(value=0),
+        precip_scale_factor=None,
+        precip_monthly_scale_factors=None,
+        precip_scale_reference=None,
+        precip_scale_factor_map=None,
+    )
+    catalog = [
+        get_climate_dataset(catalog_id).to_mapping()
+        for catalog_id in authority.graph.climate_datasets
+    ]
+
+    rendered = jinja_env.get_template("controls/climate_pure.htm").render(
+        climate=climate,
+        climate_catalog=catalog,
+    )
+
+    rendered_ids = set(
+        re.findall(r'id="climate_dataset_(?!section)([^"]+)"', rendered)
+    )
+    assert rendered_ids == {
+        "vanilla_cligen",
+        "eobs_modified",
+        "user_defined_cli",
+    }
+    for excluded in (
+        "prism_stochastic",
+        "observed_daymet",
+        "observed_gridmet",
+        "dep_nexrad",
+        "future_cmip5",
+        "agdc",
+    ):
+        assert f'id="climate_dataset_{excluded}"' not in rendered
+
+
+def test_run_context_renders_outside_axis_climate_with_ordinary_landcover(
+    jinja_env: Environment,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    run0_module = importlib.import_module(
+        "wepppy.weppcloud.routes.run_0.run_0_bp"
+    )
+    authority = SimpleNamespace(
+        defaults={"landuse_dataset": "nlcd-2019"},
+        landuse_datasets=("nlcd-2019",),
+        climate_datasets=("vanilla-cligen",),
+    )
+    landcover = SimpleNamespace(
+        kind="landcover",
+        key="nlcd/2024",
+        catalog_id="nlcd-2019",
+        label="NLCD",
+        description=None,
+        management_file=None,
+    )
+    landuse = SimpleNamespace(
+        mode=SimpleNamespace(value=0),
+        nlcd_db="nlcd/2024",
+        available_datasets=[landcover],
+        single_selection="42",
+        mofe_buffer_selection="42",
+        user_defined_landcover_fn=None,
+        mapping="disturbed",
+    )
+    climate = SimpleNamespace(
+        catalog_id="retired-climate",
+        climate_mode=SimpleNamespace(value=5),
+        climatestation_mode=SimpleNamespace(value=5),
+        climate_spatialmode=SimpleNamespace(value=0),
+        uses_tenerife_station_catalog=False,
+        is_single_storm=False,
+        datasetMap={},
+        input_years=30,
+        observed_start_year=1981,
+        observed_end_year=2024,
+        future_start_year=2030,
+        future_end_year=2060,
+        cli_fn=None,
+        orig_cli_fn=None,
+        climate_daily_temp_ds="null",
+        use_gridmet_wind_when_applicable=True,
+        adjust_mx_pt5=False,
+        silent_pass_observed_quality_guard=False,
+        precip_scaling_mode=SimpleNamespace(value=0),
+        precip_scale_factor=None,
+        precip_monthly_scale_factors=None,
+        precip_scale_reference=None,
+        precip_scale_factor_map=None,
+    )
+    retired_payload = {
+        "catalog_id": "retired-climate",
+        "label": "Retired climate",
+        "description": "Persisted current selection",
+        "help_text": "",
+        "group": "Stochastic",
+        "group_hint": "",
+        "climate_mode": 5,
+        "station_modes": [-1, 0, 1],
+        "default_station_mode": 0,
+        "spatial_modes": [0, 1, 2],
+        "default_spatial_mode": 1,
+        "ui_exposed": False,
+    }
+    monkeypatch.setattr(
+        run0_module,
+        "get_climate_dataset",
+        lambda _catalog_id: SimpleNamespace(
+            to_mapping=lambda: dict(retired_payload)
+        ),
+    )
+    monkeypatch.setattr(
+        run0_module,
+        "landuse_capability_modes",
+        lambda *_args: frozenset({0}),
+    )
+    climate_catalog = [{
+        "catalog_id": "vanilla-cligen",
+        "label": "Vanilla CLIGEN",
+        "description": "",
+        "help_text": "",
+        "group": "Stochastic",
+        "group_hint": "",
+        "climate_mode": 0,
+        "ui_exposed": True,
+    }]
+    landcover_datasets = [landcover]
+
+    landuse_modes, disabled_landcover, selected_landcover = (
+        run0_module._apply_current_dataset_compatibility(
+            authority,
+            landuse,
+            climate,
+            climate_catalog,
+            landcover_datasets,
+            "single-ofe",
+        )
+    )
+
+    climate_html = jinja_env.get_template("controls/climate_pure.htm").render(
+        climate=climate,
+        climate_catalog=climate_catalog,
+    )
+    landuse_html = jinja_env.get_template("controls/landuse_pure.htm").render(
+        landuse=landuse,
+        landuseoptions=[{"Key": "42", "Description": "Forest"}],
+        landuse_management_mapping_options=[{
+            "Key": "disturbed", "Description": "Disturbed",
+        }],
+        landcover_datasets=landcover_datasets,
+        disabled_landcover_datasets=disabled_landcover,
+        landuse_method_modes=landuse_modes,
+        selected_landcover_dataset=selected_landcover,
+        wepp=SimpleNamespace(multi_ofe=False),
+        ron=SimpleNamespace(mods=set()),
+    )
+
+    retired_option = re.search(
+        r'id="climate_dataset_retired-climate"[^>]*>', climate_html
+    )
+    assert retired_option is not None
+    assert "checked" in retired_option.group(0)
+    assert "disabled" in retired_option.group(0)
+    mesonet_option = re.search(r'id="climatestation_mode5"[^>]*>', climate_html)
+    assert mesonet_option is not None
+    assert "checked" in mesonet_option.group(0)
+    assert "disabled" in mesonet_option.group(0)
+    assert 'id="climatestation_mode_auto"' not in climate_html
+    assert 'id="climatestation_mode0"' not in climate_html
+    assert 'id="climatestation_mode1"' not in climate_html
+    assert 'id="climate_spatialmode0"' in climate_html
+    assert 'id="climate_spatialmode1"' not in climate_html
+    assert 'id="climate_spatialmode2"' not in climate_html
+    build_button = re.search(r'id="btn_build_climate"[^>]*>', climate_html)
+    assert build_button is not None
+    assert "disabled" not in build_button.group(0)
+    assert landcover_datasets == [landcover]
+    assert disabled_landcover == []
+    assert 'option value="nlcd/2024" selected' in landuse_html
+
+    climate.catalog_id = "vanilla-cligen"
+    climate.climatestation_mode = SimpleNamespace(value=1)
+    climate.climate_spatialmode = SimpleNamespace(value=2)
+    authorized_catalog = [{
+        **retired_payload,
+        "catalog_id": "vanilla-cligen",
+        "label": "Vanilla CLIGEN",
+        "station_modes": [-1, 0],
+        "spatial_modes": [0, 1],
+        "ui_exposed": True,
+    }]
+    run0_module._apply_current_dataset_compatibility(
+        authority,
+        landuse,
+        climate,
+        authorized_catalog,
+        landcover_datasets,
+        "single-ofe",
+    )
+    relationship_html = jinja_env.get_template(
+        "controls/climate_pure.htm"
+    ).render(climate=climate, climate_catalog=authorized_catalog)
+
+    assert authorized_catalog[0]["station_modes"] == [-1, 0, 1]
+    assert authorized_catalog[0]["disabled_station_modes"] == [1]
+    relationship_station = re.search(
+        r'id="climatestation_mode1"[^>]*>', relationship_html
+    )
+    assert relationship_station is not None
+    assert "checked" in relationship_station.group(0)
+    assert "disabled" in relationship_station.group(0)
+    relationship_spatial = re.search(
+        r'id="climate_spatialmode2"[^>]*>', relationship_html
+    )
+    assert relationship_spatial is not None
+    assert "checked" in relationship_spatial.group(0)
+    assert "disabled" in relationship_spatial.group(0)
+
+
+def test_run_context_renders_outside_locale_current_landcover_disabled(
+    jinja_env: Environment,
+) -> None:
+    run0_module = importlib.import_module(
+        "wepppy.weppcloud.routes.run_0.run_0_bp"
+    )
+    authority = SimpleNamespace(
+        defaults={"landuse_dataset": "nlcd-2019"},
+        landuse_datasets=("nlcd-2019",),
+        climate_datasets=("vanilla-cligen",),
+    )
+    allowed_landcover = SimpleNamespace(
+        kind="landcover",
+        key="nlcd/2024",
+        catalog_id="nlcd-2024",
+        label="NLCD",
+        description=None,
+        management_file=None,
+    )
+    current_runtime = "eu/CORINE_LandCover/2018"
+    landuse = SimpleNamespace(
+        mode=SimpleNamespace(value=0),
+        nlcd_db=current_runtime,
+        available_datasets=[allowed_landcover],
+        single_selection="42",
+        mofe_buffer_selection="42",
+        user_defined_landcover_fn=None,
+        mapping="disturbed",
+    )
+    landcover_datasets = [allowed_landcover]
+
+    landuse_modes, disabled_landcover, selected_landcover = (
+        run0_module._apply_current_dataset_compatibility(
+            authority,
+            landuse,
+            SimpleNamespace(catalog_id="vanilla-cligen"),
+            [],
+            landcover_datasets,
+            "single-ofe",
+        )
+    )
+    rendered = jinja_env.get_template("controls/landuse_pure.htm").render(
+        landuse=landuse,
+        landuseoptions=[{"Key": "42", "Description": "Forest"}],
+        landuse_management_mapping_options=[{
+            "Key": "disturbed", "Description": "Disturbed",
+        }],
+        landcover_datasets=landcover_datasets,
+        disabled_landcover_datasets=disabled_landcover,
+        landuse_method_modes=landuse_modes,
+        selected_landcover_dataset=selected_landcover,
+        wepp=SimpleNamespace(multi_ofe=False),
+        ron=SimpleNamespace(mods=set()),
+    )
+
+    current_option = re.search(
+        r'<option value="eu/CORINE_LandCover/2018"[^>]*>', rendered
+    )
+    assert current_option is not None
+    assert "selected" in current_option.group(0)
+    assert "disabled" in current_option.group(0)
+    assert disabled_landcover == [current_runtime]
+    assert [item.key for item in landcover_datasets].count(current_runtime) == 1
+
+
+def test_australia_run_control_selects_stored_builder_landcover_default(
+    jinja_env: Environment,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    run0_module = importlib.import_module(
+        "wepppy.weppcloud.routes.run_0.run_0_bp"
+    )
+    authority = SimpleNamespace(
+        locale_profiles=("australia",),
+        defaults={"landuse_dataset": "australia-landuse-2010-2011"},
+        landuse_datasets=("australia-landuse-2010-2011",),
+        climate_datasets=("vanilla-cligen",),
+    )
+    australia_landcover = SimpleNamespace(
+        kind="landcover",
+        key="au/landuse_201011/lu10v5ua",
+        catalog_id="australia-landuse-2010-2011",
+        label="Australia Land Use 2010–2011",
+        description=None,
+        management_file=None,
+    )
+    landuse = SimpleNamespace(
+        mode=SimpleNamespace(value=0),
+        nlcd_db="nlcd/2019",
+        available_datasets=[australia_landcover],
+        single_selection="42",
+        mofe_buffer_selection="42",
+        user_defined_landcover_fn=None,
+        mapping="disturbed",
+    )
+    landcover_datasets = [australia_landcover]
+    monkeypatch.setattr(
+        run0_module,
+        "landuse_capability_modes",
+        lambda *_args: frozenset({0, 1, 4}),
+    )
+
+    landuse_modes, disabled_landcover, selected_landcover = (
+        run0_module._apply_current_dataset_compatibility(
+            authority,
+            landuse,
+            SimpleNamespace(catalog_id="vanilla-cligen"),
+            [],
+            landcover_datasets,
+            "single-ofe",
+        )
+    )
+    rendered = jinja_env.get_template("controls/landuse_pure.htm").render(
+        landuse=landuse,
+        landuseoptions=[{"Key": "42", "Description": "Forest"}],
+        landuse_management_mapping_options=[{
+            "Key": "disturbed", "Description": "Disturbed",
+        }],
+        landcover_datasets=landcover_datasets,
+        disabled_landcover_datasets=disabled_landcover,
+        landuse_method_modes=landuse_modes,
+        selected_landcover_dataset=selected_landcover,
+        wepp=SimpleNamespace(multi_ofe=False),
+        ron=SimpleNamespace(mods=set()),
+    )
+
+    assert selected_landcover == "au/landuse_201011/lu10v5ua"
+    assert disabled_landcover == []
+    assert 'option value="au/landuse_201011/lu10v5ua" selected' in rendered
+    assert 'option value="nlcd/2019"' not in rendered
 
 
 def test_climate_template_renders_upload_and_scaling_contract(
@@ -2195,6 +2610,67 @@ def test_legacy_report_shell_renders_content_state_and_shared_runtime(
     assert re.search(r'id="checkbox_public"[^>]*checked', rendered)
 
 
+def test_wepp_loss_summary_formats_only_slope_cells_to_three_decimals(
+    jinja_env: Environment,
+) -> None:
+    class ReportRows(list):
+        def __init__(self, rows: list[list[tuple[object, str]]]) -> None:
+            super().__init__(rows)
+            self.units = ["ratio", "ratio"]
+
+        @property
+        def hdr(self):
+            return (header for header in ("Slope", "Other Ratio"))
+
+    hill_report = ReportRows(
+        [
+            [(1.23456, "ratio"), (0.333333, "ratio")],
+            [(0.0, "ratio"), (0.25, "ratio")],
+            [(None, "ratio"), (0.5, "ratio")],
+        ]
+    )
+    channel_report = ReportRows(
+        [
+            [(2.71828, "ratio"), (0.666667, "ratio")],
+            [(0.0, "ratio"), (0.75, "ratio")],
+            [(None, "ratio"), (1.0, "ratio")],
+        ]
+    )
+
+    rendered = jinja_env.get_template("reports/wepp/summary.htm").render(
+        out_rpt=None,
+        hill_rpt=hill_report,
+        chn_rpt=channel_report,
+        extraneous=False,
+        is_singlestorm=False,
+        output_scope="baseline",
+        unitizer=lambda value, units: f"unitized:{value}:{units}",
+        unitizer_units=lambda units: units,
+        url_for_run=lambda endpoint, **kwargs: (
+            f"/{endpoint}?format={kwargs.get('format', 'html')}"
+        ),
+    )
+
+    hill_table = rendered.split('id="hill_summary_tbl"', 1)[1].split("</table>", 1)[0]
+    channel_table = rendered.split('id="channel_summary_tbl"', 1)[1].split("</table>", 1)[0]
+
+    assert "1.235" in hill_table
+    assert "0.000" in hill_table
+    assert "2.718" in channel_table
+    assert "0.000" in channel_table
+    assert hill_table.count("&mdash;") == 1
+    assert channel_table.count("&mdash;") == 1
+    assert "unitized:0.333333:ratio" in hill_table
+    assert "unitized:0.666667:ratio" in channel_table
+    assert 'sorttable_customkey="1.23456"' in hill_table
+    assert 'sorttable_customkey="2.71828"' in channel_table
+    assert 'data-report-table="hillslopes"' in rendered
+    assert 'data-report-table="channels"' in rendered
+    assert rendered.count(
+        'data-report-url="/wepp.report_wepp_loss?format=csv"'
+    ) == 2
+
+
 def test_report_shell_consumer_inventory_has_explicit_content_blocks() -> None:
     consumers = {
         "reports/_base_report.htm": (
@@ -2334,6 +2810,39 @@ def test_run_header_hides_team_public_readonly_for_anonymous(jinja_env: Environm
     assert 'id="checkbox_public"' not in rendered
 
 
+def test_run_header_project_config_update_modal_is_accessible_and_dormant(
+    jinja_env: Environment,
+) -> None:
+    template = jinja_env.get_template("header/_run_header_fixed.htm")
+    auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
+    request = SimpleNamespace(view_args={"runid": "parent;;omni;;child", "config": "config"})
+
+    rendered = template.render(user=auth_user, current_user=auth_user, request=request)
+
+    for token in (
+        "data-project-config-update",
+        "data-project-config-update-open",
+        'id="projectConfigUpdateModal"',
+        'role="dialog"',
+        'aria-modal="true"',
+        'aria-labelledby="projectConfigUpdateTitle"',
+        'aria-describedby="projectConfigUpdateDescription"',
+        "Review every configuration addition and capability-authority change",
+        'data-project-config-update-status role="status" aria-live="polite"',
+        'data-project-config-update-error',
+        '<th scope="col">Section</th>',
+        '<th scope="col">Source revision</th>',
+        "Capability-authority changes",
+        'type="checkbox" data-project-config-update-acknowledgment-checkbox',
+        'data-project-config-update-reload hidden>Reload run to continue',
+        "I understand that refreshing capability authority changes this project's modeling envelope, diminishes strict provenance continuity with its original configuration, and may expose Preview or otherwise unstable features.",
+    ):
+        assert token in rendered
+    assert 'data-project-config-update\n' in rendered
+    assert 'data-modal hidden' in rendered
+    assert rendered.index("ARCHIVE") < rendered.index("data-project-config-update")
+
+
 def test_interfaces_template_shows_login_bypass_banner_for_anonymous_user(jinja_env: Environment) -> None:
     template = jinja_env.get_template("interfaces.htm")
     anon_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=False)
@@ -2391,6 +2900,7 @@ def test_interfaces_template_renders_exact_anonymous_cap_creation_contract(
     assert 'name="unitizer:is_english" value="" data-unitizer-input' in rendered
     assert 'type="button"' in rendered
     assert 'data-run-action="/rq-engine/create/"' in rendered
+    assert "creation_idempotency_key" in rendered
     assert 'aria-disabled="true" disabled' in rendered
     assert '/cap/assets/widget.js' in rendered
     assert '/cap/assets/floating.js' in rendered
@@ -3194,6 +3704,74 @@ def test_runs0_template_places_rusle_after_wepp_sections() -> None:
     wepp_section_index = source.index('<section id="wepp" class="wc-stack">')
     rusle_section_index = source.index('<div data-mod-section="rusle"')
     assert wepp_section_index < rusle_section_index
+
+
+def _render_runs0_title(
+    jinja_env: Environment,
+    *,
+    runid: str,
+    configname: str | None,
+    name: str | None,
+    current_runid: str,
+) -> str:
+    escaped_env = jinja_env.overlay(
+        autoescape=select_autoescape(
+            enabled_extensions=("htm", "html"),
+            default_for_string=True,
+        )
+    )
+    template = escaped_env.get_template("runs0_pure.htm")
+    context = template.new_context(
+        {
+            "runid": runid,
+            "ron": SimpleNamespace(configname=configname, name=name),
+            "current_ron": SimpleNamespace(runid=current_runid),
+        }
+    )
+    return "".join(template.blocks["title"](context))
+
+
+@pytest.mark.parametrize(
+    ("configname", "name", "current_runid"),
+    [
+        (None, None, "route-run"),
+        ("legacy-config", "Project Display Name", "nested-pup-run"),
+    ],
+)
+def test_runs0_title_is_exact_route_runid_for_all_metadata_states(
+    jinja_env: Environment,
+    configname: str | None,
+    name: str | None,
+    current_runid: str,
+) -> None:
+    title = _render_runs0_title(
+        jinja_env,
+        runid="route-run",
+        configname=configname,
+        name=name,
+        current_runid=current_runid,
+    )
+
+    assert title == "route-run"
+    assert "None" not in title
+    assert "legacy-config" not in title
+    assert "Project Display Name" not in title
+
+
+def test_runs0_title_autoescapes_html_significant_runid(
+    jinja_env: Environment,
+) -> None:
+    title = _render_runs0_title(
+        jinja_env,
+        runid='<route&"run">',
+        configname="legacy-config",
+        name="Project Display Name",
+        current_runid="nested-pup-run",
+    )
+
+    assert title == "&lt;route&amp;&#34;run&#34;&gt;"
+    assert unescape(title) == '<route&"run">'
+    assert "<route" not in title
 
 
 def test_runs0_template_places_roads_after_debris_flow() -> None:

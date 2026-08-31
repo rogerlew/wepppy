@@ -1,0 +1,18 @@
+schema_version = 1
+id = "usgs-ned1-2024"
+kind = "dem"
+source_revision = "dem-database-adapter-v1:ned1-2024"
+label = "USGS NED 1 arc-second (2024)"
+description = "Thirty-metre continental-US elevation source."
+default_cellsize = 30
+owns = ["general.dem_db"]
+overrides = ["general.dem_db"]
+
+[constraints]
+requires = ["continental-us"]
+conflicts = []
+
+[[writes]]
+section = "general"
+option = "dem_db"
+value = "ned1/2024"

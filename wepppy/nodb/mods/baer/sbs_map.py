@@ -1169,26 +1169,30 @@ class SoilBurnSeverityMap(LandcoverMap):
         color_tbl_path = _join(head, 'color_table.txt')
         self._write_color_table(color_tbl_path)
 
-        disturbed_rgb = fn
-        if _exists(disturbed_rgb):
-            os.remove(disturbed_rgb)
-
-        cmd = ['gdaldem', 'color-relief', '-of', 'VRT', '-alpha', '-exact_color_entry',
-               wgs_fn, color_tbl_path, disturbed_rgb]
-        p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-        p.wait()
-
-        assert _exists(disturbed_rgb), ' '.join(cmd)
-
         disturbed_rgb_png = rgb_png
         if _exists(disturbed_rgb_png):
             os.remove(disturbed_rgb_png)
 
-        cmd = ['gdal_translate', '-of', 'PNG', disturbed_rgb, disturbed_rgb_png]
-        p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-        p.wait()
+        # Rendering exact colors through a VRT is not stable at the upper Byte
+        # boundary: supported GDAL versions can either emit or reject a
+        # non-monotonic LUT around value 255. Render the pixels first so that
+        # the palette lookup is evaluated without serializing that LUT.
+        cmd = ['gdaldem', 'color-relief', '-of', 'PNG', '-alpha', '-exact_color_entry',
+               wgs_fn, color_tbl_path, disturbed_rgb_png]
+        result = run(cmd, stdout=PIPE, stderr=PIPE, text=True)
+        if result.returncode != 0 or not _exists(disturbed_rgb_png):
+            detail = result.stderr.strip() or "GDAL did not create the color-relief PNG"
+            raise RuntimeError(f"{' '.join(cmd)}: {detail}")
 
-        assert _exists(disturbed_rgb_png), ' '.join(cmd)
+        disturbed_rgb = fn
+        if _exists(disturbed_rgb):
+            os.remove(disturbed_rgb)
+
+        cmd = ['gdal_translate', '-of', 'VRT', disturbed_rgb_png, disturbed_rgb]
+        result = run(cmd, stdout=PIPE, stderr=PIPE, text=True)
+        if result.returncode != 0 or not _exists(disturbed_rgb):
+            detail = result.stderr.strip() or "GDAL did not create the color-relief VRT"
+            raise RuntimeError(f"{' '.join(cmd)}: {detail}")
 
 
     def export_4class_map(

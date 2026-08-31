@@ -1,0 +1,13 @@
+schema_version = 1
+id = "continental-us-capabilities"
+kind = "capability"
+source_revision = "provider-v2"
+label = "Continental-US capabilities"
+description = "Resolved deployment capability lists for continental-US projects."
+owns = []
+overrides = []
+writes = []
+
+[constraints]
+requires = ["continental-us"]
+conflicts = []

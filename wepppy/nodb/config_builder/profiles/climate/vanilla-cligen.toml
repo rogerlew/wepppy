@@ -1,0 +1,13 @@
+schema_version = 1
+id = "vanilla_cligen"
+kind = "climate"
+source_revision = "climate-catalog-v1:vanilla_cligen"
+label = "Vanilla CLIGEN"
+description = "Standard stochastic CLIGEN climate source."
+owns = []
+overrides = []
+writes = []
+
+[constraints]
+requires = ["continental-us"]
+conflicts = []

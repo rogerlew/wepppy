@@ -68,6 +68,13 @@ run_migration() {
 
 start_and_canary() {
     local volume="$1"
+    start_cap "${volume}" || return 1
+    docker exec "${CONTAINER}" node /app/canary.js
+    docker rm -f "${CONTAINER}" >/dev/null
+}
+
+start_cap() {
+    local volume="$1"
     docker run -d --network none --name "${CONTAINER}" --user 10001:10001 \
         --mount "type=volume,src=${volume},dst=/var/lib/cap" \
         --mount "type=bind,src=${TEMP_DIR}/cap_secret,dst=/run/secrets/cap_secret,readonly" \
@@ -84,8 +91,6 @@ start_and_canary() {
         fi
         if docker exec "${CONTAINER}" node -e \
             "fetch('http://127.0.0.1:3000/cap/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"; then
-            docker exec "${CONTAINER}" node /app/canary.js
-            docker rm -f "${CONTAINER}" >/dev/null
             return 0
         fi
         sleep 1
@@ -130,7 +135,17 @@ if start_and_canary "${FRESH_VOLUME}"; then
 fi
 setfacl -m u:10001:r,m::r,g::-,o::- "${TEMP_DIR}/cap_secret"
 
-write_ledger "${LEGACY_VOLUME}" '{"sentinel":4102444800000}'
+# Mint a real verification token, leave it outstanding in the ledger, then
+# reproduce legacy root ownership before migration. The exact token must remain
+# valid across migration/restart and retain its one-time semantics.
+run_migration "${LEGACY_VOLUME}"
+start_cap "${LEGACY_VOLUME}"
+OUTSTANDING_TOKEN="$(docker exec "${CONTAINER}" node /app/canary.js mint)"
+docker rm -f "${CONTAINER}" >/dev/null
+docker run --rm --network none --user 0:0 \
+    --mount "type=volume,src=${LEGACY_VOLUME},dst=/var/lib/cap" \
+    --entrypoint /bin/sh "${IMAGE}" -ec \
+    'chown 0:0 /var/lib/cap /var/lib/cap/tokensList.json; chmod 0755 /var/lib/cap; chmod 0600 /var/lib/cap/tokensList.json'
 BEFORE="$(docker run --rm --network none --user 0:0 --mount "type=volume,src=${LEGACY_VOLUME},dst=/var/lib/cap,readonly" --entrypoint sha256sum "${IMAGE}" /var/lib/cap/tokensList.json | awk '{print $1}')"
 if docker run --rm --network none --user 10001:10001 \
     --mount "type=volume,src=${LEGACY_VOLUME},dst=/var/lib/cap" \
@@ -148,7 +163,11 @@ AFTER="$(docker run --rm --network none --user 0:0 --mount "type=volume,src=${LE
     echo "cap-runtime-contract: populated ledger changed during migration" >&2
     exit 1
 }
-start_and_canary "${LEGACY_VOLUME}"
+start_cap "${LEGACY_VOLUME}"
+docker exec -e CAP_CANARY_TOKEN="${OUTSTANDING_TOKEN}" "${CONTAINER}" node /app/canary.js verify
+docker exec -e CAP_CANARY_TOKEN="${OUTSTANDING_TOKEN}" "${CONTAINER}" node /app/canary.js expect-invalid
+docker exec "${CONTAINER}" node /app/canary.js
+docker rm -f "${CONTAINER}" >/dev/null
 
 write_ledger "${BAD_VOLUME}" '[]'
 expect_migration_failure "${BAD_VOLUME}" "non-object ledger"
@@ -187,4 +206,4 @@ if [ "${UNWRITABLE_RESULT}" -eq 0 ] || [ "${UNWRITABLE_RESULT}" -eq 124 ]; then
     exit 1
 fi
 
-echo "cap-runtime-contract: ACL, rotation, fresh, idempotent legacy, and full hostile-state matrix passed image=${IMAGE}"
+echo "cap-runtime-contract: ACL, rotation, fresh, outstanding-token continuity, idempotent legacy, and full hostile-state matrix passed image=${IMAGE}"

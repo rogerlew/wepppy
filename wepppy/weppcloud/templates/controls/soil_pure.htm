@@ -25,6 +25,15 @@
     "attrs": {"class": "disable-readonly"}
   }
 ] %}
+{% if soil_capability_modes is defined and soil_capability_modes is not none %}
+  {% set filtered_modes = namespace(values=[]) %}
+  {% for option in mode_options %}
+    {% if option.value | int in soil_capability_modes or option.value | int == current_mode %}
+      {% set filtered_modes.values = filtered_modes.values + [option] %}
+    {% endif %}
+  {% endfor %}
+  {% set mode_options = filtered_modes.values %}
+{% endif %}
 
 {% set db_options = namespace(values=[]) %}
 {% for opt in soildboptions %}

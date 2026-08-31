@@ -262,8 +262,9 @@ re-review pass.
 **Hypothesis:** If every deployment mode derives and validates explicit build,
 recreate, migration, and acceptance sets from the effective Compose topology,
 then stale mixed images and missing runtime migrations will fail before the
-script reports success, and the CAP/WEPPcloudR incident signatures will not
-recur during the 14-day observation window.
+script reports success. Any later CAP/WEPPcloudR recurrence will create a new
+incident that cites and reassesses this hardening rather than depending on an
+elapsed-time follow-up.
 
 **Health signals:**
 
@@ -283,7 +284,10 @@ recur during the 14-day observation window.
 - Forest1 evidence covers a different command/mode from production.
 - A rollback restores known-bad permissions or prunes the rescue image.
 
-**Observation window:** 14 days after corrected production rollout.
+**Observation model:** stateless and recurrence-triggered. Capture one bounded
+pre/post-rollout signal snapshot. After closure, any danger signal creates a
+new incident/work package linked to this record; no scheduled telemetry state
+or remembered calendar follow-up is required.
 
 ## Lessons Learned
 

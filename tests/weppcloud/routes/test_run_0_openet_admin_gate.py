@@ -113,6 +113,7 @@ def _bootstrap_context(user_roles: set[str]) -> dict:
         "baer": None,
         "toc_task_emojis": {},
         "disabled_controllers": [],
+        "show_landuse_modify": False,
     }
 
 
@@ -126,6 +127,74 @@ def _extract_mod_flag(js_text: str, flag_name: str) -> str:
     match = re.search(rf'"{re.escape(flag_name)}"\s*:\s*(true|false)', js_text)
     assert match is not None
     return match.group(1)
+
+
+def test_run_authority_error_page_carries_diagnostic_code_details_and_id(
+    run0_template_app,
+    run0_module,
+) -> None:
+    with run0_template_app.test_request_context("/runs/run-1/cfg/"):
+        response = run0_module._render_run_authority_error_page(
+            "run-1",
+            "cfg",
+            status=409,
+            code="capability_authority_invalid",
+            details="partial schema-v3 graph",
+        )
+
+    body = response.get_data(as_text=True)
+    assert response.status_code == 409
+    assert "capability_authority_invalid" in body
+    assert "partial schema-v3 graph" in body
+    assert re.search(r"Error ID: <code>[0-9a-f]{32}</code>", body)
+
+
+def test_run_page_classifies_live_graph_failure_as_registry_503(
+    run0_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import wepppy.nodb.config_builder.resolver as builder_resolver_module
+    from wepppy.nodb.locales.capability_graph import CapabilityGraphError
+
+    client, module = run0_client
+
+    class LegacyConfig:
+        def config_get_bool(self, _section, _option, default=False):
+            return default
+
+        def config_get_raw(self, section, option, default=None):
+            if (section, option) == ("general", "locales"):
+                return '["us"]'
+            return default
+
+        def config_get_list(self, section, option, default=None):
+            if (section, option) == ("general", "locales"):
+                return ["us"]
+            return default
+
+    monkeypatch.setattr(module, "authorize", lambda *_args: None)
+    monkeypatch.setattr(
+        builder_resolver_module,
+        "build_locale_capability_graph",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            CapabilityGraphError("live provider graph failed validation")
+        ),
+    )
+    monkeypatch.setattr(
+        module,
+        "_build_runs0_context",
+        lambda *_args: module.resolve_run_capability_authority(LegacyConfig()),
+    )
+
+    response = client.get(
+        "/runs/run-1/cfg/?skip_migration_check=true"
+    )
+
+    assert response.status_code == 503
+    body = response.get_data(as_text=True)
+    assert "builder_registry_error" in body
+    assert "live provider graph failed validation" in body
+    assert response.headers["Retry-After"] == "5"
 
 
 @pytest.mark.parametrize("owner_lookup", ["empty", "error"])
@@ -450,6 +519,21 @@ def test_run_page_bootstrap_openet_flag_false_for_non_dev(run0_template_app) -> 
     assert _extract_openet_flag(js) == "false"
 
 
+@pytest.mark.parametrize("enabled", [False, True])
+def test_run_page_bootstrap_gates_landuse_modify_on_rendered_capability(
+    run0_template_app, enabled: bool
+) -> None:
+    context = _bootstrap_context(set())
+    context["show_landuse_modify"] = enabled
+
+    with run0_template_app.app_context():
+        js = render_template("run_page_bootstrap.js.j2", **context)
+
+    expected = "true" if enabled else "false"
+    assert re.search(rf'"landuseModifyEnabled"\s*:\s*{expected}', js)
+    assert "if (context.ui && context.ui.landuseModifyEnabled)" in js
+
+
 def test_run_page_bootstrap_openet_flag_true_for_dev(run0_template_app) -> None:
     context = _bootstrap_context({"Dev"})
     with run0_template_app.app_context():
@@ -598,6 +682,120 @@ def test_build_runs0_context_gates_ag_fields_by_registry_role(run0_module) -> No
     assert visibility_block is not None
     assert '_feature_role_enabled("ag_fields"' in visibility_block.group(0)
     assert "'ag_fields' in mods_list" in visibility_block.group(0)
+
+
+def test_schema_v2_wepp_options_use_only_stored_tuple_authority(
+    run0_module,
+) -> None:
+    authority = SimpleNamespace(
+        wepp_binaries=("wepp_stored_only", "wepp_other"),
+        allowed_model_tuples=("wbt|single-ofe|wepp_stored_only",),
+    )
+
+    options, disabled = run0_module._stored_wepp_binary_options(
+        authority,
+        "wbt",
+        "single-ofe",
+        "wepp_stored_only",
+    )
+
+    assert options == [("wepp_stored_only", "wepp_stored_only")]
+    assert disabled == []
+
+
+def test_legacy_wepp_presentation_does_not_consult_live_run_authority(
+    run0_module,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    stored = SimpleNamespace(wepp_binaries=("wepp_stored",))
+    monkeypatch.setattr(run0_module, "capability_authority", lambda _config: stored)
+    monkeypatch.setattr(
+        run0_module,
+        "resolve_run_capability_authority",
+        lambda _config: (_ for _ in ()).throw(
+            AssertionError("legacy WEPP presentation consulted live authority")
+        ),
+    )
+
+    config = SimpleNamespace(
+        config_get_bool=lambda *_args: True,
+        config_get_raw=lambda *_args: "2",
+    )
+    assert run0_module._wepp_presentation_authority(config) is stored
+
+    legacy = SimpleNamespace(
+        config_get_bool=lambda *_args: False,
+        config_get_raw=lambda *_args: None,
+    )
+    assert run0_module._wepp_presentation_authority(legacy) is None
+
+
+def test_schema_v1_wepp_options_enforce_present_coarse_axis(run0_module) -> None:
+    class Config:
+        def config_get_raw(self, section, option, default=None):
+            if (section, option) == ("capabilities", "wepp_binaries"):
+                return '["wepp_v1_only"]'
+            return default
+
+        def config_get_list(self, section, option, default=None):
+            if (section, option) == ("capabilities", "wepp_binaries"):
+                return ["wepp_v1_only"]
+            return default
+
+    options, disabled = run0_module._v1_wepp_binary_options(
+        Config(), "wepp_persisted_omitted"
+    )
+
+    assert options == [
+        ("wepp_v1_only", "wepp_v1_only"),
+        ("wepp_persisted_omitted", "wepp_persisted_omitted"),
+    ]
+    assert disabled == ["wepp_persisted_omitted"]
+
+
+def test_landuse_method_modes_use_current_authorized_dataset(
+    run0_module,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    authority = SimpleNamespace(
+        defaults={"landuse_dataset": "nlcd-2019"},
+        landuse_datasets=("nlcd-2019", "corine-2018"),
+    )
+    landuse = SimpleNamespace(
+        nlcd_db="eu/CORINE_LandCover/2018",
+        mode=SimpleNamespace(value=0, __int__=lambda self: self.value),
+    )
+    descriptor = SimpleNamespace(catalog_id="corine-2018")
+    selected: list[str] = []
+    monkeypatch.setattr(
+        run0_module,
+        "landuse_capability_modes",
+        lambda _landuse, dataset, _representation: selected.append(dataset)
+        or frozenset({4}),
+    )
+
+    modes = run0_module._landuse_method_modes_for_current(
+        authority, landuse, "single-ofe", descriptor
+    )
+
+    assert modes == frozenset({4})
+    assert selected == ["corine-2018"]
+
+
+def test_landuse_method_modes_preserve_only_outside_axis_current_mode(
+    run0_module,
+) -> None:
+    authority = SimpleNamespace(
+        defaults={"landuse_dataset": "nlcd-2019"},
+        landuse_datasets=("nlcd-2019",),
+    )
+    landuse = SimpleNamespace(nlcd_db="retired/runtime", mode=4)
+
+    modes = run0_module._landuse_method_modes_for_current(
+        authority, landuse, "single-ofe", None
+    )
+
+    assert modes == frozenset({4})
 
 
 @pytest.mark.parametrize(

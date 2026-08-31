@@ -99,6 +99,13 @@ The original **WEPPcloud** and **WEPPcloud-PEP** interfaces are still available 
 
 To start a new project, go to the WEPPcloud landing page and select an interface (such as **WEPPcloud-(Un)Disturbed-WBT** for U.S. watersheds). Choose your unit system (SI or English) and click **Launch**. If you are not signed in, you will complete a brief verification before proceeding.
 
+Authenticated users may instead open **Config Builder** from the Interfaces
+page. The one-page builder offers only registered combinations, shows the
+server-resolved datasets and capabilities for review, and creates a
+project-owned `config.cfg`. Its fixed route token is `config`; this is separate
+from the descriptive project name you can set after creation. To change the
+builder combination, create another project rather than editing `config.cfg`.
+
 WEPPcloud creates a new project workspace and opens the run page — the main screen where all of your work happens.
 
 <!-- ![Launching a new project](static/getting-started/launch-interface.png) -->

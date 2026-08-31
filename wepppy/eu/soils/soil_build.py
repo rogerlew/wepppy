@@ -6,10 +6,13 @@ from collections.abc import Sequence
 from dataclasses import dataclass, replace
 from datetime import datetime
 import json
+import logging
 from multiprocessing import Pool
 from pathlib import Path
 import tempfile
 from typing import Any
+
+import redis
 
 from wepppy.eu.soils.esdac import ESDAC
 from wepppy.eu.soils.esdac.esdac import Horizon
@@ -25,6 +28,17 @@ from wepppy.soils.ssurgo import SoilSummary
 # ESDAC builds are embarrassingly parallel, so the worker pool defaults to an
 # aggressive size to keep runtimes down for large watersheds.
 NCPU = 32
+_BATCH_ERROR_LOCATION_LIMIT = 10
+_BATCH_ERROR_REASON_LIMIT = 5
+_BATCH_ERROR_RAW_VALUE_LIMIT = 160
+
+logger = logging.getLogger(__name__)
+
+
+def _bounded_raw_value(raw_value: str) -> str:
+    if len(raw_value) <= _BATCH_ERROR_RAW_VALUE_LIMIT:
+        return raw_value
+    return raw_value[:_BATCH_ERROR_RAW_VALUE_LIMIT] + "..."
 
 
 @dataclass(frozen=True, slots=True)
@@ -48,10 +62,71 @@ class ESDACSoilBatchError(RuntimeError):
     ) -> None:
         self.rejected = tuple(rejected)
         self.report_path = report_path
-        locations = ", ".join(str(result.topaz_id) for result in self.rejected)
-        super().__init__(
-            f"ESDAC soil batch rejected {len(self.rejected)} location(s): {locations}"
+        locations = [str(result.topaz_id) for result in self.rejected]
+        location_summary = ", ".join(locations[:_BATCH_ERROR_LOCATION_LIMIT])
+        if len(locations) > _BATCH_ERROR_LOCATION_LIMIT:
+            location_summary += (
+                f", +{len(locations) - _BATCH_ERROR_LOCATION_LIMIT} more"
+            )
+
+        reason_counts: dict[tuple[str, str], int] = {}
+        reason_raw_values: dict[tuple[str, str], set[str]] = {}
+        for result in self.rejected:
+            quality = result.quality.as_dict()
+            for diagnostic in quality["diagnostics"]:
+                if diagnostic["severity"] != "error":
+                    continue
+                raw_value = json.dumps(
+                    diagnostic["raw_value"],
+                    ensure_ascii=True,
+                    separators=(",", ":"),
+                    sort_keys=True,
+                )
+                reason = (str(diagnostic["code"]), str(diagnostic["field"]))
+                reason_counts[reason] = reason_counts.get(reason, 0) + 1
+                reason_raw_values.setdefault(reason, set()).add(raw_value)
+
+        reasons = sorted(
+            reason_counts.items(),
+            key=lambda item: (-item[1], item[0]),
         )
+        reason_summary = "; ".join(
+            f"{code}[field={field}, count={count}, "
+            f"raw_value={_bounded_raw_value(sorted(reason_raw_values[(code, field)])[0])}]"
+            for (code, field), count in reasons[:_BATCH_ERROR_REASON_LIMIT]
+        )
+        if len(reasons) > _BATCH_ERROR_REASON_LIMIT:
+            reason_summary += (
+                f"; +{len(reasons) - _BATCH_ERROR_REASON_LIMIT} more reason(s)"
+            )
+        if not reason_summary:
+            reason_summary = "unknown_quality_failure"
+
+        super().__init__(
+            f"ESDAC soil batch rejected {len(self.rejected)} location(s) "
+            f"(TopoAZ: {location_summary}); reasons: {reason_summary}; "
+            f"report: {report_path.name}"
+        )
+
+
+def _raise_batch_error(
+    rejected: Sequence[SoilBuildWorkerResult],
+    report_path: Path,
+    *,
+    status_channel: str | None,
+) -> None:
+    """Log and raise a bounded batch diagnostic after its report is durable."""
+    error = ESDACSoilBatchError(rejected, report_path)
+    logger.error("%s", error)
+    if status_channel is not None:
+        try:
+            StatusMessenger.publish(status_channel, str(error))
+        except redis.RedisError:
+            logger.exception(
+                "Failed to publish ESDAC batch diagnostic to status channel %s",
+                status_channel,
+            )
+    raise error
 
 
 def _build_esdac_soil(kwargs: dict[str, Any]) -> SoilBuildWorkerResult:
@@ -166,6 +241,7 @@ def _raise_batch_conflict(
     code: str,
     field: str,
     raw_value: object,
+    status_channel: str | None,
 ) -> None:
     updated_results = list(results)
     for index in indexes:
@@ -180,9 +256,10 @@ def _raise_batch_conflict(
         updated_results,
         batch_outcome="rejected",
     )
-    raise ESDACSoilBatchError(
+    _raise_batch_error(
         [updated_results[index] for index in indexes],
         report_path,
+        status_channel=status_channel,
     )
 
 
@@ -244,7 +321,11 @@ def build_esdac_soils(
                 results,
                 batch_outcome="rejected",
             )
-            raise ESDACSoilBatchError(rejected, report_path)
+            _raise_batch_error(
+                rejected,
+                report_path,
+                status_channel=status_channel,
+            )
 
         staged_report_path = Path(staging_dir) / "soil_quality.json"
         _write_quality_report(
@@ -273,6 +354,7 @@ def build_esdac_soils(
                         code="batch.duplicate_soil_key",
                         field="soil_key",
                         raw_value=key_str,
+                        status_channel=status_channel,
                     )
             else:
                 move_plan[key_str] = source_path
@@ -287,6 +369,7 @@ def build_esdac_soils(
                     code="batch.existing_soil_key_conflict",
                     field="soil_key",
                     raw_value=key_str,
+                    status_channel=status_channel,
                 )
 
         previous_report = report_path.read_bytes() if report_path.exists() else None

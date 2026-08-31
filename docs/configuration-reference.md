@@ -192,10 +192,25 @@ Consolidated configuration surfaces discovered from:
 | `OPENFILEGDB_COMMAND_TIMEOUT` | `python: 1800` | `wepppy.nodb.mods.features_export` | Maximum seconds allowed for direct GeoPackage-to-OpenFileGDB conversion. |
 | `FEATURES_EXPORT_OGR2OGR_BINARY` | `python: ogr2ogr` | `wepppy.nodb.mods.features_export` | Executable used for direct OpenFileGDB conversion. |
 | `WEPP_NODIR_DEFAULT_NEW_RUNS` | `python: true` | `wepppy.nodir.mutations` | Global gate for seeding `WD/.nodir/default_archive_roots.json`; false disables marker creation even when config opts in. |
-| `[nodb].apply_nodir` (`wepppy/nodb/configs/*.cfg`) | `_defaults.toml: false` | `wepppy.microservices.rq_engine.project_routes`; `wepppy.microservices.rq_engine.upload_huc_fire_routes`; `wepppy.weppcloud.routes.test_bp` | Per-config opt-in for default NoDir marker seeding during run creation. |
+| `[nodb].apply_nodir` (`wepppy/nodb/configs/*.cfg`) | `_defaults.cfg: false` | `wepppy.microservices.rq_engine.project_routes`; `wepppy.microservices.rq_engine.upload_huc_fire_routes`; `wepppy.weppcloud.routes.test_bp` | Per-config opt-in for default NoDir marker seeding during run creation. |
 | `wepppy/nodb/configs/*.cfg` | — | `wepppy.nodb.base` | NoDb controller configuration basenames (`get_configs()`). |
-| `wepppy/nodb/configs/_defaults.toml` | — | `wepppy.nodb.base` | Default configuration seed path (`get_default_config_path()`). |
+| `wepppy/nodb/configs/_defaults.cfg` | — | `wepppy.nodb.base` | Canonical shared configuration seed selected by `get_default_config_path()`; `_defaults.toml` is a relative mixed-version compatibility symlink. Project-local resolution prefers `_defaults.cfg`, then `_defaults.toml`, before either shared name. |
 | `wepppy/nodb/configs/legacy/*.toml` | — | `wepppy.nodb.base` | Legacy configuration basenames (`get_legacy_configs()`). |
+
+Project-owned configuration writers must call
+`wepppy.project_config_sanitization.assert_materialization_safe()` before
+publishing generated config or manifest bytes. Operators and CI can scan the
+shared source corpus, a project directory, a manifest, or a ZIP/tar archive
+with `python tools/check_project_config_secrets.py [PATH ...]`. Findings are
+redacted and the command exits nonzero when secret-bearing or runtime-host-bound
+material is present.
+
+Canonical project config bytes are produced by
+`wepppy.project_config_serialization.serialize_config()`. The serializer sorts
+case-sensitive sections and options, emits one stable encoding per supported
+type, and invokes the secret gate before returning bytes. Validate active
+shared source spelling with `python tools/normalize_project_config_sources.py`;
+use `--write` only when intentionally normalizing those tracked sources.
 
 ## Docker / Infra (Compose)
 

@@ -2,11 +2,48 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from functools import lru_cache
+import hashlib
+import json
+from configparser import ConfigParser
+from pathlib import Path
+from types import MappingProxyType
 from typing import Iterable, Mapping, MutableMapping, Optional, Tuple, List
 
 
 DAYMET_LAST_AVAILABLE_YEAR = 2024
 _GHCN_ONLY_LOCALES: Tuple[str, ...] = ("au", "alaska", "hawaii", "nigeria")
+
+CLIMATE_STATION_METHOD_RUNTIME: Mapping[str, int] = MappingProxyType(
+    {
+        "auto": -1,
+        "distance": 0,
+        "multi_factor": 1,
+        "eu_heuristic": 2,
+        "au_heuristic": 3,
+        "user_defined": 4,
+    }
+)
+CLIMATE_SPATIAL_METHOD_RUNTIME: Mapping[str, int] = MappingProxyType(
+    {"single": 0, "multiple": 1, "interpolated": 2}
+)
+_STATION_METHOD_BY_RUNTIME = {value: key for key, value in CLIMATE_STATION_METHOD_RUNTIME.items()}
+_SPATIAL_METHOD_BY_RUNTIME = {value: key for key, value in CLIMATE_SPATIAL_METHOD_RUNTIME.items()}
+_BUILDER_EXPOSED_DATASETS = frozenset(
+    {
+        "vanilla_cligen",
+        "prism_stochastic",
+        "observed_daymet",
+        "observed_gridmet",
+        "dep_nexrad",
+        "future_cmip5",
+        "user_defined_cli",
+        "eobs_modified",
+        "agdc",
+    }
+)
+_SUPPORTED_NON_BUILDER_DATASETS: frozenset[str] = frozenset()
+
+CLIMATE_STATION_DATABASE_ADAPTER_REVISION = "cligen-station-resolver-v2"
 
 
 @dataclass(frozen=True)
@@ -26,12 +63,37 @@ class ClimateDataset:
     spatial_modes: Tuple[int, ...] = (0,)
     default_spatial_mode: int = 0
     station_modes: Tuple[int, ...] = (-1, 0, 1)
+    default_station_mode: int = -1
     inputs: Tuple[str, ...] = ()
     rap_compatible: bool = False
     dependencies: Tuple[str, ...] = ()
     upload_behaviour: str = "none"
     metadata: Mapping[str, object] = field(default_factory=dict)
     ui_exposed: bool = True
+
+    @property
+    def station_method_ids(self) -> Tuple[str, ...]:
+        return tuple(_STATION_METHOD_BY_RUNTIME[mode] for mode in self.station_modes)
+
+    @property
+    def spatial_method_ids(self) -> Tuple[str, ...]:
+        return tuple(_SPATIAL_METHOD_BY_RUNTIME[mode] for mode in self.spatial_modes)
+
+    @property
+    def default_station_method_id(self) -> str:
+        return _STATION_METHOD_BY_RUNTIME[self.default_station_mode]
+
+    @property
+    def default_spatial_method_id(self) -> str:
+        return _SPATIAL_METHOD_BY_RUNTIME[self.default_spatial_mode]
+
+    @property
+    def support_state(self) -> str:
+        if self.catalog_id in _BUILDER_EXPOSED_DATASETS:
+            return "builder_exposed"
+        if self.catalog_id in _SUPPORTED_NON_BUILDER_DATASETS:
+            return "supported_non_builder"
+        return "inventory_only"
 
     def to_mapping(self) -> MutableMapping[str, object]:
         """Return a mutable representation suitable for JSON serialization."""
@@ -49,6 +111,11 @@ class ClimateDataset:
             "spatial_modes": list(self.spatial_modes),
             "default_spatial_mode": self.default_spatial_mode,
             "station_modes": list(self.station_modes),
+            "station_method_ids": list(self.station_method_ids),
+            "spatial_method_ids": list(self.spatial_method_ids),
+            "default_station_method_id": self.default_station_method_id,
+            "default_spatial_method_id": self.default_spatial_method_id,
+            "support_state": self.support_state,
             "inputs": list(self.inputs),
             "rap_compatible": self.rap_compatible,
             "dependencies": list(self.dependencies),
@@ -56,7 +123,6 @@ class ClimateDataset:
             "metadata": dict(self.metadata),
             "ui_exposed": self.ui_exposed,
         }
-
     def is_allowed_for(self, locales: Iterable[str], mods: Iterable[str], include_hidden: bool = False) -> bool:
         """Return True when dataset should be offered for the supplied context."""
         if not include_hidden and not self.ui_exposed:
@@ -77,6 +143,22 @@ class ClimateDataset:
             return False
 
         return True
+
+
+@dataclass(frozen=True, slots=True)
+class ClimateStationDatabase:
+    """Stable Builder identity for one CLIGEN station catalog selector."""
+
+    catalog_id: str
+    selector: str
+    label: str
+
+
+_CLIMATE_STATION_DATABASES: Tuple[ClimateStationDatabase, ...] = (
+    ClimateStationDatabase("cligen-stations-legacy", "legacy", "Legacy"),
+    ClimateStationDatabase("cligen-stations-2015", "2015_stations.db", "2015"),
+    ClimateStationDatabase("cligen-stations-ghcn", "ghcn_stations.db", "GHCN"),
+)
 
 
 _CLIMATE_DATASETS: Tuple[ClimateDataset, ...] = (
@@ -209,6 +291,7 @@ _CLIMATE_DATASETS: Tuple[ClimateDataset, ...] = (
         spatial_modes=(0, 1),
         default_spatial_mode=0,
         station_modes=(4,),
+        default_station_mode=4,
         inputs=("upload", "spatial_mode"),
         upload_behaviour="upload",
     ),
@@ -256,14 +339,13 @@ _CLIMATE_DATASETS: Tuple[ClimateDataset, ...] = (
         climate_mode=10,
         label='AGDC (Australia)',
         description='Australia Gridded Climate datasets.',
-        help_text='Backend support only; UI exposure pending future requirements.',
+        help_text='Observed gridded climate source for Australian runs.',
         group='Observed',
         group_hint='Model validation; historical disturbance analysis',
         allowed_locales=("au",),
         spatial_modes=(0, 1),
         default_spatial_mode=0,
         station_modes=(-1, 0),
-        ui_exposed=False,
     ),
 )
 
@@ -306,9 +388,86 @@ def get_climate_dataset(catalog_id: str) -> Optional[ClimateDataset]:
     return _catalog_by_id().get(catalog_id)
 
 
+@lru_cache(maxsize=1)
+def _station_database_by_id() -> Mapping[str, ClimateStationDatabase]:
+    return {database.catalog_id: database for database in _CLIMATE_STATION_DATABASES}
+
+
+def iter_climate_station_databases() -> Tuple[ClimateStationDatabase, ...]:
+    """Return the closed Builder CLIGEN station-database inventory."""
+
+    return _CLIMATE_STATION_DATABASES
+
+
+def get_climate_station_database(catalog_id: str) -> Optional[ClimateStationDatabase]:
+    """Return one CLIGEN station-database descriptor by stable ID."""
+
+    return _station_database_by_id().get(catalog_id)
+
+
+CLIMATE_PROVIDER_ADAPTER_REVISION = "climate-input-parser-v1"
+_CLIMATE_PROVIDER_OPTIONS = (
+    "cligen_db",
+    "daymet_observed",
+    "use_gridmet_wind_when_applicable",
+)
+
+
+def default_climate_provider_tokens() -> Mapping[str, str]:
+    """Return configured non-secret climate database/version tokens."""
+
+    defaults_path = Path(__file__).parents[1] / "configs" / "_defaults.cfg"
+    parser = ConfigParser(interpolation=None)
+    if not parser.read(defaults_path, encoding="utf-8") or not parser.has_section("climate"):
+        raise ValueError(f"unable to read climate provider defaults from {defaults_path}")
+    values = {
+        option: parser.get("climate", option)
+        for option in _CLIMATE_PROVIDER_OPTIONS
+        if parser.has_option("climate", option)
+    }
+    if set(values) != set(_CLIMATE_PROVIDER_OPTIONS) or any(not value for value in values.values()):
+        raise ValueError("climate provider defaults are incomplete")
+    return values
+
+
+def climate_catalog_revision(
+    configured_tokens: Mapping[str, str],
+    adapter_revision: str = CLIMATE_PROVIDER_ADAPTER_REVISION,
+) -> str:
+    """Return identity for descriptors, configured tokens, methods, and adapter."""
+
+    payload = {
+        "datasets": [dataset.to_mapping() for dataset in _CLIMATE_DATASETS],
+        "station_runtime": dict(CLIMATE_STATION_METHOD_RUNTIME),
+        "spatial_runtime": dict(CLIMATE_SPATIAL_METHOD_RUNTIME),
+        "station_databases": [
+            {
+                "id": database.catalog_id,
+                "selector": database.selector,
+                "label": database.label,
+            }
+            for database in _CLIMATE_STATION_DATABASES
+        ],
+        "station_database_adapter_revision": CLIMATE_STATION_DATABASE_ADAPTER_REVISION,
+        "configured_tokens": dict(configured_tokens),
+        "adapter_revision": adapter_revision,
+    }
+    serialized = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
+
+
 __all__ = [
     "ClimateDataset",
+    "ClimateStationDatabase",
+    "CLIMATE_STATION_DATABASE_ADAPTER_REVISION",
+    "CLIMATE_SPATIAL_METHOD_RUNTIME",
+    "CLIMATE_STATION_METHOD_RUNTIME",
+    "CLIMATE_PROVIDER_ADAPTER_REVISION",
     "available_climate_datasets",
+    "climate_catalog_revision",
+    "default_climate_provider_tokens",
     "get_climate_dataset",
+    "get_climate_station_database",
     "iter_climate_datasets",
+    "iter_climate_station_databases",
 ]

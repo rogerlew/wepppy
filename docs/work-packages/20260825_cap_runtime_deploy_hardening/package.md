@@ -80,7 +80,7 @@ interruption of already authenticated use.
 
 - [ ] A fresh CAP deployment starts as UID/GID `10001:10001`, reads only its
   mounted secret, writes its persistent ledger, and passes `/cap/health`.
-- [ ] A populated legacy root-owned CAP data volume is migrated without token
+- [x] A populated legacy root-owned CAP data volume is migrated without token
   ledger loss and passes a redeem/write exercise.
 - [ ] An unreadable CAP secret or unwritable CAP volume stops deployment with an
   actionable error before deployment is reported successful.
@@ -180,14 +180,21 @@ interruption of already authenticated use.
   hidden permission repair, unconditional broad ownership changes, health
   checks for services not deployed, or successful deploy status with a
   restarting service.
-- **Observation window**: 14 days after production rollout.
+- **Observation model**: stateless and recurrence-triggered. Capture a bounded
+  pre/post-production rollout snapshot covering CAP health/restarts, exact
+  incident signatures, functional CAPTCHA, session continuity, and DEVAL. The
+  package may close after that evidence is recorded. Any later danger signal
+  creates a new incident/work package that cites and reassesses this package.
 - **Temporary calluses introduced**: none planned. Any compatibility migration
   must be idempotent, narrowly scoped, documented, and assigned sunset criteria
   before implementation.
-- **Callus softening hypothesis**: after all supported hosts persist the
-  canonical ownership/ACL contract through the observation window, any
-  one-time legacy migration path may be removed only after direct fresh and
-  populated-state tests plus all review gates.
+- **Recovery-material lifecycle**: retain the CAP rescue tag until a later
+  successful CAP-recreating deployment replaces it; do not depend on timed
+  cleanup.
+- **Callus softening hypothesis**: no migration or recovery path is removed due
+  only to elapsed time. Removal requires a new softening package with current
+  production evidence, direct fresh and populated-state tests, and all review
+  gates.
 
 ## References
 
@@ -212,5 +219,7 @@ interruption of already authenticated use.
 
 ## Follow-up Work
 
-- Record 14-day telemetry and decide whether any one-time migration logic can be
+- Record the bounded production rollout snapshot. Any later CAP danger signal
+  starts a new incident/work package; do not maintain a timer or telemetry
+  ledger solely to keep this package open.
   retired under the callus-softening protocol.

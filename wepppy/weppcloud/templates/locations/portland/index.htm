@@ -219,9 +219,6 @@ a.disabled {
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-116992009-1"></script>
-{% include("_analytics.htm") %}
 {% if not current_user.is_authenticated %}
     <script src="{{ static_url('js/controllers-gl.js') }}" defer></script>
     <script src="{{ static_url('js/controllers_gl_stale_check.js') }}" defer></script>

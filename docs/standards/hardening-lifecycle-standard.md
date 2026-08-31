@@ -81,6 +81,21 @@ For each hardening change, record:
   for absent, empty, populated, and supported legacy states.
 - **Observation window**: default 14-30 days unless package states otherwise.
 
+When no durable monitoring owner or scheduler exists, a package may use a
+**stateless recurrence-triggered observation model** instead of an elapsed-time
+window. That model must:
+
+- capture a bounded pre/post-rollout signal snapshot before closure;
+- promote exact health and danger signals into the canonical operator or
+  subsystem documentation;
+- define which future events require a new incident/work package that cites and
+  reassesses the prior hardening; and
+- retain or retire recovery material by an observable lifecycle event, not by
+  somebody remembering a calendar date.
+
+Do not reopen or mutate a closed work package. A recurrence creates a new
+execution record and uses the prior package as precedent.
+
 ### 4) Implementation and Validation Gates (Required)
 
 Hardening changes must be minimal and explicit:
@@ -168,7 +183,9 @@ Callus softening is expected. Defensive layers should not be permanent by defaul
 Softening is allowed only when all are true:
 
 - regression risk is low to moderate,
-- target incident class has remained stable or reduced over the observation window,
+- target incident class has remained stable or reduced over the declared
+  elapsed-time window, or the recurrence-triggered package has current rollout
+  evidence and a new package dedicated to the proposed softening,
 - rollback path is documented and fast,
 - tests cover both current behavior and intended softer behavior,
 - code + QA review gates are planned (and security review if surface is high-impact).
@@ -198,7 +215,8 @@ Softening is accepted only if:
 
 - [ ] Captured incident signature and impact.
 - [ ] Searched and linked prior hardening precedent.
-- [ ] Wrote hypothesis, health signals, guardrails, and observation window.
+- [ ] Wrote hypothesis, health signals, guardrails, and either an elapsed-time
+  or stateless recurrence-triggered observation model.
 - [ ] Added regression tests for exact failure path.
 - [ ] Ran required validation and review gates.
 - [ ] Updated package docs, artifacts, and `PROJECT_TRACKER.md`.

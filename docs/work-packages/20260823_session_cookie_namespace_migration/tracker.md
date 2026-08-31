@@ -3,9 +3,21 @@
 ## Quick Status
 
 **Started**: 2026-08-23 21:45Z
-**Current phase**: Bearhive rehearsal implementation
-**Last updated**: 2026-08-24 20:24Z
-**Next milestone**: Run reader-first production canaries and observation, then rehearse configuration recovery before activation.
+**Current phase**: Production owned-cookie writer observation
+**Last updated**: 2026-08-25 02:29Z
+**Next milestone**: Review production telemetry and legacy-reader evidence at
+2026-08-26 02:20Z; do not retire the legacy reader before that checkpoint.
+
+## Scheduled Follow-up
+
+- [ ] **2026-08-26 02:20Z (24 hours after activation):** Pull aggregate CSRF,
+  authentication, session-token, migration rejection/adoption, Redis-session,
+  and 5xx signals. Record denominators and explicitly identify telemetry gaps.
+- [ ] Review whether legacy-cookie usage is measurable and sufficiently low.
+  If it is not measurable, improve aggregate, credential-free telemetry and
+  continue dual-reading; do not infer retirement readiness from silence.
+- [ ] Open a separate reviewed retirement change before removing the legacy
+  `session` reader. No retirement change is part of the writer activation.
 
 ## Task Board
 
@@ -89,6 +101,17 @@
   Only web/rq-engine rotated; active worker jobs continued on unchanged worker
   containers, all other recorded container IDs were unchanged, and both public
   health endpoints passed.
+- [x] Activated `__Host-weppcloud_session` as the production writer on wepp1
+  using targeted mode. Both session consumers retain the legacy reader, only
+  web/rq-engine rotated, all non-target container IDs remained unchanged, and
+  both public health endpoints passed after the bounded rq-engine startup
+  delay.
+- [x] Passed the production existing-session browser canary after activation:
+  authentication survived hard refresh, heartbeat returned 204, recorder and
+  rq-engine paths worked, the owned cookie was issued, and logout propagated
+  across tabs without user remediation.
+- [x] Confirmed fresh production local and OAuth login remain functional under
+  the owned-cookie writer.
 
 ## Decisions Pending Acceptance
 

@@ -1,7 +1,10 @@
 # Project-Owned Configuration Implementation Roadmap
 
-> **Status:** Draft implementation roadmap; package folders are proposed and
-> are created only when their execution begins.
+> **Status:** Ratified 2026-08-04 by WP00R for implementation on the
+> noncanonical initiative branch; package folders are created only when their
+> execution begins.
+>
+> **Noncanonical initiative branch:** `feature/project-owned-config`
 >
 > **Contract:**
 > [`project-owned-config-contract.md`](project-owned-config-contract.md)
@@ -31,7 +34,42 @@ begins. Each package MUST contain `package.md`, `tracker.md`, and an active
 ExecPlan. The ExecPlan MUST be written from the contract and this roadmap, not
 from chat history.
 
-### 2.1 Requirement closure ownership
+### 2.1 Initiative branch and promotion boundary
+
+All roadmap scaffolding and implementation MUST use the shared integration
+branch `feature/project-owned-config`. This branch is explicitly noncanonical:
+its presence on the remote does not mean its behavior is released, supported,
+or approved for production. `master` remains the canonical release branch.
+
+Every package `package.md`, `tracker.md`, active ExecPlan, handoff, and review
+artifact MUST state:
+
+```text
+Initiative branch: feature/project-owned-config
+Canonical branch: master
+Promotion policy: merge only at the roadmap promotion gate
+```
+
+Before editing or executing a package, its agent MUST verify and record that
+`git branch --show-current` returns `feature/project-owned-config` and that the
+local branch tracks `origin/feature/project-owned-config`. Package commits and
+pushes target that branch. Agents MUST NOT create a package-specific branch or
+merge package work into `master` unless this roadmap is amended by the operator.
+
+WP11 MUST deploy and record an exact commit from the feature branch for Forest
+acceptance. WP12 is the first promotion boundary: only after all WP11, WP12B,
+WP12C, and WP12D acceptance gates pass does it merge the reviewed feature-
+branch revision into `master` and deploy the resulting canonical revision to
+production. Before WP13 begins, the feature branch MUST be synchronized to that
+promoted `master` revision. WP13 performs shared-alias retirement on the same
+feature branch and uses a second reviewed merge into `master` for the later
+retirement release.
+
+A package may be complete on the feature branch while remaining unpromoted.
+Package status and evidence MUST distinguish `implemented on feature branch`,
+`Forest accepted`, and `promoted to master`.
+
+### 2.2 Requirement closure ownership
 
 - Every requirement has exactly one **closure owner** in section 5.
 - A closure owner is accountable for the final contract test, integration
@@ -53,7 +91,7 @@ from chat history.
   receiving-owner status. The source package cannot close on that disposition
   until the receiving owner explicitly accepts it in the receiving tracker.
 
-### 2.2 Cross-package leakage
+### 2.3 Cross-package leakage
 
 Implementation agents are authorized to make the smallest required change
 outside their package's primary subsystem when that change is necessary to
@@ -76,7 +114,7 @@ Behavior discovered during implementation that changes this contract MUST be
 ratified in the contract before the changed behavior ships. Package boundaries
 never authorize silent contract drift.
 
-### 2.3 Feature flags and promotion
+### 2.4 Feature flags and promotion
 
 - Reader compatibility lands before any flattened-config writer is enabled.
 - Every flattened-config writer remains disabled until secret sanitization,
@@ -87,6 +125,10 @@ never authorize silent contract drift.
 - User-initiated config updates remain disabled until WP08 preview/apply auth,
   locking, and recovery, WP09 UI review, and WP10 fork/archive consistency pass
   together.
+- WP12D capability refresh remains governed by the existing project-config
+  update enablement; it MUST NOT add another deployment feature flag. Its
+  structural reader lands first with the refresh writer absent, and refresh
+  becomes reachable only after the recorded reader-floor gate passes.
 - A package may merge dormant code behind a default-off server feature flag;
   merging dormant code is not production acceptance.
 
@@ -106,7 +148,7 @@ WP00R contract ratification/checklist
                                                                                          │
 WP04 preset writer ──────────────────────────────────────────────────────────────────────┴─> WP10 lifecycle integrity
 
-all WP00R-WP10 prerequisites ─> WP11 Forest acceptance ─> WP12 production cutover ─> WP13 alias retirement
+all WP00R-WP10 prerequisites ─> WP11 Forest acceptance ─> WP12B locale authority ─> WP12C Builder locale expansion ─> WP12D run UI authority/refresh ─> WP12 production cutover ─> WP13 alias retirement
 ```
 
 After WP00R, WP00A, WP00B, and WP01 may run in parallel. WP02 and WP03 may
@@ -131,26 +173,29 @@ No overlap changes the exit gates or closure ownership below.
 | WP09 | `20260804_project_config_update_ui` | Add async page-load availability check, run-header notice, authenticated nonblocking digest-warning state/UI, accessible preview modal, explicit apply/status/error flow, and nested-run linkage to the top-level authority. | WP08 | High | No read-triggered mutation occurs; users can review the full delta; digest warning is visible without blocking and is deduplicated at the page-load boundary; only authorized apply is offered; stale/conflict/job states and accessibility tests pass. |
 | WP10 | `20260804_project_config_lifecycle_integrity` | Integrate config/update locks with fork and archive; recover pending updates before consistent copy; preserve config/manifest through fork/download/restore; verify nested/PUP authority, invalid/newer manifest restore, read-only/public behavior, and byte preservation. | WP04, WP08 | High | Create/reopen/fork/archive/restore and concurrent-update fixtures prove one consistent authority; legacy archives retain fallback; no pending journal is used as archive recovery. |
 | WP11 | `20260804_project_config_forest_acceptance` | Deploy the complete default-off reader/writer stack to Forest; consume WP01 defaults evidence; validate mixed-version readers, all four initial DEM/backend combinations, named preset and builder flows, climate/soil/land-use paths, updates, restart, fork/archive/restore, rollback, and operator evidence. | WP00R, WP00A, WP00B, WP01, WP02, WP03, WP04, WP05, WP06, WP07, WP08, WP09, WP10 | High | Every contract regression item has evidence or an explicit blocking disposition; only validated combinations are enabled; deployed worker/revision and rollback-target compatibility are proven. |
-| WP12 | `20260804_project_config_production_cutover` | Production deployment, staged feature-flag enablement, health/danger observation, rollback verification, documentation/operator runbooks, and handoff of deployed/rollback revision inventory plus observation evidence. | WP11 | High | Production validation and observation pass; supported revisions read `_defaults.cfg`; project-owned writer/update flags are safely enabled; alias-retirement prerequisites are handed to WP13. |
-| WP13 | `20260804_defaults_toml_alias_retirement` | Revalidate deployed and supported rollback revisions in the next planned release; remove only the shared `_defaults.toml` symlink; retain project-local legacy-reader support; run final normative-checklist and requirement-ledger audit. | WP12 | High | Shared symlink is absent; project-local legacy `_defaults.toml` still resolves; every checklist item and PC row has an accepted closure state; roadmap is closed. |
+| WP12B | `20260827_project_config_locale_authority` | Normalize `continental-us` into a comprehensive typed locale/dependency graph; classify every shipped runtime locale token; separate dataset and method capability axes; make resolved per-project capabilities authoritative for climate, landuse, soil, and watershed presentation/submission; validate the generated matrix and real Forest providers. | WP05, WP07, WP11, `20260826_project_config_builder_model_options` | High | Every token is classified; every exposed profile and dependency closes deterministically; paired views/routes use the same stored IDs; legacy behavior is preserved; Forest evidence passes. |
+| WP12C | `20260827_project_config_builder_locale_expansion` | Expose Europe, Canada, Australia, and Global Earth alongside Continental US; make each typed profile the sole authority for DEM/soil/land-cover/climate/station-database choices; default every locale to Vanilla CLIGEN; add locale-keyed immutable schema-v3 graphs and instance-local CLIGEN station resolution; prove provider-backed creation on Forest. | WP12B, WP07, WP11 | High | Exactly five profiles are exposed; dependent UI/server choices match; historical v2 projects remain valid; real concurrent station resolution is isolated; every advertised provider and each new profile passes Forest evidence. |
+| WP12D | `20260827_project_config_run_ui_authority` | Normalize effective `.cfg` locale for all shipped configs; make recognized legacy bases and valid schema-v1 named presets use current Builder climate/land-cover authority within their bounded surfaces; correct the five-locale climate matrix and complete land-cover envelopes; preserve stored authority; add explicit selection-preserving schema-v3 capability refresh with provenance acknowledgment, append-only structural identities, exact transaction reconciliation, and reader-first Forest gates. | WP12B, WP12C, WP07, WP11 | High | All 128 configs resolve canonically; Europe schema-v1 exposes exactly Vanilla/E-OBS/User-Defined; Builder land-cover defaults do not narrow run choices; stored schema-v2/v3 remains frozen by default; only congruent Builder schema-v3 refreshes after exact acknowledgment; binding reviews, reader floors, tests, and exact-host Forest rollback evidence pass. |
+| WP12 | `20260804_project_config_production_cutover` | Retain WP12D amendments `PC-24/WP12D-20260828-4` and `PC-24/WP12D-20260828-5` and repeat their scope-versus-changed-files comparisons; merge only that accepted feature-branch boundary into `master`; deploy that canonical revision; perform staged feature-flag enablement, health/danger observation, rollback verification, documentation/operator runbooks, and handoff of deployed/rollback revision inventory plus observation evidence. | WP11, WP12B, WP12C, WP12D | High | The repeated scope audits match the ratified boundaries or stop for amendment; the reviewed merge commit and production revision are recorded; production validation and observation pass; supported revisions read `_defaults.cfg`; project-owned writer/update flags are safely enabled; alias-retirement prerequisites are handed to WP13. |
+| WP13 | `20260804_defaults_toml_alias_retirement` | Synchronize the feature branch to promoted `master`; revalidate deployed and supported rollback revisions in the next planned release; remove only the shared `_defaults.toml` symlink on the feature branch; retain project-local legacy-reader support; run the final audits; merge the reviewed retirement revision into `master`. | WP12 | High | The retirement merge and production revision are recorded; shared symlink is absent; project-local legacy `_defaults.toml` still resolves; every checklist item and PC row has an accepted closure state; roadmap is closed. |
 
 ## 5. Requirement Ownership Ledger
 
 The status `contracted` means the behavior is specified but implementation
 evidence has not yet been accepted. Work-package trackers replace this status
-with one of the closure states in section 2.1.
+with one of the closure states in section 2.2.
 
 | Requirement ID | Contract scope | Closure owner | Contributing packages | Required closure evidence | Initial status |
 | --- | --- | --- | --- | --- | --- |
-| PC-00 | Contract-first ratification and exhaustive normative requirement mapping (contract status and section 16) | WP00R | Every package | Approval artifact plus checklist mapping every normative paragraph/regression bullet to a PC row and tracker task. | Contracted; approval pending |
-| PC-01 | Project-owned file naming, flattened marker, and project-local authority (sections 5, 6.1, 7.1, 7.3) | WP02 | WP04, WP06 | Loader and creation fixtures for preset basename and builder `config.cfg`; no shared fallback after marker recognition. | Contracted |
-| PC-02 | Legacy local/shared fallback and dual defaults-name precedence (sections 6.2-6.3) | WP01 | WP02, WP11 | Full four-location precedence matrix and legacy reopen equivalence. | Contracted |
-| PC-03 | Shared `_defaults.cfg` move, relative symlink compatibility, and dual-name evidence (sections 14.1-14.3) | WP01 | WP02, WP11 | Move/symlink commit, older-reader proof, defaults compatibility Forest evidence, permanent project-local legacy reader test. | Contracted |
-| PC-04 | Secret removal, snapshot-safe classification, and no secret-bearing project/archive artifacts (sections 5, 10, 13, 14.0) | WP00A | WP04, WP06, WP10, WP11, WP12 | Sanitization inventory, secret scanner/gate, security review, generated project and archive inspection. | Contracted |
-| PC-05 | Canonical byte serialization and source normalization (section 8.1) | WP00B | WP03, WP04, WP10 | Ratified type encodings, normalized sources, golden byte fixtures, deterministic round trip, archive byte preservation. | Contracted |
+| PC-00 | Contract-first ratification and exhaustive normative requirement mapping (contract status and section 16) | WP00R | Every package | Approval artifact plus checklist mapping every normative paragraph/regression bullet to a PC row and tracker task. | Verified by WP00R, 2026-08-04 |
+| PC-01 | Project-owned file naming, flattened marker, and project-local authority (sections 5, 6.1, 7.1, 7.3) | WP02 | WP04, WP06 | Loader and creation fixtures for preset basename and builder `config.cfg`; no shared fallback after marker recognition. | Reader foundation verified by WP02, 2026-08-26; real creation fixtures retained by WP04/WP06 |
+| PC-02 | Legacy local/shared fallback and dual defaults-name precedence (sections 6.2-6.3) | WP01 | WP02, WP11 | Full four-location precedence matrix and legacy reopen equivalence. | Verified by WP01, 2026-08-26; deployed Forest consumption retained by WP11 |
+| PC-03 | Shared `_defaults.cfg` move, relative symlink compatibility, and dual-name evidence (sections 14.1-14.3) | WP01 | WP02, WP11 | Move/symlink commit, older-reader proof, defaults compatibility Forest evidence, permanent project-local legacy reader test. | Verified locally by WP01, 2026-08-26; deployed Forest/rollback evidence retained by WP11 |
+| PC-04 | Secret removal, snapshot-safe classification, and no secret-bearing project/archive artifacts (sections 5, 10, 13, 14.0) | WP00A | WP04, WP06, WP10, WP11, WP12 | Sanitization inventory, secret scanner/gate, security review, generated project and archive inspection. | Verified by WP00A, 2026-08-05; downstream packages retain invocation evidence |
+| PC-05 | Canonical byte serialization and source normalization (section 8.1) | WP00B | WP03, WP04, WP10 | Ratified type encodings, normalized sources, golden byte fixtures, deterministic round trip, archive byte preservation. | Verified by WP00B, 2026-08-05; downstream packages retain integration and archive evidence |
 | PC-06 | Declarative real-TOML registry, stable IDs, ordered writeover, validation, and current-definition update semantics (sections 5.1, 8, 8.2) | WP03 | WP04, WP08 | Registry/schema tests, contributor collision/writeover tests, stable-ID failure behavior, provenance fixtures. | Contracted |
 | PC-07 | Initial continental-US DEM/backend/representation/soil/land-use/climate/no-mod matrix and cell-size rules (sections 7.2, 7.5) | WP03 | WP05, WP06, WP07, WP11 | Descriptor tests plus Forest evidence for every exposed combination and privilege matrix. | Contracted |
-| PC-08 | Normative manifest-v1 shape, immutable creation chain, amendments, digest warning, and invalid/newer-manifest behavior (sections 6.1, 10) | WP02 | WP04, WP08, WP09, WP10 | Schema fixtures, builder/preset/fork manifests, structured warning and nonblocking authenticated header UI, update-disable behavior, restore compatibility. | Contracted |
+| PC-08 | Normative manifest-v1 shape, immutable creation chain, amendments, digest warning, and invalid/newer-manifest behavior (sections 6.1, 10) | WP02 | WP04, WP08, WP09, WP10 | Schema fixtures, builder/preset/fork manifests, structured warning and nonblocking authenticated header UI, update-disable behavior, restore compatibility. | Reader schema/degradation/warning foundation verified by WP02, 2026-08-26; writer, header UI, and lifecycle evidence retained by contributing packages |
 | PC-09 | Named-preset snapshot stability, query-override allowlist/provenance, and developer completeness responsibility (section 7.1) | WP04 | WP03, WP05, WP11 | All-preset validation, override rejection/materialization tests, unchanged Interfaces route/token tests. | Contracted |
 | PC-10 | Creation durability, readiness boundary, idempotency, replay/conflict, and cleanup (sections 7.4, 7.6, 11) | WP04 | WP06, WP07, WP11 | Success replay, concurrent/different-payload conflict, failed-init cleanup, no partial-ready project. | Contracted |
 | PC-11 | Capability IDs and enforcement for newly presented/submitted choices, with legacy persisted behavior explicitly unchanged (section 9) | WP05 | WP03, WP04, WP06, WP07 | Endpoint inventory and paired UI/server tests; before/after legacy routing characterization. | Contracted |
@@ -158,12 +203,15 @@ with one of the closure states in section 2.1.
 | PC-13 | Optional one-page Config Builder UX and accessibility while preserving Interfaces (section 7.4) | WP07 | WP05, WP06 | Frontend tests, keyboard/zoom/announcement evidence, duplicate-submit test, Interfaces regression. | Contracted |
 | PC-14 | User-initiated merge-only availability/preview/apply and no read-triggered writes (section 5.1) | WP08 | WP09 | Read-only check, complete preview, explicit enqueue, stale preview, merge-only and no-overwrite tests. | Contracted |
 | PC-15 | Update authorization, locking, recovery journal, concurrency, provenance, and RQ behavior (sections 5.1, 10-11, 13.1) | WP08 | WP09, WP10 | Owner/Admin/Root and public denial tests, worker reauth, crash-point recovery, queue graph/live tree evidence. | Contracted |
-| PC-16 | Top-level run-root authority and nested/PUP inheritance with legacy child-local preservation (section 6.4) | WP02 | WP09, WP10, WP11 | Resolver precedence tests and real nested create/reopen/fork/archive/restore evidence. | Contracted |
-| PC-17 | Fork/archive/restore/download consistency, update-lock coordination, and read-only/public behavior (section 12) | WP10 | WP08, WP11 | Concurrent update/copy tests, archive inspection, restore/reopen, public/read-only mutation denial. | Contracted |
+| PC-16 | Top-level run-root authority and nested/PUP inheritance with legacy child-local preservation (section 6.4) | WP02 | WP09, WP10, WP11 | Resolver precedence tests and real nested create/reopen/fork/archive/restore evidence. | Reader containment/precedence verified by WP02, 2026-08-26; UI and real lifecycle/Forest evidence retained downstream |
+| PC-17 | Fork/archive/restore/download consistency, update-lock coordination, and read-only/public behavior (section 12) | WP10 | WP08, WP11 | Concurrent update/copy tests, archive inspection, restore/reopen, public/read-only mutation denial. | Verified locally by WP10, 2026-08-26; deployed Forest lifecycle evidence retained by WP11 |
 | PC-18 | Reader-first mixed-version rollout, feature flags, Forest gate, and rollback proof (sections 14.2-14.5) | WP11 | WP01, WP02, WP03, WP04, WP05, WP06, WP07, WP08, WP09, WP10 | Deployed revision inventory, reader/writer flag evidence, complete Forest matrix, restart and rollback results. | Contracted |
 | PC-19 | Production rollout, observation, feature enablement, and alias-retirement handoff (section 14.4) | WP12 | WP11 | Production health/danger evidence, supported rollback inventory, operator runbook, accepted WP13 handoff. | Contracted |
 | PC-20 | Shared alias retirement with permanent project-local legacy support (sections 6.2, 14.4) | WP13 | WP01, WP11, WP12 | Production observation, rollback-target audit, shared symlink absence, project-local legacy reader test. | Contracted |
 | PC-21 | Required regression evidence, synchronized user/operator/developer documentation, and complete initiative closure (sections 15-16 and repository standards) | WP13 | Every package | Per-package test/doc handoffs plus exhaustive normative-checklist audit, final ledger with no unowned/unresolved row, and broad pre-handoff gates. | Contracted |
+| PC-22 | Comprehensive canonical locale/dependency graph and resolved dataset/method authority for Builder and run views (sections 7.2.2 and 9) | WP12B | WP05, WP07, WP11, WP12 | Token inventory, registry closure tests, generated capability matrix, paired UI/server tests, legacy characterization, and Forest provider evidence. | Contracted |
+| PC-23 | Five-profile Builder expansion, profile-owned data/station-database authority, Vanilla CLIGEN defaults, versioned locale-keyed schema-v3 description graphs, instance-local CLIGEN station resolution, and Canada global-data/Daymet policy (sections 7.2.1-7.2.2, 7.4, 8.2, 9) | WP12C | WP07, WP11, WP12 | Contract reviews, generated profile matrix, cross-locale and description-version rejection tests, historical v2 fixtures/update behavior, real concurrent station isolation, paired UI/API tests, and real Forest provider/create/reopen evidence for each new profile. | Contracted |
+| PC-24 | Effective `.cfg` locale authority for legacy run controls; valid schema-v1 preset climate/land-cover projection; corrected climate matrices and complete locale land-cover envelopes; explicit selection-preserving schema-v3 capability refresh; append-only structural identities; provenance acknowledgment; exact recovery/retry reconciliation; and reader-first rollback (sections 5.1, 6.2-6.3, 7.1-7.4, 8-11, 13.1, 14.6, 15) | WP12D | WP05, WP07, WP08, WP09, WP11, WP12 | Ratified contract checkpoints, 128-config inventory, exact Europe schema-v1 and five-profile matrix tests, land-cover default/envelope tests, paired UI/API/RQ enforcement, refresh/recovery/security/accessibility evidence, reader-floor commits, exact-host Forest refresh/reopen/rollback proof, and amendment-4/-5 scope comparisons repeated by WP12 before promotion. | Contracted |
 
 ## 6. Package Handoff Contract
 
@@ -180,7 +228,8 @@ performs the final no-unmapped/no-unresolved audit.
 
 Each package MUST publish a handoff artifact or tracker section containing:
 
-- exact commit/revision and feature-flag state;
+- exact feature-branch commit/revision, upstream tracking state, and feature-
+  flag state;
 - requirement IDs implemented, partially implemented, or affected;
 - API/file/schema outputs delivered to downstream packages;
 - test commands and summarized results;
@@ -199,6 +248,8 @@ remediation; it does not silently weaken downstream acceptance.
 Every package applies the repository-standard checks relevant to its changes.
 In addition:
 
+- Package scaffolds, trackers, ExecPlans, and handoffs MUST name and verify the
+  initiative branch as required by section 2.1.
 - Pure UI or UI-coupled packages MUST preserve contract-first sequencing and
   run frontend lint/tests plus targeted browser accessibility checks.
 - Rq-engine or queue-wiring packages MUST update
@@ -227,7 +278,13 @@ result. A failed row blocks only the affected feature flag or builder
 combination when isolation is safe; it blocks the whole promotion when reader,
 manifest, security, archive consistency, or rollback safety is affected.
 
-WP12 owns production cutover, observation, and the explicit retirement handoff.
+WP12 owns production cutover only after WP12D acceptance, observation, and the
+explicit retirement handoff. It MUST retain WP12D artifact
+`artifacts/20260828_scope_audit_correction.md` from package
+`20260827_project_config_run_ui_authority` and repeat its
+scope-versus-changed-files comparison before merge or production promotion.
+Any path outside the ratified boundary stops promotion until it is explicitly
+dispositioned and, when required, ratified.
 It MUST leave the shared `_defaults.toml` symlink present and provide WP13 with
 the deployed/rollback revision inventory and observation evidence.
 

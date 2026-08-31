@@ -7,10 +7,10 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-19 19:37 UTC
-**Current phase**: Phase 6 post-implementation observation planning
-**Last updated**: 2026-08-20 00:16 UTC
-**Next milestone**: Deploy the hardened path, observe 14–30 days or 20 EU
-runs, and record the closeout evidence
+**Current phase**: Phase 6 deployed observation and corrective hardening
+**Last updated**: 2026-08-28
+**Next milestone**: Validate and deploy the bounded ESDAC batch-failure
+diagnostic, then continue the 14–30 day or 20-run observation window
 **Security impact**: `none`
 **Dedicated security review**: `no`
 **Security artifact**: N/A
@@ -34,6 +34,11 @@ runs, and record the closeout evidence
 
 ### In Progress
 
+- [x] Reproduce Forest job `893db465-9012-4489-ab1e-06b8ec73f461` from its
+  persisted quality report and identify the missing batch-error context.
+- [ ] Complete and deploy the bounded batch-error/status diagnostic, then
+  confirm the next rejected ESDAC job exposes its reason without report-file
+  archaeology.
 - [x] Phase 6 readiness: implement the EU-specific runtime gate, complete QA
   review, and define the observation plan.
 - [x] Phase 6 implementation: carry the ESDAC marker and per-location quality
@@ -387,6 +392,50 @@ entry points require the locations they are about to process.
 - [x] No temporary calluses are retained.
 
 ## Progress Notes
+
+### 2026-08-28: Forest rejection observability correction
+
+**Agent/Contributor**: Codex
+
+**Incident evidence**: Forest RQ job
+`893db465-9012-4489-ab1e-06b8ec73f461` rejected all 21 locations for run
+`conjunctive-observatory`. The traceback listed only TopoAZ IDs. The durable
+`soils/soil_quality.json` showed the shared cause as
+`source.categorical.empty` on `fao90lev1`, with raw value
+`["24", "", "No information"]`.
+
+**Correction**: The batch exception, module log, and status channel now carry
+a bounded deterministic summary: at most 10 TopoAZ IDs, at most five grouped
+diagnostic signatures, occurrence counts, representative raw values, and the
+`soil_quality.json` filename. The persisted report retains every location and
+diagnostic. No scientific validation or output-commit behavior changes.
+
+**Interface conformance**: This is a restoration of the unchanged
+`docs/ui-docs/controller-contract.md` status-stream and polling-failure
+contract, not a new UI behavior. The shared controller already fetches
+`jobinfo.exc_info`, renders the terminal exception in the control Summary, and
+keeps the traceback in Details. A controller regression now proves the exact
+226-character ESDAC diagnostic reaches both surfaces without truncation or a
+second soil-specific presentation path (`14 passed`).
+
+**Signals**: Health means a rejected batch can be diagnosed from the RQ
+exception/status message and the named report agrees with its summary. Danger
+means an `unknown_quality_failure` summary, an absent report, disagreement
+between summary and report, or an unbounded error payload. The combined unit
+and real-raster regression set passed (`10 passed`); the real-raster case
+replayed the incident coordinate through the actual ESDAC batch builder and
+verified both the error summary and durable report. Deployment and live RQ
+recurrence confirmation remain pending.
+
+**Independent review**: The correctness review found one High and one Medium
+issue. The High finding was closed by narrowly catching Redis telemetry
+failures so they are logged but cannot replace `ESDACSoilBatchError` in RQ
+`exc_info`. The Medium finding was closed by grouping only error-severity
+diagnostics by code and field, counting all occurrences, and choosing the
+lexically first serialized raw value as the deterministic representative.
+Regressions cover both dispositions, and post-fix re-review reported no new
+findings. The complete EU soils suite passed (`42 passed`); frontend lint and
+all controller tests passed (`821 passed`).
 
 ### 2026-08-19 23:42 UTC: Phase 6 runtime gate and closeout evidence
 

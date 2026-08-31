@@ -20,11 +20,29 @@ def test_available_climate_datasets_default_locale():
     assert "eobs_modified" not in catalog_ids
 
 
+def test_amendment5_climate_datasets_have_builder_support_and_runtime_modes():
+    expected = {
+        "dep_nexrad": 13,
+        "future_cmip5": 3,
+        "user_defined_cli": 12,
+    }
+    for catalog_id, mode in expected.items():
+        dataset = get_climate_dataset(catalog_id)
+        assert dataset is not None
+        assert dataset.support_state == "builder_exposed"
+        assert dataset.climate_mode == mode
+    user_defined = get_climate_dataset("user_defined_cli")
+    assert user_defined is not None
+    assert user_defined.station_method_ids == ("user_defined",)
+    assert user_defined.upload_behaviour == "upload"
+
+
 def test_available_climate_datasets_ghcn_only_locale():
     datasets = available_climate_datasets(["au"], [])
     catalog_ids = {dataset.catalog_id for dataset in datasets}
-    # Only Vanilla + single-storm style options should remain for GHCN-only locales.
+    # Australia keeps its regional AGDC source alongside CLIGEN/storm inputs.
     assert catalog_ids == {
+        "agdc",
         "vanilla_cligen",
         "single_storm",
         "single_storm_batch",

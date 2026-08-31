@@ -117,6 +117,7 @@ __all__ = [
     'createProcessPoolExecutor',
     'get_config_dir',
     'get_default_config_path',
+    'resolve_defaults_path',
     'CaseSensitiveRawConfigParser',
     'get_configs',
     'get_legacy_configs',
@@ -157,6 +158,12 @@ from logging.handlers import QueueHandler, QueueListener
 import atexit
 from logging import FileHandler, StreamHandler
 from wepppy.nodb.status_messenger import StatusMessengerHandler
+from wepppy.nodb.project_config_reader import (
+    ProjectConfigStatus,
+    load_project_config,
+    log_project_config_warning,
+    project_config_reader_enabled,
+)
 
 
 class NoDbAlreadyLockedError(Exception):
@@ -691,7 +698,8 @@ def createProcessPoolExecutor(
 
 _thisdir = os.path.dirname(__file__)
 _config_dir = _join(_thisdir, 'configs')
-_default_config = _join(_config_dir, '_defaults.toml')
+_default_config = _join(_config_dir, '_defaults.cfg')
+_legacy_default_config = _join(_config_dir, '_defaults.toml')
 
 
 def get_config_dir() -> str:
@@ -701,8 +709,29 @@ def get_config_dir() -> str:
 
 
 def get_default_config_path() -> str:
-    """Return the default configuration seed path."""
+    """Return the canonical shared defaults path, with legacy fallback."""
 
+    return resolve_defaults_path()
+
+
+def resolve_defaults_path(wd: Optional[os.PathLike[str] | str] = None) -> str:
+    """Resolve defaults using project-local then shared compatibility order."""
+
+    candidates: list[Path] = []
+    if wd is not None:
+        project_root = Path(wd)
+        candidates.extend(
+            (project_root / '_defaults.cfg', project_root / '_defaults.toml')
+        )
+    candidates.extend((Path(_default_config), Path(_legacy_default_config)))
+
+    for candidate in candidates:
+        if candidate.exists():
+            return str(candidate)
+
+    # Preserve the existing explicit failure boundary: the caller opens the
+    # canonical path and receives FileNotFoundError when neither shared name
+    # exists.
     return _default_config
 
 
@@ -722,7 +751,11 @@ class CaseSensitiveRawConfigParser(RawConfigParser):
 def get_configs() -> list[str]:
     """List available controller configuration basenames (``*.cfg`` files)."""
 
-    return [Path(fn).stem for fn in glob(_join(_config_dir, '*.cfg'))]
+    return [
+        Path(fn).stem
+        for fn in glob(_join(_config_dir, '*.cfg'))
+        if Path(fn).stem != '_defaults'
+    ]
 
 
 def get_legacy_configs() -> list[str]:
@@ -885,15 +918,16 @@ class NoDbBase(object):
     def pup_relpath(self) -> Optional[str]:  # relative path to the parent or None
         if self.parent_wd is None:
             return None
-        
-        parent_wd = os.path.abspath(self.parent_wd)
-        wd = os.path.abspath(self.wd)
 
-        if wd.startswith(parent_wd):
-            relpath = os.path.relpath(wd, parent_wd)
-            return relpath
-        
-        return None
+        parent_wd = Path(self.parent_wd).resolve()
+        wd = Path(self.wd).resolve()
+        try:
+            relpath = wd.relative_to(parent_wd)
+        except ValueError:
+            return None
+        if relpath == Path('.'):
+            return None
+        return str(relpath)
 
     @property
     def is_omni_run(self) -> bool:
@@ -1050,6 +1084,8 @@ class NoDbBase(object):
         for attr in (
             'runid_logger',
             'logger',
+            '_project_config_status',
+            '_project_config_warning_keys',
             '_queue_handler',
             '_log_queue',
             '_queue_listener',
@@ -2453,6 +2489,31 @@ class NoDbBase(object):
 
     @property
     def _configparser(self):
+        if project_config_reader_enabled():
+            result = load_project_config(
+                wd=self.wd,
+                config_token=self._config,
+                parent_wd=self.parent_wd,
+                config_dir=_config_dir,
+                defaults_resolver=resolve_defaults_path,
+                parser_factory=CaseSensitiveRawConfigParser,
+                run_id=self.runid,
+            )
+            self._project_config_status = result.status
+            emitted = getattr(self, '_project_config_warning_keys', set())
+            for warning in result.status.warnings:
+                key = (
+                    warning.code,
+                    warning.config_filename,
+                    warning.declared_digest,
+                    warning.observed_digest,
+                )
+                if key not in emitted:
+                    log_project_config_warning(warning)
+                    emitted.add(key)
+            self._project_config_warning_keys = emitted
+            return result.parser
+
         _config = self._config.split('?')
 
         cfg = self._resolve_config_path(_config[0])
@@ -2479,6 +2540,16 @@ class NoDbBase(object):
 
         return parser
 
+    @property
+    def project_config_status(self) -> ProjectConfigStatus:
+        """Return read-only status from the latest project-config resolution."""
+
+        return getattr(
+            self,
+            '_project_config_status',
+            ProjectConfigStatus('legacy', self.wd, None, False, False),
+        )
+
     def _resolve_config_path(self, filename: str) -> str:
         path = Path(filename)
         if not path.suffix:
@@ -2498,10 +2569,7 @@ class NoDbBase(object):
         return str(fallback)
 
     def _resolve_defaults_path(self) -> str:
-        candidate = Path(self.wd) / Path(_default_config).name
-        if candidate.exists():
-            return str(candidate)
-        return _default_config
+        return resolve_defaults_path(self.wd)
 
     def _load_mods(self):
         config_parser = self._configparser

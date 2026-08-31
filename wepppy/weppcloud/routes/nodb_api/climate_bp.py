@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any, List, MutableMapping, Sequence
+import uuid
 
 from flask import Response
 
@@ -17,13 +18,275 @@ from wepppy.weppcloud.utils.helpers import (
 from .._common import *  # noqa: F401,F403
 
 from wepppy.climates.cligen import StationMeta
-from wepppy.nodb.core.climate import Climate, ClimateStationMode
+from wepppy.nodb.core.climate import (
+    Climate,
+    ClimateMode,
+    ClimateStationMode,
+    _assert_supported_climate_mode,
+)
+from wepppy.nodb.locales.climate_catalog import (
+    CLIMATE_SPATIAL_METHOD_RUNTIME,
+    CLIMATE_STATION_METHOD_RUNTIME,
+    get_climate_dataset,
+)
+from wepppy.nodb.project_config_capabilities import (
+    BuilderRegistryUnavailableError,
+    CapabilityAuthorityInvalidError,
+    LocaleAuthorityInvalidError,
+    capability_default,
+    climate_spatial_capability_modes,
+    climate_station_capability_modes,
+    resolve_run_capability_authority,
+)
 from wepppy.weppcloud.utils.cap_guard import requires_cap
 
 StationOption = MutableMapping[str, Any]
 
 
 climate_bp = Blueprint('climate', __name__)
+
+
+class _ClimateSelectionRejected(ValueError):
+    """Carry a stable client error from selection validation."""
+
+    def __init__(self, message: str, *, code: str, details: str) -> None:
+        super().__init__(details)
+        self.message = message
+        self.code = code
+        self.details = details
+
+
+def _run_authority_error(exc: Exception) -> Response:
+    if isinstance(exc, LocaleAuthorityInvalidError):
+        return error_factory(
+            "Run locale authority is invalid.",
+            status_code=409,
+            code="locale_authority_invalid",
+            details=str(exc),
+            error_id=uuid.uuid4().hex,
+        )
+    if isinstance(exc, CapabilityAuthorityInvalidError):
+        return error_factory(
+            "Project capability authority is invalid.",
+            status_code=409,
+            code="capability_authority_invalid",
+            details=str(exc),
+            error_id=uuid.uuid4().hex,
+        )
+    response = error_factory(
+        "Builder registry is unavailable.",
+        status_code=503,
+        code="builder_registry_error",
+        details=str(exc),
+        error_id=uuid.uuid4().hex,
+    )
+    response.headers["Retry-After"] = "5"
+    return response
+
+
+def _climate_selection_error(exc: _ClimateSelectionRejected) -> Response:
+    return error_factory(
+        exc.message,
+        status_code=400,
+        code=exc.code,
+        details=exc.details,
+    )
+
+
+def _resolve_valid_climate_selection(
+    climate: Climate,
+    *,
+    catalog_id: str | None,
+    mode: int | None,
+) -> Any | None:
+    """Resolve one capability-authorized catalog/mode pair without mutation."""
+
+    authority = resolve_run_capability_authority(climate).graph
+    if authority is not None and mode is not None and not catalog_id:
+        raise _ClimateSelectionRejected(
+            'Climate catalog id is required for this project.',
+            code='missing_capability_id',
+            details='catalog_id is required when selecting a schema-v2 climate dataset.',
+        )
+    if authority is not None and catalog_id and mode is None:
+        raise _ClimateSelectionRejected(
+            'Climate mode is required for this project.',
+            code='missing_capability_id',
+            details='mode is required when selecting a climate catalog id.',
+        )
+
+    dataset = None
+    if catalog_id:
+        dataset = climate._resolve_catalog_dataset(str(catalog_id), include_hidden=True)
+        if dataset is None:
+            raise _ClimateSelectionRejected(
+                'Climate dataset is not supported by this project.',
+                code='unsupported_capability',
+                details=f'Unsupported climate catalog id: {catalog_id}',
+            )
+        allowed_dataset_ids = (
+            set(authority.climate_datasets)
+            if authority is not None and hasattr(authority, 'climate_datasets')
+            else None
+        )
+        if (
+            allowed_dataset_ids is not None
+            and str(catalog_id) not in allowed_dataset_ids
+            and str(catalog_id) != str(climate.catalog_id or '')
+        ):
+            raise _ClimateSelectionRejected(
+                'Climate dataset is not supported by this project.',
+                code='unsupported_capability',
+                details=f'Unsupported capabilities.climate_datasets value: {catalog_id}',
+            )
+        if mode is not None and int(dataset.climate_mode) != mode:
+            raise _ClimateSelectionRejected(
+                'Climate mode does not match the selected dataset.',
+                code='capability_mismatch',
+                details=(
+                    f'Climate catalog {catalog_id} uses mode {int(dataset.climate_mode)}, '
+                    f'not submitted mode {mode}.'
+                ),
+            )
+    return dataset
+
+
+def _apply_climate_selection_pair(
+    climate: Climate,
+    *,
+    catalog_id: str,
+    mode: int,
+) -> None:
+    """Revalidate and persist a catalog/mode pair in one NoDb transaction."""
+
+    with climate.locked():
+        missing = object()
+        snapshot_mode = getattr(climate, '_climate_mode', missing)
+        snapshot_catalog_id = getattr(climate, '_catalog_id', missing)
+        dataset = _resolve_valid_climate_selection(
+            climate,
+            catalog_id=catalog_id,
+            mode=mode,
+        )
+        if dataset is None:
+            raise RuntimeError('Climate dataset disappeared during locked validation.')
+        mode_member = ClimateMode(mode)
+        _assert_supported_climate_mode(mode_member)
+        climate._validate_station_catalog_constraints(climate_mode=mode_member)
+        try:
+            climate._climate_mode = mode_member
+            climate._catalog_id = dataset.catalog_id
+        except (AttributeError, RuntimeError, TypeError, ValueError):
+            if snapshot_mode is missing:
+                if hasattr(climate, '_climate_mode'):
+                    delattr(climate, '_climate_mode')
+            else:
+                climate._climate_mode = snapshot_mode
+            if snapshot_catalog_id is missing:
+                if hasattr(climate, '_catalog_id'):
+                    delattr(climate, '_catalog_id')
+            else:
+                climate._catalog_id = snapshot_catalog_id
+            raise
+
+
+def _resolved_climate_dataset_id(climate: Climate) -> str | None:
+    current = str(climate.catalog_id or "").strip()
+    if current:
+        return current
+    authority = resolve_run_capability_authority(climate).graph
+    if authority is not None:
+        return authority.defaults["climate_dataset"]
+    return capability_default(climate, "climate_dataset")
+
+
+def _with_exact_current_climate_dataset(
+    climate: Climate,
+    payload: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    current_catalog_id = str(climate.catalog_id or "").strip()
+    if not current_catalog_id:
+        return payload
+    current_payload = next(
+        (
+            dict(item)
+            for item in payload
+            if item.get("catalog_id") == current_catalog_id
+        ),
+        None,
+    )
+    current_authorized = current_payload is not None
+    if current_payload is None:
+        current = get_climate_dataset(current_catalog_id)
+        if current is not None:
+            current_payload = current.to_mapping()
+    if current_payload is None:
+        return payload
+    station_mode = int(climate.climatestation_mode)
+    spatial_mode = int(climate.climate_spatialmode)
+    station_method = next(
+        (
+            key for key, value in CLIMATE_STATION_METHOD_RUNTIME.items()
+            if value == station_mode
+        ),
+        None,
+    )
+    spatial_method = next(
+        (
+            key for key, value in CLIMATE_SPATIAL_METHOD_RUNTIME.items()
+            if value == spatial_mode
+        ),
+        None,
+    )
+    authorized_station_modes = list(current_payload.get("station_modes") or [])
+    authorized_spatial_modes = list(current_payload.get("spatial_modes") or [])
+    current_payload.update({
+        "current_station_mode": station_mode,
+        "current_station_mode_authorized": (
+            current_authorized and station_mode in authorized_station_modes
+        ),
+        "disabled_station_modes": (
+            [station_mode]
+            if not current_authorized or station_mode not in authorized_station_modes
+            else []
+        ),
+        "current_spatial_mode": spatial_mode,
+        "current_spatial_mode_authorized": (
+            current_authorized and spatial_mode in authorized_spatial_modes
+        ),
+        "disabled_spatial_modes": (
+            [spatial_mode]
+            if not current_authorized or spatial_mode not in authorized_spatial_modes
+            else []
+        ),
+    })
+    if not current_authorized:
+        current_payload.update({
+            "station_modes": [station_mode],
+            "default_station_mode": station_mode,
+            "spatial_modes": [spatial_mode],
+            "default_spatial_mode": spatial_mode,
+            "current_selection_disabled": True,
+        })
+        if station_method is not None:
+            current_payload.update({
+                "station_method_ids": [station_method],
+                "default_station_method_id": station_method,
+            })
+        if spatial_method is not None:
+            current_payload.update({
+                "spatial_method_ids": [spatial_method],
+                "default_spatial_method_id": spatial_method,
+            })
+        return [*payload, current_payload]
+    if station_mode not in authorized_station_modes:
+        current_payload["station_modes"] = [*authorized_station_modes, station_mode]
+    if spatial_mode not in authorized_spatial_modes:
+        current_payload["spatial_modes"] = [*authorized_spatial_modes, spatial_mode]
+    return [
+        current_payload if item.get("catalog_id") == current_catalog_id else item
+        for item in payload
+    ]
 
 def _load_precip_frequency(cli_dir: str) -> dict[str, Any] | None:
     path = Path(cli_dir) / "wepp_cli_pds_mean_metric.csv"
@@ -189,6 +452,27 @@ def set_climatestation_mode(runid: str, config: str) -> Response:
 
     wd = get_wd(runid)
     climate = Climate.getInstance(wd)
+    try:
+        dataset_id = _resolved_climate_dataset_id(climate)
+        allowed_modes = (
+            climate_station_capability_modes(climate, dataset_id)
+            if dataset_id is not None
+            else None
+        )
+    except (LocaleAuthorityInvalidError, BuilderRegistryUnavailableError, CapabilityAuthorityInvalidError) as exc:
+        return _run_authority_error(exc)
+    current_mode = int(climate.climatestation_mode)
+    if (
+        allowed_modes is not None
+        and mode not in allowed_modes
+        and mode != current_mode
+    ):
+        return error_factory(
+            'Climate station method is not supported by this project.',
+            status_code=400,
+            code='unsupported_capability',
+            details=f'Unsupported climate station method: {mode}',
+        )
 
     try:
         climate.climatestation_mode = ClimateStationMode(int(mode))
@@ -264,12 +548,21 @@ def query_climate_has_observed(runid: str, config: str) -> Response:
 
 @climate_bp.route('/runs/<string:runid>/<config>/query/climate_catalog')
 @climate_bp.route('/runs/<string:runid>/<config>/query/climate_catalog/')
+@authorize_and_handle_with_exception_factory
 def query_climate_catalog(runid: str, config: str) -> Response:
     """Return the cataloged climate datasets for the active run."""
     wd = get_wd(runid)
     climate = Climate.getInstance(wd)
     try:
-        payload = climate.catalog_datasets_payload()
+        payload = _with_exact_current_climate_dataset(
+            climate, climate.catalog_datasets_payload()
+        )
+    except (
+        LocaleAuthorityInvalidError,
+        BuilderRegistryUnavailableError,
+        CapabilityAuthorityInvalidError,
+    ) as exc:
+        return _run_authority_error(exc)
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/climate_bp.py:262", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
@@ -316,7 +609,24 @@ def set_climate_mode(runid: str, config: str) -> Response:
     """
     payload = parse_request_payload(request)
     mode_value = payload.get('mode', None)
-    catalog_id = payload.get('catalog_id') or payload.get('climate_catalog_id')
+    catalog_id_value = payload.get('catalog_id')
+    catalog_alias_value = payload.get('climate_catalog_id')
+    if (
+        catalog_id_value not in (None, '')
+        and catalog_alias_value not in (None, '')
+        and str(catalog_id_value) != str(catalog_alias_value)
+    ):
+        return error_factory(
+            'Climate catalog aliases must identify the same dataset.',
+            status_code=400,
+            code='capability_mismatch',
+            details='catalog_id and climate_catalog_id disagree.',
+        )
+    catalog_id = (
+        catalog_id_value
+        if catalog_id_value not in (None, '')
+        else catalog_alias_value
+    )
 
     mode: int | None
     if mode_value is None or mode_value == '':
@@ -329,15 +639,32 @@ def set_climate_mode(runid: str, config: str) -> Response:
 
     wd = get_wd(runid)
     climate = Climate.getInstance(wd)
+    try:
+        dataset = _resolve_valid_climate_selection(
+            climate,
+            catalog_id=str(catalog_id) if catalog_id else None,
+            mode=mode,
+        )
+    except (LocaleAuthorityInvalidError, BuilderRegistryUnavailableError, CapabilityAuthorityInvalidError) as exc:
+        return _run_authority_error(exc)
+    except _ClimateSelectionRejected as exc:
+        return _climate_selection_error(exc)
 
     try:
-        if mode is not None:
+        if mode is not None and dataset is not None:
+            _apply_climate_selection_pair(
+                climate,
+                catalog_id=dataset.catalog_id,
+                mode=mode,
+            )
+        elif mode is not None:
             climate.climate_mode = mode
-        if catalog_id:
-            dataset = climate._resolve_catalog_dataset(str(catalog_id), include_hidden=True)
-            if dataset is None:
-                return exception_factory('Unknown climate catalog id', runid=runid)
+        elif dataset is not None:
             climate.catalog_id = dataset.catalog_id
+    except (LocaleAuthorityInvalidError, BuilderRegistryUnavailableError, CapabilityAuthorityInvalidError) as exc:
+        return _run_authority_error(exc)
+    except _ClimateSelectionRejected as exc:
+        return _climate_selection_error(exc)
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/climate_bp.py:327", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
@@ -367,6 +694,27 @@ def set_climate_spatialmode(runid: str, config: str) -> Response:
 
     wd = get_wd(runid)
     climate = Climate.getInstance(wd)
+    try:
+        dataset_id = _resolved_climate_dataset_id(climate)
+        allowed_modes = (
+            climate_spatial_capability_modes(climate, dataset_id)
+            if dataset_id is not None
+            else None
+        )
+    except (LocaleAuthorityInvalidError, BuilderRegistryUnavailableError, CapabilityAuthorityInvalidError) as exc:
+        return _run_authority_error(exc)
+    current_spatialmode = int(climate.climate_spatialmode)
+    if (
+        allowed_modes is not None
+        and spatialmode not in allowed_modes
+        and spatialmode != current_spatialmode
+    ):
+        return error_factory(
+            'Climate spatial method is not supported by this project.',
+            status_code=400,
+            code='unsupported_capability',
+            details=f'Unsupported climate spatial method: {spatialmode}',
+        )
 
     try:
         climate.climate_spatialmode = spatialmode

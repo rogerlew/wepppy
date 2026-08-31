@@ -181,3 +181,19 @@ Operational notes:
 - A restarting CAP with `Persistence readiness failed` indicates an unreadable,
   malformed, or unwritable ledger. Do not delete the ledger. Run the canonical
   deployment preflight/migration and preserve its checksum receipt.
+
+### Recurrence trigger
+
+Treat any new CAP user-facing failure, CAP restart-count increase, non-200
+`/cap/health`, persistence/secret error, or cross-browser CAPTCHA regression as
+a new hardening event. Capture the exact signature and valid runtime state,
+create a new incident/work package, and cite
+`docs/work-packages/20260825_cap_runtime_deploy_hardening/` as precedent. The
+new package must determine whether the existing runtime, migration, deployment,
+and recovery contracts covered the state; do not append new work to the closed
+historical package.
+
+Do not remove the CAP migration or recovery path merely because time passed.
+Removal requires a separately scoped callus-softening package with current
+production evidence and the review gates in
+`docs/standards/hardening-lifecycle-standard.md`.

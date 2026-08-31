@@ -364,6 +364,11 @@ status_panel(
 
 **Features:**
 - `.wc-table-wrapper` provides horizontal scroll on narrow screens
+- Shared Pure UI behavior detects actual horizontal overflow and only then
+  displays input instructions and provides a visibly focused keyboard region.
+  Fitting tables receive no hint or extra tab stop, and authored focus and
+  accessible-region semantics take precedence. The exact normative behavior is owned by
+  `docs/ui-docs/contracts/table-overflow-discoverability-contract.md`.
 - Alternating row backgrounds for scanability
 - `aria-current="page"` announces current page to screen readers
 

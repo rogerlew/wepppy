@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from enum import Enum
 from os.path import exists as _exists
 from typing import TYPE_CHECKING, Any
 
@@ -9,6 +10,13 @@ if TYPE_CHECKING:
     from wepppy.nodb.core.climate import Climate
 
 
+class _ParserAuthorization(Enum):
+    PERSISTED_CURRENT_SPATIAL = "persisted-current-spatial"
+
+
+PERSISTED_CURRENT_SPATIAL_CARVEOUT = _ParserAuthorization.PERSISTED_CURRENT_SPATIAL
+
+
 class ClimateInputParsingService:
     """Parse and validate incoming climate payloads for the ``Climate`` facade."""
 
@@ -16,8 +24,30 @@ class ClimateInputParsingService:
         # Keep parsing and state mutation under one lock scope so NoDb persists
         # once per parse_inputs() call.
         with climate.locked():
-            climate_mode = self._parse_core_inputs(climate, kwds)
-            self._parse_mode_specific_inputs(climate, kwds, climate_mode)
+            mutable_fields = {
+                "_catalog_id", "_orig_cli_fn", "_climate_mode", "_climate_spatialmode",
+                "_climatestation_mode",
+                "_input_years", "_climate_daily_temp_ds", "_precip_scaling_mode",
+                "_precip_scale_factor", "_precip_monthly_scale_factors",
+                "_precip_scaling_reference", "_precip_scale_factor_map",
+                "_observed_start_year", "_observed_end_year", "_future_start_year",
+                "_future_end_year", "_ss_storm_date", "_ss_design_storm_amount_inches",
+                "_ss_duration_of_storm_in_hours", "_ss_max_intensity_inches_per_hour",
+                "_ss_time_to_peak_intensity_pct", "_ss_batch",
+            }
+            snapshot = {
+                key: climate.__dict__[key]
+                for key in mutable_fields
+                if key in climate.__dict__
+            }
+            try:
+                climate_mode = self._parse_core_inputs(climate, kwds)
+                self._parse_mode_specific_inputs(climate, kwds, climate_mode)
+            except (AssertionError, KeyError, TypeError, ValueError):
+                for key in mutable_fields.difference(snapshot):
+                    climate.__dict__.pop(key, None)
+                climate.__dict__.update(snapshot)
+                raise
 
     def _parse_core_inputs(self, climate: "Climate", kwds: dict[str, Any]) -> Any:
         from wepppy.nodb.core.climate import (
@@ -25,6 +55,7 @@ class ClimateInputParsingService:
             ClimateMode,
             ClimatePrecipScalingMode,
             ClimateSpatialMode,
+            ClimateStationMode,
             _assert_supported_climate_mode,
         )
 
@@ -49,7 +80,15 @@ class ClimateInputParsingService:
             if climate_spatialmode in (None, "", "None"):
                 climate_spatialmode = catalog_dataset.default_spatial_mode
             spatialmode_value = int(climate_spatialmode)
-            if catalog_dataset.spatial_modes and spatialmode_value not in catalog_dataset.spatial_modes:
+            allows_persisted_current = (
+                kwds.get("_persisted_current_spatial_carveout")
+                is PERSISTED_CURRENT_SPATIAL_CARVEOUT
+            )
+            if (
+                catalog_dataset.spatial_modes
+                and spatialmode_value not in catalog_dataset.spatial_modes
+                and not allows_persisted_current
+            ):
                 raise ValueError(
                     f"Unsupported spatial mode {spatialmode_value} for catalog dataset {catalog_dataset.catalog_id}"
                 )
@@ -59,6 +98,11 @@ class ClimateInputParsingService:
 
         if climate_mode == ClimateMode.SingleStorm:
             climate_spatialmode = ClimateSpatialMode.Single
+
+        raw_station_mode = kwds.get("climatestation_mode")
+        climatestation_mode = None
+        if raw_station_mode not in (None, ""):
+            climatestation_mode = ClimateStationMode(int(raw_station_mode))
 
         input_years = kwds.get("input_years", None)
         if isint(input_years):
@@ -82,10 +126,13 @@ class ClimateInputParsingService:
             validator(
                 climate_mode=climate_mode,
                 climate_spatialmode=climate_spatialmode,
+                climatestation_mode=climatestation_mode,
             )
 
         climate._climate_mode = climate_mode
         climate._climate_spatialmode = climate_spatialmode
+        if climatestation_mode is not None:
+            climate._climatestation_mode = climatestation_mode
         climate._input_years = input_years
 
         climate._climate_daily_temp_ds = kwds.get("climate_daily_temp_ds", None)

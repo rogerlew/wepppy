@@ -8,12 +8,16 @@ import zipfile
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Mapping, Sequence
+from typing import Any, Callable, ContextManager, Mapping, Sequence
 
 _ARCHIVE_DISK_HEADROOM_RATIO = 0.02
 _ARCHIVE_MIN_HEADROOM_BYTES = 64 * 1024 * 1024
 _ARCHIVE_PER_FILE_OVERHEAD_BYTES = 1024
 _ARCHIVE_EXCLUDE_PREFIXES: tuple[str, ...] = ("archives",)
+_PROJECT_CONFIG_TRANSACTION_FILES = frozenset({
+    ".config-amendment.lock",
+    ".config-amendment.pending.json",
+})
 
 
 @dataclass(frozen=True)
@@ -26,6 +30,8 @@ class ArchiveRuntime:
     publish_status: Callable[[str, str], None]
     disk_usage: Callable[[str | os.PathLike[str]], Any]
     zip_file_cls: type[zipfile.ZipFile]
+    project_config_lifecycle_guard: Callable[[str | Path], ContextManager[None]]
+    project_config_authority_wd: Callable[[str], str]
 
 
 def _normalize_relpath(relpath: str) -> str:
@@ -41,6 +47,8 @@ def _is_archive_excluded_relpath(relpath: str) -> bool:
     rel = _normalize_relpath(relpath)
     if not rel:
         return False
+    if "/" not in rel and rel in _PROJECT_CONFIG_TRANSACTION_FILES:
+        return True
     return any(rel == prefix or rel.startswith(f"{prefix}/") for prefix in _ARCHIVE_EXCLUDE_PREFIXES)
 
 
@@ -253,64 +261,66 @@ def archive_rq(runid: str, comment: str | None, *, runtime: ArchiveRuntime) -> N
         wd = runtime.get_wd(runid)
         wd_path = Path(wd)
 
-        locked = [name for name, state in runtime.lock_statuses(runid).items() if name.endswith(".nodb") and state]
-        if locked:
-            raise RuntimeError("Cannot archive while files are locked: " + ", ".join(locked))
+        authority_wd = runtime.project_config_authority_wd(runid)
+        with runtime.project_config_lifecycle_guard(authority_wd):
+            locked = [name for name, state in runtime.lock_statuses(runid).items() if name.endswith(".nodb") and state]
+            if locked:
+                raise RuntimeError("Cannot archive while files are locked: " + ", ".join(locked))
 
-        payload_bytes, payload_file_count = _calculate_run_payload_bytes(wd_path)
-        required_bytes = _estimate_archive_required_bytes(payload_bytes, payload_file_count)
-        _assert_sufficient_disk_space(
-            wd_path,
-            required_bytes=required_bytes,
-            purpose=f"create archive for {runid}",
-            disk_usage=runtime.disk_usage,
-        )
+            payload_bytes, payload_file_count = _calculate_run_payload_bytes(wd_path)
+            required_bytes = _estimate_archive_required_bytes(payload_bytes, payload_file_count)
+            _assert_sufficient_disk_space(
+                wd_path,
+                required_bytes=required_bytes,
+                purpose=f"create archive for {runid}",
+                disk_usage=runtime.disk_usage,
+            )
 
-        archives_dir = os.path.join(wd, "archives")
-        os.makedirs(archives_dir, exist_ok=True)
+            archives_dir = os.path.join(wd, "archives")
+            os.makedirs(archives_dir, exist_ok=True)
 
-        timestamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
-        archive_name = f"{runid}.{timestamp}.zip"
-        archive_path = os.path.join(archives_dir, archive_name)
-        archive_path_tmp = archive_path + ".tmp"
+            timestamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+            archive_name = f"{runid}.{timestamp}.zip"
+            archive_path = os.path.join(archives_dir, archive_name)
+            archive_path_tmp = archive_path + ".tmp"
 
-        for candidate in (archive_path, archive_path_tmp):
-            if os.path.exists(candidate):
-                os.remove(candidate)
+            for candidate in (archive_path, archive_path_tmp):
+                if os.path.exists(candidate):
+                    os.remove(candidate)
 
-        runtime.publish_status(status_channel, f"Creating archive {archive_name}")
+            runtime.publish_status(status_channel, f"Creating archive {archive_name}")
 
-        comment_bytes = (comment or "").encode("utf-8")
+            comment_bytes = (comment or "").encode("utf-8")
 
-        with runtime.zip_file_cls(archive_path_tmp, mode="w", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as zf:
-            for root, dirs, files in os.walk(wd):
-                rel_root = os.path.relpath(root, wd)
-                if rel_root == ".":
-                    rel_root = ""
+            with runtime.zip_file_cls(archive_path_tmp, mode="w", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as zf:
+                for root, dirs, files in os.walk(wd):
+                    rel_root = os.path.relpath(root, wd)
+                    if rel_root == ".":
+                        rel_root = ""
 
-                if _is_archive_excluded_relpath(rel_root):
-                    dirs[:] = []
-                    continue
-
-                dirs[:] = [
-                    d
-                    for d in dirs
-                    if not _is_archive_excluded_relpath(os.path.relpath(os.path.join(root, d), wd))
-                ]
-
-                for filename in files:
-                    abs_path = os.path.join(root, filename)
-                    arcname = os.path.relpath(abs_path, wd)
-                    if _is_archive_excluded_relpath(arcname):
+                    if _is_archive_excluded_relpath(rel_root):
+                        dirs[:] = []
                         continue
 
-                    runtime.publish_status(status_channel, f"Adding {arcname}")
-                    zf.write(abs_path, arcname)
+                    dirs[:] = [
+                        d
+                        for d in dirs
+                        if not _is_archive_excluded_relpath(os.path.relpath(os.path.join(root, d), wd))
+                    ]
 
-            if comment_bytes:
-                zf.comment = comment_bytes
+                    for filename in files:
+                        abs_path = os.path.join(root, filename)
+                        arcname = os.path.relpath(abs_path, wd)
+                        if _is_archive_excluded_relpath(arcname):
+                            continue
 
-        os.replace(archive_path_tmp, archive_path)
+                        runtime.publish_status(status_channel, f"Adding {arcname}")
+                        zf.write(abs_path, arcname)
+
+                if comment_bytes:
+                    zf.comment = comment_bytes
+
+            os.replace(archive_path_tmp, archive_path)
         runtime.publish_status(status_channel, f"Archive ready: {archive_name}")
         runtime.publish_status(status_channel, f"rq:{job_id} COMPLETED {func_name}({runid})")
         runtime.publish_status(status_channel, f"rq:{job_id} TRIGGER   archive ARCHIVE_COMPLETE")
@@ -354,7 +364,8 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
 
         runtime.publish_status(status_channel, f"Preparing to restore from {archive_name}")
 
-        with runtime.zip_file_cls(archive_path, mode="r") as zf:
+        authority_wd = runtime.project_config_authority_wd(runid)
+        with runtime.project_config_lifecycle_guard(authority_wd), runtime.zip_file_cls(archive_path, mode="r") as zf:
             failed_member = zf.testzip()
             if failed_member:
                 raise zipfile.BadZipFile(
@@ -384,7 +395,7 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                 )
 
             for entry in sorted(wd.iterdir()):
-                if entry.name == "archives":
+                if entry.name == "archives" or entry.name == ".config-amendment.lock":
                     continue
 
                 try:

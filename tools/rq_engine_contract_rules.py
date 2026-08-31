@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 SUCCESS_STATUS_OVERRIDES: dict[tuple[str, str], int] = {
+    ("POST", "/api/project-config/builder/create"): 201,
     ("POST", "/api/runs/{runid}/{config}/agfields/build-subfields"): 202,
     ("POST", "/api/runs/{runid}/{config}/agfields/plant-database"): 202,
     ("POST", "/api/runs/{runid}/{config}/agfields/run-wepp"): 202,
@@ -13,10 +14,13 @@ SUCCESS_STATUS_OVERRIDES: dict[tuple[str, str], int] = {
     ("POST", "/api/runs/{runid}/{config}/geneva/prepare-hrus"): 202,
     ("POST", "/api/runs/{runid}/{config}/geneva/run-batch"): 202,
     ("POST", "/api/runs/{runid}/{config}/geneva/run-workflow"): 202,
+    ("POST", "/api/runs/{runid}/{config}/project-config/update-apply"): 202,
     ("POST", "/create/"): 303,
 }
 
 PATHS_REQUIRING_400 = {
+    "/api/project-config/builder/create",
+    "/api/project-config/builder/validate",
     "/api/culverts-wepp-batch/",
     "/api/culverts-wepp-batch/{batch_uuid}/retry/{point_id}",
     "/api/runs/{runid}/{config}/acquire-rap-ts",
@@ -43,6 +47,7 @@ PATHS_REQUIRING_400 = {
     "/api/runs/{runid}/{config}/geneva/run-workflow",
     "/api/runs/{runid}/{config}/post-dss-export-rq",
     "/api/runs/{runid}/{config}/prep-wepp-watershed",
+    "/api/runs/{runid}/{config}/project-config/update-apply",
     "/api/runs/{runid}/{config}/restore-archive",
     "/api/runs/{runid}/{config}/run-ash",
     "/api/runs/{runid}/{config}/run-debris-flow",
@@ -54,6 +59,8 @@ PATHS_REQUIRING_400 = {
     "/api/runs/{runid}/{config}/run-wepp-watershed",
     "/api/runs/{runid}/{config}/run-wepp-watershed-no-prep",
     "/api/runs/{runid}/{config}/run-swat-noprep",
+    "/api/runs/{runid}/{config}/set-landuse-db",
+    "/api/runs/{runid}/{config}/set-landuse-mode",
     "/api/runs/{runid}/{config}/set-outlet",
     "/api/runs/{runid}/{config}/swat/print-prt",
     "/api/runs/{runid}/{config}/swat/print-prt/meta",
@@ -102,13 +109,36 @@ PATHS_REQUIRING_404 = {
 }
 
 PATHS_REQUIRING_409 = {
+    "/api/project-config/builder/create",
+    "/api/project-config/builder/validate",
     "/api/runs/{runid}/{config}/agfields/clear-watershed",
     "/api/runs/{runid}/{config}/agfields/run-watershed",
+    "/api/runs/{runid}/{config}/build-climate",
+    "/api/runs/{runid}/{config}/build-landuse",
+    "/api/runs/{runid}/{config}/build-soils",
+    "/api/runs/{runid}/{config}/controllers",
+    "/api/runs/{runid}/{config}/controllers/{controller}/hints",
+    "/api/runs/{runid}/{config}/controllers/{controller}/schema",
+    "/api/runs/{runid}/{config}/controllers/{controller}/templates",
+    "/api/runs/{runid}/{config}/endpoints",
+    "/api/runs/{runid}/{config}/endpoints/{operation_id}/defaults",
+    "/api/runs/{runid}/{config}/endpoints/{operation_id}/errors",
+    "/api/runs/{runid}/{config}/endpoints/{operation_id}/schema",
     "/api/runs/{runid}/{config}/export/features",
     "/api/runs/{runid}/{config}/export/features/job/{job_id}/download",
     "/api/runs/{runid}/{config}/export/features/published/{profile}/download",
     "/api/runs/{runid}/{config}/bootstrap/checkout",
     "/api/runs/{runid}/{config}/bootstrap/enable",
+    "/api/runs/{runid}/{config}/project-config/update-apply",
+    "/api/runs/{runid}/{config}/project-config/update-preview",
+    "/api/runs/{runid}/{config}/geospatial-metadata",
+    "/api/runs/{runid}/{config}/outputs",
+    "/api/runs/{runid}/{config}/pipeline",
+    "/api/runs/{runid}/{config}/readiness",
+    "/api/runs/{runid}/{config}/run-wepp",
+    "/api/runs/{runid}/{config}/run-wepp-watershed",
+    "/api/runs/{runid}/{config}/set-landuse-db",
+    "/api/runs/{runid}/{config}/set-landuse-mode",
 }
 
 PATHS_REQUIRING_429 = {
@@ -130,6 +160,10 @@ PATHS_REQUIRING_428 = {
     "/api/runs/{runid}/{config}/landuse-map/save",
 }
 
+PATHS_REQUIRING_503 = {
+    "/api/project-config/builder/create",
+}
+
 
 def required_response_codes(method: str, path: str) -> set[int]:
     success_code = SUCCESS_STATUS_OVERRIDES.get((method, path), 200)
@@ -149,6 +183,8 @@ def required_response_codes(method: str, path: str) -> set[int]:
         required.add(415)
     if path in PATHS_REQUIRING_428:
         required.add(428)
+    if path in PATHS_REQUIRING_503:
+        required.add(503)
 
     return required
 

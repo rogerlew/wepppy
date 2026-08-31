@@ -76,7 +76,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "build_climate",
-    "source_lineno": 443,
+    "source_lineno": 712,
     "source_module": "wepppy/microservices/rq_engine/climate_routes.py"
   },
   {
@@ -220,7 +220,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "build_landuse",
-    "source_lineno": 564,
+    "source_lineno": 755,
     "source_module": "wepppy/microservices/rq_engine/landuse_routes.py"
   },
   {
@@ -230,7 +230,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "modify_landuse_mapping",
-    "source_lineno": 832,
+    "source_lineno": 1043,
     "source_module": "wepppy/microservices/rq_engine/landuse_routes.py"
   },
   {
@@ -302,6 +302,18 @@
     "source_function": "acquire_polaris",
     "source_lineno": 79,
     "source_module": "wepppy/microservices/rq_engine/polaris_routes.py"
+  },
+  {
+    "depends_on": [],
+    "enqueue_target": "<unknown>",
+    "job_meta_stage": null,
+    "notes": [
+      "missing enqueue target"
+    ],
+    "queue_name": "default",
+    "source_function": "update_apply",
+    "source_lineno": 692,
+    "source_module": "wepppy/microservices/rq_engine/project_config_update_routes.py"
   },
   {
     "depends_on": [],
@@ -382,7 +394,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "build_soils",
-    "source_lineno": 152,
+    "source_lineno": 234,
     "source_module": "wepppy/microservices/rq_engine/soils_routes.py"
   },
   {
@@ -412,7 +424,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "upload_cli",
-    "source_lineno": 145,
+    "source_lineno": 182,
     "source_module": "wepppy/microservices/rq_engine/upload_climate_routes.py"
   },
   {
@@ -602,7 +614,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_serial_subcatchment_tree",
-    "source_lineno": 764,
+    "source_lineno": 778,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -614,7 +626,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_serial_subcatchment_tree",
-    "source_lineno": 772,
+    "source_lineno": 786,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -624,7 +636,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 1581,
+    "source_lineno": 1595,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -634,7 +646,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 1597,
+    "source_lineno": 1611,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -646,7 +658,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 1605,
+    "source_lineno": 1619,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -658,7 +670,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fork_rq",
-    "source_lineno": 2941,
+    "source_lineno": 2956,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {

@@ -1,0 +1,17 @@
+schema_version = 1
+id = "ssurgo-gnatsgso-2025"
+kind = "soil"
+source_revision = "soils-database-adapter-v1:ssurgo-gnatsgso-2025"
+label = "SSURGO/gNATSGO 2025"
+description = "2025 SSURGO/gNATSGO soil database."
+owns = ["soils.ssurgo_db"]
+overrides = ["soils.ssurgo_db"]
+
+[constraints]
+requires = ["continental-us"]
+conflicts = []
+
+[[writes]]
+section = "soils"
+option = "ssurgo_db"
+value = "ssurgo/gNATSGSO/2025"

@@ -70,6 +70,11 @@ Module: `wepppy/microservices/rq_engine/fork_archive_routes.py`
 Module: `wepppy/rq/project_rq.py`
 
 - `fork_rq(runid, new_runid, undisturbify, skip_wepp_runs_output, skip_omni_scenarios_contrasts)`:
+  - Holds the source project's config amendment lock across the copy and first
+    recovers any pending config/manifest replacement. The destination therefore
+    receives one byte-consistent project-owned config and manifest; configuration
+    selection is not changed during fork. Composite Omni identities resolve this
+    lock to their top-level project authority.
   - Uses `rsync -a --stats` to clone the run directory without publishing per-file or per-progress output.
   - **Remediation in progress (SURF-04A):** after rsync, normalize contract-listed legacy Omni child symlinks to
     destination-relative shared inputs. Targets are derived from link roles, so

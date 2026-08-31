@@ -28,6 +28,7 @@
   - `StationMeta` holds catalog metadata (state, description, `tp5/tp6` thunderstorm params, annual precip) and can emit dictionaries (optionally embedding monthlies) or build ad‑hoc GHCN-based observed climates via `build_ghcn_daily_climate`.
 - **CligenStationsManager**
   - Loads the requested SQLite catalog (`2015`, `legacy`, `au`, `ghcn`, `chile`, `tenerife`) and exposes distance-first searches (`get_closest_station(s)`), heuristic searches that combine distance, elevation, and climatology, plus specialized heuristics for Europe (`get_stations_eu_heuristic_search`) and Australia (`get_stations_au_heuristic_search`).
+  - Resolves the SQLite file and matching PAR root per manager instance. Concurrent managers for Legacy, 2015, and GHCN therefore cannot mix metadata rows with another catalog's files.
   - `export_to_geojson`/`to_geojson` serialize the currently loaded stations, falling back to a temp dir when the requested destination is unwritable; the geojson test covers this path.
   - When an LFS asset is unavailable the manager falls back to `tests/neverland_.par` so developers still have something to interact with.
 - **ClimateFile & Prn helpers**

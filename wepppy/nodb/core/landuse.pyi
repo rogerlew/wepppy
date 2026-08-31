@@ -81,6 +81,12 @@ class Landuse(NoDbBase):
         mode: Any | None = None,
         single_selection: Any | None = None,
     ) -> None: ...
+    def apply_build_landuse_selection_updates(
+        self,
+        *,
+        nlcd_db: str | None = None,
+        mode: Any | None = None,
+    ) -> None: ...
     @property
     def single_man(self) -> Any | None: ...
     @property

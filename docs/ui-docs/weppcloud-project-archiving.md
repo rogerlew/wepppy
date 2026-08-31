@@ -49,8 +49,17 @@ Module: `wepppy/microservices/rq_engine/fork_archive_routes.py`
 ## RQ Jobs
 Module: `wepppy/rq/project_rq.py`
 
-- `archive_rq(runid, comment)`: creates a timestamped zip under `archives/`, excluding any paths under `archives/`, and streams `Adding ...` status lines. Emits `ARCHIVE_COMPLETE` or `ARCHIVE_FAILED` trigger events; also emits `EXCEPTION` status on failure. Always clears `archive_job_id` in Redis.
-- `restore_archive_rq(runid, archive_name)`: validates the zip, wipes everything except `archives/`, expands files with per-file status lines, and clears NoDb file cache. Emits `RESTORE_COMPLETE` or `RESTORE_FAILED` trigger events; emits `EXCEPTION` on failure. Always clears `archive_job_id` in Redis.
+- `archive_rq(runid, comment)`: acquires the project-config amendment lock,
+  recovers any pending amendment, and creates a timestamped zip under
+  `archives/`. It excludes archive output plus the config amendment lock and
+  pending journal, while preserving project-owned config and manifest bytes.
+  It streams `Adding ...` status lines, emits completion/failure triggers, and
+  always clears `archive_job_id` in Redis.
+- `restore_archive_rq(runid, archive_name)`: validates the zip, then holds the
+  same config lock while replacing project contents. It preserves the lock
+  inode, ignores transaction-only members from older archives, expands project
+  artifacts, and clears NoDb file cache. A restored owned config is used as-is;
+  a legacy archive retains shared-defaults fallback.
 
 ## Additional Details
 - Lock enforcement uses `wepppy.nodb.base.lock_statuses(runid)` to detect locked `.nodb` files before destructive operations.
@@ -59,4 +68,7 @@ Module: `wepppy/rq/project_rq.py`
   mutation request or archive/restore job is active.
 - Archive metadata comments are UTF-8 encoded and limited to 40 characters (zip comment constraint).
 - Restore keeps `archives/` intact and blocks path traversal by validating zip entry destinations.
+- Composite Omni run identities coordinate against the top-level project's
+  config authority. Invalid or newer project manifests do not block restore;
+  the reader reopens them in degraded mode with updates disabled.
 - Dedicated archive download service health is observable through `download.complete` logs with status, bytes, duration, range metadata, request id, and sanitized archive basename.

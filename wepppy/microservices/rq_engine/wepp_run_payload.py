@@ -5,6 +5,10 @@ from typing import Any
 
 from wepppy.nodb.core import Ron, Soils, Watershed, Wepp
 from wepppy.nodb.mods.swat import Swat
+from wepppy.nodb.project_config_capabilities import (
+    capability_authority,
+    runtime_value_allowed,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -384,6 +388,66 @@ def apply_wepp_run_payload(
     wepp = wepp_cls.getInstance(wd)
     soils = soils_cls.getInstance(wd)
     watershed = watershed_cls.getInstance(wd)
+
+    try:
+        authority = capability_authority(wepp)
+    except ValueError as exc:
+        raise WeppRunPayloadValidationError(
+            "Project capability authority is invalid.",
+            code="capability_authority_invalid",
+            details=str(exc),
+        ) from exc
+
+    requested_wepp_bin = controller_payload.get("wepp_bin")
+    if isinstance(requested_wepp_bin, (list, tuple, set)):
+        requested_wepp_bin = next(
+            (item for item in requested_wepp_bin if item not in (None, "")),
+            None,
+        )
+    current_wepp_bin = getattr(wepp, "wepp_bin", None)
+    if (
+        requested_wepp_bin not in (None, "")
+        and requested_wepp_bin != current_wepp_bin
+        and not runtime_value_allowed(wepp, "wepp_binaries", str(requested_wepp_bin))
+    ):
+        raise WeppRunPayloadValidationError(
+            "WEPP binary is not supported by this project.",
+            code="unsupported_capability",
+            details=f"Unsupported capabilities.wepp_binaries value: {requested_wepp_bin}",
+        )
+    if authority is not None:
+        backend_value = getattr(watershed, "delineation_backend", None)
+        backend_name = getattr(backend_value, "name", backend_value)
+        delineation_backend = str(backend_name or "").strip().lower()
+        if not delineation_backend:
+            delineation_backend = authority.defaults["delineation_backend"]
+        watershed_representation = (
+            "multiple-ofe" if bool(getattr(wepp, "multi_ofe", False)) else "single-ofe"
+        )
+        effective_wepp_bin = str(requested_wepp_bin or current_wepp_bin or "")
+        current_tuple = (
+            delineation_backend,
+            watershed_representation,
+            str(current_wepp_bin or ""),
+        )
+        effective_tuple = (
+            delineation_backend,
+            watershed_representation,
+            effective_wepp_bin,
+        )
+        if (
+            effective_wepp_bin
+            and effective_tuple != current_tuple
+            and "|".join(effective_tuple) not in authority.allowed_model_tuples
+        ):
+            raise WeppRunPayloadValidationError(
+                "WEPP model combination is not supported by this project.",
+                code="unsupported_capability",
+                details=(
+                    "Unsupported capabilities.allowed_model_tuples value: "
+                    + "|".join(effective_tuple)
+                ),
+            )
 
     clip_soils_update: bool | None = None
     clip_soils_depth_update: int | None = None

@@ -63,3 +63,20 @@ def test_url_for_run_preserves_non_omni_pup_query_param() -> None:
 
     assert url.startswith("/weppcloud/runs/decimal-pleasing/cfg/")
     assert "pup=" in url
+
+
+def test_url_for_run_builds_explicit_microservice_run_path() -> None:
+    app = _make_app()
+
+    with app.test_request_context("/"):
+        url = helpers.url_for_run(
+            "project-config/update-availability",
+            runid="assaultive-memoir",
+            config="disturbed9002",
+            prefix="/rq-engine/api",
+        )
+
+    assert url == (
+        "/rq-engine/api/runs/assaultive-memoir/disturbed9002/"
+        "project-config/update-availability"
+    )

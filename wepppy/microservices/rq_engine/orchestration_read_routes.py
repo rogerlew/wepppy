@@ -14,6 +14,14 @@ from fastapi.responses import JSONResponse
 
 from wepppy.nodb.core import Climate, Landuse, Ron, Soils, Watershed, Wepp
 from wepppy.nodb.mods.disturbed import Disturbed
+from wepppy.nodb.project_config_capabilities import (
+    BuilderRegistryUnavailableError,
+    LocaleAuthorityInvalidError,
+    RunCapabilityMode,
+    capability_authority,
+    capability_ids,
+    resolve_run_capability_authority,
+)
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.rq.job_info import get_wepppy_rq_jobs_info
 from wepppy.weppcloud.utils.auth_tokens import get_jwt_config
@@ -37,6 +45,144 @@ RUN_STATE_DOMAIN_ORCHESTRATION = "orchestration"
 
 class RunConfigMismatchError(ValueError):
     """Raised when a run exists but the requested config path token is not the run's config."""
+
+
+class CapabilityAuthorityInvalidError(ValueError):
+    """Raised when stored run capability authority cannot be used for orchestration reads."""
+
+    def __init__(
+        self,
+        details: str,
+        *,
+        code: str = "capability_authority_invalid",
+        status_code: int = 409,
+        message: str = "Project capability authority is invalid.",
+    ) -> None:
+        super().__init__(details)
+        self.code = code
+        self.status_code = status_code
+        self.message = message
+
+
+def _run_authority_error_response(exc: CapabilityAuthorityInvalidError) -> JSONResponse:
+    response = error_response(
+        exc.message,
+        status_code=exc.status_code,
+        code=exc.code,
+        details=str(exc),
+    )
+    if exc.status_code == 503:
+        response.headers["Retry-After"] = "5"
+    return response
+
+
+def _resolve_runtime_capability_graphs(config):
+    """Resolve live/stored domain authority and stored-only model authority."""
+
+    resolved = resolve_run_capability_authority(config)
+    model_graph = (
+        capability_authority(config)
+        if resolved.mode is RunCapabilityMode.STORED
+        else None
+    )
+    return (
+        resolved.graph,
+        model_graph,
+        getattr(resolved, "projected_domains", frozenset()),
+    )
+
+
+def _runtime_capabilities(
+    domain_graph,
+    model_graph,
+    projected_domains: frozenset[str] = frozenset(),
+) -> dict[str, Any] | None:
+    """Serialize domain discovery without broadening model authority."""
+
+    if domain_graph is None and model_graph is None:
+        return None
+    source = domain_graph if domain_graph is not None else model_graph
+    capabilities: dict[str, Any] = {
+        "schema_version": source.schema_version,
+        "provider_revision": source.provider_revision,
+        "defaults": {},
+    }
+    if domain_graph is not None:
+        capabilities.update({
+            "climate_datasets": list(domain_graph.climate_datasets),
+            "climate_station_methods": list(domain_graph.climate_station_methods),
+            "climate_spatial_methods": list(domain_graph.climate_spatial_methods),
+            "climate_station_methods_by_dataset": {
+                key: list(value)
+                for key, value in domain_graph.climate_station_methods_by_dataset.items()
+            },
+            "climate_spatial_methods_by_dataset": {
+                key: list(value)
+                for key, value in domain_graph.climate_spatial_methods_by_dataset.items()
+            },
+            "climate_station_defaults": dict(domain_graph.climate_station_defaults),
+            "climate_spatial_defaults": dict(domain_graph.climate_spatial_defaults),
+            "landuse_datasets": list(domain_graph.landuse_datasets),
+            "landuse_methods": list(domain_graph.landuse_methods),
+            "landuse_methods_by_dataset": {
+                key: list(value)
+                for key, value in domain_graph.landuse_methods_by_dataset.items()
+            },
+            "landuse_methods_by_representation": {
+                key: list(value)
+                for key, value in domain_graph.landuse_methods_by_representation.items()
+            },
+            "landuse_method_defaults": dict(domain_graph.landuse_method_defaults),
+            "soil_datasets": list(domain_graph.soil_datasets),
+            "soil_builders": list(domain_graph.soil_builders),
+            "soil_builders_by_dataset": {
+                key: list(value)
+                for key, value in domain_graph.soil_builders_by_dataset.items()
+            },
+            "soil_builder_defaults": dict(domain_graph.soil_builder_defaults),
+        })
+        capabilities["defaults"].update(domain_graph.defaults)
+        if projected_domains:
+            projected_default_keys: set[str] = set()
+            if "climate" in projected_domains:
+                projected_default_keys.update(
+                    {"climate_dataset", "climate_station_database"}
+                )
+            if "landuse" in projected_domains:
+                projected_default_keys.add("landuse_dataset")
+            if "soil" in projected_domains:
+                projected_default_keys.add("soil_dataset")
+            for key in tuple(capabilities["defaults"]):
+                if key not in projected_default_keys:
+                    capabilities["defaults"].pop(key)
+        if projected_domains and "soil" not in projected_domains:
+            for key in (
+                "soil_datasets",
+                "soil_builders",
+                "soil_builders_by_dataset",
+                "soil_builder_defaults",
+            ):
+                capabilities.pop(key, None)
+            capabilities["defaults"].pop("soil_dataset", None)
+    if model_graph is not None:
+        capabilities.update({
+            "delineation_backends": list(model_graph.delineation_backends),
+            "watershed_representations": list(model_graph.watershed_representations),
+            "wepp_binaries": list(model_graph.wepp_binaries),
+            "allowed_model_tuples": list(model_graph.allowed_model_tuples),
+        })
+        capabilities["defaults"].update({
+            key: model_graph.defaults[key]
+            for key in (
+                "delineation_backend", "watershed_representation", "wepp_binary",
+            )
+        })
+    else:
+        for key in (
+            "delineation_backend", "watershed_representation", "wepp_binary",
+        ):
+            capabilities["defaults"].pop(key, None)
+    return capabilities
 
 
 @dataclass(frozen=True)
@@ -646,6 +792,11 @@ def _load_runtime_state(runid: str, config: str) -> dict[str, Any]:
         "soils_built": bool(getattr(soils, "has_soils")),
         "soils_mode": _enum_name(getattr(soils, "mode")),
         "wepp_has_run": bool(getattr(wepp, "has_run")),
+        "delineation_backend": _enum_name(getattr(watershed, "delineation_backend", None)),
+        "watershed_representation": (
+            "multiple-ofe" if bool(getattr(landuse, "multi_ofe", False)) else "single-ofe"
+        ),
+        "wepp_binary": str(getattr(wepp, "wepp_bin", "") or "").strip() or None,
         "disturbed_enabled": disturbed_enabled,
         "disturbed_sbs_uploaded": bool(getattr(prep, "has_sbs")),
         "disturbed_sol_ver_selected": disturbed_sol_ver_selected,
@@ -700,11 +851,72 @@ def _load_runtime_state(runid: str, config: str) -> dict[str, Any]:
                 if ended_ts is not None:
                     step_completion_ts[step_id] = ended_ts
 
+    try:
+        domain_capability_graph, model_capability_graph, projected_domains = (
+            _resolve_runtime_capability_graphs(wepp)
+        )
+    except LocaleAuthorityInvalidError as exc:
+        raise CapabilityAuthorityInvalidError(
+            str(exc),
+            code="locale_authority_invalid",
+            message="Run locale authority is invalid.",
+        ) from exc
+    except BuilderRegistryUnavailableError as exc:
+        raise CapabilityAuthorityInvalidError(
+            str(exc),
+            code="builder_registry_error",
+            status_code=503,
+            message="Builder registry is unavailable.",
+        ) from exc
+    except ValueError as exc:
+        raise CapabilityAuthorityInvalidError(str(exc)) from exc
+    capabilities = _runtime_capabilities(
+        domain_capability_graph,
+        model_capability_graph,
+        projected_domains,
+    )
+    if capabilities is None or projected_domains:
+        discovered_v1: dict[str, list[str]] = {}
+        for axis in (
+            "climate_datasets",
+            "climate_station_methods",
+            "climate_spatial_methods",
+            "landuse_datasets",
+            "landuse_methods",
+            "soil_datasets",
+            "soil_builders",
+            "delineation_backends",
+            "watershed_representations",
+            "wepp_binaries",
+            "mods",
+        ):
+            try:
+                values = capability_ids(wepp, axis)
+            except ValueError as exc:
+                raise CapabilityAuthorityInvalidError(str(exc)) from exc
+            if values is not None:
+                raw = wepp.config_get_list("capabilities", axis, None)
+                assert isinstance(raw, (list, tuple))
+                discovered_v1[axis] = [str(item).strip() for item in raw]
+        if discovered_v1 and capabilities is None:
+            capabilities = {"schema_version": 1, **discovered_v1}
+        elif discovered_v1 and capabilities is not None:
+            for axis, values in discovered_v1.items():
+                if axis not in {
+                    "climate_datasets",
+                    "climate_station_methods",
+                    "climate_spatial_methods",
+                    "landuse_datasets",
+                    "landuse_methods",
+                }:
+                    capabilities[axis] = values
+
     return {
         "runid": runid,
         "config": config,
         "active_mods": active_mods,
         "states": states,
+        "capabilities": capabilities,
         "step_completion_ts": step_completion_ts,
         "step_job": step_job,
         "generated_at": _utc_now_iso(),
@@ -1275,6 +1487,11 @@ def _compute_payloads(runtime: Mapping[str, Any]) -> tuple[dict[str, Any], dict[
             "runid": runid,
             "config": config,
             "active_mods": list(active_mods),
+            **(
+                {"capabilities": runtime["capabilities"]}
+                if runtime.get("capabilities") is not None
+                else {}
+            ),
             "recent_invalidations": ordered_recent_invalidations,
             "steps": step_payloads,
         }
@@ -1293,6 +1510,11 @@ def _compute_payloads(runtime: Mapping[str, Any]) -> tuple[dict[str, Any], dict[
             "run": {
                 "has_dem": bool(states.get("has_dem", False)),
                 "mods": list(active_mods),
+                **(
+                    {"capabilities": runtime["capabilities"]}
+                    if runtime.get("capabilities") is not None
+                    else {}
+                ),
             },
             "watershed": {
                 "channels_built": bool(states.get("watershed_has_channels", False)),
@@ -1346,7 +1568,11 @@ def _compute_payloads(runtime: Mapping[str, Any]) -> tuple[dict[str, Any], dict[
     responses=agent_route_responses(
         success_code=200,
         success_description="Pipeline payload returned.",
-        extra={404: "Run not found. Returns the canonical error payload."},
+        extra={
+            404: "Run not found. Returns the canonical error payload.",
+            409: "Invalid stored project capability authority.",
+            503: "Builder registry is unavailable; retry after the advertised interval.",
+        },
     ),
 )
 def get_pipeline(runid: str, config: str, request: Request) -> JSONResponse:
@@ -1364,6 +1590,8 @@ def get_pipeline(runid: str, config: str, request: Request) -> JSONResponse:
         return error_response("Run not found", status_code=404, code="not_found")
     except RunConfigMismatchError:
         return error_response("Run not found", status_code=404, code="not_found")
+    except CapabilityAuthorityInvalidError as exc:
+        return _run_authority_error_response(exc)
     except Exception:  # broad-except: route boundary contract
         logger.exception("rq-engine pipeline state load failed")
         return error_response("Error Handling Request", status_code=500)
@@ -1388,7 +1616,11 @@ def get_pipeline(runid: str, config: str, request: Request) -> JSONResponse:
     responses=agent_route_responses(
         success_code=200,
         success_description="Readiness payload returned.",
-        extra={404: "Run not found. Returns the canonical error payload."},
+        extra={
+            404: "Run not found. Returns the canonical error payload.",
+            409: "Invalid stored project capability authority.",
+            503: "Builder registry is unavailable; retry after the advertised interval.",
+        },
     ),
 )
 def get_readiness(runid: str, config: str, request: Request) -> JSONResponse:
@@ -1406,6 +1638,8 @@ def get_readiness(runid: str, config: str, request: Request) -> JSONResponse:
         return error_response("Run not found", status_code=404, code="not_found")
     except RunConfigMismatchError:
         return error_response("Run not found", status_code=404, code="not_found")
+    except CapabilityAuthorityInvalidError as exc:
+        return _run_authority_error_response(exc)
     except Exception:  # broad-except: route boundary contract
         logger.exception("rq-engine readiness state load failed")
         return error_response("Error Handling Request", status_code=500)

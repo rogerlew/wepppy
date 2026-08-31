@@ -1,0 +1,17 @@
+schema_version = 1
+id = "topaz"
+kind = "delineation"
+source_revision = "watershed-backend-contract-v1:topaz"
+label = "TOPAZ"
+description = "TOPAZ watershed delineation backend."
+owns = ["watershed.delineation_backend"]
+overrides = ["watershed.delineation_backend"]
+
+[constraints]
+requires = ["continental-us"]
+conflicts = []
+
+[[writes]]
+section = "watershed"
+option = "delineation_backend"
+value = "topaz"

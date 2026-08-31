@@ -51,6 +51,7 @@ def soils_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
             return instance
 
     monkeypatch.setattr(soils_module, "Soils", DummySoils)
+    monkeypatch.setattr(soils_module, "soil_capability_modes", lambda soils: None)
 
     class DummyDisturbed:
         _instances: Dict[str, "DummyDisturbed"] = {}
@@ -95,6 +96,46 @@ def test_set_soil_mode_updates_controller(soils_client):
     assert controller.mode == soils_module.SoilsMode.UserDefined
     assert controller.single_selection == 404
     assert controller.single_dbselection == "DB1"
+
+
+def test_set_soil_mode_rejects_stored_graph_mismatch_before_mutation(
+    soils_client, monkeypatch: pytest.MonkeyPatch,
+):
+    client, DummySoils, _, run_dir = soils_client
+    monkeypatch.setattr(
+        soils_module,
+        "soil_capability_modes",
+        lambda soils: frozenset({int(soils_module.SoilsMode.Gridded)}),
+    )
+    controller = DummySoils.getInstance(run_dir)
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_soil_mode/",
+        json={"mode": int(soils_module.SoilsMode.Single)},
+    )
+
+    assert response.status_code >= 400
+    assert controller.mode == soils_module.SoilsMode.Gridded
+
+
+def test_set_soil_mode_allows_exact_current_mode_outside_authority(
+    soils_client, monkeypatch: pytest.MonkeyPatch,
+):
+    client, DummySoils, _, run_dir = soils_client
+    monkeypatch.setattr(
+        soils_module,
+        "soil_capability_modes",
+        lambda _soils: frozenset({int(soils_module.SoilsMode.Single)}),
+    )
+    controller = DummySoils.getInstance(run_dir)
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_soil_mode/",
+        json={"mode": int(controller.mode)},
+    )
+
+    assert response.status_code == 200
+    assert controller.mode == soils_module.SoilsMode.Gridded
 
 
 def test_task_set_soils_ksflag_sets_boolean(soils_client):

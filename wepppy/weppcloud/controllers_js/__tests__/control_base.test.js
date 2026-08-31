@@ -239,6 +239,42 @@ describe("controlBase job status error handling", () => {
         );
     });
 
+    test("poll failure surfaces the complete ESDAC batch reason in the interface", async () => {
+        const diagnostic = "ESDAC soil batch rejected 21 location(s) (TopoAZ: 73, 72, 22, 62, 23, 31, 52, 61, 91, 43, +11 more); reasons: source.categorical.empty[field=fao90lev1, count=21, raw_value=[\"24\",\"\",\"No information\"]]; report: soil_quality.json";
+        window.WCHttp = {
+            getJson: jest.fn().mockResolvedValue({
+                status: "failed",
+                exc_info: [
+                    "Traceback (most recent call last):",
+                    "  File \"/workdir/wepppy/wepppy/eu/soils/soil_build.py\", line 292, in build_esdac_soils",
+                    "    _raise_batch_error(rejected, report_path, status_channel=status_channel)",
+                    `wepppy.eu.soils.soil_build.ESDACSoilBatchError: ${diagnostic}`
+                ].join("\n")
+            }),
+            request: jest.fn(),
+            requestWithSessionToken: jest.fn()
+        };
+        base.rq_job_id = "job-esdac-rejected";
+        base.triggerEvent = jest.fn();
+        base.should_continue_polling = jest.fn(() => false);
+
+        base.handle_job_status_response(base, {
+            job_id: "job-esdac-rejected",
+            status: "failed"
+        });
+        await flushPromises();
+        await flushPromises();
+
+        expect(window.WCHttp.getJson).toHaveBeenCalledWith(
+            "/rq-engine/api/jobinfo/job-esdac-rejected",
+            { params: undefined }
+        );
+        expect(document.getElementById("info").textContent).toBe(diagnostic);
+        expect(document.getElementById("stacktrace").textContent).toContain(
+            `ESDACSoilBatchError: ${diagnostic}`
+        );
+    });
+
     test("renders controlled jobinfo guidance and error id without traceback", async () => {
         const guidance = "Increase the breach distance and build channels again.";
         window.WCHttp = {

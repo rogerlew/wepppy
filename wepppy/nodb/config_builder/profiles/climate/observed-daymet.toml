@@ -1,0 +1,13 @@
+schema_version = 1
+id = "observed_daymet"
+kind = "climate"
+source_revision = "climate-catalog-v1:observed_daymet"
+label = "Observed Daymet"
+description = "Observed Daymet climate source."
+owns = []
+overrides = []
+writes = []
+
+[constraints]
+requires = ["continental-us"]
+conflicts = []

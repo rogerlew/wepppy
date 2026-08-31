@@ -5,6 +5,10 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from wepppy.all_your_base.geo import RasterDatasetInterpolator
 from wepppy.climates.cligen import CligenStationsManager
+from wepppy.nodb.locales.climate_catalog import (
+    CLIMATE_SPATIAL_METHOD_RUNTIME,
+    CLIMATE_STATION_METHOD_RUNTIME,
+)
 
 if TYPE_CHECKING:
     from wepppy.nodb.core.climate import Climate
@@ -41,11 +45,50 @@ class ClimateStationCatalogService:
         return None
 
     def available_catalog_datasets(self, climate: "Climate", include_hidden: bool = False) -> List[Any]:
-        from wepppy.nodb.locales import available_climate_datasets
+        from wepppy.nodb.locales import available_climate_datasets, iter_climate_datasets
+        from wepppy.nodb.project_config_capabilities import (
+            resolve_run_capability_authority,
+        )
 
-        locales = climate.locales or ()
-        mods = climate.ron_instance.mods or []
-        datasets = available_climate_datasets(locales, mods, include_hidden=include_hidden)
+        run_authority = resolve_run_capability_authority(climate)
+        authority = run_authority.graph
+        if authority is None:
+            locales = run_authority.runtime_tokens or tuple(climate.locales or ())
+            mods = climate.ron_instance.mods or []
+            datasets = available_climate_datasets(locales, mods, include_hidden=include_hidden)
+            from wepppy.nodb.project_config_capabilities import capability_ids
+
+            allowed = capability_ids(climate, "climate_datasets")
+            if allowed is not None:
+                datasets = [dataset for dataset in datasets if dataset.catalog_id in allowed]
+        else:
+            by_id = {dataset.catalog_id: dataset for dataset in iter_climate_datasets()}
+            datasets = [
+                by_id[catalog_id]
+                for catalog_id in authority.climate_datasets
+                if catalog_id in by_id
+                and (include_hidden or by_id[catalog_id].ui_exposed)
+            ]
+            datasets = [
+                replace(
+                    dataset,
+                    station_modes=tuple(
+                        CLIMATE_STATION_METHOD_RUNTIME[item]
+                        for item in authority.climate_station_methods_by_dataset[dataset.catalog_id]
+                    ),
+                    default_station_mode=CLIMATE_STATION_METHOD_RUNTIME[
+                        authority.climate_station_defaults[dataset.catalog_id]
+                    ],
+                    spatial_modes=tuple(
+                        CLIMATE_SPATIAL_METHOD_RUNTIME[item]
+                        for item in authority.climate_spatial_methods_by_dataset[dataset.catalog_id]
+                    ),
+                    default_spatial_mode=CLIMATE_SPATIAL_METHOD_RUNTIME[
+                        authority.climate_spatial_defaults[dataset.catalog_id]
+                    ],
+                )
+                for dataset in datasets
+            ]
 
         constrained: List[Any] = []
         for dataset in datasets:
@@ -61,6 +104,9 @@ class ClimateStationCatalogService:
         include_hidden: bool = False,
     ) -> Optional[Any]:
         from wepppy.nodb.locales import get_climate_dataset
+        from wepppy.nodb.project_config_capabilities import (
+            resolve_run_capability_authority,
+        )
 
         if catalog_id is None:
             return None
@@ -69,9 +115,37 @@ class ClimateStationCatalogService:
         if dataset is None:
             return None
 
-        locales = climate.locales or ()
+        run_authority = resolve_run_capability_authority(climate)
+        authority = run_authority.graph
+        if authority is not None:
+            if dataset.catalog_id not in authority.climate_datasets:
+                # Compatibility carveout: an ordinary build may consume the
+                # exact persisted selection even after authority stops
+                # advertising it. Presentation still uses
+                # available_catalog_datasets(), so this does not make the
+                # omitted dataset selectable again.
+                if dataset.catalog_id != climate.catalog_id:
+                    return None
+                return self._apply_runtime_constraints(climate, dataset)
+            return next(
+                (
+                    item
+                    for item in self.available_catalog_datasets(
+                        climate, include_hidden=True
+                    )
+                    if item.catalog_id == dataset.catalog_id
+                ),
+                None,
+            )
+
+        locales = run_authority.runtime_tokens or tuple(climate.locales or ())
         mods = climate.ron_instance.mods or []
         if not dataset.is_allowed_for(locales, mods, include_hidden=include_hidden):
+            return None
+        from wepppy.nodb.project_config_capabilities import capability_ids
+
+        allowed = capability_ids(climate, "climate_datasets")
+        if allowed is not None and dataset.catalog_id not in allowed:
             return None
 
         return self._apply_runtime_constraints(climate, dataset)
@@ -123,9 +197,15 @@ class ClimateStationCatalogService:
         if climate.islocked() and climate._heuristic_stations is not None:
             return climate.heuristic_stations
 
-        if "eu" in climate.locales:
+        from wepppy.nodb.project_config_capabilities import (
+            resolve_run_capability_authority,
+        )
+
+        run_authority = resolve_run_capability_authority(climate)
+        effective_locales = run_authority.runtime_tokens or tuple(climate.locales or ())
+        if "eu" in effective_locales:
             return self.find_eu_heuristic_stations(climate, num_stations=num_stations)
-        if "au" in climate.locales:
+        if "au" in effective_locales:
             return self.find_au_heuristic_stations(climate, num_stations=num_stations)
 
         with climate.locked():

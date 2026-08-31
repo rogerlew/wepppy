@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from contextlib import nullcontext
+from contextlib import contextmanager, nullcontext
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -25,6 +25,81 @@ class _LoggerStub:
         return None
 
 
+def test_build_landuse_selection_pair_is_persisted_in_one_lock_scope() -> None:
+    landuse = Landuse.__new__(Landuse)
+    landuse._mode = LanduseMode.Gridded
+    landuse._nlcd_db = "nlcd/2019"
+    lock_entries: list[str] = []
+
+    @contextmanager
+    def locked():
+        lock_entries.append("enter")
+        yield
+        lock_entries.append("exit")
+
+    landuse.locked = locked
+    landuse.validate_landuse_mode_for_mofe = lambda mode=None: None
+
+    landuse.apply_build_landuse_selection_updates(
+        nlcd_db="eu/CORINE_LandCover/2018",
+        mode=LanduseMode.Single,
+    )
+
+    assert landuse._nlcd_db == "eu/CORINE_LandCover/2018"
+    assert landuse._mode == LanduseMode.Single
+    assert lock_entries == ["enter", "exit"]
+
+
+def test_stored_australia_runtime_token_overrides_incongruent_landuse_locales(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class _AustralianDispatch(Exception):
+        pass
+
+    class _LanduseStub:
+        wd = str(tmp_path)
+        lc_dir = str(tmp_path / "landuse")
+        _mode = LanduseMode.Gridded
+        locales = ["us"]
+        mods: list[str] = []
+        multi_ofe = False
+        watershed_instance = SimpleNamespace(is_abstracted=True)
+        logger = _LoggerStub()
+
+        @staticmethod
+        def islocked() -> bool:
+            return False
+
+        @staticmethod
+        def validate_landuse_mode_for_mofe(mode=None) -> None:
+            return None
+
+        @staticmethod
+        def clean() -> None:
+            return None
+
+        @staticmethod
+        def locked():
+            return nullcontext()
+
+        @staticmethod
+        def _build_lu10v5ua() -> None:
+            raise _AustralianDispatch()
+
+        @staticmethod
+        def _build_NLCD(*_args, **_kwargs) -> None:
+            pytest.fail("used incongruent Continental-US landuse dispatch")
+
+    monkeypatch.setattr(
+        "wepppy.nodb.project_config_capabilities.resolve_run_capability_authority",
+        lambda _landuse: SimpleNamespace(graph=object(), runtime_tokens=("au",)),
+    )
+
+    with pytest.raises(_AustralianDispatch):
+        Landuse.build(_LanduseStub())
+
+
 def test_build_multi_ofe_rejects_single_landuse_mode(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -39,7 +114,6 @@ def test_build_multi_ofe_rejects_single_landuse_mode(
     landuse.logger = _LoggerStub()
     landuse.locked = lambda: nullcontext()
     landuse.islocked = lambda: False
-
     call_log: list[str] = []
 
     def _build_single_selection() -> None:
@@ -96,6 +170,18 @@ def test_build_single_ofe_keeps_management_build_before_and_after_domlc_trigger(
     landuse.logger = _LoggerStub()
     landuse.locked = lambda: nullcontext()
     landuse.islocked = lambda: False
+    landuse.config_get_raw = (
+        lambda section, option, default=None: False
+        if (section, option) == ("config", "flattened")
+        else ["us"]
+        if (section, option) == ("general", "locales")
+        else default
+    )
+    landuse.config_get_list = (
+        lambda section, option, default=None: ["us"]
+        if (section, option) == ("general", "locales")
+        else default
+    )
 
     call_log: list[str] = []
     get_instance_calls: list[str] = []

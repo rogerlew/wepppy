@@ -35,3 +35,13 @@ def test_controlled_error_summary_separates_message_and_metadata() -> None:
     assert ".wc-control__error-meta dd" in css
     assert "overflow-wrap: anywhere" in css
     assert ".wc-control__error-id" in css
+
+
+def test_overflowing_table_wrapper_has_hint_and_focus_visible_contract() -> None:
+    css = UI_FOUNDATION_CSS.read_text(encoding="utf-8")
+
+    assert ".wc-table-overflow-hint" in css
+    assert 'data-wc-horizontal-overflow="true"' in css
+    assert ":focus-visible" in css
+    assert "outline: 2px solid var(--wc-color-accent)" in css
+    assert "outline-offset: 2px" in css

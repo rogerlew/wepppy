@@ -15,6 +15,7 @@ from os.path import exists as _exists
 from os.path import join as _join
 from os.path import split as _split
 from typing import Any, Callable, Optional, ParamSpec, TypeVar
+from urllib.parse import quote
 
 import redis
 from flask import Request, Response, abort, current_app, g, jsonify, make_response, request, url_for
@@ -426,6 +427,7 @@ def url_for_run(endpoint: str, **values: Any) -> str:
     """
 
     site_prefix = current_app.config.get('SITE_PREFIX', '') if current_app else ''
+    explicit_prefix = values.pop('prefix', None)
 
     def _apply_site_prefix(path: str) -> str:
         if path.startswith(('http://', 'https://')):
@@ -498,6 +500,20 @@ def url_for_run(endpoint: str, **values: Any) -> str:
         pup_relpath = getattr(g, 'pup_relpath', None)
         if pup_relpath and not omni_composite:
             values['pup'] = pup_relpath
+
+    if explicit_prefix is not None:
+        _require(['runid', 'config'])
+        prefix = str(explicit_prefix).strip().rstrip('/')
+        if prefix and not prefix.startswith('/'):
+            prefix = '/' + prefix
+        scoped_endpoint = endpoint.strip('/')
+        path = (
+            f"{prefix}/runs/{quote(str(values['runid']), safe='')}"
+            f"/{quote(str(values['config']), safe='')}/"
+        )
+        if scoped_endpoint:
+            path += scoped_endpoint
+        return path
 
     url = url_for(endpoint, **values)
     return _apply_site_prefix(url)

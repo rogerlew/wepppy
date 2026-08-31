@@ -122,6 +122,22 @@ Bundled modules remain global so legacy controllers can incrementally migrate aw
 
 ### Project Controller Contract (2024 refresh)
 
+`project_config_update.js` separately enhances the shared run header. It makes
+one authenticated, read-only availability request at page load, exposes a
+nonblocking digest warning, and loads the complete additive/capability preview
+only when the user opens the labelled modal. Additive updates send one reviewed
+trigger. An eligible schema-v3 Builder capability refresh shows the complete
+same-locale delta and keeps Apply disabled until the exact warning is checked;
+the checkbox resets on preview, error, close, and success. Apply sends the
+server-issued opaque preview ID and preview-shaped acknowledgment through
+`WCHttp.requestWithSessionToken`, prevents duplicate submission, and polls
+canonical rq-engine job status. Terminal failures recheck read-only availability
+to distinguish not-applied, committed/recovered, and indeterminate outcomes.
+Table and diagnostic content is rendered with `textContent`. Canonical server
+`details` and `error_id` remain visible in the modal, while availability-time
+registry failures remain visible in the run header rather than hiding the
+control. Authorization, acknowledgment, and freshness remain server-enforced.
+
 ### Climate Controller Reference (2024 helper migration)
 - **DOM contract**: templates expose `data-climate-action` hooks on radios, checkboxes, selects, and buttons plus `data-climate-section` / `data-precip-section` wrappers for conditional panels. Hidden inputs tagged with `data-climate-field` mirror controller state (`climate_catalog_id`, `climate_mode`). Catalog metadata ships via `<script id="climate_catalog_data" type="application/json">` so the controller can hydrate offline datasets without extra requests.
 - **Event surface**: `Climate.getInstance().events = WCEvents.useEventMap([...])` emits `climate:dataset:changed`, `climate:dataset:mode`, `climate:station:mode`, `climate:station:selected`, `climate:station:list:loading`, `climate:station:list:loaded`, `climate:build:started`, `climate:build:completed`, `climate:build:failed`, `climate:precip:mode`, `climate:upload:completed`, `climate:upload:failed`, `climate:gridmet:updated`, `climate:mxpt5:updated`, and `climate:silent-pass-observed-quality-guard:updated`. Subscribe instead of scraping DOM so status dashboards and RRED tooling stay decoupled.
@@ -216,6 +232,7 @@ Bundled modules remain global so legacy controllers can incrementally migrate aw
 ## Project Controller Modernization
 - `project.js` now consumes `WCDom`, `WCHttp`, and `WCForms` exclusively—jQuery hooks have been replaced with delegated listeners that target `data-project-field`, `data-project-toggle`, and `data-project-action` attributes in the header and power-user templates. Update templates with those attributes instead of inline `on*` handlers when expanding the control.
 - Command bar feedback and unitizer integration are still exposed through `Project.getInstance()`, but outbound network calls flow through `WCHttp.postForm`/`postJson`, enabling native Promise semantics and shared error handling.
+- The established run page owns its document title as the exact route `runid`. Project name and scenario saves update their fields, events, and command-bar feedback but must not mutate `document.title`.
 - Regression coverage lives in `controllers_js/__tests__/project.test.js`. Run it via `wctl run-npm test` (wrapper for `npm --prefix wepppy/weppcloud/static-src test`). The suite verifies name/scenario saves, debounce behavior, and failure handling so future refactors can rely on automated guardrails.
 - Style checks: `wctl run-npm lint` lints `controllers_js/**/*.js`; `wctl run-npm check` runs lint followed by Jest in one step.
 
@@ -382,6 +399,24 @@ Keep this document updated when the bundling flow or controller contract changes
 - **State and jobs**: `AgFields.bootstrap(context)` resolves `agfields_build_subfields`, `agfields_plantdb`, and `agfields_run_wepp`, attaches the `ag_fields` StatusStream channel, and hydrates every gate from `GET /rq-engine/api/runs/<run>/<config>/agfields/state`. Completion by stream or polling re-fetches that snapshot; HTTP 409 `agfields_job_active` responses retain the server-reported active job id.
 - **Transport and map**: reads and mutations use the rq-engine session bearer token helpers. “Show on Map” registers `AgFields Sub-fields` through `MapController.addGeoJsonOverlay` with an authenticated `loadJson` callback and refreshes the registered layer after a rebuild.
 - **Testing**: `controllers_js/__tests__/ag_fields.test.js` covers pattern detection, snapshot gating, dynamic bootstrap, uploads, mapping validation, conflicts, and overlay auth. Run `wctl run-npm test -- ag_fields`, the map suite, the full frontend gates, and rebuild `controllers-gl.js` before handoff.
+
+## Config Builder
+
+`config_builder.js` owns the authenticated, non-run-scoped Config Builder page.
+It fetches `/rq-engine/api/project-config/builder` through
+`WCHttp.getRqEngineToken()` and requires Builder description schema v2. The
+selected locale chooses both `capability_graphs_by_locale` and
+`components_by_locale`; those server descriptions are the sole source of DEM,
+soil, land-cover, climate, and CLIGEN station-database options and defaults.
+The controller posts the description version with exact validation and
+creation JSON. After description options/defaults settle, and after every user
+change, it automatically validates the complete proposal; only that latest
+validation response supplies review content or enables Create. A schema `409`
+disables selection controls while reloading, preserves compatible choices,
+applies registered defaults to invalidated choices, and automatically validates
+the refreshed proposal. The controller keeps one cryptographic idempotency key
+per validated creation attempt and ignores duplicate clicks while a request is
+active. Jest coverage lives in `controllers_js/__tests__/config_builder.test.js`.
 
 ## Run-Scoped URL Construction (slug-first, no `pup=` injection)
 

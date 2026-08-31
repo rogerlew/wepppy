@@ -12,8 +12,16 @@ from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse, Response
 from sqlalchemy.exc import SQLAlchemyError
 
+from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.config.secrets import get_secret
 from wepppy.nodb.core import Ron
+from wepppy.nodb.project_config_snapshot import (
+    PresetPolicyError,
+    PresetSnapshotError,
+    materialize_preset_snapshot,
+    preset_writer_enabled,
+    resolve_preset_snapshot,
+)
 from wepppy.weppcloud.routes.readme_md import ensure_readme_on_create
 from wepppy.weppcloud.utils import auth_tokens
 from wepppy.weppcloud.utils.helpers import get_wd
@@ -28,6 +36,14 @@ from wepppy.weppcloud.user_preferences import (
 )
 
 from .auth import AuthError, _check_revocation, _check_session_revocation, require_jwt
+from .creation_idempotency import (
+    CreationIdempotencyError,
+    CreationReservation,
+    build_creation_fingerprint,
+    complete_creation,
+    release_creation,
+    reserve_creation,
+)
 from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response
@@ -37,6 +53,9 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 RQ_CREATE_SCOPES = ["rq:enqueue"]
+_CREATE_TRANSPORT_FIELDS = frozenset(
+    {"cap_token", "config", "creation_idempotency_key", "rq_token"}
+)
 
 
 class CapVerificationError(RuntimeError):
@@ -217,7 +236,7 @@ def _merge_creation_values(
 def _collect_overrides(data: Mapping[str, Any]) -> str:
     overrides: list[str] = []
     for key, value in data.items():
-        if key in {"cap_token", "rq_token", "config"}:
+        if key in _CREATE_TRANSPORT_FIELDS:
             continue
         if value is None or value == "":
             continue
@@ -230,6 +249,35 @@ def _collect_overrides(data: Mapping[str, Any]) -> str:
         overrides.append(f"{key}={serialized}")
 
     return "&".join(overrides)
+
+
+def _durable_override_values(data: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        key: value
+        for key, value in data.items()
+        if key not in _CREATE_TRANSPORT_FIELDS and value not in (None, "")
+    }
+
+
+def _creation_idempotency_client() -> redis.Redis:
+    return redis.Redis(**redis_connection_kwargs(RedisDB.LOCK))
+
+
+def _creation_actor_scope(actor: object | None) -> str | None:
+    user_id = getattr(actor, "user_id", None)
+    return f"user:{user_id}" if isinstance(user_id, int) and user_id > 0 else None
+
+
+def _release_creation_safely(
+    client: object | None,
+    reservation: CreationReservation | None,
+) -> None:
+    if client is None or reservation is None:
+        return
+    try:
+        release_creation(client, reservation)  # type: ignore[arg-type]
+    except (CreationIdempotencyError, redis.RedisError):
+        logger.exception("rq-engine create idempotency release failed")
 
 
 @router.post(
@@ -363,6 +411,16 @@ async def create(request: Request) -> Response:
                 )
 
     merged_values = _merge_creation_values(payload, request.query_params)
+    if any(
+        str(key).strip().casefold() in {"general:locales", "general.locales"}
+        for key in merged_values
+    ):
+        return error_response(
+            "Locale is owned by the selected configuration.",
+            status_code=400,
+            code="project_config_validation_failed",
+            details="Legacy creation overrides may not set general.locales.",
+        )
     try:
         creation_values = validate_creation_values(merged_values)
     except PreferenceValidationError:
@@ -370,6 +428,15 @@ async def create(request: Request) -> Response:
             "unitizer:is_english must be exactly true or false.",
             status_code=400,
             code="invalid_unitizer_override",
+        )
+    try:
+        writer_enabled = preset_writer_enabled()
+    except ValueError as exc:
+        return error_response(
+            "Project configuration writer is misconfigured.",
+            status_code=500,
+            code="preset_writer_flag_invalid",
+            details=str(exc),
         )
 
     def _create_run_blocking() -> str | Response:
@@ -388,14 +455,74 @@ async def create(request: Request) -> Response:
                 log_exception=False,
             )
 
+        candidate = None
+        idempotency_client = None
+        reservation = None
         cfg = f"{config}.cfg"
-        overrides = _collect_overrides(creation_values)
-        if overrides:
-            cfg = f"{cfg}?{overrides}"
+        if writer_enabled:
+            idempotency_key = str(creation_values.get("creation_idempotency_key") or "").strip()
+            source_revision = str(os.getenv("RQ_ENGINE_DEPLOYMENT_REVISION") or "dev").strip() or "dev"
+            try:
+                candidate = resolve_preset_snapshot(
+                    config,
+                    _durable_override_values(creation_values),
+                    source_revision=source_revision,
+                )
+                fingerprint = build_creation_fingerprint(
+                    mode="preset",
+                    preset_id=config,
+                    normalized_overrides=candidate.normalized_overrides,
+                    registry_revision=source_revision,
+                )
+                idempotency_client = _creation_idempotency_client()
+                reservation = reserve_creation(
+                    idempotency_client,
+                    idempotency_key=idempotency_key,
+                    actor_scope=_creation_actor_scope(actor),
+                    fingerprint=fingerprint,
+                )
+            except (PresetPolicyError, PresetSnapshotError, CreationIdempotencyError) as exc:
+                return error_response(
+                    "Invalid project creation request.",
+                    status_code=400,
+                    code="project_config_validation_failed",
+                    details=str(exc),
+                )
+            except redis.RedisError:
+                error_id = _creation_error_id()
+                _log_creation_exception("rq-engine create idempotency unavailable", error_id)
+                return error_response(
+                    "Project creation is temporarily unavailable.",
+                    status_code=503,
+                    code="creation_idempotency_unavailable",
+                    error_id=error_id,
+                    log_exception=False,
+                )
+            if reservation.status == "conflict":
+                return error_response(
+                    "Creation idempotency key was already used for different input.",
+                    status_code=409,
+                    code="idempotency_key_conflict",
+                )
+            if reservation.status == "in_progress":
+                response = error_response(
+                    "Project creation is already in progress.",
+                    status_code=409,
+                    code="creation_in_progress",
+                )
+                response.headers["Retry-After"] = "2"
+                return response
+            if reservation.status == "replay":
+                return RedirectResponse(str(reservation.location), status_code=303)
+        else:
+            overrides = _collect_overrides(creation_values)
+            if overrides:
+                cfg = f"{cfg}?{overrides}"
 
         try:
             runid, wd = _create_run_dir(actor.email if actor else None)
         except PermissionError:
+            _release_creation_safely(idempotency_client, reservation)
             error_id = _creation_error_id()
             _log_creation_exception(
                 "rq-engine create run directory permission error",
@@ -408,6 +535,7 @@ async def create(request: Request) -> Response:
                 log_exception=False,
             )
         except Exception:  # broad-except: boundary contract
+            _release_creation_safely(idempotency_client, reservation)
             error_id = _creation_error_id()
             _log_creation_exception(
                 "rq-engine create run directory failed",
@@ -420,9 +548,33 @@ async def create(request: Request) -> Response:
                 log_exception=False,
             )
 
+        if candidate is not None:
+            try:
+                materialize_preset_snapshot(wd, candidate)
+            except PresetSnapshotError:
+                error_id = _creation_error_id()
+                _log_creation_exception(
+                    "rq-engine create project config materialization failed",
+                    error_id,
+                )
+                try:
+                    cleanup_new_run_directory(runid, wd)
+                except (OSError, redis.RedisError, RuntimeError, ValueError):
+                    logger.exception(
+                        "rq-engine create project config cleanup failed",
+                        extra={"error_id": error_id, "runid": runid},
+                    )
+                _release_creation_safely(idempotency_client, reservation)
+                return error_response(
+                    "Could not materialize project configuration.",
+                    code="project_config_materialization_failed",
+                    error_id=error_id,
+                    log_exception=False,
+                )
+
         try:
             Ron(wd, cfg)
-        except Exception:  # broad-except: boundary contract
+        except Exception as exc:  # broad-except: boundary contract
             error_id = _creation_error_id()
             _log_creation_exception("rq-engine create Ron failed", error_id)
             try:
@@ -432,9 +584,14 @@ async def create(request: Request) -> Response:
                     "rq-engine create Ron cleanup failed",
                     extra={"error_id": error_id, "runid": runid},
                 )
+            _release_creation_safely(idempotency_client, reservation)
             return error_response(
                 "Could not create run",
                 code="run_initialization_failed",
+                details=(
+                    f"Run initialization failed ({type(exc).__name__}). "
+                    f"Search server logs for error_id {error_id}."
+                ),
                 error_id=error_id,
                 log_exception=False,
             )
@@ -462,6 +619,7 @@ async def create(request: Request) -> Response:
                         "rq-engine create directory cleanup failed",
                         extra={"error_id": error_id, "runid": runid},
                     )
+                _release_creation_safely(idempotency_client, reservation)
                 return error_response(
                     "Could not register project ownership.",
                     code="run_ownership_failed",
@@ -473,6 +631,32 @@ async def create(request: Request) -> Response:
             ensure_readme_on_create(runid, config)
         except Exception:  # broad-except: boundary contract
             logger.exception("rq-engine create README failed")
+
+        if reservation is not None and idempotency_client is not None:
+            try:
+                complete_creation(
+                    idempotency_client,
+                    reservation,
+                    run_id=runid,
+                    location=_run_url(runid, config),
+                )
+            except (CreationIdempotencyError, redis.RedisError):
+                error_id = _creation_error_id()
+                _log_creation_exception("rq-engine create idempotency completion failed", error_id)
+                try:
+                    cleanup_new_run_directory(runid, wd)
+                except (OSError, redis.RedisError, RuntimeError, ValueError):
+                    logger.exception(
+                        "rq-engine create idempotency cleanup failed",
+                        extra={"error_id": error_id, "runid": runid},
+                    )
+                _release_creation_safely(idempotency_client, reservation)
+                return error_response(
+                    "Could not complete project creation.",
+                    code="creation_idempotency_failed",
+                    error_id=error_id,
+                    log_exception=False,
+                )
 
         return runid
 

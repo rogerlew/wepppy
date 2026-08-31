@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
+import logging
 from pathlib import Path
 from typing import Any
 
@@ -10,6 +11,7 @@ from wepppy.eu.soils.esdac.quality import SoilQualityResult
 from wepppy.soils.ssurgo import SoilSummary
 
 NCPU: int
+logger: logging.Logger
 
 @dataclass(frozen=True, slots=True)
 class SoilBuildWorkerResult:

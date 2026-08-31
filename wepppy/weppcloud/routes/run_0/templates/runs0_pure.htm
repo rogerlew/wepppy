@@ -1,6 +1,6 @@
 {% extends "base_pure.htm" %}
 
-{% block title %}{{ ron.configname }}{% if ron.name %} - {{ ron.name }}{% endif %}{% endblock %}
+{% block title %}{{ runid }}{% endblock %}
 
 {#
   Preflight TOC Navigation:
@@ -11,6 +11,7 @@
 
 {% set mods_list = ron.mods or [] %}
 {% set hide_landuse_wepp = 'rhem' in mods_list and not playwright_load_all %}
+{% set show_landuse_modify = ron.enable_landuse_change %}
 {% set disabled_controllers = ['landuse', 'landuseModify', 'wepp'] if hide_landuse_wepp else [] %}
 
 {% set show_rangeland_cover = show_rangeland_cover if show_rangeland_cover is defined else ('rangeland_cover' in mods_list or playwright_load_all) %}

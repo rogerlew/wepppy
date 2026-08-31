@@ -69,6 +69,7 @@ __all__ = [
     "wepp_bin_dir",
     "linux_wepp_bin_opts",
     "get_linux_wepp_bin_opts",
+    "get_linux_wepp_bin_role_paths",
     "infer_pass_family_for_wepp_bin",
     "resolve_pass_family_for_wepp_bin",
     "make_flowpath_run",
@@ -139,6 +140,14 @@ _DSTATE_WATCHDOG_MAX_EVENTS_DEFAULT = 3
 def get_linux_wepp_bin_opts():
     """Return the current linux WEPP binaries available on disk."""
     return _compute_linux_wepp_bin_opts()
+
+
+def get_linux_wepp_bin_role_paths(wepp_bin):
+    """Return the runner-selected watershed and hillslope paths for a binary ID."""
+    return (
+        _select_wepp_binary_path(wepp_bin, prefer_hill=False),
+        _select_wepp_binary_path(wepp_bin, prefer_hill=True),
+    )
 
 
 def infer_pass_family_for_wepp_bin(wepp_bin=None):
@@ -628,15 +637,19 @@ def _assert_binary_runtime_provenance(binary_path):
 
 
 def _resolve_wepp_cmd(wepp_bin, *, prefer_hill):
+    selected_binary = _select_wepp_binary_path(wepp_bin, prefer_hill=prefer_hill)
+    _assert_binary_runtime_provenance(selected_binary)
+    return [selected_binary]
+
+
+def _select_wepp_binary_path(wepp_bin, *, prefer_hill):
     if wepp_bin is not None:
         hill_candidate = os.path.abspath(_join(wepp_bin_dir, f"{wepp_bin}_hill"))
         plain_candidate = os.path.abspath(_join(wepp_bin_dir, wepp_bin))
         selected_binary = hill_candidate if prefer_hill and _exists(hill_candidate) else plain_candidate
     else:
         selected_binary = os.path.abspath(_wepp)
-
-    _assert_binary_runtime_provenance(selected_binary)
-    return [selected_binary]
+    return selected_binary
 
 
 def _env_float_or_default(name, default, *, min_value=None):

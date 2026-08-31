@@ -248,6 +248,31 @@ def test_authorize_user_claims_allows_owner_match_by_email(monkeypatch: pytest.M
     auth._authorize_user_claims({"roles": [], "sub": "55", "email": "owner@example.com"}, "run-1")
 
 
+def test_authorize_run_mutation_requires_owner_even_when_run_is_public(monkeypatch: pytest.MonkeyPatch) -> None:
+    class Owner:
+        id = 42
+        email = "owner@example.com"
+
+    monkeypatch.setattr(auth, "get_run_owners_lazy", lambda _runid: [Owner()])
+    auth.authorize_run_mutation({"token_class": "user", "sub": "42"}, "run-1")
+
+    with pytest.raises(auth.AuthError) as exc_info:
+        auth.authorize_run_mutation({"token_class": "user", "sub": "99"}, "run-1")
+    assert exc_info.value.code == "forbidden"
+
+
+def test_authorize_run_mutation_allows_admin_actor_and_rejects_session(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(auth, "get_run_owners_lazy", lambda _runid: (_ for _ in ()).throw(AssertionError("unused")))
+    auth.authorize_run_mutation({"token_class": "user", "user_id": 5, "roles": ["admin"]}, "run-1")
+    with pytest.raises(auth.AuthError, match="authenticated user"):
+        auth.authorize_run_mutation({"token_class": "session", "session_id": "sid"}, "run-1")
+
+
+def test_sanitized_user_actor_retains_only_worker_relevant_privileged_roles() -> None:
+    actor = auth._sanitize_auth_actor({"token_class": "user", "sub": "42", "roles": ["User", "Admin", "PowerUser"]})
+    assert actor == {"token_class": "user", "user_id": 42, "roles": ["admin"]}
+
+
 def test_authorize_user_claims_rejects_non_owner_private_run(monkeypatch: pytest.MonkeyPatch) -> None:
     class Owner:
         id = 77
@@ -364,6 +389,15 @@ def test_authorize_user_claims_allows_public_batch_run_without_owners(
     ("claims", "expected"),
     [
         ({"token_class": "user", "sub": "42"}, {"token_class": "user", "user_id": 42}),
+        (
+            {
+                "token_class": "user",
+                "sub": "opaque-security-subject",
+                "user_id": 43,
+                "roles": ["Admin", "PowerUser"],
+            },
+            {"token_class": "user", "user_id": 43, "roles": ["admin"]},
+        ),
         (
             {"token_class": "session", "session_id": "sid-1"},
             {"token_class": "session", "session_id": "sid-1"},

@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-08-22T07:12:44Z",
+  "generated_at_utc": "2026-08-31T16:35:45Z",
   "mode": "observe-only",
   "base_ref": "origin/master",
   "thresholds": {
@@ -37,22 +37,22 @@
   },
   "overall": {
     "python_prod_file_sloc": {
-      "count": 959.0,
-      "p50": 127.0,
-      "p75": 315.0,
-      "p90": 680.8,
-      "p95": 989.8,
-      "p99": 2050.02,
+      "count": 982.0,
+      "p50": 130.5,
+      "p75": 334.5,
+      "p90": 698.4,
+      "p95": 1007.05,
+      "p99": 2140.13,
       "max": 5697.0
     },
     "python_prod_max_function_len": {
-      "count": 777.0,
-      "p50": 60.0,
-      "p75": 110.0,
-      "p90": 182.0,
-      "p95": 241.2,
-      "p99": 378.72,
-      "max": 2126.0
+      "count": 799.0,
+      "p50": 62.0,
+      "p75": 112.5,
+      "p90": 184.0,
+      "p95": 243.5,
+      "p99": 389.04,
+      "max": 2233.0
     },
     "python_prod_max_cc": {
       "count": 0,
@@ -64,21 +64,21 @@
       "max": 0.0
     },
     "js_source_file_sloc": {
-      "count": 201.0,
-      "p50": 252.0,
-      "p75": 572.0,
-      "p90": 1238.0,
-      "p95": 1586.0,
-      "p99": 2426.0,
+      "count": 207.0,
+      "p50": 255.0,
+      "p75": 577.0,
+      "p90": 1224.8,
+      "p95": 1598.6,
+      "p99": 2433.58,
       "max": 2835.0
     },
     "js_source_max_cc": {
-      "count": 201.0,
+      "count": 207.0,
       "p50": 6.0,
-      "p75": 21.0,
+      "p75": 20.0,
       "p90": 33.0,
-      "p95": 44.0,
-      "p99": 86.0,
+      "p95": 43.4,
+      "p99": 85.7,
       "max": 155.0
     }
   },
@@ -90,11 +90,11 @@
       },
       {
         "path": "wepppy/microservices/rq_engine/schema_defaults_routes.py",
-        "value": 4242.0
+        "value": 5274.0
       },
       {
         "path": "tests/weppcloud/routes/test_pure_controls_render.py",
-        "value": 3549.0
+        "value": 4086.0
       },
       {
         "path": "tests/nodb/mods/test_features_export_service.py",
@@ -114,7 +114,7 @@
       },
       {
         "path": "wepppy/rq/project_rq.py",
-        "value": 2695.0
+        "value": 2796.0
       },
       {
         "path": "wepppy/wepp/management/managements.py",
@@ -125,54 +125,54 @@
         "value": 2430.0
       },
       {
+        "path": "wepppy/nodb/base.py",
+        "value": 2361.0
+      },
+      {
+        "path": "wepppy/weppcloud/routes/run_0/run_0_bp.py",
+        "value": 2349.0
+      },
+      {
         "path": "wepppy/nodb/mods/disturbed/disturbed.py",
-        "value": 2345.0
+        "value": 2338.0
       },
       {
         "path": "wepppy/climates/cligen/cligen.py",
-        "value": 2318.0
+        "value": 2324.0
       },
       {
-        "path": "wepppy/nodb/base.py",
-        "value": 2221.0
+        "path": "tests/microservices/test_rq_engine_landuse_routes.py",
+        "value": 2183.0
       },
       {
         "path": "wepppy/wepp/fuzzing/single_ofe_stratified_campaign.py",
         "value": 2097.0
       },
       {
+        "path": "tests/rq/test_project_rq_mutation_guards.py",
+        "value": 2055.0
+      },
+      {
         "path": "wepppy/soils/ssurgo/ssurgo.py",
         "value": 2016.0
       },
       {
-        "path": "tests/rq/test_project_rq_mutation_guards.py",
-        "value": 2006.0
-      },
-      {
-        "path": "wepppy/weppcloud/routes/run_0/run_0_bp.py",
-        "value": 1999.0
+        "path": "tests/rq/test_project_rq_fork.py",
+        "value": 2012.0
       },
       {
         "path": "wepppy/nodb/core/soils.py",
-        "value": 1959.0
-      },
-      {
-        "path": "tests/microservices/test_browse_auth_routes.py",
-        "value": 1951.0
-      },
-      {
-        "path": "tests/rq/test_project_rq_fork.py",
-        "value": 1921.0
+        "value": 1964.0
       }
     ],
     "python_max_function_len_top20": [
       {
-        "path": "wepppy/nodb/mods/roads/roads.py",
-        "value": 2126.0
+        "path": "wepppy/microservices/rq_engine/schema_defaults_routes.py",
+        "value": 2233.0
       },
       {
-        "path": "wepppy/microservices/rq_engine/schema_defaults_routes.py",
-        "value": 2073.0
+        "path": "wepppy/nodb/mods/roads/roads.py",
+        "value": 2126.0
       },
       {
         "path": "tests/nodb/mods/disturbed/live_e2e/runbook.py",
@@ -181,6 +181,10 @@
       {
         "path": "wepppy/weppcloud/routes/ui_showcase/ui_showcase_bp.py",
         "value": 631.0
+      },
+      {
+        "path": "wepppy/microservices/rq_engine/fork_archive_routes.py",
+        "value": 613.0
       },
       {
         "path": "wepppy/nodb/mods/path_ce/data_prep.py",
@@ -192,7 +196,11 @@
       },
       {
         "path": "wepppy/microservices/rq_engine/orchestration_read_routes.py",
-        "value": 460.0
+        "value": 470.0
+      },
+      {
+        "path": "wepppy/weppcloud/routes/run_0/run_0_bp.py",
+        "value": 391.0
       },
       {
         "path": "wepppy/eu/soils/esdac/esdac.py",
@@ -207,16 +215,20 @@
         "value": 378.0
       },
       {
+        "path": "wepppy/microservices/rq_engine/project_routes.py",
+        "value": 367.0
+      },
+      {
+        "path": "tests/scripts/test_deploy_production_execution.py",
+        "value": 365.0
+      },
+      {
         "path": "wepppy/nodb/core/landuse.py",
         "value": 362.0
       },
       {
         "path": "wepppy/rq/wepp_rq_pipeline.py",
         "value": 352.0
-      },
-      {
-        "path": "wepppy/weppcloud/routes/run_0/run_0_bp.py",
-        "value": 336.0
       },
       {
         "path": "wepppy/export/arc_export.py",
@@ -233,18 +245,6 @@
       {
         "path": "wepppy/weppcloud/routes/weppcloud_site.py",
         "value": 312.0
-      },
-      {
-        "path": "wepppy/tools/migrations/unroll_root_resources_batch.py",
-        "value": 309.0
-      },
-      {
-        "path": "wepppy/rq/project_rq_fork.py",
-        "value": 303.0
-      },
-      {
-        "path": "wepppy/nodb/mods/ash_transport/ashpost.py",
-        "value": 301.0
       }
     ],
     "python_max_cc_top20": [],
@@ -259,11 +259,11 @@
       },
       {
         "path": "wepppy/weppcloud/controllers_js/map_gl.js",
-        "value": 2426.0
+        "value": 2458.0
       },
       {
         "path": "wepppy/weppcloud/controllers_js/project.js",
-        "value": 2071.0
+        "value": 2051.0
       },
       {
         "path": "wepppy/weppcloud/controllers_js/ag_fields.js",
@@ -271,7 +271,7 @@
       },
       {
         "path": "wepppy/weppcloud/controllers_js/batch_runner.js",
-        "value": 1911.0
+        "value": 1915.0
       },
       {
         "path": "wepppy/weppcloud/controllers_js/channel_gl.js",
@@ -283,23 +283,23 @@
       },
       {
         "path": "wepppy/weppcloud/controllers_js/control_base.js",
-        "value": 1730.0
+        "value": 1746.0
       },
       {
         "path": "wepppy/weppcloud/controllers_js/subcatchment_delineation.js",
         "value": 1636.0
       },
       {
+        "path": "wepppy/weppcloud/static/js/gl-dashboard/map/layers.js",
+        "value": 1604.0
+      },
+      {
         "path": "wepppy/weppcloud/controllers_js/subcatchments_gl.js",
         "value": 1586.0
       },
       {
-        "path": "wepppy/weppcloud/static/js/gl-dashboard/map/layers.js",
-        "value": 1572.0
-      },
-      {
         "path": "wepppy/weppcloud/static/js/gl-dashboard/layers/renderer.js",
-        "value": 1549.0
+        "value": 1537.0
       },
       {
         "path": "wepppy/weppcloud/static/js/gl-dashboard/layers/detector.js",
@@ -318,16 +318,16 @@
         "value": 1322.0
       },
       {
+        "path": "wepppy/weppcloud/controllers_js/__tests__/project.test.js",
+        "value": 1266.0
+      },
+      {
         "path": "wepppy/weppcloud/controllers_js/disturbed.js",
         "value": 1250.0
       },
       {
         "path": "wepppy/weppcloud/controllers_js/roads.js",
-        "value": 1243.0
-      },
-      {
-        "path": "wepppy/weppcloud/controllers_js/__tests__/project.test.js",
-        "value": 1238.0
+        "value": 1247.0
       }
     ],
     "js_max_cc_top20": [
@@ -413,5 +413,3402 @@
       }
     ]
   },
-  "changed_files": []
+  "changed_files": [
+    {
+      "path": "tests/climates/test_cligen_station_catalog_isolation.py",
+      "base_path": "tests/climates/test_cligen_station_catalog_isolation.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 45.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 34.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/docker/unit/test_project_config_rollout_contract.py",
+      "base_path": "tests/docker/unit/test_project_config_rollout_contract.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 27.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 7.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/eu/soils/test_esdac_build.py",
+      "base_path": "tests/eu/soils/test_esdac_build.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 29.0,
+          "current": 59.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 19.0,
+          "current": 32.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/eu/soils/test_esdac_soil_build.py",
+      "base_path": "tests/eu/soils/test_esdac_soil_build.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 169.0,
+          "current": 342.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 41.0,
+          "current": 50.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/microservices/test_creation_idempotency.py",
+      "base_path": "tests/microservices/test_creation_idempotency.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 105.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 33.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/microservices/test_rq_engine_auth.py",
+      "base_path": "tests/microservices/test_rq_engine_auth.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 287.0,
+          "current": 313.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 31.0,
+          "current": 31.0,
+          "trend": "unchanged",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/microservices/test_rq_engine_bootstrap_routes.py",
+      "base_path": "tests/microservices/test_rq_engine_bootstrap_routes.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 1014.0,
+          "current": 1015.0,
+          "trend": "worsened",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_function_len",
+          "base": 142.0,
+          "current": 142.0,
+          "trend": "unchanged",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "tests/microservices/test_rq_engine_builder_routes.py",
+      "base_path": "tests/microservices/test_rq_engine_builder_routes.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 393.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 46.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/microservices/test_rq_engine_climate_routes.py",
+      "base_path": "tests/microservices/test_rq_engine_climate_routes.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 284.0,
+          "current": 594.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 48.0,
+          "current": 60.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/microservices/test_rq_engine_landuse_routes.py",
+      "base_path": "tests/microservices/test_rq_engine_landuse_routes.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 1749.0,
+          "current": 2183.0,
+          "trend": "worsened",
+          "severity": "red"
+        },
+        {
+          "name": "python_function_len",
+          "base": 92.0,
+          "current": 92.0,
+          "trend": "unchanged",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "tests/microservices/test_rq_engine_openapi_contract.py",
+      "base_path": "tests/microservices/test_rq_engine_openapi_contract.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 209.0,
+          "current": 321.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 39.0,
+          "current": 95.0,
+          "trend": "worsened",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "tests/microservices/test_rq_engine_orchestration_read_routes.py",
+      "base_path": "tests/microservices/test_rq_engine_orchestration_read_routes.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 477.0,
+          "current": 664.0,
+          "trend": "worsened",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_function_len",
+          "base": 51.0,
+          "current": 51.0,
+          "trend": "unchanged",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "tests/microservices/test_rq_engine_project_config_update_routes.py",
+      "base_path": "tests/microservices/test_rq_engine_project_config_update_routes.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 568.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 88.0,
+          "trend": "new",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "tests/microservices/test_rq_engine_project_routes.py",
+      "base_path": "tests/microservices/test_rq_engine_project_routes.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 585.0,
+          "current": 737.0,
+          "trend": "worsened",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_function_len",
+          "base": 50.0,
+          "current": 50.0,
+          "trend": "unchanged",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "tests/microservices/test_rq_engine_schema_defaults_routes.py",
+      "base_path": "tests/microservices/test_rq_engine_schema_defaults_routes.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 954.0,
+          "current": 1622.0,
+          "trend": "worsened",
+          "severity": "red"
+        },
+        {
+          "name": "python_function_len",
+          "base": 66.0,
+          "current": 99.0,
+          "trend": "worsened",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "tests/microservices/test_rq_engine_soils_routes.py",
+      "base_path": "tests/microservices/test_rq_engine_soils_routes.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 183.0,
+          "current": 329.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 38.0,
+          "current": 38.0,
+          "trend": "unchanged",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/microservices/test_rq_engine_upload_climate_routes.py",
+      "base_path": "tests/microservices/test_rq_engine_upload_climate_routes.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 229.0,
+          "current": 401.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 46.0,
+          "current": 55.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/microservices/test_rq_engine_wepp_routes.py",
+      "base_path": "tests/microservices/test_rq_engine_wepp_routes.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 1375.0,
+          "current": 1507.0,
+          "trend": "worsened",
+          "severity": "red"
+        },
+        {
+          "name": "python_function_len",
+          "base": 85.0,
+          "current": 92.0,
+          "trend": "worsened",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "tests/nodb/mods/baer/test_sbs_coverage_mask.py",
+      "base_path": "tests/nodb/mods/baer/test_sbs_coverage_mask.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 146.0,
+          "current": 88.0,
+          "trend": "improved",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 35.0,
+          "current": 28.0,
+          "trend": "improved",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/nodb/mods/baer/test_sbs_rattlesnake_gdal.py",
+      "base_path": "tests/nodb/mods/baer/test_sbs_rattlesnake_gdal.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 21.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 18.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/nodb/test_climate_catalog.py",
+      "base_path": "tests/nodb/test_climate_catalog.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 178.0,
+          "current": 194.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 90.0,
+          "current": 90.0,
+          "trend": "unchanged",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "tests/nodb/test_climate_input_parser_service.py",
+      "base_path": "tests/nodb/test_climate_input_parser_service.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 211.0,
+          "current": 236.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 20.0,
+          "current": 20.0,
+          "trend": "unchanged",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/nodb/test_climate_station_catalog_service.py",
+      "base_path": "tests/nodb/test_climate_station_catalog_service.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 102.0,
+          "current": 168.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 20.0,
+          "current": 22.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/nodb/test_config_sanitization.py",
+      "base_path": "tests/nodb/test_config_sanitization.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 85.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 16.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/nodb/test_defaults_cfg_compatibility.py",
+      "base_path": "tests/nodb/test_defaults_cfg_compatibility.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 129.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 22.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/nodb/test_landuse_build_event_contracts.py",
+      "base_path": "tests/nodb/test_landuse_build_event_contracts.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 120.0,
+          "current": 190.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 64.0,
+          "current": 76.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/nodb/test_landuse_catalog.py",
+      "base_path": "tests/nodb/test_landuse_catalog.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 80.0,
+          "current": 86.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 48.0,
+          "current": 48.0,
+          "trend": "unchanged",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/nodb/test_locale_capability_authority.py",
+      "base_path": "tests/nodb/test_locale_capability_authority.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 996.0,
+          "trend": "new",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 60.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "tests/nodb/test_project_config_builder_snapshot.py",
+      "base_path": "tests/nodb/test_project_config_builder_snapshot.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 60.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 19.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/nodb/test_project_config_capabilities.py",
+      "base_path": "tests/nodb/test_project_config_capabilities.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 520.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 60.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/nodb/test_project_config_preset_snapshot.py",
+      "base_path": "tests/nodb/test_project_config_preset_snapshot.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 305.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 33.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/nodb/test_project_config_reader_foundation.py",
+      "base_path": "tests/nodb/test_project_config_reader_foundation.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 466.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 35.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/nodb/test_project_config_registry_serializer.py",
+      "base_path": "tests/nodb/test_project_config_registry_serializer.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 496.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 32.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/nodb/test_project_config_serialization.py",
+      "base_path": "tests/nodb/test_project_config_serialization.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 83.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 12.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/nodb/test_project_config_update.py",
+      "base_path": "tests/nodb/test_project_config_update.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 1345.0,
+          "trend": "new",
+          "severity": "red"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 133.0,
+          "trend": "new",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "tests/nodb/test_soils_gridded_root_creation.py",
+      "base_path": "tests/nodb/test_soils_gridded_root_creation.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 798.0,
+          "current": 831.0,
+          "trend": "worsened",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_function_len",
+          "base": 138.0,
+          "current": 138.0,
+          "trend": "unchanged",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "tests/nodb/test_tenerife_climate_catalog_service.py",
+      "base_path": "tests/nodb/test_tenerife_climate_catalog_service.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 59.0,
+          "current": 77.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 21.0,
+          "current": 21.0,
+          "trend": "unchanged",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/nodb/test_wepp_run_payload_grouped_updates.py",
+      "base_path": "tests/nodb/test_wepp_run_payload_grouped_updates.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 736.0,
+          "current": 743.0,
+          "trend": "worsened",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_function_len",
+          "base": 41.0,
+          "current": 41.0,
+          "trend": "unchanged",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "tests/profile_recorder/stubdeps.py",
+      "base_path": "tests/profile_recorder/stubdeps.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 208.0,
+          "current": 208.0,
+          "trend": "unchanged",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 188.0,
+          "current": 188.0,
+          "trend": "unchanged",
+          "severity": "red"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "tests/rq/test_project_config_update_rq.py",
+      "base_path": "tests/rq/test_project_config_update_rq.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 105.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 36.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/rq/test_project_rq_archive.py",
+      "base_path": "tests/rq/test_project_rq_archive.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 226.0,
+          "current": 413.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 34.0,
+          "current": 35.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/rq/test_project_rq_fork.py",
+      "base_path": "tests/rq/test_project_rq_fork.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 1959.0,
+          "current": 2012.0,
+          "trend": "worsened",
+          "severity": "red"
+        },
+        {
+          "name": "python_function_len",
+          "base": 168.0,
+          "current": 168.0,
+          "trend": "unchanged",
+          "severity": "red"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "tests/weppcloud/routes/test_climate_bp.py",
+      "base_path": "tests/weppcloud/routes/test_climate_bp.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 181.0,
+          "current": 864.0,
+          "trend": "worsened",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_function_len",
+          "base": 82.0,
+          "current": 156.0,
+          "trend": "worsened",
+          "severity": "red"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "tests/weppcloud/routes/test_config_builder_ui.py",
+      "base_path": "tests/weppcloud/routes/test_config_builder_ui.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 118.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 33.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/weppcloud/routes/test_pure_controls_render.py",
+      "base_path": "tests/weppcloud/routes/test_pure_controls_render.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 3549.0,
+          "current": 4086.0,
+          "trend": "worsened",
+          "severity": "red"
+        },
+        {
+          "name": "python_function_len",
+          "base": 118.0,
+          "current": 181.0,
+          "trend": "worsened",
+          "severity": "red"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "tests/weppcloud/routes/test_rq_engine_token_api.py",
+      "base_path": "tests/weppcloud/routes/test_rq_engine_token_api.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 985.0,
+          "current": 986.0,
+          "trend": "worsened",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_function_len",
+          "base": 56.0,
+          "current": 56.0,
+          "trend": "unchanged",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "tests/weppcloud/routes/test_run_0_builder_maturity.py",
+      "base_path": "tests/weppcloud/routes/test_run_0_builder_maturity.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 14.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 6.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/weppcloud/routes/test_run_0_openet_admin_gate.py",
+      "base_path": "tests/weppcloud/routes/test_run_0_openet_admin_gate.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 1051.0,
+          "current": 1212.0,
+          "trend": "worsened",
+          "severity": "red"
+        },
+        {
+          "name": "python_function_len",
+          "base": 100.0,
+          "current": 100.0,
+          "trend": "unchanged",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "tests/weppcloud/routes/test_soils_bp.py",
+      "base_path": "tests/weppcloud/routes/test_soils_bp.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 91.0,
+          "current": 124.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 59.0,
+          "current": 60.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/weppcloud/test_ui_foundation_css.py",
+      "base_path": "tests/weppcloud/test_ui_foundation_css.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 25.0,
+          "current": 32.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 13.0,
+          "current": 13.0,
+          "trend": "unchanged",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/weppcloud/test_user_preferences_postgres.py",
+      "base_path": "tests/weppcloud/test_user_preferences_postgres.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 406.0,
+          "current": 415.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 99.0,
+          "current": 99.0,
+          "trend": "unchanged",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "tests/weppcloud/utils/test_helpers_url_for_run.py",
+      "base_path": "tests/weppcloud/utils/test_helpers_url_for_run.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 40.0,
+          "current": 53.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 9.0,
+          "current": 15.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tools/check_project_config_secrets.py",
+      "base_path": "tools/check_project_config_secrets.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 29.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 19.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tools/normalize_project_config_sources.py",
+      "base_path": "tools/normalize_project_config_sources.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 37.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 24.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tools/rq_engine_contract_rules.py",
+      "base_path": "tools/rq_engine_contract_rules.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 142.0,
+          "current": 177.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 20.0,
+          "current": 22.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "wepppy/climates/cligen/cligen.py",
+      "base_path": "wepppy/climates/cligen/cligen.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 2318.0,
+          "current": 2324.0,
+          "trend": "worsened",
+          "severity": "red"
+        },
+        {
+          "name": "python_function_len",
+          "base": 276.0,
+          "current": 276.0,
+          "trend": "unchanged",
+          "severity": "red"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "wepppy/eu/soils/soil_build.py",
+      "base_path": "wepppy/eu/soils/soil_build.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 298.0,
+          "current": 372.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 151.0,
+          "current": 157.0,
+          "trend": "worsened",
+          "severity": "red"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "wepppy/microservices/rq_engine/__init__.py",
+      "base_path": "wepppy/microservices/rq_engine/__init__.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 178.0,
+          "current": 182.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 55.0,
+          "current": 55.0,
+          "trend": "unchanged",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "wepppy/microservices/rq_engine/auth.py",
+      "base_path": "wepppy/microservices/rq_engine/auth.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 320.0,
+          "current": 351.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 39.0,
+          "current": 42.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "wepppy/microservices/rq_engine/builder_routes.py",
+      "base_path": "wepppy/microservices/rq_engine/builder_routes.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 291.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 127.0,
+          "trend": "new",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "wepppy/microservices/rq_engine/climate_routes.py",
+      "base_path": "wepppy/microservices/rq_engine/climate_routes.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 414.0,
+          "current": 673.0,
+          "trend": "worsened",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_function_len",
+          "base": 95.0,
+          "current": 225.0,
+          "trend": "worsened",
+          "severity": "red"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "wepppy/microservices/rq_engine/creation_idempotency.py",
+      "base_path": "wepppy/microservices/rq_engine/creation_idempotency.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 133.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 31.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "wepppy/microservices/rq_engine/landuse_routes.py",
+      "base_path": "wepppy/microservices/rq_engine/landuse_routes.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 1432.0,
+          "current": 1634.0,
+          "trend": "worsened",
+          "severity": "red"
+        },
+        {
+          "name": "python_function_len",
+          "base": 191.0,
+          "current": 243.0,
+          "trend": "worsened",
+          "severity": "red"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "wepppy/microservices/rq_engine/orchestration_read_routes.py",
+      "base_path": "wepppy/microservices/rq_engine/orchestration_read_routes.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 1283.0,
+          "current": 1505.0,
+          "trend": "worsened",
+          "severity": "red"
+        },
+        {
+          "name": "python_function_len",
+          "base": 460.0,
+          "current": 470.0,
+          "trend": "worsened",
+          "severity": "red"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "wepppy/microservices/rq_engine/project_config_update_routes.py",
+      "base_path": "wepppy/microservices/rq_engine/project_config_update_routes.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 669.0,
+          "trend": "new",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 115.0,
+          "trend": "new",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "wepppy/microservices/rq_engine/project_routes.py",
+      "base_path": "wepppy/microservices/rq_engine/project_routes.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 412.0,
+          "current": 586.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 231.0,
+          "current": 367.0,
+          "trend": "worsened",
+          "severity": "red"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "wepppy/microservices/rq_engine/schema_defaults_routes.py",
+      "base_path": "wepppy/microservices/rq_engine/schema_defaults_routes.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 4242.0,
+          "current": 5274.0,
+          "trend": "worsened",
+          "severity": "red"
+        },
+        {
+          "name": "python_function_len",
+          "base": 2073.0,
+          "current": 2233.0,
+          "trend": "worsened",
+          "severity": "red"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "wepppy/microservices/rq_engine/soils_routes.py",
+      "base_path": "wepppy/microservices/rq_engine/soils_routes.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 146.0,
+          "current": 222.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 73.0,
+          "current": 112.0,
+          "trend": "worsened",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "wepppy/microservices/rq_engine/upload_climate_routes.py",
+      "base_path": "wepppy/microservices/rq_engine/upload_climate_routes.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 140.0,
+          "current": 177.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 69.0,
+          "current": 101.0,
+          "trend": "worsened",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "wepppy/microservices/rq_engine/wepp_routes.py",
+      "base_path": "wepppy/microservices/rq_engine/wepp_routes.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 301.0,
+          "current": 293.0,
+          "trend": "improved",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 97.0,
+          "current": 97.0,
+          "trend": "unchanged",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "wepppy/microservices/rq_engine/wepp_run_payload.py",
+      "base_path": "wepppy/microservices/rq_engine/wepp_run_payload.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 536.0,
+          "current": 598.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 233.0,
+          "current": 293.0,
+          "trend": "worsened",
+          "severity": "red"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "wepppy/nodb/base.py",
+      "base_path": "wepppy/nodb/base.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 2302.0,
+          "current": 2361.0,
+          "trend": "worsened",
+          "severity": "red"
+        },
+        {
+          "name": "python_function_len",
+          "base": 201.0,
+          "current": 201.0,
+          "trend": "unchanged",
+          "severity": "red"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "wepppy/nodb/config_builder/__init__.py",
+      "base_path": "wepppy/nodb/config_builder/__init__.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 43.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "wepppy/nodb/config_builder/registry.py",
+      "base_path": "wepppy/nodb/config_builder/registry.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 690.0,
+          "trend": "new",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 218.0,
+          "trend": "new",
+          "severity": "red"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "wepppy/nodb/config_builder/resolver.py",
+      "base_path": "wepppy/nodb/config_builder/resolver.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 507.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 156.0,
+          "trend": "new",
+          "severity": "red"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "wepppy/nodb/config_builder/schema.py",
+      "base_path": "wepppy/nodb/config_builder/schema.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 154.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 7.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "wepppy/nodb/config_builder/snapshot.py",
+      "base_path": "wepppy/nodb/config_builder/snapshot.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 109.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 37.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "wepppy/nodb/core/climate_input_parser.py",
+      "base_path": "wepppy/nodb/core/climate_input_parser.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 203.0,
+          "current": 245.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 100.0,
+          "current": 117.0,
+          "trend": "worsened",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "wepppy/nodb/core/climate_station_catalog_service.py",
+      "base_path": "wepppy/nodb/core/climate_station_catalog_service.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 140.0,
+          "current": 211.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 25.0,
+          "current": 52.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "wepppy/nodb/core/landuse.py",
+      "base_path": "wepppy/nodb/core/landuse.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 1899.0,
+          "current": 1956.0,
+          "trend": "worsened",
+          "severity": "red"
+        },
+        {
+          "name": "python_function_len",
+          "base": 362.0,
+          "current": 362.0,
+          "trend": "unchanged",
+          "severity": "red"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "wepppy/nodb/core/soils.py",
+      "base_path": "wepppy/nodb/core/soils.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 1959.0,
+          "current": 1964.0,
+          "trend": "worsened",
+          "severity": "red"
+        },
+        {
+          "name": "python_function_len",
+          "base": 218.0,
+          "current": 218.0,
+          "trend": "unchanged",
+          "severity": "red"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "wepppy/nodb/locales/__init__.py",
+      "base_path": "wepppy/nodb/locales/__init__.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 18.0,
+          "current": 83.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "wepppy/nodb/locales/capability_graph.py",
+      "base_path": "wepppy/nodb/locales/capability_graph.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 896.0,
+          "trend": "new",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 119.0,
+          "trend": "new",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "wepppy/nodb/locales/climate_catalog.py",
+      "base_path": "wepppy/nodb/locales/climate_catalog.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 285.0,
+          "current": 417.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 23.0,
+          "current": 28.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "wepppy/nodb/locales/landuse_catalog.py",
+      "base_path": "wepppy/nodb/locales/landuse_catalog.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 160.0,
+          "current": 316.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 42.0,
+          "current": 48.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "wepppy/nodb/locales/locale_profiles.py",
+      "base_path": "wepppy/nodb/locales/locale_profiles.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 391.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 49.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "wepppy/nodb/mods/baer/sbs_map.py",
+      "base_path": "wepppy/nodb/mods/baer/sbs_map.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 1041.0,
+          "current": 1043.0,
+          "trend": "worsened",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_function_len",
+          "base": 116.0,
+          "current": 116.0,
+          "trend": "unchanged",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "wepppy/nodb/project_config_capabilities.py",
+      "base_path": "wepppy/nodb/project_config_capabilities.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 639.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 145.0,
+          "trend": "new",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "wepppy/nodb/project_config_reader.py",
+      "base_path": "wepppy/nodb/project_config_reader.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 433.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 106.0,
+          "trend": "new",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "wepppy/nodb/project_config_snapshot.py",
+      "base_path": "wepppy/nodb/project_config_snapshot.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 428.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 112.0,
+          "trend": "new",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "wepppy/nodb/project_config_update.py",
+      "base_path": "wepppy/nodb/project_config_update.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 1570.0,
+          "trend": "new",
+          "severity": "red"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 124.0,
+          "trend": "new",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "wepppy/project_config_sanitization.py",
+      "base_path": "wepppy/project_config_sanitization.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 183.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 43.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "wepppy/project_config_serialization.py",
+      "base_path": "wepppy/project_config_serialization.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 267.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 62.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "wepppy/rq/project_config_update_rq.py",
+      "base_path": "wepppy/rq/project_config_update_rq.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 61.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 36.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "wepppy/rq/project_rq.py",
+      "base_path": "wepppy/rq/project_rq.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 2785.0,
+          "current": 2796.0,
+          "trend": "worsened",
+          "severity": "red"
+        },
+        {
+          "name": "python_function_len",
+          "base": 205.0,
+          "current": 205.0,
+          "trend": "unchanged",
+          "severity": "red"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "wepppy/rq/project_rq_archive.py",
+      "base_path": "wepppy/rq/project_rq_archive.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 346.0,
+          "current": 357.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 109.0,
+          "current": 110.0,
+          "trend": "worsened",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "wepppy/tools/migrations/unroll_root_resources_batch.py",
+      "base_path": "wepppy/tools/migrations/unroll_root_resources_batch.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 1256.0,
+          "current": 1255.0,
+          "trend": "improved",
+          "severity": "red"
+        },
+        {
+          "name": "python_function_len",
+          "base": 309.0,
+          "current": 309.0,
+          "trend": "unchanged",
+          "severity": "red"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "wepppy/weppcloud/controllers_js/__tests__/config_builder.test.js",
+      "base_path": "wepppy/weppcloud/controllers_js/__tests__/config_builder.test.js",
+      "status": "A",
+      "language": "javascript",
+      "metrics": [
+        {
+          "name": "js_file_sloc",
+          "base": null,
+          "current": 686.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "js_cc",
+          "base": null,
+          "current": 5.0,
+          "trend": "new",
+          "severity": "green"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "wepppy/weppcloud/controllers_js/__tests__/control_base.test.js",
+      "base_path": "wepppy/weppcloud/controllers_js/__tests__/control_base.test.js",
+      "status": "M",
+      "language": "javascript",
+      "metrics": [
+        {
+          "name": "js_file_sloc",
+          "base": 259.0,
+          "current": 292.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "js_cc",
+          "base": 1.0,
+          "current": 1.0,
+          "trend": "unchanged",
+          "severity": "green"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "wepppy/weppcloud/controllers_js/__tests__/http.test.js",
+      "base_path": "wepppy/weppcloud/controllers_js/__tests__/http.test.js",
+      "status": "M",
+      "language": "javascript",
+      "metrics": [
+        {
+          "name": "js_file_sloc",
+          "base": 411.0,
+          "current": 434.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "js_cc",
+          "base": 5.0,
+          "current": 5.0,
+          "trend": "unchanged",
+          "severity": "green"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "wepppy/weppcloud/controllers_js/__tests__/project.test.js",
+      "base_path": "wepppy/weppcloud/controllers_js/__tests__/project.test.js",
+      "status": "M",
+      "language": "javascript",
+      "metrics": [
+        {
+          "name": "js_file_sloc",
+          "base": 1238.0,
+          "current": 1266.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "js_cc",
+          "base": 6.0,
+          "current": 6.0,
+          "trend": "unchanged",
+          "severity": "green"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "wepppy/weppcloud/controllers_js/__tests__/project_config_update.test.js",
+      "base_path": "wepppy/weppcloud/controllers_js/__tests__/project_config_update.test.js",
+      "status": "A",
+      "language": "javascript",
+      "metrics": [
+        {
+          "name": "js_file_sloc",
+          "base": null,
+          "current": 487.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "js_cc",
+          "base": null,
+          "current": 3.0,
+          "trend": "new",
+          "severity": "green"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "wepppy/weppcloud/controllers_js/__tests__/table_overflow_accessibility.test.js",
+      "base_path": "wepppy/weppcloud/controllers_js/__tests__/table_overflow_accessibility.test.js",
+      "status": "A",
+      "language": "javascript",
+      "metrics": [
+        {
+          "name": "js_file_sloc",
+          "base": null,
+          "current": 203.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "js_cc",
+          "base": null,
+          "current": 2.0,
+          "trend": "new",
+          "severity": "green"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "wepppy/weppcloud/controllers_js/config_builder.js",
+      "base_path": "wepppy/weppcloud/controllers_js/config_builder.js",
+      "status": "A",
+      "language": "javascript",
+      "metrics": [
+        {
+          "name": "js_file_sloc",
+          "base": null,
+          "current": 584.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "js_cc",
+          "base": null,
+          "current": 19.0,
+          "trend": "new",
+          "severity": "yellow"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "wepppy/weppcloud/controllers_js/http.js",
+      "base_path": "wepppy/weppcloud/controllers_js/http.js",
+      "status": "M",
+      "language": "javascript",
+      "metrics": [
+        {
+          "name": "js_file_sloc",
+          "base": 849.0,
+          "current": 859.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "js_cc",
+          "base": 26.0,
+          "current": 26.0,
+          "trend": "unchanged",
+          "severity": "yellow"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "wepppy/weppcloud/controllers_js/project.js",
+      "base_path": "wepppy/weppcloud/controllers_js/project.js",
+      "status": "M",
+      "language": "javascript",
+      "metrics": [
+        {
+          "name": "js_file_sloc",
+          "base": 2071.0,
+          "current": 2051.0,
+          "trend": "improved",
+          "severity": "yellow"
+        },
+        {
+          "name": "js_cc",
+          "base": 52.0,
+          "current": 52.0,
+          "trend": "unchanged",
+          "severity": "red"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "wepppy/weppcloud/controllers_js/project_config_update.js",
+      "base_path": "wepppy/weppcloud/controllers_js/project_config_update.js",
+      "status": "A",
+      "language": "javascript",
+      "metrics": [
+        {
+          "name": "js_file_sloc",
+          "base": null,
+          "current": 407.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "js_cc",
+          "base": null,
+          "current": 16.0,
+          "trend": "new",
+          "severity": "yellow"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "wepppy/weppcloud/routes/nodb_api/climate_bp.py",
+      "base_path": "wepppy/weppcloud/routes/nodb_api/climate_bp.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 518.0,
+          "current": 848.0,
+          "trend": "worsened",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_function_len",
+          "base": 72.0,
+          "current": 87.0,
+          "trend": "worsened",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "wepppy/weppcloud/routes/nodb_api/soils_bp.py",
+      "base_path": "wepppy/weppcloud/routes/nodb_api/soils_bp.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 124.0,
+          "current": 169.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 39.0,
+          "current": 77.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "wepppy/weppcloud/routes/run_0/run_0_bp.py",
+      "base_path": "wepppy/weppcloud/routes/run_0/run_0_bp.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 1999.0,
+          "current": 2349.0,
+          "trend": "worsened",
+          "severity": "red"
+        },
+        {
+          "name": "python_function_len",
+          "base": 336.0,
+          "current": 391.0,
+          "trend": "worsened",
+          "severity": "red"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "wepppy/weppcloud/routes/weppcloud_site.py",
+      "base_path": "wepppy/weppcloud/routes/weppcloud_site.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 984.0,
+          "current": 989.0,
+          "trend": "worsened",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_function_len",
+          "base": 312.0,
+          "current": 312.0,
+          "trend": "unchanged",
+          "severity": "red"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "red"
+    },
+    {
+      "path": "wepppy/weppcloud/static-src/tests/smoke/a11y/axe-runs0.spec.js",
+      "base_path": "wepppy/weppcloud/static-src/tests/smoke/a11y/axe-runs0.spec.js",
+      "status": "M",
+      "language": "javascript",
+      "metrics": [
+        {
+          "name": "js_file_sloc",
+          "base": 907.0,
+          "current": 932.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "js_cc",
+          "base": 17.0,
+          "current": 17.0,
+          "trend": "unchanged",
+          "severity": "yellow"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "wepppy/weppcloud/static-src/tests/smoke/table-overflow-accessibility.spec.js",
+      "base_path": "wepppy/weppcloud/static-src/tests/smoke/table-overflow-accessibility.spec.js",
+      "status": "A",
+      "language": "javascript",
+      "metrics": [
+        {
+          "name": "js_file_sloc",
+          "base": null,
+          "current": 109.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "js_cc",
+          "base": null,
+          "current": 2.0,
+          "trend": "new",
+          "severity": "green"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "wepppy/weppcloud/user_preferences.py",
+      "base_path": "wepppy/weppcloud/user_preferences.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 550.0,
+          "current": 553.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 76.0,
+          "current": 76.0,
+          "trend": "unchanged",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "wepppy/weppcloud/utils/helpers.py",
+      "base_path": "wepppy/weppcloud/utils/helpers.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 828.0,
+          "current": 843.0,
+          "trend": "worsened",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_function_len",
+          "base": 125.0,
+          "current": 125.0,
+          "trend": "unchanged",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "wepppy/weppcloud/utils/rq_engine_token.py",
+      "base_path": "wepppy/weppcloud/utils/rq_engine_token.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 43.0,
+          "current": 50.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 40.0,
+          "current": 47.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    }
+  ]
 }

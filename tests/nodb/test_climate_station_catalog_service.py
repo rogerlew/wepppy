@@ -7,6 +7,7 @@ import pytest
 
 from wepppy.nodb.core.climate import ClimateMode, ClimateStationMode
 from wepppy.nodb.core.climate_station_catalog_service import ClimateStationCatalogService
+from wepppy.nodb.config_builder.resolver import resolve_builder_capability_graph
 
 pytestmark = pytest.mark.unit
 
@@ -20,6 +21,8 @@ class _Station:
 
 
 class _DummyClimate:
+    uses_tenerife_station_catalog = False
+
     def __init__(self) -> None:
         self._locked = False
         self._closest_stations = None
@@ -61,6 +64,16 @@ class _DummyClimate:
 
     def islocked(self):
         return self._locked
+
+    def config_get_raw(self, section, option, default=None):
+        if (section, option) == ("config", "flattened"):
+            return False
+        if (section, option) == ("general", "locales"):
+            return list(self.locales)
+        return default
+
+    def config_get_list(self, section, option, default=None):
+        return self.config_get_raw(section, option, default)
 
     @contextmanager
     def locked(self):
@@ -112,6 +125,30 @@ def test_find_heuristic_stations_uses_locale_specific_paths(monkeypatch: pytest.
     assert service.find_heuristic_stations(climate, num_stations=4) == [{"id": "AU-1"}]
 
 
+def test_stored_runtime_token_overrides_incongruent_climate_locales(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = ClimateStationCatalogService()
+    climate = _DummyClimate()
+    climate.locales = ["us"]
+    monkeypatch.setattr(
+        "wepppy.nodb.project_config_capabilities.resolve_run_capability_authority",
+        lambda _climate: SimpleNamespace(graph=object(), runtime_tokens=("eu",)),
+    )
+    monkeypatch.setattr(
+        service,
+        "find_eu_heuristic_stations",
+        lambda _climate, num_stations=10: [{"id": "EU-STORED"}],
+    )
+    monkeypatch.setattr(
+        service,
+        "find_au_heuristic_stations",
+        lambda *_args, **_kwargs: pytest.fail("used incongruent locale dispatch"),
+    )
+
+    assert service.find_heuristic_stations(climate) == [{"id": "EU-STORED"}]
+
+
 def test_climatestation_meta_prefers_user_defined_metadata() -> None:
     service = ClimateStationCatalogService()
     climate = _DummyClimate()
@@ -125,6 +162,10 @@ def test_climatestation_meta_prefers_user_defined_metadata() -> None:
 def test_resolve_catalog_dataset_respects_locale_access(monkeypatch: pytest.MonkeyPatch) -> None:
     service = ClimateStationCatalogService()
     climate = _DummyClimate()
+    monkeypatch.setattr(
+        "wepppy.nodb.project_config_capabilities.resolve_run_capability_authority",
+        lambda _climate: SimpleNamespace(graph=None, runtime_tokens=("us",)),
+    )
 
     dataset = SimpleNamespace(
         catalog_id="prism_stochastic",
@@ -134,3 +175,41 @@ def test_resolve_catalog_dataset_respects_locale_access(monkeypatch: pytest.Monk
     monkeypatch.setattr("wepppy.nodb.locales.get_climate_dataset", lambda catalog_id: dataset)
 
     assert service.resolve_catalog_dataset(climate, "prism_stochastic") is None
+
+
+def test_resolve_catalog_dataset_allows_exact_persisted_v2_selection(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = ClimateStationCatalogService()
+    climate = _DummyClimate()
+    climate._catalog_id = "vanilla_cligen"
+    monkeypatch.setattr(
+        "wepppy.nodb.project_config_capabilities.resolve_run_capability_authority",
+        lambda _climate: SimpleNamespace(
+            graph=SimpleNamespace(climate_datasets=("prism_stochastic",)),
+            runtime_tokens=("us",),
+        ),
+    )
+
+    dataset = service.resolve_catalog_dataset(climate, "vanilla_cligen")
+
+    assert dataset is not None
+    assert dataset.catalog_id == "vanilla_cligen"
+    assert service.resolve_catalog_dataset(climate, "observed_gridmet") is None
+
+
+def test_europe_graph_catalog_is_ordered_and_exact(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = ClimateStationCatalogService()
+    climate = _DummyClimate()
+    graph = resolve_builder_capability_graph("europe")
+    monkeypatch.setattr(
+        "wepppy.nodb.project_config_capabilities.resolve_run_capability_authority",
+        lambda _climate: SimpleNamespace(graph=graph, runtime_tokens=("eu",)),
+    )
+
+    assert [
+        dataset.catalog_id
+        for dataset in service.available_catalog_datasets(climate)
+    ] == ["vanilla_cligen", "eobs_modified", "user_defined_cli"]

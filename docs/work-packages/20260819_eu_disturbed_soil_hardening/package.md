@@ -194,6 +194,15 @@ malformed, or incomplete quality report fails through a typed diagnostic rather
 than falling through to generic disturbed generation. No existing soil keys or
 quality-report fields are renamed or removed.
 
+The 2026-08-28 Forest observation exposed an observability gap in this
+contract. A rejected batch persisted complete per-profile evidence but the RQ
+exception named only the rejected TopoAZ IDs, leaving the reason discoverable
+only by manually opening `soil_quality.json`. Batch failures must therefore
+also emit a bounded, deterministic summary of grouped reason code, field,
+count, representative raw value, and the report filename. The full report
+remains authoritative. This correction changes no validity rule, fallback,
+soil parameter, or acceptance decision.
+
 **Exit gate:** focused and repository validation are complete, evidence is
 linked, and any follow-up package or mitigation-retirement experiment is
 explicitly recorded.

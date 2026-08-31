@@ -1,4 +1,8 @@
 import contextlib
+import copy
+import hashlib
+from pathlib import Path
+import pickle
 from types import SimpleNamespace
 
 import pytest
@@ -7,15 +11,55 @@ TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import climate_routes
+from wepppy.nodb.core.climate_input_parser import ClimateInputParsingService
+from wepppy.nodb.project_config_capabilities import resolve_run_capability_authority
+from wepppy.nodb.project_config_reader import ProjectConfigStatus
+from wepppy.nodb.project_config_snapshot import (
+    materialize_preset_snapshot,
+    resolve_preset_snapshot,
+)
+from wepppy.project_config_serialization import parse_config_text
 from wepppy.runtime_paths.errors import NoDirError
 
 
 pytestmark = pytest.mark.microservice
 
 
+def _eu_preset_authority(root: Path):
+    candidate = resolve_preset_snapshot(
+        "eu-disturbed",
+        {},
+        source_revision="test-revision",
+    )
+    materialize_preset_snapshot(root, candidate)
+    values = parse_config_text(candidate.config_bytes.decode("utf-8"))
+    config = SimpleNamespace(
+        project_config_status=ProjectConfigStatus(
+            "flattened",
+            str(root),
+            "eu-disturbed.cfg",
+            True,
+            True,
+            config_sha256=hashlib.sha256(candidate.config_bytes).hexdigest(),
+        ),
+        config_get_raw=lambda section, option, default=None: values.get(
+            section, {}
+        ).get(option, default),
+        config_get_list=lambda section, option, default=None: values.get(
+            section, {}
+        ).get(option, default),
+    )
+    return resolve_run_capability_authority(config)
+
+
 def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(climate_routes, "require_jwt", lambda request, required_scopes=None: {})
     monkeypatch.setattr(climate_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(
+        climate_routes,
+        "resolve_run_capability_authority",
+        lambda climate: SimpleNamespace(graph=None),
+    )
 
 
 def _stub_queue(
@@ -109,6 +153,326 @@ def test_build_climate_parse_error(monkeypatch: pytest.MonkeyPatch) -> None:
     assert payload["error"]["code"] == "validation_error"
     assert payload["error"]["message"] == "Validation failed"
     assert payload["errors"][0]["message"] == "Invalid climate field values."
+
+
+@pytest.mark.parametrize(
+    "profile_id",
+    ("continental-us", "europe", "canada", "australia", "global-earth"),
+)
+def test_build_climate_rejects_invalid_capability_authority_before_parse(
+    monkeypatch: pytest.MonkeyPatch, profile_id: str,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(climate_routes, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(
+        climate_routes,
+        "resolve_run_capability_authority",
+        lambda climate: (_ for _ in ()).throw(
+            ValueError(f"partial {profile_id} capability graph")
+        ),
+    )
+
+    class DummyClimate:
+        parse_calls = 0
+
+        def parse_inputs(self, payload) -> None:
+            self.parse_calls += 1
+
+    controller = DummyClimate()
+    monkeypatch.setattr(climate_routes.Climate, "getInstance", lambda wd: controller)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/build-climate", json={})
+
+    assert response.status_code == 409
+    assert response.json()["error"]["details"] == (
+        f"partial {profile_id} capability graph"
+    )
+    assert controller.parse_calls == 0
+
+
+def test_build_climate_rejects_raw_hidden_mode_under_valid_v2_authority_before_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(climate_routes, "get_wd", lambda runid: "/tmp/run")
+    authority = SimpleNamespace(
+        climate_datasets=("vanilla_cligen",),
+        climate_spatial_methods_by_dataset={"vanilla_cligen": ("single",)},
+    )
+    monkeypatch.setattr(
+        climate_routes,
+        "resolve_run_capability_authority",
+        lambda climate: SimpleNamespace(graph=authority),
+    )
+
+    class DummyClimate:
+        catalog_id = "vanilla_cligen"
+        climate_spatialmode = 0
+        parse_calls = 0
+
+        def parse_inputs(self, payload) -> None:
+            self.parse_calls += 1
+
+    controller = DummyClimate()
+    monkeypatch.setattr(climate_routes.Climate, "getInstance", lambda wd: controller)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/build-climate",
+            json={
+                "climate_mode": 3,
+                "future_start_year": 2040,
+                "future_end_year": 2060,
+            },
+        )
+
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "missing_capability_id"
+    assert controller.parse_calls == 0
+
+
+def test_build_climate_rejects_different_unsupported_catalog_before_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(climate_routes, "get_wd", lambda runid: "/tmp/run")
+    authority = SimpleNamespace(
+        climate_datasets=("vanilla_cligen",),
+        climate_spatial_methods_by_dataset={"vanilla_cligen": ("single",)},
+    )
+    monkeypatch.setattr(
+        climate_routes,
+        "resolve_run_capability_authority",
+        lambda climate: SimpleNamespace(graph=authority),
+    )
+
+    class DummyClimate:
+        catalog_id = "vanilla_cligen"
+        climate_spatialmode = 0
+        parse_calls = 0
+
+        def parse_inputs(self, payload) -> None:
+            self.parse_calls += 1
+
+    controller = DummyClimate()
+    monkeypatch.setattr(climate_routes.Climate, "getInstance", lambda wd: controller)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/build-climate",
+            json={
+                "climate_catalog_id": "future_cmip5",
+                "climate_mode": 3,
+                "future_start_year": 2040,
+                "future_end_year": 2060,
+            },
+        )
+
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "unsupported_capability"
+    assert controller.parse_calls == 0
+
+
+def test_schema_v1_europe_preset_drives_rq_acceptance_and_rejection(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    from wepppy.nodb.locales import get_climate_dataset
+
+    authority_root = tmp_path / "preset"
+    authority_root.mkdir()
+    authority = _eu_preset_authority(authority_root)
+    assert authority.graph is not None
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(climate_routes, "get_wd", lambda _runid: str(tmp_path))
+    monkeypatch.setattr(
+        climate_routes,
+        "resolve_run_capability_authority",
+        lambda _climate: authority,
+    )
+
+    class DummyClimate:
+        run_group = "batch"
+        catalog_id = "vanilla_cligen"
+        climatestation_mode = -1
+        climate_spatialmode = 0
+        climate_mode = 0
+        parse_calls = 0
+
+        def parse_inputs(self, _payload) -> None:
+            self.parse_calls += 1
+
+    controller = DummyClimate()
+    monkeypatch.setattr(
+        climate_routes.Climate,
+        "getInstance",
+        lambda _wd: controller,
+    )
+    user_defined = get_climate_dataset("user_defined_cli")
+    prism = get_climate_dataset("prism_stochastic")
+
+    with TestClient(rq_engine.app) as client:
+        accepted = client.post(
+            "/api/runs/run-1/cfg/build-climate",
+            json={
+                "climate_catalog_id": "user_defined_cli",
+                "climate_mode": int(user_defined.climate_mode),
+            },
+        )
+        rejected = client.post(
+            "/api/runs/run-1/cfg/build-climate",
+            json={
+                "climate_catalog_id": "prism_stochastic",
+                "climate_mode": int(prism.climate_mode),
+            },
+        )
+
+    assert accepted.status_code == 200
+    assert accepted.json()["message"] == "Set climate inputs for batch processing"
+    assert controller.parse_calls == 1
+    assert rejected.status_code == 400
+    assert rejected.json()["error"]["code"] == "unsupported_capability"
+    assert controller.parse_calls == 1
+
+
+def test_v2_climate_preflight_translates_stable_methods_to_parser_values() -> None:
+    authority = SimpleNamespace(
+        climate_datasets=("observed_daymet",),
+        climate_station_methods_by_dataset={"observed_daymet": ("auto", "distance")},
+        climate_spatial_methods_by_dataset={"observed_daymet": ("single", "interpolated")},
+        climate_station_defaults={"observed_daymet": "auto"},
+        climate_spatial_defaults={"observed_daymet": "single"},
+    )
+    climate = SimpleNamespace(
+        catalog_id=None,
+        climatestation_mode=-1,
+        climate_spatialmode=0,
+    )
+    payload = {
+        "climate_catalog_id": "observed_daymet",
+        "climate_mode": 9,
+        "climate_station_method": "distance",
+        "climate_spatial_method": "interpolated",
+    }
+
+    response = climate_routes._validate_v2_climate_selection(
+        climate, authority, payload
+    )
+
+    assert response is None
+    assert payload["climatestation_mode"] == 0
+    assert payload["climate_spatialmode"] == 2
+
+
+def test_v2_climate_preflight_rejects_disagreeing_station_method_values() -> None:
+    authority = SimpleNamespace(
+        climate_datasets=("observed_daymet",),
+        climate_station_methods_by_dataset={"observed_daymet": ("auto", "distance")},
+        climate_spatial_methods_by_dataset={"observed_daymet": ("single",)},
+        climate_station_defaults={"observed_daymet": "auto"},
+        climate_spatial_defaults={"observed_daymet": "single"},
+    )
+    climate = SimpleNamespace(
+        catalog_id=None,
+        climatestation_mode=-1,
+        climate_spatialmode=0,
+    )
+    payload = {
+        "climate_catalog_id": "observed_daymet",
+        "climate_mode": 9,
+        "climate_station_method": "distance",
+        "climatestation_mode": -1,
+    }
+
+    response = climate_routes._validate_v2_climate_selection(
+        climate, authority, payload
+    )
+
+    assert response is not None
+    assert response.status_code == 400
+    assert b"capability_mismatch" in response.body
+
+
+def test_v2_climate_preflight_preserves_exact_current_omitted_methods() -> None:
+    authority = SimpleNamespace(
+        climate_datasets=("vanilla_cligen",),
+        climate_station_methods_by_dataset={"vanilla_cligen": ("auto",)},
+        climate_spatial_methods_by_dataset={"vanilla_cligen": ("single", "multiple")},
+        climate_station_defaults={"vanilla_cligen": "auto"},
+        climate_spatial_defaults={"vanilla_cligen": "single"},
+    )
+    climate = SimpleNamespace(
+        catalog_id="vanilla_cligen",
+        climatestation_mode=1,
+        climate_spatialmode=2,
+    )
+    payload = {"climate_mode": 0}
+
+    response = climate_routes._validate_v2_climate_selection(
+        climate, authority, payload
+    )
+
+    assert response is None
+    assert payload["climate_catalog_id"] == "vanilla_cligen"
+    assert payload["climatestation_mode"] == 1
+    assert payload["climate_spatialmode"] == 2
+
+
+def test_v2_exact_current_spatial_carveout_reaches_real_parser() -> None:
+    authority = SimpleNamespace(
+        climate_datasets=("vanilla_cligen",),
+        climate_station_methods_by_dataset={"vanilla_cligen": ("auto",)},
+        climate_spatial_methods_by_dataset={"vanilla_cligen": ("single", "multiple")},
+        climate_station_defaults={"vanilla_cligen": "auto"},
+        climate_spatial_defaults={"vanilla_cligen": "single"},
+    )
+
+    class DummyClimate:
+        catalog_id = "vanilla_cligen"
+        climatestation_mode = -1
+        climate_spatialmode = 2
+        _catalog_id = "vanilla_cligen"
+        _climate_mode = -1
+        _climate_spatialmode = 2
+        _climatestation_mode = -1
+        _input_years = None
+        _catalog = {
+            "vanilla_cligen": SimpleNamespace(
+                catalog_id="vanilla_cligen",
+                climate_mode=0,
+                spatial_modes=(0, 1),
+                default_spatial_mode=0,
+            )
+        }
+
+        @contextlib.contextmanager
+        def locked(self):
+            yield
+
+        def _resolve_catalog_dataset(self, catalog_id):
+            return self._catalog.get(catalog_id)
+
+        def _set_observed_pars_without_lock(self, **kwds):
+            return None
+
+        def _set_future_pars_without_lock(self, **kwds):
+            return None
+
+        def _set_single_storm_pars_without_lock(self, **kwds):
+            return None
+
+    climate = DummyClimate()
+    payload = {"climate_mode": 0, "input_years": 10}
+
+    response = climate_routes._validate_v2_climate_selection(
+        climate, authority, payload
+    )
+    assert response is None
+    replay_payload = pickle.loads(pickle.dumps(copy.deepcopy(payload)))
+    ClimateInputParsingService().parse_inputs(climate, replay_payload)
+
+    assert int(climate._climate_spatialmode) == 2
 
 
 def test_build_climate_parse_missing_field_key_error_returns_structured_validation(

@@ -20,6 +20,7 @@ from wepppy.rq.submission_recovery import RqSubmissionConflict, rq_submission_lo
 from .batch_routes import router as batch_router
 from .ag_fields_routes import router as ag_fields_router
 from .bootstrap_routes import router as bootstrap_router
+from .builder_routes import router as builder_router
 from .climate_routes import router as climate_router
 from .culvert_routes import router as culvert_router
 from .debris_flow_routes import router as debris_flow_router
@@ -38,6 +39,7 @@ from .orchestration_read_routes import router as orchestration_read_router
 from .openet_ts_routes import router as openet_ts_router
 from .polaris_routes import router as polaris_router
 from .project_routes import router as project_router
+from .project_config_update_routes import router as project_config_update_router
 from .run_sync_routes import router as run_sync_router
 from .rap_ts_routes import router as rap_ts_router
 from .rhem_routes import router as rhem_router
@@ -171,6 +173,8 @@ app.include_router(ag_fields_router, prefix="/api")
 app.include_router(admin_job_router, prefix="/api")
 app.include_router(batch_router, prefix="/api")
 app.include_router(bootstrap_router, prefix="/api")
+app.include_router(builder_router, prefix="/api")
+app.include_router(project_config_update_router, prefix="/api")
 app.include_router(culvert_router, prefix="/api")
 app.include_router(session_router, prefix="/api")
 app.include_router(setup_discovery_router, prefix="/api")

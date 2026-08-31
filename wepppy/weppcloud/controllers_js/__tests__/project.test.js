@@ -198,12 +198,46 @@ describe("Project controller", () => {
 
         expect(postJsonMock).toHaveBeenCalledWith("tasks/setname/", { name: "New Name" });
         expect(document.querySelector('[data-project-field="name"]').value).toBe("New Name");
-        expect(document.title).toBe("Base Title - New Name");
+        expect(document.title).toBe("Base Title");
         expect(handler).toHaveBeenCalledWith(expect.objectContaining({
             name: "New Name",
             previous: "Existing Name"
         }));
         expect(commandBar.showResult).toHaveBeenCalledWith('Saved project name to "New Name"');
+    });
+
+    test("clearing the project name preserves the document title", async () => {
+        const handler = jest.fn();
+        project.events.on("project:name:updated", handler);
+
+        await project.setName("");
+
+        expect(postJsonMock).toHaveBeenCalledWith("tasks/setname/", { name: "" });
+        expect(document.querySelector('[data-project-field="name"]').value).toBe("");
+        expect(document.title).toBe("Base Title");
+        expect(handler).toHaveBeenCalledWith(expect.objectContaining({
+            name: "",
+            previous: "Existing Name"
+        }));
+        expect(commandBar.showResult).toHaveBeenCalledWith('Saved project name to "Untitled"');
+    });
+
+    test.each(["Alpha Scenario", ""])("saving scenario %p preserves the document title", async (scenario) => {
+        const handler = jest.fn();
+        project.events.on("project:scenario:updated", handler);
+
+        await project.setScenario(scenario);
+
+        expect(postJsonMock).toHaveBeenCalledWith("tasks/setscenario/", { scenario });
+        expect(document.querySelector('[data-project-field="scenario"]').value).toBe(scenario);
+        expect(document.title).toBe("Base Title");
+        expect(handler).toHaveBeenCalledWith(expect.objectContaining({
+            scenario,
+            previous: "Initial Scenario"
+        }));
+        expect(commandBar.showResult).toHaveBeenCalledWith(
+            scenario ? 'Saved scenario to "' + scenario + '"' : "Cleared scenario"
+        );
     });
 
     test("setScenarioFromInput debounces network calls", async () => {

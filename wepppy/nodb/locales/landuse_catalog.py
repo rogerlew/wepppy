@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from functools import lru_cache
+import hashlib
+import json
+import re
 from typing import Dict, Iterable, List, Mapping, MutableMapping, Optional, Sequence, Tuple
 
 from wepppy.wepp.management import load_map
@@ -55,7 +58,9 @@ _STATIC_LANDCOVER_DATASETS: Dict[str, List[Tuple[str, str]]] = {
         ("eu/CORINE_LandCover/2012", "CORINE 2012"),
         ("eu/CORINE_LandCover/2018", "CORINE 2018"),
     ],
-    "au": [],
+    "au": [
+        ("au/landuse_201011/lu10v5ua", "Australia Land Use 2010-2011"),
+    ],
     "earth": [
         (f"locales/earth/C3Slandcover/{year}", f"C3Slandcover/{year}")
         for year in range(2020, 1991, -1)
@@ -71,11 +76,157 @@ _LANDCOVER_LOCALE_PRIORITY: Tuple[Tuple[str, ...], ...] = (
     ("virgin_islands",),
     ("eu",),
     ("au",),
-    ("earth", "nigeria"),
+    ("earth", "canada", "nigeria"),
 )
 
 
 _EXCLUDED_MANAGEMENT_FILES: Tuple[str, ...] = ("UnDisturbed/null.man",)
+
+_CONFIG_ONLY_LANDCOVER_DATASETS: Tuple[Tuple[str, str], ...] = (
+    ("hawaii/nlcd/wepp_31131a7", "Hawaii NLCD WEPP 31131a7"),
+    ("ca/canadalandcover2020", "Canada Landcover 2020"),
+    ("portland/nlcd", "Portland NLCD"),
+)
+_LANDCOVER_SPECIAL_IDS: Mapping[str, str] = {
+    "locales/ChileCayumanque/landuse": "chile-cayumanque-landuse",
+    "locales/virgin_islands/landcover": "usvi-landcover-2018",
+    "locales/virgin_islands/landcover/2023": "usvi-landcover-2023",
+    "hawaii/nlcd/wepp_31131a7": "hawaii-nlcd-wepp-31131a7",
+    "ca/canadalandcover2020": "canada-landcover-2020",
+    "portland/nlcd": "portland-nlcd",
+    "au/landuse_201011/lu10v5ua": "australia-landuse-2010-2011",
+}
+LANDCOVER_PROVIDER_ADAPTER_REVISION = "landuse-catalog-adapter-v2"
+_BUILDER_EXPOSED_LANDCOVER_IDS = frozenset(
+    {
+        *(f"nlcd-ever-forest-{year}" for year in range(1985, 2025)),
+        *(f"nlcd-{year}" for year in range(1985, 2025)),
+        *(f"emapr-vote-{year}" for year in range(1984, 2018)),
+        "corine-1990",
+        "corine-2000",
+        "corine-2006",
+        "corine-2012",
+        "corine-2018",
+        "australia-landuse-2010-2011",
+        *(f"c3s-landcover-{year}" for year in range(1992, 2021)),
+    }
+)
+
+
+@dataclass(frozen=True, slots=True)
+class LandcoverCatalogEntry:
+    """Stable landcover identity with one canonical runtime value."""
+
+    catalog_id: str
+    runtime_value: str
+    label: str
+    support_state: str
+
+
+def landcover_catalog_id(runtime_value: str) -> str:
+    """Map a closed runtime landcover token to its stable catalog ID."""
+
+    value = str(runtime_value)
+    special = _LANDCOVER_SPECIAL_IDS.get(value)
+    if special is not None:
+        return special
+    match = re.fullmatch(r"nlcd/ever_forest/(\d{4})", value)
+    if match:
+        return f"nlcd-ever-forest-{match.group(1)}"
+    match = re.fullmatch(r"nlcd/(\d{4})", value)
+    if match:
+        return f"nlcd-{match.group(1)}"
+    match = re.fullmatch(
+        r"islay\.ceoas\.oregonstate\.edu/v1/landcover/vote/(\d{4})", value
+    )
+    if match:
+        return f"emapr-vote-{match.group(1)}"
+    match = re.fullmatch(r"alaska/nlcd/(\d{4})", value)
+    if match:
+        return f"alaska-nlcd-{match.group(1)}"
+    match = re.fullmatch(r"locales/oyster-creek/landuse/(\d{4})", value)
+    if match:
+        return f"oyster-creek-{match.group(1)}"
+    match = re.fullmatch(r"eu/(?:CORINE_LandCover|corine_landcover)/(\d{4})", value)
+    if match:
+        return f"corine-{match.group(1)}"
+    match = re.fullmatch(r"locales/earth/C3Slandcover/(\d{4})", value)
+    if match:
+        return f"c3s-landcover-{match.group(1)}"
+    raise ValueError(f"unknown landcover runtime value: {value!r}")
+
+
+@lru_cache(maxsize=1)
+def iter_landcover_catalog() -> Tuple[LandcoverCatalogEntry, ...]:
+    """Return the complete unique landcover catalog and shipped-config boundary."""
+
+    values: dict[str, tuple[str, str]] = {}
+    for group, entries in _STATIC_LANDCOVER_DATASETS.items():
+        for runtime_value, label in entries:
+            catalog_id = landcover_catalog_id(runtime_value)
+            previous = values.get(catalog_id)
+            if previous is not None and previous[0] != runtime_value:
+                raise ValueError(f"landcover ID {catalog_id!r} maps to multiple runtime values")
+            values[catalog_id] = (runtime_value, label)
+    for runtime_value, label in _CONFIG_ONLY_LANDCOVER_DATASETS:
+        catalog_id = landcover_catalog_id(runtime_value)
+        values[catalog_id] = (runtime_value, label)
+    return tuple(
+        LandcoverCatalogEntry(
+            catalog_id=catalog_id,
+            runtime_value=runtime_value,
+            label=label,
+            support_state=(
+                "builder_exposed"
+                if catalog_id in _BUILDER_EXPOSED_LANDCOVER_IDS
+                else "supported_non_builder"
+            ),
+        )
+        for catalog_id, (runtime_value, label) in sorted(values.items())
+    )
+
+
+@lru_cache(maxsize=1)
+def _landcover_by_id() -> Mapping[str, LandcoverCatalogEntry]:
+    return {entry.catalog_id: entry for entry in iter_landcover_catalog()}
+
+
+def get_landcover_entry(catalog_id: str) -> LandcoverCatalogEntry | None:
+    """Return a landcover provider entry by stable ID."""
+
+    return _landcover_by_id().get(catalog_id)
+
+
+def landcover_catalog_revision(
+    adapter_revision: str = LANDCOVER_PROVIDER_ADAPTER_REVISION,
+) -> str:
+    """Return identity over entries, ordered locale groups, and adapter."""
+
+    payload = {
+        "entries": [
+            {
+                "id": entry.catalog_id,
+                "runtime": entry.runtime_value,
+                "label": entry.label,
+                "support_state": entry.support_state,
+            }
+            for entry in iter_landcover_catalog()
+        ],
+        "locale_groups": [
+            {
+                "group": group,
+                "catalog_ids": [landcover_catalog_id(runtime) for runtime, _label in entries],
+            }
+            for group, entries in _STATIC_LANDCOVER_DATASETS.items()
+        ],
+        "locale_priority": _LANDCOVER_LOCALE_PRIORITY,
+        "config_only_catalog_ids": [
+            landcover_catalog_id(runtime) for runtime, _label in _CONFIG_ONLY_LANDCOVER_DATASETS
+        ],
+        "adapter_revision": adapter_revision,
+    }
+    serialized = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
 
 
 def _resolve_landcover_datasets(locales: Iterable[str]) -> List[Tuple[str, str]]:
@@ -90,6 +241,15 @@ def _resolve_landcover_datasets(locales: Iterable[str]) -> List[Tuple[str, str]]
     return list(_STATIC_LANDCOVER_DATASETS["_default"])
 
 
+def landcover_catalog_ids_for_locales(locales: Iterable[str]) -> Tuple[str, ...]:
+    """Return the ordered locale-wide stable land-cover envelope."""
+
+    return tuple(
+        landcover_catalog_id(runtime_value)
+        for runtime_value, _label in _resolve_landcover_datasets(locales)
+    )
+
+
 @dataclass(frozen=True)
 class LanduseDataset:
     """Descriptor for an available landuse management dataset."""
@@ -99,6 +259,8 @@ class LanduseDataset:
     management_file: str
     metadata: Mapping[str, object]
     kind: str = "mapping"
+    catalog_id: str | None = None
+    support_state: str | None = None
 
     def to_mapping(self) -> MutableMapping[str, object]:
         """Return a mutable copy of the underlying metadata, keyed like legacy dicts."""
@@ -182,6 +344,12 @@ def available_landuse_datasets(
                 "kind": "landcover",
             },
             kind="landcover",
+            catalog_id=landcover_catalog_id(value),
+            support_state=(
+                "builder_exposed"
+                if landcover_catalog_id(value) in _BUILDER_EXPOSED_LANDCOVER_IDS
+                else "supported_non_builder"
+            ),
         )
         for value, label in landcover_entries
     ]
@@ -189,4 +357,13 @@ def available_landuse_datasets(
     return datasets + landcover_datasets
 
 
-__all__ = ["LanduseDataset", "available_landuse_datasets"]
+__all__ = [
+    "LandcoverCatalogEntry",
+    "LanduseDataset",
+    "available_landuse_datasets",
+    "get_landcover_entry",
+    "iter_landcover_catalog",
+    "landcover_catalog_ids_for_locales",
+    "landcover_catalog_id",
+    "landcover_catalog_revision",
+]

@@ -101,6 +101,7 @@ def _stub_auth(monkeypatch: pytest.MonkeyPatch, *, claims: dict | None = None) -
         lambda request, required_scopes=None: resolved_claims,
     )
     monkeypatch.setattr(bootstrap_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(wepp_run_payload, "capability_authority", lambda config: None)
 
 
 def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-1") -> None:

@@ -10,8 +10,13 @@ from fastapi.responses import JSONResponse
 from rq import Queue
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
-from wepppy.nodb.core import Ron, Soils, WatershedNotAbstractedError
+from wepppy.nodb.core import Ron, Soils, SoilsMode, WatershedNotAbstractedError
 from wepppy.nodb.mods.disturbed import Disturbed
+from wepppy.nodb.project_config_capabilities import (
+    BuilderRegistryUnavailableError,
+    LocaleAuthorityInvalidError,
+    soil_capability_modes,
+)
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.runtime_paths.errors import NoDirError
 from wepppy.runtime_paths.fs import resolve as _nodir_resolve
@@ -31,6 +36,37 @@ router = APIRouter()
 
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
+
+
+def _soil_modes_or_error(
+    soils: Soils,
+) -> tuple[frozenset[int] | None, JSONResponse | None]:
+    try:
+        return soil_capability_modes(soils), None
+    except LocaleAuthorityInvalidError as exc:
+        return None, error_response(
+            "Run locale authority is invalid.",
+            status_code=409,
+            code="locale_authority_invalid",
+            details=str(exc),
+        )
+    except BuilderRegistryUnavailableError as exc:
+        response = error_response(
+            "Builder registry is unavailable.",
+            status_code=503,
+            code="builder_registry_error",
+            details=str(exc),
+        )
+        response.headers["Retry-After"] = "5"
+        return None, response
+    except ValueError as exc:
+        return None, error_response(
+            "Project capability authority is invalid.",
+            status_code=409,
+            code="capability_authority_invalid",
+            details=str(exc),
+        )
+    return None, None
 
 
 def _maybe_nodir_error_response(exc: Exception):
@@ -61,6 +97,12 @@ def _to_float(value: Any) -> float:
             raise ValueError("missing")
         return _to_float(value[0])
     return float(value)
+
+
+def _first(value: Any) -> Any:
+    if isinstance(value, (list, tuple)):
+        return value[0] if value else None
+    return value
 
 
 def _normalize_config_token(value: str) -> str:
@@ -95,7 +137,8 @@ def _config_mismatch_response(wd: str, config: str) -> JSONResponse | None:
         success_description="Soils inputs accepted; returns batch update message or enqueued `job_id`.",
         extra={
             400: "Soils validation or precondition failed. Returns the canonical error payload.",
-            409: "Run config mismatch. Returns canonical `run_config_mismatch` without mutation.",
+            409: "Run config or project capability/locale authority conflict; no mutation.",
+            503: "Builder registry is unavailable; retry after the advertised interval.",
         },
     ),
 )
@@ -117,10 +160,6 @@ async def build_soils(runid: str, config: str, request: Request) -> JSONResponse
         if mismatch_response is not None:
             return mismatch_response
 
-        prep = RedisPrep.getInstance(wd)
-        prep.remove_timestamp(TaskEnum.build_soils)
-        prep.remove_timestamp(TaskEnum.run_geneva)
-
         payload = await parse_request_payload(
             request,
             boolean_fields={"clear_ssurgo_cache_on_rebuild"},
@@ -131,17 +170,60 @@ async def build_soils(runid: str, config: str, request: Request) -> JSONResponse
             return error_response("initial_sat must be numeric", status_code=400)
 
         soils = Soils.getInstance(wd)
+        allowed_modes, authority_error = _soil_modes_or_error(soils)
+        if authority_error is not None:
+            return authority_error
+        soil_mode_raw = _first(payload.get("soil_mode"))
+        mode_alias_raw = _first(payload.get("mode"))
+        requested_mode = None
+        if soil_mode_raw is not None or mode_alias_raw is not None:
+            try:
+                soil_mode = SoilsMode(int(soil_mode_raw)) if soil_mode_raw is not None else None
+                mode_alias = SoilsMode(int(mode_alias_raw)) if mode_alias_raw is not None else None
+            except (TypeError, ValueError):
+                return error_response("Invalid soil mode", status_code=400)
+            if soil_mode is not None and mode_alias is not None and soil_mode != mode_alias:
+                return error_response(
+                    "soil_mode and mode must identify the same soil builder",
+                    status_code=400,
+                )
+            requested_mode = soil_mode if soil_mode is not None else mode_alias
+            assert requested_mode is not None
+            if (
+                requested_mode != soils.mode
+                and allowed_modes is not None
+                and requested_mode.value not in allowed_modes
+            ):
+                return error_response(
+                    "Soil builder is not supported by this project.",
+                    status_code=400,
+                    code="unsupported_capability",
+                    details=f"Unsupported soil builder mode: {requested_mode.value}",
+                )
+
+        disturbed = None
+        sol_ver = None
+        if "disturbed" in soils.mods:
+            disturbed = Disturbed.getInstance(wd)
+            try:
+                sol_ver = _to_float(payload.get("sol_ver"))
+            except (TypeError, ValueError):
+                return error_response("sol_ver must be numeric", status_code=400)
+
+        prep = RedisPrep.getInstance(wd)
+        prep.remove_timestamp(TaskEnum.build_soils)
+        prep.remove_timestamp(TaskEnum.run_geneva)
+
+        if requested_mode is not None:
+            soils.mode = requested_mode
         soils.initial_sat = initial_sat
         soils.clear_ssurgo_cache_on_rebuild = bool(
             payload.get("clear_ssurgo_cache_on_rebuild", False)
         )
 
-        if "disturbed" in soils.mods:
-            disturbed = Disturbed.getInstance(wd)
-            try:
-                disturbed.sol_ver = _to_float(payload.get("sol_ver"))
-            except (TypeError, ValueError):
-                return error_response("sol_ver must be numeric", status_code=400)
+        if disturbed is not None:
+            assert sol_ver is not None
+            disturbed.sol_ver = sol_ver
 
         if soils.run_group == "batch":
             return JSONResponse({"message": "Set soils inputs for batch processing"})

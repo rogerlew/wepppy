@@ -58,6 +58,33 @@
 {% endblock %}
 
 {% block script_extras %}
+  <script>
+    (() => {
+      const ensureCreationIdempotencyKey = (form) => {
+        let input = form.querySelector('input[name="creation_idempotency_key"]');
+        if (!input) {
+          input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = 'creation_idempotency_key';
+          form.appendChild(input);
+        }
+        if (!input.value) {
+          if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+            input.value = window.crypto.randomUUID();
+          } else if (window.crypto && typeof window.crypto.getRandomValues === 'function') {
+            const bytes = new Uint8Array(24);
+            window.crypto.getRandomValues(bytes);
+            input.value = Array.from(bytes, (value) => value.toString(16).padStart(2, '0')).join('');
+          } else {
+            throw new Error('Secure random creation keys are unavailable in this browser.');
+          }
+        }
+      };
+      document.querySelectorAll('form.wc-run-form').forEach((form) => {
+        form.addEventListener('submit', () => ensureCreationIdempotencyKey(form));
+      });
+    })();
+  </script>
   {% if current_user.is_anonymous %}
     <script src="{{ static_url('js/controllers-gl.js') }}" defer></script>
     <script src="{{ static_url('js/controllers_gl_stale_check.js') }}" defer></script>

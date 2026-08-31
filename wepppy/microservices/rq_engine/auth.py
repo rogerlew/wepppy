@@ -132,10 +132,15 @@ def _sanitize_auth_actor(claims: Mapping[str, Any]) -> dict[str, Any] | None:
     actor: dict[str, Any] = {"token_class": token_class}
 
     if token_class == "user":
-        user_id = _parse_user_id(claims.get("sub"))
+        user_id = _parse_user_id(claims.get("user_id"))
+        if user_id is None:
+            user_id = _parse_user_id(claims.get("sub"))
         if user_id is None:
             return None
         actor["user_id"] = user_id
+        privileged_roles = sorted(_normalize_roles(claims.get("roles")) & {"admin", "root"})
+        if privileged_roles:
+            actor["roles"] = privileged_roles
         return actor
 
     if token_class == "session":
@@ -316,6 +321,34 @@ def authorize_run_access(
         _reject_fork_preparing_run(runid)
 
 
+def authorize_run_mutation(claims: Mapping[str, Any], runid: str) -> None:
+    """Require a current project owner or Admin/Root user identity."""
+
+    if token_class(claims) != "user":
+        raise AuthError(
+            "Project mutation requires an authenticated user identity",
+            status_code=403,
+            code="forbidden",
+        )
+    roles = _normalize_roles(claims.get("roles"))
+    if roles & {"admin", "root"}:
+        return
+    auth_runid = _authorization_runid(runid)
+    owners = get_run_owners_lazy(auth_runid)
+    token_user_id = _parse_user_id(claims.get("user_id") or claims.get("sub"))
+    token_email = str(claims.get("email") or "").strip().lower()
+    for owner in owners or ():
+        if token_user_id is not None and _parse_user_id(getattr(owner, "id", None)) == token_user_id:
+            return
+        if token_email and str(getattr(owner, "email", "")).strip().lower() == token_email:
+            return
+    raise AuthError(
+        "Project mutation requires the project owner or Admin/Root",
+        status_code=403,
+        code="forbidden",
+    )
+
+
 def _reject_fork_preparing_run(runid: str) -> None:
     redis_conn = _AUTH_REDIS_CLIENT(**redis_connection_kwargs(RedisDB.RQ))
     try:
@@ -378,6 +411,7 @@ def require_jwt(
 __all__ = [
     "AuthError",
     "authorize_run_access",
+    "authorize_run_mutation",
     "require_token_class",
     "require_jwt",
     "require_roles",

@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-08-24
-**Active Packages**: 29
+**Last Updated**: 2026-08-29
+**Active Packages**: 31
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -405,6 +405,89 @@ When resuming Kubernetes work:
 
 ## 🚧 In Progress
 
+### Project Config Production Cutover (WP12)
+
+**Started**: 2026-08-31
+
+**Priority/Security**: Critical / `high`
+
+**Link**: [docs/work-packages/20260804_project_config_production_cutover/](docs/work-packages/20260804_project_config_production_cutover/)
+
+**Scope**: Repeat the ratified WP12D changed-file audits, accept and merge only
+the reviewed project-owned-config boundary, deploy the resulting canonical
+`master` revision to production, stage readers before writers, prove rollback
+compatibility, and hand the exact revision inventory to WP13 while retaining
+the shared `_defaults.toml` alias.
+
+**Status**: Repeated scope audits and pre-merge gates pass at candidate
+`039192492`; final checkpoint/push and canonical merge are in progress. No
+production action has occurred.
+
+### Project Config Run UI Authority (WP12D)
+
+**Started**: 2026-08-27
+
+**Priority/Security**: Critical / `high`
+
+**Link**: [docs/work-packages/20260827_project_config_run_ui_authority/](docs/work-packages/20260827_project_config_run_ui_authority/)
+
+**Scope**: Make effective `.cfg` locale authoritative without locale-bearing
+Interface links. Recognized legacy base profiles use the live Builder graph for
+landuse, soil, and climate controls; projection-eligible schema-v1 named presets
+use it for climate and land cover only; Builder schema-v2/v3 projects remain
+frozen to their stored graph. Amendment 5 corrects the five-locale climate
+matrix and makes Builder Land-cover selection a default rather than a singleton
+capability. Congruent Builder-source schema-v3 projects may adopt a selection-
+preserving same-locale envelope refresh only after an authorized end user
+reviews and acknowledges the provenance/stability warning; schema-v2 refresh
+is unavailable. No migration is authorized; production remains reserved for
+WP12.
+
+**Status**: Amendment `PC-24/WP12D-20260827-3` and audit correction 4 were
+accepted and Forest-validated. The demonstrated Europe/schema-v1 and land-cover
+envelope defect reopened WP12D under amendment
+`PC-24/WP12D-20260828-5`, exactly ratified on 2026-08-28 16:29 UTC. Amendment-5
+binding correctness/governance/security reviews are READY and standalone
+checkpoint `baea9616df255d336807d0a91adf7be8f99367fe` descends from baseline
+`0ad76c547145bbe323148bac73410ff9cfcd01ef`. Its append-only reader floor must
+pass exact-host `forest` before any new graph writer is exposed.
+Parent WP12 retains merge and every production action.
+
+### Project Config Builder Locale Expansion (WP12C)
+
+**Started**: 2026-08-27
+
+**Priority/Security**: Critical / `high`
+
+**Link**: [docs/work-packages/20260827_project_config_builder_locale_expansion/](docs/work-packages/20260827_project_config_builder_locale_expansion/)
+
+**Scope**: Expose the canonical Europe, Canada, Australia, and Global Earth
+profiles alongside Continental US. Make each profile's typed data and climate-
+station database lists the sole Builder authority, with Vanilla CLIGEN available
+and selected by default in every locale and Canada using global datasets.
+
+**Status**: Candidate `b31eeb625` and audit correction `f6784420a` are
+correctness/security/governance Ready and fully validated locally. Reader-first
+acceptance on exact host `forest` is next; production remains reserved for WP12.
+
+### Project Config Builder Model Options
+
+**Started**: 2026-08-27
+
+**Priority**: High
+
+**Security impact**: `low`
+
+**Link**: [docs/work-packages/20260826_project_config_builder_model_options/](docs/work-packages/20260826_project_config_builder_model_options/)
+
+**Description**: Add WhiteboxTools-only Multiple OFE representation and an
+explicit registered WEPP binary version to project-owned Config Builder
+creation, with server-enforced compatibility and persisted provenance.
+
+**Status**: Contract checkpoint corrected after first review; second independent review pending.
+
+---
+
 ### Production Compose Deployment and CAP Runtime Hardening
 
 **Started**: 2026-08-25
@@ -485,17 +568,19 @@ remain.
 **Description**: Search a seeded, stratified sample of the ESDAC raster
 footprint for zero-valued parameters or invalid horizons, then define and
 implement explicit validation and diagnostics without silently inventing
-replacement soil values. The Phase 0 pilot, Phase 1 replay fixture, Phase 2
-quality contract, and Phase 3 pure validator are complete; production wiring
-remains in Phase 4.
-**Next Steps**: Integrate the pure validator into the ESDAC builder and worker
-aggregation, preserve TopoAZ/coordinate diagnostics, and prove that rejected
-locations cannot produce usable `.sol` files. Decide separately whether the
-50,000-sample discovery campaign is warranted.
-**Validation Notes**: Phase 3 targeted EU tests passed (`22 passed`); package,
-ADR, and tracker documentation lint passed; the full repository gate reached
-170 passed and 13 skipped before an unrelated Docker CLI compose-contract
-failure (`docker compose` rejected `-f`).
+replacement soil values. Phases 0–6 implemented the quality contract, staged
+batch commit, durable per-location report, downstream artifact gate, and
+single/MOFE runtime enforcement. Forest observation on 2026-08-28 exposed a
+batch-error observability gap: the report held the reason, but the RQ
+traceback listed only location IDs.
+**Next Steps**: Validate and deploy the bounded ESDAC exception/log/status
+summary, confirm it on the next rejected job, and continue the 14–30 day or
+20-run observation window. Decide separately whether the 50,000-sample
+discovery campaign is warranted.
+**Validation Notes**: The 2026-08-28 combined unit and actual-raster suite
+passed (`10 passed`), including replay of the incident coordinate through the
+real ESDAC batch builder; the full report remains authoritative and no
+scientific validation or fallback behavior changed.
 
 ---
 
@@ -1156,6 +1241,213 @@ the remaining-run controller plan has no next controller milestone.
 
 ## ✅ Done
 
+### Table Overflow Discoverability and WEPP Slope Display Precision
+
+**Completed**: 2026-08-29
+
+**Priority/Security**: High / `none`
+
+**Link**: [docs/work-packages/20260828_table_overflow_discoverability/](docs/work-packages/20260828_table_overflow_discoverability/)
+
+**Outcome**: Overflowing `.wc-table-wrapper` regions now expose visible input
+instructions, keyboard focus, accessible-region semantics, and lifecycle
+refresh behavior through one shared enhancement. WEPP Loss Summary hillslope
+and channel `Slope` cells display three decimal places without changing raw
+sort keys or CSV output. Independent review is READY with no findings.
+
+**Lifecycle**: In Progress -> Done (2026-08-29)
+
+---
+
+### Project Config Locale and View Authority (WP12B)
+
+**Completed**: 2026-08-27
+
+**Priority/Security**: Critical / `high`
+
+**Link**: [docs/work-packages/20260827_project_config_locale_authority/](docs/work-packages/20260827_project_config_locale_authority/)
+
+**Outcome**: Shipped a typed 16-profile locale/dependency authority,
+normalized durable `continental-us` to runtime `us`, made stored schema-v2
+capabilities authoritative for run views and mutations, passed all independent
+reviews and full local validation, and accepted revision `3e8d0d09bcf5` on
+exact host Forest with real provider-family execution. Production remains
+reserved for WP12.
+
+---
+
+### Project Config Forest Acceptance (WP11)
+
+**Completed**: 2026-08-26
+
+**Priority/Security**: High / `high`
+
+**Link**: [docs/work-packages/20260804_project_config_forest_acceptance/](docs/work-packages/20260804_project_config_forest_acceptance/)
+
+**Outcome**: Deployed the exact candidate twice through the canonical Forest
+workflow, activated readers before writers, passed 148 deployed-environment
+tests and persistent restart/lifecycle probes, and proved historical-reader
+compatibility. Authenticated model smoke and full-stack rollback remain explicit
+WP12-facing dispositions.
+
+---
+
+### Project Config Lifecycle Integrity (WP10)
+
+**Completed**: 2026-08-26
+
+**Link**: [docs/work-packages/20260804_project_config_lifecycle_integrity/](docs/work-packages/20260804_project_config_lifecycle_integrity/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-08-26)
+
+**Summary**: Integrated the existing config amendment lock and deterministic
+recovery with fork, archive, and restore; excluded transaction-only artifacts;
+preserved config/manifest bytes; and verified nested authority, legacy fallback,
+degraded manifests, secret scanning, and concurrent-update exclusion. The full
+suite passed (`6935 passed, 63 skipped`).
+
+---
+
+### Project Config Update UI (WP09)
+
+**Completed**: 2026-08-26
+
+**Link**: [docs/work-packages/20260804_project_config_update_ui/](docs/work-packages/20260804_project_config_update_ui/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-08-26)
+
+**Summary**: Delivered the default-off run-header availability and digest
+warning, accessible complete merge-only preview, explicit apply/job/error flow,
+and nested-run linkage to top-level config authority. The full Python suite
+passed (`6927 passed, 63 skipped`); frontend and focused accessibility gates
+are recorded in the package validation artifact.
+
+---
+
+### Project Config Update Backend (WP08)
+
+**Completed**: 2026-08-26
+
+**Link**: [docs/work-packages/20260804_project_config_update_backend/](docs/work-packages/20260804_project_config_update_backend/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-08-26)
+
+**Summary**: Delivered the default-off project-owned-config update backend:
+read-only complete previews, owner/Admin/Root apply, worker reauthorization,
+opaque stale-preview protection, merge-only provenance, and lock/journal crash
+recovery. The full suite passed (`6925 passed, 63 skipped`).
+
+---
+
+### Project Config Builder UI (WP07) (2026-08-26)
+
+**Completed**: 2026-08-26
+**Security impact**: `high`
+**Initiative branch**: `feature/project-owned-config` (noncanonical)
+**Link**: [docs/work-packages/20260804_project_config_builder_ui/](docs/work-packages/20260804_project_config_builder_ui/)
+
+**Outcome**: Added the distinct authenticated one-page builder, registered
+dependency filtering, exact server review, role-described cell-size controls,
+stale and duplicate-submit guards, and accessible responsive behavior without
+changing named Interfaces. Full Python and JavaScript suites, authenticated
+axe/reflow/keyboard evidence, stubs, and dedicated correctness, security, and
+accessibility reviews pass. The WP06 writer remains default-off.
+
+---
+
+### Project Config Registry and Serializer (WP03) (2026-08-26)
+
+**Completed**: 2026-08-26
+**Security impact**: `low`
+**Initiative branch**: `feature/project-owned-config` (noncanonical)
+**Link**: [docs/work-packages/20260804_project_config_registry_serializer/](docs/work-packages/20260804_project_config_registry_serializer/)
+
+**Outcome**: Added a strict real-TOML registry, exact stable component IDs,
+the conservative continental-US source corpus, deterministic selection and
+declared writeover, immutable provenance/effective-writer records, and WP00B
+canonical bytes. The exact final suite passed with 6,864 tests and 63 skips.
+No writer or runtime surface was enabled; WP11 retains deployed Forest
+acceptance for all four locally eligible DEM/backend combinations.
+
+---
+
+### Project-Owned Configuration Reader Foundation (WP02) (2026-08-26)
+
+**Completed**: 2026-08-26
+**Security impact**: `high`
+**Initiative branch**: `feature/project-owned-config` (noncanonical)
+**Link**: [docs/work-packages/20260804_project_config_reader_foundation/](docs/work-packages/20260804_project_config_reader_foundation/)
+
+**Outcome**: Added the default-off central reader for flattened config schema
+v1, manifest degradation and digest status, and containment-validated nested
+authority while preserving exact legacy values and failures. No writer or
+read-triggered mutation exists. Focused, NoDb, exact final full-suite, stub,
+docs, security/correctness, and restarted-stack gates pass. WP04/WP06/WP09/
+WP10/WP11 retain real writer, UI, lifecycle, Forest, and rollback evidence.
+
+---
+
+### Defaults CFG Compatibility (WP01) (2026-08-26)
+
+**Completed**: 2026-08-26
+**Security impact**: `low`
+**Initiative branch**: `feature/project-owned-config` (noncanonical)
+**Link**: [docs/work-packages/20260804_defaults_cfg_compatibility/](docs/work-packages/20260804_defaults_cfg_compatibility/)
+
+**Outcome**: Moved shared defaults to canonical `_defaults.cfg`, retained the
+old name as a relative symlink, and implemented project-local cfg/toml then
+shared cfg/toml precedence without changing values or config tokens. Prevented
+the canonical seed from entering the 128-preset catalog. Focused, NoDb, full
+repository, stub, docs, and running-development-stack gates pass. PC-02 is
+verified and PC-03 is locally verified; WP11 retains deployed Forest/rollback
+acceptance. No writer was enabled.
+
+---
+
+### Project Configuration Source Normalization (WP00B) (2026-08-05)
+
+**Completed**: 2026-08-05
+**Security impact**: `low`
+**Initiative branch**: `feature/project-owned-config` (noncanonical)
+**Link**: [docs/work-packages/20260804_project_config_source_normalization/](docs/work-packages/20260804_project_config_source_normalization/)
+
+**Outcome**: Ratified six canonical config value encodings, normalized 3,341
+assignments across the shared default and 128 active presets, and proved typed
+semantic parity against the starting revision. Added deterministic sorted
+serialization, strict ambiguity rejection, a checked-in golden fixture, and
+WP00A secret-gate integration. The full suite passed with 5,872 tests and 61
+skips; PC-05 is verified while WP03/WP04/WP10 retain integration evidence.
+
+### Project Configuration Secret Sanitization (WP00A) (2026-08-05)
+
+**Completed**: 2026-08-05
+**Security impact**: `high` - dedicated review passed
+**Initiative branch**: `feature/project-owned-config` (noncanonical)
+**Link**: [docs/work-packages/20260804_project_config_secret_sanitization/](docs/work-packages/20260804_project_config_secret_sanitization/)
+
+**Outcome**: Removed seven stale `w3w_api_key` assignments from the 270-file
+shared NoDb configuration corpus. Added a redacted, fail-closed config,
+manifest, project-directory, ZIP, and tar scanner with 16 focused tests. PC-04
+is verified; WP04/WP06 and WP10 retain their planned writer/archive invocation
+evidence obligations.
+
+### Project-Owned Configuration Contract Ratification (WP00R) (2026-08-04)
+
+**Completed**: 2026-08-04
+**Security impact**: `high` - documentation checkpoint passed dedicated review
+**Initiative branch**: `feature/project-owned-config` (noncanonical)
+**Link**: [docs/work-packages/20260804_project_config_contract_ratification/](docs/work-packages/20260804_project_config_contract_ratification/)
+
+**Outcome**: Ratified the project-owned configuration contract and
+implementation roadmap for feature-branch execution. The package maps 107
+mandatory groups, 54 required regression bullets, and three advisory-only
+groups to PC-00-PC-21 ownership with no orphan. Governance and security reviews
+pass; PC-00 is verified while runtime implementation remains assigned to
+WP00A-WP13.
+
+**Next Steps**: Scaffold WP00A secret sanitization, WP00B source normalization,
+or WP01 defaults compatibility. Each successor must import its checklist task
+IDs and remain on the documented initiative branch.
 ### SBS Display Class Decoding
 
 **Completed**: 2026-08-25
@@ -1374,7 +1666,6 @@ skipped`), and independent correctness, QA, and high-impact security review
 closed with no unresolved findings.
 
 ---
-
 ### Stevens Canyon Focal-Event Attribution
 
 **Completed**: 2026-08-04

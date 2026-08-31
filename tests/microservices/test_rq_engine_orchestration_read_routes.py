@@ -3,6 +3,7 @@ from __future__ import annotations
 from copy import deepcopy
 from datetime import datetime, timezone
 import re
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
@@ -11,12 +12,23 @@ TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import orchestration_read_routes
+from wepppy.nodb.locales import (
+    build_continental_us_capability_graph,
+    build_locale_capability_graph,
+)
 
 pytestmark = pytest.mark.microservice
 
 PIPELINE_PATH = "/api/runs/run-1/disturbed9002_wbt/pipeline"
 READINESS_PATH = "/api/runs/run-1/disturbed9002_wbt/readiness"
 UTC_TIMESTAMP_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
+
+
+def _binary_revisions(binary_ids: tuple[str, ...]) -> dict[str, str]:
+    return {
+        binary_id: f"provider-v1:watershed={'a' * 64}:hillslope={'b' * 64}"
+        for binary_id in binary_ids
+    }
 
 
 def _stub_auth(monkeypatch: pytest.MonkeyPatch, scope: str, *, token_class: str = "service") -> None:
@@ -596,3 +608,208 @@ def test_orchestration_routes_internal_failures_return_canonical_500(
     _assert_canonical_error(pipeline_response.json())
     assert readiness_response.status_code == 500
     _assert_canonical_error(readiness_response.json())
+
+
+def test_orchestration_routes_return_diagnostic_409_for_invalid_capability_authority(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch, "rq:status")
+
+    def _invalid(runid: str, config: str) -> dict[str, Any]:
+        raise orchestration_read_routes.CapabilityAuthorityInvalidError("partial graph")
+
+    monkeypatch.setattr(orchestration_read_routes, "_load_runtime_state", _invalid)
+
+    with TestClient(rq_engine.app) as client:
+        pipeline_response = client.get(PIPELINE_PATH)
+        readiness_response = client.get(READINESS_PATH)
+
+    assert pipeline_response.status_code == 409
+    _assert_canonical_error(pipeline_response.json(), code="capability_authority_invalid")
+    assert pipeline_response.json()["error"]["details"] == "partial graph"
+    assert readiness_response.status_code == 409
+    _assert_canonical_error(readiness_response.json(), code="capability_authority_invalid")
+
+
+def test_pipeline_and_readiness_report_only_stored_model_capabilities(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch, "rq:read")
+    runtime = _sample_baseline_runtime_state()
+    runtime["capabilities"] = {
+        "schema_version": 2,
+        "provider_revision": "a" * 64,
+        "delineation_backends": ["wbt"],
+        "watershed_representations": ["single-ofe", "multiple-ofe"],
+        "wepp_binaries": ["wepp_260803"],
+        "allowed_model_tuples": [
+            "wbt|single-ofe|wepp_260803",
+            "wbt|multiple-ofe|wepp_260803",
+        ],
+        "defaults": {
+            "delineation_backend": "wbt",
+            "watershed_representation": "single-ofe",
+            "wepp_binary": "wepp_260803",
+        },
+    }
+    monkeypatch.setattr(
+        orchestration_read_routes,
+        "_load_runtime_state",
+        lambda runid, config: deepcopy(runtime),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        pipeline = client.get(PIPELINE_PATH).json()
+        readiness = client.get(READINESS_PATH).json()
+
+    assert pipeline["capabilities"] == runtime["capabilities"]
+    assert readiness["run"]["capabilities"] == runtime["capabilities"]
+
+
+def test_legacy_live_domain_graph_is_published_without_model_authority(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    live_graph = build_continental_us_capability_graph(
+        ("wepp_260803",), _binary_revisions(("wepp_260803",))
+    )
+    config = object()
+    monkeypatch.setattr(
+        orchestration_read_routes,
+        "resolve_run_capability_authority",
+        lambda candidate: SimpleNamespace(
+            graph=live_graph,
+            mode=orchestration_read_routes.RunCapabilityMode.LEGACY_BUILDER,
+        ),
+    )
+    monkeypatch.setattr(
+        orchestration_read_routes,
+        "capability_authority",
+        lambda candidate: None,
+    )
+
+    domain_graph, model_graph, projected_domains = (
+        orchestration_read_routes._resolve_runtime_capability_graphs(config)
+    )
+    assert domain_graph is live_graph
+    assert model_graph is None
+    assert projected_domains == frozenset()
+    capabilities = orchestration_read_routes._runtime_capabilities(
+        domain_graph, model_graph
+    )
+    assert capabilities is not None
+    assert capabilities["landuse_datasets"] == list(live_graph.landuse_datasets)
+    assert capabilities["soil_datasets"] == list(live_graph.soil_datasets)
+    assert capabilities["climate_datasets"] == list(live_graph.climate_datasets)
+    assert "wepp_binaries" not in capabilities
+    assert "wepp_binary" not in capabilities["defaults"]
+
+    _stub_auth(monkeypatch, "rq:read")
+    runtime = _sample_baseline_runtime_state()
+    runtime["capabilities"] = capabilities
+    monkeypatch.setattr(
+        orchestration_read_routes,
+        "_load_runtime_state",
+        lambda runid, config: deepcopy(runtime),
+    )
+    with TestClient(rq_engine.app) as client:
+        pipeline = client.get(PIPELINE_PATH).json()
+        readiness = client.get(READINESS_PATH).json()
+
+    assert pipeline["capabilities"] == capabilities
+    assert readiness["run"]["capabilities"] == capabilities
+
+
+def test_stored_graph_publishes_domain_and_model_capabilities() -> None:
+    graph = build_continental_us_capability_graph(
+        ("wepp_260803",), _binary_revisions(("wepp_260803",))
+    )
+
+    capabilities = orchestration_read_routes._runtime_capabilities(graph, graph)
+
+    assert capabilities is not None
+    assert capabilities["landuse_methods_by_dataset"]
+    assert capabilities["soil_builders_by_dataset"]
+    assert capabilities["climate_station_methods_by_dataset"]
+    assert capabilities["wepp_binaries"] == ["wepp_260803"]
+    assert capabilities["defaults"]["wepp_binary"] == "wepp_260803"
+
+
+def test_schema_v1_projection_publishes_only_climate_and_landuse_domains() -> None:
+    graph = build_locale_capability_graph(
+        "europe",
+        ("wepp_260803",),
+        _binary_revisions(("wepp_260803",)),
+    )
+
+    capabilities = orchestration_read_routes._runtime_capabilities(
+        graph,
+        None,
+        frozenset({"climate", "landuse"}),
+    )
+
+    assert capabilities is not None
+    assert capabilities["climate_datasets"] == [
+        "vanilla_cligen",
+        "eobs_modified",
+        "user_defined_cli",
+    ]
+    assert capabilities["landuse_datasets"] == [
+        "corine-1990",
+        "corine-2000",
+        "corine-2006",
+        "corine-2012",
+        "corine-2018",
+    ]
+    assert "soil_datasets" not in capabilities
+    assert "wepp_binaries" not in capabilities
+    assert capabilities["defaults"] == {
+        "climate_dataset": "vanilla_cligen",
+        "climate_station_database": "cligen-stations-ghcn",
+        "landuse_dataset": "corine-2018",
+    }
+
+
+def test_schema_v1_compatibility_pipeline_preserves_present_axes_without_registry(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    resolved = SimpleNamespace(
+        mode=orchestration_read_routes.RunCapabilityMode.COMPATIBILITY,
+        graph=None,
+    )
+    monkeypatch.setattr(
+        orchestration_read_routes,
+        "resolve_run_capability_authority",
+        lambda _config: resolved,
+    )
+    monkeypatch.setattr(
+        orchestration_read_routes,
+        "capability_authority",
+        lambda _config: (_ for _ in ()).throw(
+            AssertionError("schema-v1 compatibility consulted stored graph reader")
+        ),
+    )
+    assert orchestration_read_routes._resolve_runtime_capability_graphs(object()) == (
+        None,
+        None,
+        frozenset(),
+    )
+
+    _stub_auth(monkeypatch, "rq:read")
+    runtime = _sample_baseline_runtime_state()
+    runtime["capabilities"] = {
+        "schema_version": 1,
+        "wepp_binaries": ["wepp_260803"],
+        "climate_datasets": ["vanilla_cligen"],
+    }
+    monkeypatch.setattr(
+        orchestration_read_routes,
+        "_load_runtime_state",
+        lambda runid, config: deepcopy(runtime),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        pipeline = client.get(PIPELINE_PATH).json()
+        readiness = client.get(READINESS_PATH).json()
+
+    assert pipeline["capabilities"] == runtime["capabilities"]
+    assert readiness["run"]["capabilities"] == runtime["capabilities"]

@@ -18,10 +18,16 @@ INVENTORY_FILE = Path(
     "docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md"
 )
 
-MAX_OPENAPI_CANONICAL_BYTES = 138_000
+# Includes the three contract-required project config update operations added by WP08.
+# WP12D's exact capability-refresh preview/apply/availability models add the
+# first exhaustive schemas for nested provenance, acknowledgment, and terminal
+# reconciliation. WP12D also documents registry-unavailability parity across
+# all run-discovery reads. These structures are asserted below, so this budget
+# is not a substitute for schema completeness.
+MAX_OPENAPI_CANONICAL_BYTES = 157_000
 MAX_FROZEN_SUMMARY_CHARS = 72
 MAX_FROZEN_DESCRIPTION_CHARS = 280
-MAX_FROZEN_METADATA_TOTAL_CHARS = 21_600
+MAX_FROZEN_METADATA_TOTAL_CHARS = 21_900
 _CORRELATION_HEADER = "X-Correlation-ID"
 _CORRELATION_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")
 
@@ -97,9 +103,129 @@ def _canonical_size_bytes(payload: dict) -> int:
     return len(serialized)
 
 
+def test_project_config_update_schemas_are_exhaustive_and_typed(
+    _openapi_doc: dict,
+) -> None:
+    schemas = _openapi_doc["components"]["schemas"]
+    exact_required = {
+        "_UpdatePreviewModel": {
+            "available", "preview_id", "config_filename", "current_digest",
+            "resulting_digest", "digest_warning", "update_kind",
+            "capability_refresh", "additions",
+        },
+        "_CapabilityRefreshModel": {
+            "locale_profile", "locales", "preserved_project_selections",
+            "acknowledgment", "prior", "resulting", "changes",
+        },
+        "_CapabilityChangeModel": {
+            "section", "option", "kind", "before", "after", "added_ids",
+            "removed_ids", "added_support",
+        },
+        "_UpdateAvailabilityModel": {
+            "available", "preview_id", "digest_warning", "current_digest",
+            "update_kind", "acknowledgment_required", "last_update",
+        },
+        "_UpdateAcceptedModel": {"job_id"},
+        "_UpdateRecoveredModel": {
+            "applied", "recovered", "sequence", "prior_digest",
+            "resulting_digest",
+        },
+    }
+    for name, required in exact_required.items():
+        assert schemas[name]["additionalProperties"] is False
+        assert set(schemas[name]["required"]) == required
+
+    change = schemas["_CapabilityChangeModel"]
+    assert change["properties"]["before"] == {
+        "$ref": "#/components/schemas/CanonicalJsonValue"
+    }
+    assert change["properties"]["after"] == {
+        "$ref": "#/components/schemas/CanonicalJsonValue"
+    }
+    json_value = schemas["CanonicalJsonValue"]["anyOf"]
+    assert {variant.get("type") for variant in json_value} == {
+        "string", "integer", "number", "boolean", "array", "object", "null"
+    }
+    recursive_ref = "#/components/schemas/CanonicalJsonValue"
+    assert next(item for item in json_value if item.get("type") == "array")[
+        "items"
+    ] == {"$ref": recursive_ref}
+    assert next(item for item in json_value if item.get("type") == "object")[
+        "additionalProperties"
+    ] == {"$ref": recursive_ref}
+
+    paths = _openapi_doc["paths"]
+    prefix = "/api/runs/{runid}/{config}/project-config"
+    availability_schema = paths[f"{prefix}/update-availability"]["get"][
+        "responses"
+    ]["200"]["content"]["application/json"]["schema"]
+    assert availability_schema == {
+        "$ref": "#/components/schemas/_UpdateAvailabilityModel"
+    }
+    preview_schema = paths[f"{prefix}/update-preview"]["get"]["responses"][
+        "200"
+    ]["content"]["application/json"]["schema"]
+    assert preview_schema == {"$ref": "#/components/schemas/_UpdatePreviewModel"}
+
+    apply_operation = paths[f"{prefix}/update-apply"]["post"]
+    variants = apply_operation["requestBody"]["content"]["application/json"][
+        "schema"
+    ]["oneOf"]
+    assert [set(item["required"]) for item in variants] == [
+        {"preview_id", "trigger"},
+        {"preview_id", "capability_acknowledgment"},
+        {"preview_id", "trigger", "capability_acknowledgment"},
+    ]
+    assert all(item["additionalProperties"] is False for item in variants)
+    for item in variants:
+        for nested in ("trigger", "capability_acknowledgment"):
+            if nested in item["properties"]:
+                assert item["properties"][nested]["additionalProperties"] is False
+    accepted_schema = apply_operation["responses"]["202"]["content"][
+        "application/json"
+    ]["schema"]
+    assert accepted_schema == {
+        "$ref": "#/components/schemas/_UpdateAcceptedModel"
+    }
+    recovered_schema = apply_operation["responses"]["200"]["content"][
+        "application/json"
+    ]["schema"]
+    assert recovered_schema == {
+        "$ref": "#/components/schemas/_UpdateRecoveredModel"
+    }
+    assert 503 in _response_codes(
+        paths[f"{prefix}/update-availability"]["get"]
+    )
+    assert 503 in _response_codes(paths[f"{prefix}/update-preview"]["get"])
+    assert 503 in _response_codes(apply_operation)
+
+
+def test_run_discovery_routes_document_registry_unavailability(
+    _openapi_doc: dict,
+) -> None:
+    prefix = "/api/runs/{runid}/{config}"
+    paths = [
+        f"{prefix}/geospatial-metadata",
+        f"{prefix}/controllers",
+        f"{prefix}/controllers/{{controller}}/schema",
+        f"{prefix}/controllers/{{controller}}/hints",
+        f"{prefix}/controllers/{{controller}}/templates",
+        f"{prefix}/endpoints",
+        f"{prefix}/endpoints/{{operation_id}}/schema",
+        f"{prefix}/endpoints/{{operation_id}}/defaults",
+        f"{prefix}/endpoints/{{operation_id}}/errors",
+        f"{prefix}/outputs",
+        f"{prefix}/pipeline",
+        f"{prefix}/readiness",
+    ]
+
+    for path in paths:
+        assert 503 in _response_codes(_openapi_doc["paths"][path]["get"]), path
+
+
 def test_frozen_agent_route_count_is_expected(_frozen_agent_routes: list[tuple[str, str]]) -> None:
-    assert len(_frozen_agent_routes) == 114
-    assert len(set(_frozen_agent_routes)) == 114
+    assert len(_frozen_agent_routes) == 120
+    assert len(set(_frozen_agent_routes)) == 120
 
 
 def test_frozen_agent_routes_exist_in_openapi(

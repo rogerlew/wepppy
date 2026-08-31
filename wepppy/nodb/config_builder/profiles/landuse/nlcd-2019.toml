@@ -1,0 +1,22 @@
+schema_version = 1
+id = "nlcd-2019"
+kind = "landuse"
+source_revision = "landcover-catalog-v1:nlcd-2019"
+label = "NLCD 2019"
+description = "2019 National Land Cover Database."
+owns = ["landuse.nlcd_db", "landuse.enable_landuse_change"]
+overrides = ["landuse.nlcd_db", "landuse.enable_landuse_change"]
+
+[constraints]
+requires = ["continental-us"]
+conflicts = []
+
+[[writes]]
+section = "landuse"
+option = "nlcd_db"
+value = "nlcd/2019"
+
+[[writes]]
+section = "landuse"
+option = "enable_landuse_change"
+value = true

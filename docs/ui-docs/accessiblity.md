@@ -141,13 +141,55 @@ This validates `/weppcloud/landing/light/` against the installed WEPPcloud route
 - visible focus indication on each keyboard-focused link and control
 - the year filter staying out of the tab order while hidden and becoming focusable after the filter panel opens
 
+### 6) Config Builder accessibility
+
+The authenticated Config Builder uses native labelled selects and fieldsets,
+linked field errors, a focusable page-level alert, polite dynamic status, and a
+single-column narrow-viewport layout. Controller tests verify error focus,
+announcements, invalidated-choice removal, privileged-control visibility, and
+duplicate-submit blocking. The axe smoke suite includes an authenticated
+builder scan plus a 640-pixel reflow and keyboard-order check. WP07 evidence is
+recorded under
+`docs/work-packages/20260804_project_config_builder_ui/artifacts/`.
+
+### 7) Project config update accessibility
+
+The shared run header contains a hidden-by-default project-config update state.
+When the read-only backend reports an available update, the notice opens a
+labelled and described modal using the canonical focus trap and focus return.
+The complete additions and capability-change tables have captions and scoped
+column headers; dynamic preview, queue, completion, reconciliation, and error
+states use polite status or alert semantics. A capability refresh presents the
+exact provenance warning through a native labelled checkbox. Apply remains
+disabled until the complete preview is rendered and, for a refresh, until the
+checkbox is checked. A new preview, error, modal close, or successful apply
+clears that state. Diagnostic details and error IDs use alert text in the modal;
+availability-time registry failures use the run-header alert so the failure is
+not hidden with the update control. WP09 evidence is recorded under
+`docs/work-packages/20260804_project_config_update_ui/artifacts/`; WP12D's
+acknowledged-refresh contract and validation evidence are recorded under
+`docs/work-packages/20260827_project_config_run_ui_authority/`.
+
+### 8) Horizontally overflowing data tables
+
+Pure UI progressively enhances the canonical
+`.wc-table-wrapper` only when its contents overflow horizontally. An overflowing
+wrapper displays concise input instructions, becomes a visibly focused keyboard
+region, and is re-evaluated after layout or dynamic-content changes. A fitting
+table receives no generated hint or extra tab stop. Shared behavior
+must preserve authored focus and accessible-region semantics and must never
+alter table data or column layout. The normative contract is
+`docs/ui-docs/contracts/table-overflow-discoverability-contract.md` and future
+validation evidence belongs under
+`docs/work-packages/20260828_table_overflow_discoverability/`.
+
 ## Coverage-to-Requirement Map
 
 This table is an evidence map for engineering and release review. It is not a substitute for the criterion-by-criterion ACR/VPAT table.
 
 | Evidence source | Primary checks in repo | WCAG 2.1 / 2.0 criteria most directly exercised | Revised 508 / manual-method relation |
 | --- | --- | --- | --- |
-| `tests/weppcloud/routes/test_pure_controls_render.py` and `tests/weppcloud/routes/test_user_runs_admin_scope.py` | language metadata, iframe/title requirements, accessible names independent of placeholders, map semantics | 3.1.1, 1.1.1, 2.4.1, 3.3.2, 4.1.2 | Web-content conformance evidence under Revised 508's WCAG references; aligns with Trusted Tester / ICT Baseline checks for language, titles, labels, and name/role/value. |
+| `tests/weppcloud/routes/test_pure_controls_render.py`, `tests/weppcloud/routes/test_config_builder_ui.py`, and `tests/weppcloud/routes/test_user_runs_admin_scope.py` | language metadata, iframe/title requirements, accessible names and errors independent of placeholders, map semantics | 3.1.1, 1.1.1, 2.4.1, 3.3.1, 3.3.2, 4.1.2 | Web-content conformance evidence under Revised 508's WCAG references; aligns with Trusted Tester / ICT Baseline checks for language, titles, labels, errors, and name/role/value. |
 | `wepppy/weppcloud/controllers_js/__tests__/copytext.test.js` and `wepppy/weppcloud/controllers_js/__tests__/map_gl.test.js` | semantic buttons, modal accessible names, keyboard behavior for map-related UI | 2.1.1, 2.1.2, 2.4.3, 2.4.7, 4.1.2 | Supports software/web-application behavior checks typically confirmed with manual keyboard and assistive-technology testing. |
 | `wepppy/weppcloud/static-src/tests/smoke/theme-metrics.spec.js` | rendered text, control, and non-text contrast across the theme set | 1.4.3, 1.4.11 | Supplies repeatable contrast evidence for the validated theme set; manual review still needed for context-specific exceptions and real-page edge cases. |
 | `wepppy/weppcloud/static-src/tests/smoke/a11y/*.spec.js` | axe scans over representative anonymous and authenticated pages | partial structural coverage across 1.1.1, 1.3.1, 2.4.1, 2.4.6, 4.1.2 and related rules | Automated scan coverage only; Section 508 guidance requires manual confirmation for gaps and false positives/negatives. |

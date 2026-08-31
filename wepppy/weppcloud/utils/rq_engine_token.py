@@ -27,6 +27,12 @@ def issue_user_rq_engine_token(
         subject = getattr(user, "email", None)
     if not subject:
         raise RuntimeError("Unable to resolve user subject for rq-engine token")
+    try:
+        user_id = int(getattr(user, "id"))
+    except (TypeError, ValueError) as exc:
+        raise RuntimeError("Unable to resolve numeric user ID for rq-engine token") from exc
+    if user_id <= 0:
+        raise RuntimeError("Unable to resolve numeric user ID for rq-engine token")
 
     roles = [
         str(getattr(role, "name", role)).strip()
@@ -41,6 +47,7 @@ def issue_user_rq_engine_token(
         extra_claims={
             "roles": roles,
             "token_class": "user",
+            "user_id": user_id,
             "email": getattr(user, "email", None),
             "jti": uuid.uuid4().hex,
         },

@@ -70,6 +70,25 @@ mixed-version rollout.
   Redis, PostgreSQL, Caddy, and scheduler retained their container IDs. Both
   public health endpoints passed and both consumers report the reader-first
   profile.
+- [x] (2026-08-25 02:20Z) Activated the owned-cookie writer on wepp1 with the
+  targeted deployment mode. Both consumers now read and write
+  `__Host-weppcloud_session` while retaining the legacy `session` reader;
+  Redis and every non-target service retained its container ID. Web and
+  rq-engine health returned HTTP 200 after the expected bounded rq-engine
+  startup delay, with no immediate CSRF, migration, Redis-session, or 5xx log
+  signal.
+- [x] (2026-08-25 02:29Z) Passed the existing-session production browser
+  canary: hard refresh preserved authentication, heartbeat returned HTTP 204,
+  recorder events and rq-engine remained functional, the owned cookie was
+  present, and logout propagated across tabs. Post-canary logs showed 2/2
+  successful session-token mints and no CSRF, conflict, Redis-session, or
+  severe errors. A logout-time rejected-state event appeared twice through
+  duplicate handlers; fencing succeeded, while the formatter omitted the
+  rejection class.
+- [x] (2026-08-25 02:29Z) Confirmed fresh local and OAuth authentication under
+  the owned-cookie writer and declared production activation healthy. Keep the
+  legacy reader active and perform the dated telemetry/retirement review at
+  2026-08-26 02:20Z.
 
 ## Surprises & Discoveries
 
