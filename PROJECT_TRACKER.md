@@ -405,6 +405,24 @@ When resuming Kubernetes work:
 
 ## 🚧 In Progress
 
+### Project Config Production Cutover (WP12)
+
+**Started**: 2026-08-31
+
+**Priority/Security**: Critical / `high`
+
+**Link**: [docs/work-packages/20260804_project_config_production_cutover/](docs/work-packages/20260804_project_config_production_cutover/)
+
+**Scope**: Repeat the ratified WP12D changed-file audits, accept and merge only
+the reviewed project-owned-config boundary, deploy the resulting canonical
+`master` revision to production, stage readers before writers, prove rollback
+compatibility, and hand the exact revision inventory to WP13 while retaining
+the shared `_defaults.toml` alias.
+
+**Status**: WP12 is scaffolded at feature candidate `30b30b3c6`; final scope
+audit and promotion gates are in progress. No merge or production action has
+occurred.
+
 ### Project Config Run UI Authority (WP12D)
 
 **Started**: 2026-08-27

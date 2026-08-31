@@ -15,4 +15,3 @@ ratified WhiteboxTools and `wepp_260803` defaults and Preview maturity, ADR-0046
 recorded the old/new parameterization and decision provenance, the feature
 registry became an explicit contract owner, and the Forest gate enumerated all
 ten supported tuples.
-

@@ -39,4 +39,3 @@ Job polling uses the canonical open status route and a one-second interval. A
 browser closing the modal does not cancel the already authorized job; this is
 intentional because the worker and project lock own lifecycle integrity. The
 feature remains default-off pending Forest and production promotion packages.
-

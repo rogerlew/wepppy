@@ -10,4 +10,3 @@ exception, deterministic watershed and hillslope SHA-256 identity, atomic
 failure, stale-revision protection, an explicit `latest` reproducibility
 policy, complete regression obligations, and provider-wide real Forest
 evidence. Security impact remains low.
-
