@@ -3577,6 +3577,154 @@ def test_run_header_shows_projection_pill_only_after_map_assignment(
     assert ">EPSG:32611</span>" in assigned
 
 
+def test_run_header_renders_accessible_config_summary_after_projection(
+    jinja_env: Environment,
+) -> None:
+    template = jinja_env.overlay(autoescape=True).get_template("header/_run_header_fixed.htm")
+    auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
+    ron = SimpleNamespace(
+        mods=[],
+        runid="parent;;omni;;child",
+        config_stem="config",
+        nodb_version=3,
+        name="",
+        scenario="",
+        readonly=False,
+        public=False,
+        srid=32611,
+    )
+    summary = {
+        "locale_id": "continental-us",
+        "rows": (
+            ("Locale", "continental-us"),
+            ("Delineation Backend", "wbt"),
+            ("Representation", "Multiple OFE"),
+            ("DEM Data Source", "usgs-ned1-2024"),
+            ("Cell Size (m)", "10"),
+            ("CLIGEN Database", "unsafe<script>"),
+        ),
+    }
+
+    rendered = template.render(
+        user=auth_user,
+        current_user=auth_user,
+        current_ron=ron,
+        request=SimpleNamespace(
+            view_args={"runid": "parent;;omni;;child", "config": "config"}
+        ),
+        run_config_summary=summary,
+    )
+
+    assert rendered.index("data-project-projection") < rendered.index("data-project-locale")
+    assert 'data-project-locale="continental-us"' in rendered
+    assert "locale: continental-us" in rendered
+    assert 'data-modal-open="configSummaryModal"' in rendered
+    assert 'id="configSummaryModal" data-modal hidden' in rendered
+    assert 'aria-labelledby="configSummaryTitle"' in rendered
+    assert 'aria-describedby="configSummaryDescription"' in rendered
+    assert "<caption>Current configuration settings</caption>" in rendered
+    assert "unsafe&lt;script&gt;" in rendered
+    assert "unsafe<script>" not in rendered
+
+    row_headers = re.findall(r'<th scope="row">([^<]+)</th>', rendered)
+    assert row_headers == [
+        "Locale",
+        "Delineation Backend",
+        "Representation",
+        "DEM Data Source",
+        "Cell Size (m)",
+        "CLIGEN Database",
+    ]
+
+
+def test_run_header_omits_config_summary_without_target_context(
+    jinja_env: Environment,
+) -> None:
+    template = jinja_env.get_template("header/_run_header_fixed.htm")
+    anon_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=False)
+    ron = SimpleNamespace(
+        mods=[],
+        runid="test-run",
+        config_stem="disturbed9002",
+        nodb_version=3,
+        name="",
+        scenario="",
+        readonly=False,
+        public=False,
+        srid=32611,
+    )
+
+    rendered = template.render(
+        user=anon_user,
+        current_user=anon_user,
+        current_ron=ron,
+        request=SimpleNamespace(
+            view_args={"runid": "test-run", "config": "disturbed9002"}
+        ),
+        run_config_summary=None,
+        playwright_load_all=True,
+    )
+
+    assert "data-project-locale" not in rendered
+    assert "configSummaryModal" not in rendered
+    assert "Config Summary" not in rendered
+
+
+def test_run_header_keeps_config_summary_when_locale_is_unavailable(
+    jinja_env: Environment,
+) -> None:
+    template = jinja_env.get_template("header/_run_header_fixed.htm")
+    anon_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=False)
+    ron = SimpleNamespace(
+        mods=[],
+        runid="test-run",
+        config_stem="config",
+        nodb_version=3,
+        name="",
+        scenario="",
+        readonly=False,
+        public=False,
+        srid=None,
+    )
+    summary = {
+        "locale_id": None,
+        "rows": (
+            ("Locale", "Not available"),
+            ("Delineation Backend", "Not available"),
+            ("Representation", "Not available"),
+            ("DEM Data Source", "Not available"),
+            ("Cell Size (m)", "Not available"),
+            ("CLIGEN Database", "Not available"),
+        ),
+    }
+
+    rendered = template.render(
+        user=anon_user,
+        current_user=anon_user,
+        current_ron=ron,
+        request=SimpleNamespace(view_args={"runid": "test-run", "config": "config"}),
+        run_config_summary=summary,
+    )
+
+    assert "data-project-locale" not in rendered
+    assert 'data-modal-open="configSummaryModal"' in rendered
+    assert rendered.count("Not available") == 6
+
+
+def test_config_summary_table_uses_active_theme_tokens() -> None:
+    css = (TEMPLATE_ROOT.parent / "static" / "css" / "ui-foundation.css").read_text(
+        encoding="utf-8"
+    )
+    caption_rule = re.search(
+        r"\.wc-config-summary__table caption\s*\{(?P<body>[^}]+)\}",
+        css,
+    )
+
+    assert caption_rule is not None
+    assert "background: var(--wc-color-surface)" in caption_rule.group("body")
+    assert "color: var(--wc-color-text)" in caption_rule.group("body")
+
+
 def test_feature_control_shell_renders_maturity_pill_next_to_label(jinja_env: Environment) -> None:
     template = jinja_env.get_template("controls/rap_ts_pure.htm")
     rendered = template.render(

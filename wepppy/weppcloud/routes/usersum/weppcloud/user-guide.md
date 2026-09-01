@@ -89,6 +89,18 @@ If you encounter an accessibility barrier, treat the feature maturity label as p
 
 ---
 
+## Config Builder Run Summary
+
+Config Builder run pages show the effective canonical locale ID in the header,
+for example `locale: continental-us`. Open **More -> Config Summary** to review
+the run's locale, delineation backend, watershed representation, DEM data
+source, effective cell size in meters, and CLIGEN database. The summary is
+read-only and reports `Not available` when a stored selection cannot be
+identified; it does not replace missing information with today's Builder
+defaults.
+
+---
+
 ## Privacy Statement
 
 WEPPcloud collects only the information necessary to operate the platform and support your work.

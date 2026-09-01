@@ -33,12 +33,14 @@ Config Builder registry happens to contain today.
   corrected edge-policy matrix.
 - [x] (2026-09-01 18:31 UTC) Obtain renewed Ready confirmations from both
   independent reviewers with no medium/high findings.
-- [ ] Complete, approve, independently review, and commit the contract-first
-  checkpoint and canonical contract amendment.
-- [ ] Implement the presentation model, locale pill, and Config Summary modal.
-- [ ] Add focused route/template, accessibility, and regression evidence.
-- [ ] Update user/developer documentation, complete correctness review, and
-  close the package.
+- [x] (2026-09-01 18:32 UTC) Commit standalone contract checkpoint
+  `790f34207` after approval and independent review.
+- [x] (2026-09-01 18:39 UTC) Implement the presentation model, locale pill,
+  Config Summary modal, theme styles, and user guidance.
+- [x] (2026-09-01 18:43 UTC) Add focused route/template, authorization,
+  nested/PUP, accessibility, and regression evidence; pass independent review.
+- [x] (2026-09-01 19:05 UTC) Complete broad validation, record the
+  browser-environment limitation, and close the package.
 
 ## Surprises & Discoveries
 
@@ -80,9 +82,18 @@ Config Builder registry happens to contain today.
 
 ## Outcomes & Retrospective
 
-The package is scaffolded and canonical locale-ID wording is confirmed.
-Implementation has not started and remains gated on the contract-first
-checkpoint.
+The locale pill and six-row Config Summary modal are implemented from effective
+run authority, documented, and covered across populated, absent, legacy,
+nested/PUP, hostile-value, and non-target states. The complete Python suite
+passed with 7,313 tests and 63 skips; all 108 frontend suites/833 tests, lint,
+documentation, syntax, and diff gates also passed. Independent correctness
+review is Ready after resolving dark-theme and authorization-boundary findings.
+
+The only residual evidence limitation is environmental: the new authenticated
+Playwright modal branch could not execute because available smoke targets could
+not provision or locate a usable Config Builder run. The branch remains in the
+suite and asserts 640-pixel reflow, focus movement/return, Escape dismissal, and
+axe results when such a fixture is available.
 
 ## Context and Orientation
 
@@ -231,3 +242,10 @@ wording remains an explicit pre-implementation decision.
 
 Plan revision note (2026-09-01 18:07 UTC): Recorded operator confirmation that
 the locale pill uses effective canonical locale IDs such as `continental-us`.
+
+Plan revision note (2026-09-01 18:43 UTC): Recorded checkpoint revision,
+implementation, focused validation, independent review findings and fixes, and
+the remaining broad-validation/closeout work.
+
+Plan revision note (2026-09-01 19:05 UTC): Recorded the full-suite pass, final
+documentation/diff gates, browser-fixture limitation, and package closure.

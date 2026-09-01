@@ -9,6 +9,7 @@
 {% set view_runid = view_args.get('runid', current_ron.runid) %}
 {% set view_config = view_args.get('config', current_ron.config_stem) %}
 {% set project_srid = current_ron.srid if current_ron.srid is defined else none %}
+{% set run_config_summary = run_config_summary if run_config_summary is defined else none %}
 {% set maturity_definition_href = maturity_definition_href if maturity_definition_href is defined else (url_for('usersum.view_markdown', category='weppcloud', filename='user-guide.md') ~ '#feature-maturity-labels') %}
 <header class="wc-header wc-run-header wc-run-header--hideaway">
   <div class="wc-container wc-container--fluid">
@@ -26,6 +27,11 @@
         <span class="wc-run-header__version wc-run-header__projection"
               data-project-projection="EPSG:{{ project_srid }}"
               title="Project projection">EPSG:{{ project_srid }}</span>
+        {% endif %}
+        {% if run_config_summary and run_config_summary.locale_id %}
+        <span class="wc-run-header__version wc-run-header__locale"
+              data-project-locale="{{ run_config_summary.locale_id }}"
+              title="Project locale">locale: {{ run_config_summary.locale_id }}</span>
         {% endif %}
         {% if run_config_maturity_label is defined and run_config_maturity_label %}
         {{ maturity_ui.maturity_pill(run_config_maturity_label, href=run_config_maturity_href if run_config_maturity_href is defined else maturity_definition_href, title="Interface maturity: " ~ run_config_maturity_label, new_tab=True) }}
@@ -178,6 +184,13 @@
                  data-open-tab-pref>
                 Browse
               </a>
+              {% if run_config_summary %}
+              <button type="button"
+                      class="pure-button"
+                      data-modal-open="configSummaryModal">
+                Config Summary
+              </button>
+              {% endif %}
               {% if user.has_role('PowerUser') or user.has_role('Admin') or user.has_role('Root') %}
                 <button type="button"
                         class="pure-button"
@@ -264,6 +277,45 @@
     </div>
   </div>
 </header>
+{% if run_config_summary %}
+<div class="wc-modal" id="configSummaryModal" data-modal hidden>
+  <div class="wc-modal__overlay" data-modal-dismiss></div>
+  <section class="wc-modal__dialog wc-config-summary__dialog"
+           role="dialog"
+           aria-modal="true"
+           aria-labelledby="configSummaryTitle"
+           aria-describedby="configSummaryDescription">
+    <header class="wc-modal__header">
+      <h2 class="wc-modal__title" id="configSummaryTitle">Config Summary</h2>
+      <button type="button"
+              class="wc-modal__close"
+              data-modal-dismiss
+              aria-label="Close configuration summary">&times;</button>
+    </header>
+    <div class="wc-modal__body">
+      <p id="configSummaryDescription">
+        Effective configuration settings for this run.
+      </p>
+      <div class="wc-config-summary__table-wrap">
+        <table class="pure-table pure-table-bordered wc-config-summary__table">
+          <caption>Current configuration settings</caption>
+          <tbody>
+            {% for label, value in run_config_summary.rows %}
+            <tr>
+              <th scope="row">{{ label }}</th>
+              <td>{{ value }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <footer class="wc-modal__footer">
+      <button type="button" class="pure-button" data-modal-dismiss>Close</button>
+    </footer>
+  </section>
+</div>
+{% endif %}
 <div class="wc-modal" id="projectConfigUpdateModal" data-modal hidden>
   <div class="wc-modal__overlay" data-modal-dismiss></div>
   <section class="wc-modal__dialog wc-project-config-update__dialog"

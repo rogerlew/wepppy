@@ -3,8 +3,10 @@
 import wepppy
 import os
 import pathlib
+import math
 
 from datetime import datetime
+from numbers import Real
 import re
 import uuid
 from wepppy.weppcloud.utils.runid import generate_runid
@@ -54,6 +56,7 @@ from wepppy.nodb.project_config_capabilities import (
     BuilderRegistryUnavailableError,
     CapabilityAuthorityInvalidError,
     LocaleAuthorityInvalidError,
+    RunCapabilityMode,
     capability_authority,
     capability_ids,
     landuse_capability_modes,
@@ -135,6 +138,79 @@ def _resolve_run_config_maturity_label(config, wd, runid, run_config_spec):
     ):
         return "Preview"
     return label
+
+
+_CONFIG_SUMMARY_UNAVAILABLE = "Not available"
+
+
+def _config_summary_text(value):
+    if not isinstance(value, str):
+        return _CONFIG_SUMMARY_UNAVAILABLE
+    normalized = value.strip()
+    return normalized or _CONFIG_SUMMARY_UNAVAILABLE
+
+
+def _config_summary_cellsize(value):
+    if isinstance(value, bool) or not isinstance(value, Real):
+        return _CONFIG_SUMMARY_UNAVAILABLE
+    numeric = float(value)
+    if not math.isfinite(numeric) or numeric <= 0:
+        return _CONFIG_SUMMARY_UNAVAILABLE
+    return str(int(numeric)) if numeric.is_integer() else str(numeric)
+
+
+def _build_run_config_summary(config, authority, ron, watershed, wepp):
+    """Build the read-only Config Builder run-summary presentation model."""
+
+    if config != "config":
+        return None
+
+    locale_id = _config_summary_text(getattr(authority, "locale_profile", None))
+
+    backend_value = getattr(watershed, "delineation_backend", None)
+    backend_name = getattr(backend_value, "name", backend_value)
+    backend_id = _config_summary_text(backend_name)
+    if backend_id != _CONFIG_SUMMARY_UNAVAILABLE:
+        backend_id = backend_id.casefold()
+
+    stored_defaults = {}
+    if (
+        getattr(authority, "mode", None) == RunCapabilityMode.STORED
+        and getattr(authority, "graph", None) is not None
+    ):
+        stored_defaults = authority.graph.defaults
+
+    multi_ofe = getattr(wepp, "multi_ofe", None)
+    if isinstance(multi_ofe, bool):
+        representation = "Multiple OFE" if multi_ofe else "Single OFE"
+    else:
+        representation = _CONFIG_SUMMARY_UNAVAILABLE
+    rows = (
+        ("Locale", locale_id),
+        ("Delineation Backend", backend_id),
+        ("Representation", representation),
+        ("DEM Data Source", _config_summary_text(stored_defaults.get("dem_source"))),
+        ("Cell Size (m)", _config_summary_cellsize(getattr(ron, "cellsize", None))),
+        (
+            "CLIGEN Database",
+            _config_summary_text(stored_defaults.get("climate_station_database")),
+        ),
+    )
+    return {
+        "locale_id": None if locale_id == _CONFIG_SUMMARY_UNAVAILABLE else locale_id,
+        "rows": rows,
+    }
+
+
+def _load_run_config_summary(config, active_root):
+    """Load summary values from the active top-level or nested/PUP root."""
+
+    wd = str(active_root)
+    ron = Ron.getInstance(wd)
+    watershed = Watershed.getInstance(wd)
+    wepp = Wepp.getInstance(wd)
+    authority = resolve_run_capability_authority(wepp)
+    return _build_run_config_summary(config, authority, ron, watershed, wepp), authority.graph
 
 VAPID_PUBLIC_KEY = ''
 _VAPID_PATH = pathlib.Path('/workdir/weppcloud2/microservices/wepppush/vapid.json')
@@ -2120,7 +2196,10 @@ def _build_runs0_context(runid, config, playwright_load_all):
         ("user_cover_transform", "User-Defined Transform")
     ]
     disabled_wepp_bin_options = []
-    run_capability_authority = resolve_run_capability_authority(wepp).graph
+    run_config_summary, run_capability_authority = _load_run_config_summary(
+        config,
+        ctx.active_root,
+    )
     stored_wepp_authority = _wepp_presentation_authority(wepp)
     if stored_wepp_authority is None:
         v1_options = _v1_wepp_binary_options(wepp, wepp.wepp_bin)
@@ -2356,6 +2435,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
         feature_maturity_labels=feature_maturity_labels,
         run_config_maturity_label=run_config_maturity_label,
         run_config_maturity_href=maturity_definition_href,
+        run_config_summary=run_config_summary,
         header_mod_options=header_mod_options,
         omni_user_defined_contrast_limit=int(getattr(omni_mod, "USER_DEFINED_CONTRAST_LIMIT", 200)),
         is_omni_child=is_omni_child,

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib
+import inspect
 import os
 import re
 import subprocess
@@ -8,6 +9,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+from werkzeug.exceptions import Forbidden
 
 pytest.importorskip("flask")
 from flask import Flask, render_template
@@ -195,6 +197,33 @@ def test_run_page_classifies_live_graph_failure_as_registry_503(
     assert "builder_registry_error" in body
     assert "live provider graph failed validation" in body
     assert response.headers["Retry-After"] == "5"
+
+
+def test_run_page_authorization_denial_precedes_summary_context(
+    run0_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, module = run0_client
+    context_called = False
+
+    def deny_authorization(*_args) -> None:
+        raise Forbidden()
+
+    def forbidden_context(*_args, **_kwargs):
+        nonlocal context_called
+        context_called = True
+        raise AssertionError("run context must not load before authorization")
+
+    monkeypatch.setattr(module, "authorize", deny_authorization)
+    monkeypatch.setattr(module, "_build_runs0_context", forbidden_context)
+
+    with client.application.test_request_context(
+        "/runs/run-1/config/?skip_migration_check=true"
+    ):
+        with pytest.raises(Forbidden):
+            inspect.unwrap(module.runs0)("run-1", "config")
+
+    assert context_called is False
 
 
 @pytest.mark.parametrize("owner_lookup", ["empty", "error"])

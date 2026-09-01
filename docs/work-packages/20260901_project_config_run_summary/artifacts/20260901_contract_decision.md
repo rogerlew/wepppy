@@ -1,6 +1,6 @@
 # Contract Decision - Project Config Run Summary
 
-**Status**: Approved and independently reviewed; checkpoint commit pending
+**Status**: Approved and independently reviewed; checkpoint committed
 
 **Date**: 2026-09-01
 **Starting implementation revision**: `9a34b336fc901cb31341a3f680e8fef0a8903b29`
@@ -141,7 +141,7 @@ contracts; this feature must not add broad exception handling.
   reviews Ready
 - **Canonical contract amendment**:
   `docs/schemas/project-owned-config-contract.md`, section 7.8, prepared
-- **Standalone ancestor revision**: Pending
+- **Standalone ancestor revision**: `790f34207`
 
 Implementation files must not be edited until every pending checkpoint item is
 complete and the ancestor revision is recorded in the tracker.

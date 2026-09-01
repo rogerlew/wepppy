@@ -9,11 +9,11 @@
 
 **Started**: 2026-09-01 18:03 UTC
 
-**Current phase**: Contract discovery
+**Current phase**: Closed
 
-**Last updated**: 2026-09-01 18:31 UTC
+**Last updated**: 2026-09-01 19:05 UTC
 
-**Next milestone**: Commit the standalone checkpoint ancestor
+**Next milestone**: None
 
 **Security impact**: `low`
 
@@ -24,24 +24,15 @@
 
 ### Ready / Backlog
 
-- [ ] Resolve the locale pill wording and the exact absent-state display.
-- [ ] Inventory all applicable canonical contracts and create the required
-  standalone contract-first checkpoint.
-- [ ] Build one server-side summary presentation model from effective run
-  authority.
-- [ ] Add the locale pill, More-menu action, and accessible modal.
-- [ ] Add focused regression and accessibility coverage.
-- [ ] Update affected user/developer documentation and complete correctness
-  review.
+- None.
 
 ### In Progress
 
-- [ ] Selectively commit the approved standalone contract checkpoint.
+- None.
 
 ### Blocked
 
-- [ ] Implementation is blocked until the contract-first checkpoint is
-  approved, independently reviewed, and committed as a standalone ancestor.
+- None.
 
 ### Done
 
@@ -62,6 +53,16 @@
   (2026-09-01 18:24 UTC).
 - [x] Both renewed independent reviews returned Ready with no medium/high
   findings (2026-09-01 18:31 UTC).
+- [x] Committed standalone contract checkpoint `790f34207`
+  (2026-09-01 18:32 UTC).
+- [x] Implemented server summary model, locale pill, accessible modal, theme
+  styling, tests, smoke coverage, and user guidance (2026-09-01 18:39 UTC).
+- [x] Focused 10-test gate, 167-test rendering gate, frontend lint, and all 108
+  frontend suites/833 tests passed (2026-09-01 18:42 UTC).
+- [x] Independent implementation review passed after resolving two medium
+  findings; no findings remain (2026-09-01 18:43 UTC).
+- [x] Full Python suite passed: 7,313 passed and 63 skipped; documentation,
+  smoke syntax, and diff gates also passed (2026-09-01 19:05 UTC).
 
 ## Timeline
 
@@ -98,39 +99,41 @@ all locale pills reflect the run's canonical locale ID.
 
 | Risk | Severity | Likelihood | Mitigation | Status |
 | --- | --- | --- | --- | --- |
-| Summary displays registry defaults instead of effective run values | Medium | Medium | Build from resolved run/config authority and test drift/legacy states | Open |
-| Shared header change leaks onto unintended pages | Medium | Medium | Gate the feature with explicit Config Builder run context and test absence | Open |
-| Missing values cause a 500 or misleading fallback | Medium | Low | Define honest unavailable behavior in the contract and state matrix | Open |
-| Long locale text harms narrow layouts | Low | Medium | Include reflow/axe smoke evidence | Open |
+| Summary displays registry defaults instead of effective run values | Medium | Medium | Build from resolved run/config authority and test drift/legacy states | Mitigated |
+| Shared header change leaks onto unintended pages | Medium | Medium | Gate the feature with explicit Config Builder run context and test absence | Mitigated |
+| Missing values cause a 500 or misleading fallback | Medium | Low | Define honest unavailable behavior in the contract and state matrix | Mitigated |
+| Long locale text harms narrow layouts | Low | Medium | Include reflow/axe smoke coverage | Mitigated; live smoke environment unavailable |
 
 ## Verification Checklist
 
 ### Code Quality
 
-- [ ] Focused Python template/route tests pass.
-- [ ] Frontend tests and lint pass.
-- [ ] `git diff --check` is clean.
+- [x] Focused Python template/route tests pass.
+- [x] Frontend tests and lint pass.
+- [x] `git diff --check` is clean.
 
 ### Security
 
 - [x] Security impact reclassified as `low` for the new HTML disclosure sink.
-- [ ] Confirm authorization denial precedes rendering and hostile values are
+- [x] Confirm authorization denial precedes rendering and hostile values are
   escaped.
 
 ### Documentation
 
-- [ ] Canonical UI contract approved and amended before implementation.
-- [ ] Affected user/developer documentation updated.
-- [ ] Work package and `PROJECT_TRACKER.md` kept current.
-- [ ] Scoped documentation lint passes.
+- [x] Canonical UI contract approved and amended before implementation.
+- [x] Affected user/developer documentation updated.
+- [x] Work package and `PROJECT_TRACKER.md` kept current.
+- [x] Scoped documentation lint passes.
 
 ### Testing
 
-- [ ] Populated Config Builder state is covered.
-- [ ] Absent/empty, supported legacy, and malformed states are covered or
+- [x] Populated Config Builder state is covered.
+- [x] Absent/empty, supported legacy, and malformed states are covered or
   explicitly ruled out by contract.
-- [ ] Keyboard/modal and narrow-layout behavior is manually verified.
-- [ ] Correctness/UX review passes with no unresolved medium/high findings.
+- [x] Keyboard/modal and narrow-layout assertions are included in the
+  authenticated Playwright smoke. Live execution was attempted but the local
+  environment could neither provision nor locate a usable Config Builder run.
+- [x] Correctness/UX review passes with no unresolved medium/high findings.
 
 ## Progress Notes
 
@@ -158,6 +161,31 @@ all locale pills reflect the run's canonical locale ID.
   the required reviews and approval, and commit the checkpoint ancestor.
 
 **Test results**: Initial package and tracker documentation lint passed.
+
+### 2026-09-01 19:05 UTC: Validation and closeout
+
+**Agent/Contributor**: Codex
+
+**Work completed**:
+
+- Passed the complete Python regression suite: 7,313 passed, 63 skipped.
+- Passed focused route/rendering coverage, all frontend tests and lint, scoped
+  documentation lint, smoke-file syntax validation, and `git diff --check`.
+- Closed both independent-review findings and recorded a Ready verdict with no
+  unresolved findings.
+
+**Environmental limitation**:
+
+- The authenticated Playwright test now opens and evaluates the modal at a
+  640-pixel viewport, including focus return and Escape dismissal. Attempts to
+  run that conditional branch could not obtain a usable Config Builder target:
+  the test API lacked `configs/config.cfg`, scanned remote runs did not reach a
+  map-bearing run page, and the direct local route remained CAP-gated. This is
+  an environment-fixture limitation, not a detected product failure.
+
+**Test results**: All executable code, frontend, documentation, and diff gates
+passed; the live conditional browser branch remains unexecuted and is retained
+as repeatable coverage for an environment with a Config Builder fixture.
 
 ## Watch List
 

@@ -1050,6 +1050,30 @@ test.describe('axe accessibility smoke', () => {
 
       const entry = await runAxeScan(page, 'runs0-dashboard');
       console.log(`[axe] ${entry.pageId}: ${entry.violationCount} violations`);
+
+      const targetUrl = new URL(targetRunPath, baseURL);
+      if (/\/runs\/[^/]+\/config\/?$/.test(targetUrl.pathname)) {
+        await page.setViewportSize({ width: 640, height: 900 });
+        const launcher = page.locator('[data-modal-open="configSummaryModal"]');
+        const modal = page.locator('#configSummaryModal');
+        await expect(launcher).toBeVisible();
+        await launcher.click();
+        await expect(modal).toBeVisible();
+        await expect(modal.locator('.wc-modal__close')).toBeFocused();
+
+        const widths = await page.evaluate(() => ({
+          client: document.documentElement.clientWidth,
+          scroll: document.documentElement.scrollWidth,
+        }));
+        expect(widths.scroll).toBeLessThanOrEqual(widths.client);
+
+        const modalEntry = await runAxeScan(page, 'runs0-config-summary-modal');
+        console.log(`[axe] ${modalEntry.pageId}: ${modalEntry.violationCount} violations`);
+
+        await page.keyboard.press('Escape');
+        await expect(modal).toBeHidden();
+        await expect(launcher).toBeFocused();
+      }
     } finally {
       await cleanupProvisionedRun(page);
     }

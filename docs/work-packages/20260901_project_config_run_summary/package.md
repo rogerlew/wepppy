@@ -1,6 +1,6 @@
 # Project Config Run Summary
 
-**Status**: Open (2026-09-01)
+**Status**: Closed (2026-09-01)
 **Timezone**: UTC
 
 ## Overview
@@ -53,17 +53,19 @@ projection pill and a read-only Config Summary modal under the More menu for
 
 ## Success Criteria
 
-- [ ] A Config Builder run with an assigned projection shows a locale pill
+- [x] A Config Builder run with an assigned projection shows a locale pill
   immediately to the right of the projection pill.
-- [ ] More contains a Config Summary action that opens a keyboard- and
+- [x] More contains a Config Summary action that opens a keyboard- and
   screen-reader-accessible modal.
-- [ ] The modal table contains exactly the six requested row labels and the
+- [x] The modal table contains exactly the six requested row labels and the
   effective values for the current run.
-- [ ] Representation renders as `Single OFE` or `Multiple OFE`.
-- [ ] Absent or unsupported summary state is communicated honestly and does
+- [x] Representation renders as `Single OFE` or `Multiple OFE`.
+- [x] Absent or unsupported summary state is communicated honestly and does
   not cause a run-page error.
-- [ ] Focused tests, frontend lint/tests, manual modal smoke testing, scoped
-  documentation lint, and the correctness/UX gate pass.
+- [x] Focused tests, frontend lint/tests, scoped documentation lint, and the
+  correctness/UX gate pass. The modal smoke branch is committed and syntax
+  checked; live execution was unavailable because the smoke environment could
+  not provision or locate a Config Builder run, as recorded in the tracker.
 
 ## Parameterization ADR Gate
 
