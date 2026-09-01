@@ -249,3 +249,6 @@ the remaining broad-validation/closeout work.
 
 Plan revision note (2026-09-01 19:05 UTC): Recorded the full-suite pass, final
 documentation/diff gates, browser-fixture limitation, and package closure.
+
+Plan revision note (2026-09-01 19:07 UTC): Recorded implementation and package
+closeout revision `2887b74ec`.
