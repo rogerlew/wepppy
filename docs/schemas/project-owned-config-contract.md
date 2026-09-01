@@ -1007,8 +1007,8 @@ pill MUST use the effective canonical locale ID with the exact form
 misspelled alias MUST NOT replace the canonical ID.
 
 The run header's More menu MUST contain a `Config Summary` button that opens an
-accessible, read-only dialog. The dialog MUST contain one two-column table with
-these row headers in this order:
+accessible, read-only dialog. The dialog MUST use the established
+`wc-summary-pane` definition-list pattern with these terms in this order:
 
 1. Locale
 2. Delineation Backend
@@ -1027,17 +1027,17 @@ Size (m) MUST be the effective runtime cell size expressed as a number in
 meters, not a freshly resolved DEM default. When the required persisted or
 runtime evidence for a field is absent, the value is `Not available`.
 
-All six rows MUST remain present when the summary is available. If an
-individual effective value is absent, the corresponding cell MUST display
+All six entries MUST remain present when the summary is available. If an
+individual effective value is absent, the corresponding definition MUST display
 `Not available`; the page MUST NOT fail and MUST NOT infer a replacement from
 the current registry. If no project capability authority can resolve a locale
 for the `/config/` run, the locale pill is omitted while the modal remains
-available with honest `Not available` cells.
+available with honest `Not available` definitions.
 
 The dialog MUST follow the shared WEPPcloud modal behavior for accessible name,
 focus containment and return, Escape and dismiss controls, and active-theme
-styling. Its table MUST use semantic row headers, remain reachable at narrow
-viewport widths, and escape all displayed values as text.
+styling. Its `wc-summary-pane` markup MUST use semantic `dt`/`dd` pairs, remain
+reachable at narrow viewport widths, and escape all displayed values as text.
 
 ## 8. Composition and Precedence
 
@@ -2151,7 +2151,8 @@ Implementation is not conformant until tests demonstrate:
   section 7.8 across populated, absent, empty, supported legacy, and malformed
   states, never substitutes live graph defaults for missing stored selections,
   and escapes hostile display values;
-- the Config Summary dialog passes semantic-table, accessible-name,
+- the Config Summary dialog uses the established `wc-summary-pane` semantic
+  definition-list structure and passes accessible-name,
   keyboard/focus, active-theme, and narrow-reflow checks;
 - capability filtering and server enforcement use the same resolved IDs;
 - update preview/apply reject public read authority and require the project
