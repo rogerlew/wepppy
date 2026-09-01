@@ -280,7 +280,7 @@
 {% if run_config_summary %}
 <div class="wc-modal" id="configSummaryModal" data-modal hidden>
   <div class="wc-modal__overlay" data-modal-dismiss></div>
-  <section class="wc-modal__dialog wc-config-summary__dialog"
+  <section class="wc-modal__dialog"
            role="dialog"
            aria-modal="true"
            aria-labelledby="configSummaryTitle"
@@ -296,18 +296,15 @@
       <p id="configSummaryDescription">
         Effective configuration settings for this run.
       </p>
-      <div class="wc-config-summary__table-wrap">
-        <table class="pure-table pure-table-bordered wc-config-summary__table">
-          <caption>Current configuration settings</caption>
-          <tbody>
-            {% for label, value in run_config_summary.rows %}
-            <tr>
-              <th scope="row">{{ label }}</th>
-              <td>{{ value }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+      <div class="wc-summary-pane">
+        <dl class="wc-summary-pane__list">
+          {% for label, value in run_config_summary.rows %}
+          <div class="wc-summary-pane__item">
+            <dt class="wc-summary-pane__term">{{ label }}</dt>
+            <dd class="wc-summary-pane__definition">{{ value }}</dd>
+          </div>
+          {% endfor %}
+        </dl>
       </div>
     </div>
     <footer class="wc-modal__footer">

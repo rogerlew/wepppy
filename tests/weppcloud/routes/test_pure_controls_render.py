@@ -3622,12 +3622,13 @@ def test_run_header_renders_accessible_config_summary_after_projection(
     assert 'id="configSummaryModal" data-modal hidden' in rendered
     assert 'aria-labelledby="configSummaryTitle"' in rendered
     assert 'aria-describedby="configSummaryDescription"' in rendered
-    assert "<caption>Current configuration settings</caption>" in rendered
+    assert '<div class="wc-summary-pane">' in rendered
+    assert '<dl class="wc-summary-pane__list">' in rendered
     assert "unsafe&lt;script&gt;" in rendered
     assert "unsafe<script>" not in rendered
 
-    row_headers = re.findall(r'<th scope="row">([^<]+)</th>', rendered)
-    assert row_headers == [
+    terms = re.findall(r'<dt class="wc-summary-pane__term">([^<]+)</dt>', rendered)
+    assert terms == [
         "Locale",
         "Delineation Backend",
         "Representation",
@@ -3635,6 +3636,7 @@ def test_run_header_renders_accessible_config_summary_after_projection(
         "Cell Size (m)",
         "CLIGEN Database",
     ]
+    assert rendered.count('class="wc-summary-pane__definition"') == 6
 
 
 def test_run_header_omits_config_summary_without_target_context(
@@ -3709,20 +3711,6 @@ def test_run_header_keeps_config_summary_when_locale_is_unavailable(
     assert "data-project-locale" not in rendered
     assert 'data-modal-open="configSummaryModal"' in rendered
     assert rendered.count("Not available") == 6
-
-
-def test_config_summary_table_uses_active_theme_tokens() -> None:
-    css = (TEMPLATE_ROOT.parent / "static" / "css" / "ui-foundation.css").read_text(
-        encoding="utf-8"
-    )
-    caption_rule = re.search(
-        r"\.wc-config-summary__table caption\s*\{(?P<body>[^}]+)\}",
-        css,
-    )
-
-    assert caption_rule is not None
-    assert "background: var(--wc-color-surface)" in caption_rule.group("body")
-    assert "color: var(--wc-color-text)" in caption_rule.group("body")
 
 
 def test_feature_control_shell_renders_maturity_pill_next_to_label(jinja_env: Environment) -> None:

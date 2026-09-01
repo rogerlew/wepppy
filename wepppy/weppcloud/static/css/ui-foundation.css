@@ -1630,28 +1630,6 @@ h5:first-child {
   color-scheme: var(--wc-color-scheme);
 }
 
-.wc-config-summary__table-wrap {
-  overflow-x: auto;
-}
-
-.wc-config-summary__table {
-  width: 100%;
-}
-
-.wc-config-summary__table th,
-.wc-config-summary__table td {
-  border-color: var(--wc-color-border);
-  color: var(--wc-color-text);
-  overflow-wrap: anywhere;
-  text-align: left;
-  vertical-align: top;
-}
-
-.wc-config-summary__table caption {
-  background: var(--wc-color-surface);
-  color: var(--wc-color-text);
-}
-
 .wc-run-header__descriptor {
   font-size: 1rem;
   font-weight: 600;
