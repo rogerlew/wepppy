@@ -70,6 +70,23 @@ The `wepppy.climates` package integrates diverse climate data sources into a uni
 - **Spatial Coverage**: CONUS (Contiguous United States)
 - **Temporal Coverage**: 1979–present (near real-time updates)
 - **Resolution**: ~4 km grid
+- **Acquisition paths**: aggregated JSON for one coordinate and annual THREDDS
+  NCSS NetCDF subsets for a watershed bounding box
+- **Reliability contract**: three bounded attempts with explicit connect/read
+  timeouts; only validated JSON or classic NetCDF3 is accepted. The NCSS
+  `accept=netcdf` response is checked for complete NetCDF3 storage before its
+  requested variable, dimensions, coordinates, and metadata are validated.
+  Single-location JSON must cover every requested date exactly once and in
+  order, with equal-length numeric series.
+  Gridded responses stage
+  beside the destination and replace it atomically after the requested variable
+  plus longitude/latitude coordinates are verified. HTTP/HTML error bodies and
+  truncated NetCDF never become final `.nc` artifacts.
+- **Resource bounds**: single-location JSON is limited to 32 MiB and annual
+  gridded responses to 512 MiB; redirects are rejected. Grid dimensions must
+  agree with one calendar year and the requested bounding box.
+- **Fan-out**: watershed variable/year downloads use at most four concurrent
+  workers by default to limit pressure on the upstream THREDDS service.
 - **Key Files**:
   - `client.py` - NetCDF downloader and interpolator (`retrieve_timeseries()`, `interpolate_daily_timeseries_for_location()`)
   - `gridmet_singlelocation_client.py` - Single-pixel convenience wrapper
@@ -462,7 +479,9 @@ def test_retrieve_timeseries_mock(responses):
 - **Leap year handling**: WEPP expects 365-day years. Most sources support `fill_leap_years=True` to duplicate Feb 28 → Feb 29.
 - **Unit conversions**: Daymet returns precipitation in mm/day; CLIGEN uses mm; WEPP .cli expects mm. GridMET returns kg/m²/day (= mm/day). Always verify units.
 - **Wind direction convention**: GridMET uses meteorological convention (direction wind comes *from*); WEPP uses the same. Daymet lacks wind (must blend GridMET).
-- **Missing data**: Handle API failures gracefully; retry with exponential backoff (see `daymet_singlelocation_client.py` retry logic).
+- **Acquisition failures**: GridMET retries only transient failures within the
+  bounded policy in ADR-0028. Do not add caller-level indefinite retries or
+  consume a `.nc` path that the validated downloader did not publish.
 
 ### Code Organization
 

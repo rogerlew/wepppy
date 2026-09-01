@@ -6,22 +6,14 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
-from datetime import datetime, timedelta
-import time
-import io
+from datetime import date, datetime, timedelta
 import numpy as np
 import pandas as pd
-import requests
 
 from metpy.calc import dewpoint_from_relative_humidity
 from metpy.units import units
 
-from calendar import isleap
-
-from wepppy.all_your_base import isint
-
-_GRIDMET_MAX_RETRIES = 3
-_GRIDMET_BASE_DELAY = 5  # seconds
+from wepppy.climates.gridmet.acquisition import request_single_location_json
 
 
 def retrieve_historical_precip(lon, lat, start_year, end_year):
@@ -36,26 +28,12 @@ def retrieve_historical_precip(lon, lat, start_year, end_year):
           f"data-path=PATH_TO_DODS/agg_met_pr_1979_CurrentYear_CONUS.nc&variable=precipitation_amount&variable-name=pr&start-date={start_year}-01-01&end-date={end_date}&"\
           f"filename=gridmet_ts.shaw"
 
-    headers = {'Accept': 'application/json', 'referer': 'https://wepp.cloud'}
-
-    response_data = None
-    for attempt in range(_GRIDMET_MAX_RETRIES):
-        try:
-            response = requests.get(url, headers=headers)
-
-            if response.status_code != 200:
-                raise Exception(response.text)
-
-            response_data = response.json()
-            break
-        except Exception:
-            if attempt < _GRIDMET_MAX_RETRIES - 1:
-                delay = _GRIDMET_BASE_DELAY * (2 ** attempt)  # 5s, 10s, 20s
-                time.sleep(delay)
-            else:
-                raise
-
-    data = response_data['data'][0]
+    data = request_single_location_json(
+        url,
+        required_series=('pr(mm)',),
+        start_date=date(start_year, 1, 1),
+        end_date=date.fromisoformat(end_date),
+    )
 
     df = pd.DataFrame()
     df['pr(mm/day)'] = pd.Series(data['pr(mm)']).astype(float)
@@ -77,33 +55,12 @@ def retrieve_historical_wind(lon, lat, start_year, end_year):
           f"data-path=PATH_TO_DODS/agg_met_th_1979_CurrentYear_CONUS.nc&variable=daily_mean_wind_direction&variable-name=th&start-date={start_year}-01-01&end-date={end_date}&"\
           f"filename=gridmet_ts.shaw"
 
-    headers = {'Accept': 'application/json', 'referer': 'https://wepp.cloud'}
-    response_data = None
-    for attempt in range(_GRIDMET_MAX_RETRIES):
-        try:
-            response = requests.get(url, headers=headers)
-
-            if response.status_code != 200:
-                raise Exception(response.text)
-
-            try:
-                response_data = response.json()
-                break
-            except Exception as e:
-                raise Exception(
-                    "Failed to parse JSON response from downscaledForecast server.\n"
-                    "URL: %s\nStatus: %s\nResponse: %s\nError: %s"
-                    % (url, response.status_code, response.text[:500], str(e))
-                )
-        except Exception:
-            if attempt < _GRIDMET_MAX_RETRIES - 1:
-                delay = _GRIDMET_BASE_DELAY * (2 ** attempt)  # 5s, 10s, 20s
-                time.sleep(delay)
-            else:
-                raise
-
-
-    data = response_data['data'][0]
+    data = request_single_location_json(
+        url,
+        required_series=('vs(m/s)', 'th(DegreesClockwisefromnorth)'),
+        start_date=date(start_year, 1, 1),
+        end_date=date.fromisoformat(end_date),
+    )
 
     df = pd.DataFrame()
     df['vs(m/s)'] = pd.Series(data['vs(m/s)']).astype(float)
@@ -136,25 +93,21 @@ def retrieve_historical_timeseries(lon, lat, start_year, end_year):
 #          f"data-path=PATH_TO_DODS/agg_met_sph_1979_CurrentYear_CONUS.nc&variable=daily_mean_specific_humidity&variable-name=sph&start-date={start_year}-01-01&end-date={end_date}&"\
 #          f"data-path=PATH_TO_DODS/agg_met_vpd_1979_CurrentYear_CONUS.nc&variable=daily_mean_vapor_pressure_deficit&variable-name=vpd&start-date={start_year}-01-01&end-date={end_date}&"\
 
-    headers = {'Accept': 'application/json', 'referer': 'https://wepp.cloud'}
-    response_data = None
-    for attempt in range(_GRIDMET_MAX_RETRIES):
-        try:
-            response = requests.get(url, headers=headers)
-
-            if response.status_code != 200:
-                raise Exception(response.text)
-
-            response_data = response.json()
-            break
-        except Exception:
-            if attempt < _GRIDMET_MAX_RETRIES - 1:
-                delay = _GRIDMET_BASE_DELAY * (2 ** attempt)  # 5s, 10s, 20s
-                time.sleep(delay)
-            else:
-                raise
-
-    data = response_data['data'][0]
+    data = request_single_location_json(
+        url,
+        required_series=(
+            'pr(mm)',
+            'srad(Wm-2)',
+            'tmmx(K)',
+            'tmmn(K)',
+            'vs(m/s)',
+            'th(DegreesClockwisefromnorth)',
+            'rmin(%)',
+            'rmax(%)',
+        ),
+        start_date=date(start_year, 1, 1),
+        end_date=date.fromisoformat(end_date),
+    )
 
     #print(data.keys())
     #dict_keys(['metadata', 'lat_lon', 'yyyy-mm-dd', 'pr(mm)', 'srad(Wm-2)', 'tmmx(K)', 'tmmn(K)', 'vs(m/s)', 'th(DegreesClockwisefromnorth)', 'rmin(%)', 'rmax(%)'])

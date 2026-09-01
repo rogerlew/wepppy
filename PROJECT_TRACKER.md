@@ -1241,6 +1241,35 @@ the remaining-run controller plan has no next controller milestone.
 
 ## ✅ Done
 
+### Project Config Run Summary
+
+**Completed**: 2026-09-01
+
+**Link**: [docs/work-packages/20260901_project_config_run_summary/](docs/work-packages/20260901_project_config_run_summary/)
+
+Added the canonical locale pill and accessible six-row Config Summary modal to
+Config Builder run pages, backed by effective stored/runtime authority and
+honest unavailable states. Contract-first and independent correctness reviews
+passed; the complete Python suite and frontend gates passed.
+
+### GridMET Download Client Hardening
+
+**Completed**: 2026-08-31
+
+**Priority/Security**: Critical / `high`
+
+**Link**: [docs/work-packages/20260831_gridmet_download_hardening/](docs/work-packages/20260831_gridmet_download_hardening/)
+
+**Outcome**: Single-location JSON now requires exact requested daily coverage;
+gridded NCSS downloads use bounded retries, classic NetCDF3 completeness and
+semantic validation, and atomic publication. Fan-out is capped at four workers.
+Forest1 live validation passed, all independent gates passed with no open
+Critical/High/Medium findings, and the full suite passed 7,306 tests.
+
+**Lifecycle**: In Progress -> Done (2026-08-31)
+
+---
+
 ### Table Overflow Discoverability and WEPP Slope Display Precision
 
 **Completed**: 2026-08-29

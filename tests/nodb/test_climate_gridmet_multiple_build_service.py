@@ -108,6 +108,44 @@ def test_worker_count_honors_env_override(monkeypatch: pytest.MonkeyPatch) -> No
     assert service._worker_count(default_workers=12, ncpu=8) == 8
 
 
+def test_gridmet_retrieval_uses_four_worker_default(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    observed_workers: list[int] = []
+
+    class _Executor:
+        def __init__(self, *, max_workers: int) -> None:
+            observed_workers.append(max_workers)
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, _exc_type, _exc, _tb) -> None:
+            return None
+
+        def submit(self, function, *args, **kwargs):
+            future = Future()
+            future.set_result(function(*args, **kwargs))
+            return future
+
+    monkeypatch.delenv("WEPPPY_NCPU", raising=False)
+    monkeypatch.setattr(service_module, "ProcessPoolExecutor", _Executor)
+    service = ClimateGridmetMultipleBuildService()
+    service._retrieve_gridmet_netcdfs(
+        retrieve_nc=lambda *_args, **_kwargs: "grid",
+        measures=[object()],
+        bbox=[-117.0, 47.0, -116.0, 46.0],
+        start_year=2025,
+        end_year=2025,
+        cli_dir=str(tmp_path),
+        climate=SimpleNamespace(logger=_RecordingLogger()),
+        ncpu=32,
+    )
+
+    assert observed_workers == [4]
+
+
 def test_load_raw_gridmet_data_preserves_unpublished_suffix_as_nan(tmp_path: Path) -> None:
     service = ClimateGridmetMultipleBuildService()
 

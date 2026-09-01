@@ -1,7 +1,9 @@
+import calendar
+import logging
+import math
+import tempfile
+import time
 import uuid
-
-import requests
-import shutil
 from enum import Enum
 import os
 from os.path import join as _join
@@ -22,6 +24,7 @@ from wepppy.all_your_base import isint
 from wepppy.all_your_base.geo import RasterDatasetInterpolator
 
 from scipy.interpolate import RegularGridInterpolator
+from scipy.io import netcdf_file
 
 import pyproj
 from pyproj import Proj
@@ -34,8 +37,18 @@ from wepppyo3.climate import interpolate_geospatial
 from wepppy.climates.cligen import df_to_prn
 
 from wepppy.nodb.status_messenger import StatusMessenger
+from wepppy.climates.gridmet.acquisition import (
+    BACKOFF_SECONDS,
+    GRID_TIMEOUT,
+    MAX_ATTEMPTS,
+    MAX_GRID_BYTES,
+    TRANSIENT_HTTP_STATUSES,
+    GridMetAcquisitionError,
+    GridMetPayloadError,
+)
 
 SCRATCH_DIR = '/dev/shm'
+_LOG = logging.getLogger(__name__)
 
 
 
@@ -119,6 +132,68 @@ def nc_extract(fn, locations):
     return d
 
 
+_GRIDMET_CELL_DEGREES = 1.0 / 24.0
+
+
+def _validate_gridmet_netcdf(path, variable_name, *, bbox, year):
+    # NCSS `accept=netcdf` returns NetCDF3.  netCDF4 can open a NetCDF3 file
+    # whose trailing record data is missing and supply zeros for that region,
+    # so require the stricter SciPy parser to prove the complete record layout
+    # is present before applying the semantic checks below.
+    try:
+        with netcdf_file(path, mode='r', mmap=True):
+            pass
+    except (OSError, TypeError, ValueError) as exc:
+        raise GridMetPayloadError("response is not a complete NetCDF3 dataset") from exc
+
+    try:
+        with netCDF4.Dataset(path) as dataset:
+            missing = [name for name in (variable_name, 'day', 'lon', 'lat') if name not in dataset.variables]
+            if missing:
+                raise GridMetPayloadError(
+                    f"NetCDF is missing required variables: {', '.join(missing)}"
+                )
+            variable = dataset.variables[variable_name]
+            if variable.size == 0:
+                raise GridMetPayloadError(f"NetCDF variable {variable_name} is empty")
+            if variable.dimensions != ('day', 'lat', 'lon'):
+                raise GridMetPayloadError(
+                    f"NetCDF variable {variable_name} dimensions must be day, lat, lon"
+                )
+            for attribute in ('description', 'units'):
+                if not getattr(variable, attribute, None):
+                    raise GridMetPayloadError(
+                        f"NetCDF variable {variable_name} is missing {attribute}"
+                    )
+            for coordinate in ('lon', 'lat'):
+                if dataset.variables[coordinate].size == 0:
+                    raise GridMetPayloadError(f"NetCDF coordinate {coordinate} is empty")
+            west, north, east, south = bbox
+            max_lon = math.ceil((east - west) / _GRIDMET_CELL_DEGREES) + 4
+            max_lat = math.ceil((north - south) / _GRIDMET_CELL_DEGREES) + 4
+            day_count, lat_count, lon_count = variable.shape
+            expected_days = 366 if calendar.isleap(year) else 365
+            if year < datetime.date.today().year and day_count != expected_days:
+                raise GridMetPayloadError(
+                    f"NetCDF completed year has {day_count} days; expected {expected_days}"
+                )
+            if year >= datetime.date.today().year and not 1 <= day_count <= expected_days:
+                raise GridMetPayloadError("NetCDF time dimension is outside the requested year")
+            if dataset.variables['day'].size != day_count:
+                raise GridMetPayloadError("NetCDF data and time-coordinate dimensions do not agree")
+            if lat_count != dataset.variables['lat'].size or lon_count != dataset.variables['lon'].size:
+                raise GridMetPayloadError("NetCDF data and coordinate dimensions do not agree")
+            if lat_count > max_lat or lon_count > max_lon:
+                raise GridMetPayloadError("NetCDF spatial dimensions exceed requested bounding box")
+            # Force a bounded data read so truncated storage is detected before publication.
+            variable[0, 0, 0]
+            dataset.variables['day'][:]
+            dataset.variables['lat'][:]
+            dataset.variables['lon'][:]
+    except OSError as exc:
+        raise GridMetPayloadError("response is not a readable NetCDF dataset") from exc
+
+
 def retrieve_nc(gridvariable: GridMetVariable, bbox, year, met_dir=None, _id=None):
     global _var_meta
 
@@ -138,19 +213,129 @@ def retrieve_nc(gridvariable: GridMetVariable, bbox, year, met_dir=None, _id=Non
           'timeStride=1&accept=netcdf'\
           .format(abbrv=abbrv, year=year, variable_name=variable_name, north=north, west=west, east=east, south=south)
 
-    referer = 'https://wepp.cloud'
-    s = requests.Session()
-    response = s.get(url, headers={'referer': referer}, stream=True)
     if _id is None:
         _id = str(uuid.uuid4())+abbrv+str(year)
+    if not _id or os.path.basename(_id) != _id:
+        raise ValueError('GridMET download id must be a non-empty filename component')
     if met_dir is None:
         met_dir = SCRATCH_DIR
+    os.makedirs(met_dir, exist_ok=True)
+    destination = _join(met_dir, f'{_id}.nc')
 
-    with open(_join(met_dir, '%s.nc' % _id), 'wb') as out_file:
-        shutil.copyfileobj(response.raw, out_file)
-    del response
+    for attempt in range(MAX_ATTEMPTS):
+        response = None
+        stage_path = None
+        try:
+            response = requests.get(
+                url,
+                headers={'referer': 'https://wepp.cloud'},
+                stream=True,
+                timeout=GRID_TIMEOUT,
+                allow_redirects=False,
+            )
+            status = int(response.status_code)
+            if status != 200:
+                if status not in TRANSIENT_HTTP_STATUSES:
+                    raise GridMetAcquisitionError(
+                        f'GridMET grid request for {gridvariable.name} {year} '
+                        f'returned non-retryable HTTP {status}'
+                    )
+                raise GridMetPayloadError(f'transient HTTP {status}')
 
-    return _id
+            declared_length = response.headers.get('Content-Length')
+            expected_length = None
+            if declared_length is not None:
+                try:
+                    expected_length = int(declared_length)
+                    if expected_length < 0:
+                        raise GridMetPayloadError('invalid Content-Length header')
+                    if expected_length > MAX_GRID_BYTES:
+                        raise GridMetPayloadError(
+                            f'NetCDF response exceeds {MAX_GRID_BYTES} byte limit'
+                        )
+                except ValueError as exc:
+                    raise GridMetPayloadError('invalid Content-Length header') from exc
+
+            with tempfile.NamedTemporaryFile(
+                mode='wb',
+                prefix=f'.{_id}.',
+                suffix='.nc.part',
+                dir=met_dir,
+                delete=False,
+            ) as stage:
+                stage_path = stage.name
+                downloaded = 0
+                for chunk in response.iter_content(chunk_size=1024 * 1024):
+                    if chunk:
+                        downloaded += len(chunk)
+                        if downloaded > MAX_GRID_BYTES:
+                            raise GridMetPayloadError(
+                                f'NetCDF response exceeds {MAX_GRID_BYTES} byte limit'
+                            )
+                        stage.write(chunk)
+                stage.flush()
+                os.fsync(stage.fileno())
+            if (
+                expected_length is not None
+                and not response.headers.get('Content-Encoding')
+                and downloaded != expected_length
+            ):
+                raise GridMetPayloadError(
+                    f'NetCDF response length {downloaded} does not match declared '
+                    f'Content-Length {expected_length}'
+                )
+            _validate_gridmet_netcdf(stage_path, variable_name, bbox=bbox, year=year)
+            os.chmod(stage_path, 0o644)
+            os.replace(stage_path, destination)
+            stage_path = None
+            return _id
+        except (
+            requests.exceptions.ConnectionError,
+            requests.exceptions.Timeout,
+            requests.exceptions.ChunkedEncodingError,
+            requests.exceptions.ContentDecodingError,
+            GridMetPayloadError,
+        ) as exc:
+            reason = (
+                f'{type(exc).__name__}: {exc}'
+                if isinstance(exc, requests.exceptions.RequestException)
+                else str(exc)
+            )
+            if response is not None:
+                response.close()
+                response = None
+            if stage_path is not None:
+                try:
+                    os.unlink(stage_path)
+                except FileNotFoundError:
+                    pass
+                stage_path = None
+            if attempt + 1 >= MAX_ATTEMPTS:
+                raise GridMetAcquisitionError(
+                    f'GridMET grid request for {gridvariable.name} {year} failed '
+                    f'after {MAX_ATTEMPTS} attempts: {reason}'
+                ) from exc
+            delay = BACKOFF_SECONDS[attempt]
+            _LOG.warning(
+                "GridMET grid request for %s %s retry %d/%d after %s; waiting %.1fs",
+                gridvariable.name,
+                year,
+                attempt + 2,
+                MAX_ATTEMPTS,
+                reason,
+                delay,
+            )
+            time.sleep(delay)
+        finally:
+            if response is not None:
+                response.close()
+            if stage_path is not None:
+                try:
+                    os.unlink(stage_path)
+                except FileNotFoundError:
+                    pass
+
+    raise AssertionError('bounded GridMET retry loop exited unexpectedly')
 
 
 def read_nc_longlat(fn):

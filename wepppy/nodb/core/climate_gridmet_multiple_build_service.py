@@ -218,7 +218,7 @@ class ClimateGridmetMultipleBuildService:
         climate: "Climate",
         ncpu: int,
     ) -> None:
-        workers = self._worker_count(default_workers=12, ncpu=ncpu)
+        workers = self._worker_count(default_workers=4, ncpu=ncpu)
         with ProcessPoolExecutor(max_workers=workers) as executor:
             futures = []
             for measure in measures:
