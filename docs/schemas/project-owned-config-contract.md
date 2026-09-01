@@ -987,6 +987,58 @@ route boundary. Values that reach HTML rendering remain subject to the existing
 Jinja autoescaping boundary. The title is not persisted and does not rewrite
 project files or provenance.
 
+### 7.8 Config Builder run summary
+
+The Config Builder summary surface is selected solely by the route config stem:
+`/runs/<runid>/config/` MUST expose a read-only summary of the effective project
+configuration, while every other config stem MUST omit the locale pill,
+launcher, and dialog. A nested/PUP request whose active route stem is `config`
+uses the active resolved run context and follows the same rule. Test-only flags,
+including `playwright_load_all`, MUST NOT expose this surface for another config
+stem. Existing run-read authorization MUST complete before any summary is
+rendered. This summary MUST NOT mutate project state, add a network request, or
+replace missing run values with current Builder registry defaults.
+
+When the run has a resolved locale profile, the header MUST render a locale
+pill in the metadata sequence immediately after the projection position. The
+pill MUST use the effective canonical locale ID with the exact form
+`locale: <canonical-id>`; for example, Continental US renders as
+`locale: continental-us`. A runtime locale token, translated display alias, or
+misspelled alias MUST NOT replace the canonical ID.
+
+The run header's More menu MUST contain a `Config Summary` button that opens an
+accessible, read-only dialog. The dialog MUST contain one two-column table with
+these row headers in this order:
+
+1. Locale
+2. Delineation Backend
+3. Representation
+4. DEM Data Source
+5. Cell Size (m)
+6. CLIGEN Database
+
+Locale MUST use the non-empty canonical profile ID resolved from the effective
+run config. DEM Data Source and CLIGEN Database MUST use selected canonical IDs
+persisted in stored project capability authority; a live legacy/preset graph
+MUST NOT supply its defaults as if they were selections. Delineation Backend
+MUST use the normalized effective runtime backend ID. Representation MUST be
+`Single OFE` or `Multiple OFE` according to the effective runtime model. Cell
+Size (m) MUST be the effective runtime cell size expressed as a number in
+meters, not a freshly resolved DEM default. When the required persisted or
+runtime evidence for a field is absent, the value is `Not available`.
+
+All six rows MUST remain present when the summary is available. If an
+individual effective value is absent, the corresponding cell MUST display
+`Not available`; the page MUST NOT fail and MUST NOT infer a replacement from
+the current registry. If no project capability authority can resolve a locale
+for the `/config/` run, the locale pill is omitted while the modal remains
+available with honest `Not available` cells.
+
+The dialog MUST follow the shared WEPPcloud modal behavior for accessible name,
+focus containment and return, Escape and dismiss controls, and active-theme
+styling. Its table MUST use semantic row headers, remain reachable at narrow
+viewport widths, and escape all displayed values as text.
+
 ## 8. Composition and Precedence
 
 Composition MUST be deterministic and schema-driven. The conceptual order is:
@@ -2091,6 +2143,16 @@ Implementation is not conformant until tests demonstrate:
 - builder validation errors preserve selections and focus/announce correctly;
 - the complete builder path passes keyboard, 200-percent zoom, and automated
   accessibility checks;
+- the `/config/` run route renders the locale pill and Config Summary dialog,
+  while other config stems and test-only exposure flags do not; nested/PUP
+  `/config/` requests use their active resolved context and authorization denial
+  occurs before rendering;
+- the run summary retains the exact six-row order and field mappings from
+  section 7.8 across populated, absent, empty, supported legacy, and malformed
+  states, never substitutes live graph defaults for missing stored selections,
+  and escapes hostile display values;
+- the Config Summary dialog passes semantic-table, accessible-name,
+  keyboard/focus, active-theme, and narrow-reflow checks;
 - capability filtering and server enforcement use the same resolved IDs;
 - update preview/apply reject public read authority and require the project
   owner or `Admin`/`Root`, including worker-time reauthorization;
