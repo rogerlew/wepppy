@@ -32,6 +32,10 @@ forest run after restarting only its development stack.
   dispositioned.
 - [x] (2026-08-21 19:27 UTC) Execute and document the authorized forest Compose
   integration proof.
+- [x] (2026-09-04 05:50 UTC) Reopen the completed package for incident remediation:
+  normalize shared fencing/export permissions after umask, join the renderer to
+  the worker data group, preserve image-vendored assets beneath the development
+  source bind mount, and pass the requested forest DEVAL canary.
 
 Kubernetes container building, publication, manifest application, and live
 cluster testing are not milestones in this plan.
@@ -58,6 +62,11 @@ cluster testing are not milestones in this plan.
 - The canonical broad suite cannot run its Compose CLI canary from inside the
   test container because that environment has no nested `docker compose -f`.
   A rerun excluding only that environment-specific test is recorded separately.
+- A production render on `wepp1` exposed that requested `0770`/`0660` modes are
+  reduced to `0750`/`0640` by the worker umask. Because the renderer did not
+  share the worker's GID, it could not traverse the fencing directory. The same
+  canary then exposed that the forest source bind mount hid the image-vendored
+  Font Awesome asset.
 
 ## Decision Log
 
@@ -81,6 +90,13 @@ cluster testing are not milestones in this plan.
 - **2026-08-21 — Acknowledge receipt events durably.** Cleaned receipts remain
   reaper-eligible until the exact state event is accepted and acknowledged;
   sink failures are isolated so later receipts continue.
+- **2026-09-04 — Make the cross-container filesystem contract explicit.** Add
+  the effective worker GID to the Compose renderer and use descriptor-based
+  `fchmod` after opening shared directories and lock files. Preserve the image's
+  immutable vendor directory with a nested named volume in development.
+  Production-equivalent identities, groups, mounts, and umask are now required
+  acceptance evidence because requested creation modes alone do not survive
+  umask and source bind mounts can hide image content.
 
 ## Outcomes & Retrospective
 
@@ -93,6 +109,13 @@ built or validated. Correctness, QA, and security gates all passed. The broad
 suite passed every package test and reached 4,593 passes before an unrelated
 pre-existing Topanga cwd-dependent test stopped the run; the canonical broad
 command also has a documented nested-Compose environment stop.
+
+On 2026-09-04 the package was reopened after production job
+`f2ae8a86-dc90-4b44-85ac-7cee3f5bdcd8` failed because the renderer could not
+traverse the worker-owned fence directory. The remediation passed 53 focused
+tests and forest canary job `7dd75911-a26c-4690-97e9-32123561802d`. An
+authenticated browser request to the requested `incommensurate-stickball`
+DEVAL URL returned HTTP 200 with a 12,519,956-character rendered page.
 
 ## Context and Orientation
 

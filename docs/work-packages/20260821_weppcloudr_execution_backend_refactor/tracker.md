@@ -1,7 +1,7 @@
 # WEPPcloudR Execution Backend Refactor Tracker
 
-**Status**: Complete — repository scope and forest Compose proof passed
-**Last updated**: 2026-08-21 21:05 UTC
+**Status**: Complete — production-permission remediation and forest Compose proof passed
+**Last updated**: 2026-09-04 05:50 UTC
 **Completed ExecPlan**: [prompts/completed/weppcloudr_execution_backend_refactor_execplan.md](prompts/completed/weppcloudr_execution_backend_refactor_execplan.md)
 
 ## Scope Guardrails
@@ -27,6 +27,9 @@
 - [x] Complete independent correctness, QA, and security reviews.
 - [x] Restart the authorized forest development stack and capture successful
   Docker-exec DEVAL evidence for the designated run.
+- [x] Remediate the production-discovered cross-container GID/umask contract,
+  preserve image-vendored assets under the forest source bind mount, and pass
+  the requested `incommensurate-stickball` DEVAL canary.
 
 ## Decisions
 
@@ -41,6 +44,8 @@
   the field but does not deploy it.
 - Implementation fidelity is a faithful extraction of current Compose behavior,
   not a redesign of report semantics.
+- Compose filesystem compatibility is accepted only with effective identity,
+  group, mount, and umask evidence plus an end-to-end user-facing render.
 
 ## Risks and Controls
 
@@ -68,6 +73,7 @@
 | QA review | `artifacts/2026-08-21_qa_review.md` | Pass |
 | Security review | `artifacts/2026-08-21_security_review.md` | Pass |
 | Forest Compose integration | `artifacts/2026-08-21_forest_compose_integration.md` | Pass |
+| 2026-09-04 incident remediation | 53 focused tests; canary job `7dd75911-a26c-4690-97e9-32123561802d`; authenticated report HTTP 200 | Pass |
 
 ## Deferred Deployment Boundary
 

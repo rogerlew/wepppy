@@ -514,6 +514,8 @@ services:
       dockerfile: weppcloudR/Dockerfile
     restart: unless-stopped
     container_name: weppcloudr
+    group_add:
+      - "${GID:-1000}"
     environment:
       PORT: ${WEPPCLOUDR_PORT:-8050}
       TEMPLATE_ROOT: /srv/weppcloudr/templates/scripts/users/chinmay

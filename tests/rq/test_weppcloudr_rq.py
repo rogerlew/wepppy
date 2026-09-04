@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import inspect
+import os
 import subprocess
 from pathlib import Path
 from types import SimpleNamespace
@@ -150,6 +151,27 @@ def test_command_log_byte_cap_is_exact_for_unicode(
 
     for suffix in ("stdout", "stderr"):
         assert (log_dir / f"render_deval_job-1.{suffix}").stat().st_size <= 1024
+
+
+def test_compose_shared_paths_override_restrictive_worker_umask(tmp_path: Path) -> None:
+    previous_umask = os.umask(0o027)
+    try:
+        weppcloudr_rq._secure_deval_paths(tmp_path, "run-1", "job-1")
+        generation = weppcloudr_rq._next_compose_fencing_generation(tmp_path, "run-1")
+    finally:
+        os.umask(previous_umask)
+
+    assert generation == 1
+    for directory in (
+        tmp_path / "export",
+        tmp_path / "export" / "WEPPcloudR",
+        tmp_path / "_locks",
+        tmp_path / "_locks" / "weppcloudr",
+    ):
+        assert directory.stat().st_mode & 0o777 == 0o770
+    fence_dir = tmp_path / "_locks" / "weppcloudr"
+    assert (fence_dir / "deval_run-1.fence").stat().st_mode & 0o777 == 0o660
+    assert (fence_dir / "deval_run-1.fence.publish.lock").stat().st_mode & 0o777 == 0o660
 
 
 def test_run_path_validation_preserves_pup_links_to_parent(tmp_path: Path) -> None:

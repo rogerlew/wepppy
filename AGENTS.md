@@ -140,8 +140,8 @@
 - Never commit secrets or tokens. Keep secrets in gitignored files and runtime env.
 - Preserve run-scoped access expectations and auth checks when editing endpoints.
 - Do not weaken validation, locking, or serialization safeguards in NoDb/RQ flows.
+- Do not ship changes across process, container, host-mount, permission, or execution boundaries until the existing user-facing workflow passes end-to-end under production-equivalent identities, groups, mounts, umask, configuration, and orchestration; unit tests alone are insufficient. Deployment preflights must exercise the real workflow and block rollout when parity evidence is missing or fails.
 - Security-sensitive work packages require a dedicated security review artifact per `docs/work-packages/README.md` (see "Security Review Gate").
-
 ## Root Exclusions
 - Do not place long tutorials in this file (NoDb internals, frontend migration guides, route catalogs, or markdown tooling manuals).
 - Do not duplicate subsystem instructions already maintained in nested `AGENTS.md` files.

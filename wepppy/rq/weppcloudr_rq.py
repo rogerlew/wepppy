@@ -114,6 +114,7 @@ def _secure_deval_paths(active_path: Path, runid: str, job_id: str) -> tuple[Pat
                         os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW,
                         dir_fd=current_fd,
                     )
+                    os.fchmod(next_fd, 0o770)
                     os.close(current_fd)
                     current_fd = next_fd
             finally:
@@ -200,6 +201,7 @@ def _next_compose_fencing_generation(active_path: Path, runid: str) -> int:
             next_fd = os.open(
                 part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=current_fd
             )
+            os.fchmod(next_fd, 0o770)
             if current_fd != root_fd:
                 os.close(current_fd)
             current_fd = next_fd
@@ -209,6 +211,7 @@ def _next_compose_fencing_generation(active_path: Path, runid: str) -> int:
             0o660,
             dir_fd=current_fd,
         )
+        os.fchmod(lock_fd, 0o660)
         try:
             fcntl.flock(lock_fd, fcntl.LOCK_EX)
             fence_name = f"deval_{runid}.fence"
@@ -250,6 +253,7 @@ def _artifact_lock(active_path: Path, runid: str) -> Iterator[None]:
         lock_directory_fd = os.open(
             "_locks", os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=root_fd
         )
+        os.fchmod(lock_directory_fd, 0o770)
     except OSError as exc:
         raise WeppcloudRError("DEVAL lock path contains an unsafe component.") from exc
     finally:

@@ -95,6 +95,14 @@ Backends MUST receive argument arrays or a structured request artifact. Shell
 command construction and evaluation of caller-provided command text are
 forbidden.
 
+For Docker Compose, the worker and renderer MUST share an explicit filesystem
+group for the mounted run tree. Shared export and fencing directories MUST be
+normalized after creation so process umask cannot remove group traversal or
+write access. The Compose deployment is non-conformant unless an end-to-end
+render succeeds using the effective worker and renderer identities.
+Development bind mounts MUST NOT hide image-vendored runtime assets; immutable
+vendor paths must remain sourced from the built renderer image.
+
 ### Versioned Render Request
 
 The cross-repository request is a UTF-8 JSON object with no unknown fields and

@@ -578,12 +578,15 @@ services:
       dockerfile: weppcloudR/Dockerfile
     image: weppcloudr-dev
     container_name: weppcloudr
+    group_add:
+      - "${GID:-1000}"
     environment:
       PORT: "8050"
       TEMPLATE_ROOT: /srv/weppcloudr/templates/scripts/users/chinmay
       DEVAL_TEMPLATE: /srv/weppcloudr/templates/scripts/users/chinmay/new_report.Rmd
     volumes:
       - ../weppcloudR:/srv/weppcloudr
+      - weppcloudr-vendor:/srv/weppcloudr/vendor:ro
       - ../WEPPcloudR:/srv/original-weppcloudr
       - ${GEODATA_DIR}:/geodata
       - ${WC1_DIR}:/wc1
@@ -953,6 +956,7 @@ networks:
 
 volumes:
   weppcloudr-renv-cache:
+  weppcloudr-vendor:
     driver: local
   status_go_cache:
     driver: local
