@@ -4,9 +4,9 @@
 
 **Timezone**: UTC  
 **Started**: 2026-09-04 11:31 UTC  
-**Current phase**: Forest deployment
-**Last updated**: 2026-09-04 13:31 UTC
-**Next milestone**: Commit and deploy the reviewed candidate to Forest
+**Current phase**: Closed
+**Last updated**: 2026-09-04 12:34 UTC
+**Next milestone**: None
 **Security impact**: `high`  
 **Dedicated security review**: `yes`  
 **Security artifact**: `artifacts/2026-09-04_security_review.md`
@@ -15,13 +15,11 @@
 
 ### In Progress
 
-- [ ] Commit and deploy the implementation candidate.
+- None.
 
 ### Ready / Backlog
 
-- [ ] Deploy to `forest`, submit `dainty-signature` at 60 m through rq-engine,
-      and capture generated-output evidence.
-- [ ] Close and archive the package.
+- None.
 
 ### Blocked
 
@@ -47,7 +45,12 @@
 - [x] Correctness implementation re-review passed with zero unresolved
   high/medium findings (2026-09-04 13:13 UTC).
 - [x] Full Python suite passed: 7,348 passed and 63 skipped
-  (2026-09-04 13:31 UTC).
+  (2026-09-04 12:27 UTC).
+- [x] Candidate `f2dc23498` deployed to Forest after zero-active-job preflight;
+  service identity and health verified (2026-09-04 12:29 UTC).
+- [x] rq-engine job `f5121308-9c63-4e46-8bae-c41083d53199` finished and all 167
+  generated slopes passed 60 m/structure/area acceptance (2026-09-04 12:34 UTC).
+- [x] Package closed and ExecPlan archived (2026-09-04 12:34 UTC).
 
 ## Decisions Log
 
@@ -64,7 +67,7 @@
 | --- | --- | --- | --- | --- |
 | Incorrect shared-width scaling changes area | High | Low | Direct numeric tests and Forest artifact comparison | Mitigated |
 | Multi-OFE parser corrupts slope rows/header | High | Low | Exact structural preservation assertions | Mitigated |
-| Stale Forest workers run old code | High | Medium | Record revision and container deployment identity before submit | Open |
+| Stale Forest workers run old code | High | Medium | Record revision and container deployment identity before submit | Mitigated |
 | Transform partially writes or mutates a hardlinked source | High | Low | Same-directory temp + `os.replace`; direct failure and inode tests | Mitigated |
 
 ## Verification Checklist
@@ -77,7 +80,7 @@
 - [ ] Changed documentation passes `wctl doc-lint`.
 - [x] Correctness review has no unresolved medium/high findings.
 - [x] Security review has no unresolved medium/high findings.
-- [ ] Forest generated-output acceptance passes.
+- [x] Forest generated-output acceptance passes.
 
 ## Progress Notes
 

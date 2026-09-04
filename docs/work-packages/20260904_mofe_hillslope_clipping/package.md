@@ -1,6 +1,6 @@
 # Multiple-OFE Hillslope Clipping
 
-**Status**: Open (2026-09-04)
+**Status**: Closed (2026-09-04)
 **Timezone**: UTC
 
 ## Overview
@@ -43,13 +43,13 @@ the representative area of the complete hillslope.
 
 ## Success Criteria
 
-- [ ] Mixed-length multi-OFE fixtures cap every long OFE at the configured value.
-- [ ] Generated width preserves original total area.
-- [ ] Disabled clipping leaves source geometry unchanged.
-- [ ] UI and user documentation state that the limit is per OFE.
-- [ ] Focused and broad quality gates pass.
-- [ ] Forest rq-engine run of `dainty-signature` at 60 m finishes successfully.
-- [ ] Every generated hillslope `p*.slp` OFE is at most 60 m; every source and
+- [x] Mixed-length multi-OFE fixtures cap every long OFE at the configured value.
+- [x] Generated width preserves original total area.
+- [x] Disabled clipping leaves source geometry unchanged.
+- [x] UI and user documentation state that the limit is per OFE.
+- [x] Focused and broad quality gates pass.
+- [x] Forest rq-engine run of `dainty-signature` at 60 m finishes successfully.
+- [x] Every generated hillslope `p*.slp` OFE is at most 60 m; every source and
       generated pair preserves OFE count, profile/header fields, and area within
       the documented tolerance.
 
@@ -91,8 +91,16 @@ prior-destination preservation, and hardlink de-aliasing/source immutability.
 
 ## Deliverables
 
-To be completed at closure.
+- Contract checkpoint `8434ecb88` and implementation candidate `f2dc23498`.
+- Per-OFE transform, MOFE preparation wiring, configured-value accessor, and
+  advanced-options copy.
+- Unit, integration, real-RQ failure-path, full-suite, review, deployment, and
+  all-file generated-output evidence.
 
 ## Closure Notes
 
-To be completed after Forest generated-output acceptance.
+Forest ran root rq-engine job `f5121308-9c63-4e46-8bae-c41083d53199` to
+`finished` on candidate `f2dc23498`. All 167 generated hillslope slopes passed:
+83 were clipped, 220 source OFEs exceeded 60 m, no generated OFE exceeded 60 m,
+and maximum relative area error was `2.19e-16`. No source OFE exceeded 300 m;
+the source maximum was 101.56 m.

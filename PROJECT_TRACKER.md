@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-09-04
-**Active Packages**: 32
+**Active Packages**: 31
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 26 packages (above target range; calculated from the 26 package entries in the In Progress section)
+**Current WIP**: 25 packages (above target range; calculated from the 25 package entries in the In Progress section)
 
 ### 3. Manage Flow
 Monitor how long packages spend in each column:
@@ -405,28 +405,6 @@ When resuming Kubernetes work:
 
 ## 🚧 In Progress
 
-### Multiple-OFE Hillslope Clipping
-
-**Started**: 2026-09-04
-
-**Size**: Medium (contract checkpoint, implementation, Forest acceptance)
-
-**Priority**: High
-
-**Security impact**: `high` (run-tree transformed file publication)
-
-**Link**: [docs/work-packages/20260904_mofe_hillslope_clipping/](docs/work-packages/20260904_mofe_hillslope_clipping/)
-
-**Description**: Apply the configured WEPP hillslope clip length independently
-to each OFE in multiple-OFE slope files, preserve representative hillslope area,
-clarify the advanced-options contract, and verify `dainty-signature` at 60 m on
-the Forest development stack through rq-engine.
-
-**Next Steps**: Complete the standalone contract/security checkpoint, implement
-and validate the transform, then deploy and capture generated-output evidence.
-
----
-
 ### Project Config Production Cutover (WP12)
 
 **Started**: 2026-08-31
@@ -784,7 +762,7 @@ authentication tokens from logs, restore persistent security logging under
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 24 packages (calculated from the In Progress section)
+**Current WIP Count**: 23 packages (calculated from the In Progress section)
 
 ### SSURGO Intelligent Fallback Empirical Study
 **Started**: 2026-07-21
@@ -1262,6 +1240,20 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### Multiple-OFE Hillslope Clipping
+
+**Completed**: 2026-09-04
+
+**Priority/Security**: High / `high`
+
+**Link**: [docs/work-packages/20260904_mofe_hillslope_clipping/](docs/work-packages/20260904_mofe_hillslope_clipping/)
+
+Implemented per-OFE clipping with area-preserving shared-width scaling,
+fail-closed atomic publication, and explicit advanced-options guidance. Both
+implementation reviews and the full suite passed. Forest rq-engine job
+`f5121308-9c63-4e46-8bae-c41083d53199` finished at 60 m; all 167 generated
+slopes passed structure, area, and length acceptance.
 
 ### Project Config Run Summary
 

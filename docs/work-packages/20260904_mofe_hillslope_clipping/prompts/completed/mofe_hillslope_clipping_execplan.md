@@ -26,9 +26,11 @@ generated `wepp/runs/p*.slp` files.
 - [x] (2026-09-04 13:31 UTC) Run focused and broad validation and close all
   correctness/security findings; full suite passed with 7,348 passed and 63
   skipped.
-- [ ] Deploy the exact candidate to `forest`, execute `dainty-signature` through
-  rq-engine at 60 m, and capture generated-output evidence.
-- [ ] Close package, archive this prompt, and update the project tracker.
+- [x] (2026-09-04 12:34 UTC) Deploy candidate `f2dc23498` to `forest`, execute
+  rq-engine root `f5121308-9c63-4e46-8bae-c41083d53199` at 60 m, and pass
+  all-file generated-output acceptance.
+- [x] (2026-09-04 12:34 UTC) Close package, archive this prompt, and update the
+  project tracker.
 
 ## Surprises & Discoveries
 
@@ -68,7 +70,19 @@ generated `wepp/runs/p*.slp` files.
 
 ## Outcomes & Retrospective
 
-Pending implementation and Forest acceptance.
+The feature is implemented and deployed on Forest. The 15-job rq-engine tree
+finished successfully. Across 167 generated hillslope slope files, 83 changed,
+all 220 source OFEs longer than 60 m were capped, the generated maximum was
+60 m, structure and permissions were preserved, and maximum relative area
+error was `2.19e-16`. Complete parse-before-publish validation and a real RQ
+failure test were valuable review-driven hardening additions.
+
+No source OFE in this run exceeded 300 m; the maximum was 101.56 m.
+
+The first public rq-engine health probe immediately after recreation returned
+502 while Uvicorn was still starting. A subsequent local and public probe
+returned `{"status":"ok","scope":"rq-engine"}` before submission; no rollback
+was required.
 
 ## Context and Orientation
 
@@ -210,3 +224,7 @@ effective property used by other consumers. No external dependency is added.
 Revision Note (2026-09-04, Codex): Initial self-contained plan created from the
 operator-approved per-OFE clipping request and observed `dainty-signature`
 failure mode.
+
+Revision Note (2026-09-04, Codex): Completed implementation, reviews, full-suite
+validation, bounded Forest deployment, rq-engine execution, and all-file output
+acceptance.
