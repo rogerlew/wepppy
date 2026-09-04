@@ -59,6 +59,11 @@ and the shared `_defaults.toml` compatibility alias remains for WP13.
   without actual shuffling when no randomization plugin exists.
   Evidence: the first worker remained active without progress for over four
   minutes; WP12 stopped it and did not claim a pass.
+- Observation: the first wepp1 deployment attempt stopped before build because
+  `shape-converter` retained the base UID/GID build definition while every
+  other `wepppy:latest` service used the wepp1 override definition.
+  Evidence: `compose_deploy_contract.py` rejected conflicting build definitions;
+  no container was rebuilt or recreated.
 
 ## Decision Log
 

@@ -49,6 +49,10 @@
 
 ### Done
 
+- [x] First wepp1 attempt failed closed before build/recreation on a conflicting
+  shared-image definition; aligned `shape-converter` with the wepp1 build anchor
+  and added merged-Compose regression coverage (2026-09-04).
+
 - [x] Verified branch/upstream/merge-base contract (2026-08-31 16:06 UTC).
 - [x] Confirmed WP11, WP12B, WP12C, and WP12D report Forest acceptance
   (2026-08-31 16:06 UTC).

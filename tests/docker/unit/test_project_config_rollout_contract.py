@@ -11,6 +11,7 @@ _REPO_ROOT = Path(__file__).resolve().parents[3]
 _PROD_COMPOSE = _REPO_ROOT / "docker" / "docker-compose.prod.yml"
 _PROD_WORKER_COMPOSE = _REPO_ROOT / "docker" / "docker-compose.prod.worker.yml"
 _PROD_WEPP3_COMPOSE = _REPO_ROOT / "docker" / "docker-compose.prod.wepp3.yml"
+_PROD_WEPP1_OVERRIDE = _REPO_ROOT / "docker" / "docker-compose.prod.wepp1.yml"
 _FLAGS = {
     "WEPPPY_PROJECT_CONFIG_READER_ENABLED",
     "WEPPPY_PROJECT_CONFIG_PRESET_WRITER_ENABLED",
@@ -57,3 +58,11 @@ def test_project_config_flags_reach_dedicated_worker_hosts(
     assert _FLAGS.issubset(environment)
     for flag in _FLAGS:
         assert environment[flag] == f"${{{flag}:-false}}"
+
+
+def test_wepp1_shape_converter_uses_shared_image_build() -> None:
+    override = yaml.safe_load(_PROD_WEPP1_OVERRIDE.read_text(encoding="utf-8"))
+    services = override["services"]
+
+    assert services["shape-converter"]["build"] == services["weppcloud"]["build"]
+    assert services["shape-converter"]["image"] == services["weppcloud"]["image"]
