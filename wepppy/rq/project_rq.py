@@ -2925,13 +2925,20 @@ def fork_rq(
                 clean_env_for_system_tools=_clean_env_for_system_tools,
             )
         if skip_omni_scenarios_contrasts:
-            _reset_forked_omni(new_runid, new_wd, status_channel)
-            _reset_forked_run_job_markers(
-                new_runid,
-                new_wd,
-                status_channel,
-                reset_redisprep=False,
-            )
+            if _fork_helpers._has_regular_fork_file(new_wd, "omni.nodb"):
+                _reset_forked_omni(new_runid, new_wd, status_channel)
+                _reset_forked_run_job_markers(
+                    new_runid,
+                    new_wd,
+                    status_channel,
+                    reset_redisprep=False,
+                )
+            else:
+                StatusMessenger.publish(
+                    status_channel,
+                    "No Omni controller found; skipping Omni reset.\n",
+                )
+                _reset_forked_run_job_markers(new_runid, new_wd, status_channel)
         else:
             _reset_forked_run_job_markers(new_runid, new_wd, status_channel)
 

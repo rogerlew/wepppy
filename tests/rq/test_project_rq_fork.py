@@ -28,6 +28,21 @@ def _assert_real_empty_directory(path: Path) -> None:
     assert list(path.iterdir()) == []
 
 
+def test_optional_fork_file_guard_allows_absent_omni_but_rejects_symlink(
+    tmp_path: Path,
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    assert not fork_helpers._has_regular_fork_file(str(tmp_path), "omni.nodb")
+
+    external = tmp_path / "external.nodb"
+    external.write_text("{}", encoding="ascii")
+    (tmp_path / "omni.nodb").symlink_to(external)
+
+    with pytest.raises(ValueError, match="regular non-symlink file"):
+        fork_helpers._has_regular_fork_file(str(tmp_path), "omni.nodb")
+
+
 def test_build_fork_rsync_cmd_directory_mode_has_no_nodir_cache_exclude() -> None:
     import wepppy.rq.project_rq as project
 
@@ -1199,7 +1214,7 @@ def test_fork_rq_reports_ttl_import_failures(
     assert any("STATUS TTL initialization failed" in message for message in published)
 
 
-def test_fork_rq_skip_omni_completes_when_child_workspace_is_absent(
+def test_fork_rq_skip_omni_completes_when_controller_is_absent(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
@@ -1222,39 +1237,17 @@ def test_fork_rq_skip_omni_completes_when_child_workspace_is_absent(
         "prepare_fork_run",
         lambda *args, **kwargs: str(destination),
     )
-    monkeypatch.setattr(project, "clear_nodb_file_cache", lambda *_args, **_kwargs: None)
-
-    class _OmniStub:
-        def reset_for_fork(self) -> None:
-            pass
-
-    monkeypatch.setattr(project.Omni, "getInstance", lambda _wd: _OmniStub())
-    monkeypatch.setattr(project.Omni, "load_detached", lambda _wd: None)
     monkeypatch.setattr(
-        project._fork_helpers,
-        "_rewrite_fork_redisprep_dump",
-        lambda _wd: {"attrs:loaded": "true"},
+        project,
+        "_reset_forked_omni",
+        lambda *_args, **_kwargs: pytest.fail("Omni reset must not run without omni.nodb"),
     )
+    reset_marker_calls: list[tuple[tuple[object, ...], dict[str, object]]] = []
     monkeypatch.setattr(
-        project._fork_helpers,
-        "_clear_query_engine_catalog_cache",
-        lambda *_args, **_kwargs: None,
+        project,
+        "_reset_forked_run_job_markers",
+        lambda *args, **kwargs: reset_marker_calls.append((args, kwargs)),
     )
-
-    class _RedisStub:
-        def delete(self, *_args) -> None:
-            pass
-
-        def hset(self, *_args) -> None:
-            pass
-
-    class _PrepStub:
-        def __init__(self, _wd: str) -> None:
-            self.run_id = "new-run"
-            self.redis = _RedisStub()
-
-    monkeypatch.setattr(project, "RedisPrep", _PrepStub)
-    monkeypatch.setattr(project, "_reset_forked_run_job_markers", lambda *_args, **_kwargs: None)
 
     project.fork_rq(
         "source-run",
@@ -1265,10 +1258,9 @@ def test_fork_rq_skip_omni_completes_when_child_workspace_is_absent(
     )
 
     assert any("TRIGGER   fork FORK_COMPLETE" in message for message in published)
+    assert any("No Omni controller found" in message for message in published)
     assert not any("FORK_FAILED" in message for message in published)
-    _assert_real_empty_directory(destination / "_pups" / "omni" / "scenarios")
-    _assert_real_empty_directory(destination / "_pups" / "omni" / "contrasts")
-    _assert_real_empty_directory(destination / "omni")
+    assert reset_marker_calls == [(("new-run", str(destination), "source-run:fork"), {})]
 
 
 def test_fork_rq_uses_wrapper_helper_aliases(monkeypatch: pytest.MonkeyPatch) -> None:

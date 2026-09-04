@@ -906,14 +906,23 @@ def _clear_query_engine_catalog_cache(
     publish_status(status_channel, "No query engine catalog cache artifacts to clear.\n")
 
 
-def _require_regular_fork_file(run_wd: str, name: str) -> None:
+def _has_regular_fork_file(run_wd: str, name: str) -> bool:
     root_fd = _open_fork_dir(run_wd)
     try:
-        entry_stat = os.stat(name, dir_fd=root_fd, follow_symlinks=False)
+        try:
+            entry_stat = os.stat(name, dir_fd=root_fd, follow_symlinks=False)
+        except FileNotFoundError:
+            return False
         if not stat.S_ISREG(entry_stat.st_mode):
             raise ValueError(f"Fork destination {name} must be a regular non-symlink file")
+        return True
     finally:
         os.close(root_fd)
+
+
+def _require_regular_fork_file(run_wd: str, name: str) -> None:
+    if not _has_regular_fork_file(run_wd, name):
+        raise FileNotFoundError(os.path.join(run_wd, name))
 
 
 def _rewrite_fork_redisprep_dump(run_wd: str) -> dict[str, Any]:
@@ -1286,7 +1295,7 @@ def prepare_fork_run(
     publish_status(status_channel, "Cleanup locks, READONLY, PUBLIC... done.\n")
 
     if skip_omni_scenarios_contrasts:
-        _require_regular_fork_file(new_wd, "omni.nodb")
+        _has_regular_fork_file(new_wd, "omni.nodb")
         _require_regular_fork_file(new_wd, "redisprep.dump")
 
     if initialize_ttl is not None:

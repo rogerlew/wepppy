@@ -83,8 +83,8 @@ Module: `wepppy/rq/project_rq.py`
     Dot-prefixed collection sidecars are ignored during link normalization.
   - Publishes copy stage transitions, a replaceable elapsed-time heartbeat every 10 seconds, and bounded final summary/error tails to `<runid>:fork`.
   - When `skip_wepp_runs_output=True` (or when `undisturbify=True`), excludes `wepp/runs` and `wepp/output` from content copy, then creates those directories in the destination run.
-  - When `skip_omni_scenarios_contrasts=True`, excludes exactly `_pups/omni/scenarios` and `_pups/omni/contrasts`, recreates empty real collection and aggregate directories, resets only the destination Omni controller, clears its two completion timestamps, and invalidates copied query-engine catalog/cache.
-  - A source that has never created Omni child workspaces may legitimately lack
+  - When `skip_omni_scenarios_contrasts=True`, excludes exactly `_pups/omni/scenarios` and `_pups/omni/contrasts`. If the project has an Omni controller, the fork recreates empty real collection and aggregate directories, resets only the destination Omni controller, clears its two completion timestamps, and invalidates copied query-engine catalog/cache. If `omni.nodb` is absent, the Omni reset is an explicit no-op and the fork continues.
+  - An Omni-enabled source that has never created Omni child workspaces may legitimately lack
     `_pups` or `_pups/omni`. In skip mode the fork creates those missing real
     destination ancestors and continues; only an existing symlink, special
     entry, or non-directory ancestor is an error.
