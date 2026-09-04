@@ -54,6 +54,11 @@ Define the canonical UI and route contract for the Disturbed modal that manages 
   - `usersum.view_markdown(category='weppcloud', filename='disturbed-land-soil-lookup.md')`
 
 ## Backend Route Contract
+- Access to the lookup editor and its rq-engine session-token bridge follows
+  the standard run authorization contract: owners and current Admin/Root users
+  may edit a private run. The bridge must not reject an elevated user already
+  authorized to open the editor merely because cached session role fields are
+  absent or stale.
 - Mutating (POST-only):
   - `POST /runs/<runid>/<config>/tasks/reset_disturbed`
   - `POST /runs/<runid>/<config>/tasks/load_extended_land_soil_lookup`

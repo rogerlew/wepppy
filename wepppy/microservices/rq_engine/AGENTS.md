@@ -51,6 +51,9 @@ this service as the canonical async interface for run-scoped operations.
   - `session` tokens are validated via Redis DB 11
     `auth:session:run:{runid}:{session_id}` markers.
   - `service`/`mcp` tokens must include the run id in `runs`/`runid` claims.
+- Cookie-backed session-token issuance resolves Admin/Root roles from the
+  current user record; optional role fields cached in the Flask session are not
+  authorization authority.
 - Admin-only endpoints use `require_roles(..., ["Admin"])` (ex: run sync).
 - `require_jwt()` sets the auth actor; `install_rq_auth_actor_hook()` writes that
   payload into `job.meta["auth_actor"]` for auditing.

@@ -528,6 +528,26 @@ def _resolve_user_id_from_fs_uniquifier(raw: Any) -> int | None:
     return _parse_user_id(getattr(match, "id", None))
 
 
+def _resolve_roles_for_user_id(user_id: int) -> list[str]:
+    _, User, _ = get_user_models()
+
+    def _lookup() -> list[str]:
+        match = User.query.filter(User.id == user_id).first()
+        if match is None:
+            return []
+        return _normalize_roles(
+            [getattr(role, "name", role) for role in (getattr(match, "roles", None) or [])]
+        )
+
+    if has_app_context():
+        return _lookup()
+
+    from wepppy.weppcloud.app import app as flask_app
+
+    with flask_app.app_context():
+        return _lookup()
+
+
 def _owner_id_matches(owner: Any, user_id: int) -> bool:
     owner_id = getattr(owner, "id", None)
     if owner_id is None:
@@ -543,9 +563,7 @@ def _identity_from_session_payload(payload: Mapping[str, Any]) -> tuple[int | No
     user_id = _parse_user_id(raw_user_id)
     if user_id is None:
         user_id = _resolve_user_id_from_fs_uniquifier(raw_user_id)
-    roles = _normalize_roles(
-        payload.get("_roles_mask") or payload.get("_roles") or payload.get("roles")
-    )
+    roles = _resolve_roles_for_user_id(user_id) if user_id is not None else []
     return user_id, roles
 
 

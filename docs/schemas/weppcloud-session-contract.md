@@ -226,7 +226,12 @@ Source-of-truth implementation:
   `EXTERNAL_HOST`/`EXTERNAL_SCHEME`. Operators previously relying on the legacy
   forwarded-origin switch MUST set those values before deploying REM-04.
 - Anonymous or stale session-token claims MUST NOT bypass CAPTCHA/public-run gates in anonymous flows.
-- Private-run session-token issuance via cookie-auth path MUST enforce run authorization from server-side owner/role state.
+- Private-run session-token issuance via the cookie-auth path MUST enforce run
+  authorization from server-side owner/role state. The authenticated user id
+  MAY be recovered from the signed server-side session, but Admin/Root roles
+  MUST be loaded from the current user record rather than trusted from optional
+  session-cached role fields. This keeps the bridge consistent with WEPPcloud
+  page authorization and prevents stale role grants or denials.
 
 ## Conformance Tests (Required)
 The following suites MUST be updated when session contract behavior changes:

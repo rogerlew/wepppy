@@ -393,6 +393,11 @@ def test_session_token_issues_with_cookie(monkeypatch: pytest.MonkeyPatch) -> No
         "_resolve_session_from_cookie",
         lambda request: ("sid-1", {"_user_id": "42", "_roles_mask": ["User", "Root"]}),
     )
+    monkeypatch.setattr(
+        session_routes,
+        "_resolve_roles_for_user_id",
+        lambda user_id: ["User", "Root"],
+    )
     monkeypatch.setattr(session_routes, "_session_user_authorized_for_run", lambda runid, user_id, roles: True)
     monkeypatch.setattr(session_routes, "_run_is_public", lambda runid: False)
     monkeypatch.setattr(session_routes, "_store_session_marker", lambda runid, session_id, ttl: None)
@@ -417,11 +422,45 @@ def test_session_token_issues_with_cookie(monkeypatch: pytest.MonkeyPatch) -> No
     assert claims["roles"] == ["User", "Root"]
 
 
+def test_session_token_allows_admin_non_owner_without_cached_session_roles(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    owner = type("Owner", (), {"id": 937})()
+    monkeypatch.setattr(
+        session_routes,
+        "_resolve_session_from_cookie",
+        lambda request: ("sid-1", {"_user_id": "42"}),
+    )
+    monkeypatch.setattr(
+        session_routes,
+        "_resolve_roles_for_user_id",
+        lambda user_id: ["User", "Admin"] if user_id == 42 else [],
+    )
+    monkeypatch.setattr(session_routes, "_run_is_public", lambda runid: False)
+    monkeypatch.setattr(session_routes, "get_run_owners_lazy", lambda runid: [owner])
+    monkeypatch.setattr(session_routes, "_store_session_marker", lambda runid, session_id, ttl: None)
+    monkeypatch.setenv("WEPP_AUTH_JWT_SECRET", "unit-test-secret")
+    auth_tokens.get_jwt_config.cache_clear()
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/private-run/cfg/session-token",
+            cookies={"session": "signed"},
+            headers={"Origin": "http://testserver"},
+        )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["user_id"] == 42
+    assert payload["roles"] == ["User", "Admin"]
+
+
 def test_identity_from_session_payload_resolves_fs_uniquifier_user_id(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     fs_uniquifier = "26f2d8c2055e413ba64392db32bc7c10"
     monkeypatch.setattr(session_routes, "_resolve_user_id_from_fs_uniquifier", lambda raw: 1384)
+    monkeypatch.setattr(session_routes, "_resolve_roles_for_user_id", lambda user_id: ["User"])
 
     user_id, roles = session_routes._identity_from_session_payload(
         {"_user_id": fs_uniquifier, "_roles_mask": ["User"]}
@@ -441,6 +480,7 @@ def test_identity_from_session_payload_prefers_numeric_user_id(
         return 999
 
     monkeypatch.setattr(session_routes, "_resolve_user_id_from_fs_uniquifier", fake_resolve)
+    monkeypatch.setattr(session_routes, "_resolve_roles_for_user_id", lambda user_id: ["Root"])
 
     user_id, roles = session_routes._identity_from_session_payload(
         {"_user_id": "42", "_roles_mask": ["Root"]}
@@ -449,6 +489,40 @@ def test_identity_from_session_payload_prefers_numeric_user_id(
     assert user_id == 42
     assert roles == ["Root"]
     assert fallback_calls == []
+
+
+def test_identity_from_session_payload_uses_authoritative_user_roles(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        session_routes,
+        "_resolve_roles_for_user_id",
+        lambda user_id: ["User", "Admin"] if user_id == 42 else [],
+    )
+
+    user_id, roles = session_routes._identity_from_session_payload(
+        {"_user_id": "42", "_roles_mask": ["User"]}
+    )
+
+    assert user_id == 42
+    assert roles == ["User", "Admin"]
+
+
+def test_identity_from_session_payload_discards_stale_elevated_roles(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        session_routes,
+        "_resolve_roles_for_user_id",
+        lambda user_id: ["User"],
+    )
+
+    user_id, roles = session_routes._identity_from_session_payload(
+        {"_user_id": "42", "_roles_mask": ["User", "Admin"]}
+    )
+
+    assert user_id == 42
+    assert roles == ["User"]
 
 
 def test_resolve_user_id_from_fs_uniquifier_with_app_context(
@@ -559,6 +633,33 @@ def test_resolve_user_id_from_fs_uniquifier_returns_none_when_missing(
     assert resolved is None
 
 
+def test_resolve_roles_for_user_id_reads_current_user_record(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class DummyField:
+        def __eq__(self, other: object) -> tuple[str, object]:
+            return ("eq", other)
+
+    class DummyQuery:
+        def filter(self, expr: object) -> "DummyQuery":
+            self.expr = expr
+            return self
+
+        def first(self):
+            roles = [type("Role", (), {"name": "User"})(), type("Role", (), {"name": "Admin"})()]
+            return type("DummyUserRow", (), {"roles": roles})()
+
+    query = DummyQuery()
+    user_model = type("DummyUserModel", (), {"id": DummyField(), "query": query})
+    monkeypatch.setattr(session_routes, "has_app_context", lambda: True)
+    monkeypatch.setattr(session_routes, "get_user_models", lambda: (object(), user_model, object()))
+
+    roles = session_routes._resolve_roles_for_user_id(42)
+
+    assert roles == ["User", "Admin"]
+    assert query.expr == ("eq", 42)
+
+
 def test_session_token_issues_with_cookie_when_session_user_id_is_fs_uniquifier(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -569,6 +670,7 @@ def test_session_token_issues_with_cookie_when_session_user_id_is_fs_uniquifier(
         lambda request: ("sid-1", {"_user_id": fs_uniquifier, "_roles_mask": ["User"]}),
     )
     monkeypatch.setattr(session_routes, "_resolve_user_id_from_fs_uniquifier", lambda raw: 1384)
+    monkeypatch.setattr(session_routes, "_resolve_roles_for_user_id", lambda user_id: ["User"])
     monkeypatch.setattr(session_routes, "_session_user_authorized_for_run", lambda runid, user_id, roles: True)
     monkeypatch.setattr(session_routes, "_run_is_public", lambda runid: False)
     monkeypatch.setattr(session_routes, "_store_session_marker", lambda runid, session_id, ttl: None)
