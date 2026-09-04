@@ -647,6 +647,11 @@ class Watershed(WatershedOperationsMixin, WatershedLookupMixin, NoDbBase):
         self._clip_hillslopes = value
 
     @property
+    def clip_hillslopes_configured(self) -> bool:
+        """Return the stored user choice without workflow-specific suppression."""
+        return getattr(self, "_clip_hillslopes", False)
+
+    @property
     def clip_hillslope_length(self) -> float:
         return getattr(self, "_clip_hillslope_length", 300.0)
 

@@ -21,6 +21,8 @@ import wepppy.microservices.rq_engine as rq_engine
 import wepppy.rq.job_info as job_info_module
 import wepppy.rq.job_dependencies as job_dependencies_module
 import wepppy.rq.project_rq as project_rq
+import wepppy.rq.wepp_rq_stage_prep as wepp_stage_prep
+from wepppy.topo.watershed_abstraction.slope_file import clip_slope_file_length
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.core.watershed_errors import (
     WATERSHED_BOUNDARY_TOUCH_MESSAGE,
@@ -146,6 +148,67 @@ def test_real_rq_strict_dependency_never_executes_after_failure(
         dependent.cancel(enqueue_dependents=False)
         dependent.delete()
         parent.delete()
+        queue.delete(delete_jobs=True)
+
+
+def test_mofe_clipping_prep_failure_is_visible_and_blocks_downstream(
+    rq_connection,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+) -> None:
+    monkeypatch.setattr(job_info_module.redis, "Redis", redis.StrictRedis)
+    runid = "mofe-clipping-failure"
+    wd = tmp_path / runid
+    (wd / "watershed").mkdir(parents=True)
+    (wd / "soils").mkdir()
+    (wd / "landuse").mkdir()
+    malformed = wd / "watershed" / "malformed.mofe.slp"
+    destination = wd / "prior.slp"
+    malformed.write_text("97.5\n1\nbogus 80\n2 100\n0, 0.1 1, 0.2\n", encoding="utf-8")
+    destination.write_text("prior destination\n", encoding="utf-8")
+
+    class _FailingWepp:
+        def _prep_multi_ofe(self, _translator) -> None:
+            clip_slope_file_length(str(malformed), str(destination), 60.0)
+
+    monkeypatch.setattr(wepp_stage_prep, "get_wd", lambda _runid: str(wd))
+    monkeypatch.setattr(wepp_stage_prep.Wepp, "getInstance", lambda _wd: _FailingWepp())
+    monkeypatch.setattr(
+        wepp_stage_prep.Watershed,
+        "getInstance",
+        lambda _wd: SimpleNamespace(translator_factory=lambda: object()),
+    )
+
+    queue_name = f"mofe-clipping-failure-{uuid.uuid4().hex}"
+    queue = Queue(queue_name, connection=rq_connection)
+    root = queue.enqueue(_noop_job, meta={"runid": runid})
+    prep = queue.enqueue(wepp_stage_prep._prep_multi_ofe_rq, runid, depends_on=root)
+    downstream = queue.enqueue(_must_not_execute_after_failure, depends_on=prep)
+    root.meta["jobs:0,func:_prep_multi_ofe_rq"] = prep.id
+    root.meta["jobs:1,func:_run_hillslopes_rq"] = downstream.id
+    root.save_meta()
+
+    try:
+        worker = _InlineWepppyWorker([queue], connection=rq_connection)
+        worker.work(burst=True, logging_level="WARNING")
+
+        prep.refresh()
+        downstream.refresh()
+        payload = get_wepppy_rq_job_info(root.id)
+        prep_payload = payload["children"]["0"][0]
+        assert payload["status"] == "failed"
+        assert prep.get_status(refresh=True) == "failed"
+        assert "invalid geometry header" in str(prep_payload["exc_info"])
+        assert downstream.get_status(refresh=True) == "deferred"
+        assert downstream.started_at is None
+        assert destination.read_text(encoding="utf-8") == "prior destination\n"
+        assert not list(wd.glob(".prior.slp.*.tmp"))
+    finally:
+        for candidate in (downstream, prep, root):
+            try:
+                candidate.delete(remove_from_queue=True)
+            except Exception:
+                pass
         queue.delete(delete_jobs=True)
 
 

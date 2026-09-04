@@ -17,10 +17,15 @@ generated `wepp/runs/p*.slp` files.
   contract, ADR, tracker, and ExecPlan.
 - [x] (2026-09-04 12:02 UTC) Obtain and disposition two independent contract
   reviews plus the security checkpoint review; all high/medium findings closed.
-- [ ] Commit the standalone checkpoint ancestor.
-- [ ] Implement the slope transform and multi-OFE preparation wiring with tests.
-- [ ] Update UI, user, operator, and developer documentation.
-- [ ] Run focused and broad validation and close correctness findings.
+- [x] (2026-09-04 12:04 UTC) Commit the standalone checkpoint ancestor as
+  `8434ecb88`.
+- [x] (2026-09-04 12:31 UTC) Implement the slope transform and multi-OFE
+  preparation wiring with tests.
+- [x] (2026-09-04 12:31 UTC) Update UI, user, operator, and developer
+  documentation.
+- [x] (2026-09-04 13:31 UTC) Run focused and broad validation and close all
+  correctness/security findings; full suite passed with 7,348 passed and 63
+  skipped.
 - [ ] Deploy the exact candidate to `forest`, execute `dainty-signature` through
   rq-engine at 60 m, and capture generated-output evidence.
 - [ ] Close package, archive this prompt, and update the project tracker.
@@ -35,6 +40,14 @@ generated `wepp/runs/p*.slp` files.
 - Observation: the synchronized `dainty-signature` run already contains OFEs
   shorter than 300 m, but the requested 60 m acceptance value will exercise
   clipping because its longest OFE is greater than 60 m.
+- Observation: generated normalized endpoint distances may round to `0.9999`.
+  Complete validation therefore uses a `1e-3` absolute endpoint tolerance while
+  still requiring bounded, strictly increasing distances.
+  Evidence: the local `hill_132.mofe.slp` and all-source dry-run acceptance.
+- Observation: atomic replacement through `NamedTemporaryFile` defaults to mode
+  `0600`; explicitly copying the source mode preserves the established generated
+  artifact permissions.
+  Evidence: implementation security review and direct mode regression.
 
 ## Decision Log
 
@@ -46,6 +59,11 @@ generated `wepp/runs/p*.slp` files.
 - Decision: classify this as an intended parameterization change requiring a
   standalone contract checkpoint and ADR.
   Rationale: multiple-OFE generated model geometry intentionally changes.
+  Date/Author: 2026-09-04, Codex.
+- Decision: reject malformed headers, trailing records, non-finite computed
+  geometry, and invalid normalized profiles before temporary output creation.
+  Rationale: the preparation boundary must fail closed without replacing a
+  prior valid generated slope.
   Date/Author: 2026-09-04, Codex.
 
 ## Outcomes & Retrospective

@@ -710,6 +710,8 @@ def prep_multi_ofe_hillslope(
         float,
         bool,
         float,
+        bool,
+        float,
     ]
 ) -> Tuple[str, float]:
     t0 = time.time()
@@ -721,17 +723,21 @@ def prep_multi_ofe_hillslope(
         sim_years,
         kslast,
         initial_sat,
+        clip_hillslopes,
+        clip_hillslope_length,
         clip_soils,
         clip_soils_depth,
         clip_soils_minimum,
         clip_soils_minimum_depth,
     ) = args
 
-    copy_input_file(
-        wd,
-        f'watershed/slope_files/hillslopes/hill_{topaz_id}.mofe.slp',
-        _join(runs_dir, f'p{wepp_id}.slp'),
-    )
+    slope_relpath = f'watershed/slope_files/hillslopes/hill_{topaz_id}.mofe.slp'
+    slope_dst_fn = _join(runs_dir, f'p{wepp_id}.slp')
+    if clip_hillslopes:
+        slope_src_fn = materialize_input_file(wd, slope_relpath, purpose='wepp-prep-multi-ofe-slope')
+        clip_slope_file_length(slope_src_fn, slope_dst_fn, clip_hillslope_length)
+    else:
+        copy_input_file(wd, slope_relpath, slope_dst_fn)
 
     soil_dst_fn = _join(runs_dir, f'p{wepp_id}.sol')
     with with_input_file_path(
@@ -2129,6 +2135,8 @@ class Wepp(NoDbBase):
         clip_soils_minimum = soils.clip_soils_minimum
         clip_soils_minimum_depth = soils.clip_soils_minimum_depth
         initial_sat = soils.initial_sat
+        clip_hillslopes = watershed.clip_hillslopes_configured
+        clip_hillslope_length = watershed.clip_hillslope_length
 
         sim_years = _coerce_sim_years(climate.input_years)
 
@@ -2191,6 +2199,8 @@ class Wepp(NoDbBase):
                     sim_years,
                     _kslast,
                     initial_sat,
+                    clip_hillslopes,
+                    clip_hillslope_length,
                     clip_soils,
                     clip_soils_depth,
                     clip_soils_minimum,

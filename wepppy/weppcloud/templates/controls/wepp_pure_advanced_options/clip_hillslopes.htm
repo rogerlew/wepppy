@@ -1,17 +1,17 @@
 {% import "controls/_pure_macros.html" as ui %}
 
   <p class="wc-text-muted">
-    WEPP can overpredict erosion on long hillslopes. Clipping restricts length and preserves area by increasing width.
+    WEPP can overpredict erosion on long hillslopes. Clipping restricts each OFE to the selected length and preserves the complete hillslope area by increasing width.
   </p>
   {{ ui.checkbox_field(
        "clip_hillslopes",
        "Clip hillslopes",
-       checked=watershed.clip_hillslopes,
+       checked=watershed.clip_hillslopes_configured,
        attrs={"class": "disable-readonly"}
      ) }}
   {{ ui.numeric_field(
        "hillslope_clip_length",
-       "Hillslope clip length",
+       "Per-OFE hillslope clip length",
        value=watershed.clip_hillslope_length | round | int,
        unit_label="m",
        unit_category="sm-distance",

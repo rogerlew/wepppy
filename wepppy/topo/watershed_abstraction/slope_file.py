@@ -1,5 +1,9 @@
 
 import importlib
+import math
+import os
+import stat
+import tempfile
 import warnings
 from functools import lru_cache
 
@@ -8,29 +12,138 @@ from scipy.interpolate import KroghInterpolator
 
 
 def clip_slope_file_length(src_fn, dst_fn, clip_length):
+    clip_length = float(clip_length)
+    if not math.isfinite(clip_length) or clip_length <= 0.0:
+        raise ValueError('clip_length must be finite and greater than zero')
+
     with open(src_fn) as fp:
         lines = fp.readlines()
         lines = [L for L in lines if not L.startswith('#')]
 
+    if len(lines) < 5:
+        raise ValueError('Malformed slope file: incomplete header or OFE data')
+
+    version_parts = lines[0].split()
+    if len(version_parts) != 1:
+        raise ValueError('Malformed slope file: invalid version')
+    try:
+        version = float(version_parts[0])
+    except ValueError as exc:
+        raise ValueError('Malformed slope file: invalid version') from exc
+    if not math.isfinite(version):
+        raise ValueError('Malformed slope file: invalid version')
+
+    try:
+        n_ofes = int(lines[1])
+    except ValueError as exc:
+        raise ValueError('Malformed slope file: invalid OFE count') from exc
+    if n_ofes < 1:
+        raise ValueError('Malformed slope file: expected at least one OFE')
+    if len(lines) != 3 + n_ofes * 2:
+        raise ValueError('Malformed slope file: unexpected trailing or missing records')
+
     line2 = lines[2].strip().split()
+    expected_header_fields = 3 if version_parts[0].startswith('2023') else 2
+    if len(line2) != expected_header_fields:
+        raise ValueError('Malformed slope file: invalid geometry header')
     aspect, fwidth = line2[0], line2[1]
-    npts, length = lines[3].split()
 
-    fwidth = float(fwidth)
-    length = float(length)
-    area = fwidth * length
+    try:
+        aspect_value = float(aspect)
+        fwidth = float(fwidth)
+        z0 = float(line2[2]) if expected_header_fields == 3 else None
+    except ValueError as exc:
+        raise ValueError('Malformed slope file: invalid geometry header') from exc
+    if not math.isfinite(aspect_value) or (z0 is not None and not math.isfinite(z0)):
+        raise ValueError('Malformed slope file: invalid geometry header')
+    if not math.isfinite(fwidth) or fwidth <= 0.0:
+        raise ValueError('Malformed slope file: width must be finite and greater than zero')
 
-    if length > clip_length:
-        length = clip_length
-        fwidth = area / length
+    original_total_length = 0.0
+    clipped_total_length = 0.0
+    clipped_lengths = []
+    for ofe_index in range(n_ofes):
+        definition_index = 3 + ofe_index * 2
+        profile_index = definition_index + 1
+        if profile_index >= len(lines):
+            raise ValueError(f'Malformed slope file: incomplete OFE {ofe_index + 1}')
+
+        definition = lines[definition_index].split()
+        if len(definition) != 2:
+            raise ValueError(f'Malformed slope file: invalid OFE {ofe_index + 1} definition')
+        try:
+            npts = int(definition[0])
+            length = float(definition[1])
+        except ValueError as exc:
+            raise ValueError(f'Malformed slope file: invalid OFE {ofe_index + 1} geometry') from exc
+        if npts < 2 or not math.isfinite(length) or length <= 0.0:
+            raise ValueError(f'Malformed slope file: invalid OFE {ofe_index + 1} geometry')
+
+        profile_values = lines[profile_index].replace(',', '').split()
+        if len(profile_values) != npts * 2:
+            raise ValueError(f'Malformed slope file: invalid OFE {ofe_index + 1} profile')
+        try:
+            profile = [float(value) for value in profile_values]
+        except ValueError as exc:
+            raise ValueError(f'Malformed slope file: invalid OFE {ofe_index + 1} profile') from exc
+        if not all(math.isfinite(value) for value in profile):
+            raise ValueError(f'Malformed slope file: non-finite OFE {ofe_index + 1} profile')
+        distances = profile[0::2]
+        if (
+            not math.isclose(distances[0], 0.0, abs_tol=1e-4)
+            or not math.isclose(distances[-1], 1.0, abs_tol=1e-3)
+            or any(distance < 0.0 or distance > 1.0 for distance in distances)
+            or any(left >= right for left, right in zip(distances, distances[1:]))
+        ):
+            raise ValueError(f'Malformed slope file: invalid normalized distances for OFE {ofe_index + 1}')
+
+        clipped_length = min(length, clip_length)
+        original_total_length += length
+        clipped_total_length += clipped_length
+        clipped_lengths.append((definition_index, definition[0], clipped_length))
+
+    if not math.isfinite(original_total_length) or not math.isfinite(clipped_total_length):
+        raise ValueError('Malformed slope file: total OFE length must be finite')
+    if original_total_length <= 0.0 or clipped_total_length <= 0.0:
+        raise ValueError('Malformed slope file: total OFE length must be greater than zero')
+
+    width_scale = original_total_length / clipped_total_length
+    clipped_fwidth = fwidth * width_scale
+    if not math.isfinite(width_scale) or not math.isfinite(clipped_fwidth):
+        raise ValueError('Malformed slope file: clipped width must be finite')
+    fwidth = clipped_fwidth
 
     line2[0] = str(aspect)
     line2[1] = str(fwidth)
     lines[2] = ' '.join(line2) + '\n'
-    lines[3] = f'{npts} {length}\n'
+    for definition_index, npts_text, clipped_length in clipped_lengths:
+        lines[definition_index] = f'{npts_text} {clipped_length}\n'
 
-    with open(dst_fn, 'w') as fp:
-        fp.writelines(lines)
+    dst_dir = os.path.dirname(os.path.abspath(dst_fn))
+    os.makedirs(dst_dir, exist_ok=True)
+    source_mode = stat.S_IMODE(os.stat(src_fn).st_mode)
+    tmp_fn = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode='w',
+            dir=dst_dir,
+            prefix=f'.{os.path.basename(dst_fn)}.',
+            suffix='.tmp',
+            delete=False,
+        ) as fp:
+            tmp_fn = fp.name
+            os.fchmod(fp.fileno(), source_mode)
+            fp.writelines(lines)
+            fp.flush()
+            os.fsync(fp.fileno())
+        os.replace(tmp_fn, dst_fn)
+        tmp_fn = None
+    finally:
+        if tmp_fn is not None:
+            try:
+                os.unlink(tmp_fn)
+            except FileNotFoundError:
+                pass
 
 
 def mofe_distance_fractions(fname):

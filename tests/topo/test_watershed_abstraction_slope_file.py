@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import importlib
+import os
 from pathlib import Path
 
 import numpy as np
@@ -13,6 +15,7 @@ from wepppy.topo.watershed_abstraction.slope_file import (
 
 
 pytestmark = pytest.mark.unit
+slope_file_module = importlib.import_module("wepppy.topo.watershed_abstraction.slope_file")
 
 
 def _write_single_ofe_slope(
@@ -96,6 +99,216 @@ def test_clip_slope_file_length_noop_when_shorter_than_clip(tmp_path: Path) -> N
     length = float(lines[3].split()[1])
     assert width == 70.0
     assert length == 50.0
+
+
+def test_clip_slope_file_length_caps_each_mofe_and_preserves_total_area(tmp_path: Path) -> None:
+    src = tmp_path / "src.mofe.slp"
+    dst = tmp_path / "dst.mofe.slp"
+    src.write_text(
+        "\n".join(
+            [
+                "97.5",
+                "3",
+                "311.995 80.0",
+                "2 40",
+                "0.0000, 0.9000 1.0000, 0.8000",
+                "2 90",
+                "0.0000, 0.8000 1.0000, 0.6000",
+                "2 120",
+                "0.0000, 0.6000 1.0000, 0.4000",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    clip_slope_file_length(str(src), str(dst), clip_length=60.0)
+
+    lines = dst.read_text(encoding="utf-8").splitlines()
+    assert [float(lines[index].split()[1]) for index in (3, 5, 7)] == [40.0, 60.0, 60.0]
+    assert float(lines[2].split()[1]) == pytest.approx(125.0)
+    assert float(lines[2].split()[1]) * 160.0 == pytest.approx(80.0 * 250.0)
+    assert [lines[index] for index in (0, 1, 4, 6, 8)] == [
+        "97.5",
+        "3",
+        "0.0000, 0.9000 1.0000, 0.8000",
+        "0.0000, 0.8000 1.0000, 0.6000",
+        "0.0000, 0.6000 1.0000, 0.4000",
+    ]
+
+
+@pytest.mark.parametrize(
+    ("lengths", "expected"),
+    [([20.0, 40.0], [20.0, 40.0]), ([60.0, 90.0], [60.0, 60.0])],
+)
+def test_clip_slope_file_length_handles_all_short_and_exact_limit_ofes(
+    tmp_path: Path,
+    lengths: list[float],
+    expected: list[float],
+) -> None:
+    src = tmp_path / "src.mofe.slp"
+    dst = tmp_path / "dst.mofe.slp"
+    src.write_text(
+        "97.5\n2\n311.995 80.0\n"
+        f"2 {lengths[0]}\n0, 0.9 1, 0.8\n"
+        f"2 {lengths[1]}\n0, 0.8 1, 0.6\n",
+        encoding="utf-8",
+    )
+
+    clip_slope_file_length(str(src), str(dst), 60.0)
+
+    lines = dst.read_text(encoding="utf-8").splitlines()
+    assert [float(lines[index].split()[1]) for index in (3, 5)] == expected
+    assert float(lines[2].split()[1]) * sum(expected) == pytest.approx(80.0 * sum(lengths))
+
+
+def test_clip_slope_file_length_preserves_2023_header_and_z0(tmp_path: Path) -> None:
+    src = tmp_path / "src.slp"
+    dst = tmp_path / "dst.slp"
+    _write_single_ofe_slope(src, version="2023.3", z0=1163.4, width=80.0, length=90.0)
+
+    clip_slope_file_length(str(src), str(dst), 60.0)
+
+    lines = dst.read_text(encoding="utf-8").splitlines()
+    assert lines[0] == "2023.3"
+    assert lines[2].split()[0] == "311.995"
+    assert lines[2].split()[2] == "1163.4"
+
+
+@pytest.mark.parametrize("clip_length", [0.0, -1.0, float("nan"), float("inf")])
+def test_clip_slope_file_length_rejects_invalid_limit_without_replacing_destination(
+    tmp_path: Path,
+    clip_length: float,
+) -> None:
+    src = tmp_path / "src.slp"
+    dst = tmp_path / "dst.slp"
+    _write_single_ofe_slope(src)
+    dst.write_text("prior destination\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="finite and greater than zero"):
+        clip_slope_file_length(str(src), str(dst), clip_length)
+
+    assert dst.read_text(encoding="utf-8") == "prior destination\n"
+
+
+def test_clip_slope_file_length_malformed_source_preserves_destination(tmp_path: Path) -> None:
+    src = tmp_path / "src.slp"
+    dst = tmp_path / "dst.slp"
+    src.write_text("97.5\n2\n311.995 80\n2 100\n0, 0.1 1, 0.2\n", encoding="utf-8")
+    dst.write_text("prior destination\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="Malformed slope file"):
+        clip_slope_file_length(str(src), str(dst), 60.0)
+
+    assert dst.read_text(encoding="utf-8") == "prior destination\n"
+    assert not list(tmp_path.glob(".dst.slp.*.tmp"))
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        "bogus\n1\n311.995 80\n2 100\n0, 0.1 1, 0.2\n",
+        "97.5\n1\nbogus 80\n2 100\n0, 0.1 1, 0.2\n",
+        "2023.3\n1\n311.995 80\n2 100\n0, 0.1 1, 0.2\n",
+        "97.5\n1\n311.995 80\n3 100\n0, 0.1 0.8, 0.2 0.7, 0.3\n",
+        "97.5\n1\n311.995 80\n2 100\n0, 0.1 1, 0.2\ntrailing\n",
+    ],
+)
+def test_clip_slope_file_length_rejects_malformed_complete_source(
+    tmp_path: Path,
+    source: str,
+) -> None:
+    src = tmp_path / "src.slp"
+    dst = tmp_path / "dst.slp"
+    src.write_text(source, encoding="utf-8")
+    dst.write_text("prior destination\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="Malformed slope file"):
+        clip_slope_file_length(str(src), str(dst), 60.0)
+
+    assert dst.read_text(encoding="utf-8") == "prior destination\n"
+    assert not list(tmp_path.glob(".dst.slp.*.tmp"))
+
+
+def test_clip_slope_file_length_replace_failure_preserves_destination_and_cleans_temp(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    src = tmp_path / "src.slp"
+    dst = tmp_path / "dst.slp"
+    _write_single_ofe_slope(src)
+    dst.write_text("prior destination\n", encoding="utf-8")
+
+    def _fail_replace(_src: str, _dst: str) -> None:
+        raise OSError("injected replace failure")
+
+    monkeypatch.setattr(slope_file_module.os, "replace", _fail_replace)
+
+    with pytest.raises(OSError, match="injected replace failure"):
+        clip_slope_file_length(str(src), str(dst), 60.0)
+
+    assert dst.read_text(encoding="utf-8") == "prior destination\n"
+    assert not list(tmp_path.glob(".dst.slp.*.tmp"))
+
+
+def test_clip_slope_file_length_temp_finalize_failure_preserves_destination_and_cleans_temp(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    src = tmp_path / "src.slp"
+    dst = tmp_path / "dst.slp"
+    _write_single_ofe_slope(src)
+    dst.write_text("prior destination\n", encoding="utf-8")
+
+    def _fail_fsync(_fd: int) -> None:
+        raise OSError("injected temp finalize failure")
+
+    monkeypatch.setattr(slope_file_module.os, "fsync", _fail_fsync)
+
+    with pytest.raises(OSError, match="injected temp finalize failure"):
+        clip_slope_file_length(str(src), str(dst), 60.0)
+
+    assert dst.read_text(encoding="utf-8") == "prior destination\n"
+    assert not list(tmp_path.glob(".dst.slp.*.tmp"))
+
+
+def test_clip_slope_file_length_rejects_overflowed_width_before_publication(tmp_path: Path) -> None:
+    src = tmp_path / "src.slp"
+    dst = tmp_path / "dst.slp"
+    _write_single_ofe_slope(src, width=1e308, length=1e308)
+    dst.write_text("prior destination\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="clipped width must be finite"):
+        clip_slope_file_length(str(src), str(dst), 60.0)
+
+    assert dst.read_text(encoding="utf-8") == "prior destination\n"
+    assert not list(tmp_path.glob(".dst.slp.*.tmp"))
+
+
+def test_clip_slope_file_length_replaces_hardlink_without_mutating_source(tmp_path: Path) -> None:
+    src = tmp_path / "src.slp"
+    dst = tmp_path / "dst.slp"
+    _write_single_ofe_slope(src, width=80.0, length=100.0)
+    original = src.read_text(encoding="utf-8")
+    dst.hardlink_to(src)
+    assert src.stat().st_ino == dst.stat().st_ino
+
+    clip_slope_file_length(str(src), str(dst), 40.0)
+
+    assert src.read_text(encoding="utf-8") == original
+    assert src.stat().st_ino != dst.stat().st_ino
+    assert float(dst.read_text(encoding="utf-8").splitlines()[3].split()[1]) == 40.0
+
+
+def test_clip_slope_file_length_preserves_source_mode(tmp_path: Path) -> None:
+    src = tmp_path / "src.slp"
+    dst = tmp_path / "dst.slp"
+    _write_single_ofe_slope(src)
+    src.chmod(0o664)
+
+    clip_slope_file_length(str(src), str(dst), 60.0)
+
+    assert os.stat(dst).st_mode & 0o777 == 0o664
 
 
 def test_mofe_distance_fractions_returns_cumulative_normalized_lengths(tmp_path: Path) -> None:

@@ -355,14 +355,15 @@ Overrides restrictive-layer hydraulic conductivity (`kslast`) in generated soil 
 
 ### What this section does
 
-Limits hillslope length while preserving hillslope area by increasing width.
+Limits each overland flow element (OFE) while preserving the complete
+hillslope area by increasing its shared width.
 
 ### Inputs and parameters
 
 | UI control | What it means |
 |---|---|
 | **Clip hillslopes** | Enables hillslope length clipping. |
-| **Hillslope clip length (m)** | Target maximum hillslope length used during slope-file preparation. |
+| **Per-OFE hillslope clip length (m)** | Maximum length applied independently to each OFE during slope-file preparation. A multiple-OFE hillslope may remain longer than this value in total. |
 
 ### Modeling impact
 
@@ -376,8 +377,10 @@ Limits hillslope length while preserving hillslope area by increasing width.
 ### Cautions
 
 - Clipping is recommended when very long abstracted hillslopes are likely to overestimate soil loss.
-- Multi-OFE workflows can limit applicability of this option.
-- If changing the clip length does not change results, verify applied slope lengths in prep-details outputs; this control may not be wired consistently in all deployments.
+- For multiple-OFE hillslopes, every OFE is clipped independently; the value is
+  not a maximum for the combined hillslope length.
+- Verify applied OFE lengths in generated slope files or prep-details outputs
+  when auditing a run.
 
 ## 10) Soil Options
 

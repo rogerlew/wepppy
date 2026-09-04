@@ -4,9 +4,9 @@
 
 **Timezone**: UTC  
 **Started**: 2026-09-04 11:31 UTC  
-**Current phase**: Contract checkpoint  
-**Last updated**: 2026-09-04 11:49 UTC  
-**Next milestone**: Close contract/security findings and commit the ancestor checkpoint  
+**Current phase**: Forest deployment
+**Last updated**: 2026-09-04 13:31 UTC
+**Next milestone**: Commit and deploy the reviewed candidate to Forest
 **Security impact**: `high`  
 **Dedicated security review**: `yes`  
 **Security artifact**: `artifacts/2026-09-04_security_review.md`
@@ -15,13 +15,10 @@
 
 ### In Progress
 
-- [ ] Complete and commit the pre-implementation contract checkpoint.
+- [ ] Commit and deploy the implementation candidate.
 
 ### Ready / Backlog
 
-- [ ] Implement and test per-OFE clipping.
-- [ ] Update UI and user/developer documentation.
-- [ ] Run focused and broad local gates plus correctness review.
 - [ ] Deploy to `forest`, submit `dainty-signature` at 60 m through rq-engine,
       and capture generated-output evidence.
 - [ ] Close and archive the package.
@@ -38,6 +35,19 @@
   checkpoint draft (2026-09-04 11:49 UTC).
 - [x] Correctness, governance, and security post-fix confirmations approve the
   checkpoint with no unresolved high/medium findings (2026-09-04 12:02 UTC).
+- [x] Standalone contract checkpoint committed as `8434ecb88`
+  (2026-09-04 12:04 UTC).
+- [x] Implemented per-OFE clipping, configured-value wiring, and UI/docs updates
+  (2026-09-04 12:31 UTC).
+- [x] Added complete-input, atomic-publication, permission, compatibility,
+  propagation, and real RQ failure-tree regressions (2026-09-04 13:04 UTC).
+- [x] Security implementation re-review passed with zero unresolved findings;
+  Forest deployment admitted subject to the planned drain preflight
+  (2026-09-04 13:10 UTC).
+- [x] Correctness implementation re-review passed with zero unresolved
+  high/medium findings (2026-09-04 13:13 UTC).
+- [x] Full Python suite passed: 7,348 passed and 63 skipped
+  (2026-09-04 13:31 UTC).
 
 ## Decisions Log
 
@@ -52,21 +62,21 @@
 
 | Risk | Severity | Likelihood | Mitigation | Status |
 | --- | --- | --- | --- | --- |
-| Incorrect shared-width scaling changes area | High | Low | Direct numeric tests and Forest artifact comparison | Open |
-| Multi-OFE parser corrupts slope rows/header | High | Low | Exact structural preservation assertions | Open |
+| Incorrect shared-width scaling changes area | High | Low | Direct numeric tests and Forest artifact comparison | Mitigated |
+| Multi-OFE parser corrupts slope rows/header | High | Low | Exact structural preservation assertions | Mitigated |
 | Stale Forest workers run old code | High | Medium | Record revision and container deployment identity before submit | Open |
-| Transform partially writes or mutates a hardlinked source | High | Low | Same-directory temp + `os.replace`; direct failure and inode tests | Open |
+| Transform partially writes or mutates a hardlinked source | High | Low | Same-directory temp + `os.replace`; direct failure and inode tests | Mitigated |
 
 ## Verification Checklist
 
-- [ ] Contract checkpoint ancestor recorded.
-- [ ] Focused slope and WEPP prep tests pass.
-- [ ] rq-engine route regression tests pass.
-- [ ] Full Python suite passes.
-- [ ] Frontend lint/tests pass if affected.
+- [x] Contract checkpoint ancestor recorded.
+- [x] Focused slope and WEPP prep tests pass.
+- [x] rq-engine route regression tests pass.
+- [x] Full Python suite passes.
+- [x] Frontend lint/tests pass if affected.
 - [ ] Changed documentation passes `wctl doc-lint`.
-- [ ] Correctness review has no unresolved medium/high findings.
-- [ ] Security review has no unresolved medium/high findings.
+- [x] Correctness review has no unresolved medium/high findings.
+- [x] Security review has no unresolved medium/high findings.
 - [ ] Forest generated-output acceptance passes.
 
 ## Progress Notes
@@ -81,6 +91,19 @@ the implementation seam. No production implementation file has been edited.
 
 **Next steps**: obtain two independent read-only contract reviews, disposition
 findings, and commit the checkpoint before implementation.
+
+### 2026-09-04 13:10 UTC: Implementation and security remediation
+
+**Agent/Contributor**: Codex
+
+Implemented the transform and multi-OFE prep wiring, clarified the advanced UI,
+and added regression coverage. Review identified incomplete source validation,
+finite-arithmetic overflow, missing direct RQ failure proof, and output-mode
+drift. The candidate now validates the complete supported slope structure before
+creating a temporary file, preserves source mode, and has a real Redis/RQ test
+showing child failure visibility and strict downstream blocking. A nonmutating
+dry run parsed all 167 dainty source files, clipped 83 files, reported a maximum
+OFE length of 60 m, and preserved area within `2.91e-11 m2` absolute error.
 
 ### 2026-09-04 11:49 UTC: Initial contract review disposition
 

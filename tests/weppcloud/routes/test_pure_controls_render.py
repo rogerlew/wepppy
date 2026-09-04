@@ -4151,7 +4151,11 @@ def test_wepp_control_renders_core_run_and_lifecycle_contract(jinja_env: Environ
     rendered = template.render(
         wepp=TemplateValue(),
         soils=TemplateValue(),
-        watershed=SimpleNamespace(clip_hillslopes=False, clip_hillslope_length=0),
+        watershed=SimpleNamespace(
+            clip_hillslopes=False,
+            clip_hillslopes_configured=False,
+            clip_hillslope_length=0,
+        ),
         wepp_bin_options=[("wepp_260514", "WEPP 260514")],
         swat=False,
         reveg=False,

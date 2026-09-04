@@ -30,6 +30,17 @@ class _LockRecorder:
         return _scope()
 
 
+def test_clip_hillslopes_configured_preserves_stored_choice_for_multi_ofe(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(Watershed, "multi_ofe", property(lambda _self: True))
+    watershed = object.__new__(Watershed)
+    watershed._clip_hillslopes = True
+
+    assert watershed.clip_hillslopes_configured is True
+    assert watershed.clip_hillslopes is False
+
+
 def test_apply_build_subcatchment_updates_noop_skips_lock_and_mutation() -> None:
     watershed = object.__new__(Watershed)
     watershed._clip_hillslopes = True
