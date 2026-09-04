@@ -50,9 +50,9 @@ values in the host's gitignored `docker/.env`:
 `WEPPPY_PROJECT_CONFIG_READER_ENABLED`,
 `WEPPPY_PROJECT_CONFIG_PRESET_WRITER_ENABLED`,
 `WEPPPY_PROJECT_CONFIG_BUILDER_WRITER_ENABLED`, and
-`WEPPPY_PROJECT_CONFIG_UPDATE_ENABLED`. Production Compose passes all four to
-web and RQ services and defaults each to `false`; enable them only under the
-initiative's accepted staged-rollout work package.
+`WEPPPY_PROJECT_CONFIG_UPDATE_ENABLED`. Every production Compose topology passes
+all four to its web and RQ services and defaults each to `false`; enable them
+only under the initiative's accepted rollout work package.
 
 For a web-boundary hotfix that changes only WEPPcloud and rq-engine, use the
 targeted mode. It pulls and builds their shared `WEPPCLOUD_IMAGE` once through

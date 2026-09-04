@@ -72,6 +72,13 @@ and the shared `_defaults.toml` compatibility alias remains for WP13.
   Rationale: Reader-before-writer staging and the shared alias are the explicit
   compatibility controls for production and rollback revisions.
   Date/Author: 2026-08-31 / Codex.
+- Decision: Use one explicit all-four-flag activation during the limited
+  production deployment window instead of a separate reader-only deployment.
+  Rationale: On 2026-09-04 the operator explicitly accepted the compressed
+  window after the reader, writer, sanitization, Forest, correctness, and
+  security gates had passed. Default-off Compose behavior and writer-first
+  disablement during rollback remain unchanged.
+  Date/Author: 2026-09-04 / Roger Lew and Codex.
 
 ## Outcomes & Retrospective
 
@@ -131,9 +138,9 @@ review and Forest evidence.
 After the exact feature revision is reviewed and pushed, merge it to `master`
 without adding unrelated changes. Record the merge revision and push only that
 reviewed canonical history. Inspect the canonical deploy script and production
-operator guidance, deploy the merge revision, verify service revisions and
-health, then enable readers before writers. Exercise authenticated creation and
-mutation, legacy reads, project-owned reads, and capability refresh. Observe
+operator guidance, stage all four explicit flags, then deploy the merge revision
+once and verify service revisions and health. Exercise authenticated creation
+and mutation, legacy reads, project-owned reads, and capability refresh. Observe
 logs and queues for the defined health and danger signals.
 
 Finally verify the selected rollback reader can open `_defaults.cfg`, confirm
@@ -191,9 +198,9 @@ The shared `_defaults.toml` alias must remain present.
 Audits and tests are read-only and repeatable. Documentation corrections are
 small commits on the feature branch. Do not merge while a scope discrepancy is
 open. The production deploy must use exact revisions and the documented
-rollback mechanism. If reader staging fails, restore the last known production
-revision before any writer flag is enabled. If writer staging fails, disable
-writer flags first while retaining compatible readers, then investigate.
+rollback mechanism. If activation fails, disable the three writer flags first
+while retaining the compatible reader when safe, then investigate or restore
+the last known production revision.
 
 ## Artifacts and Notes
 
@@ -222,3 +229,6 @@ test-isolation tooling disposition.
 
 Plan revision note (2026-08-31 17:42 UTC): Bound validation and repeated scope
 audit to exact pre-merge candidate `039192492ffec38782893a603916a2e91918cfca`.
+
+Plan revision note (2026-09-04): Recorded the operator-approved single-window
+activation and missing dedicated-worker Compose passthrough remediation.

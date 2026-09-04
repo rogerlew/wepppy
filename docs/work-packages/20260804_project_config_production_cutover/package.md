@@ -19,9 +19,10 @@ first merge and production boundary in the project-owned-config roadmap.
   the final feature-branch revision.
 - Merge only the accepted and explicitly dispositioned branch boundary into
   `master`.
-- Deploy the resulting canonical revision with staged reader-before-writer
-  feature enablement and verify production health, project creation, legacy
-  reads, project-owned writes, and rollback compatibility.
+- Deploy the resulting canonical revision with explicit feature enablement and
+  verify production health, project creation, legacy reads, project-owned
+  writes, and rollback compatibility. For the limited 2026-09-04 deployment
+  window, the operator approved enabling all four flags in one deployment.
 - Hand WP13 the deployed and rollback revision inventory while retaining the
   shared `_defaults.toml` compatibility alias.
 
@@ -32,7 +33,7 @@ first merge and production boundary in the project-owned-config roadmap.
 - Final branch, requirement, validation, security, and changed-file audits.
 - Canonical merge to `master` and production deployment through the documented
   production entry point.
-- Staged feature-flag activation, health/danger observation, and rollback
+- Explicit feature-flag activation, health/danger observation, and rollback
   verification.
 - Operator evidence, revision inventory, and WP13 handoff documentation.
 

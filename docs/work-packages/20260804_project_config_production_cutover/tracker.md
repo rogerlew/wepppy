@@ -6,11 +6,11 @@
 
 **Started**: 2026-08-31 16:06 UTC
 
-**Current phase**: Final promotion audit
+**Current phase**: Production deployment preparation
 
-**Last updated**: 2026-08-31 16:06 UTC
+**Last updated**: 2026-09-04
 
-**Next milestone**: Accept the exact merge boundary
+**Next milestone**: Deploy current master with all four flags enabled
 
 **Security impact**: `high`
 
@@ -72,6 +72,19 @@
   and recorded its exact validation ancestry (2026-08-31 17:42 UTC).
 
 ## Decisions Log
+
+### 2026-09-04: Compress flag activation into one deployment window
+
+**Context**: Production remains on pre-Builder revision `075910aff`; all four
+flags are absent. The limited deployment window does not permit a reader-only
+deployment followed by a writer deployment.
+
+**Decision**: The operator explicitly approved setting all four flags to true
+before one canonical deployment. Preserve default-off tracked Compose values,
+all validation/health gates, and writer-first disablement on rollback.
+
+**Impact**: Dedicated wepp2/wepp3 worker Compose files must receive the same
+flag passthrough as wepp1 before host-local `.env` values are staged.
 
 ### 2026-08-31 16:06 UTC: Execute WP12 as the roadmap promotion boundary
 
