@@ -125,6 +125,7 @@ Before Roads is useful, the run must already have:
 - a WBT-based delineation backend
 
 Roads is backend-gated. Non-WBT runs cannot enable the mod.
+Roads is available to PowerUser, Dev, Admin, and Root accounts.
 
 ### Upload and attribute discovery
 

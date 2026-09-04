@@ -254,7 +254,7 @@ features:
     label: Roads
     maturity: stable
     internal_reason: null
-    min_role: user
+    min_role: poweruser
     requires_backend: wbt
     requires_features: []
     section_template: controls/roads_pure.htm

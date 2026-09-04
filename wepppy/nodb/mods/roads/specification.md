@@ -55,6 +55,8 @@ Run precondition:
 Activation and backend guard:
 
 - `Roads` is enabled/disabled through the canonical project mod endpoint (`/tasks/set_mod`).
+- Roads requires the `PowerUser` role or an elevated role that includes the
+  PowerUser audience (`Dev`, `Admin`, or `Root`).
 - Roads requires WBT delineation backend (`watershed.delineation_backend_is_wbt == True`).
 - Attempting to enable Roads on non-WBT runs must return an explicit error (same pattern as existing backend-gated modules).
 - Roads execution and preflight completion are WEPP-dependent; no Roads run is considered complete before WEPP completion.
