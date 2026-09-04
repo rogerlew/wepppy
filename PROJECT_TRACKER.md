@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-08-29
-**Active Packages**: 31
+**Last Updated**: 2026-09-04
+**Active Packages**: 32
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -404,6 +404,28 @@ When resuming Kubernetes work:
 ---
 
 ## 🚧 In Progress
+
+### Multiple-OFE Hillslope Clipping
+
+**Started**: 2026-09-04
+
+**Size**: Medium (contract checkpoint, implementation, Forest acceptance)
+
+**Priority**: High
+
+**Security impact**: `high` (run-tree transformed file publication)
+
+**Link**: [docs/work-packages/20260904_mofe_hillslope_clipping/](docs/work-packages/20260904_mofe_hillslope_clipping/)
+
+**Description**: Apply the configured WEPP hillslope clip length independently
+to each OFE in multiple-OFE slope files, preserve representative hillslope area,
+clarify the advanced-options contract, and verify `dainty-signature` at 60 m on
+the Forest development stack through rq-engine.
+
+**Next Steps**: Complete the standalone contract/security checkpoint, implement
+and validate the transform, then deploy and capture generated-output evidence.
+
+---
 
 ### Project Config Production Cutover (WP12)
 
