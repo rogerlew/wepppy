@@ -760,6 +760,109 @@ def test_run_batch_project_watar_only_reuses_runtime_resolved_climate_and_wepp(
     assert leaf_state["_climatestation_mode"]["py/reduce"][1]["py/tuple"] == [0]
 
 
+def test_run_batch_project_rehydrates_climate_inside_lock_for_downstream_readers(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runner = _runner(tmp_path, monkeypatch)
+    for task in runner.DEFAULT_TASKS:
+        runner._run_directives[task] = False
+    runner._run_directives[TaskEnum.build_climate] = True
+    runner._run_directives[TaskEnum.run_wepp_hillslopes] = True
+
+    leaf = "climate-boundary"
+    run_dir = Path(runner.batch_runs_dir) / leaf
+    run_dir.mkdir(parents=True)
+    runid = f"batch;;demo;;{leaf}"
+    events: list[object] = []
+    inside_climate_lock = False
+
+    early = SimpleNamespace(label="early")
+    fresh = SimpleNamespace(label="fresh")
+    early.observed_start_year = fresh.observed_start_year = 2000
+    early.observed_end_year = fresh.observed_end_year = 2001
+    early.build = lambda: events.append(("build", early.label))
+    fresh.build = lambda: events.append(("build", fresh.label))
+
+    def _get_climate(_wd: str):
+        selected = fresh if inside_climate_lock else early
+        events.append(("hydrate", selected.label))
+        return selected
+
+    class _Wepp:
+        def clean(self) -> None:
+            return None
+
+        def _check_and_set_baseflow_map(self) -> None:
+            return None
+
+        def _check_and_set_phosphorus_map(self) -> None:
+            return None
+
+        def prep_hillslopes(self) -> None:
+            return None
+
+        def run_hillslopes(self) -> None:
+            return None
+
+    monkeypatch.setattr(
+        batch_runner_module,
+        "get_wd",
+        lambda _runid: str(run_dir),
+    )
+    monkeypatch.setattr(batch_runner_module, "_clear_batch_leaf_nodb_state", lambda *_args: ())
+    monkeypatch.setattr(runner, "resync_base_project_attributes", lambda *_args: None)
+    monkeypatch.setattr(
+        runner,
+        "_get_run_logger",
+        lambda _runid: batch_runner_module.logging.getLogger("test.climate.boundary"),
+    )
+    inert = SimpleNamespace()
+    monkeypatch.setattr(batch_runner_module.Ron, "getInstance", lambda _wd: inert)
+    monkeypatch.setattr(batch_runner_module.Watershed, "getInstance", lambda _wd: inert)
+    monkeypatch.setattr(batch_runner_module.Landuse, "getInstance", lambda _wd: inert)
+    monkeypatch.setattr(batch_runner_module.Soils, "getInstance", lambda _wd: inert)
+    monkeypatch.setattr(batch_runner_module.Climate, "getInstance", _get_climate)
+    monkeypatch.setattr(batch_runner_module.Wepp, "getInstance", lambda _wd: _Wepp())
+    monkeypatch.setattr(batch_runner_module.RAP_TS, "tryGetInstance", lambda _wd: None)
+    monkeypatch.setattr(batch_runner_module.OpenET_TS, "tryGetInstance", lambda _wd: None)
+
+    def _clear(actual_runid: str, *, pup_relpath: str) -> None:
+        events.append(("clear", actual_runid, pup_relpath))
+
+    monkeypatch.setattr(batch_runner_module, "clear_nodb_file_cache", _clear)
+
+    def _lock(_wd, root, callback, *, purpose):
+        nonlocal inside_climate_lock
+        events.append(("lock-enter", root))
+        if root == "climate":
+            inside_climate_lock = True
+        result = callback()
+        if root == "climate":
+            inside_climate_lock = False
+        events.append(("lock-exit", root))
+        return result
+
+    monkeypatch.setattr(batch_runner_module, "_run_with_directory_root_lock", _lock)
+    downstream: list[object] = []
+    monkeypatch.setattr(
+        batch_runner_module,
+        "ensure_hillslope_interchange",
+        lambda _wepp, climate, *_args, **_kwargs: downstream.append(climate),
+    )
+
+    runner.run_batch_project(_feature(leaf))
+
+    assert events == [
+        ("lock-enter", "climate"),
+        ("clear", runid, "climate.nodb"),
+        ("hydrate", "fresh"),
+        ("build", "fresh"),
+        ("lock-exit", "climate"),
+    ]
+    assert downstream == [fresh]
+
+
 def test_clear_retry_runtime_locks_uses_child_path_scope(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

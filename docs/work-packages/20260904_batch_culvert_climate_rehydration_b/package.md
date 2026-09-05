@@ -1,6 +1,7 @@
 # Batch and Culvert Climate Rehydration Hardening
 
-**Status**: Backlog - scaffolded for Forest execution
+**Status**: Conditional closeout - implementation and Forest batch accepted;
+culvert evidence limited by fixture completeness
 
 **Started**: 2026-09-05 00:29 UTC
 

@@ -26,7 +26,11 @@ from wepppy.all_your_base.geo import raster_stacker
 from wepppy.all_your_base.geo.locationinfo import RasterDatasetInterpolator
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
-from wepppy.nodb.base import NoDbAlreadyLockedError, NoDbStaleWriteError
+from wepppy.nodb.base import (
+    NoDbAlreadyLockedError,
+    NoDbStaleWriteError,
+    clear_nodb_file_cache,
+)
 from wepppy.nodb.culverts_runner import CulvertsRunner
 from wepppy.nodb.core import Climate, Landuse, Soils, Watershed, Wepp
 from wepppy.nodb.core.watershed import NoOutletFoundError
@@ -136,6 +140,13 @@ def _run_with_directory_root_lock(
     with nodir_maintenance_lock(wd, root, purpose=purpose):
         _require_directory_root(wd, root)
         return callback()
+
+
+def _build_climate_at_mutation_boundary(runid: str, wd: str) -> Climate:
+    clear_nodb_file_cache(runid, pup_relpath="climate.nodb")
+    current_climate = Climate.getInstance(wd)
+    current_climate.build()
+    return current_climate
 
 
 def _run_with_directory_roots_lock(
@@ -1357,7 +1368,6 @@ def _process_culvert_run(
         watershed = Watershed.getInstance(wd)
         landuse = Landuse.getInstance(wd)
         soils = Soils.getInstance(wd)
-        climate = Climate.getInstance(wd)  # Settings from copied base project
         wepp = Wepp.getInstance(wd)
         # Culvert batches may need to re-run watershed interchange checks; retain
         # raw watershed outputs instead of deleting them after first interchange.
@@ -1508,10 +1518,10 @@ def _process_culvert_run(
             purpose="culvert-run-landuse-soils",
         )
 
-        _run_with_directory_root_lock(
+        climate = _run_with_directory_root_lock(
             wd,
             "climate",
-            lambda: climate.build(),
+            lambda: _build_climate_at_mutation_boundary(runid, wd),
             purpose="culvert-run-climate",
         )
 

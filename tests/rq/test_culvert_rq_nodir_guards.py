@@ -230,3 +230,132 @@ def test_process_culvert_run_forces_delete_after_interchange_off_for_culverts(
     assert watershed_interchange_calls == [False]
     assert len(metadata_calls) == 1
     assert metadata_calls[0]["status"] == "success"
+
+
+def test_process_culvert_run_rehydrates_climate_inside_lock_for_interchange(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    run_wd = tmp_path / "run"
+    run_wd.mkdir(parents=True, exist_ok=True)
+    batch_root = tmp_path / "batch"
+    (batch_root / "landuse").mkdir(parents=True)
+    (batch_root / "soils").mkdir(parents=True)
+    (batch_root / "landuse" / "nlcd.tif").write_text("x", encoding="utf-8")
+    (batch_root / "soils" / "ssurgo.tif").write_text("x", encoding="utf-8")
+
+    events: list[object] = []
+    inside_climate_lock = False
+
+    class _Watershed:
+        pass
+
+    class _Landuse:
+        pass
+
+    class _Soils:
+        pass
+
+    early = SimpleNamespace(label="early")
+    fresh = SimpleNamespace(label="fresh")
+    early.build = lambda: events.append(("build", early.label))
+    fresh.build = lambda: events.append(("build", fresh.label))
+
+    def _get_climate(_wd: str):
+        selected = fresh if inside_climate_lock else early
+        events.append(("hydrate", selected.label))
+        return selected
+
+    class _Wepp:
+        delete_after_interchange = True
+
+        def clean(self) -> None:
+            return None
+
+        def prep_hillslopes(self) -> None:
+            return None
+
+        def run_hillslopes(self) -> None:
+            return None
+
+        def prep_watershed(self) -> None:
+            return None
+
+        def run_watershed(self) -> None:
+            return None
+
+    monkeypatch.setattr(culvert_rq.Watershed, "getInstance", lambda _wd: _Watershed())
+    monkeypatch.setattr(culvert_rq.Landuse, "getInstance", lambda _wd: _Landuse())
+    monkeypatch.setattr(culvert_rq.Soils, "getInstance", lambda _wd: _Soils())
+    monkeypatch.setattr(culvert_rq.Climate, "getInstance", _get_climate)
+    monkeypatch.setattr(culvert_rq.Wepp, "getInstance", lambda _wd: _Wepp())
+    monkeypatch.setattr(culvert_rq, "_resolve_batch_root", lambda _uuid: batch_root)
+
+    def _lock(_wd, root, callback, *, purpose):
+        nonlocal inside_climate_lock
+        events.append(("lock-enter", root))
+        if root == "climate":
+            inside_climate_lock = True
+            result = callback()
+            inside_climate_lock = False
+        else:
+            result = None
+        events.append(("lock-exit", root))
+        return result
+
+    monkeypatch.setattr(culvert_rq, "_run_with_directory_root_lock", _lock)
+    monkeypatch.setattr(
+        culvert_rq,
+        "_run_with_directory_roots_lock",
+        lambda *_args, **_kwargs: None,
+    )
+    monkeypatch.setattr(
+        culvert_rq,
+        "ensure_hillslope_interchange",
+        lambda _wepp, climate, **_kwargs: events.append(("hillslope", climate.label)),
+    )
+    monkeypatch.setattr(
+        culvert_rq,
+        "ensure_totalwatsed3",
+        lambda _wepp, climate: events.append(("totalwatsed3", climate.label)),
+    )
+    monkeypatch.setattr(
+        culvert_rq,
+        "ensure_watershed_interchange",
+        lambda _wepp, climate, **_kwargs: events.append(("watershed", climate.label)),
+    )
+    monkeypatch.setattr(culvert_rq, "activate_query_engine_for_run", lambda *_args: None)
+    monkeypatch.setattr(culvert_rq, "_write_run_metadata", lambda *_args: None)
+    monkeypatch.setattr(culvert_rq, "skeletonize_run", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(
+        culvert_rq,
+        "clear_nodb_file_cache",
+        lambda actual_runid, *, pup_relpath: events.append(
+            ("clear", actual_runid, pup_relpath)
+        ),
+    )
+
+    status = culvert_rq._process_culvert_run(
+        culvert_batch_uuid="batch-1",
+        run_id="001",
+        run_wd=run_wd,
+        watershed_feature=SimpleNamespace(),
+        run_config="culvert.cfg",
+        wepppy_version="test",
+        nlcd_db_override=None,
+        minimum_watershed_area_m2=None,
+    )
+
+    assert status == "success"
+    assert events == [
+        ("lock-enter", "watershed"),
+        ("lock-exit", "watershed"),
+        ("lock-enter", "climate"),
+        ("clear", "culvert;;batch-1;;001", "climate.nodb"),
+        ("hydrate", "fresh"),
+        ("build", "fresh"),
+        ("lock-exit", "climate"),
+        ("hillslope", "fresh"),
+        ("totalwatsed3", "fresh"),
+        ("watershed", "fresh"),
+    ]

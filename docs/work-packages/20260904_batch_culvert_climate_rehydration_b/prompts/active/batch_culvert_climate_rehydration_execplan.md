@@ -27,17 +27,43 @@ climate and downstream interchange without the incident signature.
 
 - [x] (2026-09-05 00:29 UTC) Captured the production incident and scaffolded
   the package for Forest dispatch.
-- [ ] Verify current `master`, package authority, applicable nested
-  `AGENTS.md`, and the exact current implementations before editing.
-- [ ] Add failing batch and culvert interleaving regressions.
-- [ ] Implement exact-scope cache invalidation and fresh Climate hydration
-  inside both existing climate root-lock callbacks.
-- [ ] Prove downstream readers use current post-build Climate state.
-- [ ] Run focused and repository validation.
-- [ ] Complete independent correctness, QA, and security review and resolve
-  every medium/high finding.
-- [ ] Deploy only to Forest, capture representative evidence, and record the
-  exact rollback procedure.
+- [x] (2026-09-05 00:42 UTC) Verified Forest hostname, clean `master` at
+  `87559fe26`, package authority, applicable nested `AGENTS.md`, the
+  concurrency/cache contracts, and the exact early-hydration implementations.
+- [x] (2026-09-05 00:44 UTC) Added failing batch and culvert interleaving
+  regressions; the new suite initially failed at collection because the
+  boundary helpers were absent.
+- [x] (2026-09-05 00:45 UTC) Implemented exact-scope cache invalidation and
+  fresh Climate hydration inside both existing climate root-lock callbacks.
+- [x] (2026-09-05 00:48 UTC) Proved downstream batch hillslope interchange and
+  culvert hillslope, totalwatsed3, and watershed interchange receive the
+  post-build Climate instance.
+- [x] (2026-09-05 01:00 UTC) Completed focused validation and ran the full
+  repository suite through 5,128 collected tests; 5,078 passed and 50 were
+  skipped before an unrelated existing shape-converter compose contract
+  failure stopped the run. Changed batch, culvert, and Climate rehydration
+  tests passed in that run.
+- [x] (2026-09-05 01:12 UTC) Completed correctness, QA, and security reviews;
+  all high/medium findings were resolved or dispositioned as unrelated
+  baseline/fixture conditions.
+- [x] (2026-09-05 01:15 UTC) Restarted only the Forest RQ workers through the
+  canonical `wctl docker compose` wrapper and verified the source bind,
+  image digest, helper imports, and worker startup receipt.
+- [x] (2026-09-05 02:18 UTC) Forest acceptance produced a successful
+  representative batch receipt: `victoria-ca-2026-sbs/Sooke18` completed
+  Climate, RAP/OpenET, hillslope, watershed, and WATAR work with RQ result
+  `(True, 59.49883031845093)` and durable `status: success` metadata. The
+  larger `nasa-roses-202603-sbs/OR-28` stress run completed Climate and
+  downstream hillslope preparation without the target signature and was
+  intentionally stopped at 10,278/11,748 soil-prep tasks after functional
+  verification.
+- [ ] (2026-09-05 02:18 UTC) Culvert full-workflow acceptance remains
+  conditional: three available fixtures stopped before or during later
+  stages on missing artifacts or a pre-existing raster-shape mismatch. No
+  target stale-write signature appeared.
+- [x] (2026-09-05 02:42 UTC) On user direction, stopped the supplemental
+  OR-28 stress job through `wepppy.rq.cancel_job.cancel_jobs`; RQ reported
+  `stopped`, Forest queues were idle, and final docs/diff gates passed.
 - [ ] Close and archive this plan after all acceptance criteria are satisfied.
 
 ## Surprises & Discoveries
@@ -56,8 +82,28 @@ climate and downstream interchange without the incident signature.
   while paths correctly referenced `202608` and `202609`. This is a diagnostic
   ambiguity, not yet evidence of a persistence-identity defect. Keep it out of
   scope unless a direct causal link is proven.
+- Observation: the repository-wide suite has a pre-existing failure in
+  `tests/shape_converter/unit/test_runtime_hardening.py::test_prod_wepp1_overlay_does_not_override_shape_converter_hardening`:
+  the committed `docker/docker-compose.prod.wepp1.yml` contains a
+  `shape-converter` service even though that test requires the overlay not to
+  define it. The working tree had no change to either file before this task;
+  the failure is outside the Climate change scope.
+- Observation: the available Forest culvert fixtures are incomplete under
+  the current soil-artifact contract. Runs `2907` and `573` reached watershed
+  and soil preparation, then failed on absent `.sol` files; neither produced
+  a Climate stale-write error.
+- Observation: the selected Forest batch `OR-28` had Climate enabled and
+  completed the full 11,748-task Climate build plus downstream preparation;
+  it was stopped by user direction at 10,278/11,748 soil-prep tasks, with no
+  target stale-write error in the worker log.
 
 ## Decision Log
+
+- Observation: the direct same-size regression uses the interleaving writer's
+  real `dump()` without the validating `locked()` wrapper; that wrapper
+  refreshes the in-process singleton after its write and would erase the
+  stale-reference condition the test is intended to reproduce. Production
+  code remains unchanged and uses the normal lock/build contract.
 
 - Decision: conform both runners to the placement already used by
   `wepppy/rq/project_rq.py::build_climate_rq`.
@@ -75,10 +121,13 @@ climate and downstream interchange without the incident signature.
 
 ## Outcomes & Retrospective
 
-Only the work-package scaffold is complete. Implementation, tests, reviews,
-and Forest evidence remain pending. At closeout, summarize the exact code
-shape, regression evidence, Forest job/run IDs, any deviations, and whether
-the logger/runid ambiguity became a separate follow-up.
+Implementation, focused regressions, reviews, and a successful smaller Forest
+batch acceptance are complete. Repository validation has one unrelated
+baseline failure recorded above. The larger stress receipt was stopped after
+functional verification, and culvert acceptance has a documented fixture
+limitation. The package is conditionally closed at the user's direction;
+production deployment remains unauthorized. The logger/runid ambiguity did
+not show a causal persistence defect and remains out of scope.
 
 ## Context and Orientation
 

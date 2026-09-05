@@ -75,36 +75,6 @@ Feedback mechanisms:
 
 ## 📋 Backlog
 
-### Batch and Culvert Climate Rehydration Hardening
-
-**Proposed**: 2026-09-04 Pacific / 2026-09-05 UTC
-
-**Size**: Medium (two orchestration paths, focused concurrency regressions,
-reviews, and Forest validation)
-
-**Priority**: Critical
-
-**Security impact**: `high` (RQ worker persistence and NoDb lock/cache
-ordering)
-
-**Link**: [docs/work-packages/20260904_batch_culvert_climate_rehydration_b/](docs/work-packages/20260904_batch_culvert_climate_rehydration_b/)
-
-**Description**: Fix batch and culvert runners that hydrate `Climate` before
-long watershed/landuse/soils stages and later attempt to build from a stale
-NoDb generation. Adopt the exact scoped cache-clear and hydrate-inside-climate-
-lock pattern already used by `project_rq::build_climate_rq`, preserve strict
-stale-write rejection, and ensure downstream interchange receives current
-post-build Climate state.
-
-**Origin**: openWEPP parent job
-`30edcfbe-297a-4326-a048-a5397410d69e`, leaf
-`ddc253a4-e30b-46dc-a819-3d2f3ec85064`, failed `OR-10` with a same-size
-`climate.nodb` generation advance on 2026-09-05 UTC.
-
-**Next Steps**: Dispatch the active ExecPlan on Forest, add deterministic batch
-and culvert interleaving regressions, implement the minimal conformance fix,
-complete correctness/QA/security gates, and capture Forest evidence. Production
-deployment is not authorized by this package.
 
 ---
 
@@ -437,6 +407,25 @@ When resuming Kubernetes work:
 ---
 
 ## 🚧 In Progress
+
+### Batch and Culvert Climate Rehydration Hardening
+
+**Started**: 2026-09-05 UTC
+
+**Priority/Security**: Critical / `high`
+
+**Link**: [docs/work-packages/20260904_batch_culvert_climate_rehydration_b/](docs/work-packages/20260904_batch_culvert_climate_rehydration_b/)
+
+**Scope**: Rehydrate Climate at the existing batch and culvert climate
+mutation boundaries, preserve strict NoDb stale-write detection, and prove
+downstream interchange consumes the post-build controller.
+
+**Status**: Implementation, focused regressions, independent reviews, and a
+successful Forest batch receipt pass; the full suite has one unrelated
+pre-existing shape-converter compose contract failure. The supplemental
+stress job was stopped after functional verification. Available Forest
+culvert fixtures fail later on missing artifacts or raster-shape mismatch, so
+acceptance is conditional. No production deployment is authorized.
 
 ### Project Config Production Cutover (WP12)
 

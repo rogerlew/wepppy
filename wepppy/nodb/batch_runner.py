@@ -202,6 +202,13 @@ def _run_with_directory_root_lock(
             time.sleep(retry_delay_seconds * attempt)
 
 
+def _build_climate_at_mutation_boundary(runid: str, wd: str) -> Climate:
+    clear_nodb_file_cache(runid, pup_relpath="climate.nodb")
+    current_climate = Climate.getInstance(wd)
+    current_climate.build()
+    return current_climate
+
+
 def _run_with_directory_roots_lock(
     wd: str,
     roots: Sequence[str],
@@ -562,7 +569,6 @@ class BatchRunner(NoDbBase):
         watershed = Watershed.getInstance(runid_wd)
         landuse = Landuse.getInstance(runid_wd)
         soils = Soils.getInstance(runid_wd)
-        climate = Climate.getInstance(runid_wd)
         wepp = Wepp.getInstance(runid_wd)
         
         if self.is_task_enabled(TaskEnum.fetch_dem) and prep[str(TaskEnum.fetch_dem)] is None:
@@ -630,12 +636,14 @@ class BatchRunner(NoDbBase):
 
         if self.is_task_enabled(TaskEnum.build_climate) and prep[str(TaskEnum.build_climate)] is None:
             logger.info(f'building climate')
-            _run_with_directory_root_lock(
+            climate = _run_with_directory_root_lock(
                 runid_wd,
                 "climate",
-                lambda: climate.build(),
+                lambda: _build_climate_at_mutation_boundary(runid, runid_wd),
                 purpose="batch-run-build-climate",
             )
+        else:
+            climate = Climate.getInstance(runid_wd)
 
         rap_ts = RAP_TS.tryGetInstance(runid_wd)
         logger.info(f'rap_ts: {rap_ts}')
