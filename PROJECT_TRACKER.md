@@ -75,6 +75,39 @@ Feedback mechanisms:
 
 ## 📋 Backlog
 
+### Batch and Culvert Climate Rehydration Hardening
+
+**Proposed**: 2026-09-04 Pacific / 2026-09-05 UTC
+
+**Size**: Medium (two orchestration paths, focused concurrency regressions,
+reviews, and Forest validation)
+
+**Priority**: Critical
+
+**Security impact**: `high` (RQ worker persistence and NoDb lock/cache
+ordering)
+
+**Link**: [docs/work-packages/20260904_batch_culvert_climate_rehydration_b/](docs/work-packages/20260904_batch_culvert_climate_rehydration_b/)
+
+**Description**: Fix batch and culvert runners that hydrate `Climate` before
+long watershed/landuse/soils stages and later attempt to build from a stale
+NoDb generation. Adopt the exact scoped cache-clear and hydrate-inside-climate-
+lock pattern already used by `project_rq::build_climate_rq`, preserve strict
+stale-write rejection, and ensure downstream interchange receives current
+post-build Climate state.
+
+**Origin**: openWEPP parent job
+`30edcfbe-297a-4326-a048-a5397410d69e`, leaf
+`ddc253a4-e30b-46dc-a819-3d2f3ec85064`, failed `OR-10` with a same-size
+`climate.nodb` generation advance on 2026-09-05 UTC.
+
+**Next Steps**: Dispatch the active ExecPlan on Forest, add deterministic batch
+and culvert interleaving regressions, implement the minimal conformance fix,
+complete correctness/QA/security gates, and capture Forest evidence. Production
+deployment is not authorized by this package.
+
+---
+
 ### Seamless WEPPcloud Session Cookie Namespace Migration
 
 **Proposed**: 2026-08-23
