@@ -88,6 +88,11 @@ durable state under a short finalizer lock. The finalizer rejects changed
 relevant inputs and applies only an explicit derived-field allowlist; it does
 not merge a stale whole-controller object.
 
+Observed GridMET/PRISM and RAP time-series operations stage derived artifacts,
+then validate captured inputs against fresh durable state under the lock.
+Unrelated edits survive; changed inputs produce an explicit superseded error.
+See [Climate/RAP finalization and recovery](../../docs/dev-notes/batch-climate-rap-finalization.md)
+for the implemented boundaries, rollback behavior, and regression evidence.
 ## WEPP Hillslope Timeout Policy
 
 Continuous hillslope runs use the default 60-second `wepp_runner.run_hillslope` timeout for single-OFE projects. MOFE projects route continuous hillslope execution through `WeppRunService` with a 300-second timeout because each WEPP invocation can route many OFEs for one hillslope. The timeout appears in the service log line as `Running Hillslopes with max_workers=..., timeout=...s` and is passed unchanged to the runner so timeout errors continue to report the command, run file, error file, attempts, and last observed WEPP output.

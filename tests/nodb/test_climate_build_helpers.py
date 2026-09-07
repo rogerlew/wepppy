@@ -734,6 +734,8 @@ def test_run_prism_revision_updates_catalog_and_sub_maps(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     climate = _ClimateStub(tmp_path)
+    from wepppy.nodb.core.climate import ClimateMode
+    climate.climate_mode = ClimateMode.PRISM
     catalog_updates: list[tuple[str, str]] = []
 
     monkeypatch.setattr(helper_module, "_retrieve_prism_revision_tiles", lambda *_args, **_kwargs: None)

@@ -1079,6 +1079,14 @@ def _wait_for_prism_revision_futures(climate: "Climate", future_map: dict[Any, s
 
 
 def run_prism_revision(climate: "Climate", verbose: bool = False) -> None:
+    from .climate_observed_build import run_prism_revision_build
+
+    from .climate import ClimateMode
+
+    if climate.climate_mode == ClimateMode.GridMetPRISM:
+        run_prism_revision_build(climate, verbose=verbose)
+        return
+
     wd = climate.wd
     cli_dir = climate.cli_dir
 
@@ -1117,6 +1125,7 @@ def run_prism_revision(climate: "Climate", verbose: bool = False) -> None:
         climate.sub_par_fns = sub_par_fns
         climate.sub_cli_fns = sub_cli_fns
         update_catalog_entry(wd, "climate")
+
 
 
 def _ensure_cligen_seed(climate: "Climate") -> None:

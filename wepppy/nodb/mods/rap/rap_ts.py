@@ -34,7 +34,6 @@ from __future__ import annotations
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
 import os
-from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
 from datetime import datetime
 from os.path import exists as _exists
 from os.path import join as _join
@@ -44,7 +43,6 @@ import pandas as pd
 import pyarrow
 from osgeo import gdal
 
-import wepppyo3
 from wepppyo3.raster_characteristics import identify_median_intersecting_raster_keys
 from wepppyo3.raster_characteristics import identify_median_single_raster_key
 
@@ -126,8 +124,7 @@ class RAP_TS(NoDbBase):
         remove it from the state dictionary to prevent it from being
         written to the .nodb file.
         """
-        super().__getstate__()
-        state = self.__dict__.copy()
+        state = super().__getstate__()
         parquet_path = _join(self.rap_dir, 'rap_ts.parquet')
         if _exists(parquet_path):
             if 'data' in state:
@@ -176,10 +173,14 @@ class RAP_TS(NoDbBase):
         # Backwards compatibility: data is in the nodb file
         data = getattr(instance, 'data', None)
         if data is not None:
+            if not isinstance(data, dict):
+                raise ValueError("RAP embedded data must be a band mapping")
             mapped: RAPTimeSeriesData = {}
             for key in RAP_Band:
                 key_repr = repr(key)
-                if key_repr in data:
+                if key in data:
+                    mapped[key] = data[key]
+                elif key_repr in data:
                     mapped[key] = data[key_repr]
             instance.data = mapped
 
@@ -213,61 +214,9 @@ class RAP_TS(NoDbBase):
         end_year: Optional[int] = None
     ) -> None:
 
-        def retrieve_rap_year(year: int) -> int:
-            self.logger.info(f'  retrieving rap {year}...')
-            retries = rap_mgr.retrieve([year])
-            if retries > 0:
-                self.logger.info(f'  retries: {retries}\n')
-            return year
+        from .rap_ts_build import acquire
 
-        def oncomplete(future: Future[int]) -> None:
-            year = future.result()
-            self.logger.info(f'  retrieving rap {year} completed.\n')
-
-        with self.locked():
-            if start_year is not None:
-                self._rap_start_year = start_year
-            else:
-                start_year = self.rap_start_year
-
-            if end_year is not None:
-                self._rap_end_year = end_year
-            else:
-                end_year = self.rap_end_year
-
-            _map = Ron.getInstance(self.wd).map
-            rap_mgr = RangelandAnalysisPlatformV3(wd=self.rap_dir, bbox=_map.extent, cellsize=_map.cellsize)
-
-            futures: list[Future[int]] = []
-            with ThreadPoolExecutor() as pool:
-                for year in range(start_year, end_year + 1):
-                    future = pool.submit(retrieve_rap_year, year)
-                    future.add_done_callback(oncomplete)
-                    futures.append(future)
-
-                futures_n = len(futures)
-                count = 0
-                pending: set[Future[int]] = set(futures)
-                while pending:
-                    done, pending = wait(pending, timeout=60, return_when=FIRST_COMPLETED)
-
-                    if not done:
-                        self.logger.warning('  RAP raster retrieval still running after 60 seconds; continuing to wait.')
-                        continue
-
-                    for future in done:
-                        try:
-                            future.result()
-                            count += 1
-                            self.logger.info(f'  ({count}/{futures_n}) rasters retrieved)')
-                        except Exception as exc:
-                            for remaining in pending:
-                                remaining.cancel()
-                            self.logger.error(f'  RAP raster retrieval failed with an error: {exc}')
-                            raise
-
-            self._rap_mgr = rap_mgr
-            update_catalog_entry(self.wd, self.rap_dir)
+        acquire(self, start_year, end_year)
 
     def on(self, evt: TriggerEvents) -> None:
         pass
@@ -304,124 +253,9 @@ class RAP_TS(NoDbBase):
         return cover / 100.0
 
     def analyze(self, use_sbs: bool = False, verbose: bool = False) -> None:
-        start_year = self.rap_start_year
-        end_year = self.rap_end_year
-        if start_year is None or end_year is None:
-            raise ValueError('RAP start and end years must be set before analysis.')
+        from .rap_ts_build import analyze
 
-        watershed = Watershed.getInstance(self.wd)
-        rap_mgr = self._rap_mgr
-        if rap_mgr is None:
-            raise RuntimeError('RAP rasters must be acquired before analysis.')
-
-        with self.locked():
-            data_ds: RAPTimeSeriesData = {}
-
-            def analyze_band_year(year: int, band: RAP_Band) -> Tuple[int, RAP_Band]:
-                if verbose:
-                    print(year, band)
-
-                if band not in data_ds:
-                    data_ds[band] = {}
-
-                self.logger.info(f'  analyzing rap {year} {band}...')
-
-                rap_ds_fn = rap_mgr.get_dataset_fn(year=year)
-                if self.multi_ofe:
-                    result = identify_median_intersecting_raster_keys(
-                        key_fn=watershed.subwta, key2_fn=watershed.mofe_map, parameter_fn=rap_ds_fn, band_indx=band.value)
-                else:
-                    result = identify_median_single_raster_key(
-                        key_fn=watershed.subwta, parameter_fn=rap_ds_fn, band_indx=band.value)
-
-                data_ds[band][year] = result
-                return year, band
-
-            def oncomplete(future: Future[Tuple[int, RAP_Band]]) -> None:
-                year, band = future.result()
-                self.logger.info(f'  analyzing rap {year} {band} completed.\n')
-
-            futures: list[Future[Tuple[int, RAP_Band]]] = []
-            with ThreadPoolExecutor() as pool:
-                for year in range(start_year, end_year + 1):
-                    for band in [RAP_Band.ANNUAL_FORB_AND_GRASS,
-                                 RAP_Band.BARE_GROUND,
-                                 RAP_Band.LITTER,
-                                 RAP_Band.PERENNIAL_FORB_AND_GRASS,
-                                 RAP_Band.SHRUB,
-                                 RAP_Band.TREE]:
-                        future = pool.submit(analyze_band_year, year, band)
-                        future.add_done_callback(oncomplete)
-                        futures.append(future)
-
-                futures_n = len(futures)
-                count = 0
-                pending: set[Future[Tuple[int, RAP_Band]]] = set(futures)
-                while pending:
-                    done, pending = wait(pending, timeout=60, return_when=FIRST_COMPLETED)
-
-                    if not done:
-                        self.logger.warning('  RAP analysis still running after 60 seconds; continuing to wait.')
-                        continue
-
-                    for future in done:
-                        try:
-                            future.result()
-                            count += 1
-                            self.logger.info(f'  ({count}/{futures_n}) analyses complete)')
-                        except Exception as exc:
-                            for remaining in pending:
-                                remaining.cancel()
-                            self.logger.error(f'  RAP analysis failed with an error: {exc}')
-                            raise
-
-            # For new projects, save data to parquet for performance.
-            if pd is not None and pyarrow is not None and data_ds:
-                records: list[dict[str, int | float]] = []
-                # Check the structure of the first data point to determine if multi-ofe
-                first_band = next(iter(data_ds.keys()))
-                first_year = next(iter(data_ds[first_band].keys()))
-                first_topaz_data = data_ds[first_band][first_year]
-                first_value = next(iter(first_topaz_data.values()))
-                is_multi_ofe = isinstance(first_value, dict)
-
-                for band, year_data in data_ds.items():
-                    for year, topaz_data in year_data.items():
-                        if is_multi_ofe:
-                            for topaz_id, mofe_data in topaz_data.items():
-                                for mofe_id, value in mofe_data.items():
-                                    records.append({
-                                        'band': band.value,
-                                        'year': int(year),
-                                        'topaz_id': int(topaz_id),
-                                        'mofe_id': int(mofe_id),
-                                        'value': value
-                                    })
-                        else:
-                            for topaz_id, value in topaz_data.items():
-                                records.append({
-                                    'band': band.value,
-                                    'year': int(year),
-                                    'topaz_id': int(topaz_id),
-                                    'mofe_id': -1,  # Sentinel for non-mofe
-                                    'value': value
-                                })
-                
-                if records:
-                    df = pd.DataFrame(records)
-                    parquet_path = _join(self.rap_dir, 'rap_ts.parquet')
-                    df.to_parquet(parquet_path)
-                    update_catalog_entry(self.wd, 'rap/rap_ts.parquet')
-
-            self.data = data_ds
-
-        self.logger.info('analysis complete...')
-
-        try:
-            prep = RedisPrep.getInstance(self.wd)
-            prep.timestamp(TaskEnum.fetch_rap_ts)
-        except FileNotFoundError:
-            pass
+        analyze(self, verbose=verbose)
 
     def __iter__(self) -> Iterator[Tuple[str, RAPPointData]]:
         if self.data is None or self.multi_ofe:

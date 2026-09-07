@@ -4,36 +4,26 @@
 
 **Timezone**: UTC
 **Started**: 2026-09-07 05:34 UTC
-**Current phase**: Scaffold complete; ready for forest dispatch
-**Last updated**: 2026-09-07 05:34 UTC
-**Next milestone**: Reproduce and attribute Climate and RAP_TS writes
-**Security impact**: `high`
-**Dedicated security review**: `yes`
-**Security artifact**: `artifacts/2026-09-07_security_review.md`
-
+**Current phase**: Closed — authorized implementation and local validation complete
+**Last updated**: 2026-09-07 UTC
+**Full repository suite**: 7535 passed, 63 skipped
+**Security impact**: `high`; independent review passed
+**Live replay/deployment**: excluded by operator; Kubernetes recurrence unmeasured
 ## Task Board
 
 ### Ready / Backlog
 
-- [ ] Capture sanitized source logs and a current queue/run-state snapshot.
-- [ ] Add deterministic real-file Climate and RAP_TS contention regressions.
-- [ ] Inventory all persistence, cache, lock, and timestamp writes in both paths.
-- [ ] Decide whether current canonical contracts already authorize the fix.
-- [ ] Implement explicit collection and fresh-state finalization per controller.
-- [ ] Verify batch metadata, retry selection, summary, and triggers on failure.
-- [ ] Run focused, persistence, stub, quality, and full-suite validation.
-- [ ] Complete independent correctness, code, QA, and security reviews.
-- [ ] Run the operator-authorized forest replay and record before/after signals.
-
+No remaining authorized implementation work. Future deployment investigation
+should attribute the actual Kubernetes writer and repair copied batch group
+identity under its own bounded scope.
 ### In Progress
 
-- None. This package is intentionally scaffold-only and ready for dispatch.
-
+None.
 ### Blocked
 
-- None. Any RQ completion/trigger behavior change is gated on a standalone
-  canonical contract checkpoint and must pause at that boundary if needed.
-
+- No implementation blocker. Live acceptance is excluded, not waiting for
+  permission. Source attribution cannot identify the deployment writer from
+  the supplied exception excerpt alone.
 ### Done
 
 - [x] Pulled WEPPpy master through `3443b07a7` (2026-09-07 05:34 UTC).
@@ -44,6 +34,13 @@
 - [x] Scaffolded package, tracker, ExecPlan, and review gates
   (2026-09-07 05:34 UTC).
 
+- [x] Attributed source writers; recorded exact synthetic writers and unknown
+  Kubernetes attribution (2026-09-07).
+- [x] Implemented fresh finalization for observed GridMET/PRISM and RAP; preserved
+  strict stale-write checks and generated schemas (2026-09-07).
+- [x] Added real-file failure/conflict/containment/commit-outcome tests and real
+  raster-to-parquet-to-WEPP-cover propagation (2026-09-07).
+- [x] Closed all independent correctness/code/QA/security findings (2026-09-07).
 ## Timeline
 
 - **2026-09-07 03:49 UTC** - openWEPP began promotion of WEPPpy `87cfe4047`.
@@ -84,37 +81,46 @@ change before editing the boundary.
 
 | Risk | Severity | Likelihood | Mitigation | Status |
 | --- | --- | --- | --- | --- |
-| Finalizer loses unrelated durable fields | High | Medium | Fresh hydrate plus explicit derived-field allowlist | Open |
-| Relevant input changes during collection | High | Medium | Snapshot and explicit superseded/conflict outcome | Open |
-| Long locks block run/UI writers | High | Medium | Keep remote and parallel work outside lock | Open |
-| RAP parquet and NoDb diverge on failure | High | Medium | Define publication order and direct partial-failure tests | Open |
-| RQ `Job OK` obscures domain failure | Medium | High | Verify metadata/summary/retry semantics; contract-gate changes | Open |
-| Copied controller retains wrong identity | Medium | Medium | Trace runid, wd, logger, cache key, and lock key independently | Open |
+| Finalizer loses unrelated durable fields | High | Medium | Fresh hydrate plus explicit derived-field allowlist | Verified |
+| Relevant input changes during collection | High | Medium | Snapshot and explicit superseded/conflict outcome | Verified |
+| Long locks block run/UI writers | High | Medium | Keep remote and parallel work outside lock | Verified |
+| RAP parquet and NoDb diverge on failure | High | Medium | Defined publication/rollback; interrupted commits retain evidence | Mitigated; crash limit documented |
+| RQ `Job OK` obscures domain failure | Medium | High | Verified existing metadata/summary/retry semantics | Verified |
+| Copied controller retains wrong identity | Medium | Medium | Independent source attribution; separate copied-group defect | Deferred follow-up |
 
 ## Hardening Signal Log
 
-- **Baseline**: at least twelve Climate/RAP_TS stale-write messages in one
-  openWEPP batch excerpt after the cache-boundary rollout.
-- **Post-change**: not yet measured.
-- **Danger signals observed**: whole-controller mutation bases span expensive
-  threaded work; domain failures are reported as successful RQ execution.
-- **Temporary callus register**: none.
-
+- **Baseline reproduction**: two real-file tests failed before the patch with
+  equal sizes and mtimes one second apart.
+- **Post-change local evidence**: unrelated writes survive; relevant changes
+  reject publication; pre/post-commit errors, unknown commit, lock takeover,
+  symlinks, empty/legacy/malformed RAP state, and real raster-to-cover output
+  are covered. 245 focused tests and 49 expanded contention/facade tests passed.
+- **Deployment signal**: unmeasured; the operator prohibited live reruns.
+- **Temporary calluses**: no retry/cache-clearing workaround. Recovery copies
+  remain only when an interrupted publication cannot safely be rolled back.
 ## Verification Checklist
 
-- [ ] Exact pre-fix regressions fail for the intended reason.
-- [ ] Exact post-fix regressions pass without weakening stale detection.
-- [ ] `wctl run-pytest tests/nodb/test_base_boundary_characterization.py --maxfail=1`
-- [ ] Focused Climate, RAP_TS, BatchRunner, and batch RQ suites pass.
-- [ ] `wctl run-pytest tests --maxfail=1`
-- [ ] Stub and broad-exception gates pass where applicable.
-- [ ] `wctl doc-lint` passes for touched documentation.
-- [ ] `git diff --check` passes.
-- [ ] Correctness, code, QA, and security findings are dispositioned.
-- [ ] Forest replay produces zero new target signatures.
-
+- [x] Both pre-fix real-file regressions fail for the intended same-size stale signature.
+- [x] Post-fix unrelated/relevant interleavings preserve strict stale detection.
+- [x] NoDb boundary/base suites pass.
+- [x] Focused Climate/RAP and batch RQ suites pass.
+- [x] Real raster summaries propagate through parquet to WEPP cover files.
+- [x] Climate/RAP public stubtest and test-stub completeness pass.
+- [x] Broad exception enforcement and Vulture pass.
+- [x] Correctness, code, QA, and security findings are dispositioned.
+- [x] Full repository suite: 7535 passed, 63 skipped; documentation/diff checks pass.
+- [x] No live replay/deployment; excluded by operator.
 ## Handoff
 
-Execute `prompts/active/batch_climate_rap_contention_execplan.md` from the
-repository root. Begin with writer attribution and failing tests. Do not begin
-with a generic retry, cache clear, or lock-duration increase.
+Implementation and validation completed 2026-09-07. The completed ExecPlan
+records the operator's no-rerun amendment. See
+`artifacts/2026-09-07_validation.md` for 7535 passed / 63 skipped in the full
+suite and all other gates, and `artifacts/2026-09-07_writer_attribution.md` for
+authority, compatibility, and exact pre-fix evidence.
+
+The durable decision is documented in
+`docs/dev-notes/batch-climate-rap-finalization.md`, especially "User and operator
+behavior" and "Publication and recovery." No branch, commit, deployment, or
+live rerun was performed. Kubernetes attribution/recurrence and copied identity
+remain documented follow-ups, not claimed production acceptance.

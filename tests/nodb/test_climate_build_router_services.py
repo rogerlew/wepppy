@@ -180,11 +180,14 @@ def test_build_router_preserves_managed_projection_cli_symlink(
     assert list(managed_target.iterdir()) == []
 
 
+@pytest.mark.parametrize("mode", [ClimateMode.PRISM, ClimateMode.GridMetPRISM])
 def test_build_router_unlinks_unmanaged_cli_symlink_without_deleting_target(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
+    mode,
 ) -> None:
     climate = _DummyClimate(tmp_path)
+    climate.climate_mode = mode
     cli_root = tmp_path / "cli"
     if cli_root.is_symlink():
         cli_root.unlink()
@@ -201,8 +204,12 @@ def test_build_router_unlinks_unmanaged_cli_symlink_without_deleting_target(
         lambda _wd: (_ for _ in ()).throw(FileNotFoundError()),
     )
 
+    mode_service = _DummyModeService()
+    if mode == ClimateMode.GridMetPRISM:
+        # Staged modes retain previous derived metadata until collection succeeds.
+        mode_service.build_for_mode = lambda *args, **kwargs: None
     router = ClimateBuildRouter(
-        mode_build_services=_DummyModeService(),
+        mode_build_services=mode_service,
         scaling_service=_DummyScalingService(),
         artifact_export_service=_DummyArtifactService(),
     )

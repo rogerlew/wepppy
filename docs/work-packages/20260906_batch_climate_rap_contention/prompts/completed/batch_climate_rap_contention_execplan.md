@@ -1,8 +1,12 @@
 # Correct batch Climate and RAP NoDb contention
 
+**Completed 2026-09-07**: implemented fresh finalization and reviewed all changes;
+full suite 7535 passed, 63 skipped. Live replay/deployment was excluded by the
+operator. See "Outcomes & Retrospective" and the validation artifact for details.
+
 This ExecPlan is a living document. Keep `Progress`, `Surprises & Discoveries`,
 `Decision Log`, and `Outcomes & Retrospective` current, and synchronize
-`../tracker.md` at every stopping point. Follow
+`../../tracker.md` at every stopping point. Follow
 `docs/prompt_templates/codex_exec_plans.md`.
 
 ## Purpose / Big Picture
@@ -13,42 +17,42 @@ mutation base during threaded work. The stale-write guard remains strict:
 unrelated concurrent changes survive, relevant input changes explicitly
 supersede collected results, and no stale object is blindly dumped again.
 
-Demonstrate the outcome with direct real-file interleaving regressions and an
-operator-authorized forest replay of the affected batch. The replay must show
-no new target `NoDbStaleWriteError` for `climate.nodb` or `rap_ts.nodb`, and
-batch metadata must correctly distinguish completed and failed watersheds.
+Demonstrate the outcome with direct real-file interleaving regressions and
+isolated artifact propagation. The operator excluded live reruns because the
+failure belongs to a separate Kubernetes deployment. No deployment recurrence
+measurement is part of this execution. Batch metadata must correctly
+distinguish completed and failed watersheds.
 
 ## Progress
 
-- [x] (2026-09-07 05:34 UTC) Captured the production recurrence and exact job
-  examples.
-- [x] (2026-09-07 05:34 UTC) Linked canonical contracts and prior hardening.
-- [x] (2026-09-07 05:34 UTC) Scaffolded the executable package.
-- [ ] Attribute all writes in the two failing paths.
-- [ ] Add failing direct regressions.
-- [ ] Complete any required standalone contract checkpoint.
-- [ ] Implement and validate Climate correction.
-- [ ] Implement and validate RAP_TS correction.
-- [ ] Validate batch failure/result consistency.
-- [ ] Complete independent reviews and forest acceptance.
-
+- [x] Recorded source writers and excluded catalog/version migration as nested writers; production writer remains unattributed.
+- [x] Reproduced both exact same-size stale-write signatures in real temporary files before implementation.
+- [x] Classified the change as conformance to the unchanged NoDb collect/finalize contract.
+- [x] Implemented observed GridMET/PRISM collection, fresh hydration, input comparison, allowlisted outputs, and reversible publication.
+- [x] Implemented RAP acquisition/analysis finalization and preserved six bands, legacy reads, empty results, and WEPP cover propagation.
+- [x] Verified unchanged batch failure metadata, retry eligibility, summaries, tuple, and triggers.
+- [x] Closed independent correctness, code, QA, and security reviews with no unresolved medium/high findings.
+- [x] Passed 245 focused/persistence/batch tests; expanded contention/facade suite passed 49 tests.
+- [x] Full suite: 7535 passed, 63 skipped; final documentation/stub/quality gates completed.
+- [x] Removed live replay/deployment from this execution per operator instruction; Kubernetes recurrence is unmeasured.
 ## Surprises & Discoveries
 
-- The outer `clear_nodb_file_cache(..., "climate.nodb")` and fresh
-  `Climate.getInstance()` are deployed and execute before `Climate.build()`;
-  recurrence proves initial hydration was not the complete contention model.
-- The failing observed GridMET path logs PRISM revision and many hillslope
-  thread-pool submissions. The prior multiple-interpolated Climate package does
-  not prove this path uses its finalized-result service.
-- RAP_TS performs year/band analysis in a thread pool while its controller is
-  inside a long `locked()` region, then publishes parquet/controller state and
-  a RedisPrep timestamp. The exact writer invalidating its signature still
-  requires a deterministic trace; do not assume threads mutate the controller
-  merely because they compute into a shared in-memory dictionary.
-- RQ reports `Job OK` because the batch wrapper returns a false result instead
-  of re-raising. StatusMessenger still emits `EXCEPTION_JSON`; these are two
-  distinct status layers.
+Catalog callbacks and thread pools do not establish a nested NoDb writer.
+Source attribution is in `artifacts/2026-09-07_writer_attribution.md`: catalog
+scan only reads metadata; current version migration does not rewrite controllers.
+Batch base resync is a direct Climate writer but normally precedes collection.
+Copied `_group_name` explains old lock/status identity while paths use new `wd`;
+it is a separate confirmed defect, not a proven cause.
 
+The existing NoDb dump can fail after its atomic replace. Blind artifact
+rollback would then corrupt the committed controller. Publication now compares
+the exact intended final payload with durable bytes; an unknown outcome retains
+both generations for recovery. Lock takeover also forbids old-owner rollback.
+
+Skipping early Climate cleanup requires invalidating old calendar/NOAA sidecars
+on successful publication and preserving existing managed-symlink rules.
+RAP's full band enum includes uncertainty bands; its six-band allowlist remains
+explicit. All these cases have direct regression coverage.
 ## Decision Log
 
 - Decision: preserve strict stale-write enforcement and use explicit
@@ -66,10 +70,28 @@ batch metadata must correctly distinguish completed and failed watersheds.
   successful RQ job is a separate externally observable contract question.
   Date/Author: 2026-09-07, Codex.
 
+- Decision: operator excludes live reruns and deployment from this execution; the incident is specific to the separate Kubernetes deployment. Local acceptance uses isolated real-file regressions and existing suites. Kubernetes recurrence is unmeasured, not a claimed pass.
+- Decision: implement conformance to the unchanged NoDb contract, Writer Ownership and Mutation Topology / Long-running collect-then-finalize pattern. No RQ semantics, scientific values, or persistent schemas change. Collection uses explicit inputs and outputs; relevant changes reject publication and unrelated changes survive. The production invalidating writer remains unknown: injected test writers establish the failure mechanism, not deployment attribution.
+- Compatibility/regression plan: preserve Climate filenames and derived attributes, RAP band/year/TOPAZ/OFE parquet columns and legacy embedded data. Cover absent, empty, populated, legacy, malformed, unrelated/relevant rewrites, and collection/publication failures. Stage artifacts before replacing canonical files; completion timestamps follow successful finalization. Copied batch identity is diagnosed separately; do not change run identity without its own bounded contract review.
 ## Outcomes & Retrospective
 
-Scaffold only. Implementation, reviews, and forest acceptance remain pending.
+Completed 2026-09-07. Observed GridMET/PRISM and RAP builders now collect outside
+locks and finalize from fresh durable state with explicit input comparisons,
+derived-field allowlists, and reversible artifact publication. All independent
+reviews closed with no unresolved medium/high findings. The full repository
+suite passed: **7535 passed, 63 skipped**. Focused, stub, Vulture, exception, and
+documentation gates also passed; see `artifacts/2026-09-07_validation.md`.
 
+The original live forest replay was removed at the operator's direction: this
+is a separate Kubernetes incident, and no live workload was rerun or deployed.
+Local injected writers establish the failure mechanism, not the deployment
+writer. That attribution and copied batch identity remain follow-up evidence.
+
+Durable user/operator/developer guidance is in
+`docs/dev-notes/batch-climate-rap-finalization.md`. Publication distinguishes
+precommit, confirmed postcommit, unknown commit, and ownership loss because one
+generic rollback would corrupt valid results. Multi-file publication is still
+not crash-atomic. No branch, commit, image, deployment, or queue change was made.
 ## Context and Orientation
 
 `NoDbBase` serializes each controller as one whole `.nodb` file. A hydrated
@@ -114,8 +136,8 @@ Trace these specific candidates:
 - copied-run hydration and any retained base-run identity.
 
 Acceptance: tests fail before implementation for the production signature and
-the tracker names the exact invalidating writer(s), rather than inferring solely
-from timing.
+name their injected invalidating writer. Record the source inventory separately;
+do not infer the production writer from timing or synthetic interleavings.
 
 ## Milestone 2: Establish contract authority
 
@@ -197,10 +219,9 @@ Before handoff run:
     git diff --check
 
 Complete independent correctness, code, QA, and security reviews with no
-unresolved medium/high findings. Then, only under the operator's forest
-authority, rebuild/deploy through the canonical workflow and replay a bounded
-affected batch subset before a larger retry. Capture image revision/digest,
-job IDs, queue state, exact error counts, artifacts, and rollback evidence.
+unresolved medium/high findings. Do not rebuild/deploy or replay a live batch:
+the operator explicitly excluded that work. Record isolated artifact and
+rollback evidence and preserve the distinction from Kubernetes acceptance.
 
 ## Idempotence and Recovery
 

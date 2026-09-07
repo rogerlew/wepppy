@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from wepppy.nodb.core.climate import Climate
 
 
-def _clear_directory_preserving_symlink_mount(path: str) -> None:
+def _clear_directory_preserving_symlink_mount(path: str, *, preserve_contents: bool = False) -> None:
     if not os.path.lexists(path):
         return
 
@@ -45,6 +45,9 @@ def _clear_directory_preserving_symlink_mount(path: str) -> None:
             os.unlink(path)
             return
 
+        if preserve_contents:
+            return
+
         for name in os.listdir(resolved):
             candidate = os.path.join(resolved, name)
             if os.path.isdir(candidate) and not os.path.islink(candidate):
@@ -53,6 +56,8 @@ def _clear_directory_preserving_symlink_mount(path: str) -> None:
                 os.unlink(candidate)
         return
 
+    if preserve_contents and os.path.isdir(path):
+        return
     if os.path.isdir(path):
         shutil.rmtree(path)
     else:
@@ -80,19 +85,24 @@ class ClimateBuildRouter:
         verbose: bool = False,
         attrs: dict[str, Any] | None = None,
     ) -> None:
-        from wepppy.nodb.core.climate import ClimateMode, ClimateModeIsUndefinedError, _assert_supported_climate_mode
+        from wepppy.nodb.core.climate import ClimateMode, ClimateSpatialMode, ClimateModeIsUndefinedError, _assert_supported_climate_mode
         from wepppy.nodb.core.watershed import WatershedNotAbstractedError
 
         climate.logger.info("Build Climates")
         climate.logger.info("  assert not self.islocked()")
         assert not climate.islocked()
 
-        with climate.locked():
-            climate.cli_fn = None
-            climate.par_fn = None
-            climate.sub_cli_fns = None
-            climate.sub_par_fns = None
-            climate._observed_quality_guard_summary_warning = None
+        staged_observed = (
+            climate.climate_mode == ClimateMode.GridMetPRISM
+            and climate.climate_spatialmode != ClimateSpatialMode.MultipleInterpolated
+        )
+        if not staged_observed:
+            with climate.locked():
+                climate.cli_fn = None
+                climate.par_fn = None
+                climate.sub_cli_fns = None
+                climate.sub_par_fns = None
+                climate._observed_quality_guard_summary_warning = None
 
         watershed = climate.watershed_instance
         if not watershed.is_abstracted:
@@ -104,7 +114,9 @@ class ClimateBuildRouter:
             climate.find_closest_stations()
 
         cli_dir = climate.cli_dir
-        if _exists(cli_dir) or os.path.lexists(cli_dir):
+        if staged_observed:
+            _clear_directory_preserving_symlink_mount(cli_dir, preserve_contents=True)
+        if not staged_observed and (_exists(cli_dir) or os.path.lexists(cli_dir)):
             climate.logger.info("  cli_dir exists, attempting to clear")
             try:
                 _clear_directory_preserving_symlink_mount(cli_dir)

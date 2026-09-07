@@ -346,6 +346,10 @@ rq-worker-batch:
 - **Locking:** Required for all mutations via `nodb_setter` decorator
 - **Run directives:** Serialized with string keys (TaskEnum values), deserialized back to TaskEnum on load
 
+Climate/RAP collection now finalizes from fresh durable state. A superseded
+result remains a failed, retry-eligible watershed under the existing metadata
+and summary rules; RQ's false result tuple and completion triggers are unchanged.
+See [finalization and recovery](../../docs/dev-notes/batch-climate-rap-finalization.md).
 ## Developer Notes
 
 ### Code Organization

@@ -1,6 +1,6 @@
 # Batch Climate and RAP NoDb Contention
 
-**Status**: Open (2026-09-07 UTC)
+**Status**: Closed 2026-09-07 — implementation and authorized local validation complete
 **Timezone**: UTC
 
 ## Overview
@@ -8,10 +8,15 @@
 Correct reproducible `NoDbStaleWriteError` failures in openWEPP batch watershed
 jobs after the batch/culvert Climate rehydration rollout. The outer cache guard
 is working as designed, but long-running Climate and RAP_TS operations retain a
-controller mutation base while nested work changes the same whole-object NoDb
-file. This package will give each affected operation explicit writer ownership
+controller mutation base across intervening whole-object NoDb rewrites. This package gives each affected operation explicit writer ownership
 and a fresh, bounded finalization transaction without weakening stale-write
 detection.
+
+The operator subsequently clarified that the failure is specific to a separate
+Kubernetes deployment and prohibited live reruns. Execution covers code,
+isolated regressions, and reviews; deployment attribution and recurrence are
+unmeasured. Source inspection does not establish a nested writer as the
+incident cause. See [writer attribution](artifacts/2026-09-07_writer_attribution.md).
 
 ## Incident Evidence
 
@@ -63,8 +68,8 @@ detection.
 - BatchRunner hydration/finalization integration needed for those controllers.
 - Copied-run controller/logger identity diagnosis where it affects hydration,
   cache keys, lock keys, or persistence targets.
-- Deterministic contention, partial-failure, compatibility, and live forest
-  acceptance evidence.
+- Deterministic contention, partial-failure, compatibility, and isolated
+  generated-output evidence.
 - Canonical NoDb contract/docs updates if discovery establishes a missing rule.
 
 ### Explicitly Out of Scope
@@ -78,8 +83,7 @@ detection.
 - Changing `BATCH_WATERSHED_TASK_COMPLETED` or RQ success/failure semantics
   without first amending the applicable canonical contract in a standalone
   ancestor commit.
-- Production or openWEPP deployment; forest acceptance is authorized only when
-  this package is dispatched there by the operator.
+- Deployment or live replay on any host, per the operator's execution amendment.
 
 ## Contract and Compatibility Plan
 
@@ -100,25 +104,23 @@ detection.
 
 ## Success Criteria
 
-- [ ] A real-file Climate regression reproduces the production signature before
-  the fix and passes afterward.
-- [ ] A real-file RAP_TS regression reproduces the production signature before
-  the fix and passes afterward.
-- [ ] Expensive/parallel collection does not hold a stale controller mutation
-  base that is later dumped.
-- [ ] Finalization locks, freshly hydrates durable state, validates relevant
-  inputs, applies only allowlisted derived fields, and commits once.
-- [ ] Unrelated same-size rewrites survive; relevant-input rewrites yield an
-  explicit conflict/superseded outcome.
-- [ ] Partial collection/finalization failure cannot publish a false complete
-  task timestamp or corrupt existing controller state.
-- [ ] Batch failure metadata, retry eligibility, final summary, and operator
-  messages agree about failed watersheds.
-- [ ] Focused suites, NoDb persistence suites, full repository suite, code/QA/
-  correctness/security reviews, and forest acceptance pass.
-- [ ] A post-fix forest rerun shows zero new target `NoDbStaleWriteError`
-  signatures for Climate and RAP_TS.
-
+- [x] Real-file Climate and RAP regressions reproduce the same-size stale-write
+  signature before the patch and pass afterward.
+- [x] Expensive collection runs outside NoDb locks; finalization freshly
+  hydrates, compares relevant inputs, applies derived-field allowlists, and
+  commits once.
+- [x] Unrelated edits survive; relevant edits reject publication explicitly.
+- [x] Collection and finalization failures preserve or retain recoverable
+  artifacts without publishing false completion timestamps.
+- [x] Batch failure metadata, retry selection, summary, tuples, and triggers
+  retain their existing semantics.
+- [x] Independent correctness, code, QA, and security reviews have no unresolved
+  medium/high findings.
+- [x] Focused, persistence, stub, and generated-output checks pass.
+- [x] Full repository suite: 7535 passed, 63 skipped; final documentation,
+  stub, Vulture, and exception checks pass.
+- [x] Exclude live reruns and deployment as directed by the operator; do not
+  claim an observed Kubernetes post-fix exception count.
 ## Related Work
 
 - [`20260820_climate_finalize_lock`](../20260820_climate_finalize_lock/package.md)
@@ -137,15 +139,15 @@ detection.
   a long-lived controller, then finalize once from freshly hydrated state under
   the controller lock, the target stale-write signature will disappear while
   legitimate concurrent relevant-input changes remain protected.
-- **Health signals**: zero target exceptions in the forest replay; exact
+- **Health signals**: exact
   unrelated/relevant interleaving tests pass; successful runs retain expected
   artifacts and timestamps; failed runs remain retry-eligible.
 - **Danger signals**: stale-object dump retries, missing or duplicate artifacts,
   lock duration spanning remote/parallel work, silently overwritten inputs,
   false RQ success, or increased cache/lock clearing.
-- **Observation model**: recurrence-triggered. Capture bounded before/after
-  forest evidence and promote durable danger signals to current NoDb/operator
-  documentation before closure.
+- **Observation model**: recurrence-triggered. Isolated tests establish local
+  conformance; deployment recurrence remains unmeasured. Durable danger signals
+  are in `docs/dev-notes/batch-climate-rap-finalization.md`.
 - **Temporary calluses**: none planned.
 
 ## Security Impact and Review Gate
@@ -162,5 +164,5 @@ detection.
 - Contract checkpoint if required by discovery.
 - Minimal Climate and RAP_TS ownership/finalization implementation.
 - Direct real-file regressions plus focused and repository validation evidence.
-- Completed correctness, code, QA, security, and forest acceptance artifacts.
+- Completed correctness, code, QA, security, and isolated acceptance artifacts.
 - Updated package tracker and `PROJECT_TRACKER.md` at every milestone.

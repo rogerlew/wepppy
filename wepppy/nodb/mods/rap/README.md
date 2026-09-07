@@ -54,6 +54,16 @@ All artifacts are stored under the scenario working directory (`<wd>`).
 
 Both controllers call `update_catalog_entry(...)` after acquiring rasters (and after writing Parquet) so the query engine/file catalog can surface RAP artifacts in the UI.
 
+Time-series retrieval and analysis stage outputs outside the NoDb lock. A short
+finalizer refreshes durable state, compares years/map/raster inputs, and applies
+only the manager/year or summary result. Empty summaries replace old parquet
+with a typed empty table. The six cover bands and existing column names/units
+remain unchanged. Conflicts fail explicitly before publication; unsuccessful
+finalization does not publish a completion timestamp.
+
+Interrupted publication can retain `.derived-backup-*` recovery copies. See
+[Climate/RAP finalization and recovery](../../../../docs/dev-notes/batch-climate-rap-finalization.md)
+before recovery, especially when lock ownership or commit outcome is uncertain.
 ## Quick start / examples
 
 These examples assume you already have a scenario working directory (`wd`) with `Ron` configured and the watershed abstracted (so `Watershed.subwta` exists).
