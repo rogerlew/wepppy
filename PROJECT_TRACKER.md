@@ -83,16 +83,7 @@ Feedback mechanisms:
 
 ## 📋 Backlog
 
-### Opt-in Login Requirement for Project Creation
 
-**Proposed**: 2026-09-07
-**Status**: Scaffolded; implementation not started
-**Package**: [Anonymous project creation policy](docs/work-packages/20260907_anonymous_project_creation/package.md)
-
-Add `WEPPCLOUD_ALLOW_ANONYMOUS_PROJECT_CREATION` (default true). False rejects
-anonymous `/rq-engine/create/` requests and omits anonymous creation controls and
-CAPTCHA on `/interfaces/`. Scope includes Docker wiring/documentation, contract
-checkpoint, regression coverage, and correctness/security review.
 
 
 ---
@@ -426,6 +417,8 @@ When resuming Kubernetes work:
 ---
 
 ## 🚧 In Progress
+
+
 
 ### Batch and Culvert Climate Rehydration Hardening
 
@@ -1281,6 +1274,19 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### Opt-in Login Requirement for Project Creation (2026-09-07)
+
+**Status**: Complete; production activation remains opt-in
+**Package**: [Anonymous project creation policy](docs/work-packages/20260907_anonymous_project_creation/package.md)
+
+Implemented `WEPPCLOUD_ALLOW_ANONYMOUS_PROJECT_CREATION` (default true), API
+enforcement, anonymous interface hiding, and Docker documentation/wiring.
+Full suite: 7,721 passed, 72 skipped; frontend: 835 passed. Real HTTP/Chromium
+checks and independent correctness/security reviews passed. Development defaults
+were restored and all ten canary runs removed. Fork/builder retain their policies.
+
+---
 
 ### MOFE mapping-aware burn management lookup (2026-09-07)
 

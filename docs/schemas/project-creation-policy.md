@@ -2,7 +2,7 @@
 
 ## Status and Scope
 
-Accepted intent for the anonymous creation work package; implementation conformance pending. This policy governs `POST /rq-engine/create/` (including `/rq-engine/api/create/`) and `/interfaces/` only. Fork, archive restore, builder, batch, and test-only creation retain their existing authorization contracts. This is not a site-wide prohibition on anonymous run allocation.
+Implemented as of `43be30d31` and validated in the development Compose stack on 2026-09-07. Production enablement remains operator-controlled. This policy governs `POST /rq-engine/create/` (including `/rq-engine/api/create/`) and `/interfaces/` only. Fork, archive restore, builder, batch, and test-only creation retain their existing authorization contracts. This is not a site-wide prohibition on anonymous run allocation.
 
 ## Configuration
 

@@ -12,8 +12,7 @@
 - Clients (controllers_js, static, profile_recorder) must normalize to this contract.
 
 Creation access policy and its conditional 403/503 errors are defined in
-[Project Creation Access Policy](project-creation-policy.md). Implementation
-conformance is pending for that policy.
+[Project Creation Access Policy](project-creation-policy.md).
 
 ## Auth expectations
 - Export endpoints require `rq:export` and run access checks.

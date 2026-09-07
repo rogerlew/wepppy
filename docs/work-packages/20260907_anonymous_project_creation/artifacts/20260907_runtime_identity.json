@@ -1,0 +1,48 @@
+{
+  "weppcloud": {
+    "user": "1000:993",
+    "group_add": null,
+    "identity": [
+      "Umask:\t0022",
+      "Uid:\t1000\t1000\t1000\t1000",
+      "Gid:\t993\t993\t993\t993",
+      "Groups:\t993 "
+    ],
+    "mounts": [
+      {
+        "Source": "/wc1",
+        "Destination": "/wc1",
+        "RW": true
+      },
+      {
+        "Source": "/home/workdir/wepppy",
+        "Destination": "/workdir/wepppy",
+        "RW": true
+      }
+    ],
+    "policy": "true"
+  },
+  "wepppy-rq-engine": {
+    "user": "1000:993",
+    "group_add": null,
+    "identity": [
+      "Umask:\t0022",
+      "Uid:\t1000\t1000\t1000\t1000",
+      "Gid:\t993\t993\t993\t993",
+      "Groups:\t993 "
+    ],
+    "mounts": [
+      {
+        "Source": "/wc1",
+        "Destination": "/wc1",
+        "RW": true
+      },
+      {
+        "Source": "/home/workdir/wepppy",
+        "Destination": "/workdir/wepppy",
+        "RW": true
+      }
+    ],
+    "policy": "true"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "mode": "true",
+  "anonymousForms": 15,
+  "authenticatedForms": 15,
+  "errors": [],
+  "checks": [
+    "real Chromium page load",
+    "sign-in flow",
+    "authenticated launch availability",
+    "no page exceptions"
+  ]
+}

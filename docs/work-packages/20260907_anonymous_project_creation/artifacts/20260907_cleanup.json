@@ -1,0 +1,75 @@
+{
+  "runs": [
+    {
+      "runid": "austral-bullfight",
+      "path": "/wc1/runs/au/austral-bullfight",
+      "directory_identity": {
+        "uid": 1000,
+        "gid": 993,
+        "mode": "0o755"
+      },
+      "removed": true
+    },
+    {
+      "runid": "calcareous-federation",
+      "path": "/wc1/runs/ca/calcareous-federation",
+      "directory_identity": {
+        "uid": 1000,
+        "gid": 993,
+        "mode": "0o755"
+      },
+      "removed": true
+    },
+    {
+      "runid": "metatarsal-reserve",
+      "path": "/wc1/runs/me/metatarsal-reserve",
+      "directory_identity": {
+        "uid": 1000,
+        "gid": 993,
+        "mode": "0o755"
+      },
+      "removed": true
+    },
+    {
+      "runid": "numeral-workmate",
+      "path": "/wc1/runs/nu/numeral-workmate",
+      "directory_identity": {
+        "uid": 1000,
+        "gid": 993,
+        "mode": "0o755"
+      },
+      "removed": true
+    },
+    {
+      "runid": "seamy-lamina",
+      "path": "/wc1/runs/se/seamy-lamina",
+      "directory_identity": {
+        "uid": 1000,
+        "gid": 993,
+        "mode": "0o755"
+      },
+      "removed": true
+    },
+    {
+      "runid": "studied-biome",
+      "path": "/wc1/runs/st/studied-biome",
+      "directory_identity": {
+        "uid": 1000,
+        "gid": 993,
+        "mode": "0o755"
+      },
+      "removed": true
+    },
+    {
+      "runid": "visible-craftiness",
+      "path": "/wc1/runs/vi/visible-craftiness",
+      "directory_identity": {
+        "uid": 1000,
+        "gid": 993,
+        "mode": "0o755"
+      },
+      "removed": true
+    }
+  ],
+  "remaining_canary_idempotency_keys_removed": 1
+}

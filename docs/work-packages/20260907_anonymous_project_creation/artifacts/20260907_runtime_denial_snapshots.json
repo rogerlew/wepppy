@@ -1,0 +1,268 @@
+{
+  "mode": "false",
+  "uid": 1000,
+  "gid": 993,
+  "checks": [
+    "anonymous real HTTP interfaces rendering",
+    "both aliases deny solved CAPTCHA without consuming token or reserving idempotency",
+    "real password/CAPTCHA login",
+    "authenticated real HTTP interfaces rendering",
+    "real cross-origin and missing-origin cookie rejection without allocation",
+    "real JWT/Redis/DB rejection of run-scoped and uppercase tokens, deleted/inactive/conflicting users in both transports",
+    "real creation artifacts and expected ownership",
+    "real creation artifacts and expected ownership",
+    "real signed service and MCP creation preserves existing access",
+    "real creation artifacts and expected ownership",
+    "real authenticated cookie creation with stale CAPTCHA field"
+  ],
+  "runs": [
+    {
+      "runid": "counterfeit-logjam",
+      "path": "/wc1/runs/co/counterfeit-logjam",
+      "owned": false,
+      "artifacts": [
+        "README.md",
+        "TTL",
+        "_query_engine",
+        "ash",
+        "ash.log",
+        "ash.nodb",
+        "ashpost.log",
+        "ashpost.nodb",
+        "climate.log",
+        "climate.nodb",
+        "config-manifest.json",
+        "debris_flow.log",
+        "debris_flow.nodb",
+        "dem",
+        "disturbed",
+        "disturbed.log",
+        "disturbed.nodb",
+        "disturbed9002.cfg",
+        "export",
+        "landuse.log",
+        "landuse.nodb",
+        "nodb.version",
+        "observed",
+        "observed.log",
+        "observed.nodb",
+        "redisprep.dump",
+        "ron.log",
+        "ron.nodb",
+        "soils.log",
+        "soils.nodb",
+        "topaz.log",
+        "topaz.nodb",
+        "treatments",
+        "treatments.log",
+        "treatments.nodb",
+        "unitizer.log",
+        "unitizer.nodb",
+        "watershed.log",
+        "watershed.nodb",
+        "wepp",
+        "wepp.log",
+        "wepp.nodb"
+      ],
+      "cleanup": "retained for cleanup after service recreation; idempotency key removed"
+    },
+    {
+      "runid": "usual-menarche",
+      "path": "/wc1/runs/us/usual-menarche",
+      "owned": false,
+      "artifacts": [
+        "README.md",
+        "TTL",
+        "_query_engine",
+        "ash",
+        "ash.log",
+        "ash.nodb",
+        "ashpost.log",
+        "ashpost.nodb",
+        "climate.log",
+        "climate.nodb",
+        "config-manifest.json",
+        "debris_flow.log",
+        "debris_flow.nodb",
+        "dem",
+        "disturbed",
+        "disturbed.log",
+        "disturbed.nodb",
+        "disturbed9002.cfg",
+        "export",
+        "landuse.log",
+        "landuse.nodb",
+        "nodb.version",
+        "observed",
+        "observed.log",
+        "observed.nodb",
+        "redisprep.dump",
+        "ron.log",
+        "ron.nodb",
+        "soils.log",
+        "soils.nodb",
+        "topaz.log",
+        "topaz.nodb",
+        "treatments",
+        "treatments.log",
+        "treatments.nodb",
+        "unitizer.log",
+        "unitizer.nodb",
+        "watershed.log",
+        "watershed.nodb",
+        "wepp",
+        "wepp.log",
+        "wepp.nodb"
+      ],
+      "cleanup": "retained for cleanup after service recreation; idempotency key removed"
+    },
+    {
+      "runid": "aural-unanimity",
+      "path": "/wc1/runs/au/aural-unanimity",
+      "owned": true,
+      "artifacts": [
+        "README.md",
+        "TTL",
+        "_query_engine",
+        "ash",
+        "ash.log",
+        "ash.nodb",
+        "ashpost.log",
+        "ashpost.nodb",
+        "climate.log",
+        "climate.nodb",
+        "config-manifest.json",
+        "debris_flow.log",
+        "debris_flow.nodb",
+        "dem",
+        "disturbed",
+        "disturbed.log",
+        "disturbed.nodb",
+        "disturbed9002.cfg",
+        "export",
+        "landuse.log",
+        "landuse.nodb",
+        "nodb.version",
+        "observed",
+        "observed.log",
+        "observed.nodb",
+        "redisprep.dump",
+        "ron.log",
+        "ron.nodb",
+        "soils.log",
+        "soils.nodb",
+        "topaz.log",
+        "topaz.nodb",
+        "treatments",
+        "treatments.log",
+        "treatments.nodb",
+        "unitizer.log",
+        "unitizer.nodb",
+        "watershed.log",
+        "watershed.nodb",
+        "wepp",
+        "wepp.log",
+        "wepp.nodb"
+      ],
+      "cleanup": "retained for cleanup after service recreation; idempotency key removed"
+    }
+  ],
+  "denial_snapshots": [
+    {
+      "root_directories": 198,
+      "sharded_run_directories": 410,
+      "database_rows": 409,
+      "unchanged": true
+    },
+    {
+      "root_directories": 198,
+      "sharded_run_directories": 410,
+      "database_rows": 409,
+      "unchanged": true
+    },
+    {
+      "root_directories": 198,
+      "sharded_run_directories": 410,
+      "database_rows": 409,
+      "unchanged": true
+    },
+    {
+      "root_directories": 198,
+      "sharded_run_directories": 410,
+      "database_rows": 409,
+      "unchanged": true
+    },
+    {
+      "root_directories": 198,
+      "sharded_run_directories": 410,
+      "database_rows": 409,
+      "unchanged": true
+    },
+    {
+      "root_directories": 198,
+      "sharded_run_directories": 410,
+      "database_rows": 409,
+      "unchanged": true
+    },
+    {
+      "root_directories": 198,
+      "sharded_run_directories": 410,
+      "database_rows": 409,
+      "unchanged": true
+    },
+    {
+      "root_directories": 198,
+      "sharded_run_directories": 410,
+      "database_rows": 409,
+      "unchanged": true
+    },
+    {
+      "root_directories": 198,
+      "sharded_run_directories": 410,
+      "database_rows": 409,
+      "unchanged": true
+    },
+    {
+      "root_directories": 198,
+      "sharded_run_directories": 410,
+      "database_rows": 409,
+      "unchanged": true
+    },
+    {
+      "root_directories": 198,
+      "sharded_run_directories": 410,
+      "database_rows": 409,
+      "unchanged": true
+    },
+    {
+      "root_directories": 198,
+      "sharded_run_directories": 410,
+      "database_rows": 409,
+      "unchanged": true
+    },
+    {
+      "root_directories": 198,
+      "sharded_run_directories": 410,
+      "database_rows": 409,
+      "unchanged": true
+    },
+    {
+      "root_directories": 198,
+      "sharded_run_directories": 410,
+      "database_rows": 409,
+      "unchanged": true
+    },
+    {
+      "root_directories": 198,
+      "sharded_run_directories": 410,
+      "database_rows": 409,
+      "unchanged": true
+    },
+    {
+      "root_directories": 198,
+      "sharded_run_directories": 410,
+      "database_rows": 409,
+      "unchanged": true
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "policy": {
+    "weppcloud": "true",
+    "wepppy-rq-engine": "true"
+  },
+  "anonymous_interfaces": "creation forms restored",
+  "anonymous_api_without_captcha": "existing CAPTCHA-required denial",
+  "disposable_runs_removed": 10
+}

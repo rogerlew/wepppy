@@ -1,6 +1,6 @@
 # Add an Opt-in Login Requirement for Project Creation
 
-This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`. Maintain Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective alongside the package tracker. Execution authorized on 2026-09-07; contract checkpoint in progress, implementation not yet started.
+This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`. Maintain Progress, Surprises & Discoveries, Decision Log, and Outcomes & Retrospective alongside the package tracker. Completed 2026-09-07 21:27 UTC. Implementation, validation, independent reviews, restoration, and cleanup are complete; this archived plan is historical execution evidence.
 
 ## Purpose / Big Picture
 
@@ -9,10 +9,10 @@ Operators can set `WEPPCLOUD_ALLOW_ANONYMOUS_PROJECT_CREATION=false` to require 
 ## Progress
 
 - [x] (2026-09-07 20:40 UTC) Inspect code and scaffold behavior, source inventory, and execution plan.
-- [ ] Ratify current contracts and commit the required reviewed checkpoint before implementation.
-- [ ] Implement shared policy semantics, API enforcement, and interfaces rendering.
-- [ ] Wire Compose and update operator/user/developer documentation.
-- [ ] Validate both modes, complete independent reviews, and close package.
+- [x] (2026-09-07 20:52 UTC) Ratify contracts after two independent reviews; checkpoint ancestor `fb67f32fc`.
+- [x] (2026-09-07 21:06 UTC) Implement shared policy, API enforcement, interface rendering, and 296 passing focused tests.
+- [x] (2026-09-07 21:07 UTC) Wire and verify Compose for true/false/empty; update operator/user/developer docs.
+- [x] (2026-09-07 21:27 UTC) Validate both modes, pass independent correctness/UX and security reviews, restore defaults, remove all ten canaries, and close package.
 
 ## Surprises & Discoveries
 
@@ -24,7 +24,7 @@ The public page is `/interfaces/`, plural. `/create` already requires login, but
 
 ## Outcomes & Retrospective
 
-The scaffold records the intended behavior and remaining decisions. No runtime feature, deployment wiring, or security validation is complete. The current milestone establishes canonical contracts; this package cannot close on planning artifacts alone.
+Implementation, Compose propagation, and focused/frontend tests are complete. Live default/restricted HTTP and browser checks pass under the real development identities, mounts, and databases. The full suite passed (7,721 passed, 72 skipped); all 16 denial snapshots were unchanged, all ten canary runs were removed, and both services were restored to true. Production was not deployed. Independent correctness/UX and security gates passed with no unresolved findings.
 
 ## Context and Orientation
 
@@ -84,3 +84,7 @@ Store checkpoint reviews/disposition, a valid-state matrix, focused/broad test r
 Revision note: 2026-09-07 20:40 UTC — created the implementation scaffold and recorded anonymous-only scope, backward-compatible default, and additional review surfaces from source discovery.
 
 Revision note: 2026-09-07 20:51 UTC — execution authorized; canonical policy now fixes strict boolean parsing, rejects all existing-run session tokens in restricted mode, and covers the API alias. Session-scope preservation supersedes the initial suggestion to resolve session user_id for creation.
+
+Revision note: 2026-09-07 21:27 UTC — full-suite, real HTTP/Chromium, identity/umask/mount, denial snapshot, and cleanup evidence completed; correctness/UX review passed. The initial OpenAPI metadata budget regression was fixed without raising the budget. NFS canary cleanup was deferred until process handles closed; browser-canary failure logging was sanitized after independent security review.
+
+Revision note: 2026-09-07 21:27 UTC — final independent security PASS received after correctness/UX PASS; package closed and prompt archived.

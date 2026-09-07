@@ -164,7 +164,7 @@ Backend matching policy for configs:
 
 - On backend-specific surfaces with an active backend context, backend must match `requires_backend` (or be `any`).
 - On `/interfaces/` launch surfaces (no active run/backend yet), role + config existence apply and backend remains part of config metadata/presentation.
-- Launch availability additionally follows `docs/schemas/project-creation-policy.md`; its anonymous-creation restriction does not grant roles or hide informational card content. Implementation conformance for that policy is pending.
+- Launch availability additionally follows `docs/schemas/project-creation-policy.md`; its anonymous-creation restriction does not grant roles or hide informational card content.
 
 Config attribute overrides are applied after YAML validation, from
 `config_registry.yaml` `overrides` in file order.
