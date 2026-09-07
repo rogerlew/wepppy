@@ -7,6 +7,9 @@
 
 ## Purpose
 
+Active: [Flask run config authority](docs/work-packages/20260906_flask_run_config/package.md)
+— 2026-09-06, shared Flask hook; other services deferred.
+
 This tracker provides a high-level view of active and planned work packages for both human and AI agents. When starting a session, agents should check this tracker to understand current initiatives and avoid duplicate work.
 
 ## How to Use This Tracker
