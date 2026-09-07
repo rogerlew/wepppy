@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-09-06
-**Active Packages**: 31
+**Active Packages**: 32
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -82,6 +82,32 @@ Feedback mechanisms:
 ---
 
 ## 📋 Backlog
+
+
+---
+
+### Batch Climate and RAP NoDb Contention
+
+**Proposed**: 2026-09-06
+
+**Size**: Medium-High (writer attribution, two controller finalizers, reviews,
+and forest replay)
+
+**Priority**: Critical
+
+**Security impact**: `high` (worker concurrency and run-tree persistence)
+
+**Link**: [docs/work-packages/20260906_batch_climate_rap_contention/](docs/work-packages/20260906_batch_climate_rap_contention/)
+
+**Description**: Correct post-rollout same-size `NoDbStaleWriteError` failures
+in observed GridMET/PRISM Climate builds and RAP_TS analysis. The deployed outer
+cache rehydration guard is present, but nested long-running work still retains
+whole-controller mutation bases across intervening writes. Attribute exact
+writers, add real-file regressions, and implement controller-specific
+collect-then-finalize ownership without weakening stale detection.
+
+**Next Steps**: Dispatch the active ExecPlan on forest; begin with exact writer
+attribution and failing Climate/RAP_TS tests before implementation.
 
 
 ---
