@@ -629,6 +629,7 @@ services:
         exec /opt/venv/bin/rq worker-pool -n "6" -u "redis://:$$REDIS_PASSWORD@redis:6379/9" --logging-level INFO --worker-class wepppy.rq.WepppyRqWorker default
     environment:
       <<: *wepppy-env
+      WBT_MAX_PROCS: ${WBT_MAX_PROCS:-12}
       LOGLEVEL: DEBUG
       RQ_LOGGING_LEVEL: DEBUG
       REDIS_HOST: redis
@@ -668,6 +669,7 @@ services:
         exec /opt/venv/bin/rq worker-pool -n "4" -u "redis://:$$REDIS_PASSWORD@redis:6379/9" --logging-level INFO --worker-class wepppy.rq.WepppyRqWorker batch
     environment:
       <<: *wepppy-env
+      WBT_MAX_PROCS: ${WBT_MAX_PROCS:-12}
       LOGLEVEL: DEBUG
       RQ_LOGGING_LEVEL: DEBUG
       REDIS_HOST: redis

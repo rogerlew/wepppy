@@ -564,6 +564,7 @@ services:
       - climate_engine_api_key
     environment:
       <<: *wepppy-env
+      WBT_MAX_PROCS: ${WBT_MAX_PROCS:-12}
       LOGLEVEL: INFO
       RQ_LOGGING_LEVEL: INFO
       # Prefer explicit RQ_REDIS_URL when running workers on external hosts
@@ -612,6 +613,7 @@ services:
       - climate_engine_api_key
     environment:
       <<: *wepppy-env
+      WBT_MAX_PROCS: ${WBT_MAX_PROCS:-12}
       LOGLEVEL: INFO
       RQ_LOGGING_LEVEL: INFO
       WEPPPY_NCPU: "6"

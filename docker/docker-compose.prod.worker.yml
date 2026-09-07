@@ -82,6 +82,7 @@ services:
       - climate_engine_api_key
     environment:
       <<: *worker-env
+      WBT_MAX_PROCS: ${WBT_MAX_PROCS:-12}
     command:
       - bash
       - -lc
@@ -109,6 +110,7 @@ services:
       - climate_engine_api_key
     environment:
       <<: *worker-env
+      WBT_MAX_PROCS: ${WBT_MAX_PROCS:-12}
       WEPPPY_NCPU: ${WEPPPY_NCPU:-6}
       PERIDOT_CPU: ${PERIDOT_CPU:-4}
     command:
