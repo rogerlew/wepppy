@@ -7,6 +7,8 @@
 
 ## Purpose
 
+In progress: [MOFE mapping-aware lookup](docs/work-packages/20260907_mofe_mapping_lookup/package.md) — correct burn management IDs for C3S and custom maps.
+
 Implemented locally: [Fork read retry and failure reporting](docs/work-packages/20260906_fork_read_retry_hardening/package.md)
 — bounded initial reads, original errno diagnostics, and fork prerequisite failures;
 228 focused tests and independent reviews passed. Production rollout remains gated.
