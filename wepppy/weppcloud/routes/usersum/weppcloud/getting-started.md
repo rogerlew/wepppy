@@ -207,6 +207,13 @@ The **Fork** button in the header creates a complete copy of your project under 
 
 When forking, you also have the option to **Undisturbify** — this creates the copy, removes fire-related disturbance data (burn severity maps and fire-modified soils/landuse), resets the project to undisturbed baseline conditions, and reruns WEPP. This lets you quickly set up a "before fire" comparison scenario from an existing post-fire project.
 
+Wait for the fork console to confirm completion before opening the new run's
+outputs. An undisturbify fork can finish copying before its WEPP rerun finishes.
+Brief file-read interruptions are retried automatically. If preparation still
+fails, the fork log identifies the failing job; include that job ID when asking
+for help. Other tasks may finish before the console displays the final failure,
+but a failed prerequisite prevents the remaining model steps from running.
+
 <!-- ![Fork console with undisturbify option](static/getting-started/fork-console.png) -->
 
 ---

@@ -247,7 +247,7 @@ object hydrated before another writer committed.
 
 ## Bounded Initial Preparation Reads (FORK-READ-01)
 
-Implementation conformance pending (2026-09-07 UTC). Initial WEPP preparation
+Implemented locally (2026-09-07 UTC); production rollout validation pending. Initial WEPP preparation
 controller loading MAY opt into one 5-second filesystem-read budget under
 [ADR-0049](../adrs/ADR-0049-fork-preparation-read-retry.md). Only ENOENT and ESTALE
 from stat/open/read operations MAY retry, with 0.1-second exponential delays

@@ -99,3 +99,24 @@ def test_handle_job_failure_preserves_rq_exception_string(
     worker.handle_job_failure(job, object(), object(), exc_string="original traceback")
 
     assert captured["exc_string"] == "original traceback"
+
+
+def test_fork_failure_status_refresh_error_does_not_interrupt_failure_handling(monkeypatch, caplog):
+    import redis
+    from types import SimpleNamespace
+
+    worker = object.__new__(WepppyRqWorker)
+    captured = []
+
+    def superclass(_self, _job, _queue, _registry, *, exc_string):
+        captured.append(exc_string)
+
+    def unavailable(*, refresh):
+        raise redis.ConnectionError("injected refresh failure")
+
+    monkeypatch.setattr(rq.Worker, 'handle_job_failure', superclass)
+    monkeypatch.setattr('wepppy.rq.rq_worker.StatusMessenger.publish', lambda *_args: captured.append('published'))
+    job = SimpleNamespace(id='fork-child', meta={'fork_failure': {}}, get_status=unavailable)
+    worker.handle_job_failure(job, object(), object(), exc_string='original task failure')
+    assert captured == ['original task failure', 'published']
+    assert 'Could not inspect failed fork prerequisite job_id=fork-child' in caplog.text

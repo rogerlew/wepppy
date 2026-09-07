@@ -956,3 +956,237 @@ def test_dump_parent_directory_fsync_estale_after_replace_keeps_committed_write(
     assert updated is not None
     assert updated.value == 52
     assert fsync_calls["count"] >= 1
+
+
+@pytest.mark.parametrize("load_method", ["getInstance", "load_detached"])
+@pytest.mark.parametrize("cache_kind", ["cold", "singleton", "redis"])
+@pytest.mark.parametrize("optional", [True, False])
+def test_initial_retry_missing_disk_never_reuses_cache(
+    tmp_path, redis_lock_stub, monkeypatch, load_method, cache_kind, optional,
+):
+    from wepppy.nodb import _read_retry as retry
+
+    _install_db_api_stub(monkeypatch, update_last_modified=lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(base, "redis_nodb_cache_client", None)
+    nodb = _DummyNoDb(str(tmp_path))
+    with nodb.locked():
+        nodb.value = 27
+    payload = (tmp_path / nodb.filename).read_text()
+    if cache_kind == "singleton":
+        _DummyNoDb._instances[str(tmp_path)] = nodb
+    else:
+        _DummyNoDb._instances.pop(str(tmp_path), None)
+    if cache_kind == "redis":
+        cache = _RedisStub()
+        cache.set(str(tmp_path / nodb.filename), payload)
+        monkeypatch.setattr(base, "redis_nodb_cache_client", cache)
+    (tmp_path / nodb.filename).unlink()
+    now = [0.0]
+    sleeps = []
+
+    def sleep(delay):
+        sleeps.append(delay)
+        now[0] += delay
+
+    monkeypatch.setattr(retry, "time", types.SimpleNamespace(monotonic=lambda: now[0], sleep=sleep))
+    try:
+        with retry.initial_read_retry(runid="missing", job_id="job"):
+            if optional:
+                assert getattr(_DummyNoDb, load_method)(str(tmp_path), allow_nonexistent=True) is None
+                assert sleeps == []
+            else:
+                with pytest.raises(FileNotFoundError) as caught:
+                    getattr(_DummyNoDb, load_method)(str(tmp_path))
+                assert caught.value.errno == errno.ENOENT
+                assert caught.value.filename == str(tmp_path / nodb.filename)
+                assert sleeps
+    finally:
+        _DummyNoDb._instances.pop(str(tmp_path), None)
+
+
+@pytest.mark.parametrize("load_method", ["getInstance", "load_detached"])
+@pytest.mark.parametrize("payload", ["", "not json", "{}"])
+def test_initial_retry_malformed_payload_is_not_retried(tmp_path, monkeypatch, load_method, payload):
+    from wepppy.nodb import _read_retry as retry
+
+    monkeypatch.setattr(base, "redis_nodb_cache_client", None)
+    monkeypatch.setattr(base, "ensure_version", lambda *_: None)
+    (tmp_path / 'dummy.nodb').write_text(payload)
+    sleeps = []
+    monkeypatch.setattr(retry, "time", types.SimpleNamespace(monotonic=lambda: 0.0, sleep=sleeps.append))
+    with retry.initial_read_retry(runid="malformed", job_id="job"):
+        with pytest.raises((TypeError, ValueError)):
+            getattr(_DummyNoDb, load_method)(str(tmp_path))
+    assert sleeps == []
+
+
+@pytest.mark.parametrize("load_method", ["getInstance", "load_detached"])
+@pytest.mark.parametrize("cache_kind", ["cold", "singleton", "redis"])
+@pytest.mark.parametrize("error_number", [errno.ENOENT, errno.ESTALE])
+def test_initial_retry_hydrates_real_payload_after_transient_error(
+    tmp_path, redis_lock_stub, monkeypatch, load_method, cache_kind, error_number,
+):
+    from wepppy.nodb import _read_retry as retry
+
+    _install_db_api_stub(monkeypatch, update_last_modified=lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(base, "redis_nodb_cache_client", None)
+    nodb = _DummyNoDb(str(tmp_path))
+    with nodb.locked():
+        nodb.value = 27
+    path = str(tmp_path / nodb.filename)
+    if cache_kind == "singleton":
+        _DummyNoDb._instances[str(tmp_path)] = nodb
+    else:
+        _DummyNoDb._instances.pop(str(tmp_path), None)
+    if cache_kind == "redis":
+        cache = _RedisStub()
+        cache.set(path, Path(path).read_text())
+        monkeypatch.setattr(base, "redis_nodb_cache_client", cache)
+    now = [0.0]
+    calls = []
+    real_stat = os.stat
+    real_open = open
+
+    def fail_once(action):
+        def wrapped(*args, **kwargs):
+            calls.append(args[0])
+            if len(calls) == 1:
+                raise OSError(error_number, "injected visibility failure", path)
+            return action(*args, **kwargs)
+        return wrapped
+
+    # Exercise actual decode and cache paths; only the first filesystem failure
+    # is injected. No controller hydration or signature policy is mocked.
+    if cache_kind == "cold" or (cache_kind == "singleton" and load_method == "load_detached"):
+        monkeypatch.setattr(retry, 'open', fail_once(real_open), raising=False)
+    else:
+        monkeypatch.setattr(retry, 'os', types.SimpleNamespace(stat=fail_once(real_stat)))
+    monkeypatch.setattr(retry, 'time', types.SimpleNamespace(monotonic=lambda: now[0], sleep=lambda delay: now.__setitem__(0, now[0] + delay)))
+    try:
+        with retry.initial_read_retry(runid="recover", job_id="job"):
+            loaded = getattr(_DummyNoDb, load_method)(str(tmp_path))
+        assert loaded.value == 27
+        assert now[0] == 0.1
+        assert len(calls) >= 2
+    finally:
+        _DummyNoDb._instances.pop(str(tmp_path), None)
+
+
+@pytest.mark.parametrize("cache_kind", ["cold", "singleton", "redis"])
+def test_optional_disappearance_at_signature_does_not_retry(
+    tmp_path, redis_lock_stub, monkeypatch, cache_kind,
+):
+    from wepppy.nodb import _read_retry as retry
+
+    _install_db_api_stub(monkeypatch, update_last_modified=lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(base, "redis_nodb_cache_client", None)
+    nodb = _DummyNoDb(str(tmp_path))
+    with nodb.locked():
+        nodb.value = 27
+    path = str(tmp_path / nodb.filename)
+    payload = Path(path).read_text()
+    if cache_kind == "singleton":
+        _DummyNoDb._instances[str(tmp_path)] = nodb
+    else:
+        _DummyNoDb._instances.pop(str(tmp_path), None)
+    if cache_kind == "redis":
+        cache = _RedisStub()
+        cache.set(path, payload)
+        monkeypatch.setattr(base, 'redis_nodb_cache_client', cache)
+    sleeps = []
+
+    def disappear(*_args):
+        Path(path).unlink(missing_ok=True)
+        raise FileNotFoundError(errno.ENOENT, 'removed during signature check', path)
+
+    monkeypatch.setattr(retry, 'os', types.SimpleNamespace(stat=disappear))
+    monkeypatch.setattr(retry, 'time', types.SimpleNamespace(monotonic=lambda: 0.0, sleep=sleeps.append))
+    try:
+        with retry.initial_read_retry(runid='optional', job_id='job'):
+            assert _DummyNoDb.getInstance(str(tmp_path), allow_nonexistent=True) is None
+        assert sleeps == []
+    finally:
+        _DummyNoDb._instances.pop(str(tmp_path), None)
+
+
+@pytest.mark.integration
+def test_initial_hydration_recovers_from_actual_enoent_then_publication(
+    tmp_path, redis_lock_stub, monkeypatch, caplog,
+):
+    """Coordinated real ENOENT and atomic publication, with actual NoDb decode."""
+    from wepppy.nodb import _read_retry as retry
+
+    _install_db_api_stub(monkeypatch, update_last_modified=lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(base, "redis_nodb_cache_client", None)
+    nodb = _DummyNoDb(str(tmp_path))
+    with nodb.locked():
+        nodb.value = 37
+    path = tmp_path / nodb.filename
+    temporary = path.with_suffix('.publish')
+    path.rename(temporary)
+    observed = threading.Event()
+    real_open = open
+
+    def observe_open(*args, **kwargs):
+        try:
+            return real_open(*args, **kwargs)
+        except FileNotFoundError:
+            observed.set()
+            raise
+
+    def publish():
+        assert observed.wait(timeout=5)
+        temporary.replace(path)
+
+    monkeypatch.setattr(retry, 'open', observe_open, raising=False)
+    caplog.set_level('INFO', logger=retry.__name__)
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        future = pool.submit(publish)
+        with retry.initial_read_retry(runid='real-hydration', job_id='job'):
+            loaded = _DummyNoDb.load_detached(str(tmp_path))
+        future.result()
+    assert loaded.value == 37
+    assert 'recovered' in caplog.text
+
+
+@pytest.mark.parametrize('cache_kind', ['cold', 'singleton', 'redis'])
+@pytest.mark.parametrize('legacy', [False, True])
+@pytest.mark.parametrize('load_method', ['getInstance', 'load_detached'])
+def test_initial_retry_healthy_and_legacy_payload_no_delay(
+    tmp_path, redis_lock_stub, monkeypatch, cache_kind, legacy, load_method,
+):
+    from wepppy.nodb import _read_retry as retry
+
+    _install_db_api_stub(monkeypatch, update_last_modified=lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(base, 'redis_nodb_cache_client', None)
+    nodb = _DummyNoDb(str(tmp_path))
+    with nodb.locked():
+        nodb.value = 42
+    path = tmp_path / nodb.filename
+    if legacy:
+        # Older persisted controllers lack file-signature fields; loader must
+        # hydrate and establish signatures rather than reject or delay them.
+        payload = json.loads(path.read_text())
+        state = payload.get('py/state', payload)
+        state.pop('_nodb_mtime', None)
+        state.pop('_nodb_size', None)
+        path.write_text(json.dumps(payload))
+    if cache_kind == 'singleton':
+        _DummyNoDb._instances[str(tmp_path)] = nodb
+    else:
+        _DummyNoDb._instances.pop(str(tmp_path), None)
+    if cache_kind == 'redis':
+        cache = _RedisStub()
+        cache.set(str(path), path.read_text())
+        monkeypatch.setattr(base, 'redis_nodb_cache_client', cache)
+    sleeps = []
+    monkeypatch.setattr(retry, 'time', types.SimpleNamespace(monotonic=lambda: 0.0, sleep=sleeps.append))
+    try:
+        with retry.initial_read_retry(runid='healthy', job_id='job'):
+            loaded = getattr(_DummyNoDb, load_method)(str(tmp_path))
+        assert loaded.value == 42
+        assert loaded._nodb_mtime == path.stat().st_mtime
+        assert loaded._nodb_size == path.stat().st_size
+        assert sleeps == []
+    finally:
+        _DummyNoDb._instances.pop(str(tmp_path), None)

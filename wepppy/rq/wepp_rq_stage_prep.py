@@ -4,6 +4,7 @@ import inspect
 
 from rq import get_current_job
 
+from wepppy.nodb._read_retry import initial_read_retry
 from wepppy.nodb.core import Watershed, Wepp
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.status_messenger import StatusMessenger
@@ -20,8 +21,9 @@ def _prep_multi_ofe_rq(runid: str) -> None:
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:wepp'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        wepp = Wepp.getInstance(wd)
-        watershed = Watershed.getInstance(wd)
+        with initial_read_retry(runid=runid, job_id=str(job.id)):
+            wepp = Wepp.getInstance(wd)
+            watershed = Watershed.getInstance(wd)
         translator = watershed.translator_factory()
         with with_stage_read_projections(
             wd,
@@ -30,7 +32,7 @@ def _prep_multi_ofe_rq(runid: str) -> None:
         ):
             wepp._prep_multi_ofe(translator)
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
-    except Exception:
+    except Exception:  # broad-except: RQ task boundary publishes failure and re-raises
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/wepp_rq_stage_prep.py:33", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
@@ -45,8 +47,9 @@ def _prep_slopes_rq(runid: str) -> None:
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:wepp'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        wepp = Wepp.getInstance(wd)
-        watershed = Watershed.getInstance(wd)
+        with initial_read_retry(runid=runid, job_id=str(job.id)):
+            wepp = Wepp.getInstance(wd)
+            watershed = Watershed.getInstance(wd)
         translator = watershed.translator_factory()
         with with_stage_read_projections(
             wd,
@@ -55,7 +58,7 @@ def _prep_slopes_rq(runid: str) -> None:
         ):
             wepp._prep_slopes(translator, watershed.clip_hillslopes, watershed.clip_hillslope_length)
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
-    except Exception:
+    except Exception:  # broad-except: RQ task boundary publishes failure and re-raises
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/wepp_rq_stage_prep.py:56", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
@@ -73,7 +76,7 @@ def _run_hillslopes_rq(runid: str) -> None:
         wepp = Wepp.getInstance(wd)
         wepp.run_hillslopes()
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
-    except Exception:
+    except Exception:  # broad-except: RQ task boundary publishes failure and re-raises
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/wepp_rq_stage_prep.py:72", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
@@ -88,12 +91,13 @@ def _prep_managements_rq(runid: str) -> None:
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:wepp'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        wepp = Wepp.getInstance(wd)
-        watershed = Watershed.getInstance(wd)
+        with initial_read_retry(runid=runid, job_id=str(job.id)):
+            wepp = Wepp.getInstance(wd)
+            watershed = Watershed.getInstance(wd)
         translator = watershed.translator_factory()
         wepp._prep_managements(translator)
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
-    except Exception:
+    except Exception:  # broad-except: RQ task boundary publishes failure and re-raises
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/wepp_rq_stage_prep.py:111", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
@@ -108,12 +112,13 @@ def _prep_soils_rq(runid: str) -> None:
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:wepp'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        wepp = Wepp.getInstance(wd)
-        watershed = Watershed.getInstance(wd)
+        with initial_read_retry(runid=runid, job_id=str(job.id)):
+            wepp = Wepp.getInstance(wd)
+            watershed = Watershed.getInstance(wd)
         translator = watershed.translator_factory()
         wepp._prep_soils(translator)
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
-    except Exception:
+    except Exception:  # broad-except: RQ task boundary publishes failure and re-raises
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/wepp_rq_stage_prep.py:129", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
@@ -128,12 +133,13 @@ def _prep_climates_rq(runid: str) -> None:
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:wepp'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        wepp = Wepp.getInstance(wd)
-        watershed = Watershed.getInstance(wd)
+        with initial_read_retry(runid=runid, job_id=str(job.id)):
+            wepp = Wepp.getInstance(wd)
+            watershed = Watershed.getInstance(wd)
         translator = watershed.translator_factory()
         wepp._prep_climates(translator)
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
-    except Exception:
+    except Exception:  # broad-except: RQ task boundary publishes failure and re-raises
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/wepp_rq_stage_prep.py:147", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
@@ -148,8 +154,9 @@ def _prep_remaining_rq(runid: str) -> None:
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:wepp'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        wepp = Wepp.getInstance(wd)
-        watershed = Watershed.getInstance(wd)
+        with initial_read_retry(runid=runid, job_id=str(job.id)):
+            wepp = Wepp.getInstance(wd)
+            watershed = Watershed.getInstance(wd)
         translator = watershed.translator_factory()
 
         def _prep_remaining() -> None:
@@ -192,7 +199,7 @@ def _prep_remaining_rq(runid: str) -> None:
 
         _prep_remaining()
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
-    except Exception:
+    except Exception:  # broad-except: RQ task boundary publishes failure and re-raises
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/wepp_rq_stage_prep.py:204", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
@@ -216,7 +223,7 @@ def _prep_watershed_rq(runid: str) -> None:
         ):
             wepp.prep_watershed()
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
-    except Exception:
+    except Exception:  # broad-except: RQ task boundary publishes failure and re-raises
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/wepp_rq_stage_prep.py:226", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')

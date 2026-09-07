@@ -245,6 +245,17 @@ class WepppyRqWorker(Worker):
                 started_job_registry,
                 exc_string=exc_string,
             )
+        if isinstance(job.meta, dict) and isinstance(job.meta.get("fork_failure"), dict):
+            # RQ's per-job failure callback is skipped when the work horse dies
+            # (for example OOM/SIGKILL). Reconcile from the surviving supervisor.
+            # Duplicate task-callback reports are suppressed by the receipt Lua.
+            from wepppy.rq.fork_failure import report_fork_failure
+
+            try:
+                if job.get_status(refresh=True) == "failed":
+                    report_fork_failure(job, job.connection, None, None, None)
+            except redis.RedisError:
+                LOGGER.exception("Could not inspect failed fork prerequisite job_id=%s", job.id)
         if isinstance(job.meta, dict):
             try:
                 from wepppy.rq.project_rq import (

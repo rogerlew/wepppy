@@ -462,7 +462,7 @@ projection above.
 
 ## Fork Prerequisite Failure Reporting (FORK-READ-01)
 
-Implementation conformance pending (2026-09-07 UTC). WEPP pipeline children
+Implemented locally (2026-09-07 UTC); production rollout validation pending. WEPP pipeline children
 enqueued by an undisturbify fork MUST retain server-generated root/source/target
 lineage and report terminal prerequisite failure to the source fork status
 channel with the failed child job ID. The exact currently registered fork

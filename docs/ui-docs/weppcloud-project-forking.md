@@ -148,3 +148,26 @@ leaf controllers depend on that identity inside their native Batch Runner contex
 - Operational thresholds and rationale are recorded in `docs/adrs/ADR-0021-fork-console-status-backpressure-thresholds.md`.
 - Destination-readiness retry thresholds and rationale are recorded in
   `docs/adrs/ADR-0031-fork-destination-readiness-retry-budget.md`.
+
+## Initial Read Recovery and Prerequisite Failures
+
+Initial Wepp/Watershed reads in WEPP preparation tolerate ENOENT/ESTALE briefly
+under [ADR-0049](../adrs/ADR-0049-fork-preparation-read-retry.md). No user action is
+needed when a transient read recovers. Exhausted or permanent failures retain
+the original filesystem error in operator diagnostics; the fork log identifies
+the failing child job without exposing raw filesystem paths.
+
+Fork WEPP pipeline children carry server-generated root/source/target lineage
+and a failure callback. `wepppy/rq/fork_failure.py` verifies the fetched root,
+registered child, and current destination receipt, then atomically stores failure
+and publishes `FORK_FAILED` using the shared Redis server. The worker supervisor
+also invokes guarded reporting for abrupt work-horse failures. Strict downstream
+jobs remain blocked and siblings are allowed to finish. While siblings are
+active, the console continues authoritative polling; after they quiesce, the
+aggregate becomes failed even if the finalizer remains deferred. A finished
+parent alone does not mean undisturbify outputs are ready.
+
+This implementation does not rerun existing failed forks. Operators should
+inspect the reported failing child and verify inputs before recovery. See the
+[incident and operator notes](../infrastructure/ui-rcds-nfs-vs-dev-nfs.md#production-incident-fork-preparation-file-visibility-failures-2026-09-06)
+and [RQ contract](../schemas/rq-response-contract.md#fork-prerequisite-failure-reporting-fork-read-01).

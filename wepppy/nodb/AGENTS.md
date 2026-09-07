@@ -102,6 +102,13 @@ Canonical behavioral contract:
 * Redis cache payloads are treated as a fast path, but stale-signature payloads
   are ignored and refreshed from disk.
 
+Initial WEPP preparation reads opt into `_read_retry.initial_read_retry` for
+bounded ENOENT/ESTALE recovery. Keep the context around initial controller loads
+only; never enclose mutation or model execution. Required read errors retain
+errno, optional absence returns None immediately, and scoped signature errors
+must not authorize stale cache reuse. See the canonical persistence contract's
+"Bounded Initial Preparation Reads" section and `tests/nodb/test_initial_read_retry.py`.
+
 ## Persistence Semantics (Atomic Write Path)
 
 * `NoDbBase.dump()` persists via temp-file write + `os.replace()` in the same

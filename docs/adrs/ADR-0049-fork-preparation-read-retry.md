@@ -1,6 +1,6 @@
 # ADR-0049: Bound transient reads during WEPP preparation
 
-**Status**: Accepted design; implementation pending
+**Status**: Accepted; implemented locally, production rollout validation pending
 **Decision venue**: User/Codex incident-remediation session, 2026-09-07 UTC
 **Participants**: Requesting WEPPcloud operator and Codex
 **Decision owner**: Requesting operator (scope); Codex (implementation defaults)
@@ -40,4 +40,4 @@ mount changes do not follow from the evidence and are excluded.
 Record recovery/exhaustion frequency and added latency. On recurrence reassess
 the errno evidence and burst hypothesis before increasing budgets. Remove or
 revise the retry scope if it hides persistent failures or adds undue latency.
-Rollback requires code only; no model parameter or persisted schema changes.
+Rollback requires code only; no model input or NoDb schema changes.

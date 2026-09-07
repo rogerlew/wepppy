@@ -11,16 +11,23 @@ small-file-heavy fork activity; no specific worker host is considered causal.
 ## Progress
 
 - [x] (2026-09-07 UTC) Incident evidence, scope and package scaffold recorded.
-- [ ] Ratify contracts through two reviews and an ancestor commit.
-- [ ] Implement read retry/diagnostics and fork failure reporting.
-- [ ] Complete targeted, direct-boundary and broad validation.
-- [ ] Complete independent reviews and update operator/user guidance.
+- [x] Ratify contracts through two reviews and an ancestor commit.
+- [x] Implement read retry/diagnostics and fork failure reporting.
+- [x] Complete targeted and direct-boundary validation; run broad suite and record its unrelated failure.
+- [x] Complete independent reviews and update operator/user guidance.
 
 ## Surprises & Discoveries
 
 - `exists()` currently discards the errno that would distinguish ENOENT from
   ESTALE. The finalizer can remain deferred after an upstream failure.
 - The read retry deadline cannot interrupt a hard-mounted NFS kernel call.
+- Optional absence can occur during any signature check, not only before the
+  first read. All scoped signature checks now carry the optional policy.
+- RQ skips job failure callbacks on abrupt work-horse death; the surviving
+  production worker supervisor now calls the same guarded reporter.
+- Line-number-based broad exception allowlisting reported false growth when
+  existing handlers moved; inline boundary explanations now keep those existing
+  RQ handlers stable under edits.
 
 ## Decision Log
 
@@ -32,7 +39,14 @@ small-file-heavy fork activity; no specific worker host is considered causal.
 
 ## Outcomes & Retrospective
 
-Scaffold and contract design prepared; implementation and validation pending.
+Implemented locally after checkpoint `2ad307aeb`. Focused tests: 228 passed;
+correctness, QA and security reviews accepted with all findings resolved.
+The user-requested shape-converter test repair passes 15 tests. Final broad
+validation reached 6,477 passed, 63 skipped and 1 deselected before an unrelated
+roads authorization/backend assertion failed. The excluded shape test passed
+separately. Full-suite green is not claimed. No production deployment or
+user-run retry has occurred; production-equivalent workflow evidence remains
+a rollout gate.
 
 ## Context and Orientation
 
@@ -61,7 +75,8 @@ Milestone 3: Carry server-generated fork source/target/root association on
 WEPP pipeline children and register an RQ failure callback. Verify lineage and
 current destination receipt before recording failure and publishing source
 fork status with the failed child ID. Do not change strict dependency edges or
-cancel siblings. Prevent stale callbacks and late parent progress from
+cancel siblings. Use `wepppy/rq/rq_worker.py` supervisor failure handling
+to cover work-horse death when RQ skips the callback. Prevent stale callbacks and late parent progress from
 clobbering terminal states. Verify existing polling sees failed descendants.
 
 Milestone 4: Add deterministic failure injection and actual filesystem reads,
@@ -108,3 +123,12 @@ value/traceback interface and guarded Redis publication.
 
 Revision note (2026-09-07 UTC): Initial scaffold reflects the operator's
 burst-of-small-files hypothesis and explicitly excludes host-specific fixes.
+
+Revision note (2026-09-07 UTC): Added optional-disappearance handling,
+supervisor failure fallback and resolved independent review findings. The
+working NAS hypothesis remains burst-related; no host-specific action taken.
+
+Revision note (2026-09-07 UTC): User requested the unrelated shape-converter
+test repair found by broad validation; test-only fix committed as `efd78afc6`,
+15 focused tests passed, and independent QA accepted. No production config
+change was needed.

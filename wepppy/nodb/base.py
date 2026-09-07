@@ -146,6 +146,8 @@ import json
 # nonstandard
 import jsonpickle
 
+from wepppy.nodb import _read_retry
+
 from configparser import (
     RawConfigParser,
     NoOptionError,
@@ -1208,14 +1210,19 @@ class NoDbBase(object):
         *,
         instance: Any,
         filepath: str,
+        allow_missing: bool = False,
     ) -> tuple[bool, Any]:
         """Validate that a cached instance signature matches ``filepath``."""
 
         try:
-            stat_result = os.stat(filepath)
+            stat_result = _read_retry.stat_path(filepath, allow_missing=allow_missing)
         except OSError:
+            if _read_retry.read_retry_active():
+                raise
             return (False, None)
 
+        if stat_result is None:
+            return (False, None)
         file_signature = cls._signature_from_stat_result(stat_result)
         cache_signature = cls._signature_from_instance(instance)
         if file_signature is None or cache_signature is None:
@@ -1260,6 +1267,7 @@ class NoDbBase(object):
                         cache_matches, stat_result = cls._cache_instance_matches_file_signature(
                             instance=db,
                             filepath=filepath,
+                            allow_missing=allow_nonexistent,
                         )
                         if cache_matches and stat_result is not None:
                             db._nodb_mtime = stat_result.st_mtime
@@ -1278,6 +1286,10 @@ class NoDbBase(object):
                             "Ignoring stale NoDb Redis cache entry due signature mismatch",
                             extra={"filepath": filepath},
                         )
+                except OSError:
+                    # Disk signature errors must retain their errno, not be
+                    # misclassified as corrupt Redis payloads.
+                    raise
                 except Exception:
                     # Cache boundary: corrupt Redis payloads must not block loading from disk.
                     logging.getLogger(__name__).warning(
@@ -1294,13 +1306,9 @@ class NoDbBase(object):
                             exc_info=True,
                         )
 
-        if not _exists(filepath):
-            if allow_nonexistent:
-                return None
-            raise FileNotFoundError(f"'{filepath}' not found!")
-
-        with open(filepath) as fp:
-            json_text = fp.read()
+        json_text = _read_retry.read_text(filepath, allow_missing=allow_nonexistent)
+        if json_text is None:
+            return None
 
         json_text = cls._preprocess_json_for_decode(json_text)
         cls._ensure_legacy_module_imports(json_text)
@@ -1345,9 +1353,13 @@ class NoDbBase(object):
         db._nodb_mtime = None
         db._nodb_size = None
         try:
-            stat_result = os.stat(filepath)
+            stat_result = _read_retry.stat_path(filepath, allow_missing=allow_nonexistent)
         except OSError:
+            if _read_retry.read_retry_active():
+                raise
             stat_result = None
+        if stat_result is None and allow_nonexistent and _read_retry.read_retry_active():
+            return None
         if stat_result is not None:
             db._nodb_mtime = stat_result.st_mtime
             db._nodb_size = stat_result.st_size
@@ -1386,19 +1398,24 @@ class NoDbBase(object):
         filepath = cls._get_nodb_path(abs_wd)
         readonly = _exists(_join(abs_wd, 'READONLY'))
 
+
         stale_cached_instance: Optional['NoDbBase'] = None
         with cls._instances_lock:
             cached = cls._instances.get(abs_wd)
 
         if cached is not None and not ignore_lock:
             refresh_needed = False
-            if not readonly:
+            if not readonly or _read_retry.read_retry_active():
                 file_mtime = None
                 file_size = None
                 try:
-                    stat_result = os.stat(filepath)
+                    stat_result = _read_retry.stat_path(filepath, allow_missing=allow_nonexistent)
                 except OSError:
+                    if _read_retry.read_retry_active():
+                        raise
                     stat_result = None
+                if stat_result is None and allow_nonexistent and _read_retry.read_retry_active():
+                    return None
                 if stat_result is not None:
                     file_mtime = stat_result.st_mtime
                     file_size = stat_result.st_size
@@ -1466,6 +1483,7 @@ class NoDbBase(object):
                         cache_matches, stat_result = cls._cache_instance_matches_file_signature(
                             instance=db,
                             filepath=filepath,
+                            allow_missing=allow_nonexistent,
                         )
                         if cache_matches and stat_result is not None:
                             db._nodb_mtime = stat_result.st_mtime
@@ -1476,6 +1494,10 @@ class NoDbBase(object):
                             "Ignoring stale NoDb Redis cache entry in load_detached due signature mismatch",
                             extra={"filepath": filepath},
                         )
+                except OSError:
+                    # Disk signature errors must retain their errno, not be
+                    # misclassified as corrupt Redis payloads.
+                    raise
                 except Exception:
                     # Cache boundary: corrupt Redis payloads must not block loading from disk.
                     logging.getLogger(__name__).debug(
@@ -1492,13 +1514,9 @@ class NoDbBase(object):
                             exc_info=True,
                         )
 
-        if not _exists(filepath):
-            if allow_nonexistent:
-                return None
-            raise FileNotFoundError(f"'{filepath}' not found!")
-
-        with open(filepath) as fp:
-            json_text = fp.read()
+        json_text = _read_retry.read_text(filepath, allow_missing=allow_nonexistent)
+        if json_text is None:
+            return None
 
         json_text = cls._preprocess_json_for_decode(json_text)
         cls._ensure_legacy_module_imports(json_text)
@@ -1529,9 +1547,13 @@ class NoDbBase(object):
         db._nodb_mtime = None
         db._nodb_size = None
         try:
-            stat_result = os.stat(filepath)
+            stat_result = _read_retry.stat_path(filepath, allow_missing=allow_nonexistent)
         except OSError:
+            if _read_retry.read_retry_active():
+                raise
             stat_result = None
+        if stat_result is None and allow_nonexistent and _read_retry.read_retry_active():
+            return None
         if stat_result is not None:
             db._nodb_mtime = stat_result.st_mtime
             db._nodb_size = stat_result.st_size

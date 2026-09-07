@@ -35,6 +35,15 @@ def _enqueue(
     child_job_id = new_rq_job_id()
     parent_job.meta[key] = child_job_id
     parent_job.save()
+    fork_options: dict[str, Any] = {}
+    lineage = parent_job.meta.get("fork_failure")
+    if isinstance(lineage, dict) and args and args[0] == lineage.get("target_runid"):
+        from wepppy.rq.fork_failure import report_fork_failure
+
+        fork_options = {
+            "meta": {"fork_failure": dict(lineage)},
+            "on_failure": report_fork_failure,
+        }
     child_job = q.enqueue_call(
         func=func,
         args=args,
@@ -42,6 +51,7 @@ def _enqueue(
         timeout=timeout,
         depends_on=depends_on,
         job_id=child_job_id,
+        **fork_options,
     )
     return child_job
 

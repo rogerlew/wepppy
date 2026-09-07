@@ -2943,6 +2943,13 @@ def fork_rq(
             _reset_forked_run_job_markers(new_runid, new_wd, status_channel)
 
         if undisturbify:
+            # Persist lineage before any child can run or fail on another worker.
+            job.meta["fork_failure"] = {
+                "root_job_id": str(job.id),
+                "source_runid": runid,
+                "target_runid": new_runid,
+            }
+            job.save()
             StatusMessenger.publish(status_channel, 'Rerunning WEPP...\n')
             final_wepp_job = run_wepp_rq(new_runid)
 

@@ -532,7 +532,41 @@ Follow-up: investigate file visibility at the cross-host handoff, capture the
 underlying filesystem error if it recurs, and ensure prerequisite failures
 reach fork workflow status rather than leaving finalization indefinitely
 deferred. Recovery of the failed jobs remains outstanding.
+### Implemented Hardening (FORK-READ-01)
 
+The [work package](../work-packages/20260906_fork_read_retry_hardening/package.md)
+implements local protection for transient initial WEPP preparation reads and
+fork prerequisite failure reporting. Production rollout and a full
+production-equivalent fork/undisturbify exercise remain pending.
+
+Initial Wepp/Watershed controller loads in the six preparation entry points
+share a five-second retry budget for ENOENT and ESTALE. Delays start at 0.1
+seconds and double to at most one second. Only filesystem stat/open/read
+operations retry; parsing, writes, translation and model execution do not.
+Optional absence returns None immediately. Other errno values fail immediately.
+The underlying exception retains its errno and filename. These application
+limits cannot interrupt a blocked hard-NFS syscall.
+
+Operator logs use `NoDb initial read retry`, `recovered`, `exhausted`, or `failed`
+with operation, errno, path, attempts, elapsed seconds, host, run and job. Use
+recovery/exhaustion counts to evaluate the burst-of-small-files hypothesis;
+worker placement alone is not causal evidence. Do not increase retry budgets
+without reviewing recurrence evidence and added worker occupancy.
+
+A failed fork WEPP child atomically updates the matching destination receipt
+with `state=failed` and `failed_job_id`, then publishes source fork diagnostics.
+The worker supervisor also reports abrupt work-horse death where RQ cannot run
+the child failure callback. Stale receipts, foreign lineage, duplicate reports
+and succeeded outcomes cannot publish a new failure. Active siblings are not
+canceled; aggregate polling becomes failed after those siblings quiesce, even
+when strict descendants remain deferred. Failure does not imply model outputs
+are complete or safe to consume.
+
+This protects consumer reads during fork activity; it is not a wepp3-specific
+mitigation or proof of the NAS failure mechanism. Existing incident jobs are
+not automatically retried by this change. Deploy worker support before enabling
+new callback-bearing fork submissions; the live workflow must pass under
+production-equivalent identities, mounts and orchestration before rollout.
 ## Small-File Read/Write/Delete + Metadata Microbench (2026-02-10)
 
 This is a lightweight microbench intended to approximate UI pain on metadata-heavy paths (many small files).

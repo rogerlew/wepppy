@@ -1,6 +1,6 @@
 # Fork Read Retry and Failure Reporting Hardening
 
-**Status**: Open; contract checkpoint preparation
+**Status**: Implemented locally; validation gaps recorded; production rollout gated
 **Started**: 2026-09-07 UTC (2026-09-06 Pacific)
 **Stable ID**: FORK-READ-01
 **Security impact**: High (filesystem reads and RQ failure callbacks); dedicated security review required.
@@ -26,12 +26,12 @@ remain explicit failures. Existing artifacts and successful outputs are unchange
 
 ## Success Criteria
 
-- [ ] Transient initial read failures recover without repeating mutations.
-- [ ] Permanent failures preserve original exception/errno and bounded telemetry.
-- [ ] Failed fork descendants set durable failure and notify source fork status.
-- [ ] No stale/foreign callback changes another fork; successful terminal state is protected.
-- [ ] Focused, real filesystem/Redis/RQ, broad and graph gates pass or gaps are recorded.
-- [ ] Independent correctness, QA, and security findings are dispositioned.
+- [x] Transient initial read failures recover without repeating mutations.
+- [x] Permanent failures preserve original exception/errno and bounded telemetry.
+- [x] Failed fork descendants set durable failure and notify source fork status.
+- [x] No stale/foreign callback changes another fork; successful terminal state is protected.
+- [x] Focused, real filesystem/Redis/RQ, broad and graph gates pass or gaps are recorded.
+- [x] Independent correctness, QA, and security findings are dispositioned.
 
 ## Related Work and Decisions
 
@@ -62,3 +62,13 @@ Before production rollout, exercise the real fork/undisturbify workflow with
 production-equivalent identities, mounts and orchestration. Local integration
 and injected errors do not prove production NAS recovery. This is a rollout
 gate, not permission to mutate the user's affected runs.
+
+## Implementation and Review Evidence
+
+Checkpoint ancestor: `2ad307aeb`. Local code is wired into NoDb disk reads, six
+WEPP preparation entry points, fork pipeline child submission and production
+worker failure supervision. RQ metadata additions are additive; NoDb/model
+artifact schemas do not change. See [validation](artifacts/2026-09-07_validation.md),
+[correctness](artifacts/2026-09-07_correctness_review.md),
+[QA](artifacts/2026-09-07_qa_review.md), and
+[security](artifacts/2026-09-07_security_review.md).

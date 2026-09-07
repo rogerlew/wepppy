@@ -2,18 +2,19 @@
 
 ## Status
 
-2026-09-07 UTC: Scaffolded; preparing contract checkpoint before implementation.
+2026-09-07 UTC: Local implementation and review complete; production rollout gated. Ancestor: `2ad307aeb`.
 Starting revision: `87cfe40473108a93cbbd5733fdc13c99d97707ea`.
 
 ## Task Board
 
 - [x] Capture incident and operator burst-of-small-files hypothesis.
 - [x] Discover NoDb, fork, deferred retry and serial-queue precedents.
-- [ ] Two independent contract reviews; standalone contract ancestor.
-- [ ] Implement bounded reads and diagnostics.
-- [ ] Implement fork prerequisite failure reporting.
-- [ ] Validate filesystem/RQ integration, focused/broad suites and graph.
-- [ ] Independent correctness, QA and security reviews; documentation handoff.
+- [x] Two independent contract reviews; standalone contract ancestor `2ad307aeb`.
+- [x] Implement bounded reads and diagnostics.
+- [x] Implement fork prerequisite failure reporting.
+- [x] Validate filesystem/RQ integration, focused/broad suites and graph; broad-suite gap recorded.
+- [x] Independent correctness, QA and security reviews: no open findings.
+- [x] Complete validation record and documentation handoff.
 
 ## Decisions
 
@@ -26,9 +27,38 @@ Starting revision: `87cfe40473108a93cbbd5733fdc13c99d97707ea`.
 
 ## Validation and Risks
 
-Pending implementation. A hard-mounted NFS syscall can block beyond a Python
+228 focused tests pass; broad-suite failure is recorded below. A hard-mounted NFS syscall can block beyond a Python
 retry deadline; this package bounds retry scheduling, not kernel I/O duration.
 
 ## Handoff
 
 Active plan: [ExecPlan](prompts/active/fork_read_retry_hardening_execplan.md).
+
+## Progress — 2026-09-07 UTC
+
+- Implementation wired after ancestor `2ad307aeb`; 228 focused tests pass.
+- Real OS ENOENT recovery and NoDb hydration, real Redis/RQ strict job tree and
+  atomic receipt/publication, and real worker subprocess death verified.
+- Optional disappearing-file policy and supervisor Redis error isolation fixed
+  following independent reviews; all review findings closed.
+- Full suite stopped at unrelated unchanged shape-converter Compose assertion:
+  5,129 passed, 50 skipped. Baseline revision contains the same contradicting
+  service/test assertion. Final full run excludes that single known failure.
+- Deployment and recovery of original production jobs remain out of scope.
+
+## Scope Addition — 2026-09-07 UTC
+
+The user explicitly requested resolution of the shape-converter broad-suite
+failure. The test-only correction permits the existing shared image/build
+service overlay while preserving runtime and environment hardening checks.
+Production Compose is unchanged. Shape/rollout validation: 15 passed;
+independent QA accepted with no findings. The already-running final broad pass
+excludes that test, which passed separately after repair.
+
+## Final Broad Validation
+
+The final run stopped at an unrelated roads authorization/backend test: 6,477
+passed, 63 skipped, 1 deselected. The test expected a WBT-backend error but
+received the PowerUser restriction first. Both the test and route are unchanged
+from the contract checkpoint. The excluded shape-converter test passed in its
+separate 15-test run. Full-suite green is not claimed; see the validation artifact.
