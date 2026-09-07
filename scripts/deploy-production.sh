@@ -531,7 +531,7 @@ assert_no_active_rq_jobs() {
         return 0
     fi
     echo "    Verifying no default or batch RQ jobs are executing..."
-    ACTIVE_RQ_JOBS="$(wctl docker compose exec -T rq-worker /opt/venv/bin/python -c '
+    ACTIVE_RQ_JOBS="$(run_rq_control_program '
 import redis
 from rq.registry import StartedJobRegistry
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs

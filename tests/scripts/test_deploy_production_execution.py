@@ -34,6 +34,8 @@ def _run_deploy(
     tmp_path: Path,
     services: dict[str, object],
     *arguments: str,
+    rq_probe_worker_stopped: bool = False,
+    rq_probe_result: str = "0",
     candidate_mismatch: bool = False,
     recovery_failure: bool = False,
     stale_renderer: bool = False,
@@ -82,7 +84,20 @@ elif [[ "${args}" == *" ps "* && "${args}" == *" -q "* ]] \
     service="${!#}"
     printf 'cid-%s\n' "${service}"
 elif [[ "${args}" == *"StartedJobRegistry"* ]]; then
-    printf '0\n'
+    if [[ "${args}" == *"exec -T rq-worker"* ]]; then
+        echo 'rq-probe|exec' >> "${FAKE_COMMAND_LOG}"
+        if [ "${FAKE_RQ_PROBE_WORKER_STOPPED}" = 1 ]; then
+            echo 'service "rq-worker" is not running' >&2
+            exit 1
+        fi
+    else
+        echo 'rq-probe|run' >> "${FAKE_COMMAND_LOG}"
+    fi
+    if [ "${FAKE_RQ_PROBE_RESULT}" = error ]; then
+        echo 'Redis connection unavailable' >&2
+        exit 1
+    fi
+    printf '%s\n' "${FAKE_RQ_PROBE_RESULT}"
 elif [[ "${args}" == *"# rq-fence-acquire"* ]]; then
     printf 'rq-token|acquire|%s\n' "${!#}" >> "${FAKE_COMMAND_LOG}"
     if [ "${FAKE_RQ_ACQUIRE_REPLY_LOST:-0}" = 1 ] \
@@ -318,6 +333,8 @@ exec /bin/cp "$@"
     environment.update(
         {
             "PATH": f"{bin_dir}:{environment['PATH']}",
+            "FAKE_RQ_PROBE_WORKER_STOPPED": "1" if rq_probe_worker_stopped else "0",
+            "FAKE_RQ_PROBE_RESULT": rq_probe_result,
             "FAKE_COMMAND_LOG": str(command_log),
             "FAKE_SERVICES": "\n".join(services),
             "FAKE_CONFIG": json.dumps({"services": services}),
@@ -953,3 +970,36 @@ def test_full_caddy_inspection_failure_returns_distinct_rescue_signal_and_resume
     assert "CAP_RESCUE_FAILED: unable to inspect Caddy" in result.stderr
     assert not any(command.startswith("docker|system prune") for command in commands)
     assert "Deployment complete!" not in result.stdout
+
+
+@pytest.mark.parametrize("worker_stopped", [False, True])
+@pytest.mark.parametrize("probe_result", ["0", "2", "error", "invalid"])
+def test_active_job_probe_preserves_gate_with_stopped_worker(
+    tmp_path: Path, worker_stopped: bool, probe_result: str,
+) -> None:
+    services = {
+        "rq-worker": _service("worker:latest"),
+        "rq-worker-batch": _service("worker:latest"),
+        "weppcloudr": _service("renderer:latest"),
+    }
+    result, commands = _run_deploy(
+        tmp_path, services,
+        rq_probe_worker_stopped=worker_stopped,
+        rq_probe_result=probe_result,
+    )
+    assert "rq-probe|exec" in commands
+    assert ("rq-probe|run" in commands) is (worker_stopped or probe_result == "error")
+    if probe_result == "0":
+        assert result.returncode == 0, result.stdout + result.stderr
+        assert _position(commands, "rq-probe|exec") < _position(commands, "build --no-cache")
+    else:
+        assert result.returncode != 0
+        assert not any("build --no-cache" in command for command in commands)
+        assert not any("docker compose stop" in command for command in commands)
+        assert not any("up -d" in command for command in commands)
+        if probe_result == "2":
+            assert "2 default/batch RQ jobs are executing" in result.stderr
+        elif probe_result == "invalid":
+            assert "Unable to determine active RQ job count" in result.stderr
+        else:
+            assert "Redis connection unavailable" in result.stderr

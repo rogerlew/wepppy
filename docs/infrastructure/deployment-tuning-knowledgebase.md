@@ -418,3 +418,23 @@ docker exec docker-weppcloud-1 sh -lc 'kill -HUP 1'
   - Live container commands (`docker inspect ... .Config.Cmd`).
   - Active Caddyfile from container (`/etc/caddy/Caddyfile`), not only repo file.
 - If runtime drift is found, treat repository expectations as hypotheses until host sync is complete.
+
+## Deployment RQ Check with Stopped Workers (2026-09-07)
+
+`scripts/deploy-production.sh` must query the shared Redis default/batch started
+registries even when the local `rq-worker` container is stopped. The active-job
+check uses `run_rq_control_program`: bounded exec first, then a temporary
+`docker compose run --rm --no-deps --entrypoint /opt/venv/bin/python rq-worker`
+using the installed service configuration. The temporary process only runs the
+query; it does not start an RQ worker or its dependencies.
+
+This repairs the wepp2 failure `service "rq-worker" is not running`. A stopped
+local worker does not imply zero jobs on other hosts. Nonzero counts, failed
+Redis queries and malformed counts still block deployment. Do not bypass the
+check or start workers solely to satisfy it. Existing fence ownership and
+suspension behavior remain unchanged. Retain this shared control path while
+stopped-worker deployment/recovery is supported; no separate bypass is needed.
+
+Execution regressions cover running/stopped workers with zero, positive,
+unavailable and malformed query results. These are shell-harness checks;
+production identity, mount and Redis parity must still be verified on rollout.
