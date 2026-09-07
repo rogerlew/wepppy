@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-09-06
-**Active Packages**: 32
+**Last Updated**: 2026-09-07
+**Active Packages**: 33
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -82,6 +82,34 @@ Feedback mechanisms:
 ---
 
 ## 📋 Backlog
+
+
+---
+
+### GridMET Redis Admission and Queue Visibility
+
+**Proposed**: 2026-09-07
+
+**Size**: Medium-High (contract, concurrency implementation, reviews, and live Forest acceptance)
+
+**Priority**: Critical
+
+**Security impact**: `high` (Redis coordination, worker concurrency,
+deployment wiring, and external-request behavior)
+
+**Link**: [docs/work-packages/20260907_gridmet_redis_admission/](docs/work-packages/20260907_gridmet_redis_admission/)
+
+**Description**: Add an explicitly enabled, Redis-backed FIFO admission queue
+and expiring leases shared across all GridMET clients. Preserve zero Redis
+interaction when disabled, expose queue/active state for bounded timeout
+diagnosis, retain the multiple-interpolated local cap, and prove the global
+ceiling across independent containers on the `forest` development stack.
+
+**Next Steps**: Execute the active contract-first plan, pass independent
+correctness/QA/security gates, deploy the exact reviewed commit plus
+`GRIDMET_REDIS_ADMISSION_*` values only to Forest, and record cross-container
+and real-client evidence. Batch testing and Kubernetes/openwepp.org deployment
+occur separately after package completion.
 
 
 ---
