@@ -111,6 +111,7 @@ services:
     environment:
       <<: *wepppy-env
       SECRET_KEY_FILE: /run/secrets/flask_secret_key
+      WEPPCLOUD_ALLOW_ANONYMOUS_PROJECT_CREATION: ${WEPPCLOUD_ALLOW_ANONYMOUS_PROJECT_CREATION-true}
       SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME:-__Host-weppcloud_session}
       SESSION_COOKIE_PRIMARY_NAME: ${SESSION_COOKIE_PRIMARY_NAME:-__Host-weppcloud_session}
       SESSION_COOKIE_LEGACY_NAME: ${SESSION_COOKIE_LEGACY_NAME:-session}
@@ -559,6 +560,7 @@ services:
     environment:
       <<: *wepppy-env
       SECRET_KEY_FILE: /run/secrets/flask_secret_key
+      WEPPCLOUD_ALLOW_ANONYMOUS_PROJECT_CREATION: ${WEPPCLOUD_ALLOW_ANONYMOUS_PROJECT_CREATION-true}
       SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME:-__Host-weppcloud_session}
       SESSION_COOKIE_PRIMARY_NAME: ${SESSION_COOKIE_PRIMARY_NAME:-__Host-weppcloud_session}
       SESSION_COOKIE_LEGACY_NAME: ${SESSION_COOKIE_LEGACY_NAME:-session}

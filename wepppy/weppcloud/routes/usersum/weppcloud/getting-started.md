@@ -106,6 +106,8 @@ project-owned `config.cfg`. Its fixed route token is `config`; this is separate
 from the descriptive project name you can set after creation. To change the
 builder combination, create another project rather than editing `config.cfg`.
 
+Some deployments require you to sign in before creating a project. On those deployments, the interfaces page shows a sign-in link instead of Start buttons and CAPTCHA. Sign in to access the available project creation actions.
+
 WEPPcloud creates a new project workspace and opens the run page — the main screen where all of your work happens.
 
 <!-- ![Launching a new project](static/getting-started/launch-interface.png) -->

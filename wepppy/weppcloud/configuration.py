@@ -5,6 +5,7 @@ from urllib.parse import quote
 
 import redis
 
+from wepppy.config.creation_policy import allow_anonymous_project_creation
 from wepppy.config.secrets import get_secret, require_secret
 
 
@@ -265,6 +266,7 @@ def config_app(app: Any):
     """
     Configure the Flask application instance using environment variables.
     """
+    app.config["WEPPCLOUD_ALLOW_ANONYMOUS_PROJECT_CREATION"] = allow_anonymous_project_creation()
     app.config.update(_resolve_mail_config())
 
     site_prefix = os.getenv("SITE_PREFIX", "/weppcloud")

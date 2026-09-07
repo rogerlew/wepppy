@@ -114,3 +114,12 @@ def test_interfaces_route_filters_visible_configs_for_root_user(interfaces_clien
     visible_config_ids = captured["context"]["visible_config_ids"]
     assert visible_config_ids == {"user-config", "power-config", "admin-config"}
     assert captured["context"]["maturity_definition_href"].endswith("#feature-maturity-labels")
+
+
+@pytest.mark.parametrize("authenticated,allow,expected", [(False, False, False), (False, True, True), (True, False, True), (True, True, True)])
+def test_interfaces_creation_availability(interfaces_client, authenticated, allow, expected):
+    client, captured, user = interfaces_client
+    user.is_authenticated = authenticated
+    client.application.config["WEPPCLOUD_ALLOW_ANONYMOUS_PROJECT_CREATION"] = allow
+    assert client.get("/interfaces/").status_code == 200
+    assert captured["context"]["can_create_project"] is expected

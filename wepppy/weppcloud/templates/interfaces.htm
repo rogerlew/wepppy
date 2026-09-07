@@ -1,6 +1,7 @@
 {% extends "base_pure.htm" %}
 {% import "shared/cap_macros.htm" as cap_macros %}
 {% import "shared/maturity_pill_macros.htm" as maturity_ui %}
+{% set can_create_project = can_create_project if can_create_project is defined else true %}
 {% set create_action = "/rq-engine/create/" %}
 {% set config_registry_map = config_registry_map if config_registry_map is defined else {} %}
 {% set config_maturity_labels = config_maturity_labels if config_maturity_labels is defined else {} %}
@@ -240,6 +241,7 @@
 
 {% block body %}
 <div class="wc-stack">
+  {% if can_create_project %}
   <div id="run-context-menu" class="wc-context-menu" aria-hidden="true" role="menu">
     <p class="wc-context-menu__title">Launch interface with units</p>
     <div class="wc-context-menu__actions">
@@ -248,9 +250,15 @@
     </div>
   </div>
 
+  {% endif %}
+
   {% if not current_user.is_authenticated %}
   <section class="wc-login-bypass-banner" aria-label="Login bypass banner">
+    {% if can_create_project %}
     <a href="{{ url_for('security.login', next=url_for('weppcloud_site.interfaces')) }}">Login</a> to Bypass Captchas
+    {% else %}
+    <a href="{{ url_for('security.login', next=url_for('weppcloud_site.interfaces')) }}">Sign in</a> to create a project.
+    {% endif %}
   </section>
   {% endif %}
 
@@ -281,9 +289,10 @@
           This workflow enables meaningful comparisons across unburned, burned, and treatment conditions and incorporates the Wildfire
           Ash Transport And Risk estimation tool (WATAR).
         </p>
-        {% if not current_user.is_authenticated %}
+        {% if can_create_project and not current_user.is_authenticated %}
         {{ cap_macros.cap_prompt("disturbed", "cap-disturbed", cap_base_url, cap_site_key) }}
         {% endif %}
+        {% if can_create_project %}
         <div class="wc-feature__actions">
           {% if visible_config_ids is none or 'disturbed9002' in visible_config_ids %}
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="disturbed" data-cap-required="true"{% endif %}>
@@ -337,6 +346,7 @@
           </form>
           {% endif %}
         </div>
+        {% endif %}
       </div>
     </article>
   </section>
@@ -361,9 +371,10 @@
           In addition to improved performance, the WBT backend emits useful GeoTIFF (`.tif`) raster products, supports additional
           batch-processing utilities, and enables advanced workflows such as Omni contrasts (for example, stream-order pruning).
         </p>
-        {% if not current_user.is_authenticated %}
+        {% if can_create_project and not current_user.is_authenticated %}
         {{ cap_macros.cap_prompt("disturbed", "cap-disturbed-wbt", cap_base_url, cap_site_key) }}
         {% endif %}
+        {% if can_create_project %}
         <div class="wc-feature__actions">
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="disturbed" data-cap-required="true"{% endif %}>
             <input type="hidden" name="config" value="{{ config_value('disturbed9002_wbt') }}">
@@ -381,6 +392,7 @@
             </button>
           </form>
         </div>
+        {% endif %}
       </div>
     </article>
   </section>
@@ -410,9 +422,10 @@
           Users can simulate stochastic wildfires, recovery trajectories, and cover transformations across perennial, annual, shrub,
           and tree components following the fire event.
         </p>
-        {% if not current_user.is_authenticated %}
+        {% if can_create_project and not current_user.is_authenticated %}
         {{ cap_macros.cap_prompt("revegetation", "cap-revegetation", cap_base_url, cap_site_key) }}
         {% endif %}
+        {% if can_create_project %}
         <div class="wc-feature__actions">
           {% if visible_config_ids is none or 'reveg' in visible_config_ids %}
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="revegetation" data-cap-required="true"{% endif %}>
@@ -483,6 +496,7 @@
           </form>
           {% endif %}
         </div>
+        {% endif %}
       </div>
     </article>
   </section>
@@ -506,9 +520,10 @@
         <p>
           This project has received funding from the European Union's Horizon 2020 research and innovation program under grant agreement No 10100389.
         </p>
-        {% if not current_user.is_authenticated %}
+        {% if can_create_project and not current_user.is_authenticated %}
         {{ cap_macros.cap_prompt("eu", "cap-eu", cap_base_url, cap_site_key) }}
         {% endif %}
+        {% if can_create_project %}
         <div class="wc-feature__actions">
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="eu" data-cap-required="true"{% endif %}>
             <input type="hidden" name="config" value="{{ config_value('eu-disturbed') }}">
@@ -526,6 +541,7 @@
             </button>
           </form>
         </div>
+        {% endif %}
       </div>
     </article>
   </section>
@@ -543,9 +559,10 @@
           {{ maturity_badge('au-disturbed') }}
         </div>
         <p>WEPPcloud for Australia assigns managements from the Land Use of Australia 2010-11 dataset and constructs soils from <a href="https://www.asris.csiro.au">ASRIS</a> data. U.S. climate stations are selected using AGDC monthly precipitation and temperature patterns.</p>
-        {% if not current_user.is_authenticated %}
+        {% if can_create_project and not current_user.is_authenticated %}
         {{ cap_macros.cap_prompt("au", "cap-au", cap_base_url, cap_site_key) }}
         {% endif %}
+        {% if can_create_project %}
         <div class="wc-feature__actions">
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="au" data-cap-required="true"{% endif %}>
             <input type="hidden" name="config" value="{{ config_value('au-disturbed') }}">
@@ -563,6 +580,7 @@
             </button>
           </form>
         </div>
+        {% endif %}
       </div>
     </article>
   </section>
@@ -594,9 +612,10 @@
         <p>
           {{ usersum_doc_link('weppcloud', 'undisturbed-earth.md', 'Earth interface guidance') }}.
         </p>
-        {% if not current_user.is_authenticated %}
+        {% if can_create_project and not current_user.is_authenticated %}
         {{ cap_macros.cap_prompt("earth", "cap-earth", cap_base_url, cap_site_key) }}
         {% endif %}
+        {% if can_create_project %}
         <div class="wc-feature__actions">
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="earth" data-cap-required="true"{% endif %}>
             <input type="hidden" name="config" value="{{ config_value('earth') }}">
@@ -614,6 +633,7 @@
             </button>
           </form>
         </div>
+        {% endif %}
       </div>
     </article>
   </section>
@@ -634,9 +654,10 @@
           Run the <a href="https://apps.tucson.ars.ag.gov/rhem/">Rangeland Hydrology and Erosion Model (RHEM)</a> across the United States. Where available, foliar and ground covers are
           estimated from NLCD Shrubland 2016 data, while SURGO/STATSGO identifies soil textures.
         </p>
-        {% if not current_user.is_authenticated %}
+        {% if can_create_project and not current_user.is_authenticated %}
         {{ cap_macros.cap_prompt("rhem", "cap-rhem", cap_base_url, cap_site_key) }}
         {% endif %}
+        {% if can_create_project %}
         <div class="wc-feature__actions">
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="rhem" data-cap-required="true"{% endif %}>
             <input type="hidden" name="config" value="{{ config_value('rhem') }}">
@@ -654,6 +675,7 @@
             </button>
           </form>
         </div>
+        {% endif %}
       </div>
     </article>
   </section>
@@ -716,9 +738,10 @@
           originate from SURGO/STATSGO, landcover from the USGS National Landcover dataset, and climates from the CLIGEN database.
         </p>
         <p><strong>This interface has been deprecated. For new projects run (Un)Disturbed without a burn severity map.</strong></p>
-        {% if not current_user.is_authenticated %}
+        {% if can_create_project and not current_user.is_authenticated %}
         {{ cap_macros.cap_prompt("legacy-weppcloud", "cap-legacy-weppcloud", cap_base_url, cap_site_key) }}
         {% endif %}
+        {% if can_create_project %}
         <div class="wc-feature__actions">
           {% if visible_config_ids is none or '0' in visible_config_ids %}
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="legacy-weppcloud" data-cap-required="true"{% endif %}>
@@ -753,6 +776,7 @@
           </form>
           {% endif %}
         </div>
+        {% endif %}
       </div>
     </article>
     {% endif %}
@@ -774,9 +798,10 @@
           <a href="https://youtu.be/g8_ClR96tFU">View 15 May 2019 USDA Forest Service Webinar: <em>An Introduction to WEPPcloud-PEP</em></a>
         </p>
         <p><strong>This interface has been deprecated. For new projects run (Un)Disturbed without a burn severity map.</strong></p>
-        {% if not current_user.is_authenticated %}
+        {% if can_create_project and not current_user.is_authenticated %}
         {{ cap_macros.cap_prompt("legacy-baer", "cap-legacy-baer", cap_base_url, cap_site_key) }}
         {% endif %}
+        {% if can_create_project %}
         <div class="wc-feature__actions">
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="legacy-baer" data-cap-required="true"{% endif %}>
             <input type="hidden" name="config" value="{{ config_value('baer') }}">
@@ -793,6 +818,7 @@
             </button>
           </form>
         </div>
+        {% endif %}
         <p>
           <a href="{{ url_for('static', filename='resources/baer/Rattlesnake.tif') }}">Download Example 4 Class SBS Map (Rattlesnake Fire)</a>
         </p>
@@ -808,7 +834,7 @@
 {% block script_extras %}
 <script src="{{ static_url('js/controllers-gl.js') }}" defer></script>
 <script src="{{ static_url('js/controllers_gl_stale_check.js') }}" defer></script>
-{% if not current_user.is_authenticated %}
+{% if can_create_project and not current_user.is_authenticated %}
 <script>
   window.CAP_CUSTOM_WASM_URL = "{{ cap_asset_base_url }}/cap_wasm.js";
 </script>

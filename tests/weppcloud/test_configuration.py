@@ -287,3 +287,20 @@ def test_global_remember_refresh_override_is_ignored(
     monkeypatch.setenv("REMEMBER_COOKIE_REFRESH_EACH_REQUEST", "true")
     app = _build_configured_app(monkeypatch)
     assert app.config["REMEMBER_COOKIE_REFRESH_EACH_REQUEST"] is False
+
+
+@pytest.mark.parametrize("raw,expected", [(None, True), ("true", True), (" YES ", True), ("1", True), ("on", True), ("false", False), (" OFF ", False), ("0", False), ("no", False)])
+def test_creation_policy_configuration(monkeypatch, raw, expected):
+    if raw is None:
+        monkeypatch.delenv("WEPPCLOUD_ALLOW_ANONYMOUS_PROJECT_CREATION", raising=False)
+    else:
+        monkeypatch.setenv("WEPPCLOUD_ALLOW_ANONYMOUS_PROJECT_CREATION", raw)
+    app = _build_configured_app(monkeypatch)
+    assert app.config["WEPPCLOUD_ALLOW_ANONYMOUS_PROJECT_CREATION"] is expected
+
+
+@pytest.mark.parametrize("raw", ["", " ", "treu", "disabled", "2"])
+def test_creation_policy_rejects_invalid_configuration(monkeypatch, raw):
+    monkeypatch.setenv("WEPPCLOUD_ALLOW_ANONYMOUS_PROJECT_CREATION", raw)
+    with pytest.raises(ValueError, match="WEPPCLOUD_ALLOW_ANONYMOUS_PROJECT_CREATION"):
+        _build_configured_app(monkeypatch)

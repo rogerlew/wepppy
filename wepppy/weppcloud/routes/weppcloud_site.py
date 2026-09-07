@@ -1001,6 +1001,10 @@ def interfaces():
         return render_template(
             'interfaces.htm',
             user=current_user,
+            can_create_project=(
+                current_user.is_authenticated
+                or current_app.config.get("WEPPCLOUD_ALLOW_ANONYMOUS_PROJECT_CREATION", True)
+            ),
             cap_base_url=cap_base_url,
             cap_asset_base_url=cap_asset_base_url,
             cap_site_key=cap_site_key,

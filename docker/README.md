@@ -14,6 +14,44 @@ repurposed. It is not a supported WEPPcloud development or worker deployment
 target; do not extend new worker topology into it unless its replacement
 contract explicitly requires that service.
 
+## Anonymous Project Creation
+
+`WEPPCLOUD_ALLOW_ANONYMOUS_PROJECT_CREATION=true` is the default. Set it to
+`false` in the host's gitignored `docker/.env` to require authenticated creation
+through `/rq-engine/create/` (including `/rq-engine/api/create/`). Anonymous
+visitors to `/weppcloud/interfaces/` see a sign-in link and informational cards;
+creation forms, Start actions, and creation CAPTCHA are omitted. Logged-in users
+and existing authorized service/MCP clients retain access. Run-scoped session
+JWTs cannot create through this endpoint in restricted mode; use a user token
+or authenticated browser session.
+
+Both `weppcloud` and `rq-engine` must receive the same setting. Compose defaults
+only an unset variable to true; empty/invalid values cause explicit configuration
+failure. Accepted values, ignoring case and surrounding whitespace, are
+`true/false`, `1/0`, `yes/no`, and `on/off`. Flask rejects invalid configuration
+at startup; rq-engine creation responds with `503 creation_policy_configuration_error`.
+
+For local development, apply the environment with `wctl up -d --no-deps
+--force-recreate weppcloud rq-engine`. A restart alone does not update container
+environment. For production, follow `scripts/deploy-production.sh --targeted-web`
+with the installed production preset and its documented preflights; do not use
+a separate deployment workflow. Verify the nonsecret variable in both containers,
+then check anonymous API denial (`403 anonymous_creation_disabled`), hidden
+anonymous interface controls, and successful authenticated creation with normal
+ownership. Verify unset/default anonymous CAPTCHA creation in staging before
+rollout. Revert to `true` and apply the same service configuration to roll back;
+existing runs require no migration.
+
+This flag covers the named endpoint and page, not every run allocation path.
+Anonymous fork retains its own access/CAPTCHA policy. Builder remains JWT-gated
+and can accept a session token without an account; test-support creation remains
+controlled by its separate deployment guard. Location-specific launch pages may
+still show controls, but requests to the restricted endpoint are denied. Do not
+disable the Cap service: login, registration, fork, and run/report viewing use it
+independently. See the [creation policy](../docs/schemas/project-creation-policy.md)
+for the full contract. The legacy HPC Compose target is unsupported and is not
+extended by this setting; supported host overrides inherit the main Compose files.
+
 ## Deployment Environments
 
 | Environment | Host | Domain | Compose File | Notes |

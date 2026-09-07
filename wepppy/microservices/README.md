@@ -271,3 +271,7 @@ Common configuration:
 Built on Starlette ASGI framework for high-performance async Python services.
 
 License: BSD-3 Clause (see [../../license.txt](../../license.txt))
+
+## Project Creation Access Policy
+
+`WEPPCLOUD_ALLOW_ANONYMOUS_PROJECT_CREATION` defaults to true. False disables CAPTCHA-only and session-token creation on `/rq-engine/create/` and its `/rq-engine/api/create/` alias; authenticated cookie/user-token and existing service/MCP callers retain access. Restricted anonymous requests receive `403 anonymous_creation_disabled`; invalid explicit configuration receives `503 creation_policy_configuration_error`. The shared parser is `wepppy/config/creation_policy.py`. See `docs/schemas/project-creation-policy.md` for precedence, exclusions, and UI behavior, and `docker/README.md` for configuration propagation.

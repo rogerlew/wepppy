@@ -12,6 +12,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse, Response
 from sqlalchemy.exc import SQLAlchemyError
 
+from wepppy.config.creation_policy import allow_anonymous_project_creation
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.config.secrets import get_secret
 from wepppy.nodb.core import Ron
@@ -285,7 +286,9 @@ def _release_creation_safely(
     summary="Create a new run",
     description=(
         "Supports `rq_token`, Bearer auth (`rq:enqueue`), same-origin session-cookie fallback, "
-        "or CAPTCHA verification. "
+        "or CAPTCHA verification when anonymous creation is enabled. "
+        "WEPPCLOUD_ALLOW_ANONYMOUS_PROJECT_CREATION=false requires user/cookie or service/mcp auth; "
+        "session tokens and CAPTCHA-only callers receive 403 anonymous_creation_disabled. "
         "Synchronously creates run directory/config metadata and responds with a redirect to the new run URL."
     ),
     tags=["rq-engine", "project"],
@@ -295,10 +298,21 @@ def _release_creation_safely(
         success_description="Run created and redirect issued to the new run URL.",
         extra={
             400: "Create payload validation failed. Returns the canonical error payload.",
+            403: "Authorization denied, including anonymous_creation_disabled when creation is restricted.",
+            503: "Invalid creation policy configuration or creation service unavailable.",
         },
     ),
 )
 async def create(request: Request) -> Response:
+    try:
+        allow_anonymous = allow_anonymous_project_creation()
+    except ValueError:
+        logger.error("Invalid anonymous project creation policy configuration")
+        return error_response(
+            "Project creation policy is misconfigured.", status_code=503,
+            code="creation_policy_configuration_error",
+        )
+
     try:
         payload = await parse_request_payload(request)
     except Exception:  # broad-except: boundary contract
@@ -375,7 +389,7 @@ async def create(request: Request) -> Response:
                 log_exception=False,
             )
     else:
-        if cap_token:
+        if cap_token and allow_anonymous:
             try:
                 verification = await asyncio.to_thread(_verify_cap_token, request, cap_token)
             except CapVerificationError as exc:
@@ -393,6 +407,11 @@ async def create(request: Request) -> Response:
                 claims = await asyncio.to_thread(_claims_from_session_cookie, request)
             except AuthError as exc:
                 if exc.status_code in {401, 403} and exc.code in {"unauthorized", "forbidden"}:
+                    if not allow_anonymous:
+                        return error_response(
+                            "Sign in to create a project.", status_code=403,
+                            code="anonymous_creation_disabled",
+                        )
                     return error_response("CAPTCHA token is required.", status_code=403)
                 return error_response(exc.message, status_code=exc.status_code, code=exc.code)
             except Exception:  # broad-except: boundary contract
@@ -409,6 +428,14 @@ async def create(request: Request) -> Response:
                     error_id=error_id,
                     log_exception=False,
                 )
+
+    if not allow_anonymous and str((claims or {}).get("token_class") or "").strip() not in {
+        "user", "service", "mcp",
+    }:
+        return error_response(
+            "Sign in to create a project.", status_code=403,
+            code="anonymous_creation_disabled",
+        )
 
     merged_values = _merge_creation_values(payload, request.query_params)
     if any(

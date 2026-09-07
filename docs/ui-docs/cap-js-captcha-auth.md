@@ -86,7 +86,7 @@ Arguments:
 Macro file: `wepppy/weppcloud/templates/shared/cap_macros.htm`
 
 ### Scripts
-Load only for anonymous users:
+Load only for anonymous users whose page still offers CAPTCHA-protected actions. On `/interfaces/`, omit creation CAPTCHA assets when anonymous creation is disabled:
 ```
 <script>
   window.CAP_CUSTOM_WASM_URL = "{{ cap_asset_base_url }}/cap_wasm.js";
@@ -151,8 +151,9 @@ Notes:
 - Use `wepppy/weppcloud/utils/cap_verify.py` as the canonical verification helper.
 
 Create endpoint behavior:
-- Anonymous: `POST /create/<config>` requires `cap_token`.
-- Authenticated: `GET /create/<config>` is allowed (no CAPTCHA).
+- Anonymous: `POST /rq-engine/create/` requires `cap_token` when `WEPPCLOUD_ALLOW_ANONYMOUS_PROJECT_CREATION` is unset or true. False rejects anonymous creation before CAPTCHA verification.
+- Authenticated: creation uses the same POST endpoint with user credentials or the existing same-origin session-cookie path (no CAPTCHA required).
+- The `/rq-engine/api/create/` alias uses the same policy.
 - `/create/` index is restricted to authenticated users.
 
 Authenticated users should bypass CAPTCHA.
@@ -197,3 +198,5 @@ Do not remove the CAP migration or recovery path merely because time passed.
 Removal requires a separately scoped callus-softening package with current
 production evidence and the review gates in
 `docs/standards/hardening-lifecycle-standard.md`.
+
+Creation policy and exact errors: [Project Creation Access Policy](../schemas/project-creation-policy.md). Flask passes `can_create_project` to the interfaces template; it combines account authentication with the configured anonymous policy and does not replace role gates.

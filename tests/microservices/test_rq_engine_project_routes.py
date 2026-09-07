@@ -62,9 +62,13 @@ def _issue_token(monkeypatch: pytest.MonkeyPatch) -> str:
 
 @pytest.fixture()
 def create_client(
+    request,
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> Tuple[Any, Dict[str, Any]]:
+    monkeypatch.delenv("WEPPCLOUD_ALLOW_ANONYMOUS_PROJECT_CREATION", raising=False)
+    if hasattr(request, "param"):
+        monkeypatch.setenv("WEPPCLOUD_ALLOW_ANONYMOUS_PROJECT_CREATION", request.param)
     captured: Dict[str, Any] = {}
 
     run_dir = tmp_path / RUN_ID
@@ -132,6 +136,7 @@ def test_create_rejects_invalid_token(create_client, monkeypatch: pytest.MonkeyP
     assert "cfg" not in captured
 
 
+@pytest.mark.parametrize("create_client", ["true", "on"], indirect=True)
 def test_create_accepts_valid_cap_token(create_client, monkeypatch: pytest.MonkeyPatch):
     client, captured = create_client
 
@@ -255,6 +260,7 @@ def test_flagged_create_same_key_different_input_conflicts(
     assert conflict.json()["error"]["code"] == "idempotency_key_conflict"
 
 
+@pytest.mark.parametrize("create_client", ["true", "false"], indirect=True)
 def test_create_accepts_rq_token(create_client, monkeypatch: pytest.MonkeyPatch):
     client, captured = create_client
 
@@ -546,6 +552,7 @@ def test_create_unexpected_auth_failure_is_sanitized(
     assert captured == {}
 
 
+@pytest.mark.parametrize("create_client", ["true", "false"], indirect=True)
 def test_create_actor_lookup_failure_creates_no_directory(
     create_client,
     monkeypatch: pytest.MonkeyPatch,
@@ -657,6 +664,7 @@ def test_create_cleanup_failure_log_uses_response_error_id(
     assert cleanup_records[0].runid == RUN_ID
 
 
+@pytest.mark.parametrize("create_client", ["true", "false"], indirect=True)
 def test_create_reauths_expired_rq_token_with_session_cookie(
     create_client,
     monkeypatch: pytest.MonkeyPatch,
@@ -702,6 +710,7 @@ def test_create_reauths_expired_rq_token_with_session_cookie(
     assert owner_calls["user_id"] == 42
 
 
+@pytest.mark.parametrize("create_client", ["true", "false"], indirect=True)
 def test_create_non_expired_rq_token_error_does_not_reauth(
     create_client,
     monkeypatch: pytest.MonkeyPatch,
@@ -791,6 +800,7 @@ def test_cookie_claims_use_migration_aware_session_selector(monkeypatch):
         lambda _request: (_ for _ in ()).throw(AssertionError("legacy-only selector used")),
     )
 
+    monkeypatch.setattr(session_routes, "_resolve_roles_for_user_id", lambda user_id: ["User"])
     claims = project_routes._claims_from_session_cookie(request)
 
     assert claims["sub"] == "42"
@@ -892,3 +902,91 @@ def test_create_opt_in_respects_global_nodir_env_gate(
     assert captured["cfg"] == f"{CONFIG}.cfg?nodb:apply_nodir=true"
     marker_path = Path(captured["wd"]) / ".nodir" / "default_archive_roots.json"
     assert not marker_path.exists()
+
+
+@pytest.mark.parametrize("path", ["/create/", "/api/create/"])
+@pytest.mark.parametrize("transport", ["data", "json"])
+@pytest.mark.parametrize("writer", ["true", "false"])
+def test_restricted_create_denies_captcha_before_side_effects(
+    create_client, monkeypatch, path, transport, writer,
+):
+    client, captured = create_client
+    monkeypatch.setenv("WEPPCLOUD_ALLOW_ANONYMOUS_PROJECT_CREATION", "false")
+    monkeypatch.setenv("WEPPPY_PROJECT_CONFIG_PRESET_WRITER_ENABLED", writer)
+    monkeypatch.setattr(project_routes, "_claims_from_session_cookie", lambda request: None)
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("Restricted anonymous creation reached a side effect")
+
+    monkeypatch.setattr(project_routes, "_verify_cap_token", forbidden)
+    monkeypatch.setattr(project_routes, "_creation_idempotency_client", forbidden)
+    response = client.post(path, **{transport: {"config": CONFIG, "cap_token": "solved-token"}})
+    assert response.status_code == 403
+    assert response.json()["error"] == {
+        "message": "Sign in to create a project.", "code": "anonymous_creation_disabled",
+        "details": "Sign in to create a project.",
+    }
+    assert "cfg" not in captured
+
+
+@pytest.mark.parametrize("raw", ["", " ", "treu", "2"])
+def test_create_invalid_policy_is_unavailable(create_client, monkeypatch, raw):
+    client, captured = create_client
+    monkeypatch.setenv("WEPPCLOUD_ALLOW_ANONYMOUS_PROJECT_CREATION", raw)
+    response = client.post("/create/", json={"config": CONFIG, "cap_token": "solved"})
+    assert response.status_code == 503
+    assert response.json()["error"]["code"] == "creation_policy_configuration_error"
+    assert captured == {}
+
+
+@pytest.mark.parametrize("token_class", ["session", "unknown", "USER", ""])
+@pytest.mark.parametrize("transport", ["rq_token", "bearer"])
+@pytest.mark.parametrize("user_id", [None, 42])
+def test_restricted_create_rejects_disallowed_signed_token_class(
+    create_client, monkeypatch, token_class, transport, user_id,
+):
+    client, captured = create_client
+    monkeypatch.setenv("WEPPCLOUD_ALLOW_ANONYMOUS_PROJECT_CREATION", "false")
+    monkeypatch.setenv("WEPP_AUTH_JWT_SECRET", "unit-test-secret")
+    auth_tokens.get_jwt_config.cache_clear()
+    token = auth_tokens.issue_token(
+        "42", scopes=["rq:enqueue"], audience="rq-engine",
+        extra_claims={"jti": "policy-jti", "token_class": token_class, "session_id": "policy-sid", "user_id": user_id},
+    )["token"]
+    monkeypatch.setattr(project_routes, "_check_revocation", lambda jti: None)
+    monkeypatch.setattr(project_routes, "_check_session_revocation", lambda sid: None)
+    from wepppy.microservices.rq_engine import auth
+    monkeypatch.setattr(auth, "_check_revocation", lambda jti: None)
+    monkeypatch.setattr(auth, "_check_session_revocation", lambda sid: None)
+    body = {"config": CONFIG}
+    headers = {}
+    if transport == "rq_token":
+        body["rq_token"] = token
+    else:
+        headers["Authorization"] = f"Bearer {token}"
+    response = client.post("/create/", json=body, headers=headers)
+    assert response.status_code == 403
+    assert response.json()["error"]["code"] == "anonymous_creation_disabled"
+    assert captured == {}
+
+
+@pytest.mark.parametrize("cap_token", ["", "stale-solved-token"])
+def test_restricted_create_accepts_cookie_with_or_without_captcha(create_client, monkeypatch, cap_token):
+    client, captured = create_client
+    monkeypatch.setenv("WEPPCLOUD_ALLOW_ANONYMOUS_PROJECT_CREATION", "false")
+    monkeypatch.setattr(project_routes, "_claims_from_session_cookie", lambda request: {"sub": "42", "token_class": "user"})
+    monkeypatch.setattr(project_routes, "resolve_creation_actor", lambda claims: _creation_actor())
+    monkeypatch.setattr(project_routes, "register_owned_run", lambda *args: None)
+    response = client.post("/create/", data={"config": CONFIG, "cap_token": cap_token}, follow_redirects=False)
+    assert response.status_code == 303
+    assert captured["email"] == "tester@example.com"
+
+
+@pytest.mark.parametrize("token_class", ["service", "mcp"])
+def test_restricted_create_preserves_service_callers(create_client, monkeypatch, token_class):
+    client, captured = create_client
+    monkeypatch.setenv("WEPPCLOUD_ALLOW_ANONYMOUS_PROJECT_CREATION", "false")
+    monkeypatch.setattr(project_routes, "require_jwt", lambda *args, **kwargs: {"sub": "operator", "token_class": token_class})
+    response = client.post("/create/", json={"config": CONFIG}, headers={"Authorization": "Bearer valid"}, follow_redirects=False)
+    assert response.status_code == 303
+    assert captured["email"] is None

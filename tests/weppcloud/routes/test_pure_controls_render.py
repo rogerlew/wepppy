@@ -4792,3 +4792,30 @@ def test_edit_csv_template_renders_run_scoped_shared_editor_contract(
     assert "https://bossanova.uk/jspreadsheet/v4/jexcel.js" in rendered
     assert "https://jsuites.net/v4/jsuites.js" in rendered
     assert '<script>alert(1)</script>' not in rendered
+
+
+@pytest.mark.parametrize("authenticated,allow", [(False, False), (False, True), (True, False), (True, True)])
+def test_interfaces_creation_policy_renders_all_launch_surfaces(jinja_env, authenticated, allow):
+    user = SimpleNamespace(has_role=lambda role: True, roles=[], is_authenticated=authenticated)
+    rendered = jinja_env.get_template("interfaces.htm").render(
+        current_user=user, user=user, can_create_project=authenticated or allow,
+        url_for=lambda endpoint, **kwargs: f"/mock/{endpoint}",
+        static_url=lambda path: f"/static/{path}",
+        cap_base_url="/cap", cap_asset_base_url="/cap/assets", cap_site_key="test-key",
+    )
+    if authenticated or allow:
+        assert rendered.count('class="wc-run-form"') == 15
+        assert 'id="run-context-menu"' in rendered
+    else:
+        assert 'class="wc-run-form"' not in rendered
+        assert 'data-run-action=' not in rendered
+        assert 'id="run-context-menu"' not in rendered
+        assert '>Sign in</a> to create a project.' in rendered
+        assert 'WEPPcloud-Disturbed' in rendered
+    if not authenticated and allow:
+        assert '<cap-widget' in rendered
+        assert '/cap/assets/widget.js' in rendered
+    else:
+        assert '<cap-widget' not in rendered
+        assert '/cap/assets/widget.js' not in rendered
+        assert '/cap/assets/floating.js' not in rendered
