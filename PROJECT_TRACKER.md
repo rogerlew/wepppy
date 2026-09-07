@@ -83,6 +83,17 @@ Feedback mechanisms:
 
 ## 📋 Backlog
 
+### Opt-in Login Requirement for Project Creation
+
+**Proposed**: 2026-09-07
+**Status**: Scaffolded; implementation not started
+**Package**: [Anonymous project creation policy](docs/work-packages/20260907_anonymous_project_creation/package.md)
+
+Add `WEPPCLOUD_ALLOW_ANONYMOUS_PROJECT_CREATION` (default true). False rejects
+anonymous `/rq-engine/create/` requests and omits anonymous creation controls and
+CAPTCHA on `/interfaces/`. Scope includes Docker wiring/documentation, contract
+checkpoint, regression coverage, and correctness/security review.
+
 
 ---
 

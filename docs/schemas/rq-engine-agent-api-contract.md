@@ -555,7 +555,7 @@ table below is the practical family map used by agent clients.
 | Archive/fork | `/api/runs/{runid}/{config}/archive`, `/restore-archive`, `/delete-archive`, `/fork` | Mostly async enqueue; some sync mutation paths | `rq:enqueue` |
 | External TS | `/api/runs/{runid}/{config}/acquire-openet-ts`, `/acquire-rap-ts` | Async enqueue | `rq:enqueue` |
 | Culvert batch | `/api/culverts-wepp-batch/`, `/api/culverts-wepp-batch/{batch_uuid}/retry/{point_id}` | Async enqueue | `culvert:batch:*` |
-| Project create | `/create/` (alias `/api/create/`) | Sync redirect (`303`) plus resource creation | `rq:enqueue` token path or CAPTCHA |
+| Project create | `/create/` (alias `/api/create/`) | Sync redirect (`303`) plus resource creation | `rq:enqueue` token path or CAPTCHA, subject to [creation policy](project-creation-policy.md) opt-in restriction and 403/503 errors (implementation pending) |
 
 Watershed map-input normalization (`fetch-dem-and-build-channels`):
 - For `set_extent_mode` `0`/`1`, agents may submit `map_bounds` without
