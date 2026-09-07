@@ -86,34 +86,6 @@ Feedback mechanisms:
 
 ---
 
-### GridMET Redis Admission and Queue Visibility
-
-**Proposed**: 2026-09-07
-
-**Size**: Medium-High (contract, concurrency implementation, reviews, and live Forest acceptance)
-
-**Priority**: Critical
-
-**Security impact**: `high` (Redis coordination, worker concurrency,
-deployment wiring, and external-request behavior)
-
-**Link**: [docs/work-packages/20260907_gridmet_redis_admission/](docs/work-packages/20260907_gridmet_redis_admission/)
-
-**Description**: Add an explicitly enabled, Redis-backed FIFO admission queue
-and expiring leases shared across all GridMET clients. Preserve zero Redis
-interaction when disabled, expose queue/active state for bounded timeout
-diagnosis, retain the multiple-interpolated local cap, and prove the global
-ceiling across independent containers on the `forest` development stack.
-
-**Next Steps**: Execute the active contract-first plan, pass independent
-correctness/QA/security gates, deploy the exact reviewed commit plus
-`GRIDMET_REDIS_ADMISSION_*` values only to Forest, and record cross-container
-and real-client evidence. Batch testing and Kubernetes/openwepp.org deployment
-occur separately after package completion.
-
-
----
-
 ### Seamless WEPPcloud Session Cookie Namespace Migration
 
 **Proposed**: 2026-08-23
@@ -1299,6 +1271,7 @@ the remaining-run controller plan has no next controller milestone.
 
 ## ✅ Done
 
+- [GridMET Redis admission](docs/work-packages/20260907_gridmet_redis_admission/package.md) — 2026-09-07: implemented, reviewed, pushed, and enabled on Forest at shared limit four. Full suite **7,651 passed / 72 skipped**; cross-container FIFO/peak-two, crash recovery, real 366-row public request, cleanup, and actual rollback passed. Registry/Kubernetes deployment and batch validation remain operator-owned.
 - [Batch Climate and RAP NoDb contention](docs/work-packages/20260906_batch_climate_rap_contention/package.md) — 2026-09-07: implemented and independently reviewed; full suite **7535 passed, 63 skipped**. Staged collection/fresh finalization preserves unrelated writes and rejects changed inputs. Live reruns/deployment excluded by operator; Kubernetes attribution and recurrence remain unmeasured.
 - [Climate spatial mode switching](docs/work-packages/20260906_climate_spatial_mode_switching/package.md) — 2026-09-06: implemented and reviewed; 212 focused Python / 835 JavaScript tests passed. Unrelated broad-suite Compose assertion documented.
 

@@ -1,6 +1,6 @@
 # GridMET Redis Admission and Queue Visibility
 
-**Status**: Open (2026-09-07)
+**Status**: Complete (2026-09-07)
 **Timezone**: UTC
 
 ## Overview
@@ -76,31 +76,31 @@ that boundary, and proves the behavior across independent containers on the
 
 ## Success Criteria
 
-- [ ] With all `GRIDMET_REDIS_ADMISSION_*` variables absent, public GridMET
+- [x] With all `GRIDMET_REDIS_ADMISSION_*` variables absent, public GridMET
   clients preserve their API/results and make no Redis connection or command.
-- [ ] Enabled independent processes and containers use one Redis queue and
+- [x] Enabled independent processes and containers use one Redis queue and
   never exceed the configured active limit under deterministic contention.
-- [ ] Admission is FIFO for live tickets; abandoned queued tickets and active
+- [x] Admission is FIFO for live tickets; abandoned queued tickets and active
   leases are reclaimed within documented bounds.
-- [ ] Permit ownership prevents one client from renewing or releasing another
+- [x] Permit ownership prevents one client from renewing or releasing another
   client's permit, and Redis/server time avoids host clock skew.
-- [ ] Each HTTP attempt holds a permit only while acquiring/streaming the
+- [x] Each HTTP attempt holds a permit only while acquiring/streaming the
   response; validation and retry sleep do not consume capacity.
-- [ ] All direct and indirect GridMET acquisition paths opt in when
+- [x] All direct and indirect GridMET acquisition paths opt in when
   Forest configuration enables admission.
-- [ ] Queue timeout, upstream timeout, permit loss, invalid configuration, and
+- [x] Queue timeout, upstream timeout, permit loss, invalid configuration, and
   Redis unavailability are distinct, bounded, actionable failures.
-- [ ] Forest has the ratified environment values, the affected containers show
+- [x] Forest has the ratified environment values, the affected containers show
   the same effective values, and a fresh process reads them as enabled.
-- [ ] An agent executes the package's cross-container Forest probe using a
+- [x] An agent executes the package's cross-container Forest probe using a
   unique test key and records raw/sanitized evidence that observed concurrency
   is at most the test limit and at least two, with queued state observed.
-- [ ] An actual public GridMET client acquisition on Forest is observed entering
+- [x] An actual public GridMET client acquisition on Forest is observed entering
   and leaving Redis admission without leaked queue or active entries.
-- [ ] Focused and full repository tests, development Compose rendering,
+- [x] Focused and full repository tests, development Compose rendering,
   documentation lint, correctness review, and security review pass with no
   unresolved medium/high findings.
-- [ ] No batch is run and no claim is made about `openwepp.org` behavior.
+- [x] No batch is run and no claim is made about `openwepp.org` behavior.
 
 ## Parameterization ADR Gate
 
@@ -109,7 +109,7 @@ that boundary, and proves the behavior across independent containers on the
 - **ADR link(s)**: [ADR-0050](../../adrs/ADR-0050-gridmet-redis-admission.md)
 - **Decision provenance captured**: `yes; Roger Lew authorized plan execution
   and Redis/explicit opt-in; Codex ratified the initial implementation values
-  in ADR-0050, with Forest validation pending`
+  in ADR-0050; Forest validation passed`
 - **Canonical contract**: [GridMET Redis admission](../../schemas/gridmet-redis-admission-contract.md)
 
 ## Dependencies
@@ -180,6 +180,16 @@ The key is operational state, not a secret. Redis credentials continue through
 the existing secret-file contract and must never be copied into these values or
 test artifacts.
 
+## Completion evidence
+
+Runtime candidate `ae5d107d44a77c6ff3d0288e97b86cac174a77a4` was pushed and
+deployed to Forest. Final full suite: 7,651 passed / 72 skipped; isolated Redis:
+9 passed. Independent correctness, QA, and security reviews passed.
+[Forest acceptance](artifacts/2026-09-07_forest_integration.md) proves shared
+peak two, FIFO, crash reclamation, a valid 366-row public request, empty cleanup,
+and actual disable/restore rollback. Forest remains enabled at limit four.
+Registry build, openwepp.org deployment, and batch validation remain deferred.
+
 ## Related Work
 
 - [Batch Climate and RAP NoDb Contention](../20260906_batch_climate_rap_contention/package.md)
@@ -187,13 +197,13 @@ test artifacts.
 
 ## Deliverables
 
-- [ ] Canonical GridMET admission/configuration contract and parameterization ADR.
-- [ ] Admission module and integrations.
-- [ ] Automated tests and reusable Forest integration probe.
-- [ ] Compose/configuration/runbook updates.
-- [ ] Forest deployment and concurrency evidence artifact.
-- [ ] Correctness, QA/code, security, and validation artifacts.
-- [ ] Updated package tracker, ExecPlan, and `PROJECT_TRACKER.md` at closeout.
+- [x] Canonical GridMET admission/configuration contract and parameterization ADR.
+- [x] Admission module and integrations.
+- [x] Automated tests and reusable Forest integration probe.
+- [x] Compose/configuration/runbook updates.
+- [x] Forest deployment and concurrency evidence artifact.
+- [x] Correctness, QA/code, security, and validation artifacts.
+- [x] Updated package tracker, ExecPlan, and `PROJECT_TRACKER.md` at closeout.
 
 ## Rollback
 

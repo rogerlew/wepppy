@@ -44,10 +44,10 @@ deployment to `openwepp.org`.
   development Compose, configuration reference, and Forest runbook.
 - [x] (2026-09-07) Complete focused/full validation and independent reviews:
   final frozen-tree suite 7,651 passed, 72 skipped; all review findings closed.
-- [ ] Commit and push the reviewed candidate to `master`.
-- [ ] Deploy exact candidate plus variables to Forest and verify containers.
-- [ ] Run and record Forest cross-container and real-client probes.
-- [ ] Close and archive the package; leave openwepp.org batch testing deferred.
+- [x] Commit and push the reviewed candidate to `master`.
+- [x] Deploy exact candidate plus variables to Forest and verify containers.
+- [x] Run and record Forest cross-container and real-client probes.
+- [x] Close and archive the package; leave openwepp.org batch testing deferred.
 
 ## Surprises & Discoveries
 
@@ -60,7 +60,7 @@ deployment to `openwepp.org`.
 
 - Observation: the NoDb contract-first standard requires two independent
   contract reviews before the standalone checkpoint commit. Both reviews are
-  assigned; runtime edits remain pending that gate.
+  completed before the standalone checkpoint and runtime edits.
 - Observation: Forest source-mounts this checkout. Feature activation remains
   disabled during implementation; container recreation and acceptance follow
   the reviewed, pushed candidate.
@@ -106,12 +106,29 @@ deployment to `openwepp.org`.
 
 ## Outcomes & Retrospective
 
-Implementation and independent correctness/QA/security reviews are complete.
-Focused client, propagation, lifecycle, probe, and isolated real-Redis tests
-pass. The frozen final implementation passed 7,651 tests with 72 skipped;
-isolated real-Redis scenarios passed separately.
-Candidate commit/push, Forest activation, cross-container/public acceptance,
-and rollback remain pending. No batch or Kubernetes work has been performed.
+Complete on 2026-09-07. Contract ancestor
+`1b4835ca73bc67c9c84ecbb26f596aab4078e234` precedes runtime candidate
+`ae5d107d44a77c6ff3d0288e97b86cac174a77a4`, which was reviewed, pushed,
+and deployed to Forest before live acceptance. Final frozen-tree tests:
+7,651 passed / 72 skipped; nine isolated Redis scenarios passed separately.
+Correctness, QA, and security findings are all closed.
+
+Forest probes across two containers observed peak exactly two, live queuing,
+FIFO, and zero violations. Killed waiter/holder reclamation took 9.626/30.011
+seconds with test TTL/lease 9/30 seconds. A real public request returned 366
+valid precipitation rows while independently observed in admission. Every test
+namespace ended empty. Actual disable/recreate/verify/restore rollback passed;
+Forest remains enabled at limit four with all 11 RQ workers idle and healthy.
+See `artifacts/2026-09-07_forest_integration.md` and its JSON evidence.
+
+The implementation preserves explicit public None/default-off behavior and
+existing HTTP payload/publication contracts. Review exposed two important
+boundaries: Lua does not roll back writes on script errors, and renewal may
+finish during context exit. Both now have direct regressions. Redis leases
+still cannot fence already-running remote requests under arbitrary suspension.
+The operator's registry build, openwepp.org deployment, and batch validation
+remain a separate later phase; no batch was run. Closeout commits only archive
+documentation and evidence, preserving exact deployed runtime contents.
 
 ## Context and Orientation
 
@@ -441,3 +458,8 @@ while retaining distinct concrete types for diagnosis.
 Revision note (2026-09-07 15:53 UTC): initial ExecPlan created from the
 operator-ratified Redis, queue visibility, opt-in, Forest deployment, and
 post-package Kubernetes batch boundaries.
+
+Revision note (2026-09-07 17:08 UTC): completed implementation, independent
+reviews, frozen-tree validation, pushed Forest deployment, cross-container and
+real-client acceptance, and actual rollback. Archive with operator-owned
+Kubernetes/batch phase explicitly deferred.

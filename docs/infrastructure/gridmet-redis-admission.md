@@ -53,6 +53,15 @@ pressure; unavailable Redis, conflicting policy, and lost lease are separate
 fail-closed errors. Inspect the effective operational namespace without
 renewing or removing live owners. Expired entries are pruned on observation.
 
+For operational diagnostics, resolve the worker's actual environment policy:
+
+```bash
+wctl docker compose exec -T rq-worker python -c 'from dataclasses import asdict; from wepppy.climates.gridmet.admission import GridMetAdmissionConfig, GridMetAdmissionController; c = GridMetAdmissionConfig.from_env(); print("disabled" if c is None else asdict(GridMetAdmissionController(c).snapshot()))'
+```
+
+This also reports the operational limit correctly when the namespace has never
+been used. The probe CLI's defaults describe its isolated test policy.
+
 Use `tools/gridmet_admission_probe.py --help` for bounded probe commands. All
 mutating probes require a unique test namespace and refuse the default and
 effective operational namespaces. Never flush Redis or delete keys by pattern.

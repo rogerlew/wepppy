@@ -1,0 +1,1378 @@
+{
+  "candidate": "ae5d107d44a77c6ff3d0288e97b86cac174a77a4",
+  "timestamp": "20260907T170013Z",
+  "root": "/tmp/gridmet-forest-ae5d107d44a7",
+  "no_batch": true,
+  "scenarios": {
+    "concurrency": {
+      "acquisition_order": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "cleanup_counts": {
+        "active": 0,
+        "container": "0f827e6565fb",
+        "event": "sample",
+        "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+        "limit": 2,
+        "pid": 462,
+        "queued": 0,
+        "server_time": 1788800450.2072
+      },
+      "completed": 6,
+      "configured_limit": 2,
+      "containers": [
+        "0f827e6565fb",
+        "633c7b74ff98"
+      ],
+      "event": "summary",
+      "expected": 6,
+      "fifo": true,
+      "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+      "limit_violations": 0,
+      "mode": "summarize",
+      "observed_peak": 2,
+      "owners_match": true,
+      "pass": true,
+      "queued_seen": true,
+      "state_changes": [
+        {
+          "active": 0,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+          "limit": 2,
+          "pid": 462,
+          "queued": 0,
+          "server_time": 1788800420.21
+        },
+        {
+          "active": 1,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+          "limit": 2,
+          "pid": 462,
+          "queued": 0,
+          "server_time": 1788800427.3653998
+        },
+        {
+          "active": 2,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+          "limit": 2,
+          "pid": 462,
+          "queued": 1,
+          "server_time": 1788800427.4676
+        },
+        {
+          "active": 2,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+          "limit": 2,
+          "pid": 462,
+          "queued": 2,
+          "server_time": 1788800427.7251
+        },
+        {
+          "active": 2,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+          "limit": 2,
+          "pid": 462,
+          "queued": 3,
+          "server_time": 1788800427.7766001
+        },
+        {
+          "active": 2,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+          "limit": 2,
+          "pid": 462,
+          "queued": 4,
+          "server_time": 1788800427.8799
+        },
+        {
+          "active": 1,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+          "limit": 2,
+          "pid": 462,
+          "queued": 4,
+          "server_time": 1788800430.3653998
+        },
+        {
+          "active": 2,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+          "limit": 2,
+          "pid": 462,
+          "queued": 3,
+          "server_time": 1788800430.4171999
+        },
+        {
+          "active": 2,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+          "limit": 2,
+          "pid": 462,
+          "queued": 2,
+          "server_time": 1788800430.4687
+        },
+        {
+          "active": 1,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+          "limit": 2,
+          "pid": 462,
+          "queued": 2,
+          "server_time": 1788800433.4269
+        },
+        {
+          "active": 2,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+          "limit": 2,
+          "pid": 462,
+          "queued": 0,
+          "server_time": 1788800433.4784
+        },
+        {
+          "active": 1,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+          "limit": 2,
+          "pid": 462,
+          "queued": 0,
+          "server_time": 1788800436.4376001
+        },
+        {
+          "active": 0,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+          "limit": 2,
+          "pid": 462,
+          "queued": 0,
+          "server_time": 1788800436.4886
+        },
+        {
+          "active": 0,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+          "limit": 2,
+          "pid": 462,
+          "queued": 0,
+          "server_time": 1788800450.2072
+        }
+      ],
+      "worker_events": [
+        {
+          "container": "633c7b74ff98",
+          "event": "started",
+          "id": "0",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+          "pid": 485
+        },
+        {
+          "active": 2,
+          "admitted_at_server_seconds": 1788800427.4203,
+          "container": "633c7b74ff98",
+          "event": "acquired",
+          "id": "0",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+          "limit": 2,
+          "pid": 485,
+          "queued": 0,
+          "sequence": 2,
+          "server_time": 1788800427.4213
+        },
+        {
+          "container": "633c7b74ff98",
+          "event": "released",
+          "id": "0",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+          "pass": true,
+          "pid": 485
+        },
+        {
+          "container": "633c7b74ff98",
+          "event": "started",
+          "id": "1",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+          "pid": 473
+        },
+        {
+          "active": 1,
+          "admitted_at_server_seconds": 1788800427.3528998,
+          "container": "633c7b74ff98",
+          "event": "acquired",
+          "id": "1",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+          "limit": 2,
+          "pid": 473,
+          "queued": 0,
+          "sequence": 1,
+          "server_time": 1788800427.3543
+        },
+        {
+          "container": "633c7b74ff98",
+          "event": "released",
+          "id": "1",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+          "pass": true,
+          "pid": 473
+        },
+        {
+          "container": "633c7b74ff98",
+          "event": "started",
+          "id": "2",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+          "pid": 474
+        },
+        {
+          "active": 2,
+          "admitted_at_server_seconds": 1788800433.4562,
+          "container": "633c7b74ff98",
+          "event": "acquired",
+          "id": "2",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+          "limit": 2,
+          "pid": 474,
+          "queued": 0,
+          "sequence": 6,
+          "server_time": 1788800433.4578001
+        },
+        {
+          "container": "633c7b74ff98",
+          "event": "released",
+          "id": "2",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+          "pass": true,
+          "pid": 474
+        },
+        {
+          "container": "0f827e6565fb",
+          "event": "started",
+          "id": "3",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+          "pid": 562
+        },
+        {
+          "active": 2,
+          "admitted_at_server_seconds": 1788800430.4074,
+          "container": "0f827e6565fb",
+          "event": "acquired",
+          "id": "3",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+          "limit": 2,
+          "pid": 562,
+          "queued": 3,
+          "sequence": 3,
+          "server_time": 1788800430.4099
+        },
+        {
+          "container": "0f827e6565fb",
+          "event": "released",
+          "id": "3",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+          "pass": true,
+          "pid": 562
+        },
+        {
+          "container": "0f827e6565fb",
+          "event": "started",
+          "id": "4",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+          "pid": 555
+        },
+        {
+          "active": 2,
+          "admitted_at_server_seconds": 1788800430.4525,
+          "container": "0f827e6565fb",
+          "event": "acquired",
+          "id": "4",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+          "limit": 2,
+          "pid": 555,
+          "queued": 2,
+          "sequence": 4,
+          "server_time": 1788800430.4542
+        },
+        {
+          "container": "0f827e6565fb",
+          "event": "released",
+          "id": "4",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+          "pass": true,
+          "pid": 555
+        },
+        {
+          "container": "0f827e6565fb",
+          "event": "started",
+          "id": "5",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+          "pid": 561
+        },
+        {
+          "active": 2,
+          "admitted_at_server_seconds": 1788800433.4332,
+          "container": "0f827e6565fb",
+          "event": "acquired",
+          "id": "5",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+          "limit": 2,
+          "pid": 561,
+          "queued": 1,
+          "sequence": 5,
+          "server_time": 1788800433.4361
+        },
+        {
+          "container": "0f827e6565fb",
+          "event": "released",
+          "id": "5",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-concurrency",
+          "pass": true,
+          "pid": 561
+        }
+      ]
+    },
+    "killed_waiter": {
+      "acquisition_order": [
+        1,
+        2,
+        4,
+        5,
+        6
+      ],
+      "cleanup_counts": {
+        "active": 0,
+        "container": "0f827e6565fb",
+        "event": "sample",
+        "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+        "limit": 2,
+        "pid": 837,
+        "queued": 0,
+        "server_time": 1788800507.4052
+      },
+      "completed": 5,
+      "configured_limit": 2,
+      "containers": [
+        "0f827e6565fb",
+        "633c7b74ff98"
+      ],
+      "event": "summary",
+      "expected": 5,
+      "fifo": true,
+      "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+      "limit_violations": 0,
+      "mode": "summarize",
+      "observed_peak": 2,
+      "owners_match": true,
+      "pass": true,
+      "queued_seen": true,
+      "killed_waiter": true,
+      "reclaimed_seconds": 9.626250552013516,
+      "before_kill": {
+        "active": 2,
+        "container": "0f827e6565fb",
+        "event": "sample",
+        "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+        "limit": 2,
+        "pid": 837,
+        "queued": 1,
+        "server_time": 1788800478.1888
+      },
+      "after_reclamation": {
+        "active": 2,
+        "container": "0f827e6565fb",
+        "event": "sample",
+        "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+        "limit": 2,
+        "pid": 837,
+        "queued": 0,
+        "server_time": 1788800487.7996001
+      },
+      "state_changes": [
+        {
+          "active": 0,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+          "limit": 2,
+          "pid": 837,
+          "queued": 0,
+          "server_time": 1788800457.408
+        },
+        {
+          "active": 1,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+          "limit": 2,
+          "pid": 837,
+          "queued": 0,
+          "server_time": 1788800464.2401001
+        },
+        {
+          "active": 2,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+          "limit": 2,
+          "pid": 837,
+          "queued": 0,
+          "server_time": 1788800471.16
+        },
+        {
+          "active": 2,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+          "limit": 2,
+          "pid": 837,
+          "queued": 1,
+          "server_time": 1788800478.1888
+        },
+        {
+          "active": 2,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+          "limit": 2,
+          "pid": 837,
+          "queued": 0,
+          "server_time": 1788800487.7996001
+        },
+        {
+          "active": 1,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+          "limit": 2,
+          "pid": 837,
+          "queued": 0,
+          "server_time": 1788800489.2307
+        },
+        {
+          "active": 2,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+          "limit": 2,
+          "pid": 837,
+          "queued": 0,
+          "server_time": 1788800494.5331001
+        },
+        {
+          "active": 2,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+          "limit": 2,
+          "pid": 837,
+          "queued": 1,
+          "server_time": 1788800494.9918
+        },
+        {
+          "active": 2,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+          "limit": 2,
+          "pid": 837,
+          "queued": 2,
+          "server_time": 1788800495.0428
+        },
+        {
+          "active": 1,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+          "limit": 2,
+          "pid": 837,
+          "queued": 2,
+          "server_time": 1788800496.1815
+        },
+        {
+          "active": 2,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+          "limit": 2,
+          "pid": 837,
+          "queued": 1,
+          "server_time": 1788800496.2331998
+        },
+        {
+          "active": 1,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+          "limit": 2,
+          "pid": 837,
+          "queued": 1,
+          "server_time": 1788800496.5409
+        },
+        {
+          "active": 2,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+          "limit": 2,
+          "pid": 837,
+          "queued": 0,
+          "server_time": 1788800496.5926
+        },
+        {
+          "active": 1,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+          "limit": 2,
+          "pid": 837,
+          "queued": 0,
+          "server_time": 1788800498.2443998
+        },
+        {
+          "active": 0,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+          "limit": 2,
+          "pid": 837,
+          "queued": 0,
+          "server_time": 1788800498.6049
+        },
+        {
+          "active": 0,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+          "limit": 2,
+          "pid": 837,
+          "queued": 0,
+          "server_time": 1788800507.4052
+        }
+      ],
+      "worker_events": [
+        {
+          "container": "633c7b74ff98",
+          "event": "started",
+          "id": "holder0",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+          "pid": 755
+        },
+        {
+          "active": 1,
+          "admitted_at_server_seconds": 1788800464.196,
+          "container": "633c7b74ff98",
+          "event": "acquired",
+          "id": "holder0",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+          "limit": 2,
+          "pid": 755,
+          "queued": 0,
+          "sequence": 1,
+          "server_time": 1788800464.1976001
+        },
+        {
+          "container": "633c7b74ff98",
+          "event": "released",
+          "id": "holder0",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+          "pass": true,
+          "pid": 755
+        },
+        {
+          "container": "0f827e6565fb",
+          "event": "started",
+          "id": "holder1",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+          "pid": 930
+        },
+        {
+          "active": 2,
+          "admitted_at_server_seconds": 1788800471.1439,
+          "container": "0f827e6565fb",
+          "event": "acquired",
+          "id": "holder1",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+          "limit": 2,
+          "pid": 930,
+          "queued": 0,
+          "sequence": 2,
+          "server_time": 1788800471.1456
+        },
+        {
+          "container": "0f827e6565fb",
+          "event": "released",
+          "id": "holder1",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+          "pass": true,
+          "pid": 930
+        },
+        {
+          "container": "0f827e6565fb",
+          "event": "started",
+          "id": "other0",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+          "pid": 1023
+        },
+        {
+          "active": 2,
+          "admitted_at_server_seconds": 1788800496.5638,
+          "container": "0f827e6565fb",
+          "event": "acquired",
+          "id": "other0",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+          "limit": 2,
+          "pid": 1023,
+          "queued": 0,
+          "sequence": 6,
+          "server_time": 1788800496.5663998
+        },
+        {
+          "container": "0f827e6565fb",
+          "event": "released",
+          "id": "other0",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+          "pass": true,
+          "pid": 1023
+        },
+        {
+          "container": "633c7b74ff98",
+          "event": "started",
+          "id": "other1",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+          "pid": 948
+        },
+        {
+          "active": 2,
+          "admitted_at_server_seconds": 1788800494.5024,
+          "container": "633c7b74ff98",
+          "event": "acquired",
+          "id": "other1",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+          "limit": 2,
+          "pid": 948,
+          "queued": 0,
+          "sequence": 4,
+          "server_time": 1788800494.5036001
+        },
+        {
+          "container": "633c7b74ff98",
+          "event": "released",
+          "id": "other1",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+          "pass": true,
+          "pid": 948
+        },
+        {
+          "container": "0f827e6565fb",
+          "event": "started",
+          "id": "other2",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+          "pid": 1029
+        },
+        {
+          "active": 2,
+          "admitted_at_server_seconds": 1788800496.2026,
+          "container": "0f827e6565fb",
+          "event": "acquired",
+          "id": "other2",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+          "limit": 2,
+          "pid": 1029,
+          "queued": 1,
+          "sequence": 5,
+          "server_time": 1788800496.205
+        },
+        {
+          "container": "0f827e6565fb",
+          "event": "released",
+          "id": "other2",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+          "pass": true,
+          "pid": 1029
+        },
+        {
+          "container": "633c7b74ff98",
+          "event": "started",
+          "id": "victim",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-waiter",
+          "pid": 849
+        }
+      ]
+    },
+    "killed_holder": {
+      "acquisition_order": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "cleanup_counts": {
+        "active": 0,
+        "container": "0f827e6565fb",
+        "event": "sample",
+        "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+        "limit": 2,
+        "pid": 1211,
+        "queued": 0,
+        "server_time": 1788800564.7686
+      },
+      "completed": 5,
+      "configured_limit": 2,
+      "containers": [
+        "0f827e6565fb",
+        "633c7b74ff98"
+      ],
+      "event": "summary",
+      "expected": 5,
+      "fifo": true,
+      "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+      "limit_violations": 0,
+      "mode": "summarize",
+      "observed_peak": 2,
+      "owners_match": true,
+      "pass": true,
+      "queued_seen": true,
+      "killed_holder": true,
+      "reclaimed_seconds": 30.011197659012396,
+      "before_kill": {
+        "active": 2,
+        "container": "0f827e6565fb",
+        "event": "sample",
+        "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+        "limit": 2,
+        "pid": 1211,
+        "queued": 1,
+        "server_time": 1788800521.9859
+      },
+      "after_reclamation": {
+        "active": 0,
+        "container": "0f827e6565fb",
+        "event": "sample",
+        "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+        "limit": 2,
+        "pid": 1211,
+        "queued": 0,
+        "server_time": 1788800551.9876
+      },
+      "killed_acquisition": {
+        "active": 1,
+        "admitted_at_server_seconds": 1788800521.9461,
+        "container": "633c7b74ff98",
+        "event": "acquired",
+        "id": "0",
+        "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+        "limit": 2,
+        "pid": 1048,
+        "queued": 0,
+        "sequence": 1,
+        "server_time": 1788800521.9473
+      },
+      "state_changes": [
+        {
+          "active": 0,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+          "limit": 2,
+          "pid": 1211,
+          "queued": 0,
+          "server_time": 1788800514.7719
+        },
+        {
+          "active": 2,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+          "limit": 2,
+          "pid": 1211,
+          "queued": 1,
+          "server_time": 1788800521.9859
+        },
+        {
+          "active": 2,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+          "limit": 2,
+          "pid": 1211,
+          "queued": 2,
+          "server_time": 1788800522.2925
+        },
+        {
+          "active": 2,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+          "limit": 2,
+          "pid": 1211,
+          "queued": 3,
+          "server_time": 1788800522.3434
+        },
+        {
+          "active": 2,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+          "limit": 2,
+          "pid": 1211,
+          "queued": 4,
+          "server_time": 1788800522.4452
+        },
+        {
+          "active": 2,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+          "limit": 2,
+          "pid": 1211,
+          "queued": 3,
+          "server_time": 1788800526.0033
+        },
+        {
+          "active": 1,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+          "limit": 2,
+          "pid": 1211,
+          "queued": 3,
+          "server_time": 1788800529.977
+        },
+        {
+          "active": 2,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+          "limit": 2,
+          "pid": 1211,
+          "queued": 2,
+          "server_time": 1788800530.0288
+        },
+        {
+          "active": 1,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+          "limit": 2,
+          "pid": 1211,
+          "queued": 2,
+          "server_time": 1788800534.0052
+        },
+        {
+          "active": 2,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+          "limit": 2,
+          "pid": 1211,
+          "queued": 1,
+          "server_time": 1788800534.0571
+        },
+        {
+          "active": 2,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+          "limit": 2,
+          "pid": 1211,
+          "queued": 0,
+          "server_time": 1788800538.0698998
+        },
+        {
+          "active": 1,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+          "limit": 2,
+          "pid": 1211,
+          "queued": 0,
+          "server_time": 1788800542.0713
+        },
+        {
+          "active": 0,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+          "limit": 2,
+          "pid": 1211,
+          "queued": 0,
+          "server_time": 1788800551.9876
+        },
+        {
+          "active": 0,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+          "limit": 2,
+          "pid": 1211,
+          "queued": 0,
+          "server_time": 1788800564.7686
+        }
+      ],
+      "worker_events": [
+        {
+          "container": "633c7b74ff98",
+          "event": "started",
+          "id": "0",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+          "pid": 1048
+        },
+        {
+          "active": 1,
+          "admitted_at_server_seconds": 1788800521.9461,
+          "container": "633c7b74ff98",
+          "event": "acquired",
+          "id": "0",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+          "limit": 2,
+          "pid": 1048,
+          "queued": 0,
+          "sequence": 1,
+          "server_time": 1788800521.9473
+        },
+        {
+          "container": "633c7b74ff98",
+          "event": "started",
+          "id": "1",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+          "pid": 1042
+        },
+        {
+          "active": 2,
+          "admitted_at_server_seconds": 1788800521.9515,
+          "container": "633c7b74ff98",
+          "event": "acquired",
+          "id": "1",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+          "limit": 2,
+          "pid": 1042,
+          "queued": 0,
+          "sequence": 2,
+          "server_time": 1788800521.9525
+        },
+        {
+          "container": "633c7b74ff98",
+          "event": "released",
+          "id": "1",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+          "pass": true,
+          "pid": 1042
+        },
+        {
+          "container": "633c7b74ff98",
+          "event": "started",
+          "id": "2",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+          "pid": 1054
+        },
+        {
+          "active": 2,
+          "admitted_at_server_seconds": 1788800538.0456998,
+          "container": "633c7b74ff98",
+          "event": "acquired",
+          "id": "2",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+          "limit": 2,
+          "pid": 1054,
+          "queued": 0,
+          "sequence": 6,
+          "server_time": 1788800538.0476
+        },
+        {
+          "container": "633c7b74ff98",
+          "event": "released",
+          "id": "2",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+          "pass": true,
+          "pid": 1054
+        },
+        {
+          "container": "0f827e6565fb",
+          "event": "started",
+          "id": "3",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+          "pid": 1304
+        },
+        {
+          "active": 2,
+          "admitted_at_server_seconds": 1788800534.0272,
+          "container": "0f827e6565fb",
+          "event": "acquired",
+          "id": "3",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+          "limit": 2,
+          "pid": 1304,
+          "queued": 1,
+          "sequence": 5,
+          "server_time": 1788800534.0293999
+        },
+        {
+          "container": "0f827e6565fb",
+          "event": "released",
+          "id": "3",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+          "pass": true,
+          "pid": 1304
+        },
+        {
+          "container": "0f827e6565fb",
+          "event": "started",
+          "id": "4",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+          "pid": 1316
+        },
+        {
+          "active": 2,
+          "admitted_at_server_seconds": 1788800529.992,
+          "container": "0f827e6565fb",
+          "event": "acquired",
+          "id": "4",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+          "limit": 2,
+          "pid": 1316,
+          "queued": 2,
+          "sequence": 4,
+          "server_time": 1788800529.9947
+        },
+        {
+          "container": "0f827e6565fb",
+          "event": "released",
+          "id": "4",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+          "pass": true,
+          "pid": 1316
+        },
+        {
+          "container": "0f827e6565fb",
+          "event": "started",
+          "id": "5",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+          "pid": 1310
+        },
+        {
+          "active": 2,
+          "admitted_at_server_seconds": 1788800525.9707,
+          "container": "0f827e6565fb",
+          "event": "acquired",
+          "id": "5",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+          "limit": 2,
+          "pid": 1310,
+          "queued": 3,
+          "sequence": 3,
+          "server_time": 1788800525.9735
+        },
+        {
+          "container": "0f827e6565fb",
+          "event": "released",
+          "id": "5",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-killed-holder",
+          "pass": true,
+          "pid": 1310
+        }
+      ]
+    },
+    "public": {
+      "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-public",
+      "public_status": 0,
+      "participated": true,
+      "valid_public_result": true,
+      "cleanup_counts": {
+        "active": 0,
+        "container": "0f827e6565fb",
+        "event": "sample",
+        "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-public",
+        "limit": 2,
+        "pid": 1680,
+        "queued": 0,
+        "server_time": 1788800609.8504
+      },
+      "public_events": [
+        {
+          "container": "633c7b74ff98",
+          "event": "public_result",
+          "pass": true,
+          "pid": 1423,
+          "rows": 366,
+          "valid_public_result": true,
+          "year": 2020
+        },
+        {
+          "cleanup_counts": {
+            "active": 0,
+            "limit": 2,
+            "queued": 0,
+            "server_time": 1788800594.3781002
+          },
+          "container": "633c7b74ff98",
+          "event": "summary",
+          "external_observer_required": true,
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-public",
+          "mode": "public",
+          "pass": true,
+          "pid": 1330,
+          "timed_out": false
+        }
+      ],
+      "observer_container": "0f827e6565fb",
+      "pass": true,
+      "state_changes": [
+        {
+          "active": 0,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-public",
+          "limit": 2,
+          "pid": 1587,
+          "queued": 0,
+          "server_time": 1788800572.188
+        },
+        {
+          "active": 1,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-public",
+          "limit": 2,
+          "pid": 1587,
+          "queued": 0,
+          "server_time": 1788800585.2713
+        },
+        {
+          "active": 0,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-public",
+          "limit": 2,
+          "pid": 1587,
+          "queued": 0,
+          "server_time": 1788800594.1399
+        },
+        {
+          "active": 0,
+          "container": "0f827e6565fb",
+          "event": "sample",
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-public",
+          "limit": 2,
+          "pid": 1587,
+          "queued": 0,
+          "server_time": 1788800602.1847
+        }
+      ],
+      "worker_events": [
+        {
+          "container": "633c7b74ff98",
+          "event": "public_result",
+          "pass": true,
+          "pid": 1423,
+          "rows": 366,
+          "valid_public_result": true,
+          "year": 2020
+        },
+        {
+          "cleanup_counts": {
+            "active": 0,
+            "limit": 2,
+            "queued": 0,
+            "server_time": 1788800594.3781002
+          },
+          "container": "633c7b74ff98",
+          "event": "summary",
+          "external_observer_required": true,
+          "key": "wepppy:gridmet:admission:acceptance:ae5d107d44a7-20260907T170013Z-public",
+          "mode": "public",
+          "pass": true,
+          "pid": 1330,
+          "timed_out": false
+        }
+      ]
+    }
+  },
+  "pass": true,
+  "deployment": [
+    {
+      "event": "environment_prepared",
+      "candidate": "ae5d107d44a77c6ff3d0288e97b86cac174a77a4",
+      "backup": "/tmp/gridmet-admission-env-hml0_ktz.backup",
+      "services": [
+        "rq-worker",
+        "rq-worker-batch"
+      ],
+      "values": {
+        "GRIDMET_REDIS_ADMISSION_ENABLED": "true",
+        "GRIDMET_REDIS_ADMISSION_LIMIT": "4",
+        "GRIDMET_REDIS_ADMISSION_WAIT_TIMEOUT_SECONDS": "900",
+        "GRIDMET_REDIS_ADMISSION_LEASE_SECONDS": "300",
+        "GRIDMET_REDIS_ADMISSION_QUEUE_TTL_SECONDS": "60",
+        "GRIDMET_REDIS_ADMISSION_POLL_INTERVAL_SECONDS": "0.25",
+        "GRIDMET_REDIS_ADMISSION_KEY": "wepppy:gridmet:admission:v1"
+      }
+    },
+    {
+      "event": "deployment_verified",
+      "candidate": "ae5d107d44a77c6ff3d0288e97b86cac174a77a4",
+      "containers": [
+        {
+          "container": "633c7b74ff98",
+          "revision": "ae5d107d44a77c6ff3d0288e97b86cac174a77a4",
+          "config": {
+            "enabled": true,
+            "key": "wepppy:gridmet:admission:v1",
+            "limit": 4,
+            "wait_timeout_seconds": 900.0,
+            "lease_seconds": 300.0,
+            "queue_ttl_seconds": 60.0,
+            "poll_interval_seconds": 0.25
+          }
+        },
+        {
+          "container": "0f827e6565fb",
+          "revision": "ae5d107d44a77c6ff3d0288e97b86cac174a77a4",
+          "config": {
+            "enabled": true,
+            "key": "wepppy:gridmet:admission:v1",
+            "limit": 4,
+            "wait_timeout_seconds": 900.0,
+            "lease_seconds": 300.0,
+            "queue_ttl_seconds": 60.0,
+            "poll_interval_seconds": 0.25
+          }
+        }
+      ]
+    }
+  ],
+  "rollback": [
+    {
+      "enabled": "false",
+      "containers": [
+        {
+          "service": "rq-worker",
+          "container": "cecf1bf2983a",
+          "revision": "ae5d107d44a77c6ff3d0288e97b86cac174a77a4",
+          "config": null
+        },
+        {
+          "service": "rq-worker-batch",
+          "container": "24dcb26e20f4",
+          "revision": "ae5d107d44a77c6ff3d0288e97b86cac174a77a4",
+          "config": null
+        }
+      ]
+    },
+    {
+      "enabled": "true",
+      "containers": [
+        {
+          "service": "rq-worker",
+          "container": "5f35997d7704",
+          "revision": "ae5d107d44a77c6ff3d0288e97b86cac174a77a4",
+          "config": {
+            "enabled": true,
+            "key": "wepppy:gridmet:admission:v1",
+            "limit": 4,
+            "wait_timeout_seconds": 900.0,
+            "lease_seconds": 300.0,
+            "queue_ttl_seconds": 60.0,
+            "poll_interval_seconds": 0.25
+          }
+        },
+        {
+          "service": "rq-worker-batch",
+          "container": "7e32b08ff7f7",
+          "revision": "ae5d107d44a77c6ff3d0288e97b86cac174a77a4",
+          "config": {
+            "enabled": true,
+            "key": "wepppy:gridmet:admission:v1",
+            "limit": 4,
+            "wait_timeout_seconds": 900.0,
+            "lease_seconds": 300.0,
+            "queue_ttl_seconds": 60.0,
+            "poll_interval_seconds": 0.25
+          }
+        }
+      ]
+    }
+  ],
+  "final_health": {
+    "container": "5f35997d7704",
+    "config": {
+      "enabled": true,
+      "key": "wepppy:gridmet:admission:v1",
+      "limit": 4,
+      "wait_timeout_seconds": 900.0,
+      "lease_seconds": 300.0,
+      "queue_ttl_seconds": 60.0,
+      "poll_interval_seconds": 0.25
+    },
+    "snapshot": {
+      "state": "absent",
+      "position": null,
+      "queued": 0,
+      "active": 0,
+      "limit": 4,
+      "waited_seconds": 0.0,
+      "server_time_seconds": 1788800778.6292,
+      "fingerprint": "",
+      "sequence": null
+    },
+    "queues": {
+      "batch": 4,
+      "default": 6,
+      "fork-archive": 1
+    },
+    "worker_states": {
+      "idle": 11
+    }
+  },
+  "operational_before_rollback": {
+    "config": {
+      "enabled": true,
+      "key": "wepppy:gridmet:admission:v1",
+      "limit": 4,
+      "wait_timeout_seconds": 900.0,
+      "lease_seconds": 300.0,
+      "queue_ttl_seconds": 60.0,
+      "poll_interval_seconds": 0.25
+    },
+    "snapshot": {
+      "state": "absent",
+      "position": null,
+      "queued": 0,
+      "active": 0,
+      "limit": 4,
+      "waited_seconds": 0.0,
+      "server_time_seconds": 1788800672.1515,
+      "fingerprint": "",
+      "sequence": null
+    }
+  },
+  "test_policy": {
+    "limit": 2,
+    "wait_seconds": 120,
+    "lease_seconds": 30,
+    "queue_ttl_seconds": 9,
+    "poll_seconds": 0.05,
+    "public_lease_seconds": 300
+  }
+}

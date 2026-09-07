@@ -4,8 +4,8 @@
 
 **Timezone**: UTC
 **Started**: 2026-09-07 15:53 UTC
-**Current phase**: Reviewed candidate commit and Forest deployment
-**Last updated**: 2026-09-07 15:53 UTC
+**Current phase**: Complete; Forest enabled and verified
+**Last updated**: 2026-09-07 17:08 UTC
 **Security impact**: `high`; independent review required
 **Live authorization**: `forest` development stack only
 **Later batch validation**: explicitly deferred to the post-package
@@ -15,45 +15,35 @@
 
 ### Ready / Backlog
 
-- [ ] Execute the active ExecPlan contract-first from repository `master`.
-- [ ] Add the GridMET admission contract and parameterization ADR.
-- [ ] Implement FIFO queue state, expiring leases, configuration, diagnostics,
-  and explicit error taxonomy in a separate admission module.
-- [ ] Integrate every GridMET client and indirect runtime caller while
-  preserving default-off behavior.
-- [ ] Add unit, real-Redis, multiprocessing, and client-wiring tests.
-- [ ] Add Compose propagation, configuration reference, operational runbook,
-  and reusable Forest probe.
-- [ ] Complete focused and full local/container validation.
-- [ ] Complete independent correctness, QA/code, and security reviews.
-- [ ] Commit and push the reviewed candidate before Forest deployment.
-- [ ] Deploy the exact candidate and environment values to `forest`, recreate
-  only affected services, and verify revision/config parity.
-- [ ] Run the cross-container concurrency probe and one admitted public GridMET
-  acquisition on Forest; save evidence and prove cleanup.
-- [ ] Close the package without running a batch or deploying Kubernetes.
+None within this package.
 
 ### In Progress
 
-Contract and ADR accepted after independent correctness and security reviews;
-standalone checkpoint: `1b4835ca73bc67c9c84ecbb26f596aab4078e234`.
-Admission module, client integration, caller propagation, and probe are
-implemented. Nine isolated real-Redis scenarios passed; focused client,
-propagation, and probe suites pass. Full suite and final independent reviews
-passed: final frozen-tree suite 7,651 passed / 72 skipped, with all independent
-review findings closed. Deployment follows the reviewed candidate commit/push.
-Preflight verified Forest, clean master at
-`583e6870c639999515035423f133e5925dae2da5`, the installed development wctl
-preset, and healthy standalone Redis 8.6.2. Baseline focused validation passed:
-54 tests across download clients and climate build helpers.
+None.
 
 ### Blocked
 
-None known. Forest access and Redis availability must be verified before the
-live milestone; failure there is evidence to record, not permission to switch
-targets.
+None.
 
 ### Done
+
+- [x] Execute the active ExecPlan contract-first from repository `master`.
+- [x] Add the GridMET admission contract and parameterization ADR.
+- [x] Implement FIFO queue state, expiring leases, configuration, diagnostics,
+  and explicit error taxonomy in a separate admission module.
+- [x] Integrate every GridMET client and indirect runtime caller while
+  preserving default-off behavior.
+- [x] Add unit, real-Redis, multiprocessing, and client-wiring tests.
+- [x] Add Compose propagation, configuration reference, operational runbook,
+  and reusable Forest probe.
+- [x] Complete focused and full local/container validation.
+- [x] Complete independent correctness, QA/code, and security reviews.
+- [x] Commit and push the reviewed candidate before Forest deployment.
+- [x] Deploy the exact candidate and environment values to `forest`, recreate
+  only affected services, and verify revision/config parity.
+- [x] Run the cross-container concurrency probe and one admitted public GridMET
+  acquisition on Forest; save evidence and prove cleanup.
+- [x] Close the package without running a batch or deploying Kubernetes.
 
 - [x] Assessed the present GridMET acquisition paths and confirmed that the
   multiple-interpolated limit is process-local (2026-09-07 15:53 UTC).
@@ -61,6 +51,17 @@ targets.
   construction with Roger Lew (2026-09-07 15:53 UTC).
 - [x] Scaffolded package, tracker, active ExecPlan, deployment boundary, and
   Forest integration acceptance (2026-09-07 15:53 UTC).
+
+## Completion
+
+Contract ancestor: `1b4835ca73bc67c9c84ecbb26f596aab4078e234`. Runtime
+candidate: `ae5d107d44a77c6ff3d0288e97b86cac174a77a4`, pushed before Forest
+deployment. Final full suite 7,651 passed / 72 skipped; nine isolated Redis
+scenarios passed. All independent reviews passed.
+[Forest evidence](artifacts/2026-09-07_forest_integration.md) records two-container
+peak two/FIFO, killed waiter and holder reclamation, a successful 366-row public
+request, zero final state, actual rollback, and restored enabled limit four.
+All 11 workers remained healthy/idle. No batch or Kubernetes work was performed.
 
 ## Decisions Log
 
@@ -95,38 +96,38 @@ bounded unique-key probe can prove coordination without starting a batch.
 
 | Risk | Severity | Likelihood | Mitigation | Status |
 | --- | --- | --- | --- | --- |
-| Pod/process death leaks capacity | High | Medium | Expiring ownership leases and renewal tests | Open |
-| Dead waiter blocks FIFO queue | High | Medium | Queue-ticket TTL, heartbeat, and pruning | Open |
-| Retry amplification retains permits | High | Medium | Per-attempt permit and release before backoff | Open |
-| Redis outage removes protection | High | Low | Enabled mode fails closed with explicit error | Open |
-| Process pool pickles unsafe client state | High | Medium | Pass immutable config; connect lazily in child | Open |
-| Long stream outlives lease | High | Medium | Ownership-safe renewal during streaming | Open |
-| Queue position misrepresented as ETA | Medium | Medium | Contract and logs expose state without ETA | Open |
-| Live probe pollutes operational keys | Medium | Low | Unique namespaced key, final emptiness proof, targeted cleanup | Open |
-| Forest-only success overclaimed | High | Medium | Explicit Kubernetes/batch exclusion in every closeout artifact | Open |
+| Pod/process death leaks capacity | High | Medium | Expiring ownership leases and renewal tests | Mitigated; validated |
+| Dead waiter blocks FIFO queue | High | Medium | Queue-ticket TTL, heartbeat, and pruning | Mitigated; validated |
+| Retry amplification retains permits | High | Medium | Per-attempt permit and release before backoff | Mitigated; validated |
+| Redis outage removes protection | High | Low | Enabled mode fails closed with explicit error | Mitigated; validated |
+| Process pool pickles unsafe client state | High | Medium | Pass immutable config; connect lazily in child | Mitigated; validated |
+| Long stream outlives lease | High | Medium | Ownership-safe renewal during streaming | Mitigated; validated |
+| Queue position misrepresented as ETA | Medium | Medium | Contract and logs expose state without ETA | Mitigated; validated |
+| Live probe pollutes operational keys | Medium | Low | Unique namespaced key, final emptiness proof, targeted cleanup | Mitigated; validated |
+| Forest-only success overclaimed | High | Medium | Explicit Kubernetes/batch exclusion in every closeout artifact | Mitigated; validated |
 
 ## Verification Checklist
 
-- [ ] Default-off path proves zero Redis construction/I/O.
-- [ ] Configuration rejects invalid boolean, numeric, and timing relationships.
-- [ ] Atomic scripts use Redis time and ownership tokens.
-- [ ] FIFO, limit, renewal, release, cancellation, and expiry tests pass.
-- [ ] Retry sleeps occur with no active permit.
-- [ ] Public point and gridded clients are wired.
-- [ ] PRISM, Daymet, SNOTEL/supplement, monthly precipitation, observed GridMET,
+- [x] Default-off path proves zero Redis construction/I/O.
+- [x] Configuration rejects invalid boolean, numeric, and timing relationships.
+- [x] Atomic scripts use Redis time and ownership tokens.
+- [x] FIFO, limit, renewal, release, cancellation, and expiry tests pass.
+- [x] Retry sleeps occur with no active permit.
+- [x] Public point and gridded clients are wired.
+- [x] PRISM, Daymet, SNOTEL/supplement, monthly precipitation, observed GridMET,
   and multiple-interpolated callers propagate opt-in configuration.
-- [ ] `ProcessPoolExecutor` path uses serializable configuration only.
-- [ ] `docker/docker-compose.dev.yml` renders with default-off and enabled values.
-- [ ] `docs/configuration-reference.md` and operator guidance are updated.
-- [ ] Focused tests pass.
-- [ ] Full repository suite passes.
-- [ ] Correctness, QA/code, and security reviews have no unresolved medium/high findings.
-- [ ] Exact candidate commit is deployed only to Forest.
-- [ ] Forest containers agree on candidate revision and effective environment.
-- [ ] Cross-container probe observes queued state and `2 <= peak_active <= test_limit`.
-- [ ] Actual GridMET client request acquires/releases admission and leaves no state.
-- [ ] Forest rollback is rehearsed or directly demonstrated without DB flush.
-- [ ] No batch or Kubernetes deployment occurred.
+- [x] `ProcessPoolExecutor` path uses serializable configuration only.
+- [x] `docker/docker-compose.dev.yml` renders with default-off and enabled values.
+- [x] `docs/configuration-reference.md` and operator guidance are updated.
+- [x] Focused tests pass.
+- [x] Full repository suite passes.
+- [x] Correctness, QA/code, and security reviews have no unresolved medium/high findings.
+- [x] Exact candidate commit is deployed only to Forest.
+- [x] Forest containers agree on candidate revision and effective environment.
+- [x] Cross-container probe observes queued state and `2 <= peak_active <= test_limit`.
+- [x] Actual GridMET client request acquires/releases admission and leaves no state.
+- [x] Forest rollback is rehearsed or directly demonstrated without DB flush.
+- [x] No batch or Kubernetes deployment occurred.
 
 ## Required Evidence Artifacts
 
@@ -143,10 +144,9 @@ observed peak, queue observation, cleanup state, and rollback result.
 
 ## Handoff
 
-Execute
-`prompts/active/gridmet_redis_admission_execplan.md` end-to-end. The executor is
-authorized to update Forest's gitignored `docker/.env`, recreate affected
-services in `docker/docker-compose.dev.yml`, and run the bounded integration
-probes after the candidate is committed and pushed. This authority does not
-extend to another Compose topology, a batch, `forest1`, `wepp.cloud`, registry
-publication, or Kubernetes/openwepp.org.
+Package complete. Forest remains enabled with the ratified seven values and
+runtime candidate above; closeout commits contain documentation/evidence only.
+The durable rules live in [the canonical contract](../../schemas/gridmet-redis-admission-contract.md)
+and [ADR-0050](../../adrs/ADR-0050-gridmet-redis-admission.md).
+The operator's subsequent registry build, openwepp.org deployment, and batch
+validation are outside this package and have not been performed.

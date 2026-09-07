@@ -1,6 +1,6 @@
 # ADR-0050: Opt-in shared GridMET Redis admission
 
-Status: Accepted for implementation; Forest acceptance pending  
+Status: Accepted; implemented and Forest-validated 2026-09-07
 Date: 2026-09-07
 
 ## Context
@@ -103,11 +103,12 @@ wall time. This limitation must remain visible in operational evidence.
 ## Evidence
 
 - [Work package and initial values](../work-packages/20260907_gridmet_redis_admission/package.md)
-- [Execution and Forest acceptance plan](../work-packages/20260907_gridmet_redis_admission/prompts/active/gridmet_redis_admission_execplan.md)
+- [Execution and Forest acceptance plan](../work-packages/20260907_gridmet_redis_admission/prompts/completed/gridmet_redis_admission_execplan.md)
 - [Earlier HTTP retry/concurrency decision](ADR-0028-gridmet-download-retry-concurrency.md)
 - Existing timeouts and retry constants: `wepppy/climates/gridmet/acquisition.py`.
-- Runtime tests, independent review, and Forest evidence remain required before
-  deployment/closeout; this ADR does not assert they have already passed.
+- [Completed automated and Forest evidence](../work-packages/20260907_gridmet_redis_admission/artifacts/2026-09-07_forest_integration.md):
+  runtime tests, independent reviews, cross-container and public-client probes,
+  and rollback passed on 2026-09-07.
 
 ## Risk and Rollback Notes
 

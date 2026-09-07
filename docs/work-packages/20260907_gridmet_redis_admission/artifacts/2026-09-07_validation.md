@@ -2,8 +2,8 @@
 
 Execution baseline: `583e6870c639999515035423f133e5925dae2da5`.
 Accepted contract ancestor: `1b4835ca73bc67c9c84ecbb26f596aab4078e234`.
-Automated runtime validation and independent reviews pass. Live Forest
-acceptance remains separate.
+Automated runtime validation, independent reviews, and live Forest acceptance
+pass for runtime candidate `ae5d107d44a77c6ff3d0288e97b86cac174a77a4`.
 
 ## Completed checks
 
@@ -47,8 +47,8 @@ acceptance remains separate.
   GridMET climate work and are activation targets.
 - Configuration reference, Forest runbook, contract/ADR, and package scoped
   documentation lint: passed. Spelling previews and `git diff --check`: clean.
-- Observe-only code-quality command completed; final staged-file refresh and
-  broad-exception enforcement passed. Existing Daymet allowlist line
+- Observe-only code-quality command completed; broad-exception enforcement
+  passed. Existing Daymet allowlist line
   references moved with imports/signatures; handler behavior did not change.
 
 ## Isolated Redis fixture
@@ -69,6 +69,27 @@ option would avoid this unnecessary verification cost in future work.
 
 ## Remaining gates
 
-Forest deployment/acceptance remains pending.
+None within this package. [Forest acceptance](2026-09-07_forest_integration.md)
+passed across two containers, including both crash repetitions, a valid public
+request, empty cleanup, and actual disable/restore rollback.
 Independent correctness, QA, and security all passed with zero unresolved
 findings; their artifacts record the regression evidence and dispositions.
+The separate registry build, Kubernetes/openwepp.org deployment, and batch
+validation remain operator-owned.
+
+## Final code-quality observation
+
+After committing, reran the observability tool against the fixed starting SHA
+`583e6870c639999515035423f133e5925dae2da5` (remote master had advanced on push),
+with outputs in `/tmp/gridmet-final-code-quality.{json,md}`. It analyzed 17
+changed Python files. Four received a red highest metric band and four yellow;
+there are no threshold-based failures. `radon` is unavailable, so Python
+cyclomatic-complexity measurements are not claimed.
+
+The long existing Daymet/grid retrieval functions grew only for explicit
+configuration/lifecycle handling; preserving their established behavior kept
+the change bounded. Acquisition's largest function shrank from 109 to 80
+measured lines. The real-Redis scenario runner deliberately shares setup and
+cleanup across nine subprocess scenarios, accounting for its function-length
+band. Independent QA reviewed cohesion and meaningful coverage. These are
+observe-only tradeoffs, not unreviewed runtime behavior changes.
