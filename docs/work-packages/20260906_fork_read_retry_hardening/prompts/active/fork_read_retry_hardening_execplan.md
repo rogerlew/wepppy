@@ -133,3 +133,15 @@ Revision note (2026-09-07 UTC): User requested the unrelated shape-converter
 test repair found by broad validation; test-only fix committed as `efd78afc6`,
 15 focused tests passed, and independent QA accepted. No production config
 change was needed.
+
+
+## Retry Budget Amendment — 2026-09-07 UTC
+
+Operator-directed correction after production recurrence: supersede the original
+5-second/0.1-second-to-1-second policy with a 120-second shared budget and
+2-second initial delay doubling to a 10-second cap. Existing production storage
+measurements already justified a longer timescale. ADR-0049 and the canonical
+NoDb contract carry the amended policy. No broader retry scope or mount changes.
+Validation: 93 targeted NoDb/read/preparation tests passed in 17.59 seconds,
+including simulated recovery after 60 seconds and permanent-error exhaustion.
+Scoped documentation lint and diff checks passed. Production rollout pending.

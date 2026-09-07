@@ -151,7 +151,7 @@ leaf controllers depend on that identity inside their native Batch Runner contex
 
 ## Initial Read Recovery and Prerequisite Failures
 
-Initial Wepp/Watershed reads in WEPP preparation tolerate ENOENT/ESTALE briefly
+Initial Wepp/Watershed reads in WEPP preparation tolerate ENOENT/ESTALE within a shared two-minute retry window
 under [ADR-0049](../adrs/ADR-0049-fork-preparation-read-retry.md). No user action is
 needed when a transient read recovers. Exhausted or permanent failures retain
 the original filesystem error in operator diagnostics; the fork log identifies

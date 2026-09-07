@@ -31,9 +31,9 @@ _BUDGET: ContextVar[_ReadBudget | None] = ContextVar("nodb_initial_read_budget",
 
 @contextmanager
 def initial_read_retry(*, runid: str, job_id: str) -> Iterator[None]:
-    """Share a five-second retry budget across initial, read-only hydration."""
+    """Share a 120-second retry budget across initial, read-only hydration."""
     existing = _BUDGET.get()
-    token = _BUDGET.set(existing or _ReadBudget(time.monotonic() + 5.0, runid, job_id, socket.gethostname()))
+    token = _BUDGET.set(existing or _ReadBudget(time.monotonic() + 120.0, runid, job_id, socket.gethostname()))
     try:
         yield
     finally:
@@ -48,7 +48,7 @@ def _call(operation: str, path: str, action: Callable[[], _T], *, allow_missing:
     budget = _BUDGET.get()
     started = time.monotonic()
     attempts = 0
-    delay = 0.1
+    delay = 2.0
     last_errno = None
     while True:
         attempts += 1
@@ -81,7 +81,7 @@ def _call(operation: str, path: str, action: Callable[[], _T], *, allow_missing:
                     budget.host, budget.runid, budget.job_id,
                 )
                 raise
-            delay = min(delay * 2, 1.0)
+            delay = min(delay * 2, 10.0)
         else:
             if budget is not None and attempts > 1:
                 _LOG.info(

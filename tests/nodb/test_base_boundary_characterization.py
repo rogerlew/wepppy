@@ -1066,7 +1066,7 @@ def test_initial_retry_hydrates_real_payload_after_transient_error(
         with retry.initial_read_retry(runid="recover", job_id="job"):
             loaded = getattr(_DummyNoDb, load_method)(str(tmp_path))
         assert loaded.value == 27
-        assert now[0] == 0.1
+        assert now[0] == 2.0
         assert len(calls) >= 2
     finally:
         _DummyNoDb._instances.pop(str(tmp_path), None)

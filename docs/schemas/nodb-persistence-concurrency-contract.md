@@ -248,10 +248,10 @@ object hydrated before another writer committed.
 ## Bounded Initial Preparation Reads (FORK-READ-01)
 
 Implemented locally (2026-09-07 UTC); production rollout validation pending. Initial WEPP preparation
-controller loading MAY opt into one 5-second filesystem-read budget under
+controller loading MAY opt into one 120-second filesystem-read budget under
 [ADR-0049](../adrs/ADR-0049-fork-preparation-read-retry.md). Only ENOENT and ESTALE
-from stat/open/read operations MAY retry, with 0.1-second exponential delays
-capped at 1 second. No attempt is scheduled after budget exhaustion. Blocking
+from stat/open/read operations MAY retry, with 2-second exponential delays
+capped at 10 seconds. No attempt is scheduled after budget exhaustion. Blocking
 kernel I/O is not bounded by this application deadline.
 
 Required disk loads MUST attempt the actual read and preserve the original

@@ -70,3 +70,15 @@ the required PowerUser role; the climate same-size rewrite fixture uses a
 deterministic atomic payload edit. Affected modules: 48 passed. Final full
 suite: 7,489 passed, 63 skipped, 12 subtests passed, no failures or deselections.
 This supersedes the broad-suite gap above. No production behavior changed.
+
+
+## Retry Budget Amendment — 2026-09-07 UTC
+
+Operator-directed correction after production recurrence: supersede the original
+5-second/0.1-second-to-1-second policy with a 120-second shared budget and
+2-second initial delay doubling to a 10-second cap. Existing production storage
+measurements already justified a longer timescale. ADR-0049 and the canonical
+NoDb contract carry the amended policy. No broader retry scope or mount changes.
+Validation: 93 targeted NoDb/read/preparation tests passed in 17.59 seconds,
+including simulated recovery after 60 seconds and permanent-error exhaustion.
+Scoped documentation lint and diff checks passed. Production rollout pending.

@@ -56,7 +56,7 @@ def test_initial_preparation_reads_retry_but_translator_is_not_replayed(tmp_path
         getattr(prep, entrypoint)('run')
     assert caught.value is original
     assert calls.count('translate') == 1
-    assert sleeps == [0.1]
+    assert sleeps == [2.0]
     assert not retry.read_retry_active()
 
 

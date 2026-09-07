@@ -54,7 +54,7 @@ def test_transient_read_recovers_with_original_errno_diagnostics(tmp_path, monke
     with retry.initial_read_retry(runid="run-1", job_id="job-1"):
         result = retry.stat_path(path) if operation == "stat" else retry.read_text(path)
     assert result is not None
-    assert fake_clock.sleeps == [0.1, 0.2]
+    assert fake_clock.sleeps == [2.0, 4.0]
     assert "recovered" in caplog.text
     assert f"errno={error_number}" in caplog.text
     assert "runid=run-1 job_id=job-1" in caplog.text
@@ -74,10 +74,12 @@ def test_permanent_error_preserves_original_exception(monkeypatch, fake_clock, e
         with pytest.raises(OSError) as caught:
             retry.read_text(original.filename)
     assert caught.value is original
-    assert fake_clock.now < 5.0
+    assert fake_clock.now < 120.0
     if error_number in (errno.ENOENT, errno.ESTALE):
-        assert len(calls) > 1
-        assert max(fake_clock.sleeps) <= 1.0
+        assert len(calls) == 14
+        assert fake_clock.now == 114.0
+        assert min(fake_clock.sleeps) >= 2.0
+        assert max(fake_clock.sleeps) <= 10.0
     else:
         assert len(calls) == 1
         assert not fake_clock.sleeps
@@ -122,8 +124,8 @@ def test_budget_is_shared_and_nested_context_does_not_extend_it(monkeypatch, fak
         with retry.initial_read_retry(runid="run", job_id="job"):
             with pytest.raises(OSError):
                 retry.read_text("two.nodb")
-    assert fake_clock.now < 5.0
-    assert all(t < 5.0 for t in calls)
+    assert fake_clock.now < 120.0
+    assert all(t < 120.0 for t in calls)
     assert not retry.read_retry_active()
 
 
@@ -177,3 +179,23 @@ def test_actual_missing_file_then_atomic_publication(tmp_path, monkeypatch, capl
         future.result()
 
     assert "recovered" in caplog.text
+
+
+@pytest.mark.parametrize("error_number", [errno.ENOENT, errno.ESTALE])
+def test_read_recovers_after_minute_of_storage_visibility_delay(
+    tmp_path, monkeypatch, fake_clock, error_number,
+):
+    path = tmp_path / "state.nodb"
+    path.write_text("ready")
+    attempts = []
+
+    def delayed_open(*args, **kwargs):
+        attempts.append(fake_clock.now)
+        if fake_clock.now < 60.0:
+            raise OSError(error_number, "visibility delayed", str(path))
+        return open(*args, **kwargs)
+
+    monkeypatch.setattr(retry, "open", delayed_open, raising=False)
+    with retry.initial_read_retry(runid="run", job_id="job"):
+        assert retry.read_text(str(path)) == "ready"
+    assert attempts == [0.0, 2.0, 6.0, 14.0, 24.0, 34.0, 44.0, 54.0, 64.0]

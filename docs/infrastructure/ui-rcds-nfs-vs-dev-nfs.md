@@ -540,8 +540,8 @@ fork prerequisite failure reporting. Production rollout and a full
 production-equivalent fork/undisturbify exercise remain pending.
 
 Initial Wepp/Watershed controller loads in the six preparation entry points
-share a five-second retry budget for ENOENT and ESTALE. Delays start at 0.1
-seconds and double to at most one second. Only filesystem stat/open/read
+share a 120-second retry budget for ENOENT and ESTALE. Delays start at 2
+seconds and double to at most 10 seconds. Only filesystem stat/open/read
 operations retry; parsing, writes, translation and model execution do not.
 Optional absence returns None immediately. Other errno values fail immediately.
 The underlying exception retains its errno and filename. These application
@@ -833,3 +833,43 @@ Direction:
 See:
 - Work package: [`docs/work-packages/20260214_nodir_archives/package.md`](../work-packages/20260214_nodir_archives/package.md)
 - Contract: [`docs/schemas/nodir-contract-spec.md`](../schemas/nodir-contract-spec.md)
+
+### Post-Hardening Recurrence (2026-09-07 UTC)
+
+Fork root `5c241491-0fa0-4cba-b737-b72c57fc87a4` copied `inconclusive-nod`
+to `fiduciary-sending` and queued WEPP preparation at approximately 05:56:58 UTC.
+All four initial preparation jobs ran in wepp1 worker container `e43a96e9220b`
+and failed around 05:57:03 UTC. Slope job
+`4297b546-cec0-4263-b4d4-b2cc5dc77051` is the user-visible failing prerequisite;
+management, soils and climate failed on the same path as well.
+
+Worker logs confirm eight `stat` attempts per job against
+`/wc1/runs/fi/fiduciary-sending/wepp.nodb`, each returning ENOENT. Exhaustion
+was logged at 4.504–4.505 seconds: the five-second budget could not accommodate
+the next one-second delay. This confirms the retry path executed and the chosen
+budget did not cover this occurrence. The new failure callback correctly
+reported the failed prerequisite in the fork console.
+
+Read-only follow-up found the 2,287-byte file on all three hosts and readable
+inside both wepp1/wepp2 worker containers as UID 1002/GID 130. Its reported mtime
+was 05:56:58.352910 UTC. This establishes later visibility, not when the failed
+client first regained visibility. Current mount observations: wepp1 NFSv4.2
+uses server address 192.168.100.102; wepp2 NFSv4.2 and wepp3 NFSv3 use
+192.168.100.101. These differences are context, not evidence of host causality.
+
+The small-file-burst/visibility hypothesis remains open. The producer's readiness
+check did not ensure consumer visibility. Further hardening needs measured
+consumer-side visibility timing; this incident does not establish a sufficient
+replacement retry budget. No mount changes or job recovery were performed.
+
+
+### Retry Budget Correction (2026-09-07 UTC)
+
+The operator directed immediate correction of the too-short retry policy using
+this document's existing measurements: create 30.376 seconds, rewrite 34.456
+seconds and system-wide sync 1.235 seconds. ADR-0049 now specifies a 120-second
+shared budget with delays of 2, 4, 8, then 10 seconds. This supersedes the original
+five-second policy and the recurrence note's suggestion to wait for more timing
+evidence before correcting it. The precise NAS visibility bound remains unknown.
+Healthy reads have no delay; optional absence and non-transient errors remain
+immediate. Only initial filesystem reads retry, never mutations or whole jobs.
