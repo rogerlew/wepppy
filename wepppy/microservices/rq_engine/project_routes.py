@@ -285,11 +285,9 @@ def _release_creation_safely(
     "/create/",
     summary="Create a new run",
     description=(
-        "Supports `rq_token`, Bearer auth (`rq:enqueue`), same-origin session-cookie fallback, "
-        "or CAPTCHA verification when anonymous creation is enabled. "
-        "WEPPCLOUD_ALLOW_ANONYMOUS_PROJECT_CREATION=false requires user/cookie or service/mcp auth; "
-        "session tokens and CAPTCHA-only callers receive 403 anonymous_creation_disabled. "
-        "Synchronously creates run directory/config metadata and responds with a redirect to the new run URL."
+        "Creates a run and redirects (303). Accepts rq_token, Bearer (rq:enqueue), "
+        "same-origin login cookie, or CAPTCHA. WEPPCLOUD_ALLOW_ANONYMOUS_PROJECT_CREATION=false "
+        "rejects CAPTCHA-only and session-token callers; user/service/mcp auth remains allowed."
     ),
     tags=["rq-engine", "project"],
     operation_id=rq_operation_id("create"),
