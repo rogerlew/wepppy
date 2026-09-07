@@ -642,7 +642,8 @@ def test_set_mod_rusle_allows_when_disturbed_enabled(project_client):
 
 
 def test_set_mod_roads_requires_wbt_backend(project_client):
-    client, RonStub, _, run_dir, _ = project_client
+    client, RonStub, dispatched, run_dir, _ = project_client
+    dispatched["current_user"].roles = {"PowerUser"}
     controller = RonStub.getInstance(run_dir)
     controller._mods = []
     project_module.Watershed.getInstance(run_dir).delineation_backend_is_wbt = False
@@ -659,7 +660,8 @@ def test_set_mod_roads_requires_wbt_backend(project_client):
 
 
 def test_set_mod_roads_allows_when_wbt_backend(project_client):
-    client, RonStub, _, run_dir, _ = project_client
+    client, RonStub, dispatched, run_dir, _ = project_client
+    dispatched["current_user"].roles = {"PowerUser"}
     controller = RonStub.getInstance(run_dir)
     controller._mods = []
     project_module.Watershed.getInstance(run_dir).delineation_backend_is_wbt = True

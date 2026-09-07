@@ -13,7 +13,7 @@ small-file-heavy fork activity; no specific worker host is considered causal.
 - [x] (2026-09-07 UTC) Incident evidence, scope and package scaffold recorded.
 - [x] Ratify contracts through two reviews and an ancestor commit.
 - [x] Implement read retry/diagnostics and fork failure reporting.
-- [x] Complete targeted and direct-boundary validation; run broad suite and record its unrelated failure.
+- [x] Complete targeted, direct-boundary and full-suite validation; resolve discovered test failures.
 - [x] Complete independent reviews and update operator/user guidance.
 
 ## Surprises & Discoveries
@@ -44,7 +44,8 @@ correctness, QA and security reviews accepted with all findings resolved.
 The user-requested shape-converter test repair passes 15 tests. Final broad
 validation reached 6,477 passed, 63 skipped and 1 deselected before an unrelated
 roads authorization/backend assertion failed. The excluded shape test passed
-separately. Full-suite green is not claimed. No production deployment or
+separately. A subsequent user-requested test repair resolves those gaps: the final full
+suite passes 7,489 tests with 63 skipped and 12 passing subtests. No production deployment or
 user-run retry has occurred; production-equivalent workflow evidence remains
 a rollout gate.
 

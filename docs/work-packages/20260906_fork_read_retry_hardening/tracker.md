@@ -27,7 +27,7 @@ Starting revision: `87cfe40473108a93cbbd5733fdc13c99d97707ea`.
 
 ## Validation and Risks
 
-228 focused tests pass; broad-suite failure is recorded below. A hard-mounted NFS syscall can block beyond a Python
+228 focused tests and the final full suite pass; follow-up results are below. A hard-mounted NFS syscall can block beyond a Python
 retry deadline; this package bounds retry scheduling, not kernel I/O duration.
 
 ## Handoff
@@ -62,3 +62,11 @@ passed, 63 skipped, 1 deselected. The test expected a WBT-backend error but
 received the PowerUser restriction first. Both the test and route are unchanged
 from the contract checkpoint. The excluded shape-converter test passed in its
 separate 15-test run. Full-suite green is not claimed; see the validation artifact.
+
+## Full-Suite Follow-up — 2026-09-07 UTC
+
+The user requested resolution of all test failures. Roads test users now have
+the required PowerUser role; the climate same-size rewrite fixture uses a
+deterministic atomic payload edit. Affected modules: 48 passed. Final full
+suite: 7,489 passed, 63 skipped, 12 subtests passed, no failures or deselections.
+This supersedes the broad-suite gap above. No production behavior changed.

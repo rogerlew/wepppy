@@ -64,13 +64,30 @@ passing run. The remaining full run stopped after 6,477 passed, 63 skipped,
 `tests/weppcloud/routes/test_project_bp.py::test_set_mod_roads_requires_wbt_backend`.
 The assertion expected a WBT-backend rejection but received the PowerUser
 authorization rejection first. The test and route are unchanged from checkpoint
-`2ad307aeb`. This is an outstanding broad-suite gap; full-suite green is not claimed.
+`2ad307aeb`. That gap was subsequently resolved in the follow-up below.
 
 Final broad command:
 
 ```bash
 wctl run-pytest tests --maxfail=1 -q -k 'not test_prod_wepp1_overlay_does_not_override_shape_converter_hardening'
 ```
+
+## Full-Suite Failure Resolution — 2026-09-07 UTC
+
+The user requested all remaining test failures be resolved. Both roads backend
+tests now grant their test user the registry-required PowerUser role so the
+request reaches backend validation. Production authorization is unchanged.
+A subsequent complete run found one intermittent climate test setup failure:
+repeated NoDb serialization could not guarantee equal adjacent payload sizes.
+The helper now atomically publishes one equal-length scalar edit with an
+explicitly distinct timestamp, preserving the real same-size disk interleaving
+without depending on variable-width serialized signature metadata.
+
+- Affected climate/project-route modules: 48 passed.
+- Final `wctl run-pytest tests -q`: **7,489 passed, 63 skipped, 12 subtests passed**
+  in 771.37 seconds; 3,103 warnings, no failures or deselected tests.
+- This result supersedes the broad-suite gaps above and includes the repaired
+  shape-converter test. Production-equivalent rollout validation remains separate.
 
 ## Rollout Gate and Limitations
 

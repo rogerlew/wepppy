@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import json
 import os
+import re
 from pathlib import Path
 
 import pytest
@@ -63,23 +65,27 @@ def _result() -> ClimateMultipleBuildResult:
 
 
 def _same_size_rewrite(climate: Climate, field_name: str, value: object) -> object:
-    """Perform a changed atomic rewrite whose final adjacent sizes match."""
-    before = os.stat(climate._nodb)
-    candidate = value
-    for attempt in range(12):
-        detached = Climate.load_detached(climate.wd)
-        with detached.locked():
-            setattr(detached, field_name, candidate)
-        after = os.stat(climate._nodb)
-        if before.st_size == after.st_size:
-            assert before.st_mtime != after.st_mtime
-            return candidate
+    """Inject one same-size atomic disk edit without reserializing metadata."""
+    path = Path(climate._nodb)
+    before = path.stat()
+    payload = path.read_text(encoding="utf-8")
+    old_value = json.dumps(getattr(climate, field_name))
+    new_value = json.dumps(value)
+    assert len(old_value.encode("utf-8")) == len(new_value.encode("utf-8"))
+    pattern = rf'({re.escape(json.dumps(field_name))}\s*:\s*){re.escape(old_value)}'
+    rewritten, count = re.subn(pattern, lambda match: match[1] + new_value, payload)
+    assert count == 1
 
-        before = after
-        if isinstance(value, str):
-            candidate = value + ("x" * (attempt + 1))
-
-    raise AssertionError("could not produce a same-size Climate NoDb rewrite")
+    # Real NoDb writes also serialize signature metadata, whose timestamp width
+    # varies. This test needs an exact same-size interleaving, not that serializer.
+    replacement = path.with_suffix(".replacement")
+    replacement.write_text(rewritten, encoding="utf-8")
+    os.utime(replacement, ns=(before.st_atime_ns, before.st_mtime_ns + 1_000_000_000))
+    os.replace(replacement, path)
+    after = path.stat()
+    assert before.st_size == after.st_size
+    assert before.st_mtime != after.st_mtime
+    return value
 
 
 def test_unrelated_same_size_rewrite_is_preserved_during_finalization(
