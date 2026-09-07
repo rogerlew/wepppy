@@ -4,7 +4,7 @@
 
 **Timezone**: UTC
 **Started**: 2026-09-07 15:53 UTC
-**Current phase**: Ready for implementation on Forest
+**Current phase**: Contract checkpoint drafting and two independent reviews
 **Last updated**: 2026-09-07 15:53 UTC
 **Security impact**: `high`; independent review required
 **Live authorization**: `forest` development stack only
@@ -35,7 +35,11 @@
 
 ### In Progress
 
-None.
+Contract and ADR drafting, with independent correctness and security reviews.
+Preflight verified Forest, clean master at
+`583e6870c639999515035423f133e5925dae2da5`, the installed development wctl
+preset, and healthy standalone Redis 8.6.2. Baseline focused validation passed:
+54 tests across download clients and climate build helpers.
 
 ### Blocked
 

@@ -106,10 +106,11 @@ that boundary, and proves the behavior across independent containers on the
 
 - **Parameterization change present**: `yes`
 - **ADR required**: `yes`
-- **ADR link(s)**: `TBD; create the next available
-  docs/adrs/ADR-XXXX-gridmet-redis-admission.md`
-- **Decision provenance captured**: `yes; Roger Lew selected Redis and explicit
-  opt-in in this task, with initial operational values to be ratified in the ADR`
+- **ADR link(s)**: [ADR-0050](../../adrs/ADR-0050-gridmet-redis-admission.md)
+- **Decision provenance captured**: `yes; Roger Lew authorized plan execution
+  and Redis/explicit opt-in; Codex ratified the initial implementation values
+  in ADR-0050, with Forest validation pending`
+- **Canonical contract**: [GridMET Redis admission](../../schemas/gridmet-redis-admission-contract.md)
 
 ## Dependencies
 
@@ -159,7 +160,9 @@ that boundary, and proves the behavior across independent containers on the
 
 ## Initial Forest Parameters
 
-The executor must codify these in the parameterization ADR before activation.
+These values are ratified for implementation in
+[ADR-0050](../../adrs/ADR-0050-gridmet-redis-admission.md); live acceptance remains
+required before closeout.
 If evidence requires a change, update the ADR, package, tracker, tests, and
 operator documentation before deployment rather than editing only `docker/.env`.
 

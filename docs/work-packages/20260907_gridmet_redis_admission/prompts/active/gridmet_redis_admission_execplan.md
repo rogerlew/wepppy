@@ -32,8 +32,12 @@ deployment to `openwepp.org`.
 - [x] (2026-09-07 15:53 UTC) Assessed current point/grid acquisition, retry,
   process-pool, Redis configuration, and deployment boundaries.
 - [x] (2026-09-07 15:53 UTC) Scaffolded the work package and live Forest gate.
-- [ ] Write and independently review the contract checkpoint and ADR before
-  runtime implementation edits.
+- [x] (2026-09-07) Execution preflight: clean master at
+  `583e6870c639999515035423f133e5925dae2da5`, Forest hostname, installed dev
+  wctl preset, healthy standalone Redis 8.6.2, and 54 baseline tests passing.
+- [x] (2026-09-07 16:22 UTC) Write canonical admission contract and ADR-0050;
+  independent correctness/security contract reviews pass with all medium
+  findings resolved. Standalone ancestor commit precedes runtime edits.
 - [ ] Implement admission state/configuration and deterministic tests.
 - [ ] Wire all GridMET clients and callers and update deployment documentation.
 - [ ] Complete focused/full validation and independent reviews.
@@ -43,6 +47,13 @@ deployment to `openwepp.org`.
 - [ ] Close and archive the package; leave openwepp.org batch testing deferred.
 
 ## Surprises & Discoveries
+
+- Observation: the NoDb contract-first standard requires two independent
+  contract reviews before the standalone checkpoint commit. Both reviews are
+  assigned; runtime edits remain pending that gate.
+- Observation: Forest source-mounts this checkout. Feature activation remains
+  disabled during implementation; container recreation and acceptance follow
+  the reviewed, pushed candidate.
 
 - Observation: the existing `ProcessPoolExecutor(max_workers=4)` is local to a
   single multiple-interpolated build.
