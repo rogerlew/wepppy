@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from contextlib import contextmanager
 from types import SimpleNamespace
 
@@ -7,6 +8,9 @@ import pytest
 
 import wepppy.nodb.mods.disturbed.disturbed as disturbed_module
 from wepppy.nodb.mods.disturbed.disturbed import Disturbed
+from wepppy.nodb.core.landuse import Landuse, LanduseCustomMappingError, _write_mofe_management_file_task
+from wepppy.wepp.management import get_management_summary, load_map
+from wepppy.wepp.management.managements import Management
 
 pytestmark = [pytest.mark.unit, pytest.mark.nodb]
 
@@ -63,6 +67,9 @@ class _FakeLanduse:
     @contextmanager
     def locked(self):
         yield
+
+    def get_mapping_dict(self):
+        return load_map('disturbed')
 
     def build_managements(self) -> None:
         self.build_managements_calls += 1
@@ -383,3 +390,146 @@ def test_remap_landuse_returns_early_without_sbs(
 
     assert landuse.domlc_d["101"] == "forest-dom"
     assert landuse.build_managements_calls == 0
+
+
+@pytest.fixture
+def mofe_mapping_case(disturbed_factory, monkeypatch):
+    """Use actual effective-map loading; isolate only raster analysis and locks."""
+    def make(mapping="c3s-disturbed", custom_state=None):
+        disturbed, run_dir = disturbed_factory("mofe-mapping")
+        source = Landuse.__new__(Landuse)
+        source.wd = str(run_dir)
+        source._mapping = mapping
+        source._custom_mapping_relpath = None
+        if custom_state is not None:
+            source._custom_mapping_relpath = "landuse/custom.json"
+            custom_path = run_dir / source._custom_mapping_relpath
+            custom_path.parent.mkdir(exist_ok=True)
+            data = load_map("c3s-disturbed")
+            if custom_state == "complete":
+                data = {f"custom-{key}": dict(value, Key=f"custom-{key}")
+                        for key, value in data.items()}
+            elif custom_state == "incomplete":
+                del data["406"]
+            if custom_state == "malformed":
+                custom_path.write_text("{broken")
+            elif custom_state != "missing":
+                custom_path.write_text(json.dumps(data))
+        landuse = _FakeLanduse({}, {}, {})
+        landuse.get_mapping_dict = source.get_mapping_dict
+        _FakeLanduse._instance = landuse
+        monkeypatch.setattr(Disturbed, "landuse_instance", property(lambda self: landuse))
+        monkeypatch.setattr(
+            disturbed_module, "Watershed",
+            SimpleNamespace(getInstance=lambda _wd:
+                            SimpleNamespace(subwta="subwta.tif", mofe_map="mofe.map")),
+        )
+        monkeypatch.setattr(Disturbed, "_calc_sbs_coverage", lambda self, sbs: None)
+        severity = {}
+        monkeypatch.setattr(
+            Disturbed, "get_sbs",
+            lambda self: SimpleNamespace(build_lcgrid=lambda *_args: severity),
+        )
+        return disturbed, landuse, source, severity, run_dir
+    return make
+
+
+@pytest.mark.parametrize("mapping,custom_state", [
+    ("disturbed", None), ("c3s-disturbed", None), ("c3s-disturbed", "complete"),
+])
+@pytest.mark.parametrize("rebuild", [True, False])
+def test_mofe_effective_mapping_and_generated_managements(
+    mofe_mapping_case, mapping, custom_state, rebuild,
+):
+    disturbed, landuse, source, severity, run_dir = mofe_mapping_case(mapping, custom_state)
+    # Preserve MOFE's current eligibility even with both flags false.
+    disturbed._burn_shrubs = False
+    disturbed._burn_grass = False
+    data = source.get_mapping_dict()
+    expected = []
+    assignments = {}
+    burns = {}
+    for vegetation in ("forest", "shrub", "short grass", "tall grass"):
+        base = next(key for key, row in data.items() if row["DisturbedClass"] == vegetation)
+        landuse.managements[base] = get_management_summary(
+            base, source._resolve_effective_mapping_reference(source.mapping))
+        for severity_code, severity_name in zip(("131", "132", "133"), ("low", "moderate", "high")):
+            segment = str(len(assignments) + 1)
+            assignments[segment] = base
+            burns[segment] = severity_code
+            bucket = "grass" if vegetation.endswith("grass") else vegetation
+            expected.append(f"{bucket} {severity_name} sev fire")
+    # Non-burned and ineligible segments remain unchanged.
+    forest = next(key for key, row in data.items() if row["DisturbedClass"] == "forest")
+    ineligible = next(key for key, row in data.items() if row["DisturbedClass"] == "")
+    landuse.managements[ineligible] = get_management_summary(
+        ineligible, source._resolve_effective_mapping_reference(source.mapping))
+    assignments["13"], assignments["14"] = forest, ineligible
+    burns["13"], burns["14"] = "130", "133"
+    landuse.domlc_mofe_d = {"101": assignments}
+    severity["101"] = burns
+
+    disturbed.remap_mofe_landuse(rebuild_managements=rebuild)
+
+    result = landuse.domlc_mofe_d["101"]
+    assert [data[result[str(i)]]["DisturbedClass"] for i in range(1, 13)] == expected
+    forest_targets = [result[str(i)] for i in (1, 2, 3)]
+    prefix = "custom-" if custom_state else ""
+    assert forest_targets == [prefix + k for k in (
+        ("106", "118", "105") if mapping == "disturbed" else ("406", "418", "405"))]
+    assert (result["13"], result["14"]) == (forest, ineligible)
+    assert landuse.build_managements_calls == int(rebuild)
+
+    # Resolve actual summaries and run the production MOFE synthesis writer.
+    reference = source._resolve_effective_mapping_reference(source.mapping)
+    summaries = [get_management_summary(result[str(i)], reference) for i in range(1, 13)]
+    plans = [dict(key=m.key, man_fn=m.man_fn, man_dir=m.man_dir,
+                  desc=m.desc, color=m.color) for m in summaries]
+    output = run_dir / "landuse" / "hill_101.mofe.man"
+    output.parent.mkdir(exist_ok=True)
+    _write_mofe_management_file_task(("101", str(output), 12, plans))
+    generated = Management(Key="hill_101", ManagementFile=output.name,
+                           ManagementDir=str(output.parent), Description="MOFE", Color=(0, 0, 0, 255))
+    # Exercise the real multi-year expansion used by WEPP preparation.
+    run_output = run_dir / "wepp" / "runs" / "p1.man"
+    run_output.write_text(str(generated.build_multiple_year_man(2)))
+    reread = Management(Key="p1", ManagementFile=run_output.name,
+                        ManagementDir=str(run_output.parent), Description="MOFE", Color=(0, 0, 0, 255))
+    assert len(reread.inis) == 12
+    for actual, summary in zip(reread.inis, summaries):
+        expected_ini = summary.get_management().inis[0]
+        for attribute in ("cancov", "inrcov", "rilcov"):
+            assert getattr(actual.data, attribute) == pytest.approx(
+                getattr(expected_ini.data, attribute))
+    assert run_output.stat().st_size > 0
+
+
+@pytest.mark.parametrize("custom_state,error", [
+    ("incomplete", AssertionError), ("malformed", LanduseCustomMappingError),
+    ("missing", LanduseCustomMappingError),
+])
+def test_mofe_invalid_mapping_fails_before_assignment_mutation(mofe_mapping_case, custom_state, error):
+    disturbed, landuse, _source, severity, _run_dir = mofe_mapping_case(custom_state=custom_state)
+    landuse.managements = {"base": _ManagementSummary("forest")}
+    landuse.domlc_mofe_d = {"101": {"1": "base"}}
+    severity["101"] = {"1": "131"}
+    with pytest.raises(error):
+        disturbed.remap_mofe_landuse()
+    assert landuse.domlc_mofe_d == {"101": {"1": "base"}}
+    assert landuse.build_managements_calls == 0
+
+
+def test_mofe_no_sbs_does_not_load_missing_map(mofe_mapping_case, monkeypatch):
+    disturbed, landuse, _source, _severity, _run_dir = mofe_mapping_case(custom_state="missing")
+    landuse.domlc_mofe_d = {"101": {"1": "base"}}
+    monkeypatch.setattr(Disturbed, "get_sbs", lambda self: None)
+    disturbed.remap_mofe_landuse()
+    assert landuse.domlc_mofe_d == {"101": {"1": "base"}}
+    assert landuse.build_managements_calls == 0
+
+
+def test_mofe_empty_assignments_remain_empty(mofe_mapping_case):
+    disturbed, landuse, _source, _severity, _run_dir = mofe_mapping_case()
+    disturbed.remap_mofe_landuse()
+    assert landuse.domlc_mofe_d == {}
+    assert landuse.build_managements_calls == 1

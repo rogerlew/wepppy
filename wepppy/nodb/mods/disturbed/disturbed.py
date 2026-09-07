@@ -1883,6 +1883,8 @@ class Disturbed(NoDbBase):
         if sbs is None:
             return
 
+        disturbed_key_lookup = self.get_disturbed_key_lookup()
+
         evaluated_segments = 0
         burned_counts: Counter[str] = Counter()
 
@@ -1906,18 +1908,29 @@ class Disturbed(NoDbBase):
                         burn_class,
                     )
 
-                    # TODO: probably a better way to do this based on the disturbed_class
                     if burn_class in ['131', '132', '133']:
                         if is_unburned_forest_disturbed_class(man.disturbed_class):
-                            landuse.domlc_mofe_d[topaz_id][_id] = {'131': '106', '132': '118', '133': '105'}[burn_class]
+                            landuse.domlc_mofe_d[topaz_id][_id] = {
+                                '131': disturbed_key_lookup['forest_low_sev_fire'],
+                                '132': disturbed_key_lookup['forest_moderate_sev_fire'],
+                                '133': disturbed_key_lookup['forest_high_sev_fire'],
+                            }[burn_class]
                             burned_counts['forest'] += 1
 
                         elif man.disturbed_class == 'shrub':
-                            landuse.domlc_mofe_d[topaz_id][_id] = {'131': '121', '132': '120', '133': '119'}[burn_class]
+                            landuse.domlc_mofe_d[topaz_id][_id] = {
+                                '131': disturbed_key_lookup['shrub_low_sev_fire'],
+                                '132': disturbed_key_lookup['shrub_moderate_sev_fire'],
+                                '133': disturbed_key_lookup['shrub_high_sev_fire'],
+                            }[burn_class]
                             burned_counts['shrub'] += 1
 
                         elif man.disturbed_class in ['short grass', 'tall grass']:
-                            landuse.domlc_mofe_d[topaz_id][_id] = {'131': '131', '132': '130', '133': '129'}[burn_class]
+                            landuse.domlc_mofe_d[topaz_id][_id] = {
+                                '131': disturbed_key_lookup['grass_low_sev_fire'],
+                                '132': disturbed_key_lookup['grass_moderate_sev_fire'],
+                                '133': disturbed_key_lookup['grass_high_sev_fire'],
+                            }[burn_class]
                             burned_counts['grass'] += 1
 
         total_burned = int(sum(burned_counts.values()))

@@ -116,6 +116,10 @@ The same logic applies to shrub and grass classes when `burn_shrubs` / `burn_gra
 - `UnDisturbed/Shrub.man` → `UnDisturbed/Shrub_High_Severity_Fire.man`
 - `UnDisturbed/Tall_Grass.man` → `UnDisturbed/Grass_High_Severity_Fire.man`
 
+For MOFE runs, each segment uses severity-specific management IDs from the active landuse map. This supports C3S and custom maps; for example, C3S low-severity forest resolves to `406`, while the disturbed map uses `106`. Existing MOFE behavior remaps eligible shrub and short/tall grass segments regardless of the burn flags above.
+
+If a previous MOFE build failed with `InvalidManagementKey: 106` on a C3S run, rebuild landuse after deploying the mapping-aware correction. Rebuild from baseline to regenerate assignments and management files; do not manually replace IDs in saved NoDb state.
+
 ### Step 2: Soil Regeneration
 
 For each hillslope, the module:
@@ -259,7 +263,7 @@ disturbed.modify_soils()
 
 ## Developer Notes
 
-- `remap_landuse()` and `remap_mofe_landuse()` map SBS classes 131/132/133 to low/mod/high severity management keys using `wepppy/wepp/management/data/disturbed.json`.
+- `remap_landuse()` and `remap_mofe_landuse()` resolve SBS classes 131/132/133 to low/mod/high severity management keys by `DisturbedClass` through `get_disturbed_key_lookup()` and the effective landuse map, including custom mappings. See the [MOFE mapping contract](../../../../docs/schemas/disturbed-mofe-mapping-contract.md).
 - `remap_landuse()` treats nodata-only/off-map hillslopes as unburned (`130`) by contract; this is an intentional safety rule and not configurable to global-mode fallback.
 - If a management entry defines `SoilFile`/`sol_path`, the controller copies that soil directly instead of regenerating from the lookup table.
 - For treatment suffixes (`-mulch_15`, `-thinning`, etc.), `lookup_disturbed_class()` strips the suffix so soils are keyed by burn severity, not treatment type.

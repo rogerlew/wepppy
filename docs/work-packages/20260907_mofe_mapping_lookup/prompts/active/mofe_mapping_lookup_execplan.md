@@ -12,8 +12,8 @@ Multiple overland-flow elements (MOFE) divide each hillslope into segments. Burn
 
 
 - [x] (2026-09-07 19:26 UTC) Diagnose failure and scaffold package.
-- [ ] Complete reviewed contract ancestor checkpoint.
-- [ ] Implement and test map-aware remapping.
+- [x] Complete reviewed contract ancestor checkpoint (38789cb4c).
+- [x] Implement and test map-aware remapping (18 focused tests passed).
 - [ ] Verify generated management artifacts, broad gates, and independent correctness.
 - [ ] Record outcomes and archive plan.
 
