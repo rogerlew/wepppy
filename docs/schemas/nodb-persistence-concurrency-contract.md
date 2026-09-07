@@ -244,3 +244,23 @@ object hydrated before another writer committed.
 - `wepppy/nodb/README.md`
 - `wepppy/nodb/AGENTS.md`
 - `tests/nodb/test_base_boundary_characterization.py`
+
+## Bounded Initial Preparation Reads (FORK-READ-01)
+
+Implementation conformance pending (2026-09-07 UTC). Initial WEPP preparation
+controller loading MAY opt into one 5-second filesystem-read budget under
+[ADR-0049](../adrs/ADR-0049-fork-preparation-read-retry.md). Only ENOENT and ESTALE
+from stat/open/read operations MAY retry, with 0.1-second exponential delays
+capped at 1 second. No attempt is scheduled after budget exhaustion. Blocking
+kernel I/O is not bounded by this application deadline.
+
+Required disk loads MUST attempt the actual read and preserve the original
+OSError errno and filename, rather than replace it with an exists()-derived
+error. Optional missing controllers (allow_nonexistent) MUST still return None
+immediately. Empty/malformed data, permissions, EIO, Redis errors and mutations
+MUST NOT be retried. Outside this opt-in scope, reads retain zero retry delay.
+Cache signatures, disk authority, locking and atomic writes remain mandatory;
+within the scope a failed signature check MUST NOT authorize stale cache reuse.
+Retry/recovery/exhaustion diagnostics MUST identify operation, errno, path,
+attempts, elapsed time, host, run and job where available. This scope addresses
+transient reads under fork activity without attributing causality to a host.

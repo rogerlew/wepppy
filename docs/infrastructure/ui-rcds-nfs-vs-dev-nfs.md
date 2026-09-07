@@ -445,6 +445,94 @@ do not assume outputs are complete merely because files remain present. Verify
 required artifacts before retrying or consuming results. A currently readable
 run path shows recovery, not that the failed write was durable.
 
+## Production Incident: Fork Preparation File Visibility Failures (2026-09-06)
+
+Four undisturbify forks for a user's Norton Creek/Mill Creek watersheds were
+investigated read-only on 2026-09-06 PDT (2026-09-07 UTC). Two Norton Ck Upper
+forks failed before model execution; the Norton Ck and Mill Ck forks completed.
+The failed runs were registered to the user's account, so missing outputs were
+not caused by failed My Runs registration.
+
+### Confirmed Evidence
+
+Both fork jobs ran on wepp3 (`a178705c9981`, `docker-rq-worker-fork-archive-1`).
+They copied and prepared the destination, then enqueued parallel WEPP input
+preparation jobs. All three failed preparation jobs ran on wepp1
+(`c7bd993b4fc0`, `docker-rq-worker-1`):
+
+| Destination run | Failed job | Job ID | Failure time (UTC, 2026-09-06) |
+| --- | --- | --- | --- |
+| `anarchistic-pannier` | `_prep_soils_rq` | `d653a3f2-1217-4158-a27b-7230cc07bebe` | 15:19:59.347763 |
+| `unopened-roasting` | `_prep_managements_rq` | `dd2cb70a-2c02-449e-bc7e-418944d9a75b` | 15:32:45.115311 |
+| `unopened-roasting` | `_prep_climates_rq` | `ae6a8b41-d472-4c45-ad4b-bb4dabba0313` | 15:32:45.116413 |
+
+Redis/RQ `job.exc_info` recorded the same failure path for all three:
+
+```text
+Wepp.getInstance(wd)
+  -> NoDbBase._hydrate_instance(...)
+  -> if not _exists(filepath): raise FileNotFoundError(...)
+
+FileNotFoundError: '/wc1/runs/an/anarchistic-pannier/wepp.nodb' not found!
+FileNotFoundError: '/wc1/runs/un/unopened-roasting/wepp.nodb' not found!
+```
+
+Concurrent preparation jobs on wepp2 (`ee6056bc19a5`) successfully loaded the
+same destination controllers: management/climate preparation for
+`anarchistic-pannier`, and slope/soil preparation for `unopened-roasting`.
+Slope preparation for `anarchistic-pannier` also succeeded on wepp1. This was
+not a persistent absence affecting every worker.
+
+At inspection, both files existed on the host and were readable, valid JSON
+inside wepp1's `rq-worker` container. Host file modification times were
+15:19:59.017736 UTC and 15:32:44.900430 UTC, respectively, shortly before the
+failed jobs. Host/container mapping:
+
+```text
+/geodata/wc1/runs/<prefix>/<runid>/wepp.nodb
+/wc1/runs/<prefix>/<runid>/wepp.nodb
+```
+
+`findmnt -T` on wepp1 showed the production mount:
+
+```text
+/geodata nas.rocket.net:/wepp nfs4
+rw,noatime,vers=4.2,rsize=65536,wsize=65536,acregmax=30,acdirmin=5,
+hard,proto=tcp,timeo=600,retrans=2,local_lock=none,addr=192.168.100.102
+```
+
+### Interpretation and User Impact
+
+The working hypothesis is a transient NFS file-visibility/cache failure under
+the fork's burst of small-file activity. Worker placement does not establish
+wepp3 as the cause. The exceptions prove
+that the loader's existence check failed; they do **not** identify the exact
+NFS/client/server mechanism or establish NAS hardware failure. No packet trace
+or underlying `stat()` errno was captured. The deployed NoDb writer uses a
+synced temporary file and `os.replace`; the investigation did not establish an
+application unlink/recreate gap.
+
+The parent fork jobs finished enqueueing work, but failed prerequisites left
+WEPP completion and fork finalization deferred, with empty `wepp/output/`
+directories. Thus parent-job completion was not workflow completion, and the
+user saw progress without receiving outputs. Root fork jobs:
+
+- `anarchistic-pannier`: `28ccb60f-2eaa-480c-aafd-08b325e24ef4`
+- `unopened-roasting`: `57b95e9d-762b-4016-ba48-71317b6983bf`
+
+The two other undisturbify forks, `missing-ecstasy` and `anaesthetic-oxide`, had
+finished WEPP completion/finalizer jobs and populated output directories.
+
+Evidence was collected with `Job.fetch`/`job.meta`/`job.exc_info`, worker Redis
+metadata, `docker ps` host mapping, host `stat`/`findmnt`, and read-only file
+opens through `wctl exec -T rq-worker python -`. No retries, mount changes,
+service restarts, or production code changes were performed.
+
+Follow-up: investigate file visibility at the cross-host handoff, capture the
+underlying filesystem error if it recurs, and ensure prerequisite failures
+reach fork workflow status rather than leaving finalization indefinitely
+deferred. Recovery of the failed jobs remains outstanding.
+
 ## Small-File Read/Write/Delete + Metadata Microbench (2026-02-10)
 
 This is a lightweight microbench intended to approximate UI pain on metadata-heavy paths (many small files).

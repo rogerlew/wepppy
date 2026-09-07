@@ -7,6 +7,10 @@
 
 ## Purpose
 
+In progress: [Fork read retry and failure reporting](docs/work-packages/20260906_fork_read_retry_hardening/package.md)
+— bounded initial reads, original errno diagnostics, and fork prerequisite failures.
+
+
 Implemented locally: [Flask run config authority](docs/work-packages/20260906_flask_run_config/package.md)
 — 2026-09-06, 36 focused tests passed; deployment and other services deferred.
 

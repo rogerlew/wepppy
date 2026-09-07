@@ -459,3 +459,38 @@ projection above.
 - If both `job_id` and list-shaped `job_ids` are present, `job_ids[0]` MUST equal
   `job_id`. The documented named-child compatibility form follows the root/child
   relationship above.
+
+## Fork Prerequisite Failure Reporting (FORK-READ-01)
+
+Implementation conformance pending (2026-09-07 UTC). WEPP pipeline children
+enqueued by an undisturbify fork MUST retain server-generated root/source/target
+lineage and report terminal prerequisite failure to the source fork status
+channel with the failed child job ID. The exact currently registered fork
+destination outcome MUST become failed without waiting for an unreachable
+completion/finalizer job. Existing polling remains authoritative.
+
+Failure publication MUST verify root/child association and the current
+destination receipt. A stale or foreign callback MUST NOT mutate another
+workflow or emit its failure signal. Succeeded state MUST NOT be overwritten;
+late parent progress MUST NOT overwrite failed state. Failure reporting errors
+MUST be logged without replacing the original job exception. Callbacks MUST NOT
+relax strict dependencies, cancel siblings, release active claims, or retry
+whole jobs. Existing response fields, auth boundaries and source/target
+configuration preservation remain unchanged.
+
+Initial WEPP preparation reads use the bounded opt-in behavior in
+[NoDb persistence contract](nodb-persistence-concurrency-contract.md#bounded-initial-preparation-reads-fork-read-01).
+
+The durable failure and source notification occur on child failure. While
+siblings are queued/started/scheduled, existing aggregate polling remains
+non-terminal; once those siblings quiesce it MUST report failure ahead of
+blocked deferred descendants. This does not promise an immediate terminal UI
+transition or change the global aggregate precedence policy.
+
+Callback authority MUST be derived from the fetched fork root's function,
+`fork-archive` queue, source/target arguments and registered child ID, together
+with the child's target argument. Child metadata alone is insufficient. The
+current receipt and terminal-state comparison and failure update MUST be
+atomic; failure publication MUST occur only for an accepted association/state,
+never after a rejected update. Status messages carry job identifiers and a
+bounded generic explanation, not raw filesystem paths or exception payloads.
