@@ -10,9 +10,9 @@ excluded. This is a working implementation, not a scaffold.
 ## Progress
 
 - [x] Operator approved scope; contract prepared.
-- [ ] Independent checkpoint reviews and ancestor commit.
-- [ ] Implement shared hook and regression tests.
-- [ ] Validate and review final implementation.
+- [x] Independent checkpoint reviews and ancestor commit 5f407550a.
+- [x] Implement shared hook and regression tests.
+- [x] Validate and review final implementation; broad-suite limitations recorded.
 
 ## Plan of Work
 
@@ -41,7 +41,14 @@ for all matched Flask run routes.
 
 ## Outcomes & Retrospective
 
-Pending implementation. No production deployment or data migration performed.
+Implemented and wired across 326 matched Flask run rules, confirmed by real app
+import. Focused hook/context/CSRF selection: 36 passed. Independent correctness
+and security reviews found no blocking issues. WEPPcloud suite stopped with 417
+passes and one unrelated Roads role-gate failure reproduced without the hook.
+Full suite interrupted after 171 passes/13 skips after that failure was known.
+No production deployment or data migration performed. Other services deferred.
+
+2026-09-06 UTC revision: recorded implementation and validation outcomes.
 
 ## Recovery and dependencies
 

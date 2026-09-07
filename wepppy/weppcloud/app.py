@@ -540,6 +540,8 @@ if isinstance(app.session_interface, RedisSessionInterface):
     )
 
 register_jinja_filters(app)
+from wepppy.weppcloud.routes._run_config import register_run_config_hooks
+register_run_config_hooks(app)
 register_blueprints(app)
 # forward_auth boundary endpoint is non-browser infrastructure traffic.
 from wepppy.weppcloud.routes.bootstrap import register_csrf_exemptions as register_bootstrap_csrf_exemptions

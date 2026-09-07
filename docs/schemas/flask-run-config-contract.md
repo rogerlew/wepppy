@@ -2,7 +2,8 @@
 
 ## Scope and decision
 
-Implementation conformance is pending. The operator approved the Flask-only
+Implementation is wired in Flask and covered by focused tests; deployment is
+pending. The operator approved the Flask-only
 hook on 2026-09-06. Other services, including browse, download and rq-engine,
 are deferred even when Caddy exposes them under `/weppcloud/runs/`.
 
