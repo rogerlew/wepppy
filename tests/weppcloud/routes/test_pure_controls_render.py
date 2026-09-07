@@ -800,6 +800,74 @@ def test_climate_template_renders_catalog_station_and_build_contract(
     assert 'id="climate_status_panel"' in rendered
 
 
+@pytest.mark.parametrize("initial_dataset", ["vanilla_cligen", "prism_stochastic"])
+@pytest.mark.parametrize("observed_dataset", ["observed_daymet", "observed_gridmet"])
+@pytest.mark.parametrize("availability", ["available", "restricted", "hidden", "disabled"])
+def test_climate_template_keeps_spatial_options_for_dataset_switching(
+    jinja_env: Environment,
+    initial_dataset: str,
+    observed_dataset: str,
+    availability: str,
+) -> None:
+    from wepppy.nodb.locales import get_climate_dataset
+
+    climate = SimpleNamespace(
+        catalog_id="prism_stochastic",
+        climate_mode=SimpleNamespace(value=5),
+        climatestation_mode=SimpleNamespace(value=-1),
+        climate_spatialmode=SimpleNamespace(value=0),
+        uses_tenerife_station_catalog=False,
+        is_single_storm=False,
+        datasetMap={},
+        input_years=30,
+        observed_start_year=1981,
+        observed_end_year=2024,
+        future_start_year=2030,
+        future_end_year=2060,
+        cli_fn=None,
+        orig_cli_fn=None,
+        climate_daily_temp_ds="null",
+        use_gridmet_wind_when_applicable=True,
+        adjust_mx_pt5=False,
+        silent_pass_observed_quality_guard=False,
+        precip_scaling_mode=SimpleNamespace(value=0),
+        precip_scale_factor=None,
+        precip_monthly_scale_factors=None,
+        precip_scale_reference=None,
+        precip_scale_factor_map=None,
+    )
+    climate.catalog_id = initial_dataset
+    initial = get_climate_dataset(initial_dataset).to_mapping()
+    observed = get_climate_dataset(observed_dataset).to_mapping()
+    climate.climate_mode = SimpleNamespace(value=initial["climate_mode"])
+    if availability == "restricted":
+        observed["spatial_modes"] = [0, 1]
+    elif availability == "hidden":
+        observed["ui_exposed"] = False
+    elif availability == "disabled":
+        observed["current_selection_disabled"] = True
+    catalog = [initial, observed]
+    template = jinja_env.get_template("controls/climate_pure.htm")
+    rendered = template.render(climate=climate, climate_catalog=catalog)
+    interpolated = re.search(r'id="climate_spatialmode2"[^>]*>', rendered)
+    if availability != "available":
+        assert interpolated is None
+        return
+    assert interpolated is not None
+    assert "disabled" in interpolated.group(0)
+    assert "checked" not in interpolated.group(0)
+
+    # Reloading the observed selection must retain an enabled checked radio.
+    climate.catalog_id = observed_dataset
+    climate.climate_mode = SimpleNamespace(value=observed["climate_mode"])
+    climate.climate_spatialmode = SimpleNamespace(value=2)
+    rendered = template.render(climate=climate, climate_catalog=catalog)
+    interpolated = re.search(r'id="climate_spatialmode2"[^>]*>', rendered)
+    assert interpolated is not None
+    assert "disabled" not in interpolated.group(0)
+    assert "checked" in interpolated.group(0)
+
+
 def test_schema_v1_europe_preset_renders_exact_climate_radios(
     jinja_env: Environment,
     tmp_path: Path,

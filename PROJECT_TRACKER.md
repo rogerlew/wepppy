@@ -1266,6 +1266,8 @@ the remaining-run controller plan has no next controller milestone.
 
 ## ✅ Done
 
+- [Climate spatial mode switching](docs/work-packages/20260906_climate_spatial_mode_switching/package.md) — 2026-09-06: implemented and reviewed; 212 focused Python / 835 JavaScript tests passed. Unrelated broad-suite Compose assertion documented.
+
 ### Multiple-OFE Hillslope Clipping
 
 **Completed**: 2026-09-04

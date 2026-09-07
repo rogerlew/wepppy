@@ -113,6 +113,10 @@ describe("Climate controller", () => {
                     <span>Single</span>
                 </label>
                 <label class="wc-choice">
+                    <input type="radio" name="climate_spatialmode" value="2" data-climate-action="spatial-mode" disabled>
+                    <span>Multiple climates (Interpolated)</span>
+                </label>
+                <label class="wc-choice">
                     <input type="radio" name="climate_spatialmode" value="1" data-climate-action="spatial-mode">
                     <span>Multiple</span>
                 </label>
@@ -272,6 +276,38 @@ describe("Climate controller", () => {
         );
         expect(handler).toHaveBeenCalledWith(expect.objectContaining({ catalogId: "dataset_b" }));
         expect(document.getElementById("climate_dataset_message").textContent).toContain("Dataset B description");
+    });
+
+    test.each([
+        ["observed_daymet", 9],
+        ["observed_gridmet", 11]
+    ])("switching to %s enables interpolated submission and switching back resets it", async (catalogId, mode) => {
+        climate.datasetMap[catalogId] = {
+            catalog_id: catalogId,
+            climate_mode: mode,
+            spatial_modes: [0, 1, 2],
+            default_spatial_mode: 0,
+            station_modes: [-1, 0, 1],
+            inputs: ["observed_years", "spatial_mode"]
+        };
+        const interpolated = document.querySelector('input[name="climate_spatialmode"][value="2"]');
+        expect(interpolated.disabled).toBe(true);
+        climate.handleDatasetChange(catalogId);
+        expect(interpolated.disabled).toBe(false);
+        interpolated.checked = true;
+        interpolated.dispatchEvent(new Event("change", { bubbles: true }));
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(postJsonMock).toHaveBeenCalledWith(
+            "tasks/set_climate_spatialmode/",
+            { spatialmode: 2 },
+            expect.objectContaining({ form: expect.any(HTMLFormElement) })
+        );
+        expect(interpolated.checked).toBe(true);
+        climate.handleDatasetChange("dataset_a");
+        expect(interpolated.disabled).toBe(true);
+        expect(interpolated.checked).toBe(false);
+        expect(document.querySelector('input[name="climate_spatialmode"][value="0"]').checked).toBe(true);
     });
 
     test("station mode change refreshes station list and emits events", async () => {

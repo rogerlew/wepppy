@@ -271,7 +271,7 @@
 {% set spatial_mode_help = {
   "0": ("Single climate", "Build one CLIGEN file for the entire watershed (fastest option)."),
   "1": ("Multiple climates", "Build per-hillslope climates using PRISM adjustments in the U.S. and E-OBS adjustments in Europe."),
-  "2": ("Multiple climates (interpolated)", "Interpolate observed PRISM/GRIDMET grids for each hillslope (U.S. only, slower).")
+  "2": ("Multiple climates (interpolated)", "Interpolate observed DAYMET/GRIDMET grids for each hillslope (where the selected dataset is available, slower).")
 } %}
 
 {% set spatial_mode_options = [
@@ -316,10 +316,21 @@
     }
   ] %}
   {% if selected_dataset %}
+    {# Keep authorized choices in the DOM so dataset switching can enable them. #}
+    {% set available_spatial_modes = namespace(values=[]) %}
+    {% for dataset in catalog %}
+      {% if dataset.ui_exposed and not dataset.current_selection_disabled and dataset.climate_mode | int not in deprecated_single_storm_modes %}
+        {% for mode in dataset.spatial_modes %}
+          {% if mode not in (dataset.disabled_spatial_modes or []) and mode not in available_spatial_modes.values %}
+            {% set available_spatial_modes.values = available_spatial_modes.values + [mode] %}
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    {% endfor %}
     {% set filtered_spatial_modes = namespace(values=[]) %}
     {% for option in spatial_mode_options %}
-      {% if option.value | int in selected_dataset.spatial_modes or option.value | int == spatial_mode %}
-        {% if option.value | int in (selected_dataset.disabled_spatial_modes or []) %}
+      {% if option.value | int in available_spatial_modes.values or option.value | int == spatial_mode %}
+        {% if option.value | int not in selected_dataset.spatial_modes or option.value | int in (selected_dataset.disabled_spatial_modes or []) or selected_dataset.current_selection_disabled %}
           {% set _ = option.update({'disabled': true}) %}
         {% endif %}
         {% set filtered_spatial_modes.values = filtered_spatial_modes.values + [option] %}

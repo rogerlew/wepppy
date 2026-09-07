@@ -389,6 +389,8 @@ This pattern is used across observed DAYMET, observed GRIDMET, PRISM-observed st
 - In operator experience, this mode has produced some of the best calibrated results for certain Pacific Northwest watersheds.
 - It is often a strong candidate for larger watersheds or watersheds with micro-climate variation.
 
+Select an available observed DAYMET or GRIDMET dataset to enable this option; no page reload is needed. It is disabled for datasets that do not support interpolation.
+
 ## Recommended spatial-mode decision path
 
 1. Start with **Single** for speed and first-pass calibration.
