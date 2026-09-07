@@ -36,6 +36,7 @@ from wepppy.climates.gridmet import (
 from wepppy.climates.gridmet import (
     retrieve_historical_wind as gridmet_retrieve_historical_wind,
 )
+from wepppy.climates.gridmet.admission import GridMetAdmissionConfig
 from wepppy.climates.prism.daily_client import (
     retrieve_historical_timeseries as prism_retrieve_historical_timeseries,
 )
@@ -385,7 +386,10 @@ def build_observed_prism(
     adjust_mx_pt5: bool = False,
     silent_pass_observed_quality_guard: bool = False,
 ) -> None:
-    df = prism_retrieve_historical_timeseries(lng, lat, start_year, end_year, gridmet_wind=gridmet_wind)
+    admission = GridMetAdmissionConfig.from_env() if gridmet_wind else None
+    df = prism_retrieve_historical_timeseries(
+        lng, lat, start_year, end_year, gridmet_wind=gridmet_wind, admission=admission
+    )
     df_to_prn(df, _join(cli_dir, prn_fn), "ppt(mm)", "tmax(degc)", "tmin(degc)")
 
     max_retries = 3
@@ -442,7 +446,10 @@ def build_observed_daymet(
 ) -> None:
     from wepppy.climates.daymet import retrieve_historical_timeseries as daymet_retrieve_historical_timeseries
 
-    df = daymet_retrieve_historical_timeseries(lng, lat, start_year, end_year, gridmet_wind=gridmet_wind)
+    admission = GridMetAdmissionConfig.from_env() if gridmet_wind else None
+    df = daymet_retrieve_historical_timeseries(
+        lng, lat, start_year, end_year, gridmet_wind=gridmet_wind, admission=admission
+    )
     df.to_parquet(_join(cli_dir, f"daymet_{start_year}-{end_year}.parquet"))
     df_to_prn(df, _join(cli_dir, prn_fn), "prcp(mm/day)", "tmax(degc)", "tmin(degc)")
 
@@ -555,6 +562,7 @@ def build_observed_snotel(
     adjust_mx_pt5: bool = False,
     silent_pass_observed_quality_guard: bool = False,
 ) -> None:
+    admission = GridMetAdmissionConfig.from_env() if gridmet_supplement else None
     snotel_data_dir = "/workdir/wepppy/wepppy/climates/snotel/processed"
     df = pd.read_csv(_join(snotel_data_dir, f"{snotel_id}.csv"), parse_dates=[0], na_values=["", " "])
 
@@ -584,7 +592,7 @@ def build_observed_snotel(
     climate = ClimateFile(cli_path)
 
     if gridmet_supplement:
-        wind_df = gridmet_retrieve_historical_timeseries(lng, lat, start_year, end_year)
+        wind_df = gridmet_retrieve_historical_timeseries(lng, lat, start_year, end_year, admission=admission)
         dates = df.index
         climate.replace_var("rad", dates, wind_df["srad(l/day)"])
         climate.replace_var("tdew", dates, wind_df["tdew(degc)"])
@@ -604,7 +612,8 @@ def build_observed_snotel(
 
 
 def get_gridmet_p_annual_monthlies(lng: float, lat: float, start_year: int, end_year: int) -> list[float]:
-    df = gridmet_retrieve_historical_precip(lng, lat, start_year, end_year)
+    admission = GridMetAdmissionConfig.from_env()
+    df = gridmet_retrieve_historical_precip(lng, lat, start_year, end_year, admission=admission)
     months = df.index.month
     precip = df["pr(mm/day)"].values
     return pyo3_cli_calculate_annual_monthlies(months=months, ppts=precip)
@@ -622,7 +631,8 @@ def build_observed_gridmet(
     adjust_mx_pt5: bool = False,
     silent_pass_observed_quality_guard: bool = False,
 ) -> None:
-    df = gridmet_retrieve_historical_timeseries(lng, lat, start_year, end_year)
+    admission = GridMetAdmissionConfig.from_env()
+    df = gridmet_retrieve_historical_timeseries(lng, lat, start_year, end_year, admission=admission)
     df.to_parquet(_join(cli_dir, f"gridmet_{start_year}-{end_year}.parquet"))
     df_to_prn(df, _join(cli_dir, prn_fn), "pr(mm/day)", "tmmx(degc)", "tmmn(degc)")
 
@@ -841,7 +851,8 @@ def _apply_depnexrad_daily_temp_overrides(
         return ClimateFile(_join(cli_dir, cli_fn)), cli_fn
 
     if climate.climate_daily_temp_ds == "gridmet":
-        df = gridmet_retrieve_historical_timeseries(lng, lat, start_year, end_year)
+        admission = GridMetAdmissionConfig.from_env()
+        df = gridmet_retrieve_historical_timeseries(lng, lat, start_year, end_year, admission=admission)
         dates = df.index
         cli.replace_var("tmax", dates, df["tmmx(degc)"])
         cli.replace_var("tmin", dates, df["tmmn(degc)"])
@@ -1316,6 +1327,8 @@ def _interpolate_daymet_hillslope_series(
     hillslope_locations: dict[str, dict[str, float]],
     start_year: int,
     end_year: int,
+    *,
+    admission: GridMetAdmissionConfig | None = None,
 ) -> None:
     from wepppy.climates.daymet.daymet_singlelocation_client import interpolate_daily_timeseries
 
@@ -1327,6 +1340,7 @@ def _interpolate_daymet_hillslope_series(
             output_dir=cli_dir,
             output_type="prn parquet",
             logger=climate.logger,
+            admission=admission,
         )
 
 
@@ -1337,6 +1351,8 @@ def _resolve_daymet_wind(
     start_year: int,
     end_year: int,
     use_gridmet_wind_when_applicable: bool | None = None,
+    *,
+    admission: GridMetAdmissionConfig | None = None,
 ) -> tuple[Optional[Any], Optional[Any]]:
     if use_gridmet_wind_when_applicable is None:
         use_gridmet_wind_when_applicable = climate.use_gridmet_wind_when_applicable
@@ -1344,7 +1360,7 @@ def _resolve_daymet_wind(
         return None, None
 
     with climate.timed("  retrieving gridmet wind"):
-        wind_df = gridmet_retrieve_historical_wind(ws_lng, ws_lat, start_year, end_year)
+        wind_df = gridmet_retrieve_historical_wind(ws_lng, ws_lat, start_year, end_year, admission=admission)
         return wind_df["vs(m/s)"], wind_df["th(DegreesClockwisefromnorth)"]
 
 
@@ -1493,6 +1509,7 @@ def run_observed_daymet_multiple_build(
     climate.set_attrs(attrs)
     climate.logger.info("  running _build_climate_observed_daymet_multiple")
     snapshot = capture_multiple_build_inputs(climate)
+    admission = GridMetAdmissionConfig.from_env() if snapshot.use_gridmet_wind_when_applicable else None
 
     (
         watershed,
@@ -1511,6 +1528,7 @@ def run_observed_daymet_multiple_build(
         hillslope_locations,
         start_year,
         end_year,
+        admission=admission,
     )
     wind_vs, wind_dir = _resolve_daymet_wind(
         climate,
@@ -1519,6 +1537,7 @@ def run_observed_daymet_multiple_build(
         start_year,
         end_year,
         snapshot.use_gridmet_wind_when_applicable,
+        admission=admission,
     )
     cligen.stage_station_parameter_file()
 

@@ -6,6 +6,8 @@ from typing import Mapping, MutableMapping, TypedDict
 import numpy as np
 import pandas as pd
 
+from wepppy.climates.gridmet.admission import GridMetAdmissionConfig
+
 
 class HillslopeLocation(TypedDict, total=False):
     latitude: float
@@ -25,6 +27,8 @@ def retrieve_historical_timeseries(
     end_year: int,
     fill_leap_years: bool = ...,
     gridmet_wind: bool = ...,
+    *,
+    admission: GridMetAdmissionConfig | None = ...,
 ) -> pd.DataFrame: ...
 
 
@@ -36,6 +40,8 @@ def _retrieve_historical_timeseries_wrapper(
     fill_leap_years: bool = ...,
     gridmet_wind: bool = ...,
     attrs: tuple[int, int] | None = ...,
+    *,
+    admission: GridMetAdmissionConfig | None = ...,
 ) -> tuple[tuple[int, int] | None, pd.DataFrame]: ...
 
 
@@ -47,6 +53,8 @@ def interpolate_daily_timeseries(
     output_type: str = ...,
     logger: logging.Logger | None = ...,
     max_workers: int = ...,
+    *,
+    admission: GridMetAdmissionConfig | None = ...,
 ) -> None: ...
 
 

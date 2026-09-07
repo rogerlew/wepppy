@@ -865,12 +865,15 @@ def test_wait_for_daymet_futures_tracks_quality_guard_bypass(
     assert bypassed is True
 
 
+@pytest.mark.parametrize("gridmet_wind", [False, True])
 def test_run_observed_daymet_multiple_build_sets_final_outputs(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
+    gridmet_wind: bool,
 ) -> None:
     climate = _ClimateStub(tmp_path)
-    climate.use_gridmet_wind_when_applicable = True
+    climate.use_gridmet_wind_when_applicable = gridmet_wind
+    monkeypatch.setenv("GRIDMET_REDIS_ADMISSION_ENABLED", "malformed")
 
     captured_executor_workers: list[int] = []
     events: list[str] = []
@@ -905,8 +908,25 @@ def test_run_observed_daymet_multiple_build_sets_final_outputs(
         ),
     )
     monkeypatch.setattr(helper_module, "_build_daymet_hillslope_locations", lambda *_args, **_kwargs: {"ws": {}})
-    monkeypatch.setattr(helper_module, "_interpolate_daymet_hillslope_series", lambda *_args, **_kwargs: None)
-    monkeypatch.setattr(helper_module, "_resolve_daymet_wind", lambda *_args, **_kwargs: ("wind_vs", "wind_dir"))
+    admission_config = helper_module.GridMetAdmissionConfig() if gridmet_wind else None
+    resolutions = []
+    forwarded = []
+
+    def _resolve_admission():
+        resolutions.append(True)
+        return admission_config
+
+    def _interpolate(*_args, admission=None):
+        forwarded.append(admission)
+
+    def _wind(*_args, admission=None):
+        forwarded.append(admission)
+        return "wind_vs", "wind_dir"
+
+    if gridmet_wind:
+        monkeypatch.setattr(helper_module.GridMetAdmissionConfig, "from_env", staticmethod(_resolve_admission))
+    monkeypatch.setattr(helper_module, "_interpolate_daymet_hillslope_series", _interpolate)
+    monkeypatch.setattr(helper_module, "_resolve_daymet_wind", _wind)
     monkeypatch.setattr(helper_module, "_resolve_daymet_worker_count", lambda: 7)
     monkeypatch.setattr(helper_module, "ProcessPoolExecutor", _ProcessPoolExecutorStub)
     monkeypatch.setattr(
@@ -919,6 +939,8 @@ def test_run_observed_daymet_multiple_build_sets_final_outputs(
 
     bypassed = helper_module.run_observed_daymet_multiple_build(climate, attrs={"mode": "daymet"})
 
+    assert resolutions == ([True] if gridmet_wind else [])
+    assert forwarded == [admission_config, admission_config]
     assert captured_executor_workers == [7]
     assert events == ["stage", "executor"]
     assert bypassed is True
@@ -968,3 +990,77 @@ def test_run_observed_daymet_multiple_build_collection_failure_does_not_finalize
     assert climate.sub_par_fns is None
     assert climate.sub_cli_fns is None
     assert climate.quality_guard_bypass_published == []
+
+
+@pytest.mark.parametrize("source", ["gridmet", "prism", "daymet", "monthlies", "depnexrad", "snotel"])
+def test_gridmet_orchestration_resolves_and_forwards_admission_once(
+    source: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Each NoDb acquisition boundary supplies its resolved policy explicitly."""
+    import wepppy.climates.daymet as daymet_module
+
+    config = helper_module.GridMetAdmissionConfig()
+    resolutions = []
+    forwarded = []
+
+    def resolve():
+        resolutions.append(True)
+        return config
+
+    class ReachedClient(Exception):
+        pass
+
+    def client(*_args, admission=None, **_kwargs):
+        forwarded.append(admission)
+        raise ReachedClient
+
+    monkeypatch.setattr(helper_module.GridMetAdmissionConfig, "from_env", staticmethod(resolve))
+    monkeypatch.setattr(helper_module, "gridmet_retrieve_historical_timeseries", client)
+    monkeypatch.setattr(helper_module, "gridmet_retrieve_historical_precip", client)
+    monkeypatch.setattr(helper_module, "prism_retrieve_historical_timeseries", client)
+    monkeypatch.setattr(daymet_module, "retrieve_historical_timeseries", client)
+    args = (None, -116.0, 46.0, 2001, 2001, str(tmp_path), "p.prn", "p.cli")
+
+    with pytest.raises(ReachedClient):
+        if source == "monthlies":
+            helper_module.get_gridmet_p_annual_monthlies(-116.0, 46.0, 2001, 2001)
+        elif source == "depnexrad":
+            helper_module._apply_depnexrad_daily_temp_overrides(
+                SimpleNamespace(climate_daily_temp_ds="gridmet"), None,
+                str(tmp_path), "p.cli", -116.0, 46.0, 2001, 2001,
+            )
+        elif source == "snotel":
+            data = pd.DataFrame({
+                "Date": pd.to_datetime(["2001-01-01"]),
+                "Precipitation Increment (in)": [1.0],
+                "Air Temperature Maximum (degF)": [40.0],
+                "Air Temperature Minimum (degF)": [30.0],
+            })
+            monkeypatch.setattr(helper_module.pd, "read_csv", lambda *_args, **_kwargs: data)
+            monkeypatch.setattr(helper_module, "df_to_prn", lambda *_args, **_kwargs: None)
+            monkeypatch.setattr(helper_module, "_run_observed_with_quality_guard_handling", lambda *_args, **_kwargs: None)
+            monkeypatch.setattr(helper_module, "ClimateFile", lambda *_args: None)
+            helper_module.build_observed_snotel(
+                None, -116.0, 46.0, "station", 2001, 2001, str(tmp_path), "p.prn", "p.cli"
+            )
+        else:
+            getattr(helper_module, f"build_observed_{source}")(*args)
+
+    assert resolutions == [True]
+    assert forwarded == [config]
+
+
+def test_daymet_wind_forwards_operation_policy(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    config = helper_module.GridMetAdmissionConfig()
+    climate = _ClimateStub(tmp_path)
+    received = []
+
+    def wind(*_args, admission=None):
+        received.append(admission)
+        return {"vs(m/s)": "velocity", "th(DegreesClockwisefromnorth)": "direction"}
+
+    monkeypatch.setattr(helper_module, "gridmet_retrieve_historical_wind", wind)
+    assert helper_module._resolve_daymet_wind(
+        climate, -116.0, 46.0, 2001, 2001, True, admission=config
+    ) == ("velocity", "direction")
+    assert received == [config]

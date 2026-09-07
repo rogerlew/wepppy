@@ -5,11 +5,15 @@ from __future__ import annotations
 import json
 import logging
 import time
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Iterator, Mapping, Sequence
+from contextlib import contextmanager, nullcontext
 from datetime import date, timedelta
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import requests
+
+if TYPE_CHECKING:
+    from wepppy.climates.gridmet.admission import GridMetAdmissionConfig
 
 MAX_ATTEMPTS = 3
 BACKOFF_SECONDS = (5.0, 10.0)
@@ -49,8 +53,9 @@ def _retry_or_raise(
         error = GridMetAcquisitionError(
             f"GridMET {operation} failed after {MAX_ATTEMPTS} attempts: {reason}"
         )
-        if cause is None:
-            raise error
+        if cause is None or isinstance(cause, requests.exceptions.RequestException):
+            # Requests exceptions may contain the complete private query URL.
+            raise error from None
         raise error from cause
     delay = BACKOFF_SECONDS[attempt]
     _LOG.warning(
@@ -114,6 +119,57 @@ def validate_single_location_payload(
     return data
 
 
+def _prepare_admission(admission: GridMetAdmissionConfig | None, timeout):
+    if admission is None:
+        return None, None
+    # Local import avoids a cycle: admission errors share our acquisition base.
+    from wepppy.climates.gridmet.admission import GridMetAdmissionController
+
+    admission.validate_http_timeout(timeout)
+    deadline = time.monotonic() + admission.wait_timeout_seconds
+    return GridMetAdmissionController(admission), deadline
+
+
+@contextmanager
+def _admitted_response(get, url, *, controller, deadline, request_kind, **kwargs):
+    context = (
+        nullcontext()
+        if controller is None
+        else controller.acquire(request_kind=request_kind, deadline=deadline)
+    )
+    with context as permit:
+        response = None
+        try:
+            if permit is not None:
+                permit.check()
+            response = get(url, **kwargs)
+            if permit is not None:
+                permit.check()
+            yield response, permit
+        finally:
+            # Close the upstream connection while its permit is still held.
+            if response is not None:
+                response.close()
+            if permit is not None:
+                permit.check()
+
+
+def _checked_response_chunks(response, permit, *, chunk_size) -> Iterator[bytes]:
+    chunks = iter(response.iter_content(chunk_size=chunk_size))
+    while True:
+        if permit is not None:
+            permit.check()
+        try:
+            chunk = next(chunks)
+        except StopIteration:
+            if permit is not None:
+                permit.check()
+            return
+        if permit is not None:
+            permit.check()
+        yield chunk
+
+
 def request_single_location_json(
     url: str,
     *,
@@ -122,85 +178,62 @@ def request_single_location_json(
     end_date: date,
     get: Callable[..., Any] | None = None,
     sleep: Callable[[float], None] | None = None,
+    admission: GridMetAdmissionConfig | None = None,
 ) -> Mapping[str, Any]:
     get = requests.get if get is None else get
     sleep = time.sleep if sleep is None else sleep
     operation = "single-location request"
+    controller, deadline = _prepare_admission(admission, SINGLE_LOCATION_TIMEOUT)
     for attempt in range(MAX_ATTEMPTS):
-        response = None
         try:
-            response = get(
+            with _admitted_response(
+                get,
                 url,
+                controller=controller,
+                deadline=deadline,
+                request_kind="point",
                 headers={"Accept": "application/json", "referer": "https://wepp.cloud"},
                 timeout=SINGLE_LOCATION_TIMEOUT,
                 allow_redirects=False,
                 stream=True,
-            )
-            status = int(response.status_code)
-            if status != 200:
-                if status not in TRANSIENT_HTTP_STATUSES:
-                    raise GridMetAcquisitionError(
-                        f"GridMET {operation} returned non-retryable HTTP {status}"
-                    )
-                response.close()
-                response = None
-                _retry_or_raise(
-                    attempt=attempt,
-                    operation=operation,
-                    reason=f"transient HTTP {status}",
-                    sleep=sleep,
-                )
-                continue
-            declared_length = response.headers.get("Content-Length")
-            if declared_length is not None:
-                try:
-                    if int(declared_length) > MAX_SINGLE_LOCATION_BYTES:
-                        raise GridMetPayloadError(
-                            f"JSON response exceeds {MAX_SINGLE_LOCATION_BYTES} byte limit"
+            ) as (response, permit):
+                status = int(response.status_code)
+                if status != 200:
+                    if status not in TRANSIENT_HTTP_STATUSES:
+                        raise GridMetAcquisitionError(
+                            f"GridMET {operation} returned non-retryable HTTP {status}"
                         )
-                except ValueError as exc:
-                    raise GridMetPayloadError("invalid Content-Length header") from exc
-            content = bytearray()
-            try:
-                for chunk in response.iter_content(chunk_size=64 * 1024):
+                    raise GridMetPayloadError(f"transient HTTP {status}")
+                declared_length = response.headers.get("Content-Length")
+                if declared_length is not None:
+                    try:
+                        if int(declared_length) > MAX_SINGLE_LOCATION_BYTES:
+                            raise GridMetPayloadError(
+                                f"JSON response exceeds {MAX_SINGLE_LOCATION_BYTES} byte limit"
+                            )
+                    except ValueError as exc:
+                        raise GridMetPayloadError("invalid Content-Length header") from exc
+                content = bytearray()
+                for chunk in _checked_response_chunks(
+                    response, permit, chunk_size=64 * 1024
+                ):
                     content.extend(chunk)
                     if len(content) > MAX_SINGLE_LOCATION_BYTES:
                         raise GridMetPayloadError(
                             f"JSON response exceeds {MAX_SINGLE_LOCATION_BYTES} byte limit"
                         )
+            # Parsing and validation do not occupy an upstream connection.
+            try:
                 payload = json.loads(content)
             except (json.JSONDecodeError, UnicodeDecodeError) as exc:
-                response.close()
-                response = None
-                _retry_or_raise(
-                    attempt=attempt,
-                    operation=operation,
-                    reason="invalid JSON response",
-                    sleep=sleep,
-                    cause=exc,
-                )
-                continue
-            try:
-                return validate_single_location_payload(
-                    payload,
-                    required_series,
-                    start_date=start_date,
-                    end_date=end_date,
-                )
-            except GridMetPayloadError as exc:
-                response.close()
-                response = None
-                _retry_or_raise(
-                    attempt=attempt,
-                    operation=operation,
-                    reason=str(exc),
-                    sleep=sleep,
-                    cause=exc,
-                )
+                raise GridMetPayloadError("invalid JSON response") from exc
+            return validate_single_location_payload(
+                payload,
+                required_series,
+                start_date=start_date,
+                end_date=end_date,
+            )
         except GridMetPayloadError as exc:
-            if response is not None:
-                response.close()
-                response = None
             _retry_or_raise(
                 attempt=attempt,
                 operation=operation,
@@ -209,9 +242,6 @@ def request_single_location_json(
                 cause=exc,
             )
         except _TRANSIENT_REQUEST_ERRORS as exc:
-            if response is not None:
-                response.close()
-                response = None
             _retry_or_raise(
                 attempt=attempt,
                 operation=operation,
@@ -219,7 +249,4 @@ def request_single_location_json(
                 sleep=sleep,
                 cause=exc,
             )
-        finally:
-            if response is not None:
-                response.close()
     raise AssertionError("bounded GridMET retry loop exited unexpectedly")

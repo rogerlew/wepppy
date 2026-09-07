@@ -444,7 +444,12 @@ def test_retrieve_historical_timeseries_leap_handling_and_conversions(monkeypatc
     assert df.index.dtype == "datetime64[ns]"
 
 
-def test_retrieve_historical_timeseries_with_gridmet_wind(monkeypatch):
+@pytest.mark.parametrize("enabled", [False, True])
+def test_retrieve_historical_timeseries_with_gridmet_wind(monkeypatch, enabled):
+    from wepppy.climates.gridmet.admission import GridMetAdmissionConfig
+
+    admission_config = GridMetAdmissionConfig() if enabled else None
+    monkeypatch.setenv("GRIDMET_REDIS_ADMISSION_ENABLED", "true")
     rows = [
         _DaymetRow(1980, 100, 5.0, 15.0, 5.0, 36_000.0, 200.0, 150.0),
         _DaymetRow(1980, 365, 10.0, 12.0, 3.0, 40_000.0, 150.0, 120.0),
@@ -453,7 +458,8 @@ def test_retrieve_historical_timeseries_with_gridmet_wind(monkeypatch):
 
     expected_index = _expected_index(rows)
 
-    def _fake_wind(lon, lat, start_year, end_year):
+    def _fake_wind(lon, lat, start_year, end_year, *, admission=None):
+        assert admission is admission_config
         assert start_year == 1980
         assert end_year == 1980
         assert pytest.approx(lon) == -116.0
@@ -466,7 +472,9 @@ def test_retrieve_historical_timeseries_with_gridmet_wind(monkeypatch):
 
     monkeypatch.setattr("wepppy.climates.gridmet.retrieve_historical_wind", _fake_wind, raising=False)
 
-    df = retrieve_historical_timeseries(-116.0, 47.0, 1980, 1980, gridmet_wind=True)
+    df = retrieve_historical_timeseries(
+        -116.0, 47.0, 1980, 1980, gridmet_wind=True, admission=admission_config
+    )
 
     assert "vs(m/s)" in df.columns
     assert "th(DegreesClockwisefromnorth)" in df.columns

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from concurrent.futures import Future
+import pickle
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -113,6 +114,8 @@ def test_gridmet_retrieval_uses_four_worker_default(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     observed_workers: list[int] = []
+    admission_config = service_module.GridMetAdmissionConfig()
+    submitted_configs = []
 
     class _Executor:
         def __init__(self, *, max_workers: int) -> None:
@@ -125,6 +128,10 @@ def test_gridmet_retrieval_uses_four_worker_default(
             return None
 
         def submit(self, function, *args, **kwargs):
+            assert kwargs["admission"] is admission_config
+            _copied_args, copied_kwargs = pickle.loads(pickle.dumps((args, kwargs)))
+            submitted_configs.append(copied_kwargs["admission"])
+            assert copied_kwargs["admission"] == admission_config
             future = Future()
             future.set_result(function(*args, **kwargs))
             return future
@@ -141,9 +148,11 @@ def test_gridmet_retrieval_uses_four_worker_default(
         cli_dir=str(tmp_path),
         climate=SimpleNamespace(logger=_RecordingLogger()),
         ncpu=32,
+        admission=admission_config,
     )
 
     assert observed_workers == [4]
+    assert len(submitted_configs) == 1
 
 
 def test_load_raw_gridmet_data_preserves_unpublished_suffix_as_nan(tmp_path: Path) -> None:
@@ -383,7 +392,19 @@ def test_gridmet_build_stages_station_before_cli_worker_pool(
         "_build_dates_and_bbox",
         lambda *_args: (pd.date_range("2026-01-01", periods=1), [0.0] * 4),
     )
-    monkeypatch.setattr(service, "_retrieve_gridmet_netcdfs", lambda **_kwargs: None)
+    config = service_module.GridMetAdmissionConfig()
+    resolutions = []
+    received = []
+
+    def _resolve_admission():
+        resolutions.append(True)
+        return config
+
+    def _retrieve_netcdfs(**kwargs):
+        received.append(kwargs["admission"])
+
+    monkeypatch.setattr(service_module.GridMetAdmissionConfig, "from_env", staticmethod(_resolve_admission))
+    monkeypatch.setattr(service, "_retrieve_gridmet_netcdfs", _retrieve_netcdfs)
     monkeypatch.setattr(
         service,
         "_load_raw_gridmet_data",
@@ -415,6 +436,8 @@ def test_gridmet_build_stages_station_before_cli_worker_pool(
     assert result.input_years == 1
     assert not hasattr(climate, "monthlies")
     assert not hasattr(climate, "cli_fn")
+    assert resolutions == [True]
+    assert received == [config]
     assert events == ["stage", "pool"]
 
 

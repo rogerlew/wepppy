@@ -4,7 +4,7 @@
 
 **Timezone**: UTC
 **Started**: 2026-09-07 15:53 UTC
-**Current phase**: Contract checkpoint drafting and two independent reviews
+**Current phase**: Reviewed candidate commit and Forest deployment
 **Last updated**: 2026-09-07 15:53 UTC
 **Security impact**: `high`; independent review required
 **Live authorization**: `forest` development stack only
@@ -35,7 +35,13 @@
 
 ### In Progress
 
-Contract and ADR drafting, with independent correctness and security reviews.
+Contract and ADR accepted after independent correctness and security reviews;
+standalone checkpoint: `1b4835ca73bc67c9c84ecbb26f596aab4078e234`.
+Admission module, client integration, caller propagation, and probe are
+implemented. Nine isolated real-Redis scenarios passed; focused client,
+propagation, and probe suites pass. Full suite and final independent reviews
+passed: final frozen-tree suite 7,651 passed / 72 skipped, with all independent
+review findings closed. Deployment follows the reviewed candidate commit/push.
 Preflight verified Forest, clean master at
 `583e6870c639999515035423f133e5925dae2da5`, the installed development wctl
 preset, and healthy standalone Redis 8.6.2. Baseline focused validation passed:

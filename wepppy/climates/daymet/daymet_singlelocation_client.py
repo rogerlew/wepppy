@@ -35,6 +35,7 @@ from metpy.units import units
 from wepppyo3.climate import interpolate_geospatial
 
 from wepppy.climates.cligen import df_to_prn
+from wepppy.climates.gridmet.admission import GridMetAdmissionConfig
 from wepppy.nodb.base import createProcessPoolExecutor
 
 
@@ -61,6 +62,8 @@ def retrieve_historical_timeseries(
     end_year: int,
     fill_leap_years: bool = True,
     gridmet_wind: bool = False,
+    *,
+    admission: GridMetAdmissionConfig | None = None,
 ) -> pd.DataFrame:
     """Download Daymet data for a single coordinate from the ORNL API.
 
@@ -72,6 +75,7 @@ def retrieve_historical_timeseries(
         fill_leap_years: Whether to duplicate Dec 31 in leap years so WEPP
             receives 366 rows.
         gridmet_wind: When ``True`` augment the result with GridMET wind data.
+        admission: Explicit GridMET admission configuration; None disables it.
 
     Returns:
         DataFrame indexed by timestamp with Daymet columns and derived
@@ -172,7 +176,7 @@ def retrieve_historical_timeseries(
     if gridmet_wind:
         from wepppy.climates.gridmet import retrieve_historical_wind as gridmet_retrieve_historical_wind
 
-        wind_df = gridmet_retrieve_historical_wind(lon, lat, start_year, end_year)
+        wind_df = gridmet_retrieve_historical_wind(lon, lat, start_year, end_year, admission=admission)
 
         df['vs(m/s)'] = wind_df['vs(m/s)']
         df['th(DegreesClockwisefromnorth)'] = wind_df['th(DegreesClockwisefromnorth)']
@@ -202,6 +206,8 @@ def _retrieve_historical_timeseries_wrapper(
     fill_leap_years: bool = True,
     gridmet_wind: bool = False,
     attrs: tuple[int, int] | None = None,
+    *,
+    admission: GridMetAdmissionConfig | None = None,
 ) -> tuple[tuple[int, int] | None, pd.DataFrame]:
     """Adapter that keeps track of pixel coordinates for executor futures."""
 
@@ -212,6 +218,7 @@ def _retrieve_historical_timeseries_wrapper(
         end_year,
         fill_leap_years=fill_leap_years,
         gridmet_wind=gridmet_wind,
+        admission=admission,
     )
     return attrs, df
 
@@ -225,6 +232,8 @@ def interpolate_daily_timeseries(
     output_type: str = 'prn parquet',
     logger: logging.Logger | None = None,
     max_workers: int = 12,
+    *,
+    admission: GridMetAdmissionConfig | None = None,
 ) -> None:
     """Interpolate Daymet single-pixel downloads onto WEPP hillslopes.
 
@@ -236,6 +245,7 @@ def interpolate_daily_timeseries(
         output_type: Space-delimited list containing ``prn`` and/or ``parquet``.
         logger: Optional logger used for progress reporting.
         max_workers: Maximum size of the executor pools used for downloads.
+        admission: Explicit GridMET configuration forwarded to child clients.
     """
 
     if max_workers < 1:
@@ -358,7 +368,8 @@ def interpolate_daily_timeseries(
             futures.append(
                 executor.submit(
                     _retrieve_historical_timeseries_wrapper, 
-                    lng, lat, start_year, end_year, gridmet_wind=gridmet_wind, attrs=(col, row)))
+                    lng, lat, start_year, end_year, gridmet_wind=gridmet_wind,
+                    attrs=(col, row), admission=admission))
 
         futures_n = len(futures)
         count = 0

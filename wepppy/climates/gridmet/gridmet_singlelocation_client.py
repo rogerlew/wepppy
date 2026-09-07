@@ -6,7 +6,10 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
+from __future__ import annotations
+
 from datetime import date, datetime, timedelta
+from typing import TYPE_CHECKING
 import numpy as np
 import pandas as pd
 
@@ -15,8 +18,13 @@ from metpy.units import units
 
 from wepppy.climates.gridmet.acquisition import request_single_location_json
 
+if TYPE_CHECKING:
+    from wepppy.climates.gridmet.admission import GridMetAdmissionConfig
 
-def retrieve_historical_precip(lon, lat, start_year, end_year):
+
+def retrieve_historical_precip(
+    lon, lat, start_year, end_year, *, admission: GridMetAdmissionConfig | None = None
+):
     yesterday = datetime.now() - timedelta(2)
     if end_year == yesterday.year:
         end_date = datetime.strftime(yesterday, '%Y-%m-%d')
@@ -33,6 +41,7 @@ def retrieve_historical_precip(lon, lat, start_year, end_year):
         required_series=('pr(mm)',),
         start_date=date(start_year, 1, 1),
         end_date=date.fromisoformat(end_date),
+        admission=admission,
     )
 
     df = pd.DataFrame()
@@ -42,7 +51,9 @@ def retrieve_historical_precip(lon, lat, start_year, end_year):
     return df
 
 
-def retrieve_historical_wind(lon, lat, start_year, end_year):
+def retrieve_historical_wind(
+    lon, lat, start_year, end_year, *, admission: GridMetAdmissionConfig | None = None
+):
     yesterday = datetime.now() - timedelta(2)
     if end_year == yesterday.year:
         end_date = datetime.strftime(yesterday, '%Y-%m-%d')
@@ -60,6 +71,7 @@ def retrieve_historical_wind(lon, lat, start_year, end_year):
         required_series=('vs(m/s)', 'th(DegreesClockwisefromnorth)'),
         start_date=date(start_year, 1, 1),
         end_date=date.fromisoformat(end_date),
+        admission=admission,
     )
 
     df = pd.DataFrame()
@@ -71,7 +83,9 @@ def retrieve_historical_wind(lon, lat, start_year, end_year):
     return df
 
 
-def retrieve_historical_timeseries(lon, lat, start_year, end_year):
+def retrieve_historical_timeseries(
+    lon, lat, start_year, end_year, *, admission: GridMetAdmissionConfig | None = None
+):
     yesterday = datetime.now() - timedelta(2)
     if end_year == yesterday.year:
         end_date = datetime.strftime(yesterday, '%Y-%m-%d')
@@ -107,6 +121,7 @@ def retrieve_historical_timeseries(lon, lat, start_year, end_year):
         ),
         start_date=date(start_year, 1, 1),
         end_date=date.fromisoformat(end_date),
+        admission=admission,
     )
 
     #print(data.keys())

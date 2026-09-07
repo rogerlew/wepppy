@@ -38,15 +38,25 @@ deployment to `openwepp.org`.
 - [x] (2026-09-07 16:22 UTC) Write canonical admission contract and ADR-0050;
   independent correctness/security contract reviews pass with all medium
   findings resolved. Standalone ancestor commit precedes runtime edits.
-- [ ] Implement admission state/configuration and deterministic tests.
-- [ ] Wire all GridMET clients and callers and update deployment documentation.
-- [ ] Complete focused/full validation and independent reviews.
+- [x] (2026-09-07) Implement admission state/configuration and deterministic
+  tests; nine isolated real-Redis scenarios passed, including six processes.
+- [x] (2026-09-07) Wire all GridMET clients/callers, add probe, and update
+  development Compose, configuration reference, and Forest runbook.
+- [x] (2026-09-07) Complete focused/full validation and independent reviews:
+  final frozen-tree suite 7,651 passed, 72 skipped; all review findings closed.
 - [ ] Commit and push the reviewed candidate to `master`.
 - [ ] Deploy exact candidate plus variables to Forest and verify containers.
 - [ ] Run and record Forest cross-container and real-client probes.
 - [ ] Close and archive the package; leave openwepp.org batch testing deferred.
 
 ## Surprises & Discoveries
+
+- Observation: Redis Lua errors do not roll back earlier script writes.
+  Independent review required full type, membership, sequence, and expiry
+  validation before pruning. Real-Redis malformed-state tests compare all six
+  keys before/after rejected operations.
+- Observation: renewal can finish while permit exit joins its thread. Exit now
+  rechecks the terminal renewal outcome before accepting successful HTTP work.
 
 - Observation: the NoDb contract-first standard requires two independent
   contract reviews before the standalone checkpoint commit. Both reviews are
@@ -71,6 +81,11 @@ deployment to `openwepp.org`.
 
 ## Decision Log
 
+- Decision: interpret numeric representability limits and foreign-observer
+  elapsed-wait semantics explicitly in the canonical contract. These clarify
+  runtime representation and diagnostics without changing operational defaults.
+  Date/Author: 2026-09-07, Codex and independent reviewers.
+
 - Decision: use a dedicated `wepppy.climates.gridmet.admission` module.
   Rationale: Redis queue mechanics, configuration, errors, and observation are
   a separate concern from response validation and DataFrame/NetCDF conversion.
@@ -91,9 +106,12 @@ deployment to `openwepp.org`.
 
 ## Outcomes & Retrospective
 
-Not yet implemented. At closeout, summarize code behavior, automated evidence,
-Forest evidence, actual values, residual risks, rollback result, and the exact
-deferred openwepp.org batch step without claiming Kubernetes acceptance.
+Implementation and independent correctness/QA/security reviews are complete.
+Focused client, propagation, lifecycle, probe, and isolated real-Redis tests
+pass. The frozen final implementation passed 7,651 tests with 72 skipped;
+isolated real-Redis scenarios passed separately.
+Candidate commit/push, Forest activation, cross-container/public acceptance,
+and rollback remain pending. No batch or Kubernetes work has been performed.
 
 ## Context and Orientation
 
@@ -309,8 +327,13 @@ After adding tests, run the discovered focused modules, including at minimum:
     wctl run-pytest tests/climates/gridmet/test_download_clients.py --maxfail=1
     wctl run-pytest tests/nodb/test_climate_build_helpers.py --maxfail=1
 
-Add explicit admission and live-Redis test modules and include their exact paths
-here once named. Validate configuration and documentation:
+Admission/lifecycle tests are `tests/climates/gridmet/test_admission.py` and
+`tests/climates/gridmet/test_admission_clients.py`; real-Redis scenarios are
+`tests/climates/gridmet/test_admission_redis.py`. The isolated-service invocation
+and exact results are recorded in `artifacts/2026-09-07_validation.md`.
+Propagation tests include `tests/climates/test_gridmet_propagation.py`, and the
+probe suite is `tests/tools/test_gridmet_admission_probe.py`. Validate
+configuration and documentation:
 
     wctl docker compose config --quiet
     wctl doc-lint --path docs/work-packages/20260907_gridmet_redis_admission

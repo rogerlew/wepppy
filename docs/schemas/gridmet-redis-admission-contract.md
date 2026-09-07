@@ -59,6 +59,11 @@ hyphen, or period; braces and whitespace are rejected. The length limit is 160
 characters. Values in a supplied configuration are
 validated as strictly as environment input.
 
+Representability is also required: the limit and derived Redis retention
+milliseconds cannot exceed the exact Lua integer range (`2**53 - 1`), and
+timings cannot exceed Python's `threading.TIMEOUT_MAX`. These are runtime
+representation guards, not additional operational tuning parameters.
+
 Redis connect and socket timeouts are each two seconds, with automatic Redis
 retries disabled. The renewal interval is `min(lease_seconds / 3, 5)` seconds.
 Require `lease_seconds > 3 * (renewal_interval + 2)` and
@@ -134,6 +139,9 @@ immutable snapshot. Snapshot fields include ticket state, zero-based waiting
 position (`None` when not queued), queued count, active count, configured limit,
 and monotonic elapsed wait. Counts describe live state at one atomic instant;
 position is not an ETA. Observation does not renew another client's liveness.
+Elapsed wait is local to a ticket known by the observing controller; an external
+observer reports zero when the originating monotonic start is unknown. Queue
+position and server time remain available across containers.
 
 The implementation interface shared by clients is
 `GridMetAdmissionController(config).acquire(deadline=..., request_kind=...)`,

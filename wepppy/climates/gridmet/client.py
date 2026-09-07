@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import calendar
 import logging
 import math
@@ -5,6 +7,7 @@ import tempfile
 import time
 import uuid
 from enum import Enum
+from typing import TYPE_CHECKING
 import os
 from os.path import join as _join
 from os.path import exists, dirname
@@ -45,7 +48,13 @@ from wepppy.climates.gridmet.acquisition import (
     TRANSIENT_HTTP_STATUSES,
     GridMetAcquisitionError,
     GridMetPayloadError,
+    _admitted_response,
+    _checked_response_chunks,
+    _prepare_admission,
 )
+
+if TYPE_CHECKING:
+    from wepppy.climates.gridmet.admission import GridMetAdmissionConfig
 
 SCRATCH_DIR = '/dev/shm'
 _LOG = logging.getLogger(__name__)
@@ -194,7 +203,10 @@ def _validate_gridmet_netcdf(path, variable_name, *, bbox, year):
         raise GridMetPayloadError("response is not a readable NetCDF dataset") from exc
 
 
-def retrieve_nc(gridvariable: GridMetVariable, bbox, year, met_dir=None, _id=None):
+def retrieve_nc(
+    gridvariable: GridMetVariable, bbox, year, met_dir=None, _id=None,
+    *, admission: GridMetAdmissionConfig | None = None,
+):
     global _var_meta
 
     abbrv, variable_name = _var_meta[gridvariable]
@@ -222,62 +234,69 @@ def retrieve_nc(gridvariable: GridMetVariable, bbox, year, met_dir=None, _id=Non
     os.makedirs(met_dir, exist_ok=True)
     destination = _join(met_dir, f'{_id}.nc')
 
+    controller, deadline = _prepare_admission(admission, GRID_TIMEOUT)
     for attempt in range(MAX_ATTEMPTS):
-        response = None
         stage_path = None
         try:
-            response = requests.get(
+            with _admitted_response(
+                requests.get,
                 url,
+                controller=controller,
+                deadline=deadline,
+                request_kind="grid",
                 headers={'referer': 'https://wepp.cloud'},
                 stream=True,
                 timeout=GRID_TIMEOUT,
                 allow_redirects=False,
-            )
-            status = int(response.status_code)
-            if status != 200:
-                if status not in TRANSIENT_HTTP_STATUSES:
-                    raise GridMetAcquisitionError(
-                        f'GridMET grid request for {gridvariable.name} {year} '
-                        f'returned non-retryable HTTP {status}'
-                    )
-                raise GridMetPayloadError(f'transient HTTP {status}')
-
-            declared_length = response.headers.get('Content-Length')
-            expected_length = None
-            if declared_length is not None:
-                try:
-                    expected_length = int(declared_length)
-                    if expected_length < 0:
-                        raise GridMetPayloadError('invalid Content-Length header')
-                    if expected_length > MAX_GRID_BYTES:
-                        raise GridMetPayloadError(
-                            f'NetCDF response exceeds {MAX_GRID_BYTES} byte limit'
+            ) as (response, permit):
+                content_encoded = bool(response.headers.get('Content-Encoding'))
+                status = int(response.status_code)
+                if status != 200:
+                    if status not in TRANSIENT_HTTP_STATUSES:
+                        raise GridMetAcquisitionError(
+                            f'GridMET grid request for {gridvariable.name} {year} '
+                            f'returned non-retryable HTTP {status}'
                         )
-                except ValueError as exc:
-                    raise GridMetPayloadError('invalid Content-Length header') from exc
+                    raise GridMetPayloadError(f'transient HTTP {status}')
 
-            with tempfile.NamedTemporaryFile(
-                mode='wb',
-                prefix=f'.{_id}.',
-                suffix='.nc.part',
-                dir=met_dir,
-                delete=False,
-            ) as stage:
-                stage_path = stage.name
-                downloaded = 0
-                for chunk in response.iter_content(chunk_size=1024 * 1024):
-                    if chunk:
-                        downloaded += len(chunk)
-                        if downloaded > MAX_GRID_BYTES:
+                declared_length = response.headers.get('Content-Length')
+                expected_length = None
+                if declared_length is not None:
+                    try:
+                        expected_length = int(declared_length)
+                        if expected_length < 0:
+                            raise GridMetPayloadError('invalid Content-Length header')
+                        if expected_length > MAX_GRID_BYTES:
                             raise GridMetPayloadError(
                                 f'NetCDF response exceeds {MAX_GRID_BYTES} byte limit'
                             )
-                        stage.write(chunk)
-                stage.flush()
-                os.fsync(stage.fileno())
+                    except ValueError as exc:
+                        raise GridMetPayloadError('invalid Content-Length header') from exc
+
+                with tempfile.NamedTemporaryFile(
+                    mode='wb',
+                    prefix=f'.{_id}.',
+                    suffix='.nc.part',
+                    dir=met_dir,
+                    delete=False,
+                ) as stage:
+                    stage_path = stage.name
+                    downloaded = 0
+                    for chunk in _checked_response_chunks(
+                        response, permit, chunk_size=1024 * 1024
+                    ):
+                        if chunk:
+                            downloaded += len(chunk)
+                            if downloaded > MAX_GRID_BYTES:
+                                raise GridMetPayloadError(
+                                    f'NetCDF response exceeds {MAX_GRID_BYTES} byte limit'
+                                )
+                            stage.write(chunk)
+                    stage.flush()
+                    os.fsync(stage.fileno())
             if (
                 expected_length is not None
-                and not response.headers.get('Content-Encoding')
+                and not content_encoded
                 and downloaded != expected_length
             ):
                 raise GridMetPayloadError(
@@ -297,13 +316,10 @@ def retrieve_nc(gridvariable: GridMetVariable, bbox, year, met_dir=None, _id=Non
             GridMetPayloadError,
         ) as exc:
             reason = (
-                f'{type(exc).__name__}: {exc}'
+                type(exc).__name__
                 if isinstance(exc, requests.exceptions.RequestException)
                 else str(exc)
             )
-            if response is not None:
-                response.close()
-                response = None
             if stage_path is not None:
                 try:
                     os.unlink(stage_path)
@@ -311,10 +327,14 @@ def retrieve_nc(gridvariable: GridMetVariable, bbox, year, met_dir=None, _id=Non
                     pass
                 stage_path = None
             if attempt + 1 >= MAX_ATTEMPTS:
-                raise GridMetAcquisitionError(
+                error = GridMetAcquisitionError(
                     f'GridMET grid request for {gridvariable.name} {year} failed '
                     f'after {MAX_ATTEMPTS} attempts: {reason}'
-                ) from exc
+                )
+                if isinstance(exc, requests.exceptions.RequestException):
+                    # Requests exceptions may expose the complete query URL.
+                    raise error from None
+                raise error from exc
             delay = BACKOFF_SECONDS[attempt]
             _LOG.warning(
                 "GridMET grid request for %s %s retry %d/%d after %s; waiting %.1fs",
@@ -327,8 +347,6 @@ def retrieve_nc(gridvariable: GridMetVariable, bbox, year, met_dir=None, _id=Non
             )
             time.sleep(delay)
         finally:
-            if response is not None:
-                response.close()
             if stage_path is not None:
                 try:
                     os.unlink(stage_path)
@@ -378,7 +396,10 @@ def dump(abbrv, year, key, ts, desc, units, met_dir):
         np.save(fp, ts)
 
 
-def retrieve_timeseries(variables, locations, start_year, end_year, met_dir):
+def retrieve_timeseries(
+    variables, locations, start_year, end_year, met_dir,
+    *, admission: GridMetAdmissionConfig | None = None,
+):
     global _var_meta
 
     lons = [loc[0] for loc in locations.values()]
@@ -402,7 +423,7 @@ def retrieve_timeseries(variables, locations, start_year, end_year, met_dir):
 
     for gridvariable in variables:
         for year in range(start_year, end_year + 1):
-            id = retrieve_nc(gridvariable, bbox, year)
+            id = retrieve_nc(gridvariable, bbox, year, admission=admission)
             fn = _join(SCRATCH_DIR, '%s.nc' % id)
 
             try:

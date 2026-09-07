@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 
 from wepppy.climates.cligen import ClimateFile, Cligen, CligenStationsManager
+from wepppy.climates.gridmet.admission import GridMetAdmissionConfig
 from wepppy.nodb.core.climate_multiple_build import (
     ClimateMultipleBuildInputs,
     ClimateMultipleBuildResult,
@@ -37,6 +38,7 @@ class ClimateGridmetMultipleBuildService:
             read_nc_longlat,
         ) = self._load_gridmet_client_functions()
 
+        admission = GridMetAdmissionConfig.from_env()
         measures = self._build_measures(measure_enum)
         interpolation_spec = self._build_interpolation_spec()
 
@@ -81,6 +83,7 @@ class ClimateGridmetMultipleBuildService:
             cli_dir=cli_dir,
             climate=climate,
             ncpu=ncpu,
+            admission=admission,
         )
 
         raw_data, longitudes, latitudes = self._load_raw_gridmet_data(
@@ -217,6 +220,7 @@ class ClimateGridmetMultipleBuildService:
         cli_dir: str,
         climate: "Climate",
         ncpu: int,
+        admission: GridMetAdmissionConfig | None = None,
     ) -> None:
         workers = self._worker_count(default_workers=4, ncpu=ncpu)
         with ProcessPoolExecutor(max_workers=workers) as executor:
@@ -231,6 +235,7 @@ class ClimateGridmetMultipleBuildService:
                             year,
                             cli_dir,
                             _id=f"{measure}_{year}",
+                            admission=admission,
                         )
                     )
             self._wait_for_futures(

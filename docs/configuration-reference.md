@@ -24,6 +24,37 @@ Consolidated configuration surfaces discovered from:
 | `SESSION_REDIS_URL` | — | `wepppy.config.redis_settings` | Optional Redis URL override for Flask session storage. |
 | `SESSION_REDIS_DB` | `python: 11` | `wepppy.config.redis_settings` | Optional DB index override for session storage when `SESSION_REDIS_URL` is used. |
 
+## GridMET Redis admission
+
+Admission is opt-in and uses the existing Redis connection settings and LOCK
+database. Unlike the general boolean convention above, unknown or empty enable
+text raises an explicit error. Absent or false disables admission without Redis
+I/O. Public clients with `admission=None` remain disabled; climate orchestration
+resolves environment configuration and forwards it explicitly.
+
+| Variable | Enabled default | Description |
+| --- | --- | --- |
+| `GRIDMET_REDIS_ADMISSION_ENABLED` | `false` in development Compose | Enables shared FIFO admission; accepts true/1/yes/on and false/0/no/off |
+| `GRIDMET_REDIS_ADMISSION_LIMIT` | `4` | Shared live-permit ceiling for point and grid attempts |
+| `GRIDMET_REDIS_ADMISSION_WAIT_TIMEOUT_SECONDS` | `900` | Single admission scheduling deadline across retries |
+| `GRIDMET_REDIS_ADMISSION_LEASE_SECONDS` | `300` | Renewable active lease duration |
+| `GRIDMET_REDIS_ADMISSION_QUEUE_TTL_SECONDS` | `60` | Waiting-ticket liveness duration |
+| `GRIDMET_REDIS_ADMISSION_POLL_INTERVAL_SECONDS` | `0.25` | Polling interval with 0.5–1.5 jitter multiplier |
+| `GRIDMET_REDIS_ADMISSION_KEY` | `wepppy:gridmet:admission:v1` | Shared namespace; all participating workers must agree |
+
+Enabled Redis failure, invalid policy, policy conflict, wait exhaustion, and
+lost ownership raise distinct acquisition errors. Timing values must be finite
+and satisfy the [canonical contract](schemas/gridmet-redis-admission-contract.md).
+Renewal runs every `min(lease / 3, 5)` seconds; Redis connect/socket timeouts are
+two seconds. A live-permit ceiling cannot fence upstream work after a process
+pause or network partition. The deadline prevents new admission after expiry;
+it does not bound total streamed HTTP duration.
+
+See [ADR-0050](adrs/ADR-0050-gridmet-redis-admission.md) for parameter rationale
+and the [Forest runbook](infrastructure/gridmet-redis-admission.md) for activation,
+diagnostics, acceptance, and rollback. Development Compose defaults off;
+production and Kubernetes topology changes are outside this implementation.
+
 ## Database (PostgreSQL / SQLAlchemy)
 
 | Variable | Default | Used by | Description |
