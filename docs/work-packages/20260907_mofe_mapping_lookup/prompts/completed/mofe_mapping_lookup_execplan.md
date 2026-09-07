@@ -14,8 +14,8 @@ Multiple overland-flow elements (MOFE) divide each hillslope into segments. Burn
 - [x] (2026-09-07 19:26 UTC) Diagnose failure and scaffold package.
 - [x] Complete reviewed contract ancestor checkpoint (38789cb4c).
 - [x] Implement and test map-aware remapping (18 focused tests passed).
-- [ ] Verify generated management artifacts, broad gates, and independent correctness.
-- [ ] Record outcomes and archive plan.
+- [x] (2026-09-07 19:45 UTC) Verify generated management artifacts, broad gates, and independent correctness.
+- [x] (2026-09-07 19:45 UTC) Record outcomes and archive plan.
 
 ## Surprises & Discoveries
 
@@ -30,7 +30,7 @@ The ordinary hillslope remapper already uses get_disturbed_key_lookup; the MOFE 
 ## Outcomes & Retrospective
 
 
-Pending implementation and validation. Production deployment and recovery are separate from this repository package.
+Implemented in 1ea4b8d52 after contract ancestor 38789cb4c. The C3S regression failed on key 106 before the correction and now passes. All 18 focused tests and 110 related tests pass (20 related skips). Generated 12-segment management stacks preserve source cover values through two-year expansion and wepp/runs readback. Independent correctness review passed. Full repository validation passed: 7662 passed, 72 skipped in 780.99 seconds. Production deployment and recovery remain separate. The package is complete locally; no implementation deviations were required.
 
 ## Context and Orientation
 
@@ -72,3 +72,7 @@ Incident: wepp1, aliquot-shoji, job 041e93ae-3103-4bb4-b4dc-f00471a87d30, ended 
 Keep remap_mofe_landuse(*, rebuild_managements: bool = True) unchanged. Reuse get_disturbed_key_lookup() -> Dict[str, str], existing map loaders, management serializers, and existing NoDb locking.
 
 Revision note: initial plan records the narrow operator-approved correction and separates production rollout.
+
+Revision note (2026-09-07 19:39 UTC): recorded implementation, regression, generated-output evidence, and independent review; full-suite closeout remains pending.
+
+Revision note (2026-09-07 19:45 UTC): closed all milestones after full-suite success; archive this completed execution record.

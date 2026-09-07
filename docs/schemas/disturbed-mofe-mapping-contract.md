@@ -2,7 +2,7 @@
 
 ## Scope and authority
 
-This contract governs management identifiers assigned by Disturbed.remap_mofe_landuse. The operator approved mapping-aware lookup on 2026-09-07 after the aliquot-shoji incident. Implementation conformance is pending.
+This contract governs management identifiers assigned by Disturbed.remap_mofe_landuse. The operator approved mapping-aware lookup on 2026-09-07 after the aliquot-shoji incident. Repository implementation conforms as of 2026-09-07 (implementation commit 1ea4b8d52); production rollout is separate.
 
 ## Mapping resolution
 

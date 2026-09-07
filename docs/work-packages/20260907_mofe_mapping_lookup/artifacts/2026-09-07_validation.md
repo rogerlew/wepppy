@@ -19,9 +19,9 @@ The raster/SBS grids, NoDb locks, and build_managements scheduling are isolated 
 - Related suite: wctl run-pytest tests/nodb/mods/disturbed tests/nodb/test_landuse_mofe_disturbed_scalar_lookup.py tests/nodb/test_landuse_mofe_process_pool.py tests/nodb/test_landuse_mofe_value_types.py --maxfail=1: 110 passed, 20 skipped (live/optional raster tests).
 - python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master: PASS; broad catch delta zero.
 - Documentation lint: package, canonical contract, and disturbed README passed.
-- Observe-only code quality completed; radon unavailable, so no Python complexity metric. Its changed-file report uses committed changes and did not include this uncommitted production edit. Generated root report files were restored to avoid unrelated churn. The production delta is 17 added / 4 removed lines, with no new branch.
+- Observe-only code quality rerun after implementation commit with /tmp outputs: production source lines 2338 to 2351 (+13); maximum function length unchanged at 378. Existing controller remains in the red size band. Rationale: explicit semantic lookup expressions replace compact hardcoded IDs without adding branches or unrelated refactoring. Test source lines 322 to 454, green band. Radon unavailable, so Python complexity is unmeasured. Earlier generated root reports were restored to avoid unrelated churn.
 - Spelling preview: new/changed package and domain docs clean; root tracker has pre-existing differences outside this change.
-- Full suite: running; final outcome follows.
+- Full suite: wctl run-pytest tests --maxfail=1: 7662 passed, 72 skipped, 3105 warnings in 780.99 seconds; exit 0 (2026-09-07 19:45 UTC).
 
 ## Operational follow-up
 

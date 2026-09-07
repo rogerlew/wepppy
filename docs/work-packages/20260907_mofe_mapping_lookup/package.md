@@ -1,6 +1,7 @@
 # Mapping-aware MOFE burn management lookup
 
-**Status**: Open (2026-09-07)  
+**Status**: Closed (2026-09-07; implemented locally)
+
 **Timezone**: UTC
 
 ## Overview
@@ -33,4 +34,8 @@ Existing custom-mapping recovery work in ../20260424_landuse_legacy_flask_state_
 
 ## Deliverables
 
-See tracker.md and prompts/active/mofe_mapping_lookup_execplan.md. Contract: ../../schemas/disturbed-mofe-mapping-contract.md.
+See tracker.md and prompts/completed/mofe_mapping_lookup_execplan.md. Contract: ../../schemas/disturbed-mofe-mapping-contract.md.
+
+## Closure
+
+Closed 2026-09-07 19:45 UTC. Contract checkpoint 38789cb4c; implementation 1ea4b8d52. Mapping-aware lookup is wired in remap_mofe_landuse, with generated-output evidence and independent correctness approval. Focused: 18 passed; related: 110 passed, 20 skipped; full repository: 7662 passed, 72 skipped. Documentation and exception checks passed. Production deployment and recovery of aliquot-shoji remain separate follow-up, not completed by this package.

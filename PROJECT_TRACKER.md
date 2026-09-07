@@ -7,8 +7,6 @@
 
 ## Purpose
 
-In progress: [MOFE mapping-aware lookup](docs/work-packages/20260907_mofe_mapping_lookup/package.md) — correct burn management IDs for C3S and custom maps.
-
 Implemented locally: [Fork read retry and failure reporting](docs/work-packages/20260906_fork_read_retry_hardening/package.md)
 — bounded initial reads, original errno diagnostics, and fork prerequisite failures;
 228 focused tests and independent reviews passed. Production rollout remains gated.
@@ -1272,6 +1270,15 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### MOFE mapping-aware burn management lookup (2026-09-07)
+
+**Status**: Implemented locally; package closed.
+
+**Link**: [Work package](docs/work-packages/20260907_mofe_mapping_lookup/package.md)
+
+MOFE burn targets now resolve from the effective landuse map, including C3S and custom maps. Legacy disturbed IDs and vegetation eligibility remain unchanged. Two contract reviews and independent correctness review passed; full suite: 7662 passed, 72 skipped. Production rollout and aliquot-shoji recovery are separate follow-up.
+
 
 - [GridMET Redis admission](docs/work-packages/20260907_gridmet_redis_admission/package.md) — 2026-09-07: implemented, reviewed, pushed, and enabled on Forest at shared limit four. Full suite **7,651 passed / 72 skipped**; cross-container FIFO/peak-two, crash recovery, real 366-row public request, cleanup, and actual rollback passed. Registry/Kubernetes deployment and batch validation remain operator-owned.
 - [Batch Climate and RAP NoDb contention](docs/work-packages/20260906_batch_climate_rap_contention/package.md) — 2026-09-07: implemented and independently reviewed; full suite **7535 passed, 63 skipped**. Staged collection/fresh finalization preserves unrelated writes and rejects changed inputs. Live reruns/deployment excluded by operator; Kubernetes attribution and recurrence remain unmeasured.
