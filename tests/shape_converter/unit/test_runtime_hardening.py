@@ -124,8 +124,14 @@ def test_shape_converter_network_isolated_to_internal_sandbox_segment(compose_pa
 
 def test_prod_wepp1_overlay_does_not_override_shape_converter_hardening() -> None:
     config = _load_yaml(_PROD_WEPP1_COMPOSE_PATH)
-    services = config["services"]
-    assert "shape-converter" not in services
+    override = config["services"].get("shape-converter", {})
+    # The shared-image build override is intentional. Runtime isolation must
+    # continue to come from the hardened production service definition.
+    assert set(override) <= {"image", "build", "environment"}
+    base_environment = _load_yaml(_PROD_COMPOSE_PATH)["services"]["shape-converter"]["environment"]
+    for key, value in override.get("environment", {}).items():
+        if key.startswith("SHAPE_CONVERTER_") or key == "PYTHONDONTWRITEBYTECODE":
+            assert value == base_environment.get(key), f"wepp1 overrides hardening environment: {key}"
 
 
 def test_wepp1_caddy_shape_converter_edge_policy_is_hardened() -> None:
