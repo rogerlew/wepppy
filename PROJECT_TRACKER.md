@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-09-07
+**Last Updated**: 2026-09-08
 **Active Packages**: 33
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -82,6 +82,16 @@ Feedback mechanisms:
 ---
 
 ## 📋 Backlog
+
+### Staley M3 WBT Terrain and DEM Resolution
+
+**Status**: Scoped 2026-09-08; ready for fresh-agent execution.
+**Package**: [20260908_staley_m3_wbt_terrain](docs/work-packages/20260908_staley_m3_wbt_terrain/package.md)
+
+Implement WBT upstream terrain tooling, verify relief semantics and numerical
+outputs, then compare matched catchments at 10 m and 30 m to recommend M3
+resolution requirements. Production Staley integration is a separate task.
+Start with the package's fresh-agent prompt and active ExecPlan.
 
 
 
