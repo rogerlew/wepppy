@@ -30,6 +30,13 @@ and stops before replacing the affected final target. See the
 [native contract](wepppyo3-interchange-spec.md) and
 [ADR-0020](../../../docs/adrs/ADR-0020-require-wepppyo3-interchange.md).
 
+`run_totalwatsed3()` also requires the native producer. WEPPpy resolves paths,
+baseflow scalars, subset IDs, and ash controller metadata; Rust performs the
+PASS/WAT/soil/element/ash aggregation and atomic publication. There is no Python
+or DuckDB producer fallback. The paired release must export
+`totalwatsed3_to_parquet`; service startup verifies both the API and shared-object
+hash. Interchange README generation reads only the schema and three preview rows
+from each Parquet file, so documentation does not reload a complete run table.
 ## Outputs
 
 Hillslope writers combine sorted per-hillslope sources into one table. Each
@@ -111,7 +118,7 @@ The main orchestration and consumer APIs are:
 | `run_wepp_hillslope_interchange()` | Generate all selected hillslope tables and the version manifest. |
 | `run_wepp_watershed_interchange()` | Generate the selected watershed tables and the version manifest. |
 | `run_wepp_*_interchange()` | Generate one report family's primary Parquet output. |
-| `run_totalwatsed3()` | Build daily watershed hydrology, sediment, baseflow, and optional ash summaries with DuckDB. |
+| `run_totalwatsed3()` | Build daily watershed hydrology, sediment, baseflow, and optional ash summaries with the required native producer. |
 | `generate_interchange_documentation()` | Render schemas and sample rows beside a generated interchange directory. |
 | `totalwatsed_partitioned_dss_export()` | Write per-channel DSS time series. |
 | `chanout_dss_export()` | Write channel peak DSS records from `chan.out.parquet`. |
@@ -121,7 +128,7 @@ but parsing and primary Parquet construction occur inside the native bulk writer
 
 ## Derived Products
 
-`run_totalwatsed3()` joins hillslope PASS and WAT Parquet with DuckDB. It can add
+`run_totalwatsed3()` delegates hillslope PASS and WAT aggregation to Rust. It can add
 baseflow diagnostics and first-year ash transport mass from ash-run Parquet.
 See [README.totalwatsed3.md](README.totalwatsed3.md) for formulas and units.
 

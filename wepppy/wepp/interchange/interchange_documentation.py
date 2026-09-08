@@ -115,8 +115,11 @@ def _table_preview_markdown(table: pa.Table) -> str:
 
 
 def _summarize_file(parquet_path: Path, description: str) -> str:
-    table = pq.read_table(parquet_path)
-    schema = table.schema
+    # Documentation needs the schema and three rows, never a whole-run table.
+    with pq.ParquetFile(parquet_path) as source:
+        schema = source.schema_arrow
+        batch = next(source.iter_batches(batch_size=MAX_SAMPLE_ROWS), None)
+        table = pa.Table.from_batches([] if batch is None else [batch], schema=schema)
     header = f"### `{parquet_path.name}`\n\n{description}\n\n"
     schema_md = _schema_markdown(schema)
     preview_md = _table_preview_markdown(table)

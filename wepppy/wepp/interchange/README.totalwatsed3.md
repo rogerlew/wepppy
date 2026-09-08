@@ -23,10 +23,19 @@ The resulting table is written to `<run>/wepp/output/interchange/totalwatsed3.pa
 
 Only the PASS file includes per-particle sediment concentrations (`sedcon_1`-`sedcon_5`, kg m⁻³). Those values are multiplied by the per-event runoff volume (`runvol`, m³) to recover per-class sediment mass in kilograms. The water-balance terms come from `H.wat` where inputs are expressed as depths (mm); the aggregator multiplies each depth by the contributing area to recover volumes, performs any needed sums, and finally divides by area again to restore depths.
 
-PASS, WAT, optional soil, and optional element aggregations each use a separate
-DuckDB connection. Closing a connection after its result is materialised releases
-its scan and aggregation buffers before the next large parquet query begins; the
-connections must not be combined into one long-lived interchange session.
+The required `wepppyo3.wepp_interchange.totalwatsed3_to_parquet` producer streams
+projected batches of at most 8,192 rows. It retains date aggregates and joins for
+one hillslope per worker, with at most twelve workers. Compact physical chunk
+metadata replaces full column statistics after indexing; readers reconstruct at
+most sixteen row groups at a time. Python resolves paths, options, and ash
+controller metadata, and retains the existing `Path` return value. Missing native
+support fails explicitly; there is no Python/DuckDB/pandas producer fallback.
+The legacy pandas schema metadata is constructed from field types and installed
+package versions without importing pandas or creating a DataFrame.
+
+After publication, interchange README generation reads only the schema and three
+preview rows from each input. Reading entire tables here can exceed a 12 GiB
+worker even when native aggregation itself succeeds.
 
 ## Output Snapshots
 
@@ -41,7 +50,7 @@ Key output columns (see `SCHEMA` in `totalwatsed3.py` for the complete list):
 - `TSMF`: area-weighted true soil moisture fraction from `H.soil` when available (null when absent).
 - `QRain`, `QSnow`: area-weighted runoff-partition depths from `H.element` when available (null when absent).
 - MOFE aggregation rules (multi-OFE hillslopes): per-OFE columns in `H.wat` are not all physically summable across OFEs without producing a non-canonical total. `totalwatsed3` handles this by:
-  - **`latqcc`**: uses only the outlet-facing (last) OFE per hillslope/day to avoid counting internal lateral-routing transfers multiple times. DuckDB first computes one maximum OFE identifier per hillslope and joins that small lookup into the daily aggregate; it does not retain a per-row partition window over the full WAT table.
+  - **`latqcc`**: uses only the outlet-facing (last) OFE per hillslope/day to avoid counting internal lateral-routing transfers multiple times. The native producer tracks the maximum OFE for one hillslope at a time and contributes only that OFE to the daily lateral-flow sum.
   - **`Runoff` (the user-facing column)**: computed from `H.pass.runvol` volume divided by aggregated watershed area, not from summed `Q` or `QOFE`. `runvol` is the canonical hillslope runoff volume under both legacy and `wepp_260516`+ builds.
   - **`Q` and `QOFE` aggregate columns** (the literal `SUM(col * 0.001 * Area)` over OFEs): retained for diagnostic continuity but **not** the canonical hillslope totals. Under `wepp_260516` and later, per-OFE `QOFE = Q` in `H.wat`, so the two aggregates are equal post-fix. Under legacy builds the per-OFE `QOFE` was inflated by an OFE-count-scaled factor that did not appear in `Q`; see the canonical definitions for the per-OFE `Q`, `QOFE`, and `Area` columns in the main interchange README [§H.wat Multi-OFE Schema Semantics](README.md#hwat-multi-ofe-schema-semantics) and the historical context in `/workdir/wepp-forest/docs/20260504-stakeholder-watbalance.md` §QOFE: canonical definition.
 - Ash transport columns when the ash directory is available:
@@ -49,7 +58,7 @@ Key output columns (see `SCHEMA` in `totalwatsed3.py` for the complete list):
   - Per-ash-type masses: `{wind,water,ash}_transport_{black,white}` (+ `_per_ha` via per-type area).
   - Ash volumetrics: `ash_vol_conc` (ash solids volume / runoff), `sed+ash_vol_conc` (sediment + ash solids volume / runoff), `ash_black_pct_by_vol` (% of ash solids volume that is black ash).
 
-Nulls from missing PASS or ash rows are filled with zeros before the final Arrow table is materialised.
+Nulls from missing PASS or ash rows are filled with zeros before the final Arrow table is materialized.
 
 ## Storage Terms
 
@@ -80,7 +89,7 @@ Specific gravity × 1 000 kg m⁻³ (density of water) yields the absolute
 
 ### Implementation in `totalwatsed3`
 
-`totalwatsed3.py` implements the following steps for every grouped day:
+The required native producer implements the following steps for every grouped day:
 
 1. Aggregate class masses per day: `seddep_i = Σ sedcon_i * runvol`.
 2. Compute total sediment delivery: `sed_del = Σ_i seddep_i`.
@@ -89,7 +98,7 @@ Specific gravity × 1 000 kg m⁻³ (density of water) yields the absolute
 5. Divide by total runoff: `sed_vol_conc = V_total / runvol_total` (guarded so zero runoff yields zero concentration).
 6. When ash is present, compute `ash_vol_conc` using per-hillslope ash masses and bulk densities from `Ash.meta` (defaulting to baked-in black/white values); `sed+ash_vol_conc` adds sediment solids; `ash_black_pct_by_vol` reports the black-ash share of ash solids volume.
 
-This mirrors the physics in WEPP: the numerator reconstructs the actual cubic meters of sediment solids mobilised that day, while the denominator is the water volume those solids travelled with. The resulting value is dimensionless (m³ m⁻³) and represents the watershed-average volumetric sediment concentration for that day. `totalwatsed3` stores it immediately after the `seddep_*` columns so future stakeholders can append per-class volumetric fractions alongside it.
+This mirrors the physics in WEPP: the numerator reconstructs the actual cubic meters of sediment solids mobilized that day, while the denominator is the water volume those solids traveled with. The resulting value is dimensionless (m³ m⁻³) and represents the watershed-average volumetric sediment concentration for that day. `totalwatsed3` stores it immediately after the `seddep_*` columns so future stakeholders can append per-class volumetric fractions alongside it.
 
 ### Proof Sketch
 

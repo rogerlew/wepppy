@@ -14,12 +14,11 @@ except ModuleNotFoundError:
 else:
     _ASH_TESTS_ENABLED = True
 
-pytestmark = pytest.mark.skipif(not _ASH_TESTS_ENABLED, reason="pandas/pyarrow required")
+pytestmark = [pytest.mark.integration, pytest.mark.skipif(not _ASH_TESTS_ENABLED, reason="pandas/pyarrow required")]
 
 if _ASH_TESTS_ENABLED:
     from wepppy.wepp.interchange.totalwatsed3 import (
         ASH_METRIC_COLUMNS,
-        _aggregate_wat,
         run_totalwatsed3,
     )
 else:  # pragma: no cover - module-level skip
@@ -397,40 +396,6 @@ def test_run_totalwatsed3_merges_tsmf_qrain_qsnow_when_available(tmp_path):
     assert data["QSnow"][0] == pytest.approx(0.5)
 
 
-def test_run_totalwatsed3_closes_each_large_aggregation_connection(
-    tmp_path,
-    monkeypatch,
-):
-    run_dir = tmp_path / "run"
-    interchange_dir = run_dir / "wepp" / "output" / "interchange"
-    _write_pass(interchange_dir / "H.pass.parquet")
-    _write_wat(interchange_dir / "H.wat.parquet", area_m2=10_000.0)
-    _write_soil(interchange_dir / "H.soil.parquet", tsmf=0.62)
-    _write_element(interchange_dir / "H.element.parquet", qrain=1.25, qsnow=0.5)
-
-    real_connect = duckdb.connect
-    connections = []
-
-    def tracking_connect(*args, **kwargs):
-        connection = real_connect(*args, **kwargs)
-        connections.append(connection)
-        return connection
-
-    monkeypatch.setattr(duckdb, "connect", tracking_connect)
-
-    run_totalwatsed3(
-        interchange_dir,
-        _BaseflowOpts(gwstorage=0.0, dscoeff=0.0, bfcoeff=0.0),
-        wepp_ids=[1],
-        ash_dir=run_dir / "ash_missing",
-    )
-
-    assert len(connections) == 4
-    for connection in connections:
-        with pytest.raises(duckdb.ConnectionException):
-            connection.execute("SELECT 1")
-
-
 def test_run_totalwatsed3_exposes_optional_wat_storage_terms(tmp_path):
     run_dir = tmp_path / "run"
     interchange_dir = run_dir / "wepp" / "output" / "interchange"
@@ -475,26 +440,25 @@ def test_run_totalwatsed3_uses_last_ofe_for_lateral_flow(tmp_path):
     assert data["Runoff"][0] == pytest.approx(5.0)  # runvol depth over aggregated Area (1 m^3 over 200 m^2)
 
 
-def test_mofe_wat_aggregation_uses_bounded_hillslope_maxima_join(tmp_path):
-    wat_path = tmp_path / "H.wat.parquet"
-    _write_wat_multi_ofe(wat_path)
+def test_native_producer_is_required_and_does_not_use_duckdb(tmp_path, monkeypatch):
+    import importlib
 
-    class CapturingConnection:
-        query = ""
+    facade = importlib.import_module("wepppy.wepp.interchange.totalwatsed3")
+    # The suite purges module entries between tests; patch the loaded call.
+    boundary = facade.call_wepppyo3_interchange.__globals__
 
-        def execute(self, query: str):
-            self.query = query
-            return self
+    _write_pass(tmp_path / "H.pass.parquet")
+    _write_wat(tmp_path / "H.wat.parquet", area_m2=10_000.0)
+    output = tmp_path / "totalwatsed3.parquet"
+    output.write_bytes(b"prior generation")
 
-        @staticmethod
-        def df():
-            return pd.DataFrame()
+    def forbidden_connect(*args, **kwargs):
+        raise AssertionError("totalwatsed3 must not use DuckDB")
 
-    connection = CapturingConnection()
-    _aggregate_wat(connection, wat_path, [1])
-
-    assert 'MAX("ofe_id") OVER' not in connection.query
-    assert 'MAX("ofe_id") AS _max_ofe_id' in connection.query
-    assert "GROUP BY wepp_id" in connection.query
-    assert "ON wat.wepp_id = maxima.wepp_id" in connection.query
-    assert "WHERE wat.wepp_id IN (1)" in connection.query
+    monkeypatch.setattr(duckdb, "connect", forbidden_connect)
+    facade.run_totalwatsed3(tmp_path, _BaseflowOpts(), ash_dir=tmp_path / "missing")
+    before = output.read_bytes()
+    monkeypatch.setitem(boundary, "_import_wepppyo3_interchange", lambda: object())
+    with pytest.raises(boundary["WeppInterchangeUnavailableError"], match="totalwatsed3_to_parquet"):
+        facade.run_totalwatsed3(tmp_path, _BaseflowOpts(), ash_dir=tmp_path / "missing")
+    assert output.read_bytes() == before

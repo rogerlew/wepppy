@@ -131,7 +131,7 @@ jobs:
             ROSETTA_REF=1c22335ee0e4055f45adb3e597e5bf49cd9a2c88
             WEPPCLOUD2_REF=7c92e33cd6c6b8d33732edd943f9840834d88b34
             WBT_REF=314d15d68344890b43045e5325776a2841b0b1ca
-            WEPPPYO3_REF=ab91fc519195e95b8908922aba5036bcbae07f21
+            WEPPPYO3_REF=bb7451eeb83690e0ffc5f5eed7c4f4c9c1688d23
             APP_USER=roger
             APP_GROUP=docker
             APP_UID=1000

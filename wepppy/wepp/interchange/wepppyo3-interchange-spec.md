@@ -27,7 +27,9 @@ WEPPpyo3 owns:
 - one source-ordered row group per hillslope input file;
 - watershed EBE outlet inference and raw `chan.out` peak-signal audit;
 - watershed PASS climate-file hint discovery;
-- the full query-engine catalog scan.
+- the full query-engine catalog scan;
+- daily `totalwatsed3.parquet` aggregation, baseflow recurrence, and sediment/ash
+  calculations from consolidated hillslope Parquet inputs.
 
 WEPPpy owns:
 
@@ -35,7 +37,7 @@ WEPPpy owns:
 - path discovery, option normalization, aggregate scheduling, and source cleanup;
 - interchange version manifests and schema declarations used by consumers;
 - climate Parquet discovery/materialization before the native call;
-- DuckDB queries, DataFrame helpers, derived products, DSS exports, and schema
+- DuckDB queries, DataFrame helpers for consumers, DSS exports, and schema
   documentation;
 - stable Python exceptions at the native boundary.
 
@@ -134,3 +136,20 @@ non-publication of failed targets.
 - [Retired migration plan](wepppyo3-interchange-plan.md)
 - [Cutover work package](../../../docs/work-packages/20260715_wepppyo3_only_interchange/package.md)
 - [WEPPpyo3 release documentation](../../../../wepppyo3/README.md)
+
+## Native daily watershed producer
+
+`run_totalwatsed3()` preserves its public arguments and output `Path`. The required
+`totalwatsed3_to_parquet` function accepts source/output paths, groundwater scalars,
+version, optional subset IDs, and resolved ash file/area/type/density tuples. It
+returns a compact write summary through the existing required-native boundary.
+Python does not aggregate rows or provide a fallback. The existing schema, nulls,
+units, metadata, duplicate-join semantics, MOFE outlet flow, and ash rules remain
+authoritative. See [README.totalwatsed3.md](README.totalwatsed3.md).
+
+Optional soil/element weighted sums skip absent matching area values in both
+numerator and denominator. Ash first-value filter metadata skips NaN values,
+matching the retired producer. Invalid Parquet counts, sizes, and physical chunk
+ranges fail through the normal native execution-error boundary before output
+replacement; valid zero-value dictionary chunks remain supported. These checks
+preserve the existing contract and do not constitute a hostile-file sandbox.

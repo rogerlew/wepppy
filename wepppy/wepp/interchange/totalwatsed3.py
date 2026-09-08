@@ -5,16 +5,13 @@ from pathlib import Path
 from typing import Iterable, Mapping, Sequence, TYPE_CHECKING, Any
 
 import logging
-import os
-import tempfile
-import duckdb
-import numpy as np
-import pandas as pd
+import json
+from importlib.metadata import version as distribution_version
 import pyarrow as pa
-import pyarrow.parquet as pq
 
 from .schema_utils import pa_field
-from .versioning import schema_with_version
+from .versioning import INTERCHANGE_VERSION, schema_with_version
+from ._rust_interchange import call_wepppyo3_interchange
 
 if TYPE_CHECKING:
     from wepppy.nodb.core.wepp import BaseflowOpts
@@ -23,38 +20,9 @@ else:
 
 LOGGER = logging.getLogger(__name__)
 
-DATE_COLUMNS = ("year", "sim_day_index", "julian", "month", "day_of_month", "water_year")
-_SEDIMENT_CLASS_COUNT = 5
-SEDIMENT_SPECIFIC_GRAVITY = (2.60, 2.65, 1.80, 1.60, 2.65)
-SEDIMENT_DENSITY_KG_M3 = tuple(value * 1000.0 for value in SEDIMENT_SPECIFIC_GRAVITY)
-SEDIMENT_MASS_COLUMNS = tuple(f"seddep_{idx}" for idx in range(1, _SEDIMENT_CLASS_COUNT + 1))
-SEDIMENT_DELIVERY_COLUMN = "sed_del"
-SEDIMENT_VOLUME_COLUMN = "sed_vol_conc"
 ASH_VOLUME_COLUMN = "ash_vol_conc"
 SED_ASH_VOLUME_COLUMN = "sed+ash_vol_conc"
 ASH_BLACK_PCT_COLUMN = "ash_black_pct_by_vol"
-
-PASS_METRIC_COLUMNS = (
-    "runvol",
-    "sbrunv",
-    "tdet",
-    "tdep",
-    *SEDIMENT_MASS_COLUMNS,
-    SEDIMENT_DELIVERY_COLUMN,
-    SEDIMENT_VOLUME_COLUMN,
-)
-
-SOIL_OPTIONAL_COLUMNS = ("TSMF",)
-ELEMENT_OPTIONAL_COLUMNS = ("QRain", "QSnow")
-WAT_OPTIONAL_COLUMNS = (
-    "SoilWaterTotal",
-    "ProfileDepth",
-    "ProfilePorosityCap",
-    "ProfileFCStore",
-    "ProfileWPStore",
-    "Interception",
-    "InterceptionStorage",
-)
 
 # Ash columns are unitless in names; units live in schema metadata
 ASH_TYPES = ("black", "white")
@@ -65,9 +33,6 @@ ASH_PER_HA_COLUMNS = tuple(f"{name}_per_ha" for name in ASH_METRIC_BASES)
 ASH_TYPED_TONNE_COLUMNS = tuple(f"{base}_{ash_type}" for ash_type in ASH_TYPES for base in ASH_TYPED_BASES)
 ASH_TYPED_PER_HA_COLUMNS = tuple(f"{name}_per_ha" for name in ASH_TYPED_TONNE_COLUMNS)
 ASH_METRIC_COLUMNS = ASH_TONNE_COLUMNS + ASH_PER_HA_COLUMNS + ASH_TYPED_TONNE_COLUMNS + ASH_TYPED_PER_HA_COLUMNS
-ASH_TYPE_AREA_COLUMNS = tuple(f"area_{ash_type}_ha" for ash_type in ASH_TYPES)
-ASH_VOLUME_HELPER_COLUMNS = ("ash_solids_volume", "ash_black_solids_volume", "ash_white_solids_volume")
-ASH_JOIN_COLUMNS = ("year", "julian", "month", "day_of_month")
 
 SCHEMA = schema_with_version(
     pa.schema(
@@ -164,8 +129,6 @@ SCHEMA = schema_with_version(
         ]
     )
 )
-
-EMPTY_TABLE = pa.table({field.name: pa.array([], type=field.type) for field in SCHEMA}, schema=SCHEMA)
 
 
 @dataclass(frozen=True)
@@ -358,490 +321,46 @@ def _locate_hillslope_path(ash_dir: Path, wepp_id: int) -> Path | None:
     return None
 
 
-def _import_read_hillslope_out_fn():
-    from wepppy.nodb.mods.ash_transport.ashpost import read_hillslope_out_fn
-
-    return read_hillslope_out_fn
-
-
-def _safe_mass_per_area(total: np.ndarray, area_ha: np.ndarray) -> np.ndarray:
-    result = np.zeros_like(total, dtype=np.float64)
-    np.divide(total, area_ha, out=result, where=area_ha > 0)
-    return result
-
-
-def _safe_volume_concentration(solids_volume: np.ndarray, runvol: np.ndarray) -> np.ndarray:
-    result = np.zeros_like(runvol, dtype=np.float64)
-    np.divide(solids_volume, runvol, out=result, where=runvol > 0.0)
-    return result
-
-
-def _compute_solids_volume(df: pd.DataFrame) -> np.ndarray:
-    if df.empty:
-        return np.zeros(0, dtype=np.float64)
-    volumes = np.zeros(df.shape[0], dtype=np.float64)
-    for column, density in zip(SEDIMENT_MASS_COLUMNS, SEDIMENT_DENSITY_KG_M3):
-        masses = df[column].to_numpy(dtype=np.float64, copy=False)
-        volumes += masses / density
-    return volumes
-
-
-def _compute_sediment_volumetric_concentration(df: pd.DataFrame) -> pd.Series:
-    if df.empty:
-        return pd.Series(dtype=np.float64, name=SEDIMENT_VOLUME_COLUMN)
-    solids_volume = _compute_solids_volume(df)
-    runvol = df["runvol"].to_numpy(dtype=np.float64, copy=False)
-    concentration = np.zeros_like(solids_volume, dtype=np.float64)
-    np.divide(solids_volume, runvol, out=concentration, where=runvol > 0.0)
-    return pd.Series(concentration, index=df.index, name=SEDIMENT_VOLUME_COLUMN)
-
-
-def _aggregate_ash_metrics(
+def _native_ash_inputs(
     interchange_dir: Path,
     wepp_ids: list[int] | None,
     ash_dir_override: Path | str | None,
     ash_area_lookup: Mapping[int, float] | None,
-) -> pd.DataFrame | None:
+) -> list[tuple[str, float, str | None, float | None]]:
+    """Resolve files and controller metadata; native code reads all ash rows."""
     ash_dir = _resolve_ash_dir(interchange_dir, ash_dir_override)
     if ash_dir is None or not ash_dir.exists():
-        return None
-
-    candidate_wepp_ids = _select_wepp_ids(ash_dir, wepp_ids)
-    if not candidate_wepp_ids:
-        return None
-
-    area_lookup = {int(k): float(v) for k, v in (ash_area_lookup or {}).items()}
+        return []
+    ids = _select_wepp_ids(ash_dir, wepp_ids)
+    if not ids:
+        return []
+    areas = {int(k): float(v) for k, v in (ash_area_lookup or {}).items()}
     run_root = _resolve_run_root(interchange_dir)
-    if not area_lookup:
-        area_lookup = _build_area_lookup_from_watershed(run_root, candidate_wepp_ids)
-
-    if not area_lookup:
-        return None
-
-    ash_type_lookup, ash_density_lookup = _build_ash_type_and_density_lookup(run_root, candidate_wepp_ids)
-
-    read_hillslope_out_fn = _import_read_hillslope_out_fn()
-
-    frames: list[pd.DataFrame] = []
-    for wepp_id in candidate_wepp_ids:
-        area_ha = area_lookup.get(int(wepp_id))
-        if area_ha is None or area_ha <= 0.0:
-            LOGGER.debug("Ash merge skipping wepp_id=%s due to missing area", wepp_id)
+    if not areas:
+        areas = _build_area_lookup_from_watershed(run_root, ids)
+    if not areas:
+        return []
+    types, densities = _build_ash_type_and_density_lookup(run_root, ids)
+    inputs = []
+    for wepp_id in ids:
+        area = areas.get(wepp_id)
+        path = _locate_hillslope_path(ash_dir, wepp_id)
+        if area is None or area <= 0.0 or path is None:
             continue
-        hillslope_path = _locate_hillslope_path(ash_dir, int(wepp_id))
-        if hillslope_path is None:
-            LOGGER.debug("Ash merge skipping wepp_id=%s; file not found", wepp_id)
-            continue
-        df = read_hillslope_out_fn(
-            str(hillslope_path),
-            meta_data={"area (ha)": area_ha},
-            meta_data_types={"area (ha)": "float64"},
-        )
-        if df.empty:
-            continue
-        if "year0" in df.columns:
-            df = df[df["year0"] == df["year"]]
-        elif "days_from_fire (days)" in df.columns:
-            df = df[df["days_from_fire (days)"] <= 365]
-        if df.empty:
-            continue
-        df = df.rename(columns={"mo": "month", "da": "day_of_month"})
-        if "month" not in df.columns or "day_of_month" not in df.columns:
-            try:
-                if {"year", "julian"}.issubset(df.columns):
-                    ordinal = (
-                        df["year"].to_numpy(dtype=np.int32, copy=False) * 1000
-                        + df["julian"].to_numpy(dtype=np.int32, copy=False)
-                    )
-                elif "date_int" in df.columns:
-                    ordinal = df["date_int"].to_numpy(dtype=np.int64, copy=False)
-                else:
-                    raise KeyError("missing year/julian for calendar resolution")
-                dates = pd.to_datetime(ordinal.astype(str), format="%Y%j", errors="coerce")
-                if dates.isna().any():
-                    raise ValueError("unable to parse ordinal dates")
-                if "month" not in df.columns:
-                    df["month"] = dates.month.astype(np.int16)
-                if "day_of_month" not in df.columns:
-                    df["day_of_month"] = dates.day.astype(np.int16)
-            except Exception as exc:  # pragma: no cover - defensive
-                LOGGER.debug("Ash merge skipped; unable to derive calendar fields for %s (%s)", hillslope_path, exc)
-                continue
-        rename_map = {
-            "wind_transport (tonne)": "wind_transport",
-            "water_transport (tonne)": "water_transport",
-            "ash_transport (tonne)": "ash_transport",
-            "transportable_ash (tonne)": "transportable_ash",
-            "wind_transport (tonne/ha)": "wind_transport_per_ha",
-            "water_transport (tonne/ha)": "water_transport_per_ha",
-            "ash_transport (tonne/ha)": "ash_transport_per_ha",
-            "transportable_ash (tonne/ha)": "transportable_ash_per_ha",
-        }
-        df = df.rename(columns=rename_map)
-        base_subset_columns = [
-            "year",
-            "month",
-            "day_of_month",
-            "julian",
-            "area (ha)",
-            *ASH_TONNE_COLUMNS,
-        ]
-        missing = [col for col in base_subset_columns if col not in df.columns]
-        if missing:
-            LOGGER.debug("Ash merge skipping %s; missing columns %s", hillslope_path, missing)
-            continue
-        ash_type = ash_type_lookup.get(int(wepp_id))
-        ash_density = ash_density_lookup.get(int(wepp_id))
-        ash_volume = np.zeros(df.shape[0], dtype=np.float64)
-        if ash_density is not None and ash_density > 0.0:
-            ash_volume = df["ash_transport"].to_numpy(dtype=np.float64, copy=False) * 1000.0 / float(ash_density)
-        df["ash_solids_volume"] = ash_volume
-        df["ash_black_solids_volume"] = ash_volume if ash_type == "black" else 0.0
-        df["ash_white_solids_volume"] = ash_volume if ash_type == "white" else 0.0
-        for ash_type_name in ASH_TYPES:
-            df[f"area_{ash_type_name}_ha"] = area_ha if ash_type == ash_type_name else 0.0
-        for base in ASH_TYPED_BASES:
-            for ash_type_name in ASH_TYPES:
-                col = f"{base}_{ash_type_name}"
-                df[col] = df[base] if ash_type == ash_type_name else 0.0
-        subset_columns = [
-            *base_subset_columns,
-            *ASH_TYPE_AREA_COLUMNS,
-            *ASH_TYPED_TONNE_COLUMNS,
-            *ASH_VOLUME_HELPER_COLUMNS,
-        ]
-        frames.append(df[subset_columns])
-
-    if not frames:
-        return None
-
-    combined = pd.concat(frames, ignore_index=True)
-    aggregations: dict[str, str] = {"area (ha)": "sum"}
-    aggregations.update({name: "sum" for name in ASH_TONNE_COLUMNS})
-    aggregations.update({name: "sum" for name in ASH_TYPE_AREA_COLUMNS})
-    aggregations.update({name: "sum" for name in ASH_TYPED_TONNE_COLUMNS})
-    aggregations.update({name: "sum" for name in ASH_VOLUME_HELPER_COLUMNS})
-    grouped = combined.groupby(list(ASH_JOIN_COLUMNS), as_index=False).agg(aggregations)
-    area = grouped["area (ha)"].to_numpy(dtype=np.float64, copy=False)
-    for base in ASH_METRIC_BASES:
-        total_col = base
-        per_ha_col = f"{base}_per_ha"
-        grouped[per_ha_col] = _safe_mass_per_area(
-            grouped[total_col].to_numpy(dtype=np.float64, copy=False),
-            area,
-        )
-    for ash_type_name in ASH_TYPES:
-        area_col = f"area_{ash_type_name}_ha"
-        area_by_type = grouped[area_col].to_numpy(dtype=np.float64, copy=False)
-        for base in ASH_TYPED_BASES:
-            total_col = f"{base}_{ash_type_name}"
-            per_ha_col = f"{total_col}_per_ha"
-            grouped[per_ha_col] = _safe_mass_per_area(
-                grouped[total_col].to_numpy(dtype=np.float64, copy=False),
-                area_by_type,
-            )
-    grouped.drop(columns=["area (ha)", *ASH_TYPE_AREA_COLUMNS], inplace=True)
-    return grouped
+        inputs.append((str(path), area, types.get(wepp_id), densities.get(wepp_id)))
+    return inputs
 
 
-def _build_where_clause(wepp_ids: list[int] | None) -> str:
-    if wepp_ids is None:
-        return ""
-    if not wepp_ids:
-        return "WHERE FALSE"
-    id_list = ",".join(str(wepp_id) for wepp_id in wepp_ids)
-    return f"WHERE wepp_id IN ({id_list})"
-
-
-def _build_where_clause_for_alias(wepp_ids: list[int] | None, alias: str) -> str:
-    if wepp_ids is None:
-        return ""
-    if not wepp_ids:
-        return "WHERE FALSE"
-    id_list = ",".join(str(wepp_id) for wepp_id in wepp_ids)
-    return f"WHERE {alias}.wepp_id IN ({id_list})"
-
-
-def _resolve_sim_day_column(path: Path) -> str:
-    schema = pq.read_schema(path)
-    if "sim_day_index" in schema.names:
-        return "sim_day_index"
-    if "day" in schema.names:
-        return "day"
-    raise KeyError(f"Neither 'sim_day_index' nor 'day' column present in {path}")
-
-
-def _resolve_ofe_column(path: Path) -> str | None:
-    schema = pq.read_schema(path)
-    if "ofe_id" in schema.names:
-        return "ofe_id"
-    if "OFE" in schema.names:
-        return "OFE"
-    return None
-
-
-def _aggregate_pass(con: duckdb.DuckDBPyConnection, pass_path: Path, where_clause: str) -> pd.DataFrame:
-    day_column = _resolve_sim_day_column(pass_path)
-    query = f"""
-        SELECT
-            year,
-            "{day_column}" AS sim_day_index,
-            julian,
-            month,
-            day_of_month,
-            water_year,
-            SUM(runvol) AS runvol,
-            SUM(sbrunv) AS sbrunv,
-            SUM(tdet) AS tdet,
-            SUM(tdep) AS tdep,
-            SUM(sedcon_1 * runvol) AS seddep_1,
-            SUM(sedcon_2 * runvol) AS seddep_2,
-            SUM(sedcon_3 * runvol) AS seddep_3,
-            SUM(sedcon_4 * runvol) AS seddep_4,
-            SUM(sedcon_5 * runvol) AS seddep_5
-        FROM read_parquet('{pass_path.as_posix()}')
-        {where_clause}
-        GROUP BY year, "{day_column}", julian, month, day_of_month, water_year
-        ORDER BY year, julian, "{day_column}"
-    """
-    df = con.execute(query).df()
-    df[SEDIMENT_DELIVERY_COLUMN] = df[list(SEDIMENT_MASS_COLUMNS)].sum(axis=1).astype(np.float64)
-    df[SEDIMENT_VOLUME_COLUMN] = _compute_sediment_volumetric_concentration(df)
-    return df
-
-
-def _aggregate_wat(
-    con: duckdb.DuckDBPyConnection,
-    wat_path: Path,
-    wepp_ids: list[int] | None,
-) -> pd.DataFrame:
-    where_clause = _build_where_clause(wepp_ids)
-    day_column = _resolve_sim_day_column(wat_path)
-    ofe_column = _resolve_ofe_column(wat_path)
-    schema_names = set(pq.read_schema(wat_path).names)
-    path_sql = wat_path.as_posix()
-    optional_exprs = []
-    for column in WAT_OPTIONAL_COLUMNS:
-        if column in schema_names:
-            optional_exprs.append(f'SUM("{column}" * 0.001 * Area) AS "{column}_volume"')
-        else:
-            optional_exprs.append(f'CAST(NULL AS DOUBLE) AS "{column}_volume"')
-    optional_sql = ",\n            ".join(optional_exprs)
-
-    if ofe_column is None:
-        source_clause = f"FROM read_parquet('{path_sql}')\n        {where_clause}"
-        latqcc_expr = "SUM(latqcc * 0.001 * Area) AS latqcc,"
-    else:
-        aliased_where_clause = _build_where_clause_for_alias(wepp_ids, alias="wat")
-        source_clause = f"""
-        FROM read_parquet('{path_sql}') AS wat
-        INNER JOIN (
-            SELECT
-                wepp_id,
-                MAX("{ofe_column}") AS _max_ofe_id
-            FROM read_parquet('{path_sql}')
-            {where_clause}
-            GROUP BY wepp_id
-        ) AS maxima
-            ON wat.wepp_id = maxima.wepp_id
-        {aliased_where_clause}
-        """
-        # In MOFE runs, latqcc is an internal lateral-routing term. Use only the
-        # outlet-facing (last) OFE per hillslope/day to avoid counting internal
-        # transfers multiple times.
-        latqcc_expr = f'SUM(CASE WHEN wat."{ofe_column}" = maxima._max_ofe_id THEN latqcc * 0.001 * Area ELSE 0 END) AS latqcc,'
-
-    query = f"""
-        SELECT
-            year,
-            "{day_column}" AS sim_day_index,
-            julian,
-            month,
-            day_of_month,
-            water_year,
-            SUM(Area) AS Area,
-            SUM(P * 0.001 * Area) AS P,
-            SUM(RM * 0.001 * Area) AS RM,
-            SUM(Q * 0.001 * Area) AS Q,
-            SUM(Dp * 0.001 * Area) AS Dp,
-            {latqcc_expr}
-            SUM(QOFE * 0.001 * Area) AS QOFE,
-            SUM(Ep * 0.001 * Area) AS Ep,
-            SUM(Es * 0.001 * Area) AS Es,
-            SUM(Er * 0.001 * Area) AS Er,
-            SUM(UpStrmQ * 0.001 * Area) AS UpStrmQ_volume,
-            SUM(SubRIn * 0.001 * Area) AS SubRIn_volume,
-            SUM("Total-Soil Water" * 0.001 * Area) AS Total_Soil_Water_volume,
-            {optional_sql},
-            SUM(frozwt * 0.001 * Area) AS frozwt_volume,
-            SUM("Snow-Water" * 0.001 * Area) AS Snow_Water_volume,
-            SUM(Tile * 0.001 * Area) AS Tile_volume,
-            SUM(Irr * 0.001 * Area) AS Irr_volume
-        {source_clause}
-        GROUP BY year, "{day_column}", julian, month, day_of_month, water_year
-        ORDER BY year, julian, "{day_column}"
-    """
-    return con.execute(query).df()
-
-
-def _aggregate_soil_tsmf(
-    con: duckdb.DuckDBPyConnection,
-    soil_path: Path,
-    wat_path: Path,
-    wepp_ids: list[int] | None,
-) -> pd.DataFrame | None:
-    schema_names = set(pq.read_schema(soil_path).names)
-    if "TSMF" not in schema_names:
-        return None
-
-    soil_day_column = _resolve_sim_day_column(soil_path)
-    wat_day_column = _resolve_sim_day_column(wat_path)
-    soil_ofe_column = _resolve_ofe_column(soil_path)
-    wat_ofe_column = _resolve_ofe_column(wat_path)
-    if soil_ofe_column is None or wat_ofe_column is None:
-        return None
-
-    where_clause = _build_where_clause_for_alias(wepp_ids, alias="soil")
-    query = f"""
-        SELECT
-            soil.year AS year,
-            soil."{soil_day_column}" AS sim_day_index,
-            soil.julian AS julian,
-            soil.month AS month,
-            soil.day_of_month AS day_of_month,
-            soil.water_year AS water_year,
-            SUM(CASE WHEN soil.TSMF IS NOT NULL THEN soil.TSMF * wat.Area ELSE 0 END) AS tsmf_weighted_sum,
-            SUM(CASE WHEN soil.TSMF IS NOT NULL THEN wat.Area ELSE 0 END) AS tsmf_area
-        FROM read_parquet('{soil_path.as_posix()}') AS soil
-        INNER JOIN read_parquet('{wat_path.as_posix()}') AS wat
-            ON soil.wepp_id = wat.wepp_id
-            AND soil."{soil_ofe_column}" = wat."{wat_ofe_column}"
-            AND soil.year = wat.year
-            AND soil."{soil_day_column}" = wat."{wat_day_column}"
-        {where_clause}
-        GROUP BY
-            soil.year,
-            soil."{soil_day_column}",
-            soil.julian,
-            soil.month,
-            soil.day_of_month,
-            soil.water_year
-        ORDER BY
-            soil.year,
-            soil.julian,
-            soil."{soil_day_column}"
-    """
-    df = con.execute(query).df()
-    if df.empty:
-        return None
-
-    weighted_sum = df["tsmf_weighted_sum"].to_numpy(dtype=np.float64, copy=False)
-    weights = df["tsmf_area"].to_numpy(dtype=np.float64, copy=False)
-    tsmf = np.full(df.shape[0], np.nan, dtype=np.float64)
-    np.divide(weighted_sum, weights, out=tsmf, where=weights > 0.0)
-    df["TSMF"] = tsmf
-    return df[list(DATE_COLUMNS) + ["TSMF"]]
-
-
-def _aggregate_element_partitions(
-    con: duckdb.DuckDBPyConnection,
-    element_path: Path,
-    wat_path: Path,
-    wepp_ids: list[int] | None,
-) -> pd.DataFrame | None:
-    schema_names = set(pq.read_schema(element_path).names)
-    available_columns = [column for column in ELEMENT_OPTIONAL_COLUMNS if column in schema_names]
-    if not available_columns:
-        return None
-
-    wat_day_column = _resolve_sim_day_column(wat_path)
-    element_ofe_column = _resolve_ofe_column(element_path)
-    wat_ofe_column = _resolve_ofe_column(wat_path)
-    if element_ofe_column is None or wat_ofe_column is None:
-        return None
-
-    where_clause = _build_where_clause_for_alias(wepp_ids, alias="elem")
-    metric_exprs: list[str] = []
-    for column in available_columns:
-        metric_exprs.append(
-            f'SUM(CASE WHEN elem."{column}" IS NOT NULL THEN elem."{column}" * 0.001 * wat.Area ELSE 0 END) AS "{column}_volume"'
-        )
-        metric_exprs.append(
-            f'SUM(CASE WHEN elem."{column}" IS NOT NULL THEN wat.Area ELSE 0 END) AS "{column}_area"'
-        )
-    metrics_sql = ",\n            ".join(metric_exprs)
-    query = f"""
-        SELECT
-            elem.year AS year,
-            wat."{wat_day_column}" AS sim_day_index,
-            elem.julian AS julian,
-            elem.month AS month,
-            elem.day_of_month AS day_of_month,
-            elem.water_year AS water_year,
-            {metrics_sql}
-        FROM read_parquet('{element_path.as_posix()}') AS elem
-        INNER JOIN read_parquet('{wat_path.as_posix()}') AS wat
-            ON elem.wepp_id = wat.wepp_id
-            AND elem."{element_ofe_column}" = wat."{wat_ofe_column}"
-            AND elem.year = wat.year
-            AND elem.julian = wat.julian
-            AND elem.month = wat.month
-            AND elem.day_of_month = wat.day_of_month
-            AND elem.water_year = wat.water_year
-        {where_clause}
-        GROUP BY
-            elem.year,
-            wat."{wat_day_column}",
-            elem.julian,
-            elem.month,
-            elem.day_of_month,
-            elem.water_year
-        ORDER BY
-            elem.year,
-            elem.julian,
-            wat."{wat_day_column}"
-    """
-    df = con.execute(query).df()
-    if df.empty:
-        return None
-
-    result = df[list(DATE_COLUMNS)].copy()
-    for column in available_columns:
-        volume = df[f"{column}_volume"].to_numpy(dtype=np.float64, copy=False)
-        area = df[f"{column}_area"].to_numpy(dtype=np.float64, copy=False)
-        depth = np.full(df.shape[0], np.nan, dtype=np.float64)
-        np.divide(volume, area, out=depth, where=area > 0.0)
-        depth *= 1000.0
-        result[column] = depth
-    return result
-
-
-def _safe_depth(volume: np.ndarray, area: np.ndarray) -> np.ndarray:
-    result = np.zeros_like(volume, dtype=np.float64)
-    np.divide(volume, area, out=result, where=area > 0)
-    result *= 1000.0
-    return result
-
-
-def _compute_baseflow(percolation_mm: np.ndarray, baseflow_opts: BaseflowOpts) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    n = percolation_mm.size
-    if n == 0:
-        return (
-            np.zeros(0, dtype=np.float64),
-            np.zeros(0, dtype=np.float64),
-            np.zeros(0, dtype=np.float64),
-        )
-    reservoir = np.zeros(n, dtype=np.float64)
-    baseflow = np.zeros(n, dtype=np.float64)
-    aquifer_losses = np.zeros(n, dtype=np.float64)
-    reservoir[0] = baseflow_opts.gwstorage
-    for idx in range(n):
-        if idx == 0:
-            continue
-        aquifer_losses[idx - 1] = reservoir[idx - 1] * baseflow_opts.dscoeff
-        reservoir[idx] = reservoir[idx - 1] - baseflow[idx - 1] + percolation_mm[idx] - aquifer_losses[idx - 1]
-        baseflow[idx] = reservoir[idx] * baseflow_opts.bfcoeff
-    return reservoir, baseflow, aquifer_losses
+def _pandas_schema_metadata() -> str:
+    """Preserve legacy Arrow metadata without importing pandas or building frames."""
+    columns = []
+    for field in SCHEMA:
+        dtype = "float64" if pa.types.is_floating(field.type) else str(field.type)
+        columns.append({"name": field.name, "field_name": field.name,
+                        "pandas_type": dtype, "numpy_type": dtype, "metadata": None})
+    return json.dumps({"index_columns": [], "column_indexes": [], "columns": columns,
+                       "attributes": {}, "creator": {"library": "pyarrow", "version": pa.__version__},
+                       "pandas_version": distribution_version("pandas")})
 
 
 def _prepare_paths(interchange_dir: Path | str) -> _QueryTargets:
@@ -865,42 +384,6 @@ def _prepare_paths(interchange_dir: Path | str) -> _QueryTargets:
     )
 
 
-def _finalise_table(df: pd.DataFrame) -> pa.Table:
-    if df.empty:
-        return EMPTY_TABLE
-    int16_cols = ["year", "julian", "water_year"]
-    int32_cols = ["sim_day_index"]
-    int8_cols = ["month", "day_of_month"]
-    for col in int16_cols:
-        df[col] = df[col].astype(np.int16, copy=False)
-    for col in int32_cols:
-        df[col] = df[col].astype(np.int32, copy=False)
-    for col in int8_cols:
-        df[col] = df[col].astype(np.int8, copy=False)
-    float_cols = [name for name in SCHEMA.names if name not in int16_cols + int8_cols + int32_cols]
-    for col in float_cols:
-        df[col] = df[col].astype(np.float64, copy=False)
-    df = df[SCHEMA.names]
-    return pa.Table.from_pandas(df, schema=SCHEMA, preserve_index=False)
-
-
-def _write_parquet_atomic(table: pa.Table, output_path: Path) -> None:
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    fd, tmp_name = tempfile.mkstemp(
-        prefix=f"{output_path.name}.",
-        suffix=".tmp",
-        dir=output_path.parent,
-    )
-    os.close(fd)
-    tmp_path = Path(tmp_name)
-    try:
-        pq.write_table(table, tmp_path, compression="snappy", use_dictionary=True)
-        os.replace(tmp_path, output_path)
-    finally:
-        if tmp_path.exists():
-            tmp_path.unlink()
-
-
 def run_totalwatsed3(
     interchange_dir: Path | str,
     baseflow_opts: BaseflowOpts,
@@ -922,128 +405,17 @@ def run_totalwatsed3(
     """
     targets = _prepare_paths(interchange_dir)
     wepp_ids_normalized = _normalize_wepp_ids(wepp_ids)
-    where_clause = _build_where_clause(wepp_ids_normalized)
-
-    # Keep each large parquet aggregation on its own connection. DuckDB retains
-    # scan/aggregation buffers for the lifetime of a connection, so sharing one
-    # across WAT, soil, and element queries stacks their otherwise bounded peaks.
-    with duckdb.connect() as con:
-        pass_df = _aggregate_pass(con, targets.pass_path, where_clause)
-    with duckdb.connect() as con:
-        wat_df = _aggregate_wat(con, targets.wat_path, wepp_ids_normalized)
-    soil_df = None
-    if targets.soil_path is not None:
-        with duckdb.connect() as con:
-            soil_df = _aggregate_soil_tsmf(
-                con,
-                targets.soil_path,
-                targets.wat_path,
-                wepp_ids_normalized,
-            )
-    element_df = None
-    if targets.element_path is not None:
-        with duckdb.connect() as con:
-            element_df = _aggregate_element_partitions(
-                con,
-                targets.element_path,
-                targets.wat_path,
-                wepp_ids_normalized,
-            )
-
-    if wat_df.empty:
-        table = EMPTY_TABLE
-        _write_parquet_atomic(table, targets.output_path)
-        return targets.output_path
-
-    merged = wat_df.merge(pass_df, on=list(DATE_COLUMNS), how="left", suffixes=("", "_pass"))
-    if pass_df.empty:
-        merged[list(PASS_METRIC_COLUMNS)] = 0.0
-    else:
-        merged[list(PASS_METRIC_COLUMNS)] = merged[list(PASS_METRIC_COLUMNS)].fillna(0.0)
-
-    ash_df = _aggregate_ash_metrics(Path(interchange_dir), wepp_ids_normalized, ash_dir, ash_area_lookup)
-    if ash_df is None:
-        for col in ASH_METRIC_COLUMNS:
-            merged[col] = 0.0
-        for col in ASH_VOLUME_HELPER_COLUMNS:
-            merged[col] = 0.0
-    else:
-        merged = merged.merge(ash_df, on=list(ASH_JOIN_COLUMNS), how="left", validate="many_to_one")
-        merged[list(ASH_METRIC_COLUMNS)] = merged[list(ASH_METRIC_COLUMNS)].fillna(0.0)
-        for col in ASH_VOLUME_HELPER_COLUMNS:
-            if col in merged:
-                merged[col] = merged[col].fillna(0.0)
-            else:
-                merged[col] = 0.0
-
-    area = merged["Area"].to_numpy(dtype=np.float64, copy=False)
-
-    merged["UpStrmQ"] = _safe_depth(merged.pop("UpStrmQ_volume").to_numpy(dtype=np.float64, copy=False), area)
-    merged["SubRIn"] = _safe_depth(merged.pop("SubRIn_volume").to_numpy(dtype=np.float64, copy=False), area)
-    merged["Total-Soil Water"] = _safe_depth(merged.pop("Total_Soil_Water_volume").to_numpy(dtype=np.float64, copy=False), area)
-    for column in WAT_OPTIONAL_COLUMNS:
-        volume_col = f"{column}_volume"
-        if volume_col in merged and not merged[volume_col].isna().all():
-            depth = _safe_depth(merged.pop(volume_col).to_numpy(dtype=np.float64, copy=False), area)
-            if column == "Interception":
-                merged[column] = np.nan_to_num(depth, nan=0.0)
-            else:
-                merged[column] = depth
-        else:
-            merged.drop(columns=[volume_col], inplace=True, errors="ignore")
-            merged[column] = 0.0 if column == "Interception" else np.nan
-    if soil_df is not None:
-        merged = merged.merge(soil_df, on=list(DATE_COLUMNS), how="left", validate="one_to_one")
-    else:
-        merged["TSMF"] = np.nan
-    if element_df is not None:
-        merged = merged.merge(element_df, on=list(DATE_COLUMNS), how="left", validate="one_to_one")
-    for column in ELEMENT_OPTIONAL_COLUMNS:
-        if column not in merged:
-            merged[column] = np.nan
-    merged["frozwt"] = _safe_depth(merged.pop("frozwt_volume").to_numpy(dtype=np.float64, copy=False), area)
-    merged["Snow-Water"] = _safe_depth(merged.pop("Snow_Water_volume").to_numpy(dtype=np.float64, copy=False), area)
-    merged["Tile"] = _safe_depth(merged.pop("Tile_volume").to_numpy(dtype=np.float64, copy=False), area)
-    merged["Irr"] = _safe_depth(merged.pop("Irr_volume").to_numpy(dtype=np.float64, copy=False), area)
-
-    merged["Precipitation"] = _safe_depth(merged["P"].to_numpy(dtype=np.float64, copy=False), area)
-    merged["Rain+Melt"] = _safe_depth(merged["RM"].to_numpy(dtype=np.float64, copy=False), area)
-    merged["Percolation"] = _safe_depth(merged["Dp"].to_numpy(dtype=np.float64, copy=False), area)
-    merged["Lateral Flow"] = _safe_depth(merged["latqcc"].to_numpy(dtype=np.float64, copy=False), area)
-    merged["Runoff"] = _safe_depth(merged["runvol"].to_numpy(dtype=np.float64, copy=False), area)
-
-    merged["Transpiration"] = _safe_depth(merged["Ep"].to_numpy(dtype=np.float64, copy=False), area)
-    evaporation_volume = merged["Es"].to_numpy(dtype=np.float64, copy=False) + merged["Er"].to_numpy(dtype=np.float64, copy=False)
-    merged["Evaporation"] = _safe_depth(evaporation_volume, area)
-    merged["ET"] = _safe_depth(
-        merged["Ep"].to_numpy(dtype=np.float64, copy=False)
-        + merged["Es"].to_numpy(dtype=np.float64, copy=False)
-        + merged["Er"].to_numpy(dtype=np.float64, copy=False),
-        area,
+    call_wepppyo3_interchange(
+        "totalwatsed3", "totalwatsed3_to_parquet",
+        str(targets.pass_path), str(targets.wat_path), str(targets.output_path),
+        float(baseflow_opts.gwstorage), float(baseflow_opts.bfcoeff), float(baseflow_opts.dscoeff),
+        INTERCHANGE_VERSION.major, INTERCHANGE_VERSION.minor,
+        soil_path=str(targets.soil_path) if targets.soil_path is not None else None,
+        element_path=str(targets.element_path) if targets.element_path is not None else None,
+        wepp_ids=wepp_ids_normalized,
+        ash_inputs=_native_ash_inputs(Path(interchange_dir), wepp_ids_normalized, ash_dir, ash_area_lookup),
+        pandas_metadata=_pandas_schema_metadata(),
     )
-
-    percolation_mm = merged["Percolation"].to_numpy(dtype=np.float64, copy=False)
-    reservoir, baseflow, aquifer_losses = _compute_baseflow(percolation_mm, baseflow_opts)
-    merged["Reservoir Volume"] = reservoir
-    merged["Baseflow"] = baseflow
-    merged["Aquifer losses"] = aquifer_losses
-    merged["Streamflow"] = merged["Runoff"] + merged["Lateral Flow"] + merged["Baseflow"]
-
-    runvol_volume = merged["runvol"].to_numpy(dtype=np.float64, copy=False)
-    ash_solids_volume = merged["ash_solids_volume"].to_numpy(dtype=np.float64, copy=False)
-    ash_black_volume = merged["ash_black_solids_volume"].to_numpy(dtype=np.float64, copy=False)
-    merged[ASH_VOLUME_COLUMN] = _safe_volume_concentration(ash_solids_volume, runvol_volume)
-    ash_black_pct = np.zeros_like(ash_solids_volume, dtype=np.float64)
-    np.divide(ash_black_volume, ash_solids_volume, out=ash_black_pct, where=ash_solids_volume > 0.0)
-    ash_black_pct *= 100.0
-    merged[ASH_BLACK_PCT_COLUMN] = ash_black_pct
-    sed_solids_volume = merged[SEDIMENT_VOLUME_COLUMN].to_numpy(dtype=np.float64, copy=False) * runvol_volume
-    merged[SED_ASH_VOLUME_COLUMN] = _safe_volume_concentration(sed_solids_volume + ash_solids_volume, runvol_volume)
-    merged.drop(columns=list(ASH_VOLUME_HELPER_COLUMNS), inplace=True, errors="ignore")
-
-    merged = merged.sort_values(["year", "julian", "sim_day_index"], kind="mergesort").reset_index(drop=True)
-    table = _finalise_table(merged)
-    _write_parquet_atomic(table.combine_chunks(), targets.output_path)
     return targets.output_path
 
 

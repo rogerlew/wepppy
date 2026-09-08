@@ -62,7 +62,8 @@ def test_native_summary_is_logged_with_record_counts(
     monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
 ) -> None:
     module = SimpleNamespace(
-        writer=lambda: {
+        writer=lambda *args: {
+            "output_paths": ["totalwatsed3.parquet"],
             "candidate_records": 27,
             "accepted_records": 27,
             "rejected_records": 0,
@@ -73,10 +74,12 @@ def test_native_summary_is_logged_with_record_counts(
     monkeypatch.setattr(native, "_import_wepppyo3_interchange", lambda: module)
 
     with caplog.at_level("INFO", logger=native.LOGGER.name):
-        result = native.call_wepppyo3_interchange("test writer", "writer")
+        result = native.call_wepppyo3_interchange(
+            "test writer", "writer", "H.pass.parquet", "H.wat.parquet", "totalwatsed3.parquet"
+        )
 
     assert result["rows_written"] == 27
-    assert "input=None output=None candidates=27 accepted=27 rejected=0 rows_written=27 row_groups=1" in caplog.text
+    assert "input=H.pass.parquet output=['totalwatsed3.parquet'] candidates=27 accepted=27 rejected=0 rows_written=27 row_groups=1" in caplog.text
 
 
 def test_complete_required_api_can_be_preflighted(monkeypatch: pytest.MonkeyPatch) -> None:
