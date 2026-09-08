@@ -35,6 +35,7 @@ from wepppy.weppcloud.utils.helpers import get_wd
 
 from wepppy.nodb.base import (
     NoDbAlreadyLockedError,
+    NoDbStaleWriteError,
     NoDbBase,
     clear_locks,
     clear_nodb_file_cache,
@@ -540,8 +541,8 @@ def run_batch_rq(batch_name: str) -> dict[str, Any]:
 
         if job is not None:
             try:
-                batch_runner.set_rq_job_id("run_batch_rq", job.id)
-            except Exception as exc:
+                batch_runner.set_rq_job_id_fresh("run_batch_rq", job.id)
+            except (NoDbAlreadyLockedError, NoDbStaleWriteError, OSError, redis.exceptions.RedisError) as exc:
                 logger.warning("batch_rq: failed to persist run_batch_rq job id - %s", exc)
         watershed_collection = batch_runner.get_watershed_collection()
         if not watershed_collection.runid_template:
@@ -653,14 +654,14 @@ def run_batch_rq(batch_name: str) -> dict[str, Any]:
             )
             final_job.meta['runid'] = batch_name
             final_job.save()
-            try:
-                batch_runner.set_rq_job_id("final_batch_complete_rq", final_job.id)
-            except Exception as exc:
-                logger.warning("batch_rq: failed to persist final_batch_complete_rq job id - %s", exc)
             if job is not None:
                 job.meta['jobs:1,func:_final_batch_complete_rq'] = final_job.id
                 job.save()
             _release_deferred_finalizer_if_ready(q, final_job)
+            try:
+                batch_runner.set_rq_job_id_fresh("final_batch_complete_rq", final_job.id)
+            except (NoDbAlreadyLockedError, NoDbStaleWriteError, OSError, redis.exceptions.RedisError) as exc:
+                logger.warning("batch_rq: failed to persist final_batch_complete_rq job id - %s", exc)
 
         StatusMessenger.publish(status_channel, f'rq:{job_id} COMPLETED {func_name}({batch_name})')
         return {

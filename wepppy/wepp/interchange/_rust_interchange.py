@@ -21,6 +21,8 @@ REQUIRED_WEPPPYO3_INTERCHANGE_API = frozenset(
         "ag_fields_hillslope_wat_files_to_parquet",
         "catalog_scan",
         "totalwatsed3_to_parquet",
+        "hillslope_watbal_wepp_ids",
+        "hillslope_watbal_to_parquet",
         "hillslope_ebe_files_to_parquet",
         "hillslope_element_files_to_parquet",
         "hillslope_loss_files_to_parquet",

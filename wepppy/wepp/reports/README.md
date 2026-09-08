@@ -113,3 +113,16 @@ This guide captures the DuckDB-backed report pipelines that translate WEPP inter
   > `ebe_pw0.parquet`, climate intensities, and `totalwatsed3.parquet`, then expose
   > a `ReturnPeriodDataset` that supplies the template without relying on the old
   > pandas-based code.”
+
+## Hillslope Water Balance
+
+`HillslopeWatbalReport` requires the paired native hillslope-watbal API when a
+cache must be rebuilt. Rust streams projected H.wat batches and writes the
+compact Topaz/year summary; Python loads only that summary for report iterators.
+Existing baseline/Roads mappings, cache version, source freshness, legacy reads,
+headers, units, and average divisors remain unchanged. Large-run processing no
+longer creates a source-sized pandas dataframe. Missing native support fails
+explicitly; update the paired release and startup pin together.
+
+See the [summary cache contract](../../../docs/schemas/output-scope-contract.md#hillslope-water-balance-summary-cache)
+for exact fields, null behavior, and publication expectations.

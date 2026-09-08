@@ -144,3 +144,34 @@ When adding or modifying scope-aware report surfaces:
    - invalid scope (`400`).
 5. Keep roads-only writes under `wepp/roads/output/*`; never mutate `wepp/output/*` in roads flows.
 6. Update this contract in the same change set when scope behavior changes.
+
+## Hillslope water-balance summary cache
+
+`HillslopeWatbalReport` retains `hillslope_watbal_summary.parquet` under
+`wepp/reports/cache`, with `_roads` for Roads, version `1` sidecars, baseline
+legacy-cache reads, and source-newer-than-cache rebuilding. Required native
+`hillslope_watbal_wepp_ids` discovers distinct IDs in bounded batches;
+`hillslope_watbal_to_parquet` produces the compact summary atomically.
+WEPPpy retains translator policy and Roads manifest/raw-ID logging. There is
+no full-source Python producer or fallback; a missing native API fails explicitly.
+
+The ordered columns remain `TopazID`, `WaterYear`, `Area_m2`,
+`Precipitation (mm)`, `Percolation (mm)`, `Surface Runoff (mm)`,
+`Lateral Flow (mm)`, and `Transpiration + Evaporation (mm)`. Populated keys
+are nullable Int64; metrics are nullable Float64. Empty caches retain nullable
+Null columns. Sort by Topaz/year and preserve pandas schema metadata.
+
+Null/NaN flux and area values become zero. Area is the first value per
+WEPP/OFE, summed per WEPP and then mapped Topaz. Null/NaN OFE rows contribute
+flux but no area. Sum P, Dp, QOFE, latqcc, Ep, Es, and Er independently per
+Topaz/year; combined evaporation is `(sum(Ep) + sum(Es)) + sum(Er)`.
+Average annual iteration retains `max(number_of_years - 1, 1)` as its divisor.
+These historical semantics are preserved to avoid changing reported science
+while removing full-source materialization from large-worker post-processing.
+
+Canonical H.wat keys are integers. Malformed/nonintegral/out-of-range keys,
+unsupported numeric layouts, and infinite metrics fail explicitly. Existing
+cache access bits are preserved during staging and publication for service-owned
+files; first creation respects the worker umask. Parent paths and UID/GID remain
+owned by WEPPpy orchestration. Atomic replacement preserves prior cache bytes
+on normal write failure; process termination or unlink failure can leave residue.

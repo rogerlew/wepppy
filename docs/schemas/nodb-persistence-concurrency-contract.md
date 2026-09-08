@@ -264,3 +264,25 @@ within the scope a failed signature check MUST NOT authorize stale cache reuse.
 Retry/recovery/exhaustion diagnostics MUST identify operation, errno, path,
 attempts, elapsed time, host, run and job where available. This scope addresses
 transient reads under fork activity without attributing causality to a host.
+
+## Batch job receipt compatibility mirror
+
+`BatchRunner.rq_job_ids` remains the compatibility mirror for batch status and
+deferred recovery; root RQ metadata is authoritative. The two `run_batch_rq`
+receipt sites use `BatchRunner.set_rq_job_id_fresh`: acquire the distributed
+lock, hydrate durable disk state without the Redis payload fast path, check
+controller identity, apply only the named key, dump once, and unlock. This is
+an application of Writer Ownership and Mutation Topology, not a stale-write
+retry or merge of independently mutated objects.
+
+Retain external lock-token ownership while refreshing attributes. Failed
+acquisition must not modify an existing owner's mutation signature. After an
+acquired transaction fails, invalidate only that instance's signature so its
+next singleton read reloads durable state. Never clear global caches.
+
+Save root finalizer linkage and release a ready deferred finalizer before the
+compatibility receipt, so a receipt failure cannot skip RQ bookkeeping.
+Named lock-contention/stale-write, I/O, and Redis errors remain logged receipt
+failures. Unexpected errors, including untyped RuntimeError/RecursionError,
+propagate through the RQ boundary. This keeps finalizer dependencies and Omni
+linkage intact while preserving failure observability.

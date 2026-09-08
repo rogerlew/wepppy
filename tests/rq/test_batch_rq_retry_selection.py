@@ -1109,8 +1109,9 @@ def test_release_deferred_finalizer_if_ready_keeps_unmet_dependencies_deferred(
     assert calls == [(queue, final_job)]
 
 
+@pytest.mark.parametrize("receipt_failure", [None, ValueError, RuntimeError, RecursionError])
 def test_run_batch_rq_enqueues_only_retry_eligible_features(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch, receipt_failure: type[Exception] | None,
 ) -> None:
     parent_job = _DummyJob("parent")
     monkeypatch.setattr(batch_rq, "get_current_job", lambda: parent_job)
@@ -1124,7 +1125,9 @@ def test_run_batch_rq_enqueues_only_retry_eligible_features(
         wd = "/tmp/batch/demo"
         rq_job_ids: dict[str, str] = {}
 
-        def set_rq_job_id(self, key: str, job_id: str) -> None:
+        def set_rq_job_id_fresh(self, key: str, job_id: str) -> None:
+            if receipt_failure and key == "final_batch_complete_rq":
+                raise receipt_failure("injected receipt decode failure")
             self.rq_job_ids[key] = job_id
 
         def get_watershed_collection(self):
@@ -1186,6 +1189,15 @@ def test_run_batch_rq_enqueues_only_retry_eligible_features(
         lambda _channel, message: published.append(message),
     )
 
+    released = []
+    monkeypatch.setattr(batch_rq, "_release_deferred_finalizer_if_ready", lambda q, j: released.append(j.id))
+    if receipt_failure:
+        with pytest.raises(receipt_failure, match="injected receipt decode failure"):
+            batch_rq.run_batch_rq("demo")
+        assert released == [enqueue_calls[-1]["job"].id]
+        assert parent_job.meta["jobs:1,func:_final_batch_complete_rq"] == released[0]
+        assert enqueue_calls[-1]["depends_on"].allow_failure is True
+        return
     result = batch_rq.run_batch_rq("demo")
 
     watershed_calls = [
@@ -1218,7 +1230,7 @@ def test_run_batch_rq_full_rerun_enqueues_all_features(
     class _Runner:
         rq_job_ids: dict[str, str] = {}
 
-        def set_rq_job_id(self, key: str, job_id: str) -> None:
+        def set_rq_job_id_fresh(self, key: str, job_id: str) -> None:
             self.rq_job_ids[key] = job_id
 
         def get_watershed_collection(self):

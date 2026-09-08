@@ -153,3 +153,24 @@ matching the retired producer. Invalid Parquet counts, sizes, and physical chunk
 ranges fail through the normal native execution-error boundary before output
 replacement; valid zero-value dictionary chunks remain supported. These checks
 preserve the existing contract and do not constitute a hostile-file sandbox.
+
+## Hillslope water-balance summary producer
+
+The required API inventory also includes `hillslope_watbal_wepp_ids(wat_path)`
+and `hillslope_watbal_to_parquet(wat_path, output_path, topaz_by_wepp_id,
+pandas_metadata=None)`. Discovery returns sorted distinct integer IDs; the
+writer returns only `input_rows`, `rows_written`, and `ofe_keys`. Rust owns
+projected-batch aggregation and compact-cache publication. WEPPpy owns mapping
+policy, pandas metadata, version sidecars, and report iteration. The report
+requires the module through the existing unavailable-native boundary; native
+schema/value, missing-ID, and write failures remain ValueError, KeyError, and
+OSError respectively. No source-sized fallback is retained.
+
+See the [output-scope contract](../../../docs/schemas/output-scope-contract.md#hillslope-water-balance-summary-cache)
+for preserved cache/report semantics. This extraction avoids the demonstrated
+full-source pandas memory expansion after totalwatsed3.
+
+Release provenance: native revision `0ba67a55f35c7193c6313fb5487d6874dc42e198`,
+py312 interchange SHA-256
+`fe5b2c156b361181fe52004399a6ce131b3b43f92797ae744350d6e9f5713917`.
+The image-build source pin and startup preflight enforce this release.

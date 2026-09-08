@@ -9,7 +9,9 @@ from pathlib import Path
 from typing import Iterable, Iterator, Mapping
 
 import pandas as pd
-import pyarrow.parquet as pq
+import pyarrow as pa
+
+from wepppy.wepp.interchange._rust_interchange import require_wepppyo3_interchange
 
 from .helpers import ReportCacheManager
 from .output_scope import normalize_output_scope, scoped_dataset_path
@@ -64,7 +66,6 @@ class HillslopeWatbalReport(ReportBase):
 
         if dataframe is None or not self._validate_cache_columns(dataframe):
             dataframe = self._build_summary()
-            cache.write_parquet(cache_key, dataframe, version=self._CACHE_VERSION, index=False)
 
         if dataframe.empty:
             self._initialise_empty()
@@ -129,42 +130,28 @@ class HillslopeWatbalReport(ReportBase):
         self.years = []
 
     def _build_summary(self) -> pd.DataFrame:
-        """Query the H.wat parquet and aggregate to both hill/year and watershed scales."""
+        """Prepare bounded mapping data for the required native summary producer."""
         source_path = self._resolve_source_path()
         if not source_path.exists():
             raise FileNotFoundError(source_path)
 
         from wepppy.nodb.core import Watershed
 
-        table = pq.read_table(
-            source_path,
-            columns=[
-                "wepp_id",
-                "ofe_id",
-                "water_year",
-                "P",
-                "Dp",
-                "QOFE",
-                "latqcc",
-                "Ep",
-                "Es",
-                "Er",
-                "Area",
-            ],
+        native = require_wepppyo3_interchange(
+            "hillslope water balance", "hillslope_watbal_wepp_ids", "hillslope_watbal_to_parquet"
         )
-        frame = table.to_pandas()
-        if frame.empty:
-            return pd.DataFrame(columns=["TopazID", "WaterYear", "Area_m2", *self._MEASURE_MAP.keys()])
+        wepp_ids = native.hillslope_watbal_wepp_ids(str(source_path))
+        if not wepp_ids:
+            return self._write_native_summary(native, source_path, {})
 
         watershed = Watershed.getInstance(str(self.wd))
         translator = watershed.translator_factory()
         roads_segment_targets = self._load_roads_segment_target_map()
-        wepp_ids = frame["wepp_id"].astype(int)
         fallback_ids: set[int] = set()
         manifest_mapped_ids: set[int] = set()
         topaz_lookup: dict[int, int] = {}
 
-        for wepp_id in sorted(wepp_ids.unique().tolist()):
+        for wepp_id in wepp_ids:
             try:
                 topaz_lookup[wepp_id] = int(translator.top(wepp=int(wepp_id)))
                 continue
@@ -206,53 +193,29 @@ class HillslopeWatbalReport(ReportBase):
                 },
             )
 
-        frame["wepp_id"] = wepp_ids
-        frame["TopazID"] = frame["wepp_id"].map(topaz_lookup).astype(int)
-        frame["P"] = frame["P"].astype(float).fillna(0.0)
-        frame["Dp"] = frame["Dp"].astype(float).fillna(0.0)
-        frame["QOFE"] = frame["QOFE"].astype(float).fillna(0.0)
-        frame["latqcc"] = frame["latqcc"].astype(float).fillna(0.0)
-        frame["Ep"] = frame["Ep"].astype(float).fillna(0.0)
-        frame["Es"] = frame["Es"].astype(float).fillna(0.0)
-        frame["Er"] = frame["Er"].astype(float).fillna(0.0)
-        frame["Area"] = frame["Area"].astype(float).fillna(0.0)
-        frame["water_year"] = frame["water_year"].astype(int)
+        return self._write_native_summary(native, source_path, topaz_lookup)
 
-        area_lookup = (
-            frame.groupby(["wepp_id", "ofe_id"])["Area"]
-            .first()
-            .groupby("wepp_id")
-            .sum()
+    def _write_native_summary(self, native, source_path: Path, mapping: dict[int, int]) -> pd.DataFrame:
+        """Publish the compact cache natively, then load only its report rows."""
+        names = ["TopazID", "WaterYear", "Area_m2", *self._MEASURE_MAP.keys()]
+        if mapping:
+            template = pd.DataFrame({
+                name: pd.Series(dtype="int64" if i < 2 else "float64")
+                for i, name in enumerate(names)
+            })
+        else:
+            template = pd.DataFrame(columns=names)
+        metadata = pa.Schema.from_pandas(template, preserve_index=False).metadata[b"pandas"].decode()
+        cache = ReportCacheManager(self.wd)
+        cache.root.mkdir(parents=True, exist_ok=True)
+        cache_path = cache.root / f"{self._resolve_cache_key()}.parquet"
+        native.hillslope_watbal_to_parquet(
+            str(source_path), str(cache_path), mapping, pandas_metadata=metadata
         )
-
-        topaz_area: dict[int, float] = {}
-        for wepp_id, area in area_lookup.items():
-            topaz_id = int(topaz_lookup[int(wepp_id)])
-            topaz_area[topaz_id] = topaz_area.get(topaz_id, 0.0) + float(area)
-
-        grouped = frame.groupby(["TopazID", "water_year"], as_index=False).agg(
-            {
-                "P": "sum",
-                "Dp": "sum",
-                "QOFE": "sum",
-                "latqcc": "sum",
-                "Ep": "sum",
-                "Es": "sum",
-                "Er": "sum",
-            }
+        cache_path.with_suffix(".meta.json").write_text(
+            json.dumps({"version": self._CACHE_VERSION}, indent=2)
         )
-
-        grouped["Area_m2"] = grouped["TopazID"].map(topaz_area).fillna(0.0)
-        grouped = grouped.rename(columns={"water_year": "WaterYear"})
-        grouped["Precipitation (mm)"] = grouped["P"]
-        grouped["Percolation (mm)"] = grouped["Dp"]
-        grouped["Surface Runoff (mm)"] = grouped["QOFE"]
-        grouped["Lateral Flow (mm)"] = grouped["latqcc"]
-        grouped["Transpiration + Evaporation (mm)"] = grouped["Ep"] + grouped["Es"] + grouped["Er"]
-
-        summary = grouped[["TopazID", "WaterYear", "Area_m2", *self._MEASURE_MAP.keys()]].copy()
-        summary.sort_values(["TopazID", "WaterYear"], inplace=True)
-        return summary
+        return pd.read_parquet(cache_path)
 
     def _load_roads_segment_target_map(self) -> dict[int, int]:
         """Return Roads segment run ID -> target hillslope WEPP ID map when available."""

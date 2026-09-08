@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import contextlib
 import json
 import os
 import shutil
@@ -12,43 +11,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from tests.stubs import ensure_geopandas_stub
-
-if "deprecated" not in sys.modules:
-    module = types.ModuleType("deprecated")
-
-    def _noop_deprecated(*args, **kwargs):
-        def decorator(func):
-            return func
-
-        return decorator
-
-    module.deprecated = _noop_deprecated
-    sys.modules["deprecated"] = module
-
-sys.modules.setdefault("utm", types.ModuleType("utm"))
-sys.modules.setdefault("pyproj", types.ModuleType("pyproj"))
-
-if "rasterio" not in sys.modules:
-    rasterio_module = types.ModuleType("rasterio")
-
-    class _Env(contextlib.AbstractContextManager):  # pragma: no cover - stub
-        def __exit__(self, exc_type, exc_val, exc_tb):
-            return False
-
-    rasterio_module.Env = _Env
-    warp_module = types.ModuleType("rasterio.warp")
-    warp_module.reproject = lambda *args, **kwargs: None  # pragma: no cover - stub
-
-    class _Resampling:  # pragma: no cover - stub
-        nearest = 0
-
-    warp_module.Resampling = _Resampling
-    warp_module.calculate_default_transform = lambda *args, **kwargs: (None, None, None)
-    sys.modules["rasterio"] = rasterio_module
-    sys.modules["rasterio.warp"] = warp_module
-
-ensure_geopandas_stub()
+pytestmark = pytest.mark.unit
 
 
 class _Translator:
@@ -284,3 +247,51 @@ def test_hillslope_watbal_rejects_invalid_output_scope(tmp_path, monkeypatch):
 
     with pytest.raises(ValueError, match="Invalid output_scope"):
         HillslopeWatbalReport(run_dir, output_scope="invalid")
+
+
+def test_hillslope_watbal_requires_current_native_api(tmp_path, monkeypatch):
+    from wepppy.wepp.reports.hillslope_watbal import HillslopeWatbalReport
+    from wepppy.wepp.interchange import _rust_interchange
+    source = tmp_path / "wepp/output/interchange/H.wat.parquet"
+    _write_h_wat_parquet(source)
+    monkeypatch.setattr(_rust_interchange, "_import_wepppyo3_interchange", lambda: types.SimpleNamespace())
+    with pytest.raises(_rust_interchange.WeppInterchangeUnavailableError, match="missing native API"):
+        HillslopeWatbalReport(tmp_path)
+    assert not (tmp_path / "wepp/reports/cache/hillslope_watbal_summary.parquet").exists()
+
+
+def test_hillslope_watbal_reads_legacy_cache_without_native(tmp_path, monkeypatch):
+    from wepppy.wepp.reports.hillslope_watbal import HillslopeWatbalReport
+    from wepppy.wepp.interchange import _rust_interchange
+    source = tmp_path / "wepp/output/interchange/H.wat.parquet"
+    _write_h_wat_parquet(source)
+    report = HillslopeWatbalReport(tmp_path)
+    cache = tmp_path / "wepp/reports/cache/hillslope_watbal_summary.parquet"
+    legacy = source.parent / "hillslope_watbal_summary.parquet"
+    shutil.copyfile(cache, legacy)
+    cache.unlink()
+    monkeypatch.setattr(_rust_interchange, "_import_wepppyo3_interchange", lambda: types.SimpleNamespace())
+    reloaded = HillslopeWatbalReport(tmp_path)
+    assert [dict(r.row) for r in reloaded.avg_annual_iter()] == [dict(r.row) for r in report.avg_annual_iter()]
+
+
+def test_hillslope_watbal_empty_source(tmp_path):
+    import pyarrow.parquet as pq
+    from wepppy.wepp.reports.hillslope_watbal import HillslopeWatbalReport
+    source = tmp_path / "wepp/output/interchange/H.wat.parquet"
+    _write_h_wat_parquet(source)
+    table = pq.read_table(source).slice(0, 0)
+    pq.write_table(table, source)
+    report = HillslopeWatbalReport(tmp_path)
+    assert report.years == []
+    assert list(report.avg_annual_iter()) == []
+    assert list(report.yearly_iter()) == []
+
+
+def test_hillslope_watbal_unknown_baseline_id_fails(tmp_path):
+    from wepppy.wepp.reports.hillslope_watbal import HillslopeWatbalReport
+    source = tmp_path / "wepp/output/interchange/H.wat.parquet"
+    _write_h_wat_parquet(source)
+    frame = pd.read_parquet(source);frame["wepp_id"] = 99;frame.to_parquet(source,index=False)
+    with pytest.raises(KeyError):
+        HillslopeWatbalReport(tmp_path)

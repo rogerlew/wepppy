@@ -498,7 +498,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_batch_rq",
-    "source_lineno": 630,
+    "source_lineno": 631,
     "source_module": "wepppy/rq/batch_rq.py"
   },
   {
@@ -510,7 +510,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_batch_rq",
-    "source_lineno": 648,
+    "source_lineno": 649,
     "source_module": "wepppy/rq/batch_rq.py"
   },
   {

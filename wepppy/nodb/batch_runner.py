@@ -448,6 +448,36 @@ class BatchRunner(NoDbBase):
             else:
                 self._rq_job_ids.pop(key, None)
 
+    def set_rq_job_id_fresh(self, key: str, job_id: Optional[str]) -> None:
+        """Publish one receipt from current durable state under the NoDb lock."""
+        if not key:
+            return
+        committed = False
+        acquired = False
+        try:
+            with self.locked(validate_on_success=False):
+                acquired = True
+                lock_key = self._distributed_lock_key
+                fresh = type(self)._hydrate_instance(
+                    os.path.abspath(self.wd), False, False, False, use_redis_cache=False
+                )
+                if fresh._distributed_lock_key != lock_key:
+                    raise RuntimeError("Batch receipt controller identity changed during hydration")
+                # Tokens are held outside __dict__; retain this lock-owning instance.
+                self.__dict__.clear()
+                self.__dict__.update(fresh.__dict__)
+                if not self._rq_job_ids:
+                    self._rq_job_ids = {}
+                if job_id:
+                    self._rq_job_ids[key] = job_id
+                else:
+                    self._rq_job_ids.pop(key, None)
+            committed = True
+        finally:
+            if acquired and not committed:
+                # A later singleton read must discard an uncommitted receipt.
+                self._nodb_mtime = None
+
     def update_run_directives(self, directives: Mapping[str, Any]) -> Dict[str, bool]:
         
         if not isinstance(directives, Mapping):
