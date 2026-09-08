@@ -29,52 +29,6 @@ def _infer_units(column: str) -> str | None: ...
 
 def _describe_column(column: str) -> str | None: ...
 
-def _cast_integral_columns(df: pd.DataFrame) -> None: ...
-
-def _add_per_area_columns(
-    df: pd.DataFrame,
-    source_columns: Sequence[str],
-    area_column: str = ..., 
-) -> None: ...
-
-def _write_parquet(df: pd.DataFrame, path: str) -> None: ...
-
-def calculate_return_periods(
-    df: pd.DataFrame,
-    measure: str,
-    recurrence: Sequence[int],
-    num_fire_years: float,
-    cols_to_extract: Sequence[str],
-) -> ReturnPeriods: ...
-
-def calculate_cumulative_transport(
-    df: pd.DataFrame,
-    recurrence: Sequence[int],
-    ash_post_dir: str,
-) -> ReturnPeriods: ...
-
-def calculate_hillslope_statistics(
-    df: pd.DataFrame,
-    ash: Ash,
-    ash_post_dir: str,
-    first_year_only: bool = ..., 
-) -> None: ...
-
-def calculate_watershed_statisics(
-    df: pd.DataFrame,
-    ash_post_dir: str,
-    recurrence: Sequence[int],
-    burn_classes: Sequence[int] = ...,
-    first_year_only: bool = ..., 
-) -> Tuple[ReturnPeriods, BurnClassReturnPeriods]: ...
-
-def read_hillslope_out_fn(
-    out_fn: str,
-    meta_data: Optional[Mapping[str, Any]] = ...,
-    meta_data_types: Optional[Mapping[str, str]] = ...,
-    cumulative: bool = ..., 
-) -> pd.DataFrame: ...
-
 def watershed_daily_aggregated(
     wd: str,
     recurrence: Sequence[int] = ...,

@@ -14,44 +14,30 @@ from __future__ import annotations
 import os
 from pathlib import Path
 from os.path import join as _join
-from os.path import split as _split
 from os.path import exists as _exists
-from copy import deepcopy
 
-import shutil
-import math
-from typing import TYPE_CHECKING, Any, Dict, Iterable, Mapping, MutableMapping, Optional, Sequence
+from typing import Any, Dict, Mapping, Optional, Sequence
 
 # non-standard
-import duckdb
-import numpy as np
 
 from wepppy.all_your_base.dateutils import YearlessDate
 import pandas as pd
-import dask.dataframe as dd
-import pyarrow as pa
 import pyarrow.parquet as pq
 
-from wepppy.all_your_base import isfloat
-from wepppy.all_your_base.stats import probability_of_occurrence, weibull_series
 
 from wepppy.nodb.base import NoDbBase
 
-from pprint import pprint
 
 from wepppy.query_engine.activate import update_catalog_entry
-from wepppy.wepp.interchange.schema_utils import pa_field
 
 from .ashpost_documentation import generate_ashpost_documentation
 from .ashpost_versioning import (
     ASHPOST_VERSION,
     remove_incompatible_outputs,
-    schema_with_version,
     write_version_manifest,
 )
 
-if TYPE_CHECKING:
-    from wepppy.nodb.mods.ash_transport.ash import Ash
+from wepppy.wepp.interchange._rust_interchange import require_wepppyo3_interchange
 
 __all__ = [
     'AshPostNoDbLockedException',
@@ -161,730 +147,71 @@ def _describe_column(column: str) -> str | None:
     return None
 
 
-def _cast_integral_columns(df: pd.DataFrame) -> None:
-    """Downcast known integral columns to compact unsigned dtypes."""
-    for column in UINT16_COLUMNS:
-        if column in df.columns:
-            df[column] = df[column].astype('uint16')
-    for column in UINT8_COLUMNS:
-        if column in df.columns:
-            df[column] = df[column].astype('uint8')
-
-
-def _add_per_area_columns(
-    df: pd.DataFrame,
-    source_columns: Sequence[str],
-    area_column: str = 'area (ha)',
-) -> None:
-    """Add per-area columns (tonne/ha, mm) derived from volumetric inputs."""
-    if area_column not in df.columns:
-        return
-    area = df[area_column].to_numpy(dtype=np.float64)
-    with np.errstate(divide='ignore', invalid='ignore'):
-        for col in source_columns:
-            if col not in df.columns:
-                continue
-            per_ha_col = col.replace(' (tonne)', ' (tonne/ha)').replace(' (m^3)', ' (mm)')
-            result = np.divide(
-                df[col].to_numpy(dtype=np.float64),
-                area,
-                out=np.zeros_like(area, dtype=np.float64),
-                where=area > 0,
-            )
-            if per_ha_col.endswith(' (mm)'):
-                # convert average depth from meters to millimeters
-                result *= 1000.0 / 10000.0
-            df[per_ha_col] = result
-
-
-def _write_parquet(df: pd.DataFrame, path: str) -> None:
-    """Persist a DataFrame with schema metadata and AshPost versioning."""
-    if not len(df.columns):
-        empty_schema = schema_with_version(pa.schema([]))
-        table = pa.Table.from_arrays([], schema=empty_schema)
-        pq.write_table(table, path, compression='snappy')
-        return
-
-    table = pa.Table.from_pandas(df, preserve_index=False)
-    schema_fields = []
-    for field in table.schema:
-        units = _infer_units(field.name)
-        description = _describe_column(field.name)
-        schema_fields.append(pa_field(field.name, field.type, units=units, description=description))
-    schema = pa.schema(schema_fields)
-    schema = schema_with_version(schema)
-    table = table.cast(schema)
-    pq.write_table(table, path, compression='snappy')
-
-
-def _read_totalwatsed3_daily(wd: str) -> pd.DataFrame:
-    """Load daily hydrology + sediment from totalwatsed3 for ash adjustments."""
-    path = Path(wd) / "wepp" / "output" / "interchange" / "totalwatsed3.parquet"
-    if not path.exists():  # pragma: no cover - defensive
-        return pd.DataFrame()
-    schema = pq.read_schema(path)
-    cols = [
-        "year",
-        "julian",
-        "Streamflow",
-        "Runoff",
-        "Lateral Flow",
-        "Baseflow",
-        "Area",
-        "seddep_1",
-        "seddep_2",
-        "seddep_3",
-        "seddep_4",
-        "seddep_5",
-    ]
-    available_cols = [col for col in cols if col in schema.names]
-    if not available_cols:
-        return pd.DataFrame()
-    return pq.read_table(path, columns=available_cols).to_pandas()
-
-
-def _aggregate_runoff_by_wepp_ids(wat_path: Path, wepp_ids: list[int]) -> pd.DataFrame:
-    """Aggregate QOFE (runoff) volumes for selected hillslopes."""
-    if not wat_path.exists() or not wepp_ids:
-        return pd.DataFrame(columns=["year", "julian", "runoff_m3"])
-    id_list = ",".join(str(wid) for wid in sorted(set(wepp_ids)))
-    query = f"""
-        SELECT
-            year,
-            julian,
-            SUM(QOFE * 0.001 * Area) AS runoff_m3
-        FROM read_parquet('{wat_path.as_posix()}')
-        WHERE wepp_id IN ({id_list})
-        GROUP BY year, julian
-        ORDER BY year, julian
-    """
-    with duckdb.connect() as con:
-        return con.execute(query).df()
-
-
-def calculate_return_periods(
-    df: pd.DataFrame,
-    measure: str,
-    recurrence: Sequence[int],
-    num_fire_years: float,
-    cols_to_extract: Sequence[str],
-) -> ReturnPeriods:
-    """Compute Weibull return period stats for a single measure."""
-
-    measure_rank = measure.replace(' (tonne)', '_rank')\
-                          .replace(' (days)', '_rank')
-    measure_ri = measure.replace(' (tonne)', '_ri')\
-                        .replace(' (days)', '_ri')
-    measure_poo = measure.replace(' (tonne)', '_probability')\
-                         .replace(' (days)', '_probability')
-
-    cols_to_extract = [measure, measure_rank, measure_ri, measure_poo] + cols_to_extract
-
-    df.sort_values(by=measure, ascending=False, inplace=True)
-
-    df[measure_rank] = df[measure].rank(ascending=False)
-    df[measure_ri] = (num_fire_years + 1) / df[measure_rank]
-    df[measure_poo] = df[measure_ri].apply(lambda ri: probability_of_occurrence(ri, 1.0))
-
-    rec = weibull_series(recurrence, num_fire_years)
-
-
-    num_events = (df[measure] > 0).sum()
-    return_periods: ReturnPeriods = {}
-    for retperiod in recurrence:
-        if retperiod not in rec:
-            return_periods[retperiod] = { measure: 0,
-                                          'probability': 0,
-                                          'rank': 0,
-                                          'ri': 0 }
-        else:
-            indx = rec[retperiod]
-            if indx > num_events - 1:
-                indx = num_events - 1
-
-            _row = df.iloc[indx][cols_to_extract].to_dict()
-            for _m in _row:
-                if _m in ('date_int', 'year0', 'year', 'mo', 'da', 'days_from_fire (days)', measure_rank):
-                    _row[_m] = int(_row[_m])
-                elif isfloat(_row[_m]):
-                    _row[_m] = float(_row[_m])
-                else:
-                    _row[_m] = str(_row[_m])
-
-            _row['probability'] = _row[measure_poo]
-            _row['rank'] = _row[measure_rank]
-            _row['ri'] = _row[measure_ri]
-
-            del _row[measure_poo]
-            del _row[measure_rank]
-            del _row[measure_ri]
-
-            return_periods[retperiod] = _row
-
-    return return_periods
-
-
-def calculate_cumulative_transport(
-    df: pd.DataFrame,
-    recurrence: Sequence[int],
-    ash_post_dir: str,
-) -> ReturnPeriods:
-    """Aggregate cumulative transport metrics and compute return periods."""
-
-    # Early exit if no data
-    if df.empty:
-        return {}
-
-    # group the filtered rows by year0 and aggregate the cum_ columns and weighted average of days_from_fire
-    agg_d = {'days_from_fire (days)': 'first'}
-
-    for col_name in df.columns:
-        if col_name.startswith('cum_'):
-            agg_d[col_name] = 'sum'
-
-    df_agg = df.groupby('year0').agg(agg_d)
-
-    # create a new dataframe with one row per unique year
-    cum_df = pd.DataFrame({'year0': df['year0'].unique()})
-
-    # merge the aggregated data with the new dataframe
-    cum_df = pd.merge(cum_df, df_agg, on='year0')
-    cum_df.sort_values('year0', inplace=True)
-    _cast_integral_columns(cum_df)
-    _write_parquet(cum_df, _join(ash_post_dir, ASH_POST_FILES['watershed_cumulatives']))
-
-    # calculate return intervals and probabilities for cumulative results
-    num_fire_years = len(cum_df)
-    
-    # Guard against empty dataframe
-    if num_fire_years == 0:
-        return {}
-    
-    cum_return_periods: ReturnPeriods = {}
-    cols_to_extract = ['year0']
-
-    for measure in ['cum_wind_transport (tonne)', 'cum_water_transport (tonne)',
-                    'cum_ash_transport (tonne)', 'days_from_fire (days)']:
-        cum_return_periods[measure] = calculate_return_periods(cum_df, measure, recurrence, num_fire_years,
-                                                               cols_to_extract)
-
-    return cum_return_periods
-
-
-def calculate_hillslope_statistics(
-    df: pd.DataFrame,
-    ash: "Ash",
-    ash_post_dir: str,
-    first_year_only: bool = False,
-) -> None:
-    """Summarize hillslope-level transport metrics and persist annual stats."""
-    agg_d = { 'wind_transport (tonne/ha)': 'sum',
-              'water_transport (tonne/ha)': 'sum',
-              'ash_transport (tonne/ha)': 'sum' }
-
-    # group the dataframe by topaz_id and year, and calculate the sum of x within each group
-
-#    print(len(df.index), 'rows in hillslope data frame')
-    if first_year_only:
-        df = df[df['days_from_fire (days)'] <= 365]
-
-#    df.to_parquet(_join(ash_post_dir, 'sanity_check_first_year.parquet'), index=False)
-#    print(len(df.index), 'rows in hillslope data frame')
-
-    df_hillslope_annuals = df.groupby(['topaz_id', 'year']).agg(agg_d).reset_index()
-    df_hillslope_average_annuals = df_hillslope_annuals.groupby('topaz_id').mean(numeric_only=True).reset_index()
-    if 'year' in df_hillslope_average_annuals.columns:
-        df_hillslope_average_annuals.drop('year', axis=1, inplace=True)
-    _cast_integral_columns(df_hillslope_average_annuals)
-    ordered_cols = [
-        'topaz_id',
-        'wind_transport (tonne/ha)',
-        'water_transport (tonne/ha)',
-        'ash_transport (tonne/ha)',
-    ]
-    df_hillslope_average_annuals = df_hillslope_average_annuals[[col for col in ordered_cols if col in df_hillslope_average_annuals.columns]]
-    _write_parquet(df_hillslope_average_annuals, _join(ash_post_dir, ASH_POST_FILES['hillslope_annuals']))
-
-
-def calculate_watershed_statisics(
-    df: pd.DataFrame,
-    ash_post_dir: str,
-    recurrence: Sequence[int],
-    burn_classes: Sequence[int] = (1, 2, 3),
-    *,
-    wd: str,
-    watershed,
-    translator,
-    ash,
-    first_year_only: bool = False,
-) -> tuple[ReturnPeriods, BurnClassReturnPeriods]:
-    """Aggregate watershed transport metrics and compute return periods."""
-    burn_classes = list(burn_classes)
-
-    if first_year_only:
-        df = df[df['days_from_fire (days)'] <= 365]
-
-    global common_cols
-
-    #df.to_pickle(_join(ash_post_dir, 'full.pkl'))
-
-    measures = ['wind_transport (tonne)', 'water_transport (tonne)', 'ash_transport (tonne)']
-
-    ws_cols_to_drop = ['date_int', 'topaz_id']
-    for col in ['da', 'mo', 'julian']:
-        if col in out_cols:
-            ws_cols_to_drop.append(col)
-
-    agg_d = {}
-    for col in df.columns:
-        if col == 'area (ha)':
-            agg_d[col] = 'sum'
-            continue
-        # Sum volumetric/mass columns; depths and densities will be dropped and recalculated
-        if 'm^3' in col or 'tonne' in col:
-            agg_d[col] = 'sum'
-        if col in common_cols:
-            agg_d[col] = 'first'
-
-        # Drop per-area columns; they will be recalculated from totals after aggregation
-        if 'mm' in col or 'tonne/ha' in col or col.startswith('cum_'):
-            ws_cols_to_drop.append(col)
-
-    df_annuals = df.groupby('year', as_index=False).agg(agg_d)
-    df_annuals.drop(ws_cols_to_drop, axis=1, inplace=True, errors='ignore')
-    df_annuals.drop(columns=['burn_class'], inplace=True, errors='ignore')
-    _cast_integral_columns(df_annuals)
-    tonne_cols = [
-        'wind_transport (tonne)',
-        'water_transport (tonne)',
-        'ash_transport (tonne)',
-        'transportable_ash (tonne)',
-    ]
-    volume_cols_annual = [col for col in VOLUME_COLUMNS_M3 if col in df_annuals.columns]
-    _add_per_area_columns(df_annuals, tonne_cols)
-    if volume_cols_annual:
-        _add_per_area_columns(df_annuals, volume_cols_annual)
-    annual_cols = [
-        'year',
-        'year0',
-        'days_from_fire (days)',
-        'area (ha)',
-        'wind_transport (tonne)',
-        'wind_transport (tonne/ha)',
-        'water_transport (tonne)',
-        'water_transport (tonne/ha)',
-        'ash_transport (tonne)',
-        'ash_transport (tonne/ha)',
-        'transportable_ash (tonne)',
-        'transportable_ash (tonne/ha)',
-    ]
-    for volume_col in volume_cols_annual:
-        annual_cols.extend([
-            volume_col,
-            volume_col.replace(' (m^3)', ' (mm)'),
-        ])
-    df_annuals = df_annuals[[col for col in annual_cols if col in df_annuals.columns]]
-    _write_parquet(df_annuals, _join(ash_post_dir, ASH_POST_FILES['watershed_annuals']))
-
-    df_daily = df.groupby(['year0', 'year', 'julian'], as_index=False).agg(agg_d)
-    df_daily.drop(columns=['burn_class'], inplace=True, errors='ignore')
-    _cast_integral_columns(df_daily)
-    existing_density_cols = [col for col in df_daily.columns if '(tonne/ha)' in col or col.endswith(' (mm)')]
-    if existing_density_cols:
-        df_daily.drop(columns=existing_density_cols, inplace=True)
-    volume_cols_daily = [col for col in VOLUME_COLUMNS_M3 if col in df_daily.columns]
-    _add_per_area_columns(df_daily, tonne_cols)
-    if volume_cols_daily:
-        _add_per_area_columns(df_daily, volume_cols_daily)
-
-    hydrology_df = _read_totalwatsed3_daily(wd)
-    wat_path = Path(wd) / "wepp" / "output" / "interchange" / "H.wat.parquet"
-
-    ash_wepp_ids: list[int] = []
-    for topaz_id in watershed._subs_summary:
-        wepp_id = translator.wepp(top=topaz_id)
-        meta_entry = ash.meta.get(str(topaz_id), ash.meta.get(topaz_id, {}))
-        if meta_entry.get('ash_type') is None:
-            continue
-        ash_wepp_ids.append(int(wepp_id))
-
-    ash_wepp_runoff = _aggregate_runoff_by_wepp_ids(wat_path, ash_wepp_ids)
-    ash_wepp_runoff = ash_wepp_runoff.rename(columns={'runoff_m3': 'ash_wepp_runoff_m3'})
-
-    if not hydrology_df.empty:
-        hydrology_df['seddep_total_tonne'] = (
-            hydrology_df.get('seddep_1', 0)
-            + hydrology_df.get('seddep_2', 0)
-            + hydrology_df.get('seddep_3', 0)
-            + hydrology_df.get('seddep_4', 0)
-            + hydrology_df.get('seddep_5', 0)
-        ) / 1000.0
-        hydro_cols = [
-            'year',
-            'julian',
-            'Streamflow',
-            'Runoff',
-            'Lateral Flow',
-            'Baseflow',
-            'Area',
-            'seddep_total_tonne',
-        ]
-        hydrology_df = hydrology_df[hydro_cols].drop_duplicates(subset=['year', 'julian'])
-        df_daily = df_daily.merge(hydrology_df, on=['year', 'julian'], how='left')
-        df_daily = df_daily.merge(ash_wepp_runoff, on=['year', 'julian'], how='left')
-
-        area_total_m2 = df_daily.get('Area', pd.Series(0, index=df_daily.index)).to_numpy(dtype=np.float64)
-        area_total_ha = area_total_m2 / 10000.0
-        area_ash_ha = df_daily.get('area (ha)', pd.Series(0, index=df_daily.index)).to_numpy(dtype=np.float64)
-        area_ash_m2 = area_ash_ha * 10000.0
-
-        runoff_mm = df_daily.get('Runoff', pd.Series(0, index=df_daily.index)).to_numpy(dtype=np.float64)
-        runoff_total_m3 = runoff_mm * 0.001 * area_total_m2
-        ash_wepp_runoff_m3 = df_daily.get('ash_wepp_runoff_m3', pd.Series(0, index=df_daily.index)).to_numpy(dtype=np.float64)
-        runoff_nonash_m3 = np.clip(runoff_total_m3 - ash_wepp_runoff_m3, 0.0, None)
-
-        if 'ash_runoff (m^3)' in df_daily.columns:
-            ash_runoff_m3 = df_daily['ash_runoff (m^3)'].fillna(0.0).to_numpy(dtype=np.float64)
-        elif 'ash_runoff (mm)' in df_daily.columns:
-            ash_runoff_m3 = df_daily['ash_runoff (mm)'].fillna(0.0).to_numpy(dtype=np.float64) * 0.001 * area_ash_m2
-        else:
-            ash_runoff_m3 = np.zeros_like(runoff_total_m3, dtype=np.float64)
-
-        lat_flow_m3 = df_daily.get('Lateral Flow', pd.Series(0, index=df_daily.index)).to_numpy(dtype=np.float64) * 0.001 * area_total_m2
-        baseflow_m3 = df_daily.get('Baseflow', pd.Series(0, index=df_daily.index)).to_numpy(dtype=np.float64) * 0.001 * area_total_m2
-
-        corrected_runoff_m3 = runoff_nonash_m3 + ash_runoff_m3
-        corrected_streamflow_mm = np.zeros_like(corrected_runoff_m3, dtype=np.float64)
-        np.divide(
-            corrected_runoff_m3 + lat_flow_m3 + baseflow_m3,
-            area_total_m2,
-            out=corrected_streamflow_mm,
-            where=area_total_m2 > 0,
-        )
-        corrected_streamflow_mm *= 1000.0
-
-        streamflow_orig_mm = df_daily.get('Streamflow', pd.Series(0, index=df_daily.index)).to_numpy(dtype=np.float64)
-        df_daily['Streamflow_orig (mm)'] = streamflow_orig_mm
-        df_daily['Streamflow_ash_corr (mm)'] = corrected_streamflow_mm
-
-        # verify and warn if corrected streamflow is greater than original streamflow on any day
-        exceed_mask = corrected_streamflow_mm > streamflow_orig_mm
-        if np.any(exceed_mask):
-            exceed_count = int(np.count_nonzero(exceed_mask))
-            max_overage_mm = float(np.max(corrected_streamflow_mm[exceed_mask] - streamflow_orig_mm[exceed_mask]))
-            sample = df_daily.loc[
-                exceed_mask, ['year', 'julian', 'Streamflow_orig (mm)', 'Streamflow_ash_corr (mm)']
-            ].head(5)
-            ash.logger.warning(
-                "AshPost: corrected streamflow exceeds original on %d day(s); max overage %.4f mm. Samples:\n%s",
-                exceed_count,
-                max_overage_mm,
-                sample.to_string(index=False),
-            )
-        
-
-        ash_transport_total = df_daily.get('ash_transport (tonne)', pd.Series(0, index=df_daily.index)).to_numpy(dtype=np.float64)
-        seddep_total_tonne = df_daily.get('seddep_total_tonne', pd.Series(0, index=df_daily.index)).to_numpy(dtype=np.float64)
-        tot_solids_tonne = seddep_total_tonne + ash_transport_total
-        df_daily['tot_seddep+ash (tonne)'] = tot_solids_tonne
-        tot_solids_per_ha = np.zeros_like(tot_solids_tonne, dtype=np.float64)
-        np.divide(tot_solids_tonne, area_total_ha, out=tot_solids_per_ha, where=area_total_ha > 0)
-        df_daily['tot_seddep+ash (tonne/ha)'] = tot_solids_per_ha
-    else:
-        df_daily['Streamflow_orig (mm)'] = 0.0
-        df_daily['Streamflow_ash_corr (mm)'] = 0.0
-        df_daily['tot_seddep+ash (tonne)'] = 0.0
-        df_daily['tot_seddep+ash (tonne/ha)'] = 0.0
-
-    daily_cols = [
-        'year0',
-        'year',
-        'julian',
-        'days_from_fire (days)',
-        'area (ha)',
-        'wind_transport (tonne)',
-        'wind_transport (tonne/ha)',
-        'water_transport (tonne)',
-        'water_transport (tonne/ha)',
-        'ash_transport (tonne)',
-        'ash_transport (tonne/ha)',
-        'transportable_ash (tonne)',
-        'transportable_ash (tonne/ha)',
-        'Streamflow_orig (mm)',
-        'Streamflow_ash_corr (mm)',
-        'tot_seddep+ash (tonne)',
-        'tot_seddep+ash (tonne/ha)',
-    ]
-    for volume_col in volume_cols_daily:
-        daily_cols.extend([
-            volume_col,
-            volume_col.replace(' (m^3)', ' (mm)'),
-        ])
-    df_daily = df_daily[[col for col in daily_cols if col in df_daily.columns]]
-    _write_parquet(df_daily, _join(ash_post_dir, ASH_POST_FILES['watershed_daily']))
-
-    num_days = len(df_daily.julian)
-    num_fire_years = num_days / 365.25
-    return_periods = {}
-    cols_to_extract = ['days_from_fire (days)', 'year0', 'year', 'julian']
-
-    # Group the DataFrame by 'date_int' and 'burn_class' columns
-    grouped_df = df.groupby(['year0', 'year', 'julian', 'burn_class'], as_index=False).agg(agg_d)
-    _cast_integral_columns(grouped_df)
-    existing_density_cols = [col for col in grouped_df.columns if '(tonne/ha)' in col or col.endswith(' (mm)')]
-    if existing_density_cols:
-        grouped_df.drop(columns=existing_density_cols, inplace=True)
-    volume_cols_class = [col for col in VOLUME_COLUMNS_M3 if col in grouped_df.columns]
-    _add_per_area_columns(grouped_df, tonne_cols)
-    if volume_cols_class:
-        _add_per_area_columns(grouped_df, volume_cols_class)
-    class_cols = [
-        'burn_class',
-        'year0',
-        'year',
-        'julian',
-        'days_from_fire (days)',
-        'area (ha)',
-        'wind_transport (tonne)',
-        'wind_transport (tonne/ha)',
-        'water_transport (tonne)',
-        'water_transport (tonne/ha)',
-        'ash_transport (tonne)',
-        'ash_transport (tonne/ha)',
-        'transportable_ash (tonne)',
-        'transportable_ash (tonne/ha)',
-    ]
-    for volume_col in volume_cols_class:
-        class_cols.extend([
-            volume_col,
-            volume_col.replace(' (m^3)', ' (mm)'),
-        ])
-    grouped_df = grouped_df[[col for col in class_cols if col in grouped_df.columns]]
-    _write_parquet(grouped_df, _join(ash_post_dir, ASH_POST_FILES['watershed_daily_by_burn_class']))
-
-    # Initialize the return_periods dictionary
-    burn_class_return_periods = {}
-    for burn_class in burn_classes:
-        burn_class_return_periods[burn_class] = {}
-        for measure in measures:
-            burn_class_return_periods[burn_class][measure] = {}
-            for rec in recurrence:
-                burn_class_return_periods[burn_class][measure][rec] = {}
-
-    for measure in measures:
-        return_periods[measure] = calculate_return_periods(df_daily, measure, recurrence, num_fire_years,
-                                                           cols_to_extract)
-
-        for rec in return_periods[measure]:
-            v = return_periods[measure][rec][measure]
-
-            year0 = return_periods[measure][rec].get('year0', None)
-            year = return_periods[measure][rec].get('year', None)
-            julian = return_periods[measure][rec].get('julian', None)
-
-            for burn_class in burn_classes:
-                burn_class_return_periods[burn_class][measure][rec] = deepcopy(return_periods[measure][rec])
-                burn_class_return_periods[burn_class][measure][rec][measure] = 0.0
-
-                if v == 0:
-                    continue
-
-                # Calculate return_periods using the values for the current burn_class
-                # Boolean indexing to filter rows
-
-                filtered_df = grouped_df[(grouped_df['year0'] == np.uint16(year0)) &
-                                         (grouped_df['year'] == np.uint16(year)) &
-                                         (grouped_df['julian'] == np.uint16(julian)) &
-                                         (grouped_df['burn_class'] == np.uint8(burn_class))]
-
-                num_rows = len(filtered_df)
-
-                if num_rows == 0:
-                    continue
-                elif num_rows == 1:
-                    burn_class_return_periods[burn_class][measure][rec][measure] = float(filtered_df.iloc[0][measure])
-                else:
-                    raise Exception('Unexpected number of rows: {}'.format(num_rows))
-
-    return return_periods, burn_class_return_periods
-
-
-def read_hillslope_out_fn(
-    out_fn: str,
-    meta_data: Optional[Mapping[str, Any]] = None,
-    meta_data_types: Optional[Mapping[str, str]] = None,
-    cumulative: bool = False,
-) -> pd.DataFrame:
-    """Load a single hillslope ash parquet and attach run metadata."""
-    global common_cols, out_cols
-
-    if cumulative:
-        df = pd.read_parquet(out_fn)
-    else:
-        try:
-            schema = pq.read_schema(out_fn)
-            available_columns = [name for name in out_cols if name in schema.names]
-            df = pd.read_parquet(out_fn, columns=available_columns or None)
-        except pa.ArrowInvalid:
-            # Older outputs may omit the unit-suffixed columns; fall back to full read.
-            df = pd.read_parquet(out_fn)
-
-    if meta_data is not None:
-        for key, value in meta_data.items():
-            if meta_data_types and key in meta_data_types and meta_data_types[key] == 'category':
-                df[key] = pd.Categorical([value] * len(df))
-            else:
-                df[key] = pd.Series([value] * len(df)).astype(meta_data_types.get(key) if meta_data_types else None)
-
-    # Create a unique index from year and julian columns (avoid uint16 overflow)
-    year_ord = df['year'].astype(np.int32, copy=False)
-    julian_ord = df['julian'].astype(np.int32, copy=False)
-    df['date_int'] = year_ord * 1000 + julian_ord
-    df.set_index('date_int', inplace=True)
-
-    # Select columns to aggregate
-    agg_d = {}
-    for col in df.columns:
-        if '(mm)' in col or '(tonne/ha)' in col or '(gm/cm3)' in col:
-            agg_d[col] = 'sum'
-        if col in common_cols:
-            agg_d[col] = 'first'
-
-    # Pivot and aggregate the data
-    df_agg =  df.groupby('date_int').agg(agg_d)
-
-    # Reset the index to get a dataframe with one row per unique combination of year, julian, and topaz_id
-    df_agg.reset_index(inplace=True)
-
-    area_ha = float(df_agg['area (ha)'].iloc[0])
-
-    # Convert columns in tonne/ha to tonne by multiplying by area_ha
-    for col in df_agg.columns:
-        if 'tonne/ha' in col:
-            df_agg[col.replace('tonne/ha', 'tonne')] = df_agg[col] * area_ha
-
-    # Convert columns in mm to m^3 using area_ha
-    for col in df_agg.columns:
-        if 'mm' in col:
-            df_agg[col.replace('mm', 'm^3')] = ( df_agg[col] * 0.001) *  (area_ha * 10000)
-
-    if cumulative:
-        # Get the last day for each fire year (year0) instead of filtering by exact zero
-        # This is more robust than checking transportable_ash == 0.0 due to floating-point issues
-        df_agg = df_agg.sort_values(['year0', 'julian'])
-        df_agg = df_agg.groupby('year0').tail(1)
-    return df_agg
-
-
-
 def watershed_daily_aggregated(
     wd: str,
     recurrence: Sequence[int] = (1000, 500, 200, 100, 50, 25, 20, 10, 5, 2),
     verbose: bool = True,
 ) -> Optional[tuple[ReturnPeriods, ReturnPeriods, BurnClassReturnPeriods]]:
-    """Aggregate hillslope outputs across the watershed and compute summaries."""
-    #
-    # Setup stuff
-    #
-
+    """Discover ordered hillslope inputs and delegate aggregation to native code."""
     from wepppy.nodb.core import Watershed
     from wepppy.nodb.mods.ash_transport import Ash
 
-    # Get NoDB instances
     watershed = Watershed.getInstance(wd)
-    translator = watershed.translator_factory()
     ash = Ash.getInstance(wd)
-
-    ash_post_dir = _join(ash.ash_dir, 'post')
-    os.makedirs(ash_post_dir, exist_ok=True)
-
-    #
-    # Read all hillslope output files to a single df
-    #
-
-    # loop over the hillslopes and read their ash output files.
-    hill_data_frames = []
+    translator = watershed.translator_factory()
+    root = Path(wd)
+    manifest = []
     for topaz_id in watershed._subs_summary:
-        # get the wepp_id
         wepp_id = translator.wepp(top=topaz_id)
-
-        # get the burn class
         burn_class = ash.meta[topaz_id]['burn_class']
-
-        # get the area in hectares
-        area_m2 = watershed.hillslope_area(topaz_id)
-        area_ha = area_m2 / 10000
-
-
-        # get the list of output files
-        out_fn = _join(ash.ash_dir, f'H{wepp_id}_ash.parquet')
-
-        if _exists(out_fn):
-            # read the output files into dataframes and append them to hill_data_frames
-            meta = {"topaz_id": topaz_id, "area (ha)": area_ha, "burn_class": burn_class}
-            meta_dtypes = {"topaz_id": "uint16", "area (ha)": "float32", "burn_class": "uint8"}
-            hill_data_frames.append(read_hillslope_out_fn(out_fn,
-                meta_data=meta,
-                meta_data_types=meta_dtypes))
-
-    if hill_data_frames == []:
+        area_ha = watershed.hillslope_area(topaz_id) / 10000
+        path = Path(ash.ash_dir) / f'H{wepp_id}_ash.parquet'
+        if path.exists():
+            manifest.append((os.path.relpath(path, root), int(topaz_id), area_ha, burn_class))
+    if not manifest:
         return None
 
+    # Schema metadata is small; source rows remain entirely on the native side.
+    names = set(pq.read_schema(root / manifest[0][0]).names) | set(common_cols)
+    names |= {name.replace('tonne/ha', 'tonne').replace('(mm)', '(m^3)') for name in names}
+    metadata = {}
+    for name in names:
+        field = {}
+        if units := _infer_units(name):
+            field['units'] = units
+        if description := _describe_column(name):
+            field['description'] = description
+        metadata[name] = field
 
-    # Combine all data into a single DataFrame
-    df = pd.concat(hill_data_frames, ignore_index=True)
+    def optional_path(name):
+        path = root / 'wepp' / 'output' / 'interchange' / name
+        return os.path.relpath(path, root) if path.exists() else None
 
-    calculate_hillslope_statistics(deepcopy(df), ash, ash_post_dir, first_year_only=True)
-
-    return_periods, burn_class_return_periods = calculate_watershed_statisics(
-        deepcopy(df),
-        ash_post_dir,
-        recurrence,
-        wd=wd,
-        watershed=watershed,
-        translator=translator,
-        ash=ash,
-        first_year_only=True,
-    )
-
-    del df
-    del hill_data_frames
-
-    # Calculate cumulative return periods
-    # read the last day of each fire run
-    hill_data_frames = []
+    ash_wepp_ids = []
     for topaz_id in watershed._subs_summary:
-        # get the wepp_id
-        wepp_id = translator.wepp(top=topaz_id)
-
-        # get the burn class
-        burn_class = ash.meta[topaz_id]['burn_class']
-
-        # get the area in hectares
-        area_m2 = watershed.hillslope_area(topaz_id)
-        area_ha = area_m2 / 10000
-
-        # get the list of output files
-        out_fn = _join(ash.ash_dir, f'H{wepp_id}_ash.parquet')
-
-        if _exists(out_fn):
-            # read the output files into dataframes and append them to hill_data_frames
-            meta = {"topaz_id": topaz_id, "area (ha)": area_ha, "burn_class": burn_class}
-            meta_dtypes = {"topaz_id": "uint16", "area (ha)": "float32", "burn_class": "uint8"}
-            hill_data_frames.append(read_hillslope_out_fn(out_fn,
-                meta_data=meta, meta_data_types=meta_dtypes, cumulative=True))
-
-    # combine to single dataframe
-    df = pd.concat(hill_data_frames, ignore_index=True)
-
-    cum_return_periods = calculate_cumulative_transport(df, recurrence, ash_post_dir)
-
-    del df
-    del hill_data_frames
-
-    # return all the results
-    return return_periods, cum_return_periods, burn_class_return_periods
-
+        meta = ash.meta.get(str(topaz_id), ash.meta.get(topaz_id, {}))
+        if meta.get('ash_type') is not None:
+            ash_wepp_ids.append(int(translator.wepp(top=topaz_id)))
+    native = require_wepppyo3_interchange('AshPost', 'ashpost_to_parquet')
+    result = native.ashpost_to_parquet(
+        str(root), str(Path(ash.ash_dir) / 'post'), manifest, list(recurrence),
+        hydrology_path=optional_path('totalwatsed3.parquet'),
+        wat_path=optional_path('H.wat.parquet'), ash_wepp_ids=ash_wepp_ids,
+        field_metadata=metadata,
+    )
+    if warning := result.get('streamflow_exceedance'):
+        ash.logger.warning(
+            "AshPost: corrected streamflow exceeds original on %d day(s); max overage %.4f mm. Samples:\n%s",
+            warning['count'], warning['max_overage_mm'],
+            pd.DataFrame(warning['samples'], columns=[
+                'year', 'julian', 'Streamflow_orig (mm)', 'Streamflow_ash_corr (mm)'
+            ]).to_string(index=False),
+        )
+    if verbose:
+        ash.logger.info('Native AshPost completed: input_rows=%s rows_written=%s',
+                        result['input_rows'], result['rows_written'])
+    return (result['return_periods'], result['cum_return_periods'],
+            result['burn_class_return_periods'])
 
 
 class AshPostNoDbLockedException(Exception):

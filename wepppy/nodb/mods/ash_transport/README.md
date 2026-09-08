@@ -22,12 +22,13 @@ Primary consumers include incident hydrologists, Burned Area Emergency Response 
 ### 2. Hillslope Simulation
 - `Ash.run_ash` iterates over watershed TOPAZ hillslopes, computes metadata (burn class, area, slope, ash type), and pulls inputs such as CLIGEN climate series (`ClimateFile.as_dataframe`) and WEPP hill water balance parquet (`load_hill_wat_dataframe`).
 - Depending on `ash.model`, hillslope simulations use `ash_multi_year_model.White/BlackAshModel` (exponential decay controlled by bulk density and runoff) or `ash_multi_year_model_alex.White/BlackAshModel` (dynamic transport capacity sensitive to slope and organic matter).
-- Simulations run in parallel through `createProcessPoolExecutor` when multiple CPUs are available. Each task writes `H{wepp_id}_ash.parquet` plus diagnostic PNGs into `ash_dir`.
+- Simulations run in parallel through `createProcessPoolExecutor` when multiple CPUs are available. The parent loads hill water-balance inputs as slots become available, with at most twice the worker count in flight. The executor and climate input are released before post-processing. Each task writes `H{wepp_id}_ash.parquet` plus diagnostic PNGs into `ash_dir`.
 - Runtime metadata (initial depths, loads, ash types) is cached on the NoDb instance for downstream inspection and post-processing.
 
 ### 3. Post-Processing and Documentation
 - After hillslope simulations finish, `Ash` ensures an `AshPost` controller exists and invokes `AshPost.run_post`.
-- `AshPost` removes incompatible outputs when the schema version changes (`ASHPOST_VERSION`), converts hillslope outputs into watershed-scale annual, daily, burn-class, and cumulative parquet tables, and stores semantic metadata (units, descriptions) in Arrow schemas via `pa_field`.
+- `AshPost` removes incompatible outputs when the schema version changes (`ASHPOST_VERSION`) and requires `wepppyo3.wepp_interchange.ashpost_to_parquet`. Rust streams hillslope batches into the existing five annual, daily, burn-class, and cumulative parquet tables; Python supplies semantic metadata and persists compact return-period dictionaries. There is no Python aggregation fallback.
+- Each output uses the existing individual-file writer, following the hillslope interchange -> totalwatsed3 pattern. An ordinary failure propagates; rerunning regenerates outputs. No new multi-file transaction or recovery mechanism is involved.
 - Markdown documentation (`ash/post/README.md`) is regenerated from actual parquet schemas using `generate_ashpost_documentation`, keeping analysts aligned with the precise column definitions.
 
 ### 4. Catalog and Telemetry
@@ -89,7 +90,7 @@ Watanabe static mode computes each daily transport increment as `delta_M = (A / 
 - **Calibration data:** Default parameter tables ship in `data/`, while provenance artifacts (spreadsheets, notebooks) live under `dev/`.
 - **Versioning:** Bump `ASHPOST_VERSION` alongside schema changes. `remove_incompatible_outputs` clears stale parquet files before regeneration, and `write_version_manifest` records the active version.
 - **Serialization:** Add new public attributes or helpers to `__all__` in `__init__.py` so legacy NoDb payloads hydrate cleanly. Use `nodb_setter` on mutating properties to persist changes.
-- **Testing:** Integration-heavy tests live in `wepppy/nodb/mods/ash_transport/tests/` (for example `multi_year_test.py`, `annuals_test.py`). Run `pytest wepppy/nodb/mods/ash_transport/tests` from the repository root; tests expect WEPP outputs and sample rasters stored in `tests/data/`.
+- **Testing:** Run `wctl run-pytest tests/nodb/mods/test_ash_transport_run_ash.py tests/nodb/mods/test_ashpost_no_data.py tests/nodb/mods/test_ash_multi_year_model_alex_static.py`. Native schema, numeric, recurrence, and writer tests live in `wepppyo3/tests/wepp_interchange/test_ashpost.py`. The module-local `tests/` directory contains historical fixture data.
 
 ## Operational Notes
 

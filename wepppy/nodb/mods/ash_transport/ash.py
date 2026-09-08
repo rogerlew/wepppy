@@ -30,7 +30,7 @@ from subprocess import Popen, PIPE
 from enum import IntEnum
 from deprecated import deprecated
 
-from concurrent.futures import as_completed
+from concurrent.futures import FIRST_COMPLETED, wait
 from typing import Any, Dict, Iterator, List, Mapping, MutableMapping, Optional, Tuple
 
 # wepppy
@@ -81,6 +81,50 @@ from .ash_multi_year_model import WhiteAshModel as WhiteAshModelAnu
 from .ash_multi_year_model import BlackAshModel as BlackAshModelAnu
 from .ash_multi_year_model_alex import WhiteAshModel as WhiteAshModelAlex
 from .ash_multi_year_model_alex import BlackAshModel as BlackAshModelAlex
+
+def _run_hillslope_work(work_items, cli_df, output_dir, logger):
+    """Load one hill in the parent per available slot and release pool state here."""
+    def load_work(item):
+        return dict(item, cli_df=cli_df, hill_wat_df=load_hill_wat_dataframe(
+            output_dir, int(item['prefix'][1:]), collapse="daily"
+        ))
+
+    total = len(work_items)
+    if not MULTIPROCESSING or not total:
+        for item in work_items:
+            logger.info(f"  running {item['prefix']}\n")
+            run_ash_model(load_work(item))
+        return
+
+    max_workers = max(1, min(NCPU, total))
+    remaining = iter(work_items)
+    pending = set()
+    with createProcessPoolExecutor(max_workers=max_workers, logger=logger) as executor:
+        def submit_next():
+            item = next(remaining, None)
+            if item is not None:
+                pending.add(executor.submit(run_ash_model, load_work(item)))
+
+        # Deliberate executor boundary: report failures and cancel outstanding work.
+        try:
+            for _ in range(min(total, 2 * max_workers)):
+                submit_next()
+            completed = 0
+            while pending:
+                done, pending = wait(pending, return_when=FIRST_COMPLETED)
+                while done:
+                    future = done.pop()
+                    future.result()
+                    del future
+                    completed += 1
+                    logger.info(f'  ({completed}/{total}) ash model task completed')
+                    submit_next()
+        except Exception as exc:
+            logger.error(f'  Ash model task failed: {exc}')
+            for future in pending:
+                future.cancel()
+            raise
+
 
 def run_ash_model(kwds: MutableMapping[str, Any]) -> str:
     """
@@ -696,7 +740,7 @@ class Ash(NoDbBase):
 
             self.logger.info('  Running Hillslopes')
             meta: AshMetadata = {}
-            args: List[Dict[str, Any]] = []
+            work_items: List[Dict[str, Any]] = []
             for topaz_id in watershed._subs_summary:
                 self.logger.info(f'    Running Hillslope {topaz_id}')
 
@@ -732,10 +776,6 @@ class Ash(NoDbBase):
                 if load_d is not None:
                     if load_d.get(topaz_id, 0.0) <= 0.0:
                         continue
-
-                hill_wat_df = load_hill_wat_dataframe(
-                    wepp.output_dir, wepp_id, collapse="daily"
-                )
 
                 field_white_ash_bulkdensity = self.field_white_ash_bulkdensity
                 field_black_ash_bulkdensity = self.field_black_ash_bulkdensity
@@ -806,8 +846,6 @@ class Ash(NoDbBase):
                             ini_ash_load=ini_ash_load,
                             ash_bulkdensity=ash_bulkdensity,
                             fire_date=fire_date,
-                            cli_df=cli_df,
-                            hill_wat_df=hill_wat_df,
                             out_dir=ash_dir,
                             prefix='H{wepp_id}'.format(wepp_id=wepp_id),
                             area_ha=area_ha,
@@ -818,28 +856,10 @@ class Ash(NoDbBase):
                 if model == 'alex':
                     kwds['slope'] = slope
 
-                args.append(kwds)
+                work_items.append(kwds)
 
-            if MULTIPROCESSING and args:
-                max_workers = max(1, min(NCPU, len(args)))
-                with createProcessPoolExecutor(max_workers=max_workers, logger=self.logger) as executor:
-                    futures = [executor.submit(run_ash_model, kwds) for kwds in args]
-                    total = len(futures)
-
-                    for index, future in enumerate(as_completed(futures), start=1):
-                        try:
-                            future.result()
-                            self.logger.info(f'  ({index}/{total}) ash model task completed')
-                        except Exception as exc:
-                            self.logger.error(f'  Ash model task failed: {exc}')
-                            for pending_future in futures:
-                                if pending_future is not future and not pending_future.done():
-                                    pending_future.cancel()
-                            raise
-            else:
-                for kwds in args:
-                    self.logger.info(f"  running {kwds['prefix']}\n")
-                    run_ash_model(kwds)
+            _run_hillslope_work(work_items, cli_df, wepp.output_dir, self.logger)
+            del cli_df, work_items
 
             self._ash_load_d = load_d
             self._ash_type_d = ash_type_d

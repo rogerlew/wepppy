@@ -175,3 +175,15 @@ cache access bits are preserved during staging and publication for service-owned
 files; first creation respects the worker umask. Parent paths and UID/GID remain
 owned by WEPPpy orchestration. Atomic replacement preserves prior cache bytes
 on normal write failure; process termination or unlink failure can leave residue.
+
+## AshPost file-production scope
+
+AshPost memory optimization follows the existing hillslope interchange ->
+totalwatsed3 pattern: produce complete files individually using established
+writer behavior, then aggregate completed inputs. Preserve filenames, schemas,
+scientific results, normal error propagation, and regeneration on retry.
+No new multi-file transaction, all-five staging barrier, rollback/recovery
+system, generation layout, migration, or NFS-specific publication mechanism is
+required. The operator confirmed this scope on 2026-09-08 because the established
+pattern is sufficient; bounded scheduling and streaming aggregation address the
+memory problem without redesigning storage consistency.

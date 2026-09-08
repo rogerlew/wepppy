@@ -28,6 +28,11 @@ _CLEANUP_TARGETS: List[str] = []
 
 
 def load_module(full_name: str, relative_path: str):
+    existing = sys.modules.get(full_name)
+    if existing is not None and getattr(existing, "__file__", None):
+        if Path(existing.__file__).resolve() == (REPO_ROOT / relative_path).resolve():
+            # Replacing a real module strands its existing callers on old globals.
+            return existing
     parts = full_name.split(".")
     for idx in range(1, len(parts)):
         pkg = ".".join(parts[:idx])
@@ -58,5 +63,3 @@ def cleanup_import_state() -> None:
         name = _CLEANUP_TARGETS.pop()
         sys.modules.pop(name, None)
 
-    sys.modules.pop("wepppy.wepp", None)
-    sys.modules.pop("wepppy", None)

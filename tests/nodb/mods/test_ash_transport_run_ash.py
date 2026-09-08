@@ -367,3 +367,119 @@ def test_run_ash_does_not_timestamp_when_ashpost_fails(
         )
 
     assert not any(call[0] == "timestamp" for call in post_calls)
+
+
+def test_hillslope_queue_bounds_loaded_inputs_and_releases_them(ash_module, monkeypatch):
+    from concurrent.futures import Future
+    import weakref
+
+    _, module = ash_module
+    refs = []
+    peak = 0
+    completed = []
+
+    class Water:
+        pass
+
+    def load(*args, **kwargs):
+        nonlocal peak
+        assert kwargs == {'collapse': 'daily'}
+        water = Water()
+        refs.append(weakref.ref(water))
+        peak = max(peak, sum(ref() is not None for ref in refs))
+        return water
+
+    class WorkFuture(Future):
+        def result(self, *args, **kwargs):
+            completed.append(self.work['prefix'])
+            self.work = None
+            return super().result(*args, **kwargs)
+
+    class Executor:
+        def __init__(self, **kwargs):
+            assert kwargs['max_workers'] == 3
+        def __enter__(self):
+            return self
+        def __exit__(self, *args):
+            assert all(ref() is None for ref in refs)
+        def submit(self, function, work):
+            assert function is module.run_ash_model
+            future = WorkFuture()
+            future.work = work
+            future.set_result(None)
+            return future
+
+    monkeypatch.setattr(module, 'MULTIPROCESSING', True)
+    monkeypatch.setattr(module, 'NCPU', 3)
+    monkeypatch.setattr(module, 'load_hill_wat_dataframe', load)
+    monkeypatch.setattr(module, 'createProcessPoolExecutor', Executor)
+    items = [{'prefix': f'H{i}'} for i in range(30)]
+    module._run_hillslope_work(items, object(), '/outputs', logging.getLogger('test'))
+    assert peak == 6
+    assert sorted(completed) == sorted(item['prefix'] for item in items)
+    assert all(ref() is None for ref in refs)
+    assert items == [{'prefix': f'H{i}'} for i in range(30)]
+
+
+def test_hillslope_queue_cancels_pending_and_propagates_load_failure(ash_module, monkeypatch):
+    from concurrent.futures import Future
+
+    _, module = ash_module
+    futures = []
+    def load(_directory, wepp_id, **kwargs):
+        if wepp_id == 2:
+            raise ValueError('bad hill input')
+        return object()
+
+    class Executor:
+        def __init__(self, **kwargs):
+            pass
+        def __enter__(self):
+            return self
+        def __exit__(self, *args):
+            return False
+        def submit(self, *args):
+            future = Future()
+            futures.append(future)
+            return future
+
+    monkeypatch.setattr(module, 'MULTIPROCESSING', True)
+    monkeypatch.setattr(module, 'NCPU', 2)
+    monkeypatch.setattr(module, 'load_hill_wat_dataframe', load)
+    monkeypatch.setattr(module, 'createProcessPoolExecutor', Executor)
+    with pytest.raises(ValueError, match='bad hill input'):
+        module._run_hillslope_work([{'prefix': f'H{i}'} for i in range(10)],
+                                  object(), '/outputs', logging.getLogger('test'))
+    assert len(futures) == 2
+    assert all(future.cancelled() for future in futures)
+
+
+def test_hillslope_queue_propagates_model_failure_and_cancels_pending(ash_module, monkeypatch):
+    from concurrent.futures import Future
+
+    _, module = ash_module
+    futures = []
+
+    class Executor:
+        def __init__(self, **kwargs):
+            pass
+        def __enter__(self):
+            return self
+        def __exit__(self, *args):
+            return False
+        def submit(self, *args):
+            future = Future()
+            if not futures:
+                future.set_exception(RuntimeError('model failed'))
+            futures.append(future)
+            return future
+
+    monkeypatch.setattr(module, 'MULTIPROCESSING', True)
+    monkeypatch.setattr(module, 'NCPU', 2)
+    monkeypatch.setattr(module, 'load_hill_wat_dataframe', lambda *a, **kw: object())
+    monkeypatch.setattr(module, 'createProcessPoolExecutor', Executor)
+    with pytest.raises(RuntimeError, match='model failed'):
+        module._run_hillslope_work([{'prefix': f'H{i}'} for i in range(20)],
+                                  object(), '/outputs', logging.getLogger('test'))
+    assert len(futures) == 4
+    assert all(future.cancelled() for future in futures[1:])

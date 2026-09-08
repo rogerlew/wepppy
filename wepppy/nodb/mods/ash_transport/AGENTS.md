@@ -26,18 +26,18 @@
 - Always mutate controller state inside `with self.locked():`. Reuse `nodb_setter` for property setters.
 - Keep `meta`, `fire_years`, `ash_load_d`, and `ash_type_d` consistent; downstream helpers expect them populated before post-processing.
 - When using new rasters, ensure the file lives under the working directory or provide a deterministic staging step (crop + copy).
-- If you adjust CLI/WEPP file naming conventions, update both the model and post-processing loaders (`read_hillslope_out_fn`).
+- If you adjust CLI/WEPP file naming conventions, update both the model and post-processing loaders (the native AshPost manifest contract).
 
 ## Post-Processing (AshPost)
 1. **Version Gate**: `_join(ash_dir, 'post')` is cleared when the stored manifest major version mismatches `ASHPOST_VERSION`. Bump the constant for schema-breaking changes only.
 2. **Aggregation**: Processes every `H{wepp_id}_ash.parquet`, joins metadata, casts numeric types (uint8/uint16), converts per-area metrics to totals, and computes cumulative transport.
-3. **Statistics**: Builds daily, annual, burn-class, and cumulative tables; calculates Weibull-based return periods via `probability_of_occurrence` helpers.
+3. **Statistics**: Builds daily, annual, burn-class, and cumulative tables; calculates Weibull-based return periods in the required native kernel.
 4. **Output**: Writes parquet files with Arrow metadata (`units`, `description`, dataset version info) and renders `post/README.md` documenting schema previews.
 5. **Catalog**: Calls `update_catalog_entry` so dashboards and DuckDB agents discover the newly generated datasets.
 
 ### AshPost Expectations
 - Schema metadata must remain in sync with the parquet columns. Update `COLUMN_DESCRIPTIONS`, `UINT16_COLUMNS`, `UINT8_COLUMNS`, and helper transformations when adding/removing columns.
-- Ensure new columns receive both per-area (`(tonne/ha)`) and total (`(tonne)`) variants when appropriate. `_add_per_area_columns` handles automatic conversion, but only for correctly named source columns.
+- Ensure new columns receive both per-area (`(tonne/ha)`) and total (`(tonne)`) variants when appropriate. The native kernel owns per-area conversions; Python supplies descriptions and units.
 - Regenerate `ash/post/README.md` through `generate_ashpost_documentation`; never edit the generated file manually.
 
 ## Configuration & Parameters
@@ -69,15 +69,15 @@
 4. Document the calibration in `README.md` and research notebooks under `dev/`.
 
 ## Adjusting AshPost Schemas
-1. Update aggregation logic in `ashpost.py`, column metadata dictionaries, and Arrow schema generation.
+1. Update native aggregation in `wepppyo3/wepp_interchange/src/ashpost.rs` and Python column metadata dictionaries together.
 2. Bump `ASHPOST_VERSION.major` for breaking schema changes; bump `.minor` for additive updates that maintain compatibility.
 3. Run the relevant pytest targets and regenerate documentation (`AshPost.run_post()`).
 4. Validate the catalog entry payload if the dataset list changes.
 
 ## Testing Guidance
-- Primary tests live in `wepppy/nodb/mods/ash_transport/tests/`. They expect a fully built working directory with hillslope outputs; prefer integration environments or curated fixtures.
+- Primary tests live in `tests/nodb/mods/test_ash_transport_run_ash.py` and `test_ashpost_no_data.py`; native tests live in `wepppyo3/tests/wepp_interchange/test_ashpost.py`. Module-local `tests/` holds historical fixture data.
 - Recommended commands:
-  - `pytest wepppy/nodb/mods/ash_transport/tests --maxfail=1`
+  - `wctl run-pytest tests/nodb/mods/test_ash_transport_run_ash.py tests/nodb/mods/test_ashpost_no_data.py --maxfail=1`
   - For exploratory runs, use the scripts under `tests/` (`multi_year_test.py`) with a local working directory.
 - When editing calibration logic, manually inspect generated plots (`H*_ash.png` & `_ash_scatter.png`) to confirm transport curves remain physically plausible.
 

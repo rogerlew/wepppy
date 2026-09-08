@@ -96,7 +96,7 @@ def test_preflight_pins_vendored_interchange_artifact() -> None:
     source = PREFLIGHT.read_text(encoding="utf-8")
     assert (
         'EXPECTED_INTERCHANGE_SHA256 = (\n'
-        '    "fe5b2c156b361181fe52004399a6ce131b3b43f92797ae744350d6e9f5713917"\n'
+        '    "c6b746bb77be39d38321a365df1762fd8d88ce0522f3a51215d5bb8bfdddf248"\n'
         ")"
     ) in source
     assert "artifact_sha256 != EXPECTED_INTERCHANGE_SHA256" in source
