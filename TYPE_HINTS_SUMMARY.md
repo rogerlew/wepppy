@@ -207,7 +207,7 @@ _Scanned root_: `wepppy`
 - [ ] `wepppy/microservices/upload_boundary.py`
 - [ ] `wepppy/nodb/__init__.py`
 - [x] `wepppy/nodb/base.py`
-- [ ] `wepppy/nodb/batch_runner.py`
+- [x] `wepppy/nodb/batch_runner.py`
 - [ ] `wepppy/nodb/configs/_migration/_tomlnull_migrate.py`
 - [ ] `wepppy/nodb/configs/_migration/_tomlnull_validate.py`
 - [x] `wepppy/nodb/core/__init__.py`

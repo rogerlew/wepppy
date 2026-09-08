@@ -478,7 +478,7 @@ class BatchRunner(NoDbBase):
                 # A later singleton read must discard an uncommitted receipt.
                 self._nodb_mtime = None
 
-    def update_run_directives(self, directives: Mapping[str, Any]) -> Dict[str, bool]:
+    def update_run_directives(self, directives: Mapping[str, Any]) -> Dict[TaskEnum, bool]:
         
         if not isinstance(directives, Mapping):
             self.logger.warning(f"Invalid directives type: {type(directives)}")
@@ -1050,7 +1050,7 @@ class BatchRunner(NoDbBase):
     # ------------------------------------------------------------------
     # Watershed GeoJSON
     # ------------------------------------------------------------------
-    def register_geojson(self, watershed_collection: WatershedCollection, metadata: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def register_geojson(self, watershed_collection: WatershedCollection, metadata: Optional[Dict[str, Any]] = None) -> None:
         """Register a GeoJSON file as the watershed definition for this batch.
 
         Fail fast, this is model code.
@@ -1058,7 +1058,7 @@ class BatchRunner(NoDbBase):
         Args:
             filepath: Path to the GeoJSON file to register.
         Returns:
-            A dictionary with information about the registered GeoJSON.
+            None. Registration stores the analysis in ``geojson_state``.
         """
         from wepppy.topo.watershed_collection.watershed_collection import WatershedCollection
 
