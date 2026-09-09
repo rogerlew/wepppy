@@ -1,0 +1,244 @@
+{
+  "description": "Synthetic supplied predictors; arithmetic evidence, not real-project scientific validation.",
+  "units": {
+    "rainfall": "mm",
+    "intensity": "mm/hour",
+    "duration": "minutes",
+    "T": "prepared dimensionless terrain predictor",
+    "F": "M1 normalized dNBR; M3 burned fraction",
+    "S": "M1 calibrated K convention; M3 mean thickness cm / 254"
+  },
+  "cases": [
+    {
+      "model": "M1",
+      "duration_minutes": 15,
+      "predictors": {
+        "T": 0.4,
+        "F": 0.6,
+        "S": 0.3
+      },
+      "rainfall_mm": 8,
+      "rainfall_intensity_mm_per_hour": 32.0,
+      "q_decimal": "0.776",
+      "x_decimal": "2.578",
+      "probability": 0.929432205755199,
+      "independent_probability_decimal": "0.929432205755198928376007806676857667366940432364382010199742",
+      "target_probability": 0.5,
+      "threshold": {
+        "status": "available",
+        "reason": null,
+        "rainfall_mm": 4.677835051546391,
+        "intensity_mm_per_hour": 18.711340206185564
+      },
+      "independent_threshold_mm_decimal": "4.67783505154639175257731958762886597938144329896907216494845",
+      "reconstructed_probability": 0.4999999999999999
+    },
+    {
+      "model": "M1",
+      "duration_minutes": 30,
+      "predictors": {
+        "T": 0.4,
+        "F": 0.6,
+        "S": 0.3
+      },
+      "rainfall_mm": 8,
+      "rainfall_intensity_mm_per_hour": 16.0,
+      "q_decimal": "0.488",
+      "x_decimal": "0.294",
+      "probability": 0.572975115921622,
+      "independent_probability_decimal": "0.572975115921621984591801921290799006413736421184780503620768",
+      "target_probability": 0.5,
+      "threshold": {
+        "status": "available",
+        "reason": null,
+        "rainfall_mm": 7.397540983606557,
+        "intensity_mm_per_hour": 14.795081967213115
+      },
+      "independent_threshold_mm_decimal": "7.39754098360655737704918032786885245901639344262295081967213",
+      "reconstructed_probability": 0.5
+    },
+    {
+      "model": "M1",
+      "duration_minutes": 60,
+      "predictors": {
+        "T": 0.4,
+        "F": 0.6,
+        "S": 0.3
+      },
+      "rainfall_mm": 8,
+      "rainfall_intensity_mm_per_hour": 8.0,
+      "q_decimal": "0.2540",
+      "x_decimal": "-1.1780",
+      "probability": 0.235411992093109,
+      "independent_probability_decimal": "0.235411992093109024459026682366395161919340198304293924221980",
+      "target_probability": 0.5,
+      "threshold": {
+        "status": "available",
+        "reason": null,
+        "rainfall_mm": 12.63779527559055,
+        "intensity_mm_per_hour": 12.63779527559055
+      },
+      "independent_threshold_mm_decimal": "12.6377952755905511811023622047244094488188976377952755905512",
+      "reconstructed_probability": 0.5
+    },
+    {
+      "model": "M3",
+      "duration_minutes": 15,
+      "predictors": {
+        "T": 0.4,
+        "F": 0.6,
+        "S": 0.3
+      },
+      "rainfall_mm": 8,
+      "rainfall_intensity_mm_per_hour": 32.0,
+      "q_decimal": "0.467",
+      "x_decimal": "0.026",
+      "probability": 0.5064996338580845,
+      "independent_probability_decimal": "0.506499633858084506901998753458056585599582170312949668275641",
+      "target_probability": 0.5,
+      "threshold": {
+        "status": "available",
+        "reason": null,
+        "rainfall_mm": 7.944325481798716,
+        "intensity_mm_per_hour": 31.777301927194863
+      },
+      "independent_threshold_mm_decimal": "7.94432548179871520342612419700214132762312633832976445396146",
+      "reconstructed_probability": 0.5
+    },
+    {
+      "model": "M3",
+      "duration_minutes": 30,
+      "predictors": {
+        "T": 0.4,
+        "F": 0.6,
+        "S": 0.3
+      },
+      "rainfall_mm": 8,
+      "rainfall_intensity_mm_per_hour": 16.0,
+      "q_decimal": "0.306",
+      "x_decimal": "-1.342",
+      "probability": 0.20718135168779953,
+      "independent_probability_decimal": "0.207181351687799523583823219739152527732381339379207188760041",
+      "target_probability": 0.5,
+      "threshold": {
+        "status": "available",
+        "reason": null,
+        "rainfall_mm": 12.38562091503268,
+        "intensity_mm_per_hour": 24.77124183006536
+      },
+      "independent_threshold_mm_decimal": "12.3856209150326797385620915032679738562091503267973856209150",
+      "reconstructed_probability": 0.5
+    },
+    {
+      "model": "M3",
+      "duration_minutes": 60,
+      "predictors": {
+        "T": 0.4,
+        "F": 0.6,
+        "S": 0.3
+      },
+      "rainfall_mm": 8,
+      "rainfall_intensity_mm_per_hour": 8.0,
+      "q_decimal": "0.170",
+      "x_decimal": "-2.100",
+      "probability": 0.10909682119561298,
+      "independent_probability_decimal": "0.109096821195612938299106072408470391915705619859673740776426",
+      "target_probability": 0.5,
+      "threshold": {
+        "status": "available",
+        "reason": null,
+        "rainfall_mm": 20.352941176470587,
+        "intensity_mm_per_hour": 20.352941176470587
+      },
+      "independent_threshold_mm_decimal": "20.3529411764705882352941176470588235294117647058823529411765",
+      "reconstructed_probability": 0.5
+    }
+  ],
+  "edge_cases": [
+    {
+      "name": "constant_match",
+      "model": "M1",
+      "duration_minutes": 15,
+      "predictors": {
+        "T": 0,
+        "F": 0,
+        "S": 0
+      },
+      "target_probability": 0.025831238524664058,
+      "result": {
+        "status": "nonunique",
+        "reason": "constant_probability",
+        "rainfall_mm": null,
+        "intensity_mm_per_hour": null
+      }
+    },
+    {
+      "name": "constant_mismatch",
+      "model": "M1",
+      "duration_minutes": 15,
+      "predictors": {
+        "T": 0,
+        "F": 0,
+        "S": 0
+      },
+      "target_probability": 0.5,
+      "result": {
+        "status": "unavailable",
+        "reason": "constant_probability_mismatch",
+        "rainfall_mm": null,
+        "intensity_mm_per_hour": null
+      }
+    },
+    {
+      "name": "negative_solution",
+      "model": "M1",
+      "duration_minutes": 15,
+      "predictors": {
+        "T": 0,
+        "F": 1,
+        "S": 0
+      },
+      "target_probability": 0.01,
+      "result": {
+        "status": "unavailable",
+        "reason": "negative_rainfall",
+        "rainfall_mm": null,
+        "intensity_mm_per_hour": null
+      }
+    },
+    {
+      "name": "decreasing_response_equality",
+      "model": "M1",
+      "duration_minutes": 15,
+      "predictors": {
+        "T": 0,
+        "F": -1,
+        "S": 0
+      },
+      "target_probability": 0.01,
+      "result": {
+        "status": "available",
+        "reason": null,
+        "rainfall_mm": 1.440477388260582,
+        "intensity_mm_per_hour": 5.761909553042328
+      }
+    },
+    {
+      "name": "inverse_overflow",
+      "model": "M1",
+      "duration_minutes": 15,
+      "predictors": {
+        "T": 0,
+        "F": 0,
+        "S": 1e-320
+      },
+      "target_probability": 0.5,
+      "result": {
+        "status": "unavailable",
+        "reason": "arithmetic_overflow",
+        "rainfall_mm": null,
+        "intensity_mm_per_hour": null
+      }
+    }
+  ]
+}

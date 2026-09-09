@@ -1,6 +1,6 @@
 # Staley project watershed and numerical engine
 
-Status: scaffolded, 2026-09-09 04:18 UTC; implementation not started.
+Status: complete, 2026-09-09 UTC; offline watershed contract and engine.
 Roadmap stages 1–2, with spatial predictor production reserved for stage 3.
 
 ## Purpose and scope
@@ -11,7 +11,7 @@ project delineation and resolved outlet supply one assessment domain. Users
 manually isolate suspected burned basins when creating projects; this package
 adds no nested catchment selection or new delineation workflow.
 
-Read the [ExecPlan](prompts/active/watershed_engine_execplan.md),
+Read the [ExecPlan](prompts/completed/watershed_engine_execplan.md),
 [tracker](tracker.md), and [decision register](artifacts/decision_register.md).
 Current authority: the module [specification](../../../wepppy/nodb/mods/postfire_debris_flow/specification.md)
 and [ADR-0055](../../adrs/ADR-0055-staley-project-watershed-scope.md).
@@ -43,8 +43,18 @@ subprocess wrappers, or public transport require fresh triage and scope review.
 Independent correctness review is required before closure. A dedicated security
 artifact is required if scope changes to a high-impact surface.
 
-Scaffolding is authorized now; this request does not execute the package.
-Numerical policies remain proposed. UI/NoDb/RQ work is outside scope and would
+The owner requested execution and container checks with WBT at
+`/workdir/weppcloud-wbt`.
+N01–N04 are owner-approved in the detailed engine contract and ADR-0056. UI/NoDb/RQ work is outside scope and would
 require the separately approved, reviewed, committed contract checkpoint.
 The successor M1 predictor package implements slope/SBS/K aggregation; the
 rainfall/results package consumes this engine. Do not close those stages here.
+
+## Outcome
+
+Delivered canonical watershed artifact mapping, accepted ADR-0056/engine
+contract, pure scalar M1/M3 forward/inverse API, synthetic examples and
+independent correctness review with zero unresolved findings. Final focused
+validation: 145 passed. Full suite: 7,959 passed, 72 skipped. See
+[validation evidence](artifacts/validation.md). Roadmap stages 1–2 are complete;
+project predictor production and all production integration remain pending.

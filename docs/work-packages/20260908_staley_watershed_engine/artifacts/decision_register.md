@@ -1,6 +1,6 @@
 # Decision register
 
-Status: proposed numerical policies, 2026-09-09 04:18 UTC. This register is an
+Status: N01–N04 accepted by the owner, 2026-09-09 UTC. This register is an
 execution aid, not canonical authority. Record acceptance in the module
 specification, detailed engine contract and parameterization ADR before code.
 
@@ -10,7 +10,7 @@ One existing project watershed, one existing canonically resolved project
 outlet; manually selected suspected burned basin. No nested/channel assessment
 or second delineation. ADR-0055 records explicit owner direction.
 
-## Decisions needed for this package
+## Accepted numerical decisions
 
 | ID | Recommendation | Rationale and unresolved detail |
 | --- | --- | --- |
@@ -36,3 +36,8 @@ full-RUSLE readiness; M3 material/incomplete-component/fallback policy and
 freshness, unitized presentation and dashboard contracts remain on the
 [roadmap](../../../../wepppy/nodb/mods/postfire_debris_flow/implementation_roadmap.md).
 They do not block a pure engine consuming explicit prepared predictors.
+
+Owner approval: explicit yes to adopting N01–N04 in the detailed engine
+contract. Canonical authority is now
+[the engine contract](../../../../wepppy/nodb/mods/postfire_debris_flow/docs/staley2017_engine.md)
+and [ADR-0056](../../../adrs/ADR-0056-staley-numerical-engine.md).

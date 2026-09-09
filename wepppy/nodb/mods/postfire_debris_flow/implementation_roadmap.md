@@ -2,8 +2,8 @@
 
 Status: planning baseline after dNBR backend commit `9b99d535c`.
 Production model execution, NoDb, browser upload, RQ, and dashboard integration
-are not implemented. The first package is scaffolded below; execution has not
-started.
+are not implemented. The watershed/engine package completes stages 1–2 with an independently
+reviewed and validated offline numerical API.
 
 ## Maintenance Contract
 
@@ -47,7 +47,7 @@ then complete the interactive dashboard. M3 soil-policy work can proceed during
 M1 development; M1 does not need to wait for that policy. Both models remain in
 scope. SI/English presentation belongs in the first user-facing increment.
 
-Stages 1–2 are **scaffolded, not executing**, in the
+Stages 1–2 are **complete**, in the
 [project watershed and numerical engine package](../../../../docs/work-packages/20260908_staley_watershed_engine/package.md).
 Later stages are **not started**. Stage completion requires its exit evidence,
 not only source files. Accepted scope is the existing project watershed/outlet;
@@ -55,8 +55,8 @@ nested/channel assessments are excluded from initial delivery (ADR-0055).
 
 | Stage | Scope and dependencies | Exit evidence |
 | --- | --- | --- |
-| 1. Assessment contract | Reuse the existing project watershed and resolved outlet; document authoritative mask/grid/outlet identity and full contributing-area support. Track slope/SBS/NoData decisions for stage 3. | Accepted single-watershed scope (done); canonical artifact mapping and independently checked mask/outlet evidence (pending). |
-| 2. Numerical engine | Implement `staley2017.py` for both M1 and M3. Can begin after its numerical contract is resolved, independently of spatial implementation. | Independently checked published coefficients, ADR, analytical cases, stable forward/inverse behavior, invalid-input and unreachable-threshold tests. |
+| 1. Assessment contract | Reuse the existing project watershed and resolved outlet; document authoritative mask/grid/outlet identity and full contributing-area support. Track slope/SBS/NoData decisions for stage 3. | Accepted single-watershed scope (done); canonical artifact mapping and independently checked mask/outlet evidence (done). |
+| 2. Numerical engine | Implement `staley2017.py` for both M1 and M3. Can begin after its numerical contract is resolved, independently of spatial implementation. | Complete: checked coefficients, ADR-0056, 145 focused tests, six-row generated examples, independent review and full-suite validation. |
 | 3. M1 predictors | Depends on stage 1 and accepted slope/SBS/NoData rules. Aggregate slope/SBS intersection, normalized dNBR, and RUSLE Nomograph K over the project watershed; emit coverage, reasons, and input identity. | Reproducible real-project predictor artifacts; correct intersection and full-domain denominators; partial and unavailable watershed checks. |
 | 4. Rainfall and results | Compose stages 2–3 with Climate-owned event parquet and frequency artifacts. Define event identity, schemas, canonical units, and querying. | Event probabilities, ratified design scenarios and inverse thresholds; missing-scenario handling, source provenance, representative catalog benchmark, and inspectable generated outputs. |
 | 5. Production M1 | Integrate stages 1–4 through NoDb, safe dNBR upload/publication, prerequisite checks, RQ, and a basic Pure UI control/report. | Contract checkpoint followed by upload → build → results → reload under production-equivalent identities/mounts; stale inputs, failed replacement, authorization, and SI/English equivalence verified. |
@@ -77,9 +77,9 @@ scientific limitation that implementation cannot resolve.
 
 | ID | Decision or remaining work | Resolve before | Current authority / status |
 | --- | --- | --- | --- |
-| L01 | Scope resolved: existing project watershed and existing outlet. Confirm canonical artifact mapping; no new outlet selection or nested enumeration. | Stage 1 completion | [Accepted scope](specification.md#project-watershed-assessment-scope), [ADR-0055](../../../../docs/adrs/ADR-0055-staley-project-watershed-scope.md); artifact audit pending. |
+| L01 | Scope resolved: existing project watershed and existing outlet. Confirm canonical artifact mapping; no new outlet selection or nested enumeration. | Stage 1 completion | [Accepted scope](specification.md#project-watershed-assessment-scope), [ADR-0055](../../../../docs/adrs/ADR-0055-staley-project-watershed-scope.md); [artifact audit completed](../../../../docs/work-packages/20260908_staley_watershed_engine/artifacts/watershed_artifact_audit.md). |
 | L02 | Slope algorithm, SBS class mapping, unknown pixels, soil/K coverage, and independent predictor denominators. | Stage 3 implementation | [Predictors](specification.md#predictors), [dNBR](specification.md#dnbr-upload-and-processing-contract). Do not extend accepted dNBR partial-coverage policy to other predictors implicitly. |
-| L03 | Coefficient verification, stable sigmoid/logit, permitted rainfall/probability inputs, zero/negative denominators, negative or unreachable thresholds. | Stage 2 implementation | [Scientific model](specification.md#scientific-model); numerical contract and ADR pending. |
+| L03 | Coefficient verification, stable sigmoid/logit, permitted rainfall/probability inputs, zero/negative denominators, negative or unreachable thresholds. | Stage 2 implementation | Resolved in [engine contract](docs/staley2017_engine.md) and [ADR-0056](../../../../docs/adrs/ADR-0056-staley-numerical-engine.md), including review fixes for adjacent targets and inverse underflow. |
 | L04 | K calibration units, artifact provenance/freshness, full RUSLE versus K-only readiness, and M3's RUSLE prerequisite. | Stages 3 and 5 | [RUSLE dependency](specification.md#rusle-and-polaris-dependency). Recommend K-artifact readiness for M1 and no RUSLE prerequisite for M3; not yet ratified. |
 | L05 | Soil material inclusion, horizon validity, incomplete components, fallback granularity/triggers, and residual missing coverage. | Stage 6 implementation | [M3 soil direction](specification.md#m3-soil-thickness-ssurgo-feasibility); source priority accepted, production rules pending. |
 | L06 | Prepared SSURGO inventory, substituted/custom/legacy soils, STATSGO source delivery and freshness; neither source usable. | Stage 6 integration | [Soils readiness](specification.md#availability-and-soils-readiness), [soil contract](docs/m3_soil_thickness.md). No implicit soil rebuild or acquisition authority. |
@@ -89,10 +89,23 @@ scientific limitation that implementation cannot resolve.
 | L10 | Upload packaging, path authorization, CSRF, resource limits, replacement, concurrent builds, atomic publication, and failed-build preservation. | Stage 5 implementation | [dNBR backend contract](docs/dnbr_upload.md) plus shared transport/NoDb contracts; local backend trust assumptions do not define browser safety. |
 | L11 | Exact dependency fingerprints and invalidation for DEM/routing, Soils, SBS, K, dNBR, climate, parameters, and results. | Stage 5 implementation | [Compatibility plan](specification.md#compatibility-and-validation-plan). Preserve old `debris_flow.nodb`; define additive schemas and stale-result presentation. |
 | L12 | Effective CONUS locale mapping, legacy `us`, cross-boundary footprints, and server/UI prerequisite parity. | Stage 5 implementation | [Availability](specification.md#availability-and-soils-readiness). WBT/CONUS/built Soils accepted; Western US guidance is not a second regional gate. |
-| L13 | Exact Unitizer categories, API normalization, export units, and age/area evidence-domain presentation. | Stage 5 implementation | [Unitization](specification.md#unitization-contract), [scientific context](specification.md#scientific-model). No new age/area rejection thresholds approved. |
+| L13 | Exact Unitizer categories, API normalization, export units, and age/area evidence-domain presentation. | Stage 5 implementation | [Unitization](specification.md#unitization-contract), [scientific context](specification.md#scientific-model). Area policy accepted: warn outside inclusive 0.2–8 km²; never hard-fail solely for area. ADR-0057; warning propagation/presentation remain to implement, age policy remains open. |
 | L14 | Control/feature registration, payloads, job graph, dashboard host, accessibility, and empty/partial/legacy/hostile states. | Relevant stages 5–7 implementation | [Planned organization](specification.md#planned-file-organization) and shared UI/RQ contracts; detailed runtime contracts pending. |
 
 ## Progress Log
+
+- 2026-09-09 UTC: owner selected a nonblocking warning outside the manuscript's
+  inclusive 0.2–8 km² study range, for both models. Accepted in the specification
+  and ADR-0057; use full unrounded watershed area and preserve model results.
+  Add warning propagation in stage 4 and user-facing presentation in stage 5.
+  The completed scalar engine has no area input and remains unchanged.
+
+- 2026-09-09 UTC, post-closeout owner decision: the supplied manuscript is
+  authoritative for the study's 0.2–8 km² catchment range. Corrected the
+  unsupported 0.02 km² lower bound in the specification and retired the
+  source-reconciliation caveat. This updates evidence-domain guidance only;
+  no engine parameter or area gate changes. See
+  [Published Coefficients and study context](specification.md#published-coefficients).
 
 - Baseline: terrain and soil evaluations and local dNBR backend are complete;
   remaining stages and loose ends recorded. Next work: assessment contract and
@@ -103,3 +116,22 @@ scientific limitation that implementation cannot resolve.
   from initial scope; synchronized the specification and dashboard description.
   First package scaffolded for stages 1–2; numerical policies remain proposed in
   its decision register. No executable implementation started.
+
+- 2026-09-09 04:33 UTC: verified publication coefficients and equations; audited
+  existing Topanga watershed in the container (49,917 cells, outlet included,
+  matching grids and unchanged hashes). Stage 1 mapping is now documented in
+  the specification. Stage 2 contract is drafted in
+  [staley2017_engine.md](docs/staley2017_engine.md), explicitly proposed pending
+  N01–N04 owner resolution; engine implementation and final review remain.
+
+- 2026-09-09 UTC: owner approved N01–N04; implemented pure scalar engine,
+  generated synthetic examples for six model/duration rows and passed 145
+  focused tests. Independent correctness review resolved adjacent-baseline
+  cancellation and inverse underflow; no open findings. Full-suite validation
+  and package closeout are running. L01/L03 are resolved; L02 and L04–L14 remain.
+
+- 2026-09-09 UTC closeout: stages 1–2 complete. Full suite passed 7,959 tests
+  with 72 skips; final focused suite passed 145. Container fixture and synthetic
+  example reproduction, API/stub and docs gates passed; plan archived and board
+  moved to Done. See [validation](../../../../docs/work-packages/20260908_staley_watershed_engine/artifacts/validation.md).
+  Stage 3 starts with slope/SBS/K unit/support policy; stages 3–7 remain pending.

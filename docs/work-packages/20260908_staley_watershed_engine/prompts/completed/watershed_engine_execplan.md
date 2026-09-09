@@ -3,8 +3,9 @@
 
 This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`.
 Maintain Progress, Surprises & Discoveries, Decision Log, and Outcomes &
-Retrospective at every handoff. The current request scaffolds this plan;
-execution has not started and numerical decisions remain proposed.
+Retrospective at every handoff. Completed 2026-09-09 UTC: watershed artifact contract and scalar engine
+validated; N01–N04 are owner-approved. Production integration remains outside
+this completed scope.
 
 ## Purpose / Big Picture
 
@@ -25,11 +26,13 @@ assessment or deployment.
 
 
 - [x] (2026-09-09 04:18 UTC) Scaffold package and record owner-selected scope.
-- [ ] Resolve numerical decisions and publish canonical contract plus ADR.
-- [ ] Independently verify coefficient table and existing watershed artifact mapping.
-- [ ] Implement and test pure M1/M3 evaluator and inverse interface.
-- [ ] Generate example outputs, obtain independent correctness review, validate.
-- [ ] Update roadmap/specification, record outcomes, and archive this plan.
+- [x] (2026-09-09 UTC) Owner approved N01–N04; accepted detailed contract and ADR-0056 before code.
+- [x] (2026-09-09 04:33 UTC) Verify coefficient table and watershed artifact mapping; reproduce audit in container.
+- [x] (2026-09-09 04:33 UTC) Draft proposed detailed numerical contract and request N01–N04 owner resolution.
+- [x] (2026-09-09 UTC) Implement scalar engine and focused tests; independent review identified adjacent-target and underflow fixes, now covered.
+- [x] (2026-09-09 UTC) Generate examples; independent review passes after two numerical fixes.
+- [x] (2026-09-09 UTC) Full suite: 7,959 passed, 72 skipped; final focused suite: 145 passed; API/stub/docs checks pass.
+- [x] (2026-09-09 UTC) Update roadmap/specification, record outcomes, archive plan and move board entry to Done.
 
 ## Surprises & Discoveries
 
@@ -38,11 +41,20 @@ The earlier roadmap treated per-channel nested assessments as a foundation.
 The owner clarified that the existing project watershed/outlet is sufficient
 and selected it as the sole initial assessment scope. Multiple-mask offline
 soil/dNBR helpers and nested terrain study fixtures do not impose a UI need.
-No code investigations or numerical validation have been performed for this
-package at scaffolding time.
+The Topanga routed mask includes the outlet despite selection metadata
+reporting `outlet_in_mask=false`; that field describes the optional selection
+mask. The 49,917-cell mask matches the polygon and subcatchment support.
+PDF text extraction omits equations; rendered pages were checked. The manuscript
+area range differs from current guidance, as noted in the coefficient audit.
 
 ## Decision Log
 
+
+2026-09-09 UTC, owner: explicitly approved N01–N04 in the drafted detailed
+contract. ADR-0056 records accepted scalar/equality policies and provenance.
+Independent review found cancellation near the intercept and inverse underflow;
+exact reachability and stable centered log-odds preserve those policies, with
+explicit underflow unavailability rather than a false zero result.
 
 2026-09-09 04:18 UTC, owner decision: reuse the project watershed and existing
 outlet; users should manually isolate burned basins they suspect may be at risk.
@@ -58,9 +70,20 @@ parameterization and must be resolved before executable implementation.
 ## Outcomes & Retrospective
 
 
-Scaffold only. No model implementation, generated outputs, validation results,
-or production wiring yet. Completion must distinguish these states and name
-any still-open successor decisions rather than marking the whole roadmap done.
+All four milestones are complete within the offline scope. The accepted
+contract and ADR-0056 precede the pure scalar engine; final focused tests pass
+145 cases. Generated examples cover both models/all durations, independent
+Decimal arithmetic, and explicit inverse availability. Independent correctness
+review resolved adjacent-baseline cancellation and nonzero inverse underflow;
+no findings remain. Full repository suite passed 7,959 tests with 72 skips in
+791.10 seconds. Container fixture audit preserves hashes and verifies 49,917
+watershed cells, matching grid/support and the existing resolved outlet.
+
+No real-project predictor aggregation, climate adapter, saved results,
+UI/NoDb/RQ wiring or deployed assessment is delivered. Stages 3–7 remain
+successor work. Numerical tests establish arithmetic, not model calibration.
+The source-version area-range discrepancy is retained in current scientific
+guidance for later reconciliation without introducing an area gate.
 
 ## Context and Orientation
 
@@ -174,8 +197,9 @@ Before handoff run:
 
 Use the applicable stub checks if package exports/stubs change. Record exact
 commands, counts and generated artifact locations in `artifacts/validation.md`.
-For this documentation scaffold, only docs lint/link/whitespace checks apply;
-do not run the full test suite or begin implementation merely to fill evidence.
+Run Python checks in the container via `wctl run-python` and numerical tests
+via `wctl run-pytest`; WBT is `/workdir/weppcloud-wbt`. Until N01–N04 are resolved,
+validate the audit and docs only; after implementation run the full gates above.
 
 ## Validation and Acceptance
 
@@ -206,25 +230,27 @@ scratch directories for any raster audit products and preserve source fixtures.
 If runtime scope expands to file handling, UI, NoDb or RQ, reassess security and
 obtain the applicable contract-first checkpoint before implementation. No live
 Soils rebuild, deployment, implicit external download or push is authorized by
-this scaffold. Do not introduce fallback dependencies to hide missing tools.
+this package. Do not introduce fallback dependencies to hide missing tools.
 
 ## Artifacts and Notes
 
 
-Expected evidence: `artifacts/coefficient_check.md`,
+Delivered evidence: `artifacts/coefficient_check.md`,
 `artifacts/watershed_artifact_audit.md`, reproducible example output and its
 invocation, `artifacts/validation.md`, and a dated independent correctness
-review. These do not exist at scaffolding. The existing decision register
-separates pending policy from accepted scope. Record actual hashes, revisions
-and review findings rather than claiming that planned checks have passed.
+review. See `artifacts/synthetic_examples.json` and `generate_examples.py` for
+reproducible six-row arithmetic evidence; `20260909_correctness_review.md`
+records independent review and both resolved findings. The decision register
+records explicit owner acceptance; the engine contract and ADR-0056 carry
+durable numerical authority.
 
 ## Interfaces and Dependencies
 
 
-Proposed Python interface names are `probability(model, duration_minutes, *,
+Implemented Python interface names are `probability(model, duration_minutes, *,
 T, F, S, rainfall_mm)` and `rainfall_threshold(model, duration_minutes, *, T, F,
-S, target_probability)`. Fix return types, scalar/array support, error vocabulary
-and units in the detailed contract before implementation. The probability
+S, target_probability)`. The accepted detailed contract fixes scalar-only
+inputs, return types, reasons and units. The probability
 interface returns a 0–1 value; inverse results must distinguish a unique finite
 solution from unavailable or nonunique cases. These are local library names,
 not HTTP payloads or persisted schemas. Production defaults remain external.
@@ -237,3 +263,17 @@ not an unreviewed production loader.
 
 Revision note: initial scaffold records the owner's single-watershed decision
 and limits delivery to the assessment contract and numerical foundation.
+
+
+Revision note (2026-09-09 04:33 UTC): execution requested; source/fixture checks
+completed and draft numerical contract prepared. Owner directed container use
+with WBT at `/workdir/weppcloud-wbt`; audit rerun reproduced all measurements
+and hashes. This direction does not resolve N01–N04. Implementation remains
+pending their explicit owner resolution as required by milestone 1.
+
+
+Completion revision (2026-09-09 UTC): owner approved N01–N04 after the initial
+pause. Implemented and reviewed the accepted API; recorded both numerical
+review refinements in the contract/ADR. All focused/full and documentation
+checks passed. Archived this plan with stage 1–2 outcomes; stages 3–7 remain
+unimplemented. Evidence is in `artifacts/validation.md` and the dated review.

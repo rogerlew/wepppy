@@ -87,19 +87,6 @@ Feedback mechanisms:
 
 ## 📋 Backlog
 
-### Staley Project Watershed and Numerical Engine
-
-**Scoped**: 2026-09-08 (2026-09-09 04:18 UTC). Scaffolded; not executing.
-
-**Link**: [Package](docs/work-packages/20260908_staley_watershed_engine/package.md)
-
-**Scope**: Reuse the existing project watershed/outlet; verify artifact identity
-and implement the offline M1/M3 probability/threshold engine after resolving
-numerical policies. No nested assessments, predictor production or UI/NoDb/RQ.
-
-**Next**: Resolve numerical decision register, verify coefficients and audit
-existing watershed artifacts. Security triage: none for in-memory library/docs.
-
 ### Seamless WEPPcloud Session Cookie Namespace Migration
 
 **Proposed**: 2026-08-23
@@ -1287,6 +1274,23 @@ the remaining-run controller plan has no next controller milestone.
 
 ## ✅ Done
 
+### Staley Project Watershed and Numerical Engine
+
+**Completed**: 2026-09-09 UTC (2026-09-08 Pacific).
+
+**Package**: [20260908_staley_watershed_engine](docs/work-packages/20260908_staley_watershed_engine/package.md)
+
+**Delivered**: Canonical existing watershed/grid/outlet mapping; verified
+publication coefficients; owner-approved numerical contract and ADR-0056;
+pure scalar M1/M3 probability and inverse equality API; reproducible synthetic
+examples and independent correctness review with no open findings.
+
+**Validation**: 145 final focused tests passed; full suite 7,959 passed,
+72 skipped. Container fixture audit, API/stub checks and docs validation passed.
+See [evidence](docs/work-packages/20260908_staley_watershed_engine/artifacts/validation.md).
+
+**Remaining**: Roadmap stages 3–7: predictor preparation, rainfall/results,
+production UI/NoDb/RQ and dashboard integration. No deployed assessment is claimed.
 ### Staley M3 SSURGO Soil Thickness
 
 **Closed**: 2026-09-09
@@ -4014,7 +4018,6 @@ ADR-0005 captured parameterization governance.
 **Outcome**: Authoritative helper-first documentation established; archived per-controller plans grouped within work package.
 
 ---
-
 ## 🔮 Vision / Long-Term Initiatives
 
 High-level initiatives that haven't been broken down into concrete work packages yet. These represent strategic directions or large efforts requiring planning.

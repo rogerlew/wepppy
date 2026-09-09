@@ -1,8 +1,8 @@
 # Postfire Debris Flow Specification
 
-Status: domain specification updated 2026-09-09. Offline M3 soil derivation and
-local dNBR normalization are implemented under their dedicated contracts; production integration remains
-pending. Accepted direction records operator discussion; proposals and open
+Status: domain specification updated 2026-09-09. Offline M3 soil derivation,
+local dNBR normalization and the scalar M1/M3 numerical engine are implemented
+under their dedicated contracts; production integration remains pending. Accepted direction records operator discussion; proposals and open
 questions are not ratified production contracts. No production persisted schema
 or queue graph changes are included.
 
@@ -46,10 +46,12 @@ I_p = R_p / duration_hours
 ```
 
 `R` is rainfall accumulation in mm for the coefficient duration; `I_p` is
-mm/hour. `p` is a probability, not a percentage. Stable numerical evaluation,
-endpoint handling, invalid denominators, and negative threshold policy must
-be specified before implementation. RUSLE annual erosivity R is a different
-quantity and must not be used as Staley rainfall.
+mm/hour. `p` is a probability, not a percentage. The accepted
+[numerical engine contract](docs/staley2017_engine.md) and
+[ADR-0056](../../../../docs/adrs/ADR-0056-staley-numerical-engine.md) define scalar
+validation, stable arithmetic, and inverse equality/unavailability policies.
+RUSLE annual erosivity R is a different quantity and must not be used as Staley
+rainfall.
 
 ### Predictors
 
@@ -70,8 +72,9 @@ catchment mean directly supplies F; see the dNBR upload contract below.
 
 ### Published Coefficients
 
-Transcribed scientific values from Table 4; an independent table check and
-parameterization ADR are required before executable use.
+Verified against Table 4 in the local accepted manuscript; see the
+[publication check](../../../../docs/work-packages/20260908_staley_watershed_engine/artifacts/coefficient_check.md)
+and ADR-0056.
 
 | Model | Duration (min) | B | Ct | Cf | Cs |
 | --- | --- | --- | --- | --- | --- |
@@ -82,10 +85,32 @@ parameterization ADR are required before executable use.
 | M3 | 30 | -3.79 | 0.21 | 0.19 | 0.36 |
 | M3 | 60 | -3.46 | 0.14 | 0.10 | 0.18 |
 
-The study used 10 m DEMs and catchments of 0.02-8 km2, with observations within
+The study used 10 m DEMs and catchments of 0.2–8 km², with observations within
 the first two years after fire in the western United States. These describe
-the evidence domain. Availability is CONUS-only as specified below; additional
-age/area rejection or warning thresholds are not yet set.
+the evidence domain. Availability is CONUS-only as specified below; an age
+warning/rejection policy remains open.
+Source authority (owner decision, 2026-09-09 UTC): use the operator-provided
+accepted manuscript, printed page 12, as authoritative for this study range.
+Its explicit 0.2–8 km² statement supersedes the earlier unsupported 0.02–8 km²
+transcription; no final-journal reconciliation is required for this decision.
+The numerical engine consumes explicit predictors and does not enforce
+catchment size.
+
+Area warning policy (owner decision, 2026-09-09 UTC): for either model, warn
+when the full delineated watershed area is below 0.2 km² or above 8 km².
+The endpoints are included in the study range and do not trigger this warning.
+Compare unrounded canonical area in m² against 200,000 and 8,000,000; display
+unit preferences and rounding must not change the warning decision.
+Allow assessment and preserve calculated probabilities and inverse results;
+area outside the range alone must not fail readiness, reject execution, or
+make results unavailable. Present the warning with results and reports, for
+example: "Watershed area is outside the study's 0.2–8 km² range. Results
+extrapolate beyond the reported study areas."
+This warns about the evidence domain without treating it as a validated
+physical limit. [ADR-0057](../../../../docs/adrs/ADR-0057-staley-area-range-warning.md)
+records the decision. Runtime warning integration belongs to the forthcoming
+project assessment/results workflow; the scalar engine has no area input.
+
 The authors recommend M1 and found 15-minute thresholds most accurate overall.
 M3 is an alternative formulation, not a model assigned to a particular region.
 
@@ -236,7 +261,8 @@ agreed closely, but the panel does not justify a universal 30 m size exemption.
 See [resolution findings](../../../../docs/work-packages/20260908_staley_m3_wbt_terrain/artifacts/resolution_decision.md).
 This recommendation is not implemented UI/server enforcement and does not
 establish predictive validity or CONUS-wide calibration.
-For a 0.02 km2 catchment the approximate cell counts are 200 and 22 respectively.
+For illustration below the study's minimum area, a hypothetical 0.02 km²
+catchment has approximately 200 and 22 cells respectively.
 Upsampling a 30 m DEM does not establish 10 m terrain fidelity.
 
 ### Project Watershed Assessment Scope
@@ -265,9 +291,36 @@ Nested assessments would require a separately approved scope change. Existing
 offline helpers and evaluation fixtures may retain multiple masks/outlets for
 testing; that capability is not a production workflow requirement.
 
-Project artifact mapping, resampling, slope calculation, SBS class mapping, and
-NoData denominators still require an implementation contract. Missing SBS pixels
+Resampling, slope calculation, SBS class mapping, and NoData denominators
+still require an implementation contract. Missing SBS pixels
 must not silently become unburned observations.
+
+Canonical artifact mapping (verified 2026-09-09 UTC): `Watershed.bound` supplies
+`dem/wbt/bound.tif`, produced by WBT from the existing D8 pointer and resolved
+`dem/wbt/outlet.geojson`. Use its valid positive routed cells, including channel
+cells, as the full assessment support. Validate that the resolved outlet is in
+that support and matches its recorded row/column and projected cell center.
+Do not use requested outlet coordinates to select a different cell.
+
+Reuse the raw project DEM (`Watershed.dem_fn`) grid exactly: CRS, affine
+transform, shape and extent. Resolve D8 pointer format through the existing WBT
+property (`flovec.tif` or `flovec.vrt`). On a projected meter grid, cell area is
+the absolute affine determinant in m²; full area is cell count times cell area.
+Require explicit unit handling for other grids rather than assuming square
+meters. M3 elevation remains raw DEM elevation, not conditioned WBT `relief`.
+
+The derived `bound.geojson` and `bound.WGS.geojson` are display views;
+user-drawn boundaries and outlet-selection masks are not the routed domain.
+Outlet JSON `outlet_in_mask` and `watershed_cell_count` describe an optional
+selection mask and must not replace direct checks of the completed routed mask.
+Grid disagreement, an outlet outside support, or boundary-touch diagnostics
+must be reported without implicit re-snapping or re-delineation. The existing
+WBT boundary policy remains authoritative; this audit adds no rejection cutoff.
+
+The [read-only fixture audit](../../../../docs/work-packages/20260908_staley_watershed_engine/artifacts/watershed_artifact_audit.md)
+checks grid identity, 49,917 routed cells, outlet inclusion, polygon agreement
+and source hashes. This mapping establishes reuse; slope/SBS/K aggregation and
+scientific missing-data policies remain stage 3 work.
 
 ## Unitization Contract
 
@@ -395,8 +448,8 @@ average recurrence interval terminology; do not label a 1-year PDS scenario as
 100% annual probability. Record climate record length and frequency method;
 merely having ten years permits the existing estimator's 10-year output but
 does not establish estimate precision. Missing intervals remain unavailable.
-Numerical policies, source default, sample adequacy guidance, and probability
-threshold choices require resolution before implementation.
+The scalar engine numerical policies are accepted in ADR-0056. Source default,
+sample adequacy guidance and UI probability threshold defaults remain pending.
 
 ## Interactive Event Dashboard
 
@@ -441,7 +494,8 @@ host, and large-catalog performance requirements remain open.
 
 ## Planned File Organization
 
-Paths below are reserved design locations; executable files do not yet exist.
+The scalar `staley2017.py` engine is implemented under its accepted contract.
+Other paths below remain reserved integration locations.
 
 | Location | Responsibility |
 | --- | --- |
@@ -466,15 +520,15 @@ Paths below are reserved design locations; executable files do not yet exist.
 2. Production application of the accepted maximum-minus-outlet terrain
    contract and recommended 10 m requirement; original calibration
    preprocessing equivalence remains unproven.
-3. Map the accepted project watershed/outlet to canonical artifacts and specify
-   spatial aggregation/NoData rules. Assessment scope is resolved; nested
-   catchments are not a prerequisite.
+3. Implement spatial aggregation/NoData rules using the accepted project
+   watershed artifact mapping above. Assessment scope and artifacts are
+   resolved; nested catchments are not a prerequisite.
 4. Integrate the accepted dNBR backend with future browser transport, run
    access, active-artifact publication and M1 freshness under contract-first
    sequencing. Backend encoding/grid/coverage choices are in ADR-0054.
 5. Ratify the proposed rainfall-source selector and 12-scenario matrix above;
    set source default, sample adequacy guidance, probability thresholds, and
-   numerical edge cases.
+   production presentation of numerical availability.
 6. RUSLE completion versus artifact readiness; M3 prerequisites; K freshness.
 7. UI placement, payload/schema names, RQ wiring, result formats, and invalidation.
 8. Canonical CONUS locale mapping, footprint boundary policy, and precise

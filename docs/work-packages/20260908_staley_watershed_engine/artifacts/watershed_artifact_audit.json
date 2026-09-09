@@ -1,0 +1,57 @@
+{
+  "fixture": "/workdir/weppcloud-wbt/test_fixtures/staley_m3_resolution/topanga/10m/dem",
+  "source_sha256": {
+    "dem.tif": "4b8d13f60905c5beebccce475c948998433d85f74632a09fe5b4cef2b23414e1",
+    "wbt/flovec.tif": "3c3d1f2cdb246d78ca420d9826677ec0ba9b28759c04b244ad9b607428e05cc4",
+    "wbt/bound.tif": "53fbf98ab6223acdaa5a1fbdfc60670dc51169dea3221a391e62ea3ac1285da9",
+    "wbt/subwta.tif": "fd0443a357b14e1f9378e94de917677c8a7eccc29cd39a5daf4618922adfb897",
+    "wbt/outlet.geojson": "4e466491de91b399c457fd513ac09841ac8d4f299e1f1116f8a74028f07ddc1b",
+    "wbt/bound.geojson": "01a14e0377c92cd072e25d53cd463416ed434cbae906ddfe0d4dc46d58723030",
+    "wbt/bound.WGS.geojson": "e2162674b4d54ca6286c1879a913463a70bd4550d5a13d0d37bf37c15279b4ba"
+  },
+  "grid": {
+    "shape": [
+      391,
+      380
+    ],
+    "affine": [
+      10.0,
+      0.0,
+      353566.5645379969,
+      0.0,
+      -10.0,
+      3778381.5143099623
+    ],
+    "crs": "EPSG:32611",
+    "linear_units": "metre"
+  },
+  "positive_mask_labels": [
+    1
+  ],
+  "mask_cells": 49917,
+  "cell_area_m2": 100.0,
+  "watershed_area_m2": 4991700.0,
+  "mask_edge_cells": 0,
+  "outlet_row": 201,
+  "outlet_column": 36,
+  "outlet_in_routed_mask": true,
+  "outlet_xy": [
+    353931.5645379969,
+    3776366.5143099623
+  ],
+  "outlet_geojson_xy": [
+    353931.5645379969,
+    3776366.5143099623
+  ],
+  "requested_row": 203,
+  "requested_column": 37,
+  "selection_metadata_outlet_in_mask": false,
+  "selection_metadata_watershed_cell_count": 0,
+  "derived_polygon_center_mask_difference_cells": 0,
+  "subwta_mask_difference_cells": 0,
+  "grid_matches": {
+    "dem.tif": true,
+    "wbt/flovec.tif": true,
+    "wbt/subwta.tif": true
+  }
+}
