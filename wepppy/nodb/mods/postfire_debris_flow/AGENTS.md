@@ -1,6 +1,9 @@
 # Postfire Debris Flow
 
 - Current domain specification: [specification.md](specification.md).
+- Track delivery and loose ends in [implementation_roadmap.md](implementation_roadmap.md).
+  Update the roadmap, specification, and affected detailed contracts together
+  as implementation progresses; roadmap proposals are not accepted contracts.
 - Status: offline soil helper and local dNBR backend exist; production NoDb/UI/RQ
   integration remains pending.
 - Preserve accepted decisions and explicitly label proposals and unresolved inputs.

@@ -1,10 +1,16 @@
 # Postfire Debris Flow Specification
 
-Status: domain specification updated 2026-09-09. Offline M3 soil derivation is
-implemented under the dedicated contract below; production integration remains
+Status: domain specification updated 2026-09-09. Offline M3 soil derivation and
+local dNBR normalization are implemented under their dedicated contracts; production integration remains
 pending. Accepted direction records operator discussion; proposals and open
 questions are not ratified production contracts. No production persisted schema
 or queue graph changes are included.
+
+Track delivery stages, evidence, and unresolved decisions in the living
+[implementation roadmap](implementation_roadmap.md). Update this specification
+and affected detailed contracts alongside the roadmap in each implementation
+change. The roadmap tracks progress; it does not ratify proposed behavior or
+replace the required contract-first checkpoint.
 
 ## Accepted Direction and Rationale
 

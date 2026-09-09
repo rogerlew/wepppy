@@ -11,6 +11,8 @@ browser UI, HTTP API or production model wiring is
 implemented here. Existing `debris_flow` behavior is unchanged.
 The [specification](specification.md) distinguishes accepted direction from
 open scientific and integration decisions.
+The [implementation roadmap](implementation_roadmap.md) tracks remaining stages,
+completion evidence, and unresolved decisions alongside that specification.
 
 ## Intended Workflow
 
@@ -20,8 +22,8 @@ open scientific and integration decisions.
    also supply continuous pre/post-fire dNBR.
 3. Select M1 (default) or M3 explicitly. M3 requires soil thickness instead of K
    and does not require dNBR. Raw project SSURGO horizons are a feasible source;
-   offline aggregation and coverage are explicit, but source substitution is not
-   approved.
+   SSURGO is the approved primary source with original STATSGO THICK as fallback.
+   Production fallback and coverage rules remain pending.
 4. Use the project's climate event intensities to assess storm-event
    probabilities. Browse events in an interactive dashboard and select an
    event to inspect catchment results, rainfall, and input provenance.
@@ -53,7 +55,7 @@ placeholders are intentionally deferred until the contracts are ready.
 - The standard RUSLE build produces named K artifacts, not `rusle/k.tif`.
 - M3 offline thickness uses raw validated intervals and explicit fractional
   component support. Original units are inches; S is mean cm / 254.
-  Production source approval, assessment scope and rainfall sourcing remain open.
+  Production fallback policy, assessment scope and rainfall sourcing remain open.
 - See [local agent guidance](AGENTS.md) for implementation sequencing.
 - See [SSURGO feasibility](docs/ssurgo_m3_feasibility.md) for reusable raw fields
   and why generated WEPP soil depth and the current `SolThk` are unsuitable.
