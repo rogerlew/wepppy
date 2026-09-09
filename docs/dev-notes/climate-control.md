@@ -31,6 +31,7 @@ This note captures the steady-state design of the climate control after the Pure
 - Status panel is a macro instance that pairs with StatusStream (log limit 400 by default).
 
 - Operator-requested label restoration (2026-09-09): use "Spatial Scaling from Map (config dependent)" to make the configuration dependency explicit. The map field displays `climate.precip_scale_factor_map`; this wording change does not alter scaling behavior.
+- The read-only scale-factor map input uses a 70-character width, capped at the available space, so configured raster paths are easier to read.
 
 ## 5. JavaScript Controller Highlights
 - Catalog bootstrap:
