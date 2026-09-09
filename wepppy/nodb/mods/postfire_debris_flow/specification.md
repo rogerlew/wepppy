@@ -213,7 +213,11 @@ EPIC is not automatically enabled for Staley by its availability in RUSLE.
   coarse fragments can modify permeability. This is an estimate, not a direct
   STATSGO Kf extraction or WEPP Ki/Kr substitution.
 - Record source mode, depth treatment, fragment adjustment, units, gap filling,
-  and artifact identity. Verify compatibility with Staley's calibration scale.
+  and artifact identity. The verified Nomograph scale maps to S with multiplier 1
+  (ADR-0059); full finite [0,1] K support and provenance are required for point S.
+  Partial K mean remains diagnostic, with no additional gap filling. Named K
+  readiness is independent of unrelated RUSLE factors; completed WEPP Soils
+  remains a production prerequisite. See [local contract](docs/m1_predictors.md).
 - Changing the input K must make dependency freshness visible; exact
   invalidation/rebuild and artifact publication contracts are pending.
 
@@ -346,14 +350,15 @@ scientific missing-data policies remain stage 3 work.
 
 ## Local M1 Predictor Composition
 
-The next increment composes the completed slope/SBS, dNBR and scalar engine
-backends for the existing project watershed. The
-[proposed M1 predictor contract](docs/m1_predictors.md) covers lossless prepared
-WBT inputs, actual binary invocation, T/F/S with independent support, K convention
-verification and new local artifact provenance. The
-[work package](../../../../docs/work-packages/20260909_staley_m1_predictors/package.md)
-is scaffolded, not executing. K coverage and artifact-only versus full-RUSLE
-readiness remain unresolved; they are not approved through this proposal.
+The local `integration.build_m1_predictors` adapter composes prepared sources
+with the actual owned WBT executable. The [accepted contract](docs/m1_predictors.md)
+and ADR-0059 define lossless copies, independent T/F/S support, K units/coverage,
+provenance and retained incomplete failures. `evaluate_m1_scenarios` evaluates
+explicit accumulations through the scalar engine; no climate defaults are added.
+
+The [work package](../../../../docs/work-packages/20260909_staley_m1_predictors/package.md)
+retains complete synthetic and authentic rebuilt Wallow T/F/S evidence, plus
+missing-input cases. Stage 3 local composition acceptance is satisfied.
 No live NoDb/UI/RQ publication, source rebuild or climate adapter is included.
 
 ## Unitization Contract

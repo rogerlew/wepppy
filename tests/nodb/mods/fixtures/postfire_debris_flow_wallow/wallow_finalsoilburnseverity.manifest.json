@@ -1,0 +1,51 @@
+{
+  "archive_url": "https://edcintl.cr.usgs.gov/downloads/sciweb1/shared/MTBS_Fire/data/baer/Wallow_FinalSoilBurnSeverity.zip",
+  "archive_sha256": "423eb8b0edf87a733a1d441d64e11295b6fb65db3c18c30b00bab250998ecaaf",
+  "sources": [
+    {
+      "member": "Wallow_FinalSoilBurnSeverity/FinalSoilBurnSeverity/wallow_finalsoilburnseverity.shp",
+      "sha256": "501f1080c1d14ef3fec041212b841d8bdff23af5a139b8000abfc3320bedea15"
+    },
+    {
+      "member": "Wallow_FinalSoilBurnSeverity/FinalSoilBurnSeverity/wallow_finalsoilburnseverity.shx",
+      "sha256": "74331abf73b74ac822fc72d843a0267436e2b3152a15582f920a5ae3d0789815"
+    },
+    {
+      "member": "Wallow_FinalSoilBurnSeverity/FinalSoilBurnSeverity/wallow_finalsoilburnseverity.dbf",
+      "sha256": "7ea67845267c490869ebfc2eaf43b549a55a3c4395f04e10dda41ceec0372082"
+    },
+    {
+      "member": "Wallow_FinalSoilBurnSeverity/FinalSoilBurnSeverity/wallow_finalsoilburnseverity.prj",
+      "sha256": "c2e102c73fba08ebaef452664acd997cb9d3d8668864c117a8323b23e0837e95"
+    }
+  ],
+  "path": "wallow_finalsoilburnseverity.tif",
+  "sha256": "ed99c81b229cf4c241e055f97c8b068eb1b9def6c1cceb80b200fa54ae38ed3b",
+  "attribute": "GRIDCODE",
+  "classes": {
+    "0": "background/NoData",
+    "1": "unchanged/very low",
+    "2": "low",
+    "3": "moderate",
+    "4": "high"
+  },
+  "rasterization": "GDAL default pixel-center rule; source feature order; no ALL_TOUCHED",
+  "grid_reference": "wallow_20110623_barc4_alb.tif",
+  "grid_reference_sha256": "27c5cb24bc5152b8aec35fab7a1e3f0e9ea4756cddec759933f61a9dfc3d95ca",
+  "feature_counts": {
+    "2": 28505,
+    "0": 2668,
+    "1": 32347,
+    "3": 28170,
+    "4": 6375
+  },
+  "pixel_counts": {
+    "0": 332344,
+    "1": 4053218,
+    "2": 1048376,
+    "3": 399147,
+    "4": 376335
+  },
+  "nodata": 0,
+  "gdal_version": "GDAL 3.10.3, released 2025/04/01"
+}

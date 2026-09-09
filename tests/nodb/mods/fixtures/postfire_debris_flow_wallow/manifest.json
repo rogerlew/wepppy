@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "archive_url": "https://edcintl.cr.usgs.gov/downloads/sciweb1/shared/MTBS_Fire/data/baer/Wallow_FinalSoilBurnSeverity.zip",
+  "archive_sha256": "423eb8b0edf87a733a1d441d64e11295b6fb65db3c18c30b00bab250998ecaaf",
+  "originator": "USDA Forest Service, Remote Sensing Applications Center",
+  "rights": "Source metadata: no use restrictions except proper acknowledgment",
+  "collection": "FinalSoilBurnSeverity",
+  "prefire_date": "2011-05-30",
+  "postfire_date": "2011-06-23",
+  "conversion": "HFA to DEFLATE GeoTIFF; no sample/grid/mask changes; preserve palette RGB",
+  "files": [
+    {
+      "path": "wallow_20110623_barc4_alb.tif",
+      "source_member": "Wallow_FinalSoilBurnSeverity/FinalSoilBurnSeverity/wallow_20110623_barc4_alb.img",
+      "source_sha256": "cc41284ff6c4db4254d1a1a96b2606b3ca696526e93f507eb33e42df3a6fa711",
+      "sha256": "27c5cb24bc5152b8aec35fab7a1e3f0e9ea4756cddec759933f61a9dfc3d95ca",
+      "bytes": 558840,
+      "shape": [
+        2609,
+        2380
+      ],
+      "crs": "EPSG:5070",
+      "transform": [
+        30.0,
+        0.0,
+        -1249110.0,
+        0.0,
+        -30.0,
+        1319220.0
+      ],
+      "dtype": "uint8",
+      "nodata": null,
+      "valid_cells": 6209420,
+      "valid_range": [
+        0.0,
+        4.0
+      ],
+      "class_counts": {
+        "0": 332344,
+        "1": 4053218,
+        "2": 1048376,
+        "3": 399147,
+        "4": 376335
+      },
+      "classes": {
+        "0": "unclassified/background",
+        "1": "unchanged/very low",
+        "2": "low",
+        "3": "moderate",
+        "4": "high"
+      }
+    },
+    {
+      "path": "wallow_20110623_barc256_alb.tif",
+      "source_member": "Wallow_FinalSoilBurnSeverity/FinalSoilBurnSeverity/wallow_20110623_barc256_alb.img",
+      "source_sha256": "28a4bca86c4ea32aca2342dec1f4771b245bef922990bc7ad26c8a21dc85da07",
+      "sha256": "87e9529effb4f468b15e7f9b058bddfa0f7227cda4e9d87a81852ca74f63a6f9",
+      "bytes": 4086266,
+      "shape": [
+        2609,
+        2380
+      ],
+      "crs": "EPSG:5070",
+      "transform": [
+        30.0,
+        0.0,
+        -1249110.0,
+        0.0,
+        -30.0,
+        1319220.0
+      ],
+      "dtype": "uint8",
+      "nodata": null,
+      "valid_cells": 6209420,
+      "valid_range": [
+        0.0,
+        255.0
+      ]
+    },
+    {
+      "path": "wallow_dnbr.tif",
+      "source_member": "Wallow_FinalSoilBurnSeverity/FinalSoilBurnSeverity/wallow_dnbr.img",
+      "source_sha256": "f6494b9faba696ca7deef6765313e23556fe08af6086b4f73f8c323715f35194",
+      "sha256": "3b1da7165ea14d6224755d9606eae646887bd5d95db50ff90d6219a079574ae9",
+      "bytes": 7775799,
+      "shape": [
+        2609,
+        2380
+      ],
+      "crs": "EPSG:5070",
+      "transform": [
+        30.0,
+        0.0,
+        -1249110.0,
+        0.0,
+        -30.0,
+        1319220.0
+      ],
+      "dtype": "float32",
+      "nodata": null,
+      "valid_cells": 6209420,
+      "valid_range": [
+        -2000.0,
+        1266.0
+      ],
+      "scale_factor": 0.001,
+      "add_offset": 0
+    }
+  ],
+  "metadata": [
+    {
+      "path": "source_metadata.txt",
+      "source_member": "Wallow_FinalSoilBurnSeverity/FinalSoilBurnSeverity/FINAL_ Wallow_20110623_metadata_alb.txt",
+      "sha256": "ccbca4d4dd85fcbc71966441d4db5ce691e8a6644ff06c0bd1053af80edc79d0"
+    },
+    {
+      "path": "source_README.txt",
+      "source_member": "Wallow_FinalSoilBurnSeverity/README_FinalBurnSeverity.txt",
+      "sha256": "18ed203c1699d99f1bd79d1951f17475062fc7dbd48312a4471ccf771ce5d013"
+    }
+  ]
+}

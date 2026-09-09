@@ -1,7 +1,7 @@
 # Staley M1 prepared predictor integration
 
-Status: scaffolded 2026-09-09 15:06 UTC; execution not started.
-Baseline WEPPpy `2c4d1a94f`; WBT slope backend `a97abb7`.
+Status: Closed 2026-09-09 — local implementation and complete authentic acceptance delivered.
+Execution baseline WEPPpy `0cac0f3a0`; WBT slope backend `a97abb7`.
 
 ## Purpose and scope
 
@@ -12,10 +12,16 @@ inspectable new artifact bundle containing T/F/S, independent coverage,
 unavailable reasons and reproducible source identity. Demonstrate explicit
 rainfall scenarios through the existing engine; climate ingestion is later work.
 
-Read the [ExecPlan](prompts/active/m1_predictors_execplan.md),
+Read the [ExecPlan](prompts/completed/m1_predictors_execplan.md),
 [tracker](tracker.md), and [decision register](artifacts/decision_register.md).
-Canonical proposal: [M1 predictor contract](../../../wepppy/nodb/mods/postfire_debris_flow/docs/m1_predictors.md).
+Canonical contract: [M1 predictor contract](../../../wepppy/nodb/mods/postfire_debris_flow/docs/m1_predictors.md).
 Update it and the module specification/roadmap together as decisions are made.
+
+Execution evidence: [K unit audit](artifacts/k_unit_audit.md),
+[candidate source inventory](artifacts/source_inventory.json), and
+[compatibility plan](artifacts/compatibility_plan.md). [Generated evidence](artifacts/generated_evidence.json) includes complete synthetic
+and authentic missing-dNBR bundles. [Rebuilt Wallow evidence](artifacts/wallow_rebuilt_evidence.json)
+adds complete authentic T/F/S using final SBS and matching June 23 dNBR.
 
 ## Boundaries
 
@@ -46,3 +52,13 @@ requires its own end-to-end identity/mount evidence and contract checkpoint.
 Completes the local M1 composition portion of stage 3 when validated. Live
 prepared-input publication, controller readiness/invalidation and orchestration
 remain stage 5 work. Package scaffolding alone completes no implementation stage.
+
+## Execution result
+
+Local builder, scenario interface, 50 focused tests, actual-binary generated
+evidence and independent reviews delivered. Full suite: 8,016 passed, 72 skipped;
+API/stub/docs checks passed. See [validation](artifacts/validation.md).
+The owner rebuilt Wallow with final polygon SBS; all 12,973 basin cells have
+usable T/F/S support and zero unknown intersections. Complete local acceptance
+is satisfied. Prior July 1 partial evidence remains historical.
+See [rebuilt Wallow evidence](artifacts/wallow_rebuilt_evidence.json).

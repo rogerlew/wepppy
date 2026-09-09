@@ -30,6 +30,7 @@
   parity work: legacy ArcGIS surface slope and modern pfdf directional slope
   differ. Current pfdf is not the scientific oracle for M1 T; preserve the
   distinction between suspected preprocessing regression and proven error.
-- Next scaffolded package: [M1 predictors](../../../../docs/work-packages/20260909_staley_m1_predictors/package.md).
+- Local composition package: [M1 predictors](../../../../docs/work-packages/20260909_staley_m1_predictors/package.md).
   Read [docs/m1_predictors.md](docs/m1_predictors.md) before composition work;
-  K policy gates remain pending. Local build only, no NoDb/UI/RQ publication.
+  K policy is accepted in ADR-0059. Local adapter validated with complete authentic
+  Wallow T/F/S evidence. No NoDb/UI/RQ publication.

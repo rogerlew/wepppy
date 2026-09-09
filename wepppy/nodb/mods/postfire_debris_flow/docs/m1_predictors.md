@@ -1,111 +1,97 @@
 # M1 prepared predictor integration contract
 
-Status: proposed local backend contract, 2026-09-09 UTC. Implementation pending.
-The [work package](../../../../../docs/work-packages/20260909_staley_m1_predictors/package.md)
-composes existing accepted helpers. New K coverage/readiness policies remain
-proposals; scaffolding does not approve them or production workflow changes.
+Status: accepted local backend contract, 2026-09-09.
 
-## Scope and existing authority
+Reuse the [slope/SBS contract](slope_sbs.md), [dNBR contract](dnbr_upload.md),
+and [scalar engine](staley2017_engine.md). Write only a fresh caller-owned
+local bundle; no NoDb/UI/RQ, upstream rebuild, acquisition or publication.
 
-Read the existing project watershed/outlet, raw DEM, prepared WEPP Soils, SBS,
-normalized dNBR and named RUSLE Nomograph K. Write only a caller-selected fresh
-local output directory. No live controller mutation, rebuild, acquisition,
-active-result replacement, UI, queue or deployment. RUSLE owns K preparation.
+## Frozen interface and behavior
 
-Reuse the [domain mapping](../specification.md#project-watershed-assessment-scope),
-[slope/SBS contract](slope_sbs.md), [dNBR contract](dnbr_upload.md),
-[numerical engine](staley2017_engine.md), and ADRs 0054–0058. Initial scope is
-one project watershed at its existing resolved outlet, including channel cells.
-Do not shrink the domain to common coverage of the predictor rasters.
+Accepted 2026-09-09 after owner approval of P02/P03; ADR-0059 governs K policy.
+This section froze the local interface before implementation.
 
-## Proposed composition
+`integration.M1Inputs` is a frozen dataclass with required paths `dem`, `mask`,
+`outlet` (Point, Feature or single-feature FeatureCollection), `sbs`, required `expected_sha256` path-to-digest mapping,
+`wbt_sha256` executable digest, and explicit `source_kind` (`real`, `synthetic`,
+`mixed`). Optional paths: `k`, `k_manifest`, `dnbr`, `dnbr_manifest`.
+`lineage_sources` is a tuple of explicitly authorized dNBR source paths.
+`elevation_units` is `m`; `sbs_alignment` is `exact` (default) or `nearest`.
+`build_m1_predictors(inputs, output_dir, *, wbt_executable)` returns the version-1
+manifest dictionary. `M1Error.code` carries expected boundary failure reasons.
 
-A thin `integration.py` collaborator validates explicit prepared inputs and
-coordinates existing helpers. Keep manifest/schema handling in `manifest.py`
-only if that separation clarifies the bounded implementation. Freeze Python
-signatures, required provenance fields and error vocabulary before code.
-The backend has no default rainfall or model-switching behavior.
+Inputs are regular nonsymlink trusted local GeoTIFF/JSON files, with expected
+SHA-256 for every supplied file, including external `.tif.msk` masks. Internal
+masks are honored; auxiliary metadata/overviews and other sidecars are rejected.
+JSON is capped at 1 MiB, rasters at 512 MiB and 10 million cells. Decode only
+single-band GeoTIFF with identity encoding and pixel-area metadata. The target
+DEM/mask/K/dNBR grid is WGS84 UTM with square meter cells; opt-in nearest SBS
+preparation admits other finite georeferenced source grids. Reject contradictory vertical units. Unmasked nonfinite DEM/SBS/mask
+samples are invalid. Palette SBS uses indices, only 0–3. Lossless WBT copies
+use Float64 DEM/mask, Int16 SBS, finite collision-free sentinels, explicit
+SampleFormat, classic uncompressed untiled grayscale TIFF. Verify samples,
+masks and exact grid after writing. A separate positive-valid binary mask
+adapts the existing domain to `summarize_dnbr`. Only explicit nearest SBS
+alignment is permitted; K/dNBR never warp. NumPy/GDAL compiled reductions are
+existing precedents; owned Rust alone computes Horn and intersections.
 
-T comes from a fresh, complete StaleySlopeSbs invocation with the accepted
-Horn/raw DEM/strict-neighborhood contract. Preserve true/false/unknown counts,
-input coverage, T_lower/T_upper and null T where uncertainty remains. A success
-marker means processing completed, not necessarily model-ready T.
+S uses the named `k_polaris_nomograph.tif`, multiplier 1, finite [0,1] full
+coverage only. K metadata must select Nomograph and name its artifact, retaining
+statistic, depth weights, mode/fragment contract and gap-fill policy/summary.
+Preserve the whole K section. Missing fields yield unavailable S with
+`missing_provenance`; malformed/contradictory metadata fails explicitly.
+F requires version-1 normalization manifest, matching raster hash and target
+grid, finite positive scale/finite offset, and input hashes checked against
+explicit lineage paths. Do not follow arbitrary embedded paths. Unprovided
+lineage yields unavailable F; mismatched lineage is an error. Missing optional
+raster paths yield `missing_input`. Source hashes prove identity, not controller
+freshness. Record production Soils readiness as `not_checked_local`.
 
-F comes from `summarize_dnbr` over the same full watershed mask. The canonical
-dNBR raster contains normalized differences: its mean supplies F directly.
-Require its normalization provenance and source identity. Positive partial
-coverage permits the accepted observed-support estimate, with coverage warning;
-no observations means unavailable F. Existing normalize_dnbr remains a separate
-preparation operation; this composition does not reinterpret original encoding.
+Top-level fields: `schema_version` (1), `status` (`complete`, processing only),
+`availability` (`complete`, `partial`, `unavailable` by point availability),
+`source_kind`, `readiness`, `grid`, `outlet`, `area_km2`, `warnings`, `predictors`
+(T/F/S with value, units, status, reason and independent support),
+`sources_sha256`, `prepared_sha256`, `tool`, `k_provenance`, `artifacts_sha256`.
+T retains WBT summary and lower/upper bounds; its `support.valid_cells` counts
+determined intersections, while raw slope/SBS/joint support remains in the WBT
+summary. Unknown T uses
+`unknown_intersection`; incomplete K uses `incomplete_k_coverage`; empty F uses
+`empty_dnbr`. Partial F remains an observed-support estimate. Area warning is
+`area_outside_study_range`, outside inclusive 0.2–8 km².
 
-S comes from `rusle/k_polaris_nomograph.tif`, not the default K alias or EPIC.
-Verify calibrated units against actual RUSLE formula/output and published Kf
-before fixing the mapping to S. Record source depth/statistic, source gap fill,
-optional fragment treatment and explicit unit conversion or identity. Missing K
-policy remains pending; recommended behavior is no additional fill and no point
-S on incomplete usable coverage. Do not impose T's support rules or dNBR's
-partial mean by analogy. Existing upstream RUSLE filling must remain disclosed.
+Expected errors: `invalid_input`, `invalid_grid`, `invalid_sbs`,
+`invalid_encoding`, `resource_limit`, `missing_provenance`,
+`provenance_mismatch`, `source_changed`, `output_exists`, `tool_unavailable`,
+`tool_failed`, `invalid_tool_output`, `preparation_failed`. Native filesystem
+errors are preserved; malformed JSON is invalid input.
 
-## Prepared raster boundary
+Exclusively reserve a private fresh directory. Retain `incomplete.json` and
+partial files on failure; retry elsewhere. `manifest.json` is the final marker,
+written after complete readable grid-matching WBT products, consistent summary
+counts/bounds, and source/binary hash rechecks. Existing output is never replaced.
+Pin binary hash and validate capability; invoke without shell or global cwd
+changes, with 300-second timeout and stdout/stderr written to local log files.
+Trusted immutable directory ownership is required; this is not hostile-owner
+concurrency protection or active run publication.
 
-Prepare independent copies for the owned WBT decoder: classic, uncompressed,
-untiled, single-band grayscale GeoTIFF with explicit SampleFormat and finite
-NoData. Preserve CRS, affine, dimensions, valid samples and missing masks;
-verify those properties after conversion. Pick a representable sentinel that
-cannot collide with valid data. Do not reuse dNBR NaN conventions for WBT inputs.
-Preserve palette indices for SBS, not rendered RGB values. Canonical normalized
-classes are 0–3, with declared 255 NoData; use the existing SBS owner's mapping.
-Rasterio/GDAL is an existing preparation precedent; Rust still computes slopes.
+`evaluate_m1_scenarios(bundle, scenarios)` accepts explicit `(duration_minutes,
+rainfall_mm)` pairs and validates through the scalar engine. Return null
+probability with `missing_predictors` when any point predictor is unavailable.
+Retain source kind/area warnings. No climate default, frequency claim, M3
+fallback or probability bounds. Authentic dNBR absence blocks full real-project
+acceptance, not independently labeled controlled testing.
 
-The raw DEM grid never changes. Define any necessary categorical SBS alignment
-explicitly with nearest sampling and retained holes. Require the K/dNBR grid
-contract separately; do not silently warp continuous K or change its averaging
-scale. The composed resource budget must respect WBT's 10-million-cell limit,
-not the dNBR backend's larger cap. No decoder fallback or limit bypass.
 
-Invoke a verified StaleySlopeSbs executable through an existing owned execution
-pattern. Record executable hash/version, parameters, return status and outputs;
-fail clearly if the tool is missing. Account for wrapper cwd behavior without
-changing process-global state unsafely. FNV source fingerprints in the WBT
-summary are diagnostic; preserve independent SHA-256 lineage in the bundle.
+## Assessment identity and acceptance evidence
 
-## Availability, identity and outputs
+Match the dNBR assessment dates to the selected severity source and record source
+lineage explicitly. A project rebuild creates a new source snapshot and fresh
+bundle; preserve older results as historical evidence instead of relabeling them.
+This prevents pairing a final June 23 assessment with an earlier project's July 1
+preliminary imagery. Validate uploaded severity classes and masks against the
+prepared SBS when retaining reproduction evidence.
 
-Proposed bundle includes versioned manifest, prepared-input identities, WBT
-artifacts, predictor record and source/support diagnostics. Final field names
-must be frozen before implementation. Successful processing and scientific
-availability are distinct. Preserve a null/unavailable predictor with reasons;
-do not emit a probability if any required predictor is unavailable.
-
-Record full basin area/outlet/grid, T/F/S units, independent support, source and
-prepared hashes, accepted parameterization and binary identity. Propagate the
-accepted 0.2–8 km² area warning without rejecting on area alone. Machine-readable
-canonical values do not depend on SI/English display settings. Example rainfall
-scenarios are validation artifacts, not a climate-frequency result contract.
-
-Hash immutable inputs before/after the build and validate referenced manifests
-and completion markers. A hash proves identity, not that a stale upstream
-artifact still matches its source configuration. Define the available lineage
-checks and report unsupported/missing provenance explicitly. Reject source
-mutation during build; do not publish a successful bundle based on mixed inputs.
-
-Use fresh private local output with a final completion marker after validation.
-Existing output preservation, partial-write cleanup/retention and retry semantics
-must be specified and tested. Do not imply this local interface safely handles
-hostile concurrent directory owners or publishes active NoDb results.
-
-## Remaining decisions and validation
-
-[Decision register](../../../../../docs/work-packages/20260909_staley_m1_predictors/artifacts/decision_register.md)
-tracks K convention, coverage and artifact-only readiness. The latter is
-recommended instead of full RUSLE completion but is not yet accepted workflow.
-Completed WEPP Soils remains an accepted production prerequisite; fixture builds
-must distinguish supplied artifact validation from a live controller check.
-
-Acceptance requires real binary/binding outputs, analytical predictor means,
-independent-support cases, valid zero/negative dNBR, missing/stale/legacy sources,
-unit/encoding errors, actual file-boundary failures and source preservation.
-Use representative project artifacts with verified overlap; synthetic SBS/K
-must be labeled. A final real-project claim requires real prepared sources,
-not synthetic replacements. If these cannot be obtained read-only, record the
-missing evidence and do not claim that acceptance gate passed.
+Local complete-source acceptance is demonstrated on rebuilt Wallow: all 12,973
+basin cells support T/F/S, with zero unknown intersections. The 11.6757 km² area
+warning remains applicable. This validates local composition; live preparation,
+publication, upstream freshness and climate ingestion require their own contracts.

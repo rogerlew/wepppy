@@ -1,9 +1,15 @@
 # Compose prepared M1 watershed predictors
 
 
-This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`.
+Completed 2026-09-09: local T/F/S acceptance passed; independent correctness and
+security reviews have no open medium/high findings.
+
+This ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`.
 Maintain Progress, Surprises & Discoveries, Decision Log and Outcomes &
-Retrospective. Current request scaffolds only; implementation has not started.
+Retrospective. Execution requested 2026-09-09; engineering audit and candidate
+inventory completed. Owner accepted P02/P03; local implementation and validation
+are delivered. The rebuilt Wallow final assessment now supplies complete authentic
+T/F/S evidence with zero unknown intersections.
 
 ## Purpose / Big Picture
 
@@ -18,39 +24,81 @@ production controllers, climate catalog, public upload and RQ remain separate.
 ## Progress
 
 
-- [x] (2026-09-09 15:06 UTC) Inspect precedents and scaffold package/contracts.
-- [ ] Resolve K convention/coverage/readiness and freeze interface/schema with ADR.
-- [ ] Inventory authentic source fixtures and plan compatibility/regression coverage.
-- [ ] Implement prepared-input conversion and owned-tool invocation.
-- [ ] Compose T/F/S, provenance, availability and reproducible example outputs.
-- [ ] Validate focused/full suites, independent reviews and synchronized closeout.
-
+- [x] (2026-09-09) Audit K scale against primary references and scalar example.
+- [x] (2026-09-09) Owner accepted P02/P03; freeze local contract and ADR-0059.
+- [x] (2026-09-09) Inventory sources and write additive compatibility plan.
+- [x] (2026-09-09) Implement lossless copies, actual WBT invocation and independent T/F/S.
+- [x] (2026-09-09) Generate complete synthetic and authentic missing-dNBR bundles/scenarios.
+- [x] (2026-09-09) Pass 50 focused actual-file/binary tests and close correctness findings.
+- [x] (2026-09-09) Full suite: 8,016 passed, 72 skipped; API/stub/docs checks and final security review passed.
+- [x] (2026-09-09) Obtain matching Wallow July 1 dNBR with archive lineage; verify read-only project evidence.
+- [x] (2026-09-09) Demonstrate complete real T/F/S after owner rebuild with final polygon SBS and matching June 23 dNBR.
 ## Surprises & Discoveries
 
 
-StaleySlopeSbs does not accept every project GeoTIFF layout. Its bounded owned
-reader requires explicit finite NoData and SampleFormat, uncompressed classic
-TIFF strips and no palettes. A lossless preparation stage is necessary; do not
-pass arbitrary project files and mask failures with another implementation.
-RUSLE K already includes source gap-fill provenance; complete numeric coverage
-is not necessarily complete measured soil information.
+Execution baseline: WEPPpy `0cac0f3a03295075aa805240f7e5b7209e1e2042`,
+WBT `a97abb7754a24390edf1d93f3f26a09d80b4669b`. Three real K candidates have
+full numeric coverage, but two have legacy provenance. Available Arizona dNBR
+fixtures do not overlap these projects. The later rebuilt Wallow assessment establishes a complete authentic M1 set.
+
+Native rasters include palette/sample-layout differences and statistics-only PAM
+metadata. The reproduction script materializes byte-identical TIFF copies outside
+the project after checking PAM content and original/copy samples, masks and grids.
+The runtime rejects auxiliary metadata. Original project hashes remain unchanged.
+GDAL NoData comparisons can mask adjacent extreme floats: preparation now chooses
+well-separated sentinels and verifies decoded masks. Independent review also
+identified disguised VRT masks, worldfiles, companion-set mutation and insufficient
+WBT/nested provenance validation; regression checks cover the corrections.
+Historical July 1 Wallow follow-up: all 12,973 basin slopes are valid, but only 10,627 SBS cells
+are valid. The 149 unknown steep intersections leave T unavailable. F and S
+have full coverage; see `artifacts/wallow_evidence.json`.
 
 ## Decision Log
 
 
-2026-09-09 15:06 UTC: user requested the next work-package scaffold after
-slope/SBS completion. Scope is local M1 composition, not deployment or NoDb/UI/RQ.
-Prior accepted rules remain: one project watershed/outlet, Horn on raw DEM,
-strict nine-cell neighborhoods, uncertainty-preserving T, normalized observed-
-support dNBR F, and area warnings outside inclusive 0.2–8 km². K-specific policy
-remains pending in the decision register; no silent approval by analogy.
+2026-09-09: owner answered "proceed as recommended" to the combined P02/P03
+question. Adopt full usable K support without new filling, named Nomograph K
+readiness independent of other RUSLE factors, and retained production WEPP Soils
+prerequisite. ADR-0059 and the canonical M1 contract record rationale and exact rules.
+
+P01 audit establishes multiplier 1. Missing legacy provenance yields unavailable
+predictors with retained diagnostics; contradictory metadata is an error. Explicit
+hashes establish bytes, not live upstream freshness. No server publication is added.
+
+Retain failure artifacts with an incomplete marker; retry in a fresh directory.
+Keep real missing-dNBR evidence distinct from synthetic complete evidence. Do not
+archive this plan or mark stage 3 complete without authentic complete T/F/S evidence.
+2026-09-09: owner selected the USGS Wallow archive and identified `woolen-refusal`.
+Retain lossless June 23 final-severity fixtures separately from the project
+July 1 preliminary BARC assessment. Use matching July 1 dNBR for project evidence;
+do not substitute dates, fill SBS gaps, or mutate the project to force availability.
+
+2026-09-09: after the owner rebuilt the project with final polygon severity,
+select matching June 23 dNBR explicitly and verify the configured upload and
+source-to-prepared SBS classes/masks. Keep July 1 results as historical evidence
+rather than rewriting them to describe a different assessment.
 
 ## Outcomes & Retrospective
 
 
-Scaffold only. No new implementation, generated predictor bundles or tests.
-Completion must identify local evidence separately from production readiness.
-Do not mark climate, M3 soil fallback or stage 5 wiring complete here.
+Local composition is implemented. Actual container-binary evidence yields synthetic
+T=1, F=0.4000000059604645, S=0.3, with valid 15/30/60-minute scenario probabilities.
+The authentic `strained-mod` domain has 80,949 cells, T=0.41419906360795067 and
+S=0.338206766138312. F is unavailable (`missing_input`); probabilities remain null.
+Original sources are unchanged. See `artifacts/generated_evidence.json` and
+`artifacts/reproduce.py`; generated rasters remain under ignored `artifacts/generated/`.
+
+Full validation passed (8,016 passed, 72 skipped); final focused suite passed 50
+cases. API/stub/docs gates and both independent reviews passed, with no open
+medium/high findings. Wallow now supplies authentic normalized dNBR; complete
+real T acceptance is now satisfied by the rebuilt June 23 assessment; climate, M3 integration and
+stage 5 production wiring remain successor work. Review findings are tracked in
+separate correctness/security artifacts; planned evidence is never counted as passed.
+Rebuilt Wallow closeout: T=0.1894704386032529, F=0.6141950971236625 and
+S=0.43397823632668575, full support on all 12,973 cells. Explicit scenario
+probabilities are available; the 11.6757 km² area warning is retained. Source
+hashes remain unchanged. `artifacts/wallow_rebuilt_evidence.json` closes the local
+authentic complete-source gate; no production publication is implied.
 
 ## Context and Orientation
 
@@ -200,7 +248,7 @@ reproduction command/script and the actual executable path/hash in package
 validation evidence; make the binary available in the test environment through
 existing supported mounts/tooling, without production installation. If execution
 crosses a container boundary, exercise real identity/mount permissions there.
-No full tests or implementation are needed merely for this scaffold.
+Record complete execution validation in `artifacts/validation.md`.
 
 ## Validation and Acceptance
 
@@ -243,3 +291,17 @@ No new scientific model, automatic source fallback or external dependency.
 
 Revision note: initial scaffold isolates local M1 composition and input-format
 preparation from later production publication and climate/dashboard work.
+
+Execution revision 2026-09-09: record initial audit/inventory and explicit pending
+owner policy gate; do not archive or claim implementation completion.
+
+Execution decision: owner approved both recommendations. Frozen contract and
+ADR-0059 precede code; continue all implementation and validation milestones.
+
+Final execution revision 2026-09-09: local milestones and validation delivered;
+retain active plan for authentic complete-source acceptance rather than archive
+it prematurely. See `artifacts/validation.md` for commands, counts and limitations.
+
+Closeout revision 2026-09-09: owner rebuild resolves SBS coverage; matched June 23
+real-source evidence closes the local acceptance gate without changing runtime
+policies or mutating the project.

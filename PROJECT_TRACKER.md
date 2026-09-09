@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-09-08
-**Active Packages**: 33
+**Last Updated**: 2026-09-09
+**Active Packages**: 35
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -49,7 +49,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 25 packages (above target range; calculated from the 25 package entries in the In Progress section)
+**Current WIP**: 35 packages (above target range; calculated from the 35 package entries in the In Progress section)
 
 ### 3. Manage Flow
 Monitor how long packages spend in each column:
@@ -86,19 +86,6 @@ Feedback mechanisms:
 ---
 
 ## 📋 Backlog
-
-### Staley M1 Prepared Predictor Integration
-
-**Scoped**: 2026-09-09 15:06 UTC. Scaffolded; not executing.
-
-**Link**: [Package](docs/work-packages/20260909_staley_m1_predictors/package.md)
-
-**Scope**: Compose prepared project inputs and owned StaleySlopeSbs into a local
-T/F/S bundle with independent support, provenance and scalar scenario evidence.
-No live NoDb/UI/RQ publication, upstream rebuild or climate adapter.
-
-**Next**: Verify K convention; resolve K coverage and artifact-only readiness;
-freeze conversion/schema contract. Dedicated correctness/security reviews required.
 
 ### Seamless WEPPcloud Session Cookie Namespace Migration
 
@@ -429,7 +416,6 @@ When resuming Kubernetes work:
 ---
 
 ## 🚧 In Progress
-
 
 
 ### Batch and Culvert Climate Rehydration Hardening
@@ -1286,6 +1272,21 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### Staley M1 Prepared Predictor Integration
+
+**Status**: Closed 2026-09-09 — local backend acceptance complete.
+
+**Link**: [Package](docs/work-packages/20260909_staley_m1_predictors/package.md)
+
+**Delivered**: accepted K policy (ADR-0059), prepared copies, independent T/F/S,
+source hashes, complete synthetic and authentic rebuilt Wallow bundles, and
+missing-input evidence. All 12,973 Wallow basin cells have full support with zero
+unknown intersections; explicit example scenarios retain the area warning.
+Full suite: 8,016 passed, 72 skipped; 50 focused tests and independent correctness/
+security reviews passed. ExecPlan archived. Climate, NoDb/UI/RQ publication and
+live freshness enforcement remain successor scope.
+
 
 ### Staley WBT Slope and SBS Intersection
 

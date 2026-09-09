@@ -90,3 +90,6 @@ Each ADR should normally include:
 - `ADR-0047`: [Project Config Locale and View Authority](ADR-0047-project-config-locale-authority.md) (Accepted, 2026-08-27)
 - `ADR-0050`: [Opt-in Shared GridMET Redis Admission](ADR-0050-gridmet-redis-admission.md) (Accepted for implementation; Forest acceptance pending, 2026-09-07)
 - `ADR-0052`: [Staley M3 Upstream Terrain Definition](ADR-0052-staley-m3-upstream-terrain.md) (Accepted engineering formula; 10 m initial-support recommendation, 2026-09-09)
+
+- `ADR-0059`: [Local M1 Prepared Predictor Composition](ADR-0059-staley-m1-prepared-predictors.md) (Accepted, 2026-09-09)
+- `ADR-0060`: [Pseudo-BARC256 Fixture Derivation](ADR-0060-pseudo-barc256-fixture-derivation.md) (Accepted for test artifacts, 2026-09-09)

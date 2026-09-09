@@ -43,10 +43,12 @@ The dNBR backend is not a completed browser upload workflow.
 ## Next Scoped Increment
 
 [Local M1 predictor integration](../../../../docs/work-packages/20260909_staley_m1_predictors/package.md)
-is scaffolded, not executing. It composes the completed slope/SBS and dNBR
-backends with RUSLE Nomograph K; see [proposed contract](docs/m1_predictors.md).
-This is remaining local stage-3 work, with K policy gates and separate future
-production publication. Completed backend contracts are not reopened.
+is implemented and validated locally with complete authentic Wallow evidence. It
+composes the completed slope/SBS and dNBR
+backends with RUSLE Nomograph K; see [accepted contract](docs/m1_predictors.md).
+K policy is accepted in ADR-0059. Complete synthetic and authentic T/F/S outputs
+and missing-input cases exist. Climate composition and production publication
+remain successor work. Completed backend contracts are not reopened.
 
 ## Delivery Sequence
 
@@ -59,7 +61,8 @@ Stages 1–2 are **complete**, in the
 [project watershed and numerical engine package](../../../../docs/work-packages/20260908_staley_watershed_engine/package.md).
 Stage 3 slope/SBS local backend is **implemented and validated**, in the
 [WBT slope/SBS package](../../../../docs/work-packages/20260908_staley_slope_sbs/package.md).
-Other stage 3 work and later stages are **not started**. Stage completion requires its exit evidence,
+Local stage 3 composition is **complete**, including authentic complete-source
+evidence. Later stages are **not started**. Stage completion requires its exit evidence,
 not only source files. Accepted scope is the existing project watershed/outlet;
 nested/channel assessments are excluded from initial delivery (ADR-0055).
 
@@ -88,9 +91,9 @@ scientific limitation that implementation cannot resolve.
 | ID | Decision or remaining work | Resolve before | Current authority / status |
 | --- | --- | --- | --- |
 | L01 | Scope resolved: existing project watershed and existing outlet. Confirm canonical artifact mapping; no new outlet selection or nested enumeration. | Stage 1 completion | [Accepted scope](specification.md#project-watershed-assessment-scope), [ADR-0055](../../../../docs/adrs/ADR-0055-staley-project-watershed-scope.md); [artifact audit completed](../../../../docs/work-packages/20260908_staley_watershed_engine/artifacts/watershed_artifact_audit.md). |
-| L02 | Slope algorithm, SBS class mapping, unknown pixels, soil/K coverage, and independent predictor denominators. | Stage 3 implementation | [Slope/SBS backend](docs/slope_sbs.md) and both WBT bindings validated; Horn, raw DEM, strict edges and uncertainty preservation recorded (ADR-0058). K coverage remains separate. Do not extend accepted dNBR partial-coverage policy implicitly. |
+| L02 | Slope algorithm, SBS class mapping, unknown pixels, soil/K coverage, and independent predictor denominators. | Stage 3 implementation | [Slope/SBS backend](docs/slope_sbs.md) and both WBT bindings validated; Horn, raw DEM, strict edges and uncertainty preservation recorded (ADR-0058). Full K coverage without additional fill is accepted in ADR-0059; partial K remains diagnostic. |
 | L03 | Coefficient verification, stable sigmoid/logit, permitted rainfall/probability inputs, zero/negative denominators, negative or unreachable thresholds. | Stage 2 implementation | Resolved in [engine contract](docs/staley2017_engine.md) and [ADR-0056](../../../../docs/adrs/ADR-0056-staley-numerical-engine.md), including review fixes for adjacent targets and inverse underflow. |
-| L04 | K calibration units, artifact provenance/freshness, full RUSLE versus K-only readiness, and M3's RUSLE prerequisite. | Stages 3 and 5 | [RUSLE dependency](specification.md#rusle-and-polaris-dependency). Recommend K-artifact readiness for M1 and no RUSLE prerequisite for M3; not yet ratified. |
+| L04 | K calibration units, artifact provenance/freshness, full RUSLE versus K-only readiness, and M3's RUSLE prerequisite. | Stages 3 and 5 | [RUSLE dependency](specification.md#rusle-and-polaris-dependency). M1 K-artifact readiness and identity scale are accepted in ADR-0059; production freshness enforcement and M3 requirements remain separate. |
 | L05 | Soil material inclusion, horizon validity, incomplete components, fallback granularity/triggers, and residual missing coverage. | Stage 6 implementation | [M3 soil direction](specification.md#m3-soil-thickness-ssurgo-feasibility); source priority accepted, production rules pending. |
 | L06 | Prepared SSURGO inventory, substituted/custom/legacy soils, STATSGO source delivery and freshness; neither source usable. | Stage 6 integration | [Soils readiness](specification.md#availability-and-soils-readiness), [soil contract](docs/m3_soil_thickness.md). No implicit soil rebuild or acquisition authority. |
 | L07 | Adopt genuine 10 m M3 requirement; detect source fidelity, validate installed WBT tool/bindings, and sample accepted relief/area at assessment outlets. | Stage 6 integration | [Terrain contract](docs/m3_terrain.md). Calibration-preprocessing equivalence remains unproven; upsampling does not establish fidelity. |
@@ -175,7 +178,20 @@ scientific limitation that implementation cannot resolve.
 
 - 2026-09-09 15:06 UTC: [local M1 predictor package](../../../../docs/work-packages/20260909_staley_m1_predictors/package.md)
   scaffolded for remaining local stage-3 composition. See the
-  [proposed contract](docs/m1_predictors.md). Covers WBT-compatible prepared
+  [accepted contract](docs/m1_predictors.md). Covers WBT-compatible prepared
   inputs, independent T/F/S support and provenance. K unit verification,
   coverage policy and artifact-only readiness remain decision gates. Execution
   has not started; live publication and UI/RQ remain stage 5 work.
+
+- 2026-09-09 execution: owner accepted P02/P03, recorded in ADR-0059. Local
+  adapter and 50 boundary tests implemented; actual binary generated synthetic
+  complete and authentic `strained-mod` missing-dNBR bundles. Correctness findings
+  closed. Full suite: 8,016 passed, 72 skipped; API/stub/docs gates passed.
+  Stage 3 remains open for authentic complete
+  source evidence. No production publication or climate integration claimed.
+
+- 2026-09-09 UTC: owner rebuilt Wallow using final polygon SBS. Matching June 23
+  dNBR and rebuilt Nomograph K yield full T/F/S support on 12,973 cells, zero
+  unknown intersections and explicit scenario outputs. Local stage 3 acceptance
+  is complete; area applicability warning retained. Production wiring remains
+  stage 5 scope.

@@ -1,0 +1,340 @@
+{
+  "project_url": "https://wc.bearhive.duckdns.org/weppcloud/runs/woolen-refusal/disturbed9002_wbt/",
+  "project": "/wc1/runs/wo/woolen-refusal",
+  "output": "/workdir/wepppy/docs/work-packages/20260909_staley_m1_predictors/artifacts/generated/wallow-rebuilt-final",
+  "source_kind": "real",
+  "assessment": "2011-06-23 final polygon severity, matching rebuilt run SBS",
+  "archive_sha256": "423eb8b0edf87a733a1d441d64e11295b6fb65db3c18c30b00bab250998ecaaf",
+  "dnbr_member": "Wallow_FinalSoilBurnSeverity/FinalSoilBurnSeverity/wallow_dnbr.img",
+  "dnbr_member_sha256": "f6494b9faba696ca7deef6765313e23556fe08af6086b4f73f8c323715f35194",
+  "uploaded_severity_verified": true,
+  "upload_provenance": {
+    "archive_url": "https://edcintl.cr.usgs.gov/downloads/sciweb1/shared/MTBS_Fire/data/baer/Wallow_FinalSoilBurnSeverity.zip",
+    "archive_sha256": "423eb8b0edf87a733a1d441d64e11295b6fb65db3c18c30b00bab250998ecaaf",
+    "sources": [
+      {
+        "member": "Wallow_FinalSoilBurnSeverity/FinalSoilBurnSeverity/wallow_finalsoilburnseverity.shp",
+        "sha256": "501f1080c1d14ef3fec041212b841d8bdff23af5a139b8000abfc3320bedea15"
+      },
+      {
+        "member": "Wallow_FinalSoilBurnSeverity/FinalSoilBurnSeverity/wallow_finalsoilburnseverity.shx",
+        "sha256": "74331abf73b74ac822fc72d843a0267436e2b3152a15582f920a5ae3d0789815"
+      },
+      {
+        "member": "Wallow_FinalSoilBurnSeverity/FinalSoilBurnSeverity/wallow_finalsoilburnseverity.dbf",
+        "sha256": "7ea67845267c490869ebfc2eaf43b549a55a3c4395f04e10dda41ceec0372082"
+      },
+      {
+        "member": "Wallow_FinalSoilBurnSeverity/FinalSoilBurnSeverity/wallow_finalsoilburnseverity.prj",
+        "sha256": "c2e102c73fba08ebaef452664acd997cb9d3d8668864c117a8323b23e0837e95"
+      }
+    ],
+    "path": "wallow_finalsoilburnseverity.tif",
+    "sha256": "ed99c81b229cf4c241e055f97c8b068eb1b9def6c1cceb80b200fa54ae38ed3b",
+    "attribute": "GRIDCODE",
+    "classes": {
+      "0": "background/NoData",
+      "1": "unchanged/very low",
+      "2": "low",
+      "3": "moderate",
+      "4": "high"
+    },
+    "rasterization": "GDAL default pixel-center rule; source feature order; no ALL_TOUCHED",
+    "grid_reference": "wallow_20110623_barc4_alb.tif",
+    "grid_reference_sha256": "27c5cb24bc5152b8aec35fab7a1e3f0e9ea4756cddec759933f61a9dfc3d95ca",
+    "feature_counts": {
+      "2": 28505,
+      "0": 2668,
+      "1": 32347,
+      "3": 28170,
+      "4": 6375
+    },
+    "pixel_counts": {
+      "0": 332344,
+      "1": 4053218,
+      "2": 1048376,
+      "3": 399147,
+      "4": 376335
+    },
+    "nodata": 0,
+    "gdal_version": "GDAL 3.10.3, released 2025/04/01"
+  },
+  "original_project_sha256": {
+    "/wc1/runs/wo/woolen-refusal/dem/dem.tif": "7c1012c998eb5202137f0c24cfed5b3aa6ffd7adf8106ab643efe878083bb970",
+    "/wc1/runs/wo/woolen-refusal/dem/dem.tif.aux.xml": "09988c55011cf96927f49665f4f7b782719cddf4f946668c81e680e1958ff2eb",
+    "/wc1/runs/wo/woolen-refusal/dem/wbt/bound.tif": "c708e2fe55d23f615192fe0055454877fb12b2fffb411f440f9e5242de7dd24e",
+    "/wc1/runs/wo/woolen-refusal/dem/wbt/outlet.geojson": "4c429073348cc9273999320bc28c85ea6387801f89b51ae90c3f89856a15b2df",
+    "/wc1/runs/wo/woolen-refusal/disturbed/sbs_4class.tif": "d93993ec4338c9e5eb92456d61bdc07d5cbbd19615ec0dbd14b9be72e5fbfba3",
+    "/wc1/runs/wo/woolen-refusal/rusle/k_polaris_nomograph.tif": "7769213e276c7fe842e9910de0b66d27aeb8e045432a0a5afd26b1d303ae8568",
+    "/wc1/runs/wo/woolen-refusal/rusle/manifest.json": "ba9abd9288cb98e427e94f23d82a3d4e61335fd00d06446224625a0907737eaa",
+    "/wc1/runs/wo/woolen-refusal/soils.nodb": "32cd91f0220523c937c8171e084b1d67559c0425ad12379710cce5612a8f6ef8",
+    "/wc1/runs/wo/woolen-refusal/disturbed.nodb": "102e447a667ce2c32651afc37eb6ca4ebe4c06251a3af0281abd3ce0b7693b61",
+    "/wc1/runs/wo/woolen-refusal/watershed.nodb": "63e308a1682a0fa77b402ab0f20a526130eda53465633e923a20150707fac0ed",
+    "/wc1/runs/wo/woolen-refusal/soils/658465.sol": "d62cbb7123c1f9171d92b581fe2f22ce89a354a2b3d5c8e20b45e0b6ff9c5e08",
+    "/wc1/runs/wo/woolen-refusal/soils/658580.sol": "2decaa0c1a3c3db15575e2d1267f81a1a42c66403047c52c59372c73d42bfc70",
+    "/wc1/runs/wo/woolen-refusal/soils/658498.sol": "688e5f9add74d2641c03056d3cec4e466ddf6d118ceb56cbab6da602eb759370",
+    "/wc1/runs/wo/woolen-refusal/soils/658497.sol": "21edb0eb170899a2c34df784c3872a33b178df9c0fe23ef083f7a8674c26638b",
+    "/wc1/runs/wo/woolen-refusal/soils/658504.sol": "56ea5d8ba7a6399a342d519e33dd08f10c1f74b4f09063e57d71e7064897794a",
+    "/wc1/runs/wo/woolen-refusal/soils/665730.sol": "0f6c314e17d9033a3af553ccee45793b0677240270d7bf9fc44260d48a1aa86b",
+    "/wc1/runs/wo/woolen-refusal/soils/658504-loam-shrub high sev fire.sol": "1e797500e4e670b76c655e6efc254f17f5f3192eff90488367c4f9157a6ea7b4",
+    "/wc1/runs/wo/woolen-refusal/soils/658498-loam-shrub high sev fire.sol": "2a5c481da1821dbd373039257336849a5cc86a2760bd85e20721d9fa691d5d81",
+    "/wc1/runs/wo/woolen-refusal/soils/658498-loam-shrub.sol": "adad69e2e92813963eade559e79bf4e683a63024bb037c33a6d0054f046a9700",
+    "/wc1/runs/wo/woolen-refusal/soils/658504-loam-forest.sol": "c3a0e72a71f8a9b62f50559eaf99dc967365c2465260c860526c12f1f8f100c3",
+    "/wc1/runs/wo/woolen-refusal/soils/658498-loam-forest.sol": "7a05513db894bbfe95818e145be4fa33f42a2643f74125fbcc1fc28c0173c4ea",
+    "/wc1/runs/wo/woolen-refusal/soils/658504-loam-shrub.sol": "e85be43896d127e23278a9b7500b828a11edc76fa5c082b01c1da1bd704c351b",
+    "/wc1/runs/wo/woolen-refusal/disturbed/wallow_finalsoilburnseverity.tif": "ed99c81b229cf4c241e055f97c8b068eb1b9def6c1cceb80b200fa54ae38ed3b",
+    "/workdir/wepppy/tests/nodb/mods/fixtures/postfire_debris_flow_wallow/wallow_finalsoilburnseverity.manifest.json": "672146b96e8ab3c5f39bea17401321fe80e94dab0edf81b2c1768913ebafe361"
+  },
+  "soil_artifacts_verified": 12,
+  "identity": {
+    "uid": 1000,
+    "gid": 993,
+    "groups": [
+      993
+    ]
+  },
+  "availability": "complete",
+  "area_km2": 11.6757,
+  "predictors": {
+    "T": {
+      "value": 0.1894704386032529,
+      "units": "fraction",
+      "status": "available",
+      "reason": null,
+      "support": {
+        "total_cells": 12973,
+        "valid_cells": 12973,
+        "coverage_fraction": 1.0
+      },
+      "lower": 0.1894704386032529,
+      "upper": 0.1894704386032529,
+      "wbt_summary": {
+        "T": 0.1894704386032529,
+        "T_lower": 0.1894704386032529,
+        "T_upper": 0.1894704386032529,
+        "areas_m2": {
+          "basin": 11675700.0,
+          "intersection_false": 9463500.0,
+          "intersection_true": 2212200.0,
+          "intersection_unknown": 0.0,
+          "jointly_valid": 11675700.0,
+          "sbs_high": 8873100.0,
+          "sbs_low": 1388700.0,
+          "sbs_moderate": 495900.0,
+          "sbs_unburned": 918000.0,
+          "sbs_valid": 11675700.0,
+          "slope_valid": 11675700.0,
+          "steep": 2338200.0
+        },
+        "counts": {
+          "basin": 12973,
+          "intersection_false": 10515,
+          "intersection_true": 2458,
+          "intersection_unknown": 0,
+          "jointly_valid": 12973,
+          "sbs_high": 9859,
+          "sbs_low": 1543,
+          "sbs_moderate": 551,
+          "sbs_unburned": 1020,
+          "sbs_valid": 12973,
+          "slope_valid": 12973,
+          "steep": 2598
+        },
+        "grid": {
+          "columns": 647,
+          "epsg": 32612,
+          "north": 3743119.907841919,
+          "resolution_m": 30.0,
+          "rows": 624,
+          "west": 645580.1789054491
+        },
+        "parameters": {
+          "algorithm": "Horn 3x3",
+          "dem_source": "raw",
+          "edges": "nine-valid-cells",
+          "elevation_units": "m",
+          "sbs_classes": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "threshold_degrees": 23
+        },
+        "schema_version": 1,
+        "sources": {
+          "dem": {
+            "bytes": 3233966,
+            "fnv1a64": "3c9d133a32dcbe4e",
+            "path": "/workdir/wepppy/docs/work-packages/20260909_staley_m1_predictors/artifacts/generated/wallow-rebuilt-final/bundle/prepared/dem.tif"
+          },
+          "mask": {
+            "bytes": 3233966,
+            "fnv1a64": "81b92234ca7edab4",
+            "path": "/workdir/wepppy/docs/work-packages/20260909_staley_m1_predictors/artifacts/generated/wallow-rebuilt-final/bundle/prepared/mask.tif"
+          },
+          "sbs": {
+            "bytes": 808452,
+            "fnv1a64": "6c50c640df3feacd",
+            "path": "/workdir/wepppy/docs/work-packages/20260909_staley_m1_predictors/artifacts/generated/wallow-rebuilt-final/bundle/prepared/sbs.tif"
+          }
+        },
+        "status": "complete",
+        "tool": "StaleySlopeSbs",
+        "tool_version": "2.4.0"
+      }
+    },
+    "F": {
+      "value": 0.6141950971236625,
+      "units": "normalized_dNBR",
+      "status": "available",
+      "reason": null,
+      "support": {
+        "total_cells": 12973,
+        "valid_cells": 12973,
+        "coverage_fraction": 1.0
+      },
+      "observed_mean": 0.6141950971236625,
+      "warning": null
+    },
+    "S": {
+      "value": 0.43397823632668575,
+      "units": "USLE_customary",
+      "status": "available",
+      "reason": null,
+      "support": {
+        "total_cells": 12973,
+        "valid_cells": 12973,
+        "coverage_fraction": 1.0
+      },
+      "observed_mean": 0.43397823632668575,
+      "invalid_cells": 0,
+      "multiplier": 1.0
+    }
+  },
+  "scenarios": [
+    {
+      "duration_minutes": 15,
+      "rainfall_mm": 10,
+      "probability": 0.9866102237667208,
+      "reason": null,
+      "warnings": [
+        "area_outside_study_range"
+      ],
+      "source_kind": "real"
+    },
+    {
+      "duration_minutes": 30,
+      "rainfall_mm": 20,
+      "probability": 0.998507412524049,
+      "reason": null,
+      "warnings": [
+        "area_outside_study_range"
+      ],
+      "source_kind": "real"
+    },
+    {
+      "duration_minutes": 60,
+      "rainfall_mm": 30,
+      "probability": 0.9866885015218513,
+      "reason": null,
+      "warnings": [
+        "area_outside_study_range"
+      ],
+      "source_kind": "real"
+    }
+  ],
+  "normalization": {
+    "schema_version": 1,
+    "source": "/workdir/wepppy/docs/work-packages/20260909_staley_m1_predictors/artifacts/generated/wallow-rebuilt-final/sources/raw_dnbr.tif",
+    "physical_source": "/workdir/wepppy/docs/work-packages/20260909_staley_m1_predictors/artifacts/generated/wallow-rebuilt-final/sources/raw_dnbr.tif",
+    "input_sha256": {
+      "/workdir/wepppy/docs/work-packages/20260909_staley_m1_predictors/artifacts/generated/wallow-rebuilt-final/sources/raw_dnbr.tif": "b13f15380008c4a2f83543a807535c39fe31c0e12fba9d1383240b879815d52b",
+      "/workdir/wepppy/docs/work-packages/20260909_staley_m1_predictors/artifacts/generated/wallow-rebuilt-final/sources/dem/dem.tif": "7c1012c998eb5202137f0c24cfed5b3aa6ffd7adf8106ab643efe878083bb970",
+      "/workdir/wepppy/docs/work-packages/20260909_staley_m1_predictors/artifacts/generated/wallow-rebuilt-final/sources/domain.tif": "acb3995825ccfe57575f44bc915a761f1c7ccdf2542bb1511bb0f4dfd56a62aa"
+    },
+    "source_dtype": "float32",
+    "source_driver": "GTiff",
+    "source_band": 1,
+    "source_valid_cells": 6209420,
+    "source_grid": {
+      "shape": [
+        2609,
+        2380
+      ],
+      "crs": "EPSG:5070",
+      "transform": [
+        30.0,
+        0.0,
+        -1249110.0,
+        0.0,
+        -30.0,
+        1319220.0
+      ]
+    },
+    "source_nodata": "None",
+    "metadata_encoding": [
+      1.0,
+      0.0
+    ],
+    "scale_factor": 0.001,
+    "add_offset": 0.0,
+    "resampling": "nearest",
+    "target_grid": {
+      "shape": [
+        624,
+        647
+      ],
+      "crs": "EPSG:32612",
+      "transform": [
+        30.0,
+        0.0,
+        645580.1789054491,
+        0.0,
+        -30.0,
+        3743119.907841919
+      ]
+    },
+    "normalized_range": [
+      -2.0,
+      1.055999994277954
+    ],
+    "outside_ideal_range_cells": 0,
+    "prefire_date": "2011-05-30",
+    "postfire_date": "2011-06-23",
+    "assessment_type": null,
+    "watershed": {
+      "status": "complete",
+      "total_cells": 12973,
+      "valid_cells": 12973,
+      "coverage_fraction": 1.0,
+      "mean_dnbr": 0.6141950971236625,
+      "m1_f": 0.6141950971236625,
+      "warning": null
+    },
+    "dnbr_sha256": "a8063071fecf60f2e09fb5a888800644fd39273231157f98178f5e8ab0c46ce7"
+  },
+  "basin_normalized_dnbr_range": [
+    -0.13600000739097595,
+    1.0210000276565552
+  ],
+  "tool": {
+    "path": "/workdir/weppcloud-wbt/target/release/whitebox_tools",
+    "sha256": "6647d55c2d8d28680addd16adc4d9d406857a7ccb394cd4260a2d61d7d8ffc42",
+    "version": "2.4.0",
+    "command": [
+      "/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--dem=/workdir/wepppy/docs/work-packages/20260909_staley_m1_predictors/artifacts/generated/wallow-rebuilt-final/bundle/prepared/dem.tif",
+      "--mask=/workdir/wepppy/docs/work-packages/20260909_staley_m1_predictors/artifacts/generated/wallow-rebuilt-final/bundle/prepared/mask.tif",
+      "--sbs=/workdir/wepppy/docs/work-packages/20260909_staley_m1_predictors/artifacts/generated/wallow-rebuilt-final/bundle/prepared/sbs.tif",
+      "--output_dir=/workdir/wepppy/docs/work-packages/20260909_staley_m1_predictors/artifacts/generated/wallow-rebuilt-final/bundle/wbt",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ]
+  },
+  "limitations": [
+    "Assessment dates are explicit; prior July 1 evidence is historical",
+    "No production publication or automatic controller freshness enforcement"
+  ]
+}

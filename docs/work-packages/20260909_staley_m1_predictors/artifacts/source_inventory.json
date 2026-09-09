@@ -1,0 +1,409 @@
+{
+  "captured_utc": "2026-09-09T15:15:36.424974+00:00",
+  "scope": "read-only candidate inventory; does not establish freshness or complete WEPP Soils readiness",
+  "runs": [
+    {
+      "root": "/wc1/runs/on/onshore-xenophobia",
+      "files": [
+        {
+          "path": "dem/dem.tif",
+          "sha256": "01f62bca1683a76151c2098fcde44246fad002271b8ff4e905fa73b60d6995b1",
+          "bytes": 1967960,
+          "shape": [
+            696,
+            706
+          ],
+          "crs": "EPSG:32610",
+          "transform": [
+            30.0,
+            0.0,
+            529812.9713058415,
+            0.0,
+            -30.0,
+            4900742.200598567
+          ],
+          "dtype": "float32",
+          "nodata": "-999999.0"
+        },
+        {
+          "path": "dem/wbt/bound.tif",
+          "sha256": "b5e2545f8930f74c0aaf67c9afe4f7b9e6d7bb7957a046f10a6b49c9c57cdddc",
+          "bytes": 1971506,
+          "shape": [
+            696,
+            706
+          ],
+          "crs": "EPSG:32610",
+          "transform": [
+            30.0,
+            0.0,
+            529812.9713058415,
+            0.0,
+            -30.0,
+            4900742.200598567
+          ],
+          "dtype": "int32",
+          "nodata": "-32768.0"
+        },
+        {
+          "path": "dem/wbt/outlet.geojson",
+          "sha256": "1b10186d4b5ae4bec21426b954d7f0c5a7678acbda2d629b4601ab351947b896",
+          "bytes": 1019
+        },
+        {
+          "path": "disturbed/sbs_4class.tif",
+          "sha256": "bbbd8466f6b0f5927f1c2b5ad67642015626272d121d01f243b1939809aae3fa",
+          "bytes": 235572,
+          "shape": [
+            1448,
+            2270
+          ],
+          "crs": "EPSG:26910",
+          "transform": [
+            19.999999999999975,
+            0.0,
+            517347.7844699473,
+            0.0,
+            -20.0,
+            4904114.418559566
+          ],
+          "dtype": "uint8",
+          "nodata": "255.0"
+        },
+        {
+          "path": "rusle/sbs_4class.tif",
+          "sha256": "cc41e144ffc0e60305e4e3ac0d82688b6caefa0787b51696f4e614bfd7b7fe36",
+          "bytes": 55282,
+          "shape": [
+            696,
+            706
+          ],
+          "crs": "EPSG:32610",
+          "transform": [
+            30.0,
+            0.0,
+            529812.9713058415,
+            0.0,
+            -30.0,
+            4900742.200598567
+          ],
+          "dtype": "uint8",
+          "nodata": "255.0"
+        },
+        {
+          "path": "rusle/k_polaris_nomograph.tif",
+          "sha256": "04e08362c195c3a247c4de5d020409b9de40b895775bc5b5109c71b271961dd8",
+          "bytes": 233571,
+          "shape": [
+            696,
+            706
+          ],
+          "crs": "EPSG:32610",
+          "transform": [
+            30.0,
+            0.0,
+            529812.9713058415,
+            0.0,
+            -30.0,
+            4900742.200598567
+          ],
+          "dtype": "float32",
+          "nodata": "-9999.0"
+        },
+        {
+          "path": "rusle/manifest.json",
+          "sha256": "7ea0f0fb31b2dbfe26941751a49d75623eff9266d6b95caa2a6c4ba9aa66092e",
+          "bytes": 9180
+        }
+      ],
+      "domain_cells": 138204,
+      "usable_k_cells": 138204,
+      "observed_k_mean": 0.010477215982973576,
+      "k_manifest_fields": [
+        "artifacts",
+        "comparison_thresholds",
+        "default_k_mode",
+        "generated_utc",
+        "mode_contract",
+        "near_surface_depths",
+        "near_surface_weights_cm",
+        "selected_modes",
+        "statistic"
+      ],
+      "selected_modes": [
+        "polaris_nomograph"
+      ],
+      "dnbr_status": "not located by filename search; no verified normalized source"
+    },
+    {
+      "root": "/wc1/runs/co/countrywide-kleptomania",
+      "files": [
+        {
+          "path": "dem/dem.tif",
+          "sha256": "396e21e7c6c46e944ce2c2d7b7c122fa3c71fbc070ed1ad2dc702ed7a7dc2969",
+          "bytes": 2264528,
+          "shape": [
+            747,
+            757
+          ],
+          "crs": "EPSG:32610",
+          "transform": [
+            30.0,
+            0.0,
+            529185.9759496379,
+            0.0,
+            -30.0,
+            4901272.971475919
+          ],
+          "dtype": "float32",
+          "nodata": "-999999.0"
+        },
+        {
+          "path": "dem/wbt/bound.tif",
+          "sha256": "f40b6c9eb759fb00b18d6f7ef6c1cf62e62cde3f9c050a37aed9733d429c7243",
+          "bytes": 2268326,
+          "shape": [
+            747,
+            757
+          ],
+          "crs": "EPSG:32610",
+          "transform": [
+            30.0,
+            0.0,
+            529185.9759496379,
+            0.0,
+            -30.0,
+            4901272.971475919
+          ],
+          "dtype": "int32",
+          "nodata": "-32768.0"
+        },
+        {
+          "path": "dem/wbt/outlet.geojson",
+          "sha256": "25718c93563d5e26468d39907fee176141c79e4159fefeea3384b472b061cd87",
+          "bytes": 1020
+        },
+        {
+          "path": "disturbed/sbs_4class.tif",
+          "sha256": "bbbd8466f6b0f5927f1c2b5ad67642015626272d121d01f243b1939809aae3fa",
+          "bytes": 235572,
+          "shape": [
+            1448,
+            2270
+          ],
+          "crs": "EPSG:26910",
+          "transform": [
+            19.999999999999975,
+            0.0,
+            517347.7844699473,
+            0.0,
+            -20.0,
+            4904114.418559566
+          ],
+          "dtype": "uint8",
+          "nodata": "255.0"
+        },
+        {
+          "path": "rusle/sbs_4class.tif",
+          "sha256": "a151a8a315abf95ca654b6318b8bc715b256b83c56ccad1d3edca98cf4c13f9d",
+          "bytes": 62648,
+          "shape": [
+            747,
+            757
+          ],
+          "crs": "EPSG:32610",
+          "transform": [
+            30.0,
+            0.0,
+            529185.9759496379,
+            0.0,
+            -30.0,
+            4901272.971475919
+          ],
+          "dtype": "uint8",
+          "nodata": "255.0"
+        },
+        {
+          "path": "rusle/k_polaris_nomograph.tif",
+          "sha256": "cd95bc6732882adc8fe1f151e1b01e88bdcb009ef3b3c858361d5b4190e5c2b5",
+          "bytes": 258974,
+          "shape": [
+            747,
+            757
+          ],
+          "crs": "EPSG:32610",
+          "transform": [
+            30.0,
+            0.0,
+            529185.9759496379,
+            0.0,
+            -30.0,
+            4901272.971475919
+          ],
+          "dtype": "float32",
+          "nodata": "-9999.0"
+        },
+        {
+          "path": "rusle/manifest.json",
+          "sha256": "26cdb865c0d57dcedffaba267dc470be0ca3f49a46f5375fc81f82dd6f9a4696",
+          "bytes": 8533
+        }
+      ],
+      "domain_cells": 138226,
+      "usable_k_cells": 138226,
+      "observed_k_mean": 0.010530113242566586,
+      "k_manifest_fields": [
+        "artifacts",
+        "comparison_thresholds",
+        "default_k_mode",
+        "generated_utc",
+        "mode_contract",
+        "near_surface_depths",
+        "near_surface_weights_cm",
+        "selected_modes",
+        "statistic"
+      ],
+      "selected_modes": [
+        "polaris_nomograph"
+      ],
+      "dnbr_status": "not located by filename search; no verified normalized source"
+    },
+    {
+      "root": "/wc1/runs/st/strained-mod",
+      "files": [
+        {
+          "path": "dem/dem.tif",
+          "sha256": "12dbeb22159679d0b340a01e350452d339c61046baac0d0bd166702a4b2de6c4",
+          "bytes": 6469418,
+          "shape": [
+            1281,
+            1261
+          ],
+          "crs": "EPSG:32611",
+          "transform": [
+            30.0,
+            0.0,
+            395039.8048115814,
+            0.0,
+            -30.0,
+            3817819.9991623196
+          ],
+          "dtype": "float32",
+          "nodata": "-999999.0"
+        },
+        {
+          "path": "dem/wbt/bound.tif",
+          "sha256": "e59561c23b7dfef2ae1cb579d487296f3e3de89323596f4a81ff631195308231",
+          "bytes": 6472046,
+          "shape": [
+            1281,
+            1261
+          ],
+          "crs": "EPSG:32611",
+          "transform": [
+            30.0,
+            0.0,
+            395039.8048115814,
+            0.0,
+            -30.0,
+            3817819.9991623196
+          ],
+          "dtype": "int32",
+          "nodata": "-32768.0"
+        },
+        {
+          "path": "dem/wbt/outlet.geojson",
+          "sha256": "8dc1a4ef8a6a1ba107b1cbefd54868815569db8c3fbd183db281e4b6f6946ba3",
+          "bytes": 1021
+        },
+        {
+          "path": "disturbed/sbs_4class.tif",
+          "sha256": "50800959a292cc576416d2239743c46c44b4158094aa8f79fcc8fd18fa3be20e",
+          "bytes": 218168,
+          "shape": [
+            1764,
+            1563
+          ],
+          "crs": "EPSG:26911",
+          "transform": [
+            20.0,
+            0.0,
+            398311.0707999995,
+            0.0,
+            -20.0,
+            3816241.2112000003
+          ],
+          "dtype": "uint8",
+          "nodata": "255.0"
+        },
+        {
+          "path": "rusle/sbs_4class.tif",
+          "sha256": "3f312a8d28b5b6fb898a70aa59c87256e638d4e749b970b871100f9514942c64",
+          "bytes": 121492,
+          "shape": [
+            1281,
+            1261
+          ],
+          "crs": "EPSG:32611",
+          "transform": [
+            30.0,
+            0.0,
+            395039.8048115814,
+            0.0,
+            -30.0,
+            3817819.9991623196
+          ],
+          "dtype": "uint8",
+          "nodata": "255.0"
+        },
+        {
+          "path": "rusle/k_polaris_nomograph.tif",
+          "sha256": "cd4e832fdfb5d6c0bd4d9819f6846b2ef32aa51b9fe212ded5dc86ab2e90bd5d",
+          "bytes": 5170352,
+          "shape": [
+            1281,
+            1261
+          ],
+          "crs": "EPSG:32611",
+          "transform": [
+            30.0,
+            0.0,
+            395039.8048115814,
+            0.0,
+            -30.0,
+            3817819.9991623196
+          ],
+          "dtype": "float32",
+          "nodata": "-9999.0"
+        },
+        {
+          "path": "rusle/manifest.json",
+          "sha256": "96e75c0b293a1e03d6e2a1a1e2e1a041d7f1ff6d38e914db9ad6e75d15e67cfe",
+          "bytes": 44465
+        }
+      ],
+      "domain_cells": 80949,
+      "usable_k_cells": 80949,
+      "observed_k_mean": 0.33820679783821106,
+      "k_manifest_fields": [
+        "artifacts",
+        "cfvo_summary",
+        "comparison_thresholds",
+        "default_k_mode",
+        "gap_fill_policy",
+        "gap_fill_summary",
+        "generated_utc",
+        "mode_contract",
+        "near_surface_depths",
+        "near_surface_weights_cm",
+        "selected_modes",
+        "statistic"
+      ],
+      "selected_modes": [
+        "polaris_nomograph",
+        "polaris_epic"
+      ],
+      "dnbr_status": "not located by filename search; no verified normalized source"
+    }
+  ]
+}

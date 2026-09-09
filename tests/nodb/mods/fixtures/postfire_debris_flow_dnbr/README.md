@@ -18,3 +18,18 @@ Files are small ordinary Git fixtures. Tests are offline and generate temporary
 targets/masks; they do not claim these images overlap the earlier soil panel.
 MTBS fire bundles are another development source; continuous `dnbr.tif` must
 not be confused with categorical `dnbr6.tif` or relativized `rdnbr.tif`.
+
+## Preferred real severity fixtures
+
+Use the [Wallow final-severity collection](../postfire_debris_flow_wallow/README.md)
+for real SBS/BARC examples. It includes the distributed final four-class map,
+BARC256 and continuous dNBR from the user-selected USGS archive. The pseudo
+products below are retained as labeled historical derivatives, not the preferred
+severity examples. These collections cover different fires and are not co-located.
+
+## Pseudo-BARC256 derivatives
+
+Two derived byte rasters are available in [pseudo_barc256/](pseudo_barc256/README.md),
+with original grid/support, an internal missing-data mask and source/output hashes.
+They are labeled pseudo products, not field-validated SBS or independent burn
+severity observations. Original dNBR files and this source manifest are unchanged.

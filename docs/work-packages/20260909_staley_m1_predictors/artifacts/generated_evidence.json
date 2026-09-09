@@ -1,0 +1,325 @@
+{
+  "original_project_sha256": {
+    "/wc1/runs/st/strained-mod/dem/dem.tif": "12dbeb22159679d0b340a01e350452d339c61046baac0d0bd166702a4b2de6c4",
+    "/wc1/runs/st/strained-mod/dem/dem.tif.aux.xml": "2f5b64b2bee6168fe7a75fb2cf542f84c592a6ccc918beb63dc7cd632845525b",
+    "/wc1/runs/st/strained-mod/dem/wbt/bound.tif": "e59561c23b7dfef2ae1cb579d487296f3e3de89323596f4a81ff631195308231",
+    "/wc1/runs/st/strained-mod/dem/wbt/outlet.geojson": "8dc1a4ef8a6a1ba107b1cbefd54868815569db8c3fbd183db281e4b6f6946ba3",
+    "/wc1/runs/st/strained-mod/disturbed/sbs_4class.tif": "50800959a292cc576416d2239743c46c44b4158094aa8f79fcc8fd18fa3be20e",
+    "/wc1/runs/st/strained-mod/rusle/k_polaris_nomograph.tif": "cd4e832fdfb5d6c0bd4d9819f6846b2ef32aa51b9fe212ded5dc86ab2e90bd5d",
+    "/wc1/runs/st/strained-mod/rusle/manifest.json": "96e75c0b293a1e03d6e2a1a1e2e1a041d7f1ff6d38e914db9ad6e75d15e67cfe"
+  },
+  "preparation": "Byte-identical copied TIFFs; statistics-only PAM excluded after explicit XML and raster identity checks",
+  "output": "/workdir/wepppy/docs/work-packages/20260909_staley_m1_predictors/artifacts/generated/final",
+  "binary": "/workdir/weppcloud-wbt/target/release/whitebox_tools",
+  "binary_sha256": "6647d55c2d8d28680addd16adc4d9d406857a7ccb394cd4260a2d61d7d8ffc42",
+  "identity": {
+    "uid": 1000,
+    "gid": 993,
+    "groups": [
+      993
+    ]
+  },
+  "synthetic": {
+    "availability": "complete",
+    "predictors": {
+      "T": {
+        "value": 1.0,
+        "units": "fraction",
+        "status": "available",
+        "reason": null,
+        "support": {
+          "total_cells": 25,
+          "valid_cells": 25,
+          "coverage_fraction": 1.0
+        },
+        "lower": 1.0,
+        "upper": 1.0,
+        "wbt_summary": {
+          "T": 1.0,
+          "T_lower": 1.0,
+          "T_upper": 1.0,
+          "areas_m2": {
+            "basin": 22500.0,
+            "intersection_false": 0.0,
+            "intersection_true": 22500.0,
+            "intersection_unknown": 0.0,
+            "jointly_valid": 22500.0,
+            "sbs_high": 22500.0,
+            "sbs_low": 0.0,
+            "sbs_moderate": 0.0,
+            "sbs_unburned": 0.0,
+            "sbs_valid": 22500.0,
+            "slope_valid": 22500.0,
+            "steep": 22500.0
+          },
+          "counts": {
+            "basin": 25,
+            "intersection_false": 0,
+            "intersection_true": 25,
+            "intersection_unknown": 0,
+            "jointly_valid": 25,
+            "sbs_high": 25,
+            "sbs_low": 0,
+            "sbs_moderate": 0,
+            "sbs_unburned": 0,
+            "sbs_valid": 25,
+            "slope_valid": 25,
+            "steep": 25
+          },
+          "grid": {
+            "columns": 7,
+            "epsg": 32611,
+            "north": 4000000.0,
+            "resolution_m": 30.0,
+            "rows": 7,
+            "west": 500000.0
+          },
+          "parameters": {
+            "algorithm": "Horn 3x3",
+            "dem_source": "raw",
+            "edges": "nine-valid-cells",
+            "elevation_units": "m",
+            "sbs_classes": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "threshold_degrees": 23
+          },
+          "schema_version": 1,
+          "sources": {
+            "dem": {
+              "bytes": 790,
+              "fnv1a64": "bdaa3c1df13dd0a5",
+              "path": "/workdir/wepppy/docs/work-packages/20260909_staley_m1_predictors/artifacts/generated/final/synthetic-complete/prepared/dem.tif"
+            },
+            "mask": {
+              "bytes": 790,
+              "fnv1a64": "e6a38b110b5b2594",
+              "path": "/workdir/wepppy/docs/work-packages/20260909_staley_m1_predictors/artifacts/generated/final/synthetic-complete/prepared/mask.tif"
+            },
+            "sbs": {
+              "bytes": 470,
+              "fnv1a64": "da0c5e09492b3536",
+              "path": "/workdir/wepppy/docs/work-packages/20260909_staley_m1_predictors/artifacts/generated/final/synthetic-complete/prepared/sbs.tif"
+            }
+          },
+          "status": "complete",
+          "tool": "StaleySlopeSbs",
+          "tool_version": "2.4.0"
+        }
+      },
+      "F": {
+        "value": 0.4000000059604645,
+        "units": "normalized_dNBR",
+        "status": "available",
+        "reason": null,
+        "support": {
+          "total_cells": 25,
+          "valid_cells": 25,
+          "coverage_fraction": 1.0
+        },
+        "observed_mean": 0.4000000059604645,
+        "warning": null
+      },
+      "S": {
+        "value": 0.3,
+        "units": "USLE_customary",
+        "status": "available",
+        "reason": null,
+        "support": {
+          "total_cells": 25,
+          "valid_cells": 25,
+          "coverage_fraction": 1.0
+        },
+        "observed_mean": 0.3,
+        "invalid_cells": 0,
+        "multiplier": 1.0
+      }
+    },
+    "scenarios": [
+      {
+        "duration_minutes": 15,
+        "rainfall_mm": 10,
+        "probability": 0.9947798745138197,
+        "reason": null,
+        "warnings": [
+          "area_outside_study_range"
+        ],
+        "source_kind": "synthetic"
+      },
+      {
+        "duration_minutes": 30,
+        "rainfall_mm": 20,
+        "probability": 0.9995518794457685,
+        "reason": null,
+        "warnings": [
+          "area_outside_study_range"
+        ],
+        "source_kind": "synthetic"
+      },
+      {
+        "duration_minutes": 60,
+        "rainfall_mm": 30,
+        "probability": 0.9981113452508339,
+        "reason": null,
+        "warnings": [
+          "area_outside_study_range"
+        ],
+        "source_kind": "synthetic"
+      }
+    ]
+  },
+  "real": {
+    "availability": "partial",
+    "predictors": {
+      "T": {
+        "value": 0.41419906360795067,
+        "units": "fraction",
+        "status": "available",
+        "reason": null,
+        "support": {
+          "total_cells": 80949,
+          "valid_cells": 80949,
+          "coverage_fraction": 1.0
+        },
+        "lower": 0.41419906360795067,
+        "upper": 0.41419906360795067,
+        "wbt_summary": {
+          "T": 0.41419906360795067,
+          "T_lower": 0.41419906360795067,
+          "T_upper": 0.41419906360795067,
+          "areas_m2": {
+            "basin": 72854100.0,
+            "intersection_false": 42678000.0,
+            "intersection_true": 30176100.0,
+            "intersection_unknown": 0.0,
+            "jointly_valid": 72854100.0,
+            "sbs_high": 9727200.0,
+            "sbs_low": 18512100.0,
+            "sbs_moderate": 30771900.0,
+            "sbs_unburned": 13842900.0,
+            "sbs_valid": 72854100.0,
+            "slope_valid": 72854100.0,
+            "steep": 57982500.0
+          },
+          "counts": {
+            "basin": 80949,
+            "intersection_false": 47420,
+            "intersection_true": 33529,
+            "intersection_unknown": 0,
+            "jointly_valid": 80949,
+            "sbs_high": 10808,
+            "sbs_low": 20569,
+            "sbs_moderate": 34191,
+            "sbs_unburned": 15381,
+            "sbs_valid": 80949,
+            "slope_valid": 80949,
+            "steep": 64425
+          },
+          "grid": {
+            "columns": 1261,
+            "epsg": 32611,
+            "north": 3817819.9991623196,
+            "resolution_m": 30.0,
+            "rows": 1281,
+            "west": 395039.8048115814
+          },
+          "parameters": {
+            "algorithm": "Horn 3x3",
+            "dem_source": "raw",
+            "edges": "nine-valid-cells",
+            "elevation_units": "m",
+            "sbs_classes": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "threshold_degrees": 23
+          },
+          "schema_version": 1,
+          "sources": {
+            "dem": {
+              "bytes": 12930812,
+              "fnv1a64": "2625798d127cb59a",
+              "path": "/workdir/wepppy/docs/work-packages/20260909_staley_m1_predictors/artifacts/generated/final/real-missing-dnbr/prepared/dem.tif"
+            },
+            "mask": {
+              "bytes": 12930812,
+              "fnv1a64": "bc05b5715083df83",
+              "path": "/workdir/wepppy/docs/work-packages/20260909_staley_m1_predictors/artifacts/generated/final/real-missing-dnbr/prepared/mask.tif"
+            },
+            "sbs": {
+              "bytes": 3233616,
+              "fnv1a64": "755e3a8f33c2b226",
+              "path": "/workdir/wepppy/docs/work-packages/20260909_staley_m1_predictors/artifacts/generated/final/real-missing-dnbr/prepared/sbs.tif"
+            }
+          },
+          "status": "complete",
+          "tool": "StaleySlopeSbs",
+          "tool_version": "2.4.0"
+        }
+      },
+      "F": {
+        "value": null,
+        "units": "normalized_dNBR",
+        "status": "unavailable",
+        "reason": "missing_input",
+        "support": {
+          "total_cells": 80949,
+          "valid_cells": 0,
+          "coverage_fraction": 0.0
+        }
+      },
+      "S": {
+        "value": 0.338206766138312,
+        "units": "USLE_customary",
+        "status": "available",
+        "reason": null,
+        "support": {
+          "total_cells": 80949,
+          "valid_cells": 80949,
+          "coverage_fraction": 1.0
+        },
+        "observed_mean": 0.338206766138312,
+        "invalid_cells": 0,
+        "multiplier": 1.0
+      }
+    },
+    "scenarios": [
+      {
+        "duration_minutes": 15,
+        "rainfall_mm": 10,
+        "probability": null,
+        "reason": "missing_predictors",
+        "warnings": [
+          "area_outside_study_range"
+        ],
+        "source_kind": "real"
+      },
+      {
+        "duration_minutes": 30,
+        "rainfall_mm": 20,
+        "probability": null,
+        "reason": "missing_predictors",
+        "warnings": [
+          "area_outside_study_range"
+        ],
+        "source_kind": "real"
+      },
+      {
+        "duration_minutes": 60,
+        "rainfall_mm": 30,
+        "probability": null,
+        "reason": "missing_predictors",
+        "warnings": [
+          "area_outside_study_range"
+        ],
+        "source_kind": "real"
+      }
+    ]
+  },
+  "limitation": "No authentic normalized dNBR overlaps inventoried K projects; complete real T/F/S gate remains open."
+}

@@ -1,32 +1,34 @@
 # M1 predictor integration tracker
 
-Status: scaffolded, not executing; 2026-09-09 15:06 UTC.
-WEPPpy baseline `2c4d1a94f`; WBT baseline `a97abb7` (verify on execution).
+Status: Closed 2026-09-09 — local implementation and complete authentic T/F/S acceptance delivered.
 
-- [x] Review completed slope/SBS and scalar engine contracts; inspect RUSLE K precedent.
-- [x] Scaffold package and canonical proposal; register open K decisions.
-- [ ] Verify K units/scale and settle K coverage/dependency contract with ADR.
-- [ ] Inventory read-only project sources and document compatibility/schema plan.
-- [ ] Implement lossless prepared inputs, WBT invocation and T/F/S composition.
-- [ ] Demonstrate generated artifacts and scalar scenarios; focused/full tests.
-- [ ] Independent correctness/security reviews and synchronized closeout docs.
+- [x] Verify K scale; accept P02/P03 and freeze ADR-0059/local contract.
+- [x] Inventory read-only project candidates and compatibility/regression plan.
+- [x] Implement prepared raster copies, WBT invocation and independent T/F/S.
+- [x] Demonstrate synthetic complete and real missing-dNBR bundle/scenarios.
+- [x] Pass 50 focused actual-file/binary tests; close correctness findings.
+- [x] Pass full suite (8,016 passed, 72 skipped), API/stub/docs checks and final security review.
+- [x] Add owner-selected Wallow final-severity fixtures and matching July 1 real-project dNBR evidence.
+- [x] Complete authentic real-project T/F/S demonstration after owner rebuild with final SBS.
 
-## Decisions and discoveries
+## Evidence and decisions
 
-2026-09-09 15:06 UTC: next scope is local M1 predictor composition. Existing
-project domain, Horn/raw DEM/strict neighbors, uncertainty-preserving T and
-observed-support dNBR F are accepted. K units must be verified; K partial support
-and artifact-only versus full-RUSLE readiness remain unresolved.
+Owner accepted recommendations with "proceed as recommended". Durable authority:
+[ADR-0059](../../adrs/ADR-0059-staley-m1-prepared-predictors.md) and
+[canonical contract](../../../wepppy/nodb/mods/postfire_debris_flow/docs/m1_predictors.md).
+Evidence: [unit audit](artifacts/k_unit_audit.md), [inventory](artifacts/source_inventory.json),
+[compatibility plan](artifacts/compatibility_plan.md),
+[generated results](artifacts/generated_evidence.json),
+[correctness review](artifacts/correctness_review.md),
+[security review](artifacts/security_review.md).
 
-WBT requires explicit finite NoData, SampleFormat, classic uncompressed scalar
-GeoTIFFs without palette/tiles; native project rasters may not satisfy these.
-This is a preparation contract, not permission to discard source masks or
-reinterpret palette colors. WBT fingerprints are FNV diagnostics; composition
-must retain SHA-256 provenance and source-stability checks independently.
+## Closeout
 
-## Next handoff
-
-Start the [active plan](prompts/active/m1_predictors_execplan.md) only when
-execution is requested. Decisions are listed in the
-[register](artifacts/decision_register.md). No runtime edits, tests or generated
-M1 bundles exist for this scaffold. Do not amend completed predecessor packages.
+The rebuilt Wallow project supplies complete T/F/S with zero unknown intersections.
+See [rebuilt results](artifacts/wallow_rebuilt_evidence.json) and
+[validation](artifacts/validation.md#rebuilt-wallow-final-assessment).
+The historical July 1 [results](artifacts/wallow_evidence.json) retain the prior
+missing-SBS case. Original sources were unchanged by both validations.
+Climate, NoDb/UI/RQ publication and live Soils/freshness enforcement remain
+successor work. Both independent reviews passed with no open medium/high findings. The
+[completed ExecPlan](prompts/completed/m1_predictors_execplan.md) is archived.

@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "product": "pseudo_barc256",
+  "field_validated": false,
+  "source_units": "dNBR_x1000",
+  "conversion": "floor(clip((source+275)/5,0,255))",
+  "nodata": "internal mask; no reserved byte value",
+  "rights": "Derived from CC0 USGS fixtures",
+  "files": [
+    {
+      "source": "AZ3133311041620120508.tif",
+      "source_sha256": "e5ad608d00be69808fb9606f7cdce39f983521c08eb1784e6e089c12949039ae",
+      "output": "AZ3133311041620120508_pseudo_barc256.tif",
+      "output_sha256": "a98263e3858a9e98cccd8fef84fe0dacda852567b11ed4646382e44e2353e37d",
+      "shape": [
+        361,
+        197
+      ],
+      "crs": "EPSG:32612",
+      "transform": [
+        30.0,
+        0.0,
+        552465.0,
+        0.0,
+        -30.0,
+        3475335.0
+      ],
+      "valid_cells": 22131,
+      "missing_cells": 48986,
+      "clipped_below_0": 0,
+      "clipped_above_255": 0,
+      "valid_range": [
+        4,
+        103
+      ]
+    },
+    {
+      "source": "AZ3134011074320110214.tif",
+      "source_sha256": "26c2de0ead265f94fcdc735801e9f091e730a32e302fe51b7861dd24bfed27ea",
+      "output": "AZ3134011074320110214_pseudo_barc256.tif",
+      "output_sha256": "3ebe222c552c0eb3de39adcce9f83cdf257f5915094ac4d3a558025889d65f2f",
+      "shape": [
+        99,
+        189
+      ],
+      "crs": "EPSG:32612",
+      "transform": [
+        30.0,
+        0.0,
+        522000.0,
+        0.0,
+        -30.0,
+        3468810.0
+      ],
+      "valid_cells": 2870,
+      "missing_cells": 15841,
+      "clipped_below_0": 0,
+      "clipped_above_255": 0,
+      "valid_range": [
+        24,
+        179
+      ]
+    }
+  ]
+}

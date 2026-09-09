@@ -1,6 +1,6 @@
 # M1 predictor decision register
 
-Status: proposals, 2026-09-09 15:06 UTC. Promote accepted choices into current
+Status: P01–P06 resolved for local implementation, 2026-09-09. Promote accepted choices into current
 contracts and a parameterization ADR; this register is not standalone authority.
 
 | ID | Work or decision | Recommendation and gate |
@@ -28,3 +28,13 @@ Climate source/default/scenario catalog, M3 soils, dashboard, locale/UI controls
 live invalidation/publication and RQ wiring remain successor work. Document
 which readiness checks the local adapter can actually establish versus future
 server enforcement. No implicit source rebuild, metadata repair or acquisition.
+
+## Execution decisions
+
+Owner accepted P02/P03 with "proceed as recommended". P01 identity mapping is
+verified in `k_unit_audit.md`. ADR-0059 records the accepted K coverage/readiness
+rules. P04–P06 are frozen in the canonical M1 contract: missing legacy metadata
+is unavailable, explicit hashes do not prove live freshness, trusted masked
+GeoTIFF conversion preserves samples, opt-in nearest SBS alignment, version-1
+fresh-directory bundle and retained incomplete failures. Proposal rows above
+are retained as decision history, not pending gates.

@@ -1,0 +1,137 @@
+Identification_Information:
+  Citation: 
+   Citation_Information
+      Originator: USDA Forest Service
+        Publication_Date: 20110623
+      Publication_Information:
+        Publication_Place: Salt Lake City, Utah, USA
+        Publisher: U.S. Forest Service
+	  Title: BARC Data Bundle for the Wallow Fire occuring on the Apache-Sitgreaves National Forest - 2011
+      Geospatial_Data_Presentation_Form: raster digital data
+      Online_Linkage: http://activefiremaps.fs.fed.us/baer/download.php?year=2011
+
+  Description:
+    Abstract: These data products are derived from Landsat Thematic Mapper data. The pre-fire and post-fire subsets included were used to create a differenced Normalized Burn Ratio (dNBR) image. The dNBR image attempts to portray the variation of burn severity within a fire. The severity ratings are influenced by the effects to the canopy.  The severity rating is based upon a composite of the severity to the understory (grass, shrub layers), midstory trees and overstory trees. Because there is often a strong correlation between canopy consumption and soil effects, this algorithm works in many cases for BAER teams whose objective is a soil burn severity assessment.  It is not, however, appropriate in all ecosystems or fires.
+    Purpose: These data were created by the USDA Forest Service Remote Sensing Applications Center to support Burned Area Emergency Response (BAER) teams.
+    Supplemental_Information:
+      Fire Name: Wallow
+      Agency: US Forest Service
+      Land Management Unit: Apache-Sitgreaves National Forest 
+      Type of assessment: Emergency
+      Fire size (acres) as listed on the Situation Report: 529,825
+      Pre-Fire Landsat Path/Row and Date: Landsat 5; 35/36 and 35/37; 20110530
+      Post-Fire Landsat Path/Row and Date: Landsat 7; 35/36 and 35/37; 20110623
+      Output Dataset Projection: USA_Contiguous_Albers_Equal_Area_Conic_USGS_version
+      Spheroid Name: GCS_North_American_1983
+
+      Product List:
+
+Wallow_20110530_pre_alb.img = Pre-Fire Landsat reflectance at sensor data subset, scaled by 400 and converted to integer (bands 6,4,3 ERDAS Imagine format)
+
+Wallow_20110623_post_alb.img = Post-Fire Landsat reflectance at sensor data subset, scaled by 400 and converted to integer (bands 6,4,3 ERDAS Imagine format)
+
+Wallow_20110623_dnbr_alb.img = Continuous dNBR product scaled by 1000; theoretical range of values is -2000 to 2000
+
+Wallow_20110623_barc256_alb.img = 256-class (0-255) continuous image representing fire severity. This dataset is meant to be adjusted if the BARC4 does not provide a good estimate of fire severity. It is anticipated that users will adjust the breakpoints between classes, then recode to their desired 3 or 4 classes.
+
+Wallow_20110623_barc4_alb.img = Four category severity classification subset values:
+            1 = unchanged / very low (Dark Green)
+            2 = low severity (Cyan)
+            3 = moderate severity (Yellow)
+            4 = high severity (Red)
+
+  Time_Period_of_Content:
+    Time_Period_Information:
+        Single_Date/Time:
+          Calendar_Date: 20110530 (pre-fire image), 20110623 (post-fire image)
+    Currentness_Reference: Severity data created from post-fire image
+  Status:
+    Progress: Evaluation of methods in process
+    Maintenance_and_Update_Frequency: As needed
+  Keywords:
+    Theme:
+      Theme_Keyword_Thesaurus: none
+      Theme_Keyword: Wildland Fire
+      Theme_Keyword: Normalized Burn Ratio (NBR)
+      Theme_Keyword: Fire Severity
+      Theme_Keyword: USDA Forest Service
+      Theme_Keyword: Landsat
+    Place:
+      Place_Keyword_Thesaurus: none
+      Place_Keyword: Apache-Sitgreaves National Forest
+      Place_Keyword: Wallow
+  Access_Constraints: FTP data sets are available to any user with access to the USFS FSWEB.
+  Use_Constraints: There are no restrictions on use, except for reasonable and proper acknowledgement of information sources.
+  Data_Set_Credit: USDA Forest Service
+  Native_Data_Set_Environment: ERDAS Imagine, ARCInfo
+Data_Quality_Information:
+  Positional_Accuracy:
+    Horizontal_Positional_Accuracy:
+      Horizontal_Positional_Accuracy_Report: These data were terrain corrected using a USGS digital elevation model with less than 1/2 pixel RMS error.
+  Lineage:
+    Process_Step:
+      Process_Description:
+        These data products are derived from Landsat Thematic Mapper data. Pre-fire and post-fire scenes are analyzed to create a differenced Normalized Burn Ratio (dNBR) image. The dNBR image portrays the variation of burn severity within the fire. The pre- and post-fire Landsat images are terrain corrected and further processed to convert bands 1-5 and 7 to at-sensor-reflectance. The Normalized Burn Ratio (NBR) is computed for each date of imagery using the following formula: 
+        (Band 4 - Band 7) / (Band 4 + Band 7) = NBR
+
+        The Differenced NBR is computed to determine severity by subtracting the post-fire NBR from the pre-fire NBR:
+        (PreNBR - PostNBR) = dNBR
+
+        The BARC products are a generalization of the raw dNBR dataset. Both BARC products have been resampled to unsigned 8-bit images and are easily viewed and edited within ArcGIS.
+
+        The classes represented on the BARC products are created with thresholds chosen by an analyst at RSAC.  These thresholds can be roughly related back to original dNBR values by multiplying by 5 and then subtracting 275 (for example, a BARC256 value of 100 would relate to a dNBR value of 225).  The BARC thresholds used on this particular fire are:
+
+            Unchanged:    All values less than 72.
+            Low:          All values greater than 72 and less than 106.
+            Moderate:     All values greater than 106 and less than 154.
+            High:         All values greater than 154.
+
+        General descriptions of the severity classes are below:
+
+            Unchanged:    This means the area after the fire was indistinguishable from pre-fire conditions. This does not always indicate the area did not burn.
+            Low:          This severity class represents areas of surface fire with little change in cover and little mortality of the dominant vegetation.
+            Moderate:     This severity class is between low and high and means there is a mixture of effects on the dominant vegetation.
+            High:         This severity class represents areas where the canopy has high to complete consumption.
+
+Spatial_Data_Organization_Information:
+  Direct_Spatial_Reference_Method: Raster
+  Raster_Object_Information:
+    Vertical_Count: 1
+Spatial_Reference_Information:
+  Horizontal_Coordinate_System_Definition:
+    Planar:
+      Map_Projection:
+        Map Projection Name: Albers Conical Equal Area
+        Albers_Conical_Equal_Area:
+          Standard_Parallel: 29.500000
+          Standard_Parallel: 45.500000
+          Longitude_of_Central_Meridian: -96.000000
+          Latitude_of_Projection_Origin: 23.000000
+          False_Easting: 0.000000
+          False_Northing: 0.000000
+      Planar_Coordinate_Information:
+        Planar_Coordinate_Encoding_Method: row and column
+        Coordinate_Representation:
+          Abscissa_Resolution: 30.000000
+          Ordinate_Resolution: 30.000000
+        Planar_Distance_Units: meters
+    Geodetic_Model:
+      Horizontal_Datum_Name: North American Datum of 1983
+      Ellipsoid_Name: Geodetic Reference System 80
+      Semi-major_Axis: 6378137.000000
+      Denominator_of_Flattening_Ratio: 298.257222
+Distribution_Information:
+  Resource_Description: Downloadable Data
+Metadata_Reference_Information:
+  Metadata_Date: 20110623
+  Metadata_Contact:
+    Contact_Information:
+      Contact_Organization_Primary:
+        Contact_Organization: USDA Forest Service, Remote Sensing Applications Center (RSAC)
+        Contact_Person: Jess Clark
+      Contact_Address:
+        Address_Type: 2222 W. 2300 S.
+        City: Salt Lake City
+        State_or_Province: UT
+        Postal_Code: 84119
+      Contact_Voice_Telephone: 801-975-3769
