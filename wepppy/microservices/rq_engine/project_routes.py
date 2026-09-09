@@ -1,15 +1,18 @@
 from __future__ import annotations
 
 import asyncio
+import errno
+import json
 import logging
 import os
+import re
 from typing import Any, Mapping, Sequence
 import uuid
 
 import redis
 import requests
 from fastapi import APIRouter, Request
-from fastapi.responses import RedirectResponse, Response
+from fastapi.responses import JSONResponse, RedirectResponse, Response
 from sqlalchemy.exc import SQLAlchemyError
 
 from wepppy.config.creation_policy import allow_anonymous_project_creation
@@ -68,7 +71,47 @@ def _creation_error_id() -> str:
 
 
 def _log_creation_exception(message: str, error_id: str) -> None:
-    logger.exception(message, extra={"error_id": error_id})
+    logger.exception("%s [error_id=%s]", message, error_id, extra={"error_id": error_id})
+
+
+def _creation_failure_details(exc: BaseException, operation: str) -> str:
+    """Classify public causes without forwarding arbitrary initializer diagnostics."""
+    cause = exc
+    seen: set[int] = set()
+    while id(cause) not in seen:
+        seen.add(id(cause))
+        if isinstance(cause, FileNotFoundError):
+            reason = "A required file or directory is missing. The administrator must restore the required server data before retrying."
+        elif isinstance(cause, PermissionError):
+            reason = "The server does not have permission to access required files. The administrator must repair the storage permissions before retrying."
+        elif isinstance(cause, OSError) and cause.errno in {errno.ENOSPC, errno.EDQUOT}:
+            reason = "Server storage is full or its quota is exhausted. The administrator must free storage or increase the quota before retrying."
+        elif isinstance(cause, ImportError):
+            reason = "A required Python dependency could not be loaded. The administrator must repair the server installation before retrying."
+        elif isinstance(cause, redis.RedisError):
+            reason = "The creation state service could not complete an operation. The administrator must check the Redis service before retrying."
+        elif isinstance(cause, SQLAlchemyError):
+            reason = "A database operation failed. The administrator must check the project ownership database before retrying."
+        elif isinstance(cause, PreferenceIdentityError):
+            reason = "The signed-in account could not be used for project ownership. Sign in again; if the problem persists, ask the administrator to check the account."
+        else:
+            # Ron's legacy signature is the only permitted dynamic diagnostic.
+            module = re.fullmatch(r"unknown mod ([A-Za-z0-9_][A-Za-z0-9_-]{0,63})", str(cause))
+            if module:
+                reason = (
+                    f"Required module '{module.group(1)}' is unavailable on this server. "
+                    "Check the configured module name, or ask the administrator to install or enable the required module before retrying."
+                )
+            elif cause.__cause__ is not None:
+                cause = cause.__cause__
+                continue
+            else:
+                reason = (
+                    "The cause could not be safely identified. "
+                    "Ask the administrator to investigate using the error reference included in this response."
+                )
+        return f"{operation} failed. {reason}"
+    return f"{operation} failed. The cause could not be safely identified. Ask the administrator to investigate using the error reference included in this response."
 
 
 def _normalize_prefix(prefix: str | None) -> str:
@@ -272,13 +315,17 @@ def _creation_actor_scope(actor: object | None) -> str | None:
 def _release_creation_safely(
     client: object | None,
     reservation: CreationReservation | None,
+    error_id: str | None = None,
 ) -> None:
     if client is None or reservation is None:
         return
     try:
         release_creation(client, reservation)  # type: ignore[arg-type]
     except (CreationIdempotencyError, redis.RedisError):
-        logger.exception("rq-engine create idempotency release failed")
+        if error_id is None:  # Builder retains the existing two-argument helper contract.
+            logger.exception("rq-engine create idempotency release failed")
+        else:
+            _log_creation_exception("rq-engine create idempotency release failed", error_id)
 
 
 @router.post(
@@ -302,6 +349,31 @@ def _release_creation_safely(
     ),
 )
 async def create(request: Request) -> Response:
+    # HTTP boundary: every application failure must retain a canonical response
+    # and searchable correlation, including exceptions missed by stage handlers.
+    try:
+        response = await _create(request)
+    except Exception as exc:  # broad-except: boundary contract
+        error_id = _creation_error_id()
+        _log_creation_exception("rq-engine create unexpected failure", error_id)
+        response = error_response(
+            "Could not create project.",
+            code="run_creation_failed",
+            details=_creation_failure_details(exc, "Project creation"),
+            error_id=error_id,
+            log_exception=False,
+        )
+    if isinstance(response, JSONResponse) and response.status_code >= 400:
+        payload = json.loads(response.body)
+        # Only contract metadata: request values and diagnostics may be sensitive.
+        logger.warning(
+            "rq-engine create response [error_id=%s status=%s code=%s]",
+            payload["error_id"], response.status_code, payload["error"]["code"],
+        )
+    return response
+
+
+async def _create(request: Request) -> Response:
     try:
         allow_anonymous = allow_anonymous_project_creation()
     except ValueError:
@@ -309,6 +381,7 @@ async def create(request: Request) -> Response:
         return error_response(
             "Project creation policy is misconfigured.", status_code=503,
             code="creation_policy_configuration_error",
+            details="The administrator must correct WEPPCLOUD_ALLOW_ANONYMOUS_PROJECT_CREATION before creating projects.",
         )
 
     try:
@@ -342,7 +415,7 @@ async def create(request: Request) -> Response:
             )
         except AuthError as exc:
             if not _is_expired_rq_token_error(exc):
-                return error_response(exc.message, status_code=exc.status_code, code=exc.code)
+                return error_response(exc.message, status_code=exc.status_code, code=exc.code, log_exception=True)
             try:
                 claims = await asyncio.to_thread(_claims_from_session_cookie, request)
             except AuthError as session_exc:
@@ -351,6 +424,7 @@ async def create(request: Request) -> Response:
                     status_code=session_exc.status_code,
                     code=session_exc.code,
                     details=exc.message,
+                    log_exception=True,
                 )
             except Exception:  # broad-except: boundary contract
                 error_id = _creation_error_id()
@@ -362,7 +436,7 @@ async def create(request: Request) -> Response:
                     "Failed to authorize request",
                     status_code=401,
                     code="unauthorized",
-                    details="Authorization failed.",
+                    details="The server could not complete authorization. Sign in again; if this persists, ask the administrator to check the error reference.",
                     error_id=error_id,
                     log_exception=False,
                 )
@@ -374,7 +448,7 @@ async def create(request: Request) -> Response:
                 required_scopes=RQ_CREATE_SCOPES,
             )
         except AuthError as exc:
-            return error_response(exc.message, status_code=exc.status_code, code=exc.code)
+            return error_response(exc.message, status_code=exc.status_code, code=exc.code, log_exception=True)
         except Exception:  # broad-except: boundary contract
             error_id = _creation_error_id()
             _log_creation_exception("rq-engine create auth failed", error_id)
@@ -382,7 +456,7 @@ async def create(request: Request) -> Response:
                 "Failed to authorize request",
                 status_code=401,
                 code="unauthorized",
-                details="Authorization failed.",
+                details="The server could not complete authorization. Sign in again; if this persists, ask the administrator to check the error reference.",
                 error_id=error_id,
                 log_exception=False,
             )
@@ -390,9 +464,15 @@ async def create(request: Request) -> Response:
         if cap_token and allow_anonymous:
             try:
                 verification = await asyncio.to_thread(_verify_cap_token, request, cap_token)
-            except CapVerificationError as exc:
-                logger.error("CAPTCHA verification error for create/%s: %s", config, exc)
-                return error_response("CAPTCHA verification failed.", status_code=500)
+            except CapVerificationError:
+                error_id = _creation_error_id()
+                _log_creation_exception("rq-engine create CAPTCHA verification failed", error_id)
+                return error_response(
+                    "CAPTCHA verification failed.", status_code=500,
+                    details="The CAPTCHA service could not verify the request. Retry verification; if this persists, ask the administrator to check the CAPTCHA service.",
+                    error_id=error_id,
+                    log_exception=False,
+                )
             if not verification.get("success"):
                 logger.warning(
                     "CAPTCHA rejected for create/%s (errors=%s)",
@@ -409,9 +489,10 @@ async def create(request: Request) -> Response:
                         return error_response(
                             "Sign in to create a project.", status_code=403,
                             code="anonymous_creation_disabled",
+                            log_exception=True,
                         )
-                    return error_response("CAPTCHA token is required.", status_code=403)
-                return error_response(exc.message, status_code=exc.status_code, code=exc.code)
+                    return error_response("CAPTCHA token is required.", status_code=403, log_exception=True)
+                return error_response(exc.message, status_code=exc.status_code, code=exc.code, log_exception=True)
             except Exception:  # broad-except: boundary contract
                 error_id = _creation_error_id()
                 _log_creation_exception(
@@ -422,7 +503,7 @@ async def create(request: Request) -> Response:
                     "Failed to authorize request",
                     status_code=401,
                     code="unauthorized",
-                    details="Authorization failed.",
+                    details="The server could not complete authorization. Sign in again; if this persists, ask the administrator to check the error reference.",
                     error_id=error_id,
                     log_exception=False,
                 )
@@ -453,21 +534,22 @@ async def create(request: Request) -> Response:
             "unitizer:is_english must be exactly true or false.",
             status_code=400,
             code="invalid_unitizer_override",
+            log_exception=True,
         )
     try:
         writer_enabled = preset_writer_enabled()
-    except ValueError as exc:
+    except ValueError:
         return error_response(
             "Project configuration writer is misconfigured.",
             status_code=500,
             code="preset_writer_flag_invalid",
-            details=str(exc),
+            details="The administrator must correct WEPPPY_PROJECT_CONFIG_PRESET_WRITER_ENABLED before creating projects.",
         )
 
     def _create_run_blocking() -> str | Response:
         try:
             actor = resolve_creation_actor(claims)
-        except (PreferenceIdentityError, SQLAlchemyError):
+        except (PreferenceIdentityError, SQLAlchemyError) as exc:
             error_id = _creation_error_id()
             _log_creation_exception(
                 "rq-engine create owner resolution failed",
@@ -476,6 +558,7 @@ async def create(request: Request) -> Response:
             return error_response(
                 "Could not resolve project owner.",
                 code="run_ownership_failed",
+                details=_creation_failure_details(exc, "Project owner resolution"),
                 error_id=error_id,
                 log_exception=False,
             )
@@ -506,20 +589,30 @@ async def create(request: Request) -> Response:
                     actor_scope=_creation_actor_scope(actor),
                     fingerprint=fingerprint,
                 )
-            except (PresetPolicyError, PresetSnapshotError, CreationIdempotencyError) as exc:
+            except PresetPolicyError:
+                return error_response(
+                    "Invalid project creation request.",
+                    status_code=400,
+                    code="project_config_validation_failed",
+                    details="The server's preset configuration policy could not be loaded or validated. The administrator must repair the preset policy before retrying.",
+                    log_exception=True,
+                )
+            except (PresetSnapshotError, CreationIdempotencyError) as exc:
                 return error_response(
                     "Invalid project creation request.",
                     status_code=400,
                     code="project_config_validation_failed",
                     details=str(exc),
+                    log_exception=True,
                 )
-            except redis.RedisError:
+            except redis.RedisError as exc:
                 error_id = _creation_error_id()
                 _log_creation_exception("rq-engine create idempotency unavailable", error_id)
                 return error_response(
                     "Project creation is temporarily unavailable.",
                     status_code=503,
                     code="creation_idempotency_unavailable",
+                    details=_creation_failure_details(exc, "Creation reservation"),
                     error_id=error_id,
                     log_exception=False,
                 )
@@ -546,22 +639,23 @@ async def create(request: Request) -> Response:
 
         try:
             runid, wd = _create_run_dir(actor.email if actor else None)
-        except PermissionError:
-            _release_creation_safely(idempotency_client, reservation)
+        except PermissionError as exc:
             error_id = _creation_error_id()
+            _release_creation_safely(idempotency_client, reservation, error_id)
             _log_creation_exception(
                 "rq-engine create run directory permission error",
                 error_id,
             )
             return error_response(
-                "Could not create run directory. NAS may be down.",
+                "Could not create run directory.",
                 code="run_directory_failed",
+                details=_creation_failure_details(exc, "Run directory creation"),
                 error_id=error_id,
                 log_exception=False,
             )
-        except Exception:  # broad-except: boundary contract
-            _release_creation_safely(idempotency_client, reservation)
+        except Exception as exc:  # broad-except: boundary contract
             error_id = _creation_error_id()
+            _release_creation_safely(idempotency_client, reservation, error_id)
             _log_creation_exception(
                 "rq-engine create run directory failed",
                 error_id,
@@ -569,6 +663,7 @@ async def create(request: Request) -> Response:
             return error_response(
                 "Could not create run directory.",
                 code="run_directory_failed",
+                details=_creation_failure_details(exc, "Run directory creation"),
                 error_id=error_id,
                 log_exception=False,
             )
@@ -576,7 +671,7 @@ async def create(request: Request) -> Response:
         if candidate is not None:
             try:
                 materialize_preset_snapshot(wd, candidate)
-            except PresetSnapshotError:
+            except PresetSnapshotError as exc:
                 error_id = _creation_error_id()
                 _log_creation_exception(
                     "rq-engine create project config materialization failed",
@@ -586,13 +681,14 @@ async def create(request: Request) -> Response:
                     cleanup_new_run_directory(runid, wd)
                 except (OSError, redis.RedisError, RuntimeError, ValueError):
                     logger.exception(
-                        "rq-engine create project config cleanup failed",
+                        "rq-engine create project config cleanup failed [error_id=%s]", error_id,
                         extra={"error_id": error_id, "runid": runid},
                     )
-                _release_creation_safely(idempotency_client, reservation)
+                _release_creation_safely(idempotency_client, reservation, error_id)
                 return error_response(
                     "Could not materialize project configuration.",
                     code="project_config_materialization_failed",
+                    details=_creation_failure_details(exc, "Project configuration persistence"),
                     error_id=error_id,
                     log_exception=False,
                 )
@@ -606,17 +702,14 @@ async def create(request: Request) -> Response:
                 cleanup_new_run_directory(runid, wd)
             except (OSError, redis.RedisError, RuntimeError, ValueError):
                 logger.exception(
-                    "rq-engine create Ron cleanup failed",
+                    "rq-engine create Ron cleanup failed [error_id=%s]", error_id,
                     extra={"error_id": error_id, "runid": runid},
                 )
-            _release_creation_safely(idempotency_client, reservation)
+            _release_creation_safely(idempotency_client, reservation, error_id)
             return error_response(
                 "Could not create run",
                 code="run_initialization_failed",
-                details=(
-                    f"Run initialization failed ({type(exc).__name__}). "
-                    f"Search server logs for error_id {error_id}."
-                ),
+                details=_creation_failure_details(exc, "Run initialization"),
                 error_id=error_id,
                 log_exception=False,
             )
@@ -631,7 +724,7 @@ async def create(request: Request) -> Response:
         if actor is not None:
             try:
                 register_owned_run(runid, config, actor.user_id)
-            except (PreferenceIdentityError, SQLAlchemyError):
+            except (PreferenceIdentityError, SQLAlchemyError) as exc:
                 error_id = _creation_error_id()
                 _log_creation_exception(
                     "rq-engine create run owner failed",
@@ -641,13 +734,14 @@ async def create(request: Request) -> Response:
                     cleanup_new_run_directory(runid, wd)
                 except (OSError, redis.RedisError, RuntimeError, ValueError):
                     logger.exception(
-                        "rq-engine create directory cleanup failed",
+                        "rq-engine create directory cleanup failed [error_id=%s]", error_id,
                         extra={"error_id": error_id, "runid": runid},
                     )
-                _release_creation_safely(idempotency_client, reservation)
+                _release_creation_safely(idempotency_client, reservation, error_id)
                 return error_response(
                     "Could not register project ownership.",
                     code="run_ownership_failed",
+                    details=_creation_failure_details(exc, "Project ownership registration"),
                     error_id=error_id,
                     log_exception=False,
                 )
@@ -665,20 +759,21 @@ async def create(request: Request) -> Response:
                     run_id=runid,
                     location=_run_url(runid, config),
                 )
-            except (CreationIdempotencyError, redis.RedisError):
+            except (CreationIdempotencyError, redis.RedisError) as exc:
                 error_id = _creation_error_id()
                 _log_creation_exception("rq-engine create idempotency completion failed", error_id)
                 try:
                     cleanup_new_run_directory(runid, wd)
                 except (OSError, redis.RedisError, RuntimeError, ValueError):
                     logger.exception(
-                        "rq-engine create idempotency cleanup failed",
+                        "rq-engine create idempotency cleanup failed [error_id=%s]", error_id,
                         extra={"error_id": error_id, "runid": runid},
                     )
-                _release_creation_safely(idempotency_client, reservation)
+                _release_creation_safely(idempotency_client, reservation, error_id)
                 return error_response(
                     "Could not complete project creation.",
                     code="creation_idempotency_failed",
+                    details=_creation_failure_details(exc, "Project creation completion"),
                     error_id=error_id,
                     log_exception=False,
                 )

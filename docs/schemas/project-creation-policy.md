@@ -28,7 +28,7 @@ Default true preserves existing deployments. False changes only the named creati
 
 Errors follow [RQ response contract](rq-response-contract.md). Cookie authorization follows [CSRF contract](weppcloud-csrf-contract.md); the policy must not weaken origin, session, or CSRF checks. Creation permission is independent of existing run-access permissions.
 
-Named-preset initialization failures also follow [creation initialization diagnostics](rq-response-contract.md#named-preset-creation-initialization-diagnostics): explain recognized causes and next actions safely, and preserve searchable log correlation. Implementation of that 2026-09-09 amendment is pending.
+Named-preset initialization failures also follow [creation initialization diagnostics](rq-response-contract.md#named-preset-creation-initialization-diagnostics): explain recognized causes and next actions safely, and preserve searchable log correlation. Implemented and validated in development on 2026-09-09.
 
 Every failed response from either named-preset create alias also follows
 [creation failure coverage](rq-response-contract.md#named-preset-creation-failure-coverage),

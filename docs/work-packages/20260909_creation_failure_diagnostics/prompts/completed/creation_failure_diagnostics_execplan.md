@@ -14,10 +14,11 @@ named-preset create route, not Builder, batch, fork, or upload creation.
 - [x] Reproduce Portland's `unknown mod portland` with real Ron in rq-engine.
 - [x] Prepare canonical diagnostics amendment and independent initial reviews.
 - [x] Obtain operator commit authority and all-failure coverage instruction.
-- [ ] Review expanded coverage and commit the checkpoint before implementation.
-- [ ] Add failure regressions, implement safe diagnostics and complete correlation.
-- [ ] Run focused/broad tests and real HTTP creation checks.
-- [ ] Complete correctness, QA, security review and commit the scoped fix.
+- [x] Review expanded coverage and commit checkpoint `bf063ed56` before implementation.
+- [x] Add failure regressions, implement safe diagnostics and complete correlation.
+- [x] Run focused tests (132 passed) and real browser/HTTP creation checks.
+- [x] Complete independent correctness, QA and security code reviews.
+- [x] Finish broad rerun (8,110 passed, 72 skipped) and prepare the scoped final commit.
 
 ## Surprises & Discoveries
 
@@ -36,8 +37,11 @@ public disclosure uses the narrow canonical classifications.
 
 ## Outcomes & Retrospective
 
-Diagnosis and initial reviews are complete. Implementation and runtime
-conformance remain pending. No production deployment is included.
+Implementation, independent reviews, live browser correlation checks and broad
+validation are complete. Builder's shared-helper call contract is preserved.
+The final implementation commit carries this closure record. No production
+deployment is included. Portland module availability and failed-initialization
+cleanup remain separate issues; temporary smoke remnants were removed.
 
 ## Context and Orientation
 
@@ -98,3 +102,5 @@ SQLAlchemy, FastAPI and canonical response helpers. No new dependency, public
 endpoint, or data schema is needed.
 
 2026-09-09: created after the operator expanded the task to every create failure.
+2026-09-09: completed with 132 focused tests, 8,110 broad passes, and live
+browser/log correlation evidence; archived after all review conditions passed.

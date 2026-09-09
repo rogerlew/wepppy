@@ -492,10 +492,8 @@ def test_create_initialization_failure_returns_correlated_diagnostic(
     payload = response.json()
     assert response.status_code == 500
     assert payload["error"]["code"] == "run_initialization_failed"
-    assert payload["error"]["details"] == (
-        f"Run initialization failed (ValueError). "
-        f"Search server logs for error_id {payload['error_id']}."
-    )
+    assert "Run initialization failed." in payload["error"]["details"]
+    assert "cause could not be safely identified" in payload["error"]["details"]
     assert "/private/run" not in response.text
 
 
@@ -655,7 +653,7 @@ def test_create_cleanup_failure_log_uses_response_error_id(
     cleanup_records = [
         record
         for record in caplog.records
-        if record.getMessage() == "rq-engine create directory cleanup failed"
+        if record.getMessage().startswith("rq-engine create directory cleanup failed")
     ]
     assert response.status_code == 500
     assert RUN_ID not in response.text
@@ -990,3 +988,285 @@ def test_restricted_create_preserves_service_callers(create_client, monkeypatch,
     response = client.post("/create/", json={"config": CONFIG}, headers={"Authorization": "Bearer valid"}, follow_redirects=False)
     assert response.status_code == 303
     assert captured["email"] is None
+
+
+@pytest.mark.parametrize("endpoint", ["/create/", "/api/create/"])
+@pytest.mark.parametrize(
+    "failure, expected",
+    [
+        (Exception("unknown mod portland"), "module 'portland' is unavailable"),
+        (FileNotFoundError("/private/secret"), "required file or directory is missing"),
+        (PermissionError("/private/secret"), "permission"),
+        (OSError(28, "private token=secret"), "storage is full"),
+        (ModuleNotFoundError("private token=secret"), "Python dependency"),
+        (project_routes.redis.ConnectionError("private token=secret"), "state service"),
+        (SQLAlchemyError("private token=secret"), "database operation"),
+        (ValueError("/private/token=secret"), "could not be safely identified"),
+    ],
+)
+def test_create_initialization_cause_and_formatted_correlation(
+    create_client, monkeypatch, caplog, endpoint, failure, expected,
+):
+    client, _ = create_client
+    monkeypatch.setattr(project_routes, "_verify_cap_token", lambda *_: {"success": True})
+    monkeypatch.setattr(project_routes, "Ron", lambda *_: (_ for _ in ()).throw(failure))
+    with caplog.at_level("WARNING", logger=project_routes.__name__):
+        response = client.post(endpoint, data={"config": CONFIG, "cap_token": "good"})
+    payload = response.json()
+    assert response.status_code == 500
+    assert payload["error"]["code"] == "run_initialization_failed"
+    assert expected in payload["error"]["details"]
+    assert "administrator" in payload["error"]["details"]
+    assert any(action in payload["error"]["details"] for action in (
+        "restore", "repair", "free storage", "check", "install or enable", "investigate",
+    ))
+    assert "private" not in response.text
+    assert "token=secret" not in response.text
+    assert payload["error_id"] in caplog.text
+    assert any(r.exc_info and payload["error_id"] in r.getMessage() for r in caplog.records)
+    assert any(
+        payload["error_id"] in r.getMessage()
+        and "status=500" in r.getMessage()
+        and "code=run_initialization_failed" in r.getMessage()
+        for r in caplog.records
+    )
+
+
+@pytest.mark.parametrize("diagnostic", [
+    "unknown mod portland\n", "unknown mod portland extra", "unknown mod /private/path",
+    "unknown mod <script>", "unknown mod pö rtland", "unknown mod " + "a" * 65,
+    "unknown mod ", "unknown mod token=secret",
+])
+def test_create_rejects_unsafe_module_diagnostics(create_client, monkeypatch, diagnostic):
+    client, _ = create_client
+    monkeypatch.setattr(project_routes, "_verify_cap_token", lambda *_: {"success": True})
+    monkeypatch.setattr(project_routes, "Ron", lambda *_: (_ for _ in ()).throw(Exception(diagnostic)))
+    response = client.post("/create/", data={"config": CONFIG, "cap_token": "good"})
+    assert response.status_code == 500
+    assert "could not be safely identified" in response.json()["error"]["details"]
+    assert diagnostic not in response.text
+
+
+@pytest.mark.parametrize("endpoint", ["/create/", "/api/create/"])
+@pytest.mark.parametrize("data", [{}, {"config": CONFIG}])
+def test_create_validation_and_auth_response_ids_are_logged(create_client, caplog, endpoint, data):
+    client, _ = create_client
+    with caplog.at_level("WARNING", logger=project_routes.__name__):
+        response = client.post(endpoint, data=data)
+    payload = response.json()
+    assert response.status_code in (400, 403)
+    assert any(
+        payload["error_id"] in r.getMessage()
+        and f"status={response.status_code}" in r.getMessage()
+        and f"code={payload['error']['code']}" in r.getMessage()
+        for r in caplog.records
+    )
+
+
+@pytest.mark.parametrize("endpoint", ["/create/", "/api/create/"])
+def test_create_uncaught_exception_is_canonical(create_client, monkeypatch, caplog, endpoint):
+    client, captured = create_client
+    monkeypatch.setattr(
+        project_routes, "_require_rq_token",
+        lambda *_a, **_k: (_ for _ in ()).throw(RuntimeError("/private/token=secret")),
+    )
+    with caplog.at_level("ERROR", logger=project_routes.__name__):
+        response = client.post(endpoint, data={"config": CONFIG, "rq_token": "opaque"})
+    payload = response.json()
+    assert response.status_code == 500
+    assert payload["error"]["code"] == "run_creation_failed"
+    assert "Project creation" in payload["error"]["details"]
+    assert "private" not in response.text
+    assert captured == {}
+    assert any(r.exc_info and payload["error_id"] in r.getMessage() for r in caplog.records)
+
+
+@pytest.mark.parametrize("boundary, failure, code, operation, cause", [
+    ("_create_run_dir", PermissionError("/private/secret"), "run_directory_failed", "Run directory creation", "permission"),
+    ("_create_run_dir", OSError(28, "secret"), "run_directory_failed", "Run directory creation", "storage is full"),
+    ("resolve_creation_actor", PreferenceIdentityError("secret"), "run_ownership_failed", "Project owner resolution", "signed-in account"),
+    ("resolve_creation_actor", SQLAlchemyError("secret"), "run_ownership_failed", "Project owner resolution", "database operation"),
+    ("_verify_cap_token", project_routes.CapVerificationError("secret"), "internal_error", "CAPTCHA", "CAPTCHA service"),
+])
+def test_create_infrastructure_stage_diagnostics(
+    create_client, monkeypatch, caplog, boundary, failure, code, operation, cause,
+):
+    client, _ = create_client
+    monkeypatch.setattr(project_routes, "_verify_cap_token", lambda *_: {"success": True})
+    monkeypatch.setattr(project_routes, boundary, lambda *_: (_ for _ in ()).throw(failure))
+    with caplog.at_level("WARNING"):
+        response = client.post("/create/", data={"config": CONFIG, "cap_token": "good"})
+    payload = response.json()
+    assert response.status_code == 500
+    assert payload["error"]["code"] == code
+    assert operation in payload["error"]["details"]
+    assert cause in payload["error"]["details"]
+    assert "secret" not in response.text
+    assert "NAS" not in response.text
+    assert any(r.exc_info and payload["error_id"] in r.getMessage() for r in caplog.records)
+
+
+@pytest.mark.parametrize("boundary, expected_code, operation", [
+    ("_creation_idempotency_client", "creation_idempotency_unavailable", "Creation reservation"),
+    ("materialize_preset_snapshot", "project_config_materialization_failed", "Project configuration persistence"),
+    ("complete_creation", "creation_idempotency_failed", "Project creation completion"),
+])
+def test_create_writer_failures_remain_observable_and_release_reservation(
+    create_client, monkeypatch, caplog, boundary, expected_code, operation,
+):
+    client, _ = create_client
+    state = _FakeIdempotencyRedis()
+    monkeypatch.setenv("WEPPPY_PROJECT_CONFIG_PRESET_WRITER_ENABLED", "1")
+    monkeypatch.setattr(project_routes, "_creation_idempotency_client", lambda: state)
+    monkeypatch.setattr(project_routes, "_verify_cap_token", lambda *_: {"success": True})
+
+    def fail(*_args, **_kwargs):
+        if boundary == "materialize_preset_snapshot":
+            try:
+                raise PermissionError("/private/secret")
+            except PermissionError as exc:
+                raise project_routes.PresetSnapshotError("secret") from exc
+        raise project_routes.redis.ConnectionError("secret")
+
+    monkeypatch.setattr(project_routes, boundary, fail)
+    with caplog.at_level("WARNING"):
+        response = client.post("/create/", data={
+            "config": CONFIG, "cap_token": "good",
+            "creation_idempotency_key": "12345678-1234-4234-9234-123456789abc",
+        })
+    payload = response.json()
+    assert response.status_code == (503 if boundary == "_creation_idempotency_client" else 500)
+    assert payload["error"]["code"] == expected_code
+    assert operation in payload["error"]["details"]
+    assert ("permission" if boundary == "materialize_preset_snapshot" else "state service") in payload["error"]["details"]
+    assert "secret" not in response.text
+    assert not state.values
+    assert any(r.exc_info and payload["error_id"] in r.getMessage() for r in caplog.records)
+
+
+def test_create_initialization_retains_original_failure_when_cleanup_fails(create_client, monkeypatch, caplog):
+    client, _ = create_client
+    monkeypatch.setattr(project_routes, "_verify_cap_token", lambda *_: {"success": True})
+    monkeypatch.setattr(project_routes, "Ron", lambda *_: (_ for _ in ()).throw(Exception("unknown mod portland")))
+    monkeypatch.setattr(project_routes, "cleanup_new_run_directory", lambda *_: (_ for _ in ()).throw(OSError("cleanup secret")))
+    with caplog.at_level("ERROR"):
+        response = client.post("/create/", data={"config": CONFIG, "cap_token": "good"})
+    payload = response.json()
+    assert "module 'portland' is unavailable" in payload["error"]["details"]
+    assert "cleanup" not in response.text
+    failures = [r for r in caplog.records if r.exc_info and payload["error_id"] in r.getMessage()]
+    assert any(str(r.exc_info[1]) == "unknown mod portland" for r in failures)
+    assert any(str(r.exc_info[1]) == "cleanup secret" for r in failures)
+
+
+def test_create_unexpected_post_allocation_failure_does_not_add_cleanup(create_client, monkeypatch, caplog):
+    client, captured = create_client
+    state = _FakeIdempotencyRedis()
+    cleanup = []
+    monkeypatch.setenv("WEPPPY_PROJECT_CONFIG_PRESET_WRITER_ENABLED", "1")
+    monkeypatch.setattr(project_routes, "_creation_idempotency_client", lambda: state)
+    monkeypatch.setattr(project_routes, "_verify_cap_token", lambda *_: {"success": True})
+    monkeypatch.setattr(project_routes, "materialize_preset_snapshot", lambda *_: (_ for _ in ()).throw(RuntimeError("secret")))
+    monkeypatch.setattr(project_routes, "cleanup_new_run_directory", lambda *_: cleanup.append(True))
+    with caplog.at_level("WARNING"):
+        response = client.post("/create/", data={
+            "config": CONFIG, "cap_token": "good",
+            "creation_idempotency_key": "12345678-1234-4234-9234-123456789abc",
+        })
+    payload = response.json()
+    assert response.status_code == 500
+    assert payload["error"]["code"] == "run_creation_failed"
+    assert "secret" not in response.text
+    assert "email" in captured
+    assert cleanup == []
+    assert state.values  # Existing unhandled-failure lifecycle is unchanged.
+    assert any(r.exc_info and payload["error_id"] in r.getMessage() for r in caplog.records)
+
+
+def test_create_release_failure_keeps_initialization_diagnosis(create_client, monkeypatch, caplog):
+    client, _ = create_client
+    monkeypatch.setenv("WEPPPY_PROJECT_CONFIG_PRESET_WRITER_ENABLED", "1")
+    monkeypatch.setattr(project_routes, "_creation_idempotency_client", _FakeIdempotencyRedis)
+    monkeypatch.setattr(project_routes, "_verify_cap_token", lambda *_: {"success": True})
+    monkeypatch.setattr(project_routes, "Ron", lambda *_: (_ for _ in ()).throw(Exception("unknown mod portland")))
+    monkeypatch.setattr(project_routes, "release_creation", lambda *_: (_ for _ in ()).throw(project_routes.redis.RedisError("release secret")))
+    with caplog.at_level("ERROR"):
+        response = client.post("/create/", data={
+            "config": CONFIG, "cap_token": "good",
+            "creation_idempotency_key": "12345678-1234-4234-9234-123456789abc",
+        })
+    payload = response.json()
+    assert "module 'portland' is unavailable" in payload["error"]["details"]
+    assert "secret" not in response.text
+    assert any(
+        r.exc_info and str(r.exc_info[1]) == "release secret" and payload["error_id"] in r.getMessage()
+        for r in caplog.records
+    )
+
+
+@pytest.mark.parametrize("boundary", ["ttl", "readme"])
+def test_create_optional_failure_keeps_success(create_client, monkeypatch, caplog, boundary):
+    from wepppy.weppcloud.utils import run_ttl
+
+    client, _ = create_client
+    monkeypatch.setattr(project_routes, "_verify_cap_token", lambda *_: {"success": True})
+    target, name = (run_ttl, "initialize_ttl") if boundary == "ttl" else (project_routes, "ensure_readme_on_create")
+    monkeypatch.setattr(target, name, lambda *_: (_ for _ in ()).throw(RuntimeError("optional failure")))
+    with caplog.at_level("ERROR"):
+        response = client.post("/create/", data={"config": CONFIG, "cap_token": "good"}, follow_redirects=False)
+    assert response.status_code == 303
+    assert RUN_ID in response.headers["location"]
+    assert any(r.exc_info and str(r.exc_info[1]) == "optional failure" for r in caplog.records)
+
+
+def test_create_in_progress_keeps_retry_header_and_correlation(create_client, monkeypatch, caplog):
+    client, captured = create_client
+    monkeypatch.setenv("WEPPPY_PROJECT_CONFIG_PRESET_WRITER_ENABLED", "1")
+    monkeypatch.setattr(project_routes, "_creation_idempotency_client", _FakeIdempotencyRedis)
+    monkeypatch.setattr(project_routes, "_verify_cap_token", lambda *_: {"success": True})
+    monkeypatch.setattr(project_routes, "reserve_creation", lambda *_a, **_k: project_routes.CreationReservation("in_progress", "test-key", "test-fingerprint"))
+    with caplog.at_level("WARNING"):
+        response = client.post("/create/", data={"config": CONFIG, "cap_token": "good"})
+    payload = response.json()
+    assert response.status_code == 409
+    assert response.headers["retry-after"] == "2"
+    assert payload["error"]["code"] == "creation_in_progress"
+    assert captured == {}
+    assert any(payload["error_id"] in r.getMessage() for r in caplog.records)
+
+
+def test_create_legacy_mod_override_remains_accepted(create_client, monkeypatch):
+    client, captured = create_client
+    monkeypatch.setattr(project_routes, "_verify_cap_token", lambda *_: {"success": True})
+
+    def initialize(_wd, cfg):
+        captured['cfg'] = cfg
+        raise Exception("unknown mod custom_mod")
+
+    monkeypatch.setattr(project_routes, "Ron", initialize)
+    response = client.post("/create/", data={
+        "config": CONFIG, "cap_token": "good", "nodb:mods": '["custom_mod"]',
+    })
+    assert 'nodb:mods=["custom_mod"]' in captured['cfg']
+    details = response.json()["error"]["details"]
+    assert "module 'custom_mod' is unavailable" in details
+    assert "Check the configured module name" in details
+    assert "install or enable" in details
+
+
+def test_create_preset_policy_failure_hides_private_policy_path(create_client, monkeypatch, caplog):
+    client, captured = create_client
+    monkeypatch.setenv("WEPPPY_PROJECT_CONFIG_PRESET_WRITER_ENABLED", "1")
+    monkeypatch.setattr(project_routes, "_verify_cap_token", lambda *_: {"success": True})
+    monkeypatch.setattr(project_routes, "resolve_preset_snapshot", lambda *_a, **_k: (_ for _ in ()).throw(project_routes.PresetPolicyError("Unable to parse preset policies: /private/policy.toml")))
+    with caplog.at_level("WARNING"):
+        response = client.post("/create/", data={"config": CONFIG, "cap_token": "good"})
+    payload = response.json()
+    assert response.status_code == 400
+    assert payload["error"]["code"] == "project_config_validation_failed"
+    assert "administrator must repair the preset policy" in payload["error"]["details"]
+    assert "/private/" not in response.text
+    assert captured == {}
+    assert payload["error_id"] in caplog.text
+    assert "Traceback" in caplog.text
+    assert "/private/policy.toml" in caplog.text

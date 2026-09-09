@@ -7,6 +7,10 @@
 
 ## Purpose
 
+Implemented locally: [Creation failure diagnostics](docs/work-packages/20260909_creation_failure_diagnostics/package.md)
+— named-preset failures expose safe causes and next steps, with correlated
+tracebacks and response logs; live Portland failure verified.
+
 Checkpoint preparation: [Run sync overwrite](docs/work-packages/20260909_run_sync_overwrite/package.md)
 — manifest-scoped partial cleanup and fresh replacement; implementation pending
 reviewed contract commit authority.

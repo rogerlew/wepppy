@@ -455,7 +455,7 @@ projection above.
 
 ### Named-preset creation initialization diagnostics
 
-Implementation conformance pending (2026-09-09 amendment).
+Implemented and validated in development on 2026-09-09; production rollout is separate.
 For `POST /rq-engine/create/` and `/rq-engine/api/create/`, failures while
 initializing Ron retain HTTP 500, `error.code=run_initialization_failed`, and
 `error_id`. The response MUST explain a recognized cause and a relevant next
@@ -495,7 +495,7 @@ initializer exceptions. Other endpoints retain their existing traceback rules.
 
 ### Named-preset creation failure coverage
 
-Implementation conformance pending (2026-09-09 amendment).
+Implemented and validated in development on 2026-09-09; production rollout is separate.
 Both named-preset create aliases MUST return a canonical error for every handled
 failure and every otherwise unhandled application exception. Each failed
 response, including validation/authentication 4xx responses, MUST have an

@@ -2,7 +2,8 @@
 
 ## Status and scope
 
-2026-09-09: contract checkpoint in preparation; implementation pending.
+Closed 2026-09-09: implemented and validated in development. Production rollout
+is separate. Checkpoint ancestor: `bf063ed56`.
 The operator requested an actionable explanation for Portland creation failure
 `2a50c192697b4256a025be32c47a4f4d`, rather than an instruction to search logs.
 Scope is every failure exit from both named-preset create aliases in
@@ -58,3 +59,16 @@ based; this adds no temporary retry or fallback mitigation to sunset.
 
 The project-owned configuration contract remains applicable to materialization
 and creation lifecycle; those behaviors are outside this response-only delta.
+
+## Outcomes
+
+Both named-preset aliases emit correlated errors for handled and otherwise
+unhandled application failures. Recognized infrastructure causes include repair
+guidance; arbitrary internal diagnostics remain in server logs. Actual browser
+Portland creation and both aliases' validation errors were verified against
+ordinary text logs. Focused project/Builder suites: 132 passed. Broad suite:
+8,110 passed, 72 skipped. Docs lint and broad-exception enforcement passed.
+Independent correctness, QA and security reviews have no unresolved findings.
+
+The unavailable Portland module and existing failed-initialization cleanup
+behavior remain separate repairs. Test-owned smoke run remnants were removed.
