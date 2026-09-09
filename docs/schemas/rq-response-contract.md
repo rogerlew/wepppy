@@ -453,6 +453,76 @@ projection above.
 }
 ```
 
+### Named-preset creation initialization diagnostics
+
+Implementation conformance pending (2026-09-09 amendment).
+For `POST /rq-engine/create/` and `/rq-engine/api/create/`, failures while
+initializing Ron retain HTTP 500, `error.code=run_initialization_failed`, and
+`error_id`. The response MUST explain a recognized cause and a relevant next
+action; an exception class or log-search instruction alone is insufficient.
+
+An unavailable NoDb module MUST identify the module only when the entire
+exception message matches `unknown mod <identifier>`, where the identifier
+matches `[A-Za-z0-9_][A-Za-z0-9_-]{0,63}`. This explicitly permits echoing that
+module identifier even when it originates in a supported configuration override.
+Explain that the selected configuration requires a module unavailable on this
+server: verify the configured module name, or have the administrator install
+or enable the required module before retrying. Missing required files, filesystem permission denial,
+storage exhaustion, and unavailable Python dependencies MUST receive distinct
+safe explanations identifying the server-side problem and need for repair.
+Do not imply that choosing a different scientific configuration is an equivalent
+substitute for repairing the selected preset.
+
+Public messages MUST NOT forward arbitrary exception strings, paths,
+credentials, arbitrary request values, or tracebacks. The module identifier
+above is the sole dynamic exception-message disclosure permitted here.
+Unclassified failures MUST honestly
+state that run initialization failed and the cause could not be safely
+identified, retaining a support reference rather than inventing a diagnosis.
+This restriction is specific to these creation initialization responses.
+
+The original failure and its full traceback MUST be logged with `error_id`
+present in the ordinary formatted message as well as structured metadata.
+Secondary cleanup failures MUST NOT replace the original client diagnosis.
+Creation authorization and lifecycle remain governed by the
+[project creation policy](project-creation-policy.md) and
+[project-owned configuration contract](project-owned-config-contract.md).
+
+Rationale: users need the available explanation without operator log access;
+correlation remains useful for unexpected failures but cannot replace a known,
+safe cause. Explicit classifications avoid exposing secrets from arbitrary
+initializer exceptions. Other endpoints retain their existing traceback rules.
+
+### Named-preset creation failure coverage
+
+Implementation conformance pending (2026-09-09 amendment).
+Both named-preset create aliases MUST return a canonical error for every handled
+failure and every otherwise unhandled application exception. Each failed
+response, including validation/authentication 4xx responses, MUST have an
+`error_id` recorded in ordinary server log text with the HTTP status and error
+code. Exception failures MUST also preserve their original traceback in logs.
+Do not log request bodies, credentials, or arbitrary diagnostic prose in the
+response-summary log entry.
+
+For creation infrastructure failures, identify the failed operation (such as
+workspace allocation, configuration persistence, ownership registration, or
+creation completion), explain recognized causes using safe classifications,
+and give a relevant next action. This extends the disclosure restrictions in
+the initialization section to infrastructure diagnostics across these aliases.
+Recognized categories additionally include unavailable Redis/database services
+and invalid account identity. Unknown causes MUST remain honest and carry the
+support reference. Never guess that a permission error means the NAS is down.
+Existing request-validation and authentication contracts retain their public
+messages, status codes, and error codes. Otherwise unhandled exceptions use
+HTTP 500 and `error.code=run_creation_failed` with safe creation-stage details.
+
+Optional TTL/README failures retain their existing nonfatal success behavior
+and exception logs. This amendment does not change publication, cleanup,
+authorization, idempotency, or retry semantics. It covers named-preset creation
+only; Builder, fork, upload, and batch endpoints retain their own contracts.
+Rationale: observability must cover every exit from the create link, including
+unexpected failures, without weakening authorization or exposing internal data.
+
 ## Non-JSON responses
 - File downloads may return non-JSON payloads on success; errors must still conform to the error schema.
 
