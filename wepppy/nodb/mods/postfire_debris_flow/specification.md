@@ -116,6 +116,13 @@ builds. It is a substitute source requiring comparison with the original
 STATSGO predictor, not demonstrated calibration parity. See the detailed
 [SSURGO feasibility assessment](docs/ssurgo_m3_feasibility.md).
 
+The [M3 soil work package](../../../../docs/work-packages/20260908_staley_m3_soils/package.md)
+scopes source inventory, reproducible offline derivation, and a fixed-10 m
+comparison against original STATSGO THICK. The user requested this follow-up
+after terrain completion; it resolves soil-source suitability independently
+of terrain resolution. It does not yet establish an accepted SSURGO policy
+or authorize automatic source fallback or live soil rebuilds.
+
 The original STATSGO `THICK` is cumulative layer thickness in **inches**, not
 centimeters, depth to bedrock, or WEPP's modeled profile depth. Thus:
 

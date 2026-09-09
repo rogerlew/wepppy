@@ -83,6 +83,16 @@ Feedback mechanisms:
 
 ## 📋 Backlog
 
+### Staley M3 SSURGO Soil Thickness
+
+**Status**: Scoped 2026-09-08 Pacific; ready for fresh-agent execution.
+**Package**: [20260908_staley_m3_soils](docs/work-packages/20260908_staley_m3_soils/package.md)
+
+Audit and freeze soil inputs for the supplied 10 m terrain panel, implement
+an offline SSURGO cumulative-thickness derivation, and compare it against
+original STATSGO THICK. Resolve interval, bedrock, component weighting, and
+missing-data contracts before production M3 integration.
+
 ### Seamless WEPPcloud Session Cookie Namespace Migration
 
 **Proposed**: 2026-08-23

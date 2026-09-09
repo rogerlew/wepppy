@@ -3,6 +3,11 @@
 Assessment date: 2026-09-08. Code/schema and primary-source review only; no
 run-specific completeness audit, numerical parity claim, or production change.
 
+Execution follow-up: [M3 soil work package](../../../../../docs/work-packages/20260908_staley_m3_soils/package.md).
+Its fresh-agent plan includes explicit soil acquisition/inventory because the
+committed terrain fixtures contain no soil tables and current availability
+of the named live runs does not establish populated SSURGO caches.
+
 ## Finding
 
 SSURGO is a feasible source for an M3 cumulative soil-profile thickness estimate.
