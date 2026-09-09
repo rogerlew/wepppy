@@ -44,6 +44,9 @@ def raster_stacker(
     match_fn: PathType,
     dst_fn: PathType,
     resample: str = ...,
+    *,
+    dst_nodata: float | None = ...,
+    dst_dtype: str | None = ...,
 ) -> None: ...
 
 

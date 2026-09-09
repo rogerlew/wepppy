@@ -49,3 +49,12 @@ collides with a destination sentinel. Normalize the staged result to negative
 nodata (-9999) before aggregation/publication; no nonpositive value is valid
 conductivity. Generic raster_stacker rejects finite sentinel collisions before
 creating output, rather than silently relabeling valid source data.
+
+## Publication completion marker
+
+Both output files are individually atomically replaced. The summary is published
+last and binds `map_sha256`; consumers must verify that hash before treating
+an existing pair as current. A failed second rename propagates before worker
+submission and leaves a detectable mismatch, never a reported successful prep.
+Retry rebuilds both artifacts. Resolved soils paths must remain inside the run;
+permitted in-run aliases follow the same maintenance lock and publication path.

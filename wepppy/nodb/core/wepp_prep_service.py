@@ -407,11 +407,12 @@ class WeppPrepService:
         clip_soils_minimum_depth = soils.clip_soils_minimum_depth
         initial_sat = soils.initial_sat
 
-        kslast_map_fn = wepp.kslast_map
-        kslast_map = RasterDatasetInterpolator(kslast_map_fn) if kslast_map_fn is not None else None
+        from .kslast_map import prepare_kslast_map, kslast_provenance
+        soil_items = list(soils.sub_iter())
+        kslast_records = prepare_kslast_map(wepp, (key for key, _ in soil_items))
 
         task_args_list = []
-        for topaz_id, soil in soils.sub_iter():
+        for topaz_id, soil in soil_items:
             wepp_id = translator.wepp(top=int(topaz_id))
             src_fn = wepp_module.materialize_input_file(
                 wepp.wd,
@@ -420,28 +421,9 @@ class WeppPrepService:
             )
             dst_fn = os.path.join(runs_dir, f"p{wepp_id}.sol")
 
-            _kslast = None
-            modify_kslast_pars = None
-
-            if kslast_map is not None:
-                lng, lat = watershed.hillslope_centroid_lnglat(topaz_id)
-                try:
-                    sampled_kslast = kslast_map.get_location_info(lng, lat, method="nearest")
-                except RDIOutOfBoundsException:
-                    sampled_kslast = None
-
-                if isfloat(sampled_kslast) and float(sampled_kslast) > 0.0:
-                    _kslast = float(sampled_kslast)
-                    modify_kslast_pars = dict(
-                        map_fn=kslast_map_fn,
-                        lng=lng,
-                        lat=lat,
-                        map_value=_kslast,
-                    )
-                elif kslast is not None:
-                    _kslast = kslast
-            elif kslast is not None:
-                _kslast = kslast
+            record = None if kslast_records is None else kslast_records[str(int(topaz_id))]
+            _kslast = kslast if record is None else record["mean"]
+            modify_kslast_pars = None if record is None else kslast_provenance(wepp.kslast_map, record)
 
             task_args_list.append(
                 (

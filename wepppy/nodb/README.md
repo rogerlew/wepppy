@@ -111,3 +111,17 @@ NoDb configs reference large, location-specific datasets through placeholders th
 Use the helper script `python wepppy/nodb/scripts/update_extended_mods_data.py --apply`
 whenever locations (Portland, Seattle, Lake Tahoe) need to be relinked to the external
 bundle; the script rewrites the `.cfg` files to use the placeholder consistently.
+
+### Mapped restrictive-layer conductivity
+
+Both ordinary and MOFE WEPP preparation create `soils/kslast.tif` on the project
+hillslope grid and assign each hillslope its area mean. All its OFEs receive that
+value, retaining the developed-soil exemption. `soils/kslast_summary.json` records
+source/grid/map hashes, normalization counts and per-hillslope default fractions.
+A configured scalar fills only missing area; missing coverage without a default
+fails before soil workers start. Nonpositive/nonfinite conductivity is missing.
+The map is rebuilt on prep and retains nodata. Existing runs adopt the change
+when prepared again. See the [kslast map contract](../../docs/schemas/kslast-map-contract.md)
+for units, coverage policy, directory boundaries and diagnostics. The native
+release must export `identify_area_weighted_mean_single_raster_key` before
+restarting workers with this code.

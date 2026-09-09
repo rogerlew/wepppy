@@ -205,6 +205,9 @@ def raster_stacker(
     match_fn: PathType,
     dst_fn: PathType,
     resample: str = 'near',
+    *,
+    dst_nodata: float | None = None,
+    dst_dtype: str | None = None,
 ) -> None:
     """
     Warps a source raster to match the grid of another raster using rasterio.
@@ -215,6 +218,11 @@ def raster_stacker(
                         will be used as the target.
         dst_fn (str): Path for the output warped raster.
         resample (str): Resampling algorithm (e.g., 'near', 'bilinear', 'cubic').
+        dst_nodata: Explicit missing-area value; None inherits source nodata.
+        dst_dtype: Output dtype; None inherits source dtype.
+
+    Unrepresentable nodata and finite sentinel collisions with valid source
+    data fail before creating output. NaN is a collision-free floating sentinel.
     """
     # A mapping from string names to rasterio's Resampling methods
     resampling_methods = {
@@ -242,6 +250,22 @@ def raster_stacker(
 
     # 2. Open the source raster to get its data.
     with rasterio.open(src_fn) as src:
+        dtype = np.dtype(dst_dtype or src.dtypes[0])
+        nodata = src.nodata if dst_nodata is None else dst_nodata
+        if nodata is not None:
+            if dtype.kind in 'iu':
+                bounds = np.iinfo(dtype)
+                representable = np.isfinite(nodata) and bounds.min <= nodata <= bounds.max and float(nodata).is_integer()
+            elif dtype.kind == 'f':
+                representable = np.isnan(nodata) or (np.isfinite(nodata) and abs(nodata) <= np.finfo(dtype).max)
+            else:
+                representable = False
+            if representable and np.isfinite(nodata):
+                # Metadata must represent exactly the sentinel passed to GDAL;
+                # notably, a tiny float64 must not become float32 zero.
+                representable = float(np.array(nodata, dtype=dtype)) == nodata
+            if not representable:
+                raise ValueError(f"nodata {nodata} is not representable in {dtype}")
         # Update the output profile with source properties and compression.
         # It's important to use the source's nodata value and data type.
         out_profile.update({
@@ -255,29 +279,48 @@ def raster_stacker(
             'transform': match_transform,
             'crs': match_crs,
             'compress': 'lzw',
-            'nodata': src.nodata,
-            'dtype': src.dtypes[0]
+            'nodata': nodata,
+            'dtype': dtype.name
         })
         
-        # 3. Create the destination file and perform the reprojection.
-        with rasterio.open(dst_fn, 'w', **out_profile) as dst:
-            reproject(
-                source=rasterio.band(src, 1),
-                destination=rasterio.band(dst, 1),
-                src_transform=src.transform,
-                src_crs=src.crs,
-                dst_transform=match_transform,
-                dst_crs=match_crs,
-                resampling=resampling_methods[resample]
-            )
-    
+        if nodata is not None and (dst_nodata is not None or dst_dtype is not None):
+            # Warp with a collision-free floating sentinel, then let GDAL do
+            # destination conversion. Validate after both resampling and casting:
+            # either can create a finite sentinel absent from source pixels.
+            staging_profile = dict(out_profile, dtype='float64', nodata=float('nan'))
+            with rasterio.io.MemoryFile() as memory:
+                with memory.open(**staging_profile) as staged:
+                    reproject(
+                        source=rasterio.band(src, 1), destination=rasterio.band(staged, 1),
+                        src_transform=src.transform, src_crs=src.crs, src_nodata=src.nodata,
+                        dst_transform=match_transform, dst_crs=match_crs,
+                        dst_nodata=float('nan'), init_dest_nodata=True,
+                        resampling=resampling_methods[resample],
+                    )
+                    valid = staged.read_masks(1) != 0
+                    converted = staged.read(1, out_dtype=dtype.name)
+                    if np.isfinite(nodata) and np.any(valid & (converted == nodata)):
+                        raise ValueError("Destination nodata collides with resampled/converted valid data; use another sentinel")
+                    converted[~valid] = nodata
+            with rasterio.open(dst_fn, 'w', **out_profile) as dst:
+                dst.write(converted, 1)
+        else:
+            with rasterio.open(dst_fn, 'w', **out_profile) as dst:
+                reproject(
+                    source=rasterio.band(src, 1), destination=rasterio.band(dst, 1),
+                    src_transform=src.transform, src_crs=src.crs, src_nodata=src.nodata,
+                    dst_transform=match_transform, dst_crs=match_crs,
+                    dst_nodata=nodata, init_dest_nodata=True,
+                    resampling=resampling_methods[resample],
+                )
+
     # 4. Preserve color table if present in source raster
     # rasterio doesn't handle color tables, so we use GDAL for this
     src_ds = gdal.Open(src_fn, gdal.GA_ReadOnly)
     src_band = src_ds.GetRasterBand(1)
     src_color_table = src_band.GetRasterColorTable()
     
-    if src_color_table is not None:
+    if src_color_table is not None and dtype.name in ('uint8', 'uint16'):
         dst_ds = gdal.Open(dst_fn, gdal.GA_Update)
         dst_band = dst_ds.GetRasterBand(1)
         dst_band.SetRasterColorTable(src_color_table)

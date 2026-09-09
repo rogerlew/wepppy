@@ -698,21 +698,7 @@ def _coerce_sim_years(sim_years: Any) -> int:
 
 
 def prep_multi_ofe_hillslope(
-    args: Tuple[
-        str,
-        int,
-        str,
-        str,
-        int,
-        Optional[float],
-        float,
-        bool,
-        float,
-        bool,
-        float,
-        bool,
-        float,
-    ]
+    args: Tuple[Any, ...]
 ) -> Tuple[str, float]:
     t0 = time.time()
     (
@@ -729,7 +715,8 @@ def prep_multi_ofe_hillslope(
         clip_soils_depth,
         clip_soils_minimum,
         clip_soils_minimum_depth,
-    ) = args
+    ) = args[:13]
+    modify_kslast_pars = args[13] if len(args) > 13 else None
 
     slope_relpath = f'watershed/slope_files/hillslopes/hill_{topaz_id}.mofe.slp'
     slope_dst_fn = _join(runs_dir, f'p{wepp_id}.slp')
@@ -758,7 +745,7 @@ def prep_multi_ofe_hillslope(
         soilu.modify_initial_sat(initial_sat)
 
         if kslast is not None:
-            soilu.modify_kslast(kslast)
+            soilu.modify_kslast(kslast, pars=modify_kslast_pars)
 
         if clip_soils_minimum:
             soilu.ensure_minimum_soil_depth(clip_soils_minimum_depth)
@@ -2144,10 +2131,8 @@ class Wepp(NoDbBase):
 
         kslast = self.kslast
 
-        kslast_map_fn = self.kslast_map
-        kslast_map = None
-        if kslast_map_fn is not None:
-            kslast_map = RasterDatasetInterpolator(kslast_map_fn)
+        from .kslast_map import prepare_kslast_map, kslast_provenance
+        kslast_records = prepare_kslast_map(self, watershed.subs_summary)
 
         cpu_count = os.cpu_count() or 1
         ncpu_override = os.getenv('WEPPPY_NCPU')
@@ -2167,28 +2152,9 @@ class Wepp(NoDbBase):
         task_args_list = []
         for topaz_id in watershed.subs_summary:
             wepp_id = translator.wepp(top=int(topaz_id))
-            lng, lat = watershed.hillslope_centroid_lnglat(topaz_id)
-
-            _kslast = None
-
-            if kslast_map is not None:
-                try:
-                    _kslast = kslast_map.get_location_info(lng, lat, method='nearest')
-                except RDIOutOfBoundsException:
-                    _kslast = None
-
-                if not isfloat(_kslast):
-                    if kslast is not None:
-                        _kslast = kslast
-                    else:
-                        _kslast = None
-                elif _kslast <= 0.0:
-                    if kslast is not None:
-                        _kslast = kslast
-                    else:
-                        _kslast = None
-            elif kslast is not None:
-                _kslast = kslast
+            record = None if kslast_records is None else kslast_records[str(int(topaz_id))]
+            _kslast = kslast if record is None else record["mean"]
+            modify_kslast_pars = None if record is None else kslast_provenance(self.kslast_map, record)
 
             task_args_list.append(
                 (
@@ -2205,6 +2171,7 @@ class Wepp(NoDbBase):
                     clip_soils_depth,
                     clip_soils_minimum,
                     clip_soils_minimum_depth,
+                    modify_kslast_pars,
                 )
             )
 
