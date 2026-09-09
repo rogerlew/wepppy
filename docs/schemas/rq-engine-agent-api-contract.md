@@ -411,8 +411,10 @@ For API-only replication flows, climate setup is order-sensitive:
    - years: `observed_start_year`, `observed_end_year`,
      `future_start_year`, `future_end_year`
    - scaling: `precip_scaling_mode`, `precip_scale_factor`,
-     `precip_monthly_scale_factors_0..11`, `precip_scale_reference`,
-     `precip_scale_factor_map`
+     `precip_monthly_scale_factors_0..11`, `precip_scale_reference`.
+   - The spatial scale map is configuration-owned and immutable to submissions.
+     Legacy `precip_scale_factor_map` payload fields are accepted but ignored;
+     see [Climate scale-map authority](climate-precipitation-scaling-contract.md).
 5. Submit `POST /api/runs/{runid}/{config}/build-climate` and poll
    `GET /api/jobstatus/{job_id}` to terminal state.
 
