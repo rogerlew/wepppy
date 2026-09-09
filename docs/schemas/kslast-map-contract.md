@@ -35,3 +35,17 @@ Publish additive `soils/kslast_summary.json` with source/grid identity, aggregat
 Ignoring missing cells silently assumes the mapped portion represents the whole hillslope. Area-based default substitution makes that assumption explicit and preserves coverage evidence. Generic Rust semantics avoid coupling reusable raster statistics to soil physics. Nearest-neighbor stacking preserves mapped classes; arithmetic aggregation can still be dominated by a small high-conductivity fraction, which is intended.
 
 Required examples: 80% at 0.0001 plus 20% default 0.05 gives 0.01008; 99% at 0.0001 plus 1% at 0.5 gives 0.005099. Verify prepared soil values and fresh full WEPP execution, not only kernel results. Existing saved run artifacts require a new authorized preparation/run to adopt this behavior.
+
+## Directory-only runtime boundary
+
+Current runtime paths have retired NoDir materialization. Mapped prep requires
+an existing soils directory; archive-only roots fail before publication. In
+mixed legacy roots the directory is authoritative and the archive is left
+untouched. Use the active soils maintenance lock for one artifact writer.
+No archived-root thaw or archive rewrite is introduced.
+
+Warp with explicit Float64 NaN nodata so no finite invalid source conductivity
+collides with a destination sentinel. Normalize the staged result to negative
+nodata (-9999) before aggregation/publication; no nonpositive value is valid
+conductivity. Generic raster_stacker rejects finite sentinel collisions before
+creating output, rather than silently relabeling valid source data.
