@@ -2,10 +2,13 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-09-09
-**Active Packages**: 35
+**Active Packages**: 36
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
+
+Scaffolded: [Project-grid area-weighted kslast](docs/work-packages/20260909_kslast_area_weighted/package.md)
+— generic wepppyo3 mean, explicit uncovered nodata, native installation, required local forest restart and full seductive-sabra WEPP validation; execution pending.
 
 Completed: [Peridot centroid projection](docs/work-packages/20260909_peridot_centroid_projection/package.md)
 — pointwise PROJ conversion and three vendored binaries; 51 Rust and 8146 broad Python tests passed, with container and MOFE input validation.
