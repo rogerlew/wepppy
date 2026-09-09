@@ -1,0 +1,83 @@
+[
+  {
+    "site": "moscow_mountain",
+    "table": "lineage",
+    "query": "SELECT mu.mukey,l.areasymbol,l.areatypename,sac.saversion,sac.saverest FROM mapunit mu INNER JOIN legend l ON mu.lkey=l.lkey INNER JOIN sacatalog sac ON sac.areasymbol=l.areasymbol WHERE mu.mukey IN (644246,644262,644802,644804,644904,644910,644912,645296,645304,678582,682651,814010,1387521,1387525,1487706,1487712,1487714,1487716,1689249,1689255,1689256,1689257,1689258,1689263,1689264,1689265,1689266,1689267,1689270,1689271,1689275,1689277,1689280,2375734,2437917,2487253,2487255,2487260,2487269,2487272,2487290,2487291,2501171,2501175)",
+    "source_url": "https://SDMDataAccess.nrcs.usda.gov/Tabular/post.rest",
+    "format": "JSON+COLUMNNAME",
+    "retrieved_utc": "2026-09-09T02:44:00.843698+00:00",
+    "rows": 44
+  },
+  {
+    "site": "moscow_mountain",
+    "table": "component",
+    "query": "SELECT mukey,cokey,compname,comppct_r,compkind FROM component WHERE mukey IN (644246,644262,644802,644804,644904,644910,644912,645296,645304,678582,682651,814010,1387521,1387525,1487706,1487712,1487714,1487716,1689249,1689255,1689256,1689257,1689258,1689263,1689264,1689265,1689266,1689267,1689270,1689271,1689275,1689277,1689280,2375734,2437917,2487253,2487255,2487260,2487269,2487272,2487290,2487291,2501171,2501175) ORDER BY mukey,cokey",
+    "source_url": "https://SDMDataAccess.nrcs.usda.gov/Tabular/post.rest",
+    "format": "JSON+COLUMNNAME",
+    "retrieved_utc": "2026-09-09T02:44:01.209889+00:00",
+    "rows": 91
+  },
+  {
+    "site": "moscow_mountain",
+    "table": "chorizon",
+    "query": "SELECT h.cokey,h.chkey,h.hzname,h.hzdept_r,h.hzdepb_r,h.hzthk_r,h.desgnmaster FROM chorizon h INNER JOIN component c ON c.cokey=h.cokey WHERE c.mukey IN (644246,644262,644802,644804,644904,644910,644912,645296,645304,678582,682651,814010,1387521,1387525,1487706,1487712,1487714,1487716,1689249,1689255,1689256,1689257,1689258,1689263,1689264,1689265,1689266,1689267,1689270,1689271,1689275,1689277,1689280,2375734,2437917,2487253,2487255,2487260,2487269,2487272,2487290,2487291,2501171,2501175) ORDER BY h.cokey,h.hzdept_r,h.chkey",
+    "source_url": "https://SDMDataAccess.nrcs.usda.gov/Tabular/post.rest",
+    "format": "JSON+COLUMNNAME",
+    "retrieved_utc": "2026-09-09T02:44:01.667139+00:00",
+    "rows": 514
+  },
+  {
+    "site": "topanga",
+    "table": "lineage",
+    "query": "SELECT mu.mukey,l.areasymbol,l.areatypename,sac.saversion,sac.saverest FROM mapunit mu INNER JOIN legend l ON mu.lkey=l.lkey INNER JOIN sacatalog sac ON sac.areasymbol=l.areasymbol WHERE mu.mukey IN (456007,456024,456042,469823,469935,469954,469961,469988,469990,469993,735080,735089,747704)",
+    "source_url": "https://SDMDataAccess.nrcs.usda.gov/Tabular/post.rest",
+    "format": "JSON+COLUMNNAME",
+    "retrieved_utc": "2026-09-09T02:44:02.763113+00:00",
+    "rows": 13
+  },
+  {
+    "site": "topanga",
+    "table": "component",
+    "query": "SELECT mukey,cokey,compname,comppct_r,compkind FROM component WHERE mukey IN (456007,456024,456042,469823,469935,469954,469961,469988,469990,469993,735080,735089,747704) ORDER BY mukey,cokey",
+    "source_url": "https://SDMDataAccess.nrcs.usda.gov/Tabular/post.rest",
+    "format": "JSON+COLUMNNAME",
+    "retrieved_utc": "2026-09-09T02:44:03.134886+00:00",
+    "rows": 64
+  },
+  {
+    "site": "topanga",
+    "table": "chorizon",
+    "query": "SELECT h.cokey,h.chkey,h.hzname,h.hzdept_r,h.hzdepb_r,h.hzthk_r,h.desgnmaster FROM chorizon h INNER JOIN component c ON c.cokey=h.cokey WHERE c.mukey IN (456007,456024,456042,469823,469935,469954,469961,469988,469990,469993,735080,735089,747704) ORDER BY h.cokey,h.hzdept_r,h.chkey",
+    "source_url": "https://SDMDataAccess.nrcs.usda.gov/Tabular/post.rest",
+    "format": "JSON+COLUMNNAME",
+    "retrieved_utc": "2026-09-09T02:44:03.507505+00:00",
+    "rows": 97
+  },
+  {
+    "site": "az_ponderosa",
+    "table": "lineage",
+    "query": "SELECT mu.mukey,l.areasymbol,l.areatypename,sac.saversion,sac.saverest FROM mapunit mu INNER JOIN legend l ON mu.lkey=l.lkey INNER JOIN sacatalog sac ON sac.areasymbol=l.areasymbol WHERE mu.mukey IN (56390,56449,56462,56475,2721103,2721109,2721113,2721150,2934232,2934242,2934247,2934254,2934256,2934269,2934312,2934319,2934354,2934358,2934373,2934380,2934382,2934384,2934385,2934386,2934390,2934391,2934392,2934394,2934395,2934397,2934398,2934401,2934404,2934408,2934410,2934430,2934443,2934483,2934511,2934513,2934520,2934522,2934581,2934582,2934586,2934600,2942447,2942453,2942481,2942502,2942503,2942512,2942517,2942518)",
+    "source_url": "https://SDMDataAccess.nrcs.usda.gov/Tabular/post.rest",
+    "format": "JSON+COLUMNNAME",
+    "retrieved_utc": "2026-09-09T02:44:04.379586+00:00",
+    "rows": 54
+  },
+  {
+    "site": "az_ponderosa",
+    "table": "component",
+    "query": "SELECT mukey,cokey,compname,comppct_r,compkind FROM component WHERE mukey IN (56390,56449,56462,56475,2721103,2721109,2721113,2721150,2934232,2934242,2934247,2934254,2934256,2934269,2934312,2934319,2934354,2934358,2934373,2934380,2934382,2934384,2934385,2934386,2934390,2934391,2934392,2934394,2934395,2934397,2934398,2934401,2934404,2934408,2934410,2934430,2934443,2934483,2934511,2934513,2934520,2934522,2934581,2934582,2934586,2934600,2942447,2942453,2942481,2942502,2942503,2942512,2942517,2942518) ORDER BY mukey,cokey",
+    "source_url": "https://SDMDataAccess.nrcs.usda.gov/Tabular/post.rest",
+    "format": "JSON+COLUMNNAME",
+    "retrieved_utc": "2026-09-09T02:44:04.753329+00:00",
+    "rows": 235
+  },
+  {
+    "site": "az_ponderosa",
+    "table": "chorizon",
+    "query": "SELECT h.cokey,h.chkey,h.hzname,h.hzdept_r,h.hzdepb_r,h.hzthk_r,h.desgnmaster FROM chorizon h INNER JOIN component c ON c.cokey=h.cokey WHERE c.mukey IN (56390,56449,56462,56475,2721103,2721109,2721113,2721150,2934232,2934242,2934247,2934254,2934256,2934269,2934312,2934319,2934354,2934358,2934373,2934380,2934382,2934384,2934385,2934386,2934390,2934391,2934392,2934394,2934395,2934397,2934398,2934401,2934404,2934408,2934410,2934430,2934443,2934483,2934511,2934513,2934520,2934522,2934581,2934582,2934586,2934600,2942447,2942453,2942481,2942502,2942503,2942512,2942517,2942518) ORDER BY h.cokey,h.hzdept_r,h.chkey",
+    "source_url": "https://SDMDataAccess.nrcs.usda.gov/Tabular/post.rest",
+    "format": "JSON+COLUMNNAME",
+    "retrieved_utc": "2026-09-09T02:44:05.293646+00:00",
+    "rows": 895
+  }
+]

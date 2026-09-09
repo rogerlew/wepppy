@@ -1,0 +1,12 @@
+{
+  "wbt_sha256": "d4adb49d0e856a587ff996cf695bb71fbacf5669b90e4b526de403aac91d4718",
+  "fixture_manifest_sha256": "e304b99a814eec1081c847beff9ef8b72ab550e2947f555dbc50fdbb42b3ee81",
+  "terrain_inputs": {
+    "/workdir/weppcloud-wbt/test_fixtures/staley_m3_resolution/moscow_mountain/10m/dem/dem.tif": "61e8515e7d1e8abbf7ca299d2df5ea1d43814772345fc695db09128edeacd164",
+    "/workdir/weppcloud-wbt/test_fixtures/staley_m3_resolution/topanga/10m/dem/dem.tif": "4b8d13f60905c5beebccce475c948998433d85f74632a09fe5b4cef2b23414e1",
+    "/workdir/weppcloud-wbt/test_fixtures/staley_m3_resolution/az_ponderosa/10m/dem/dem.tif": "29252ee37842d81e51d4913fc6884877245c850f5b5e98f7c55f9b09fd9a6b53"
+  },
+  "reference_outlets_sha256": "0a7f1cda43955007659c000d44103d4726c11c2d39c5c7702850bd0d89e02a04",
+  "script_sha256": "c2e7967784259c61d5ddaa4e42ec6469d627ffebfa372e73fc78fe0efa062579",
+  "helper_sha256": "5f04b3c541078f2750f0baffe9ad95db772c039834595159a0515abda723e082"
+}

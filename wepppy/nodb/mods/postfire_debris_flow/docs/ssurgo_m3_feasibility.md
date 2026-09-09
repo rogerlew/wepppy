@@ -1,14 +1,30 @@
 # SSURGO for M3 Soil Thickness
 
-Assessment date: 2026-09-08. Code/schema and primary-source review only; no
-run-specific completeness audit, numerical parity claim, or production change.
+Updated 2026-09-09 after bounded acquisition and offline paired evaluation.
+No production source approval or integration is claimed.
 
 Execution follow-up: [M3 soil work package](../../../../../docs/work-packages/20260908_staley_m3_soils/package.md).
 Its fresh-agent plan includes explicit soil acquisition/inventory because the
 committed terrain fixtures contain no soil tables and current availability
 of the named live runs does not establish populated SSURGO caches.
 
-## Finding
+## Measured follow-up
+
+The three live projects had no `soils/` directories. Study acquisition froze
+111 original map units, 390 components and 1,506 horizons, with survey lineage,
+queries and hashes, plus bounded original STATSGO THICK windows. All 12 sampled
+catchments had incomplete component support; strict soil treatment was
+unavailable at two Topanga outlets. Keeping all recorded layers materially
+changed results. Source substitution is not justified by mapping detail alone.
+
+The [canonical offline contract](m3_soil_thickness.md) and
+[ADR-0053](../../../../../docs/adrs/ADR-0053-staley-m3-offline-soil-thickness.md)
+now define executable interval, weighting, coverage and units. The
+[source decision](../../../../../docs/work-packages/20260908_staley_m3_soils/artifacts/soil_decision.md)
+records measured effects and remaining scientific uncertainty. Retain the
+original predictor pending owner review; no automatic fallback is implemented.
+
+## Initial feasibility finding
 
 SSURGO is a feasible source for an M3 cumulative soil-profile thickness estimate.
 Current Soils builds already cache the relevant raw fields in the project.

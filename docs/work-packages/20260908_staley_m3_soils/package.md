@@ -1,6 +1,6 @@
 # Staley M3 SSURGO Soil Thickness
 
-**Status**: Open — scaffold ready for fresh-agent execution.
+**Status**: Closed — offline implementation and paired experiment complete, 2026-09-09.
 **Started**: 2026-09-09 02:17 UTC (2026-09-08 Pacific)
 **Timezone**: UTC
 
@@ -34,10 +34,10 @@ not a GPL implementation extraction or a claim of calibrated predictive skill.
 
 The requesting user owns scientific source/availability decisions; the executing
 agent implements and evaluates the derivation. Independent reviewers assess
-correctness and data-boundary changes. Begin with
-[start_here.md](prompts/active/start_here.md), execute the
-[ExecPlan](prompts/active/staley_m3_soils_execplan.md), and update
-[tracker.md](tracker.md) at each milestone.
+correctness and data-boundary changes. The
+[archived start prompt](prompts/completed/start_here.md),
+[completed ExecPlan](prompts/completed/staley_m3_soils_execplan.md), and
+[tracker](tracker.md) preserve execution history.
 
 ## Success Criteria
 
@@ -86,7 +86,10 @@ fixtures. Close medium/high findings before completion.
 
 ## Deliverables and Follow-up
 
-All implementation and scientific deliverables are pending. This session
-scaffolds the package only. The follow-up is production M3 integration under
-the repository contract-first standard, using the resolved source contract.
-No source-policy decision should rely solely on archived work-package text.
+The offline helper, frozen source fixtures, paired soil-source experiment,
+ADR-0053 and independent reviews are delivered. The recommendation is to retain
+original STATSGO pending scientific source approval; no SSURGO production
+coverage cutoff or material policy is approved. See the
+[decision report](artifacts/soil_decision.md) and
+[canonical offline contract](../../../wepppy/nodb/mods/postfire_debris_flow/docs/m3_soil_thickness.md).
+Future production integration requires its own contract-first work.

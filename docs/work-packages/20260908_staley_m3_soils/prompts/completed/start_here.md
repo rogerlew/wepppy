@@ -1,4 +1,9 @@
-# Fresh-Agent Handoff: Staley M3 Soils
+# Archived Start Prompt: Staley M3 Soils
+
+Completed 2026-09-09. Offline implementation and comparison are delivered;
+reviews and validation pass. See the package decision report for the
+recommendation to retain original STATSGO pending scientific source approval.
+The original execution instructions follow for historical reproducibility.
 
 Execute [staley_m3_soils_execplan.md](staley_m3_soils_execplan.md) end-to-end.
 Read root and nested AGENTS, the package brief, canonical postfire specification,

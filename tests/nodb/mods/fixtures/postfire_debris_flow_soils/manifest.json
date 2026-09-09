@@ -1,0 +1,98 @@
+{
+  "files": [
+    {
+      "path": "az_ponderosa_chorizon.csv",
+      "sha256": "d0f6e3aaa8d9eadeec19e3fc53a541c0fbc99ec1c2a6790bf6da633533190a04",
+      "bytes": 29478
+    },
+    {
+      "path": "az_ponderosa_component.csv",
+      "sha256": "b8cd30a89043e1d7f6de64fb8ac4a6e656179f91fd1c1df8f8a4a42c72fd513a",
+      "bytes": 9958
+    },
+    {
+      "path": "az_ponderosa_lineage.json",
+      "sha256": "42770e9cf93b61a25fb672503c9eeb7212a7bbea554f17b4f660ccab273da102",
+      "bytes": 4390
+    },
+    {
+      "path": "az_ponderosa_mukey.tif",
+      "sha256": "5127176618005304b8ecd2e862e39c367666d10b5a4f2375d50cc26abce42f8e",
+      "bytes": 150502
+    },
+    {
+      "path": "az_ponderosa_statsgo_native.tif",
+      "sha256": "a9ec1cbadefb5b08ac65953c0b96e6a984299434596ab188ea4d4585e637314f",
+      "bytes": 8901
+    },
+    {
+      "path": "moscow_mountain_chorizon.csv",
+      "sha256": "b63a94c9bb383aa84194440b7eef5f3e337a95b4fac917013c3ecec40d41dccc",
+      "bytes": 17060
+    },
+    {
+      "path": "moscow_mountain_component.csv",
+      "sha256": "c446c7b0523600ed685b80e9a86d31dacd034c390350738da078a504bd4316a8",
+      "bytes": 3326
+    },
+    {
+      "path": "moscow_mountain_lineage.json",
+      "sha256": "5af7085663f2e97cf16f2f7dbce012d1e6cbedcc955669a3fd137d9a585b2cd7",
+      "bytes": 3630
+    },
+    {
+      "path": "moscow_mountain_mukey.tif",
+      "sha256": "7da53fe9e971cbec4ccfb8c33622fcc2ba7e8181a265de612326a4f00728a8fe",
+      "bytes": 53964
+    },
+    {
+      "path": "moscow_mountain_statsgo_native.tif",
+      "sha256": "03178f49faba5bda2820e61323541bb50bcf15158029e62de278b706bc64e3ed",
+      "bytes": 4030
+    },
+    {
+      "path": "queries.json",
+      "sha256": "37f0f95d57fe06fd86b681e49079103b891cd18e0d457b3e445eb52e28babfba",
+      "bytes": 6363
+    },
+    {
+      "path": "statsgo_metadata.json",
+      "sha256": "0e94c9a998b07b159ff6d1ee82e7523c61822dcf1270ef1b89de575ca1da9307",
+      "bytes": 12183
+    },
+    {
+      "path": "topanga_chorizon.csv",
+      "sha256": "1692e74f7cd3dfb3f85e40e326e87f46f33610165261c9d7625703db6a88e029",
+      "bytes": 3177
+    },
+    {
+      "path": "topanga_component.csv",
+      "sha256": "e3b2b0f81c244de1bea81cdca1df85343a46d032c3d1685201378c4b734bb5b0",
+      "bytes": 2769
+    },
+    {
+      "path": "topanga_lineage.json",
+      "sha256": "c455b949e8e36095753eb24d5cd27b3006d2aae2214e02a95120f8c1d7ac778e",
+      "bytes": 1105
+    },
+    {
+      "path": "topanga_mukey.tif",
+      "sha256": "accdb61434abafc47fb107fa23c5247836d86d74451ff1eb0ab4c0924d89cbb5",
+      "bytes": 9020
+    },
+    {
+      "path": "topanga_statsgo_native.tif",
+      "sha256": "5a7211ce36912e7f55f546a37e88f5408a6850b69c56431067c6f795ac2f0d76",
+      "bytes": 2681
+    }
+  ],
+  "spatial_source": "/wc1/geodata/ssurgo/gNATSGSO/2025/.vrt",
+  "spatial_vintage": "2025 mosaic; SDA tables retrieved separately",
+  "original_keys": true,
+  "substitutions": [],
+  "attribution": "USDA NRCS Soil Survey; USGS Schwarz and Alexander 1995, King 2025",
+  "units": {
+    "horizons": "cm",
+    "STATSGO_THICK": "inches"
+  }
+}

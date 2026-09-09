@@ -5,8 +5,9 @@
 
 ## Status
 
-Documentation scaffold, started 2026-09-08. No controller, UI, API, or executable
-model is implemented here. Existing `debris_flow` behavior is unchanged.
+Offline soil-thickness derivation and a reproducible source-comparison harness
+are implemented. No postfire controller, UI, API or production model wiring is
+implemented here. Existing `debris_flow` behavior is unchanged.
 The [specification](specification.md) distinguishes accepted direction from
 open scientific and integration decisions.
 
@@ -18,7 +19,8 @@ open scientific and integration decisions.
    also supply continuous pre/post-fire dNBR.
 3. Select M1 (default) or M3 explicitly. M3 requires soil thickness instead of K
    and does not require dNBR. Raw project SSURGO horizons are a feasible source;
-   their aggregation and missing-data rules still need validation.
+   offline aggregation and coverage are explicit, but source substitution is not
+   approved.
 4. Use the project's climate event intensities to assess storm-event
    probabilities. Browse events in an interactive dashboard and select an
    event to inspect catchment results, rainfall, and input provenance.
@@ -48,12 +50,32 @@ placeholders are intentionally deferred until the contracts are ready.
   reporting; missing pixels are not zero. See the [upload design](docs/dnbr_upload.md).
 - RUSLE owns M1 K preparation and its UI; do not duplicate the K estimator.
 - The standard RUSLE build produces named K artifacts, not `rusle/k.tif`.
-- M3 ruggedness, thickness aggregation, assessment scope, and rainfall sourcing
-  need resolution before implementation. Original thickness units are inches:
-  M3 uses mean thickness in inches divided by 100.
+- M3 offline thickness uses raw validated intervals and explicit fractional
+  component support. Original units are inches; S is mean cm / 254.
+  Production source approval, assessment scope and rainfall sourcing remain open.
 - See [local agent guidance](AGENTS.md) for implementation sequencing.
 - See [SSURGO feasibility](docs/ssurgo_m3_feasibility.md) for reusable raw fields
   and why generated WEPP soil depth and the current `SolThk` are unsuitable.
+
+## Offline soil study
+
+`soil_thickness.py` provides pure interval/map-unit calculations, a read-only
+SQLite adapter, and `build_artifacts` for prepared GeoTIFFs and upstream masks.
+It writes component/map-unit audits, thickness/support rasters, catchment S
+and input hashes into a new directory. It never builds live soils or acquires
+missing sources. Partial means are diagnostics; full-support outputs are absent
+when component or spatial support is incomplete.
+
+See the [canonical soil contract](docs/m3_soil_thickness.md) for signatures,
+required columns, reason codes and the strict-soil/all-layer distinction.
+The [study harness and validation](../../../../docs/work-packages/20260908_staley_m3_soils/artifacts/validation.md)
+reproduce the frozen three-site comparison with owned WBT routing and Rust
+intersection counts. The helper can be loaded directly by that harness without
+NoDb's package-level Redis initialization.
+
+The study recommends retaining the original STATSGO predictor pending a
+scientific source decision. SSURGO's finer mapping does not establish calibrated
+parity, and the sampled catchments all have incomplete component support.
 
 ## References and Licensing
 

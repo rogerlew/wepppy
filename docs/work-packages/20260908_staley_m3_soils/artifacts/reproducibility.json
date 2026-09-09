@@ -1,0 +1,35 @@
+{
+  "final_directory": "/tmp/staley-m3-soils-study/evaluation-final",
+  "compared_directory": "/tmp/staley-m3-soils-study/evaluation-v4",
+  "tables": [
+    {
+      "artifact": "source_comparison.csv",
+      "check": "byte-identical to evaluation-v4"
+    },
+    {
+      "artifact": "m3_sensitivity.csv",
+      "check": "byte-identical to evaluation-v4"
+    },
+    {
+      "artifact": "component_audit.csv",
+      "check": "byte-identical to evaluation-v4"
+    },
+    {
+      "artifact": "mapunit_audit.csv",
+      "check": "byte-identical to evaluation-v4"
+    }
+  ],
+  "raster_arrays_equal": 30,
+  "input_hashes_unchanged": true,
+  "final_code_hashes_verified": true,
+  "published": {
+    "catchment_coverage.csv": "fba1e4338184969a1918153f7bb33e5968123a37cccc55523da036f9b6ace0a0",
+    "m3_sensitivity.csv": "51b783a8b116986a17561164f562fc4d2b2f196ea07176e4b3af4242588ee038",
+    "environment.json": "30b0425e2c3106abe75de09a60295cc997711d38360dc3b12b3381296998afa5",
+    "soil_comparison.png": "f238b2b55452afc5b2ec35c460ee59179a02a71db694a3a6d5bddcd3b2ff0f96",
+    "source_comparison.csv": "30506b70f77e8078d434bb3a3c77aec1f47ac68c74b131f585dbfce5083aaf40",
+    "mapunit_audit.csv": "7b81c0d3be8f06fa388934ff00eed99132f79604e36d7abfd5d0c982be84fdcb",
+    "component_audit.csv": "c0acf59675f759fb61703e340323af8df96734a5959eeaac3551faf45eda1f49",
+    "commands.json": "4c1f3b1eb602d177700145740ace91e279e1f1a3357a0c82107b36360b6febf8"
+  }
+}

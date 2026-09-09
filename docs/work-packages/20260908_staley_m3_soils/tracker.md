@@ -2,20 +2,19 @@
 
 ## Quick Status
 
-**Started / updated**: 2026-09-09 02:17 UTC
-**Phase**: Scaffold ready; implementation not started
-**Next milestone**: Audit/acquire soil inputs and draft interval/source contract
-**Security impact**: high for planned file/database/acquisition boundaries
-**Dedicated correctness and security reviews**: pending execution
+**Updated**: 2026-09-09 UTC
+**Phase**: Closed — offline implementation and experiment complete
+**Security impact**: high; dedicated security and correctness gates pass
+**Recommendation**: retain original STATSGO; no automatic SSURGO substitution
 
 ## Task Board
 
-- [x] Scope, ExecPlan, fresh-agent handoff, and artifact catalog scaffolded.
-- [ ] M1: Audit data readiness, freeze minimal soil fixtures, draft ADR/protocol.
-- [ ] M2: Resolve and test interval/component/catchment policies.
-- [ ] M3: Implement reproducible offline artifact builder and fixture propagation.
-- [ ] M4: Compare SSURGO against original STATSGO on fixed 10 m catchments.
-- [ ] M5: Independent reviews, source recommendation, durable docs, closeout.
+- [x] Scope and source inventory recorded; live projects remain read-only.
+- [x] M1: Freeze 111 map units, 390 components, 1,506 horizons and THICK windows.
+- [x] M2: Verify embedded original SAS; freeze offline contract and ADR-0053.
+- [x] M3: Implement/test read-only builder and source-to-M3 propagation.
+- [x] M4: Complete 72 comparisons and 924 diagnostic scenarios on 12 outlets.
+- [x] M5: Final reproducibility published, durable docs promoted, prompts archived.
 
 ## Decisions
 
@@ -28,21 +27,26 @@
 
 ## Discoveries and Risks
 
-At scaffold time, the supplied three 10 m project paths have no `soils/`
-directory. The committed WBT terrain fixtures contain no soil cache tables.
-Do not assume the earlier existence of `soils.nodb` proves populated horizons.
-The fresh agent must inventory available sources and perform any needed bounded
-acquisition into a separate study workspace, never silently rebuild live runs.
+All three live `soils/` directories are absent. Frozen study inputs do not imply
+project readiness. All acquired spatial keys resolve to Non-MLRA Soil Survey
+Areas, but spatial/table vintages differ. Original SAS excludes WATER and
+renormalizes missing component support; it does not explicitly filter bedrock.
+Weathered material, repeated profile endpoints, absent component horizons and
+unknown within-unit component locations constrain source interpretation.
 
-Source THICK semantics, duplicate/gapped horizons, bedrock designations,
-component weights, substitutions, and missing spatial coverage remain open.
-Original STATSGO retrieval and metadata still need verification. Fixed-depth
-substitution, zero fill, and automatic fallback are not accepted policies.
+Strict soil has no support at two Topanga outlets; all catchments are partial
+under both evaluated policies. No production SSURGO source or cutoff is approved.
+The small panel includes nested catchments and one 22.9858 km2 diagnostic.
 
 ## Validation and Handoff
 
-Scaffold validation is documentation-only. No soil records were acquired or
-modified and no derivation or scientific comparison has run. Start with
-[start_here.md](prompts/active/start_here.md); maintain this tracker and the
-ExecPlan at each milestone. Record actual input availability rather than
-claiming a complete study from synthetic data alone.
+35 focused tests pass. Full suite: 7,766 passed, 72 skipped. Independent
+correctness and security reviews pass with no unresolved findings. Same-session
+acquisition reproduction is byte-identical for the 12 source data files.
+Final command evidence is in [validation](artifacts/validation.md); scientific
+outcomes are in [soil_decision](artifacts/soil_decision.md). Canonical authority
+is the module's `docs/m3_soil_thickness.md`, not this package history.
+
+Final reproduction: four numerical tables byte-identical and 30 raster arrays
+exactly equal; input/code hashes verified. Stubtest, stub hygiene, scoped docs
+lint and spelling checks pass. No branch, commit, deployment or live writes.

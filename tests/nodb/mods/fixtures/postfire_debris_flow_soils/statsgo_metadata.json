@@ -1,0 +1,299 @@
+{
+  "link": {
+    "rel": "self",
+    "url": "https://www.sciencebase.gov/catalog/item/675721b9d34e5c5dfd05c575"
+  },
+  "relatedItems": {
+    "link": {
+      "url": "https://www.sciencebase.gov/catalog/itemLinks?itemId=675721b9d34e5c5dfd05c575",
+      "rel": "related"
+    }
+  },
+  "id": "675721b9d34e5c5dfd05c575",
+  "title": "STATSGO Soil Thickness (THICK) Cloud Optimized GeoTIFF for the Continental US",
+  "summary": "This data release reformats the STATSGO soil thickness (THICK) dataset (Schwarz and Alexander, 1995) as a cloud-optimized GeoTIFF (COG). The COG format allows standard software tools to efficiently access the datasets over an internet connection. The soil thickness values have units of inches. Please refer to the documentation of the source archive (Schwarz and Alexander, 1995) for additional details on the underlying dataset.  The COG dataset spans the continental US at a nominal 30 meter resolution. The spatial reference is EPSG:5069. Each COG uses a float32 precision, and the NoData value (NaN) indicates raster pixels not covered by the original STATSGO dataset. The COG also includes non-physical values of -0.1, which were used [...]",
+  "body": "This data release reformats the STATSGO soil thickness (THICK) dataset (Schwarz and Alexander, 1995) as a cloud-optimized GeoTIFF (COG). The COG format allows standard software tools to efficiently access the datasets over an internet connection. The soil thickness values have units of inches. Please refer to the documentation of the source archive (Schwarz and Alexander, 1995) for additional details on the underlying dataset.<br>\n<br>\nThe COG dataset spans the continental US at a nominal 30 meter resolution. The spatial reference is EPSG:5069. Each COG uses a float32 precision, and the NoData value (NaN) indicates raster pixels not covered by the original STATSGO dataset. The COG also includes non-physical values of -0.1, which were used by the source dataset to mark large water bodies.<br>\n<br>\nThe COG format uses compression internally to reduce file size. As such, reading large portions of a COG into memory can require much more RAM than the nominal file size. This COG will require ~60GB of memory to read in full.<br>\n<br>\nThis dataset can be reproduced by running the `rasterize_statsgo.py` Python script included in this dataset's parent folder (https://doi.org/10.5066/P13WAPYV). Please refer to the script for documentation and usage instructions.<br>\n<br>\nDisclaimer:<br>\nAny use of trade, firm, or product names is for descriptive purposes only and does not imply endorsement by the U.S. Government.<br>\n<br>\nReferences:<br>\nSchwarz, G.E. and Alexander, R.B., 1995, Soils data for the Conterminous United States Derived from the NRCS State Soil Geographic (STATSGO) Data Base. [Original title: State Soil Geographic (STATSGO) Data Base for the Conterminous United States.]: U.S. Geological Survey data release, <a href=\"https://doi.org/10.5066/P94JAULO\">https://doi.org/10.5066/P94JAULO</a>.",
+  "citation": "King, J.M., 2025, STATSGO Cloud Optimized GeoTIFFs for the Continental US: U.S. Geological Survey data release, https://doi.org/10.5066/P13WAPYV.",
+  "purpose": "This dataset is intended to support software tools that need to load rasterized portions of the STATSGO soil thickness (THICK) dataset over an internet connection.",
+  "provenance": {
+    "dataSource": "Input directly",
+    "dateCreated": "2024-12-09T16:58:33Z",
+    "lastUpdated": "2025-02-11T14:03:34Z"
+  },
+  "maintenanceUpdateFrequency": "None planned",
+  "hasChildren": false,
+  "parentId": "675083c6d34ea60e894354ad",
+  "contacts": [
+    {
+      "name": "US Geological Survey, Geologic Hazards Science Center",
+      "type": "Point of Contact",
+      "contactType": "organization",
+      "organizationsPerson": "GHSC Data Steward",
+      "email": "ghsc_metadata@usgs.gov",
+      "jobTitle": "Open Data Policy Coordinator",
+      "organization": {},
+      "primaryLocation": {
+        "officePhone": "3032738500",
+        "streetAddress": {},
+        "mailAddress": {
+          "line1": "1711 Illinois St",
+          "city": "Golden",
+          "state": "CO",
+          "zip": "80401",
+          "country": "US"
+        }
+      }
+    },
+    {
+      "name": "GHSC Data Steward",
+      "type": "Point of Contact",
+      "contactType": "person",
+      "email": "ghsc_metadata@usgs.gov",
+      "jobTitle": "Open Data Policy Coordinator",
+      "organization": {
+        "displayText": "US Geological Survey, Geologic Hazards Science Center"
+      },
+      "primaryLocation": {
+        "officePhone": "3032738500",
+        "streetAddress": {},
+        "mailAddress": {
+          "line1": "1711 Illinois St",
+          "city": "Golden",
+          "state": "CO",
+          "zip": "80401",
+          "country": "US"
+        }
+      }
+    },
+    {
+      "name": "Jonathan M. King",
+      "type": "Originator",
+      "organization": {},
+      "primaryLocation": {
+        "streetAddress": {},
+        "mailAddress": {}
+      }
+    },
+    {
+      "name": "US Geological Survey, Geologic Hazards Science Center",
+      "type": "Metadata Contact",
+      "contactType": "organization",
+      "organizationsPerson": "GHSC Data Steward",
+      "email": "ghsc_metadata@usgs.gov",
+      "jobTitle": "Open Data Policy Coordinator",
+      "organization": {},
+      "primaryLocation": {
+        "officePhone": "3032738500",
+        "streetAddress": {},
+        "mailAddress": {
+          "line1": "1711 Illinois St",
+          "city": "Golden",
+          "state": "CO",
+          "zip": "80401",
+          "country": "US"
+        }
+      }
+    },
+    {
+      "name": "GHSC Data Steward",
+      "type": "Metadata Contact",
+      "contactType": "person",
+      "email": "ghsc_metadata@usgs.gov",
+      "jobTitle": "Open Data Policy Coordinator",
+      "organization": {
+        "displayText": "US Geological Survey, Geologic Hazards Science Center"
+      },
+      "primaryLocation": {
+        "officePhone": "3032738500",
+        "streetAddress": {},
+        "mailAddress": {
+          "line1": "1711 Illinois St",
+          "city": "Golden",
+          "state": "CO",
+          "zip": "80401",
+          "country": "US"
+        }
+      }
+    },
+    {
+      "name": "U.S. Geological Survey - ScienceBase",
+      "oldPartyId": 70157,
+      "type": "Distributor",
+      "contactType": "organization",
+      "onlineResource": "https://www.sciencebase.gov",
+      "email": "sciencebase@usgs.gov",
+      "organization": {},
+      "primaryLocation": {
+        "name": "U.S. Geological Survey - ScienceBase - Location",
+        "officePhone": "18882758747",
+        "streetAddress": {},
+        "mailAddress": {
+          "line1": "Denver Federal Center",
+          "line2": "Building 810",
+          "mailStopCode": "302",
+          "city": "Denver",
+          "state": "CO",
+          "zip": "80225",
+          "country": "United States"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "type": "Theme",
+      "scheme": "ISO 19115 Topic Category",
+      "name": "geoscientificInformation"
+    },
+    {
+      "type": "Theme",
+      "scheme": "None",
+      "name": "STATSGO"
+    },
+    {
+      "type": "Theme",
+      "scheme": "None",
+      "name": "soil thickness"
+    },
+    {
+      "type": "Theme",
+      "scheme": "None",
+      "name": "cloud optimized GeoTIFF"
+    },
+    {
+      "type": "Theme",
+      "scheme": "None",
+      "name": "raster"
+    },
+    {
+      "type": "Place",
+      "scheme": "None",
+      "name": "Continental US"
+    }
+  ],
+  "dates": [
+    {
+      "type": "Publication",
+      "dateString": "2025-02-11",
+      "label": "Publication Date"
+    },
+    {
+      "type": "Info",
+      "dateString": "1995",
+      "label": "Time Period"
+    }
+  ],
+  "spatial": {
+    "boundingBox": {
+      "minX": -127.886,
+      "maxX": -65.3467,
+      "minY": 22.9415,
+      "maxY": 51.5993
+    }
+  },
+  "files": [
+    {
+      "cuid": "cm4iome7900150vpn5pao8ljb",
+      "key": "675721b9d34e5c5dfd05c575/STATSGO-THICK.tif",
+      "bucket": "prod-is-usgs-sb-prod-publish",
+      "published": true,
+      "node": {
+        "managerUrl": "https://sciencebase.usgs.gov/manager"
+      },
+      "name": "STATSGO-THICK.tif",
+      "title": null,
+      "contentType": "image/geotiff",
+      "contentEncoding": null,
+      "pathOnDisk": "__s3__",
+      "processed": false,
+      "processToken": null,
+      "imageWidth": null,
+      "imageHeight": null,
+      "size": 352422285,
+      "dateUploaded": "2024-12-10T19:41:06Z",
+      "originalMetadata": false,
+      "useForPreview": false,
+      "movedToS3": false,
+      "s3Object": null,
+      "checksum": null,
+      "url": "https://sciencebase.usgs.gov/manager/item/675721b9d34e5c5dfd05c575/file/cm4iome7900150vpn5pao8ljb",
+      "downloadUri": "https://sciencebase.usgs.gov/manager/download/cm4iome7900150vpn5pao8ljb",
+      "publishedS3Uri": "https://prod-is-usgs-sb-prod-publish.s3.amazonaws.com/675721b9d34e5c5dfd05c575/STATSGO-THICK.tif"
+    },
+    {
+      "cuid": null,
+      "key": null,
+      "bucket": null,
+      "published": false,
+      "node": null,
+      "name": "STATSGO_Soil_Thickness_THICK_Cloud_Optimized_GeoTIFF_for_the_Continental_US.xml",
+      "title": "",
+      "contentType": "application/fgdc+xml",
+      "contentEncoding": null,
+      "pathOnDisk": "__disk__45/22/ce/4522cec99498e5aeec6a7d5a82162481ef241c30",
+      "processed": false,
+      "processToken": null,
+      "imageWidth": null,
+      "imageHeight": null,
+      "size": 15557,
+      "dateUploaded": "2025-02-11T14:03:32Z",
+      "originalMetadata": true,
+      "useForPreview": false,
+      "movedToS3": false,
+      "s3Object": null,
+      "checksum": {
+        "value": "b49aae6e8f8da3eaa4051e4ee4a7fd31",
+        "type": "MD5"
+      },
+      "url": "https://www.sciencebase.gov/catalog/file/get/675721b9d34e5c5dfd05c575?f=__disk__45%2F22%2Fce%2F4522cec99498e5aeec6a7d5a82162481ef241c30",
+      "downloadUri": "https://www.sciencebase.gov/catalog/file/get/675721b9d34e5c5dfd05c575?f=__disk__45%2F22%2Fce%2F4522cec99498e5aeec6a7d5a82162481ef241c30",
+      "viewUri": "https://www.sciencebase.gov/catalog/file/get/675721b9d34e5c5dfd05c575?f=__disk__45%2F22%2Fce%2F4522cec99498e5aeec6a7d5a82162481ef241c30&allowOpen=true",
+      "metadataHtmlViewUri": "https://www.sciencebase.gov/catalog/file/get/675721b9d34e5c5dfd05c575?f=__disk__45%2F22%2Fce%2F4522cec99498e5aeec6a7d5a82162481ef241c30&transform=1"
+    }
+  ],
+  "distributionLinks": [
+    {
+      "uri": "https://www.sciencebase.gov/catalog/file/get/675721b9d34e5c5dfd05c575",
+      "title": "Download Attached Files",
+      "type": "downloadLink",
+      "typeLabel": "Download Link",
+      "rel": "alternate",
+      "name": "STATSGOSoilThic.zip",
+      "files": [
+        {
+          "name": "STATSGO-THICK.tif",
+          "title": null,
+          "contentType": "image/geotiff",
+          "size": 352422285,
+          "checksum": null
+        },
+        {
+          "name": "STATSGO_Soil_Thickness_THICK_Cloud_Optimized_GeoTIFF_for_the_Continental_US.xml",
+          "title": "",
+          "contentType": "application/fgdc+xml",
+          "size": 15557,
+          "checksum": {
+            "value": "b49aae6e8f8da3eaa4051e4ee4a7fd31",
+            "type": "MD5"
+          }
+        }
+      ]
+    }
+  ],
+  "previewImage": {
+    "from": "mapPreview",
+    "original": {
+      "uri": "https://www.sciencebase.gov/catalog/file/get/675721b9d34e5c5dfd05c575?f=__disk__f3%2Fbf%2F2a%2Ff3bf2a62afea88a9652b07086dae4a9914c6ea75",
+      "viewUri": "https://www.sciencebase.gov/catalog/file/get/675721b9d34e5c5dfd05c575?f=__disk__f3%2Fbf%2F2a%2Ff3bf2a62afea88a9652b07086dae4a9914c6ea75&width=360&height=240",
+      "viewUrl": "https://www.sciencebase.gov/catalog/file/get/675721b9d34e5c5dfd05c575?deprecated=__use__viewUri__instead__&f=__disk__f3%2Fbf%2F2a%2Ff3bf2a62afea88a9652b07086dae4a9914c6ea75&width=360&height=240",
+      "width": 360,
+      "height": 240,
+      "size": 147666
+    },
+    "thumbnail": {
+      "uri": "https://www.sciencebase.gov/catalog/file/get/675721b9d34e5c5dfd05c575?f=__disk__f3%2Fbf%2F2a%2Ff3bf2a62afea88a9652b07086dae4a9914c6ea75&width=150&height=100",
+      "width": 150,
+      "height": 100
+    }
+  }
+}

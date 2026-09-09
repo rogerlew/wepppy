@@ -5,7 +5,7 @@ This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md` in
 `/workdir/wepppy`. Keep Progress, Surprises & Discoveries, Decision Log, and
 Outcomes & Retrospective current. Package-relative paths below refer to
 `docs/work-packages/20260908_staley_m3_soils/`; update its tracker at each
-milestone. This plan is ready for a fresh agent, not already implemented.
+milestone. Execution completed 2026-09-09; see outcomes and validation evidence.
 
 ## Purpose / Big Picture
 
@@ -24,13 +24,22 @@ the production data contract; dashboard and NoDb/RQ integration are deferred.
 
 
 - [x] (2026-09-09 02:17 UTC) Scaffold and user direction recorded.
-- [ ] M1: Inventory/acquire/freeze inputs and draft ADR plus protocol.
-- [ ] M2: Resolve original predictor and interval/component policies.
-- [ ] M3: Implement offline derivation, artifacts, and meaningful tests.
-- [ ] M4: Run fixed-terrain paired soil-source evaluation.
-- [ ] M5: Review, recommend source policy, promote documentation, close out.
+- [x] (2026-09-09) M1: Frozen 111 map units, 390 components, 1,506 horizons and bounded original THICK windows; inventory, ADR-0053 and protocol recorded.
+- [x] (2026-09-09) M2: Original embedded SAS verified; strict-soil and all-layer diagnostic contracts frozen and promoted to canonical module docs. Scientific source approval remains deferred.
+- [x] (2026-09-09) M3: Offline read-only SQLite/raster builder implemented; 35 focused tests pass, including generated outputs and M3 propagation.
+- [x] (2026-09-09) M4: Final evaluation completed: 72 comparisons, 924 diagnostic scenarios; four tables and 30 raster arrays reproduce exactly.
+- [x] (2026-09-09) M5: Correctness/security gates pass; 35 focused tests and broad 7,766-pass/72-skip suite, stubtest, stubs and docs checks pass. Durable docs published; prompts archived.
 
 ## Surprises & Discoveries
+
+Execution (2026-09-09): All live soil directories remain absent. Bounded
+acquisition succeeded from the installed 2025 gNATSGO mosaic and NRCS SDA;
+all 111 spatial keys resolve to Non-MLRA Soil Survey Areas. Mixed source vintage
+is explicit. Original USGS metadata embeds the SAS: missing-component weights
+are renormalized, WATER attributes are excluded, no horizon bedrock filter is
+present. Weathered Cr records are common; strict support is sparse at Topanga.
+The controlled terrain outlets require their conditioned pointer; using the
+native pointer failed cell-count parity and was rejected before comparison.
 
 
 The three supplied 10 m live run paths currently lack `soils/` directories.
@@ -44,6 +53,14 @@ horizons that gives 40 cm rather than 30 cm. Do not consume this output for M3
 or expand this task into changing unrelated consumers.
 
 ## Decision Log
+
+Decision (2026-09-09, Codex under the supplied ExecPlan): select a conservative
+strict-soil offline candidate, reject ambiguous weathered/legacy material,
+and separately evaluate all recorded layers. No production source or coverage
+policy is approved. See ADR-0053 and canonical docs/m3_soil_thickness.md.
+Preserve fractional component support in catchment denominators; full outputs
+require complete support. Rationale: prevent silently treating known support
+as the full calibrated predictor while exposing source sensitivity.
 
 
 Decision (2026-09-09 02:17 UTC, user/Codex conversation): scaffold the M3 soil
@@ -59,9 +76,27 @@ comparison. Rationale: isolate soil effects without confounding the completed
 ## Outcomes & Retrospective
 
 
-Documentation scaffold only. No source acceptance, acquisition, runtime
-derivation, test, or soil comparison is complete. Replace this section with
-measured outcomes and remaining limitations at each major handoff.
+Delivered offline derivation, bounded reproducible sources, paired fixed-terrain
+comparison, independent reviews and durable canonical documentation. Final
+output is `/tmp/staley-m3-soils-study/evaluation-final/`; versioned numerical
+tables, command/code/source hashes and plot are in artifacts/. Four numerical
+tables and 30 raster arrays reproduce exactly; all source hashes are unchanged.
+
+Recommendation: retain original STATSGO pending a scientific source decision.
+Strict support is 0–99.25%, all-layer support 84.24–99.25%; no catchment has
+complete component support. Maximum common-support probability effects are
+19.35 and 11.52 points respectively. These are source-sensitivity diagnostics,
+not predictive validation or approved availability thresholds. Material inclusion,
+endpoint censoring and acceptable missing support remain explicit future
+scientific choices; no production change is claimed.
+
+Validation: 35 final focused tests pass; full suite 7,766 passed/72 skipped;
+stubtest and stub hygiene pass; independent correctness/security findings all
+closed. Documentation lint and spelling pass. Read-only live-project scope,
+no-branch/no-commit/no-deploy constraints were preserved. The source inventory
+was a real dependency: controller-file existence alone proved insufficient.
+Canonical `wepppy/nodb/mods/postfire_debris_flow/docs/m3_soil_thickness.md`
+and ADR-0053 own the durable rules; package history is not living governance.
 
 ## Context and Orientation
 
@@ -353,3 +388,9 @@ before adding any new library. No new production NoDb/RQ/UI contract is shipped.
 
 Revision note (2026-09-09 02:17 UTC): Initial scaffold created for a fresh agent;
 source acquisition, policy resolution, implementation, and comparison are pending.
+
+Revision (2026-09-09): Recorded acquisition, source-policy contracts, implementation,
+initial evaluation and review fixes. Final gates remain explicitly pending.
+
+Revision (2026-09-09 closeout): All offline milestones achieved; published final
+reproducibility and validation, retained scientific limits, and archived prompts.

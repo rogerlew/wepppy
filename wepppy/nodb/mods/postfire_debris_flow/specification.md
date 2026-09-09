@@ -1,9 +1,10 @@
 # Postfire Debris Flow Specification
 
-Status: initial domain specification, 2026-09-08. Implementation conformance is
-pending. Accepted direction below records the operator discussion; proposals
-and open questions are not ratified implementation contracts. No runtime
-behavior, persisted schema, or queue graph changes in this scaffold.
+Status: domain specification updated 2026-09-09. Offline M3 soil derivation is
+implemented under the dedicated contract below; production integration remains
+pending. Accepted direction records operator discussion; proposals and open
+questions are not ratified production contracts. No production persisted schema
+or queue graph changes are included.
 
 ## Accepted Direction and Rationale
 
@@ -143,6 +144,16 @@ the former can be clipped/adjusted, and the latter sums cumulative bottom
 depths rather than layer thicknesses. Do not substitute a POLARIS depth interval
 or numeric zero for missing thickness. Missing/invalid source data must remain
 explicit; partial-coverage acceptance thresholds are not yet approved.
+
+## Offline M3 Soil Evaluation Contract
+
+The [version 1 offline soil contract](docs/m3_soil_thickness.md)
+and [ADR-0053](../../../../docs/adrs/ADR-0053-staley-m3-offline-soil-thickness.md)
+define the study helper before executable implementation. This contract applies
+only to offline raw-record derivation and diagnostics. No live Soils build,
+NoDb/UI/RQ integration, source substitution approval or partial-coverage
+availability threshold is established. Strict soil and all-recorded-layer
+sensitivities remain scientifically distinct.
 
 ## RUSLE and POLARIS Dependency
 
@@ -421,7 +432,8 @@ Paths below are reserved design locations; executable files do not yet exist.
 
 ## Compatibility and Validation Plan
 
-The initial scaffold is documentation-only. Future implementation is additive:
+Offline soil artifacts follow the dedicated contract above. Future production
+implementation is additive:
 preserve existing `debris_flow.nodb` state and older outputs, and avoid renaming
 user-visible fields without explicit approval. Before data mutations, specify
 new NoDb/CSV/parquet schemas and downstream generated-artifact propagation.

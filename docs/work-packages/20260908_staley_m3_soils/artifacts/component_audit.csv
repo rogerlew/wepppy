@@ -1,0 +1,781 @@
+site,policy,mukey,cokey,compname,comppct_r,thickness_cm,status,reason_codes,horizon_count,interval_sum_cm,interval_union_cm,deepest_bottom_cm
+moscow_mountain,strict_soil,644246,26387167,Mannering,25.0,160.0,valid,,6,160.0,160.0,160.0
+moscow_mountain,strict_soil,644246,26387168,Aquandic Endoaquepts,50.0,152.0,valid,,3,152.0,152.0,152.0
+moscow_mountain,strict_soil,644246,26387169,Porrett,20.0,152.0,valid,,5,152.0,152.0,152.0
+moscow_mountain,strict_soil,644262,26387176,Bouldercreek,40.0,152.0,valid,,7,152.0,152.0,152.0
+moscow_mountain,strict_soil,644262,26387177,Jacot,45.0,155.0,valid,,6,155.0,155.0,155.0
+moscow_mountain,strict_soil,644802,26387213,Carrico,20.0,,unavailable,ambiguous_material,7,152.0,152.0,152.0
+moscow_mountain,strict_soil,644802,26387214,Kruse,15.0,152.0,valid,,7,152.0,152.0,152.0
+moscow_mountain,strict_soil,644802,26387215,Carlinton,45.0,152.0,valid,,6,152.0,152.0,152.0
+moscow_mountain,strict_soil,644804,26387216,Kruse,20.0,152.0,valid,,7,152.0,152.0,152.0
+moscow_mountain,strict_soil,644804,26387217,Carrico,25.0,,unavailable,ambiguous_material,7,152.0,152.0,152.0
+moscow_mountain,strict_soil,644804,26387218,Carrico,40.0,,unavailable,ambiguous_material,7,152.0,152.0,152.0
+moscow_mountain,strict_soil,644904,26387237,Jacot,20.0,155.0,valid,,6,155.0,155.0,155.0
+moscow_mountain,strict_soil,644904,26387238,Brequito,15.0,163.0,valid,,8,163.0,163.0,163.0
+moscow_mountain,strict_soil,644904,26387239,Brequito,20.0,163.0,valid,,8,163.0,163.0,163.0
+moscow_mountain,strict_soil,644904,26387240,Jacot,35.0,155.0,valid,,6,155.0,155.0,155.0
+moscow_mountain,strict_soil,644910,26387243,Mushel,20.0,152.0,valid,,7,152.0,152.0,152.0
+moscow_mountain,strict_soil,644910,26387244,Jacot,50.0,155.0,valid,,6,155.0,155.0,155.0
+moscow_mountain,strict_soil,644912,26387245,Joel,80.0,155.0,valid,,5,155.0,155.0,155.0
+moscow_mountain,strict_soil,645296,26387270,Hildebrand,25.0,152.0,valid,,4,152.0,152.0,152.0
+moscow_mountain,strict_soil,645296,26387271,Porrett,10.0,152.0,valid,,5,152.0,152.0,152.0
+moscow_mountain,strict_soil,645296,26387272,Spacecreek,50.0,152.0,valid,,7,152.0,152.0,152.0
+moscow_mountain,strict_soil,645304,26387275,Taney,75.0,152.0,valid,,4,152.0,152.0,152.0
+moscow_mountain,strict_soil,678582,26387292,Lado,30.0,152.0,valid,,7,152.0,152.0,152.0
+moscow_mountain,strict_soil,678582,26387293,Brequito,55.0,163.0,valid,,7,163.0,163.0,163.0
+moscow_mountain,strict_soil,682651,26387298,Kruse,75.0,152.0,valid,,7,152.0,152.0,152.0
+moscow_mountain,strict_soil,814010,26387341,Vassar,45.0,,unavailable,ambiguous_material,6,152.0,152.0,152.0
+moscow_mountain,strict_soil,814010,26387342,Jacot,55.0,155.0,valid,,6,155.0,155.0,155.0
+moscow_mountain,strict_soil,1387521,26387359,Santa,40.0,152.0,valid,,5,152.0,152.0,152.0
+moscow_mountain,strict_soil,1387521,26387360,Sinkler,30.0,152.0,valid,,6,152.0,152.0,152.0
+moscow_mountain,strict_soil,1387525,26387361,Micapeak,25.0,,unavailable,ambiguous_material,5,152.0,152.0,152.0
+moscow_mountain,strict_soil,1387525,26387362,Quinnamose,20.0,,unavailable,ambiguous_material,7,152.0,152.0,152.0
+moscow_mountain,strict_soil,1387525,26387363,Carrico,30.0,,unavailable,ambiguous_material,7,152.0,152.0,152.0
+moscow_mountain,strict_soil,1487706,26387370,Taney,80.0,152.0,valid,,4,152.0,152.0,152.0
+moscow_mountain,strict_soil,1487712,26387373,Santa,75.0,152.0,valid,,5,152.0,152.0,152.0
+moscow_mountain,strict_soil,1487714,26387374,Santa,80.0,150.0,valid,,5,150.0,150.0,150.0
+moscow_mountain,strict_soil,1487716,26387376,Santa,35.0,152.0,valid,,5,152.0,152.0,152.0
+moscow_mountain,strict_soil,1487716,26387377,Reggear,45.0,152.0,valid,,6,152.0,152.0,152.0
+moscow_mountain,strict_soil,1689249,26387385,Aldermand,25.0,152.0,valid,,6,152.0,152.0,152.0
+moscow_mountain,strict_soil,1689249,26387386,Quinnamose,45.0,,unavailable,ambiguous_material,7,152.0,152.0,152.0
+moscow_mountain,strict_soil,1689255,26387391,Lado,25.0,152.0,valid,,7,152.0,152.0,152.0
+moscow_mountain,strict_soil,1689255,26387392,Vassar,20.0,,unavailable,ambiguous_material,6,152.0,152.0,152.0
+moscow_mountain,strict_soil,1689255,26387393,Jacot,50.0,155.0,valid,,6,155.0,155.0,155.0
+moscow_mountain,strict_soil,1689256,26387394,Lado,15.0,152.0,valid,,7,152.0,152.0,152.0
+moscow_mountain,strict_soil,1689256,26387395,Vassar,20.0,,unavailable,ambiguous_material,6,152.0,152.0,152.0
+moscow_mountain,strict_soil,1689256,26387396,Jacot,50.0,155.0,valid,,6,155.0,155.0,155.0
+moscow_mountain,strict_soil,1689257,26387397,Aldermand,15.0,152.0,valid,,6,152.0,152.0,152.0
+moscow_mountain,strict_soil,1689257,26387398,Vassar,40.0,,unavailable,ambiguous_material,6,152.0,152.0,152.0
+moscow_mountain,strict_soil,1689257,26387399,Jacot,25.0,155.0,valid,,6,155.0,155.0,155.0
+moscow_mountain,strict_soil,1689258,26387400,Vassar,60.0,,unavailable,ambiguous_material,6,152.0,152.0,152.0
+moscow_mountain,strict_soil,1689258,26387401,Jacot,30.0,155.0,valid,,6,155.0,155.0,155.0
+moscow_mountain,strict_soil,1689263,26387402,Joel,90.0,155.0,valid,,5,155.0,155.0,155.0
+moscow_mountain,strict_soil,1689264,26387403,Carrico,45.0,,unavailable,ambiguous_material,7,152.0,152.0,152.0
+moscow_mountain,strict_soil,1689264,26387404,Micapeak,35.0,,unavailable,ambiguous_material,5,152.0,152.0,152.0
+moscow_mountain,strict_soil,1689265,26387405,Micapeak,35.0,,unavailable,ambiguous_material,5,152.0,152.0,152.0
+moscow_mountain,strict_soil,1689265,26387406,Micapeak,15.0,,unavailable,ambiguous_material,5,152.0,152.0,152.0
+moscow_mountain,strict_soil,1689265,26387407,Carrico,25.0,,unavailable,ambiguous_material,7,152.0,152.0,152.0
+moscow_mountain,strict_soil,1689266,26387408,Micapeak,55.0,,unavailable,ambiguous_material,5,152.0,152.0,152.0
+moscow_mountain,strict_soil,1689266,26387409,Carrico,20.0,,unavailable,ambiguous_material,7,152.0,152.0,152.0
+moscow_mountain,strict_soil,1689267,26387410,Bouldercreek,60.0,152.0,valid,,7,152.0,152.0,152.0
+moscow_mountain,strict_soil,1689267,26387411,Weitas,20.0,152.0,valid,,5,152.0,152.0,152.0
+moscow_mountain,strict_soil,1689270,26387412,Keeler,20.0,152.0,valid,,5,152.0,152.0,152.0
+moscow_mountain,strict_soil,1689270,26387413,Cobbler,30.0,173.0,valid,,8,173.0,173.0,173.0
+moscow_mountain,strict_soil,1689270,26387414,Carrico,35.0,,unavailable,ambiguous_material,7,152.0,152.0,152.0
+moscow_mountain,strict_soil,1689271,26387415,Kruse,60.0,152.0,valid,,7,152.0,152.0,152.0
+moscow_mountain,strict_soil,1689271,26387416,Brodeer,30.0,150.0,valid,,5,150.0,150.0,150.0
+moscow_mountain,strict_soil,1689275,26387417,Micapeak,35.0,,unavailable,ambiguous_material,5,152.0,152.0,152.0
+moscow_mountain,strict_soil,1689275,26387418,Quinnamose,20.0,,unavailable,ambiguous_material,7,152.0,152.0,152.0
+moscow_mountain,strict_soil,1689275,26387419,Cobbler,40.0,173.0,valid,,8,173.0,173.0,173.0
+moscow_mountain,strict_soil,1689277,26387420,Taney,70.0,152.0,valid,,4,152.0,152.0,152.0
+moscow_mountain,strict_soil,1689277,26387421,Joel,20.0,152.0,valid,,4,152.0,152.0,152.0
+moscow_mountain,strict_soil,1689280,26387422,Aldermand,50.0,152.0,valid,,6,152.0,152.0,152.0
+moscow_mountain,strict_soil,1689280,26387423,Keeler,25.0,152.0,valid,,5,152.0,152.0,152.0
+moscow_mountain,strict_soil,2375734,26387427,Sinkler,50.0,152.0,valid,,6,152.0,152.0,152.0
+moscow_mountain,strict_soil,2375734,26387428,Santa,30.0,152.0,valid,,5,152.0,152.0,152.0
+moscow_mountain,strict_soil,2437917,26387434,Crumarine,85.0,152.0,valid,,4,152.0,152.0,152.0
+moscow_mountain,strict_soil,2437917,26387435,Porrett,10.0,152.0,valid,,5,152.0,152.0,152.0
+moscow_mountain,strict_soil,2437917,26387436,Aquandic Endoaquepts,5.0,152.0,valid,,3,152.0,152.0,152.0
+moscow_mountain,strict_soil,2487253,26387450,Larkin,30.0,162.0,valid,,4,162.0,162.0,162.0
+moscow_mountain,strict_soil,2487253,26387451,Driscoll,40.0,173.0,valid,,2,173.0,173.0,173.0
+moscow_mountain,strict_soil,2487255,26387452,Garfield,90.0,152.0,valid,,3,152.0,152.0,152.0
+moscow_mountain,strict_soil,2487260,26387453,Joel,90.0,152.0,valid,,4,152.0,152.0,152.0
+moscow_mountain,strict_soil,2487269,26387462,Larkin,85.0,162.0,valid,,4,162.0,162.0,162.0
+moscow_mountain,strict_soil,2487272,26387467,Latahco,55.0,152.0,valid,,4,152.0,152.0,152.0
+moscow_mountain,strict_soil,2487272,26387468,Lovell,35.0,,unavailable,thickness_conflict,3,152.0,152.0,152.0
+moscow_mountain,strict_soil,2487272,26387469,Aquolls,5.0,150.0,valid,,5,150.0,150.0,150.0
+moscow_mountain,strict_soil,2487290,26387486,Southwick,85.0,152.0,valid,,3,152.0,152.0,152.0
+moscow_mountain,strict_soil,2487291,26387487,Southwick,85.0,152.0,valid,,3,152.0,152.0,152.0
+moscow_mountain,strict_soil,2501171,26387531,Brodeer,60.0,170.0,valid,,6,170.0,170.0,170.0
+moscow_mountain,strict_soil,2501171,26387532,Mushel,35.0,173.0,valid,,7,173.0,173.0,173.0
+moscow_mountain,strict_soil,2501175,26387535,Carlinton,50.0,157.0,valid,,5,157.0,157.0,157.0
+moscow_mountain,strict_soil,2501175,26387536,Kruse,35.0,155.0,valid,,6,155.0,155.0,155.0
+moscow_mountain,all_layers,644246,26387167,Mannering,25.0,160.0,valid,,6,160.0,160.0,160.0
+moscow_mountain,all_layers,644246,26387168,Aquandic Endoaquepts,50.0,152.0,valid,,3,152.0,152.0,152.0
+moscow_mountain,all_layers,644246,26387169,Porrett,20.0,152.0,valid,,5,152.0,152.0,152.0
+moscow_mountain,all_layers,644262,26387176,Bouldercreek,40.0,152.0,valid,,7,152.0,152.0,152.0
+moscow_mountain,all_layers,644262,26387177,Jacot,45.0,155.0,valid,,6,155.0,155.0,155.0
+moscow_mountain,all_layers,644802,26387213,Carrico,20.0,152.0,valid,,7,152.0,152.0,152.0
+moscow_mountain,all_layers,644802,26387214,Kruse,15.0,152.0,valid,,7,152.0,152.0,152.0
+moscow_mountain,all_layers,644802,26387215,Carlinton,45.0,152.0,valid,,6,152.0,152.0,152.0
+moscow_mountain,all_layers,644804,26387216,Kruse,20.0,152.0,valid,,7,152.0,152.0,152.0
+moscow_mountain,all_layers,644804,26387217,Carrico,25.0,152.0,valid,,7,152.0,152.0,152.0
+moscow_mountain,all_layers,644804,26387218,Carrico,40.0,152.0,valid,,7,152.0,152.0,152.0
+moscow_mountain,all_layers,644904,26387237,Jacot,20.0,155.0,valid,,6,155.0,155.0,155.0
+moscow_mountain,all_layers,644904,26387238,Brequito,15.0,163.0,valid,,8,163.0,163.0,163.0
+moscow_mountain,all_layers,644904,26387239,Brequito,20.0,163.0,valid,,8,163.0,163.0,163.0
+moscow_mountain,all_layers,644904,26387240,Jacot,35.0,155.0,valid,,6,155.0,155.0,155.0
+moscow_mountain,all_layers,644910,26387243,Mushel,20.0,152.0,valid,,7,152.0,152.0,152.0
+moscow_mountain,all_layers,644910,26387244,Jacot,50.0,155.0,valid,,6,155.0,155.0,155.0
+moscow_mountain,all_layers,644912,26387245,Joel,80.0,155.0,valid,,5,155.0,155.0,155.0
+moscow_mountain,all_layers,645296,26387270,Hildebrand,25.0,152.0,valid,,4,152.0,152.0,152.0
+moscow_mountain,all_layers,645296,26387271,Porrett,10.0,152.0,valid,,5,152.0,152.0,152.0
+moscow_mountain,all_layers,645296,26387272,Spacecreek,50.0,152.0,valid,,7,152.0,152.0,152.0
+moscow_mountain,all_layers,645304,26387275,Taney,75.0,152.0,valid,,4,152.0,152.0,152.0
+moscow_mountain,all_layers,678582,26387292,Lado,30.0,152.0,valid,,7,152.0,152.0,152.0
+moscow_mountain,all_layers,678582,26387293,Brequito,55.0,163.0,valid,,7,163.0,163.0,163.0
+moscow_mountain,all_layers,682651,26387298,Kruse,75.0,152.0,valid,,7,152.0,152.0,152.0
+moscow_mountain,all_layers,814010,26387341,Vassar,45.0,152.0,valid,,6,152.0,152.0,152.0
+moscow_mountain,all_layers,814010,26387342,Jacot,55.0,155.0,valid,,6,155.0,155.0,155.0
+moscow_mountain,all_layers,1387521,26387359,Santa,40.0,152.0,valid,,5,152.0,152.0,152.0
+moscow_mountain,all_layers,1387521,26387360,Sinkler,30.0,152.0,valid,,6,152.0,152.0,152.0
+moscow_mountain,all_layers,1387525,26387361,Micapeak,25.0,152.0,valid,,5,152.0,152.0,152.0
+moscow_mountain,all_layers,1387525,26387362,Quinnamose,20.0,152.0,valid,,7,152.0,152.0,152.0
+moscow_mountain,all_layers,1387525,26387363,Carrico,30.0,152.0,valid,,7,152.0,152.0,152.0
+moscow_mountain,all_layers,1487706,26387370,Taney,80.0,152.0,valid,,4,152.0,152.0,152.0
+moscow_mountain,all_layers,1487712,26387373,Santa,75.0,152.0,valid,,5,152.0,152.0,152.0
+moscow_mountain,all_layers,1487714,26387374,Santa,80.0,150.0,valid,,5,150.0,150.0,150.0
+moscow_mountain,all_layers,1487716,26387376,Santa,35.0,152.0,valid,,5,152.0,152.0,152.0
+moscow_mountain,all_layers,1487716,26387377,Reggear,45.0,152.0,valid,,6,152.0,152.0,152.0
+moscow_mountain,all_layers,1689249,26387385,Aldermand,25.0,152.0,valid,,6,152.0,152.0,152.0
+moscow_mountain,all_layers,1689249,26387386,Quinnamose,45.0,152.0,valid,,7,152.0,152.0,152.0
+moscow_mountain,all_layers,1689255,26387391,Lado,25.0,152.0,valid,,7,152.0,152.0,152.0
+moscow_mountain,all_layers,1689255,26387392,Vassar,20.0,152.0,valid,,6,152.0,152.0,152.0
+moscow_mountain,all_layers,1689255,26387393,Jacot,50.0,155.0,valid,,6,155.0,155.0,155.0
+moscow_mountain,all_layers,1689256,26387394,Lado,15.0,152.0,valid,,7,152.0,152.0,152.0
+moscow_mountain,all_layers,1689256,26387395,Vassar,20.0,152.0,valid,,6,152.0,152.0,152.0
+moscow_mountain,all_layers,1689256,26387396,Jacot,50.0,155.0,valid,,6,155.0,155.0,155.0
+moscow_mountain,all_layers,1689257,26387397,Aldermand,15.0,152.0,valid,,6,152.0,152.0,152.0
+moscow_mountain,all_layers,1689257,26387398,Vassar,40.0,152.0,valid,,6,152.0,152.0,152.0
+moscow_mountain,all_layers,1689257,26387399,Jacot,25.0,155.0,valid,,6,155.0,155.0,155.0
+moscow_mountain,all_layers,1689258,26387400,Vassar,60.0,152.0,valid,,6,152.0,152.0,152.0
+moscow_mountain,all_layers,1689258,26387401,Jacot,30.0,155.0,valid,,6,155.0,155.0,155.0
+moscow_mountain,all_layers,1689263,26387402,Joel,90.0,155.0,valid,,5,155.0,155.0,155.0
+moscow_mountain,all_layers,1689264,26387403,Carrico,45.0,152.0,valid,,7,152.0,152.0,152.0
+moscow_mountain,all_layers,1689264,26387404,Micapeak,35.0,152.0,valid,,5,152.0,152.0,152.0
+moscow_mountain,all_layers,1689265,26387405,Micapeak,35.0,152.0,valid,,5,152.0,152.0,152.0
+moscow_mountain,all_layers,1689265,26387406,Micapeak,15.0,152.0,valid,,5,152.0,152.0,152.0
+moscow_mountain,all_layers,1689265,26387407,Carrico,25.0,152.0,valid,,7,152.0,152.0,152.0
+moscow_mountain,all_layers,1689266,26387408,Micapeak,55.0,152.0,valid,,5,152.0,152.0,152.0
+moscow_mountain,all_layers,1689266,26387409,Carrico,20.0,152.0,valid,,7,152.0,152.0,152.0
+moscow_mountain,all_layers,1689267,26387410,Bouldercreek,60.0,152.0,valid,,7,152.0,152.0,152.0
+moscow_mountain,all_layers,1689267,26387411,Weitas,20.0,152.0,valid,,5,152.0,152.0,152.0
+moscow_mountain,all_layers,1689270,26387412,Keeler,20.0,152.0,valid,,5,152.0,152.0,152.0
+moscow_mountain,all_layers,1689270,26387413,Cobbler,30.0,173.0,valid,,8,173.0,173.0,173.0
+moscow_mountain,all_layers,1689270,26387414,Carrico,35.0,152.0,valid,,7,152.0,152.0,152.0
+moscow_mountain,all_layers,1689271,26387415,Kruse,60.0,152.0,valid,,7,152.0,152.0,152.0
+moscow_mountain,all_layers,1689271,26387416,Brodeer,30.0,150.0,valid,,5,150.0,150.0,150.0
+moscow_mountain,all_layers,1689275,26387417,Micapeak,35.0,152.0,valid,,5,152.0,152.0,152.0
+moscow_mountain,all_layers,1689275,26387418,Quinnamose,20.0,152.0,valid,,7,152.0,152.0,152.0
+moscow_mountain,all_layers,1689275,26387419,Cobbler,40.0,173.0,valid,,8,173.0,173.0,173.0
+moscow_mountain,all_layers,1689277,26387420,Taney,70.0,152.0,valid,,4,152.0,152.0,152.0
+moscow_mountain,all_layers,1689277,26387421,Joel,20.0,152.0,valid,,4,152.0,152.0,152.0
+moscow_mountain,all_layers,1689280,26387422,Aldermand,50.0,152.0,valid,,6,152.0,152.0,152.0
+moscow_mountain,all_layers,1689280,26387423,Keeler,25.0,152.0,valid,,5,152.0,152.0,152.0
+moscow_mountain,all_layers,2375734,26387427,Sinkler,50.0,152.0,valid,,6,152.0,152.0,152.0
+moscow_mountain,all_layers,2375734,26387428,Santa,30.0,152.0,valid,,5,152.0,152.0,152.0
+moscow_mountain,all_layers,2437917,26387434,Crumarine,85.0,152.0,valid,,4,152.0,152.0,152.0
+moscow_mountain,all_layers,2437917,26387435,Porrett,10.0,152.0,valid,,5,152.0,152.0,152.0
+moscow_mountain,all_layers,2437917,26387436,Aquandic Endoaquepts,5.0,152.0,valid,,3,152.0,152.0,152.0
+moscow_mountain,all_layers,2487253,26387450,Larkin,30.0,162.0,valid,,4,162.0,162.0,162.0
+moscow_mountain,all_layers,2487253,26387451,Driscoll,40.0,173.0,valid,,2,173.0,173.0,173.0
+moscow_mountain,all_layers,2487255,26387452,Garfield,90.0,152.0,valid,,3,152.0,152.0,152.0
+moscow_mountain,all_layers,2487260,26387453,Joel,90.0,152.0,valid,,4,152.0,152.0,152.0
+moscow_mountain,all_layers,2487269,26387462,Larkin,85.0,162.0,valid,,4,162.0,162.0,162.0
+moscow_mountain,all_layers,2487272,26387467,Latahco,55.0,152.0,valid,,4,152.0,152.0,152.0
+moscow_mountain,all_layers,2487272,26387468,Lovell,35.0,,unavailable,thickness_conflict,3,152.0,152.0,152.0
+moscow_mountain,all_layers,2487272,26387469,Aquolls,5.0,150.0,valid,,5,150.0,150.0,150.0
+moscow_mountain,all_layers,2487290,26387486,Southwick,85.0,152.0,valid,,3,152.0,152.0,152.0
+moscow_mountain,all_layers,2487291,26387487,Southwick,85.0,152.0,valid,,3,152.0,152.0,152.0
+moscow_mountain,all_layers,2501171,26387531,Brodeer,60.0,170.0,valid,,6,170.0,170.0,170.0
+moscow_mountain,all_layers,2501171,26387532,Mushel,35.0,173.0,valid,,7,173.0,173.0,173.0
+moscow_mountain,all_layers,2501175,26387535,Carlinton,50.0,157.0,valid,,5,157.0,157.0,157.0
+moscow_mountain,all_layers,2501175,26387536,Kruse,35.0,155.0,valid,,6,155.0,155.0,155.0
+topanga,strict_soil,456007,27412455,Typic Haploxerepts,3.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,strict_soil,456007,27412456,Cropley,5.0,152.0,valid,,2,152.0,152.0,152.0
+topanga,strict_soil,456007,27412457,Gazos,5.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,strict_soil,456007,27412458,Balcom,85.0,,unavailable,ambiguous_material,3,200.0,200.0,200.0
+topanga,strict_soil,456007,27412459,Urban land,2.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,strict_soil,456024,27412460,Balcom,10.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,strict_soil,456024,27412461,Millsholm,90.0,38.0,valid,bedrock_excluded,3,63.0,63.0,63.0
+topanga,strict_soil,456042,27412309,Unnamed,1.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,strict_soil,456042,27412310,Rock outcrop,4.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,strict_soil,456042,27412311,Xerorthents,45.0,,unavailable,ambiguous_material,2,177.0,177.0,177.0
+topanga,strict_soil,456042,27412312,Balcom,15.0,,unavailable,ambiguous_material,2,150.0,150.0,150.0
+topanga,strict_soil,456042,27412313,Urban land,35.0,,unavailable,ambiguous_material,1,15.0,15.0,15.0
+topanga,strict_soil,469823,27419463,Mipolomol,30.0,,unavailable,ambiguous_material,2,55.0,55.0,55.0
+topanga,strict_soil,469823,27419464,Sapwi,15.0,96.0,valid,bedrock_excluded,5,121.0,121.0,121.0
+topanga,strict_soil,469823,27419465,Topanga,40.0,,unavailable,ambiguous_material,4,69.0,69.0,69.0
+topanga,strict_soil,469823,27419466,Pachic Argixerolls,10.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,strict_soil,469823,27419467,Typic Argixerolls,3.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,strict_soil,469823,27419468,Rock outcrop,2.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,strict_soil,469935,27419570,Typic Xerorthents,8.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,strict_soil,469935,27419571,Riverwash,7.0,152.0,valid,,2,152.0,152.0,152.0
+topanga,strict_soil,469935,27419572,Botella,85.0,152.0,valid,,2,152.0,152.0,152.0
+topanga,strict_soil,469954,27419827,Boades,5.0,,unavailable,ambiguous_material,3,61.0,61.0,61.0
+topanga,strict_soil,469954,27419828,Mipolomol,45.0,,unavailable,ambiguous_material,2,55.0,55.0,55.0
+topanga,strict_soil,469954,27419829,Topanga,40.0,,unavailable,ambiguous_material,4,70.0,70.0,70.0
+topanga,strict_soil,469954,27419830,Pachic Argixerolls,2.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,strict_soil,469954,27419831,Typic Palexerolls,2.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,strict_soil,469954,27419832,Pachic Argixerolls,1.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,strict_soil,469954,27419833,Rock outcrop,5.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,strict_soil,469961,27419573,Cotharin,85.0,,unavailable,ambiguous_material,4,53.0,53.0,53.0
+topanga,strict_soil,469961,27419574,Boades,1.0,,unavailable,ambiguous_material,3,61.0,61.0,61.0
+topanga,strict_soil,469961,27419575,Kayiwish,2.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,strict_soil,469961,27419576,Rock outcrop,5.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,strict_soil,469961,27419577,Pachic Argixerolls,7.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,strict_soil,469988,27419736,Kawenga,10.0,,unavailable,ambiguous_material,6,163.0,163.0,163.0
+topanga,strict_soil,469988,27419737,Mipolomol,2.0,,unavailable,ambiguous_material,2,55.0,55.0,55.0
+topanga,strict_soil,469988,27419738,Sapwi,85.0,96.0,valid,bedrock_excluded,5,121.0,121.0,121.0
+topanga,strict_soil,469988,27419739,Topanga,3.0,,unavailable,ambiguous_material,4,70.0,70.0,70.0
+topanga,strict_soil,469990,27419624,Sapwi,20.0,96.0,valid,bedrock_excluded,5,121.0,121.0,121.0
+topanga,strict_soil,469990,27419625,Kawenga,10.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,strict_soil,469990,27419626,Mipolomol,2.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,strict_soil,469990,27419627,Topanga,3.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,strict_soil,469990,27419628,Urban land,65.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,strict_soil,469993,27419539,Typic Haploxerepts,3.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,strict_soil,469993,27419540,Cropley,5.0,152.0,valid,,2,152.0,152.0,152.0
+topanga,strict_soil,469993,27419541,Gazos,5.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,strict_soil,469993,27419542,Balcom,85.0,,unavailable,ambiguous_material,3,200.0,200.0,200.0
+topanga,strict_soil,469993,27419543,Urban land,2.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,strict_soil,735080,27412352,Mipolomol,30.0,,unavailable,ambiguous_material,2,55.0,55.0,55.0
+topanga,strict_soil,735080,27412353,Sapwi,15.0,96.0,valid,bedrock_excluded,5,121.0,121.0,121.0
+topanga,strict_soil,735080,27412354,Topanga,40.0,,unavailable,ambiguous_material,4,69.0,69.0,69.0
+topanga,strict_soil,735080,27412355,Pachic Argixerolls,10.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,strict_soil,735080,27412356,Typic Argixerolls,3.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,strict_soil,735080,27412357,Rock outcrop,2.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,strict_soil,735089,27412391,Xerorthents,40.0,,unavailable,ambiguous_material,3,157.0,157.0,157.0
+topanga,strict_soil,735089,27412392,Balcom,20.0,,unavailable,ambiguous_material,3,150.0,150.0,150.0
+topanga,strict_soil,735089,27412393,Rock outcrop,5.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,strict_soil,735089,27412394,Urban land,35.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,strict_soil,747704,27412398,Boades,5.0,,unavailable,ambiguous_material,3,61.0,61.0,61.0
+topanga,strict_soil,747704,27412399,Mipolomol,45.0,,unavailable,ambiguous_material,2,55.0,55.0,55.0
+topanga,strict_soil,747704,27412400,Topanga,40.0,,unavailable,ambiguous_material,4,70.0,70.0,70.0
+topanga,strict_soil,747704,27412401,Pachic Argixerolls,2.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,strict_soil,747704,27412402,Typic Palexerolls,2.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,strict_soil,747704,27412403,Pachic Argixerolls,1.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,strict_soil,747704,27412404,Rock outcrop,5.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,all_layers,456007,27412455,Typic Haploxerepts,3.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,all_layers,456007,27412456,Cropley,5.0,152.0,valid,,2,152.0,152.0,152.0
+topanga,all_layers,456007,27412457,Gazos,5.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,all_layers,456007,27412458,Balcom,85.0,200.0,valid,,3,200.0,200.0,200.0
+topanga,all_layers,456007,27412459,Urban land,2.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,all_layers,456024,27412460,Balcom,10.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,all_layers,456024,27412461,Millsholm,90.0,63.0,valid,,3,63.0,63.0,63.0
+topanga,all_layers,456042,27412309,Unnamed,1.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,all_layers,456042,27412310,Rock outcrop,4.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,all_layers,456042,27412311,Xerorthents,45.0,177.0,valid,,2,177.0,177.0,177.0
+topanga,all_layers,456042,27412312,Balcom,15.0,150.0,valid,,2,150.0,150.0,150.0
+topanga,all_layers,456042,27412313,Urban land,35.0,15.0,valid,,1,15.0,15.0,15.0
+topanga,all_layers,469823,27419463,Mipolomol,30.0,55.0,valid,,2,55.0,55.0,55.0
+topanga,all_layers,469823,27419464,Sapwi,15.0,121.0,valid,,5,121.0,121.0,121.0
+topanga,all_layers,469823,27419465,Topanga,40.0,69.0,valid,,4,69.0,69.0,69.0
+topanga,all_layers,469823,27419466,Pachic Argixerolls,10.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,all_layers,469823,27419467,Typic Argixerolls,3.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,all_layers,469823,27419468,Rock outcrop,2.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,all_layers,469935,27419570,Typic Xerorthents,8.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,all_layers,469935,27419571,Riverwash,7.0,152.0,valid,,2,152.0,152.0,152.0
+topanga,all_layers,469935,27419572,Botella,85.0,152.0,valid,,2,152.0,152.0,152.0
+topanga,all_layers,469954,27419827,Boades,5.0,61.0,valid,,3,61.0,61.0,61.0
+topanga,all_layers,469954,27419828,Mipolomol,45.0,55.0,valid,,2,55.0,55.0,55.0
+topanga,all_layers,469954,27419829,Topanga,40.0,70.0,valid,,4,70.0,70.0,70.0
+topanga,all_layers,469954,27419830,Pachic Argixerolls,2.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,all_layers,469954,27419831,Typic Palexerolls,2.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,all_layers,469954,27419832,Pachic Argixerolls,1.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,all_layers,469954,27419833,Rock outcrop,5.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,all_layers,469961,27419573,Cotharin,85.0,53.0,valid,,4,53.0,53.0,53.0
+topanga,all_layers,469961,27419574,Boades,1.0,61.0,valid,,3,61.0,61.0,61.0
+topanga,all_layers,469961,27419575,Kayiwish,2.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,all_layers,469961,27419576,Rock outcrop,5.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,all_layers,469961,27419577,Pachic Argixerolls,7.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,all_layers,469988,27419736,Kawenga,10.0,163.0,valid,,6,163.0,163.0,163.0
+topanga,all_layers,469988,27419737,Mipolomol,2.0,55.0,valid,,2,55.0,55.0,55.0
+topanga,all_layers,469988,27419738,Sapwi,85.0,121.0,valid,,5,121.0,121.0,121.0
+topanga,all_layers,469988,27419739,Topanga,3.0,70.0,valid,,4,70.0,70.0,70.0
+topanga,all_layers,469990,27419624,Sapwi,20.0,121.0,valid,,5,121.0,121.0,121.0
+topanga,all_layers,469990,27419625,Kawenga,10.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,all_layers,469990,27419626,Mipolomol,2.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,all_layers,469990,27419627,Topanga,3.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,all_layers,469990,27419628,Urban land,65.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,all_layers,469993,27419539,Typic Haploxerepts,3.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,all_layers,469993,27419540,Cropley,5.0,152.0,valid,,2,152.0,152.0,152.0
+topanga,all_layers,469993,27419541,Gazos,5.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,all_layers,469993,27419542,Balcom,85.0,200.0,valid,,3,200.0,200.0,200.0
+topanga,all_layers,469993,27419543,Urban land,2.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,all_layers,735080,27412352,Mipolomol,30.0,55.0,valid,,2,55.0,55.0,55.0
+topanga,all_layers,735080,27412353,Sapwi,15.0,121.0,valid,,5,121.0,121.0,121.0
+topanga,all_layers,735080,27412354,Topanga,40.0,69.0,valid,,4,69.0,69.0,69.0
+topanga,all_layers,735080,27412355,Pachic Argixerolls,10.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,all_layers,735080,27412356,Typic Argixerolls,3.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,all_layers,735080,27412357,Rock outcrop,2.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,all_layers,735089,27412391,Xerorthents,40.0,157.0,valid,,3,157.0,157.0,157.0
+topanga,all_layers,735089,27412392,Balcom,20.0,150.0,valid,,3,150.0,150.0,150.0
+topanga,all_layers,735089,27412393,Rock outcrop,5.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,all_layers,735089,27412394,Urban land,35.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,all_layers,747704,27412398,Boades,5.0,61.0,valid,,3,61.0,61.0,61.0
+topanga,all_layers,747704,27412399,Mipolomol,45.0,55.0,valid,,2,55.0,55.0,55.0
+topanga,all_layers,747704,27412400,Topanga,40.0,70.0,valid,,4,70.0,70.0,70.0
+topanga,all_layers,747704,27412401,Pachic Argixerolls,2.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,all_layers,747704,27412402,Typic Palexerolls,2.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,all_layers,747704,27412403,Pachic Argixerolls,1.0,,unavailable,missing_horizons,0,0,0.0,
+topanga,all_layers,747704,27412404,Rock outcrop,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,56390,27472014,Jarmillo,5.0,152.0,valid,,2,152.0,152.0,152.0
+az_ponderosa,strict_soil,56390,27472015,Calaveras,10.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,56390,27472016,Cajete,85.0,152.0,valid,,6,152.0,152.0,152.0
+az_ponderosa,strict_soil,56449,27472259,Laventana,3.0,127.0,valid,bedrock_excluded,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,56449,27472260,Cypher,5.0,48.0,valid,bedrock_excluded,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,56449,27472261,Rock outcrop,2.0,,unavailable,ambiguous_material,1,152.0,152.0,152.0
+az_ponderosa,strict_soil,56449,27472262,Cajete,5.0,152.0,valid,,2,152.0,152.0,152.0
+az_ponderosa,strict_soil,56449,27472263,Cypher,35.0,41.0,valid,bedrock_excluded,4,152.0,152.0,152.0
+az_ponderosa,strict_soil,56449,27472264,Rock outcrop,50.0,0,nonsoil,bedrock_excluded;nonsoil,1,152.0,152.0,152.0
+az_ponderosa,strict_soil,56462,27472319,Cajete,10.0,165.0,valid,,3,165.0,165.0,165.0
+az_ponderosa,strict_soil,56462,27472320,Rubble land,5.0,,unavailable,ambiguous_material,1,152.0,152.0,152.0
+az_ponderosa,strict_soil,56462,27472321,Rock outcrop,10.0,,unavailable,ambiguous_material,1,152.0,152.0,152.0
+az_ponderosa,strict_soil,56462,27472322,Origo,50.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,56462,27472323,Pavo,25.0,152.0,valid,,7,152.0,152.0,152.0
+az_ponderosa,strict_soil,56475,27472375,Cajete,10.0,152.0,valid,,2,152.0,152.0,152.0
+az_ponderosa,strict_soil,56475,27472376,Rock outcrop,15.0,0,nonsoil,bedrock_excluded;nonsoil,1,152.0,152.0,152.0
+az_ponderosa,strict_soil,56475,27472377,Totavi,45.0,152.0,valid,,2,152.0,152.0,152.0
+az_ponderosa,strict_soil,56475,27472378,Jemez,30.0,69.0,valid,bedrock_excluded,5,152.0,152.0,152.0
+az_ponderosa,strict_soil,2721103,27470594,Cajete,85.0,152.0,valid,,6,152.0,152.0,152.0
+az_ponderosa,strict_soil,2721103,27470595,Jemez,5.0,69.0,valid,bedrock_excluded,5,152.0,152.0,152.0
+az_ponderosa,strict_soil,2721103,27470596,Calaveras,5.0,152.0,valid,,4,152.0,152.0,152.0
+az_ponderosa,strict_soil,2721103,27470597,Jarmillo,5.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2721109,27470608,Cochiti,50.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2721109,27470609,Espiritu,45.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2721109,27470610,Rock outcrop,1.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2721109,27470611,Waumac,2.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2721109,27470612,Teco,1.0,165.0,valid,,4,165.0,165.0,165.0
+az_ponderosa,strict_soil,2721109,27470613,Parkelei,1.0,203.0,valid,,3,203.0,203.0,203.0
+az_ponderosa,strict_soil,2721113,27470598,Cypher,25.0,38.0,valid,bedrock_excluded,4,152.0,152.0,152.0
+az_ponderosa,strict_soil,2721113,27470599,Cajete,65.0,152.0,valid,,2,152.0,152.0,152.0
+az_ponderosa,strict_soil,2721113,27470600,Rock outcrop,2.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2721113,27470601,Laventana,5.0,127.0,valid,bedrock_excluded,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2721113,27470602,Mirand,3.0,152.0,valid,,7,152.0,152.0,152.0
+az_ponderosa,strict_soil,2721150,27469549,Water,90.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2721150,27469550,Riverwash,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2721150,27469551,wet soils,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934232,27469846,Rock outcrop,35.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934232,27469847,Typic Haplustalfs,50.0,140.0,valid,bedrock_excluded,8,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934232,27469848,Lithic Haplustalfs,10.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934232,27469849,Udic Haplustepts,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934242,27469882,Typic Ustorthents,30.0,152.0,valid,bedrock_excluded,5,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934242,27469883,Barranca family #,5.0,99.0,valid,bedrock_excluded,5,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934242,27469884,Lithic Haplustalfs,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934242,27469885,Typic Haplustalfs,35.0,152.0,valid,bedrock_excluded,6,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934242,27469886,Rock outcrop,25.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934247,27469901,Rock outcrop,20.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934247,27469902,Spudrock family,40.0,58.0,valid,bedrock_excluded,5,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934247,27469903,Nees family,20.0,,unavailable,ambiguous_material;bedrock_excluded,5,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934247,27469904,Cortaro family,10.0,44.0,valid,bedrock_excluded,6,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934247,27469905,Loghouse family,10.0,57.0,valid,bedrock_excluded,5,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934254,27469929,Bluebirdmesa family #,80.0,152.0,valid,bedrock_excluded,7,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934254,27469930,Lobat family,5.0,150.0,valid,bedrock_excluded,9,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934254,27469931,Derecho family,15.0,150.0,valid,bedrock_excluded,7,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934256,27469935,Rock outcrop,20.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934256,27469936,Udic Haplustalfs,60.0,150.0,valid,bedrock_excluded,7,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934256,27469937,Calaveras family,10.0,150.0,valid,bedrock_excluded,8,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934256,27469938,Lithic Haplustalfs,10.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934269,27469979,Typic Haplustalfs,85.0,152.0,valid,bedrock_excluded,7,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934269,27469980,Rock outcrop,10.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934269,27469981,Udic Haplustepts,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934312,27470125,Barranca family #,50.0,152.0,valid,bedrock_excluded,6,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934312,27470126,Lama family,30.0,152.0,valid,bedrock_excluded,7,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934312,27470127,Quintana family,10.0,55.0,valid,bedrock_excluded,4,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934312,27470128,Wodomont family,10.0,48.0,valid,bedrock_excluded,4,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934319,27470151,Uwing family,40.0,110.0,valid,,3,110.0,110.0,110.0
+az_ponderosa,strict_soil,2934319,27470152,Typic Haplustolls,10.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934319,27470153,Riomedio family #,45.0,110.0,valid,,4,110.0,110.0,110.0
+az_ponderosa,strict_soil,2934319,27470154,Pachic Haplustolls,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934354,27470273,Goldbug family,70.0,152.0,valid,bedrock_excluded,7,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934354,27470274,Losindios family,15.0,,unavailable,ambiguous_material;bedrock_excluded,7,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934354,27470275,Sheek family,15.0,85.0,valid,bedrock_excluded,8,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934358,27470285,Crooked Creek family #,25.0,120.0,valid,,5,120.0,120.0,120.0
+az_ponderosa,strict_soil,2934358,27470286,Fentonlake family #,20.0,110.0,valid,,6,110.0,110.0,110.0
+az_ponderosa,strict_soil,2934358,27470287,Fughes family,40.0,135.0,valid,,5,135.0,135.0,135.0
+az_ponderosa,strict_soil,2934358,27470288,Herm family,10.0,102.0,valid,,6,102.0,102.0,102.0
+az_ponderosa,strict_soil,2934358,27470289,Cumulic Haplustolls,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934373,27470335,Sawyercanyon family #,80.0,102.0,valid,,6,102.0,102.0,102.0
+az_ponderosa,strict_soil,2934373,27470336,Fluventic Haplustepts,15.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934373,27470337,Aquic Ustifluvents,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934380,27470360,Lobat family,40.0,152.0,valid,bedrock_excluded,6,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934380,27470361,Barleycanyon family #,30.0,152.0,valid,bedrock_excluded,7,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934380,27470362,Jarmillo family,15.0,152.0,valid,,4,152.0,152.0,152.0
+az_ponderosa,strict_soil,2934380,27470363,Litag family,15.0,152.0,valid,bedrock_excluded,6,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934382,27470367,Jemez family,50.0,152.0,valid,bedrock_excluded,7,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934382,27470368,Cymery family,30.0,40.0,valid,bedrock_excluded,5,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934382,27470369,Arlenson family #,5.0,37.0,valid,bedrock_excluded,4,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934382,27470370,Barleycanyon family #,15.0,152.0,valid,bedrock_excluded,7,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934384,27470375,Vibo family,70.0,93.0,valid,bedrock_excluded,7,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934384,27470376,Lama family,15.0,152.0,valid,bedrock_excluded,7,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934384,27470377,Lithic Haplustalfs,15.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934385,27470378,Jemez family,70.0,106.0,valid,bedrock_excluded,7,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934385,27470379,Burnac family,15.0,82.0,valid,bedrock_excluded,6,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934385,27470380,Lajuita family,15.0,,unavailable,ambiguous_material;bedrock_excluded,5,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934386,27470381,Arlenson family #,70.0,37.0,valid,bedrock_excluded,4,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934386,27470382,Litag family,15.0,99.0,valid,bedrock_excluded,8,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934386,27470383,Parajito family,15.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934390,27470391,Laventana family,80.0,152.0,valid,bedrock_excluded,6,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934390,27470392,Lobat family,10.0,152.0,valid,bedrock_excluded,6,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934390,27470393,Vitrandic Haplustepts,10.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934391,27470394,Rock outcrop,20.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934391,27470395,Vitrandic Udorthents,50.0,150.0,valid,bedrock_excluded,6,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934391,27470396,Abreu family,15.0,150.0,valid,bedrock_excluded,6,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934391,27470397,Litag family,15.0,152.0,valid,bedrock_excluded,6,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934392,27470398,Pax family,50.0,152.0,valid,bedrock_excluded,6,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934392,27470399,LaCueva family #,20.0,152.0,valid,bedrock_excluded,7,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934392,27470400,Barleycanyon family #,15.0,152.0,valid,bedrock_excluded,7,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934392,27470401,Litag family,15.0,99.0,valid,bedrock_excluded,8,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934394,27470402,LaCueva family #,75.0,113.0,valid,,6,113.0,113.0,113.0
+az_ponderosa,strict_soil,2934394,27470403,Laventana family,10.0,152.0,valid,bedrock_excluded,6,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934394,27470404,Pax family,15.0,152.0,valid,bedrock_excluded,6,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934395,27470405,LaCueva family #,60.0,113.0,valid,,7,113.0,113.0,113.0
+az_ponderosa,strict_soil,2934395,27470406,Bearsprings Peak family #,30.0,138.0,valid,,5,138.0,138.0,138.0
+az_ponderosa,strict_soil,2934395,27470407,Vitrandic Ustorthents,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934395,27470408,Typic Haplustalfs,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934397,27470413,Cajete family,50.0,114.0,valid,,6,114.0,114.0,114.0
+az_ponderosa,strict_soil,2934397,27470414,Jemez family,30.0,105.0,valid,,6,105.0,105.0,105.0
+az_ponderosa,strict_soil,2934397,27470415,Laventana family,10.0,107.0,valid,,6,107.0,107.0,107.0
+az_ponderosa,strict_soil,2934397,27470416,Bearsprings Peak family #,10.0,138.0,valid,,5,138.0,138.0,138.0
+az_ponderosa,strict_soil,2934398,27470417,Cajete family,90.0,114.0,valid,,6,114.0,114.0,114.0
+az_ponderosa,strict_soil,2934398,27470418,Burrfoot family,10.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934401,27470427,Vitrandic Ustorthents,60.0,62.0,valid,bedrock_excluded,5,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934401,27470428,Rock outcrop,20.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934401,27470429,Laventana family,15.0,150.0,valid,bedrock_excluded,7,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934401,27470430,Lithic Ustorthents,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934404,27470437,Cajete family,60.0,114.0,valid,,6,114.0,114.0,114.0
+az_ponderosa,strict_soil,2934404,27470438,Faleria family,30.0,152.0,valid,,4,152.0,152.0,152.0
+az_ponderosa,strict_soil,2934404,27470439,Bearsprings Peak family #,10.0,138.0,valid,,5,138.0,138.0,138.0
+az_ponderosa,strict_soil,2934408,27470446,Litag family,75.0,114.0,valid,,5,114.0,114.0,114.0
+az_ponderosa,strict_soil,2934408,27470447,Vitrandic Udorthents,15.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934408,27470448,Abreu family,10.0,150.0,valid,bedrock_excluded,6,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934410,27470453,Litag family,95.0,152.0,valid,bedrock_excluded,6,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934410,27470454,Rock outcrop,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934430,27470515,Chamita family,50.0,115.0,valid,,5,115.0,115.0,115.0
+az_ponderosa,strict_soil,2934430,27470516,Irim family,15.0,100.0,valid,,6,100.0,100.0,100.0
+az_ponderosa,strict_soil,2934430,27470517,Jarmillo family,25.0,152.0,valid,,4,152.0,152.0,152.0
+az_ponderosa,strict_soil,2934430,27470518,Pachic Haplustolls,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934430,27470519,Olallie family,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934443,27469763,Badland,90.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934443,27469764,Menefee,10.0,,unavailable,ambiguous_material,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2934483,27470745,Cochiti,30.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2934483,27470746,Espiritu,35.0,152.0,valid,,4,152.0,152.0,152.0
+az_ponderosa,strict_soil,2934483,27470747,Atarque,20.0,36.0,valid,bedrock_excluded,4,152.0,152.0,152.0
+az_ponderosa,strict_soil,2934483,27470748,Rock outcrop,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934483,27470749,Ribera,5.0,79.0,valid,bedrock_excluded,6,104.0,104.0,104.0
+az_ponderosa,strict_soil,2934483,27470750,Menefee,5.0,,unavailable,ambiguous_material,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2934511,27470829,Morenda,5.0,206.0,valid,,7,206.0,206.0,206.0
+az_ponderosa,strict_soil,2934511,27470830,Chamita,30.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2934511,27470831,Dalmatian,55.0,155.0,valid,,4,155.0,155.0,155.0
+az_ponderosa,strict_soil,2934511,27470832,Dula,5.0,203.0,valid,,3,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934511,27470833,Pastorius,5.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2934513,27469631,Chamita,20.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2934513,27469632,Hesperus,40.0,152.0,valid,,4,152.0,152.0,152.0
+az_ponderosa,strict_soil,2934513,27469633,Pastorius,25.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2934513,27469634,Nabor,5.0,152.0,valid,,4,152.0,152.0,152.0
+az_ponderosa,strict_soil,2934513,27469635,Shawa,5.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2934513,27469636,Dula,3.0,203.0,valid,,3,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934513,27469637,Abreu,2.0,147.0,valid,bedrock_excluded,5,152.0,152.0,152.0
+az_ponderosa,strict_soil,2934520,27469788,Escrito,20.0,43.0,valid,bedrock_excluded,4,69.0,69.0,69.0
+az_ponderosa,strict_soil,2934520,27469789,Ishkoten,45.0,,unavailable,ambiguous_material,5,112.0,112.0,112.0
+az_ponderosa,strict_soil,2934520,27469790,Lajuita,25.0,,unavailable,ambiguous_material;bedrock_excluded,5,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934520,27469791,Rock outcrop,3.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934520,27469792,Losindios,4.0,203.0,valid,,4,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934520,27469793,Ustorthents,3.0,,unavailable,ambiguous_material,3,46.0,46.0,46.0
+az_ponderosa,strict_soil,2934522,27470858,Bosquecito,6.0,213.0,valid,,10,213.0,213.0,213.0
+az_ponderosa,strict_soil,2934522,27470859,Jaralosa,85.0,213.0,valid,,9,213.0,213.0,213.0
+az_ponderosa,strict_soil,2934522,27470860,Urban land,2.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934522,27470861,Innacutt,4.0,305.0,valid,,9,305.0,305.0,305.0
+az_ponderosa,strict_soil,2934522,27470862,Cuyamungue,3.0,254.0,valid,,7,254.0,254.0,254.0
+az_ponderosa,strict_soil,2934581,27471035,Fiesta,35.0,307.0,valid,,10,307.0,307.0,307.0
+az_ponderosa,strict_soil,2934581,27471036,Espanola,15.0,203.0,valid,,8,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934581,27471037,Enmedio,3.0,122.0,valid,bedrock_excluded,7,152.0,152.0,152.0
+az_ponderosa,strict_soil,2934581,27471038,Morenda,25.0,211.0,valid,,8,211.0,211.0,211.0
+az_ponderosa,strict_soil,2934581,27471039,Morenda,20.0,206.0,valid,,8,206.0,206.0,206.0
+az_ponderosa,strict_soil,2934581,27471040,Riverwash,2.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934582,27471041,Dula,15.0,203.0,valid,,3,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934582,27471042,Espanola,5.0,203.0,valid,,8,203.0,203.0,203.0
+az_ponderosa,strict_soil,2934582,27471043,Fiesta,30.0,307.0,valid,,8,307.0,307.0,307.0
+az_ponderosa,strict_soil,2934582,27471044,Morenda,40.0,206.0,valid,,7,206.0,206.0,206.0
+az_ponderosa,strict_soil,2934582,27471045,Chamita,5.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2934582,27471046,Pastorius,5.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2934586,27469651,Elbuck,30.0,152.0,valid,,4,152.0,152.0,152.0
+az_ponderosa,strict_soil,2934586,27469652,Nabor,55.0,152.0,valid,,4,152.0,152.0,152.0
+az_ponderosa,strict_soil,2934586,27469653,Rock outcrop,1.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934586,27469654,Trampas,4.0,155.0,valid,,4,155.0,155.0,155.0
+az_ponderosa,strict_soil,2934586,27469655,Tottles,1.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2934586,27469656,Rombo,4.0,,unavailable,ambiguous_material,4,152.0,152.0,152.0
+az_ponderosa,strict_soil,2934586,27469657,Wiggler,5.0,,unavailable,ambiguous_material,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2934600,27471100,Origo,50.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2934600,27471101,Pavo,25.0,152.0,valid,,7,152.0,152.0,152.0
+az_ponderosa,strict_soil,2934600,27471102,Rubble land,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934600,27471103,Rock outcrop,10.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2934600,27471104,Cajete,10.0,152.0,valid,,6,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942447,27469674,Rock outcrop,50.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2942447,27469675,Cypher,35.0,41.0,valid,bedrock_excluded,4,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942447,27469676,Abreu,9.0,109.0,valid,bedrock_excluded,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942447,27469677,Laventana,5.0,127.0,valid,bedrock_excluded,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942447,27469678,Cajete,1.0,152.0,valid,,2,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942453,27469679,Espiritu,25.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942453,27469680,Vessilla,25.0,25.0,valid,bedrock_excluded,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942453,27469681,Rock outcrop,35.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2942453,27469682,Fragua,5.0,,unavailable,ambiguous_material,4,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942453,27469683,Menefee,2.0,,unavailable,ambiguous_material,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942453,27469684,Skyvillage,1.0,46.0,valid,bedrock_excluded,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942453,27469685,Atarque,5.0,41.0,valid,bedrock_excluded,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942453,27469686,Sedillo,2.0,178.0,valid,,3,178.0,178.0,178.0
+az_ponderosa,strict_soil,2942481,27471332,Rock outcrop,15.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2942481,27471333,Jemez,30.0,69.0,valid,bedrock_excluded,5,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942481,27471334,Totavison family #,45.0,152.0,valid,,2,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942481,27471335,Cajete,10.0,152.0,valid,,2,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942502,27469706,Abiquiu,40.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942502,27469707,Walrees,45.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942502,27469708,Peralta,5.0,165.0,valid,,3,165.0,165.0,165.0
+az_ponderosa,strict_soil,2942502,27469709,Werlog,5.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942502,27469710,Jocity,5.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942503,27469715,Wauquie,85.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942503,27469716,Vessilla,3.0,25.0,valid,bedrock_excluded,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942503,27469717,Rosced,3.0,152.0,valid,,4,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942503,27469718,Santa Fe,3.0,20.0,valid,bedrock_excluded,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942503,27469719,Laventana,3.0,127.0,valid,bedrock_excluded,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942503,27469720,Bamac,3.0,165.0,valid,,3,165.0,165.0,165.0
+az_ponderosa,strict_soil,2942512,27471448,Zia,40.0,152.0,valid,,2,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942512,27471449,San Mateo,35.0,152.0,valid,,2,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942512,27471450,Querencia,10.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942512,27471451,Sparank,10.0,165.0,valid,,2,165.0,165.0,165.0
+az_ponderosa,strict_soil,2942512,27471452,unknown,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2942517,27471479,Cajete,65.0,152.0,valid,,2,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942517,27471480,Jarmillo,20.0,152.0,valid,,8,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942517,27471481,Ustorthents,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,strict_soil,2942517,27471482,Jemez,5.0,69.0,valid,bedrock_excluded,5,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942517,27471483,Calaveras,5.0,152.0,valid,,4,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942518,27471484,Lobat,55.0,152.0,valid,,4,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942518,27471485,Cajete,30.0,152.0,valid,,2,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942518,27471486,Jemez,5.0,99.0,valid,bedrock_excluded,4,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942518,27471487,Palon,5.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,strict_soil,2942518,27471488,Jarmillo,5.0,152.0,valid,,8,152.0,152.0,152.0
+az_ponderosa,all_layers,56390,27472014,Jarmillo,5.0,152.0,valid,,2,152.0,152.0,152.0
+az_ponderosa,all_layers,56390,27472015,Calaveras,10.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,56390,27472016,Cajete,85.0,152.0,valid,,6,152.0,152.0,152.0
+az_ponderosa,all_layers,56449,27472259,Laventana,3.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,56449,27472260,Cypher,5.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,56449,27472261,Rock outcrop,2.0,152.0,valid,,1,152.0,152.0,152.0
+az_ponderosa,all_layers,56449,27472262,Cajete,5.0,152.0,valid,,2,152.0,152.0,152.0
+az_ponderosa,all_layers,56449,27472263,Cypher,35.0,152.0,valid,,4,152.0,152.0,152.0
+az_ponderosa,all_layers,56449,27472264,Rock outcrop,50.0,152.0,valid,,1,152.0,152.0,152.0
+az_ponderosa,all_layers,56462,27472319,Cajete,10.0,165.0,valid,,3,165.0,165.0,165.0
+az_ponderosa,all_layers,56462,27472320,Rubble land,5.0,152.0,valid,,1,152.0,152.0,152.0
+az_ponderosa,all_layers,56462,27472321,Rock outcrop,10.0,152.0,valid,,1,152.0,152.0,152.0
+az_ponderosa,all_layers,56462,27472322,Origo,50.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,56462,27472323,Pavo,25.0,152.0,valid,,7,152.0,152.0,152.0
+az_ponderosa,all_layers,56475,27472375,Cajete,10.0,152.0,valid,,2,152.0,152.0,152.0
+az_ponderosa,all_layers,56475,27472376,Rock outcrop,15.0,152.0,valid,,1,152.0,152.0,152.0
+az_ponderosa,all_layers,56475,27472377,Totavi,45.0,152.0,valid,,2,152.0,152.0,152.0
+az_ponderosa,all_layers,56475,27472378,Jemez,30.0,152.0,valid,,5,152.0,152.0,152.0
+az_ponderosa,all_layers,2721103,27470594,Cajete,85.0,152.0,valid,,6,152.0,152.0,152.0
+az_ponderosa,all_layers,2721103,27470595,Jemez,5.0,152.0,valid,,5,152.0,152.0,152.0
+az_ponderosa,all_layers,2721103,27470596,Calaveras,5.0,152.0,valid,,4,152.0,152.0,152.0
+az_ponderosa,all_layers,2721103,27470597,Jarmillo,5.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2721109,27470608,Cochiti,50.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2721109,27470609,Espiritu,45.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2721109,27470610,Rock outcrop,1.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2721109,27470611,Waumac,2.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2721109,27470612,Teco,1.0,165.0,valid,,4,165.0,165.0,165.0
+az_ponderosa,all_layers,2721109,27470613,Parkelei,1.0,203.0,valid,,3,203.0,203.0,203.0
+az_ponderosa,all_layers,2721113,27470598,Cypher,25.0,152.0,valid,,4,152.0,152.0,152.0
+az_ponderosa,all_layers,2721113,27470599,Cajete,65.0,152.0,valid,,2,152.0,152.0,152.0
+az_ponderosa,all_layers,2721113,27470600,Rock outcrop,2.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2721113,27470601,Laventana,5.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2721113,27470602,Mirand,3.0,152.0,valid,,7,152.0,152.0,152.0
+az_ponderosa,all_layers,2721150,27469549,Water,90.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2721150,27469550,Riverwash,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2721150,27469551,wet soils,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934232,27469846,Rock outcrop,35.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934232,27469847,Typic Haplustalfs,50.0,203.0,valid,,8,203.0,203.0,203.0
+az_ponderosa,all_layers,2934232,27469848,Lithic Haplustalfs,10.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934232,27469849,Udic Haplustepts,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934242,27469882,Typic Ustorthents,30.0,203.0,valid,,5,203.0,203.0,203.0
+az_ponderosa,all_layers,2934242,27469883,Barranca family #,5.0,203.0,valid,,5,203.0,203.0,203.0
+az_ponderosa,all_layers,2934242,27469884,Lithic Haplustalfs,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934242,27469885,Typic Haplustalfs,35.0,203.0,valid,,6,203.0,203.0,203.0
+az_ponderosa,all_layers,2934242,27469886,Rock outcrop,25.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934247,27469901,Rock outcrop,20.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934247,27469902,Spudrock family,40.0,203.0,valid,,5,203.0,203.0,203.0
+az_ponderosa,all_layers,2934247,27469903,Nees family,20.0,203.0,valid,,5,203.0,203.0,203.0
+az_ponderosa,all_layers,2934247,27469904,Cortaro family,10.0,203.0,valid,,6,203.0,203.0,203.0
+az_ponderosa,all_layers,2934247,27469905,Loghouse family,10.0,203.0,valid,,5,203.0,203.0,203.0
+az_ponderosa,all_layers,2934254,27469929,Bluebirdmesa family #,80.0,203.0,valid,,7,203.0,203.0,203.0
+az_ponderosa,all_layers,2934254,27469930,Lobat family,5.0,203.0,valid,,9,203.0,203.0,203.0
+az_ponderosa,all_layers,2934254,27469931,Derecho family,15.0,203.0,valid,,7,203.0,203.0,203.0
+az_ponderosa,all_layers,2934256,27469935,Rock outcrop,20.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934256,27469936,Udic Haplustalfs,60.0,203.0,valid,,7,203.0,203.0,203.0
+az_ponderosa,all_layers,2934256,27469937,Calaveras family,10.0,203.0,valid,,8,203.0,203.0,203.0
+az_ponderosa,all_layers,2934256,27469938,Lithic Haplustalfs,10.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934269,27469979,Typic Haplustalfs,85.0,203.0,valid,,7,203.0,203.0,203.0
+az_ponderosa,all_layers,2934269,27469980,Rock outcrop,10.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934269,27469981,Udic Haplustepts,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934312,27470125,Barranca family #,50.0,203.0,valid,,6,203.0,203.0,203.0
+az_ponderosa,all_layers,2934312,27470126,Lama family,30.0,203.0,valid,,7,203.0,203.0,203.0
+az_ponderosa,all_layers,2934312,27470127,Quintana family,10.0,203.0,valid,,4,203.0,203.0,203.0
+az_ponderosa,all_layers,2934312,27470128,Wodomont family,10.0,203.0,valid,,4,203.0,203.0,203.0
+az_ponderosa,all_layers,2934319,27470151,Uwing family,40.0,110.0,valid,,3,110.0,110.0,110.0
+az_ponderosa,all_layers,2934319,27470152,Typic Haplustolls,10.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934319,27470153,Riomedio family #,45.0,110.0,valid,,4,110.0,110.0,110.0
+az_ponderosa,all_layers,2934319,27470154,Pachic Haplustolls,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934354,27470273,Goldbug family,70.0,203.0,valid,,7,203.0,203.0,203.0
+az_ponderosa,all_layers,2934354,27470274,Losindios family,15.0,203.0,valid,,7,203.0,203.0,203.0
+az_ponderosa,all_layers,2934354,27470275,Sheek family,15.0,203.0,valid,,8,203.0,203.0,203.0
+az_ponderosa,all_layers,2934358,27470285,Crooked Creek family #,25.0,120.0,valid,,5,120.0,120.0,120.0
+az_ponderosa,all_layers,2934358,27470286,Fentonlake family #,20.0,110.0,valid,,6,110.0,110.0,110.0
+az_ponderosa,all_layers,2934358,27470287,Fughes family,40.0,135.0,valid,,5,135.0,135.0,135.0
+az_ponderosa,all_layers,2934358,27470288,Herm family,10.0,102.0,valid,,6,102.0,102.0,102.0
+az_ponderosa,all_layers,2934358,27470289,Cumulic Haplustolls,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934373,27470335,Sawyercanyon family #,80.0,102.0,valid,,6,102.0,102.0,102.0
+az_ponderosa,all_layers,2934373,27470336,Fluventic Haplustepts,15.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934373,27470337,Aquic Ustifluvents,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934380,27470360,Lobat family,40.0,203.0,valid,,6,203.0,203.0,203.0
+az_ponderosa,all_layers,2934380,27470361,Barleycanyon family #,30.0,203.0,valid,,7,203.0,203.0,203.0
+az_ponderosa,all_layers,2934380,27470362,Jarmillo family,15.0,152.0,valid,,4,152.0,152.0,152.0
+az_ponderosa,all_layers,2934380,27470363,Litag family,15.0,203.0,valid,,6,203.0,203.0,203.0
+az_ponderosa,all_layers,2934382,27470367,Jemez family,50.0,203.0,valid,,7,203.0,203.0,203.0
+az_ponderosa,all_layers,2934382,27470368,Cymery family,30.0,203.0,valid,,5,203.0,203.0,203.0
+az_ponderosa,all_layers,2934382,27470369,Arlenson family #,5.0,203.0,valid,,4,203.0,203.0,203.0
+az_ponderosa,all_layers,2934382,27470370,Barleycanyon family #,15.0,203.0,valid,,7,203.0,203.0,203.0
+az_ponderosa,all_layers,2934384,27470375,Vibo family,70.0,203.0,valid,,7,203.0,203.0,203.0
+az_ponderosa,all_layers,2934384,27470376,Lama family,15.0,203.0,valid,,7,203.0,203.0,203.0
+az_ponderosa,all_layers,2934384,27470377,Lithic Haplustalfs,15.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934385,27470378,Jemez family,70.0,203.0,valid,,7,203.0,203.0,203.0
+az_ponderosa,all_layers,2934385,27470379,Burnac family,15.0,203.0,valid,,6,203.0,203.0,203.0
+az_ponderosa,all_layers,2934385,27470380,Lajuita family,15.0,203.0,valid,,5,203.0,203.0,203.0
+az_ponderosa,all_layers,2934386,27470381,Arlenson family #,70.0,203.0,valid,,4,203.0,203.0,203.0
+az_ponderosa,all_layers,2934386,27470382,Litag family,15.0,203.0,valid,,8,203.0,203.0,203.0
+az_ponderosa,all_layers,2934386,27470383,Parajito family,15.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934390,27470391,Laventana family,80.0,203.0,valid,,6,203.0,203.0,203.0
+az_ponderosa,all_layers,2934390,27470392,Lobat family,10.0,203.0,valid,,6,203.0,203.0,203.0
+az_ponderosa,all_layers,2934390,27470393,Vitrandic Haplustepts,10.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934391,27470394,Rock outcrop,20.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934391,27470395,Vitrandic Udorthents,50.0,203.0,valid,,6,203.0,203.0,203.0
+az_ponderosa,all_layers,2934391,27470396,Abreu family,15.0,203.0,valid,,6,203.0,203.0,203.0
+az_ponderosa,all_layers,2934391,27470397,Litag family,15.0,203.0,valid,,6,203.0,203.0,203.0
+az_ponderosa,all_layers,2934392,27470398,Pax family,50.0,203.0,valid,,6,203.0,203.0,203.0
+az_ponderosa,all_layers,2934392,27470399,LaCueva family #,20.0,203.0,valid,,7,203.0,203.0,203.0
+az_ponderosa,all_layers,2934392,27470400,Barleycanyon family #,15.0,203.0,valid,,7,203.0,203.0,203.0
+az_ponderosa,all_layers,2934392,27470401,Litag family,15.0,203.0,valid,,8,203.0,203.0,203.0
+az_ponderosa,all_layers,2934394,27470402,LaCueva family #,75.0,113.0,valid,,6,113.0,113.0,113.0
+az_ponderosa,all_layers,2934394,27470403,Laventana family,10.0,203.0,valid,,6,203.0,203.0,203.0
+az_ponderosa,all_layers,2934394,27470404,Pax family,15.0,203.0,valid,,6,203.0,203.0,203.0
+az_ponderosa,all_layers,2934395,27470405,LaCueva family #,60.0,113.0,valid,,7,113.0,113.0,113.0
+az_ponderosa,all_layers,2934395,27470406,Bearsprings Peak family #,30.0,138.0,valid,,5,138.0,138.0,138.0
+az_ponderosa,all_layers,2934395,27470407,Vitrandic Ustorthents,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934395,27470408,Typic Haplustalfs,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934397,27470413,Cajete family,50.0,114.0,valid,,6,114.0,114.0,114.0
+az_ponderosa,all_layers,2934397,27470414,Jemez family,30.0,105.0,valid,,6,105.0,105.0,105.0
+az_ponderosa,all_layers,2934397,27470415,Laventana family,10.0,107.0,valid,,6,107.0,107.0,107.0
+az_ponderosa,all_layers,2934397,27470416,Bearsprings Peak family #,10.0,138.0,valid,,5,138.0,138.0,138.0
+az_ponderosa,all_layers,2934398,27470417,Cajete family,90.0,114.0,valid,,6,114.0,114.0,114.0
+az_ponderosa,all_layers,2934398,27470418,Burrfoot family,10.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934401,27470427,Vitrandic Ustorthents,60.0,203.0,valid,,5,203.0,203.0,203.0
+az_ponderosa,all_layers,2934401,27470428,Rock outcrop,20.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934401,27470429,Laventana family,15.0,203.0,valid,,7,203.0,203.0,203.0
+az_ponderosa,all_layers,2934401,27470430,Lithic Ustorthents,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934404,27470437,Cajete family,60.0,114.0,valid,,6,114.0,114.0,114.0
+az_ponderosa,all_layers,2934404,27470438,Faleria family,30.0,152.0,valid,,4,152.0,152.0,152.0
+az_ponderosa,all_layers,2934404,27470439,Bearsprings Peak family #,10.0,138.0,valid,,5,138.0,138.0,138.0
+az_ponderosa,all_layers,2934408,27470446,Litag family,75.0,114.0,valid,,5,114.0,114.0,114.0
+az_ponderosa,all_layers,2934408,27470447,Vitrandic Udorthents,15.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934408,27470448,Abreu family,10.0,203.0,valid,,6,203.0,203.0,203.0
+az_ponderosa,all_layers,2934410,27470453,Litag family,95.0,203.0,valid,,6,203.0,203.0,203.0
+az_ponderosa,all_layers,2934410,27470454,Rock outcrop,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934430,27470515,Chamita family,50.0,115.0,valid,,5,115.0,115.0,115.0
+az_ponderosa,all_layers,2934430,27470516,Irim family,15.0,100.0,valid,,6,100.0,100.0,100.0
+az_ponderosa,all_layers,2934430,27470517,Jarmillo family,25.0,152.0,valid,,4,152.0,152.0,152.0
+az_ponderosa,all_layers,2934430,27470518,Pachic Haplustolls,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934430,27470519,Olallie family,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934443,27469763,Badland,90.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934443,27469764,Menefee,10.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2934483,27470745,Cochiti,30.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2934483,27470746,Espiritu,35.0,152.0,valid,,4,152.0,152.0,152.0
+az_ponderosa,all_layers,2934483,27470747,Atarque,20.0,152.0,valid,,4,152.0,152.0,152.0
+az_ponderosa,all_layers,2934483,27470748,Rock outcrop,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934483,27470749,Ribera,5.0,104.0,valid,,6,104.0,104.0,104.0
+az_ponderosa,all_layers,2934483,27470750,Menefee,5.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2934511,27470829,Morenda,5.0,206.0,valid,,7,206.0,206.0,206.0
+az_ponderosa,all_layers,2934511,27470830,Chamita,30.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2934511,27470831,Dalmatian,55.0,155.0,valid,,4,155.0,155.0,155.0
+az_ponderosa,all_layers,2934511,27470832,Dula,5.0,203.0,valid,,3,203.0,203.0,203.0
+az_ponderosa,all_layers,2934511,27470833,Pastorius,5.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2934513,27469631,Chamita,20.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2934513,27469632,Hesperus,40.0,152.0,valid,,4,152.0,152.0,152.0
+az_ponderosa,all_layers,2934513,27469633,Pastorius,25.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2934513,27469634,Nabor,5.0,152.0,valid,,4,152.0,152.0,152.0
+az_ponderosa,all_layers,2934513,27469635,Shawa,5.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2934513,27469636,Dula,3.0,203.0,valid,,3,203.0,203.0,203.0
+az_ponderosa,all_layers,2934513,27469637,Abreu,2.0,152.0,valid,,5,152.0,152.0,152.0
+az_ponderosa,all_layers,2934520,27469788,Escrito,20.0,69.0,valid,,4,69.0,69.0,69.0
+az_ponderosa,all_layers,2934520,27469789,Ishkoten,45.0,112.0,valid,,5,112.0,112.0,112.0
+az_ponderosa,all_layers,2934520,27469790,Lajuita,25.0,203.0,valid,,5,203.0,203.0,203.0
+az_ponderosa,all_layers,2934520,27469791,Rock outcrop,3.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934520,27469792,Losindios,4.0,203.0,valid,,4,203.0,203.0,203.0
+az_ponderosa,all_layers,2934520,27469793,Ustorthents,3.0,46.0,valid,,3,46.0,46.0,46.0
+az_ponderosa,all_layers,2934522,27470858,Bosquecito,6.0,213.0,valid,,10,213.0,213.0,213.0
+az_ponderosa,all_layers,2934522,27470859,Jaralosa,85.0,213.0,valid,,9,213.0,213.0,213.0
+az_ponderosa,all_layers,2934522,27470860,Urban land,2.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934522,27470861,Innacutt,4.0,305.0,valid,,9,305.0,305.0,305.0
+az_ponderosa,all_layers,2934522,27470862,Cuyamungue,3.0,254.0,valid,,7,254.0,254.0,254.0
+az_ponderosa,all_layers,2934581,27471035,Fiesta,35.0,307.0,valid,,10,307.0,307.0,307.0
+az_ponderosa,all_layers,2934581,27471036,Espanola,15.0,203.0,valid,,8,203.0,203.0,203.0
+az_ponderosa,all_layers,2934581,27471037,Enmedio,3.0,152.0,valid,,7,152.0,152.0,152.0
+az_ponderosa,all_layers,2934581,27471038,Morenda,25.0,211.0,valid,,8,211.0,211.0,211.0
+az_ponderosa,all_layers,2934581,27471039,Morenda,20.0,206.0,valid,,8,206.0,206.0,206.0
+az_ponderosa,all_layers,2934581,27471040,Riverwash,2.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934582,27471041,Dula,15.0,203.0,valid,,3,203.0,203.0,203.0
+az_ponderosa,all_layers,2934582,27471042,Espanola,5.0,203.0,valid,,8,203.0,203.0,203.0
+az_ponderosa,all_layers,2934582,27471043,Fiesta,30.0,307.0,valid,,8,307.0,307.0,307.0
+az_ponderosa,all_layers,2934582,27471044,Morenda,40.0,206.0,valid,,7,206.0,206.0,206.0
+az_ponderosa,all_layers,2934582,27471045,Chamita,5.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2934582,27471046,Pastorius,5.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2934586,27469651,Elbuck,30.0,152.0,valid,,4,152.0,152.0,152.0
+az_ponderosa,all_layers,2934586,27469652,Nabor,55.0,152.0,valid,,4,152.0,152.0,152.0
+az_ponderosa,all_layers,2934586,27469653,Rock outcrop,1.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934586,27469654,Trampas,4.0,155.0,valid,,4,155.0,155.0,155.0
+az_ponderosa,all_layers,2934586,27469655,Tottles,1.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2934586,27469656,Rombo,4.0,152.0,valid,,4,152.0,152.0,152.0
+az_ponderosa,all_layers,2934586,27469657,Wiggler,5.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2934600,27471100,Origo,50.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2934600,27471101,Pavo,25.0,152.0,valid,,7,152.0,152.0,152.0
+az_ponderosa,all_layers,2934600,27471102,Rubble land,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934600,27471103,Rock outcrop,10.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2934600,27471104,Cajete,10.0,152.0,valid,,6,152.0,152.0,152.0
+az_ponderosa,all_layers,2942447,27469674,Rock outcrop,50.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2942447,27469675,Cypher,35.0,152.0,valid,,4,152.0,152.0,152.0
+az_ponderosa,all_layers,2942447,27469676,Abreu,9.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2942447,27469677,Laventana,5.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2942447,27469678,Cajete,1.0,152.0,valid,,2,152.0,152.0,152.0
+az_ponderosa,all_layers,2942453,27469679,Espiritu,25.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2942453,27469680,Vessilla,25.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2942453,27469681,Rock outcrop,35.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2942453,27469682,Fragua,5.0,152.0,valid,,4,152.0,152.0,152.0
+az_ponderosa,all_layers,2942453,27469683,Menefee,2.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2942453,27469684,Skyvillage,1.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2942453,27469685,Atarque,5.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2942453,27469686,Sedillo,2.0,178.0,valid,,3,178.0,178.0,178.0
+az_ponderosa,all_layers,2942481,27471332,Rock outcrop,15.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2942481,27471333,Jemez,30.0,152.0,valid,,5,152.0,152.0,152.0
+az_ponderosa,all_layers,2942481,27471334,Totavison family #,45.0,152.0,valid,,2,152.0,152.0,152.0
+az_ponderosa,all_layers,2942481,27471335,Cajete,10.0,152.0,valid,,2,152.0,152.0,152.0
+az_ponderosa,all_layers,2942502,27469706,Abiquiu,40.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2942502,27469707,Walrees,45.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2942502,27469708,Peralta,5.0,165.0,valid,,3,165.0,165.0,165.0
+az_ponderosa,all_layers,2942502,27469709,Werlog,5.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2942502,27469710,Jocity,5.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2942503,27469715,Wauquie,85.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2942503,27469716,Vessilla,3.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2942503,27469717,Rosced,3.0,152.0,valid,,4,152.0,152.0,152.0
+az_ponderosa,all_layers,2942503,27469718,Santa Fe,3.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2942503,27469719,Laventana,3.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2942503,27469720,Bamac,3.0,165.0,valid,,3,165.0,165.0,165.0
+az_ponderosa,all_layers,2942512,27471448,Zia,40.0,152.0,valid,,2,152.0,152.0,152.0
+az_ponderosa,all_layers,2942512,27471449,San Mateo,35.0,152.0,valid,,2,152.0,152.0,152.0
+az_ponderosa,all_layers,2942512,27471450,Querencia,10.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2942512,27471451,Sparank,10.0,165.0,valid,,2,165.0,165.0,165.0
+az_ponderosa,all_layers,2942512,27471452,unknown,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2942517,27471479,Cajete,65.0,152.0,valid,,2,152.0,152.0,152.0
+az_ponderosa,all_layers,2942517,27471480,Jarmillo,20.0,152.0,valid,,8,152.0,152.0,152.0
+az_ponderosa,all_layers,2942517,27471481,Ustorthents,5.0,,unavailable,missing_horizons,0,0,0.0,
+az_ponderosa,all_layers,2942517,27471482,Jemez,5.0,152.0,valid,,5,152.0,152.0,152.0
+az_ponderosa,all_layers,2942517,27471483,Calaveras,5.0,152.0,valid,,4,152.0,152.0,152.0
+az_ponderosa,all_layers,2942518,27471484,Lobat,55.0,152.0,valid,,4,152.0,152.0,152.0
+az_ponderosa,all_layers,2942518,27471485,Cajete,30.0,152.0,valid,,2,152.0,152.0,152.0
+az_ponderosa,all_layers,2942518,27471486,Jemez,5.0,152.0,valid,,4,152.0,152.0,152.0
+az_ponderosa,all_layers,2942518,27471487,Palon,5.0,152.0,valid,,3,152.0,152.0,152.0
+az_ponderosa,all_layers,2942518,27471488,Jarmillo,5.0,152.0,valid,,8,152.0,152.0,152.0

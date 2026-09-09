@@ -83,16 +83,6 @@ Feedback mechanisms:
 
 ## 📋 Backlog
 
-### Staley M3 SSURGO Soil Thickness
-
-**Status**: Scoped 2026-09-08 Pacific; ready for fresh-agent execution.
-**Package**: [20260908_staley_m3_soils](docs/work-packages/20260908_staley_m3_soils/package.md)
-
-Audit and freeze soil inputs for the supplied 10 m terrain panel, implement
-an offline SSURGO cumulative-thickness derivation, and compare it against
-original STATSGO THICK. Resolve interval, bedrock, component weighting, and
-missing-data contracts before production M3 integration.
-
 ### Seamless WEPPcloud Session Cookie Namespace Migration
 
 **Proposed**: 2026-08-23
@@ -1279,6 +1269,22 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### Staley M3 SSURGO Soil Thickness
+
+**Closed**: 2026-09-09
+**Package**: [20260908_staley_m3_soils](docs/work-packages/20260908_staley_m3_soils/package.md)
+
+Delivered read-only offline derivation, frozen source fixtures and 12-outlet
+fixed-terrain comparison (72 rows, 924 diagnostics). Recommend retaining
+original STATSGO pending scientific source approval: every catchment has
+incomplete SSURGO component support and material policy materially changes M3.
+35 focused tests and full 7,766-pass/72-skip suite pass; independent correctness
+and security reviews close all findings. Production wiring/availability remain
+separate. Durable authority: module `docs/m3_soil_thickness.md` and ADR-0053.
+
+---
+
 
 ### Staley M3 WBT Terrain and DEM Resolution
 
