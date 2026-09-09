@@ -83,21 +83,6 @@ Feedback mechanisms:
 
 ## 📋 Backlog
 
-### Staley M3 WBT Terrain and DEM Resolution
-
-**Status**: Scoped 2026-09-08; ready for fresh-agent execution.
-**Package**: [20260908_staley_m3_wbt_terrain](docs/work-packages/20260908_staley_m3_wbt_terrain/package.md)
-
-Implement WBT upstream terrain tooling, verify relief semantics and numerical
-outputs, then compare matched catchments at 10 m and 30 m to recommend M3
-resolution requirements. Production Staley integration is a separate task.
-Start with the package's fresh-agent prompt and active ExecPlan.
-
-
-
-
----
-
 ### Seamless WEPPcloud Session Cookie Namespace Migration
 
 **Proposed**: 2026-08-23
@@ -1284,6 +1269,20 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### Staley M3 WBT Terrain and DEM Resolution
+
+**Closed**: 2026-09-09
+**Package**: [20260908_staley_m3_wbt_terrain](docs/work-packages/20260908_staley_m3_wbt_terrain/package.md)
+
+Delivered registered WBT upstream raw-elevation relief/area tooling and both
+bindings. The 24-pair study recommends genuine 10 m for initial M3; controlled
+30 m effects reached 10.598 probability points and 12.479% inverse-threshold
+change. All gates and independent reviews passed. Production M3 integration,
+UI enforcement, deployment and binary vendoring remain separate work.
+
+---
+
 
 ### Opt-in Login Requirement for Project Creation (2026-09-07)
 

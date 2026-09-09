@@ -1,4 +1,8 @@
-# Fresh-Agent Handoff: Staley M3 Terrain
+# Completed Handoff: Staley M3 Terrain
+
+Outcome (2026-09-09 UTC): registered command/bindings and 24-pair evaluation
+completed; recommend genuine 10 m for initial M3. All required gates/reviews
+passed. The following is the original execution handoff, retained as history.
 
 Execute [staley_m3_wbt_terrain_execplan.md](staley_m3_wbt_terrain_execplan.md)
 end-to-end. This package implements new terrain tooling in

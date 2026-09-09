@@ -1,23 +1,25 @@
 # Evidence Catalog
 
-Status: planned artifacts; none of the numerical evaluations has run.
+The registered owned terrain command and evaluation are implemented. The
+[decision report](resolution_decision.md) recommends genuine 10 m for initial
+M3 support; production wiring/availability enforcement is outside scope.
 
-Execution should produce `terrain_contract.md`, `study_protocol.md`,
-`catchments.csv`, `reference_parity.md`, `resolution_comparison.csv`,
-`resolution_decision.md`, and `validation.md`, plus dated independent
-correctness and security review reports. Include portable plots where useful.
+- [Terrain contract](terrain_contract.md), [predeclared study protocol](study_protocol.md).
+- [Initial fixture inventory](catchments.csv), [requested-coordinate audit](requested_coordinate_audit.csv).
+- [Reference findings](reference_parity.md), [rebuilt comparison](reference_built_comparison.json).
+- [24 resolution comparisons](resolution_comparison.csv), [864 M3 scenarios](m3_sensitivity.csv), [plot](resolution_sensitivity.png).
+- [Runtime measurements](runtime.csv), [environment/binary hash](environment.json), [commands](commands.json), [unavailable cases](unavailable.json).
+- [Source hashes](source_hashes.json), [built source delta](wbt_source.patch), [validation](validation.md).
+- [Correctness review](20260908_correctness_review.md), [security review](20260908_security_review.md).
 
-Record source URLs or authorized local paths, input hashes, geographic outlets,
-CRS, vertical units, pixel dimensions, conditioning parameters, pointer encoding,
-tool and reference revisions, built-binary hash, commands, and runtime environment.
-Store large DEMs and generated rasters outside git in an isolated study directory;
-record their locations and reproduction steps here. Do not commit the Staley PDF
-or copied GPL implementation/tests. Missing evidence must remain explicit.
+`reference_probe.py`/`reference_probe.jsonl` preserve initial independently
+authored diagnostic inputs and observed external-reference values.
+`inventory.py` reproduces the initial fixture grid/outlet inventory. The final
+runnable study and reference-comparison harnesses live in WBT `tools/` and
+are included in the source delta. No GPL source/tests were copied or translated.
 
-The primary input fixtures are committed in the sibling WBT repository at
-`test_fixtures/staley_m3_resolution/`; its README and manifest identify all six
-runs and source URLs. This deliberately versions the selected input rasters
-as ordinary Git files (new LFS uploads are disallowed on the public fork),
-while generated study rasters remain external. Boundary TIFFs and
-projected/WGS84 GeoJSONs are included. No new site acquisition is needed to
-begin the paired workflow comparison.
+The six-run fixture bundle remains in sibling WBT
+`test_fixtures/staley_m3_resolution/` with its original 66 files and hashes.
+Final generated rasters are external in `/tmp/staley-m3-terrain-study/study-v4/`
+and `reference-built-v4/`; validation records reproduction commands. No
+publisher PDF, generated raster, production binary or live run is added here.

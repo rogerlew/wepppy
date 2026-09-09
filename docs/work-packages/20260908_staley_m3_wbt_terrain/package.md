@@ -1,6 +1,6 @@
 # Staley M3 WBT Terrain and DEM Resolution
 
-**Status**: Open — scaffold ready for a fresh agent; implementation not started.
+**Status**: Closed 2026-09-09 — tooling and evaluation complete.
 **Started**: 2026-09-08 23:30 UTC
 **Timezone**: UTC
 
@@ -34,8 +34,8 @@ production WEPPpy wiring remains a separate task.
 The requesting user owns model availability decisions. The fresh executing
 agent implements and evaluates the tooling; independent correctness and security
 reviewers assess the final changes. Start with the
-[handoff prompt](prompts/active/start_here.md), then execute the
-[ExecPlan](prompts/active/staley_m3_wbt_terrain_execplan.md).
+[handoff prompt](prompts/completed/start_here.md), then execute the
+[ExecPlan](prompts/completed/staley_m3_wbt_terrain_execplan.md).
 Track progress in [tracker.md](tracker.md).
 
 ## Success Criteria
@@ -68,9 +68,8 @@ file/path handling and Python subprocess bindings. Dedicated security review
 required before implementation closeout. Use the existing raster I/O and
 wrapper boundaries; no new network service or upload endpoint is in scope.
 Create dated correctness and security review artifacts from the repository
-templates after implementation, and close medium/high findings. These reviews
-are future execution gates, not claims that the documentation scaffold adds an
-attack surface.
+templates after implementation, and close medium/high findings. Independent correctness and security artifacts document findings and their
+closure. This local CLI is not a hostile-upload or remote service boundary.
 
 ## Dependencies and References
 
@@ -85,8 +84,11 @@ attack surface.
 
 ## Deliverables and Follow-up
 
-Deliverables are pending. Evidence locations and runnable steps are assigned
-in the ExecPlan. The study informs future production M3 integration; enabling
+Delivered registered `D8UpstreamRelief`, both bindings, analytical/generated
+output tests, pinned-reference diagnostics, 24 paired comparisons, 864 M3
+scenarios, runtime evidence and a 10 m initial-support recommendation.
+See [decision report](artifacts/resolution_decision.md) and
+[validation](artifacts/validation.md). The study informs future production M3 integration; enabling
 M3 or changing its user-facing resolution restrictions is not part of this
 tooling package. No branch changes, commits, or deployment are authorized by
 this scaffold.

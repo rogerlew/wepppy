@@ -2,61 +2,60 @@
 
 ## Quick Status
 
-**Started / last updated**: 2026-09-08 23:30 UTC
-**Phase**: Scaffold ready; awaiting fresh-agent execution
-**Next milestone**: Resolve terrain contract and draft ADR
-**Security impact**: high for planned CLI/path/binding changes
-**Dedicated security review**: required at implementation closeout
+**Started**: 2026-09-08 23:30 UTC
+**Last updated**: 2026-09-09 02:08 UTC
+**Phase**: Closed; all required gates and independent reviews passed
+**Security impact**: high; dedicated review required and recorded
 
 ## Task Board
 
-- [x] Package, self-contained ExecPlan, and fresh-agent prompt scaffolded.
-- [ ] M1: Inspect both repositories, settle contract, draft ADR and study protocol.
-- [ ] M2: Implement and register WBT terrain tool with both bindings and fixtures.
-- [ ] M3: Run rebuilt-binary and pinned reference comparisons.
-- [ ] M4: Select catchments and perform 10 m/30 m sensitivity study.
-- [ ] M5: Review, recommend resolution policy, promote docs, and close package.
+- [x] M1: User adopted maximum upstream raw elevation minus outlet elevation; ADR-0052, CLI contract and predeclared protocol recorded.
+- [x] M2: Rust traversal, registration, both bindings, analytical and generated-output tests implemented.
+- [x] M3: Final rebuilt binary and both bindings verified; pinned reference differences explained.
+- [x] M4: 24 paired comparisons and 864 M3 scenarios completed; recommend genuine 10 m for initial support.
+- [x] M5: Final validation/review sign-off complete; durable docs promoted and prompts archived.
 
-## Decisions
+## Decisions and Rationale
 
-- **2026-09-08 23:30 UTC** — User selected weppcloud-wbt ownership and a
-  subsequent 10 m/30 m assessment. Runtime implementation is assigned to a
-  fresh agent, not this scaffolding session.
-- **2026-09-08 23:30 UTC** — Keep reference parity and terrain-resolution
-  sensitivity separate; neither alone proves predictive validity.
+The user authorized WBT ownership and a resolution study, then explicitly
+adopted the physical maximum-minus-outlet formula after reviewing pfdf's
+analytical failure. [ADR-0052](../../adrs/ADR-0052-staley-m3-upstream-terrain.md)
+records the accepted formula and why highest-source and max-minus-min
+alternatives were rejected. The 10 m recommendation follows the predeclared
+engineering screen; no arbitrary 30 m size exemption or production UI rule
+was introduced. Implementation is independent of GPL reference code/tests.
 
-## Risks and Open Questions
+## Findings and Evidence
 
-Relief semantics differ across paper prose and reference documentation.
-The inspected reference uses weighted maximum paths and needs pinned-version
-testing. Raw versus conditioned elevation may change the maximum/outlet
-relationship. Three paired watersheds and their terrain/boundary fixtures are now supplied
-in WBT; upstream completeness and outlet offsets still require assessment. M3 soil thickness remains unresolved; the terrain study must label
-fixed diagnostic soil/burn inputs rather than imply production readiness.
+[Resolution decision](artifacts/resolution_decision.md): controlled effects reach
+10.598 probability points and 12.479% inverse-threshold change. Both controlled
+and native sets fail at two of 12 outlets; all 24 masks have no detected
+edge/NoData contact. Main-outlet agreement alone conceals headwater failures.
+Native matching can delineate different catchments despite nearby centers.
 
-## Validation and Evidence
+[Reference comparison](artifacts/reference_parity.md): pfdf 3.0.2/pysheds 0.4
+fails a monotonic-chain physical expectation. The rebuilt owned tool produces
+30 m / 300 m2 at all three diagnostic outlets. Calibration-preprocessing
+parity is not established or claimed.
 
-Scaffold validation (2026-09-08 23:30 UTC): documentation lint passed for all
-five package files, eight module documents, and PROJECT_TRACKER.md with zero
-errors/warnings. Local links and spelling previews passed for all five package
-files and the two amended module documents.
-No tool implementation, numeric parity, raster study, or review has run.
-Future evidence belongs in [artifacts](artifacts/README.md); keep large rasters
-in an isolated workspace and retain acquisition recipes and hashes.
+The final study workspace is `/tmp/staley-m3-terrain-study/study-v4/`.
+Input fixtures remain unchanged; no branch changes, commits, runtime binary
+installation, production wiring or live-run mutations occurred.
 
-## Handoff
+## Validation and Reviews
 
-Start with [start_here.md](prompts/active/start_here.md). Execute the named
-ExecPlan only; unrelated active WEPPpy initiatives are outside scope. Update
-this tracker and the ExecPlan after each milestone, and PROJECT_TRACKER.md when
-execution begins. No known external blocker prevents initial discovery.
+[Validation](artifacts/validation.md) records commands, hashes and limitations.
+WBT has 152 passing app Rust tests and 15 passing Python tests, including
+11 CLI/binding regressions and two study-matching regressions. Raster checks
+cover 42 integration cases and one documentation example. Independent
+[correctness review](artifacts/20260908_correctness_review.md) closed five
+findings; [security review](artifacts/20260908_security_review.md) closed two.
+The broad WEPPpy gate passed: 7742 tests passed, 72 skipped. Documentation,
+spelling previews, links and both repository diff checks passed.
 
-## Supplied Test Panel
+## Remaining Scope
 
-The WBT directory `test_fixtures/staley_m3_resolution/` contains Moscow Mountain,
-Topanga, and user-labeled AZ ponderosa at both resolutions: 66 source files,
-including raw/conditioned DEMs, D8 routing, channel/subcatchment grids, raster
-and both projected/WGS84 vector boundaries, outlet records, and provenance.
-The manifest preserves hashes and grid metadata. TIFFs use ordinary Git storage because GitHub rejected new LFS objects on
-the public WBT fork. Run the fixture verifier after cloning. Stored requested and snapped
-outlet coordinates differ slightly within pairs; quantify these in the study.
+Package execution is complete; archived prompts record final outcomes.
+Production postfire integration, soil readiness, availability enforcement,
+deployment and vendoring remain separate work. No unresolved scientific
+choice blocks this engineering tool or its conservative resolution recommendation.

@@ -1,0 +1,1410 @@
+diff --git a/WBT/whitebox_tools.py b/WBT/whitebox_tools.py
+index c49578c..c8f2a3e 100755
+--- a/WBT/whitebox_tools.py
++++ b/WBT/whitebox_tools.py
+@@ -4990,6 +4990,21 @@ Okay, that's it for now.
+         if esri_pntr: args.append("--esri_pntr")
+         return self.run_tool('d8_flow_accumulation', args, callback)  # returns 1 if error
+ 
++    def d8_upstream_relief(self, dem, d8_pntr, output, area,
++                           elevation_units, coverage=None, callback=None):
++        """Compute upstream raw-elevation relief (m) and area (m2).
++
++        Requires aligned WGS84 UTM GeoTIFFs, WBT pointers and elevation_units='m'.
++        Outputs must be new paths. Optional coverage flags potential upstream
++        truncation (1) from edge/NoData adjacency. Includes the outlet cell.
++        """
++        args = [f"--dem={dem}", f"--d8_pntr={d8_pntr}",
++                f"--output={output}", f"--area={area}",
++                f"--elevation_units={elevation_units}"]
++        if coverage is not None:
++            args.append(f"--coverage={coverage}")
++        return self.run_tool("d8_upstream_relief", args, callback)
++
+     def d8_mass_flux(self, dem, loading, efficiency, absorption, output, callback=None):
+         """Performs a D8 mass flux calculation.
+ 
+diff --git a/whitebox-raster/src/geotiff/mod.rs b/whitebox-raster/src/geotiff/mod.rs
+index 7c30740..54b8c8f 100755
+--- a/whitebox-raster/src/geotiff/mod.rs
++++ b/whitebox-raster/src/geotiff/mod.rs
+@@ -661,10 +661,14 @@ pub fn read_geotiff<'a>(
+         }
+     };
+ 
+-    // let num_samples = match ifd_map.get(&277) {
+-    //     Some(ifd) => ifd.interpret_as_u16()[0],
+-    //     _ => 0,
+-    // };
++    // Preserve the source sample count so single-band consumers can reject
++    // multi-sample inputs instead of trusting the default RasterConfigs value.
++    configs.bands = match ifd_map.get(&277) {
++        Some(ifd) => u8::try_from(ifd.interpret_as_u16()[0]).map_err(|_| {
++            Error::new(ErrorKind::InvalidData, "Unsupported TIFF sample count.")
++        })?,
++        None => 1,
++    };
+ 
+     match ifd_map.get(&280) {
+         Some(ifd) => {
+@@ -791,6 +795,7 @@ pub fn read_geotiff<'a>(
+         _ => {}
+     }
+ 
++    configs.source_pixel_scale = Some(configs.model_pixel_scale);
+     if configs.model_tiepoint.len() == 6 {
+         // see if the model_pixel_scale tag was actually specified
+         if configs.model_pixel_scale[0] == 0.0 {
+@@ -4176,6 +4181,14 @@ pub fn write_geotiff<'a>(r: &'a mut Raster) -> Result<(), Error> {
+         }
+     }
+ 
++    // Persist tool provenance in the standard ImageDescription ASCII field.
++    if !r.configs.metadata.is_empty() {
++        let description = format!("{:<8}\0", r.configs.metadata.join("\n"));
++        ifd_entries.push(Entry::new(270, DT_ASCII, description.len() as u64,
++            larger_values_data.len() as u64));
++        for byte in description.as_bytes() { larger_values_data.write_u8(*byte)?; }
++    }
++
+     // Compression tag (259)
+     if use_compression {
+         ifd_entries.push(Entry::new(
+@@ -4213,8 +4226,12 @@ pub fn write_geotiff<'a>(r: &'a mut Raster) -> Result<(), Error> {
+         pi as u64,
+     ));
+ 
+-    // StripOffsets tag (273)
+-    if !is_big_tiff {
++    // StripOffsets tag (273): a single strip value fits inline in the IFD.
++    if r.configs.rows == 1 {
++        let offset = if use_compression { strip_offsets[0] } else { header_size };
++        ifd_entries.push(Entry::new(TAG_STRIPOFFSETS,
++            if is_big_tiff { DT_TIFF_LONG8 } else { DT_LONG }, 1, offset));
++    } else if !is_big_tiff {
+         ifd_entries.push(Entry::new(
+             TAG_STRIPOFFSETS,
+             DT_LONG,
+@@ -4292,8 +4309,13 @@ pub fn write_geotiff<'a>(r: &'a mut Raster) -> Result<(), Error> {
+     // RowsPerStrip tag (278)
+     ifd_entries.push(Entry::new(TAG_ROWSPERSTRIP, DT_SHORT, 1u64, 1u64));
+ 
+-    // StripByteCounts tag (279)
+-    if !is_big_tiff {
++    // StripByteCounts tag (279): a single strip byte count also fits inline.
++    if r.configs.rows == 1 {
++        let length = if use_compression { strip_byte_counts[0] }
++            else { r.configs.columns as u64 * total_bytes_per_pixel as u64 };
++        ifd_entries.push(Entry::new(TAG_STRIPBYTECOUNTS,
++            if is_big_tiff { DT_TIFF_LONG8 } else { DT_LONG }, 1, length));
++    } else if !is_big_tiff {
+         ifd_entries.push(Entry::new(
+             TAG_STRIPBYTECOUNTS,
+             DT_LONG,
+@@ -4980,6 +5002,8 @@ pub fn write_geotiff<'a>(r: &'a mut Raster) -> Result<(), Error> {
+     // Write the larger_values_data //
+     //////////////////////////////////
+     write_bytes(&mut writer, larger_values_data.get_inner())?;
++    // Surface final buffered I/O errors to fallible callers before publication.
++    writer.flush()?;
+ 
+     Ok(())
+ }
+diff --git a/whitebox-raster/src/lib.rs b/whitebox-raster/src/lib.rs
+index 83a8d49..e9ac0fe 100755
+--- a/whitebox-raster/src/lib.rs
++++ b/whitebox-raster/src/lib.rs
+@@ -1333,6 +1333,8 @@ pub struct RasterConfigs {
+     pub coordinate_ref_system_wkt: String,
+     pub model_tiepoint: Vec<f64>,
+     pub model_pixel_scale: [f64; 3],
++    /// Original GeoTIFF scale before legacy decoder assumptions, when read.
++    pub source_pixel_scale: Option<[f64; 3]>,
+     pub model_transformation: [f64; 16],
+     pub geo_key_directory: Vec<u16>,
+     pub geo_double_params: Vec<f64>,
+@@ -1372,6 +1374,7 @@ impl Default for RasterConfigs {
+             coordinate_ref_system_wkt: "not specified".to_string(),
+             model_tiepoint: vec![],
+             model_pixel_scale: [0f64; 3],
++            source_pixel_scale: None,
+             model_transformation: [0f64; 16],
+             geo_key_directory: vec![],
+             geo_double_params: vec![],
+diff --git a/whitebox-tools-app/src/tools/hydro_analysis/mod.rs b/whitebox-tools-app/src/tools/hydro_analysis/mod.rs
+index 443f372..b86698e 100755
+--- a/whitebox-tools-app/src/tools/hydro_analysis/mod.rs
++++ b/whitebox-tools-app/src/tools/hydro_analysis/mod.rs
+@@ -114,3 +114,6 @@ pub use self::topaz_condition_dem::TopazConditionDem;
+ pub use self::unnest_basins::UnnestBasins;
+ pub use self::upslope_depression_storage::UpslopeDepressionStorage;
+ pub use self::watershed::Watershed;
++
++mod d8_upstream_relief;
++pub use self::d8_upstream_relief::D8UpstreamRelief;
+diff --git a/whitebox-tools-app/src/tools/mod.rs b/whitebox-tools-app/src/tools/mod.rs
+index 65d27ec..d8d1991 100755
+--- a/whitebox-tools-app/src/tools/mod.rs
++++ b/whitebox-tools-app/src/tools/mod.rs
+@@ -164,6 +164,7 @@ impl ToolManager {
+         tool_names.push("BurnStreamsAtRoads".to_string());
+         tool_names.push("D8FlowAccumulation".to_string());
+         tool_names.push("D8MassFlux".to_string());
++        tool_names.push("D8UpstreamRelief".to_string());
+         tool_names.push("D8Pointer".to_string());
+         tool_names.push("DepthInSink".to_string());
+         tool_names.push("DInfFlowAccumulation".to_string());
+@@ -702,6 +703,7 @@ impl ToolManager {
+             "burnstreamsatroads" => Some(Box::new(hydro_analysis::BurnStreamsAtRoads::new())),
+             "d8flowaccumulation" => Some(Box::new(hydro_analysis::D8FlowAccumulation::new())),
+             "d8massflux" => Some(Box::new(hydro_analysis::D8MassFlux::new())),
++            "d8upstreamrelief" => Some(Box::new(hydro_analysis::D8UpstreamRelief::new())),
+             "d8pointer" => Some(Box::new(hydro_analysis::D8Pointer::new())),
+             "depthinsink" => Some(Box::new(hydro_analysis::DepthInSink::new())),
+             "dinfflowaccumulation" => Some(Box::new(hydro_analysis::DInfFlowAccumulation::new())),
+diff --git a/whitebox_tools.py b/whitebox_tools.py
+index c49578c..c8f2a3e 100755
+--- a/whitebox_tools.py
++++ b/whitebox_tools.py
+@@ -4990,6 +4990,21 @@ Okay, that's it for now.
+         if esri_pntr: args.append("--esri_pntr")
+         return self.run_tool('d8_flow_accumulation', args, callback)  # returns 1 if error
+ 
++    def d8_upstream_relief(self, dem, d8_pntr, output, area,
++                           elevation_units, coverage=None, callback=None):
++        """Compute upstream raw-elevation relief (m) and area (m2).
++
++        Requires aligned WGS84 UTM GeoTIFFs, WBT pointers and elevation_units='m'.
++        Outputs must be new paths. Optional coverage flags potential upstream
++        truncation (1) from edge/NoData adjacency. Includes the outlet cell.
++        """
++        args = [f"--dem={dem}", f"--d8_pntr={d8_pntr}",
++                f"--output={output}", f"--area={area}",
++                f"--elevation_units={elevation_units}"]
++        if coverage is not None:
++            args.append(f"--coverage={coverage}")
++        return self.run_tool("d8_upstream_relief", args, callback)
++
+     def d8_mass_flux(self, dem, loading, efficiency, absorption, output, callback=None):
+         """Performs a D8 mass flux calculation.
+ 
+diff --git a/whitebox-tools-app/src/tools/hydro_analysis/d8_upstream_relief.rs b/whitebox-tools-app/src/tools/hydro_analysis/d8_upstream_relief.rs
+new file mode 100644
+index 0000000..f95c018
+--- /dev/null
++++ b/whitebox-tools-app/src/tools/hydro_analysis/d8_upstream_relief.rs
+@@ -0,0 +1,699 @@
++// Independently derived upstream maximum/area traversal. License: MIT.
++use std::collections::VecDeque;
++use std::io::{Error, ErrorKind};
++use std::path::{Path, PathBuf};
++use std::time::Instant;
++
++use crate::tools::*;
++use whitebox_raster::{DataType, PhotometricInterpretation, Raster, RasterConfigs};
++
++/// Maximum upstream raw elevation minus local elevation, using supplied WBT D8
++/// routing. Includes each cell in its upstream area. See docs/d8_upstream_relief.md.
++pub struct D8UpstreamRelief {
++    parameters: Vec<ToolParameter>,
++}
++
++fn invalid(message: impl Into<String>) -> Error {
++    Error::new(ErrorKind::InvalidInput, message.into())
++}
++
++impl D8UpstreamRelief {
++    pub fn new() -> Self {
++        let parameters = [
++            ("dem", "Raw elevation DEM", false, false),
++            ("d8_pntr", "WBT D8 pointer", false, false),
++            ("output", "Vertical relief (m)", true, false),
++            ("area", "Upstream area (m2)", true, false),
++            (
++                "coverage",
++                "Potential upstream truncation (0/1)",
++                true,
++                true,
++            ),
++        ]
++        .iter()
++        .map(|(flag, description, output, optional)| ToolParameter {
++            name: description.to_string(),
++            flags: vec![format!("--{}", flag)],
++            description: description.to_string(),
++            parameter_type: if *output {
++                ParameterType::NewFile(ParameterFileType::Raster)
++            } else {
++                ParameterType::ExistingFile(ParameterFileType::Raster)
++            },
++            default_value: None,
++            optional: *optional,
++        })
++        .chain(std::iter::once(ToolParameter {
++            name: "Elevation units declaration".into(),
++            flags: vec!["--elevation_units".into()],
++            description: "Required declaration that raw elevations are meters: m".into(),
++            parameter_type: ParameterType::OptionList(vec!["m".into()]),
++            default_value: None,
++            optional: false,
++        }))
++        .collect();
++        Self { parameters }
++    }
++}
++
++#[derive(Default)]
++struct Inputs {
++    dem: String,
++    pointer: String,
++    relief: String,
++    area: String,
++    coverage: String,
++    units: String,
++}
++
++fn unquote(value: &str) -> &str {
++    if value.len() >= 2
++        && ((value.starts_with('\'') && value.ends_with('\''))
++            || (value.starts_with('"') && value.ends_with('"')))
++    {
++        &value[1..value.len() - 1]
++    } else {
++        value
++    }
++}
++
++fn parse(args: &[String]) -> Result<Inputs, Error> {
++    let mut inputs = Inputs::default();
++    let mut i = 0;
++    while i < args.len() {
++        let (flag, inline) = match args[i].split_once('=') {
++            Some((key, value)) => (key, Some(value)),
++            None => (args[i].as_str(), None),
++        };
++        let slot = match flag.trim_start_matches('-').to_lowercase().as_str() {
++            "dem" => &mut inputs.dem,
++            "d8_pntr" => &mut inputs.pointer,
++            "output" | "o" => &mut inputs.relief,
++            "area" => &mut inputs.area,
++            "coverage" => &mut inputs.coverage,
++            "elevation_units" => &mut inputs.units,
++            _ => return Err(invalid(format!("Unknown argument: {}", flag))),
++        };
++        if !slot.is_empty() {
++            return Err(invalid(format!("Duplicate argument: {}", flag)));
++        }
++        let value = match inline {
++            Some(value) => value,
++            None => {
++                i += 1;
++                args.get(i)
++                    .ok_or_else(|| invalid(format!("Missing value for {}", flag)))?
++            }
++        };
++        if value.is_empty() || value.starts_with("--") {
++            return Err(invalid(format!("Missing value for {}", flag)));
++        }
++        *slot = unquote(value).to_string();
++        i += 1;
++    }
++    if inputs.dem.is_empty()
++        || inputs.pointer.is_empty()
++        || inputs.relief.is_empty()
++        || inputs.area.is_empty()
++    {
++        return Err(invalid(
++            "Required: --dem, --d8_pntr, --output, --area, --elevation_units=m",
++        ));
++    }
++    if inputs.units != "m" {
++        return Err(invalid(
++            "Declare raw elevation units with --elevation_units=m; other units are unsupported.",
++        ));
++    }
++    Ok(inputs)
++}
++
++fn resolved(name: &str, wd: &str) -> Result<PathBuf, Error> {
++    let path = Path::new(name);
++    let joined = if path.is_absolute() {
++        path.to_path_buf()
++    } else {
++        Path::new(wd).join(path)
++    };
++    let extension = joined
++        .extension()
++        .and_then(|s| s.to_str())
++        .unwrap_or("")
++        .to_lowercase();
++    if extension != "tif" && extension != "tiff" {
++        return Err(invalid("D8UpstreamRelief supports .tif/.tiff files only."));
++    }
++    Ok(joined)
++}
++
++fn new_output(path: &Path) -> Result<PathBuf, Error> {
++    match std::fs::symlink_metadata(path) {
++        Ok(_) => {
++            return Err(invalid(format!(
++                "Output already exists: {}",
++                path.display()
++            )))
++        }
++        Err(error) if error.kind() == ErrorKind::NotFound => (),
++        Err(error) => return Err(error),
++    }
++    let parent = path
++        .parent()
++        .filter(|p| !p.as_os_str().is_empty())
++        .unwrap_or(Path::new("."));
++    let parent = parent.canonicalize()?;
++    let name = path
++        .file_name()
++        .ok_or_else(|| invalid("Output needs a filename."))?;
++    Ok(parent.join(name))
++}
++
++// Private staging plus hard-link publication prevents concurrent writers from
++// replacing an existing destination. Each output is published independently.
++fn publish(out: &mut Raster, destination: &Path) -> Result<(), Error> {
++    use std::sync::atomic::{AtomicU64, Ordering};
++    static NEXT: AtomicU64 = AtomicU64::new(0);
++    let parent = destination
++        .parent()
++        .ok_or_else(|| invalid("Output needs parent."))?;
++    let mut directory;
++    loop {
++        directory = parent.join(format!(
++            ".d8-relief-{}-{}",
++            std::process::id(),
++            NEXT.fetch_add(1, Ordering::Relaxed)
++        ));
++        let mut builder = std::fs::DirBuilder::new();
++        #[cfg(unix)]
++        {
++            use std::os::unix::fs::DirBuilderExt;
++            builder.mode(0o700);
++        }
++        match builder.create(&directory) {
++            Ok(()) => break,
++            Err(error) if error.kind() == ErrorKind::AlreadyExists => continue,
++            Err(error) => return Err(error),
++        }
++    }
++    let staged = directory.join("output.tif");
++    out.file_name = staged
++        .to_str()
++        .ok_or_else(|| invalid("Non-UTF8 staging path."))?
++        .to_string();
++    let result = whitebox_raster::geotiff::write_geotiff(out)
++        .and_then(|_| std::fs::hard_link(&staged, destination));
++    let cleanup = std::fs::remove_dir_all(&directory);
++    if let Err(error) = &cleanup {
++        eprintln!(
++            "D8UpstreamRelief staging cleanup failed for {}: {}",
++            directory.display(),
++            error
++        );
++    }
++    result.and(cleanup)
++}
++
++fn meters(units: &str) -> bool {
++    matches!(
++        units.to_lowercase().as_str(),
++        "m" | "meter" | "meters" | "metre" | "metres" | "linear_meter"
++    )
++}
++
++fn validate_grid(c: &RasterConfigs) -> Result<(), Error> {
++    if !((32601..=32660).contains(&c.epsg_code) || (32701..=32760).contains(&c.epsg_code)) {
++        return Err(invalid(
++            "Only WGS84 UTM meter grids (EPSG:32601-32660/32701-32760) are supported.",
++        ));
++    }
++    let point_pixels = c
++        .geo_key_directory
++        .get(4..)
++        .unwrap_or(&[])
++        .chunks_exact(4)
++        .any(|key| key[0] == 1025 && (key[1] != 0 || key[2] != 1 || key[3] != 1));
++    if c.bands != 1
++        || point_pixels
++        || !c.pixel_is_area
++        || c.model_transformation.iter().any(|v| *v != 0.0)
++    {
++        return Err(invalid(
++            "Require a single-band, north-up pixel-area grid without a transformation matrix.",
++        ));
++    }
++    if c.xy_units != "not specified" && !meters(&c.xy_units) {
++        return Err(invalid("Horizontal units must be meters."));
++    }
++    let source_scale = c
++        .source_pixel_scale
++        .ok_or_else(|| invalid("Original GeoTIFF scale unavailable."))?;
++    if source_scale[0] <= 0.0 || source_scale[1] <= 0.0 {
++        return Err(invalid(
++            "Missing or nonpositive original GeoTIFF pixel scale.",
++        ));
++    }
++    if c.rows == 0
++        || c.columns == 0
++        || ![
++            c.north,
++            c.south,
++            c.east,
++            c.west,
++            c.resolution_x,
++            c.resolution_y,
++        ]
++        .iter()
++        .all(|x| x.is_finite())
++        || c.resolution_x <= 0.0
++        || c.resolution_y <= 0.0
++        || c.north < c.south
++        || c.east < c.west
++    {
++        return Err(invalid("Invalid raster extent, size or spacing."));
++    }
++    // The owned GeoTIFF reader stores the last pixel origin as east/south.
++    // Require the conventional single top-left tiepoint, avoiding its general
++    // tiepoint-offset path; compare input grids using the same representation.
++    if c.model_tiepoint.len() != 6 || c.model_tiepoint[0] != 0.0 || c.model_tiepoint[1] != 0.0 {
++        return Err(invalid("Require a single top-left GeoTIFF tiepoint."));
++    }
++    let width = c.resolution_x * c.columns.saturating_sub(1) as f64;
++    let height = c.resolution_y * c.rows.saturating_sub(1) as f64;
++    if ((c.east - c.west) - width).abs() > 1e-8 * c.resolution_x
++        || ((c.north - c.south) - height).abs() > 1e-8 * c.resolution_y
++    {
++        return Err(invalid("Raster extent does not agree with cell spacing."));
++    }
++    Ok(())
++}
++
++const OFFSETS: [(isize, isize); 8] = [
++    (-1, 1),
++    (0, 1),
++    (1, 1),
++    (1, 0),
++    (1, -1),
++    (0, -1),
++    (-1, -1),
++    (-1, 0),
++];
++const NONE: usize = usize::MAX;
++
++#[derive(Debug)]
++struct Terrain {
++    relief: Vec<f64>,
++    count: Vec<u64>,
++    coverage: Vec<u8>,
++}
++
++// Kahn traversal: every valid edge is visited once. Maxima and counts combine
++// associatively, so queue order cannot change the integer area count or maximum.
++fn accumulate(
++    z: &[f64],
++    pointers: &[f64],
++    valid: &[bool],
++    rows: usize,
++    cols: usize,
++) -> Result<Terrain, Error> {
++    let n = rows
++        .checked_mul(cols)
++        .ok_or_else(|| invalid("Raster size overflow."))?;
++    if z.len() != n || pointers.len() != n || valid.len() != n {
++        return Err(invalid("Array size mismatch."));
++    }
++    let mut downstream = vec![NONE; n];
++    let mut indegree = vec![0u8; n];
++    let mut maximum = z.to_vec();
++    let mut count = vec![0u64; n];
++    let mut coverage = vec![255u8; n];
++    for cell in 0..n {
++        if !valid[cell] {
++            continue;
++        }
++        count[cell] = 1;
++        coverage[cell] = 0;
++        let row = (cell / cols) as isize;
++        let col = (cell % cols) as isize;
++        for (dr, dc) in OFFSETS {
++            let (r, c) = (row + dr, col + dc);
++            if r < 0
++                || c < 0
++                || r >= rows as isize
++                || c >= cols as isize
++                || !valid[r as usize * cols + c as usize]
++            {
++                coverage[cell] = 1;
++            }
++        }
++        let p = pointers[cell];
++        if !z[cell].is_finite() || !p.is_finite() {
++            return Err(invalid("Nonfinite valid raster value."));
++        }
++        if p == 0.0 {
++            continue;
++        }
++        let d = match p {
++            1.0 => 0,
++            2.0 => 1,
++            4.0 => 2,
++            8.0 => 3,
++            16.0 => 4,
++            32.0 => 5,
++            64.0 => 6,
++            128.0 => 7,
++            _ => {
++                return Err(invalid(format!(
++                    "Invalid WBT D8 pointer {} at row {}, column {}",
++                    p, row, col
++                )))
++            }
++        };
++        let (r, c) = (row + OFFSETS[d].0, col + OFFSETS[d].1);
++        if r >= 0 && c >= 0 && r < rows as isize && c < cols as isize {
++            let target = r as usize * cols + c as usize;
++            if valid[target] {
++                downstream[cell] = target;
++                indegree[target] += 1;
++            }
++        }
++    }
++    let mut queue = VecDeque::new();
++    for cell in 0..n {
++        if valid[cell] && indegree[cell] == 0 {
++            queue.push_back(cell);
++        }
++    }
++    let mut visited = 0;
++    while let Some(cell) = queue.pop_front() {
++        visited += 1;
++        let target = downstream[cell];
++        if target == NONE {
++            continue;
++        }
++        maximum[target] = maximum[target].max(maximum[cell]);
++        count[target] += count[cell];
++        coverage[target] |= coverage[cell];
++        indegree[target] -= 1;
++        if indegree[target] == 0 {
++            queue.push_back(target);
++        }
++    }
++    if visited != valid.iter().filter(|v| **v).count() {
++        return Err(invalid("Cycle in supplied D8 routing."));
++    }
++    for cell in 0..n {
++        maximum[cell] = if valid[cell] {
++            maximum[cell] - z[cell]
++        } else {
++            -32768.0
++        };
++        if valid[cell] && !maximum[cell].is_finite() {
++            return Err(invalid("Relief overflow."));
++        }
++    }
++    Ok(Terrain {
++        relief: maximum,
++        count,
++        coverage,
++    })
++}
++
++impl WhiteboxTool for D8UpstreamRelief {
++    fn get_source_file(&self) -> String {
++        file!().into()
++    }
++    fn get_tool_name(&self) -> String {
++        "D8UpstreamRelief".into()
++    }
++    fn get_tool_description(&self) -> String {
++        "Computes maximum upstream raw elevation minus local elevation and contributing area using supplied WBT D8 routing.".into()
++    }
++    fn get_tool_parameters(&self) -> String {
++        format!(
++            "{{\"parameters\":{}}}",
++            serde_json::to_string(&self.parameters).expect("serializable tool parameters")
++        )
++    }
++    fn get_example_usage(&self) -> String {
++        "whitebox_tools -r=D8UpstreamRelief --dem=raw.tif --d8_pntr=pointer.tif --output=height.tif --area=area.tif --elevation_units=m --coverage=coverage.tif".into()
++    }
++    fn get_toolbox(&self) -> String {
++        "Hydrological Analysis".into()
++    }
++    fn run<'a>(
++        &self,
++        args: Vec<String>,
++        working_directory: &'a str,
++        verbose: bool,
++    ) -> Result<(), Error> {
++        let input = parse(&args)?;
++        let dem_path = resolved(&input.dem, working_directory)?.canonicalize()?;
++        let pointer_path = resolved(&input.pointer, working_directory)?.canonicalize()?;
++        let mut outputs = vec![
++            new_output(&resolved(&input.relief, working_directory)?)?,
++            new_output(&resolved(&input.area, working_directory)?)?,
++        ];
++        if !input.coverage.is_empty() {
++            outputs.push(new_output(&resolved(&input.coverage, working_directory)?)?);
++        }
++        for (i, path) in outputs.iter().enumerate() {
++            if path == &dem_path || path == &pointer_path || outputs[..i].contains(path) {
++                return Err(invalid(
++                    "Output paths must be distinct from inputs and each other.",
++                ));
++            }
++        }
++        let dem = Raster::new(
++            dem_path
++                .to_str()
++                .ok_or_else(|| invalid("Non-UTF8 DEM path."))?,
++            "r",
++        )?;
++        let pointer = Raster::new(
++            pointer_path
++                .to_str()
++                .ok_or_else(|| invalid("Non-UTF8 pointer path."))?,
++            "r",
++        )?;
++        let c = &dem.configs;
++        let p = &pointer.configs;
++        validate_grid(c)?;
++        validate_grid(p)?;
++        if c.z_units != "not specified" && !meters(&c.z_units) {
++            return Err(invalid(
++                "DEM vertical units contradict --elevation_units=m.",
++            ));
++        }
++        if c.rows != p.rows
++            || c.columns != p.columns
++            || c.epsg_code != p.epsg_code
++            || [
++                c.north,
++                c.south,
++                c.east,
++                c.west,
++                c.resolution_x,
++                c.resolution_y,
++            ] != [
++                p.north,
++                p.south,
++                p.east,
++                p.west,
++                p.resolution_x,
++                p.resolution_y,
++            ]
++        {
++            return Err(invalid("DEM and pointer grids must align exactly."));
++        }
++        let n = c
++            .rows
++            .checked_mul(c.columns)
++            .ok_or_else(|| invalid("Raster size overflow."))?;
++        let mut z = Vec::with_capacity(n);
++        let mut flow = Vec::with_capacity(n);
++        let mut valid = Vec::with_capacity(n);
++        for row in 0..c.rows as isize {
++            for col in 0..c.columns as isize {
++                let a = dem.get_value(row, col);
++                let b = pointer.get_value(row, col);
++                let an = a == c.nodata || (c.nodata.is_nan() && a.is_nan());
++                let bn = b == p.nodata || (p.nodata.is_nan() && b.is_nan());
++                if an != bn {
++                    return Err(invalid("DEM and pointer NoData masks must match exactly."));
++                }
++                z.push(a);
++                flow.push(b);
++                valid.push(!an);
++            }
++        }
++        if !valid.iter().any(|v| *v) {
++            return Err(invalid("No valid terrain cells."));
++        }
++        let start = Instant::now();
++        let terrain = accumulate(&z, &flow, &valid, c.rows, c.columns)?;
++        let cell_area = c.resolution_x * c.resolution_y;
++        if !(cell_area * n as f64).is_finite() {
++            return Err(invalid("Area overflow."));
++        }
++        let flagged = terrain.coverage.iter().filter(|v| **v == 1).count();
++        let elapsed = start.elapsed();
++        for (kind, path) in outputs.iter().enumerate() {
++            let mut out = Raster::initialize_using_file(
++                path.to_str()
++                    .ok_or_else(|| invalid("Non-UTF8 output path."))?,
++                &dem,
++            );
++            out.configs.data_type = if kind == 2 {
++                DataType::U8
++            } else {
++                DataType::F64
++            };
++            out.configs.nodata = if kind == 2 { 255.0 } else { -32768.0 };
++            // Regenerate UTM keys so area/coverage do not inherit elevation units.
++            out.configs.geo_key_directory.clear();
++            out.configs.geo_double_params.clear();
++            out.configs.geo_ascii_params.clear();
++            out.configs.photometric_interp = PhotometricInterpretation::Continuous;
++            out.configs.z_units = if kind == 0 {
++                "meters".into()
++            } else {
++                "not specified".into()
++            };
++            out.configs.minimum = f64::INFINITY;
++            out.configs.maximum = f64::NEG_INFINITY;
++            for row in 0..c.rows {
++                for col in 0..c.columns {
++                    let i = row * c.columns + col;
++                    let value = match kind {
++                        0 => terrain.relief[i],
++                        1 => {
++                            if valid[i] {
++                                terrain.count[i] as f64 * cell_area
++                            } else {
++                                -32768.0
++                            }
++                        }
++                        _ => terrain.coverage[i] as f64,
++                    };
++                    if value != out.configs.nodata {
++                        out.configs.minimum = out.configs.minimum.min(value);
++                        out.configs.maximum = out.configs.maximum.max(value);
++                    }
++                    out.set_value(row as isize, col as isize, value);
++                }
++            }
++            for entry in [
++                "Created by D8UpstreamRelief".to_string(),
++                "Relief: maximum upstream raw elevation minus local elevation; includes local cell".into(),
++                format!("Raw DEM: {}; elevation_units=m",dem_path.display()),
++                format!("Pointer: {}; WBT D8 encoding; 0=terminal",pointer_path.display()),
++                "Area: contributing cell count including local cell times dx*dy; m2".into(),
++                format!("Potential truncation: D8 edge/NoData adjacency propagated downstream; flagged cells={}",flagged),
++                format!("Output quantity: {}",["relief (m)","area (m2)","potential truncation (0/1)"][kind]),
++                format!("Traversal elapsed seconds: {}",elapsed.as_secs_f64()),
++            ] {out.add_metadata_entry(entry);}
++            publish(&mut out, path)?;
++        }
++        if verbose {
++            println!("D8UpstreamRelief complete: {} cells; {} potentially truncated cells; traversal {:?}",n,flagged,elapsed);
++        }
++        Ok(())
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    #[test]
++    fn analytical_chains_nested_outlets_and_conditioning() {
++        for (z, expected) in [
++            (vec![130., 120., 100.], vec![0., 10., 30.]),
++            (vec![110., 130., 100.], vec![0., 0., 30.]),
++            (vec![130., 90., 100.], vec![0., 40., 30.]),
++            (vec![100., 100., 100.], vec![0., 0., 0.]),
++        ] {
++            let t = accumulate(&z, &[2., 2., 0.], &[true; 3], 1, 3).unwrap();
++            assert_eq!(t.relief, expected);
++            assert_eq!(t.count, vec![1, 2, 3]);
++        }
++    }
++    #[test]
++    fn unequal_tributaries_and_coverage_propagation() {
++        let mut z = vec![100.; 25];
++        let mut p = vec![0.; 25];
++        z[6] = 140.;
++        z[8] = 170.;
++        z[12] = 120.;
++        p[6] = 4.;
++        p[8] = 16.;
++        p[12] = 8.;
++        let t = accumulate(&z, &p, &[true; 25], 5, 5).unwrap();
++        assert_eq!(t.count[12], 3);
++        assert_eq!(t.relief[12], 50.);
++        assert_eq!(t.count[17], 4);
++        assert_eq!(t.relief[17], 70.);
++        assert_eq!(t.coverage[12], 0);
++        p[0] = 4.;
++        let t = accumulate(&z, &p, &[true; 25], 5, 5).unwrap();
++        assert_eq!(t.coverage[12], 1);
++        assert_eq!(t.coverage[17], 1);
++    }
++    #[test]
++    fn invalid_cycles_values_and_nodata_boundary() {
++        assert!(accumulate(&[2., 1.], &[2., 32.], &[true; 2], 1, 2)
++            .unwrap_err()
++            .to_string()
++            .contains("Cycle"));
++        for p in [3., -1., 1.5, f64::INFINITY] {
++            assert!(accumulate(&[1.], &[p], &[true], 1, 1).is_err());
++        }
++        let t = accumulate(&[2., -9999.], &[2., -9999.], &[true, false], 1, 2).unwrap();
++        assert_eq!(t.relief, vec![0., -32768.]);
++        assert_eq!(t.count, vec![1, 0]);
++    }
++    #[test]
++    fn publication_never_replaces_existing_destination_and_propagates_io_error() {
++        let root =
++            std::env::temp_dir().join(format!("terrain-publish-test-{}", std::process::id()));
++        std::fs::create_dir(&root).unwrap();
++        let destination = root.join("existing.tif");
++        std::fs::write(&destination, b"preserve").unwrap();
++        let mut configs = RasterConfigs::default();
++        configs.rows = 1;
++        configs.columns = 1;
++        configs.north = 1.;
++        configs.south = 0.;
++        configs.east = 1.;
++        configs.west = 0.;
++        configs.resolution_x = 1.;
++        configs.resolution_y = 1.;
++        configs.data_type = DataType::F64;
++        configs.photometric_interp = PhotometricInterpretation::Continuous;
++        let mut out = Raster::initialize_using_config("unused.tif", &configs);
++        out.set_value(0, 0, 1.);
++        assert_eq!(
++            publish(&mut out, &destination).unwrap_err().kind(),
++            ErrorKind::AlreadyExists
++        );
++        assert_eq!(std::fs::read(&destination).unwrap(), b"preserve");
++        assert!(publish(&mut out, &root.join("missing").join("out.tif")).is_err());
++        // A writer-level failure (unknown storage type) must not publish a file.
++        out.configs.data_type = DataType::Unknown;
++        assert!(publish(&mut out, &root.join("failed.tif")).is_err());
++        assert!(!root.join("failed.tif").exists());
++        assert_eq!(std::fs::read_dir(&root).unwrap().count(), 1);
++        std::fs::remove_dir_all(root).unwrap();
++    }
++
++    #[test]
++    fn parser_rejects_missing_unknown_and_duplicate() {
++        for args in [
++            vec!["--dem"],
++            vec!["--unknown=x"],
++            vec!["--dem=a", "--dem=b"],
++        ] {
++            assert!(parse(&args.into_iter().map(String::from).collect::<Vec<_>>()).is_err());
++        }
++    }
++}
+diff --git a/tools/staley_m3_resolution_study.py b/tools/staley_m3_resolution_study.py
+new file mode 100644
+index 0000000..b977fb9
+--- /dev/null
++++ b/tools/staley_m3_resolution_study.py
+@@ -0,0 +1,241 @@
++#!/usr/bin/env python3
++"""Reproducible terrain study. Bulk routing/traversal uses the rebuilt owned WBT.
++
++Requires installed numpy, rasterio, matplotlib. All outputs go to a new directory.
++"""
++import argparse
++import csv
++import hashlib
++import json
++import math
++import os
++from pathlib import Path
++import platform
++import subprocess
++import time
++
++import numpy as np
++import rasterio
++from rasterio.warp import reproject, Resampling
++import matplotlib
++matplotlib.use('Agg')
++import matplotlib.pyplot as plt
++
++SITES = ['moscow_mountain', 'topanga', 'az_ponderosa']
++COEFFICIENTS = [(15, -3.71, .32, .33, .47), (30, -3.79, .21, .19, .36), (60, -3.46, .14, .10, .18)]
++
++
++def csv_write(path, rows):
++    with path.open('w') as out:
++        writer = csv.DictWriter(out, fieldnames=list(rows[0]))
++        writer.writeheader(); writer.writerows(rows)
++
++
++def read(path):
++    with rasterio.open(path) as ds:
++        return ds.read(1), ds.profile
++
++
++def write(path, data, profile, nodata=-32768):
++    profile = dict(profile, dtype=data.dtype, count=1, nodata=nodata)
++    with rasterio.open(path, 'w', **profile) as out:
++        out.write(data, 1)
++
++
++class Study:
++    def __init__(self, root, binary, output):
++        self.root, self.binary, self.output = root, binary, output
++        self.commands = []; self.timings = []; self.records = []; self.scenarios = []
++        self.grids = {}; self.unavailable = []
++
++    def run(self, tool, **params):
++        command = [str(self.binary), f'-r={tool}', '--compress_rasters=false', *[f'--{key}={value}' for key,value in params.items()]]
++        self.commands.append(command)
++        stamp = len(self.commands)
++        memory_path = self.output/f'process-{stamp}.time'
++        start = time.perf_counter()
++        result = subprocess.run(['/usr/bin/time', '-f', '%e,%M', '-o', str(memory_path), *command],
++                                capture_output=True, text=True, env=dict(os.environ, WBT_MAX_PROCS='12'))
++        (self.output/f'process-{stamp}.log').write_text(result.stdout+result.stderr)
++        if result.returncode:
++            raise RuntimeError(f'{tool} failed: {result.stdout}{result.stderr}')
++        wall, rss = memory_path.read_text().strip().split(',')
++        self.timings.append(dict(tool=tool,wall_seconds=time.perf_counter()-start,
++                                 time_wall_seconds=float(wall),peak_rss_kib=int(rss),command_index=stamp))
++
++    def terrain(self, site, kind, resolution, dem, pointer):
++        directory = self.output/site/kind/resolution
++        directory.mkdir(parents=True, exist_ok=True)
++        paths = dict(output=directory/'h.tif', area=directory/'a.tif', coverage=directory/'c.tif')
++        self.run('D8UpstreamRelief', dem=dem,d8_pntr=pointer,elevation_units='m',**paths)
++        z,profile=read(dem); area,_=read(paths['area']);h,_=read(paths['output']);coverage,_=read(paths['coverage'])
++        grid=dict(dem=dem,pointer=pointer,z=z,area=area,h=h,coverage=coverage,profile=profile,directory=directory)
++        self.grids[(site,kind,resolution)]=grid
++        return grid
++
++    def catchment(self, grid, row, col, label):
++        pour=np.zeros(grid['z'].shape,dtype='float32'); pour[row,col]=1
++        pourpath=grid['directory']/f'{label}-pour.tif'; maskpath=grid['directory']/f'{label}-basin.tif'
++        write(pourpath,pour,grid['profile'],nodata=0)
++        self.run('Watershed',d8_pntr=grid['pointer'],pour_pts=pourpath,output=maskpath)
++        mask,_=read(maskpath)
++        mask=mask==1
++        expected=grid['area'][row,col]/abs(grid['profile']['transform'].a*grid['profile']['transform'].e)
++        if abs(mask.sum()-expected)>1e-6:
++            raise ValueError(f'Catchment cell count disagrees: {mask.sum()} versus {expected}')
++        return mask
++
++    def snap(self, grid, x,y):
++        transform=grid['profile']['transform']; rr,cc=np.nonzero(grid['area']>=5000)
++        xx=transform.c+(cc+.5)*transform.a; yy=transform.f+(rr+.5)*transform.e
++        distances=(xx-x)**2+(yy-y)**2
++        if distances.size == 0: return None
++        i=int(np.argmin(distances))
++        if distances[i]>90**2: return None
++        return int(rr[i]),int(cc[i]),math.sqrt(float(distances[i]))
++
++    def coordinates(self, grid,row,col):
++        return rasterio.transform.xy(grid['profile']['transform'],row,col)
++
++    def compare(self, site, kind, label, ref, other, rc10, rc30, snap_distance):
++        r,c=rc10; rr,cc=rc30
++        mask10=self.catchment(ref,r,c,f'{label}-10');mask30=self.catchment(other,rr,cc,f'{label}-30')
++        # Nearest raster overlay on the fine reference grid for diagnostic overlap.
++        projected=np.zeros(mask10.shape,dtype='uint8')
++        reproject(mask30.astype('uint8'),projected,src_transform=other['profile']['transform'],
++                  src_crs=other['profile']['crs'],dst_transform=ref['profile']['transform'],
++                  dst_crs=ref['profile']['crs'],resampling=Resampling.nearest)
++        intersection=np.count_nonzero(mask10 & (projected==1))*100
++        a10=float(ref['area'][r,c]);a30=float(other['area'][rr,cc])
++        overlap=intersection/(a10+a30-intersection)
++        h10=float(ref['h'][r,c]);h30=float(other['h'][rr,cc]);t10=h10/math.sqrt(a10);t30=h30/math.sqrt(a30)
++        x10,y10=self.coordinates(ref,r,c);x30,y30=self.coordinates(other,rr,cc)
++        record=dict(site=site,comparison=kind,outlet=label,row10=r,col10=c,row30=rr,col30=cc,
++                    x10=x10,y10=y10,x30=x30,y30=y30,snap_distance_m=snap_distance,
++                    actual_center_offset_m=math.hypot(x10-x30,y10-y30),boundary_iou=overlap,
++                    area10_m2=a10,area30_m2=a30,area_change_pct=100*(a30/a10-1),
++                    cells10=int(mask10.sum()),cells30=int(mask30.sum()),
++                    outlet_z10=float(ref['z'][r,c]),outlet_z30=float(other['z'][rr,cc]),
++                    maximum_z10=float(ref['z'][mask10].max()),maximum_z30=float(other['z'][mask30].max()),
++                    h10_m=h10,h30_m=h30,t10=t10,t30=t30,t_change_pct=100*(t30/t10-1) if t10 else None,
++                    coverage10=int(ref['coverage'][r,c]),coverage30=int(other['coverage'][rr,cc]))
++        # Independently sampled raster extrema validate the bulk output at every study outlet.
++        assert math.isclose(h10,record['maximum_z10']-record['outlet_z10'],rel_tol=1e-9,abs_tol=1e-9)
++        assert math.isclose(h30,record['maximum_z30']-record['outlet_z30'],rel_tol=1e-9,abs_tol=1e-9)
++        changes=[];threshold_changes=[]
++        for duration,b,ct,cf,cs in COEFFICIENTS:
++            for f in [.25,.75]:
++                for s in [.25,.75]:
++                    k10=ct*t10+cf*f+cs*s;k30=ct*t30+cf*f+cs*s
++                    for probability in [.25,.5,.75]:
++                        rain=(math.log(probability/(1-probability))-b)/k10
++                        x=b+rain*k30
++                        p30=1/(1+math.exp(-x))
++                        i10=rain/(duration/60)
++                        i30=(math.log(probability/(1-probability))-b)/k30/(duration/60)
++                        change=100*(p30-probability);threshold_pct=100*(i30/i10-1)
++                        changes.append(abs(change))
++                        if probability in [.5,.75]:threshold_changes.append(abs(threshold_pct))
++                        self.scenarios.append(dict(site=site,comparison=kind,outlet=label,duration_min=duration,
++                           F=f,S=s,reference_probability=probability,rain_mm=rain,probability30=p30,
++                           probability_change_pp=change,threshold10_mm_h=i10,threshold30_mm_h=i30,
++                           threshold_change_mm_h=i30-i10,threshold_change_pct=threshold_pct))
++        record['max_probability_change_pp']=max(changes);record['max_threshold_change_pct']=max(threshold_changes)
++        record['passes_primary_screen']=max(changes)<=5 and max(threshold_changes)<=10
++        record['coverage_eligible']=record['coverage10']==0 and record['coverage30']==0
++        self.records.append(record)
++        print(site,kind,label,'A',round(a10),round(a30),'H',round(h10,3),round(h30,3),
++              'p change',round(max(changes),3),'coverage',record['coverage10'],record['coverage30'],flush=True)
++
++    def execute(self):
++        for site in SITES:
++            native={}
++            for resolution in ['10m','30m']:
++                source=self.root/site/resolution/'dem'
++                native[resolution]=self.terrain(site,'native',resolution,source/'dem.tif',source/'wbt/flovec.tif')
++            props={res:json.loads((self.root/site/res/'dem/wbt/outlet.geojson').read_text())['features'][0]['properties'] for res in native}
++            main=(props['10m']['row'],props['10m']['column'])
++            main30=(props['30m']['row'],props['30m']['column'])
++            mask=self.catchment(native['10m'],*main,'selection')
++            points=[('terminal',main)]
++            mainarea=native['10m']['area'][main]
++            for target in [20000,100000,1000000]:
++                if target<mainarea/2:
++                    delta=np.where(mask,np.abs(native['10m']['area']-target),np.inf)
++                    index=np.unravel_index(np.argmin(delta),delta.shape)
++                    points.append((f'nested_{target}',tuple(map(int,index))))
++            # Prepare controlled raw average and condition at both resolutions.
++            controlled={}
++            for resolution in ['10m','30m']:
++                directory=self.output/site/'controlled'/resolution;directory.mkdir(parents=True)
++                profile=native['10m']['profile'];z=native['10m']['z']
++                if resolution=='30m':
++                    shape=(math.ceil(z.shape[0]/3),math.ceil(z.shape[1]/3))
++                    transform=profile['transform']*rasterio.Affine.scale(3)
++                    coarse=np.full(shape,profile['nodata'],dtype='float64')
++                    reproject(z,coarse,src_transform=profile['transform'],src_crs=profile['crs'],
++                              src_nodata=profile['nodata'],dst_transform=transform,dst_crs=profile['crs'],
++                              dst_nodata=profile['nodata'],resampling=Resampling.average)
++                    raw=directory/'raw.tif';write(raw,coarse,dict(profile,height=shape[0],width=shape[1],transform=transform),nodata=profile['nodata'])
++                else:raw=native['10m']['dem']
++                conditioned=directory/'conditioned.tif';pointer=directory/'pointer.tif'
++                self.run('FillDepressions',dem=raw,output=conditioned,fix_flats='true',flat_increment=.00001)
++                self.run('D8Pointer',dem=conditioned,output=pointer)
++                controlled[resolution]=self.terrain(site,'controlled',resolution,raw,pointer)
++            for label,rc in points:
++                x,y=self.coordinates(native['10m'],*rc)
++                # Controlled comparison shares the same physical target, with explicit snapping at each resolution.
++                match10=self.snap(controlled['10m'],x,y);match30=self.snap(controlled['30m'],x,y)
++                if match10 is None or match30 is None:
++                    self.unavailable.append(dict(site=site,comparison='controlled',outlet=label,reason='No eligible channel within 90 m'))
++                    continue
++                cr,cc,dist10=match10
++                dr,dc,dist30=match30
++                self.compare(site,'controlled',label,controlled['10m'],controlled['30m'],(cr,cc),(dr,dc),dist30)
++                self.records[-1]['snap_reference_m']=dist10
++            for label,rc in points:
++                x,y=self.coordinates(native['10m'],*rc)
++                if label=='terminal':
++                    other=main30; xx,yy=self.coordinates(native['30m'],*other);distance=math.hypot(x-xx,y-yy)
++                else:
++                    match=self.snap(native['30m'],x,y)
++                    if match is None:
++                        self.unavailable.append(dict(site=site,comparison='native',outlet=label,reason='No eligible channel within 90 m'))
++                        continue
++                    r,c,distance=match;other=(r,c)
++                self.compare(site,'native',label,native['10m'],native['30m'],rc,other,distance)
++                self.records[-1]['snap_reference_m']=0.
++        # Three measured new-output invocations for largest source grid.
++        grid=self.grids[('az_ponderosa','native','10m')]
++        for iteration in range(3):
++            directory=self.output/f'benchmark-{iteration}';directory.mkdir()
++            self.run('D8UpstreamRelief',dem=grid['dem'],d8_pntr=grid['pointer'],elevation_units='m',
++                     output=directory/'h.tif',area=directory/'a.tif',coverage=directory/'c.tif')
++        (self.output/'unavailable.json').write_text(json.dumps(self.unavailable,indent=2))
++        csv_write(self.output/'resolution_comparison.csv',self.records)
++        csv_write(self.output/'m3_sensitivity.csv',self.scenarios)
++        csv_write(self.output/'runtime.csv',self.timings)
++        (self.output/'commands.json').write_text(json.dumps(self.commands,indent=2))
++        env=dict(binary=str(self.binary),binary_sha256=hashlib.sha256(self.binary.read_bytes()).hexdigest(),
++                 platform=platform.platform(),cpu_count=os.cpu_count(),python=platform.python_version(),
++                 compress_rasters=False,wbt_max_procs=12,
++                 numpy=np.__version__,rasterio=rasterio.__version__,source_fixture_root=str(self.root))
++        (self.output/'environment.json').write_text(json.dumps(env,indent=2))
++        fig,axes=plt.subplots(1,2,figsize=(13,5),layout='constrained')
++        for kind,marker in [('controlled','o'),('native','x')]:
++            records=[r for r in self.records if r['comparison']==kind]
++            axes[0].scatter([r['area10_m2']/1e6 for r in records],[r['max_probability_change_pp'] for r in records],label=kind,marker=marker)
++            axes[1].scatter([r['area10_m2']/1e6 for r in records],[r['max_threshold_change_pct'] for r in records],label=kind,marker=marker)
++        for ax,limit,title in zip(axes,[5,10],['Maximum probability change (percentage points)','Maximum inverse-threshold change (%)']):
++            ax.axhline(limit,color='red',linestyle='--',label='predeclared screen');ax.set_xscale('log');ax.set_xlabel('10 m upstream area (km²)');ax.set_ylabel(title);ax.legend()
++        fig.savefig(self.output/'resolution_sensitivity.png',dpi=160);plt.close(fig)
++
++
++def main():
++    parser=argparse.ArgumentParser()
++    parser.add_argument('--fixtures',type=Path,required=True);parser.add_argument('--binary',type=Path,required=True);parser.add_argument('--output',type=Path,required=True)
++    args=parser.parse_args();args.output.mkdir(parents=True,exist_ok=False)
++    Study(args.fixtures.resolve(),args.binary.resolve(),args.output.resolve()).execute()
++
++
++if __name__=='__main__':main()
+diff --git a/tools/staley_m3_reference_compare.py b/tools/staley_m3_reference_compare.py
+new file mode 100644
+index 0000000..c138b58
+--- /dev/null
++++ b/tools/staley_m3_reference_compare.py
+@@ -0,0 +1,42 @@
++"""Public-API external reference probe; no reference algorithm is reproduced."""
++import argparse
++import hashlib
++import json
++from pathlib import Path
++import subprocess
++import importlib.metadata
++
++import numpy as np
++import rasterio
++from rasterio.transform import from_origin
++from pfdf import watershed
++from pfdf.raster import Raster
++
++
++def main():
++    parser=argparse.ArgumentParser()
++    parser.add_argument('--binary',type=Path,required=True);parser.add_argument('--output',type=Path,required=True)
++    args=parser.parse_args();args.output.mkdir(parents=True,exist_ok=False)
++    assert importlib.metadata.version('pysheds')=='0.4'
++    assert importlib.metadata.version('pfdf')=='3.0.2'
++    rows=[]
++    for name,heights in [('descending',[130,120,100,95,90]),('internal_maximum',[110,130,100,95,90]),('pit',[130,90,100,95,90])]:
++        directory=args.output/name;directory.mkdir()
++        z=np.full((5,9),-9999.,dtype='float64');p=z.copy();z[2,2:7]=heights;p[2,2:7]=2
++        profile=dict(driver='GTiff',height=5,width=9,count=1,dtype='float64',crs='EPSG:32611',transform=from_origin(500000,5200000,10,10),nodata=-9999)
++        for filename,values in [('dem.tif',z),('pointer.tif',p)]:
++            with rasterio.open(directory/filename,'w',**profile) as out:out.write(values,1)
++        subprocess.run([str(args.binary),'-r=D8UpstreamRelief','--compress_rasters=false',f'--dem={directory}/dem.tif',f'--d8_pntr={directory}/pointer.tif',f'--output={directory}/h.tif',f'--area={directory}/a.tif','--elevation_units=m'],check=True,capture_output=True)
++        f=np.where(p==2,1,p)
++        kw=dict(nodata=-9999,crs=32611,transform=profile['transform'])
++        reference_h=watershed.relief(Raster.from_array(z,**kw),Raster.from_array(f,**kw)).values
++        reference_a=watershed.accumulation(Raster.from_array(f,**kw),times=100).values
++        with rasterio.open(directory/'h.tif') as ds:h=ds.read(1)
++        with rasterio.open(directory/'a.tif') as ds:a=ds.read(1)
++        assert h[2,4]==30 and a[2,4]==300
++        rows.append(dict(case=name,raw_elevations=heights,wbt_h=h[2,2:7].tolist(),reference_h=reference_h[2,2:7].tolist(),wbt_area=a[2,2:7].tolist(),reference_area=reference_a[2,2:7].tolist(),outlet_h_error=float(reference_h[2,4]-h[2,4]),outlet_t_error=float((reference_h[2,4]-h[2,4])/np.sqrt(300))))
++    evidence=dict(binary=str(args.binary),binary_sha256=hashlib.sha256(args.binary.read_bytes()).hexdigest(),reference_module=watershed.__file__,versions={k:importlib.metadata.version(k) for k in ['pfdf','pysheds','numpy','numba','rasterio']},cases=rows)
++    (args.output/'comparison.json').write_text(json.dumps(evidence,indent=2));print(json.dumps(evidence,indent=2))
++
++
++if __name__=='__main__':main()
+diff --git a/tests/test_d8_upstream_relief.py b/tests/test_d8_upstream_relief.py
+new file mode 100644
+index 0000000..1ed5c17
+--- /dev/null
++++ b/tests/test_d8_upstream_relief.py
+@@ -0,0 +1,176 @@
++"""Generated-output contract tests; set WBT_TERRAIN_BINARY to a rebuilt binary."""
++import importlib.util
++import os
++from pathlib import Path
++import subprocess
++import tempfile
++import unittest
++
++import numpy as np
++import rasterio
++from rasterio.transform import from_origin
++
++ROOT = Path(__file__).resolve().parents[1]
++BINARY = Path(os.environ.get('WBT_TERRAIN_BINARY', ROOT / 'target/release/whitebox_tools')).resolve()
++
++
++class TerrainCommandTests(unittest.TestCase):
++    def setUp(self):
++        self.temp = tempfile.TemporaryDirectory(prefix='wbt terrain ')
++        self.directory = Path(self.temp.name)
++        self.z = np.full((5, 7), -9999., dtype='float64')
++        self.p = self.z.copy()
++        self.z[2, 2:5] = [130, 120, 100]
++        self.p[2, 2:5] = [2, 2, 0]
++        self.write('dem.tif', self.z)
++        self.write('pointer.tif', self.p)
++
++    def tearDown(self):
++        self.temp.cleanup()
++
++    def write(self, name, values, **kwargs):
++        options = dict(driver='GTiff', height=values.shape[0], width=values.shape[1],
++                       count=1, dtype=values.dtype, crs='EPSG:32611',
++                       transform=from_origin(500000, 5200000, 10, 10), nodata=-9999)
++        options.update(kwargs)
++        with rasterio.open(self.directory / name, 'w', **options) as out:
++            out.write(values, 1)
++
++    def arguments(self):
++        return dict(dem=str(self.directory/'dem.tif'), d8_pntr=str(self.directory/'pointer.tif'),
++                    output=str(self.directory/'h.tif'), area=str(self.directory/'a.tif'),
++                    coverage=str(self.directory/'c.tif'), elevation_units='m')
++
++    def run_cli(self, **changes):
++        args = self.arguments(); args.update(changes)
++        return subprocess.run([str(BINARY), '-r=D8UpstreamRelief',
++                               *[f'--{k}={v}' for k, v in args.items()]],
++                              capture_output=True, text=True, timeout=30)
++
++    def assert_outputs(self, expected=(0, 10, 30)):
++        for name, values in [('h.tif', expected), ('a.tif', [100, 200, 300]), ('c.tif', [1, 1, 1])]:
++            with rasterio.open(self.directory/name) as out, rasterio.open(self.directory/'dem.tif') as dem:
++                np.testing.assert_allclose(out.read(1)[2, 2:5], values, rtol=1e-9, atol=1e-9)
++                np.testing.assert_array_equal(out.dataset_mask(), dem.dataset_mask())
++                self.assertEqual(out.crs, dem.crs); self.assertEqual(out.transform, dem.transform)
++                if name != 'c.tif': self.assertEqual(out.dtypes, ('float64',))
++
++    def test_cli_chain_and_output_alias_rejection(self):
++        result = self.run_cli(); self.assertEqual(result.returncode, 0, result.stdout+result.stderr)
++        self.assert_outputs()
++        before = (self.directory/'dem.tif').read_bytes()
++        self.assertNotEqual(self.run_cli(output=str(self.directory/'dem.tif')).returncode, 0)
++        self.assertEqual(before, (self.directory/'dem.tif').read_bytes())
++        self.assertNotEqual(self.run_cli().returncode, 0)
++
++    def test_both_bindings_execute_current_binary(self):
++        for index, path in enumerate([ROOT/'whitebox_tools.py', ROOT/'WBT/whitebox_tools.py']):
++            with self.subTest(binding=str(path)):
++                spec = importlib.util.spec_from_file_location(f'terrain_binding_{index}', path)
++                module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
++                original = Path.cwd()
++                tool = module.WhiteboxTools(verbose=False, raise_on_error=True); tool.set_whitebox_dir(str(BINARY.parent))
++                try:
++                    result = tool.d8_upstream_relief(**self.arguments(), callback=lambda _: None)
++                finally:
++                    os.chdir(original)
++                self.assertEqual(result, 0); self.assert_outputs()
++                for name in ['h.tif', 'a.tif', 'c.tif']: (self.directory/name).unlink()
++
++    def test_conditioned_pit_and_internal_maximum(self):
++        for heights, expected in [([130, 90, 100], [0, 40, 30]), ([110, 130, 100], [0, 0, 30])]:
++            with self.subTest(heights=heights):
++                self.z[2,2:5] = heights; self.write('dem.tif', self.z)
++                result = self.run_cli(); self.assertEqual(result.returncode, 0, result.stderr)
++                self.assert_outputs(expected)
++                for name in ['h.tif', 'a.tif', 'c.tif']: (self.directory/name).unlink()
++
++    def test_invalid_pointer_cycle_and_mask(self):
++        for code in [3, 1.5, -1, np.inf, np.nan, 32, -9999]:
++            with self.subTest(code=code):
++                self.p[2,3] = code; self.write('pointer.tif', self.p)
++                self.assertNotEqual(self.run_cli().returncode, 0)
++                self.assertFalse((self.directory/'h.tif').exists())
++
++    def test_grid_and_units_rejected(self):
++        for options in [dict(crs='EPSG:4326'), dict(transform=from_origin(500001,5200000,10,10)),
++                        dict(transform=rasterio.Affine(10,1,500000,0,-10,5200000))]:
++            with self.subTest(options=options):
++                self.write('pointer.tif', self.p, **options)
++                self.assertNotEqual(self.run_cli().returncode, 0)
++        self.write('pointer.tif', self.p)
++        self.assertNotEqual(self.run_cli(elevation_units='ft').returncode, 0)
++
++    def test_nodata_outgoing_pointer_does_not_contaminate_relief(self):
++        self.p[2,4] = 2; self.write('pointer.tif', self.p)
++        self.assertEqual(self.run_cli().returncode, 0); self.assert_outputs()
++
++    def test_single_row_outputs_compressed_and_uncompressed(self):
++        self.write('dem.tif', np.array([[130.,120.,100.]]))
++        self.write('pointer.tif', np.array([[2.,2.,0.]]))
++        for compress in ['false','true']:
++            command=[str(BINARY), '-r=D8UpstreamRelief', f'--compress_rasters={compress}',
++                     *[f'--{k}={v}' for k,v in self.arguments().items()]]
++            result=subprocess.run(command,capture_output=True,text=True,timeout=30)
++            self.assertEqual(result.returncode,0,result.stdout+result.stderr)
++            for name, expected in [('h.tif',[[0,10,30]]),('a.tif',[[100,200,300]]),('c.tif',[[1,1,1]])]:
++                with rasterio.open(self.directory/name) as out:
++                    np.testing.assert_array_equal(out.read(1),expected)
++                    description=out.tags()['TIFFTAG_IMAGEDESCRIPTION']
++                    self.assertIn('maximum upstream raw elevation',description)
++                    self.assertIn('flagged cells=',description)
++                (self.directory/name).unlink()
++
++    def test_nan_nodata_and_bigtiff_roundtrip(self):
++        for name, data in [('dem.tif', self.z.copy()), ('pointer.tif', self.p.copy())]:
++            data[data == -9999] = np.nan
++            self.write(name,data,nodata=np.nan,BIGTIFF='YES')
++        result=self.run_cli();self.assertEqual(result.returncode,0,result.stdout+result.stderr)
++        self.assert_outputs()
++
++    def test_original_zero_pixel_scale_rejected(self):
++        # Independent fixture mutation: standard little-endian TIFF double tag.
++        import struct
++        for name in ['dem.tif','pointer.tif']:
++            path=self.directory/name
++            data=bytearray(path.read_bytes())
++            self.assertEqual(data[:2],b'II')
++            ifd=struct.unpack_from('<I',data,4)[0]
++            count=struct.unpack_from('<H',data,ifd)[0]
++            for index in range(count):
++                entry=ifd+2+12*index
++                tag,kind,n,offset=struct.unpack_from('<HHII',data,entry)
++                if tag==33550:
++                    self.assertEqual((kind,n),(12,3))
++                    struct.pack_into('<d',data,offset,0.)
++                    break
++            else:self.fail('Fixture has no pixel scale')
++            path.write_bytes(data)
++        result=self.run_cli();self.assertNotEqual(result.returncode,0)
++        self.assertFalse((self.directory/'h.tif').exists())
++        # Legacy tools retain their assumed-spacing behavior and output georeferencing.
++        legacy = self.directory/'legacy.tif'
++        result=subprocess.run([str(BINARY), '-r=D8Pointer', f'--dem={self.directory}/dem.tif',
++                               f'--output={legacy}'],capture_output=True,text=True,timeout=30)
++        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
++        with rasterio.open(legacy) as out:
++            self.assertEqual(out.crs,rasterio.crs.CRS.from_epsg(32611))
++            self.assertEqual(out.transform,from_origin(500000,5200000,1,1))
++
++    def test_point_pixels_and_multisample_inputs_rejected(self):
++        with rasterio.open(self.directory/'dem.tif','r+') as ds:
++            ds.update_tags(AREA_OR_POINT='Point')
++        self.assertNotEqual(self.run_cli().returncode,0)
++        self.write('dem.tif',self.z,count=2)
++        self.assertNotEqual(self.run_cli().returncode,0)
++
++    def test_duplicate_output_symlink_and_missing_value(self):
++        self.assertNotEqual(self.run_cli(area=str(self.directory/'h.tif')).returncode, 0)
++        (self.directory/'link.tif').symlink_to(self.directory/'dem.tif')
++        self.assertNotEqual(self.run_cli(output=str(self.directory/'link.tif')).returncode, 0)
++        result = subprocess.run([str(BINARY), '-r=D8UpstreamRelief', '--dem'], capture_output=True, timeout=30)
++        self.assertNotEqual(result.returncode, 0)
++
++
++if __name__ == '__main__':
++    unittest.main()
+diff --git a/tests/test_staley_m3_study.py b/tests/test_staley_m3_study.py
+new file mode 100644
+index 0000000..97f7afa
+--- /dev/null
++++ b/tests/test_staley_m3_study.py
+@@ -0,0 +1,32 @@
++"""Regression coverage for unavailable study matches and nearest-cell selection."""
++import importlib.util
++from pathlib import Path
++import unittest
++
++import numpy as np
++from rasterio.transform import from_origin
++
++ROOT = Path(__file__).resolve().parents[1]
++spec = importlib.util.spec_from_file_location('staley_study', ROOT/'tools/staley_m3_resolution_study.py')
++study = importlib.util.module_from_spec(spec)
++spec.loader.exec_module(study)
++
++
++class StudyMatchingTests(unittest.TestCase):
++    def setUp(self):
++        self.study = study.Study(ROOT, ROOT/'target/release/whitebox_tools', Path('/unused'))
++        self.grid = dict(area=np.array([[100., 5000., 9000.]]),
++                         profile=dict(transform=from_origin(500000, 5200000, 30, 30)))
++
++    def test_empty_or_distant_match_is_explicitly_unavailable(self):
++        self.assertIsNone(self.study.snap(self.grid, 0, 0))
++        self.grid['area'][:] = 100
++        self.assertIsNone(self.study.snap(self.grid, 500045, 5199985))
++
++    def test_nearest_eligible_cell_does_not_optimize_area_agreement(self):
++        self.assertEqual(self.study.snap(self.grid, 500045, 5199985), (0, 1, 0.))
++        self.assertEqual(self.study.snap(self.grid, 500075, 5199985), (0, 2, 0.))
++
++
++if __name__ == '__main__':
++    unittest.main()

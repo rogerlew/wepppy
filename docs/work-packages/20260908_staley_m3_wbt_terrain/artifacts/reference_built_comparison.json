@@ -1,0 +1,134 @@
+{
+  "binary": "/workdir/weppcloud-wbt/target/release/whitebox_tools",
+  "binary_sha256": "d4adb49d0e856a587ff996cf695bb71fbacf5669b90e4b526de403aac91d4718",
+  "reference_module": "/workdir/usgs-pfdf/pfdf/watershed.py",
+  "versions": {
+    "pfdf": "3.0.2",
+    "pysheds": "0.4",
+    "numpy": "1.26.4",
+    "numba": "0.63.1",
+    "rasterio": "1.4.4"
+  },
+  "cases": [
+    {
+      "case": "descending",
+      "raw_elevations": [
+        130,
+        120,
+        100,
+        95,
+        90
+      ],
+      "wbt_h": [
+        0.0,
+        10.0,
+        30.0,
+        35.0,
+        40.0
+      ],
+      "reference_h": [
+        0.0,
+        20.0,
+        25.0,
+        30.0,
+        10119.0
+      ],
+      "wbt_area": [
+        100.0,
+        200.0,
+        300.0,
+        400.0,
+        500.0
+      ],
+      "reference_area": [
+        100.0,
+        200.0,
+        300.0,
+        400.0,
+        500.0
+      ],
+      "outlet_h_error": -5.0,
+      "outlet_t_error": -0.28867513459481287
+    },
+    {
+      "case": "internal_maximum",
+      "raw_elevations": [
+        110,
+        130,
+        100,
+        95,
+        90
+      ],
+      "wbt_h": [
+        0.0,
+        0.0,
+        30.0,
+        35.0,
+        40.0
+      ],
+      "reference_h": [
+        0.0,
+        30.0,
+        35.0,
+        40.0,
+        10129.0
+      ],
+      "wbt_area": [
+        100.0,
+        200.0,
+        300.0,
+        400.0,
+        500.0
+      ],
+      "reference_area": [
+        100.0,
+        200.0,
+        300.0,
+        400.0,
+        500.0
+      ],
+      "outlet_h_error": 5.0,
+      "outlet_t_error": 0.28867513459481287
+    },
+    {
+      "case": "pit",
+      "raw_elevations": [
+        130,
+        90,
+        100,
+        95,
+        90
+      ],
+      "wbt_h": [
+        0.0,
+        40.0,
+        30.0,
+        35.0,
+        40.0
+      ],
+      "reference_h": [
+        0.0,
+        0.0,
+        5.0,
+        10.0,
+        10099.0
+      ],
+      "wbt_area": [
+        100.0,
+        200.0,
+        300.0,
+        400.0,
+        500.0
+      ],
+      "reference_area": [
+        100.0,
+        200.0,
+        300.0,
+        400.0,
+        500.0
+      ],
+      "outlet_h_error": -25.0,
+      "outlet_t_error": -1.4433756729740643
+    }
+  ]
+}

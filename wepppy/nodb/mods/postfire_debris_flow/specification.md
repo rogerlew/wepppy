@@ -47,7 +47,7 @@ quantity and must not be used as Staley rainfall.
 
 | Predictor | M1 | M3 |
 | --- | --- | --- |
-| T | Fraction of contributing area both moderately/highly burned and slope >=23 degrees | Catchment relief / square root of catchment area; exact relief algorithm pending |
+| T | Fraction of contributing area both moderately/highly burned and slope >=23 degrees | Maximum upstream raw elevation minus outlet elevation / square root of total upstream area |
 | F | Mean contributing-area dNBR / 1000 | Fraction of contributing area moderately/highly burned |
 | S | Mean contributing-area Kf; proposed integration uses RUSLE POLARIS Nomograph estimate | Mean contributing-area cumulative soil-layer thickness in inches / 100; SSURGO derivation under evaluation |
 
@@ -164,20 +164,41 @@ it is not sufficient evidence of a Staley-compatible catchment calculation.
 For M3, pfdf evaluates `relief / sqrt(area)` in consistent length units, which
 is dimensionless. The local manuscript's section 5.2 prose omits the square root; pfdf
 documentation also alternates between nearest and highest ridge and incorrectly
-labels units in one method docstring. Resolve the original relief definition
-and verify the WBT flow-based implementation before fixing the contract.
-See [M3 terrain evaluation](docs/m3_terrain.md) for the proposed WBT algorithm,
-existing-tool limitations, and catchment comparison design.
+labels units in one method docstring. The user resolved the engineering definition below, and the owned WBT
+implementation was verified against analytical fixtures and full catchment
+counts/extrema. See [M3 terrain evaluation](docs/m3_terrain.md) for the
+accepted contract, implementation limitations and resolution findings.
 
 Accepted direction (2026-09-08): implement the terrain tooling in
 weppcloud-wbt, then evaluate matched 10 m/30 m catchments to determine M3
 resolution requirements. This keeps raster traversal in the owned Rust backend
 and makes resolution acceptance evidence-based. Execution is scoped in the
 [terrain work package](../../../../docs/work-packages/20260908_staley_m3_wbt_terrain/package.md);
-the exact relief contract and resolution decision remain pending its findings.
+the accepted formula and measured resolution recommendation are recorded below.
 
-10 m is the proposed reference resolution. 30 m is computationally feasible,
-but acceptance requires a representative 10 m/30 m sensitivity comparison.
+Discovery finding (2026-09-09): pinned pfdf 3.0.2/pysheds 0.4 returns 25 m
+where a descending synthetic catchment has 30 m relief under all candidate
+physical definitions. Raw-elevation alternatives also disagree with each other
+under conditioned routing. The reference therefore cannot ratify the formula;
+see [diagnostic evidence](../../../../docs/work-packages/20260908_staley_m3_wbt_terrain/artifacts/reference_parity.md)
+and [ADR-0052](../../../../docs/adrs/ADR-0052-staley-m3-upstream-terrain.md).
+The user subsequently adopted maximum upstream raw elevation minus outlet
+elevation as the engineering contract. Include the outlet in the upstream
+maximum and in area; use raw meter elevations with supplied conditioned D8
+routing, A in m2, and T=H/sqrt(A). This choice includes internal raw maxima
+and measures relief relative to the actual assessment outlet. Highest-source
+and catchment-max-minus-min alternatives are rejected for these reasons.
+Calibration-preprocessing equivalence remains unproven; 30 m acceptance still
+requires the resolution study. ADR-0052 records decision provenance.
+
+The completed terrain evaluation recommends requiring genuine 10 m for initial
+M3 support. Across 24 outlet pairs, controlled 30 m effects reached 10.598
+probability percentage points and 12.479% inverse-threshold change, exceeding
+the predeclared 5-point/10% engineering screen. Larger sampled catchments
+agreed closely, but the panel does not justify a universal 30 m size exemption.
+See [resolution findings](../../../../docs/work-packages/20260908_staley_m3_wbt_terrain/artifacts/resolution_decision.md).
+This recommendation is not implemented UI/server enforcement and does not
+establish predictive validity or CONUS-wide calibration.
 For a 0.02 km2 catchment the approximate cell counts are 200 and 22 respectively.
 Upsampling a 30 m DEM does not establish 10 m terrain fidelity.
 
@@ -376,7 +397,9 @@ Paths below are reserved design locations; executable files do not yet exist.
 1. Ratify SSURGO thickness aggregation, bedrock/interval rules, missing-data
    coverage policy, and comparison against STATSGO THICK. Original units are
    resolved as inches; automatic STATSGO fallback is not approved.
-2. M3 relief algorithm and WBT parity; DEM resolution acceptance.
+2. Production application of the accepted maximum-minus-outlet terrain
+   contract and recommended 10 m requirement; original calibration
+   preprocessing equivalence remains unproven.
 3. Assessment scope and spatial aggregation/NoData rules.
 4. Ratify dNBR numeric-type support, encoding presets, resampling/support-mask
    method, date-field requiredness, and detailed partial-coverage aggregation;

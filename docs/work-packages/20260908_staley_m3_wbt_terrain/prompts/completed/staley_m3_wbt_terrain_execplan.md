@@ -19,8 +19,8 @@ all cells draining to a specified outlet, including upstream tributaries.
 The user should receive runnable tooling, reproducible comparison results,
 and a defensible recommendation about M3 resolution requirements.
 
-The present task created a scaffold only. This plan's execution must deliver
-working CLI and binding behavior and measurements from the rebuilt binary.
+The original handoff was a scaffold; execution has now delivered working CLI
+and binding behavior plus measurements from the rebuilt binary.
 Production Staley NoDb/UI/RQ integration, deployment, binary vendoring, soil
 estimation, and changes to live project data are excluded. Do not create or
 switch branches or commit unless the user separately authorizes that action.
@@ -29,13 +29,23 @@ switch branches or commit unless the user separately authorizes that action.
 
 
 - [x] (2026-09-08 23:30 UTC) Scaffold created and user direction recorded.
-- [ ] M1: Repository discovery, scientific/CLI contract, ADR, study protocol.
-- [ ] M2: Rust implementation, registration, bindings, and synthetic tests.
-- [ ] M3: Current-binary execution and external reference comparison.
-- [ ] M4: Catchment selection and paired 10 m/30 m study.
-- [ ] M5: Validation, independent reviews, decision report, durable docs.
+- [x] (2026-09-09 01:21 UTC) Read governing instructions and full plan; clean starting revisions recorded; 66 fixture files verified; six grid pairs audited; baseline Rust check and 147 tests passed.
+- [x] (2026-09-09 01:21 UTC) Pinned pfdf/pysheds diagnostic probe demonstrates relief discrepancies even on a monotonic chain. Draft contract, ADR-0052, study protocol and outlet inventory recorded.
+- [x] M1: User adopted maximum upstream raw elevation minus outlet elevation. ADR-0052 and terrain contract freeze the formula, UTM-meter GeoTIFF support, required elevation declaration, joint-mask validation and optional coverage output.
+- [x] (2026-09-09) M2: Rust implementation, registration, both bindings, five new Rust tests and 11 generated-output/binding tests complete.
+- [x] (2026-09-09) M3: Final binary d4adb49d... verified against analytical/reference fixtures; reference discrepancies explained.
+- [x] (2026-09-09) M4: 24 outlet pairs, 864 scenarios, criteria sensitivity and runtime evidence complete; recommend 10 m.
+- [x] (2026-09-09 02:08 UTC) M5: 152 WBT app Rust tests, 42 raster integration cases plus doc example, 15 Python tests and 7742 WEPPpy tests passed (72 skipped). Both independent reviews pass; durable docs and evidence promoted; prompts archived.
+
 
 ## Surprises & Discoveries
+
+The independent reviews found and verified repairs for single-row GeoTIFF
+strip encoding, absent metadata persistence, ineffective source-tag validation,
+output no-replace publication and write-error propagation. Source pixel scale
+is now retained separately so strict validation does not change legacy
+D8Pointer assumed-spacing behavior. All supported edge cases were rechecked
+against the final binary before rerunning the study.
 
 
 WEPPpy's existing `wbt/relief.tif` is a conditioned elevation DEM, not a
@@ -48,11 +58,25 @@ alternates between nearest and highest ridge. Its underlying weighted-path
 recurrence requires pinned-version verification, including weight indexing;
 simple maximum-elevation subtraction is not yet proven equivalent.
 
+Pinned pfdf 3.0.2 with pysheds 0.4 returns 25 m at the third cell of the
+130,120,100,95,90 m chain, where all three physical candidate definitions
+give 30 m. Area is correctly 300 m2. The terminal output is contaminated by
+NoData. See `artifacts/reference_parity.md` and its reproducible probe.
+The primary-source prose does not settle the raw-elevation alternatives;
+reference execution therefore cannot resolve the scientific ambiguity.
+
 The existing WBT maximum-upslope-value plugin derives its own D8 routing.
 It demonstrates the traversal pattern but does not already accept the project's
-authoritative pointer raster. No numeric comparisons have been run.
+authoritative pointer raster. Reference diagnostics have run; WBT comparisons
+remain pending.
 
 ## Decision Log
+
+Decision (2026-09-08 America/Los_Angeles, user): adopt maximum upstream raw
+elevation minus outlet elevation and continue. Implementation will use
+`D8UpstreamRelief --dem --d8_pntr --output --area --elevation_units=m`, optional
+`--coverage`, with full interface details in `artifacts/terrain_contract.md`.
+No calibration-equivalence or 30 m acceptance claim is implied.
 
 
 Decision (2026-09-08 23:30 UTC, user via Codex conversation): implement the
@@ -66,12 +90,41 @@ from resolution sensitivity, and keep production integration out of this
 package. Rationale: matching a reference does not establish 30 m suitability,
 and terrain readiness does not resolve the outstanding M3 soil input contract.
 
+Decision (2026-09-09 01:21 UTC, Codex): pause before M2 for scientific
+ratification, as M1 requires when primary evidence and diagnostics cannot
+resolve the ambiguity. Recommend maximum-upstream-minus-outlet as an explicit
+engineering quantity; do not claim calibration equivalence or reproduce
+reference defects. ADR-0052 remains proposed. No 30 m policy is accepted.
+
+Decision (2026-09-09, Codex): recommend 10 m for initial M3 support after
+predeclared controlled/native screens failed small-catchment cases. Preserve
+large-catchment agreement as limited evidence, not a universal size exemption.
+
 ## Outcomes & Retrospective
 
 
-Scaffold only. The six-run fixture inventory is available. No runtime implementation, reference parity,
-resolution acceptance, or production integration is complete. At handoff replace
-this paragraph with measured outcomes, limitations, and remaining work.
+The accepted maximum-upstream-raw-elevation-minus-outlet command is registered
+in WBT with both bindings, strict supported-grid/mask/unit validation and
+potential-truncation output. The final release binary and both bindings
+produce analytical H/A values; independent review closed five correctness
+and two security findings, including supporting GeoTIFF repairs.
+
+The 24-pair/864-scenario study recommends genuine 10 m for initial M3 support.
+Two of 12 controlled pairs and two of 12 native pairs fail the predeclared
+screen. Controlled changes reach 10.598 probability percentage points and
+12.479% inverse-threshold change; main-outlet agreement does not establish
+small-catchment equivalence. No universal size exemption is supported.
+Original calibration preprocessing and CONUS-wide validity remain unproven.
+
+Final source/binary hashes, commands, CSVs, plot and review reports are in
+`artifacts/`; full generated rasters are in
+`/tmp/staley-m3-terrain-study/study-v4/`. No production integration, binary
+installation/vendoring, deployment, commits or branch changes occurred.
+All required gates passed, including 7742 WEPPpy tests (72 skipped), and both
+independent reviews signed off with zero unresolved findings. The package is
+closed; durable contracts live in the postfire specification/terrain note,
+ADR-0052 and WBT tool guide. This plan is archived execution history.
+
 
 ## Context and Orientation
 
@@ -279,11 +332,11 @@ From `/workdir/weppcloud-wbt`, baseline and post-change checks are:
     cargo test -p whitebox-tools-app
     python -m py_compile whitebox_tools.py WBT/whitebox_tools.py
 
-Use its documented build entry point for the runnable release binary; record
-the exact command and path here after discovery. The planned smoke invocation
+The verified build command is `cargo build --locked -p whitebox-tools-app --release`;
+execute `/workdir/weppcloud-wbt/target/release/whitebox_tools` directly. The planned smoke invocation
 is the following, replacing the placeholder with that verified current binary:
 
-    <current-binary> -r=D8UpstreamRelief --dem=<fixture-dem> --d8_pntr=<fixture-pointer> --output=<study-dir>/vertical_relief.tif --area=<study-dir>/upstream_area.tif
+    /workdir/weppcloud-wbt/target/release/whitebox_tools -r=D8UpstreamRelief --dem=<fixture-dem> --d8_pntr=<fixture-pointer> --output=<study-dir>/vertical_relief.tif --area=<study-dir>/upstream_area.tif --elevation_units=m
 
 Before M3 completes replace these placeholders in `artifacts/validation.md`
 with actual reproducible commands, fixture creation steps, expected values,
@@ -350,3 +403,13 @@ for a fresh agent; implementation and resolution acceptance remain pending.
 Revision note: User supplied three paired watersheds; terrain and boundary fixtures
 are preserved in WBT with hashes. Replaced open-ended site acquisition
 with this primary panel; stored coordinate differences remain explicit.
+
+Revision note (2026-09-09 01:21 UTC): Recorded M1 discovery, pinned-reference
+anomalies, proposed ADR/contract/protocol, baseline validation and the scientific
+decision required before implementation. Keep this plan active.
+
+Revision note (2026-09-09): User accepted formula; implemented/verified tool,
+resolved independent review findings and completed the predeclared study.
+
+Revision note (2026-09-09 02:08 UTC): All gates and independent reviews passed;
+closed execution and archived prompts with final outcomes.

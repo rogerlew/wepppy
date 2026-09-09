@@ -1,0 +1,12 @@
+{
+  "binary": "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+  "binary_sha256": "d4adb49d0e856a587ff996cf695bb71fbacf5669b90e4b526de403aac91d4718",
+  "platform": "Linux-6.8.0-137-generic-x86_64-with-glibc2.39",
+  "cpu_count": 48,
+  "python": "3.12.3",
+  "compress_rasters": false,
+  "wbt_max_procs": 12,
+  "numpy": "1.26.4",
+  "rasterio": "1.4.4",
+  "source_fixture_root": "/home/workdir/weppcloud-wbt/test_fixtures/staley_m3_resolution"
+}
