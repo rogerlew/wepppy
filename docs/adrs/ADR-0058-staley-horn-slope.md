@@ -47,6 +47,15 @@ specifies terrain resolution and the threshold but does not establish the
 original differentiation stencil. This is an owner-approved engineering choice,
 not a claim of calibration preprocessing equivalence. See the
 [source findings](../work-packages/20260908_staley_slope_sbs/artifacts/slope_method_findings.md).
+Subsequent read-only historical inspection strengthens Horn's basis: the
+preserved 2022-named USGS M1 script uses ArcGIS Slope in degrees, the ≥23°
+intersection and separate TauDEM accumulation. The modern pfdf helper uses
+pysheds directional slopes after the 2023 migration. This is a suspected
+preprocessing regression relative to the legacy workflow; original 2017
+calibration equivalence is still not established. See the durable
+[versioned evidence](../../wepppy/nodb/mods/postfire_debris_flow/docs/historical_slope_evidence.md).
+Current pfdf parity is not an acceptance criterion for our M1 T. Legacy
+zero-replacement call sites do not supersede our accepted uncertainty policy.
 No GPL implementation or tests are copied or translated.
 
 ## Risks, verification and rollback

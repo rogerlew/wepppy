@@ -70,3 +70,15 @@ copied into this repository. Because master is mutable, downloaded file SHA-256:
 
 - sgrid.py: `c50883a307433e98c734298b985abc8a3cd0fe26ec803df9db87463b30b405f4`
 - _sgrid.py: `c815cc0e9501bb9773c0f17cdb6636186c83ba0dc10bd65b09a0352305fe13c0`
+
+## Historical predecessor follow-up
+
+The owner supplied historical USGS provenance, verified read-only on
+2026-09-09 UTC. The preserved 2022-named script uses ArcGIS planar slope before
+M1 thresholding and TauDEM accumulation. The 2023 migration changes the context
+of current pysheds comparisons. Full hashes, lines, confidence limits and
+scientific implications are promoted to the durable
+[historical evidence note](../../../../wepppy/nodb/mods/postfire_debris_flow/docs/historical_slope_evidence.md).
+This strengthens Horn selection; it does not establish original 2017 tooling
+or authorize legacy zero filling. Treat modern pfdf divergence as a suspected
+preprocessing regression to measure, not an oracle to reproduce.

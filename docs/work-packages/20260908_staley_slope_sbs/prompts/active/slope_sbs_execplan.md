@@ -33,7 +33,10 @@ gradient. WBT's projected generic Slope uses Florinsky 5×5, not Horn 3×3.
 The inspected Staley manuscript establishes 10 m terrain and ≥23°, but no
 explicit differentiation stencil. Horn is now selected; raw DEM remains proposed. Do not claim
 original calibration parity. Initial web evidence and local source locations
-are in `artifacts/slope_method_findings.md` in this package.
+are in `artifacts/slope_method_findings.md` in this package. Subsequent verified
+historical evidence confirms ArcGIS planar/Horn-style slope in the preserved
+2022-named USGS workflow; original 2017 calibration remains unconfirmed. Read
+the canonical `docs/historical_slope_evidence.md` in the module before comparison.
 
 ## Decision Log
 
@@ -251,3 +254,10 @@ are explicitly separate from algorithm approval.
 
 Revision note: uncertainty preservation is accepted; the supplied pysheds
 reference was checked and does not establish Horn preprocessing.
+
+Revision note: historical USGS ArcGIS slope provenance is now verified and
+promoted to the canonical evidence note. Treat current pfdf's directional-slope
+path as a suspected preprocessing regression, not a parity oracle. Keep
+estimator changes separate from conditioning, ArcGIS edge weights and legacy
+null-to-zero calls; retain the owner's accepted uncertainty policy. Record
+threshold and predictor differences without claiming observed predictive error.

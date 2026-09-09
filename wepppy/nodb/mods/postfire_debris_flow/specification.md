@@ -299,6 +299,12 @@ coverage and owned Rust tooling. The owner adopted Horn 3×3 surface slope in
 [ADR-0058](../../../../docs/adrs/ADR-0058-staley-horn-slope.md). Raw elevation
 remains the recommended source; original Staley slope preprocessing is not
 established.
+[Historical source evidence](docs/historical_slope_evidence.md) now confirms
+ArcGIS planar/Horn-style slope in the preserved 2022-named USGS M1 workflow,
+followed by a 2023 migration to pysheds. The inspected modern helper uses
+directional slope: treat that as a suspected predictor-preprocessing regression,
+not a calibration reference. Exact 2017 tooling and predictive impact remain
+unconfirmed.
 Existing D8 flow-vector slope and WBT's projected Florinsky 5×5 Slope are
 separate algorithms, not approved substitutes by their availability alone.
 The owner accepted preserving incomplete-intersection uncertainty: report

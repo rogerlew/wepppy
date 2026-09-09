@@ -25,3 +25,7 @@
   is scaffolded, not executing; Horn is accepted (ADR-0058), while source
   and edge policies remain pending. Unresolved intersection support retains
   bounds and unavailable point T (accepted in ADR-0058).
+- Read [historical slope evidence](docs/historical_slope_evidence.md) before
+  parity work: legacy ArcGIS surface slope and modern pfdf directional slope
+  differ. Current pfdf is not the scientific oracle for M1 T; preserve the
+  distinction between suspected preprocessing regression and proven error.

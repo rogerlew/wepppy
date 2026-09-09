@@ -151,3 +151,9 @@ scientific limitation that implementation cannot resolve.
   Unknown intersection cells retain T bounds and unavailable point T; no
   partial-support extrapolation. Verified the supplied pysheds link describes
   routed drop/distance, not Horn; it is not calibration-parity evidence.
+
+- 2026-09-09 UTC: [historical USGS evidence](docs/historical_slope_evidence.md)
+  confirms ArcGIS planar/Horn-style slope in the preserved 2022-named workflow.
+  The modern directional helper follows a 2023 migration; its predictor
+  compatibility is a suspected regression to investigate. Original 2017
+  calibration method is still unconfirmed. Do not use current pfdf as M1 T oracle.

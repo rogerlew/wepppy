@@ -32,3 +32,12 @@ confirmed evidence, engineering recommendations and owner choices. Source and
 comparison work can proceed when execution is requested; dependent scientific
 policy requires resolution before publication as an accepted contract.
 No tests, generated slope artifacts, implementation or deployment claimed yet.
+
+## Historical evidence update — 2026-09-09 UTC
+
+Verified historical ArcGIS planar M1 path and September 2023 pysheds migration.
+[Durable evidence](../../../wepppy/nodb/mods/postfire_debris_flow/docs/historical_slope_evidence.md)
+records exact revisions/lines and confidence. Horn now has legacy workflow
+support; original calibration equivalence remains unconfirmed. Current pfdf
+D8 slope is a suspected preprocessing regression; measure its effect without
+requiring parity. Separate historical zero-filling from accepted uncertainty.

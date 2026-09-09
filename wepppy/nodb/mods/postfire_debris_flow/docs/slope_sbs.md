@@ -41,9 +41,12 @@ Threshold the unrounded calculation inclusively at 23 degrees; record precision
 and test boundary behavior, including equivalence to gradient >= tan(23°).
 Do not classify display-rounded degrees or use 23 percent slope.
 
-Horn is an accepted engineering choice. The manuscript inspected specifies
-10 m DEMs and the threshold, but original stencil/conditioning equivalence
-has not been established. Existing FVSlope is directional D8 drop/distance;
+Horn is an accepted engineering choice with confirmed historical workflow
+support: the preserved USGS script named for 2022 invokes ArcGIS planar Slope
+before the M1 ≥23° intersection. Complete-neighborhood derivatives match Horn.
+The [historical evidence](historical_slope_evidence.md) distinguishes that path
+from the later pysheds directional-slope helper. Original 2017 calibration
+stencil/conditioning equivalence remains unestablished. Existing FVSlope is directional D8 drop/distance;
 projected generic WBT Slope is Florinsky 5×5. Neither is implicitly equivalent.
 
 ## Accepted intersection and uncertainty policy
@@ -92,7 +95,9 @@ NoData neighborhoods, partial SBS and same-grid real terrain comparisons.
 Benchmark Horn, existing FVSlope and Florinsky, separating conditioning from
 algorithm effects; compare 10/30 m without imposing an unapproved M1 gate.
 Document full-neighborhood parity and edge differences against independent
-published formulas/GDAL. A comparison is method sensitivity, not validation
+published formulas/GDAL. GDAL is a comparator, not established historical USGS
+slope software. Current pfdf directional-slope agreement is not an acceptance
+criterion: investigate its divergence as a potential preprocessing regression. A comparison is method sensitivity, not validation
 against observed debris-flow outcomes.
 
 See the [work package](../../../../../docs/work-packages/20260908_staley_slope_sbs/package.md)
