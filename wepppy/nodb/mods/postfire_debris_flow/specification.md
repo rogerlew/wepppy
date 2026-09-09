@@ -291,6 +291,16 @@ Nested assessments would require a separately approved scope change. Existing
 offline helpers and evaluation fixtures may retain multiple masks/outlets for
 testing; that capability is not a production workflow requirement.
 
+The owner requested slope/SBS intersection tooling in weppcloud-wbt. The
+[proposed slope/SBS backend contract](docs/slope_sbs.md) and
+[implementation package](../../../../docs/work-packages/20260908_staley_slope_sbs/package.md)
+cover algorithm selection, raw-versus-conditioned terrain, class mapping,
+coverage and owned Rust tooling. Horn 3×3 on raw elevation is the current
+recommendation; original Staley slope preprocessing is not established.
+Existing D8 flow-vector slope and WBT's projected Florinsky 5×5 Slope are
+separate algorithms, not approved substitutes by their availability alone.
+Partial-support and edge policies remain proposals pending disposition.
+
 Resampling, slope calculation, SBS class mapping, and NoData denominators
 still require an implementation contract. Missing SBS pixels
 must not silently become unburned observations.

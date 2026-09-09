@@ -43,6 +43,11 @@ facade, numerical helpers, and integration/provenance collaborators.
 The specification records planned source and UI paths; empty executable
 placeholders are intentionally deferred until the contracts are ready.
 
+The next bounded increment is [WBT slope/SBS tooling](docs/slope_sbs.md),
+scaffolded for algorithm selection and whole-watershed intersection/coverage.
+The proposed surface slope is separate from the existing routing slope;
+no production slope/SBS integration is implemented yet.
+
 ## Developer and Operator Notes
 
 - WBT is the supported terrain backend for this new module.

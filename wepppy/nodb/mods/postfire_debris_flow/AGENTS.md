@@ -20,3 +20,6 @@
   no nested/channel assessment requirement. Accepted numerical policies are in
   [the engine contract](docs/staley2017_engine.md) and ADR-0056; future
   predictor and runtime integration remain separately scoped.
+- Slope/SBS backend proposal: [docs/slope_sbs.md](docs/slope_sbs.md).
+  [WBT package](../../../../docs/work-packages/20260908_staley_slope_sbs/package.md)
+  is scaffolded, not executing; algorithm/support choices are not yet accepted.
