@@ -1,9 +1,12 @@
 # Staley slope/SBS intersection design
 
-Status: proposed backend contract, 2026-09-09 UTC; implementation pending.
-User selected owned weppcloud-wbt tooling. Algorithm/source and missing-support
-policy below are recommendations awaiting evidence and disposition, not
-accepted production parameterization. The model's ≥23° spatial intersection
+Status: Horn 3×3 and uncertainty-preserving support accepted, 2026-09-09 UTC;
+implementation pending.
+User selected owned weppcloud-wbt tooling and explicitly adopted Horn.
+[ADR-0058](../../../../../docs/adrs/ADR-0058-staley-horn-slope.md) records the choice.
+Owner subsequently accepted preserving uncertainty: unresolved intersection
+cells produce bounds and no point T. DEM source and neighborhood edge handling
+remain recommendations awaiting disposition. The model's ≥23° spatial intersection
 and existing project watershed scope are already accepted.
 
 ## Purpose and ownership
@@ -14,9 +17,10 @@ WEPPpy later supplies canonical artifacts and handles workflow publication.
 The existing watershed delineation, routing slope and generic WBT Slope remain
 unchanged. No nested catchments, re-snapping, dNBR-derived SBS, or soil/K work.
 
-## Proposed slope method
+## Accepted slope algorithm and proposed preprocessing
 
-Use raw project elevation on the authoritative projected meter grid. Compute
+Recommended preprocessing: use raw project elevation on the authoritative
+projected meter grid. Compute
 planar Horn 3×3 slope before masking to the watershed, allowing neighbors
 outside the basin to inform slopes inside it. For a full neighborhood
 `a b c / d e f / g h i`, horizontal spacing dx and vertical spacing dy:
@@ -37,12 +41,12 @@ Threshold the unrounded calculation inclusively at 23 degrees; record precision
 and test boundary behavior, including equivalence to gradient >= tan(23°).
 Do not classify display-rounded degrees or use 23 percent slope.
 
-This is an engineering recommendation. The manuscript inspected specifies
+Horn is an accepted engineering choice. The manuscript inspected specifies
 10 m DEMs and the threshold, but original stencil/conditioning equivalence
 has not been established. Existing FVSlope is directional D8 drop/distance;
 projected generic WBT Slope is Florinsky 5×5. Neither is implicitly equivalent.
 
-## Intersection and support proposal
+## Accepted intersection and uncertainty policy
 
 Use the full existing routed watershed mask including channels and unburned
 terrain. Require exact grid agreement for mask, DEM and prepared categorical
@@ -55,16 +59,19 @@ For each in-watershed cell classify the intersection as true, false or unknown.
 True means slope >=23° and SBS moderate/high. Either a known slope below 23°
 or known unburned/low SBS proves false; otherwise a missing operand leaves
 unknown. Unknown class codes remain distinguishable from declared NoData.
-Validate malformed class maps explicitly. This three-state proposal avoids
+Validate malformed class maps explicitly. This three-state policy avoids
 counting missing observations as low severity or flat terrain.
 
 Report total basin cells/area, SBS-valid area, slope-valid area, jointly valid
 area, true/false/unknown intersection counts and provenance. With N full basin
 cells, Y true and U unknown, report bounds Y/N and (Y+U)/N as missing-data
-bounds, not confidence intervals. If U=0, T=Y/N is determined. If U>0, whether
-a labeled partial point estimate is allowed requires owner disposition; do not
-silently shrink the denominator or publish the lower bound as T. Any observed-
-support ratio is a separately labeled diagnostic. A valid zero T differs from
+bounds, not confidence intervals. If U=0, T=Y/N is determined. If U>0,
+processing succeeds with coverage and bounds, but point T is unavailable. Do
+not extrapolate a partial point estimate, shrink the denominator, or publish
+the lower bound as T. An observed-support ratio, if exposed, is a separately
+labeled diagnostic and must not enter the model as T. A downstream single M1
+probability that requires unavailable T remains unavailable; propagation of
+probability bounds would require a separate result contract. A valid zero T differs from
 unavailable T. Empty watershed is invalid, not a zero-area model result.
 
 Expose sufficient SBS-only counts for later M3 F, independently of slope
@@ -90,5 +97,6 @@ against observed debris-flow outcomes.
 
 See the [work package](../../../../../docs/work-packages/20260908_staley_slope_sbs/package.md)
 and its [evidence/decision register](../../../../../docs/work-packages/20260908_staley_slope_sbs/artifacts/slope_method_findings.md).
-Create a parameterization ADR when selecting the algorithm and support policy.
+ADR-0058 records algorithm selection and uncertainty preservation; amend or
+supplement it when source and neighborhood edge policies are accepted.
 The accepted contract must be updated with the roadmap as work progresses.

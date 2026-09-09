@@ -295,11 +295,16 @@ The owner requested slope/SBS intersection tooling in weppcloud-wbt. The
 [proposed slope/SBS backend contract](docs/slope_sbs.md) and
 [implementation package](../../../../docs/work-packages/20260908_staley_slope_sbs/package.md)
 cover algorithm selection, raw-versus-conditioned terrain, class mapping,
-coverage and owned Rust tooling. Horn 3×3 on raw elevation is the current
-recommendation; original Staley slope preprocessing is not established.
+coverage and owned Rust tooling. The owner adopted Horn 3×3 surface slope in
+[ADR-0058](../../../../docs/adrs/ADR-0058-staley-horn-slope.md). Raw elevation
+remains the recommended source; original Staley slope preprocessing is not
+established.
 Existing D8 flow-vector slope and WBT's projected Florinsky 5×5 Slope are
 separate algorithms, not approved substitutes by their availability alone.
-Partial-support and edge policies remain proposals pending disposition.
+The owner accepted preserving incomplete-intersection uncertainty: report
+coverage and full-watershed T bounds; publish point T only when no intersection
+cells remain unknown. Do not replace it with an observed-support estimate.
+DEM-source and neighborhood edge policies remain proposed.
 
 Resampling, slope calculation, SBS class mapping, and NoData denominators
 still require an implementation contract. Missing SBS pixels

@@ -22,4 +22,6 @@
   predictor and runtime integration remain separately scoped.
 - Slope/SBS backend proposal: [docs/slope_sbs.md](docs/slope_sbs.md).
   [WBT package](../../../../docs/work-packages/20260908_staley_slope_sbs/package.md)
-  is scaffolded, not executing; algorithm/support choices are not yet accepted.
+  is scaffolded, not executing; Horn is accepted (ADR-0058), while source
+  and edge policies remain pending. Unresolved intersection support retains
+  bounds and unavailable point T (accepted in ADR-0058).

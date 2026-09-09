@@ -18,7 +18,9 @@ Rust backend with evidence, not an installed WEPPcloud model or new UI.
 
 
 - [x] (2026-09-09 05:08 UTC) Inspect initial science/code evidence and scaffold.
-- [ ] Determine algorithm, surface, edge and support policy; finalize contract/ADR.
+- [x] (2026-09-09 UTC) Owner adopted Horn 3×3; ADR-0058 records algorithm choice.
+- [x] (2026-09-09 UTC) Owner accepted uncertainty preservation (ADR-0058).
+- [ ] Resolve surface and neighborhood edges; finalize contract/ADR.
 - [ ] Implement registered Rust tooling, bindings and synthetic tests.
 - [ ] Run existing three-site terrain panel and inspect current-binary artifacts.
 - [ ] Independent correctness/security reviews, validation and documented handoff.
@@ -29,7 +31,7 @@ Rust backend with evidence, not an installed WEPPcloud model or new UI.
 Existing FVSlope measures drop toward the D8 receiver, not a neighborhood surface
 gradient. WBT's projected generic Slope uses Florinsky 5×5, not Horn 3×3.
 The inspected Staley manuscript establishes 10 m terrain and ≥23°, but no
-explicit differentiation stencil. Horn/raw DEM is provisional; do not claim
+explicit differentiation stencil. Horn is now selected; raw DEM remains proposed. Do not claim
 original calibration parity. Initial web evidence and local source locations
 are in `artifacts/slope_method_findings.md` in this package.
 
@@ -39,8 +41,11 @@ are in `artifacts/slope_method_findings.md` in this package.
 2026-09-09 05:08 UTC: user requests slope/SBS tooling in weppcloud-wbt and
 algorithm determination. Reuse the existing project watershed/outlet per
 ADR-0055. No nested basin workflow, change to FVSlope, or production caller.
-Codex recommends evaluating Horn 3×3/raw terrain; owner disposition of the
-selected scientific parameterization and partial-support behavior is pending.
+The owner subsequently adopted Horn 3×3 (2026-09-09 UTC, ADR-0058). Raw
+terrain and neighborhood edges remain proposed. Owner subsequently accepted
+uncertainty preservation: unresolved intersection cells yield bounds and no
+point T. Comparisons verify
+and characterize Horn; they do not reopen the algorithm decision.
 
 ## Outcomes & Retrospective
 
@@ -89,10 +94,10 @@ section 5.2 and Table 4; inspect supporting primary references if they identify
 the original preprocessing. The PDF is ignored under its redistribution policy.
 Do not contact authors or send messages without user authorization. Bound this
 investigation: if original method cannot be established, document the limit,
-compare candidates and obtain an explicit engineering choice rather than block
+characterize the accepted Horn engineering choice rather than block
 indefinitely or claim inferred ArcGIS usage as fact.
 
-The candidate is Horn's weighted 3×3 gradient: for neighborhood a b c / d e f /
+The selected algorithm is Horn's weighted 3×3 gradient: for neighborhood a b c / d e f /
 g h i, gx=((c+2f+i)-(a+2d+g))/(8dx), gy=((g+2h+i)-(a+2b+c))/(8dy), slope is
 atan(hypot(gx,gy)) in degrees. Recommend raw meter elevations on the full
 project DEM, with valid center/eight neighbors, before applying the basin mask.
@@ -101,9 +106,9 @@ GDAL Horn and Esri are not interchangeable at gaps. Current generic WBT Slope
 must retain its default for all existing callers. Prefer a dedicated tool or
 explicit additive method only after documenting the smallest supported design.
 
-Resolve register S01–S05. In particular, decide whether partial intersection
-support permits a point T or only bounds/unavailable. Provide count diagnostics
-regardless. Known low/unburned SBS or slope below threshold proves a false
+Resolve remaining register items; S01 algorithm and S03 uncertainty policy
+are accepted. Partial unresolved intersection support yields bounds and
+unavailable point T. Provide count diagnostics regardless. Known low/unburned SBS or slope below threshold proves a false
 intersection even when the other operand is missing; otherwise propagate
 unknown. Never silently renormalize to observed support or zero-fill. No
 arbitrary minimum coverage percentage or M1 resolution gate is authorized.
@@ -240,3 +245,9 @@ contract; closed packages provide evidence only.
 
 Revision note: initial scaffold separates surface-slope selection from D8
 routing slope and bounds delivery to the single-watershed slope/SBS backend.
+
+Revision note: owner adopted Horn; remaining preprocessing and support policies
+are explicitly separate from algorithm approval.
+
+Revision note: uncertainty preservation is accepted; the supplied pysheds
+reference was checked and does not establish Horn preprocessing.

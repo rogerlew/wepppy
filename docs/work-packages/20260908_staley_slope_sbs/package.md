@@ -4,8 +4,10 @@ Status: scaffolded 2026-09-09 05:08 UTC; execution not started.
 
 Implement the owned Rust terrain/burn intersection needed for M1 T, with both
 WBT Python bindings, reproducible artifacts and independent reviews. Determine
-and document the slope method before implementing the selected production
-parameterization. This is a bounded part of roadmap stage 3, not complete M1
+and document the selected Horn 3×3 method (ADR-0058); resolve DEM source,
+and neighborhood edges before implementing dependent parameterization.
+Unresolved intersection coverage retains bounds and no point T, as accepted
+by the owner in ADR-0058. This is a bounded part of roadmap stage 3, not complete M1
 predictor or WEPPcloud integration.
 
 Use the existing project watershed and resolved outlet only. Users manually

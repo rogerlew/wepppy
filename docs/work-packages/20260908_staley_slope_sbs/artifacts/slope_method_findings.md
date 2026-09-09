@@ -31,13 +31,13 @@ full-neighborhood formula. Record these differences rather than claiming whole-
 raster parity. USGS pfdf documentation fetches returned 403 during this pass;
 no GPL source or tests were consulted or copied.
 
-## Recommendations needing disposition
+## Decisions and recommendations
 
 | ID | Recommendation | Decision/evidence needed |
 | --- | --- | --- |
-| S01 | Dedicated planar Horn 3×3 surface slope on raw project DEM; preserve existing FVSlope and generic Slope. | Confirm scientific references, compare real-data methods and approve the engineering choice if original preprocessing cannot be established. No assumption that a newer/smoother algorithm better reproduces calibration. |
+| S01 | Horn 3×3 adopted by owner, ADR-0058. Raw project DEM remains recommended; preserve existing FVSlope and generic Slope. | Algorithm resolved 2026-09-09 UTC; verify implementation and characterize sensitivity. Source/edge policies remain open. Original calibration equivalence is unproven. |
 | S02 | Compute on the full available DEM before applying the watershed mask; require a valid center and eight valid neighbors, with no edge interpolation. | Document one-cell halo and residual unknown support; compare strict Horn with published Esri missing-neighbor behavior. Raw versus conditioned surface effects must be separated from algorithm effects. |
-| S03 | Unknown SBS or slope remains unknown; report full-area counts, observed-support diagnostics and possible bounds, without a published point T on unresolved support until policy is accepted. | Owner choice: require a fully determined intersection, or permit a labeled partial estimate. No silent zero fill or arbitrary coverage cutoff. Handle logically known false intersections separately from unknown ones. |
+| S03 | Accepted: preserve unknown intersection support; report full-area counts and bounds, with no point T where unresolved cells remain. | Owner accepted 2026-09-09 UTC, ADR-0058. No partial extrapolation, zero fill or coverage cutoff. A known false operand determines a false intersection even if the other operand is missing. |
 | S04 | Explicit recognized SBS class mapping from the existing SBS owner; no dtype/range guesses, recoding of NoData as unburned, or bilinear class resampling. | Audit `Disturbed.sbs_4class_path` and `SoilBurnSeverityMap`; distinguish normalized four-class values from legacy landuse burn codes 130–133. Engineering contract, not an extra user classification workflow. |
 | S05 | Evaluate both existing 10 m and 30 m project fixtures without imposing a new M1 resolution gate. | Measure T and downstream probability effects. M3's existing 10 m recommendation does not automatically apply to M1. Any M1 gate requires a separate evidence-backed owner decision. |
 
@@ -55,3 +55,18 @@ as though cell aligned. Use same-grid method comparisons first. Supply labeled
 synthetic SBS patterns to isolate algorithm effects; inventory whether a real
 SBS map actually overlaps an existing fixture before claiming real-burn results.
 dNBR fixtures are not SBS and must not be thresholded as a substitute.
+
+## User-supplied pysheds reference check
+
+Checked 2026-09-09 UTC:
+[sgrid.py](https://raw.githubusercontent.com/mdbartos/pysheds/master/pysheds/sgrid.py)
+`cell_slopes()` obtains downstream elevation differences and distances and calls
+`_cell_slopes_numba`. The
+[helper](https://raw.githubusercontent.com/mdbartos/pysheds/master/pysheds/_sgrid.py)
+divides those arrays, using zero for zero distance. The fetched file contains
+no identified Horn surface-gradient routine. This reference supports a routed
+slope distinction, not a Horn or Staley calibration-parity claim. No code was
+copied into this repository. Because master is mutable, downloaded file SHA-256:
+
+- sgrid.py: `c50883a307433e98c734298b985abc8a3cd0fe26ec803df9db87463b30b405f4`
+- _sgrid.py: `c815cc0e9501bb9773c0f17cdb6636186c83ba0dc10bd65b09a0352305fe13c0`

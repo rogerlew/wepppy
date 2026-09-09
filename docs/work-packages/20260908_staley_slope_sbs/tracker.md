@@ -5,7 +5,10 @@ WEPPpy starting revision: `49c50ecba`. Record WBT revision on execution.
 
 - [x] Inspect manuscript, WBT FVSlope/Slope, existing watershed audit and SBS owner.
 - [x] Scaffold bounded Rust implementation/evaluation package and canonical proposal.
-- [ ] Resolve slope/source and missing-support policies; write parameterization ADR.
+- [x] Owner adopted Horn 3×3; recorded ADR-0058.
+- [x] Owner accepted uncertainty preservation; bounds with unavailable point T
+  when any intersection cell remains unresolved (ADR-0058).
+- [ ] Resolve DEM source and neighborhood edges.
 - [ ] Specify CLI/output types/class map/units/edges and publication behavior.
 - [ ] Implement Rust tool(s), both bindings, analytical and boundary tests.
 - [ ] Run three-site sensitivity and rebuilt-binary generated-output checks.
@@ -17,8 +20,10 @@ User requested owned WBT slope/SBS tooling and a determination of the appropriat
 slope algorithm. Whole project watershed/outlet remains accepted scope.
 FVSlope is D8-direction drop/distance; projected WBT Slope uses Florinsky 5×5.
 The inspected manuscript states 10 m terrain and ≥23° but does not identify a
-stencil. Horn 3×3/raw DEM is a recommendation, not proven original processing.
-No algorithm or partial-support policy is silently approved by scaffolding.
+stencil. Owner subsequently adopted Horn 3×3 (2026-09-09 UTC, ADR-0058).
+Owner accepted uncertainty-preserving support: unresolved cells retain bounds
+and no point T. Raw DEM and neighborhood edges remain proposed. This is an
+engineering choice, not proof of original calibration preprocessing.
 
 ## Next steps and evidence
 
