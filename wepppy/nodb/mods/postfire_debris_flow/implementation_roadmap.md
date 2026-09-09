@@ -2,7 +2,8 @@
 
 Status: planning baseline after dNBR backend commit `9b99d535c`.
 Production model execution, NoDb, browser upload, RQ, and dashboard integration
-are not implemented. No implementation package is activated by this roadmap.
+are not implemented. The first package is scaffolded below; execution has not
+started.
 
 ## Maintenance Contract
 
@@ -46,24 +47,27 @@ then complete the interactive dashboard. M3 soil-policy work can proceed during
 M1 development; M1 does not need to wait for that policy. Both models remain in
 scope. SI/English presentation belongs in the first user-facing increment.
 
-All stages below are **not started**. Attach execution packages and evidence as
-work begins; stage completion requires its exit evidence, not only source files.
+Stages 1–2 are **scaffolded, not executing**, in the
+[project watershed and numerical engine package](../../../../docs/work-packages/20260908_staley_watershed_engine/package.md).
+Later stages are **not started**. Stage completion requires its exit evidence,
+not only source files. Accepted scope is the existing project watershed/outlet;
+nested/channel assessments are excluded from initial delivery (ADR-0055).
 
 | Stage | Scope and dependencies | Exit evidence |
 | --- | --- | --- |
-| 1. Assessment contract | Define assessment outlets, stable catchment IDs, nested upstream domains, grid/slope/SBS rules, and aggregation denominators. Proposed scope: each channel's full upstream catchment plus the watershed outlet, deduplicating identical outlets. | Accepted scope and missing-data rules; independently checked masks/counts and a reproducible fixture plan. |
+| 1. Assessment contract | Reuse the existing project watershed and resolved outlet; document authoritative mask/grid/outlet identity and full contributing-area support. Track slope/SBS/NoData decisions for stage 3. | Accepted single-watershed scope (done); canonical artifact mapping and independently checked mask/outlet evidence (pending). |
 | 2. Numerical engine | Implement `staley2017.py` for both M1 and M3. Can begin after its numerical contract is resolved, independently of spatial implementation. | Independently checked published coefficients, ADR, analytical cases, stable forward/inverse behavior, invalid-input and unreachable-threshold tests. |
-| 3. M1 predictors | Depends on stage 1. Aggregate slope/SBS intersection, normalized dNBR, and RUSLE Nomograph K; emit coverage, reasons, and input identity. | Reproducible real-project predictor artifacts; correct intersection and full-domain denominators; partial and unavailable catchment checks. |
+| 3. M1 predictors | Depends on stage 1 and accepted slope/SBS/NoData rules. Aggregate slope/SBS intersection, normalized dNBR, and RUSLE Nomograph K over the project watershed; emit coverage, reasons, and input identity. | Reproducible real-project predictor artifacts; correct intersection and full-domain denominators; partial and unavailable watershed checks. |
 | 4. Rainfall and results | Compose stages 2–3 with Climate-owned event parquet and frequency artifacts. Define event identity, schemas, canonical units, and querying. | Event probabilities, ratified design scenarios and inverse thresholds; missing-scenario handling, source provenance, representative catalog benchmark, and inspectable generated outputs. |
 | 5. Production M1 | Integrate stages 1–4 through NoDb, safe dNBR upload/publication, prerequisite checks, RQ, and a basic Pure UI control/report. | Contract checkpoint followed by upload → build → results → reload under production-equivalent identities/mounts; stale inputs, failed replacement, authorization, and SI/English equivalence verified. |
 | 6. Production M3 | Resolve soil policy; compose SSURGO/fallback thickness and owned WBT relief with the shared engine and production workflow. Soil-policy preparation may precede stage 5. | Explicit source contribution/coverage, unusable-both-sources cases, terrain fidelity gate, and real-project M3 results through the same publication/report path. |
-| 7. Interactive dashboard | Use established result/query contracts for linked events, catchment map, detail, design comparisons, and thresholds. | Event/catchment selections remain consistent; partial/unavailable results, simulation dates, unitization, accessibility, and realistic catalog performance verified. |
+| 7. Interactive dashboard | Use established result/query contracts for project watershed events, detail, design comparisons, and thresholds; maps may show the existing basin and input coverage. | Event selections remain consistent; no nested catchment selector; partial/unavailable results, simulation dates, unitization, accessibility, and realistic catalog performance verified. |
 
 Recommended architecture: separate predictor preparation from rainfall
 evaluation so climate changes do not require terrain/soil/dNBR recomputation.
 Define exact invalidation edges in stage 5's contract. Benchmark stored results
-against evaluation on demand before committing to an event × catchment ×
-duration materialization strategy in stage 4.
+against evaluation on demand for the project event × model × duration catalog
+in stage 4. There is one assessment watershed per project.
 
 ## Loose Ends and Decision Gates
 
@@ -73,7 +77,7 @@ scientific limitation that implementation cannot resolve.
 
 | ID | Decision or remaining work | Resolve before | Current authority / status |
 | --- | --- | --- | --- |
-| L01 | Whole watershed versus channel upstream catchments; outlet placement, duplicate/nested domains, IDs, and map geometry. | Stage 1 completion | [Terrain and scope](specification.md#terrain-sbs-and-assessment-scope); per-channel plus outlet remains proposed. |
+| L01 | Scope resolved: existing project watershed and existing outlet. Confirm canonical artifact mapping; no new outlet selection or nested enumeration. | Stage 1 completion | [Accepted scope](specification.md#project-watershed-assessment-scope), [ADR-0055](../../../../docs/adrs/ADR-0055-staley-project-watershed-scope.md); artifact audit pending. |
 | L02 | Slope algorithm, SBS class mapping, unknown pixels, soil/K coverage, and independent predictor denominators. | Stage 3 implementation | [Predictors](specification.md#predictors), [dNBR](specification.md#dnbr-upload-and-processing-contract). Do not extend accepted dNBR partial-coverage policy to other predictors implicitly. |
 | L03 | Coefficient verification, stable sigmoid/logit, permitted rainfall/probability inputs, zero/negative denominators, negative or unreachable thresholds. | Stage 2 implementation | [Scientific model](specification.md#scientific-model); numerical contract and ADR pending. |
 | L04 | K calibration units, artifact provenance/freshness, full RUSLE versus K-only readiness, and M3's RUSLE prerequisite. | Stages 3 and 5 | [RUSLE dependency](specification.md#rusle-and-polaris-dependency). Recommend K-artifact readiness for M1 and no RUSLE prerequisite for M3; not yet ratified. |
@@ -93,3 +97,9 @@ scientific limitation that implementation cannot resolve.
 - Baseline: terrain and soil evaluations and local dNBR backend are complete;
   remaining stages and loose ends recorded. Next work: assessment contract and
   numerical engine. No production implementation or deployment is claimed.
+
+- 2026-09-09 04:18 UTC: owner selected the existing project watershed/outlet and
+  manual isolation of suspected burned basins. Removed the per-channel proposal
+  from initial scope; synchronized the specification and dashboard description.
+  First package scaffolded for stages 1–2; numerical policies remain proposed in
+  its decision register. No executable implementation started.

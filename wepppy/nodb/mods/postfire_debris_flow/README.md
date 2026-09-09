@@ -18,6 +18,9 @@ completion evidence, and unresolved decisions alongside that specification.
 
 1. Use a continental US (CONUS) project, delineate with WBT, complete the WEPP
    Soils build, and provide a soil burn severity (SBS) map.
+   Manually isolate a burned basin you suspect may be at risk when setting up
+   the project. Assessment reuses that watershed and its existing outlet;
+   additional or nested catchment delineation is not required.
 2. For M1, acquire POLARIS inputs and build the Nomograph K raster through RUSLE;
    also supply continuous pre/post-fire dNBR.
 3. Select M1 (default) or M3 explicitly. M3 requires soil thickness instead of K
@@ -26,7 +29,7 @@ completion evidence, and unresolved decisions alongside that specification.
    Production fallback and coverage rules remain pending.
 4. Use the project's climate event intensities to assess storm-event
    probabilities. Browse events in an interactive dashboard and select an
-   event to inspect catchment results, rainfall, and input provenance.
+   event to inspect the project watershed result, rainfall, and input provenance.
    Return-interval comparisons and rainfall thresholds are complementary views.
 
 These are planned steps, not currently available commands. M1 and M3 predict
@@ -55,7 +58,7 @@ placeholders are intentionally deferred until the contracts are ready.
 - The standard RUSLE build produces named K artifacts, not `rusle/k.tif`.
 - M3 offline thickness uses raw validated intervals and explicit fractional
   component support. Original units are inches; S is mean cm / 254.
-  Production fallback policy, assessment scope and rainfall sourcing remain open.
+  Production fallback policy, spatial aggregation and rainfall sourcing remain open.
 - See [local agent guidance](AGENTS.md) for implementation sequencing.
 - See [SSURGO feasibility](docs/ssurgo_m3_feasibility.md) for reusable raw fields
   and why generated WEPP soil depth and the current `SolThk` are unsuitable.

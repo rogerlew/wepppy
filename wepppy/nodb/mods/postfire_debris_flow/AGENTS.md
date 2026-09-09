@@ -14,3 +14,8 @@
   pfdf code, tests, or documentation into this module.
 - Reference PDF storage decisions live in `docs/pdfs/README.md`; gitignore
   publisher PDFs without established redistribution permission.
+- First scaffolded package (not executing):
+  [watershed/engine ExecPlan](../../../../docs/work-packages/20260908_staley_watershed_engine/prompts/active/watershed_engine_execplan.md).
+  Initial scope is one existing project watershed and outlet (ADR-0055), with
+  no nested/channel assessment requirement. Resolve its numerical decision
+  register before implementing dependent behavior.

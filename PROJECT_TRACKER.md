@@ -87,6 +87,19 @@ Feedback mechanisms:
 
 ## 📋 Backlog
 
+### Staley Project Watershed and Numerical Engine
+
+**Scoped**: 2026-09-08 (2026-09-09 04:18 UTC). Scaffolded; not executing.
+
+**Link**: [Package](docs/work-packages/20260908_staley_watershed_engine/package.md)
+
+**Scope**: Reuse the existing project watershed/outlet; verify artifact identity
+and implement the offline M1/M3 probability/threshold engine after resolving
+numerical policies. No nested assessments, predictor production or UI/NoDb/RQ.
+
+**Next**: Resolve numerical decision register, verify coefficients and audit
+existing watershed artifacts. Security triage: none for in-memory library/docs.
+
 ### Seamless WEPPcloud Session Cookie Namespace Migration
 
 **Proposed**: 2026-08-23

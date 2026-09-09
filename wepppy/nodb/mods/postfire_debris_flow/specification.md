@@ -17,6 +17,7 @@ replace the required contract-first checkpoint.
 | Decision | Rationale |
 | --- | --- |
 | Separate `PostfireDebrisFlow` NoDb module and Pure UI control | Keep model inputs, execution, and results together while preserving the older debris-flow controller and saved runs. |
+| Assess the existing project watershed at its existing user-selected outlet | Reuse the completed delineation. Users should manually isolate burned basins they suspect may be at risk; nested/channel assessments are outside initial implementation. |
 | Follow RUSLE documentation and source organization | Reuse established module, numerical-helper, integration, UI, and reference-bundle conventions. |
 | Support WBT only | Reuse the owned terrain and watershed stack; no TOPAZ integration in the new module. |
 | Require a completed WEPP Soils build for both models | Projects prepare soil data before postfire assessment; reuse the Soils inventory and provenance rather than building a parallel soil acquisition workflow. |
@@ -238,11 +239,35 @@ establish predictive validity or CONUS-wide calibration.
 For a 0.02 km2 catchment the approximate cell counts are 200 and 22 respectively.
 Upsampling a 30 m DEM does not establish 10 m terrain fidelity.
 
-Open scope decision: whole watershed, per-channel upstream catchments, or both.
-Per-channel catchments plus the outlet are a proposal, not an accepted default.
-Specify outlet placement, nested catchments, resampling, slope calculation,
-SBS class mapping, and NoData denominators together. Missing SBS pixels must
-not silently become unburned observations.
+### Project Watershed Assessment Scope
+
+Accepted owner decision (2026-09-09 UTC): assess the watershed already delineated
+by the project, using its existing user-selected outlet as resolved by the
+canonical WBT workflow. One project supplies one assessment domain per model.
+Do not require a second delineation, additional outlet selection, automated
+burned-basin extraction, or per-channel/nested catchment enumeration.
+Use the full delineated upstream area, including channels and unburned portions;
+do not clip the assessment to the fire perimeter, valid dNBR footprint, or
+individual WEPP hillslopes. Confirm the canonical mask/grid and resolved outlet
+cell in the implementation contract rather than silently snapping a new outlet.
+
+User guidance in the control and reports: manually isolate a burned basin that
+you suspect may be at risk for debris flows when creating the project. Place
+the project outlet to delineate that basin. This basin-selection guidance does
+not establish predictive validity or replace the study's area, age, and regional
+context. The result is a basin assessment for the selected rainfall scenario,
+not an aggregate probability of a debris flow occurring anywhere in a larger
+landscape and not a runout prediction.
+
+[ADR-0055](../../../../docs/adrs/ADR-0055-staley-project-watershed-scope.md)
+records why the earlier per-channel proposal was rejected for initial delivery.
+Nested assessments would require a separately approved scope change. Existing
+offline helpers and evaluation fixtures may retain multiple masks/outlets for
+testing; that capability is not a production workflow requirement.
+
+Project artifact mapping, resampling, slope calculation, SBS class mapping, and
+NoData denominators still require an implementation contract. Missing SBS pixels
+must not silently become unburned observations.
 
 ## Unitization Contract
 
@@ -351,7 +376,7 @@ Recommended workflow, pending ratification:
   sources. Keep event intensities in parquet as the source of full-precision
   CLI values; the current frequency CSV rounds to two decimal places.
 - Evaluate 1-, 2-, 5-, and 10-year intervals for each of 15, 30, and 60 minutes:
-  12 scenarios per catchment, selected model, and source. Lead the report with
+  12 scenarios for the project watershed, selected model, and source. Lead the report with
   15-minute results; retain the other durations for comparison. The paper
   supplies duration-specific coefficients, not a prescribed return-period set.
 - Convert intensity to accumulation as `R_mm = I_mm_per_hour * minutes / 60`.
@@ -383,7 +408,7 @@ This preserves actual event combinations of duration-specific intensities
 instead of replacing every event with a frequency estimate.
 
 For each event, evaluate the available 15-, 30-, and 60-minute peak intensities
-with their matching Staley coefficients for each eligible catchment and selected
+with their matching Staley coefficients for the project watershed and selected
 model. Retain event identity, climate year/date, climate mode, and source
 provenance. Synthetic climate dates must be identified as simulation dates.
 NOAA PDS supplies design-storm estimates, not a dated event catalog; switching
@@ -391,14 +416,15 @@ frequency sources must not relabel project CLI events as NOAA observations.
 
 Proposed interaction, pending detailed UI contract:
 
-- A linked event plot and sortable table show probabilities for a selected
-  catchment, model, and duration. Start with 15 minutes and allow 30/60-minute
-  comparisons. Keep catchment scope visible; there is no defined single
-  watershed-wide occurrence probability.
-- Selecting an event updates the catchment probability map and event detail.
-  Selecting a catchment updates its event series and predictor details.
+- A linked event plot and sortable table show probabilities for the project
+  watershed, selected model, and duration. Start with 15 minutes and allow
+  30/60-minute comparisons. Keep the existing project boundary/outlet visible
+  where a map is presented; there is no catchment selector in initial scope.
+- Selecting an event updates the watershed result and event detail. A map may
+  show the basin result and input coverage; it must not imply independently
+  evaluated channel, hillslope, or pixel probabilities.
 - Event detail shows storm depth/duration when available, all three peak
-  intensities and corresponding probabilities, source/date, model, catchment
+  intensities and corresponding probabilities, source/date, model, watershed
   predictors, and data coverage/unavailable reasons. Apply project SI/English
   display preferences. A hyetograph requires a separate explicit reconstruction
   contract; peak-intensity columns alone do not supply one.
@@ -440,7 +466,9 @@ Paths below are reserved design locations; executable files do not yet exist.
 2. Production application of the accepted maximum-minus-outlet terrain
    contract and recommended 10 m requirement; original calibration
    preprocessing equivalence remains unproven.
-3. Assessment scope and spatial aggregation/NoData rules.
+3. Map the accepted project watershed/outlet to canonical artifacts and specify
+   spatial aggregation/NoData rules. Assessment scope is resolved; nested
+   catchments are not a prerequisite.
 4. Integrate the accepted dNBR backend with future browser transport, run
    access, active-artifact publication and M1 freshness under contract-first
    sequencing. Backend encoding/grid/coverage choices are in ADR-0054.
