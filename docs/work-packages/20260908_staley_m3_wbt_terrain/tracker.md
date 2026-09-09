@@ -30,8 +30,8 @@
 Relief semantics differ across paper prose and reference documentation.
 The inspected reference uses weighted maximum paths and needs pinned-version
 testing. Raw versus conditioned elevation may change the maximum/outlet
-relationship. Suitable real catchments and complete source DEMs still need
-selection. M3 soil thickness remains unresolved; the terrain study must label
+relationship. Three paired watersheds and their terrain/boundary fixtures are now supplied
+in WBT; upstream completeness and outlet offsets still require assessment. M3 soil thickness remains unresolved; the terrain study must label
 fixed diagnostic soil/burn inputs rather than imply production readiness.
 
 ## Validation and Evidence
@@ -50,3 +50,13 @@ Start with [start_here.md](prompts/active/start_here.md). Execute the named
 ExecPlan only; unrelated active WEPPpy initiatives are outside scope. Update
 this tracker and the ExecPlan after each milestone, and PROJECT_TRACKER.md when
 execution begins. No known external blocker prevents initial discovery.
+
+## Supplied Test Panel
+
+The WBT directory `test_fixtures/staley_m3_resolution/` contains Moscow Mountain,
+Topanga, and user-labeled AZ ponderosa at both resolutions: 66 source files,
+including raw/conditioned DEMs, D8 routing, channel/subcatchment grids, raster
+and both projected/WGS84 vector boundaries, outlet records, and provenance.
+The manifest preserves hashes and grid metadata. TIFFs use a scoped LFS rule.
+Run the fixture verifier after `git lfs pull`. Stored requested and snapped
+outlet coordinates differ slightly within pairs; quantify these in the study.

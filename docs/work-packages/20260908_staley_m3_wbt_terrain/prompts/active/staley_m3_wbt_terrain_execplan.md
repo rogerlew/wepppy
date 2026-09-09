@@ -69,7 +69,7 @@ and terrain readiness does not resolve the outstanding M3 soil input contract.
 ## Outcomes & Retrospective
 
 
-Scaffold only. No runtime implementation, catchment inventory, reference parity,
+Scaffold only. The six-run fixture inventory is available. No runtime implementation, reference parity,
 resolution acceptance, or production integration is complete. At handoff replace
 this paragraph with measured outcomes, limitations, and remaining work.
 
@@ -202,16 +202,25 @@ Resolve material discrepancies before relying on the tool for resolution claims.
 ### M4 — Assess representative catchments at both resolutions
 
 
-Identify a starting panel of 6-10 physical outlets spanning small headwaters,
-nested tributaries, steep dissected and gentler terrain, and conditioning-sensitive
-cases. Expand the panel when initial results reveal an unrepresented failure
-mode. Use full upstream catchments, not incremental WEPP hillslope polygons.
-Inspect `/wc1/runs/` read-only for suitable projects and audit the candidate WBT
-fixture `test_fixtures/gatecreek_10m_30_2`; its name is not proof of DEM resolution
-or source completeness. Published-fire catchments are useful if inputs/outlets
-are reproducible, but no particular unavailable site is a required dependency.
-Record selection, geography, area range, terrain range, source completeness,
-and exclusions in `artifacts/catchments.csv` and the study protocol.
+The user has supplied three primary paired watersheds, now snapshotted in
+`/workdir/weppcloud-wbt/test_fixtures/staley_m3_resolution/`: Moscow Mountain
+(bass-elimination 30 m, desolate-yea 10 m), Topanga (untucked-hit 30 m,
+sorrowful-semicircle 10 m), and user-labeled AZ ponderosa (offshore-remake 30 m,
+full-crocodile 10 m). Run `git lfs pull` in WBT and the fixture `verify.py`.
+Start with these three outlet pairs; add matched nested outlets where useful
+and expand only when an unrepresented failure mode warrants it. Gate Creek
+is optional additional evidence, not a required acquisition task.
+
+The fixture manifest contains source URLs, hashes, grids, and outlet metadata.
+Boundary maps are supplied as raster, projected GeoJSON, and WGS84 GeoJSON.
+The user identifies the pairs as the same watersheds with identically specified
+outlets, but stored requested coordinates and snapped centers differ slightly.
+Quantify these offsets rather than assuming equality. Extents intentionally
+differ: verify upstream completeness without clipping to their intersection.
+These are canonical-workflow comparisons, with source and delineation effects;
+controlled resampling remains a separate isolation experiment. Use full upstream
+catchments rather than incremental hillslope labels. Record suitability,
+geography, matched outlets, and exclusions in `artifacts/catchments.csv`.
 
 Work in an isolated directory such as `/tmp/staley-m3-terrain-study/`, keeping
 large rasters out of git and preserving live runs. First compare the 10 m
@@ -337,3 +346,7 @@ preserved in every comparison.
 
 Revision note (2026-09-08 23:30 UTC): Initial plan scaffolded at user request
 for a fresh agent; implementation and resolution acceptance remain pending.
+
+Revision note: User supplied three paired watersheds; terrain and boundary fixtures
+are preserved in WBT with LFS and hashes. Replaced open-ended site acquisition
+with this primary panel; stored coordinate differences remain explicit.

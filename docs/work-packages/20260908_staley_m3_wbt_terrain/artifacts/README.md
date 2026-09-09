@@ -13,3 +13,10 @@ tool and reference revisions, built-binary hash, commands, and runtime environme
 Store large DEMs and generated rasters outside git in an isolated study directory;
 record their locations and reproduction steps here. Do not commit the Staley PDF
 or copied GPL implementation/tests. Missing evidence must remain explicit.
+
+The primary input fixtures are committed in the sibling WBT repository at
+`test_fixtures/staley_m3_resolution/`; its README and manifest identify all six
+runs and source URLs. This deliberately versions the selected input rasters
+through LFS, while generated study rasters remain external. Boundary TIFFs and
+projected/WGS84 GeoJSONs are included. No new site acquisition is needed to
+begin the paired workflow comparison.
