@@ -30,6 +30,8 @@ This note captures the steady-state design of the climate control after the Pure
 - Hidden inputs `climate_catalog_id` and `climate_mode` keep form submissions compatible with existing endpoints.
 - Status panel is a macro instance that pairs with StatusStream (log limit 400 by default).
 
+- Operator-requested label restoration (2026-09-09): use "Spatial Scaling from Map (config dependent)" to make the configuration dependency explicit. The map field displays `climate.precip_scale_factor_map`; this wording change does not alter scaling behavior.
+
 ## 5. JavaScript Controller Highlights
 - Catalog bootstrap:
   - Parses JSON seed, builds `datasetMap`, default-selects the current catalog ID (or first exposed dataset).
