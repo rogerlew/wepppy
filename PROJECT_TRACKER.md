@@ -7,6 +7,10 @@
 
 ## Purpose
 
+Checkpoint preparation: [Run sync overwrite](docs/work-packages/20260909_run_sync_overwrite/package.md)
+— manifest-scoped partial cleanup and fresh replacement; implementation pending
+reviewed contract commit authority.
+
 Implemented locally: [Yearly water-balance repair](docs/work-packages/20260909_yearly_water_balance/package.md)
 — surface-runoff reporting and explicit all-years selection; production-data
 parity and broad regression checks passed. Deployment remains separate.
