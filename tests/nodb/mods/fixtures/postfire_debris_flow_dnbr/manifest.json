@@ -1,0 +1,26 @@
+{
+  "doi": "10.5066/P99S0I9W",
+  "rights": "CC0 1.0 Universal per USGS landing page",
+  "landing_page": "https://www.usgs.gov/data/differenced-normalized-burn-ratio-dnbr-data-wildfires-sky-island-mountains-southwestern-us-and",
+  "archive_url": "https://www.sciencebase.gov/catalog/file/get/5ea1d53d82cefae35a16eb92?f=__disk__d7%2Fe9%2F74%2Fd7e9746f8799e90c934bde3fcc377a9a498cb21e",
+  "archive_sha256": "07a2bd18472760a67d26fe78a9bf8643db2af3a7c30030b8237f85db9f66f633",
+  "files": [
+    {
+      "path": "AZ3133311041620120508.tif",
+      "archive_member": "Sky_Island_Fire_dNBR-images_2011_2017/Sky_Island_Fire_dNBR-images_2011_2017/Sky_Island_Fire_dNBR-images_2011_2017/AZ3133311041620120508.tif",
+      "sha256": "e5ad608d00be69808fb9606f7cdce39f983521c08eb1784e6e089c12949039ae",
+      "bytes": 115027,
+      "scale_factor": 0.001,
+      "add_offset": 0
+    },
+    {
+      "path": "AZ3134011074320110214.tif",
+      "archive_member": "Sky_Island_Fire_dNBR-images_2011_2017/Sky_Island_Fire_dNBR-images_2011_2017/Sky_Island_Fire_dNBR-images_2011_2017/AZ3134011074320110214.tif",
+      "sha256": "26c2de0ead265f94fcdc735801e9f091e730a32e302fe51b7861dd24bfed27ea",
+      "bytes": 19941,
+      "scale_factor": 0.001,
+      "add_offset": 0
+    }
+  ],
+  "metadata_sha256": "ec3bde92d05be0ba3e7f1ce65fa9ab7163acee9c827db5c89c318a240f2208e3"
+}

@@ -1,155 +1,119 @@
-# dNBR Upload and Raster Normalization
+# dNBR Input and Normalization Contract
 
-Status: design scaffold, 2026-09-08. The operator has established SBS-like upload,
-different source scales/extents, project-grid normalization, valid watershed
-overlap, and resilience to partial coverage. Choices marked proposed remain
-subject to the pre-implementation contract checkpoint and parameterization ADR.
+Status: backend v1 contract, 2026-09-09; backend implementation and regression conformance verified.
+The current increment is a local Python interface, not a browser upload endpoint,
+NoDb controller, or RQ job. Future transport follows the SBS upload contract.
 
-## SBS Precedent
+## Backend Interface
 
-- [Upload endpoint contract](../../../../../docs/schemas/upload-endpoint-contract.md):
-  run SBS accepts `.tif`, `.tiff`, `.img`, `.vrt`, capped at 100 MiB.
-- [SBS map guide](../../baer/README.sbs_map.md): recommended single-band input,
-  valid spatial reference, integer class values, at most 256 distinct classes.
-- `upload_disturbed_routes.py` uses shared upload-boundary helpers, run access
-  checks, canonical errors, and a synchronous validate/install path.
-- Disturbed aligns SBS to the project DEM using `raster_stacker` with
-  nearest-neighbor sampling because SBS is categorical.
+`normalize_dnbr(source, dem, watershed_mask, output_dir, *, scale_factor,
+add_offset=0, source_refs=(), prefire_date=None, postfire_date=None,
+assessment_type=None)` validates and creates a new completed directory with
+`dnbr.tif` and `manifest.json`. `summarize_dnbr(dnbr, catchment_mask)` returns
+full/partial/unavailable status, valid/total target cells, coverage fraction,
+mean normalized dNBR and M1 F. Both means are the same dimensionless value.
+Paths are local files. Caller supplies authoritative WBT DEM and binary mask;
+mask value 1 denotes catchment, 0/NoData denotes outside. CRS, transform and
+shape must agree exactly. The DEM must use projected meters and a north-up
+square grid. The caller owns WBT/CONUS readiness and active-artifact publication.
 
-The dNBR control should use the same upload/status/error presentation and file
-format family. Inherit the 100 MiB cap unless explicitly revised. Shared upload
-helpers handle transport and naming, not scientific raster validation.
+## Formats, Limits and Encoding
 
-## Source Data Types and Encoding
+Accept .tif/.tiff (GTiff), self-contained .img (HFA), and the safe identity-VRT
+subset below, exactly one real integer/float numeric band. Reject complex,
+RGB/palette imagery, missing CRS, singular/invalid georeferencing and invalid
+encoding. Extensions and actual drivers must agree. Source and reference
+rasters are bounded to 100 MiB per physical file and 25 million cells each;
+these are resource limits, not geographic/scientific eligibility thresholds.
+Identity VRT XML is limited to 64 KiB before parsing. Individual decoded raster
+blocks must also fit the cell limit and 100 MiB, including padded TIFF tiles.
 
-Pending confirmation: accept real integer and floating-point numeric rasters.
-This supports both integer-scaled dNBR and unscaled continuous dNBR without
-requiring users to quantize their data. SBS's integer-valued and 256-class
-restrictions must not be accidentally inherited as dNBR checks. If integer-only
-input is selected, preserve explicit scaling support and document that limit.
+Scale is required, finite and positive; offset is finite. Normalize as
+`raw * scale_factor + add_offset` exactly once, before resampling. Factor
+0.001 represents x1000 values; factor 1 represents unscaled dNBR. Nondefault
+GDAL scale/offset metadata must match the explicit pair or fail with an
+encoding conflict. Default 1/0 metadata is unspecified and does not override
+the caller. No histogram/dtype scale detection. Mask declared NoData, masks,
+NaN and infinities before scaling. Reject overflow. Preserve negative and zero.
+Report values outside theoretical [-2,2] as a diagnostic, never clip or silently
+reject them: upstream processing can depart from the ideal NBR bounds.
 
-Propose exactly one numeric band. RGB/RGBA renderings and categorical SBS/BARC
-values do not encode continuous dNBR; a color table alone does not establish
-numeric semantics. Reject complex-valued data and unreadable/missing CRS or
-georeferencing. Accept reprojectable source CRSs and differing resolutions;
-do not require source UTM or pre-alignment.
+## Local Reference Boundary
 
-Proposed normalization equation:
+Read self-contained GTiff/HFA from in-memory encoded bytes with driver allowlists;
+no external sidecar is part of this backend input. Materialize external masks
+or IMG companion data into a self-contained raster before calling. Reject
+recognized adjacent mask, auxiliary, overview and HFA companion files instead
+of silently discarding their metadata or valid support. Reject
+symlink inputs, nonregular paths and output/input aliases. A future hostile
+browser-upload boundary needs separate containment and contract review.
 
-```text
-normalized_dnbr = stored_value * scale_factor + add_offset
-```
+VRT is a restricted identity wrapper, not an executable GDAL program. Parse
+XML before GDAL access; reject DTD/entities, derived/raw bands, pixel functions,
+remote/absolute/traversing references and unsupported XML elements/attributes.
+Permit one SimpleSource, band 1, relative SourceFilename explicitly allowlisted
+by `source_refs`, pointing to one self-contained GTiff/HFA. Require full-size
+identity SrcRect/DstRect (if present), matching dimensions, dtype, CRS and affine;
+read the validated leaf directly. This supports ordinary identity VRT wrappers
+without enabling mosaics, arbitrary paths, or nested VRTs. Other VRTs receive
+an explicit unsupported-VRT error rather than an implicit conversion.
 
-| Source encoding | Scale | Offset | Example |
-| --- | --- | --- | --- |
-| NBR difference multiplied by 1000 | 0.001 | 0 | 650 becomes 0.65 |
-| Unscaled NBR difference | 1 | 0 | 0.65 remains 0.65 |
-| Other documented numeric encoding | explicit finite positive factor | explicit finite offset | Defined by source provenance |
+## Grid, Resampling, Overlap and Coverage
 
-These are proposed presets, not auto-detection rules. Show the selected encoding
-and resulting valid-data range for confirmation. A dtype or histogram cannot
-reliably distinguish low-magnitude scaled values from normalized values.
-GDAL scale/offset metadata can prepopulate a proposal; define precedence and
-apply the transform exactly once. Conflicting metadata requires resolution,
-not an undocumented override. Preserve source NoData/masks before scaling.
+Write one Float32 GeoTIFF with NaN NoData on the exact DEM CRS/affine/shape.
+Use compiled GDAL nearest-neighbor sampling of the normalized source. This
+preserves actual observations and avoids interpolation across source holes;
+it does not create new 10 m information from a 30 m input. Compare bilinear
+behavior on shifted/holey fixtures as evidence, not a configurable silent mode.
+No extrapolation, gap fill, clipping, or source stretching. Target DEM NoData
+is invalid support. Any watershed cell on DEM NoData is an invalid reference.
 
-Keep normalized negative values (possible greening) and valid zero values.
-Do not clip to 0-1, interpret zero as missing, or reconstruct dNBR from SBS.
-Physical-range validation/tolerance must be set in the parameterization ADR;
-do not add silent clipping as a fallback.
+At least one valid target sample must occur inside the actual watershed mask
+before publication. Disjoint, boundary-touch-only and NoData-only overlap fail;
+subpixel overlap that disappears at target sampling returns the explicit
+`no_valid_target_overlap` error. The interface makes no claim that bounding-box
+intersection alone establishes coverage. Retain normalized data outside the
+watershed within the project grid, with watershed coverage reported separately.
 
-## Canonical Project Raster
+Compute summaries over observed target-cell area (equal square cell weights),
+not full area with implicit zeros. Partial coverage is accepted with no minimum
+fraction; expose its fraction and warning. Empty dNBR support is unavailable
+for that catchment, not zero hazard; empty catchment masks are invalid inputs.
+Keep M1 T/S and M3 independent of dNBR support. M1 F receives normalized mean
+without another /1000. Do not treat target-cell support as exact source-polygon
+area or proof that missing observations are representative.
 
-Propose a single-band Float32 GeoTIFF, normalized NBR-difference values, and
-explicit NaN NoData. Proposed path: `postfire_debris_flow/dnbr.tif` in the run.
-Artifact paths, manifest keys, and exact mask representation are not yet fixed.
+## Metadata, Dates, Output Lifecycle and Errors
 
-The reference grid is the authoritative WBT project DEM grid. Match its CRS,
-affine transform, pixel origin, dimensions, resolution, and extent. Verify
-actual metadata after processing; matching resolution alone can leave a
-half-cell shift. Use the watershed mask for overlap and coverage, not the
-rectangular DEM footprint. Crop larger sources and retain NoData where smaller
-sources do not cover the project. Never stretch a source to fill the target.
+Record input hashes, source/leaf identity, dtype, grid, NoData, declared encoding
+and metadata, normalized range, out-of-range counts, nearest method, target
+identity, mask identity and summary. Optional image dates are ISO YYYY-MM-DD;
+if both exist require prefire < postfire. Unknown dates remain null; fire/event
+filename dates are not image dates. Assessment type is null, initial or extended.
+No scientific dates are inferred from upload time.
 
-Propose normalizing to physical dNBR before resampling, with validity handled
-separately. Reuse owned raster tooling; do not introduce a new GIS dependency.
-The resampling kernel and support-mask rule remain open: continuous dNBR is
-not a categorical SBS map, so SBS's nearest-neighbor choice is a precedent to
-evaluate rather than automatically copy. Compare candidate kernels on coarse,
-fine, shifted, and reprojected grids before choosing. No gap filling or
-extrapolation is implied by resampling.
+Validate into a private sibling staging directory, then publish to a previously
+absent output directory. Existing directories (including empty/symlink ones)
+are rejected, never replaced. Single-writer output ownership is required.
+Failed calls remove their staging and preserve existing/source artifacts.
+Source identity is checked by hashes; no NoDb pointer is updated. The future
+controller must atomically select the completed artifact and invalidate M1
+only; this backend does not claim to implement that lifecycle.
 
-## Overlap and Partial Coverage
+`DnbrError(ValueError)` carries a stable `code`: invalid_input, resource_limit,
+invalid_raster, invalid_grid, invalid_mask, invalid_encoding, encoding_conflict,
+unsafe_reference, unsupported_vrt, invalid_dates, output_exists,
+no_valid_target_overlap, or source_changed. Filesystem operational errors remain
+explicit OSError rather than becoming false input errors. No success manifest
+or ready result may be returned for an incomplete artifact.
 
-Accept an upload if valid source data have positive-area overlap with the
-actual watershed. An intersecting bounding box, boundary-only touch, or
-intersection consisting entirely of NoData does not meet that requirement.
-Processing must also establish valid target-grid support before reporting
-ready. Very small overlap can disappear at target resolution; report this
-explicitly without inventing synthetic coverage.
+## Validation and Deferred Browser Work
 
-Proposed catchment reporting:
-
-- Observed dNBR area and fraction of the full contributing catchment.
-- Whether the mean is full-coverage, partial-coverage, or unavailable.
-- Valid-data mean and the resulting M1 F, using observed-support area weights.
-- Partial-coverage warning in the UI, report, and machine-readable provenance.
-
-For a partial catchment, divide the weighted sum by observed area, not total
-catchment area. Dividing by total area would implicitly assign dNBR zero to
-missing pixels. This observed mean estimates the paper's full-catchment mean
-and can be biased if the available footprint is unrepresentative; identify
-that limitation alongside the coverage fraction.
-
-Keep T and S on their independently defined full contributing-catchment domains;
-the dNBR footprint must not redefine the watershed or SBS burned-area fraction.
-No valid dNBR for a catchment means unavailable M1, not zero risk. Continue for
-other assessable catchments. M3 is not affected by dNBR absence and is never
-selected implicitly. No numerical minimum coverage fraction is approved.
-
-## Metadata, Dates, and Lifecycle
-
-Preserve original filename, content hash, band/dtype, CRS/grid, declared NoData,
-scale/offset source, normalized range, target grid identity, processing version,
-resampling method, and coverage diagnostics. Source imagery dates and initial
-versus extended assessment type should be recorded when supplied; unknown dates
-must remain unknown rather than inferred from upload time. Date-field
-requiredness and date-order validation remain pending.
-
-The uploaded source and successfully processed artifact are distinct states.
-Stage a replacement and validate it before replacing a usable prior upload.
-Failed uploads must not destroy the current source or results. A successful
-replacement invalidates dependent M1 outputs; exact NoDb/RQ freshness fields
-and atomic publication mechanics belong in the implementation checkpoint.
-Do not claim M3 requires rebuilding merely because a dNBR file changes.
-
-VRT/IMG format parity does not authorize arbitrary filesystem/network reads.
-Resolve sidecar/reference handling within the authorized run upload boundary;
-missing assets must produce a useful error. Validate VRT referenced sources
-before opening them and prohibit access outside approved data locations or
-unapproved remote URLs. Decide the concrete safe packaging/reference contract
-before enabling these formats; the filename allowlist is insufficient.
-
-## Validation Plan
-
-Before runtime work, enumerate absent/ready/partial/stale/failed-replacement
-states and define endpoint fields, canonical errors, and upload processing
-orchestration. Test with real raster files and generated artifact readback:
-
-1. Integer x1000 and normalized float fixtures produce equivalent F and M1
-   results within the chosen Float32 tolerance, if float inputs are adopted.
-2. Matching, shifted, finer, coarser, and differing-CRS inputs align exactly to
-   the reference grid. Larger/smaller extents preserve appropriate coverage.
-3. Reject disjoint, boundary-only, all-NoData, and NoData-only watershed overlap.
-4. Accept partial coverage; means use observed area and coverage remains visible.
-5. Catchments with zero support remain unavailable while other results succeed.
-6. Valid negative/zero values survive scaling, masking, and aggregation.
-7. Resampling neither bridges data gaps into valid observations nor contaminates
-   values with source sentinels; target support mask and values agree.
-8. Invalid replacement leaves prior valid artifacts intact; successful
-   replacement invalidates M1 and preserves unrelated project data.
-9. Unsupported data/CRS, size failures, and unsafe VRT references fail explicitly
-   under production-equivalent upload and worker identities.
-
-Amend shared upload/controller-state contracts in the implementation ancestor
-checkpoint; this design does not register a working endpoint or alter SBS.
+Exercise real USGS Arizona rasters and synthetic matching/shifted/coarse/fine/
+reprojected grids, source masks and sentinels, negative/zero values, equivalent
+integer/float encodings, partial support and unavailable catchments. Verify
+real output readback, source hashes, safe VRT/IMG paths and failed-output
+preservation. Future browser transport must cover shared run access, CSRF,
+100 MiB upload enforcement, UI state, NoDb publication/invalidation and error
+translation in its own contract-first ancestor checkpoint. No endpoint is
+registered by this backend contract.

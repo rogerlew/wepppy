@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <idinfo>
+    <citation>
+      <citeinfo>
+        <origin>Miguel L. Villarreal</origin>
+        <origin>Caroline R. Conrad</origin>
+        <pubdate>20200731</pubdate>
+        <title>Differenced Normalized Burn Ratio (dNBR) data of wildfires in the Sky Island Mountains of the southwestern US and northern Mexico from 2011-2017</title>
+        <geoform>raster digital data</geoform>
+        <onlink>https://doi.org/10.5066/P99S0I9W</onlink>
+      </citeinfo>
+    </citation>
+    <descript>
+      <abstract>This dataset is composed of 97 Differenced Normalized Burn Ratio (dNBR) images. Each dNBR represents a rough measure of fire-related vegetation change for wildfires (&gt;400 ha) that occurred in the Sky Island Mountains within the Madrean Archipelago Ecoregion of the United States and Northern Mexico.  These fires occurred between 2011 and 2017 and were mapped using Landsat 7 and 8 satellite imagery.</abstract>
+      <purpose>This database was created for the purpose of determining the approximate severity of wildfires in the Madrean Archipelago Ecoregion from 2011 to 2017, and analyzing the relationship between anthropogenic land uses, climate and fire severity.
+
+This dataset has a companion dataset of the perimeters of the fires mapped for this analysis: 
+
+Villarreal, M.L.,  Poitras, T.B, and Conrad, C.R. Mapped fire perimeters from the Sky Island Mountains of US and Mexico: 1985-2017:U.S. Geological Survey data release, https://doi.org/10.5066/P9BB5TIO
+
+This dataset is an update to the previous release of fire burn severities in the Sky Islands Mountains from 1985-2011: 
+
+Villarreal, M.L., and Poitras, T.B., 2018, Differenced Normalized Burn Ratio (dNBR) data of wildfires in the Sky Island Mountains of the southwestern US and Northern Mexico from 1985-2011: U.S. Geological Survey data release, https://doi.org/10.5066/P9P3NIXR.</purpose>
+    </descript>
+    <timeperd>
+      <timeinfo>
+        <rngdates>
+          <begdate>20110716</begdate>
+          <enddate>20170711</enddate>
+        </rngdates>
+      </timeinfo>
+      <current>observed</current>
+    </timeperd>
+    <status>
+      <progress>Complete</progress>
+      <update>Unknown</update>
+    </status>
+    <spdom>
+      <bounding>
+        <westbc>-111.6802</westbc>
+        <eastbc>-108.2330</eastbc>
+        <northbc>33.1074</northbc>
+        <southbc>29.5325</southbc>
+      </bounding>
+      <descgeog></descgeog>
+    </spdom>
+    <keywords>
+      <theme>
+        <themekt>USGS</themekt>
+        <themekey>burn mapping</themekey>
+        <themekey>wildfire</themekey>
+        <themekey>remote sensing</themekey>
+        <themekey>fires</themekey>
+        <themekey>biota</themekey>
+      </theme>
+      <theme>
+        <themekt>USGS Metadata Identifier</themekt>
+        <themekey>USGS:5ea1d53d82cefae35a16eb92</themekey>
+      </theme>
+      <place>
+        <placekt>USGS</placekt>
+        <placekey>Madrean Archipelago</placekey>
+        <placekey>Sonora, Mexico</placekey>
+        <placekey>Chihuahua, Mexico</placekey>
+        <placekey>New Mexico, USA</placekey>
+        <placekey>Arizona, USA</placekey>
+      </place>
+    </keywords>
+    <accconst>None.  Please see 'Distribution Info' for details.</accconst>
+    <useconst>None. Please check sources, scale, accuracy, currentness and other available information. Please confirm that you are using the most recent copy of both data and metadata. Acknowledgement of the USGS would be appreciated.</useconst>
+    <ptcontac>
+      <cntinfo>
+        <cntperp>
+          <cntper>Miguel Villarreal</cntper>
+          <cntorg>U.S. Geological Survey, PACIFIC REGION</cntorg>
+        </cntperp>
+        <cntpos>Supervisory Research Geographer</cntpos>
+        <cntaddr>
+          <addrtype>mailing address</addrtype>
+          <address>P.O. Box 158</address>
+          <city>Moffett Field</city>
+          <state>CA</state>
+          <postal>94035</postal>
+          <country>US</country>
+        </cntaddr>
+        <cntvoice>650-329-4261</cntvoice>
+        <cntfax>650-329-4710</cntfax>
+        <cntemail>mvillarreal@usgs.gov</cntemail>
+      </cntinfo>
+    </ptcontac>
+    <native>Software: ArcGIS Pro 2.4, Google Earth Engine
+File Name: Sky_Island_Fire_dNBR-images_2011_2017</native>
+  </idinfo>
+  <dataqual>
+    <attracc>
+      <attraccr>No formal attribute accuracy tests were conducted.</attraccr>
+    </attracc>
+    <logic>No formal logical accuracy tests were conducted.</logic>
+    <complete>This data represents wildfires that occurred within the Sky Islands mountain ranges as defined by Madrean Sky Island Complexes GIS dataset provided by skyislandalliance.org (See Deyo et al. 2013 for more information). All other fires at lower elevations were excluded.The dataset is considered complete for the information presented, as described in the abstract. Users are advised to read the rest of the metadata record carefully for additional details.
+
+(Deyo, Nicholas S.; Van Devender, Thomas R.; Smith, Alex; Gilbert, Edward. 2013. Documenting the biodiversity of the Madrean Archipelago: An analysis of a virtual flora and fauna. In: Gottfried, Gerald J.; Ffolliott, Peter F.; Gebow, Brooke S.; Eskew, Lane G.; Collins, Loa C. Merging science and management in a rapidly changing world: Biodiversity and management of the Madrean Archipelago III and 7th Conference on Research and Resource Management in the Southwestern Deserts; 2012 May 1-5; Tucson, AZ. Proceedings. RMRS-P-67. Fort Collins, CO: U.S. Department of Agriculture, Forest Service, Rocky Mountain Research Station. p. 292-299.)</complete>
+    <posacc>
+      <horizpa>
+        <horizpar>A formal accuracy assessment of the horizontal positional information in the dataset has not been conducted.</horizpar>
+      </horizpa>
+      <vertacc>
+        <vertaccr>A formal accuracy assessment of the vertical positional information in the dataset has not been conducted.</vertaccr>
+      </vertacc>
+    </posacc>
+    <lineage>
+      <srcinfo>
+        <srccite>
+          <citeinfo>
+            <origin>Miguel L. Villarreal (Western Geographic Science Center, USGS)</origin>
+            <origin>Travis B. Poitras (Western Geographic Science Center, USGS)</origin>
+            <origin>Caroline R. Conrad (Western Geographic Science Center, USGS)</origin>
+            <pubdate>20170727</pubdate>
+            <title>Mapped fire perimeters from the Sky Island Mountains of US and Mexico: 1985-2017</title>
+            <geoform>vector digital data</geoform>
+          </citeinfo>
+        </srccite>
+        <typesrc>Digital and/or Hardcopy</typesrc>
+        <srctime>
+          <timeinfo>
+            <rngdates>
+              <begdate>19850716</begdate>
+              <enddate>20170711</enddate>
+            </rngdates>
+          </timeinfo>
+          <srccurr>observed</srccurr>
+        </srctime>
+        <srccitea>Sky Island fire perimeters: 1985-2017</srccitea>
+        <srccontr>The source contribution dataset was created for the purpose of delineating wildfire areas in order to approximate severity of wildfires in the Madrean Archipelago Ecoregion from 1985 to 2017, and analyze the relationship between anthropogenic land uses, climate and fire severity.</srccontr>
+      </srcinfo>
+      <procstep>
+        <procdesc>Pre- and post-fire scenes were selected using the USGS Global Visualization Viewer (GloVis). ArcGIS shapefiles containing polygons of the fire scars were uploaded into the viewer to aid with scene selection. All of the selected scenes were then loaded into ArcGIS for closer visual inspection to assess imagery with cloud cover, as cloud-free areas need only extend enough to encompass the burn scar area.
+
+We chose pre- and post-fire images with the best possible matching anniversary dates to minimize differences in sun angle and phenology. 
+
+1) Pre-fire scenes were selected based on the closest date prior to the fire ignition. When necessary, largely due to cloud cover, pre-fire scenes were selected from a year or two before their fire ignition dates, as long as conditions were comparable and no interim disturbances overlapped the burn scar area.
+
+2) Post-fire scenes were selected one year after the pre-fire scene date, resulting in an extended assessment one year after the occurrence of any given fire. By waiting until the following year, burned vegetation has had time to recover and demonstrate additional responses indicative of initial severity.
+
+Of the 97 fires that we analyzed, Landsat 8 OLI images were used as much as possible for pre-fire/post-fire comparisons. If there was not a Landsat 8 OLI image available for pre-fire conditions, Landsat 7 ETM imagery was used for pre-fire and post-fire comparisons. 34 dNBR images were developed from Landsat 7 ETM data. However, due to the known "striping" issue associated with Landsat 7 ETM SLC-off data products; these images have areas of missing data that affect portions of the total burned-area.</procdesc>
+        <procdate>20191001</procdate>
+      </procstep>
+      <procstep>
+        <procdesc>The next step was the application of the Differenced Normalized Burn Ratio (dNBR) image. The dNBR highlights areas where fire has changed the spectral values between the two image dates. The pre- and post-fire images are terrain corrected and further processed to convert to surface reflectance. The Normalized Burn Ratio (NBR) is computed for each date of imagery using the following formula:
+
+((NIR - SWIR2) / (NIR + SWIR2)) = NBR
+
+Where NIR is Band 4 for Landsat 7, and Band 5 for Landsat 8 and SWIR2 is band 7 for both Landsat 7 and 8.
+
+The total differenced NBR is computed by subtracting the post-fire NBR from the pre-fire NBR:
+
+(PreNBR – PostNBR) x 1000 = dNBR
+
+Where 1000 is a conventional scaling factor applied to the dNBR.</procdesc>
+        <procdate>20191015</procdate>
+      </procstep>
+      <procstep>
+        <procdesc>The first step in our GEE code involved uploading a shapefile of polygons representing each fire in our dataset as an asset within GEE. This shapefile and associated metadata can be downloaded from ScienceBase here: https://doi.org/10.5066/P9BB5TIO
+
+Each fire perimeter polygon within the shapefile is named for the fire that it represents, and each dNBR in this database is named accordingly after each fire.
+
+Our code then goes on to call the pre and post-fire Landsat images which it then uses to compute a pre-fire NBR and a post-fire NBR. The two NBRs are then differenced to calculate the dNBR.   
+
+The code then specifies that the final dNBR be clipped according to the boundaries of the fire using the polygon geometry from the shapefile, and outputs the final result as a 30 meter 8-bit image.
+
+What follows is a brief version of sample code used to create a dNBR, our example fire is named - 
+"LOS-AJOS-LA-MADERA-20130618":
+
+// define the individual fire poly from the shapefile
+var fire1 = FirePolys.filterMetadata('Fire_ID','equals',"LOS-AJOS-LA-MADERA-20130618");
+
+// Load two Landsat 5 images.
+var imagePRE = ee.Image('LANDSAT/LE07/C01/T1/LE07_035039_20130612');
+var imagePOST = ee.Image('LANDSAT/LE07/C01/T1/LE07_035039_20140701');
+
+// Compute pre-fire NBR.
+var nbrPRE = imagePRE.normalizedDifference(['B5', 'B7']);
+// Compute post-fire NBR.
+var nbrPOST = imagePOST.normalizedDifference(['B5', 'B7']);
+// Compute dNBR
+var dNBR = ((nbrPRE.subtract(nbrPOST)).multiply(1000));
+
+// Clip the dNBR to the polygon geometry
+var dNBR_clip = dNBR.clip(fire1);
+
+//color scale properties for dnbr
+var dNBRViz = {min: -100, max: 779, palette: ['09f510','fff81d','ff0326']};
+
+// Add a map layer of the dNBR clipped to the polygon.
+Map.addLayer(dNBR_clip, dNBRViz, 'dNBR', true);
+
+//Set id variable to the same Fire_ID
+var id =  "LOS-AJOS-LA-MADERA-20130618"
+;
+Export.image.toDrive({
+image: dNBR,
+description: id,
+folder:'dNBR',
+scale: 30,
+maxPixels: 10000000000000,
+region: area
+});</procdesc>
+        <procdate>20171017</procdate>
+      </procstep>
+    </lineage>
+  </dataqual>
+  <spdoinfo>
+    <direct>Raster</direct>
+    <rastinfo>
+      <rasttype>Grid Cell</rasttype>
+      <rowcount>various</rowcount>
+      <colcount>various</colcount>
+    </rastinfo>
+  </spdoinfo>
+  <spref>
+    <horizsys>
+      <planar>
+        <gridsys>
+          <gridsysn>Universal Transverse Mercator</gridsysn>
+          <utm>
+            <utmzone>12</utmzone>
+            <transmer>
+              <sfctrmer>0.9996</sfctrmer>
+              <longcm>-111.0</longcm>
+              <latprjo>0.0</latprjo>
+              <feast>500000.0</feast>
+              <fnorth>0.0</fnorth>
+            </transmer>
+          </utm>
+        </gridsys>
+        <planci>
+          <plance>coordinate pair</plance>
+          <coordrep>
+            <absres>0.6096</absres>
+            <ordres>0.6096</ordres>
+          </coordrep>
+          <plandu>meters</plandu>
+        </planci>
+      </planar>
+      <geodetic>
+        <horizdn>WGS_1984</horizdn>
+        <ellips>WGS_84</ellips>
+        <semiaxis>6378137.0</semiaxis>
+        <denflat>298.257223563</denflat>
+      </geodetic>
+    </horizsys>
+  </spref>
+  <eainfo>
+    <detailed>
+      <enttyp>
+        <enttypl>Sky_Island_Fire_dNBR-images_2011-2017</enttypl>
+        <enttypd>Included in this data package are 97 dNBRs, in Raster image format (.tif); created from fires that occurred between 2011-2017 within the Sky Island mountain ranges in the USA and Mexico.
+
+Each dNBR is named for the fire that it is associated with.  The naming convention for dNBRs within the US are based on the MTBS fire naming designations, and these names were not changed.  MTBS (Monitoring Trends in Burn Severity) is a multiagency program which maps burn perimeters and severity of wildfires throughout the US (https://www.mtbs.gov/).  The names of dNBRs within Mexico are designated according to the following protocol: Each fire is named for the Sky Island mountain complex that the fire occurs within, along with the date of the first Landsat scene showing evidence of a fire-scar.  For example:"EL-PINITO-20110521", this fire took place within the El Pinito complex on or around May 21, 2011.</enttypd>
+        <enttypds>Producer defined</enttypds>
+      </enttyp>
+    </detailed>
+    <overview>
+      <eaover>This dataset is composed of 97 Differenced Normalized Burn Ratio (dNBR) images.  Each dNBR represents a wildfire that occurred in the Sky Island Mountains within the Madrean Archipelago Ecoregion of the United States and Mexico.  These fires occurred from 2011 to 2017 and were mapped using Landsat satellite imagery.</eaover>
+      <eadetcit>Producer defined</eadetcit>
+    </overview>
+  </eainfo>
+  <distinfo>
+    <distrib>
+      <cntinfo>
+        <cntorgp>
+          <cntorg>U.S. Geological Survey</cntorg>
+          <cntper>GS ScienceBase</cntper>
+        </cntorgp>
+        <cntaddr>
+          <addrtype>mailing address</addrtype>
+          <address>Denver Federal Center, Building 810, Mail Stop 302</address>
+          <city>Denver</city>
+          <state>CO</state>
+          <postal>80225</postal>
+          <country>United States</country>
+        </cntaddr>
+        <cntvoice>1-888-275-8747</cntvoice>
+        <cntemail>sciencebase@usgs.gov</cntemail>
+      </cntinfo>
+    </distrib>
+    <distliab>Unless otherwise stated, all data, metadata and related materials are considered to satisfy the quality standards relative to the purpose for which the data were collected. Although these data and associated metadata have been reviewed for accuracy and completeness and approved for release by the U.S. Geological Survey (USGS), no warranty expressed or implied is made regarding the display or utility of the data on any other system or for general or scientific purposes, nor shall the act of distribution constitute any such warranty.</distliab>
+    <stdorder>
+      <digform>
+        <digtinfo>
+          <formname>Digital Data</formname>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://doi.org/10.5066/P99S0I9W</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <fees>None</fees>
+    </stdorder>
+  </distinfo>
+  <metainfo>
+    <metd>20200830</metd>
+    <metc>
+      <cntinfo>
+        <cntperp>
+          <cntper>Miguel Villarreal</cntper>
+          <cntorg>U.S. Geological Survey, PACIFIC REGION</cntorg>
+        </cntperp>
+        <cntpos>Supervisory Research Geographer</cntpos>
+        <cntaddr>
+          <addrtype>mailing</addrtype>
+          <address>P.O. Box 158</address>
+          <city>Moffett Field</city>
+          <state>CA</state>
+          <postal>94035</postal>
+          <country>US</country>
+        </cntaddr>
+        <cntvoice>650-329-4261</cntvoice>
+        <cntfax>650-329-4710</cntfax>
+        <cntemail>mvillarreal@usgs.gov</cntemail>
+      </cntinfo>
+    </metc>
+    <metstdn>FGDC Biological Data Profile of the Content Standard for Digital Geospatial Metadata</metstdn>
+    <metstdv>FGDC-STD-001.1-1999</metstdv>
+    <metuc>Record created using USGS Metadata Wizard tool. (https://github.com/usgs/fort-pymdwizard)</metuc>
+  </metainfo>
+</metadata>

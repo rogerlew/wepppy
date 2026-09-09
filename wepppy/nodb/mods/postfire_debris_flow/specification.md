@@ -271,20 +271,23 @@ of browser preferences. Detailed export schemas remain pending.
 Accepted direction: reuse SBS upload conventions, accept different source grids
 and extents, create a standardized project-aligned raster, require valid overlap
 with the watershed, and support partial coverage. The detailed
-[dNBR upload design](docs/dnbr_upload.md) records implementation proposals and
-remaining choices separately. No upload endpoint is implemented by this document.
+[dNBR backend contract](docs/dnbr_upload.md) fixes the Python normalization and
+summary interface; ADR-0054 records its numerical choices. Browser upload and
+NoDb/RQ publication remain deferred.
 
 The SBS precedent accepts `.tif`, `.tiff`, `.img`, and `.vrt` with a 100 MiB
 file cap. Its categorical value checks (integer values and at most 256 classes)
-are not a complete continuous-dNBR validator. Source numeric-type support needs
-explicit resolution: integer and floating-point input is recommended, while
-retaining the same file-format family. Do not silently narrow or broaden this
-choice in code.
+do not apply to continuous dNBR. Backend v1 accepts real integer and floating-
+point single-band inputs, self-contained GTiff/HFA and explicitly allowlisted
+identity VRT wrappers. It does not execute arbitrary VRTs or read sidecars.
+The contract defines validation and resource limits; future transport must
+handle packaging and access independently.
 
 Normalize to the authoritative WBT project grid: CRS, resolution, origin,
 affine transform, dimensions, and extent must match, not just the EPSG code and
-nominal cell size. Proposed output is a single-band Float32 GeoTIFF containing
-normalized prefire-minus-postfire NBR difference with explicit NoData.
+nominal cell size. Output is a single-band Float32 GeoTIFF containing
+normalized prefire-minus-postfire NBR difference with NaN NoData. Backend v1
+uses compiled GDAL nearest sampling to retain source observations and holes.
 Use a separate coverage/support mask when needed to keep resampling from
 turning absent source coverage into observations. Preserve the source artifact
 and normalization provenance.
@@ -296,7 +299,7 @@ values. NoData is not unburned and is not dNBR zero.
 
 Require positive valid-data overlap with the actual watershed mask; bounding-box
 intersection alone is insufficient. Partial coverage is accepted and reported.
-For catchments with some valid dNBR, the proposed F is the area-weighted mean
+For catchments with some valid dNBR, F is the area-weighted target-cell mean
 over observed support, with observed area/fraction reported against the full
 catchment. This is a partial-coverage estimate of the publication's full-area
 predictor. Do not shrink the SBS or soil aggregation domains to the dNBR footprint.
@@ -432,9 +435,9 @@ Paths below are reserved design locations; executable files do not yet exist.
    contract and recommended 10 m requirement; original calibration
    preprocessing equivalence remains unproven.
 3. Assessment scope and spatial aggregation/NoData rules.
-4. Ratify dNBR numeric-type support, encoding presets, resampling/support-mask
-   method, date-field requiredness, and detailed partial-coverage aggregation;
-   formats, project alignment, overlap, and partial-coverage direction are set.
+4. Integrate the accepted dNBR backend with future browser transport, run
+   access, active-artifact publication and M1 freshness under contract-first
+   sequencing. Backend encoding/grid/coverage choices are in ADR-0054.
 5. Ratify the proposed rainfall-source selector and 12-scenario matrix above;
    set source default, sample adequacy guidance, probability thresholds, and
    numerical edge cases.

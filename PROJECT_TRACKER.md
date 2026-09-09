@@ -7,6 +7,10 @@
 
 ## Purpose
 
+Implemented locally: [Staley dNBR backend](docs/work-packages/20260908_staley_dnbr/package.md)
+— explicit encoding, project-grid normalization, partial coverage and public
+Arizona fixtures; browser/NoDb/RQ wiring deferred.
+
 Implemented locally: [Fork read retry and failure reporting](docs/work-packages/20260906_fork_read_retry_hardening/package.md)
 — bounded initial reads, original errno diagnostics, and fork prerequisite failures;
 228 focused tests and independent reviews passed. Production rollout remains gated.

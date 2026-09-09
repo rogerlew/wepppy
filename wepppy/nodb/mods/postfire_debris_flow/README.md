@@ -5,8 +5,9 @@
 
 ## Status
 
-Offline soil-thickness derivation and a reproducible source-comparison harness
-are implemented. No postfire controller, UI, API or production model wiring is
+Offline soil-thickness derivation, its source-comparison harness, and the local
+dNBR normalization/summary backend are implemented. No postfire controller,
+browser UI, HTTP API or production model wiring is
 implemented here. Existing `debris_flow` behavior is unchanged.
 The [specification](specification.md) distinguishes accepted direction from
 open scientific and integration decisions.
@@ -79,6 +80,34 @@ Source selection and fallback contributions must be reported. Material policy,
 partial-support handling, and fallback granularity remain implementation
 decisions; the offline complete-only criterion is not a production requirement.
 The study measures source sensitivity, not comparative predictive accuracy.
+
+## dNBR Backend
+
+The local Python interface in `dnbr.py` normalizes explicitly encoded dNBR
+onto a supplied WBT project grid. It accepts partial coverage and reports
+observed-support means for M1 without double scaling. Example:
+
+```python
+from wepppy.nodb.mods.postfire_debris_flow.dnbr import normalize_dnbr, summarize_dnbr
+
+manifest = normalize_dnbr(
+    source="source_dnbr.tif", dem="dem.tif", watershed_mask="catchment_mask.tif",
+    output_dir="new_dnbr_artifact", scale_factor=0.001,
+)
+summary = summarize_dnbr("new_dnbr_artifact/dnbr.tif", "catchment_mask.tif")
+```
+
+The output directory must not exist; failed processing preserves prior artifacts.
+The mask must be binary 1 inside / 0 outside on the exact DEM grid. Do not pass
+an arbitrary watershed label raster without constructing the binary mask.
+This is a backend interface, not a working browser upload or NoDb publication
+workflow. See the [input contract](docs/dnbr_upload.md) for safe VRT restrictions,
+self-contained IMG, optional dates, limits, error codes and provenance.
+
+Two real USGS Arizona fixtures (CC0) and their original metadata are included
+under `tests/nodb/mods/fixtures/postfire_debris_flow_dnbr`. They are Float32
+x1000 data, so use explicit scale 0.001. The tests also cover normalized floats
+and integer encoding; dtype alone cannot establish scale.
 
 ## References and Licensing
 

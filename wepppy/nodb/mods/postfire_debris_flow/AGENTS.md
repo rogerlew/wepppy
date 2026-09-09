@@ -1,7 +1,8 @@
 # Postfire Debris Flow
 
 - Current domain specification: [specification.md](specification.md).
-- Status: documentation scaffold; implementation conformance is pending.
+- Status: offline soil helper and local dNBR backend exist; production NoDb/UI/RQ
+  integration remains pending.
 - Preserve accepted decisions and explicitly label proposals and unresolved inputs.
 - Follow `../../AGENTS.md` and the repository contract-first standard before
   adding NoDb, UI, API, or RQ behavior. This scaffold is not a completed
