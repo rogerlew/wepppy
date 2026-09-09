@@ -218,14 +218,61 @@ def _download_spec(spec_url: str, headers: dict[str, str] | None, target_dir: Pa
     # Write spec file to target_dir if provided (avoids snap/container filesystem issues)
     if target_dir is not None:
         target_dir.mkdir(parents=True, exist_ok=True)
-        spec_file = target_dir / ".aria2c.spec"
-        spec_file.write_bytes(response.content)
-        return spec_file
+        with tempfile.NamedTemporaryFile(
+            dir=target_dir, prefix=".aria2c.spec-", delete=False
+        ) as handle:
+            handle.write(response.content)
+            return Path(handle.name)
     
     tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".aria2")
     with tmp_file:
         tmp_file.write(response.content)
         return Path(tmp_file.name)
+
+
+def _prepare_sync_files(input_file: Path, target_dir: Path) -> None:
+    """Validate the complete manifest before removing listed transfer state."""
+    root = target_dir.resolve()
+    destinations: list[Path] = []
+    pending_url = False
+    for raw in input_file.read_text(encoding="utf-8").splitlines():
+        if not raw.strip():
+            continue
+        if raw[0].isspace():
+            option = raw.strip()
+            if not pending_url or not option.startswith("out="):
+                raise ValueError("Unsupported run sync manifest directive")
+            name = option[4:]
+            relative = Path(name)
+            if (not name or any(ord(char) < 32 or ord(char) == 127 for char in name)
+                    or relative.is_absolute() or ".." in relative.parts
+                    or relative == Path(".") or relative.name.startswith(".aria2c.spec")):
+                raise ValueError(f"Invalid run sync destination: {name}")
+            destinations.append(root / relative)
+            pending_url = False
+        else:
+            if pending_url or urlparse(raw).scheme not in {"http", "https"}:
+                raise ValueError("Invalid run sync manifest URL or missing out path")
+            pending_url = True
+    if pending_url:
+        raise ValueError("Run sync manifest URL missing out path")
+
+    paths = [path for dest in destinations for path in (dest, Path(str(dest) + ".aria2"))]
+    if len(set(paths)) != len(paths):
+        raise ValueError("Run sync destination/control path collision")
+    path_set = set(paths)
+    for path in paths:
+        if input_file.resolve() == path or any(parent in path_set for parent in path.parents):
+            raise ValueError("Run sync destination path collision")
+        for ancestor in path.parents:
+            if ancestor == root:
+                break
+            if ancestor.is_symlink() or (ancestor.exists() and not ancestor.is_dir()):
+                raise ValueError(f"Unsafe run sync ancestor: {ancestor}")
+        if path.is_symlink() or (path.exists() and not path.is_file()):
+            raise ValueError(f"Unsafe run sync destination: {path}")
+    for path in paths:
+        path.unlink(missing_ok=True)
 
 
 def _run_aria2c(
@@ -237,11 +284,13 @@ def _run_aria2c(
     if shutil.which("aria2c") is None:
         raise RuntimeError("aria2c is required to sync runs but was not found on PATH")
 
+    _prepare_sync_files(input_file, target_dir)
+
     cmd = [
         "aria2c",
         "--allow-overwrite=true",
         "--auto-file-renaming=false",
-        "--continue=true",
+        "--continue=false",
         "--check-integrity=true",
         "--max-connection-per-server=4",
         "--retry-wait=3",
@@ -263,6 +312,7 @@ def _run_aria2c(
         bufsize=1,
     )
     output_tail: deque[str] = deque(maxlen=50)
+    error_lines: deque[str] = deque(maxlen=50)
 
     assert process.stdout is not None
     for line in process.stdout:
@@ -270,12 +320,16 @@ def _run_aria2c(
         if not cleaned:
             continue
         output_tail.append(cleaned)
+        if any(marker in cleaned.lower() for marker in ("error", "exception", "|err", "failed", "->", "abort")):
+            error_lines.append(cleaned)
         if status_callback:
             status_callback(cleaned)
 
     process.wait()
     if process.returncode != 0:
-        tail = "\n".join(output_tail)
+        diagnostics = list(error_lines)
+        diagnostics.extend(line for line in output_tail if line not in error_lines)
+        tail = "\n".join(diagnostics)
         raise RuntimeError(f"aria2c failed ({process.returncode}): {tail}")
 
 

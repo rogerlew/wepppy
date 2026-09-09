@@ -2,7 +2,8 @@
 
 ## Replacement semantics
 
-Implementation conformance: pending (2026-09-09).
+Implementation conformance: implemented locally and regression-tested
+(2026-09-09); live browser workflow validation remains pending.
 
 A requested sync treats the source manifest as authoritative for listed files.
 Before payload downloading, validate the entire manifest and all destination paths.

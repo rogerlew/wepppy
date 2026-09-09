@@ -21,7 +21,7 @@ function installDom(token = "rq-token") {
           <input id="run_migrations" name="run_migrations" type="checkbox" checked>
           <input id="archive_before" name="archive_before" type="checkbox">
           <button id="run_sync_submit" type="submit">Start sync</button>
-          <section id="run_sync_status_panel"><pre id="run_sync_status_log"></pre></section>
+          <section id="run_sync_status_panel"><pre id="run_sync_status_log"></pre><p data-job-hint hidden></p></section>
           <section data-stacktrace-panel hidden><div id="stacktrace" data-stacktrace-body></div></section>
           <div id="run_sync_summary"></div>
         </form>
@@ -125,6 +125,10 @@ describe("Run Sync dashboard contract", () => {
             { headers: { Authorization: "Bearer rq-token" } }
         );
         expect(poller.set_rq_job_id).toHaveBeenCalledWith(poller, "sync-job");
+        poller.hint.html('<a href="/job/sync-job">sync-job</a>');
+        poller.hint.show();
+        expect(document.querySelector("[data-job-hint]").hidden).toBe(false);
+        expect(document.querySelector("[data-job-hint] a").textContent).toBe("sync-job");
         expect(poller.attach_status_stream).toHaveBeenCalledWith(
             poller,
             expect.objectContaining({ channel: "run_sync", runId: "run one" })
@@ -239,10 +243,16 @@ describe("Run Sync dashboard contract", () => {
         );
         await settle();
 
+        await import("../control_base.js");
+        var realController = window.controlBase();
+        poller.rq_job_id = "sync-job";
+        realController.render_job_hint(poller);
         poller.triggerEvent("RUN_SYNC_FAILED");
         poller.triggerEvent("RUN_SYNC_FAILED");
         await settle();
 
+        expect(document.querySelector("[data-job-hint] a").textContent).toBe("sync-job");
+        expect(document.querySelector("[data-job-hint]").hidden).toBe(false);
         expect(document.getElementById("run_sync_summary").textContent).toContain(
             "Sync failed"
         );

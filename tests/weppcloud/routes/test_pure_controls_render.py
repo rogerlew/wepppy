@@ -3384,6 +3384,8 @@ def test_run_sync_console_renders_exact_admin_contract_and_escaped_config(
     assert 'name="run_migrations"' in rendered
     assert 'id="archive_before"' in rendered
     assert 'name="archive_before"' in rendered
+    assert 'id="run_sync_job_hint"' in rendered
+    assert 'data-job-hint' in rendered
     assert 'id="run_sync_submit"' in rendered
     assert "/static/js/controllers-gl.js" in rendered
     assert "/static/js/controllers_gl_stale_check.js" in rendered

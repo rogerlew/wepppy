@@ -466,6 +466,12 @@
             }
             poller = controlBase();
             poller.form = form;
+            var jobHint = container.querySelector("[data-job-hint]");
+            poller.hint = jobHint ? {
+                html: function (value) { jobHint.innerHTML = value; },
+                show: function () { jobHint.hidden = false; },
+                hide: function () { jobHint.hidden = true; }
+            } : null;
             poller.rq_job = statusPanel ? statusPanel.querySelector("#rq_job") : container.querySelector("#rq_job");
             poller.stacktrace = stacktraceBody;
             poller.statusSpinnerEl = statusPanel ? statusPanel.querySelector("#braille") : container.querySelector("#braille");

@@ -1,6 +1,6 @@
 # Run sync overwrite
 
-Status: pre-implementation checkpoint; implementation pending commit authority.
+Status: implemented locally and tested; live workflow validation pending.
 
 Scope: worker cleanup and fresh replacement of manifest-listed files, with real
 filesystem and downloader regression coverage. Source service, queue wiring,

@@ -17,9 +17,9 @@ Implemented locally: [Creation failure diagnostics](docs/work-packages/20260909_
 — named-preset failures expose safe causes and next steps, with correlated
 tracebacks and response logs; live Portland failure verified.
 
-Checkpoint preparation: [Run sync overwrite](docs/work-packages/20260909_run_sync_overwrite/package.md)
-— manifest-scoped partial cleanup and fresh replacement; implementation pending
-reviewed contract commit authority.
+Implemented locally: [Run sync overwrite](docs/work-packages/20260909_run_sync_overwrite/package.md)
+— manifest-scoped partial cleanup and fresh replacement; 30 focused tests and
+8057 broad tests passed. Live browser workflow validation remains pending.
 
 Implemented locally: [Yearly water-balance repair](docs/work-packages/20260909_yearly_water_balance/package.md)
 — surface-runoff reporting and explicit all-years selection; production-data
