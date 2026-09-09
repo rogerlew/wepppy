@@ -33,19 +33,16 @@ no GPL source or tests were consulted or copied.
 
 ## Decisions and recommendations
 
-| ID | Recommendation | Decision/evidence needed |
+| ID | Disposition | Evidence and limit |
 | --- | --- | --- |
-| S01 | Horn 3×3 adopted by owner, ADR-0058. Raw project DEM remains recommended; preserve existing FVSlope and generic Slope. | Algorithm resolved 2026-09-09 UTC; verify implementation and characterize sensitivity. Source/edge policies remain open. Original calibration equivalence is unproven. |
-| S02 | Compute on the full available DEM before applying the watershed mask; require a valid center and eight valid neighbors, with no edge interpolation. | Document one-cell halo and residual unknown support; compare strict Horn with published Esri missing-neighbor behavior. Raw versus conditioned surface effects must be separated from algorithm effects. |
-| S03 | Accepted: preserve unknown intersection support; report full-area counts and bounds, with no point T where unresolved cells remain. | Owner accepted 2026-09-09 UTC, ADR-0058. No partial extrapolation, zero fill or coverage cutoff. A known false operand determines a false intersection even if the other operand is missing. |
-| S04 | Explicit recognized SBS class mapping from the existing SBS owner; no dtype/range guesses, recoding of NoData as unburned, or bilinear class resampling. | Audit `Disturbed.sbs_4class_path` and `SoilBurnSeverityMap`; distinguish normalized four-class values from legacy landuse burn codes 130–133. Engineering contract, not an extra user classification workflow. |
-| S05 | Evaluate both existing 10 m and 30 m project fixtures without imposing a new M1 resolution gate. | Measure T and downstream probability effects. M3's existing 10 m recommendation does not automatically apply to M1. Any M1 gate requires a separate evidence-backed owner decision. |
+| S01 | Horn 3×3 adopted; generic Slope/FVSlope preserved. | ADR-0058; independent f64 oracle and six-terrain comparison. Original 2017 calibration equivalence unproven. |
+| S02 | Raw meter DEM, full DEM before basin masking, strict center/eight-neighbor validity. | ADR-0058 execution disposition; analytical edges and separate conditioning contrasts. Esri gap reweighting characterized separately. |
+| S03 | True/false/unknown with full-watershed bounds and no point T for U>0. | Owner accepted policy; known false operand still determines false. Tests cover missing slopes/SBS and valid zero. |
+| S04 | Required explicit class map; normalized values 0–3, NoData 255. | Disturbed/SoilBurnSeverityMap source audit. Prepared grayscale with explicit SampleFormat and finite NoData avoids legacy reader reinterpretation; no implicit resampling or dNBR substitution. |
+| S05 | Native 10/30 m existing main-watershed contrasts, no resolution gate. | Terrain report retains mask/area/outlet context, synthetic SBS and fixed numerical scenarios; no predictive-accuracy claim. |
 
-Strict support can still yield a determined intersection where one input is
-missing: known unburned/low SBS proves false regardless of slope; known slope
-below threshold proves false regardless of SBS. Track SBS coverage separately
-so this logical deduction does not masquerade as full SBS observation.
-
+See [validation](validation.md), [terrain report](terrain_report.md), and the
+independent reviews for completed implementation and remaining production scope.
 ## Evaluation panel
 
 Reuse `/workdir/weppcloud-wbt/test_fixtures/staley_m3_resolution/` for Moscow

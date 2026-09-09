@@ -1,0 +1,236 @@
+{
+  "binary": "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+  "binary_sha256": "6647d55c2d8d28680addd16adc4d9d406857a7ccb394cd4260a2d61d7d8ffc42",
+  "sources_preserved": true,
+  "cases": [
+    {
+      "case": "valid",
+      "returncode": 0,
+      "seconds": 0.0244,
+      "stderr": "",
+      "output_exists": true,
+      "summary_exists": true,
+      "mode": "0o700",
+      "products": [
+        "intersection.tif",
+        "slope.tif",
+        "summary.json",
+        "support.tif"
+      ]
+    },
+    {
+      "case": "whitespace_nodata",
+      "returncode": 0,
+      "seconds": 0.0236,
+      "stderr": "",
+      "output_exists": true,
+      "summary_exists": true,
+      "mode": "0o700",
+      "products": [
+        "intersection.tif",
+        "slope.tif",
+        "summary.json",
+        "support.tif"
+      ]
+    },
+    {
+      "case": "planar2",
+      "returncode": 0,
+      "seconds": 0.0207,
+      "stderr": "",
+      "output_exists": true,
+      "summary_exists": true,
+      "mode": "0o700",
+      "products": [
+        "intersection.tif",
+        "slope.tif",
+        "summary.json",
+        "support.tif"
+      ]
+    },
+    {
+      "case": "f32_nodata_overflow",
+      "returncode": 1,
+      "seconds": 0.0102,
+      "stderr": "Error: Custom { kind: InvalidInput, error: \"NoData is not representable as finite Float32\" }\n",
+      "output_exists": false,
+      "summary_exists": false
+    },
+    {
+      "case": "nan_nodata",
+      "returncode": 1,
+      "seconds": 0.0094,
+      "stderr": "Error: Custom { kind: InvalidInput, error: \"Require finite NoData; legacy reader normalizes nonfinite sentinels\" }\n",
+      "output_exists": false,
+      "summary_exists": false
+    },
+    {
+      "case": "short_geokey",
+      "returncode": 1,
+      "seconds": 0.0117,
+      "stderr": "Error: Custom { kind: InvalidInput, error: \"Invalid GeoKey directory\" }\n",
+      "output_exists": false,
+      "summary_exists": false
+    },
+    {
+      "case": "excess_geokey_count",
+      "returncode": 1,
+      "seconds": 0.0104,
+      "stderr": "Error: Custom { kind: InvalidInput, error: \"Invalid or excessive GeoKey count\" }\n",
+      "output_exists": false,
+      "summary_exists": false
+    },
+    {
+      "case": "bad_geokey_ascii_ref",
+      "returncode": 1,
+      "seconds": 0.0108,
+      "stderr": "Error: Custom { kind: InvalidInput, error: \"Missing GeoKey parameter tag\" }\n",
+      "output_exists": false,
+      "summary_exists": false
+    },
+    {
+      "case": "bad_geokey_double_ref",
+      "returncode": 1,
+      "seconds": 0.0102,
+      "stderr": "Error: Custom { kind: InvalidInput, error: \"Missing GeoKey parameter tag\" }\n",
+      "output_exists": false,
+      "summary_exists": false
+    },
+    {
+      "case": "unknown_units",
+      "returncode": 1,
+      "seconds": 0.0117,
+      "stderr": "\nthread 'main' (991123) panicked at whitebox-raster/src/geotiff/mod.rs:974:45:\ncalled `Option::unwrap()` on a `None` value\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\nError: Custom { kind: InvalidInput, error: \"GeoTIFF decoder rejected malformed metadata: /tmp/staley-security-final24/unknown_units.tif\" }\n",
+      "output_exists": false,
+      "summary_exists": false
+    },
+    {
+      "case": "byte_width",
+      "returncode": 1,
+      "seconds": 0.0122,
+      "stderr": "Error: Custom { kind: InvalidInput, error: \"Invalid TIFF layout tag type\" }\n",
+      "output_exists": false,
+      "summary_exists": false
+    },
+    {
+      "case": "wrong_scale_type",
+      "returncode": 1,
+      "seconds": 0.0122,
+      "stderr": "Error: Custom { kind: InvalidInput, error: \"Require three DOUBLE pixel scales\" }\n",
+      "output_exists": false,
+      "summary_exists": false
+    },
+    {
+      "case": "two_tiepoints",
+      "returncode": 1,
+      "seconds": 0.0118,
+      "stderr": "Error: Custom { kind: InvalidInput, error: \"Require one six-DOUBLE tiepoint\" }\n",
+      "output_exists": false,
+      "summary_exists": false
+    },
+    {
+      "case": "invalid_utf8_nodata",
+      "returncode": 1,
+      "seconds": 0.0103,
+      "stderr": "Error: Custom { kind: InvalidInput, error: \"Invalid NoData text\" }\n",
+      "output_exists": false,
+      "summary_exists": false
+    },
+    {
+      "case": "huge_cells",
+      "returncode": 1,
+      "seconds": 0.012,
+      "stderr": "Error: Custom { kind: InvalidInput, error: \"Raster exceeds 10 million cells or is empty\" }\n",
+      "output_exists": false,
+      "summary_exists": false
+    },
+    {
+      "case": "existing_file",
+      "returncode": 1,
+      "seconds": 0.0102,
+      "stderr": "Error: Custom { kind: InvalidInput, error: \"Output directory already exists\" }\n",
+      "output_exists": true,
+      "summary_exists": false
+    },
+    {
+      "case": "existing_dir",
+      "returncode": 1,
+      "seconds": 0.0096,
+      "stderr": "Error: Custom { kind: InvalidInput, error: \"Output directory already exists\" }\n",
+      "output_exists": true,
+      "summary_exists": true,
+      "mode": "0o775",
+      "products": [
+        "summary.json"
+      ]
+    },
+    {
+      "case": "dangling_symlink",
+      "returncode": 1,
+      "seconds": 0.0105,
+      "stderr": "Error: Custom { kind: InvalidInput, error: \"Output directory already exists\" }\n",
+      "output_exists": false,
+      "summary_exists": false
+    },
+    {
+      "case": "missing_parent",
+      "returncode": 1,
+      "seconds": 0.0121,
+      "stderr": "Error: Os { code: 2, kind: NotFound, message: \"No such file or directory\" }\n",
+      "output_exists": false,
+      "summary_exists": false
+    },
+    {
+      "case": "midwrite_limit",
+      "returncode": 1,
+      "seconds": 0.0219,
+      "stderr": "Error: Os { code: 27, kind: FileTooLarge, message: \"File too large\" }\n",
+      "output_exists": true,
+      "summary_exists": false,
+      "mode": "0o700",
+      "products": [
+        "slope.tif"
+      ]
+    },
+    {
+      "case": "inflated_strip",
+      "returncode": 1,
+      "seconds": 0.0115,
+      "stderr": "Error: Custom { kind: InvalidInput, error: \"Invalid strip byte range\" }\n",
+      "output_exists": false,
+      "summary_exists": false
+    },
+    {
+      "case": "aliased_metadata",
+      "returncode": 1,
+      "seconds": 0.0249,
+      "stderr": "Error: Custom { kind: InvalidInput, error: \"Invalid TIFF tag size\" }\n",
+      "output_exists": false,
+      "summary_exists": false
+    },
+    {
+      "case": "permitted_geokeys",
+      "returncode": 0,
+      "seconds": 0.0405,
+      "stderr": "",
+      "output_exists": true,
+      "summary_exists": true,
+      "mode": "0o700",
+      "products": [
+        "intersection.tif",
+        "slope.tif",
+        "summary.json",
+        "support.tif"
+      ]
+    },
+    {
+      "case": "excessive_geokeys",
+      "returncode": 1,
+      "seconds": 0.0104,
+      "stderr": "Error: Custom { kind: InvalidInput, error: \"Invalid or excessive GeoKey count\" }\n",
+      "output_exists": false,
+      "summary_exists": false
+    }
+  ],
+  "passed": 24
+}

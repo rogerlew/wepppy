@@ -3,7 +3,7 @@
 
 This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md` in
 WEPPpy. Maintain Progress, Surprises & Discoveries, Decision Log and Outcomes &
-Retrospective. This request scaffolds the package; execution has not started.
+Retrospective. Execution started 2026-09-09 UTC.
 
 ## Purpose / Big Picture
 
@@ -20,10 +20,10 @@ Rust backend with evidence, not an installed WEPPcloud model or new UI.
 - [x] (2026-09-09 05:08 UTC) Inspect initial science/code evidence and scaffold.
 - [x] (2026-09-09 UTC) Owner adopted Horn 3×3; ADR-0058 records algorithm choice.
 - [x] (2026-09-09 UTC) Owner accepted uncertainty preservation (ADR-0058).
-- [ ] Resolve surface and neighborhood edges; finalize contract/ADR.
-- [ ] Implement registered Rust tooling, bindings and synthetic tests.
-- [ ] Run existing three-site terrain panel and inspect current-binary artifacts.
-- [ ] Independent correctness/security reviews, validation and documented handoff.
+- [x] (2026-09-09 UTC) Resolve raw source/strict edges and freeze additive tool contract/ADR before implementation.
+- [x] (2026-09-09 UTC) Implement registered StaleySlopeSbs, both bindings and synthetic fixtures.
+- [x] (2026-09-09 UTC) Six native main watersheds, 48 method rows, 432 scenarios and inspected generated rasters.
+- [x] (2026-09-09 UTC) Independent correctness/security reviews closed; 157 Rust, 60 analytical and 24 security cases; docs and reproducible handoff.
 
 ## Surprises & Discoveries
 
@@ -31,7 +31,7 @@ Rust backend with evidence, not an installed WEPPcloud model or new UI.
 Existing FVSlope measures drop toward the D8 receiver, not a neighborhood surface
 gradient. WBT's projected generic Slope uses Florinsky 5×5, not Horn 3×3.
 The inspected Staley manuscript establishes 10 m terrain and ≥23°, but no
-explicit differentiation stencil. Horn is now selected; raw DEM remains proposed. Do not claim
+explicit differentiation stencil. Horn, raw DEM and strict nine-valid-cell edges are selected. Do not claim
 original calibration parity. Initial web evidence and local source locations
 are in `artifacts/slope_method_findings.md` in this package. Subsequent verified
 historical evidence confirms ArcGIS planar/Horn-style slope in the preserved
@@ -44,18 +44,43 @@ the canonical `docs/historical_slope_evidence.md` in the module before compariso
 2026-09-09 05:08 UTC: user requests slope/SBS tooling in weppcloud-wbt and
 algorithm determination. Reuse the existing project watershed/outlet per
 ADR-0055. No nested basin workflow, change to FVSlope, or production caller.
-The owner subsequently adopted Horn 3×3 (2026-09-09 UTC, ADR-0058). Raw
-terrain and neighborhood edges remain proposed. Owner subsequently accepted
+The owner subsequently adopted Horn 3×3 (2026-09-09 UTC, ADR-0058). Raw terrain and strict neighborhood edges are adopted in the execution disposition. Owner subsequently accepted
 uncertainty preservation: unresolved intersection cells yield bounds and no
 point T. Comparisons verify
 and characterize Horn; they do not reopen the algorithm decision.
 
+2026-09-09 execution: implement one dedicated StaleySlopeSbs tool, with explicit
+units/class codes and raw meter DEM/strict nine-cell neighborhoods. Reserve a
+fresh 0700 directory and write summary.json last; failed/interrupted writes remain
+visibly incomplete. Frozen schemas and rationale preceded dependent Rust edits.
+Refined prepared-GeoTIFF restrictions after owned decoder inspection: grayscale,
+explicit SampleFormat, finite declared NoData representable in storage dtype,
+bounded strips/metadata/GeoKeys. Never silently convert palette colors or NoData.
+Use coordinate-anchored synthetic SBS across native grids; retain native outlet
+context and do not claim isolated resolution effects. Source fingerprints in the
+runtime summary are labeled FNV-1a-64 diagnostics; reproduction uses SHA-256.
+
 ## Outcomes & Retrospective
 
 
-Scaffold only. No Rust changes, tests, generated slope/intersection products or
-deployment. Closure requires actual rebuilt-binary outputs and both bindings,
-not only a report or surrogate Python implementation.
+Completed local backend: registered StaleySlopeSbs and both Python bindings,
+full-DEM Horn slope, basin intersection/support products, complete count/area
+summary with preserved uncertainty, bounded input validation and reserved fresh
+output directories. The rebuilt executable and both wrappers generated analytical
+and real-terrain products. All medium/high independent review findings are closed.
+Evidence and exact invocations are in `artifacts/validation.md`, with method,
+conditioning, native-basin and probability results in `artifacts/terrain_report.md`.
+No binary installation, NoDb/UI/RQ caller or deployment was performed. Stage 3
+remains partial; K, dNBR composition and production preparation/orchestration
+remain successor work.
+
+Concrete discoveries: the owned reader expands palette indices and normalizes
+nonfinite NoData to -32768. Restrict prepared inputs explicitly to preserve
+observations; a general decoder rewrite is not needed for this bounded tool.
+GDAL float32 working arithmetic differs slightly from f64 Horn; retain measured
+precision effects separately from estimator changes. Both wrappers mutate cwd;
+validation isolates/restores process cwd. Initial failures in the terrain harness
+were corrected and the accepted run regenerated from scratch.
 
 ## Context and Orientation
 
@@ -261,3 +286,7 @@ path as a suspected preprocessing regression, not a parity oracle. Keep
 estimator changes separate from conditioning, ArcGIS edge weights and legacy
 null-to-zero calls; retain the owner's accepted uncertainty policy. Record
 threshold and predictor differences without claiming observed predictive error.
+
+Revision note: execution begins at WEPPpy `68f4804e28560ca7da1cb9c55d57d3d3259d3f1d` and WBT `01381f54c469564abc6776ff97d70b4966340726`, both clean. Frozen interface is StaleySlopeSbs with reserved fresh output directory and summary completion marker; see canonical contract. Raw DEM and strict edges are implementation decisions under requested execution.
+
+Revision note: completed rebuilt-binary implementation, independent reviews, current-binary analytical/security/terrain evidence and local handoff. Final delivery is the backend only; downstream stage-3 production work remains separate.

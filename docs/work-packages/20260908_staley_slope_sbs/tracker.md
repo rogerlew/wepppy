@@ -1,18 +1,19 @@
 # Staley slope/SBS tracker
 
-Status: scaffolded, not executing; 2026-09-09 05:08 UTC.
-WEPPpy starting revision: `49c50ecba`. Record WBT revision on execution.
+Status: completed local backend; 2026-09-09 UTC.
+Execution starting revisions: WEPPpy `68f4804e28560ca7da1cb9c55d57d3d3259d3f1d`;
+WBT `01381f54c469564abc6776ff97d70b4966340726`. Both were clean.
 
 - [x] Inspect manuscript, WBT FVSlope/Slope, existing watershed audit and SBS owner.
 - [x] Scaffold bounded Rust implementation/evaluation package and canonical proposal.
 - [x] Owner adopted Horn 3×3; recorded ADR-0058.
 - [x] Owner accepted uncertainty preservation; bounds with unavailable point T
   when any intersection cell remains unresolved (ADR-0058).
-- [ ] Resolve DEM source and neighborhood edges.
-- [ ] Specify CLI/output types/class map/units/edges and publication behavior.
-- [ ] Implement Rust tool(s), both bindings, analytical and boundary tests.
-- [ ] Run three-site sensitivity and rebuilt-binary generated-output checks.
-- [ ] Correctness/security reviews, validation, documentation and closeout.
+- [x] Resolve raw DEM source and strict nine-valid-cell edges.
+- [x] Freeze StaleySlopeSbs CLI, output schema, explicit class map and fresh-directory publication contract.
+- [x] Registered StaleySlopeSbs, both bindings, analytical and boundary tests.
+- [x] Six-terrain panel, both real bindings, generated-output/provenance checks.
+- [x] Correctness/security reviews closed, all gates and documentation complete.
 
 ## Decisions and discoveries
 
@@ -22,16 +23,21 @@ FVSlope is D8-direction drop/distance; projected WBT Slope uses Florinsky 5×5.
 The inspected manuscript states 10 m terrain and ≥23° but does not identify a
 stencil. Owner subsequently adopted Horn 3×3 (2026-09-09 UTC, ADR-0058).
 Owner accepted uncertainty-preserving support: unresolved cells retain bounds
-and no point T. Raw DEM and neighborhood edges remain proposed. This is an
+and no point T. Execution adopts raw DEM and strict nine-valid-cell edges (ADR-0058 execution disposition). This is an
 engineering choice, not proof of original calibration preprocessing.
 
-## Next steps and evidence
+## Completed evidence and successors
 
-[Findings/decision register](artifacts/slope_method_findings.md) separates
-confirmed evidence, engineering recommendations and owner choices. Source and
-comparison work can proceed when execution is requested; dependent scientific
-policy requires resolution before publication as an accepted contract.
-No tests, generated slope artifacts, implementation or deployment claimed yet.
+[Validation](artifacts/validation.md): 157 Rust tests, 60 analytical CLI/binding
+checks, 24 direct security cases, 48 terrain method rows and 432 probability
+scenarios. [Terrain report](artifacts/terrain_report.md) and independent
+[correctness](artifacts/correctness_review.md)/[security](artifacts/security_review.md)
+reviews retain numeric results and limits. All medium/high findings are closed.
+
+Backend implementation is complete locally; no deployment or live installation.
+Stage 3 is not complete: production prepared inputs/orchestration, K integration
+and normalized dNBR composition remain successors. Source data and routing are
+unchanged; synthetic SBS is clearly labeled and is not observed burn evidence.
 
 ## Historical evidence update — 2026-09-09 UTC
 

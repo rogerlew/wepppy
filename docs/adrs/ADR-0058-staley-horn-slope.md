@@ -2,12 +2,12 @@
 
 ## Status and provenance
 
-Accepted algorithm and uncertainty-preserving intersection support; implementation
-pending. Venue: user/Codex repository
+Accepted algorithm and uncertainty-preserving intersection support; local backend
+implemented. Raw-source/strict-edge execution disposition is recorded below. Venue: user/Codex repository
 conversation, recorded 2026-09-09 UTC. Participants: repository owner and Codex.
 Decision owner: user, explicitly stating “adopt horn”, then accepting
 “preserving uncertainty should be fine”. Implementer: Codex for
-this documentation; Rust implementation has not started.
+documentation and the subsequently requested Rust implementation.
 
 ## Decision and rationale
 
@@ -17,10 +17,10 @@ FVSlope and generic WBT Slope behavior. Horn measures a neighborhood surface
 gradient independently of the routed receiver direction, with an explicit
 stencil that can be verified against analytical surfaces and independent tools.
 
-Raw DEM is still the recommended source. This algorithm decision does not
+At the original algorithm-only decision, raw DEM remained recommended. That decision did not
 approve DEM conditioning, missing-neighbor interpolation, new resolution
-restrictions, or a production caller. Resolve those
-separately in the [canonical contract](../../wepppy/nodb/mods/postfire_debris_flow/docs/slope_sbs.md).
+restrictions, or a production caller. The later execution disposition resolves
+raw-source/strict-edge behavior in the [canonical contract](../../wepppy/nodb/mods/postfire_debris_flow/docs/slope_sbs.md).
 
 ## Accepted uncertainty policy
 
@@ -66,3 +66,26 @@ algorithm approval does not waive them. Comparison results support limitations
 and future decisions, not predictive validation. No production state changes
 exist to roll back. Any later algorithm change requires a documented contract
 and parameterization revision rather than switching an existing tool default.
+
+## Execution disposition — 2026-09-09 UTC
+
+Venue: repository conversation; participants: user and Codex. User requested
+execution of the slope/SBS package using `/workdir/weppcloud-wbt`. Codex resolves
+the remaining engineering choices under that execution instruction: raw project
+DEM in meters and strict center/eight-neighbor validity before basin masking.
+This does not represent a separately quoted owner scientific approval. Raw DEM
+avoids routing-conditioning artifacts in the surface predictor; strict validity
+avoids inventing elevations and follows accepted uncertainty preservation.
+Rejected alternatives: conditioned terrain as default, clipping to basin before
+slope, and Esri edge reweighting. These remain comparison factors.
+
+The additive `StaleySlopeSbs` interface and output schema are frozen in the
+canonical slope/SBS contract and WBT `docs/staley_slope_sbs.md` before Rust edits.
+Integer SBS mapping is required explicitly; normalized WEPPpy export is 0–3
+with 255 NoData. This backend does not change parameterization of existing
+callers. Rollback is removal of the additive tool; no live data is mutated.
+
+Execution evidence: the owned backend and both bindings passed analytical,
+security and six-terrain validation. The [terrain report](../work-packages/20260908_staley_slope_sbs/artifacts/terrain_report.md)
+separates estimator, conditioning, numerical precision and native-basin effects.
+No production deployment or original-calibration-equivalence claim follows.

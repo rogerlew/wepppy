@@ -292,13 +292,12 @@ offline helpers and evaluation fixtures may retain multiple masks/outlets for
 testing; that capability is not a production workflow requirement.
 
 The owner requested slope/SBS intersection tooling in weppcloud-wbt. The
-[proposed slope/SBS backend contract](docs/slope_sbs.md) and
+[slope/SBS backend contract](docs/slope_sbs.md) and
 [implementation package](../../../../docs/work-packages/20260908_staley_slope_sbs/package.md)
 cover algorithm selection, raw-versus-conditioned terrain, class mapping,
 coverage and owned Rust tooling. The owner adopted Horn 3×3 surface slope in
-[ADR-0058](../../../../docs/adrs/ADR-0058-staley-horn-slope.md). Raw elevation
-remains the recommended source; original Staley slope preprocessing is not
-established.
+[ADR-0058](../../../../docs/adrs/ADR-0058-staley-horn-slope.md). Execution selects raw project elevation with strict nine-valid-cell neighborhoods;
+original Staley slope preprocessing equivalence is not established.
 [Historical source evidence](docs/historical_slope_evidence.md) now confirms
 ArcGIS planar/Horn-style slope in the preserved 2022-named USGS M1 workflow,
 followed by a 2023 migration to pysheds. The inspected modern helper uses
@@ -310,10 +309,12 @@ separate algorithms, not approved substitutes by their availability alone.
 The owner accepted preserving incomplete-intersection uncertainty: report
 coverage and full-watershed T bounds; publish point T only when no intersection
 cells remain unknown. Do not replace it with an observed-support estimate.
-DEM-source and neighborhood edge policies remain proposed.
+The additive StaleySlopeSbs backend and both bindings are implemented and
+validated locally; production preparation/publication remains pending.
 
-Resampling, slope calculation, SBS class mapping, and NoData denominators
-still require an implementation contract. Missing SBS pixels
+The [local backend contract](docs/slope_sbs.md) fixes slope, explicit SBS class
+mapping and whole-watershed support. Any future resampling/preparation workflow
+requires its own integration contract. Missing SBS pixels
 must not silently become unburned observations.
 
 Canonical artifact mapping (verified 2026-09-09 UTC): `Watershed.bound` supplies

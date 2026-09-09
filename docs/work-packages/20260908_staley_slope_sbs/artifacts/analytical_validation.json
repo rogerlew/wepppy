@@ -1,0 +1,1644 @@
+{
+  "binary": "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+  "binary_sha256": "6647d55c2d8d28680addd16adc4d9d406857a7ccb394cd4260a2d61d7d8ffc42",
+  "tests": [
+    {
+      "test": "plane-0-0",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 25,
+        "intersection_true": 0,
+        "intersection_unknown": 0,
+        "jointly_valid": 25,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 25,
+        "sbs_unburned": 0,
+        "sbs_valid": 25,
+        "slope_valid": 25,
+        "steep": 0
+      }
+    },
+    {
+      "test": "plane-0-30",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 25,
+        "intersection_true": 0,
+        "intersection_unknown": 0,
+        "jointly_valid": 25,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 25,
+        "sbs_unburned": 0,
+        "sbs_valid": 25,
+        "slope_valid": 25,
+        "steep": 0
+      }
+    },
+    {
+      "test": "plane-0-45",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 25,
+        "intersection_true": 0,
+        "intersection_unknown": 0,
+        "jointly_valid": 25,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 25,
+        "sbs_unburned": 0,
+        "sbs_valid": 25,
+        "slope_valid": 25,
+        "steep": 0
+      }
+    },
+    {
+      "test": "plane-0-90",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 25,
+        "intersection_true": 0,
+        "intersection_unknown": 0,
+        "jointly_valid": 25,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 25,
+        "sbs_unburned": 0,
+        "sbs_valid": 25,
+        "slope_valid": 25,
+        "steep": 0
+      }
+    },
+    {
+      "test": "plane-0-135",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 25,
+        "intersection_true": 0,
+        "intersection_unknown": 0,
+        "jointly_valid": 25,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 25,
+        "sbs_unburned": 0,
+        "sbs_valid": 25,
+        "slope_valid": 25,
+        "steep": 0
+      }
+    },
+    {
+      "test": "plane-0-230",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 25,
+        "intersection_true": 0,
+        "intersection_unknown": 0,
+        "jointly_valid": 25,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 25,
+        "sbs_unburned": 0,
+        "sbs_valid": 25,
+        "slope_valid": 25,
+        "steep": 0
+      }
+    },
+    {
+      "test": "plane-22.999999-0",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 25,
+        "intersection_true": 0,
+        "intersection_unknown": 0,
+        "jointly_valid": 25,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 25,
+        "sbs_unburned": 0,
+        "sbs_valid": 25,
+        "slope_valid": 25,
+        "steep": 0
+      }
+    },
+    {
+      "test": "plane-22.999999-30",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 25,
+        "intersection_true": 0,
+        "intersection_unknown": 0,
+        "jointly_valid": 25,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 25,
+        "sbs_unburned": 0,
+        "sbs_valid": 25,
+        "slope_valid": 25,
+        "steep": 0
+      }
+    },
+    {
+      "test": "plane-22.999999-45",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 25,
+        "intersection_true": 0,
+        "intersection_unknown": 0,
+        "jointly_valid": 25,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 25,
+        "sbs_unburned": 0,
+        "sbs_valid": 25,
+        "slope_valid": 25,
+        "steep": 0
+      }
+    },
+    {
+      "test": "plane-22.999999-90",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 25,
+        "intersection_true": 0,
+        "intersection_unknown": 0,
+        "jointly_valid": 25,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 25,
+        "sbs_unburned": 0,
+        "sbs_valid": 25,
+        "slope_valid": 25,
+        "steep": 0
+      }
+    },
+    {
+      "test": "plane-22.999999-135",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 25,
+        "intersection_true": 0,
+        "intersection_unknown": 0,
+        "jointly_valid": 25,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 25,
+        "sbs_unburned": 0,
+        "sbs_valid": 25,
+        "slope_valid": 25,
+        "steep": 0
+      }
+    },
+    {
+      "test": "plane-22.999999-230",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 25,
+        "intersection_true": 0,
+        "intersection_unknown": 0,
+        "jointly_valid": 25,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 25,
+        "sbs_unburned": 0,
+        "sbs_valid": 25,
+        "slope_valid": 25,
+        "steep": 0
+      }
+    },
+    {
+      "test": "plane-23-0",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 15,
+        "intersection_true": 10,
+        "intersection_unknown": 0,
+        "jointly_valid": 25,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 25,
+        "sbs_unburned": 0,
+        "sbs_valid": 25,
+        "slope_valid": 25,
+        "steep": 10
+      }
+    },
+    {
+      "test": "plane-23-30",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 11,
+        "intersection_true": 14,
+        "intersection_unknown": 0,
+        "jointly_valid": 25,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 25,
+        "sbs_unburned": 0,
+        "sbs_valid": 25,
+        "slope_valid": 25,
+        "steep": 14
+      }
+    },
+    {
+      "test": "plane-23-45",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 1,
+        "intersection_true": 24,
+        "intersection_unknown": 0,
+        "jointly_valid": 25,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 25,
+        "sbs_unburned": 0,
+        "sbs_valid": 25,
+        "slope_valid": 25,
+        "steep": 24
+      }
+    },
+    {
+      "test": "plane-23-90",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 15,
+        "intersection_true": 10,
+        "intersection_unknown": 0,
+        "jointly_valid": 25,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 25,
+        "sbs_unburned": 0,
+        "sbs_valid": 25,
+        "slope_valid": 25,
+        "steep": 10
+      }
+    },
+    {
+      "test": "plane-23-135",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 3,
+        "intersection_true": 22,
+        "intersection_unknown": 0,
+        "jointly_valid": 25,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 25,
+        "sbs_unburned": 0,
+        "sbs_valid": 25,
+        "slope_valid": 25,
+        "steep": 22
+      }
+    },
+    {
+      "test": "plane-23-230",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 10,
+        "intersection_true": 15,
+        "intersection_unknown": 0,
+        "jointly_valid": 25,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 25,
+        "sbs_unburned": 0,
+        "sbs_valid": 25,
+        "slope_valid": 25,
+        "steep": 15
+      }
+    },
+    {
+      "test": "plane-23.000001-0",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 0,
+        "intersection_true": 25,
+        "intersection_unknown": 0,
+        "jointly_valid": 25,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 25,
+        "sbs_unburned": 0,
+        "sbs_valid": 25,
+        "slope_valid": 25,
+        "steep": 25
+      }
+    },
+    {
+      "test": "plane-23.000001-30",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 0,
+        "intersection_true": 25,
+        "intersection_unknown": 0,
+        "jointly_valid": 25,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 25,
+        "sbs_unburned": 0,
+        "sbs_valid": 25,
+        "slope_valid": 25,
+        "steep": 25
+      }
+    },
+    {
+      "test": "plane-23.000001-45",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 0,
+        "intersection_true": 25,
+        "intersection_unknown": 0,
+        "jointly_valid": 25,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 25,
+        "sbs_unburned": 0,
+        "sbs_valid": 25,
+        "slope_valid": 25,
+        "steep": 25
+      }
+    },
+    {
+      "test": "plane-23.000001-90",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 0,
+        "intersection_true": 25,
+        "intersection_unknown": 0,
+        "jointly_valid": 25,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 25,
+        "sbs_unburned": 0,
+        "sbs_valid": 25,
+        "slope_valid": 25,
+        "steep": 25
+      }
+    },
+    {
+      "test": "plane-23.000001-135",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 0,
+        "intersection_true": 25,
+        "intersection_unknown": 0,
+        "jointly_valid": 25,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 25,
+        "sbs_unburned": 0,
+        "sbs_valid": 25,
+        "slope_valid": 25,
+        "steep": 25
+      }
+    },
+    {
+      "test": "plane-23.000001-230",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 0,
+        "intersection_true": 25,
+        "intersection_unknown": 0,
+        "jointly_valid": 25,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 25,
+        "sbs_unburned": 0,
+        "sbs_valid": 25,
+        "slope_valid": 25,
+        "steep": 25
+      }
+    },
+    {
+      "test": "plane-45-0",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 0,
+        "intersection_true": 25,
+        "intersection_unknown": 0,
+        "jointly_valid": 25,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 25,
+        "sbs_unburned": 0,
+        "sbs_valid": 25,
+        "slope_valid": 25,
+        "steep": 25
+      }
+    },
+    {
+      "test": "plane-45-30",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 0,
+        "intersection_true": 25,
+        "intersection_unknown": 0,
+        "jointly_valid": 25,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 25,
+        "sbs_unburned": 0,
+        "sbs_valid": 25,
+        "slope_valid": 25,
+        "steep": 25
+      }
+    },
+    {
+      "test": "plane-45-45",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 0,
+        "intersection_true": 25,
+        "intersection_unknown": 0,
+        "jointly_valid": 25,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 25,
+        "sbs_unburned": 0,
+        "sbs_valid": 25,
+        "slope_valid": 25,
+        "steep": 25
+      }
+    },
+    {
+      "test": "plane-45-90",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 0,
+        "intersection_true": 25,
+        "intersection_unknown": 0,
+        "jointly_valid": 25,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 25,
+        "sbs_unburned": 0,
+        "sbs_valid": 25,
+        "slope_valid": 25,
+        "steep": 25
+      }
+    },
+    {
+      "test": "plane-45-135",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 0,
+        "intersection_true": 25,
+        "intersection_unknown": 0,
+        "jointly_valid": 25,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 25,
+        "sbs_unburned": 0,
+        "sbs_valid": 25,
+        "slope_valid": 25,
+        "steep": 25
+      }
+    },
+    {
+      "test": "plane-45-230",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 0,
+        "intersection_true": 25,
+        "intersection_unknown": 0,
+        "jointly_valid": 25,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 25,
+        "sbs_unburned": 0,
+        "sbs_valid": 25,
+        "slope_valid": 25,
+        "steep": 25
+      }
+    },
+    {
+      "test": "exact-threshold",
+      "passed": true,
+      "counts": {
+        "basin": 1,
+        "intersection_false": 0,
+        "intersection_true": 1,
+        "intersection_unknown": 0,
+        "jointly_valid": 1,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 1,
+        "sbs_unburned": 0,
+        "sbs_valid": 1,
+        "slope_valid": 1,
+        "steep": 1
+      }
+    },
+    {
+      "test": "unknown-burn",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 0,
+        "intersection_true": 0,
+        "intersection_unknown": 25,
+        "jointly_valid": 0,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 0,
+        "sbs_unburned": 0,
+        "sbs_valid": 0,
+        "slope_valid": 25,
+        "steep": 25
+      }
+    },
+    {
+      "test": "known-flat-missing-burn",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 25,
+        "intersection_true": 0,
+        "intersection_unknown": 0,
+        "jointly_valid": 0,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 0,
+        "sbs_unburned": 0,
+        "sbs_valid": 0,
+        "slope_valid": 25,
+        "steep": 0
+      }
+    },
+    {
+      "test": "missing-neighbor",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 0,
+        "intersection_true": 16,
+        "intersection_unknown": 9,
+        "jointly_valid": 16,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 25,
+        "sbs_unburned": 0,
+        "sbs_valid": 25,
+        "slope_valid": 16,
+        "steep": 16
+      }
+    },
+    {
+      "test": "known-unburned-missing-slope",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 25,
+        "intersection_true": 0,
+        "intersection_unknown": 0,
+        "jointly_valid": 16,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 0,
+        "sbs_unburned": 25,
+        "sbs_valid": 25,
+        "slope_valid": 16,
+        "steep": 16
+      }
+    },
+    {
+      "test": "raster-edges",
+      "passed": true,
+      "counts": {
+        "basin": 49,
+        "intersection_false": 0,
+        "intersection_true": 25,
+        "intersection_unknown": 24,
+        "jointly_valid": 25,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 49,
+        "sbs_unburned": 0,
+        "sbs_valid": 49,
+        "slope_valid": 25,
+        "steep": 25
+      }
+    },
+    {
+      "test": "ridge",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 5,
+        "intersection_true": 20,
+        "intersection_unknown": 0,
+        "jointly_valid": 25,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 25,
+        "sbs_unburned": 0,
+        "sbs_valid": 25,
+        "slope_valid": 25,
+        "steep": 20
+      }
+    },
+    {
+      "test": "pit",
+      "passed": true,
+      "counts": {
+        "basin": 25,
+        "intersection_false": 17,
+        "intersection_true": 8,
+        "intersection_unknown": 0,
+        "jointly_valid": 25,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 25,
+        "sbs_unburned": 0,
+        "sbs_valid": 25,
+        "slope_valid": 25,
+        "steep": 8
+      }
+    },
+    {
+      "test": "overlap",
+      "passed": true,
+      "counts": {
+        "basin": 2,
+        "intersection_false": 1,
+        "intersection_true": 1,
+        "intersection_unknown": 0,
+        "jointly_valid": 2,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 1,
+        "sbs_unburned": 1,
+        "sbs_valid": 2,
+        "slope_valid": 2,
+        "steep": 1
+      }
+    },
+    {
+      "test": "disjoint",
+      "passed": true,
+      "counts": {
+        "basin": 2,
+        "intersection_false": 2,
+        "intersection_true": 0,
+        "intersection_unknown": 0,
+        "jointly_valid": 2,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 1,
+        "sbs_unburned": 1,
+        "sbs_valid": 2,
+        "slope_valid": 2,
+        "steep": 1
+      }
+    },
+    {
+      "test": "invalid-class",
+      "passed": true,
+      "rejected": true
+    },
+    {
+      "test": "nonfinite-sbs",
+      "passed": true,
+      "rejected": true
+    },
+    {
+      "test": "misaligned",
+      "passed": true,
+      "rejected": true
+    },
+    {
+      "test": "wrong-crs",
+      "passed": true,
+      "rejected": true
+    },
+    {
+      "test": "no-nodata",
+      "passed": true,
+      "rejected": true
+    },
+    {
+      "test": "no-sampleformat",
+      "passed": true,
+      "rejected": true
+    },
+    {
+      "test": "palette",
+      "passed": true,
+      "rejected": true
+    },
+    {
+      "test": "empty-mask",
+      "passed": true,
+      "rejected": true
+    },
+    {
+      "test": "wrong-units",
+      "passed": true,
+      "rejected": true
+    },
+    {
+      "test": "duplicate-codes",
+      "passed": true,
+      "rejected": true
+    },
+    {
+      "test": "nodata-collision",
+      "passed": true,
+      "rejected": true
+    },
+    {
+      "test": "no-parent",
+      "passed": true,
+      "rejected": true
+    },
+    {
+      "test": "existing-output",
+      "passed": true,
+      "rejected": true
+    },
+    {
+      "test": "input-as-output",
+      "passed": true,
+      "rejected": true
+    },
+    {
+      "test": "symlink-output",
+      "passed": true,
+      "rejected": true
+    },
+    {
+      "test": "esri-full",
+      "passed": true,
+      "counts": {
+        "basin": 1,
+        "intersection_false": 0,
+        "intersection_true": 1,
+        "intersection_unknown": 0,
+        "jointly_valid": 1,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 1,
+        "sbs_unburned": 0,
+        "sbs_valid": 1,
+        "slope_valid": 1,
+        "steep": 1
+      }
+    },
+    {
+      "test": "esri-gap",
+      "passed": true,
+      "counts": {
+        "basin": 1,
+        "intersection_false": 0,
+        "intersection_true": 0,
+        "intersection_unknown": 1,
+        "jointly_valid": 0,
+        "sbs_high": 0,
+        "sbs_low": 0,
+        "sbs_moderate": 1,
+        "sbs_unburned": 0,
+        "sbs_valid": 1,
+        "slope_valid": 0,
+        "steep": 0
+      }
+    },
+    {
+      "test": "surface-versus-directional",
+      "passed": true,
+      "surface_degrees": 45,
+      "directional_degrees": 35.26438903808594,
+      "esri_gap_formula_degrees": 74.07173599673855
+    },
+    {
+      "test": "binding-0",
+      "passed": true,
+      "source": "/home/workdir/weppcloud-wbt/whitebox_tools.py"
+    },
+    {
+      "test": "binding-1",
+      "passed": true,
+      "source": "/home/workdir/weppcloud-wbt/WBT/whitebox_tools.py"
+    }
+  ],
+  "threshold_boundary_cases": [
+    {
+      "degrees": 0,
+      "azimuth": 0,
+      "T": 0.0
+    },
+    {
+      "degrees": 0,
+      "azimuth": 30,
+      "T": 0.0
+    },
+    {
+      "degrees": 0,
+      "azimuth": 45,
+      "T": 0.0
+    },
+    {
+      "degrees": 0,
+      "azimuth": 90,
+      "T": 0.0
+    },
+    {
+      "degrees": 0,
+      "azimuth": 135,
+      "T": 0.0
+    },
+    {
+      "degrees": 0,
+      "azimuth": 230,
+      "T": 0.0
+    },
+    {
+      "degrees": 22.999999,
+      "azimuth": 0,
+      "T": 0.0
+    },
+    {
+      "degrees": 22.999999,
+      "azimuth": 30,
+      "T": 0.0
+    },
+    {
+      "degrees": 22.999999,
+      "azimuth": 45,
+      "T": 0.0
+    },
+    {
+      "degrees": 22.999999,
+      "azimuth": 90,
+      "T": 0.0
+    },
+    {
+      "degrees": 22.999999,
+      "azimuth": 135,
+      "T": 0.0
+    },
+    {
+      "degrees": 22.999999,
+      "azimuth": 230,
+      "T": 0.0
+    },
+    {
+      "degrees": 23,
+      "azimuth": 0,
+      "T": 0.4
+    },
+    {
+      "degrees": 23,
+      "azimuth": 30,
+      "T": 0.56
+    },
+    {
+      "degrees": 23,
+      "azimuth": 45,
+      "T": 0.96
+    },
+    {
+      "degrees": 23,
+      "azimuth": 90,
+      "T": 0.4
+    },
+    {
+      "degrees": 23,
+      "azimuth": 135,
+      "T": 0.88
+    },
+    {
+      "degrees": 23,
+      "azimuth": 230,
+      "T": 0.6
+    },
+    {
+      "degrees": 23.000001,
+      "azimuth": 0,
+      "T": 1.0
+    },
+    {
+      "degrees": 23.000001,
+      "azimuth": 30,
+      "T": 1.0
+    },
+    {
+      "degrees": 23.000001,
+      "azimuth": 45,
+      "T": 1.0
+    },
+    {
+      "degrees": 23.000001,
+      "azimuth": 90,
+      "T": 1.0
+    },
+    {
+      "degrees": 23.000001,
+      "azimuth": 135,
+      "T": 1.0
+    },
+    {
+      "degrees": 23.000001,
+      "azimuth": 230,
+      "T": 1.0
+    },
+    {
+      "degrees": 45,
+      "azimuth": 0,
+      "T": 1.0
+    },
+    {
+      "degrees": 45,
+      "azimuth": 30,
+      "T": 1.0
+    },
+    {
+      "degrees": 45,
+      "azimuth": 45,
+      "T": 1.0
+    },
+    {
+      "degrees": 45,
+      "azimuth": 90,
+      "T": 1.0
+    },
+    {
+      "degrees": 45,
+      "azimuth": 135,
+      "T": 1.0
+    },
+    {
+      "degrees": 45,
+      "azimuth": 230,
+      "T": 1.0
+    }
+  ],
+  "commands": [
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/plane-0-0.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/plane-0-0",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/plane-0-30.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/plane-0-30",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/plane-0-45.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/plane-0-45",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/plane-0-90.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/plane-0-90",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/plane-0-135.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/plane-0-135",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/plane-0-230.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/plane-0-230",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/plane-22.999999-0.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/plane-22.999999-0",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/plane-22.999999-30.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/plane-22.999999-30",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/plane-22.999999-45.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/plane-22.999999-45",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/plane-22.999999-90.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/plane-22.999999-90",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/plane-22.999999-135.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/plane-22.999999-135",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/plane-22.999999-230.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/plane-22.999999-230",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/plane-23-0.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/plane-23-0",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/plane-23-30.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/plane-23-30",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/plane-23-45.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/plane-23-45",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/plane-23-90.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/plane-23-90",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/plane-23-135.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/plane-23-135",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/plane-23-230.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/plane-23-230",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/plane-23.000001-0.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/plane-23.000001-0",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/plane-23.000001-30.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/plane-23.000001-30",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/plane-23.000001-45.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/plane-23.000001-45",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/plane-23.000001-90.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/plane-23.000001-90",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/plane-23.000001-135.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/plane-23.000001-135",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/plane-23.000001-230.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/plane-23.000001-230",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/plane-45-0.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/plane-45-0",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/plane-45-30.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/plane-45-30",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/plane-45-45.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/plane-45-45",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/plane-45-90.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/plane-45-90",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/plane-45-135.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/plane-45-135",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/plane-45-230.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/plane-45-230",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/exact-dem.tif",
+      "--sbs=/tmp/staley-analytical-delivery/exact-sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/exact-mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/exact-threshold",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/steep.tif",
+      "--sbs=/tmp/staley-analytical-delivery/missing-sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/unknown-burn",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/flat.tif",
+      "--sbs=/tmp/staley-analytical-delivery/missing-sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/known-flat-missing-burn",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/hole.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/missing-neighbor",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/hole.tif",
+      "--sbs=/tmp/staley-analytical-delivery/unburned.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/known-unburned-missing-slope",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/steep.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/full-mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/raster-edges",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/ridge.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/ridge",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/pit.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/pit",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/overlap-dem.tif",
+      "--sbs=/tmp/staley-analytical-delivery/overlap-sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/two-mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/overlap",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/overlap-dem.tif",
+      "--sbs=/tmp/staley-analytical-delivery/disjoint-sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/two-mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/disjoint",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/steep.tif",
+      "--sbs=/tmp/staley-analytical-delivery/invalid-class.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/invalid-class",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/steep.tif",
+      "--sbs=/tmp/staley-analytical-delivery/nonfinite-sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/nonfinite-sbs",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/steep.tif",
+      "--sbs=/tmp/staley-analytical-delivery/misaligned.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/misaligned",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/steep.tif",
+      "--sbs=/tmp/staley-analytical-delivery/wrong-crs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/wrong-crs",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/steep.tif",
+      "--sbs=/tmp/staley-analytical-delivery/no-nodata.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/no-nodata",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/steep.tif",
+      "--sbs=/tmp/staley-analytical-delivery/no-sampleformat.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/no-sampleformat",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/steep.tif",
+      "--sbs=/tmp/staley-analytical-delivery/palette.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/palette",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/steep.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/empty.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/empty-mask",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/steep.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/wrong-units",
+      "--elevation_units=ft",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/steep.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/duplicate-codes",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,2"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/steep.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/nodata-collision",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,255"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/steep.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/missing/output",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/steep.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/preserved",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/steep.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/steep.tif",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/steep.tif",
+      "--sbs=/tmp/staley-analytical-delivery/sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/symlink",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/esri-full.tif",
+      "--sbs=/tmp/staley-analytical-delivery/exact-sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/exact-mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/esri-full",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=StaleySlopeSbs",
+      "--compress_rasters=false",
+      "--dem=/tmp/staley-analytical-delivery/esri-gap.tif",
+      "--sbs=/tmp/staley-analytical-delivery/exact-sbs.tif",
+      "--mask=/tmp/staley-analytical-delivery/exact-mask.tif",
+      "--output_dir=/tmp/staley-analytical-delivery/esri-gap",
+      "--elevation_units=m",
+      "--sbs_classes=0,1,2,3"
+    ],
+    [
+      "/home/workdir/weppcloud-wbt/target/release/whitebox_tools",
+      "-r=FVSlope",
+      "--dem=/tmp/staley-analytical-delivery/plane-45-45.tif",
+      "--d8_pntr=/tmp/staley-analytical-delivery/west-pointer.tif",
+      "--output=/tmp/staley-analytical-delivery/directional.tif",
+      "--units=degrees",
+      "--zfactor=1"
+    ]
+  ]
+}

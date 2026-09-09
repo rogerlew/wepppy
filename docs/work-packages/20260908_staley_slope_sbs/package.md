@@ -1,11 +1,10 @@
 # Staley slope and SBS intersection in weppcloud-wbt
 
-Status: scaffolded 2026-09-09 05:08 UTC; execution not started.
+Status: local backend completed and validated, 2026-09-09 UTC.
 
 Implement the owned Rust terrain/burn intersection needed for M1 T, with both
-WBT Python bindings, reproducible artifacts and independent reviews. Determine
-and document the selected Horn 3×3 method (ADR-0058); resolve DEM source,
-and neighborhood edges before implementing dependent parameterization.
+WBT Python bindings, reproducible artifacts and independent reviews. Horn 3×3, raw meter DEM and strict neighborhood validity are documented in
+ADR-0058 and the canonical contract.
 Unresolved intersection coverage retains bounds and no point T, as accepted
 by the owner in ADR-0058. This is a bounded part of roadmap stage 3, not complete M1
 predictor or WEPPcloud integration.
@@ -14,7 +13,7 @@ Use the existing project watershed and resolved outlet only. Users manually
 isolate suspected burned basins when creating projects. No nested assessments,
 new delineation, or changes to existing routing/FVSlope behavior.
 
-Read the [ExecPlan](prompts/active/slope_sbs_execplan.md), [tracker](tracker.md),
+Read the [ExecPlan](prompts/completed/slope_sbs_execplan.md), [tracker](tracker.md),
 and [source findings and decisions](artifacts/slope_method_findings.md).
 Canonical design: [slope/SBS contract](../../../wepppy/nodb/mods/postfire_debris_flow/docs/slope_sbs.md).
 
@@ -38,5 +37,14 @@ files on rejected input. Correctness review must independently verify valid
 workflows as well as malformed inputs.
 
 Work spans `/workdir/weppcloud-wbt` (Rust, wrappers, fixtures and tool docs) and
-`/workdir/wepppy` (canonical domain docs, evidence and handoff). The scaffold
-lives in WEPPpy; WBT source and its existing generic slope defaults are unchanged.
+`/workdir/wepppy` (canonical domain docs, evidence and handoff). The package
+lives in WEPPpy; the additive WBT implementation preserves generic slope defaults.
+
+## Outcome
+
+Registered `StaleySlopeSbs`, both bindings and reproducible synthetic/terrain
+fixtures are delivered. [Validation](artifacts/validation.md) records 157 Rust,
+60 analytical and 24 security checks, six-terrain generated output, independent
+reviews and exact binary identity. [Terrain report](artifacts/terrain_report.md)
+separates estimator, conditioning, native-grid and fixed-scenario sensitivity.
+No live binary installation, deployment or complete stage-3 integration.

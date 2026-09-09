@@ -49,7 +49,7 @@ scope. SI/English presentation belongs in the first user-facing increment.
 
 Stages 1–2 are **complete**, in the
 [project watershed and numerical engine package](../../../../docs/work-packages/20260908_staley_watershed_engine/package.md).
-Stage 3 slope/SBS work is **scaffolded, not executing**, in the
+Stage 3 slope/SBS local backend is **implemented and validated**, in the
 [WBT slope/SBS package](../../../../docs/work-packages/20260908_staley_slope_sbs/package.md).
 Other stage 3 work and later stages are **not started**. Stage completion requires its exit evidence,
 not only source files. Accepted scope is the existing project watershed/outlet;
@@ -80,7 +80,7 @@ scientific limitation that implementation cannot resolve.
 | ID | Decision or remaining work | Resolve before | Current authority / status |
 | --- | --- | --- | --- |
 | L01 | Scope resolved: existing project watershed and existing outlet. Confirm canonical artifact mapping; no new outlet selection or nested enumeration. | Stage 1 completion | [Accepted scope](specification.md#project-watershed-assessment-scope), [ADR-0055](../../../../docs/adrs/ADR-0055-staley-project-watershed-scope.md); [artifact audit completed](../../../../docs/work-packages/20260908_staley_watershed_engine/artifacts/watershed_artifact_audit.md). |
-| L02 | Slope algorithm, SBS class mapping, unknown pixels, soil/K coverage, and independent predictor denominators. | Stage 3 implementation | [Slope/SBS proposal](docs/slope_sbs.md) and WBT package scaffolded; Horn and uncertainty preservation adopted (ADR-0058); source/edge policies pending. K coverage remains separate. Do not extend accepted dNBR partial-coverage policy implicitly. |
+| L02 | Slope algorithm, SBS class mapping, unknown pixels, soil/K coverage, and independent predictor denominators. | Stage 3 implementation | [Slope/SBS backend](docs/slope_sbs.md) and both WBT bindings validated; Horn, raw DEM, strict edges and uncertainty preservation recorded (ADR-0058). K coverage remains separate. Do not extend accepted dNBR partial-coverage policy implicitly. |
 | L03 | Coefficient verification, stable sigmoid/logit, permitted rainfall/probability inputs, zero/negative denominators, negative or unreachable thresholds. | Stage 2 implementation | Resolved in [engine contract](docs/staley2017_engine.md) and [ADR-0056](../../../../docs/adrs/ADR-0056-staley-numerical-engine.md), including review fixes for adjacent targets and inverse underflow. |
 | L04 | K calibration units, artifact provenance/freshness, full RUSLE versus K-only readiness, and M3's RUSLE prerequisite. | Stages 3 and 5 | [RUSLE dependency](specification.md#rusle-and-polaris-dependency). Recommend K-artifact readiness for M1 and no RUSLE prerequisite for M3; not yet ratified. |
 | L05 | Soil material inclusion, horizon validity, incomplete components, fallback granularity/triggers, and residual missing coverage. | Stage 6 implementation | [M3 soil direction](specification.md#m3-soil-thickness-ssurgo-feasibility); source priority accepted, production rules pending. |
@@ -157,3 +157,10 @@ scientific limitation that implementation cannot resolve.
   The modern directional helper follows a 2023 migration; its predictor
   compatibility is a suspected regression to investigate. Original 2017
   calibration method is still unconfirmed. Do not use current pfdf as M1 T oracle.
+
+- 2026-09-09 UTC: completed the local StaleySlopeSbs Rust backend, both bindings,
+  60 analytical and 24 security CLI checks, six-terrain panel and independent
+  reviews. [Validation and limitations](../../../../docs/work-packages/20260908_staley_slope_sbs/artifacts/validation.md).
+  Stage 3 remains partial: K integration, normalized dNBR composition and
+  production predictor preparation/orchestration are successor work. No binary
+  installation or deployment was performed.

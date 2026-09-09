@@ -1,0 +1,380 @@
+[
+  {
+    "site": "moscow_mountain",
+    "resolution_m": 30,
+    "runid": "bass-elimination",
+    "source_root": "/wc1/runs/ba/bass-elimination",
+    "existing_outlet": {
+      "type": "FeatureCollection",
+      "features": [
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              506375.00225648296,
+              5180063.0168808075
+            ]
+          },
+          "properties": {
+            "Id": 0,
+            "candidate_rank": null,
+            "candidates_considered": 0,
+            "centroid_col": null,
+            "centroid_row": null,
+            "column": 59,
+            "distance_to_boundary": null,
+            "easting": 506375.00225648296,
+            "epsg": 32611,
+            "northing": 5180063.0168808075,
+            "outlet_downstream_of_mask": false,
+            "outlet_in_mask": false,
+            "outlet_junction_count": 1,
+            "outlet_mask_value": null,
+            "perimeter_stream_count": 0,
+            "requested_cell_offset": 0,
+            "requested_col": 60,
+            "requested_easting": 506405.00225648296,
+            "requested_lat": 46.77415587686962,
+            "requested_lon": -116.91645230831963,
+            "requested_northing": 5180063.0168808075,
+            "requested_row": 175,
+            "row": 175,
+            "start_col": 60,
+            "start_distance_to_boundary": null,
+            "start_in_mask": false,
+            "start_mode": "requested",
+            "start_offset_cells": 0,
+            "start_row": 175,
+            "steps_beyond_mask": 0,
+            "steps_from_center": 1,
+            "steps_from_start": 1,
+            "watershed_cell_count": 0
+          }
+        }
+      ],
+      "crs": {
+        "properties": {
+          "name": "urn:ogc:def:crs:EPSG::32611"
+        },
+        "type": "name"
+      }
+    },
+    "sbs_files_found": []
+  },
+  {
+    "site": "moscow_mountain",
+    "resolution_m": 10,
+    "runid": "desolate-yea",
+    "source_root": "/wc1/runs/de/desolate-yea",
+    "existing_outlet": {
+      "type": "FeatureCollection",
+      "features": [
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              506363.0963980568,
+              5180051.780112741
+            ]
+          },
+          "properties": {
+            "Id": 0,
+            "candidate_rank": null,
+            "candidates_considered": 0,
+            "centroid_col": null,
+            "centroid_row": null,
+            "column": 131,
+            "distance_to_boundary": null,
+            "easting": 506363.0963980568,
+            "epsg": 32611,
+            "northing": 5180051.780112741,
+            "outlet_downstream_of_mask": false,
+            "outlet_in_mask": false,
+            "outlet_junction_count": 1,
+            "outlet_mask_value": null,
+            "perimeter_stream_count": 0,
+            "requested_cell_offset": 0,
+            "requested_col": 133,
+            "requested_easting": 506383.0963980568,
+            "requested_lat": 46.77408624790884,
+            "requested_lon": -116.91649792061206,
+            "requested_northing": 5180061.780112741,
+            "requested_row": 535,
+            "row": 536,
+            "start_col": 133,
+            "start_distance_to_boundary": null,
+            "start_in_mask": false,
+            "start_mode": "requested",
+            "start_offset_cells": 0,
+            "start_row": 535,
+            "steps_beyond_mask": 0,
+            "steps_from_center": 2,
+            "steps_from_start": 2,
+            "watershed_cell_count": 0
+          }
+        }
+      ],
+      "crs": {
+        "properties": {
+          "name": "urn:ogc:def:crs:EPSG::32611"
+        },
+        "type": "name"
+      }
+    },
+    "sbs_files_found": []
+  },
+  {
+    "site": "topanga",
+    "resolution_m": 30,
+    "runid": "untucked-hit",
+    "source_root": "/wc1/runs/un/untucked-hit",
+    "existing_outlet": {
+      "type": "FeatureCollection",
+      "features": [
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              353939.90881591244,
+              3776350.667680568
+            ]
+          },
+          "properties": {
+            "Id": 0,
+            "candidate_rank": null,
+            "candidates_considered": 0,
+            "centroid_col": null,
+            "centroid_row": null,
+            "column": 12,
+            "distance_to_boundary": null,
+            "easting": 353939.90881591244,
+            "epsg": 32611,
+            "northing": 3776350.667680568,
+            "outlet_downstream_of_mask": false,
+            "outlet_in_mask": false,
+            "outlet_junction_count": 1,
+            "outlet_mask_value": null,
+            "perimeter_stream_count": 0,
+            "requested_cell_offset": 0,
+            "requested_col": 12,
+            "requested_easting": 353939.90881591244,
+            "requested_lat": 34.11782199134691,
+            "requested_lon": -118.58391420736442,
+            "requested_northing": 3776350.667680568,
+            "requested_row": 67,
+            "row": 67,
+            "start_col": 12,
+            "start_distance_to_boundary": null,
+            "start_in_mask": false,
+            "start_mode": "requested",
+            "start_offset_cells": 0,
+            "start_row": 67,
+            "steps_beyond_mask": 0,
+            "steps_from_center": 0,
+            "steps_from_start": 0,
+            "watershed_cell_count": 0
+          }
+        }
+      ],
+      "crs": {
+        "properties": {
+          "name": "urn:ogc:def:crs:EPSG::32611"
+        },
+        "type": "name"
+      }
+    },
+    "sbs_files_found": []
+  },
+  {
+    "site": "topanga",
+    "resolution_m": 10,
+    "runid": "sorrowful-semicircle",
+    "source_root": "/wc1/runs/so/sorrowful-semicircle",
+    "existing_outlet": {
+      "type": "FeatureCollection",
+      "features": [
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              353931.5645379969,
+              3776366.5143099623
+            ]
+          },
+          "properties": {
+            "Id": 0,
+            "candidate_rank": null,
+            "candidates_considered": 0,
+            "centroid_col": null,
+            "centroid_row": null,
+            "column": 36,
+            "distance_to_boundary": null,
+            "easting": 353931.5645379969,
+            "epsg": 32611,
+            "northing": 3776366.5143099623,
+            "outlet_downstream_of_mask": false,
+            "outlet_in_mask": false,
+            "outlet_junction_count": 1,
+            "outlet_mask_value": null,
+            "perimeter_stream_count": 0,
+            "requested_cell_offset": 0,
+            "requested_col": 37,
+            "requested_easting": 353941.5645379969,
+            "requested_lat": 34.11780631920858,
+            "requested_lon": -118.58374424147402,
+            "requested_northing": 3776346.5143099623,
+            "requested_row": 203,
+            "row": 201,
+            "start_col": 37,
+            "start_distance_to_boundary": null,
+            "start_in_mask": false,
+            "start_mode": "requested",
+            "start_offset_cells": 0,
+            "start_row": 203,
+            "steps_beyond_mask": 0,
+            "steps_from_center": 2,
+            "steps_from_start": 2,
+            "watershed_cell_count": 0
+          }
+        }
+      ],
+      "crs": {
+        "properties": {
+          "name": "urn:ogc:def:crs:EPSG::32611"
+        },
+        "type": "name"
+      }
+    },
+    "sbs_files_found": []
+  },
+  {
+    "site": "az_ponderosa",
+    "resolution_m": 30,
+    "runid": "offshore-remake",
+    "source_root": "/wc1/runs/of/offshore-remake",
+    "existing_outlet": {
+      "type": "FeatureCollection",
+      "features": [
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              348903.55051379104,
+              3955535.8593238005
+            ]
+          },
+          "properties": {
+            "Id": 0,
+            "candidate_rank": null,
+            "candidates_considered": 0,
+            "centroid_col": null,
+            "centroid_row": null,
+            "column": 86,
+            "distance_to_boundary": null,
+            "easting": 348903.55051379104,
+            "epsg": 32613,
+            "northing": 3955535.8593238005,
+            "outlet_downstream_of_mask": false,
+            "outlet_in_mask": false,
+            "outlet_junction_count": 1,
+            "outlet_mask_value": null,
+            "perimeter_stream_count": 0,
+            "requested_cell_offset": 0,
+            "requested_col": 86,
+            "requested_easting": 348903.55051379104,
+            "requested_lat": 35.73238809243358,
+            "requested_lon": -106.67083115927025,
+            "requested_northing": 3955535.8593238005,
+            "requested_row": 349,
+            "row": 349,
+            "start_col": 86,
+            "start_distance_to_boundary": null,
+            "start_in_mask": false,
+            "start_mode": "requested",
+            "start_offset_cells": 0,
+            "start_row": 349,
+            "steps_beyond_mask": 0,
+            "steps_from_center": 0,
+            "steps_from_start": 0,
+            "watershed_cell_count": 0
+          }
+        }
+      ],
+      "crs": {
+        "properties": {
+          "name": "urn:ogc:def:crs:EPSG::32613"
+        },
+        "type": "name"
+      }
+    },
+    "sbs_files_found": []
+  },
+  {
+    "site": "az_ponderosa",
+    "resolution_m": 10,
+    "runid": "full-crocodile",
+    "source_root": "/wc1/runs/fu/full-crocodile",
+    "existing_outlet": {
+      "type": "FeatureCollection",
+      "features": [
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              348897.0919053316,
+              3955533.2352388427
+            ]
+          },
+          "properties": {
+            "Id": 0,
+            "candidate_rank": null,
+            "candidates_considered": 0,
+            "centroid_col": null,
+            "centroid_row": null,
+            "column": 259,
+            "distance_to_boundary": null,
+            "easting": 348897.0919053316,
+            "epsg": 32613,
+            "northing": 3955533.2352388427,
+            "outlet_downstream_of_mask": false,
+            "outlet_in_mask": false,
+            "outlet_junction_count": 1,
+            "outlet_mask_value": null,
+            "perimeter_stream_count": 0,
+            "requested_cell_offset": 0,
+            "requested_col": 260,
+            "requested_easting": 348907.0919053316,
+            "requested_lat": 35.73222621805862,
+            "requested_lon": -106.67076606035236,
+            "requested_northing": 3955533.2352388427,
+            "requested_row": 1048,
+            "row": 1048,
+            "start_col": 260,
+            "start_distance_to_boundary": null,
+            "start_in_mask": false,
+            "start_mode": "requested",
+            "start_offset_cells": 0,
+            "start_row": 1048,
+            "steps_beyond_mask": 0,
+            "steps_from_center": 1,
+            "steps_from_start": 1,
+            "watershed_cell_count": 0
+          }
+        }
+      ],
+      "crs": {
+        "properties": {
+          "name": "urn:ogc:def:crs:EPSG::32613"
+        },
+        "type": "name"
+      }
+    },
+    "sbs_files_found": []
+  }
+]

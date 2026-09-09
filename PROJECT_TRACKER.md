@@ -87,19 +87,6 @@ Feedback mechanisms:
 
 ## 📋 Backlog
 
-### Staley WBT Slope and SBS Intersection
-
-**Scoped**: 2026-09-08 (2026-09-09 05:08 UTC). Scaffolded; not executing.
-
-**Link**: [Package](docs/work-packages/20260908_staley_slope_sbs/package.md)
-
-**Scope**: Determine surface-slope algorithm and implement owned Rust slope/SBS
-intersection for the existing project watershed, both Python bindings and
-three-site method sensitivity. No nested assessments or production wiring.
-
-**Next**: Resolve algorithm/source/edge/support contract and ADR. Dedicated
-correctness/security reviews required for new raster and output boundaries.
-
 ### Seamless WEPPcloud Session Cookie Namespace Migration
 
 **Proposed**: 2026-08-23
@@ -1286,6 +1273,21 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### Staley WBT Slope and SBS Intersection
+
+**Completed backend**: 2026-09-09 UTC. Registered Rust tool and both bindings;
+157 Rust tests, 60 analytical checks, 24 security checks and six-terrain panel.
+
+**Link**: [Package](docs/work-packages/20260908_staley_slope_sbs/package.md)
+
+**Scope**: Determine surface-slope algorithm and implement owned Rust slope/SBS
+intersection for the existing project watershed, both Python bindings and
+three-site method sensitivity. No nested assessments or production wiring.
+
+**Next**: Production prepared-input orchestration, K and dNBR composition remain
+successors. Independent correctness/security reviews passed. No installation
+or deployment; stage 3 is not complete.
 
 ### Staley Project Watershed and Numerical Engine
 

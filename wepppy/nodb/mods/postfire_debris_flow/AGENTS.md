@@ -20,10 +20,11 @@
   no nested/channel assessment requirement. Accepted numerical policies are in
   [the engine contract](docs/staley2017_engine.md) and ADR-0056; future
   predictor and runtime integration remain separately scoped.
-- Slope/SBS backend proposal: [docs/slope_sbs.md](docs/slope_sbs.md).
+- Implemented local slope/SBS backend: [docs/slope_sbs.md](docs/slope_sbs.md).
   [WBT package](../../../../docs/work-packages/20260908_staley_slope_sbs/package.md)
-  is scaffolded, not executing; Horn is accepted (ADR-0058), while source
-  and edge policies remain pending. Unresolved intersection support retains
+  contains validation/reviews for StaleySlopeSbs and both bindings. Raw DEM and
+  strict nine-valid-cell edges are recorded in ADR-0058; production input
+  preparation and orchestration remain pending. Unresolved intersection support retains
   bounds and unavailable point T (accepted in ADR-0058).
 - Read [historical slope evidence](docs/historical_slope_evidence.md) before
   parity work: legacy ArcGIS surface slope and modern pfdf directional slope
