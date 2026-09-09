@@ -1,0 +1,95 @@
+{
+  "topaz": {
+    "channels.parquet": {
+      "rows": 220,
+      "max_coordinate_error_degrees": 0.0,
+      "other_columns_exact": false,
+      "differing_columns": [
+        "slope_scalar",
+        "length",
+        "direction",
+        "area"
+      ]
+    },
+    "hillslopes.parquet": {
+      "rows": 505,
+      "max_coordinate_error_degrees": 0.0,
+      "other_columns_exact": false,
+      "differing_columns": [
+        "length",
+        "width",
+        "direction",
+        "length_estimate_mode",
+        "length_area_over_channel",
+        "area"
+      ]
+    },
+    "slope_files": {
+      "count": 506,
+      "changed": [
+        "watershed/slope_files/channels.slp",
+        "watershed/slope_files/hillslopes/hill_1753.slp",
+        "watershed/slope_files/hillslopes/hill_853.slp",
+        "watershed/slope_files/hillslopes/hill_852.slp",
+        "watershed/slope_files/hillslopes/hill_1543.slp",
+        "watershed/slope_files/hillslopes/hill_1532.slp",
+        "watershed/slope_files/hillslopes/hill_1632.slp",
+        "watershed/slope_files/hillslopes/hill_1752.slp",
+        "watershed/slope_files/hillslopes/hill_1812.slp",
+        "watershed/slope_files/hillslopes/hill_1623.slp",
+        "watershed/slope_files/hillslopes/hill_1563.slp",
+        "watershed/slope_files/hillslopes/hill_1813.slp",
+        "watershed/slope_files/hillslopes/hill_1772.slp",
+        "watershed/slope_files/hillslopes/hill_243.slp",
+        "watershed/slope_files/hillslopes/hill_1542.slp",
+        "watershed/slope_files/hillslopes/hill_793.slp",
+        "watershed/slope_files/hillslopes/hill_1773.slp",
+        "watershed/slope_files/hillslopes/hill_1562.slp",
+        "watershed/slope_files/hillslopes/hill_242.slp",
+        "watershed/slope_files/hillslopes/hill_1622.slp"
+      ]
+    }
+  },
+  "wbt": {
+    "channels.parquet": {
+      "rows": 7,
+      "max_coordinate_error_degrees": 0.0,
+      "other_columns_exact": true,
+      "differing_columns": []
+    },
+    "flowpaths.parquet": {
+      "rows": 2291,
+      "max_coordinate_error_degrees": 0.0,
+      "other_columns_exact": true,
+      "differing_columns": []
+    },
+    "hillslopes.parquet": {
+      "rows": 17,
+      "max_coordinate_error_degrees": 0.0,
+      "other_columns_exact": true,
+      "differing_columns": []
+    },
+    "slope_files": {
+      "count": 35,
+      "changed": []
+    }
+  },
+  "fields": {
+    "field_flowpaths.csv": {
+      "rows": 2291,
+      "max_coordinate_error_degrees": 1.4210854715202004e-14,
+      "other_columns_exact": true,
+      "differing_columns": []
+    },
+    "fields.csv": {
+      "rows": 17,
+      "max_coordinate_error_degrees": 1.4210854715202004e-14,
+      "other_columns_exact": true,
+      "differing_columns": []
+    },
+    "slope_files": {
+      "count": 34,
+      "changed": []
+    }
+  }
+}

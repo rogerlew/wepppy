@@ -1,0 +1,30 @@
+{
+  "topaz/channels.parquet": {
+    "rows": 220,
+    "max_error_degrees": 0.0
+  },
+  "topaz/hillslopes.parquet": {
+    "rows": 505,
+    "max_error_degrees": 0.0
+  },
+  "wbt/channels.parquet": {
+    "rows": 7,
+    "max_error_degrees": 0.0
+  },
+  "wbt/hillslopes.parquet": {
+    "rows": 17,
+    "max_error_degrees": 0.0
+  },
+  "wbt/flowpaths.parquet": {
+    "rows": 2291,
+    "max_error_degrees": 0.0
+  },
+  "fields/field_flowpaths.csv": {
+    "rows": 2291,
+    "max_error_degrees": 1.4210854715202004e-14
+  },
+  "fields/fields.csv": {
+    "rows": 17,
+    "max_error_degrees": 1.4210854715202004e-14
+  }
+}

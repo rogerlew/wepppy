@@ -1,0 +1,19 @@
+{
+  "source_repository": "https://github.com/wepp-in-the-woods/peridot",
+  "source_commit": "3cef07bdc93a595016d80d0619718809a1bdccc8",
+  "build_command": "cargo build --release --bin abstract_watershed --bin wbt_abstract_watershed --bin sub_fields_abstraction",
+  "binaries": {
+    "abstract_watershed": {
+      "sha256": "f45c3c2b434b56242d3cedf2d5769bc2e834ed4c1b65d33fbcb938b740e27238",
+      "version": "peridot 0.1.0 (built 2026-09-09T15:52:19.419983060-07:00)"
+    },
+    "wbt_abstract_watershed": {
+      "sha256": "31b51155c29ecc7f9b9898b136f0989efb023776e220c74d7c35687727340353",
+      "version": "peridot 0.1.0 (built 2026-09-09T15:52:19.419983060-07:00)"
+    },
+    "sub_fields_abstraction": {
+      "sha256": "00595c519f99b8551616fa48793e805dcbdc817aa285c840323270ba87679381",
+      "version": "peridot 0.1.0 (built 2026-09-09T15:52:19.419983060-07:00)"
+    }
+  }
+}

@@ -1,6 +1,6 @@
 # Peridot centroid projection correction
 
-**Status**: Open (2026-09-09)
+**Status**: Closed (2026-09-09)
 **Timezone**: UTC
 
 ## Overview
@@ -30,3 +30,9 @@ Related: 20260426_peridot_runtime_contract_hardening and 20260321_peridot_waters
 ## Stakeholders
 
 Requesting user approves scope; Codex implements and reviews. See tracker.md and the ExecPlan for execution evidence.
+
+## Closure — 2026-09-09 23:00 UTC
+
+Delivered pointwise projection in all eight metadata exporters, regression coverage, three rebuilt/vendored binaries, and release/migration notes. Peridot main is pushed at 3cef07b; WEPPpy publication accompanies this closeout. Checks: 51 Rust tests passed; targeted Python 158 passed / 4 skipped; broad Python 8146 passed / 72 skipped. All three final binaries execute in the WEPPcloud container; geographic output matches pyproj and eight inspected hillslopes write 0.0001 in real MOFE soil prep.
+
+See [validation](artifacts/validation.md), [correctness review](artifacts/20260909_correctness_review.md), and [release notes](../../dev-notes/peridot-centroid-projection.md). No production deployment or live-run repair performed. Separate follow-ups: Python sampler rounding and preexisting TOPAZ traversal nondeterminism.

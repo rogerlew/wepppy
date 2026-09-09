@@ -7,6 +7,9 @@
 
 ## Purpose
 
+Completed: [Peridot centroid projection](docs/work-packages/20260909_peridot_centroid_projection/package.md)
+— pointwise PROJ conversion and three vendored binaries; 51 Rust and 8146 broad Python tests passed, with container and MOFE input validation.
+
 Implemented locally: [Creation failure diagnostics](docs/work-packages/20260909_creation_failure_diagnostics/package.md)
 — named-preset failures expose safe causes and next steps, with correlated
 tracebacks and response logs; live Portland failure verified.

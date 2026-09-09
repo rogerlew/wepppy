@@ -1,0 +1,52 @@
+{
+  "verified_soil_inputs": [
+    {
+      "topaz_id": 293,
+      "wepp_id": 61,
+      "kslast": 0.0001,
+      "ofes": 1
+    },
+    {
+      "topaz_id": 282,
+      "wepp_id": 58,
+      "kslast": 0.0001,
+      "ofes": 1
+    },
+    {
+      "topaz_id": 212,
+      "wepp_id": 43,
+      "kslast": 0.0001,
+      "ofes": 1
+    },
+    {
+      "topaz_id": 252,
+      "wepp_id": 52,
+      "kslast": 0.0001,
+      "ofes": 1
+    },
+    {
+      "topaz_id": 202,
+      "wepp_id": 41,
+      "kslast": 0.0001,
+      "ofes": 1
+    },
+    {
+      "topaz_id": 292,
+      "wepp_id": 60,
+      "kslast": 0.0001,
+      "ofes": 1
+    },
+    {
+      "topaz_id": 263,
+      "wepp_id": 55,
+      "kslast": 0.0001,
+      "ofes": 1
+    },
+    {
+      "topaz_id": 232,
+      "wepp_id": 47,
+      "kslast": 0.0001,
+      "ofes": 2
+    }
+  ]
+}
