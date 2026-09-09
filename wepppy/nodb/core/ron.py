@@ -1133,6 +1133,9 @@ def _try_bool(x: Any) -> bool:
 # for jinja views
 class RonViewModel(object):
     def __init__(self, ron: Ron) -> None:
+        # Detached controllers do not retain reader status; resolve before exposing it.
+        _ = ron._configparser
+        self.project_config_status = ron.project_config_status
         self.runid = _try_str(ron.runid)
         self.name = _try_str(ron.name)
         self.scenario = _try_str(ron.scenario)

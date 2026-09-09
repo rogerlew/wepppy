@@ -10,6 +10,7 @@
 {% set view_config = view_args.get('config', current_ron.config_stem) %}
 {% set project_srid = current_ron.srid if current_ron.srid is defined else none %}
 {% set run_config_summary = run_config_summary if run_config_summary is defined else none %}
+{% set show_project_config_update = current_ron.project_config_status is defined and current_ron.project_config_status.mode == 'flattened' %}
 {% set maturity_definition_href = maturity_definition_href if maturity_definition_href is defined else (url_for('usersum.view_markdown', category='weppcloud', filename='user-guide.md') ~ '#feature-maturity-labels') %}
 <header class="wc-header wc-run-header wc-run-header--hideaway">
   <div class="wc-container wc-container--fluid">
@@ -100,6 +101,7 @@
             ARCHIVE
           </a>
           {% endif %}
+          {% if show_project_config_update %}
           <div class="wc-project-config-update"
                data-project-config-update
                data-availability-url="{{ url_for_run('project-config/update-availability', runid=view_runid, config=view_config, prefix='/rq-engine/api') }}"
@@ -123,6 +125,7 @@
                role="alert"
                hidden></p>
           </div>
+          {% endif %}
         </div>
         <div class="wc-run-header__right">
           <div class="wc-run-header__theme">
@@ -313,6 +316,7 @@
   </section>
 </div>
 {% endif %}
+{% if show_project_config_update %}
 <div class="wc-modal" id="projectConfigUpdateModal" data-modal hidden>
   <div class="wc-modal__overlay" data-modal-dismiss></div>
   <section class="wc-modal__dialog wc-project-config-update__dialog"
@@ -404,6 +408,7 @@
     </footer>
   </section>
 </div>
+{% endif %}
 <script>
   "use strict";
   var pup_relpath = {{ pup_relpath | tojson }};

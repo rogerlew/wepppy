@@ -1,6 +1,7 @@
 from _typeshed import Incomplete
 from typing import Any, ClassVar, Dict, List, Optional, Tuple
 from wepppy.nodb.base import NoDbBase
+from wepppy.nodb.project_config_reader import ProjectConfigStatus
 from .map_object import Map
 
 __all__ = ['Map', 'RonNoDbLockedException', 'Ron', 'RonViewModel']
@@ -89,6 +90,7 @@ class Ron(NoDbBase):
     def chn_summary(self, topaz_id: Optional[str] = None, wepp_id: Optional[str] = None) -> Dict: ...
 
 class RonViewModel:
+    project_config_status: ProjectConfigStatus
     runid: Incomplete
     name: Incomplete
     scenario: Incomplete

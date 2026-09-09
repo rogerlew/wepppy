@@ -32,6 +32,8 @@ def test_ron_view_model_exposes_assigned_project_srid(
 ) -> None:
     monkeypatch.setattr(ron_module, "read_version", lambda _wd: 3)
     ron = SimpleNamespace(
+        _configparser=None,
+        project_config_status=None,
         runid="test-run",
         name="",
         scenario="",

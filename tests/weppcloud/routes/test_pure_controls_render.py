@@ -18,6 +18,7 @@ from wepppy.weppcloud.feature_registry.runtime import (
 )
 from wepppy.nodb.project_config_capabilities import resolve_run_capability_authority
 from wepppy.nodb.project_config_reader import ProjectConfigStatus
+from wepppy.nodb.core.ron import Ron, RonViewModel
 from wepppy.nodb.project_config_snapshot import (
     materialize_preset_snapshot,
     resolve_preset_snapshot,
@@ -2878,14 +2879,48 @@ def test_run_header_hides_team_public_readonly_for_anonymous(jinja_env: Environm
     assert 'id="checkbox_public"' not in rendered
 
 
+@pytest.fixture
+def header_ron_view_model(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setenv("WEPPPY_PROJECT_CONFIG_READER_ENABLED", "true")
+
+    def build(mode: str, manifest_state: str = "valid"):
+        if mode == "flattened":
+            candidate = resolve_preset_snapshot("eu-disturbed", {}, source_revision="test-revision")
+            materialize_preset_snapshot(tmp_path, candidate)
+            manifest = tmp_path / "config-manifest.json"
+            if manifest_state == "missing":
+                manifest.unlink()
+            elif manifest_state == "malformed":
+                manifest.write_text("{", encoding="utf-8")
+            elif manifest_state == "empty":
+                manifest.write_text("", encoding="utf-8")
+        # A cold Ron exercises the real reader without initializing model components.
+        ron = Ron.__new__(Ron)
+        ron.wd = str(tmp_path)
+        ron._config = "eu-disturbed.cfg"
+        ron._name = ""
+        ron._mods = []
+        ron._map = None
+        assert ron.project_config_status.mode == "legacy"
+        view_model = RonViewModel(ron)
+        assert view_model.project_config_status.mode == mode
+        return view_model
+
+    return build
+
+
+@pytest.mark.parametrize("manifest_state", ["valid", "missing", "malformed", "empty"])
 def test_run_header_project_config_update_modal_is_accessible_and_dormant(
-    jinja_env: Environment,
+    jinja_env: Environment, manifest_state: str, header_ron_view_model,
 ) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
     auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
     request = SimpleNamespace(view_args={"runid": "parent;;omni;;child", "config": "config"})
 
-    rendered = template.render(user=auth_user, current_user=auth_user, request=request)
+    rendered = template.render(
+        user=auth_user, current_user=auth_user, request=request,
+        current_ron=header_ron_view_model("flattened", manifest_state),
+    )
 
     for token in (
         "data-project-config-update",
@@ -2909,6 +2944,18 @@ def test_run_header_project_config_update_modal_is_accessible_and_dormant(
     assert 'data-project-config-update\n' in rendered
     assert 'data-modal hidden' in rendered
     assert rendered.index("ARCHIVE") < rendered.index("data-project-config-update")
+
+
+def test_legacy_run_header_omits_project_config_update_workflow(
+    jinja_env: Environment, header_ron_view_model,
+) -> None:
+    rendered = jinja_env.get_template("header/_run_header_fixed.htm").render(
+        current_ron=header_ron_view_model("legacy"),
+    )
+
+    assert "data-project-config-update" not in rendered
+    assert 'id="projectConfigUpdateModal"' not in rendered
+    assert "project-config/update-availability" not in rendered
 
 
 def test_interfaces_template_shows_login_bypass_banner_for_anonymous_user(jinja_env: Environment) -> None:
