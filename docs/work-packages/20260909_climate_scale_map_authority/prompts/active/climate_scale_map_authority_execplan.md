@@ -86,3 +86,12 @@ repair, canary, replay deployment dependency, and explicit rebuild disposition.
 
 2026-09-09 follow-up: full suite and real RQ replay regression passed; recorded
 new live submissions and the outstanding production job/deployment gate.
+
+2026-09-09 22:52 UTC: canceled two active climate jobs as requested (warming
+climate had already completed). Repaired the two stopped runs again, preserving
+new scalar settings. Warming model activity blocks its repeat repair; permanent
+code activation is still pending. Evidence: live evidence cancellation section.
+
+22:55 UTC: under-fecundity and warming-championship map repairs completed on
+explicit follow-up, preserving scalar settings. The under climate job was stopped;
+verified non-writing warming model jobs continued. Code activation remains pending.

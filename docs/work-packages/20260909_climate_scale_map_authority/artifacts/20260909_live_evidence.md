@@ -101,3 +101,33 @@ inactive, then verify current modes/scalars, disk/cache, and loaded worker code.
   exercised before separating pytest and Jest prerequisites.
 - Changed broad-exception enforcement, test stub checks, and Markdown lint passed.
 - Independent correctness and QA findings closed; worker replay coverage approved.
+
+## Requested cancellation and second repair
+
+At 2026-09-09 22:49 UTC, the user explicitly requested cancellation of the three
+recent climate builds. On wepp1, verified exact run/function identities and used
+RQ `send_stop_job_command`; readback confirmed `stopped` for seductive-sabra
+`404f3477-94d7-4cc5-a0da-efef9b7bae94` and replacement asteroid-hindrance job
+`1c9dacc8-78a1-421c-a818-531e9c1ce9b5`. Its earlier job had already failed.
+Warming-championship climate job `b9982247-0e22-4952-a020-d424fe7e2f7d` had
+already finished; a later `_run_hillslopes_rq` job was active and was not canceled.
+A separate under-fecundity climate job was also active outside this cancel scope.
+
+At 22:52 UTC, re-applied the reviewed repair narrowed to the two stopped runs.
+Both stored maps are restored to configuration with current scalar choices
+preserved. Backups and readback hashes: `20260909_post_cancel_repairs.json`.
+Warming-championship map repair remains deferred while its model job is active.
+Permanent code activation remains pending; cancellation did not deploy code.
+
+## Explicit under-fecundity and warming-championship repair
+
+At 2026-09-09 22:55 UTC, on the user's explicit follow-up, stopped under-fecundity
+climate job `01a3c9a2-810f-47f3-9c1c-bf325bd109b2`; verified `stopped`. Restored
+both map fields through the same backed-up NoDb repair. For this execution only,
+the guard allowed two inspected warming jobs: run_watershed_rq
+`8b65ac1c-9a70-4c9d-af48-00364b05acd8` and _build_hillslope_interchange_rq
+`9d765300-5329-4161-b281-dbb5439f8da7`. Source inspection confirms neither writes
+climate.nodb; all other target jobs still blocked repair, and NoDb locking, fresh
+hydration, field-only comparison, and sampled-input hashes remained enforced.
+Current scalar choices were preserved. Results/backups: `20260909_under_warming_repairs.json`.
+Permanent code activation remains pending.

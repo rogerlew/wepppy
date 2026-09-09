@@ -1,0 +1,24 @@
+[
+  {
+    "runid": "seductive-sabra",
+    "before": "1.1",
+    "after": "/geodata/extended_mods_data/wepppy-locations-portland/daymet_scale.tif",
+    "backup": "/wc1/.incident-backups/climate-scale-map-20260909T225210Z/seductive-sabra.climate.nodb",
+    "samples": {
+      "wepp/runs/p1.cli": "46e0890f88d73062a122a2891c584701a302d556a947645e6d710277cff3c07a"
+    },
+    "before_sha256": "17837bb0a41733b4867b3cb26b39b4e0f1d4f710f0036f4aee86f1d482b96e2f",
+    "after_sha256": "165aa68003498ae04e3ded2e9f2a08a49b057a5aa994e114eab0747c1e2b7b32"
+  },
+  {
+    "runid": "asteroid-hindrance",
+    "before": "1.1",
+    "after": "/geodata/extended_mods_data/wepppy-locations-portland/daymet_scale.tif",
+    "backup": "/wc1/.incident-backups/climate-scale-map-20260909T225210Z/asteroid-hindrance.climate.nodb",
+    "samples": {
+      "wepp/runs/p1.cli": "56ecd0ead3cd4d1b1a27854b55f26db307b8b722864eb5f49c5cf898899a255f"
+    },
+    "before_sha256": "144ab9220bb530a464d849cbc4f498d43fa4b9cbe2d3820b478cc70cfa116f3a",
+    "after_sha256": "7c3f115f61803d86ef39112fe0347411f95ef645baed612b7a56d1cbf8f0180b"
+  }
+]

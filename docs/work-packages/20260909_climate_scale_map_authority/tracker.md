@@ -32,3 +32,12 @@ Permanent code activation and final repeat repair are pending the production
 job gate. Active jobs prevent deployment without explicit operator approval;
 canonical cutover additionally requires drained default/batch jobs. All local
 implementation, focused/broad validation, and independent reviews are complete.
+
+22:52 UTC follow-up: two active climate jobs stopped on explicit request;
+warming-championship climate had finished and WEPP was active. Seductive-sabra
+and asteroid-hindrance maps repaired again. Warming map and code activation
+remain pending; see the live evidence cancellation section.
+
+22:55 UTC: under-fecundity and warming-championship map repairs completed on
+explicit follow-up, preserving scalar settings. The under climate job was stopped;
+verified non-writing warming model jobs continued. Code activation remains pending.

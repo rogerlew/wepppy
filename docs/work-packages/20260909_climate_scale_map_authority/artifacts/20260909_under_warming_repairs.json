@@ -1,0 +1,25 @@
+[
+  {
+    "runid": "under-fecundity",
+    "before": "1.1",
+    "after": "/geodata/extended_mods_data/wepppy-locations-portland/daymet_scale.tif",
+    "backup": "/wc1/.incident-backups/climate-scale-map-20260909T225538Z/under-fecundity.climate.nodb",
+    "samples": {
+      "wepp/runs/p1.cli": "4e7b62f207e53c6def71a3c8aea52b396d40310d136987b1eab1cc70e1fac6dc"
+    },
+    "before_sha256": "9e1416fd421f729653e625062a7e85f6239d8c1106bcc07b5d451fe2f1884a6f",
+    "after_sha256": "f72d88152b5714739423bda05205b2a1a941b69af4134677c0068b0e07819840"
+  },
+  {
+    "runid": "warming-championship",
+    "before": "1.1",
+    "after": "/geodata/extended_mods_data/wepppy-locations-portland/daymet_scale.tif",
+    "backup": "/wc1/.incident-backups/climate-scale-map-20260909T225538Z/warming-championship.climate.nodb",
+    "samples": {
+      "climate/scale_wepp.cli": "85954cc46586c448345108f49f355710ca3df032c85f6784e371458f6414058f",
+      "wepp/runs/p1.cli": "164fcd2e921212180330cced1b3da51b7c3357bb30d2d3e30ffec15c93eadd8a"
+    },
+    "before_sha256": "2ce39eec10469bf726843c128720149478ea3676688dfefe65b85e2119b92b1c",
+    "after_sha256": "ce5d5e0364fc0bca907d71b54c6f1983c902ca421f27a099af5f94b5604e3092"
+  }
+]
