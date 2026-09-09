@@ -24,6 +24,9 @@ class ClimateInputParsingService:
         # Keep parsing and state mutation under one lock scope so NoDb persists
         # once per parse_inputs() call.
         with climate.locked():
+            # Resolve before any payload mutation: configuration IO failures must
+            # not leave a partially parsed controller behind.
+            configured_scale_map = climate.precip_scale_factor_map
             mutable_fields = {
                 "_catalog_id", "_orig_cli_fn", "_climate_mode", "_climate_spatialmode",
                 "_climatestation_mode",
@@ -43,6 +46,7 @@ class ClimateInputParsingService:
             try:
                 climate_mode = self._parse_core_inputs(climate, kwds)
                 self._parse_mode_specific_inputs(climate, kwds, climate_mode)
+                climate._precip_scale_factor_map = configured_scale_map
             except (AssertionError, KeyError, TypeError, ValueError):
                 for key in mutable_fields.difference(snapshot):
                     climate.__dict__.pop(key, None)
@@ -161,9 +165,6 @@ class ClimateInputParsingService:
 
         if kwds.get("precip_scale_reference", None) is not None:
             climate._precip_scaling_reference = kwds["precip_scale_reference"]
-
-        if kwds.get("precip_scale_factor_map", None) is not None:
-            climate._precip_scale_factor_map = kwds["precip_scale_factor_map"]
 
         return climate_mode
 

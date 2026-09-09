@@ -15,17 +15,24 @@ on wepp1 is `/geodata/wc1/runs/<prefix>/<runid>` on host, `/wc1/runs/...` in con
 ## Progress
 
 - [x] Inspect deployed parser/template and identify owner account/family.
-- [ ] Inventory actual corrupted runs and active jobs.
-- [ ] Ratify/commit the map contract and API compatibility amendment after reviews.
-- [ ] Fix property/parser and omit display-only form submission; add regression tests.
-- [ ] Validate and apply bounded live remediation with backups.
-- [ ] Complete broad checks, independent reviews, and outcome/rebuild record.
+- [x] Inventory 14 owner runs: four corrupt, nine correct, one absent; verify failed RQ jobs.
+- [x] Ratify/commit contract checkpoint `acf04419c` after two independent reviews.
+- [x] Fix property/parser and omit display-only submission; focused Python/Jest tests pass.
+- [x] Real worker raster/CLI/WEPP-prep canary passed; four live records repaired with backups.
+- [x] Disk/cache inventory and repeated-repair no-op verified.
+- [ ] Activate matching code in request handlers and RQ workers.
+- [x] Complete broad checks (8,145 passed), independent reviews, and outcome record.
+- [ ] Recheck/re-repair after new live submissions and matching code activation.
 
 ## Surprises & Discoveries
 
 - The recent display patch is deployed, but server-side map assignment remains.
-- A canonical API document currently tells callers to submit the map. This
-  must be amended explicitly before removing its authority.
+- The API document previously told callers to submit the map; its amendment
+  was ratified before implementation.
+- RQ workers replay build payloads, so request-handler-only deployment leaves
+  an old worker capable of restoring the poison value.
+- The first broad suite exposed a route-test dummy missing the real map property;
+  the fixture was corrected and all 21 climate route tests passed.
 
 ## Decision Log
 
@@ -63,6 +70,19 @@ snapshots over subsequent user work. Repeated repair is a no-op for correct fiel
 
 ## Outcomes & Retrospective
 
-Pending. This plan governs only this incident, not the other active work packages.
+Four corrupt wepp1 maps were repaired at 2026-09-09 22:19 UTC; all 13 existing
+climate files now agree with configuration. Sampled generated files are unchanged.
+Spatial builds for seductive-sabra, warming-championship, and asteroid-hindrance
+need rebuilding before the next model run. Under-fecundity retained its current
+no-scaling mode and later successful climate build. Broad checks passed. New user submissions at 22:32 UTC again carried the poison
+map, with newly selected scalar modes that must be preserved. Permanent activation
+and repeat repair after active jobs drain are pending. See `artifacts/20260909_live_evidence.md`
+and `artifacts/20260909_implementation_reviews.md`.
 
 Plan created 2026-09-09 after confirming the deployed assignment path.
+
+2026-09-09 update: recorded contract checkpoint, implementation, reviewed live
+repair, canary, replay deployment dependency, and explicit rebuild disposition.
+
+2026-09-09 follow-up: full suite and real RQ replay regression passed; recorded
+new live submissions and the outstanding production job/deployment gate.

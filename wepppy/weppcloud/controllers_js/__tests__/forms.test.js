@@ -59,6 +59,17 @@ describe("WCForms helpers", () => {
         expect(payload.mode).toBe("fast");
     });
 
+    test("serializeForm excludes a disabled config map while preserving the scalar", () => {
+        const form = document.createElement("form");
+        form.innerHTML = `
+            <input name="precip_scale_factor" value="1.1">
+            <input name="precip_scale_factor_map" value="/configured/daymet_scale.tif" readonly disabled>
+        `;
+        expect(WCForms.serializeForm(form, { format: "json" })).toEqual({
+            precip_scale_factor: "1.1"
+        });
+    });
+
     test("applyValues hydrates radios, checkboxes, and selects", () => {
         const form = document.createElement("form");
         form.innerHTML = `

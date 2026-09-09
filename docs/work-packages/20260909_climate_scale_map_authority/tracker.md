@@ -7,10 +7,13 @@
 - [x] Raw disk inventory: four corrupt maps (`under-fecundity`, `seductive-sabra`,
   `warming-championship`, `asteroid-hindrance`), nine correct, and one missing
   canonical climate.nodb (`free-sally`). Config and active-job checks continue.
-- [ ] Review and commit canonical contract checkpoint.
-- [ ] Implement and validate configuration authority and browser omission.
-- [ ] Apply bounded production fix and reset affected NoDb records.
-- [ ] Verify disk/cache/artifact propagation and document rebuild disposition.
+- [x] Ratify and commit canonical contract checkpoint `acf04419c`.
+- [x] Implement configuration authority/browser omission; focused checks and reviews pass.
+- [x] Repair four production records with protected backups and verify no-op replay.
+- [ ] Activate code in both request handlers and RQ workers.
+- [x] Verify disk/cache, real raster/CLI/WEPP-prep canary, and rebuild disposition.
+- [x] Broad suite: 8,145 passed, 72 skipped; added real replay test passed separately.
+- [ ] Repeat repair after later user submissions and matching code activation.
 
 ## Decision log
 
@@ -20,4 +23,12 @@
 
 ## Validation and outcome
 
-Pending. No production NoDb files have been changed by this task.
+Initial four maps repaired at 2026-09-09 22:19 UTC; disk/cache and no-op verified.
+At 22:32 UTC three new user build payloads again carried map `"1.1"`, alongside
+new user-selected scalar modes. Preserve those choices. Full evidence, tests,
+and revised rebuild disposition: `artifacts/20260909_live_evidence.md`.
+
+Permanent code activation and final repeat repair are pending the production
+job gate. Active jobs prevent deployment without explicit operator approval;
+canonical cutover additionally requires drained default/batch jobs. All local
+implementation, focused/broad validation, and independent reviews are complete.

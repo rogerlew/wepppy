@@ -429,6 +429,7 @@ def test_v2_exact_current_spatial_carveout_reaches_real_parser() -> None:
     )
 
     class DummyClimate:
+        precip_scale_factor_map = None
         catalog_id = "vanilla_cligen"
         climatestation_mode = -1
         climate_spatialmode = 2

@@ -38,6 +38,11 @@ Incident recovery: [DEVAL soils permissions](docs/work-packages/20260909_deval_s
 25 focused tests, 8,113 broad tests, and production regenerated-input render passed; permanent rollout
 awaits the production job gate.
 
+Incident recovery: [Climate scale-map authority](docs/work-packages/20260909_climate_scale_map_authority/package.md)
+— initial four-map repair verified; new live submissions carried stale map values.
+Configuration authority passes 8,145 broad tests and raster/WEPP-input propagation;
+matching worker activation and final repair await the production job gate.
+
 ## How to Use This Tracker
 
 **For Agents**:

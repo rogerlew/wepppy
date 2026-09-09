@@ -1274,7 +1274,7 @@ def test_climate_template_renders_upload_and_scaling_contract(
         precip_scale_factor=1.1,
         precip_monthly_scale_factors=[1.0] * 12,
         precip_scale_reference="prism",
-        precip_scale_factor_map=None,
+        precip_scale_factor_map="/configured/daymet_scale.tif",
     )
     catalog = [{
         "catalog_id": "user_defined_cli", "label": "User CLI", "description": "",
@@ -1296,6 +1296,12 @@ def test_climate_template_renders_upload_and_scaling_contract(
     assert 'id="climate_precipscaling_mode2_controls"' in rendered
     assert 'id="precip_monthly_scale_factors_0"' in rendered
     assert 'name="precip_monthly_scale_factors_11"' in rendered
+
+    field = re.search(r'<input[^>]*id="precip_scale_factor_map"[^>]*>', rendered).group(0)
+    assert 'value="/configured/daymet_scale.tif"' in field
+    assert re.search(r"\bdisabled(?:\s|=|>)", field)
+    assert re.search(r"\breadonly(?:\s|=|>)", field)
+    assert "disable-readonly" not in field
 
 
 def test_observed_template_renders_model_fit_contract(jinja_env: Environment) -> None:

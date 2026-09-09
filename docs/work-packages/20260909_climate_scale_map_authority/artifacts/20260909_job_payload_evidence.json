@@ -1,0 +1,72 @@
+[
+  {
+    "job": "3ed3844f-8407-47f7-94ea-f1e786ba2439",
+    "created_at": "2026-09-09 16:46:28.492084",
+    "started_at": "2026-09-09 16:46:28.524162",
+    "status": "failed",
+    "payload": {
+      "precip_scale_factor_map": "1.1",
+      "precip_scale_factor": "",
+      "precip_scaling_mode": "4",
+      "climate_mode": "11",
+      "observed_start_year": "1980",
+      "observed_end_year": "2025"
+    }
+  },
+  {
+    "job": "248efb2b-4973-4d13-884a-ed6719e0eba6",
+    "created_at": "2026-09-09 18:30:46.096986",
+    "started_at": "2026-09-09 18:30:46.131761",
+    "status": "failed",
+    "payload": {
+      "precip_scale_factor_map": "1.1",
+      "precip_scale_factor": "",
+      "precip_scaling_mode": "4",
+      "climate_mode": "11",
+      "observed_start_year": "1980",
+      "observed_end_year": "2025"
+    }
+  },
+  {
+    "job": "285c7f4f-51d4-4d4c-aa16-349be0e26baa",
+    "created_at": "2026-09-09 18:30:41.048979",
+    "started_at": "2026-09-09 18:30:41.083215",
+    "status": "failed",
+    "payload": {
+      "precip_scale_factor_map": "1.1",
+      "precip_scale_factor": "",
+      "precip_scaling_mode": "4",
+      "climate_mode": "11",
+      "observed_start_year": "1980",
+      "observed_end_year": "2003"
+    }
+  },
+  {
+    "job": "b542738e-6293-4876-9ef9-9ef033f69578",
+    "created_at": "2026-09-09 18:30:48.746959",
+    "started_at": "2026-09-09 18:30:48.781322",
+    "status": "failed",
+    "payload": {
+      "precip_scale_factor_map": "1.1",
+      "precip_scale_factor": "1.1",
+      "precip_scaling_mode": "4",
+      "climate_mode": "11",
+      "observed_start_year": "1980",
+      "observed_end_year": "2022"
+    }
+  },
+  {
+    "job": "da59b226-4d5e-4533-84a9-e4fa1930f417",
+    "created_at": "2026-09-09 17:22:36.296810",
+    "started_at": "2026-09-09 17:22:36.386932",
+    "status": "finished",
+    "payload": {
+      "precip_scale_factor_map": "1.1",
+      "precip_scale_factor": "",
+      "precip_scaling_mode": "0",
+      "climate_mode": "11",
+      "observed_start_year": "1980",
+      "observed_end_year": "2025"
+    }
+  }
+]

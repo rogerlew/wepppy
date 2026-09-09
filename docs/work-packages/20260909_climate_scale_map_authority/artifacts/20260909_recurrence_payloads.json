@@ -1,0 +1,58 @@
+[
+  {
+    "job": "404f3477-94d7-4cc5-a0da-efef9b7bae94",
+    "created_at": "2026-09-09 22:32:27.090643",
+    "started_at": "2026-09-09 22:32:27.155754",
+    "status": "started",
+    "payload": {
+      "precip_scale_factor_map": "1.1",
+      "precip_scale_factor": "0.9168",
+      "precip_scaling_mode": "1",
+      "climate_mode": "11",
+      "observed_start_year": "1980",
+      "observed_end_year": "2025"
+    }
+  },
+  {
+    "job": "197cf090-fa48-46d9-8e53-2972a553a134",
+    "created_at": "2026-09-09 22:32:38.676829",
+    "started_at": "2026-09-09 22:32:38.711940",
+    "status": "started",
+    "payload": {
+      "precip_scale_factor_map": "1.1",
+      "precip_scale_factor": "1.0688",
+      "precip_scaling_mode": "1",
+      "climate_mode": "11",
+      "observed_start_year": "1980",
+      "observed_end_year": "2022"
+    }
+  },
+  {
+    "job": "b9982247-0e22-4952-a020-d424fe7e2f7d",
+    "created_at": "2026-09-09 22:32:08.087045",
+    "started_at": "2026-09-09 22:32:08.150711",
+    "status": "started",
+    "payload": {
+      "precip_scale_factor_map": "1.1",
+      "precip_scale_factor": "1.12",
+      "precip_scaling_mode": "1",
+      "climate_mode": "11",
+      "observed_start_year": "1980",
+      "observed_end_year": "2003"
+    }
+  },
+  {
+    "job": "0012f700-5add-4437-81c6-59daa05ed260",
+    "created_at": "2026-09-09 22:31:55.992623",
+    "started_at": "2026-09-09 22:31:56.051958",
+    "status": "started",
+    "payload": {
+      "precip_scale_factor_map": "/geodata/extended_mods_data/wepppy-locations-portland/daymet_scale.tif",
+      "precip_scale_factor": "1.18",
+      "precip_scaling_mode": "1",
+      "climate_mode": "11",
+      "observed_start_year": "1980",
+      "observed_end_year": "2025"
+    }
+  }
+]

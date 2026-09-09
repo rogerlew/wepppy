@@ -581,7 +581,16 @@ class Climate(NoDbBase):
 
     @property
     def precip_scale_factor_map(self) -> Optional[str]:
-        return getattr(self, '_precip_scale_factor_map', None)
+        # Preserve initialization precedence; persisted/form values are not authority.
+        for option in (
+            'daymet_precip_scale_factor_map',
+            'gridmet_precip_scale_factor_map',
+            'precip_scale_factor_map',
+        ):
+            path = self.config_get_path('climate', option, None)
+            if path is not None:
+                return path
+        return None
 
     @property
     def gridmet_precip_scale_factor(self) -> Optional[float]:

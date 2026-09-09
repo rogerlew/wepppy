@@ -1,0 +1,276 @@
+[
+  {
+    "runid": "enterprising-pout",
+    "status": "correct disk and cache",
+    "scaling_mode": {
+      "py/reduce": [
+        {
+          "py/type": "wepppy.nodb.core.climate.ClimatePrecipScalingMode"
+        },
+        {
+          "py/tuple": [
+            1
+          ]
+        }
+      ]
+    },
+    "scalar": 1.1,
+    "sha256": "41a4f21829015c63d9da0ec9a7e0bbf47527361089b320cb9d22379b7aab4f1f"
+  },
+  {
+    "runid": "dulled-acetate",
+    "status": "correct disk and cache",
+    "scaling_mode": {
+      "py/reduce": [
+        {
+          "py/type": "wepppy.nodb.core.climate.ClimatePrecipScalingMode"
+        },
+        {
+          "py/tuple": [
+            1
+          ]
+        }
+      ]
+    },
+    "scalar": 1.1,
+    "sha256": "47cc539e9494d24ddeb69e0af4c5cbfdbe65ba0db0088c62cd3734edfad06f37"
+  },
+  {
+    "runid": "forceful-tomato",
+    "status": "correct disk and cache",
+    "scaling_mode": {
+      "py/reduce": [
+        {
+          "py/type": "wepppy.nodb.core.climate.ClimatePrecipScalingMode"
+        },
+        {
+          "py/tuple": [
+            0
+          ]
+        }
+      ]
+    },
+    "scalar": 1.1,
+    "sha256": "013ec79b4706621648b67f5906c4fe9a0a90298a3fbe3144600c36eb760e967e"
+  },
+  {
+    "runid": "downright-houri",
+    "status": "correct disk and cache",
+    "scaling_mode": {
+      "py/reduce": [
+        {
+          "py/type": "wepppy.nodb.core.climate.ClimatePrecipScalingMode"
+        },
+        {
+          "py/tuple": [
+            0
+          ]
+        }
+      ]
+    },
+    "scalar": null,
+    "sha256": "1b2b9d64de8899559743efa58f4f0aa848ea761cd34c6f4f7a543bcf08b30962"
+  },
+  {
+    "runid": "seductive-sabra",
+    "status": "correct disk and cache",
+    "scaling_mode": {
+      "py/reduce": [
+        {
+          "py/type": "wepppy.nodb.core.climate.ClimatePrecipScalingMode"
+        },
+        {
+          "py/tuple": [
+            4
+          ]
+        }
+      ]
+    },
+    "scalar": null,
+    "sha256": "d51ea6f4e36ed20b903d27f0c542725021d13bcf8a315b1ac75e3b7e2e59ad83"
+  },
+  {
+    "runid": "tied-hauler",
+    "status": "correct disk and cache",
+    "scaling_mode": {
+      "py/reduce": [
+        {
+          "py/type": "wepppy.nodb.core.climate.ClimatePrecipScalingMode"
+        },
+        {
+          "py/tuple": [
+            4
+          ]
+        }
+      ]
+    },
+    "scalar": null,
+    "sha256": "bccff82c702984e8664bdacfc5196c8967c80d2929803296acc01fbede49685e"
+  },
+  {
+    "runid": "under-fecundity",
+    "status": "correct disk and cache",
+    "scaling_mode": {
+      "py/reduce": [
+        {
+          "py/type": "wepppy.nodb.core.climate.ClimatePrecipScalingMode"
+        },
+        {
+          "py/tuple": [
+            0
+          ]
+        }
+      ]
+    },
+    "scalar": null,
+    "sha256": "cae2350325f43406d4ea4d8173a5f4777082939cfc64c2eec3393b574a463507"
+  },
+  {
+    "runid": "free-sally",
+    "status": "missing climate.nodb"
+  },
+  {
+    "runid": "wise-loggia",
+    "status": "correct disk and cache",
+    "scaling_mode": {
+      "py/reduce": [
+        {
+          "py/type": "wepppy.nodb.core.climate.ClimatePrecipScalingMode"
+        },
+        {
+          "py/tuple": [
+            0
+          ]
+        }
+      ]
+    },
+    "scalar": 1.1,
+    "sha256": "ac45faec6d0b299413b8bff8a67d1aa37a076e00fdf2f53f5acad2a087754140"
+  },
+  {
+    "runid": "dehydrated-resettlement",
+    "status": "correct disk and cache",
+    "scaling_mode": {
+      "py/reduce": [
+        {
+          "py/type": "wepppy.nodb.core.climate.ClimatePrecipScalingMode"
+        },
+        {
+          "py/tuple": [
+            0
+          ]
+        }
+      ]
+    },
+    "scalar": 1.1,
+    "sha256": "3186b7b36f5735fc0728c46addb52a81687bad85daf1adab91eb1da334647ec6"
+  },
+  {
+    "runid": "full-page-origami",
+    "status": "correct disk and cache",
+    "scaling_mode": {
+      "py/reduce": [
+        {
+          "py/type": "wepppy.nodb.core.climate.ClimatePrecipScalingMode"
+        },
+        {
+          "py/tuple": [
+            4
+          ]
+        }
+      ]
+    },
+    "scalar": null,
+    "sha256": "5b083144384cbeb4f327924c72927328f35518b73d87c92fa0ef36377b22a90a"
+  },
+  {
+    "runid": "warming-championship",
+    "status": "correct disk and cache",
+    "scaling_mode": {
+      "py/reduce": [
+        {
+          "py/type": "wepppy.nodb.core.climate.ClimatePrecipScalingMode"
+        },
+        {
+          "py/tuple": [
+            4
+          ]
+        }
+      ]
+    },
+    "scalar": null,
+    "sha256": "ffa03b7460bc78ab95438235c6017ae39faf468c4ca91b6b766fae86dac1196b"
+  },
+  {
+    "runid": "asteroid-hindrance",
+    "status": "correct disk and cache",
+    "scaling_mode": {
+      "py/reduce": [
+        {
+          "py/type": "wepppy.nodb.core.climate.ClimatePrecipScalingMode"
+        },
+        {
+          "py/tuple": [
+            4
+          ]
+        }
+      ]
+    },
+    "scalar": 1.1,
+    "sha256": "063bb12d11fa94af92b290524e6517d92ed3a72dc5104cc382afc9876b287a4a"
+  },
+  {
+    "runid": "provincial-facing",
+    "status": "correct disk and cache",
+    "scaling_mode": {
+      "py/reduce": [
+        {
+          "py/type": "wepppy.nodb.core.climate.ClimatePrecipScalingMode"
+        },
+        {
+          "py/tuple": [
+            4
+          ]
+        }
+      ]
+    },
+    "scalar": null,
+    "sha256": "e993dbb746b5a104e34eb19bf07d75382726db30fff4828620d197c8b7baf426"
+  },
+  {
+    "failed_job": "3ed3844f-8407-47f7-94ea-f1e786ba2439",
+    "status": "failed",
+    "tail": [
+      "    assert _exists(scale_factor_map), scale_factor_map",
+      "           ^^^^^^^^^^^^^^^^^^^^^^^^^",
+      "AssertionError: 1.1"
+    ]
+  },
+  {
+    "failed_job": "248efb2b-4973-4d13-884a-ed6719e0eba6",
+    "status": "failed",
+    "tail": [
+      "    assert _exists(scale_factor_map), scale_factor_map",
+      "           ^^^^^^^^^^^^^^^^^^^^^^^^^",
+      "AssertionError: 1.1"
+    ]
+  },
+  {
+    "failed_job": "285c7f4f-51d4-4d4c-aa16-349be0e26baa",
+    "status": "failed",
+    "tail": [
+      "    assert _exists(scale_factor_map), scale_factor_map",
+      "           ^^^^^^^^^^^^^^^^^^^^^^^^^",
+      "AssertionError: 1.1"
+    ]
+  },
+  {
+    "failed_job": "b542738e-6293-4876-9ef9-9ef033f69578",
+    "status": "failed",
+    "tail": [
+      "    assert _exists(scale_factor_map), scale_factor_map",
+      "           ^^^^^^^^^^^^^^^^^^^^^^^^^",
+      "AssertionError: 1.1"
+    ]
+  }
+]

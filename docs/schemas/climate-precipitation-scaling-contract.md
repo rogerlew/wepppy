@@ -42,10 +42,11 @@ must configure their map before spatial scaling can run.
 On 2026-09-09 the operator directed that Marta's `portland-10-mofe` runs use
 the configured `/geodata/extended_mods_data/wepppy-locations-portland/daymet_scale.tif`
 and that the map remain immutable. Read-only HTML still submits a field;
-trusting it allowed the former scalar display value `"1.1"` to overwrite the
-map. Server-side configuration authority also handles stale pages and corrupted
+trusting it allowed a submitted scalar string `"1.1"` to overwrite the
+map. The operator reported an earlier scalar-display bug; the inspected
+deployed template already bound the map property. Server-side configuration authority also handles stale pages and corrupted
 NoDb snapshots. Rejecting old payloads was rejected because an ignored display
 field should not block a valid climate rebuild.
 
-Implementation conformance is pending the registered repair package:
+Implementation and live repair evidence are recorded in the repair package:
 `docs/work-packages/20260909_climate_scale_map_authority/`.

@@ -36,6 +36,11 @@ class _DummyClimate:
         self._observed_end_year = ""
         self._future_start_year = ""
         self._future_end_year = ""
+        self.configured_scale_map = None
+
+    @property
+    def precip_scale_factor_map(self):
+        return self.configured_scale_map
 
     @contextmanager
     def locked(self):
@@ -76,6 +81,52 @@ def _payload() -> dict[str, str]:
         "climate_daily_temp_ds": "null",
         "precip_scaling_mode": "0",
     }
+
+
+@pytest.mark.parametrize("configured", [None, "/configured/daymet_scale.tif"])
+@pytest.mark.parametrize("submitted", [None, "", "1.1", "/untrusted/map.tif"])
+def test_parse_inputs_map_is_config_owned(configured, submitted) -> None:
+    climate = _DummyClimate()
+    climate.configured_scale_map = configured
+    climate._precip_scale_factor_map = "1.1"
+    payload = _payload()
+    payload["climate_mode"] = str(int(ClimateMode.Vanilla))
+    if submitted is not None:
+        payload["precip_scale_factor_map"] = submitted
+
+    ClimateInputParsingService().parse_inputs(climate, payload)
+
+    assert climate._precip_scale_factor_map == configured
+
+
+def test_parse_inputs_config_read_failure_precedes_mutation() -> None:
+    class _UnavailableConfigClimate(_DummyClimate):
+        @property
+        def precip_scale_factor_map(self):
+            raise OSError("configuration unavailable")
+
+    climate = _UnavailableConfigClimate()
+    before = {key: value for key, value in vars(climate).items() if key != "events"}
+    payload = _payload()
+    payload["climate_mode"] = str(int(ClimateMode.Vanilla))
+    with pytest.raises(OSError, match="configuration unavailable"):
+        ClimateInputParsingService().parse_inputs(climate, payload)
+    assert {key: value for key, value in vars(climate).items() if key != "events"} == before
+    assert climate.events == ["lock-enter", "lock-exit"]
+
+
+def test_parse_inputs_invalid_payload_does_not_persist_map_repair() -> None:
+    climate = _DummyClimate()
+    climate.configured_scale_map = "/configured/map.tif"
+    climate._precip_scale_factor_map = "1.1"
+    payload = _payload()
+    payload["climate_mode"] = str(int(ClimateMode.Observed))
+    payload.pop("observed_end_year")
+
+    with pytest.raises(ValueError, match="observed_end_year"):
+        ClimateInputParsingService().parse_inputs(climate, payload)
+
+    assert climate._precip_scale_factor_map == "1.1"
 
 
 def test_parse_inputs_catalog_sets_mode_and_spatial_mode() -> None:

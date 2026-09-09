@@ -1,0 +1,70 @@
+[
+  {
+    "runid": "under-fecundity",
+    "map": "/geodata/extended_mods_data/wepppy-locations-portland/daymet_scale.tif",
+    "scalar": null,
+    "scaling_mode": {
+      "py/reduce": [
+        {
+          "py/type": "wepppy.nodb.core.climate.ClimatePrecipScalingMode"
+        },
+        {
+          "py/tuple": [
+            0
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "runid": "seductive-sabra",
+    "map": "1.1",
+    "scalar": 0.9168,
+    "scaling_mode": {
+      "py/reduce": [
+        {
+          "py/type": "wepppy.nodb.core.climate.ClimatePrecipScalingMode"
+        },
+        {
+          "py/tuple": [
+            1
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "runid": "warming-championship",
+    "map": "1.1",
+    "scalar": 1.12,
+    "scaling_mode": {
+      "py/reduce": [
+        {
+          "py/type": "wepppy.nodb.core.climate.ClimatePrecipScalingMode"
+        },
+        {
+          "py/tuple": [
+            1
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "runid": "asteroid-hindrance",
+    "map": "1.1",
+    "scalar": 1.0688,
+    "scaling_mode": {
+      "py/reduce": [
+        {
+          "py/type": "wepppy.nodb.core.climate.ClimatePrecipScalingMode"
+        },
+        {
+          "py/tuple": [
+            1
+          ]
+        }
+      ]
+    }
+  }
+]

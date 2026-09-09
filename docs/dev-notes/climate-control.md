@@ -23,6 +23,13 @@ This note captures the steady-state design of the climate control after the Pure
 - New route `query/climate_catalog/` exposes catalog JSON for JS clients.
 - Run context includes `climate_catalog=climate.catalog_datasets_payload(include_hidden=True)` so templates can render dataset choices even for hidden entries.
 
+The spatial precipitation map is configuration-owned. Its property resolves
+Daymet, then Gridmet, then generic map settings using the canonical config
+reader; successful input parsing synchronizes the persisted value. Submitted
+`precip_scale_factor_map` values are accepted and ignored, including stale
+pages carrying a scalar string. See the normative
+[scale-map contract](../schemas/climate-precipitation-scaling-contract.md).
+
 ## 4. Pure Template Anatomy
 - Renders dataset selector (`ui.radio_group`) backed by JSON from `<script id="climate_catalog_data">`.
 - Sections are tagged with `data-climate-section` (e.g., `stochastic_years`, `observed_years`, `upload`). The controller toggles them based on `dataset.inputs`.
@@ -31,7 +38,8 @@ This note captures the steady-state design of the climate control after the Pure
 - Status panel is a macro instance that pairs with StatusStream (log limit 400 by default).
 
 - Operator-requested label restoration (2026-09-09): use "Spatial Scaling from Map (config dependent)" to make the configuration dependency explicit. The map field displays `climate.precip_scale_factor_map`; this wording change does not alter scaling behavior.
-- The read-only scale-factor map input uses a 70-character width, capped at the available space, so configured raster paths are easier to read.
+- The read-only scale-factor map input uses a 70-character width, capped at the available space. It is disabled so form serialization omits it. To change a map, update run configuration; scalar and monthly controls remain editable.
+- Repairing a stored map does not regenerate climate files or WEPP inputs. Rebuild climate before rerunning a scenario whose spatial-scaling build failed.
 
 ## 5. JavaScript Controller Highlights
 - Catalog bootstrap:

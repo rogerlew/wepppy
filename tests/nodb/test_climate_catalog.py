@@ -173,6 +173,128 @@ def _baseline_form() -> dict[str, str]:
     }
 
 
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "settings, expected",
+    [
+        ({}, None),
+        ({"precip_scale_factor_map": '"/maps/generic.tif"'}, "/maps/generic.tif"),
+        ({"precip_scale_factor_map": '"/maps/generic.tif"',
+          "gridmet_precip_scale_factor_map": '"/maps/gridmet.tif"'}, "/maps/gridmet.tif"),
+        ({"precip_scale_factor_map": '"/maps/generic.tif"',
+          "gridmet_precip_scale_factor_map": '"/maps/gridmet.tif"',
+          "daymet_precip_scale_factor_map": '"/maps/daymet.tif"'}, "/maps/daymet.tif"),
+        ({"gridmet_precip_scale_factor_map": '"/maps/gridmet.tif"',
+          "daymet_precip_scale_factor_map": "None"}, "/maps/gridmet.tif"),
+    ],
+)
+@pytest.mark.parametrize("persisted", ["missing", None, "", "1.1"])
+def test_config_owned_scale_map_persists_and_reloads(climate_factory, settings, expected, persisted):
+    import json
+    from pathlib import Path
+
+    climate = climate_factory()
+    config_path = Path(climate.wd) / "0.cfg"
+    with config_path.open("a") as handle:
+        for key, value in settings.items():
+            handle.write(f"{key} = {value}\n")
+    with climate.locked():
+        if persisted == "missing":
+            del climate._precip_scale_factor_map
+        else:
+            climate._precip_scale_factor_map = persisted
+    assert climate.precip_scale_factor_map == expected
+
+    payload = _baseline_form()
+    payload["climate_mode"] = str(int(ClimateMode.Vanilla))
+    payload["precip_scale_factor_map"] = "/untrusted/map.tif"
+    climate.parse_inputs(payload)
+
+    document = json.loads((Path(climate.wd) / "climate.nodb").read_text())
+    assert document["py/state"]["_precip_scale_factor_map"] == expected
+    reloaded = Climate.getInstance(climate.wd, ignore_lock=True)
+    assert reloaded._precip_scale_factor_map == expected
+    assert reloaded.precip_scale_factor_map == expected
+
+
+@pytest.mark.unit
+def test_rq_payload_replay_cannot_replace_configured_scale_map(climate_factory, monkeypatch):
+    import json
+    import pickle
+    from pathlib import Path
+    import wepppy.rq.project_rq as project_rq
+
+    climate = climate_factory()
+    wd = Path(climate.wd)
+    expected = "/configured/daymet_scale.tif"
+    with (wd / "0.cfg").open("a") as handle:
+        handle.write(f'daymet_precip_scale_factor_map = "{expected}"\n')
+    with climate.locked():
+        climate._precip_scale_factor_map = expected
+    payload = _baseline_form()
+    payload.update(climate_mode="0", precip_scale_factor_map="1.1")
+    # Reproduce the serialized enqueue-time payload seen by a later worker.
+    job = types.SimpleNamespace(id="map-replay", meta=pickle.loads(pickle.dumps({
+        "build_payload": payload,
+    })))
+    monkeypatch.setattr(project_rq, "get_current_job", lambda: job)
+    monkeypatch.setattr(project_rq, "get_wd", lambda runid: str(wd))
+    monkeypatch.setattr("wepppy.rq.exception_logging.get_wd", lambda runid: str(wd))
+    # Production run-id lookup is external RQ plumbing; use the fixture directory.
+    monkeypatch.setattr("wepppy.weppcloud.utils.helpers.get_wd", lambda runid: str(wd))
+    monkeypatch.setattr(project_rq.StatusMessenger, "publish", lambda *args: None)
+    monkeypatch.setattr(project_rq.RedisPrep, "getInstance", lambda wd: types.SimpleNamespace(
+        timestamp=lambda task: None,
+    ))
+    monkeypatch.setattr(project_rq, "_run_with_directory_root_lock",
+                        lambda wd, root, operation, **kwargs: operation())
+    built = []
+
+    def build(controller):
+        built.append(controller.precip_scale_factor_map)
+        assert controller._precip_scale_factor_map == expected
+
+    monkeypatch.setattr(Climate, "build", build)
+    project_rq.build_climate_rq(climate.runid)
+
+    assert built == [expected]
+    assert job.meta["build_payload"]["precip_scale_factor_map"] == "1.1"
+    assert json.loads((wd / "climate.nodb").read_text())["py/state"]["_precip_scale_factor_map"] == expected
+    reloaded = Climate.getInstance(str(wd), ignore_lock=True)
+    assert reloaded._precip_scale_factor_map == reloaded.precip_scale_factor_map == expected
+
+
+@pytest.mark.unit
+def test_missing_map_config_does_not_become_client_map(climate_factory):
+    from wepppy.nodb.core.climate import ClimatePrecipScalingMode
+    from wepppy.nodb.core.climate_scaling_service import ClimateScalingService
+
+    climate = climate_factory()
+    climate._precip_scale_factor_map = "/untrusted/map.tif"
+    climate._precip_scaling_mode = ClimatePrecipScalingMode.Spatial
+    with pytest.raises(ValueError, match="precip_scale_factor_map is None"):
+        ClimateScalingService().validate_scaling_inputs(climate)
+
+
+@pytest.mark.unit
+def test_scale_map_config_io_failure_preserves_disk_and_input_state(climate_factory, monkeypatch):
+    from pathlib import Path
+
+    monkeypatch.setenv("WEPPPY_PROJECT_CONFIG_READER_ENABLED", "false")
+    climate = climate_factory()
+    nodb_path = Path(climate.wd) / "climate.nodb"
+    before = nodb_path.read_bytes()
+    input_years = climate.input_years
+    (Path(climate.wd) / "0.cfg").unlink()
+    (Path(climate.wd) / "0.cfg").mkdir()
+    payload = _baseline_form()
+    payload["climate_mode"] = str(int(ClimateMode.Vanilla))
+    with pytest.raises(IsADirectoryError):
+        climate.parse_inputs(payload)
+    assert climate.input_years == input_years
+    assert nodb_path.read_bytes() == before
+
+
 def test_parse_inputs_sets_catalog_id_and_mode(climate_factory):
     climate = climate_factory(locales=('us',))
     form = _baseline_form()
