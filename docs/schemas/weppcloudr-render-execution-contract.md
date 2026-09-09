@@ -151,6 +151,12 @@ authority.
 - Adding Kubernetes execution MUST NOT require changing the Compose renderer
   image or merging the WEPPpy and WEPPcloudR images.
 
+Operational evidence for the soils input permission recurrence and writer repair
+is recorded in [the September 9 incident](../work-packages/20260909_deval_soils_permissions/package.md).
+For an errno-13 failure, inspect the per-job stderr under `_logs/weppcloudr/`,
+then compare the failing input mode and ownership with the renderer identity.
+A successful cached render does not establish that regenerated inputs are readable.
+
 ## Kubernetes Job Backend
 
 ### Workload Shape

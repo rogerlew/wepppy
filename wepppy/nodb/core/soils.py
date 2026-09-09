@@ -2250,6 +2250,9 @@ class Soils(NoDbBase):
         try:
             df.to_parquet(temporary_path, index=False)
             with temporary_path.open("rb") as handle:
+                # Published run data must be readable by the report container;
+                # NamedTemporaryFile otherwise carries owner-only mode into replace.
+                os.fchmod(handle.fileno(), 0o644)
                 os.fsync(handle.fileno())
             os.replace(temporary_path, parquet_path)
             directory_fd = os.open(self.soils_dir, os.O_RDONLY | os.O_DIRECTORY)

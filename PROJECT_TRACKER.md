@@ -33,6 +33,11 @@ Implemented locally: [Flask run config authority](docs/work-packages/20260906_fl
 
 This tracker provides a high-level view of active and planned work packages for both human and AI agents. When starting a session, agents should check this tracker to understand current initiatives and avoid duplicate work.
 
+Incident recovery: [DEVAL soils permissions](docs/work-packages/20260909_deval_soils_permissions/package.md)
+— wepp1 report restored; atomic parquet writer permission correction passes
+25 focused tests, 8,113 broad tests, and production regenerated-input render passed; permanent rollout
+awaits the production job gate.
+
 ## How to Use This Tracker
 
 **For Agents**:

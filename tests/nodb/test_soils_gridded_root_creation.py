@@ -566,11 +566,15 @@ def test_subs_summary_includes_raw_and_substituted_mukey_columns() -> None:
     assert summary["590"]["shadow_cluster_id"] is None
 
 
+@pytest.mark.parametrize("existing_mode", [None, 0o600, 0o640, 0o644])
 def test_dump_soils_parquet_round_trips_local_fallback_provenance(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
+    existing_mode: int | None,
 ) -> None:
     import json
+    import os
+    import stat
 
     import pandas as pd
 
@@ -617,7 +621,18 @@ def test_dump_soils_parquet_round_trips_local_fallback_provenance(
         lambda wd, rel_path: catalog_entries.append((wd, rel_path)),
     )
 
-    soils.dump_soils_parquet()
+    parquet_path = soils_dir / "soils.parquet"
+    if existing_mode is not None:
+        parquet_path.write_bytes(b"previous artifact")
+        parquet_path.chmod(existing_mode)
+    previous_umask = os.umask(0o077)
+    try:
+        soils.dump_soils_parquet()
+    finally:
+        os.umask(previous_umask)
+
+    assert stat.S_IMODE(parquet_path.stat().st_mode) == 0o644
+    assert not list(soils_dir.glob(".soils.parquet.*.tmp"))
 
     frame = pd.read_parquet(soils_dir / "soils.parquet")
     assert frame.loc[0, "topaz_id"] == 573
