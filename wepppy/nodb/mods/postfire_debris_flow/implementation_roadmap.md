@@ -40,6 +40,14 @@ The offline soil study's complete-only outputs are not a production coverage
 gate. SSURGO primary and original STATSGO fallback are accepted source priority.
 The dNBR backend is not a completed browser upload workflow.
 
+## Next Scoped Increment
+
+[Local M1 predictor integration](../../../../docs/work-packages/20260909_staley_m1_predictors/package.md)
+is scaffolded, not executing. It composes the completed slope/SBS and dNBR
+backends with RUSLE Nomograph K; see [proposed contract](docs/m1_predictors.md).
+This is remaining local stage-3 work, with K policy gates and separate future
+production publication. Completed backend contracts are not reopened.
+
 ## Delivery Sequence
 
 Build shared scientific components, deliver a usable M1 workflow, integrate M3,
@@ -164,3 +172,10 @@ scientific limitation that implementation cannot resolve.
   Stage 3 remains partial: K integration, normalized dNBR composition and
   production predictor preparation/orchestration are successor work. No binary
   installation or deployment was performed.
+
+- 2026-09-09 15:06 UTC: [local M1 predictor package](../../../../docs/work-packages/20260909_staley_m1_predictors/package.md)
+  scaffolded for remaining local stage-3 composition. See the
+  [proposed contract](docs/m1_predictors.md). Covers WBT-compatible prepared
+  inputs, independent T/F/S support and provenance. K unit verification,
+  coverage policy and artifact-only readiness remain decision gates. Execution
+  has not started; live publication and UI/RQ remain stage 5 work.

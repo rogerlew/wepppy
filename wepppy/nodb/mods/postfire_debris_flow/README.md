@@ -162,3 +162,10 @@ The scientific source is [Staley et al. (2017)](https://doi.org/10.1016/j.geomor
 The planned implementation is independently derived from the publication.
 The GPL-3.0-only pfdf package is a comparison reference, not a runtime dependency.
 See the [PDF storage decision](docs/pdfs/README.md) for reference redistribution.
+
+## Next integration increment
+
+The [M1 predictor package](../../../../docs/work-packages/20260909_staley_m1_predictors/package.md)
+is scaffolded for local T/F/S composition, WBT-compatible input preparation and
+provenance. [Its proposed contract](docs/m1_predictors.md) records pending K
+unit/coverage/readiness choices. Execution and production wiring have not begun.

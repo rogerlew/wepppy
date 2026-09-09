@@ -344,6 +344,18 @@ checks grid identity, 49,917 routed cells, outlet inclusion, polygon agreement
 and source hashes. This mapping establishes reuse; slope/SBS/K aggregation and
 scientific missing-data policies remain stage 3 work.
 
+## Local M1 Predictor Composition
+
+The next increment composes the completed slope/SBS, dNBR and scalar engine
+backends for the existing project watershed. The
+[proposed M1 predictor contract](docs/m1_predictors.md) covers lossless prepared
+WBT inputs, actual binary invocation, T/F/S with independent support, K convention
+verification and new local artifact provenance. The
+[work package](../../../../docs/work-packages/20260909_staley_m1_predictors/package.md)
+is scaffolded, not executing. K coverage and artifact-only versus full-RUSLE
+readiness remain unresolved; they are not approved through this proposal.
+No live NoDb/UI/RQ publication, source rebuild or climate adapter is included.
+
 ## Unitization Contract
 
 Use the existing `wepppy/nodb/unitizer.py` and WEPPcloud unitizer helpers for

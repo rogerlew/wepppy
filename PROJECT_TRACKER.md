@@ -87,6 +87,19 @@ Feedback mechanisms:
 
 ## 📋 Backlog
 
+### Staley M1 Prepared Predictor Integration
+
+**Scoped**: 2026-09-09 15:06 UTC. Scaffolded; not executing.
+
+**Link**: [Package](docs/work-packages/20260909_staley_m1_predictors/package.md)
+
+**Scope**: Compose prepared project inputs and owned StaleySlopeSbs into a local
+T/F/S bundle with independent support, provenance and scalar scenario evidence.
+No live NoDb/UI/RQ publication, upstream rebuild or climate adapter.
+
+**Next**: Verify K convention; resolve K coverage and artifact-only readiness;
+freeze conversion/schema contract. Dedicated correctness/security reviews required.
+
 ### Seamless WEPPcloud Session Cookie Namespace Migration
 
 **Proposed**: 2026-08-23
