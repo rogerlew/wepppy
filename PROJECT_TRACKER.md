@@ -7,8 +7,9 @@
 
 ## Purpose
 
-In progress: [Yearly water-balance repair](docs/work-packages/20260909_yearly_water_balance/package.md)
-— restore surface-runoff reporting and explicit all-years selection.
+Implemented locally: [Yearly water-balance repair](docs/work-packages/20260909_yearly_water_balance/package.md)
+— surface-runoff reporting and explicit all-years selection; production-data
+parity and broad regression checks passed. Deployment remains separate.
 
 Implemented locally: [Staley dNBR backend](docs/work-packages/20260908_staley_dnbr/package.md)
 — explicit encoding, project-grid normalization, partial coverage and public

@@ -8,6 +8,7 @@ import re
 from html import unescape
 from pathlib import Path
 from types import SimpleNamespace
+from urllib.parse import parse_qs, urlencode, urlsplit
 
 import pytest
 from jinja2 import DebugUndefined, Environment, FileSystemLoader, select_autoescape
@@ -2738,6 +2739,36 @@ def test_wepp_loss_summary_formats_only_slope_cells_to_three_decimals(
     assert rendered.count(
         'data-report-url="/wepp.report_wepp_loss?format=csv"'
     ) == 2
+
+
+@pytest.mark.parametrize("scope", ["baseline", "roads"])
+@pytest.mark.parametrize("excluded", [[], [0, 1]])
+def test_yearly_water_balance_all_years_and_csv_links(jinja_env, scope, excluded):
+    def report_url(_endpoint, **values):
+        values.pop("runid", None)
+        values.pop("config", None)
+        return "/yearly_watbal?" + urlencode(values)
+
+    class EmptyReport:
+        hdr = units = means = stdevs = pratios = ()
+
+        def __iter__(self):
+            return iter(())
+
+    rendered = jinja_env.get_template("reports/wepp/yearly_watbal.htm").render(
+        rpt=EmptyReport(), exclude_yr_indxs=excluded, output_scope=scope,
+        url_for_run=report_url,
+    )
+    option = re.search(r'<option value="([^"]+)"[^>]*>Include all years</option>', rendered)
+    download = re.search(r'data-report-url="([^"]+)"', rendered)
+    assert option and download
+    all_query = parse_qs(urlsplit(unescape(option.group(1))).query, keep_blank_values=True)
+    csv_query = parse_qs(urlsplit(unescape(download.group(1))).query, keep_blank_values=True)
+    assert all_query["exclude_yr_indxs"] == [""]
+    assert all_query["output_scope"] == [scope]
+    assert csv_query["exclude_yr_indxs"] == [",".join(map(str, excluded))]
+    assert csv_query["output_scope"] == [scope]
+    assert csv_query["format"] == ["csv"]
 
 
 def test_report_shell_consumer_inventory_has_explicit_content_blocks() -> None:

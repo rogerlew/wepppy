@@ -1012,7 +1012,12 @@ def test_avg_annual_watbal_supports_roads_output_scope(wepp_client, monkeypatch:
     assert captured_template["kwargs"]["output_scope"] == "roads"
 
 
-def test_yearly_watbal_supports_roads_output_scope(wepp_client, monkeypatch: pytest.MonkeyPatch) -> None:
+@pytest.mark.parametrize(("year_query", "expected_exclusions"), [
+    ("", [0, 1]), ("&exclude_yr_indxs=", []), ("&exclude_yr_indxs=0", [0]),
+])
+def test_yearly_watbal_supports_roads_output_scope(
+    wepp_client, monkeypatch: pytest.MonkeyPatch, year_query, expected_exclusions,
+) -> None:
     client, _, run_dir = wepp_client
 
     monkeypatch.setattr(cap_guard, "current_user", type("User", (), {"is_authenticated": True})(), raising=False)
@@ -1058,11 +1063,12 @@ def test_yearly_watbal_supports_roads_output_scope(wepp_client, monkeypatch: pyt
 
     monkeypatch.setattr(wepp_module, "render_template", _fake_render)
 
-    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/wepp/yearly_watbal?output_scope=roads")
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/wepp/yearly_watbal?output_scope=roads{year_query}")
 
     assert response.status_code == 200
     assert response.get_data(as_text=True) == "ok"
     assert captured_scopes["yearly"] == "roads"
+    assert captured_scopes["exclude_yr_indxs"] == expected_exclusions
     assert captured_template["template_name"] == "reports/wepp/yearly_watbal.htm"
     assert captured_template["kwargs"]["output_scope"] == "roads"
 

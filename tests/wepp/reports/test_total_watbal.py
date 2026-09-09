@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import contextlib
+import io
 import shutil
 import sys
 import types
 from pathlib import Path
 
 import pandas as pd
+import pyarrow as pa
 import pytest
 
 from tests.stubs import ensure_geopandas_stub
@@ -49,6 +51,8 @@ ensure_geopandas_stub()
 
 from wepppy.wepp.reports.total_watbal import TotalWatbalReport
 
+pytestmark = pytest.mark.unit
+
 
 def _write_totalwatsed3(path: Path) -> None:
     records = [
@@ -56,6 +60,7 @@ def _write_totalwatsed3(path: Path) -> None:
             "water_year": 2000,
             "Precipitation": 2.0,
             "Rain+Melt": 3.0,
+            "Runoff": 0.4,
             "Lateral Flow": 1.0,
             "ET": 0.6,
             "Percolation": 0.4,
@@ -71,6 +76,7 @@ def _write_totalwatsed3(path: Path) -> None:
             "water_year": 2000,
             "Precipitation": 1.0,
             "Rain+Melt": 0.5,
+            "Runoff": 0.1,
             "Lateral Flow": 0.3,
             "ET": 0.2,
             "Percolation": 0.1,
@@ -86,6 +92,7 @@ def _write_totalwatsed3(path: Path) -> None:
             "water_year": 2001,
             "Precipitation": 4.0,
             "Rain+Melt": 2.0,
+            "Runoff": 0.6,
             "Lateral Flow": 1.5,
             "ET": 1.0,
             "Percolation": 0.8,
@@ -101,6 +108,7 @@ def _write_totalwatsed3(path: Path) -> None:
             "water_year": 2001,
             "Precipitation": 2.0,
             "Rain+Melt": 1.0,
+            "Runoff": 0.4,
             "Lateral Flow": 0.8,
             "ET": 0.5,
             "Percolation": 0.3,
@@ -132,17 +140,24 @@ def test_total_watbal_summarises_water_years(tmp_path):
     assert first["WaterYear"] == 2000
     assert first["Precipitation (mm)"] == pytest.approx(3.0)
     assert first["Rain + Melt (mm)"] == pytest.approx(3.5)
+    assert first["Surface Runoff (mm)"] == pytest.approx(0.5)
     assert first["Sed Del (kg)"] == pytest.approx(5.2)
 
     second = dict(rows[1].row)
     assert second["WaterYear"] == 2001
     assert second["Precipitation (mm)"] == pytest.approx(6.0)
+    assert second["Surface Runoff (mm)"] == pytest.approx(1.0)
 
     means = dict(report.means.row)
     assert means["Precipitation (mm)"] == pytest.approx(4.5)
+    assert means["Surface Runoff (mm)"] == pytest.approx(0.75)
+    assert report.stdevs.row["Surface Runoff (mm)"] == pytest.approx(0.25)
 
     ratios = dict(report.pratios.row)
     assert ratios["Rain + Melt (%)"] == pytest.approx((3.5 + 3.0) / 9.0 * 100.0)
+    assert ratios["Surface Runoff (%)"] == pytest.approx(1.5 / 9.0 * 100.0)
+    csv = pd.read_csv(io.StringIO(report.to_dataframe().to_csv(index=False)))
+    assert csv["Surface Runoff (mm)"].tolist() == pytest.approx([0.5, 1.0])
 
 
 def test_total_watbal_excludes_year_indices(tmp_path):
@@ -154,6 +169,8 @@ def test_total_watbal_excludes_year_indices(tmp_path):
     rows = list(report)
     assert len(rows) == 1
     assert rows[0].row["WaterYear"] == 2001
+    assert rows[0].row["Surface Runoff (mm)"] == pytest.approx(1.0)
+    assert report.means.row["Surface Runoff (mm)"] == pytest.approx(1.0)
 
 
 def test_total_watbal_uses_roads_output_scope(tmp_path):
@@ -167,6 +184,7 @@ def test_total_watbal_uses_roads_output_scope(tmp_path):
 
     roads_df = pd.read_parquet(roads_path)
     roads_df["Precipitation"] = roads_df["Precipitation"].astype(float) + 100.0
+    roads_df["Runoff"] = roads_df["Runoff"] + 2.0
     roads_df.to_parquet(roads_path, index=False)
 
     baseline_report = TotalWatbalReport(run_dir, exclude_yr_indxs=[], output_scope="baseline")
@@ -175,6 +193,35 @@ def test_total_watbal_uses_roads_output_scope(tmp_path):
     baseline_rows = [row.row for row in baseline_report]
     roads_rows = [row.row for row in roads_report]
     assert roads_rows[0]["Precipitation (mm)"] > baseline_rows[0]["Precipitation (mm)"]
+    assert baseline_rows[0]["Surface Runoff (mm)"] == pytest.approx(0.5)
+    assert roads_rows[0]["Surface Runoff (mm)"] == pytest.approx(4.5)
+
+
+def test_total_watbal_missing_runoff_is_not_zero(tmp_path):
+    with pytest.raises(KeyError, match="Runoff"):
+        TotalWatbalReport(tmp_path, dataframe=pd.DataFrame({"water_year": [2000]}))
+
+
+def test_total_watbal_parquet_requires_runoff_column(tmp_path):
+    dataset = tmp_path / "wepp/output/interchange/totalwatsed3.parquet"
+    _write_totalwatsed3(dataset)
+    frame = pd.read_parquet(dataset).drop(columns="Runoff")
+    frame.to_parquet(dataset, index=False)
+    with pytest.raises(pa.ArrowInvalid, match="Runoff"):
+        TotalWatbalReport(tmp_path)
+
+
+def test_total_watbal_retains_null_runoff_normalization(tmp_path):
+    report = TotalWatbalReport(tmp_path, dataframe=pd.DataFrame({
+        "water_year": [2000, 2000], "Runoff": [None, 0.5], "Precipitation": [1.0, 1.0],
+    }))
+    assert report.data[0]["Surface Runoff (mm)"] == pytest.approx(0.5)
+
+
+def test_total_watbal_empty_dataframe_keeps_runoff_header(tmp_path):
+    report = TotalWatbalReport(tmp_path, dataframe=pd.DataFrame())
+    assert list(report) == []
+    assert "Surface Runoff (mm)" in report.header
 
 
 def test_total_watbal_rejects_invalid_output_scope(tmp_path):

@@ -25,13 +25,14 @@ class TotalWatbalReport(ReportBase):
         [
             ("Precipitation (mm)", "Precipitation"),
             ("Rain + Melt (mm)", "Rain+Melt"),
+            ("Surface Runoff (mm)", "Runoff"),
             ("Lateral Flow (mm)", "Lateral Flow"),
             ("ET (mm)", "ET"),
             ("Percolation (mm)", "Percolation"),
             ("Sed Del (kg)", "sediment_delivery_kg"),
         ]
     )
-    _RATIO_COLUMNS = {"Rain + Melt (mm)", "Lateral Flow (mm)", "ET (mm)", "Percolation (mm)"}
+    _RATIO_COLUMNS = {"Rain + Melt (mm)", "Surface Runoff (mm)", "Lateral Flow (mm)", "ET (mm)", "Percolation (mm)"}
     _SEDIMENT_COLUMNS = tuple(f"seddep_{idx}" for idx in range(1, 6))
 
     def __init__(
@@ -52,7 +53,7 @@ class TotalWatbalReport(ReportBase):
             if not dataset_path.exists():
                 raise FileNotFoundError(dataset_path)
             schema_names = set(pq.read_schema(dataset_path).names)
-            columns = ["water_year", "Precipitation", "Rain+Melt", "Lateral Flow", "ET", "Percolation"]
+            columns = ["water_year", "Precipitation", "Rain+Melt", "Runoff", "Lateral Flow", "ET", "Percolation"]
             sed_columns = [name for name in self._SEDIMENT_COLUMNS if name in schema_names]
             if sed_columns:
                 columns.extend(sed_columns)
@@ -69,6 +70,9 @@ class TotalWatbalReport(ReportBase):
         if self._frame.empty:
             self._initialise_empty()
             return
+
+        if "Runoff" not in self._frame:
+            raise KeyError("Runoff")
 
         self._frame["water_year"] = self._frame["water_year"].astype(int)
         sed_columns = [name for name in self._SEDIMENT_COLUMNS if name in self._frame.columns]

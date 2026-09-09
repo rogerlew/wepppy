@@ -1,5 +1,7 @@
 # Yearly water-balance report repair
 
+Status: completed locally, 2026-09-09. Production deployment is separate.
+
 Scope: expose existing surface runoff in yearly HTML/CSV reports and repair
 the explicit all-years selection and download. User approval: "add runoff and
 fix the include all years bug" (2026-09-09). No model execution, data migration,

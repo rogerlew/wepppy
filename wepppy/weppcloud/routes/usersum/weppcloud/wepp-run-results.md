@@ -159,6 +159,8 @@ These links appear for continuous-climate WEPP runs and help explain where water
 ### `Yearly Report`
 
 - **What it is for:** A year-by-year watershed water-balance table with summary rows.
+- **Surface runoff:** The `Surface Runoff` column reports yearly runoff depth, with mean, standard deviation, and runoff-to-precipitation ratio in the summary rows. It is also included in the CSV download.
+- **Include all years:** Select this option to include every available water year in the table and CSV. Opening the report without an explicit year filter retains the default exclusion of the first two years.
 - **When to use it:** Use it when you want to identify unusually wet or dry years, compare scenarios year by year, or test whether excluding the first one, two, or five simulation years changes the interpretation.
 - **Cautions and limits:** This is a watershed-scale table, not a mapped hillslope breakdown. Early years can reflect startup or initial-condition effects, so the exclusion control is often useful.
 - **Do not confuse it with:** `Average Annual Report`, which collapses the run into multi-year averages, or the daily graph, which focuses on timing within years.

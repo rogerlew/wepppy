@@ -19,7 +19,7 @@
   {% endif %}
 {%- endmacro %}
 
-{% set exclude_years_param = exclude_yr_indxs|join(',') if exclude_yr_indxs else None %}
+{% set exclude_years_param = exclude_yr_indxs|join(',') %}
 {% set output_scope_value = output_scope | default('baseline', true) %}
 
 <header class="wc-stack">
@@ -38,7 +38,7 @@
     <label>
       <span class="wc-text-muted">Exclude simulation years</span>
       <select id="yearSelection">
-        <option value="{{ url_for_run('wepp.report_wepp_yearly_watbal', runid=runid, config=config, output_scope=output_scope_value) }}"{% if not exclude_yr_indxs %} selected{% endif %}>Include all years</option>
+        <option value="{{ url_for_run('wepp.report_wepp_yearly_watbal', runid=runid, config=config, exclude_yr_indxs='', output_scope=output_scope_value) }}"{% if not exclude_yr_indxs %} selected{% endif %}>Include all years</option>
         <option value="{{ url_for_run('wepp.report_wepp_yearly_watbal', runid=runid, config=config, exclude_yr_indxs='0', output_scope=output_scope_value) }}"{% if exclude_yr_indxs == [0] %} selected{% endif %}>
           Exclude first year
         </option>
