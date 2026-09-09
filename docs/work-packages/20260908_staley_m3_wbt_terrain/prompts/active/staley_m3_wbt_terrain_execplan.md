@@ -206,7 +206,7 @@ The user has supplied three primary paired watersheds, now snapshotted in
 `/workdir/weppcloud-wbt/test_fixtures/staley_m3_resolution/`: Moscow Mountain
 (bass-elimination 30 m, desolate-yea 10 m), Topanga (untucked-hit 30 m,
 sorrowful-semicircle 10 m), and user-labeled AZ ponderosa (offshore-remake 30 m,
-full-crocodile 10 m). Run `git lfs pull` in WBT and the fixture `verify.py`.
+full-crocodile 10 m). Run the fixture `verify.py` after cloning WBT.
 Start with these three outlet pairs; add matched nested outlets where useful
 and expand only when an unrepresented failure mode warrants it. Gate Creek
 is optional additional evidence, not a required acquisition task.
@@ -348,5 +348,5 @@ Revision note (2026-09-08 23:30 UTC): Initial plan scaffolded at user request
 for a fresh agent; implementation and resolution acceptance remain pending.
 
 Revision note: User supplied three paired watersheds; terrain and boundary fixtures
-are preserved in WBT with LFS and hashes. Replaced open-ended site acquisition
+are preserved in WBT with hashes. Replaced open-ended site acquisition
 with this primary panel; stored coordinate differences remain explicit.

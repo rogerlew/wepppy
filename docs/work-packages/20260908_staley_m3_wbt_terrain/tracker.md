@@ -57,6 +57,6 @@ The WBT directory `test_fixtures/staley_m3_resolution/` contains Moscow Mountain
 Topanga, and user-labeled AZ ponderosa at both resolutions: 66 source files,
 including raw/conditioned DEMs, D8 routing, channel/subcatchment grids, raster
 and both projected/WGS84 vector boundaries, outlet records, and provenance.
-The manifest preserves hashes and grid metadata. TIFFs use a scoped LFS rule.
-Run the fixture verifier after `git lfs pull`. Stored requested and snapped
+The manifest preserves hashes and grid metadata. TIFFs use ordinary Git storage because GitHub rejected new LFS objects on
+the public WBT fork. Run the fixture verifier after cloning. Stored requested and snapped
 outlet coordinates differ slightly within pairs; quantify these in the study.

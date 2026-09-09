@@ -17,6 +17,7 @@ or copied GPL implementation/tests. Missing evidence must remain explicit.
 The primary input fixtures are committed in the sibling WBT repository at
 `test_fixtures/staley_m3_resolution/`; its README and manifest identify all six
 runs and source URLs. This deliberately versions the selected input rasters
-through LFS, while generated study rasters remain external. Boundary TIFFs and
+as ordinary Git files (new LFS uploads are disallowed on the public fork),
+while generated study rasters remain external. Boundary TIFFs and
 projected/WGS84 GeoJSONs are included. No new site acquisition is needed to
 begin the paired workflow comparison.
