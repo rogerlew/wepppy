@@ -2,8 +2,10 @@
 
 ## Status
 
-Accepted for offline evaluation only, 2026-09-09. Production soil source,
-weathered-material treatment and partial-coverage acceptance remain unapproved.
+Accepted for offline evaluation, with subsequent owner decision on 2026-09-09:
+SSURGO primary and original STATSGO THICK fallback. Weathered-material treatment,
+partial-coverage acceptance, and fallback granularity remain unresolved;
+production integration is not implemented.
 
 ## Decision provenance
 
@@ -58,4 +60,29 @@ is 84.24–99.25%, so neither supplies complete full-catchment coverage. Maximum
 common-support probability effects are 19.35 and 11.52 percentage points,
 respectively. These are diagnostic effects, not published acceptance limits.
 See the [decision report](../work-packages/20260908_staley_m3_soils/artifacts/soil_decision.md).
-Production source, weathered-material and coverage approval remain deferred.
+This historical recommendation was superseded by the owner decision below.
+Weathered-material treatment and coverage rules remain unresolved.
+
+## Subsequent owner decision: source priority
+
+- Venue/date: user/Codex repository conversation, 2026-09-09 UTC.
+- Participants and decision owner: requesting user; Codex records the decision.
+- Implementer: Codex for documentation; runtime implementation pending.
+- Change: select SSURGO as primary and original STATSGO THICK as fallback,
+  superseding the study recommendation to retain STATSGO as primary.
+- Rationale: prefer SSURGO's more detailed soil information and use STATSGO for
+  broad coverage. Source differences do not demonstrate inferior SSURGO accuracy.
+- Alternatives rejected: making original-source agreement the acceptance test;
+  imposing complete component support on SSURGO while equating nonmissing
+  STATSGO raster cells with complete source observations.
+- Scope: approve source priority, not the strict study material filter, 100%
+  coverage gate, fallback granularity, or an arbitrary numeric threshold.
+- Evidence: original STATSGO processing itself renormalizes over nonmissing
+  components; the paired study measures source sensitivity, not outcome accuracy.
+- Risks and recovery: define usability and fallback boundaries before runtime
+  integration; expose source contributions and invalid/unavailable support.
+  Preserve version 1 offline results for reproducibility. No runtime change or
+  live project mutation is made by this amendment.
+
+The detailed source contract is maintained in the canonical postfire
+specification and soil document; the closed package remains immutable history.

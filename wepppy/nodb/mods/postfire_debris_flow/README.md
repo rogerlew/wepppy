@@ -73,9 +73,12 @@ reproduce the frozen three-site comparison with owned WBT routing and Rust
 intersection counts. The helper can be loaded directly by that harness without
 NoDb's package-level Redis initialization.
 
-The study recommends retaining the original STATSGO predictor pending a
-scientific source decision. SSURGO's finer mapping does not establish calibrated
-parity, and the sampled catchments all have incomplete component support.
+The subsequent owner decision selects **SSURGO primary, original STATSGO THICK
+fallback**, preferring detailed soil information with broader-coverage backup.
+Source selection and fallback contributions must be reported. Material policy,
+partial-support handling, and fallback granularity remain implementation
+decisions; the offline complete-only criterion is not a production requirement.
+The study measures source sensitivity, not comparative predictive accuracy.
 
 ## References and Licensing
 

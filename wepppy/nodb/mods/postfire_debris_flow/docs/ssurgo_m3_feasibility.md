@@ -1,7 +1,8 @@
 # SSURGO for M3 Soil Thickness
 
 Updated 2026-09-09 after bounded acquisition and offline paired evaluation.
-No production source approval or integration is claimed.
+Owner direction now approves SSURGO primary and original STATSGO THICK
+fallback. Production integration and detailed fallback policy remain pending.
 
 Execution follow-up: [M3 soil work package](../../../../../docs/work-packages/20260908_staley_m3_soils/package.md).
 Its fresh-agent plan includes explicit soil acquisition/inventory because the
@@ -21,8 +22,9 @@ The [canonical offline contract](m3_soil_thickness.md) and
 [ADR-0053](../../../../../docs/adrs/ADR-0053-staley-m3-offline-soil-thickness.md)
 now define executable interval, weighting, coverage and units. The
 [source decision](../../../../../docs/work-packages/20260908_staley_m3_soils/artifacts/soil_decision.md)
-records measured effects and remaining scientific uncertainty. Retain the
-original predictor pending owner review; no automatic fallback is implemented.
+records historical measured effects and uncertainty. The subsequent owner
+decision supersedes its retain-STATSGO recommendation: SSURGO is primary and
+STATSGO is fallback. No runtime fallback is implemented.
 
 ## Initial feasibility finding
 
@@ -44,7 +46,7 @@ USGS also distributes the original predictor as a
 [STATSGO THICK COG](https://catalog.data.gov/dataset/statsgo-soil-thickness-thick-cloud-optimized-geotiff-for-the-continental-us),
 explicitly in inches, nominally rasterized at 30 m. Its fine raster spacing
 does not increase the original soil-map detail. It provides a useful comparison
-baseline, not an approved automatic fallback. Its metadata identifies NaN and
+baseline and the approved fallback source; runtime fallback rules are pending. Its metadata identifies NaN and
 nonphysical `-0.1` water values that must not enter a thickness mean.
 
 For a valid SSURGO thickness `d_cm`, the M3 scaling is `d_cm / 254`.

@@ -1,7 +1,9 @@
 # Offline thickness contract, version 1
 
-This is an executable study contract, not owner approval of production SSURGO
-substitution. ADR-0053 records the parameterization and unresolved science.
+This is the executable version 1 study contract. The subsequent owner decision
+approves SSURGO primary and original STATSGO THICK fallback for production
+direction; the existing offline helper does not implement that fallback.
+ADR-0053 records both decisions and the remaining implementation details.
 
 ## Original reference
 
@@ -116,16 +118,25 @@ errors raise explicit exceptions; scientific unavailability is returned in rows.
 
 ## Source recommendation and scientific limits
 
-The 2026-09-09 three-site, 12-outlet comparison recommends retaining original
-STATSGO as reference; automatic SSURGO substitution is not approved. All sampled
-catchments have incomplete component support, and strict versus all-recorded
-material treatment changes diagnostic M3 probabilities materially. The paired
-experiment establishes source sensitivity, not predictive validity. See
-[measured evidence](../../../../../docs/work-packages/20260908_staley_m3_soils/artifacts/soil_decision.md).
+The archived three-site, 12-outlet study recommended retaining original
+STATSGO pending owner review. The owner subsequently selected **SSURGO as
+primary and original STATSGO THICK as fallback**, preferring detailed soil
+information while retaining broad geographic coverage. This supersedes the
+study's source-selection recommendation, not its numerical findings.
 
-A future production change must separately ratify material inclusion, missing
-component support, source freshness and availability under contract-first
-integration. No fixed profile depth, zero fill, automatic source acquisition,
-Soils rebuild or source fallback is approved. Explicit nonfinite arithmetic
-and Float32 representation errors abort offline artifact creation; these are
-numeric storage checks, not scientific soil-depth cutoffs.
+The comparison measures sensitivity, not which source predicts debris flows
+more accurately. Original STATSGO processing renormalizes over nonmissing
+components; complete raster coverage is not complete component observation.
+The version 1 complete-only outputs and strict-material policy remain offline
+study behavior, not ratified production usability requirements.
+
+Before runtime integration, specify material inclusion, incomplete-component
+handling, fallback granularity/triggers, and source freshness. Report source
+identity and fallback contributions without silently treating missing depth
+as zero. Validate STATSGO coverage and sentinels; if neither source is usable,
+report unavailable. Source-priority approval does not authorize live Soils
+rebuilds or implicit network acquisition. Explicit nonfinite arithmetic and
+Float32 representation errors still abort the offline builder.
+
+See [measured evidence](../../../../../docs/work-packages/20260908_staley_m3_soils/artifacts/soil_decision.md)
+for historical findings and ADR-0053 for the subsequent owner decision.

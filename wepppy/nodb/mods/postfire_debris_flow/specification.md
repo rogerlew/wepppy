@@ -121,8 +121,19 @@ The [M3 soil work package](../../../../docs/work-packages/20260908_staley_m3_soi
 scopes source inventory, reproducible offline derivation, and a fixed-10 m
 comparison against original STATSGO THICK. The user requested this follow-up
 after terrain completion; it resolves soil-source suitability independently
-of terrain resolution. It does not yet establish an accepted SSURGO policy
-or authorize automatic source fallback or live soil rebuilds.
+of terrain resolution. The subsequent owner decision selects **SSURGO as
+primary and original STATSGO THICK as fallback**. Prefer the more detailed
+SSURGO soil information where usable and retain STATSGO for broader coverage.
+Differences from STATSGO do not establish that SSURGO is less accurate.
+
+Source priority is accepted; runtime integration remains pending. Fallback must
+be explicit in output provenance and coverage reporting. The fallback unit
+(component, map unit, cell, or catchment), usability criteria, material policy,
+and incomplete-component handling remain to be specified. A nonmissing STATSGO
+pixel is not proof of complete underlying component observations; validate its
+NoData/nonphysical values too. Do not apply the offline 100% support criterion
+as an approved production gate. No live soil rebuild is authorized by this
+source-priority decision.
 
 The original STATSGO `THICK` is cumulative layer thickness in **inches**, not
 centimeters, depth to bedrock, or WEPP's modeled profile depth. Thus:
@@ -151,8 +162,9 @@ The [version 1 offline soil contract](docs/m3_soil_thickness.md)
 and [ADR-0053](../../../../docs/adrs/ADR-0053-staley-m3-offline-soil-thickness.md)
 define the study helper before executable implementation. This contract applies
 only to offline raw-record derivation and diagnostics. No live Soils build,
-NoDb/UI/RQ integration, source substitution approval or partial-coverage
-availability threshold is established. Strict soil and all-recorded-layer
+NoDb/UI/RQ integration or partial-coverage availability threshold is
+established by the offline contract. The owner has separately approved the
+SSURGO-primary/STATSGO-fallback direction above. Strict soil and all-recorded-layer
 sensitivities remain scientifically distinct.
 
 ## RUSLE and POLARIS Dependency
@@ -414,7 +426,8 @@ Paths below are reserved design locations; executable files do not yet exist.
 
 1. Ratify SSURGO thickness aggregation, bedrock/interval rules, missing-data
    coverage policy, and comparison against STATSGO THICK. Original units are
-   resolved as inches; automatic STATSGO fallback is not approved.
+   resolved as inches. SSURGO primary and STATSGO fallback are approved;
+   fallback granularity, triggers, and provenance require an implementation contract.
 2. Production application of the accepted maximum-minus-outlet terrain
    contract and recommended 10 m requirement; original calibration
    preprocessing equivalence remains unproven.
