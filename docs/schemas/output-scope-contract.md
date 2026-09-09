@@ -145,6 +145,31 @@ When adding or modifying scope-aware report surfaces:
 5. Keep roads-only writes under `wepp/roads/output/*`; never mutate `wepp/output/*` in roads flows.
 6. Update this contract in the same change set when scope behavior changes.
 
+## Yearly water-balance presentation
+
+For both output scopes, `TotalWatbalReport` MUST expose `Surface Runoff (mm)`
+after `Rain + Melt (mm)`, sourced from the existing `Runoff` depth column in
+`totalwatsed3.parquet`. It MUST use the same water-year sums, mean, population
+standard deviation, and precipitation-ratio treatment as the other water-depth
+measures. HTML and CSV MUST include the column without renaming existing columns.
+This adds a missing presentation of existing model output, not a new runoff
+formula or unit conversion. A missing `Runoff` column in a parquet source or a
+nonempty injected dataframe MUST fail explicitly, not appear as zero runoff.
+Null/NaN cells in an existing column retain the existing zero-fill policy.
+Empty injected dataframes may omit columns and retain empty report rows;
+empty parquet sources still require the selected schema columns.
+
+The yearly report MUST distinguish an omitted `exclude_yr_indxs` query parameter
+(the existing default `[0, 1]`) from an explicitly empty parameter (exclude no
+years). `Include all years` and its CSV link MUST encode `exclude_yr_indxs=`
+and preserve `output_scope`. Existing integer-list parsing, duplicate handling,
+and out-of-range-index behavior remain unchanged. Omitting the parameter is
+not a valid way to express an explicit all-years selection.
+
+Rationale: the shared report omitted existing runoff data, and its all-years
+option accidentally reapplied the two-year default. Preserve direct-link
+defaults and source data while correcting those two user-visible defects.
+
 ## Hillslope water-balance summary cache
 
 `HillslopeWatbalReport` retains `hillslope_watbal_summary.parquet` under
