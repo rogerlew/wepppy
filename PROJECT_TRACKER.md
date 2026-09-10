@@ -7,6 +7,10 @@
 
 ## Purpose
 
+Contract preparation: [RQ cancellation directory locks](docs/work-packages/20260909_rq_cancel_directory_locks/package.md)
+— release canceled execution locks after writers stop; implementation pending
+reviewed checkpoint and commit authority.
+
 Completed: [GridMET queue recovery](docs/work-packages/20260909_gridmet_queue_recovery/package.md)
 — live queue waiting no longer expires; Redis transport recovery preserves ownership.
 8,192 broad tests, real Redis fault injection and observed public download passed;

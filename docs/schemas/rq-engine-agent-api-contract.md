@@ -329,6 +329,26 @@ Climate-parse validation contract:
   top-level `errors` (for example `future_start_year`, `future_end_year`)
   instead of traceback text in `error.details`.
 
+## Cancellation directory-lock cleanup
+
+Implementation conformance pending (RQ-CANCEL-LOCKS-01).
+
+Cancellation MUST release directory maintenance locks owned by the canceled
+execution after its workhorse and descendant writers, including detached
+writers, have terminated. Unverifiable termination MUST retain locks with an
+inspectable cleanup reason. A stop
+command acknowledgment is not termination evidence; existing asynchronous
+cancellation responses remain unchanged. Cleanup MUST match execution ownership
+and the current lock token, never all locks for a run. Queued cancellation MUST
+preserve active executions' locks. Repeated cleanup MUST be idempotent.
+Cleanup errors MUST remain logged and inspectable without suppressing RQ stop
+handling. Legacy locks without verifiable execution ownership retain explicit
+operator recovery. See [maintenance cancellation ownership](directory-maintenance-lock-contract.md#rq-cancellation-ownership).
+
+Rationale: stopping the workhorse can bypass Python context-manager cleanup,
+leaving a directory locked until expiry; releasing before writers stop breaks
+write exclusion. This does not authorize clearing unrelated NoDb controller locks.
+
 ## Agent Workflow (Recommended)
 1. Acquire a token:
    - User/service token (pre-issued), or
