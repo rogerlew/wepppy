@@ -130,6 +130,19 @@ Feedback mechanisms:
 
 ## 📋 Backlog
 
+### Staley Rainfall Adapters and M1 Results
+
+**Scoped**: 2026-09-10 05:15 UTC (2026-09-09 Pacific). Scaffolded; not executing.
+
+**Link**: [Package](docs/work-packages/20260909_staley_rainfall_results/package.md)
+
+**Scope**: Existing M1 bundles plus Climate event/CLI/NOAA frequency snapshots;
+local event probabilities, design comparisons, inverse thresholds and bounded
+queries. No rebuilds, public endpoint, dashboard or NoDb/RQ publication.
+
+**Next**: Resolve source/design-matrix and sparse-sample policies; freeze input,
+result and query contracts. Independent correctness/security reviews required.
+
 ### Seamless WEPPcloud Session Cookie Namespace Migration
 
 **Proposed**: 2026-08-23

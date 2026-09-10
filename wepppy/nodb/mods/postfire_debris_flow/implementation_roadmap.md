@@ -50,6 +50,14 @@ K policy is accepted in ADR-0059. Complete synthetic and authentic T/F/S outputs
 and missing-input cases exist. Climate composition and production publication
 remain successor work. Completed backend contracts are not reopened.
 
+## Next Rainfall/Results Increment
+
+The [rainfall/results package](../../../../docs/work-packages/20260909_staley_rainfall_results/package.md)
+is scaffolded, not executing, for local M1 stage 4. Its
+[proposed contract](docs/rainfall_results.md) covers events, design comparisons,
+inverse thresholds and bounded local queries. L08/L09 remain pending until
+source/sample policies and schemas are accepted. No production UI/RQ scope.
+
 ## Delivery Sequence
 
 Build shared scientific components, deliver a usable M1 workflow, integrate M3,
@@ -195,3 +203,8 @@ scientific limitation that implementation cannot resolve.
   unknown intersections and explicit scenario outputs. Local stage 3 acceptance
   is complete; area applicability warning retained. Production wiring remains
   stage 5 scope.
+
+- 2026-09-10 05:15 UTC: reviewed completed M1 contract/validation and authentic
+  Wallow acceptance; scaffolded local rainfall/results package. Climate CSV
+  rounding, missing-column zeros and sparse-duration rank clamping are explicit
+  decision gates. Review is read-only, not a new correctness/security signoff.

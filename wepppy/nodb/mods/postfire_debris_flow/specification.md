@@ -439,6 +439,13 @@ readiness or extrapolate values.
 
 ## Rainfall Sources and Scenario Outputs
 
+Local stage-4 execution is scaffolded in the
+[rainfall/results package](../../../../docs/work-packages/20260909_staley_rainfall_results/package.md).
+The [proposed adapter/result contract](docs/rainfall_results.md) composes accepted
+M1 bundles with existing Climate artifacts; execution has not started. Source
+selection, the design matrix and sparse-sample behavior remain explicit decision
+gates. No new Climate estimator or production workflow is approved here.
+
 Accepted direction: focus on short return intervals and reuse Climate-owned
 event intensities and NOAA PDS artifacts. Do not reconstruct CLIGEN storm
 intensities inside this module.
@@ -460,6 +467,13 @@ failing the climate build, so readiness must validate data rather than assume
 files exist. The CLI frequency CSV can contain zero placeholders for missing
 intensity columns; these must not become design-storm inputs. Validate against
 the event parquet and report missing scenarios explicitly.
+
+Implementation review also found that CLI frequency selection clamps a requested
+rank to the last positive observation if a duration has too few samples. The
+shared rank helper assigns indices across the supplied recurrence set, so exact
+Climate parity requires its full request context before selecting a subset.
+The successor contract must resolve this sparse-sample behavior explicitly;
+do not silently fork the estimator or interpret the clamp as evidence of adequacy.
 
 Recommended workflow, pending ratification:
 

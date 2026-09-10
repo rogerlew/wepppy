@@ -169,3 +169,12 @@ The [M1 predictor package](../../../../docs/work-packages/20260909_staley_m1_pre
 is scaffolded for local T/F/S composition, WBT-compatible input preparation and
 provenance. [Its proposed contract](docs/m1_predictors.md) records pending K
 unit/coverage/readiness choices. Execution and production wiring have not begun.
+
+## Rainfall/results follow-up
+
+The [rainfall/results package](../../../../docs/work-packages/20260909_staley_rainfall_results/package.md)
+is scaffolded after complete local M1 acceptance. It will consume existing
+Climate event/frequency artifacts for local probabilities, design comparisons
+and inverse thresholds. [Contract proposals](docs/rainfall_results.md) preserve
+source identities, missing scenarios and the fixed postfire predictor state.
+Implementation, dashboard and production wiring remain pending.
