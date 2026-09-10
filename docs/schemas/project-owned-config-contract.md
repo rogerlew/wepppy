@@ -2317,3 +2317,50 @@ builder combination. Failure of any provider-supplied WEPP binary invalidates
 Builder binary availability as a whole until the provider or deployment is
 corrected. Neither case authorizes an inferred fallback or a change to
 Interfaces presets.
+
+### Builder Soil Burn Severity support (2026-09-10)
+
+Implementation conformance pending. Every newly Builder-created project MUST
+include the internal `disturbed` controller in its effective `[nodb] mods`,
+regardless of locale, DEM resolution, delineation backend or optional model
+selections. The existing Soil Burn Severity control MUST therefore be available
+without enabling a model. Upload remains optional. The normal Disturbed landuse and soil adjustment
+workflow MUST apply, including its existing behavior without an SBS map. No
+Builder-specific SBS-only guard may bypass that workflow. Existing SBS upload, classification, removal and
+uniform-severity contracts remain unchanged. This does not enable Staley or
+change its eligibility rules.
+
+`selections.mods` in the creation manifest continues to record user-selected
+optional modules; `disturbed` is a required Builder runtime dependency, not an
+additional selectable capability. The effective writer is `builder:sbs-support`.
+Configuration updates MUST accept both historical exact selected-module lists
+and the new effective list `['disturbed', *selected_mods_without_disturbed]`,
+with exact ordered-list equality, while rejecting unrelated selection mismatches.
+No set/subset comparison may relax validation. Updates MUST preserve existing configuration values; they
+MUST NOT silently enable this dependency in older projects.
+
+For existing Builder projects, an explicit operator repair may initialize the
+missing Disturbed controller and add `disturbed` under canonical NoDb locks to
+the project and core controllers that dispatch module events. Existing maps,
+controller values except the explicitly repaired default landuse mapping,
+configuration bytes and manifest digests MUST be preserved;
+existing Disturbed state MUST be reused. This is a runtime enable operation,
+not a configuration refresh. Read-only or malformed projects MUST not be repaired.
+The present repair is limited to the operator-identified `fair-division`; broader
+existing-project repair requires an enumerated operator scope.
+
+Rationale: SBS is basic project input, not a model-menu choice. The Builder's
+empty optional-module selection previously hid the control entirely. Reuse the
+existing controller instead of introducing a second upload path. Keep source
+selections separate from required runtime support and preserve historical
+configuration provenance. The owner explicitly clarified that Builder projects always have Disturbed.
+Enabling its normal adjustment workflow is intentional (ADR-0064); its existing
+soil version, burn conversion and numerical routines remain unchanged. Builder
+landuse profiles MUST use the existing compatible mappings: `disturbed` for
+NLCD/EMAPR, `eu-disturbed` for CORINE, `au-disturbed` for Australian landuse, and
+`c3s-disturbed` for C3S (already configured). These mapping writes belong to the
+landuse component and its provenance revision. Do not modify lookup contents.
+For fair-division, the absent/default persisted Landuse mapping is explicitly
+repaired to `disturbed`; a populated custom mapping must not be overwritten.
+Older config updates preserve populated mapping values and may propose a newly
+registered missing mapping through the existing explicit preview/apply contract. Authentication and RQ topology remain unchanged.
