@@ -12,6 +12,7 @@ import requests
 
 from wepppy.rq.weppcloudr_backends import (
     BackendConfigurationError,
+    DockerExecBackend,
     HttpRenderControlPlaneClient,
     KubernetesJobBackend,
     KubernetesRenderError,
@@ -24,6 +25,31 @@ pytestmark = pytest.mark.unit
 
 IMAGE_DIGEST = "sha256:" + "a" * 64
 REPO_ROOT = Path(__file__).resolve().parents[2]
+
+
+@pytest.mark.parametrize("uid,gid", [(1002, 130), (1000, 993)])
+def test_compose_render_uses_worker_identity(monkeypatch, uid, gid):
+    from wepppy.rq import weppcloudr_backends as backends
+
+    monkeypatch.setattr(backends.os, "geteuid", lambda: uid)
+    monkeypatch.setattr(backends.os, "getegid", lambda: gid)
+    monkeypatch.setattr(backends.shutil, "which", lambda command: "/usr/bin/docker")
+    calls = []
+
+    def execute(command, **kwargs):
+        calls.append((command, kwargs))
+        return SimpleNamespace(returncode=0, stdout="rendered", stderr="")
+
+    monkeypatch.setattr(backends.subprocess, "run", execute)
+    request = _request()
+    result = DockerExecBackend("weppcloudr", fencing_generation=3).render(request, timeout=600)
+    command, options = calls[0]
+    assert command == ["docker", "exec", "--user", f"{uid}:{gid}", "-i",
+                       "weppcloudr", "Rscript", "/srv/weppcloudr/render-compose-request.R"]
+    assert json.loads(options["input"])["run_path"] == request.active_root
+    assert json.loads(options["input"])["fencing_generation"] == 3
+    assert options["timeout"] == 600
+    assert result.stdout == "rendered"
 
 
 def _request(**overrides: object) -> RenderRequest:

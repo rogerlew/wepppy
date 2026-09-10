@@ -197,6 +197,10 @@ class DockerExecBackend:
         command = [
             "docker",
             "exec",
+            # Run inputs belong to the worker, including legacy mode-0600 files.
+            # Image-default identities and supplementary groups cannot read them.
+            "--user",
+            f"{os.geteuid()}:{os.getegid()}",
             "-i",
             self._container_name,
             "Rscript",

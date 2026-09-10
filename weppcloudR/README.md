@@ -38,6 +38,20 @@ Environment variables:
 
 ## One-shot renderer
 
+The WEPPcloud DEVAL report page renders through RQ. For Docker Compose, each
+render runs with the worker's numeric UID/GID, so existing owner-only run inputs
+work without a permission repair or model rebuild. The renderer image's default
+user is not the RQ render identity. Files, report contents, and route authorization
+are unchanged. The legacy direct Plumber endpoint uses its container identity;
+use the WEPPcloud report page for the supported queued workflow.
+
+Before deployment, `docker/validate-weppcloudr-runtime-contract.sh` checks real
+worker-to-renderer access to an owner-only parquet. When changing identities or
+mounts, also force a fresh full report and verify output through the report page;
+a cache hit is insufficient. Diagnose failures using the job's
+`_logs/weppcloudr/render_deval_<job-id>.stderr`. Do not use recursive chmod as a
+substitute for matching the render execution identity to the run-data worker.
+
 Kubernetes Jobs use `render-request-v1.R`, not the Plumber entrypoint. The
 controller mounts one immutable request at `/run/weppcloudr/request.json`,
 passes its independently trusted SHA-256 digest, and starts the process with

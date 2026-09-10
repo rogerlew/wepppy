@@ -103,6 +103,15 @@ render succeeds using the effective worker and renderer identities.
 Development bind mounts MUST NOT hide image-vendored runtime assets; immutable
 vendor paths must remain sourced from the built renderer image.
 
+Compose implementation note: the Docker-exec render uses the worker process's
+effective numeric UID and GID. This restores access to existing worker-owned
+owner-only inputs without changing their permissions; supplementary groups alone
+cannot provide that access. Identity comes from the executing process, never a
+request field. Deployment validation exercises worker-created 0600 parquet in a
+0700 directory, renderer read/write, and worker readback. A fresh complete report
+is also required when changing this boundary. See the
+[execution identity recurrence](../work-packages/20260910_deval_execution_identity/package.md).
+
 ### Versioned Render Request
 
 The cross-repository request is a UTF-8 JSON object with no unknown fields and

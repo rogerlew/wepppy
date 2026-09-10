@@ -263,6 +263,8 @@ def test_render_deval_details_rq_runs_container_and_publishes_completion(
     assert command == [
         "docker",
         "exec",
+        "--user",
+        f"{os.geteuid()}:{os.getegid()}",
         "-i",
         "renderer",
         "Rscript",

@@ -7,6 +7,10 @@
 
 ## Purpose
 
+In validation: [DEVAL execution identity](docs/work-packages/20260910_deval_execution_identity/package.md)
+— render as the worker owning run data; owner-only and regenerated-input canaries
+pass without data repair, including actual queued execution and report readback.
+
 Contract preparation: [RQ cancellation directory locks](docs/work-packages/20260909_rq_cancel_directory_locks/package.md)
 — release canceled execution locks after writers stop; implementation pending
 reviewed checkpoint and commit authority.
