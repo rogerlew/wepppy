@@ -357,3 +357,21 @@ control rehydrates on open and marks cached readiness non-live on close/error.
 Existing per-run authorization remains on the detailed state endpoint. No
 filesystem watcher is introduced: unmanaged operator file edits are checked at
 next state request/submission and are outside realtime producer notifications.
+
+### Fixed completed-file access (publication review clarification)
+
+Keep completed bundles under hidden attempt storage. Copying to a generic public
+run folder before committing NoDb would expose unaccepted or partially published
+work. Instead use authenticated rq-engine GET
+`postfire-debris-flow/files/{attempt_id}/{name}` with `rq:export`, run/config
+checks, ID equality with the last accepted result and the four-name allowlist.
+Resolve only the recorded attempt's hidden results directory; verify its published
+file signature before serving. This is a fixed-file adapter, not a generic path
+or archive endpoint. Browser downloads use the existing session-token request
+helper and a temporary blob link. Stale previous results remain downloadable
+when their own files match the accepted record; missing/changed files return 409.
+No generic browseable publication directory is created. NoDb commit is the sole
+publication boundary, eliminating a two-store atomicity gap.
+
+Open each validated regular file once, compare its accepted signature using that
+open handle and stream the same handle; do not reopen by pathname after validation.
