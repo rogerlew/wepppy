@@ -332,6 +332,79 @@ class WepppyRqWorker(Worker):
         print(f"Job {job.id} Raised Exception")
 
 
+    def fork_work_horse(self, job: Job, queue: Queue) -> None:
+        from wepppy.rq.directory_locks import prepare_containment
+        from wepppy.runtime_paths.thaw_freeze import maintenance_lock_execution
+
+        self._directory_lock_cancel_requested = False
+        self._directory_lock_containment_error = None
+        self._directory_lock_protected_children = {}
+        try:
+            scheduler_process = getattr(getattr(self, "scheduler", None), "_process", None)
+            scheduler_pid = (
+                scheduler_process.pid
+                if scheduler_process is not None and scheduler_process.is_alive()
+                else None
+            )
+            self._directory_lock_protected_children = prepare_containment(scheduler_pid)
+        except (OSError, RuntimeError) as exc:
+            # Cleanup boundary: cancellation still stops RQ, but uncertain
+            # process ownership must never authorize directory-lock release.
+            self._directory_lock_containment_error = str(exc)
+            LOGGER.exception("Directory lock containment unavailable job_id=%s", job.id)
+        with maintenance_lock_execution(job.id) as execution_id:
+            self._directory_lock_execution_id = execution_id
+            job.meta["directory_lock_execution_id"] = execution_id
+            job.meta["directory_lock_cleanup"] = {"execution_id": execution_id, "state": "not_requested"}
+            job.save_meta()
+            super().fork_work_horse(job, queue)
+
+    def kill_horse(self, sig: signal.Signals = signal.SIGKILL) -> None:
+        if self._stopped_job_id is not None:
+            self._directory_lock_cancel_requested = True
+        super().kill_horse(sig)
+
+    def monitor_work_horse(self, job: Job, queue: Queue) -> None:
+        try:
+            super().monitor_work_horse(job, queue)
+        finally:
+            try:
+                self._cleanup_canceled_directory_locks(job)
+            finally:
+                self._retire_if_writers_remain(job)
+                for fd in self._directory_lock_protected_children.values():
+                    os.close(fd)
+                self._directory_lock_protected_children = {}
+
+    def _cleanup_canceled_directory_locks(self, job: Job) -> None:
+        if getattr(self, "_directory_lock_cancel_requested", False):
+            from wepppy.rq.directory_locks import cleanup_stopped_execution, record_cleanup
+
+            try:
+                cleanup_stopped_execution(self, job)
+            except (OSError, RuntimeError, ValueError, redis.RedisError) as exc:
+                # Post-stop cleanup boundary: retain exclusion on uncertain
+                # termination/Redis state and preserve RQ's terminal handling.
+                LOGGER.exception("Directory lock cleanup failed job_id=%s", job.id)
+                record_cleanup(job, self._directory_lock_execution_id,
+                               "pending", reason=str(exc))
+
+    def _retire_if_writers_remain(self, job: Job) -> None:
+        from wepppy.rq.directory_locks import has_remaining_writers
+
+        try:
+            if not self._directory_lock_containment_error and not has_remaining_writers(
+                self._directory_lock_protected_children
+            ):
+                return
+        except (OSError, RuntimeError):
+            LOGGER.exception("Could not inspect residual writers job_id=%s", job.id)
+        # Subreaper adoption survives job failure. Never attribute a crashed
+        # execution's surviving descendants to the next job. The worker pool
+        # replaces this supervisor; failed-job locks retain existing recovery.
+        self._stop_requested = True
+        LOGGER.error("Retiring worker with uncertain/residual writers job_id=%s", job.id)
+
 def start_worker() -> None:
     """Start a worker that listens on the high/default/low queues."""
     conn_kwargs = redis_connection_kwargs(RedisDB.RQ)

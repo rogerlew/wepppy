@@ -2,7 +2,7 @@
 
 ## RQ cancellation ownership
 
-Implementation conformance pending (RQ-CANCEL-LOCKS-01).
+Implementation validated locally (RQ-CANCEL-LOCKS-01); production rollout pending.
 
 New RQ-owned directory maintenance locks MUST identify the server-created job
 execution that acquired them, distinguishing retries of the same job. Ownership

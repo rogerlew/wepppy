@@ -12,9 +12,9 @@ Completed: [DEVAL execution identity](docs/work-packages/20260910_deval_executio
 pass on both production hosts, including queued execution and report readback;
 8,194 tests passed, and the fix is pushed and synced to production source.
 
-Contract preparation: [RQ cancellation directory locks](docs/work-packages/20260909_rq_cancel_directory_locks/package.md)
-— release canceled execution locks after writers stop; implementation pending
-reviewed checkpoint and commit authority.
+Implemented locally: [RQ cancellation directory locks](docs/work-packages/20260909_rq_cancel_directory_locks/package.md)
+— release execution-owned locks after detached writers stop; real WorkerPool/Redis
+regressions, 8202 broad tests and independent reviews passed. Deployment separate.
 
 Completed: [GridMET queue recovery](docs/work-packages/20260909_gridmet_queue_recovery/package.md)
 — live queue waiting no longer expires; Redis transport recovery preserves ownership.

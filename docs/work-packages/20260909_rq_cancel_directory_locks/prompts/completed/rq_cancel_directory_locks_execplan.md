@@ -12,9 +12,10 @@ longer block the next build. Preserve other executions' exclusion locks.
 - [x] (2026-09-10 UTC) Inspect incident, cancellation, locks, and RQ supervisor.
 - [x] (2026-09-10 UTC) Prepare contract amendment and state matrix.
 - [x] (2026-09-10 UTC) Complete two independent checkpoint reviews; findings closed.
-- [ ] Obtain authority and create standalone checkpoint ancestor commit.
-- [ ] Implement ownership and cleanup with regression tests.
-- [ ] Verify real process/Redis lifecycle, broad tests, and final reviews.
+- [x] (2026-09-10 UTC) Authorized checkpoint committed as 3903cb778.
+- [x] (2026-09-10 UTC) Implement ownership and cleanup; 17 focused tests pass.
+- [x] (2026-09-10 UTC) Verify real process/Redis lifecycle and independent final reviews.
+- [x] (2026-09-10 UTC) Broad suite passed (8202 passed, 83 skipped); local handoff complete.
 
 ## Surprises & Discoveries
 
@@ -23,6 +24,9 @@ exists. RQ kill_horse signals the process group, and monitor_work_horse waits
 for the workhorse before handling user-stop failure. Waiting for the leader
 alone does not prove every descendant writer has terminated.
 The incident lock had a six-hour TTL and named a removed container.
+Production RQ worker-pool enables a scheduler child; it must be identity-pinned
+and preserved during cleanup. Failed-job descendants also persist after
+subreaper adoption, so ambiguous supervisors retire before accepting another job.
 Independent reviews identified CLIGEN's start_new_session=True launch at
 wepppy/climates/cligen/cligen.py:2554: its writer can escape the workhorse's
 process group. The real regression must include detached/reparented writers.
@@ -37,7 +41,13 @@ with "yes" on 2026-09-10 UTC.
 
 ## Outcomes & Retrospective
 
-Checkpoint preparation only. No implementation or rollout is complete.
+Local implementation, 17 focused tests, actual WorkerPool identity/run-mount
+probe and independent correctness/security/QA reviews passed. Full suite passed:
+8202 passed, 83 skipped. Linux containment and exact payload comparison preserve
+other executions while removing the stopped execution's exclusion locks.
+Scheduler-aware and detached-process tests closed the original mocked-lifecycle
+coverage gap. Remaining legacy/container-death recovery is explicitly separate.
+Production rollout remains outside this implementation authorization.
 
 ## Context and Orientation
 
@@ -112,3 +122,9 @@ Add no dependencies or lease/retry defaults. Public cancellation payloads stay
 compatible. Execution identity must distinguish retries of the same RQ job.
 
 Revision note: initial plan records requested cleanup and mandatory sequencing.
+
+Revision note: implementation uses rq/directory_locks.py for Linux subreaper
+containment and diagnostics, without changing enqueue topology. Review findings
+added scheduler protection, diagnostic-fault isolation, worker retirement and
+independent probe teardown. The 17-test focused gate includes real Redis by
+default when development credentials are configured.

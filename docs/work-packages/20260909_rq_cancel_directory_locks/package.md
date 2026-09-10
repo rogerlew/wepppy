@@ -1,6 +1,11 @@
 # RQ cancellation directory-lock cleanup
 
-Status: Contract checkpoint preparation; implementation pending.
+Status: Closed 2026-09-10 UTC for local implementation. Production rollout is separate.
+
+Delivered execution-owned cancellation cleanup, real WorkerPool/Redis regression,
+worker identity/run-mount evidence and independent correctness/security/QA
+approvals. Full suite: 8202 passed, 83 skipped. Final focused suite: 17 passed.
+See artifacts/20260910_validation.md and tracker.md.
 
 ## Scope and incident
 

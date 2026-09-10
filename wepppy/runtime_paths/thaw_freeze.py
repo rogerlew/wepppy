@@ -8,6 +8,8 @@ import json
 import os
 import socket
 import uuid
+from contextlib import contextmanager
+from collections.abc import Iterator
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
@@ -40,7 +42,56 @@ __all__ = [
     "thaw",
     "freeze_locked",
     "freeze",
+    "maintenance_lock_execution",
+    "release_execution_locks",
 ]
+
+# RQ executes one job per workhorse process. Process-local state deliberately
+# reaches both threads and forked process pools; request/job metadata is not
+# accepted as ownership authority.
+_rq_lock_execution: tuple[str, str] | None = None
+
+
+@contextmanager
+def maintenance_lock_execution(job_id: str) -> Iterator[str]:
+    """Create server-owned lock identity before forking an RQ workhorse."""
+    global _rq_lock_execution
+    previous = _rq_lock_execution
+    execution_id = uuid.uuid4().hex
+    _rq_lock_execution = (job_id, execution_id)
+    try:
+        yield execution_id
+    finally:
+        _rq_lock_execution = previous
+
+
+def release_execution_locks(job_id: str, execution_id: str) -> list[str]:
+    """Release exact execution payloads, only after its writers have stopped."""
+    if not job_id or len(execution_id) != 32:
+        raise ValueError("invalid directory lock execution identity")
+    uuid.UUID(hex=execution_id)
+    client = _runtime_lock_redis_client()
+    cleared = []
+    for key in _iter_runtime_lock_keys(client):
+        try:
+            raw = client.get(key)
+        except redis.exceptions.RedisError as exc:
+            raise RuntimeError(f"could not inspect directory lock {key}") from exc
+        payload = _parse_lock_payload(raw)
+        if (payload.get("rq_job_id"), payload.get("rq_execution_id")) != (job_id, execution_id):
+            continue
+        token = payload.get("token")
+        if not isinstance(token, str) or not token:
+            raise ValueError(f"missing token for execution-owned directory lock {key}")
+        # Compare the entire observed payload atomically, including execution
+        # ownership and token. A replacement owner is never deleted.
+        try:
+            deleted = _delete_if_raw_matches(client, key, raw)
+        except RuntimeError as exc:
+            raise RuntimeError(f"could not release directory lock {key}") from exc
+        if deleted:
+            cleared.append(key)
+    return cleared
 
 
 @dataclass(frozen=True, slots=True)
@@ -585,6 +636,8 @@ def acquire_maintenance_lock(
         "expires_at": expires_at,
         "ttl_seconds": ttl,
     }
+    if _rq_lock_execution is not None:
+        payload["rq_job_id"], payload["rq_execution_id"] = _rq_lock_execution
     serialized = _serialize_lock_payload(payload)
 
     client = _runtime_lock_redis_client()

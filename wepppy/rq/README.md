@@ -95,6 +95,52 @@ cancel_jobs(job.id)
 ```
 - `cancel_jobs` walks the stored metadata and issues `send_stop_job_command` for running descendants before calling `Job.cancel()` on queued ones.
 
+### Directory locks after cancellation
+
+After cancellation stops a running job's writers, `WepppyRqWorker` releases
+directory maintenance locks owned by that execution. This includes detached
+CLIGEN writers and locks acquired in workhorse threads or forked process pools.
+Queued cancellation does not clear another job's locks. NoDb controller locks
+and legacy directory locks without execution identity retain explicit operator
+recovery.
+
+Stop acknowledgment and RQ's `stopped` status can precede cleanup. Operators can
+inspect `Job.fetch(job_id, connection=...).get_meta(refresh=True)`:
+`directory_lock_cleanup.state` is `not_requested`, `terminating_writers`,
+`complete`, or `pending`. A pending receipt includes its reason; a complete
+receipt lists `cleared_keys`. Redis diagnostic failures are logged with job and
+execution identity and do not prevent local process termination. Retained locks
+must not be cleared manually until their writers are confirmed stopped.
+
+The supervisor uses Linux child-subreaper adoption and pidfds to stop and reap
+detached descendants. The verified RQ scheduler is preserved. Missing process
+inspection or uncertain ownership retains locks with diagnostics. A supervisor
+with residual writers retires before taking another job; worker-pool replaces it
+so an earlier execution's descendants cannot be attributed to a later one.
+Whole-container death still requires existing expiry/operator recovery.
+
+Each fork creates a fresh server-owned execution UUID, separate from the RQ job
+ID. Directory lock payloads add `rq_job_id` and `rq_execution_id`; release
+compares the complete payload atomically, including its token. This protects
+replacement locks and retries of the same job. See the
+[directory lock contract](../../docs/schemas/directory-maintenance-lock-contract.md).
+
+Run focused guards with `wctl run-pytest tests/rq/test_directory_lock_cleanup.py`.
+Unique-key real Redis scenarios run automatically when a Redis credential file
+is configured, including normal development Compose runs. For other development
+Redis configurations, explicitly enable them with:
+
+```bash
+wctl docker compose exec -T -e RQ_CANCEL_TEST_REAL_REDIS=1 weppcloud \
+  /opt/venv/bin/pytest tests/rq/test_directory_lock_cleanup.py
+```
+
+The real tests use the scheduler-enabled worker, detached writers, immediate
+lock reacquisition, Redis diagnostic faults, and crash/replacement-worker
+recovery. They never flush Redis. Production rollout requires running the probe
+under the worker container's identity and run mount, with
+`RQ_CANCEL_TEST_RUN_PARENT` naming a writable disposable-run parent.
+
 ## Developer Notes
 
 ### WEPPcloudR execution backends

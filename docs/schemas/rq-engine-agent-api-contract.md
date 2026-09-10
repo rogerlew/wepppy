@@ -331,7 +331,7 @@ Climate-parse validation contract:
 
 ## Cancellation directory-lock cleanup
 
-Implementation conformance pending (RQ-CANCEL-LOCKS-01).
+Implementation validated locally (RQ-CANCEL-LOCKS-01); production rollout pending.
 
 Cancellation MUST release directory maintenance locks owned by the canceled
 execution after its workhorse and descendant writers, including detached
