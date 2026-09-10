@@ -1,0 +1,446 @@
+{
+  "r02-cli": {
+    "source_inventory_sha256": "affa2acdd629760a416292f138536b8b0cf5a312e8a34750c0615935aa4344a9",
+    "result_manifest_sha256": "78558b2980e0506b65217ffd09e34482d4f7bc6a257042a4c21f4545d5bc3341",
+    "tables": {
+      "events": {
+        "sha256": "fab024237bbd814cb490b5ada349e37d2100bc92bb97307bf74990df7c21e581",
+        "rows": 30936
+      },
+      "design": {
+        "sha256": "95afd0de52f43248c37f66fb638e5ef2cc881199cfcd394dbe198241340765e0",
+        "rows": 12
+      },
+      "inverse": {
+        "sha256": "f06bf63b13903231f6b0ee584807505c093c56c3c29552258f7c0c7f753ad76c",
+        "rows": 6
+      }
+    },
+    "build_seconds": 2.2377879600971937,
+    "open_seconds": 1.2191563699161634,
+    "list_seconds": 0.01861208595801145,
+    "detail_seconds": 0.0020004609832540154,
+    "peak_rss_kib": 452380,
+    "first_design_scenario": {
+      "return_interval_years": 1,
+      "source": "cli",
+      "rank_index": 99,
+      "positive_samples": 10312,
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": 38.78638009814023,
+      "rainfall_mm": 9.696595024535057,
+      "probability": 0.9830299576955752,
+      "status": "available",
+      "reason": null
+    },
+    "limitations": [
+      "Fixed current predictors applied to synthetic climate events; no recovery forecast",
+      "Genuine NOAA frequency snapshot, not observed events",
+      "Local snapshot identity, no live controller freshness"
+    ],
+    "example_events": [
+      {
+        "event_id": "5a6eef840e046d2a2a6e9a325b2ca31c1d304c345e21510e4d51dfb7d5b5e681:36417",
+        "row_ordinal": 36417,
+        "year": 100.0,
+        "month": 9.0,
+        "day_of_month": 16.0,
+        "sim_day_index": 36418.0,
+        "precipitation_mm": 61.3,
+        "date_status": "simulation_labels",
+        "duration_minutes": 15,
+        "intensity_mm_per_hour": 102.90298029782264,
+        "rainfall_mm": 25.72574507445566,
+        "probability": 0.9999999478926174,
+        "status": "available",
+        "reason": null
+      },
+      {
+        "event_id": "5a6eef840e046d2a2a6e9a325b2ca31c1d304c345e21510e4d51dfb7d5b5e681:12281",
+        "row_ordinal": 12281,
+        "year": 34.0,
+        "month": 8.0,
+        "day_of_month": 17.0,
+        "sim_day_index": 12282.0,
+        "precipitation_mm": 35.4,
+        "date_status": "simulation_labels",
+        "duration_minutes": 15,
+        "intensity_mm_per_hour": 94.37773595605898,
+        "rainfall_mm": 23.594433989014746,
+        "probability": 0.9999997175815103,
+        "status": "available",
+        "reason": null
+      },
+      {
+        "event_id": "5a6eef840e046d2a2a6e9a325b2ca31c1d304c345e21510e4d51dfb7d5b5e681:8223",
+        "row_ordinal": 8223,
+        "year": 23.0,
+        "month": 7.0,
+        "day_of_month": 8.0,
+        "sim_day_index": 8224.0,
+        "precipitation_mm": 49.9,
+        "date_status": "simulation_labels",
+        "duration_minutes": 15,
+        "intensity_mm_per_hour": 74.98052695797487,
+        "rainfall_mm": 18.74513173949372,
+        "probability": 0.9999867894795436,
+        "status": "available",
+        "reason": null
+      },
+      {
+        "event_id": "5a6eef840e046d2a2a6e9a325b2ca31c1d304c345e21510e4d51dfb7d5b5e681:24294",
+        "row_ordinal": 24294,
+        "year": 67.0,
+        "month": 7.0,
+        "day_of_month": 8.0,
+        "sim_day_index": 24295.0,
+        "precipitation_mm": 50.0,
+        "date_status": "simulation_labels",
+        "duration_minutes": 15,
+        "intensity_mm_per_hour": 74.09223647797307,
+        "rainfall_mm": 18.52305911949327,
+        "probability": 0.9999842457565442,
+        "status": "available",
+        "reason": null
+      },
+      {
+        "event_id": "5a6eef840e046d2a2a6e9a325b2ca31c1d304c345e21510e4d51dfb7d5b5e681:18828",
+        "row_ordinal": 18828,
+        "year": 52.0,
+        "month": 7.0,
+        "day_of_month": 20.0,
+        "sim_day_index": 18829.0,
+        "precipitation_mm": 43.0,
+        "date_status": "simulation_labels",
+        "duration_minutes": 15,
+        "intensity_mm_per_hour": 70.73838557956995,
+        "rainfall_mm": 17.684596394892488,
+        "probability": 0.9999693700687821,
+        "status": "available",
+        "reason": null
+      }
+    ]
+  },
+  "r02-noaa": {
+    "source_inventory_sha256": "affa2acdd629760a416292f138536b8b0cf5a312e8a34750c0615935aa4344a9",
+    "result_manifest_sha256": "2f42969514a0ef5bc8cde0945a4630b1ac1e56c240275288d02ece0fc989fd76",
+    "tables": {
+      "events": {
+        "sha256": "fab024237bbd814cb490b5ada349e37d2100bc92bb97307bf74990df7c21e581",
+        "rows": 30936
+      },
+      "design": {
+        "sha256": "180a50c113206b2358533a5f9ec17a488ac665410a772ecc8ee0cd9e553a14b8",
+        "rows": 12
+      },
+      "inverse": {
+        "sha256": "f06bf63b13903231f6b0ee584807505c093c56c3c29552258f7c0c7f753ad76c",
+        "rows": 6
+      }
+    },
+    "build_seconds": 2.27755201398395,
+    "open_seconds": 1.2354554689954966,
+    "list_seconds": 0.018820554949343204,
+    "detail_seconds": 0.0018444940214976668,
+    "peak_rss_kib": 452808,
+    "first_design_scenario": {
+      "return_interval_years": 1,
+      "source": "noaa",
+      "rank_index": null,
+      "positive_samples": null,
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": 56.0,
+      "rainfall_mm": 14.0,
+      "probability": 0.9994313616102337,
+      "status": "available",
+      "reason": null
+    },
+    "limitations": [
+      "Fixed current predictors applied to synthetic climate events; no recovery forecast",
+      "Genuine NOAA frequency snapshot, not observed events",
+      "Local snapshot identity, no live controller freshness"
+    ],
+    "example_events": [
+      {
+        "event_id": "5a6eef840e046d2a2a6e9a325b2ca31c1d304c345e21510e4d51dfb7d5b5e681:36417",
+        "row_ordinal": 36417,
+        "year": 100.0,
+        "month": 9.0,
+        "day_of_month": 16.0,
+        "sim_day_index": 36418.0,
+        "precipitation_mm": 61.3,
+        "date_status": "simulation_labels",
+        "duration_minutes": 15,
+        "intensity_mm_per_hour": 102.90298029782264,
+        "rainfall_mm": 25.72574507445566,
+        "probability": 0.9999999478926174,
+        "status": "available",
+        "reason": null
+      },
+      {
+        "event_id": "5a6eef840e046d2a2a6e9a325b2ca31c1d304c345e21510e4d51dfb7d5b5e681:12281",
+        "row_ordinal": 12281,
+        "year": 34.0,
+        "month": 8.0,
+        "day_of_month": 17.0,
+        "sim_day_index": 12282.0,
+        "precipitation_mm": 35.4,
+        "date_status": "simulation_labels",
+        "duration_minutes": 15,
+        "intensity_mm_per_hour": 94.37773595605898,
+        "rainfall_mm": 23.594433989014746,
+        "probability": 0.9999997175815103,
+        "status": "available",
+        "reason": null
+      },
+      {
+        "event_id": "5a6eef840e046d2a2a6e9a325b2ca31c1d304c345e21510e4d51dfb7d5b5e681:8223",
+        "row_ordinal": 8223,
+        "year": 23.0,
+        "month": 7.0,
+        "day_of_month": 8.0,
+        "sim_day_index": 8224.0,
+        "precipitation_mm": 49.9,
+        "date_status": "simulation_labels",
+        "duration_minutes": 15,
+        "intensity_mm_per_hour": 74.98052695797487,
+        "rainfall_mm": 18.74513173949372,
+        "probability": 0.9999867894795436,
+        "status": "available",
+        "reason": null
+      },
+      {
+        "event_id": "5a6eef840e046d2a2a6e9a325b2ca31c1d304c345e21510e4d51dfb7d5b5e681:24294",
+        "row_ordinal": 24294,
+        "year": 67.0,
+        "month": 7.0,
+        "day_of_month": 8.0,
+        "sim_day_index": 24295.0,
+        "precipitation_mm": 50.0,
+        "date_status": "simulation_labels",
+        "duration_minutes": 15,
+        "intensity_mm_per_hour": 74.09223647797307,
+        "rainfall_mm": 18.52305911949327,
+        "probability": 0.9999842457565442,
+        "status": "available",
+        "reason": null
+      },
+      {
+        "event_id": "5a6eef840e046d2a2a6e9a325b2ca31c1d304c345e21510e4d51dfb7d5b5e681:18828",
+        "row_ordinal": 18828,
+        "year": 52.0,
+        "month": 7.0,
+        "day_of_month": 20.0,
+        "sim_day_index": 18829.0,
+        "precipitation_mm": 43.0,
+        "date_status": "simulation_labels",
+        "duration_minutes": 15,
+        "intensity_mm_per_hour": 70.73838557956995,
+        "rainfall_mm": 17.684596394892488,
+        "probability": 0.9999693700687821,
+        "status": "available",
+        "reason": null
+      }
+    ]
+  },
+  "r02-sparse": {
+    "source_kind": "controlled synthetic rainfall / genuine pinned predictors",
+    "policy": "R02 unavailable unsupported rank",
+    "csv_exporter": "unchanged ClimateArtifactExportService",
+    "sources_sha256": {
+      "/workdir/wepppy/docs/work-packages/20260909_staley_m1_predictors/artifacts/generated/wallow-rebuilt-final/bundle/manifest.json": "f9aa60abf2e632716496095b3b7b4ea6bdb956f4b3ea4b0e4bfb96ea9804dfb0",
+      "/workdir/wepppy/docs/work-packages/20260909_staley_m1_predictors/artifacts/generated/wallow-rebuilt-final/bundle/wbt/intersection.tif": "f40daf6cac16c28bc1b8f5913496c3802889297ea353db51b22e2680fbd1491e",
+      "/workdir/wepppy/docs/work-packages/20260909_staley_m1_predictors/artifacts/generated/wallow-rebuilt-final/bundle/wbt/slope.tif": "e22d455ebd19497d41f14d325ada20f069671e4911c1cc8b96fcfb837fb97c63",
+      "/workdir/wepppy/docs/work-packages/20260909_staley_m1_predictors/artifacts/generated/wallow-rebuilt-final/bundle/wbt/summary.json": "a92d1d1342e3d0fe92acb203a3dd7d8de369c6cc5e14ed8ffaeaeeefec7c10e2",
+      "/workdir/wepppy/docs/work-packages/20260909_staley_m1_predictors/artifacts/generated/wallow-rebuilt-final/bundle/wbt/support.tif": "2ccc8ae70819c0a8cdb4fefd2f45d7d249753a9846f3090628bfa4592b2f297e",
+      "/workdir/wepppy/docs/work-packages/20260909_staley_rainfall_results/artifacts/generated/r02-sparse/controlled.parquet": "53e61f2674429fc6c4596278b3b4f2a7bd0cc325eaa1c27a205c98313f0b101f",
+      "/workdir/wepppy/docs/work-packages/20260909_staley_rainfall_results/artifacts/generated/r02-sparse/wepp_cli_pds_mean_metric.csv": "0779a44e68ef20380f3e208f0702a1821083ed33b55fd64f5beedc9f8384cefd"
+    },
+    "manifest_sha256": "5ea7ead8de78ad31bdc2f3780c5b9f543fef3e893dd8afd7ef53b8ccb59f4aa9",
+    "design": [
+      {
+        "return_interval_years": 1,
+        "source": "cli",
+        "rank_index": 9,
+        "positive_samples": 1,
+        "duration_minutes": 15,
+        "intensity_mm_per_hour": null,
+        "rainfall_mm": null,
+        "probability": null,
+        "status": "unavailable",
+        "reason": "insufficient_positive_samples"
+      },
+      {
+        "return_interval_years": 1,
+        "source": "cli",
+        "rank_index": 9,
+        "positive_samples": 10,
+        "duration_minutes": 30,
+        "intensity_mm_per_hour": 40.0,
+        "rainfall_mm": 20.0,
+        "probability": 0.9985074125,
+        "status": "available",
+        "reason": null
+      },
+      {
+        "return_interval_years": 1,
+        "source": "cli",
+        "rank_index": 9,
+        "positive_samples": 0,
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": null,
+        "rainfall_mm": null,
+        "probability": null,
+        "status": "unavailable",
+        "reason": "no_positive_samples"
+      },
+      {
+        "return_interval_years": 2,
+        "source": "cli",
+        "rank_index": 4,
+        "positive_samples": 1,
+        "duration_minutes": 15,
+        "intensity_mm_per_hour": null,
+        "rainfall_mm": null,
+        "probability": null,
+        "status": "unavailable",
+        "reason": "insufficient_positive_samples"
+      },
+      {
+        "return_interval_years": 2,
+        "source": "cli",
+        "rank_index": 4,
+        "positive_samples": 10,
+        "duration_minutes": 30,
+        "intensity_mm_per_hour": 40.0,
+        "rainfall_mm": 20.0,
+        "probability": 0.9985074125,
+        "status": "available",
+        "reason": null
+      },
+      {
+        "return_interval_years": 2,
+        "source": "cli",
+        "rank_index": 4,
+        "positive_samples": 0,
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": null,
+        "rainfall_mm": null,
+        "probability": null,
+        "status": "unavailable",
+        "reason": "no_positive_samples"
+      },
+      {
+        "return_interval_years": 5,
+        "source": "cli",
+        "rank_index": 1,
+        "positive_samples": 1,
+        "duration_minutes": 15,
+        "intensity_mm_per_hour": null,
+        "rainfall_mm": null,
+        "probability": null,
+        "status": "unavailable",
+        "reason": "insufficient_positive_samples"
+      },
+      {
+        "return_interval_years": 5,
+        "source": "cli",
+        "rank_index": 1,
+        "positive_samples": 10,
+        "duration_minutes": 30,
+        "intensity_mm_per_hour": 40.0,
+        "rainfall_mm": 20.0,
+        "probability": 0.9985074125,
+        "status": "available",
+        "reason": null
+      },
+      {
+        "return_interval_years": 5,
+        "source": "cli",
+        "rank_index": 1,
+        "positive_samples": 0,
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": null,
+        "rainfall_mm": null,
+        "probability": null,
+        "status": "unavailable",
+        "reason": "no_positive_samples"
+      },
+      {
+        "return_interval_years": 10,
+        "source": "cli",
+        "rank_index": 0,
+        "positive_samples": 1,
+        "duration_minutes": 15,
+        "intensity_mm_per_hour": 40.0,
+        "rainfall_mm": 10.0,
+        "probability": 0.9866102238,
+        "status": "available",
+        "reason": null
+      },
+      {
+        "return_interval_years": 10,
+        "source": "cli",
+        "rank_index": 0,
+        "positive_samples": 10,
+        "duration_minutes": 30,
+        "intensity_mm_per_hour": 40.0,
+        "rainfall_mm": 20.0,
+        "probability": 0.9985074125,
+        "status": "available",
+        "reason": null
+      },
+      {
+        "return_interval_years": 10,
+        "source": "cli",
+        "rank_index": 0,
+        "positive_samples": 0,
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": null,
+        "rainfall_mm": null,
+        "probability": null,
+        "status": "unavailable",
+        "reason": "no_positive_samples"
+      }
+    ],
+    "tables": {
+      "events": {
+        "sha256": "251f5f774717e144cbbf1e71ec0b33f6c2e5b65cc94983c1567210d77668827a",
+        "rows": 30
+      },
+      "design": {
+        "sha256": "792223ab4edd7797c49312b11ccae0299d60fede2ea0585f0a37027666f63609",
+        "rows": 12
+      },
+      "inverse": {
+        "sha256": "f06bf63b13903231f6b0ee584807505c093c56c3c29552258f7c0c7f753ad76c",
+        "rows": 6
+      }
+    }
+  },
+  "historical-unknown-t": {
+    "manifest_sha256": "5d2c1e37434d7b6b72a4be5df7623eef3ceac4dc7bf6deeecd62de654c65714c",
+    "rows": 30936,
+    "predictor_manifest_sha256": "6b13d293fcf0040ebb8104419047bedf0603f60d4a8c9d1a9a45804e94e8e254",
+    "example": [
+      {
+        "event_id": "5a6eef840e046d2a2a6e9a325b2ca31c1d304c345e21510e4d51dfb7d5b5e681:0",
+        "row_ordinal": 0,
+        "year": 1.0,
+        "month": 1.0,
+        "day_of_month": 1.0,
+        "sim_day_index": 1.0,
+        "precipitation_mm": 19.4,
+        "date_status": "simulation_labels",
+        "duration_minutes": 15,
+        "intensity_mm_per_hour": 3.154471544715463,
+        "rainfall_mm": 0.7886178861788657,
+        "probability": null,
+        "status": "unavailable",
+        "reason": "missing_predictors"
+      }
+    ],
+    "status": "historical unavailable-state diagnostic only"
+  },
+  "supported_source_regression": "All CLI/NOAA event/design/inverse table hashes unchanged after R02"
+}

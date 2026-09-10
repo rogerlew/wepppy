@@ -47,16 +47,16 @@ is implemented and validated locally with complete authentic Wallow evidence. It
 composes the completed slope/SBS and dNBR
 backends with RUSLE Nomograph K; see [accepted contract](docs/m1_predictors.md).
 K policy is accepted in ADR-0059. Complete synthetic and authentic T/F/S outputs
-and missing-input cases exist. Climate composition and production publication
-remain successor work. Completed backend contracts are not reopened.
+and missing-input cases exist. Local Climate composition is implemented in stage 4; production publication
+remains successor work. Completed backend contracts are not reopened.
 
-## Next Rainfall/Results Increment
+## Local Rainfall/Results Increment
 
 The [rainfall/results package](../../../../docs/work-packages/20260909_staley_rainfall_results/package.md)
-is scaffolded, not executing, for local M1 stage 4. Its
-[proposed contract](docs/rainfall_results.md) covers events, design comparisons,
-inverse thresholds and bounded local queries. L08/L09 remain pending until
-source/sample policies and schemas are accepted. No production UI/RQ scope.
+implements local M1 stage 4. Its [accepted contract](docs/rainfall_results.md)
+covers events, design comparisons, inverse thresholds and bounded local queries.
+R02 unavailable sparse-rank behavior is explicitly approved in ADR-0062. Backend
+L08/L09 decisions are resolved; browser defaults/dashboard remain future scope.
 
 ## Delivery Sequence
 
@@ -70,7 +70,8 @@ Stages 1–2 are **complete**, in the
 Stage 3 slope/SBS local backend is **implemented and validated**, in the
 [WBT slope/SBS package](../../../../docs/work-packages/20260908_staley_slope_sbs/package.md).
 Local stage 3 composition is **complete**, including authentic complete-source
-evidence. Later stages are **not started**. Stage completion requires its exit evidence,
+evidence. Local stage 4 is **complete**, with genuine CLI/NOAA and sparse-rank acceptance.
+Production stages 5–7 are **not started**. Stage completion requires its exit evidence,
 not only source files. Accepted scope is the existing project watershed/outlet;
 nested/channel assessments are excluded from initial delivery (ADR-0055).
 
@@ -79,7 +80,7 @@ nested/channel assessments are excluded from initial delivery (ADR-0055).
 | 1. Assessment contract | Reuse the existing project watershed and resolved outlet; document authoritative mask/grid/outlet identity and full contributing-area support. Track slope/SBS/NoData decisions for stage 3. | Accepted single-watershed scope (done); canonical artifact mapping and independently checked mask/outlet evidence (done). |
 | 2. Numerical engine | Implement `staley2017.py` for both M1 and M3. Can begin after its numerical contract is resolved, independently of spatial implementation. | Complete: checked coefficients, ADR-0056, 145 focused tests, six-row generated examples, independent review and full-suite validation. |
 | 3. M1 predictors | Depends on stage 1 and accepted slope/SBS/NoData rules. Aggregate slope/SBS intersection, normalized dNBR, and RUSLE Nomograph K over the project watershed; emit coverage, reasons, and input identity. | Reproducible real-project predictor artifacts; correct intersection and full-domain denominators; partial and unavailable watershed checks. |
-| 4. Rainfall and results | Compose stages 2–3 with Climate-owned event parquet and frequency artifacts. Define event identity, schemas, canonical units, and querying. | Event probabilities, ratified design scenarios and inverse thresholds; missing-scenario handling, source provenance, representative catalog benchmark, and inspectable generated outputs. |
+| 4. Rainfall and results | Compose stages 2–3 with Climate-owned event parquet and frequency artifacts. Define event identity, schemas, canonical units, and querying. | Complete: genuine event/design/inverse bundles, ADR-0062 sparse-rank policy, bounded queries, 62 focused and 8,273 full-suite passes, independent reviews; [evidence](../../../../docs/work-packages/20260909_staley_rainfall_results/artifacts/validation.md). |
 | 5. Production M1 | Integrate stages 1–4 through NoDb, safe dNBR upload/publication, prerequisite checks, RQ, and a basic Pure UI control/report. | Contract checkpoint followed by upload → build → results → reload under production-equivalent identities/mounts; stale inputs, failed replacement, authorization, and SI/English equivalence verified. |
 | 6. Production M3 | Resolve soil policy; compose SSURGO/fallback thickness and owned WBT relief with the shared engine and production workflow. Soil-policy preparation may precede stage 5. | Explicit source contribution/coverage, unusable-both-sources cases, terrain fidelity gate, and real-project M3 results through the same publication/report path. |
 | 7. Interactive dashboard | Use established result/query contracts for project watershed events, detail, design comparisons, and thresholds; maps may show the existing basin and input coverage. | Event selections remain consistent; no nested catchment selector; partial/unavailable results, simulation dates, unitization, accessibility, and realistic catalog performance verified. |
@@ -105,8 +106,8 @@ scientific limitation that implementation cannot resolve.
 | L05 | Soil material inclusion, horizon validity, incomplete components, fallback granularity/triggers, and residual missing coverage. | Stage 6 implementation | [M3 soil direction](specification.md#m3-soil-thickness-ssurgo-feasibility); source priority accepted, production rules pending. |
 | L06 | Prepared SSURGO inventory, substituted/custom/legacy soils, STATSGO source delivery and freshness; neither source usable. | Stage 6 integration | [Soils readiness](specification.md#availability-and-soils-readiness), [soil contract](docs/m3_soil_thickness.md). No implicit soil rebuild or acquisition authority. |
 | L07 | Adopt genuine 10 m M3 requirement; detect source fidelity, validate installed WBT tool/bindings, and sample accepted relief/area at assessment outlets. | Stage 6 integration | [Terrain contract](docs/m3_terrain.md). Calibration-preprocessing equivalence remains unproven; upsampling does not establish fidelity. |
-| L08 | Ratify 1/2/5/10-year × 15/30/60-minute matrix, CLIGEN/NOAA selector/default, sample guidance, precision, and inverse target probabilities. | Stage 4 implementation | [Rainfall](specification.md#rainfall-sources-and-scenario-outputs). No silent source switch; NOAA is not an event catalog. |
-| L09 | Stable event IDs, source/date semantics, result/export schemas, query strategy, catalog limits, and filter defaults. | Stage 4 completion | [Dashboard](specification.md#interactive-event-dashboard). Current predictor state applies to all rainfall scenarios; no recovery simulation. |
+| L08 | Ratify 1/2/5/10-year × 15/30/60-minute matrix, CLIGEN/NOAA selector/default, sample guidance, precision, and inverse target probabilities. | Stage 4 implementation | [Rainfall contract](docs/rainfall_results.md), ADR-0062: local source/matrix/sample policy accepted; explicit inverse targets. Browser defaults remain stage 5/7 scope. |
+| L09 | Stable event IDs, source/date semantics, result/export schemas, query strategy, catalog limits, and filter defaults. | Stage 4 completion | [Rainfall contract](docs/rainfall_results.md): local event IDs, schemas, limits and deterministic queries implemented. Dashboard filters remain stage 7 scope; fixed predictors, no recovery simulation. |
 | L10 | Upload packaging, path authorization, CSRF, resource limits, replacement, concurrent builds, atomic publication, and failed-build preservation. | Stage 5 implementation | [dNBR backend contract](docs/dnbr_upload.md) plus shared transport/NoDb contracts; local backend trust assumptions do not define browser safety. |
 | L11 | Exact dependency fingerprints and invalidation for DEM/routing, Soils, SBS, K, dNBR, climate, parameters, and results. | Stage 5 implementation | [Compatibility plan](specification.md#compatibility-and-validation-plan). Preserve old `debris_flow.nodb`; define additive schemas and stale-result presentation. |
 | L12 | Effective CONUS locale mapping, legacy `us`, cross-boundary footprints, and server/UI prerequisite parity. | Stage 5 implementation | [Availability](specification.md#availability-and-soils-readiness). WBT/CONUS/built Soils accepted; Western US guidance is not a second regional gate. |
@@ -208,3 +209,18 @@ scientific limitation that implementation cannot resolve.
   Wallow acceptance; scaffolded local rainfall/results package. Climate CSV
   rounding, missing-column zeros and sparse-duration rank clamping are explicit
   decision gates. Review is read-only, not a new correctness/security signoff.
+
+- 2026-09-09 Pacific execution: stage 4 local adapters/results/query implementation
+  and genuine Wallow CLI/NOAA artifacts exist. Sparse-rank R02 approval remains
+  pending, so stage 4 stays open. See the rainfall/results tracker for focused,
+  full-suite and independent review evidence. Stages 5/7 remain unimplemented.
+
+- R02 owner approval: unsupported CLI positive ranks now retain unavailable rows
+  with rank/count diagnostics, preserving supported scenarios and Climate CSV
+  parity. Final validation and package closure are recorded in the tracker.
+
+- 2026-09-10 06:50 UTC closeout: local stage 4 complete. Explicit R02 approval,
+  62 focused tests, 8,273 full-suite passes (77 skips), genuine CLI/NOAA and
+  controlled sparse/unknown-T evidence, and independent review gates passed.
+  ExecPlan archived. Backend L08/L09 resolved; browser defaults and production
+  publication/dashboard remain stages 5–7.

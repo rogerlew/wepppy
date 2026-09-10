@@ -1,0 +1,117 @@
+{
+  "missing_k_provenance": {
+    "accepted": false,
+    "code": "invalid_input"
+  },
+  "wrong_k_multiplier": {
+    "accepted": false,
+    "code": "invalid_input"
+  },
+  "contradictory_f_observed_mean": {
+    "accepted": false,
+    "code": "invalid_input"
+  },
+  "empty_grid_outlet": {
+    "accepted": false,
+    "code": "invalid_input"
+  },
+  "inconsistent_t_support": {
+    "accepted": false,
+    "code": "invalid_input"
+  },
+  "missing_wbt_summary": {
+    "accepted": false,
+    "code": "invalid_input"
+  },
+  "missing_result_identity": {
+    "accepted": false,
+    "code": "invalid_input"
+  },
+  "wrong_result_units": {
+    "accepted": false,
+    "code": "invalid_input"
+  },
+  "out_of_range_probability": {
+    "accepted": false,
+    "code": "invalid_input"
+  },
+  "wrong_scalar_probability": {
+    "accepted": false,
+    "code": "invalid_input"
+  },
+  "duplicate_event_duration": {
+    "accepted": false,
+    "code": "invalid_input"
+  },
+  "incorrect_event_date_status": {
+    "accepted": false,
+    "code": "invalid_input"
+  },
+  "unavailable_reason_with_rainfall": {
+    "accepted": false,
+    "code": "invalid_input"
+  },
+  "contradictory_noaa_type": {
+    "accepted": false,
+    "code": "invalid_input"
+  },
+  "nonfinite_cli_support": {
+    "accepted": false,
+    "rank_index": 1,
+    "positive_samples": 1
+  },
+  "approved_sparse_cli_roundtrip": {
+    "unavailable_ranks": [
+      9,
+      4,
+      1
+    ],
+    "positive_samples": 1,
+    "supported_other_duration_rainfall_mm": [
+      45.5,
+      48.0,
+      49.5,
+      50.0
+    ],
+    "event_rows": 30,
+    "design_rows": 12,
+    "inverse_rows": 3,
+    "csv_clamped_parity": true
+  },
+  "insufficient_reason_with_supported_rank": {
+    "accepted": false,
+    "code": "invalid_input"
+  },
+  "insufficient_reason_with_zero_samples": {
+    "accepted": false,
+    "code": "invalid_input"
+  },
+  "available_cli_rainfall_without_rank_support": {
+    "accepted": false,
+    "code": "invalid_input"
+  },
+  "genuine_cli_parity": {
+    "available_design_rows": 12,
+    "full_recurrence_context": [
+      1,
+      2,
+      5,
+      10,
+      25,
+      50,
+      100
+    ],
+    "first_design": {
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": 38.78638009814023,
+      "rainfall_mm": 9.696595024535057,
+      "probability": null,
+      "status": "available",
+      "reason": null,
+      "return_interval_years": 1,
+      "source": "cli",
+      "rank_index": 99,
+      "positive_samples": 10312
+    }
+  }
+}

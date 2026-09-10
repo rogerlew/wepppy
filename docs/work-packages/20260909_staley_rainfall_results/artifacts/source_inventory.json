@@ -1,0 +1,65 @@
+{
+  "project": "/wc1/runs/wo/woolen-refusal",
+  "source_kind": "genuine Climate-generated synthetic catalog",
+  "predictor_evidence_sha256": "e7f2abc4de818af5a46abb8e313af5e578c3db0456ea5354932107dcabc42e8d",
+  "matched_project_sha256": {
+    "/wc1/runs/wo/woolen-refusal/dem/dem.tif": "7c1012c998eb5202137f0c24cfed5b3aa6ffd7adf8106ab643efe878083bb970",
+    "/wc1/runs/wo/woolen-refusal/dem/wbt/bound.tif": "c708e2fe55d23f615192fe0055454877fb12b2fffb411f440f9e5242de7dd24e",
+    "/wc1/runs/wo/woolen-refusal/dem/wbt/outlet.geojson": "4c429073348cc9273999320bc28c85ea6387801f89b51ae90c3f89856a15b2df",
+    "/wc1/runs/wo/woolen-refusal/disturbed/sbs_4class.tif": "d93993ec4338c9e5eb92456d61bdc07d5cbbd19615ec0dbd14b9be72e5fbfba3",
+    "/wc1/runs/wo/woolen-refusal/rusle/k_polaris_nomograph.tif": "7769213e276c7fe842e9910de0b66d27aeb8e045432a0a5afd26b1d303ae8568"
+  },
+  "sources": {
+    "climate/wepp_cli.parquet": {
+      "sha256": "5a6eef840e046d2a2a6e9a325b2ca31c1d304c345e21510e4d51dfb7d5b5e681",
+      "bytes": 1614273,
+      "snapshot": "docs/work-packages/20260909_staley_rainfall_results/artifacts/sources/wepp_cli.parquet"
+    },
+    "climate/wepp_cli_pds_mean_metric.csv": {
+      "sha256": "322892689c3d5629315ddc43ab714c927c0def50284bff513501fde4cc1f592e",
+      "bytes": 1243,
+      "snapshot": "docs/work-packages/20260909_staley_rainfall_results/artifacts/sources/wepp_cli_pds_mean_metric.csv"
+    },
+    "climate/atlas14_intensity_pds_mean_metric.csv": {
+      "sha256": "01cabbfdd35d1b0bc812eebe4e1a169968d9ee30c0168c6a239ae942893afbfc",
+      "bytes": 1136,
+      "snapshot": "docs/work-packages/20260909_staley_rainfall_results/artifacts/sources/atlas14_intensity_pds_mean_metric.csv"
+    }
+  },
+  "climate_nodb_sha256": "dbd47367a0d638793259b9af454f4db2168744164f79acc33db9e9b41d87dc03",
+  "climate_mode_value": {
+    "py/reduce": [
+      {
+        "py/type": "wepppy.nodb.core.climate.ClimateMode"
+      },
+      {
+        "py/tuple": [
+          5
+        ]
+      }
+    ]
+  },
+  "cli_fn": "az020159.cli",
+  "station": "az020159",
+  "cligen_db": "2015_stations.db",
+  "rows": 36524,
+  "wet_rows": 10312,
+  "wet_years": 100,
+  "years": [
+    1,
+    100
+  ],
+  "positive_samples": {
+    "15": 10312,
+    "30": 10312,
+    "60": 10312
+  },
+  "scalar_prototype": {
+    "rows": 30936,
+    "seconds": 0.2297508140327409,
+    "peak_rss_kib": 400128,
+    "strategy": "materialize all duration probabilities once; repeated on-demand full sorts would repeat this cost"
+  },
+  "predictor_manifest_sha256": "f9aa60abf2e632716496095b3b7b4ea6bdb956f4b3ea4b0e4bfb96ea9804dfb0",
+  "historical_unknown_t_manifest_sha256": "6b13d293fcf0040ebb8104419047bedf0603f60d4a8c9d1a9a45804e94e8e254"
+}

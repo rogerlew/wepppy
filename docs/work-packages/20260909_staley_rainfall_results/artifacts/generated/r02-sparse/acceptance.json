@@ -1,0 +1,175 @@
+{
+  "source_kind": "controlled synthetic rainfall / genuine pinned predictors",
+  "policy": "R02 unavailable unsupported rank",
+  "csv_exporter": "unchanged ClimateArtifactExportService",
+  "sources_sha256": {
+    "/workdir/wepppy/docs/work-packages/20260909_staley_m1_predictors/artifacts/generated/wallow-rebuilt-final/bundle/manifest.json": "f9aa60abf2e632716496095b3b7b4ea6bdb956f4b3ea4b0e4bfb96ea9804dfb0",
+    "/workdir/wepppy/docs/work-packages/20260909_staley_m1_predictors/artifacts/generated/wallow-rebuilt-final/bundle/wbt/intersection.tif": "f40daf6cac16c28bc1b8f5913496c3802889297ea353db51b22e2680fbd1491e",
+    "/workdir/wepppy/docs/work-packages/20260909_staley_m1_predictors/artifacts/generated/wallow-rebuilt-final/bundle/wbt/slope.tif": "e22d455ebd19497d41f14d325ada20f069671e4911c1cc8b96fcfb837fb97c63",
+    "/workdir/wepppy/docs/work-packages/20260909_staley_m1_predictors/artifacts/generated/wallow-rebuilt-final/bundle/wbt/summary.json": "a92d1d1342e3d0fe92acb203a3dd7d8de369c6cc5e14ed8ffaeaeeefec7c10e2",
+    "/workdir/wepppy/docs/work-packages/20260909_staley_m1_predictors/artifacts/generated/wallow-rebuilt-final/bundle/wbt/support.tif": "2ccc8ae70819c0a8cdb4fefd2f45d7d249753a9846f3090628bfa4592b2f297e",
+    "/workdir/wepppy/docs/work-packages/20260909_staley_rainfall_results/artifacts/generated/r02-sparse/controlled.parquet": "53e61f2674429fc6c4596278b3b4f2a7bd0cc325eaa1c27a205c98313f0b101f",
+    "/workdir/wepppy/docs/work-packages/20260909_staley_rainfall_results/artifacts/generated/r02-sparse/wepp_cli_pds_mean_metric.csv": "0779a44e68ef20380f3e208f0702a1821083ed33b55fd64f5beedc9f8384cefd"
+  },
+  "manifest_sha256": "5ea7ead8de78ad31bdc2f3780c5b9f543fef3e893dd8afd7ef53b8ccb59f4aa9",
+  "design": [
+    {
+      "return_interval_years": 1,
+      "source": "cli",
+      "rank_index": 9,
+      "positive_samples": 1,
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": null,
+      "rainfall_mm": null,
+      "probability": null,
+      "status": "unavailable",
+      "reason": "insufficient_positive_samples"
+    },
+    {
+      "return_interval_years": 1,
+      "source": "cli",
+      "rank_index": 9,
+      "positive_samples": 10,
+      "duration_minutes": 30,
+      "intensity_mm_per_hour": 40.0,
+      "rainfall_mm": 20.0,
+      "probability": 0.9985074125,
+      "status": "available",
+      "reason": null
+    },
+    {
+      "return_interval_years": 1,
+      "source": "cli",
+      "rank_index": 9,
+      "positive_samples": 0,
+      "duration_minutes": 60,
+      "intensity_mm_per_hour": null,
+      "rainfall_mm": null,
+      "probability": null,
+      "status": "unavailable",
+      "reason": "no_positive_samples"
+    },
+    {
+      "return_interval_years": 2,
+      "source": "cli",
+      "rank_index": 4,
+      "positive_samples": 1,
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": null,
+      "rainfall_mm": null,
+      "probability": null,
+      "status": "unavailable",
+      "reason": "insufficient_positive_samples"
+    },
+    {
+      "return_interval_years": 2,
+      "source": "cli",
+      "rank_index": 4,
+      "positive_samples": 10,
+      "duration_minutes": 30,
+      "intensity_mm_per_hour": 40.0,
+      "rainfall_mm": 20.0,
+      "probability": 0.9985074125,
+      "status": "available",
+      "reason": null
+    },
+    {
+      "return_interval_years": 2,
+      "source": "cli",
+      "rank_index": 4,
+      "positive_samples": 0,
+      "duration_minutes": 60,
+      "intensity_mm_per_hour": null,
+      "rainfall_mm": null,
+      "probability": null,
+      "status": "unavailable",
+      "reason": "no_positive_samples"
+    },
+    {
+      "return_interval_years": 5,
+      "source": "cli",
+      "rank_index": 1,
+      "positive_samples": 1,
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": null,
+      "rainfall_mm": null,
+      "probability": null,
+      "status": "unavailable",
+      "reason": "insufficient_positive_samples"
+    },
+    {
+      "return_interval_years": 5,
+      "source": "cli",
+      "rank_index": 1,
+      "positive_samples": 10,
+      "duration_minutes": 30,
+      "intensity_mm_per_hour": 40.0,
+      "rainfall_mm": 20.0,
+      "probability": 0.9985074125,
+      "status": "available",
+      "reason": null
+    },
+    {
+      "return_interval_years": 5,
+      "source": "cli",
+      "rank_index": 1,
+      "positive_samples": 0,
+      "duration_minutes": 60,
+      "intensity_mm_per_hour": null,
+      "rainfall_mm": null,
+      "probability": null,
+      "status": "unavailable",
+      "reason": "no_positive_samples"
+    },
+    {
+      "return_interval_years": 10,
+      "source": "cli",
+      "rank_index": 0,
+      "positive_samples": 1,
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": 40.0,
+      "rainfall_mm": 10.0,
+      "probability": 0.9866102238,
+      "status": "available",
+      "reason": null
+    },
+    {
+      "return_interval_years": 10,
+      "source": "cli",
+      "rank_index": 0,
+      "positive_samples": 10,
+      "duration_minutes": 30,
+      "intensity_mm_per_hour": 40.0,
+      "rainfall_mm": 20.0,
+      "probability": 0.9985074125,
+      "status": "available",
+      "reason": null
+    },
+    {
+      "return_interval_years": 10,
+      "source": "cli",
+      "rank_index": 0,
+      "positive_samples": 0,
+      "duration_minutes": 60,
+      "intensity_mm_per_hour": null,
+      "rainfall_mm": null,
+      "probability": null,
+      "status": "unavailable",
+      "reason": "no_positive_samples"
+    }
+  ],
+  "tables": {
+    "events": {
+      "sha256": "251f5f774717e144cbbf1e71ec0b33f6c2e5b65cc94983c1567210d77668827a",
+      "rows": 30
+    },
+    "design": {
+      "sha256": "792223ab4edd7797c49312b11ccae0299d60fede2ea0585f0a37027666f63609",
+      "rows": 12
+    },
+    "inverse": {
+      "sha256": "f06bf63b13903231f6b0ee584807505c093c56c3c29552258f7c0c7f753ad76c",
+      "rows": 6
+    }
+  }
+}

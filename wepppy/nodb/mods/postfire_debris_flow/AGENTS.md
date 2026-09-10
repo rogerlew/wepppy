@@ -34,6 +34,6 @@
   Read [docs/m1_predictors.md](docs/m1_predictors.md) before composition work;
   K policy is accepted in ADR-0059. Local adapter validated with complete authentic
   Wallow T/F/S evidence. No NoDb/UI/RQ publication.
-- Next scaffolded local stage-4 package: [rainfall/results](../../../../docs/work-packages/20260909_staley_rainfall_results/package.md).
-  Read [docs/rainfall_results.md](docs/rainfall_results.md); source/sample
-  policy and result schemas remain proposed. No Climate rebuild or UI/RQ wiring.
+- Local stage-4 rainfall/results package: [rainfall/results](../../../../docs/work-packages/20260909_staley_rainfall_results/package.md).
+  Read [docs/rainfall_results.md](docs/rainfall_results.md); result schemas are implemented locally;
+  sparse-rank policy R02 is accepted in ADR-0062. No Climate rebuild or UI/RQ wiring.

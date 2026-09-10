@@ -1,0 +1,29 @@
+Point precipitation frequency estimates (mm, hours, mm/hour)
+WEPP CLI derived precipitation frequency statistics
+Data type: Precipitation depth, storm duration, peak intensities
+Time series type: Partial duration
+Project area: controlled-r02
+Location name (WEPP): controlled-r02
+Station Name: controlled
+Latitude: 33.0000 Degree
+Longitude: -109.0000 Degree
+Elevation (WEPP): None
+
+
+PRECIPITATION FREQUENCY ESTIMATES
+by metric for ARI (years):, 1,2,5,10
+Precipitation depth (mm):, 1,1,1,1
+Storm duration (hours):, 0,0,0,0
+10-min intensity (mm/hour):, 0,0,0,0
+15-min intensity (mm/hour):, 40,40,40,40
+30-min intensity (mm/hour):, 40,40,40,40
+60-min intensity (mm/hour):, 0,0,0,0
+
+MONTHLY MODELED MX .5 P
+Month:, 1,2,3,4,5,6,7,8,9,10,11,12
+Median (mm/hour):, 40,0,0,0,0,0,0,0,0,0,0,0
+75th percentile (mm/hour):, 40,0,0,0,0,0,0,0,0,0,0,0
+90th percentile(mm/hour):, 40,0,0,0,0,0,0,0,0,0,0,0
+
+Date/time (GMT):  Thu Sep 10 06:34:42 2026
+pyRunTime:  0.029622

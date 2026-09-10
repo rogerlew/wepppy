@@ -1,7 +1,9 @@
 # Rainfall/results decision register
 
-Status: proposals, 2026-09-10 05:15 UTC. Existing scalar numerical policy is
-accepted in ADR-0056; do not re-decide endpoint, inverse or overflow behavior.
+Status: resolved for local implementation, including explicit owner approval of
+R02. The table retains initial recommendations and gates; the execution
+disposition below records their resolution. Existing scalar numerical policy
+remains accepted in ADR-0056.
 
 | ID | Recommendation / question | Gate |
 | --- | --- | --- |
@@ -16,3 +18,25 @@ accepted in ADR-0056; do not re-decide endpoint, inverse or overflow behavior.
 Keep current postfire predictors fixed for all events, including multidecade
 synthetic climate catalogs. Do not simulate recovery, combine duration
 probabilities, reconstruct a hyetograph, or label NOAA estimates as observations.
+
+## Execution disposition (2026-09-09 Pacific)
+
+R01, R03–R06 are selected for the authorized local implementation in the
+canonical contract's two "Execution contract" sections. Frequency source,
+durations, intervals and inverse targets remain explicit caller arguments.
+The measured materialized strategy preserves bounded deterministic queries;
+reopening additionally checks scalar parity. No browser defaults are selected.
+R07 preserves Climate wet-year count and full recurrence context, reports sample
+counts and unsupported record lengths, and adds no adequacy cutoff.
+
+**R02 accepted by explicit operator response “YES”.** The owner approved the
+recommended unavailable result for a CLI rank beyond positive-sample support.
+Return `insufficient_positive_samples`, preserve requested rank/sample count,
+and leave rainfall/probability null. This replaces the temporary refusal gate;
+flagged clamping was rejected because it could appear to be a supported estimate.
+Climate’s own clamped CSV export remains unchanged and is checked as provenance.
+
+Positive infinity makes CLI design unavailable for the affected duration rather
+than shifting valid ranks by dropping the sample. NaN/negative/zero exclusions
+match the positive-rank precedent. ADR-0062 records parameterization, alternatives,
+execution provenance and the explicit approval.

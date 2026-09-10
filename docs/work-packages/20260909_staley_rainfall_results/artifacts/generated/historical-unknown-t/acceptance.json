@@ -1,0 +1,24 @@
+{
+  "manifest_sha256": "5d2c1e37434d7b6b72a4be5df7623eef3ceac4dc7bf6deeecd62de654c65714c",
+  "rows": 30936,
+  "predictor_manifest_sha256": "6b13d293fcf0040ebb8104419047bedf0603f60d4a8c9d1a9a45804e94e8e254",
+  "example": [
+    {
+      "event_id": "5a6eef840e046d2a2a6e9a325b2ca31c1d304c345e21510e4d51dfb7d5b5e681:0",
+      "row_ordinal": 0,
+      "year": 1.0,
+      "month": 1.0,
+      "day_of_month": 1.0,
+      "sim_day_index": 1.0,
+      "precipitation_mm": 19.4,
+      "date_status": "simulation_labels",
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": 3.154471544715463,
+      "rainfall_mm": 0.7886178861788657,
+      "probability": null,
+      "status": "unavailable",
+      "reason": "missing_predictors"
+    }
+  ],
+  "status": "historical unavailable-state diagnostic only"
+}

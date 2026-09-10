@@ -163,18 +163,19 @@ The planned implementation is independently derived from the publication.
 The GPL-3.0-only pfdf package is a comparison reference, not a runtime dependency.
 See the [PDF storage decision](docs/pdfs/README.md) for reference redistribution.
 
-## Next integration increment
+## Local M1 predictors and rainfall results
 
 The [M1 predictor package](../../../../docs/work-packages/20260909_staley_m1_predictors/package.md)
-is scaffolded for local T/F/S composition, WBT-compatible input preparation and
-provenance. [Its proposed contract](docs/m1_predictors.md) records pending K
-unit/coverage/readiness choices. Execution and production wiring have not begun.
+provides local T/F/S composition with accepted Nomograph K policy and complete
+authentic Wallow evidence. See the [predictor contract](docs/m1_predictors.md).
 
-## Rainfall/results follow-up
-
-The [rainfall/results package](../../../../docs/work-packages/20260909_staley_rainfall_results/package.md)
-is scaffolded after complete local M1 acceptance. It will consume existing
-Climate event/frequency artifacts for local probabilities, design comparisons
-and inverse thresholds. [Contract proposals](docs/rainfall_results.md) preserve
-source identities, missing scenarios and the fixed postfire predictor state.
-Implementation, dashboard and production wiring remain pending.
+`results.build_m1_results` composes pinned predictors and existing Climate
+snapshots into event, explicit CLI/NOAA design and inverse tables. `open_results`,
+`list_events` and `get_event` provide bounded local browsing. The approved R02
+policy retains unsupported CLI ranks as unavailable rows with
+`insufficient_positive_samples`; supported ranks and durations remain usable.
+See the [rainfall contract](docs/rainfall_results.md) for arguments, units,
+limits, provenance and query semantics, and the
+[work package](../../../../docs/work-packages/20260909_staley_rainfall_results/package.md)
+for genuine Wallow evidence and reproduction scripts. Production publication,
+NoDb/RQ integration and dashboard work remain separately scoped.

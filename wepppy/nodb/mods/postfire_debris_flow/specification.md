@@ -439,12 +439,12 @@ readiness or extrapolate values.
 
 ## Rainfall Sources and Scenario Outputs
 
-Local stage-4 execution is scaffolded in the
+Local stage-4 implementation and evidence are in the
 [rainfall/results package](../../../../docs/work-packages/20260909_staley_rainfall_results/package.md).
-The [proposed adapter/result contract](docs/rainfall_results.md) composes accepted
-M1 bundles with existing Climate artifacts; execution has not started. Source
-selection, the design matrix and sparse-sample behavior remain explicit decision
-gates. No new Climate estimator or production workflow is approved here.
+The [accepted adapter/result contract](docs/rainfall_results.md) composes M1
+bundles with existing Climate artifacts. Callers explicitly select source,
+durations, intervals and inverse targets. ADR-0062 records approved sample
+handling; Climate itself and production workflows are unchanged.
 
 Accepted direction: focus on short return intervals and reuse Climate-owned
 event intensities and NOAA PDS artifacts. Do not reconstruct CLIGEN storm
@@ -472,12 +472,15 @@ Implementation review also found that CLI frequency selection clamps a requested
 rank to the last positive observation if a duration has too few samples. The
 shared rank helper assigns indices across the supplied recurrence set, so exact
 Climate parity requires its full request context before selecting a subset.
-The successor contract must resolve this sparse-sample behavior explicitly;
-do not silently fork the estimator or interpret the clamp as evidence of adequacy.
+Approved R02 returns unavailable / `insufficient_positive_samples` when the
+requested zero-based rank is at least the positive duration sample count. Retain
+rank/count diagnostics and null rainfall/probability, while supported ranks and
+other durations continue. The unchanged Climate CSV clamp remains parity
+evidence only; see ADR-0062 for the decision and rationale.
 
-Recommended workflow, pending ratification:
+Accepted local workflow; browser presentation defaults remain proposals:
 
-- Provide a CLIGEN / NOAA rainfall-frequency source selector, using the existing
+- Require explicit CLI / NOAA frequency source selection, using the existing
   project artifacts and Climate-owned frequency method. Never silently switch
   sources. Keep event intensities in parquet as the source of full-precision
   CLI values; the current frequency CSV rounds to two decimal places.
@@ -626,3 +629,12 @@ under production-equivalent identities and mounts before shipping.
 - [Reference bundle and retrieval evidence](docs/README.md).
 - [pfdf model guide](https://ghsc.code-pages.usgs.gov/lhp/pfdf/guide/models/s17.html):
   implementation comparison only, not a replacement for the published method.
+
+## Local rainfall/results execution status
+
+The [local rainfall contract](docs/rainfall_results.md) now defines additive
+event/design/inverse tables and bounded local queries. Genuine Wallow snapshots
+exercise both explicit frequency sources with fixed predictors. This does not
+implement production publication or a dashboard. The owner explicitly approved
+R02: unsupported positive ranks retain unavailable rows. Parameterization and
+rationale are recorded in ADR-0062; the package tracker records final validation.

@@ -130,19 +130,6 @@ Feedback mechanisms:
 
 ## 📋 Backlog
 
-### Staley Rainfall Adapters and M1 Results
-
-**Scoped**: 2026-09-10 05:15 UTC (2026-09-09 Pacific). Scaffolded; not executing.
-
-**Link**: [Package](docs/work-packages/20260909_staley_rainfall_results/package.md)
-
-**Scope**: Existing M1 bundles plus Climate event/CLI/NOAA frequency snapshots;
-local event probabilities, design comparisons, inverse thresholds and bounded
-queries. No rebuilds, public endpoint, dashboard or NoDb/RQ publication.
-
-**Next**: Resolve source/design-matrix and sparse-sample policies; freeze input,
-result and query contracts. Independent correctness/security reviews required.
-
 ### Seamless WEPPcloud Session Cookie Namespace Migration
 
 **Proposed**: 2026-08-23
@@ -1328,6 +1315,20 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### Staley Rainfall Adapters and M1 Results
+
+**Status**: Closed 2026-09-09 Pacific — local stage 4 complete.
+
+**Link**: [Package](docs/work-packages/20260909_staley_rainfall_results/package.md)
+
+**Delivered**: pinned Climate/predictor adapters, event/design/inverse bundles,
+bounded local queries and approved sparse-rank unavailable policy (ADR-0062).
+Genuine Wallow CLI/NOAA outputs retain 30,936 event rows, 12 design rows and six
+inverse rows per source; controlled sparse and historical unknown-T states pass.
+62 focused and 8,273 full-suite tests passed (77 skipped); independent reviews
+passed and ExecPlan archived. Production publication/UI/RQ and dashboard remain
+stages 5–7.
 
 ### Staley M1 Prepared Predictor Integration
 
