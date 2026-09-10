@@ -200,6 +200,18 @@ test.describe('theme contrast metrics', () => {
       `Missing enforced themes in theme metrics output: ${missingEnforcedThemes.join(', ')}`
     ).toEqual([]);
 
+    const inputPairs = [
+      'text_vs_background', 'readonly_text_vs_background', 'scale_factor_map_text_vs_background',
+    ];
+    for (const themeId of themeIds) {
+      for (const pairName of inputPairs) {
+        const entry = results.find((result) => result.theme === themeId
+          && result.targetId === 'wc_input_disabled' && result.pairName === pairName);
+        expect(entry, `Missing Pure form input metric: ${themeId}/${pairName}`).toBeDefined();
+        expect(entry?.passed, `Pure form input contrast failed: ${themeId}/${pairName} ratio=${entry?.ratio}`).toBe(true);
+      }
+    }
+
     const aaFailures = results.filter(
       (entry) => enforcedThemeSet.has(entry.theme) && !entry.aaExempt && entry.passed === false
     );

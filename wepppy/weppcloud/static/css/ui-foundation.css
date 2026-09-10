@@ -2451,10 +2451,13 @@ a.wc-maturity-pill:focus-visible {
   box-shadow: 0 0 0 3px var(--wc-color-accent-soft);
 }
 
+/* Match Pure's typed disabled-input specificity so theme tokens win. */
 .wc-field__control:disabled,
 .wc-field__control[readonly],
 .pure-form .wc-field__control:disabled,
-.pure-form .wc-field__control[readonly] {
+.pure-form .wc-field__control[readonly],
+.pure-form input.wc-field__control:disabled,
+.pure-form input.wc-field__control[readonly] {
   background-color: var(--wc-input-disabled-bg);
   border-color: var(--wc-input-disabled-border);
   color: var(--wc-input-disabled-text);

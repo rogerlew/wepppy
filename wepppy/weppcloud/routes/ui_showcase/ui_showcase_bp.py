@@ -549,13 +549,23 @@ def component_gallery() -> str:
         },
         {
             "id": "wc_input_disabled",
-            "label": "Disabled input text vs background",
+            "label": "Pure form disabled and read-only input text vs background",
             "threshold": 4.5,
             "pairs": [
                 {
                     "name": "text_vs_background",
                     "foreground": "#theme_lab_disabled_input",
                     "background": "#theme_lab_disabled_input",
+                },
+                {
+                    "name": "readonly_text_vs_background",
+                    "foreground": "#theme_lab_readonly_input",
+                    "background": "#theme_lab_readonly_input",
+                },
+                {
+                    "name": "scale_factor_map_text_vs_background",
+                    "foreground": "#theme_lab_scale_factor_map",
+                    "background": "#theme_lab_scale_factor_map",
                 }
             ],
         },

@@ -10,7 +10,7 @@ The weppcloud theme system reuses curated VS Code themes to populate CSS custom 
 | Category | Detail |
 |----------|--------|
 | Catalog | 13 generated themes (Ayu x6, Cursor x4, OneDark, Dark Modern, Light High Contrast) + default base palette in `ui-foundation.css` |
-| Exposure | Header switcher exposes 12 non-default themes; Theme Lab/metrics uses a curated list (excludes `cursor-light`, `light-high-contrast`) |
+| Exposure | Header switcher exposes 12 non-default themes; Theme Lab selector uses a curated list; metrics covers every bundled theme |
 | Mapping | `wepppy/weppcloud/themes/theme-mapping.json` drives token → CSS variable conversion with per-theme overrides |
 | Payload | `static/css/themes/all-themes.css` ≈15.9 KB raw (≈2.2 KB gzipped), delivered once and cached |
 | Persistence | `wc-theme` stored in `localStorage`; `controllers_js/theme.js` toggles `data-theme` |
@@ -181,8 +181,8 @@ wepppy/weppcloud/
 
 ### Theme Lab & Metrics
 - `/weppcloud/ui/components/#theme-lab` hosts the canonical specimens (buttons, helper text, radios, checkboxes, Leaflet zoom controls, and themed standalone surfaces such as the browse parquet preview banner, browse directory tree rows, and Parquet Data Filter builder) that the automation harness inspects. Keep this page in sync with macro and standalone-template updates so the rendered sample always matches production markup.
-- Theme IDs are pulled from the Theme Lab `<select data-theme-select>` list (`THEME_OPTIONS` in `ui_showcase_bp.py`).
-- Theme Lab exclusions (intentional): `cursor-light`, `light-high-contrast`.
+- Metrics discovers themes from both the Theme Lab selector and the canonical `all-themes.css` bundle, including hidden `cursor-light`. The user-facing selector remains curated.
+- Disabled/read-only input metrics use `ui.text_field` inside `.pure-form`, including the combined Scale factor map state. All three input-state pairs must meet 4.5 contrast in every bundled theme.
 - Run the contrast suite locally with `npm run smoke:theme-metrics` from `wepppy/weppcloud/static-src/` or through the CLI via `wctl2 run-playwright --suite theme-metrics --env local`. The harness simply hits the Theme Lab and does **not** require run provisioning, but the backend must be running so the page renders.
 - Results are written to `wepppy/weppcloud/static-src/test-results/theme-metrics/theme-contrast.{json,md}`. Attach the Markdown table to PRs when tweaking `theme-mapping.json` to prove contrast moved in the right direction.
 - Implementation details and expansion plan live in `docs/ui-docs/theme-metrics.spec.md`.
@@ -190,7 +190,7 @@ wepppy/weppcloud/
 ### Catalog Health
 | Metric | Target | Current | Notes |
 |--------|--------|---------|-------|
-| Catalog size | 6 – 12 themes | 13 generated (12 non-default in header, 11 non-default in Theme Lab) | Above target; avoid decision fatigue |
+| Catalog size | 6 – 12 themes | 13 generated plus default (12 non-default in header; all 14 measured) | Above target; avoid decision fatigue |
 | Guaranteed coverage | ≥1 light, ≥1 dark AA-compliant | ✅ (2025-10-28 report) | Cursor Light + Ayu dark variants |
 | Accessibility pass rate | ≥75% AA compliant | 5/11 (45%) in latest converter report | Prioritize Ayu Light + Cursor variants |
 | Bundle size | ≤15 KB gzipped | ≈2.2 KB gzipped (15.9 KB raw) | Plenty of headroom |

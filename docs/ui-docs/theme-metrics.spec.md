@@ -23,6 +23,22 @@
   - Geneva Storm Measure vs Intensity SVG marker specimens covering every series marker class and every duration label used by the report chart.
 - Each specimen uses Pure macros so markup stays in sync with `control-components.md`.
 
+### Disabled and read-only field regression
+
+The `wc_input_disabled` target must render inside `.pure-form`, using the
+canonical `ui.text_field` macro. Measure disabled-only, read-only-only, and
+combined disabled/read-only states; the combined specimen represents Climate's
+Scale factor map. Require all three rendered text/background pairs to meet the
+existing 4.5 contrast threshold in every catalog theme. This focused regression
+applies to all themes without changing enforcement for unrelated specimens.
+
+The Pure form ancestor is essential: its typed disabled-input selector can
+otherwise override theme tokens unnoticed by an isolated input specimen.
+Canonical `--wc-input-disabled-*` tokens must win for `.wc-field__control`
+inputs; preserve read-only/disabled behavior and configuration authority.
+See [2026-09-09 validation](theme-input-contrast-20260909.md) for the all-theme
+before/after measurements.
+
 ### 2.2 Target Metadata
 - Assign `data-contrast-id="<component-key>"` on the outer wrapper for every specimen.
 - Embed a `<script type="application/json" id="themeContrastTargets">` payload describing:
@@ -52,7 +68,7 @@
 
 ## 3. Playwright Harness (`theme-metrics.spec.js`)
 ### 3.1 Execution Flow
-1. Read theme IDs from `_theme_switcher.htm` or a shared JSON list so tests stay synced with header options.
+1. Read theme IDs from the selector and the loaded canonical `all-themes.css` bundle, plus `default`, so hidden bundled themes are measured too.
 2. For each theme:
    - Inject `localStorage.wc-theme` + `documentElement.dataset.theme` before navigation.
    - Visit `/weppcloud/ui/components/theme-lab` (or the enhanced gallery) and wait for network idle.

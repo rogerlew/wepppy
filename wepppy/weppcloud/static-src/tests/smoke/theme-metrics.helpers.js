@@ -13,10 +13,18 @@ const WCAG_AA_NON_TEXT = 3.0;
 export async function extractThemeIds(page) {
   const values = await page.evaluate(() => {
     const selectors = document.querySelectorAll('[data-theme-select] option');
-    if (!selectors.length) {
-      return ['default'];
+    const values = ['default', ...Array.from(selectors, (opt) => opt.value || 'default')];
+    const bundle = Array.from(document.styleSheets).find((sheet) => sheet.href
+      && new URL(sheet.href).pathname.endsWith('/themes/all-themes.css'));
+    if (!bundle) {
+      throw new Error('Canonical theme stylesheet missing from Theme Lab');
     }
-    return Array.from(selectors, (opt) => opt.value || 'default');
+    // Include bundled themes hidden from the user-facing selector as well.
+    for (const rule of bundle.cssRules) {
+      const matches = (rule.selectorText || '').matchAll(/\[data-theme=["']([^"']+)["']\]/g);
+      for (const match of matches) values.push(match[1]);
+    }
+    return values;
   });
   return Array.from(new Set(values));
 }

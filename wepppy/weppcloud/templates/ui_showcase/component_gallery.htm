@@ -914,11 +914,16 @@
         <article class="wc-card wc-theme-lab__card" data-contrast-id="wc-input-disabled">
           <header class="wc-card__header">
             <h3 class="wc-card__title">Disabled input</h3>
-            <p class="wc-card__description">Text input disabled state used by readonly controls.</p>
+            <p class="wc-card__description">Disabled and read-only text fields inside a Pure form, including Climate's Scale factor map.</p>
           </header>
-          <div class="wc-card__body">
-            <label for="theme_lab_disabled_input" class="wc-field__label">Scenario name</label>
-            <input id="theme_lab_disabled_input" class="wc-field__control" type="text" value="Readonly project scenario" disabled>
+          <div class="wc-card__body pure-form">
+            {{ ui.text_field("theme_lab_disabled_input", "Disabled input",
+                 value="Readonly project scenario", attrs={"disabled": True}) }}
+            {{ ui.text_field("theme_lab_readonly_input", "Read-only input",
+                 value="Configured project scenario", attrs={"readonly": True}) }}
+            {{ ui.text_field("theme_lab_scale_factor_map", "Scale factor map",
+                 value="climate/precip_scale_factor.tif",
+                 attrs={"readonly": True, "disabled": True}) }}
           </div>
         </article>
       </div>
