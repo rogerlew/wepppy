@@ -697,3 +697,12 @@ wctl up -d --force-recreate preflight
 ---
 
 **Maintained by AI agents per authorship policy. Human reviewers: ensure technical accuracy when modifying.**
+
+## Artifact readiness notifications
+
+The [production M1 contract](../../../wepppy/nodb/mods/postfire_debris_flow/docs/production_m1.md#state-serialization-and-notification-details)
+requires a frame on every run keyspace notification, including unchanged derived
+checklists. Controllers may coalesce these events to rehydrate authenticated
+artifact readiness. `preflight:connection` carries a `connected` boolean on
+open/close/error; reconnect reconciles state. Detailed uploaded metadata remains
+on authenticated endpoints, never in the public preflight payload.

@@ -95,3 +95,8 @@ Local complete-source acceptance is demonstrated on rebuilt Wallow: all 12,973
 basin cells support T/F/S, with zero unknown intersections. The 11.6757 km² area
 warning remains applicable. This validates local composition; live preparation,
 publication, upstream freshness and climate ingestion require their own contracts.
+
+Production upload does not request image dates and unknown dates do not block
+M1. Compare assessment metadata when available; the user is responsible for
+choosing dNBR and soil burn severity from the same fire assessment, as stated
+beside the upload. Never infer imagery dates from upload timestamps.

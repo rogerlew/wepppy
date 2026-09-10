@@ -416,9 +416,19 @@ turning absent source coverage into observations. Preserve the source artifact
 and normalization provenance.
 
 Treat value encoding separately from spatial scale. Explicit source scale and
-offset (or a confirmed encoding preset) determine normalized dNBR; do not infer
-the scale solely from dtype or value range. Preserve valid negative and zero
+offset (or a resolved encoding preset) determine normalized dNBR. The local
+normalizer requires explicit encoding; production Auto may resolve it from the
+valid-value distribution under the evaluated detection contract below. Preserve valid negative and zero
 values. NoData is not unburned and is not dNBR zero.
+
+Production upload uses an Auto-default scale select with standard presets and a
+Custom factor/offset option. The adapter must resolve Auto to explicit encoding
+before normalization; unresolved scale cannot publish an accepted map. See the
+[production UI contract](../../../../docs/ui-docs/contracts/postfire-debris-flow-control-contract.md#dnbr-field-and-copy)
+for distribution-based detection, the uploaded-map summary table and correction
+flow. Distribution-v1 numerical criteria and initial evidence are recorded in
+[ADR-0063](../../../../docs/adrs/ADR-0063-dnbr-auto-scale.md). The local normalizer's
+explicit encoding API remains unchanged.
 
 Require positive valid-data overlap with the actual watershed mask; bounding-box
 intersection alone is insufficient. Partial coverage is accepted and reported.
@@ -548,6 +558,29 @@ debris-flow forecast. Do not combine duration probabilities into a joint score.
 Event identifiers, persistence/query strategy, filtering defaults, dashboard
 host, and large-catalog performance requirements remain open.
 
+## Production M1 Workflow Increment
+
+Owner scope (2026-09-10 UTC): NoDb state, prerequisite/freshness checks, dNBR
+upload and publication, RQ execution and a minimal control for uploading and
+running M1. Reports and interactive dashboard are deferred. The owner plans a
+10 m project for testing; this does not change M1 resolution eligibility.
+
+[Production workflow proposal](docs/production_m1.md) and
+[UI contract proposal](../../../../docs/ui-docs/contracts/postfire-debris-flow-control-contract.md)
+specify intended state/publication behavior, a compact required-data list,
+dNBR upload and one run action. Use familiar land-manager/hydrologist terminology;
+keep implementation details in the job log and avoid additional parameter panels.
+Owner revisions: required-data readiness updates through preflight in realtime;
+label the raster “differenced Normalized Burn Ratio (dNBR)”; omit image-date
+entry; offer Auto scale selection; persist the uploaded filename and show accepted
+raster formats/datatypes; disable NOAA when unavailable. These remove unnecessary
+map-preparation friction and avoid calling dNBR a soil burn severity map.
+Detailed UI/default/state proposals require operator review and the contract-first
+ancestor before runtime edits. The
+[production M1 package](../../../../docs/work-packages/20260910_staley_m1_production/package.md)
+is executing under its required contract checkpoint. Initial completion means status and protected
+model-file access, not report tables/charts or dashboard implementation.
+
 ## Planned File Organization
 
 The scalar `staley2017.py` engine is implemented under its accepted contract.
@@ -561,7 +594,7 @@ Other paths below remain reserved integration locations.
 | `manifest.py` | Provenance and artifact manifest |
 | `wepppy/weppcloud/controllers_js/postfire_debris_flow.js` | Pure UI controller |
 | `wepppy/weppcloud/templates/controls/postfire_debris_flow_pure.htm` | Control and prerequisite presentation |
-| `wepppy/weppcloud/templates/controls/postfire_debris_flow_reports.htm` | Result summaries |
+| `wepppy/weppcloud/templates/controls/postfire_debris_flow_reports.htm` | Deferred report increment; excluded from initial production upload/run package |
 | `wepppy/microservices/rq_engine/postfire_debris_flow_routes.py` | RQ-engine submission boundary |
 | `tests/nodb/mods/test_postfire_debris_flow_*.py` | Numerical and integration tests |
 | `tests/microservices/test_rq_engine_postfire_debris_flow_routes.py` | Route contracts |

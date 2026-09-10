@@ -130,6 +130,19 @@ Feedback mechanisms:
 
 ## 📋 Backlog
 
+### Production Staley M1 Upload and Run
+
+**Scoped**: 2026-09-10 07:23 UTC. Scaffolded; not executing.
+
+**Link**: [Package](docs/work-packages/20260910_staley_m1_production/package.md)
+
+**Scope**: NoDb state, prerequisites/freshness, dNBR upload/publication, RQ
+execution and minimal land-manager/hydrologist-facing upload/run control.
+Reports and dashboard deferred; user's planned 10 m project is a later smoke test.
+
+**Next**: Review exact UI/defaults/state matrix, obtain independent contract
+reviews and standalone approved ancestor before runtime implementation.
+
 ### Seamless WEPPcloud Session Cookie Namespace Migration
 
 **Proposed**: 2026-08-23

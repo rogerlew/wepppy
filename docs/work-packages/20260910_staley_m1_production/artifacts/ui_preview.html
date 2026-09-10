@@ -1,0 +1,101 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Post-fire debris flow control preview</title><link rel="stylesheet" href="/weppcloud/static/css/ui-foundation.css"><style>body{font-family:system-ui;max-width:760px;margin:2rem auto;padding:1rem}section{margin-bottom:3rem}table{border-collapse:collapse}th,td{text-align:left;padding:.35rem 1rem .35rem 0}label{display:block;margin:.6rem 0}button{margin:.6rem 0}small{display:block}</style>
+<section><h2>Empty</h2><h3>Post-fire debris flow</h3><p>Estimate debris-flow likelihood for this watershed using the Staley model.</p><a href="#">About this model</a><h4>Required project data</h4><table>
+<tr><th scope="row">Watershed</th><td>Ready</td></tr>
+<tr><th scope="row">Soils</th><td>Ready</td></tr>
+<tr><th scope="row">Soil burn severity</th><td>Ready</td></tr>
+<tr><th scope="row">Soil erodibility (K)</th><td>Needed — Prepare in RUSLE</td></tr>
+<tr><th scope="row">Climate</th><td>Ready</td></tr>
+</table><label>differenced Normalized Burn Ratio (dNBR)<input type="file"></label><small>Single-band raster with integer or floating-point values. GeoTIFF (.tif/.tiff) preferred; self-contained .img or supported .vrt accepted. Maximum 100 MiB per raster.</small><label>dNBR values <select><option>Auto</option><option>Scaled by 1,000</option><option>NBR difference</option><option>Custom scale</option></select></label><button>Upload dNBR</button>
+<fieldset><legend>Design storm rainfall</legend><label><input type="radio" checked> Project climate</label><label><input type="radio" disabled> NOAA Atlas 14</label><small>NOAA rainfall estimates are not available for this project.</small></fieldset><p>Storm events always use the project climate.</p><button disabled>Run debris-flow model</button>
+<p role="status">Prepare soil erodibility in RUSLE before running the model.</p></section>
+<section><h2>Ready</h2><h3>Post-fire debris flow</h3><p>Estimate debris-flow likelihood for this watershed using the Staley model.</p><a href="#">About this model</a><h4>Required project data</h4><table>
+<tr><th scope="row">Watershed</th><td>Ready</td></tr>
+<tr><th scope="row">Soils</th><td>Ready</td></tr>
+<tr><th scope="row">Soil burn severity</th><td>Ready</td></tr>
+<tr><th scope="row">Soil erodibility (K)</th><td>Ready</td></tr>
+<tr><th scope="row">Climate</th><td>Ready</td></tr>
+</table><label>differenced Normalized Burn Ratio (dNBR)<input type="file"></label><small>Single-band raster with integer or floating-point values. GeoTIFF (.tif/.tiff) preferred; self-contained .img or supported .vrt accepted. Maximum 100 MiB per raster.</small><label>dNBR values <select><option>Auto</option><option>Scaled by 1,000</option><option>NBR difference</option><option>Custom scale</option></select></label><button>Upload dNBR</button>
+<div class="wc-control__panel-summary"><table>
+<tr><th scope="row">File</th><td>wallow_dnbr.tif</td></tr>
+<tr><th scope="row">Format / data type</th><td>GeoTIFF / Int16</td></tr>
+<tr><th scope="row">Prepared cell size</th><td>10 m × 10 m</td></tr>
+<tr><th scope="row">Watershed coverage</th><td>100%</td></tr>
+<tr><th scope="row">Uploaded values</th><td>−120 to 850</td></tr>
+<tr><th scope="row">Applied scale</th><td>Divide by 1,000 (Auto — value distribution)</td></tr>
+<tr><th scope="row">Prepared dNBR values</th><td>−0.120 to 0.850</td></tr>
+</table></div>
+<fieldset><legend>Design storm rainfall</legend><label><input type="radio" checked> Project climate</label><label><input type="radio" disabled> NOAA Atlas 14</label><small>NOAA rainfall estimates are not available for this project.</small></fieldset><p>Storm events always use the project climate.</p><button>Run debris-flow model</button>
+<p role="status"></p></section>
+<section><h2>Partial coverage</h2><h3>Post-fire debris flow</h3><p>Estimate debris-flow likelihood for this watershed using the Staley model.</p><a href="#">About this model</a><h4>Required project data</h4><table>
+<tr><th scope="row">Watershed</th><td>Ready</td></tr>
+<tr><th scope="row">Soils</th><td>Ready</td></tr>
+<tr><th scope="row">Soil burn severity</th><td>Ready</td></tr>
+<tr><th scope="row">Soil erodibility (K)</th><td>Ready</td></tr>
+<tr><th scope="row">Climate</th><td>Ready</td></tr>
+</table><label>differenced Normalized Burn Ratio (dNBR)<input type="file"></label><small>Single-band raster with integer or floating-point values. GeoTIFF (.tif/.tiff) preferred; self-contained .img or supported .vrt accepted. Maximum 100 MiB per raster.</small><label>dNBR values <select><option>Auto</option><option>Scaled by 1,000</option><option>NBR difference</option><option>Custom scale</option></select></label><button>Upload dNBR</button>
+<div class="wc-control__panel-summary"><table>
+<tr><th scope="row">File</th><td>wallow_dnbr.tif</td></tr>
+<tr><th scope="row">Format / data type</th><td>GeoTIFF / Int16</td></tr>
+<tr><th scope="row">Prepared cell size</th><td>10 m × 10 m</td></tr>
+<tr><th scope="row">Watershed coverage</th><td>94%</td></tr>
+<tr><th scope="row">Uploaded values</th><td>−120 to 850</td></tr>
+<tr><th scope="row">Applied scale</th><td>Divide by 1,000 (Auto — value distribution)</td></tr>
+<tr><th scope="row">Prepared dNBR values</th><td>−0.120 to 0.850</td></tr>
+</table></div>
+<fieldset><legend>Design storm rainfall</legend><label><input type="radio" checked> Project climate</label><label><input type="radio" disabled> NOAA Atlas 14</label><small>NOAA rainfall estimates are not available for this project.</small></fieldset><p>Storm events always use the project climate.</p><button>Run debris-flow model</button>
+<p role="status">The dNBR map covers only part of the watershed. Calculations will use the available dNBR values.</p></section>
+<section><h2>Running</h2><h3>Post-fire debris flow</h3><p>Estimate debris-flow likelihood for this watershed using the Staley model.</p><a href="#">About this model</a><h4>Required project data</h4><table>
+<tr><th scope="row">Watershed</th><td>Ready</td></tr>
+<tr><th scope="row">Soils</th><td>Ready</td></tr>
+<tr><th scope="row">Soil burn severity</th><td>Ready</td></tr>
+<tr><th scope="row">Soil erodibility (K)</th><td>Ready</td></tr>
+<tr><th scope="row">Climate</th><td>Ready</td></tr>
+</table><label>differenced Normalized Burn Ratio (dNBR)<input type="file"></label><small>Single-band raster with integer or floating-point values. GeoTIFF (.tif/.tiff) preferred; self-contained .img or supported .vrt accepted. Maximum 100 MiB per raster.</small><label>dNBR values <select><option>Auto</option><option>Scaled by 1,000</option><option>NBR difference</option><option>Custom scale</option></select></label><button>Upload dNBR</button>
+<div class="wc-control__panel-summary"><table>
+<tr><th scope="row">File</th><td>wallow_dnbr.tif</td></tr>
+<tr><th scope="row">Format / data type</th><td>GeoTIFF / Int16</td></tr>
+<tr><th scope="row">Prepared cell size</th><td>10 m × 10 m</td></tr>
+<tr><th scope="row">Watershed coverage</th><td>100%</td></tr>
+<tr><th scope="row">Uploaded values</th><td>−120 to 850</td></tr>
+<tr><th scope="row">Applied scale</th><td>Divide by 1,000 (Auto — value distribution)</td></tr>
+<tr><th scope="row">Prepared dNBR values</th><td>−0.120 to 0.850</td></tr>
+</table></div>
+<fieldset><legend>Design storm rainfall</legend><label><input type="radio" checked> Project climate</label><label><input type="radio" disabled> NOAA Atlas 14</label><small>NOAA rainfall estimates are not available for this project.</small></fieldset><p>Storm events always use the project climate.</p><button disabled>Run debris-flow model</button>
+<p role="status">Calculating debris-flow likelihood…</p></section>
+<section><h2>Failed replacement</h2><h3>Post-fire debris flow</h3><p>Estimate debris-flow likelihood for this watershed using the Staley model.</p><a href="#">About this model</a><h4>Required project data</h4><table>
+<tr><th scope="row">Watershed</th><td>Ready</td></tr>
+<tr><th scope="row">Soils</th><td>Ready</td></tr>
+<tr><th scope="row">Soil burn severity</th><td>Ready</td></tr>
+<tr><th scope="row">Soil erodibility (K)</th><td>Ready</td></tr>
+<tr><th scope="row">Climate</th><td>Ready</td></tr>
+</table><label>differenced Normalized Burn Ratio (dNBR)<input type="file"></label><small>Single-band raster with integer or floating-point values. GeoTIFF (.tif/.tiff) preferred; self-contained .img or supported .vrt accepted. Maximum 100 MiB per raster.</small><label>dNBR values <select><option>Auto</option><option>Scaled by 1,000</option><option>NBR difference</option><option>Custom scale</option></select></label><button>Upload dNBR</button>
+<div class="wc-control__panel-summary"><table>
+<tr><th scope="row">File</th><td>wallow_dnbr.tif</td></tr>
+<tr><th scope="row">Format / data type</th><td>GeoTIFF / Int16</td></tr>
+<tr><th scope="row">Prepared cell size</th><td>10 m × 10 m</td></tr>
+<tr><th scope="row">Watershed coverage</th><td>100%</td></tr>
+<tr><th scope="row">Uploaded values</th><td>−120 to 850</td></tr>
+<tr><th scope="row">Applied scale</th><td>Divide by 1,000 (Auto — value distribution)</td></tr>
+<tr><th scope="row">Prepared dNBR values</th><td>−0.120 to 0.850</td></tr>
+</table></div>
+<fieldset><legend>Design storm rainfall</legend><label><input type="radio" checked> Project climate</label><label><input type="radio" disabled> NOAA Atlas 14</label><small>NOAA rainfall estimates are not available for this project.</small></fieldset><p>Storm events always use the project climate.</p><button>Run debris-flow model</button>
+<p role="status">Replacement upload failed. The previously uploaded map is still available.</p></section>
+<section><h2>Stale</h2><h3>Post-fire debris flow</h3><p>Estimate debris-flow likelihood for this watershed using the Staley model.</p><a href="#">About this model</a><h4>Required project data</h4><table>
+<tr><th scope="row">Watershed</th><td>Ready</td></tr>
+<tr><th scope="row">Soils</th><td>Ready</td></tr>
+<tr><th scope="row">Soil burn severity</th><td>Ready</td></tr>
+<tr><th scope="row">Soil erodibility (K)</th><td>Ready</td></tr>
+<tr><th scope="row">Climate</th><td>Ready</td></tr>
+</table><label>differenced Normalized Burn Ratio (dNBR)<input type="file"></label><small>Single-band raster with integer or floating-point values. GeoTIFF (.tif/.tiff) preferred; self-contained .img or supported .vrt accepted. Maximum 100 MiB per raster.</small><label>dNBR values <select><option>Auto</option><option>Scaled by 1,000</option><option>NBR difference</option><option>Custom scale</option></select></label><button>Upload dNBR</button>
+<div class="wc-control__panel-summary"><table>
+<tr><th scope="row">File</th><td>wallow_dnbr.tif</td></tr>
+<tr><th scope="row">Format / data type</th><td>GeoTIFF / Int16</td></tr>
+<tr><th scope="row">Prepared cell size</th><td>10 m × 10 m</td></tr>
+<tr><th scope="row">Watershed coverage</th><td>100%</td></tr>
+<tr><th scope="row">Uploaded values</th><td>−120 to 850</td></tr>
+<tr><th scope="row">Applied scale</th><td>Divide by 1,000 (Auto — value distribution)</td></tr>
+<tr><th scope="row">Prepared dNBR values</th><td>−0.120 to 0.850</td></tr>
+</table></div>
+<fieldset><legend>Design storm rainfall</legend><label><input type="radio" checked> Project climate</label><label><input type="radio" disabled> NOAA Atlas 14</label><small>NOAA rainfall estimates are not available for this project.</small></fieldset><p>Storm events always use the project climate.</p><button>Run debris-flow model</button>
+<p role="status">Inputs changed. Run the model again.</p></section>
+</html>

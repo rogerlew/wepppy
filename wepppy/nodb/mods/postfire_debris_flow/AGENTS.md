@@ -37,3 +37,9 @@
 - Local stage-4 rainfall/results package: [rainfall/results](../../../../docs/work-packages/20260909_staley_rainfall_results/package.md).
   Read [docs/rainfall_results.md](docs/rainfall_results.md); result schemas are implemented locally;
   sparse-rank policy R02 is accepted in ADR-0062. No Climate rebuild or UI/RQ wiring.
+- Production M1 scaffold: [package](../../../../docs/work-packages/20260910_staley_m1_production/package.md),
+  [workflow proposal](docs/production_m1.md) and
+  [UI contract](../../../../docs/ui-docs/contracts/postfire-debris-flow-control-contract.md).
+  Obtain the exact approved/reviewed contract ancestor before runtime edits.
+  Minimal upload/run control only; reports/dashboard deferred. Do not invent
+  UI controls or implementation-heavy user messages beyond the accepted design.

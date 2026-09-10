@@ -1,0 +1,86 @@
+{
+  "algorithm": "distribution-v1-proposed",
+  "records": [
+    {
+      "file": "tests/nodb/mods/fixtures/postfire_debris_flow_dnbr/AZ3133311041620120508.tif",
+      "variant": "source",
+      "valid_cells": 22131,
+      "factor": 0.001,
+      "abs_quantiles_95_99": [
+        101.48913192749023,
+        123.860417175293
+      ]
+    },
+    {
+      "file": "tests/nodb/mods/fixtures/postfire_debris_flow_dnbr/AZ3133311041620120508.tif",
+      "variant": "normalized",
+      "valid_cells": 22131,
+      "factor": 1.0,
+      "abs_quantiles_95_99": [
+        0.10148913192749023,
+        0.12386041717529299
+      ]
+    },
+    {
+      "file": "tests/nodb/mods/fixtures/postfire_debris_flow_dnbr/AZ3134011074320110214.tif",
+      "variant": "source",
+      "valid_cells": 2870,
+      "factor": 0.001,
+      "abs_quantiles_95_99": [
+        221.1201583862304,
+        401.3395639038078
+      ]
+    },
+    {
+      "file": "tests/nodb/mods/fixtures/postfire_debris_flow_dnbr/AZ3134011074320110214.tif",
+      "variant": "normalized",
+      "valid_cells": 2870,
+      "factor": 1.0,
+      "abs_quantiles_95_99": [
+        0.22112015838623042,
+        0.4013395639038078
+      ]
+    },
+    {
+      "file": "tests/nodb/mods/fixtures/postfire_debris_flow_wallow/wallow_dnbr.tif",
+      "variant": "source",
+      "valid_cells": 6209420,
+      "factor": 0.001,
+      "abs_quantiles_95_99": [
+        2000.0,
+        2000.0
+      ]
+    },
+    {
+      "file": "tests/nodb/mods/fixtures/postfire_debris_flow_wallow/wallow_dnbr.tif",
+      "variant": "normalized",
+      "valid_cells": 6209420,
+      "factor": 1.0,
+      "abs_quantiles_95_99": [
+        2.0,
+        2.0
+      ]
+    },
+    {
+      "case": "all_zero",
+      "factor": null
+    },
+    {
+      "case": "low_integer",
+      "factor": null
+    },
+    {
+      "case": "isolated_extreme",
+      "factor": 1.0
+    },
+    {
+      "case": "too_few",
+      "factor": null
+    },
+    {
+      "case": "arbitrary_scale",
+      "factor": null
+    }
+  ],
+  "limitations": "Known-encoding fixtures and analytical cases; not a universal encoding guarantee."
+}

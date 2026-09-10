@@ -179,3 +179,11 @@ limits, provenance and query semantics, and the
 [work package](../../../../docs/work-packages/20260909_staley_rainfall_results/package.md)
 for genuine Wallow evidence and reproduction scripts. Production publication,
 NoDb/RQ integration and dashboard work remain separately scoped.
+
+## Production workflow planning
+
+The [production M1 package](../../../../docs/work-packages/20260910_staley_m1_production/package.md)
+is scaffolded for project readiness, dNBR upload and running the model through
+a minimal control. [UI design](../../../../docs/ui-docs/contracts/postfire-debris-flow-control-contract.md)
+is proposed for owner review before implementation. Reports and dashboard are
+deferred; initial completion provides status and authorized model-file access.

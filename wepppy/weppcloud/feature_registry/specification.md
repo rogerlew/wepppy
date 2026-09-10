@@ -319,3 +319,13 @@ At minimum:
   not a superset of the enable audience
 - config launch-surface render tests from registry data in `interfaces.htm`
 - toggle endpoint behavior parity for visible features
+
+## Post-fire debris-flow production increment
+
+The postfire_debris_flow feature is preview, requires user role and WBT, requires
+Disturbed and enables RUSLE (and its existing POLARIS dependency). No upstream
+build occurs on enabling. Effective CONUS locale eligibility comes from run
+capability authority, not registry labels. Eligible absent optional NoDb state
+renders the upload/run control. See the [production M1 contract](../../nodb/mods/postfire_debris_flow/docs/production_m1.md#execution-contract-2026-09-10)
+and [UI contract](../../../docs/ui-docs/contracts/postfire-debris-flow-control-contract.md).
+Runtime registration/conformance is pending the production package checkpoint.

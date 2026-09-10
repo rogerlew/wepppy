@@ -58,6 +58,21 @@ covers events, design comparisons, inverse thresholds and bounded local queries.
 R02 unavailable sparse-rank behavior is explicitly approved in ADR-0062. Backend
 L08/L09 decisions are resolved; browser defaults/dashboard remain future scope.
 
+## Production Upload/Run Increment
+
+[Production M1 package](../../../../docs/work-packages/20260910_staley_m1_production/package.md)
+is scaffolded for stage 5 with NoDb, freshness, dNBR upload/publication, RQ and
+minimal upload/run control. Reports are explicitly deferred by the owner.
+Review the [UI contract](../../../../docs/ui-docs/contracts/postfire-debris-flow-control-contract.md)
+and [workflow proposal](docs/production_m1.md) before the required checkpoint.
+Execution, deployment and the owner's planned 10 m smoke test remain pending.
+Owner UI revisions recorded: live preflight prerequisites/NOAA availability,
+differenced Normalized Burn Ratio label, no image-date entry, Auto-default scale
+select, persistent uploaded filename and visible raster-format/datatype guidance.
+Auto must attempt distribution-based scale detection and publish upload details
+and the applied scale in a `wc-control__panel-summary` table. Detection criteria,
+fixture evidence (ADR-0063) and bounded correction retry remain checkpoint work.
+
 ## Delivery Sequence
 
 Build shared scientific components, deliver a usable M1 workflow, integrate M3,
@@ -81,7 +96,7 @@ nested/channel assessments are excluded from initial delivery (ADR-0055).
 | 2. Numerical engine | Implement `staley2017.py` for both M1 and M3. Can begin after its numerical contract is resolved, independently of spatial implementation. | Complete: checked coefficients, ADR-0056, 145 focused tests, six-row generated examples, independent review and full-suite validation. |
 | 3. M1 predictors | Depends on stage 1 and accepted slope/SBS/NoData rules. Aggregate slope/SBS intersection, normalized dNBR, and RUSLE Nomograph K over the project watershed; emit coverage, reasons, and input identity. | Reproducible real-project predictor artifacts; correct intersection and full-domain denominators; partial and unavailable watershed checks. |
 | 4. Rainfall and results | Compose stages 2–3 with Climate-owned event parquet and frequency artifacts. Define event identity, schemas, canonical units, and querying. | Complete: genuine event/design/inverse bundles, ADR-0062 sparse-rank policy, bounded queries, 62 focused and 8,273 full-suite passes, independent reviews; [evidence](../../../../docs/work-packages/20260909_staley_rainfall_results/artifacts/validation.md). |
-| 5. Production M1 | Integrate stages 1–4 through NoDb, safe dNBR upload/publication, prerequisite checks, RQ, and a basic Pure UI control/report. | Contract checkpoint followed by upload → build → results → reload under production-equivalent identities/mounts; stale inputs, failed replacement, authorization, and SI/English equivalence verified. |
+| 5. Production M1 | Integrate stages 1–4 through NoDb, safe dNBR upload/publication, prerequisite checks, RQ, and a minimal Pure UI upload/run control; reports deferred. | Contract checkpoint followed by upload → build → results → reload under production-equivalent identities/mounts; stale inputs, failed replacement, authorization, and SI/English equivalence verified. |
 | 6. Production M3 | Resolve soil policy; compose SSURGO/fallback thickness and owned WBT relief with the shared engine and production workflow. Soil-policy preparation may precede stage 5. | Explicit source contribution/coverage, unusable-both-sources cases, terrain fidelity gate, and real-project M3 results through the same publication/report path. |
 | 7. Interactive dashboard | Use established result/query contracts for project watershed events, detail, design comparisons, and thresholds; maps may show the existing basin and input coverage. | Event selections remain consistent; no nested catchment selector; partial/unavailable results, simulation dates, unitization, accessibility, and realistic catalog performance verified. |
 
@@ -224,3 +239,9 @@ scientific limitation that implementation cannot resolve.
   controlled sparse/unknown-T evidence, and independent review gates passed.
   ExecPlan archived. Backend L08/L09 resolved; browser defaults and production
   publication/dashboard remain stages 5–7.
+
+- 2026-09-10 07:23 UTC: owner scoped production upload/run with NoDb,
+  prerequisites/freshness, publication and RQ. Scaffolded exact simple UI
+  labels/layout/state proposals and runtime checkpoint. Reports/dashboard
+  deferred; completion status and protected model-file access only. No runtime
+  implementation or deployment; UI/default approval remains pending.

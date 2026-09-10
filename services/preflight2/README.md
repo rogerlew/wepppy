@@ -81,7 +81,9 @@ These directly inform the Go design:
      notification).
    - Recompute checklist fields using the same logic as
      `wepppy.nodb.redis_prep.TaskEnum`.
-   - Push updated JSON frames only when diffs occur.
+   - Push a JSON frame for every run keyspace notification, even when derived
+     checklist/locks/whole-second last_modified are unchanged. Consumers use the
+     notification to refresh authenticated artifact readiness.
 4. **Lock surfaces**:
    - Translate `locked:<filename>` fields into the `lock_statuses` map.
 5. **Health endpoints**:
@@ -253,7 +255,8 @@ runaway calls during outages.
 - **Integration tests**:
   - Spin up ephemeral Redis (testcontainer) and ensure updates propagate.
   - Simulate Redis disconnects to verify reconnection logic.
-  - Verify no duplicate frames for unchanged hashes.
+  - Verify same-second artifact notifications reach clients even when the
+    derived checklist is unchanged.
 - **Load testing**:
   - k6 or vegeta script opening 200 sockets and mutating a run hash.
   - Measure latency and memory footprint.
