@@ -1,5 +1,8 @@
 # ADR-0050: Opt-in shared GridMET Redis admission
 
+Queue deadline and transient Redis failure decisions are superseded by
+[ADR-0061](ADR-0061-gridmet-persistent-queue-recovery.md).
+
 Status: Accepted; implemented and Forest-validated 2026-09-07
 Date: 2026-09-07
 

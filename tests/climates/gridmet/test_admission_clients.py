@@ -21,14 +21,12 @@ _PAYLOAD = {"data": [{"yyyy-mm-dd": ["2025-01-01"], "pr(mm)": [1.0]}]}
 class _Lifecycle:
     def __init__(self):
         self.events = []
-        self.deadlines = []
         self.active = False
         self.lost = False
 
-    def acquire(self, *, request_kind, deadline):
+    def acquire(self, *, request_kind):
         assert not self.active
         self.events.append(("acquire", request_kind))
-        self.deadlines.append(deadline)
         return self
 
     def __enter__(self):
@@ -155,7 +153,7 @@ def test_enabled_attempt_closes_and_releases_before_validation(
 
 
 @pytest.mark.parametrize("kind", ["point", "grid"])
-def test_retries_requeue_and_share_deadline_after_released_backoff(
+def test_retries_requeue_after_released_backoff(
     kind, lifecycle, config, monkeypatch, tmp_path
 ):
     _track_validation(kind, lifecycle, monkeypatch)
@@ -168,8 +166,6 @@ def test_retries_requeue_and_share_deadline_after_released_backoff(
     pending = iter(responses)
     _invoke(kind, config, monkeypatch, tmp_path, lambda *_a, **_k: next(pending))
 
-    assert len(lifecycle.deadlines) == 3
-    assert len(set(lifecycle.deadlines)) == 1
     assert lifecycle.events.count("release") == 3
     assert [event for event in lifecycle.events if isinstance(event, tuple)] == [
         ("acquire", kind), ("sleep", 5.0), ("acquire", kind),
@@ -309,39 +305,19 @@ def test_grid_timeseries_forwards_configuration(config, monkeypatch, tmp_path):
 
 
 @pytest.mark.parametrize("kind", ["point", "grid"])
-def test_backoff_exhausts_original_deadline_without_another_http_attempt(
-    kind, lifecycle, monkeypatch, tmp_path
-):
-    now = [100.0]
-    deadlines = []
+def test_backoff_does_not_expire_admission(kind, lifecycle, monkeypatch, tmp_path):
+    _track_validation(kind, lifecycle, monkeypatch)
     config = admission_module.GridMetAdmissionConfig(wait_timeout_seconds=1)
-    original_acquire = lifecycle.acquire
+    responses = iter([_Response(lifecycle, status=503), _Response(lifecycle)])
+    calls = []
 
-    def acquire(*, request_kind, deadline):
-        deadlines.append(deadline)
-        if now[0] >= deadline:
-            raise admission_module.GridMetAdmissionTimeout("test deadline exhausted")
-        return original_acquire(request_kind=request_kind, deadline=deadline)
+    def get(*args, **kwargs):
+        calls.append(1)
+        return next(responses)
 
-    def sleep(seconds):
-        assert not lifecycle.active
-        now[0] += seconds
-
-    monkeypatch.setattr(acquisition.time, "monotonic", lambda: now[0])
-    monkeypatch.setattr(acquisition.time, "sleep", sleep)
-    monkeypatch.setattr(lifecycle, "acquire", acquire)
-    response = _Response(lifecycle, status=503)
-    requests_made = []
-
-    def get(*_args, **_kwargs):
-        requests_made.append(1)
-        return response
-
-    with pytest.raises(admission_module.GridMetAdmissionTimeout):
-        _invoke(kind, config, monkeypatch, tmp_path, get)
-    assert deadlines == [101.0, 101.0]
-    assert requests_made == [1]
-    assert response.closed
+    _invoke(kind, config, monkeypatch, tmp_path, get)
+    assert len(calls) == 2
+    assert lifecycle.events.count("release") == 2
     assert not lifecycle.active
 
 

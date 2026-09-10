@@ -30,7 +30,7 @@ def _isolated_environment():
     return env
 
 
-@pytest.mark.parametrize("scenario", ["ownership", "fifo", "processes", "timeout", "outage", "clocks", "killed", "corruption", "heartbeat"])
+@pytest.mark.parametrize("scenario", ["ownership", "fifo", "processes", "persistent", "outage", "lost-reply", "clocks", "killed", "corruption", "heartbeat"])
 def test_real_redis_boundary(scenario):
     result = subprocess.run(
         [sys.executable, str(Path(__file__).resolve()), "scenario", scenario],
@@ -39,6 +39,20 @@ def test_real_redis_boundary(scenario):
     assert result.returncode == 0, result.stdout + result.stderr
     evidence = json.loads(result.stdout.strip().splitlines()[-1])
     assert evidence["passed"] is True
+
+
+@pytest.mark.parametrize("operation", ["enqueue", "poll", "renew", "release"])
+def test_real_socket_timeout_recovery(operation):
+    env = _isolated_environment()
+    if env.get("GRIDMET_ADMISSION_TEST_ALLOW_PAUSE") != "true":
+        pytest.skip("Pause tests require explicit opt-in on a dedicated disposable Redis")
+    result = subprocess.run(
+        [sys.executable, str(Path(__file__).resolve()), "scenario", "delay-" + operation],
+        env=env, capture_output=True, text=True, timeout=45,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "TimeoutError" in result.stderr
+    assert json.loads(result.stdout.strip().splitlines()[-1])["passed"]
 
 
 def _config(key=None, limit=2):
@@ -80,7 +94,7 @@ def _scenario(name):
         GridMetAdmissionController, GridMetAdmissionConflict, GridMetAdmissionLostLease,
         GridMetAdmissionTimeout, GridMetAdmissionUnavailable,
     )
-    config = _config(limit=1 if name in {"fifo", "ownership", "timeout", "killed", "corruption", "heartbeat"} else 2)
+    config = _config(limit=1 if name in {"fifo", "ownership", "persistent", "killed", "corruption", "heartbeat"} else 2)
     controller = GridMetAdmissionController(config)
     children = []
     permits = []
@@ -143,27 +157,157 @@ def _scenario(name):
             assert peak == 2 and queued_seen
             assert len({record["pid"] for record in records}) == 6
             evidence.update(peak=peak, queued_seen=queued_seen)
-        elif name == "timeout":
+        elif name == "persistent":
+            import threading
+            # Legacy budget is deliberately shorter than the live queue wait.
+            config = replace(config, wait_timeout_seconds=0.05)
+            controller = GridMetAdmissionController(config)
             blocker = controller.acquire(request_kind="blocker")
             permits.append(blocker)
-            with pytest.raises(GridMetAdmissionTimeout):
-                controller.acquire(request_kind="timeout", deadline=time.monotonic() + 0.1)
-            assert controller.snapshot().queued == 0
-            assert controller.snapshot().active == 1
+            result = []
+
+            def waiter():
+                with controller.acquire(request_kind="persistent"):
+                    result.append("admitted")
+
+            thread = threading.Thread(target=waiter, daemon=True)
+            thread.start()
+            _wait(lambda: controller.snapshot().queued == 1)
+            time.sleep(0.2)
+            assert thread.is_alive() and not result
+            assert controller.snapshot().queued == 1
             blocker.release()
+            thread.join(5)
+            assert result == ["admitted"]
         elif name == "outage":
             import redis
-            from redis.backoff import NoBackoff
-            from redis.retry import Retry
-            controller._redis = redis.Redis(host="127.0.0.1", port=1, socket_connect_timeout=0.1,
-                                             socket_timeout=0.1, retry=Retry(NoBackoff(), 0))
-            controller._pid = os.getpid()
-            started = time.monotonic()
-            with pytest.raises(GridMetAdmissionUnavailable) as caught:
-                controller.acquire(request_kind="outage")
-            assert time.monotonic() - started < 2
-            assert "127.0.0.1" not in str(caught.value)
-            controller._redis = None
+            connection = controller._connection()
+            original_eval = connection.eval
+            calls = []
+
+            def unavailable_then_recover(*args):
+                calls.append(args[8])
+                if len(calls) == 1:
+                    raise redis.exceptions.ConnectionError("private connection URL")
+                return original_eval(*args)
+
+            connection.eval = unavailable_then_recover
+            with controller.acquire(request_kind="outage recovery"):
+                assert controller.snapshot().active == 1
+            assert calls[:2] == ["enqueue", "enqueue"]
+            connection.eval = original_eval
+        elif name == "lost-reply":
+            import redis
+            connection = controller._connection()
+            original_eval = connection.eval
+            lost = set()
+
+            def lose_committed_reply(*args):
+                result = original_eval(*args)
+                operation = args[8]
+                if operation in {"enqueue", "poll", "renew", "release"} and operation not in lost:
+                    lost.add(operation)
+                    raise redis.exceptions.TimeoutError("private Redis URL")
+                return result
+
+            connection.eval = lose_committed_reply
+            with controller.acquire(request_kind="lost reply") as permit:
+                assert controller.snapshot().active == 1
+                permit.renew()
+                permit.check()
+            holders = [controller.acquire(request_kind="holder") for _ in range(2)]
+            permits.extend(holders)
+            first, _ = controller._transition("enqueue", "queued", "queued-owner")
+            replay, _ = controller._transition("enqueue", "queued", "queued-owner")
+            assert first.sequence == replay.sequence and replay.position == 0
+            with pytest.raises(GridMetAdmissionLostLease):
+                controller._transition("enqueue", "queued", "foreign")
+            holders[0].release()
+            admitted, _ = controller._retry_transition("poll", "queued", "queued-owner")
+            assert admitted.state == "active" and controller.snapshot().active == 2
+            controller._transition("release", "queued", "queued-owner")
+            holders[1].release()
+            assert lost == {"enqueue", "poll", "renew", "release"}
+            connection.eval = original_eval
+        elif name.startswith("delay-"):
+            # Only explicitly opted-in disposable Redis may be paused. This
+            # exercises actual redis-py socket timeouts, not fabricated errors.
+            assert os.environ.get("GRIDMET_ADMISSION_TEST_ALLOW_PAUSE") == "true"
+            import threading
+            from datetime import date
+            from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+            from wepppy.climates.gridmet.acquisition import request_single_location_json
+
+            operation = name.removeprefix("delay-")
+            config = replace(config, lease_seconds=300)
+            controller = GridMetAdmissionController(config)
+            connection = controller._connection()
+            original_eval = connection.eval
+            paused = []
+
+            def delay_command(*args):
+                if args[8] == operation and not paused:
+                    paused.append(operation)
+                    connection.execute_command("CLIENT", "PAUSE", 2400, "ALL")
+                return original_eval(*args)
+
+            connection.eval = delay_command
+            if operation == "poll":
+                # Enqueue behind a holder, free capacity, then lose the poll
+                # response while it transitions the existing ticket to active.
+                holder = controller.acquire(request_kind="poll holder")
+                second = controller.acquire(request_kind="second holder")
+                permits.extend([holder, second])
+                controller._transition("enqueue", "waiter", "owner")
+                holder.release()
+                snapshot, _ = controller._retry_transition("poll", "waiter", "owner")
+                assert snapshot.state == "active"
+                controller._transition("release", "waiter", "owner")
+                second.release()
+            elif operation == "release":
+                # Exercise real requests HTTP, response close, permit release,
+                # JSON parsing and validation through the production client.
+                payload = {"data": [{"yyyy-mm-dd": ["2025-01-01"], "pr(mm)": [1.0]}]}
+
+                class Handler(BaseHTTPRequestHandler):
+                    def do_GET(self):
+                        body = json.dumps(payload).encode()
+                        self.send_response(200)
+                        self.send_header("Content-Length", str(len(body)))
+                        self.end_headers()
+                        self.wfile.write(body)
+
+                    def log_message(self, *_args):
+                        pass  # Test HTTP fixture has no request logging.
+
+                server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+                thread = threading.Thread(target=server.serve_forever, daemon=True)
+                thread.start()
+                from wepppy.climates.gridmet import acquisition
+                original_prepare = acquisition._prepare_admission
+                acquisition._prepare_admission = lambda *_args: controller
+                try:
+                    data = request_single_location_json(
+                        f"http://127.0.0.1:{server.server_port}/gridmet",
+                        required_series=("pr(mm)",), start_date=date(2025, 1, 1),
+                        end_date=date(2025, 1, 1), admission=config,
+                    )
+                    assert data == payload["data"][0]
+                    evidence["validated_http"] = True
+                finally:
+                    acquisition._prepare_admission = original_prepare
+                    server.shutdown()
+                    server.server_close()
+                    thread.join(2)
+            else:
+                with controller.acquire(request_kind="socket delay") as permit:
+                    if operation == "renew":
+                        permit.renew()
+                    permit.check()
+                    assert controller.snapshot().active == 1
+            assert paused == [operation]
+            connection.eval = original_eval
+            evidence["pause_ms"] = 2400
         elif name == "clocks":
             real_time = time.time
             time.time = lambda: real_time() + 10**9

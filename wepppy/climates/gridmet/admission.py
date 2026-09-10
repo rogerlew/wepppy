@@ -14,6 +14,7 @@ import re
 import secrets
 import threading
 import time
+import typing
 from dataclasses import dataclass, replace
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
@@ -45,11 +46,15 @@ class GridMetAdmissionConflict(GridMetAdmissionConfigError):
 
 
 class GridMetAdmissionTimeout(GridMetAdmissionError):
-    """The overall monotonic admission deadline has elapsed."""
+    """Legacy exception retained for imports; queue waiting no longer expires."""
 
 
 class GridMetAdmissionUnavailable(GridMetAdmissionError):
     """Redis did not provide a trustworthy admission result."""
+
+
+class _GridMetTransportError(GridMetAdmissionUnavailable):
+    """A retryable Redis transport failure with an unknown command outcome."""
 
 
 class GridMetAdmissionLostLease(GridMetAdmissionError):
@@ -61,6 +66,7 @@ class GridMetAdmissionConfig:
     enabled: bool = True
     key: str = DEFAULT_KEY
     limit: int = 4
+    # Legacy configuration/fingerprint field; never limits live queue waiting.
     wait_timeout_seconds: float = 900.0
     lease_seconds: float = 300.0
     queue_ttl_seconds: float = 60.0
@@ -108,7 +114,7 @@ class GridMetAdmissionConfig:
             raise GridMetAdmissionConfigError("GRIDMET_REDIS_ADMISSION_ENABLED must be a recognized boolean")
         prefix = "GRIDMET_REDIS_ADMISSION_"
         defaults = cls()
-        values = {"key": os.environ.get(prefix + "KEY", defaults.key)}
+        values: dict[str, typing.Any] = {"key": os.environ.get(prefix + "KEY", defaults.key)}
         for name in ("limit", "wait_timeout_seconds", "lease_seconds", "queue_ttl_seconds", "poll_interval_seconds"):
             try:
                 parser = int if name == "limit" else float
@@ -219,8 +225,15 @@ local code = 'ok'
 local ordinal = redis.call('ZSCORE', queue, id)
 local owner = redis.call('HGET', owners, id)
 if op == 'enqueue' then
-    if owner then
+    if owner and owner ~= token then
         code = 'ownership'
+    elseif owner then
+        -- Replay after a lost reply keeps the same ticket and FIFO ordinal.
+        if redis.call('ZSCORE', active, id) then
+            redis.call('ZADD', active, now + lease, id)
+        else
+            redis.call('ZADD', live, now + ttl, id)
+        end
     else
         ordinal = redis.call('INCR', seq)
         redis.call('ZADD', queue, ordinal, id)
@@ -232,6 +245,7 @@ elseif op == 'poll' then
     if not owner then code = 'ok'
     elseif owner ~= token then code = 'ownership'
     elseif redis.call('ZSCORE', live, id) then redis.call('ZADD', live, now + ttl, id)
+    elseif redis.call('ZSCORE', active, id) then redis.call('ZADD', active, now + lease, id)
     else code = 'ownership' end
 elseif op == 'renew' then
     if owner ~= token or not redis.call('ZSCORE', active, id) then code = 'ownership'
@@ -277,7 +291,7 @@ class GridMetAdmissionController:
         self.config = config
         self._redis = None
         self._pid = None
-        self._wait_started = {}
+        self._wait_started: dict[str, tuple[float, float | None]] = {}
         self._keys = tuple(f"{{{config.key}}}:v1:{suffix}" for suffix in ("meta", "sequence", "queue", "liveness", "active", "owners"))
 
     def _connection(self):
@@ -309,6 +323,14 @@ class GridMetAdmissionController:
                 config.queue_ttl_seconds * 1000,
                 math.ceil(2 * max(config.lease_seconds, config.queue_ttl_seconds) * 1000 + 1000),
             )
+        except (redis.exceptions.AuthenticationError, redis.exceptions.AuthorizationError) as exc:
+            raise GridMetAdmissionUnavailable(
+                f"GridMET admission {operation} unavailable ({type(exc).__name__})"
+            ) from None
+        except (redis.exceptions.ConnectionError, redis.exceptions.TimeoutError) as exc:
+            raise _GridMetTransportError(
+                f"GridMET admission {operation} unavailable ({type(exc).__name__})"
+            ) from None
         except (redis.exceptions.RedisError, OSError, ValueError) as exc:
             raise GridMetAdmissionUnavailable(
                 f"GridMET admission {operation} unavailable ({type(exc).__name__})"
@@ -335,13 +357,41 @@ class GridMetAdmissionController:
     def snapshot(self, ticket_or_permit_id: str = "") -> GridMetAdmissionSnapshot:
         return self._transition("snapshot", ticket_or_permit_id)[0]
 
-    def acquire(self, *, request_kind: str, deadline: float | None = None) -> GridMetPermit:
+    def _retry_transition(self, operation, ticket_id, token, *, stop=None, valid_until=None):
+        """Reconcile transport failures; never infer a grant from a lost reply."""
+        failures = 0
+        next_log = 0.0
+        while True:
+            if stop is not None and stop.is_set():
+                return None
+            if valid_until is not None and time.monotonic() >= valid_until:
+                raise GridMetAdmissionLostLease("GridMET admission lease expired during Redis recovery")
+            try:
+                result = self._transition(operation, ticket_id, token)
+            except _GridMetTransportError as exc:
+                failures += 1
+                now = time.monotonic()
+                if now >= next_log:
+                    _LOG.warning("%s; recovering owned state (attempt=%d)", exc, failures)
+                    next_log = now + 30
+                pause = self.config.poll_interval_seconds * random.uniform(0.5, 1.5)
+                if valid_until is not None:
+                    pause = max(0, min(pause, valid_until - now))
+                if stop is None:
+                    time.sleep(pause)
+                else:
+                    stop.wait(pause)
+                continue
+            if valid_until is not None and time.monotonic() >= valid_until:
+                raise GridMetAdmissionLostLease("GridMET admission lease expired during Redis recovery")
+            if failures:
+                _LOG.info("GridMET admission %s recovered after %d transport failures", operation, failures)
+            return result
+
+    def acquire(self, *, request_kind: str) -> GridMetPermit:
         if not re.fullmatch(r"[A-Za-z0-9 _.()-]{1,80}", request_kind):
             raise GridMetAdmissionConfigError("Admission request kind must be a bounded operation label")
         started = time.monotonic()
-        deadline = started + self.config.wait_timeout_seconds if deadline is None else deadline
-        if not math.isfinite(deadline):
-            raise GridMetAdmissionConfigError("Admission deadline must be finite")
         ticket_id, token = secrets.token_hex(16), secrets.token_hex(32)
         self._wait_started[ticket_id] = (started, None)
         snapshot = None
@@ -349,13 +399,7 @@ class GridMetAdmissionController:
         acquired = False
         try:
             while True:
-                remaining = deadline - time.monotonic()
-                if remaining <= 0:
-                    context = "" if snapshot is None else f" (queued={snapshot.queued}, active={snapshot.active}, limit={snapshot.limit})"
-                    raise GridMetAdmissionTimeout(f"GridMET {request_kind} admission deadline exhausted{context}")
-                snapshot, command_started = self._transition(operation, ticket_id, token, waited=time.monotonic() - started)
-                if time.monotonic() >= deadline:
-                    raise GridMetAdmissionTimeout(f"GridMET {request_kind} admission deadline exhausted")
+                snapshot, command_started = self._retry_transition(operation, ticket_id, token)
                 if snapshot.state == "active":
                     ended = time.monotonic()
                     self._wait_started[ticket_id] = (started, ended)
@@ -372,7 +416,7 @@ class GridMetAdmissionController:
                     operation = "enqueue"
                 else:
                     operation = "poll"
-                pause = min(deadline - time.monotonic(), self.config.poll_interval_seconds * random.uniform(0.5, 1.5))
+                pause = self.config.poll_interval_seconds * random.uniform(0.5, 1.5)
                 if pause > 0:
                     time.sleep(pause)
         finally:
@@ -396,8 +440,10 @@ class GridMetPermit:
         self.snapshot = snapshot
         self._failure = None
         self._closed = False
+        self._released = False
         self._stop = threading.Event()
         self._guard = threading.Lock()
+        self._renew_guard = threading.Lock()
         self._thread = None
 
     def _start_renewal(self):
@@ -422,55 +468,70 @@ class GridMetPermit:
                 raise GridMetAdmissionLostLease("GridMET admission permit is no longer locally valid")
 
     def renew(self) -> None:
-        self.check()
-        if self._stop.is_set():
-            return
-        try:
-            _, started = self.controller._transition("renew", self.ticket_id, self._token)
-            with self._guard:
-                if not self._closed:
-                    self._valid_until = started + self.controller.config.lease_seconds
+        # Manual and background renewal must not race on confirmed lease age.
+        with self._renew_guard:
             self.check()
-        except GridMetAdmissionError as exc:
-            with self._guard:
-                self._failure = exc
-            self._stop.set()
-            raise
+            if self._stop.is_set():
+                return
+            try:
+                result = self.controller._retry_transition(
+                    "renew", self.ticket_id, self._token,
+                    stop=self._stop, valid_until=self._valid_until,
+                )
+                if result is None:
+                    return
+                _, started = result
+                with self._guard:
+                    if not self._closed:
+                        self._valid_until = started + self.controller.config.lease_seconds
+                self.check()
+            except GridMetAdmissionError as exc:
+                with self._guard:
+                    self._failure = exc
+                self._stop.set()
+                raise
 
-    def release(self) -> None:
+    def release(self, *, recover: bool = True) -> None:
         self._stop.set()
         with self._guard:
-            if self._closed:
+            if self._released:
                 return
         if self._thread is not None and self._thread is not threading.current_thread():
             self._thread.join(timeout=2 * _SOCKET_TIMEOUT + 0.5)
             if self._thread.is_alive():
                 with self._guard:
                     self._failure = GridMetAdmissionUnavailable("GridMET admission renewal did not stop within its bound")
+        # Revoke local authority before release can commit (including lost replies).
         with self._guard:
             self._closed = True
-        self.controller._transition("release", self.ticket_id, self._token)
+            recover = recover and self._failure is None
+        transition = self.controller._retry_transition if recover else self.controller._transition
+        transition("release", self.ticket_id, self._token)
+        with self._guard:
+            self._released = True
 
     def __enter__(self) -> GridMetPermit:
         try:
             self.check()
         except GridMetAdmissionError:
             try:
-                self.release()
+                self.release(recover=False)
             except GridMetAdmissionError as cleanup_error:
                 _LOG.warning("GridMET admission entry cleanup failed (%s)", type(cleanup_error).__name__)
             raise
         return self
 
-    def __exit__(self, exc_type, exc, tb) -> bool:
+    def __exit__(self, exc_type, exc, tb) -> typing.Literal[False]:
         failure = None
         try:
             self.check()
         except GridMetAdmissionError as admission_error:
             failure = admission_error
         try:
-            self.release()
+            self.release(recover=exc is None and failure is None)
         except GridMetAdmissionError as cleanup_error:
+            with self._guard:
+                failure = self._failure or failure
             if exc is None and failure is None:
                 raise
             _LOG.warning("GridMET admission permit cleanup failed (%s)", type(cleanup_error).__name__)

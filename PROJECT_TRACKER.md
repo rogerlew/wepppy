@@ -7,6 +7,12 @@
 
 ## Purpose
 
+Completed: [GridMET queue recovery](docs/work-packages/20260909_gridmet_queue_recovery/package.md)
+— live queue waiting no longer expires; Redis transport recovery preserves ownership.
+8,192 broad tests, real Redis fault injection and observed public download passed;
+independent reviews passed. Production deployment held.
+
+
 Completed: [Project-grid area-weighted kslast](docs/work-packages/20260909_kslast_area_weighted/package.md)
 — native area means installed; forest restarted; full 46-year WEPP workflow, 505 hillslopes/1259 OFEs and 25 output tables verified; 8174 tests passed; both repositories pushed.
 

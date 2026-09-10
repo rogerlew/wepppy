@@ -4,7 +4,8 @@ This runbook applies to `forest.bearhive.internal`, using the installed `wctl`
 development preset and `docker/docker-compose.dev.yml`. It does not deploy
 production, forest1, registry images, or Kubernetes. The
 [contract](../schemas/gridmet-redis-admission-contract.md) defines behavior;
-[ADR-0050](../adrs/ADR-0050-gridmet-redis-admission.md) owns parameter rationale.
+[ADR-0050](../adrs/ADR-0050-gridmet-redis-admission.md) and
+[ADR-0061](../adrs/ADR-0061-gridmet-persistent-queue-recovery.md) own parameter rationale.
 
 ## Activation
 
@@ -48,9 +49,11 @@ this bounded worker activation.
 ## Diagnostics and acceptance
 
 Snapshot state includes queued and active counts, a zero-based waiting position,
-and elapsed wait. Position is not an ETA. Waiting timeout indicates admission
-pressure; unavailable Redis, conflicting policy, and lost lease are separate
-fail-closed errors. Inspect the effective operational namespace without
+and elapsed wait. Position is not an ETA. Healthy waiters have no age deadline.
+`WAIT_TIMEOUT_SECONDS` remains a legacy compatibility/fingerprint value and does
+not expire waiting requests. Transient Redis transport errors log recovery
+attempts and retry; authentication, malformed state, conflicting policy and lost
+lease remain terminal errors. Inspect the effective operational namespace without
 renewing or removing live owners. Expired entries are pruned on observation.
 
 For operational diagnostics, resolve the worker's actual environment policy:
@@ -80,7 +83,8 @@ wctl docker compose exec -T rq-worker-batch python tools/gridmet_admission_probe
 
 The test key must start `wepppy:gridmet:admission:acceptance:` and include the
 candidate SHA and UTC timestamp. Default test policy is limit two, lease 30,
-queue TTL nine, poll 0.05, and wait 120 seconds. Keep policy identical across
+queue TTL nine and poll 0.05; the legacy wait value is 120 seconds and has no
+effect on queue waiting. Keep policy identical across
 all contenders. Combine their files and the observer file with `summarize
 --key "$GRIDMET_TEST_KEY" --contenders 6 --minimum-containers 2 --input FILE`
 (repeat `--input` for each file). The summary checks contender identities,
@@ -115,7 +119,23 @@ accepted enabled values after any acceptance rollback rehearsal.
 Do not delete an operational namespace while any enabled client can own it.
 Idle metadata expires automatically. A policy change requires draining all
 participating clients and updating them together; mixed live settings fail.
-Operators should assess queue depth, wait errors, upstream retries, lease loss,
+Operators should assess queue depth, transport recovery, upstream retries, lease loss,
 and throughput before revising the ADR and deploying new values. A separate
 registry build, openwepp.org deployment, and batch validation remain the
 operator's later phase.
+
+
+## Recovery signals
+
+Healthy recovery retains live FIFO order, completes releases and leaves no
+abandoned owners beyond heartbeat/lease expiry. A Redis outage can leave a
+request waiting until recovery or explicit job cancellation. Active HTTP still
+requires a confirmed unexpired lease. Increasing the legacy wait value cannot
+fix Redis transport delays. Never bypass capacity checks or delete live keys.
+
+A recurrence of poll/release transport aborts, duplicate grants, occupancy above
+the limit, terminal malformed-state errors or unreclaimed owners requires a new
+incident investigation citing the
+[queue recovery package](../work-packages/20260909_gridmet_queue_recovery/package.md).
+Record pre/post failure counts, queue depth and recovery logs without credentials.
+Historical infrastructure latency for the September 9 incident is not proven.

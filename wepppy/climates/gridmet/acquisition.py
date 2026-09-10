@@ -121,21 +121,20 @@ def validate_single_location_payload(
 
 def _prepare_admission(admission: GridMetAdmissionConfig | None, timeout):
     if admission is None:
-        return None, None
+        return None
     # Local import avoids a cycle: admission errors share our acquisition base.
     from wepppy.climates.gridmet.admission import GridMetAdmissionController
 
     admission.validate_http_timeout(timeout)
-    deadline = time.monotonic() + admission.wait_timeout_seconds
-    return GridMetAdmissionController(admission), deadline
+    return GridMetAdmissionController(admission)
 
 
 @contextmanager
-def _admitted_response(get, url, *, controller, deadline, request_kind, **kwargs):
+def _admitted_response(get, url, *, controller, request_kind, **kwargs):
     context = (
         nullcontext()
         if controller is None
-        else controller.acquire(request_kind=request_kind, deadline=deadline)
+        else controller.acquire(request_kind=request_kind)
     )
     with context as permit:
         response = None
@@ -183,14 +182,13 @@ def request_single_location_json(
     get = requests.get if get is None else get
     sleep = time.sleep if sleep is None else sleep
     operation = "single-location request"
-    controller, deadline = _prepare_admission(admission, SINGLE_LOCATION_TIMEOUT)
+    controller = _prepare_admission(admission, SINGLE_LOCATION_TIMEOUT)
     for attempt in range(MAX_ATTEMPTS):
         try:
             with _admitted_response(
                 get,
                 url,
                 controller=controller,
-                deadline=deadline,
                 request_kind="point",
                 headers={"Accept": "application/json", "referer": "https://wepp.cloud"},
                 timeout=SINGLE_LOCATION_TIMEOUT,

@@ -1,7 +1,8 @@
 # GridMET Redis admission contract
 
-Status: implementation contract, 2026-09-07. Parameter provenance is in
-[ADR-0050](../adrs/ADR-0050-gridmet-redis-admission.md).
+Status: implementation contract, revised 2026-09-09. Parameter provenance is in
+[ADR-0050](../adrs/ADR-0050-gridmet-redis-admission.md) and the queue/recovery correction
+[ADR-0061](../adrs/ADR-0061-gridmet-persistent-queue-recovery.md).
 
 ## Scope and public configuration boundary
 
@@ -46,7 +47,7 @@ these values; the committed development Compose enable default is `false`.
 | Environment variable | Enabled default | Meaning |
 | --- | --- | --- |
 | `GRIDMET_REDIS_ADMISSION_LIMIT` | `4` | Maximum live Redis permits, shared by point and grid |
-| `GRIDMET_REDIS_ADMISSION_WAIT_TIMEOUT_SECONDS` | `900` | Overall deadline for scheduling admission across retries |
+| `GRIDMET_REDIS_ADMISSION_WAIT_TIMEOUT_SECONDS` | `900` | Legacy compatibility field; does not limit queue waiting |
 | `GRIDMET_REDIS_ADMISSION_LEASE_SECONDS` | `300` | Active lease duration after acquisition or renewal |
 | `GRIDMET_REDIS_ADMISSION_QUEUE_TTL_SECONDS` | `60` | Ticket liveness since its last waiting heartbeat |
 | `GRIDMET_REDIS_ADMISSION_POLL_INTERVAL_SECONDS` | `0.25` | Base wait-poll interval with bounded jitter |
@@ -65,11 +66,11 @@ timings cannot exceed Python's `threading.TIMEOUT_MAX`. These are runtime
 representation guards, not additional operational tuning parameters.
 
 Redis connect and socket timeouts are each two seconds, with automatic Redis
-retries disabled. The renewal interval is `min(lease_seconds / 3, 5)` seconds.
+retries disabled at the Redis library layer. Admission operations recover transport
+failures explicitly as described below. The renewal interval is `min(lease_seconds / 3, 5)` seconds.
 Require `lease_seconds > 3 * (renewal_interval + 2)` and
 `queue_ttl_seconds > 3 * (1.5 * poll_interval_seconds + 2)`. Waiting poll jitter
-ranges from half to one-and-a-half times the configured interval, clipped to
-the remaining admission deadline. These relationships leave multiple chances
+ranges from half to one-and-a-half times the configured interval. These relationships leave multiple chances
 to refresh live state without making the queue TTL an HTTP timeout.
 
 Before an enabled HTTP attempt starts, require its lease duration to exceed
@@ -113,13 +114,13 @@ prunes stale logical entries even when no background janitor is running.
 | --- | --- |
 | Enabled, valid, Redis reachable | Enqueue a unique owned ticket and evaluate admission atomically |
 | Enabled, invalid | Raise configuration error before outbound HTTP |
-| Redis unavailable or command outcome unknown | Fail closed; never assume a permit was acquired or renewed |
+| Redis transport unavailable or command outcome unknown | Retry with the same ticket/token; never assume a permit was acquired or renewed |
 | Namespace absent or empty | Initialize policy atomically; head may acquire if capacity exists |
 | Populated queue | Refresh only the caller's live ticket; report queue position and occupancy |
 | Stale waiting ticket | Prune after queue TTL; it no longer blocks FIFO; a resumed owner must obtain a fresh ticket |
 | Active | Count toward limit; renew only while token matches and original lease is still live |
 | Expired lease | Prune; renewal cannot resurrect it; former owner raises lost-lease error |
-| Canceled or timed out waiter | Remove only matching owned queued state; later attempts get a new sequence |
+| Explicitly canceled waiter | Remove only matching owned queued state; later attempts get a new sequence |
 | Released holder | Remove only matching live owned permit; no capacity counter underflow |
 | Foreign ownership | Reject renew/release/cancel; never alter another owner's entry |
 | Configuration conflict | Explicit error; no admission under competing policy |
@@ -132,7 +133,7 @@ expiry when the namespace is idle. A killed process cannot permanently consume
 capacity. Cleanup after exceptions attempts only owned state, uses bounded
 Redis calls, and preserves the primary error while reporting cleanup failure.
 
-## Permit lifecycle, errors, and timeout accounting
+## Permit lifecycle, errors, and recovery
 
 The controller exposes an ownership-safe permit context manager and an
 immutable snapshot. Snapshot fields include ticket state, zero-based waiting
@@ -144,10 +145,10 @@ observer reports zero when the originating monotonic start is unknown. Queue
 position and server time remain available across containers.
 
 The implementation interface shared by clients is
-`GridMetAdmissionController(config).acquire(deadline=..., request_kind=...)`,
+`GridMetAdmissionController(config).acquire(request_kind=...)`,
 returning a context manager whose entered permit exposes `check()`.
-The deadline is an absolute `time.monotonic()` value initialized once before
-the first admission attempt. The context starts background lease renewal
+There is no elapsed queue-wait deadline. A live waiter remains eligible until
+admitted or explicitly canceled. The context starts background lease renewal
 before returning control to HTTP code. `check()` raises any recorded
 renewal failure or lost lease. It also independently rejects local lease expiry,
 even when the renewal thread has not run after a process pause. The local
@@ -163,17 +164,33 @@ Clients check validity immediately before and after `requests.get()`, before
 and after each blocking stream iteration, and after response close. Hold the
 permit through response closing, then release it before parsing/validation,
 conversion, atomic file publication, or retry backoff. Every retry reenters
-FIFO with a new token. One monotonic admission deadline covers elapsed queue
-wait, completed transfers, validation, and backoff across retries; it is never
-reset by a retry. No new admission starts once exhausted. An already admitted
-transfer may finish after the admission deadline if its lease remains valid;
-this deadline is not a total HTTP-transfer timeout.
+FIFO with a new token. HTTP retries and backoff do not consume an admission
+wait budget. The legacy positive wait configuration remains accepted and in the
+fingerprint for compatibility with existing clients, but never expires a waiter.
 
-Distinct exceptions identify invalid/conflicting configuration, admission wait
-exhaustion, Redis unavailability, and lost lease. They remain distinct from
-ordinary upstream failures through dedicated `GridMetAcquisitionError`
-subclasses and are not retried as transient upstream errors.
-Redis/ownership failures are fail-closed even during streaming. Sanitized
+Transport connection and socket timeouts retry at the admission boundary with
+sanitized, rate-limited warnings and a recovery log. Enqueue replay with the
+same ticket/token preserves a live queue ordinal. Enqueue/poll replay of an
+already granted permit confirms matching ownership and refreshes its live lease,
+so a lost grant reply cannot invent a fresh local validity bound on an old lease.
+A ticket pruned after a prolonged outage rejoins the tail. Acquisition and release
+recovery have no elapsed deadline and remain interruptible by process cancellation.
+Renewal retries only within the last confirmed local lease lifetime; release
+signals its recovery loop to stop. A reply after local expiry does not restore
+authority. Release replays idempotent matching-token cleanup, including when the
+first release committed but its reply was lost. Release revokes local authority
+before Redis I/O; acknowledgment is tracked separately so failed cleanup can be
+retried without making the permit usable again. Cleanup during acquisition
+cancellation, invalid context entry or exceptional context exit makes one bounded
+attempt and preserves the primary exception. Abandoned owned state expires.
+
+Authentication/authorization, malformed state, policy conflicts and foreign
+ownership remain explicit terminal errors. They are never classified as
+retryable transport outages. Active lease loss still prevents consumption or
+publication. `GridMetAdmissionTimeout` remains importable for compatibility but
+is no longer raised for queue waiting. Admission errors remain distinct from
+ordinary upstream failures through `GridMetAcquisitionError` subclasses.
+Sanitized
 messages include operation kind and bounded queue/active context when known,
 never credentials, tokens, Redis connection URLs, or full GridMET query URLs.
 
@@ -188,7 +205,7 @@ or delay local cancellation. Consequently this design does not promise a hard
 upstream socket ceiling under arbitrary process suspension or network failure.
 
 Background renewal is required during blocked reads; renewal only between
-chunks is insufficient. On renewal failure the owner records the failure,
+chunks is insufficient. On terminal renewal failure or exhausted lease authority the owner records the failure,
 stops admitting further HTTP work, and closes the response as soon as control
 returns. Requests read timeouts bound socket inactivity rather than total
 streamed wall time; DNS and a thread stalled inside I/O do not have a hard

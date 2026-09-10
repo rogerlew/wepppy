@@ -22,6 +22,16 @@ The `wepppy.climates` package integrates diverse climate data sources into a uni
 - **Climate revisions** adjusting stochastic climates with PRISM monthly normals or observed data
 - **Unified output** to WEPP `.cli` (Climate) and `.prn` (PRiNted input) formats, plus Parquet archives for analysis
 
+## GridMET queue behavior
+
+When shared GridMET admission is enabled, requests wait in FIFO order until
+capacity becomes available or the job is canceled. Busy capacity does not cause
+a 15-minute admission failure. Transient Redis connection delays recover while
+preserving live ownership; abandoned tickets expire through heartbeat tracking.
+HTTP still requires a confirmed active lease. See the
+[admission contract](../../docs/schemas/gridmet-redis-admission-contract.md) and
+[operator diagnostics](../../docs/infrastructure/gridmet-redis-admission.md).
+
 ## Components
 
 ### Core Module Files

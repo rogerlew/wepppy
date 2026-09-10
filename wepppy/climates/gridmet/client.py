@@ -234,7 +234,7 @@ def retrieve_nc(
     os.makedirs(met_dir, exist_ok=True)
     destination = _join(met_dir, f'{_id}.nc')
 
-    controller, deadline = _prepare_admission(admission, GRID_TIMEOUT)
+    controller = _prepare_admission(admission, GRID_TIMEOUT)
     for attempt in range(MAX_ATTEMPTS):
         stage_path = None
         try:
@@ -242,7 +242,6 @@ def retrieve_nc(
                 requests.get,
                 url,
                 controller=controller,
-                deadline=deadline,
                 request_kind="grid",
                 headers={'referer': 'https://wepp.cloud'},
                 stream=True,

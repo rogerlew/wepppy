@@ -56,7 +56,8 @@ def parser() -> argparse.ArgumentParser:
     result.add_argument("mode", choices=("worker", "observe", "run", "public", "inspect", "public-request", "summarize"))
     result.add_argument("--key", required=True)
     result.add_argument("--limit", type=int, default=2)
-    result.add_argument("--wait-seconds", type=bounded_number, default=120.0)
+    result.add_argument("--wait-seconds", type=bounded_number, default=120.0,
+                        help="Legacy policy compatibility value; does not expire queue waiting")
     result.add_argument("--lease-seconds", type=bounded_number, default=30.0)
     result.add_argument("--queue-ttl-seconds", type=bounded_number, default=9.0)
     result.add_argument("--poll-seconds", type=bounded_number, default=0.05)
