@@ -1,6 +1,6 @@
 # Project-grid area-weighted kslast
 
-**Status**: Scaffolded, not executed (2026-09-09)
+**Status**: Implementation, restart and full integration complete; all validation gates passed; publication in progress (2026-09-09 UTC)
 **Timezone**: UTC
 
 ## Purpose
@@ -17,7 +17,7 @@ Excluded: wepp1/wepp2 deployment; new external dependencies; Peridot changes; fi
 
 ## Implementation fidelity and compatibility
 
-Target: faithful implementation of the accepted area-weighted contract, not scaffold/surrogate discovery. This scaffold is non-closable until implemented AND wired behavior passes generated-output and full-run gates. No existing user-visible columns/keys are removed. Add `soils/kslast.tif` and `soils/kslast_summary.json`; preserve nodata in the raster and record coverage/default provenance in the summary. Treat archived/mixed soils roots using canonical NoDir APIs, not unchecked direct writes.
+Target: faithful implementation of the accepted area-weighted contract, not scaffold/surrogate discovery. This scaffold is non-closable until implemented AND wired behavior passes generated-output and full-run gates. No existing user-visible columns/keys are removed. Add `soils/kslast.tif` and `soils/kslast_summary.json`; preserve nodata in the raster and record coverage/default provenance in the summary. Current runtime is directory-only: archive-only roots fail; mixed roots use the existing directory and leave archives untouched. Resolved publication paths remain inside the run and use the active soils maintenance lock.
 
 Compatibility plan: preserve raster_stacker callers that do not supply the new explicit destination nodata option. Keep the Rust API domain-neutral and existing wrapper imports stable. Preserve the no-map preparation path. Rebuild aligned map and summaries from current map/grid inputs before prep to avoid stale cache reuse. Validate every generated `wepp/runs/p*.sol` against the new result for its hillslope, including every MOFE OFE and existing developed-soil exemptions.
 
@@ -27,14 +27,14 @@ Missing cells contribute configured `wepp.kslast` over their area. With any miss
 
 ## Required acceptance
 
-- [ ] Authoritative contract and ADR checkpoint committed before production code.
-- [ ] Native function, wrappers, typing, and unit/integration tests implemented.
-- [ ] Stacker uncovered-area tests pass for sources with and without declared nodata.
-- [ ] Both soil preparation modes use the same area-weighted map results.
-- [ ] Rebuilt release artifact installed through the actual WEPPpy import path.
-- [ ] Local forest restarted with exactly `wctl down` and `wctl up -d`; fresh imports verified in web and worker containers.
-- [ ] Full local seductive-sabra RQ workflow completes with fresh WEPP outputs and verified kslast inputs.
-- [ ] Correctness/security reviews and required quality gates closed.
+- [x] Authoritative contract and ADR checkpoint committed before production code.
+- [x] Native function, wrappers, typing, and unit/integration tests implemented.
+- [x] Stacker uncovered-area tests pass for sources with and without declared nodata.
+- [x] Both soil preparation modes use the same area-weighted map results.
+- [x] Rebuilt release artifact installed through the actual WEPPpy import path.
+- [x] Local forest restarted with exactly `wctl down` and `wctl up -d`; fresh imports verified in web and worker containers.
+- [x] Full local seductive-sabra RQ workflow completes with fresh WEPP outputs and verified kslast inputs.
+- [x] Correctness/security reviews and required quality gates closed.
 - [ ] Both existing branches committed and pushed; remote tips verified.
 
 ## Security impact and authorized operations

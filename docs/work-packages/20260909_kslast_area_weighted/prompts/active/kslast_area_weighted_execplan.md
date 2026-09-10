@@ -11,12 +11,12 @@ Replace single-centroid bedrock-map sampling with a reproducible mean over each 
 - [x] (2026-09-09 UTC) User approved area/default policy and requested scaffolding, native installation, local restart, actual model validation, and both repository pushes.
 - [x] (2026-09-09 UTC) Read-only preflight confirmed host forest, local seductive-sabra and configured kslast raster readable inside WEPPcloud; scalar 0.05 and MOFE enabled.
 - [x] (2026-09-09 UTC) Package, tracker, durable contract, ADR and evidence checklist scaffolded.
-- [ ] M1: commit contract checkpoint and capture external rollback baseline.
-- [ ] M2: implement/test generic native kernel and explicit destination nodata support.
-- [ ] M3: wire shared WEPPpy preparation and additive diagnostics.
-- [ ] M4: build/install native release and verify actual runtime import provenance.
-- [ ] M5: restart local forest Compose and verify fresh processes and imports.
-- [ ] M6: complete full local seductive-sabra RQ/WEPP execution with input/output parity evidence.
+- [x] M1: commit contract checkpoint and capture external rollback baseline.
+- [x] M2: implement/test generic native kernel and explicit destination nodata support.
+- [x] M3: wire shared WEPPpy preparation and additive diagnostics.
+- [x] M4: build/install native release and verify actual runtime import provenance.
+- [x] M5: restart local forest Compose and verify fresh processes and imports.
+- [x] M6: complete full local seductive-sabra RQ/WEPP execution with input/output parity evidence.
 - [ ] M7: close independent reviews and quality gates, commit/push both repositories, archive plan.
 
 ## Surprises & Discoveries
@@ -137,6 +137,24 @@ Staging/atomic publication and explicit current-input validation make map prepar
 ## Outcomes & Retrospective
 
 
-Scaffold only. No production code, native artifact, container lifecycle, or model state was changed in this turn. Execution is pending. The plan is deliberately non-closable until the built/installed native kernel, restarted local runtime, full model workflow, and both repository pushes are evidenced.
+Implemented and installed the generic area mean and shared project-grid prep.
+All 15 RQ jobs completed the unchanged 46-year local run; independent checks
+matched 505 means, 1259 OFEs and 25 fresh output tables. Rust tests: 8 passed;
+release Python: 43 passed; new WEPPpy tests: 28 passed; broad suite: 8174 passed,
+72 skipped. Independent correctness/security findings were corrected and closed.
+Publication/archival is the only remaining step.
+
+Discoveries: NoDir runtime was already directory-only, so the contract was
+corrected before implementation. Generic nodata needs validation after GDAL
+resampling and conversion, not merely against source values. Signed cancellation
+requires scaled Neumaier accumulation. Resolved soil publication paths must
+remain inside the run. The final restart followed the reviewed native rebuild.
+All changes use existing owned components; no dependency or queue wiring changed.
 
 Revision: 2026-09-09 UTC, initial scaffold from the accepted user requirements and read-only source/runtime inspection.
+
+2026-09-09 UTC execution update: contract checkpoints and external backup complete. Native kernel builds; 8 Rust tests and 42 real-raster release tests pass. Shared prep/stacker targeted suite: 21 pass. M2/M3 implemented with further integration tests pending. Directory-only correction and staging rationale are in the canonical contract.
+
+2026-09-09 UTC: M2–M5 complete. 43 native release tests and 28 project-grid/prep tests pass; both real soil workers verified for two OFEs and developed exemptions. Independent numerical, nodata conversion and path-containment findings were fixed and retested. Two authorized local restarts completed; final fresh service hashes match release_manifest.json. Full RQ job 90431b48-4138-4f28-89f6-90a5b3806f7e has completed prep and is executing hillslopes. Broad suite running; M6/M7 remain open.
+
+2026-09-09 23:57 UTC: M6 passed. All 15 RQ jobs finished; unchanged 46-year model completed. Final oracle validates 505 hillslopes / 1259 OFEs and 25 fresh finite output tables (70,151,967 rows), zero defaulted hillslopes. Full-suite and publication gate remain open.

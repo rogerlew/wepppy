@@ -1,0 +1,15 @@
+{
+  "kslast": 0.05,
+  "source": "/geodata/extended_mods_data/wepppy-locations-portland/bedrock/combined_ksat_map.tif",
+  "source_hash": "da8f26c8ccc12871b5b282a13c3096a2c1203f5dd0085ae5547e434979f64c33",
+  "grid": "/wc1/runs/se/seductive-sabra/dem/topaz/SUBWTA.ARC",
+  "grid_hash": "ec503509a164e45f6cf780784caacf07028e3aca04ccfaedd3c01adef0bfe8e1",
+  "hillslopes": 505,
+  "years": 46,
+  "model": "wepp_260430",
+  "multi_ofe": true,
+  "watershed": true,
+  "file_inventory_path": "/tmp/kslast-area-weighted-20260909/baseline-files.json",
+  "file_inventory_sha256": "b12854093f0a9f369034978ac0a6507c2b3b230683d0557254623335b29fe04b",
+  "file_count": 6619
+}

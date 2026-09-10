@@ -1,0 +1,204 @@
+{
+  "90431b48-4138-4f28-89f6-90a5b3806f7e": {
+    "function": "wepppy.rq.wepp_rq.run_wepp_rq",
+    "status": "finished",
+    "created": "2026-09-09 23:43:53.618274",
+    "started": "2026-09-09 23:43:53.654710",
+    "ended": "2026-09-09 23:44:03.845649",
+    "dependencies": [],
+    "children": {
+      "jobs:0,func:_prep_multi_ofe_rq": "873ec94b-b0a7-4720-9b9f-cfb465b46b6b",
+      "jobs:0,func:_prep_climates_rq": "dc701705-b1fb-416a-a82f-79feca31a733",
+      "jobs:0,func:_prep_remaining_rq": "ee7f865a-3a68-4e37-af99-25425315cc7c",
+      "jobs:1,func:run_hillslopes_rq": "5d8ae4ab-496a-4243-bf79-96ef4b65886e",
+      "jobs:2,func:_prep_watershed_rq": "ac77f571-2e44-4f74-8de8-bf745a181b93",
+      "jobs:2,func:_build_hillslope_interchange_rq": "1e7124ca-9bd0-4ad3-aeb3-8c92289ef6ed",
+      "jobs:2,func:_build_totalwatsed3_rq": "641ea5bd-3cef-4262-945a-d000c697e6ac",
+      "jobs:3,func:run_watershed_rq": "afd6dcda-f79b-435d-9ee8-dc281a37fd8c",
+      "jobs:4,func:_post_run_cleanup_out_rq": "512f4826-03ac-45db-b5e9-cf0346133f24",
+      "jobs:4,func:_run_hillslope_watbal_rq": "3a104428-0e8a-47d4-a689-16bdcb384727",
+      "jobs:4,func:_post_watershed_interchange_rq": "9daf98f0-e2ac-4db0-aadd-2703a30f50c7",
+      "jobs:4,func:_analyze_return_periods_rq": "406e37ff-2d23-4659-8a51-8b572299cd83",
+      "jobs:5,func:_post_gpkg_export_rq": "721a27db-c559-4df5-b51a-433637d6aa62",
+      "jobs:6,func:_log_complete_rq": "a880a403-5d42-4346-9940-aeb4fb42ace0"
+    },
+    "exception": null
+  },
+  "a880a403-5d42-4346-9940-aeb4fb42ace0": {
+    "function": "wepppy.rq.wepp_rq._log_complete_rq",
+    "status": "finished",
+    "created": "2026-09-09 23:44:03.842868",
+    "started": "2026-09-09 23:56:19.517234",
+    "ended": "2026-09-09 23:56:19.621385",
+    "dependencies": [
+      "b'rq:job:3a104428-0e8a-47d4-a689-16bdcb384727'",
+      "b'rq:job:1e7124ca-9bd0-4ad3-aeb3-8c92289ef6ed'",
+      "b'rq:job:406e37ff-2d23-4659-8a51-8b572299cd83'",
+      "b'rq:job:641ea5bd-3cef-4262-945a-d000c697e6ac'",
+      "b'rq:job:9daf98f0-e2ac-4db0-aadd-2703a30f50c7'",
+      "b'rq:job:512f4826-03ac-45db-b5e9-cf0346133f24'",
+      "b'rq:job:721a27db-c559-4df5-b51a-433637d6aa62'"
+    ],
+    "children": {},
+    "exception": null
+  },
+  "721a27db-c559-4df5-b51a-433637d6aa62": {
+    "function": "wepppy.rq.wepp_rq._post_gpkg_export_rq",
+    "status": "finished",
+    "created": "2026-09-09 23:44:03.840446",
+    "started": "2026-09-09 23:56:13.050267",
+    "ended": "2026-09-09 23:56:19.487560",
+    "dependencies": [
+      "b'rq:job:3a104428-0e8a-47d4-a689-16bdcb384727'",
+      "b'rq:job:406e37ff-2d23-4659-8a51-8b572299cd83'",
+      "b'rq:job:512f4826-03ac-45db-b5e9-cf0346133f24'",
+      "b'rq:job:9daf98f0-e2ac-4db0-aadd-2703a30f50c7'"
+    ],
+    "children": {},
+    "exception": null
+  },
+  "406e37ff-2d23-4659-8a51-8b572299cd83": {
+    "function": "wepppy.rq.wepp_rq._analyze_return_periods_rq",
+    "status": "finished",
+    "created": "2026-09-09 23:44:03.832846",
+    "started": "2026-09-09 23:56:09.761096",
+    "ended": "2026-09-09 23:56:13.016029",
+    "dependencies": [
+      "b'rq:job:641ea5bd-3cef-4262-945a-d000c697e6ac'",
+      "b'rq:job:9daf98f0-e2ac-4db0-aadd-2703a30f50c7'"
+    ],
+    "children": {},
+    "exception": null
+  },
+  "9daf98f0-e2ac-4db0-aadd-2703a30f50c7": {
+    "function": "wepppy.rq.wepp_rq._post_watershed_interchange_rq",
+    "status": "finished",
+    "created": "2026-09-09 23:44:03.830940",
+    "started": "2026-09-09 23:55:03.210801",
+    "ended": "2026-09-09 23:56:09.717455",
+    "dependencies": [
+      "b'rq:job:1e7124ca-9bd0-4ad3-aeb3-8c92289ef6ed'",
+      "b'rq:job:512f4826-03ac-45db-b5e9-cf0346133f24'"
+    ],
+    "children": {},
+    "exception": null
+  },
+  "3a104428-0e8a-47d4-a689-16bdcb384727": {
+    "function": "wepppy.rq.wepp_rq._run_hillslope_watbal_rq",
+    "status": "finished",
+    "created": "2026-09-09 23:44:03.829071",
+    "started": "2026-09-09 23:54:59.040782",
+    "ended": "2026-09-09 23:55:05.803622",
+    "dependencies": [
+      "b'rq:job:afd6dcda-f79b-435d-9ee8-dc281a37fd8c'",
+      "b'rq:job:1e7124ca-9bd0-4ad3-aeb3-8c92289ef6ed'"
+    ],
+    "children": {},
+    "exception": null
+  },
+  "512f4826-03ac-45db-b5e9-cf0346133f24": {
+    "function": "wepppy.rq.wepp_rq._post_run_cleanup_out_rq",
+    "status": "finished",
+    "created": "2026-09-09 23:44:03.825556",
+    "started": "2026-09-09 23:54:59.040645",
+    "ended": "2026-09-09 23:55:03.167627",
+    "dependencies": [
+      "b'rq:job:afd6dcda-f79b-435d-9ee8-dc281a37fd8c'"
+    ],
+    "children": {},
+    "exception": null
+  },
+  "afd6dcda-f79b-435d-9ee8-dc281a37fd8c": {
+    "function": "wepppy.rq.wepp_rq.run_watershed_rq",
+    "status": "finished",
+    "created": "2026-09-09 23:44:03.823864",
+    "started": "2026-09-09 23:45:28.823335",
+    "ended": "2026-09-09 23:54:59.003494",
+    "dependencies": [
+      "b'rq:job:ac77f571-2e44-4f74-8de8-bf745a181b93'"
+    ],
+    "children": {},
+    "exception": null
+  },
+  "641ea5bd-3cef-4262-945a-d000c697e6ac": {
+    "function": "wepppy.rq.wepp_rq._build_totalwatsed3_rq",
+    "status": "finished",
+    "created": "2026-09-09 23:44:03.822258",
+    "started": "2026-09-09 23:49:00.648108",
+    "ended": "2026-09-09 23:49:09.556648",
+    "dependencies": [
+      "b'rq:job:1e7124ca-9bd0-4ad3-aeb3-8c92289ef6ed'"
+    ],
+    "children": {},
+    "exception": null
+  },
+  "1e7124ca-9bd0-4ad3-aeb3-8c92289ef6ed": {
+    "function": "wepppy.rq.wepp_rq._build_hillslope_interchange_rq",
+    "status": "finished",
+    "created": "2026-09-09 23:44:03.820447",
+    "started": "2026-09-09 23:45:20.961650",
+    "ended": "2026-09-09 23:49:00.611381",
+    "dependencies": [
+      "b'rq:job:5d8ae4ab-496a-4243-bf79-96ef4b65886e'"
+    ],
+    "children": {},
+    "exception": null
+  },
+  "ac77f571-2e44-4f74-8de8-bf745a181b93": {
+    "function": "wepppy.rq.wepp_rq._prep_watershed_rq",
+    "status": "finished",
+    "created": "2026-09-09 23:44:03.816844",
+    "started": "2026-09-09 23:45:20.962529",
+    "ended": "2026-09-09 23:45:28.790237",
+    "dependencies": [
+      "b'rq:job:5d8ae4ab-496a-4243-bf79-96ef4b65886e'"
+    ],
+    "children": {},
+    "exception": null
+  },
+  "5d8ae4ab-496a-4243-bf79-96ef4b65886e": {
+    "function": "wepppy.rq.wepp_rq._run_hillslopes_rq",
+    "status": "finished",
+    "created": "2026-09-09 23:44:03.813226",
+    "started": "2026-09-09 23:44:38.764867",
+    "ended": "2026-09-09 23:45:20.926092",
+    "dependencies": [
+      "b'rq:job:ee7f865a-3a68-4e37-af99-25425315cc7c'"
+    ],
+    "children": {},
+    "exception": null
+  },
+  "ee7f865a-3a68-4e37-af99-25425315cc7c": {
+    "function": "wepppy.rq.wepp_rq._prep_remaining_rq",
+    "status": "finished",
+    "created": "2026-09-09 23:44:03.809206",
+    "started": "2026-09-09 23:44:35.813155",
+    "ended": "2026-09-09 23:44:38.725336",
+    "dependencies": [
+      "b'rq:job:873ec94b-b0a7-4720-9b9f-cfb465b46b6b'",
+      "b'rq:job:dc701705-b1fb-416a-a82f-79feca31a733'"
+    ],
+    "children": {},
+    "exception": null
+  },
+  "dc701705-b1fb-416a-a82f-79feca31a733": {
+    "function": "wepppy.rq.wepp_rq._prep_climates_rq",
+    "status": "finished",
+    "created": "2026-09-09 23:44:03.808020",
+    "started": "2026-09-09 23:44:03.840757",
+    "ended": "2026-09-09 23:44:04.832665",
+    "dependencies": [],
+    "children": {},
+    "exception": null
+  },
+  "873ec94b-b0a7-4720-9b9f-cfb465b46b6b": {
+    "function": "wepppy.rq.wepp_rq._prep_multi_ofe_rq",
+    "status": "finished",
+    "created": "2026-09-09 23:44:03.805239",
+    "started": "2026-09-09 23:44:03.840860",
+    "ended": "2026-09-09 23:44:35.767384",
+    "dependencies": [],
+    "children": {},
+    "exception": null
+  }
+}

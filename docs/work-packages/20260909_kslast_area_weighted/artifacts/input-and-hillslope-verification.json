@@ -1,0 +1,48 @@
+{
+  "hillslopes": 505,
+  "ofes": 1259,
+  "developed_exemptions": [],
+  "defaulted_hillslopes": 0,
+  "aggregation_rtol": 1e-12,
+  "aggregation_atol": 1e-12,
+  "soil_tolerance": 1e-12,
+  "tables": {
+    "wepp/output/interchange/totalwatsed3.parquet": {
+      "rows": 16802,
+      "sha256": "9fae805d0fecaace4fe67ca859f1838b65aa4884c178d501323306e4445cae3e",
+      "finite_batches": 73
+    },
+    "wepp/output/interchange/H.soil.parquet": {
+      "rows": 21153718,
+      "sha256": "ef6721e3d9185c51e8683827b6a44b636d6bd09e48ac849711bd2a1df06613f0",
+      "finite_batches": 3876
+    },
+    "wepp/output/interchange/H.loss.parquet": {
+      "rows": 2525,
+      "sha256": "4fea537dc320f7f7a373711ad8df24d2e437f31a729c4597e72edff9d69bdfeb",
+      "finite_batches": 8
+    },
+    "wepp/output/interchange/H.element.parquet": {
+      "rows": 2905726,
+      "sha256": "f50f03f146df7987c5a84e7a2230b0a87c6958faefa059c00ec3fc220339f1d0",
+      "finite_batches": 990
+    },
+    "wepp/output/interchange/H.pass.parquet": {
+      "rows": 8485010,
+      "sha256": "3133b0e1c072da035580caa607219516370f50ca954506a81cfe1c998d4d97ca",
+      "finite_batches": 3120
+    },
+    "wepp/output/interchange/H.ebe.parquet": {
+      "rows": 442880,
+      "sha256": "30f48ba65eade6f57060422d41560d079d212e8cc455e6e8cb445bc38a5d2411",
+      "finite_batches": 91
+    },
+    "wepp/output/interchange/H.wat.parquet": {
+      "rows": 21153718,
+      "sha256": "6a9c48294a58f10e5f545671993116556b76d4d8abd9aaa80a7fd1a52fda35ac",
+      "finite_batches": 7429
+    }
+  },
+  "model": "wepp_260430",
+  "years": 46
+}

@@ -1,0 +1,86 @@
+{
+  "weppcloud": {
+    "before": {
+      "CreatedAt": "2026-09-09 14:20:04 -0700 PDT",
+      "ID": "3acf21c9a029",
+      "Image": "wepppy-dev",
+      "Name": "weppcloud",
+      "Service": "weppcloud",
+      "State": "running",
+      "Status": "Up 2 hours"
+    },
+    "after": {
+      "CreatedAt": "2026-09-09 16:42:36 -0700 PDT",
+      "ID": "d236fe9a14c6",
+      "Image": "wepppy-dev",
+      "Name": "weppcloud",
+      "Service": "weppcloud",
+      "State": "running",
+      "Status": "Up 18 seconds",
+      "StartedAt": "2026-09-09T23:42:50.812314773Z"
+    }
+  },
+  "rq-engine": {
+    "before": {
+      "CreatedAt": "2026-09-09 14:20:02 -0700 PDT",
+      "ID": "d255cd9343ac",
+      "Image": "wepppy-dev",
+      "Name": "wepppy-rq-engine",
+      "Service": "rq-engine",
+      "State": "running",
+      "Status": "Up 2 hours"
+    },
+    "after": {
+      "CreatedAt": "2026-09-09 16:42:35 -0700 PDT",
+      "ID": "a6a1ef040a20",
+      "Image": "wepppy-dev",
+      "Name": "wepppy-rq-engine",
+      "Service": "rq-engine",
+      "State": "running",
+      "Status": "Up 28 seconds",
+      "StartedAt": "2026-09-09T23:42:41.28016476Z"
+    }
+  },
+  "rq-worker": {
+    "before": {
+      "CreatedAt": "2026-09-09 14:20:04 -0700 PDT",
+      "ID": "fbd5bb954030",
+      "Image": "wepppy-dev",
+      "Name": "wepppy-rq-worker",
+      "Service": "rq-worker",
+      "State": "running",
+      "Status": "Up 2 hours"
+    },
+    "after": {
+      "CreatedAt": "2026-09-09 16:42:36 -0700 PDT",
+      "ID": "6a5a81f81002",
+      "Image": "wepppy-dev",
+      "Name": "wepppy-rq-worker",
+      "Service": "rq-worker",
+      "State": "running",
+      "Status": "Up 25 seconds",
+      "StartedAt": "2026-09-09T23:42:44.032624049Z"
+    }
+  },
+  "rq-worker-batch": {
+    "before": {
+      "CreatedAt": "2026-09-09 14:20:04 -0700 PDT",
+      "ID": "406e77e70801",
+      "Image": "wepppy-dev",
+      "Name": "wepppy-rq-worker-batch",
+      "Service": "rq-worker-batch",
+      "State": "running",
+      "Status": "Up 2 hours"
+    },
+    "after": {
+      "CreatedAt": "2026-09-09 16:42:36 -0700 PDT",
+      "ID": "6c90246e0aec",
+      "Image": "wepppy-dev",
+      "Name": "wepppy-rq-worker-batch",
+      "Service": "rq-worker-batch",
+      "State": "running",
+      "Status": "Up 26 seconds",
+      "StartedAt": "2026-09-09T23:42:43.781401465Z"
+    }
+  }
+}

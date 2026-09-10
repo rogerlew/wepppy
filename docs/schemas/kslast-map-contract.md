@@ -1,6 +1,6 @@
 # Project-grid kslast map contract
 
-Status: accepted design, 2026-09-09; implementation pending. Authority for WEPPpy bedrock-map preparation in ordinary and MOFE workflows. Provenance: [ADR](../adrs/20260909_kslast_area_weighted.md).
+Status: accepted design, 2026-09-09; implemented and validated on local forest. Authority for WEPPpy bedrock-map preparation in ordinary and MOFE workflows. Provenance: [ADR](../adrs/20260909_kslast_area_weighted.md).
 
 ## Grid and artifacts
 

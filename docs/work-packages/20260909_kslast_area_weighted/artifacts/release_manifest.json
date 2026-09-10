@@ -1,0 +1,100 @@
+{
+  "source_commit": "125edc1565a37f629889278e3560b1a0af4b44d2",
+  "build_command": "PYO3_PYTHON=/usr/bin/python3.12 cargo build --release -p raster_characteristics_rust",
+  "python": "Python 3.12.3",
+  "rust": "rustc 1.92.0 (ded5c06cf 2025-12-08)",
+  "gdal": "3.10.1",
+  "files": {
+    "raster_characteristics/src/area_mean.rs": "adeb1573c8c20f06228e9ec41f8d98890a2a7995e0b996e378151ca5ad4a65f4",
+    "raster_characteristics/src/lib.rs": "a4f87d0b39b556c594fdeb830927de1042fedb3688514d8f651151a939c7e517",
+    "release/linux/py312/wepppyo3/raster_characteristics/__init__.py": "80901e6d5ab1143023372e6b357c4d3425a6dfa1307f457f94a66a33e31d7694",
+    "release/linux/py312/wepppyo3/raster_characteristics/raster_characteristics_rust.so": "587bb3371c282296291f233d6674d4bcad65f950d966f7cd71c0162cdb279b54"
+  },
+  "refreshed_utc": "2026-09-09T23:42:36.537537+00:00",
+  "installation": "Atomic same-directory .so rename into mounted canonical py312 release tree; restart fresh Compose services",
+  "runtime": {
+    "weppcloud": {
+      "uid": 1000,
+      "gid": 993,
+      "python": "3.12.14 (main, Aug 25 2026, 01:17:55) [GCC 14.2.0]",
+      "module": "/workdir/wepppyo3/release/linux/py312/wepppyo3/raster_characteristics/__init__.py",
+      "native": "/workdir/wepppyo3/release/linux/py312/wepppyo3/raster_characteristics/raster_characteristics_rust.so",
+      "sha256": "587bb3371c282296291f233d6674d4bcad65f950d966f7cd71c0162cdb279b54",
+      "result": {
+        "11": {
+          "mean": 11.0,
+          "valid_cell_count": 2,
+          "missing_cell_count": 0,
+          "total_cell_count": 2
+        }
+      }
+    },
+    "rq-engine": {
+      "uid": 1000,
+      "gid": 993,
+      "python": "3.12.14 (main, Aug 25 2026, 01:17:55) [GCC 14.2.0]",
+      "module": "/workdir/wepppyo3/release/linux/py312/wepppyo3/raster_characteristics/__init__.py",
+      "native": "/workdir/wepppyo3/release/linux/py312/wepppyo3/raster_characteristics/raster_characteristics_rust.so",
+      "sha256": "587bb3371c282296291f233d6674d4bcad65f950d966f7cd71c0162cdb279b54",
+      "result": {
+        "11": {
+          "mean": 11.0,
+          "valid_cell_count": 2,
+          "missing_cell_count": 0,
+          "total_cell_count": 2
+        }
+      }
+    },
+    "rq-worker": {
+      "uid": 1000,
+      "gid": 993,
+      "python": "3.12.14 (main, Aug 25 2026, 01:17:55) [GCC 14.2.0]",
+      "module": "/workdir/wepppyo3/release/linux/py312/wepppyo3/raster_characteristics/__init__.py",
+      "native": "/workdir/wepppyo3/release/linux/py312/wepppyo3/raster_characteristics/raster_characteristics_rust.so",
+      "sha256": "587bb3371c282296291f233d6674d4bcad65f950d966f7cd71c0162cdb279b54",
+      "result": {
+        "11": {
+          "mean": 11.0,
+          "valid_cell_count": 2,
+          "missing_cell_count": 0,
+          "total_cell_count": 2
+        }
+      }
+    },
+    "rq-worker-batch": {
+      "uid": 1000,
+      "gid": 993,
+      "python": "3.12.14 (main, Aug 25 2026, 01:17:55) [GCC 14.2.0]",
+      "module": "/workdir/wepppyo3/release/linux/py312/wepppyo3/raster_characteristics/__init__.py",
+      "native": "/workdir/wepppyo3/release/linux/py312/wepppyo3/raster_characteristics/raster_characteristics_rust.so",
+      "sha256": "587bb3371c282296291f233d6674d4bcad65f950d966f7cd71c0162cdb279b54",
+      "result": {
+        "11": {
+          "mean": 11.0,
+          "valid_cell_count": 2,
+          "missing_cell_count": 0,
+          "total_cell_count": 2
+        }
+      }
+    }
+  },
+  "proj": "9.4.1",
+  "benchmark": {
+    "shape": [
+      1984,
+      2044
+    ],
+    "hillslopes": 505,
+    "seconds": [
+      0.6200599740259349,
+      0.6397709469310939,
+      0.5312221699859947
+    ],
+    "process_peak_rss_kib": 542856,
+    "note": "Whole-process high-water RSS includes WEPPpy imports; no comparative performance claim."
+  },
+  "model_binaries": {
+    "wepp_runner/bin/wepp_260430": "b11c94d8ba19deb941e4221977c4ec3437f41f612a2b816beacaca1b15563292",
+    "wepp_runner/bin/wepp_260430_hill": "3b2fdd2b7a9e264b84f1e7b161dfb0730d49d3cb652218139efeb3ba17d7a160"
+  }
+}

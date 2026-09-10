@@ -7,8 +7,8 @@
 
 ## Purpose
 
-Scaffolded: [Project-grid area-weighted kslast](docs/work-packages/20260909_kslast_area_weighted/package.md)
-— generic wepppyo3 mean, explicit uncovered nodata, native installation, required local forest restart and full seductive-sabra WEPP validation; execution pending.
+Executing: [Project-grid area-weighted kslast](docs/work-packages/20260909_kslast_area_weighted/package.md)
+— generic wepppyo3 mean, explicit uncovered nodata, native installation, required local forest restart and full seductive-sabra WEPP validation; native installation/restart verified; full model and broad validation running.
 
 Completed: [Peridot centroid projection](docs/work-packages/20260909_peridot_centroid_projection/package.md)
 — pointwise PROJ conversion and three vendored binaries; 51 Rust and 8146 broad Python tests passed, with container and MOFE input validation.

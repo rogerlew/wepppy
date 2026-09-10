@@ -1,0 +1,45 @@
+{
+  "full_pytest": {
+    "passed": 8174,
+    "skipped": 72,
+    "warnings": 3110,
+    "seconds": 900.45
+  },
+  "native_python_tests": 43,
+  "rust_tests": 8,
+  "project_grid_tests": 28,
+  "logs": {
+    "full-pytest.log": {
+      "path": "/tmp/kslast-area-weighted-20260909/full-pytest.log",
+      "sha256": "d2d882cda320149e3aecfc97f6251e500800fc13e88c45979328f05698d9c0e3"
+    },
+    "stubtest-configured.log": {
+      "path": "/tmp/kslast-area-weighted-20260909/stubtest-configured.log",
+      "sha256": "5f0800e43dbf10f9a8902d0d2be3652845f4257770eda2547fe144501549234c"
+    },
+    "check-stubs.log": {
+      "path": "/tmp/kslast-area-weighted-20260909/check-stubs.log",
+      "sha256": "ee775a79bf72d0202e3135c0d4e59ad4f41917f6c8f5360c8ee45ffa249bc0cc"
+    },
+    "broad-exceptions.log": {
+      "path": "/tmp/kslast-area-weighted-20260909/broad-exceptions.log",
+      "sha256": "36872e69b274d9fb203a694ae7644457e3f4bd7b338d6df67c6596d8f543ef95"
+    },
+    "quality-final.md": {
+      "path": "/tmp/kslast-area-weighted-20260909/quality-final.md",
+      "sha256": "544f0f9af794d52aafee38fe1d33eee8697e24b1b1d147e1f5eb78f65b85cc36"
+    },
+    "final-down.log": {
+      "path": "/tmp/kslast-area-weighted-20260909/final-down.log",
+      "sha256": "10ff605fab12744c822ef7da5b086c240385396e1da6887ddaf97d631560c89c"
+    },
+    "final-up.log": {
+      "path": "/tmp/kslast-area-weighted-20260909/final-up.log",
+      "sha256": "1bee0e8d22fd001b738e7ba41235f6f99f985f471a9ad7ba1077587aa6709069"
+    },
+    "verify-final.log": {
+      "path": "/tmp/kslast-area-weighted-20260909/verify-final.log",
+      "sha256": "143c189e6c53bb8cce7bb25cea8601234811bbf3305cca08a672c345206ab6ee"
+    }
+  }
+}
