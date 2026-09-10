@@ -20,7 +20,7 @@ Confirmed gates:
 
 Full watershed/postprocessing job tree and final output verification passed: 15 jobs, 505 hillslopes, 1259 OFEs, 25 tables.
 `wctl run-pytest tests --maxfail=1`: **8174 passed, 72 skipped**, 3110 warnings, 900.45 seconds.
-Final publication receipt/tip checks follow below.
+Both validated revisions pushed and remote-verified; see [publication receipt](publication.json).
 Raw logs remain at `/tmp/kslast-area-weighted-20260909/`; unrelated preexisting
 code-quality-report.json and code-quality-summary.md were not overwritten.
 
@@ -42,3 +42,5 @@ boundary. Legacy no-map/worker arguments remain covered. The broad suite passes.
 The observed stacker size increase is justified above. Remaining limits are the
 explicit projected-grid contract and workload-bounded performance evidence;
 no claim of exhaustive malformed-raster or extreme-size coverage is made.
+
+Validated release/evidence SHAs: WEPPpy `252bac87998a3c2a900b64bb4495f0078466e04b`; wepppyo3 `d6641abfe3a932826b0e161494c7eafd0ba4e8d8`. The final WEPPpy documentation-closeout commit is also pushed and its local/remote tip equality checked at handoff.

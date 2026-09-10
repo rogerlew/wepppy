@@ -2,7 +2,7 @@
 
 ## Status
 
-2026-09-09 UTC: implementation, installed native release, fresh local restart, full WEPP integration and all test/review gates passed. Native main pushed; WEPPpy evidence/closeout publication in progress.
+2026-09-09 UTC: implementation, installed native release, fresh local restart, full WEPP integration and all test/review gates passed. Both repositories pushed and remote-verified; package complete.
 
 ## Task board
 
@@ -14,7 +14,7 @@
 - [x] M4: build/install py312 extension and validate source-to-import provenance.
 - [x] M5: drain local work, `wctl down`, `wctl up -d`, verify new processes/imports.
 - [x] M6: run full local seductive-sabra WEPP workflow and verify outputs.
-- [ ] M7: complete reviews/gates, commit and push both repositories, close package.
+- [x] M7: complete reviews/gates, commit and push both repositories, close package.
 
 ## Decisions
 
@@ -30,10 +30,12 @@ Restart affects other local services; wait for active local jobs to finish and v
 
 ## Publication ledger
 
-WEPPpy branch observed: master. wepppyo3 branch observed: main at 2c31f6c. Recheck at execution; do not switch branches. WEPPpy has unrelated dirty changes; stage only package-owned hunks. Source commit, release hash, integration job IDs, final commits, and remote tips: pending execution.
+WEPPpy master implementation: `9e1c48f4d`; validated evidence publication: `252bac87998a3c2a900b64bb4495f0078466e04b`. wepppyo3 main native source: `125edc1`; published release: `d6641abfe3a932826b0e161494c7eafd0ba4e8d8`. Both remote tips were verified before this documentation closeout; see artifacts/publication.json. Release hash, process identities and full job tree are recorded in artifacts. Unrelated dirty code-quality files remain untouched.
 
 2026-09-09 UTC execution update: contract checkpoints and external backup complete. Native kernel builds; 8 Rust tests and 42 real-raster release tests pass. Shared prep/stacker targeted suite: 21 pass. M2/M3 implemented with further integration tests pending. Directory-only correction and staging rationale are in the canonical contract.
 
 2026-09-09 UTC: M2–M5 complete. 43 native release tests and 28 project-grid/prep tests pass; both real soil workers verified for two OFEs and developed exemptions. Independent numerical, nodata conversion and path-containment findings were fixed and retested. Two authorized local restarts completed; final fresh service hashes match release_manifest.json. Full RQ job 90431b48-4138-4f28-89f6-90a5b3806f7e has completed prep and is executing hillslopes. Broad suite running; M6/M7 remain open.
 
 2026-09-09 23:57 UTC: M6 passed. All 15 RQ jobs finished; unchanged 46-year model completed. Final oracle validates 505 hillslopes / 1259 OFEs and 25 fresh finite output tables (70,151,967 rows), zero defaulted hillslopes. Full-suite and publication gate remain open.
+
+2026-09-10 00:01 UTC: All milestones complete. Both validated revisions pushed and remote-verified: WEPPpy 252bac87998a3c2a900b64bb4495f0078466e04b; wepppyo3 d6641abfe3a932826b0e161494c7eafd0ba4e8d8. Publication receipt: artifacts/publication.json. Final documentation closeout is pushed on the same WEPPpy branch and its tip checked at handoff.

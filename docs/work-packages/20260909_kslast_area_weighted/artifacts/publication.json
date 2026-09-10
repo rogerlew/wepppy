@@ -1,0 +1,16 @@
+{
+  "verified_at": "2026-09-10 00:01 UTC",
+  "scope": "Validated implementation and evidence revisions; this receipt is followed only by documentation closeout on WEPPpy master.",
+  "wepppy": {
+    "branch": "master",
+    "validated_commit": "252bac87998a3c2a900b64bb4495f0078466e04b",
+    "remote_tip_at_receipt": "252bac87998a3c2a900b64bb4495f0078466e04b",
+    "verified": true
+  },
+  "wepppyo3": {
+    "branch": "main",
+    "validated_commit": "d6641abfe3a932826b0e161494c7eafd0ba4e8d8",
+    "remote_tip_at_receipt": "d6641abfe3a932826b0e161494c7eafd0ba4e8d8",
+    "verified": true
+  }
+}

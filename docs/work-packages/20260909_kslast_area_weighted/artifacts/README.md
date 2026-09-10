@@ -11,3 +11,5 @@ model outputs remain outside Git as described in baseline.md.
 - [Independent correctness review](20260909_correctness_review.md), [focused security review](20260909_security_review.md).
 
 Full watershed/postprocessing acceptance: [integration summary](integration.md), [final verification](integration-verification.json). Final gates/publication: [validation](validation.md).
+
+Both repositories published: [receipt](publication.json).

@@ -1,6 +1,6 @@
 # Project-grid area-weighted kslast
 
-**Status**: Implementation, restart and full integration complete; all validation gates passed; publication in progress (2026-09-09 UTC)
+**Status**: Complete (2026-09-10 00:01 UTC)
 **Timezone**: UTC
 
 ## Purpose
@@ -9,7 +9,7 @@ Replace hillslope-centroid sampling of bedrock conductivity with an arithmetic a
 
 ## Authority and approved scope
 
-The user approved the design and requested this scaffold on 2026-09-09. Execute against [the active ExecPlan](prompts/active/kslast_area_weighted_execplan.md). Durable policy: [kslast map contract](../../schemas/kslast-map-contract.md); decision provenance: [ADR](../../adrs/20260909_kslast_area_weighted.md).
+The user approved the design and requested this scaffold on 2026-09-09. Execute against [the completed ExecPlan](prompts/completed/kslast_area_weighted_execplan.md). Durable policy: [kslast map contract](../../schemas/kslast-map-contract.md); decision provenance: [ADR](../../adrs/20260909_kslast_area_weighted.md).
 
 Included: generic Rust mean and coverage statistics; explicit destination nodata in raster_stacker; project-grid kslast preparation shared by ordinary and MOFE paths; native build/release/import verification; local forest `wctl down` then `wctl up -d`; full RQ WEPP preparation, model execution, and post-processing on seductive-sabra; tests, documentation, reviews, scoped commits and pushes in WEPPpy and wepppyo3.
 
@@ -35,7 +35,7 @@ Missing cells contribute configured `wepp.kslast` over their area. With any miss
 - [x] Local forest restarted with exactly `wctl down` and `wctl up -d`; fresh imports verified in web and worker containers.
 - [x] Full local seductive-sabra RQ workflow completes with fresh WEPP outputs and verified kslast inputs.
 - [x] Correctness/security reviews and required quality gates closed.
-- [ ] Both existing branches committed and pushed; remote tips verified.
+- [x] Both existing branches committed and pushed; remote tips verified.
 
 ## Security impact and authorized operations
 

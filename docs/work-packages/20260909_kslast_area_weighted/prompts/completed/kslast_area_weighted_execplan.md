@@ -1,5 +1,7 @@
 # Implement and validate project-grid area-weighted kslast
 
+Completed 2026-09-10 UTC: native and WEPPpy changes built, installed, tested and published; full local 46-year run passed after restart. See Outcomes & Retrospective and artifacts/publication.json.
+
 ## Purpose / Big Picture
 
 
@@ -17,7 +19,7 @@ Replace single-centroid bedrock-map sampling with a reproducible mean over each 
 - [x] M4: build/install native release and verify actual runtime import provenance.
 - [x] M5: restart local forest Compose and verify fresh processes and imports.
 - [x] M6: complete full local seductive-sabra RQ/WEPP execution with input/output parity evidence.
-- [ ] M7: close independent reviews and quality gates, commit/push both repositories, archive plan.
+- [x] M7: close independent reviews and quality gates, commit/push both repositories, archive plan.
 
 ## Surprises & Discoveries
 
@@ -142,7 +144,7 @@ All 15 RQ jobs completed the unchanged 46-year local run; independent checks
 matched 505 means, 1259 OFEs and 25 fresh output tables. Rust tests: 8 passed;
 release Python: 43 passed; new WEPPpy tests: 28 passed; broad suite: 8174 passed,
 72 skipped. Independent correctness/security findings were corrected and closed.
-Publication/archival is the only remaining step.
+Both validated revisions are published; this closeout archives the plan and records the publication receipt.
 
 Discoveries: NoDir runtime was already directory-only, so the contract was
 corrected before implementation. Generic nodata needs validation after GDAL
@@ -158,3 +160,5 @@ Revision: 2026-09-09 UTC, initial scaffold from the accepted user requirements a
 2026-09-09 UTC: M2–M5 complete. 43 native release tests and 28 project-grid/prep tests pass; both real soil workers verified for two OFEs and developed exemptions. Independent numerical, nodata conversion and path-containment findings were fixed and retested. Two authorized local restarts completed; final fresh service hashes match release_manifest.json. Full RQ job 90431b48-4138-4f28-89f6-90a5b3806f7e has completed prep and is executing hillslopes. Broad suite running; M6/M7 remain open.
 
 2026-09-09 23:57 UTC: M6 passed. All 15 RQ jobs finished; unchanged 46-year model completed. Final oracle validates 505 hillslopes / 1259 OFEs and 25 fresh finite output tables (70,151,967 rows), zero defaulted hillslopes. Full-suite and publication gate remain open.
+
+2026-09-10 00:01 UTC: All milestones complete. Both validated revisions pushed and remote-verified: WEPPpy 252bac87998a3c2a900b64bb4495f0078466e04b; wepppyo3 d6641abfe3a932826b0e161494c7eafd0ba4e8d8. Publication receipt: artifacts/publication.json. Final documentation closeout is pushed on the same WEPPpy branch and its tip checked at handoff.
