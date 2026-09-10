@@ -1,6 +1,6 @@
 # DEVAL execution identity tracker
 
-Status: active. Owner: Codex.
+Status: complete. Owner: Codex.
 
 September 10 UTC: confirmed legacy 0600 input recurrence; recovered single job;
 verified deployed writer fix and diagnosed worker/renderer UID mismatch. Started
@@ -31,7 +31,10 @@ Full broad validation passed: 8,194 passed, 77 skipped in 854.71 seconds, includ
 the disturbed simulation matrix. Documentation lint passed. The isolated canary
 copy was removed after retaining reviewed evidence.
 
-Acceptance outstanding: commit and push only this repair and fast-forward host
-source checkouts. Container-layer fixes survive ordinary
+Implementation commit `f3baad964` was pushed to origin/master and both wepp1 and
+wepp2 source checkouts were fast-forwarded to it. Source SHA256 matches all four
+patched worker containers. No unrelated local changes were included.
+
+All acceptance gates passed. Container-layer fixes survive ordinary
 restart; the canonical deployment rebuilds locally built images from the fixed
 source before recreation. Do not recreate from an older image outside that workflow.

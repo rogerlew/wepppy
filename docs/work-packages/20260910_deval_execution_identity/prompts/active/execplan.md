@@ -23,7 +23,8 @@ and prove fresh output through the deployed worker and renderer.
 - [x] Full broad suite passed: 8,194 passed, 77 skipped in 854.71 seconds.
 - [x] Applied bounded source correction on both shared-queue production hosts;
   actual queued job and authenticated report readback passed.
-- [ ] Commit/push and fast-forward production source checkouts.
+- [x] Committed/pushed `f3baad964` and fast-forwarded both production source
+  checkouts; source hash matches all patched workers.
 - [x] Removed the isolated canary copy after recording reviewed evidence.
 
 ## Surprises & Discoveries
@@ -96,7 +97,7 @@ The runtime correction passed on both production hosts, including unchanged
 queued replacement of an existing report, and authenticated Flask artifact
 readback. No workers were restarted or queues modified beyond the canary job.
 Source backups remain available in each patched worker. Full-suite validation
-passed; source publication remains open. No image or Compose configuration changed;
+and source publication passed; this plan is complete. No image or Compose configuration changed;
 ordinary restart retains the patched layer, and the supported deploy script
 rebuilds the fixed source before recreating locally built containers.
 

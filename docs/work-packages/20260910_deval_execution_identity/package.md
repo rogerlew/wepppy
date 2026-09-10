@@ -1,5 +1,10 @@
 # DEVAL execution identity recurrence
 
+Status: complete. Implementation `f3baad964` is pushed and synchronized to both
+production source checkouts; live default/batch workers on both hosts are fixed.
+Full suite: 8,194 passed, 77 skipped. Production acceptance and independent reviews
+are recorded under `artifacts/`.
+
 Fix recurring Compose report permission failures for existing and future runs.
 Execute [the active plan](prompts/active/execplan.md). The user explicitly requested
 a durable production correction after the second permissions repair left legacy
