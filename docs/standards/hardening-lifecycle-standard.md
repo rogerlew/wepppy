@@ -20,6 +20,37 @@ Apply this standard when any of the following are true:
 - code introduces temporary defensive logic, toggles, delays, or wrappers,
 - a team wants to remove or reduce prior defensive complexity.
 
+## Authority and Working Behavior
+
+The requested task defines the agent's authority. Preserve existing working
+behavior unless the operator requests its change. Image publication, dependency
+updates, cleanup, refactoring, and generic security advice do not authorize
+additional changes to runtime identities, permissions, authentication, isolation,
+report outputs, defaults, or established user workflows. Do not bundle such
+changes into otherwise authorized work. Existing explicit authorization remains
+valid; routine implementation within that scope does not require another approval.
+
+Before proposing an unrequested security change, identify the reachable threat
+in the actual deployment, the attacker's required access, existing protections,
+and the incremental benefit relative to compatibility and operational cost.
+A best-practice label, scanner recommendation, or reviewer preference is not a
+substitute for that explanation or for operator approval. Retaining the working
+design is a valid outcome. Prepare a concrete proposal and seek approval before
+implementing the additional behavior change; continue independent authorized work.
+
+Reviewers must reject unauthorized scope expansion and regressions in valid user
+behavior even when a security checklist passes. A security review cannot grant
+operator authority or substitute for workflow correctness. Do not weaken these
+requirements by changing the contract to match an unrequested implementation.
+
+Rationale: the August 2026 auxiliary-image publication work changed the DEVAL
+renderer identity without preserving access to existing run data. Group repairs
+and a future-write permission fix left existing owner-only inputs broken. The
+September 2026 recurrence demonstrated that generic hardening and isolated green
+checks can impose substantial operational harm without establishing an
+application-specific benefit. These rules constrain scope, not ordinary bug fixes;
+they do not introduce a new review framework or require approval for every edit.
+
 ## Terms
 
 - **Hardening**: targeted changes that reduce recurrence, blast radius, or operator toil for a confirmed failure mode.
@@ -116,6 +147,28 @@ Required gates:
 - pre-handoff sanity (`wctl run-pytest tests --maxfail=1`) unless blocked (document blocker),
 - independent code review and QA review for medium/high-risk packages,
 - dedicated security review artifact when security impact triage is `high`.
+
+### Recurrence and Restoration
+
+The first recurrence after a claimed fix invalidates that fix's completeness.
+Reassess the original change and the full failing boundary before adding another
+patch. Prioritize restoring the known working workflow; consider a scoped reversal
+of the causal change within existing authorization when safer than accumulating
+mitigations. Do not automatically roll back unrelated work or weaken unrelated
+access controls. Create a new incident record rather than editing a closed package.
+
+Distinguish a recovered job from a durable fix. One-file repairs, successful health
+checks, cached reports, and fresh empty fixtures cannot establish compatibility
+with existing projects. Completion requires the previously failing workflow with
+representative legacy data, newly generated data, every participating execution
+identity/host, and actual output readback. Verify the fix is retained by supported
+restart and deployment paths. Preserve the regression at the responsible test or
+deployment boundary and block that rollout when the workflow check fails; reuse
+existing validation entry points rather than adding a new framework by default.
+
+Report what was recovered, what was permanently corrected, and any unverified
+rollout scope separately. Do not call the incident fixed while necessary coverage
+or rollout remains incomplete, or use a large unrelated test count as its proof.
 
 ### 5) Documentation Expectations (Required)
 

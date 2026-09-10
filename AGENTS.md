@@ -53,7 +53,7 @@
 - Update affected user, operator, and developer documentation in the same final change set for every production change; contract-first sequencing is an additional requirement, not a replacement.
 - Prefer the smallest fix that resolves the confirmed failing path; for mechanical refactors, preserve code structure (scope/indent/order) and change only the intended tokens.
 - For incident-driven hardening and mitigation-retirement work, follow `docs/standards/hardening-lifecycle-standard.md`.
-- State assumptions explicitly in change notes before broadening behavior.
+- Preserve working behavior; unrequested changes to runtime identity, permissions, auth, isolation, report outputs, defaults, or established workflows require explicit operator approval. Generic hardening, image publication, cleanup, or refactoring is not authorization; state assumptions and follow `docs/standards/hardening-lifecycle-standard.md#authority-and-working-behavior`.
 - Do not rely on model memory or chat history as the only requirements source; closed work packages are immutable history, never living governance, so promote durable rules outside `docs/work-packages/` and amend the promotion later.
 - When user conversation establishes or changes behavior/UX/data contracts, update the authoritative spec/work-package doc in the same change.
 - Capture both normative contract and concise rationale (why this choice, what alternatives were rejected) for conversation-derived decisions.
