@@ -88,15 +88,21 @@ def test_interrupted_publication_repairs_without_recomputation(accepted_project,
     real_replace = publication.os.replace
     calls = []
     def fail(src, dst):
-        calls.append(Path(dst).name)
-        if len(calls) == fail_at+1:
-            raise OSError('injected output installation failure')
+        if Path(dst).parent == output and Path(dst).name in p.FILES:
+            calls.append(Path(dst).name)
+            if len(calls) == fail_at+1:
+                raise OSError('injected output installation failure')
         real_replace(src, dst)
     with monkeypatch.context() as patch:
         patch.setattr(publication.os, 'replace', fail)
         with pytest.raises(OSError, match='injected'):
             publication.publish_outputs(controller.wd)
     assert calls == list(p.FILES[:fail_at+1])
+    import json
+    retained = [folder for folder in (output/'publication_work').iterdir()
+                if json.loads((folder/'status.json').read_text())['status'] == 'incomplete']
+    assert len(retained) == 1
+    assert (retained[0]/'manifest.json').is_file()
     assert Path(controller.wd, controller.filename).read_bytes() == before_state
     publication.publish_outputs(controller.wd)
     assert Path(controller.wd, controller.filename).read_bytes() == before_state

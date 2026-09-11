@@ -4232,4 +4232,4 @@ If this tracker format isn't working or you have suggestions:
 - [x] Reconcile stale lifecycle state transitions in tracker columns
 - [ ] Update metrics section with recent data
 
-- Active: [Artifact observability and Staley intermediate records](docs/work-packages/20260911_artifact_observability/package.md).
+- Completed 2026-09-11: [Artifact observability and Staley intermediate records](docs/work-packages/20260911_artifact_observability/package.md).

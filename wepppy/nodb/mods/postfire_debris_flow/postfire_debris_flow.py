@@ -51,9 +51,13 @@ class PostfireDebrisFlow(NoDbBase):
         with self.locked():
             type(self).getInstance(self.wd)
             state = self.state
+            from .observability import record_attempts
+            record_attempts(self.wd, state)
             previous = state['last_successful_run']
             callback(state)
             self._state = state
+            self.dump()
+            record_attempts(self.wd, state)
         accepted = state['last_successful_run']
         if accepted and (not previous or accepted['id'] != previous['id']):
             from .publication import publish_outputs

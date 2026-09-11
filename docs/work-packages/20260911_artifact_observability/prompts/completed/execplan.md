@@ -13,12 +13,12 @@ model behavior and payloads are preserved; no rerun is required.
 
 - [x] Inspected storage, cleanup, browser filters and actual archive traversal.
 - [x] Prepared canonical observability rule, review gates and domain amendment.
-- [ ] Independent reviews and checkpoint commit.
-- [ ] Implement visible attempt/work writers and explicit audited migration.
-- [ ] Add writer/failure/migration and canonical archive/restore tests.
-- [ ] Run focused tests; close correctness/security findings.
-- [ ] Migrate live project under normal identity, verify browser and archive inventory.
-- [ ] Update docs, tracker and validation; archive this plan.
+- [x] Independent contract reviews and checkpoint commit `19dc2941a`.
+- [x] Implement visible attempt/work writers and explicit audited migration.
+- [x] Add writer/failure/migration and canonical archive/restore tests.
+- [x] Run focused tests (158 passed, latest migration 21 passed); both independent reviews accepted.
+- [x] Migrate live project under normal identity, verify browser and archive/restore bytes.
+- [x] Update docs, tracker and validation; archive this plan.
 
 ## Context and decisions
 
@@ -53,6 +53,15 @@ unacceptable. Canonical archive walks dot paths today, but browse excludes them.
   confirmed defect is browser invisibility and reliance on nonportable dot storage.
 - Legacy metadata binds path names and checksums; a bare rename breaks reuse.
 
+- Installed RQ registry getters perform cleanup and do not accept `cleanup=False`; read registry membership directly to avoid modifying unrelated jobs. Disposable real-admission migration passed under uid 1000/gid 993.
+- Recovery independently reconstructs metadata transitions and anchors accepted inventory to original NoDb signatures; edited recovery records cannot approve changed science.
+
+## Decision log
+
+- Preserve failed source/normalization/publication bytes with visible receipts; established browser/auth/archive paths remain authoritative.
+- Gate new writes on explicit legacy migration to prevent conflicting hidden and visible trees.
+- Full Python suite remains on hold by user instruction.
+
 ## Validation and recovery
 
 Tests must execute real filesystem writes and archive generation/restoration.
@@ -64,4 +73,11 @@ completed migration is a no-op. New scientific defaults are out of scope.
 
 ## Outcomes & retrospective
 
-Pending implementation and live evidence. Completion requires all gates above.
+Completed. The rule is promoted to the canonical standard, root guide and review
+prompts; generated CI executes concrete retention tests. Live migration retained
+all 69 non-JSON files across 10 attempts; results remain current. Browser/download
+hashes and 148-file archive/restore passed. Both independent reviews accepted.
+The final module audit also removed offline counting-raster deletion (35 soil
+tests passed). Implementation is uncommitted; the required contract checkpoint is
+`19dc2941a`. Other projects with legacy storage need the explicit documented
+migration. No full suite or fleet deployment was performed.

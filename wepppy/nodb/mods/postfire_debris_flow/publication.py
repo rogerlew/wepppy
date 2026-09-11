@@ -2,7 +2,9 @@
 import hashlib
 import os
 from pathlib import Path
-from tempfile import TemporaryDirectory
+import uuid
+
+from .observability import write_json
 
 from .postfire_debris_flow import PostfireDebrisFlow
 
@@ -37,33 +39,37 @@ def publish_outputs(wd):
                     or signature(wd, src) != expected[:4]):
                 raise WorkflowError('changed_file', 'Accepted model files changed.', 409)
             files.append((src, dst, expected))
-        with TemporaryDirectory(prefix='.publish-', dir=root) as temporary:
-            staged = Path(temporary)
-            for src, dst, expected in files:
-                checksum = hashlib.sha256()
-                remaining = expected[1]
-                # Ordinary creation honors the worker umask, as other module
-                # outputs do. Bound reads to the accepted artifact's size.
-                with src.open('rb') as incoming, (staged/dst.name).open('xb') as outgoing:
-                    while remaining:
-                        block = incoming.read(min(1024*1024, remaining))
-                        if not block:
-                            raise WorkflowError('changed_file', 'Accepted model files changed.', 409)
-                        outgoing.write(block)
-                        checksum.update(block)
-                        remaining -= len(block)
-                    if incoming.read(1) or checksum.hexdigest() != expected[4]:
+        work_root = safe(wd, root/'publication_work', exists=False)
+        work_root.mkdir(exist_ok=True)
+        staged = work_root/uuid.uuid4().hex
+        staged.mkdir()
+        write_json(staged/'status.json', {'status': 'incomplete', 'accepted_id': accepted['id']})
+        for src, dst, expected in files:
+            checksum = hashlib.sha256()
+            remaining = expected[1]
+            # Ordinary creation honors the worker umask, as other module
+            # outputs do. Bound reads to the accepted artifact's size.
+            with src.open('rb') as incoming, (staged/dst.name).open('xb') as outgoing:
+                while remaining:
+                    block = incoming.read(min(1024*1024, remaining))
+                    if not block:
                         raise WorkflowError('changed_file', 'Accepted model files changed.', 409)
-                if digest(staged/dst.name) != expected[4]:
-                    raise WorkflowError('changed_file', 'Copied model files changed.', 409)
-            # Every file is ready before exposing any replacement. The manifest
-            # follows the tables; interrupted publication can be rerun unchanged.
-            for _, dst, _ in files:
-                safe(wd, dst, exists=False)
-            controller._assert_lock_owned_for_dump()
-            for _, dst, _ in files:
-                safe(wd, dst, exists=False)
-                os.replace(staged/dst.name, dst)
+                    outgoing.write(block)
+                    checksum.update(block)
+                    remaining -= len(block)
+                if incoming.read(1) or checksum.hexdigest() != expected[4]:
+                    raise WorkflowError('changed_file', 'Accepted model files changed.', 409)
+            if digest(staged/dst.name) != expected[4]:
+                raise WorkflowError('changed_file', 'Copied model files changed.', 409)
+        # Every file is ready before exposing any replacement. The manifest
+        # follows the tables; interrupted publication can be rerun unchanged.
+        for _, dst, _ in files:
+            safe(wd, dst, exists=False)
+        controller._assert_lock_owned_for_dump()
+        for _, dst, _ in files:
+            safe(wd, dst, exists=False)
+            os.replace(staged/dst.name, dst)
+        write_json(staged/'status.json', {'status': 'complete', 'accepted_id': accepted['id']})
         return [str(dst) for _, dst, _ in files]
     finally:
         controller.unlock()

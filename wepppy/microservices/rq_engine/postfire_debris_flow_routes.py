@@ -118,11 +118,14 @@ def encoding(data):
 
 
 def new_attempt(wd, kind, snapshot, **extra):
+    from wepppy.nodb.mods.postfire_debris_flow.observability import require_visible_storage, write_json
+    require_visible_storage(wd)
     identity=uuid.uuid4().hex
     path=p.directory(wd,identity)
     path.mkdir(parents=True,mode=0o770)
     record={'id':identity,'job_id':None,'phase':'staged','created_at':p.now(),'error':None,
             'retryable':False,'snapshot':snapshot,'job_key':'postfire_upload_rq' if kind=='upload_attempt' else 'postfire_m1_rq',**extra}
+    write_json(p.safe(wd,path/'status.json',exists=False), {'schema_version':1,'kind':kind,'attempt':record})
     return record,path
 
 
@@ -189,6 +192,8 @@ async def state(runid:str,config:str,request:Request):
     responses=agent_route_responses(success_code=200, success_description='Operation succeeded.',
         extra={400:'Invalid request.',404:'No accepted file or retained candidate.',409:'Busy or changed project data.',413:'Upload limit exceeded.',422:'Required project data unavailable.',503:'Service unavailable.'}))
 async def upload(runid:str,config:str,request:Request):
+    record = None
+    copying = False
     try:
         wd=context(request,runid,config,True)
         if not p.get_state(wd,config,reconcile=False)['upload_ready']:raise p.WorkflowError('missing_prerequisite','Delineate an eligible watershed before uploading dNBR.',422)
@@ -223,6 +228,7 @@ async def upload(runid:str,config:str,request:Request):
                         raise p.WorkflowError('missing_prerequisite','Delineate an eligible watershed before uploading dNBR.',422)
                     ensure_idle(p.reconcile_attempts(wd,p.state_at(wd),conn,persist=True),'upload_attempt')
                     record,path=new_attempt(wd,'upload_attempt',p.sources(wd,rainfall=False)[4],filename=file.filename,encoding=selected)
+                    copying = True
                     record['source_id']=record['id'];record['source_sha256']={};dest=path/'source';dest.mkdir(mode=0o770)
                     for item in uploads:
                         checksum=hashlib.sha256()
@@ -235,8 +241,20 @@ async def upload(runid:str,config:str,request:Request):
                                 checksum.update(chunk)
                         if not size:invalid('Uploaded raster is empty.')
                         record['source_sha256'][str((dest/item.filename).relative_to(Path(wd)))]=checksum.hexdigest()
+                    copying = False
                     return enqueue(Queue(connection=conn),wd,runid,'upload_attempt',record)
     except (AuthError,p.WorkflowError,OSError,ValueError,RedisError,RqEnqueueVerificationError,RqSubmissionConflict,NoDbAlreadyLockedError,MultiPartException,HTTPException,ClientDisconnect) as exc:
+        if copying and record is not None:
+            # Retain a failed transfer independently of the prior accepted NoDb state.
+            from wepppy.nodb.mods.postfire_debris_flow.observability import write_json, record_error
+            record.update(phase='failed', ended_at=p.now(), error={'code':'upload_incomplete',
+                          'message':'The upload did not finish.'})
+            try:
+                record_error(wd, record['id'])
+                write_json(p.safe(wd,path/'status.json',exists=False),
+                           {'schema_version':1,'kind':'upload_attempt','attempt':record})
+            except (OSError, ValueError):
+                logger.exception('Could not retain failed upload record: %s', record['id'])
         return boundary_error(exc)
 
 

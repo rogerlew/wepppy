@@ -88,7 +88,7 @@ def safe(wd, path, *, exists=True):
 def directory(wd, identity):
     if not isinstance(identity, str) or not ID.fullmatch(identity):
         raise WorkflowError('invalid_candidate', 'Invalid upload identifier.')
-    return safe(wd, Path(wd)/'postfire_debris_flow'/'.staging'/identity, exists=False)
+    return safe(wd, Path(wd)/'postfire_debris_flow'/'attempts'/identity, exists=False)
 
 
 def signature(wd, path, *, strong=False):

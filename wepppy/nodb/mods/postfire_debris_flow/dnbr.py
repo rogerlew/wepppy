@@ -10,7 +10,6 @@ import hashlib
 import json
 import math
 from pathlib import Path
-import tempfile
 from xml.etree import ElementTree as ET
 
 import numpy as np
@@ -268,23 +267,17 @@ def normalize_dnbr(source, dem, watershed_mask, output_dir, *, scale_factor,
         output.mkdir()
     except FileExistsError as exc:
         raise DnbrError("output_exists", "Output directory already exists") from exc
-    completed = False
-    try:
-        with tempfile.TemporaryDirectory(prefix=".dnbr-", dir=output.parent) as temporary:
-            stage = Path(temporary) / "complete"
-            stage.mkdir()
-            with rasterio.open(stage / "dnbr.tif", "w", driver="GTiff", height=grid[0][0],
-                               width=grid[0][1], count=1, dtype="float32", nodata=np.nan,
-                               crs=grid[2], transform=grid[1], compress="deflate") as dst:
-                dst.write(target, 1)
-            for path, digest in inputs.items():
-                if _hash(Path(path)) != digest:
-                    _fail("source_changed", "Input changed during normalization")
-            manifest["dnbr_sha256"] = _hash(stage / "dnbr.tif")
-            (stage / "manifest.json").write_text(json.dumps(manifest, indent=2, allow_nan=False) + "\n")
-            stage.replace(output)
-            completed = True
-    finally:
-        if not completed:
-            output.rmdir()
+    marker = output / "incomplete.json"
+    marker.write_text(json.dumps({"schema_version": 1, "status": "incomplete"}) + "\n")
+    # Retain visible work on failure; only a completed manifest establishes success.
+    with rasterio.open(output / "dnbr.tif", "w", driver="GTiff", height=grid[0][0],
+                       width=grid[0][1], count=1, dtype="float32", nodata=np.nan,
+                       crs=grid[2], transform=grid[1], compress="deflate") as dst:
+        dst.write(target, 1)
+    for path, digest in inputs.items():
+        if _hash(Path(path)) != digest:
+            _fail("source_changed", "Input changed during normalization")
+    manifest["dnbr_sha256"] = _hash(output / "dnbr.tif")
+    (output / "manifest.json").write_text(json.dumps(manifest, indent=2, allow_nan=False) + "\n")
+    marker.unlink()
     return manifest

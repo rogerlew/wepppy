@@ -266,7 +266,7 @@ def test_nonfinite_normalization_and_diagnostic_range(tmp_path,refs):
     assert r['watershed']['m1_f']==3 and r['outside_ideal_range_cells']==16
 
 
-def test_actual_writer_failure_preserves_sources_and_cleans_stage(tmp_path,refs,monkeypatch):
+def test_actual_writer_failure_preserves_sources_and_visible_incomplete_output(tmp_path,refs,monkeypatch):
     # Inject an operational write failure at the real filesystem boundary.
     import wepppy.nodb.mods.postfire_debris_flow.dnbr as module
     original=module.rasterio.open
@@ -277,7 +277,9 @@ def test_actual_writer_failure_preserves_sources_and_cleans_stage(tmp_path,refs,
     monkeypatch.setattr(module.rasterio,'open',fail_output)
     with pytest.raises(OSError,match='storage failure'):
         normalize_dnbr(refs[0],*refs,tmp_path/'out',scale_factor=1)
-    assert not (tmp_path/'out').exists() and not list(tmp_path.glob('.dnbr-*'))
+    assert (tmp_path/'out'/'incomplete.json').is_file()
+    assert not (tmp_path/'out'/'manifest.json').exists()
+    assert not list(tmp_path.glob('.dnbr-*'))
     assert before==[hashlib.sha256(p.read_bytes()).hexdigest() for p in refs]
 
 
@@ -292,7 +294,9 @@ def test_source_change_aborts_publication(tmp_path,refs,monkeypatch):
     monkeypatch.setattr(module,'reproject',change_after_warp)
     with pytest.raises(DnbrError) as e:normalize_dnbr(refs[0],*refs,tmp_path/'out',scale_factor=1)
     assert e.value.code=='source_changed'
-    assert not (tmp_path/'out').exists() and not list(tmp_path.glob('.dnbr-*'))
+    assert (tmp_path/'out'/'incomplete.json').is_file()
+    assert not (tmp_path/'out'/'manifest.json').exists()
+    assert not list(tmp_path.glob('.dnbr-*'))
 
 
 def test_internal_mask_is_retained(tmp_path,refs):

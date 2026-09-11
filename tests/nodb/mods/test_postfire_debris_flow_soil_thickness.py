@@ -150,6 +150,9 @@ def test_generated_pipeline_full_partial_unknown_water(tmp_path):
     assert r['source_sha256']==before==hashlib.sha256(db.read_bytes()).hexdigest()
     with rasterio.open(tmp_path/'out/thickness_cm.tif') as ds:
         a=ds.read(1);assert a[0,0]==58;assert np.isnan(a[1,1])
+    with rasterio.open(tmp_path/'out/count_keys.tif') as ds:
+        assert ds.nodata is None
+        np.testing.assert_array_equal(ds.read(1), [[7,7],[99,0]])
     full=write_raster(tmp_path/'full.tif',[[1,1],[0,0]])
     assert build_artifacts(db,keys,{'a':full},tmp_path/'fullout',source_id='test')[0]['full_S']==58/254
     with pytest.raises(FileExistsError):build_artifacts(db,keys,{'a':mask},tmp_path/'out',source_id='test')

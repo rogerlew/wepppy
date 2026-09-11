@@ -277,3 +277,11 @@ scientific limitation that implementation cannot resolve.
   postfire_debris_flow/, browsable like other module outputs. Existing accepted
   results can be republished without rerunning the numerical engine. See the
   [direct-output package](../../../../docs/work-packages/20260911_staley_public_outputs/package.md).
+
+- 2026-09-11: [Artifact observability](../../../../docs/work-packages/20260911_artifact_observability/package.md)
+  replaces hidden attempts with visible `attempts/`, preserves failed work and
+  per-attempt receipts, and installs canonical review/CI retention gates.
+  `addicted-reservist` migrated without changing raster/table bytes; freshness,
+  ordinary browser/downloads, and archive/restore verified. Offline M3 counting
+  rasters are retained as inspectable support evidence. M3 production and reports
+  remain deferred.

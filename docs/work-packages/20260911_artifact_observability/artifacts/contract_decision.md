@@ -3,7 +3,7 @@
 Base: 4305972a6. Operator explicitly requests installing an enforceable rule and
 making post-fire intermediate artifacts user-facing and archivable. Authorization
 includes correcting existing hidden records in addicted-reservist and the required
-checkpoint. No legal conclusion about FERPA is asserted.
+checkpoint. The operator corrected the records-access reference to FOIA. No legal conclusion is asserted.
 
 Canonical changes: artifact-observability standard; root AGENTS pointer; shared
 contract-first and review gates; production_m1.md attempt layout, failure retention,

@@ -514,3 +514,35 @@ def test_restore_archive_rq_fails_when_nodb_cache_clear_fails(
     assert (run_dir / "new.txt").exists()
     assert prep_by_run["demo"].cleared == 1
     assert any("Failed to clear NoDb cache after restore" in message for _, message in published)
+
+
+def test_postfire_records_survive_canonical_archive_and_restore(archive_rq_environment):
+    from wepppy.nodb.mods.postfire_debris_flow.observability import record_attempts, record_error
+    project, tmp_path, _, _ = archive_rq_environment
+    run_dir = tmp_path/'demo'; run_dir.mkdir()
+    root = run_dir/'postfire_debris_flow'
+    failed = root/'attempts'/('a'*32)
+    record = {'id':'a'*32,'phase':'failed','job_id':'expired-rq-job','error':{'code':'invalid_raster'}}
+    record_attempts(run_dir, {'upload_attempt':record,'run_attempt':None})
+    try:
+        raise ValueError('retained failure')
+    except ValueError:
+        record_error(run_dir,'a'*32)
+    artifacts = {'source/map.img':b'original upload','normalized/incomplete.json':b'{"status":"incomplete"}',
+                 'normalized/dnbr.tif':b'partial raster', 'predictors/wbt/summary.json':b'{"t":0.5}',
+                 'predictors/wbt/stderr.log':b'tool diagnostic'}
+    for name, data in artifacts.items():
+        path = failed/name; path.parent.mkdir(parents=True,exist_ok=True); path.write_bytes(data)
+    record_attempts(run_dir, {'upload_attempt':{'id':'b'*32,'phase':'complete'},'run_attempt':None})
+    work = root/'publication_work'/'interrupted'; work.mkdir(parents=True)
+    (work/'status.json').write_text('{"status":"incomplete"}')
+    (work/'events.parquet').write_bytes(b'partial copy')
+    expected = {str(path.relative_to(run_dir)):path.read_bytes() for path in root.rglob('*') if path.is_file()}
+    project.archive_rq('demo',comment='observable scientific records')
+    archive = next((run_dir/'archives').glob('*.zip'))
+    with zipfile.ZipFile(archive) as zipped:
+        for name, data in expected.items():
+            assert zipped.read(name) == data
+    (failed/'status.json').write_text('changed')
+    project.restore_archive_rq('demo',archive.name)
+    assert {name:(run_dir/name).read_bytes() for name in expected} == expected

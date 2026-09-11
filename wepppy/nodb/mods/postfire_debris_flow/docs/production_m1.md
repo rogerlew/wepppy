@@ -539,7 +539,7 @@ and restore the recorded matching application/WBT revision. Stop admitting new
 postfire jobs while restoring compatibility; preserve accepted NoDb/artifact data
 and exact job receipts. Do not delete state or substitute an old completed job.
 After restoration, repeat actual runtime discovery and the disposable workflow
-before resuming. No legacy debris-flow migration is required.
+before resuming. For hidden legacy artifact storage, use the separate migration below.
 
 ## Observable intermediate artifacts and migration
 
@@ -594,3 +594,32 @@ including enqueue_unknown, and verify recorded jobs and active default-queue
 postfire jobs for the run are terminal before mutation. Missing expired jobs are
 permitted only for already terminal attempt records. NoDb locking alone is not
 sufficient to exclude a worker that is writing raster files.
+
+### Operator migration and recovery
+
+Run in the normal worker container with the project's service identity:
+
+```python
+from wepppy.nodb.mods.postfire_debris_flow.migration import migrate_attempts
+migrate_attempts("/wc1/runs/ad/addicted-reservist")
+```
+
+Inspect `postfire_debris_flow/migrations/<id>/migration.json`, then verify current
+NoDb freshness and the ordinary browser/download paths. Recovery after relocation
+requires `migrate_attempts(wd, resume="<id>")`; it revalidates accepted original
+signatures, independently derives JSON rebasing, and rejects altered evidence.
+A `status.json` in `preparing` with no `migration.json` means preparation stopped
+before any attempt-tree mutation; retain that audit and start a fresh migration.
+Do not merge competing trees or edit checksums to make a failed migration pass.
+New uploads/state changes explicitly reject an unmigrated `.staging` tree.
+
+The raw NoDb backup must contain the same plain JSON `_state` captured in the
+migration report. An unsupported serialization requires operator inspection;
+recovery never executes arbitrary serialized backup objects. Only the exact
+`LEGACY_ENGINE` to `TARGET_ENGINE` pair in `migration.py` permits storage-only
+freshness promotion. Future numerical code changes cannot inherit that approval.
+
+An upload receives its visible staged receipt before project file copying. A
+failed transfer retains partial source bytes, an error log and failed receipt
+without replacing the prior accepted NoDb state. If storage itself prevents the
+receipt update, the staged receipt remains and the service logs that failure.

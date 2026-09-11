@@ -1,0 +1,2 @@
+ARCHIVE_START {"runid": "artifact-observability-archive-b13882a1", "files": 148, "uid": 1000, "gid": 993}
+ARCHIVE_RESTORE_PASS {"runid": "artifact-observability-archive-b13882a1", "archive": "artifact-observability-archive-b13882a1.20260911T040411Z.zip", "files_unchanged": 148, "archive_bytes": 574142986}

@@ -315,7 +315,6 @@ def build_artifacts(cache_path, mukey_raster, catchments, output_dir, *, source_
                             status="complete" if complete else "partial" if support else "unavailable",
                             reason_codes=_reasons(reasons), source_sha256=hashes[str(cache)],
                             spatial_sha256=hashes[str(raster)], mask_sha256=hashes[str(mask)]))
-    count_keys.unlink()
     _csv(out/"components.csv", components)
     _csv(out/"mapunits.csv", units)
     _csv(out/"catchments.csv", results)

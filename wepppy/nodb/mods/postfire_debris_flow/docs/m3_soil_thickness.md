@@ -102,8 +102,10 @@ Create a new output directory; never overwrite input paths, live caches or
 existing study outputs. GeoTIFF input only (no VRT/network reader in evaluation),
 regular resolved files, with grid checks before cross-raster operations.
 Artifacts: `components.csv`, `mapunits.csv`, `thickness_cm.tif` (Float32, NaN),
-`valid_fraction.tif` (Float32, zero unsupported), `catchments.csv`, and
+`valid_fraction.tif` (Float32, zero unsupported), `count_keys.tif` (map-unit
+keys with zero retained as a category for denominator accounting), `catchments.csv`, and
 `manifest.json` with source ID, policy, units and SHA-256 for every input.
+Retain the counting raster after success so support calculations remain inspectable.
 CSV reason codes are sorted, semicolon-separated; missing numbers are empty.
 Raster NaN means unavailable thickness, never measured zero. Check input hashes
 after generation. Failed builds may leave an explicitly incomplete output

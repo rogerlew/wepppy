@@ -188,3 +188,35 @@ def test_nonfinite_and_boolean_custom_scale_rejected(client,tmp_path,value):
     response=client.post('/runs/test/config/postfire-debris-flow/retry-dnbr',content='{"candidate_id":"'+('a'*32)+'","scale_mode":"custom","scale_factor":'+value+',"add_offset":0}',headers={'Content-Type':'application/json'})
     assert response.status_code==400
     assert not (tmp_path/'postfire_debris_flow.nodb').exists()
+
+
+def test_failed_upload_retains_partial_source_and_receipt(client,tmp_path,monkeypatch):
+    monkeypatch.setattr(routes.redis,'Redis',lambda **kw:nullcontext(None))
+    monkeypatch.setattr(routes,'rq_submission_lock',lambda *a,**kw:nullcontext())
+    monkeypatch.setattr(p,'reconcile_attempts',lambda wd,state,*a,**kw:state)
+    monkeypatch.setattr(p,'sources',lambda *a,**kw:(True,False,{}, {},{}))
+    original = routes.UploadFile.read
+    reads = 0
+    async def interrupted(file,size=-1):
+        nonlocal reads
+        reads += 1
+        if reads == 2:
+            raise OSError('injected transfer failure')
+        return await original(file,size)
+    monkeypatch.setattr(routes.UploadFile,'read',interrupted)
+    response=client.post('/runs/test/config/postfire-debris-flow/upload-dnbr',files={'file':('map.tif',b'x'*70000)})
+    assert response.status_code == 503
+    root = next((tmp_path/'postfire_debris_flow'/'attempts').iterdir())
+    assert (root/'source'/'map.tif').read_bytes() == b'x'*65536
+    receipt = json.loads((root/'status.json').read_text())
+    assert receipt['attempt']['phase'] == 'failed'
+    assert receipt['attempt']['error']['code'] == 'upload_incomplete'
+    assert 'injected transfer failure' in (root/'error.log').read_text()
+    assert not (tmp_path/'postfire_debris_flow.nodb').exists()
+
+
+def test_new_attempt_requires_explicit_legacy_migration(tmp_path):
+    (tmp_path/'postfire_debris_flow'/'.staging').mkdir(parents=True)
+    with pytest.raises(p.WorkflowError,match='migration'):
+        routes.new_attempt(tmp_path,'upload_attempt',{})
+    assert not (tmp_path/'postfire_debris_flow'/'attempts').exists()

@@ -14,6 +14,15 @@ from wepppy.nodb.mods.postfire_debris_flow.rainfall_io import RainfallError
 logger = logging.getLogger(__name__)
 
 
+def _retain_error(wd, identity):
+    from wepppy.nodb.mods.postfire_debris_flow.observability import record_error
+    try:
+        record_error(wd, identity)
+    except (OSError, ValueError):
+        # Diagnostic boundary: preserve the original model failure if storage fails.
+        logger.exception('Could not retain postfire attempt error log: %s', identity)
+
+
 def _execute(runid, identity, kind):
     wd = get_wd(runid)
     job = get_current_job()
@@ -27,6 +36,7 @@ def _execute(runid, identity, kind):
             tool = WhiteboxTools()
             production.execute_model(wd, identity, Path(tool.exe_path)/tool.exe_name)
     except (DnbrError, M1Error, RainfallError, production.WorkflowError) as exc:
+        _retain_error(wd, identity)
         code = exc.code
         phase = 'needs_scale' if code == 'ambiguous_encoding' else ('superseded' if code=='superseded' else 'failed')
         message = ('Could not determine the dNBR value scale. Choose the scale used by your map.'
@@ -35,6 +45,7 @@ def _execute(runid, identity, kind):
         logger.exception('Postfire operation failed: %s %s',runid,identity)
         if phase!='needs_scale':raise RuntimeError(f'Postfire operation failed ({code}). See protected run logs.') from None
     except Exception:  # Worker boundary: persist terminal failure; expose a sanitized RQ error.
+        _retain_error(wd, identity)
         logger.exception('Unexpected postfire failure: %s %s',runid,identity)
         production.update_attempt(wd,kind,identity,phase='failed',error={'code':'operation_failed','message':'The operation could not finish. See the job log.'},retryable=True)
         raise RuntimeError('Postfire operation failed. See protected run logs.') from None
