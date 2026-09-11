@@ -1,0 +1,9 @@
+INFO:wctl2:docker compose exec -T weppcloud python -
+Before: current 88d613bedab2464b84f752929b86d43c
+events.parquet 851401 0o644 1000 993
+design.parquet 3120 0o644 1000 993
+inverse.parquet 2106 0o644 1000 993
+manifest.json 48974 0o644 1000 993
+AFTER current 88d613bedab2464b84f752929b86d43c
+HASHES {"events.parquet": "29ed9b96b54ac14290c34232bafec5138781c0e8908f45ca9245192795710830", "design.parquet": "88803d6c0a682a20437e9d39b07e011ec0fb8b0e8ae18b80b83380a9d5e06de2", "inverse.parquet": "995954b8056f6386237c0de70d76ac37454ab556276c2f36f033091a9bf223c1", "manifest.json": "38cce7d3b3d68ee89555ac1dbeb47f5d1cc65f62e35e00319184f23a670099c4"}
+PASS direct files, unchanged accepted state, hashes, freshness; no model rerun

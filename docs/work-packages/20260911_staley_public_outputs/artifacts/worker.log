@@ -1,0 +1,4 @@
+INFO:wctl2:docker compose exec -T rq-worker python -
+Worker identity 1000 993 umask 0o22
+Published: ['/wc1/runs/ad/addicted-reservist/postfire_debris_flow/events.parquet', '/wc1/runs/ad/addicted-reservist/postfire_debris_flow/design.parquet', '/wc1/runs/ad/addicted-reservist/postfire_debris_flow/inverse.parquet', '/wc1/runs/ad/addicted-reservist/postfire_debris_flow/manifest.json']
+PASS worker identity, mounts, permissions, accepted state and freshness

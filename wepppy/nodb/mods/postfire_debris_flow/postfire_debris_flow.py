@@ -51,7 +51,12 @@ class PostfireDebrisFlow(NoDbBase):
         with self.locked():
             type(self).getInstance(self.wd)
             state = self.state
+            previous = state['last_successful_run']
             callback(state)
             self._state = state
+        accepted = state['last_successful_run']
+        if accepted and (not previous or accepted['id'] != previous['id']):
+            from .publication import publish_outputs
+            publish_outputs(self.wd)
         from .preflight import notify
         notify(self.wd)

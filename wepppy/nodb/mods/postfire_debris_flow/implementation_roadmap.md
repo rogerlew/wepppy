@@ -271,3 +271,9 @@ scientific limitation that implementation cannot resolve.
   complete; timestamp invalidation is advisory and detailed artifact freshness
   remains authoritative. See [completion contract](docs/production_m1.md#preflight-completion-task)
   and [validation package](../../../../docs/work-packages/20260911_staley_preflight/package.md).
+
+- 2026-09-11: corrected completed-output layout to publish events.parquet,
+  design.parquet, inverse.parquet, and manifest.json directly in
+  postfire_debris_flow/, browsable like other module outputs. Existing accepted
+  results can be republished without rerunning the numerical engine. See the
+  [direct-output package](../../../../docs/work-packages/20260911_staley_public_outputs/package.md).
