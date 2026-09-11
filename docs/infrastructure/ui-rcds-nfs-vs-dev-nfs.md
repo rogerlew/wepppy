@@ -117,6 +117,45 @@ Ratios (production time ÷ wepp2 time):
 - Treat `sync_s` as a “system dirtiness / background IO” indicator, not a per-path metric.
 - For a heavier profile, bump `--files-per-dir` and/or `--dir-depth` (expect NFS to degrade faster than local FS).
 
+## WA-117 read-path comparison (2026-09-11)
+
+A read-only comparison exercised the six hillslope interchange input families
+on their native client paths: a Dell Kubernetes batch-worker pod reading HPC
+NFS and `wepp1` reading the legacy NAS. The openwepp corpus contained 7,146
+files and 21.49 GB; legacy contained 7,140 files and 21.13 GB. This 1.7% byte
+difference is too small to explain the historical 2.2x interchange gap.
+
+| Phase | Dell to HPC NFS | wepp1 to legacy NFS |
+| --- | ---: | ---: |
+| Stat all files | 2.375 s | 2.601 s |
+| Open/close all files | 2.479 s | 8.500 s |
+| First full read | 435.461 s (47.1 MiB/s) | 787.019 s (25.6 MiB/s) |
+| Second full read | 162.245 s (126.3 MiB/s) | 14.099 s (1,429.3 MiB/s) |
+
+The Dell path was faster for metadata and first reads. Generic HPC NFS latency
+therefore does not explain why historical openwepp hillslope interchange was
+slower. The important difference was cache retention. `wepp1` had 251 GiB RAM
+with 218 GiB in buffer/cache and served the second corpus pass almost entirely
+from client page cache. The Dell worker pod has a 12 GiB cgroup limit, smaller
+than the 21.49 GB corpus, and its second pass still generated substantial NFS
+traffic.
+
+Mount-stat deltas support that interpretation. The Dell probe received about
+36.96 GB across 46,032 NFS READ calls over two logical 21.49 GB passes, whereas
+wepp1 received about 21.29 GB across 329,540 READ calls over two logical
+21.13 GB passes. Thus nearly all of wepp1's second pass was cached, while the
+Dell had to reread much of its corpus. The READ-call difference also reflects
+the negotiated read sizes: 1 MiB on the Dell mount and 64 KiB on wepp1.
+
+This study changes the leading explanation for the historical result. Legacy
+WEPP wrote the hillslope files into a large host page cache and then the serial
+interchange reader immediately consumed that warm corpus. The 12 GiB openwepp
+worker cannot retain the complete output corpus, so interchange rereads evicted
+data over NFS. Bounded native concurrency may overlap that latency, but should
+be evaluated as an optimization rather than as the explanation for the
+original deployment difference. Full method and limitations are retained in
+the [work package](../work-packages/20260911_wa117_nfs_client_comparison/package.md).
+
 ## Current RCDS WEPP1-to-NAS link (2026-08-20)
 
 The RCDS physical path between WEPP1 and the production NAS must now be treated

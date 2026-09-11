@@ -1,11 +1,16 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-09-10
+**Last Updated**: 2026-09-11
 **Active Packages**: 36
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
+
+Completed: [WA-117 NFS client comparison](docs/work-packages/20260911_wa117_nfs_client_comparison/package.md)
+— Dell-to-HPC metadata and first reads outperformed wepp1-to-legacy NFS, while
+wepp1's 251 GiB host cache made its second 21.1 GB pass complete in 14.1 seconds;
+the 12 GiB worker limit prevents equivalent whole-corpus cache retention.
 
 Completed: [Batch hillslope-to-watershed RQ task boundary](docs/work-packages/20260910_batch_hillslope_watershed_boundary/package.md)
 — two ordered jobs on existing batch workers, real failure/full-rerun and
