@@ -393,7 +393,7 @@ def test_list_run_endpoints_declares_include_operation_docs_query_param(
 
 def test_postfire_operations_are_documented(_openapi_doc):
     prefix='/api/runs/{runid}/{config}/postfire-debris-flow/'
-    for action,method in (('state','get'),('upload-dnbr','post'),('retry-dnbr','post'),('run-m1','post'),('files/{attempt_id}/{name}','get')):
+    for action,method in (('state','get'),('upload-dnbr','post'),('retry-dnbr','post'),('run-m1','post'),('run','post'),('selection','post'),('files/{attempt_id}/{name}','get')):
         operation=_openapi_doc['paths'][prefix+action][method]
         assert 'postfire_' in operation['operationId']
         assert {200,401,403,409,413,422,503} <= _response_codes(operation)

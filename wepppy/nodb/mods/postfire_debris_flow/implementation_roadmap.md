@@ -1,8 +1,8 @@
 # Postfire Debris Flow Implementation Roadmap
 
 Status: updated 2026-09-11. Production M1 NoDb, browser upload and RQ execution
-are implemented. Production M3 and the dashboard remain pending. M1/M3 UI and
-request wiring are the next owner-directed increment; full M3 integration follows.
+are implemented. M1/M3 UI and request wiring are implemented; M3 scientific
+composition, valid-support calculations and the dashboard remain pending.
 
 ## Maintenance Contract
 
@@ -39,15 +39,20 @@ The offline soil study's complete-only outputs are not a production coverage
 gate. SSURGO primary and original STATSGO fallback are accepted source priority.
 Stage 5 adds the browser upload workflow to the local dNBR backend.
 
-## Next Scoped Increment
+## Model Selection and Task Wiring
 
 Owner request 2026-09-11: [M1/M3 UI and request wiring](docs/model_selection.md).
-Record the shared model comparison/header, side-by-side selector and conditional
-prerequisites before runtime changes. M3 must reach its dedicated RQ task in this increment. Owner decisions fix
+The shared comparison/header, side-by-side selector, conditional prerequisites
+and dedicated M3 RQ task are implemented after checkpoint `aa30e637e`. Owner decisions fix
 10 m NED13/2022 eligibility, retain automatic POLARIS/RUSLE enablement and
 select scalar estimates with coverage masking. SSURGO validity assessment and
-exact scientific integration remain explicit. The active plan is [model wiring](../../../../docs/work-packages/20260911_staley_model_wiring/prompts/active/execplan.md).
-No implementation or full M3 execution is claimed by this planning entry.
+exact scientific integration remain explicit. Evidence is tracked in the
+[model wiring package](../../../../docs/work-packages/20260911_staley_model_wiring/package.md).
+Validation passed: full Python 8,468/103 skipped, frontend 872, independent
+reviews and live selection/task/reload/preflight checks. The M3 task reports
+`integration_pending`; full M3 execution is not complete.
+Next: ratify analysis support and compose M3 soil/terrain plus the accepted
+valid-support scalar/mask policy. Reports remain stage 7.
 
 ### Completed local predictor increment
 
@@ -96,7 +101,8 @@ Stage 3 slope/SBS local backend is **implemented and validated**, in the
 Local stage 3 composition is **complete**, including authentic complete-source
 evidence. Local stage 4 is **complete**, with genuine CLI/NOAA and sparse-rank acceptance.
 Production stage 5 is **complete** with development browser/worker validation.
-Stages 6–7 are **not started**. Stage completion requires its exit evidence,
+Stage 6 has **UI/task wiring only**; scientific composition is pending. Stage 7
+is **not started**. Stage completion requires its exit evidence,
 not only source files. Accepted scope is the existing project watershed/outlet;
 nested/channel assessments are excluded from initial delivery (ADR-0055).
 

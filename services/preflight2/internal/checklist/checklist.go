@@ -113,12 +113,18 @@ func Evaluate(prep map[string]string) (map[string]bool, map[string]bool) {
 	// Staley publication is independent of the legacy WEPP debris workflow.
 	postfire, validPostfire := parseInt(prep["timestamps:run_postfire_debris_flow"])
 	check["postfire_debris_flow"] = validPostfire && postfire > 0
-	for _, task := range []string{
-		"fetch_dem", "build_channels", "set_outlet", "find_outlet",
-		"build_subcatchments", "abstract_watershed", "build_landuse",
-		"build_rangeland_cover", "build_soils", "init_sbs_map", "build_polaris",
-		"build_rusle", "build_climate",
-	} {
+	model := prep["postfire_debris_flow:model"]
+	upstreamTasks := []string{"fetch_dem", "build_channels", "set_outlet", "find_outlet",
+		"build_subcatchments", "abstract_watershed", "init_sbs_map", "build_climate"}
+	switch model {
+	case "", "M1":
+		upstreamTasks = append(upstreamTasks, "build_polaris", "build_rusle")
+	case "M3":
+		upstreamTasks = append(upstreamTasks, "build_landuse", "build_rangeland_cover", "build_soils")
+	default:
+		check["postfire_debris_flow"] = false
+	}
+	for _, task := range upstreamTasks {
 		if upstream, present := prep["timestamps:"+task]; present {
 			upstreamTime, validUpstream := parseInt(upstream)
 			check["postfire_debris_flow"] = check["postfire_debris_flow"] &&

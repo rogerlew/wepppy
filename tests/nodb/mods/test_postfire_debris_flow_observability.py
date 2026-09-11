@@ -16,6 +16,7 @@ pytestmark = pytest.mark.unit
 @pytest.fixture
 def legacy(tmp_path, monkeypatch):
     monkeypatch.setattr(preflight, 'notify', lambda wd: None)
+    monkeypatch.setattr(p, 'engine_identity', lambda: deepcopy(m.TARGET_ENGINE))
     controller = PostfireDebrisFlow(str(tmp_path), 'disturbed9002_wbt.cfg')
     @contextmanager
     def admission(obj):
@@ -245,3 +246,44 @@ def test_registry_check_is_read_only_and_rejects_earlier_live_job(monkeypatch):
     connection=SimpleNamespace(zrange=lambda *args:[b'old-job'])
     with pytest.raises(ValueError,match='earlier postfire job'):
         m._jobs_idle({'upload_attempt':None,'run_attempt':None},'run',connection)
+
+
+def test_legacy_migration_accepts_missing_model_without_rewriting_backup(legacy):
+    controller, root, old, external = legacy
+    wd = Path(controller.wd)
+    with controller.locked(): controller._state.pop('model')
+    original = (wd/controller.filename).read_bytes()
+    report = m.migrate_attempts(wd)
+    assert controller.state['model'] == 'M1'
+    backups = list((root/'migrations').glob('*/original_metadata/postfire_debris_flow.nodb'))
+    assert len(backups) == 1 and backups[0].read_bytes() == original
+    assert not (root/'.staging').exists()
+
+
+def test_future_engine_is_not_blessed_by_storage_migration(legacy, monkeypatch):
+    controller, root, old, external = legacy
+    monkeypatch.setattr(p, 'engine_identity', lambda: {'future': 'unapproved'})
+    m.migrate_attempts(controller.wd)
+    assert controller.state['last_successful_run']['snapshot']['inputs']['selections']['engine_sha256'] == m.LEGACY_ENGINE
+
+
+def test_preselector_migration_resume_after_state_dump(legacy, monkeypatch):
+    controller, root, old, external = legacy
+    with controller.locked(): controller._state.pop('model')
+    original_state_property = PostfireDebrisFlow.state
+    def preselector_state(obj):
+        value = original_state_property.fget(obj)
+        value.pop('model', None)
+        return value
+    with monkeypatch.context() as patch:
+        patch.setattr(PostfireDebrisFlow, 'state', property(preselector_state))
+        patch.setattr(m, 'record_attempts', lambda *a: (_ for _ in ()).throw(OSError('stopped after dump')))
+        with pytest.raises(OSError, match='stopped after dump'):
+            m.migrate_attempts(controller.wd)
+    audit = next((root/'migrations').iterdir())
+    report = json.loads((audit/'migration.json').read_text())
+    assert 'model' not in report['original_state']
+    assert 'model' not in report['planned_state']
+    controller._state = PostfireDebrisFlow.load_detached(controller.wd).state
+    assert controller.state['model'] == 'M1'
+    assert m.migrate_attempts(controller.wd, resume=audit.name)['status'] == 'complete'

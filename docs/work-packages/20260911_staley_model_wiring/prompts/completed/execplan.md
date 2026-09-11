@@ -15,10 +15,11 @@ Do not close roadmap stage 6 or claim M3 probabilities. No production deployment
 - [x] Record owner UI/DEM/masking/mod decisions and inspect SSURGO rules.
 - [x] Create canonical selection amendment and ADR-0066.
 - [x] Complete independent contract reviews and disposition (both accepted).
-- [ ] Commit the required standalone contract ancestor with authority recorded.
-- [ ] Implement model UI/state/admission/freshness and dedicated M3 RQ task.
-- [ ] Validate focused and full suites, real development browser/job tree.
-- [ ] Complete correctness/security reviews and archive this wiring plan.
+- [x] Commit standalone contract ancestor aa30e637e with explicit owner authority.
+- [x] Implement model UI/state/admission/freshness and dedicated M3 RQ task.
+- [x] Validate focused/npm/Go checks and real development browser/job tree.
+- [x] Finish full Python suite: 8,468 passed, 103 skipped; final evidence recorded.
+- [x] Complete correctness/security reviews and archive this wiring plan.
 
 ## Context and contracts
 
@@ -106,6 +107,15 @@ helper already validates intervals. Evaluate reuse there before adding rules.
 Production M1 currently includes independent built Soils in admission/freshness;
 hiding its row alone would leave the request blocked.
 
+Singleton refresh can replace an earlier controller reference; test fixtures
+now read durable state or reacquire before direct writes. Real overlapping
+preference/worker/publication mutations passed against Redis. Initial enabled
+selectors could persist template rainfall before state restoration; disable
+until live. Recorder click events share run admission with preference saves;
+explicit pre-admission job_active alone receives bounded, visible retries.
+Headless WebGL rendering slowed browser automation; collapse the existing Map
+control and focus the postfire section while retaining all normal recording.
+
 ## Decision Log
 
 
@@ -114,12 +124,23 @@ assessment, scalar valid-support estimates and mask download, retained automatic
 POLARIS/RUSLE enablement, and required M3 to reach its RQ task now. Reports and
 full scientific integration remain subsequent work. No probability-bound UI.
 
+2026-09-11 UTC: both reviewers accepted the bounded selection-only busy retry
+as conformance to the approved serialized-save behavior. Record this mechanism
+and its recurrence-triggered reassessment in the canonical selection contract;
+never exempt recording, weaken shared admission, or retry model jobs.
+
 ## Outcomes & Retrospective
 
 
-Planning and source assessment complete. Implementation has not started. Update
-this section with generated-output and browser evidence, actual remaining limits,
-and checkpoint revision before handoff; do not claim complete M3 integration.
+Implementation, independent source reviews and live validation complete.
+Checkpoint ancestor: aa30e637e. Both dedicated task identities are recorded in
+artifacts/live_job_trees.json. M1 completed; M3 reports integration_pending,
+retaining its error and prior M1 results. Browser readback verifies saved NOAA,
+conditional inputs, retry with recording enabled, download200 and live preflight.
+Full Python 8,468 passed, 103 skipped; npm 872 and lint passed. All reviewer
+conditions are satisfied, and this wiring plan is archived. M3 scientific
+composition, valid-support aggregation/mask and reports remain outside this
+completed wiring increment; do not close roadmap stage6.
 
 
 Preflight scope: amend module preflight.py and Go checklist projection with the

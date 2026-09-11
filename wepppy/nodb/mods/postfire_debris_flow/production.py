@@ -147,7 +147,9 @@ def k_current(wd, files, polaris_completed):
         return False
 
 
-def sources(wd, *, rainfall=True, frequency='cli'):
+def sources(wd, *, rainfall=True, frequency='cli', model='M1'):
+    if model not in ('M1', 'M3'):
+        raise WorkflowError('invalid_model', 'Choose M1 or M3.')
     from wepppy.nodb.core import Ron, Watershed, Soils, Climate
     from wepppy.nodb.mods.disturbed import Disturbed
     from wepppy.nodb.project_config_capabilities import resolve_run_capability_authority
@@ -155,11 +157,15 @@ def sources(wd, *, rainfall=True, frequency='cli'):
     watershed = Watershed.getInstance(str(wd))
     from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
     prep = RedisPrep.getInstance(str(wd))
+    receipt_keys = {'watershed'}
+    if rainfall:
+        receipt_keys.update(('abstract', 'sbs', 'climate'))
+        receipt_keys.update(('polaris',) if model == 'M1' else ('soils', 'landuse', 'rangeland'))
     completed = {key: prep[str(task)] for key, task in (
         ("watershed", TaskEnum.build_subcatchments), ("soils", TaskEnum.build_soils),
         ("sbs", TaskEnum.init_sbs_map), ("climate", TaskEnum.build_climate),
         ("polaris", TaskEnum.fetch_polaris), ("abstract", TaskEnum.abstract_watershed),
-        ("landuse", TaskEnum.build_landuse), ("rangeland", TaskEnum.build_rangeland_cover))}
+        ("landuse", TaskEnum.build_landuse), ("rangeland", TaskEnum.build_rangeland_cover)) if key in receipt_keys}
     authority = resolve_run_capability_authority(ron)
     eligible = ('postfire_debris_flow' in ron.mods and watershed.delineation_backend_is_wbt
                 and authority.locale_profile == 'continental-us')
@@ -168,22 +174,28 @@ def sources(wd, *, rainfall=True, frequency='cli'):
     checks = {'watershed': bool(completed['watershed']) and all(p.is_file() for p in files.values()) and files['dem'].suffix.lower() in ('.tif','.tiff')}
     selections = {'locale': authority.locale_profile, 'backend': bool(watershed.delineation_backend_is_wbt),
                   'completed': {'watershed': completed['watershed']}, 'dem': str(files['dem']), 'outlet': watershed.outlet.as_dict() if watershed.outlet else None}
+    if rainfall and model == 'M3':
+        selections['dem_source'] = ron.dem_db
+        selections['cellsize'] = ron.cellsize
+        checks['watershed'] = checks['watershed'] and ron.cellsize == 10 and ron.dem_db == 'ned13/2022'
     if rainfall:
         def after(key, parent):
             return bool(completed[key] and completed[parent] and completed[key] > completed[parent])
         checks['watershed'] = checks['watershed'] and after('abstract', 'watershed')
-        soils = Soils.tryGetInstance(str(wd))
+        soils = Soils.tryGetInstance(str(wd)) if model == 'M3' else None
         climate = Climate.tryGetInstance(str(wd))
         disturbed = Disturbed.tryGetInstance(str(wd))
-        inventory = getattr(soils, 'soils', {}) or {}
-        soil_paths = [Path(soils.soils_dir)/str(summary.fname) for summary in inventory.values()] if soils else []
-        checks['soils'] = bool(after('soils','abstract') and (after('soils','landuse') or after('soils','rangeland')) and soils and soils.has_soils and soil_paths and all(p.is_file() for p in soil_paths))
-        for index, path in enumerate(sorted(soil_paths)):
-            files[f'soil_{index}'] = path
+        if model == 'M3':
+            inventory = getattr(soils, 'soils', {}) or {}
+            soil_paths = [Path(soils.soils_dir)/str(summary.fname) for summary in inventory.values()] if soils else []
+            checks['soils'] = bool(after('soils','abstract') and (after('soils','landuse') or after('soils','rangeland')) and soils and soils.has_soils and soil_paths and all(p.is_file() for p in soil_paths))
+            for index, path in enumerate(sorted(soil_paths)):
+                files[f'soil_{index}'] = path
         if disturbed:
             files['sbs'] = Path(disturbed.sbs_4class_path)
-        files['k'] = Path(wd)/'rusle'/'k_polaris_nomograph.tif'
-        files['k_manifest'] = Path(wd)/'rusle'/'manifest.json'
+        if model == 'M1':
+            files['k'] = Path(wd)/'rusle'/'k_polaris_nomograph.tif'
+            files['k_manifest'] = Path(wd)/'rusle'/'manifest.json'
         files['cli'] = Path(wd)/'climate'/'wepp_cli.parquet'
         cli_name = getattr(climate, 'cli_fn', None)
         if climate and cli_name:
@@ -192,7 +204,6 @@ def sources(wd, *, rainfall=True, frequency='cli'):
         if frequency == 'noaa':
             files['noaa'] = noaa
         checks.update(sbs=bool(completed['sbs'] and disturbed and files['sbs'].is_file()),
-                      k=files['k'].is_file() and files['k_manifest'].is_file(),
                       climate=bool(after('climate','abstract') and climate and files['cli'].is_file()
                           and files.get('active_cli') and files['active_cli'].is_file()
                           and files['cli'].stat().st_mtime_ns >= files['active_cli'].stat().st_mtime_ns), noaa=noaa_current(wd,noaa,getattr(watershed,'_centroid',None)))
@@ -201,20 +212,20 @@ def sources(wd, *, rainfall=True, frequency='cli'):
         tool = WhiteboxTools()
         binary = Path(tool.exe_path)/tool.exe_name
         selections['wbt_sha256'] = cached_digest(binary)
-        selections['completed'] = completed
-        candidate = Path(wd)/'polaris'/'manifest.json'
-        if candidate.is_file(): files['polaris_manifest'] = candidate
-        checks['k'] = checks['k'] and k_current(wd, files, completed['polaris'])
+        excluded = ('soils', 'landuse', 'rangeland') if model == 'M1' else ('polaris',)
+        selections['completed'] = {k:v for k,v in completed.items() if k not in excluded}
+        if model == 'M1':
+            candidate = Path(wd)/'polaris'/'manifest.json'
+            if candidate.is_file(): files['polaris_manifest'] = candidate
+            checks['k'] = files['k'].is_file() and files['k_manifest'].is_file() and k_current(wd, files, completed['polaris'])
         selections['sbs'] = {key: getattr(disturbed, key, None) for key in ('disturbed_fn','classes','breaks','nodata_vals','sbs_mode','fire_date')}
         selections['climate'] = {key: getattr(climate, key, None) for key in ('catalog_id','climatestation','input_years','observed_start_year','observed_end_year','future_start_year','future_end_year','precip_scale_factor','precip_monthly_scale_factors','adjust_mx_pt5')}
-        selections['soil_mapping'] = dict(getattr(soils, 'domsoil_d', {}) or {})
-        for key, relative in (('polaris_manifest','polaris/manifest.json'),):
-            candidate = Path(wd)/relative
-            if candidate.is_file(): files[key] = candidate
+        if model == 'M3':
+            selections.update(soil_mapping=dict(getattr(soils, 'domsoil_d', {}) or {}),
+                              soil_source=getattr(soils, 'soil_source', None),
+                              soil_mode=str(getattr(soils, 'mode', None)))
         mode = getattr(climate, 'climate_mode', None)
-        selections.update(climate_mode=getattr(mode, 'name', str(mode)), cli_fn=getattr(climate, 'cli_fn', None),
-                          soil_source=getattr(soils, 'soil_source', None),
-                          soil_mode=str(getattr(soils, 'mode', None)))
+        selections.update(climate_mode=getattr(mode, 'name', str(mode)), cli_fn=getattr(climate, 'cli_fn', None))
     # External masks affect decoded project support; inert statistics do not.
     for key in ('dem', 'mask'):
         companion = Path(str(files[key]) + '.msk')
@@ -248,7 +259,7 @@ def reconcile_attempts(wd, state, connection, *, persist=False):
         try:
             job=Job.fetch(job_id,connection=connection)
             if (tuple(job.args)!=(runid,attempt['id']) or job.origin!='default'
-                    or job.func_name != 'wepppy.rq.postfire_debris_flow_rq.' + ('upload_dnbr_rq' if kind=='upload_attempt' else 'run_m1_rq')):
+                    or job.func_name != 'wepppy.rq.postfire_debris_flow_rq.' + ('upload_dnbr_rq' if kind=='upload_attempt' else 'run_m3_rq' if attempt.get('model', 'M1') == 'M3' else 'run_m1_rq')):
                 raise WorkflowError('job_mismatch','Job association could not be verified.',409)
             phase=job.get_status(refresh=True)
             phase=getattr(phase,'value',phase)
@@ -275,13 +286,17 @@ def reconcile_attempts(wd, state, connection, *, persist=False):
     return result
 
 
-def public_attempt(attempt):
+def public_attempt(attempt, *, model=False):
     if attempt is None:
         return None
-    return {key: deepcopy(attempt.get(key)) for key in ('id','job_id','phase','created_at','error','retryable','filename')}
+    result = {key: deepcopy(attempt.get(key)) for key in ('id','job_id','phase','created_at','error','retryable','filename')}
+    if model:
+        result['model'] = attempt.get('model', 'M1')
+        result['frequency_source'] = attempt.get('frequency_source', attempt.get('snapshot', {}).get('frequency'))
+    return result
 
 
-def get_state(wd, config, *, frequency=None, reconcile=True):
+def get_state(wd, config, *, frequency=None, model=None, reconcile=True):
     from wepppy.nodb.core import Ron
     runid = Ron.getInstance(str(wd)).runid
     state = state_at(wd)
@@ -299,7 +314,8 @@ def get_state(wd, config, *, frequency=None, reconcile=True):
                 state=state_at(wd)
     if frequency is not None:
         state['frequency_source'] = frequency
-    eligible, readonly, checks, paths, snapshot = sources(wd, frequency=state['frequency_source'])
+    model = model or state.get('model', 'M1')
+    eligible, readonly, checks, paths, snapshot = sources(wd, frequency=state['frequency_source'], model=model)
     active = deepcopy(state['active_dnbr'])
     upload_sources = sources(wd, rainfall=False)
     checks['dnbr'] = bool(active and active['snapshot'] == upload_sources[4] and artifacts_current(wd,active,strong=False))
@@ -307,7 +323,14 @@ def get_state(wd, config, *, frequency=None, reconcile=True):
         active['current'] = checks['dnbr']
         active = {k:v for k,v in active.items() if k not in ('snapshot','source_id','source_sha256','artifacts')}
     result = deepcopy(state['last_successful_run'])
-    current = bool(result and checks['dnbr'] and artifacts_current(wd,result,strong=False) and result['snapshot'] == {'inputs': snapshot, 'dnbr': active['id'] if active else None, 'frequency': state['frequency_source']})
+    current = False
+    if result:
+        result_model = result.get('model', 'M1')
+        result_frequency = result['snapshot']['frequency']
+        result_snapshot = snapshot if (result_model == model and result_frequency == state['frequency_source']) else sources(wd, frequency=result_frequency, model=result_model)[4]
+        expected = {'inputs': result_snapshot, 'dnbr': active['id'] if active and result_model == 'M1' else None, 'frequency': result_frequency}
+        current = bool((result_model == 'M3' or checks['dnbr']) and artifacts_current(wd,result,strong=False) and result['snapshot'] == expected)
+        result['model'] = result_model
     if result:
         result.pop('snapshot', None)
         result.pop('artifacts', None)
@@ -315,13 +338,15 @@ def get_state(wd, config, *, frequency=None, reconcile=True):
         result['current'] = current
         result['files'] = [{'name': name, 'url': f'/rq-engine/api/runs/{runid}/{config}/postfire-debris-flow/files/{result["id"]}/{name}'} for name in FILES]
     required = [{'key': key, 'ready': bool(checks.get(key)), 'reason': None if checks.get(key) else 'missing_input',
-                 'message': '' if checks.get(key) else label, 'control': anchor} for key,(label,anchor) in LABELS.items()]
-    return {'schema_version': 1, 'eligible': eligible, 'readonly': readonly,
+                 'message': '' if checks.get(key) else label, 'control': anchor} for key,(label,anchor) in LABELS.items() if key not in (('soils',) if model == 'M1' else ('k', 'dnbr'))]
+    if model == 'M3' and (snapshot['selections'].get('cellsize') != 10 or snapshot['selections'].get('dem_source') != 'ned13/2022'):
+        required[0]['message'] = 'Use a 10 m project with the NED13/2022 elevation source.'
+    return {'schema_version': 1, 'model': model, 'eligible': eligible, 'readonly': readonly,
             'unavailable_reason': None if eligible else 'Post-fire debris flow requires a WBT project in the continental US.',
             'required': required, 'noaa_available': bool(checks.get('noaa')),
             'frequency_source': state['frequency_source'], 'upload_ready': eligible and not readonly and upload_sources[2]['watershed'],
             'run_ready': eligible and not readonly and all(item['ready'] for item in required) and (state['frequency_source']!='noaa' or checks['noaa']),
-            'upload': public_attempt(state['upload_attempt']), 'run': public_attempt(state['run_attempt']),
+            'upload': public_attempt(state['upload_attempt']), 'run': public_attempt(state['run_attempt'], model=True),
             'dnbr': active, 'results': result, 'freshness': 'current' if current else ('stale' if result else 'absent')}
 
 
@@ -393,7 +418,7 @@ def execute_upload(wd, identity):
 
 def reuse_predictors(wd, accepted, hashes, binary_hash, output):
     """Reuse only a published predictor bundle with verified content identities."""
-    if not accepted or not accepted.get('predictor_artifacts'):
+    if not accepted or accepted.get('model', 'M1') != 'M1' or not accepted.get('predictor_artifacts'):
         return False
     if not artifacts_current(wd, {'artifacts': accepted['predictor_artifacts']}):
         return False
@@ -439,10 +464,13 @@ def execute_model(wd, identity, binary):
     state=state_at(wd); attempt=state['run_attempt']; active=state['active_dnbr']
     if not attempt or attempt['id']!=identity or not active:
         raise WorkflowError('superseded', 'Run was superseded.',409)
+    if attempt.get('model', 'M1') != 'M1':
+        raise WorkflowError('invalid_model', 'M1 task received another model.', 409)
+    frequency = attempt['snapshot']['frequency']
     update_attempt(wd,'run_attempt',identity,phase='running')
-    eligible, readonly, checks, paths, snapshot = sources(wd,frequency=state['frequency_source'])
-    expected={'inputs':snapshot,'dnbr':active['id'],'frequency':state['frequency_source']}
-    if not eligible or readonly or expected != attempt['snapshot'] or not all(checks.values() if state['frequency_source']=='noaa' else (v for k,v in checks.items() if k!='noaa')):
+    eligible, readonly, checks, paths, snapshot = sources(wd,frequency=frequency)
+    expected={'inputs':snapshot,'dnbr':active['id'],'frequency':frequency}
+    if not eligible or readonly or expected != attempt['snapshot'] or not all(checks.values() if frequency=='noaa' else (v for k,v in checks.items() if k!='noaa')):
         raise WorkflowError('superseded','Required project data changed. Run the model again.',409)
     if not artifacts_current(wd, active):
         raise WorkflowError('changed_source','Uploaded files changed. Upload the map again.',409)
@@ -468,8 +496,8 @@ def execute_model(wd, identity, binary):
     mode=snapshot['selections']['climate_mode']
     build_m1_results(RainfallInputs(predictor,paths['cli'],result_hashes,Ron.getInstance(str(wd)).runid,mode,
                      'simulation_labels' if mode in ('Vanilla','Future','PRISM') else 'calendar',active['id'],noaa_csv=paths.get('noaa')),
-                     root/'results',frequency_source=state['frequency_source'],return_intervals=(1,2,5,10),durations=(15,30,60),target_probabilities=(.5,))
-    if any(digest(p)!=h for p,h in hashes.items()) or sources(wd,frequency=state['frequency_source'])[4]!=snapshot:
+                     root/'results',frequency_source=frequency,return_intervals=(1,2,5,10),durations=(15,30,60),target_probabilities=(.5,))
+    if any(digest(p)!=h for p,h in hashes.items()) or sources(wd,frequency=frequency)[4]!=snapshot:
         raise WorkflowError('superseded','Inputs changed. Run the model again.',409)
     destination=root/'results'
     result_manifest=read_json(destination/'manifest.json')
@@ -483,13 +511,28 @@ def execute_model(wd, identity, binary):
     result_artifacts = {str((destination/name).relative_to(Path(wd))):signature(wd,destination/name,strong=True) for name in FILES}
     def publish(current):
         if (current['run_attempt']['id']!=identity or current['active_dnbr']['id']!=active['id']
-                or current['frequency_source']!=state['frequency_source']
-                or sources(wd,frequency=state['frequency_source'])[4]!=snapshot
+                or sources(wd,frequency=frequency)[4]!=snapshot
                 or not artifacts_current(wd,current['active_dnbr'], strong=False)
                 or not artifacts_current(wd, {'artifacts': result_artifacts}, strong=False)
                 or not artifacts_current(wd, {'artifacts': predictor_artifacts}, strong=False)):
             raise WorkflowError('superseded','Inputs changed. Run the model again.',409)
-        current['last_successful_run']={'id':identity,'completed_at':now(),'snapshot':expected,'partial':partial,'area_warning':area_warning,
+        current['last_successful_run']={'id':identity,'model':'M1','completed_at':now(),'snapshot':expected,'partial':partial,'area_warning':area_warning,
             'artifacts': result_artifacts, 'predictor_artifacts': predictor_artifacts}
         current['run_attempt'].update(phase='complete',retryable=True)
     mutable(wd).change(publish)
+
+
+def execute_m3(wd, identity):
+    """Real task boundary; scientific composition is the next integration stage."""
+    state = state_at(wd)
+    attempt = state['run_attempt']
+    if not attempt or attempt['id'] != identity or attempt.get('model') != 'M3':
+        raise WorkflowError('superseded', 'M3 run was superseded.', 409)
+    update_attempt(wd, 'run_attempt', identity, phase='running')
+    frequency = attempt['snapshot']['frequency']
+    eligible, readonly, checks, paths, snapshot = sources(wd, frequency=frequency, model='M3')
+    expected = {'inputs': snapshot, 'dnbr': None, 'frequency': frequency}
+    if not eligible or readonly or expected != attempt['snapshot'] or not all(
+            value for key, value in checks.items() if key != 'noaa' or frequency == 'noaa'):
+        raise WorkflowError('superseded', 'Required project data changed. Run the model again.', 409)
+    raise WorkflowError('integration_pending', 'M3 soil and terrain integration is not implemented yet.', 422)

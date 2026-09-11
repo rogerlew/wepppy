@@ -7,7 +7,10 @@
 
 The production M1 control, NoDb state, dNBR upload and RQ execution are implemented.
 Development validation is recorded in the [production work package](../../../../docs/work-packages/20260910_staley_m1_production/package.md).
-Reports, the event dashboard and production M3 remain deferred. Existing
+The M1/M3 selector and dedicated M3 RQ task are wired; see the
+[model wiring validation](../../../../docs/work-packages/20260911_staley_model_wiring/artifacts/validation.md). M3 soil/terrain
+composition remains deferred: its task reports an explicit integration-pending
+failure and does not publish probabilities. Reports and the event dashboard remain deferred. Existing
 `debris_flow` behavior is unchanged. See the [specification](specification.md)
 and [roadmap](implementation_roadmap.md) for scientific scope and remaining work.
 
@@ -16,7 +19,7 @@ and [roadmap](implementation_roadmap.md) for scientific scope and remaining work
 1. Delineate the burned watershed of interest in a continental-US WBT project.
    The empirical model is intended for recently burned Western US basins.
 2. Enable **Post-fire debris flow** in Mods (also enables POLARIS and RUSLE).
-   Build project soils and climate, set soil burn severity, and prepare POLARIS
+   Build project climate, set soil burn severity, and prepare POLARIS
    Nomograph K through RUSLE. The control shows which prerequisites need work;
    completion of the entire RUSLE model is not required.
 3. Upload a single-band GeoTIFF
@@ -32,7 +35,20 @@ replacements preserve the accepted map. Changed prerequisites require preparatio
 or a rerun. Display units follow project preferences; model files use canonical SI
 units. The model estimates occurrence likelihood, not volume or inundation extent.
 
-## Planned M3 and dashboard workflow
+## Select M3
+
+Select M3 beside M1 in the existing control. The dNBR upload and K prerequisite
+are hidden; Soils is shown instead. Initial M3 eligibility requires the project's
+10 m cell size and NED13/2022 DEM source. Automatic POLARIS/RUSLE enablement stays
+in place, but M3 does not require their outputs. Prepare project soils, SBS and
+climate before submitting. The job ID and explicit integration-pending failure
+remain visible after reload while scientific composition is being completed.
+
+Changing selection preserves prior model outputs and their model labels. The
+🌋 marker represents the latest accepted result on its own inputs, independently
+of the radio selection. A failed M3 task does not erase a current M1 result.
+
+## Planned M3 scientific integration and dashboard workflow
 
 1. Use a continental US (CONUS) project, delineate with WBT, complete the WEPP
    Soils build, and provide a soil burn severity (SBS) map.

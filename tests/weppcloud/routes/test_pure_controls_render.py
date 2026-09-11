@@ -4915,3 +4915,15 @@ def test_interfaces_creation_policy_renders_all_launch_surfaces(jinja_env, authe
         assert '<cap-widget' not in rendered
         assert '/cap/assets/widget.js' not in rendered
         assert '/cap/assets/floating.js' not in rendered
+
+
+def test_postfire_model_header_and_conditional_upload_group(jinja_env: Environment):
+    rendered = jinja_env.get_template('controls/postfire_debris_flow_pure.htm').render()
+    header = rendered.split('<header class="wc-control__header">', 1)[1].split('</header>', 1)[0]
+    assert '<table class="wc-table">' in header
+    assert 'Staley et al. (2017) recommend M1' in header
+    assert re.search(r'name="model"[^>]*value="M1"[^>]*checked', rendered)
+    assert re.search(r'name="model"[^>]*value="M3"', rendered)
+    assert 'wc-choice-group--horizontal' in rendered
+    assert 'data-pfdf-dnbr-fields' in rendered
+    assert rendered.index('data-pfdf-dnbr-fields') < rendered.index('data-pfdf-summary') < rendered.index('Design storm rainfall')

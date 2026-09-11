@@ -7,15 +7,18 @@ with upload and model execution now and reports deferred. The contract checkpoin
 
 ## Scope and layout
 
-Pending increment (owner request 2026-09-11): the fixed-M1 layout below is the
-implemented baseline. [M1/M3 selection](../../../wepppy/nodb/mods/postfire_debris_flow/docs/model_selection.md)
-records the accepted replacement presentation and accepted state/transport
-intent. Complete its contract checkpoint before implementation; do not treat
-the planned M3 selector as evidence that production M3 execution is available.
+The [M1/M3 selection](../../../wepppy/nodb/mods/postfire_debris_flow/docs/model_selection.md)
+layout and model-aware state/task transport are implemented after reviewed
+checkpoint `aa30e637e` (2026-09-11). M1 retains its scientific pipeline; M3
+reaches its dedicated task and explicitly reports pending soil/terrain integration.
+Selectors remain disabled until saved model/rainfall state loads, so an early
+click cannot persist template defaults. The selector does not establish completed
+M3 probability calculations.
 
 One existing Pure UI control named **Post-fire debris flow**, following project
 control typography, spacing, form helpers and status patterns. No new dashboard,
-wizard, card grid or tabs. Model is fixed to Staley M1; no model picker. Existing
+wizard, card grid or tabs. Use the accepted M1/M3 radio selector and header
+comparison in the linked selection contract. Existing
 project watershed/outlet supplies the assessment domain.
 
 The control and its navigation link follow RUSLE, which supplies soil
@@ -38,9 +41,10 @@ Proposed layout (brackets describe controls, not literal rendered text):
     Estimate debris-flow likelihood for this watershed using the Staley model.
     About this model
 
-    Required project data
+    Model  (•) M1 (recommended)  ( ) M3
+
+    Required project data (M1 shown)
     Watershed                 Ready
-    Soils                     Ready
     Soil burn severity        Ready
     Soil erodibility (K)       Needed — Prepare in RUSLE
     Climate                   Ready

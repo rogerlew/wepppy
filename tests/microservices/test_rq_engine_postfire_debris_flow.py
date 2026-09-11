@@ -248,4 +248,62 @@ def test_enqueue_hands_off_without_writing_over_started_worker(tmp_path,monkeypa
     finally:
         controller.unlock()
     assert json.loads(response.body)['job_id']==job_id
-    assert controller.state[kind]['phase']=='running'
+    assert PostfireDebrisFlow.load_detached(str(tmp_path)).state[kind]['phase']=='running'
+
+@pytest.mark.parametrize('model', ['M1', 'M3'])
+def test_model_dispatch_records_identity_before_enqueue(client, tmp_path, monkeypatch, model):
+    from wepppy.nodb.mods.postfire_debris_flow import preflight
+    from wepppy.nodb.mods.postfire_debris_flow.postfire_debris_flow import PostfireDebrisFlow
+    monkeypatch.setattr(preflight, 'notify', lambda wd: None)
+    controller = PostfireDebrisFlow(str(tmp_path), 'disturbed9002_wbt.cfg')
+    monkeypatch.setattr(p, 'mutable', lambda wd: controller)
+    monkeypatch.setattr(routes, 'rq_submission_lock', lambda *a, **kw: nullcontext())
+    monkeypatch.setattr(p, 'reconcile_attempts', lambda wd, state, *a, **kw: state)
+    monkeypatch.setattr(p, 'sources', lambda *a, **kw: (True, False, {}, {}, {}))
+    monkeypatch.setattr(p, 'get_state', lambda *a, **kw: {'run_ready': True})
+    monkeypatch.setattr(routes.RedisPrep, 'getInstance', lambda wd: object())
+    monkeypatch.setattr(p, 'artifacts_current', lambda *a, **kw: model == 'M1' or pytest.fail('M3 must not inspect dNBR'))
+    captured = []
+    def admit(queue, function, **kw):
+        kw['on_job_id']('job-123')
+        record = PostfireDebrisFlow.load_detached(str(tmp_path)).state['run_attempt']
+        captured.append((function, record))
+        return SimpleNamespace(id='job-123')
+    monkeypatch.setattr(routes, 'enqueue_tracked_rq_job', admit)
+    response = client.post('/runs/test/config/postfire-debris-flow/run', json={'model': model, 'frequency_source': 'cli'})
+    assert response.status_code == 200, response.text
+    function, record = captured[0]
+    assert function is (routes.run_m3_rq if model == 'M3' else routes.run_m1_rq)
+    assert record['model'] == model and record['phase'] == 'queued'
+    assert record['frequency_source'] == 'cli' and record['job_id'] == 'job-123'
+    other = 'M1' if model == 'M3' else 'M3'
+    assert client.post('/runs/test/config/postfire-debris-flow/run', json={'model': other}).status_code == 409
+
+
+@pytest.mark.parametrize('suffix,body', [
+    ('run', {}), ('run', {'model':'M2'}), ('run', {'model':['M3']}),
+    ('run-m1', {'model':'M3'}), ('selection', {'model':'M3'}),
+    ('selection', {'model':'M3','frequency_source':'bad'}),
+])
+def test_model_payload_rejected_before_mutation(client, tmp_path, suffix, body):
+    response = client.post('/runs/test/config/postfire-debris-flow/'+suffix, json=body)
+    assert response.status_code == 400
+    assert not (tmp_path/'postfire_debris_flow.nodb').exists()
+
+
+def test_selection_does_not_rewrite_running_attempt(client, tmp_path, monkeypatch):
+    from wepppy.nodb.mods.postfire_debris_flow import preflight
+    from wepppy.nodb.mods.postfire_debris_flow.postfire_debris_flow import PostfireDebrisFlow
+    monkeypatch.setattr(preflight, 'notify', lambda wd: None)
+    controller = PostfireDebrisFlow(str(tmp_path), 'disturbed9002_wbt.cfg')
+    attempt = {'id':'b'*32,'model':'M1','phase':'running','created_at':p.now(),'retryable':False,
+               'snapshot':{'frequency':'cli'},'job_id':'original'}
+    controller.change(lambda state: state.update(run_attempt=attempt))
+    monkeypatch.setattr(p, 'mutable', lambda wd: controller)
+    monkeypatch.setattr(routes, 'rq_submission_lock', lambda *a, **kw: nullcontext())
+    monkeypatch.setattr(p, 'sources', lambda *a, **kw: (True, False, {}, {}, {}))
+    response = client.post('/runs/test/config/postfire-debris-flow/selection', json={'model':'M3','frequency_source':'noaa'})
+    assert response.status_code == 200
+    saved = PostfireDebrisFlow.load_detached(str(tmp_path)).state
+    assert saved['model'] == 'M3' and saved['frequency_source'] == 'noaa'
+    assert saved['run_attempt'] == attempt

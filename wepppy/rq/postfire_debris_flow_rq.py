@@ -23,7 +23,7 @@ def _retain_error(wd, identity):
         logger.exception('Could not retain postfire attempt error log: %s', identity)
 
 
-def _execute(runid, identity, kind):
+def _execute(runid, identity, kind, model='M1'):
     wd = get_wd(runid)
     job = get_current_job()
     if job:
@@ -31,6 +31,8 @@ def _execute(runid, identity, kind):
     try:
         if kind == 'upload_attempt':
             production.execute_upload(wd, identity)
+        elif model == 'M3':
+            production.execute_m3(wd, identity)
         else:
             from whitebox_tools import WhiteboxTools
             tool = WhiteboxTools()
@@ -41,6 +43,8 @@ def _execute(runid, identity, kind):
         phase = 'needs_scale' if code == 'ambiguous_encoding' else ('superseded' if code=='superseded' else 'failed')
         message = ('Could not determine the dNBR value scale. Choose the scale used by your map.'
                    if phase=='needs_scale' else 'The operation could not finish. Check the project inputs and job log.')
+        if code == 'integration_pending':
+            message = str(exc)
         production.update_attempt(wd,kind,identity,phase=phase,error={'code':code,'message':message},retryable=True)
         logger.exception('Postfire operation failed: %s %s',runid,identity)
         if phase!='needs_scale':raise RuntimeError(f'Postfire operation failed ({code}). See protected run logs.') from None
@@ -62,3 +66,8 @@ def upload_dnbr_rq(runid, identity):
 @with_exception_logging
 def run_m1_rq(runid, identity):
     return _execute(runid, identity, 'run_attempt')
+
+
+@with_exception_logging
+def run_m3_rq(runid, identity):
+    return _execute(runid, identity, 'run_attempt', model='M3')

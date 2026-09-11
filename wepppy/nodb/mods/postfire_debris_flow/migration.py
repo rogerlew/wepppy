@@ -165,12 +165,18 @@ def _render(groups, paths):
     return hashes, rendered
 
 
+def _legacy_model_default(state):
+    # Normalize only the accepted additive default; preserve backup bytes and
+    # reject every other mismatch in the independently anchored migration plan.
+    return {**state, 'model': state.get('model', 'M1')} if isinstance(state, dict) else state
+
+
 def _validate_plan(wd, controller, root, audit, report):
     backup = p.safe(wd, audit/'original_metadata'/controller.filename)
     if p.digest(backup) != report['original_nodb_sha256']:
         raise ValueError('Migration NoDb backup changed.')
     raw_state = _json(backup).get('py/state', {}).get('_state')
-    if raw_state != report['original_state']:
+    if _legacy_model_default(raw_state) != _legacy_model_default(report['original_state']):
         raise ValueError('Original migration state does not match the NoDb backup; inspect serialization.')
     if _json(p.safe(wd, audit/'original_metadata'/'state.json')) != report['original_state']:
         raise ValueError('Migration original state changed.')
@@ -329,9 +335,9 @@ def _updated_state(wd, report):
 def _install(wd, controller, root, audit, report, lease):
     _validate_plan(wd, controller, root, audit, report)
     state = controller.state
-    if state != report['original_state']:
+    if _legacy_model_default(state) != _legacy_model_default(report['original_state']):
         expected, _ = _updated_state(wd, report)
-        if state != expected:
+        if _legacy_model_default(state) != _legacy_model_default(expected):
             raise ValueError('Project state changed since migration started.')
     inventory = report['inventory']
     legacy, target = root/'.staging', root/'attempts'

@@ -1,0 +1,20 @@
+[
+  {
+    "job_id": "2fc8d67a-6436-4408-8a0a-49cdca0127b1",
+    "runid": "addicted-reservist",
+    "status": "finished",
+    "started_at": "2026-09-11 21:23:22.752242",
+    "ended_at": "2026-09-11 21:23:41.130143",
+    "description": "wepppy.rq.postfire_debris_flow_rq.run_m1_rq('addicted-reservist', '4dcc8744ef294d238849600872232499')",
+    "children": {}
+  },
+  {
+    "job_id": "6259b9ab-b249-4edc-a4ac-bdab669df5e0",
+    "runid": "addicted-reservist",
+    "status": "failed",
+    "started_at": "2026-09-11 21:24:36.570835",
+    "ended_at": "2026-09-11 21:24:42.682521",
+    "description": "wepppy.rq.postfire_debris_flow_rq.run_m3_rq('addicted-reservist', '0d2a172cd13b4107b09be6e92a7bf896')",
+    "children": {}
+  }
+]

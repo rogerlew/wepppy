@@ -1,0 +1,13 @@
+SELECTION RESPONSE 409
+SELECTION RESPONSE 409
+SELECTION RESPONSE 409
+SELECTION RESPONSE 200
+SAVED M3 noaa
+SELECTION RESPONSE 200
+SAVED M1 noaa
+SELECTION RESPONSE 200
+SAVED M3 noaa
+RELOAD {"model":"M3","frequency":"noaa","dnbrHidden":true,"jobIdVisible":true,"errorVisible":true,"connected":true}
+PREFLIGHT {"type":"preflight","checklist":{"ag_fields":false,"channels":true,"climate":true,"debris":false,"dss_export":false,"geneva":false,"landuse":true,"observed":false,"omni_contrasts":false,"omni_scenarios":false,"openet_ts":false,"outlet":true,"postfire_debris_flow":true,"rangeland_cover":false,"rap_ts":false,"rhem":false,"roads":false,"run_path_ce":false,"rusle":true,"sbs_map":true,"soils":true,"subcatchments":true,"watar":false,"wepp":true},"lock_statuses":{"climate.nodb":true,"disturbed.nodb":false,"landuse.nodb":false,"observed.nodb":false,"polaris.nodb":false,"postfire_debris_flow.nodb":false,"ron.nodb":false,"rusle.nodb":false,"soils.nodb":false,"unitizer.nodb":false,"watershed.nodb":false,"wepp.nodb":false},"last_modified":1789162637}
+DOWNLOAD {"url":"https://wc.bearhive.duckdns.org/rq-engine/api/runs/addicted-reservist/config/postfire-debris-flow/files/4dcc8744ef294d238849600872232499/manifest.json","status":200}
+PASS delayed initial state, restored NOAA, M1/M3 persistence, failed M3 job reload, download and preflight stream

@@ -220,8 +220,7 @@ func TestPostfirePublicationAndUpstreamInvalidation(t *testing.T) {
 	}
 	for _, task := range []string{
 		"fetch_dem", "build_channels", "set_outlet", "find_outlet",
-		"build_subcatchments", "abstract_watershed", "build_landuse",
-		"build_rangeland_cover", "build_soils", "init_sbs_map", "build_polaris",
+		"build_subcatchments", "abstract_watershed", "init_sbs_map", "build_polaris",
 		"build_rusle", "build_climate",
 	} {
 		for _, timestamp := range []string{"100", "200", "300", "", "bad", "0", "-1"} {
@@ -246,4 +245,21 @@ func TestPostfirePublicationAndUpstreamInvalidation(t *testing.T) {
 	if check["postfire_debris_flow"] {
 		t.Fatal("legacy task must not complete Staley")
 	}
+}
+
+func TestPostfireModelDependencies(t *testing.T) {
+    for _, model := range []string{"M1", "M3", "invalid"} {
+        for _, task := range []string{"build_soils", "build_polaris", "build_rusle", "build_landuse"} {
+            check, _ := Evaluate(map[string]string{
+                "timestamps:run_postfire_debris_flow": "200",
+                "postfire_debris_flow:model": model,
+                "timestamps:" + task: "300",
+            })
+            relevant := (model == "M1" && (task == "build_polaris" || task == "build_rusle")) ||
+                (model == "M3" && (task == "build_soils" || task == "build_landuse"))
+            if check["postfire_debris_flow"] != (model != "invalid" && !relevant) {
+                t.Fatalf("unexpected %s freshness after %s", model, task)
+            }
+        }
+    }
 }

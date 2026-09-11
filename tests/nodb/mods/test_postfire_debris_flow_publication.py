@@ -14,6 +14,8 @@ def accepted_project(tmp_path, monkeypatch):
     monkeypatch.setattr(preflight, 'notify', lambda wd: None)
     controller = PostfireDebrisFlow(str(tmp_path), 'disturbed9002_wbt.cfg')
     def accept(identity, value=b'accepted', hook=True):
+        nonlocal controller
+        controller = PostfireDebrisFlow.getInstance(str(tmp_path))
         root = p.directory(tmp_path, identity)/'results'
         root.mkdir(parents=True)
         for name in p.FILES:
@@ -126,6 +128,7 @@ def test_hash_failure_before_install_preserves_prior_outputs(accepted_project, m
     prior = {name: (output/name).read_bytes() for name in p.FILES}
     accept('b'*32, b'new', hook=False)
     if damage == 'recorded_hash':
+        controller = PostfireDebrisFlow.getInstance(controller.wd)
         with controller.locked():
             for expected in controller._state['last_successful_run']['artifacts'].values():
                 expected[-1] = '0'*64  # Same file/stat, incorrect accepted hash.

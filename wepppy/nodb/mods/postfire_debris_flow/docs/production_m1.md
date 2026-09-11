@@ -12,10 +12,10 @@ Reports and interactive dashboard are deferred. Canonical UI contract:
 
 ## Authority and acceptance boundary
 
-Pending owner-directed increment: [M1/M3 selection](model_selection.md) records
-model-specific UI and prerequisite changes, including removal of the independent
-WEPP Soils requirement for M1. The baseline below remains implemented behavior
-until the reviewed contract checkpoint and runtime changes are complete.
+The implemented [M1/M3 selection](model_selection.md) amendment records
+model-specific UI, task dispatch and prerequisites after checkpoint aa30e637e.
+M1 has no independent built WEPP Soils requirement; M3 uses that inventory and
+its dedicated task, with scientific composition still deferred.
 
 Reuse existing predictor, rainfall, dNBR, slope/SBS and scalar contracts. Preserve
 legacy debris_flow.nodb and outputs. The new facade is PostfireDebrisFlow,
@@ -37,7 +37,7 @@ the intended operator smoke test, not a new M1 10 m restriction. Respect accepte
 area warnings outside inclusive 0.2–8 km² without rejecting on area alone.
 
 Run prerequisites: completed delineation with valid raw DEM/grid/boundary/outlet,
-readable built WEPP Soils inventory, prepared SBS, RUSLE Nomograph K with accepted
+prepared SBS, RUSLE Nomograph K with accepted
 provenance, accepted normalized dNBR, and valid project Climate event parquet.
 NOAA artifact is required only for requested NOAA design comparisons. Use K-
 artifact readiness, not a successful unrelated full RUSLE factor build (ADR-0059).
@@ -142,8 +142,8 @@ Incomplete scientific support can produce a successful diagnostic result with
 null probabilities under accepted backend contracts; this is distinct from a
 failed worker or an invalid request.
 
-Dependency snapshot includes DEM/grid/domain/resolved outlet, Soils build/source
-inventory, SBS artifact/class mapping/assessment, named K and its provenance,
+M1 dependency snapshot includes DEM/grid/domain/resolved outlet, SBS
+artifact/class mapping/assessment, named K and its provenance,
 dNBR source/normalization/assessment, CLI parquet/mode/date semantics, selected
 frequency source/NOAA or CLI parity artifact, engine/tool identity and scientific
 parameters. Hashes establish content identity, not association with current
@@ -277,7 +277,7 @@ No new rectangular/geographic cutoff is inferred. Western US guidance remains
 visible; scientific area warnings do not block execution.
 
 Read current Ron.dem_fn, Watershed.wbt_wd/bound.tif and outlet.geojson, current
-built Soils inventory, Disturbed.sbs_4class_path, rusle/k_polaris_nomograph.tif
+Disturbed.sbs_4class_path, rusle/k_polaris_nomograph.tif
 and rusle/manifest.json, Climate's climate/wepp_cli.parquet and selected
 climate/atlas14_intensity_pds_mean_metric.csv. Confirm artifact ownership and
 current controller selections, not arbitrary file presence. SBS is already 0–3;
@@ -505,9 +505,10 @@ run readiness after a state-fetch or preflight connection failure are disabled.
 
 Climate readiness also requires the active CLI file and an event parquet no older
 than that CLI. This rejects an old event table retained after a failed export,
-even if the overall climate build has a completion receipt. Soils/climate receipt
-ordering follows the shared preflight contract relative to watershed abstraction
-and landuse (or rangeland for soils). Upload requires only the delineated grid;
+even if the overall climate build has a completion receipt. Climate receipt
+ordering follows the shared preflight contract relative to watershed abstraction.
+M3 Soils/landuse/rangeland checks are specified in model_selection.md; they are
+not independent M1 prerequisites. Upload requires only the delineated grid;
 model execution requires completed watershed abstraction.
 
 Use stat identities for live readiness and locked finalizers. Retain full hashes

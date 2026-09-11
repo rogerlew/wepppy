@@ -1,6 +1,6 @@
 # Postfire Debris Flow Specification
 
-Status: updated 2026-09-10. Production M1 NoDb, upload, prerequisite/freshness,
+Status: updated 2026-09-11. Production M1 NoDb, upload, prerequisite/freshness,
 RQ execution and minimal UI are implemented under the
 [production contract](docs/production_m1.md). Development validation passed; deployment to other hosts is not implied. M3 production integration
 and reports/dashboard remain deferred.
@@ -19,7 +19,7 @@ replace the required contract-first checkpoint.
 | Assess the existing project watershed at its existing user-selected outlet | Reuse the completed delineation. Users should manually isolate burned basins they suspect may be at risk; nested/channel assessments are outside initial implementation. |
 | Follow RUSLE documentation and source organization | Reuse established module, numerical-helper, integration, UI, and reference-bundle conventions. |
 | Support WBT only | Reuse the owned terrain and watershed stack; no TOPAZ integration in the new module. |
-| Require a completed WEPP Soils build for both models | Projects prepare soil data before postfire assessment; reuse the Soils inventory and provenance rather than building a parallel soil acquisition workflow. |
+| Require built WEPP Soils for M3; require RUSLE K for M1 | M3 reuses the project Soils inventory. M1 consumes K with its own source provenance and has no independent WEPP Soils prerequisite. |
 | Limit availability to the continental US (CONUS) locale | The model is empirical and the initial integration is limited to the conterminous United States; Western US intended-use guidance remains mandatory. |
 | Support SI and English unitization in UI and reports | Follow project unit preferences while preserving the calibrated equation units and identical model results. |
 | Implement M1 and M3, with M1 default and explicit M3 selection | M1 is the publication's recommended model; M3 offers a formulation without dNBR. Do not silently switch models for missing inputs. |
@@ -56,8 +56,10 @@ rainfall.
 The owner requested a shared M1/M3 header comparison, side-by-side model radios,
 M1-only dNBR/K controls and an M3-only Soils prerequisite. Accepted presentation,
 model-aware task transport/state compatibility and remaining integration decisions are
-recorded in [model selection](docs/model_selection.md). Implementation and the
-reviewed contract checkpoint remain pending; production still executes M1 only.
+recorded in [model selection](docs/model_selection.md). The UI and task wiring
+are implemented after checkpoint `aa30e637e`. M1 retains its current scientific
+pipeline; M3 reaches its dedicated RQ task and reports pending soil/terrain
+integration. M3 probabilities and valid-support calculations remain deferred.
 
 ### Predictors
 
@@ -122,11 +124,13 @@ M3 is an alternative formulation, not a model assigned to a particular region.
 
 ## Availability and Soils Readiness
 
-Both models require WBT, a CONUS locale, and a completed Soils controller build
-with populated, readable project soil artifacts. A controller file existing
-without built data does not establish readiness. Show the missing prerequisite
-in the UI and reject bypassed submissions at the server boundary. The postfire
-job consumes prepared soil data; it must not silently initiate a soil rebuild.
+Both models require WBT and a CONUS locale. M3 also requires a completed Soils
+controller build with populated, readable project soil artifacts; a controller
+file without built data does not establish readiness. M1 requires prepared
+RUSLE K and its provenance, without an independent WEPP Soils prerequisite.
+Show model-specific missing data and reject bypassed submissions at the server.
+Neither model silently initiates a soil or K rebuild. See the implemented
+[selection and readiness contract](docs/model_selection.md).
 
 Interpret continental US here as the conterminous lower 48 states and DC,
 excluding Alaska, Hawaii, territories, and non-US projects. Resolve eligibility
@@ -222,8 +226,8 @@ EPIC is not automatically enabled for Staley by its availability in RUSLE.
   and artifact identity. The verified Nomograph scale maps to S with multiplier 1
   (ADR-0059); full finite [0,1] K support and provenance are required for point S.
   Partial K mean remains diagnostic, with no additional gap filling. Named K
-  readiness is independent of unrelated RUSLE factors; completed WEPP Soils
-  remains a production prerequisite. See [local contract](docs/m1_predictors.md).
+  readiness is independent of unrelated RUSLE factors and has no independent
+  completed WEPP Soils prerequisite. See [local contract](docs/m1_predictors.md).
 - Changing K invalidates M1 results under the implemented
   [production freshness contract](docs/production_m1.md#owner-completion-and-recovery-conformance).
 

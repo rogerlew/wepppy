@@ -1,9 +1,9 @@
 # M1/M3 selection and workflow increment
 
-Status: owner-directed UI intent recorded 2026-09-11; implementation pending.
-The accepted request and state intent below requires the contract-first checkpoint
-before runtime edits. Production currently executes M1 only. This increment
-prepares UI and rq-engine wiring; full M3 predictor integration follows.
+Status: UI, state and task wiring implemented after reviewed checkpoint
+`aa30e637e`, 2026-09-11. M1 executes its existing scientific pipeline. M3 reaches
+its dedicated task and explicitly reports pending soil/terrain integration.
+Full M3 predictor integration and valid-support calculations remain subsequent work.
 
 ## Accepted presentation
 
@@ -21,7 +21,7 @@ the established table presentation:
 | Soil | Mean soil erodibility (K), prepared through RUSLE | Mean soil thickness, using SSURGO first and STATSGO as fallback |
 | Rainfall | Rainfall over 15, 30 or 60 minutes | Rainfall over 15, 30 or 60 minutes |
 
-Proposed header copy: “Estimate debris-flow likelihood for recently burned
+Header copy: “Estimate debris-flow likelihood for recently burned
 watersheds in the Western United States. Staley et al. (2017) recommend M1;
 it performed most consistently against regional rainfall thresholds in their
 test dataset. M3 provides an alternative when dNBR is unavailable and requires
@@ -94,7 +94,7 @@ handoff under existing development service identities before claiming completion
 ## Exact wiring boundary
 
 This section supersedes the earlier fixed-M1 UI/transport intent for this
-increment. Implementation remains pending the reviewed checkpoint ancestor.
+increment. The reviewed checkpoint ancestor is `aa30e637e`.
 
 The added run route is POST `/postfire-debris-flow/run` beneath the existing
 run/config API prefix. Require `model` exactly `M1` or `M3`; `frequency_source`
@@ -108,7 +108,9 @@ mutation uses existing rq:enqueue scope, config/readonly/feature/locale checks,
 4 KiB JSON limit, duplicate/unknown-key rejection and NoDb lock/refresh behavior.
 Serialize it with the existing admission lease. GET `/state` remains read-only;
 it returns persisted selection (legacy default M1) and its requirements.
-Browser radio changes save selection, then apply the returned state. Discard
+Selectors remain disabled until the initial saved state is restored; template
+defaults must never overwrite saved rainfall when a user switches models during
+page loading. Browser radio changes save selection, then apply the returned state. Discard
 obsolete responses, and serialize preference writes so an older server request
 cannot overwrite the newest choice. Disable Run during that pending save.
 
@@ -188,3 +190,28 @@ Retain accepted rainfall choices: project climate events; CLI or available NOAA
 design storms; 15/30/60 minutes; 1/2/5/10-year intervals; 50% inverse threshold.
 Keep project watershed/outlet scope, continental-US eligibility, Western-US
 guidance, study-area warnings and project SI/English display preferences.
+
+
+Implementation coordination: facade changes serialize short preference/worker
+mutations through `postfire-state:<runid>` before taking the ordinary NoDb lock
+and refreshing state. The Redis lease uses the existing 120-second/10-second
+bounded lease/wait precedent; check ownership before dump. Lock order is admission
+(if held), state gate, NoDb. Release both mutation locks before notification. Artifact publication separately
+acquires the same gate before its existing NoDb-protected validation/copy/install
+section, checking ownership before replacement; neither guards scientific computation. This implements the
+accepted concurrent-selection behavior without retrying stale objects or clearing
+another writer's lock. Validate real overlapping writers, not only sequential saves.
+
+Selection contention: recording a click uses the same run lifecycle fence as
+saving its model/rainfall preference. Within the existing serialized save queue,
+retry only an explicit HTTP 409 with `body.error.code == job_active`, using the
+same captured payload, at most four total attempts (waits 250, 500, 1000 ms).
+Keep Run disabled and show “Waiting to save selection…” during the wait. Stop
+retries after controller destruction; retain an explicit error after exhaustion.
+Never retry model execution, uploads, transport uncertainty, authorization errors
+or another 409 code. This preserves normal selection with recording enabled,
+without bypassing admission or excluding observations. Reassess this mechanism
+when shared admission/recording coordination changes, or any recurrence exhausts
+its budget; evaluate busy-response count and final save outcome, bounded latency,
+recording continuity and unchanged job counts. Those events trigger a scoped
+follow-up; do not broaden retries automatically.

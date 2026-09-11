@@ -2,14 +2,15 @@
 from copy import deepcopy
 import re
 
-from wepppy.nodb.base import NoDbBase
+from wepppy.nodb.base import NoDbBase, _ensure_redis_lock_client
+from redis.exceptions import LockError
 
 __all__ = ['PostfireDebrisFlow']
 
 
 def empty_state():
     return {'schema_version': 1, 'active_dnbr': None, 'upload_attempt': None,
-            'run_attempt': None, 'frequency_source': 'cli', 'last_successful_run': None}
+            'run_attempt': None, 'model': 'M1', 'frequency_source': 'cli', 'last_successful_run': None}
 
 
 class PostfireDebrisFlow(NoDbBase):
@@ -26,8 +27,12 @@ class PostfireDebrisFlow(NoDbBase):
         value = getattr(self, '_state', None)
         if value is None:
             return empty_state()
+        if isinstance(value, dict) and 'model' not in value:
+            value = {**value, 'model': 'M1'}
         if not isinstance(value, dict) or set(value) != set(empty_state()) or value['schema_version'] != 1:
             raise ValueError('Invalid post-fire debris-flow state.')
+        if value['model'] not in ('M1', 'M3'):
+            raise ValueError('Invalid post-fire debris-flow model.')
         if value['frequency_source'] not in ('cli', 'noaa'):
             raise ValueError('Invalid rainfall source in post-fire debris-flow state.')
         for key in ('upload_attempt','run_attempt','active_dnbr','last_successful_run'):
@@ -37,6 +42,8 @@ class PostfireDebrisFlow(NoDbBase):
                 raise ValueError('Invalid post-fire debris-flow record.')
             if not isinstance(record.get('snapshot'),dict):
                 raise ValueError('Invalid post-fire dependency snapshot.')
+            if key in ('run_attempt', 'last_successful_run') and record.get('model', 'M1') not in ('M1', 'M3'):
+                raise ValueError('Invalid post-fire model identity.')
             if key.endswith('_attempt'):
                 if record.get('phase') not in ('staged','queued','running','needs_scale','complete','failed','superseded','enqueue_unknown'):
                     raise ValueError('Invalid post-fire operation state.')
@@ -46,18 +53,27 @@ class PostfireDebrisFlow(NoDbBase):
                 raise ValueError('Invalid post-fire artifact metadata.')
         return deepcopy(value)
 
+    def _mutation_gate(self):
+        return _ensure_redis_lock_client().lock(f'postfire-state:{self.runid}', timeout=120, blocking_timeout=10)
+
     def change(self, callback):
         """Refresh while locked; only this facade's state is modified."""
-        with self.locked():
-            type(self).getInstance(self.wd)
-            state = self.state
-            from .observability import record_attempts
-            record_attempts(self.wd, state)
-            previous = state['last_successful_run']
-            callback(state)
-            self._state = state
-            self.dump()
-            record_attempts(self.wd, state)
+        # Serialize short preference/worker mutations before the nonblocking NoDb
+        # lock. Never hold this gate across scientific computation or publication.
+        with self._mutation_gate() as gate:
+            # Another thread may have refreshed the singleton while we waited.
+            controller = type(self).getInstance(self.wd)
+            with controller.locked():
+                state = controller.state
+                from .observability import record_attempts
+                record_attempts(self.wd, state)
+                previous = state['last_successful_run']
+                callback(state)
+                if not gate.owned():
+                    raise LockError('Postfire state mutation lease expired.')
+                controller._state = state
+                controller.dump()
+                record_attempts(self.wd, state)
         accepted = state['last_successful_run']
         if accepted and (not previous or accepted['id'] != previous['id']):
             from .publication import publish_outputs

@@ -5,7 +5,7 @@ describe('PostfireDebrisFlow', () => {
     beforeEach(async () => {
         jest.resetModules();
         window.preflightConnected = true;
-        document.body.innerHTML = `<form id="postfire_debris_flow_form"><div data-pfdf-required></div><div data-pfdf-candidate-field hidden><div class="wc-field wc-field--display"><span class="wc-field__label">Uploaded dNBR map</span><div class="wc-text-display"><code data-pfdf-candidate></code></div></div></div><div data-pfdf-summary></div><p data-job-hint></p><div id="postfire_status_panel"><div id="status"></div><div id="rq_job"></div></div><details id="postfire_stacktrace_panel"><div id="stacktrace"></div></details><p data-pfdf-message></p><p data-pfdf-warning></p><div data-pfdf-files></div><input name="file" type="file"><input name="companion" type="file"><select name="scale_mode"><option value="auto">Auto</option><option value="custom">Custom</option></select><div data-pfdf-custom></div><div data-pfdf-companion></div><input type="radio" name="frequency_source" value="cli" checked><input type="radio" name="frequency_source" value="noaa"><p data-pfdf-noaa></p><button data-pfdf-action="upload"></button><button data-pfdf-action="run"></button></form>`;
+        document.body.innerHTML = `<form id="postfire_debris_flow_form"><div data-pfdf-dnbr-fields></div><input type="radio" name="model" value="M1" checked><input type="radio" name="model" value="M3"><div data-pfdf-required></div><div data-pfdf-candidate-field hidden><div class="wc-field wc-field--display"><span class="wc-field__label">Uploaded dNBR map</span><div class="wc-text-display"><code data-pfdf-candidate></code></div></div></div><div data-pfdf-summary></div><p data-job-hint></p><div id="postfire_status_panel"><div id="status"></div><div id="rq_job"></div></div><details id="postfire_stacktrace_panel"><div id="stacktrace"></div></details><p data-pfdf-message></p><p data-pfdf-warning></p><div data-pfdf-files></div><input name="file" type="file"><input name="companion" type="file"><select name="scale_mode"><option value="auto">Auto</option><option value="custom">Custom</option></select><div data-pfdf-custom></div><div data-pfdf-companion></div><input type="radio" name="frequency_source" value="cli" checked><input type="radio" name="frequency_source" value="noaa"><p data-pfdf-noaa></p><button data-pfdf-action="upload"></button><button data-pfdf-action="run"></button></form>`;
         await import('../dom.js'); await import('../events.js');
         window.WCHttp = {requestWithSessionToken: jest.fn().mockResolvedValue({body: {result: {}}})};
         global.url_for_run = (path) => path;
@@ -116,6 +116,129 @@ describe('PostfireDebrisFlow', () => {
         await instance.refresh();
         expect(document.querySelector('[data-pfdf-warning]').textContent).toContain('outside the study basin size range');
         expect(document.querySelector('[data-pfdf-action="run"]').disabled).toBe(false);
+    });
+
+    test('restores saved selections before accepting a model change', async () => {
+        let restore;
+        window.WCHttp.requestWithSessionToken.mockImplementation(() => new Promise(resolve => {restore=resolve;}));
+        window.WCHttp.postJsonWithSessionToken = jest.fn();
+        const pending = instance.refresh();
+        expect(Array.from(document.querySelectorAll('[name="model"], [name="frequency_source"]')).every(r => r.disabled)).toBe(true);
+        const m3=document.querySelector('[name="model"][value="M3"]');
+        m3.checked=true;m3.dispatchEvent(new Event('change',{bubbles:true}));
+        expect(window.WCHttp.postJsonWithSessionToken).not.toHaveBeenCalled();
+        restore({body:{result:{model:'M1',frequency_source:'noaa',noaa_available:true,required:[]}}});
+        await pending;
+        expect(document.querySelector('[name="model"][value="M1"]').checked).toBe(true);
+        expect(document.querySelector('[value="noaa"]').checked).toBe(true);
+        expect(m3.disabled).toBe(false);
+    });
+
+    test('model saves are serialized and M3 run submits explicit identity', async () => {
+        const ready = {model:'M1',frequency_source:'cli',eligible:true,required:[],noaa_available:true};
+        window.WCHttp.requestWithSessionToken.mockResolvedValue({body:{result:ready}});
+        await instance.refresh();
+        let finish;
+        window.WCHttp.postJsonWithSessionToken = jest.fn().mockImplementationOnce(() => new Promise(resolve => { finish=resolve; }))
+            .mockResolvedValueOnce({body:{result:{...ready,model:'M1'}}})
+            .mockResolvedValueOnce({body:{job_id:'new-job'}});
+        const change = value => {
+            const radio=document.querySelector('[name="model"][value="'+value+'"]');
+            radio.checked=true; radio.dispatchEvent(new Event('change',{bubbles:true}));
+        };
+        change('M3');
+        await Promise.resolve();
+        expect(document.querySelector('[data-pfdf-dnbr-fields]').hidden).toBe(true);
+        expect(document.querySelector('[data-pfdf-action="run"]').disabled).toBe(true);
+        change('M1');
+        expect(window.WCHttp.postJsonWithSessionToken).toHaveBeenCalledTimes(1);
+        finish({body:{result:{...ready,model:'M3'}}});
+        await new Promise(resolve=>setTimeout(resolve,0));
+        expect(window.WCHttp.postJsonWithSessionToken).toHaveBeenCalledTimes(2);
+        expect(document.querySelector('[name="model"][value="M1"]').checked).toBe(true);
+        instance.render({...ready,model:'M3'});
+        document.querySelector('[data-pfdf-action="run"]').click();
+        await new Promise(resolve=>setTimeout(resolve,0));
+        expect(window.WCHttp.postJsonWithSessionToken).toHaveBeenLastCalledWith(
+            expect.stringContaining('/run'), {model:'M3',frequency_source:'cli'}, expect.any(Object));
+    });
+
+    test.each([
+        [409, 'job_active', 4], [409, 'changed_file', 1],
+        [403, 'job_active', 1], [0, undefined, 1]
+    ])('selection retries only explicit busy, with bounded attempts (%s/%s)', async (status, code, count) => {
+        jest.useFakeTimers();
+        try {
+            window.WCHttp.requestWithSessionToken.mockResolvedValue({body:{result:{model:'M1',frequency_source:'noaa',noaa_available:true,required:[]}}});
+            await instance.refresh();
+            window.WCHttp.postJsonWithSessionToken=jest.fn().mockRejectedValue({status,body:{error:{code}}});
+            document.querySelector('[name="model"][value="M3"]').click();
+            await jest.advanceTimersByTimeAsync(0);
+            expect(window.WCHttp.postJsonWithSessionToken).toHaveBeenCalledTimes(1);
+            expect(document.querySelector('[data-pfdf-message]').textContent).toBe(count === 4 ? 'Waiting to save selection…' : 'Could not save the model and rainfall selection. Reload to try again.');
+            for (const [delay, expected] of [[250,2],[500,3],[1000,4]]) {
+                await jest.advanceTimersByTimeAsync(delay-1);
+                expect(window.WCHttp.postJsonWithSessionToken).toHaveBeenCalledTimes(Math.min(expected-1,count));
+                await jest.advanceTimersByTimeAsync(1);
+                expect(window.WCHttp.postJsonWithSessionToken).toHaveBeenCalledTimes(Math.min(expected,count));
+            }
+            await jest.runAllTimersAsync();
+            expect(window.WCHttp.postJsonWithSessionToken).toHaveBeenCalledTimes(count);
+            expect(document.querySelector('[data-pfdf-message]').textContent).toContain('Could not save');
+        } finally { jest.useRealTimers(); }
+    });
+
+    test('busy selection preserves payload order and destruction stops delayed writes', async () => {
+        jest.useFakeTimers();
+        try {
+            const ready={model:'M1',frequency_source:'noaa',noaa_available:true,required:[]};
+            window.WCHttp.requestWithSessionToken.mockResolvedValue({body:{result:ready}});
+            await instance.refresh();
+            window.WCHttp.postJsonWithSessionToken=jest.fn()
+                .mockRejectedValueOnce({status:409,body:{error:{code:'job_active'}}})
+                .mockResolvedValueOnce({body:{result:{...ready,model:'M3'}}})
+                .mockResolvedValueOnce({body:{result:ready}});
+            document.querySelector('[name="model"][value="M3"]').click();
+            await jest.advanceTimersByTimeAsync(0);
+            document.querySelector('[name="model"][value="M1"]').click();
+            await jest.advanceTimersByTimeAsync(250);
+            expect(window.WCHttp.postJsonWithSessionToken.mock.calls.map(call=>call[1])).toEqual([
+                {model:'M3',frequency_source:'noaa'},{model:'M3',frequency_source:'noaa'},{model:'M1',frequency_source:'noaa'}
+            ]);
+            expect(document.querySelector('[name="model"][value="M1"]').checked).toBe(true);
+            window.WCHttp.postJsonWithSessionToken.mockClear().mockRejectedValue({status:409,body:{error:{code:'job_active'}}});
+            document.querySelector('[name="model"][value="M3"]').click();
+            await jest.advanceTimersByTimeAsync(0);
+            instance.destroy();
+            await jest.runAllTimersAsync();
+            expect(window.WCHttp.postJsonWithSessionToken).toHaveBeenCalledTimes(1);
+        } finally { jest.useRealTimers(); }
+    });
+
+    test('pending run receipt locks selectors and ignores selection changes', async () => {
+        const ready = {model:'M1',frequency_source:'cli',eligible:true,required:[],noaa_available:true};
+        window.WCHttp.requestWithSessionToken.mockResolvedValue({body:{result:ready}});
+        await instance.refresh();
+        let finish;
+        window.WCHttp.postJsonWithSessionToken = jest.fn().mockImplementation(() => new Promise(resolve => {finish=resolve;}));
+        document.querySelector('[data-pfdf-action="run"]').click();
+        expect(Array.from(document.querySelectorAll('[name="model"], [name="frequency_source"]')).every(r => r.disabled)).toBe(true);
+        const m3 = document.querySelector('[name="model"][value="M3"]');
+        m3.checked=true;m3.dispatchEvent(new Event('change',{bubbles:true}));
+        expect(window.WCHttp.postJsonWithSessionToken).toHaveBeenCalledTimes(1);
+        expect(document.querySelector('[name="model"][value="M1"]').checked).toBe(true);
+        finish({body:{job_id:'job'}});
+        await new Promise(resolve => setTimeout(resolve,0));
+        expect(m3.disabled).toBe(false);
+    });
+
+    test('new M3 failure remains visible while an older dNBR upload runs', () => {
+        instance.render({model:'M3',frequency_source:'cli',required:[],
+            upload:{job_id:'old-upload',phase:'running',created_at:'2026-09-11T01:00:00Z'},
+            run:{model:'M3',job_id:'new-m3',phase:'failed',created_at:'2026-09-11T01:01:00Z',
+                error:{message:'M3 soil and terrain integration is not implemented yet.'}}});
+        expect(instance.set_rq_job_id).toHaveBeenLastCalledWith(instance,'new-m3');
+        expect(document.querySelector('[data-pfdf-message]').textContent).toContain('M3 soil and terrain');
     });
 
 });

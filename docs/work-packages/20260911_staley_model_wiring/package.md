@@ -1,6 +1,6 @@
 # Staley M1/M3 UI and RQ wiring
 
-Status: active contract preparation, 2026-09-11 UTC. Starting revision 29a18e00f.
+Status: closed 2026-09-11 UTC. Starting revision 29a18e00f.
 Owner: repository user. Implementer: Codex.
 
 Deliver the existing postfire control with header comparison, M1/M3 radios,
@@ -11,8 +11,8 @@ be disabled solely because integration is pending and never reports fake success
 This is scaffold/task-boundary scope, not completed scientific integration.
 
 The current [selection contract](../../../wepppy/nodb/mods/postfire_debris_flow/docs/model_selection.md)
-is the durable authority linked by the domain specification. The active
-[ExecPlan](prompts/active/execplan.md) controls execution. ADR-0066 records the
+is the durable authority linked by the domain specification. The archived
+[ExecPlan](prompts/completed/execplan.md) records execution. ADR-0066 records the
 owner's valid-support numerical direction for the following scientific milestone.
 
 Compatibility: preserve run-m1 endpoint, legacy M1 attempts/results, published
@@ -41,3 +41,11 @@ canonical production_m1.md “Preflight completion task” policy. 🌋 reflects
 latest accepted result's own model/frequency; selection alone never invalidates
 it. Validate both relevant and unrelated model dependency changes with Python
 and `wctl run-preflight-tests` Go tests, plus actual development stream readback.
+
+Delivered and validated on the development stack after checkpoint aa30e637e.
+[Validation](artifacts/validation.md): full Python 8,468 passed, 103 skipped,
+frontend 872 passed, live M1/M3 task dispatch and reload, real Redis contention,
+recorder-enabled selection recovery, downloads and preflight.
+[Correctness review](artifacts/implementation_reviews.md) and
+[security review](artifacts/security_review.md) passed. M3 scientific integration
+and valid-support calculations are the explicit successor scope.

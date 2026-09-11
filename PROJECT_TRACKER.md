@@ -7,7 +7,7 @@
 
 ## Purpose
 
-Active: [Staley M1/M3 model wiring](docs/work-packages/20260911_staley_model_wiring/package.md)
+Completed: [Staley M1/M3 model wiring](docs/work-packages/20260911_staley_model_wiring/package.md)
 — owner-directed selector, model-specific prerequisites and real M3 RQ task;
 scientific M3 composition and valid-support calculations follow separately.
 

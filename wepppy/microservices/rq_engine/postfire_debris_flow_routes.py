@@ -23,7 +23,7 @@ from wepppy.nodb.base import NoDbAlreadyLockedError
 from wepppy.nodb.core import Ron
 from wepppy.nodb.redis_prep import RedisPrep
 from wepppy.nodb.mods.postfire_debris_flow import production as p
-from wepppy.rq.postfire_debris_flow_rq import upload_dnbr_rq, run_m1_rq
+from wepppy.rq.postfire_debris_flow_rq import upload_dnbr_rq, run_m1_rq, run_m3_rq
 from wepppy.rq.submission_recovery import rq_submission_lock, enqueue_tracked_rq_job, RqSubmissionConflict, RqEnqueueVerificationError
 from wepppy.weppcloud.utils.helpers import get_wd
 from rq import Queue
@@ -135,11 +135,13 @@ def enqueue(q,wd,runid,kind,record):
         record['phase'] = 'queued'
         def apply(state):
             state[kind] = record
-            if kind == 'run_attempt': state['frequency_source'] = record['snapshot']['frequency']
+            if kind == 'run_attempt':
+                state['frequency_source'] = record['snapshot']['frequency']
+                state['model'] = record.get('model', 'M1')
         p.mutable(wd).change(apply)
     prep=RedisPrep.getInstance(wd)
     try:
-        job=enqueue_tracked_rq_job(q,upload_dnbr_rq if kind=='upload_attempt' else run_m1_rq,
+        job=enqueue_tracked_rq_job(q,upload_dnbr_rq if kind=='upload_attempt' else run_m3_rq if record.get('model') == 'M3' else run_m1_rq,
                     prep=prep,job_key=record['job_key'],runid=runid,args=(runid,record['id']),on_job_id=save_receipt,
                     timeout=int(os.getenv('RQ_ENGINE_RQ_TIMEOUT','216000')))
     except (RedisError,RqEnqueueVerificationError):
@@ -170,8 +172,8 @@ def boundary_error(exc):
     return error_response('The operation could not finish. Check the project data and job log.',status_code=503,code='operation_failed')
 
 
-@router.get(PREFIX+'/state', summary='Read M1 readiness and accepted files',
-    description='Requires Bearer rq:status and authorized run access. See the production M1 contract.',
+@router.get(PREFIX+'/state', summary='Read Staley model readiness and accepted files',
+    description='Requires Bearer rq:status and authorized run access. See the model selection contract.',
     tags=['rq-engine','runs'], operation_id=rq_operation_id('postfire_state'),
     responses=agent_route_responses(success_code=200, success_description='Operation succeeded.',
         extra={400:'Invalid request.',404:'No accepted file or retained candidate.',409:'Busy or changed project data.',413:'Upload limit exceeded.',422:'Required project data unavailable.',503:'Service unavailable.'}))
@@ -280,6 +282,9 @@ async def retry(runid:str,config:str,request:Request):
         return boundary_error(exc)
 
 
+@router.post(PREFIX+'/run', summary='Run the selected Staley model', operation_id=rq_operation_id('postfire_run'),
+    tags=['rq-engine','runs'], responses=agent_route_responses(success_code=200, success_description='Job admitted.',
+        extra={400:'Invalid model or rainfall request.',409:'Busy or changed project data.',413:'Request too large.',422:'Required project data unavailable.',503:'Service unavailable.'}))
 @router.post(PREFIX+'/run-m1', summary='Run watershed M1 likelihood calculations',
     description='Requires Bearer rq:enqueue and authorized run access. See the production M1 contract.',
     tags=['rq-engine','runs'], operation_id=rq_operation_id('postfire_run_m1'),
@@ -288,23 +293,26 @@ async def retry(runid:str,config:str,request:Request):
 async def run(runid:str,config:str,request:Request):
     try:
         wd=context(request,runid,config,True);data=await json_body(request)
-        if set(data)-{'frequency_source'}:invalid('Unexpected model option.')
+        legacy = request.url.path.endswith('/run-m1')
+        if set(data) - ({'frequency_source'} if legacy else {'model', 'frequency_source'}):invalid('Unexpected model option.')
+        model = 'M1' if legacy else data.get('model')
+        if model not in ('M1', 'M3'):invalid('Choose M1 or M3.')
         frequency=data.get('frequency_source','cli')
         if frequency not in ('cli','noaa'):invalid('Choose project climate or NOAA rainfall.')
         with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as conn:
             with rq_submission_lock(conn,f'{runid}:postfire-admission',lifecycle_key=runid):
                 context(request,runid,config,True)
                 state=p.reconcile_attempts(wd,p.state_at(wd),conn,persist=True)
-                snapshot={'inputs':p.sources(wd,frequency=frequency)[4],'dnbr':state['active_dnbr']['id'] if state['active_dnbr'] else None,'frequency':frequency}
+                snapshot={'inputs':p.sources(wd,frequency=frequency,model=model)[4],'dnbr':state['active_dnbr']['id'] if model == 'M1' and state['active_dnbr'] else None,'frequency':frequency}
                 attempt=state['run_attempt']
                 if attempt and attempt['phase'] in p.ACTIVE:
-                    if attempt['snapshot']==snapshot and attempt['job_id']:
+                    if attempt.get('model', 'M1') == model and attempt['snapshot']==snapshot and attempt['job_id']:
                         return JSONResponse({'job_id':attempt['job_id'],'result':{'attempt_id':attempt['id']}})
                     raise p.WorkflowError('busy','A model run is already active.',409)
-                if not p.get_state(wd,config,frequency=frequency,reconcile=False)['run_ready']:raise p.WorkflowError('missing_prerequisite','Prepare the required project data before running the model.',422)
-                if not p.artifacts_current(wd,state['active_dnbr']):
+                if not p.get_state(wd,config,frequency=frequency,model=model,reconcile=False)['run_ready']:raise p.WorkflowError('missing_prerequisite','Prepare the required project data before running the model.',422)
+                if model == 'M1' and not p.artifacts_current(wd,state['active_dnbr']):
                     raise p.WorkflowError('changed_source','Uploaded files changed. Upload the map again.',409)
-                record,path=new_attempt(wd,'run_attempt',snapshot)
+                record,path=new_attempt(wd,'run_attempt',snapshot,model=model,frequency_source=frequency,job_key='postfire_m3_rq' if model == 'M3' else 'postfire_m1_rq')
                 return enqueue(Queue(connection=conn),wd,runid,'run_attempt',record)
     except (AuthError,p.WorkflowError,OSError,ValueError,RedisError,RqEnqueueVerificationError,RqSubmissionConflict,NoDbAlreadyLockedError) as exc:
         return boundary_error(exc)
@@ -338,4 +346,25 @@ async def download(runid:str,config:str,attempt_id:str,name:str,request:Request)
         return DownloadResponse(handle,media_type='application/octet-stream',headers={'Content-Disposition':f'attachment; filename="{name}"'})
     except (AuthError,p.WorkflowError,OSError,ValueError,RedisError) as exc:
         if handle is not None:handle.close()
+        return boundary_error(exc)
+
+
+@router.post(PREFIX+'/selection', summary='Save Staley model and rainfall selection',
+             operation_id=rq_operation_id('postfire_selection'), tags=['rq-engine','runs'],
+             responses=agent_route_responses(success_code=200, success_description='Selection saved.',
+                 extra={400:'Invalid model or rainfall request.',409:'Busy or changed project data.',413:'Request too large.',422:'Ineligible project.',503:'Service unavailable.'}))
+async def selection(runid: str, config: str, request: Request):
+    try:
+        wd = context(request, runid, config, True)
+        data = await json_body(request)
+        if set(data) != {'model', 'frequency_source'} or data['model'] not in ('M1', 'M3') or data['frequency_source'] not in ('cli', 'noaa'):
+            invalid('Choose M1 or M3 and project climate or NOAA rainfall.')
+        with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as conn:
+            with rq_submission_lock(conn, f'{runid}:postfire-admission', lifecycle_key=runid):
+                context(request, runid, config, True)
+                if not p.sources(wd, rainfall=False)[0]:
+                    raise p.WorkflowError('missing_prerequisite', 'Post-fire debris flow requires a WBT project in the continental US.', 422)
+                p.mutable(wd).change(lambda state: state.update(model=data['model'], frequency_source=data['frequency_source']))
+                return JSONResponse({'result': p.get_state(wd, config, reconcile=False)})
+    except (AuthError, p.WorkflowError, OSError, ValueError, RedisError, RqSubmissionConflict, NoDbAlreadyLockedError) as exc:
         return boundary_error(exc)

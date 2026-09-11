@@ -1,12 +1,24 @@
 {% import 'controls/_pure_macros.html' as ui with context %}
 {% set description %}
-<p>Estimate debris-flow likelihood for this watershed using the Staley model. Intended for recently burned basins in the Western United States.</p>
+<p>Estimate debris-flow likelihood for recently burned watersheds in the Western United States. Staley et al. (2017) recommend M1; it performed most consistently against regional rainfall thresholds in their test dataset. M3 provides an alternative when dNBR is unavailable and requires soil thickness and basin ruggedness.</p>
+<div class="wc-table-wrapper"><table class="wc-table">
+<thead><tr><th scope="col">Input</th><th scope="col">M1</th><th scope="col">M3</th></tr></thead>
+<tbody>
+<tr><th scope="row">Terrain</th><td>Fraction of watershed both at least 23° slope and moderately/highly burned</td><td>Basin ruggedness: vertical relief divided by square root of watershed area</td></tr>
+<tr><th scope="row">Fire</th><td>Mean differenced Normalized Burn Ratio (dNBR)</td><td>Fraction of watershed moderately/highly burned</td></tr>
+<tr><th scope="row">Soil</th><td>Mean soil erodibility (K), prepared through RUSLE</td><td>Mean soil thickness, using SSURGO first and STATSGO as fallback</td></tr>
+<tr><th scope="row">Rainfall</th><td>Rainfall over 15, 30 or 60 minutes</td><td>Rainfall over 15, 30 or 60 minutes</td></tr>
+</tbody></table></div>
 <p>{{ usersum_doc_link('src', 'wepppy/nodb/mods/postfire_debris_flow/README.md', 'About this model') }}</p>
 {% endset %}
 {% call ui.control_shell(form_id='postfire_debris_flow_form', title='Post-fire debris flow', collapsible=False, description=description, summary_panel_override='',
     status_panel_options={'id':'postfire_status_panel'}, stacktrace_panel_options={'panel_id':'postfire_stacktrace_panel','body_id':'stacktrace'}) %}
+{{ ui.radio_group('model', label='Model', layout='horizontal', options=[
+    {'id': 'postfire_model_m1', 'value': 'M1', 'label': 'M1 (recommended)', 'selected': True, 'attrs': {'disabled': 'disabled'}},
+    {'id': 'postfire_model_m3', 'value': 'M3', 'label': 'M3', 'attrs': {'disabled': 'disabled'}}]) }}
 <h4>Required project data</h4>
 <div data-pfdf-required aria-live="polite">Checking project data…</div>
+<div data-pfdf-dnbr-fields>
 <label for="postfire_dnbr_file">differenced Normalized Burn Ratio (dNBR)</label>
 <p>Upload a dNBR map for the same fire assessment as the soil burn severity map. The map will be aligned to the project watershed.</p>
 <input id="postfire_dnbr_file" name="file" type="file" accept=".tif,.tiff,.img,.vrt" aria-describedby="postfire_format_help">
@@ -25,8 +37,9 @@
   {{ ui.text_display(label='Uploaded dNBR map', content=uploaded_dnbr_filename) }}
 </div>
 <div class="wc-control__panel-summary" data-pfdf-summary></div>
+</div>
 {% call ui.fieldset(legend="Design storm rainfall") %}
-<label class="wc-choice"><input type="radio" name="frequency_source" value="cli" checked> Project climate</label>
+<label class="wc-choice"><input type="radio" name="frequency_source" value="cli" checked disabled> Project climate</label>
 <label class="wc-choice"><input type="radio" name="frequency_source" value="noaa" disabled> NOAA Atlas 14</label>
 <p data-pfdf-noaa class="wc-text-muted">NOAA rainfall estimates are not available for this project.</p>
 {% endcall %}

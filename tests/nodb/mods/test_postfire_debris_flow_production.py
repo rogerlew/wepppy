@@ -80,7 +80,7 @@ def test_upload_and_model_real_artifacts(tmp_path,monkeypatch,prepared_inputs):
     np.testing.assert_array_equal(before[before_valid], after[after_valid])
     manifest = json.loads((folder/'normalized'/'manifest.json').read_text())
     assert str(folder/'dem.tif') in manifest['input_sha256']
-    assert str((folder/'dem.tif').relative_to(tmp_path)) in controller.state['active_dnbr']['artifacts']
+    assert str((folder/'dem.tif').relative_to(tmp_path)) in PostfireDebrisFlow.load_detached(str(tmp_path)).state['active_dnbr']['artifacts']
     loaded=PostfireDebrisFlow.load_detached(str(tmp_path))
     assert loaded.state['active_dnbr']['scale_factor']==.001
     runid=uuid.uuid4().hex;p.directory(tmp_path,runid).mkdir()
@@ -96,19 +96,19 @@ def test_upload_and_model_real_artifacts(tmp_path,monkeypatch,prepared_inputs):
     assert len(pd.read_parquet(p.directory(tmp_path,runid)/'results'/'events.parquet'))==90
 
     statistics.write_text(statistics.read_text().replace('>0<', '>1<'))
-    assert p.artifacts_current(tmp_path, controller.state['active_dnbr'])
+    assert p.artifacts_current(tmp_path, PostfireDebrisFlow.load_detached(str(tmp_path)).state['active_dnbr'])
     # Climate-only rerun must reuse verified terrain, rather than invoking WBT.
     monkeypatch.setattr(p,'build_m1_predictors',lambda *a,**kw:pytest.fail('terrain should be reused'))
     next_id=uuid.uuid4().hex;p.directory(tmp_path,next_id).mkdir()
     controller.change(lambda state:state.update(run_attempt={'id':next_id,'job_id':None,'phase':'queued','created_at':p.now(),
         'retryable':False,'error':None,'snapshot':{'inputs':snapshot,'dnbr':identity,'frequency':'cli'}}))
     p.execute_model(tmp_path,next_id,BINARY)
-    assert controller.state['last_successful_run']['id']==next_id
+    assert PostfireDebrisFlow.load_detached(str(tmp_path)).state['last_successful_run']['id']==next_id
     statistics.unlink()
-    assert p.artifacts_current(tmp_path, controller.state['active_dnbr'])
+    assert p.artifacts_current(tmp_path, PostfireDebrisFlow.load_detached(str(tmp_path)).state['active_dnbr'])
     with (folder/'dem.tif').open('ab') as stream:
         stream.write(b'tampered')
-    assert not p.artifacts_current(tmp_path, controller.state['active_dnbr'])
+    assert not p.artifacts_current(tmp_path, PostfireDebrisFlow.load_detached(str(tmp_path)).state['active_dnbr'])
 
 
 @pytest.fixture
@@ -152,7 +152,7 @@ def test_owner_climate_invalidation_and_watershed_rebuild(owner_project):
     from wepppy.nodb.redis_prep import TaskEnum
     wd,prep=owner_project
     eligible,_,checks,_,_=p.sources(wd)
-    assert eligible and checks['watershed'] and checks['soils'] and checks['climate'] and checks['k']
+    assert eligible and checks['watershed'] and 'soils' not in checks and checks['climate'] and checks['k']
     prep.remove_timestamp(TaskEnum.build_climate)
     assert (wd/'climate/wepp_cli.parquet').is_file()
     assert not p.sources(wd)[2]['climate']
@@ -161,7 +161,7 @@ def test_owner_climate_invalidation_and_watershed_rebuild(owner_project):
     assert not p.sources(wd)[2]['watershed']
     prep[str(TaskEnum.abstract_watershed)]=201
     assert not p.sources(wd)[2]['climate']
-    assert not p.sources(wd)[2]['soils']
+    assert not p.sources(wd, model='M3')[2]['soils']
 
 
 def test_k_source_rewrite_and_used_cfvo_removal(owner_project):
@@ -222,7 +222,7 @@ def test_upload_rejects_mutation_and_preserves_accepted(tmp_path,monkeypatch,pre
     if mutation in ('source_after_auto','dem_after_auto','dem_mask_after_auto'):monkeypatch.setattr(p,'inspect_encoding',changed_auto)
     else:monkeypatch.setattr(p.dnbr,'normalize_dnbr',changed_watershed)
     with pytest.raises(p.WorkflowError):p.execute_upload(tmp_path,identity)
-    assert controller.state['active_dnbr']==old
+    assert PostfireDebrisFlow.load_detached(str(tmp_path)).state['active_dnbr']==old
 
 
 def test_reuse_ignores_unrecorded_external_symlink(tmp_path,monkeypatch):
@@ -350,7 +350,7 @@ def test_project_masks_change_dependency_snapshot_but_statistics_do_not(owner_pr
 
 @pytest.mark.parametrize('case,expected', [
     ('absent', None), ('partial', 1789094046), ('complete', 1789094046),
-    ('failed_retry', 1789094046), ('replacement', None), ('frequency', None),
+    ('failed_retry', 1789094046), ('replacement', None), ('frequency', 1789094046),
 ])
 def test_preflight_projects_durable_publication(tmp_path, monkeypatch, case, expected):
     from unittest.mock import MagicMock
@@ -426,4 +426,84 @@ def test_delayed_preflight_notifier_reads_replacement_after_acquiring_lock(tmp_p
     preflight.notify(tmp_path)
     pipe = prep.redis.pipeline.return_value.__enter__.return_value
     pipe.hdel.assert_called_once_with('test-run', 'timestamps:run_postfire_debris_flow')
-    assert len(pipe.hset.call_args_list) == 1  # Revision notification only.
+    assert len(pipe.hset.call_args_list) == 2  # Model and revision notification.
+
+
+def test_model_selection_legacy_roundtrip(tmp_path, monkeypatch):
+    monkeypatch.setattr(preflight, 'notify', lambda wd: None)
+    obj = PostfireDebrisFlow(str(tmp_path), 'disturbed9002_wbt.cfg')
+    with obj.locked(): obj._state.pop('model')
+    assert obj.state['model'] == 'M1'
+    assert 'model' not in obj._state  # Read projection does not mutate legacy state.
+    obj.change(lambda state: state.update(model='M3'))
+    assert PostfireDebrisFlow.load_detached(str(tmp_path)).state['model'] == 'M3'
+
+
+def test_model_source_dependencies_are_separate(owner_project):
+    from wepppy.nodb.core import Ron
+    from wepppy.nodb.redis_prep import TaskEnum
+    wd, prep = owner_project
+    ron = Ron.getInstance(str(wd))
+    with ron.locked():
+        ron._cellsize = 10
+        ron._dem_db = 'ned13/2022'
+    m1 = p.sources(wd)[4]
+    prep[str(TaskEnum.build_soils)] = 200
+    assert p.sources(wd)[4] == m1
+    m3 = p.sources(wd, model='M3')
+    assert m3[2]['watershed'] and m3[2]['soils']
+    assert 'k' not in m3[2] and not any(k.startswith('polaris') for k in m3[3])
+    prep[str(TaskEnum.fetch_polaris)] = 300
+    (wd/'rusle/k_polaris_nomograph.tif').unlink()
+    assert p.sources(wd, model='M3')[4] == m3[4]
+    assert not p.sources(wd)[2]['k']
+    with ron.locked(): ron._cellsize = 30
+    assert not p.sources(wd, model='M3')[2]['watershed']
+    assert p.sources(wd)[2]['watershed']
+
+
+def test_m3_task_retains_failure_and_preserves_previous_result(tmp_path, monkeypatch):
+    import json
+    from wepppy.rq import postfire_debris_flow_rq as worker
+    monkeypatch.setattr(preflight, 'notify', lambda wd: None)
+    controller = PostfireDebrisFlow(str(tmp_path), 'disturbed9002_wbt.cfg')
+    snapshot = {'inputs': {}, 'dnbr': None, 'frequency': 'cli'}
+    attempt = {'id': 'c'*32, 'model': 'M3', 'snapshot': snapshot, 'phase': 'queued',
+               'created_at': p.now(), 'retryable': False, 'job_id': 'test-job'}
+    controller.change(lambda state: state.update(run_attempt=attempt, model='M1', frequency_source='noaa'))
+    monkeypatch.setattr(p, 'mutable', lambda wd: controller)
+    monkeypatch.setattr(p, 'sources', lambda wd, **kw: (True, False, {'watershed':True,'soils':True,'sbs':True,'climate':True,'noaa':False}, {}, {}))
+    monkeypatch.setattr(worker, 'get_wd', lambda runid: str(tmp_path))
+    monkeypatch.setattr(worker, 'get_current_job', lambda: None)
+    with pytest.raises(RuntimeError, match='integration_pending'):
+        worker.run_m3_rq('test', attempt['id'])
+    state = PostfireDebrisFlow.load_detached(str(tmp_path)).state
+    assert state['run_attempt']['phase'] == 'failed'
+    assert state['run_attempt']['error']['code'] == 'integration_pending'
+    assert state['model'] == 'M1' and state['frequency_source'] == 'noaa'
+    assert state['last_successful_run'] is None
+    root = p.directory(tmp_path, attempt['id'])
+    assert 'integration is not implemented' in (root/'error.log').read_text()
+    assert json.loads((root/'status.json').read_text())['attempt']['phase'] == 'failed'
+
+
+def test_public_run_uses_immutable_legacy_or_explicit_identity():
+    attempt = {'id':'a'*32, 'snapshot':{'frequency':'cli'}, 'phase':'running'}
+    assert p.public_attempt(attempt, model=True)['model'] == 'M1'
+    attempt.update(model='M3', frequency_source='noaa')
+    public = p.public_attempt(attempt, model=True)
+    assert public['model'] == 'M3' and public['frequency_source'] == 'noaa'
+    assert 'snapshot' not in public
+
+
+def test_m1_reuse_refuses_m3_before_reading_artifacts(tmp_path, monkeypatch):
+    monkeypatch.setattr(p, 'artifacts_current', lambda *a, **kw: pytest.fail('foreign model inspected'))
+    assert not p.reuse_predictors(tmp_path, {'model':'M3','predictor_artifacts':{'irrelevant':[]}}, {}, 'hash', tmp_path/'out')
+
+
+@pytest.mark.parametrize('model,irrelevant', [('M1','build_soils'),('M1','build_landuse'),('M3','build_polaris')])
+def test_irrelevant_malformed_receipt_does_not_block_model(owner_project, model, irrelevant):
+    wd, prep = owner_project
+    prep.redis.hset(prep.run_id, 'timestamps:'+irrelevant, 'malformed')
+    p.sources(wd, model=model)
+    p.sources(wd, rainfall=False)

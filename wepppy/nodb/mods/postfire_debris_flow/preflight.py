@@ -18,8 +18,8 @@ def notify(wd):
             state = state_at(wd)
             result, active = state['last_successful_run'], state['active_dnbr']
             completed = None
-            if (result and active and result['snapshot'].get('dnbr') == active['id']
-                    and result['snapshot'].get('frequency') == state['frequency_source']):
+            model = result.get('model', 'M1') if result else 'M1'
+            if result and (model == 'M3' or (model == 'M1' and active and result['snapshot'].get('dnbr') == active['id'])):
                 completed = int(datetime.fromisoformat(result['completed_at']).timestamp())
             if not lock.owned():
                 raise LockError('Postfire preflight projection lease expired.')
@@ -29,6 +29,7 @@ def notify(wd):
                     pipe.hdel(prep.run_id, key)
                 else:
                     pipe.hset(prep.run_id, key, completed)
+                pipe.hset(prep.run_id, 'postfire_debris_flow:model', model)
                 pipe.hset(prep.run_id, 'postfire_debris_flow:revision', uuid.uuid4().hex)
                 pipe.execute()
             prep.dump()
