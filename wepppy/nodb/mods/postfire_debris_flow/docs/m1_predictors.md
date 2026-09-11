@@ -22,7 +22,23 @@ manifest dictionary. `M1Error.code` carries expected boundary failure reasons.
 
 Inputs are regular nonsymlink trusted local GeoTIFF/JSON files, with expected
 SHA-256 for every supplied file, including external `.tif.msk` masks. Internal
-masks are honored; auxiliary metadata/overviews and other sidecars are rejected.
+masks are honored. A regular `.tif.aux.xml` of at most 64 KiB may contain only
+one PAMDataset/PAMRasterBand (band 1)/Metadata tree of nonempty, unique known
+STATISTICS_* entries (minimum, maximum, mean, standard deviation, valid percent,
+and approximate flag). Reject declarations/entities, unexpected attributes,
+other elements, references, georeferencing, NoData, encoding and units. Numeric
+statistics must be finite; the approximate flag is YES/NO. An absent sidecar is
+valid; empty/malformed sidecars fail explicitly. PAM is disabled during raster
+reads, so this validated inert cache never influences samples, support or grid.
+This exception applies to trusted local M1 GeoTIFFs, not uploaded source rasters.
+Validated statistics caches are excluded from expected SHA-256 and scientific
+freshness: appearance, removal or valid statistics refresh cannot alter raster
+decoding. Validate a present cache each time the local raster boundary is used;
+malformed or meaningful metadata is never treated as inert.
+All other auxiliary metadata/overviews and sidecars are rejected. This admits
+standard project DEM statistics without weakening meaningful-metadata checks.
+Implementation of the statistics-only exception is pending the upload/status
+repair checkpoint.
 JSON is capped at 1 MiB, rasters at 512 MiB and 10 million cells. Decode only
 single-band GeoTIFF with identity encoding and pixel-area metadata. The target
 DEM/mask/K/dNBR grid is WGS84 UTM with square meter cells; opt-in nearest SBS

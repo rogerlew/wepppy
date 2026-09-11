@@ -276,7 +276,12 @@ current controller selections, not arbitrary file presence. SBS is already 0–3
 retain classes/masks and use accepted nearest alignment. Use raw DEM, never
 conditioned relief/fvslop. Initial raster admission retains the existing local
 M1 supported formats/limits; unsupported raw DEM representation produces an
-explicit prerequisite error, not an implicit terrain substitution.
+explicit prerequisite error, not an implicit terrain substitution. For dNBR
+preparation, materialize a self-contained reference DEM through the local M1
+reader/writer, preserving samples, support and grid and recording it in accepted
+artifacts. Statistics-only PAM admission follows the local M1 contract; the
+uploaded dNBR decoder retains its strict self-contained-file boundary. This
+preparation repair is pending implementation.
 
 Snapshot relevant input selections and actual source signatures for cheap live
 freshness; SHA-256 all consumed inputs before/after computation. Exclude unrelated
@@ -399,7 +404,9 @@ No enqueue response is required to recover a successfully queued operation.
 
 Uploaded source and companion hashes are recorded while streaming, checked across
 Auto inspection and normalization, and retained through accepted publication.
-Source companions participate in accepted-artifact freshness. Parser and download
+Uploaded source companions participate in accepted-artifact freshness. Validated
+statistics-only caches on trusted local project rasters are excluded from
+scientific freshness and expected hashes under the local M1 contract. Parser and download
 lifetimes close files on cancellation/disconnect, including before response headers.
 Admission rechecks config/read-only state under the lease before staging or NoDb
 mutation. Rejected model requests do not change rainfall selection.
