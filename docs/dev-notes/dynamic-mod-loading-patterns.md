@@ -1,593 +1,121 @@
 # Dynamic Mod Loading Patterns and Pitfalls
 
-**Last Updated:** November 17, 2025  
-**Context:** Lessons learned from DSS Export mod integration issues
+Use this checklist whenever adding a run-page control selectable from **Mods**.
+The [shared controller contract](../ui-docs/controller-contract.md#dynamic-mods-handling)
+and [feature registry specification](../../wepppy/weppcloud/feature_registry/specification.md)
+are authoritative. Registering a feature or rendering its template on page load
+alone does not complete its integration.
 
-## The Problem
+## Required integration checklist
 
-When mods are dynamically enabled via the Mods dialog (Project controller), controllers face a **DOM availability paradox**:
+Paths below are relative to `wepppy/weppcloud/`.
 
-1. **Singleton Pattern Requirement**: Controllers use `getInstance()` to ensure only one instance exists
-2. **Early Instance Creation**: `getInstance()` is called to initialize the controller
-3. **Late DOM Insertion**: The HTML is inserted into the DOM *after* instance creation
-4. **Stale References**: The controller holds `null` references to DOM elements that don't exist yet
-5. **No Re-Query**: Since the instance already exists, subsequent calls to `getInstance()` don't re-query the DOM
+| Surface | Required wiring |
+| --- | --- |
+| `feature_registry/feature_registry.yaml` | Register the exact mod id, section id/template, eligibility, and declared enable dependencies. |
+| `routes/run_0/run_0_bp.py` | Supply full-page and dynamic-fragment context, including the enabled/visible flag. Handle a never-used module without assuming persisted optional state exists. The existing `view/mod/<mod_name>` path renders the fragment. |
+| `routes/run_0/templates/runs0_pure.htm` | Keep `data-mod-nav="<mod_id>"` and `data-mod-section="<mod_id>"` placeholders in the initial DOM for selectable mods, even when disabled. Hide the wrappers; conditionally include only their control contents. |
+| `routes/run_0/templates/run_page_bootstrap.js.j2` | Register initialization for a control already enabled when the page loads. |
+| `controllers_js/project.js` | Add the controller to `MOD_BOOTSTRAP_MAP`; dynamic enabling does not rerun page bootstrap. Use `forceRemount: true` when the controller caches the replaced form. |
+| `controllers_js/project.js` state reconciliation | Check `MOD_STICKY_FALSE_FLAGS` for server visibility gates and `MOD_ENABLE_PROPAGATION` for declared dependencies. Only explicitly enabled or server-confirmed dependencies may become visible; preserve unrelated eligibility gates. |
+| `controllers_js/<controller>.js` | Export the expected window symbol and idempotent `bootstrap`; re-query the current form or provide `remount` that releases the old instance before binding the new one. |
+| Controller bundle | Confirm the source is included by `build_controllers_js.py`, rebuild the served bundle, then verify the browser loads it. |
 
-### Why This Doesn't Happen on Page Load
+Keep the mod id consistent across registry, `data-*` attributes, visibility flags,
+fragment requests and bootstrap mapping. The section anchor may differ from the
+mod id, but its navigation link must match. Put navigation and control sections
+in the same agreed workflow order, with prerequisite controls before consumers.
+`enable_dependencies` remains server-owned registry policy; client propagation
+must reflect that policy rather than inventing extra dependencies.
 
-When a mod is present on initial page load:
-- The HTML is rendered server-side in the template
-- DOM elements exist *before* any JavaScript runs
-- Controller's `createInstance()` finds all elements immediately
-- Everything works perfectly
+## Persistent placeholders
 
-### Why Dynamic Loading Breaks
+Adapt this structure to the feature's agreed layout and eligibility rules:
 
-When a mod is enabled via checkbox:
-```javascript
-// project.js set_mod() flow:
-1. Backend: /tasks/set_mod persists state
-2. Backend: /view/mod/<mod_name> returns HTML
-3. Frontend: toggleModSection() → container.innerHTML = html
-4. Frontend: bootstrapModController() → DssExport.getInstance()
-5. DssExport: createInstance() runs, queries DOM → finds NOTHING (elements just inserted)
-6. DssExport: Stores null references in controller.modePanels, controller.form, etc.
-7. DssExport: bootstrap() is called, but can't undo the null references
+```jinja
+<li data-mod-nav="example" {% if not show_example %}hidden{% endif %}>
+  <a href="#example-control" class="nav-link">Example</a>
+</li>
+
+<div data-mod-section="example" {% if not show_example %}hidden{% endif %}>
+  {% if show_example %}
+  <section id="example-control" class="wc-stack">
+    {% include 'controls/example_pure.htm' %}
+  </section>
+  {% endif %}
+</div>
 ```
 
-## The Two Fixes Applied to DSS Export
+Do not enclose the entire placeholder in `{% if show_example %}`. A never-enabled
+mod would then have no insertion target. The dynamic fragment supplies the inner
+section/form; it must not duplicate the outer `data-mod-section` wrapper. Empty
+wrappers contain no protected state and do not replace server authorization.
 
-### Fix #1: Defer Controller Bootstrap
+## Bootstrap after insertion and after replacement
 
-**Problem:** Controller initialization was happening synchronously with DOM insertion, before the browser could update the rendering tree.
+The Project controller persists the selection, fetches `view/mod/<mod_id>`,
+inserts its HTML, then calls the mapped controller bootstrap. Both placeholders
+and the mapping must exist. `DOMContentLoaded` and full-page bootstrap are not
+repeated when the checkbox changes.
 
-**Solution:** Add `setTimeout(..., 0)` in `project.js` to defer to next event loop tick:
+An `innerHTML` assignment makes its nodes queryable synchronously. Missing
+containers, omitted bootstrap hooks, and stale singleton references are wiring
+problems; adding timeouts cannot repair them. Preserve the Project controller's
+existing scheduling, but do not add delays as a substitute for the checklist.
 
-```javascript
-// In project.js set_mod()
-applyUI(html);
-// Allow DOM to settle before bootstrapping controller
-return new Promise(function (resolve) {
-    setTimeout(function () {
-        bootstrapModController(normalized);
-        // ... rest of logic
-        resolve(response);
-    }, 0);
-});
-```
-
-**Why This Helps:** The browser processes the `innerHTML` assignment and updates the DOM tree before the controller queries for elements.
-
-### Fix #2: Re-Query Elements in Bootstrap
-
-**Problem:** Even with the setTimeout, elements queried during `createInstance()` were stored as `null` and never updated.
-
-**Solution:** Add re-query logic in the `bootstrap()` method:
+A cached form can be non-null yet detached after disable/re-enable. Re-query
+against the current DOM or remount; a null-only guard is insufficient. For a
+controller that owns cached form references, the bootstrap-map entry follows:
 
 ```javascript
-// In dss_export.js bootstrap()
-controller.bootstrap = function bootstrap(context) {
-    // Re-query mode panels if they weren't found during initial creation
-    if ((!controller.modePanels[1] || !controller.modePanels[1].element) && controller.form) {
-        var mode1El = dom.qs(SELECTORS.mode1, controller.form);
-        if (mode1El) {
-            controller.modePanels[1] = createLegacyAdapter(mode1El);
-        }
-    }
-    // ... repeat for mode2, other critical elements
-    
-    // ... rest of bootstrap logic
-};
-```
-
-**Why This Works:** `bootstrap()` runs *after* DOM insertion and can fix null references from `createInstance()`.
-
-### Fix #3: Re-Attach Event Delegates in Bootstrap
-
-**Problem:** Event listeners were only attached in `createInstance()` when `formElement` existed. When dynamically loaded, `formElement` is null, so delegates never get attached.
-
-**Solution:** Add conditional delegate setup in `bootstrap()` method:
-
-```javascript
-// In dss_export.js bootstrap()
-controller.bootstrap = function bootstrap(context) {
-    // Track whether we need to set up delegates
-    var needsDelegates = false;
-    
-    // Re-query form if it wasn't found during createInstance
-    if (!controller.form) {
-        var formElement = dom.qs(SELECTORS.form);
-        if (formElement) {
-            controller.form = formElement;
-            needsDelegates = true;  // Form is fresh, need to wire up events
-        }
-    }
-    
-    // Set up event delegates if this is the first time we have a valid form
-    if (needsDelegates && controller.form) {
-        controller._delegates.push(
-            dom.delegate(controller.form, "change", ACTIONS.modeToggle, function(event) {
-                // ... mode toggle handler
-            })
-        );
-        controller._delegates.push(
-            dom.delegate(controller.form, "click", ACTIONS.runExport, function(event) {
-                // ... export button handler
-            })
-        );
-        controller.form.addEventListener("DSS_EXPORT_TASK_COMPLETED", function(event) {
-            // ... completion handler
-        });
-    }
-    
-    // ... rest of bootstrap logic
-};
-```
-
-**Why This Is Critical:** Without this fix:
-- DOM elements appear in the page ✅
-- Controller can query and manipulate them ✅
-- But clicking buttons/radios does nothing ❌ (no event handlers attached)
-
-**Symptom:** Mode panels exist but don't swap when radio buttons are clicked; controller.state.mode doesn't match the checked radio value.
-
-## Root Cause Analysis
-
-The real issue is **premature singleton instantiation**. The singleton pattern assumes:
-- Instance is created once
-- All required resources exist at creation time
-- No need to re-initialize
-
-But dynamic mod loading violates these assumptions:
-- Instance may be created before DOM exists
-- Resources appear *after* instantiation
-- We need partial re-initialization without breaking the singleton
-
-## Prevention Checklist for Future Mods
-
-When creating a new mod controller that will be dynamically loaded:
-
-### 1. **Lazy Element Queries**
-
-❌ **Don't** query all elements in `createInstance()`:
-```javascript
-function createInstance() {
-    var form = dom.qs("#my_form");  // May be null!
-    var button = dom.qs("#my_button", form);  // Will fail if form is null
-    return { form: form, button: button };
+example: function (ctx) {
+    bootstrapControllerSymbol(window.Example, ctx, { forceRemount: true });
 }
 ```
 
-✅ **Do** query elements lazily or in `bootstrap()`:
-```javascript
-function createInstance() {
-    var controller = {
-        _formCache: null,
-        get form() {
-            if (!this._formCache) {
-                this._formCache = dom.qs("#my_form");
-            }
-            return this._formCache;
-        }
-    };
-    return controller;
-}
-```
+`Example.remount()` must actually exist for this path to recreate the instance.
+Release old delegates, document listeners, timers and status streams, and cancel
+or invalidate asynchronous callbacks owned by the removed form. Bind actions
+once to the replacement form, then refresh authoritative state. Repeated
+bootstrap calls against the same form must not duplicate listeners or requests.
+Absent forms must not cause eager initialization failures.
 
-Or better yet, use a getter pattern:
-```javascript
-function createInstance() {
-    var controller = {};
-    
-    function getForm() {
-        return dom.qs("#my_form");
-    }
-    
-    controller.doSomething = function() {
-        var form = getForm();  // Query fresh each time
-        if (!form) {
-            console.warn("Form not found");
-            return;
-        }
-        // ... use form
-    };
-    
-    return controller;
-}
-```
+## Required validation
 
-### 2. **Bootstrap Re-Query Pattern**
+Start with an eligible project where the mod is **off and has never been used**.
+A browser check that starts with the mod already enabled misses this defect.
 
-Always implement re-query logic in `bootstrap()`:
+1. Render the actual run template with the mod disabled. Assert both hidden
+   placeholders exist and the optional form is absent; check section/nav order.
+2. Exercise `Project.set_mod` with fragment loading in Jest. Assert the form is
+   inserted before the mapped controller bootstraps, the navigation is visible,
+   and declared newly enabled dependencies are shown without changing unrelated
+   visibility gates. A controller-only fixture with a preinserted form cannot
+   prove this integration.
+3. Test replacement: disable, re-enable, and interact with the new form. Verify
+   readiness/data refresh and handlers use the replacement nodes; old callbacks
+   and listeners must not update or submit from the detached form.
+4. In an authenticated browser on a disposable eligible project, use the actual
+   **Mods checkbox**. Without reloading, verify the visible form, navigation,
+   prerequisite order, readiness response and a working action. Then disable,
+   re-enable, exercise an action again, and reload to verify persisted selection.
+   Calling the API or manually inserting HTML alone is not this smoke test.
+5. Check unavailable/unauthorized/readonly states against the feature contract;
+   hidden placeholders must not expose content or authorize mutations. Include
+   previously populated state where the control hydrates saved results.
 
-```javascript
-controller.bootstrap = function bootstrap(context) {
-    // Re-query critical elements if they're missing
-    if (!controller.form || !controller.form.element) {
-        var formElement = dom.qs(SELECTORS.form);
-        if (formElement) {
-            controller.form = formElement;
-            // Re-query child elements that depend on form
-            controller.submitButton = dom.qs(SELECTORS.submit, formElement);
-            controller.statusPanel = dom.qs(SELECTORS.status, formElement);
-        }
-    }
-    
-    // Now proceed with bootstrap logic knowing elements are fresh
-    // ...
-};
-```
+Use `controllers_js/__tests__/project.test.js` for Project integration and the
+controller's own Jest suite for remount behavior. Use paired route/template tests
+for server rendering and eligibility. Run the relevant frontend gates and rebuild
+through the [frontend change checklist](frontend-change-checklist.md).
 
-### 3. **Event Delegate Setup in Bootstrap**
+## Diagnostic order
 
-If your controller uses event delegates, they must be set up in `bootstrap()` as well as `createInstance()`:
+If selecting a mod has no visible effect, inspect the initial placeholder first,
+then the `set_mod` response and persisted list, the fragment response, the
+bootstrap-map entry, and finally the controller's current form reference.
+Reloading successfully proves only the separate full-page path.
 
-```javascript
-function createInstance() {
-    var controller = {
-        _delegates: [],
-        form: null
-    };
-    
-    var formElement = dom.qs(SELECTORS.form);
-    if (formElement) {
-        controller.form = formElement;
-        // Set up delegates for normal page load
-        setupDelegates(controller);
-    }
-    
-    return controller;
-}
-
-function setupDelegates(controller) {
-    if (!controller.form) return;
-    
-    controller._delegates.push(
-        dom.delegate(controller.form, "change", ".mode-toggle", function(e) {
-            // ... handler
-        })
-    );
-}
-
-controller.bootstrap = function bootstrap(context) {
-    var needsDelegates = false;
-    
-    // Re-query form if null
-    if (!controller.form) {
-        var formElement = dom.qs(SELECTORS.form);
-        if (formElement) {
-            controller.form = formElement;
-            needsDelegates = true;
-        }
-    }
-    
-    // Set up delegates for dynamic load
-    if (needsDelegates) {
-        setupDelegates(controller);
-    }
-};
-```
-
-**Critical:** Event handlers are not automatically restored when elements are re-queried. You must explicitly attach them in `bootstrap()`.
-
-### 4. **Defensive Element Access**
-
-Always check for element existence before use:
-
-```javascript
-controller.setMode = function(mode) {
-    if (!controller.modePanels || !controller.modePanels[mode]) {
-        console.warn("[MyController] Mode panel not found:", mode);
-        return;
-    }
-    controller.modePanels[mode].show();
-};
-```
-
-### 5. **Test Dynamic Loading**
-
-Add this to your controller testing checklist:
-
-- ✅ Test initial page load (mod in template)
-- ✅ Test dynamic enable (checkbox in Mods dialog)
-- ✅ Test dynamic disable → re-enable
-- ✅ Test mode switches after dynamic load
-- ✅ Test event handlers (clicks, changes) after dynamic load
-- ✅ Verify all UI interactions work identically in both scenarios
-
-### 6. **Document Dynamic Loading Requirements**
-
-In your controller's README or header comment:
-
-```javascript
-/**
- * MyController
- * 
- * DYNAMIC LOADING NOTES:
- * - Form elements may be null during createInstance() if mod is dynamically loaded
- * - bootstrap() re-queries form and child elements to handle dynamic loading
- * - All public methods defensively check for element existence
- */
-```
-
-## Alternative Architectures to Consider
-
-### Option A: Remount Pattern (Used by Omni)
-
-Instead of singleton, allow full remount:
-
-```javascript
-return {
-    getInstance: function() {
-        if (!instance) {
-            instance = createInstance();
-        }
-        return instance;
-    },
-    remount: function() {
-        if (instance && typeof instance.dispose === "function") {
-            instance.dispose();  // Clean up old instance
-        }
-        instance = createInstance();  // Fresh instance with fresh queries
-        return instance;
-    }
-};
-```
-
-Then in `project.js` `MOD_BOOTSTRAP_MAP`:
-```javascript
-omni: function (ctx) {
-    bootstrapControllerSymbol(window.Omni, ctx, { forceRemount: true });
-}
-```
-
-**Pros:**
-- Clean slate for dynamic loading
-- No stale references possible
-- Simpler controller code
-
-**Cons:**
-- Loses in-memory state
-- Event listeners must be re-attached
-- More complex lifecycle management
-
-### Option B: Factory Functions
-
-Replace singleton with factory that returns new controller per DOM root:
-
-```javascript
-function createDssExportController(formElement) {
-    if (!formElement) {
-        throw new Error("DssExport requires form element");
-    }
-    
-    // All queries scoped to formElement
-    var submitButton = dom.qs(SELECTORS.submit, formElement);
-    var statusPanel = dom.qs(SELECTORS.status, formElement);
-    
-    return {
-        form: formElement,
-        submit: function() { /* ... */ }
-    };
-}
-
-// Usage:
-var form = dom.qs("#dss_export_form");
-var controller = createDssExportController(form);
-```
-
-**Pros:**
-- Explicit dependencies
-- Easy to test
-- No singleton state
-
-**Cons:**
-- Breaks current `getInstance()` API
-- Callers must manage instances
-- Not compatible with existing bootstrap pattern
-
-### Option C: Two-Phase Initialization (Recommended)
-
-Split creation into instantiation + initialization:
-
-```javascript
-function createInstance() {
-    var controller = {
-        _initialized: false,
-        form: null,
-        modePanels: {}
-    };
-    
-    controller.initialize = function() {
-        if (controller._initialized) {
-            return;  // Already initialized
-        }
-        
-        // Query elements
-        controller.form = dom.qs(SELECTORS.form);
-        if (!controller.form) {
-            throw new Error("DssExport form not found in DOM");
-        }
-        
-        var mode1El = dom.qs(SELECTORS.mode1, controller.form);
-        var mode2El = dom.qs(SELECTORS.mode2, controller.form);
-        controller.modePanels = {
-            1: createLegacyAdapter(mode1El),
-            2: createLegacyAdapter(mode2El)
-        };
-        
-        // Set up event listeners
-        dom.delegate(controller.form, "change", ACTIONS.modeToggle, handleModeChange);
-        
-        controller._initialized = true;
-    };
-    
-    controller.bootstrap = function(context) {
-        controller.initialize();  // Safe to call multiple times
-        // ... rest of bootstrap
-    };
-    
-    return controller;
-}
-```
-
-**Usage in project.js:**
-```javascript
-function bootstrapModController(modName) {
-    var controller = MOD_SYMBOL_MAP[modName].getInstance();
-    if (typeof controller.initialize === "function") {
-        controller.initialize();  // Ensure DOM elements are queried
-    }
-    if (typeof controller.bootstrap === "function") {
-        controller.bootstrap(window.runContext || {});
-    }
-}
-```
-
-**Pros:**
-- Separates concerns (instantiation vs initialization)
-- Safe to call `initialize()` multiple times
-- Compatible with singleton pattern
-- Clear contract for dynamic loading
-
-**Cons:**
-- Extra method to maintain
-- Must remember to call `initialize()` before use
-
-## When to Use Which Pattern
-
-| Scenario | Recommended Pattern | Rationale |
-|----------|-------------------|-----------|
-| Simple, stateless mod | Factory Functions | Clean, testable, no lifecycle issues |
-| Complex state, dynamic loading | Two-Phase Initialization | Best balance of safety and simplicity |
-| Heavy UI widgets | Remount Pattern | Clean slate prevents stale DOM refs |
-| Existing controllers | Re-Query in Bootstrap | Minimal code changes, backwards compatible |
-
-## Testing Dynamic Loading
-
-Add this smoke test to your mod:
-
-```javascript
-// In tests/weppcloud/routes/test_dynamic_mod_loading.js
-describe('Dynamic Mod Loading', () => {
-    it('should fully initialize DSS Export when enabled via checkbox', async () => {
-        // 1. Load page without mod
-        const response = await client.get(`/runs/${runid}/${config}/`);
-        expect(response.text).not.toContain('id="dss_export_form"');
-        
-        // 2. Enable mod via API
-        await client.post(`/runs/${runid}/${config}/tasks/set_mod`, {
-            mod: 'dss_export',
-            enabled: true
-        });
-        
-        // 3. Fetch mod HTML
-        const modResponse = await client.get(`/runs/${runid}/${config}/view/mod/dss_export`);
-        expect(modResponse.body.error).toBeUndefined();
-        
-        // 4. Simulate frontend: insert HTML and bootstrap
-        const html = modResponse.body.Content.html;
-        // ... insert into test DOM
-        
-        // 5. Verify controller functionality
-        const controller = DssExport.getInstance();
-        controller.bootstrap(mockContext);
-        
-        // 6. Test mode switching
-        controller.setMode(2);
-        expect(mode2Panel.hidden).toBe(false);
-        expect(mode1Panel.hidden).toBe(true);
-        
-        controller.setMode(1);
-        expect(mode1Panel.hidden).toBe(false);
-        expect(mode2Panel.hidden).toBe(true);
-    });
-});
-```
-
-## Documentation Updates Needed
-
-1. **README.md** for each mod controller should include:
-   - "Dynamic Loading Behavior" section
-   - List of elements that may be null initially
-   - How `bootstrap()` handles re-initialization
-
-2. **wepppy/weppcloud/controllers_js/README.md** should document:
-   - The dynamic loading lifecycle
-   - Recommended patterns for new controllers
-   - Common pitfalls (this document)
-
-3. **Code comments** in `project.js` `set_mod()`:
-   ```javascript
-   // Apply UI changes, then defer controller bootstrap to next tick.
-   // This ensures innerHTML assignment completes and DOM is queryable
-   // before controllers try to find their elements.
-   applyUI(html);
-   return new Promise(function (resolve) {
-       setTimeout(function () {
-           bootstrapModController(normalized);  // Controllers can now find DOM
-           // ...
-       }, 0);
-   });
-   ```
-
-4. **Template pattern** in `MOD_UI_DEFINITIONS` (run_0_bp.py):
-   ```python
-   MOD_UI_DEFINITIONS = {
-       'dss_export': {
-           'template': 'controls/dss_export_pure.htm',
-           'section_id': 'dss-export',
-           # IMPORTANT: Ensure all critical elements have stable IDs
-           # that controllers can query. Avoid dynamic IDs or classes.
-           'critical_selectors': [
-               '#dss_export_form',
-               '#dss_export_mode1_controls',
-               '#dss_export_mode2_controls'
-           ]
-       }
-   }
-   ```
-
-## Summary
-
-**Why DSS Export was stubborn:**
-1. Singleton pattern + dynamic DOM insertion = null references
-2. No re-query mechanism in `bootstrap()`
-3. Synchronous bootstrap immediately after `innerHTML`
-
-**How to prevent in future:**
-1. Use lazy getters or re-query in `bootstrap()`
-2. Add `setTimeout(..., 0)` in `project.js` for all dynamic mods (already done)
-3. Test dynamic loading explicitly, not just initial page load
-4. Document dynamic loading behavior in controller README
-5. Consider two-phase initialization pattern for new controllers
-
-**Quick Reference for New Mods:**
-
-```javascript
-// Template for dynamic-loading-safe controller
-function createInstance() {
-    var controller = {};
-    
-    // Lazy element access
-    function getForm() {
-        return dom.qs("#my_form");
-    }
-    
-    controller.doSomething = function() {
-        var form = getForm();
-        if (!form) return;  // Defensive check
-        // ... use form
-    };
-    
-    controller.bootstrap = function(context) {
-        // Re-query if needed
-        var form = getForm();
-        if (form) {
-            // Bootstrap logic
-        }
-    };
-    
-    return controller;
-}
-```
+The [Post-fire debris-flow repair](20260910_postfire_control_mount.md) records a
+concrete recurrence: missing placeholders and mapping prevented first activation;
+remounting and dependency propagation completed the dynamic path.

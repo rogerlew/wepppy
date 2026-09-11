@@ -69,11 +69,13 @@ var Project = (function () {
         "x-csrf-token"
     ].join("|");
     var MOD_ENABLE_PROPAGATION = {
-        geneva: ["roads"]
+        geneva: ["roads"],
+        postfire_debris_flow: ["polaris", "rusle"]
     };
     var MOD_STICKY_FALSE_FLAGS = {
         openet_ts: true,
         rusle: true,
+        postfire_debris_flow: true,
         debris_flow: true,
         omni_contrasts: true
     };
@@ -879,6 +881,9 @@ var Project = (function () {
             },
             ag_fields: function (ctx) {
                 bootstrapControllerSymbol(window.AgFields, ctx);
+            },
+            postfire_debris_flow: function (ctx) {
+                bootstrapControllerSymbol(window.PostfireDebrisFlow, ctx, { forceRemount: true });
             },
             rusle: function (ctx) {
                 bootstrapControllerSymbol(window.Rusle, ctx, { forceRemount: true });

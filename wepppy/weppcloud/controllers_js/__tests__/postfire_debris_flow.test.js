@@ -5,7 +5,7 @@ describe('PostfireDebrisFlow', () => {
     beforeEach(async () => {
         jest.resetModules();
         window.preflightConnected = true;
-        document.body.innerHTML = `<form id="postfire_debris_flow_form"><div data-pfdf-required></div><p data-pfdf-candidate></p><div data-pfdf-summary></div><p data-pfdf-message></p><p data-pfdf-warning></p><div data-pfdf-files></div><input name="file" type="file"><input name="companion" type="file"><select name="scale_mode"><option value="auto">Auto</option><option value="custom">Custom</option></select><div data-pfdf-custom></div><div data-pfdf-companion></div><input type="radio" name="frequency_source" value="cli" checked><input type="radio" name="frequency_source" value="noaa"><p data-pfdf-noaa></p><button data-pfdf-action="upload"></button><button data-pfdf-action="run"></button></form>`;
+        document.body.innerHTML = `<form id="postfire_debris_flow_form"><div data-pfdf-required></div><div data-pfdf-candidate-field hidden><div class="wc-field wc-field--display"><span class="wc-field__label">Uploaded dNBR map</span><div class="wc-text-display"><code data-pfdf-candidate></code></div></div></div><div data-pfdf-summary></div><p data-pfdf-message></p><p data-pfdf-warning></p><div data-pfdf-files></div><input name="file" type="file"><input name="companion" type="file"><select name="scale_mode"><option value="auto">Auto</option><option value="custom">Custom</option></select><div data-pfdf-custom></div><div data-pfdf-companion></div><input type="radio" name="frequency_source" value="cli" checked><input type="radio" name="frequency_source" value="noaa"><p data-pfdf-noaa></p><button data-pfdf-action="upload"></button><button data-pfdf-action="run"></button></form>`;
         await import('../dom.js'); await import('../events.js');
         window.WCHttp = {requestWithSessionToken: jest.fn().mockResolvedValue({body: {result: {}}})};
         global.url_for_run = (path) => path;
@@ -15,6 +15,18 @@ describe('PostfireDebrisFlow', () => {
         instance = window.PostfireDebrisFlow.getInstance();
     });
     afterEach(() => { instance.destroy(); delete window.PostfireDebrisFlow; });
+    test('remount binds readiness to the replacement form', async () => {
+        const old = document.querySelector('form');
+        const replacement = old.cloneNode(true);
+        old.replaceWith(replacement);
+        const destroy = jest.spyOn(instance, 'destroy');
+        instance = window.PostfireDebrisFlow.remount();
+        expect(destroy).toHaveBeenCalledTimes(1);
+        window.WCHttp.requestWithSessionToken.mockResolvedValue({body:{result:{required:[{key:'k',ready:false,message:'Prepare in RUSLE'}],frequency_source:'cli'}}});
+        await instance.refresh();
+        expect(replacement.querySelector('[data-pfdf-required]').textContent).toContain('Prepare in RUSLE');
+        expect(old.querySelector('[data-pfdf-required]').textContent).toBe('');
+    });
     test('summary is escaped, persists and NOAA is disabled', () => {
         instance.render({required: [{key:'k',ready:false,message:'Prepare in RUSLE',control:'#rusle'}],noaa_available:false,frequency_source:'cli',upload_ready:true,run_ready:false,
             dnbr:{filename:'<img src=x>',format:'GTiff',dtype:'int16',cell_size_m:[10,10],coverage_fraction:.94,source_range:[-120,850],prepared_range:[-.12,.85],scale_mode:'auto',scale_method:'distribution',scale_factor:.001,add_offset:0}});
@@ -44,7 +56,8 @@ describe('PostfireDebrisFlow', () => {
     test('failed candidate is named while accepted summary persists', () => {
         instance.render({required:[],frequency_source:'cli',upload_ready:true,upload:{id:'candidate',filename:'replacement.tif',phase:'needs_scale',retryable:true,error:{message:'Choose a scale.'}},
             dnbr:{id:'accepted',filename:'accepted.tif',format:'GTiff',dtype:'int16',cell_size_m:[10,10],coverage_fraction:1,source_range:[0,900],prepared_range:[0,.9],scale_mode:'auto',scale_method:'distribution',scale_factor:.001,add_offset:0}});
-        expect(document.querySelector('[data-pfdf-candidate]').textContent).toContain('replacement.tif');
+        expect(document.querySelector('[data-pfdf-candidate-field]').hidden).toBe(false);
+        expect(document.querySelector('code[data-pfdf-candidate]').textContent).toBe('replacement.tif');
         expect(document.querySelector('[data-pfdf-summary]').textContent).toContain('accepted.tif');
     });
 

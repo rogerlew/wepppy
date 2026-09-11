@@ -12,6 +12,14 @@ control typography, spacing, form helpers and status patterns. No new dashboard,
 wizard, card grid or tabs. Model is fixed to Staley M1; no model picker. Existing
 project watershed/outlet supplies the assessment domain.
 
+The control and its navigation link follow RUSLE, which supplies soil
+erodibility. Selecting the mod inserts and initializes it without a page reload,
+including on projects where it has never been enabled. Keep hidden navigation
+and section placeholders when disabled; re-enabling binds a fresh controller
+to the new form. This follows the registry’s usable-toggle contract and its
+RUSLE-before-debris-flow order. Eligibility and execution prerequisites remain
+server-authoritative.
+
 Opening text: “Estimate debris-flow likelihood for this watershed using the
 Staley model.” A single help link, “About this model”, explains Western US
 intended use, recent-fire context, 0.2–8 km² study range, and guidance to isolate
@@ -147,7 +155,11 @@ algorithm diagnostics in provenance, not extra user-facing rows.
 Persist the table across reloads and escape the original filename as text.
 The native file picker shows a new selection, not proof of upload. Retain the
 accepted summary during a pending/failed replacement, identifying the candidate
-separately. On initial failure show the actionable error without a ready summary.
+separately. Display the uploaded filename using the shared `ui.text_display`
+macro: label **Uploaded dNBR map**, standard `wc-field--display` /
+`wc-text-display` classes, and the filename alone in a `<code>` element populated
+as text. Match the SBS filename field rather than using an inline prose sentence.
+On initial failure show the actionable error without a ready summary.
 Show partial coverage as “The dNBR map covers only part of the watershed.
 Calculations will use the available dNBR values.” Keep replacement available
 through the same picker/button; no separate destructive remove/reset workflow.

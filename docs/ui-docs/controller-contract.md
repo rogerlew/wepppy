@@ -22,6 +22,15 @@
   - job hint: `data-job-hint` element near the command button
 - Controllers must store panel references (`statusPanelEl`, `stacktracePanelEl`, `hint`) and pass them into `attach_status_stream` so status, job info, and stacktraces render correctly.
 
+### Established presentation conventions
+
+- Before implementing a view or component, inspect the [UI style guide](ui-style-guide.md), shared macros in `templates/controls/_pure_macros.html`, and a comparable current controller. Record the reused pattern in change notes.
+- Reuse established macros and presentation conventions for fields, uploaded filenames, buttons, summary tables, status, and Details. Match their hierarchy, spacing, widths, typography, and placement; use terminology familiar to land managers and hydrologists.
+- For example, uploaded filenames use `ui.text_display`: a field label above a `wc-text-display` containing the filename in `<code>`, as in the SBS control. Populate filenames as text. Use the established summary panel/table for map metadata and Details for error diagnostics; hints are field guidance.
+- Do not introduce a one-off view, component, inline style, or prose substitute when an established pattern serves the same purpose. A new domain model does not justify a new visual language. Consistency makes controls predictable and avoids forcing users to relearn familiar actions.
+- If existing patterns cannot express a concrete requirement, document the gap and rationale in the applicable contract, then extend a shared pattern where practical.
+- Verify the rendered page against the reference controller, including uploaded and error states when affected. DOM assertions alone do not establish visual consistency.
+
 ### Status stream + stacktrace
 - Always call `attach_status_stream` with `channel`, `runId`, `spinner`, and `stacktrace: { element, body? }`.
 - StatusStream will enrich stacktraces via `/rq-engine/api/jobinfo/<jobid>` when the channel message includes an RQ job id (`rq:<uuid> ...`). Keep the `data-stacktrace-*` hooks intact or enrichment will fail silently.
@@ -108,12 +117,25 @@
 - Still call `controlBase.triggerEvent(...)` when legacy consumers require it, but keep new logic on the event map.
 
 ### Dynamic mods handling
-- If a controller can be loaded when its section is hidden, guard eager code paths:
-  - Re-query critical elements inside `bootstrap`.
-  - Short-circuit actions when `form`/panels are missing.
-  - Keep delegates in arrays and avoid re-registering once set.
-- Tests (Jest/Playwright) rely on this to toggle mods on the fly without reloading the page.
-
+- A selectable mod MUST have persistent `data-mod-nav` and `data-mod-section`
+  placeholders in the initial run-page DOM while disabled. Hide the wrappers;
+  conditionally render their contents. Registry metadata alone creates neither
+  these placeholders nor the controller's bootstrap hooks.
+- Wire both full-page bootstrap and `MOD_BOOTSTRAP_MAP` in `project.js` for
+  dynamic bootstrap. Insert the fragment before initializing its
+  controller. Preserve server-authoritative visibility and declared dependencies.
+- Controllers must bind the current form after section replacement, through
+  bootstrap re-query or an explicit remount. A non-null reference to a detached
+  form is stale. Release old listeners, timers and streams and invalidate pending
+  callbacks; repeated bootstrap must not duplicate handlers. Guard absent forms.
+- Navigation and sections follow the agreed workflow order, with prerequisite
+  controls before consumers. Dynamic enable must keep that same order.
+- Validate first enable from a never-used/off state through the actual Mods
+  checkbox without reload, then disable/re-enable with a working action and
+  reload with persisted state. Test placeholder rendering and Project insertion/
+  bootstrap separately from controller-only fixtures that preinsert the form.
+- Follow the [new-mod integration checklist](../dev-notes/dynamic-mod-loading-patterns.md#required-integration-checklist)
+  for exact files and the [validation matrix](../dev-notes/dynamic-mod-loading-patterns.md#required-validation).
 ### Job hints
 - `controlBase.set_rq_job_id` will set and render hints if `hint` points at a `data-job-hint` element. Do not clear hints in `reset_panel_state` when `rq_job_id` is set—rely on the control_base guard instead.
 - **Hydrate on load:** In `bootstrap(context)` always look up the last job id from (in order) `WCControllerBootstrap.resolveJobId(ctx, "<rq_key>")`, `controllerContext.job_id`, and `ctx.jobIds.<rq_key>`, then pass it to `set_rq_job_id`. This keeps the job link visible after page reloads or mod toggles.

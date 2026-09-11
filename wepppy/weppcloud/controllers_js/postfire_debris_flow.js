@@ -68,7 +68,8 @@
             var candidate = next.upload && next.upload.retryable ? next.upload : next.dnbr;
             var hasFile = !!field('file').files[0];
             form.querySelector('[data-pfdf-action="upload"]').disabled = submitting || !live || !next.upload_ready || uploadBusy || !(hasFile || candidate);
-            node('candidate').textContent = !hasFile && candidate ? 'Map for scale correction: ' + candidate.filename : '';
+            node('candidate-field').hidden = hasFile || !candidate;
+            node('candidate').textContent = !hasFile && candidate ? candidate.filename : '';
             var selectedSource = form.querySelector('[name="frequency_source"]:checked');
             var ready = !!next.eligible && !next.readonly && (next.required || []).every(function (item) {return item.ready;}) && (selectedSource && (selectedSource.value !== 'noaa' || next.noaa_available));
             form.querySelector('[data-pfdf-action="run"]').disabled = submitting || !live || !connected || !ready || runBusy || uploadBusy;
@@ -162,8 +163,11 @@
         controller.events.on('job:completed',preflight); controller.events.on('job:error',preflight);
         controller.bootstrap=function () {selection();refresh();if(global.UnitizerClient) {global.UnitizerClient.ready().then(function () {if(state) {render(state);}});}};
         controller.refresh=refresh;controller.render=render;
-        controller.destroy=function () {document.removeEventListener('unitizer:preferences-changed',unitChange);global.clearTimeout(timer);document.removeEventListener('preflight:update',preflight);document.removeEventListener('preflight:connection',connection);};
+        controller.destroy=function () {requestNumber++;controller.detach_status_stream(controller);document.removeEventListener('unitizer:preferences-changed',unitChange);global.clearTimeout(timer);document.removeEventListener('preflight:update',preflight);document.removeEventListener('preflight:connection',connection);};
         return controller;
     }
-    global.PostfireDebrisFlow={getInstance:function () {if(!singleton) {singleton=create();}return singleton;}};
+    global.PostfireDebrisFlow={
+        getInstance:function () {if(!singleton) {singleton=create();}return singleton;},
+        remount:function () {if(singleton) {singleton.destroy();}singleton=create();return singleton;}
+    };
 }(window));

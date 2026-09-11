@@ -528,6 +528,7 @@ When adding a new run controller or modernizing a legacy one:
    - [ ] Design event surface (lifecycle + domain events)
    - [ ] Define `data-*` attribute schema
    - [ ] Sketch bootstrap context requirements
+   - [ ] For selectable controls, complete the [new-mod integration checklist](dynamic-mod-loading-patterns.md#required-integration-checklist); registry metadata alone does not wire the run-page placeholders or dynamic bootstrap.
 
 3. **Implement**
    - [ ] Replace jQuery with helper calls
@@ -539,7 +540,7 @@ When adding a new run controller or modernizing a legacy one:
    - [ ] Integrate `controlBase.attach_status_stream`
 
 4. **Document**
-   - [ ] Create/update controller plan in `archived-plans/`
+   - [ ] Update the current canonical controller/domain contract and any active implementation plan; archived plans remain historical.
    - [ ] Add controller reference to `README.md`
    - [ ] Update `AGENTS.md` with quick reference
    - [ ] Document payload schemas and event contracts
@@ -549,6 +550,7 @@ When adding a new run controller or modernizing a legacy one:
    - [ ] Extend pytest coverage for routes
    - [ ] Run `wctl run-npm check` and fix lint errors
    - [ ] Rebuild bundle and verify in browser
+   - [ ] For selectable controls, test the actual Mods checkbox from a never-used/off project, disable/re-enable with an action, and persisted state after reload; see [required validation](dynamic-mod-loading-patterns.md#required-validation).
    - [ ] Execute smoke tests if applicable
    - [ ] Update this foundations doc if new patterns emerge
 

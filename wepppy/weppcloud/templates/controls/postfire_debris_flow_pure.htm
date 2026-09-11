@@ -20,7 +20,10 @@
 <label for="postfire_offset">Add offset</label><input id="postfire_offset" name="add_offset" type="number" step="any" value="0">
 </div>
 <button type="button" class="pure-button" data-pfdf-action="upload" disabled>Upload dNBR</button>
-<p data-pfdf-candidate></p>
+<div data-pfdf-candidate-field hidden>
+  {% set uploaded_dnbr_filename %}<code data-pfdf-candidate></code>{% endset %}
+  {{ ui.text_display(label='Uploaded dNBR map', content=uploaded_dnbr_filename) }}
+</div>
 <div class="wc-control__panel-summary" data-pfdf-summary></div>
 <fieldset><legend>Design storm rainfall</legend>
 <label class="wc-choice"><input type="radio" name="frequency_source" value="cli" checked> Project climate</label>

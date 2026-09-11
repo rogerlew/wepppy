@@ -382,6 +382,27 @@ describe("Project controller", () => {
         spy.mockRestore();
     });
 
+    test("set_mod mounts post-fire debris flow into its placeholder", async () => {
+        window.runContext = {mods:{list:[],flags:{postfire_debris_flow:false}}};
+        document.getElementById("project-fixture").insertAdjacentHTML("beforeend", `
+            <li data-mod-nav="postfire_debris_flow" hidden></li>
+            <div data-mod-section="postfire_debris_flow" hidden></div>
+            <input type="checkbox" data-project-mod="postfire_debris_flow">
+        `);
+        const bootstrap = jest.fn(() => {
+            expect(document.getElementById("postfire_debris_flow_form")).not.toBeNull();
+        });
+        window.PostfireDebrisFlow = {remount:jest.fn(() => ({bootstrap}))};
+        requestMock.mockResolvedValueOnce({body:{Content:{label:"Post-fire debris flow"}}});
+        getJsonMock.mockResolvedValueOnce({Content:{html:'<section id="postfire-debris-flow"><form id="postfire_debris_flow_form"></form></section>'}});
+        await project.set_mod("postfire_debris_flow", true, {notify:false});
+        expect(document.querySelector('[data-mod-section="postfire_debris_flow"]').hidden).toBe(false);
+        expect(document.querySelector('[data-mod-nav="postfire_debris_flow"]').hidden).toBe(false);
+        expect(window.PostfireDebrisFlow.remount).toHaveBeenCalledTimes(1);
+        expect(bootstrap).toHaveBeenCalledTimes(1);
+        delete window.PostfireDebrisFlow;
+    });
+
     test("set_mod bootstraps Geneva after rendering the dynamic section", async () => {
         window.runContext = { mods: { list: [], flags: {} } };
         document.getElementById("project-fixture").insertAdjacentHTML("beforeend", `

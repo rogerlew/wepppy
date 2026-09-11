@@ -60,6 +60,14 @@ These remain manual and must be updated separately:
 - JS bootstrap/controller wiring in `project.js` and `run_page_bootstrap.js.j2`.
 - Docs access model under `routes/usersum/*` (`user/operator/developer/internal`) is separate from feature-registry roles.
 
+## New selectable controls
+
+Adding a registry entry also requires the
+[new-mod integration checklist](../../../docs/dev-notes/dynamic-mod-loading-patterns.md#required-integration-checklist):
+persistent hidden run-page placeholders, both bootstrap paths, remount/re-query,
+and browser first-enable plus disable/re-enable checks. Registry validation does
+not establish that the control can mount or respond to user actions.
+
 ## Edit Checklist
 
 For feature/config lifecycle or visibility changes:

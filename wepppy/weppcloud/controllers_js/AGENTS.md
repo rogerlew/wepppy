@@ -30,12 +30,32 @@ See `docs/dev-notes/controller_foundations.md` for the canonical vision. Key pil
 
 > Controllers should focus on domain logic while helpers + documented contracts handle the boilerplate. If you find yourself re-implementing plumbing, improve the shared primitives instead.
 
+## Presentation conventions (Required)
+
+Before writing markup or rendering UI, inspect a comparable existing controller,
+the shared Pure macros, and the [presentation contract](../../../docs/ui-docs/controller-contract.md#established-presentation-conventions).
+Reuse established fields, filename displays, summaries, buttons, and error
+placement. Match spacing, typography, and terminology. Do not invent a one-off
+view or component for information already presented elsewhere. Record the reused
+reference in change notes and verify the actual page; justify any necessary
+departure in the applicable contract.
+
 ## Primary Assets
 - Helpers: `dom.js`, `events.js`, `forms.js`, `http.js` (global namespaces exposed via IIFEs).
 - Infrastructure: `control_base.js`, `status_stream.js`, `unitizer_client.js`.
 - Controllers: one file per control (`project.js`, `path_ce.js`, etc.).
 - Template: `templates/controllers.js.j2` (rendered by `build_controllers_js.py`).
 - Tests: `__tests__/` directory (Jest, jsdom environment).
+
+## New Mods-menu controllers (Required)
+
+Before adding a selectable run control, complete the
+[new-mod integration checklist](../../../docs/dev-notes/dynamic-mod-loading-patterns.md#required-integration-checklist).
+A registry entry is insufficient: wire persistent hidden nav/section placeholders,
+full-page bootstrap, `project.js` dynamic bootstrap, and replacement-form binding.
+Prove first enable from a never-used/off project through the Mods checkbox without
+reload, then disable/re-enable and exercise an action. Pre-enabled page loads and
+controller tests with preinserted forms do not establish this integration.
 
 ## Standard Workflow
 See also: `docs/dev-notes/frontend-change-checklist.md` (unified end-to-end checklist for controller JS changes).

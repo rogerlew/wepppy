@@ -3997,6 +3997,13 @@ def test_runs0_template_places_rusle_after_wepp_sections() -> None:
     wepp_section_index = source.index('<section id="wepp" class="wc-stack">')
     rusle_section_index = source.index('<div data-mod-section="rusle"')
     assert wepp_section_index < rusle_section_index
+    pfdf_nav_index = source.index('<li data-mod-nav="postfire_debris_flow"')
+    pfdf_section_index = source.index('<div data-mod-section="postfire_debris_flow"')
+    assert rusle_nav_index < pfdf_nav_index
+    assert rusle_section_index < pfdf_section_index
+    assert '<div data-mod-section="postfire_debris_flow" {% if not show_postfire_debris_flow %}hidden{% endif %}>' in source
+    assert '<li data-mod-nav="postfire_debris_flow" {% if not show_postfire_debris_flow %}hidden{% endif %}>' in source
+
 
 
 def _render_runs0_title(

@@ -3,6 +3,8 @@
 Status: accepted 2026-09-10; implemented and validated on the development stack.
 Scope explicitly requested: NoDb state, prerequisite/freshness checks, dNBR
 upload/publication, RQ execution, and a minimal control to upload and run M1.
+Enable **Post-fire debris flow** from Mods; its control appears immediately
+below RUSLE. Prepare soil erodibility in RUSLE before running M1.
 Reports and interactive dashboard are deferred. Canonical UI contract:
 [Post-fire debris-flow control](../../../../../docs/ui-docs/contracts/postfire-debris-flow-control-contract.md).
 

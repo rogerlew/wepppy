@@ -13,7 +13,7 @@ Unified checklist for changing WEPPcloud controller JavaScript (`wepppy/weppclou
 - [ ] Identify the paired Flask endpoints under `wepppy/weppcloud/routes/` and the current request/response payload expectations.
 - [ ] Locate the current Jest suite(s) under `wepppy/weppcloud/controllers_js/__tests__/` and the current pytest coverage under `tests/weppcloud/`.
 - [ ] If the controller can be enabled dynamically (mods dialog), review `docs/dev-notes/dynamic-mod-loading-patterns.md` before editing.
-
+- [ ] Identify a comparable controller and shared macro for each presentation need using the [presentation contract](../ui-docs/controller-contract.md#established-presentation-conventions). Record the reference; reuse its conventions instead of inventing a one-off view.
 ## 2. Implementation steps
 - [ ] Prefer the helper stack (`WCDom`, `WCEvents`, `WCHttp`, `WCForms`) plus `controlBase`/`StatusStream`; do not reintroduce jQuery or bespoke polling/WebSocket clients.
 - [ ] Keep controllers and helpers as IIFEs that attach their intended public surface to `window` (consistent global namespaces and ordering assumptions).
@@ -21,6 +21,12 @@ Unified checklist for changing WEPPcloud controller JavaScript (`wepppy/weppclou
 - [ ] Maintain/extend the controller’s event surface (domain events + `job:*` lifecycle) so other modules can subscribe without scraping DOM state.
 - [ ] If outbound requests or payload shapes change, update the paired Flask routes in the same change (use `parse_request_payload` and preserve legacy behavior).
 - [ ] Add or update Jest + pytest coverage for the changed behavior, payload coercion, and error paths.
+
+### Mods-menu integration (required for selectable controls)
+
+- [ ] Complete the [new-mod integration checklist](dynamic-mod-loading-patterns.md#required-integration-checklist), including hidden nav/section placeholders, full-page and dynamic bootstrap, and replacement-form binding.
+- [ ] Verify declared enable dependencies and server visibility gates remain consistent during dynamic activation; place prerequisite controls before consumers.
+- [ ] Test the actual disabled run template and `Project.set_mod` insertion/bootstrap, rather than only a controller fixture with its form already present.
 
 ## 3. Bundle rebuild (`build_controllers_js.py`)
 - [ ] Rebuild the bundle: `python wepppy/weppcloud/controllers_js/build_controllers_js.py`.
@@ -45,7 +51,9 @@ Unified checklist for changing WEPPcloud controller JavaScript (`wepppy/weppclou
 - [ ] Rebuild the bundle, reload with cache bypass, and exercise the primary flows end-to-end (click actions, submit forms, file uploads if applicable).
 - [ ] Watch browser devtools for runtime errors and failed requests; verify `controlBase` + StatusStream telemetry (status panels, spinners, stacktraces) still behaves correctly.
 
+- [ ] For selectable controls, start with an eligible never-used/off project: enable through the actual Mods checkbox without reload, verify a working action/readiness, disable/re-enable and act again, then reload to check persisted selection. Follow the [full validation matrix](dynamic-mod-loading-patterns.md#required-validation).
+
 ## 9. Documentation updates required
 - [ ] Update `wepppy/weppcloud/controllers_js/README.md` and `wepppy/weppcloud/controllers_js/AGENTS.md` when helper usage, bundling, or workflow expectations change.
-- [ ] Update the controller’s contract doc under `docs/work-packages/` when payload schema, events, or `data-*` hooks change.
+- [ ] Update the current canonical controller/domain contract when payload schema, events, or `data-*` hooks change. Keep active work-package evidence in sync; closed packages are history, not contract authority.
 - [ ] If templates or route contracts changed, update the relevant route/blueprint notes you relied on so future edits follow the same workflow.

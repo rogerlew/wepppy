@@ -6,6 +6,22 @@
 
 This note explains how the controller JavaScript in `wepppy/weppcloud` is organized, how individual controller modules cooperate with the shared infrastructure, and what needs to happen when you extend the system.
 
+## Presentation conventions
+
+Follow the [established presentation contract](../../../docs/ui-docs/controller-contract.md#established-presentation-conventions):
+inspect a comparable controller and reuse the shared Pure macros and layout before
+creating custom markup. Keep familiar fields, uploaded filenames, summaries, and
+errors consistent across controls; verify the rendered page against that reference.
+
+## Adding a Mods-menu control
+
+Start with the [new-mod integration checklist](../../../docs/dev-notes/dynamic-mod-loading-patterns.md#required-integration-checklist).
+It names every registry, template, bootstrap and controller integration point.
+First enable from a never-used/off project and disable/re-enable must work through
+the actual Mods checkbox without reload. Rendering an already-enabled control is
+only the full-page path. The [shared contract](../../../docs/ui-docs/controller-contract.md#dynamic-mods-handling)
+defines the required behavior.
+
 ## Controller Contract Test Workflow
 
 Audit and repair one controller at a time. Establish intended behavior, render
@@ -496,3 +512,7 @@ render as inert formatted HTML in Details; JSON diagnostics remain text. Hints
 are reserved for job links. `sbs_error.js` tracks summary/map failures separately
 so concurrent successful requests do not erase errors. See
 [the SBS control contract](../../../docs/ui-docs/contracts/sbs-control-contract.md).
+
+Post-fire debris flow uses the same hidden mod placeholders and dynamic bootstrap
+path as RUSLE. Its controller remounts after section replacement; enabling it
+also reveals the registry-declared RUSLE/POLARIS dependencies.
