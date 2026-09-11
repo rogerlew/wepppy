@@ -1,0 +1,35 @@
+INFO:wctl2:docker compose exec -T weppcloud python -
+2026-09-10 23:58:21 [INFO] wepppy.run.self-imposed-nave.disturbed: disturbed.on(TriggerEvents.LANDUSE_DOMLC_COMPLETE)
+2026-09-10 23:58:21 [INFO] wepppy.run.self-imposed-nave.landuse: Disturbed::on TriggerEvents.LANDUSE_DOMLC_COMPLETE
+2026-09-10 23:58:21 [INFO] wepppy.run.self-imposed-nave.disturbed:   Routing to LANDUSE_DOMLC_COMPLETE
+2026-09-10 23:58:21 [INFO] wepppy.run.self-imposed-nave.landuse:   Disturbed::Modifying landuse
+2026-09-10 23:58:21 [INFO] wepppy.run.self-imposed-nave.disturbed:   Remapping landuse...
+2026-09-10 23:58:21 [INFO] wepppy.run.self-imposed-nave.disturbed: disturbed.remap_landuse()
+2026-09-10 23:58:21 [INFO] wepppy.run.self-imposed-nave.disturbed:   Remapping landuse... done. (0.00s)
+2026-09-10 23:58:21 [INFO] wepppy.run.self-imposed-nave.disturbed:   Calling spatialize_treecanopy hook...
+2026-09-10 23:58:21 [INFO] wepppy.run.self-imposed-nave.disturbed: disturbed.spatialize_treecanopy()
+2026-09-10 23:58:21 [INFO] wepppy.run.self-imposed-nave.disturbed:   No treecanopy mod found
+2026-09-10 23:58:21 [INFO] wepppy.run.self-imposed-nave.disturbed:   Calling spatialize_treecanopy hook... done. (0.00s)
+2026-09-10 23:58:22 [INFO] wepppy.run.self-imposed-nave.soils: soils.dump_soils_parquet()
+2026-09-10 23:58:22 [INFO] wepppy.run.self-imposed-nave.disturbed: disturbed.on(TriggerEvents.SOILS_BUILD_COMPLETE)
+2026-09-10 23:58:22 [INFO] wepppy.run.self-imposed-nave.disturbed:   Routing to SOILS_BUILD_COMPLETE
+2026-09-10 23:58:22 [INFO] wepppy.run.self-imposed-nave.soils:   Disturbed::Modifying soils
+2026-09-10 23:58:22 [INFO] wepppy.run.self-imposed-nave.disturbed:   Modifying soils...
+2026-09-10 23:58:22 [INFO] wepppy.run.self-imposed-nave.disturbed: disturbed._modify_soils_impl()
+2026-09-10 23:58:22 [INFO] wepppy.run.self-imposed-nave.soils: Disturbed::  Disturbed.modify_soils, sol_ver: 7778.0
+2026-09-10 23:58:22 [INFO] wepppy.run.self-imposed-nave.disturbed: disturbed.modify_soil(topaz_id=101)
+2026-09-10 23:58:22 [INFO] wepppy.run.self-imposed-nave.soils:   Disturbed:: Disturbed.modify_soil(topaz_id=101, mukey=base, dom=42)
+2026-09-10 23:58:22 [INFO] wepppy.run.self-imposed-nave.disturbed:   Identifying soil
+2026-09-10 23:58:22 [INFO] wepppy.run.self-imposed-nave.disturbed:   Generating disturbed soil for topaz_id: 101, mukey: base, dom: 42, disturbed_mukey: base-loam-forest
+2026-09-10 23:58:23 [INFO] wepppy.run.self-imposed-nave.soils: soils.dump_soils_parquet()
+2026-09-10 23:58:23 [INFO] wepppy.run.self-imposed-nave.disturbed:   Modifying soils... done. (1.56s)
+{
+  "runid": "self-imposed-nave",
+  "no_sbs_landuse_event": "passed",
+  "normal_soil_event": "passed",
+  "soil_key": "base-loam-forest",
+  "artifacts": {
+    "soils/base-loam-forest.sol": "cf725d346f15577abbee1674d9992dc4c4ca49a0962a36d1b6077aad1b49f560",
+    "wepp/runs/p1.sol": "56ab0ca6452d3a535c8b5e711b546ad25d3d294dbda122426259094539816b46"
+  }
+}

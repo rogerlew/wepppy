@@ -2291,6 +2291,11 @@ def _build_runs0_context(runid, config, playwright_load_all):
         and (rusle_backend_supported or playwright_load_all)
         and ((rusle is not None) or playwright_load_all)
     )
+    postfire_authority = resolve_run_capability_authority(ron)
+    show_postfire_debris_flow = (
+        'postfire_debris_flow' in mods_list and 'disturbed' in mods_list
+        and rusle_backend_supported and postfire_authority.locale_profile == 'continental-us'
+    ) or playwright_load_all
     rusle_rap_year_options = rusle.available_rap_years() if rusle is not None else []
 
     bootstrap_admin_disabled = bool(getattr(run_record, "bootstrap_disabled", False)) if run_record else False
@@ -2318,6 +2323,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
             'dss_export': show_dss_export,
             'path_ce': show_path_ce,
             'rusle': show_rusle,
+            'postfire_debris_flow': show_postfire_debris_flow,
         }
     )
     header_mod_options = build_header_mod_options(
@@ -2430,6 +2436,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
         show_dss_export=show_dss_export,
         show_path_ce=show_path_ce,
         show_rusle=show_rusle,
+        show_postfire_debris_flow=show_postfire_debris_flow,
         rusle_backend_supported=rusle_backend_supported,
         maturity_definition_href=maturity_definition_href,
         feature_maturity_labels=feature_maturity_labels,

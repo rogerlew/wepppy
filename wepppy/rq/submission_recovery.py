@@ -125,6 +125,7 @@ def rq_submission_lock(
     lifecycle_key: str,
     lifecycle_type: str = "run",
     blocking_timeout: float = 10,
+    inherit_lifecycle: bool = True,
 ) -> Iterator[SubmissionLease]:
     """Hold the owner-safe admission lock for a submission transaction."""
     resource = str(resource_key)
@@ -133,7 +134,9 @@ def rq_submission_lock(
     # identities.  A run named ``batch:x`` must never alias batch ``x``.
     lifecycle = f"{lifecycle_type}\0{lifecycle_key}"
     lifecycle_digest = hashlib.sha256(lifecycle.encode("utf-8")).hexdigest()
-    parent_lease = _HELD_LIFECYCLES.get().get(lifecycle)
+    # HTTP request admission starts fresh even if the server copied an old context.
+    inherited = _HELD_LIFECYCLES.get() if inherit_lifecycle else {}
+    parent_lease = inherited.get(lifecycle)
     already_held = parent_lease is not None
     if not already_held:
         lock_names.insert(0, f"rq:submission-lifecycle:{lifecycle_digest}")
@@ -189,7 +192,7 @@ def rq_submission_lock(
     lifecycle_token = None
     try:
         if not already_held:
-            held_lifecycles = dict(_HELD_LIFECYCLES.get())
+            held_lifecycles = dict(inherited)
             held_lifecycles[lifecycle] = lease
             lifecycle_token = _HELD_LIFECYCLES.set(
                 held_lifecycles
@@ -350,6 +353,7 @@ def enqueue_tracked_rq_job(
     runid: str,
     args: tuple[Any, ...],
     kwargs: dict[str, Any] | None = None,
+    on_job_id: Callable[[str], None] | None = None,
     timeout: Any = None,
     meta: dict[str, Any] | None = None,
     conflict_keys: Iterable[str] | None = None,
@@ -367,6 +371,8 @@ def enqueue_tracked_rq_job(
         queue.connection, f"{runid}:{family}", lifecycle_key=runid
     ) as lease:
         replacement_job_id = new_rq_job_id()
+        if on_job_id is not None:
+            on_job_id(replacement_job_id)
         prepare_redisprep_job_id(
             prep,
             job_key=job_key,

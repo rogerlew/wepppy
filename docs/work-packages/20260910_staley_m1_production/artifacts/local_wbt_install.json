@@ -1,0 +1,7 @@
+{
+  "before_sha256": "9778a9c7e56c805633e02ee4c03c595d7383feaa8b0386a2f7538dd777e95c98",
+  "after_sha256": "6647d55c2d8d28680addd16adc4d9d406857a7ccb394cd4260a2d61d7d8ffc42",
+  "lock_sha256": "c26bacf2dfff0bada3d4f67d162917ab237ebec7fb0dcf4f60a385d7ec21225e",
+  "backup": "/tmp/staley-production-wbt-before",
+  "scope": "local development worker only"
+}

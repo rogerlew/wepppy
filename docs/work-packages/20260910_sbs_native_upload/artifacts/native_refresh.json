@@ -1,0 +1,13 @@
+{
+  "source_commit": "d6641abfe3a932826b0e161494c7eafd0ba4e8d8",
+  "before_sha256": "17a255f2f72dba49fa9d2d7c41125c82538227ac1b0eff1cf8cef0130fe4ea84",
+  "after_sha256": "69119d84349a1e60d4290aa583c79419a0f22ecac416f3c26b60ada34a8eec45",
+  "backup": "/tmp/sbs_map_rust-before-native-required.so",
+  "build": "PYO3_PYTHON=/usr/bin/python3.12 PYTHON_SYS_EXECUTABLE=/usr/bin/python3.12 cargo build -p sbs_map_rust --release",
+  "build_gdal": "3.10.1",
+  "runtime_gdal": "3.10.3",
+  "python_abi": "cp312",
+  "scope": "development shared release mount",
+  "at": "2026-09-11T00:23:29.101434+00:00",
+  "source_delta": "sbs_map/src/lib.rs: exclude fractional/nonfinite metadata from integer NoData mask; analytical Rust regression"
+}

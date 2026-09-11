@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import logging
 
 import redis
 from fastapi import FastAPI, Request
@@ -45,6 +46,7 @@ from .rap_ts_routes import router as rap_ts_router
 from .rhem_routes import router as rhem_router
 from .roads_routes import router as roads_router
 from .rusle_routes import router as rusle_router
+from .postfire_debris_flow_routes import router as postfire_debris_flow_router
 from .schema_defaults_routes import router as schema_defaults_router
 from .session_routes import router as session_router, validate_session_cookie_profile
 from .setup_discovery_routes import router as setup_discovery_router
@@ -106,6 +108,7 @@ async def run_mutation_lifecycle_middleware(request: Request, call_next):
                 f"{runid}:request",
                 lifecycle_key=runid,
                 blocking_timeout=0,
+                inherit_lifecycle=False,
             ) as lease:
                 original_receive = request._receive
 
@@ -118,6 +121,9 @@ async def run_mutation_lifecycle_middleware(request: Request, call_next):
                 request._receive = lifecycle_checked_receive
                 return await call_next(request)
         except RqSubmissionConflict as exc:
+            logging.getLogger(__name__).warning(
+                "Run mutation admission failed for %s", runid, exc_info=True
+            )
             from .responses import error_response
 
             return error_response(
@@ -195,6 +201,7 @@ app.include_router(debris_flow_router, prefix="/api")
 app.include_router(rhem_router, prefix="/api")
 app.include_router(roads_router, prefix="/api")
 app.include_router(rusle_router, prefix="/api")
+app.include_router(postfire_debris_flow_router, prefix="/api")
 app.include_router(rap_ts_router, prefix="/api")
 app.include_router(openet_ts_router, prefix="/api")
 app.include_router(polaris_router, prefix="/api")

@@ -618,7 +618,9 @@ reasons:
   - guard tests
   - this document when behavior changes for clients
 
-The global canonical OpenAPI size budget is 138,000 bytes as of 2026-07-13.
+The global canonical OpenAPI size budget is 165,000 bytes as of 2026-09-10.
+This includes the subsequent project-config contracts and five production Staley
+M1 operations with explicit errors; see the [M1 contract](../../wepppy/nodb/mods/postfire_debris_flow/docs/production_m1.md).
 The AgFields backend contributes 15 frozen run-scoped operations. The existing
 watershed-run operation accepts exact `concept_1`, `concept_2`, `hybrid`, and
 `all` request values; omitted scheme remains `concept_2`. A single-scheme submit
@@ -636,8 +638,7 @@ dispatch and cancellation share a lock so cancellation cannot observe a partial
 tree. Suite-owned scheme children do not emit the suite completion trigger; the
 finalizer is its single publisher. The isolated-clear operation accepts the same
 selection contract, preserves legacy unscoped Concept 2 evidence, and never
-creates an `all` artifact tree. The canonical OpenAPI size budget remains
-138,000 bytes.
+creates an `all` artifact tree. The current global OpenAPI budget is recorded above.
 
 ## Controller-State Contract Status
 - Controller-state/schema/orchestration contract for agent clients is tracked in
@@ -671,3 +672,14 @@ creates an `all` artifact tree. The canonical OpenAPI size budget remains
   - expected test-count strings MAY be reported as examples but MUST NOT be the
     correctness gate;
   - endpoint-call evidence MUST record method/path/status with UTC timestamps.
+
+
+## HTTP request admission isolation
+
+Each authenticated run-mutation HTTP request acquires its own lifecycle lease.
+Context inherited from a previous HTTP request is not authority to reuse that
+request's lease. Nested operations within the current request continue to share
+its lease and fail closed if ownership is lost. Conflict responses remain
+HTTP409 with the existing `job_active` contract. No lock timeout or ownership
+check is relaxed. This clarifies the request boundary after real SBS uploads
+exposed inherited references to already-released leases.

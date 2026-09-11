@@ -3912,13 +3912,16 @@ def test_openet_ts_control_renders_acquisition_contract(jinja_env: Environment) 
     assert "2000 - 2025" in rendered
 
 
-def test_disturbed_baer_sbs_control_renders_joint_owner_contract(jinja_env: Environment) -> None:
+@pytest.mark.parametrize("filename", [None, "sbs.tif"])
+def test_disturbed_baer_sbs_control_renders_joint_owner_contract(jinja_env: Environment, filename) -> None:
     rendered = jinja_env.get_template("controls/disturbed_sbs_pure.htm").render(
-        disturbed=SimpleNamespace(sbs_mode=1, uniform_severity=2, disturbed_fn="sbs.tif", fire_date="05 01 24"),
+        disturbed=SimpleNamespace(sbs_mode=1, uniform_severity=2, disturbed_fn=filename, fire_date="05 01 24"),
         baer=None,
         ron=SimpleNamespace(mods={"disturbed"}),
         climate=SimpleNamespace(mods={"rap_ts"}),
     )
+    assert "Current SBS map" in rendered
+    assert (filename or "No map uploaded.") in rendered
     for marker in ('name="sbs_mode"', 'name="input_upload_sbs"', 'data-sbs-action="remove"', 'data-sbs-uniform="2"', 'name="firedate"', 'data-sbs-action="set-firedate"'):
         assert marker in rendered
 

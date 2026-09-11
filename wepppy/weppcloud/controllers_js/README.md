@@ -486,3 +486,13 @@ path.write_text(new_content)
 # Check for unwrapped endpoints (should be empty)
 grep -rh '"tasks/\|"query/\|"resources/' wepppy/weppcloud/controllers_js/*.js | grep -v url_for_run
 ```
+
+
+### SBS results and errors
+
+SBS uploads retain the accepted filename and classification table until the new
+result arrives. Summary renders the server's classification HTML. Gateway errors
+render as inert formatted HTML in Details; JSON diagnostics remain text. Hints
+are reserved for job links. `sbs_error.js` tracks summary/map failures separately
+so concurrent successful requests do not erase errors. See
+[the SBS control contract](../../../docs/ui-docs/contracts/sbs-control-contract.md).

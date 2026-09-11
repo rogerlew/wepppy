@@ -12,10 +12,10 @@ branch; preserve all preexisting dirty M1 and timeout work.
 
 - [x] Confirm root cause and stop full-suite testing.
 - [x] Prepare canonical contract and compatibility plan.
-- [ ] Independent contract reviews and ancestor checkpoint.
-- [ ] Implement resolver and manifest-validation compatibility.
-- [ ] Validate new Builder creation and explicitly repair fair-division.
-- [ ] Focused tests, independent correctness review, browser evidence and closeout.
+- [x] Independent contract reviews and ancestor checkpoint `f59d18942`.
+- [x] Implement resolver and manifest-validation compatibility.
+- [x] Validate new Builder creation and explicitly repair fair-division.
+- [x] Focused tests, independent correctness review, browser evidence and closeout.
 
 ## Plan of work
 
@@ -54,4 +54,9 @@ old config bytes; explicit scoped enable for the named existing run.
 
 ## Outcomes & Retrospective
 
-Pending implementation and focused/browser evidence.
+Completed. Standard Disturbed is always enabled for Builder projects with
+source-compatible mappings. Historical manifests remain accepted; fair-division
+was repaired under locks without changing config bytes. 178 focused tests,
+actual creation/upload/removal/reload and generated no-SBS soil inputs passed.
+The native-upload package records final classification table/map and error
+recovery validation. No full Python suite; implementation remains uncommitted.

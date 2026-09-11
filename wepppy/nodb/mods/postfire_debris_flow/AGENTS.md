@@ -4,12 +4,11 @@
 - Track delivery and loose ends in [implementation_roadmap.md](implementation_roadmap.md).
   Update the roadmap, specification, and affected detailed contracts together
   as implementation progresses; roadmap proposals are not accepted contracts.
-- Status: offline soil, dNBR and scalar Staley numerical helpers exist; production NoDb/UI/RQ
-  integration remains pending.
+- Status: scientific backends and production M1 NoDb/UI/RQ are implemented;
+  M3 production and reports/dashboard remain pending.
 - Preserve accepted decisions and explicitly label proposals and unresolved inputs.
 - Follow `../../AGENTS.md` and the repository contract-first standard before
-  adding NoDb, UI, API, or RQ behavior. This scaffold is not a completed
-  pre-implementation checkpoint.
+  adding NoDb, UI, API, or RQ behavior. Contract ancestors for this increment are listed below.
 - Implement published equations independently; do not copy or translate GPL
   pfdf code, tests, or documentation into this module.
 - Reference PDF storage decisions live in `docs/pdfs/README.md`; gitignore
@@ -23,8 +22,7 @@
 - Implemented local slope/SBS backend: [docs/slope_sbs.md](docs/slope_sbs.md).
   [WBT package](../../../../docs/work-packages/20260908_staley_slope_sbs/package.md)
   contains validation/reviews for StaleySlopeSbs and both bindings. Raw DEM and
-  strict nine-valid-cell edges are recorded in ADR-0058; production input
-  preparation and orchestration remain pending. Unresolved intersection support retains
+  strict nine-valid-cell edges are recorded in ADR-0058; production M1 preparation and orchestration are implemented below. Unresolved intersection support retains
   bounds and unavailable point T (accepted in ADR-0058).
 - Read [historical slope evidence](docs/historical_slope_evidence.md) before
   parity work: legacy ArcGIS surface slope and modern pfdf directional slope
@@ -37,9 +35,9 @@
 - Local stage-4 rainfall/results package: [rainfall/results](../../../../docs/work-packages/20260909_staley_rainfall_results/package.md).
   Read [docs/rainfall_results.md](docs/rainfall_results.md); result schemas are implemented locally;
   sparse-rank policy R02 is accepted in ADR-0062. No Climate rebuild or UI/RQ wiring.
-- Production M1 scaffold: [package](../../../../docs/work-packages/20260910_staley_m1_production/package.md),
-  [workflow proposal](docs/production_m1.md) and
+- Production M1: [package](../../../../docs/work-packages/20260910_staley_m1_production/package.md),
+  [workflow contract](docs/production_m1.md) and
   [UI contract](../../../../docs/ui-docs/contracts/postfire-debris-flow-control-contract.md).
-  Obtain the exact approved/reviewed contract ancestor before runtime edits.
+  Contract ancestors: `5c0a172ee`, `595816476`; follow contract-first for later behavior changes.
   Minimal upload/run control only; reports/dashboard deferred. Do not invent
   UI controls or implementation-heavy user messages beyond the accepted design.

@@ -704,5 +704,6 @@ The [production M1 contract](../../../wepppy/nodb/mods/postfire_debris_flow/docs
 requires a frame on every run keyspace notification, including unchanged derived
 checklists. Controllers may coalesce these events to rehydrate authenticated
 artifact readiness. `preflight:connection` carries a `connected` boolean on
-open/close/error; reconnect reconciles state. Detailed uploaded metadata remains
+open/close/error; reconnect reconciles state. `window.preflightConnected` supplies
+the same current boolean to controls bootstrapped after the socket opens. Detailed uploaded metadata remains
 on authenticated endpoints, never in the public preflight payload.

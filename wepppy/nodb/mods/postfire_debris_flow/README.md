@@ -1,20 +1,38 @@
 # Postfire Debris Flow
 
-> Planned WBT-based postfire debris-flow likelihood and rainfall-threshold
+> WBT-based postfire debris-flow likelihood and rainfall-threshold
 > assessment using Staley et al. (2017), with RUSLE supplying M1 soil erodibility.
 
 ## Status
 
-Offline soil-thickness derivation, its source-comparison harness, and the local
-dNBR normalization/summary backend and pure M1/M3 numerical engine are implemented. No postfire controller,
-browser UI, HTTP API or production model wiring is
-implemented here. Existing `debris_flow` behavior is unchanged.
-The [specification](specification.md) distinguishes accepted direction from
-open scientific and integration decisions.
-The [implementation roadmap](implementation_roadmap.md) tracks remaining stages,
-completion evidence, and unresolved decisions alongside that specification.
+The production M1 control, NoDb state, dNBR upload and RQ execution are implemented.
+Development validation is recorded in the [production work package](../../../../docs/work-packages/20260910_staley_m1_production/package.md).
+Reports, the event dashboard and production M3 remain deferred. Existing
+`debris_flow` behavior is unchanged. See the [specification](specification.md)
+and [roadmap](implementation_roadmap.md) for scientific scope and remaining work.
 
-## Intended Workflow
+## Run M1
+
+1. Delineate the burned watershed of interest in a continental-US WBT project.
+   The empirical model is intended for recently burned Western US basins.
+2. Enable **Post-fire debris flow** in Mods (also enables POLARIS and RUSLE).
+   Build project soils and climate, set soil burn severity, and prepare POLARIS
+   Nomograph K through RUSLE. The control shows which prerequisites need work;
+   completion of the entire RUSLE model is not required.
+3. Upload a single-band GeoTIFF
+   (preferred), self-contained IMG, or supported VRT with its referenced raster.
+   **Auto** estimates the dNBR scale from values. If it cannot resolve the scale,
+   choose a scale and retry the retained map without uploading again.
+4. Check the accepted filename, scale and watershed coverage in the upload table.
+   Select Project climate or available NOAA design rainfall and run the model.
+   Download completed event, design-storm and threshold files. Reports are deferred.
+
+Partial dNBR coverage is supported; missing observations are not zero. Failed
+replacements preserve the accepted map. Changed prerequisites require preparation
+or a rerun. Display units follow project preferences; model files use canonical SI
+units. The model estimates occurrence likelihood, not volume or inundation extent.
+
+## Planned M3 and dashboard workflow
 
 1. Use a continental US (CONUS) project, delineate with WBT, complete the WEPP
    Soils build, and provide a soil burn severity (SBS) map.
@@ -32,7 +50,7 @@ completion evidence, and unresolved decisions alongside that specification.
    event to inspect the project watershed result, rainfall, and input provenance.
    Return-interval comparisons and rainfall thresholds are complementary views.
 
-These are planned steps, not currently available commands. M1 and M3 predict
+M3 and dashboard steps remain planned. M1 and M3 predict
 occurrence, not debris-flow volume or inundation extent.
 
 ## Organization
@@ -40,13 +58,7 @@ occurrence, not debris-flow volume or inundation extent.
 Follow the [RUSLE module](../rusle/README.md): module-level overview and science
 specification, a reference bundle under [docs](docs/README.md), a thin NoDb
 facade, numerical helpers, and integration/provenance collaborators.
-The specification records planned source and UI paths; empty executable
-placeholders are intentionally deferred until the contracts are ready.
-
-The next bounded increment is [WBT slope/SBS tooling](docs/slope_sbs.md),
-scaffolded for algorithm selection and whole-watershed intersection/coverage.
-The proposed surface slope is separate from the existing routing slope;
-no production slope/SBS integration is implemented yet.
+The specification and detailed contracts map the implemented source and UI paths.
 
 ## Developer and Operator Notes
 
@@ -187,3 +199,18 @@ is scaffolded for project readiness, dNBR upload and running the model through
 a minimal control. [UI design](../../../../docs/ui-docs/contracts/postfire-debris-flow-control-contract.md)
 is proposed for owner review before implementation. Reports and dashboard are
 deferred; initial completion provides status and authorized model-file access.
+
+## Production operations
+
+The [production contract](docs/production_m1.md) defines routes, state, source
+freshness, candidate retention and publication. `postfire_debris_flow.nodb` is
+optional until the first accepted mutation. Inputs and outputs are immutable
+under `postfire_debris_flow/.staging/<attempt-id>`; only the accepted completed
+bundle is downloadable through its authenticated endpoint. Do not move these
+files into the general browse tree. Unaccepted retries expire after 24 hours;
+automatic artifact deletion is deferred.
+
+Workers require the owned WBT `StaleySlopeSbs` tool. Use the existing
+[WBT cutover runbook](../../../../docs/dev-notes/weppcloud-wbt-release-cutover.md)
+and verify the actual worker executable before installing on another host.
+Development-host verification does not establish production-host installation.

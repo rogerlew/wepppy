@@ -2,7 +2,8 @@
 
 Status: accepted local contract; R02 explicitly approved by the operator.
 The [work package](../../../../../docs/work-packages/20260909_staley_rainfall_results/package.md)
-scopes local roadmap stage 4. No production UI, NoDb/RQ or Climate-owner changes.
+scopes local roadmap stage 4. Production UI/NoDb/RQ composition and Climate
+readiness notifications are separately implemented in [production_m1.md](production_m1.md).
 
 ## Scientific identity and ownership
 

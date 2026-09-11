@@ -97,6 +97,7 @@
         {% if not hide_landuse_wepp %}
         <li><a href="#wepp" class="nav-link">WEPP</a></li>
         {% endif %}
+        {% if show_postfire_debris_flow %}<li data-mod-nav="postfire_debris_flow"><a href="#postfire-debris-flow" class="nav-link">Post-fire debris flow</a></li>{% endif %}
         <li data-mod-nav="rusle" {% if not show_rusle %}hidden{% endif %}>
           <a href="#rusle" class="nav-link">Gridded RUSLE</a>
         </li>
@@ -214,6 +215,7 @@
       </section>
       {% endif %}
 
+      {% if show_postfire_debris_flow %}<section id="postfire-debris-flow" data-mod-section="postfire_debris_flow" class="wc-stack">{% include "controls/postfire_debris_flow_pure.htm" %}</section>{% endif %}
       <div data-mod-section="rusle" {% if not show_rusle %}hidden{% endif %}>
         {% if show_rusle %}
         <section id="rusle" class="wc-stack">

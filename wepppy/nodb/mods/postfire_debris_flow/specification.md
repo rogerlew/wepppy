@@ -1,10 +1,9 @@
 # Postfire Debris Flow Specification
 
-Status: domain specification updated 2026-09-09. Offline M3 soil derivation,
-local dNBR normalization and the scalar M1/M3 numerical engine are implemented
-under their dedicated contracts; production integration remains pending. Accepted direction records operator discussion; proposals and open
-questions are not ratified production contracts. No production persisted schema
-or queue graph changes are included.
+Status: updated 2026-09-10. Production M1 NoDb, upload, prerequisite/freshness,
+RQ execution and minimal UI are implemented under the
+[production contract](docs/production_m1.md). Development validation passed; deployment to other hosts is not implied. M3 production integration
+and reports/dashboard remain deferred.
 
 Track delivery stages, evidence, and unresolved decisions in the living
 [implementation roadmap](implementation_roadmap.md). Update this specification
@@ -30,9 +29,8 @@ replace the required contract-first checkpoint.
 | Accept partial dNBR coverage when valid data overlap the watershed | Retain usable observations and expose missing coverage rather than requiring complete watershed coverage. |
 | Derive code independently from published science | Preserve WEPPpy licensing without importing or translating GPL pfdf implementation or tests. |
 
-The RUSLE dependency is established for M1's K artifact. Whether completion of
-the entire RUSLE build is required, and whether M3 shares a module-level RUSLE
-prerequisite, remain open. Do not infer those workflow rules from the table.
+The RUSLE dependency is established for M1's K artifact. M1 requires the named K artifact and its own current provenance, not completion
+of the full RUSLE model. M3 prerequisite policy remains open.
 
 ## Scientific Model
 
@@ -218,8 +216,8 @@ EPIC is not automatically enabled for Staley by its availability in RUSLE.
   Partial K mean remains diagnostic, with no additional gap filling. Named K
   readiness is independent of unrelated RUSLE factors; completed WEPP Soils
   remains a production prerequisite. See [local contract](docs/m1_predictors.md).
-- Changing the input K must make dependency freshness visible; exact
-  invalidation/rebuild and artifact publication contracts are pending.
+- Changing K invalidates M1 results under the implemented
+  [production freshness contract](docs/production_m1.md#owner-completion-and-recovery-conformance).
 
 ## Terrain, SBS, and Assessment Scope
 
@@ -314,7 +312,8 @@ The owner accepted preserving incomplete-intersection uncertainty: report
 coverage and full-watershed T bounds; publish point T only when no intersection
 cells remain unknown. Do not replace it with an observed-support estimate.
 The additive StaleySlopeSbs backend and both bindings are implemented and
-validated locally; production preparation/publication remains pending.
+validated locally; production M1 preparation/publication is implemented under
+the [production contract](docs/production_m1.md).
 
 The [local backend contract](docs/slope_sbs.md) fixes slope, explicit SBS class
 mapping and whole-watershed support. Any future resampling/preparation workflow
@@ -359,14 +358,17 @@ explicit accumulations through the scalar engine; no climate defaults are added.
 The [work package](../../../../docs/work-packages/20260909_staley_m1_predictors/package.md)
 retains complete synthetic and authentic rebuilt Wallow T/F/S evidence, plus
 missing-input cases. Stage 3 local composition acceptance is satisfied.
-No live NoDb/UI/RQ publication, source rebuild or climate adapter is included.
+That local package excludes live publication; stages 4–5 now add Climate
+composition and production NoDb/UI/RQ without rebuilding upstream sources.
 
 ## Unitization Contract
 
 Use the existing `wepppy/nodb/unitizer.py` and WEPPcloud unitizer helpers for
 project-selected SI/English presentation in controls, tables, reports, legends,
 and tooltips. Any dimensional input exposed by the control must carry its unit
-and normalize once at the API boundary. Exact payload fields remain pending.
+and normalize once at the API boundary. Initial M1 exposes no dimensional
+model input; its upload cell size and area warning use Unitizer. Exact payloads
+are defined in the [production contract](docs/production_m1.md).
 
 | Quantity | SI presentation | English presentation | Calculation requirement |
 | --- | --- | --- | --- |
@@ -387,7 +389,8 @@ change to the regression input.
 Changing display units must not rerun the model, change probabilities, or
 rewrite canonical scientific values. Persist input/source units and scaling
 provenance; machine-readable exports must identify their units independently
-of browser preferences. Detailed export schemas remain pending.
+of browser preferences. Event/design/inverse export schemas are defined in
+[the rainfall contract](docs/rainfall_results.md).
 
 ## dNBR Upload and Processing Contract
 
@@ -396,15 +399,15 @@ and extents, create a standardized project-aligned raster, require valid overlap
 with the watershed, and support partial coverage. The detailed
 [dNBR backend contract](docs/dnbr_upload.md) fixes the Python normalization and
 summary interface; ADR-0054 records its numerical choices. Browser upload and
-NoDb/RQ publication remain deferred.
+NoDb/RQ publication are implemented in [the production workflow](docs/production_m1.md).
 
 The SBS precedent accepts `.tif`, `.tiff`, `.img`, and `.vrt` with a 100 MiB
 file cap. Its categorical value checks (integer values and at most 256 classes)
 do not apply to continuous dNBR. Backend v1 accepts real integer and floating-
 point single-band inputs, self-contained GTiff/HFA and explicitly allowlisted
 identity VRT wrappers. It does not execute arbitrary VRTs or read sidecars.
-The contract defines validation and resource limits; future transport must
-handle packaging and access independently.
+The backend defines raster validation and resource limits; production transport
+adds streamed packaging, authorization and candidate publication checks.
 
 Normalize to the authoritative WBT project grid: CRS, resolution, origin,
 affine transform, dimensions, and extent must match, not just the EPSG code and
@@ -417,7 +420,7 @@ and normalization provenance.
 
 Treat value encoding separately from spatial scale. Explicit source scale and
 offset (or a resolved encoding preset) determine normalized dNBR. The local
-normalizer requires explicit encoding; production Auto may resolve it from the
+normalizer requires explicit encoding; production Auto resolves it from the
 valid-value distribution under the evaluated detection contract below. Preserve valid negative and zero
 values. NoData is not unburned and is not dNBR zero.
 
@@ -454,7 +457,8 @@ Local stage-4 implementation and evidence are in the
 The [accepted adapter/result contract](docs/rainfall_results.md) composes M1
 bundles with existing Climate artifacts. Callers explicitly select source,
 durations, intervals and inverse targets. ADR-0062 records approved sample
-handling; Climate itself and production workflows are unchanged.
+handling. Production stage 5 consumes these artifacts and adds completion
+notifications to Climate export; climate generation semantics are unchanged.
 
 Accepted direction: focus on short return intervals and reuse Climate-owned
 event intensities and NOAA PDS artifacts. Do not reconstruct CLIGEN storm
@@ -503,8 +507,8 @@ Accepted local workflow; browser presentation defaults remain proposals:
   rainfall intensity and accumulation, duration, return interval, source, and
   predictor coverage. Different durations are separate scenarios; do not
   average their probabilities or interpret them as independent joint events.
-- Also offer inverse rainfall thresholds for a selected probability (proposed
-  default 50%, optional 75%) at all three durations. These thresholds depend on
+- Initial M1 supplies inverse rainfall thresholds at 50% for all three durations.
+  A future dashboard may expose additional explicit targets under its contract. These thresholds depend on
   catchment predictors and coefficients, not on a rainfall-frequency source;
   assigning a return interval to a threshold is a separate operation.
 
@@ -514,8 +518,9 @@ average recurrence interval terminology; do not label a 1-year PDS scenario as
 100% annual probability. Record climate record length and frequency method;
 merely having ten years permits the existing estimator's 10-year output but
 does not establish estimate precision. Missing intervals remain unavailable.
-The scalar engine numerical policies are accepted in ADR-0056. Source default,
-sample adequacy guidance and UI probability threshold defaults remain pending.
+The scalar engine numerical policies are accepted in ADR-0056.
+Sample adequacy is recorded with unavailable sparse ranks (ADR-0062).
+Initial production M1 uses the fixed matrix and 50% inverse target (ADR-0063).
 
 ## Interactive Event Dashboard
 
@@ -565,8 +570,8 @@ upload and publication, RQ execution and a minimal control for uploading and
 running M1. Reports and interactive dashboard are deferred. The owner plans a
 10 m project for testing; this does not change M1 resolution eligibility.
 
-[Production workflow proposal](docs/production_m1.md) and
-[UI contract proposal](../../../../docs/ui-docs/contracts/postfire-debris-flow-control-contract.md)
+[Production workflow contract](docs/production_m1.md) and
+[UI contract](../../../../docs/ui-docs/contracts/postfire-debris-flow-control-contract.md)
 specify intended state/publication behavior, a compact required-data list,
 dNBR upload and one run action. Use familiar land-manager/hydrologist terminology;
 keep implementation details in the job log and avoid additional parameter panels.
@@ -575,29 +580,32 @@ label the raster “differenced Normalized Burn Ratio (dNBR)”; omit image-date
 entry; offer Auto scale selection; persist the uploaded filename and show accepted
 raster formats/datatypes; disable NOAA when unavailable. These remove unnecessary
 map-preparation friction and avoid calling dNBR a soil burn severity map.
-Detailed UI/default/state proposals require operator review and the contract-first
-ancestor before runtime edits. The
+The accepted UI/default/state contract precedes runtime edits in ancestors
+`5c0a172ee` and `595816476`. The
 [production M1 package](../../../../docs/work-packages/20260910_staley_m1_production/package.md)
-is executing under its required contract checkpoint. Initial completion means status and protected
+implements the accepted workflow. Initial completion means status and protected
 model-file access, not report tables/charts or dashboard implementation.
 
 ## Planned File Organization
 
 The scalar `staley2017.py` engine is implemented under its accepted contract.
-Other paths below remain reserved integration locations.
+The M1 facade, production adapter, routes, workers and control are implemented;
+reports remain reserved for the deferred increment.
 
 | Location | Responsibility |
 | --- | --- |
 | `postfire_debris_flow.py`, `__init__.py` in this directory | NoDb facade and exports |
 | `staley2017.py` | Independent numerical M1/M3 evaluator |
 | `integration.py` | Artifact validation, catchment aggregation, orchestration |
-| `manifest.py` | Provenance and artifact manifest |
+| `production.py`, `encoding.py` | Owner freshness, safe publication, Auto-scale resolution |
+| `results.py`, `rainfall_io.py` | Result manifests, event/design/inverse artifacts and provenance |
+| `wepppy/rq/postfire_debris_flow_rq.py` | Upload and model workers |
 | `wepppy/weppcloud/controllers_js/postfire_debris_flow.js` | Pure UI controller |
 | `wepppy/weppcloud/templates/controls/postfire_debris_flow_pure.htm` | Control and prerequisite presentation |
 | `wepppy/weppcloud/templates/controls/postfire_debris_flow_reports.htm` | Deferred report increment; excluded from initial production upload/run package |
 | `wepppy/microservices/rq_engine/postfire_debris_flow_routes.py` | RQ-engine submission boundary |
 | `tests/nodb/mods/test_postfire_debris_flow_*.py` | Numerical and integration tests |
-| `tests/microservices/test_rq_engine_postfire_debris_flow_routes.py` | Route contracts |
+| `tests/microservices/test_rq_engine_postfire_debris_flow.py` | Route contracts |
 | `wepppy/weppcloud/controllers_js/__tests__/postfire_debris_flow.test.js` | UI state and payload tests |
 
 ## Open Decisions Before Implementation
@@ -609,24 +617,21 @@ Other paths below remain reserved integration locations.
 2. Production application of the accepted maximum-minus-outlet terrain
    contract and recommended 10 m requirement; original calibration
    preprocessing equivalence remains unproven.
-3. Implement spatial aggregation/NoData rules using the accepted project
-   watershed artifact mapping above. Assessment scope and artifacts are
-   resolved; nested catchments are not a prerequisite.
-4. Integrate the accepted dNBR backend with future browser transport, run
-   access, active-artifact publication and M1 freshness under contract-first
-   sequencing. Backend encoding/grid/coverage choices are in ADR-0054.
-5. Ratify the proposed rainfall-source selector and 12-scenario matrix above;
-   set source default, sample adequacy guidance, probability thresholds, and
-   production presentation of numerical availability.
-6. RUSLE completion versus artifact readiness; M3 prerequisites; K freshness.
-7. UI placement, payload/schema names, RQ wiring, result formats, and invalidation.
-8. Canonical CONUS locale mapping, footprint boundary policy, and precise
-   Unitizer/payload/export mappings for SI and English units.
+3. M3 prerequisites, production soil/terrain freshness and publication through
+   the shared workflow. M1 K-only readiness and freshness are implemented.
+4. Interactive event dashboard, report placement, filters and presentation of
+   unavailable scenarios. Existing event IDs, SI export schemas, the M1 source
+   selector and fixed scenario matrix are implemented; no new scientific defaults
+   are implied by future dashboard work.
+5. Any future post-fire age policy, dimensional input fields and M3/report
+   Unitizer mappings. M1 has no image-date input or age gate. Canonical continental-US
+   eligibility, WBT enforcement, upload scaling/alignment, minimal control units
+   and study-area warnings are implemented.
 
 ## Compatibility and Validation Plan
 
-Offline soil artifacts follow the dedicated contract above. Future production
-implementation is additive:
+Offline soil artifacts follow the dedicated contract above. Production M1
+is additive; future M3 integration must also
 preserve existing `debris_flow.nodb` state and older outputs, and avoid renaming
 user-visible fields without explicit approval. Before data mutations, specify
 new NoDb/CSV/parquet schemas and downstream generated-artifact propagation.
@@ -667,7 +672,7 @@ under production-equivalent identities and mounts before shipping.
 
 The [local rainfall contract](docs/rainfall_results.md) now defines additive
 event/design/inverse tables and bounded local queries. Genuine Wallow snapshots
-exercise both explicit frequency sources with fixed predictors. This does not
-implement production publication or a dashboard. The owner explicitly approved
+exercise both explicit frequency sources with fixed predictors. The separate
+production M1 contract now supplies publication; a dashboard remains deferred. The owner explicitly approved
 R02: unsupported positive ranks retain unavailable rows. Parameterization and
 rationale are recorded in ADR-0062; the package tracker records final validation.

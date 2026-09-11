@@ -24,7 +24,8 @@ INVENTORY_FILE = Path(
 # reconciliation. WP12D also documents registry-unavailability parity across
 # all run-discovery reads. These structures are asserted below, so this budget
 # is not a substitute for schema completeness.
-MAX_OPENAPI_CANONICAL_BYTES = 157_000
+# Five bounded Staley M1 state/upload/retry/run/download operations add explicit errors.
+MAX_OPENAPI_CANONICAL_BYTES = 165_000
 MAX_FROZEN_SUMMARY_CHARS = 72
 MAX_FROZEN_DESCRIPTION_CHARS = 280
 MAX_FROZEN_METADATA_TOTAL_CHARS = 21_900
@@ -388,3 +389,11 @@ def test_list_run_endpoints_declares_include_operation_docs_query_param(
     assert include_param is not None
     assert include_param.get("in") == "query"
     assert include_param.get("schema", {}).get("type") == "boolean"
+
+
+def test_postfire_operations_are_documented(_openapi_doc):
+    prefix='/api/runs/{runid}/{config}/postfire-debris-flow/'
+    for action,method in (('state','get'),('upload-dnbr','post'),('retry-dnbr','post'),('run-m1','post'),('files/{attempt_id}/{name}','get')):
+        operation=_openapi_doc['paths'][prefix+action][method]
+        assert 'postfire_' in operation['operationId']
+        assert {200,401,403,409,413,422,503} <= _response_codes(operation)

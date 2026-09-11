@@ -502,7 +502,7 @@ def resolve_builder_config(
         (("config", "resolver_version"), 1, "resolver-v1"),
         (("config", "schema_version"), 1, "resolver-v1"),
         (("general", "cellsize"), effective_cellsize, "selection:cellsize"),
-        (("nodb", "mods"), list(selections.mods), "selection:mods"),
+        (("nodb", "mods"), ["disturbed", *(mod for mod in selections.mods if mod != "disturbed")], "builder:sbs-support"),
         (("capability_defaults", "locale_profile"), selections.locale, "selection:locale"),
         (("capability_defaults", "dem_source"), selections.dem, "selection:dem"),
         (("capability_defaults", "climate_dataset"), selections.climate, "selection:climate"),

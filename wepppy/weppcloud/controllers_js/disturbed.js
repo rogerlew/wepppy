@@ -435,16 +435,14 @@ var Disturbed = (function () {
             disturbedEvents.emit(name, payload || {});
         }
 
-        function startTask(taskMsg) {
-            if (infoAdapter && typeof infoAdapter.text === "function") {
+        function startTask(taskMsg, preserveSummary) {
+            if (!preserveSummary && infoAdapter && typeof infoAdapter.text === "function") {
                 infoAdapter.text("");
             }
             if (statusAdapter && typeof statusAdapter.text === "function") {
                 statusAdapter.text(taskMsg + "...");
             }
-            if (stacktraceAdapter && typeof stacktraceAdapter.text === "function") {
-                stacktraceAdapter.text("");
-            }
+            window.WCSbsError.clear(disturbed);
         }
 
         function setLookupStatus(message, state) {
@@ -657,16 +655,17 @@ var Disturbed = (function () {
         }
 
         function updateCurrentFilename(filename) {
-            if (!filename) {
-                return;
-            }
             // Find the text display showing current SBS map filename
             var displays = formElement ? formElement.querySelectorAll(".wc-field--display .wc-text-display") : [];
             for (var i = 0; i < displays.length; i++) {
                 var display = displays[i];
                 var label = display.parentElement ? display.parentElement.querySelector(".wc-field__label") : null;
                 if (label && label.textContent && label.textContent.indexOf("Current SBS map") !== -1) {
-                    display.innerHTML = "<code>" + filename + "</code>";
+                    if (filename) {
+                        var code = document.createElement("code");
+                        code.textContent = filename;
+                        display.replaceChildren(code);
+                    } else { display.textContent = "No map uploaded."; }
                     break;
                 }
             }
@@ -764,8 +763,12 @@ var Disturbed = (function () {
             return request;
         }
 
-        function handleResponseError(taskMsg, payload, errorEvent, taskName) {
-            disturbed.pushResponseStacktrace(disturbed, payload);
+        function handleResponseError(taskMsg, payload, errorEvent, taskName, error) {
+            if (taskName === "disturbed:upload") {
+                window.WCSbsError.show(disturbed, payload, error);
+            } else {
+                disturbed.pushResponseStacktrace(disturbed, payload);
+            }
             failTask(taskMsg);
             emit(errorEvent, { error: payload });
             disturbed.triggerEvent("job:error", { task: taskName, error: payload });
@@ -944,7 +947,7 @@ var Disturbed = (function () {
             }
             var taskMsg = "Uploading SBS";
             clearUploadHint();
-            startTask(taskMsg);
+            startTask(taskMsg, true);
             emit("disturbed:upload:started", {});
             disturbed.triggerEvent("job:started", { task: "disturbed:upload" });
             var formData = new window.FormData(formElement);
@@ -958,7 +961,6 @@ var Disturbed = (function () {
                     var data = result.body || {};
                     if (!data.error && !data.errors) {
                         completeTask(taskMsg);
-                        setAdapterText(uploadHintAdapter, "SBS raster uploaded successfully.");
                         updateHasSbs(true, "upload");
                         
                         // Update filename display if provided
@@ -999,15 +1001,13 @@ var Disturbed = (function () {
                         refreshHasSbs("upload");
                         return data;
                     }
-                    setAdapterText(uploadHintAdapter, resolveErrorMessage(data, "Upload failed."));
                     handleResponseError(taskMsg, data, "disturbed:upload:error", "disturbed:upload");
                     refreshHasSbs("upload");
                     return data;
                 })
                 .catch(function (error) {
                     var payload = toResponsePayload(http, error);
-                    setAdapterText(uploadHintAdapter, resolveErrorMessage(payload, "Upload failed."));
-                    handleResponseError(taskMsg, payload, "disturbed:upload:error", "disturbed:upload");
+                    handleResponseError(taskMsg, payload, "disturbed:upload:error", "disturbed:upload", error);
                     refreshHasSbs("upload");
                     return payload;
                 });
@@ -1029,7 +1029,7 @@ var Disturbed = (function () {
                     var data = result.body || {};
                     if (!data.error && !data.errors) {
                         completeTask(taskMsg);
-                        setAdapterText(removeHintAdapter, "SBS raster removed.");
+                        updateCurrentFilename(null);
                         updateHasSbs(false, "remove");
                         emit("disturbed:remove:completed", { response: data });
                         disturbed.triggerEvent("SBS_REMOVE_TASK_COMPLETE", data);

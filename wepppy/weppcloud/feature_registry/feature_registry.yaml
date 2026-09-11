@@ -211,6 +211,23 @@ features:
       - polaris
     disable_blockers: []
 
+  - id: postfire_debris_flow
+    label: Post-fire debris flow
+    nav_label: Post-fire debris flow
+    section_id: postfire-debris-flow
+    section_class: wc-stack
+    section_template: controls/postfire_debris_flow_pure.htm
+    maturity: preview
+    internal_reason: null
+    min_role: user
+    requires_backend: wbt
+    requires_features:
+      - disturbed
+    enable_dependencies:
+      - polaris
+      - rusle
+    disable_blockers: []
+
   - id: culvert_runner
     label: Culvert Runner
     nav_label: Culvert Runner

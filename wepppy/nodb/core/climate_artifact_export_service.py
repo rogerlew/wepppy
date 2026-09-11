@@ -144,6 +144,9 @@ class ClimateArtifactExportService:
             parquet_path.parent.mkdir(parents=True, exist_ok=True)
             export_df.to_parquet(parquet_path, index=False)
             climate.logger.info("Exported CLI parquet with peak intensities", extra={"parquet": str(parquet_path)})
+            if (Path(climate.wd) / "postfire_debris_flow.nodb").is_file():
+                from wepppy.nodb.mods.postfire_debris_flow.production import notify
+                notify(climate.wd)
             return parquet_path
         # Export boundary: any parse/serialization backend error should be logged and skipped.
         except (ImportError, KeyError, OSError, RuntimeError, TypeError, ValueError):
@@ -445,6 +448,9 @@ class ClimateArtifactExportService:
                         "Downloaded NOAA Atlas 14 intensity data",
                         extra={"csv": str(result_path), "attempt": attempt, "attempts": total_attempts},
                     )
+                    if (Path(climate.wd) / "postfire_debris_flow.nodb").is_file():
+                        from wepppy.nodb.mods.postfire_debris_flow.production import notify
+                        notify(climate.wd)
                     return result_path
                 climate.logger.warning(
                     "NOAA Atlas 14 download did not produce expected file",

@@ -344,6 +344,9 @@
         if (modFlags.path_ce && typeof PathCE !== "undefined" && PathCE && typeof PathCE.getInstance === "function") {
             add("pathCe", PathCE);
         }
+        if (document.getElementById("postfire_debris_flow_form")) {
+            add("postfire_debris_flow", typeof PostfireDebrisFlow !== "undefined" ? PostfireDebrisFlow : null);
+        }
         if (modFlags.rusle) {
             add("rusle", typeof Rusle !== "undefined" ? Rusle : null);
         }

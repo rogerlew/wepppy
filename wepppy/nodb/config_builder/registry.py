@@ -550,7 +550,16 @@ def _synthesized_builder_components(
         if component_id != "australia-landuse-2010-2011":
             writes_list.insert(0, ConfigWrite("landuse", "nlcd_db", entry.runtime_value))
         if component_id.startswith("c3s-landcover-"):
-            writes_list.append(ConfigWrite("landuse", "mapping", "c3s-disturbed"))
+            mapping = "c3s-disturbed"
+        elif component_id.startswith(("nlcd-", "emapr-vote-")):
+            mapping = "disturbed"
+        elif component_id.startswith("corine-"):
+            mapping = "eu-disturbed"
+        elif component_id == "australia-landuse-2010-2011":
+            mapping = "au-disturbed"
+        else:
+            raise RegistryError(f"No Disturbed mapping for land-cover provider {component_id!r}")
+        writes_list.append(ConfigWrite("landuse", "mapping", mapping))
         writes = tuple(writes_list)
         components[component_id] = ComponentDefinition(
             component_id=component_id,
@@ -562,6 +571,7 @@ def _synthesized_builder_components(
                 (
                     entry.runtime_value,
                     entry.support_state,
+                    mapping,
                     LANDCOVER_PROVIDER_ADAPTER_REVISION,
                 ),
             ),

@@ -1,0 +1,15 @@
+   Compiling pyo3-macros-backend v0.22.6
+   Compiling pyo3-macros v0.22.6
+   Compiling pyo3 v0.22.6
+   Compiling numpy v0.22.1
+   Compiling sbs_map_rust v0.1.0 (/workdir/wepppyo3/sbs_map)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 13.83s
+     Running unittests src/lib.rs (/workdir/wepppyo3/target/debug/deps/sbs_map_rust-b7235359a2a3e4d1)
+
+running 4 tests
+test tests::export_nodata_override_writes_255_without_changing_model_fallback ... ok
+test nodata_tests::metadata_does_not_truncate_into_valid_classes ... ok
+test tests::default_color_map_contains_current_interagency_palette ... ok
+test tests::missing_and_corrupt_color_maps_use_the_builtin_palette ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

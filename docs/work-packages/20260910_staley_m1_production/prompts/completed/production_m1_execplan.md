@@ -24,12 +24,13 @@ this increment provides the minimal control necessary for upload and execution.
 - [x] (2026-09-10) Record distribution-based Auto and uploaded-map summary table; draft ADR-0063.
 - [x] Evaluate/freeze distribution-v1 criteria with three real products, normalized equivalents and analytical cases.
 - [x] Produce six-state static preview; record owner execution authorization and concrete contract.
-- [ ] Two independent contract reviews; disposition; standalone ancestor commit.
-- [ ] Implement NoDb state, owner prerequisites and freshness with tests.
-- [ ] Implement authorized upload/publication and RQ model execution.
-- [ ] Implement approved minimal control and reload/file-access behavior.
-- [ ] Real end-to-end validation and independent correctness/security/UI reviews.
-- [ ] Target preflight/install approval as needed; operator 10 m smoke handoff.
+- [x] Two independent contract reviews; checkpoint `5c0a172ee`, file-publication amendment `595816476`.
+- [x] Implement NoDb state, owner prerequisites and freshness with tests.
+- [x] Implement authorized upload/publication and RQ model execution.
+- [x] Implement approved minimal control and reload/file-access behavior.
+- [x] Real end-to-end validation and independent correctness/security/UI reviews.
+- [x] Development worker installation/preflight and operator 10 m test handoff;
+  other-host deployment and real-basin acceptance remain separate.
 
 ## Surprises & Discoveries
 
@@ -40,6 +41,14 @@ The new adapter must establish source association, stage safe files and preserve
 attempt ownership. WBT exists as a validated local build, not a guaranteed worker
 installation. RUSLE's source organization is reusable, but its many parameter
 controls and implementation-heavy prose are not the UI template for this feature.
+
+Additional execution findings: registry enablement applies only direct dependencies,
+so postfire lists both POLARIS and RUSLE. Worker completion can race state polling;
+reconciliation now preserves the complete atomic publication revision. Test doubles
+for Climate export must provide the real owner's working directory. Browser
+acceptance must wait for exact job and accepted artifact IDs; earlier scripts could
+advance too early and are not evidence. The canonical Go builder avoids the older
+host toolchain. No broad prerequisite or scientific fallback was introduced.
 
 ## Decision Log
 
@@ -63,10 +72,14 @@ backend's explicit scale API and scientific provenance.
 ## Outcomes & Retrospective
 
 
-Scaffold only. No runtime, tests, contract-approval artifact, review signoff or
-deployment exists. A later scaffold commit is not the required approved checkpoint.
-Owner UI revisions are synchronized across the domain/UI contracts and package;
-numerical distribution criteria and staged scale-correction retry remain proposed details.
+Completed 2026-09-10. NoDb, safe upload/publication, RQ execution and the minimal live control are
+implemented. Independent correctness/security findings are closed and final gates passed. Real development browser/worker acceptance passed on a disposable synthetic
+10 m project with actual ClimateFile parquet export. Frontend: 109 suites/841 tests.
+Production focused: 14; transport: 17; encoding: 9; Climate export: 12; Go preflight
+passed. Full Python suite passed 8,312 tests with 77 skips; final documentation gates
+passed. The three new race/enablement tests were separately covered in the
+14-test focused run. Required review conditions are satisfied.
+The owner's real burned-basin test and installation on other hosts are separate.
 
 ## Context and Orientation
 
@@ -261,7 +274,8 @@ Use module stubtest when public API changes and rebuild controller bundles via
 existing controller-JS tooling. If graph drift is reported, regenerate using
 `python tools/check_rq_dependency_graph.py --write`, inspect changes and validate
 live job trees. Record exact browser smoke command after environment discovery.
-Do not run runtime suites for this documentation scaffold alone.
+Runtime validation commands above were executed; results are recorded in
+artifacts/validation.md.
 
 ## Validation and Acceptance
 

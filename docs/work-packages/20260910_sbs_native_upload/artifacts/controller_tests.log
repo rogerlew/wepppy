@@ -1,0 +1,15 @@
+
+> weppcloud-static@0.1.0 test
+> NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.mjs baer.test.js sbs_error.test.js disturbed.test.js
+
+(node:161222) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../controllers_js/__tests__/baer.test.js
+PASS ../controllers_js/__tests__/disturbed.test.js
+PASS ../controllers_js/__tests__/sbs_error.test.js
+
+Test Suites: 3 passed, 3 total
+Tests:       30 passed, 30 total
+Snapshots:   0 total
+Time:        1.724 s
+Ran all test suites matching baer.test.js|sbs_error.test.js|disturbed.test.js.

@@ -31,6 +31,7 @@ def rq_submission_lock(
     lifecycle_key: str,
     lifecycle_type: str = ...,
     blocking_timeout: float = ...,
+    inherit_lifecycle: bool = ...,
 ) -> AbstractContextManager[SubmissionLease]: ...
 def prepare_redisprep_job_id(
     prep: RedisPrep,
@@ -61,6 +62,7 @@ def enqueue_tracked_rq_job(
     runid: str,
     args: tuple[Any, ...],
     kwargs: dict[str, Any] | None = ...,
+    on_job_id: Callable[[str], None] | None = ...,
     timeout: Any = ...,
     meta: dict[str, Any] | None = ...,
     conflict_keys: Iterable[str] | None = ...,

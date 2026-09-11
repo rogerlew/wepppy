@@ -130,6 +130,7 @@ describe("Baer controller", () => {
             return path;
         });
 
+        await import("../sbs_error.js");
         await import("../baer.js");
     });
 
@@ -279,4 +280,42 @@ describe("Baer controller", () => {
         setTimeoutSpy.mockRestore();
         jest.useRealTimers();
     });
+    test.each(["summary", "map"])("%s failure survives a successful concurrent refresh and clears on retry", async (failed) => {
+        const baer = Baer.getInstance();
+        document.querySelector("#info").innerHTML = "<table><tr><td>Accepted</td></tr></table>";
+        const error = {body:"<h1>504 Gateway Time-out</h1>", response:{headers:{get:()=>"text/html"}}};
+        mapInstance.sbs_layer = {};
+        mapInstance.hasLayer = () => true;
+        mapInstance.loadSbsMap = jest.fn(() => failed === "map" ? Promise.reject(error) : Promise.resolve({Content:{bounds:[],imgurl:"map.png"}}));
+        httpRequestMock.mockImplementation(() => failed === "summary" ? Promise.reject(error) : Promise.resolve({body:"<table><tr><td>Accepted</td></tr></table>"}));
+        if (failed === "summary") {
+            await baer.load_modify_class();
+            await baer.show_sbs({flyToBounds:false});
+        } else {
+            await baer.show_sbs({flyToBounds:false});
+            await baer.load_modify_class();
+        }
+        expect(document.querySelector("#info table").textContent).toBe("Accepted");
+        expect(document.querySelector("#stacktrace h1").textContent).toBe("504 Gateway Time-out");
+        expect(document.querySelector("#status").textContent).toContain("Failed");
+        mapInstance.loadSbsMap.mockResolvedValue({Content:{bounds:[],imgurl:"map.png"}});
+        httpRequestMock.mockResolvedValue({body:"<table><tr><td>Recovered</td></tr></table>"});
+        if (failed === "summary") { await baer.load_modify_class(); }
+        else { await baer.show_sbs({flyToBounds:false}); }
+        expect(document.querySelector("#stacktrace").textContent).toBe("");
+        expect(document.querySelector("#status").textContent).toContain("Success");
+    });
+
+    test.each(["", "<table><tr><td>Accepted</td></tr></table>"])("HTTP200 JSON errors preserve existing Summary %s", async (summary) => {
+        const baer = Baer.getInstance();
+        document.querySelector("#info").innerHTML = summary;
+        const expected = document.querySelector("#info").innerHTML;
+        const payload = {error:{message:"No SBS map has been specified."}};
+        httpRequestMock.mockResolvedValue({body:payload});
+        await baer.load_modify_class();
+        expect(document.querySelector("#info").innerHTML).toBe(expected);
+        expect(document.querySelector("#status").textContent).toContain("Failed");
+        expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith({stacktrace:baer.stacktrace},payload);
+    });
+
 });

@@ -1,6 +1,6 @@
 # Production M1 upload and execution
 
-Status: scaffolded 2026-09-10 07:23 UTC; runtime implementation not started.
+Status: completed 2026-09-10; ExecPlan archived.
 Baseline `304572530`. User requests NoDb state, prerequisites/freshness, dNBR
 upload/publication and RQ execution with a simple control. Reports are deferred.
 
@@ -17,13 +17,14 @@ watershed, soil burn severity, soil erodibility and rainfall terminology.
 Review the [UI contract](../../../docs/ui-docs/contracts/postfire-debris-flow-control-contract.md),
 [workflow contract](../../../wepppy/nodb/mods/postfire_debris_flow/docs/production_m1.md),
 [decision register](artifacts/decision_register.md), [tracker](tracker.md) and
-[ExecPlan](prompts/active/production_m1_execplan.md). UI copy/layout and state
-behavior are concrete proposals for owner review, not approved by scaffolding.
+[ExecPlan](prompts/completed/production_m1_execplan.md). UI copy/layout and state
+behavior are accepted through owner execution authorization and the contract checkpoint.
 
-Required contract-first ancestor before runtime edits: exact contract/state
-matrix and operator approval, two independent reviews, affected canonical docs
-and disposition committed separately. The current request authorizes scaffolding;
-no runtime checkpoint, commit, installation or deployment is implied.
+Contract-first ancestors `5c0a172ee` and `595816476` contain the accepted
+contract/state matrix, owner authorization and independent reviews before runtime
+edits. Runtime changes remain uncommitted; no production deployment occurred.
+See [validation](artifacts/validation.md), [correctness review](artifacts/correctness_review.md)
+and [security review](artifacts/security_review.md).
 
 ## Scope and acceptance
 

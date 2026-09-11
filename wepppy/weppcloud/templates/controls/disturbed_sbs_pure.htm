@@ -83,13 +83,11 @@
          attrs={"data-auto-upload": "true"}
        ) }}
 
-    {% if current_sbs_fn %}
-      {% set current_sbs_content %}<code>{{ current_sbs_fn }}</code>{% endset %}
-      {{ ui.text_display(
-           label="Current SBS map",
-           content=current_sbs_content
-      ) }}
-    {% endif %}
+    {% set current_sbs_content %}{% if current_sbs_fn %}<code>{{ current_sbs_fn }}</code>{% else %}No map uploaded.{% endif %}{% endset %}
+    {{ ui.text_display(
+         label="Current SBS map",
+         content=current_sbs_content
+    ) }}
 
     {% call button_row() %}
       {% if 'disturbed' in ron.mods or 'baer' in ron.mods %}

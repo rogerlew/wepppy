@@ -1,10 +1,9 @@
 # Postfire debris-flow control contract
 
-Status: owner-directed execution contract; conformance pending, 2026-09-10 UTC; implementation pending.
+Status: accepted owner-directed contract; implemented and validated on the development stack.
 Canonical domain: [production M1 workflow](../../../wepppy/nodb/mods/postfire_debris_flow/docs/production_m1.md).
 The owner requested a simple interface for land managers and hydrologists,
-with upload and model execution now and reports deferred. This proposal requires
-the contract-first checkpoint before any runtime edits.
+with upload and model execution now and reports deferred. The contract checkpoints are `5c0a172ee` and `595816476`.
 
 ## Scope and layout
 

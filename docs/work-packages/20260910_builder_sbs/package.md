@@ -7,4 +7,5 @@ Security impact: low; use existing authenticated SBS transport and NoDb locks.
 No new endpoints, upload formats, Disturbed numerical defaults or queue edges.
 Canonical authority: project-owned-config-contract.md, Builder Soil Burn Severity
 support (2026-09-10); NoDb persistence/concurrency and shared CSRF/RQ contracts.
-Status: contract review, implementation pending. No full suite per operator.
+Status: completed; plan archived under prompts/completed/. Validation and
+independent correctness review are in artifacts/. No full suite per operator.

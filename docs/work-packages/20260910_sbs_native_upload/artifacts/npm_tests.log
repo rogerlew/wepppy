@@ -1,0 +1,1740 @@
+
+> weppcloud-static@0.1.0 test
+> NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.mjs
+
+PASS ../controllers_js/__tests__/runs_catalog_inline.test.js
+(node:184535) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../controllers_js/__tests__/dss_export.test.js
+(node:184668) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../controllers_js/__tests__/bootstrap_control.test.js
+(node:184713) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../controllers_js/__tests__/rap_ts.test.js
+PASS ../controllers_js/__tests__/controllers_gl_stale_check.test.js
+(node:184681) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../controllers_js/__tests__/run_sync_dashboard.test.js
+PASS ../controllers_js/__tests__/team.test.js
+(node:184524) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../controllers_js/__tests__/batch_runner.test.js
+(node:184490) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:184599) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../controllers_js/__tests__/ermit_export_inline.test.js
+PASS ../controllers_js/__tests__/user_preferences.test.js
+PASS ../controllers_js/__tests__/geneva_summary_report.test.js
+(node:184736) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../static/js/storm-event-analyzer/__tests__/event-table.test.js
+(node:184780) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../controllers_js/__tests__/user_profile_inline.test.js
+(node:184478) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../controllers_js/__tests__/omni.test.js
+(node:184710) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../controllers_js/__tests__/outlet_gl.test.js
+(node:184777) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../controllers_js/__tests__/forms.test.js
+PASS ../controllers_js/__tests__/table_overflow_accessibility.test.js
+PASS ../controllers_js/__tests__/soil.test.js
+PASS ../controllers_js/__tests__/diagnostics_core_page.test.js
+(node:184541) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../controllers_js/__tests__/wepp.test.js
+  ● Console
+
+    console.log
+      [WEPP] Cover transform uploaded
+
+      at controllers_js/wepp.js:572:25
+
+PASS ../controllers_js/__tests__/openet_ts.test.js
+PASS ../static/js/gl-dashboard/__tests__/batch-tooltips.test.js
+PASS ../static/js/storm-event-analyzer/__tests__/event-data.test.js
+  ● Console
+
+    console.warn
+      Storm Event Analyzer: TSMF not available; falling back to Saturation Error: Binder Error: Referenced column "TSMF" not found in FROM clause
+          at /home/workdir/wepppy/wepppy/weppcloud/static/js/storm-event-analyzer/__tests__/event-data.test.js:136:17
+          at /home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-mock/build/index.js:305:39
+          at /home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-mock/build/index.js:312:13
+          at mockConstructor (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-mock/build/index.js:57:19)
+          at fetchSoilResult (/home/workdir/wepppy/wepppy/weppcloud/static/js/storm-event-analyzer/data/event-data.js:652:28)
+          at Object.fetchEventRows (/home/workdir/wepppy/wepppy/weppcloud/static/js/storm-event-analyzer/data/event-data.js:796:7)
+          at processTicksAndRejections (node:internal/process/task_queues:103:5)
+          at Object.<anonymous> (/home/workdir/wepppy/wepppy/weppcloud/static/js/storm-event-analyzer/__tests__/event-data.test.js:149:20)
+
+      663 |         };
+      664 |       }
+    > 665 |       console.warn('Storm Event Analyzer: TSMF not available; falling back to Saturation', error);
+          |               ^
+      666 |     }
+      667 |
+      668 |     const fallbackSource = 'saturation';
+
+      at fetchSoilResult (static/js/storm-event-analyzer/data/event-data.js:665:15)
+          at async Promise.all (index 0)
+      at Object.fetchEventRows (static/js/storm-event-analyzer/data/event-data.js:795:75)
+      at Object.<anonymous> (static/js/storm-event-analyzer/__tests__/event-data.test.js:149:20)
+
+    console.warn
+      Storm Event Analyzer: soil saturation query failed Error: soil missing
+          at Object.<anonymous> (/home/workdir/wepppy/wepppy/weppcloud/static/js/storm-event-analyzer/__tests__/event-data.test.js:194:30)
+          at Promise.finally.completed (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+          at _callCircusTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+          at processTicksAndRejections (node:internal/process/task_queues:103:5)
+          at _runTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+          at /home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+          at _runTestsForDescribeBlock (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+          at _runTestsForDescribeBlock (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+          at run (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+          at runAndTransformResultsToJestFormat (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+          at jestAdapter (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/runner.js:101:19)
+          at runTestInternal (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:275:16)
+          at runTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:343:7)
+          at Object.worker (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:497:12)
+
+      657 |     } catch (error) {
+      658 |       if (!isMissingTsmfColumnError(error)) {
+    > 659 |         console.warn('Storm Event Analyzer: soil saturation query failed', error);
+          |                 ^
+      660 |         return {
+      661 |           records: [],
+      662 |           soilSaturationLabel: getSoilSaturationLabel('saturation'),
+
+      at fetchSoilResult (static/js/storm-event-analyzer/data/event-data.js:659:17)
+          at async Promise.all (index 0)
+      at Object.fetchEventRows (static/js/storm-event-analyzer/data/event-data.js:795:75)
+      at Object.<anonymous> (static/js/storm-event-analyzer/__tests__/event-data.test.js:205:20)
+
+PASS ../static/js/gl-dashboard/__tests__/raster-utils-nodata.test.js
+PASS ../controllers_js/__tests__/postfire_debris_flow.test.js
+PASS ../static/js/gl-dashboard/__tests__/label-styling.test.js
+(node:184480) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:184805) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../static/js/storm-event-analyzer/__tests__/frequency-table.test.js
+PASS ../controllers_js/__tests__/landuse_user_defined_catalog_inline.test.js
+PASS ../controllers_js/__tests__/sorttable.test.js
+PASS ../controllers_js/__tests__/session_heartbeat.test.js
+  ● Console
+
+    console.warn
+      Session heartbeat is retrying after repeated network errors.
+
+      215 |           failureWarningIssued = true;
+      216 |           if (window.console && typeof window.console.warn === "function") {
+    > 217 |             window.console.warn("Session heartbeat is retrying after repeated network errors.");
+          |                            ^
+      218 |           }
+      219 |         }
+      220 |       })
+
+      at static/js/session_heartbeat.js:217:28
+
+(node:184743) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../controllers_js/__tests__/observed.test.js
+PASS ../static/js/gl-dashboard/__tests__/wepp-data.test.js
+PASS ../controllers_js/__tests__/command_bar.test.js
+  ● Console
+
+    console.error
+      Error clearing runtime directory locks: Error: offline
+          at Object.<anonymous> (/home/workdir/wepppy/wepppy/weppcloud/controllers_js/__tests__/command_bar.test.js:167:44)
+          at processTicksAndRejections (node:internal/process/task_queues:103:5)
+
+      at eval (eval at <anonymous> (controllers_js/__tests__/command_bar.test.js:114:16), <anonymous>:1799:29)
+      at Object.<anonymous> (controllers_js/__tests__/command_bar.test.js:168:9)
+
+PASS ../controllers_js/__tests__/edit_csv_inline.test.js
+PASS ../controllers_js/__tests__/csrf_bootstrap.test.js
+PASS ../controllers_js/__tests__/baer.test.js
+PASS ../controllers_js/__tests__/rq_job_dashboard_inline.test.js
+PASS ../controllers_js/__tests__/diagnostics_realtime.test.js
+(node:184604) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../controllers_js/__tests__/dom.test.js
+PASS ../controllers_js/__tests__/run_migration_status_inline.test.js
+PASS ../static/js/gl-dashboard/__tests__/batch-readiness.test.js
+  ● Console
+
+    console.info
+      gl-dashboard detection: Subcatchments GeoJSON missing {
+        url: '/weppcloud/runs/batch;;spring-2025-ready;;run-002/cfg1/resources/subcatchments.json',
+        status: 404
+      }
+
+      at logDetection (static/js/gl-dashboard/layers/detector.js:46:16)
+          at async Promise.all (index 1)
+
+    console.info
+      gl-dashboard detection: Channels GeoJSON missing {
+        url: '/weppcloud/runs/batch;;spring-2025-ready;;run-002/cfg1/resources/channels.json',
+        status: 404
+      }
+
+      at logDetection (static/js/gl-dashboard/layers/detector.js:46:16)
+          at async Promise.all (index 1)
+
+PASS ../controllers_js/__tests__/deval_loading_inline.test.js
+  ● Console
+
+    console.error
+      Failed to poll job status Error: HTTP 429
+          at fetchOnce (eval at <anonymous> (/home/workdir/wepppy/wepppy/weppcloud/controllers_js/__tests__/deval_loading_inline.test.js:69:16), <anonymous>:116:23)
+          at pollStatus (eval at <anonymous> (/home/workdir/wepppy/wepppy/weppcloud/controllers_js/__tests__/deval_loading_inline.test.js:69:16), <anonymous>:159:23) {
+        status: 429,
+        payload: {
+          error: { code: 'rate_limited', message: 'Too many polling requests' }
+        }
+      }
+
+      at pollStatus (eval at <anonymous> (controllers_js/__tests__/deval_loading_inline.test.js:69:16), <anonymous>:202:15)
+
+    console.error
+      Failed to poll job status Error: offline
+          at Object.<anonymous> (/home/workdir/wepppy/wepppy/weppcloud/controllers_js/__tests__/deval_loading_inline.test.js:152:32)
+          at Promise.finally.completed (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+          at _callCircusTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+          at _runTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+          at /home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+          at _runTestsForDescribeBlock (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+          at _runTestsForDescribeBlock (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+          at run (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+          at runAndTransformResultsToJestFormat (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+          at jestAdapter (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/runner.js:101:19)
+          at runTestInternal (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:275:16)
+          at runTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:343:7)
+          at Object.worker (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:497:12)
+
+      at pollStatus (eval at <anonymous> (controllers_js/__tests__/deval_loading_inline.test.js:69:16), <anonymous>:202:15)
+
+    console.error
+      Failed to poll job status Error: offline
+          at Object.<anonymous> (/home/workdir/wepppy/wepppy/weppcloud/controllers_js/__tests__/deval_loading_inline.test.js:152:32)
+          at Promise.finally.completed (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+          at _callCircusTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+          at _runTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+          at /home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+          at _runTestsForDescribeBlock (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+          at _runTestsForDescribeBlock (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+          at run (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+          at runAndTransformResultsToJestFormat (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+          at jestAdapter (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/runner.js:101:19)
+          at runTestInternal (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:275:16)
+          at runTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:343:7)
+          at Object.worker (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:497:12)
+
+      at pollStatus (eval at <anonymous> (controllers_js/__tests__/deval_loading_inline.test.js:69:16), <anonymous>:202:15)
+
+    console.error
+      Failed to poll job status Error: offline
+          at Object.<anonymous> (/home/workdir/wepppy/wepppy/weppcloud/controllers_js/__tests__/deval_loading_inline.test.js:152:32)
+          at Promise.finally.completed (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+          at _callCircusTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+          at _runTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+          at /home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+          at _runTestsForDescribeBlock (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+          at _runTestsForDescribeBlock (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+          at run (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+          at runAndTransformResultsToJestFormat (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+          at jestAdapter (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/runner.js:101:19)
+          at runTestInternal (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:275:16)
+          at runTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:343:7)
+          at Object.worker (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:497:12)
+
+      at pollStatus (eval at <anonymous> (controllers_js/__tests__/deval_loading_inline.test.js:69:16), <anonymous>:202:15)
+
+    console.error
+      Failed to poll job status Error: offline
+          at Object.<anonymous> (/home/workdir/wepppy/wepppy/weppcloud/controllers_js/__tests__/deval_loading_inline.test.js:152:32)
+          at Promise.finally.completed (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+          at _callCircusTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+          at _runTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+          at /home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+          at _runTestsForDescribeBlock (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+          at _runTestsForDescribeBlock (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+          at run (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+          at runAndTransformResultsToJestFormat (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+          at jestAdapter (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/runner.js:101:19)
+          at runTestInternal (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:275:16)
+          at runTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:343:7)
+          at Object.worker (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:497:12)
+
+      at pollStatus (eval at <anonymous> (controllers_js/__tests__/deval_loading_inline.test.js:69:16), <anonymous>:202:15)
+
+    console.error
+      Failed to poll job status Error: offline
+          at Object.<anonymous> (/home/workdir/wepppy/wepppy/weppcloud/controllers_js/__tests__/deval_loading_inline.test.js:152:32)
+          at Promise.finally.completed (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+          at _callCircusTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+          at _runTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+          at /home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+          at _runTestsForDescribeBlock (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+          at _runTestsForDescribeBlock (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+          at run (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+          at runAndTransformResultsToJestFormat (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+          at jestAdapter (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/runner.js:101:19)
+          at runTestInternal (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:275:16)
+          at runTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:343:7)
+          at Object.worker (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:497:12)
+
+      at pollStatus (eval at <anonymous> (controllers_js/__tests__/deval_loading_inline.test.js:69:16), <anonymous>:202:15)
+
+PASS ../controllers_js/__tests__/landuse_modify_gl.test.js
+  ● Console
+
+    console.info
+      LanduseModify GL: pointerdown {
+        shiftKey: true,
+        clientX: 10,
+        clientY: 20,
+        dragStart: { lat: 20, lng: 10 }
+      }
+
+      at HTMLDivElement.onMapMouseDown (controllers_js/landuse_modify_gl.js:459:21)
+
+    console.info
+      LanduseModify GL: pointermove { shiftKey: true, clientX: 110, clientY: 120, hasDragStart: true }
+
+      at HTMLDivElement.onMapMouseMove (controllers_js/landuse_modify_gl.js:488:25)
+
+    console.info
+      LanduseModify GL: pointerup { shiftKey: true, clientX: 110, clientY: 120, hasDragStart: false }
+
+      at onMapMouseUp (controllers_js/landuse_modify_gl.js:523:21)
+
+    console.info
+      LanduseModify GL: pointerup { shiftKey: true, clientX: 110, clientY: 120, hasDragStart: true }
+
+      at onMapMouseUp (controllers_js/landuse_modify_gl.js:523:21)
+
+PASS ../static/js/gl-dashboard/__tests__/detector-d8.test.js
+PASS ../static/js/storm-event-analyzer/__tests__/hyetograph-data.test.js
+PASS ../controllers_js/__tests__/readme_editor_inline.test.js
+PASS ../controllers_js/__tests__/utils_labels.test.js
+  ● Console
+
+    console.warn
+      applyLabelHtml: failed to write label content, falling back to textContent Error: fail
+          at Object.<anonymous> (/home/workdir/wepppy/wepppy/weppcloud/controllers_js/__tests__/utils_labels.test.js:30:41)
+          at /home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-mock/build/index.js:305:39
+          at Object.<anonymous> (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-mock/build/index.js:312:13)
+          at Object.mockConstructor [as html] (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-mock/build/index.js:102:19)
+          at applyLabelHtml (/home/workdir/wepppy/wepppy/weppcloud/controllers_js/utils.js:231:23)
+          at Object.<anonymous> (/home/workdir/wepppy/wepppy/weppcloud/controllers_js/__tests__/utils_labels.test.js:33:9)
+          at processTicksAndRejections (node:internal/process/task_queues:103:5)
+
+      242 |         textFallback();
+      243 |     } catch (err) {
+    > 244 |         console.warn("applyLabelHtml: failed to write label content, falling back to textContent", err);
+          |                 ^
+      245 |         textFallback();
+      246 |     }
+      247 | }
+
+      at applyLabelHtml (controllers_js/utils.js:244:17)
+      at Object.<anonymous> (controllers_js/__tests__/utils_labels.test.js:33:9)
+
+PASS ../controllers_js/__tests__/poweruser_panel_inline.test.js
+  ● Console
+
+    console.warn
+      [wepppush] Notification toggle elements not present; skipping toggle wiring
+
+      at Document.eval (eval at <anonymous> (controllers_js/__tests__/poweruser_panel_inline.test.js:35:16), <anonymous>:141:15)
+      at Document.callTheUserObjectsOperation (static-src/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+      at innerInvokeEventListeners (static-src/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
+      at invokeEventListeners (static-src/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
+      at DocumentImpl._dispatch (static-src/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
+      at DocumentImpl.dispatchEvent (static-src/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
+      at Document.dispatchEvent (static-src/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
+      at Object.<anonymous> (controllers_js/__tests__/poweruser_panel_inline.test.js:36:18)
+
+    console.warn
+      [wepppush] Notification toggle elements not present; skipping toggle wiring
+
+      at Document.eval (eval at <anonymous> (controllers_js/__tests__/poweruser_panel_inline.test.js:35:16), <anonymous>:141:15)
+      at Document.callTheUserObjectsOperation (static-src/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+      at innerInvokeEventListeners (static-src/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
+      at invokeEventListeners (static-src/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
+      at DocumentImpl._dispatch (static-src/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
+      at DocumentImpl.dispatchEvent (static-src/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:104:17)
+      at Document.dispatchEvent (static-src/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
+      at Object.<anonymous> (controllers_js/__tests__/poweruser_panel_inline.test.js:62:18)
+
+PASS ../controllers_js/__tests__/interfaces_captcha.test.js
+(node:184691) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../controllers_js/__tests__/http.test.js
+(node:184619) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../controllers_js/__tests__/diagnostics_bandwidth.test.js
+PASS ../controllers_js/__tests__/bootstrap.test.js
+PASS ../controllers_js/__tests__/path_ce.test.js
+PASS ../controllers_js/__tests__/landuse_map_inline.test.js
+(node:184557) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../static/js/gl-dashboard/__tests__/colors.test.js
+PASS ../controllers_js/__tests__/copytext.test.js
+PASS ../controllers_js/__tests__/security_auth_inline.test.js
+(node:184808) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../static/js/gl-dashboard/__tests__/sbs-color-shift-tooltip.test.js
+(node:184755) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../static/js/gl-dashboard/__tests__/state.test.js
+PASS ../static/js/gl-dashboard/__tests__/batch-keys.test.js
+PASS ../controllers_js/__tests__/utils_url_for_run.test.js
+PASS ../controllers_js/__tests__/rangeland_cover.test.js
+(node:184814) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../controllers_js/__tests__/shared_ui_contracts.test.js
+(node:184800) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../controllers_js/__tests__/diagnostics_report.test.js
+PASS ../static/js/gl-dashboard/__tests__/detector-siteprefix.test.js
+(node:184770) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:184744) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../controllers_js/__tests__/subcatchment_delineation.test.js
+PASS ../static/js/gl-dashboard/__tests__/timeseries-graph-highlight.test.js
+(node:184718) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:184458) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../controllers_js/__tests__/disturbed.test.js
+PASS ../controllers_js/__tests__/bootstrap_observability.test.js
+  ● Console
+
+    console.error
+      [bootstrap] Controller bootstrap failure
+      stage=bootstrapMany
+      message=before recorder
+      stacktrace:
+      Error: before recorder
+          at Object.<anonymous> (/home/workdir/wepppy/wepppy/weppcloud/controllers_js/__tests__/bootstrap_observability.test.js:133:57)
+          at Promise.finally.completed (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+          at _callCircusTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+          at processTicksAndRejections (node:internal/process/task_queues:103:5)
+          at _runTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+          at /home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+          at _runTestsForDescribeBlock (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+          at _runTestsForDescribeBlock (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+          at run (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+          at runAndTransformResultsToJestFormat (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+          at jestAdapter (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/runner.js:101:19)
+          at runTestInternal (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:275:16)
+          at runTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:343:7)
+          at Object.worker (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:497:12)
+
+      328 |             if (!commandBarNotified && !recorderNotified) {
+      329 |                 if (logger && typeof logger.error === "function") {
+    > 330 |                     logger.error(diagnostic);
+          |                            ^
+      331 |                 } else if (logger && typeof logger.warn === "function") {
+      332 |                     logger.warn(diagnostic);
+      333 |                 }
+
+      at Object.notify (controllers_js/bootstrap_observability.js:330:28)
+      at Object.<anonymous> (controllers_js/__tests__/bootstrap_observability.test.js:133:18)
+
+PASS ../static/js/gl-dashboard/__tests__/detector-rusle-raster.test.js
+  ● Console
+
+    console.info
+      gl-dashboard detection: SBS map not available { url: '/site/runs/run1/cfg1/query/baer_wgs_map', status: 404 }
+
+      at logDetection (static/js/gl-dashboard/layers/detector.js:46:16)
+
+    console.info
+      gl-dashboard detection: SBS map not available { url: '/site/runs/run1/cfg1/query/baer_wgs_map', status: 404 }
+
+      at logDetection (static/js/gl-dashboard/layers/detector.js:46:16)
+
+    console.info
+      gl-dashboard detection: SBS map not available { url: '/site/runs/run1/cfg1/query/baer_wgs_map', status: 404 }
+
+      at logDetection (static/js/gl-dashboard/layers/detector.js:46:16)
+
+PASS ../controllers_js/__tests__/rhem.test.js
+PASS ../static/js/gl-dashboard/__tests__/query-engine.test.js
+PASS ../controllers_js/__tests__/events.test.js
+PASS ../static/js/gl-dashboard/__tests__/detector-wepp-event.test.js
+  ● Console
+
+    console.info
+      gl-dashboard detection: WEPP Event overlays unavailable: invalid climate year bounds { minYear: 0, maxYear: 100 }
+
+      at logDetection (static/js/gl-dashboard/layers/detector.js:46:16)
+
+    console.info
+      gl-dashboard detection: WEPP Event overlays unavailable: invalid climate year bounds { minYear: 2025, maxYear: 2020 }
+
+      at logDetection (static/js/gl-dashboard/layers/detector.js:46:16)
+
+PASS ../static/js/storm-event-analyzer/__tests__/state.test.js
+PASS ../controllers_js/__tests__/runs_lifecycle_template.test.js
+(node:184702) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:184792) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:184799) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../controllers_js/__tests__/roads_gl.test.js
+(node:184710) Warning: `--localstorage-file` was provided without a valid path
+PASS ../controllers_js/__tests__/recorder_interceptor.test.js
+PASS ../controllers_js/__tests__/cap_gate_inline.test.js
+PASS ../static/js/storm-event-analyzer/__tests__/hyetograph-chart.test.js
+PASS ../static/js/storm-event-analyzer/__tests__/frequency-data.test.js
+PASS ../controllers_js/__tests__/usermod_inline.test.js
+(node:184646) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../controllers_js/__tests__/rusle.test.js
+PASS ../controllers_js/__tests__/gl_dashboard_colors.test.js
+PASS ../controllers_js/__tests__/rangeland_cover_modify_gl.test.js
+  ● Console
+
+    console.info
+      RangelandCoverModify GL: pointerdown {
+        shiftKey: true,
+        clientX: 20,
+        clientY: 30,
+        dragStart: { lat: 30, lng: 20 }
+      }
+
+      at HTMLDivElement.onMapMouseDown (controllers_js/rangeland_cover_modify_gl.js:578:21)
+
+    console.info
+      RangelandCoverModify GL: pointermove { shiftKey: true, clientX: 140, clientY: 160, hasDragStart: true }
+
+      at HTMLDivElement.onMapMouseMove (controllers_js/rangeland_cover_modify_gl.js:607:25)
+
+    console.info
+      RangelandCoverModify GL: pointerup { shiftKey: true, clientX: 140, clientY: 160, hasDragStart: true }
+
+      at onMapMouseUp (controllers_js/rangeland_cover_modify_gl.js:642:21)
+
+(node:184742) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../static/js/gl-dashboard/__tests__/layers-orchestrator.test.js
+PASS ../controllers_js/__tests__/omni_contrasts_gl.test.js
+PASS ../static/js/gl-dashboard/__tests__/scenario-manager.test.js
+(node:184700) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../static/js/gl-dashboard/__tests__/renderer-open-state.test.js
+PASS ../controllers_js/__tests__/treatments.test.js
+PASS ../controllers_js/__tests__/subcatchments_gl.test.js
+PASS ../controllers_js/__tests__/debris_flow.test.js
+(node:184571) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:184597) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../controllers_js/__tests__/project_config_update.test.js
+PASS ../controllers_js/__tests__/control_base.test.js
+(node:184583) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../controllers_js/__tests__/geneva.test.js
+(node:184638) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../static/js/storm-event-analyzer/__tests__/hydrology-summary.test.js
+PASS ../controllers_js/__tests__/ash.test.js
+PASS ../static/js/gl-dashboard/__tests__/batch-detector.test.js
+PASS ../controllers_js/__tests__/sbs_error.test.js
+(node:184472) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:184628) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../controllers_js/__tests__/roads.test.js
+PASS ../controllers_js/__tests__/config_builder.test.js
+(node:184573) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../controllers_js/__tests__/landuse.test.js
+(node:184530) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../controllers_js/__tests__/channel_delineation.test.js
+  ● Console
+
+    console.warn
+      Invalid conditioning diagnostics trigger SyntaxError: Unexpected token '', "~Ê'" is not valid JSON
+          at JSON.parse (<anonymous>)
+          at conditioningDiagnosticsFromCompletion (/home/workdir/wepppy/wepppy/weppcloud/controllers_js/channel_delineation.js:910:42)
+          at Object.channel.triggerEvent (/home/workdir/wepppy/wepppy/weppcloud/controllers_js/channel_delineation.js:953:51)
+          at Object.<anonymous> (/home/workdir/wepppy/wepppy/weppcloud/controllers_js/__tests__/channel_delineation.test.js:305:17)
+          at Promise.finally.completed (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+          at _callCircusTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+          at processTicksAndRejections (node:internal/process/task_queues:103:5)
+          at _runTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+          at /home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+          at _runTestsForDescribeBlock (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+          at _runTestsForDescribeBlock (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+          at run (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+          at runAndTransformResultsToJestFormat (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+          at jestAdapter (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/runner.js:101:19)
+          at runTestInternal (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:275:16)
+          at runTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:343:7)
+          at Object.worker (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:497:12)
+
+      910 |                         candidate = JSON.parse(decoded);
+      911 |                     } catch (error) {
+    > 912 |                         console.warn("Invalid conditioning diagnostics trigger", error);
+          |                                 ^
+      913 |                     }
+      914 |                 }
+      915 |             }
+
+      at conditioningDiagnosticsFromCompletion (controllers_js/channel_delineation.js:912:33)
+      at Object.channel.triggerEvent (controllers_js/channel_delineation.js:953:51)
+      at Object.<anonymous> (controllers_js/__tests__/channel_delineation.test.js:305:17)
+
+(node:184466) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../controllers_js/__tests__/console_smoke.test.js
+(node:184496) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../controllers_js/__tests__/channel_gl.test.js
+PASS ../controllers_js/__tests__/ag_fields.test.js (5.485 s)
+PASS ../controllers_js/__tests__/climate.test.js
+PASS ../controllers_js/__tests__/project.test.js
+  ● Console
+
+    console.error
+      Failed to persist unit preferences {
+        name: 'Error',
+        message: 'network unavailable',
+        stack: 'Error: network unavailable\n' +
+          '    at Object.<anonymous> (/home/workdir/wepppy/wepppy/weppcloud/controllers_js/__tests__/project.test.js:363:44)\n' +
+          '    at Promise.finally.completed (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)\n' +
+          '    at new Promise (<anonymous>)\n' +
+          '    at callAsyncCircusFn (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)\n' +
+          '    at _callCircusTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)\n' +
+          '    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n' +
+          '    at _runTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:947:3)\n' +
+          '    at /home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:849:7\n' +
+          '    at _runTestsForDescribeBlock (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:862:11)\n' +
+          '    at _runTestsForDescribeBlock (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:857:11)\n' +
+          '    at run (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:761:3)\n' +
+          '    at runAndTransformResultsToJestFormat (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)\n' +
+          '    at jestAdapter (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/runner.js:101:19)\n' +
+          '    at runTestInternal (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:275:16)\n' +
+          '    at runTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:343:7)\n' +
+          '    at Object.worker (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:497:12)'
+      }
+
+      186 |                 }
+      187 |             } else {
+    > 188 |                 console.error(safeMessage, safeError);
+          |                         ^
+      189 |             }
+      190 |         } else {
+      191 |             console.error(safeMessage);
+
+      at notifyError (controllers_js/project.js:188:25)
+      at controllers_js/project.js:2059:21
+      at Object.<anonymous> (controllers_js/__tests__/project.test.js:365:24)
+
+    console.error
+      Error bootstrapping dependent module section {
+        name: 'Error',
+        message: 'roads bootstrap failure',
+        stack: 'Error: roads bootstrap failure\n' +
+          '    at Object.<anonymous> (/home/workdir/wepppy/wepppy/weppcloud/controllers_js/__tests__/project.test.js:895:19)\n' +
+          '    at /home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-mock/build/index.js:305:39\n' +
+          '    at Object.<anonymous> (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-mock/build/index.js:312:13)\n' +
+          '    at Object.mockConstructor [as bootstrap] (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-mock/build/index.js:102:19)\n' +
+          '    at bootstrapControllerSymbol (/home/workdir/wepppy/wepppy/weppcloud/controllers_js/project.js:923:28)\n' +
+          '    at roads (/home/workdir/wepppy/wepppy/weppcloud/controllers_js/project.js:865:17)\n' +
+          '    at bootstrapModController (/home/workdir/wepppy/wepppy/weppcloud/controllers_js/project.js:1223:17)\n' +
+          '    at /home/workdir/wepppy/wepppy/weppcloud/controllers_js/project.js:1693:33'
+      }
+
+      186 |                 }
+      187 |             } else {
+    > 188 |                 console.error(safeMessage, safeError);
+          |                         ^
+      189 |             }
+      190 |         } else {
+      191 |             console.error(safeMessage);
+
+      at notifyError (controllers_js/project.js:188:25)
+      at controllers_js/project.js:1695:33
+
+    console.error
+      Error bootstrapping module section {
+        name: 'Error',
+        message: 'bootstrap failure',
+        stack: 'Error: bootstrap failure\n' +
+          '    at Object.bootstrap (/home/workdir/wepppy/wepppy/weppcloud/controllers_js/__tests__/project.test.js:1040:27)\n' +
+          '    at bootstrapControllerSymbol (/home/workdir/wepppy/wepppy/weppcloud/controllers_js/project.js:923:28)\n' +
+          '    at geneva (/home/workdir/wepppy/wepppy/weppcloud/controllers_js/project.js:869:17)\n' +
+          '    at bootstrapModController (/home/workdir/wepppy/wepppy/weppcloud/controllers_js/project.js:1223:17)\n' +
+          '    at /home/workdir/wepppy/wepppy/weppcloud/controllers_js/project.js:1771:37\n' +
+          '    at Timeout.task [as _onTimeout] (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jsdom/lib/jsdom/browser/Window.js:579:19)\n' +
+          '    at listOnTimeout (node:internal/timers:605:17)\n' +
+          '    at processTimers (node:internal/timers:541:7)'
+      }
+
+      186 |                 }
+      187 |             } else {
+    > 188 |                 console.error(safeMessage, safeError);
+          |                         ^
+      189 |             }
+      190 |         } else {
+      191 |             console.error(safeMessage);
+
+      at notifyError (controllers_js/project.js:188:25)
+      at controllers_js/project.js:1777:37
+      at Timeout.task [as _onTimeout] (static-src/node_modules/jsdom/lib/jsdom/browser/Window.js:579:19)
+
+    console.error
+      Error updating module state {
+        name: 'Error',
+        message: 'network down',
+        stack: 'Error: network down\n' +
+          '    at Object.<anonymous> (/home/workdir/wepppy/wepppy/weppcloud/controllers_js/__tests__/project.test.js:1083:43)\n' +
+          '    at Promise.finally.completed (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)\n' +
+          '    at new Promise (<anonymous>)\n' +
+          '    at callAsyncCircusFn (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)\n' +
+          '    at _callCircusTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)\n' +
+          '    at _runTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:947:3)\n' +
+          '    at /home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:849:7\n' +
+          '    at _runTestsForDescribeBlock (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:862:11)\n' +
+          '    at _runTestsForDescribeBlock (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:857:11)\n' +
+          '    at run (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:761:3)\n' +
+          '    at runAndTransformResultsToJestFormat (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)\n' +
+          '    at jestAdapter (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/runner.js:101:19)\n' +
+          '    at runTestInternal (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:275:16)\n' +
+          '    at runTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:343:7)\n' +
+          '    at Object.worker (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:497:12)'
+      }
+
+      186 |                 }
+      187 |             } else {
+    > 188 |                 console.error(safeMessage, safeError);
+          |                         ^
+      189 |             }
+      190 |         } else {
+      191 |             console.error(safeMessage);
+
+      at notifyError (controllers_js/project.js:188:25)
+      at controllers_js/project.js:1881:17
+      at Object.<anonymous> (controllers_js/__tests__/project.test.js:1087:24)
+
+    console.error
+      Error updating module state {
+        name: 'Error',
+        message: 'network down',
+        stack: 'Error: network down\n    at set_mod',
+        status: 503,
+        statusText: 'Service Unavailable',
+        url: '/runs/run-123/config-a/tasks/set_mod',
+        detail: 'upstream timeout',
+        body: {
+          error: {
+            message: 'upstream timeout',
+            details: 'Traceback (most recent call last):\nRuntimeError: upstream timeout'
+          }
+        }
+      }
+
+      186 |                 }
+      187 |             } else {
+    > 188 |                 console.error(safeMessage, safeError);
+          |                         ^
+      189 |             }
+      190 |         } else {
+      191 |             console.error(safeMessage);
+
+      at notifyError (controllers_js/project.js:188:25)
+      at controllers_js/project.js:1881:17
+      at Object.<anonymous> (controllers_js/__tests__/project.test.js:1208:24)
+
+    console.error
+      Error updating module state {
+        name: 'Error',
+        message: 'network down',
+        stack: 'Error: network down\n' +
+          '    at Object.<anonymous> (/home/workdir/wepppy/wepppy/weppcloud/controllers_js/__tests__/project.test.js:1253:32)\n' +
+          '    at Promise.finally.completed (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)\n' +
+          '    at new Promise (<anonymous>)\n' +
+          '    at callAsyncCircusFn (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)\n' +
+          '    at _callCircusTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)\n' +
+          '    at _runTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:947:3)\n' +
+          '    at /home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:849:7\n' +
+          '    at _runTestsForDescribeBlock (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:862:11)\n' +
+          '    at _runTestsForDescribeBlock (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:857:11)\n' +
+          '    at run (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:761:3)\n' +
+          '    at runAndTransformResultsToJestFormat (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)\n' +
+          '    at jestAdapter (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/runner.js:101:19)\n' +
+          '    at runTestInternal (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:275:16)\n' +
+          '    at runTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:343:7)\n' +
+          '    at Object.worker (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:497:12)',
+        detail: 'authorization=[redacted]',
+        body: { error: { message: 'request failed', details: [Object] } }
+      }
+
+      186 |                 }
+      187 |             } else {
+    > 188 |                 console.error(safeMessage, safeError);
+          |                         ^
+      189 |             }
+      190 |         } else {
+      191 |             console.error(safeMessage);
+
+      at notifyError (controllers_js/project.js:188:25)
+      at controllers_js/project.js:1881:17
+      at Object.<anonymous> (controllers_js/__tests__/project.test.js:1268:9)
+
+    console.error
+      Error updating module state {
+        name: 'Error',
+        message: 'network down',
+        stack: 'Error: network down\n' +
+          '    at Object.<anonymous> (/home/workdir/wepppy/wepppy/weppcloud/controllers_js/__tests__/project.test.js:1293:32)\n' +
+          '    at Promise.finally.completed (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)\n' +
+          '    at new Promise (<anonymous>)\n' +
+          '    at callAsyncCircusFn (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)\n' +
+          '    at _callCircusTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)\n' +
+          '    at _runTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:947:3)\n' +
+          '    at /home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:849:7\n' +
+          '    at _runTestsForDescribeBlock (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:862:11)\n' +
+          '    at _runTestsForDescribeBlock (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:857:11)\n' +
+          '    at run (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:761:3)\n' +
+          '    at runAndTransformResultsToJestFormat (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)\n' +
+          '    at jestAdapter (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-circus/build/runner.js:101:19)\n' +
+          '    at runTestInternal (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:275:16)\n' +
+          '    at runTest (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:343:7)\n' +
+          '    at Object.worker (/home/workdir/wepppy/wepppy/weppcloud/static-src/node_modules/jest-runner/build/testWorker.js:497:12)',
+        status: 503,
+        statusText: 'Service Unavailable',
+        detail: {
+          message: 'transport wrapper',
+          details: [
+            'Traceback (most recent call last):',
+            'RuntimeError: nested transport detail'
+          ]
+        },
+        body: { error: { message: 'upstream timeout', details: [Array] } }
+      }
+
+      186 |                 }
+      187 |             } else {
+    > 188 |                 console.error(safeMessage, safeError);
+          |                         ^
+      189 |             }
+      190 |         } else {
+      191 |             console.error(safeMessage);
+
+      at notifyError (controllers_js/project.js:188:25)
+      at controllers_js/project.js:1881:17
+      at Object.<anonymous> (controllers_js/__tests__/project.test.js:1316:9)
+
+    console.error
+      Error rendering module section {
+        status: 500,
+        statusText: 'Internal Server Error',
+        body: {
+          error: {
+            message: 'Module fragment unavailable',
+            details: 'Traceback (most recent call last):\n' +
+              'RuntimeError: render failed\n' +
+              'cookie=[redacted]'
+          }
+        }
+      }
+
+      186 |                 }
+      187 |             } else {
+    > 188 |                 console.error(safeMessage, safeError);
+          |                         ^
+      189 |             }
+      190 |         } else {
+      191 |             console.error(safeMessage);
+
+      at notifyError (controllers_js/project.js:188:25)
+      at controllers_js/project.js:1846:25
+      at Object.<anonymous> (controllers_js/__tests__/project.test.js:1362:24)
+
+(node:184460) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../controllers_js/__tests__/map_gl.test.js (5.498 s)
+  ● Console
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 10).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 10).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: USGS Gage Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: SNOTEL Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: USGS Gage Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: SNOTEL Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 10).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 10).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: USGS Gage Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: SNOTEL Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: USGS Gage Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: SNOTEL Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: USGS Gage Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: SNOTEL Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: USGS Gage Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: SNOTEL Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: USGS Gage Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: SNOTEL Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: USGS Gage Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: SNOTEL Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: USGS Gage Locations requires zoom 9+ (current 0).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: SNOTEL Locations requires zoom 9+ (current 0).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 0).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: USGS Gage Locations requires zoom 9+ (current 0).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: SNOTEL Locations requires zoom 9+ (current 0).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 0).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 10).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 10).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 10).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 10).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 10).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 10).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.warn
+      Map GL: failed to refresh SBS map Error: No SBS map has been specified
+          at /home/workdir/wepppy/wepppy/weppcloud/controllers_js/map_gl.js:2093:37
+          at processTicksAndRejections (node:internal/process/task_queues:103:5)
+          at Object.<anonymous> (/home/workdir/wepppy/wepppy/weppcloud/controllers_js/__tests__/map_gl.test.js:630:9) {
+        payload: { error: { message: 'No SBS map has been specified' } }
+      }
+
+      1453 |                 }).catch(function (error) {
+      1454 |                     clearSbsLegend();
+    > 1455 |                     console.warn("Map GL: failed to refresh SBS map", error);
+           |                             ^
+      1456 |                     if (options && options.propagateErrors) { throw error; }
+      1457 |                 });
+      1458 |             },
+
+      at controllers_js/map_gl.js:1455:29
+      at Object.<anonymous> (controllers_js/__tests__/map_gl.test.js:630:9)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: USGS Gage Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: USGS Gage Locations requires zoom 9+ (current 8).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: SNOTEL Locations requires zoom 9+ (current 8).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 8).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: USGS Gage Locations requires zoom 9+ (current 8).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: SNOTEL Locations requires zoom 9+ (current 8).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 8).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: USGS Gage Locations requires zoom 9+ (current 8).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 10).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 10).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 10).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 10).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: USGS Gage Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: SNOTEL Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: USGS Gage Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: SNOTEL Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: USGS Gage Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: SNOTEL Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: USGS Gage Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: SNOTEL Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: USGS Gage Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: SNOTEL Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: USGS Gage Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: SNOTEL Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: USGS Gage Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: SNOTEL Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: USGS Gage Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: SNOTEL Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: USGS Gage Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: SNOTEL Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: USGS Gage Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: SNOTEL Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: USGS Gage Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: SNOTEL Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: USGS Gage Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: SNOTEL Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: USGS Gage Locations requires zoom 9+ (current 7).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: SNOTEL Locations requires zoom 9+ (current 7).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 7).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: USGS Gage Locations requires zoom 9+ (current 7).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: SNOTEL Locations requires zoom 9+ (current 7).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 7).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: USGS Gage Locations requires zoom 9+ (current 7).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: SNOTEL Locations requires zoom 9+ (current 7).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 7).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: USGS Gage Locations requires zoom 9+ (current 7).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: SNOTEL Locations requires zoom 9+ (current 7).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 7).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: USGS Gage Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: SNOTEL Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: USGS Gage Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: SNOTEL Locations requires zoom 9+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+          at Array.forEach (<anonymous>)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 10).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+    console.info
+      Map GL: NHD Flowlines requires zoom 11+ (current 6).
+
+      at requireMinZoom (controllers_js/map_gl.js:2240:25)
+
+(node:184459) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../controllers_js/__tests__/features_export.test.js (9.645 s)
+
+Test Suites: 110 passed, 110 total
+Tests:       852 passed, 852 total
+Snapshots:   0 total
+Time:        12.383 s
+Ran all test suites.

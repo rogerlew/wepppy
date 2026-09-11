@@ -14,10 +14,12 @@ coverage summaries exclude masked cells and four-class interchange exports
 write them as value `255`. If every in-bound cell is masked, all four coverage
 fractions are zero.
 
-Masked four-class exports temporarily use the Python path until the companion
-Rust NoData correction is included in a WEPPpy extension release. This
-mixed-version guard preserves output correctness; unmasked exports continue to
-use Rust acceleration.
+All raster summaries, default palette interpretation, reclassification and
+four-class exports require `wepppyo3.sbs_map`. Missing or failing native operations
+raise errors; there is no Python raster fallback. Install the native exporter
+with the source-NoData correction before updating WEPPpy. See
+[the raster contract](../../../../docs/schemas/sbs-raster-contract.md) and
+[ADR-0065](../../../../docs/adrs/ADR-0065-sbs-native-required.md).
 
 > Classifies Soil Burn Severity (SBS) rasters into canonical WEPP burn classes, whether the source raster uses numeric breaks or a color table.
 
@@ -86,9 +88,9 @@ Use this section when preparing an SBS file for upload to wepp.cloud, especially
 - Python bindings (`from osgeo import gdal`)
 - CLI tools used by export helpers (`gdalwarp`, `gdaldem`, `gdal_translate`)
 
-Optional acceleration:
-- Rust helpers from `wepppyo3.sbs_map` are used when available.
-- Python logic is the fallback and remains the behavior baseline.
+Required native processing:
+- Rust helpers from `wepppyo3.sbs_map` perform raster classification and export.
+- Python retains orchestration, scalar helpers and explicit custom palette interpretation.
 
 ## Color Table And Palette Contracts
 
@@ -191,7 +193,7 @@ Use this checklist when implementing or reviewing SBS presentation:
 
 ## Developer Notes
 
-- Rust acceleration is used when available (`wepppyo3.sbs_map`); Python fallback remains authoritative.
+- Native processing is required (`wepppyo3.sbs_map`); failures propagate to the upload boundary.
 - `_SBS_COLOR_MAP_PATH` is passed into Rust helpers so Python and Rust share the same lookup contract.
 - When updating color lookup behavior:
   - Update `sbs_map.py` fallback defaults.

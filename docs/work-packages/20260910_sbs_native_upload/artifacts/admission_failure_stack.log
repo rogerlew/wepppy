@@ -1,0 +1,30 @@
+wepppy-rq-engine  | INFO:     172.28.0.26:46992 - "POST /api/runs/lawless-challah/config/tasks/upload-sbs/ HTTP/1.1" 200 OK
+wepppy-rq-engine  | Run mutation admission failed for lawless-challah
+wepppy-rq-engine  | Traceback (most recent call last):
+wepppy-rq-engine  |   File "/workdir/wepppy/wepppy/rq/submission_recovery.py", line 111, in checkpoint
+wepppy-rq-engine  |     renewed = all(
+wepppy-rq-engine  |               ^^^^
+wepppy-rq-engine  |   File "/workdir/wepppy/wepppy/rq/submission_recovery.py", line 112, in <genexpr>
+wepppy-rq-engine  |     lock.extend(120, replace_ttl=True) for lock in self._locks
+wepppy-rq-engine  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wepppy-rq-engine  |   File "/opt/venv/lib/python3.12/site-packages/redis/lock.py", line 299, in extend
+wepppy-rq-engine  |     raise LockError("Cannot extend an unlocked lock", lock_name=self.name)
+wepppy-rq-engine  | redis.exceptions.LockError: Cannot extend an unlocked lock
+wepppy-rq-engine  |
+wepppy-rq-engine  | The above exception was the direct cause of the following exception:
+wepppy-rq-engine  |
+wepppy-rq-engine  | Traceback (most recent call last):
+wepppy-rq-engine  |   File "/workdir/wepppy/wepppy/microservices/rq_engine/__init__.py", line 106, in run_mutation_lifecycle_middleware
+wepppy-rq-engine  |     with rq_submission_lock(
+wepppy-rq-engine  |          ^^^^^^^^^^^^^^^^^^^
+wepppy-rq-engine  |   File "/usr/local/lib/python3.12/contextlib.py", line 137, in __enter__
+wepppy-rq-engine  |     return next(self.gen)
+wepppy-rq-engine  |            ^^^^^^^^^^^^^^
+wepppy-rq-engine  |   File "/workdir/wepppy/wepppy/rq/submission_recovery.py", line 198, in rq_submission_lock
+wepppy-rq-engine  |     parent_lease.checkpoint()
+wepppy-rq-engine  |   File "/workdir/wepppy/wepppy/rq/submission_recovery.py", line 115, in checkpoint
+wepppy-rq-engine  |     raise RqSubmissionConflict("Submission lock expired.") from exc
+wepppy-rq-engine  | wepppy.rq.submission_recovery.RqSubmissionConflict: Submission lock expired.
+wepppy-rq-engine  | INFO:     172.28.0.26:46992 - "POST /api/runs/lawless-challah/config/tasks/upload-sbs/ HTTP/1.1" 409 Conflict
+wepppy-rq-engine  | INFO:     172.28.0.26:49942 - "GET /api/jobstatus/46731d4f-de7a-43cd-8a14-1515766a78b2?_=1789087705623 HTTP/1.1" 200 OK
+wepppy-rq-engine  | INFO:     172.28.0.26:49942 - "GET /api/jobstatus/46731d4f-de7a-43cd-8a14-1515766a78b2?_=1789087714282 HTTP/1.1" 200 OK

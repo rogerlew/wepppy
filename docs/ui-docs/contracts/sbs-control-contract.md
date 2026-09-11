@@ -1,6 +1,6 @@
 # Soil Burn Severity upload result and error contract
 
-Implementation pending. Applies to the shared Disturbed/BAER SBS control for
+Implemented by `sbs_error.js`, Disturbed and BAER. Applies to the shared Disturbed/BAER SBS control for
 upload, result-summary fetch and their failure paths. Shared controller, CSRF,
 run-access and RQ response contracts remain authoritative.
 
@@ -29,7 +29,10 @@ run-access and RQ response contracts remain authoritative.
   Content-Type; JSON error messages containing markup remain escaped text.
 - Upload success updates accepted filename, classification summary and map.
   Follow-up summary/map requests must settle before the browser smoke declares
-  success. Subsequent success clears stale error details.
+  success. Summary/map errors are tracked separately: a successful sibling
+  request cannot hide an unresolved error. Successful retry clears that
+  request’s error; a new upload clears the prior attempt’s errors. Legacy
+  HTTP200 JSON error envelopes are failures, never successful HTML summaries.
 - Timeout reports failure without claiming that the backend stopped or that a
   map was not saved. Reload/state queries remain authoritative.
 

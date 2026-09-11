@@ -1,0 +1,2 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /tmp && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/stubtest wepppy.rq.submission_recovery
+Success: no issues found in 1 module

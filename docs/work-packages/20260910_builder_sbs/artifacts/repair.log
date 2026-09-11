@@ -1,0 +1,22 @@
+INFO:wctl2:docker compose exec -T weppcloud python -
+{
+  "runid": "fair-division",
+  "controllers": [
+    "Ron",
+    "Landuse",
+    "Soils",
+    "Watershed",
+    "Climate",
+    "Wepp",
+    "Unitizer",
+    "Observed",
+    "Disturbed"
+  ],
+  "mapping": "disturbed",
+  "has_sbs": false,
+  "config_digests_unchanged": {
+    "config.cfg": "7072965be53a9504f989212684e35d0e2be1ee26fc820e3f0ee97770d001dc44",
+    "config-manifest.json": "bf7e98c3b30639989b803a96801e477a6e0e3eff3eb367c05d114076b9131d67"
+  },
+  "backup": "/tmp/builder-sbs-fair-division-before"
+}

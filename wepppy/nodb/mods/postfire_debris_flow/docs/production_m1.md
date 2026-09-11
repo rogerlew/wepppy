@@ -1,29 +1,29 @@
 # Production M1 upload and execution workflow
 
-Status: proposed 2026-09-10 UTC; no runtime implementation or deployment.
+Status: accepted 2026-09-10; implemented and validated on the development stack.
 Scope explicitly requested: NoDb state, prerequisite/freshness checks, dNBR
 upload/publication, RQ execution, and a minimal control to upload and run M1.
-Reports and interactive dashboard are deferred. Canonical UI proposal:
+Reports and interactive dashboard are deferred. Canonical UI contract:
 [Post-fire debris-flow control](../../../../../docs/ui-docs/contracts/postfire-debris-flow-control-contract.md).
 
 ## Authority and acceptance boundary
 
 Reuse existing predictor, rainfall, dNBR, slope/SBS and scalar contracts. Preserve
 legacy debris_flow.nodb and outputs. The new facade is PostfireDebrisFlow,
-proposed file postfire_debris_flow.nodb. Existing project watershed/outlet is
+file postfire_debris_flow.nodb. Existing project watershed/outlet is
 exclusive assessment scope. Both upload and run enforce authorization and CSRF
 at the proper session/token boundary through existing contracts.
 
 Complete the contract-first checkpoint before any coupled runtime edits:
 explicit operator approval of UI/data/state matrix, two independent read-only
 reviews, all affected canonical amendments, and a standalone ancestor commit.
-This draft and package are not that checkpoint. Security impact is high.
+Checkpoints `5c0a172ee` and `595816476` precede runtime implementation.
+Security impact is high.
 
 ## Prerequisites and source ownership
 
-M1 eligibility is WBT plus canonical effective CONUS locale. Resolve legacy us
-and cross-boundary behavior through project-config authority before freezing
-payloads; never infer geography from template/config names. A 10 m project is
+M1 eligibility is WBT plus canonical effective `continental-us` locale.
+Project-config authority resolves legacy `us` and cross-boundary behavior; never infer geography from template/config names. A 10 m project is
 the intended operator smoke test, not a new M1 10 m restriction. Respect accepted
 area warnings outside inclusive 0.2–8 km² without rejecting on area alone.
 
@@ -106,7 +106,7 @@ than exposing its trusted-path assumptions to browser input. Specify overall
 request cap as well as per-file cap; use SBS precedent without importing its
 categorical-value limits. Do not write final inputs into a shared public path.
 
-Proposed upload route stages validated transport, enqueues normalization and
+The upload route stages validated transport, enqueues normalization and
 returns canonical job identity. Queued worker uses normalize_dnbr with current
 project grid/domain, verifies source hashes and publishes only on complete
 success with unchanged grid and current attempt. Failed replacement preserves
@@ -116,7 +116,7 @@ must be an explicit documented action, not an unnoticed source change.
 
 ## RQ model execution and freshness
 
-Proposed one model job prepares an immutable snapshot, invokes the completed
+One model job prepares an immutable snapshot, invokes the completed
 build_m1_predictors and build_m1_results sequentially, then finalizes the active
 run pointer. Use existing rq-engine submission/auth/job/status conventions;
 freeze retry/timeout/idempotency and response states before code. Do not invent
@@ -145,11 +145,10 @@ at checkpoint, including source deletion and legacy missing provenance.
 
 ## UI parameters and output boundary
 
-Proposed first-control defaults: frequency source project climate, all 15/30/60
+Accepted first-control defaults: frequency source project climate, all 15/30/60
 minute event/design durations, 1/2/5/10-year design intervals and 50% inverse
-threshold. These are proposed UI/workflow defaults requiring explicit approval
-and ADR; backend contracts remain explicit-argument APIs. No M3 selector or
-algorithm/coverage knobs. Dates/encoding are upload metadata, not model tuning.
+threshold. These UI/workflow defaults are accepted in ADR-0063; backend contracts remain explicit-argument APIs. No M3 selector or
+algorithm/coverage knobs. Encoding describes uploaded values, not model tuning; there are no date fields.
 
 Show status, upload coverage, actionable errors and completion/download access
 only. Generated event/design/inverse files exist and can be inspected by the
@@ -177,11 +176,12 @@ this scaffold. Operator's later 10 m project is the final upload/run smoke case.
 
 This section supersedes preceding provisional implementation details and pending
 choice language. Its exact decisions are normative for the checkpoint; the
-earlier sections describe scope/rationale. Runtime conformance remains pending.
+earlier sections describe scope/rationale. Validation is recorded in the production package.
 
 The owner's instruction to execute this package authorizes implementation of the
 reviewed UI and the following bounded engineering choices, including its required
-standalone contract commit. Conformance is pending. No deployment or push is implied.
+standalone contract commits. Development conformance is recorded in the package;
+installation on other hosts remains a separate action.
 
 ### Transport and admission
 
@@ -261,7 +261,7 @@ compatible web/worker permissions and validate them under actual identities.
 No automatic deletion in this increment: reject expired retry candidates; cleanup
 is an operator task limited to verified unreferenced attempt directories.
 
-RunCapabilityAuthority.locale_profile must resolve to `conus`; missing/invalid or
+RunCapabilityAuthority.locale_profile must resolve to `continental-us`; missing/invalid or
 other locale authority is unavailable. Existing authority handles legacy `us`.
 No new rectangular/geographic cutoff is inferred. Western US guidance remains
 visible; scientific area warnings do not block execution.
@@ -295,13 +295,14 @@ when checklist booleans remain the same; ensure the stream emits these events.
 Publish a domain revision notification on upload/run transitions. Reconcile on
 socket reconnect and expose connection state using the existing preflight status;
 do not create another socket or an expensive raster scan in the Go service.
-Live state inspects owner selections and file signatures, while workers perform
+Controllers initialized after socket connection read `window.preflightConnected`
+before listening for subsequent connection events. Live state inspects owner selections and file signatures, while workers perform
 full validation. A prerequisite row means input available for model validation,
 not a guarantee that every watershed cell has valid scientific support.
 
 Use the exact control fields/table/copy in the UI contract. Register
 `postfire_debris_flow` as a preview feature, user role, WBT, requires disturbed,
-enable dependency rusle (which already enables polaris); enabling features never
+enable dependencies polaris and rusle (the registry enables direct dependencies only); enabling features never
 builds owner data. Render eligible absent-controller state. Feature metadata
 cannot define locale; run capability authority controls locale availability.
 
@@ -375,3 +376,96 @@ publication boundary, eliminating a two-store atomicity gap.
 
 Open each validated regular file once, compare its accepted signature using that
 open handle and stream the same handle; do not reopen by pathname after validation.
+
+### Owner completion and recovery conformance
+
+File presence alone never establishes readiness. Require the existing RedisPrep
+completion receipts for watershed, soils, SBS, climate and POLARIS. Cleared owner
+receipts make their prerequisite unavailable even when old files remain. K uses
+its own `manifest.json.k` publication (mean POLARIS nomograph, expected artifact),
+not full RUSLE completion. Its required near-surface source layers must exist and
+must not be newer than that publication; a newer POLARIS completion also requires
+K preparation again. Legacy K without sufficient publication provenance is shown
+as needing preparation in RUSLE. This reuses existing owner provenance without
+changing K values or the RUSLE output schema.
+
+An attempt persists its exact allocated canonical RQ job ID before any enqueue
+receipt or queue write. Reconciliation uses that ID, function, queue and run/attempt
+arguments, never a previous attempt's Redis marker. Reconcile under the existing
+submission lease and re-read durable state before projecting a terminal failure.
+No enqueue response is required to recover a successfully queued operation.
+
+Uploaded source and companion hashes are recorded while streaming, checked across
+Auto inspection and normalization, and retained through accepted publication.
+Source companions participate in accepted-artifact freshness. Parser and download
+lifetimes close files on cancellation/disconnect, including before response headers.
+Admission rechecks config/read-only state under the lease before staging or NoDb
+mutation. Rejected model requests do not change rainfall selection.
+
+A failed candidate's filename identifies the map a scale correction will retry;
+the accepted summary remains visible separately. Empty upload controls and cached
+run readiness after a state-fetch or preflight connection failure are disabled.
+
+
+### Publication verification and reuse
+
+Climate readiness also requires the active CLI file and an event parquet no older
+than that CLI. This rejects an old event table retained after a failed export,
+even if the overall climate build has a completion receipt. Soils/climate receipt
+ordering follows the shared preflight contract relative to watershed abstraction
+and landuse (or rangeland for soils). Upload requires only the delineated grid;
+model execution requires completed watershed abstraction.
+
+Use stat identities for live readiness and locked finalizers. Retain full hashes
+for accepted dNBR/results/predictors and verify them at admission, execution,
+reuse and opened-file download. Engine/tool digests are cached by device, inode,
+size and nanosecond modification/change timestamps. Managed owner invalidations
+also emit preflight updates; unmanaged file edits are conclusively checked at the
+execution boundaries rather than by rereading every raster on every UI event.
+
+Rainfall-only reruns may reuse the latest published predictor bundle only after
+verifying its exact recorded inventory, all predictor-source hashes, tool hash
+and engine identity. Copy only that inventory; extra files or links are never
+followed or published. Verify predictor and result signatures before final
+publication. Model files retain canonical units; UI numeric range formatting does
+not change stored values.
+
+Completed results include an `area_warning` boolean propagated directly from the
+accepted predictor's `area_outside_study_range` warning. Display it inline with
+the 0.2–8 km² study range through Unitizer, without disabling execution. General
+Western US intended-use guidance is visible before upload.
+
+State reconciliation preserves the entire atomic worker publication revision when
+an attempt completes during a read; it never combines a completed attempt with
+previously accepted inputs/results. This keeps completion and download readiness
+consistent during concurrent polling.
+
+## Operator installation and acceptance
+
+The current package proves the development Compose workflow only. For another
+host, inspect its installed `wctl` preset and obtain the canonical deployment
+plan with `scripts/deploy-production.sh --print-plan --no-flush-rq-db`.
+This change spans web, rq-engine, workers and preflight2; a targeted web-only
+restart does not install the complete workflow. Use that entry point and its
+existing queue cutover protections; do not create a parallel rollout or flush RQ.
+
+Follow [WBT release cutover](../../../../../docs/dev-notes/weppcloud-wbt-release-cutover.md)
+and its linked owned runbook: locked release build, atomic installation into
+`/workdir/weppcloud-wbt/WBT/whitebox_tools`, matching wrapper surfaces, recorded
+source/lock/previous/built/installed hashes. Verify `StaleySlopeSbs` discovery and
+a disposable execution under every relevant worker's actual identity and mounts.
+Keep the previous executable and application deployment revision for rollback.
+
+Before enabling wider use, exercise the browser's normal upload, queued
+normalization, M1 run, authenticated download and reload using real run data.
+Check both display-unit choices, failed replacement preservation and live
+prerequisite changes. Record exact attempt/job IDs and generated artifacts;
+a wrapper import or successful upload response is insufficient. Block rollout
+when the worker cannot execute the tool or web cannot read its accepted outputs.
+
+If cutover fails, use the deployment entry point's existing recovery procedure
+and restore the recorded matching application/WBT revision. Stop admitting new
+postfire jobs while restoring compatibility; preserve accepted NoDb/artifact data
+and exact job receipts. Do not delete state or substitute an old completed job.
+After restoration, repeat actual runtime discovery and the disposable workflow
+before resuming. No legacy debris-flow migration is required.

@@ -7,6 +7,12 @@
 
 ## Purpose
 
+Completed: [Native SBS upload](docs/work-packages/20260910_sbs_native_upload/package.md)
+— remove Python raster fallback; render SBS errors in Details and restore summaries.
+
+Completed: [Builder Disturbed support](docs/work-packages/20260910_builder_sbs/package.md)
+— standard Disturbed setup, SBS upload and explicit fair-division repair; focused validation only.
+
 Completed: [DEVAL execution identity](docs/work-packages/20260910_deval_execution_identity/package.md)
 — render as the worker owning run data; owner-only and regenerated-input canaries
 pass on both production hosts, including queued execution and report readback;
@@ -130,18 +136,6 @@ Feedback mechanisms:
 
 ## 📋 Backlog
 
-### Production Staley M1 Upload and Run
-
-**Scoped**: 2026-09-10 07:23 UTC. Scaffolded; not executing.
-
-**Link**: [Package](docs/work-packages/20260910_staley_m1_production/package.md)
-
-**Scope**: NoDb state, prerequisites/freshness, dNBR upload/publication, RQ
-execution and minimal land-manager/hydrologist-facing upload/run control.
-Reports and dashboard deferred; user's planned 10 m project is a later smoke test.
-
-**Next**: Review exact UI/defaults/state matrix, obtain independent contract
-reviews and standalone approved ancestor before runtime implementation.
 
 ### Seamless WEPPcloud Session Cookie Namespace Migration
 
@@ -1328,6 +1322,18 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### Production Staley M1 Upload and Run (2026-09-10)
+
+**Status**: Complete; runtime changes uncommitted. [Package](docs/work-packages/20260910_staley_m1_production/package.md).
+
+Implemented NoDb state, live prerequisites/freshness, dNBR Auto upload/correction,
+RQ execution and minimal unitized control. Actual development browser/worker
+acceptance and independent correctness/security reviews passed. Full Python:
+8,312 passed, 77 skipped; frontend 841, production 14, required gates passed.
+Reports, dashboard, production M3, other-host deployment and the owner's real
+10 m burned-basin acceptance remain separate.
+
 
 ### Staley Rainfall Adapters and M1 Results
 

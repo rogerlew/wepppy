@@ -392,9 +392,9 @@ def test_registry_addition_does_not_enable_or_apply_a_mod() -> None:
     active = resolve_builder_config(_selections(mods=("test-mod",)), registry=registry)
 
     assert "test" not in dormant.config
-    assert dormant.config["nodb"]["mods"] == []
+    assert dormant.config["nodb"]["mods"] == ["disturbed"]
     assert active.config["test"]["enabled"] is True
-    assert active.config["nodb"]["mods"] == ["test-mod"]
+    assert active.config["nodb"]["mods"] == ["disturbed", "test-mod"]
 
 
 def test_resolution_is_independent_from_caller_base_mutation() -> None:

@@ -141,6 +141,36 @@ _V2_RELATION_SECTIONS = (
 )
 
 
+class _ObservedCapabilityConfig:
+    """One validated NoDb parser observation for one authority resolution."""
+
+    def __init__(self, config):
+        self._configparser = config._configparser
+        self.project_config_status = config.project_config_status
+
+    def config_get_raw(self, section, option, default=None):
+        return self._configparser.get(section, option, fallback=default)
+
+    def config_get_list(self, section, option, default=None):
+        value = self.config_get_raw(section, option, default)
+        if isinstance(value, str):
+            value = ast.literal_eval(value)
+        return [] if value is None else value
+
+
+def _observe_nodb_config(config: CapabilityConfig) -> CapabilityConfig:
+    # No cache survives this operation. The next call revalidates config/manifest
+    # through the owner, including pending amendment recovery and schema checks.
+    from wepppy.nodb.base import NoDbBase
+    if isinstance(config, NoDbBase) and all(
+        getattr(getattr(config, name), '__func__', None) is getattr(NoDbBase, name)
+        for name in ('config_get_raw', 'config_get_list')
+    ):
+        return _ObservedCapabilityConfig(config)
+    # Custom getter implementations remain authoritative for their configuration.
+    return config
+
+
 def _scalar(config: CapabilityConfig, section: str, option: str, default: object = None) -> object:
     raw = config.config_get_raw(section, option, default)
     if not isinstance(raw, str):
@@ -271,6 +301,8 @@ def _defaults(
 def capability_authority(config: CapabilityConfig) -> CapabilityGraph | None:
     """Return validated schema-v2/v3 authority, or ``None`` for legacy/v1."""
 
+    config = _observe_nodb_config(config)
+
     version = _schema_version(config)
     if version is None:
         return None
@@ -382,6 +414,8 @@ def resolve_run_capability_authority(
     registry: Registry | None = None,
 ) -> RunCapabilityAuthority:
     """Compose stored authority with effective-config legacy locale authority."""
+
+    config = _observe_nodb_config(config)
 
     flattened = _scalar(config, "config", "flattened", False)
     if isinstance(flattened, str) and flattened.casefold() in {"true", "false"}:

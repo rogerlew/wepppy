@@ -305,6 +305,16 @@
   },
   {
     "depends_on": [],
+    "enqueue_target": "upload_dnbr_rq if kind == 'upload_attempt' else run_m1_rq",
+    "job_meta_stage": null,
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "enqueue",
+    "source_lineno": 138,
+    "source_module": "wepppy/microservices/rq_engine/postfire_debris_flow_routes.py"
+  },
+  {
+    "depends_on": [],
     "enqueue_target": "<unknown>",
     "job_meta_stage": null,
     "notes": [

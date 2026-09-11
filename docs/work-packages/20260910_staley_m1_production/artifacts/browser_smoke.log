@@ -1,0 +1,21 @@
+SUBMITTED upload ed21b989-1f35-4451-84a7-8fd1cc159e66 6f338098519e4af1b2389fb85c0171a5
+ATTEMPT upload ed21b989-1f35-4451-84a7-8fd1cc159e66 complete
+UPLOAD_COMPLETE ed21b989-1f35-4451-84a7-8fd1cc159e66
+SUBMITTED run 4c1d6089-d83f-49fe-a020-8f0f65fb0fc0 48f85fb8348b41da83fbf32f55e5be07
+ATTEMPT run 4c1d6089-d83f-49fe-a020-8f0f65fb0fc0 complete
+COMPLETION_STATE {"schema_version":1,"eligible":true,"readonly":false,"unavailable_reason":null,"required":[{"key":"watershed","ready":true,"reason":null,"message":"","control":"#subcatchments-delineation"},{"key":"soils","ready":true,"reason":null,"message":"","control":"#soils"},{"key":"sbs","ready":true,"reason":null,"message":"","control":"#disturbed-sbs"},{"key":"k","ready":true,"reason":null,"message":"","control":"#rusle"},{"key":"climate","ready":true,"reason":null,"message":"","control":"#climate"},{"key":"dnbr","ready":true,"reason":null,"message":"","control":"#postfire-debris-flow"}],"noaa_available":false,"frequency_source":"cli","upload_ready":true,"run_ready":true,"upload":{"id":"6f338098519e4af1b2389fb85c0171a5","job_id":"ed21b989-1f35-4451-84a7-8fd1cc159e66","phase":"complete","created_at":"2026-09-10T22:27:59.441547+00:00","error":null,"retryable":true,"filename":"smoke-dnbr.tif"},"run":{"id":"48f85fb8348b41da83fbf32f55e5be07","job_id":"4c1d6089-d83f-49fe-a020-8f0f65fb0fc0","phase":"complete","created_at":"2026-09-10T22:28:07.600289+00:00","error":null,"retryable":true,"filename":null},"dnbr":{"id":"6f338098519e4af1b2389fb85c0171a5","filename":"smoke-dnbr.tif","format":"GTiff","dtype":"float32","cell_size_m":[10,10],"coverage_fraction":1,"source_range":[-200,900],"prepared_range":[-0.11538461595773697,0.8153846263885498],"scale_mode":"auto","scale_factor":0.001,"add_offset":0,"scale_method":"distribution","completed_at":"2026-09-10T22:28:05.576014+00:00","current":true},"results":{"id":"48f85fb8348b41da83fbf32f55e5be07","completed_at":"2026-09-10T22:28:15.156568+00:00","partial":true,"area_warning":true,"current":true,"files":[{"name":"events.parquet","url":"/rq-engine/api/runs/pfdf-smoke-d9fc3c69/disturbed9002_wbt/postfire-debris-flow/files/48f85fb8348b41da83fbf32f55e5be07/events.parquet"},{"name":"design.parquet","url":"/rq-engine/api/runs/pfdf-smoke-d9fc3c69/disturbed9002_wbt/postfire-debris-flow/files/48f85fb8348b41da83fbf32f55e5be07/design.parquet"},{"name":"inverse.parquet","url":"/rq-engine/api/runs/pfdf-smoke-d9fc3c69/disturbed9002_wbt/postfire-debris-flow/files/48f85fb8348b41da83fbf32f55e5be07/inverse.parquet"},{"name":"manifest.json","url":"/rq-engine/api/runs/pfdf-smoke-d9fc3c69/disturbed9002_wbt/postfire-debris-flow/files/48f85fb8348b41da83fbf32f55e5be07/manifest.json"}]},"freshness":"current"}
+MODEL_COMPLETE 4c1d6089-d83f-49fe-a020-8f0f65fb0fc0 partial=true
+DOWNLOAD events.parquet 129050
+RELOAD_PRESERVED
+SI_10_M
+ENGLISH_33_FT
+SUBMITTED upload 6da726eb-5a67-403f-b9d1-cc16c7ace236 7fca8fade07d4057b0aa898627f662f7
+ATTEMPT upload 6da726eb-5a67-403f-b9d1-cc16c7ace236 needs_scale
+AMBIGUOUS_PRESERVED_ACCEPTED
+SUBMITTED upload 8acb2ae1-7335-46a6-9209-bf2004b4342e ae944d973922402f8826f05de20a8a33
+ATTEMPT upload 8acb2ae1-7335-46a6-9209-bf2004b4342e complete
+CORRECTION_WITHOUT_REUPLOAD
+INFO:wctl2:docker compose exec -T weppcloud python -
+LIVE_INVALIDATION
+INFO:wctl2:docker compose exec -T weppcloud python -
+LIVE_RECOVERY

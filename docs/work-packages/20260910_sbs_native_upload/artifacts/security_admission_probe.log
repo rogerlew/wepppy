@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "real_redis": true,
+  "real_flock": true,
+  "copied_closed_context_reproduced": true,
+  "fresh_requests_reacquired_twice": true,
+  "active_owner_rejected": true,
+  "nested_lost_parent_rejected": true,
+  "file_fence_after_redis_loss_rejected": true,
+  "cleanup_and_recovery_passed": true,
+  "submission_recovery_sha256": "a40318bbcbe18f28c7f845f1fc18f298b6acb3769496df206f45d26ef44b93ba"
+}

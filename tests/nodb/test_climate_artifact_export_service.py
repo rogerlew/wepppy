@@ -300,6 +300,7 @@ def test_download_noaa_atlas14_intensity_returns_path_on_success(
 
     climate = SimpleNamespace(
         cligen_db="ghcn_2015",
+        wd=str(tmp_path),
         cli_dir=str(tmp_path),
         logger=logging.getLogger("tests.nodb.climate.artifacts.atlas.success"),
         watershed_instance=SimpleNamespace(centroid=(-116.2, 43.6)),
@@ -337,6 +338,7 @@ def test_download_noaa_atlas14_intensity_transient_failure_then_success(
 
     climate = SimpleNamespace(
         cligen_db="legacy",
+        wd=str(tmp_path),
         cli_dir=str(tmp_path),
         logger=logging.getLogger("tests.nodb.climate.artifacts.atlas.transient"),
         watershed_instance=SimpleNamespace(centroid=(-116.2, 43.6)),
@@ -370,6 +372,7 @@ def test_download_noaa_atlas14_intensity_retry_exhaustion_returns_none(
 
     climate = SimpleNamespace(
         cligen_db="legacy",
+        wd=str(tmp_path),
         cli_dir=str(tmp_path),
         logger=logging.getLogger("tests.nodb.climate.artifacts.atlas.exhausted"),
         watershed_instance=SimpleNamespace(centroid=(-116.2, 43.6)),
@@ -399,6 +402,7 @@ def test_download_noaa_atlas14_intensity_no_coverage_is_non_retryable(
 
     climate = SimpleNamespace(
         cligen_db="legacy",
+        wd=str(tmp_path),
         cli_dir=str(tmp_path),
         logger=logging.getLogger("tests.nodb.climate.artifacts.atlas.no_coverage"),
         watershed_instance=SimpleNamespace(centroid=(-116.2, 43.6)),
@@ -437,6 +441,7 @@ def test_download_noaa_atlas14_intensity_applies_timeout_cap_and_attempt_env(
 
     climate = SimpleNamespace(
         cligen_db="legacy",
+        wd=str(tmp_path),
         cli_dir=str(tmp_path),
         logger=logging.getLogger("tests.nodb.climate.artifacts.atlas.env_override"),
         watershed_instance=SimpleNamespace(centroid=(-116.2, 43.6)),
@@ -476,6 +481,7 @@ def test_download_noaa_atlas14_intensity_invalid_env_uses_defaults(
 
     climate = SimpleNamespace(
         cligen_db="legacy",
+        wd=str(tmp_path),
         cli_dir=str(tmp_path),
         logger=logging.getLogger("tests.nodb.climate.artifacts.atlas.invalid_env"),
         watershed_instance=SimpleNamespace(centroid=(-116.2, 43.6)),

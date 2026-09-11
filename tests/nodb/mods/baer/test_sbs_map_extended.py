@@ -355,17 +355,10 @@ class TestColorTableMaps(unittest.TestCase):
         self.assertIn(2, sbs_map.ct['mod'])
         self.assertIn(3, sbs_map.ct['high'])
         self.assertIn(9, sbs_map.nodata_vals)
-        with mock.patch("wepppy.nodb.mods.baer.sbs_map._rust_sbs_map", None):
-            sbs_map._data = None
-            python_data = sbs_map.data.copy()
         np.testing.assert_array_equal(
-            python_data.flatten(),
+            sbs_map.data.flatten(),
             np.array([130, 131, 132, 133, 130], dtype=np.uint8),
         )
-        module = importlib.import_module("wepppy.nodb.mods.baer.sbs_map")
-        if module._rust_sbs_map is not None:
-            sbs_map._data = None
-            np.testing.assert_array_equal(sbs_map.data, python_data)
         np.testing.assert_array_equal(
             sbs_map.source_valid_mask.flatten(),
             np.array([True, True, True, True, False]),
@@ -895,12 +888,10 @@ class TestSBSMapProperties(unittest.TestCase):
             sbs_map.source_valid_mask.flatten(),
             np.array([True, True, True, True, False]),
         )
-        with mock.patch("wepppy.nodb.mods.baer.sbs_map._rust_sbs_map", None):
-            sbs_map._data = None
-            np.testing.assert_array_equal(
-                sbs_map.data.flatten(),
-                np.array([130, 131, 132, 133, 130], dtype=np.uint8),
-            )
+        np.testing.assert_array_equal(
+            sbs_map.data.flatten(),
+            np.array([130, 131, 132, 133, 130], dtype=np.uint8),
+        )
         self.assertEqual(sbs_map.class_pixel_map['-9999'], '130')
         self.assertIn((-9999, 'No Burn', 1), sbs_map.class_map)
         sbs_map.export_4class_map(output_fn)

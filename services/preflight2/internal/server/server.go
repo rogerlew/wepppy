@@ -155,7 +155,6 @@ type connection struct {
 	runID    string
 	ws       wsConn
 	lastSeen atomic.Int64
-	last     *checklist.Payload
 	writeMu  sync.Mutex
 }
 
@@ -390,16 +389,11 @@ func (c *connection) pushUpdate(ctx context.Context) error {
 		LastModified: lastModified,
 	}
 
-	if c.last != nil && checklist.Equal(*c.last, payload) {
-		c.logger.Info("preflight unchanged", "run_id", c.runID)
-		return nil
-	}
+	// Every notification can change artifact readiness even within one timestamp second.
 	if err := c.sendPayload(ctx, payload); err != nil {
 		return err
 	}
 	c.logger.Info("preflight update", "run_id", c.runID, "checklist", payload.Checklist, "locks", payload.LockStatuses)
-	copyPayload := payload
-	c.last = &copyPayload
 	c.logger.Info("push update complete", "run_id", c.runID)
 	return nil
 }

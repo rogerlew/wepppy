@@ -393,17 +393,14 @@ var Baer = (function () {
             baerEvents.emit(name, payload || {});
         }
 
-        function startTask(message) {
-            if (infoAdapter && typeof infoAdapter.html === "function") {
+        function startTask(message, preserveSummary, preserveErrors) {
+            if (!preserveSummary && infoAdapter && typeof infoAdapter.html === "function") {
                 infoAdapter.html("");
             }
             if (statusAdapter && typeof statusAdapter.text === "function") {
                 statusAdapter.text(message + "...");
             }
-            if (stacktraceAdapter && typeof stacktraceAdapter.text === "function") {
-                stacktraceAdapter.text("");
-            }
-            baer.hideStacktrace();
+            if (!preserveErrors) { window.WCSbsError.clear(baer); }
         }
 
         function completeTask(message) {
@@ -519,7 +516,7 @@ var Baer = (function () {
             }
 
             var taskMsg = "Uploading SBS";
-            startTask(taskMsg);
+            startTask(taskMsg, true);
             var formData = new window.FormData(formElement);
 
             emit("baer:upload:started", {});
@@ -539,7 +536,7 @@ var Baer = (function () {
                         jobCompleted("baer:upload", { response: data });
                         return data;
                     }
-                    baer.pushResponseStacktrace(baer, data);
+                    window.WCSbsError.show(baer, data);
                     failTask(taskMsg);
                     emit("baer:upload:error", { response: data });
                     jobErrored("baer:upload", { response: data });
@@ -547,7 +544,7 @@ var Baer = (function () {
                 })
                 .catch(function (error) {
                     var payload = toResponsePayload(http, error);
-                    baer.pushResponseStacktrace(baer, payload);
+                    window.WCSbsError.show(baer, payload, error);
                     failTask(taskMsg);
                     emit("baer:upload:error", { error: payload });
                     jobErrored("baer:upload", { error: payload });
@@ -663,16 +660,24 @@ var Baer = (function () {
             })
                 .then(function (result) {
                     var content = result.body;
+                    if (content && (content.error || content.errors)) {
+                        window.WCSbsError.show(baer, content, null, "summary");
+                        failTask("Loading SBS summary");
+                        return content;
+                    }
                     if (infoAdapter && typeof infoAdapter.html === "function") {
                         infoAdapter.html(content);
                     } else if (infoElement) {
                         infoElement.innerHTML = content === null || content === undefined ? "" : String(content);
                     }
+                    if (window.WCSbsError.clear(baer, "summary")) { completeTask("Loading SBS summary"); }
+                    else { failTask("Loading SBS data"); }
                     return content;
                 })
                 .catch(function (error) {
                     var payload = toResponsePayload(http, error);
-                    baer.pushResponseStacktrace(baer, payload);
+                    window.WCSbsError.show(baer, payload, error, "summary");
+                    failTask("Loading SBS summary");
                     return payload;
                 });
         }
@@ -873,7 +878,7 @@ var Baer = (function () {
             var opts = options || {};
             var flyToBounds = opts.flyToBounds !== undefined ? Boolean(opts.flyToBounds) : true;
             var taskMsg = "Querying SBS map";
-            startTask(taskMsg);
+            startTask(taskMsg, true, true);
 
             try {
                 SubcatchmentDelineation.getInstance();
@@ -898,10 +903,11 @@ var Baer = (function () {
                     console.warn("[Baer] Failed to add SBS layer to map", err);
                 }
 
-                return Promise.resolve(map.loadSbsMap()).then(function (data) {
+                return Promise.resolve(map.loadSbsMap({ propagateErrors: true })).then(function (data) {
                     var payload = data || {};
                     if (!payload.error && !payload.errors && payload.Content) {
-                        completeTask(taskMsg);
+                        if (window.WCSbsError.clear(baer, "map")) { completeTask(taskMsg); }
+                        else { failTask("Loading SBS data"); }
                         emit("baer:map:shown", {
                             bounds: payload.Content.bounds,
                             imgurl: payload.Content.imgurl
@@ -916,13 +922,13 @@ var Baer = (function () {
                     if (!payload.error && !payload.errors) {
                         payload = Object.assign({ error: { message: "No SBS map has been specified." } }, payload);
                     }
-                    baer.pushResponseStacktrace(baer, payload);
+                    window.WCSbsError.show(baer, payload, null, "map");
                     failTask(taskMsg);
                     emit("baer:map:error", { response: payload });
                     return payload;
                 }).catch(function (error) {
                     var payload = toResponsePayload(http, error);
-                    baer.pushResponseStacktrace(baer, payload);
+                    window.WCSbsError.show(baer, payload, error, "map");
                     failTask(taskMsg);
                     emit("baer:map:error", { error: payload });
                     return payload;
@@ -969,14 +975,9 @@ var Baer = (function () {
                 .then(function (result) {
                     var data = result.body || {};
                     if (!data.error && !data.errors && data.Content) {
-                        completeTask(taskMsg);
-                        var map;
-                        try {
-                            map = MapController.getInstance();
-                        } catch (err) {
-                            baer.pushErrorStacktrace(baer, err);
-                            throw err;
-                        }
+                        if (window.WCSbsError.clear(baer, "map")) { completeTask(taskMsg); }
+                        else { failTask("Loading SBS data"); }
+                        var map = MapController.getInstance();
                         var bounds = data.Content.bounds;
                         var imgurl = data.Content.imgurl ? data.Content.imgurl + "?v=" + Date.now() : null;
 
@@ -998,14 +999,14 @@ var Baer = (function () {
                         return data;
                     }
 
-                    baer.pushResponseStacktrace(baer, data);
+                    window.WCSbsError.show(baer, data, null, "map");
                     failTask(taskMsg);
                     emit("baer:map:error", { response: data });
                     return data;
                 })
                 .catch(function (error) {
                     var payload = toResponsePayload(http, error);
-                    baer.pushResponseStacktrace(baer, payload);
+                    window.WCSbsError.show(baer, payload, error, "map");
                     failTask(taskMsg);
                     emit("baer:map:error", { error: payload });
                     return payload;

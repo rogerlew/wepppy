@@ -1519,3 +1519,60 @@ def test_crash_recovery_returns_one_consistent_pair(
     assert bool(manifest["amendments"]) is expected_applied
     assert manifest["config"]["sha256"] == hashlib.sha256(config_path.read_bytes()).hexdigest()
     assert not (tmp_path / JOURNAL_NAME).exists()
+
+
+@pytest.mark.parametrize("refresh", [False, True])
+@pytest.mark.parametrize("mods", [[], ["disturbed"]])
+@pytest.mark.parametrize("mapping", [None, "disturbed", "custom-historical-mapping"])
+def test_builder_sbs_update_preserves_historical_modules_and_mapping(tmp_path, monkeypatch, mods, mapping, refresh):
+    candidate = resolve_builder_candidate(BuilderSelections(
+        locale="continental-us", dem="usgs-ned13-2022", delineation_backend="wbt",
+        watershed_representation="single-ofe", soil="ssurgo-gnatsgso-2025",
+        wepp_binary="wepp_260803", landuse="nlcd-2019", climate="vanilla_cligen",
+    ))
+    materialize_preset_snapshot(tmp_path, candidate.artifact)
+    path = tmp_path / "config.cfg"
+    config = parse_config_text(path.read_text())
+    config["nodb"]["mods"] = mods
+    if mapping is None:
+        config["landuse"].pop("mapping")
+    else:
+        config["landuse"]["mapping"] = mapping
+    del config["unitizer"]["is_english"]
+    path.write_bytes(serialize_config(config))
+    manifest_path = tmp_path / "config-manifest.json"
+    manifest = json.loads(manifest_path.read_text())
+    for item in manifest["parent_chain"]:
+        if refresh and item["kind"] == "landuse":
+            item["revision"] = "historical-before-disturbed-default"
+    manifest["config"]["sha256"] = hashlib.sha256(path.read_bytes()).hexdigest()
+    manifest_path.write_text(json.dumps(manifest))
+    if refresh:
+        graph = replace(resolve_builder_capability_graph("continental-us"), provider_revision="f" * 64)
+        monkeypatch.setattr(project_update, "resolve_builder_capability_graph", lambda *_a, **_k: graph)
+    preview = preview_project_config_update(tmp_path)
+    assert preview.available
+    assert (preview.capability_refresh is not None) == refresh
+    apply_project_config_update(tmp_path, preview.preview_id, trigger_section="unitizer",
+                                trigger_option="is_english", application_revision="builder-sbs-test",
+                                capability_acknowledgment_accepted=refresh,
+                                capability_acknowledgment_revision=CAPABILITY_REFRESH_ACKNOWLEDGMENT_REVISION if refresh else None)
+    updated = parse_config_text(path.read_text())
+    assert updated["nodb"]["mods"] == mods
+    assert updated["landuse"]["mapping"] == ("disturbed" if mapping is None else mapping)
+
+
+@pytest.mark.parametrize("mods", [["unexpected"], ["disturbed", "unexpected"], ["disturbed", "disturbed"]])
+def test_builder_sbs_update_rejects_unrelated_module_changes(tmp_path, mods):
+    candidate = resolve_builder_candidate(BuilderSelections(
+        locale="continental-us", dem="usgs-ned13-2022", delineation_backend="wbt",
+        watershed_representation="single-ofe", soil="ssurgo-gnatsgso-2025",
+        wepp_binary="wepp_260803", landuse="nlcd-2019", climate="vanilla_cligen",
+    ))
+    materialize_preset_snapshot(tmp_path, candidate.artifact)
+    path = tmp_path / "config.cfg"
+    config = parse_config_text(path.read_text())
+    config["nodb"]["mods"] = mods
+    path.write_bytes(serialize_config(config))
+    with pytest.raises(ConfigUpdateUnavailableError, match="nodb.mods"):
+        preview_project_config_update(tmp_path)

@@ -13,6 +13,7 @@
 "use strict";
 
 var preflight_ws;
+window.preflightConnected = false;
 let lastPreflightChecklist = null;
 let controller_lock_statuses = null;
 let lastModifiedMeta = null;
@@ -142,6 +143,8 @@ function initPreflight(runid) {
         preflight_ws = new WebSocket(wsUrl);
 
         preflight_ws.onopen = function() {
+            window.preflightConnected = true;
+            document.dispatchEvent(new CustomEvent("preflight:connection", { detail: { connected: true } }));
             isConnecting = false;
             var statusEl = document.getElementById("preflight_status");
             if (statusEl) {
@@ -155,6 +158,8 @@ function initPreflight(runid) {
         };
 
         preflight_ws.onerror = function(event) {
+            window.preflightConnected = false;
+            document.dispatchEvent(new CustomEvent("preflight:connection", { detail: { connected: false } }));
             console.warn("Preflight websocket error", event);
         };
 
@@ -178,6 +183,8 @@ function initPreflight(runid) {
         };
 
         preflight_ws.onclose = function(event) {
+            window.preflightConnected = false;
+            document.dispatchEvent(new CustomEvent("preflight:connection", { detail: { connected: false } }));
             isConnecting = false;
             console.log(
                 "Preflight websocket closed",

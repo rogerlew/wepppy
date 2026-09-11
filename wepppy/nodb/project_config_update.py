@@ -861,11 +861,15 @@ def _assert_builder_congruence(
     for key, writer in resolved.effective_writers.items():
         if writer not in selection_ids or key[0].startswith("capabilit"):
             continue
+        # Mapping is a preserved project value, not a selected source ID.
+        if key == ("landuse", "mapping"):
+            continue
         section, option = key
         if option in current.get(section, {}) and current[section][option] != resolved.config[section][option]:
             mismatches.append(f"{section}.{option}")
     manifest_mods = selections.get("mods", [])
-    if current.get("nodb", {}).get("mods", []) != manifest_mods:
+    effective_mods = ["disturbed", *(mod for mod in manifest_mods if mod != "disturbed")]
+    if current.get("nodb", {}).get("mods", []) not in (manifest_mods, effective_mods):
         mismatches.append("nodb.mods")
     if mismatches:
         raise ConfigUpdateUnavailableError(
@@ -891,6 +895,9 @@ def _assert_builder_refresh_completeness(
     }
     mismatches: list[str] = []
     for (section, option), writer in resolved.effective_writers.items():
+        # Preserve populated mappings; missing mappings remain additive updates.
+        if (section, option) == ("landuse", "mapping"):
+            continue
         if writer not in selection_ids or section.startswith("capabilit"):
             continue
         if option not in current.get(section, {}):

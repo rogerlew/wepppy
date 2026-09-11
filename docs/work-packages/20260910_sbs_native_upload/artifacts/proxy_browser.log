@@ -1,0 +1,9 @@
+FAIR_SBS 1
+CREATE {"status":201,"body":{"run_id":"lawless-challah","location":"/weppcloud/runs/lawless-challah/config","config_token":"config"}}
+WALLOW_UPLOAD_SECONDS 5.597
+SUMMARY_TABLE_MAP_PASS
+FAILURE_DOM <h1>504 Gateway Time-out</h1><p>Test gateway failure</p>
+REPEATED_UPLOAD_PASS 1
+REPEATED_UPLOAD_PASS 2
+REPEATED_UPLOAD_PASS 3
+BROWSER_PASS lawless-challah HTML Details, retained Summary, blank hint, recovery and reload

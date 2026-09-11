@@ -1,0 +1,78 @@
+{
+  "runid": "pfdf-smoke-d9fc3c69",
+  "worker_exec_uid": 1000,
+  "worker_exec_gid": 993,
+  "worker_main_process": [
+    "Name:\trq",
+    "Umask:\t0022",
+    "Uid:\t1000\t1000\t1000\t1000",
+    "Gid:\t993\t993\t993\t993"
+  ],
+  "nodb_mode": "0o644",
+  "jobs": {
+    "0_upload": {
+      "job_id": "ed21b989-1f35-4451-84a7-8fd1cc159e66",
+      "runid": "pfdf-smoke-d9fc3c69",
+      "status": "finished",
+      "result": {
+        "message": "Upload processed."
+      },
+      "started_at": "2026-09-10 22:27:59.888725",
+      "ended_at": "2026-09-10 22:28:06.186873",
+      "description": "wepppy.rq.postfire_debris_flow_rq.upload_dnbr_rq('pfdf-smoke-d9fc3c69', '6f338098519e4af1b2389fb85c0171a5')",
+      "elapsed_s": 6.298148,
+      "exc_info": null,
+      "auth_actor": null,
+      "culvert_batch_uuid": null,
+      "children": {}
+    },
+    "1_run": {
+      "job_id": "4c1d6089-d83f-49fe-a020-8f0f65fb0fc0",
+      "runid": "pfdf-smoke-d9fc3c69",
+      "status": "finished",
+      "result": {
+        "message": "Model run complete."
+      },
+      "started_at": "2026-09-10 22:28:08.040379",
+      "ended_at": "2026-09-10 22:28:15.196242",
+      "description": "wepppy.rq.postfire_debris_flow_rq.run_m1_rq('pfdf-smoke-d9fc3c69', '48f85fb8348b41da83fbf32f55e5be07')",
+      "elapsed_s": 7.155863,
+      "exc_info": null,
+      "auth_actor": null,
+      "culvert_batch_uuid": null,
+      "children": {}
+    },
+    "2_upload": {
+      "job_id": "6da726eb-5a67-403f-b9d1-cc16c7ace236",
+      "runid": "pfdf-smoke-d9fc3c69",
+      "status": "finished",
+      "result": {
+        "message": "Upload processed."
+      },
+      "started_at": "2026-09-10 22:28:21.835432",
+      "ended_at": "2026-09-10 22:28:28.015626",
+      "description": "wepppy.rq.postfire_debris_flow_rq.upload_dnbr_rq('pfdf-smoke-d9fc3c69', '7fca8fade07d4057b0aa898627f662f7')",
+      "elapsed_s": 6.180194,
+      "exc_info": null,
+      "auth_actor": null,
+      "culvert_batch_uuid": null,
+      "children": {}
+    },
+    "3_upload": {
+      "job_id": "8acb2ae1-7335-46a6-9209-bf2004b4342e",
+      "runid": "pfdf-smoke-d9fc3c69",
+      "status": "finished",
+      "result": {
+        "message": "Upload processed."
+      },
+      "started_at": "2026-09-10 22:28:29.820410",
+      "ended_at": "2026-09-10 22:28:36.818719",
+      "description": "wepppy.rq.postfire_debris_flow_rq.upload_dnbr_rq('pfdf-smoke-d9fc3c69', 'ae944d973922402f8826f05de20a8a33')",
+      "elapsed_s": 6.998309,
+      "exc_info": null,
+      "auth_actor": null,
+      "culvert_batch_uuid": null,
+      "children": {}
+    }
+  }
+}

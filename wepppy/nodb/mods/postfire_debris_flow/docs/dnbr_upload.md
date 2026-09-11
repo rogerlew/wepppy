@@ -45,8 +45,8 @@ no external sidecar is part of this backend input. Materialize external masks
 or IMG companion data into a self-contained raster before calling. Reject
 recognized adjacent mask, auxiliary, overview and HFA companion files instead
 of silently discarding their metadata or valid support. Reject
-symlink inputs, nonregular paths and output/input aliases. A future hostile
-browser-upload boundary needs separate containment and contract review.
+symlink inputs, nonregular paths and output/input aliases. The production
+browser-upload containment boundary is specified in [production_m1.md](production_m1.md).
 
 VRT is a restricted identity wrapper, not an executable GDAL program. Parse
 XML before GDAL access; reject DTD/entities, derived/raw bands, pixel functions,
@@ -96,7 +96,7 @@ Validate into a private sibling staging directory, then publish to a previously
 absent output directory. Existing directories (including empty/symlink ones)
 are rejected, never replaced. Single-writer output ownership is required.
 Failed calls remove their staging and preserve existing/source artifacts.
-Source identity is checked by hashes; no NoDb pointer is updated. The future
+Source identity is checked by hashes; this local API updates no NoDb pointer. The production
 controller must atomically select the completed artifact and invalidate M1
 only; this backend does not claim to implement that lifecycle.
 
@@ -117,3 +117,7 @@ preservation. Future browser transport must cover shared run access, CSRF,
 100 MiB upload enforcement, UI state, NoDb publication/invalidation and error
 translation in its own contract-first ancestor checkpoint. No endpoint is
 registered by this backend contract.
+
+Production browser staging, distribution-based Auto, retained-file correction and
+atomic NoDb/RQ publication are implemented in [production_m1.md](production_m1.md).
+They wrap this explicit local API without changing its encoding/grid rules.

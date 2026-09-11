@@ -596,3 +596,51 @@ def test_legacy_model_tuple_helpers_do_not_consult_live_builder_authority(
 
     assert model_tuple_allowed(config, "topaz", "single-ofe", "legacy-bin") is True
     assert model_tuple_binaries(config, "topaz", "single-ofe") is None
+
+
+@pytest.mark.parametrize('entrypoint', [resolve_run_capability_authority, capability_module.capability_authority])
+def test_nodb_authority_reads_once_and_refreshes_next_call(tmp_path, monkeypatch, entrypoint):
+    import wepppy.nodb.base as base
+    from wepppy.nodb.project_config_reader import PROJECT_CONFIG_READER_FLAG
+    from tests.nodb.test_project_config_reader_foundation import _write_manifest
+
+    resolved = resolve_builder_config(BuilderSelections(
+        locale='continental-us', dem='usgs-ned1-2024', delineation_backend='wbt',
+        watershed_representation='single-ofe', wepp_binary='wepp_260803',
+        soil='ssurgo-gnatsgso-2025', landuse='nlcd-2019', climate='vanilla_cligen', mods=(),
+    ))
+    path = tmp_path/'config.cfg'
+    path.write_bytes(resolved.config_bytes)
+    _write_manifest(tmp_path, path)
+    owner = object.__new__(base.NoDbBase)
+    owner.wd = str(tmp_path)
+    owner._config = 'config'
+    monkeypatch.setenv(PROJECT_CONFIG_READER_FLAG, '1')
+    load = base.load_project_config
+    reads = []
+    def observed_load(**kwargs):
+        reads.append(kwargs['wd'])
+        return load(**kwargs)
+    monkeypatch.setattr(base, 'load_project_config', observed_load)
+
+    actual = entrypoint(owner)
+    expected = entrypoint(ParsedConfig(resolved.config_bytes.decode()))
+    assert actual == expected
+    assert len(reads) == 1
+    # No cross-call cache: changed authority must still fail its normal validation.
+    text = path.read_text().replace('schema_version = 3', 'schema_version = 999')
+    assert text != path.read_text()
+    path.write_text(text)
+    with pytest.raises(ValueError, match='unsupported capabilities.schema_version'):
+        entrypoint(owner)
+    assert len(reads) == 2
+
+
+def test_nodb_custom_getters_remain_authoritative():
+    from wepppy.nodb.base import NoDbBase
+    owner = object.__new__(NoDbBase)
+    # This supported protocol implementation intentionally has no disk parser.
+    supplied = ParsedConfig('[config]\nflattened = false\n[general]\nlocales = ["us"]\n')
+    owner.config_get_raw = supplied.config_get_raw
+    owner.config_get_list = supplied.config_get_list
+    assert resolve_run_capability_authority(owner) == resolve_run_capability_authority(supplied)

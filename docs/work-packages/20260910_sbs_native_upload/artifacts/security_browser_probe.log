@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "sourceHashes": {
+    "control_base.js": "7532d2c109fd394f6afd37c484ea21fa13868ebf3190e54ebd1c92d9c866d83a",
+    "sbs_error.js": "dbbcfd77c914093169ed89082cec45abbe955ab440881171cc84c9f1fe52e438"
+  },
+  "chromium": "141.0.7390.37",
+  "executed": 0,
+  "clean": true,
+  "safeText": "GatewayReadableTable<img src=\"https://security.invalid/entity\">",
+  "revealed": true,
+  "forbidden": false,
+  "jsonLiteral": true,
+  "deep": true,
+  "retained": true,
+  "recovered": true,
+  "summary": "Accepted result",
+  "hint": "",
+  "url": "about:blank",
+  "requests": [],
+  "errors": []
+}

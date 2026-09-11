@@ -1,6 +1,6 @@
 # SBS native raster contract
 
-Implementation pending. Soil Burn Severity raster processing in
+Implemented and checked by the native-upload package. Soil Burn Severity raster processing in
 `wepppy/nodb/mods/baer/sbs_map.py` requires the existing `wepppyo3.sbs_map`
 implementations for raster summary, default color-table reading/summary, raster
 reclassification and four-class export. Missing native modules/functions and
@@ -10,7 +10,7 @@ Python raster implementation. A failed computation MUST NOT be cached as success
 
 Preserve classification, palette, orientation, projection, resolution and
 NoData semantics. Four-class export MUST mask the union of original source
-NoData and current display NoData; WGS display export must not erase original
+NoData and configured source classification NoData; WGS display export must not erase original
 source masking. Native output must match the previously correct Python output
 pixel-for-pixel on the actual Wallow raster and representative NoData/color-table
 cases. No numerical formula or class threshold changes are authorized.
@@ -38,3 +38,7 @@ return the canonical error response when sanity checking or required burn-class
 summary fails, rather than logging and publishing incomplete success metadata.
 No native failure may authorize a model run or accepted summary. Preserve existing
 authentication, run ownership, upload limits and cleanup containment.
+
+Source-grid export must not use the separate WGS display NoData sentinel: a valid
+source value of 255 remains classifiable. Noninteger or nonfinite metadata must
+not be truncated into an unrelated integer class when passed to Rust.

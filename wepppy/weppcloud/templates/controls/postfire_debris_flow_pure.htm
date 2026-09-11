@@ -1,0 +1,35 @@
+{% import 'controls/_pure_macros.html' as ui with context %}
+{% set description %}
+<p>Estimate debris-flow likelihood for this watershed using the Staley model. Intended for recently burned basins in the Western United States.</p>
+<p>{{ usersum_doc_link('src', 'wepppy/nodb/mods/postfire_debris_flow/README.md', 'About this model') }}</p>
+{% endset %}
+{% call ui.control_shell(form_id='postfire_debris_flow_form', title='Post-fire debris flow', collapsible=False, description=description, summary_panel_override='',
+    status_panel_options={'id':'postfire_status_panel'}, stacktrace_panel_options={'panel_id':'postfire_stacktrace_panel','body_id':'stacktrace'}) %}
+<h4>Required project data</h4>
+<div data-pfdf-required aria-live="polite">Checking project data…</div>
+<label for="postfire_dnbr_file">differenced Normalized Burn Ratio (dNBR)</label>
+<p>Upload a dNBR map for the same fire assessment as the soil burn severity map. The map will be aligned to the project watershed.</p>
+<input id="postfire_dnbr_file" name="file" type="file" accept=".tif,.tiff,.img,.vrt" aria-describedby="postfire_format_help">
+<p id="postfire_format_help" class="wc-text-muted">Single-band raster with integer or floating-point values. GeoTIFF (.tif/.tiff) preferred; self-contained .img or supported .vrt accepted. Maximum 100 MiB per raster. Shapefiles, geodatabases and ESRI GRID folders are not supported.</p>
+<div data-pfdf-companion hidden><label for="postfire_companion">Referenced raster</label><input id="postfire_companion" name="companion" type="file" accept=".tif,.tiff,.img"></div>
+<label for="postfire_scale">dNBR values</label>
+<select id="postfire_scale" name="scale_mode"><option value="auto" selected>Auto</option><option value="scaled_1000">Scaled by 1,000</option><option value="normalized">NBR difference</option><option value="custom">Custom scale</option></select>
+<p class="wc-text-muted">Auto estimates the scale from the map values.</p>
+<div data-pfdf-custom hidden>
+<label for="postfire_factor">Multiply values by</label><input id="postfire_factor" name="scale_factor" type="number" step="any">
+<label for="postfire_offset">Add offset</label><input id="postfire_offset" name="add_offset" type="number" step="any" value="0">
+</div>
+<button type="button" class="pure-button" data-pfdf-action="upload" disabled>Upload dNBR</button>
+<p data-pfdf-candidate></p>
+<div class="wc-control__panel-summary" data-pfdf-summary></div>
+<fieldset><legend>Design storm rainfall</legend>
+<label class="wc-choice"><input type="radio" name="frequency_source" value="cli" checked> Project climate</label>
+<label class="wc-choice"><input type="radio" name="frequency_source" value="noaa" disabled> NOAA Atlas 14</label>
+<p data-pfdf-noaa class="wc-text-muted">NOAA rainfall estimates are not available for this project.</p>
+</fieldset>
+<p>Storm events always use the project climate.</p>
+<button type="button" class="pure-button pure-button-primary" data-pfdf-action="run" disabled>Run debris-flow model</button>
+<p data-pfdf-message role="status"></p>
+<p data-pfdf-warning class="wc-text-muted" role="status"></p>
+<div data-pfdf-files></div>
+{% endcall %}

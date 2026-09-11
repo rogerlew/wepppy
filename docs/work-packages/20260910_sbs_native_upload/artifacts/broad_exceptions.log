@@ -1,0 +1,49 @@
+Broad exception handler changed-file enforcement
+
+Repo root: /home/workdir/wepppy
+Base ref: origin/master
+Merge base: 30457253011aab3006d7676341ca7ee255972d18
+Path filter: wepppy, services
+Allowlist source: /home/workdir/wepppy/docs/standards/broad-exception-boundary-allowlist.md
+Changed Python files scanned: 17
+
+Files:
+  M wepppy/microservices/rq_engine/__init__.py
+  A wepppy/microservices/rq_engine/postfire_debris_flow_routes.py
+  M wepppy/microservices/rq_engine/upload_batch_runner_routes.py
+  M wepppy/nodb/config_builder/registry.py
+  M wepppy/nodb/config_builder/resolver.py
+  M wepppy/nodb/core/climate_artifact_export_service.py
+  M wepppy/nodb/mods/baer/sbs_map.py
+  A wepppy/nodb/mods/postfire_debris_flow/__init__.py
+  A wepppy/nodb/mods/postfire_debris_flow/encoding.py
+  A wepppy/nodb/mods/postfire_debris_flow/postfire_debris_flow.py
+  A wepppy/nodb/mods/postfire_debris_flow/production.py
+  M wepppy/nodb/mods/rusle/k_integration.py
+  M wepppy/nodb/project_config_capabilities.py
+  M wepppy/nodb/project_config_update.py
+  A wepppy/rq/postfire_debris_flow_rq.py
+  M wepppy/rq/submission_recovery.py
+  M wepppy/weppcloud/routes/run_0/run_0_bp.py
+
+Per-file delta (unsuppressed broad catches):
+  M wepppy/microservices/rq_engine/__init__.py (base=0 current=0 delta=+0)
+  A wepppy/microservices/rq_engine/postfire_debris_flow_routes.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/upload_batch_runner_routes.py (base=7 current=7 delta=+0)
+  M wepppy/nodb/config_builder/registry.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/config_builder/resolver.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/core/climate_artifact_export_service.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/mods/baer/sbs_map.py (base=5 current=0 delta=-5)
+  A wepppy/nodb/mods/postfire_debris_flow/__init__.py (base=0 current=0 delta=+0)
+  A wepppy/nodb/mods/postfire_debris_flow/encoding.py (base=0 current=0 delta=+0)
+  A wepppy/nodb/mods/postfire_debris_flow/postfire_debris_flow.py (base=0 current=0 delta=+0)
+  A wepppy/nodb/mods/postfire_debris_flow/production.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/mods/rusle/k_integration.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/project_config_capabilities.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/project_config_update.py (base=0 current=0 delta=+0)
+  A wepppy/rq/postfire_debris_flow_rq.py (base=0 current=0 delta=+0)
+  M wepppy/rq/submission_recovery.py (base=0 current=0 delta=+0)
+  M wepppy/weppcloud/routes/run_0/run_0_bp.py (base=15 current=15 delta=+0)
+
+Net delta (all changed files): -5
+Result: PASS

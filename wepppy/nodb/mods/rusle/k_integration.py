@@ -998,6 +998,9 @@ def run_rusle_k_factors(
         }
 
     update_k_manifest(manifest_path, k_manifest)
+    if os.path.isfile(_join(wd, "postfire_debris_flow.nodb")):
+        from wepppy.nodb.mods.postfire_debris_flow.production import notify
+        notify(wd)
 
     return RusleKResult(
         nomograph=nomograph_path if wrote_nomograph else None,

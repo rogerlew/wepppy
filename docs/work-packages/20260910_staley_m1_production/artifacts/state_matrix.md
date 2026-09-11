@@ -1,7 +1,9 @@
-# Proposed valid-state and request matrix
+# Valid-state and request matrix
 
-Status: draft, 2026-09-10 UTC. Finalize exact errors and transitions in current
-workflow/UI contracts before checkpoint. This is not a claim of exhaustive tests.
+Status: accepted at the contract checkpoint, 2026-09-10 UTC. Normative errors
+and transitions are in current workflow/UI contracts. Validation maps targeted
+regressions and real workflow evidence in [validation.md](validation.md); this
+matrix is not a claim of exhaustive cross-product testing.
 
 | Runtime state | User outcome | Server/worker obligation |
 | --- | --- | --- |

@@ -1,0 +1,47 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/baer/test_sbs_native_required.py tests/nodb/mods/baer/test_sbs_map_extended.py tests/sbs_map/test_sbs_map.py tests/microservices/test_rq_engine_upload_batch_runner_routes.py --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 78 items
+
+tests/nodb/mods/baer/test_sbs_native_required.py ....................    [ 25%]
+tests/nodb/mods/baer/test_sbs_map_extended.py .......................... [ 58%]
+.................                                                        [ 80%]
+tests/sbs_map/test_sbs_map.py .....                                      [ 87%]
+tests/microservices/test_rq_engine_upload_batch_runner_routes.py ....... [ 96%]
+...                                                                      [100%]
+
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+../../opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+../../opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16
+  /opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+tests/microservices/test_rq_engine_upload_batch_runner_routes.py::test_upload_geojson_succeeds
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The ConfirmRegisterForm and the confirm_register_form option are deprecated as of version 5.6.0 and will be removed in a future release.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+tests/microservices/test_rq_engine_upload_batch_runner_routes.py::test_upload_geojson_succeeds
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The RegisterForm is deprecated as of version 5.6.0 and will be removed in a future release. The form RegisterFormV2 should be sub-classed instead.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 78 passed, 8 warnings in 10.16s ========================

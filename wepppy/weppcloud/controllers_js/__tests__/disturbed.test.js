@@ -19,6 +19,7 @@ describe("Disturbed controller", () => {
                 <div id="status"></div>
                 <div id="stacktrace"></div>
                 <div id="rq_job"></div>
+                <div class="wc-field--display"><label class="wc-field__label">Current SBS map</label><div class="wc-text-display">No map uploaded.</div></div>
                 <div id="sbs_mode0_controls"></div>
                 <div id="sbs_mode1_controls" hidden></div>
                 <p id="hint_upload_sbs"></p>
@@ -75,6 +76,7 @@ describe("Disturbed controller", () => {
         originalConfirm = window.confirm;
         window.confirm = jest.fn(() => true);
 
+        await import("../sbs_error.js");
         await import("../disturbed.js");
     });
 
@@ -96,6 +98,19 @@ describe("Disturbed controller", () => {
     function getController() {
         return window.Disturbed.getInstance();
     }
+
+    test("upload gateway failure preserves Summary and renders Details without hint text", async () => {
+        document.querySelector("#info").innerHTML = "<table><tr><td>Accepted SBS</td></tr></table>";
+        global.WCHttp.requestWithSessionToken = jest.fn().mockRejectedValue({
+            body: "<h1>504 Gateway Time-out</h1><p>Timeout</p>",
+            response: {headers:{get:()=>"text/html"}}, status:504
+        });
+        await getController().upload_sbs();
+        expect(document.querySelector("#info table").textContent).toBe("Accepted SBS");
+        expect(document.querySelector("#hint_upload_sbs").textContent).toBe("");
+        expect(document.querySelector("#stacktrace h1").textContent).toBe("504 Gateway Time-out");
+        expect(document.querySelector("#status").textContent).toContain("Failed");
+    });
 
     test("switching modes toggles panels and emits mode event", () => {
         const controller = getController();
@@ -234,6 +249,15 @@ describe("Disturbed controller", () => {
 
         expect(controller.has_sbs()).toBe(true);
     });
+    test("first upload displays the accepted filename as text", async () => {
+        const disturbed = Disturbed.getInstance();
+        global.WCHttp.requestWithSessionToken = jest.fn().mockResolvedValue({body:{result:{disturbed_fn:"map<img>.tif"}}});
+        await disturbed.upload_sbs();
+        const display = document.querySelector(".wc-text-display");
+        expect(display.textContent).toBe("map<img>.tif");
+        expect(display.querySelector("img")).toBeNull();
+    });
+
 });
 
 describe("Disturbed lookup variant persistence", () => {
@@ -300,6 +324,7 @@ describe("Disturbed lookup variant persistence", () => {
         window.runId = "test-run";
         window.config = "test-config";
 
+        await import("../sbs_error.js");
         await import("../disturbed.js");
     });
 
@@ -433,4 +458,6 @@ describe("Disturbed lookup variant persistence", () => {
         expect(syncButton.disabled).toBe(false);
         expect(extendedLink.getAttribute("aria-disabled")).toBeNull();
     });
+
+
 });

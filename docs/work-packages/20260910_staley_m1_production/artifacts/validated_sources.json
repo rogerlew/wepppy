@@ -1,0 +1,44 @@
+{
+  "recorded_utc": "2026-09-10T22:43:11.419972+00:00",
+  "contract_head": "5958164769fe51a05f5165b1f657d613481f345e",
+  "runtime_uncommitted": true,
+  "sha256": {
+    "services/preflight2/internal/server/server.go": "36ce4c6407063212d3a75fa27344148c70542cc4451415cd8e656ff443217e61",
+    "services/preflight2/internal/server/server_test.go": "a2b2d96fb4d3da830c3ec1ac562147ad734d3403e4ddd5abf35aa861734c1879",
+    "tests/microservices/test_rq_engine_openapi_contract.py": "71fae264906d158af2675ae62bbd3359934a9b1e6758bc4854f41fc399b14a93",
+    "tests/microservices/test_rq_engine_postfire_debris_flow.py": "be02fe8afb5529688a796eb9b872931a9acdcbd90ee03d2e69540bb324b294b3",
+    "tests/nodb/mods/test_postfire_debris_flow_encoding.py": "68d02910a84e1ae44eb4fc05f29a38a585eee29329e2fb99a49cf7bd0738e5de",
+    "tests/nodb/mods/test_postfire_debris_flow_production.py": "6857303899c29c9f86abb7c86517bba0bcd0f9f520e8d2c183ff8f79bbfa9eae",
+    "tests/nodb/test_climate_artifact_export_service.py": "0201f7009693e2b18f51c00a01c7730b2a7fa3254520a1a55f59d2b6dedd3ed8",
+    "tests/rq/test_submission_recovery.py": "32eb712d72f9e982c5735e5ca9103373e39b0ec6fa55c742ada0f3382ed4e0c5",
+    "wepppy/microservices/rq_engine/__init__.py": "36be7a9e41c139679b5a8c79aaf5e683b3aa8cef57d506d529b7e6c874f59fdd",
+    "wepppy/microservices/rq_engine/postfire_debris_flow_routes.py": "b8aae564296a27e51f73be674e32143b85c4fdcf065012799a54dfcb72618baf",
+    "wepppy/nodb/core/climate_artifact_export_service.py": "436e26344956d233794f976717e7cf032db097376ff00f266425bb43893cda34",
+    "wepppy/nodb/mods/postfire_debris_flow/__init__.py": "dffa5daa26ca7dadb645c1225698c3ec4590ff1f9b5a78dd5a058b06fe93a447",
+    "wepppy/nodb/mods/postfire_debris_flow/encoding.py": "aed2572df051f9e8418166030e57ca28db0b2ac3147c8cbeaf718aebf2aaef29",
+    "wepppy/nodb/mods/postfire_debris_flow/postfire_debris_flow.py": "2524a36a8d44d6f4b978cf745f7007891bdd97eb77610f88bc661f577a07b115",
+    "wepppy/nodb/mods/postfire_debris_flow/postfire_debris_flow.pyi": "9b203f55649a2e28ea1901a77278dcc34d25d76e314e1f35099cd0df01ae93f1",
+    "wepppy/nodb/mods/postfire_debris_flow/production.py": "22d4914f23ade25f8c144f23d4cd297c46e47622e83551abdf8f35ab5dd2d2e8",
+    "wepppy/nodb/mods/rusle/k_integration.py": "71aa61703ca26172d6c5243b8641fd8dd5cba07558faa927a757040da07afb8a",
+    "wepppy/rq/postfire_debris_flow_rq.py": "13a848d2f1c0b94685b4f9ced50a013360d9b31b71be3b903444869feafad385",
+    "wepppy/rq/submission_recovery.py": "80b98cbbd8abf2467a82afb4d228f943b8e3a2794855cd8dd4f5ad7559f47e99",
+    "wepppy/weppcloud/controllers_js/__tests__/postfire_debris_flow.test.js": "bc7c18a737899e388d09f51a26a9d9f99f2bfdb898916bdabbb5267cd40eddc9",
+    "wepppy/weppcloud/controllers_js/postfire_debris_flow.js": "8c0da5d32df8b575f4535d9b89aacd0a7c5906f7af052d6e3e4b14ac30003e2d",
+    "wepppy/weppcloud/feature_registry/feature_registry.yaml": "740a0e7cb9145051149655827a7446cda8864a219ce5a70747ee74d8750f4d81",
+    "wepppy/weppcloud/routes/run_0/run_0_bp.py": "7f5fd6507a52632ac9a67ef7d9940668c1132636f3650aa321a1eb8154755dd3",
+    "wepppy/weppcloud/routes/run_0/templates/run_page_bootstrap.js.j2": "a37783917ed9b288b31accf54de48c8f472ede5160b98b562ce70a72d66115e0",
+    "wepppy/weppcloud/routes/run_0/templates/runs0_pure.htm": "dad62a1d0ee0b4b0b9fbee87b1e7e788652452940d1152f8ed40f6e534adb698",
+    "wepppy/weppcloud/static/js/preflight.js": "efc7ac1bb656cc12aa1fc78ebe9dbf36398953f461d658642184cbbdd334e358",
+    "wepppy/weppcloud/templates/controls/postfire_debris_flow_pure.htm": "8faec795aaa026c43345f9855fcb96942d8e3d0487b7b7c2a470ced1600da985"
+  },
+  "full_pytest": {
+    "passed": 8312,
+    "skipped": 77,
+    "seconds": 939.28
+  },
+  "production_focused": 14,
+  "frontend": {
+    "suites": 109,
+    "tests": 841
+  }
+}

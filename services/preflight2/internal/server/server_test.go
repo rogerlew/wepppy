@@ -112,6 +112,16 @@ func TestPushUpdateWritesMessage(t *testing.T) {
 	if len(fake.messages) != 1 {
 		t.Fatalf("expected 1 message, got %d", len(fake.messages))
 	}
+	// Domain revisions can change readiness without changing checklist booleans.
+	if err := client.HSet(context.Background(), runID, "postfire_debris_flow:revision", "new").Err(); err != nil {
+		t.Fatalf("update domain revision: %v", err)
+	}
+	if err := conn.pushUpdate(context.Background()); err != nil {
+		t.Fatalf("push unchanged checklist: %v", err)
+	}
+	if len(fake.messages) != 2 || string(fake.messages[0]) != string(fake.messages[1]) {
+		t.Fatalf("expected two identical checklist frames after domain revision")
+	}
 }
 
 type fakeConn struct {

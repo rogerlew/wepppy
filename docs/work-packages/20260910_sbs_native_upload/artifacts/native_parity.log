@@ -1,0 +1,7 @@
+INFO:wctl2:docker compose exec -T weppcloud python -
+{
+  "pixel_geometry_nodata_parity": true,
+  "export_seconds": 0.5701862019486725,
+  "native_sha256": "69119d84349a1e60d4290aa583c79419a0f22ecac416f3c26b60ada34a8eec45",
+  "gdal": "3100300"
+}

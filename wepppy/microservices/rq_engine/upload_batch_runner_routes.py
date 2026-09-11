@@ -333,17 +333,17 @@ async def upload_sbs_map(batch_name: str, request: Request) -> JSONResponse:
     except OSError:
         size_bytes = None
 
-    sanity_status, sanity_message = sbs_map_sanity_check(dest_path)
-    if sanity_status != 0:
-        _safe_unlink(dest_path)
-        return error_response(sanity_message or "Invalid SBS map.", status_code=400)
-
-    burn_class_counts: Optional[Dict[str, int]] = None
     try:
+        sanity_status, sanity_message = sbs_map_sanity_check(dest_path)
+        if sanity_status != 0:
+            _safe_unlink(dest_path)
+            return error_response(sanity_message or "Invalid SBS map.", status_code=400)
         burn_class_counts = SoilBurnSeverityMap(dest_path).burn_class_counts
-    except Exception as exc:
-        logger.warning("rq-engine upload-sbs-map burn class summary failed: %s", exc)
-    
+    except Exception:  # Native/GDAL boundary: never publish a failed SBS computation.
+        _safe_unlink(dest_path)
+        logger.exception("rq-engine upload-sbs-map native validation failed")
+        return error_response("SBS raster processing failed.", status_code=500)
+
     try:
         relative_path = os.path.relpath(dest_path, batch_runner.wd)
     except ValueError:

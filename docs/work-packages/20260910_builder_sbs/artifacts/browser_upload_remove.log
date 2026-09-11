@@ -1,0 +1,23 @@
+FAIR_SBS 1
+CREATE {"status":201,"body":{"run_id":"self-imposed-nave","location":"/weppcloud/runs/self-imposed-nave/config","config_token":"config"}}
+UPLOAD 200 {"result":{"disturbed_fn":"burn_severity.tif"}}
+RELOAD_FILENAME Soil Burn Severity
+
+SBS upload is optional. Upload a Soil Burn Severity raster (.img or .tif) or generate a uniform severity map. Raster uploads should use uint8 or short integer values, preferably in UTM projection. Maps with color tables automatically adopt their color scale for severity classes.
+
+For the upload checklist (single-band integer raster, valid projection, class-count limit, and common validation fixes), see 📄 SBS map preparation guidance.
+
+Mode
+Upload SBS Map
+Specify Uniform SBS (requires channel delineation)
+Upload SBS raster
+Current SBS map
+burn_severity.tif
+Remove SBS
+
+Status
+Querying SBS map...
+Summary
+Details
+REMOVE 200
+BROWSER_PASS self-imposed-nave

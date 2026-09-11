@@ -2318,9 +2318,20 @@ Builder binary availability as a whole until the provider or deployment is
 corrected. Neither case authorizes an inferred fallback or a change to
 Interfaces presets.
 
+### Capability reader performance conformance (2026-09-10)
+
+The NoDb-backed capability resolver uses one validated parser observation per
+resolution rather than reopening the full config/manifest for every graph field.
+Custom getter implementations retain their existing behavior. The optimization
+retains the existing reader, validation and status behavior; no parsed config
+or graph is cached across calls. Subsequent resolutions still read current
+project-owned authority. This is an implementation correction for builder run-page
+timeouts, not a change to the capability envelope or legacy fallback rules.
+[Incident and regression evidence](../dev-notes/20260910_config_builder_run_page_timeout.md).
+
 ### Builder Soil Burn Severity support (2026-09-10)
 
-Implementation conformance pending. Every newly Builder-created project MUST
+Implemented and validated in the Builder SBS package. Every newly Builder-created project MUST
 include the internal `disturbed` controller in its effective `[nodb] mods`,
 regardless of locale, DEM resolution, delineation backend or optional model
 selections. The existing Soil Burn Severity control MUST therefore be available

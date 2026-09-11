@@ -255,3 +255,118 @@ def test_submission_lock_can_fail_fast_without_blocking() -> None:
             pytest.fail("busy lock must not enter")
 
     assert acquire_kwargs == [{"blocking": False}]
+
+
+def test_durable_job_identity_precedes_failed_receipt_write(monkeypatch):
+    from redis.exceptions import ConnectionError
+    events=[]
+    class Connection:
+        def hget(self,*args):return None
+        def lock(self,*args,**kwargs):return _Lock(events)
+    class Queue:
+        connection=Connection()
+        def enqueue_call(self,*args,**kwargs):raise AssertionError('Must not enqueue after failed receipt')
+    def fail_receipt(*args,**kwargs):
+        assert events[-1][0]=='durable-id'
+        raise ConnectionError('unavailable before marker')
+    monkeypatch.setattr(submission_recovery,'prepare_redisprep_job_id',fail_receipt)
+    with pytest.raises(ConnectionError):
+        submission_recovery.enqueue_tracked_rq_job(Queue(),_job_func,prep=object(),job_key='build',runid='run-1',args=('run-1',),
+                                                   on_job_id=lambda identity:events.append(('durable-id',identity)))
+    from uuid import UUID
+    assert UUID(next(event[1] for event in events if isinstance(event,tuple) and event[0]=='durable-id'))
+
+
+class _OwnedConnection:
+    """Model owner-checked Redis locks, including release and contention."""
+    def __init__(self):
+        self.owners = {}
+        self.acquired = []
+
+    def hget(self, *args):
+        return None
+
+    def lock(self, name, **kwargs):
+        from redis.exceptions import LockError
+        connection = self
+        class Lock:
+            def acquire(self, **kwargs):
+                if name in connection.owners:
+                    return False
+                connection.owners[name] = self
+                connection.acquired.append(name)
+                return True
+
+            def extend(self, *args, **kwargs):
+                if connection.owners.get(name) is not self:
+                    raise LockError("Cannot extend an unlocked lock")
+                return True
+
+            def release(self):
+                if connection.owners.get(name) is self:
+                    del connection.owners[name]
+        return Lock()
+
+
+def test_new_http_admission_reacquires_after_inherited_request_closed():
+    from contextvars import copy_context
+    connection = _OwnedConnection()
+    with submission_recovery.rq_submission_lock(connection, "run-1:request", lifecycle_key="run-1"):
+        inherited = copy_context()
+    assert not connection.owners
+
+    def next_request():
+        with submission_recovery.rq_submission_lock(connection, "run-1:request", lifecycle_key="run-1", inherit_lifecycle=False):
+            submission_recovery.checkpoint_run_lifecycle("run-1")
+            with submission_recovery.rq_submission_lock(connection, "run-1:model", lifecycle_key="run-1"):
+                submission_recovery.checkpoint_run_lifecycle("run-1")
+    inherited.run(next_request)
+    assert len([name for name in connection.acquired if "submission-lifecycle:" in name]) == 2
+    assert not connection.owners
+
+
+def test_new_http_admission_does_not_bypass_active_owner():
+    connection = _OwnedConnection()
+    with submission_recovery.rq_submission_lock(connection, "run-1:request", lifecycle_key="run-1"):
+        with pytest.raises(submission_recovery.RqSubmissionConflict, match="already in progress"):
+            with submission_recovery.rq_submission_lock(connection, "run-1:request", lifecycle_key="run-1", inherit_lifecycle=False, blocking_timeout=0):
+                pytest.fail("must acquire a real new lease")
+        submission_recovery.checkpoint_run_lifecycle("run-1")
+
+
+def test_nested_admission_still_rejects_lost_parent():
+    connection = _OwnedConnection()
+    with submission_recovery.rq_submission_lock(connection, "run-1:request", lifecycle_key="run-1"):
+        connection.owners.clear()
+        with pytest.raises(submission_recovery.RqSubmissionConflict, match="lock expired"):
+            with submission_recovery.rq_submission_lock(connection, "run-1:model", lifecycle_key="run-1"):
+                pytest.fail("lost parent must not permit nested mutation")
+
+
+def test_http_middleware_uses_fresh_admission_context(monkeypatch):
+    import asyncio
+    from contextvars import copy_context
+    from contextlib import contextmanager
+    import wepppy.microservices.rq_engine as engine
+    connection = _OwnedConnection()
+    with submission_recovery.rq_submission_lock(connection, "run-1:request", lifecycle_key="run-1"):
+        inherited = copy_context()
+
+    @contextmanager
+    def client(**kwargs):
+        yield connection
+    monkeypatch.setattr(engine, "_LIFECYCLE_REDIS_CLIENT", client)
+    monkeypatch.setattr(engine, "_verify_lifecycle_bearer", lambda request: None)
+
+    async def receive():
+        return {"type": "http.request", "body": b"upload", "more_body": False}
+
+    async def next_handler(request):
+        assert (await request._receive())["body"] == b"upload"
+        submission_recovery.checkpoint_run_lifecycle("run-1")
+        return "accepted"
+
+    request = SimpleNamespace(method="POST", url=SimpleNamespace(path="/api/runs/run-1/config/tasks/upload-sbs/"), headers={"Authorization": "Bearer test"}, _receive=receive)
+    result = inherited.run(asyncio.run, engine.run_mutation_lifecycle_middleware(request, next_handler))
+    assert result == "accepted"
+    assert not connection.owners

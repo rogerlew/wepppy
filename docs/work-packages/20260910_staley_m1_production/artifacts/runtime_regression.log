@@ -1,0 +1,2 @@
+INFO:wctl2:docker compose exec -T weppcloud python -
+{"exact_missing_receipt_recovered": true, "previous_receipt_not_reused": true, "durable_state_restored": true}

@@ -1433,7 +1433,7 @@ var MapController = (function () {
                     console.warn("Map GL: failed to refresh NHD flowlines", error);
                 });
             },
-            loadSbsMap: function () {
+            loadSbsMap: function (options) {
                 if (!map.sbs_layer || !map.hasLayer(map.sbs_layer) || typeof map.sbs_layer.refresh !== "function") {
                     return null;
                 }
@@ -1453,6 +1453,7 @@ var MapController = (function () {
                 }).catch(function (error) {
                     clearSbsLegend();
                     console.warn("Map GL: failed to refresh SBS map", error);
+                    if (options && options.propagateErrors) { throw error; }
                 });
             },
             hillQuery: function (queryUrl) {
