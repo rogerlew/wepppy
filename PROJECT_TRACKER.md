@@ -1,11 +1,17 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-09-09
-**Active Packages**: 35
+**Last Updated**: 2026-09-10
+**Active Packages**: 36
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
+
+Ready for Forest execution: [Batch hillslope-to-watershed RQ task boundary](docs/work-packages/20260910_batch_hillslope_watershed_boundary/package.md)
+— split each batch leaf into two dependent jobs on the existing `batch` queue;
+run the full pytest suite, validate the handoff on Forest, push master, and
+publish the immutable GHCR image. Full batch and memory integration occur only
+after package close in the openwepp.org deployment.
 
 Completed: [Native SBS upload](docs/work-packages/20260910_sbs_native_upload/package.md)
 — remove Python raster fallback; render SBS errors in Details and restore summaries.
