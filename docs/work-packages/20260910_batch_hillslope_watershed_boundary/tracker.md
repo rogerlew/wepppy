@@ -26,9 +26,7 @@
 - [ ] Close without deploying or running a batch on openwepp.org.
 
 ### In progress
-
-None.
-
+Contract checkpoint and independent reviews; baseline graph and 35 focused tests pass on Forest at `0c34afdb5`.
 ### Blocked
 
 None.

@@ -43,6 +43,13 @@ Creation access policy and its conditional 403/503 errors are defined in
 - Implementation conforms as of `41b23983d`: preallocated UUID RQ job IDs use
   the shared canonical generator and job lookup preserves exact stored IDs.
 
+## Batch leaf dependency specialization
+
+[Batch task boundary contract](batch-task-boundary-contract.md) defines the
+existing-queue two-stage batch leaf and its gated terminal-observer edge.
+The observer may report upstream failure but MUST NOT consume failed required
+outputs. Implementation conformance is pending.
+
 ## Job submission responses
 - Async job submission endpoints may return HTTP `200` or `202` depending on
   the route contract; async responses must include canonical job keys

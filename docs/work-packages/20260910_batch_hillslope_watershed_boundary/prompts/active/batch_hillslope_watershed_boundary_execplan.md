@@ -35,7 +35,10 @@ Compose handoff. The later openwepp.org deployment owns full-batch output and
 - [ ] Commit/push the reviewed candidate and deploy it to Forest.
 - [ ] Execute Forest RQ integration and close all evidence.
 - [ ] Commit/push closeout and verify the immutable GHCR image build.
-
+- [x] (2026-09-11) Execution baseline: Forest `master` at `0c34afdb5`;
+  graph check and 35 focused tests pass (12.43 s).
+- [x] Drafted durable handoff/terminal-observer contract; independent reviews
+  in progress before standalone contract commit and production edits.
 ## Surprises & Discoveries
 
 - Observation: RQ already forks a work-horse process for each job, while the
