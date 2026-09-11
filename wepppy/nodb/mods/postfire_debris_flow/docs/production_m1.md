@@ -65,7 +65,8 @@ artifacts so an old worker cannot replace a newer submission.
 
 Layout under postfire_debris_flow/: hidden .staging/<id>/ contains immutable
 source/normalized artifacts and unfinished predictor/results bundles. Only
-accepted completed model files are exposed through fixed result links.
+accepted completed model files are published directly in postfire_debris_flow/
+and exposed through the standard project browser and fixed result links.
 A completed accepted pointer in NoDb is the active authority; partial directories
 are never active. Retain previously accepted artifacts on upload/run failure.
 Specify retention/cleanup and orphan reconciliation before code; no destructive
@@ -407,21 +408,44 @@ numerical engine fingerprint, so task-only changes preserve scientific freshness
 
 ### Fixed completed-file access (publication review clarification)
 
-Keep completed bundles under hidden attempt storage. Copying to a generic public
-run folder before committing NoDb would expose unaccepted or partially published
-work. Instead use authenticated rq-engine GET
-`postfire-debris-flow/files/{attempt_id}/{name}` with `rq:export`, run/config
-checks, ID equality with the last accepted result and the four-name allowlist.
-Resolve only the recorded attempt's hidden results directory; verify its published
-file signature before serving. This is a fixed-file adapter, not a generic path
-or archive endpoint. Browser downloads use the existing session-token request
-helper and a temporary blob link. Stale previous results remain downloadable
-when their own files match the accepted record; missing/changed files return 409.
-No generic browseable publication directory is created. NoDb commit is the sole
-publication boundary, eliminating a two-store atomicity gap.
+Completed M1 outputs MUST be published directly as
+`postfire_debris_flow/events.parquet`, `design.parquet`, `inverse.parquet`, and
+`manifest.json`, following the ordinary RUSLE module-directory pattern. They
+must appear in the existing project file browser and use its existing project
+access rules. No new UI, nested result directory, symlink, or custom browser
+route is required. Scientifically partial results are published too.
 
-Open each validated regular file once, compare its accepted signature using that
-open handle and stream the same handle; do not reopen by pathname after validation.
+After the accepted NoDb commit, materialize the four fixed files from that
+accepted bundle, verifying their recorded hashes. Prepare all files privately,
+then replace each destination atomically using ordinary generated-file permissions,
+with manifest.json replaced last. Validate every source/destination path and all
+private-copy hashes before the first replacement.
+Serialize the latest durable-state read and installation with the existing
+postfire NoDb lock so an older callback cannot restore an older bundle.
+Each file is atomic; the four-file browser view is not a multi-file transaction.
+A publication I/O failure is explicit and retryable by republishing accepted
+files, without rerunning the model. No prior outputs are deleted first. A copy
+failure preserves accepted NoDb/originals but may leave mixed public files; repair
+with `wepppy.nodb.mods.postfire_debris_flow.publication.publish_outputs(wd)`.
+
+The accepted NoDb pointer and immutable attempt artifacts continue to establish
+scientific provenance. Existing authenticated fixed-file download links remain
+compatible: authenticated rq-engine GET `postfire-debris-flow/files/{attempt_id}/{name}`
+requires `rq:export`, run/config checks, accepted-ID equality, and the four-name
+allowlist. Resolve the recorded hidden bundle, open once, validate its published
+signature and SHA-256, then stream that same handle. Changed/missing files return
+409; stale previous results remain downloadable if their recorded files match.
+Private uploads and unfinished computations
+remain hidden. A failed/unaccepted new run does not replace visible prior outputs;
+visible files represent the last accepted run and may be scientifically stale.
+The control continues to show authoritative freshness.
+
+Existing accepted projects can be republished after checking their recorded
+artifact hashes, without changing their NoDb schema, source snapshots, numerical
+engine fingerprint, or model files. Publication lives outside fingerprinted
+engine modules. Absent/empty state is a no-op. Malformed records, changed source
+files, and symlinked paths fail explicitly before output replacement. This
+supersedes the former hidden-only output policy at the operator's direction.
 
 ### Owner completion and recovery conformance
 
