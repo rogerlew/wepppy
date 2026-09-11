@@ -120,3 +120,16 @@ def test_fork_failure_status_refresh_error_does_not_interrupt_failure_handling(m
     worker.handle_job_failure(job, object(), object(), exc_string='original task failure')
     assert captured == ['original task failure', 'published']
     assert 'Could not inspect failed fork prerequisite job_id=fork-child' in caplog.text
+
+
+@pytest.mark.parametrize("stage", ["hillslopes", "watershed"])
+def test_batch_stage_preserves_unvalidated_identity_without_run_access(monkeypatch, stage):
+    worker = _build_worker(monkeypatch)
+    job = _DummyJob("stage", args=("demo", object(), "upstream"),
+                    meta={"runid": "batch;;demo;;unvalidated-leaf"})
+    job.func_name = f"wepppy.rq.batch_rq.run_batch_{stage}_rq"
+    def forbid_lookup(_runid):
+        pytest.fail("worker must not access a batch leaf before task validation")
+    monkeypatch.setattr("wepppy.rq.rq_worker.get_wd", forbid_lookup)
+    assert worker.perform_job(job, object()) is True
+    assert job.meta["runid"] == "batch;;demo;;unvalidated-leaf"

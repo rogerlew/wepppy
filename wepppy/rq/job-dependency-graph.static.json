@@ -502,13 +502,27 @@
     "source_module": "wepppy/rq/ag_fields_rq.py"
   },
   {
-    "depends_on": [],
+    "depends_on": [
+      "job_id"
+    ],
+    "enqueue_target": "run_batch_hillslopes_rq",
+    "job_meta_stage": "jobs:0",
+    "notes": [],
+    "queue_name": "batch",
+    "source_function": "run_batch_rq",
+    "source_lineno": 637,
+    "source_module": "wepppy/rq/batch_rq.py"
+  },
+  {
+    "depends_on": [
+      "Dependency(jobs=[hillslope_job_id], allow_failure=True)"
+    ],
     "enqueue_target": "run_batch_watershed_rq",
     "job_meta_stage": "jobs:0",
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_batch_rq",
-    "source_lineno": 631,
+    "source_lineno": 647,
     "source_module": "wepppy/rq/batch_rq.py"
   },
   {
@@ -520,7 +534,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_batch_rq",
-    "source_lineno": 649,
+    "source_lineno": 666,
     "source_module": "wepppy/rq/batch_rq.py"
   },
   {

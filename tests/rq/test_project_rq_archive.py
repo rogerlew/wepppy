@@ -546,3 +546,20 @@ def test_postfire_records_survive_canonical_archive_and_restore(archive_rq_envir
     (failed/'status.json').write_text('changed')
     project.restore_archive_rq('demo',archive.name)
     assert {name:(run_dir/name).read_bytes() for name in expected} == expected
+
+
+@pytest.mark.parametrize("state", ["working", "failed", "success", "restored"])
+def test_batch_handoff_records_survive_archive_restore(archive_rq_environment, state):
+    project, tmp_path, _published, _prep = archive_rq_environment
+    run_dir = tmp_path / "demo"
+    receipt = run_dir / "batch_handoff" / "attempt.json"
+    receipt.parent.mkdir(parents=True)
+    payload = json.dumps({"status": state, "runid": "batch;;demo;;leaf"}).encode()
+    receipt.write_bytes(payload)
+    project.archive_rq("demo", comment="batch handoff evidence")
+    archive = next((run_dir / "archives").glob("*.zip"))
+    with zipfile.ZipFile(archive) as zf:
+        assert zf.read("batch_handoff/attempt.json") == payload
+    receipt.unlink()
+    project.restore_archive_rq("demo", archive.name)
+    assert receipt.read_bytes() == payload

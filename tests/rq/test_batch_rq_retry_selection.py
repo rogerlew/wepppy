@@ -50,6 +50,7 @@ class _FakeRedisPrep:
 def _runner(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> BatchRunner:
     monkeypatch.setattr(BatchRunner, "_init_base_project", lambda self: None)
     monkeypatch.setattr(batch_runner_module, "RedisPrep", _FakeRedisPrep)
+    monkeypatch.setattr(batch_runner_module, "clear_nodb_file_cache", lambda *_args, **_kwargs: [])
     batch_dir = tmp_path / "demo"
     batch_dir.mkdir(parents=True, exist_ok=True)
     runner = BatchRunner(str(batch_dir), "batch/default_batch.cfg", "dummy_base.cfg")
@@ -851,7 +852,7 @@ def test_run_batch_project_rehydrates_climate_inside_lock_for_downstream_readers
         lambda _wepp, climate, *_args, **_kwargs: downstream.append(climate),
     )
 
-    runner.run_batch_project(_feature(leaf))
+    runner.run_batch_hillslopes(_feature(leaf))
 
     assert events == [
         ("lock-enter", "climate"),
@@ -1052,9 +1053,14 @@ class _DummyJob:
         self.meta: dict[str, object] = {}
         self.saves = 0
         self.status = batch_rq.JobStatus.QUEUED
+        self.connection = None
+        self.args = ["demo", None, "hills"]
 
     def save(self) -> None:
         self.saves += 1
+
+    def save_meta(self) -> None:
+        self.save()
 
     def get_status(self, refresh: bool = True):
         return self.status
@@ -1166,7 +1172,7 @@ def test_run_batch_rq_enqueues_only_retry_eligible_features(
             assert name == "batch"
 
         def enqueue_call(
-            self, func, args=(), timeout=None, depends_on=None, job_id=None, meta=None
+            self, func, args=(), timeout=None, depends_on=None, job_id=None, meta=None, result_ttl=None
         ):
             job = _DummyJob(job_id or f"job-{len(enqueue_calls) + 1}")
             enqueue_calls.append(
@@ -1204,6 +1210,17 @@ def test_run_batch_rq_enqueues_only_retry_eligible_features(
         call for call in enqueue_calls if call["func"] is batch_rq.run_batch_watershed_rq
     ]
     assert [call["args"][1].runid for call in watershed_calls] == ["failed", "missing"]
+    hillslope_calls = [
+        call for call in enqueue_calls if call["func"] is batch_rq.run_batch_hillslopes_rq
+    ]
+    assert len(hillslope_calls) == len(watershed_calls) == 2
+    for hillslope, watershed in zip(hillslope_calls, watershed_calls):
+        assert watershed["depends_on"].dependencies == [hillslope["job"].id]
+        assert watershed["depends_on"].allow_failure is True
+        assert hillslope["depends_on"] == parent_job.id
+        assert watershed["args"][2] == hillslope["job"].id
+        assert hillslope["args"][2] == watershed["job"].id
+
     assert result["final_job_id"] == enqueue_calls[-1]["job"].id
     assert result["enqueued"] == 2
     assert result["selection"]["enqueued"] == 2
@@ -1265,7 +1282,7 @@ def test_run_batch_rq_full_rerun_enqueues_all_features(
             assert name == "batch"
 
         def enqueue_call(
-            self, func, args=(), timeout=None, depends_on=None, job_id=None, meta=None
+            self, func, args=(), timeout=None, depends_on=None, job_id=None, meta=None, result_ttl=None
         ):
             job = _DummyJob(job_id or f"job-{len(enqueue_calls) + 1}")
             enqueue_calls.append(
@@ -1361,6 +1378,10 @@ def test_run_batch_watershed_rq_writes_success_metadata(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    monkeypatch.setattr(batch_rq, "_validate_batch_stage", lambda *_args: None)
+    monkeypatch.setattr(batch_rq, "_verify_batch_handoff", lambda *_args: None)
+    upstream = SimpleNamespace(id="hills", meta={}, args=["demo", None, "job-leaf"])
+    monkeypatch.setattr(batch_rq.Job, "fetch", lambda *_args, **_kwargs: upstream)
     run_dir = tmp_path / "WA-38"
     run_dir.mkdir(parents=True)
     (run_dir / "run_metadata.json").write_text(
@@ -1374,9 +1395,10 @@ def test_run_batch_watershed_rq_writes_success_metadata(
 
     class _Runner:
         base_wd = str(tmp_path / "_base")
+        batch_runs_dir = str(tmp_path)
         rq_job_ids: dict[str, str] = {}
 
-        def run_batch_project(self, watershed_feature, job_id=None):
+        def run_batch_watershed(self, watershed_feature, job_id=None):
             return ()
 
         def is_task_enabled(self, task: TaskEnum) -> bool:
@@ -1393,7 +1415,7 @@ def test_run_batch_watershed_rq_writes_success_metadata(
         TaskEnum.run_wepp_hillslopes.value: 2,
     }
 
-    status, elapsed = batch_rq.run_batch_watershed_rq("demo", _feature("WA-38"))
+    status, elapsed = batch_rq.run_batch_watershed_rq("demo", _feature("WA-38"), "hills")
 
     assert status is True
     assert elapsed >= 0
@@ -1410,11 +1432,15 @@ def test_run_batch_watershed_rq_writes_failed_metadata_and_returns_false(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    monkeypatch.setattr(batch_rq, "_validate_batch_stage", lambda *_args: None)
+    monkeypatch.setattr(batch_rq, "_verify_batch_handoff", lambda *_args: None)
+    upstream = SimpleNamespace(id="hills", meta={}, args=["demo", None, "job-leaf"])
+    monkeypatch.setattr(batch_rq.Job, "fetch", lambda *_args, **_kwargs: upstream)
     run_dir = tmp_path / "WA-40"
     run_dir.mkdir(parents=True)
     published: list[str] = []
 
-    monkeypatch.setattr(batch_rq, "get_current_job", lambda: _DummyJob("job-failed-leaf"))
+    monkeypatch.setattr(batch_rq, "get_current_job", lambda: _DummyJob("job-leaf"))
     monkeypatch.setattr(batch_rq, "get_wd", lambda _runid: str(run_dir))
     monkeypatch.setattr(
         batch_rq.StatusMessenger,
@@ -1424,9 +1450,10 @@ def test_run_batch_watershed_rq_writes_failed_metadata_and_returns_false(
 
     class _Runner:
         base_wd = str(tmp_path / "_base")
+        batch_runs_dir = str(tmp_path)
         rq_job_ids: dict[str, str] = {}
 
-        def run_batch_project(self, watershed_feature, job_id=None):
+        def run_batch_watershed(self, watershed_feature, job_id=None):
             raise RuntimeError(
                 "WATAR requires completed WEPP tasks: run_wepp_hillslopes, "
                 "run_wepp_watershed"
@@ -1440,7 +1467,7 @@ def test_run_batch_watershed_rq_writes_failed_metadata_and_returns_false(
     monkeypatch.setattr(batch_rq.RedisPrep, "getInstance", _FakeRedisPrep.getInstance)
     _FakeRedisPrep.timestamps_by_wd[str(run_dir)] = {}
 
-    status, elapsed = batch_rq.run_batch_watershed_rq("demo", _feature("WA-40"))
+    status, elapsed = batch_rq.run_batch_watershed_rq("demo", _feature("WA-40"), "hills")
 
     assert status is False
     assert elapsed >= 0
@@ -1453,7 +1480,7 @@ def test_run_batch_watershed_rq_writes_failed_metadata_and_returns_false(
             "run_wepp_watershed"
         ),
     }
-    assert metadata["rq_job_id"] == "job-failed-leaf"
+    assert metadata["rq_job_id"] == "job-leaf"
     assert any("EXCEPTION_JSON" in message for message in published)
     assert any("BATCH_WATERSHED_TASK_COMPLETED" in message for message in published)
 
@@ -1462,6 +1489,10 @@ def test_run_batch_watershed_rq_task_status_failure_is_metadata_warning(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    monkeypatch.setattr(batch_rq, "_validate_batch_stage", lambda *_args: None)
+    monkeypatch.setattr(batch_rq, "_verify_batch_handoff", lambda *_args: None)
+    upstream = SimpleNamespace(id="hills", meta={}, args=["demo", None, "job-leaf"])
+    monkeypatch.setattr(batch_rq.Job, "fetch", lambda *_args, **_kwargs: upstream)
     run_dir = tmp_path / "WA-39"
     run_dir.mkdir(parents=True)
 
@@ -1471,9 +1502,10 @@ def test_run_batch_watershed_rq_task_status_failure_is_metadata_warning(
 
     class _Runner:
         base_wd = str(tmp_path / "_base")
+        batch_runs_dir = str(tmp_path)
         rq_job_ids: dict[str, str] = {}
 
-        def run_batch_project(self, watershed_feature, job_id=None):
+        def run_batch_watershed(self, watershed_feature, job_id=None):
             return ()
 
         def is_task_enabled(self, task: TaskEnum) -> bool:
@@ -1495,7 +1527,7 @@ def test_run_batch_watershed_rq_task_status_failure_is_metadata_warning(
 
     monkeypatch.setattr(batch_rq.RedisPrep, "getInstance", _get_prep)
 
-    status, elapsed = batch_rq.run_batch_watershed_rq("demo", _feature("WA-39"))
+    status, elapsed = batch_rq.run_batch_watershed_rq("demo", _feature("WA-39"), "hills")
 
     assert status is True
     assert elapsed >= 0
@@ -1549,3 +1581,59 @@ def test_final_batch_complete_publishes_failure_summary(
     assert any("STATUS run summary total=2 complete=1 failed=1" in message for message in published)
     assert any("TRIGGER batch BATCH_RUN_COMPLETED_WITH_FAILURES" in message for message in published)
     assert any("TRIGGER batch BATCH_RUN_COMPLETED" in message for message in published)
+
+
+@pytest.mark.parametrize("hills_enabled,water_enabled,completed", [
+    (True, True, False), (False, True, False), (True, False, False),
+    (False, False, False), (True, True, True),
+])
+def test_batch_phases_stop_at_interchange_and_rehydrate(
+    tmp_path, monkeypatch, hills_enabled, water_enabled, completed,
+):
+    runner = _runner(tmp_path, monkeypatch)
+    for task in runner.DEFAULT_TASKS:
+        runner._run_directives[task] = False
+    runner._run_directives[TaskEnum.run_wepp_hillslopes] = hills_enabled
+    runner._run_directives[TaskEnum.run_wepp_watershed] = water_enabled
+    run_dir = Path(runner.batch_runs_dir) / "phases"
+    run_dir.mkdir(parents=True)
+    _FakeRedisPrep.timestamps_by_wd[str(run_dir)] = {
+        task.value: 1 for task in (TaskEnum.run_wepp_hillslopes, TaskEnum.run_wepp_watershed)
+    } if completed else {}
+    events = []
+    monkeypatch.setattr(batch_runner_module, "get_wd", lambda _: str(run_dir))
+    monkeypatch.setattr(batch_runner_module, "_clear_batch_leaf_nodb_state", lambda *_: ())
+    monkeypatch.setattr(runner, "resync_base_project_attributes", lambda *_: None)
+    for cls in (batch_runner_module.Ron, batch_runner_module.Watershed,
+                batch_runner_module.Landuse, batch_runner_module.Soils):
+        monkeypatch.setattr(cls, "getInstance", lambda _: SimpleNamespace())
+    for cls in (batch_runner_module.RAP_TS, batch_runner_module.OpenET_TS, batch_runner_module.Ash):
+        monkeypatch.setattr(cls, "tryGetInstance", lambda _: None)
+    class Wepp:
+        def clean(self): events.append("clean")
+        def _check_and_set_baseflow_map(self): pass
+        def _check_and_set_phosphorus_map(self): pass
+        def prep_hillslopes(self): events.append("prep_hills")
+        def run_hillslopes(self): events.append("hills")
+        def prep_watershed(self): events.append("prep_water")
+        def run_watershed(self): events.append("water")
+    loaded = []
+    def load(_):
+        instance = Wepp(); loaded.append(instance); return instance
+    monkeypatch.setattr(batch_runner_module.Wepp, "getInstance", load)
+    monkeypatch.setattr(batch_runner_module.Climate, "getInstance", lambda _: SimpleNamespace())
+    for name in ("ensure_hillslope_interchange", "ensure_totalwatsed3",
+                 "ensure_watershed_interchange", "activate_query_engine_for_run"):
+        monkeypatch.setattr(batch_runner_module, name, lambda *_, _name=name, **__: events.append(_name))
+    guards = []
+    monkeypatch.setattr(batch_runner_module, "clear_nodb_file_cache", lambda runid, *, pup_relpath: guards.append(pup_relpath))
+    runner.run_batch_hillslopes(_feature("phases"))
+    assert "water" not in events
+    assert ("hills" in events) is (hills_enabled and not completed)
+    before = list(events)
+    runner.run_batch_watershed(_feature("phases"))
+    assert len(loaded) == 2 and loaded[0] is not loaded[1]
+    assert guards == ["wepp.nodb", "ash.nodb"]
+    assert ("water" in events) is (water_enabled and not completed)
+    assert events.count("clean") == int(hills_enabled and not completed)
+    assert "ensure_hillslope_interchange" not in events[len(before):]

@@ -183,3 +183,8 @@ the separately reviewed deployment supplies and operates those controls.
 - `AGENTS.md` – operational expectations for RQ workers within the broader WEPPcloud stack.
 - `docs/prompt_templates/module_documentation_workflow.prompt.md` – the workflow used for writing/maintaining documentation like this README.
 - `wepppy/microservices/rq_engine/` – rq-engine endpoints that call into these modules; useful when tracing how user actions map to background jobs.
+
+## Batch task boundary
+
+See [Batch hillslope and watershed jobs](../../docs/dev-notes/batch-task-boundary.md)
+for phase ownership, job-tree inspection, durable handoff records and retry.

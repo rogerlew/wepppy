@@ -520,7 +520,7 @@ class BatchRunner(NoDbBase):
         logger.info(f"Logger initialized for runid: {_runid}")
         return logger
 
-    def run_batch_project(
+    def run_batch_hillslopes(
         self,
         watershed_feature: WatershedFeature,
         job_id: Optional[str] = None,
@@ -731,6 +731,26 @@ class BatchRunner(NoDbBase):
                 watershed_pending=run_watershed,
             )
 
+        return tuple(locks_cleared) if locks_cleared else ()
+
+    def run_batch_watershed(
+        self,
+        watershed_feature: WatershedFeature,
+        job_id: Optional[str] = None,
+    ) -> None:
+        """Resume watershed/downstream work using freshly hydrated leaf state."""
+        runid = f'batch;;{self.batch_name};;{watershed_feature.runid}'
+        runid_wd = get_wd(runid)
+        logger = self._get_run_logger(watershed_feature.runid)
+        logger.info("Starting watershed stage for %s (RQ %s)", runid, job_id)
+        NoDbBase.cleanup_run_instances(runid_wd)
+        prep = RedisPrep.getInstance(runid_wd)
+        clear_nodb_file_cache(runid, pup_relpath="wepp.nodb")
+        wepp = Wepp.getInstance(runid_wd)
+        climate = Climate.getInstance(runid_wd)
+        run_watershed = self.is_task_enabled(TaskEnum.run_wepp_watershed) \
+            and prep[str(TaskEnum.run_wepp_watershed)] is None
+
         if run_watershed:
             logger.info('calling wepp.prep_watershed()')
             wepp.prep_watershed()
@@ -745,12 +765,22 @@ class BatchRunner(NoDbBase):
             )
             activate_query_engine_for_run(wepp, logger)
 
+        clear_nodb_file_cache(runid, pup_relpath="ash.nodb")
         ash = Ash.tryGetInstance(runid_wd)
         if ash is not None and self.is_task_enabled(TaskEnum.run_watar) \
             and prep[str(TaskEnum.run_watar)] is None:
             self._run_watar_stage(runid_wd, prep, ash, wepp, climate, logger)
 
-        return tuple(locks_cleared) if locks_cleared else ()
+
+    def run_batch_project(
+        self,
+        watershed_feature: WatershedFeature,
+        job_id: Optional[str] = None,
+    ) -> Tuple[str, ...]:
+        """Compatibility entry point for standalone scientific evidence scripts."""
+        locks_cleared = self.run_batch_hillslopes(watershed_feature, job_id=job_id)
+        self.run_batch_watershed(watershed_feature, job_id=job_id)
+        return locks_cleared
 
     def _run_watar_stage(
         self,

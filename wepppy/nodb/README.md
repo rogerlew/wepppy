@@ -125,3 +125,8 @@ when prepared again. See the [kslast map contract](../../docs/schemas/kslast-map
 for units, coverage policy, directory boundaries and diagnostics. The native
 release must export `identify_area_weighted_mean_single_raster_key` before
 restarting workers with this code.
+
+## Batch task boundary
+
+See [Batch hillslope and watershed jobs](../../docs/dev-notes/batch-task-boundary.md)
+for phase ownership, job-tree inspection, durable handoff records and retry.

@@ -79,6 +79,14 @@ class JobCancelledException(Exception):
 
 def _extract_runid(job: Job) -> str | None:
     """Best-effort runid extraction for jobs with positional or keyword args."""
+    if getattr(job, "func_name", None) in {
+        "wepppy.rq.batch_rq.run_batch_hillslopes_rq",
+        "wepppy.rq.batch_rq.run_batch_watershed_rq",
+    }:
+        # These tasks validate their composite leaf identity before run-tree
+        # access. Preserve supplied metadata and defer run logging to the task;
+        # args[0] is a batch name, not a leaf runid or authorized log location.
+        return None
     if job.args:
         candidate = job.args[0]
         if isinstance(candidate, str) and candidate:

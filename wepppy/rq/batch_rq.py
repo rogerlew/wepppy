@@ -14,6 +14,7 @@ import os
 import shutil
 import socket
 import time
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Tuple, List, Optional
@@ -193,6 +194,7 @@ def _job_targets_batch(job: Job, batch_name: str) -> bool:
         f"{__name__}.delete_batch_rq",
         f"{__name__}.run_batch_rq",
         f"{__name__}.run_batch_watershed_rq",
+        f"{__name__}.run_batch_hillslopes_rq",
         f"{__name__}._final_batch_complete_rq",
         "wepppy.rq.omni_rq.run_omni_scenarios_rq",
         "wepppy.rq.omni_rq.run_omni_scenario_rq",
@@ -526,6 +528,8 @@ def run_batch_rq(batch_name: str) -> dict[str, Any]:
         status_channel = f'{batch_name}:batch'
 
         if job is not None:
+            # Downstream identity validation must survive unbounded queue delay.
+            job.result_ttl = -1
             job.meta['runid'] = batch_name
             job.save()
 
@@ -619,8 +623,10 @@ def run_batch_rq(batch_name: str) -> dict[str, Any]:
                 runid = str(wf.runid)
                 child_runid = f'batch;;{batch_name};;{runid}'
                 child_job_id = new_rq_job_id()
+                hillslope_job_id = new_rq_job_id()
                 if job is not None:
                     job.meta[f'jobs:0,runid:{runid}'] = child_job_id
+                    job.meta[f'jobs:0,hillslopes,runid:{runid}'] = hillslope_job_id
                     job.save()
                 with rq_submission_lock(
                     redis_conn,
@@ -628,12 +634,23 @@ def run_batch_rq(batch_name: str) -> dict[str, Any]:
                     lifecycle_key=child_runid,
                 ) as lease:
                     lease.checkpoint()
+                    q.enqueue_call(
+                        func=run_batch_hillslopes_rq,
+                        args=[batch_name, wf, child_job_id],
+                        timeout=TIMEOUT,
+                        job_id=hillslope_job_id,
+                        result_ttl=-1,
+                        depends_on=job_id,
+                        meta={'runid': child_runid, 'batch_root_job_id': job_id,
+                              'jobs:0,func:run_batch_watershed_rq': child_job_id},
+                    )
                     child_job = q.enqueue_call(
                         func=run_batch_watershed_rq,
-                        args=[batch_name, wf],
+                        args=[batch_name, wf, hillslope_job_id],
                         timeout=TIMEOUT,
                         job_id=child_job_id,
-                        meta={'runid': child_runid},
+                        meta={'runid': child_runid, 'batch_root_job_id': job_id},
+                        depends_on=Dependency(jobs=[hillslope_job_id], allow_failure=True),
                     )
                 watershed_jobs.append(child_job)
 
@@ -653,6 +670,7 @@ def run_batch_rq(batch_name: str) -> dict[str, Any]:
                 depends_on=final_depends_on,
             )
             final_job.meta['runid'] = batch_name
+            final_job.meta['batch_root_job_id'] = job_id
             final_job.save()
             if job is not None:
                 job.meta['jobs:1,func:_final_batch_complete_rq'] = final_job.id
@@ -678,18 +696,122 @@ def run_batch_rq(batch_name: str) -> dict[str, Any]:
         raise
 
 
+def _validate_batch_stage(job: Job, batch_name: str, leaf: str, stage: str) -> str:
+    """Validate task identity before any run-tree access, including error writes."""
+    for value in (batch_name, leaf):
+        if (not isinstance(value, str) or not value or value in {".", ".."}
+                or any(token in value for token in ("/", "\\", "\x00", ";;"))):
+            raise ValueError("Invalid batch stage identity")
+    runid = f"batch;;{batch_name};;{leaf}"
+    if job is None or job.origin != "batch" or job.meta.get("runid") != runid:
+        raise ValueError("Batch stage job identity mismatch")
+    if (len(job.args) != 3 or job.args[0] != batch_name
+            or getattr(job.args[1], "runid", None) != leaf):
+        raise ValueError("Batch stage arguments mismatch")
+    if job.func_name != f"wepppy.rq.batch_rq.run_batch_{stage}_rq":
+        raise ValueError("Batch stage function mismatch")
+    root = Job.fetch(job.meta["batch_root_job_id"], connection=job.connection)
+    key = f"jobs:0,runid:{leaf}" if stage == "watershed" else f"jobs:0,hillslopes,runid:{leaf}"
+    if (root.origin != "batch" or root.func_name != "wepppy.rq.batch_rq.run_batch_rq"
+            or tuple(root.args) != (batch_name,) or root.meta.get(key) != job.id
+            or root.get_status(refresh=True) != JobStatus.FINISHED):
+        raise ValueError("Batch stage root lineage mismatch")
+    return runid
+
+
+def _batch_handoff_path(run_wd: Path, hillslope_job_id: str) -> Path:
+    if (not isinstance(hillslope_job_id, str) or not hillslope_job_id
+            or hillslope_job_id in {".", ".."}
+            or any(token in hillslope_job_id for token in ("/", "\\", "\x00"))):
+        raise ValueError("Invalid hillslope job ID")
+    path = run_wd / "batch_handoff" / f"{hillslope_job_id}.json"
+    if path.resolve() != run_wd.resolve() / "batch_handoff" / path.name:
+        raise ValueError("Batch handoff path escapes its leaf")
+    return path
+
+
+def _verify_batch_handoff(
+    job: Job, upstream: Job, runid: str, run_wd: Path,
+) -> None:
+    """Require successful RQ completion and exact durable attempt evidence."""
+    if upstream.get_status(refresh=True) != JobStatus.FINISHED:
+        raise RuntimeError(f"Hillslope prerequisite {upstream.id} did not finish successfully")
+    path = _batch_handoff_path(run_wd, upstream.id)
+    receipt = json.loads(path.read_text(encoding="utf-8"))
+    expected = {
+        "schema_version": 1, "status": "success", "runid": runid,
+        "hillslope_job_id": upstream.id, "watershed_job_id": job.id,
+    }
+    if not isinstance(receipt, dict) or any(receipt.get(k) != v for k, v in expected.items()):
+        raise ValueError("Batch handoff receipt mismatch")
+    if upstream.meta.get("batch_handoff") != receipt:
+        raise ValueError("Batch handoff RQ receipt mismatch")
+
+
+def run_batch_hillslopes_rq(
+    batch_name: str,
+    watershed_feature: WatershedFeature,
+    watershed_job_id: str,
+) -> dict[str, Any]:
+    """Complete preparation/hillslopes and publish the attempt-bound handoff."""
+    job = get_current_job()
+    runid = _validate_batch_stage(job, batch_name, watershed_feature.runid, "hillslopes")
+    downstream = Job.fetch(watershed_job_id, connection=job.connection)
+    _validate_batch_stage(downstream, batch_name, watershed_feature.runid, "watershed")
+    if (downstream.meta.get("batch_root_job_id") != job.meta.get("batch_root_job_id")
+            or downstream.args[2] != job.id or job.args[2] != downstream.id):
+        raise ValueError("Batch stage downstream lineage mismatch")
+    status_channel = f"{batch_name}:batch"
+    StatusMessenger.publish(status_channel, f"rq:{job.id} STARTED run_batch_hillslopes_rq({runid})")
+    try:
+        runner = BatchRunner.getInstanceFromBatchName(batch_name)
+        run_wd = Path(get_wd(runid))
+        if run_wd.resolve() != Path(runner.batch_runs_dir).resolve() / watershed_feature.runid:
+            raise ValueError("Batch leaf path escapes its workspace")
+        locks_cleared = runner.run_batch_hillslopes(watershed_feature, job_id=job.id)
+        receipt = {
+            "schema_version": 1, "status": "success", "runid": runid,
+            "hillslope_job_id": job.id, "watershed_job_id": watershed_job_id,
+            "completed_at": datetime.now(timezone.utc).isoformat(),
+            "hostname": socket.gethostname(), "pid": os.getpid(),
+        }
+        path = _batch_handoff_path(run_wd, job.id)
+        path.parent.mkdir(exist_ok=True)
+        # Same-directory atomic publication preserves the preceding receipt on failure.
+        with tempfile.NamedTemporaryFile(mode="w", dir=path.parent, delete=False) as stream:
+            temporary = Path(stream.name)
+            try:
+                json.dump(receipt, stream, indent=2)
+                stream.flush()
+                os.fsync(stream.fileno())
+                os.replace(temporary, path)
+            finally:
+                temporary.unlink(missing_ok=True)
+        job.meta["batch_handoff"] = receipt
+        job.meta["locks_cleared"] = list(locks_cleared)
+        job.save_meta()
+        StatusMessenger.publish(status_channel, f"rq:{job.id} COMPLETED run_batch_hillslopes_rq({runid})")
+        return receipt
+    except Exception:
+        # RQ task boundary: retain traceback and failed job status for the observer.
+        logger.exception("Batch hillslope stage failed for %s (job %s)", runid, job.id)
+        raise
+
+
 def run_batch_watershed_rq(
     batch_name: str,
     watershed_feature: WatershedFeature,
+    hillslope_job_id: str,
 ) -> Tuple[bool, float]:
-    """Execute the batch workflow for a single watershed feature.
+    """Complete watershed work or observe an unsuccessful hillslope prerequisite.
 
     Args:
         batch_name: Identifier of the batch runner workspace.
         watershed_feature: Feature metadata describing the watershed run.
+        hillslope_job_id: Exact upstream job whose durable handoff is required.
 
     Returns:
-        Tuple containing the success flag and the runtime in seconds.
+        Success flag and whole-leaf elapsed seconds, including the stage handoff.
     """
     job = get_current_job()
     job_id = job.id if job is not None else "N/A"
@@ -700,18 +822,34 @@ def run_batch_watershed_rq(
     start_ts = time.time()
     started_at = datetime.now(timezone.utc)
 
+    # Identity failures must not enter the run-metadata failure writer below.
+    _validate_batch_stage(job, batch_name, _runid, "watershed")
+    upstream = Job.fetch(hillslope_job_id, connection=job.connection)
+    _validate_batch_stage(upstream, batch_name, _runid, "hillslopes")
+    if (upstream.meta.get("batch_root_job_id") != job.meta.get("batch_root_job_id")
+            or upstream.args[2] != job.id or job.args[2] != upstream.id):
+        raise ValueError("Batch stage upstream lineage mismatch")
+    stage_started_at = started_at
+    upstream_started_at = getattr(upstream, "started_at", None)
+    if upstream_started_at is not None:
+        started_at = upstream_started_at.replace(tzinfo=timezone.utc)
+        start_ts = started_at.timestamp()
+    batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
+    runid_wd = Path(get_wd(runid))
+    if runid_wd.resolve() != Path(batch_runner.batch_runs_dir).resolve() / _runid:
+        raise ValueError("Batch leaf path escapes its workspace")
+
     try:
         StatusMessenger.publish(status_channel, f'rq:{job_id} STARTED {func_name}({runid})')
 
-        batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
-        locks_cleared = batch_runner.run_batch_project(watershed_feature, job_id=job_id)
-        if locks_cleared:
-            StatusMessenger.publish(
-                status_channel,
-                f'rq:{job_id} INFO cleared stale locks {list(locks_cleared)}',
-            )
+        _verify_batch_handoff(job, upstream, runid, runid_wd)
+        job.meta["watershed_stage_started"] = {
+            "hostname": socket.gethostname(), "pid": os.getpid(),
+            "started_at": stage_started_at.isoformat(),
+        }
+        job.save_meta()
+        batch_runner.run_batch_watershed(watershed_feature, job_id=job_id)
 
-        runid_wd = Path(get_wd(runid))
         prep: Optional[RedisPrep] = None
         try:
             prep = RedisPrep.getInstance(str(runid_wd))
@@ -721,38 +859,41 @@ def run_batch_watershed_rq(
         if batch_runner.is_task_enabled(TaskEnum.run_omni_scenarios) and (
             prep is None or prep[str(TaskEnum.run_omni_scenarios)] is None
         ):
+            root_job = Job.fetch(job.meta["batch_root_job_id"], connection=job.connection)
+            final_job_id = root_job.meta["jobs:1,func:_final_batch_complete_rq"]
+            # Publish intent before dispatch, under a short metadata-only lock.
+            # Omni can execute synchronously; never hold this lock during science.
+            with job.connection.lock(
+                f"batch-finalizer-link:{final_job_id}", timeout=30, blocking_timeout=30,
+            ):
+                root_job.refresh()
+                pending = list(root_job.meta.get("batch_pending_omni_links", []))
+                pending.append(job.id)
+                root_job.meta["batch_pending_omni_links"] = pending
+                root_job.save_meta()
             _reset_omni_nodb_from_base(Path(batch_runner.base_wd), runid_wd, runid)
             omni_final_job = run_omni_scenarios_rq(runid)
-            if job is not None and omni_final_job is not None:
-                job.meta['omni_final_job_id'] = omni_final_job.id
-                job.save()
             if omni_final_job is not None:
-                final_job_id = batch_runner.rq_job_ids.get("final_batch_complete_rq")
-                if not final_job_id:
-                    logger.warning(
-                        "batch_rq: missing final_batch_complete_rq id for %s; Omni job %s not linked",
-                        batch_name,
-                        omni_final_job.id,
-                    )
-                else:
-                    conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
-                    with redis.Redis(**conn_kwargs) as redis_conn:
-                        try:
-                            final_job = Job.fetch(final_job_id, connection=redis_conn)
-                        except Exception as exc:
-                            logger.warning(
-                                "batch_rq: failed to fetch final_batch_complete_rq %s for %s - %s",
-                                final_job_id,
-                                batch_name,
-                                exc,
-                            )
-                        else:
-                            dependency_ids = list(final_job._dependency_ids or [])
-                            if omni_final_job.id not in dependency_ids:
-                                dependency_ids.append(omni_final_job.id)
-                                final_job._dependency_ids = dependency_ids
-                                final_job.save()
-                                final_job.register_dependency()
+                job.meta['omni_final_job_id'] = omni_final_job.id
+                job.save_meta()
+            with job.connection.lock(
+                f"batch-finalizer-link:{final_job_id}", timeout=30, blocking_timeout=30,
+            ):
+                if omni_final_job is not None:
+                    final_job = Job.fetch(final_job_id, connection=job.connection)
+                    dependency_ids = list(final_job._dependency_ids or [])
+                    if omni_final_job.id not in dependency_ids:
+                        dependency_ids.append(omni_final_job.id)
+                        final_job._dependency_ids = dependency_ids
+                        final_job.save()
+                        final_job.register_dependency()
+                # Refresh after dispatch: other leaves may have added intent.
+                # Failure retains intent, preventing false final completion.
+                root_job.refresh()
+                pending = list(root_job.meta.get("batch_pending_omni_links", []))
+                pending.remove(job.id)
+                root_job.meta["batch_pending_omni_links"] = pending
+                root_job.save_meta()
 
         elapsed = time.time() - start_ts
         status = True
@@ -785,7 +926,7 @@ def run_batch_watershed_rq(
         }
 
         try:
-            run_wd = Path(get_wd(runid))
+            run_wd = runid_wd
             run_wd.mkdir(parents=True, exist_ok=True)
             _write_watershed_run_metadata(
                 run_wd=run_wd,
@@ -819,6 +960,12 @@ def _final_batch_complete_rq(batch_name: str) -> None:
 
     try:
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({batch_name})')
+
+        root_job_id = job.meta.get("batch_root_job_id")
+        if root_job_id:
+            root_job = Job.fetch(root_job_id, connection=job.connection)
+            if root_job.meta.get("batch_pending_omni_links"):
+                raise RuntimeError("Batch Omni dependency linkage is incomplete; retry after job inspection")
 
         batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
         run_states = batch_runner.classify_batch_run_states()

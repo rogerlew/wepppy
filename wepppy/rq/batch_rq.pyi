@@ -25,9 +25,16 @@ def run_batch_rq(batch_name: str) -> dict[str, Any]: ...
 
 def delete_batch_rq(batch_name: str) -> dict[str, Any]: ...
 
+def run_batch_hillslopes_rq(
+    batch_name: str,
+    watershed_feature: WatershedFeature,
+    watershed_job_id: str,
+) -> dict[str, Any]: ...
+
 def run_batch_watershed_rq(
     batch_name: str,
     watershed_feature: WatershedFeature,
+    hillslope_job_id: str,
 ) -> Tuple[bool, float]: ...
 
 def _final_batch_complete_rq(batch_name: str) -> None: ...

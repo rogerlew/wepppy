@@ -2,7 +2,7 @@
 
 ## Quick status
 
-- **Status**: Ready for Forest execution
+- **Status**: Reviewed implementation; Forest acceptance pending
 - **Started**: 2026-09-11 04:52 UTC
 - **Starting revision**: `29a18e00f87dc08f7832dc4f5cc8a7b87302562e`
 - **Live authorization**: Forest Docker Compose development stack only
@@ -15,18 +15,22 @@
 ### Ready
 
 - [ ] Execute the active ExecPlan from current `master` on Forest.
-- [ ] Establish the two-stage failure and handoff contract with failing tests.
-- [ ] Implement the BatchRunner phase boundary and batch RQ dependency chain.
-- [ ] Update stubs and the RQ dependency graph/catalog.
-- [ ] Pass focused and complete pytest suites and repository quality gates.
-- [ ] Complete independent correctness, QA/code, and security reviews.
+- [x] Establish the two-stage failure and handoff contract with failing tests.
+- [x] Implement the BatchRunner phase boundary and batch RQ dependency chain.
+- [x] Update stubs and the RQ dependency graph/catalog.
+- [x] Pass focused and complete pytest suites and repository quality gates.
+- [x] Complete independent correctness, QA/code, and security reviews.
 - [ ] Commit and push the reviewed implementation to `master`.
 - [ ] Deploy the exact candidate to Forest and validate the real two-job handoff.
 - [ ] Verify the master-triggered GHCR build and retain its immutable digest.
 - [ ] Close without deploying or running a batch on openwepp.org.
 
 ### In progress
-Contract checkpoint and independent reviews; baseline graph and 35 focused tests pass on Forest at `0c34afdb5`.
+Contract ancestors: `869ca7dcf`, `f221e7f2a`. All code review findings closed;
+Final 95 focused tests and post-review full suite (8447 passed, 103 skipped)
+pass. Forest unique fixture is prepared; no live
+jobs have been submitted and no worker has been restarted.
+
 ### Blocked
 
 None.

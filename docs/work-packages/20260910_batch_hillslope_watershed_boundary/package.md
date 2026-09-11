@@ -1,6 +1,6 @@
 # Batch hillslope-to-watershed RQ task boundary
 
-**Status**: Ready for execution on `forest`
+**Status**: Implementation reviewed; final validation and Forest handoff in progress
 **Started**: 2026-09-11 04:52 UTC
 **Starting revision**: `29a18e00f87dc08f7832dc4f5cc8a7b87302562e`
 

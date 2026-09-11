@@ -26,20 +26,42 @@ Compose handoff. The later openwepp.org deployment owns full-batch output and
 - [x] (2026-09-11 04:52 UTC) Pulled `master` to starting revision `29a18e00f`.
 - [x] (2026-09-11 04:52 UTC) Defined the existing-queue, two-task scope and the
   post-close Kubernetes integration boundary.
-- [ ] Record the handoff/failure contract and add failing tests.
-- [ ] Extract BatchRunner phases without changing scientific behavior.
-- [ ] Wire the two-stage RQ chain and terminal finalizer dependencies.
-- [ ] Update stubs, dependency catalog/graph, and durable documentation.
-- [ ] Pass focused tests and the complete pytest suite.
-- [ ] Complete independent correctness, QA/code, and security reviews.
+- [x] Contract checkpoint `869ca7dcf` approved independently and committed;
+  topology regression failed on the monolithic baseline (missing hillslope task).
+- [x] Extracted BatchRunner phases; existing 50 batch/WATAR tests pass.
+- [x] Wired root dispatch barrier, two-stage chain and terminal dependencies;
+  real isolated RQ transition coverage passes.
+- [x] Updated stubs, dependency catalog/graph, and durable documentation.
+- [x] Final source: 95 focused tests pass (29.44 s); complete suite 8447
+  passed, 103 skipped (960.51 s). Stubs, graph, docs and exception gates pass.
+- [x] Independent correctness, QA/code, and security reviews approved code;
+  all high/medium findings closed. Deployment acceptance remains pending.
 - [ ] Commit/push the reviewed candidate and deploy it to Forest.
 - [ ] Execute Forest RQ integration and close all evidence.
 - [ ] Commit/push closeout and verify the immutable GHCR image build.
 - [x] (2026-09-11) Execution baseline: Forest `master` at `0c34afdb5`;
   graph check and 35 focused tests pass (12.43 s).
 - [x] Drafted durable handoff/terminal-observer contract; independent reviews
-  in progress before standalone contract commit and production edits.
+  approved before standalone contract commit and production edits.
 ## Surprises & Discoveries
+
+- The production worker inferred a run ID from the batch-name argument and
+  overwrote composite leaf metadata. The two stages now defer run access until
+  task validation; real forking-worker and no-prevalidation-access tests pass.
+- Successful root/hillslope identity records need unlimited result retention
+  for unbounded queue delays; reviewed contract addendum `f221e7f2a` preceded
+  this implementation.
+- Merged concurrent governance revision `94b58e881` without conflicts. The
+  two-task implementation remains within its explicit complexity budget.
+- First complete suite passed 8445 tests (94 skipped, 960.32 s). The required
+  post-review complete rerun passed 8447 tests (103 skipped, 960.51 s).
+
+- Forest checkout was at `0c34afdb5`, newer than the planning baseline.
+- Pytest globally stubs `redis.Redis`; isolated RQ tests explicitly restore
+  `StrictRedis`. The pytest container lacks `redis-server`, so the isolated
+  host server exposes only a workspace Unix socket to that container.
+- Parallel Omni attachments formerly performed uncoordinated read/save of one
+  finalizer; the extracted terminal stage serializes that update.
 
 - Observation: RQ already forks a work-horse process for each job, while the
   Kubernetes worker container is long-lived. Therefore this package must not
@@ -48,6 +70,20 @@ Compose handoff. The later openwepp.org deployment owns full-batch output and
   is explicitly deferred to openwepp.org.
 
 ## Decision Log
+
+- Decision: retain whole-leaf elapsed time from the hillslope start, while
+  recording the watershed start separately for phase observability.
+- Decision: keep Omni dispatch outside short finalizer-metadata locks.
+  A durable pending-link flag prevents false completion after attachment failure.
+- Decision: use a real-controller Forest fixture with scientific tasks disabled
+  and explicit full rerun. It proves deployment wiring, not science or memory;
+  normal partial-retry behavior is covered by isolated RQ regression tests.
+
+- Decision: preserve `run_batch_project` only as a thin synchronous wrapper.
+  Rationale: the existing standalone WATAR generated-evidence script calls it;
+  RQ exclusively uses the two phase APIs.
+- Decision: require successful root dispatch before stage one.
+  Rationale: all dependency/finalizer linkage must exist before fast leaves run.
 
 - Decision: use the existing `batch` queue for both stages.
   Rationale: Roger explicitly rejected another pool; the smallest requested
@@ -65,7 +101,8 @@ Compose handoff. The later openwepp.org deployment owns full-batch output and
 
 ## Outcomes & Retrospective
 
-Pending implementation.
+Implementation and independent reviews are complete. Focused RQ, real worker,
+NoDb, archive, and Omni checks pass. Forest deployment and publication gates remain open.
 
 ## Context and Orientation
 
