@@ -6,7 +6,7 @@
 - **Reviewer**: Independent read-only review by `/root/contract_review_1` (implementation review; sign-off pending boundary evidence)
 - **Date**: 2026-09-11
 - **Scope reviewed**: `Landuse.modify`, MOFE synthesis override path, selected-landuse route behavior, and focused tests
-- **Commit/branch context**: implementation working tree after contract ancestor `134a3a9af`
+- **Commit/branch context**: implementation commit `a69be34ce` after contract ancestor `134a3a9af`
 - **Canonical contract(s)**: `docs/schemas/landuse-modification-contract.md`
 - **Related QA/security artifacts**: `docs/work-packages/20260911_modify_landuse_mofe/artifacts/20260911_contract_decision.md`
 
@@ -23,7 +23,7 @@
 | --- | --- | --- | --- |
 | Single-OFE state | yes | Existing assignment and summary rebuild | Existing route tests; focused code path |
 | MOFE state absent/never built | no for multi-OFE | Explicit build-first error before mutation | `test_modify_rejects_unbuilt_mofe_state` |
-| MOFE state populated and complete | yes | Update selected OFEs, synthesize files, rebuild summary | `test_modify_regenerates_mofe_assignments_and_managements`; synthesis override tests |
+| MOFE state populated and complete | yes | Update selected OFEs, synthesize files, rebuild summary | `test_modify_regenerates_mofe_assignments_and_managements`; synthesis override tests; synced `upraised-seventeen` run |
 | Supported legacy nested assignment state | yes | Preserve nesting and use existing builder normalization | Contract; builder override tests |
 | Empty, incomplete, or malformed MOFE state | no | Explicit error before mutation | `test_modify_rejects_incomplete_mofe_state` |
 | Unknown class or selected ID | no | Validation error; no assignment mutation | `test_modify_rejects_unknown_class_before_mutation`; existing route validation tests |
@@ -43,22 +43,24 @@
 - [x] Required state dimensions are enumerated separately from request inputs.
 - [x] Explicit assignments bypass optional burn lookup.
 - [x] Focused regression tests cover validation and synthesis wiring.
-- [ ] Direct unmocked persistence, archive/restore, browser/download, and downstream WEPP preparation evidence remains to be run before approval.
+- [x] Direct unmocked NoDb persistence, process-pool synthesis, generated-file and parquet-summary reload were exercised on synced `upraised-seventeen`; the tested hillslope was restored to its original class.
+- [ ] Archive/restore, browser/download, and downstream WEPP preparation evidence remains to be run before approval.
 
 ## Findings
 
 | ID | Severity | User/state surface | Description | Evidence | Required action | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| COR-01 | High | Artifact and downstream boundaries | Focused tests use test doubles for NoDb locking and management synthesis; they do not establish live archive/browser/downstream evidence. | Focused pytest results | Run production-equivalent disposable-run checks before approval. | Open |
+| COR-01 | Medium | Artifact and downstream boundaries | Live synced-run evidence now covers persistence, synthesis, files, summary, reload, and restoration; archive/browser/downstream evidence remains absent. | `upraised-seventeen` run at 2026-09-11 22:50-22:51 UTC; focused pytest | Run remaining production-equivalent checks before approval. | Open |
 
 ## Verdict
 
 - **Gate status**: `fail pending boundary evidence`
-- **Unresolved findings**: High 1; Medium 0; Low 0
+- **Unresolved findings**: High 0; Medium 1; Low 0
 - **Release recommendation**: `hold`
 - **Reviewer sign-off**: pending direct boundary evidence
 
 ## Artifact Observability Gate (Required)
 
 - [x] Existing landuse layout, parquet summary, logs, and status/error paths are named.
-- [ ] Real writer/failure, archive/restore, browser/download, and downstream preparation evidence remains required before production rollout.
+- [x] Real writer and generated-file persistence were exercised on the synced run.
+- [ ] Archive/restore, browser/download, downstream preparation, and real writer-failure retention evidence remain required before production rollout.

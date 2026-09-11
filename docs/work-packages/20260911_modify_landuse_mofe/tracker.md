@@ -7,7 +7,13 @@
 - Two independent contract reviews approved after state/failure-policy clarification.
 - Contract and package documentation lint passed.
 - Standalone contract ancestor committed as `134a3a9af`.
-- Implementation and focused regression tests complete; correctness review recommends ship with disposable-run artifact/downstream checks before deployment.
+- Implementation and focused regression tests complete. A disposable synced run was exercised with real NoDb locking, process-pool MOFE synthesis, parquet summary persistence, reload, and restoration of the original selection. Archive/browser/downstream checks remain pending before deployment.
+
+Runtime evidence: on 2026-09-11 22:50 UTC, Topaz 1433 changed 90 -> 424;
+`domlc_mofe_d` changed to `{'1': '424'}`, the regenerated file was written, and
+summary class 424 reported 0.3125 area / 0.0172867% coverage. At 22:51 UTC the
+selection was restored 424 -> 90; final counts returned to 434 hillslopes class
+424, 21 class 90, 1,052 OFE segments class 90, and 13 class 70.
 
 ## Decisions and compatibility plan
 
