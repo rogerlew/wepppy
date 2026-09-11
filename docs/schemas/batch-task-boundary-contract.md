@@ -36,6 +36,10 @@ Handoff evidence is written atomically to visible
 successfully. It records schema version, run identity, both job IDs, status,
 completion time and process/host observations. The upstream RQ metadata mirrors
 the receipt; the run artifact is retained across ordinary retry and archive.
+Root dispatch and hillslope identity jobs MUST use non-expiring successful
+result retention: a delayed watershed job has no bounded queue wait and still
+needs these exact records. They remain inspectable until explicit operator
+cleanup; no automatic job deletion is added.
 Completion is not inferred merely from file existence. Stage two verifies the
 receipt and upstream RQ identity/status before any mutable hydration.
 
