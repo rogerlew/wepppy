@@ -463,6 +463,10 @@ receipt or queue write. Reconciliation uses that ID, function, queue and run/att
 arguments, never a previous attempt's Redis marker. Reconcile under the existing
 submission lease and re-read durable state before projecting a terminal failure.
 No enqueue response is required to recover a successfully queued operation.
+The producer completes the exact-ID queued receipt before queue admission, then
+hands NoDb mutation ownership to the worker. A successful enqueue response must
+not reacquire the controller lock or rewrite the association: an immediately
+starting worker may already own that lock. RQ remains the queue-status authority.
 
 Uploaded source and companion hashes are recorded while streaming, checked across
 Auto inspection and normalization, and retained through accepted publication.

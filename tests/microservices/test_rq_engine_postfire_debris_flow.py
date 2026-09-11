@@ -220,3 +220,32 @@ def test_new_attempt_requires_explicit_legacy_migration(tmp_path):
     with pytest.raises(p.WorkflowError,match='migration'):
         routes.new_attempt(tmp_path,'upload_attempt',{})
     assert not (tmp_path/'postfire_debris_flow'/'attempts').exists()
+
+
+@pytest.mark.parametrize('kind', ['upload_attempt','run_attempt'])
+def test_enqueue_hands_off_without_writing_over_started_worker(tmp_path,monkeypatch,kind):
+    from wepppy.nodb.mods.postfire_debris_flow import preflight
+    from wepppy.nodb.mods.postfire_debris_flow.postfire_debris_flow import PostfireDebrisFlow
+    monkeypatch.setattr(preflight,'notify',lambda wd:None)
+    controller=PostfireDebrisFlow(str(tmp_path),'disturbed9002_wbt.cfg')
+    monkeypatch.setattr(p,'mutable',lambda wd:controller)
+    monkeypatch.setattr(routes.RedisPrep,'getInstance',lambda wd:object())
+    record,_=routes.new_attempt(tmp_path,kind,{'frequency':'cli'})
+    job_id='00000000-0000-4000-8000-000000000123'
+    def start_immediately(q,func,**kwargs):
+        kwargs['on_job_id'](job_id)
+        # Queue admission happens after the producer has durably recorded the ID.
+        saved=PostfireDebrisFlow.load_detached(str(tmp_path)).state[kind]
+        assert saved['job_id']==job_id
+        assert saved['phase']=='queued'
+        controller.change(lambda state:state[kind].update(phase='running'))
+        # Worker still owns a mutation when enqueue returns to the producer.
+        controller.lock()
+        return SimpleNamespace(id=job_id)
+    monkeypatch.setattr(routes,'enqueue_tracked_rq_job',start_immediately)
+    try:
+        response=routes.enqueue(object(),str(tmp_path),'test',kind,record)
+    finally:
+        controller.unlock()
+    assert json.loads(response.body)['job_id']==job_id
+    assert controller.state[kind]['phase']=='running'

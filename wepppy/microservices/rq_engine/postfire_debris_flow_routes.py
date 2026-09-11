@@ -132,6 +132,7 @@ def new_attempt(wd, kind, snapshot, **extra):
 def enqueue(q,wd,runid,kind,record):
     def save_receipt(job_id):
         record['job_id'] = job_id
+        record['phase'] = 'queued'
         def apply(state):
             state[kind] = record
             if kind == 'run_attempt': state['frequency_source'] = record['snapshot']['frequency']
@@ -147,12 +148,7 @@ def enqueue(q,wd,runid,kind,record):
     except RqSubmissionConflict:
         p.update_attempt(wd,kind,record['id'],phase='failed',retryable=True)
         raise
-    def associate(state):
-        attempt=state[kind]
-        if attempt['id']==record['id']:
-            attempt['job_id']=job.id
-            if attempt['phase']=='staged':attempt['phase']='queued'
-    p.mutable(wd).change(associate)
+    # The worker can start before enqueue returns; all producer state is saved above.
     return JSONResponse({'job_id':job.id,'result':{'attempt_id':record['id']}})
 
 

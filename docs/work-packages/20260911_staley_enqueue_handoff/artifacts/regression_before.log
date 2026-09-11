@@ -1,0 +1,125 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/microservices/test_rq_engine_postfire_debris_flow.py -k enqueue_hands_off --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 21 items / 19 deselected / 2 selected
+
+tests/microservices/test_rq_engine_postfire_debris_flow.py F
+
+=================================== FAILURES ===================================
+__ test_enqueue_hands_off_without_writing_over_started_worker[upload_attempt] __
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-0/test_enqueue_hands_off_without0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7b0734a7fa10>
+kind = 'upload_attempt'
+
+    @pytest.mark.parametrize('kind', ['upload_attempt','run_attempt'])
+    def test_enqueue_hands_off_without_writing_over_started_worker(tmp_path,monkeypatch,kind):
+        from wepppy.nodb.mods.postfire_debris_flow import preflight
+        from wepppy.nodb.mods.postfire_debris_flow.postfire_debris_flow import PostfireDebrisFlow
+        monkeypatch.setattr(preflight,'notify',lambda wd:None)
+        controller=PostfireDebrisFlow(str(tmp_path),'disturbed9002_wbt.cfg')
+        monkeypatch.setattr(p,'mutable',lambda wd:controller)
+        monkeypatch.setattr(routes.RedisPrep,'getInstance',lambda wd:object())
+        record,_=routes.new_attempt(tmp_path,kind,{'frequency':'cli'})
+        job_id='00000000-0000-4000-8000-000000000123'
+        def start_immediately(q,func,**kwargs):
+            kwargs['on_job_id'](job_id)
+            # Queue admission happens after the producer has durably recorded the ID.
+            saved=PostfireDebrisFlow.load_detached(str(tmp_path)).state[kind]
+            assert saved['job_id']==job_id
+            controller.change(lambda state:state[kind].update(phase='running'))
+            # Worker still owns a mutation when enqueue returns to the producer.
+            controller.lock()
+            return SimpleNamespace(id=job_id)
+        monkeypatch.setattr(routes,'enqueue_tracked_rq_job',start_immediately)
+        try:
+>           response=routes.enqueue(object(),str(tmp_path),'test',kind,record)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/microservices/test_rq_engine_postfire_debris_flow.py:246:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+wepppy/microservices/rq_engine/postfire_debris_flow_routes.py:155: in enqueue
+    p.mutable(wd).change(associate)
+wepppy/nodb/mods/postfire_debris_flow/postfire_debris_flow.py:51: in change
+    with self.locked():
+/usr/local/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+wepppy/nodb/base.py:1682: in locked
+    self.lock()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <wepppy.nodb.mods.postfire_debris_flow.postfire_debris_flow.PostfireDebrisFlow object at 0x7b0734a7fa40>
+ttl = None
+
+    def lock(self, ttl: Optional[int] = None):
+        if self.readonly:
+            raise Exception('lock() called on readonly project')
+
+        lock_client = _ensure_redis_lock_client()
+
+        replacement_key = _run_replacement_lock_key(self.runid)
+        if lock_client.get(replacement_key) is not None:
+            raise NoDbRunReplacingError('Run replacement is in progress.')
+
+        ttl_seconds = LOCK_DEFAULT_TTL if ttl is None else max(1, int(ttl))
+        lock_key = self._distributed_lock_key
+
+        token = uuid.uuid4().hex
+        payload = _serialize_lock_payload(token, ttl_seconds)
+        acquired = lock_client.set(lock_key, payload, nx=True, ex=ttl_seconds)
+        if not acquired:
+            existing_payload = lock_client.get(lock_key)
+            existing_data = _parse_lock_payload(existing_payload) if existing_payload else {}
+            message = 'lock() called on an already locked nodb'
+            owner = existing_data.get('owner')
+            if owner:
+                message += f' (owner={owner})'
+            else:
+                existing_token = existing_data.get('token')
+                if existing_token:
+                    message += f' (token={existing_token})'
+>           raise NoDbAlreadyLockedError(message)
+E           wepppy.nodb.base.NoDbAlreadyLockedError: lock() called on an already locked nodb (owner=40b1431e0e89:1076)
+
+wepppy/nodb/base.py:2331: NoDbAlreadyLockedError
+------------------------------ Captured log call -------------------------------
+WARNING  wepppy.weppcloud.app:agent_auth.py:40 AGENT_JWT_SECRET not configured; falling back to SECRET_KEY for agent JWTs
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+../../opt/venv/lib/python3.12/site-packages/starlette/applications.py:239
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+../../opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+../../opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16
+  /opt/venv/lib/python3.12/site-packages/passlib/pwd.py:16: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+tests/microservices/test_rq_engine_postfire_debris_flow.py::test_enqueue_hands_off_without_writing_over_started_worker[upload_attempt]
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The ConfirmRegisterForm and the confirm_register_form option are deprecated as of version 5.6.0 and will be removed in a future release.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+tests/microservices/test_rq_engine_postfire_debris_flow.py::test_enqueue_hands_off_without_writing_over_started_worker[upload_attempt]
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The RegisterForm is deprecated as of version 5.6.0 and will be removed in a future release. The form RegisterFormV2 should be sub-classed instead.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/microservices/test_rq_engine_postfire_debris_flow.py::test_enqueue_hands_off_without_writing_over_started_worker[upload_attempt]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+================= 1 failed, 19 deselected, 8 warnings in 3.07s =================

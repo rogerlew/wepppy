@@ -285,3 +285,8 @@ scientific limitation that implementation cannot resolve.
   ordinary browser/downloads, and archive/restore verified. Offline M3 counting
   rasters are retained as inspectable support evidence. M3 production and reports
   remain deferred.
+
+- 2026-09-11: [Enqueue handoff fix](../../../../docs/work-packages/20260911_staley_enqueue_handoff/package.md)
+  removes the successful post-enqueue NoDb write that raced an immediately
+  starting upload/model worker. Exact queued receipts persist before admission;
+  85 focused tests and an actual retained-upload retry passed.

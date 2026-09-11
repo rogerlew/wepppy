@@ -4233,3 +4233,5 @@ If this tracker format isn't working or you have suggestions:
 - [ ] Update metrics section with recent data
 
 - Completed 2026-09-11: [Artifact observability and Staley intermediate records](docs/work-packages/20260911_artifact_observability/package.md).
+
+- Completed 2026-09-11: [Staley enqueue handoff conformance fix](docs/work-packages/20260911_staley_enqueue_handoff/package.md).
