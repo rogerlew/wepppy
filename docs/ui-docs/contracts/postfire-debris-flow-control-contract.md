@@ -169,6 +169,9 @@ watershed. Check the file and its location.” Details may expand in the job log
 
 ## Run action and completion
 
+Render **Design storm rainfall** with the shared `ui.fieldset` macro so its
+legend and border use theme colors, as in the Bootstrap control.
+
 The only run option is **Design storm rainfall**: “Project climate” or
 “NOAA Atlas 14”. Proposed default: Project climate. NOAA is disabled when its
 artifact is unavailable or stale, with “NOAA rainfall estimates are not available for
@@ -214,6 +217,12 @@ NoDb, hashes, stencils, schema versions and filenames of internal artifacts.
 
 Server-rendered/hydrated state is authoritative after reload, including upload
 preparation, queued/running jobs, previous success, failure and changed inputs.
+Restore the latest attempt's linked job ID using the shared `ui.job_hint`,
+separate from the ordinary workflow message. Reattach terminal jobs on reload so
+`controlBase` restores failure Details and status/timestamps. Preserve its escaped
+HTML layout, including separate status and timeline blocks; flattening HTML to
+text concatenates labels. Clear old status/Details before retrying, retain the
+accepted map summary, and ignore late responses from an older tracked job.
 A unit preference change must not rebuild or mark results stale. Use project
 Unitizer for dimensional status/help values; percent coverage and likelihood
 retain explicit labels. Show dates/times using existing project conventions.

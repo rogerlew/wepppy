@@ -25,13 +25,14 @@
   {{ ui.text_display(label='Uploaded dNBR map', content=uploaded_dnbr_filename) }}
 </div>
 <div class="wc-control__panel-summary" data-pfdf-summary></div>
-<fieldset><legend>Design storm rainfall</legend>
+{% call ui.fieldset(legend="Design storm rainfall") %}
 <label class="wc-choice"><input type="radio" name="frequency_source" value="cli" checked> Project climate</label>
 <label class="wc-choice"><input type="radio" name="frequency_source" value="noaa" disabled> NOAA Atlas 14</label>
 <p data-pfdf-noaa class="wc-text-muted">NOAA rainfall estimates are not available for this project.</p>
-</fieldset>
+{% endcall %}
 <p>Storm events always use the project climate.</p>
 <button type="button" class="pure-button pure-button-primary" data-pfdf-action="run" disabled>Run debris-flow model</button>
+{{ ui.job_hint("hint_postfire_debris_flow", extra_class="wc-field__help") }}
 <p data-pfdf-message role="status"></p>
 <p data-pfdf-warning class="wc-text-muted" role="status"></p>
 <div data-pfdf-files></div>

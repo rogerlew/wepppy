@@ -13,6 +13,7 @@ import pyarrow.parquet as pq
 
 __all__ = ['RainfallError']
 MAX_BYTES = 64 * 1024 * 1024
+MAX_PREDICTOR_BYTES = 96 * 1024 * 1024
 MAX_TEXT = 1024 * 1024
 MAX_DECODED = 128 * 1024 * 1024
 HASH = re.compile(r'[0-9a-f]{64}\Z')
@@ -47,9 +48,9 @@ def regular(path, limit=MAX_BYTES):
     return p
 
 
-def digest(path):
+def digest(path, limit=MAX_BYTES):
     h = hashlib.sha256()
-    with regular(path).open('rb') as stream:
+    with regular(path, limit).open('rb') as stream:
         for block in iter(lambda: stream.read(1024 * 1024), b''):
             h.update(block)
     return h.hexdigest()
@@ -64,16 +65,17 @@ def pinned(path, expected, consumed, limit=MAX_BYTES):
     key = str(p)
     if key not in expected or not hash_value(expected[key]):
         fail('missing_provenance', f'Expected SHA-256 required: {p}')
-    actual = digest(p)
+    actual = digest(p, limit)
     if actual != expected[key]:
         fail('provenance_mismatch', f'SHA-256 mismatch: {p}')
     consumed[key] = actual
     return p
 
 
-def recheck(consumed):
+def recheck(consumed, *, limits=None):
     for path, expected in consumed.items():
-        if digest(path) != expected:
+        limit = (limits or {}).get(path, MAX_BYTES)
+        if digest(path, limit) != expected:
             fail('source_changed', f'Source changed: {path}')
 
 
@@ -144,7 +146,7 @@ def read_table(path, *, max_rows, numeric=False, schema=None):
     return table.replace_schema_metadata(None)
 
 
-def load_predictors(path, expected, consumed):
+def load_predictors(path, expected, consumed, *, artifact_limits=None):
     p = pinned(path, expected, consumed, MAX_TEXT)
     m = read_json(p)
     validate_predictors(m)
@@ -152,11 +154,14 @@ def load_predictors(path, expected, consumed):
         fail('invalid_input', 'Unexpected predictor artifact names')
     # Only fixed artifact paths are read. Source and preparation paths are provenance.
     for name in ARTIFACTS:
-        artifact = regular(p.parent / name)
-        actual = digest(artifact)
+        limit = MAX_TEXT if name == 'wbt/summary.json' else MAX_PREDICTOR_BYTES
+        artifact = regular(p.parent / name, limit)
+        actual = digest(artifact, limit)
         if actual != m['artifacts_sha256'][name]:
             fail('provenance_mismatch', 'Predictor artifact digest mismatch')
         consumed[str(artifact)] = actual
+        if artifact_limits is not None:
+            artifact_limits[str(artifact)] = limit
     summary = read_json(p.parent / 'wbt/summary.json')
     t = m['predictors']['T']
     if summary != t.get('wbt_summary') or summary.get('status') != 'complete' or summary.get('T') != t['value']:

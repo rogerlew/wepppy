@@ -11,3 +11,9 @@ Independent read-only reviewers: contract_correctness and contract_security.
   Dedicated short run-scoped Redis projection lock serializes notifiers; no
   authenticated GET writes or automatic reconciliation. Correctness accepted with ownership check before writing; security accepted.
   Both reviewers require final implementation and live validation.
+
+Final source review: both reviewers accepted. Correctness follow-ups (recovery
+dump persistence and nonpositive dependency timestamps) were fixed and reviewed.
+Required live evidence subsequently passed: real Redis/NoDb clear/restore probe,
+current-result reconciliation, public WebSocket boolean, and browser/reload.
+See validation.md for evidence.

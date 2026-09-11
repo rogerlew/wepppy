@@ -1,6 +1,6 @@
 # Staley predictor artifact admission repair
 
-Status: active. Repair the reported resource_limit failure on addicted-reservist.
+Status: completed 2026-09-11. Repair the reported resource_limit failure on addicted-reservist.
 Terrain construction succeeded; rainfall_io.load_predictors rejected the
 74,129,489-byte generated slope TIFF against the rainfall 64 MiB cap.
 

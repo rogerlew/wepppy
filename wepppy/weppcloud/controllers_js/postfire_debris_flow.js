@@ -14,8 +14,9 @@
         function adapter(element) {
             return {length: element ? 1 : 0, element: element,
                 text: function (value) { if (element) { element.textContent = value; } },
-                html: function (value) { if (element) { var parsed = new global.DOMParser().parseFromString(String(value || ''),'text/html'); element.textContent = parsed.body.textContent; } },
-                append: function (value) { if (element) { element.append(String(value)); } },
+                // controlBase supplies escaped markup for job links, status and tracebacks.
+                html: function (value) { if (element) { element.innerHTML = value == null ? '' : String(value); } },
+                append: function (value) { if (element && value != null) { if (value instanceof global.Node) { element.append(value); } else { element.insertAdjacentHTML('beforeend',String(value)); } } },
                 empty: function () { if (element) { element.textContent = ''; } },
                 show: function () { if (element) { element.hidden = false; } },
                 hide: function () { if (element) { element.hidden = true; } }};
@@ -25,7 +26,9 @@
         controller.status = adapter(form.querySelector('#status'));
         controller.stacktrace = adapter(form.querySelector('#stacktrace'));
         controller.rq_job = adapter(form.querySelector('#rq_job'));
-        controller.hint = adapter(node('message'));
+        controller.hint = adapter(form.querySelector('[data-job-hint]'));
+        controller.statusPanelEl = dom.qs('#postfire_status_panel');
+        controller.stacktracePanelEl = dom.qs('#postfire_stacktrace_panel');
         controller.poll_completion_event = 'POSTFIRE_TASK_COMPLETED';
         controller.attach_status_stream(controller, {element: dom.qs('#postfire_status_panel'), channel: 'postfire_debris_flow', runId: global.runid, logLimit:200});
         function table(rows) {
@@ -81,11 +84,16 @@
                 node('summary').replaceChildren(table([ ['File',d.filename],['Format / data type',d.format + ' / ' + d.dtype],['Prepared cell size',size],['Watershed coverage',(100*d.coverage_fraction).toFixed(1)+'%'],['Uploaded values',d.source_range.map(function (v) {return Number(v.toPrecision(4));}).join(' to ')],['Applied scale',scale],['Prepared dNBR values',d.prepared_range.map(function (v) {return Number(v.toPrecision(4));}).join(' to ')]]));
             } else { node('summary').replaceChildren(); }
             var active = uploadBusy ? next.upload : runBusy ? next.run : null;
-            if (active) {
+            var latest = [next.upload, next.run].filter(Boolean).sort(function (a,b) { return String(b.created_at || '').localeCompare(String(a.created_at || '')); })[0];
+            var tracked = active || latest;
+            if (tracked && tracked.job_id && controller._trackedJob !== tracked.job_id) {
+                controller._trackedJob = tracked.job_id;
+                controller.set_rq_job_id(controller,tracked.job_id);
+            }
+            if (submitting) { message(submitting === 'run' ? 'Waiting to run…' : 'Uploading dNBR…'); }
+            else if (active) {
                 message(uploadBusy ? 'Preparing dNBR…' : 'Calculating debris-flow likelihood…');
-                if (active.job_id && controller._trackedJob !== active.job_id) { controller._trackedJob = active.job_id; controller.set_rq_job_id(controller,active.job_id); }
-            } else if (next.upload && next.upload.error) { message(next.upload.error.message); }
-            else if (next.run && next.run.error) { message(next.run.error.message); }
+            } else if (latest && latest.error) { message(latest.error.message); }
             else if (next.freshness === 'stale') { message('Inputs changed. Run the model again.'); }
             else if (next.results) { message(next.results.partial ? 'Run complete. Some probabilities could not be calculated.' : 'Run complete.'); }
             else if (d && d.coverage_fraction < 1) { message('The dNBR map covers only part of the watershed. Calculations will use the available dNBR values.'); }
@@ -118,7 +126,8 @@
         }
         async function submit(action) {
             if (submitting || !state || state.readonly) { return; }
-            submitting=true; render(state);
+            controller.reset_panel_state(controller, {clearSummary:false});
+            submitting=action; render(state);
             var failure = null;
             try {
                 var result, payload;
@@ -140,6 +149,7 @@
                         result=await http.postJsonWithSessionToken(url('retry-dnbr'),payload,{form:form});
                     }
                 }
+                controller._trackedJob = result.body.job_id;
                 controller.set_rq_job_id(controller,result.body.job_id);
                 await refresh();
             } catch (error) { failure=error.message || 'The operation could not finish.'; }
@@ -163,7 +173,7 @@
         controller.events.on('job:completed',preflight); controller.events.on('job:error',preflight);
         controller.bootstrap=function () {selection();refresh();if(global.UnitizerClient) {global.UnitizerClient.ready().then(function () {if(state) {render(state);}});}};
         controller.refresh=refresh;controller.render=render;
-        controller.destroy=function () {requestNumber++;controller.detach_status_stream(controller);document.removeEventListener('unitizer:preferences-changed',unitChange);global.clearTimeout(timer);document.removeEventListener('preflight:update',preflight);document.removeEventListener('preflight:connection',connection);};
+        controller.destroy=function () {requestNumber++;controller.stop_job_status_polling(controller);controller.detach_status_stream(controller);document.removeEventListener('unitizer:preferences-changed',unitChange);global.clearTimeout(timer);document.removeEventListener('preflight:update',preflight);document.removeEventListener('preflight:connection',connection);};
         return controller;
     }
     global.PostfireDebrisFlow={

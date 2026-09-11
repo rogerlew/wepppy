@@ -21,6 +21,7 @@ class TaskEnum(Enum):
     run_ag_fields = "run_ag_fields"
     run_observed = "run_observed"
     run_debris = "run_debris"
+    run_postfire_debris_flow = "run_postfire_debris_flow"
     run_watar = "run_watar"
     run_rhem = "run_rhem"
     fetch_dem = "fetch_dem"
@@ -32,6 +33,18 @@ class TaskEnum(Enum):
     run_features_export = "run_features_export"
     set_readonly = "set_readonly"
     run_path_cost_effective = "run_path_ce"
+
+    build_rangeland_cover = "build_rangeland_cover"
+
+    build_rusle = "build_rusle"
+
+    build_treatments = "build_treatments"
+
+    fetch_polaris = "build_polaris"
+
+    run_geneva = "run_geneva"
+
+    run_roads = "run_roads"
 
     def label(self) -> str: ...
 

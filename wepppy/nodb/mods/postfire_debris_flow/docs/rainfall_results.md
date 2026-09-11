@@ -40,8 +40,8 @@ immutable ownership. Rainfall files are capped at 64 MiB (JSON/CSV at 1 MiB).
 The three fixed predictor TIFF artifacts use the operator-selected cap of 96 MiB; their summary JSON and manifest retain the 1 MiB text cap. These
 upstream artifacts are streamed for hash verification, not decoded here. Applying
 the rainfall-file cap to generated Float64 terrain would reject otherwise valid
-project grids. Implementation of this distinction is pending the artifact-limit
-repair checkpoint. Parquet is capped at
+project grids. This distinction is implemented under checkpoint `c145e73ce`; the explicit
+artifact cap is retained through initial streaming hashes and final rechecks. Parquet is capped at
 200,000 input rows, 64 primitive numeric columns and 128 MiB declared decoded
 row-group bytes. Reject duplicate field names, nested/string input columns,
 external column chunks and contradictory schemas before decoding. JSON rejects

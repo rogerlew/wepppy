@@ -1,0 +1,8 @@
+UPLOAD_VIEW {"summary":"Filewallow_20110701_dnbr_alb.imgFormat / data typeHFA / int16Prepared cell size10 m33 ft × 10 m33 ftWatershed coverage100.0%Uploaded values-1344 to 1500Applied scaleDivide by 1,000 (Auto — value distribution)Prepared dNBR values-0.545 to 1.11","message":"","link":"54a8fe43-10c6-4f18-947b-31676c86f8e0","status":"Status: Finished\nStarted: 2026-09-11 01:46:08 UTC Ended: 2026-09-11 01:46:22 UTC","details":"No stack trace recorded."}
+page.screenshot: Timeout 30000ms exceeded.
+Call log:
+[2m  - taking page screenshot[22m
+[2m  - waiting for fonts to load...[22m
+[2m  - fonts loaded[22m
+
+    at /tmp/pfdf-success-browser.cjs:42:14

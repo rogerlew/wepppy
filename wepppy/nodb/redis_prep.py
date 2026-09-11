@@ -38,6 +38,7 @@ class TaskEnum(Enum):
     run_ag_fields = 'run_ag_fields'
     run_observed = 'run_observed'
     run_debris = 'run_debris'
+    run_postfire_debris_flow = 'run_postfire_debris_flow'
     run_roads = 'run_roads'
     run_watar = 'run_watar'
     run_geneva = 'run_geneva'
@@ -80,6 +81,7 @@ class TaskEnum(Enum):
             TaskEnum.run_ag_fields: 'Run Agricultural Fields',
             TaskEnum.run_observed: 'Run Observed',
             TaskEnum.run_debris: 'Run Debris',
+            TaskEnum.run_postfire_debris_flow: 'Run Post-fire Debris Flow',
             TaskEnum.run_roads: 'Run Roads',
             TaskEnum.run_watar: 'Run WATAR',
             TaskEnum.run_geneva: 'Run Geneva',
@@ -120,6 +122,7 @@ class TaskEnum(Enum):
             TaskEnum.run_ag_fields: '🌽',
             TaskEnum.run_observed: '📊',
             TaskEnum.run_debris: '🪨',
+            TaskEnum.run_postfire_debris_flow: '🌋',
             TaskEnum.run_roads: '🚗',
             TaskEnum.run_watar: '🌋',
             TaskEnum.run_geneva: '🐈',

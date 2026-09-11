@@ -570,6 +570,7 @@ document.addEventListener('preflight:update', function(event) {
 | `ag_fields` | `#ag-fields` | `run_ag_fields` | 🌽 |
 | `observed` | `#observed` | `run_observed` | 📊 |
 | `debris` | `#debris-flow` | `run_debris` | 🪨 |
+| `postfire_debris_flow` | `#postfire-debris-flow` | `run_postfire_debris_flow` | 🌋 |
 | `watar` | `#ash` | `run_watar` | 🌋 |
 | `dss_export` | `#dss-export` | `dss_export` | 📤 |
 | `geneva` | `#geneva` | `run_geneva` | 🐈 |
@@ -707,3 +708,11 @@ artifact readiness. `preflight:connection` carries a `connected` boolean on
 open/close/error; reconnect reconciles state. `window.preflightConnected` supplies
 the same current boolean to controls bootstrapped after the socket opens. Detailed uploaded metadata remains
 on authenticated endpoints, never in the public preflight payload.
+
+### Post-fire debris-flow completion
+
+The [M1 completion contract](../../../wepppy/nodb/mods/postfire_debris_flow/docs/production_m1.md#preflight-completion-task)
+uses the shared TaskEnum/anchor/boolean path. A published partial result counts
+as completed. Upstream timestamp changes clear the coarse indicator; detailed
+artifact freshness remains in the authenticated control. This task is separate
+from legacy Debris Flow and does not depend on a WEPP run.

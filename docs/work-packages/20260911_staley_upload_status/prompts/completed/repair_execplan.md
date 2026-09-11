@@ -11,9 +11,9 @@ terminal attempts are not reattached after reload.
 ## Progress
 
 - [x] Diagnose project failure and UI causes.
-- [ ] Review bounded internal statistics metadata contract.
-- [ ] Repair internal DEM preparation and standard status binding.
-- [ ] Focused tests, frontend gates, bundle, authenticated upload/reload check.
+- [x] Review bounded internal statistics metadata contract; checkpoint `7447e6243`.
+- [x] Repair internal DEM preparation and standard status binding.
+- [x] Focused tests, frontend gates, bundle, authenticated upload/reload check.
 
 ## Surprises & Discoveries
 
@@ -42,6 +42,19 @@ reload before retrying the stored candidate through the UI. Do not run M1 or
 change other user inputs. Rollback source edits leaves prior accepted artifacts
 and failed attempts intact; do not edit their NoDb files manually.
 
+Review found newly admitted external masks needed dependency snapshots and
+raw-source hashes; fixed and tested appearance/removal/mutation. Shared job-status
+and jobinfo callbacks now ignore superseded jobs, with resolve/reject race tests.
+
 ## Outcomes & Retrospective
 
-Pending.
+Completed: actual stored Wallow retry finished in about 15 seconds; accepted
+10 m raster covers 100% of the watershed with Auto scale 0.001. Failed and
+successful job state/link/Details survive reload. All review findings closed.
+136 focused raster tests, subsequent source-freshness regressions, and 861
+frontend tests passed. Full Python suite remained on operator hold.
+
+The controller stub previously hid markup loss and lifecycle races; use real
+controlBase rendering and delayed-response regressions for these seams. Browser
+functional checks passed; direct CDP capture succeeded after screenshot-helper
+timeouts and the live control was visually inspected. See validation.

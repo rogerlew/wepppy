@@ -239,6 +239,7 @@ TOC_TASK_ANCHOR_TO_TASK = {
     '#wepp': TaskEnum.run_wepp_watershed,
     '#ag-fields': TaskEnum.run_ag_fields,
     '#rusle': TaskEnum.build_rusle,
+    '#postfire-debris-flow': TaskEnum.run_postfire_debris_flow,
     '#ash': TaskEnum.run_watar,
     '#rhem': TaskEnum.run_rhem,
     '#omni-scenarios': TaskEnum.run_omni_scenarios,

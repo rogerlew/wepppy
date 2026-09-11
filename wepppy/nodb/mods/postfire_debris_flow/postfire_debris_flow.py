@@ -53,5 +53,5 @@ class PostfireDebrisFlow(NoDbBase):
             state = self.state
             callback(state)
             self._state = state
-        from .production import notify
+        from .preflight import notify
         notify(self.wd)

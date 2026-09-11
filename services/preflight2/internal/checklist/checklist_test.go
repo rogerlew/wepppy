@@ -210,3 +210,40 @@ func TestEvaluateGenevaIgnoresInitSbsMapWhenSbsDisabled(t *testing.T) {
 		t.Fatalf("expected geneva checklist entry to stay true when SBS dependency is inactive")
 	}
 }
+
+func TestPostfirePublicationAndUpstreamInvalidation(t *testing.T) {
+	for _, completion := range []string{"", "bad", "0", "-1", "200"} {
+		check, _ := Evaluate(map[string]string{"timestamps:run_postfire_debris_flow": completion})
+		if check["postfire_debris_flow"] != (completion == "200") {
+			t.Fatalf("unexpected completion for %q", completion)
+		}
+	}
+	for _, task := range []string{
+		"fetch_dem", "build_channels", "set_outlet", "find_outlet",
+		"build_subcatchments", "abstract_watershed", "build_landuse",
+		"build_rangeland_cover", "build_soils", "init_sbs_map", "build_polaris",
+		"build_rusle", "build_climate",
+	} {
+		for _, timestamp := range []string{"100", "200", "300", "", "bad", "0", "-1"} {
+			check, _ := Evaluate(map[string]string{
+				"timestamps:run_postfire_debris_flow": "200",
+				"timestamps:" + task:                  timestamp,
+			})
+			if check["postfire_debris_flow"] != (timestamp == "100") {
+				t.Fatalf("unexpected freshness for %s=%q", task, timestamp)
+			}
+		}
+	}
+	check, _ := Evaluate(map[string]string{
+		"timestamps:run_postfire_debris_flow": "200",
+		"timestamps:run_wepp_watershed":       "300",
+		"timestamps:run_debris":               "400",
+	})
+	if !check["postfire_debris_flow"] {
+		t.Fatal("legacy WEPP tasks must not invalidate Staley")
+	}
+	check, _ = Evaluate(map[string]string{"timestamps:run_debris": "200"})
+	if check["postfire_debris_flow"] {
+		t.Fatal("legacy task must not complete Staley")
+	}
+}

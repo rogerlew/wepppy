@@ -215,6 +215,11 @@ def sources(wd, *, rainfall=True, frequency='cli'):
         selections.update(climate_mode=getattr(mode, 'name', str(mode)), cli_fn=getattr(climate, 'cli_fn', None),
                           soil_source=getattr(soils, 'soil_source', None),
                           soil_mode=str(getattr(soils, 'mode', None)))
+    # External masks affect decoded project support; inert statistics do not.
+    for key in ('dem', 'mask'):
+        companion = Path(str(files[key]) + '.msk')
+        if companion.exists() or companion.is_symlink():
+            files[key + '_mask'] = safe(wd, companion)
     snapshot = {'selections': selections, 'files': {key: signature(wd,p) if p.is_file() else None for key,p in files.items()}}
     return eligible, bool(ron.readonly), checks, files, snapshot
 
@@ -338,18 +343,27 @@ def execute_upload(wd, identity):
     eligible, readonly, checks, files, snapshot = sources(wd, rainfall=False)
     if not eligible or readonly or not checks['watershed'] or snapshot != attempt['snapshot']:
         raise WorkflowError('superseded', 'The watershed changed. Upload the map again.', 409)
+    project_sha256 = {str(path): digest(path) for path in files.values()}
     # Derive the positive routed watershed mask with the accepted M1 decoder.
     values, valid, grid = read_raster(files['mask'])
     prepare(target/'mask.tif', (valid & (values>0)).astype(float), np.ones(valid.shape,dtype=bool), grid)
+    # The upload decoder accepts self-contained files; project DEMs may have
+    # validated inert statistics caches or external masks. Preserve decoded support.
+    dem_values, dem_valid, dem_grid = read_raster(files['dem'], target_grid=True)
+    reference_dem = target/'dem.tif'
+    prepare(reference_dem, dem_values, dem_valid, dem_grid)
+    del dem_values, dem_valid
     source = directory(wd, attempt['source_id'])/'source'/attempt['filename']
     refs = tuple(source.parent.glob('*')) if source.suffix.lower()=='.vrt' else ()
     def verify_sources():
+        if any(digest(path) != expected for path, expected in project_sha256.items()):
+            raise WorkflowError('superseded', 'The watershed changed. Upload the map again.', 409)
         if not attempt.get('source_sha256') or any(digest(safe(wd, Path(wd)/rel))!=h for rel,h in attempt['source_sha256'].items()):
             raise WorkflowError('changed_source', 'Uploaded files changed. Upload the map again.', 409)
     verify_sources()
-    encoding = inspect_encoding(source, files['dem'], target/'mask.tif', refs=tuple(p for p in refs if p!=source), **attempt['encoding'])
+    encoding = inspect_encoding(source, reference_dem, target/'mask.tif', refs=tuple(p for p in refs if p!=source), **attempt['encoding'])
     verify_sources()
-    manifest = dnbr.normalize_dnbr(source, files['dem'], target/'mask.tif', target/'normalized',
+    manifest = dnbr.normalize_dnbr(source, reference_dem, target/'mask.tif', target/'normalized',
                                   scale_factor=encoding['factor'], add_offset=encoding['offset'],
                                   source_refs=tuple(p for p in refs if p!=source))
     verify_sources()
@@ -364,8 +378,9 @@ def execute_upload(wd, identity):
                'completed_at': now(), 'snapshot': snapshot, 'source_id': attempt['source_id'], 'source_sha256': attempt['source_sha256']}
     if sources(wd, rainfall=False)[4] != snapshot:
         raise WorkflowError('superseded', 'The watershed changed. Upload the map again.', 409)
-    summary['artifacts'] = {str(path.relative_to(Path(wd))): signature(wd,path,strong=True) for path in (*[Path(wd)/rel for rel in attempt['source_sha256']], target/'normalized'/'dnbr.tif', target/'normalized'/'manifest.json', target/'encoding.json', target/'mask.tif')}
-    verified_sources = {rel: signature(wd, Path(wd)/rel) for rel in attempt['source_sha256']}
+    summary['artifacts'] = {str(path.relative_to(Path(wd))): signature(wd,path,strong=True) for path in (*files.values(), *[Path(wd)/rel for rel in attempt['source_sha256']], target/'normalized'/'dnbr.tif', target/'normalized'/'manifest.json', target/'encoding.json', target/'mask.tif', reference_dem)}
+    verify_sources()
+    verified_sources = {rel: signature(wd, Path(wd)/rel) for rel in summary['artifacts']}
     def publish(current):
         if any(signature(wd, Path(wd)/rel)!=sig for rel,sig in verified_sources.items()):
             raise WorkflowError('changed_source','Uploaded files changed. Upload the map again.',409)

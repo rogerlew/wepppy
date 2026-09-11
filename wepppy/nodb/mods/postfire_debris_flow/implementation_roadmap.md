@@ -132,6 +132,17 @@ scientific limitation that implementation cannot resolve.
 
 ## Progress Log
 
+- 2026-09-11: Predictor TIFF verification now uses the operator-selected 96 MiB
+  cap through final recheck, independently of rainfall's 64 MiB limit. See
+  [artifact admission repair](../../../../docs/work-packages/20260911_staley_predictor_artifact_limit/package.md).
+
+- 2026-09-11: [Upload/status repair](../../../../docs/work-packages/20260911_staley_upload_status/package.md)
+  admits validated internal statistics caches, prepares a self-contained DEM,
+  tracks external mask freshness, and restores linked job IDs, failure reload,
+  status layout and safe retry callbacks. Validation and live verification are
+  tracked in the package; reports remain deferred.
+
+
 - 2026-09-09 UTC: owner selected a nonblocking warning outside the manuscript's
   inclusive 0.2–8 km² study range, for both models. Accepted in the specification
   and ADR-0057; use full unrounded watershed area and preserve model results.
@@ -254,3 +265,9 @@ scientific limitation that implementation cannot resolve.
   passed. L10–L12 and M1 portions of L04/L08/L13/L14 are delivered. Reports,
   dashboard, M3 and the owner's real-basin acceptance remain separate. Runtime
   changes are uncommitted. [Evidence](../../../../docs/work-packages/20260910_staley_m1_production/artifacts/validation.md).
+
+- 2026-09-11: wired the published M1 task into preflight with TaskEnum 🌋,
+  independent of legacy debris and WEPP execution. Partial publications count as
+  complete; timestamp invalidation is advisory and detailed artifact freshness
+  remains authoritative. See [completion contract](docs/production_m1.md#preflight-completion-task)
+  and [validation package](../../../../docs/work-packages/20260911_staley_preflight/package.md).

@@ -1,6 +1,6 @@
 from pathlib import Path
 import pytest
-from wepppy.nodb.mods.postfire_debris_flow import production as p
+from wepppy.nodb.mods.postfire_debris_flow import production as p, preflight
 from wepppy.nodb.mods.postfire_debris_flow.postfire_debris_flow import PostfireDebrisFlow
 
 pytestmark = pytest.mark.unit
@@ -32,7 +32,7 @@ def test_absent_read_does_not_create_nodb(tmp_path):
 
 
 def test_real_nodb_roundtrip(tmp_path,monkeypatch):
-    monkeypatch.setattr(p,'notify',lambda wd:None)
+    monkeypatch.setattr(preflight,'notify',lambda wd:None)
     obj=PostfireDebrisFlow(str(tmp_path),'disturbed9002_wbt.cfg')
     obj.change(lambda state:state.update(frequency_source='noaa'))
     loaded=PostfireDebrisFlow.load_detached(str(tmp_path))
@@ -53,7 +53,7 @@ def test_upload_and_model_real_artifacts(tmp_path,monkeypatch,prepared_inputs):
     i=prepared_inputs
     from wepppy.nodb.core import Ron
     Ron(str(tmp_path),'disturbed9002_wbt.cfg')
-    monkeypatch.setattr(p,'notify',lambda wd:None)
+    monkeypatch.setattr(preflight,'notify',lambda wd:None)
     controller=PostfireDebrisFlow(str(tmp_path),'disturbed9002_wbt.cfg')
     monkeypatch.setattr(p,'mutable',lambda wd:controller)
     parquet=tmp_path/'climate.parquet'
@@ -69,7 +69,18 @@ def test_upload_and_model_real_artifacts(tmp_path,monkeypatch,prepared_inputs):
     shutil.copyfile(i.lineage_sources[0],folder/'source'/'dnbr.tif')
     controller.change(lambda state:state.update(upload_attempt={'id':identity,'job_id':None,'phase':'queued','created_at':p.now(),
         'retryable':False,'error':None,'snapshot':snapshot,'source_id':identity,'source_sha256':{str((folder/'source'/'dnbr.tif').relative_to(tmp_path)):p.digest(folder/'source'/'dnbr.tif')},'filename':'dnbr.tif','encoding':{'mode':'auto'}}))
+    statistics = Path(str(i.dem) + '.aux.xml')
+    statistics.write_text('<PAMDataset><PAMRasterBand band="1"><Metadata><MDI key="STATISTICS_MINIMUM">0</MDI></Metadata></PAMRasterBand></PAMDataset>')
     p.execute_upload(tmp_path,identity)
+    import numpy as np
+    before, before_valid, before_grid = p.read_raster(i.dem)
+    after, after_valid, after_grid = p.read_raster(folder/'dem.tif')
+    assert before_grid == after_grid
+    np.testing.assert_array_equal(before_valid, after_valid)
+    np.testing.assert_array_equal(before[before_valid], after[after_valid])
+    manifest = json.loads((folder/'normalized'/'manifest.json').read_text())
+    assert str(folder/'dem.tif') in manifest['input_sha256']
+    assert str((folder/'dem.tif').relative_to(tmp_path)) in controller.state['active_dnbr']['artifacts']
     loaded=PostfireDebrisFlow.load_detached(str(tmp_path))
     assert loaded.state['active_dnbr']['scale_factor']==.001
     runid=uuid.uuid4().hex;p.directory(tmp_path,runid).mkdir()
@@ -84,6 +95,8 @@ def test_upload_and_model_real_artifacts(tmp_path,monkeypatch,prepared_inputs):
     assert not (tmp_path/'postfire_debris_flow'/'runs').exists()
     assert len(pd.read_parquet(p.directory(tmp_path,runid)/'results'/'events.parquet'))==90
 
+    statistics.write_text(statistics.read_text().replace('>0<', '>1<'))
+    assert p.artifacts_current(tmp_path, controller.state['active_dnbr'])
     # Climate-only rerun must reuse verified terrain, rather than invoking WBT.
     monkeypatch.setattr(p,'build_m1_predictors',lambda *a,**kw:pytest.fail('terrain should be reused'))
     next_id=uuid.uuid4().hex;p.directory(tmp_path,next_id).mkdir()
@@ -91,6 +104,11 @@ def test_upload_and_model_real_artifacts(tmp_path,monkeypatch,prepared_inputs):
         'retryable':False,'error':None,'snapshot':{'inputs':snapshot,'dnbr':identity,'frequency':'cli'}}))
     p.execute_model(tmp_path,next_id,BINARY)
     assert controller.state['last_successful_run']['id']==next_id
+    statistics.unlink()
+    assert p.artifacts_current(tmp_path, controller.state['active_dnbr'])
+    with (folder/'dem.tif').open('ab') as stream:
+        stream.write(b'tampered')
+    assert not p.artifacts_current(tmp_path, controller.state['active_dnbr'])
 
 
 @pytest.fixture
@@ -171,15 +189,22 @@ def test_completed_climate_with_failed_parquet_export_is_not_ready(owner_project
     assert not p.sources(wd)[2]['climate']
 
 
-@pytest.mark.parametrize('mutation',['source_after_auto','watershed_after_normalization'])
+@pytest.mark.parametrize('mutation',['source_after_auto','watershed_after_normalization','dem_after_auto','dem_mask_after_auto'])
 def test_upload_rejects_mutation_and_preserves_accepted(tmp_path,monkeypatch,prepared_inputs,mutation):
     import shutil,uuid
-    monkeypatch.setattr(p,'notify',lambda wd:None)
+    monkeypatch.setattr(preflight,'notify',lambda wd:None)
     controller=PostfireDebrisFlow(str(tmp_path),'disturbed9002_wbt.cfg')
     monkeypatch.setattr(p,'mutable',lambda wd:controller)
     original_snapshot={'revision':1};current_snapshot=dict(original_snapshot)
+    paths={'mask':prepared_inputs.mask,'dem':prepared_inputs.dem}
+    if mutation == 'dem_mask_after_auto':
+        import rasterio, numpy as np
+        with rasterio.Env(GDAL_TIFF_INTERNAL_MASK=False):
+            with rasterio.open(prepared_inputs.dem, 'r+') as ds:
+                ds.write_mask(np.full(ds.shape, 255, dtype='uint8'))
+        paths['dem_mask']=Path(str(prepared_inputs.dem)+'.msk')
     monkeypatch.setattr(p,'sources',lambda *a,**kw:(True,False,{'watershed':True},
-        {'mask':prepared_inputs.mask,'dem':prepared_inputs.dem},dict(current_snapshot)))
+        dict(paths),dict(current_snapshot)))
     identity=uuid.uuid4().hex;folder=p.directory(tmp_path,identity);(folder/'source').mkdir(parents=True)
     source=folder/'source'/'dnbr.tif';shutil.copyfile(prepared_inputs.lineage_sources[0],source)
     old={'id':'f'*32,'snapshot':{},'artifacts':{}}
@@ -189,11 +214,12 @@ def test_upload_rejects_mutation_and_preserves_accepted(tmp_path,monkeypatch,pre
     inspect=p.inspect_encoding;normalize=p.dnbr.normalize_dnbr
     def changed_auto(*args,**kwargs):
         result=inspect(*args,**kwargs)
-        with source.open('ab') as stream:stream.write(b'changed bytes')
+        changed = paths['dem_mask'] if mutation == 'dem_mask_after_auto' else prepared_inputs.dem if mutation == 'dem_after_auto' else source
+        with changed.open('ab') as stream:stream.write(b'changed bytes')
         return result
     def changed_watershed(*args,**kwargs):
         result=normalize(*args,**kwargs);current_snapshot['revision']=2;return result
-    if mutation=='source_after_auto':monkeypatch.setattr(p,'inspect_encoding',changed_auto)
+    if mutation in ('source_after_auto','dem_after_auto','dem_mask_after_auto'):monkeypatch.setattr(p,'inspect_encoding',changed_auto)
     else:monkeypatch.setattr(p.dnbr,'normalize_dnbr',changed_watershed)
     with pytest.raises(p.WorkflowError):p.execute_upload(tmp_path,identity)
     assert controller.state['active_dnbr']==old
@@ -248,3 +274,156 @@ def test_enable_materializes_both_soil_dependencies(tmp_path):
     assert {'postfire_debris_flow', 'rusle', 'polaris'}.issubset(ron.mods)
     for filename in ('postfire_debris_flow.nodb', 'rusle.nodb', 'polaris.nodb'):
         assert (tmp_path/filename).is_file()
+
+
+@pytest.mark.parametrize('payload', [
+    b'', b'<PAMDataset/>', b'<PAMDataset>',
+    b'<!DOCTYPE PAMDataset [<!ENTITY x SYSTEM "file:///etc/passwd">]><PAMDataset/>',
+    '<PAMDataset/>'.encode('utf-16'),
+    b'<PAMDataset><SRS>EPSG:4326</SRS></PAMDataset>',
+    b'<PAMDataset><PAMRasterBand band="1"><NoDataValue>0</NoDataValue></PAMRasterBand></PAMDataset>',
+    b'<PAMDataset><PAMRasterBand band="1"><Metadata/></PAMRasterBand></PAMDataset>',
+    *[('<PAMDataset><PAMRasterBand band="1"><Metadata>'+entry+'</Metadata></PAMRasterBand></PAMDataset>').encode() for entry in [
+        '<MDI key="STATISTICS_MINIMUM">nan</MDI>',
+        '<MDI key="STATISTICS_MINIMUM">inf</MDI>',
+        '<MDI key="STATISTICS_MINIMUM"></MDI>',
+        '<MDI key="STATISTICS_MINIMUM">1</MDI><MDI key="STATISTICS_MINIMUM">2</MDI>',
+        '<MDI key="SCALE">0.001</MDI>',
+        '<MDI key="STATISTICS_APPROXIMATE">MAYBE</MDI>',
+        '<MDI key="STATISTICS_MINIMUM" source="external">1</MDI>',
+        '<MDI key="STATISTICS_MINIMUM"><SourceFilename>other</SourceFilename></MDI>',
+    ]],
+    b' ' * (64*1024+1),
+])
+def test_reject_unsafe_or_meaningful_statistics_cache(tmp_path, payload):
+    from wepppy.nodb.mods.postfire_debris_flow.m1_inputs import validate_statistics_cache, M1Error
+    cache=tmp_path/'dem.tif.aux.xml';cache.write_bytes(payload)
+    with pytest.raises(M1Error): validate_statistics_cache(cache)
+
+
+def test_statistics_cache_preserves_raster_and_strict_upload_boundary(tmp_path):
+    import numpy as np
+    from tests.nodb.mods.test_postfire_debris_flow_integration import raster
+    from wepppy.nodb.mods.postfire_debris_flow.m1_inputs import companions, read_raster, validate_statistics_cache, M1Error
+    from wepppy.nodb.mods.postfire_debris_flow.dnbr import _raster, DnbrError
+    source=tmp_path/'dem.tif'; raster(source,np.array([[5.,6.],[7.,-9999.]]))
+    expected, valid, grid=read_raster(source)
+    original_hash=p.digest(source)
+    cache=Path(str(source)+'.aux.xml')
+    for value in ('1', '200'):
+        cache.write_text('<PAMDataset><PAMRasterBand band="1"><Metadata><MDI key="STATISTICS_MINIMUM">'+value+'</MDI><MDI key="STATISTICS_APPROXIMATE">YES</MDI></Metadata></PAMRasterBand></PAMDataset>')
+        actual, support, actual_grid=read_raster(source)
+        np.testing.assert_array_equal(actual,expected)
+        np.testing.assert_array_equal(support,valid)
+        assert actual_grid==grid and p.digest(source)==original_hash
+        assert companions(source)==[]
+        with pytest.raises(DnbrError):
+            with _raster(source): pytest.fail('uploaded sidecar must remain forbidden')
+    cache.unlink()
+    assert companions(source)==[]
+    cache.symlink_to(source)
+    with pytest.raises(M1Error): validate_statistics_cache(cache)
+    cache.unlink();cache.mkdir()
+    with pytest.raises(M1Error): validate_statistics_cache(cache)
+
+
+def test_project_masks_change_dependency_snapshot_but_statistics_do_not(owner_project):
+    wd, _ = owner_project
+    before = p.sources(wd, rainfall=False)[4]
+    dem = p.sources(wd, rainfall=False)[3]['dem']
+    primary_hash = p.digest(dem)
+    cache = Path(str(dem)+'.aux.xml')
+    cache.write_text('<PAMDataset><PAMRasterBand band="1"><Metadata><MDI key="STATISTICS_MINIMUM">0</MDI></Metadata></PAMRasterBand></PAMDataset>')
+    assert p.sources(wd, rainfall=False)[4] == before
+    cache.unlink()
+    assert p.sources(wd, rainfall=False)[4] == before
+    mask = Path(str(dem)+'.msk')
+    mask.write_bytes(b'first mask bytes')
+    added = p.sources(wd, rainfall=False)[4]
+    assert added != before and 'dem_mask' in added['files']
+    mask.write_bytes(b'changed mask bytes')
+    assert p.sources(wd, rainfall=False)[4] != added
+    mask.unlink()
+    assert p.sources(wd, rainfall=False)[4] == before
+    assert p.digest(dem) == primary_hash
+
+
+@pytest.mark.parametrize('case,expected', [
+    ('absent', None), ('partial', 1789094046), ('complete', 1789094046),
+    ('failed_retry', 1789094046), ('replacement', None), ('frequency', None),
+])
+def test_preflight_projects_durable_publication(tmp_path, monkeypatch, case, expected):
+    from unittest.mock import MagicMock
+    from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+    controller = PostfireDebrisFlow(str(tmp_path), 'disturbed9002_wbt.cfg')
+    state = p.empty_state()
+    if case != 'absent':
+        state['active_dnbr'] = {'id': 'a'*32, 'snapshot': {}, 'artifacts': {}}
+        state['last_successful_run'] = {
+            'id': 'b'*32, 'completed_at': '2026-09-11T02:34:06+00:00',
+            'snapshot': {'dnbr': 'a'*32, 'frequency': 'cli'},
+            'artifacts': {}, 'partial': case == 'partial',
+        }
+        if case == 'replacement': state['active_dnbr']['id'] = 'c'*32
+        if case == 'frequency': state['frequency_source'] = 'noaa'
+        if case == 'failed_retry':
+            state['run_attempt'] = {'id': 'd'*32, 'snapshot': {}, 'phase': 'failed',
+                                    'created_at': p.now(), 'retryable': True}
+    with controller.locked(): controller._state = state
+    prep = MagicMock(run_id='test-run')
+    lock = prep.redis.lock.return_value.__enter__.return_value
+    lock.owned.return_value = True
+    monkeypatch.setattr(RedisPrep, 'getInstance', lambda wd: prep)
+    preflight.notify(tmp_path)
+    pipe = prep.redis.pipeline.return_value.__enter__.return_value
+    key = 'timestamps:run_postfire_debris_flow'
+    if expected is None:
+        pipe.hdel.assert_called_once_with('test-run', key)
+    else:
+        assert expected == int(p.datetime.fromisoformat(state['last_successful_run']['completed_at']).timestamp())
+        assert ('test-run', key, expected) in [call.args for call in pipe.hset.call_args_list]
+        pipe.hdel.assert_not_called()
+    pipe.execute.assert_called_once()
+    prep.dump.assert_called_once()
+    assert TaskEnum.run_postfire_debris_flow.emoji() == '🌋'
+    assert TaskEnum.run_postfire_debris_flow.label() == 'Run Post-fire Debris Flow'
+
+
+def test_preflight_reads_after_lock_and_skips_expired_lease(tmp_path, monkeypatch, caplog):
+    from unittest.mock import MagicMock
+    from wepppy.nodb.redis_prep import RedisPrep
+    prep = MagicMock(run_id='test-run')
+    lock = prep.redis.lock.return_value.__enter__.return_value
+    lock.owned.return_value = False
+    monkeypatch.setattr(RedisPrep, 'getInstance', lambda wd: prep)
+    def latest(wd):
+        prep.redis.lock.return_value.__enter__.assert_called_once()
+        return p.empty_state()
+    monkeypatch.setattr(p, 'state_at', latest)
+    preflight.notify(tmp_path)
+    prep.redis.pipeline.assert_not_called()
+    assert 'projection lease expired' in caplog.text
+
+
+def test_delayed_preflight_notifier_reads_replacement_after_acquiring_lock(tmp_path, monkeypatch):
+    from unittest.mock import MagicMock
+    from wepppy.nodb.redis_prep import RedisPrep
+    state = p.empty_state()
+    state['active_dnbr'] = {'id': 'a'*32}
+    state['last_successful_run'] = {
+        'snapshot': {'dnbr': 'a'*32, 'frequency': 'cli'},
+        'completed_at': '2026-09-11T02:34:06+00:00',
+    }
+    prep = MagicMock(run_id='test-run')
+    lock = MagicMock()
+    lock.owned.return_value = True
+    def acquire_after_replacement():
+        state['active_dnbr']['id'] = 'c'*32
+        return lock
+    prep.redis.lock.return_value.__enter__.side_effect = acquire_after_replacement
+    monkeypatch.setattr(RedisPrep, 'getInstance', lambda wd: prep)
+    monkeypatch.setattr(p, 'state_at', lambda wd: state)
+    preflight.notify(tmp_path)
+    pipe = prep.redis.pipeline.return_value.__enter__.return_value
+    pipe.hdel.assert_called_once_with('test-run', 'timestamps:run_postfire_debris_flow')
+    assert len(pipe.hset.call_args_list) == 1  # Revision notification only.

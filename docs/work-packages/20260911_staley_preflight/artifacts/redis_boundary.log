@@ -1,0 +1,2 @@
+INFO:wctl2:docker compose exec -T weppcloud python docs/work-packages/20260911_staley_preflight/artifacts/redis_boundary.py
+PASS real NoDb publication, Redis lock/pipeline, original timestamp, replacement, dump restoration

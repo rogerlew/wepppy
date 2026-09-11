@@ -314,7 +314,8 @@ function getSelectorForKey(key) {
         "watar": 'a[href="#ash"]',
         "dss_export": 'a[href="#dss-export"]',
         "run_path_ce": 'a[href="#path-cost-effective"]',
-        "rusle": 'a[href="#rusle"]'
+        "rusle": 'a[href="#rusle"]',
+        "postfire_debris_flow": 'a[href="#postfire-debris-flow"]'
     };
 
     return mapping[key];

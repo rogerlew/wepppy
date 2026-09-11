@@ -58,7 +58,9 @@ def build_m1_results(inputs: RainfallInputs, output_dir: Path, *, frequency_sour
     if frequency_source not in ('cli','noaa'):
         fail('invalid_input', 'Explicit cli or noaa frequency source required')
     consumed = {}
-    predictors = load_predictors(inputs.predictor_manifest, inputs.expected_sha256, consumed)
+    artifact_limits = {}
+    predictors = load_predictors(inputs.predictor_manifest, inputs.expected_sha256, consumed,
+                                 artifact_limits=artifact_limits)
     events, df, frequency = rainfall.climate_events(inputs, durations, consumed)
     parsed = {}
     for source, path in (('cli',inputs.cli_frequency_csv),('noaa',inputs.noaa_csv)):
@@ -99,7 +101,7 @@ def build_m1_results(inputs: RainfallInputs, output_dir: Path, *, frequency_sour
         if not actual.equals(table):
             fail('invalid_input', 'Result table readback differs')
         tables[name] = {'sha256':digest(p),'rows':len(rows)}
-    recheck(consumed)
+    recheck(consumed, limits=artifact_limits)
     manifest = {'schema_version':1,'status':'complete','model':'M1',
                 'identity':context,'predictor_snapshot':predictors,
                 'sources_sha256':consumed,'frequency':frequency,

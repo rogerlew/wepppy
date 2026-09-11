@@ -110,6 +110,22 @@ func Evaluate(prep map[string]string) (map[string]bool, map[string]bool) {
 		safeGT(prep["timestamps:run_debris"], prep["timestamps:build_climate"]) &&
 		safeGT(prep["timestamps:run_debris"], runWepp)
 
+	// Staley publication is independent of the legacy WEPP debris workflow.
+	postfire, validPostfire := parseInt(prep["timestamps:run_postfire_debris_flow"])
+	check["postfire_debris_flow"] = validPostfire && postfire > 0
+	for _, task := range []string{
+		"fetch_dem", "build_channels", "set_outlet", "find_outlet",
+		"build_subcatchments", "abstract_watershed", "build_landuse",
+		"build_rangeland_cover", "build_soils", "init_sbs_map", "build_polaris",
+		"build_rusle", "build_climate",
+	} {
+		if upstream, present := prep["timestamps:"+task]; present {
+			upstreamTime, validUpstream := parseInt(upstream)
+			check["postfire_debris_flow"] = check["postfire_debris_flow"] &&
+				validUpstream && upstreamTime > 0 && postfire > upstreamTime
+		}
+	}
+
 	check["roads"] = safeGT(prep["timestamps:run_roads"], runWepp)
 
 	check["watar"] = safeGT(prep["timestamps:run_watar"], prep["timestamps:build_landuse"]) &&

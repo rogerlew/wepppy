@@ -1,0 +1,4 @@
+RETRY_RECEIPT 200 {"job_id":"c885f28b-e292-4046-853a-d3b8898caa39","result":{"attempt_id":"3d7fd3391ebb40169cedd5c2367abe37"}}
+UPLOAD_VIEW {"summary":"Filewallow_20110701_dnbr_alb.imgFormat / data typeHFA / int16Prepared cell size10 m33 ft × 10 m33 ftWatershed coverage100.0%Uploaded values-1344 to 1500Applied scaleDivide by 1,000 (Auto — value distribution)Prepared dNBR values-0.545 to 1.11","message":"Run complete. Some probabilities could not be calculated.","link":"c885f28b-e292-4046-853a-d3b8898caa39","status":"Status: Finished\nStarted: 2026-09-11 02:16:43 UTC Ended: 2026-09-11 02:17:15 UTC","details":"","files":"Download model files — 9/10/2026, 7:17:15 PMevents.parquet design.parquet inverse.parquet manifest.json "}
+MODEL_PUBLICATION_PASS
+LIVE_MODEL_AND_RELOAD_PASS

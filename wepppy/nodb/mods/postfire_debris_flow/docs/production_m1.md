@@ -5,6 +5,8 @@ Scope explicitly requested: NoDb state, prerequisite/freshness checks, dNBR
 upload/publication, RQ execution, and a minimal control to upload and run M1.
 Enable **Post-fire debris flow** from Mods; its control appears immediately
 below RUSLE. Prepare soil erodibility in RUSLE before running M1.
+The linked job ID remains available after reload; failed-job diagnostics appear
+in Details. Use Upload dNBR again to retry the stored map without reselecting it.
 Reports and interactive dashboard are deferred. Canonical UI contract:
 [Post-fire debris-flow control](../../../../../docs/ui-docs/contracts/postfire-debris-flow-control-contract.md).
 
@@ -280,8 +282,10 @@ explicit prerequisite error, not an implicit terrain substitution. For dNBR
 preparation, materialize a self-contained reference DEM through the local M1
 reader/writer, preserving samples, support and grid and recording it in accepted
 artifacts. Statistics-only PAM admission follows the local M1 contract; the
-uploaded dNBR decoder retains its strict self-contained-file boundary. This
-preparation repair is pending implementation.
+uploaded dNBR decoder retains its strict self-contained-file boundary. Original DEM/domain/outlet sources and meaningful external masks are hashed
+before/after preparation and retained in accepted artifact signatures. External
+mask appearance/removal/content changes affect dependency freshness; inert
+statistics do not. The preparation repair is implemented under `7447e6243`.
 
 Snapshot relevant input selections and actual source signatures for cheap live
 freshness; SHA-256 all consumed inputs before/after computation. Exclude unrelated
@@ -381,21 +385,26 @@ the marker. Serialize each fresh durable read and Redis projection with a short
 run-scoped Redis lock, checking ownership before writing, so delayed
 notifications cannot restore obsolete state. Lock timeout or Redis failure may
 leave the coarse indicator stale; it never authorizes file access.
-Projection remains best-effort after durable publication; Redis failure is logged
-and must not reclassify the completed model run. Notifications carry no filenames, paths, or scientific metadata.
+Persist successful projections through the existing RedisPrep recovery dump.
+Projection remains best-effort after durable publication; Redis or recovery-dump
+I/O failure is logged and must not reclassify the completed model run.
+Notifications carry no filenames, paths, or scientific metadata.
 
 The Go checklist requires a positive completion timestamp later than every
 present upstream timestamp for DEM, channels, outlet, subcatchments, abstraction,
 land use/rangeland, soils, SBS, POLARIS, RUSLE, and climate. Missing upstream
 markers alone do not reject an already admitted publication; malformed present
-markers do. Same-second ties conservatively remain incomplete. It does not require a WEPP run or completed full RUSLE simulation.
+markers do. Same-second ties conservatively remain incomplete. It does not
+require a WEPP run or completed full RUSLE simulation.
 These are coarse workflow checks; authenticated artifact freshness and download
 validation remain authoritative for file changes not represented by timestamps.
 
 Existing completed runs may be reconciled after verifying authenticated state
 reports current results, using the original completion time rather than the
 migration time. No model rerun is required. This additive task changes neither
-NoDb nor model-output schemas. Implementation conformance pending validation.
+NoDb nor model-output schemas. The adapter lives in `preflight.py`, outside the
+numerical engine fingerprint, so task-only changes preserve scientific freshness.
+
 ### Fixed completed-file access (publication review clarification)
 
 Keep completed bundles under hidden attempt storage. Copying to a generic public

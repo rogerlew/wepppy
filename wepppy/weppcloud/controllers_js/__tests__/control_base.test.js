@@ -40,6 +40,38 @@ describe("controlBase job status error handling", () => {
         jest.clearAllMocks();
     });
 
+    test.each(['resolve', 'reject'])('late old-job status %s cannot replace the retry', async (mode) => {
+        let resolveOld, rejectOld;
+        const pending = new Promise((resolve,reject) => { resolveOld=resolve; rejectOld=reject; });
+        const getJson=jest.fn().mockReturnValueOnce(pending).mockResolvedValueOnce({status:'started'});
+        window.WCHttp={request:jest.fn(),getJson};
+        base.rq_job_id='old-job';
+        base.fetch_job_status(base);
+        base.set_rq_job_id(base,'new-job');
+        if(mode==='resolve') {resolveOld({status:'failed'});} else {rejectOld({status:500});}
+        await flushPromises(); await flushPromises();
+        expect(getJson).toHaveBeenCalledTimes(2);
+        expect(getJson.mock.calls[1][0]).toContain('/new-job');
+        expect(base.rq_job_status.status).toBe('started');
+        expect(base._job_status_error).toBeNull();
+        expect(document.getElementById('stacktrace').textContent).toBe('');
+    });
+
+    test.each(['resolve', 'reject'])('late old-job details %s cannot repopulate retry errors', async (mode) => {
+        let resolveOld, rejectOld;
+        const pending=new Promise((resolve,reject)=>{resolveOld=resolve;rejectOld=reject;});
+        window.WCHttp={request:jest.fn(),getJson:jest.fn().mockReturnValueOnce(pending).mockResolvedValueOnce({status:'started'})};
+        base.rq_job_id='old-job';
+        base.triggerEvent=jest.fn();
+        base.handle_job_status_response(base,{status:'failed'});
+        base.set_rq_job_id(base,'new-job');
+        if(mode==='resolve') {resolveOld({exc_info:'old failure'});} else {rejectOld({status:500});}
+        await flushPromises(); await flushPromises();
+        expect(base.rq_job_status.status).toBe('started');
+        expect(document.getElementById('stacktrace').textContent).toBe('');
+        expect(base.triggerEvent).not.toHaveBeenCalledWith('job:error',expect.anything());
+    });
+
     test("re-enables command button when job status poll returns 502", () => {
         base.rq_job_id = "job-1";
 

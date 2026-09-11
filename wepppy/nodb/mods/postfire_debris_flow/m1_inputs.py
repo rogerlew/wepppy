@@ -5,6 +5,7 @@ import hashlib
 import json
 import math
 from pathlib import Path
+import xml.etree.ElementTree as ET
 
 import numpy as np
 import rasterio
@@ -62,13 +63,57 @@ def write_json(path, value):
         stream.write('\n')
 
 
+def validate_statistics_cache(path):
+    """Recognize inert GDAL statistics only; PAM stays disabled during decoding."""
+    raw = regular(path, 64 * 1024).read_bytes()
+    if not raw or b'<!' in raw or b'<?' in raw or b'\x00' in raw:
+        fail('invalid_input', 'Unsupported statistics cache XML')
+    try:
+        root = ET.fromstring(raw.decode('ascii'))
+    except (UnicodeError, ET.ParseError) as exc:
+        raise M1Error('invalid_input', 'Malformed statistics cache XML') from exc
+    if root.tag != 'PAMDataset' or root.attrib or len(root) != 1:
+        fail('invalid_input', 'Unsupported statistics cache dataset')
+    band = root[0]
+    if band.tag != 'PAMRasterBand' or band.attrib != {'band': '1'} or len(band) != 1:
+        fail('invalid_input', 'Unsupported statistics cache band')
+    metadata = band[0]
+    if metadata.tag != 'Metadata' or metadata.attrib or not len(metadata):
+        fail('invalid_input', 'Expected statistics cache metadata')
+    for element in root.iter():
+        if (element.tail or '').strip() or (element.tag != 'MDI' and (element.text or '').strip()):
+            fail('invalid_input', 'Unexpected statistics cache text')
+    allowed = {'STATISTICS_MINIMUM', 'STATISTICS_MAXIMUM', 'STATISTICS_MEAN',
+               'STATISTICS_STDDEV', 'STATISTICS_VALID_PERCENT', 'STATISTICS_APPROXIMATE'}
+    seen = set()
+    for entry in metadata:
+        key = entry.get('key')
+        if entry.tag != 'MDI' or set(entry.attrib) != {'key'} or key not in allowed or key in seen or len(entry):
+            fail('invalid_input', 'Unsupported statistics cache entry')
+        value = (entry.text or '').strip()
+        if key == 'STATISTICS_APPROXIMATE':
+            if value not in ('YES', 'NO'):
+                fail('invalid_input', 'Invalid statistics approximation flag')
+        else:
+            try:
+                finite = math.isfinite(float(value))
+            except ValueError as exc:
+                raise M1Error('invalid_input', 'Invalid statistics cache number') from exc
+            if not finite:
+                fail('invalid_input', 'Nonfinite statistics cache number')
+        seen.add(key)
+
+
 def companions(path):
-    """Admit only explicit external masks, never silently discard metadata."""
+    """Admit masks and validated inert statistics; reject meaningful sidecars."""
     path = Path(path)
     forbidden = {path.name.lower() + ext for ext in ('.aux.xml', '.ovr', 'w')}
     forbidden.update(path.stem.lower() + ext for ext in ('.aux', '.aux.xml', '.tfw', '.wld', '.rrd'))
     masks = []
     for child in path.parent.iterdir():
+        if child.name == path.name + '.aux.xml':
+            validate_statistics_cache(child)
+            continue
         if child.name.lower() in forbidden:
             fail('invalid_input', f'Unsupported raster companion: {child}')
         if child.name.lower() == path.name.lower() + '.msk':

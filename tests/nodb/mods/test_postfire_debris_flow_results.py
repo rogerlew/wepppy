@@ -116,9 +116,9 @@ def test_query_limits(inputs,tmp_path,kw):
 
 def test_incomplete_changed_and_tampered_tables(inputs,tmp_path,monkeypatch):
     path=tmp_path/'result'
-    def changed(consumed):
+    def changed(consumed, *, limits=None):
         inputs.cli_parquet.write_bytes(b'changed')
-        io.recheck(consumed)
+        io.recheck(consumed, limits=limits)
     monkeypatch.setattr(r,'recheck',changed)
     with pytest.raises(io.RainfallError) as e:build(inputs,path)
     assert e.value.code=='source_changed'
@@ -286,3 +286,41 @@ def test_reopen_rejects_clamped_rainfall_at_unsupported_rank(inputs,tmp_path,mis
     (output/'manifest.json').write_text(json.dumps(m))
     with pytest.raises(io.RainfallError,match='requires a supported positive rank') as e:catalog(output)
     assert e.value.code=='invalid_input'
+
+
+def test_large_predictor_publishes_and_rechecks_without_widening_rainfall(inputs, tmp_path):
+    slope = inputs.predictor_manifest.parent / 'wbt/slope.tif'
+    # Sparse controlled bytes test hashing/admission, not TIFF decoding.
+    with slope.open('wb') as stream:
+        stream.truncate(96 * 1024 * 1024)
+    manifest = json.loads(inputs.predictor_manifest.read_text())
+    manifest['artifacts_sha256']['wbt/slope.tif'] = io.digest(slope, io.MAX_PREDICTOR_BYTES)
+    inputs.predictor_manifest.write_text(json.dumps(manifest))
+    inputs = replace(inputs, expected_sha256={**inputs.expected_sha256,
+        str(inputs.predictor_manifest): io.digest(inputs.predictor_manifest)})
+    with pytest.raises(io.RainfallError, match='byte limit'):
+        io.digest(slope)  # Default rainfall admission is still 64 MiB.
+    result = build(inputs, tmp_path/'large-results')
+    assert result['status'] == 'complete'
+    assert (tmp_path/'large-results/manifest.json').is_file()
+    consumed, limits = {}, {}
+    io.load_predictors(inputs.predictor_manifest, inputs.expected_sha256, consumed, artifact_limits=limits)
+    io.recheck(consumed, limits=limits)
+    with slope.open('r+b') as stream:
+        stream.write(b'changed')
+    with pytest.raises(io.RainfallError, match='Source changed'):
+        io.recheck(consumed, limits=limits)
+    with pytest.raises(io.RainfallError, match='digest mismatch'):
+        io.load_predictors(inputs.predictor_manifest, inputs.expected_sha256, {})
+
+
+@pytest.mark.parametrize('name,size', [
+    ('slope.tif', 96*1024*1024+1),
+    ('summary.json', 1024*1024+1),
+])
+def test_predictor_artifact_caps_before_hashing(inputs, name, size):
+    artifact = inputs.predictor_manifest.parent/'wbt'/name
+    with artifact.open('wb') as stream:
+        stream.truncate(size)
+    with pytest.raises(io.RainfallError, match='byte limit'):
+        io.load_predictors(inputs.predictor_manifest, inputs.expected_sha256, {})

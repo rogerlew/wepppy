@@ -384,6 +384,7 @@ function controlBase() {
         const errorPayload = { error: { message: `Job ${status}.` } };
 
         function emitFailure() {
+            if (self.rq_job_id !== jobId) { return; }
             try {
                 self.triggerEvent("job:error", {
                     job_id: jobId,
@@ -415,6 +416,7 @@ function controlBase() {
 
         Promise.resolve(fetchJobInfo)
             .then(function (payload) {
+                if (self.rq_job_id !== jobId) { return; }
                 if (payload && payload.error && typeof payload.error === "object" && payload.error.message) {
                     clearStacktrace(self.stacktrace);
                     renderControlledErrorSummary(self, {
@@ -434,6 +436,7 @@ function controlBase() {
                 emitFailure();
             })
             .catch(function (error) {
+                if (self.rq_job_id !== jobId) { return; }
                 self.pushErrorStacktrace(self, error, status, errorPayload.error.message);
                 emitFailure();
             });
@@ -1279,18 +1282,20 @@ function controlBase() {
 
             self._job_status_fetch_inflight = true;
             const http = ensureHttp();
-            const primaryUrl = `/rq-engine/api/jobstatus/${encodeURIComponent(self.rq_job_id)}`;
+            const requestedJobId = self.rq_job_id;
+            const primaryUrl = `/rq-engine/api/jobstatus/${encodeURIComponent(requestedJobId)}`;
             const fetchJobStatus = fetchJobJson(self, http, primaryUrl, { _: Date.now() });
 
             fetchJobStatus
                 .then(function (data) {
-                    self.handle_job_status_response(self, data);
+                    if (self.rq_job_id === requestedJobId) { self.handle_job_status_response(self, data); }
                 })
                 .catch(function (error) {
-                    self.handle_job_status_error(self, error);
+                    if (self.rq_job_id === requestedJobId) { self.handle_job_status_error(self, error); }
                 })
                 .finally(function () {
                     self._job_status_fetch_inflight = false;
+                    if (self.rq_job_id && self.rq_job_id !== requestedJobId) { self.fetch_job_status(self); }
                 });
         },
 

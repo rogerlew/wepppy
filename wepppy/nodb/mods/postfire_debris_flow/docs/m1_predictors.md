@@ -37,8 +37,7 @@ decoding. Validate a present cache each time the local raster boundary is used;
 malformed or meaningful metadata is never treated as inert.
 All other auxiliary metadata/overviews and sidecars are rejected. This admits
 standard project DEM statistics without weakening meaningful-metadata checks.
-Implementation of the statistics-only exception is pending the upload/status
-repair checkpoint.
+The statistics-only exception is implemented under checkpoint `7447e6243`.
 JSON is capped at 1 MiB, rasters at 512 MiB and 10 million cells. Decode only
 single-band GeoTIFF with identity encoding and pixel-area metadata. The target
 DEM/mask/K/dNBR grid is WGS84 UTM with square meter cells; opt-in nearest SBS
