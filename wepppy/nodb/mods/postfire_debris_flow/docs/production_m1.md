@@ -366,6 +366,36 @@ Existing per-run authorization remains on the detailed state endpoint. No
 filesystem watcher is introduced: unmanaged operator file edits are checked at
 next state request/submission and are outside realtime producer notifications.
 
+### Preflight completion task
+
+`TaskEnum.run_postfire_debris_flow` has label `Run Post-fire Debris Flow` and
+emoji 🌋. The boolean checklist key `postfire_debris_flow` maps to
+`#postfire-debris-flow`, after RUSLE; the legacy `run_debris` task stays separate.
+
+After durable publication, project the accepted run's original UTC completion
+second into `timestamps:run_postfire_debris_flow`. Complete and scientifically
+partial publications both count. An absent publication produces no timestamp.
+A failed retry does not erase an accepted publication. Accepted dNBR replacement
+or a persisted rainfall-source selection differing from the publication clears
+the marker. Serialize each fresh durable read and Redis projection with a short
+run-scoped Redis lock, checking ownership before writing, so delayed
+notifications cannot restore obsolete state. Lock timeout or Redis failure may
+leave the coarse indicator stale; it never authorizes file access.
+Projection remains best-effort after durable publication; Redis failure is logged
+and must not reclassify the completed model run. Notifications carry no filenames, paths, or scientific metadata.
+
+The Go checklist requires a positive completion timestamp later than every
+present upstream timestamp for DEM, channels, outlet, subcatchments, abstraction,
+land use/rangeland, soils, SBS, POLARIS, RUSLE, and climate. Missing upstream
+markers alone do not reject an already admitted publication; malformed present
+markers do. Same-second ties conservatively remain incomplete. It does not require a WEPP run or completed full RUSLE simulation.
+These are coarse workflow checks; authenticated artifact freshness and download
+validation remain authoritative for file changes not represented by timestamps.
+
+Existing completed runs may be reconciled after verifying authenticated state
+reports current results, using the original completion time rather than the
+migration time. No model rerun is required. This additive task changes neither
+NoDb nor model-output schemas. Implementation conformance pending validation.
 ### Fixed completed-file access (publication review clarification)
 
 Keep completed bundles under hidden attempt storage. Copying to a generic public
