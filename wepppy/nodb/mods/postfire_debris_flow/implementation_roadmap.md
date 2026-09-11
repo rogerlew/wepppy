@@ -1,9 +1,8 @@
 # Postfire Debris Flow Implementation Roadmap
 
-Status: planning baseline after dNBR backend commit `9b99d535c`.
-Production model execution, NoDb, browser upload, RQ, and dashboard integration
-are not implemented. The watershed/engine package completes stages 1–2 with an independently
-reviewed and validated offline numerical API.
+Status: updated 2026-09-11. Production M1 NoDb, browser upload and RQ execution
+are implemented. Production M3 and the dashboard remain pending. M1/M3 UI and
+request wiring are the next owner-directed increment; full M3 integration follows.
 
 ## Maintenance Contract
 
@@ -41,6 +40,16 @@ gate. SSURGO primary and original STATSGO fallback are accepted source priority.
 Stage 5 adds the browser upload workflow to the local dNBR backend.
 
 ## Next Scoped Increment
+
+Owner request 2026-09-11: [M1/M3 UI and request wiring](docs/model_selection.md).
+Record the shared model comparison/header, side-by-side selector and conditional
+prerequisites before runtime changes. M3 must reach its dedicated RQ task in this increment. Owner decisions fix
+10 m NED13/2022 eligibility, retain automatic POLARIS/RUSLE enablement and
+select scalar estimates with coverage masking. SSURGO validity assessment and
+exact scientific integration remain explicit. The active plan is [model wiring](../../../../docs/work-packages/20260911_staley_model_wiring/prompts/active/execplan.md).
+No implementation or full M3 execution is claimed by this planning entry.
+
+### Completed local predictor increment
 
 [Local M1 predictor integration](../../../../docs/work-packages/20260909_staley_m1_predictors/package.md)
 is implemented and validated locally with complete authentic Wallow evidence. It

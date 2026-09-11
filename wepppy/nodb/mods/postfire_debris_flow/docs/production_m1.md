@@ -12,6 +12,11 @@ Reports and interactive dashboard are deferred. Canonical UI contract:
 
 ## Authority and acceptance boundary
 
+Pending owner-directed increment: [M1/M3 selection](model_selection.md) records
+model-specific UI and prerequisite changes, including removal of the independent
+WEPP Soils requirement for M1. The baseline below remains implemented behavior
+until the reviewed contract checkpoint and runtime changes are complete.
+
 Reuse existing predictor, rainfall, dNBR, slope/SBS and scalar contracts. Preserve
 legacy debris_flow.nodb and outputs. The new facade is PostfireDebrisFlow,
 file postfire_debris_flow.nodb. Existing project watershed/outlet is
@@ -377,28 +382,42 @@ next state request/submission and are outside realtime producer notifications.
 emoji 🌋. The boolean checklist key `postfire_debris_flow` maps to
 `#postfire-debris-flow`, after RUSLE; the legacy `run_debris` task stays separate.
 
-After durable publication, project the accepted run's original UTC completion
-second into `timestamps:run_postfire_debris_flow`. Complete and scientifically
-partial publications both count. An absent publication produces no timestamp.
-A failed retry does not erase an accepted publication. Accepted dNBR replacement
-or a persisted rainfall-source selection differing from the publication clears
-the marker. Serialize each fresh durable read and Redis projection with a short
-run-scoped Redis lock, checking ownership before writing, so delayed
-notifications cannot restore obsolete state. Lock timeout or Redis failure may
-leave the coarse indicator stale; it never authorizes file access.
-Persist successful projections through the existing RedisPrep recovery dump.
-Projection remains best-effort after durable publication; Redis or recovery-dump
-I/O failure is logged and must not reclassify the completed model run.
-Notifications carry no filenames, paths, or scientific metadata.
+Pending M1/M3 amendment (2026-09-11; implementation checkpoint required):
+🌋 represents the latest accepted publication evaluated against its own model,
+frequency and inputs. It does not represent current radio selection. A different
+model/frequency selection or failed retry does not clear an otherwise current
+accepted result. No historical search for another current result is introduced.
 
-The Go checklist requires a positive completion timestamp later than every
-present upstream timestamp for DEM, channels, outlet, subcatchments, abstraction,
-land use/rangeland, soils, SBS, POLARIS, RUSLE, and climate. Missing upstream
-markers alone do not reject an already admitted publication; malformed present
-markers do. Same-second ties conservatively remain incomplete. It does not
-require a WEPP run or completed full RUSLE simulation.
-These are coarse workflow checks; authenticated artifact freshness and download
-validation remain authoritative for file changes not represented by timestamps.
+Project the accepted run's original UTC completion second into
+`timestamps:run_postfire_debris_flow` and its immutable model into
+`postfire_debris_flow:model`. Legacy missing model means M1; malformed model
+means incomplete. Complete and scientifically partial publications both count.
+Absent publication produces no completion timestamp. An accepted dNBR replacement
+clears an M1 marker, not an M3 marker. The dedicated pending-integration M3 task
+never sets a completion marker. Python result freshness evaluates the accepted
+record's model and frequency, independently of selected UI settings.
+
+Serialize each fresh durable read and Redis projection with the existing short
+run-scoped Redis lock, checking ownership before writing. Project timestamp and
+model together and persist through RedisPrep recovery dump. Redis/dump failures
+are logged and do not reclassify durable success. Public notifications contain
+no filenames, paths or scientific metadata. Marker freshness remains advisory.
+
+The Go checklist requires a positive completion timestamp later than present
+shared upstream timestamps for DEM, channels, outlet, subcatchments, abstraction,
+SBS and climate. M1 additionally checks POLARIS/RUSLE markers; it does not check
+WEPP soils or landuse/rangeland. M3 additionally checks soils and its landuse/
+rangeland prerequisites; it does not check POLARIS/RUSLE. Missing upstream markers
+alone do not reject an accepted publication; malformed present markers do.
+Same-second ties remain conservatively incomplete. No WEPP run or successful
+full RUSLE build is required. These coarse checks can conservatively lag exact
+artifact readiness; authenticated model-specific source freshness remains
+otherwise authoritative. Source revision notifications still refresh the UI.
+
+The wiring scope includes module `preflight.py`, `production.py` result freshness,
+`services/preflight2/internal/checklist/checklist.go` and their Python/Go tests.
+Verify selected M3 with a current M1 result, selected NOAA with accepted CLI,
+failed M3 after M1 success, and both models' relevant/irrelevant upstream changes.
 
 Existing completed runs may be reconciled after verifying authenticated state
 reports current results, using the original completion time rather than the

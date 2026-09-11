@@ -51,6 +51,14 @@ validation, stable arithmetic, and inverse equality/unavailability policies.
 RUSLE annual erosivity R is a different quantity and must not be used as Staley
 rainfall.
 
+### Model selection increment (2026-09-11)
+
+The owner requested a shared M1/M3 header comparison, side-by-side model radios,
+M1-only dNBR/K controls and an M3-only Soils prerequisite. Accepted presentation,
+model-aware task transport/state compatibility and remaining integration decisions are
+recorded in [model selection](docs/model_selection.md). Implementation and the
+reviewed contract checkpoint remain pending; production still executes M1 only.
+
 ### Predictors
 
 | Predictor | M1 | M3 |

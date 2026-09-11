@@ -7,6 +7,10 @@
 
 ## Purpose
 
+Active: [Staley M1/M3 model wiring](docs/work-packages/20260911_staley_model_wiring/package.md)
+— owner-directed selector, model-specific prerequisites and real M3 RQ task;
+scientific M3 composition and valid-support calculations follow separately.
+
 Completed: [WA-117 NFS client comparison](docs/work-packages/20260911_wa117_nfs_client_comparison/package.md)
 — Dell-to-HPC metadata and first reads outperformed wepp1-to-legacy NFS, while
 wepp1's 251 GiB host cache made its second 21.1 GB pass complete in 14.1 seconds;

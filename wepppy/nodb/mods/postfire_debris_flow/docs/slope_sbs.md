@@ -1,5 +1,12 @@
 # Staley slope/SBS intersection design
 
+
+Pending production amendment (2026-09-11): [ADR-0066](../../../../../docs/adrs/ADR-0066-staley-valid-support.md)
+and [model selection](model_selection.md) record scalar valid-support estimates,
+coverage artifacts and the initial M3 NED13/2022 10 m source requirement.
+Existing local tool outputs remain unchanged; scientific composition follows
+its own checkpoint after UI/task wiring.
+
 Status: Horn 3×3 and uncertainty-preserving support accepted, 2026-09-09 UTC;
 local backend implemented and validated.
 User selected owned weppcloud-wbt tooling and explicitly adopted Horn.

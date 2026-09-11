@@ -7,6 +7,12 @@ with upload and model execution now and reports deferred. The contract checkpoin
 
 ## Scope and layout
 
+Pending increment (owner request 2026-09-11): the fixed-M1 layout below is the
+implemented baseline. [M1/M3 selection](../../../wepppy/nodb/mods/postfire_debris_flow/docs/model_selection.md)
+records the accepted replacement presentation and accepted state/transport
+intent. Complete its contract checkpoint before implementation; do not treat
+the planned M3 selector as evidence that production M3 execution is available.
+
 One existing Pure UI control named **Post-fire debris flow**, following project
 control typography, spacing, form helpers and status patterns. No new dashboard,
 wizard, card grid or tabs. Model is fixed to Staley M1; no model picker. Existing

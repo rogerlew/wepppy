@@ -1,5 +1,12 @@
 # M3 Terrain Contract and Resolution Findings
 
+
+Pending production amendment (2026-09-11): [ADR-0066](../../../../../docs/adrs/ADR-0066-staley-valid-support.md)
+and [model selection](model_selection.md) record scalar valid-support estimates,
+coverage artifacts and the initial M3 NED13/2022 10 m source requirement.
+Existing local tool outputs remain unchanged; scientific composition follows
+its own checkpoint after UI/task wiring.
+
 ## Accepted engineering definition
 
 The user adopted the following contract on 2026-09-08 America/Los_Angeles;

@@ -1,5 +1,12 @@
 # M1 prepared predictor integration contract
 
+
+Pending production amendment (2026-09-11): [ADR-0066](../../../../../docs/adrs/ADR-0066-staley-valid-support.md)
+and [model selection](model_selection.md) record scalar valid-support estimates,
+coverage artifacts and the initial M3 NED13/2022 10 m source requirement.
+Existing local tool outputs remain unchanged; scientific composition follows
+its own checkpoint after UI/task wiring.
+
 Status: accepted local backend contract, 2026-09-09.
 
 Reuse the [slope/SBS contract](slope_sbs.md), [dNBR contract](dnbr_upload.md),
