@@ -35,7 +35,7 @@ Compose handoff. The later openwepp.org deployment owns full-batch output and
 - [x] Final source: 95 focused tests pass (29.44 s); complete suite 8447
   passed, 103 skipped (960.51 s). Stubs, graph, docs and exception gates pass.
 - [x] Independent correctness, QA/code, and security reviews approved code;
-  all high/medium findings closed. Deployment acceptance remains pending.
+  all high/medium findings closed. Final deployment acceptance also approved.
 - [x] Candidate `0a1e2e1ef` committed/pushed and deployed with the existing
   Forest `wctl` development workflow; only batch workers recreated.
 - [x] Forest failure/full-rerun, distinct PID/order, authenticated receipt
