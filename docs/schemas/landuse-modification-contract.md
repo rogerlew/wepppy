@@ -4,7 +4,7 @@
 
 The operator requested on 2026-09-11 that clicking **Modify Landuse** regenerate
 MOFE management files and include the modified class in the landuse summary.
-Implementation conformance is pending. This contract governs the selected-Topaz-ID
+Implementation conformance is pending production-equivalent artifact validation. This contract governs the selected-Topaz-ID
 `modify-landuse` operation, not the separate class-to-class mapping operation.
 
 ## Required outcome

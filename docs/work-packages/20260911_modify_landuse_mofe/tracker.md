@@ -6,8 +6,8 @@
 - Drafted selected-hillslope contract; operator's requested outcome recorded.
 - Two independent contract reviews approved after state/failure-policy clarification.
 - Contract and package documentation lint passed.
-- Standalone contract ancestor commit requires commit authority; no implementation edits.
-- Implementation, tests, generated-artifact validation, and correctness review pending.
+- Standalone contract ancestor committed as `134a3a9af`.
+- Implementation and focused regression tests complete; correctness review recommends ship with disposable-run artifact/downstream checks before deployment.
 
 ## Decisions and compatibility plan
 

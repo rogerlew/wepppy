@@ -270,6 +270,32 @@ def test_build_multiple_ofe_uses_explicit_treated_assignments(
     assert landuse.domlc_mofe_d == treated
 
 
+def test_explicit_mofe_assignments_do_not_require_disturbed_burn_lookup(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class _BrokenBurnLookup(_DisturbedStub):
+        def get_disturbed_key_lookup(self) -> dict[str, str]:
+            raise AssertionError('explicit assignments must bypass burn lookup')
+
+    treated = {'101': {'1': 'treated-dom', '2': 'shrub-dom'}}
+    managements = _make_managements()
+    managements['treated-dom'] = _ManagementSummaryStub('treated-dom', 'thinning_40_75')
+    landuse, run_dir = _make_landuse_fixture(
+        tmp_path,
+        monkeypatch,
+        run_name='treated-with-broken-burn-state',
+        domlc_d=treated,
+        managements=managements,
+        disturbed=_BrokenBurnLookup({}),
+    )
+    monkeypatch.setattr(landuse_module, '_write_mofe_management_file_task', _write_task_snapshot)
+
+    landuse._build_multiple_ofe(domlc_mofe_override=treated)
+
+    assert 'dom=treated-dom' in (run_dir / 'landuse' / 'hill_101.mofe.man').read_text(encoding='utf-8')
+
+
 def test_build_multiple_ofe_retries_spawn_failure_with_fork_pool(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

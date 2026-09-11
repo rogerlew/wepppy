@@ -1464,13 +1464,13 @@ class Landuse(NoDbBase):
         if managements is None:
             managements = {}
 
-        if disturbed is not None:
+        if disturbed is not None and domlc_mofe_override is None:
             disturbed_key_lookup = disturbed.get_disturbed_key_lookup()
             burn_shrubs = disturbed.burn_shrubs
             burn_grass = disturbed.burn_grass
             sbs = disturbed.get_sbs()
 
-            if sbs is not None and domlc_mofe_override is None:
+            if sbs is not None:
                 self.logger.info('Applying burn severities to landuse by multiple OFE')
 
                 wait_s = get_peridot_input_wait_s()
@@ -2152,14 +2152,86 @@ class Landuse(NoDbBase):
     # modify
     #
     def modify(self, topaz_ids: List[str], landuse: str) -> None:
+        topaz_ids = [str(topaz_id) for topaz_id in topaz_ids]
+        landuse = str(int(landuse))
+        mapping_reference = self._resolve_effective_mapping_reference(self.mapping)
+        try:
+            get_management_summary(landuse, mapping_reference)
+        except InvalidManagementKey as exc:
+            raise ValueError(f'Unknown landuse class: {landuse}') from exc
+        assert self.domlc_d is not None
+        missing_topaz_ids = [topaz_id for topaz_id in topaz_ids if topaz_id not in self.domlc_d]
+        if missing_topaz_ids:
+            raise ValueError(
+                'Landuse assignments are missing for Topaz ID(s): '
+                + ', '.join(missing_topaz_ids)
+            )
+
         with self.locked():
-            landuse = str(int(landuse))
             assert self.domlc_d is not None
 
+            if self.multi_ofe:
+                domlc_mofe_d = getattr(self, 'domlc_mofe_d', None)
+                if not isinstance(domlc_mofe_d, dict) or not domlc_mofe_d:
+                    raise ValueError(
+                        'MOFE landuse assignments are unavailable; build landuse before modifying it.'
+                    )
+                missing_state_ids = [topaz_id for topaz_id in self.domlc_d if topaz_id not in domlc_mofe_d]
+                if missing_state_ids:
+                    raise ValueError(
+                        'MOFE landuse assignments are missing for Topaz ID(s): '
+                        + ', '.join(missing_state_ids)
+                    )
+                malformed_state_ids = [
+                    topaz_id
+                    for topaz_id, ofe_map in domlc_mofe_d.items()
+                    if (
+                        not isinstance(ofe_map, dict)
+                        or not ofe_map
+                        or any(
+                            not str(mofe_id).strip() or not str(dom).strip()
+                            for mofe_id, dom in ofe_map.items()
+                        )
+                    )
+                ]
+                if malformed_state_ids:
+                    raise ValueError(
+                        'MOFE landuse assignments are malformed for Topaz ID(s): '
+                        + ', '.join(map(str, malformed_state_ids))
+                    )
+                expected_segments = self.watershed_instance.mofe_nsegments
+                missing_segment_counts = [
+                    str(topaz_id) for topaz_id in self.domlc_d if str(topaz_id) not in expected_segments
+                ]
+                if missing_segment_counts:
+                    raise ValueError(
+                        'MOFE segment counts are missing for Topaz ID(s): '
+                        + ', '.join(missing_segment_counts)
+                    )
+                incomplete_state_ids = [
+                    str(topaz_id)
+                    for topaz_id, ofe_map in domlc_mofe_d.items()
+                    if str(topaz_id) in expected_segments
+                    and (
+                        len(ofe_map) != int(expected_segments[str(topaz_id)])
+                        or set(map(str, ofe_map))
+                        != {str(index) for index in range(1, int(expected_segments[str(topaz_id)]) + 1)}
+                    )
+                ]
+                if incomplete_state_ids:
+                    raise ValueError(
+                        'MOFE landuse assignments have incomplete OFE segments for Topaz ID(s): '
+                        + ', '.join(incomplete_state_ids)
+                    )
             for topaz_id in topaz_ids:
-                assert topaz_id in self.domlc_d
                 self.domlc_d[topaz_id] = landuse
 
+                if self.multi_ofe:
+                    for mofe_id in self.domlc_mofe_d[topaz_id]:
+                        self.domlc_mofe_d[topaz_id][mofe_id] = landuse
+
+        if self.multi_ofe:
+            self._build_multiple_ofe(domlc_mofe_override=self.domlc_mofe_d)
         self.build_managements()
         self.set_cover_defaults()
 
