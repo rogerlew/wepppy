@@ -7,6 +7,9 @@
 
 ## Purpose
 
+Contract preparation: [Modify Landuse MOFE](docs/work-packages/20260911_modify_landuse_mofe/package.md)
+— regenerate selected-hillslope managements and summaries; implementation awaits contract checkpoint.
+
 Completed: [Staley M1/M3 model wiring](docs/work-packages/20260911_staley_model_wiring/package.md)
 — owner-directed selector, model-specific prerequisites and real M3 RQ task;
 scientific M3 composition and valid-support calculations follow separately.
