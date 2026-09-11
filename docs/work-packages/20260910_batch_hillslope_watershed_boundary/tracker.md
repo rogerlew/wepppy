@@ -2,7 +2,7 @@
 
 ## Quick status
 
-- **Status**: Forest accepted; immutable closeout publication pending
+- **Status**: Completed — 2026-09-11 06:14 UTC
 - **Started**: 2026-09-11 04:52 UTC
 - **Starting revision**: `29a18e00f87dc08f7832dc4f5cc8a7b87302562e`
 - **Live authorization**: Forest Docker Compose development stack only
@@ -12,7 +12,7 @@
 
 ## Task board
 
-### Ready
+### Completed
 
 - [x] Execute the active ExecPlan from current `master` on Forest.
 - [x] Establish the two-stage failure and handoff contract with failing tests.
@@ -22,13 +22,15 @@
 - [x] Complete independent correctness, QA/code, and security reviews.
 - [x] Commit and push the reviewed implementation to `master`.
 - [x] Deploy the exact candidate to Forest and validate the real two-job handoff.
-- [ ] Verify the master-triggered GHCR build and retain its immutable digest.
+- [x] Verify the master-triggered GHCR build and retain its immutable digest.
 - [x] Close without deploying or running a batch on openwepp.org.
 
 ### In progress
-Candidate `0a1e2e1ef` pushed and deployed. All reviews and Forest acceptance
-pass; 8447 full-suite tests and 95 focused tests pass. Closeout publication is
-the remaining gate; see retained validation and Forest artifacts.
+
+None. Implementation `0a1e2e1ef` and closeout `30a5d0505` are pushed.
+All reviews, 8447 full-suite tests, 95 focused tests and Forest acceptance pass.
+Exact closeout image publication succeeded; immutable coordinates and LFS
+results are retained in the publication artifact.
 
 ### Blocked
 
@@ -67,6 +69,6 @@ None.
 ## Handoff
 
 The executed plan is under `prompts/completed/`. Forest is restored to its
-normal worker configuration with the reviewed source loaded. After exact
-closeout-SHA publication, the separate openwepp.org rollout must validate
+normal worker configuration with the reviewed source loaded. Exact closeout-SHA
+publication is verified. The separate openwepp.org rollout must validate
 scientific output and memory headroom; no such claim is made here.

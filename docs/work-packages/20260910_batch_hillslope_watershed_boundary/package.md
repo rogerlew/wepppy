@@ -1,6 +1,6 @@
 # Batch hillslope-to-watershed RQ task boundary
 
-**Status**: Forest accepted; immutable closeout publication pending
+**Status**: Completed — Forest accepted and immutable closeout image published
 **Started**: 2026-09-11 04:52 UTC
 **Starting revision**: `29a18e00f87dc08f7832dc4f5cc8a7b87302562e`
 
@@ -150,8 +150,8 @@ review templates and retain the completed artifacts under `artifacts/`.
 - [x] Focused tests and `wctl run-pytest tests --maxfail=1` pass.
 - [x] Documentation, stubs, broad-exception, code-quality, and diff checks pass.
 - [x] Independent reviews pass with no unresolved high/medium findings.
-- [ ] The implementation and closeout are committed and pushed to `master`.
-- [ ] The master-triggered GHCR workflow succeeds and its source SHA, immutable
+- [x] The implementation and closeout are committed and pushed to `master`.
+- [x] The master-triggered GHCR workflow succeeds and its source SHA, immutable
   tag, and digest are recorded.
 - [x] No openwepp.org deployment or full batch integration is performed or
   claimed during package execution.
@@ -174,3 +174,12 @@ that integration result.
 - Correctness, QA/code, security, and validation artifacts.
 - Completed active ExecPlan and tracker.
 - Pushed master commit and immutable GHCR digest evidence.
+
+## Outcome
+
+Implementation `0a1e2e1ef` is deployed on Forest; closeout `30a5d0505` is
+pushed and published. See [validation](artifacts/2026-09-11_validation.md),
+[Forest evidence](artifacts/2026-09-11_forest_integration.md), and
+[immutable publication](artifacts/2026-09-11_ghcr_publication.md). All required
+reviews and package gates passed. openwepp.org science/memory acceptance remains
+the separate post-close integration gate above.

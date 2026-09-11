@@ -7,9 +7,10 @@
 
 ## Purpose
 
-Forest accepted; publication pending: [Batch hillslope-to-watershed RQ task boundary](docs/work-packages/20260910_batch_hillslope_watershed_boundary/package.md)
+Completed: [Batch hillslope-to-watershed RQ task boundary](docs/work-packages/20260910_batch_hillslope_watershed_boundary/package.md)
 — two ordered jobs on existing batch workers, real failure/full-rerun and
-authenticated receipt readback verified; 8,447 tests passed. Full scientific
+authenticated receipt readback verified; 8,447 tests passed and immutable
+closeout image published. Full scientific
 and memory integration remains assigned to the later openwepp.org rollout.
 
 Completed: [Native SBS upload](docs/work-packages/20260910_sbs_native_upload/package.md)

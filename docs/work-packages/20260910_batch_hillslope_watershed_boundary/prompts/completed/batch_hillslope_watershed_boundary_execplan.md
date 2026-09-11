@@ -40,7 +40,9 @@ Compose handoff. The later openwepp.org deployment owns full-batch output and
   Forest `wctl` development workflow; only batch workers recreated.
 - [x] Forest failure/full-rerun, distinct PID/order, authenticated receipt
   downloads and empty test registries verified; acceptance reviews approved.
-- [ ] Commit/push closeout and verify the immutable GHCR image build.
+- [x] Closeout `30a5d0505` pushed; workflow `34568456675` succeeded at
+  06:14:22 UTC, LFS checks pass and immutable digest is recorded in
+  `../../artifacts/2026-09-11_ghcr_publication.md`.
 - [x] (2026-09-11) Execution baseline: Forest `master` at `0c34afdb5`;
   graph check and 35 focused tests pass (12.43 s).
 - [x] Drafted durable handoff/terminal-observer contract; independent reviews
@@ -115,7 +117,9 @@ version returned strings. Refreshed existing allowlist entries and corrected
 the temporary probe; no dependency or generic framework was introduced.
 
 Implementation and independent reviews are complete. Focused RQ, real worker,
-NoDb, archive, and Omni checks pass. Forest acceptance passed; immutable closeout publication remains pending.
+NoDb, archive, and Omni checks pass. Forest acceptance and exact closeout image publication passed; no package
+gates remain open. Publication evidence is committed separately after the
+immutable build, without redefining its source coordinates.
 
 ## Context and Orientation
 
