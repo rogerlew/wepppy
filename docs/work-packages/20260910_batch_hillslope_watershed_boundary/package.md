@@ -66,6 +66,26 @@ boundary. It does not change pod resources or kernel memory policy.
   occur only after this package is closed and require a separate deployment
   work package in the open-wepp-org repository.
 
+## Complexity budget
+
+- **Existing mechanisms reused**: `batch` queue, current batch workers,
+  `BatchRunner`, RQ dependencies, RedisPrep timestamps, NoDb locks, and current
+  Forest Compose services.
+- **New mechanisms permitted**: two task functions and the dependency/receipt
+  metadata needed to join them; no new runtime component.
+- **Simplest plausible change tested first**: split the existing monolithic
+  leaf at hillslope interchange while retaining the current queue and workers.
+- **Real acceptance condition**: Forest proves the task handoff; the subsequent
+  openwepp.org batch proves correct output and adequate memory headroom.
+- **Evidence required before escalation**: retained openwepp.org batch evidence
+  that the two-task implementation still fails its correctness or 12 GiB
+  memory acceptance condition.
+- **Explicitly prohibited expansion**: another queue, worker pool, service,
+  daemon, dependency, privilege, memory controller, or scheduling topology.
+
+The executor must not redesign around a theoretical cgroup limitation. Record
+that concern as a post-deployment measurement and test this bounded change.
+
 ## Required behavior
 
 For every selected watershed, `run_batch_rq` creates a two-job chain:

@@ -50,6 +50,23 @@ Feel free to omit `notes/` or `artifacts/` if the package stays simple.
 9. When the initiative ends, update `package.md` with the closure date and highlight deliverables or follow-ups.
 10. If the package changes parameterization defaults/formulas/thresholds/unit conversions/fallback rules, add or update an ADR in `docs/adrs/` per `docs/standards/parameterization-adr-standard.md`.
 
+## Simplicity and escalation gate
+
+Start with the smallest reversible change that directly and plausibly addresses
+the observed problem. Treat a theoretical limitation as a risk for the real
+acceptance test, not as proof that the simpler approach will fail. Keep
+diagnosis, remediation, and architectural redesign separate unless retained
+evidence makes them inseparable.
+
+Every package records a complexity budget. Adding a queue, service, datastore,
+daemon, dependency, privilege, protocol, or deployment topology outside that
+budget requires stopping before implementation and recording the simpler
+approach attempted, evidence that it missed the real acceptance condition, the
+smallest necessary escalation, and the added operational and recovery costs.
+Do not add infrastructure to make an untested application change theoretically
+complete. An operator-selected bounded solution must be implemented and tested
+as scoped unless it violates a known safety or correctness requirement.
+
 Keeping everything inside one folder makes handoffs easier and lets us archive the package without losing the history.
 
 ## Modernization Scope Clarity
