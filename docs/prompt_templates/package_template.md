@@ -25,6 +25,20 @@
 - Tempting extensions that would expand scope
 - Other systems that won't be modified
 
+## Complexity Budget
+
+- **Existing mechanisms reused**: [Queues/services/modules/dependencies already available]
+- **New mechanisms permitted**: [Explicit list or `none`]
+- **Simplest plausible change tested first**: [Bounded change]
+- **Real acceptance condition**: [Observable workload and outcome]
+- **Evidence required before escalation**: [Retained result showing insufficiency]
+- **Explicitly prohibited expansion**: [Queues/services/datastores/daemons/dependencies/privileges/protocols/topology or other]
+
+Treat theoretical limitations as acceptance-test risks, not proof of failure.
+If implementation needs something outside this budget, stop and record the
+simple attempt, evidence of insufficiency, smallest additional mechanism, and
+new operational/recovery cost before expanding the package.
+
 ## Implementation Fidelity and Evidence (Required for modernization/migrations)
 [Use this section when work modernizes legacy behavior or migrates execution paths.]
 
