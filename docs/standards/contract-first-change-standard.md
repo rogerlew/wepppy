@@ -252,3 +252,11 @@ and incident-remediation review artifacts.
 Every production change also updates affected user, operator, and developer
 documentation in the same final change set. Contract-first ordering is additive
 to that repository-wide documentation obligation.
+
+## Artifact Observability Gate
+
+Artifact-producing changes must satisfy the
+[artifact observability standard](artifact-observability-standard.md). Include
+visible working/failed/completed states and archive/restore coverage in the
+valid-state matrix. Missing evidence blocks approval; do not substitute hidden
+state or fixed-file endpoints for normal project inspection.

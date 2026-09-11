@@ -4231,3 +4231,5 @@ If this tracker format isn't working or you have suggestions:
 - [x] Verify Backlog priorities still align with current goals
 - [x] Reconcile stale lifecycle state transitions in tracker columns
 - [ ] Update metrics section with recent data
+
+- Active: [Artifact observability and Staley intermediate records](docs/work-packages/20260911_artifact_observability/package.md).

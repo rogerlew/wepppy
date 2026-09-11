@@ -77,3 +77,16 @@ needs a contract-based justification and regression evidence.
 - **Unresolved findings**: High [count]; Medium [count]; Low [count]
 - **Release recommendation**: `ship | ship-with-conditions | hold`
 - **Reviewer sign-off**: [Name/agent and date]
+
+## Artifact Observability Gate (Required)
+
+Follow [artifact observability](../standards/artifact-observability-standard.md).
+Reject hidden-only/download-only project records or unapproved exclusions.
+
+- [ ] Comparable module and canonical artifact inventory are named.
+- [ ] Inputs, intermediates, failure evidence, provenance and outputs are visible
+  through established project tools under normal project authorization.
+- [ ] Real writer/failure tests prove retention; canonical archive/restore tests
+  prove member coverage and byte equality; live browser/download evidence exists.
+- [ ] Any exception has explicit operator approval, exact scope and a canonical
+  decision. Safety/atomicity arguments alone do not override observability.

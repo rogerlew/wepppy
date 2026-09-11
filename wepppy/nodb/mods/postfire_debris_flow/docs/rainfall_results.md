@@ -91,7 +91,7 @@ Sequences must be nonempty. Normalize durations/intervals/targets ascending.
 No frequency source substitution. Each inverse target uses scalar equality
 semantics and preserves all three statuses and reasons.
 
-Fresh private output directory contains `incomplete.json`, `events.parquet`,
+Fresh caller-owned visible output directory contains `incomplete.json`, `events.parquet`,
 `design.parquet`, `inverse.parquet`, and final `manifest.json`. Never replace an
 existing directory. Failure retains incomplete files for diagnosis; retry at a
 new path. The final marker follows table readback/schema/hash verification and

@@ -676,3 +676,12 @@ exercise both explicit frequency sources with fixed predictors. The separate
 production M1 contract now supplies publication; a dashboard remains deferred. The owner explicitly approved
 R02: unsupported positive ranks retain unavailable rows. Parameterization and
 rationale are recorded in ADR-0062; the package tracker records final validation.
+
+## Artifact observability
+
+[Artifact observability](../../../../docs/standards/artifact-observability-standard.md)
+is mandatory. Sources, intermediate maps, diagnostic files and failed/completed
+attempts use visible attempts/<id>/ directories and durable status receipts.
+Latest result files remain directly under postfire_debris_flow/. Preserve them
+through canonical project archive/restore. Storage migration and failure retention
+are governed by [production M1](docs/production_m1.md#observable-intermediate-artifacts-and-migration).

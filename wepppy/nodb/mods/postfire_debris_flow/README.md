@@ -205,9 +205,9 @@ deferred; initial completion provides status and authorized model-file access.
 The [production contract](docs/production_m1.md) defines routes, state, source
 freshness, candidate retention and publication. `postfire_debris_flow.nodb` is
 optional until the first accepted mutation. Inputs and outputs are immutable
-under `postfire_debris_flow/.staging/<attempt-id>`; only the accepted completed
-bundle is downloadable through its authenticated endpoint. Do not move these
-files into the general browse tree. Unaccepted retries expire after 24 hours;
+under visible `postfire_debris_flow/attempts/<attempt-id>/`. Sources, intermediate
+maps, diagnostics, failed work and completed files are browsable and archived.
+The latest four result files also appear directly in `postfire_debris_flow/`. Unaccepted retries expire after 24 hours;
 automatic artifact deletion is deferred.
 
 Workers require the owned WBT `StaleySlopeSbs` tool. Use the existing

@@ -17,6 +17,7 @@
 ## Core Directives
 - `??` in prompt means provide critical analysis only; do not implement code.
 - Ask for human clarification when requirements or debug context are ambiguous.
+- **Observability is paramount:** follow [artifact observability](docs/standards/artifact-observability-standard.md); project records, including failed/intermediate artifacts, must be browsable and archivable.
 - Keep docs terse: Codex loads context in bulk and does not compress verbose guidance.
 - Do not add fallback wrappers that silently mask missing required dependencies; prefer explicit failures over hidden recovery paths.
 - Do not create or switch to a new git branch unless the user explicitly asks for it.
@@ -153,7 +154,6 @@
 - Reuse existing patterns from adjacent code before introducing new abstractions.
 - Ask a human when requirements are unclear or an external dependency blocks progress.
 - When work is possible but unnecessarily difficult, note the friction and recommend the smallest doc/tooling/interface improvement in handoff for human review.
-
 ## Root Size Policy
 - Keep this file within roughly 100-160 lines.
 - If a section grows beyond quick onboarding value, move detail to a canonical doc and leave a pointer.

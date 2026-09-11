@@ -63,7 +63,7 @@ run revision, dependency snapshot/freshness, and terminal failure details. Keep
 large rasters/tables in artifacts, not NoDb JSON. Bind attempt IDs to published
 artifacts so an old worker cannot replace a newer submission.
 
-Layout under postfire_debris_flow/: hidden .staging/<id>/ contains immutable
+Layout under postfire_debris_flow/: visible attempts/<id>/ contains immutable
 source/normalized artifacts and unfinished predictor/results bundles. Only
 accepted completed model files are published directly in postfire_debris_flow/
 and exposed through the standard project browser and fixed result links.
@@ -75,7 +75,7 @@ for web and worker identities on the actual target mounts.
 
 Use short lock/refresh/allowlisted-state updates, not a NoDb lock across uploads,
 normalization, hashing or model execution. Workers snapshot inputs, compute in
-private attempt directories and finalize only after reacquiring fresh state and
+visible attempt directories and finalize only after reacquiring fresh state and
 checking attempt/dependency identities. Readbacks refresh cached NoDb using the
 canonical persistence contract. No whole-object merging or stale mutation retry.
 
@@ -257,9 +257,9 @@ NOAA availability, selected source, upload/run status, accepted dNBR summary,
 previous/current result state and fixed file links. Never serialize raw controller
 objects or arbitrary manifests to the browser.
 
-Store sources and unfinished computation under `postfire_debris_flow/.staging/`
-with exclusive attempt directories. Do not expose hidden data through browsing.
-Retain immutable accepted sources/normalization in hidden storage as well; expose
+Store sources and unfinished computation under `postfire_debris_flow/attempts/`
+with exclusive visible attempt directories. Sources, normalization, intermediate
+files and failed work are available through the normal project browser. Expose
 only verified completed model bundle files via fixed accepted-result links.
 All paths must remain within nonsymlink project-owned directories. Use group-
 compatible web/worker permissions and validate them under actual identities.
@@ -349,10 +349,10 @@ Public dNBR has `id` (also valid for correction), `filename`, `format`, `dtype`,
 (`distribution`, `metadata`, `selected`), `completed_at`, `current` (bool).
 Result has `id`, `completed_at`, `current` (bool), `partial` (bool), `files`
 (list of `{name,url}` for events.parquet, design.parquet, inverse.parquet and
-manifest.json only). Never include hidden source paths or candidate tokens in
+manifest.json only). Never include source paths or candidate tokens in
 preflight/job results. UUID is an identifier, not authorization.
 
-Private attempts additionally store `snapshot`, `source_id`, `encoding`,
+Attempt records additionally store `snapshot`, `source_id`, `encoding`,
 `filename` and `job_key`; schema allows absent optional values only in a freshly
 created/empty state. Reject malformed populated records; do not interpret them
 as a ready/empty controller. Public projections explicitly select fields.
@@ -416,10 +416,10 @@ access rules. No new UI, nested result directory, symlink, or custom browser
 route is required. Scientifically partial results are published too.
 
 After the accepted NoDb commit, materialize the four fixed files from that
-accepted bundle, verifying their recorded hashes. Prepare all files privately,
+accepted bundle, verifying their recorded hashes. Prepare all files in visible publication_work directories,
 then replace each destination atomically using ordinary generated-file permissions,
 with manifest.json replaced last. Validate every source/destination path and all
-private-copy hashes before the first replacement.
+working-copy hashes before the first replacement.
 Serialize the latest durable-state read and installation with the existing
 postfire NoDb lock so an older callback cannot restore an older bundle.
 Each file is atomic; the four-file browser view is not a multi-file transaction.
@@ -432,11 +432,10 @@ The accepted NoDb pointer and immutable attempt artifacts continue to establish
 scientific provenance. Existing authenticated fixed-file download links remain
 compatible: authenticated rq-engine GET `postfire-debris-flow/files/{attempt_id}/{name}`
 requires `rq:export`, run/config checks, accepted-ID equality, and the four-name
-allowlist. Resolve the recorded hidden bundle, open once, validate its published
+allowlist. Resolve the recorded attempt bundle, open once, validate its published
 signature and SHA-256, then stream that same handle. Changed/missing files return
 409; stale previous results remain downloadable if their recorded files match.
-Private uploads and unfinished computations
-remain hidden. A failed/unaccepted new run does not replace visible prior outputs;
+Uploaded sources and unfinished computations remain visible under attempts/. A failed/unaccepted new run does not replace visible prior outputs;
 visible files represent the last accepted run and may be scientifically stale.
 The control continues to show authoritative freshness.
 
@@ -541,3 +540,57 @@ postfire jobs while restoring compatibility; preserve accepted NoDb/artifact dat
 and exact job receipts. Do not delete state or substitute an old completed job.
 After restoration, repeat actual runtime discovery and the disposable workflow
 before resuming. No legacy debris-flow migration is required.
+
+## Observable intermediate artifacts and migration
+
+The artifact-observability standard overrides the former hidden-attempt policy.
+Use postfire_debris_flow/attempts/<id>/ for uploaded source files, normalized dNBR,
+prepared predictor maps, WBT outputs/diagnostics, manifests and result tables.
+Both successful and failed attempts remain inspectable and archivable through
+the existing browser; incomplete.json and durable job state distinguish validity.
+The four latest accepted files remain directly in postfire_debris_flow/.
+
+dNBR normalization writes visible reserved output paths and retains incomplete
+artifacts on failure. Publication uses visible publication_work/<id>/ with status
+metadata, retains failed copies, and moves successful copies to the module root.
+Empty coordination files may be removed after successful work; meaningful data
+and diagnostics may not be deleted merely because an operation failed.
+
+Legacy migration requires a quiescent project and rejects a simultaneous legacy
+and destination tree. Rename .staging to attempts without changing binary data.
+Before mutation, retain exact original NoDb/JSON metadata and a file inventory in
+visible migrations/<id>/. Rebase path strings and dependent JSON hash references
+in dependency order, then refresh affected NoDb artifact signatures. Record every
+metadata/hash transition; preserve numerical arrays, tables and predictor values.
+Republish the four accepted root files. No automatic GET mutation or model rerun.
+
+Storage-only engine fingerprint migration is permitted only for the exact known
+pre-change engine revision recorded by the migration. Record old/new fingerprints
+and the nonnumerical changes. Unknown prior fingerprints remain unchanged and
+therefore stale; do not silently promote different science. Preserve metadata
+for all failed/historical attempts, including incomplete or malformed diagnostic
+files; malformed JSON is retained verbatim rather than interpreted as lineage.
+An interrupted migration must retain an explicit visible status and original
+metadata; recovery is explicit and cannot overwrite a concurrent tree.
+
+Acceptance requires real writer/failure tests, a legacy data migration test with
+unchanged scientific payloads, canonical archive/restore byte equality, and live
+browser/download inspection of input, predictor and failed-attempt files.
+
+### Attempt receipts and migration exclusion
+
+Every upload/model attempt retains attempts/<id>/status.json with its kind and
+full durable attempt record (ID, job ID, phase, timestamps, input snapshot and
+existing sanitized error). Persist the old receipt before replacing current
+NoDb attempt state. A later retry and Redis expiry must not erase failure identity.
+Retain per-attempt worker error.log diagnostics using the existing run exception
+logging convention; do not include credentials or session tokens. Historical
+attempts lacking a recoverable receipt are labeled historical_unknown, never
+invented as successful. Receipts are ordinary project records in archives.
+
+Migration acquires the existing run-scoped postfire-admission submission/lifecycle
+lease before refreshing NoDb and taking its mutation lock. Reject ACTIVE phases,
+including enqueue_unknown, and verify recorded jobs and active default-queue
+postfire jobs for the run are terminal before mutation. Missing expired jobs are
+permitted only for already terminal attempt records. NoDb locking alone is not
+sufficient to exclude a worker that is writing raster files.

@@ -92,10 +92,12 @@ if both exist require prefire < postfire. Unknown dates remain null; fire/event
 filename dates are not image dates. Assessment type is null, initial or extended.
 No scientific dates are inferred from upload time.
 
-Validate into a private sibling staging directory, then publish to a previously
-absent output directory. Existing directories (including empty/symlink ones)
+Reserve a previously absent, visible output directory and write its
+incomplete.json before artifact writes. Existing directories (including empty/symlink ones)
 are rejected, never replaced. Single-writer output ownership is required.
-Failed calls remove their staging and preserve existing/source artifacts.
+Failed calls retain incomplete artifacts and the marker for inspection and
+archival; existing/source artifacts remain unchanged. Publish the success
+manifest last and remove the incomplete marker only after success.
 Source identity is checked by hashes; this local API updates no NoDb pointer. The production
 controller must atomically select the completed artifact and invalidate M1
 only; this backend does not claim to implement that lifecycle.

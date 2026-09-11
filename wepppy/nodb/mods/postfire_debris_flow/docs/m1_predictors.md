@@ -80,7 +80,7 @@ Expected errors: `invalid_input`, `invalid_grid`, `invalid_sbs`,
 `tool_failed`, `invalid_tool_output`, `preparation_failed`. Native filesystem
 errors are preserved; malformed JSON is invalid input.
 
-Exclusively reserve a private fresh directory. Retain `incomplete.json` and
+Exclusively reserve a caller-owned visible fresh directory. Retain `incomplete.json` and
 partial files on failure; retry elsewhere. `manifest.json` is the final marker,
 written after complete readable grid-matching WBT products, consistent summary
 counts/bounds, and source/binary hash rechecks. Existing output is never replaced.
