@@ -43,3 +43,10 @@ Code review approved; zero unresolved high/medium findings. Review is based on
 source/test inspection and primary-agent test reports. Reviewer did not
 independently rerun tests. Full-suite and live Forest/browser evidence remain
 package acceptance gates, recorded separately in validation/integration artifacts.
+
+## Final acceptance review
+
+The same independent reviewer approved the final Forest and validation
+artifacts on 2026-09-11: zero open high/medium findings. Actual separate-stage
+execution, safe failure/full-rerun, authenticated byte-parity downloads and
+empty test registries close the deployment gates. Publication remains pending.

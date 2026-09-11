@@ -1,6 +1,6 @@
 # Batch hillslope-to-watershed RQ task boundary
 
-**Status**: Implementation reviewed; final validation and Forest handoff in progress
+**Status**: Forest accepted; immutable closeout publication pending
 **Started**: 2026-09-11 04:52 UTC
 **Starting revision**: `29a18e00f87dc08f7832dc4f5cc8a7b87302562e`
 
@@ -134,26 +134,26 @@ review templates and retain the completed artifacts under `artifacts/`.
 
 ## Success criteria
 
-- [ ] Two separate RQ jobs exist per selected leaf and both use `batch`.
-- [ ] Watershed work cannot start before a successful hillslope handoff.
-- [ ] The second task freshly hydrates controllers and preserves valid
+- [x] Two separate RQ jobs exist per selected leaf and both use `batch`.
+- [x] Watershed work cannot start before a successful hillslope handoff.
+- [x] The second task freshly hydrates controllers and preserves valid
   hillslope/interchange outputs.
-- [ ] Success, either-stage failure, cancellation, retry, already-complete,
+- [x] Success, either-stage failure, cancellation, retry, already-complete,
   WATAR, and Omni behavior are explicit and covered.
-- [ ] Batch finalization cannot race the second stage or remain permanently
+- [x] Batch finalization cannot race the second stage or remain permanently
   deferred after a failed leaf.
-- [ ] `wctl check-rq-graph` passes and the checked-in graph/catalog describe the
+- [x] `wctl check-rq-graph` passes and the checked-in graph/catalog describe the
   actual two-stage topology.
-- [ ] Forest Compose evidence shows distinct hillslope and watershed RQ job IDs
+- [x] Forest Compose evidence shows distinct hillslope and watershed RQ job IDs
   on existing batch workers, correct dependency order, one terminal metadata
   record, and no leaked/deferred test jobs.
-- [ ] Focused tests and `wctl run-pytest tests --maxfail=1` pass.
-- [ ] Documentation, stubs, broad-exception, code-quality, and diff checks pass.
-- [ ] Independent reviews pass with no unresolved high/medium findings.
+- [x] Focused tests and `wctl run-pytest tests --maxfail=1` pass.
+- [x] Documentation, stubs, broad-exception, code-quality, and diff checks pass.
+- [x] Independent reviews pass with no unresolved high/medium findings.
 - [ ] The implementation and closeout are committed and pushed to `master`.
 - [ ] The master-triggered GHCR workflow succeeds and its source SHA, immutable
   tag, and digest are recorded.
-- [ ] No openwepp.org deployment or full batch integration is performed or
+- [x] No openwepp.org deployment or full batch integration is performed or
   claimed during package execution.
 
 ## Post-close integration gate

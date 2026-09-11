@@ -41,3 +41,10 @@ Full-suite and live Forest browser/download identity evidence remain package
 acceptance gates. The reviewer inspected code/tests and primary-agent reports;
 they did not independently rerun tests. Receipt mode is 0600; live readability
 under the shared Compose service UID must be recorded before package closure.
+
+## Final acceptance review
+
+The same independent reviewer approved the final Forest and validation
+artifacts on 2026-09-11: zero open high/medium findings. Actual separate-stage
+execution, safe failure/full-rerun, authenticated byte-parity downloads and
+empty test registries close the deployment gates. Publication remains pending.

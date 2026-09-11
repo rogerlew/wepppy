@@ -1,0 +1,333 @@
+{
+  "source_sha": "0a1e2e1efdd816243883254cd99412b022983cd2",
+  "batch_name": "codex-boundary-20260911-0540",
+  "attempts": {
+    "failure": {
+      "root": "b867c966-4457-44b8-9f50-0182138d6128",
+      "jobs": [
+        {
+          "id": "b867c966-4457-44b8-9f50-0182138d6128",
+          "function": "wepppy.rq.batch_rq.run_batch_rq",
+          "origin": "batch",
+          "status": "finished",
+          "dependencies": [],
+          "started_at": "2026-09-11 06:00:06.828503",
+          "ended_at": "2026-09-11 06:00:10.867254",
+          "result": {
+            "batch_name": "codex-boundary-20260911-0540",
+            "final_job_id": "1a9fb80e-0b67-4909-9c9a-ed9f1c9439dc",
+            "enqueued": 1,
+            "selection": {
+              "total": 1,
+              "complete": 0,
+              "failed": 0,
+              "incomplete": 0,
+              "missing": 0,
+              "invalid": 0,
+              "retry_eligible": 1,
+              "metadata_stale": 0,
+              "metadata_error": 0,
+              "prep_error": 0,
+              "base_stale": 0,
+              "base_sync_error": 0,
+              "unclassified": 1,
+              "mode": "full_rerun",
+              "enqueued": 1,
+              "skipped": 0
+            }
+          },
+          "phase_observation": null
+        },
+        {
+          "id": "2a964f83-2036-4a2c-8b3c-c4fec30444de",
+          "function": "wepppy.rq.batch_rq.run_batch_watershed_rq",
+          "origin": "batch",
+          "status": "finished",
+          "dependencies": [
+            "4cf2486e-ecd7-4416-b55d-8ca90bfb3730"
+          ],
+          "started_at": "2026-09-11 06:00:11.157051",
+          "ended_at": "2026-09-11 06:00:11.208255",
+          "result": [
+            false,
+            0.2891826629638672
+          ],
+          "phase_observation": null
+        },
+        {
+          "id": "4cf2486e-ecd7-4416-b55d-8ca90bfb3730",
+          "function": "wepppy.rq.batch_rq.run_batch_hillslopes_rq",
+          "origin": "batch",
+          "status": "failed",
+          "dependencies": [
+            "b867c966-4457-44b8-9f50-0182138d6128"
+          ],
+          "started_at": "2026-09-11 06:00:10.911128",
+          "ended_at": "2026-09-11 06:00:11.111322",
+          "result": null,
+          "phase_observation": null
+        },
+        {
+          "id": "1a9fb80e-0b67-4909-9c9a-ed9f1c9439dc",
+          "function": "wepppy.rq.batch_rq._final_batch_complete_rq",
+          "origin": "batch",
+          "status": "finished",
+          "dependencies": [
+            "2a964f83-2036-4a2c-8b3c-c4fec30444de"
+          ],
+          "started_at": "2026-09-11 06:00:11.251143",
+          "ended_at": "2026-09-11 06:00:11.327735",
+          "result": null,
+          "phase_observation": null
+        }
+      ],
+      "terminal_metadata": {
+        "runid": "batch;;codex-boundary-20260911-0540;;leaf",
+        "batch_name": "codex-boundary-20260911-0540",
+        "status": "failed",
+        "started_at": "2026-09-11T06:00:10.911128+00:00",
+        "completed_at": "2026-09-11T06:00:11.200890+00:00",
+        "duration_seconds": 0.2891826629638672,
+        "rq_job_id": "2a964f83-2036-4a2c-8b3c-c4fec30444de",
+        "task_status": {
+          "rmtree": null,
+          "fetch_dem": null,
+          "build_channels": null,
+          "find_outlet": null,
+          "build_subcatchments": null,
+          "abstract_watershed": null,
+          "build_landuse": null,
+          "build_soils": null,
+          "build_climate": null,
+          "build_rap_ts": null,
+          "build_openet_ts": null,
+          "run_wepp_hillslopes": null,
+          "run_wepp_watershed": null,
+          "run_watar": null,
+          "run_omni_scenarios": null,
+          "run_omni_contrasts": null
+        },
+        "error": {
+          "type": "RuntimeError",
+          "message": "Hillslope prerequisite 4cf2486e-ecd7-4416-b55d-8ca90bfb3730 did not finish successfully"
+        }
+      },
+      "active_test_ids": [],
+      "canonical_job_info_tree_observed": true,
+      "browse": {
+        "runid": "batch;;codex-boundary-20260911-0540;;leaf",
+        "path": "run_metadata.json",
+        "listing_status": 200,
+        "listing_contains_filename": true,
+        "download_status": 200,
+        "content_type": "application/json",
+        "content_disposition": "attachment; filename=\"run_metadata.json\"",
+        "bytes_match": true,
+        "sha256": "5ced795cb25c14f057e2b584e86c28934681e2d3a607e35f9e595550654ae42f",
+        "local_uid": 1000,
+        "local_gid": 993,
+        "local_mode": "0o644"
+      }
+    },
+    "success": {
+      "root": "128bcb08-d721-4b5d-9d30-ea9556e0ab77",
+      "jobs": [
+        {
+          "id": "128bcb08-d721-4b5d-9d30-ea9556e0ab77",
+          "function": "wepppy.rq.batch_rq.run_batch_rq",
+          "origin": "batch",
+          "status": "finished",
+          "dependencies": [],
+          "started_at": "2026-09-11 06:00:59.831998",
+          "ended_at": "2026-09-11 06:01:03.887082",
+          "result": {
+            "batch_name": "codex-boundary-20260911-0540",
+            "final_job_id": "6250c7bf-5eb3-4676-84b7-9b0ea5795ca2",
+            "enqueued": 1,
+            "selection": {
+              "total": 1,
+              "complete": 0,
+              "failed": 0,
+              "incomplete": 0,
+              "missing": 0,
+              "invalid": 0,
+              "retry_eligible": 1,
+              "metadata_stale": 0,
+              "metadata_error": 0,
+              "prep_error": 0,
+              "base_stale": 0,
+              "base_sync_error": 0,
+              "unclassified": 1,
+              "mode": "full_rerun",
+              "enqueued": 1,
+              "skipped": 0
+            }
+          },
+          "phase_observation": null
+        },
+        {
+          "id": "8f913e61-cdcf-4745-8b7e-67d9bdf6e2b1",
+          "function": "wepppy.rq.batch_rq.run_batch_watershed_rq",
+          "origin": "batch",
+          "status": "finished",
+          "dependencies": [
+            "748aea79-973c-4ea1-bac7-0b72bc5db164"
+          ],
+          "started_at": "2026-09-11 06:01:08.721616",
+          "ended_at": "2026-09-11 06:01:09.678337",
+          "result": [
+            true,
+            5.746675491333008
+          ],
+          "phase_observation": {
+            "hostname": "492189b6c9bb",
+            "pid": 391,
+            "started_at": "2026-09-11T06:01:08.750362+00:00"
+          }
+        },
+        {
+          "id": "748aea79-973c-4ea1-bac7-0b72bc5db164",
+          "function": "wepppy.rq.batch_rq.run_batch_hillslopes_rq",
+          "origin": "batch",
+          "status": "finished",
+          "dependencies": [
+            "128bcb08-d721-4b5d-9d30-ea9556e0ab77"
+          ],
+          "started_at": "2026-09-11 06:01:03.922895",
+          "ended_at": "2026-09-11 06:01:08.684889",
+          "result": {
+            "schema_version": 1,
+            "status": "success",
+            "runid": "batch;;codex-boundary-20260911-0540;;leaf",
+            "hillslope_job_id": "748aea79-973c-4ea1-bac7-0b72bc5db164",
+            "watershed_job_id": "8f913e61-cdcf-4745-8b7e-67d9bdf6e2b1",
+            "completed_at": "2026-09-11T06:01:08.677890+00:00",
+            "hostname": "492189b6c9bb",
+            "pid": 382
+          },
+          "phase_observation": {
+            "schema_version": 1,
+            "status": "success",
+            "runid": "batch;;codex-boundary-20260911-0540;;leaf",
+            "hillslope_job_id": "748aea79-973c-4ea1-bac7-0b72bc5db164",
+            "watershed_job_id": "8f913e61-cdcf-4745-8b7e-67d9bdf6e2b1",
+            "completed_at": "2026-09-11T06:01:08.677890+00:00",
+            "hostname": "492189b6c9bb",
+            "pid": 382
+          }
+        },
+        {
+          "id": "6250c7bf-5eb3-4676-84b7-9b0ea5795ca2",
+          "function": "wepppy.rq.batch_rq._final_batch_complete_rq",
+          "origin": "batch",
+          "status": "finished",
+          "dependencies": [
+            "8f913e61-cdcf-4745-8b7e-67d9bdf6e2b1"
+          ],
+          "started_at": "2026-09-11 06:01:09.720971",
+          "ended_at": "2026-09-11 06:01:09.796844",
+          "result": null,
+          "phase_observation": null
+        }
+      ],
+      "terminal_metadata": {
+        "runid": "batch;;codex-boundary-20260911-0540;;leaf",
+        "batch_name": "codex-boundary-20260911-0540",
+        "status": "success",
+        "started_at": "2026-09-11T06:01:03.922895+00:00",
+        "completed_at": "2026-09-11T06:01:09.670134+00:00",
+        "duration_seconds": 5.746675491333008,
+        "rq_job_id": "8f913e61-cdcf-4745-8b7e-67d9bdf6e2b1",
+        "task_status": {
+          "rmtree": null,
+          "fetch_dem": null,
+          "build_channels": null,
+          "find_outlet": null,
+          "build_subcatchments": null,
+          "abstract_watershed": null,
+          "build_landuse": null,
+          "build_soils": null,
+          "build_climate": null,
+          "build_rap_ts": null,
+          "build_openet_ts": null,
+          "run_wepp_hillslopes": null,
+          "run_wepp_watershed": null,
+          "run_watar": null,
+          "run_omni_scenarios": null,
+          "run_omni_contrasts": null
+        }
+      },
+      "active_test_ids": [],
+      "canonical_job_info_tree_observed": true,
+      "browse": {
+        "runid": "batch;;codex-boundary-20260911-0540;;leaf",
+        "path": "batch_handoff/748aea79-973c-4ea1-bac7-0b72bc5db164.json",
+        "listing_status": 200,
+        "listing_contains_filename": true,
+        "download_status": 200,
+        "content_type": "application/json",
+        "content_disposition": "attachment; filename=\"748aea79-973c-4ea1-bac7-0b72bc5db164.json\"",
+        "bytes_match": true,
+        "sha256": "5ac77cbc0ecb736d839b87171bf73c2b37511bdcd75ccf7177277fd963d7ca09",
+        "local_uid": 1000,
+        "local_gid": 993,
+        "local_mode": "0o600"
+      }
+    }
+  },
+  "success_events": {
+    "events": [
+      "rq:128bcb08-d721-4b5d-9d30-ea9556e0ab77 STARTED run_batch_rq(codex-boundary-20260911-0540)",
+      "rq:128bcb08-d721-4b5d-9d30-ea9556e0ab77 STATUS run selection total=1 enqueued=1 skipped=0 mode=full_rerun",
+      "rq:128bcb08-d721-4b5d-9d30-ea9556e0ab77 COMPLETED run_batch_rq(codex-boundary-20260911-0540)",
+      "rq:748aea79-973c-4ea1-bac7-0b72bc5db164 STARTED run_batch_hillslopes_rq(batch;;codex-boundary-20260911-0540;;leaf)",
+      "rq:748aea79-973c-4ea1-bac7-0b72bc5db164 COMPLETED run_batch_hillslopes_rq(batch;;codex-boundary-20260911-0540;;leaf)",
+      "rq:8f913e61-cdcf-4745-8b7e-67d9bdf6e2b1 STARTED run_batch_watershed_rq(batch;;codex-boundary-20260911-0540;;leaf)",
+      "rq:8f913e61-cdcf-4745-8b7e-67d9bdf6e2b1 COMPLETED run_batch_watershed_rq(batch;;codex-boundary-20260911-0540;;leaf) -> (True, 5.747)",
+      "rq:8f913e61-cdcf-4745-8b7e-67d9bdf6e2b1 TRIGGER batch BATCH_WATERSHED_TASK_COMPLETED",
+      "rq:6250c7bf-5eb3-4676-84b7-9b0ea5795ca2 STARTED _final_batch_complete_rq(codex-boundary-20260911-0540)",
+      "rq:6250c7bf-5eb3-4676-84b7-9b0ea5795ca2 STATUS run summary total=1 complete=1 failed=0 incomplete=0 missing=0 invalid=0 retry_eligible=0",
+      "rq:6250c7bf-5eb3-4676-84b7-9b0ea5795ca2 COMPLETED _final_batch_complete_rq(codex-boundary-20260911-0540)",
+      "rq:6250c7bf-5eb3-4676-84b7-9b0ea5795ca2 TRIGGER batch BATCH_RUN_COMPLETED"
+    ],
+    "terminal_trigger_count": 1
+  },
+  "final_inventory": {
+    "at": "2026-09-11T06:01:39.042575+00:00",
+    "queue_count": 0,
+    "workers": [
+      {
+        "name": "1554093b26a5454bbb5cf2dd53df25ec",
+        "queues": [
+          "batch"
+        ],
+        "state": "idle",
+        "current_job": null
+      },
+      {
+        "name": "c46d2901564a4aac9cdd8398a0e2517f",
+        "queues": [
+          "batch"
+        ],
+        "state": "idle",
+        "current_job": null
+      },
+      {
+        "name": "8047f5ed3a5840018cf3c02f66daddfa",
+        "queues": [
+          "batch"
+        ],
+        "state": "idle",
+        "current_job": null
+      },
+      {
+        "name": "eaac8751c7854a8c9f91855c98225c46",
+        "queues": [
+          "batch"
+        ],
+        "state": "idle",
+        "current_job": null
+      }
+    ]
+  }
+}

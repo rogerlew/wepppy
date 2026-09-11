@@ -48,8 +48,11 @@ non-skipped focused execution above is the acceptance evidence.
 
 Code-quality observability ran with custom `/tmp` output paths, preserving the
 pre-existing dirty root reports. Host `radon` is unavailable; Python complexity
-telemetry is therefore limited. Changed-commit telemetry will be recorded after
-the implementation commit, because the tool does not analyze uncommitted source
-changes against the branch comparison.
+telemetry is therefore limited. Changed-commit telemetry against `94b58e881` completed after implementation
+commit `0a1e2e1ef`: BatchRunner SLOC 1373→1400, longest function 231→212;
+batch RQ SLOC 751→880, longest function 169→185; worker SLOC 366→371.
+The RQ growth implements the required dependency/receipt identity checks and
+short Omni linkage critical sections; no generic phase framework was added.
+Existing file/function hotspot bands remain observe-only follow-up telemetry.
 
 Forest worker/browser evidence and publication evidence are separate gates.

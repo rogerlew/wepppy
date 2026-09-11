@@ -3,8 +3,8 @@
 ## Status and authority
 
 Intended behavior approved by Roger Lew's request to execute the
-20260910_batch_hillslope_watershed_boundary package. Implementation conformance
-is pending. This contract specializes the dependency rules in
+20260910_batch_hillslope_watershed_boundary package. Implementation conformance was verified on Forest at `0a1e2e1ef`
+with real RQ, failure/full-rerun and authenticated artifact evidence. This contract specializes the dependency rules in
 [rq-response-contract.md](rq-response-contract.md); NoDb persistence and scoped
 mutation-cache contracts remain unchanged.
 

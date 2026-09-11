@@ -2,7 +2,7 @@
 
 ## Quick status
 
-- **Status**: Reviewed implementation; Forest acceptance pending
+- **Status**: Forest accepted; immutable closeout publication pending
 - **Started**: 2026-09-11 04:52 UTC
 - **Starting revision**: `29a18e00f87dc08f7832dc4f5cc8a7b87302562e`
 - **Live authorization**: Forest Docker Compose development stack only
@@ -14,22 +14,21 @@
 
 ### Ready
 
-- [ ] Execute the active ExecPlan from current `master` on Forest.
+- [x] Execute the active ExecPlan from current `master` on Forest.
 - [x] Establish the two-stage failure and handoff contract with failing tests.
 - [x] Implement the BatchRunner phase boundary and batch RQ dependency chain.
 - [x] Update stubs and the RQ dependency graph/catalog.
 - [x] Pass focused and complete pytest suites and repository quality gates.
 - [x] Complete independent correctness, QA/code, and security reviews.
-- [ ] Commit and push the reviewed implementation to `master`.
-- [ ] Deploy the exact candidate to Forest and validate the real two-job handoff.
+- [x] Commit and push the reviewed implementation to `master`.
+- [x] Deploy the exact candidate to Forest and validate the real two-job handoff.
 - [ ] Verify the master-triggered GHCR build and retain its immutable digest.
-- [ ] Close without deploying or running a batch on openwepp.org.
+- [x] Close without deploying or running a batch on openwepp.org.
 
 ### In progress
-Contract ancestors: `869ca7dcf`, `f221e7f2a`. All code review findings closed;
-Final 95 focused tests and post-review full suite (8447 passed, 103 skipped)
-pass. Forest unique fixture is prepared; no live
-jobs have been submitted and no worker has been restarted.
+Candidate `0a1e2e1ef` pushed and deployed. All reviews and Forest acceptance
+pass; 8447 full-suite tests and 95 focused tests pass. Closeout publication is
+the remaining gate; see retained validation and Forest artifacts.
 
 ### Blocked
 
@@ -67,7 +66,7 @@ None.
 
 ## Handoff
 
-Begin with the active ExecPlan. Do not add infrastructure or claim Kubernetes
-memory success. At closeout, move the plan to `prompts/completed/`, update this
-tracker and `PROJECT_TRACKER.md`, then push the reviewed commits and wait for the
-GHCR workflow result.
+The executed plan is under `prompts/completed/`. Forest is restored to its
+normal worker configuration with the reviewed source loaded. After exact
+closeout-SHA publication, the separate openwepp.org rollout must validate
+scientific output and memory headroom; no such claim is made here.

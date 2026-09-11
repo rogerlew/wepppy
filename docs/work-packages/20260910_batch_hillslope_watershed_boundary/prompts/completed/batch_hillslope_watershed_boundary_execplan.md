@@ -36,8 +36,10 @@ Compose handoff. The later openwepp.org deployment owns full-batch output and
   passed, 103 skipped (960.51 s). Stubs, graph, docs and exception gates pass.
 - [x] Independent correctness, QA/code, and security reviews approved code;
   all high/medium findings closed. Deployment acceptance remains pending.
-- [ ] Commit/push the reviewed candidate and deploy it to Forest.
-- [ ] Execute Forest RQ integration and close all evidence.
+- [x] Candidate `0a1e2e1ef` committed/pushed and deployed with the existing
+  Forest `wctl` development workflow; only batch workers recreated.
+- [x] Forest failure/full-rerun, distinct PID/order, authenticated receipt
+  downloads and empty test registries verified; acceptance reviews approved.
 - [ ] Commit/push closeout and verify the immutable GHCR image build.
 - [x] (2026-09-11) Execution baseline: Forest `master` at `0c34afdb5`;
   graph check and 35 focused tests pass (12.43 s).
@@ -101,8 +103,19 @@ Compose handoff. The later openwepp.org deployment owns full-batch output and
 
 ## Outcomes & Retrospective
 
+The requested two-stage boundary is implemented, wired, reviewed and deployed
+on Forest. Actual receipt/readback evidence shows separate PIDs 382 and 391
+and ordered execution. Failure observation and explicit full rerun passed;
+no test work remains active. The fixture and sanitized records remain visible.
+Full scientific and memory acceptance remain assigned to openwepp.org.
+
+Concrete tooling friction: the exception allowlist uses stale source line
+locations, and the RQ inspection probe assumed enum statuses while the live
+version returned strings. Refreshed existing allowlist entries and corrected
+the temporary probe; no dependency or generic framework was introduced.
+
 Implementation and independent reviews are complete. Focused RQ, real worker,
-NoDb, archive, and Omni checks pass. Forest deployment and publication gates remain open.
+NoDb, archive, and Omni checks pass. Forest acceptance passed; immutable closeout publication remains pending.
 
 ## Context and Orientation
 

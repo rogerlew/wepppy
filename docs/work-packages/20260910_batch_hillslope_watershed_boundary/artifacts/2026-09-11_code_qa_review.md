@@ -16,3 +16,11 @@ Non-blocking feedback also addressed: concurrent Omni test now uses an explicit
 multiprocessing barrier; operator/developer note documents the worker logging
 exception. Review used code inspection and reported test results, not an
 independent test rerun. Full-suite and Forest acceptance are separate gates.
+
+## Final acceptance review
+
+The independent QA reviewer checked the final JSON relationships and approved
+Forest acceptance: no open high/medium findings. Full-suite and focused counts,
+ordered separate processes, safe failure/full-rerun, authenticated receipt byte
+parity, one completion event and empty active fixture registries are consistent.
+Only exact closeout-SHA publication remains pending.
