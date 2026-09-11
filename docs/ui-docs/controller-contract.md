@@ -247,3 +247,10 @@ if (controller.form) {
 - [`dynamic-mod-loading-patterns.md`](../dev-notes/dynamic-mod-loading-patterns.md) - Deep dive on dynamic loading
 - [`ui-style-guide.md`](ui-style-guide.md) - UI patterns and templates
 - [AGENTS.md](../../AGENTS.md#front-end-development) - Front-end development section
+
+### SBS HTML error details
+
+The [SBS control contract](contracts/sbs-control-contract.md) permits inert,
+allowlisted HTML gateway-error rendering in Details only. SBS Summary remains
+result HTML and hints remain job metadata; other controllers retain the shared
+escaped-text error renderer.
