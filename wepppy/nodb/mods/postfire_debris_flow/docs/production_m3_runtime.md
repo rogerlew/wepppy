@@ -44,6 +44,14 @@ manifest. Reuse references remain project-contained; negative tests must reject
 promotion of another basin's keys/grid/source identity. Generic preparation
 implementation is authorized; live network execution remains separately gated.
 
+Operational approval (2026-09-14): the owner explicitly authorized the recorded
+bounded source-delivery proposal for the development acceptance preparation.
+The initial live target is `addicted-reservist`, using the generic basin-derived
+path. No further acquisition approval is needed within that scope. This does
+not waive pre-execution proof of byte/time/range/identity controls or authorize
+shared soil/cache writes, expanded limits, or production deployment. See the
+[authorization record](../../../../../docs/work-packages/20260914_staley_m3_integration/artifacts/20260914_acquisition_authorization.md).
+
 Promotion changes no NoDb state: use the existing mutation gate and explicit
 module lock, recheck both ownerships immediately before a descriptor-relative
 atomic rename, and do not invoke the state-save/notification callback afterward.

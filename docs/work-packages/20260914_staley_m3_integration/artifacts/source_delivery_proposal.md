@@ -1,8 +1,9 @@
 # Bounded source delivery and soil decision proposal
 
 Status: recorded-depth policy ratified at `89d673c38`; reusable basin-independent
-source preparation required by owner clarification. Network acquisition remains
-unapproved. Earlier scientific proposal language below is historical.
+source preparation required by owner clarification. Network acquisition is now
+explicitly [authorized](20260914_acquisition_authorization.md), with all recorded
+limits unchanged. Earlier scientific proposal language below is historical.
 Evidence: [development inventory](source_inventory.md).
 
 ## Recommended scientific direction

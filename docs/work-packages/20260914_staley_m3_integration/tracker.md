@@ -8,6 +8,9 @@ Last updated: 2026-09-14.
 
 ## Task board
 
+- [x] Owner explicitly authorizes bounded source acquisition on 2026-09-14;
+  see [authorization](artifacts/20260914_acquisition_authorization.md).
+- [ ] Prove network-reader limits, acquire and retain approved live inputs.
 - [x] Record accepted common support and soil-builder isolation.
 - [x] Review retained paper, current soil code and NRCS documentation.
 - [x] Audit frozen three-site component totals and repeated depth intervals.
@@ -27,6 +30,9 @@ Last updated: 2026-09-14.
 
 ## Decisions
 
+- **2026-09-14 — Acquisition authorized:** owner approved the recorded bounded
+  source-delivery proposal. Earlier unapproved/gated statements describe prior
+  checkpoints; no scope/limit expansion or shared soil/cache writes are allowed.
 - **2026-09-14 — Basin-independent scope:** owner requires generic preparation
   and execution beyond `addicted-reservist`. Derive keys/extent per project;
   require multi-basin acceptance, not bespoke named-run inputs. Network

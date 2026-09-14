@@ -24,6 +24,9 @@ production deployment is authorized by this package.
 ## Progress
 
 
+- [x] (2026-09-14) Owner explicitly authorizes bounded source acquisition under
+  the recorded proposal; retain `artifacts/20260914_acquisition_authorization.md`.
+- [ ] Prove bounded network controls, then acquire verified live lineage/THICK.
 - [x] (2026-09-14) Record owner requirement for basin-independent preparation:
   derive original keys and THICK extent per project; named runs are tests only.
 - [ ] Implement reusable source preparation and prove the same path on at least
@@ -78,6 +81,11 @@ production deployment is authorized by this package.
 ## Surprises & Discoveries
 
 
+At acquisition authorization, repository inspection confirmed only the local
+source preparer exists. The installed Rasterio 1.3.10 has a file-object adapter,
+but no bounded remote transport has yet been implemented/tested. Approval
+resolves permission; the proposal still requires control proof before live IO.
+
 Native upstream area equality alone accepted a same-sized wrong basin mask.
 The terrain helper now also runs owned WBT Watershed and compares exact cells
 before declaring terrain valid. Review also reproduced receipt/hash races,
@@ -111,6 +119,11 @@ scientific proposals, not prerequisites for making this development basin pass.
 
 ## Decision Log
 
+
+Decision (2026-09-14): execute the existing bounded acquisition proposal following
+the owner's explicit authorization. This supersedes prior operational permission
+gates, not byte/time/identity limits, generic preparation, shared-soil isolation
+or required pre-execution control tests. Initial live basin: addicted-reservist.
 
 Decision (2026-09-14): source-manifest rename is the file-only commit point;
 expected postcommit lock/descriptor cleanup errors return explicit committed
@@ -171,6 +184,13 @@ acquisition remain pending; the earlier conservative recommendation is rejected.
 
 ## Outcomes & Retrospective
 
+
+Acquisition authorization is now recorded in the canonical runtime contract and
+`artifacts/20260914_acquisition_authorization.md`. No approved source payloads
+have yet been acquired. Next acquisition work must implement/test the reusable
+range reader and SDA adapter, retain current collection/version evidence without
+claiming historical cache lineage, then execute against the development basin.
+Do not request the same permission again; abort rather than widen approved limits.
 
 Current increment: local native terrain and two-basin source preparation exist.
 Focused source/M1 regression gate passed 68 tests; combined source, terrain,
@@ -449,3 +469,5 @@ Scope clarification: require reusable basin-derived source preparation and
 multi-basin acceptance after the owner rejected a named-basin-only framing.
 Implementation continuation: record generic checkpoint, local cross-basin and
 native routing evidence, promotion race corrections, and remaining wiring gates.
+Authorization revision: owner approved bounded live acquisition on 2026-09-14;
+record approval separately from uncompleted control proof and actual acquisition.
