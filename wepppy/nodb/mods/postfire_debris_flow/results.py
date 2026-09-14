@@ -61,6 +61,8 @@ def build_m1_results(inputs: RainfallInputs, output_dir: Path, *, frequency_sour
     artifact_limits = {}
     predictors = load_predictors(inputs.predictor_manifest, inputs.expected_sha256, consumed,
                                  artifact_limits=artifact_limits)
+    if predictors.get('model', 'M1') != 'M1':
+        fail('integration_pending', 'M3 results dispatch is not implemented')
     events, df, frequency = rainfall.climate_events(inputs, durations, consumed)
     parsed = {}
     for source, path in (('cli',inputs.cli_frequency_csv),('noaa',inputs.noaa_csv)):

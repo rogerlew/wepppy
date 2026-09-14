@@ -58,6 +58,13 @@ def build(inputs,path,**kw):
 def catalog(path):return r.open_results(path,expected_manifest_sha256=io.digest(path/'manifest.json'))
 
 
+def test_m1_result_builder_cannot_apply_m1_equation_to_m3(inputs,tmp_path,monkeypatch):
+    monkeypatch.setattr(r,'load_predictors',lambda *args,**kwargs:{'model':'M3'})
+    with pytest.raises(io.RainfallError,match='M3 results dispatch'):
+        build(inputs,tmp_path/'wrong_model')
+    assert not (tmp_path/'wrong_model').exists()
+
+
 def test_output_query_parity_and_repeat(inputs,tmp_path):
     path=tmp_path/'result';m=build(inputs,path);c=catalog(path)
     page=r.list_events(c,duration_minutes=15,sort='probability',descending=True,limit=1)

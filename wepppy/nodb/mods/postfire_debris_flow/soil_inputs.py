@@ -48,10 +48,12 @@ def _json_snapshot(path):
     return value, hashlib.sha256(raw).hexdigest()
 
 
-def prepared_sources(wd):
+def prepared_sources(wd, *, metadata_path=None):
     """Validate only bounded local metadata; never decode rasters in preflight."""
     root = Path(wd).absolute()
-    path = root/META
+    path = root/META if metadata_path is None else Path(metadata_path).absolute()
+    if not path.is_relative_to(root):
+        io.fail('invalid_input', 'Soil metadata must remain inside this project')
     if not path.exists() and not path.is_symlink():
         return {'primary': None, 'fallback': None, 'files': {}, 'metadata': None}
     m, metadata_hash = _json_snapshot(path)
