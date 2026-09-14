@@ -3,6 +3,14 @@
 Date: 2026-09-14. Contract ancestor: `7328a0004`; scientific ancestor:
 `89d673c38`. Status: local implementation under review, not production acceptance.
 
+Final bounded checkpoints: replay contract `0792c7e59`, local implementation
+`4b4e77733`. Both independent bounded reviews approve; production acceptance is
+still open. Latest gates: 520 module tests, 41 results tests and 13 analytical/
+mixed-source M3 tests pass. Stub completeness and six-file broad-exception delta
+checks pass; package/module documentation lint reports no errors or warnings.
+The full Python sweep passed 8,537 tests, skipped 103, in 953.04 seconds.
+It collected before the latest M3/result additions; focused gates cover those.
+
 ## Evidence
 
 Two independent local basin fixtures derive different MUKEY sets and native
@@ -50,8 +58,8 @@ a fixture manifest; corrected fixture mutation now exercises reader rejection.
 Production must resolve and bind authoritative Ron/Watershed sources through
 promotion; project containment alone does not establish basin authority. M3
 composition and version-2 reader have bounded approval; mixed-source regression
-is being added and full production validation remains due. Worker/results/publication wiring,
+now passes and full production validation remains due. Worker/results/publication wiring,
 browser/RQ/live multi-basin acceptance and full-suite completion remain open.
-The current full sweep started before the latest M3 test additions; retain
+The completed full sweep started before the latest M3 test additions; retain
 focused results separately. Live acquisition remains separately gated and has
 not occurred.

@@ -35,6 +35,11 @@ production deployment is authorized by this package.
   independent correctness review closes the equal-area/wrong-mask finding.
 - [x] (2026-09-14) Close bounded source-promotion security and M3 composition/
   reader reviews; twelve analytical M3 cases pass independently.
+- [x] (2026-09-14) Add mixed nonuniform primary/fallback and disjoint missing-cell
+  regression (13 M3 cases pass); commit replay contract `0792c7e59` and local
+  implementation `4b4e77733`. Module gate 520 passed; latest results gate 41 passed.
+- [x] (2026-09-14) Full Python sweep: 8,537 passed, 103 skipped in 953.04 s;
+  later test additions covered by the focused gates above.
 - [ ] Complete authoritative project binding and production integration;
   approved local helpers do not establish production readiness.
 - [x] (2026-09-14 16:40 UTC) Scaffolded scope, accepted support/isolation, research,
@@ -172,8 +177,18 @@ Focused source/M1 regression gate passed 68 tests; combined source, terrain,
 initial M3 composition and rainfall gate passed 49 tests. The two initial M3
 composition cases demonstrate F/S shrinking with missing SBS while T retains
 the full basin. This is not completed artifact-reader/security/live acceptance.
-A new full Python sweep is running; the prior 8,498-pass sweep applies only to
-the earlier isolated checkpoint. No live source acquisition has been performed.
+The new full Python sweep passed 8,537 tests with 103 skipped in 953.04 s;
+later test additions passed focused gates. The prior 8,498-pass sweep applies
+only to the earlier isolated checkpoint. No live source acquisition occurred.
+
+Bounded reviewers subsequently approved the local primitive and composition;
+the mixed-source coverage gap is closed by an analytical primary/fallback test.
+Implementation is committed at `4b4e77733`. Production remains explicitly M3
+pending, and the M1-only result builder rejects M3 manifests to prevent wrong-model
+calculations before shared dispatch is implemented. Next work is generic results
+with exact-mask propagation, followed by authoritative source/worker/publication
+wiring and live acceptance. No approval is needed for those implementation steps;
+actual missing-source network execution retains its separate recorded gate.
 
 Milestone 1 is complete at checkpoint `89d673c38`. Milestone 2 implementation is
 in progress: recorded-depth derivation, bounded snapshots and prepared-local
