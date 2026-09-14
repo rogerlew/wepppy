@@ -161,3 +161,10 @@ request combinations, date labels and predictor state. Reevaluate scalar
 forward/inverse values to detect inconsistent pinned tables; hashing alone
 does not establish those invariants. This adds about 1.2 seconds when opening
 the genuine catalog; subsequent list/detail queries are approximately 18/2 ms.
+## Scientific integration amendment — 2026-09-14
+
+For new production execution, [the runtime integration contract](production_m3_runtime.md)
+and accepted ADR-0067 govern model-specific common support, recorded-depth soil
+policy, version-2 predictors and mask publication. Existing local/offline v1
+semantics below remain reproducible. Runtime implementation conformance is pending;
+the amendment does not authorize source acquisition or production deployment.

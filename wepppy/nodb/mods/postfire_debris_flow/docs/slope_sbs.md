@@ -184,3 +184,10 @@ checks and the six main-watershed terrain panel. Exact evidence and limitations:
 The tool is built locally, not installed into live containers. Stage 3 remains
 partial: prepared-input publication, K, dNBR composition and production predictor
 orchestration require successor contracts and workflow validation.
+## Scientific integration amendment — 2026-09-14
+
+For new production execution, [the runtime integration contract](production_m3_runtime.md)
+and accepted ADR-0067 govern model-specific common support, recorded-depth soil
+policy, version-2 predictors and mask publication. Existing local/offline v1
+semantics below remain reproducible. Runtime implementation conformance is pending;
+the amendment does not authorize source acquisition or production deployment.

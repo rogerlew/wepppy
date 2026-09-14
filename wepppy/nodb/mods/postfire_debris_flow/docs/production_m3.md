@@ -1,8 +1,8 @@
 # Production M3 and shared analysis support
 
-Status: scaffolded 2026-09-14. Analysis support and soil-builder isolation are
-owner-approved intent; soil derivation and source-delivery details below are
-proposals pending evidence and the implementation checkpoint. No new runtime
+Status: accepted intent 2026-09-14. Analysis support, soil-builder isolation and
+the ADR-0067 recorded-depth replacement are owner-approved. The prepared-only
+runtime contract specifies delivery and schemas; acquisition is unapproved. No new runtime
 conformance is claimed. This amends the [selection contract](model_selection.md)
 and [production workflow](production_m1.md) for the next scientific increment.
 
@@ -70,33 +70,38 @@ raw horizons still available for the original spatial key; neither may it be
 misrepresented as original soil. Audit this distinction against actual project
 rasters before wiring source selection.
 
-## Soil decisions to ratify
+## Accepted soil decisions
 
 The [soil evidence assessment](ssurgo_validity_assessment.md#production-research-2026-09-14)
 records source findings. The paper needs cumulative layer thickness, not root
-zone depth or depth to a hydraulic restriction. Candidate rules are:
+zone depth or depth to a hydraulic restriction. ADR-0067 rules are:
 
 1. Use raw representative top/bottom depths in cm; preserve source keys,
    intervals and validation reasons. Do not reject depth solely because texture,
    conductivity or CEC is missing. No default profile extension or gap filling.
-2. Evaluate organic/ordinary soil layers, hard R exclusion, weathered Cr and
-   ambiguous materials explicitly against the calibrated THICK definition.
-   Existing `strict_soil` is a starting candidate, not approved production policy.
+2. Include ordinary soil/organic layers, documented H and weathered Cr;
+   exclude explicit terminal hard R and retain unknown/mixed-R diagnostics.
+   The owner rejected `strict_soil` as a production policy on 2026-09-14.
+   NRCS NSSH 618.38(C)(2) documents legacy H layers in approved map units;
+   H designation alone must not be treated as unknown rock. The replacement
+   in accepted ADR-0067 uses recorded depth including H/Cr, explicit R
+   exclusion and audited disagreement with separate thickness fields.
+   Runtime implementation conformance remains pending.
 3. Recognize documented paired horizons without double-counting thickness;
    distinguish those from conflicting duplicate keys and unexplained overlap.
    Do not silently accept every overlap by taking its union.
-4. Evaluate a component-percentage-weighted mean over usable components with
-   disclosed omitted weights. Totals below or above 100 require explicit policy;
-   they are not automatically corrupt records. Do not impose complete-only
+4. Normalize component-percentage-weighted means over positive usable weights,
+   disclosing omitted weights. Totals above 100 alone are not corrupt;
+   individual invalid weights reject the map-unit estimate. Do not impose complete-only
    usability or infer component completeness from raster coverage.
 5. Prefer usable SSURGO map-unit estimates at each project cell, otherwise use
-   aligned original STATSGO THICK there. This cell selection is proposed; avoid
+   aligned original STATSGO THICK there. Use nearest-neighbor sampling; avoid
    replacing the entire catchment or mixing unlocated component gaps with a
-   coarse raster estimate. Disclose component support separately. Finalize
-   resampling and unusable-both-sources behavior with numerical examples.
+   coarse raster estimate. Disclose component support separately. Unusable
+   both-source cells are excluded, never treated as zero.
 
-Ratify exact material/paired-horizon/weight/fallback rules and their uncertainty
-in an ADR before implementation. Neither mapping detail nor agreement with
+Accepted ADR-0067 and the runtime contract fix the exact rules and uncertainty.
+Neither mapping detail nor agreement with
 STATSGO establishes predictive accuracy. This package preserves source priority.
 
 ## Runtime and compatibility requirements
@@ -143,3 +148,10 @@ specifies the checkpoint, soil-builder protection matrix, real WBT output,
 large-10 m development browser/RQ acceptance and independent reviews. Both
 complete-support M1 parity and partial-support changed behavior must be checked.
 No live production deployment is part of this scaffold.
+## Scientific integration amendment — 2026-09-14
+
+For new production execution, [the runtime integration contract](production_m3_runtime.md)
+and accepted ADR-0067 govern model-specific common support, recorded-depth soil
+policy, version-2 predictors and mask publication. Existing local/offline v1
+semantics below remain reproducible. Runtime implementation conformance is pending;
+the amendment does not authorize source acquisition or production deployment.

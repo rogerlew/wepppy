@@ -90,3 +90,10 @@ At targets adjacent to the intercept probability, adding the solved rainfall
 term to B in the forward function may round back to B. Reconstruction is subject
 to binary64 rounding; an available equality is not a promise of bitwise target
 reconstruction. Exact side-of-baseline reachability is preserved.
+## Scientific integration amendment — 2026-09-14
+
+For new production execution, [the runtime integration contract](production_m3_runtime.md)
+and accepted ADR-0067 govern model-specific common support, recorded-depth soil
+policy, version-2 predictors and mask publication. Existing local/offline v1
+semantics below remain reproducible. Runtime implementation conformance is pending;
+the amendment does not authorize source acquisition or production deployment.

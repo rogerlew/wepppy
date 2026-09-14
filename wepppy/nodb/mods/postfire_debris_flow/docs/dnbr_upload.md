@@ -123,3 +123,10 @@ registered by this backend contract.
 Production browser staging, distribution-based Auto, retained-file correction and
 atomic NoDb/RQ publication are implemented in [production_m1.md](production_m1.md).
 They wrap this explicit local API without changing its encoding/grid rules.
+## Scientific integration amendment — 2026-09-14
+
+For new production execution, [the runtime integration contract](production_m3_runtime.md)
+and accepted ADR-0067 govern model-specific common support, recorded-depth soil
+policy, version-2 predictors and mask publication. Existing local/offline v1
+semantics below remain reproducible. Runtime implementation conformance is pending;
+the amendment does not authorize source acquisition or production deployment.

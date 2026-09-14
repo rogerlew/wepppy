@@ -26,8 +26,18 @@ production deployment is authorized by this package.
 
 - [x] (2026-09-14 16:40 UTC) Scaffolded scope, accepted support/isolation, research,
   frozen source audit, soil regression plan and draft checkpoint.
-- [ ] Audit development sources and ratify soil/delivery/schema decisions.
-- [ ] Complete independent contract reviews and standalone ancestor checkpoint.
+- [x] (2026-09-14) Audit development sources and ratify soil/prepared-delivery/schema contracts; live missing-source acceptance remains due.
+- [x] (2026-09-14 16:58 UTC) Audit actual development grid, original soil keys,
+  WAL core records and strict-policy support; retain source hashes and proposal.
+- [ ] Resolve dominant legacy H material/lineage and bounded THICK/SDA delivery
+  before ratifying the remaining scientific and source contract.
+- [x] (2026-09-14) Complete two preliminary source-proposal reviews and amend
+  provenance, zero-value and bounded-read details; final checkpoint reviews pending.
+- [x] (2026-09-14) Record owner rejection of strict material policy; investigate
+  NRCS legacy H guidance and four depth candidates on frozen/live records.
+- [x] (2026-09-14) Retain replacement experiment, numerical results and sixteen
+  analytical cases; fix research duplicate-ID handling discovered in review.
+- [x] (2026-09-14) Complete both independent contract reviews; standalone ancestor commit is the next step before runtime edits.
 - [ ] Implement production thickness adapter; prove unchanged soil building.
 - [ ] Implement M3 terrain and shared-support aggregation/masks for both models.
 - [ ] Integrate execution, freshness, publication and canonical summaries.
@@ -43,6 +53,19 @@ contain neither; 42 of 44 Moscow Mountain map units have totals below 100.
 These are evidence gaps to cover, not reasons to change shared WEPP validation.
 The detailed source/code audit is `artifacts/soil_research.md`.
 
+Development inventory found only 8,705 of 4,311,420 basin cells usable under
+the strict offline soil policy. The other cells map to legacy H horizons.
+The live cache lacks mapunit/legend/sacatalog lineage, and no prepared THICK
+asset was found for this basin. USGS object HEAD succeeds with byte ranges;
+acquisition has not occurred. See `artifacts/source_inventory.md`.
+
+NRCS NSSH 618.38(C)(2) explicitly recognizes legacy H layers in approved map
+units. The earlier recommendation missed that guidance. H-only eligibility
+restores thickness estimates to all 4,311,420 basin cells, with mean
+163.55344468875683 cm before SBS masking. The broader depth-no-R candidate
+recovers additional frozen profiles; the Cr and endpoint choices remain explicit
+scientific proposals, not prerequisites for making this development basin pass.
+
 ## Decision Log
 
 
@@ -56,12 +79,32 @@ Rationale: M3 depth validity differs from WEPP parameter readiness; new model
 policy must not change existing soil construction. Owner requested particular
 regression protection, 2026-09-14. Exact soil policies are still pending.
 
+Decision: prepare an explicit conservative soil and bounded source-delivery
+proposal rather than infer H material or collection lineage from cache names.
+Rationale: this affects almost the entire development basin. ADR-0067 is
+proposed, not accepted; S05–S09 and acquisition authority remain unresolved.
+Codex recorded this execution finding on 2026-09-14.
+
+Decision: owner rejected the strict-material proposal as non-viable and
+authorized depth-based investigation. Replace the proposed ADR-0067 material
+section with recorded-depth inclusion of H/Cr, explicit hard-R exclusion,
+endpoint-based thickness with separate-field warnings, and bounded legacy-pair
+recognition. Rationale and measured alternatives are retained in
+`artifacts/depth_policy_assessment.md`. Replacement ratification and source
+acquisition remain pending; the earlier conservative recommendation is rejected.
+
 ## Outcomes & Retrospective
 
 
-Scaffold and research only. No implementation, live source acquisition, soil
-rebuild, tests of new runtime behavior, review signoff or deployment is claimed.
-Next work is bounded source/soil-rule evidence and the contract checkpoint.
+Milestone 1 is partially executed: actual source inventory, strict-policy
+fixture evaluation, core logical hashes and a bounded delivery proposal are
+retained. No runtime implementation, live acquisition, soil rebuild, new runtime
+validation, checkpoint signoff or deployment is claimed. Next work resolves
+the material/source choices in `artifacts/source_delivery_proposal.md`, then
+finishes S05–S09 and the reviewed checkpoint before milestone 2. The replacement
+investigation is now complete with reproducible counts and analytical checks;
+it changes no production soil builders or offline defaults. Preliminary
+replacement reviews are recorded separately from final checkpoint approval.
 
 ## Context and Orientation
 
@@ -293,3 +336,8 @@ RQ, CSRF and artifact observability standards remain binding. Production policy
 is explicitly versioned; existing offline APIs/defaults and accepted output
 semantics remain reproducible. SQLite and owned native raster tools are existing
 dependencies. No additional service, queue, datastore or parser is budgeted.
+
+Revision note (2026-09-14): recorded the development inventory and dominant
+legacy-H/source-delivery decision discovered while executing milestone 1.
+Subsequent revision: record owner rejection and the researched recorded-depth
+replacement, including corrected H evidence and explicit scientific limits.

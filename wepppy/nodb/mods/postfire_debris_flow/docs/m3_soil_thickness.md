@@ -148,3 +148,10 @@ Float32 representation errors still abort the offline builder.
 
 See [measured evidence](../../../../../docs/work-packages/20260908_staley_m3_soils/artifacts/soil_decision.md)
 for historical findings and ADR-0053 for the subsequent owner decision.
+## Scientific integration amendment — 2026-09-14
+
+For new production execution, [the runtime integration contract](production_m3_runtime.md)
+and accepted ADR-0067 govern model-specific common support, recorded-depth soil
+policy, version-2 predictors and mask publication. Existing local/offline v1
+semantics below remain reproducible. Runtime implementation conformance is pending;
+the amendment does not authorize source acquisition or production deployment.

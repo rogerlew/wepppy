@@ -251,3 +251,9 @@ realistic empty/ready/partial/running/failed/stale states. Owner approval covers
 layout, labels and normal messages, not permission for unreviewed UI additions.
 Prototype artifacts are non-runtime; do not modify controllers/templates before
 the required contract ancestor commit exists.
+## Scientific integration amendment — 2026-09-14
+
+The accepted [production runtime integration contract](../../../wepppy/nodb/mods/postfire_debris_flow/docs/production_m3_runtime.md)
+governs new M1/M3 coverage, explicit model dispatch and additive mask download.
+Retain existing controls/job lifecycle. Show exact counts and Valid coverage,
+with legacy coverage explicitly not recorded. Runtime conformance is pending.

@@ -87,3 +87,10 @@ label is retained as provenance, not verified geographic identity. The limited
 panel does not establish CONUS-wide validity. Upsampling 30 m does not restore
 10 m information. Broader same-channel small-catchment evidence is needed to
 revisit 30 m acceptance.
+## Scientific integration amendment — 2026-09-14
+
+For new production execution, [the runtime integration contract](production_m3_runtime.md)
+and accepted ADR-0067 govern model-specific common support, recorded-depth soil
+policy, version-2 predictors and mask publication. Existing local/offline v1
+semantics below remain reproducible. Runtime implementation conformance is pending;
+the amendment does not authorize source acquisition or production deployment.

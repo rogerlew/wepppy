@@ -1,0 +1,911 @@
+{
+  "experiment": "counterfactual_depth_policy_v1",
+  "offline_sha256": "d8606c1cc2e526f6ef88875df694e0c6b6111ee8af11ba69cabd2f71f67e447a",
+  "sqlite_version": "3.45.1",
+  "sources": {
+    "moscow_mountain": {
+      "components": 91,
+      "horizons": 514,
+      "policies": {
+        "strict_v1": {
+          "component_status": {
+            "valid": 68,
+            "unavailable": 23
+          },
+          "component_reasons": {
+            "": 68,
+            "ambiguous_material": 22,
+            "thickness_conflict": 1
+          },
+          "mapunit_status": {
+            "partial": 39,
+            "unavailable": 4,
+            "complete": 1
+          },
+          "mapunit_mean_delta_on_common_keys_cm": {
+            "minimum": 0,
+            "maximum": 0,
+            "changed_count": 0
+          }
+        },
+        "h_only": {
+          "component_status": {
+            "valid": 68,
+            "unavailable": 23
+          },
+          "component_reasons": {
+            "": 68,
+            "ambiguous_material": 22,
+            "thickness_conflict": 1
+          },
+          "mapunit_status": {
+            "partial": 39,
+            "unavailable": 4,
+            "complete": 1
+          },
+          "mapunit_mean_delta_on_common_keys_cm": {
+            "minimum": 0,
+            "maximum": 0,
+            "changed_count": 0
+          }
+        },
+        "depth_no_r": {
+          "component_status": {
+            "valid": 91
+          },
+          "component_reasons": {
+            "": 91
+          },
+          "mapunit_status": {
+            "partial": 42,
+            "complete": 2
+          },
+          "mapunit_mean_delta_on_common_keys_cm": {
+            "minimum": -12.15789473684211,
+            "maximum": 0.06140350877191736,
+            "changed_count": 8
+          }
+        },
+        "all_recorded": {
+          "component_status": {
+            "valid": 91
+          },
+          "component_reasons": {
+            "": 91
+          },
+          "mapunit_status": {
+            "partial": 42,
+            "complete": 2
+          },
+          "mapunit_mean_delta_on_common_keys_cm": {
+            "minimum": -12.15789473684211,
+            "maximum": 0.06140350877191736,
+            "changed_count": 8
+          },
+          "hard_r_effect_vs_depth_no_r_cm": {
+            "changed_count": 0,
+            "minimum": 0,
+            "maximum": 0
+          }
+        }
+      },
+      "reported_thickness_conflicts": 1,
+      "sha256": {
+        "moscow_mountain_component.csv": "c446c7b0523600ed685b80e9a86d31dacd034c390350738da078a504bd4316a8",
+        "moscow_mountain_chorizon.csv": "b63a94c9bb383aa84194440b7eef5f3e337a95b4fac917013c3ecec40d41dccc"
+      }
+    },
+    "topanga": {
+      "components": 64,
+      "horizons": 97,
+      "policies": {
+        "strict_v1": {
+          "component_status": {
+            "unavailable": 55,
+            "valid": 9
+          },
+          "component_reasons": {
+            "missing_horizons": 33,
+            "": 4,
+            "ambiguous_material": 22,
+            "bedrock_excluded": 5
+          },
+          "mapunit_status": {
+            "partial": 8,
+            "unavailable": 5
+          },
+          "mapunit_mean_delta_on_common_keys_cm": {
+            "minimum": 0,
+            "maximum": 0,
+            "changed_count": 0
+          }
+        },
+        "h_only": {
+          "component_status": {
+            "unavailable": 52,
+            "valid": 12
+          },
+          "component_reasons": {
+            "missing_horizons": 33,
+            "": 7,
+            "ambiguous_material": 19,
+            "bedrock_excluded": 5
+          },
+          "mapunit_status": {
+            "partial": 9,
+            "unavailable": 4
+          },
+          "mapunit_mean_delta_on_common_keys_cm": {
+            "minimum": 0,
+            "maximum": 0,
+            "changed_count": 0
+          }
+        },
+        "depth_no_r": {
+          "component_status": {
+            "unavailable": 33,
+            "valid": 31
+          },
+          "component_reasons": {
+            "missing_horizons": 33,
+            "": 26,
+            "bedrock_excluded": 5
+          },
+          "mapunit_status": {
+            "partial": 12,
+            "complete": 1
+          },
+          "mapunit_mean_delta_on_common_keys_cm": {
+            "minimum": -27.17647058823529,
+            "maximum": 45.33333333333334,
+            "changed_count": 5
+          }
+        },
+        "all_recorded": {
+          "component_status": {
+            "unavailable": 33,
+            "valid": 31
+          },
+          "component_reasons": {
+            "missing_horizons": 33,
+            "": 31
+          },
+          "mapunit_status": {
+            "partial": 12,
+            "complete": 1
+          },
+          "mapunit_mean_delta_on_common_keys_cm": {
+            "minimum": -22.764705882352942,
+            "maximum": 45.33333333333334,
+            "changed_count": 7
+          },
+          "hard_r_effect_vs_depth_no_r_cm": {
+            "changed_count": 5,
+            "minimum": 0,
+            "maximum": 25
+          }
+        }
+      },
+      "reported_thickness_conflicts": 0,
+      "sha256": {
+        "topanga_component.csv": "e3b2b0f81c244de1bea81cdca1df85343a46d032c3d1685201378c4b734bb5b0",
+        "topanga_chorizon.csv": "1692e74f7cd3dfb3f85e40e326e87f46f33610165261c9d7625703db6a88e029"
+      }
+    },
+    "az_ponderosa": {
+      "components": 235,
+      "horizons": 895,
+      "policies": {
+        "strict_v1": {
+          "component_status": {
+            "valid": 172,
+            "unavailable": 61,
+            "nonsoil": 2
+          },
+          "component_reasons": {
+            "": 101,
+            "bedrock_excluded": 71,
+            "ambiguous_material": 11,
+            "bedrock_excluded;nonsoil": 2,
+            "missing_horizons": 46,
+            "ambiguous_material;bedrock_excluded": 4
+          },
+          "mapunit_status": {
+            "complete": 16,
+            "partial": 36,
+            "unavailable": 2
+          },
+          "mapunit_mean_delta_on_common_keys_cm": {
+            "minimum": 0,
+            "maximum": 0,
+            "changed_count": 0
+          }
+        },
+        "h_only": {
+          "component_status": {
+            "valid": 175,
+            "nonsoil": 2,
+            "unavailable": 58
+          },
+          "component_reasons": {
+            "": 104,
+            "bedrock_excluded": 71,
+            "bedrock_excluded;nonsoil": 2,
+            "missing_horizons": 46,
+            "ambiguous_material;bedrock_excluded": 4,
+            "ambiguous_material": 8
+          },
+          "mapunit_status": {
+            "complete": 17,
+            "partial": 35,
+            "unavailable": 2
+          },
+          "mapunit_mean_delta_on_common_keys_cm": {
+            "minimum": -0.22941176470587266,
+            "maximum": 3.7333333333333343,
+            "changed_count": 2
+          }
+        },
+        "depth_no_r": {
+          "component_status": {
+            "valid": 187,
+            "nonsoil": 2,
+            "unavailable": 46
+          },
+          "component_reasons": {
+            "": 112,
+            "bedrock_excluded": 75,
+            "bedrock_excluded;nonsoil": 2,
+            "missing_horizons": 46
+          },
+          "mapunit_status": {
+            "complete": 19,
+            "partial": 34,
+            "unavailable": 1
+          },
+          "mapunit_mean_delta_on_common_keys_cm": {
+            "minimum": -9.864705882352936,
+            "maximum": 10.745704467353946,
+            "changed_count": 9
+          }
+        },
+        "all_recorded": {
+          "component_status": {
+            "valid": 189,
+            "unavailable": 46
+          },
+          "component_reasons": {
+            "": 189,
+            "missing_horizons": 46
+          },
+          "mapunit_status": {
+            "complete": 21,
+            "partial": 32,
+            "unavailable": 1
+          },
+          "mapunit_mean_delta_on_common_keys_cm": {
+            "minimum": -0.22941176470587266,
+            "maximum": 155.05882352941177,
+            "changed_count": 36
+          },
+          "hard_r_effect_vs_depth_no_r_cm": {
+            "changed_count": 34,
+            "minimum": 0,
+            "maximum": 155.05882352941177
+          }
+        }
+      },
+      "reported_thickness_conflicts": 0,
+      "sha256": {
+        "az_ponderosa_component.csv": "b8cd30a89043e1d7f6de64fb8ac4a6e656179f91fd1c1df8f8a4a42c72fd513a",
+        "az_ponderosa_chorizon.csv": "d0f6e3aaa8d9eadeec19e3fc53a541c0fbc99ec1c2a6790bf6da633533190a04"
+      }
+    },
+    "addicted-reservist": {
+      "components": 63,
+      "horizons": 178,
+      "policies": {
+        "strict_v1": {
+          "component_status": {
+            "unavailable": 47,
+            "valid": 16
+          },
+          "component_reasons": {
+            "ambiguous_material": 29,
+            "": 16,
+            "bedrock_excluded;thickness_conflict": 6,
+            "thickness_conflict": 1,
+            "missing_horizons": 11
+          },
+          "mapunit_status": {
+            "unavailable": 19,
+            "complete": 11,
+            "partial": 4
+          },
+          "mapunit_mean_delta_on_common_keys_cm": {
+            "minimum": 0,
+            "maximum": 0,
+            "changed_count": 0
+          },
+          "valid_cells": 8705,
+          "total_cells": 4311420,
+          "mean_cm": 152,
+          "basin_mapunits": [
+            {
+              "mukey": "53947",
+              "mean_cm": 152,
+              "valid_percentage": 100
+            },
+            {
+              "mukey": "53958",
+              "mean_cm": 152,
+              "valid_percentage": 100
+            },
+            {
+              "mukey": "658465",
+              "mean_cm": null,
+              "valid_percentage": 0
+            },
+            {
+              "mukey": "658489",
+              "mean_cm": null,
+              "valid_percentage": 0
+            },
+            {
+              "mukey": "658497",
+              "mean_cm": null,
+              "valid_percentage": 0
+            },
+            {
+              "mukey": "658498",
+              "mean_cm": null,
+              "valid_percentage": 0
+            },
+            {
+              "mukey": "658504",
+              "mean_cm": null,
+              "valid_percentage": 0
+            },
+            {
+              "mukey": "658566",
+              "mean_cm": null,
+              "valid_percentage": 0
+            },
+            {
+              "mukey": "658580",
+              "mean_cm": null,
+              "valid_percentage": 0
+            },
+            {
+              "mukey": "665730",
+              "mean_cm": null,
+              "valid_percentage": 0
+            }
+          ],
+          "raw_predicate_cross_counts": {
+            "raw_WEPP=False,component_depth=False": 71,
+            "raw_WEPP=True,component_depth=False": 49,
+            "raw_WEPP=True,component_depth=True": 57,
+            "raw_WEPP=False,component_depth=True": 1
+          }
+        },
+        "h_only": {
+          "component_status": {
+            "valid": 45,
+            "unavailable": 18
+          },
+          "component_reasons": {
+            "": 45,
+            "bedrock_excluded;thickness_conflict": 6,
+            "thickness_conflict": 1,
+            "missing_horizons": 11
+          },
+          "mapunit_status": {
+            "unavailable": 7,
+            "complete": 23,
+            "partial": 4
+          },
+          "mapunit_mean_delta_on_common_keys_cm": {
+            "minimum": 0,
+            "maximum": 0,
+            "changed_count": 0
+          },
+          "valid_cells": 4311420,
+          "total_cells": 4311420,
+          "mean_cm": 163.55344468875683,
+          "basin_mapunits": [
+            {
+              "mukey": "53947",
+              "mean_cm": 152,
+              "valid_percentage": 100
+            },
+            {
+              "mukey": "53958",
+              "mean_cm": 152,
+              "valid_percentage": 100
+            },
+            {
+              "mukey": "658465",
+              "mean_cm": 152,
+              "valid_percentage": 100
+            },
+            {
+              "mukey": "658489",
+              "mean_cm": 160.25,
+              "valid_percentage": 100
+            },
+            {
+              "mukey": "658497",
+              "mean_cm": 152,
+              "valid_percentage": 100
+            },
+            {
+              "mukey": "658498",
+              "mean_cm": 159.2,
+              "valid_percentage": 100
+            },
+            {
+              "mukey": "658504",
+              "mean_cm": 170,
+              "valid_percentage": 100
+            },
+            {
+              "mukey": "658566",
+              "mean_cm": 152,
+              "valid_percentage": 100
+            },
+            {
+              "mukey": "658580",
+              "mean_cm": 152,
+              "valid_percentage": 100
+            },
+            {
+              "mukey": "665730",
+              "mean_cm": 157.4,
+              "valid_percentage": 100
+            }
+          ],
+          "raw_predicate_cross_counts": {
+            "raw_WEPP=False,component_depth=True": 60,
+            "raw_WEPP=True,component_depth=True": 80,
+            "raw_WEPP=True,component_depth=False": 26,
+            "raw_WEPP=False,component_depth=False": 12
+          }
+        },
+        "depth_no_r": {
+          "component_status": {
+            "valid": 52,
+            "unavailable": 11
+          },
+          "component_reasons": {
+            "": 46,
+            "bedrock_excluded": 6,
+            "missing_horizons": 11
+          },
+          "mapunit_status": {
+            "partial": 6,
+            "complete": 26,
+            "unavailable": 2
+          },
+          "mapunit_mean_delta_on_common_keys_cm": {
+            "minimum": -46.875,
+            "maximum": 0,
+            "changed_count": 1
+          },
+          "valid_cells": 4311420,
+          "total_cells": 4311420,
+          "mean_cm": 163.55344468875683,
+          "basin_mapunits": [
+            {
+              "mukey": "53947",
+              "mean_cm": 152,
+              "valid_percentage": 100
+            },
+            {
+              "mukey": "53958",
+              "mean_cm": 152,
+              "valid_percentage": 100
+            },
+            {
+              "mukey": "658465",
+              "mean_cm": 152,
+              "valid_percentage": 100
+            },
+            {
+              "mukey": "658489",
+              "mean_cm": 160.25,
+              "valid_percentage": 100
+            },
+            {
+              "mukey": "658497",
+              "mean_cm": 152,
+              "valid_percentage": 100
+            },
+            {
+              "mukey": "658498",
+              "mean_cm": 159.2,
+              "valid_percentage": 100
+            },
+            {
+              "mukey": "658504",
+              "mean_cm": 170,
+              "valid_percentage": 100
+            },
+            {
+              "mukey": "658566",
+              "mean_cm": 152,
+              "valid_percentage": 100
+            },
+            {
+              "mukey": "658580",
+              "mean_cm": 152,
+              "valid_percentage": 100
+            },
+            {
+              "mukey": "665730",
+              "mean_cm": 157.4,
+              "valid_percentage": 100
+            }
+          ],
+          "raw_predicate_cross_counts": {
+            "raw_WEPP=False,component_depth=True": 72,
+            "raw_WEPP=True,component_depth=True": 106
+          }
+        },
+        "all_recorded": {
+          "component_status": {
+            "valid": 52,
+            "unavailable": 11
+          },
+          "component_reasons": {
+            "": 52,
+            "missing_horizons": 11
+          },
+          "mapunit_status": {
+            "partial": 6,
+            "complete": 26,
+            "unavailable": 2
+          },
+          "mapunit_mean_delta_on_common_keys_cm": {
+            "minimum": -1.125,
+            "maximum": 0,
+            "changed_count": 1
+          },
+          "hard_r_effect_vs_depth_no_r_cm": {
+            "changed_count": 5,
+            "minimum": 0,
+            "maximum": 94.2125
+          },
+          "valid_cells": 4311420,
+          "total_cells": 4311420,
+          "mean_cm": 163.55344468875683,
+          "basin_mapunits": [
+            {
+              "mukey": "53947",
+              "mean_cm": 152,
+              "valid_percentage": 100
+            },
+            {
+              "mukey": "53958",
+              "mean_cm": 152,
+              "valid_percentage": 100
+            },
+            {
+              "mukey": "658465",
+              "mean_cm": 152,
+              "valid_percentage": 100
+            },
+            {
+              "mukey": "658489",
+              "mean_cm": 160.25,
+              "valid_percentage": 100
+            },
+            {
+              "mukey": "658497",
+              "mean_cm": 152,
+              "valid_percentage": 100
+            },
+            {
+              "mukey": "658498",
+              "mean_cm": 159.2,
+              "valid_percentage": 100
+            },
+            {
+              "mukey": "658504",
+              "mean_cm": 170,
+              "valid_percentage": 100
+            },
+            {
+              "mukey": "658566",
+              "mean_cm": 152,
+              "valid_percentage": 100
+            },
+            {
+              "mukey": "658580",
+              "mean_cm": 152,
+              "valid_percentage": 100
+            },
+            {
+              "mukey": "665730",
+              "mean_cm": 157.4,
+              "valid_percentage": 100
+            }
+          ],
+          "raw_predicate_cross_counts": {
+            "raw_WEPP=False,component_depth=True": 72,
+            "raw_WEPP=True,component_depth=True": 106
+          }
+        }
+      },
+      "reported_thickness_conflicts": 16,
+      "logical_sha256": [
+        "3549565988fe2acdbbc55f6c9ee6ae86796e5e235efef782905856f5ea7b4857",
+        "e67dbc339263f0df49c1c581cfa2d111261c8c36b882f0df96742a881b3b5a3a"
+      ]
+    }
+  },
+  "analytical_cases": {
+    "legacy_pair": {
+      "mukey": "1",
+      "cokey": "1",
+      "compname": "Analytical",
+      "comppct_r": 100,
+      "thickness_cm": 40,
+      "status": "valid",
+      "reason_codes": "",
+      "horizon_count": 3,
+      "interval_sum_cm": 40,
+      "interval_union_cm": 40,
+      "deepest_bottom_cm": 40,
+      "source_row_count": 4,
+      "pair_reductions": [
+        {
+          "cokey": "1",
+          "source_chkeys": [
+            "2",
+            "3"
+          ],
+          "top_cm": 10,
+          "bottom_cm": 30,
+          "reason": "legacy_combination_pair"
+        }
+      ]
+    },
+    "legacy_pair_with_repeated_id": {
+      "mukey": "1",
+      "cokey": "1",
+      "compname": "Analytical",
+      "comppct_r": 100,
+      "thickness_cm": 20,
+      "status": "valid",
+      "reason_codes": "",
+      "horizon_count": 1,
+      "interval_sum_cm": 20,
+      "interval_union_cm": 20,
+      "deepest_bottom_cm": 20,
+      "source_row_count": 3,
+      "pair_reductions": [
+        {
+          "cokey": "1",
+          "source_chkeys": [
+            "1",
+            "2"
+          ],
+          "top_cm": 0,
+          "bottom_cm": 20,
+          "reason": "legacy_combination_pair"
+        }
+      ]
+    },
+    "ordinary_duplicate_range": {
+      "mukey": "1",
+      "cokey": "1",
+      "compname": "Analytical",
+      "comppct_r": 100,
+      "thickness_cm": null,
+      "status": "unavailable",
+      "reason_codes": "gap;overlap",
+      "horizon_count": 2,
+      "interval_sum_cm": 40,
+      "interval_union_cm": 20,
+      "deepest_bottom_cm": 20,
+      "source_row_count": 2,
+      "pair_reductions": []
+    },
+    "offset_overlap": {
+      "mukey": "1",
+      "cokey": "1",
+      "compname": "Analytical",
+      "comppct_r": 100,
+      "thickness_cm": null,
+      "status": "unavailable",
+      "reason_codes": "gap;overlap",
+      "horizon_count": 2,
+      "interval_sum_cm": 40,
+      "interval_union_cm": 30,
+      "deepest_bottom_cm": 30,
+      "source_row_count": 2,
+      "pair_reductions": []
+    },
+    "gap": {
+      "mukey": "1",
+      "cokey": "1",
+      "compname": "Analytical",
+      "comppct_r": 100,
+      "thickness_cm": null,
+      "status": "unavailable",
+      "reason_codes": "gap",
+      "horizon_count": 2,
+      "interval_sum_cm": 20,
+      "interval_union_cm": 20,
+      "deepest_bottom_cm": 30,
+      "source_row_count": 2,
+      "pair_reductions": []
+    },
+    "conflicting_id": {
+      "mukey": "1",
+      "cokey": "1",
+      "compname": "Analytical",
+      "comppct_r": 100,
+      "thickness_cm": null,
+      "status": "unavailable",
+      "reason_codes": "duplicate_id_conflict",
+      "horizon_count": 1,
+      "interval_sum_cm": 10,
+      "interval_union_cm": 10,
+      "deepest_bottom_cm": 10,
+      "source_row_count": 2,
+      "pair_reductions": []
+    },
+    "conflicting_id_reported_thickness": {
+      "mukey": "1",
+      "cokey": "1",
+      "compname": "Analytical",
+      "comppct_r": 100,
+      "thickness_cm": null,
+      "status": "unavailable",
+      "reason_codes": "duplicate_id_conflict",
+      "horizon_count": 1,
+      "interval_sum_cm": 10,
+      "interval_union_cm": 10,
+      "deepest_bottom_cm": 10,
+      "source_row_count": 2,
+      "pair_reductions": []
+    },
+    "conflicting_id_h_names": {
+      "mukey": "1",
+      "cokey": "1",
+      "compname": "Analytical",
+      "comppct_r": 100,
+      "thickness_cm": null,
+      "status": "unavailable",
+      "reason_codes": "ambiguous_material;duplicate_id_conflict",
+      "horizon_count": 1,
+      "interval_sum_cm": 10,
+      "interval_union_cm": 10,
+      "deepest_bottom_cm": 10,
+      "source_row_count": 2,
+      "pair_reductions": []
+    },
+    "conflicting_id_material": {
+      "mukey": "1",
+      "cokey": "1",
+      "compname": "Analytical",
+      "comppct_r": 100,
+      "thickness_cm": null,
+      "status": "unavailable",
+      "reason_codes": "ambiguous_material;duplicate_id_conflict",
+      "horizon_count": 1,
+      "interval_sum_cm": 10,
+      "interval_union_cm": 10,
+      "deepest_bottom_cm": 10,
+      "source_row_count": 2,
+      "pair_reductions": []
+    },
+    "conflicting_id_cr_material": {
+      "mukey": "1",
+      "cokey": "1",
+      "compname": "Analytical",
+      "comppct_r": 100,
+      "thickness_cm": null,
+      "status": "unavailable",
+      "reason_codes": "ambiguous_material;duplicate_id_conflict",
+      "horizon_count": 1,
+      "interval_sum_cm": 10,
+      "interval_union_cm": 10,
+      "deepest_bottom_cm": 10,
+      "source_row_count": 2,
+      "pair_reductions": []
+    },
+    "normalized_same_id_not_pair": {
+      "mukey": "1",
+      "cokey": "1",
+      "compname": "Analytical",
+      "comppct_r": 100,
+      "thickness_cm": 20,
+      "status": "valid",
+      "reason_codes": "",
+      "horizon_count": 1,
+      "interval_sum_cm": 20,
+      "interval_union_cm": 20,
+      "deepest_bottom_cm": 20,
+      "source_row_count": 2,
+      "pair_reductions": []
+    },
+    "rock_between_soil": {
+      "mukey": "1",
+      "cokey": "1",
+      "compname": "Analytical",
+      "comppct_r": 100,
+      "thickness_cm": null,
+      "status": "unavailable",
+      "reason_codes": "bedrock_excluded;gap",
+      "horizon_count": 3,
+      "interval_sum_cm": 30,
+      "interval_union_cm": 30,
+      "deepest_bottom_cm": 30,
+      "source_row_count": 3,
+      "pair_reductions": []
+    },
+    "terminal_rock": {
+      "mukey": "1",
+      "cokey": "1",
+      "compname": "Analytical",
+      "comppct_r": 100,
+      "thickness_cm": 10,
+      "status": "valid",
+      "reason_codes": "bedrock_excluded",
+      "horizon_count": 2,
+      "interval_sum_cm": 20,
+      "interval_union_cm": 20,
+      "deepest_bottom_cm": 20,
+      "source_row_count": 2,
+      "pair_reductions": []
+    },
+    "weathered_recorded": {
+      "mukey": "1",
+      "cokey": "1",
+      "compname": "Analytical",
+      "comppct_r": 100,
+      "thickness_cm": 20,
+      "status": "valid",
+      "reason_codes": "",
+      "horizon_count": 2,
+      "interval_sum_cm": 20,
+      "interval_union_cm": 20,
+      "deepest_bottom_cm": 20,
+      "source_row_count": 2,
+      "pair_reductions": []
+    },
+    "legacy_h": {
+      "mukey": "1",
+      "cokey": "1",
+      "compname": "Analytical",
+      "comppct_r": 100,
+      "thickness_cm": 10,
+      "status": "valid",
+      "reason_codes": "",
+      "horizon_count": 1,
+      "interval_sum_cm": 10,
+      "interval_union_cm": 10,
+      "deepest_bottom_cm": 10,
+      "source_row_count": 1,
+      "pair_reductions": []
+    },
+    "reversed_depth": {
+      "mukey": "1",
+      "cokey": "1",
+      "compname": "Analytical",
+      "comppct_r": 100,
+      "thickness_cm": null,
+      "status": "unavailable",
+      "reason_codes": "invalid_depth",
+      "horizon_count": 1,
+      "interval_sum_cm": 0,
+      "interval_union_cm": 0,
+      "deepest_bottom_cm": null,
+      "source_row_count": 1,
+      "pair_reductions": []
+    }
+  }
+}

@@ -1,6 +1,11 @@
 # Production M3 and valid-support estimates
 
-Status: scaffolded 2026-09-14; implementation not started.
+Status: milestone-1 source audit and depth-policy research executed 2026-09-14;
+strict material policy rejected, replacement scientific/source choices remain
+open, implementation not started. See [replacement assessment](artifacts/depth_policy_assessment.md),
+[inventory](artifacts/source_inventory.md),
+[proposal](artifacts/source_delivery_proposal.md) and
+[preliminary reviews](artifacts/20260914_preliminary_reviews.md).
 Owner: repository user. Starting revision: `97800607c30c0979d422f99b1e2c65f1b8a89ab5`.
 
 ## Purpose and scope

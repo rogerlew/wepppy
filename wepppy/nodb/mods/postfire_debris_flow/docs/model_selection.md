@@ -218,3 +218,10 @@ when shared admission/recording coordination changes, or any recurrence exhausts
 its budget; evaluate busy-response count and final save outcome, bounded latency,
 recording continuity and unchanged job counts. Those events trigger a scoped
 follow-up; do not broaden retries automatically.
+## Scientific integration amendment — 2026-09-14
+
+For new production execution, [the runtime integration contract](production_m3_runtime.md)
+and accepted ADR-0067 govern model-specific common support, recorded-depth soil
+policy, version-2 predictors and mask publication. Existing local/offline v1
+semantics below remain reproducible. Runtime implementation conformance is pending;
+the amendment does not authorize source acquisition or production deployment.

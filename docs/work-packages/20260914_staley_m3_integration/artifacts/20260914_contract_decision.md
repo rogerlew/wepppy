@@ -1,7 +1,7 @@
 # Scientific integration contract checkpoint
 
-Status: draft 2026-09-14 UTC; no implementation authorization/checkpoint commit
-claimed. Starting implementation revision: `97800607c30c0979d422f99b1e2c65f1b8a89ab5`.
+Status: checkpoint prepared 2026-09-14 UTC; independent final contract reviews
+and standalone commit pending. Implementation base: `c81635b43804a11642e6c777ae725aa4a7fa7b78`.
 
 ## Authority and classification
 
@@ -10,6 +10,10 @@ scaffold, soil-model/SSURGO research and particular care against regressions in
 SSURGO/STATSGO soil building. Earlier accepted direction retains SSURGO primary,
 original THICK fallback, configured 10 m NED13/2022 for M3, existing UI/RQ and
 observable artifacts. Exact soil policies have not been approved by this request.
+Subsequent owner direction explicitly rejects strict material rules as non-viable
+and authorizes depth-based replacement investigation. The [replacement
+assessment](depth_policy_assessment.md) documents NRCS support for H and measured
+candidate effects. Acquisition remains unapproved.
 
 This is an intended scientific/runtime behavior change: replace M3's scaffold
 failure with actual results; replace M1 all-or-nothing point availability with
@@ -17,6 +21,14 @@ common valid support. Historical coefficients, Horn and upstream soil building
 remain unchanged. It is not restoration of already-implemented M3 calculations.
 
 ## Canonical authorities to synchronize
+
+The owner subsequently answered “proceed” to the explicit replacement-policy
+ratification question. ADR-0067 is accepted. Executing the requested plan
+includes its standalone checkpoint commit; no source acquisition is inferred.
+The canonical [runtime detail contract](../../../../wepppy/nodb/mods/postfire_debris_flow/docs/production_m3_runtime.md)
+specifies schemas, prepared-source inputs, limits and compatibility. The exact
+source-delivery implementation uses prepared local files only. Missing prepared
+lineage/THICK remains an acceptance limitation, not permission for acquisition.
 
 Repository-relative authority set: module `specification.md`, detailed
 `docs/production_m3.md`, `docs/model_selection.md`, `docs/production_m1.md`,
@@ -44,11 +56,11 @@ README, roadmap and user/operator guidance with final behavior before closure.
 | S02 | Accepted | Full contributing-basin relief/area for M3 T; full project area for applicability warnings. No soil-mask redefinition of geometry. |
 | S03 | Accepted | Exact visible mask, spatial coverage/counts, zero-support unavailability, no minimum percentage threshold or uncertainty-interval UI. |
 | S04 | Accepted | M3 is a read-only downstream soil consumer; no shared builder validity, donor, clipping, cache or `.sol` changes. |
-| S05 | Open | Material and interval policy. Evaluate O/ordinary soil, R/Cr/ambiguous layers, legitimate paired horizons versus conflicts/gaps. Preserve offline defaults. |
-| S06 | Open | Component weighting and incomplete/above-100 totals. Proposed usable-weight mean with explicit component completeness, independent of binary spatial coverage. Quantify and ratify. |
-| S07 | Open | Proposed cellwise selection of usable SSURGO estimate then original THICK; ratify fallback trigger, residual missing data and resampling. No arbitrary complete-only rule. |
-| S08 | Open | Audit source availability and original spatial keys in actual projects; define bounded THICK delivery. No implicit soil rebuild/acquisition. |
-| S09 | Open | Final additive artifact/schema versions, source fingerprints/WAL snapshot semantics, numerical reuse invalidation, coverage display precision and resource evidence. |
+| S05 | Accepted | Recorded-depth replacement approved by owner; ADR-0067 includes H/Cr, endpoint disagreement warnings and bounded legacy combination pairs. Offline defaults preserved. |
+| S06 | Accepted | Positive usable-weight map-unit mean; disclose known/usable/nonsoil/rejected weights; individual invalid weights reject, totals above 100 alone do not. Binary spatial support. |
+| S07 | Accepted | Per-cell usable primary then original THICK, nearest-neighbor, finite zero THICK valid and missing values excluded. No component-fraction spatial weighting. |
+| S08 | Prepared-only contract | Inventory complete. Optional local soil_sources.json supplies verified primary keys and/or original THICK window. Missing delivery blocks corresponding real acceptance. Acquisition remains unapproved. |
+| S09 | Specified, review pending | Canonical production_m3_runtime.md specifies snapshots, schema versions, artifacts, limits, freshness and coverage. Resource and runtime evidence remain implementation gates. |
 
 ## Compatibility, risk and regression
 
@@ -68,6 +80,14 @@ states. Corrupt source files and normal scientific missing values have distinct
 failure contracts; runtime/path failures must not silently become fallback data.
 
 ## Checkpoint completion
+
+Execution update, 2026-09-14: [source inventory](source_inventory.md) and
+[bounded proposal](source_delivery_proposal.md) now supply actual development
+evidence. Strict material policy was rejected; the recorded-depth replacement
+is approved in ADR-0067. Collection lineage and an original THICK window are
+still missing for live acceptance. S05–S07 are accepted; S08 specifies prepared
+local sources only; S09 fixes runtime/schema details. Independent final contract
+reviews and their disposition govern the standalone ancestor commit.
 
 After bounded evidence, record exact S05–S09 resolutions and operator approval of
 unresolved scientific/acquisition choices. Obtain two independent read-only

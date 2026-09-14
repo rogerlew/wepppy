@@ -706,3 +706,10 @@ attempts use visible attempts/<id>/ directories and durable status receipts.
 Latest result files remain directly under postfire_debris_flow/. Preserve them
 through canonical project archive/restore. Storage migration and failure retention
 are governed by [production M1](docs/production_m1.md#observable-intermediate-artifacts-and-migration).
+## Scientific integration amendment — 2026-09-14
+
+Accepted [production runtime integration](docs/production_m3_runtime.md) and
+ADR-0067 govern the next M1/M3 common-support execution, explicit recorded-depth
+soil policy and additive coverage artifacts. Runtime conformance is pending.
+This supersedes pending-integration behavior only when actual M3 is implemented;
+offline v1 outputs and scalar coefficients retain their established semantics.

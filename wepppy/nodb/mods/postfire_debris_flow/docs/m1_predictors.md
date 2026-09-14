@@ -122,3 +122,10 @@ Production upload does not request image dates and unknown dates do not block
 M1. Compare assessment metadata when available; the user is responsible for
 choosing dNBR and soil burn severity from the same fire assessment, as stated
 beside the upload. Never infer imagery dates from upload timestamps.
+## Scientific integration amendment — 2026-09-14
+
+For new production execution, [the runtime integration contract](production_m3_runtime.md)
+and accepted ADR-0067 govern model-specific common support, recorded-depth soil
+policy, version-2 predictors and mask publication. Existing local/offline v1
+semantics below remain reproducible. Runtime implementation conformance is pending;
+the amendment does not authorize source acquisition or production deployment.

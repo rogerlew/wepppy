@@ -651,3 +651,10 @@ An upload receives its visible staged receipt before project file copying. A
 failed transfer retains partial source bytes, an error log and failed receipt
 without replacing the prior accepted NoDb state. If storage itself prevents the
 receipt update, the staged receipt remains and the service logs that failure.
+## Scientific integration amendment — 2026-09-14
+
+For new production execution, [the runtime integration contract](production_m3_runtime.md)
+and accepted ADR-0067 govern model-specific common support, recorded-depth soil
+policy, version-2 predictors and mask publication. Existing local/offline v1
+semantics below remain reproducible. Runtime implementation conformance is pending;
+the amendment does not authorize source acquisition or production deployment.
