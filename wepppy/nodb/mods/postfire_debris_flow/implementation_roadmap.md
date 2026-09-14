@@ -52,9 +52,13 @@ Validation passed: full Python 8,468/103 skipped, frontend 872, independent
 reviews and live selection/task/reload/preflight checks. The M3 task reports
 `integration_pending`; full M3 execution is not complete.
 Next: execute the scaffolded [M3 scientific integration package](../../../../docs/work-packages/20260914_staley_m3_integration/package.md).
-Common analysis support was accepted on 2026-09-14; ratify soil material,
-component, fallback and source-delivery details before composing M3 and both
-models' coverage masks. The [production amendment](docs/production_m3.md)
+Common analysis support and recorded-depth soil policy were ratified at
+checkpoint `89d673c38`. Isolated `soil_policy`, `soil_snapshot` and `soil_inputs`
+now provide recorded-depth derivation, retained source copies and prepared-local
+cellwise composition. Local M1 accepts opt-in common support and v2 masks/readers;
+production still uses v1 until orchestration/publication integration is complete.
+Actual M3 terrain/results, generated soil-builder parity and live acceptance
+remain pending. The [production amendment](docs/production_m3.md)
 requires read-only consumption and nonregression of existing SSURGO/STATSGO
 soil building. Reports remain stage 7.
 

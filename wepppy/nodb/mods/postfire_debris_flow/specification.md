@@ -713,3 +713,11 @@ ADR-0067 govern the next M1/M3 common-support execution, explicit recorded-depth
 soil policy and additive coverage artifacts. Runtime conformance is pending.
 This supersedes pending-integration behavior only when actual M3 is implemented;
 offline v1 outputs and scalar coefficients retain their established semantics.
+
+Implementation increment after checkpoint `89d673c38`: isolated recorded-depth
+derivation and prepared-local soil composition are implemented with retained
+SQLite/MUKEY/evidence copies and real SQLite/WBT tests. M1 common support is
+available through the explicit local `support_policy='common_valid_v1'` option;
+the default remains offline v1. These helpers are not production-wired. M3
+terrain/results integration, generated soil-builder parity and live acceptance
+remain required before claiming completion.

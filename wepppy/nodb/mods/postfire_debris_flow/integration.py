@@ -270,8 +270,10 @@ def _tool_result(output, grid, domain):
         raise M1Error('invalid_tool_output', 'Missing or malformed WBT products') from exc
 
 
-def build_m1_predictors(inputs: M1Inputs, output_dir, *, wbt_executable) -> dict:
+def build_m1_predictors(inputs: M1Inputs, output_dir, *, wbt_executable, support_policy='offline_v1') -> dict:
     """Build a new local bundle; failed reservations remain visibly incomplete."""
+    if support_policy not in ('offline_v1', 'common_valid_v1'):
+        fail('invalid_input', 'Unsupported support policy')
     if inputs.source_kind not in ('real', 'synthetic', 'mixed') or inputs.elevation_units != 'm' or inputs.sbs_alignment not in ('exact', 'nearest'):
         fail('invalid_input', 'Explicit source kind, meter elevations and supported alignment required')
     output = Path(output_dir).absolute()
@@ -328,6 +330,32 @@ def build_m1_predictors(inputs: M1Inputs, output_dir, *, wbt_executable) -> dict
                 lower=summary['T_lower'], upper=summary['T_upper'], wbt_summary=summary)
     f = _f_predictor(inputs, grid, domain, prepared / 'domain.tif', hashes)
     s, k_provenance = _k_predictor(inputs, grid, domain)
+    coverage = None
+    if support_policy == 'common_valid_v1':
+        from .analysis_support import write_valid_mask
+        with rasterio.open(output/'wbt/intersection.tif') as source:
+            intersection = source.read(1)
+        common = domain & (intersection != 2)
+        if inputs.dnbr is None or inputs.k is None or f['reason'] not in (None, 'empty_dnbr') or s['reason'] not in (None, 'incomplete_k_coverage'):
+            common[:] = False
+            kval = np.zeros(domain.shape)
+        else:
+            _, dvalid, _ = read_raster(inputs.dnbr, continuous_missing=True)
+            kval, kvalid, _ = read_raster(inputs.k, continuous_missing=True)
+            common &= dvalid & kvalid & (kval >= 0) & (kval <= 1)
+        coverage = write_valid_mask(output/'valid_mask.tif', grid, domain, common)
+        support = _support(common, domain)
+        reason = None if common.any() else 'zero_valid_support'
+        t = _record(float(np.count_nonzero(common & (intersection == 1)))/support['valid_cells']
+                    if common.any() else None, 'fraction', reason, support, wbt_summary=summary)
+        if common.any():
+            prepare(prepared/'common_domain.tif', common.astype(float), np.ones(domain.shape, dtype=bool), grid)
+            mean = summarize_dnbr(prepared/'dnbr.tif', prepared/'common_domain.tif')['m1_f']
+        else:
+            mean = None
+        f = _record(mean, 'normalized_dNBR', reason, support, warning=f.get('warning'))
+        s = _record(float(np.mean(kval[common], dtype=np.float64)) if common.any() else None,
+                    'USLE_customary', reason, support)
     points = {'T': t, 'F': f, 'S': s}
     count = sum(p['value'] is not None for p in points.values())
     area = int(domain.sum()) * grid['transform'][0] ** 2 / 1e6
@@ -343,6 +371,9 @@ def build_m1_predictors(inputs: M1Inputs, output_dir, *, wbt_executable) -> dict
                 'tool': {'path': str(binary), 'sha256': inputs.wbt_sha256, 'version': summary['tool_version'], 'command': command},
                 'prepared_sha256': {p.name: digest(p) for p in sorted(prepared.iterdir())},
                 'artifacts_sha256': {str(p.relative_to(output)): digest(p) for p in sorted((output / 'wbt').iterdir())}}
+    if coverage is not None:
+        manifest.update(schema_version=2, model='M1', support_policy=support_policy, coverage=coverage)
+        manifest['artifacts_sha256']['valid_mask.tif'] = digest(output/'valid_mask.tif')
     try:
         current = _sources(inputs)
         if current != hashes or digest(binary) != inputs.wbt_sha256:

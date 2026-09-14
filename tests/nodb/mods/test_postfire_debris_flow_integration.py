@@ -73,6 +73,75 @@ def build(inputs, tmp_path):
     return m1.build_m1_predictors(inputs, tmp_path/'result', wbt_executable=BINARY)
 
 
+@pytest.mark.parametrize('case,count,t', [('full',25,1), ('partial',23,1), ('disjoint',0,None), ('raw_differs',1,1), ('unknown',24,1)])
+def test_common_support_actual_binary_and_reader(inputs, tmp_path, case, count, t):
+    from wepppy.nodb.mods.postfire_debris_flow.rainfall_io import load_predictors, RainfallError
+    k = np.full((7,7), .3)
+    dnbr = np.full((7,7), .4)
+    if case == 'partial':
+        k[2,2] = -9999
+        dnbr[3,3] = -9999
+        # Independent means differ; the common mask must exclude both outliers.
+        k[3,3] = .9
+        dnbr[2,2] = .8
+    elif case == 'disjoint':
+        k[:, :4] = -9999
+        dnbr[:, 4:] = -9999
+    elif case == 'raw_differs':
+        sbs = np.zeros((7,7), dtype='uint8'); sbs[2,2] = 3
+        raster(inputs.sbs, sbs, nodata=255)
+        k[:] = -9999; k[2,2] = .3
+    elif case == 'unknown':
+        sbs = np.full((7,7), 3, dtype='uint8'); sbs[2,2] = 255
+        raster(inputs.sbs, sbs, nodata=255)
+    raster(inputs.k, k)
+    raster(inputs.dnbr, dnbr)
+    normalized = json.loads(inputs.dnbr_manifest.read_text())
+    normalized['dnbr_sha256'] = digest(inputs.dnbr)
+    inputs.dnbr_manifest.write_text(json.dumps(normalized))
+    inputs = refresh(inputs)
+    output = tmp_path/'common'
+    m = m1.build_m1_predictors(inputs, output, wbt_executable=BINARY, support_policy='common_valid_v1')
+    assert m['schema_version'] == 2
+    assert m['coverage']['valid_cells'] == count
+    assert m['coverage']['excluded_cells'] == 25-count
+    assert m['predictors']['T']['value'] == t
+    assert all(p['support']['valid_cells'] == count for p in m['predictors'].values())
+    assert 'lower' not in m['predictors']['T']
+    if count:
+        assert m['predictors']['F']['value'] == pytest.approx(.4)
+        assert m['predictors']['S']['value'] == pytest.approx(.3)
+    else:
+        assert all(p['reason'] == 'zero_valid_support' for p in m['predictors'].values())
+    if case == 'raw_differs':
+        assert m['predictors']['T']['wbt_summary']['T'] == 1/25
+    if case == 'unknown':
+        assert m['predictors']['T']['wbt_summary']['T'] is None
+    path = output/'manifest.json'
+    assert load_predictors(path, {str(path):digest(path)}, {}) == m
+    if case == 'partial':
+        with rasterio.open(output/'valid_mask.tif', 'r+') as ds:
+            original_mask = ds.read(1)
+            swapped = original_mask.copy()
+            swapped[2,2] = 255; swapped[0,0] = 0
+            ds.write(swapped, 1)
+        m['artifacts_sha256']['valid_mask.tif'] = digest(output/'valid_mask.tif')
+        path.write_text(json.dumps(m))
+        with pytest.raises(RainfallError, match='domain'):
+            load_predictors(path, {str(path):digest(path)}, {})
+        with rasterio.open(output/'valid_mask.tif', 'r+') as ds:
+            ds.write(original_mask, 1)
+    with rasterio.open(output/'valid_mask.tif', 'r+') as ds:
+        mask = ds.read(1)
+        assert np.count_nonzero(mask == 255) == 24
+        mask[1,1] = 1-mask[1,1]
+        ds.write(mask, 1)
+    m['artifacts_sha256']['valid_mask.tif'] = digest(output/'valid_mask.tif')
+    path.write_text(json.dumps(m))
+    with pytest.raises(RainfallError, match='coverage'):
+        load_predictors(path, {str(path):digest(path)}, {})
+
+
 def test_complete_actual_binary_and_scenarios(inputs, tmp_path):
     bundle = build(inputs, tmp_path)
     assert bundle['availability'] == 'complete'

@@ -29,15 +29,26 @@ production deployment is authorized by this package.
 - [x] (2026-09-14) Audit development sources and ratify soil/prepared-delivery/schema contracts; live missing-source acceptance remains due.
 - [x] (2026-09-14 16:58 UTC) Audit actual development grid, original soil keys,
   WAL core records and strict-policy support; retain source hashes and proposal.
-- [ ] Resolve dominant legacy H material/lineage and bounded THICK/SDA delivery
-  before ratifying the remaining scientific and source contract.
+- [x] Resolve legacy H material policy and prepared-local delivery contract;
+  acquisition remains a separate unapproved action.
 - [x] (2026-09-14) Complete two preliminary source-proposal reviews and amend
   provenance, zero-value and bounded-read details; final checkpoint reviews pending.
 - [x] (2026-09-14) Record owner rejection of strict material policy; investigate
   NRCS legacy H guidance and four depth candidates on frozen/live records.
 - [x] (2026-09-14) Retain replacement experiment, numerical results and sixteen
   analytical cases; fix research duplicate-ID handling discovered in review.
-- [x] (2026-09-14) Complete both independent contract reviews; standalone ancestor commit is the next step before runtime edits.
+- [x] (2026-09-14) Complete both independent contract reviews and commit standalone
+  ancestor `89d673c38` before runtime edits.
+- [x] (2026-09-14) Add isolated recorded-depth policy and initial real SQLite tests;
+  49 soil tests passed before review corrections.
+- [x] (2026-09-14) Add opt-in local M1 common support and version-2 reader;
+  79 integration/rainfall tests passed, including real WBT partial/disjoint masks.
+- [x] Close implementation review findings on sidecar-free WAL snapshots,
+  nonfinite source values and lossless NULL/empty replay.
+- [x] Add prepared-local primary/fallback raster composition and close bounded
+  security review findings, including real rollback spill and symlink swaps.
+- [x] Run increment validation: full Python 8,498 passed/103 skipped; latest
+  combined focused gate 153 passed; final M1 reader check 55 passed.
 - [ ] Implement production thickness adapter; prove unchanged soil building.
 - [ ] Implement M3 terrain and shared-support aggregation/masks for both models.
 - [ ] Integrate execution, freshness, publication and canonical summaries.
@@ -69,6 +80,18 @@ scientific proposals, not prerequisites for making this development basin pass.
 ## Decision Log
 
 
+Decision: owner approved the recorded-depth replacement by “proceed”; accepted
+ADR-0067 and the prepared-local runtime contract are committed at `89d673c38`.
+The earlier strict-material proposal and pending-ratification notes below are
+historical. No acquisition or deployment is implied. Codex, 2026-09-14.
+
+Decision: copy bounded main/WAL into visible attempt-owned snapshot directories
+before opening SQLite. Independent review reproduced `mode=ro` creating shared
+sidecars for a clean WAL database. Original stat identities bracket copying and
+reading; retained SQLite copies preserve SQL NULL/empty distinctions lost in
+inspection CSVs. This closes source-isolation/replay defects without changing
+scientific policy. Codex, 2026-09-14.
+
 Decision: use common valid spatial inputs per model; retain full-basin geometry
 for M3 ruggedness and study-area warnings. Rationale: predictors should describe
 the same observed area without changing the drainage basin when soil/SBS is
@@ -96,15 +119,14 @@ acquisition remain pending; the earlier conservative recommendation is rejected.
 ## Outcomes & Retrospective
 
 
-Milestone 1 is partially executed: actual source inventory, strict-policy
-fixture evaluation, core logical hashes and a bounded delivery proposal are
-retained. No runtime implementation, live acquisition, soil rebuild, new runtime
-validation, checkpoint signoff or deployment is claimed. Next work resolves
-the material/source choices in `artifacts/source_delivery_proposal.md`, then
-finishes S05–S09 and the reviewed checkpoint before milestone 2. The replacement
-investigation is now complete with reproducible counts and analytical checks;
-it changes no production soil builders or offline defaults. Preliminary
-replacement reviews are recorded separately from final checkpoint approval.
+Milestone 1 is complete at checkpoint `89d673c38`. Milestone 2 implementation is
+in progress: recorded-depth derivation, bounded snapshots and prepared-local
+cellwise soil composition have focused tests; both bounded soil implementation
+reviews closed their source-isolation/replay findings. Local opt-in M1 common
+support and v2 reading pass real WBT tests but are not wired to production.
+M3 terrain composition, runtime,
+builder/generated-input parity and live acceptance remain. No acquisition,
+shared soil rebuild or deployment has occurred.
 
 ## Context and Orientation
 
@@ -341,3 +363,5 @@ Revision note (2026-09-14): recorded the development inventory and dominant
 legacy-H/source-delivery decision discovered while executing milestone 1.
 Subsequent revision: record owner rejection and the researched recorded-depth
 replacement, including corrected H evidence and explicit scientific limits.
+Implementation revision: record checkpoint `89d673c38`, isolated soil/M1 helpers,
+real SQLite review corrections and remaining production/live acceptance work.

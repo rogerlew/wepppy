@@ -4,6 +4,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import os
 from pathlib import Path
 import re
 import stat
@@ -50,10 +51,37 @@ def regular(path, limit=MAX_BYTES):
 
 def digest(path, limit=MAX_BYTES):
     h = hashlib.sha256()
+    size = 0
     with regular(path, limit).open('rb') as stream:
         for block in iter(lambda: stream.read(1024 * 1024), b''):
+            size += len(block)
+            if size > limit:
+                fail('resource_limit', 'File grew beyond byte limit while hashing')
             h.update(block)
     return h.hexdigest()
+
+
+def open_local(path, limit=MAX_BYTES):
+    """Open a bounded regular file without following any path-component symlink."""
+    p = regular(path, limit)
+    directory = os.open(p.anchor, os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        for part in p.parts[1:-1]:
+            child = os.open(part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=directory)
+            os.close(directory)
+            directory = child
+        descriptor = os.open(p.name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=directory)
+    finally:
+        os.close(directory)
+    try:
+        info = os.fstat(descriptor)
+        if not stat.S_ISREG(info.st_mode) or info.st_size > limit:
+            fail('invalid_input', 'Expected bounded regular local descriptor')
+        stream = os.fdopen(descriptor, 'rb')
+    except (OSError, ValueError):
+        os.close(descriptor)
+        raise
+    return stream
 
 
 def hash_value(value):
@@ -150,6 +178,10 @@ def load_predictors(path, expected, consumed, *, artifact_limits=None):
     p = pinned(path, expected, consumed, MAX_TEXT)
     m = read_json(p)
     validate_predictors(m)
+    if m['schema_version'] == 2:
+        from .predictor_v2 import load_artifacts
+        load_artifacts(p.parent, m, consumed, artifact_limits)
+        return m
     if set(m['artifacts_sha256']) != set(ARTIFACTS):
         fail('invalid_input', 'Unexpected predictor artifact names')
     # Only fixed artifact paths are read. Source and preparation paths are provenance.
@@ -169,7 +201,7 @@ def load_predictors(path, expected, consumed, *, artifact_limits=None):
     return m
 
 
-def _validate_predictor_geometry(m, total):
+def _validate_grid_outlet(m, total):
     grid = m['grid']
     shape, transform, crs = (grid.get(k) for k in ('shape','transform','crs'))
     if (not isinstance(shape,list) or len(shape) != 2 or any(type(v) is not int or v <= 0 for v in shape)
@@ -196,6 +228,12 @@ def _validate_predictor_geometry(m, total):
     coordinates = outlet.get('coordinates')
     if not isinstance(coordinates,list) or len(coordinates) != 2 or not all(number(v) for v in coordinates):
         fail('invalid_input', 'Invalid outlet coordinates')
+
+
+def _validate_predictor_geometry(m, total):
+    _validate_grid_outlet(m, total)
+    shape, transform, crs = (m['grid'][k] for k in ('shape', 'transform', 'crs'))
+    a,b,c,d,e,f = transform
     t = m['predictors']['T']
     summary = t.get('wbt_summary')
     if not isinstance(summary,dict):
@@ -222,6 +260,10 @@ def _validate_predictor_geometry(m, total):
 
 
 def validate_predictors(m):
+    if type(m.get('schema_version')) is int and m['schema_version'] == 2:
+        from .predictor_v2 import validate
+        validate(m)
+        return
     required = {'schema_version', 'status', 'availability', 'source_kind', 'readiness',
                 'grid', 'outlet', 'area_km2', 'warnings', 'predictors', 'sources_sha256',
                 'prepared_sha256', 'tool', 'k_provenance', 'artifacts_sha256'}

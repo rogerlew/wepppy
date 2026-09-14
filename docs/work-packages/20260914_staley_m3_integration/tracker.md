@@ -1,6 +1,6 @@
 # Production M3 integration tracker
 
-Status: milestone 1 contract approved; standalone ancestor commit next, implementation pending.
+Status: checkpoint `89d673c38` committed; isolated implementation and review in progress.
 Last updated: 2026-09-14.
 
 ## Task board
@@ -10,10 +10,10 @@ Last updated: 2026-09-14.
 - [x] Audit frozen three-site component totals and repeated depth intervals.
 - [x] Scaffold canonical amendment, decision register, regression plan and ExecPlan.
 - [x] Inventory actual project sources and installed original THICK delivery.
-- [ ] Resolve dominant H material/lineage and bounded source-acquisition proposal.
+- [x] Resolve H material and prepared-local delivery; acquisition remains unapproved.
 - [x] Establish NRCS support for H, quantify replacement depth policies and
   retain sixteen analytical checks and independent preliminary review findings.
-- [ ] Ratify S05–S09, complete independent contract reviews and checkpoint commit.
+- [x] Ratify S05–S09, complete independent contract reviews and checkpoint commit.
 - [x] Ratify recorded-depth replacement and exact prepared-source/runtime schemas;
   both independent final contract reviews approved with findings closed.
 - [ ] Implement isolated production soil derivation and prove builder parity.
@@ -33,17 +33,33 @@ Last updated: 2026-09-14.
 
 ## Risks and remaining decisions
 
-S05–S09 in the [checkpoint](artifacts/20260914_contract_decision.md) remain open.
+S05–S09 in the [checkpoint](artifacts/20260914_contract_decision.md) are ratified.
 Principal risks: double-counted paired horizons, misclassified component weights,
 donor keys mistaken for spatial soil identity, component percentages presented as
 mapped coverage, incomplete SQLite snapshots, hidden fallback or upstream writes.
-Source delivery is not yet inventoried; built WEPP soils alone do not prove M3
-inputs exist. The actual audit found legacy H horizons on 99.798% of basin
+Built WEPP soils alone do not prove M3 inputs exist. The actual audit found
+legacy H horizons on 99.798% of basin
 cells and no prepared THICK input for this basin. Strict material rules were
 subsequently rejected. Documented H eligibility restores all basin thickness
-cells; Cr/endpoint/pair treatment remains proposed. Resolve the concrete
-[source-delivery proposal](artifacts/source_delivery_proposal.md) before
-acquisition and scientific checkpoint ratification.
+cells; Cr/endpoint/pair treatment is accepted. The concrete
+[source-delivery proposal](artifacts/source_delivery_proposal.md) requires
+separate acquisition authority; prepared-local execution is approved.
+
+## Notes – implementation after checkpoint
+
+Recorded-depth derivation and snapshot extraction initially passed 49 soil tests.
+Independent review found clean-WAL sidecar creation, nonfinite JSON handling and
+NULL/empty replay defects; corrections retain bounded SQLite copies under visible
+attempt directories. Both bounded implementation reviews now close their
+medium/high findings. Cellwise primary/fallback composition and dependency
+appearance checks are implemented locally. Shared builders remain untouched.
+Local opt-in M1 common
+support plus the v2 reader passed 79 integration/rainfall tests, including actual
+WBT full/partial/disjoint support and a raw-T/common-T difference. Production
+wiring, M3 composition, generated soil parity and live acceptance remain pending.
+Validation: full Python sweep 8,498 passed/103 skipped; focused updated modules
+153 passed, followed by 55 M1 integration passes for final reader-domain checks.
+See [validation evidence](artifacts/20260914_implementation_validation.md).
 
 ## Notes – 2026-09-14 execution
 

@@ -137,7 +137,7 @@ def validate_grid(grid):
         fail('invalid_grid', 'Expected square north-up WGS84 UTM meter grid')
 
 
-def read_raster(path, *, categorical=False, continuous_missing=False, target_grid=False):
+def read_raster(path, *, categorical=False, continuous_missing=False, target_grid=False, allowed_units=None):
     path = regular(path)
     masks = companions(path)
     mask_shapes = []
@@ -176,7 +176,8 @@ def read_raster(path, *, categorical=False, continuous_missing=False, target_gri
                     fail('invalid_encoding', 'Raster must have identity sample encoding')
                 if ds.tags().get('AREA_OR_POINT', 'Area') != 'Area':
                     fail('invalid_grid', 'Pixel-area raster required')
-                if ds.units[0] not in (None, '', 'm', 'metre', 'meter') and not categorical:
+                units = (None, '', 'm', 'metre', 'meter') if allowed_units is None else allowed_units
+                if ds.units[0] not in units and not categorical:
                     fail('invalid_encoding', 'Contradictory raster unit declaration')
                 allowed = {ColorInterp.gray, ColorInterp.undefined}
                 if categorical:

@@ -80,6 +80,20 @@ baseline captured only after reading an older snapshot. Compare the post-read
 identity again at the locked finalizer; persistent drift fails, not retries into
 an unrelated source revision.
 
+Implementation clarification from real SQLite noninterference tests: `mode=ro`
+can create WAL/SHM beside a clean WAL-mode source. Never connect SQLite to the
+shared source. Copy bounded main and existing WAL into a fresh visible
+attempt-owned `snapshots/<read-id>/` directory, then read that copy in one
+query-only transaction. Bracket the entire copy/read with original source
+identities. Retain copies for lossless replay: inspection CSVs represent missing
+numeric values as empty, but cannot alone distinguish SQL NULL from empty text.
+Logical hashing uses explicit tagged nonfinite numeric values so invalid source
+numbers reach the recorded-depth unavailable policy, not a JSON encoder failure.
+Source identities always refer to originals, not copy-side journal housekeeping.
+Reject any existing rollback `-journal` before and after copying/reading: main
+pages may contain uncommitted spills. Do not replay or remove shared journals.
+This deliberately conservative admission includes residual rollback journals.
+
 ## Predictors and exact support
 
 Use existing raster admission (10 million cells, aligned projected square meter
@@ -220,3 +234,22 @@ source snapshot/WAL concurrency, soil-builder/generated-WEPP-input parity,
 real installed WBT output, live RQ/browser/download and archive round trips.
 Missing prepared lineage/THICK prevents the corresponding acceptance case;
 unit tests and a source-free unavailable result do not close the package.
+
+## Current implementation surface
+
+After checkpoint `89d673c38`, `soil_policy.derive_recorded_mapunits` implements
+the approved policy independently of shared builders. `soil_snapshot.snapshot_cache`
+and `verify_snapshot` require a fresh visible output directory for each read;
+`prepare_soil_tables` retains inspection CSVs and replay copies. Source CSV keys
+are canonical decimal strings; raw SQLite copies and logical identities retain
+original typed values. `soil_inputs.prepare_soil(wd, output, grid, domain)` adds
+cellwise maps and prepared provenance. Its manifest returns dependency presence
+and stat identities for later finalization. It copies original MUKEY/mask files
+and raster retrieval metadata under `sources/`, alongside the sources above.
+Fallback evidence uses `schema_version`, `source_id`, `source`, `sha256`, `grid`
+and `bounds`; the native raster's declared units must be absent or inches,
+never meters. Metadata parsing and hashing consume the same bounded bytes.
+
+Local M1 adds opt-in `support_policy='common_valid_v1'`; default v1 is unchanged.
+The v2 reader currently admits M1 only. Production orchestration still uses v1;
+M3 terrain, results, publication/freshness and live acceptance are not complete.

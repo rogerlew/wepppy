@@ -183,28 +183,45 @@ def _hash(path):
         return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
+def _read_tables(conn, *, allow_empty=False, max_table_bytes=None, source_schema=None):
+    """Shared raw-table parser; optional bounds are used by production snapshots."""
+    required = {"component": ("mukey", "cokey", "compname", "comppct_r"),
+                "chorizon": ("cokey", "chkey", "hzname", "hzdept_r", "hzdepb_r", "hzthk_r", "desgnmaster")}
+    conn.row_factory = sqlite3.Row
+    result = []
+    for table, columns in required.items():
+        info = list(conn.execute(f"PRAGMA table_info({table})"))
+        schema = {r[1] for r in info}
+        kind = conn.execute("SELECT type FROM sqlite_master WHERE name=?", (table,)).fetchone()
+        if not kind or kind[0] != "table" or not set(columns) <= schema:
+            raise ValueError(f"Incompatible {table} source schema")
+        if source_schema is not None:
+            source_schema[table] = {r[1]: r[2] for r in info if r[1] in columns}
+        rows, size = [], 0
+        for value in conn.execute(f"SELECT {','.join(columns)} FROM {table}"):
+            row = dict(value)
+            if max_table_bytes is not None:
+                # This serialization measures size only; nonfinite source numbers
+                # must still reach the component's unavailable-value policy.
+                size += len(json.dumps(row).encode('utf-8'))
+                if size > max_table_bytes:
+                    raise ValueError(f"Resource limit exceeded for {table}")
+            rows.append(row)
+        if not rows and not allow_empty:
+            raise ValueError(f"Empty {table} source")
+        result.append(rows)
+    return tuple(result)
+
+
 def read_cache(path):
     """Read canonical core columns from SQLite without creating/writing a DB."""
     p = _file(path)
-    required = {"component": ("mukey", "cokey", "compname", "comppct_r"),
-                "chorizon": ("cokey", "chkey", "hzname", "hzdept_r", "hzdepb_r", "hzthk_r", "desgnmaster")}
     conn = sqlite3.connect(p.as_uri()+"?mode=ro", uri=True)
     try:
         conn.execute("PRAGMA query_only=ON")
         conn.execute("PRAGMA trusted_schema=OFF")
         conn.enable_load_extension(False)
-        conn.row_factory = sqlite3.Row
-        result = []
-        for table, columns in required.items():
-            schema = {r[1] for r in conn.execute(f"PRAGMA table_info({table})")}
-            kind = conn.execute("SELECT type FROM sqlite_master WHERE name=?", (table,)).fetchone()
-            if not kind or kind[0] != "table" or not set(columns) <= schema:
-                raise ValueError(f"Incompatible {table} source schema")
-            rows = [dict(r) for r in conn.execute(f"SELECT {','.join(columns)} FROM {table}")]
-            if not rows:
-                raise ValueError(f"Empty {table} source")
-            result.append(rows)
-        return tuple(result)
+        return _read_tables(conn)
     finally:
         conn.close()
 
