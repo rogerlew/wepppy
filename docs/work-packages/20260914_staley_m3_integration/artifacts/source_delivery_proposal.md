@@ -1,7 +1,8 @@
 # Bounded source delivery and soil decision proposal
 
-Status: replacement proposed after owner rejection of strict material rules;
-acquisition remains unapproved.
+Status: recorded-depth policy ratified at `89d673c38`; reusable basin-independent
+source preparation required by owner clarification. Network acquisition remains
+unapproved. Earlier scientific proposal language below is historical.
 Evidence: [development inventory](source_inventory.md).
 
 ## Recommended scientific direction
@@ -52,9 +53,10 @@ legacy paired records explicitly. Offline defaults remain unchanged.
 
 ## Acquisition delta for approval
 
-Allow a one-time development preparation of the native-resolution USGS THICK
-window covering this project's DEM extent, using only the exact USGS object
-in the inventory. Retain the native window and request metadata in a new,
+Implement reusable project-scoped preparation of the native-resolution USGS
+THICK window covering the selected project's DEM extent, using only the exact
+USGS object in the inventory. Derive the extent from that project's grid, not
+from a named validation run. Retain the native window and request metadata in a new,
 visible `postfire_debris_flow/source_preparation/<unique-id>/` directory.
 Do not overwrite an existing record or write to the shared soil cache.
 
@@ -64,7 +66,7 @@ including metadata/auxiliary reads. No automatic retries. Abort and retain diagn
 cannot enforce that bound. Record object identity before/after, source CRS,
 native window, units, nodata, request outcome and resulting file hash. Treat
 object drift as an explicit abort. Pin each range request to the inventoried
-ETag with `If-Match`, reject responses that ignore the requested range, and
+object identity established for that preparation with `If-Match`, reject responses that ignore the requested range, and
 reject redirects outside the exact approved object location. The implementation
 must prove these controls before this acquisition can run. Treat
 negative values and nonfinite values as unavailable; convert valid inches
@@ -73,8 +75,9 @@ interpolated thickness across missing cells. Retain the native window so
 this resampling choice remains reproducible. Execution must still demonstrate
 that the existing predictor artifact limit is sufficient.
 
-Also allow one bounded read-only NRCS SDA query for the 34 cached map-unit
-keys, joining mapunit/legend/sacatalog to retrieve collection identity and
+Also prepare one bounded read-only NRCS SDA query for the unique original
+map-unit keys found within the selected project's watershed mask, joining
+mapunit/legend/sacatalog to retrieve collection identity and
 current survey version only. This does not establish the historical version
 of the existing cached horizons; retain their retrieval sidecar and content
 hashes, and label historical survey version unknown unless separately proven.
@@ -85,6 +88,16 @@ lineage cannot be established, do not label those keys SSURGO primary.
 The only SDA endpoint is `https://SDMDataAccess.nrcs.usda.gov/Tabular/post.rest`;
 reject redirects. Current associations alone must not be presented as verified
 historical record provenance.
+Absent primary mapping/cache or no usable original keys skips this query and
+allows fallback-only preparation; malformed present files remain errors.
+Incremental unique-key collection and the final encoded SDA request each have
+a 1 MiB ceiling. Abort rather than automatically batching or expanding requests.
+
+The 34 cached keys and raster extent in the original development inventory are
+observations, not generic query inputs or limits. Reuse the same preparation
+entry point across eligible basins; validate it on distinct key sets and grid
+extents, with primary, fallback and missing-source cases. Do not close this work
+with a one-off download script or manually assembled named-basin inputs.
 
 This preparation proposal adds no runtime acquisition service or dependency.
 General runtime delivery remains prepared local inputs; missing delivery must
@@ -93,7 +106,7 @@ must not become successful scientific fallback. If approval changes the soil
 policy, quantify that choice and amend the canonical contract and proposed ADR
 before independent checkpoint approval and the standalone ancestor commit.
 
-## Remaining checkpoint work
+## Historical checkpoint work before ratification
 
 S05 requires the H/Cr and paired-horizon disposition; S06–S07 require ratifying
 the weighting and per-cell/resampling rules above. S08 requires acquisition

@@ -24,6 +24,10 @@ production deployment is authorized by this package.
 ## Progress
 
 
+- [x] (2026-09-14) Record owner requirement for basin-independent preparation:
+  derive original keys and THICK extent per project; named runs are tests only.
+- [ ] Implement reusable source preparation and prove the same path on at least
+  two independent basins, without hand-authored per-basin manifests.
 - [x] (2026-09-14 16:40 UTC) Scaffolded scope, accepted support/isolation, research,
   frozen source audit, soil regression plan and draft checkpoint.
 - [x] (2026-09-14) Audit development sources and ratify soil/prepared-delivery/schema contracts; live missing-source acceptance remains due.
@@ -60,6 +64,11 @@ production deployment is authorized by this package.
 ## Surprises & Discoveries
 
 
+The initial delivery proposal described one development run's 34 cached keys
+and extent as a one-time preparation. The owner clarified that generic basin
+support is required. Those inventory observations must not become runtime
+constants or a manual per-basin workflow.
+
 NRCS documents legitimate paired horizons sharing depths and component totals
 above 100. The offline helper rejects those cases. Frozen three-site records
 contain neither; 42 of 44 Moscow Mountain map units have totals below 100.
@@ -81,6 +90,14 @@ scientific proposals, not prerequisites for making this development basin pass.
 
 ## Decision Log
 
+
+Decision: source preparation derives original in-basin keys and DEM extent
+from the selected project and produces the same local evidence/manifest contract
+for any eligible basin. Require at least two independent basin acceptance cases.
+Rationale: source evidence and THICK fallback are per-project dependencies, not
+special fixtures for `addicted-reservist`. Existing acquisition limits and the
+separate network-authority gate remain unchanged. Owner clarification recorded
+by Codex, 2026-09-14.
 
 Decision: owner approved the recorded-depth replacement by “proceed”; accepted
 ADR-0067 and the prepared-local runtime contract are committed at `89d673c38`.
@@ -129,6 +146,8 @@ support and v2 reading pass real WBT tests but are not wired to production.
 M3 terrain composition, runtime,
 builder/generated-input parity and live acceptance remain. No acquisition,
 shared soil rebuild or deployment has occurred.
+The owner has clarified generic delivery scope: reusable source preparation and
+multi-basin acceptance remain required, rather than one-off validation inputs.
 
 ## Context and Orientation
 
@@ -211,6 +230,13 @@ with exact numerical/runtime rules and the soil nonregression evidence plan.
 
 ### Milestone 2: Isolated soil preparation
 
+
+Implement preparation as one project-parameterized path: derive unique original
+MUKEYs inside the watershed mask and the THICK native window from the DEM
+extent. Never hard-code development-run keys, bounds or run IDs. Preserve the
+bounded acquisition gate and prepared-local runtime boundary; no additional
+service or queue is implied. Exercise this path on at least two independent
+basins with distinct keys/extents, including primary/fallback/missing cases.
 
 Implement module-owned M3 input/soil composition, using existing raw helpers
 with an explicit versioned production policy. Never instantiate WEPP soil
@@ -367,3 +393,5 @@ Subsequent revision: record owner rejection and the researched recorded-depth
 replacement, including corrected H evidence and explicit scientific limits.
 Implementation revision: record checkpoint `89d673c38`, isolated soil/M1 helpers,
 real SQLite review corrections and remaining production/live acceptance work.
+Scope clarification: require reusable basin-derived source preparation and
+multi-basin acceptance after the owner rejected a named-basin-only framing.

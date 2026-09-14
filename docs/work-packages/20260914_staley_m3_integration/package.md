@@ -1,8 +1,9 @@
 # Production M3 and valid-support estimates
 
-Status: milestone-1 source audit and depth-policy research executed 2026-09-14;
-strict material policy rejected, replacement scientific/source choices remain
-open, implementation not started. See [replacement assessment](artifacts/depth_policy_assessment.md),
+Status: contract checkpoint `89d673c38` and isolated implementation `587c6b8de`
+complete; production integration and multi-basin acceptance remain open.
+Strict material rules were rejected and recorded-depth policy accepted.
+See [replacement assessment](artifacts/depth_policy_assessment.md),
 [inventory](artifacts/source_inventory.md),
 [proposal](artifacts/source_delivery_proposal.md) and
 [preliminary reviews](artifacts/20260914_preliminary_reviews.md).
@@ -22,6 +23,12 @@ watershed/outlet, existing rainfall choices and SI/English presentation.
 The [current contract](../../../wepppy/nodb/mods/postfire_debris_flow/docs/production_m3.md)
 separates owner-approved support/isolation from soil/source-delivery proposals.
 
+Source preparation must be reusable across eligible basins: derive original
+map-unit keys and THICK extent from each project, with no named-run branches,
+fixed 34-key list or hand-built per-basin manifests. `addicted-reservist` is one
+validation case only. The durable [basin-independent preparation requirement](../../../wepppy/nodb/mods/postfire_debris_flow/docs/production_m3_runtime.md#basin-independent-preparation-requirement)
+records the owner's 2026-09-14 clarification and rationale.
+
 This is full scientific integration, not another selectable surrogate. Completion
 requires outputs from the installed owned WBT path and actual development RQ
 jobs. Reports/dashboard, nested basins, additional terrain sources, model
@@ -38,8 +45,9 @@ requires source preservation and generated-output evidence, including failures.
 
 Budget: existing NoDb, RQ, UI, owned native raster tools and soil helpers only.
 No new services, queues, dependencies, schema migration of shared soil caches or
-soil acquisition infrastructure. If source delivery requires more than prepared
-inputs, define and authorize that bounded delta before implementation.
+soil acquisition infrastructure. Generic bounded preparation implementation is
+authorized by the owner's scope clarification and continuation; live network
+execution remains a separately gated delta.
 
 ## Milestones and decisions
 
@@ -72,7 +80,9 @@ partial/zero support, stable full-basin ruggedness under soil/SBS masking, sourc
 changes during execution, and unchanged WEPP soil builds before/after integration.
 Use `addicted-reservist` for the large 10 m development acceptance if its current
 inventory remains suitable; audit first, do not rebuild its soils to make a test
-pass. Use frozen three-site fixtures and isolated projects for destructive cases.
+pass. Require another independent basin with different keys and extent through
+the same preparation/execution path; include primary/fallback/missing cases.
+Use frozen three-site fixtures and isolated projects for destructive cases.
 
 Security impact: **high** (worker subprocesses, source files/SQLite, publication,
 download and optional bounded source acquisition). Require independent contract

@@ -8,6 +8,50 @@ version-2 predictor manifests. Offline version-1 products remain unchanged.
 
 ## Prepared source boundary
 
+### Basin-independent preparation requirement
+
+Owner clarification, 2026-09-14: source preparation and M3 execution must work
+for any eligible project basin, not only `addicted-reservist`. That run is a
+validation case, never a runtime branch, fixed key list or fixed raster extent.
+Preparation takes the project directory, derives unique original MUKEYs within
+its authoritative watershed mask, and derives the native THICK window from
+its DEM grid/extent. Query only the needed collection metadata; do not fetch
+replacement horizons, use donor keys or mutate shared soil caches.
+Absent original mapping/cache or no usable original keys skips the primary
+metadata query, records primary unavailability and permits the THICK-only path.
+Present malformed primary files still fail explicitly. Collect unique keys
+incrementally with a 1 MiB encoded-key-list ceiling; the final encoded SDA
+request must also fit 1 MiB before sending. Abort at the ceiling, without
+automatic batching or widening acquisition. These are resource bounds, not
+scientific soil eligibility rules.
+
+Use one reusable module-owned preparation path to produce the local manifest
+and retained evidence below. Do not require hand-authored per-basin manifests
+or bespoke download commands as the finished workflow. The same bounded
+source, timeout, size, provenance and missing-data rules apply across basins;
+exceeding a bound fails explicitly rather than silently enlarging it. Source
+reuse must match the current basin keys/grid and source identities, not merely
+a project name or an earlier basin's files. Existing model/locale/10 m terrain
+eligibility is unchanged. This scope clarification does not itself execute or
+authorize network acquisition; that operational delta remains separately gated.
+
+Each preparation owns a fresh visible receipt directory containing its sources,
+evidence and candidate manifest. Only a complete verified preparation may
+atomically promote `inputs/soil_sources.json`, under the existing module lock
+after rechecking project source identities and the prior manifest identity.
+Failed or stale preparation retains diagnostics and preserves the prior valid
+manifest. Reuse references remain project-contained; negative tests must reject
+promotion of another basin's keys/grid/source identity. Generic preparation
+implementation is authorized; live network execution remains separately gated.
+
+Acceptance must exercise the same preparation and execution path on at least
+two independent basins with different keys and extents, covering primary,
+fallback and missing-source behavior. A passing named-basin case alone is
+insufficient. Rationale: collection evidence and fallback coverage are ordinary
+per-project dependencies, not fixtures supplied solely to make one run pass.
+
+### Local input contract
+
 M3 reads existing `soils/ssurgo.tif`, its retrieval metadata, and
 `soils/ssurgo_tabular_cache.sqlite`. It never initializes or refreshes that cache,
 builds Soils, or substitutes WEPP donor keys. A missing optional primary source

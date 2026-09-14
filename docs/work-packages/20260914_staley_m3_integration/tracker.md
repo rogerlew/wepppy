@@ -25,6 +25,10 @@ Last updated: 2026-09-14.
 
 ## Decisions
 
+- **2026-09-14 — Basin-independent scope:** owner requires generic preparation
+  and execution beyond `addicted-reservist`. Derive keys/extent per project;
+  require multi-basin acceptance, not bespoke named-run inputs. Network
+  acquisition remains a separate operational gate.
 - **2026-09-14 16:40 UTC** — Owner accepted the analysis-support explanation:
   common valid cells per model; M3 ruggedness retains full-basin geometry.
 - **2026-09-14 16:40 UTC** — Owner requires particular soil-building regression
