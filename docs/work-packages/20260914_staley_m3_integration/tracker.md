@@ -1,6 +1,7 @@
 # Production M3 integration tracker
 
-Status: checkpoint `89d673c38` committed; isolated implementation and review in progress.
+Status: checkpoint `89d673c38` and isolated implementation `587c6b8de` committed;
+production integration and live acceptance remain open.
 Last updated: 2026-09-14.
 
 ## Task board

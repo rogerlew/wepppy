@@ -49,6 +49,8 @@ production deployment is authorized by this package.
   security review findings, including real rollback spill and symlink swaps.
 - [x] Run increment validation: full Python 8,498 passed/103 skipped; latest
   combined focused gate 153 passed; final M1 reader check 55 passed.
+- [x] Commit tested isolated implementation as `587c6b8de`; preserve offline
+  defaults and leave production M3 explicitly pending.
 - [ ] Implement production thickness adapter; prove unchanged soil building.
 - [ ] Implement M3 terrain and shared-support aggregation/masks for both models.
 - [ ] Integrate execution, freshness, publication and canonical summaries.
