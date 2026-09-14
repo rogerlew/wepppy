@@ -4,6 +4,11 @@ Status: updated 2026-09-14. Production M1 NoDb, browser upload and RQ execution
 are implemented. M1/M3 UI and request wiring are implemented; M3 scientific
 composition, valid-support calculations and the dashboard remain pending.
 
+Local M3 terrain/composition and basin-derived local soil-source preparation are
+now under review in the active M3 package. Two basin fixtures exercise generic
+keys/windows; native terrain verifies exact routed membership. These helpers
+are not yet authoritative production orchestration or live acceptance.
+
 ## Maintenance Contract
 
 This is the living delivery tracker. [specification.md](specification.md) and

@@ -1,7 +1,8 @@
 # Production M3 integration tracker
 
 Status: checkpoint `89d673c38` and isolated implementation `587c6b8de` committed;
-production integration and live acceptance remain open.
+generic preparation contract `7328a0004` committed; local preparation/terrain
+increment under review. Production integration and live acceptance remain open.
 Last updated: 2026-09-14.
 
 ## Task board
@@ -51,6 +52,14 @@ cells; Cr/endpoint/pair treatment is accepted. The concrete
 separate acquisition authority; prepared-local execution is approved.
 
 ## Notes – implementation after checkpoint
+
+Generic local preparation now derives each basin's original keys and native
+THICK window, with two distinct basin fixtures. Native terrain checks now prove
+exact routed membership, not just equal area. Focused source/M1 tests: 68 passed;
+source/terrain/initial M3 composition/rainfall tests: 49 passed. Full sweep is in
+progress. Source-promotion cleanup and artifact races are under final security
+review; authoritative Ron/Watershed binding and production M3 remain unfinished.
+See [continuation review](artifacts/20260914_generic_implementation_review.md).
 
 Recorded-depth derivation and snapshot extraction initially passed 49 soil tests.
 Independent review found clean-WAL sidecar creation, nonfinite JSON handling and

@@ -28,6 +28,15 @@ production deployment is authorized by this package.
   derive original keys and THICK extent per project; named runs are tests only.
 - [ ] Implement reusable source preparation and prove the same path on at least
   two independent basins, without hand-authored per-basin manifests.
+- [x] (2026-09-14) Commit generic preparation contract checkpoint `7328a0004`.
+- [x] (2026-09-14) Implement local basin-derived keys/native-window preparation
+  and test two distinct basin grids; no network execution or production wiring.
+- [x] (2026-09-14) Prove native M3 relief and exact routed basin membership;
+  independent correctness review closes the equal-area/wrong-mask finding.
+- [x] (2026-09-14) Close bounded source-promotion security and M3 composition/
+  reader reviews; twelve analytical M3 cases pass independently.
+- [ ] Complete authoritative project binding and production integration;
+  approved local helpers do not establish production readiness.
 - [x] (2026-09-14 16:40 UTC) Scaffolded scope, accepted support/isolation, research,
   frozen source audit, soil regression plan and draft checkpoint.
 - [x] (2026-09-14) Audit development sources and ratify soil/prepared-delivery/schema contracts; live missing-source acceptance remains due.
@@ -64,6 +73,13 @@ production deployment is authorized by this package.
 ## Surprises & Discoveries
 
 
+Native upstream area equality alone accepted a same-sized wrong basin mask.
+The terrain helper now also runs owned WBT Watershed and compares exact cells
+before declaring terrain valid. Review also reproduced receipt/hash races,
+out-of-project pathname rename, and a NoDb callback failure after file commit.
+Corrections use same-byte parsing, bracketed identities, descriptor-relative
+rename and explicit existing locks without an unrelated NoDb save afterward.
+
 The initial delivery proposal described one development run's 34 cached keys
 and extent as a one-time preparation. The owner clarified that generic basin
 support is required. Those inventory observations must not become runtime
@@ -90,6 +106,19 @@ scientific proposals, not prerequisites for making this development basin pass.
 
 ## Decision Log
 
+
+Decision (2026-09-14): source-manifest rename is the file-only commit point;
+expected postcommit lock/descriptor cleanup errors return explicit committed
+warnings. Rationale: a NoDb save/notification is unrelated to this file mutation
+and must not report successful activation as failure or trigger unlocked rollback.
+The canonical runtime contract records these semantics under basin-independent
+preparation. Production binding to authoritative Ron/Watershed remains required.
+
+Decision (2026-09-14): add fixed native membership, aligned SBS and authoritative
+domain artifacts to the unreleased M3 predictor inventory (twelve paths). Both
+independent reviewers approve. Reproduced wrong-domain and asserted-F acceptance
+showed hashes/counts alone were insufficient for archive replay; no arbitrary
+provenance-directed reads or changes to released M1/v1 artifacts are introduced.
 
 Decision: source preparation derives original in-basin keys and DEM extent
 from the selected project and produces the same local evidence/manifest contract
@@ -137,6 +166,14 @@ acquisition remain pending; the earlier conservative recommendation is rejected.
 
 ## Outcomes & Retrospective
 
+
+Current increment: local native terrain and two-basin source preparation exist.
+Focused source/M1 regression gate passed 68 tests; combined source, terrain,
+initial M3 composition and rainfall gate passed 49 tests. The two initial M3
+composition cases demonstrate F/S shrinking with missing SBS while T retains
+the full basin. This is not completed artifact-reader/security/live acceptance.
+A new full Python sweep is running; the prior 8,498-pass sweep applies only to
+the earlier isolated checkpoint. No live source acquisition has been performed.
 
 Milestone 1 is complete at checkpoint `89d673c38`. Milestone 2 implementation is
 in progress: recorded-depth derivation, bounded snapshots and prepared-local
@@ -395,3 +432,5 @@ Implementation revision: record checkpoint `89d673c38`, isolated soil/M1 helpers
 real SQLite review corrections and remaining production/live acceptance work.
 Scope clarification: require reusable basin-derived source preparation and
 multi-basin acceptance after the owner rejected a named-basin-only framing.
+Implementation continuation: record generic checkpoint, local cross-basin and
+native routing evidence, promotion race corrections, and remaining wiring gates.

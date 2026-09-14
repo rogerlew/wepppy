@@ -6,7 +6,9 @@ RQ execution and minimal UI are implemented under the
 and reports/dashboard remain deferred. The 2026-09-14
 [production M3/shared-support amendment](docs/production_m3.md) records accepted
 analysis support and protection of existing SSURGO/STATSGO soil building;
-soil-rule and source-delivery details remain pending the implementation checkpoint.
+recorded-depth rules and generic prepared-local source delivery are ratified in
+the [runtime contract](docs/production_m3_runtime.md). Local source preparation
+and native M3 composition are under review; production wiring remains pending.
 
 Track delivery stages, evidence, and unresolved decisions in the living
 [implementation roadmap](implementation_roadmap.md). Update this specification

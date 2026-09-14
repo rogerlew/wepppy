@@ -44,6 +44,14 @@ manifest. Reuse references remain project-contained; negative tests must reject
 promotion of another basin's keys/grid/source identity. Generic preparation
 implementation is authorized; live network execution remains separately gated.
 
+Promotion changes no NoDb state: use the existing mutation gate and explicit
+module lock, recheck both ownerships immediately before a descriptor-relative
+atomic rename, and do not invoke the state-save/notification callback afterward.
+The rename is the commit point. Precommit failure preserves the prior manifest;
+an expected lock-release error after commit returns a committed outcome with an
+explicit logged cleanup warning, not a false failure or an unlocked rollback.
+This avoids treating unrelated persistence/notification failure as source failure.
+
 Acceptance must exercise the same preparation and execution path on at least
 two independent basins with different keys and extents, covering primary,
 fallback and missing-source behavior. A passing named-basin case alone is
@@ -202,7 +210,17 @@ an arbitrary label is insufficient provenance.
 Fixed version-2 predictor artifact inventories are M1: `valid_mask.tif`,
 `wbt/intersection.tif`, `wbt/slope.tif`, `wbt/support.tif`, `wbt/summary.json`;
 M3: `valid_mask.tif`, `wbt/relief.tif`, `wbt/area.tif`, `wbt/coverage.tif`,
-`wbt/summary.json`, `soil/thickness_cm.tif`, `soil/source.tif`, `soil/manifest.json`.
+`wbt/summary.json`, `soil/thickness_cm.tif`, `soil/source.tif`, `soil/manifest.json`,
+`terrain/manifest.json`, `terrain/wbt/watershed.tif`, `prepared/sbs.tif`,
+`prepared/domain.tif`.
+Readers require exact equality with the prepared authoritative domain even
+when T is unavailable; terrain validity must not weaken F/S domain identity.
+The terrain artifacts bind the owned native routing membership
+proof. Exact domain equality is required for available T: equal upstream area
+alone admits a different same-sized basin (reproduced during implementation
+review). These are fixed module paths, not arbitrary source dereferences.
+Readers must recompute and compare exact common support and F from the aligned
+normalized SBS map rather than trusting asserted point values/source hashes.
 M3 wbt/summary.json records tool/version/hash, grid, outlet row/column,
 full_upstream_cells, area_m2, relief_m, terrain_valid and reason; point
 T = relief_m / sqrt(area_m2) only for valid full terrain. The module writes
@@ -295,5 +313,8 @@ and `bounds`; the native raster's declared units must be absent or inches,
 never meters. Metadata parsing and hashing consume the same bounded bytes.
 
 Local M1 adds opt-in `support_policy='common_valid_v1'`; default v1 is unchanged.
-The v2 reader currently admits M1 only. Production orchestration still uses v1;
-M3 terrain, results, publication/freshness and live acceptance are not complete.
+Local M3 composition now invokes owned terrain tools, verifies exact routed
+membership and retains aligned SBS plus soil maps. The v2 reader admits M1/M3
+and recomputes common support and M3 F/S from retained maps. This increment is
+under review; production orchestration still uses v1. Authoritative basin-bound
+source activation, results, publication/freshness and live acceptance remain open.
