@@ -12,6 +12,10 @@ Reports and interactive dashboard are deferred. Canonical UI contract:
 
 ## Authority and acceptance boundary
 
+The [2026-09-14 scientific integration amendment](production_m3.md) accepts common
+valid support for both models and protects upstream soil building. Implementation
+is pending; existing numerical behavior described below remains the v1 baseline.
+
 The implemented [M1/M3 selection](model_selection.md) amendment records
 model-specific UI, task dispatch and prerequisites after checkpoint aa30e637e.
 M1 has no independent built WEPP Soils requirement; M3 uses that inventory and

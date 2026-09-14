@@ -3,7 +3,10 @@
 Status: updated 2026-09-11. Production M1 NoDb, upload, prerequisite/freshness,
 RQ execution and minimal UI are implemented under the
 [production contract](docs/production_m1.md). Development validation passed; deployment to other hosts is not implied. M3 production integration
-and reports/dashboard remain deferred.
+and reports/dashboard remain deferred. The 2026-09-14
+[production M3/shared-support amendment](docs/production_m3.md) records accepted
+analysis support and protection of existing SSURGO/STATSGO soil building;
+soil-rule and source-delivery details remain pending the implementation checkpoint.
 
 Track delivery stages, evidence, and unresolved decisions in the living
 [implementation roadmap](implementation_roadmap.md). Update this specification
@@ -224,7 +227,9 @@ EPIC is not automatically enabled for Staley by its availability in RUSLE.
   STATSGO Kf extraction or WEPP Ki/Kr substitution.
 - Record source mode, depth treatment, fragment adjustment, units, gap filling,
   and artifact identity. The verified Nomograph scale maps to S with multiplier 1
-  (ADR-0059); full finite [0,1] K support and provenance are required for point S.
+  (ADR-0059); full finite [0,1] K support and provenance are required by the
+  implemented v1 point S. New production aggregation uses the common support
+  accepted in ADR-0066; numerical implementation is pending.
   Partial K mean remains diagnostic, with no additional gap filling. Named K
   readiness is independent of unrelated RUSLE factors and has no independent
   completed WEPP Soils prerequisite. See [local contract](docs/m1_predictors.md).
@@ -320,9 +325,11 @@ not a calibration reference. Exact 2017 tooling and predictive impact remain
 unconfirmed.
 Existing D8 flow-vector slope and WBT's projected Florinsky 5×5 Slope are
 separate algorithms, not approved substitutes by their availability alone.
-The owner accepted preserving incomplete-intersection uncertainty: report
-coverage and full-watershed T bounds; publish point T only when no intersection
-cells remain unknown. Do not replace it with an observed-support estimate.
+The raw tool retains coverage, full-watershed T bounds and no point T when
+intersection cells remain unknown. New production composition will aggregate
+over the accepted common valid support (ADR-0066 and
+[production M3/shared support](docs/production_m3.md)); it must preserve these
+raw diagnostics. That numerical amendment is not yet implemented.
 The additive StaleySlopeSbs backend and both bindings are implemented and
 validated locally; production M1 preparation/publication is implemented under
 the [production contract](docs/production_m1.md).
@@ -450,7 +457,9 @@ intersection alone is insufficient. Partial coverage is accepted and reported.
 For catchments with some valid dNBR, F is the area-weighted target-cell mean
 over observed support, with observed area/fraction reported against the full
 catchment. This is a partial-coverage estimate of the publication's full-area
-predictor. Do not shrink the SBS or soil aggregation domains to the dNBR footprint.
+predictor in the existing local normalizer. New production M1 uses the common
+slope/SBS/dNBR/K support accepted in ADR-0066; upload summaries still describe
+the uploaded map's own coverage. Do not confuse upload support with model support.
 Catchments without valid dNBR have unavailable M1 results, not zero probability
 and not an implicit M3 result. A catchment-level gap must not discard other
 catchments that can be assessed.

@@ -5,6 +5,12 @@ approves SSURGO primary and original STATSGO THICK fallback for production
 direction; the existing offline helper does not implement that fallback.
 ADR-0053 records both decisions and the remaining implementation details.
 
+Production follow-up: [M3/shared support](production_m3.md) and the
+[NRCS reassessment](ssurgo_validity_assessment.md#production-research-2026-09-14).
+The owner accepted common valid spatial support and preservation of existing
+soil builders. Production material/component rules remain pending; preserve this
+version-1 helper's defaults and archived numerical semantics.
+
 ## Original reference
 
 The [1995 archive metadata and embedded SAS](https://www.sciencebase.gov/catalog/item/631405c5d34e36012efa3187)

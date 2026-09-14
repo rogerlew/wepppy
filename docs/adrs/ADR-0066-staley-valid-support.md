@@ -47,3 +47,20 @@ coverage cutoff is introduced by this decision. Keep accepted versions and
 attempts observable; rollback changes future execution policy, never deletes or
 rewrites prior scientific results. Exact M3 support/geometry treatment remains
 part of the scientific integration checkpoint.
+
+## Analysis-support ratification (2026-09-14)
+
+The owner accepted one common spatial support per model: M1 uses determined
+slope/SBS intersection plus valid normalized dNBR and K; M3 uses valid SBS and
+usable thickness after the approved source-priority process. Include valid
+unburned cells. M3 ruggedness retains full contributing-basin relief and area;
+masking observations does not redefine basin geometry. Study-area warnings keep
+full watershed area. This prevents predictor averages describing different
+observed portions of the basin without fabricating terrain changes.
+
+Venue: owner/Codex conversation, America/Los_Angeles, 2026-09-14; exact clock
+time not recorded. Decision owner: repository owner; recorder: Codex.
+The [production integration contract](../../wepppy/nodb/mods/postfire_debris_flow/docs/production_m3.md)
+records the accepted support and soil-builder noninterference requirement.
+Soil material/component/fallback details and exact output schema remain subject
+to their checkpoint; numerical implementation remains pending.

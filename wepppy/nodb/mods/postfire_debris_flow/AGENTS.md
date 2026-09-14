@@ -4,6 +4,8 @@
 - Track delivery and loose ends in [implementation_roadmap.md](implementation_roadmap.md).
   Update the roadmap, specification, and affected detailed contracts together
   as implementation progresses; roadmap proposals are not accepted contracts.
+- Next scientific contract: [M3/shared support](docs/production_m3.md). M3 must
+  consume raw soil records without changing SSURGO/STATSGO building behavior.
 - Status: scientific backends and production M1 NoDb/UI/RQ are implemented;
   M3 production and reports/dashboard remain pending.
 - Preserve accepted decisions and explicitly label proposals and unresolved inputs.
@@ -23,7 +25,8 @@
   [WBT package](../../../../docs/work-packages/20260908_staley_slope_sbs/package.md)
   contains validation/reviews for StaleySlopeSbs and both bindings. Raw DEM and
   strict nine-valid-cell edges are recorded in ADR-0058; production M1 preparation and orchestration are implemented below. Unresolved intersection support retains
-  bounds and unavailable point T (accepted in ADR-0058).
+  bounds and unavailable point T in raw outputs (ADR-0058); ADR-0066 amends new
+  production aggregation to common valid support, not yet implemented.
 - Read [historical slope evidence](docs/historical_slope_evidence.md) before
   parity work: legacy ArcGIS surface slope and modern pfdf directional slope
   differ. Current pfdf is not the scientific oracle for M1 T; preserve the

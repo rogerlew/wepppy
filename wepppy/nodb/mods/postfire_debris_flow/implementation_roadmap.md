@@ -1,6 +1,6 @@
 # Postfire Debris Flow Implementation Roadmap
 
-Status: updated 2026-09-11. Production M1 NoDb, browser upload and RQ execution
+Status: updated 2026-09-14. Production M1 NoDb, browser upload and RQ execution
 are implemented. M1/M3 UI and request wiring are implemented; M3 scientific
 composition, valid-support calculations and the dashboard remain pending.
 
@@ -51,8 +51,12 @@ exact scientific integration remain explicit. Evidence is tracked in the
 Validation passed: full Python 8,468/103 skipped, frontend 872, independent
 reviews and live selection/task/reload/preflight checks. The M3 task reports
 `integration_pending`; full M3 execution is not complete.
-Next: ratify analysis support and compose M3 soil/terrain plus the accepted
-valid-support scalar/mask policy. Reports remain stage 7.
+Next: execute the scaffolded [M3 scientific integration package](../../../../docs/work-packages/20260914_staley_m3_integration/package.md).
+Common analysis support was accepted on 2026-09-14; ratify soil material,
+component, fallback and source-delivery details before composing M3 and both
+models' coverage masks. The [production amendment](docs/production_m3.md)
+requires read-only consumption and nonregression of existing SSURGO/STATSGO
+soil building. Reports remain stage 7.
 
 ### Completed local predictor increment
 
@@ -146,6 +150,13 @@ scientific limitation that implementation cannot resolve.
 | L14 | Control/feature registration, payloads, job graph, dashboard host, accessibility, and empty/partial/legacy/hostile states. | Relevant stages 5–7 implementation | [Planned organization](specification.md#planned-file-organization) and shared UI/RQ contracts; M1 runtime contracts and control are implemented; dashboard/accessibility work remains stage 7 scope. |
 
 ## Progress Log
+
+- 2026-09-14: scaffolded production M3/shared-support package and active ExecPlan.
+  Recorded owner approval of common M1/M3 support with full-basin M3 ruggedness.
+  Reviewed manuscript and NRCS documentation; legitimate paired horizons and
+  above-100 component totals need explicit production policy. Soil-builder
+  preservation includes source-write checks and generated WEPP input parity.
+  No runtime implementation, source acquisition or soil rebuild performed.
 
 - 2026-09-11: Predictor TIFF verification now uses the operator-selected 96 MiB
   cap through final recheck, independently of rainfall's 64 MiB limit. See

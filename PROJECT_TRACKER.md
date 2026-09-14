@@ -1,11 +1,15 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-09-11
-**Active Packages**: 36
+**Last Updated**: 2026-09-14
+**Active Packages**: 37
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
+
+Scaffolded: [Staley M3 scientific integration](docs/work-packages/20260914_staley_m3_integration/package.md)
+— complete M3, common valid-support estimates for both models, and explicit
+SSURGO/STATSGO soil-builder nonregression evidence; soil checkpoint next.
 
 Contract preparation: [Modify Landuse MOFE](docs/work-packages/20260911_modify_landuse_mofe/package.md)
 — regenerate selected-hillslope managements and summaries; implementation awaits contract checkpoint.

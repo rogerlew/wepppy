@@ -165,17 +165,20 @@ output. No feature-registry dependency redesign is part of this increment.
 
 ## Coverage integration details
 
-The next numerical milestone must use one declared analysis support and publish
-its exact mask, numerator/denominator counts and grid. Proposed M1 support is
+Owner accepted common analysis support on 2026-09-14. The next numerical
+milestone must use one declared support and publish
+its exact mask, numerator/denominator counts and grid. Accepted M1 support is
 in-watershed cells with determined slope/SBS intersection, valid normalized
 dNBR and valid K; all three predictors aggregate over that same support. This
 preserves the owned tool's Horn and three-state diagnostics while replacing the
 production all-or-nothing point estimate. Retain the original watershed area
-for applicability warnings. M3 needs a separate support definition for SBS and
+for applicability warnings. M3 support intersects valid SBS and usable
 thickness; its basin-scale relief is not a local surface roughness raster.
 Do not silently substitute masked pixel count into the accepted full-upstream
-ruggedness formula. Ratify that exact aggregation contract at the scientific
-integration checkpoint.
+ruggedness formula. Full-basin ruggedness is accepted; soil rules and exact
+schemas still require the scientific integration checkpoint. See
+[production M3 and shared support](production_m3.md) for this amendment and
+the protected SSURGO/STATSGO soil-builder boundary. Implementation is pending.
 
 Planned coverage output is `valid_mask.tif`, aligned to the project grid, UInt8:
 1 used, 0 excluded inside the watershed, 255 NoData outside. `coverage` metadata

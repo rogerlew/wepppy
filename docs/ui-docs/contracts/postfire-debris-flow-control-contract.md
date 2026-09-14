@@ -15,6 +15,11 @@ Selectors remain disabled until saved model/rainfall state loads, so an early
 click cannot persist template defaults. The selector does not establish completed
 M3 probability calculations.
 
+The [scientific integration amendment](../../../wepppy/nodb/mods/postfire_debris_flow/docs/production_m3.md)
+will supply common-support coverage/counts and the exact mask through existing
+summary and download patterns. It is scaffolded, not runtime-complete; no
+additional selector, report or dashboard is introduced.
+
 One existing Pure UI control named **Post-fire debris flow**, following project
 control typography, spacing, form helpers and status patterns. No new dashboard,
 wizard, card grid or tabs. Use the accepted M1/M3 radio selector and header
