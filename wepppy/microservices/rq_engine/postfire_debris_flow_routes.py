@@ -320,7 +320,7 @@ async def run(runid:str,config:str,request:Request):
 __all__=['router']
 
 
-@router.get(PREFIX+'/files/{attempt_id}/{name}', summary='Download an accepted M1 file',
+@router.get(PREFIX+'/files/{attempt_id}/{name}', summary='Download an accepted model file',
     description='Requires Bearer rq:export and authorized run access. See the production M1 contract.',
     tags=['rq-engine','runs'], operation_id=rq_operation_id('postfire_download'),
     responses=agent_route_responses(success_code=200, success_description='Operation succeeded.',
@@ -329,10 +329,10 @@ async def download(runid:str,config:str,attempt_id:str,name:str,request:Request)
     handle=None
     try:
         wd=context(request,runid,config,export=True)
-        if name not in p.FILES:raise p.WorkflowError('missing_file','Model file not found.',404)
         root=p.directory(wd,attempt_id)
         accepted=p.state_at(wd)['last_successful_run']
         if not accepted or accepted['id']!=attempt_id:raise p.WorkflowError('missing_file','Model file not found.',404)
+        if name not in p.result_files(accepted):raise p.WorkflowError('missing_file','Model file not found.',404)
         path=p.safe(wd,root/'results'/name,exists=False)
         if not path.is_file():raise p.WorkflowError('changed_file','Model files changed. Run the model again.',409)
         expected=accepted['artifacts'].get(str(path.relative_to(Path(wd))))

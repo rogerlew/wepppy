@@ -222,7 +222,7 @@ def prepare_local_sources(wd, dem, mask, *, collection_catalog=None, thick=None,
     return output/'receipt.json'
 
 
-def promote_local_sources(controller, receipt_path, *, expected_sha256):
+def promote_local_sources(controller, receipt_path, *, expected_sha256, verify_project=None):
     """Verify outside the lock, then atomically install under the module lock."""
     root = Path(controller.wd).absolute()
     receipt_path = _inside(root, receipt_path)
@@ -272,6 +272,8 @@ def promote_local_sources(controller, receipt_path, *, expected_sha256):
     staged_state = dependency_state([staged])
     def install():
         nonlocal committed
+        if verify_project is not None:
+            verify_project()
         if dependency_state(state) != state or dependency_state(artifact_state) != artifact_state or dependency_state(staged_state) != staged_state:
             io.fail('source_changed', 'Source preparation changed before locked promotion')
         if cache_identity is not None and source_state(cache) != cache_identity['source_state']:

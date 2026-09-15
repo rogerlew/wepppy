@@ -43,6 +43,22 @@ describe('PostfireDebrisFlow', () => {
         await instance.refresh();
         expect(window.WCHttp.requestWithSessionToken).toHaveBeenCalledWith(expect.stringContaining('/state'),expect.any(Object));
     });
+    test.each([0, 9999999, 10000000])('accepted coverage preserves exact counts and mask link (%s cells)', (valid) => {
+        instance.render({required:[],frequency_source:'cli',results:{model:'M3',current:true,
+            completed_at:'2026-09-14T00:00:00Z',coverage:{total_cells:10000000,valid_cells:valid,valid_fraction:valid/10000000},
+            files:[{name:'valid_mask.tif',url:'/accepted-mask'}]}});
+        const summary = document.querySelector('[data-pfdf-files]').textContent;
+        expect(summary).toContain('Valid coverage');
+        expect(summary).toContain(valid + ' of 10000000 cells');
+        if (valid < 10000000) { expect(summary).not.toContain('100.0000%'); }
+        expect(document.querySelector('[data-pfdf-download="valid_mask.tif"]').getAttribute('href')).toBe('/accepted-mask');
+        expect(summary).toContain('Estimates represent the area with usable inputs.');
+    });
+    test('legacy accepted results explicitly lack recorded coverage', () => {
+        instance.render({required:[],frequency_source:'cli',results:{current:false,completed_at:'2026-09-14T00:00:00Z',files:[]}});
+        expect(document.querySelector('[data-pfdf-files]').textContent).toContain('Not recorded for this result');
+        expect(document.querySelector('[data-pfdf-download="valid_mask.tif"]')).toBeNull();
+    });
     test('state-fetch failure disables cached readiness and empty upload', async () => {
         const ready={eligible:true,readonly:false,required:[{key:'dnbr',ready:true}],noaa_available:false,frequency_source:'cli',upload_ready:true,run_ready:true};
         window.WCHttp.requestWithSessionToken.mockResolvedValue({body:{result:ready}});

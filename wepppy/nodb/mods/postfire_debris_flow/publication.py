@@ -14,7 +14,7 @@ __all__ = ['publish_outputs']
 
 def publish_outputs(wd):
     """Publish the latest accepted bundle; also repairs older completed projects."""
-    from .production import FILES, WorkflowError, digest, directory, safe, signature
+    from .production import result_files, WorkflowError, digest, directory, safe, signature
 
     controller = PostfireDebrisFlow.tryGetInstance(str(wd))
     if controller is None:
@@ -32,7 +32,7 @@ def publish_outputs(wd):
             root = safe(wd, Path(wd)/'postfire_debris_flow', exists=False)
             source = directory(wd, accepted['id'])/'results'
             files = []
-            for name in FILES:  # The canonical inventory places manifest.json last.
+            for name in result_files(accepted):  # Manifest is installed last.
                 src = safe(wd, source/name)
                 dst = safe(wd, root/name, exists=False)
                 if dst.exists() and not dst.is_file():

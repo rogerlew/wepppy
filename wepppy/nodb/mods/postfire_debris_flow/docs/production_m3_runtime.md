@@ -1,6 +1,12 @@
 # Production scientific integration runtime contract
 
-Status: intended behavior approved for execution 2026-09-14; conformance pending.
+Status: approved and implemented 2026-09-14; local production wiring reviewed.
+Live development RQ/browser/archive conformance remains pending.
+
+Production activation binds prepared receipts to current Ron/Watershed DEM,
+mask, derived grid and original keys. Both model finalizers recheck eligibility,
+read-only status, prerequisites and source identity before and inside locked
+acceptance. Source identity alone cannot detect removal of module authority.
 This specifies the runtime details of [production M3](production_m3.md),
 ADR-0066 common support and accepted ADR-0067 recorded-depth policy. It amends
 production M1 aggregation and shared rainfall/publication behavior for new

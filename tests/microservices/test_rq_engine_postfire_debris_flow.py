@@ -76,6 +76,20 @@ def test_download_deleted_file_is_conflict(client,tmp_path,monkeypatch):
     assert client.get(f'/runs/test/config/postfire-debris-flow/files/{identity}/events.parquet').status_code==409
 
 
+def test_mask_download_requires_accepted_inventory(client,tmp_path,monkeypatch):
+    identity = 'a'*32
+    root = p.directory(tmp_path,identity)/'results'; root.mkdir(parents=True)
+    path = root/'valid_mask.tif'; path.write_bytes(b'exact accepted mask')
+    accepted = {'id':identity,'artifacts':{}}
+    monkeypatch.setattr(p,'state_at',lambda wd:{'last_successful_run':accepted})
+    url = f'/runs/test/config/postfire-debris-flow/files/{identity}/valid_mask.tif'
+    assert client.get(url).status_code == 404
+    accepted['artifacts'][str(path.relative_to(tmp_path))] = p.signature(tmp_path,path,strong=True)
+    assert client.get(url).content == b'exact accepted mask'
+    path.write_bytes(b'changed mask')
+    assert client.get(url).status_code == 409
+
+
 @pytest.mark.parametrize('fail_at',[0,1])
 def test_download_disconnect_closes_real_handle(tmp_path,fail_at):
     path=tmp_path/'result';path.write_bytes(b'x'*70000)

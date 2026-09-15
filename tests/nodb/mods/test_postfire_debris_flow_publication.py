@@ -55,6 +55,26 @@ def test_completion_hook_publishes_partial_replaces_and_keeps_originals(accepted
     assert not list(output.glob('.publish-*'))
 
 
+def test_mask_is_published_only_when_recorded_and_before_manifest(accepted_project,monkeypatch):
+    controller,accept,output = accepted_project
+    root = accept('a'*32)
+    path = root/'valid_mask.tif'; path.write_bytes(b'exact mask')
+    publication.publish_outputs(controller.wd)
+    assert not (output/'valid_mask.tif').exists()
+    order = []
+    replace = publication.os.replace
+    def record(src,dst):
+        if Path(dst).parent == output: order.append(Path(dst).name)
+        replace(src,dst)
+    monkeypatch.setattr(publication.os,'replace',record)
+    def add(state):
+        state['last_successful_run']['artifacts'][str(path.relative_to(Path(controller.wd)))] = p.signature(controller.wd,path,strong=True)
+    controller.change(add)
+    publication.publish_outputs(controller.wd)
+    assert (output/'valid_mask.tif').read_bytes() == b'exact mask'
+    assert order[-2:] == ['valid_mask.tif','manifest.json']
+
+
 @pytest.mark.parametrize('damage', ['source', 'source_symlink', 'destination_symlink', 'destination_directory'])
 def test_bad_last_file_preserves_all_visible_outputs(accepted_project, damage):
     controller, accept, output = accepted_project

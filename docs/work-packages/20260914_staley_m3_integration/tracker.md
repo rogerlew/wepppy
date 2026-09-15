@@ -15,7 +15,9 @@ Last updated: 2026-09-14.
 - [ ] Finish reviewed offline recovery, authoritative activation and live use.
 - [x] Shared M1/M3 result dispatch and mask replay: independent reviews close
   legacy-model and lineage reconstruction findings; 81 focused tests pass.
-- [ ] Validate production M3/M1-v2 wiring, freshness, publication and UI.
+- [x] Validate production M3/M1-v2 wiring, freshness, publication and UI locally:
+  independent correctness/security reviews close; 59 runtime/production and
+  22 controller tests pass. Live acceptance remains separate.
 - [x] Record accepted common support and soil-builder isolation.
 - [x] Review retained paper, current soil code and NRCS documentation.
 - [x] Audit frozen three-site component totals and repeated depth intervals.
@@ -34,6 +36,10 @@ Last updated: 2026-09-14.
 - [ ] Synchronize durable docs and archive the completed plan.
 
 ## Decisions
+
+- **2026-09-14 — Finalization authority:** check eligibility, read-only status,
+  prerequisites and source identity before and inside locked result acceptance.
+  Independent reproduction demonstrated source identity alone was insufficient.
 
 - **2026-09-14 — Acquisition authorized:** owner approved the recorded bounded
   source-delivery proposal. Earlier unapproved/gated statements describe prior

@@ -31,6 +31,10 @@ def test_absent_read_does_not_create_nodb(tmp_path):
     assert not (tmp_path/PostfireDebrisFlow.filename).exists()
 
 
+def test_scientific_engine_identity_covers_shared_soil_derivation():
+    assert 'soil_thickness.py' in p.engine_identity()
+
+
 def test_real_nodb_roundtrip(tmp_path,monkeypatch):
     monkeypatch.setattr(preflight,'notify',lambda wd:None)
     obj=PostfireDebrisFlow(str(tmp_path),'disturbed9002_wbt.cfg')
@@ -228,7 +232,7 @@ def test_upload_rejects_mutation_and_preserves_accepted(tmp_path,monkeypatch,pre
 def test_reuse_ignores_unrecorded_external_symlink(tmp_path,monkeypatch):
     import json
     identity='a'*32;previous=p.directory(tmp_path,identity)/'predictors';previous.mkdir(parents=True)
-    manifest={'tool':{'sha256':'tool'},'sources_sha256':{}}
+    manifest={'schema_version':2,'support_policy':'common_valid_v1','tool':{'sha256':'tool'},'sources_sha256':{}}
     (previous/'manifest.json').write_text(json.dumps(manifest));(previous/'good').write_text('verified')
     records={str(path.relative_to(tmp_path)):p.signature(tmp_path,path,strong=True) for path in previous.iterdir()}
     outside=tmp_path/'outside';outside.mkdir();(outside/'private').write_text('must not copy')
@@ -447,6 +451,7 @@ def test_model_source_dependencies_are_separate(owner_project):
     with ron.locked():
         ron._cellsize = 10
         ron._dem_db = 'ned13/2022'
+    (wd/'dem/wbt/flovec.tif').write_bytes(b'pointer inventory fixture')
     m1 = p.sources(wd)[4]
     prep[str(TaskEnum.build_soils)] = 200
     assert p.sources(wd)[4] == m1
@@ -472,18 +477,25 @@ def test_m3_task_retains_failure_and_preserves_previous_result(tmp_path, monkeyp
                'created_at': p.now(), 'retryable': False, 'job_id': 'test-job'}
     controller.change(lambda state: state.update(run_attempt=attempt, model='M1', frequency_source='noaa'))
     monkeypatch.setattr(p, 'mutable', lambda wd: controller)
-    monkeypatch.setattr(p, 'sources', lambda wd, **kw: (True, False, {'watershed':True,'soils':True,'sbs':True,'climate':True,'noaa':False}, {}, {}))
+    paths = {key:tmp_path/(key+'.tif' if key != 'outlet' else 'outlet.json') for key in ('dem','pointer','mask','outlet','sbs')}
+    for path in paths.values(): path.write_bytes(b'controlled worker failure boundary')
+    monkeypatch.setattr(p, 'sources', lambda wd, **kw: (True, False, {'watershed':True,'soils':True,'sbs':True,'climate':True,'noaa':False}, paths, {}))
+    from wepppy.nodb.mods.postfire_debris_flow import m3_integration
+    from wepppy.nodb.mods.postfire_debris_flow.rainfall_io import RainfallError
+    def fail_native(*args,**kwargs):
+        raise RainfallError('tool_failed','Native terrain failed')
+    monkeypatch.setattr(m3_integration,'build_m3_predictors',fail_native)
     monkeypatch.setattr(worker, 'get_wd', lambda runid: str(tmp_path))
     monkeypatch.setattr(worker, 'get_current_job', lambda: None)
-    with pytest.raises(RuntimeError, match='integration_pending'):
+    with pytest.raises(RuntimeError, match='tool_failed'):
         worker.run_m3_rq('test', attempt['id'])
     state = PostfireDebrisFlow.load_detached(str(tmp_path)).state
     assert state['run_attempt']['phase'] == 'failed'
-    assert state['run_attempt']['error']['code'] == 'integration_pending'
+    assert state['run_attempt']['error']['code'] == 'tool_failed'
     assert state['model'] == 'M1' and state['frequency_source'] == 'noaa'
     assert state['last_successful_run'] is None
     root = p.directory(tmp_path, attempt['id'])
-    assert 'integration is not implemented' in (root/'error.log').read_text()
+    assert 'Native terrain failed' in (root/'error.log').read_text()
     assert json.loads((root/'status.json').read_text())['attempt']['phase'] == 'failed'
 
 

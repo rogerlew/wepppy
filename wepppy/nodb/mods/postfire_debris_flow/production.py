@@ -21,12 +21,19 @@ from .encoding import inspect_encoding
 from .integration import M1Inputs, build_m1_predictors
 from .m1_inputs import digest, read_raster, prepare, read_json, companions
 from .postfire_debris_flow import PostfireDebrisFlow, empty_state
-from .results import RainfallInputs, build_m1_results
+from .results import RainfallInputs, build_m1_results, build_results
 
-__all__ = ['WorkflowError', 'get_state', 'execute_upload', 'execute_model']
+__all__ = ['WorkflowError', 'get_state', 'execute_upload', 'execute_model', 'execute_m3', 'result_files']
 ACTIVE = {'staged', 'queued', 'running', 'enqueue_unknown'}
 ID = re.compile(r'[0-9a-f]{32}\Z')
 FILES = ('events.parquet', 'design.parquet', 'inverse.parquet', 'manifest.json')
+
+
+def result_files(accepted):
+    mask = f'postfire_debris_flow/attempts/{accepted["id"]}/results/valid_mask.tif'
+    return (*FILES[:-1],'valid_mask.tif',FILES[-1]) if mask in accepted.get('artifacts',{}) else FILES
+
+
 LABELS = {'watershed': ('Delineate watershed', '#subcatchments-delineation'),
           'soils': ('Build soils', '#soils'), 'sbs': ('Set soil burn severity', '#disturbed-sbs'),
           'k': ('Prepare in RUSLE', '#rusle'), 'climate': ('Build climate', '#climate'),
@@ -186,6 +193,10 @@ def sources(wd, *, rainfall=True, frequency='cli', model='M1'):
         climate = Climate.tryGetInstance(str(wd))
         disturbed = Disturbed.tryGetInstance(str(wd))
         if model == 'M3':
+            from .production_soils import inventory as soil_inventory
+            selections['soil_inputs'] = soil_inventory(wd)
+            files['pointer'] = Path(watershed.wbt_wd)/'flovec.tif'
+            checks['watershed'] = checks['watershed'] and files['pointer'].is_file()
             inventory = getattr(soils, 'soils', {}) or {}
             soil_paths = [Path(soils.soils_dir)/str(summary.fname) for summary in inventory.values()] if soils else []
             checks['soils'] = bool(after('soils','abstract') and (after('soils','landuse') or after('soils','rangeland')) and soils and soils.has_soils and soil_paths and all(p.is_file() for p in soil_paths))
@@ -227,7 +238,9 @@ def sources(wd, *, rainfall=True, frequency='cli', model='M1'):
         mode = getattr(climate, 'climate_mode', None)
         selections.update(climate_mode=getattr(mode, 'name', str(mode)), cli_fn=getattr(climate, 'cli_fn', None))
     # External masks affect decoded project support; inert statistics do not.
-    for key in ('dem', 'mask'):
+    for key in ('dem', 'mask', 'pointer', 'sbs'):
+        if key not in files:
+            continue
         companion = Path(str(files[key]) + '.msk')
         if companion.exists() or companion.is_symlink():
             files[key + '_mask'] = safe(wd, companion)
@@ -240,6 +253,12 @@ def artifacts_current(wd, record, *, strong=True):
         return bool(record.get('artifacts')) and all(signature(wd, Path(wd)/rel,strong=strong and len(sig)==5)==(sig if strong else sig[:4]) for rel,sig in record['artifacts'].items())
     except (OSError, WorkflowError):
         return False
+
+
+def _current_authority(wd, frequency, model, snapshot):
+    eligible,readonly,checks,_,current = sources(wd,frequency=frequency,model=model)
+    return eligible and not readonly and current == snapshot and all(
+        value for key,value in checks.items() if key != 'noaa' or frequency == 'noaa')
 
 
 def reconcile_attempts(wd, state, connection, *, persist=False):
@@ -325,6 +344,7 @@ def get_state(wd, config, *, frequency=None, model=None, reconcile=True):
     result = deepcopy(state['last_successful_run'])
     current = False
     if result:
+        names = result_files(result)
         result_model = result.get('model', 'M1')
         result_frequency = result['snapshot']['frequency']
         result_snapshot = snapshot if (result_model == model and result_frequency == state['frequency_source']) else sources(wd, frequency=result_frequency, model=result_model)[4]
@@ -336,7 +356,7 @@ def get_state(wd, config, *, frequency=None, model=None, reconcile=True):
         result.pop('artifacts', None)
         result.pop('predictor_artifacts', None)
         result['current'] = current
-        result['files'] = [{'name': name, 'url': f'/rq-engine/api/runs/{runid}/{config}/postfire-debris-flow/files/{result["id"]}/{name}'} for name in FILES]
+        result['files'] = [{'name': name, 'url': f'/rq-engine/api/runs/{runid}/{config}/postfire-debris-flow/files/{result["id"]}/{name}'} for name in names]
     required = [{'key': key, 'ready': bool(checks.get(key)), 'reason': None if checks.get(key) else 'missing_input',
                  'message': '' if checks.get(key) else label, 'control': anchor} for key,(label,anchor) in LABELS.items() if key not in (('soils',) if model == 'M1' else ('k', 'dnbr'))]
     if model == 'M3' and (snapshot['selections'].get('cellsize') != 10 or snapshot['selections'].get('dem_source') != 'ned13/2022'):
@@ -424,6 +444,8 @@ def reuse_predictors(wd, accepted, hashes, binary_hash, output):
         return False
     previous = directory(wd, accepted['id'])/'predictors'
     manifest = read_json(previous/'manifest.json')
+    if manifest.get('schema_version') != 2 or manifest.get('support_policy') != 'common_valid_v1':
+        return False
     if manifest['tool']['sha256'] != binary_hash:
         return False
     if any(hashes.get(path) != checksum for path, checksum in manifest['sources_sha256'].items()):
@@ -457,7 +479,9 @@ def cached_digest(path):
 def engine_identity():
     root = Path(__file__).parent
     return {name: cached_digest(root/name) for name in ('integration.py','m1_inputs.py',
-        'staley2017.py','dnbr.py','encoding.py','rainfall.py','rainfall_io.py','results.py','production.py')}
+        'staley2017.py','dnbr.py','encoding.py','rainfall.py','rainfall_io.py','results.py','production.py',
+        'analysis_support.py','predictor_v2.py','soil_policy.py','soil_thickness.py','soil_snapshot.py','soil_inputs.py',
+        'm3_terrain.py','m3_integration.py','production_soils.py','result_support.py')}
 
 
 def execute_model(wd, identity, binary):
@@ -489,7 +513,7 @@ def execute_model(wd, identity, binary):
         build_m1_predictors(M1Inputs(dem=paths['dem'],mask=paths['mask'],outlet=paths['outlet'],sbs=paths['sbs'],
                            k=paths['k'],k_manifest=paths['k_manifest'],dnbr=paths['dnbr'],dnbr_manifest=paths['dnbr_manifest'],
                            lineage_sources=lineage,expected_sha256=hashes,wbt_sha256=digest(binary),source_kind='real',
-                           sbs_alignment='nearest'),root/'predictors',wbt_executable=binary)
+                           sbs_alignment='nearest'),root/'predictors',wbt_executable=binary,support_policy='common_valid_v1')
     predictor=root/'predictors'/'manifest.json'
     result_hashes={**hashes,str(predictor):digest(predictor)}
     from wepppy.nodb.core import Ron
@@ -497,7 +521,7 @@ def execute_model(wd, identity, binary):
     build_m1_results(RainfallInputs(predictor,paths['cli'],result_hashes,Ron.getInstance(str(wd)).runid,mode,
                      'simulation_labels' if mode in ('Vanilla','Future','PRISM') else 'calendar',active['id'],noaa_csv=paths.get('noaa')),
                      root/'results',frequency_source=frequency,return_intervals=(1,2,5,10),durations=(15,30,60),target_probabilities=(.5,))
-    if any(digest(p)!=h for p,h in hashes.items()) or sources(wd,frequency=frequency)[4]!=snapshot:
+    if any(digest(p)!=h for p,h in hashes.items()) or not _current_authority(wd,frequency,'M1',snapshot):
         raise WorkflowError('superseded','Inputs changed. Run the model again.',409)
     destination=root/'results'
     result_manifest=read_json(destination/'manifest.json')
@@ -508,22 +532,22 @@ def execute_model(wd, identity, binary):
         frame = pd.read_parquet(destination/name)
         partial = partial or bool(frame['probability'].isna().any())
     predictor_artifacts = {str(path.relative_to(Path(wd))):signature(wd,path,strong=True) for path in (root/'predictors').rglob('*') if path.is_file()}
-    result_artifacts = {str((destination/name).relative_to(Path(wd))):signature(wd,destination/name,strong=True) for name in FILES}
+    result_artifacts = {str((destination/name).relative_to(Path(wd))):signature(wd,destination/name,strong=True) for name in (*FILES,'valid_mask.tif')}
     def publish(current):
         if (current['run_attempt']['id']!=identity or current['active_dnbr']['id']!=active['id']
-                or sources(wd,frequency=frequency)[4]!=snapshot
+                or not _current_authority(wd,frequency,'M1',snapshot)
                 or not artifacts_current(wd,current['active_dnbr'], strong=False)
                 or not artifacts_current(wd, {'artifacts': result_artifacts}, strong=False)
                 or not artifacts_current(wd, {'artifacts': predictor_artifacts}, strong=False)):
             raise WorkflowError('superseded','Inputs changed. Run the model again.',409)
         current['last_successful_run']={'id':identity,'model':'M1','completed_at':now(),'snapshot':expected,'partial':partial,'area_warning':area_warning,
-            'artifacts': result_artifacts, 'predictor_artifacts': predictor_artifacts}
+            'artifacts': result_artifacts, 'predictor_artifacts': predictor_artifacts,'coverage':result_manifest['coverage']}
         current['run_attempt'].update(phase='complete',retryable=True)
     mutable(wd).change(publish)
 
 
 def execute_m3(wd, identity):
-    """Real task boundary; scientific composition is the next integration stage."""
+    """Execute M3 locally from prepared sources; never acquire or rebuild soils."""
     state = state_at(wd)
     attempt = state['run_attempt']
     if not attempt or attempt['id'] != identity or attempt.get('model') != 'M3':
@@ -535,4 +559,47 @@ def execute_m3(wd, identity):
     if not eligible or readonly or expected != attempt['snapshot'] or not all(
             value for key, value in checks.items() if key != 'noaa' or frequency == 'noaa'):
         raise WorkflowError('superseded', 'Required project data changed. Run the model again.', 409)
-    raise WorkflowError('integration_pending', 'M3 soil and terrain integration is not implemented yet.', 422)
+    from whitebox_tools import WhiteboxTools
+    from .m3_integration import M3Inputs, build_m3_predictors
+    from .production_soils import verify_soil
+    from wepppy.nodb.core import Ron
+    tool = WhiteboxTools()
+    binary = Path(tool.exe_path)/tool.exe_name
+    root = directory(wd,identity); root.mkdir(exist_ok=True)
+    all_paths = set(paths.values())
+    for path in tuple(all_paths):
+        safe(wd,path)
+        if path.suffix.lower() in ('.tif','.tiff'):
+            all_paths.update(companions(path))
+    hashes = {str(path.absolute()):digest(path) for path in all_paths}
+    build_m3_predictors(M3Inputs(Path(wd),paths['dem'],paths['pointer'],paths['mask'],paths['outlet'],paths['sbs'],
+        hashes,digest(binary),'real',sbs_alignment='nearest'),root/'predictors',wbt_executable=binary)
+    predictor = root/'predictors/manifest.json'
+    mode = snapshot['selections']['climate_mode']
+    build_results(RainfallInputs(predictor,paths['cli'],{**hashes,str(predictor):digest(predictor)},
+        Ron.getInstance(str(wd)).runid,mode,'simulation_labels' if mode in ('Vanilla','Future','PRISM') else 'calendar',
+        identity,noaa_csv=paths.get('noaa')),root/'results',frequency_source=frequency,
+        return_intervals=(1,2,5,10),durations=(15,30,60),target_probabilities=(.5,),expected_model='M3')
+    verify_soil(wd,root/'predictors',root/'soil_final_verification')
+    if any(digest(path) != checksum for path,checksum in hashes.items()) or not _current_authority(wd,frequency,'M3',snapshot):
+        raise WorkflowError('superseded','Inputs changed. Run the model again.',409)
+    manifest = read_json(root/'results/manifest.json')
+    import pandas as pd
+    partial = any(v['value'] is None for v in manifest['predictor_snapshot']['predictors'].values())
+    for name in ('events.parquet','design.parquet'):
+        partial = partial or bool(pd.read_parquet(root/'results'/name)['probability'].isna().any())
+    predictor_artifacts = {str(path.relative_to(Path(wd))):signature(wd,path,strong=True)
+                           for path in (root/'predictors').rglob('*') if path.is_file()}
+    artifacts = {str((root/'results'/name).relative_to(Path(wd))):signature(wd,root/'results'/name,strong=True)
+                 for name in (*FILES,'valid_mask.tif')}
+    def publish(current):
+        if (not current['run_attempt'] or current['run_attempt']['id'] != identity
+                or not _current_authority(wd,frequency,'M3',snapshot)
+                or not artifacts_current(wd,{'artifacts':artifacts},strong=False)
+                or not artifacts_current(wd,{'artifacts':predictor_artifacts},strong=False)):
+            raise WorkflowError('superseded','Inputs changed. Run the model again.',409)
+        current['last_successful_run'] = dict(id=identity,model='M3',completed_at=now(),snapshot=expected,
+            partial=partial,area_warning='area_outside_study_range' in manifest['predictor_snapshot']['warnings'],
+            artifacts=artifacts,predictor_artifacts=predictor_artifacts,coverage=manifest['coverage'])
+        current['run_attempt'].update(phase='complete',retryable=True)
+    mutable(wd).change(publish)

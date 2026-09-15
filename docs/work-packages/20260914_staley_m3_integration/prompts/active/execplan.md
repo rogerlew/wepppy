@@ -32,7 +32,12 @@ production deployment is authorized by this package.
 - [ ] Complete reviewed offline recovery, authoritative activation and live use.
 - [x] (2026-09-14) Shared M1/M3 results and mask replay pass independent review;
   81 focused tests pass, including rejection of mislabeled legacy predictors.
-- [ ] Review and validate newly wired production M3/M1-v2 and publication.
+- [x] Review production M3/M1-v2, conditional mask publication/download and
+  authoritative source activation. Independent finalization-race reproduction
+  now rejects superseded authority; 59 runtime/production tests pass.
+- [x] UI coverage gate: 22 tests pass; full npm baseline: 111 suites/872 tests.
+- [ ] Live acceptance: protected baseline records 22,357 files before activation;
+  exercise development RQ/browser/archive and compare protected bytes afterward.
 - [x] (2026-09-14) Record owner requirement for basin-independent preparation:
   derive original keys and THICK extent per project; named runs are tests only.
 - [ ] Implement reusable source preparation and prove the same path on at least
@@ -86,6 +91,12 @@ production deployment is authorized by this package.
 
 ## Surprises & Discoveries
 
+
+Finalization originally checked source identity without rechecking eligibility,
+read-only status and all prerequisites. Independent real-owner reproduction
+proved a disabled module could accept results. Both models now check complete
+authority before finalization and inside the locked acceptance callback; the
+reproduction rejects with `superseded` and retains attempt evidence.
 
 Live SDA identified two SSURGO and eight STATSGO keys in the ten-key basin.
 Historical cache survey vintage remains unknown. The original THICK declares
