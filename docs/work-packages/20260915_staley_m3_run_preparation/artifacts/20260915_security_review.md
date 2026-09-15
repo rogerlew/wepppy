@@ -46,3 +46,10 @@ protected files. Full repository regression result is recorded in the tracker.
 Gate: pass for this bounded development fix, zero unresolved medium/high
 findings. Not production rollout authority. Primary agent retains responsibility
 for final regression and closeout evidence; correctness review is separate.
+
+Final independent evidence disposition: pass. Reviewer checked initially absent
+pointer, acquisition timestamps after the Run request, pinned receipt/promotion,
+matching downloaded mask, all 2,648 unchanged protected entries, actual worker
+identity and the added automatic-promotion failure/retry regression. Native
+transcript contains eight requests and 393,216 response bytes. Entire postfire
+suite: 598 passed; final full repository sweep: 8,632 passed, 103 skipped.

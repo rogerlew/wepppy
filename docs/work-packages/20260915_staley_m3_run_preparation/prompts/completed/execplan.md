@@ -20,9 +20,9 @@ requires generated outputs from the real worker and native binary on
   and standalone ancestor commit.
 - [x] Implement bounded acquisition/activation with attempt-safe snapshot rebasing.
 - [x] Add unit and real-boundary regressions; independent focused suite 44 passed.
-- [ ] Finish full repository regression gate.
+- [x] Finish full repository regression gate: 8,632 passed, 103 skipped.
 - [x] Rerun normal browser/RQ workflow; verify probabilities and protected hashes.
-- [ ] Complete security review, docs, evidence and closeout.
+- [x] Complete security review, docs, evidence and closeout.
 
 
 ## Context and plan
@@ -108,6 +108,7 @@ Normal Run M3 now creates missing bounded inputs and produces all 27,450 event,
 12 design and 3 inverse estimates for overpriced-sprawl. Exact-mask and literal
 Table-4 arithmetic pass; all 2,648 protected files are unchanged. Independent
 correctness/security reviews approve the bounded implementation. Final full
-Python suite and administrative closeout remain. First-use acceptance must
+Python suite: 8,632 passed, 103 skipped, 12 subtests passed in 1,082.38 seconds;
+postfire suite: 598 passed. Package closed 2026-09-15. First-use acceptance must
 begin with genuinely absent source inputs; prepared-basin validation alone
 cannot establish that user workflow.

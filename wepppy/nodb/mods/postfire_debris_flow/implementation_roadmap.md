@@ -5,6 +5,7 @@
 fix. Source reuse, race rejection and retry pass 44 focused tests. Normal
 browser/RQ acceptance on overpriced-sprawl produced all 27,450 event probabilities
 with 100% valid coverage and no protected-input changes. No manual pre-acquisition.
+Full regression: 8,632 passed, 103 skipped; remediation closed 2026-09-15.
 
 Status: updated 2026-09-14. Production M1 NoDb, browser upload and RQ execution
 are implemented. M1/M3 scientific composition, shared valid-support calculations,

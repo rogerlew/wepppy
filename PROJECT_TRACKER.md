@@ -2,13 +2,14 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-09-15
-**Active Packages**: 37
+**Active Packages**: 36
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
 
-Active: [M3 fresh-basin Run preparation](docs/work-packages/20260915_staley_m3_run_preparation/package.md)
-— fix missing source orchestration, add regression tests and rerun overpriced-sprawl.
+Completed: [M3 fresh-basin Run preparation](docs/work-packages/20260915_staley_m3_run_preparation/package.md)
+— automatic bounded source preparation; overpriced-sprawl now produces all
+27,450 event probabilities with unchanged protected inputs. Full suite: 8,632 passed.
 
 Completed: [Staley M3 scientific integration](docs/work-packages/20260914_staley_m3_integration/package.md)
 — bounded generic source acquisition, M3/M1 valid support, real RQ/browser/archive
