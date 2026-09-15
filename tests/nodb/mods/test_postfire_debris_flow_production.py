@@ -486,6 +486,11 @@ def test_m3_task_retains_failure_and_preserves_previous_result(tmp_path, monkeyp
     import json
     from wepppy.rq import postfire_debris_flow_rq as worker
     monkeypatch.setattr(preflight, 'notify', lambda wd: None)
+    # This tests a prepared run's native failure, not first-use acquisition.
+    from wepppy.nodb.mods.postfire_debris_flow.soil_inputs import META
+    pointer = tmp_path/META
+    pointer.parent.mkdir(parents=True)
+    pointer.write_text(json.dumps({'schema_version':1}))
     controller = PostfireDebrisFlow(str(tmp_path), 'disturbed9002_wbt.cfg')
     snapshot = {'inputs': {}, 'dnbr': None, 'frequency': 'cli'}
     attempt = {'id': 'c'*32, 'model': 'M3', 'snapshot': snapshot, 'phase': 'queued',

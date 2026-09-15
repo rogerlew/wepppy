@@ -86,6 +86,11 @@ fresh-basin regression failed because acquisition was never called. Initial
 post-fix real-owner runtime tests: 16 passed. Extended tests and full suite running.
 The container has no working browser installation; the existing acceptance
 runner is executed on the host, against the same authenticated development URL.
+The first full gate stopped after 2,988 passing tests: an older worker-error
+fixture had no prepared pointer and mismatched saved selections, so the new
+first-use gate correctly superseded it before its injected native failure.
+Supply valid empty metadata in that prepared-run fixture; production code is
+unchanged. Re-run the production test module and full gate.
 
 
 ## Decision Log

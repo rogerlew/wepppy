@@ -12,6 +12,8 @@ were restarted to load the code. No production deployment.
 - POST 200, job finished, accepted result current, partial false.
 - Automatic receipt: `source_preparation/b8e644085a2d4425b2f0bc251fd9b105/receipt.json`.
 - Promotion committed with no cleanup warnings.
+- Actual worker identity UID 1000 / GID 993; pointer and result parquet owned
+  by 1000:993 with mode 0644. No identity/mount/permission workaround was used.
 - Valid coverage: 410,121 / 410,121 cells, all original USGS THICK fallback.
   SDA identifies the two spatial keys (658504 and 665730) as STATSGO, not SSURGO;
   their raw cache records are not incorrectly promoted to the primary tier.

@@ -42,3 +42,9 @@ independent arithmetic checks. See [live evidence](20260915_live_acceptance.md).
 Final independent focused suite: 44 passed, 8 warnings in 119.47 seconds.
 Full-suite results are recorded in tracker.
 No remaining medium/high finding. Security is reviewed separately.
+
+Final test-only follow-up: the older prepared-run worker-error fixture now supplies
+valid empty metadata rather than unintentionally testing first-use acquisition.
+Independent reviewer approved the five-line correction; all original failure,
+saved-preference and retained-diagnostic assertions remain. Production module:
+56 passed. Canonical archive/restore regression: 1 passed (21 deselected).
