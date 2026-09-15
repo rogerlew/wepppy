@@ -355,6 +355,164 @@ Packaging sources: [development image](../docker/Dockerfile.dev),
 [production image](../docker/Dockerfile), and
 [infrastructure knowledgebase](infrastructure/README.md).
 
+## WEPPpy governance: humans, agents, and work packages
+
+WEPPpy development combines human decisions about intended behavior and
+operational risk with agent-assisted investigation, implementation, testing,
+review, and documentation. Repository instructions and canonical contracts make
+those decisions durable across agents and sessions. This section summarizes
+the current governance requirements; it does not certify that every historical
+change completed every gate.
+
+### Responsibilities and authority
+
+| Participant | Responsibility |
+| --- | --- |
+| Human requester/package owner | Establish scope, intended outcomes, acceptance criteria, and authorization for behavior changes; resolve decisions that exceed the agreed scope |
+| Implementing agent | Inspect applicable instructions/contracts, maintain the execution record, make bounded changes, run validation, retain evidence, and report limitations |
+| Independent reviewers | Evaluate correctness, maintainability, test quality, and security against the agreed contract; record findings and verify their disposition |
+| Production operator / authorized operator agent | Execute explicitly authorized deployment or production repair using the applicable runbook, with operational checks and recovery evidence |
+
+Authority follows the requested task. Existing authorization remains valid for
+work within its scope; routine implementation does not require repeated
+confirmation. Conversely, a code review, security recommendation, or image
+publication task cannot authorize unrelated changes to runtime identity,
+permissions, authentication, isolation, defaults, reports, or established
+workflows. See [authority and working behavior](standards/hardening-lifecycle-standard.md#authority-and-working-behavior).
+
+### Work packages are the execution record
+
+Complex, high-risk, cross-cutting, or multi-agent initiatives use
+`docs/work-packages/YYYYMMDD_slug/`. A package contains:
+
+- `package.md`: problem, scope, stakeholders, security triage, and exit criteria.
+- `tracker.md`: progress, decisions with rationale, risks, evidence, and handoffs.
+- `prompts/active/`: the active ExecPlan and other execution instructions.
+- `artifacts/` and optional `notes/`: tests, reviews, diagnostics, and supporting
+  records needed to assess the work.
+
+Agents update the active plan and tracker as work progresses. The root
+`PROJECT_TRACKER.md` makes initiatives discoverable. Closeout records delivered
+behavior, remaining follow-ups, commits, and review outcomes; completed prompts
+move to `prompts/completed/` with an outcome summary.
+
+Durable rules must be promoted into canonical specifications, standards, or
+ADRs before closeout. Closed work packages remain immutable historical records,
+not editable authority for future changes. See the
+[work-package process](work-packages/README.md) and
+[ExecPlan guidance](prompt_templates/codex_exec_plans.md).
+
+### Code and behavioral standards
+
+- Follow root and nearest subsystem `AGENTS.md` instructions and existing
+  architecture. Prefer the smallest reversible change that addresses the
+  observed requirement; new infrastructure needs evidence and an explicit
+  complexity/escalation decision.
+- Preserve NoDb locking/persistence, RQ response/dependency contracts, and
+  authentication boundaries. Avoid silent dependency fallbacks and broad
+  exception handlers that conceal failures.
+- For Pure UI and UI-coupled changes, ratify intended behavior before
+  implementation: document the contract delta, obtain operator approval, amend
+  canonical contracts, and complete the independent contract reviews required
+  by the [contract-first standard](standards/contract-first-change-standard.md).
+- Changes to scientific defaults, formulas, thresholds, unit conversions, or
+  fallback heuristics require an ADR under the
+  [parameterization standard](standards/parameterization-adr-standard.md).
+- Update affected user/operator/developer documentation with production
+  changes. Keep inputs, intermediate products, failure evidence, and final
+  artifacts observable and archivable under the
+  [artifact standard](standards/artifact-observability-standard.md).
+
+### Unit and integration validation
+
+Validation is selected for the changed behavior and recorded in the package.
+Unit tests check isolated logic and contracts; integration tests exercise the
+real boundaries between controllers, persistence, queues, subprocesses, files,
+and services. Browser tests verify the user workflow. Mocking a boundary cannot
+prove that the actual boundary works.
+
+Typical gates include focused `wctl run-pytest` runs and, for substantive code
+changes, `wctl run-pytest tests --maxfail=1`. Frontend changes require npm lint
+and tests, with browser smoke checks for affected workflows. RQ wiring changes
+require dependency-catalog updates, `wctl check-rq-graph`, and live job-tree
+validation. Stub/API changes have their own stub checks. Literal-only config
+edits retain the narrower direct-readback/schema validation required by root
+guidance.
+
+For process, container, permission, or host-mount changes, unit tests alone are
+insufficient: the established workflow must pass under production-equivalent
+identities, groups, mounts, umask, configuration, and orchestration before
+shipping. Changed safety/persistence boundaries require direct, unmocked checks
+of valid behavior as well as rejection of malformed or hostile states.
+
+### Code, correctness, and security reviews
+
+Review evidence identifies the revision and surfaces reviewed, findings,
+severity, remediation, and final disposition. Code/QA review assesses regression
+risk, clarity, maintainability, and whether tests meaningfully exercise the
+change. Production behavior changes and incident fixes require an independent
+[correctness review](prompt_templates/correctness_review_template.md), including
+valid absent, empty, populated, and supported legacy states and their user
+outcomes.
+
+Every package records security impact as `none`, `low`, or `high`. High-impact
+work requires a dedicated [security review](prompt_templates/security_review_template.md).
+Examples include auth/secrets, public file handling, queue/subprocess execution,
+agent permissions, and deployment/CI wiring. Review checks both threat rejection
+and preservation of valid workflows. Medium/high findings must be closed before
+package closeout; security approval does not replace correctness approval or
+grant additional operator authority.
+
+### Deployment and wepp1-operator boundaries
+
+The documented progression is development validation, test-production/user
+checks, correction of observed failures, and authorized production deployment.
+Implementation completion, image publication, and production deployment are
+separate milestones. Record actual deployment evidence and skipped checks
+rather than treating a successful build as proof of a working service.
+
+For current `wepp.cloud` hosts, the production entry point is
+[scripts/deploy-production.sh](../scripts/deploy-production.sh) through the
+installed `wctl` preset. The operator resolves the effective topology and uses
+the established preflight, health, recovery, and post-deploy workflow. A future
+RKE2/GitOps migration must establish its replacement deployment contract; it
+does not retroactively change the authority of the present Compose workflow.
+
+The **wepp1-operator boundary** separates production operations from ordinary
+repository development:
+
+- Inspect production only within the task's authorized access and scope;
+  access to a host is not blanket permission to mutate it.
+- Production deployment, restarts, live run-state repairs, permission changes,
+  and other operational mutations need authorization covering that action.
+  A development fix or a request to push an image does not imply it.
+- Preserve production data and established user behavior. Prepare the intended
+  action, validation, and recovery path before an additional approval is needed;
+  do not use production as an unbounded implementation experiment.
+- Retain the operational evidence and report the resulting state back to the
+  package. Production acceptance is not established by agent self-report alone.
+
+The operational skill was inspected on forest at
+`/home/roger/.codex/skills/wepp1-operator/SKILL.md`. It applies to production
+`wepp1` and `wepp2` and adds these concrete controls:
+
+| Operation | Skill requirement |
+| --- | --- |
+| Host and run preflight | Verify `hostname` and `pwd` before impactful commands. Confirm the run exists in both host and container views and check relevant worker/API/web services before diagnosing failure |
+| Run-path mapping | Host: `/geodata/wc1/runs/<prefix>/<runid>/`; container: `/wc1/runs/<prefix>/<runid>/`. The prefix is the first two run-id characters; route configuration names are not filesystem path suffixes |
+| RQ triage | Identify the failing leaf job; obtain Redis/RQ traceback evidence (`job.exc_info` and, when present, `job.meta["exc_string"]`), then correlate run logs. Distinguish model/application failures from worker, heartbeat, Redis, or network interruptions |
+| Intervention scope | Prefer targeted recovery of identified jobs. Avoid stack-wide restarts unless explicitly requested; require clarification if an action could target the wrong host or environment |
+| Deployment queue gate | Run `wctl rq-info --detailed`. Started jobs in `default` or `batch` require explicit approval before proceeding |
+| Deployment sequence | Use `/workdir/wepppy/scripts/deploy-production.sh`. Deploy `wepp1` first, then repeat preflight/queue checks on `wepp2` before deploying it; reverse the order only when explicitly requested |
+| Authorized no-restart hotfix | Inspect and record the in-container baseline, make a timestamped backup, and patch only the required file/function with expected-marker checks. Reload Gunicorn workers with `HUP`; verify unchanged container `StartedAt`, running/healthy state, and the intended behavior |
+| Operational handoff | Report timestamps with timezone, host identity, job IDs, commands, confirmed facts, assumptions, and the smallest safe next action |
+
+The skill remains host-managed rather than vendored into this repository; load
+its current version before production operations. Its two abbreviated run-log
+examples omit `<prefix>`; the explicit run-path contract above is the mapping
+to use. These procedures apply within the authorized task and do not grant
+blanket permission for production mutations.
+
 ## wepp-forest release and vendoring
 
 The WEPP model release workflow is agent-driven CI/CD: a coding agent follows
