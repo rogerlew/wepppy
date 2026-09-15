@@ -104,6 +104,49 @@ Source entry points: [architecture](../ARCHITECTURE.md),
 [RQ dependency catalog](../wepppy/rq/job-dependencies-catalog.md), and
 [WEPP runner](../wepp_runner/README.md).
 
+#### Documentation
+
+WEPPpy maintains documentation for different audiences and purposes. File names
+help readers navigate, but authority comes from the applicable governance and
+explicit contract references, not a filename alone.
+
+| Documentation class | Purpose and audience | Examples |
+| --- | --- | --- |
+| `AGENTS.md` | Instructions for coding agents and contributors: scope, invariants, subsystem routing, required checks, and operational boundaries. Root guidance provides the map; nearer subsystem instructions refine the local workflow | [Root guide](../AGENTS.md), [NoDb guide](../wepppy/nodb/AGENTS.md), [runner guide](../wepp_runner/AGENTS.md) |
+| `README.md` / `readme.md` | Repository or module entry points for humans and agents: purpose, architecture, capabilities, setup, APIs, examples, artifacts, testing, and links to deeper contracts. Scope and detail vary by module | [Project overview](../readme.md), [RUSLE module README](../wepppy/nodb/mods/rusle/README.md), [README authoring guide](prompt_templates/readme_authoring_template.md) |
+| `ENDUSER.md` | Task-oriented guidance for nondeveloper scientific and land-management users: when to use a feature, prerequisites, UI choices, output interpretation, units, assumptions, limitations, and troubleshooting | [Gridded RUSLE guide](../wepppy/weppcloud/routes/usersum/weppcloud/models/gridded-rusle/ENDUSER.md), [end-user authoring guide](../wepppy/weppcloud/routes/usersum/weppcloud/enduser-authoring-guide.md), [Omni guide](../wepppy/nodb/mods/omni/ENDUSER.md) |
+| Model and subsystem specifications | Precise scientific and software contracts: equations, assumptions, data sources, units, parameter choices, supported modes, output schemas, and validation obligations. Developers implement and reviewers assess against the current canonical contract | [RUSLE specification](../wepppy/nodb/mods/rusle/specification.md), [feature registry specification](../wepppy/weppcloud/feature_registry/specification.md) |
+| UI standards and guidance (`docs/ui-docs/`) | Shared presentation and interaction guidance for frontend contributors: reusable controls and macros, layout, typography, themes, accessibility, and control-specific styling. The directory also contains design and migration records; canonical references and document status distinguish current requirements from plans and history | [UI documentation map](ui-docs/README.md), [style guide](ui-docs/ui-style-guide.md), [accessibility guidance](ui-docs/accessiblity.md), [theme system](ui-docs/theme-system.md) |
+| UI and controller contracts | Canonical behavior for controller lifecycle, DOM hooks, requests, job status, errors, and feature-specific interactions. These connect browser behavior to server and persistence contracts and provide acceptance criteria for implementation and tests | [Shared controller contract](ui-docs/controller-contract.md), [SBS control contract](ui-docs/contracts/sbs-control-contract.md), [contract-first change standard](standards/contract-first-change-standard.md) |
+| Shared schemas, standards, and ADRs | Cross-cutting interface/behavior contracts, engineering rules, and recorded architectural or parameterization decisions with rationale | [RQ response contract](schemas/rq-response-contract.md), [parameterization ADR standard](standards/parameterization-adr-standard.md), [RUSLE surface-rock decision](adrs/ADR-0004-rusle-scenario-sbs-surface-rock-partition.md) |
+| Work-package documentation | Time-bounded execution records: problem and acceptance criteria, active plans, progress, decisions, tests, reviews, and release evidence. Durable rules are promoted to canonical documents before closure; closed packages remain historical provenance | [Work-package guide](work-packages/README.md), [ExecPlan guidance](prompt_templates/codex_exec_plans.md) |
+
+Gridded RUSLE illustrates the complementary layers: its end-user guide explains
+factor choices and how to interpret the resulting detachment map; the module
+README explains the build workflow and integration; the specification records
+the scientific methods and artifact contracts. Related ADRs explain why
+particular parameterization choices were made, while work packages retain the
+evidence for implementing and reviewing changes. The RUSLE specification also
+distinguishes implemented behavior from planned or optional direction; the
+presence of a method in the document does not establish that it is deployed.
+
+UI documentation supplies another complementary layer: the style guide defines
+reusable presentation patterns, while controller and feature contracts define
+observable behavior and integration obligations. The shared controller contract
+covers repeatable initialization, required DOM hooks, shared request helpers,
+and asynchronous job feedback. It also requires checking rendered controls,
+including relevant upload and error states; DOM assertions alone do not establish
+visual correctness. For Pure UI and UI-coupled WEPPcloud/NoDb/RQ changes, the
+contract-first standard governs amendments to intended behavior before
+implementation. Durable UI contracts live alongside the shared guidance in
+`docs/ui-docs/` and `docs/ui-docs/contracts/`, with cross-cutting API and data
+contracts in `docs/schemas/`; work packages retain the change and review evidence.
+
+Selected documentation is published through WEPPcloud's in-app usersum browser.
+Its explicit manifest and navigation configuration determine inclusion and
+role-aware visibility; creating an `ENDUSER.md` or README does not automatically
+publish it. See the [documentation engine specification](../wepppy/weppcloud/routes/usersum/specification.md).
+
 ### wepppyo3 — native routines called from Python
 
 PyO3 exposes Rust functions as Python extension modules. This keeps native
@@ -411,10 +454,6 @@ not editable authority for future changes. See the
 - Preserve NoDb locking/persistence, RQ response/dependency contracts, and
   authentication boundaries. Avoid silent dependency fallbacks and broad
   exception handlers that conceal failures.
-- For Pure UI and UI-coupled changes, ratify intended behavior before
-  implementation: document the contract delta, obtain operator approval, amend
-  canonical contracts, and complete the independent contract reviews required
-  by the [contract-first standard](standards/contract-first-change-standard.md).
 - Changes to scientific defaults, formulas, thresholds, unit conversions, or
   fallback heuristics require an ADR under the
   [parameterization standard](standards/parameterization-adr-standard.md).
@@ -422,6 +461,87 @@ not editable authority for future changes. See the
   changes. Keep inputs, intermediate products, failure evidence, and final
   artifacts observable and archivable under the
   [artifact standard](standards/artifact-observability-standard.md).
+
+### Contract- and specification-driven development
+
+Contracts define what the system is intended to do: accepted inputs, valid
+states, outputs and artifacts, error behavior, compatibility, authorization,
+and persistence obligations. Implementation and runtime observations show what
+the system currently does. Tests provide evidence of conformance; neither an
+existing implementation nor a passing test silently creates a new requirement.
+
+Agents first locate the applicable canonical specifications through the nearest
+`AGENTS.md`. These include domain specifications, `docs/schemas/`, UI contracts,
+and accepted ADRs. A work package coordinates the change and preserves its
+rationale, but the lasting behavioral contract belongs outside the package.
+Human decisions that alter behavior must be recorded in that contract, including
+why the choice was made and which alternatives were rejected.
+
+The [contract-first standard](standards/contract-first-change-standard.md)
+prescribes a stricter sequence for intended behavior changes in Pure UI and
+UI-coupled WEPPcloud, NoDb, and RQ code:
+
+1. **Specify the change.** Record the starting revision, applicable contracts,
+   exact intended delta, rationale, compatibility/security impacts, and proposed
+   regression evidence in the active package's contract-decision artifact.
+   Enumerate valid runtime states separately from request/flag combinations,
+   including absent, empty, populated, supported legacy, and hostile states.
+2. **Ratify the specification.** Obtain the operator's explicit approval of the
+   intended behavior, amend all affected canonical contracts, and mark
+   implementation conformance as pending. Two independent read-only reviewers
+   examine the contract changes; the author cannot approve their own amendment.
+3. **Commit the checkpoint before implementation.** Commit the decision,
+   contract amendments, reviews, and finding dispositions as a standalone
+   ancestor commit. Record its revision in the tracker. This requires commit
+   authority; an uncommitted specification is not the required checkpoint.
+4. **Implement and demonstrate conformance.** Change only the agreed surfaces
+   and add regression evidence for their obligations. Verify valid user states
+   still reach the intended result and invalid/hostile states fail within the
+   authorized boundary. Exercise changed persistence, filesystem, and safety
+   boundaries directly rather than only through mocks.
+5. **Review against the approved contract.** Final review checks behavior,
+   evidence, contract revision, commit ancestry, and review timestamps. An
+   implementation cannot retroactively create its own approval checkpoint.
+   Record remaining discrepancies instead of changing the specification merely
+   to describe an unintended implementation.
+
+For example, a change to an optional controller must specify what happens when
+its state has never been created, exists but is empty, or contains legacy data.
+Tests then demonstrate those promised outcomes; a new error for an ordinary
+empty state is not justified simply because the implementation now raises it.
+
+This mandatory checkpoint sequence has the scope named above. Other subsystems
+follow their own canonical specifications and nearest instructions; scientific
+parameterization changes additionally follow the ADR requirement. Across these
+scopes, the aim is traceability from human intent to specification, code, tests,
+review evidence, and ultimately observed deployed behavior.
+
+### Feature maturity and release readiness
+
+WEPPcloud classifies individual features and interface configurations so mature
+operational workflows can coexist with capabilities still undergoing validation
+or research. Maturity communicates readiness, support expectations, and change
+risk rather than assigning one release status to the entire application.
+
+| Maturity | Meaning and intended use |
+| --- | --- |
+| `stable` | Production capability with broad operational confidence and normal support; intended for routine operational use |
+| `preview` | Usable, near-production capability still gathering validation/feedback or stabilizing its interface and contract; details may change |
+| `experimental` | Research-stage capability with limited validation, narrower transferability, or methods still under development; independently validate before operational decisions |
+
+The registries also support `deprecated` for replacement/removal paths and
+`internal` for intentionally restricted capabilities, including internal beta
+work. Maintainers select the least-optimistic label supported by evidence;
+unresolved validation, regional transferability, or operational support prevents
+a `stable` classification.
+
+The feature and config registries supply maturity labels to interface cards,
+run headers, and feature control headings. Separate role, backend, prerequisite,
+and activation rules control availability; a maturity label alone is not an
+authorization rule. This partitions functionality by readiness while preserving
+explicit access and dependency contracts. See the
+[user-facing definitions](../wepppy/weppcloud/routes/usersum/weppcloud/user-guide.md#feature-maturity-labels)
+and [registry specification](../wepppy/weppcloud/feature_registry/specification.md).
 
 ### Unit and integration validation
 
@@ -738,6 +858,122 @@ Windows artifacts; it does not define a numerical test stage. No automated
 assertion-based suite was found in the checkout. Downstream WEPPpy tests cover
 station selection, climate wrappers, retries, and selected parity cases, such
 as [CLIGEN WC1 parity](../tests/climate/test_cligen_wc1_parity.py).
+
+## Documentation and source-code footprint
+
+Measured on 2026-09-15 with **ocloc 0.5.1** across all ten local repositories.
+The unit below is **nonblank physical lines**, including code comments and
+Python docstrings. This measures repository text volume, not executable
+statement count, documentation quality, test coverage, or feature maturity.
+
+### Scope and counting method
+
+- Input is `git ls-files` with current working-tree contents, including tracked
+  edits. Untracked files, symlinks, absent files, and build/cache directories
+  (`target`, `node_modules`, `.venv`, `venv`, `__pycache__`, `.git`) are excluded.
+  Tracked tests, fixtures containing source, vendored source, and generated
+  source outside those directories are included; this is not an authored-code audit.
+- The installed ocloc does not recognize Fortran and several other source
+  formats. The measurement script classifies files, stages their contents as
+  `.txt`, and runs `ocloc <staging-directory> --json` for each bucket. It uses
+  `total - blank` and independently checks file and nonblank-line counts.
+  Comments remain included consistently for every language.
+- Source includes Python and stubs, JavaScript modules, TypeScript/TSX, Rust,
+  Fortran and include files, Go, R, shell/PowerShell/batch/Perl scripts,
+  HTML/CSS/Jinja/Mako templates, extracted Visual Basic, build recipes, LaTeX
+  support code, and executable R Markdown/Quarto report templates. Notebook
+  code cells count as source and Markdown cells as documentation; serialized
+  notebook outputs and metadata are excluded. The script also recognizes
+  C/C++ and SQL source; neither contributes implementation lines in this snapshot.
+- Documentation includes Markdown, reStructuredText, TeX and Org documents,
+  named README/ENDUSER/AGENTS text files, and notebook Markdown cells. Generic
+  `.txt` files, PDFs, Word files, images, license files without a documentation
+  extension, and scientific input/output datasets are outside the documentation
+  total. Configuration/structured text is reported separately, including the
+  Rosetta SQL data dump. It is not a complete inventory of every model-data format.
+- This stack document and the measurement artifact directory are excluded to
+  avoid counting the report itself. No cross-file or cross-repository deduplication
+  is applied. The retained snapshot records each repository's HEAD, dirty status,
+  and a hash of selected paths and contents.
+
+### Repository comparison
+
+Work-package documentation is separated using the bucket rules below; remaining
+documentation combines all other buckets. Each ratio divides the corresponding
+documentation count by source lines, expressed as a percentage.
+
+| Repository | Work-package docs | Remaining docs | All source | Work-package docs / source | Remaining docs / source | Config / structured text |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `wepppy` | 212,982 | 143,801 | 760,353 | 28.01% | 18.91% | 410,186 |
+| `wepppyo3` | 0 | 100 | 2,815 | 0.00% | 3.55% | 50 |
+| `peridot` | 0 | 953 | 7,794 | 0.00% | 12.23% | 260 |
+| `weppcloud-wbt` | 801 | 9,577 | 329,277 | 0.24% | 2.91% | 3,630 |
+| `rosetta` | 0 | 110 | 1,461 | 0.00% | 7.53% | 34,413 |
+| `wepp-forest` | 20,221 | 9,634 | 84,595 | 23.90% | 11.39% | 14,426,133 |
+| `wepp-forest-revegetation` | 0 | 11 | 78,116 | 0.00% | 0.01% | 0 |
+| `wepppy-win-bootstrap` | 0 | 154 | 4,839 | 0.00% | 3.18% | 79 |
+| `topaz` | 0 | 15 | 30,571 | 0.00% | 0.05% | 0 |
+| `jimf-cligen532` | 0 | 29 | 8,076 | 0.00% | 0.36% | 32 |
+
+### Documentation buckets
+
+Buckets are mutually exclusive, assigned in this order: AGENTS filename,
+README filename, ENDUSER filename, work-package path (including mini packages),
+UI-docs path, specification/contract/standard/schema/ADR name or path, then other
+docs. Thus a work-package README counts as README, and a UI contract counts as
+UI docs. These are navigational buckets, not a determination of normative
+authority. Other docs include research, investigations, release notes, papers,
+and notebook narrative.
+
+| Repository | Agents | README | End-user | Specs/contracts/standards | UI docs | Work packages | Other docs |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `wepppy` | 2,400 | 25,775 | 1,674 | 22,996 | 10,333 | 212,982 | 80,623 |
+| `wepppyo3` | 0 | 100 | 0 | 0 | 0 | 0 | 0 |
+| `peridot` | 0 | 181 | 0 | 199 | 0 | 0 | 573 |
+| `weppcloud-wbt` | 44 | 2,218 | 0 | 226 | 0 | 801 | 7,089 |
+| `rosetta` | 0 | 110 | 0 | 0 | 0 | 0 | 0 |
+| `wepp-forest` | 233 | 1,504 | 0 | 900 | 0 | 20,221 | 6,997 |
+| `wepp-forest-revegetation` | 0 | 11 | 0 | 0 | 0 | 0 | 0 |
+| `wepppy-win-bootstrap` | 0 | 117 | 0 | 0 | 0 | 0 | 37 |
+| `topaz` | 0 | 15 | 0 | 0 | 0 | 0 | 0 |
+| `jimf-cligen532` | 0 | 29 | 0 | 0 | 0 | 0 | 0 |
+
+### Source-language breakdown
+
+“Web” combines JavaScript, TypeScript, HTML/CSS and templates. “Other source”
+includes the remaining scripts, build recipes, Visual Basic, notebook code,
+LaTeX support and literate report templates. The JSON snapshot retains separate
+counts for each measured language or format.
+
+| Repository | Python / stubs | Rust | Fortran / includes | Web | Go / R | Other source |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `wepppy` | 508,163 | 0 | 39 | 226,104 | 5,343 | 20,704 |
+| `wepppyo3` | 848 | 1,967 | 0 | 0 | 0 | 0 |
+| `peridot` | 0 | 7,782 | 0 | 7 | 0 | 5 |
+| `weppcloud-wbt` | 31,419 | 297,731 | 0 | 0 | 0 | 127 |
+| `rosetta` | 1,461 | 0 | 0 | 0 | 0 | 0 |
+| `wepp-forest` | 7,251 | 0 | 75,352 | 0 | 0 | 1,992 |
+| `wepp-forest-revegetation` | 0 | 0 | 77,836 | 0 | 0 | 280 |
+| `wepppy-win-bootstrap` | 4,165 | 0 | 0 | 0 | 0 | 674 |
+| `topaz` | 0 | 0 | 30,543 | 0 | 0 | 28 |
+| `jimf-cligen532` | 0 | 0 | 7,988 | 0 | 0 | 88 |
+
+WEPPpy's work-package bucket accounts for 59.7% of its measured
+documentation; wepp-forest's accounts for 67.7%. These repositories retain
+substantial development and review history alongside current guides and contracts.
+The Fortran totals make the model repositories visible in the comparison;
+low documentation ratios in those repositories do not establish poor model
+validation or account for documentation published outside the checkout.
+
+Reproduction and detailed results: [measurement script](dev-notes/weppcloud-stack-loc/measure.py)
+and [JSON snapshot](dev-notes/weppcloud-stack-loc/snapshot.json).
+Run from the WEPPpy root:
+
+```bash
+python3 docs/dev-notes/weppcloud-stack-loc/measure.py \
+  --root ~/src \
+  --output docs/dev-notes/weppcloud-stack-loc/snapshot.json
+```
 
 ## Licensing
 
