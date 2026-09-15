@@ -1,5 +1,11 @@
 # Postfire Debris Flow Implementation Roadmap
 
+2026-09-15: fresh-basin Run preparation is wired after contract checkpoint
+`e8c40adda`. The new regression reproduced the missing acquisition before the
+fix. Source reuse, race rejection and retry pass 44 focused tests. Normal
+browser/RQ acceptance on overpriced-sprawl produced all 27,450 event probabilities
+with 100% valid coverage and no protected-input changes. No manual pre-acquisition.
+
 Status: updated 2026-09-14. Production M1 NoDb, browser upload and RQ execution
 are implemented. M1/M3 scientific composition, shared valid-support calculations,
 authoritative preparation and publication are implemented. Dashboard remains pending.

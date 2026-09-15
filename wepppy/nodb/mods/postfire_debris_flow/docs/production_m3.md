@@ -6,7 +6,7 @@ was separately authorized and executed; the runtime reader still consumes
 prepared inputs without network in its numerical adapters. The
 [Run-preparation amendment](production_m3_runtime.md#2026-09-15-run-preparation-amendment)
 requires explicit Run M3 to prepare absent source pointers before calculation;
-implementation conformance is pending. Development M1/M3 RQ and browser checks pass,
+orchestration and fresh-basin live validation pass. Development M1/M3 RQ and browser checks pass,
 including positive synthetic M3 and genuine terrain-unavailable results.
 This amends the [selection contract](model_selection.md) and
 [production workflow](production_m1.md); production deployment is not implied.

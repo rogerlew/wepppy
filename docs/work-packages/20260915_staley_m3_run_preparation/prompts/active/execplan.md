@@ -16,11 +16,12 @@ requires generated outputs from the real worker and native binary on
 
 - [x] Diagnosed attempt 5cd64c185a9843abaac662ec4b90f637: absent source pointer,
   zero valid cells and zero probabilities; rainfall and terrain available.
-- [ ] Ratify canonical Run-preparation amendment with two independent reviews
+- [x] Ratify canonical Run-preparation amendment with two independent reviews
   and standalone ancestor commit.
-- [ ] Implement bounded acquisition/activation with attempt-safe snapshot rebasing.
-- [ ] Add unit and real-boundary regressions and run canonical tests.
-- [ ] Rerun normal browser/RQ workflow; verify probabilities and protected hashes.
+- [x] Implement bounded acquisition/activation with attempt-safe snapshot rebasing.
+- [x] Add unit and real-boundary regressions; independent focused suite 44 passed.
+- [ ] Finish full repository regression gate.
+- [x] Rerun normal browser/RQ workflow; verify probabilities and protected hashes.
 - [ ] Complete security review, docs, evidence and closeout.
 
 
@@ -80,6 +81,11 @@ Run workflow. The real basin's 27,450 event rows were all unavailable.
 The first protected-input audit detected a changing wepp/runs/tc_out.txt;
 existing job 4d845387-25f3-4365-b71e-4e72657a8ffe is performing watershed
 interchange on this basin. Leave it running and retake the baseline when idle.
+The job finished; a clean baseline contains 2,648 protected files. The pre-fix
+fresh-basin regression failed because acquisition was never called. Initial
+post-fix real-owner runtime tests: 16 passed. Extended tests and full suite running.
+The container has no working browser installation; the existing acceptance
+runner is executed on the host, against the same authenticated development URL.
 
 
 ## Decision Log
@@ -93,4 +99,10 @@ budgets. No scientific parameter change or new service is needed.
 ## Outcomes & Retrospective
 
 
-Pending implementation and live validation.
+Normal Run M3 now creates missing bounded inputs and produces all 27,450 event,
+12 design and 3 inverse estimates for overpriced-sprawl. Exact-mask and literal
+Table-4 arithmetic pass; all 2,648 protected files are unchanged. Independent
+correctness/security reviews approve the bounded implementation. Final full
+Python suite and administrative closeout remain. First-use acceptance must
+begin with genuinely absent source inputs; prepared-basin validation alone
+cannot establish that user workflow.

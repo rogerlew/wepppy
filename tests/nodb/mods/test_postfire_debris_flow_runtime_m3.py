@@ -65,13 +65,131 @@ def protected(wd):
     return {str(path):io.digest(path,512*1024*1024) for path in paths if path.is_file()}
 
 
+def enqueue_m3(wd):
+    identity = uuid.uuid4().hex
+    snapshot = dict(inputs=p.sources(wd,model='M3')[4],dnbr=None,frequency='cli')
+    p.mutable(wd).change(lambda state:state.update(model='M3',frequency_source='cli',
+        run_attempt=dict(id=identity,model='M3',phase='queued',created_at=p.now(),
+                         retryable=False,job_id=None,snapshot=snapshot)))
+    return identity
+
+
+def test_fresh_basin_run_prepares_sources_and_reuses_them(project,monkeypatch):
+    from wepppy.nodb.mods.postfire_debris_flow import source_acquisition
+    wd,dem,mask,catalog = project
+    before = protected(wd)
+    calls = []
+    def acquire(root,source_dem,source_mask):
+        assert (root,source_dem,source_mask) == (wd,dem,mask)
+        calls.append(root)
+        return prepare_local_sources(root,source_dem,source_mask,collection_catalog=catalog)
+    monkeypatch.setattr(source_acquisition,'acquire_sources',acquire)
+    assert not (wd/META).exists()
+    identity = enqueue_m3(wd)
+    assert p.get_state(wd,'config',model='M3',reconcile=False)['run_ready']
+    assert calls == []  # State inspection must not acquire.
+    p.execute_m3(wd,identity)
+    assert calls == [wd]
+    assert p.state_at(wd)['last_successful_run']['coverage']['valid_cells'] == 3
+    assert p.get_state(wd,'config',model='M3',reconcile=False)['freshness'] == 'current'
+    assert pd.read_parquet(p.directory(wd,identity)/'results/events.parquet').probability.notna().all()
+    # A new absent-pointer preparation can commit before later calculation fails.
+    (wd/META).unlink()
+    failed = enqueue_m3(wd)
+    def fail_results(*args,**kwargs): raise OSError('injected post-promotion failure')
+    with monkeypatch.context() as patch:
+        patch.setattr(p,'build_results',fail_results)
+        with pytest.raises(OSError,match='post-promotion'): p.execute_m3(wd,failed)
+    assert (wd/META).exists()
+    assert p.state_at(wd)['last_successful_run']['id'] == identity
+    retried = enqueue_m3(wd)
+    p.execute_m3(wd,retried)
+    assert calls == [wd,wd]  # The retry reuses the promotion from the failed run.
+    assert protected(wd) == before
+
+
+@pytest.mark.parametrize('change',['attempt','model','frequency','sbs','wal','pointer'])
+def test_first_run_rejects_changes_before_promotion(project,monkeypatch,change):
+    import sqlite3
+    from wepppy.nodb.mods.postfire_debris_flow import source_acquisition
+    from wepppy.nodb.mods.disturbed import Disturbed
+    wd,dem,mask,catalog = project
+    identity = enqueue_m3(wd)
+    connections = []
+    def acquire(*args):
+        receipt = prepare_local_sources(wd,dem,mask,collection_catalog=catalog)
+        if change == 'attempt': enqueue_m3(wd)
+        elif change == 'model': p.mutable(wd).change(lambda state:state.update(model='M1'))
+        elif change == 'frequency': p.mutable(wd).change(lambda state:state.update(frequency_source='noaa'))
+        elif change == 'pointer':
+            pointer = wd/META; pointer.parent.mkdir(parents=True,exist_ok=True)
+            io.write_json(pointer,{'schema_version':1})
+        elif change == 'sbs':
+            with rasterio.open(Disturbed.getInstance(str(wd)).sbs_4class_path,'r+') as ds:
+                ds.write(np.ones(ds.shape),1)
+        else:
+            connection = sqlite3.connect(wd/'soils/ssurgo_tabular_cache.sqlite')
+            connections.append(connection)
+            connection.execute('PRAGMA journal_mode=WAL')
+            connection.execute('UPDATE chorizon SET hzdepb_r=120'); connection.commit()
+        return receipt
+    monkeypatch.setattr(source_acquisition,'acquire_sources',acquire)
+    try:
+        with pytest.raises((p.WorkflowError,io.RainfallError)):
+            p.execute_m3(wd,identity)
+        assert p.state_at(wd)['last_successful_run'] is None
+        assert (wd/META).exists() == (change == 'pointer')
+    finally:
+        for connection in connections: connection.close()
+
+
+@pytest.mark.parametrize('change',['attempt','pointer','sbs'])
+def test_first_run_rejects_changes_after_real_promotion(project,monkeypatch,change):
+    from wepppy.nodb.mods.postfire_debris_flow import source_acquisition, production_soils
+    from wepppy.nodb.mods.disturbed import Disturbed
+    wd,dem,mask,catalog = project
+    identity = enqueue_m3(wd)
+    monkeypatch.setattr(source_acquisition,'acquire_sources',
+                        lambda *args:prepare_local_sources(wd,dem,mask,collection_catalog=catalog))
+    activate = production_soils.activate_sources
+    def changed(*args,**kwargs):
+        result = activate(*args,**kwargs)
+        if change == 'attempt': enqueue_m3(wd)
+        elif change == 'pointer': (wd/META).write_text(json.dumps({'schema_version':1}))
+        else:
+            with rasterio.open(Disturbed.getInstance(str(wd)).sbs_4class_path,'r+') as ds:
+                ds.write(np.ones(ds.shape),1)
+        return result
+    monkeypatch.setattr(production_soils,'activate_sources',changed)
+    with pytest.raises(p.WorkflowError): p.execute_m3(wd,identity)
+    assert (wd/META).exists()  # Do not roll back a committed pointer.
+    assert p.state_at(wd)['last_successful_run'] is None
+
+
+def test_failed_acquisition_preserves_previous_result(project,monkeypatch):
+    from wepppy.nodb.mods.postfire_debris_flow import source_acquisition
+    wd,dem,mask,catalog = project
+    identity = enqueue_m3(wd)
+    previous = dict(id=uuid.uuid4().hex,model='M3',snapshot={},artifacts={})
+    # Set a retained prior result without invoking unrelated publication machinery.
+    controller = p.mutable(wd)
+    with controller.locked(): controller._state['last_successful_run'] = previous
+    def fail(*args):
+        prepare_local_sources(wd,dem,mask)
+        raise TimeoutError('bounded acquisition failure')
+    monkeypatch.setattr(source_acquisition,'acquire_sources',fail)
+    with pytest.raises(TimeoutError,match='bounded acquisition'): p.execute_m3(wd,identity)
+    assert p.state_at(wd)['last_successful_run'] == previous
+    assert list((wd/'postfire_debris_flow/source_preparation').glob('*/receipt.json'))
+    assert not (wd/META).exists()
+
+
 @pytest.mark.parametrize('available',[True,False])
 def test_owner_bound_m3_executes_and_publishes_without_dnbr_k(project,available,monkeypatch):
     wd,dem,mask,catalog = project
     before = protected(wd)
-    if available:
-        receipt = prepare_local_sources(wd,dem,mask,collection_catalog=catalog)
-        assert activate_sources(wd,receipt,expected_sha256=io.digest(receipt))['status'] == 'committed'
+    receipt = prepare_local_sources(wd,dem,mask,collection_catalog=catalog if available else None)
+    assert activate_sources(wd,receipt,expected_sha256=io.digest(receipt))['status'] == 'committed'
     eligible,readonly,checks,paths,snapshot = p.sources(wd,model='M3')
     assert eligible and not readonly and all(v for k,v in checks.items() if k != 'noaa')
     identity = uuid.uuid4().hex

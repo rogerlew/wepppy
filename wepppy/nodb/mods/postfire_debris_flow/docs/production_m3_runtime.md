@@ -362,7 +362,9 @@ Preflight never calls this network entry point. Run M3 may call it as below.
 
 ### 2026-09-15 Run-preparation amendment
 
-Implementation conformance: pending. Explicit Run M3 on an eligible basin with
+Implementation: `run_preparation.prepare_for_run`; normal fresh-basin browser/RQ
+validation passed on overpriced-sprawl on 2026-09-15 with all probability rows available.
+Explicit Run M3 on an eligible basin with
 absent `postfire_debris_flow/inputs/soil_sources.json` must acquire and activate
 the bounded sources before calculation, within its existing job. Reuse valid
 present-empty and populated pointers without acquisition; malformed pointers

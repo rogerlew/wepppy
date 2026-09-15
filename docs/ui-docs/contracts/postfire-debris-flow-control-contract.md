@@ -1,6 +1,6 @@
 # Postfire debris-flow control contract
 
-2026-09-15 amendment (implementation pending): Run M3 includes bounded preparation
+2026-09-15 amendment (wired and live-validated): Run M3 includes bounded preparation
 when its module source pointer is absent, using the existing job and unchanged
 request/auth/CSRF contracts. No extra operator action or new control is required.
 State reads never acquire sources. Existing pointers are reused and preparation

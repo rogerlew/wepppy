@@ -8,6 +8,8 @@
   consume raw soil records without changing SSURGO/STATSGO building behavior.
 - Status: M1/M3 scientific backends and production NoDb/UI/RQ are implemented;
   development acceptance is complete in the closed M3 package. Reports/dashboard remain pending.
+- Run M3 prepares absent source pointers using bounded acquisition; state reads
+  remain local. The 2026-09-15 runtime amendment governs attempt-safe promotion.
 - Preserve accepted decisions and explicitly label proposals and unresolved inputs.
 - Follow `../../AGENTS.md` and the repository contract-first standard before
   adding NoDb, UI, API, or RQ behavior. Contract ancestors for this increment are listed below.

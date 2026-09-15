@@ -1,6 +1,6 @@
 # Postfire Debris Flow Specification
 
-2026-09-15 amendment (implementation pending): explicit Run M3 prepares an absent
+2026-09-15 amendment (wired and live-validated): explicit Run M3 prepares an absent
 module source pointer using the existing bounded reader and locked activation;
 see [Run preparation](docs/production_m3_runtime.md#2026-09-15-run-preparation-amendment).
 Existing valid pointers are reused; preflight and state reads remain local.
@@ -14,7 +14,7 @@ analysis support and protection of existing SSURGO/STATSGO soil building;
 recorded-depth rules and generic prepared-local source delivery are ratified in
 the [runtime contract](docs/production_m3_runtime.md). Generic source acquisition,
 native M3 composition and production wiring pass local independent review;
-live acceptance is tracked in the active M3 work package.
+fresh-basin browser/RQ acceptance passed on overpriced-sprawl on 2026-09-15.
 
 Track delivery stages, evidence, and unresolved decisions in the living
 [implementation roadmap](implementation_roadmap.md). Update this specification

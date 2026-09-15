@@ -101,7 +101,7 @@ The specification and detailed contracts map the implemented source and UI paths
   `source_acquisition.acquire_sources` only with bounded network authority,
   then `production_soils.activate_sources` with the returned receipt SHA-256.
   The accepted [Run-preparation amendment](docs/production_m3_runtime.md#2026-09-15-run-preparation-amendment)
-  (implementation pending) also makes explicit Run M3 prepare an absent source
+  also makes explicit Run M3 prepare an absent source
   pointer automatically. Existing pointers are reused. Readers never acquire
   sources, and neither workflow rebuilds soils or changes shared caches.
 - See [local agent guidance](AGENTS.md) for implementation sequencing.

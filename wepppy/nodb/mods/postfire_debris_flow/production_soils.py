@@ -36,7 +36,7 @@ def verify_soil(wd, predictor, output):
         io.fail('source_changed','Soil sources changed before result acceptance')
 
 
-def activate_sources(wd, receipt_path, *, expected_sha256):
+def activate_sources(wd, receipt_path, *, expected_sha256, verify_project=None):
     """Bind a prepared receipt to Ron/Watershed, then use file-only promotion."""
     from .production import sources, mutable, WorkflowError
     from .source_preparation import prepare_local_sources, promote_local_sources, _inside
@@ -63,5 +63,7 @@ def activate_sources(wd, receipt_path, *, expected_sha256):
     def verify():
         if authority()[1] != snapshot:
             io.fail('source_changed','Project authority changed before source activation')
+        if verify_project is not None:
+            verify_project()
     return promote_local_sources(mutable(wd),receipt_path,expected_sha256=expected_sha256,
                                  verify_project=verify)

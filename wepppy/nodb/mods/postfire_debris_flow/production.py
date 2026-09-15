@@ -481,7 +481,8 @@ def engine_identity():
     return {name: cached_digest(root/name) for name in ('integration.py','m1_inputs.py',
         'staley2017.py','dnbr.py','encoding.py','rainfall.py','rainfall_io.py','results.py','production.py',
         'analysis_support.py','predictor_v2.py','soil_policy.py','soil_thickness.py','soil_snapshot.py','soil_inputs.py',
-        'm3_terrain.py','m3_integration.py','production_soils.py','result_support.py')}
+        'm3_terrain.py','m3_integration.py','production_soils.py','result_support.py',
+        'run_preparation.py','source_preparation.py','source_acquisition.py','source_transport.py')}
 
 
 def partial_reason(manifest, partial):
@@ -565,7 +566,7 @@ def execute_model(wd, identity, binary):
 
 
 def execute_m3(wd, identity):
-    """Execute M3 locally from prepared sources; never acquire or rebuild soils."""
+    """Prepare absent bounded sources and execute M3; never rebuild soils."""
     state = state_at(wd)
     attempt = state['run_attempt']
     if not attempt or attempt['id'] != identity or attempt.get('model') != 'M3':
@@ -577,6 +578,9 @@ def execute_m3(wd, identity):
     if not eligible or readonly or expected != attempt['snapshot'] or not all(
             value for key, value in checks.items() if key != 'noaa' or frequency == 'noaa'):
         raise WorkflowError('superseded', 'Required project data changed. Run the model again.', 409)
+    from .run_preparation import prepare_for_run
+    paths, expected = prepare_for_run(wd, identity, expected, paths)
+    snapshot = expected['inputs']
     from whitebox_tools import WhiteboxTools
     from .m3_integration import M3Inputs, build_m3_predictors
     from .production_soils import verify_soil
