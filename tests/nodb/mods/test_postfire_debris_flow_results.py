@@ -65,6 +65,16 @@ def test_m1_result_builder_cannot_apply_m1_equation_to_m3(inputs,tmp_path,monkey
     assert not (tmp_path/'wrong_model').exists()
 
 
+def test_legacy_predictor_extra_label_cannot_select_m3(inputs,tmp_path):
+    manifest = json.loads(inputs.predictor_manifest.read_text())
+    manifest['model'] = 'M3'
+    inputs.predictor_manifest.write_text(json.dumps(manifest))
+    inputs.expected_sha256[str(inputs.predictor_manifest)] = io.digest(inputs.predictor_manifest)
+    with pytest.raises(io.RainfallError,match='version-2 M3'):
+        r.build_results(inputs,tmp_path/'wrong_model',frequency_source='cli',return_intervals=[1],
+                        durations=[15],target_probabilities=[.5])
+
+
 def test_output_query_parity_and_repeat(inputs,tmp_path):
     path=tmp_path/'result';m=build(inputs,path);c=catalog(path)
     page=r.list_events(c,duration_minutes=15,sort='probability',descending=True,limit=1)

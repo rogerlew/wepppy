@@ -307,6 +307,25 @@ unit tests and a source-free unavailable result do not close the package.
 
 ## Current implementation surface
 
+Explicit source delivery is available through `source_acquisition.acquire_sources`:
+derive keys/grid, query SDA, then decode a bounded original-object window through
+identity-pinned ranges. A supervising process enforces 30-second request/SDA and
+120-second native deadlines even when native callbacks do not return to Python.
+Requests retain start/final records and response bodies with acquisition-time
+hashes. There are no redirects, retries, GDAL URLs or whole-object downloads.
+Preflight and model execution never call this network entry point.
+
+`source_replay.recover_sources` can recover a complete retained transcript after
+local metadata failure, in a fresh visible directory, with zero network requests.
+It reconstructs lineage from the exact original query/response, pins the original
+decoded TIFF before replay, and requires byte-identical decoded output afterward.
+Older transcripts lacking response hashes require this independent TIFF check;
+new transcripts additionally verify acquisition-time body hashes. Replayed
+evidence records `retrieval_mode: retained_transcript`, `network_requests: 0`,
+`replayed_at` and unknown original `retrieved_at`, never a fresh remote check.
+Nonfinite original NoData declarations are recorded as explicit `NaN`, `Infinity`
+or `-Infinity` strings; source samples and masks are unchanged.
+
 After checkpoint `89d673c38`, `soil_policy.derive_recorded_mapunits` implements
 the approved policy independently of shared builders. `soil_snapshot.snapshot_cache`
 and `verify_snapshot` require a fresh visible output directory for each read;

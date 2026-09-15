@@ -10,7 +10,12 @@ Last updated: 2026-09-14.
 
 - [x] Owner explicitly authorizes bounded source acquisition on 2026-09-14;
   see [authorization](artifacts/20260914_acquisition_authorization.md).
-- [ ] Prove network-reader limits, acquire and retain approved live inputs.
+- [x] Prove network-reader controls; acquire live SDA lineage and bounded THICK
+  responses. Retain failed NaN metadata receipt without activating inputs.
+- [ ] Finish reviewed offline recovery, authoritative activation and live use.
+- [x] Shared M1/M3 result dispatch and mask replay: independent reviews close
+  legacy-model and lineage reconstruction findings; 81 focused tests pass.
+- [ ] Validate production M3/M1-v2 wiring, freshness, publication and UI.
 - [x] Record accepted common support and soil-builder isolation.
 - [x] Review retained paper, current soil code and NRCS documentation.
 - [x] Audit frozen three-site component totals and repeated depth intervals.

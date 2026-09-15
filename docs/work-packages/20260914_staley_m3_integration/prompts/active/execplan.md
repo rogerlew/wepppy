@@ -26,7 +26,13 @@ production deployment is authorized by this package.
 
 - [x] (2026-09-14) Owner explicitly authorizes bounded source acquisition under
   the recorded proposal; retain `artifacts/20260914_acquisition_authorization.md`.
-- [ ] Prove bounded network controls, then acquire verified live lineage/THICK.
+- [x] (2026-09-14) Implement/test supervised range/SDA readers; retain live
+  lineage and 393,216 THICK response bytes without activation. Native receipt
+  failed on legitimate NaN NoData; preserve attempt and implement offline replay.
+- [ ] Complete reviewed offline recovery, authoritative activation and live use.
+- [x] (2026-09-14) Shared M1/M3 results and mask replay pass independent review;
+  81 focused tests pass, including rejection of mislabeled legacy predictors.
+- [ ] Review and validate newly wired production M3/M1-v2 and publication.
 - [x] (2026-09-14) Record owner requirement for basin-independent preparation:
   derive original keys and THICK extent per project; named runs are tests only.
 - [ ] Implement reusable source preparation and prove the same path on at least
@@ -81,6 +87,13 @@ production deployment is authorized by this package.
 ## Surprises & Discoveries
 
 
+Live SDA identified two SSURGO and eight STATSGO keys in the ten-key basin.
+Historical cache survey vintage remains unknown. The original THICK declares
+NaN NoData; raster decoding succeeded, but JSON receipt creation rejected the
+nonfinite metadata value. Recovery now preserves that declaration as a string,
+replays retained HTTP bytes without network, and verifies the independent
+original decoded raster. No activated source or shared soil mutation resulted.
+
 At acquisition authorization, repository inspection confirmed only the local
 source preparer exists. The installed Rasterio 1.3.10 has a file-object adapter,
 but no bounded remote transport has yet been implemented/tested. Approval
@@ -119,6 +132,13 @@ scientific proposals, not prerequisites for making this development basin pass.
 
 ## Decision Log
 
+
+Decision (2026-09-14): recover retained network evidence in a fresh visible
+directory, never overwrite the failed acquisition. Offline replay is labeled
+explicitly and does not assert current remote freshness. Reconstruct lineage
+from the raw response and bind exact request keys; retain historical unknowns.
+Rationale: a local metadata serialization defect does not require redownloading
+the original object or hand-authoring basin manifests.
 
 Decision (2026-09-14): execute the existing bounded acquisition proposal following
 the owner's explicit authorization. This supersedes prior operational permission
@@ -184,6 +204,13 @@ acquisition remain pending; the earlier conservative recommendation is rejected.
 
 ## Outcomes & Retrospective
 
+
+Current continuation: bounded network delivery and generic result dispatch are
+implemented with independent review. Live acquisition retained payloads but
+needs the tested offline metadata recovery. Production wiring is in progress,
+not yet validated or accepted; browser/RQ, soil parity and full gates remain.
+The older checkpoint paragraphs below describe historical state, not a renewed
+permission gate. Owner authority remains sufficient for the recorded scope.
 
 Acquisition authorization is now recorded in the canonical runtime contract and
 `artifacts/20260914_acquisition_authorization.md`. No approved source payloads

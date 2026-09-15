@@ -67,6 +67,34 @@ def test_common_support_does_not_shrink_full_basin_terrain(terrain, tmp_path, mi
     assert result['coverage']['valid_cells'] == {'none':3 if terrain_valid else 2,'one':2,'all':0}[missing]
     manifest = output/'manifest.json'
     io.load_predictors(manifest, {str(manifest):io.digest(manifest)}, {})
+    if depth == 100 and missing == 'one' and terrain_valid:
+        import pandas as pd
+        import shutil
+        from wepppy.nodb.mods.postfire_debris_flow.results import RainfallInputs, build_results, open_results
+        from wepppy.nodb.mods.postfire_debris_flow.staley2017 import probability
+        climate = tmp_path/'climate.parquet'
+        pd.DataFrame({'prcp':[10.], 'year':[1], 'month':[1], 'day_of_month':[1],
+                      'peak_intensity_15':[40.], 'peak_intensity_30':[20.], 'peak_intensity_60':[10.]}).to_parquet(climate,index=False)
+        rainfall = RainfallInputs(manifest,climate,{str(manifest):io.digest(manifest),str(climate):io.digest(climate)},
+                                  'fixture','cligen','simulation_labels','fixture')
+        results = tmp_path/'results'
+        built = build_results(rainfall,results,frequency_source='cli',return_intervals=[1,2,5,10],
+                              durations=[15,30,60],target_probabilities=[.5],expected_model='M3')
+        assert built['model'] == 'M3' and built['coverage'] == result['coverage']
+        assert (results/'valid_mask.tif').read_bytes() == (output/'valid_mask.tif').read_bytes()
+        archive = tmp_path/'archive'; shutil.copytree(results,archive)
+        catalog = open_results(archive,expected_manifest_sha256=io.digest(archive/'manifest.json'))
+        for event in catalog.events.to_pylist():
+            assert event['probability'] == probability('M3',event['duration_minutes'],T=30/np.sqrt(300),F=.5,S=100/254,
+                                                        rainfall_mm=event['rainfall_mm'])
+        for inverse in pd.read_parquet(archive/'inverse.parquet').to_dict('records'):
+            if inverse['status'] == 'available':
+                assert probability('M3',inverse['duration_minutes'],T=30/np.sqrt(300),F=.5,S=100/254,
+                                   rainfall_mm=inverse['rainfall_mm']) == pytest.approx(.5)
+        built['model'] = 'M1'
+        (archive/'manifest.json').write_text(json.dumps(built))
+        with pytest.raises(io.RainfallError,match='model identities'):
+            open_results(archive,expected_manifest_sha256=io.digest(archive/'manifest.json'))
     if missing == 'none' and depth == 100:
         result['predictors']['F']['value'] = .1
         manifest.write_text(json.dumps(result))

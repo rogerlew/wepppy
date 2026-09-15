@@ -1,4 +1,4 @@
-"""Materialized local M1 event/design/inverse results and bounded queries."""
+"""Materialized M1/M3 event/design/inverse results and bounded queries."""
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
@@ -14,7 +14,7 @@ from .rainfall_io import (RainfallError, MAX_TEXT, digest, fail, load_predictors
                           number, pinned, read_json, read_table, recheck, write_json, validate_predictors)
 from .staley2017 import probability, rainfall_threshold
 
-__all__ = ['RainfallError', 'RainfallInputs', 'ResultCatalog', 'build_m1_results',
+__all__ = ['RainfallError', 'RainfallInputs', 'ResultCatalog', 'build_m1_results', 'build_results',
            'open_results', 'list_events', 'get_event']
 COMMON = [('duration_minutes',pa.int64()), ('intensity_mm_per_hour',pa.float64()),
           ('rainfall_mm',pa.float64()), ('probability',pa.float64()),
@@ -30,14 +30,14 @@ SCHEMAS = {
 LIMITS = {'events':600_000, 'design':12, 'inverse':300}
 
 
-def _forward(rows, predictors):
+def _forward(rows, predictors, model):
     values = {k:v['value'] for k,v in predictors.items()}
     for row in rows:
         if row['status'] == 'available':
             if any(v is None for v in values.values()):
                 row.update(status='unavailable', reason='missing_predictors')
             else:
-                row['probability'] = probability('M1', row['duration_minutes'], **values, rainfall_mm=row['rainfall_mm'])
+                row['probability'] = probability(model, row['duration_minutes'], **values, rainfall_mm=row['rainfall_mm'])
 
 
 def _targets(values):
@@ -48,8 +48,22 @@ def _targets(values):
     return tuple(sorted(values))
 
 
+def _model(predictors):
+    model = predictors.get('model','M1')
+    if predictors.get('schema_version',1) == 1 and model != 'M1':
+        fail('invalid_input','M3 results dispatch requires version-2 M3 predictors')
+    return model
+
+
 def build_m1_results(inputs: RainfallInputs, output_dir: Path, *, frequency_source: str,
                      return_intervals, durations, target_probabilities) -> dict:
+    """Backward-compatible M1-only entry point; never switches model implicitly."""
+    return build_results(inputs,output_dir,frequency_source=frequency_source,return_intervals=return_intervals,
+                         durations=durations,target_probabilities=target_probabilities,expected_model='M1')
+
+
+def build_results(inputs: RainfallInputs, output_dir: Path, *, frequency_source: str,
+                  return_intervals, durations, target_probabilities, expected_model=None) -> dict:
     """Build a fresh immutable local bundle; contract in docs/rainfall_results.md."""
     context = rainfall.identity(inputs)
     durations = rainfall.selections(durations, rainfall.DURATIONS, 'durations')
@@ -61,8 +75,9 @@ def build_m1_results(inputs: RainfallInputs, output_dir: Path, *, frequency_sour
     artifact_limits = {}
     predictors = load_predictors(inputs.predictor_manifest, inputs.expected_sha256, consumed,
                                  artifact_limits=artifact_limits)
-    if predictors.get('model', 'M1') != 'M1':
-        fail('integration_pending', 'M3 results dispatch is not implemented')
+    model = _model(predictors)
+    if model not in ('M1','M3') or expected_model not in (None,'M1','M3') or (expected_model is not None and model != expected_model):
+        fail('invalid_input', 'M3 results dispatch requires the matching shared result entry point')
     events, df, frequency = rainfall.climate_events(inputs, durations, consumed)
     parsed = {}
     for source, path in (('cli',inputs.cli_frequency_csv),('noaa',inputs.noaa_csv)):
@@ -72,8 +87,8 @@ def build_m1_results(inputs: RainfallInputs, output_dir: Path, *, frequency_sour
         design = rainfall.cli_design(df, intervals, durations, frequency, parsed.get('cli'))
     else:
         design = rainfall.noaa_design(parsed.get('noaa'), intervals, durations)
-    _forward(events, predictors['predictors'])
-    _forward(design, predictors['predictors'])
+    _forward(events, predictors['predictors'],model)
+    _forward(design, predictors['predictors'],model)
     values = {k:v['value'] for k,v in predictors['predictors'].items()}
     inverse = []
     for target in targets:
@@ -82,7 +97,7 @@ def build_m1_results(inputs: RainfallInputs, output_dir: Path, *, frequency_sour
                 result = {'status':'unavailable','reason':'missing_predictors',
                           'rainfall_mm':None,'intensity_mm_per_hour':None}
             else:
-                result = asdict(rainfall_threshold('M1',duration,**values,target_probability=target))
+                result = asdict(rainfall_threshold(model,duration,**values,target_probability=target))
             inverse.append({'target_probability':target,'duration_minutes':duration,
                             'probability':None,**result})
     output = Path(output_dir).absolute()
@@ -104,7 +119,7 @@ def build_m1_results(inputs: RainfallInputs, output_dir: Path, *, frequency_sour
             fail('invalid_input', 'Result table readback differs')
         tables[name] = {'sha256':digest(p),'rows':len(rows)}
     recheck(consumed, limits=artifact_limits)
-    manifest = {'schema_version':1,'status':'complete','model':'M1',
+    manifest = {'schema_version':1,'status':'complete','model':model,
                 'identity':context,'predictor_snapshot':predictors,
                 'sources_sha256':consumed,'frequency':frequency,
                 'frequency_metadata':{k:{'title':v['title'],**v['metadata']} for k,v in parsed.items()},
@@ -112,6 +127,10 @@ def build_m1_results(inputs: RainfallInputs, output_dir: Path, *, frequency_sour
                 'request':{'frequency_source':frequency_source,'return_intervals':list(intervals),
                            'durations':list(durations),'target_probabilities':list(targets)},
                 'tables':tables}
+    if predictors['schema_version'] == 2:
+        from .result_support import copy_support
+        manifest.update(copy_support(Path(inputs.predictor_manifest).parent,output,predictors))
+    recheck(consumed, limits=artifact_limits)
     write_json(output/'manifest.json',manifest)
     return manifest
 
@@ -131,7 +150,7 @@ def open_results(path: Path, *, expected_manifest_sha256: str) -> ResultCatalog:
     consumed = {}
     pinned(p,{str(p):expected_manifest_sha256},consumed,MAX_TEXT)
     m = read_json(p)
-    if m.get('schema_version') != 1 or type(m['schema_version']) is not int or m.get('status') != 'complete' or m.get('model') != 'M1':
+    if m.get('schema_version') != 1 or type(m['schema_version']) is not int or m.get('status') != 'complete' or m.get('model') not in ('M1','M3'):
         fail('invalid_input', 'Unsupported result manifest')
     if not isinstance(m.get('tables'),dict) or set(m['tables']) != set(SCHEMAS):
         fail('invalid_input', 'Unexpected result table names')
@@ -139,6 +158,8 @@ def open_results(path: Path, *, expected_manifest_sha256: str) -> ResultCatalog:
         if not isinstance(m.get(key),dict):
             fail('invalid_input', f'Missing result {key}')
     _validate_manifest(m)
+    from .result_support import read_support
+    limits = read_support(directory,m,consumed)
     events = None
     for name, schema in SCHEMAS.items():
         info = m['tables'][name]
@@ -152,7 +173,7 @@ def open_results(path: Path, *, expected_manifest_sha256: str) -> ResultCatalog:
         _validate_rows(name, table, m)
         if name == 'events':
             events = table
-    recheck(consumed)
+    recheck(consumed,limits=limits)
     return ResultCatalog(m, events)
 
 
@@ -216,6 +237,8 @@ def _validate_manifest(m):
            for k in ('project_id','climate_mode','assessment_id')) or context.get('date_semantics') not in ('simulation_labels','calendar'):
         fail('invalid_input', 'Invalid result identity')
     validate_predictors(m['predictor_snapshot'])
+    if m['model'] != _model(m['predictor_snapshot']):
+        fail('invalid_input', 'Result and predictor model identities disagree')
     request = m['request']
     rainfall.selections(request.get('durations'),rainfall.DURATIONS,'durations')
     rainfall.selections(request.get('return_intervals'),rainfall.INTERVALS,'intervals')
@@ -262,7 +285,7 @@ def _validate_rows(name, table, m):
             fail('invalid_input', 'Unavailable result has probability')
         if name != 'inverse':
             if accumulation is not None:
-                expected_probability = None if missing else probability('M1',duration,**predictors,rainfall_mm=accumulation)
+                expected_probability = None if missing else probability(m['model'],duration,**predictors,rainfall_mm=accumulation)
                 if (row['probability'] != expected_probability or status != ('unavailable' if missing else 'available')
                         or reason != ('missing_predictors' if missing else None)):
                     fail('invalid_input', 'Forward result disagrees with predictor snapshot')
@@ -276,7 +299,7 @@ def _validate_rows(name, table, m):
                 fail('invalid_input', 'Unrequested inverse target')
             expected_inverse = ({'status':'unavailable','reason':'missing_predictors',
                                  'rainfall_mm':None,'intensity_mm_per_hour':None} if missing else
-                                asdict(rainfall_threshold('M1',duration,**predictors,target_probability=target)))
+                                asdict(rainfall_threshold(m['model'],duration,**predictors,target_probability=target)))
             if any(row[k] != v for k,v in expected_inverse.items()):
                 fail('invalid_input', 'Inverse result disagrees with predictor snapshot')
         if reason == 'insufficient_positive_samples' and name != 'design':
