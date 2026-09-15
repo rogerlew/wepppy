@@ -76,7 +76,7 @@ per-project dependencies, not fixtures supplied solely to make one run pass.
 ### Local input contract
 
 Operator entry points and the local schema below define the prepared-source
-handoff. Preparation is explicit; ordinary model execution does not acquire data.
+handoff. Explicit Run M3 also prepares absent sources under the amendment below.
 
 ### Operator entry points
 
@@ -101,7 +101,7 @@ Use `source_preparation.prepare_local_sources` for already prepared local source
 assets. `source_replay.recover_sources` can recover a retained complete HTTP
 transcript using a pinned original receipt; it makes zero network requests,
 preserves failed attempts, and does not assert current remote freshness.
-No reader, preflight or model execution implicitly acquires data. An aborted
+No reader or preflight acquires data. An aborted
 byte/time/identity check requires inspecting its visible diagnostics, not larger
 limits, hidden retries or shared soil-cache refresh.
 
@@ -141,7 +141,8 @@ An empty `{}` primary/fallback entry is malformed, not absent.
 Source vintage and current collection association are separate. Retain raw
 cache retrieval metadata and snapshot hashes; unknown historical survey version
 stays unknown. Newly prepared source metadata cannot claim retroactive version
-proof. No source acquisition is implicit or authorized by this contract.
+proof. Acquisition is restricted to explicit operator preparation or Run M3
+with an absent metadata pointer, as specified below.
 Missing optional source entries remain unavailable; zero usable support is an
 explicit unavailable result, not a successful numerical estimate.
 
@@ -357,7 +358,30 @@ identity-pinned ranges. A supervising process enforces 30-second request/SDA and
 120-second native deadlines even when native callbacks do not return to Python.
 Requests retain start/final records and response bodies with acquisition-time
 hashes. There are no redirects, retries, GDAL URLs or whole-object downloads.
-Preflight and model execution never call this network entry point.
+Preflight never calls this network entry point. Run M3 may call it as below.
+
+### 2026-09-15 Run-preparation amendment
+
+Implementation conformance: pending. Explicit Run M3 on an eligible basin with
+absent `postfire_debris_flow/inputs/soil_sources.json` must acquire and activate
+the bounded sources before calculation, within its existing job. Reuse valid
+present-empty and populated pointers without acquisition; malformed pointers
+fail explicitly. No state read, preflight, M1 run or numerical adapter acquires.
+All existing network, containment and promotion limits remain unchanged.
+
+Verify current attempt/model/frequency and full project authority before delivery
+and inside locked promotion. After promotion rebase only the same attempt's
+prepared-source inventory, pinned to the receipt candidate hash; every other
+input, including raw cache/WAL identity, must remain unchanged. Network runs
+outside locks. Retain source receipt provenance and failed/intermediate outputs.
+Acquisition failure must fail the attempt without replacing accepted results;
+genuine prepared zero support remains unavailable. A successfully promoted
+pointer survives later calculation failure and is reused on retry.
+
+Rationale: first-use Run must not silently produce all-unavailable probabilities
+merely because no operator has prepared optional source files. Existing empty
+pointers retain compatibility and avoid repeated downloads for zero coverage.
+No soil/cache rebuild, scientific-policy change or queue topology change is authorized.
 
 `source_replay.recover_sources` can recover a complete retained transcript after
 local metadata failure, in a fresh visible directory, with zero network requests.

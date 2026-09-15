@@ -1,5 +1,10 @@
 # Postfire Debris Flow Specification
 
+2026-09-15 amendment (implementation pending): explicit Run M3 prepares an absent
+module source pointer using the existing bounded reader and locked activation;
+see [Run preparation](docs/production_m3_runtime.md#2026-09-15-run-preparation-amendment).
+Existing valid pointers are reused; preflight and state reads remain local.
+
 Status: updated 2026-09-14. Production M1 NoDb, upload, prerequisite/freshness,
 RQ execution and minimal UI are implemented under the
 [production contract](docs/production_m1.md). Development validation passed; deployment to other hosts is not implied. M3 production integration
