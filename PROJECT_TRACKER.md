@@ -2,15 +2,15 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-09-14
-**Active Packages**: 37
+**Active Packages**: 36
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
 
-Implemented / development validated: [Staley M3 scientific integration](docs/work-packages/20260914_staley_m3_integration/package.md)
+Completed: [Staley M3 scientific integration](docs/work-packages/20260914_staley_m3_integration/package.md)
 — bounded generic source acquisition, M3/M1 valid support, real RQ/browser/archive
 and SSURGO/STATSGO builder parity; full Python/frontend regressions pass.
-Archival held for SEC-06 owner credential-response/risk-acceptance disposition.
+Closed 2026-09-14 with explicit SEC-06 owner risk acceptance; no rotation or deployment.
 
 Contract preparation: [Modify Landuse MOFE](docs/work-packages/20260911_modify_landuse_mofe/package.md)
 — regenerate selected-hillslope managements and summaries; implementation awaits contract checkpoint.

@@ -187,12 +187,13 @@ restore or an archive-API authorization test.
 - Gate status: **pass**, bounded to the reviewed scientific/source-integrity,
   finalization, user-state/UX and artifact-observability changes.
 - Unresolved correctness findings: high 0, medium 0, low 0.
-- Release recommendation: **hold package closeout**. Security finding SEC-06
-  independently requires owner credential-response confirmation or explicit
-  reviewed risk acceptance. Neither a correctness pass nor new code silently
-  resolves that external security condition. No deployment approval is given.
-- Reviewer sign-off: `source_contract_review`, 2026-09-14; correctness/UX pass,
-  package closeout hold for the separate security-response condition.
+- Release disposition: **development-package closeout approved**. The original
+  reviewer recommendation held only for SEC-06 owner disposition; the owner
+  has now explicitly accepted that risk without rotation. See
+  [primary-agent closeout record](20260914_closeout.md#sec-06-owner-disposition).
+  No deployment approval is given.
+- Reviewer sign-off: `source_contract_review`, 2026-09-14; correctness/UX pass.
+  Owner disposition closes the separate condition; no new reviewer run is claimed.
 
 Parent-reported gates, distinguished from this reviewer's independent runs:
 the final canonical full Python gate completed with exit 0: **8,602 passed,
@@ -218,5 +219,5 @@ resolve SEC-06 or substitute for owner incident response.
   and byte equality, and live browse/download evidence are present as above.
 - [x] No hidden/download-only storage or new project archive exclusion is
   accepted. Builder QA's Git exclusions do not hide or remove local records.
-- [x] Observability approval is bounded to this evidence; it does not waive
-  the external security-response condition.
+- [x] Observability approval is bounded to this evidence; SEC-06 was separately
+  closed by explicit owner risk acceptance, not by this technical approval.

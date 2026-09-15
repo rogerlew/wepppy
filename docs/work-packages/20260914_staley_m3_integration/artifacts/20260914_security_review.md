@@ -48,7 +48,7 @@ unavailability is not a security error or proof of positive M3 acceptance.
 | SEC-03 | High | Network/native execution | Python signal deadlines did not bound blocked native C work; independent reproduction exceeded its request budget. `source_transport.py`, `source_acquisition.py`. | Parent supervision of overall and active request deadlines; shared budgets and latched admission failures. | Resolved; controlled C-blocking request killed within the parent bound. |
 | SEC-04 | Medium | Replay/provenance | Derived collection labels and retained range bytes could be altered before replay; offline replay could appear freshly retrieved. `source_replay.py`, acquisition/parser tests. | Regenerate lineage/query, verify acquisition-time body hashes, pin original native TIFF for legacy transcripts, record zero network requests and unknown original retrieval time. | Resolved; independent tamper rejections and final attribution readback. |
 | SEC-05 | Medium | Browser credentials | Playwright `fill(password)` failure messages include the password; the initial runner persisted raw exceptions/page errors to browsable evidence and stdout. | Persist only fixed failure/stage signals; restrict the privileged login to the authorized HTTPS origin and form action; scan retained evidence without printing values. | Resolved; independent synthetic reproduction and corrected-runner replay below. |
-| SEC-06 | Medium | Credential incident | The earlier unrestricted process diagnostic exposed a Redis credential in tool output, as recorded in the implementation review. The owner said "redis credential is known" and then "continue"; this acknowledges the notice and continued work, not confirmed rotation or explicit acceptance of the residual exposure. | Owner confirms credential response/rotation, or explicitly accepts the recorded exposure without rotation for development-package closeout; never repeat the value in evidence. | Open external response condition; reviewer recommends bounded development-only risk acceptance if explicitly acknowledged, not production-deployment approval. |
+| SEC-06 | Medium | Credential incident | The earlier unrestricted process diagnostic exposed a Redis credential in tool output, as recorded in the implementation review. Earlier acknowledgment alone did not close the finding. | Explicit owner disposition without repeating the credential value. | Closed by owner-accepted residual risk on 2026-09-14: “we aren't rotating the redis credential. I accept the risk.” Development-package closeout only; no rotation or production-deployment approval. |
 
 No unresolved medium/high implementation finding remains in production
 checkpoint `b998d44e2` or the reviewed additive final UX correction. SEC-06 is
@@ -59,11 +59,11 @@ not silently accepted or considered repaired by subsequent code changes.
 - Production code boundary gate: **pass**, bounded to the reviewed checkpoint
   and additive final UX correction described below.
 - Artifact observability gate: **pass**, with final live/archive evidence below.
-- Package security gate: **fail / hold** pending SEC-06 response or explicit
-  owner acceptance of the recommended bounded development-only residual risk.
-- Unresolved findings: high 0, medium 1, low 0.
-- Release recommendation: hold package closeout; this is not production
-  deployment approval. No production deployment occurred in this review.
+- Package security gate: **pass with owner-accepted residual risk**; the owner
+  has satisfied the reviewer's explicit SEC-06 disposition condition.
+- Unresolved findings: high 0, medium 0, low 0; accepted residual risks: SEC-06.
+- Closeout disposition: approved for this development package, not production
+  deployment. No production deployment or credential rotation occurred.
 
 ## Surface checks
 
@@ -93,7 +93,7 @@ exact-value scan found zero matches in 524 text files across package artifacts
 and both live validation roots; only counts/paths were emitted, never values.
 This expands the earlier 15-file scan. It is not proof that the earlier Redis
 tool-output exposure never occurred, a rotation check, or a scan of every binary
-or encoded representation. SEC-06 remains an explicit incident-response condition.
+or encoded representation. SEC-06 is explicitly owner-accepted, not remediated.
 
 ### 3) Input validation and output safety
 
@@ -264,15 +264,15 @@ or warnings); American English spelling preview applied to prose only.
 
 ## Residual risk and completion conditions
 
-No new risk acceptance is recorded. The owner acknowledgment and continued-work
-authority for SEC-06 are retained exactly above. They do not establish rotation.
-The reviewer can recommend accepting that recorded exposure for development
-package closeout, provided the owner explicitly accepts proceeding without
-rotation; this does not authorize deployment or further credential disclosure.
+Owner disposition recorded by the primary agent on 2026-09-14: “we aren't
+rotating the redis credential. I accept the risk.” This satisfies the independent
+reviewer's recommended development-package risk-acceptance condition. The
+earlier hold is lifted; no rotation, remediation or exposure erasure is claimed.
+No deployment or further credential disclosure is authorized. See
+[closeout](20260914_closeout.md#sec-06-owner-disposition).
 
-The only remaining security closeout condition is SEC-06 owner incident response
-or explicit acceptance of the recommended residual risk. Scientific, overall QA
-and full-suite completion remain the responsible reviewers' separate gates.
+No security closeout condition remains. Scientific, QA and full-suite completion
+are recorded separately in the final acceptance and correctness artifacts.
 
 The parent reports activation of recovered receipt
 `source_preparation/d0a0f389b467467ab56d69b1b2b14701/receipt.json`, SHA-256
@@ -283,10 +283,10 @@ independently as described above.
 
 ## Sign-off
 
-- Security reviewer: `source_boundary_review`, 2026-09-14; scoped code pass,
-  package closeout hold as above.
-- Package owner: acknowledges the Redis notice and authorizes continued work;
-  explicit SEC-06 risk acceptance or incident-response confirmation is pending.
+- Security reviewer: `source_boundary_review`, 2026-09-14; scoped code pass and
+  conditional closeout recommendation preserved. No new reviewer run is claimed.
+- Package owner: explicitly accepts SEC-06 without rotation and directs package
+  completion. Primary-agent closeout records fulfillment of that condition.
 
 ## Artifact observability gate
 

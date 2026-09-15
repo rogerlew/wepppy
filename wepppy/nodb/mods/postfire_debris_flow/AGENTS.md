@@ -4,10 +4,10 @@
 - Track delivery and loose ends in [implementation_roadmap.md](implementation_roadmap.md).
   Update the roadmap, specification, and affected detailed contracts together
   as implementation progresses; roadmap proposals are not accepted contracts.
-- Next scientific contract: [M3/shared support](docs/production_m3.md). M3 must
+- Current scientific contract: [M3/shared support](docs/production_m3.md). M3 must
   consume raw soil records without changing SSURGO/STATSGO building behavior.
 - Status: M1/M3 scientific backends and production NoDb/UI/RQ are implemented;
-  live acceptance is tracked in the M3 package. Reports/dashboard remain pending.
+  development acceptance is complete in the closed M3 package. Reports/dashboard remain pending.
 - Preserve accepted decisions and explicitly label proposals and unresolved inputs.
 - Follow `../../AGENTS.md` and the repository contract-first standard before
   adding NoDb, UI, API, or RQ behavior. Contract ancestors for this increment are listed below.

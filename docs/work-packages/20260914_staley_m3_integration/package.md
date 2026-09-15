@@ -1,9 +1,10 @@
 # Production M3 and valid-support estimates
 
-Status: bounded acquisition and production integration are implemented at
-`6f64d45a0` / `b998d44e2`; development multi-basin/browser/archive acceptance
-passes, including the final full Python/frontend regressions. Package archival
-remains on hold for owner disposition of SEC-06, the recorded credential exposure.
+Status: **Closed 2026-09-14**. Bounded acquisition and production integration are
+implemented at `6f64d45a0` / `b998d44e2`, with final UX/evidence at `e36c3eb54`.
+Development multi-basin/browser/archive and full Python/frontend gates pass.
+The owner explicitly accepted SEC-06 without credential rotation; see the
+[closeout and owner disposition](artifacts/20260914_closeout.md).
 Strict material rules were rejected and recorded-depth policy accepted.
 See [replacement assessment](artifacts/depth_policy_assessment.md),
 [inventory](artifacts/source_inventory.md),
@@ -92,8 +93,9 @@ Security impact: **high** (worker subprocesses, source files/SQLite, publication
 download and optional bounded source acquisition). Require independent contract
 reviews before the standalone checkpoint and dedicated final correctness and
 security artifacts with no open medium/high findings. Independent correctness,
-soil-builder QA and security reviews have run; the sole external hold is SEC-06.
+soil-builder QA and security reviews have run; SEC-06 is closed by explicit
+owner-accepted residual risk, with no open medium/high findings.
 See [development acceptance](artifacts/20260914_live_validation.md) and the
 [security review](artifacts/20260914_security_review.md). The
-[ExecPlan](prompts/active/execplan.md) and [tracker](tracker.md) remain active
-until explicit credential-response or risk-acceptance disposition permits closure.
+[ExecPlan](prompts/completed/execplan.md) and [tracker](tracker.md) record completion.
+No production deployment or credential rotation occurred.

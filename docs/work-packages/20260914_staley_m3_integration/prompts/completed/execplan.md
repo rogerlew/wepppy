@@ -1,9 +1,9 @@
 # Complete production M3 and valid-support estimates
 
 
-This is a living ExecPlan maintained under `docs/prompt_templates/codex_exec_plans.md`.
-Keep Progress, Surprises & Discoveries, Decision Log and Outcomes & Retrospective
-current, and update this package's tracker at every handoff.
+Completed 2026-09-14. This archived ExecPlan records implementation and acceptance
+under `docs/prompt_templates/codex_exec_plans.md`; it is historical evidence,
+not living governance. All package gates are complete.
 
 ## Purpose / Big Picture
 
@@ -98,12 +98,15 @@ production deployment is authorized by this package.
 - [x] Complete real browser/RQ evidence and independent implementation reviews;
   final npm lint/full suite passes (111 suites, 877 tests), focused Python 70 pass.
 - [x] Synchronize durable docs and record scientific/validation limitations.
-- [ ] Obtain explicit owner response or development-only risk acceptance for
-  SEC-06, then close the security gate and archive this plan. Do not infer
-  rotation/acceptance from “redis credential is known” or continued execution.
+- [x] (2026-09-14) Owner explicitly accepts SEC-06 without rotation and directs
+  completion. Security condition satisfied; close package and archive this plan.
 
 ## Surprises & Discoveries
 
+
+The final administrative hold is resolved by explicit owner risk acceptance.
+This changes the closeout disposition, not the implementation, scientific
+limitations or completed validation; another runtime test cycle is unnecessary.
 
 Final browser review found that full soil/SBS coverage plus a generic partial
 completion message concealed the terrain reason. Accepted state now includes a
@@ -170,6 +173,13 @@ scientific proposals, not prerequisites for making this development basin pass.
 
 ## Decision Log
 
+
+Decision (2026-09-14): owner explicitly states “we aren't rotating the redis
+credential. I accept the risk.” Record SEC-06 as closed by development-only
+owner risk acceptance and complete archival without another confirmation.
+Rationale: this directly satisfies the independent security review's remaining
+condition. No rotation, production deployment or additional disclosure is allowed.
+This supersedes the historical hold below; see `artifacts/20260914_closeout.md`.
 
 Decision (2026-09-14): retain the package as active until SEC-06 receives an
 explicit owner credential-response or development-only risk-acceptance record.
@@ -266,9 +276,10 @@ The final explanatory UI correction passes genuine and synthetic M3 browsers,
 70 production/runtime tests and all 877 npm tests. Final M1 compatibility,
 all final-bundle arithmetic and protected-byte audit pass. The final full Python
 sweep passes: 8,602 passed, 103 skipped in 1034.93 s. Final implementation and
-evidence are committed at `e36c3eb54`. SEC-06 owner disposition is the sole external
-closure condition; see `artifacts/20260914_live_validation.md` for all evidence
-and qualifications. Do not archive the plan while that condition remains open.
+evidence are committed at `e36c3eb54`, with final gate records at `479bc6d8c`.
+The owner explicitly accepted SEC-06 without rotation; every package gate is
+complete and this plan is archived. See `artifacts/20260914_live_validation.md`
+for evidence/qualifications and `artifacts/20260914_closeout.md` for disposition.
 The older checkpoint paragraphs below describe historical state, not a renewed
 permission gate. Owner authority remains sufficient for the recorded scope.
 
@@ -562,4 +573,5 @@ Acceptance revision: record actual generic source delivery, real development
 workflows, soil/downstream parity, archive/browse retention, the partial-reason
 UX correction and the remaining external credential-response closure hold.
 Final validation revision: record all completed technical acceptance gates and
-the final full Python result; leave only SEC-06 disposition/archival unchecked.
+the final full Python result. Closure revision: record explicit owner SEC-06
+risk acceptance without rotation and archive the completed plan.

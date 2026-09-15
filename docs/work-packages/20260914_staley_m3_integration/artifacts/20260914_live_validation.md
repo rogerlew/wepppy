@@ -1,8 +1,8 @@
 # Development acceptance and final validation
 
 Status: implementation, live technical acceptance and final full Python/frontend
-regressions complete. Package closure still
-requires owner disposition of SEC-06 in the [security review](20260914_security_review.md).
+regressions complete. Package closed 2026-09-14 after explicit owner acceptance
+of SEC-06 without rotation; see [closeout](20260914_closeout.md).
 No production deployment, shared soil rebuild or shared cache refresh occurred.
 
 ## Scope and identities
@@ -156,4 +156,4 @@ for failure JSON, native THICK, HTTP body, receipt, copied WAL and exact mask.
 Final scientific/runtime limits: historical cache lineage vintage unknown;
 genuine basin terrain unavailable; synthetic positive evidence is not field
 validation; reports/dashboard and production deployment remain outside scope.
-SEC-06 needs explicit owner response/acceptance before package archival.
+SEC-06 is closed by explicit owner risk acceptance; package archival is complete.

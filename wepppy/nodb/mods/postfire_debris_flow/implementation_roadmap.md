@@ -5,11 +5,12 @@ are implemented. M1/M3 scientific composition, shared valid-support calculations
 authoritative preparation and publication are implemented. Dashboard remains pending.
 
 Local M3 terrain/composition and basin-derived local soil-source preparation are
-reviewed in the active M3 package. Two independent grid/key fixtures exercise
+reviewed in the completed M3 package. Two independent grid/key fixtures exercise
 authoritative activation and native runtime; 14 tests pass. Live development
 M1/M3 browser/RQ, positive synthetic M3, builder parity and archive/browse checks
-pass. The active package retains final regression evidence and a separate
-credential-incident disposition gate; no production deployment is claimed.
+pass. The package closed 2026-09-14 with final regression evidence and explicit
+owner acceptance of the recorded credential risk without rotation. No production
+deployment is claimed; current behavior remains governed by the contracts below.
 
 ## Maintenance Contract
 

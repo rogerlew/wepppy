@@ -1,11 +1,11 @@
 # Production M3 integration tracker
 
-Status: checkpoint `89d673c38` and isolated implementation `587c6b8de` committed;
+Status: **Closed 2026-09-14**. Checkpoint `89d673c38` and isolated implementation `587c6b8de` committed;
 generic preparation contract `7328a0004`, replay refinement `0792c7e59` and
 reviewed local preparation/M3 increment `4b4e77733` committed. Production
 integration committed at `b998d44e2`; live development acceptance, builder parity
-and archive/browse checks pass. Final full regression passes; package
-archival remains held for SEC-06 owner disposition. See
+and archive/browse checks pass. Final full regression passes; SEC-06 is closed
+by explicit owner acceptance without rotation. See [closeout](artifacts/20260914_closeout.md) and
 [consolidated evidence](artifacts/20260914_live_validation.md).
 Last updated: 2026-09-14.
 
@@ -42,10 +42,15 @@ Last updated: 2026-09-14.
 - [x] Final post-UX full Python gate: 8,602 passed, 103 skipped (1034.93 s);
   final npm lint and 111 suites/877 tests pass. Code/evidence commit `e36c3eb54`.
 - [x] Synchronize durable scientific/runtime/UI docs and retain acceptance limits.
-- [ ] Obtain explicit SEC-06 owner credential-response/risk-acceptance disposition;
-  only then close the package and archive the plan.
+- [x] Owner explicitly accepts SEC-06 without rotation; close the package and
+  archive the completed plan. No remaining package gates.
 
 ## Decisions
+
+- **2026-09-14 — Final owner disposition:** “we aren't rotating the redis
+  credential. I accept the risk.” Close SEC-06 by explicit development-only
+  risk acceptance and finish archival. No further confirmation, rotation or
+  production deployment; this supersedes the earlier closure hold below.
 
 - **2026-09-14 — Closure hold:** all medium/high implementation findings are
   corrected; the earlier Redis exposure still needs explicit owner response or
@@ -81,8 +86,8 @@ Last updated: 2026-09-14.
 
 ## Risks and remaining decisions
 
-The only external closure decision is SEC-06 in the
-[security review](artifacts/20260914_security_review.md). Genuine terrain
+No closure decisions remain. SEC-06 in the
+[security review](artifacts/20260914_security_review.md) is owner-accepted. Genuine terrain
 unavailability and unknown historical cache vintage remain scientific limits,
 not grounds to weaken the model or modify shared source data. The historical
 notes below record successive checkpoints, not current permission gates.
@@ -167,5 +172,5 @@ No Python/npm suites warranted for this docs-only increment. Documentation
 validation passed: package (6 files), module (19 files), ADR, UI contract and
 project tracker; zero errors/warnings. Root AGENTS size is 160 lines and
 `git diff --check` passed. Unrelated quality reports remain
-untouched. Next agent starts milestone 1 of [ExecPlan](prompts/active/execplan.md),
+untouched. Next agent starts milestone 1 of [ExecPlan](prompts/completed/execplan.md),
 not M3 code edits. Closed predecessor packages remain immutable.
