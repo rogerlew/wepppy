@@ -2,6 +2,8 @@
 
 This directory holds top-level documentation that supports the codebase. Use these guides to locate the right place for architectural notes, UI references, and multi-step initiatives.
 
+- [WEPPcloud stack](weppcloud-stack.md) — Repository roles, service topology, model data flow, and integration boundaries across the sibling repositories.
+
 ## Directory Guide
 - `work-packages/` — Formal, multi-deliverable work packages with full templates, trackers, and prompts.
 - `mini-work-packages/` — Lightweight “mini packages” for focused efforts (for example, one-off controller upgrades) that still need a tracked plan or retrospective but do not warrant the full work-package structure.

@@ -1,0 +1,1031 @@
+# WEPPcloud stack
+
+> Draft based on the local repositories under `~/src`, inspected 2026-09-15.
+> This is a source-level map, not a verification of the versions deployed on a server.
+
+## Overview
+
+WEPPcloud turns terrain, soil, vegetation, climate, and management data into
+Water Erosion Prediction Project (WEPP) simulations and browsable results.
+The stack combines a Python web application and workflow engine, Rust terrain
+and data-processing components, a Python soil-property model, and Fortran
+terrain-processing, climate-generation, and simulation executables.
+A separate bootstrap repository supports running
+downloaded projects on a personal computer.
+
+The ten repositories have different integration boundaries: Python imports,
+command-line executables, generated files, and downloadable project bundles.
+They are integrated as libraries, tools, model engines, and clients.
+
+| Repository | Role | How WEPPcloud uses it |
+| --- | --- | --- |
+| `wepppy` | Application, workflow orchestration, input generation, execution wrappers, reports, and infrastructure | Hosts the web application and workers; coordinates the other components |
+| `wepppyo3` | Rust routines exposed to Python through PyO3 | Imported by Python for native processing; current WEPPpy also requires its WEPP interchange API |
+| `weppcloud-wbt` | WEPPcloud's WhiteboxTools fork for terrain processing and delineation | Python wrapper launches the compiled terrain tools |
+| `topaz` | Fortran terrain analysis and drainage delineation | WEPPpy's TOPAZ adapter launches bundled tools; their raster/network outputs feed Peridot's TOPAZ abstraction path |
+| `peridot` | Converts delineated terrain into an explicit watershed graph and WEPP slope inputs | WEPPpy launches vendored command-line binaries and consumes their files |
+| `rosetta` | Estimates soil hydraulic properties from soil measurements | Imported by the soil-building code |
+| `jimf-cligen532` | CLIGEN 5.32-family Fortran climate generator, source and executables | WEPPpy's CLIGEN wrapper runs a selected bundled executable with station parameters to produce WEPP `.cli` climate inputs |
+| `wepp-forest` | Forest-oriented WEPP simulation source and releases | Compiled executables are vendored into WEPPpy and selected by the runner |
+| `wepp-forest-revegetation` | Separate WEPP variant with vegetation-recovery and soil-conductivity behavior | Supplies a specialized model lineage; the desktop bootstrap explicitly supports a revegetation executable |
+| `wepppy-win-bootstrap` | Downloads and executes prepared WEPPcloud projects locally | Consumes exported projects and runs bundled model binaries outside the server stack |
+
+## Relationships at a glance
+
+Arrows below describe calls or artifact transfers. The model boxes represent
+compiled releases from the source repositories; workers do not compile Fortran
+for each project.
+
+```mermaid
+flowchart TD
+    U[Browser or API client] --> W[wepppy: web app and job API]
+    W --> Q[Redis and RQ workers]
+    Q --> P[wepppy: run controllers and input builders]
+    D[Terrain, soils, land cover, climate data] --> P
+    P -->|WBT backend| T[weppcloud-wbt: terrain tools]
+    P -->|TOPAZ backend| TP[topaz: terrain and drainage tools]
+    T -->|Delineation rasters and network| A[peridot: watershed abstraction]
+    TP -->|TOPAZ rasters and network| A
+    P -->|Launch abstraction| A
+    A -->|Slope files and watershed tables| P
+    P --> R[rosetta: soil hydraulic estimates]
+    R -->|Parameters for soil construction| P
+    P -->|Station parameters and climate options| CG[jimf-cligen532: CLIGEN climate generator]
+    CG -->|WEPP .cli climate files| P
+    P <--> N[wepppyo3: Python-callable Rust routines]
+    P --> I[WEPP input files and run controls]
+    I --> F[Selected WEPP executable: wepp-forest or compatible variant]
+    F --> O[Model outputs]
+    O --> X[wepppy and wepppyo3: interchange and reports]
+    X --> V[Query engine, maps, reports, downloads]
+    V --> U
+    I --> B[Exported project bundle]
+    B --> C[wepppy-win-bootstrap]
+    C --> L[Bundled desktop WEPP or revegetation executable]
+    RF[wepp-forest-revegetation source] -.->|Specialized executable lineage| L
+```
+
+WBT and TOPAZ are alternative delineation backends. The selected backend
+determines drainage and terrain partitions; Peridot turns those partitions into
+model elements and slope profiles. Rosetta contributes soil parameters. CLIGEN
+generates climate inputs for workflows that select it; WEPPpy also supports
+other climate-data workflows. WEPP performs the physical simulation. WEPPpy
+coordinates those stages and exposes their results.
+
+Sources for the added components: [TOPAZ repository](../../topaz/README.md),
+[WEPPpy TOPAZ adapter](../wepppy/topo/topaz/topaz.py),
+[CLIGEN repository](../../jimf-cligen532/README.md), and
+[WEPPpy CLIGEN wrapper](../wepppy/climates/cligen/README.md).
+
+## Repository details
+
+### wepppy — application and orchestration
+
+`wepppy` is both the Python package and the repository containing much of the
+surrounding WEPPcloud application stack.
+
+- **Web interface:** Flask/Gunicorn routes, templates, JavaScript controllers,
+  authentication, run controls, maps, and reports in `wepppy/weppcloud/`.
+- **Run state:** NoDb controllers in `wepppy/nodb/` persist run configuration to
+  files, coordinate mutations with locks, and use Redis for caching.
+- **Background work:** `wepppy/rq/` executes long-running jobs. The FastAPI
+  `rq-engine` provides job submission, status, and cancellation APIs.
+- **Input construction:** terrain adapters, climate builders, soils, land cover,
+  management files, and optional modules assemble a runnable model project.
+- **Model execution:** the top-level `wepp_runner/` package writes run-control
+  files and launches hillslope and watershed executables.
+- **Results:** `wepppy/wepp/interchange/` coordinates native output conversion;
+  the query engine uses DuckDB to query run artifacts such as Parquet files.
+- **Operations:** `docker/`, `services/`, `wctl/`, and `scripts/` provide images,
+  service definitions, telemetry, and deployment tooling.
+
+Source entry points: [architecture](../ARCHITECTURE.md),
+[NoDb concurrency contract](schemas/nodb-persistence-concurrency-contract.md),
+[RQ dependency catalog](../wepppy/rq/job-dependencies-catalog.md), and
+[WEPP runner](../wepp_runner/README.md).
+
+#### Documentation
+
+WEPPpy maintains documentation for different audiences and purposes. File names
+help readers navigate, but authority comes from the applicable governance and
+explicit contract references, not a filename alone.
+
+| Documentation class | Purpose and audience | Examples |
+| --- | --- | --- |
+| `AGENTS.md` | Instructions for coding agents and contributors: scope, invariants, subsystem routing, required checks, and operational boundaries. Root guidance provides the map; nearer subsystem instructions refine the local workflow | [Root guide](../AGENTS.md), [NoDb guide](../wepppy/nodb/AGENTS.md), [runner guide](../wepp_runner/AGENTS.md) |
+| `README.md` / `readme.md` | Repository or module entry points for humans and agents: purpose, architecture, capabilities, setup, APIs, examples, artifacts, testing, and links to deeper contracts. Scope and detail vary by module | [Project overview](../readme.md), [RUSLE module README](../wepppy/nodb/mods/rusle/README.md), [README authoring guide](prompt_templates/readme_authoring_template.md) |
+| `ENDUSER.md` | Task-oriented guidance for nondeveloper scientific and land-management users: when to use a feature, prerequisites, UI choices, output interpretation, units, assumptions, limitations, and troubleshooting | [Gridded RUSLE guide](../wepppy/weppcloud/routes/usersum/weppcloud/models/gridded-rusle/ENDUSER.md), [end-user authoring guide](../wepppy/weppcloud/routes/usersum/weppcloud/enduser-authoring-guide.md), [Omni guide](../wepppy/nodb/mods/omni/ENDUSER.md) |
+| Model and subsystem specifications | Precise scientific and software contracts: equations, assumptions, data sources, units, parameter choices, supported modes, output schemas, and validation obligations. Developers implement and reviewers assess against the current canonical contract | [RUSLE specification](../wepppy/nodb/mods/rusle/specification.md), [feature registry specification](../wepppy/weppcloud/feature_registry/specification.md) |
+| UI standards and guidance (`docs/ui-docs/`) | Shared presentation and interaction guidance for frontend contributors: reusable controls and macros, layout, typography, themes, accessibility, and control-specific styling. The directory also contains design and migration records; canonical references and document status distinguish current requirements from plans and history | [UI documentation map](ui-docs/README.md), [style guide](ui-docs/ui-style-guide.md), [accessibility guidance](ui-docs/accessiblity.md), [theme system](ui-docs/theme-system.md) |
+| UI and controller contracts | Canonical behavior for controller lifecycle, DOM hooks, requests, job status, errors, and feature-specific interactions. These connect browser behavior to server and persistence contracts and provide acceptance criteria for implementation and tests | [Shared controller contract](ui-docs/controller-contract.md), [SBS control contract](ui-docs/contracts/sbs-control-contract.md), [contract-first change standard](standards/contract-first-change-standard.md) |
+| Shared schemas, standards, and ADRs | Cross-cutting interface/behavior contracts, engineering rules, and recorded architectural or parameterization decisions with rationale | [RQ response contract](schemas/rq-response-contract.md), [parameterization ADR standard](standards/parameterization-adr-standard.md), [RUSLE surface-rock decision](adrs/ADR-0004-rusle-scenario-sbs-surface-rock-partition.md) |
+| Work-package documentation | Time-bounded execution records: problem and acceptance criteria, active plans, progress, decisions, tests, reviews, and release evidence. Durable rules are promoted to canonical documents before closure; closed packages remain historical provenance | [Work-package guide](work-packages/README.md), [ExecPlan guidance](prompt_templates/codex_exec_plans.md) |
+
+Gridded RUSLE illustrates the complementary layers: its end-user guide explains
+factor choices and how to interpret the resulting detachment map; the module
+README explains the build workflow and integration; the specification records
+the scientific methods and artifact contracts. Related ADRs explain why
+particular parameterization choices were made, while work packages retain the
+evidence for implementing and reviewing changes. The RUSLE specification also
+distinguishes implemented behavior from planned or optional direction; the
+presence of a method in the document does not establish that it is deployed.
+
+UI documentation supplies another complementary layer: the style guide defines
+reusable presentation patterns, while controller and feature contracts define
+observable behavior and integration obligations. The shared controller contract
+covers repeatable initialization, required DOM hooks, shared request helpers,
+and asynchronous job feedback. It also requires checking rendered controls,
+including relevant upload and error states; DOM assertions alone do not establish
+visual correctness. For Pure UI and UI-coupled WEPPcloud/NoDb/RQ changes, the
+contract-first standard governs amendments to intended behavior before
+implementation. Durable UI contracts live alongside the shared guidance in
+`docs/ui-docs/` and `docs/ui-docs/contracts/`, with cross-cutting API and data
+contracts in `docs/schemas/`; work packages retain the change and review evidence.
+
+Selected documentation is published through WEPPcloud's in-app usersum browser.
+Its explicit manifest and navigation configuration determine inclusion and
+role-aware visibility; creating an `ENDUSER.md` or README does not automatically
+publish it. See the [documentation engine specification](../wepppy/weppcloud/routes/usersum/specification.md).
+
+### wepppyo3 — native routines called from Python
+
+PyO3 exposes Rust functions as Python extension modules. This keeps native
+processing within the Python workflow without launching a separate web service.
+
+The inspected checkout contains four Cargo workspace members:
+
+| Member | Responsibility visible in this checkout |
+| --- | --- |
+| `raster` | Shared raster implementation used by the native code |
+| `raster_characteristics` | Raster summaries, including modal and median values within raster-defined regions |
+| `cli_revision` | WEPP climate-file processing, exposed through `wepppyo3.climate` |
+| `wepp_viz` | Native helpers for WEPP visualization |
+
+Packaged extensions live under platform/Python-specific `release/` directories.
+WEPPpy's Dockerfiles configure import paths for the Linux Python 3.12 release.
+
+**Local checkout mismatch:** current WEPPpy additionally imports
+`wepppyo3.wepp_interchange` and requires native interchange symbols. That module
+is absent from the inspected sibling checkout, as are the `docs/module-registry.md`
+and `docs/architecture-and-boundaries.md` files referenced by WEPPpy's architecture
+guide. These local checkouts therefore do not, by themselves, establish a
+compatible complete runtime. The broader native API is a requirement visible
+in the WEPPpy consumer, not an implementation verified in this sibling snapshot.
+
+Sources: [Cargo workspace](../../wepppyo3/Cargo.toml),
+[packaged raster API](../../wepppyo3/release/linux/py312/wepppyo3/raster_characteristics/__init__.py),
+[WEPP interchange contract](../wepppy/wepp/interchange/wepppyo3-interchange-spec.md),
+[native import boundary](../wepppy/wepp/interchange/_rust_interchange.py), and
+[startup preflight](../docker/wepppyo3-interchange-preflight.py).
+
+### weppcloud-wbt — terrain and drainage delineation
+
+This Rust fork of WhiteboxTools supplies WEPPcloud-specific hydrologic tools
+alongside the underlying GIS and raster framework. The Python-facing
+`WBT/whitebox_tools.py` wrapper invokes the compiled `whitebox_tools` executable.
+
+Its responsibilities include DEM conditioning, flow directions, channel-network
+construction and pruning, outlet discovery, watershed delineation, and
+TOPAZ-style hillslope identifiers. Examples include `HillslopesTopaz`,
+`FindOutlet`, `StreamJunctionIdentifier`, and `PruneStrahlerStreamOrder`.
+These outputs feed Peridot and other WEPPpy terrain workflows.
+
+WEPPpy's WBT adapter writes run-scoped artifacts under `dem/wbt/`, including
+terrain, flow-direction, hillslope, and network products. WBT is one supported
+delineation backend; some WEPPcloud workflows specifically require it, including
+automatic outlet discovery and reuse of precomputed channel rasters.
+
+Sources: [toolkit README](../../weppcloud-wbt/README.md),
+[WEPPpy adapter](../wepppy/topo/wbt/wbt_topaz_emulator.py), and
+[release/cutover guide](dev-notes/weppcloud-wbt-release-cutover.md).
+
+### peridot — watershed graph and slope abstraction
+
+Peridot is a Rust command-line application that consumes existing delineation
+artifacts and represents channels, hillslopes, flowpaths, and optional field
+intersections as an explicit graph. It derives the geometry used by WEPP.
+
+Principal entry points are:
+
+- `abstract_watershed` for TOPAZ `.ARC` inputs.
+- `wbt_abstract_watershed` for WBT-derived inputs.
+- `sub_fields_abstraction` for agricultural field/hillslope intersections.
+- `trace_downslope_flowpath` and `subfield_channel_connectivity` for focused
+  connectivity workflows.
+
+The watershed stage emits `watershed/slope_files/`, `channels.parquet`,
+`hillslopes.parquet`, `channels.geojson`, `network.txt`, and a generated
+`README.md` manifest. Full flowpath tables and profiles are conditional outputs.
+Representative-flowpath mode intentionally changes the abstraction strategy
+and disables full flowpath export.
+
+WEPPpy's runner invokes binaries in `wepppy/topo/peridot/bin/`, records process
+output in `_peridot.log`, and performs downstream table/manifest processing.
+The sibling Rust checkout is the development source; its presence alone does
+not replace those vendored executables.
+
+Sources: [Peridot overview](../../peridot/README.md),
+[output contract](../../peridot/docs/contracts/watershed-output-contract.md), and
+[WEPPpy runner](../wepppy/topo/peridot/peridot_runner.py).
+
+### rosetta — soil hydraulic parameter estimation
+
+Rosetta is a Python implementation of soil pedotransfer functions: it estimates
+hydraulic properties from more commonly available measurements such as sand,
+silt, clay, and bulk density. Outputs include soil-water retention parameters,
+saturated hydraulic conductivity, and optional field-capacity and wilting-point
+estimates.
+
+WEPPpy's SSURGO builder imports `Rosetta2` and `Rosetta3`. It uses predictions
+where the soil-building contract calls for estimation or replacement of invalid
+water-content values. WEPPpy owns the selection rules, unit conversions,
+validation, and final WEPP soil-file construction.
+
+The repository includes neural-network/model data in `db/rosetta.duckdb` and
+associated Parquet files. This is a bundled model-data store, separate from the
+WEPPcloud account database and the per-run query engine. Docker image builds
+install Rosetta as a Python package.
+
+Sources: [Rosetta README](../../rosetta/README.md),
+[SSURGO implementation](../wepppy/soils/ssurgo/ssurgo.py), and
+[soil-building documentation](../wepppy/soils/README.md).
+
+### wepp-forest — WEPP simulation engine
+
+This repository contains the forest-oriented Fortran WEPP source, build tools,
+release executables, and numerical regression fixtures. The model simulates
+water balance, runoff, erosion, sediment transport, and watershed routing using
+the input files prepared by WEPPpy.
+
+The build supports watershed (`wepp`) and hillslope (`wepp_hill`) executables.
+WEPPpy distributes selected releases under `wepp_runner/bin/`; the runner
+resolves the configured executable and its hillslope companion. Release JSON
+sidecars describe capabilities that affect run prompts and hillslope-pass
+formats, including modern HBP support. Binary and input-format compatibility
+is therefore part of the integration contract.
+
+The source checkout and the server's selected release are separate identities.
+Editing or building the sibling repository does not automatically change the
+binary selected for a WEPPcloud run.
+
+Sources: [model README](../../wepp-forest/README.md),
+[runner implementation](../wepp_runner/wepp_runner.py), and
+[prompt/capability contract](../wepp_runner/README.md#watershed-prompt-contracts-legacy-vs-modern-binaries).
+
+### wepp-forest-revegetation — specialized model variant
+
+This separate Fortran source tree contains changes associated with vegetation
+recovery and its interaction with soil hydraulic behavior. In the inspected
+source, soil format `9005` reads additional texture/conductivity fields;
+`infpar.for` uses ground cover in conductivity calculations; and `grow.for`
+contains revegetation-specific growth logic.
+
+It occupies the simulation-engine layer. It is not a Python vegetation
+preprocessor or a second model stage that always runs after `wepp-forest`.
+Use depends on the selected executable and compatible prepared inputs.
+
+The desktop bootstrap explicitly selects `bin/wepp_reveg.exe` with its
+`--revegetation` option. The bootstrap README describes this workflow for
+`9005` soils. The inspected sources do not establish that every server-side
+revegetation run uses a binary built from this exact checkout, or that the
+current forest and revegetation branches have identical fixes.
+
+Sources: [build README](../../wepp-forest-revegetation/README.md),
+[soil input reader](../../wepp-forest-revegetation/src/input.for),
+[infiltration parameters](../../wepp-forest-revegetation/src/infpar.for), and
+[growth code](../../wepp-forest-revegetation/src/grow.for).
+
+### wepppy-win-bootstrap — local project execution
+
+This repository provides download scripts, a Python project runner, supporting
+input-preparation/post-processing scripts, and bundled WEPP executables.
+Its main workflow is:
+
+1. Download a prepared WEPPcloud project and extract it locally.
+2. Read the project's existing `wepp/runs/` inputs and run-control files.
+3. Execute hillslopes, in parallel by default, then the watershed simulation.
+4. Optionally perform water-year calculations or explicit input preparation.
+
+The runner selects `wepppy-win-bootstrap.exe` by default on Windows and supports
+the revegetation executable. The repository also documents an Apple Silicon
+workflow, and the runner has a macOS ARM64 binary selection path.
+
+This extends WEPPcloud's prepared-project workflow to local compute. It does not
+reproduce the web application, RQ services, or the whole geospatial preprocessing
+environment. Reproducibility depends on preserving inputs and knowing which
+desktop model executable ran them.
+
+The similarly named **WEPPcloud Bootstrap** feature inside WEPPpy is a separate
+Git-backed, server-side input-editing workflow. See its
+[specification](weppcloud-bootstrap-spec.md).
+
+Sources: [desktop README](../../wepppy-win-bootstrap/README.md) and
+[project runner](../../wepppy-win-bootstrap/scripts/run_project.py).
+
+## End-to-end data flow
+
+| Stage | Main owner | Artifacts or interface passed forward |
+| --- | --- | --- |
+| Create/configure project | WEPPpy web app and NoDb | Run configuration, spatial extent, outlet, model/scenario settings |
+| Acquire and prepare data | WEPPpy builders and data services | DEM, soil/land-cover rasters, climate data, management selections |
+| Delineate terrain | WBT or another configured backend | Flow directions, channel network, hillslope/watershed rasters |
+| Abstract watershed | Peridot, invoked by WEPPpy | Slope profiles, topology, hillslope/channel tables and manifest |
+| Build model inputs | WEPPpy, Rosetta, selected native helpers | `.slp`, `.sol`, `.cli`, `.man`, routing and auxiliary inputs |
+| Run hillslopes and watershed | WEPPpy runner and selected Fortran release | Hillslope pass files, water balance, runoff, erosion and routing outputs |
+| Convert and publish results | WEPPpy and required wepppyo3 interchange | Parquet interchange, query catalogs, maps, reports and exports |
+| Re-run locally, when requested | Windows bootstrap and bundled executable | Local simulation logs and model outputs from exported inputs |
+
+The canonical server run root is `/wc1/runs/`, conventionally
+`/wc1/runs/<first-two-runid-characters>/<runid>/`. A run contains persistent
+configuration, intermediate data, model inputs, outputs, logs, and provenance.
+Some runs include additional scenario or module directories.
+
+Inputs, intermediate and failed-attempt artifacts, diagnostics, and final
+results are project records. Their visibility and archive behavior follow the
+[artifact observability standard](standards/artifact-observability-standard.md).
+
+## Services surrounding the scientific components
+
+The ten repositories sit within a larger service topology. The following
+groups are visible in [development Compose](../docker/docker-compose.dev.yml);
+deployment presets determine which services run on a particular host.
+
+| Service/group | Purpose |
+| --- | --- |
+| Caddy | Reverse proxy and static-file delivery |
+| `weppcloud` | Flask web application served by Gunicorn |
+| `rq-engine`, RQ worker pools, scheduler, RQ dashboard | Job APIs, asynchronous execution, scheduling and job inspection |
+| Redis | Queues, locks, run metadata, caches, sessions and status messaging |
+| PostgreSQL and backup service | Relational application/account persistence and its backups; NoDb run state remains file-backed |
+| `status`, `preflight` | Go services streaming status and readiness information to clients |
+| `browse`, `download`, `dtale` | Run artifact browsing, downloads and tabular inspection |
+| `query-engine` | DuckDB-backed run analytics and MCP/API access |
+| `elevationquery`, `metquery`, `wmesque`, `wmesque2` | Elevation, meteorological and raster-data services |
+| `weppcloudr` | R-based report-rendering service |
+| `shape-converter` | Geospatial upload/conversion service |
+| CAP, profile-playback, `fcgiwrap` | Challenge verification, recorded workflow playback, and CGI support |
+| `webpush` | Optional Compose profile containing a placeholder service; no notification implementation is established by this definition |
+
+Scientific data collections, additional climate tools, GDAL/PROJ, and optional model
+integrations also sit outside the ten-repository list. This document maps the
+requested repositories and their service context; the Compose files and module
+contracts carry the exhaustive configuration for each deployment.
+
+## Packaging and deployment relationships
+
+- **Development layout:** sibling repositories under `~/src` correspond to
+  `/workdir/...` paths in the Linux development environment. Development Compose
+  mounts `rosetta`, `peridot`, `weppcloud-wbt`, and `wepppyo3` alongside WEPPpy.
+  A mount alone does not prove an import or executable resolves to that checkout.
+- **Native Python and WBT releases:** Dockerfiles configure Python paths for
+  WBT's wrapper and the packaged wepppyo3 extensions. Image-vendored copies and
+  development mounts have different resolution paths.
+- **Rosetta:** Dockerfiles install its package and bundled model data into the
+  Python environment; a sibling source mount is distinct from that installation.
+- **Peridot and WEPP:** the inspected WEPPpy runners resolve executables from
+  WEPPpy's own vendored `bin/` directories. Their source repositories are build
+  inputs and provenance references, not mandatory per-job source checkouts.
+- **Desktop bootstrap:** ships its own executables and runs independently of
+  server containers after downloading the necessary project files.
+
+`wepp.cloud` production uses Docker Compose through the installed `wctl` preset
+and [deployment script](../scripts/deploy-production.sh). `openwepp.org` uses
+Kubernetes. Use the relevant deployment documentation to resolve a host's actual
+topology and release; the developer's sibling checkout versions are not a
+deployment manifest.
+
+Packaging sources: [development image](../docker/Dockerfile.dev),
+[production image](../docker/Dockerfile), and
+[infrastructure knowledgebase](infrastructure/README.md).
+
+## WEPPpy governance: humans, agents, and work packages
+
+WEPPpy development combines human decisions about intended behavior and
+operational risk with agent-assisted investigation, implementation, testing,
+review, and documentation. Repository instructions and canonical contracts make
+those decisions durable across agents and sessions. This section summarizes
+the current governance requirements; it does not certify that every historical
+change completed every gate.
+
+### Responsibilities and authority
+
+| Participant | Responsibility |
+| --- | --- |
+| Human requester/package owner | Establish scope, intended outcomes, acceptance criteria, and authorization for behavior changes; resolve decisions that exceed the agreed scope |
+| Implementing agent | Inspect applicable instructions/contracts, maintain the execution record, make bounded changes, run validation, retain evidence, and report limitations |
+| Independent reviewers | Evaluate correctness, maintainability, test quality, and security against the agreed contract; record findings and verify their disposition |
+| Production operator / authorized operator agent | Execute explicitly authorized deployment or production repair using the applicable runbook, with operational checks and recovery evidence |
+
+Authority follows the requested task. Existing authorization remains valid for
+work within its scope; routine implementation does not require repeated
+confirmation. Conversely, a code review, security recommendation, or image
+publication task cannot authorize unrelated changes to runtime identity,
+permissions, authentication, isolation, defaults, reports, or established
+workflows. See [authority and working behavior](standards/hardening-lifecycle-standard.md#authority-and-working-behavior).
+
+### Work packages are the execution record
+
+Complex, high-risk, cross-cutting, or multi-agent initiatives use
+`docs/work-packages/YYYYMMDD_slug/`. A package contains:
+
+- `package.md`: problem, scope, stakeholders, security triage, and exit criteria.
+- `tracker.md`: progress, decisions with rationale, risks, evidence, and handoffs.
+- `prompts/active/`: the active ExecPlan and other execution instructions.
+- `artifacts/` and optional `notes/`: tests, reviews, diagnostics, and supporting
+  records needed to assess the work.
+
+Agents update the active plan and tracker as work progresses. The root
+`PROJECT_TRACKER.md` makes initiatives discoverable. Closeout records delivered
+behavior, remaining follow-ups, commits, and review outcomes; completed prompts
+move to `prompts/completed/` with an outcome summary.
+
+Durable rules must be promoted into canonical specifications, standards, or
+ADRs before closeout. Closed work packages remain immutable historical records,
+not editable authority for future changes. See the
+[work-package process](work-packages/README.md) and
+[ExecPlan guidance](prompt_templates/codex_exec_plans.md).
+
+### Code and behavioral standards
+
+- Follow root and nearest subsystem `AGENTS.md` instructions and existing
+  architecture. Prefer the smallest reversible change that addresses the
+  observed requirement; new infrastructure needs evidence and an explicit
+  complexity/escalation decision.
+- Preserve NoDb locking/persistence, RQ response/dependency contracts, and
+  authentication boundaries. Avoid silent dependency fallbacks and broad
+  exception handlers that conceal failures.
+- Changes to scientific defaults, formulas, thresholds, unit conversions, or
+  fallback heuristics require an ADR under the
+  [parameterization standard](standards/parameterization-adr-standard.md).
+- Update affected user/operator/developer documentation with production
+  changes. Keep inputs, intermediate products, failure evidence, and final
+  artifacts observable and archivable under the
+  [artifact standard](standards/artifact-observability-standard.md).
+
+### Contract- and specification-driven development
+
+Contracts define what the system is intended to do: accepted inputs, valid
+states, outputs and artifacts, error behavior, compatibility, authorization,
+and persistence obligations. Implementation and runtime observations show what
+the system currently does. Tests provide evidence of conformance; neither an
+existing implementation nor a passing test silently creates a new requirement.
+
+Agents first locate the applicable canonical specifications through the nearest
+`AGENTS.md`. These include domain specifications, `docs/schemas/`, UI contracts,
+and accepted ADRs. A work package coordinates the change and preserves its
+rationale, but the lasting behavioral contract belongs outside the package.
+Human decisions that alter behavior must be recorded in that contract, including
+why the choice was made and which alternatives were rejected.
+
+The [contract-first standard](standards/contract-first-change-standard.md)
+prescribes a stricter sequence for intended behavior changes in Pure UI and
+UI-coupled WEPPcloud, NoDb, and RQ code:
+
+1. **Specify the change.** Record the starting revision, applicable contracts,
+   exact intended delta, rationale, compatibility/security impacts, and proposed
+   regression evidence in the active package's contract-decision artifact.
+   Enumerate valid runtime states separately from request/flag combinations,
+   including absent, empty, populated, supported legacy, and hostile states.
+2. **Ratify the specification.** Obtain the operator's explicit approval of the
+   intended behavior, amend all affected canonical contracts, and mark
+   implementation conformance as pending. Two independent read-only reviewers
+   examine the contract changes; the author cannot approve their own amendment.
+3. **Commit the checkpoint before implementation.** Commit the decision,
+   contract amendments, reviews, and finding dispositions as a standalone
+   ancestor commit. Record its revision in the tracker. This requires commit
+   authority; an uncommitted specification is not the required checkpoint.
+4. **Implement and demonstrate conformance.** Change only the agreed surfaces
+   and add regression evidence for their obligations. Verify valid user states
+   still reach the intended result and invalid/hostile states fail within the
+   authorized boundary. Exercise changed persistence, filesystem, and safety
+   boundaries directly rather than only through mocks.
+5. **Review against the approved contract.** Final review checks behavior,
+   evidence, contract revision, commit ancestry, and review timestamps. An
+   implementation cannot retroactively create its own approval checkpoint.
+   Record remaining discrepancies instead of changing the specification merely
+   to describe an unintended implementation.
+
+For example, a change to an optional controller must specify what happens when
+its state has never been created, exists but is empty, or contains legacy data.
+Tests then demonstrate those promised outcomes; a new error for an ordinary
+empty state is not justified simply because the implementation now raises it.
+
+This mandatory checkpoint sequence has the scope named above. Other subsystems
+follow their own canonical specifications and nearest instructions; scientific
+parameterization changes additionally follow the ADR requirement. Across these
+scopes, the aim is traceability from human intent to specification, code, tests,
+review evidence, and ultimately observed deployed behavior.
+
+### Feature maturity and release readiness
+
+WEPPcloud classifies individual features and interface configurations so mature
+operational workflows can coexist with capabilities still undergoing validation
+or research. Maturity communicates readiness, support expectations, and change
+risk rather than assigning one release status to the entire application.
+
+| Maturity | Meaning and intended use |
+| --- | --- |
+| `stable` | Production capability with broad operational confidence and normal support; intended for routine operational use |
+| `preview` | Usable, near-production capability still gathering validation/feedback or stabilizing its interface and contract; details may change |
+| `experimental` | Research-stage capability with limited validation, narrower transferability, or methods still under development; independently validate before operational decisions |
+
+The registries also support `deprecated` for replacement/removal paths and
+`internal` for intentionally restricted capabilities, including internal beta
+work. Maintainers select the least-optimistic label supported by evidence;
+unresolved validation, regional transferability, or operational support prevents
+a `stable` classification.
+
+The feature and config registries supply maturity labels to interface cards,
+run headers, and feature control headings. Separate role, backend, prerequisite,
+and activation rules control availability; a maturity label alone is not an
+authorization rule. This partitions functionality by readiness while preserving
+explicit access and dependency contracts. See the
+[user-facing definitions](../wepppy/weppcloud/routes/usersum/weppcloud/user-guide.md#feature-maturity-labels)
+and [registry specification](../wepppy/weppcloud/feature_registry/specification.md).
+
+### Unit and integration validation
+
+Validation is selected for the changed behavior and recorded in the package.
+Unit tests check isolated logic and contracts; integration tests exercise the
+real boundaries between controllers, persistence, queues, subprocesses, files,
+and services. Browser tests verify the user workflow. Mocking a boundary cannot
+prove that the actual boundary works.
+
+Typical gates include focused `wctl run-pytest` runs and, for substantive code
+changes, `wctl run-pytest tests --maxfail=1`. Frontend changes require npm lint
+and tests, with browser smoke checks for affected workflows. RQ wiring changes
+require dependency-catalog updates, `wctl check-rq-graph`, and live job-tree
+validation. Stub/API changes have their own stub checks. Literal-only config
+edits retain the narrower direct-readback/schema validation required by root
+guidance.
+
+For process, container, permission, or host-mount changes, unit tests alone are
+insufficient: the established workflow must pass under production-equivalent
+identities, groups, mounts, umask, configuration, and orchestration before
+shipping. Changed safety/persistence boundaries require direct, unmocked checks
+of valid behavior as well as rejection of malformed or hostile states.
+
+### Code, correctness, and security reviews
+
+Review evidence identifies the revision and surfaces reviewed, findings,
+severity, remediation, and final disposition. Code/QA review assesses regression
+risk, clarity, maintainability, and whether tests meaningfully exercise the
+change. Production behavior changes and incident fixes require an independent
+[correctness review](prompt_templates/correctness_review_template.md), including
+valid absent, empty, populated, and supported legacy states and their user
+outcomes.
+
+Every package records security impact as `none`, `low`, or `high`. High-impact
+work requires a dedicated [security review](prompt_templates/security_review_template.md).
+Examples include auth/secrets, public file handling, queue/subprocess execution,
+agent permissions, and deployment/CI wiring. Review checks both threat rejection
+and preservation of valid workflows. Medium/high findings must be closed before
+package closeout; security approval does not replace correctness approval or
+grant additional operator authority.
+
+### Deployment and wepp1-operator boundaries
+
+The documented progression is development validation, test-production/user
+checks, correction of observed failures, and authorized production deployment.
+Implementation completion, image publication, and production deployment are
+separate milestones. Record actual deployment evidence and skipped checks
+rather than treating a successful build as proof of a working service.
+
+For current `wepp.cloud` hosts, the production entry point is
+[scripts/deploy-production.sh](../scripts/deploy-production.sh) through the
+installed `wctl` preset. The operator resolves the effective topology and uses
+the established preflight, health, recovery, and post-deploy workflow. A future
+RKE2/GitOps migration must establish its replacement deployment contract; it
+does not retroactively change the authority of the present Compose workflow.
+
+The **wepp1-operator boundary** separates production operations from ordinary
+repository development:
+
+- Inspect production only within the task's authorized access and scope;
+  access to a host is not blanket permission to mutate it.
+- Production deployment, restarts, live run-state repairs, permission changes,
+  and other operational mutations need authorization covering that action.
+  A development fix or a request to push an image does not imply it.
+- Preserve production data and established user behavior. Prepare the intended
+  action, validation, and recovery path before an additional approval is needed;
+  do not use production as an unbounded implementation experiment.
+- Retain the operational evidence and report the resulting state back to the
+  package. Production acceptance is not established by agent self-report alone.
+
+The operational skill was inspected on forest at
+`/home/roger/.codex/skills/wepp1-operator/SKILL.md`. It applies to production
+`wepp1` and `wepp2` and adds these concrete controls:
+
+| Operation | Skill requirement |
+| --- | --- |
+| Host and run preflight | Verify `hostname` and `pwd` before impactful commands. Confirm the run exists in both host and container views and check relevant worker/API/web services before diagnosing failure |
+| Run-path mapping | Host: `/geodata/wc1/runs/<prefix>/<runid>/`; container: `/wc1/runs/<prefix>/<runid>/`. The prefix is the first two run-id characters; route configuration names are not filesystem path suffixes |
+| RQ triage | Identify the failing leaf job; obtain Redis/RQ traceback evidence (`job.exc_info` and, when present, `job.meta["exc_string"]`), then correlate run logs. Distinguish model/application failures from worker, heartbeat, Redis, or network interruptions |
+| Intervention scope | Prefer targeted recovery of identified jobs. Avoid stack-wide restarts unless explicitly requested; require clarification if an action could target the wrong host or environment |
+| Deployment queue gate | Run `wctl rq-info --detailed`. Started jobs in `default` or `batch` require explicit approval before proceeding |
+| Deployment sequence | Use `/workdir/wepppy/scripts/deploy-production.sh`. Deploy `wepp1` first, then repeat preflight/queue checks on `wepp2` before deploying it; reverse the order only when explicitly requested |
+| Authorized no-restart hotfix | Inspect and record the in-container baseline, make a timestamped backup, and patch only the required file/function with expected-marker checks. Reload Gunicorn workers with `HUP`; verify unchanged container `StartedAt`, running/healthy state, and the intended behavior |
+| Operational handoff | Report timestamps with timezone, host identity, job IDs, commands, confirmed facts, assumptions, and the smallest safe next action |
+
+The skill remains host-managed rather than vendored into this repository; load
+its current version before production operations. Its two abbreviated run-log
+examples omit `<prefix>`; the explicit run-path contract above is the mapping
+to use. These procedures apply within the authorized task and do not grant
+blanket permission for production mutations.
+
+## wepp-forest release and vendoring
+
+The WEPP model release workflow is agent-driven CI/CD: a coding agent follows
+the repository playbooks to build a candidate, execute quality gates, retain
+evidence, and promote the validated executables into WEPPpy. The repeatable
+build and test scripts supply automation; the agent coordinates the cross-repo
+release and handoff. This is distinct from the GitHub workflow that subsequently
+builds and publishes the WEPPcloud container image.
+
+The authoritative instructions are
+[wepp-forest/AGENTS.md](../../wepp-forest/AGENTS.md),
+[wepp_runner/AGENTS.md](../wepp_runner/AGENTS.md), and the
+[binary lifecycle policy](binary-lifecycle.md).
+
+### Agent-coordinated release stages
+
+1. **Establish source lineage.** Resolve the source repository's remote-default
+   branch through `origin/HEAD`, verify the candidate branch, and record the
+   source commit. A non-default release requires explicit operator authorization.
+   Retain evidence of any source changes not represented by that commit; a
+   directory name or a HEAD hash alone cannot describe a dirty build tree.
+2. **Build both model roles.** The
+   [dated release builder](../../wepp-forest/tools/build_wepp_dated_release.sh)
+   defaults to `/usr/bin/gfortran` and builds watershed and hillslope executables
+   sequentially to avoid include-file copy races. It installs dated artifacts
+   under `wepp-forest/release/`, generates their sidecars, prints hashes/compiler
+   and library information, and rejects detected Intel toolchain fingerprints.
+3. **Execute source-side gates.** Run smoke checks for both binaries, the
+   permanent hillslope watchlist, pytest, the ablation artifact policy check,
+   and the required `reconciled-condenser` watershed replay. Require the model
+   success marker and absence of the specified parse/runtime errors. Verify
+   system-loader compatibility. A failed required gate blocks vendoring.
+4. **Finalize release evidence.** Record actual validation outcomes against the
+   exact candidate binaries, retain logs and comparison artifacts, and update
+   the source repository's `change-log.md`. Sidecar status must reflect observed
+   results; generation of a sidecar does not mean validation passed.
+5. **Vendor the release pairs into WEPPpy.** Copy executables with mode `0755`
+   and their adjacent JSON sidecars into `wepp_runner/bin/`, preserving explicit
+   version names. Keep historical releases and `wepp`/`latest` defaults unchanged
+   unless their change is authorized. Hillslope pass files and the watershed
+   executable must use compatible versions and pass formats.
+6. **Validate the consumer integration.** Run WEPPpy's binary provenance checks,
+   host smoke tests, and runner/output regressions. The provenance gate rejects
+   unsupported ELF loaders, non-system runtime paths, and incompatible
+   `libgfortran` resolution. Container workflow validation supplies deployment
+   evidence; a missing container check must be reported, not recorded as passed.
+7. **Commit and hand off the release.** Commit/push the authorized source and
+   vendor changes with release notes identifying binaries, hashes, source
+   lineage, commands, outcomes, and any skipped checks. Subsequent image builds
+   package the vendored artifacts; they do not rebuild WEPP from Fortran source.
+
+### Generated binary metadata sidecars
+
+Each binary has its own adjacent JSON file:
+
+```text
+wepp_runner/bin/
+  wepp_<tag>
+  wepp_<tag>.json
+  wepp_<tag>_hill
+  wepp_<tag>_hill.json
+```
+
+The [sidecar generator](../../wepp-forest/tools/generate_wepp_release_sidecar.py)
+emits schema `wepp-binary-release-metadata-v1`. A retained example is
+[wepp_260803.json](../wepp_runner/bin/wepp_260803.json).
+
+| Fields | Purpose |
+| --- | --- |
+| `binary_name`, `binary_role`, `release_tag` | Identify the artifact and whether it is the watershed or hillslope executable |
+| `source_repo`, `source_branch`, `source_commit` | Record the source lineage supplied to the generator |
+| `sha256` | Hash the actual executable bytes so the release can be matched to a binary |
+| `built_utc`, `wepp_banner_version` | Record timestamp and model banner metadata; the current generator timestamps sidecar creation |
+| `features` | Describe execution capabilities, including HBP support, pass-file families, and watershed prompt behavior |
+| `validation` | Record host smoke, hillslope watchlist, and same-build watershed replay outcomes; initialized to `not_run` |
+
+The sidecar serves both provenance and runtime compatibility. WEPPpy's runner
+reads capability metadata to select run-file prompts and pass-family behavior.
+It must match the executable; it is not merely descriptive release text.
+
+### Automation boundaries
+
+The current generator is specifically for legacy-pass releases: it emits
+`hbp_supported=false` and fixed feature/banner metadata. It hashes the binary,
+but accepts source branch/commit as arguments and does not run validation,
+verify a clean checkout, or infer capabilities from the executable. The agent
+must verify those facts and complete the evidence record. Compiler details are
+printed by the build script rather than captured as structured sidecar fields.
+
+The historical [rebuild/vendor helper](../tools/rebuild_vendor_wepp_260319.sh)
+targets a specific dated release; it is not a universal release command. Use
+the current playbooks and dated builder for a new release.
+
+These JSON files are **binary sidecars packaged inside WEPPpy and its image**.
+They are not OCI artifacts attached to a GHCR digest, and they do not replace a
+complete image provenance manifest or a corresponding-source archive.
+
+## Testing
+
+Testing spans unit and contract checks, numerical regression fixtures, native
+tool integration tests, browser workflows, and manual model replays. The
+inventory below describes tests present in the local checkouts; it does not
+report a fresh test run, coverage percentage, or passing CI status. The Peridot
+and Windows bootstrap inventories include the upstream updates fetched during
+the licensing work, after the initial source inspection.
+
+### wepppy
+
+- **Python:** [tests/](../tests/) contains pytest suites for NoDb state/locking,
+  RQ APIs and job orchestration, authentication, terrain adapters, climate and
+  soil builders, model runners, output interchange, reports, and exports.
+  Examples include [TOPAZ subprocess guards](../tests/topo/test_topaz_subprocess_guards.py),
+  [Peridot schema integration](../tests/topo/test_peridot_sub_fields_schema.py), and
+  [binary provenance guards](../tests/wepp_runner/test_binary_runtime_provenance_guard.py).
+- **Browser and JavaScript:** Jest checks controller behavior; Playwright smoke
+  and accessibility tests exercise browser workflows. Commands and configuration
+  are in [static-src/package.json](../wepppy/weppcloud/static-src/package.json).
+- **Services:** Go unit/integration tests cover
+  [status streaming](../services/status2/internal/server/) and
+  [preflight checklists](../services/preflight2/internal/checklist/).
+- **Entry points:** `wctl run-pytest tests/<path>`, `wctl run-npm test`, and
+  `wctl run-npm smoke`. Native, live-service, and browser checks need their
+  corresponding runtime/data setup; stubbed unit tests do not establish model
+  or deployment parity.
+
+### wepppyo3
+
+[Python climate tests](../../wepppyo3/tests/climate/) use `unittest` to check
+linear, nearest-neighbor, and cubic interpolation, invalid inputs, clipping,
+precipitation scaling, and monthly summaries. The monthly optimization script
+is a timing comparison rather than an assertion-based regression test. These
+tests require importable native extensions; some also import WEPPpy and expect
+the climate fixture/output paths relative to the test working directory.
+
+Rust tests cover raster value/index/mask operations and visualization calls.
+The [visualization tests](../../wepppyo3/wepp_viz/src/lib.rs) reference external
+run directories, and one contains a placeholder constant assertion rather than
+checking the computed result. They should not be described as portable numerical
+validation. This checkout has no native interchange module or corresponding
+interchange suite, as noted in the repository details above.
+
+### peridot
+
+[Rust integration tests](../../peridot/tests/) cover hillslope slope scalars,
+edge flowpaths, channel walking, downstream road traces, field-flowpath schemas,
+centroid projection, and Parquet/README output contracts. Inline Rust tests also
+exercise raster operations, interpolation helpers, flowpath selection, CLI
+options, and subfield/channel connectivity. Tests combine small constructed
+cases with retained watershed fixtures.
+
+`cargo test` is the Cargo test entry point; building requires the repository's
+GDAL/PROJ toolchain. See the
+[manifest tests](../../peridot/tests/watershed_parquet_manifest.rs) and
+[centroid tests](../../peridot/tests/centroid_projection.rs) for artifact and
+coordinate checks.
+
+### weppcloud-wbt
+
+Rust unit/integration tests exercise DEM conditioning, TOPAZ hillslopes, flow
+slopes, outlets, watersheds, basin unnesting, road elevation, stream junctions,
+stream pruning, raster clipping, and VRT/windowed GeoTIFF reads. Small raster
+fixtures and retained terrain examples support the checks. The README documents
+`cargo test -p whitebox_raster --tests` and `cargo test -p whitebox-tools-app`.
+
+[Python wrapper tests](../../weppcloud-wbt/tests/) separately check argument
+forwarding for iterative pruning and subprocess failure/timeout containment.
+The forwarding test probes the wrapper without executing the hydrologic tool;
+the containment tests use a controlled fake executable. See also
+[raster I/O tests](../../weppcloud-wbt/whitebox-raster/tests/).
+
+### rosetta
+
+[Regression tests](../../rosetta/tests/test_rosetta_regression.py) compare
+Rosetta2/Rosetta3 predictions with fixed numerical baselines for retention
+parameters, conductivity, field capacity, and wilting point. The repository
+also retains input/output/validation datasets and an older PTF test script.
+
+The [performance suite](../../rosetta/tests/test_performance.py) is an opt-in
+timing harness, enabled with `ROSETTA_RUN_BENCHMARKS=1`; it is skipped by default.
+Prediction tests need the package dependencies and bundled model database.
+
+### wepp-forest
+
+[Pytest suites](../../wepp-forest/tests/) include numerical-instability
+regressions, hillslope/watershed input and output contracts, pass metadata and
+calendar guards, output-comparison tools, and fixture/watchlist validation.
+Some checks inspect source or retained outputs; they do not all execute a new
+simulation.
+
+Executable validation uses host smoke runs, fixture replay, and the permanent
+[hillslope watchlist](../../wepp-forest/docs/ablation/hillslope_watchlist.csv).
+The [test matrix](../../wepp-forest/docs/test-matrix.md) specifies builds of both
+`wepp` and `wepp_hill`, model smoke checks, and pytest according to change type.
+These checks require compatible compiled binaries and the specified run fixtures.
+
+### wepp-forest-revegetation
+
+No automated test suite or dedicated regression harness was found in this
+checkout. Its [README](../../wepp-forest-revegetation/README.md) documents
+compilation. Tests in `wepp-forest` do not establish parity or coverage for this
+separate source tree and executable lineage.
+
+### wepppy-win-bootstrap
+
+The repository retains [sample parser/output files](../../wepppy-win-bootstrap/scripts/wepp/out/test/)
+and paired [WEPPcloud/Apple Silicon loss outputs](../../wepppy-win-bootstrap/validation/unsupported-watercolor/).
+These support inspection and manual comparisons. No automated test runner or
+assertion-based regression suite was found; the presence of these data files
+does not establish an automated cross-platform parity check.
+
+### topaz
+
+No automated test suite was found in the inspected
+[TOPAZ repository](../../topaz/README.md). WEPPpy maintains downstream TOPAZ
+adapter tests and terrain fixtures, including subprocess guards, but those
+belong to WEPPpy and are not a standalone TOPAZ numerical regression suite.
+
+### jimf-cligen532
+
+The repository contains a [broken station-parameter fixture](../../jimf-cligen532/test/broken_pars/NuevaAldea.par).
+Its [GitLab CI definition](../../jimf-cligen532/.gitlab-ci.yml) builds Linux and
+Windows artifacts; it does not define a numerical test stage. No automated
+assertion-based suite was found in the checkout. Downstream WEPPpy tests cover
+station selection, climate wrappers, retries, and selected parity cases, such
+as [CLIGEN WC1 parity](../tests/climate/test_cligen_wc1_parity.py).
+
+## Documentation and source-code footprint
+
+Measured on 2026-09-15 with **ocloc 0.5.1** across all ten local repositories.
+The unit below is **nonblank physical lines**, including code comments and
+Python docstrings. This measures repository text volume, not executable
+statement count, documentation quality, test coverage, or feature maturity.
+
+### Scope and counting method
+
+- Input is `git ls-files` with current working-tree contents, including tracked
+  edits. Untracked files, symlinks, absent files, and build/cache directories
+  (`target`, `node_modules`, `.venv`, `venv`, `__pycache__`, `.git`) are excluded.
+  Tracked tests, fixtures containing source, vendored source, and generated
+  source outside those directories are included; this is not an authored-code audit.
+- The installed ocloc does not recognize Fortran and several other source
+  formats. The measurement script classifies files, stages their contents as
+  `.txt`, and runs `ocloc <staging-directory> --json` for each bucket. It uses
+  `total - blank` and independently checks file and nonblank-line counts.
+  Comments remain included consistently for every language.
+- Source includes Python and stubs, JavaScript modules, TypeScript/TSX, Rust,
+  Fortran and include files, Go, R, shell/PowerShell/batch/Perl scripts,
+  HTML/CSS/Jinja/Mako templates, extracted Visual Basic, build recipes, LaTeX
+  support code, and executable R Markdown/Quarto report templates. Notebook
+  code cells count as source and Markdown cells as documentation; serialized
+  notebook outputs and metadata are excluded. The script also recognizes
+  C/C++ and SQL source; neither contributes implementation lines in this snapshot.
+- Documentation includes Markdown, reStructuredText, TeX and Org documents,
+  named README/ENDUSER/AGENTS text files, and notebook Markdown cells. Generic
+  `.txt` files, PDFs, Word files, images, license files without a documentation
+  extension, and scientific input/output datasets are outside the documentation
+  total. Configuration/structured text is reported separately, including the
+  Rosetta SQL data dump. It is not a complete inventory of every model-data format.
+- This stack document and the measurement artifact directory are excluded to
+  avoid counting the report itself. No cross-file or cross-repository deduplication
+  is applied. The retained snapshot records each repository's HEAD, dirty status,
+  and a hash of selected paths and contents.
+
+### Repository comparison
+
+Work-package documentation is separated using the bucket rules below; remaining
+documentation combines all other buckets. Each ratio divides the corresponding
+documentation count by source lines, expressed as a percentage.
+
+| Repository | Work-package docs | Remaining docs | All source | Work-package docs / source | Remaining docs / source | Config / structured text |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `wepppy` | 212,982 | 143,801 | 760,353 | 28.01% | 18.91% | 410,186 |
+| `wepppyo3` | 0 | 100 | 2,815 | 0.00% | 3.55% | 50 |
+| `peridot` | 0 | 953 | 7,794 | 0.00% | 12.23% | 260 |
+| `weppcloud-wbt` | 801 | 9,577 | 329,277 | 0.24% | 2.91% | 3,630 |
+| `rosetta` | 0 | 110 | 1,461 | 0.00% | 7.53% | 34,413 |
+| `wepp-forest` | 20,221 | 9,634 | 84,595 | 23.90% | 11.39% | 14,426,133 |
+| `wepp-forest-revegetation` | 0 | 11 | 78,116 | 0.00% | 0.01% | 0 |
+| `wepppy-win-bootstrap` | 0 | 154 | 4,839 | 0.00% | 3.18% | 79 |
+| `topaz` | 0 | 15 | 30,571 | 0.00% | 0.05% | 0 |
+| `jimf-cligen532` | 0 | 29 | 8,076 | 0.00% | 0.36% | 32 |
+
+### Documentation buckets
+
+Buckets are mutually exclusive, assigned in this order: AGENTS filename,
+README filename, ENDUSER filename, work-package path (including mini packages),
+UI-docs path, specification/contract/standard/schema/ADR name or path, then other
+docs. Thus a work-package README counts as README, and a UI contract counts as
+UI docs. These are navigational buckets, not a determination of normative
+authority. Other docs include research, investigations, release notes, papers,
+and notebook narrative.
+
+| Repository | Agents | README | End-user | Specs/contracts/standards | UI docs | Work packages | Other docs |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `wepppy` | 2,400 | 25,775 | 1,674 | 22,996 | 10,333 | 212,982 | 80,623 |
+| `wepppyo3` | 0 | 100 | 0 | 0 | 0 | 0 | 0 |
+| `peridot` | 0 | 181 | 0 | 199 | 0 | 0 | 573 |
+| `weppcloud-wbt` | 44 | 2,218 | 0 | 226 | 0 | 801 | 7,089 |
+| `rosetta` | 0 | 110 | 0 | 0 | 0 | 0 | 0 |
+| `wepp-forest` | 233 | 1,504 | 0 | 900 | 0 | 20,221 | 6,997 |
+| `wepp-forest-revegetation` | 0 | 11 | 0 | 0 | 0 | 0 | 0 |
+| `wepppy-win-bootstrap` | 0 | 117 | 0 | 0 | 0 | 0 | 37 |
+| `topaz` | 0 | 15 | 0 | 0 | 0 | 0 | 0 |
+| `jimf-cligen532` | 0 | 29 | 0 | 0 | 0 | 0 | 0 |
+
+### Source-language breakdown
+
+“Web” combines JavaScript, TypeScript, HTML/CSS and templates. “Other source”
+includes the remaining scripts, build recipes, Visual Basic, notebook code,
+LaTeX support and literate report templates. The JSON snapshot retains separate
+counts for each measured language or format.
+
+| Repository | Python / stubs | Rust | Fortran / includes | Web | Go / R | Other source |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `wepppy` | 508,163 | 0 | 39 | 226,104 | 5,343 | 20,704 |
+| `wepppyo3` | 848 | 1,967 | 0 | 0 | 0 | 0 |
+| `peridot` | 0 | 7,782 | 0 | 7 | 0 | 5 |
+| `weppcloud-wbt` | 31,419 | 297,731 | 0 | 0 | 0 | 127 |
+| `rosetta` | 1,461 | 0 | 0 | 0 | 0 | 0 |
+| `wepp-forest` | 7,251 | 0 | 75,352 | 0 | 0 | 1,992 |
+| `wepp-forest-revegetation` | 0 | 0 | 77,836 | 0 | 0 | 280 |
+| `wepppy-win-bootstrap` | 4,165 | 0 | 0 | 0 | 0 | 674 |
+| `topaz` | 0 | 0 | 30,543 | 0 | 0 | 28 |
+| `jimf-cligen532` | 0 | 0 | 7,988 | 0 | 0 | 88 |
+
+WEPPpy's work-package bucket accounts for 59.7% of its measured
+documentation; wepp-forest's accounts for 67.7%. These repositories retain
+substantial development and review history alongside current guides and contracts.
+The Fortran totals make the model repositories visible in the comparison;
+low documentation ratios in those repositories do not establish poor model
+validation or account for documentation published outside the checkout.
+
+Reproduction and detailed results: [measurement script](dev-notes/weppcloud-stack-loc/measure.py)
+and [JSON snapshot](dev-notes/weppcloud-stack-loc/snapshot.json).
+Run from the WEPPpy root:
+
+```bash
+python3 docs/dev-notes/weppcloud-stack-loc/measure.py \
+  --root ~/src \
+  --output docs/dev-notes/weppcloud-stack-loc/snapshot.json
+```
+
+## Licensing
+
+The table records declarations found in the inspected local checkouts. A
+repository-level license and a license attached to individual source files have
+different scopes. This inventory does not assign a single license to the full
+stack or extend repository declarations to bundled dependencies, datasets, or
+precompiled executables with separate provenance.
+
+| Repository | Declared license | Evidence and scope |
+| --- | --- | --- |
+| `wepppy` | BSD 3-Clause (`BSD-3-Clause`) | Root [license.txt](../license.txt); copyright University of Idaho, 2018 |
+| `wepppyo3` | BSD 3-Clause (`BSD-3-Clause`) | Root [LICENSE](../../wepppyo3/LICENSE); copyright WEPP in the Woods, 2023 |
+| `peridot` | MIT (`MIT`) | Root [LICENSE](../../peridot/LICENSE); copyright Roger Lew, 2026; [Cargo.toml](../../peridot/Cargo.toml) also declares MIT. The README preserves separate terms for bundled third-party components |
+| `weppcloud-wbt` | MIT (`MIT`) | Root [LICENSE.txt](../../weppcloud-wbt/LICENSE.txt) names John Lindsay for core WBT/tools and Roger Lew for WEPPcloud tools/amendments; [Python package metadata](../../weppcloud-wbt/pyproject.toml) also declares MIT |
+| `rosetta` | GNU GPL version 2 or later (`GPL-2.0-or-later`) | Root [license.txt](../../rosetta/license.txt) explicitly permits version 2 or any later version; the README's shorter “GNU GPL V2” description omits that qualifier |
+| `wepp-forest` | No repository-level license declaration found; `CC0-1.0` on five rewritten routines | SPDX headers declare CC0 in [imppol.f90](../../wepp-forest/src/imppol.f90), [imppow.f90](../../wepp-forest/src/imppow.f90), [impris.f90](../../wepp-forest/src/impris.f90), [impsvb.f90](../../wepp-forest/src/impsvb.f90), and [impsvd.f90](../../wepp-forest/src/impsvd.f90); these are file-level declarations |
+| `wepp-forest-revegetation` | No repository-level license declaration found | Source includes Numerical Recipes Software copyright notices in `imppol.for`, `imppow.for`, `impris.for`, `impsvb.for`, and [impsvd.for](../../wepp-forest-revegetation/src/impsvd.for); the forest repository's CC0 rewrite declarations do not describe these separate files |
+| `wepppy-win-bootstrap` | MIT (`MIT`) | Root [LICENSE](../../wepppy-win-bootstrap/LICENSE); copyright University of Idaho, 2026. The README applies MIT to repository-authored code and preserves separate terms/notices for bundled third-party code, executables, and datasets |
+| `topaz` | No repository-level license declaration found | No license file found; [README](../../topaz/README.md) credits Jurgen D. Garbrecht as author and Roger Lew as repository maintainer without declaring a license |
+| `jimf-cligen532` | No repository-level license declaration found | [README](../../jimf-cligen532/README.md) attributes source and executables to Jim Frankenberger at USDA-ARS without declaring a license; [cligen.f](../../jimf-cligen532/cligen532/cligen.f) describes its ACM chi-square code as public domain, a component-specific statement |
+
+“No repository-level license declaration found” describes the inspection result,
+not a public-domain designation. Copyright notices are recorded separately from
+explicit license grants. The table covers these ten repositories' declarations,
+not a transitive dependency license audit.
+
+## Inspection provenance and remaining verification
+
+The draft was prepared from these local HEAD revisions and their working trees.
+Revisions identify the inspected source baseline, not the provenance of every
+precompiled binary stored within it. Existing unrelated WEPPpy working-tree
+changes were present during inspection.
+
+| Repository under `~/src` | HEAD inspected |
+| --- | --- |
+| `wepppy` | `e8edf2030dba` |
+| `wepppyo3` | `86981caec87d` |
+| `peridot` | `8343b8fd1bb7` |
+| `weppcloud-wbt` | `314d15d68344` |
+| `rosetta` | `2aea4acd0529` |
+| `wepp-forest` | `2444b521210d` |
+| `wepp-forest-revegetation` | `6139c922b86c` |
+| `wepppy-win-bootstrap` | `e849b192ba98` |
+| `topaz` (licensing inventory) | `116607fc1185` |
+| `jimf-cligen532` (licensing inventory) | `c8cac87739f6` |
+
+Before using this as a deployed-version inventory, resolve the wepppyo3
+checkout/API mismatch and record the deployed images, native import locations,
+and selected model/Peridot binary provenance. No builds, model simulations, or
+live-server checks were performed for this documentation draft.
+
+Links to sibling repositories use the requested `~/src` layout. They work in
+that local layout; they are not portable cross-repository links in a standalone
+WEPPpy checkout or its GitHub documentation view.

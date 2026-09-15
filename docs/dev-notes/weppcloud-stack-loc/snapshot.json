@@ -1,0 +1,600 @@
+{
+  "tool": "ocloc 0.5.1",
+  "metric": "Nonblank physical lines, including comments/docstrings",
+  "repositories": {
+    "wepppy": {
+      "head": "5a9b711e8dc354d3274a2e76932f50ea55e3e888",
+      "tracked_worktree_dirty": true,
+      "selected_content_sha256": "beaec6eda190ff5bd95068fe62fc6faa4fde036d3672be2f92f57f8cdbe18af4",
+      "excluded_files": {
+        "data/assets/binaries/other formats": 44907,
+        "build/cache or measurement files": 1,
+        "symlink or absent file": 12706
+      },
+      "docs": {
+        "Agents": {
+          "files": 33,
+          "nonblank": 2400,
+          "total": 2894,
+          "blank": 494
+        },
+        "End-user": {
+          "files": 14,
+          "nonblank": 1674,
+          "total": 2531,
+          "blank": 857
+        },
+        "Other docs": {
+          "files": 365,
+          "nonblank": 80623,
+          "total": 101051,
+          "blank": 20428
+        },
+        "README": {
+          "files": 167,
+          "nonblank": 25775,
+          "total": 33085,
+          "blank": 7310
+        },
+        "Specs/contracts/standards": {
+          "files": 125,
+          "nonblank": 22996,
+          "total": 27749,
+          "blank": 4753
+        },
+        "UI docs": {
+          "files": 58,
+          "nonblank": 10333,
+          "total": 12651,
+          "blank": 2318
+        },
+        "Work packages": {
+          "files": 2436,
+          "nonblank": 212982,
+          "total": 272768,
+          "blank": 59786
+        }
+      },
+      "source": {
+        "Build recipes": {
+          "files": 11,
+          "nonblank": 565,
+          "total": 673,
+          "blank": 108
+        },
+        "Extensionless/other scripts": {
+          "files": 6,
+          "nonblank": 31,
+          "total": 36,
+          "blank": 5
+        },
+        "Fortran": {
+          "files": 1,
+          "nonblank": 39,
+          "total": 40,
+          "blank": 1
+        },
+        "Go": {
+          "files": 18,
+          "nonblank": 3237,
+          "total": 3687,
+          "blank": 450
+        },
+        "HTML/CSS/templates": {
+          "files": 252,
+          "nonblank": 45287,
+          "total": 49260,
+          "blank": 3973
+        },
+        "JavaScript": {
+          "files": 332,
+          "nonblank": 178023,
+          "total": 199092,
+          "blank": 21069
+        },
+        "LaTeX support": {
+          "files": 6,
+          "nonblank": 5055,
+          "total": 5521,
+          "blank": 466
+        },
+        "Literate reports": {
+          "files": 6,
+          "nonblank": 2664,
+          "total": 3271,
+          "blank": 607
+        },
+        "Notebook code": {
+          "files": 10,
+          "nonblank": 2698,
+          "total": 3408,
+          "blank": 710
+        },
+        "PowerShell": {
+          "files": 2,
+          "nonblank": 146,
+          "total": 167,
+          "blank": 21
+        },
+        "Python": {
+          "files": 2352,
+          "nonblank": 508163,
+          "total": 606187,
+          "blank": 98024
+        },
+        "R": {
+          "files": 5,
+          "nonblank": 2106,
+          "total": 2301,
+          "blank": 195
+        },
+        "Shell": {
+          "files": 40,
+          "nonblank": 5059,
+          "total": 5736,
+          "blank": 677
+        },
+        "TypeScript": {
+          "files": 8,
+          "nonblank": 2794,
+          "total": 2973,
+          "blank": 179
+        },
+        "Visual Basic": {
+          "files": 42,
+          "nonblank": 4486,
+          "total": 5605,
+          "blank": 1119
+        }
+      },
+      "config": {
+        "Configuration/structured text": {
+          "files": 911,
+          "nonblank": 410186,
+          "total": 413819,
+          "blank": 3633
+        }
+      }
+    },
+    "wepppyo3": {
+      "head": "86981caec87da943ed30c1d9daa77ac0801529ac",
+      "tracked_worktree_dirty": true,
+      "selected_content_sha256": "3d2cc337d51dd4cd8be7f4c2a054ea978a5a6ec2b659e7313553770ca3285484",
+      "excluded_files": {
+        "data/assets/binaries/other formats": 29,
+        "build/cache or measurement files": 643
+      },
+      "docs": {
+        "README": {
+          "files": 2,
+          "nonblank": 100,
+          "total": 142,
+          "blank": 42
+        }
+      },
+      "source": {
+        "Python": {
+          "files": 25,
+          "nonblank": 848,
+          "total": 1049,
+          "blank": 201
+        },
+        "Rust": {
+          "files": 5,
+          "nonblank": 1967,
+          "total": 2313,
+          "blank": 346
+        }
+      },
+      "config": {
+        "Configuration/structured text": {
+          "files": 5,
+          "nonblank": 50,
+          "total": 58,
+          "blank": 8
+        }
+      }
+    },
+    "peridot": {
+      "head": "6eaa326ef60b9109e020b7644c935e2d8741d7a3",
+      "tracked_worktree_dirty": false,
+      "selected_content_sha256": "5c0bb0b47d3c7bbbe736efb32acce728826c8f2b5930ed06dfb9b224edeb72ae",
+      "excluded_files": {
+        "data/assets/binaries/other formats": 144,
+        "build/cache or measurement files": 2
+      },
+      "docs": {
+        "Other docs": {
+          "files": 7,
+          "nonblank": 573,
+          "total": 739,
+          "blank": 166
+        },
+        "README": {
+          "files": 1,
+          "nonblank": 181,
+          "total": 254,
+          "blank": 73
+        },
+        "Specs/contracts/standards": {
+          "files": 1,
+          "nonblank": 199,
+          "total": 257,
+          "blank": 58
+        }
+      },
+      "source": {
+        "HTML/CSS/templates": {
+          "files": 1,
+          "nonblank": 7,
+          "total": 7,
+          "blank": 0
+        },
+        "Rust": {
+          "files": 35,
+          "nonblank": 7782,
+          "total": 8734,
+          "blank": 952
+        },
+        "Shell": {
+          "files": 1,
+          "nonblank": 5,
+          "total": 7,
+          "blank": 2
+        }
+      },
+      "config": {
+        "Configuration/structured text": {
+          "files": 3,
+          "nonblank": 260,
+          "total": 268,
+          "blank": 8
+        }
+      }
+    },
+    "weppcloud-wbt": {
+      "head": "314d15d68344890b43045e5325776a2841b0b1ca",
+      "tracked_worktree_dirty": false,
+      "selected_content_sha256": "1be6b3223d38954da18ca4eb97f844df6618ab3d4f138f38561fd7a1e5482bc4",
+      "excluded_files": {
+        "data/assets/binaries/other formats": 275
+      },
+      "docs": {
+        "Agents": {
+          "files": 1,
+          "nonblank": 44,
+          "total": 51,
+          "blank": 7
+        },
+        "Other docs": {
+          "files": 62,
+          "nonblank": 7089,
+          "total": 9203,
+          "blank": 2114
+        },
+        "README": {
+          "files": 11,
+          "nonblank": 2218,
+          "total": 2622,
+          "blank": 404
+        },
+        "Specs/contracts/standards": {
+          "files": 1,
+          "nonblank": 226,
+          "total": 303,
+          "blank": 77
+        },
+        "Work packages": {
+          "files": 10,
+          "nonblank": 801,
+          "total": 1050,
+          "blank": 249
+        }
+      },
+      "source": {
+        "Python": {
+          "files": 22,
+          "nonblank": 31419,
+          "total": 37566,
+          "blank": 6147
+        },
+        "Rust": {
+          "files": 609,
+          "nonblank": 297731,
+          "total": 325537,
+          "blank": 27806
+        },
+        "Shell": {
+          "files": 1,
+          "nonblank": 127,
+          "total": 150,
+          "blank": 23
+        }
+      },
+      "config": {
+        "Configuration/structured text": {
+          "files": 74,
+          "nonblank": 3630,
+          "total": 3727,
+          "blank": 97
+        }
+      }
+    },
+    "rosetta": {
+      "head": "2aea4acd0529177719f9e22055198e6f4792a0dc",
+      "tracked_worktree_dirty": false,
+      "selected_content_sha256": "47d77f6724570cb6772024ada7f35e1f4402b3f37fb735ba081aaef54f8fa4d3",
+      "excluded_files": {
+        "data/assets/binaries/other formats": 24
+      },
+      "docs": {
+        "README": {
+          "files": 1,
+          "nonblank": 110,
+          "total": 145,
+          "blank": 35
+        }
+      },
+      "source": {
+        "Python": {
+          "files": 10,
+          "nonblank": 1461,
+          "total": 1854,
+          "blank": 393
+        }
+      },
+      "config": {
+        "SQL data dump": {
+          "files": 1,
+          "nonblank": 34413,
+          "total": 34478,
+          "blank": 65
+        }
+      }
+    },
+    "wepp-forest": {
+      "head": "2444b521210d01e832cf4a92daf5c8e3376abfd9",
+      "tracked_worktree_dirty": false,
+      "selected_content_sha256": "85c62689d92c027428e6308a080f63254d7a5d3ef57689e59c66f0164fffc024",
+      "excluded_files": {
+        "data/assets/binaries/other formats": 51579,
+        "symlink or absent file": 2
+      },
+      "docs": {
+        "Agents": {
+          "files": 4,
+          "nonblank": 233,
+          "total": 271,
+          "blank": 38
+        },
+        "Other docs": {
+          "files": 72,
+          "nonblank": 6997,
+          "total": 8891,
+          "blank": 1894
+        },
+        "README": {
+          "files": 38,
+          "nonblank": 1504,
+          "total": 1991,
+          "blank": 487
+        },
+        "Specs/contracts/standards": {
+          "files": 9,
+          "nonblank": 900,
+          "total": 1211,
+          "blank": 311
+        },
+        "Work packages": {
+          "files": 348,
+          "nonblank": 20221,
+          "total": 26868,
+          "blank": 6647
+        }
+      },
+      "source": {
+        "Build recipes": {
+          "files": 3,
+          "nonblank": 1734,
+          "total": 2137,
+          "blank": 403
+        },
+        "Extensionless/other scripts": {
+          "files": 1,
+          "nonblank": 20,
+          "total": 22,
+          "blank": 2
+        },
+        "Fortran": {
+          "files": 484,
+          "nonblank": 75352,
+          "total": 78187,
+          "blank": 2835
+        },
+        "Python": {
+          "files": 43,
+          "nonblank": 7251,
+          "total": 8621,
+          "blank": 1370
+        },
+        "Shell": {
+          "files": 5,
+          "nonblank": 238,
+          "total": 278,
+          "blank": 40
+        }
+      },
+      "config": {
+        "Configuration/structured text": {
+          "files": 2770,
+          "nonblank": 14426133,
+          "total": 14426133,
+          "blank": 0
+        }
+      }
+    },
+    "wepp-forest-revegetation": {
+      "head": "6139c922b86c9ea3a2e068b1841fdc4f960d3184",
+      "tracked_worktree_dirty": false,
+      "selected_content_sha256": "cfcbbeea4a850246b364642d4984f886ff4aeec19bdb6a56010a50f8232e0266",
+      "excluded_files": {
+        "data/assets/binaries/other formats": 14
+      },
+      "docs": {
+        "README": {
+          "files": 1,
+          "nonblank": 11,
+          "total": 17,
+          "blank": 6
+        }
+      },
+      "source": {
+        "Build recipes": {
+          "files": 2,
+          "nonblank": 280,
+          "total": 310,
+          "blank": 30
+        },
+        "Fortran": {
+          "files": 479,
+          "nonblank": 77836,
+          "total": 80613,
+          "blank": 2777
+        }
+      },
+      "config": {}
+    },
+    "wepppy-win-bootstrap": {
+      "head": "75a8c04a2e3e03890b1436afc701b97ef5b7fc8a",
+      "tracked_worktree_dirty": false,
+      "selected_content_sha256": "843be97940d6ea3681da9f1d4a3651bc42a3adc4d8705408cd93cc3962ae07ab",
+      "excluded_files": {
+        "data/assets/binaries/other formats": 28,
+        "build/cache or measurement files": 8
+      },
+      "docs": {
+        "Other docs": {
+          "files": 1,
+          "nonblank": 37,
+          "total": 41,
+          "blank": 4
+        },
+        "README": {
+          "files": 2,
+          "nonblank": 117,
+          "total": 170,
+          "blank": 53
+        }
+      },
+      "source": {
+        "Batch": {
+          "files": 4,
+          "nonblank": 38,
+          "total": 42,
+          "blank": 4
+        },
+        "Perl": {
+          "files": 2,
+          "nonblank": 618,
+          "total": 726,
+          "blank": 108
+        },
+        "Python": {
+          "files": 29,
+          "nonblank": 4165,
+          "total": 5364,
+          "blank": 1199
+        },
+        "Shell": {
+          "files": 1,
+          "nonblank": 18,
+          "total": 21,
+          "blank": 3
+        }
+      },
+      "config": {
+        "Configuration/structured text": {
+          "files": 7,
+          "nonblank": 79,
+          "total": 90,
+          "blank": 11
+        }
+      }
+    },
+    "topaz": {
+      "head": "116607fc1185800ca78e387454ef1ccd3ffd73b4",
+      "tracked_worktree_dirty": false,
+      "selected_content_sha256": "44e04c7ca65bda5dde189379e923f1cd4dd8581cc259a038665a5030cfb3f756",
+      "excluded_files": {
+        "data/assets/binaries/other formats": 310
+      },
+      "docs": {
+        "README": {
+          "files": 3,
+          "nonblank": 15,
+          "total": 29,
+          "blank": 14
+        }
+      },
+      "source": {
+        "Build recipes": {
+          "files": 2,
+          "nonblank": 28,
+          "total": 42,
+          "blank": 14
+        },
+        "Fortran": {
+          "files": 4,
+          "nonblank": 30543,
+          "total": 30554,
+          "blank": 11
+        }
+      },
+      "config": {}
+    },
+    "jimf-cligen532": {
+      "head": "c8cac87739f698f079a05f4e76586f3affe57e36",
+      "tracked_worktree_dirty": true,
+      "selected_content_sha256": "65b91568f98c467d7c1714575850c6cd7427a98b32fb29d424dd9bf0f15ea99d",
+      "excluded_files": {
+        "data/assets/binaries/other formats": 30850
+      },
+      "docs": {
+        "README": {
+          "files": 2,
+          "nonblank": 29,
+          "total": 47,
+          "blank": 18
+        }
+      },
+      "source": {
+        "Build recipes": {
+          "files": 3,
+          "nonblank": 88,
+          "total": 112,
+          "blank": 24
+        },
+        "Fortran": {
+          "files": 14,
+          "nonblank": 7988,
+          "total": 8107,
+          "blank": 119
+        },
+        "Python": {
+          "files": 1,
+          "nonblank": 0,
+          "total": 0,
+          "blank": 0
+        }
+      },
+      "config": {
+        "Configuration/structured text": {
+          "files": 1,
+          "nonblank": 32,
+          "total": 38,
+          "blank": 6
+        }
+      }
+    }
+  }
+}
