@@ -7,8 +7,9 @@
 - Scope: recorded-depth policy, original-source snapshots/acquisition/replay,
   generic preparation and owner-bound activation, M1/M3 exact support/results,
   finalization/publication, accepted downloads and control behavior.
-- Commit context: production checkpoint `b998d44e2126889e8014cc83230d51f6b89e9c82`,
-  plus the reviewed additive `partial_reason` correction in the working tree.
+- Commit context: `e36c3eb542026b2af1a4b1e3e64b26745b198448`, including the
+  reviewed additive `partial_reason` correction, production behavior and evidence.
+  Earlier production review checkpoint: `b998d44e2126889e8014cc83230d51f6b89e9c82`.
 - Canonical intent: module `docs/production_m3_runtime.md`, sections Prepared
   source boundary, Soil policy and stable snapshots, Predictors and exact
   support, Artifacts and publication, State and compatibility evidence;
@@ -194,14 +195,18 @@ restore or an archive-API authorization test.
   package closeout hold for the separate security-response condition.
 
 Parent-reported gates, distinguished from this reviewer's independent runs:
-full Python 8,590 passed/103 skipped; strengthened two-grid native runtime 14
-passed, including success/result-boundary failure/retry and expanded protected
-hashes. The later partial-message delta has independent four-case Python and
-23-case Jest results; additional closeout gates belong in the package validation
-record. The final full-suite rerun is still in progress at this sign-off and is
-not claimed complete. Builder QA is separately signed off and is not substituted
-for this review. The parent-reported zero-match scan of 524 text files does not
-itself resolve SEC-06 or substitute for owner incident response.
+the final canonical full Python gate completed with exit 0: **8,602 passed,
+103 skipped, 3,128 warnings in 1,034.93 seconds (17:14)**. This supersedes the
+earlier 8,590-pass gate; this reviewer did not independently rerun the full suite.
+The strengthened two-grid native runtime gate passed 14 tests, including
+success/result-boundary failure/retry and expanded protected hashes. The
+partial-message delta has this reviewer's independent four-case Python and
+23-case Jest results. The security reviewer reports an independent final
+`protected_final.json` readback after the last live M1 run: 22,357 entries with
+zero changes. Additional closeout evidence belongs in the package validation
+record. Builder QA is separately signed off and is not substituted for this
+review. The parent-reported zero-match scan of 524 text files does not itself
+resolve SEC-06 or substitute for owner incident response.
 
 ## Artifact Observability Gate
 
@@ -214,4 +219,4 @@ itself resolve SEC-06 or substitute for owner incident response.
 - [x] No hidden/download-only storage or new project archive exclusion is
   accepted. Builder QA's Git exclusions do not hide or remove local records.
 - [x] Observability approval is bounded to this evidence; it does not waive
-  the external security-response condition or outstanding final test execution.
+  the external security-response condition.

@@ -5,7 +5,8 @@
 - Package: `docs/work-packages/20260914_staley_m3_integration/`.
 - Reviewer: independent `source_boundary_review` security agent, 2026-09-14.
 - Reviewed production checkpoint: `b998d44e2126889e8014cc83230d51f6b89e9c82`;
-  current additive `live_browser.cjs` reviewed separately before commit.
+  additive final `partial_reason` backend/controller correction and
+  `live_browser.cjs` reviewed at checkpoint `e36c3eb54`.
 - Scope: module `io`, soil snapshot/input/policy readers, source preparation,
   transport/acquisition/replay, production soil authority, production M3,
   fixed-path predictor/result replay, publication and accepted download route;
@@ -13,7 +14,9 @@
 - Related evidence: [implementation reviews](20260914_implementation_reviews.md),
   [local preparation review](20260914_generic_implementation_review.md),
   [network/result review](20260914_network_reader_review.md), and
-  [runtime validation](20260914_runtime_completion_validation.md).
+  [runtime validation](20260914_runtime_completion_validation.md),
+  [final correctness review](20260914_correctness_review.md), and
+  [live validation](20260914_live_validation.md).
 - Authority: scientific checkpoint `89d673c38`, generic preparation `7328a0004`,
   replay refinement `0792c7e59`, bounded acquisition authorization `2de5ca737`.
 
@@ -48,12 +51,13 @@ unavailability is not a security error or proof of positive M3 acceptance.
 | SEC-06 | Medium | Credential incident | The earlier unrestricted process diagnostic exposed a Redis credential in tool output, as recorded in the implementation review. The owner said "redis credential is known" and then "continue"; this acknowledges the notice and continued work, not confirmed rotation or explicit acceptance of the residual exposure. | Owner confirms credential response/rotation, or explicitly accepts the recorded exposure without rotation for development-package closeout; never repeat the value in evidence. | Open external response condition; reviewer recommends bounded development-only risk acceptance if explicitly acknowledged, not production-deployment approval. |
 
 No unresolved medium/high implementation finding remains in production
-checkpoint `b998d44e2`. SEC-06 is not silently accepted or considered repaired
-by subsequent code changes.
+checkpoint `b998d44e2` or the reviewed additive final UX correction. SEC-06 is
+not silently accepted or considered repaired by subsequent code changes.
 
 ## Verdict
 
-- Production code boundary gate: **pass**, bounded to the reviewed checkpoint.
+- Production code boundary gate: **pass**, bounded to the reviewed checkpoint
+  and additive final UX correction described below.
 - Artifact observability gate: **pass**, with final live/archive evidence below.
 - Package security gate: **fail / hold** pending SEC-06 response or explicit
   owner acceptance of the recommended bounded development-only residual risk.
@@ -84,9 +88,12 @@ fixtures; no archive API authorization test is claimed.
 
 No new production secret dependency or secret argument is introduced. The
 runner reads the established gitignored credential file, does not save browser
-storage, and no longer retains raw Playwright errors. Its operator-reported
-exact-value scan found zero matches in 15 retained JSON/text files; values were
-not printed. SEC-06 remains an explicit earlier incident-response condition.
+storage, and no longer retains raw Playwright errors. The final operator-reported
+exact-value scan found zero matches in 524 text files across package artifacts
+and both live validation roots; only counts/paths were emitted, never values.
+This expands the earlier 15-file scan. It is not proof that the earlier Redis
+tool-output exposure never occurred, a rotation check, or a scan of every binary
+or encoded representation. SEC-06 remains an explicit incident-response condition.
 
 ### 3) Input validation and output safety
 
@@ -94,6 +101,9 @@ Strict bounded JSON/table/key/raster admission and fixed source identities are
 preserved. Predictor replay pins twelve fixed paths, including basin/domain/SBS
 evidence; it never dereferences arbitrary original source paths. Malformed
 populated inputs fail explicitly. API downloads reject unrecorded/tampered masks.
+Final `production.partial_reason` selects only fixed explanatory strings from
+validated predictor state. The controller's existing `message()` writes through
+`textContent`, not an HTML sink; no arbitrary source reason is reflected.
 
 ### 4) Filesystem and run-tree boundaries
 
@@ -192,10 +202,38 @@ unavailability remains visible in result status, not hidden by full F/S coverage
 Screenshots show the expected model, job ID, coverage/mask link and explicit
 unavailability where applicable; this is not a full accessibility certification.
 
-The reviewer compared every entry in retained `protected_before.json` and
-`protected_after.json` under `addicted-reservist`'s validation root: 22,357 files
-in both, matching project identities and zero changed entries. This compares
-the recorded before/after hashes; it is not a new rehash of every live file.
+The reviewer compared every entry in retained `protected_before.json` against
+both `protected_after.json` and final `protected_final.json` under
+`addicted-reservist`'s validation root: 22,357 files in each, matching project
+identities and zero changed entries. The final audit file was written at
+2026-09-15 01:47:48 UTC, after the final M1 job. This compares recorded hashes;
+it is not an independent new rehash of every live file.
+
+### Final bounded UX correction
+
+The final production/controller diff adds optional accepted/public
+`partial_reason` without new input, route, authorization, filesystem or network
+behavior. Its fixed text is chosen inside the existing locked acceptance
+callback. Missing legacy reasons preserve the previous completion text, and
+nonpartial results retain a null reason. Backend and controller regression
+readback covers the intended states; independent correctness review closes
+COR-UX-01. Security review found no new finding.
+
+The reviewer independently read final large-basin M3 job
+`528f1c22-0315-4a49-b164-c5b5f28a90f7`, accepted attempt
+`8a6aac78039d4a4fab781e879368372e`, in `browser_m3_final2/`. After reload,
+`completion_message.txt` contains the normal partial-completion text followed
+by "Elevation coverage does not establish complete upstream terrain."
+Public state carries that same fixed reason, and the downloaded mask matches
+the accepted result. The final screenshot is not relied upon for this proof.
+
+Final M1 job `9645f921-fdb4-4147-9894-d87b1ebc826e`, attempt
+`34adfb822ae34c9789c04e620efe77ca`, in `browser_m1_final/` finished without an
+exception, retained `partial: false` / null reason and "Run complete.", and
+downloaded the exact accepted mask. Final numerical reports for these two
+bundles and synthetic positive M3 attempt `5d2980fedf0f4e7197075469334b8993`
+preserve the available/unavailable outcomes above; this reviewer independently
+matched all three report manifest hashes to their retained result manifests.
 
 Canonical `project_rq_archive` excludes only `archives/` and two root config
 transaction files, not the M3 module. The new `archive_module_evidence.py` uses

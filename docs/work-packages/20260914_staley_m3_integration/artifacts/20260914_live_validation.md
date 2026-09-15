@@ -1,13 +1,14 @@
 # Development acceptance and final validation
 
-Status: implementation and live technical acceptance complete; final full
-Python gate is in progress. Package closure still
+Status: implementation, live technical acceptance and final full Python/frontend
+regressions complete. Package closure still
 requires owner disposition of SEC-06 in the [security review](20260914_security_review.md).
 No production deployment, shared soil rebuild or shared cache refresh occurred.
 
 ## Scope and identities
 
-Source/dispatch checkpoint: `6f64d45a0`; production checkpoint: `b998d44e2`.
+Source/dispatch checkpoint: `6f64d45a0`; production checkpoint: `b998d44e2`;
+final UX/code/evidence checkpoint: `e36c3eb54`.
 The subsequent bounded UX correction adds an explanatory `partial_reason` to
 accepted state and renders it as text, fulfilling the existing UI contract.
 Scientific coefficients, source policy, masks and table schemas are unchanged.
@@ -120,8 +121,9 @@ for failure JSON, native THICK, HTTP body, receipt, copied WAL and exact mask.
 
 ## Gates and qualifications
 
-- Full Python before the final UX correction: **8,590 passed, 103 skipped**,
-  1025.69 s. Final post-correction sweep is running.
+- Final full Python (`wctl run-pytest tests --maxfail=1`): **8,602 passed,
+  103 skipped**, 3,128 warnings, 1034.93 s, exit 0. The earlier 8,590-pass sweep
+  predates the final two-grid/partial-message additions.
 - Final production/runtime gate: **70 passed**; covers two independent basins,
   finalization authority and success/failure/retry noninterference.
 - Network/results combined gate: **81 passed**; final reader-only gate: 26 passed.

@@ -2,8 +2,8 @@
 
 Status: bounded acquisition and production integration are implemented at
 `6f64d45a0` / `b998d44e2`; development multi-basin/browser/archive acceptance
-passes. Final regression closeout is in progress. Package archival remains on
-hold for owner disposition of SEC-06, the recorded credential exposure.
+passes, including the final full Python/frontend regressions. Package archival
+remains on hold for owner disposition of SEC-06, the recorded credential exposure.
 Strict material rules were rejected and recorded-depth policy accepted.
 See [replacement assessment](artifacts/depth_policy_assessment.md),
 [inventory](artifacts/source_inventory.md),

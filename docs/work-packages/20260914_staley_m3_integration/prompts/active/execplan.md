@@ -44,7 +44,8 @@ production deployment is authorized by this package.
   through optional accepted `partial_reason`; genuine and synthetic M3 reruns pass.
 - [x] Final M1 compatibility rerun and all final-bundle independent arithmetic
   checks pass; final protected audit again reports 22,357 files, zero changes.
-- [ ] Finish final full Python gate.
+- [x] Final full Python gate: 8,602 passed, 103 skipped (1034.93 s); reviewed
+  UX/code/evidence checkpoint `e36c3eb54`. No production deployment occurred.
 - [x] (2026-09-14) Record owner requirement for basin-independent preparation:
   derive original keys and THICK extent per project; named runs are tests only.
 - [x] Implement reusable source preparation and prove the same path on at least
@@ -264,7 +265,8 @@ byte-identically and the first 22,357-file protected audit reports zero changes.
 The final explanatory UI correction passes genuine and synthetic M3 browsers,
 70 production/runtime tests and all 877 npm tests. Final M1 compatibility,
 all final-bundle arithmetic and protected-byte audit pass. The final full Python
-sweep is in progress. SEC-06 owner disposition is the sole external
+sweep passes: 8,602 passed, 103 skipped in 1034.93 s. Final implementation and
+evidence are committed at `e36c3eb54`. SEC-06 owner disposition is the sole external
 closure condition; see `artifacts/20260914_live_validation.md` for all evidence
 and qualifications. Do not archive the plan while that condition remains open.
 The older checkpoint paragraphs below describe historical state, not a renewed
@@ -559,3 +561,5 @@ record approval separately from uncompleted control proof and actual acquisition
 Acceptance revision: record actual generic source delivery, real development
 workflows, soil/downstream parity, archive/browse retention, the partial-reason
 UX correction and the remaining external credential-response closure hold.
+Final validation revision: record all completed technical acceptance gates and
+the final full Python result; leave only SEC-06 disposition/archival unchecked.

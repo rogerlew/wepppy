@@ -4,7 +4,7 @@ Status: checkpoint `89d673c38` and isolated implementation `587c6b8de` committed
 generic preparation contract `7328a0004`, replay refinement `0792c7e59` and
 reviewed local preparation/M3 increment `4b4e77733` committed. Production
 integration committed at `b998d44e2`; live development acceptance, builder parity
-and archive/browse checks pass. Final full regression is in progress; package
+and archive/browse checks pass. Final full regression passes; package
 archival remains held for SEC-06 owner disposition. See
 [consolidated evidence](artifacts/20260914_live_validation.md).
 Last updated: 2026-09-14.
@@ -39,7 +39,8 @@ Last updated: 2026-09-14.
 - [x] Complete workers, publication, freshness and coverage summaries.
 - [x] Validate real development jobs/browser/archive and independent code reviews:
   genuine M1/M3, positive synthetic M3, 521 archive-restored files, ordinary browse.
-- [ ] Complete final post-UX full Python gate; final npm 111 suites/877 tests pass.
+- [x] Final post-UX full Python gate: 8,602 passed, 103 skipped (1034.93 s);
+  final npm lint and 111 suites/877 tests pass. Code/evidence commit `e36c3eb54`.
 - [x] Synchronize durable scientific/runtime/UI docs and retain acceptance limits.
 - [ ] Obtain explicit SEC-06 owner credential-response/risk-acceptance disposition;
   only then close the package and archive the plan.
