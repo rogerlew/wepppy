@@ -7,9 +7,10 @@
 
 ## Purpose
 
-Scaffolded: [Staley M3 scientific integration](docs/work-packages/20260914_staley_m3_integration/package.md)
-— complete M3, common valid-support estimates for both models, and explicit
-SSURGO/STATSGO soil-builder nonregression evidence; soil checkpoint next.
+Implemented / development validated: [Staley M3 scientific integration](docs/work-packages/20260914_staley_m3_integration/package.md)
+— bounded generic source acquisition, M3/M1 valid support, real RQ/browser/archive
+and SSURGO/STATSGO builder parity; final regression closeout in progress,
+archival held for SEC-06 owner credential-response/risk-acceptance disposition.
 
 Contract preparation: [Modify Landuse MOFE](docs/work-packages/20260911_modify_landuse_mofe/package.md)
 — regenerate selected-hillslope managements and summaries; implementation awaits contract checkpoint.

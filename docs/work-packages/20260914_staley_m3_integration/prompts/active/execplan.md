@@ -8,15 +8,15 @@ current, and update this package's tracker at every handoff.
 ## Purpose / Big Picture
 
 
-Users already select M1 or M3 in the Post-fire debris flow control. M1 executes;
-M3 reaches RQ but fails `integration_pending`. Finish M3 soil/terrain composition
+At package entry, users could select M1 or M3 in the Post-fire debris flow
+control, but M3 failed `integration_pending`. Finish M3 soil/terrain composition
 and produce real event probabilities, design-storm probabilities and inverse
 rainfall thresholds. Both models must calculate over usable spatial inputs,
 display Valid coverage and expose an exact downloadable mask. The user should
 use the existing control without another selector/API redesign. Reports and the
 dashboard remain deferred.
 
-This plan scaffolds full scientific integration, not a surrogate model. Closure
+This plan delivers full scientific integration, not a surrogate model. Closure
 requires actual output from the installed owned WBT tool and development RQ
 workflow. Implemented, wired, validated and deployed are separate states. No
 production deployment is authorized by this package.
@@ -29,18 +29,25 @@ production deployment is authorized by this package.
 - [x] (2026-09-14) Implement/test supervised range/SDA readers; retain live
   lineage and 393,216 THICK response bytes without activation. Native receipt
   failed on legitimate NaN NoData; preserve attempt and implement offline replay.
-- [ ] Complete reviewed offline recovery, authoritative activation and live use.
+- [x] Complete reviewed offline recovery, authoritative activation and live use.
 - [x] (2026-09-14) Shared M1/M3 results and mask replay pass independent review;
   81 focused tests pass, including rejection of mislabeled legacy predictors.
 - [x] Review production M3/M1-v2, conditional mask publication/download and
   authoritative source activation. Independent finalization-race reproduction
   now rejects superseded authority; 59 runtime/production tests pass.
 - [x] UI coverage gate: 22 tests pass; full npm baseline: 111 suites/872 tests.
-- [ ] Live acceptance: protected baseline records 22,357 files before activation;
-  exercise development RQ/browser/archive and compare protected bytes afterward.
+- [x] Live acceptance: genuine M1/M3 and positive synthetic M3 use development
+  RQ/browser; 521 files restore byte-identically through the canonical archive
+  engine and ordinary authenticated browse/download passes. First protected
+  before/after audit proves all 22,357 upstream files unchanged.
+- [x] Correct final UX finding: explain full-coverage/unavailable-terrain results
+  through optional accepted `partial_reason`; genuine and synthetic M3 reruns pass.
+- [x] Final M1 compatibility rerun and all final-bundle independent arithmetic
+  checks pass; final protected audit again reports 22,357 files, zero changes.
+- [ ] Finish final full Python gate.
 - [x] (2026-09-14) Record owner requirement for basin-independent preparation:
   derive original keys and THICK extent per project; named runs are tests only.
-- [ ] Implement reusable source preparation and prove the same path on at least
+- [x] Implement reusable source preparation and prove the same path on at least
   two independent basins, without hand-authored per-basin manifests.
 - [x] (2026-09-14) Commit generic preparation contract checkpoint `7328a0004`.
 - [x] (2026-09-14) Implement local basin-derived keys/native-window preparation
@@ -54,7 +61,7 @@ production deployment is authorized by this package.
   implementation `4b4e77733`. Module gate 520 passed; latest results gate 41 passed.
 - [x] (2026-09-14) Full Python sweep: 8,537 passed, 103 skipped in 953.04 s;
   later test additions covered by the focused gates above.
-- [ ] Complete authoritative project binding and production integration;
+- [x] Complete authoritative project binding and production integration;
   approved local helpers do not establish production readiness.
 - [x] (2026-09-14 16:40 UTC) Scaffolded scope, accepted support/isolation, research,
   frozen source audit, soil regression plan and draft checkpoint.
@@ -83,14 +90,33 @@ production deployment is authorized by this package.
   combined focused gate 153 passed; final M1 reader check 55 passed.
 - [x] Commit tested isolated implementation as `587c6b8de`; preserve offline
   defaults and leave production M3 explicitly pending.
-- [ ] Implement production thickness adapter; prove unchanged soil building.
-- [ ] Implement M3 terrain and shared-support aggregation/masks for both models.
-- [ ] Integrate execution, freshness, publication and canonical summaries.
-- [ ] Complete full validation, real browser/RQ evidence and independent reviews.
-- [ ] Synchronize docs, close package and archive this plan with outcomes.
+- [x] Implement production thickness adapter; prove unchanged soil building in
+  eight baseline/candidate cases, including actual downstream `.sol`/`.run` files.
+- [x] Implement M3 terrain and shared-support aggregation/masks for both models.
+- [x] Integrate execution, freshness, publication and canonical summaries.
+- [x] Complete real browser/RQ evidence and independent implementation reviews;
+  final npm lint/full suite passes (111 suites, 877 tests), focused Python 70 pass.
+- [x] Synchronize durable docs and record scientific/validation limitations.
+- [ ] Obtain explicit owner response or development-only risk acceptance for
+  SEC-06, then close the security gate and archive this plan. Do not infer
+  rotation/acceptance from “redis credential is known” or continued execution.
 
 ## Surprises & Discoveries
 
+
+Final browser review found that full soil/SBS coverage plus a generic partial
+completion message concealed the terrain reason. Accepted state now includes a
+fixed explanatory `partial_reason`, rendered as text and preserved on reload.
+This fulfills the existing UI requirement without changing scientific rules.
+Isolation diagnostics pass all scoped tests but flag shared import/environment
+state; the unchanged Fairpoint suite reproduces the same observations.
+
+The first real M3 job completed in the development worker with full common
+soil/SBS support (4,311,420 cells), but native terrain reports potential
+truncation. Readback confirms 1,123 domain cells touch the raster edge. All
+27,669 events, 12 designs and three inverse rows correctly remain unavailable.
+Positive-result acceptance therefore also uses an isolated synthetic basin;
+do not repair the live watershed or weaken terrain validity to obtain numbers.
 
 Finalization originally checked source identity without rechecking eligibility,
 read-only status and all prerequisites. Independent real-owner reproduction
@@ -143,6 +169,17 @@ scientific proposals, not prerequisites for making this development basin pass.
 
 ## Decision Log
 
+
+Decision (2026-09-14): retain the package as active until SEC-06 receives an
+explicit owner credential-response or development-only risk-acceptance record.
+Rationale: dedicated security review closes implementation findings but cannot
+infer incident resolution from known credentials or continued work. Rotation
+and production deployment are outside this execution authority.
+
+Decision (2026-09-14): explain partial results through optional, fixed accepted
+state text rather than exposing arbitrary diagnostic strings. Rationale: full
+spatial coverage and complete terrain/rainfall are distinct requirements; users
+need the reason without a new selector or changes to result tables.
 
 Decision (2026-09-14): recover retained network evidence in a fresh visible
 directory, never overwrite the failed acquisition. Offline replay is labeled
@@ -216,10 +253,20 @@ acquisition remain pending; the earlier conservative recommendation is rejected.
 ## Outcomes & Retrospective
 
 
-Current continuation: bounded network delivery and generic result dispatch are
-implemented with independent review. Live acquisition retained payloads but
-needs the tested offline metadata recovery. Production wiring is in progress,
-not yet validated or accepted; browser/RQ, soil parity and full gates remain.
+Current continuation: bounded network delivery and production integration are
+implemented and independently reviewed at `6f64d45a0`/`b998d44e2`. Recovered
+sources activated successfully. Real development M3 publication, exact-mask
+download, reload, SI/English and job status/info reads pass, with scientifically
+unavailable terrain explicitly preserved. Positive synthetic M3 passes with
+independently verified event/design/inverse arithmetic. Eight soil-builder
+baseline/candidate cases match generated inputs; all 521 archived files restore
+byte-identically and the first 22,357-file protected audit reports zero changes.
+The final explanatory UI correction passes genuine and synthetic M3 browsers,
+70 production/runtime tests and all 877 npm tests. Final M1 compatibility,
+all final-bundle arithmetic and protected-byte audit pass. The final full Python
+sweep is in progress. SEC-06 owner disposition is the sole external
+closure condition; see `artifacts/20260914_live_validation.md` for all evidence
+and qualifications. Do not archive the plan while that condition remains open.
 The older checkpoint paragraphs below describe historical state, not a renewed
 permission gate. Owner authority remains sufficient for the recorded scope.
 
@@ -509,3 +556,6 @@ Implementation continuation: record generic checkpoint, local cross-basin and
 native routing evidence, promotion race corrections, and remaining wiring gates.
 Authorization revision: owner approved bounded live acquisition on 2026-09-14;
 record approval separately from uncompleted control proof and actual acquisition.
+Acceptance revision: record actual generic source delivery, real development
+workflows, soil/downstream parity, archive/browse retention, the partial-reason
+UX correction and the remaining external credential-response closure hold.

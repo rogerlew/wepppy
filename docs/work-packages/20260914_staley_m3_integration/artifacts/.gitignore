@@ -1,0 +1,18 @@
+# Local validation evidence remains visible on disk. These are version-control
+# exclusions only, not project browser/archive exclusions. Retain compact final
+# results, hashes, diagnostics and explicit failed-trial status in Git.
+/soil_builder_validation_20260914*/**
+!/soil_builder_validation_20260914*/status.json
+!/soil_builder_validation_20260914_r2/base.log
+!/soil_builder_validation_20260914_r5/existing_soil_regression.xml
+!/soil_builder_validation_20260914_r6/environment.json
+!/soil_builder_validation_20260914_r6/protected_identities.json
+!/soil_builder_validation_20260914_r6/comparison.json
+!/soil_builder_validation_20260914_r6/base.log
+!/soil_builder_validation_20260914_r6/candidate.log
+!/soil_builder_validation_20260914_r6/base/
+!/soil_builder_validation_20260914_r6/base/results.json
+!/soil_builder_validation_20260914_r6/candidate/
+!/soil_builder_validation_20260914_r6/candidate/results.json
+!/soil_builder_validation_20260914_r6/inputs/
+!/soil_builder_validation_20260914_r6/inputs/*.json

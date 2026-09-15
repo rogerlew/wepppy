@@ -1,0 +1,158 @@
+{
+  "wepp_runner/__init__.py": {
+    "base_sha256": "145724c2810e67604fb7c4746c4634c932e27bb872e178299ab9f8b1e0bf5e48",
+    "candidate_sha256": "145724c2810e67604fb7c4746c4634c932e27bb872e178299ab9f8b1e0bf5e48"
+  },
+  "wepp_runner/bin/__init__.py": {
+    "base_sha256": "1b74a8106f2ac6669777933d6a2dda058a490cc3d1c6229b404849d55a42665c",
+    "candidate_sha256": "1b74a8106f2ac6669777933d6a2dda058a490cc3d1c6229b404849d55a42665c"
+  },
+  "wepp_runner/status_messenger.py": {
+    "base_sha256": "398e945e4b2e4ee66ad6a212df07e688318d269bfd8846157e2699221209047c",
+    "candidate_sha256": "398e945e4b2e4ee66ad6a212df07e688318d269bfd8846157e2699221209047c"
+  },
+  "wepp_runner/templates/flowpath.template": {
+    "base_sha256": "e7450d2d321d1d77674a10a6c16a7002be98515b95bed1368d2ec2dc30d55ed3",
+    "candidate_sha256": "e7450d2d321d1d77674a10a6c16a7002be98515b95bed1368d2ec2dc30d55ed3"
+  },
+  "wepp_runner/templates/hillslope.template": {
+    "base_sha256": "b9af5a0098758c2d53d66d98d5c09bba7327f5a43ffed531e6fe986f63e680db",
+    "candidate_sha256": "b9af5a0098758c2d53d66d98d5c09bba7327f5a43ffed531e6fe986f63e680db"
+  },
+  "wepp_runner/templates/pmetpara.r1.txt": {
+    "base_sha256": "e02366f75b2ef60b786b8f2e18d4daab381649f478992bd619780dbf76c3a556",
+    "candidate_sha256": "e02366f75b2ef60b786b8f2e18d4daab381649f478992bd619780dbf76c3a556"
+  },
+  "wepp_runner/templates/pmetpara.r2.txt": {
+    "base_sha256": "b66deac536f056a6450e11fa9dba0455c1a38d16d37b516b25417182e8e17869",
+    "candidate_sha256": "b66deac536f056a6450e11fa9dba0455c1a38d16d37b516b25417182e8e17869"
+  },
+  "wepp_runner/templates/pmetpara.r3.txt": {
+    "base_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "wepp_runner/templates/reveg_hillslope.template": {
+    "base_sha256": "ca00a08a2e6cff3922adf705d9ab6ba7ac401c140f5a25a208fa707ce88820c1",
+    "candidate_sha256": "ca00a08a2e6cff3922adf705d9ab6ba7ac401c140f5a25a208fa707ce88820c1"
+  },
+  "wepp_runner/templates/ss_batch_hillslope.template": {
+    "base_sha256": "042c35b69ed8b907e02ecdc0efe2cc655e7986f00b4ce529cee295f2165329df",
+    "candidate_sha256": "042c35b69ed8b907e02ecdc0efe2cc655e7986f00b4ce529cee295f2165329df"
+  },
+  "wepp_runner/templates/ss_batch_watershed.template": {
+    "base_sha256": "b84c74e50ebe86d753de08e8290f63a140604749cf4aba96d0a84714b1b84016",
+    "candidate_sha256": "b84c74e50ebe86d753de08e8290f63a140604749cf4aba96d0a84714b1b84016"
+  },
+  "wepp_runner/templates/ss_flowpath.template": {
+    "base_sha256": "396fbec7019547c434e27894af0c77ce5119c946b82cf4a1771a17e3447ffb8b",
+    "candidate_sha256": "396fbec7019547c434e27894af0c77ce5119c946b82cf4a1771a17e3447ffb8b"
+  },
+  "wepp_runner/templates/ss_hillslope.template": {
+    "base_sha256": "cb7c49bcaf0a3a102a45216eabe37ac5c15f6e25a7b36a76505a7d76076f0c77",
+    "candidate_sha256": "cb7c49bcaf0a3a102a45216eabe37ac5c15f6e25a7b36a76505a7d76076f0c77"
+  },
+  "wepp_runner/templates/ss_watershed.template": {
+    "base_sha256": "a9e02710c9a3250d8b1da3bfd93d9a52e78708f434c876b477622dfe398d1459",
+    "candidate_sha256": "a9e02710c9a3250d8b1da3bfd93d9a52e78708f434c876b477622dfe398d1459"
+  },
+  "wepp_runner/templates/watershed.template": {
+    "base_sha256": "85700692942ef302dd04705aa4e08771b9234e85b0ddd8ddb13ec2db69fc0769",
+    "candidate_sha256": "85700692942ef302dd04705aa4e08771b9234e85b0ddd8ddb13ec2db69fc0769"
+  },
+  "wepp_runner/wepp_runner.py": {
+    "base_sha256": "fd6aec96ea6ffe79e5d9f356d05ed65e5ba344e989de7bef55cd6f59cbea3ac3",
+    "candidate_sha256": "fd6aec96ea6ffe79e5d9f356d05ed65e5ba344e989de7bef55cd6f59cbea3ac3"
+  },
+  "wepppy/nodb/core/soils.py": {
+    "base_sha256": "50b0aa414feb3eb36db50a40e6d2396e41d6483cfb551c049b195e17ba712be6",
+    "candidate_sha256": "50b0aa414feb3eb36db50a40e6d2396e41d6483cfb551c049b195e17ba712be6"
+  },
+  "wepppy/nodb/core/wepp.py": {
+    "base_sha256": "7ac4a9c67dde391d790b0210de39fd49b8d90579775483e86e6077d3badbd516",
+    "candidate_sha256": "7ac4a9c67dde391d790b0210de39fd49b8d90579775483e86e6077d3badbd516"
+  },
+  "wepppy/nodb/core/wepp_prep_service.py": {
+    "base_sha256": "455db02821711a74f006726bb3bd59bd7a22d616d90c5034a63e208d6280ed3c",
+    "candidate_sha256": "455db02821711a74f006726bb3bd59bd7a22d616d90c5034a63e208d6280ed3c"
+  },
+  "wepppy/soils/__init__.py": {
+    "base_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "wepppy/soils/ssurgo/__init__.py": {
+    "base_sha256": "2bafa05a0edf5ccf03ebc2caf23b00ad5addc826bdef8031d0091030692ca574",
+    "candidate_sha256": "2bafa05a0edf5ccf03ebc2caf23b00ad5addc826bdef8031d0091030692ca574"
+  },
+  "wepppy/soils/ssurgo/data/__init__.py": {
+    "base_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "wepppy/soils/ssurgo/data/surgo/build/surgo_tabular_db_builder.py": {
+    "base_sha256": "17d317d97b324a1ce9f735faf3817932150063eb44f9901b966914d1fdf7f43b",
+    "candidate_sha256": "17d317d97b324a1ce9f735faf3817932150063eb44f9901b966914d1fdf7f43b"
+  },
+  "wepppy/soils/ssurgo/fallback.py": {
+    "base_sha256": "5c4e2562fb020c8057e2600899aa4da6444909d72e9d70c482ac8c2c50622ec5",
+    "candidate_sha256": "5c4e2562fb020c8057e2600899aa4da6444909d72e9d70c482ac8c2c50622ec5"
+  },
+  "wepppy/soils/ssurgo/spatializer.py": {
+    "base_sha256": "d38ecc07e6a39323e8adbaeeb87fb5f370cc46ce803c820b0fd029ca991d175d",
+    "candidate_sha256": "d38ecc07e6a39323e8adbaeeb87fb5f370cc46ce803c820b0fd029ca991d175d"
+  },
+  "wepppy/soils/ssurgo/ssurgo.py": {
+    "base_sha256": "f274e400a07081bce83a001db112a6bad23f47af187b12f0d9ec6dbac28f4055",
+    "candidate_sha256": "f274e400a07081bce83a001db112a6bad23f47af187b12f0d9ec6dbac28f4055"
+  },
+  "wepppy/soils/ssurgo/statsgo_spatial.py": {
+    "base_sha256": "636f42365c1f7e3408dd819aa4995ce57af9f68d0e388a4cc6939392470bc9d5",
+    "candidate_sha256": "636f42365c1f7e3408dd819aa4995ce57af9f68d0e388a4cc6939392470bc9d5"
+  },
+  "wepppy/soils/ssurgo/surgo_map.py": {
+    "base_sha256": "fc98c759860b74316decfb17e3d0a62708822714a2a05a2ae118f61a40092b32",
+    "candidate_sha256": "fc98c759860b74316decfb17e3d0a62708822714a2a05a2ae118f61a40092b32"
+  },
+  "wepppy/soils/ssurgo/tests/__init__.py": {
+    "base_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "wepppy/soils/ssurgo/tests/testsoils/__init__.py": {
+    "base_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "wepppy/wepp/soils/__init__.py": {
+    "base_sha256": "9afd8a17d5adb2fe0f8d33fb11ad773bb9387c6d2f26633bbd5a1c5f4145bfc2",
+    "candidate_sha256": "9afd8a17d5adb2fe0f8d33fb11ad773bb9387c6d2f26633bbd5a1c5f4145bfc2"
+  },
+  "wepppy/wepp/soils/builder/__init__.py": {
+    "base_sha256": "5e9274638e5be2670aaff206718163cb90cabf4e57d317d619bd5ce15651504e",
+    "candidate_sha256": "5e9274638e5be2670aaff206718163cb90cabf4e57d317d619bd5ce15651504e"
+  },
+  "wepppy/wepp/soils/horizon_mixin.py": {
+    "base_sha256": "e803959e3281f00c6d6b60e2431bff0586a8a169972e80f7072a85feabf29d53",
+    "candidate_sha256": "e803959e3281f00c6d6b60e2431bff0586a8a169972e80f7072a85feabf29d53"
+  },
+  "wepppy/wepp/soils/soilsdb/__init__.py": {
+    "base_sha256": "ca4c20aa7cb92d6973357dd4f7360e9a476f162284a96917cb2931b53c6be499",
+    "candidate_sha256": "ca4c20aa7cb92d6973357dd4f7360e9a476f162284a96917cb2931b53c6be499"
+  },
+  "wepppy/wepp/soils/soilsdb/data/_migration/migrate_forest.py": {
+    "base_sha256": "fb468babb97847b49761b056885a84f7198d6608c0f718204ec73df9c495079c",
+    "candidate_sha256": "fb468babb97847b49761b056885a84f7198d6608c0f718204ec73df9c495079c"
+  },
+  "wepppy/wepp/soils/utils/__init__.py": {
+    "base_sha256": "2035ff297a804e9b54862e9b7f1c835f4038a347be826d4e5ef0b4d800a25cc8",
+    "candidate_sha256": "2035ff297a804e9b54862e9b7f1c835f4038a347be826d4e5ef0b4d800a25cc8"
+  },
+  "wepppy/wepp/soils/utils/multi_ofe.py": {
+    "base_sha256": "e21c33a19fa4d95d9b7ce2cfd17a24efffdafaff3f0968610be1e090856e82d2",
+    "candidate_sha256": "e21c33a19fa4d95d9b7ce2cfd17a24efffdafaff3f0968610be1e090856e82d2"
+  },
+  "wepppy/wepp/soils/utils/utils.py": {
+    "base_sha256": "e11619f75716ef711ca2370067760fe4541b2202f9da436b0af391e813cdfb70",
+    "candidate_sha256": "e11619f75716ef711ca2370067760fe4541b2202f9da436b0af391e813cdfb70"
+  },
+  "wepppy/wepp/soils/utils/wepp_soil_util.py": {
+    "base_sha256": "cdd708cff5ac3213564e4a421642a4f116804b88312e48d046f721bf77efe668",
+    "candidate_sha256": "cdd708cff5ac3213564e4a421642a4f116804b88312e48d046f721bf77efe668"
+  }
+}

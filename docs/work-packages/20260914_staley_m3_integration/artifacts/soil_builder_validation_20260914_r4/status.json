@@ -1,0 +1,5 @@
+{
+  "status": "six_synthetic_comparisons_passed",
+  "acceptance_evidence": "Generated soil and run bytes match; r6 is the final retained-payload inventory.",
+  "limitations": "No historical database panels. WAL/shared-memory housekeeping files were incorrectly included as stable payload identities; r6 excludes only those coordination files while retaining exact committed schema/row checks."
+}

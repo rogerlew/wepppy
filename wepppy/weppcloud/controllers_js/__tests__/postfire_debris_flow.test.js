@@ -50,9 +50,17 @@ describe('PostfireDebrisFlow', () => {
         const summary = document.querySelector('[data-pfdf-files]').textContent;
         expect(summary).toContain('Valid coverage');
         expect(summary).toContain(valid + ' of 10000000 cells');
-        if (valid < 10000000) { expect(summary).not.toContain('100.0000%'); }
+        expect(summary.includes('100.0000%')).toBe(valid === 10000000);
         expect(document.querySelector('[data-pfdf-download="valid_mask.tif"]').getAttribute('href')).toBe('/accepted-mask');
         expect(summary).toContain('Estimates represent the area with usable inputs.');
+    });
+    test('full soil coverage explains unavailable terrain without inventing probabilities', () => {
+        const reason='Elevation coverage does not establish complete upstream terrain.';
+        instance.render({required:[],frequency_source:'cli',freshness:'current',results:{model:'M3',current:true,
+            completed_at:'2026-09-14T00:00:00Z',partial:true,partial_reason:reason,
+            coverage:{total_cells:100,valid_cells:100,valid_fraction:1},files:[]}});
+        expect(document.querySelector('[data-pfdf-message]').textContent).toContain(reason);
+        expect(document.querySelector('[data-pfdf-files]').textContent).toContain('100 of 100');
     });
     test('legacy accepted results explicitly lack recorded coverage', () => {
         instance.render({required:[],frequency_source:'cli',results:{current:false,completed_at:'2026-09-14T00:00:00Z',files:[]}});

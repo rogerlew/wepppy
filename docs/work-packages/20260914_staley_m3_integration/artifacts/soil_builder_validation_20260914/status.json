@@ -1,0 +1,6 @@
+{
+  "status": "harness_failed_before_builders",
+  "reason": "Installed rosetta module has no rosetta-soil distribution metadata; metadata lookup failed.",
+  "acceptance_evidence": false,
+  "note": "Initial harness also needed explicit SQLite connection closure; these preliminary input copies are not the final fixtures. Retained for inspection. No production or live soil files changed."
+}

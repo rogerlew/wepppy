@@ -1,0 +1,5 @@
+{
+  "status": "harness_failed_before_builders",
+  "reason": "Hardcoded native extension module name _duckdb was unavailable in this installed DuckDB release. Corrected to inventory actual loaded extension files.",
+  "acceptance_evidence": false
+}

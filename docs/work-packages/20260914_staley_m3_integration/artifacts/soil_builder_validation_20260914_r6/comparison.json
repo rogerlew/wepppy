@@ -1,0 +1,20 @@
+{
+  "all_equal": true,
+  "builder_executions": 16,
+  "cases": {
+    "historical_ssurgo/ssurgo": true,
+    "historical_statsgo/statsgo": true,
+    "invalid_major_texture/ssurgo": true,
+    "invalid_major_texture/statsgo": true,
+    "missing_texture_defaults/ssurgo": true,
+    "missing_texture_defaults/statsgo": true,
+    "reclaimed/ssurgo": true,
+    "reclaimed/statsgo": true
+  },
+  "downstream_run_files_per_revision": 44,
+  "downstream_soils_per_revision": 44,
+  "generated_soils_per_revision": 22,
+  "input_databases_unchanged": true,
+  "retained_payload_hashes_rechecked": 296,
+  "sqlite_coordination_files": "Excluded from payload hashes; committed schema/rows compared exactly"
+}

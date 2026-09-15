@@ -1,4 +1,11 @@
-# Local rainfall adapters and M1 results
+# Local rainfall adapters and M1/M3 results
+
+The [production runtime amendment](production_m3_runtime.md) adds `build_results`
+with explicit M1/M3 dispatch and v2 predictor support. `build_m1_results` remains
+the M1-pinned compatibility wrapper. Result schema 1 and table columns remain;
+new common-valid bundles add exact coverage and fixed `valid_mask.tif`, verified
+on replay without following original project paths. Legacy v1 M1 behavior below
+remains supported; contradictory M3 labels on v1 inputs are rejected.
 
 Status: accepted local contract; R02 explicitly approved by the operator.
 The [work package](../../../../../docs/work-packages/20260909_staley_rainfall_results/package.md)

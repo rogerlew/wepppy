@@ -1,0 +1,563 @@
+{
+  "bad_chfrags_chkey": {
+    "rows": [],
+    "schema": "CREATE TABLE bad_chfrags_chkey (chkey INTEGER)"
+  },
+  "bad_chorizon_cokey": {
+    "rows": [],
+    "schema": "CREATE TABLE bad_chorizon_cokey (cokey INTEGER)"
+  },
+  "bad_chtexturegrp_chkey": {
+    "rows": [],
+    "schema": "CREATE TABLE bad_chtexturegrp_chkey (chkey INTEGER)"
+  },
+  "bad_component_mukey": {
+    "rows": [],
+    "schema": "CREATE TABLE bad_component_mukey (mukey INTEGER)"
+  },
+  "bad_corestrictions_cokey": {
+    "rows": [],
+    "schema": "CREATE TABLE bad_corestrictions_cokey (cokey INTEGER)"
+  },
+  "chfrags": {
+    "rows": [
+      [
+        329445911,
+        0.0
+      ],
+      [
+        329445912,
+        0.0
+      ],
+      [
+        329445921,
+        0.0
+      ],
+      [
+        329445922,
+        0.0
+      ],
+      [
+        329446011,
+        0.0
+      ],
+      [
+        329446012,
+        0.0
+      ],
+      [
+        329446021,
+        0.0
+      ],
+      [
+        329446022,
+        0.0
+      ],
+      [
+        329446111,
+        0.0
+      ],
+      [
+        329446112,
+        0.0
+      ],
+      [
+        329446121,
+        0.0
+      ],
+      [
+        329446122,
+        0.0
+      ]
+    ],
+    "schema": "CREATE TABLE chfrags\n                          (chkey INTEGER PRIMARY KEY , fragvol_r REAL)"
+  },
+  "chorizon": {
+    "rows": [
+      [
+        32944591,
+        329445911,
+        "A",
+        9.0,
+        0.0,
+        9.0,
+        1.76,
+        0.1,
+        0.0,
+        24.0,
+        1.0,
+        8.0,
+        0.08,
+        0.0,
+        0.0,
+        "A",
+        85.0,
+        24.0,
+        12.0,
+        2.0,
+        null
+      ],
+      [
+        32944591,
+        329445912,
+        "C",
+        152.0,
+        9.0,
+        143.0,
+        1.86,
+        0.014,
+        0.0,
+        22.4,
+        0.5,
+        5.0,
+        0.08,
+        0.0,
+        0.0,
+        "C",
+        85.0,
+        18.0,
+        9.0,
+        3.0,
+        null
+      ],
+      [
+        32944592,
+        329445921,
+        "A",
+        14.0,
+        0.0,
+        14.0,
+        1.81,
+        0.1,
+        22.0,
+        22.0,
+        1.0,
+        7.0,
+        0.08,
+        0.0,
+        0.0,
+        "A",
+        85.0,
+        22.0,
+        11.0,
+        2.5,
+        null
+      ],
+      [
+        32944592,
+        329445922,
+        "C",
+        203.0,
+        14.0,
+        189.0,
+        1.92,
+        0.014,
+        21.0,
+        28.0,
+        0.5,
+        5.0,
+        0.08,
+        0.0,
+        0.0,
+        "C",
+        85.0,
+        20.0,
+        10.0,
+        3.0,
+        null
+      ],
+      [
+        32944601,
+        329446011,
+        "A",
+        9.0,
+        0.0,
+        9.0,
+        1.76,
+        0.1,
+        0.0,
+        24.0,
+        1.0,
+        8.0,
+        0.08,
+        0.0,
+        0.0,
+        "A",
+        85.0,
+        24.0,
+        12.0,
+        2.0,
+        null
+      ],
+      [
+        32944601,
+        329446012,
+        "C",
+        152.0,
+        9.0,
+        143.0,
+        1.86,
+        0.014,
+        0.0,
+        22.4,
+        0.5,
+        5.0,
+        0.08,
+        0.0,
+        0.0,
+        "C",
+        85.0,
+        18.0,
+        9.0,
+        3.0,
+        null
+      ],
+      [
+        32944602,
+        329446021,
+        "A",
+        14.0,
+        0.0,
+        14.0,
+        1.81,
+        0.1,
+        22.0,
+        22.0,
+        1.0,
+        7.0,
+        0.08,
+        0.0,
+        0.0,
+        "A",
+        85.0,
+        22.0,
+        11.0,
+        2.5,
+        null
+      ],
+      [
+        32944602,
+        329446022,
+        "C",
+        203.0,
+        14.0,
+        189.0,
+        1.92,
+        0.014,
+        21.0,
+        28.0,
+        0.5,
+        5.0,
+        0.08,
+        0.0,
+        0.0,
+        "C",
+        85.0,
+        20.0,
+        10.0,
+        3.0,
+        null
+      ],
+      [
+        32944611,
+        329446111,
+        "A",
+        9.0,
+        0.0,
+        9.0,
+        1.76,
+        0.1,
+        0.0,
+        24.0,
+        1.0,
+        8.0,
+        0.08,
+        0.0,
+        0.0,
+        "A",
+        85.0,
+        24.0,
+        12.0,
+        2.0,
+        null
+      ],
+      [
+        32944611,
+        329446112,
+        "C",
+        152.0,
+        9.0,
+        143.0,
+        1.86,
+        0.014,
+        0.0,
+        22.4,
+        0.5,
+        5.0,
+        0.08,
+        0.0,
+        0.0,
+        "C",
+        85.0,
+        18.0,
+        9.0,
+        3.0,
+        null
+      ],
+      [
+        32944612,
+        329446121,
+        "A",
+        14.0,
+        0.0,
+        14.0,
+        1.81,
+        0.1,
+        22.0,
+        22.0,
+        1.0,
+        7.0,
+        0.08,
+        0.0,
+        0.0,
+        "A",
+        85.0,
+        22.0,
+        11.0,
+        2.5,
+        null
+      ],
+      [
+        32944612,
+        329446122,
+        "C",
+        203.0,
+        14.0,
+        189.0,
+        1.92,
+        0.014,
+        21.0,
+        28.0,
+        0.5,
+        5.0,
+        0.08,
+        0.0,
+        0.0,
+        "C",
+        85.0,
+        20.0,
+        10.0,
+        3.0,
+        null
+      ]
+    ],
+    "schema": "CREATE TABLE chorizon\n                          (cokey INTEGER, chkey INTEGER UNIQUE, hzname TEXT,\n                           hzdepb_r REAL, hzdept_r REAL, hzthk_r REAL, \n                           dbthirdbar_r REAL, ksat_r REAL, \n                           sandtotal_r REAL, claytotal_r REAL, om_r REAL, \n                           cec7_r REAL, awc_l REAL, fraggt10_r REAL, \n                           frag3to10_r REAL, desgnmaster TEXT, \n                           sieveno10_r REAL, wthirdbar_r REAL, \n                           wfifteenbar_r REAL, sandvf_r  REAL,\n                           ll_r  REAL)"
+  },
+  "chtexturegrp": {
+    "rows": [
+      [
+        329445911,
+        "silt loam"
+      ],
+      [
+        329445912,
+        "silt loam"
+      ],
+      [
+        329445921,
+        "silt loam"
+      ],
+      [
+        329445922,
+        "silt loam"
+      ],
+      [
+        329446011,
+        "silt loam"
+      ],
+      [
+        329446012,
+        "silt loam"
+      ],
+      [
+        329446021,
+        "silt loam"
+      ],
+      [
+        329446022,
+        "silt loam"
+      ],
+      [
+        329446111,
+        "silt loam"
+      ],
+      [
+        329446112,
+        "silt loam"
+      ],
+      [
+        329446121,
+        "silt loam"
+      ],
+      [
+        329446122,
+        "silt loam"
+      ]
+    ],
+    "schema": "CREATE TABLE chtexturegrp\n                          (chkey INTEGER PRIMARY KEY , texture TEXT)"
+  },
+  "component": {
+    "rows": [
+      [
+        3294459,
+        32944591,
+        "Fairpoint",
+        95.0,
+        0.15,
+        0.0,
+        0.0,
+        "Fairpoint reclaimed mine land",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        3294459,
+        32944592,
+        "Bethesda",
+        5.0,
+        0.15,
+        0.0,
+        0.0,
+        "Bethesda silt loam",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        3294460,
+        32944601,
+        "Fairpoint",
+        95.0,
+        0.15,
+        0.0,
+        0.0,
+        "Fairpoint reclaimed mine land",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        3294460,
+        32944602,
+        "Bethesda",
+        5.0,
+        0.15,
+        0.0,
+        0.0,
+        "Bethesda silt loam",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        3294461,
+        32944611,
+        "Fairpoint",
+        95.0,
+        0.15,
+        0.0,
+        0.0,
+        "Fairpoint reclaimed mine land",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        3294461,
+        32944612,
+        "Bethesda",
+        5.0,
+        0.15,
+        0.0,
+        0.0,
+        "Bethesda silt loam",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ]
+    ],
+    "schema": "CREATE TABLE component\n                          (mukey INTEGER, cokey INTEGER UNIQUE, compname TEXT, \n                           comppct_r REAL, albedodry_r REAL, \n                           hydricrating REAL, drainagecl REAL, muname TEXT,\n                           wtdepannmin TEXT, flodfreqdcd TEXT,\n                           aws025wta TEXT, aws0150wta TEXT,\n                           hydgrpdcd TEXT, drclassdcd TEXT,\n                           taxclname TEXT, geomdesc TEXT,\n                           taxorder TEXT, taxsuborder TEXT)"
+  },
+  "corestrictions": {
+    "rows": [
+      [
+        32944591,
+        "densic material"
+      ],
+      [
+        32944592,
+        "densic material"
+      ],
+      [
+        32944601,
+        "densic material"
+      ],
+      [
+        32944602,
+        "densic material"
+      ],
+      [
+        32944611,
+        "densic material"
+      ],
+      [
+        32944612,
+        "densic material"
+      ]
+    ],
+    "schema": "CREATE TABLE corestrictions\n                          (cokey INTEGER PRIMARY KEY , reskind TEXT)"
+  }
+}

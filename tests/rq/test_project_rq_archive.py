@@ -533,6 +533,18 @@ def test_postfire_records_survive_canonical_archive_and_restore(archive_rq_envir
                  'predictors/wbt/stderr.log':b'tool diagnostic'}
     for name, data in artifacts.items():
         path = failed/name; path.parent.mkdir(parents=True,exist_ok=True); path.write_bytes(data)
+    source_records = {
+        'source_preparation/failed/acquisition/native_failure.json':b'{"status":"failed"}',
+        'source_preparation/failed/acquisition/thick_requests/request-00003.body':b'original range bytes',
+        'source_preparation/failed/acquisition/native_thick.tif':b'original native THICK window',
+        'source_preparation/recovered/receipt.json':b'{"status":"prepared"}',
+        'source_preparation/recovered/snapshot/cache.sqlite':b'copied SQLite main',
+        'source_preparation/recovered/snapshot/cache.sqlite-wal':b'copied committed WAL',
+        'attempts/m3/predictors/valid_mask.tif':b'exact predictor mask',
+        'attempts/m3/results/valid_mask.tif':b'exact predictor mask',
+    }
+    for name,data in source_records.items():
+        path=root/name;path.parent.mkdir(parents=True,exist_ok=True);path.write_bytes(data)
     record_attempts(run_dir, {'upload_attempt':{'id':'b'*32,'phase':'complete'},'run_attempt':None})
     work = root/'publication_work'/'interrupted'; work.mkdir(parents=True)
     (work/'status.json').write_text('{"status":"incomplete"}')

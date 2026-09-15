@@ -1,0 +1,6 @@
+{
+  "status": "harness_failed_before_builders",
+  "reason": "Internet socket guard correctly blocked an import-time Redis connection; RuntimeError prevented the existing NoDb offline error boundary from handling it. Guard corrected to OSError, without allowing connections.",
+  "acceptance_evidence": false,
+  "diagnostics": "base.log"
+}

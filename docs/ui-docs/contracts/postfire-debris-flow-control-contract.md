@@ -216,7 +216,10 @@ On success: “Run complete.” Show completion time and an authorized **Downloa
 model files** link. This is access to generated files, not a report. The download
 must be a fixed allowlisted artifact set; no arbitrary path/archive request.
 On valid partial output: “Run complete. Some probabilities could not be
-calculated.” Follow with a concise reason such as “Soil erodibility data are
+calculated.” Follow with the accepted record's optional bounded `partial_reason`.
+For incomplete M3 terrain this is “Elevation coverage does not establish complete
+upstream terrain.” Coverage describes spatial soil/SBS inputs, not terrain
+completeness. Other examples include “Soil erodibility data are
 missing for part of the watershed.” Preserve downloads and diagnostics; never
 show unavailable probabilities as zero. No charts, probability tables, maps,
 summary cards or report-template implementation in this package.

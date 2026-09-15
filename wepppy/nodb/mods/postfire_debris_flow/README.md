@@ -7,10 +7,10 @@
 
 The production M1 control, NoDb state, dNBR upload and RQ execution are implemented.
 Development validation is recorded in the [production work package](../../../../docs/work-packages/20260910_staley_m1_production/package.md).
-The M1/M3 selector and dedicated M3 RQ task are wired; see the
-[model wiring validation](../../../../docs/work-packages/20260911_staley_model_wiring/artifacts/validation.md). M3 soil/terrain
-composition remains deferred: its task reports an explicit integration-pending
-failure and does not publish probabilities. Reports and the event dashboard remain deferred. Existing
+M3 soil/terrain composition, bounded source preparation and shared valid-support
+results are implemented under the [runtime contract](docs/production_m3_runtime.md).
+Live acceptance is tracked in the [M3 package](../../../../docs/work-packages/20260914_staley_m3_integration/package.md).
+Reports and the event dashboard remain deferred. Existing
 `debris_flow` behavior is unchanged. See the [specification](specification.md)
 and [roadmap](implementation_roadmap.md) for scientific scope and remaining work.
 
@@ -41,14 +41,17 @@ Select M3 beside M1 in the existing control. The dNBR upload and K prerequisite
 are hidden; Soils is shown instead. Initial M3 eligibility requires the project's
 10 m cell size and NED13/2022 DEM source. Automatic POLARIS/RUSLE enablement stays
 in place, but M3 does not require their outputs. Prepare project soils, SBS and
-climate before submitting. The job ID and explicit integration-pending failure
-remain visible after reload while scientific composition is being completed.
+climate before submitting. The task derives soil thickness from verified SSURGO
+records with original STATSGO THICK fallback, and ruggedness from the full basin.
+The summary reports exact Valid coverage and links its downloadable mask.
+Missing cells are excluded, not filled with zero; zero support yields explicit
+unavailable probabilities. The job ID and results remain visible after reload.
 
 Changing selection preserves prior model outputs and their model labels. The
 🌋 marker represents the latest accepted result on its own inputs, independently
 of the radio selection. A failed M3 task does not erase a current M1 result.
 
-## Planned M3 scientific integration and dashboard workflow
+## Scientific integration and planned dashboard workflow
 
 1. Use a continental US (CONUS) project, delineate with WBT, complete the WEPP
    Soils build, and provide a soil burn severity (SBS) map.
@@ -60,13 +63,14 @@ of the radio selection. A failed M3 task does not erase a current M1 result.
 3. Select M1 (default) or M3 explicitly. M3 requires soil thickness instead of K
    and does not require dNBR. Raw project SSURGO horizons are a feasible source;
    SSURGO is the approved primary source with original STATSGO THICK as fallback.
-   Production fallback and coverage rules remain pending.
+   Production uses recorded-depth policy and common valid cells; shared WEPP
+   soil builders, substitutions and caches are not changed.
 4. Use the project's climate event intensities to assess storm-event
    probabilities. Browse events in an interactive dashboard and select an
    event to inspect the project watershed result, rainfall, and input provenance.
    Return-interval comparisons and rainfall thresholds are complementary views.
 
-M3 and dashboard steps remain planned. M1 and M3 predict
+The interactive dashboard remains planned. M1 and M3 predict
 occurrence, not debris-flow volume or inundation extent.
 
 ## Organization
@@ -79,7 +83,7 @@ The specification and detailed contracts map the implemented source and UI paths
 ## Developer and Operator Notes
 
 - WBT is the supported terrain backend for this new module.
-- Both models require built project Soils data. Availability is restricted to
+- M3 requires built project Soils; M1 requires current RUSLE K instead. Availability is restricted to
   CONUS; the empirical model is intended for recently burned watersheds in the
   Western United States. Availability elsewhere in CONUS is not local validation.
 - UI and reports must follow project SI/English unit preferences without
@@ -91,7 +95,12 @@ The specification and detailed contracts map the implemented source and UI paths
 - The standard RUSLE build produces named K artifacts, not `rusle/k.tif`.
 - M3 offline thickness uses raw validated intervals and explicit fractional
   component support. Original units are inches; S is mean cm / 254.
-  Production fallback policy, spatial aggregation and rainfall sourcing remain open.
+  Production uses the separate accepted recorded-depth/common-valid policy;
+  the strict offline study remains reproducible.
+- Source preparation derives keys and extent from each basin. Operators use
+  `source_acquisition.acquire_sources` only with bounded network authority,
+  then `production_soils.activate_sources` with the returned receipt SHA-256.
+  Readers and model runs never acquire sources or rebuild soils implicitly.
 - See [local agent guidance](AGENTS.md) for implementation sequencing.
 - See [SSURGO feasibility](docs/ssurgo_m3_feasibility.md) for reusable raw fields
   and why generated WEPP soil depth and the current `SolThk` are unsuitable.
@@ -129,9 +138,9 @@ wctl run-python docs/work-packages/20260908_staley_watershed_engine/artifacts/ge
 wctl run-pytest tests/nodb/mods/test_postfire_debris_flow_staley2017.py --maxfail=1
 ```
 
-Production predictor preparation, climate integration, persisted results and
-browser controls remain pending. No live run rebuild or deployment is needed
-for this numerical API.
+Production preparation, Climate integration, persisted results and browser
+controls compose this API separately. No live rebuild is needed to use the
+offline numerical functions.
 
 ## Offline soil study
 

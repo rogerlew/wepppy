@@ -1,0 +1,22 @@
+{
+  "historical_ssurgo": {
+    "historical_version": "unknown; repository-bundled frozen database",
+    "repository_path": "wepppy/soils/ssurgo/data/surgo/surgo_tabular.db",
+    "selected_mukeys": [
+      2396743
+    ],
+    "sha256": "a4961148ea288f0b1746bd37469b798fca4b6a89643f7e4b53f8b2048ab30194",
+    "use_statsgo": false
+  },
+  "historical_statsgo": {
+    "historical_version": "unknown; repository-bundled frozen database",
+    "repository_path": "wepppy/soils/ssurgo/data/statsgo/statsgo_tabular.db",
+    "selected_mukeys": [
+      661787,
+      661951,
+      661956
+    ],
+    "sha256": "b816dd1b5b0a1b815a2e3dddb60243d3af634c40a62667096c1db7c3fbe05a7f",
+    "use_statsgo": true
+  }
+}

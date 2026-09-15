@@ -484,6 +484,23 @@ def engine_identity():
         'm3_terrain.py','m3_integration.py','production_soils.py','result_support.py')}
 
 
+def partial_reason(manifest, partial):
+    """Bounded plain-language explanation; never echo arbitrary source metadata."""
+    if not partial:
+        return None
+    predictors=manifest['predictor_snapshot']['predictors']
+    terrain=predictors['T']
+    if manifest.get('model')=='M3' and terrain['value'] is None:
+        if terrain.get('reason')=='terrain_potentially_truncated':
+            return 'Elevation coverage does not establish complete upstream terrain.'
+        return 'A complete terrain estimate is unavailable for the mapped watershed.'
+    if any(value['value'] is None for value in predictors.values()):
+        if manifest.get('coverage',{}).get('valid_cells')==0:
+            return 'No watershed cells have all required spatial inputs.'
+        return 'One or more required spatial predictors are unavailable.'
+    return 'Some rainfall observations or requested design-storm estimates are unavailable.'
+
+
 def execute_model(wd, identity, binary):
     state=state_at(wd); attempt=state['run_attempt']; active=state['active_dnbr']
     if not attempt or attempt['id']!=identity or not active:
@@ -541,7 +558,8 @@ def execute_model(wd, identity, binary):
                 or not artifacts_current(wd, {'artifacts': predictor_artifacts}, strong=False)):
             raise WorkflowError('superseded','Inputs changed. Run the model again.',409)
         current['last_successful_run']={'id':identity,'model':'M1','completed_at':now(),'snapshot':expected,'partial':partial,'area_warning':area_warning,
-            'artifacts': result_artifacts, 'predictor_artifacts': predictor_artifacts,'coverage':result_manifest['coverage']}
+            'artifacts': result_artifacts, 'predictor_artifacts': predictor_artifacts,'coverage':result_manifest['coverage'],
+            'partial_reason':partial_reason(result_manifest,partial)}
         current['run_attempt'].update(phase='complete',retryable=True)
     mutable(wd).change(publish)
 
@@ -599,7 +617,8 @@ def execute_m3(wd, identity):
                 or not artifacts_current(wd,{'artifacts':predictor_artifacts},strong=False)):
             raise WorkflowError('superseded','Inputs changed. Run the model again.',409)
         current['last_successful_run'] = dict(id=identity,model='M3',completed_at=now(),snapshot=expected,
-            partial=partial,area_warning='area_outside_study_range' in manifest['predictor_snapshot']['warnings'],
+            partial=partial,partial_reason=partial_reason(manifest,partial),
+            area_warning='area_outside_study_range' in manifest['predictor_snapshot']['warnings'],
             artifacts=artifacts,predictor_artifacts=predictor_artifacts,coverage=manifest['coverage'])
         current['run_attempt'].update(phase='complete',retryable=True)
     mutable(wd).change(publish)

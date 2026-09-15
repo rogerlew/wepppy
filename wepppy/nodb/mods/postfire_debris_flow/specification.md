@@ -1,14 +1,15 @@
 # Postfire Debris Flow Specification
 
-Status: updated 2026-09-11. Production M1 NoDb, upload, prerequisite/freshness,
+Status: updated 2026-09-14. Production M1 NoDb, upload, prerequisite/freshness,
 RQ execution and minimal UI are implemented under the
 [production contract](docs/production_m1.md). Development validation passed; deployment to other hosts is not implied. M3 production integration
-and reports/dashboard remain deferred. The 2026-09-14
+is implemented; reports/dashboard remain deferred. The 2026-09-14
 [production M3/shared-support amendment](docs/production_m3.md) records accepted
 analysis support and protection of existing SSURGO/STATSGO soil building;
 recorded-depth rules and generic prepared-local source delivery are ratified in
-the [runtime contract](docs/production_m3_runtime.md). Local source preparation
-and native M3 composition are under review; production wiring remains pending.
+the [runtime contract](docs/production_m3_runtime.md). Generic source acquisition,
+native M3 composition and production wiring pass local independent review;
+live acceptance is tracked in the active M3 work package.
 
 Track delivery stages, evidence, and unresolved decisions in the living
 [implementation roadmap](implementation_roadmap.md). Update this specification
@@ -35,7 +36,9 @@ replace the required contract-first checkpoint.
 | Derive code independently from published science | Preserve WEPPpy licensing without importing or translating GPL pfdf implementation or tests. |
 
 The RUSLE dependency is established for M1's K artifact. M1 requires the named K artifact and its own current provenance, not completion
-of the full RUSLE model. M3 prerequisite policy remains open.
+of the full RUSLE model. M3 requires built Soils, SBS, Climate and the eligible
+10 m NED13/2022 watershed; missing usable soil data produces explicit coverage
+and unavailable results, not an implicit rebuild.
 
 ## Scientific Model
 
@@ -62,9 +65,10 @@ The owner requested a shared M1/M3 header comparison, side-by-side model radios,
 M1-only dNBR/K controls and an M3-only Soils prerequisite. Accepted presentation,
 model-aware task transport/state compatibility and remaining integration decisions are
 recorded in [model selection](docs/model_selection.md). The UI and task wiring
-are implemented after checkpoint `aa30e637e`. M1 retains its current scientific
-pipeline; M3 reaches its dedicated RQ task and reports pending soil/terrain
-integration. M3 probabilities and valid-support calculations remain deferred.
+are implemented after checkpoint `aa30e637e`. The subsequent approved runtime
+amendment implements M3 and common-valid support for both models. Full-basin
+M3 ruggedness is unchanged by missing soil/SBS cells. Existing v1 M1 snapshots
+remain readable; new production predictors use v2 and exact masks.
 
 ### Predictors
 
@@ -173,10 +177,10 @@ primary and original STATSGO THICK as fallback**. Prefer the more detailed
 SSURGO soil information where usable and retain STATSGO for broader coverage.
 Differences from STATSGO do not establish that SSURGO is less accurate.
 
-Source priority is accepted; runtime integration remains pending. Fallback must
-be explicit in output provenance and coverage reporting. The fallback unit
-(component, map unit, cell, or catchment), usability criteria, material policy,
-and incomplete-component handling remain to be specified. A nonmissing STATSGO
+Source priority and runtime integration are implemented. Fallback is explicit
+in output provenance and coverage reporting. Accepted ADR-0067 fixes cellwise
+fallback, recorded-depth usability and weighted incomplete-component handling.
+A nonmissing STATSGO
 pixel is not proof of complete underlying component observations; validate its
 NoData/nonphysical values too. Do not apply the offline 100% support criterion
 as an approved production gate. No live soil rebuild is authorized by this
@@ -231,8 +235,8 @@ EPIC is not automatically enabled for Staley by its availability in RUSLE.
   and artifact identity. The verified Nomograph scale maps to S with multiplier 1
   (ADR-0059); full finite [0,1] K support and provenance are required by the
   implemented v1 point S. New production aggregation uses the common support
-  accepted in ADR-0066; numerical implementation is pending.
-  Partial K mean remains diagnostic, with no additional gap filling. Named K
+  accepted in ADR-0066 and implemented in v2; v1 partial K remains diagnostic.
+  No additional gap filling is introduced. Named K
   readiness is independent of unrelated RUSLE factors and has no independent
   completed WEPP Soils prerequisite. See [local contract](docs/m1_predictors.md).
 - Changing K invalidates M1 results under the implemented
@@ -711,15 +715,16 @@ are governed by [production M1](docs/production_m1.md#observable-intermediate-ar
 ## Scientific integration amendment — 2026-09-14
 
 Accepted [production runtime integration](docs/production_m3_runtime.md) and
-ADR-0067 govern the next M1/M3 common-support execution, explicit recorded-depth
-soil policy and additive coverage artifacts. Runtime conformance is pending.
-This supersedes pending-integration behavior only when actual M3 is implemented;
+ADR-0067 govern implemented M1/M3 common-support execution, explicit recorded-depth
+soil policy and additive coverage artifacts. Development M1/M3 RQ/browser
+validation passes. Actual composition supersedes the pending-integration task;
 offline v1 outputs and scalar coefficients retain their established semantics.
 
 Implementation increment after checkpoint `89d673c38`: isolated recorded-depth
 derivation and prepared-local soil composition are implemented with retained
 SQLite/MUKEY/evidence copies and real SQLite/WBT tests. M1 common support is
 available through the explicit local `support_policy='common_valid_v1'` option;
-the default remains offline v1. These helpers are not production-wired. M3
-terrain/results integration, generated soil-builder parity and live acceptance
-remain required before claiming completion.
+the local default remains offline v1. Production explicitly selects v2 for both
+models. Independent generated SSURGO/STATSGO/WEPP input parity, native runtime,
+real RQ/browser execution and archive/restore evidence are recorded in the M3
+package. Its final security disposition is separate from scientific conformance.

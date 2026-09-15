@@ -22,36 +22,53 @@ from wepppy.nodb.mods.postfire_debris_flow.staley2017 import probability
 pytestmark = pytest.mark.integration
 
 
-@pytest.fixture
-def project(owner_project,terrain,monkeypatch):
+@pytest.fixture(params=[(0,7),(10000,11)],ids=['western-key7','eastern-key11'])
+def project(owner_project,terrain,monkeypatch,request):
     from wepppy.nodb.core import Ron, Watershed
     from wepppy.nodb.mods.disturbed import Disturbed
     wd,_ = owner_project
+    offset,key = request.param
     monkeypatch.setattr(preflight,'notify',lambda wd:None)
     ron,watershed = Ron.getInstance(str(wd)),Watershed.getInstance(str(wd))
     with ron.locked():
         ron._cellsize = 10; ron._dem_db = 'ned13/2022'
     dem,mask,pointer = Path(ron.dem_fn),Path(watershed.wbt_wd)/'bound.tif',Path(watershed.wbt_wd)/'flovec.tif'
     for source,target in zip(terrain,(dem,pointer,mask)): shutil.copyfile(source,target)
+    for target in (dem,pointer,mask):
+        with rasterio.open(target,'r+') as ds:
+            ds.transform = rasterio.Affine.translation(offset,offset)*ds.transform
     outlet = Path(watershed.wbt_wd)/'outlet.geojson'
-    outlet.write_text(json.dumps({'type':'Point','coordinates':[500045,3999965]}))
+    outlet.write_text(json.dumps({'type':'Point','coordinates':[500045+offset,3999965+offset]}))
     sbs = Path(Disturbed.getInstance(str(wd)).sbs_4class_path)
     with rasterio.open(dem) as ds: profile = ds.profile
     values = np.zeros((7,7)); values[3,2:5] = [2,3,0]
     with rasterio.open(sbs,'w',**profile) as ds: ds.write(values,1)
     database(wd/'soils/ssurgo_tabular_cache.sqlite')
-    with rasterio.open(wd/'soils/ssurgo.tif','w',**profile) as ds: ds.write(np.full((7,7),7.),1)
+    import sqlite3
+    with sqlite3.connect(wd/'soils/ssurgo_tabular_cache.sqlite') as conn:
+        conn.execute('UPDATE component SET mukey=?',(str(key),))
+    with rasterio.open(wd/'soils/ssurgo.tif','w',**profile) as ds: ds.write(np.full((7,7),float(key)),1)
     catalog = wd/'lineage.json'
-    io.write_json(catalog,dict(schema_version=1,collection_by_mukey={'7':'SSURGO'},source='analytical fixture',retrieved_at='2026-09-14'))
+    io.write_json(catalog,dict(schema_version=1,collection_by_mukey={str(key):'SSURGO'},source='analytical fixture',retrieved_at='2026-09-14'))
     pd.DataFrame({'prcp':[10.]*30,'year':list(range(1,31)),'month':[1]*30,'day_of_month':[1]*30,
                   'peak_intensity_15':[40.]*30,'peak_intensity_30':[20.]*30,'peak_intensity_60':[10.]*30}).to_parquet(wd/'climate/wepp_cli.parquet')
+    downstream=wd/'wepp/runs';downstream.mkdir(parents=True,exist_ok=True)
+    shutil.copyfile(wd/'soils/123.sol',downstream/'p1.sol')
+    (downstream/'p1.run').write_text('retained soil reference: p1.sol\n')
     return wd,dem,mask,catalog
 
 
+def protected(wd):
+    paths=[wd/'soils.nodb',wd/'rusle.nodb']
+    for name in ('soils','rusle','wepp/runs'):
+        paths.extend((wd/name).rglob('*'))
+    return {str(path):io.digest(path,512*1024*1024) for path in paths if path.is_file()}
+
+
 @pytest.mark.parametrize('available',[True,False])
-def test_owner_bound_m3_executes_and_publishes_without_dnbr_k(project,available):
+def test_owner_bound_m3_executes_and_publishes_without_dnbr_k(project,available,monkeypatch):
     wd,dem,mask,catalog = project
-    before = {str(p):io.digest(p,512*1024*1024) for p in (wd/'soils').rglob('*') if p.is_file()}
+    before = protected(wd)
     if available:
         receipt = prepare_local_sources(wd,dem,mask,collection_catalog=catalog)
         assert activate_sources(wd,receipt,expected_sha256=io.digest(receipt))['status'] == 'committed'
@@ -72,11 +89,28 @@ def test_owner_bound_m3_executes_and_publishes_without_dnbr_k(project,available)
     else:
         assert all(event['probability'] is None for event in result.events.to_pylist())
     assert (wd/'postfire_debris_flow/valid_mask.tif').read_bytes() == (output/'valid_mask.tif').read_bytes()
-    assert {str(p):io.digest(p,512*1024*1024) for p in (wd/'soils').rglob('*') if p.is_file()} == before
+    assert protected(wd) == before
     public = p.get_state(wd,'config',model='M3',reconcile=False)
     assert public['freshness'] == 'current'
     assert 'valid_mask.tif' in [f['name'] for f in public['results']['files']]
     assert public['results']['coverage'] == accepted['coverage']
+    assert public['results']['partial_reason'] == (None if available else 'No watershed cells have all required spatial inputs.')
+    # Genuine native preparation followed by a result-boundary failure and retry.
+    def enqueue():
+        next_id=uuid.uuid4().hex
+        controller.change(lambda state:state.update(run_attempt=dict(id=next_id,model='M3',phase='queued',
+            created_at=p.now(),retryable=False,job_id=None,snapshot=dict(inputs=p.sources(wd,model='M3')[4],dnbr=None,frequency='cli'))))
+        return next_id
+    failed=enqueue()
+    def fail_results(*args,**kwargs):raise OSError('injected result writer failure')
+    with monkeypatch.context() as patch:
+        patch.setattr(p,'build_results',fail_results)
+        with pytest.raises(OSError,match='injected result writer failure'):p.execute_m3(wd,failed)
+    assert p.state_at(wd)['last_successful_run']['id']==identity
+    assert protected(wd)==before
+    retried=enqueue();p.execute_m3(wd,retried)
+    assert p.state_at(wd)['last_successful_run']['id']==retried
+    assert protected(wd)==before
 
 
 def test_authoritative_activation_rejects_other_mask_and_external_receipt(project):

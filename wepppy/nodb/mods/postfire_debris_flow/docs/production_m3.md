@@ -1,10 +1,12 @@
 # Production M3 and shared analysis support
 
-Status: accepted intent 2026-09-14. Analysis support, soil-builder isolation and
-the ADR-0067 recorded-depth replacement are owner-approved. The prepared-only
-runtime contract specifies delivery and schemas; acquisition is unapproved. No new runtime
-conformance is claimed. This amends the [selection contract](model_selection.md)
-and [production workflow](production_m1.md) for the next scientific increment.
+Status: accepted and implemented 2026-09-14. Analysis support, soil-builder
+isolation and ADR-0067 recorded depth are owner-approved. Bounded acquisition
+was separately authorized and executed; the runtime reader still consumes
+prepared inputs without network. Development M1/M3 RQ and browser checks pass,
+including positive synthetic M3 and genuine terrain-unavailable results.
+This amends the [selection contract](model_selection.md) and
+[production workflow](production_m1.md); production deployment is not implied.
 
 ## Accepted analysis support
 
@@ -86,7 +88,7 @@ zone depth or depth to a hydraulic restriction. ADR-0067 rules are:
    H designation alone must not be treated as unknown rock. The replacement
    in accepted ADR-0067 uses recorded depth including H/Cr, explicit R
    exclusion and audited disagreement with separate thickness fields.
-   Runtime implementation conformance remains pending.
+   Independent analytical, raw-cache and production composition tests pass.
 3. Recognize documented paired horizons without double-counting thickness;
    distinguish those from conflicting duplicate keys and unexplained overlap.
    Do not silently accept every overlap by taking its union.
@@ -153,5 +155,5 @@ No live production deployment is part of this scaffold.
 For new production execution, [the runtime integration contract](production_m3_runtime.md)
 and accepted ADR-0067 govern model-specific common support, recorded-depth soil
 policy, version-2 predictors and mask publication. Existing local/offline v1
-semantics below remain reproducible. Runtime implementation conformance is pending;
-the amendment does not authorize source acquisition or production deployment.
+semantics remain reproducible. Runtime composition is implemented and tested;
+source acquisition retains separate bounded authority and deployment is excluded.

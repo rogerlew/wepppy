@@ -1,13 +1,15 @@
 # Postfire Debris Flow Implementation Roadmap
 
 Status: updated 2026-09-14. Production M1 NoDb, browser upload and RQ execution
-are implemented. M1/M3 UI and request wiring are implemented; M3 scientific
-composition, valid-support calculations and the dashboard remain pending.
+are implemented. M1/M3 scientific composition, shared valid-support calculations,
+authoritative preparation and publication are implemented. Dashboard remains pending.
 
 Local M3 terrain/composition and basin-derived local soil-source preparation are
-now under review in the active M3 package. Two basin fixtures exercise generic
-keys/windows; native terrain verifies exact routed membership. These helpers
-are not yet authoritative production orchestration or live acceptance.
+reviewed in the active M3 package. Two independent grid/key fixtures exercise
+authoritative activation and native runtime; 14 tests pass. Live development
+M1/M3 browser/RQ, positive synthetic M3, builder parity and archive/browse checks
+pass. The active package retains final regression evidence and a separate
+credential-incident disposition gate; no production deployment is claimed.
 
 ## Maintenance Contract
 
@@ -36,8 +38,8 @@ For each implementation increment:
 
 | Foundation | Delivered | Remaining integration |
 | --- | --- | --- |
-| M3 terrain | Owned WBT `D8UpstreamRelief`, bindings, analytical checks, and matched 10 m/30 m evaluation. [Contract and evidence](docs/m3_terrain.md). | Runtime invocation, binary availability, catchment sampling, and adoption/enforcement of the genuine 10 m recommendation. |
-| M3 soils | Offline raw SSURGO interval/map-unit derivation and comparison with original STATSGO THICK. [Contract and evidence](docs/m3_soil_thickness.md). | SSURGO-primary/STATSGO-fallback runtime policy, acquisition/readiness, and production coverage handling. |
+| M3 terrain | Owned WBT `D8UpstreamRelief`, production invocation, exact basin membership and enforced 10 m NED13/2022 eligibility. [Contract and evidence](docs/m3_terrain.md). | Calibration-preprocessing equivalence is not asserted; truncated terrain remains unavailable. |
+| M3 soils | Isolated recorded-depth SSURGO-primary/original THICK fallback, bounded source acquisition and generic authoritative preparation. [Runtime contract](docs/production_m3_runtime.md). | Source acquisition requires separate bounded authority; historical raw-cache survey vintage can remain unknown. |
 | dNBR | Local normalization/summary API, explicit encoding, project-grid alignment, partial coverage, provenance, and two public Arizona fixtures; `9b99d535c`. [Contract](docs/dnbr_upload.md), [validation](../../../../docs/work-packages/20260908_staley_dnbr/artifacts/validation.md). | Implemented in stage 5; development browser/worker validation recorded below. |
 
 The offline soil study's complete-only outputs are not a production coverage
@@ -54,16 +56,16 @@ select scalar estimates with coverage masking. SSURGO validity assessment and
 exact scientific integration remain explicit. Evidence is tracked in the
 [model wiring package](../../../../docs/work-packages/20260911_staley_model_wiring/package.md).
 Validation passed: full Python 8,468/103 skipped, frontend 872, independent
-reviews and live selection/task/reload/preflight checks. The M3 task reports
-`integration_pending`; full M3 execution is not complete.
-Next: execute the scaffolded [M3 scientific integration package](../../../../docs/work-packages/20260914_staley_m3_integration/package.md).
+reviews and live selection/task/reload/preflight checks. The scaffold pending
+task is superseded by actual M3 composition in the
+[M3 scientific integration package](../../../../docs/work-packages/20260914_staley_m3_integration/package.md).
 Common analysis support and recorded-depth soil policy were ratified at
 checkpoint `89d673c38`. Isolated `soil_policy`, `soil_snapshot` and `soil_inputs`
 now provide recorded-depth derivation, retained source copies and prepared-local
 cellwise composition. Local M1 accepts opt-in common support and v2 masks/readers;
-production still uses v1 until orchestration/publication integration is complete.
-Actual M3 terrain/results, generated soil-builder parity and live acceptance
-remain pending. The [production amendment](docs/production_m3.md)
+new production M1/M3 now uses v2 and publishes exact validity masks while
+retaining legacy M1 reads. Generated soil-builder parity and live acceptance
+are tracked in that package. The [production amendment](docs/production_m3.md)
 requires read-only consumption and nonregression of existing SSURGO/STATSGO
 soil building. Reports remain stage 7.
 
@@ -114,7 +116,7 @@ Stage 3 slope/SBS local backend is **implemented and validated**, in the
 Local stage 3 composition is **complete**, including authentic complete-source
 evidence. Local stage 4 is **complete**, with genuine CLI/NOAA and sparse-rank acceptance.
 Production stage 5 is **complete** with development browser/worker validation.
-Stage 6 has **UI/task wiring only**; scientific composition is pending. Stage 7
+Stage 6 is **implemented, acceptance in progress**. Stage 7
 is **not started**. Stage completion requires its exit evidence,
 not only source files. Accepted scope is the existing project watershed/outlet;
 nested/channel assessments are excluded from initial delivery (ADR-0055).
@@ -147,7 +149,7 @@ scientific limitation that implementation cannot resolve.
 | L02 | Slope algorithm, SBS class mapping, unknown pixels, soil/K coverage, and independent predictor denominators. | Stage 3 implementation | [Slope/SBS backend](docs/slope_sbs.md) and both WBT bindings validated; Horn, raw DEM, strict edges and uncertainty preservation recorded (ADR-0058). Full K coverage without additional fill is accepted in ADR-0059; partial K remains diagnostic. |
 | L03 | Coefficient verification, stable sigmoid/logit, permitted rainfall/probability inputs, zero/negative denominators, negative or unreachable thresholds. | Stage 2 implementation | Resolved in [engine contract](docs/staley2017_engine.md) and [ADR-0056](../../../../docs/adrs/ADR-0056-staley-numerical-engine.md), including review fixes for adjacent targets and inverse underflow. |
 | L04 | K calibration units, artifact provenance/freshness, full RUSLE versus K-only readiness, and M3's RUSLE prerequisite. | Stages 3 and 5 | [RUSLE dependency](specification.md#rusle-and-polaris-dependency). M1 K-artifact readiness and identity scale are accepted in ADR-0059; M1 production freshness is enforced in stage 5; M3 requirements remain separate. |
-| L05 | Soil material inclusion, horizon validity, incomplete components, fallback granularity/triggers, and residual missing coverage. | Stage 6 implementation | [M3 soil direction](specification.md#m3-soil-thickness-ssurgo-feasibility); source priority accepted, production rules pending. |
+| L05 | Soil material inclusion, horizon validity, incomplete components, fallback granularity/triggers, and residual missing coverage. | Stage 6 implementation | Accepted and implemented recorded-depth policy, ADR-0067 and [runtime contract](docs/production_m3_runtime.md). Strict offline study is unchanged. |
 | L06 | Prepared SSURGO inventory, substituted/custom/legacy soils, STATSGO source delivery and freshness; neither source usable. | Stage 6 integration | [Soils readiness](specification.md#availability-and-soils-readiness), [soil contract](docs/m3_soil_thickness.md). No implicit soil rebuild or acquisition authority. |
 | L07 | Adopt genuine 10 m M3 requirement; detect source fidelity, validate installed WBT tool/bindings, and sample accepted relief/area at assessment outlets. | Stage 6 integration | [Terrain contract](docs/m3_terrain.md). Calibration-preprocessing equivalence remains unproven; upsampling does not establish fidelity. |
 | L08 | Ratify 1/2/5/10-year × 15/30/60-minute matrix, CLIGEN/NOAA selector/default, sample guidance, precision, and inverse target probabilities. | Stage 4 implementation | [Rainfall contract](docs/rainfall_results.md), ADR-0062: local source/matrix/sample policy accepted; explicit inverse targets. Stage 5 accepts Project climate by default and the fixed matrix with 50% inverse target; dashboard defaults remain stage 7 scope. |

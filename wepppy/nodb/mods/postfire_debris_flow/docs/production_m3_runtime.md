@@ -1,7 +1,8 @@
 # Production scientific integration runtime contract
 
 Status: approved and implemented 2026-09-14; local production wiring reviewed.
-Live development RQ/browser/archive conformance remains pending.
+Development M1/M3 RQ/browser conformance passes; archive verification and final
+package security disposition are recorded in the M3 work package.
 
 Production activation binds prepared receipts to current Ron/Watershed DEM,
 mask, derived grid and original keys. Both model finalizers recheck eligibility,
@@ -73,6 +74,38 @@ insufficient. Rationale: collection evidence and fallback coverage are ordinary
 per-project dependencies, not fixtures supplied solely to make one run pass.
 
 ### Local input contract
+
+Operator entry points and the local schema below define the prepared-source
+handoff. Preparation is explicit; ordinary model execution does not acquire data.
+
+### Operator entry points
+
+For an authorized project, derive paths from its current controllers rather than
+copying another basin's keys or bounds:
+
+```python
+from pathlib import Path
+from wepppy.nodb.core import Ron, Watershed
+from wepppy.nodb.mods.postfire_debris_flow.source_acquisition import acquire_sources
+from wepppy.nodb.mods.postfire_debris_flow.production_soils import activate_sources
+from wepppy.nodb.mods.postfire_debris_flow.rainfall_io import digest
+
+ron = Ron.getInstance(wd)
+watershed = Watershed.getInstance(wd)
+# Network access: only after separate bounded-source authorization.
+receipt = acquire_sources(wd, Path(ron.dem_fn), Path(watershed.wbt_wd) / 'bound.tif')
+activate_sources(wd, receipt, expected_sha256=digest(receipt))
+```
+
+Use `source_preparation.prepare_local_sources` for already prepared local source
+assets. `source_replay.recover_sources` can recover a retained complete HTTP
+transcript using a pinned original receipt; it makes zero network requests,
+preserves failed attempts, and does not assert current remote freshness.
+No reader, preflight or model execution implicitly acquires data. An aborted
+byte/time/identity check requires inspecting its visible diagnostics, not larger
+limits, hidden retries or shared soil-cache refresh.
+
+### Local input schema
 
 M3 reads existing `soils/ssurgo.tif`, its retrieval metadata, and
 `soils/ssurgo_tabular_cache.sqlite`. It never initializes or refreshes that cache,
@@ -288,7 +321,12 @@ visible attempts/publication work, and canonical archive/restore. No hidden
 records, alternate route or broad directory downloads. Failed replacements
 preserve accepted pointers and files; existing explicit publication repair applies.
 
-NoDb state keeps schema version 1; add coverage to accepted result records.
+NoDb state keeps schema version 1; add coverage and optional `partial_reason`
+to accepted result records. New partial completions supply a bounded plain-language
+reason (terrain, no common spatial support, or unavailable rainfall). This
+implements the existing UI completion contract: 100% soil/SBS coverage cannot
+imply usable ruggedness or explain a missing probability by itself. Legacy
+records without the additive reason retain their prior completion message.
 Public state displays Valid coverage with counts, a precision that reveals any
 exclusion, the existing explanatory text and mask link. Missing legacy coverage
 is “Not recorded for this result.” Existing model/frequency selection transport,

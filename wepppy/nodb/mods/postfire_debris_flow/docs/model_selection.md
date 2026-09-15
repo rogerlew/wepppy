@@ -1,9 +1,10 @@
 # M1/M3 selection and workflow increment
 
 Status: UI, state and task wiring implemented after reviewed checkpoint
-`aa30e637e`, 2026-09-11. M1 executes its existing scientific pipeline. M3 reaches
-its dedicated task and explicitly reports pending soil/terrain integration.
-Full M3 predictor integration and valid-support calculations remain subsequent work.
+`aa30e637e`, 2026-09-11. The subsequent
+[runtime amendment](production_m3_runtime.md) implements M3 scientific
+composition and common-valid support for both models. Scaffold-only statements
+below are historical boundaries superseded by that amendment.
 
 ## Accepted presentation
 
@@ -70,16 +71,10 @@ No automatic model substitution. Reports/dashboard remain deferred.
 - Exclude unrelated model inputs from freshness: dNBR/K changes do not stale
   M3; WEPP soil-thickness changes alone do not stale M1. Shared DEM/domain/SBS/
   climate dependencies still apply. K's actual provenance remains checked.
-- M3 is wired through the real run endpoint into a dedicated `run_m3_rq` task
-  now. Enable Run when its model-specific project prerequisites are ready; do
-  not disable it merely because scientific composition is deferred. The task
-  receives the immutable M3 attempt and uses the existing job/status/error
-  lifecycle. Until scientific composition is implemented, it fails explicitly
-  with `integration_pending` and “M3 soil and terrain integration is not
-  implemented yet.” Retain job ID, failure and visible attempt/error records
-  across reload. No placeholder probabilities, successful no-op or M1 dispatch.
-  This is a wired task boundary, not a claim of implemented M3 calculations.
-  Completing composition later must not require another selector/API change.
+- M3 uses the real run endpoint and dedicated `run_m3_rq` task with immutable
+  M3 identity, actual terrain/soil/rainfall composition and the existing
+  job/status/error lifecycle. Retain job IDs, failures and visible attempt
+  records across reload. No placeholder probabilities or M1 dispatch.
 - Keep the existing latest accepted result publication in the module directory
   and all earlier attempts visible. Separate persistent current bundles per
   model are not assumed by this proposal.
@@ -175,12 +170,13 @@ production all-or-nothing point estimate. Retain the original watershed area
 for applicability warnings. M3 support intersects valid SBS and usable
 thickness; its basin-scale relief is not a local surface roughness raster.
 Do not silently substitute masked pixel count into the accepted full-upstream
-ruggedness formula. Full-basin ruggedness is accepted; soil rules and exact
-schemas still require the scientific integration checkpoint. See
+ruggedness formula. Full-basin ruggedness, soil rules and exact schemas are
+accepted in the scientific integration checkpoint. See
 [production M3 and shared support](production_m3.md) for this amendment and
-the protected SSURGO/STATSGO soil-builder boundary. Implementation is pending.
+the protected SSURGO/STATSGO soil-builder boundary. Implementation and
+development M1/M3 browser/RQ validation now exist.
 
-Planned coverage output is `valid_mask.tif`, aligned to the project grid, UInt8:
+Implemented coverage output is `valid_mask.tif`, aligned to the project grid, UInt8:
 1 used, 0 excluded inside the watershed, 255 NoData outside. `coverage` metadata
 records total/valid/excluded cells and unrounded `valid_fraction`; display
 percentage to enough precision to reveal a nonzero exclusion, with counts
@@ -223,5 +219,6 @@ follow-up; do not broaden retries automatically.
 For new production execution, [the runtime integration contract](production_m3_runtime.md)
 and accepted ADR-0067 govern model-specific common support, recorded-depth soil
 policy, version-2 predictors and mask publication. Existing local/offline v1
-semantics below remain reproducible. Runtime implementation conformance is pending;
-the amendment does not authorize source acquisition or production deployment.
+semantics remain reproducible. Runtime composition and mask publication are
+implemented; source acquisition requires separate bounded authority, and
+production deployment is excluded.

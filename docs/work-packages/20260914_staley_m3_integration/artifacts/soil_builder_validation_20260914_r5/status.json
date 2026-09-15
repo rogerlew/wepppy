@@ -1,0 +1,5 @@
+{
+  "status": "eight_numerical_comparisons_passed_retention_inventory_superseded",
+  "acceptance_evidence": "All generated .sol, .run, metadata, component and horizon comparisons passed. Existing soil suite: 78 passed, 5 network-dependent skips; JUnit retained here.",
+  "limitations": "Postprocess hash recheck identified changed/removed SQLite WAL and shared-memory coordination files, not soil payload differences. r6 corrects the stable artifact inventory and re-executes the comparisons."
+}

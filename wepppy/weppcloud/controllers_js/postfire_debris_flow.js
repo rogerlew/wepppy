@@ -102,7 +102,7 @@
                 message(active === next.upload ? 'Preparing dNBR…' : 'Calculating ' + (next.run.model || 'M1') + ' debris-flow likelihood…');
             } else if (latest && latest.error) { message(latest.error.message); }
             else if (next.freshness === 'stale') { message('Inputs changed. Run the model again.'); }
-            else if (next.results) { message(next.results.partial ? 'Run complete. Some probabilities could not be calculated.' : 'Run complete.'); }
+            else if (next.results) { message(next.results.partial ? 'Run complete. Some probabilities could not be calculated.' + (next.results.partial_reason ? ' ' + next.results.partial_reason : '') : 'Run complete.'); }
             else if ((!model || model.value === 'M1') && d && d.coverage_fraction < 1) { message('The dNBR map covers only part of the watershed. Calculations will use the available dNBR values.'); }
             else { message((next.required || []).filter(function (item) {return !item.ready;}).map(function (item) {return item.message;}).join('. ')); }
             node('warning').replaceChildren();

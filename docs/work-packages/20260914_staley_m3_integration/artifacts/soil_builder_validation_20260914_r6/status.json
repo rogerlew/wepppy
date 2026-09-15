@@ -1,0 +1,6 @@
+{
+  "status": "passed",
+  "acceptance_evidence": "Eight baseline/candidate builder cases, 16 real builder executions, exact component/horizon/metadata/soil/run parity; 296 retained payload hashes rechecked after worker exit.",
+  "limits": "Bounded original-builder/downstream comparison; not a full application checkout, live soil rebuild, or WEPP simulation.",
+  "comparison": "comparison.json"
+}

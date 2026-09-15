@@ -1,0 +1,113 @@
+{
+  "base": "97800607c30c0979d422f99b1e2c65f1b8a89ab5",
+  "candidate_head": "b998d44e2126889e8014cc83230d51f6b89e9c82",
+  "fixed_output_clock": "2026-09-14T12:00:00Z",
+  "fixture": {
+    "path": "tests/soils/test_ssurgo_reclaimed_fairpoint.py",
+    "sha256": "8622acb1cdc4179a8cbbb5f7c96bae2574a8b97ca6ccd38915eeda52e409cd39"
+  },
+  "input_hashes": {
+    "historical_ssurgo": {
+      "logical_sha256": "e925114ab3e4c4f0362c115e2d32fd5ddd331053248b3db07af05add5bb4756d",
+      "sha256": "5095e3e4b293e9d6781890e9bb60e334f02e2b2a47ec9a4be434d4e7591671d1"
+    },
+    "historical_statsgo": {
+      "logical_sha256": "6d0c91e69cd35ef3cf85970b084edc63a7d11577344881307a646332202f1b04",
+      "sha256": "fafebe624f8ee3bfbd4e90728d9fe7adb7f912022a74bbfba595c451314b8cdd"
+    },
+    "invalid_major_texture": {
+      "logical_sha256": "79dba624f4eb5dfbd329fc916efab447638f3bf7c0bd048918c279fdd96387b3",
+      "sha256": "8f1a1d7472dee1f9162f73957371f01d2c5d293656a77ae5498b931c6467e438"
+    },
+    "missing_texture_defaults": {
+      "logical_sha256": "180a96685a700d6c499287c585d0308723eb5e5a9809850d1f29118d3caa56ee",
+      "sha256": "ed37c71c50498f75a03b098d47f8715b361e739816b15a343bb2b4c406f90e9d"
+    },
+    "reclaimed": {
+      "logical_sha256": "c1e184e615fbc81e56c600bb74256c042d7f3f08d21debb0dcef26ece70492f4",
+      "sha256": "4c5b886fb0b0990d117519fb73605e735995630319409a8ff2eb907e0f1c9bb1"
+    }
+  },
+  "method": "Separate processes, retained baseline/candidate module sources, exact unchanged protected dependencies",
+  "native_dependencies": {
+    "duckdb.duckdb": {
+      "path": "/opt/venv/lib/python3.12/site-packages/duckdb/duckdb.cpython-312-x86_64-linux-gnu.so",
+      "sha256": "8b64cb4c1c2cff74e2c01da6a611a3d0abe719dcaecead4bfa858a44e9d8db95"
+    },
+    "numpy.core._multiarray_tests": {
+      "path": "/opt/venv/lib/python3.12/site-packages/numpy/core/_multiarray_tests.cpython-312-x86_64-linux-gnu.so",
+      "sha256": "0b6495b0b6ab340e8342423a72dbfc870d270a18606abdbaf886fbdc533f25d7"
+    },
+    "numpy.core._multiarray_umath": {
+      "path": "/opt/venv/lib/python3.12/site-packages/numpy/core/_multiarray_umath.cpython-312-x86_64-linux-gnu.so",
+      "sha256": "164eb264458d26031c346950c1b4576c6b48f9f30cf1f2e4926ca3318ab41aee"
+    },
+    "numpy.fft._pocketfft_internal": {
+      "path": "/opt/venv/lib/python3.12/site-packages/numpy/fft/_pocketfft_internal.cpython-312-x86_64-linux-gnu.so",
+      "sha256": "ef8fe02d4e019464804b9131e5987847a0c723d7d95230efc157227eb54c8e91"
+    },
+    "numpy.linalg._umath_linalg": {
+      "path": "/opt/venv/lib/python3.12/site-packages/numpy/linalg/_umath_linalg.cpython-312-x86_64-linux-gnu.so",
+      "sha256": "f33c26c0bda876975157ca476dac801bf22cae9a9deeef48e05be8f0145dddb0"
+    },
+    "numpy.random._bounded_integers": {
+      "path": "/opt/venv/lib/python3.12/site-packages/numpy/random/_bounded_integers.cpython-312-x86_64-linux-gnu.so",
+      "sha256": "d2ba8d1af6a3826dc689cb44e412a72a6cf13fb5ae837acbc0d2887bb72e91be"
+    },
+    "numpy.random._common": {
+      "path": "/opt/venv/lib/python3.12/site-packages/numpy/random/_common.cpython-312-x86_64-linux-gnu.so",
+      "sha256": "ccb84ad6bdaad295db739cce44d738fa99cdc5a5dd90ab7537af3d79a81d8ca8"
+    },
+    "numpy.random._generator": {
+      "path": "/opt/venv/lib/python3.12/site-packages/numpy/random/_generator.cpython-312-x86_64-linux-gnu.so",
+      "sha256": "9611e2727eeeb03530bef4ae789cd277b02bcb4ad43bc99a3abd4031f6fb9057"
+    },
+    "numpy.random._mt19937": {
+      "path": "/opt/venv/lib/python3.12/site-packages/numpy/random/_mt19937.cpython-312-x86_64-linux-gnu.so",
+      "sha256": "39e9f25f2999ecee233c8530d34af5e6c7bbf71925b83ede361ac4ddf4d209b7"
+    },
+    "numpy.random._pcg64": {
+      "path": "/opt/venv/lib/python3.12/site-packages/numpy/random/_pcg64.cpython-312-x86_64-linux-gnu.so",
+      "sha256": "1beb3a19c9ae301aa080e9bb3f7e527fd79a97e9fc4503c72878e6d7527cd9f6"
+    },
+    "numpy.random._philox": {
+      "path": "/opt/venv/lib/python3.12/site-packages/numpy/random/_philox.cpython-312-x86_64-linux-gnu.so",
+      "sha256": "c3189d9a5d9ac885f2236daacfd317ac7482a8206e056a5f52c48d575ea60140"
+    },
+    "numpy.random._sfc64": {
+      "path": "/opt/venv/lib/python3.12/site-packages/numpy/random/_sfc64.cpython-312-x86_64-linux-gnu.so",
+      "sha256": "da137d13c0061c2e5cb20356c93bd693070f3da5ddaba65b74db0590b1d67bd5"
+    },
+    "numpy.random.bit_generator": {
+      "path": "/opt/venv/lib/python3.12/site-packages/numpy/random/bit_generator.cpython-312-x86_64-linux-gnu.so",
+      "sha256": "3a7ee158ee3c99235b0e18a900be808cf2eb4e95bafb8904af12970d1005f6af"
+    },
+    "numpy.random.mtrand": {
+      "path": "/opt/venv/lib/python3.12/site-packages/numpy/random/mtrand.cpython-312-x86_64-linux-gnu.so",
+      "sha256": "ec4d7418c8799054296393ba8f72dd5667e737787bd45d8eba0709e4d6c41320"
+    }
+  },
+  "network": "Internet socket connects prohibited; no missing-record fetch allowed",
+  "packages": {
+    "jsonpickle": "3.0.4",
+    "numpy": "1.26.0",
+    "rasterio": "1.3.10"
+  },
+  "python": "3.12.14 (main, Aug 25 2026, 01:17:55) [GCC 14.2.0]",
+  "rosetta_source_and_model_hashes": {
+    "__init__.py": "5959e8b05ab553d44cc2a38d9cc0baef43e02eb4f0511b192f63676c588b519c",
+    "__main__.py": "0cf1355c0ed00de13c0d6203818a5e8f15a007f4cdc37e6db598a60801f7e48c",
+    "_migration/create_duckdb.py": "5f0e2b9def71449a6cfdca71ff66f814458600c2950611e57f263dee19594b1f",
+    "_migration/dump_sqlite_to_parquet.py": "c2fcb8e1fcc56066cb309623ef804d60d6b695a996c1ac481b949ff9a32992e8",
+    "ann.py": "7c943102c11b62374ce1fdf239d86aed525a80dc642fdb3ed0c0e7e4f1e18f12",
+    "db.py": "ca2c46bd004aa36ad32b5b158525045c8980fc2d35b26a4559aa8498bfdfc4e1",
+    "db/rosetta.duckdb": "a1e26a549f7babfb77456201850c760d84d88788f1614d7db89e81f0b139532f",
+    "rosetta.py": "6c0b8739a5d4b193dc89094ae86a7da5a03bff45918710a0e104e1678111b11f",
+    "tests/PTF_Model_tests.py": "36b3488a8e6a92260800fcd165e2d7abd4da255881a8303d68296a3bc455a32e",
+    "tests/test_performance.py": "9fa75c224e6d1e9d3e9e3fe228b8187885297c1d0bd847d4f6c620ac51a0d575",
+    "tests/test_rosetta_regression.py": "371de7d24139abd67860ff9b4868ee99e2084b40e9382eb6949099d6f1bdd397",
+    "tests/test_streaming.py": "bbd77240152341b3a4922ab3bff865fae14931f3f948e39d3acfa6b04379a9db"
+  },
+  "sqlite": "3.46.1",
+  "validation_script_sha256": "61f8b49f2c7cb6de57631aa3ddb5d127e529f49063fda62bace561f5fd63cc03"
+}

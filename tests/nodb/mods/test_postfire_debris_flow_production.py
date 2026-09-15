@@ -35,6 +35,21 @@ def test_scientific_engine_identity_covers_shared_soil_derivation():
     assert 'soil_thickness.py' in p.engine_identity()
 
 
+@pytest.mark.parametrize('model,terrain,cells,partial,expected',[
+    ('M3',None,100,True,'complete upstream terrain'),
+    ('M3',1.,0,True,'No watershed cells'),
+    ('M1',1.,100,True,'rainfall observations'),
+    ('M1',1.,100,False,None),
+])
+def test_partial_completion_has_bounded_scientific_reason(model,terrain,cells,partial,expected):
+    manifest={'model':model,'coverage':{'valid_cells':cells},'predictor_snapshot':{'predictors':{
+        'T':{'value':terrain,'reason':'terrain_potentially_truncated'},
+        'F':{'value':.5 if cells else None},'S':{'value':.3 if cells else None}}}}
+    reason=p.partial_reason(manifest,partial)
+    if expected is None:assert reason is None
+    else:assert expected in reason
+
+
 def test_real_nodb_roundtrip(tmp_path,monkeypatch):
     monkeypatch.setattr(preflight,'notify',lambda wd:None)
     obj=PostfireDebrisFlow(str(tmp_path),'disturbed9002_wbt.cfg')

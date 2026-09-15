@@ -3,7 +3,10 @@
 Status: checkpoint `89d673c38` and isolated implementation `587c6b8de` committed;
 generic preparation contract `7328a0004`, replay refinement `0792c7e59` and
 reviewed local preparation/M3 increment `4b4e77733` committed. Production
-integration and live acceptance remain open.
+integration committed at `b998d44e2`; live development acceptance, builder parity
+and archive/browse checks pass. Final full regression is in progress; package
+archival remains held for SEC-06 owner disposition. See
+[consolidated evidence](artifacts/20260914_live_validation.md).
 Last updated: 2026-09-14.
 
 ## Task board
@@ -12,7 +15,7 @@ Last updated: 2026-09-14.
   see [authorization](artifacts/20260914_acquisition_authorization.md).
 - [x] Prove network-reader controls; acquire live SDA lineage and bounded THICK
   responses. Retain failed NaN metadata receipt without activating inputs.
-- [ ] Finish reviewed offline recovery, authoritative activation and live use.
+- [x] Finish reviewed offline recovery, authoritative activation and live use.
 - [x] Shared M1/M3 result dispatch and mask replay: independent reviews close
   legacy-model and lineage reconstruction findings; 81 focused tests pass.
 - [x] Validate production M3/M1-v2 wiring, freshness, publication and UI locally:
@@ -23,19 +26,39 @@ Last updated: 2026-09-14.
 - [x] Audit frozen three-site component totals and repeated depth intervals.
 - [x] Scaffold canonical amendment, decision register, regression plan and ExecPlan.
 - [x] Inventory actual project sources and installed original THICK delivery.
-- [x] Resolve H material and prepared-local delivery; acquisition remains unapproved.
+- [x] Resolve H material and prepared-local delivery; later acquisition approval
+  is recorded above and supersedes the initial operational gate.
 - [x] Establish NRCS support for H, quantify replacement depth policies and
   retain sixteen analytical checks and independent preliminary review findings.
 - [x] Ratify S05–S09, complete independent contract reviews and checkpoint commit.
 - [x] Ratify recorded-depth replacement and exact prepared-source/runtime schemas;
   both independent final contract reviews approved with findings closed.
-- [ ] Implement isolated production soil derivation and prove builder parity.
-- [ ] Compose M3 terrain and M1/M3 common support with exact masks.
-- [ ] Complete workers, publication, freshness and coverage summaries.
-- [ ] Validate real development jobs/browser/archive, full suites and reviews.
-- [ ] Synchronize durable docs and archive the completed plan.
+- [x] Implement isolated production soil derivation and prove builder parity:
+  eight cases; 22 built soils, 44 downstream soils and 44 run files per revision.
+- [x] Compose M3 terrain and M1/M3 common support with exact masks.
+- [x] Complete workers, publication, freshness and coverage summaries.
+- [x] Validate real development jobs/browser/archive and independent code reviews:
+  genuine M1/M3, positive synthetic M3, 521 archive-restored files, ordinary browse.
+- [ ] Complete final post-UX full Python gate; final npm 111 suites/877 tests pass.
+- [x] Synchronize durable scientific/runtime/UI docs and retain acceptance limits.
+- [ ] Obtain explicit SEC-06 owner credential-response/risk-acceptance disposition;
+  only then close the package and archive the plan.
 
 ## Decisions
+
+- **2026-09-14 — Closure hold:** all medium/high implementation findings are
+  corrected; the earlier Redis exposure still needs explicit owner response or
+  development-only risk acceptance. Known credentials/continued work do not
+  establish rotation. No rotation or production deployment is authorized here.
+
+- **2026-09-14 — Partial completion explanation:** accepted state adds the
+  optional fixed `partial_reason` message required by the existing UI contract;
+  full spatial coverage must not conceal unavailable terrain or rainfall.
+
+- **2026-09-14 — Preserve unavailable terrain:** actual basin touches the DEM
+  edge (1,123 cells); real M3 RQ completion correctly emits unavailable
+  probabilities despite full soil/SBS coverage. Positive-result acceptance uses
+  an isolated synthetic basin, not relaxed terrain rules or a live rebuild.
 
 - **2026-09-14 — Finalization authority:** check eligibility, read-only status,
   prerequisites and source identity before and inside locked result acceptance.
@@ -57,6 +80,12 @@ Last updated: 2026-09-14.
 
 ## Risks and remaining decisions
 
+The only external closure decision is SEC-06 in the
+[security review](artifacts/20260914_security_review.md). Genuine terrain
+unavailability and unknown historical cache vintage remain scientific limits,
+not grounds to weaken the model or modify shared source data. The historical
+notes below record successive checkpoints, not current permission gates.
+
 S05–S09 in the [checkpoint](artifacts/20260914_contract_decision.md) are ratified.
 Principal risks: double-counted paired horizons, misclassified component weights,
 donor keys mistaken for spatial soil identity, component percentages presented as
@@ -70,6 +99,9 @@ cells; Cr/endpoint/pair treatment is accepted. The concrete
 separate acquisition authority; prepared-local execution is approved.
 
 ## Notes – implementation after checkpoint
+
+Historical checkpoint notes follow; current execution is summarized above and
+in the consolidated development acceptance artifact.
 
 Generic local preparation now derives each basin's original keys and native
 THICK window, with two distinct basin fixtures. Native terrain checks now prove
