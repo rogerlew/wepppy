@@ -1,0 +1,1 @@
+{"headers": {"If-Match": "\"978b86438e7a437429ccf062285e4de7\"", "Range": "bytes=262144-327679"}, "method": "GET", "received_bytes": 0, "status": "incomplete", "url": "https://prod-is-usgs-sb-prod-publish.s3.amazonaws.com/6750c172d34ed8d3858534d8/statsgo-KFFACT.tif"}

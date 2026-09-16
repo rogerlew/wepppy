@@ -1,6 +1,9 @@
 # Postfire Debris Flow
 
 - Current domain specification: [specification.md](specification.md).
+- Proposed M1 Kf replacement: [source/runtime contract](docs/kf_source.md).
+  Source research and canonical amendments are prepared; independent reviews and
+  the standalone ancestor checkpoint remain pending before runtime changes.
 - Track delivery and loose ends in [implementation_roadmap.md](implementation_roadmap.md).
   Update the roadmap, specification, and affected detailed contracts together
   as implementation progresses; roadmap proposals are not accepted contracts.

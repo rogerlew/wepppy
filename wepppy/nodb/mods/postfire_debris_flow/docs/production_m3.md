@@ -160,3 +160,13 @@ and accepted ADR-0067 govern model-specific common support, recorded-depth soil
 policy, version-2 predictors and mask publication. Existing local/offline v1
 semantics remain reproducible. Runtime composition is implemented and tested;
 source acquisition retains separate bounded authority and deployment is excluded.
+
+## Kf source amendment — 2026-09-16
+
+Status: accepted 2026-09-16 after two independent reviews; implementation
+conformance pending. The [Kf source/runtime contract](kf_source.md)
+is the controlling amendment for new production M1.
+
+Only shared new-M1 composition/readers change; M3 recorded-depth sources, preparation and schema-2 behavior remain unchanged.
+Earlier conflicting requirements remain the historical/legacy contract only
+once this checkpoint is accepted; do not reinterpret old accepted artifacts.

@@ -1,5 +1,13 @@
 # Postfire Debris Flow Implementation Roadmap
 
+2026-09-16: [Kf/report revision package](../../../../docs/work-packages/20260916_postfire_kf_report_revisions/package.md)
+execution started. Owner directs replacement of new M1 RUSLE K with traceable Kf,
+removal of RUSLE dependency, response curve and provenance labels; delineation
+and M3 soil policy unchanged. Original USSOILS/COG parity passes in two regions;
+ADR-0068 policy and canonical checkpoint are drafted. Independent reviews,
+ancestor commit and implementation remain pending; stages below describe the
+existing baseline. See [source proposal](docs/kf_source.md).
+
 2026-09-15: fresh-basin Run preparation is wired after contract checkpoint
 `e8c40adda`. The new regression reproduced the missing acquisition before the
 fix. Source reuse, race rejection and retry pass 44 focused tests. Normal

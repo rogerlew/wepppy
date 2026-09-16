@@ -1,11 +1,21 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-09-15
+**Last Updated**: 2026-09-16
 **Active Packages**: 37
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
+
+Executing: [Post-fire Kf and report revisions](docs/work-packages/20260916_postfire_kf_report_revisions/package.md)
+— replace new M1 RUSLE K with traceable Kf, remove RUSLE dependency, add a rainfall
+response curve and clarify event provenance. Source research and draft canonical
+checkpoint prepared; independent reviews, commit authority and implementation pending;
+acceptance includes forest-stack restart and nervous-mesquite end-to-end rerun.
+
+Completed audit: [Thomas Fire verification](docs/work-packages/20260916_thomas_fire_verification/package.md)
+— nervous-mesquite numerical checks pass; matched USGS comparison isolates a
+material soil-input difference. Four recommendations; no run or production changes.
 
 Active: [Post-fire debris-flow report implementation](docs/work-packages/20260915_postfire_debris_flow_report_implementation/package.md)
 — owner-authorized read-only report, contract checkpoint and implementation commits;

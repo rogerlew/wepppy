@@ -1,5 +1,20 @@
 # Postfire Debris Flow Specification
 
+## Pending 2026-09-16 revision direction
+
+Owner-approved direction, not implemented: replace new-run M1 POLARIS/RUSLE K
+with traceable USGS-compatible NRCS fine-earth Kf and remove gridded RUSLE as a
+post-fire dependency. Preserve legacy saved provenance, M3 thickness behavior
+and existing delineation. Add a duration-linked probability/intensity curve and
+clarify design-rainfall versus modeled event provenance. Exact Kf source and
+aggregation require the scientific/contract checkpoint in
+[ADR-0068](../../../../docs/adrs/ADR-0068-staley-kf-source-replacement.md) and the
+[revision package](../../../../docs/work-packages/20260916_postfire_kf_report_revisions/package.md).
+The implemented contracts below remain the current execution behavior until
+that checkpoint and cutover; this note is not a claim of completed replacement.
+
+## Implemented baseline
+
 2026-09-15 amendment (wired and live-validated): explicit Run M3 prepares an absent
 module source pointer using the existing bounded reader and locked activation;
 see [Run preparation](docs/production_m3_runtime.md#2026-09-15-run-preparation-amendment).
@@ -750,3 +765,13 @@ the local default remains offline v1. Production explicitly selects v2 for both
 models. Independent generated SSURGO/STATSGO/WEPP input parity, native runtime,
 real RQ/browser execution and archive/restore evidence are recorded in the M3
 package. Its final security disposition is separate from scientific conformance.
+
+## Kf source amendment — 2026-09-16
+
+Status: accepted 2026-09-16 after two independent reviews; implementation
+conformance pending. The [Kf source/runtime contract](docs/kf_source.md)
+is the controlling amendment for new production M1.
+
+New production M1 replaces POLARIS/RUSLE K with module-owned Kf; M3 remains unchanged.
+Earlier conflicting requirements remain the historical/legacy contract only
+once this checkpoint is accepted; do not reinterpret old accepted artifacts.

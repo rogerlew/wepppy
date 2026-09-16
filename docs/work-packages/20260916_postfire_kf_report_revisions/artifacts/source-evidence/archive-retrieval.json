@@ -1,0 +1,14 @@
+[
+  {
+    "file": "ussoils_18shp.zip",
+    "url": "https://water.usgs.gov/GIS/dsdl/ussoils_18shp.zip",
+    "status": 200,
+    "sha256": "40bf9d209de7c0294b246f353c1419c8667fa4088d6ebb1d1e8b611f05991678"
+  },
+  {
+    "file": "ussoils_15shp.zip",
+    "url": "https://water.usgs.gov/GIS/dsdl/ussoils_15shp.zip",
+    "status": 200,
+    "sha256": "ae4fd1c57a8b5eeed4f95202ee7a25668f8b7c4d0f4d90d74019c88b117b7395"
+  }
+]

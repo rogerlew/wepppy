@@ -425,3 +425,86 @@ Geneva [specification](../../../wepppy/nodb/mods/geneva/specification.md)
 sections 12.3–12.4 and 14, and the return-period report's compact tables. Unlike
 the Analyzer's combined draft/implementation history, this document owns the
 proposed durable report behavior; work-package plans/reviews own execution history.
+
+## Kf, response curve and rainfall provenance amendment — 2026-09-16
+
+Status: accepted 2026-09-16 after two independent reviews; implementation
+conformance pending. This amendment supersedes the earlier prohibition on
+computed response curves. It does not authorize writes during report reads.
+The [Kf contract](../../../wepppy/nodb/mods/postfire_debris_flow/docs/kf_source.md)
+owns source identity and legacy/new freshness dispatch. Display the accepted
+soil source: NRCS-derived STATSGO Kf for v3 M1, recorded POLARIS/RUSLE K for
+legacy M1, and recorded thickness provenance for M3. Do not infer source from
+current controls or label every accepted M1 as Kf-backed.
+
+### Curve payload and bounded calculation
+
+The existing page/query payload gains `response_curve` for the selected rainfall
+window. No endpoint or request parameter is added. Use only T/F/S, model and
+source identity from the validated accepted manifest; scalar evaluation does
+not prepare predictors or modify saved scenario tables. Supported legacy M1
+and current M3 remain eligible. Query attempt pinning, no-store, authentication,
+input limits and out-of-order response handling remain unchanged.
+
+The object contains `status` (available/unavailable), `reason`,
+`duration_minutes`, `direction` (increasing/constant/decreasing),
+`intensity_units: mm/hour`, `probability_units: fraction`, `range_max`, `points`
+(each intensity_mm_per_hour/rainfall_mm/probability), `p50` (existing scalar
+status/reason and equality intensity, or null), and `design_markers` from the
+validated saved design rows. Missing predictors return unavailable with no
+points. Direction follows the sign of the scalar rainfall response coefficient;
+never assume monotonic increase or manufacture a P50 for a nonunique equality.
+
+Deterministic presentation policy `response_curve_v1`: set the nonnegative
+intensity range to [0, max(1, available finite saved design intensities,
+available finite P50 intensity, available finite 99%-equality intensity)].
+The 1 mm/hour floor gives degenerate/no-marker models a visible axis; the 99%
+equality exposes the increasing transition. These are display choices, not
+scientific thresholds or new design storms. Discard unavailable inverse values,
+not errors or negative forward probabilities. Evaluate 101 evenly spaced values,
+plus deduplicated exact available design intensities and P50. With at most four
+design rows, this produces at most 106 points per duration. Use overflow-safe
+sampling and the existing scalar engine. Arithmetic failure returns an explicit
+unavailable curve while preserving valid saved tables; do not clamp a failing
+calculation or silently rescale it. Probability stays in [0,1].
+
+Draw one curve in the existing rainfall-scenarios section using existing plotting
+conventions, fixed 0–100% y-axis, the current duration selector and Unitizer.
+Keep saved design markers and add a labeled P50 marker only for a unique,
+nonnegative finite equality. Label the line as equation response, distinct from
+design markers. Marker/row selection and keyboard operation remain intact.
+An ordinary expandable numeric table contains every sampled point with units,
+window and likelihood, and a displayed-unit CSV action. The curve table provides
+a complete usable alternative; no hover-only information or new advanced panel.
+Unit changes alter presentation only. Duration changes replace curve and markers
+from the same accepted snapshot and preserve the existing event behavior.
+
+### Rainfall provenance and exports
+
+NOAA Atlas 14 points are statistical design rainfall, not dated observations.
+Project Climate supplies event peaks. For a recorded GridMetPRISM/CLIGEN
+pipeline label subdaily intensities “Modeled/disaggregated rainfall”; calendar
+labels alone never imply measured 15/30/60-minute rainfall. Retain actual date
+semantics and climate mode separately. Do not mark every possible climate source
+synthetic; unsupported/missing historical subdaily origin is “Not recorded.”
+Only recorded pipeline provenance can establish measured versus modeled origin.
+
+Add summary `rainfall_provenance` with `design_origin`, `event_origin`,
+`climate_mode`, `date_semantics`, and `subdaily_origin` (modeled_disaggregated,
+measured, or not_recorded). Populate from the accepted snapshot, never current
+Climate. New result manifests retain this object in context; old manifests may
+be projected from sufficient recorded provenance or report not_recorded.
+Do not alter old parquet files, introduce guessed provenance, or infer an
+observation claim from a calendar date.
+
+All displayed-row CSVs, including curve CSV, carry accepted source/model,
+attempt/assessment, provenance labels, duration and displayed units. Full saved
+parquet downloads remain unchanged and link to their provenance manifest;
+legacy missing provenance is explicitly identified. Formula-injection defenses
+apply to new textual context fields. Fixed-postfire/no-recovery, conditional
+probability, coverage-not-confidence and no-runout explanations remain visible.
+
+Acceptance includes independent curve/scalar/P50 calculations at all durations,
+English/SI equivalence, negative/zero rainfall response, legacy missing provenance,
+real browser keyboard/numeric-table use, export and reload, and proof that reads
+leave scientific state and artifacts unchanged.

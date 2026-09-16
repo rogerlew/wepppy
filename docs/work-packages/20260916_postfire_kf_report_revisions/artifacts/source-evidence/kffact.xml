@@ -1,0 +1,387 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<metadata xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <idinfo>
+    <citation>
+      <citeinfo>
+        <origin>Jonathan M. King</origin>
+        <pubdate>20250211</pubdate>
+        <title>STATSGO KF-factor (KFFACT) Cloud Optimized GeoTIFF for the Continental US</title>
+        <geoform>raster digital data</geoform>
+        <onlink>https://doi.org/10.5066/P13WAPYV</onlink>
+      </citeinfo>
+    </citation>
+    <descript>
+      <abstract>This data release reformats the STATSGO KF-factor (KFFACT) dataset (Schwarz and Alexander, 1995) as a cloud-optimized GeoTIFF (COG). The COG format allows standard software tools to efficiently access the datasets over an internet connection. KF-factors are defined as the saturated hydraulic conductivity of the fine soil (&lt; 2mm) fraction. Units are inches per hour. Please refer to the documentation of the source archive (Schwarz and Alexander, 1995) for additional details on the underlying dataset.
+
+The COG dataset spans the continental US at a nominal 30 meter resolution. The spatial reference is EPSG:5069. Each COG uses a float32 precision, and the NoData value (NaN) indicates raster pixels not covered by the original STATSGO dataset. The COG also includes non-physical values of -0.1, which were used by the source dataset to mark large water bodies.
+
+The COG format uses compression internally to reduce file size. As such, reading large portions of a COG into memory can require much more RAM than the nominal file size. This COG will require ~60GB of memory to read in full.
+
+This dataset can be reproduced by running the `rasterize_statsgo.py` Python script included in this dataset's parent folder (https://doi.org/10.5066/P13WAPYV). Please refer to the script for documentation and usage instructions.
+
+Disclaimer: 
+Any use of trade, firm, or product names is for descriptive purposes only and does not imply endorsement by the U.S. Government. 
+
+References:
+Schwarz, G.E. and Alexander, R.B., 1995, Soils data for the Conterminous United States Derived from the NRCS State Soil Geographic (STATSGO) Data Base. [Original title: State Soil Geographic (STATSGO) Data Base for the Conterminous United States.]: U.S. Geological Survey data release, https://doi.org/10.5066/P94JAULO.</abstract>
+      <purpose>This dataset is intended to support software tools that need to load rasterized portions of the STATSGO KF-factor (KFFACT) dataset over an internet connection.</purpose>
+    </descript>
+    <timeperd>
+      <timeinfo>
+        <sngdate>
+          <caldate>1995</caldate>
+        </sngdate>
+      </timeinfo>
+      <current>publication date</current>
+    </timeperd>
+    <status>
+      <progress>Complete</progress>
+      <update>None planned</update>
+    </status>
+    <spdom>
+      <bounding>
+        <westbc>-127.8860</westbc>
+        <eastbc>-65.3467</eastbc>
+        <northbc>51.5993</northbc>
+        <southbc>22.9415</southbc>
+      </bounding>
+    </spdom>
+    <keywords>
+      <theme>
+        <themekt>ISO 19115 Topic Category</themekt>
+        <themekey>geoscientificInformation</themekey>
+      </theme>
+      <theme>
+        <themekt>None</themekt>
+        <themekey>STATSGO</themekey>
+        <themekey>soil erodibility</themekey>
+        <themekey>cloud optimized GeoTIFF</themekey>
+        <themekey>raster</themekey>
+        <themekey>KF factor</themekey>
+      </theme>
+      <theme>
+        <themekt>USGS Metadata Identifier</themekt>
+        <themekey>USGS:6750c172d34ed8d3858534d8</themekey>
+      </theme>
+      <place>
+        <placekt>None</placekt>
+        <placekey>Continental US</placekey>
+      </place>
+    </keywords>
+    <accconst>None.  Please see 'Distribution Info' for details.</accconst>
+    <useconst>None.  Users are advised to read the dataset's metadata thoroughly to understand appropriate use and data limitations.</useconst>
+    <ptcontac>
+      <cntinfo>
+        <cntorgp>
+          <cntorg>US Geological Survey, Geologic Hazards Science Center</cntorg>
+          <cntper>GHSC Data Steward</cntper>
+        </cntorgp>
+        <cntpos>Open Data Policy Coordinator</cntpos>
+        <cntaddr>
+          <addrtype>mailing and physical</addrtype>
+          <address>1711 Illinois St</address>
+          <city>Golden</city>
+          <state>CO</state>
+          <postal>80401</postal>
+          <country>US</country>
+        </cntaddr>
+        <cntvoice>3032738500</cntvoice>
+        <cntemail>ghsc_metadata@usgs.gov</cntemail>
+      </cntinfo>
+    </ptcontac>
+    <native>These data were produced on a Windows 10 operating system, using Python 3.11 and the statsgo-cog 1.0.0 package (https://doi.org/10.5066/P134CRW3). Please refer to the `rasterize_statsgo.py` Python script to reproduce the dataset. Note that the script is located in this dataset's parent folder (https://doi.org/10.5066/P13WAPYV).</native>
+    <crossref>
+      <citeinfo>
+        <origin>U.S. Geological Survey</origin>
+        <pubdate>2023</pubdate>
+        <title>Soils data for the Conterminous United States Derived from the NRCS State Soil Geographic (STATSGO) Data Base. [Original title: State Soil Geographic (STATSGO) Data Base for the Conterminous United States.]</title>
+        <geoform>dataset</geoform>
+        <pubinfo>
+          <pubplace>https://www.sciencebase.gov</pubplace>
+          <publish>U.S. Geological Survey</publish>
+        </pubinfo>
+        <onlink>https://doi.org/10.5066/p94jaulo</onlink>
+      </citeinfo>
+    </crossref>
+    <crossref>
+      <citeinfo>
+        <origin>Jonathan M King</origin>
+        <pubdate>2024</pubdate>
+        <title>statsgo-cog 1.0.0</title>
+        <geoform>software release</geoform>
+        <pubinfo>
+          <pubplace>https://code.usgs.gov/ghsc/lhp</pubplace>
+          <publish>U.S. Geological Survey</publish>
+        </pubinfo>
+        <onlink>https://doi.org/10.5066/p134crw3</onlink>
+      </citeinfo>
+    </crossref>
+  </idinfo>
+  <dataqual>
+    <attracc>
+      <attraccr>We performed spot checks to verify the rasterized dataset matches the source shapefile archive.</attraccr>
+    </attracc>
+    <logic>No formal logical tests were performed.</logic>
+    <complete>The dataset represents all KF-factor (KFFACT) values from all shapefiles in the source archive. The dataset covers the continental US.</complete>
+    <lineage>
+      <srcinfo>
+        <srccite>
+          <citeinfo>
+            <origin>U.S. Geological Survey</origin>
+            <pubdate>2023</pubdate>
+            <title>Soils data for the Conterminous United States Derived from the NRCS State Soil Geographic (STATSGO) Data Base. [Original title: State Soil Geographic (STATSGO) Data Base for the Conterminous United States.]</title>
+            <geoform>dataset</geoform>
+            <pubinfo>
+              <pubplace>https://www.sciencebase.gov</pubplace>
+              <publish>U.S. Geological Survey</publish>
+            </pubinfo>
+            <onlink>https://doi.org/10.5066/p94jaulo</onlink>
+          </citeinfo>
+        </srccite>
+        <typesrc>Digital and/or Hardcopy</typesrc>
+        <srctime>
+          <timeinfo>
+            <sngdate>
+              <caldate>1995</caldate>
+            </sngdate>
+          </timeinfo>
+          <srccurr>publication date</srccurr>
+        </srctime>
+        <srccitea>STATSGO shapefile archive</srccitea>
+        <srccontr>All data values are derived from this source.</srccontr>
+      </srcinfo>
+      <procstep>
+        <procdesc>These data were generated by running the `rasterize_statsgo.py` Python script, which is included in this dataset's parent folder (https://doi.org/10.5066/P13WAPYV). The script, which includes documentation and installation instructions, is reproduced here:
+
+***** BEGIN SCRIPT *****
+
+"""
+=======
+SUMMARY
+=======
+This Python script will reproduce the datasets provided in the data release when run.
+Specifically, this will compile the KF-factor (KFFACT) and soil thickness (THICK) data 
+fields from the STATSGO Shapefile archive into cloud optimized GeoTiffs (COGs).
+
+==========
+DISCLAIMER
+==========
+This software has been approved for release by the U.S. Geological Survey
+(USGS). Although the software has been subjected to rigorous review, the USGS
+reserves the right to update the software as needed pursuant to further analysis
+and review. No warranty, expressed or implied, is made by the USGS or the U.S.
+Government as to the functionality of the software and related material nor
+shall the fact of release constitute any such warranty. Furthermore, the
+software is released on condition that neither the USGS nor the U.S. Government
+shall be held liable for any damages resulting from its authorized or
+unauthorized use. Any use of trade, firm, or product names is for descriptive purposes 
+only and does not imply endorsement by the U.S. Government.
+
+============
+INSTALLATION
+============
+Before running this script, you will need to complete the following installation.
+
+**Step 1**
+Install Python 3.11 (https://www.python.org/downloads/)
+
+**Step 2**
+Install the statsgo-cog library, version 1.0.0 (https://code.usgs.gov/ghsc/lhp/statsgo-cog)
+You can install the library by entering the following at a command line:
+
+pip install statsgo-cog==1.0.0 -i https://code.usgs.gov/api/v4/groups/859/-/packages/pypi/simple
+
+==================
+RUNNING THE SCRIPT
+==================
+To run this script, open a command line and navigate to the folder holding the script.
+Then, enter the following:
+
+python rasterize_statsgo.py
+
+This will run the script and reproduce the datasets. The script will create two folders
+in the current directory: `data` and `cogs`. The `data` folder will hold the downloaded
+and merged STATSGO shapefile archive, and the `cogs` subfolder will hold the final COG 
+files.
+
+The final COG files use the following naming scheme: statsgo-{field}.tif
+where {field} is the name of the rasterized data field from the shapefile archive.
+This script will rasterize the KF-factor (KFFACT) and soil thickness (THICK) fields
+from the shapefile archive.
+
+======================
+PERFORMANCE AND MEMORY
+======================
+This script requires at least 60 GB of free disk space. In practice, 80+ GB is
+recommended. The script also requires ~15 GB of RAM.
+
+The downloaded and merged shapefile archive will occupy ~690 MB of disk space. The
+combined size of the two final COG files is ~675 MB. The COG files use compression to
+reduce total file size. If uncompressed, each COG dataset would occupy ~60 GB of memory.
+
+The script requires ~1.5 hours to run on a Dell Precision 3570 Windows machine with a 
+12th Gen Intel(R) Core(TM) i7-1265U Processor and 32 GB of RAM.
+"""
+
+from pathlib import Path
+from statsgo_cog import download, merge, rasterize
+
+# Get subfolders. The "data" subfolder will hold the STATSGO shapefile archive, and the
+# "cogs" subfolder will hold the final output COG files
+data = Path("data")
+cogs = Path("cogs")
+
+# Download and merge the STATSGO shapefile archive
+data = download(folder=data)
+statsgo = merge(data)
+
+# Rasterize the fields
+for field in ["KFFACT", "THICK"]:
+output_file = cogs / f"statsgo-{field}.tif"
+rasterize(
+statsgo,
+field,
+cog=output_file,
+N=4,
+dtype="float32",
+resolution=30,
+)
+
+***** END SCRIPT *****</procdesc>
+        <srcused>STATSGO shapefile archive</srcused>
+        <procdate>2024</procdate>
+      </procstep>
+    </lineage>
+  </dataqual>
+  <spdoinfo>
+    <direct>Raster</direct>
+    <rastinfo>
+      <rasttype>Grid Cell</rasttype>
+      <rowcount>96502</rowcount>
+      <colcount>153814</colcount>
+      <vrtcount>1</vrtcount>
+    </rastinfo>
+  </spdoinfo>
+  <spref>
+    <horizsys>
+      <planar>
+        <mapproj>
+          <mapprojn>Albers Conical Equal Area</mapprojn>
+          <albers>
+            <stdparll>29.5</stdparll>
+            <stdparll>45.5</stdparll>
+            <longcm>-96.0</longcm>
+            <latprjo>23.0</latprjo>
+            <feast>0.0</feast>
+            <fnorth>0.0</fnorth>
+          </albers>
+        </mapproj>
+        <planci>
+          <plance>row and column</plance>
+          <coordrep>
+            <absres>30.0</absres>
+            <ordres>30.0</ordres>
+          </coordrep>
+          <plandu>meters</plandu>
+        </planci>
+      </planar>
+      <geodetic>
+        <horizdn>North_American_Datum_1927</horizdn>
+        <ellips>Clarke 1866</ellips>
+        <semiaxis>6378206.4</semiaxis>
+        <denflat>294.978698199999</denflat>
+      </geodetic>
+    </horizsys>
+  </spref>
+  <eainfo>
+    <detailed>
+      <enttyp>
+        <enttypl>statsgo-KFFACT.tif</enttypl>
+        <enttypd>Raster geospatial data file.</enttypd>
+        <enttypds>Producer Defined</enttypds>
+      </enttyp>
+      <attr>
+        <attrlabl>Value</attrlabl>
+        <attrdef>Unique numeric values contained in each raster cell.</attrdef>
+        <attrdefs>Producer Defined</attrdefs>
+        <attrdomv>
+          <edom>
+            <edomv>NaN</edomv>
+            <edomvd>Area not covered by the original STATSGO shapefiles</edomvd>
+            <edomvds>Producer defined</edomvds>
+          </edom>
+        </attrdomv>
+        <attrdomv>
+          <rdom>
+            <rdommin>-0.10000000149011612</rdommin>
+            <rdommax>0.6200000047683716</rdommax>
+            <attrunit>inches per hour</attrunit>
+          </rdom>
+        </attrdomv>
+      </attr>
+    </detailed>
+  </eainfo>
+  <distinfo>
+    <distrib>
+      <cntinfo>
+        <cntorgp>
+          <cntorg>U.S. Geological Survey - ScienceBase</cntorg>
+        </cntorgp>
+        <cntaddr>
+          <addrtype>mailing address</addrtype>
+          <address>Denver Federal Center</address>
+          <address>Building 810</address>
+          <address>Mail Stop 302</address>
+          <city>Denver</city>
+          <state>CO</state>
+          <postal>80225</postal>
+          <country>United States</country>
+        </cntaddr>
+        <cntvoice>1-888-275-8747</cntvoice>
+        <cntemail>sciencebase@usgs.gov</cntemail>
+      </cntinfo>
+    </distrib>
+    <distliab>Unless otherwise stated, all data, metadata and related materials are considered to satisfy the quality standards relative to the purpose for which the data were collected. Although these data and associated metadata have been reviewed for accuracy and completeness and approved for release by the U.S. Geological Survey (USGS), no warranty expressed or implied is made regarding the display or utility of the data for other purposes, nor on all computer systems, nor shall the act of distribution constitute any such warranty.</distliab>
+    <stdorder>
+      <digform>
+        <digtinfo>
+          <formname>Digital Data</formname>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://doi.org/10.5066/P13WAPYV</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <fees>None</fees>
+    </stdorder>
+  </distinfo>
+  <metainfo>
+    <metd>20250211</metd>
+    <metc>
+      <cntinfo>
+        <cntorgp>
+          <cntorg>US Geological Survey, Geologic Hazards Science Center</cntorg>
+          <cntper>GHSC Data Steward</cntper>
+        </cntorgp>
+        <cntpos>Open Data Policy Coordinator</cntpos>
+        <cntaddr>
+          <addrtype>mailing and physical</addrtype>
+          <address>1711 Illinois St</address>
+          <city>Golden</city>
+          <state>CO</state>
+          <postal>80401</postal>
+          <country>US</country>
+        </cntaddr>
+        <cntvoice>3032738500</cntvoice>
+        <cntemail>ghsc_metadata@usgs.gov</cntemail>
+      </cntinfo>
+    </metc>
+    <metstdn>FGDC Content Standard for Digital Geospatial Metadata</metstdn>
+    <metstdv>FGDC-STD-001-1998</metstdv>
+  </metainfo>
+</metadata>

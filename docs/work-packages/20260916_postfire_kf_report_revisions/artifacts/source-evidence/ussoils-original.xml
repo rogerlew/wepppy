@@ -1,0 +1,2579 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="fgdc_classic.xsl"?>
+<metadata xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://water.usgs.gov/GIS/metadata/usgswrd/fgdc-std-001-1998.xsd">
+  <idinfo>
+    <citation>
+      <citeinfo>
+        <origin>Schwarz, G.E. and Alexander, R.B.</origin>
+        <pubdate>19950901</pubdate>
+        <title>Soils data for the Conterminous United States Derived from the NRCS State Soil Geographic (STATSGO) Data Base. [Original title: State Soil Geographic (STATSGO) Data Base for the Conterminous United States.]</title>
+        <edition>1.1</edition>
+        <geoform>Series_Name  Open-File Report
+Issue_Identification  95-449</geoform>
+        <pubinfo>
+          <pubplace>Reston, VA</pubplace>
+          <publish>U.S. Geological Survey</publish>
+        </pubinfo>
+        <onlink>https://water.usgs.gov/lookup/getspatial?ussoils</onlink>
+      </citeinfo>
+    </citation>
+    <descript>
+      <abstract>USSOILS is an Arc 7.0 coverage containing hydrology-relevant information 
+for 10,498 map units covering the entire conterminous United States.
+The coverage was compiled from individual State coverages contained 
+in the October 1994 State Soil Geographic (STATSGO) Data Base 
+produced on CD-ROM. The geo-dataset USSOILS.PAT relates 
+(on the basis of a map unit identifier) the 10,498 map units to 78,518 
+polygons.
+		
+The scale of the geo-dataset is 1:250,000.  The INFO attribute table 
+USSOILS.MUID_ATTS contains selected variables from the STATSGO 
+data set for 10,501 map units (an extra 3 map units are contained in 
+the attribute table that are not in the geo-dataset - see the 'Procedures' 
+section below), including:  the map unit identifier, a 2-character state 
+abbreviation, available water capacity of the soil, percent clay in the soil, 
+the actual k-factor used in the water erosion component of the universal 
+soil loss equation, the organic material in soil, soil permeability, 
+cumulative thickness of all soil layers, hydrologic characteristics of 
+the soil, quality of drainage, surface slope, liquid limit of the soil, share 
+of a map unit having hydric soils, and the annual frequency of flooding.  
+To facilitate mapping the attribute data, the narrative section below 
+contains instructions for transferring the information contained in the 
+attribute table USSOILS.MUID_ATTS to the polygon attribute table USSOILS.PAT. 
+			
+STATSGO
+United States
+Soil
+Water Capacity
+Clay
+Organic material
+Permeability
+Infiltration
+Drainage
+Hydric
+Flood frequency
+Slope</abstract>
+      <purpose>The USSOILS coverage was originally compiled to support a national model of water quality.  The model uses 
+the soil characteristics contained in this coverage to mediate deliveries of nonpoint source pollution to stream 
+and river segments in the RF1 data base. The National Resource Conservation Service (NRCS) recommends 
+that any maps using NRCS STATSGO data show the source and date, and provide the following statement: 
+			
+"STATSGO is designed to support regional, multistate, State, and river basin resource planning, management 
+and monitoring."</purpose>
+      <supplinf>Procedures_Used:
+			
+The individual State coverages are from the State Soil Geographic (STATSGO) CD-ROM data base, issued by 
+U.S. Department of Agriculture, NRCS National Cartography and GIS Center, P.O. Box 6567, Fort Worth, Texas 
+76115-0567, 1-800-672-5559 (U.S. Department of Agriculture, 1991). The CD-ROM coverage for New Mexico was 
+defective and was not used.  A corrected copy of the New Mexico coverage was obtained from Norman Bliss of 
+the EROS Data Center ((605) 594-6034).  The STATSGO State-based coverages were merged together into a 
+national coverage using the Arc MAPJOIN command.  All nodes along merged boundaries were checked and 
+edited to remove any superfluous nodes created during the mapjoin process, and to ensure arcs properly merged 
+along and across State boundaries.  The joining process preserved all State boundaries. 
+			
+To understand the procedures used to create the attribute table USSOILS.MUID_ATTS, it helps to have an 
+understanding of the STATSGO data structure.  The smallest spatial entity mapped within the STATSGO 
+dataset is called a map unit, of which there are 10,498 broken out into 78,518 polygons within the conterminous 
+United States.  Each map unit consists of up to 21 components.  Components are used to apportion different 
+characteristics of a map unit and do not represent a separate spatial entity.  To help understand this, consider 
+a map unit that has only two components.  Suppose 30 percent of this map unit contains soil of type A and
+ the remaining 70 percent contains soil of type B.  Thus, component 1 of the map unit would have soil type 
+A and component 2 would have soil type B.  The data base would record the soil type for each component, 
+along with the percentage of the map unit represented by each component (in this example, 30 percent for 
+component 1 and 70 percent for component 2).  The specific locations of soil types A and B are not spatially 
+defined in the data base.
+			
+Each component is further delineated into a maximum of 6 layers, corresponding to distinct soil layers.  Soil 
+characteristics recorded for a layer typically consist of a high and low value, which describes a range for that 
+characteristic within that layer.  Included among the characteristics of the soil layer is the thickness of the layer.
+			
+In developing the USSOILS.MUID_ATTS table, it is necessary to aggregate the layer and component information 
+up to the level of a map unit.  To aggregate layer information to the component level, we first construct a simple 
+average of the high and low values of a characteristic for each layer.  We then construct a weighted average 
+across all layers of the layer-specific characteristic averages, the weights being the thickness of the layer relative
+ to the total thickness of all layers.  For component-level information that is expressed as a range, we construct
+ a simple average of the high and low values defining the range. These steps reduce layer-specific information 
+and ranges of component-specific information into a single datum of component-specific information for each 
+characteristic in the data base.  Finally, to obtain map unit information, we construct a weighted average across 
+all components of the component-specific information, the weights being the component percentages given for 
+the map unit.
+			
+Included in the Notes section below are the computer programs used to construct the USSOILS.MUID_ATTS 
+data base, along with an AML program for transferring this information to the polygon attribute table USSOILS.PAT. 
+We ask the reader to refer to the documentation contained in these programs to obtain detailed information on the 
+methods used to construct each data item.  The following is a brief description of how the programs were used.
+			
+The AMLs "layer_out.aml" and "comp_out.aml" were run using the UNIX batch program "batch.prog" to write data 
+from the STATSGO State INFO layer and comp files into ascii files.  The ascii files were read by the SAS program 
+"setussoils.sas" to aggregate data from the layer and component level to the map unit level.  If there is no information 
+available to determine a characteristic's value in a given map unit, the characteristic is given the value -0.1 to indicate 
+a missing value.  The program "setussoils.sas" creates an ascii, comma-delimited file and a SAS file of the aggregated, 
+map unit data containing information for 10,470 map units.  The comma-delimited, ascii file is then read back into 
+ARC/INFO using the aml "ussoils_muid_atts.aml" to create the attribute table USSOILS.MUID_ATTS.  Note that 
+there is a discrepancy between the number of map units contained in the combined COMP and LAYER files (10,470) 
+and the number contained in the polygon attribute table (PAT) USSOILS.PAT (10,498 broken out into 78,518 polygons).  
+The discrepancy arises because 3 map units in the COMP and LAYER files were not included in the PAT 
+(these are - VT029, UTWA1 (not in LAYER file either), and NE165 (not in LAYER file either)), while 31 map units in the 
+PAT coverage were not in the COMP or LAYER files.  The 31 map units missing from the COMP and LAYER files are 
+all "water" designated map units for which the values of all items are missing.  To assure that the attribute table is 
+complete, the program 'ussoils_muid_atts.aml' appends the missing MUIDs from USSOILS.PAT to USSOILS.MUID_ATTS 
+and sets the attribute values (except for STATE) to missing.  Thus, the total number of map units contained in 
+USSOILS.MUID_ATTS is 10,501 (10,470 + 31).  We made no attempts to correct the USSOILS.PAT file for the 3 
+missing map units contained in the COMP and LAYER files and in the attribute table USSOILS.MUID_ATTS.
+			
+To assist the user in mapping the attribute information, we include the program 'ussoils_atts.aml' in the "Notes" section.  
+This program relates the attribute information for the 10,498 "mapped" map units (10,501 - 3) to the 78,518 polygons 
+contained in the polygon attribute table USSOILS.PAT.  This program may be run as an AML from the command line 
+in ARC by entering the command: &amp;r ussoils_atts.
+			
+Revisions:
+1.0  Original Version
+1.1  Changed the documentation and coverages in accordance with comments received from reviewers.  Created the 
+INFO file USSOILS.MUID_ATTS containing the attribute information for 10,501 map units.  Deleted this information from 
+the polygon attribute table USSOILS.PAT.  Changed the programs and documentation to reflect this change in file structure.
+			
+Reviews_Applied_to_Data:
+Summary of review by Ken Lanfear, Network Info Products Coordinator,
+Reston, VA, August 21, 1995.
+			
+Ken reviewed the metadata for the State Soil Geographic (STATSGO) Data Base for the Conterminous United States, 
+and the associated coverage, ussoils.
+			
+He viewed the coverage on a computer screen to ensure arcs were present for the 48 conterminous States and the 
+District of Columbia (included in Maryland). He selected several States by Mapping Unit ID (MUID) and plotted polygons 
+to check that the states were complete and that mapping units plotted in the correct state. He also examined the polygon 
+attribute table, USSOILS.PAT, to note record counts and verify the format. He spot checked one mapping unit (TX118) 
+against the original data (which was on line) and verified that the HYGRP and DRAIN items were computed correctly.
+			
+He read the procedures included under supplementary information, and concurs with the overall processing steps. 
+However, time did not permit him to check details of the coding.
+			
+Ken found one possible discrepancy: There are 10,499 (actually 10,498 if we exclude the null map unit consisting 
+of the "outer" polygon to the coverage) unique MUID's in the USSOILS.PAT file, but only 10,470 in the SOIL_ATTS file. 
+He inquired where the 29 extra units came from?
+			
+Ken emphasized that the narrative portion should be modified to make it 
+clear that each mapping unit can be comprised of several polygons. This 
+caused him some confusion initially.
+			
+Ken had a suggestion for reducing the size of the coverage.  Instead of appending all the items of SOIL_ATTS to 
+USSOILS.PAT, why not just rename SOIL_ATTS to USSOILS.SOIL_ATTS ? This file would export with the coverage. 
+By copying to the .PAT, the values are repeated an average of about 7.8 times. However, since the current form of 
+ussoils is large but workable, he made this suggestion optional.
+			
+Summary of review by Barb Ruddy, Hydrologist, Lakewood, CO, August 31,
+1995.
+			
+Barb looked at the programs to make sure they made sense.  She found the programs to be well documented and 
+the procedures to be appropriate for aggregating the comp and layer information to a single map unit value. She checked 
+the values for the variable hygrp and found they were comparable to the analysis that she and Bill Battaglin had done.  
+She also looked at how the data plotted nationally and it checked.
+			
+Barb's main concern was the inefficient storage of the attribute information. Because each map unit is repeated multiple 
+times in the PAT file, she suggested that the attribute data could be more efficiently stored in an info file.
+			
+Related_Spatial_and_Tabular_Data_Sets:
+None
+			
+Other_References_Cited:
+U.S. Department of Agriculture, National Resource Conservation Service,
+National Soil Survey Center, 1991, "State Soil Geographic (STATSGO) Data
+Base:  Data use information," Miscellaneous Publication Number 1492, 110
+p. (Revised July 1994.)
+			
+Notes:
+The AMLs and SAS programs used to create USSOILS.MUID_ATTS and to transfer the attribute information to the 
+polygon attribute table USSOILS.PAT are given below.  Please refer to the documentation contained in these programs 
+for information on variable descriptions, and computation methods.
+			
+1.  The AML "layer_out.aml" used to unload selected items from the individual STATSGO State layer files into a single ascii data set.
+			
+/*----------------------------------------------------------------------
+/*
+/*  Command name: LAYER_OUT.AML
+/*  Language: AML
+/*
+/*::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+/*
+/* Purpose:  Program outputs soil LAYER data for processing in SAS.
+/*
+/*::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+/*
+/* Comments:
+/* 1. Item description:
+/*   LAYDEPH,LAYDEPL = layer depth high,low values
+/*   AWC = available water capacity (inches/inch)
+/*   CLAY = clay content of soil (% of soil &lt; 2mm in size)
+/*   KFFACT = soil erodibility f-factor
+/*   OM = organic matter content (% by weight)
+/*   PERM = permeability rates (inches/hour)
+/*   LL = liquid limit of the soil (%moisture by weight)
+/*
+/*::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+/*
+/* History:
+/*     Author/Site,                Date,        Event
+/*     ------------------------------------------------------------
+/*    R. Alexander/G. Schwarz    04/18/95    CREATED
+/*::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+&amp;sv STATEUP := [TRANSLATE [response 'ENTER STATE']]
+&amp;DATA arc info
+ARC
+/*
+CALC $NM = 1
+CALC $COMMA-SWITCH = -1
+CALC $PRINTER-SIZE = 200
+/*======================================================================
+/*
+SEL LAYER
+OUTPUT /srv3/bsa/gschwarz/statsgo/LAYER.%STATEUP% INIT
+PRINT MUID,SEQNUM,LAYDEPH,LAYDEPL,AWCH,~
+AWCL,CLAYH,CLAYL,KFFACT,OMH,OML,~
+PERMH,PERML,LLH,LLL
+/*
+Q STOP
+&amp;END
+&amp;RETURN
+		
+2.  The AML "comp_out.aml" used to unload selected items from the
+individual STATSGO State component files into a single ascii
+data set.
+		
+/*----------------------------------------------------------------------
+/*
+/*  Command name: COMP_OUT.AML
+/*  Language: AML
+/*
+/*::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+/*
+/* Purpose:  Program outputs soil COMP data for processing in SAS.
+/*
+/*::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+/*
+/* Comments:
+/* 1.  Output data are averages of high and low values
+/*
+/* 2.  Item description:
+/*       MUID = Mapunit identifier
+/*       SEQNUM = component identifier
+/*       COMPNAME = Name of the component
+/*       COMPKIND = Description of the kind of component
+/*       COMPPCT = Percent of mapunit represented by component
+/*       DRAINAGE = Drainage quality (1=well drained to 7=poorly drained)
+/*       HYDGRP = soil index variables (1=well drained to 4=poorly drained)
+/*       HYDRIC = hydric soil indicator (1 if hydric)
+/*       ANFLOOD = Annual flood frequency (1 = frequent (&gt;50% chance)
+/*                 2 = occasional (5-50% chance), 3 = rare (&lt;5% chance))
+/*       SLOPE = Slope of surface (percent)
+/*
+/*::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+/*
+/* History:
+/*     Author/Site,                Date,        Event
+/*     ------------------------------------------------------------
+/*    R. Alexander/G. Schwarz    04/18/95    CREATED
+/*::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+&amp;sv STATEUP := [TRANSLATE [response 'ENTER STATE']]
+/*
+&amp;DATA arc info
+ARC
+/*
+CALC $NM = 1
+CALC $COMMA-SWITCH = -1
+CALC $PRINTER-SIZE = 200
+/*======================================================================
+/*
+SEL COMP
+CALC SLOPE = ( SLOPEL + SLOPEH ) / 2
+/*
+OUTPUT /srv3/bsa/gschwarz/statsgo/COMP.%STATEUP% INIT
+PRINT MUID,SEQNUM,COMPNAME,COMPKIND,~
+COMPPCT,DRAINAGE,HYDGRP,HYDRIC,~
+SLOPE,ANFLOOD
+/*
+Q STOP
+&amp;END
+&amp;RETURN
+			
+3.  The program "batch.prog" is used to run the AML's "layer_out.aml" and "comp_out.aml" to create individual 
+layer and comp files for each state. The resulting state files will be read by the SAS program "setussoils.sas."
+			
+#./bin/ksh
+#################################################################
+#   PROGRAM : BATCH.PROG                                        #
+#   DATE    : 04/18/95                                          #
+#   PURPOSE : THIS PROGRAM PROCESSES STATSGO AML OUTPUT PROGRAMS#
+#             FOR EACH OF THE STATES.                           #
+#             THE PROGRAM CHANGES THE READ/WRITE ATTRIBUTES OF  #
+#             THE STATSGO STATE DIRECTORIES AND                 #
+#             DIRECTS THE LOOP VALUES TO THE AML                #
+#################################################################
+			
+for state in al ar az ca co ct de fl ga ia id il in ks ky la ma md me mi \
+mn mo ms mt nc nd ne nh nj nm nv ny oh ok or pa ri sc sd tn tx ut va vt \
+wa wi wv wy; do
+#chmod 755 /srv3/bsa/gschwarz/statsgo/data/$state/spatial/info/*
+#chmod 755 /srv3/bsa/gschwarz/statsgo/data/$state/spatial/$state/*
+cd /srv3/bsa/gschwarz/statsgo/data/$state/spatial
+/gis2/esri70/arcexe70/programs/arc&lt;&lt;-::::
+&amp;r /srv3/bsa/gschwarz/statsgo/layer_out
+$state
+&amp;r /srv3/bsa/gschwarz/statsgo/comp_out
+$state
+q
+::::
+done
+			
+4.  The SAS program "setussoils.sas" used to read the ascii files created by "layer_out.aml" and 
+"comp_out.aml", perform averages of the data, merge the information from the layer file into the component 
+file, and aggregate the component level information into a file having mapunit as the unit of observation.  
+The resulting "map unit" file is output as both an ascii, comma-delimited file and a SAS file.
+			
+/*  Program to read the conterminous state statsgo ascii info files, comp.state and layer.state, and 
+calculate summary statistics by muid. The program prints an ascii file which is then passed back to 
+info in a latter step.
+			
+Program written by Greg Schwarz, 4/24/95.
+			
+The program uses the SAS macro language to perform iterative appends to the main database.  Two 
+database files are created, an ascii file ussoils.dat containing comma-delimited data, and a SAS dataset, 
+ussoils.ssd.  To iteratively build the files, we use the mod option of the file statement for the ascii file, and 
+proc append for the SAS file.
+			
+The program reads in the layer.state file (where state refers to the state name and is updated as the 
+program iterates through the do loop. 
+The variables taken from this file are:
+			
+muid    character    map unit identifier (first two characters are
+the state abbreviation).
+			
+seqnum  integer      sequence number identifying the component
+(there are up to 21 components in a map unit).
+			
+laydeph integer      depth of lower boundary of the layer (in
+inches).  There are no more than 6 layers to a
+component
+			
+laydepl integer      depth of upper boundary of the layer (in
+inches).
+			
+awch    float        high range of available water capacity (in
+inches per inch) for the given
+layer/component/mapunit.
+			
+awcl    float        low range of available water capacity (in
+inches per inch).
+			
+clayh   float        high range of percent of soil consisting of
+clay (in percent of material less than 2mm in
+size).
+			
+clayl   float        low range of percent of soil consisting of
+clay (in percent).
+			
+kffact  float        actual k factor used in universal soil loss
+equation to calculate soil loss by water.
+			
+llh     float        high range of liquid limit of soil layer
+(in percent moisture by weight).
+			
+lll     float        low range of liquid limit of soil layer
+(in percent moisture by weight).
+			
+omh     float        high range of organic material in the soil
+(in percent by weight).
+			
+oml     float        low range of organic material in the soil (in
+percent by weight).
+			
+permh   float        high range of the permeability of the soil
+(in inches per hour).
+			
+perml   float        low range of the permeability of the soil (in
+inches per hour).
+			
+First, we compute the average of the high and low values for those variables expressed as a range.  
+We then average the varaiables over all layers using the layer thickness (laydeph - laydepl) as weights.  
+The final summary layer file contains a single weighted value for each component of each mapunit.
+			
+The program then reads in the component file comp.state for each state.  
+The variables read in are:
+			
+muid     character     the map unit identifier
+			
+seqnum   integer       the component number
+			
+compname character     the name of the component (contains useful
+information for tagging certain types of
+components as explained below).
+			
+compkind character     a one character code useful for tagging
+certain types of components as explained below.
+			
+comppct  integer       the percent of the mapunit covered by the
+particular component.
+			
+drainage  character    a two character code identifying the quality of the drainage for the component.
+The codes are E = excessive, SE = somewhat excessive, W = well drained, MW = moderately 
+drained, SP = somewhat poorly drained, P = poorly drained, and VP = very poorly drained.  
+These codes are converted into numeric values and assigned to the variable drain as follows:
+  E = 1, SE = 2, W = 3, MW = 4, SP = 5, P = 6 and VP = 7. 
+			
+hydgrp    character    a three digit code identifying the hydrologic characteristics of the soil.  
+The codes are defined in the Statsgo information guide.  We convert the character codes into numeric 
+codes according to Battaglin's methods. The numeric codes are assigned to the variable hygrp.  
+The codes are A = 1, B = 2, C = 3, D, A/D, B/D, and C/D = 4.  
+Also, we subselect areas and assign values for hygrp. Miscellaneous areas (denoted by M in compkind) 
+and labeled as Dumps, and Gullied Land in compname are assigned the hygrp = 2.5 if the hydgrp value 
+is missing.  Areas denoted as Pits, Rock Outcrops, Terrace Escarpments, and Urban land with missing 
+hydgrp are assigned a hygrp of 4.
+			
+hydric    character    Hydric soil rating, Y = hydric, N = non-hydric.
+			
+slope     float        The slope of the component (in percent).
+The value read in from the comp.state file is an average of the high and low range values stored in the 
+INFO comp file for that state. 
+			
+anflood   character    Frequency of annual flooding.  Three classes, frequent (FREQ) - greater than 50%, 
+occasional (OCCAS) 5-50% chance, and rare (RARE) less than 5% chance.
+			
+The layer file and the comp file are merged together by muid and seqnum.  Water denoted components 
+(from compname) are assigned missing values for all characteristics except comppct.  The numeric variables 
+are then averaged over all components within a mapunit using the comppct as weights.  The final file gives 
+one observation per map unit.  Note that any remaining missing values are assigned the value of -.1.   */
+			
+libname dir '';
+filename outfile '/srv3/bsa/gschwarz/statsgo/ussoils.dat' ;
+			
+/*  Define the states for dynamically allocating files */
+			
+%let state1 = al ;
+%let state2 = ar ;
+%let state3 = az ;
+%let state4 = ca ;
+%let state5 = co ;
+%let state6 = ct ;
+%let state7 = de ;
+%let state8 = fl ;
+%let state9 = ga ;
+%let state10 = ia ;
+%let state11 = id ;
+%let state12 = il ;
+%let state13 = in ;
+%let state14 = ks ;
+%let state15 = ky ;
+%let state16 = la ;
+%let state17 = ma ;
+%let state18 = md ;
+%let state19 = me ;
+%let state20 = mi ;
+%let state21 = mn ;
+%let state22 = mo ;
+%let state23 = ms ;
+%let state24 = mt ;
+%let state25 = nc ;
+%let state26 = nd ;
+%let state27 = ne ;
+%let state28 = nh ;
+%let state29 = nj ;
+%let state30 = nm ;
+%let state31 = nv ;
+%let state32 = ny ;
+%let state33 = oh ;
+%let state34 = ok ;
+%let state35 = or ;
+%let state36 = pa ;
+%let state37 = ri ;
+%let state38 = sc ;
+%let state39 = sd ;
+%let state40 = tn ;
+%let state41 = tx ;
+%let state42 = ut ;
+%let state43 = va ;
+%let state44 = vt ;
+%let state45 = wa ;
+%let state46 = wi ;
+%let state47 = wv ;
+%let state48 = wy ;
+			
+/*  Begin the macro  */
+			
+%macro loopy ;
+			
+/*  Iterate over conterminous states */
+			
+%do iter = 1 %to 48 ;
+			
+option dquote ;
+			
+/*  Dynamically define the layer and comp files for processing (by state) */
+			
+filename indatal "~/statsgo/layer.&amp;&amp;&amp;state&amp;iter" ;
+filename indatac "~/statsgo/comp.&amp;&amp;&amp;state&amp;iter" ;
+			
+/*  Read in the layer specific data for each state */
+			
+data one ;
+infile indatal missover ;
+input
+muid $ 2-8
+seqnum 10-11
+laydeph 13-14
+laydepl 16-17
+awch 19-22
+awcl 24-27
+clayh 29-30
+clayl 32-33
+kffact 35-38
+omh 40-43
+oml 45-48
+permh 50-54
+perml 56-60
+llh 62-64
+lll 66-68
+;
+			
+/*  Compute the thickness of each layer and the thickness weighted values of awc, clay, kffact, om, and perm.  
+If a range is given for a variable, then take the average of the range */
+			
+thick = laydeph - laydepl ;
+awc = thick*(awch + awcl)/2 ;
+clay = thick*(clayh + clayl)/2 ;
+kffact = thick*kffact ;
+om = thick*(omh + oml)/2 ;
+perm = thick*(permh + perml)/2 ;
+ll = thick*(llh+lll)/2 ;
+			
+/*  m(varname) stores the thickness of layers in which missing values for varname are encountered.  
+This information is necessary to ensure we normalize the weights correctly later in the program */
+			
+if awc = . then mawc = thick ;
+else mawc = 0 ;
+if clay = . then mclay = thick ;
+else mclay = 0 ;
+if kffact = . then mkffact = thick ;
+else mkffact = 0 ;
+if om = . then mom = thick ;
+else mom = 0 ;
+if perm = . then mperm = thick ;
+else mperm = 0 ;
+if ll = . then mll = thick ;
+else mll = 0 ;
+			
+keep muid seqnum thick awc clay kffact om perm ll mawc mclay mkffact mom mperm mll ;
+			
+proc sort ; by muid seqnum ;
+			
+/*  Compute the sum of the  thickness*varname over all layers. 
+Also accumulate the thickness of layers where varname is missing */
+			
+proc means noprint ;
+var thick awc clay kffact om perm ll 
+mawc mclay mkffact mom mperm mll ; 
+by muid seqnum ; 
+output out = layer sum = thick awc clay kffact om perm ll 
+mawc mclay mkffact mom mperm mll ; 
+			
+/*  Read in the state component files */
+			
+data comp ;
+infile indatac missover ;
+input
+muid $ 2-7
+seqnum 10-11
+compname $ 13-42
+compkind $ 44
+comppct 46-48
+drainage $ 50-54
+hydgrp $ 62-64
+hydric $ 66
+slope 68-69
+anflood $ 71-74 ;
+			
+proc sort; by muid seqnum ;
+			
+data comp ; merge comp layer ; by muid seqnum ;
+			
+/*  Recode the hydgrp data to numeric values (see Battaglin) */
+			
+if hydgrp = 'A  ' then hygrp = 1 ;
+else if hydgrp = 'B  ' then hygrp = 2 ;
+else if hydgrp = 'C  ' then hygrp = 3 ;
+else if hydgrp = 'D  ' then hygrp = 4 ;
+else if hydgrp = 'A/D' then hygrp = 4 ;
+else if hydgrp = 'B/D' then hygrp = 4 ;
+else if hydgrp = 'C/D' then hygrp = 4 ;
+else hygrp = . ;
+			
+/*  Recode the drainage data to numeric values */
+			
+if drainage = 'A    ' then drain = 4.0 ;
+else if drainage = 'E    ' then drain = 1.0 ;
+else if drainage = 'E,MW ' then drain = 2.5 ;
+else if drainage = 'E,P  ' then drain = 3.5 ;
+else if drainage = 'E,SE ' then drain = 1.5 ;
+else if drainage = 'E,W  ' then drain = 2.0 ;
+else if drainage = 'MW   ' then drain = 4.0 ;
+else if drainage = 'MW,A ' then drain = 4.0 ;
+else if drainage = 'MW,P ' then drain = 5.0 ;
+else if drainage = 'MW,SE' then drain = 3.0 ;
+else if drainage = 'MW,SP' then drain = 4.5 ;
+else if drainage = 'MW,W ' then drain = 3.5 ;
+else if drainage = 'P    ' then drain = 6.0 ;
+else if drainage = 'P,A  ' then drain = 5.0 ;
+else if drainage = 'P,SP ' then drain = 5.5 ;
+else if drainage = 'P,VP ' then drain = 6.5 ;
+else if drainage = 'PD,A ' then drain = 5.0 ;
+else if drainage = 'SE   ' then drain = 2.0 ;
+else if drainage = 'SE,E ' then drain = 1.5 ;
+else if drainage = 'SE,MW' then drain = 3.0 ;
+else if drainage = 'SO   ' then drain = 5.0 ;
+else if drainage = 'SP   ' then drain = 5.0 ;
+else if drainage = 'SP,A ' then drain = 4.5 ;
+else if drainage = 'SP,E ' then drain = 3.0 ;
+else if drainage = 'SP,MW' then drain = 4.5 ;
+else if drainage = 'SP,P ' then drain = 5.5 ;
+else if drainage = 'SP,VP' then drain = 6.0 ;
+else if drainage = 'SP,W ' then drain = 4.0 ;
+else if drainage = 'SW   ' then drain = 4.0 ;
+else if drainage = 'VP   ' then drain = 7.0 ;
+else if drainage = 'VP,P ' then drain = 6.5 ;
+else if drainage = 'VP,SP' then drain = 6.0 ;
+else if drainage = 'W    ' then drain = 3.0 ;
+else if drainage = 'W,A  ' then drain = 3.5 ;
+else if drainage = 'W,E  ' then drain = 2.5 ;
+else if drainage = 'W,MW ' then drain = 3.5 ;
+else if drainage = 'W,SE ' then drain = 2.5 ;
+else if drainage = 'W,SP ' then drain = 4.0 ;
+else if drainage = 'W,VP ' then drain = 5.0 ;
+else if drainage = 'WD   ' then drain = 3.0 ;
+else drain = . ;
+			
+/*  Recode the anflood data */
+			
+if anflood = 'FREQ' then afldfreq = 1 ;
+else if anflood = 'OCCA' then afldfreq = 2 ;
+else if anflood = 'RARE' then afldfreq = 3 ;
+else if anflood = 'NONE' then afldfreq = 4 ;
+else afldfreq = . ;
+			
+/*  Recode the hydric data */
+			
+if hydric = 'Y' then ifhyd = 1 ;
+else if hydric = 'N' then ifhyd = 0 ;
+else ifhyd = . ;
+			
+/*  Assign default values to components denoted as Miscellaneous areas */
+			
+if compkind = 'M' then do ;
+			
+if compname = 'BEACHES' then do ;
+if drain = . then drain = 6 ;
+end ;
+if compname = 'COASTAL BEACHES' then drain = 6 ;
+if compname = 'COASTAL DUNES' then clay = 1 ;
+if compname = 'DUMPS' then do ;
+if hygrp = . then hygrp = 4 ;
+end ;
+if compname = 'GULLIED LAND' then do ;
+if hygrp = . then hygrp = 2.5 ;
+end ;
+if compname = 'LAVA FLOWS' then do ;
+if clay = . then clay = 0 ;
+end ;
+if compname = 'PITS' then do ;
+if clay = . then clay = .5 ;
+if hygrp = . then hygrp = 2.5 ;
+end ;
+if compname = 'ROCK OUTCROP' then do ;
+if hygrp = . then hygrp = 4 ;
+end ;
+if compname = 'TERRACE ESCARPMENTS' or
+compname = 'URBAN LAND' or
+compname = 'URBANLAND' then hygrp = 4 ;
+			
+end ;
+			
+/*  Set numeric data to missing if the component is WATER */
+			
+if compname = 'WATER' then do ;
+thick = . ;
+awc = . ;
+clay = . ;
+kffact = . ;
+om = . ;
+perm = . ;
+hygrp = . ;
+drain = . ;
+slope = . ;
+ll = . ;
+ifhyd = . ;
+afldfreq = . ;
+end ;
+			
+/* Compute the component weighted values, and normalize for thickness.
+Set the variable to missing if thickness equals m(varname).  
+Other-wise, normalize the layer weights by dividing by the total non-missing thickness of all the layers.  */
+			
+if mawc = thick then awc = . ;
+else awc = comppct*awc/(thick - mawc) ;
+if mclay = thick then clay = . ;
+else clay = comppct*clay/(thick - mclay) ;
+if mkffact = thick then kffact = . ;
+else kffact = comppct*kffact/(thick - mkffact) ;
+if mom = thick then om = . ;
+else om = comppct*om/(thick - mom) ;
+if mperm = thick then perm = . ;
+else perm = comppct*perm/(thick - mperm) ;
+if mll = thick then ll = . ;
+else ll = comppct*ll/(thick - mll) ;
+thick = comppct*thick ;
+			
+hygrp = comppct*hygrp ;
+drain = comppct*drain ;
+slope = comppct*slope ;
+ifhyd = comppct*ifhyd ;
+afldfreq = comppct*afldfreq ;
+			
+/*  m(varname) stores the component pct of components in which missing values for varname are encountered.  
+This information is necessary to ensure we normalize the weights correctly later in the program */
+			
+if awc = . then mawc = comppct ;
+else mawc = 0 ;
+if clay = . then mclay = comppct ;
+else mclay = 0 ;
+if kffact = . then mkffact = comppct ;
+else mkffact = 0 ;
+if om = . then mom = comppct ;
+else mom = 0 ;
+if perm = . then mperm = comppct ;
+else mperm = 0 ;
+if ll = . then mll = comppct ;
+else mll = 0 ;
+if thick = . then mthick = comppct ;
+else mthick = 0 ;
+if hygrp = . then mhygrp = comppct ;
+else mhygrp = 0 ;
+if drain = . then mdrain = comppct ;
+else mdrain = 0 ;
+if slope = . then mslope = comppct ;
+else mslope = 0 ;
+if ifhyd = . then mifhyd = comppct ;
+else mifhyd = 0 ;
+if afldfreq = . then mafldf = comppct ;
+else mafldf = 0 ;
+			
+keep muid seqnum comppct awc clay kffact om perm thick hygrp
+drain slope ll ifhyd afldfreq
+mawc mclay mkffact mom mperm mll mthick mhygrp mdrain
+mslope mifhyd mafldf ;
+			
+/*  Sum the comppct*varname over components
+Accumulate the missing comppct for each varname */
+			
+proc means data = comp noprint ;
+var comppct awc clay kffact om perm thick hygrp drain
+slope ll ifhyd afldfreq
+mawc mclay mkffact mom mperm mll mthick mhygrp mdrain
+mslope mifhyd mafldf ;
+by muid ;
+output out = mapunit
+sum = comppct awc clay kffact om perm thick hygrp drain
+slope ll ifhyd afldfreq
+mawc mclay mkffact mom mperm mll mthick mhygrp mdrain
+mslope mifhyd mafldf ;
+			
+data mapunit ; set mapunit ;
+			
+/* Normalize the averaged data for comppct.
+Set the variable to missing if comppct equals m(varname). Other-
+wise, normalize the comppct weights by dividing by the total non-
+missing comppct of all the components.  */
+			
+if mawc = comppct then awc = . ;
+else awc     = awc / (comppct - mawc) ;
+if mclay = comppct then clay = . ;
+else clay    = clay / (comppct - mclay) ;
+if mkffact = comppct then kffact = . ;
+else kffact  = kffact / (comppct - mkffact) ;
+if mom = comppct then om = . ;
+else om      = om / (comppct - mom) ;
+if mperm = comppct then perm = . ;
+else perm    = perm / (comppct - mperm) ;
+if mthick = comppct then thick = . ;
+else thick   = thick / (comppct - mthick) ;
+if mhygrp = comppct then hygrp = . ;
+else hygrp   = hygrp / (comppct - mhygrp) ;
+if mdrain = comppct then drain = . ;
+else drain   = drain / (comppct - mdrain) ;
+if mslope = comppct then slope = . ;
+else slope   = slope / (comppct - mslope) ;
+if mll = comppct then ll = . ;
+else ll      = ll / (comppct - mll) ;
+if mifhyd = comppct then ifhyd = . ;
+else ifhyd   = ifhyd / (comppct - mifhyd) ;
+if mafldf = comppct then afldfreq = . ;
+else afldfreq = afldfreq / (comppct - mafldf) ;
+		
+/* Extract the state abbreviation from the muid */
+		
+state = substr(muid,1,2) ;
+		
+/* Set missing values to -.1 */
+		
+if awc = . then awc = -.1 ;
+if clay = . then clay = -.1 ;
+if kffact = . then kffact = -.1 ;
+if om = . then om = -.1 ;
+if perm = . then perm = -.1 ;
+if thick = . then thick = -.1 ;
+if hygrp = . then hygrp = -.1 ;
+if drain = . then drain = -.1 ;
+if slope = . then slope = -.1 ;
+if ll = . then ll = -.1 ;
+if ifhyd = . then ifhyd = -.1 ;
+if afldfreq = . then afldfreq = -.1 ;
+		
+com = ',' ;
+		
+/*  Append the state's map unit data to the ascii ussoils dataset */
+		
+file outfile mod ;
+put
+muid $ 1-7
+com $ 8
+state $ 9-10
+com $ 11
+awc 12-16 .2
+com $ 17
+clay 18-21 .1
+com $ 22
+kffact 23-27 .2
+com $ 28
+om 29-32 .1
+com $ 33
+perm 34-38 .2
+com $ 39
+thick 40-43 .1
+com $ 44
+hygrp 45-48 .1
+com $ 49
+drain 50-53 .1
+com $ 54
+slope 55-58 .1
+com $ 59
+ll 60-64 .1
+com $ 65
+ifhyd 66-69 .1
+com $ 70
+afldfreq 71-74 .1
+;
+		
+drop _type_ _freq_ com mawc mclay mkffact mom mperm mll mthick
+mhygrp mdrain mslope mifhyd mafldf ;
+		
+/*  Append the state's map unit data to the SAS ussoils dataset */
+		
+proc append base = dir.ussoils data = mapunit ;
+		
+%end ;
+		
+%mend loopy ;
+		
+/*  Execute the macro */
+		
+%loopy ;
+		
+5.  The AML "ussoils_muid_atts.aml" used to read the ascii file
+created by the SAS program and create the PAT
+coverage "ussoils.muid_atts."
+		
+/*----------------------------------------------------------------------
+/*
+/*  Command name: USSOILS_MUID_ATTS.AML
+/*  Language: AML
+/*
+/*::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+/*
+/* Purpose:  Program creates the INFO attribute table USSOILS.MUID_ATTS
+/*           from the computed averages of STATSGO variables created by
+/*           the SAS program setussoils.sas.
+/*
+/*::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+/*
+/* Comments:
+/* 1. Item description:
+/*   AWC = available water capacity (inches/inch)
+/*   CLAY = clay content of soil (% of soil &lt; 2mm in size)
+/*   KFFACT = soil erodibility f-factor
+/*   OM = organic matter content (% by weight)
+/*   PERM = permeability rates (inches/hour)
+/*   THICK = total thickness of all sampled soil layers (inches)
+/*   HYGRP = soil index variables (1=well drained to 4=poorly drained)
+/*   DRAIN = soil index variable (1=well drained to 7=poorly drained)
+/*   SLOPE = average slope (%)
+/*   LL = liquid limit (percent moisture by weight)
+/*   IFHYDRIC = hydric soil indicator (1 if hydric)
+/*   AFLDFREQ = annual flood frequency (1 = frequent (&gt;50% chance)
+/*              2 = occasional (5-50% chance), 3 = rare (&lt;5% chance))
+/*
+/* 2. Relate the USSOILS.PAT file to USSOILS.MUID_ATTS to determine map unit
+/*    identifiers for map units that are in USSOILS.PAT but not in
+/*    COMP or LAYER files, and thus not in USSOILS.MUID_ATTS.  These
+/*    missing MUIDs are then written to a temporary file, where they are
+/*    summarized (to eliminate redundancies from multiple polygons in
+/*    USSOILS.PAT having the same MUIDs), and then added to
+/*    USSOILS.MUID_ATTS.
+/*
+/* 3. The missing MUIDs added into USSOILS.MUID_ATTS have no attribute
+/*    information.  We reselect these MUIDs and assign missing values to
+/*    all the items, except for STATE.  To fill in STATE, we create the
+/*    redefined item STID that consists of the first two characters of
+/*    MUID.  We then move this value into the value for STATE.
+/*
+/*::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+/*
+/* History:
+/*     Author/Site,                Date,        Event
+/*     ------------------------------------------------------------
+/*      R. Alexander/G. Schwarz    04/24/95    CREATED
+/*      R. Alexander/G. Schwarz    09/08/95    Modified to create
+/*                                             USSOILS.MUID_ATTS only
+/*                                             and to include missing
+/*                                             MUIDs in the
+/*                                             USSOILS.MUID_ATTS file.
+/*
+/*::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+/*
+&amp;DATA arc info
+ARC
+/*
+CALC $NM = 1
+CALC $COMMA-SWITCH = -1
+CALC $PRINTER-SIZE = 200
+/*======================================================================
+/*
+DEFINE USSOILS.MUID_ATTS
+MUID,7,7,C
+STATE,2,2,C
+AWC,4,5,F,2
+CLAY,4,4,F,1
+KFFACT,4,5,F,2
+OM,4,4,F,1
+PERM,4,5,F,2
+THICK,4,4,F,1
+HYGRP,4,4,F,1
+DRAIN,4,4,F,1
+SLOPE,4,4,F,1
+LL,4,5,F,1
+IFHYDRIC,4,4,F,1
+AFLDFREQ,4,4,F,1
+		
+/*
+ADD FROM /srv3/bsa/gschwarz/statsgo/ussoils.dat
+SEL USSOILS.MUID_ATTS
+SORT MUID
+/*
+/* Create temporary file FILE1 to hold missing values.
+/*
+SEL USSOILS.MUID_ATTS
+REDEFINE
+1
+STID
+2
+2
+C
+
+MODIFY FILE1
+/*
+/* Find missing MUIDs in USSOILS.PAT and put in FILE1
+/*
+SEL USSOILS.PAT
+RELATE USSOILS.MUID_ATTS 1 MUID ORDER
+RESEL MUID NE $1MUID
+RESEL MUID NE ''
+RELATE FILE1 2 MUID INIT
+MOVE MUID TO $2MUID
+SEL FILE1
+SORT MUID
+/*
+/* Relate FILE1 to USSOILS.MUID_ATTS by MUID and do SUMMARY
+/*
+RELATE USSOILS.MUID_ATTS 1 MUID SUMMARY
+/*
+/* set all MUID not in COMP files with water designation to missing
+/*
+CALC $1AWC = -0.1
+CALC $1CLAY = -0.1
+CALC $1KFFACT = -0.1
+CALC $1OM = -0.1
+CALC $1PERM = -0.1
+CALC $1THICK = -0.1
+CALC $1HYGRP = -0.1
+CALC $1DRAIN = -0.1
+CALC $1SLOPE = -0.1
+CALC $1LL = -0.1
+CALC $1IFHYDRIC = -0.1
+CALC $1AFLDFREQ = -0.1
+MOVE STID TO $1STATE
+/*
+/* Delete the temporary file FILE1
+/*
+SEL FILE1
+ERASE FILE1
+Y
+		
+SEL USSOILS.MUID_ATTS
+SORT MUID
+/*
+Q STOP
+&amp;END
+DROPITEM USSOILS.MUID_ATTS USSOILS.MUID_ATTS STID
+		
+6.  The AML 'ussoils_atts.aml' which may be used to transfer the attribute infor
+contained in the attribute table USSOILS.MUID_ATTS to the polygon attribute tabl
+USSOILS.PAT to permit mapping the attribute information.
+		
+/*----------------------------------------------------------------------
+/*
+/*  Command name: USSOILS_ATTS.AML
+/*  Language: AML
+/*
+/*::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+/*
+/* Purpose:  Program creates attribute information for the national
+/* coverage USSOILS.PAT.  The attribute information is taken from the
+/* info file USSOILS.MUID_ATTS.
+/*
+/*::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+/*
+/* Comments:
+/* 1. Item description:
+/*   AWC = available water capacity (inches/inch)
+/*   CLAY = clay content of soil (% of soil &lt; 2mm in size)
+/*   KFFACT = soil erodibility f-factor
+/*   OM = organic matter content (% by weight)
+/*   PERM = permeability rates (inches/hour)
+/*   THICK = total thickness of all sampled soil layers (inches)
+/*   HYGRP = soil index variables (1=well drained to 4=poorly drained)
+/*   DRAIN = soil index variable (1=well drained to 7=poorly drained)
+/*   SLOPE = average slope (%)
+/*   LL = liquid limit (percent moisture by weight)
+/*   IFHYDRIC = hydric soil indicator (1 if hydric)
+/*   AFLDFREQ = annual flood frequency (1 = frequent (&gt;50% chance)
+/*              2 = occasional (5-50% chance), 3 = rare (&lt;5% chance))
+/*
+/* 2. Items are ADDED to USSOILS.PAT, then we RELATE to USSOILS.MUID_ATTS
+/*    on the basis of MUID.  Note that there are 3 MUIDS contained in
+/*    USSOILS.MUID_ATTS that are not in USSOILS.PAT.
+/*
+/*::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+/*
+/* History:
+/*     Author/Site,                Date,        Event
+/*     ------------------------------------------------------------
+/*      R. Alexander/G. Schwarz    09/08/95    CREATED
+/*::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+/*
+ADDITEM USSOILS.PAT USSOILS.PAT STATE 2 2 C
+ADDITEM USSOILS.PAT USSOILS.PAT AWC 4 5 F 2
+ADDITEM USSOILS.PAT USSOILS.PAT CLAY 4 4 F 1
+ADDITEM USSOILS.PAT USSOILS.PAT KFFACT 4 5 F 2
+ADDITEM USSOILS.PAT USSOILS.PAT OM 4 4 F 1
+ADDITEM USSOILS.PAT USSOILS.PAT PERM 4 5 F 2
+ADDITEM USSOILS.PAT USSOILS.PAT THICK 4 4 F 1
+ADDITEM USSOILS.PAT USSOILS.PAT HYGRP 4 4 F 1
+ADDITEM USSOILS.PAT USSOILS.PAT DRAIN 4 4 F 1
+ADDITEM USSOILS.PAT USSOILS.PAT SLOPE 4 4 F 1
+ADDITEM USSOILS.PAT USSOILS.PAT LL 4 5 F 1
+ADDITEM USSOILS.PAT USSOILS.PAT IFHYDRIC 4 4 F 1
+ADDITEM USSOILS.PAT USSOILS.PAT AFLDFREQ 4 4 F 1
+/*
+&amp;DATA arc info
+ARC
+/*
+CALC $NM = 1
+CALC $COMMA-SWITCH = -1
+CALC $PRINTER-SIZE = 200
+/*======================================================================
+/*
+SEL USSOILS.PAT
+RELATE USSOILS.MUID_ATTS 1 MUID ORDER
+MOVE $1STATE TO STATE
+CALC AWC = $1AWC
+CALC CLAY = $1CLAY
+CALC KFFACT = $1KFFACT
+CALC OM = $1OM
+CALC PERM = $1PERM
+CALC THICK = $1THICK
+CALC HYGRP = $1HYGRP
+CALC DRAIN = $1DRAIN
+CALC SLOPE = $1SLOPE
+CALC LL = $1LL
+CALC IFHYDRIC = $1IFHYDRIC
+CALC AFLDFREQ = $1AFLDFREQ
+/*
+Q STOP
+&amp;END
+&amp;RETURN</supplinf>
+    </descript>
+    <timeperd>
+      <timeinfo>
+        <sngdate>
+          <caldate>1995</caldate>
+        </sngdate>
+      </timeinfo>
+      <current>ground condition</current>
+    </timeperd>
+    <status>
+      <progress>Complete</progress>
+      <update>As Needed</update>
+    </status>
+    <spdom>
+      <bounding>
+        <westbc>-127.88685968</westbc>
+        <eastbc>-65.34551784</eastbc>
+        <northbc>48.24566548</northbc>
+        <southbc>22.94132336</southbc>
+      </bounding>
+    </spdom>
+    <keywords>
+      <theme>
+        <themekt>USGS Thesaurus</themekt>
+        <themekey>State Soil Geographic (STATSGO) Data Base for the Conterminous United States</themekey>
+        <themekey>inlandWaters</themekey>
+      </theme>
+      <theme>
+        <themekt>ISO 19115 Topic Category</themekt>
+        <themekey>geoscientificInformation</themekey>
+        <themekey>inlandWaters</themekey>
+        <themekey>environment</themekey>
+      </theme>
+      <theme>
+        <themekt>USGS Metadata Identifier</themekt>
+        <themekey>USGS:ad9c5610-aaf5-4631-9577-5917acd873b5</themekey>
+      </theme>
+       <place>
+        <placekt>Geographic Names Information System</placekt>
+        <placekey>Conterminous U.S.</placekey>
+      </place>
+    </keywords>
+    <accconst>None</accconst>
+    <useconst>The National Resource Conservation Service recommends that the data not
+be used to describe soil characteristics for regions smaller than a
+multi-county area.</useconst>
+    <ptcontac>
+      <cntinfo>
+        <cntperp>
+          <cntper>Gregory E. Schwarz</cntper>
+          <cntorg>U.S. Geological Survey, Water Resources Div. (WRD)</cntorg>
+        </cntperp>
+        <cntpos>Economist, Branch of Systems Analysis</cntpos>
+        <cntaddr>
+          <addrtype>mailing address</addrtype>
+          <address>12201 Sunrise Valley Drive, MS 410</address>
+          <city>Reston</city>
+          <state>VA</state>
+          <postal>20191</postal>
+          <country>USA</country>
+        </cntaddr>
+        <cntvoice>1-888-275-8747</cntvoice>
+        <cntfax>703-648-5295</cntfax>
+        <cntemail>gschwarz@usgs.gov</cntemail>
+        <hours>9:00am-5:00pm EST</hours>
+        <cntinst>Please contact thru email</cntinst>
+      </cntinfo>
+    </ptcontac>
+    <browse>
+      <browsen>https://water.usgs.gov/GIS/browse/ussoils.gif</browsen>
+      <browsed>Illlustration of data set</browsed>
+      <browset>GIF</browset>
+    </browse>
+    <datacred>See References</datacred>
+    <secinfo>
+      <secsys>None</secsys>
+      <secclass>Unclassified</secclass>
+      <sechandl>None</sechandl>
+    </secinfo>
+    <native>dgux, 5.4R3.10, AViiON UNIX, ARC/INFO version 7.0.4</native>
+    <crossref>
+      <citeinfo>
+        <origin>U.S. Dept. of Agriculture, Soil Conservation Service, National Coop. Soil Survey</origin>
+        <pubdate>1994</pubdate>
+        <title>State Soil Geographic (STATSGO) Data Base:  U.S. Coverage by States ...</title>
+        <geoform>map</geoform>
+        <othercit>ARC/INFO 7.0 Coverage on CDROM</othercit>
+      </citeinfo>
+    </crossref>
+  </idinfo>
+  <dataqual>
+    <attracc>
+      <attraccr>See Entity_Attribute_Information</attraccr>
+      <qattracc>
+        <attraccv>See Explanation</attraccv>
+        <attracce>Attribute accuracy is described, where present, with each
+attribute defined in the Entity and Attribute Section.</attracce>
+      </qattracc>
+    </attracc>
+    <logic>Polygon topology present.</logic>
+    <complete>complete</complete>
+    <lineage>
+      <srcinfo>
+        <srccite>
+          <citeinfo>
+            <origin>Unspecified</origin>
+            <pubdate>1994</pubdate>
+            <title>Unspecified</title>
+          </citeinfo>
+        </srccite>
+        <srcscale>250,000</srcscale>
+        <typesrc>Unspecified</typesrc>
+        <srctime>
+          <timeinfo>
+            <sngdate>
+              <caldate>1994</caldate>
+            </sngdate>
+          </timeinfo>
+          <srccurr>Unspecified</srccurr>
+        </srctime>
+        <srccitea>Unspecified</srccitea>
+        <srccontr>Unspecified</srccontr>
+      </srcinfo>
+      <procstep>
+        <procdesc>GSCHWARZ     MAPJOIN /SRV3/BSA/GSCHWARZ/STATSGO/USSOILS POLY NONE</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950419</procdate>
+        <proctime>1840</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ ARCEDIT /SRV3/BSA/GSCHWARZ/STATSGO/USSOILS</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950420</procdate>
+        <proctime>1154</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ       BUILD /SRV3/BSA/GSCHWARZ/STATSGO/USSOILS POLY</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950420</procdate>
+        <proctime>1213</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950717</procdate>
+        <proctime>1413</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950717</procdate>
+        <proctime>1454</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950717</procdate>
+        <proctime>1536</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950717</procdate>
+        <proctime>1708</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950718</procdate>
+        <proctime>0959</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950719</procdate>
+        <proctime>1506</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950725</procdate>
+        <proctime>1219</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950725</procdate>
+        <proctime>1613</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950726</procdate>
+        <proctime>1457</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950726</procdate>
+        <proctime>1502</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950726</procdate>
+        <proctime>1519</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950802</procdate>
+        <proctime>0931</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950802</procdate>
+        <proctime>1422</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950803</procdate>
+        <proctime>1457</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950803</procdate>
+        <proctime>1538</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS DELETE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950803</procdate>
+        <proctime>1538</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950803</procdate>
+        <proctime>1558</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950803</procdate>
+        <proctime>1611</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS DELETE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950803</procdate>
+        <proctime>1611</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950803</procdate>
+        <proctime>1711</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950804</procdate>
+        <proctime>1530</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950804</procdate>
+        <proctime>1535</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950804</procdate>
+        <proctime>1538</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950804</procdate>
+        <proctime>1553</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950804</procdate>
+        <proctime>1612</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950804</procdate>
+        <proctime>1615</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950804</procdate>
+        <proctime>1619</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950804</procdate>
+        <proctime>1622</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950804</procdate>
+        <proctime>1627</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950808</procdate>
+        <proctime>1059</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950808</procdate>
+        <proctime>1105</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS DELETE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950811</procdate>
+        <proctime>0931</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ EXPORT COVER USSOILS USSOILS</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950811</procdate>
+        <proctime>1551</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ         COPY /SRV3/BSA/GSCHWARZ/STATSGO/USSOILS /SRV3/BSA/GSCHWARZ/NEWS</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950911</procdate>
+        <proctime>1044</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950911</procdate>
+        <proctime>1210</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950911</procdate>
+        <proctime>1356</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950911</procdate>
+        <proctime>1401</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950911</procdate>
+        <proctime>1427</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ EXPORT COVER USSOILS USSOILS FULL</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950911</procdate>
+        <proctime>1531</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>GSCHWARZ DOCUMENT USSOILS UPDATE GSCHWARZ</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950918</procdate>
+        <proctime>1522</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>MNEGRI IMPORT COVER /SCRATCH_AREA1/MNEGRI/USSOILS.E00 USSOILS</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950920</procdate>
+        <proctime>1552</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>MNEGRI EXPORT COVER /DSDL1/CUSA/TILES/CUSA/USSOILS USSOILS.E00 NONE</procdesc>
+        <srcused>None</srcused>
+        <procdate>19950926</procdate>
+        <proctime>1325</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+      <procstep>
+        <procdesc>MNEGRI EXPORT COVER /DSDL1/CUSA/TILES/CUSA/USSOILS USSOILS.E00</procdesc>
+        <srcused>None</srcused>
+        <procdate>19960708</procdate>
+        <proctime>1158</proctime>
+        <srcprod>None</srcprod>
+      </procstep>
+    </lineage>
+  </dataqual>
+  <spdoinfo>
+    <direct>Vector</direct>
+    <ptvctinf>
+      <sdtsterm>
+        <sdtstype>Point</sdtstype>
+        <ptvctcnt>78518</ptvctcnt>
+      </sdtsterm>
+      <sdtsterm>
+        <sdtstype>String</sdtstype>
+        <ptvctcnt>241658</ptvctcnt>
+      </sdtsterm>
+      <sdtsterm>
+        <sdtstype>GT-polygon composed of chains</sdtstype>
+        <ptvctcnt>78519</ptvctcnt>
+      </sdtsterm>
+    </ptvctinf>
+  </spdoinfo>
+  <spref>
+    <horizsys>
+      <planar>
+        <mapproj>
+          <mapprojn>Albers Conical Equal Area</mapprojn>
+          <albers>
+            <stdparll>29.5</stdparll>
+            <stdparll>45.5</stdparll>
+            <longcm>-96</longcm>
+            <latprjo>23</latprjo>
+            <feast>0.00000</feast>
+            <fnorth>0.00000</fnorth>
+          </albers>
+        </mapproj>
+        <planci>
+          <plance>coordinate pair</plance>
+          <coordrep>
+            <absres>1.0</absres>
+            <ordres>1.0</ordres>
+          </coordrep>
+          <plandu>METERS</plandu>
+        </planci>
+      </planar>
+      <geodetic>
+        <horizdn>North American Datum of 1927</horizdn>
+        <ellips>Clarke 1866</ellips>
+        <semiaxis>6378206.4</semiaxis>
+        <denflat>294.98</denflat>
+      </geodetic>
+    </horizsys>
+  </spref>
+  <eainfo>
+    <detailed>
+      <enttyp>
+        <enttypl>USSOILS.PAT</enttypl>
+        <enttypd>Selected items of hydrologic relevance from the STATSGO Data Base</enttypd>
+        <enttypds>STATSGO Data Base ARC/INFO 7.0 Coverage CD-ROM, October 1994</enttypds>
+      </enttyp>
+      <attr>
+        <attrlabl>-</attrlabl>
+        <attrdef>Selected items of hydrologic relevance from the STATSGO Data Base</attrdef>
+        <attrdefs>STATSGO Data Base ARC/INFO 7.0 Coverage CD-ROM, October 1994</attrdefs>
+        <attrdomv>
+          <edom>
+            <edomv>-</edomv>
+            <edomvd>unspecified</edomvd>
+            <edomvds>unspecified</edomvds>
+          </edom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>AREA</attrlabl>
+        <attrdef>Area of poly in square coverage units</attrdef>
+        <attrdefs>Computed</attrdefs>
+        <attrdomv>
+          <edom>
+            <edomv>Positive real numbers</edomv>
+            <edomvd>unspecified</edomvd>
+            <edomvds>unspecified</edomvds>
+          </edom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>PERIMETER</attrlabl>
+        <attrdef>Perimeter of polygon in coverage units</attrdef>
+        <attrdefs>Computed</attrdefs>
+        <attrdomv>
+          <edom>
+            <edomv>Positive real numbers</edomv>
+            <edomvd>unspecified</edomvd>
+            <edomvds>unspecified</edomvds>
+          </edom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>USSOILS#</attrlabl>
+        <attrdef>Internal feature number</attrdef>
+        <attrdefs>Computed</attrdefs>
+        <attrdomv>
+          <edom>
+            <edomv>Sequential unique positive integer</edomv>
+            <edomvd>unspecified</edomvd>
+            <edomvds>unspecified</edomvds>
+          </edom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>USSOILS-ID</attrlabl>
+        <attrdef>User-assigned feature number</attrdef>
+        <attrdefs>User-defined</attrdefs>
+        <attrdomv>
+          <edom>
+            <edomv>Integer</edomv>
+            <edomvd>unspecified</edomvd>
+            <edomvds>unspecified</edomvds>
+          </edom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>MUID</attrlabl>
+        <attrdef>Mapunit Identification code - used to reference observations</attrdef>
+        <attrdefs>STATSGO, October 1994</attrdefs>
+        <attrdomv>
+          <edom>
+            <edomv>Character</edomv>
+            <edomvd>unspecified</edomvd>
+            <edomvds>unspecified</edomvds>
+          </edom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>STATE</attrlabl>
+        <attrdef>2-character State abbreviation</attrdef>
+        <attrdefs>Created from first two characters of muid in STATSGO data base</attrdefs>
+        <attrdomv>
+          <edom>
+            <edomv>Character</edomv>
+            <edomvd>unspecified</edomvd>
+            <edomvds>unspecified</edomvds>
+          </edom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>AWC</attrlabl>
+        <attrdef>Available water capacity (inches per inch)</attrdef>
+        <attrdefs>Created from AWCH and AWCL in STATSGO (10/94) layer file - see narrative</attrdefs>
+        <attrdomv>
+          <edom>
+            <edomv>Positive real numbers, missing value indicator = -0.1</edomv>
+            <edomvd>unspecified</edomvd>
+            <edomvds>unspecified</edomvds>
+          </edom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>CLAY</attrlabl>
+        <attrdef>Percent clay in soil (percent of material less than 2mm in size)</attrdef>
+        <attrdefs>Created from clayh and clayl in STATSGO (10/94) layer file - see narrative</attrdefs>
+        <attrdomv>
+          <edom>
+            <edomv>0 to 100, missing value indicator = -0.1</edomv>
+            <edomvd>unspecified</edomvd>
+            <edomvds>unspecified</edomvds>
+          </edom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>KFFACT</attrlabl>
+        <attrdef>Actual k factor used in water erosion component of universal soil loss equation</attrdef>
+        <attrdefs>Created from STATSGO (10/94) component file - see narrative.</attrdefs>
+        <attrdomv>
+          <edom>
+            <edomv>Non-negative real, missing value indicator = -0.1</edomv>
+            <edomvd>unspecified</edomvd>
+            <edomvds>unspecified</edomvds>
+          </edom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>OM</attrlabl>
+        <attrdef>Organic material in soil (in percent by weight)</attrdef>
+        <attrdefs>Created from omh and oml of STATSGO (10/94) layer file - see narrative</attrdefs>
+        <attrdomv>
+          <edom>
+            <edomv>0 to 100, missing value indicator = -0.1</edomv>
+            <edomvd>unspecified</edomvd>
+            <edomvds>unspecified</edomvds>
+          </edom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>PERM</attrlabl>
+        <attrdef>Permeability of the soil (in inches per hour)</attrdef>
+        <attrdefs>Created from permh and perml of STATSGO (10/94) layer file - see narrative</attrdefs>
+        <attrdomv>
+          <edom>
+            <edomv>Non-negative real, missing value indicator = -0.1</edomv>
+            <edomvd>unspecified</edomvd>
+            <edomvds>unspecified</edomvds>
+          </edom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>THICK</attrlabl>
+        <attrdef>Cumulative thickness of all soil layers (in inches)</attrdef>
+        <attrdefs>Created from laydeph and laydepl of STATSGO (10/94) layer file - see narrative</attrdefs>
+        <attrdomv>
+          <edom>
+            <edomv>Positive real, missing value indicator = -0.1</edomv>
+            <edomvd>unspecified</edomvd>
+            <edomvds>unspecified</edomvds>
+          </edom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>HYGRP</attrlabl>
+        <attrdef>Hydrologic characteristics of soil</attrdef>
+        <attrdefs>Created from hydgrp item of STATSGO (10/94) component file - see narrative</attrdefs>
+        <attrdomv>
+          <edom>
+            <edomv>1-4:1=High infiltration,2=Mod infil,3=Slow infil,4=Very slow infil,-0.1=Miss</edomv>
+            <edomvd>unspecified</edomvd>
+            <edomvds>unspecified</edomvds>
+          </edom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>DRAIN</attrlabl>
+        <attrdef>Soil drainage</attrdef>
+        <attrdefs>Created from drainage in STATSGO (10/94) component file - see narrative</attrdefs>
+        <attrdomv>
+          <edom>
+            <edomv>1-7:1=excess,2=mod excess,3=well,4=mod well,5=mod poor,6=poor,7=v poor,-.1=miss</edomv>
+            <edomvd>unspecified</edomvd>
+            <edomvds>unspecified</edomvds>
+          </edom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>SLOPE</attrlabl>
+        <attrdef>Surface slope (in percent)</attrdef>
+        <attrdefs>Created from slopeh and slopel of STATSGO (10/94) component file - see narrative</attrdefs>
+        <attrdomv>
+          <edom>
+            <edomv>0 to 100, missing value indicator = -0.1</edomv>
+            <edomvd>unspecified</edomvd>
+            <edomvds>unspecified</edomvds>
+          </edom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>LL</attrlabl>
+        <attrdef>Liquid limit of soil (in percent moisture by weight)</attrdef>
+        <attrdefs>Created from llh and lll of STATSGO (10/94) layer file - see narrative</attrdefs>
+        <attrdomv>
+          <edom>
+            <edomv>0 to 100, missing value indicator = -0.1</edomv>
+            <edomvd>unspecified</edomvd>
+            <edomvds>unspecified</edomvds>
+          </edom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>IFHYDRIC</attrlabl>
+        <attrdef>Share of map unit components with hydric soils</attrdef>
+        <attrdefs>Created from hydric of STATSGO (10/94) component file - see narrative</attrdefs>
+        <attrdomv>
+          <edom>
+            <edomv>0 to 1 (1=all components hydric), missing value indicator = -0.1</edomv>
+            <edomvd>unspecified</edomvd>
+            <edomvds>unspecified</edomvds>
+          </edom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>AFLDFREQ</attrlabl>
+        <attrdef>Annual flood frequency</attrdef>
+        <attrdefs>Created from item anflood of STATSGO (10/94) component file - see narrative</attrdefs>
+        <attrdomv>
+          <edom>
+            <edomv>1-4: 1=greater than 50 pct, 2=5 to 50 pct, 3=0 to 5 pct, 4=none, -0.1=missing</edomv>
+            <edomvd>unspecified</edomvd>
+            <edomvds>unspecified</edomvds>
+          </edom>
+        </attrdomv>
+      </attr>
+    </detailed>
+    <overview>
+      <eaover>The attribute table, USSOILS.MUID_ATTS, contains the following items for each map unit:
+			
+Label         Type           Description
+			
+muid          character      Map unit identifier (first two characters are the state abbreviation).
+			
+state         character      2-character State abbreviation.
+			
+awc           float          Available water capacity (in inches per inch).  Computed as a layer thickness weighted average, across soil layers, 
+of a simple average of awch and awcl contained in the STATSGO layer file.  Missing value .FALSE.
+			
+clay          float          Percent of soil consisting of clay (in percent of material less than 2mm in size). Computed as a layer thickness 
+weighted average, across soil layers, of a simple average of clayh and clayl contained in the STATSGO layer file.  Missing value indicator = -0.1.
+			
+kffact        float          Actual k factor used in universal soil loss equation to calculate soil loss by water. Computed as a layer thickness 
+weighted average, across soil layers, of the variable kffact contained in the STATSGO layer file. Missing value indicator = -0.1.
+			
+ll            float          Liquid limit of soil layer (in percent moisture by weight).  Computed as a layer thickness weighted average, across 
+soil layers, of a simple average of llh and lll contained in the STATSGO layer file. Missing value indicator = -0.1.
+			
+om            float          Organic material in the soil (in percent by weight).  Computed as a layer thickness weighted average, across 
+soil layers, of a simple average of omh and oml contained in the STATSGO layer file. Missing value .FALSE.
+			
+perm          float          Permeability of the soil (in inches per hour). Computed as a layer thickness weighted average, across soil layers, 
+of a simple average of permh and perml contained in the STATSGO layer file.  Missing value .FALSE.
+			
+thick         float          Depth of soil layers (in inches).  Computed as the sum of the differences between laydeph and laydepl for each 
+soil layer in the STATSGO layer file.  Missing value .FALSE.
+			
+hygrp         float          A code identifying the hydrologic characteristics of the soil.  The character codes defined in the STATSGO component 
+file are converted into numeric codes according to Bill Battaglin's methods (Battaglin, written communication dated March 8, 1995).
+			
+The coding transformations are A = 1 (high infiltration, deep soils, well drained to excessively drained sands and gravels), B = 2 
+(moderate infiltration rates, deep and moderately deep, moderately well and well drained soils with moderately coarse textures), 
+C = 3 (slow infiltration rates, soils with layers impeding downward movement of water, or soils with moderately fine or fine textures), 
+D = 4 (very slow infiltration rates, soils are clayey, have a high water table, or are shallow to an impervious layer),  
+			
+Mixture codes A/D, B/D, and C/D are assigned the value 4.  Also, we subselect certain areas and assign values for hygrp based on 
+the area type. Miscellaneous areas (denoted by M in compkind) and labeled as Dumps, and Gullied Land in compname are assigned 
+the hygrp = 2.5 if the hydgrp value is missing.  Areas denoted as Pits, Rock Outcrops, Terrace Escarpments, and Urban land with 
+missing hydgrp are assigned a hygrp of 4. See the documentation of the SAS program "setussoils.sas" for additional details. The 
+transformed data are averaged across components using the component percentage as weights. The missing value indicator is -0.1.
+			
+drain         float          A code identifying the quality of soil drainage.  The two character code from the STATSGO component file is 
+converted to a numeric value according to the following translation:  E = 1 (excessive), SE = 2 (somewhat excessive), W = 3 (well drained), 
+MW = 4 (moderately drained), SP = 5 (somewhat poorly drained), P = 6 (poorly drained), and VP = 7 (very poorly drained) .The values 
+are averaged across components using the component percentage as weights. The missing value indicator is -0.1.
+			
+slope         float          The slope of the map unit (in percent). Slope values contained in the STATSGO component file are averaged 
+using the component percentage as weights.  The missing value indicator is -0.1.
+			
+ifhydric      float          Share of map unit with hydric soils (1 = entire map unit has hydric soils).  Computed by summing the component 
+percentage for each component designated as having hydric soils according to the variable hydric in the STATSGO component file.  
+Missing value .FALSE.
+			
+afldfreq      float          Annual flood frequency code.  Flood frequency designations contained in the variable anflood in the STATSGO 
+component file are converted to numeric codes according to the following translation:  1 = greater than 50%, 2 = 5% to 50%, 3 = 0% to 5%, 
+and 4 = no flood.  Translated variables are averaged across components using the component percentage as weights.  The missing value 
+indicator is -0.1.</eaover>
+      <eadetcit>Not Available</eadetcit>
+    </overview>
+  </eainfo>
+  <distinfo>
+    <distrib>
+      <cntinfo>
+        <cntorgp>
+          <cntorg>U.S. Geological Survey</cntorg>
+          <cntper>Michael Ierardi</cntper>
+        </cntorgp>
+        <cntpos>IT Specialist</cntpos>
+        <cntaddr>
+          <addrtype>mailing and physical</addrtype>
+          <address>445 National Center</address>
+          <city>Reston</city>
+          <state>Virginia</state>
+          <postal>20192</postal>
+          <country>USA</country>
+        </cntaddr>
+        <cntvoice>1-888-275-8747 (1-888-ASK-USGS)</cntvoice>
+        <cntemail>mierardi@usgs.gov</cntemail>
+      </cntinfo>
+    </distrib>
+    <distliab>Although this data set has been used by the U.S. Geological Survey, 
+U.S. Department of the Interior, no warranty expressed or implied is made by the 
+U.S. Geological Survey as to the accuracy of the data and related materials. 
+		
+The act of distribution shall not constitute any such warranty, and no responsibility 
+is assumed by the U.S. Geological Survey in the use of this data, software, or related materials.
+			
+Any use of trade, product, or firm names is for descriptive purposes only and does not imply endorsement by the U.S. Government.</distliab>
+    <stdorder>
+      <digform>
+        <digtinfo>
+          <formname>Shape File</formname>
+          <formcont>Region 01 New England</formcont>
+          <filedec>zipped</filedec>
+          <transize>3501</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_01shp.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Shape File</formname>
+          <formcont>Region 02 Mid-Atlantic</formcont>
+          <filedec>zipped</filedec>
+          <transize>5825</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_02shp.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Shape File</formname>
+          <formcont>Region 03 South Atlantic-Gulf</formcont>
+          <filedec>zipped</filedec>
+          <transize>16839</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_03shp.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Shape File</formname>
+          <formcont>Region 04 Great Lakes</formcont>
+          <filedec>zipped</filedec>
+          <transize>5676</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_04shp.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Shape File</formname>
+          <formcont>Region 05 Ohio</formcont>
+          <filedec>zipped</filedec>
+          <transize>6787</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_05shp.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Shape File</formname>
+          <formcont>Region 06 Tennessee</formcont>
+          <filedec>zipped</filedec>
+          <transize>2857</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_06shp.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Shape File</formname>
+          <formcont>Region 07 Upper Mississippi</formcont>
+          <filedec>zipped</filedec>
+          <transize>9935</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_07shp.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Shape File</formname>
+          <formcont>Region 08 Lower Mississippi</formcont>
+          <filedec>zipped</filedec>
+          <transize>5936</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_08shp.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Shape File</formname>
+          <formcont>Region 09 Souris-Red-Rainy</formcont>
+          <filedec>zipped</filedec>
+          <transize>2286</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_09shp.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Shape File</formname>
+          <formcont>Region 10 Missouri</formcont>
+          <filedec>zipped</filedec>
+          <transize>331</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_10shp.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Shape File</formname>
+          <formcont>Region 11 Arkansas-White-Red</formcont>
+          <filedec>zipped</filedec>
+          <transize>10319</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_11shp.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Shape File</formname>
+          <formcont>Region 12 Texas-Gulf</formcont>
+          <filedec>zipped</filedec>
+          <transize>5854</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_12shp.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Shape File</formname>
+          <formcont>Region 13 Rio Grande</formcont>
+          <filedec>zipped</filedec>
+          <transize>4194</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_13shp.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Shape File</formname>
+          <formcont>Region 14 Upper Colorado</formcont>
+          <filedec>zipped</filedec>
+          <transize>4637</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_14shp.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Shape File</formname>
+          <formcont>Region 15 Lower Colorado</formcont>
+          <filedec>zipped</filedec>
+          <transize>4215</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_15shp.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Shape File</formname>
+          <formcont>Region 16 Great Basin</formcont>
+          <filedec>zipped</filedec>
+          <transize>5973</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_16shp.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Shape File</formname>
+          <formcont>Region 17 Pacific Northwest</formcont>
+          <filedec>zipped</filedec>
+          <transize>13487</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_17shp.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Shape File</formname>
+          <formcont>Region 18 California</formcont>
+          <filedec>zipped</filedec>
+          <transize>7412</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_18shp.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Export</formname>
+          <formcont>Region 01 New England</formcont>
+          <filedec>zipped</filedec>
+          <transize>155</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_01e00.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Export</formname>
+          <formcont>Region 02 Mid-Atlantic</formcont>
+          <filedec>zipped</filedec>
+          <transize>349</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_02e00.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Export</formname>
+          <formcont>Region 03 South Atlantic-Gulf</formcont>
+          <filedec>zipped</filedec>
+          <transize>702</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_03e00.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Export</formname>
+          <formcont>Region 04 Great Lakes</formcont>
+          <filedec>zipped</filedec>
+          <transize>369</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_04e00.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Export</formname>
+          <formcont>Region 05 Ohio</formcont>
+          <filedec>zipped</filedec>
+          <transize>257</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_05e00.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Export</formname>
+          <formcont>Region 06 Tennessee</formcont>
+          <filedec>zipped</filedec>
+          <transize>90</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_06e00.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Export</formname>
+          <formcont>Region 07 Upper Mississippi</formcont>
+          <filedec>zipped</filedec>
+          <transize>310</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_07e00.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Export</formname>
+          <formcont>Region 08 Lower Mississippi</formcont>
+          <filedec>zipped</filedec>
+          <transize>307</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_08e00.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Export</formname>
+          <formcont>Region 09 Souris-Red-Rainy</formcont>
+          <filedec>zipped</filedec>
+          <transize>101</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_09e00.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Export</formname>
+          <formcont>Region 10 Missouri</formcont>
+          <filedec>zipped</filedec>
+          <transize>656</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_10e00.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Export</formname>
+          <formcont>Region 11 Arkansas-White-Red</formcont>
+          <filedec>zipped</filedec>
+          <transize>377</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_11e00.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Export</formname>
+          <formcont>Region 12 Texas-Gulf</formcont>
+          <filedec>zipped</filedec>
+          <transize>389</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_12e00.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Export</formname>
+          <formcont>Region 13 Rio Grande</formcont>
+          <filedec>zipped</filedec>
+          <transize>171</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_13e00.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Export</formname>
+          <formcont>Region 14 Upper Colorado</formcont>
+          <filedec>zipped</filedec>
+          <transize>144</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_14e00.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Export</formname>
+          <formcont>Region 15 Lower Colorado</formcont>
+          <filedec>zipped</filedec>
+          <transize>138</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_15e00.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Export</formname>
+          <formcont>Region 16 Great Basin</formcont>
+          <filedec>zipped</filedec>
+          <transize>167</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_16e00.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Export</formname>
+          <formcont>Region 17 Pacific Northwest</formcont>
+          <filedec>zipped</filedec>
+          <transize>414</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_17e00.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <digform>
+        <digtinfo>
+          <formname>Export</formname>
+          <formcont>Region 18 California</formcont>
+          <filedec>zipped</filedec>
+          <transize>241</transize>
+        </digtinfo>
+        <digtopt>
+          <onlinopt>
+            <computer>
+              <networka>
+                <networkr>https://water.usgs.gov/GIS/dsdl/ussoils_18e00.zip</networkr>
+              </networka>
+            </computer>
+          </onlinopt>
+        </digtopt>
+      </digform>
+      <fees>None. This dataset is provided by USGS as a public service.</fees>
+    </stdorder>
+  </distinfo>
+  <metainfo>
+    <metd>20201117</metd>
+    <metc>
+      <cntinfo>
+        <cntorgp>
+          <cntorg>U.S. Geological Survey</cntorg>
+        </cntorgp>
+        <cntpos>Ask USGS -- Water Webserver Team</cntpos>
+        <cntaddr>
+          <addrtype>mailing</addrtype>
+          <address>445 National Center</address>
+          <city>Reston</city>
+          <state>VA</state>
+          <postal>20192</postal>
+        </cntaddr>
+        <cntvoice>1-888-275-8747 (1-888-ASK-USGS)</cntvoice>
+        <cntemail>mierardi@usgs.gov</cntemail>
+      </cntinfo>
+    </metc>
+    <metstdn>FGDC Content Standards for Digital Geospatial Metadata</metstdn>
+    <metstdv>FGDC-STD-001-1998</metstdv>
+  </metainfo>
+</metadata>

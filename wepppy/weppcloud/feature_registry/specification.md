@@ -337,3 +337,18 @@ capability authority, not registry labels. Eligible absent optional NoDb state
 renders the upload/run control. See the [production M1 contract](../../nodb/mods/postfire_debris_flow/docs/production_m1.md#execution-contract-2026-09-10)
 and [UI contract](../../../docs/ui-docs/contracts/postfire-debris-flow-control-contract.md).
 Runtime registration/conformance is pending the production package checkpoint.
+
+## Kf source amendment — 2026-09-16
+
+Status: accepted 2026-09-16 after two independent reviews; implementation
+conformance pending. The [Kf source/runtime contract](../../nodb/mods/postfire_debris_flow/docs/kf_source.md)
+is the controlling amendment for new production M1.
+
+Postfire keeps disturbed, user role, preview, WBT and CONUS constraints. Its enable_dependencies becomes empty; enabling postfire must no longer enable POLARIS or RUSLE. Existing enabled standalone features remain enabled. The runtime YAML change belongs after the ancestor checkpoint; current YAML still implements the earlier dependency behavior.
+Earlier conflicting requirements remain the historical/legacy contract only
+once this checkpoint is accepted; do not reinterpret old accepted artifacts.
+
+Kf cutover acceptance also covers the immediate browser state: removing RUSLE
+must retain the enabled postfire controller/report link before and after reload.
+Remove the postfire POLARIS/RUSLE frontend propagation rule together with the
+registry dependency metadata; neither is a substitute for the other.

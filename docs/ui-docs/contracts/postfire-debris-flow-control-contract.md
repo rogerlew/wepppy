@@ -275,3 +275,19 @@ The accepted [production runtime integration contract](../../../wepppy/nodb/mods
 governs new M1/M3 coverage, explicit model dispatch and additive mask download.
 Retain existing controls/job lifecycle. Show exact counts and Valid coverage,
 with legacy coverage explicitly not recorded. Runtime conformance is pending.
+
+## Kf source amendment — 2026-09-16
+
+Status: accepted 2026-09-16 after two independent reviews; implementation
+conformance pending. The [Kf source/runtime contract](../../../wepppy/nodb/mods/postfire_debris_flow/docs/kf_source.md)
+is the controlling amendment for new production M1.
+
+Run M1 prepares absent Kf automatically; no RUSLE/POLARIS preparation link or readiness gate applies to new M1. Display source preparation/failure explicitly and preserve prior accepted reports.
+Earlier conflicting requirements remain the historical/legacy contract only
+once this checkpoint is accepted; do not reinterpret old accepted artifacts.
+
+The Kf increment's Mods acceptance includes immediate state after disabling
+RUSLE: postfire remains checked and its controller/report link stays visible,
+without a reload. One and two reloads must retain that same state. Enabling
+postfire must not auto-enable POLARIS/RUSLE. This covers the owner-reported
+transient disappearance after RUSLE removal, not just persisted server state.

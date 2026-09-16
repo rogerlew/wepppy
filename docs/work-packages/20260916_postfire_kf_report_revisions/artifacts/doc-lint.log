@@ -1,0 +1,59 @@
+PROJECT_TRACKER.md: exit 0
+✅ 1 files validated, 0 errors, 0 warnings
+
+docs/adrs/ADR-0068-staley-kf-source-replacement.md: exit 0
+✅ 1 files validated, 0 errors, 0 warnings
+
+docs/ui-docs/contracts/postfire-debris-flow-control-contract.md: exit 0
+✅ 1 files validated, 0 errors, 0 warnings
+
+docs/ui-docs/contracts/postfire-debris-flow-report-contract.md: exit 0
+✅ 1 files validated, 0 errors, 0 warnings
+
+wepppy/weppcloud/feature_registry/specification.md: exit 0
+✅ 1 files validated, 0 errors, 0 warnings
+
+wepppy/nodb/mods/postfire_debris_flow/AGENTS.md: exit 0
+✅ 1 files validated, 0 errors, 0 warnings
+
+wepppy/nodb/mods/postfire_debris_flow/specification.md: exit 0
+✅ 1 files validated, 0 errors, 0 warnings
+
+wepppy/nodb/mods/postfire_debris_flow/implementation_roadmap.md: exit 0
+✅ 1 files validated, 0 errors, 0 warnings
+
+wepppy/nodb/mods/postfire_debris_flow/docs/kf_source.md: exit 0
+✅ 1 files validated, 0 errors, 0 warnings
+
+wepppy/nodb/mods/postfire_debris_flow/docs/m1_predictors.md: exit 0
+✅ 1 files validated, 0 errors, 0 warnings
+
+wepppy/nodb/mods/postfire_debris_flow/docs/production_m1.md: exit 0
+✅ 1 files validated, 0 errors, 0 warnings
+
+wepppy/nodb/mods/postfire_debris_flow/docs/production_m3.md: exit 0
+✅ 1 files validated, 0 errors, 0 warnings
+
+wepppy/nodb/mods/postfire_debris_flow/docs/production_m3_runtime.md: exit 0
+✅ 1 files validated, 0 errors, 0 warnings
+
+wepppy/nodb/mods/postfire_debris_flow/docs/model_selection.md: exit 0
+✅ 1 files validated, 0 errors, 0 warnings
+
+wepppy/nodb/mods/postfire_debris_flow/docs/rainfall_results.md: exit 0
+✅ 1 files validated, 0 errors, 0 warnings
+
+docs/work-packages/20260916_postfire_kf_report_revisions/tracker.md: exit 0
+✅ 1 files validated, 0 errors, 0 warnings
+
+docs/work-packages/20260916_postfire_kf_report_revisions/package.md: exit 0
+✅ 1 files validated, 0 errors, 0 warnings
+
+docs/work-packages/20260916_postfire_kf_report_revisions/artifacts/20260916_contract_decision.md: exit 0
+✅ 1 files validated, 0 errors, 0 warnings
+
+docs/work-packages/20260916_postfire_kf_report_revisions/artifacts/kf_source_policy.md: exit 0
+✅ 1 files validated, 0 errors, 0 warnings
+
+docs/work-packages/20260916_postfire_kf_report_revisions/prompts/active/kf_report_revisions_execplan.md: exit 0
+✅ 1 files validated, 0 errors, 0 warnings

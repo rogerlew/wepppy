@@ -191,3 +191,13 @@ and accepted ADR-0067 govern model-specific common support, recorded-depth soil
 policy, version-2 predictors and mask publication. Existing local/offline v1
 semantics below remain reproducible. Runtime implementation conformance is pending;
 the amendment does not authorize source acquisition or production deployment.
+
+## Kf source amendment — 2026-09-16
+
+Status: accepted 2026-09-16 after two independent reviews; implementation
+conformance pending. The [Kf source/runtime contract](kf_source.md)
+is the controlling amendment for new production M1.
+
+Readers admit schema-3 M1 predictors additively and retain all old schemas and parquet columns. New context records rainfall provenance. Read-only scalar curve evaluation is allowed by the report amendment; persisted scenarios are unchanged.
+Earlier conflicting requirements remain the historical/legacy contract only
+once this checkpoint is accepted; do not reinterpret old accepted artifacts.

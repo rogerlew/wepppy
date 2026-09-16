@@ -1,0 +1,54 @@
+[
+  {
+    "file": "kffact.xml",
+    "url": "https://data.usgs.gov/datacatalog/metadata/USGS.6750c172d34ed8d3858534d8.xml",
+    "status": 200,
+    "sha256": "c9e8c40e2739891b04882d559b99e60f224e1b55f92d0134cbbb1f3cf9bfd9cb"
+  },
+  {
+    "file": "soils250k.html",
+    "url": "https://pubs.usgs.gov/ds/270/data/DVD-1/METADATA/Soils250K.htm",
+    "status": 200,
+    "sha256": "77b01a2b6d1e405ddab257741159ddbaf41c58eee779c55e7c6c13249cf47afa"
+  },
+  {
+    "file": "ussoils.xml",
+    "url": "https://data.usgs.gov/datacatalog/metadata/USGS.631405c5d34e36012efa3187.xml",
+    "status": 404,
+    "sha256": "c328719b7f560bf2f42a14a9363d5686d8f9fcce39d78c5f14b34cbecc2ff402"
+  },
+  {
+    "file": "original-ussoils.txt",
+    "url": "https://water.usgs.gov/GIS/metadata/usgswrd/ASCII/ussoils.txt",
+    "status": 404,
+    "sha256": "5315351b7cb10a4ab14dfc3cab4d4fb9827012bdb24bfa14fe68ce24e2dff843",
+    "final_url": "https://water.usgs.gov/GIS/metadata/usgswrd/ASCII/ussoils.txt"
+  },
+  {
+    "file": "original-ussoils.html",
+    "url": "https://water.usgs.gov/GIS/metadata/usgswrd/HTML/ussoils.html",
+    "status": 404,
+    "sha256": "5315351b7cb10a4ab14dfc3cab4d4fb9827012bdb24bfa14fe68ce24e2dff843",
+    "final_url": "https://water.usgs.gov/GIS/metadata/usgswrd/HTML/ussoils.html"
+  },
+  {
+    "file": "setussoils.sas",
+    "url": "https://water.usgs.gov/GIS/dsdl/setussoils.sas",
+    "status": 404,
+    "sha256": "5315351b7cb10a4ab14dfc3cab4d4fb9827012bdb24bfa14fe68ce24e2dff843",
+    "final_url": "https://water.usgs.gov/GIS/dsdl/setussoils.sas"
+  },
+  {
+    "file": "cog-head.json",
+    "url": "https://prod-is-usgs-sb-prod-publish.s3.amazonaws.com/6750c172d34ed8d3858534d8/STATSGO-KFFACT.tif",
+    "status": 403,
+    "sha256": "0414bcb62eb0aec2262176f0b652ec7b5b1194cc29c9ce32b82cf7e5aabde5e9",
+    "final_url": "https://prod-is-usgs-sb-prod-publish.s3.amazonaws.com/6750c172d34ed8d3858534d8/STATSGO-KFFACT.tif"
+  },
+  {
+    "file": "ussoils-original.xml",
+    "url": "https://data.usgs.gov/datacatalog/metadata/USGS.ad9c5610-aaf5-4631-9577-5917acd873b5.xml",
+    "status": 200,
+    "sha256": "aa25c8ac4b1653bd0d729fee30a224fc248c612b6367cf8bc950a4777fdf2a6f"
+  }
+]

@@ -415,3 +415,13 @@ membership and retains aligned SBS plus soil maps. The v2 reader admits M1/M3
 and recomputes common support and M3 F/S from retained maps. This increment is
 under review; production orchestration still uses v1. Authoritative basin-bound
 source activation, results, publication/freshness and live acceptance remain open.
+
+## Kf source amendment — 2026-09-16
+
+Status: accepted 2026-09-16 after two independent reviews; implementation
+conformance pending. The [Kf source/runtime contract](kf_source.md)
+is the controlling amendment for new production M1.
+
+New M1 uses attempt-owned Kf preparation and schema 3; the shared bounded transport admits its fixed endpoint without changing THICK/SDA behavior.
+Earlier conflicting requirements remain the historical/legacy contract only
+once this checkpoint is accepted; do not reinterpret old accepted artifacts.
