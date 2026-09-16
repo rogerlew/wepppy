@@ -21,7 +21,11 @@ bundle with the canonical container command; no worker jobs were submitted.
   5 production Python files, zero unsuppressed catches, pass.
 - Scoped Markdown lint/spelling preview and `git diff --check`: pass; repeat
   after final closeout edits. Code-quality observability is nonblocking;
-  initial report lacks changed-file deltas because it compares committed HEAD.
+  final committed-HEAD report analyzes 9 files: zero red, two yellow. The
+  existing results-reader function length is unchanged; new report controller
+  complexity 16 is slightly above yellow, localized to presentation/state
+  handling with direct tests. No speculative abstraction was added to lower it.
+  Python complexity is unavailable because radon is absent; no dependency added.
   Captured CSV retains original browser CRLF bytes; staged whitespace validation
   uses `git -c core.whitespace=cr-at-eol diff --cached --check` for those artifacts.
 

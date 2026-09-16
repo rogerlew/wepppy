@@ -1,7 +1,7 @@
 # Code Quality Observability Report
 
 - Mode: `observe-only` (non-blocking)
-- Generated (UTC): `2026-09-16T03:55:23Z`
+- Generated (UTC): `2026-09-16T04:08:07Z`
 - Base ref: `ac4deb681`
 
 ## Threshold Bands
@@ -35,7 +35,19 @@
 
 ## Changed Files
 
-_No changed-file analysis available (base ref missing or no analyzable files changed)._
+- Files analyzed: `9`; highest severity red: `0`, yellow: `2`; worsened metric entries: `3` (exceptions: `0`, actionable: `3`)
+
+| File | Lang | Highest | Key Metric Deltas |
+| --- | --- | --- | --- |
+| `tests/nodb/mods/test_postfire_debris_flow_report.py` | `python` | `green` | python_file_sloc n/a->263 (new, green)<br>python_function_len n/a->61 (new, green)<br>python_cc n/a->n/a (n/a, unknown) |
+| `tests/weppcloud/routes/test_postfire_report_bp.py` | `python` | `green` | python_file_sloc n/a->164 (new, green)<br>python_function_len n/a->26 (new, green)<br>python_cc n/a->n/a (n/a, unknown) |
+| `wepppy/nodb/mods/postfire_debris_flow/report.py` | `python` | `green` | python_file_sloc n/a->170 (new, green)<br>python_function_len n/a->42 (new, green)<br>python_cc n/a->n/a (n/a, unknown) |
+| `wepppy/nodb/mods/postfire_debris_flow/results.py` | `python` | `yellow` | python_file_sloc 319->320 (worsened, green)<br>python_function_len 96->96 (unchanged, yellow)<br>python_cc n/a->n/a (n/a, unknown) |
+| `wepppy/weppcloud/_blueprints_context.py` | `python` | `green` | python_file_sloc 73->74 (worsened, green)<br>python_function_len 12->12 (unchanged, green)<br>python_cc n/a->n/a (n/a, unknown) |
+| `wepppy/weppcloud/controllers_js/__tests__/postfire_report.test.js` | `javascript` | `green` | js_file_sloc n/a->316 (new, green)<br>js_cc n/a->2 (new, green) |
+| `wepppy/weppcloud/controllers_js/postfire_report.js` | `javascript` | `yellow` | js_file_sloc n/a->427 (new, green)<br>js_cc n/a->16 (new, yellow) |
+| `wepppy/weppcloud/routes/__init__.py` | `python` | `green` | python_file_sloc 212->215 (worsened, green)<br>python_function_len 17->17 (unchanged, green)<br>python_cc n/a->n/a (n/a, unknown) |
+| `wepppy/weppcloud/routes/nodb_api/postfire_report_bp.py` | `python` | `green` | python_file_sloc n/a->153 (new, green)<br>python_function_len n/a->24 (new, green)<br>python_cc n/a->n/a (n/a, unknown) |
 
 ## Hotspots (Current Tree)
 

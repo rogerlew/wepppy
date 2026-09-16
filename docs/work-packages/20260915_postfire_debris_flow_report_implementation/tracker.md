@@ -1,6 +1,6 @@
 # Report implementation tracker
 
-Status: Active. Timestamps: UTC.
+Status: Complete. Timestamps: UTC.
 
 ## Progress
 
@@ -10,7 +10,7 @@ Status: Active. Timestamps: UTC.
 - [x] Validated reader and read adapters: 55 reader/results and 25 route tests pass.
 - [x] Pure report/controller, tests-first interactions and control link.
 - [x] Saved-bundle/browser acceptance, full gates and final independent reviews.
-- [ ] Implementation commit and truthful closure/handoff.
+- [x] Implementation committed as `8c5a0eece`; closure evidence retained.
 
 ## Decisions
 
@@ -44,3 +44,9 @@ Review records: [runtime findings](artifacts/runtime_review_disposition.md),
 low-priority muted-help styling improvement deferred.
 Dedicated [correctness](artifacts/20260916_correctness_review.md) and
 [security](artifacts/20260916_security_review.md) records retain final sign-offs.
+
+## Closeout — 2026-09-16 UTC
+
+Checkpoint `ac4deb681` precedes implementation `8c5a0eece`. All required gates
+pass. No push, production deployment, source acquisition or model rerun. The
+completed ExecPlan and validation retain limitations and optional low UX polish.

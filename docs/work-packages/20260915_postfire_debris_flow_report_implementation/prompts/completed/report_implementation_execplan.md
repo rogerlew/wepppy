@@ -1,7 +1,7 @@
 # Implement the saved post-fire likelihood report
 
 
-This is the active living ExecPlan for the report implementation, maintained
+This is the completed ExecPlan for the report implementation, maintained
 under `docs/prompt_templates/codex_exec_plans.md`. Update Progress, Surprises &
 Discoveries, Decision Log and Outcomes & Retrospective at every milestone.
 
@@ -25,7 +25,7 @@ or live model reruns. The closed design package is immutable history.
 - [x] (2026-09-16 03:45 UTC) Reader and routes implemented; 55 reader/results and 25 route tests pass.
 - [x] (2026-09-16 04:01 UTC) Pure report/control link implemented; 18 focused Jest tests and 895 full frontend tests pass.
 - [x] (2026-09-16 04:05 UTC) Saved M1/M3 browser and no-write checks pass; full Python 8672 and frontend 898 pass, final focused backend 44 and controller 21 pass.
-- [ ] Resolve final independent reviews, commit implementation, close or name gaps.
+- [x] (2026-09-16 04:08 UTC) Independent correctness/security/UX approved; implementation committed as `8c5a0eece`. Package complete with optional low UX polish deferred.
 
 ## Surprises & Discoveries
 
@@ -62,6 +62,11 @@ with focused tests. Saved M1/NOAA and M3/CLI values and attachment bytes match;
 failure recovery and ordinary artifact browsing/download pass. Full Python,
 frontend and final conformance regressions pass. Saved probabilities remain inspectable despite legitimate
 engine-source staleness; no rerun was needed for read-only validation.
+Implementation commit: `8c5a0eece`. No push or production deployment. Existing
+unrelated code-quality outputs were preserved. The real Unitizer integration
+test is the concrete improvement over a mock-only interface check; keep it when
+changing report unit behavior. Optional low-priority muted-help polish is the
+only UX follow-up, not an unresolved acceptance blocker.
 
 ## Context and Orientation
 

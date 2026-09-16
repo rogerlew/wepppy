@@ -1,7 +1,7 @@
 # Runtime findings and disposition
 
 Status: medium/high findings resolved; final broad gates passed. Reviews/evidence dates are UTC, 2026-09-16.
-Reviewed ancestor: `ac4deb681`. Implementation commit pending.
+Reviewed ancestor: `ac4deb681`. Implementation: `8c5a0eece`.
 
 ## Resolved backend findings
 

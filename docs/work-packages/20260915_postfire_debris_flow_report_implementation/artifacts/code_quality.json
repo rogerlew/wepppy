@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-09-16T03:55:23Z",
+  "generated_at_utc": "2026-09-16T04:08:07Z",
   "mode": "observe-only",
   "base_ref": "ac4deb681",
   "thresholds": {
@@ -413,5 +413,262 @@
       }
     ]
   },
-  "changed_files": []
+  "changed_files": [
+    {
+      "path": "tests/nodb/mods/test_postfire_debris_flow_report.py",
+      "base_path": "tests/nodb/mods/test_postfire_debris_flow_report.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 263.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 61.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "tests/weppcloud/routes/test_postfire_report_bp.py",
+      "base_path": "tests/weppcloud/routes/test_postfire_report_bp.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 164.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 26.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "wepppy/nodb/mods/postfire_debris_flow/report.py",
+      "base_path": "wepppy/nodb/mods/postfire_debris_flow/report.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 170.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 42.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "wepppy/nodb/mods/postfire_debris_flow/results.py",
+      "base_path": "wepppy/nodb/mods/postfire_debris_flow/results.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 319.0,
+          "current": 320.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 96.0,
+          "current": 96.0,
+          "trend": "unchanged",
+          "severity": "yellow"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "wepppy/weppcloud/_blueprints_context.py",
+      "base_path": "wepppy/weppcloud/_blueprints_context.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 73.0,
+          "current": 74.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 12.0,
+          "current": 12.0,
+          "trend": "unchanged",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "wepppy/weppcloud/controllers_js/__tests__/postfire_report.test.js",
+      "base_path": "wepppy/weppcloud/controllers_js/__tests__/postfire_report.test.js",
+      "status": "A",
+      "language": "javascript",
+      "metrics": [
+        {
+          "name": "js_file_sloc",
+          "base": null,
+          "current": 316.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "js_cc",
+          "base": null,
+          "current": 2.0,
+          "trend": "new",
+          "severity": "green"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "wepppy/weppcloud/controllers_js/postfire_report.js",
+      "base_path": "wepppy/weppcloud/controllers_js/postfire_report.js",
+      "status": "A",
+      "language": "javascript",
+      "metrics": [
+        {
+          "name": "js_file_sloc",
+          "base": null,
+          "current": 427.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "js_cc",
+          "base": null,
+          "current": 16.0,
+          "trend": "new",
+          "severity": "yellow"
+        }
+      ],
+      "highest_severity": "yellow"
+    },
+    {
+      "path": "wepppy/weppcloud/routes/__init__.py",
+      "base_path": "wepppy/weppcloud/routes/__init__.py",
+      "status": "M",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": 212.0,
+          "current": 215.0,
+          "trend": "worsened",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": 17.0,
+          "current": 17.0,
+          "trend": "unchanged",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    },
+    {
+      "path": "wepppy/weppcloud/routes/nodb_api/postfire_report_bp.py",
+      "base_path": "wepppy/weppcloud/routes/nodb_api/postfire_report_bp.py",
+      "status": "A",
+      "language": "python",
+      "metrics": [
+        {
+          "name": "python_file_sloc",
+          "base": null,
+          "current": 153.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_function_len",
+          "base": null,
+          "current": 24.0,
+          "trend": "new",
+          "severity": "green"
+        },
+        {
+          "name": "python_cc",
+          "base": null,
+          "current": null,
+          "trend": "n/a",
+          "severity": "unknown"
+        }
+      ],
+      "highest_severity": "green"
+    }
+  ]
 }

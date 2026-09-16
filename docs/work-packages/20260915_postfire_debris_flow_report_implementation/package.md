@@ -1,6 +1,6 @@
 # Post-fire debris-flow report implementation
 
-Status: Active, 2026-09-16 UTC (package date: September 15 Pacific).
+Status: Complete, 2026-09-16 UTC (package date: September 15 Pacific).
 
 ## Scope and authority
 
@@ -34,5 +34,14 @@ state matrix have evidence, including real-file boundaries and browser tasks.
 Missing live saved bundles are evidence gaps, not authority to create new runs.
 Run full Python/frontend gates and retain failures honestly before closure.
 
-See [tracker](tracker.md), [active ExecPlan](prompts/active/report_implementation_execplan.md)
+See [tracker](tracker.md), [completed ExecPlan](prompts/completed/report_implementation_execplan.md)
 and [checkpoint](artifacts/20260915_contract_decision.md).
+
+## Outcome
+
+Implemented in `8c5a0eece` after ancestor `ac4deb681`. Saved M1/NOAA and M3/CLI
+browser checks pass without changing project/model files. Full Python: 8,672
+passed; frontend: 898 passed. Independent correctness, security and dedicated
+UX gates pass; optional low-priority muted-help polish remains deferred.
+See [validation](artifacts/validation.md) for exact evidence and coverage limits.
+Nothing was pushed or deployed to production; no model was rerun.
