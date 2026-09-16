@@ -26,6 +26,7 @@ _BLUEPRINT_ATTRS = [
     "debris_flow_bp",
     "disturbed_bp",
     "geneva_bp",
+    "postfire_report_bp",
     "geodata_bp",
     "huc_fire_bp",
     "diff_bp",

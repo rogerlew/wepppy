@@ -140,6 +140,8 @@ class ResultCatalog:
     """Validated in-memory result snapshot; open using open_results."""
     manifest: dict
     events: pa.Table
+    design: pa.Table | None = None
+    inverse: pa.Table | None = None
 
 
 def open_results(path: Path, *, expected_manifest_sha256: str) -> ResultCatalog:
@@ -160,7 +162,7 @@ def open_results(path: Path, *, expected_manifest_sha256: str) -> ResultCatalog:
     _validate_manifest(m)
     from .result_support import read_support
     limits = read_support(directory,m,consumed)
-    events = None
+    tables = {}
     for name, schema in SCHEMAS.items():
         info = m['tables'][name]
         if not isinstance(info,dict) or type(info.get('rows')) is not int or not 0 <= info['rows'] <= LIMITS[name]:
@@ -171,10 +173,9 @@ def open_results(path: Path, *, expected_manifest_sha256: str) -> ResultCatalog:
         if table.num_rows != info['rows']:
             fail('invalid_input', 'Table count differs from manifest')
         _validate_rows(name, table, m)
-        if name == 'events':
-            events = table
+        tables[name] = table
     recheck(consumed,limits=limits)
-    return ResultCatalog(m, events)
+    return ResultCatalog(m, tables['events'], tables['design'], tables['inverse'])
 
 
 def _context(catalog):

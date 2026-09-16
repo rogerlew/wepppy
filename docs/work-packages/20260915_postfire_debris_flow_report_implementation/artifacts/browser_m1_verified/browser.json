@@ -1,0 +1,331 @@
+[
+  {
+    "utc": "2026-09-16T04:05:04.470Z",
+    "stage": "report",
+    "model": "M1",
+    "attempt_id": "49987d8eb4f841ba913a182df46fb7a3",
+    "assessment_id": "a58e2438a4614f48a3e354868c4538a2",
+    "frequency_source": "noaa",
+    "current": false,
+    "total_events": 9150,
+    "load_ms": 2875
+  },
+  {
+    "utc": "2026-09-16T04:05:05.690Z",
+    "stage": "event_detail",
+    "path": "/weppcloud/runs/overpriced-sprawl/config/query/postfire_debris_flow/event",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-16T04:05:05.693Z",
+    "stage": "event_detail",
+    "helper_check": {
+      "keys": [
+        "attempt_id",
+        "rows"
+      ],
+      "rows": 3
+    }
+  },
+  {
+    "utc": "2026-09-16T04:05:05.707Z",
+    "stage": "event_detail",
+    "response_keys": [
+      "attempt_id",
+      "rows"
+    ],
+    "response_row_count": 3
+  },
+  {
+    "utc": "2026-09-16T04:05:06.940Z",
+    "stage": "event_detail",
+    "path": "/weppcloud/runs/overpriced-sprawl/config/query/postfire_debris_flow/event",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-16T04:05:06.956Z",
+    "stage": "event_detail",
+    "response_keys": [
+      "attempt_id",
+      "rows"
+    ],
+    "response_row_count": 3
+  },
+  {
+    "utc": "2026-09-16T04:05:07.762Z",
+    "stage": "event_detail",
+    "detail_status": ""
+  },
+  {
+    "utc": "2026-09-16T04:05:09.183Z",
+    "stage": "duration",
+    "path": "/weppcloud/runs/overpriced-sprawl/config/query/postfire_debris_flow/",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-16T04:05:09.238Z",
+    "stage": "duration",
+    "response_keys": [
+      "attempt_id",
+      "design",
+      "events",
+      "inverse",
+      "query",
+      "schema_version",
+      "status",
+      "summary",
+      "urls"
+    ],
+    "response_row_count": null
+  },
+  {
+    "utc": "2026-09-16T04:05:10.643Z",
+    "stage": "paging",
+    "path": "/weppcloud/runs/overpriced-sprawl/config/query/postfire_debris_flow/",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-16T04:05:10.693Z",
+    "stage": "paging",
+    "response_keys": [
+      "attempt_id",
+      "design",
+      "events",
+      "inverse",
+      "query",
+      "schema_version",
+      "status",
+      "summary",
+      "urls"
+    ],
+    "response_row_count": null
+  },
+  {
+    "utc": "2026-09-16T04:05:10.695Z",
+    "stage": "paging",
+    "page_query_ms": 1453,
+    "page_offset": 100,
+    "count": 9150
+  },
+  {
+    "utc": "2026-09-16T04:05:16.717Z",
+    "stage": "controlled_detail_failures",
+    "path": "/weppcloud/runs/overpriced-sprawl/config/query/postfire_debris_flow/event",
+    "status": 503
+  },
+  {
+    "utc": "2026-09-16T04:05:16.719Z",
+    "stage": "controlled_detail_failures",
+    "response_keys": [
+      "error"
+    ],
+    "response_row_count": null
+  },
+  {
+    "utc": "2026-09-16T04:05:18.747Z",
+    "stage": "controlled_detail_failures",
+    "path": "/weppcloud/runs/overpriced-sprawl/config/query/postfire_debris_flow/event",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-16T04:05:18.784Z",
+    "stage": "controlled_detail_failures",
+    "response_keys": [
+      "attempt_id",
+      "rows"
+    ],
+    "response_row_count": 3
+  },
+  {
+    "utc": "2026-09-16T04:05:18.923Z",
+    "stage": "controlled_detail_failures",
+    "controlled_failure": "first_detail",
+    "recovery": "passed"
+  },
+  {
+    "utc": "2026-09-16T04:05:18.998Z",
+    "stage": "controlled_detail_failures",
+    "path": "/weppcloud/runs/overpriced-sprawl/config/query/postfire_debris_flow/event",
+    "status": 503
+  },
+  {
+    "utc": "2026-09-16T04:05:19.001Z",
+    "stage": "controlled_detail_failures",
+    "response_keys": [
+      "error"
+    ],
+    "response_row_count": null
+  },
+  {
+    "utc": "2026-09-16T04:05:20.499Z",
+    "stage": "controlled_detail_failures",
+    "path": "/weppcloud/runs/overpriced-sprawl/config/query/postfire_debris_flow/event",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-16T04:05:20.514Z",
+    "stage": "controlled_detail_failures",
+    "response_keys": [
+      "attempt_id",
+      "rows"
+    ],
+    "response_row_count": 3
+  },
+  {
+    "utc": "2026-09-16T04:05:20.600Z",
+    "stage": "controlled_detail_failures",
+    "controlled_failure": "last_detail",
+    "recovery": "passed"
+  },
+  {
+    "utc": "2026-09-16T04:05:20.711Z",
+    "stage": "controlled_paging_failure",
+    "path": "/weppcloud/runs/overpriced-sprawl/config/query/postfire_debris_flow/",
+    "status": 503
+  },
+  {
+    "utc": "2026-09-16T04:05:20.714Z",
+    "stage": "controlled_paging_failure",
+    "response_keys": [
+      "error"
+    ],
+    "response_row_count": null
+  },
+  {
+    "utc": "2026-09-16T04:05:22.168Z",
+    "stage": "controlled_paging_failure",
+    "path": "/weppcloud/runs/overpriced-sprawl/config/query/postfire_debris_flow/",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-16T04:05:22.213Z",
+    "stage": "controlled_paging_failure",
+    "controlled_failure": "paging",
+    "recovery": "passed"
+  },
+  {
+    "utc": "2026-09-16T04:05:22.220Z",
+    "stage": "off_page_selection",
+    "response_keys": [
+      "attempt_id",
+      "design",
+      "events",
+      "inverse",
+      "query",
+      "schema_version",
+      "status",
+      "summary",
+      "urls"
+    ],
+    "response_row_count": null
+  },
+  {
+    "utc": "2026-09-16T04:05:23.456Z",
+    "stage": "off_page_selection",
+    "path": "/weppcloud/runs/overpriced-sprawl/config/query/postfire_debris_flow/event",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-16T04:05:23.496Z",
+    "stage": "off_page_selection",
+    "response_keys": [
+      "attempt_id",
+      "rows"
+    ],
+    "response_row_count": 3
+  },
+  {
+    "utc": "2026-09-16T04:05:24.863Z",
+    "stage": "off_page_selection",
+    "path": "/weppcloud/runs/overpriced-sprawl/config/query/postfire_debris_flow/",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-16T04:05:24.915Z",
+    "stage": "off_page_selection",
+    "response_keys": [
+      "attempt_id",
+      "design",
+      "events",
+      "inverse",
+      "query",
+      "schema_version",
+      "status",
+      "summary",
+      "urls"
+    ],
+    "response_row_count": null
+  },
+  {
+    "utc": "2026-09-16T04:05:26.174Z",
+    "stage": "off_page_selection",
+    "path": "/weppcloud/runs/overpriced-sprawl/config/query/postfire_debris_flow/",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-16T04:05:26.254Z",
+    "stage": "off_page_selection",
+    "response_keys": [
+      "attempt_id",
+      "design",
+      "events",
+      "inverse",
+      "query",
+      "schema_version",
+      "status",
+      "summary",
+      "urls"
+    ],
+    "response_row_count": null
+  },
+  {
+    "utc": "2026-09-16T04:05:27.564Z",
+    "stage": "off_page_selection",
+    "path": "/weppcloud/runs/overpriced-sprawl/config/query/postfire_debris_flow/",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-16T04:05:27.645Z",
+    "stage": "off_page_selection",
+    "response_keys": [
+      "attempt_id",
+      "design",
+      "events",
+      "inverse",
+      "query",
+      "schema_version",
+      "status",
+      "summary",
+      "urls"
+    ],
+    "response_row_count": null
+  },
+  {
+    "utc": "2026-09-16T04:05:27.652Z",
+    "stage": "off_page_selection",
+    "off_page_selection": "preserved_after_duration_and_paging"
+  },
+  {
+    "utc": "2026-09-16T04:05:29.432Z",
+    "stage": "ordinary_browse",
+    "ordinary_browse_download": "passed"
+  },
+  {
+    "utc": "2026-09-16T04:05:29.464Z",
+    "stage": "ordinary_browse",
+    "screenshots": [
+      "desktop.png",
+      "narrow.png"
+    ],
+    "page_errors": [],
+    "mutations": [],
+    "inherited_recorder_requests": 18
+  },
+  {
+    "utc": "2026-09-16T04:05:29.486Z",
+    "stage": "ordinary_browse",
+    "acceptance": "passed",
+    "protected_files": 18,
+    "unchanged": true
+  }
+]

@@ -10,7 +10,10 @@ Development validation is recorded in the [production work package](../../../../
 M3 soil/terrain composition, bounded source preparation and shared valid-support
 results are implemented under the [runtime contract](docs/production_m3_runtime.md).
 Live acceptance is tracked in the [M3 package](../../../../docs/work-packages/20260914_staley_m3_integration/package.md).
-Reports and the event dashboard remain deferred. Existing
+The saved likelihood report is implemented under its
+[reviewed contract](../../../../docs/ui-docs/contracts/postfire-debris-flow-report-contract.md);
+see [implementation progress](../../../../docs/work-packages/20260915_postfire_debris_flow_report_implementation/tracker.md).
+Maps and advanced scenario exploration remain deferred. Existing
 `debris_flow` behavior is unchanged. See the [specification](specification.md)
 and [roadmap](implementation_roadmap.md) for scientific scope and remaining work.
 
@@ -28,7 +31,7 @@ and [roadmap](implementation_roadmap.md) for scientific scope and remaining work
    choose a scale and retry the retained map without uploading again.
 4. Check the accepted filename, scale and watershed coverage in the upload table.
    Select Project climate or available NOAA design rainfall and run the model.
-   Download completed event, design-storm and threshold files. Reports are deferred.
+   Download completed event, design-storm and threshold files.
 
 Partial dNBR coverage is supported; missing observations are not zero. Failed
 replacements preserve the accepted map. Changed prerequisites require preparation
@@ -51,7 +54,43 @@ Changing selection preserves prior model outputs and their model labels. The
 🌋 marker represents the latest accepted result on its own inputs, independently
 of the radio selection. A failed M3 task does not erase a current M1 result.
 
-## Scientific integration and planned dashboard workflow
+## Read the likelihood report
+
+The report adds **View likelihood report** to the existing control. It reads the
+last accepted assessment, not the currently selected model. Opening it does not
+run a model, acquire data or repair missing inputs. Before a first assessment,
+the page explains that no completed assessment is available.
+
+Choose a **Rainfall window** (15, 30 or 60 minutes) to compare the four saved
+rainfall scenarios and browse storm events. The three-row 50% table always shows
+all windows. Filter events by minimum likelihood or original year label, then
+select an event to see its three window estimates immediately below its row.
+Reset filters returns to the complete event catalog; unavailable probabilities
+remain visible unless a numeric likelihood filter excludes them.
+
+Likelihood is conditional on the shown rainfall and the accepted post-fire
+inputs. It is **not an annual debris-flow probability**, a warning threshold or
+a prediction of runout, volume or inundation. Rainfall recurrence intervals refer
+to rainfall, not debris flows. The 50% rainfall is an equation-derived equality,
+not a safe/unsafe boundary. Different windows are separate estimates; do not add
+or average their probabilities. All events use the same fixed post-fire inputs,
+not a simulation of landscape recovery. Simulation year labels are not observed
+calendar years. Spatial coverage measures usable input cells, not confidence.
+
+Input changes leave previous results available with a warning. If the report
+cannot check whether inputs are current, it says so without discarding saved
+values. If another model run replaces the assessment while you are viewing it,
+reload before continuing. Missing or inconsistent accepted files are explicitly
+unavailable; the report never fills missing probabilities with zero.
+
+**Download displayed rows (CSV)** exports the current page in displayed units
+with full numeric precision and assessment/filter context. Full saved parquet
+downloads use canonical units. Changing SI/English display units does not change
+probabilities or model inputs. Methods contains assessment identity and detailed
+limitations; the ordinary project browser retains source, failed and intermediate
+artifacts as well as completed outputs.
+
+## Scientific integration workflow
 
 1. Use a continental US (CONUS) project, delineate with WBT, complete the WEPP
    Soils build, and provide a soil burn severity (SBS) map.
@@ -66,11 +105,11 @@ of the radio selection. A failed M3 task does not erase a current M1 result.
    Production uses recorded-depth policy and common valid cells; shared WEPP
    soil builders, substitutions and caches are not changed.
 4. Use the project's climate event intensities to assess storm-event
-   probabilities. Browse events in an interactive dashboard and select an
+   probabilities. Browse saved events in the likelihood report and select an
    event to inspect the project watershed result, rainfall, and input provenance.
    Return-interval comparisons and rainfall thresholds are complementary views.
 
-The interactive dashboard remains planned. M1 and M3 predict
+Map-based and advanced interactive scenarios remain deferred. M1 and M3 predict
 occurrence, not debris-flow volume or inundation extent.
 
 ## Organization
@@ -81,6 +120,19 @@ facade, numerical helpers, and integration/provenance collaborators.
 The specification and detailed contracts map the implemented source and UI paths.
 
 ## Developer and Operator Notes
+
+- The report reads accepted attempt directories through `open_results`; it does
+  not reopen unchecked public parquet copies. Its GET page/query/detail and
+  fixed attachments enforce run access and no-store. Browser CSV is page-scoped.
+- Freshness uses existing production checks without job reconciliation. Missing
+  currentness prerequisites yield unknown freshness; do not initialize optional
+  project state to satisfy a read. Existing Redis/session caches retain their
+  normal behavior. A source-code identity change may legitimately mark earlier
+  results stale without changing their scientific values.
+- Troubleshoot unavailable reports by checking retained acceptance and artifact
+  evidence in the ordinary project browser. Do not rebuild soils, republish or
+  run a model as an automatic report recovery action. Report technical errors
+  are logged server-side; browser messages omit host paths and credentials.
 
 - WBT is the supported terrain backend for this new module.
 - M3 requires built project Soils; M1 requires current RUSLE K instead. Availability is restricted to
@@ -220,13 +272,13 @@ limits, provenance and query semantics, and the
 for genuine Wallow evidence and reproduction scripts. Production publication,
 NoDb/RQ integration and dashboard work remain separately scoped.
 
-## Production workflow planning
+## Production workflow
 
 The [production M1 package](../../../../docs/work-packages/20260910_staley_m1_production/package.md)
-is scaffolded for project readiness, dNBR upload and running the model through
-a minimal control. [UI design](../../../../docs/ui-docs/contracts/postfire-debris-flow-control-contract.md)
-is proposed for owner review before implementation. Reports and dashboard are
-deferred; initial completion provides status and authorized model-file access.
+delivered project readiness, dNBR upload and running the model through
+a minimal control. The [control contract](../../../../docs/ui-docs/contracts/postfire-debris-flow-control-contract.md)
+now also links the saved likelihood report described above. Dashboard work
+remains separately scoped.
 
 ## Production operations
 

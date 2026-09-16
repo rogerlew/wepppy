@@ -1,0 +1,138 @@
+[
+  {
+    "utc": "2026-09-16T03:50:09.845Z",
+    "stage": "report",
+    "model": "M1",
+    "attempt_id": "49987d8eb4f841ba913a182df46fb7a3",
+    "assessment_id": "a58e2438a4614f48a3e354868c4538a2",
+    "frequency_source": "noaa",
+    "current": false,
+    "total_events": 9150,
+    "load_ms": 2140
+  },
+  {
+    "utc": "2026-09-16T03:50:11.167Z",
+    "stage": "event_detail",
+    "path": "/weppcloud/runs/overpriced-sprawl/config/query/postfire_debris_flow/event",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-16T03:50:11.222Z",
+    "stage": "event_detail",
+    "helper_check": {
+      "keys": [
+        "attempt_id",
+        "rows"
+      ],
+      "rows": 3
+    }
+  },
+  {
+    "utc": "2026-09-16T03:50:11.286Z",
+    "stage": "event_detail",
+    "response_keys": [
+      "attempt_id",
+      "rows"
+    ],
+    "response_row_count": 3
+  },
+  {
+    "utc": "2026-09-16T03:50:12.686Z",
+    "stage": "event_detail",
+    "path": "/weppcloud/runs/overpriced-sprawl/config/query/postfire_debris_flow/event",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-16T03:50:12.718Z",
+    "stage": "event_detail",
+    "response_keys": [
+      "attempt_id",
+      "rows"
+    ],
+    "response_row_count": 3
+  },
+  {
+    "utc": "2026-09-16T03:50:13.438Z",
+    "stage": "event_detail",
+    "detail_status": ""
+  },
+  {
+    "utc": "2026-09-16T03:50:14.895Z",
+    "stage": "duration",
+    "path": "/weppcloud/runs/overpriced-sprawl/config/query/postfire_debris_flow/",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-16T03:50:14.983Z",
+    "stage": "duration",
+    "response_keys": [
+      "attempt_id",
+      "design",
+      "events",
+      "inverse",
+      "query",
+      "schema_version",
+      "status",
+      "summary",
+      "urls"
+    ],
+    "response_row_count": null
+  },
+  {
+    "utc": "2026-09-16T03:50:16.306Z",
+    "stage": "paging",
+    "path": "/weppcloud/runs/overpriced-sprawl/config/query/postfire_debris_flow/",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-16T03:50:16.381Z",
+    "stage": "paging",
+    "response_keys": [
+      "attempt_id",
+      "design",
+      "events",
+      "inverse",
+      "query",
+      "schema_version",
+      "status",
+      "summary",
+      "urls"
+    ],
+    "response_row_count": null
+  },
+  {
+    "utc": "2026-09-16T03:50:16.385Z",
+    "stage": "paging",
+    "page_query_ms": 1399,
+    "page_offset": 100,
+    "count": 9150
+  },
+  {
+    "utc": "2026-09-16T03:50:24.431Z",
+    "stage": "ordinary_browse",
+    "ordinary_browse_download": "passed"
+  },
+  {
+    "utc": "2026-09-16T03:50:24.432Z",
+    "stage": "ordinary_browse",
+    "screenshots": [
+      "desktop.png",
+      "narrow.png"
+    ],
+    "page_errors": [],
+    "mutations": [
+      "/weppcloud/runs/overpriced-sprawl/config/tasks/set_unit_preferences/",
+      "/weppcloud/runs/overpriced-sprawl/config/recorder/events",
+      "/weppcloud/runs/overpriced-sprawl/config/recorder/events",
+      "/weppcloud/runs/overpriced-sprawl/config/recorder/events",
+      "/weppcloud/runs/overpriced-sprawl/config/recorder/events",
+      "/weppcloud/runs/overpriced-sprawl/config/recorder/events",
+      "/weppcloud/runs/overpriced-sprawl/config/recorder/events"
+    ]
+  },
+  {
+    "utc": "2026-09-16T03:50:24.479Z",
+    "stage": "ordinary_browse",
+    "failure": true
+  }
+]

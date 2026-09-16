@@ -126,8 +126,9 @@ evidence. Local stage 4 is **complete**, with genuine CLI/NOAA and sparse-rank a
 Production stage 5 is **complete** with development browser/worker validation.
 Stage 6 is **implemented, acceptance in progress**. Stage 7
 has an [owner-authorized report contract](../../../../docs/ui-docs/contracts/postfire-debris-flow-report-contract.md)
-and active [implementation package](../../../../docs/work-packages/20260915_postfire_debris_flow_report_implementation/package.md).
-The contract checkpoint is in progress; runtime implementation remains pending.
+and [implementation package](../../../../docs/work-packages/20260915_postfire_debris_flow_report_implementation/package.md).
+The saved report is implemented after checkpoint `ac4deb681`; M1/NOAA and M3/CLI
+development browser acceptance passed without model reruns. Dashboard work remains deferred.
 Stage completion requires its exit evidence,
 not only source files. Accepted scope is the existing project watershed/outlet;
 nested/channel assessments are excluded from initial delivery (ADR-0055).

@@ -1,0 +1,181 @@
+[
+  {
+    "utc": "2026-09-16T04:05:04.209Z",
+    "stage": "report",
+    "model": "M3",
+    "attempt_id": "5d2980fedf0f4e7197075469334b8993",
+    "assessment_id": "5d2980fedf0f4e7197075469334b8993",
+    "frequency_source": "cli",
+    "current": false,
+    "total_events": 30,
+    "load_ms": 2574
+  },
+  {
+    "utc": "2026-09-16T04:05:07.659Z",
+    "stage": "event_detail",
+    "path": "/weppcloud/runs/pfdf-m3-validation-20260914b/disturbed9002_wbt/query/postfire_debris_flow/event",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-16T04:05:07.665Z",
+    "stage": "event_detail",
+    "helper_check": {
+      "keys": [
+        "attempt_id",
+        "rows"
+      ],
+      "rows": 3
+    }
+  },
+  {
+    "utc": "2026-09-16T04:05:07.702Z",
+    "stage": "event_detail",
+    "response_keys": [
+      "attempt_id",
+      "rows"
+    ],
+    "response_row_count": 3
+  },
+  {
+    "utc": "2026-09-16T04:05:09.247Z",
+    "stage": "event_detail",
+    "path": "/weppcloud/runs/pfdf-m3-validation-20260914b/disturbed9002_wbt/query/postfire_debris_flow/event",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-16T04:05:09.265Z",
+    "stage": "event_detail",
+    "response_keys": [
+      "attempt_id",
+      "rows"
+    ],
+    "response_row_count": 3
+  },
+  {
+    "utc": "2026-09-16T04:05:09.803Z",
+    "stage": "event_detail",
+    "detail_status": ""
+  },
+  {
+    "utc": "2026-09-16T04:05:10.058Z",
+    "stage": "duration",
+    "path": "/weppcloud/runs/pfdf-m3-validation-20260914b/disturbed9002_wbt/query/postfire_debris_flow/",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-16T04:05:10.082Z",
+    "stage": "duration",
+    "response_keys": [
+      "attempt_id",
+      "design",
+      "events",
+      "inverse",
+      "query",
+      "schema_version",
+      "status",
+      "summary",
+      "urls"
+    ],
+    "response_row_count": null
+  },
+  {
+    "utc": "2026-09-16T04:05:10.094Z",
+    "stage": "paging",
+    "page_offset": 0,
+    "count": 30,
+    "next_disabled": true
+  },
+  {
+    "utc": "2026-09-16T04:05:15.031Z",
+    "stage": "controlled_detail_failures",
+    "path": "/weppcloud/runs/pfdf-m3-validation-20260914b/disturbed9002_wbt/query/postfire_debris_flow/event",
+    "status": 503
+  },
+  {
+    "utc": "2026-09-16T04:05:15.034Z",
+    "stage": "controlled_detail_failures",
+    "response_keys": [
+      "error"
+    ],
+    "response_row_count": null
+  },
+  {
+    "utc": "2026-09-16T04:05:17.091Z",
+    "stage": "controlled_detail_failures",
+    "path": "/weppcloud/runs/pfdf-m3-validation-20260914b/disturbed9002_wbt/query/postfire_debris_flow/event",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-16T04:05:17.102Z",
+    "stage": "controlled_detail_failures",
+    "response_keys": [
+      "attempt_id",
+      "rows"
+    ],
+    "response_row_count": 3
+  },
+  {
+    "utc": "2026-09-16T04:05:17.617Z",
+    "stage": "controlled_detail_failures",
+    "controlled_failure": "first_detail",
+    "recovery": "passed"
+  },
+  {
+    "utc": "2026-09-16T04:05:17.644Z",
+    "stage": "controlled_detail_failures",
+    "path": "/weppcloud/runs/pfdf-m3-validation-20260914b/disturbed9002_wbt/query/postfire_debris_flow/event",
+    "status": 503
+  },
+  {
+    "utc": "2026-09-16T04:05:17.646Z",
+    "stage": "controlled_detail_failures",
+    "response_keys": [
+      "error"
+    ],
+    "response_row_count": null
+  },
+  {
+    "utc": "2026-09-16T04:05:18.003Z",
+    "stage": "controlled_detail_failures",
+    "path": "/weppcloud/runs/pfdf-m3-validation-20260914b/disturbed9002_wbt/query/postfire_debris_flow/event",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-16T04:05:18.007Z",
+    "stage": "controlled_detail_failures",
+    "response_keys": [
+      "attempt_id",
+      "rows"
+    ],
+    "response_row_count": 3
+  },
+  {
+    "utc": "2026-09-16T04:05:18.116Z",
+    "stage": "controlled_detail_failures",
+    "controlled_failure": "last_detail",
+    "recovery": "passed"
+  },
+  {
+    "utc": "2026-09-16T04:05:20.323Z",
+    "stage": "ordinary_browse",
+    "ordinary_browse_download": "passed"
+  },
+  {
+    "utc": "2026-09-16T04:05:20.355Z",
+    "stage": "ordinary_browse",
+    "screenshots": [
+      "desktop.png",
+      "narrow.png"
+    ],
+    "page_errors": [],
+    "mutations": [],
+    "inherited_recorder_requests": 10
+  },
+  {
+    "utc": "2026-09-16T04:05:20.362Z",
+    "stage": "ordinary_browse",
+    "acceptance": "passed",
+    "protected_files": 23,
+    "unchanged": true
+  }
+]

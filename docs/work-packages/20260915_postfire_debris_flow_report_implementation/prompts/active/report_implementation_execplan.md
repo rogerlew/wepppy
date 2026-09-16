@@ -18,13 +18,13 @@ or live model reruns. The closed design package is immutable history.
 ## Progress
 
 
-- [x] (2026-09-15 UTC) Read design handoff and repository contract-first process.
-- [x] (2026-09-15 UTC) Owner granted checkpoint and implementation commit authority.
-- [x] (2026-09-15 UTC) Prepared exact interface and compatibility/security record.
-- [ ] Obtain independent contract/security/UX reviews and commit ancestor.
-- [ ] Implement validated saved-table reader and bounded read routes with tests.
-- [ ] Write controller tests, implement Pure report and wire existing control link.
-- [ ] Validate saved M1/M3, browser tasks, no-write boundaries and broad gates.
+- [x] (2026-09-16 UTC) Read design handoff and repository contract-first process.
+- [x] (2026-09-16 UTC) Owner granted checkpoint and implementation commit authority.
+- [x] (2026-09-16 UTC) Prepared exact interface and compatibility/security record.
+- [x] (2026-09-16 03:36 UTC) Independent reviews passed; ancestor `ac4deb681` committed.
+- [x] (2026-09-16 03:45 UTC) Reader and routes implemented; 55 reader/results and 25 route tests pass.
+- [x] (2026-09-16 04:01 UTC) Pure report/control link implemented; 18 focused Jest tests and 895 full frontend tests pass.
+- [x] (2026-09-16 04:05 UTC) Saved M1/M3 browser and no-write checks pass; full Python 8672 and frontend 898 pass, final focused backend 44 and controller 21 pass.
 - [ ] Resolve final independent reviews, commit implementation, close or name gaps.
 
 ## Surprises & Discoveries
@@ -36,6 +36,10 @@ is smaller than creating another decoder. get_state requires reconcile=False
 to avoid job-state reconciliation. M1 assessment identity is the upload ID.
 The existing bearer-only artifact route lacks explicit no-store, so the report
 needs a small fixed-name session-authenticated attachment route.
+Real browser checks exposed a nonexistent mocked Unitizer API and inherited
+passive preference-save behavior. Both now have scoped conformance fixes.
+Final review also checks preservation of off-page event selection on duration
+changes. Retain these findings in runtime_review_disposition.md.
 
 ## Decision Log
 
@@ -44,11 +48,20 @@ needs a small fixed-name session-authenticated attachment route.
 the planned design and required local commits. Use browser CSV from coherent
 displayed rows; no separate CSV endpoint. No new data/queue/services. Preserve
 existing freshness, including code-identity staleness; never rerun to hide it.
+2026-09-16 / root and independent reviewers: suppress only this report's initial
+Unitizer persistence with a default-preserving shared-template block. This fixes
+the accepted read-only contract; it does not change other reports or explicit
+presentation preference actions.
 
 ## Outcomes & Retrospective
 
 
-Preparation underway. No runtime changes or implementation validation yet.
+Reviewed ancestor ac4deb681 precedes implementation. Reader/routes implemented
+with focused tests. Saved M1/NOAA and M3/CLI values and attachment bytes match;
+23/28 protected project files remain unchanged. M1/M3 browser tasks, local
+failure recovery and ordinary artifact browsing/download pass. Full Python,
+frontend and final conformance regressions pass. Saved probabilities remain inspectable despite legitimate
+engine-source staleness; no rerun was needed for read-only validation.
 
 ## Context and Orientation
 
@@ -64,7 +77,7 @@ original rasters. Existing scalar/saved-mask validation remains enabled.
 
 Read nearest AGENTS before edits. Routes belong under
 `wepppy/weppcloud/routes/nodb_api/postfire_report_bp.py`, registered in routes
-`__init__.py` and `_blueprints_context.py`. Report template belongs under
+`__init__.py` and `wepppy/weppcloud/_blueprints_context.py`. Report template belongs under
 `templates/reports/postfire_debris_flow/`; controller and Jest tests belong
 under `controllers_js/` and `controllers_js/__tests__/`. Reuse Geneva's Pure
 report shell and Unitizer patterns, not its scientific logic. Existing control
@@ -113,7 +126,7 @@ From the workspace run `wctl run-pytest tests/nodb/mods --maxfail=1` and
 `wctl run-pytest tests/weppcloud --maxfail=1`, narrowing first to newly created
 test modules and existing postfire fixtures. Run `wctl run-npm lint`,
 `wctl run-npm test`, and rebuild using
-`python3 wepppy/weppcloud/controllers_js/build_controllers_js.py`.
+`wctl run-python wepppy/weppcloud/controllers_js/build_controllers_js.py`.
 Run `wctl run-pytest tests --maxfail=1` before final delivery. For public Python
 surface changes run `wctl check-test-stubs`; record any independent failures.
 Lint changed docs with `wctl doc-lint --path <path>`, preview uk2us and run

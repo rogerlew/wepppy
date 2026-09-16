@@ -25,6 +25,17 @@ The NoDb API blueprints expose server-side endpoints for interacting with NoDb s
 
 ## Route Organization
 
+### Saved post-fire likelihood report
+
+`postfire_report_bp.py` serves GET-only report, bounded event-query/detail and
+fixed saved attachments under the existing run/config scope. It uses existing
+run authorization with a local sanitized error boundary and no-store responses.
+`postfire_debris_flow.report` pins the accepted attempt and uses the validated
+local reader; it does not wrap the query-engine service or enqueue model work.
+The report controller performs page-scoped CSV export in displayed units.
+See the [exact report contract](../../../../docs/ui-docs/contracts/postfire-debris-flow-report-contract.md#exact-read-interface--2026-09-15)
+for payloads, shared pup handling, bounds and absent/stale/replaced states.
+
 ### URL Patterns
 
 Routes follow consistent naming conventions:

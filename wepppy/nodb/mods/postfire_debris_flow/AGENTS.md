@@ -7,7 +7,9 @@
 - Current scientific contract: [M3/shared support](docs/production_m3.md). M3 must
   consume raw soil records without changing SSURGO/STATSGO building behavior.
 - Status: M1/M3 scientific backends and production NoDb/UI/RQ are implemented;
-  development acceptance is complete in the closed M3 package. Reports/dashboard remain pending.
+  development acceptance is complete in the closed M3 package. The saved report
+  is implemented under the [report contract](../../../../docs/ui-docs/contracts/postfire-debris-flow-report-contract.md)
+  (ancestor `ac4deb681`); dashboard work remains deferred.
 - Run M3 prepares absent source pointers using bounded acquisition; state reads
   remain local. The 2026-09-15 runtime amendment governs attempt-safe promotion.
 - Preserve accepted decisions and explicitly label proposals and unresolved inputs.
@@ -44,5 +46,5 @@
   [workflow contract](docs/production_m1.md) and
   [UI contract](../../../../docs/ui-docs/contracts/postfire-debris-flow-control-contract.md).
   Contract ancestors: `5c0a172ee`, `595816476`; follow contract-first for later behavior changes.
-  Minimal upload/run control only; reports/dashboard deferred. Do not invent
+  That initial package supplied the minimal upload/run control. Do not invent
   UI controls or implementation-heavy user messages beyond the accepted design.

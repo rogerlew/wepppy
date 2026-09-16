@@ -1,0 +1,37 @@
+{
+  "runid": "overpriced-sprawl",
+  "model": "M1",
+  "attempt_id": "49987d8eb4f841ba913a182df46fb7a3",
+  "assessment_id": "a58e2438a4614f48a3e354868c4538a2",
+  "current": false,
+  "frequency_source": "noaa",
+  "open_seconds": 1.3217202881351113,
+  "queries": [
+    {
+      "duration": 15,
+      "query_seconds": 0.01859835395589471,
+      "total_events": 9150,
+      "page_rows": 100
+    },
+    {
+      "duration": 30,
+      "query_seconds": 0.014290583785623312,
+      "total_events": 9150,
+      "page_rows": 100
+    },
+    {
+      "duration": 60,
+      "query_seconds": 0.015951800858601928,
+      "total_events": 9150,
+      "page_rows": 100
+    }
+  ],
+  "protected_files": 23,
+  "unchanged": true,
+  "manifest_sha256": "25dc0cd5d818e46f8c3dd5fc9b7a580f362b51b2a70d1e548214891bd8753fde",
+  "scientific_table_sha256": {
+    "events": "597ebe89d2e68c9c05ae4c38fc12e64fde24a8eaf6e1cda3609a024d62c5d377",
+    "design": "3418bf117fd8a5127168d211efd8a4307c3bfe89a1e4350212ddcd4376a644a1",
+    "inverse": "03cf65e96752095713a773a0a81d92a1bbbb496c02c5a3f69b824a93b2d05d64"
+  }
+}

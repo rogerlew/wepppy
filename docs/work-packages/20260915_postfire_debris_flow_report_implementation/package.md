@@ -1,6 +1,6 @@
 # Post-fire debris-flow report implementation
 
-Status: Active, 2026-09-15. Timestamps: UTC.
+Status: Active, 2026-09-16 UTC (package date: September 15 Pacific).
 
 ## Scope and authority
 

@@ -1,0 +1,84 @@
+{% extends "reports/_base_report.htm" %}
+{% block report_title %}Post-fire debris-flow likelihood{% endblock %}
+{% block report_unitizer_bootstrap %}{% endblock %}
+{% block report_content %}
+<article class="wc-stack" data-postfire-report>
+  <script id="postfire-report-seed" type="application/json">{{ postfire_report_seed | tojson }}</script>
+  <h1>Post-fire debris-flow likelihood</h1>
+  {% if postfire_report_error %}
+  <p role="alert">{{ postfire_report_error }}</p>
+  {% endif %}
+  <p data-pfr-status role="status" aria-live="polite"></p>
+  <div class="wc-inline">
+    <button type="button" class="pure-button" data-pfr-action="retry" hidden>Retry</button>
+    <button type="button" class="pure-button" data-pfr-action="reload" hidden>Reload report</button>
+  </div>
+  <section data-pfr-empty hidden><h2>No completed assessment</h2><p>Run an assessment from the existing <a data-pfr-control>post-fire debris-flow control</a>. This report does not run a model.</p></section>
+  <noscript><p>JavaScript is required to explore saved results. Enable it and reload this report.</p></noscript>
+  <div class="wc-stack" data-pfr-results hidden>
+    <section class="wc-panel wc-stack-sm" aria-labelledby="pfr-summary-heading">
+      <h2 id="pfr-summary-heading">Assessment summary</h2>
+      <p data-pfr-summary></p>
+      <p data-pfr-current></p>
+      <p data-pfr-coverage></p>
+      <p data-pfr-warnings></p>
+      <p>Likelihood is conditional on the rainfall shown and the modeled post-fire conditions. It is not the annual chance of a debris flow and does not predict where debris will travel. This is not an official warning or evacuation threshold.</p>
+    </section>
+    <section class="wc-panel wc-stack-sm" aria-labelledby="pfr-design-heading">
+      <h2 id="pfr-design-heading">Rainfall scenarios — <span data-pfr-window></span></h2>
+      <div class="pure-form pure-form-stacked">
+        <label for="pfr-duration">Rainfall window</label>
+        <select id="pfr-duration" data-pfr-field="duration" aria-describedby="pfr-duration-help"><option value="15" selected>15 minutes</option><option value="30">30 minutes</option><option value="60">60 minutes</option></select>
+        <p id="pfr-duration-help" class="wc-text-muted">Changes rainfall scenarios and storm events; the 50% table always shows all three windows.</p>
+      </div>
+      <p data-pfr-source></p>
+      <p class="wc-text-muted">Rainfall recurrence intervals are partial-duration-series average recurrence intervals (PDS ARI), not debris-flow return periods or annual debris-flow probabilities.</p>
+      <div data-pfr-chart></div>
+      <p class="wc-text-muted">Select a saved marker or its table button to highlight that scenario. No probability curve is interpolated between points.</p>
+      <div class="wc-table-wrapper"><table class="wc-table wc-table--dense wc-table--striped"><caption>Saved rainfall scenarios</caption><thead><tr><th scope="col">Rainfall recurrence interval</th><th scope="col">Peak rainfall intensity</th><th scope="col">Rainfall in the selected window</th><th scope="col">Modeled likelihood</th></tr></thead><tbody data-pfr-body="design"></tbody></table></div>
+      <div class="wc-table-actions"><button type="button" class="pure-button pure-button-link" data-pfr-export="design">Download displayed rows (CSV)</button></div>
+    </section>
+    <section class="wc-panel wc-stack-sm" aria-labelledby="pfr-inverse-heading">
+      <h2 id="pfr-inverse-heading">Rainfall associated with 50% modeled likelihood</h2>
+      <p>All three rainfall windows. These equation-derived values depend on the accepted model and post-fire inputs, not the rainfall-frequency source. They are not safe/unsafe boundaries or recommended warning triggers.</p>
+      <div class="wc-table-wrapper"><table class="wc-table wc-table--dense wc-table--striped wc-table--compact"><caption>All three rainfall windows</caption><thead><tr><th scope="col">Rainfall window</th><th scope="col">Peak rainfall intensity</th><th scope="col">Rainfall in the window</th></tr></thead><tbody data-pfr-body="inverse"></tbody></table></div>
+      <div class="wc-table-actions"><button type="button" class="pure-button pure-button-link" data-pfr-export="inverse">Download displayed rows (CSV)</button></div>
+    </section>
+    <section class="wc-panel wc-stack-sm" aria-labelledby="pfr-events-heading">
+      <h2 id="pfr-events-heading">Storm events — <span data-pfr-window></span></h2>
+      <p data-pfr-climate></p>
+      <p>Every storm uses the same fixed post-fire conditions. A long climate record does not simulate landscape recovery. Total event rainfall is separate from rainfall in the selected window.</p>
+      <form class="pure-form" data-pfr-filters>
+        <label for="pfr-minimum">Minimum likelihood (%)</label> <input id="pfr-minimum" data-pfr-field="min_probability" type="number" min="0" max="100" step="any" aria-describedby="pfr-filter-help">
+        <label for="pfr-year">Year (original label)</label> <input id="pfr-year" data-pfr-field="year" type="number" step="1">
+        <label for="pfr-sort">Order by</label> <select id="pfr-sort" data-pfr-field="sort"><option value="row_ordinal">Original event order</option><option value="rainfall_mm">Rainfall in the window</option><option value="probability">Modeled likelihood</option></select>
+        <label><input data-pfr-field="descending" type="checkbox"> Descending</label>
+        <button type="submit" class="pure-button" data-pfr-action="apply">Apply filters</button>
+        <button type="button" class="pure-button pure-button-link" data-pfr-action="reset">Reset filters</button>
+      </form>
+      <p id="pfr-filter-help" class="wc-text-muted">Blank filters include all storms. A minimum likelihood excludes storms with unavailable likelihoods.</p>
+      <p data-pfr-event-status role="status" aria-live="polite"></p>
+      <button type="button" class="pure-button" data-pfr-action="retry" hidden>Retry</button>
+      <p data-pfr-count aria-live="polite"></p>
+      <div class="wc-table-wrapper"><table class="wc-table wc-table--dense wc-table--striped"><caption>Saved storm events; select a date label for all three rainfall windows</caption><thead><tr><th scope="col" data-pfr-date-heading>Date label</th><th scope="col">Peak rainfall intensity</th><th scope="col">Rainfall in the selected window</th><th scope="col">Total event rainfall</th><th scope="col">Modeled likelihood</th></tr></thead><tbody data-pfr-body="events"></tbody></table></div>
+      <div data-pfr-pagination>
+        <p data-pfr-event-status role="status" aria-live="polite"></p>
+        <div class="wc-inline"><button type="button" class="pure-button" data-pfr-action="previous">Previous page</button> <button type="button" class="pure-button" data-pfr-action="next">Next page</button> <button type="button" class="pure-button" data-pfr-action="retry" hidden>Retry</button></div>
+      </div>
+      <div class="wc-table-actions"><button type="button" class="pure-button pure-button-link" data-pfr-export="events">Download displayed rows (CSV)</button></div>
+    </section>
+    <section class="wc-panel wc-stack-sm" aria-labelledby="pfr-methods-heading">
+      <h2 id="pfr-methods-heading">Methods and downloads</h2>
+      <details><summary>Assessment provenance and interpretation</summary>
+        <div data-pfr-methods></div>
+        <p>Separate rainfall windows are separate estimates: do not sum, average or combine their probabilities. M1 and M3 are distinct models, not an ensemble or uncertainty bounds. Input coverage is usable spatial support, not confidence.</p>
+        <p>The published study-area range is 0.2–8 km². Preprocessing equivalence to published assessments remains unresolved. These results do not estimate debris-flow volume, runout, inundation or damage, and are not an official USGS assessment.</p>
+        <p>Short rainfall PDS recurrence intervals are not interchangeable with annual exceedance probabilities. NOAA, when used, supplies design rainfall, not the event catalog.</p>
+      </details>
+      <p class="wc-text-muted">Displayed-row CSV: current page and displayed rainfall units; numeric values retain full precision. Probability columns are explicitly labeled fractions (0–1), not percentages. Context columns identify the assessment, filters, page and units.</p>
+      <ul data-pfr-downloads></ul>
+      <p>Saved manifest and validity mask, when present, remain available with the normal browsable and archived module files.</p>
+    </section>
+  </div>
+</article>
+{% endblock %}

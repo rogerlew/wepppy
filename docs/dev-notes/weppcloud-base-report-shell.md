@@ -66,6 +66,13 @@ return render_template(
 ```
 
 ## Operational notes
+
+- `report_unitizer_bootstrap` is the extension point for the initial unit sync.
+  Its default invokes the existing Project synchronization, including preference
+  persistence. The postfire saved report overrides only this initial call and
+  reads existing DOM preferences into the ready UnitizerClient without saving.
+  Explicit Change Units actions and all other reports retain existing behavior.
+  This prevents a passive saved-result read from rewriting project preferences.
 - If you wrap rendered HTML in a `Response(...)` (for example, to set `Cache-Control`), keep the same template context contract above.
 - Keep report-specific payloads in a dedicated JSON node (`<script type="application/json">`) and let client JS parse that node.
 - For run-scoped query/report pairs, keep the payload shape identical between `/query/...` and `/report/...` outputs.

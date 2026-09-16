@@ -19,6 +19,7 @@ _BLUEPRINT_IMPORTS: dict[str, tuple[str, str]] = {
     "debris_flow_bp": (".nodb_api.debris_flow_bp", "debris_flow_bp"),
     "disturbed_bp": (".nodb_api.disturbed_bp", "disturbed_bp"),
     "geneva_bp": (".nodb_api.geneva_bp", "geneva_bp"),
+    "postfire_report_bp": (".nodb_api.postfire_report_bp", "postfire_report_bp"),
     "landuse_bp": (".nodb_api.landuse_bp", "landuse_bp"),
     "interchange_bp": (".nodb_api.interchange_bp", "interchange_bp"),
     "observed_bp": (".nodb_api.observed_bp", "observed_bp"),
@@ -96,6 +97,7 @@ _OPTIONAL_BLUEPRINT_ATTRS = {
 }
 
 _RUN_CONTEXT_BLUEPRINT_ATTRS = {
+    "postfire_report_bp",
     "admin_bp",
     "archive_bp",
     "climate_bp",
@@ -180,6 +182,7 @@ def __dir__() -> List[str]:
 
 
 __all__ = [
+    'postfire_report_bp',
     'weppcloud_site_bp', 
     'admin_bp',
     'archive_bp',

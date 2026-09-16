@@ -8,7 +8,7 @@ Existing valid pointers are reused; preflight and state reads remain local.
 Status: updated 2026-09-14. Production M1 NoDb, upload, prerequisite/freshness,
 RQ execution and minimal UI are implemented under the
 [production contract](docs/production_m1.md). Development validation passed; deployment to other hosts is not implied. M3 production integration
-is implemented; reports/dashboard remain deferred. The 2026-09-14
+is implemented; the saved report is implemented as described below, while dashboard work remains deferred. The 2026-09-14
 [production M3/shared-support amendment](docs/production_m3.md) records accepted
 analysis support and protection of existing SSURGO/STATSGO soil building;
 recorded-depth rules and generic prepared-local source delivery are ratified in
@@ -482,13 +482,14 @@ availability. If source overlap disappears on the target grid, normalization
 must return a clear unusable-at-project-resolution result rather than claim
 readiness or extrapolate values.
 
-## Interactive report design status
+## Interactive report status
 
 The [post-fire debris-flow report contract](../../../../docs/ui-docs/contracts/postfire-debris-flow-report-contract.md)
 documents the owner-authorized stage-7 presentation: familiar Pure report shell,
 saved rainfall scenarios, existing 50% thresholds and paginated storm events.
-Implementation is active in the [successor package](../../../../docs/work-packages/20260915_postfire_debris_flow_report_implementation/package.md),
-subject to its reviewed ancestor checkpoint and validation gates.
+Implementation and saved M1/M3 development browser evidence are in the
+[successor package](../../../../docs/work-packages/20260915_postfire_debris_flow_report_implementation/package.md),
+following reviewed ancestor `ac4deb681`. No production deployment is implied.
 The [design work package](../../../../docs/work-packages/20260915_postfire_debris_flow_report/package.md)
 retains reviews and the implementation handoff, not durable scientific authority.
 

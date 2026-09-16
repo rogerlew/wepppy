@@ -1,9 +1,12 @@
 # Post-fire debris-flow likelihood report
 
-Status: owner-authorized report design, implementation pending (2026-09-15).
+Status: implemented; saved M1/M3 development browser acceptance passed (2026-09-16 UTC).
 The owner requested execution and explicitly authorized the successor package,
 contract checkpoint and implementation commits. Scientific and publication
 contracts remain unchanged. The reviewed ancestor checkpoint precedes code.
+Checkpoint: `ac4deb681`. Validation and independent review are retained in the
+[implementation package](../../work-packages/20260915_postfire_debris_flow_report_implementation/package.md).
+No production deployment or model rerun is implied.
 
 ## Purpose and authority
 

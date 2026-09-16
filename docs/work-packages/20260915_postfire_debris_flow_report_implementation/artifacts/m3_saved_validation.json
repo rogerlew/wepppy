@@ -1,0 +1,37 @@
+{
+  "runid": "pfdf-m3-validation-20260914b",
+  "model": "M3",
+  "attempt_id": "5d2980fedf0f4e7197075469334b8993",
+  "assessment_id": "5d2980fedf0f4e7197075469334b8993",
+  "current": false,
+  "frequency_source": "cli",
+  "open_seconds": 1.3721511829644442,
+  "queries": [
+    {
+      "duration": 15,
+      "query_seconds": 0.007841577986255288,
+      "total_events": 30,
+      "page_rows": 30
+    },
+    {
+      "duration": 30,
+      "query_seconds": 0.004933979129418731,
+      "total_events": 30,
+      "page_rows": 30
+    },
+    {
+      "duration": 60,
+      "query_seconds": 0.004600450163707137,
+      "total_events": 30,
+      "page_rows": 30
+    }
+  ],
+  "protected_files": 28,
+  "unchanged": true,
+  "manifest_sha256": "68b94a3d9fc4758f3f77ad602b8fdb15fcc7a8bbd8aac96f54ffe428fc0a543f",
+  "scientific_table_sha256": {
+    "events": "fd5704318a7e0a0eb149fd3fb49642078008c6e25949ccd8a9b263be38bac9ab",
+    "design": "812fae6896be40023da61d922c50c4195cae7fa4f85af8f332099067fbf64d08",
+    "inverse": "5628a41b98f384bcade66c2c319dd871410d6f1732c3456a6f0123969b0d1b4a"
+  }
+}

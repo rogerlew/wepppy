@@ -44,6 +44,7 @@
 <p data-pfdf-noaa class="wc-text-muted">NOAA rainfall estimates are not available for this project.</p>
 {% endcall %}
 <p>Storm events always use the project climate.</p>
+<p><a href="{{ url_for_run('postfire_report.report', runid=runid, config=config) }}" target="_blank" rel="noopener" data-open-tab-pref>View likelihood report</a></p>
 <button type="button" class="pure-button pure-button-primary" data-pfdf-action="run" disabled>Run debris-flow model</button>
 {{ ui.job_hint("hint_postfire_debris_flow", extra_class="wc-field__help") }}
 <p data-pfdf-message role="status"></p>

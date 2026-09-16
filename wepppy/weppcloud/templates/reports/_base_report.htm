@@ -232,7 +232,7 @@
       ? window.Project.getInstance()
       : null;
 
-    triggerUnitChange();
+    {% block report_unitizer_bootstrap %}triggerUnitChange();{% endblock %}
   });
 
   if (pupRelPath) {
