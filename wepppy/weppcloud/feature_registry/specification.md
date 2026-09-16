@@ -322,6 +322,14 @@ At minimum:
 
 ## Post-fire debris-flow production increment
 
+The 2026-09-15 owner-authorized report increment adds a **View likelihood report**
+link within the existing eligible control, including the never-run state. It
+does not add a registry option or change roles, enabling, prerequisites or
+backend/locale gates. Authorized direct report inspection remains available for
+retained results after the mod is disabled. Run access is always enforced.
+See the [report contract](../../../docs/ui-docs/contracts/postfire-debris-flow-report-contract.md#exact-read-interface--2026-09-15).
+Implementation conformance is pending its standalone checkpoint.
+
 The postfire_debris_flow feature is preview, requires user role and WBT, requires
 Disturbed and enables RUSLE (and its existing POLARIS dependency). No upstream
 build occurs on enabling. Effective CONUS locale eligibility comes from run

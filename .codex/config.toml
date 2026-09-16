@@ -40,6 +40,10 @@ config_file = "agents/security_reviewer.toml"
 description = "Secondary QA reviewer for maintainability, readability, and test quality after correctness review."
 config_file = "agents/qa_reviewer.toml"
 
+[agents.ux_reviewer]
+description = "Independent end-user UX advocate for intuitive workflows, familiar patterns, and the fewest necessary controls."
+config_file = "agents/ux_reviewer.toml"
+
 [agents.code_quality_refactorer]
 description = "Refactors a bounded module for complexity/readability while preserving behavior."
 config_file = "agents/code_quality_refactorer.toml"

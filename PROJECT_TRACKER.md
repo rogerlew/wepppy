@@ -2,10 +2,18 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-09-15
-**Active Packages**: 36
+**Active Packages**: 37
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
+
+Active: [Post-fire debris-flow report implementation](docs/work-packages/20260915_postfire_debris_flow_report_implementation/package.md)
+— owner-authorized read-only report, contract checkpoint and implementation commits;
+independent correctness/security/UX gates. No push, deployment or model reruns.
+
+Documentation complete: [Post-fire debris-flow report](docs/work-packages/20260915_postfire_debris_flow_report/package.md)
+— reviewed report proposal, module links, implementation plan and reusable UX
+reviewer; all correctness/security/UX findings resolved. Report implementation pending.
 
 Completed: [M3 fresh-basin Run preparation](docs/work-packages/20260915_staley_m3_run_preparation/package.md)
 — automatic bounded source preparation; overpriced-sprawl now produces all

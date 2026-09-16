@@ -482,6 +482,22 @@ availability. If source overlap disappears on the target grid, normalization
 must return a clear unusable-at-project-resolution result rather than claim
 readiness or extrapolate values.
 
+## Interactive report design status
+
+The [post-fire debris-flow report contract](../../../../docs/ui-docs/contracts/postfire-debris-flow-report-contract.md)
+documents the owner-authorized stage-7 presentation: familiar Pure report shell,
+saved rainfall scenarios, existing 50% thresholds and paginated storm events.
+Implementation is active in the [successor package](../../../../docs/work-packages/20260915_postfire_debris_flow_report_implementation/package.md),
+subject to its reviewed ancestor checkpoint and validation gates.
+The [design work package](../../../../docs/work-packages/20260915_postfire_debris_flow_report/package.md)
+retains reviews and the implementation handoff, not durable scientific authority.
+
+Accepted production attempt identity and the validated rainfall/result bundle
+own displayed model, source, dates, values and provenance; current form preferences
+must not relabel an older accepted result. Existing rainfall/results and production
+contracts remain authoritative. No new calculations, source acquisition, artifact
+schemas, coverage cutoffs or model execution are authorized by this design work.
+
 ## Rainfall Sources and Scenario Outputs
 
 Local stage-4 implementation and evidence are in the

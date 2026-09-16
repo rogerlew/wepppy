@@ -125,7 +125,10 @@ Local stage 3 composition is **complete**, including authentic complete-source
 evidence. Local stage 4 is **complete**, with genuine CLI/NOAA and sparse-rank acceptance.
 Production stage 5 is **complete** with development browser/worker validation.
 Stage 6 is **implemented, acceptance in progress**. Stage 7
-is **not started**. Stage completion requires its exit evidence,
+has an [owner-authorized report contract](../../../../docs/ui-docs/contracts/postfire-debris-flow-report-contract.md)
+and active [implementation package](../../../../docs/work-packages/20260915_postfire_debris_flow_report_implementation/package.md).
+The contract checkpoint is in progress; runtime implementation remains pending.
+Stage completion requires its exit evidence,
 not only source files. Accepted scope is the existing project watershed/outlet;
 nested/channel assessments are excluded from initial delivery (ADR-0055).
 

@@ -191,6 +191,14 @@ watershed. Check the file and its location.” Details may expand in the job log
 
 ## Run action and completion
 
+Report amendment (2026-09-15, owner-authorized, implementation pending): add one
+**View likelihood report** link in the existing control, also reachable before
+the first assessment. It opens the separately governed
+[report](postfire-debris-flow-report-contract.md#exact-read-interface--2026-09-15).
+This supersedes only the earlier report-deferral language, not uploads, model
+selection, prerequisites, execution, status, or existing file downloads.
+
+
 Render **Design storm rainfall** with the shared `ui.fieldset` macro so its
 legend and border use theme colors, as in the Bootstrap control.
 

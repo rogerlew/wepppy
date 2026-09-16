@@ -142,6 +142,22 @@ remain explicit. The accepted scientific unavailable reasons remain unchanged.
 
 ## Local acceptance and sample-support policy
 
+### Additive report projection — 2026-09-15
+
+Owner-authorized, implementation pending the report checkpoint. `ResultCatalog`
+adds optional `design` and `inverse` Arrow tables after existing manifest/events
+fields, preserving two-argument construction for existing callers. `open_results`
+always supplies all three validated tables from the same final-rechecked read.
+Existing query responses and all saved schema/file/hash/resource contracts remain
+unchanged. Direct callers constructing a catalog without these projections do
+not acquire unchecked tables; the report requires an `open_results` catalog.
+The [report contract](../../../../../docs/ui-docs/contracts/postfire-debris-flow-report-contract.md)
+owns the sanitized browser projection and accepted-attempt pinning. Preserve v2
+saved-mask and scalar consistency validation. No schema migration or new model
+calculation is authorized. Existing engine-code identity may mark saved runs
+stale after this reader edit; do not bypass freshness or rerun to hide that fact.
+
+
 The genuine Wallow catalog produces 30,936 event rows, 12 design rows for each
 selected source and six explicit inverse rows. Final local reproduction is in
 `artifacts/reproduce.py` in the work package; use `--frequency-source cli` or
