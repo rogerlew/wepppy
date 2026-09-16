@@ -3,7 +3,7 @@
 - Current domain specification: [specification.md](specification.md).
 - Accepted M1 Kf replacement: [source/runtime contract](docs/kf_source.md).
   Independent contract reviews passed; ancestor checkpoint `9395f4722`.
-  Implementation and live acceptance are tracked in the active Kf work package.
+  Implementation `d5646ca95`; restarted forest UI/RQ acceptance and reviews pass.
 - Track delivery and loose ends in [implementation_roadmap.md](implementation_roadmap.md).
   Update the roadmap, specification, and affected detailed contracts together
   as implementation progresses; roadmap proposals are not accepted contracts.

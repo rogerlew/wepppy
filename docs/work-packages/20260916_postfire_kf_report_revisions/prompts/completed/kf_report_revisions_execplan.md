@@ -7,8 +7,8 @@ Standalone ancestor checkpoint `9395f4722` precedes runtime implementation.
 The owner authorized completion after the explicit reviews/checkpoint-commit
 request; required review delegation and commits are authorized. No push is authorized.
 The owner's follow-up explicitly includes a forest-stack restart and a new M1
-run on `nervous-mesquite` during package execution after implementation; do not
-perform those operations in the scaffold-editing turn.
+run on `nervous-mesquite` during package execution after implementation. Those
+mandatory gates passed; this completed plan records the delivered outcome.
 
 ## Purpose / Big Picture
 
@@ -31,7 +31,7 @@ watershed delineation, M1/M3 equations and M3 thickness behavior stay unchanged.
 - [x] M5: validate generic live behavior and complete independent reviews.
 - [x] M5 live gate: restart forest and verify nervous-mesquite end to end with
   new Kf-backed results, report/export/reload and preserved protected inputs.
-- [ ] M6: finish durable documentation and implementation closeout.
+- [x] M6: durable docs, final reviews/validation and implementation `d5646ca95` complete.
 
 ## Surprises & Discoveries
 
@@ -91,7 +91,7 @@ I15=24 mm/hour probability from 85.63% to 72.19%, preserving T/F/support.
 Initial review issues (native snapshot integrity, selection races, POLARIS
 freshness and UX labels) are repaired with regression evidence. Full repository
 sanity passes: 8,693 passed, 103 skipped (18:29); all final reviews PASS.
-M6 records the final implementation revision and closes the package.
+Implementation revision is `d5646ca95`; M6 closes the package with all gates passed.
 
 ## Context and Orientation
 
@@ -341,3 +341,9 @@ Revision 2026-09-16 23:27 UTC: full repository gate passed, 8,693 tests with
 103 skips and 3,135 retained warnings (1,109.71s). All three final independent
 reviews PASS. Complete final telemetry/documentation/commit and move this plan
 to completed; no runtime or acceptance work remains.
+
+Completed 2026-09-16 UTC: implementation `d5646ca95`, both normal UI/RQ runs,
+restart/recovery, all independent reviews and full regression passed. Source,
+report, failure/intermediate and archive evidence is retained under artifacts.
+No push or production deployment; no unrelated changes staged. This plan is now
+historical execution evidence; durable rules live in the promoted module/UI contracts.

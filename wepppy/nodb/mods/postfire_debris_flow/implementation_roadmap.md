@@ -5,8 +5,8 @@ implemented after ancestor `9395f4722`. New M1 prepares traceable STATSGO Kf
 without POLARIS/RUSLE; the report evaluates a bounded curve with P50, numeric
 values and rainfall-origin labels. Restarted forest UI/RQ acceptance passed on
 nervous-mesquite and a no-RUSLE fixture, with independent raster/table checks and
-canonical archive/restore. Final full-suite/review closeout is tracked in the
-package. [Source/runtime contract](docs/kf_source.md); ADR-0068. Older dated
+canonical archive/restore. Full suite passed (8,693 tests, 103 skips); all final independent reviews PASS.
+The package is closed. [Source/runtime contract](docs/kf_source.md); ADR-0068. Older dated
 entries below describe their implementation stage and do not override this policy.
 
 2026-09-15: fresh-basin Run preparation is wired after contract checkpoint

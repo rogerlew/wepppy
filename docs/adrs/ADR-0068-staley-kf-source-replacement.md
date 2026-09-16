@@ -1,7 +1,7 @@
 # ADR-0068: Replace M1 RUSLE K with traceable fine-earth Kf
 
 Status: Accepted source and report policy after independent reviews, 2026-09-16.
-Date: 2026-09-16 UTC. Implementation: wired; restarted forest acceptance passed (final regression closeout in package).
+Date: 2026-09-16 UTC. Implementation: `d5646ca95`; restarted forest acceptance and final regression/reviews passed.
 
 ## Decision provenance
 

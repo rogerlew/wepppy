@@ -65,3 +65,17 @@ whitespace, and browser CSV retains CRLF. Authored-code/Markdown whitespace chec
 exclude only the raw log directory and vendored publisher XML and enable Git's
 `cr-at-eol` handling for CSV. These are evidence-format exceptions, not hidden
 merge-conflict markers or source-code whitespace waivers.
+
+## Code quality observability
+
+[Committed implementation delta](code_quality_observability.md), against contract
+ancestor `9395f4722`, analyzed 19 files; 23 metric entries worsened. This is
+observe-only telemetry. The new Kf validator has cyclomatic complexity 46 from
+explicit field, units, grid, hash and transport checks. Existing predictor,
+production and integration maxima rose 76→86, 62→69 and 48→53 respectively for
+schema/policy compatibility and publication guards. Keeping those checks at
+the existing artifact/publication boundaries avoids hiding failure contracts.
+Report JS increased 16→18 for the curve and numeric equivalent. Independent
+reviews and regression/live tests cover these branches; future changes to these
+validators should consider small extractions that preserve explicit errors.
+No speculative refactor was added solely to lower a metric.

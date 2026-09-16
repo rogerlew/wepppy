@@ -1,7 +1,7 @@
 # Post-fire Kf replacement and rainfall-response report
 
-Status: Implementation and restarted-stack live acceptance passed; final
-regression/review closeout in progress. Date: 2026-09-16 UTC.
+Status: **Complete**. Implementation `d5646ca95`; contract ancestor `9395f4722`.
+Restarted forest UI/RQ acceptance, regression and independent reviews passed. Date: 2026-09-16 UTC.
 
 ## Purpose and authority
 
@@ -46,7 +46,7 @@ new rainfall observations, a dashboard redesign, or forced migration of old runs
 ## Scientific gate and parameterization ADR
 
 [ADR-0068](../../adrs/ADR-0068-staley-kf-source-replacement.md) records the owner's
-direction and pending scientific details. Before implementation, establish the
+accepted direction and scientific details. The checkpoint established the
 source product/version, Kf field, horizon selection, component weighting, map-unit
 aggregation, units, spatial resampling/support, missing-value rules and any
 explicit source hierarchy from primary evidence. Do not inherit M3 thickness
@@ -102,4 +102,12 @@ do not rebuild soils, climate, delineation or RUSLE. Do not delete existing
 RUSLE data to demonstrate independence; use the separate no-RUSLE fixture.
 Retain restart, job and browser evidence. A healthy restart alone is not acceptance.
 
-See [tracker](tracker.md) and [ExecPlan](prompts/active/kf_report_revisions_execplan.md).
+See [tracker](tracker.md) and [ExecPlan](prompts/completed/kf_report_revisions_execplan.md).
+
+## Completion evidence
+
+All milestones completed on forest; see [tracker](tracker.md),
+[validation](artifacts/validation.md), [restart](artifacts/forest_restart_validation.md),
+[nervous-mesquite](artifacts/nervous_mesquite_e2e.md) and
+[final reviews](artifacts/final_review_disposition.md). Full suite: 8,693 passed,
+103 skipped; frontend: 112 suites, 899 tests. No push or production deployment.
