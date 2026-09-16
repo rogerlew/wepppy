@@ -1,0 +1,28 @@
+INFO:wctl2:docker compose ps
+NAME                            IMAGE                 COMMAND                  SERVICE                  CREATED          STATUS                   PORTS
+docker-fcgiwrap-1               docker-fcgiwrap       "spawn-fcgi -n -p 90…"   fcgiwrap                 58 minutes ago   Up 9 minutes             9000/tcp
+profile-playback                wepppy-dev            "uvicorn services.pr…"   profile-playback         58 minutes ago   Up 9 minutes             0.0.0.0:8070->8070/tcp, [::]:8070->8070/tcp
+weppcloud                       wepppy-dev            "./docker/weppcloud-…"   weppcloud                58 minutes ago   Up 9 minutes             0.0.0.0:8000->8000/tcp, [::]:8000->8000/tcp
+weppcloud-preflight             preflight2-dev        "/preflight2"            preflight                9 minutes ago    Up 8 minutes             0.0.0.0:9001->9001/tcp, [::]:9001->9001/tcp
+weppcloud-status                status2-dev           "/status2"               status                   58 minutes ago   Up 9 minutes             0.0.0.0:9002->9002/tcp, [::]:9002->9002/tcp
+weppcloudr                      weppcloudr-dev        "Rscript /srv/weppcl…"   weppcloudr               58 minutes ago   Up 9 minutes             80/tcp, 0.0.0.0:8050->8050/tcp, [::]:8050->8050/tcp
+wepppy-browse                   wepppy-dev            "gunicorn --workers …"   browse                   58 minutes ago   Up 9 minutes             0.0.0.0:9009->9009/tcp, [::]:9009->9009/tcp
+wepppy-caddy                    caddy:2-alpine        "caddy run --config …"   caddy                    58 minutes ago   Up 9 minutes             80/tcp, 443/tcp, 2019/tcp, 443/udp, 0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp
+wepppy-cap                      wepppy-cap-dev        "docker-entrypoint.s…"   cap                      58 minutes ago   Up 9 minutes             3000/tcp
+wepppy-download                 wepppy-dev            "gunicorn --workers …"   download                 58 minutes ago   Up 9 minutes (healthy)   0.0.0.0:9011->9011/tcp, [::]:9011->9011/tcp
+wepppy-dtale                    wepppy-dev            "gunicorn --workers …"   dtale                    58 minutes ago   Up 9 minutes             0.0.0.0:9010->9010/tcp, [::]:9010->9010/tcp
+wepppy-elevationquery           wepppy-dev            "gunicorn --workers …"   elevationquery           58 minutes ago   Up 9 minutes             0.0.0.0:8002->8002/tcp, [::]:8002->8002/tcp
+wepppy-metquery                 wepppy-dev            "gunicorn --workers …"   metquery                 58 minutes ago   Up 9 minutes             0.0.0.0:8004->8004/tcp, [::]:8004->8004/tcp
+wepppy-postgres                 postgres:16           "docker-entrypoint.s…"   postgres                 58 minutes ago   Up 9 minutes (healthy)   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp
+wepppy-postgres-backup          postgres:16           "docker-entrypoint.s…"   postgres-backup          58 minutes ago   Up 9 minutes (healthy)   5432/tcp
+wepppy-query-engine             wepppy-dev            "/opt/venv/bin/pytho…"   query-engine             58 minutes ago   Up 9 minutes             0.0.0.0:8041->8041/tcp, [::]:8041->8041/tcp
+wepppy-redis                    redis:latest          "/usr/local/bin/redi…"   redis                    58 minutes ago   Up 9 minutes (healthy)   0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp
+wepppy-rq-dashboard             docker-rq-dashboard   "bash -lc 'set -euo …"   rq-dashboard             58 minutes ago   Up 9 minutes             9181/tcp
+wepppy-rq-engine                wepppy-dev            "/opt/venv/bin/pytho…"   rq-engine                58 minutes ago   Up 9 minutes             0.0.0.0:8042->8042/tcp, [::]:8042->8042/tcp
+wepppy-rq-worker                wepppy-dev            "/opt/venv/bin/pytho…"   rq-worker                58 minutes ago   Up 9 minutes             
+wepppy-rq-worker-batch          wepppy-dev            "/opt/venv/bin/pytho…"   rq-worker-batch          58 minutes ago   Up 9 minutes             
+wepppy-rq-worker-fork-archive   wepppy-dev            "/opt/venv/bin/pytho…"   rq-worker-fork-archive   58 minutes ago   Up 9 minutes             
+wepppy-scheduler                wepppy-dev            "/opt/venv/bin/pytho…"   scheduler                58 minutes ago   Up 9 minutes             
+wepppy-shape-converter          wepppy-dev            "uvicorn wepppy.micr…"   shape-converter          58 minutes ago   Up 9 minutes             8060/tcp
+wepppy-wmesque                  wepppy-dev            "gunicorn --workers …"   wmesque                  58 minutes ago   Up 9 minutes             0.0.0.0:8003->8003/tcp, [::]:8003->8003/tcp
+wepppy-wmesque2                 wepppy-dev            "gunicorn --workers …"   wmesque2                 58 minutes ago   Up 9 minutes             0.0.0.0:8030->8030/tcp, [::]:8030->8030/tcp

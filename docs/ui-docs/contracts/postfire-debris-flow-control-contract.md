@@ -279,7 +279,7 @@ with legacy coverage explicitly not recorded. Runtime conformance is pending.
 ## Kf source amendment — 2026-09-16
 
 Status: accepted 2026-09-16 after two independent reviews; implementation
-conformance pending. The [Kf source/runtime contract](../../../wepppy/nodb/mods/postfire_debris_flow/docs/kf_source.md)
+conformance verified on forest, 2026-09-16. The [Kf source/runtime contract](../../../wepppy/nodb/mods/postfire_debris_flow/docs/kf_source.md)
 is the controlling amendment for new production M1.
 
 Run M1 prepares absent Kf automatically; no RUSLE/POLARIS preparation link or readiness gate applies to new M1. Display source preparation/failure explicitly and preserve prior accepted reports.

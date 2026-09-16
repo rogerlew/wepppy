@@ -54,8 +54,8 @@
         function render(next) {
             state = next;
             var rows = (next.required || []).filter(function (item) { return item.key !== 'dnbr'; }).map(function (item) {
-                var labels = {watershed:'Watershed',soils:'Soils',sbs:'Soil burn severity',k:'Soil erodibility (K)',climate:'Climate'};
-                var value = 'Ready';
+                var labels = {watershed:'Watershed',soils:'Soils',sbs:'Soil burn severity',k:'Fine-earth soil erodibility (Kf)',climate:'Climate'};
+                var value = item.message || 'Ready';
                 if (!item.ready) { value = document.createElement('a'); value.href = item.control; value.textContent = item.message; }
                 return [labels[item.key],value];
             });

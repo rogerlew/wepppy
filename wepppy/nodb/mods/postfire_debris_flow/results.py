@@ -127,7 +127,9 @@ def build_results(inputs: RainfallInputs, output_dir: Path, *, frequency_source:
                 'request':{'frequency_source':frequency_source,'return_intervals':list(intervals),
                            'durations':list(durations),'target_probabilities':list(targets)},
                 'tables':tables}
-    if predictors['schema_version'] == 2:
+    from .response_curve import rainfall_provenance
+    manifest['rainfall_provenance'] = rainfall_provenance(context,frequency_source)
+    if predictors['schema_version'] in (2, 3):
         from .result_support import copy_support
         manifest.update(copy_support(Path(inputs.predictor_manifest).parent,output,predictors))
     recheck(consumed, limits=artifact_limits)
@@ -237,6 +239,9 @@ def _validate_manifest(m):
     if any(not isinstance(context.get(k),str) or not context[k].strip() or len(context[k]) > 256
            for k in ('project_id','climate_mode','assessment_id')) or context.get('date_semantics') not in ('simulation_labels','calendar'):
         fail('invalid_input', 'Invalid result identity')
+    from .response_curve import rainfall_provenance
+    if ('rainfall_provenance' in m and m['rainfall_provenance'] != rainfall_provenance(context,m['request']['frequency_source'])):
+        fail('invalid_input','Rainfall provenance differs from accepted source identity')
     validate_predictors(m['predictor_snapshot'])
     if m['model'] != _model(m['predictor_snapshot']):
         fail('invalid_input', 'Result and predictor model identities disagree')

@@ -341,7 +341,7 @@ Runtime registration/conformance is pending the production package checkpoint.
 ## Kf source amendment — 2026-09-16
 
 Status: accepted 2026-09-16 after two independent reviews; implementation
-conformance pending. The [Kf source/runtime contract](../../nodb/mods/postfire_debris_flow/docs/kf_source.md)
+conformance verified on forest, 2026-09-16. The [Kf source/runtime contract](../../nodb/mods/postfire_debris_flow/docs/kf_source.md)
 is the controlling amendment for new production M1.
 
 Postfire keeps disturbed, user role, preview, WBT and CONUS constraints. Its enable_dependencies becomes empty; enabling postfire must no longer enable POLARIS or RUSLE. Existing enabled standalone features remain enabled. The runtime YAML change belongs after the ancestor checkpoint; current YAML still implements the earlier dependency behavior.

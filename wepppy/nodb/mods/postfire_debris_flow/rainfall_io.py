@@ -178,7 +178,7 @@ def load_predictors(path, expected, consumed, *, artifact_limits=None):
     p = pinned(path, expected, consumed, MAX_TEXT)
     m = read_json(p)
     validate_predictors(m)
-    if m['schema_version'] == 2:
+    if m['schema_version'] in (2, 3):
         from .predictor_v2 import load_artifacts
         load_artifacts(p.parent, m, consumed, artifact_limits)
         return m
@@ -260,7 +260,7 @@ def _validate_predictor_geometry(m, total):
 
 
 def validate_predictors(m):
-    if type(m.get('schema_version')) is int and m['schema_version'] == 2:
+    if type(m.get('schema_version')) is int and m['schema_version'] in (2, 3):
         from .predictor_v2 import validate
         validate(m)
         return

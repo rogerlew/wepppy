@@ -37,6 +37,7 @@ class M1Inputs:
     lineage_sources: tuple[Path, ...] = ()
     elevation_units: str = 'm'
     sbs_alignment: str = 'exact'
+    soil_policy: str | None = None
 
 
 def _sources(inputs):
@@ -82,6 +83,15 @@ def _k_predictor(inputs, grid, domain):
     empty = _support(np.zeros(domain.shape, dtype=bool), domain)
     if inputs.k is None:
         return _record(None, 'USLE_customary', 'missing_input', empty), None
+    if inputs.soil_policy is not None:
+        from .kf_source import read_prepared
+        if inputs.k_manifest is None:
+            fail('missing_provenance', 'Kf requires its preparation manifest')
+        values, valid, manifest = read_prepared(inputs.k, inputs.k_manifest, grid)
+        support = _support(valid, domain)
+        mean = float(np.mean(values[valid & domain], dtype=np.float64)) if support['valid_cells'] else None
+        reason = None if support['valid_cells'] == support['total_cells'] else 'incomplete_k_coverage'
+        return _record(mean if reason is None else None, 'USLE_customary', reason, support), manifest
     if Path(inputs.k).name != 'k_polaris_nomograph.tif':
         fail('provenance_mismatch', 'K must be the named Nomograph artifact')
     values, finite, source_grid = read_raster(inputs.k, continuous_missing=True)
@@ -272,6 +282,9 @@ def _tool_result(output, grid, domain):
 
 def build_m1_predictors(inputs: M1Inputs, output_dir, *, wbt_executable, support_policy='offline_v1') -> dict:
     """Build a new local bundle; failed reservations remain visibly incomplete."""
+    from .kf_source import POLICY
+    if inputs.soil_policy not in (None, POLICY) or (inputs.soil_policy is not None and support_policy != 'common_valid_v1'):
+        fail('invalid_input', 'Kf requires explicit supported common-valid policy')
     if support_policy not in ('offline_v1', 'common_valid_v1'):
         fail('invalid_input', 'Unsupported support policy')
     if inputs.source_kind not in ('real', 'synthetic', 'mixed') or inputs.elevation_units != 'm' or inputs.sbs_alignment not in ('exact', 'nearest'):
@@ -374,6 +387,19 @@ def build_m1_predictors(inputs: M1Inputs, output_dir, *, wbt_executable, support
     if coverage is not None:
         manifest.update(schema_version=2, model='M1', support_policy=support_policy, coverage=coverage)
         manifest['artifacts_sha256']['valid_mask.tif'] = digest(output/'valid_mask.tif')
+    if inputs.soil_policy is not None:
+        from .soil_inputs import _copy
+        if k_provenance is None:
+            fail('missing_provenance', 'Kf preparation is required')
+        folder = output/'kf'; folder.mkdir()
+        manifest_hash = digest(inputs.k_manifest)
+        _copy(inputs.k,folder/'kf.tif',digest(inputs.k),96*1024*1024)
+        _copy(inputs.k_manifest,folder/'manifest.json',manifest_hash,1024*1024)
+        manifest.update(schema_version=3,soil_policy=POLICY,
+                        kf_provenance=dict(manifest=k_provenance,sha256=manifest_hash))
+        manifest.pop('k_provenance')
+        manifest['artifacts_sha256'].update({'kf/kf.tif':digest(folder/'kf.tif'),
+                                              'kf/manifest.json':manifest_hash})
     try:
         current = _sources(inputs)
         if current != hashes or digest(binary) != inputs.wbt_sha256:

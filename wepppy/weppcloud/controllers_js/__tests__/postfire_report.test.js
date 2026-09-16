@@ -14,6 +14,8 @@ const seed = () => ({schema_version: 1, status: "available", attempt_id: attempt
         current: false, climate_mode: "CLIGEN", date_semantics: "simulation_labels", frequency_source: "noaa",
         frequency: {represented_years: 10, year_min: 1, year_max: 10}, area_km2: 41,
         coverage: {total_cells: 100, valid_cells: 90, excluded_cells: 10, valid_fraction: 0.9}, warnings: [], predictors: []},
+    response_curve: {status: "available", direction: "increasing", range_max: 60, p50: {status: "available", intensity_mm_per_hour: 24},
+        points: [{...row(), intensity_mm_per_hour: 0, probability: 0.02}, {...row(), intensity_mm_per_hour: 24, probability: 0.5}, {...row(), intensity_mm_per_hour: 60, probability: 0.99}]},
     design: [row(), {...row(), return_interval_years: 2, probability: 0.00001}, row(30)],
     inverse: [15, 30, 60].map(d => ({...row(d), probability: null, target_probability: 0.5})),
     events: {rows: [row()], total: 101, unfiltered_total: 101},
@@ -340,4 +342,19 @@ test("unknown off-page selection uses bounded detail and discards an older in-fl
     oldDetail({attempt_id: "f".repeat(32), rows: []}); await flush();
     expect(document.querySelector("[data-pfr-event-status]").textContent).toContain("Selected storm retained");
     expect(document.querySelector("[data-pfr-export=events]").disabled).toBe(false);
+});
+
+
+test("curve has P50, numeric equivalent and provenance-aware export", () => {
+    expect(document.querySelector("[data-pfr-response-line]")).not.toBeNull();
+    expect(document.querySelector("[data-pfr-p50]").getAttribute("aria-label")).toContain("24.00");
+    expect(document.querySelectorAll("[data-pfr-body=curve] tr")).toHaveLength(4);
+    const csv = window.PostfireReport.getInstance().csv("curve");
+    expect(csv).toContain("soil_source");
+    expect(csv).toContain("subdaily_origin");
+    expect(csv).toContain(",0.5,");
+    client.getPreferencePayload = () => ({rain: "in", intensity: "in", area: "km^2"});
+    unitHandler();
+    expect(document.querySelector("[data-pfr-p50]").getAttribute("aria-label")).toContain((24 / 25.4).toFixed(3));
+    expect(window.PostfireReport.getInstance().csv("curve")).toContain(String(24 / 25.4));
 });

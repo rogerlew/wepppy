@@ -164,7 +164,7 @@ source acquisition retains separate bounded authority and deployment is excluded
 ## Kf source amendment — 2026-09-16
 
 Status: accepted 2026-09-16 after two independent reviews; implementation
-conformance pending. The [Kf source/runtime contract](kf_source.md)
+conformance verified on forest, 2026-09-16. The [Kf source/runtime contract](kf_source.md)
 is the controlling amendment for new production M1.
 
 Only shared new-M1 composition/readers change; M3 recorded-depth sources, preparation and schema-2 behavior remain unchanged.

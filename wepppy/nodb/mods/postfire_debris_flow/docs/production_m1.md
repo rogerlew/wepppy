@@ -662,7 +662,7 @@ the amendment does not authorize source acquisition or production deployment.
 ## Kf source amendment — 2026-09-16
 
 Status: accepted 2026-09-16 after two independent reviews; implementation
-conformance pending. The [Kf source/runtime contract](kf_source.md)
+conformance verified on forest, 2026-09-16. The [Kf source/runtime contract](kf_source.md)
 is the controlling amendment for new production M1.
 
 Run M1 prepares absent Kf through the existing worker; new-run readiness and freshness no longer depend on RUSLE or POLARIS.

@@ -1,0 +1,144 @@
+[
+  {
+    "utc": "2026-09-16T23:09:00.838Z",
+    "stage": "before",
+    "state": {
+      "schema_version": 1,
+      "model": "M1",
+      "eligible": true,
+      "readonly": false,
+      "unavailable_reason": null,
+      "required": [
+        {
+          "key": "watershed",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#subcatchments-delineation"
+        },
+        {
+          "key": "sbs",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#disturbed-sbs"
+        },
+        {
+          "key": "k",
+          "ready": true,
+          "reason": null,
+          "message": "Kf will be prepared when you run M1",
+          "control": "#postfire-debris-flow"
+        },
+        {
+          "key": "climate",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#climate"
+        },
+        {
+          "key": "dnbr",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#postfire-debris-flow"
+        }
+      ],
+      "noaa_available": true,
+      "frequency_source": "noaa",
+      "upload_ready": true,
+      "run_ready": true,
+      "upload": {
+        "id": "052cbf59f446418dac7c501c8462d0e6",
+        "job_id": "9441ae68-2648-419f-8f4d-10898d133155",
+        "phase": "complete",
+        "created_at": "2026-09-16T20:53:01.376470+00:00",
+        "error": null,
+        "retryable": true,
+        "filename": "thomas_s2_20171128_21071228_dnbr.tif"
+      },
+      "run": {
+        "id": "e10dbaa5899047e1be37d074b3a8df07",
+        "job_id": "3a1e3bff-3aa6-4d33-ac9e-66641e72823d",
+        "phase": "complete",
+        "created_at": "2026-09-16T22:29:28.236333+00:00",
+        "error": null,
+        "retryable": true,
+        "filename": null,
+        "model": "M1",
+        "frequency_source": "noaa"
+      },
+      "dnbr": {
+        "id": "052cbf59f446418dac7c501c8462d0e6",
+        "filename": "thomas_s2_20171128_21071228_dnbr.tif",
+        "format": "GTiff",
+        "dtype": "float32",
+        "cell_size_m": [
+          10,
+          10
+        ],
+        "coverage_fraction": 1,
+        "source_range": [
+          -1367.7366943359375,
+          1235.358642578125
+        ],
+        "prepared_range": [
+          -0.037987105548381805,
+          1.0205727815628052
+        ],
+        "scale_mode": "auto",
+        "scale_factor": 0.001,
+        "add_offset": 0,
+        "scale_method": "distribution",
+        "completed_at": "2026-09-16T20:53:08.999857+00:00",
+        "current": true
+      },
+      "results": {
+        "id": "e10dbaa5899047e1be37d074b3a8df07",
+        "model": "M1",
+        "completed_at": "2026-09-16T22:29:36.084744+00:00",
+        "partial": false,
+        "area_warning": false,
+        "coverage": {
+          "excluded_cells": 2,
+          "mask": "valid_mask.tif",
+          "policy": "common_valid_v1",
+          "total_cells": 77669,
+          "valid_cells": 77667,
+          "valid_fraction": 0.9999742497006527
+        },
+        "partial_reason": null,
+        "current": false,
+        "files": [
+          {
+            "name": "events.parquet",
+            "url": "/rq-engine/api/runs/nervous-mesquite/config/postfire-debris-flow/files/e10dbaa5899047e1be37d074b3a8df07/events.parquet"
+          },
+          {
+            "name": "design.parquet",
+            "url": "/rq-engine/api/runs/nervous-mesquite/config/postfire-debris-flow/files/e10dbaa5899047e1be37d074b3a8df07/design.parquet"
+          },
+          {
+            "name": "inverse.parquet",
+            "url": "/rq-engine/api/runs/nervous-mesquite/config/postfire-debris-flow/files/e10dbaa5899047e1be37d074b3a8df07/inverse.parquet"
+          },
+          {
+            "name": "valid_mask.tif",
+            "url": "/rq-engine/api/runs/nervous-mesquite/config/postfire-debris-flow/files/e10dbaa5899047e1be37d074b3a8df07/valid_mask.tif"
+          },
+          {
+            "name": "manifest.json",
+            "url": "/rq-engine/api/runs/nervous-mesquite/config/postfire-debris-flow/files/e10dbaa5899047e1be37d074b3a8df07/manifest.json"
+          }
+        ]
+      },
+      "freshness": "stale"
+    }
+  },
+  {
+    "utc": "2026-09-16T23:10:30.888Z",
+    "stage": "FAIL",
+    "error": "page.waitForResponse: Timeout 90000ms exceeded while waiting for event \"response\""
+  }
+]

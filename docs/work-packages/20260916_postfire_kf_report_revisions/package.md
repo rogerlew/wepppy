@@ -1,7 +1,7 @@
 # Post-fire Kf replacement and rainfall-response report
 
-Status: Execution started; source research and draft checkpoint prepared;
-independent reviews and ancestor commit pending. Date: 2026-09-16 UTC.
+Status: Implementation and restarted-stack live acceptance passed; final
+regression/review closeout in progress. Date: 2026-09-16 UTC.
 
 ## Purpose and authority
 
@@ -13,11 +13,11 @@ modeled versus observed rainfall. Preserve existing WEPPcloud delineation.
 Owner requested this scaffold after the Thomas Fire audit. This explicitly
 supersedes the audit's recommendation to retain POLARIS as the new-run M1 input;
 the closed audit remains an immutable record. The direction is approved; the
-exact source/aggregation policy requires the scientific checkpoint below.
+exact source/aggregation policy was accepted in checkpoint `9395f4722`.
 The original scaffolding turn authorized documentation only. The owner requested
 execution on 2026-09-16, authorizing this plan's work and named acceptance scope.
-Independent contract reviews and the ancestor commit remain gates before runtime
-implementation. The owner subsequently authorized completion after the explicit
+Independent contract reviews passed before runtime implementation;
+standalone ancestor checkpoint: `9395f4722`. The owner subsequently authorized completion after the explicit
 review/commit request, including those steps. No push is authorized.
 Owner's follow-up adds a forest-stack restart and a new M1 end-to-end run on
 `nervous-mesquite` to the authorized acceptance scope when this package is

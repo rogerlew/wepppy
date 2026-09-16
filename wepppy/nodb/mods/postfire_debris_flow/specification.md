@@ -1,17 +1,19 @@
 # Postfire Debris Flow Specification
 
-## Pending 2026-09-16 revision direction
+## Implemented 2026-09-16 Kf and report revision
 
-Owner-approved direction, not implemented: replace new-run M1 POLARIS/RUSLE K
-with traceable USGS-compatible NRCS fine-earth Kf and remove gridded RUSLE as a
-post-fire dependency. Preserve legacy saved provenance, M3 thickness behavior
-and existing delineation. Add a duration-linked probability/intensity curve and
-clarify design-rainfall versus modeled event provenance. Exact Kf source and
-aggregation require the scientific/contract checkpoint in
-[ADR-0068](../../../../docs/adrs/ADR-0068-staley-kf-source-replacement.md) and the
+New M1 prepares NRCS-derived STATSGO fine-earth Kf under the accepted
+[source/runtime contract](docs/kf_source.md), replacing POLARIS/RUSLE as its
+production soil input. Enabling post-fire no longer enables those modules.
+Legacy provenance/readers, M3 thickness and delineation are preserved. Reports
+include a duration-linked response curve, P50, numeric values/CSV and explicit
+statistical-design versus modeled/disaggregated event rainfall provenance.
+
+Scientific rationale: [ADR-0068](../../../../docs/adrs/ADR-0068-staley-kf-source-replacement.md).
+Independent reviews, forest restart, normal UI/RQ acceptance, protected-input
+checks and archive evidence are retained in the
 [revision package](../../../../docs/work-packages/20260916_postfire_kf_report_revisions/package.md).
-The implemented contracts below remain the current execution behavior until
-that checkpoint and cutover; this note is not a claim of completed replacement.
+The dated amendment below supersedes earlier M1 source/dependency clauses.
 
 ## Implemented baseline
 
@@ -769,7 +771,7 @@ package. Its final security disposition is separate from scientific conformance.
 ## Kf source amendment — 2026-09-16
 
 Status: accepted 2026-09-16 after two independent reviews; implementation
-conformance pending. The [Kf source/runtime contract](docs/kf_source.md)
+conformance verified on forest, 2026-09-16. The [Kf source/runtime contract](docs/kf_source.md)
 is the controlling amendment for new production M1.
 
 New production M1 replaces POLARIS/RUSLE K with module-owned Kf; M3 remains unchanged.

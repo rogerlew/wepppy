@@ -65,6 +65,9 @@ def prepared_inputs(tmp_path):
 
 
 def test_upload_and_model_real_artifacts(tmp_path,monkeypatch,prepared_inputs):
+    from tests.nodb.mods.test_postfire_debris_flow_kf import fake_native
+    from wepppy.nodb.mods.postfire_debris_flow import kf_source
+    monkeypatch.setattr(kf_source, "_native_window", fake_native)
     import json, uuid
     import pandas as pd
     from types import SimpleNamespace
@@ -116,12 +119,37 @@ def test_upload_and_model_real_artifacts(tmp_path,monkeypatch,prepared_inputs):
 
     statistics.write_text(statistics.read_text().replace('>0<', '>1<'))
     assert p.artifacts_current(tmp_path, PostfireDebrisFlow.load_detached(str(tmp_path)).state['active_dnbr'])
-    # Climate-only rerun must reuse verified terrain, rather than invoking WBT.
-    monkeypatch.setattr(p,'build_m1_predictors',lambda *a,**kw:pytest.fail('terrain should be reused'))
+    # A new Kf run owns a fresh source preparation and predictor bundle.
     next_id=uuid.uuid4().hex;p.directory(tmp_path,next_id).mkdir()
     controller.change(lambda state:state.update(run_attempt={'id':next_id,'job_id':None,'phase':'queued','created_at':p.now(),
         'retryable':False,'error':None,'snapshot':{'inputs':snapshot,'dnbr':identity,'frequency':'cli'}}))
     p.execute_model(tmp_path,next_id,BINARY)
+    assert PostfireDebrisFlow.load_detached(str(tmp_path)).state['last_successful_run']['id']==next_id
+    acquire = kf_source.acquire_kf
+    for selection in ({'model':'M3'},{'frequency_source':'noaa'}):
+        stale_id=uuid.uuid4().hex
+        controller.change(lambda state:state.update(model='M1',frequency_source='cli',run_attempt={
+            'id':stale_id,'job_id':None,'phase':'queued','created_at':p.now(),'retryable':False,'error':None,'snapshot':{'inputs':snapshot,'dnbr':identity,'frequency':'cli'}}))
+        def superseded_acquire(*args):
+            result=acquire(*args)
+            controller.change(lambda state:state.update(selection))
+            return result
+        monkeypatch.setattr(kf_source,'acquire_kf',superseded_acquire)
+        with pytest.raises(p.WorkflowError,match='superseded'):
+            p.execute_model(tmp_path,stale_id,BINARY)
+        assert PostfireDebrisFlow.load_detached(str(tmp_path)).state['last_successful_run']['id']==next_id
+    monkeypatch.setattr(kf_source,'acquire_kf',acquire)
+    original_change=controller.change
+    def change_at_publish(callback):
+        if callback.__name__=='publish':
+            original_change(lambda state:state.update(frequency_source='noaa'))
+        return original_change(callback)
+    monkeypatch.setattr(controller,'change',change_at_publish)
+    stale_id=uuid.uuid4().hex
+    controller.change(lambda state:state.update(model='M1',frequency_source='cli',run_attempt={
+        'id':stale_id,'job_id':None,'phase':'queued','created_at':p.now(),'retryable':False,'error':None,'snapshot':{'inputs':snapshot,'dnbr':identity,'frequency':'cli'}}))
+    with pytest.raises(p.WorkflowError,match='superseded'):
+        p.execute_model(tmp_path,stale_id,BINARY)
     assert PostfireDebrisFlow.load_detached(str(tmp_path)).state['last_successful_run']['id']==next_id
     statistics.unlink()
     assert p.artifacts_current(tmp_path, PostfireDebrisFlow.load_detached(str(tmp_path)).state['active_dnbr'])
@@ -186,15 +214,15 @@ def test_owner_climate_invalidation_and_watershed_rebuild(owner_project):
 def test_k_source_rewrite_and_used_cfvo_removal(owner_project):
     import json,os
     wd,prep=owner_project
-    assert p.sources(wd)[2]['k']
+    assert p.sources(wd,soil_policy=None)[2]['k']
     path=wd/'polaris'/'sand_mean_0_5.tif';st=path.stat();k_st=(wd/'rusle/k_polaris_nomograph.tif').stat()
     os.utime(path,ns=(st.st_atime_ns,k_st.st_mtime_ns+1))
-    assert not p.sources(wd)[2]['k']
+    assert not p.sources(wd,soil_policy=None)[2]['k']
     os.utime(path,ns=(st.st_atime_ns,st.st_mtime_ns))
     manifest=wd/'rusle/manifest.json';m=json.loads(manifest.read_text())
     m['k']['cfvo_summary']={'status':'available','source':{'top_path':str(wd/'polaris/missing-cfvo.tif')}}
     manifest.write_text(json.dumps(m))
-    assert not p.sources(wd)[2]['k']
+    assert not p.sources(wd,soil_policy=None)[2]['k']
 
 
 def test_completed_climate_with_failed_parquet_export_is_not_ready(owner_project):
@@ -285,14 +313,16 @@ def test_reconciliation_keeps_worker_publication_revision_together(tmp_path, mon
     assert p.reconcile_attempts(tmp_path, before, None) == published
 
 
-def test_enable_materializes_both_soil_dependencies(tmp_path):
+def test_enable_postfire_without_rusle_or_polaris(tmp_path):
     from wepppy.nodb.core import Ron
     from wepppy.weppcloud.routes.nodb_api.project_bp import _enable_mod_for_run
     ron = Ron(str(tmp_path), 'disturbed9002_wbt.cfg')
     assert _enable_mod_for_run(ron, str(tmp_path), ron.config_stem, 'postfire_debris_flow')
-    assert {'postfire_debris_flow', 'rusle', 'polaris'}.issubset(ron.mods)
-    for filename in ('postfire_debris_flow.nodb', 'rusle.nodb', 'polaris.nodb'):
-        assert (tmp_path/filename).is_file()
+    assert 'postfire_debris_flow' in ron.mods
+    assert not {'rusle','polaris'}.intersection(ron.mods)
+    assert (tmp_path/'postfire_debris_flow.nodb').is_file()
+    assert not (tmp_path/'rusle.nodb').exists()
+    assert not (tmp_path/'polaris.nodb').exists()
 
 
 @pytest.mark.parametrize('payload', [
@@ -397,11 +427,11 @@ def test_preflight_projects_durable_publication(tmp_path, monkeypatch, case, exp
     pipe = prep.redis.pipeline.return_value.__enter__.return_value
     key = 'timestamps:run_postfire_debris_flow'
     if expected is None:
-        pipe.hdel.assert_called_once_with('test-run', key)
+        pipe.hdel.assert_any_call('test-run', key)
     else:
         assert expected == int(p.datetime.fromisoformat(state['last_successful_run']['completed_at']).timestamp())
         assert ('test-run', key, expected) in [call.args for call in pipe.hset.call_args_list]
-        pipe.hdel.assert_not_called()
+        pipe.hdel.assert_called_once_with('test-run','postfire_debris_flow:soil_policy')
     pipe.execute.assert_called_once()
     prep.dump.assert_called_once()
     assert TaskEnum.run_postfire_debris_flow.emoji() == '🌋'
@@ -444,7 +474,7 @@ def test_delayed_preflight_notifier_reads_replacement_after_acquiring_lock(tmp_p
     monkeypatch.setattr(p, 'state_at', lambda wd: state)
     preflight.notify(tmp_path)
     pipe = prep.redis.pipeline.return_value.__enter__.return_value
-    pipe.hdel.assert_called_once_with('test-run', 'timestamps:run_postfire_debris_flow')
+    pipe.hdel.assert_any_call('test-run', 'timestamps:run_postfire_debris_flow')
     assert len(pipe.hset.call_args_list) == 2  # Model and revision notification.
 
 
@@ -476,7 +506,9 @@ def test_model_source_dependencies_are_separate(owner_project):
     prep[str(TaskEnum.fetch_polaris)] = 300
     (wd/'rusle/k_polaris_nomograph.tif').unlink()
     assert p.sources(wd, model='M3')[4] == m3[4]
-    assert not p.sources(wd)[2]['k']
+    assert p.sources(wd)[2]['k']
+    assert p.sources(wd)[4] == m1
+    assert not p.sources(wd,soil_policy=None)[2]['k']
     with ron.locked(): ron._cellsize = 30
     assert not p.sources(wd, model='M3')[2]['watershed']
     assert p.sources(wd)[2]['watershed']

@@ -43,7 +43,7 @@ def _execute(runid, identity, kind, model='M1'):
         phase = 'needs_scale' if code == 'ambiguous_encoding' else ('superseded' if code=='superseded' else 'failed')
         message = ('Could not determine the dNBR value scale. Choose the scale used by your map.'
                    if phase=='needs_scale' else 'The operation could not finish. Check the project inputs and job log.')
-        if code == 'integration_pending':
+        if code in ('integration_pending', 'kf_preparation_failed'):
             message = str(exc)
         production.update_attempt(wd,kind,identity,phase=phase,error={'code':code,'message':message},retryable=True)
         logger.exception('Postfire operation failed: %s %s',runid,identity)

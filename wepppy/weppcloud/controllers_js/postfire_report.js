@@ -3,6 +3,11 @@
     "use strict";
     var instance;
     var reasons = {
+        constant_probability: "Likelihood is constant; there is no single rainfall intensity for this target",
+        constant_probability_mismatch: "Likelihood is constant and does not reach this target",
+        negative_rainfall: "This target has no solution at nonnegative rainfall",
+        arithmetic_overflow: "The calculation exceeds the supported numerical range",
+        arithmetic_underflow: "The calculation is below the supported numerical range",
         missing_duration: "Rainfall window not recorded", missing_intensity: "Rainfall intensity not recorded",
         nonfinite_intensity: "Rainfall intensity is invalid", negative_intensity: "Rainfall intensity is invalid",
         missing_noaa: "NOAA rainfall is unavailable", unsupported_combination: "Rainfall combination not available",
@@ -122,14 +127,17 @@
             });
             setText("[data-pfr-warnings]", notices.join(" "));
             var frequency = summary.frequency;
+            var provenance = summary.rainfall_provenance || {};
+            var subdaily = provenance.subdaily_origin === "modeled_disaggregated" ? " Event subdaily peaks are modeled/disaggregated rainfall, including events with calendar dates." : " Event subdaily rainfall origin was not recorded.";
             setText("[data-pfr-source]", "Saved rainfall-frequency source: " + (summary.frequency_source === "noaa" ? "NOAA Atlas 14 PDS" : summary.frequency_source === "cli" ? "Project climate PDS" : "Not recorded") + ".");
             setText("[data-pfr-climate]", "Accepted climate mode: " + recorded(summary.climate_mode) + ". Years represented: " + recorded(frequency.represented_years) +
                 " (original labels " + recorded(frequency.year_min) + "–" + recorded(frequency.year_max) + "; not necessarily a continuous record)." +
-                (summary.date_semantics === "simulation_labels" ? " Dates below are simulation labels, not observed calendar dates." : " Dates retain the accepted climate provenance."));
+                (summary.date_semantics === "simulation_labels" ? " Dates below are simulation labels, not observed calendar dates." : " Dates retain the accepted climate provenance.") + subdaily);
             setText("[data-pfr-date-heading]", summary.date_semantics === "simulation_labels" ? "Simulation year / month / day" : "Date label (year / month / day)");
             var methods = qs("[data-pfr-methods]"); methods.replaceChildren();
             methods.appendChild(node("p", "Assessment ID: " + recorded(summary.assessment_id) + ". Accepted attempt ID: " + payload.attempt_id + "."));
             methods.appendChild(node("p", "Wet years: " + recorded(frequency.wet_years) + ". " + (coverage ? "Inputs use the saved common-valid support." : "Legacy v1 M1 inputs have independent support; no common-valid fraction or mask is inferred.")));
+            methods.appendChild(node("p", "Soil source: " + recorded(summary.soil_source) + "."));
             summary.predictors.forEach(function (predictor) {
                 methods.appendChild(node("p", predictor.name + ": " + (finite(predictor.value) ? predictor.value + " " + predictor.unit : "Unavailable — " + reason(predictor.reason))));
             });
@@ -163,9 +171,24 @@
         function renderChart() {
             var chart = qs("[data-pfr-chart]"); chart.replaceChildren();
             var rows = scenarioRows(); var intensity = unit("mm/hour");
+            var curve = payload.response_curve;
+            var curvePoints = curve && curve.status === "available" ? curve.points : [];
+            var body = qs('[data-pfr-body="curve"]');
+            if (body) {
+                body.replaceChildren();
+                unitsRow(body, [intensity.key, unit("mm").key, "%"]);
+                curvePoints.forEach(function (row) {
+                    var tr = node("tr");
+                    [quantity(row.intensity_mm_per_hour, "mm/hour"), quantity(row.rainfall_mm, "mm"), probability(row.probability)].forEach(function (value) { tr.appendChild(node("td", value)); });
+                    body.appendChild(tr);
+                });
+                setText("[data-pfr-curve-status]", curvePoints.length ? "Accepted model response (" + curve.direction + "). P50: " +
+                    (curve.p50.status === "available" ? quantity(curve.p50.intensity_mm_per_hour, "mm/hour") + " " + intensity.key : (curve.p50.status === "nonunique" ? "Not unique — " : "Unavailable — ") + reason(curve.p50.reason)) :
+                    "Response curve unavailable — " + reason(curve && curve.reason));
+            }
             var points = rows.filter(function (row) { return finite(row.probability) && finite(row.intensity_mm_per_hour); });
-            if (!points.length) { chart.appendChild(node("p", "No available rainfall scenario points; see the table for reasons.")); return; }
-            var maximum = Math.max.apply(null, points.map(function (row) { return converted(row.intensity_mm_per_hour, intensity); }));
+            if (!points.length && !curvePoints.length) { chart.appendChild(node("p", "No available rainfall scenario points; see the table for reasons.")); return; }
+            var maximum = Math.max.apply(null, points.concat(curvePoints).map(function (row) { return converted(row.intensity_mm_per_hour, intensity); }));
             if (maximum === 0) maximum = 1;
             var svg = svgNode("svg", {viewBox: "0 0 680 300", width: "100%", style: "max-width:56rem", "aria-label": payload.query.duration_minutes + "-minute rainfall scenarios; likelihood scale zero to one hundred percent", role: "group"});
             [0, 25, 50, 75, 100].forEach(function (percent) {
@@ -178,6 +201,17 @@
             });
             svg.appendChild(svgNode("text", {x: 345, y: 294, "text-anchor": "middle", fill: "currentColor", "font-size": 14}, "Peak rainfall intensity (" + intensity.key + ")"));
             svg.appendChild(svgNode("text", {x: 65, y: 22, fill: "currentColor", "font-size": 14}, "Modeled likelihood · " + payload.query.duration_minutes + "-minute window"));
+            if (curvePoints.length) {
+                svg.appendChild(svgNode("polyline", {points: curvePoints.map(function (row) {
+                    return (65 + converted(row.intensity_mm_per_hour, intensity) / maximum * 565) + "," + (250 - row.probability * 200);
+                }).join(" "), fill: "none", stroke: "currentColor", "stroke-width": 2, "data-pfr-response-line": ""}));
+                if (curve.p50.status === "available") {
+                    var p50x = 65 + converted(curve.p50.intensity_mm_per_hour, intensity) / maximum * 565;
+                    svg.appendChild(svgNode("path", {d: "M " + p50x + " 142 l 8 8 l -8 8 l -8 -8 Z", fill: "currentColor", tabindex: 0, role: "img",
+                        "data-pfr-p50": "", "aria-label": "P50: " + quantity(curve.p50.intensity_mm_per_hour, "mm/hour") + " " + intensity.key + ", 50% modeled likelihood"}));
+                    svg.appendChild(svgNode("text", {x: p50x + 10, y: 140, fill: "currentColor", "font-size": 13}, "P50"));
+                }
+            }
             rows.forEach(function (row, index) {
                 if (!finite(row.probability) || !finite(row.intensity_mm_per_hour)) return;
                 var x = 65 + converted(row.intensity_mm_per_hour, intensity) / maximum * 565;
@@ -353,11 +387,14 @@
         }
         function csv(kind) {
             if (replaced || !payload || payload.status !== "available") return "";
-            var rows = kind === "events" ? payload.events.rows : kind === "design" ? scenarioRows() : payload.inverse;
+            var rows = kind === "events" ? payload.events.rows : kind === "design" ? scenarioRows() : kind === "curve" ? (payload.response_curve ? payload.response_curve.points : []) : payload.inverse;
             var intensity = unit("mm/hour"), rain = unit("mm");
             var contextKeys = ["model", "assessment_id", "attempt_id", "view", "selected_window_minutes", "min_probability_fraction", "year_filter", "sort", "descending", "offset", "limit", "intensity_unit", "rainfall_unit", "probability_unit"];
             var context = [payload.summary.model, payload.summary.assessment_id, payload.attempt_id, previousView ? "previous view" : "displayed view", payload.query.duration_minutes, payload.query.min_probability,
                 payload.query.year, payload.query.sort, payload.query.descending, payload.query.offset, payload.query.limit, intensity.key, rain.key, "fraction (0–1)"];
+            var provenance = payload.summary.rainfall_provenance || {};
+            contextKeys = contextKeys.concat(["soil_source", "design_origin", "event_origin", "subdaily_origin", "climate_mode"]);
+            context = context.concat([payload.summary.soil_source, provenance.design_origin, provenance.event_origin, provenance.subdaily_origin, provenance.climate_mode]);
             var columns = ["event_id", "date_label", "date_semantics", "return_interval_years", "duration_minutes", "peak_intensity", "window_rainfall", "total_event_rainfall", "probability_fraction", "target_probability_fraction", "reason"];
             var lines = [contextKeys.concat(columns).map(csvCell).join(",")];
             rows.forEach(function (row) {

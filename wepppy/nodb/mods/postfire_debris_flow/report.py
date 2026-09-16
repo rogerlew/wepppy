@@ -10,6 +10,7 @@ from pathlib import Path
 import re
 
 from . import production, rainfall_io as io, results
+from .response_curve import response_curve, rainfall_provenance
 
 __all__ = ['ReportError', 'Assessment', 'attempt_id', 'open_assessment', 'summary',
            'view', 'artifact_names', 'open_attachment']
@@ -123,6 +124,9 @@ def summary(assessment):
     predictors = m['predictor_snapshot']
     coverage = m.get('coverage')
     return dict(
+        soil_source=('NRCS-derived STATSGO fine-earth Kf' if predictors['schema_version']==3
+                     else 'POLARIS/RUSLE Nomograph K (legacy)' if m['model']=='M1' else 'Recorded soil thickness'),
+        rainfall_provenance=rainfall_provenance(m['identity'],m['request']['frequency_source']),
         model=m['model'], completed_at=assessment.accepted.get('completed_at'),
         assessment_id=m['identity']['assessment_id'], current=assessment.current,
         newer_attempt=assessment.newer_attempt, climate_mode=m['identity']['climate_mode'],
@@ -142,7 +146,7 @@ def summary(assessment):
 def view(assessment, query=None):
     query = dict(DEFAULT_QUERY if query is None else query)
     payload = dict(schema_version=1, status='absent', attempt_id=None, summary=None,
-                   design=[], inverse=[], events=dict(rows=[], total=0, unfiltered_total=0), query=query)
+                   response_curve=None, design=[], inverse=[], events=dict(rows=[], total=0, unfiltered_total=0), query=query)
     if assessment is None:
         return payload
     catalog = assessment.catalog
@@ -150,6 +154,7 @@ def view(assessment, query=None):
     import pyarrow.compute as pc
     total = pc.sum(pc.equal(catalog.events['duration_minutes'], query['duration_minutes'])).as_py() or 0
     payload.update(status='available', attempt_id=assessment.accepted['id'], summary=summary(assessment),
+                   response_curve=response_curve(catalog.manifest,catalog.design.to_pylist(),query['duration_minutes']),
                    design=catalog.design.to_pylist(),
                    inverse=[row for row in catalog.inverse.to_pylist() if row['target_probability'] == .5],
                    events=dict(rows=page['rows'], total=page['total'], unfiltered_total=total))
@@ -159,7 +164,7 @@ def view(assessment, query=None):
 
 def artifact_names(assessment):
     names = production.FILES
-    if assessment.catalog.manifest['predictor_snapshot']['schema_version'] == 2:
+    if assessment.catalog.manifest['predictor_snapshot']['schema_version'] in (2, 3):
         names = (*names, 'valid_mask.tif')
     return names
 

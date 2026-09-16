@@ -52,7 +52,7 @@ def test_query_exact_payload_and_prefix(client):
     assert response.status_code == 200, response.data
     assert response.headers['Cache-Control'] == 'no-store'
     payload = response.get_json()
-    assert set(payload) == {'schema_version', 'status', 'attempt_id', 'summary', 'design', 'inverse', 'events', 'query', 'urls'}
+    assert set(payload) == {'schema_version', 'status', 'attempt_id', 'summary', 'design', 'inverse', 'events', 'query', 'urls', 'response_curve'}
     assert len(payload['events']['rows']) == 1
     assert payload['events']['total'] == payload['events']['unfiltered_total'] == 3
     assert all(url.startswith('/weppcloud/runs/') for key, url in payload['urls'].items() if key != 'artifacts')

@@ -38,6 +38,9 @@ scientific discrepancies against the final publication before implementation.
 
 ## Related Sources
 
+- [M1 Kf source/runtime policy](kf_source.md): approved KFFACT field, aggregation,
+  metadata discrepancy, bounded delivery and versioned legacy compatibility.
+
 - [M3 terrain evaluation](m3_terrain.md): WBT ownership, relief ambiguity,
   algorithm complexity, and catchment/resolution comparison design.
 - [dNBR upload design](dnbr_upload.md): SBS precedent, scale normalization,

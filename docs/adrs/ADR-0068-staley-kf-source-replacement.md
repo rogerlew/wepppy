@@ -1,18 +1,18 @@
 # ADR-0068: Replace M1 RUSLE K with traceable fine-earth Kf
 
 Status: Accepted source and report policy after independent reviews, 2026-09-16.
-Date: 2026-09-16 UTC. Implementation: not started.
+Date: 2026-09-16 UTC. Implementation: wired; restarted forest acceptance passed (final regression closeout in package).
 
 ## Decision provenance
 
 Venue: owner/assistant repository conversation, 2026-09-16 UTC (exact time not
 recorded). Participants: repository owner and Codex. Decision owner: repository
-owner. Implementer: not yet assigned; Codex authored this scaffold.
+owner. Implementer: Codex, after owner execution/completion authorization.
 
 Owner direction: replace RUSLE K with stricter USGS Kf; gridded RUSLE is no
 longer to be a post-fire debris-flow dependency. Add an intensity-response curve
-and preserve existing delineation. The current request is to scaffold work,
-not execute or commit the scientific replacement.
+and preserve existing delineation. The initial request was scaffold-only; subsequent owner instructions explicitly
+authorized execution, required reviews/commits, stack restart and a named end-to-end run.
 
 ## Context and evidence
 

@@ -30,6 +30,11 @@ def notify(wd):
                 else:
                     pipe.hset(prep.run_id, key, completed)
                 pipe.hset(prep.run_id, 'postfire_debris_flow:model', model)
+                policy = result.get('soil_policy') if result else None
+                if policy is None:
+                    pipe.hdel(prep.run_id, 'postfire_debris_flow:soil_policy')
+                else:
+                    pipe.hset(prep.run_id, 'postfire_debris_flow:soil_policy', policy)
                 pipe.hset(prep.run_id, 'postfire_debris_flow:revision', uuid.uuid4().hex)
                 pipe.execute()
             prep.dump()

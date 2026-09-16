@@ -223,9 +223,7 @@ features:
     requires_backend: wbt
     requires_features:
       - disturbed
-    enable_dependencies:
-      - polaris
-      - rusle
+    enable_dependencies: []
     disable_blockers: []
 
   - id: culvert_runner

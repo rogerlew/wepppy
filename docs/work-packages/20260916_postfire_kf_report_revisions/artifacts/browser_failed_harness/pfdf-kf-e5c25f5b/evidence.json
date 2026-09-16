@@ -1,0 +1,13 @@
+[
+  {
+    "utc": "2026-09-16T23:11:14.574Z",
+    "stage": "failure_page",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/pfdf-kf-e5c25f5b/disturbed9002_wbt/",
+    "text": "500 - Internal Server Error\n\nRun 'pfdf-kf-e5c25f5b' (config disturbed9002_wbt) failed to render.\n\nStacktrace:\n\nTraceback (most recent call last):\n  File \"/workdir/wepppy/wepppy/weppcloud/routes/run_0/run_0_bp.py\", line 2507, in runs0\n    return render_template('runs0_pure.htm', **context)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/venv/lib/python3.12/site-packages/flask/templating.py\", line 151, in render_template\n    return _render(app, template, context)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/venv/lib/python3.12/site-packages/flask/templating.py\", line 132, in _render\n    rv = template.render(context)\n         ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/venv/lib/python3.12/site-packages/jinja2/environment.py\", line 1295, in render\n    self.environment.handle_exception()\n  File \"/opt/venv/lib/python3.12/site-packages/jinja2/environment.py\", line 942, in handle_exception\n    raise rewrite_traceback_stack(source=source)\n  File \"/workdir/wepppy/wepppy/weppcloud/routes/run_0/templates/runs0_pure.htm\", line 37, in top-level template code\n    {% set show_disturbed_sbs = (('baer' in ron.mods or 'disturbed' in ron.mods) and 'lt' not in ron.mods) or playwright_load_all %}\n    ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workdir/wepppy/wepppy/weppcloud/templates/base_pure.htm\", line 27, in top-level template code\n    {% block head_extras %}{% endblock %}\n    ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workdir/wepppy/wepppy/weppcloud/routes/run_0/templates/runs0_pure.htm\", line 52, in block 'head_extras'\n    {% include 'run_page_bootstrap.js.j2' %}\n    ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workdir/wepppy/wepppy/weppcloud/routes/run_0/templates/run_page_bootstrap.js.j2\", line 205, in top-level template code\n    } | tojson }};\n  File \"/opt/venv/lib/python3.12/site-packages/jinja2/environment.py\", line 490, in getattr\n    return getattr(obj, attribute)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workdir/wepppy/wepppy/nodb/core/climate.py\", line 969, in has_observed\n    cli = ClimateFile(cli_path)\n          ^^^^^^^^^^^^^^^^^^^^^\n  File \"/workdir/wepppy/wepppy/climates/cligen/cligen.py\", line 830, in __init__\n    _ = lines[4].split()\n        ~~~~~^^^\nIndexError: list index out of range\n"
+  },
+  {
+    "utc": "2026-09-16T23:11:14.606Z",
+    "stage": "FAIL",
+    "error": "locator.waitFor: Timeout 45000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#postfire_debris_flow_form') to be visible\u001b[22m\n"
+  }
+]

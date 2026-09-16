@@ -1,0 +1,16 @@
+{
+  "job_id": "087cf30a-db0d-4ffa-afc2-7c9ea4e70a7a",
+  "runid": "pfdf-kf-e5c25f5b",
+  "status": "finished",
+  "result": {
+    "message": "Model run complete."
+  },
+  "started_at": "2026-09-16 23:13:07.820809",
+  "ended_at": "2026-09-16 23:13:17.262933",
+  "description": "wepppy.rq.postfire_debris_flow_rq.run_m1_rq('pfdf-kf-e5c25f5b', '089792b89459438ebd5de3f2c4b972c0')",
+  "elapsed_s": 9.442124,
+  "exc_info": null,
+  "auth_actor": null,
+  "culvert_batch_uuid": null,
+  "children": {}
+}

@@ -118,7 +118,14 @@ func Evaluate(prep map[string]string) (map[string]bool, map[string]bool) {
 		"build_subcatchments", "abstract_watershed", "init_sbs_map", "build_climate"}
 	switch model {
 	case "", "M1":
-		upstreamTasks = append(upstreamTasks, "build_polaris", "build_rusle")
+		switch prep["postfire_debris_flow:soil_policy"] {
+		case "":
+			upstreamTasks = append(upstreamTasks, "build_polaris", "build_rusle")
+		case "statsgo_kffact_1995_cog2025_v1":
+			// Published Kf has no POLARIS/RUSLE task dependency.
+		default:
+			check["postfire_debris_flow"] = false
+		}
 	case "M3":
 		upstreamTasks = append(upstreamTasks, "build_landuse", "build_rangeland_cover", "build_soils")
 	default:

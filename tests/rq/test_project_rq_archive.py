@@ -542,6 +542,11 @@ def test_postfire_records_survive_canonical_archive_and_restore(archive_rq_envir
         'source_preparation/recovered/snapshot/cache.sqlite-wal':b'copied committed WAL',
         'attempts/m3/predictors/valid_mask.tif':b'exact predictor mask',
         'attempts/m3/results/valid_mask.tif':b'exact predictor mask',
+        'attempts/kf/kf/requests/request-00001.body':b'original KFFACT range bytes',
+        'attempts/kf/kf/native_kf.tif':b'native KFFACT window',
+        'attempts/kf/kf/publisher_metadata.xml':b'original KFFACT metadata',
+        'attempts/kf/kf/incomplete.json':b'{"status":"incomplete"}',
+        'attempts/kf/kf/kf_failure.json':b'{"status":"failed"}',
     }
     for name,data in source_records.items():
         path=root/name;path.parent.mkdir(parents=True,exist_ok=True);path.write_bytes(data)

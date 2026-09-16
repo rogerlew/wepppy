@@ -34,7 +34,12 @@
       <p data-pfr-source></p>
       <p class="wc-text-muted">Rainfall recurrence intervals are partial-duration-series average recurrence intervals (PDS ARI), not debris-flow return periods or annual debris-flow probabilities.</p>
       <div data-pfr-chart></div>
-      <p class="wc-text-muted">Select a saved marker or its table button to highlight that scenario. No probability curve is interpolated between points.</p>
+      <p class="wc-text-muted">Select a saved marker or its table button to highlight that scenario. The line evaluates the accepted model between rainfall intensities; P50 marks a rainfall intensity associated with 50% modeled likelihood when available.</p>
+      <details data-pfr-curve-details><summary>Response curve values</summary>
+        <p data-pfr-curve-status></p>
+        <div class="wc-table-wrapper"><table class="wc-table wc-table--dense wc-table--striped"><caption>Equation response at the selected rainfall window</caption><thead><tr><th scope="col">Peak rainfall intensity</th><th scope="col">Rainfall in the window</th><th scope="col">Modeled likelihood</th></tr></thead><tbody data-pfr-body="curve"></tbody></table></div>
+        <button type="button" class="pure-button pure-button-link" data-pfr-export="curve">Download curve values (CSV)</button>
+      </details>
       <div class="wc-table-wrapper"><table class="wc-table wc-table--dense wc-table--striped"><caption>Saved rainfall scenarios</caption><thead><tr><th scope="col">Rainfall recurrence interval</th><th scope="col">Peak rainfall intensity</th><th scope="col">Rainfall in the selected window</th><th scope="col">Modeled likelihood</th></tr></thead><tbody data-pfr-body="design"></tbody></table></div>
       <div class="wc-table-actions"><button type="button" class="pure-button pure-button-link" data-pfr-export="design">Download displayed rows (CSV)</button></div>
     </section>

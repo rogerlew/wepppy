@@ -9,9 +9,9 @@
 
 Executing: [Post-fire Kf and report revisions](docs/work-packages/20260916_postfire_kf_report_revisions/package.md)
 — replace new M1 RUSLE K with traceable Kf, remove RUSLE dependency, add a rainfall
-response curve and clarify event provenance. Source research and draft canonical
-checkpoint prepared; independent reviews, commit authority and implementation pending;
-acceptance includes forest-stack restart and nervous-mesquite end-to-end rerun.
+response curve and clarify event provenance. Contract ancestor `9395f4722`;
+implementation, forest restart and nervous-mesquite/no-RUSLE UI/RQ acceptance pass.
+Independent review repairs pass; full regression and package closeout underway.
 
 Completed audit: [Thomas Fire verification](docs/work-packages/20260916_thomas_fire_verification/package.md)
 — nervous-mesquite numerical checks pass; matched USGS comparison isolates a

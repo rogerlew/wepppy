@@ -1,0 +1,70 @@
+INFO:wctl2:docker compose build preflight
+ Image preflight2-dev Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 520B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 641B 0.0s done
+#2 DONE 0.0s
+
+#3 resolve image config for docker-image://docker.io/docker/dockerfile:1
+#3 DONE 0.6s
+
+#4 docker-image://docker.io/docker/dockerfile:1@sha256:ecfaec9ed6d810b56388c508f4121597bfbba70d41a6dfeee4d8cad5f295fc32
+#4 CACHED
+
+#5 [internal] load metadata for docker.io/library/golang:1.25-alpine@sha256:3eb6c2b3db8d55e38537302edb510b4417f8a115efbd5906d131ceba9468e29a
+#5 ...
+
+#6 [internal] load metadata for gcr.io/distroless/static:nonroot@sha256:f7f8f729987ad0fdf6b05eeeae94b26e6a0f613bdf46feea7fc40f7bd72953e6
+#6 DONE 0.2s
+
+#5 [internal] load metadata for docker.io/library/golang:1.25-alpine@sha256:3eb6c2b3db8d55e38537302edb510b4417f8a115efbd5906d131ceba9468e29a
+#5 DONE 0.5s
+
+#7 [internal] load .dockerignore
+#7 transferring context: 297B done
+#7 DONE 0.0s
+
+#8 [build 1/6] FROM docker.io/library/golang:1.25-alpine@sha256:3eb6c2b3db8d55e38537302edb510b4417f8a115efbd5906d131ceba9468e29a
+#8 DONE 0.0s
+
+#9 [stage-1 1/2] FROM gcr.io/distroless/static:nonroot@sha256:f7f8f729987ad0fdf6b05eeeae94b26e6a0f613bdf46feea7fc40f7bd72953e6
+#9 DONE 0.0s
+
+#10 [internal] load build context
+#10 transferring context: 84.87kB done
+#10 DONE 0.0s
+
+#11 [build 2/6] WORKDIR /src
+#11 CACHED
+
+#12 [build 3/6] COPY services/preflight2/go.mod ./
+#12 CACHED
+
+#13 [build 4/6] RUN go mod download
+#13 CACHED
+
+#14 [build 5/6] COPY services/preflight2/ ./
+#14 DONE 0.2s
+
+#15 [build 6/6] RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o /preflight2 ./cmd/preflight2
+#15 DONE 20.9s
+
+#9 [stage-1 1/2] FROM gcr.io/distroless/static:nonroot@sha256:f7f8f729987ad0fdf6b05eeeae94b26e6a0f613bdf46feea7fc40f7bd72953e6
+#9 CACHED
+
+#16 [stage-1 2/2] COPY --from=build /preflight2 /preflight2
+#16 DONE 0.0s
+
+#17 exporting to image
+#17 exporting layers
+#17 exporting layers 0.5s done
+#17 writing image sha256:2998547246db386779d40843ea3d42f80af10ddd0847fda140202968870499e7 done
+#17 naming to docker.io/library/preflight2-dev done
+#17 DONE 0.5s
+
+#18 resolving provenance for metadata file
+#18 DONE 0.0s
+ Image preflight2-dev Built 

@@ -1,0 +1,296 @@
+[
+  {
+    "utc": "2026-09-16T23:11:25.734Z",
+    "stage": "before",
+    "state": {
+      "schema_version": 1,
+      "model": "M1",
+      "eligible": true,
+      "readonly": false,
+      "unavailable_reason": null,
+      "required": [
+        {
+          "key": "watershed",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#subcatchments-delineation"
+        },
+        {
+          "key": "sbs",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#disturbed-sbs"
+        },
+        {
+          "key": "k",
+          "ready": true,
+          "reason": null,
+          "message": "Kf will be prepared when you run M1",
+          "control": "#postfire-debris-flow"
+        },
+        {
+          "key": "climate",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#climate"
+        },
+        {
+          "key": "dnbr",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#postfire-debris-flow"
+        }
+      ],
+      "noaa_available": true,
+      "frequency_source": "noaa",
+      "upload_ready": true,
+      "run_ready": true,
+      "upload": {
+        "id": "052cbf59f446418dac7c501c8462d0e6",
+        "job_id": "9441ae68-2648-419f-8f4d-10898d133155",
+        "phase": "complete",
+        "created_at": "2026-09-16T20:53:01.376470+00:00",
+        "error": null,
+        "retryable": true,
+        "filename": "thomas_s2_20171128_21071228_dnbr.tif"
+      },
+      "run": {
+        "id": "0ea9c1f5b0964b22ba7f1b457c1a6c9f",
+        "job_id": "b5232960-674f-4468-ba0f-a67588bed59d",
+        "phase": "complete",
+        "created_at": "2026-09-16T23:09:54.987978+00:00",
+        "error": null,
+        "retryable": true,
+        "filename": null,
+        "model": "M1",
+        "frequency_source": "noaa"
+      },
+      "dnbr": {
+        "id": "052cbf59f446418dac7c501c8462d0e6",
+        "filename": "thomas_s2_20171128_21071228_dnbr.tif",
+        "format": "GTiff",
+        "dtype": "float32",
+        "cell_size_m": [
+          10,
+          10
+        ],
+        "coverage_fraction": 1,
+        "source_range": [
+          -1367.7366943359375,
+          1235.358642578125
+        ],
+        "prepared_range": [
+          -0.037987105548381805,
+          1.0205727815628052
+        ],
+        "scale_mode": "auto",
+        "scale_factor": 0.001,
+        "add_offset": 0,
+        "scale_method": "distribution",
+        "completed_at": "2026-09-16T20:53:08.999857+00:00",
+        "current": true
+      },
+      "results": {
+        "id": "0ea9c1f5b0964b22ba7f1b457c1a6c9f",
+        "model": "M1",
+        "soil_policy": "statsgo_kffact_1995_cog2025_v1",
+        "completed_at": "2026-09-16T23:10:07.030929+00:00",
+        "partial": false,
+        "area_warning": false,
+        "coverage": {
+          "excluded_cells": 2,
+          "mask": "valid_mask.tif",
+          "policy": "common_valid_v1",
+          "total_cells": 77669,
+          "valid_cells": 77667,
+          "valid_fraction": 0.9999742497006527
+        },
+        "partial_reason": null,
+        "current": true,
+        "files": [
+          {
+            "name": "events.parquet",
+            "url": "/rq-engine/api/runs/nervous-mesquite/config/postfire-debris-flow/files/0ea9c1f5b0964b22ba7f1b457c1a6c9f/events.parquet"
+          },
+          {
+            "name": "design.parquet",
+            "url": "/rq-engine/api/runs/nervous-mesquite/config/postfire-debris-flow/files/0ea9c1f5b0964b22ba7f1b457c1a6c9f/design.parquet"
+          },
+          {
+            "name": "inverse.parquet",
+            "url": "/rq-engine/api/runs/nervous-mesquite/config/postfire-debris-flow/files/0ea9c1f5b0964b22ba7f1b457c1a6c9f/inverse.parquet"
+          },
+          {
+            "name": "valid_mask.tif",
+            "url": "/rq-engine/api/runs/nervous-mesquite/config/postfire-debris-flow/files/0ea9c1f5b0964b22ba7f1b457c1a6c9f/valid_mask.tif"
+          },
+          {
+            "name": "manifest.json",
+            "url": "/rq-engine/api/runs/nervous-mesquite/config/postfire-debris-flow/files/0ea9c1f5b0964b22ba7f1b457c1a6c9f/manifest.json"
+          }
+        ]
+      },
+      "freshness": "current"
+    }
+  },
+  {
+    "utc": "2026-09-16T23:11:25.735Z",
+    "stage": "resume_existing_ui_submission",
+    "response": {
+      "job_id": "b5232960-674f-4468-ba0f-a67588bed59d"
+    }
+  },
+  {
+    "utc": "2026-09-16T23:11:26.836Z",
+    "stage": "completed",
+    "state": {
+      "schema_version": 1,
+      "model": "M1",
+      "eligible": true,
+      "readonly": false,
+      "unavailable_reason": null,
+      "required": [
+        {
+          "key": "watershed",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#subcatchments-delineation"
+        },
+        {
+          "key": "sbs",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#disturbed-sbs"
+        },
+        {
+          "key": "k",
+          "ready": true,
+          "reason": null,
+          "message": "Kf will be prepared when you run M1",
+          "control": "#postfire-debris-flow"
+        },
+        {
+          "key": "climate",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#climate"
+        },
+        {
+          "key": "dnbr",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#postfire-debris-flow"
+        }
+      ],
+      "noaa_available": true,
+      "frequency_source": "noaa",
+      "upload_ready": true,
+      "run_ready": true,
+      "upload": {
+        "id": "052cbf59f446418dac7c501c8462d0e6",
+        "job_id": "9441ae68-2648-419f-8f4d-10898d133155",
+        "phase": "complete",
+        "created_at": "2026-09-16T20:53:01.376470+00:00",
+        "error": null,
+        "retryable": true,
+        "filename": "thomas_s2_20171128_21071228_dnbr.tif"
+      },
+      "run": {
+        "id": "0ea9c1f5b0964b22ba7f1b457c1a6c9f",
+        "job_id": "b5232960-674f-4468-ba0f-a67588bed59d",
+        "phase": "complete",
+        "created_at": "2026-09-16T23:09:54.987978+00:00",
+        "error": null,
+        "retryable": true,
+        "filename": null,
+        "model": "M1",
+        "frequency_source": "noaa"
+      },
+      "dnbr": {
+        "id": "052cbf59f446418dac7c501c8462d0e6",
+        "filename": "thomas_s2_20171128_21071228_dnbr.tif",
+        "format": "GTiff",
+        "dtype": "float32",
+        "cell_size_m": [
+          10,
+          10
+        ],
+        "coverage_fraction": 1,
+        "source_range": [
+          -1367.7366943359375,
+          1235.358642578125
+        ],
+        "prepared_range": [
+          -0.037987105548381805,
+          1.0205727815628052
+        ],
+        "scale_mode": "auto",
+        "scale_factor": 0.001,
+        "add_offset": 0,
+        "scale_method": "distribution",
+        "completed_at": "2026-09-16T20:53:08.999857+00:00",
+        "current": true
+      },
+      "results": {
+        "id": "0ea9c1f5b0964b22ba7f1b457c1a6c9f",
+        "model": "M1",
+        "soil_policy": "statsgo_kffact_1995_cog2025_v1",
+        "completed_at": "2026-09-16T23:10:07.030929+00:00",
+        "partial": false,
+        "area_warning": false,
+        "coverage": {
+          "excluded_cells": 2,
+          "mask": "valid_mask.tif",
+          "policy": "common_valid_v1",
+          "total_cells": 77669,
+          "valid_cells": 77667,
+          "valid_fraction": 0.9999742497006527
+        },
+        "partial_reason": null,
+        "current": true,
+        "files": [
+          {
+            "name": "events.parquet",
+            "url": "/rq-engine/api/runs/nervous-mesquite/config/postfire-debris-flow/files/0ea9c1f5b0964b22ba7f1b457c1a6c9f/events.parquet"
+          },
+          {
+            "name": "design.parquet",
+            "url": "/rq-engine/api/runs/nervous-mesquite/config/postfire-debris-flow/files/0ea9c1f5b0964b22ba7f1b457c1a6c9f/design.parquet"
+          },
+          {
+            "name": "inverse.parquet",
+            "url": "/rq-engine/api/runs/nervous-mesquite/config/postfire-debris-flow/files/0ea9c1f5b0964b22ba7f1b457c1a6c9f/inverse.parquet"
+          },
+          {
+            "name": "valid_mask.tif",
+            "url": "/rq-engine/api/runs/nervous-mesquite/config/postfire-debris-flow/files/0ea9c1f5b0964b22ba7f1b457c1a6c9f/valid_mask.tif"
+          },
+          {
+            "name": "manifest.json",
+            "url": "/rq-engine/api/runs/nervous-mesquite/config/postfire-debris-flow/files/0ea9c1f5b0964b22ba7f1b457c1a6c9f/manifest.json"
+          }
+        ]
+      },
+      "freshness": "current"
+    }
+  },
+  {
+    "utc": "2026-09-16T23:12:04.616Z",
+    "stage": "failure_page",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/nervous-mesquite/config/report/postfire_debris_flow/",
+    "text": "WEPPcloud\nnervous-mesquite\nconfig\nNoDb v1000\nEPSG:32611\nLast Modified: 2026-09-16 23:11:21 UTC\nPROJECT NAME\nSCENARIO\nREADME\nFORK\nARCHIVE\nTHEMES\nDefault (Light) · AA checked\nHigh Contrast (Light) · AA checked\nOneDark · Sensory preference\nDark Modern · Sensory preference\nAyu Dark · Sensory preference\nAyu Mirage · AA checked\nAyu Light · Sensory preference\nAyu Dark · Bordered · Sensory preference\nAyu Mirage · Bordered · AA checked\nAyu Light · Bordered · Sensory preference\nCursor Dark (Anysphere) · Sensory preference\nCursor Dark (Midnight) · AA checked\nCursor Dark (High Contrast) · Sensory preference\nMore\nTip: Press ':' to activate the command bar. :help for commands.\nPost-fire debris-flow likelihood\n\nAssessment summary\n\nAccepted model M1 · Completed 2026-09-16T23:10:07.030929+00:00 · Watershed area: 1919.24 acre\n\nResults match the current inputs.\n\nUsable input coverage: 77667 of 77669 cells (>99.9%); 2 excluded. Coverage is not confidence.\n\nLikelihood is conditional on the rainfall shown and the modeled post-fire conditions. It is not the annual chance of a debris flow and does not predict where debris will travel. This is not an official warning or evacuation threshold.\n\nRainfall scenarios — 60 minutes\nRainfall window\n15 minutes\n30 minutes\n60 minutes\n\nChanges rainfall scenarios and storm events; the 50% table always shows all three windows.\n\nSaved rainfall-frequency source: NOAA Atlas 14 PDS.\n\nRainfall recurrence intervals are partial-duration-series average recurrence intervals (PDS ARI), not debris-flow return periods or annual debris-flow probabilities.\n\n0%\n25%\n50%\n75%\n100%\n0.00\n0.39\n0.79\n1.18\n1.57\nPeak rainfall intensity (in/hour)\nModeled likelihood · 60-minute window\nP50\n\nSelect a saved marker or its table button to highlight that scenario. The line evaluates the accepted model between rainfall intensities; P50 marks a rainfall intensity associated with 50% modeled likelihood when available.\n\nResponse curve values\nSaved rainfall scenarios\nRainfall recurrence interval\tPeak rainfall intensity\tRainfall in the selected window\tModeled likelihood\nyears\tin/hour\tin\t%\nSelected: 1\t0.83\t0.83\t91.3%\n2\t1.02\t1.02\t97.5%\n5\t1.34\t1.34\t99.7%\n10\t1.57\t1.57\t99.9%\nDownload displayed rows (CSV)\nRainfall associated with 50% modeled likelihood\n\nAll three rainfall windows. These equation-derived values depend on the accepted model and post-fire inputs, not the rainfall-frequency source. They are not safe/unsafe boundaries or recommended warning triggers.\n\nAll three rainfall windows\nRainfall window\tPeak rainfall intensity\tRainfall in the window\nminutes\tin/hour\tin\n15\t0.75\t0.19\n30\t0.60\t0.30\n60\t0.48\t0.48\nDownload displayed rows (CSV)\nStorm events — 60 minutes\n\nAccepted climate mode: GridMetPRISM. Years represented: 46 (original labels 1980–2025; not necessarily a continuous record). Dates retain the accepted climate provenance. Event subdaily peaks are modeled/disaggregated rainfall, including events with calendar dates.\n\nEvery storm uses the same fixed post-fire conditions. A long climate record does not simulate landscape recovery. Total event rainfall is separate from rainfall in the selected window.\n\nMinimum likelihood (%)\nYear (original label)\nOrder by\nOriginal event order\nRainfall in the window\nModeled likelihood\n Descending\nApply filters Reset filters\n\nBlank filters include all storms. A minimum likelihood excludes storms with unavailable likelihoods.\n\nShowing 1–100 of 2689 matching storm events. 2689 storm events before filters.\n\nMore columns are available. Scroll horizontally to view them: use Shift + mouse wheel, or focus this table and use Left and Right Arrow keys.\n\nSaved storm events; select a date label for all three rainfall windows\nDate label (year / month / day)\tPeak rainfall intensity\tRainfall in the selected window\tTotal event rainfall\tModeled likelihood\n\tin/hour\tin\tin\t%\n1980 / 1 / 6\t0.04\t0.04\t0.05\t5%\n1980 / 1 / 7\t0.05\t0.05\t0.06\t5.3%\n1980 / 1 / 8\t0.29\t0.29\t0.46\t22.7%\n1980 / 1 / 9\t1.65\t1.65\t3.03\t>99.9%\n1980 / 1 / 10\t0.48\t0.48\t1.30\t50.3%\n1980 / 1 / 11\t0.75\t0.75\t1.85\t86.1%\n1980 / 1 / 12\t0.22\t0.22\t0.55\t15.1%\n1980 / 1 / 13\t0.73\t0.73\t1.05\t84.3%\n1980 / 1 / 14\t0.28\t0.28\t0.42\t20.6%\n1980 / 1 / 15\t0.07\t0.07\t0.10\t6%\n1980 / 1 / 16\t0.03\t0.03\t0.06\t4.7%\n1980 / 1 / 17\t0.03\t0.03\t0.07\t4.7%\n1980 / 1 / 18\t0.01\t0.01\t0.01\t4.1%\n1980 / 1 / 19\t0.02\t0.02\t0.02\t4.3%\n1980 / 1 / 23\t0.01\t0.01\t0.02\t4.2%\n1980 / 1 / 27\t0.13\t0.13\t0.23\t8.7%\n1980 / 1 / 28\t0.59\t0.59\t0.99\t67.4%\n1980 / 1 / 29\t0.27\t0.27\t0.51\t19.5%\n1980 / 2 / 12\t0.08\t0.08\t0.20\t6.5%\n1980 / 2 / 13\t0.45\t0.45\t0.66\t45.3%\n1980 / 2 / 14\t1.12\t1.12\t1.61\t98.7%\n1980 / 2 / 15\t0.91\t0.91\t4.89\t94.9%\n1980 / 2 / 16\t1.18\t1.18\t2.87\t99.1%\n1980 / 2 / 17\t1.40\t1.40\t2.08\t99.8%\n1980 / 2 / 18\t1.69\t1.69\t2.41\t>99.9%\n1980 / 2 / 19\t1.06\t1.06\t2.07\t98.1%\n1980 / 2 / 20\t1.24\t1.24\t1.54\t99.4%\n1980 / 2 / 21\t0.40\t0.40\t0.56\t37.8%\n1980 / 2 / 27\t0.01\t0.01\t0.02\t4.3%\n1980 / 2 / 28\t0.01\t0.01\t0.02\t4.2%\n1980 / 3 / 1\t0.13\t0.13\t0.37\t8.6%\n1980 / 3 / 2\t0.79\t0.79\t1.41\t89.3%\n1980 / 3 / 3\t0.35\t0.35\t0.50\t29.9%\n1980 / 3 / 4\t0.09\t0.09\t0.17\t7.1%\n1980 / 3 / 5\t0.88\t0.88\t1.80\t93.6%\n1980 / 3 / 6\t0.14\t0.14\t0.33\t9.5%\n1980 / 3 / 10\t0.03\t0.03\t0.03\t4.6%\n1980 / 3 / 11\t0.03\t0.03\t0.05\t4.7%\n1980 / 3 / 17\t0.01\t0.01\t0.03\t4.2%\n1980 / 3 / 18\t0.02\t0.02\t0.03\t4.4%\n1980 / 3 / 24\t0.05\t0.05\t0.12\t5.2%\n1980 / 3 / 25\t0.07\t0.07\t0.11\t6.2%\n1980 / 3 / 26\t0.03\t0.03\t0.05\t4.7%\n1980 / 4 / 1\t0.01\t0.01\t0.01\t4.1%\n1980 / 4 / 2\t0.05\t0.05\t0.05\t5.2%\n1980 / 4 / 5\t0.03\t0.03\t0.03\t4.8%\n1980 / 4 / 7\t0.01\t0.01\t0.01\t4.2%\n1980 / 4 / 19\t0.02\t0.02\t0.02\t4.4%\n1980 / 4 / 22\t0.14\t0.14\t0.23\t9.2%\n1980 / 4 / 23\t0.06\t0.06\t0.07\t5.7%\n1980 / 4 / 27\t0.03\t0.03\t0.04\t4.6%\n1980 / 4 / 28\t0.34\t0.34\t0.40\t28.9%\n1980 / 4 / 29\t0.17\t0.17\t0.17\t11.2%\n1980 / 4 / 30\t0.06\t0.06\t0.07\t5.7%\n1980 / 5 / 9\t0.03\t0.03\t0.04\t4.7%\n1980 / 5 / 10\t0.14\t0.14\t0.16\t9.2%\n1980 / 5 / 11\t0.04\t0.04\t0.04\t5%\n1980 / 5 / 20\t0.04\t0.04\t0.04\t5%\n1980 / 5 / 24\t0.02\t0.02\t0.02\t4.4%\n1980 / 10 / 14\t0.08\t0.08\t0.08\t6.4%\n1980 / 10 / 16\t0.07\t0.07\t0.07\t6.1%\n1980 / 12 / 2\t0.01\t0.01\t0.02\t4.2%\n1980 / 12 / 3\t0.55\t0.55\t0.80\t61.6%\n1980 / 12 / 4\t0.91\t0.91\t1.18\t95%\n1981 / 1 / 2\t0.02\t0.02\t0.04\t4.3%\n1981 / 1 / 3\t0.03\t0.03\t0.07\t4.6%\n1981 / 1 / 4\t0.06\t0.06\t0.09\t5.9%\n1981 / 1 / 11\t0.01\t0.01\t0.01\t4.1%\n1981 / 1 / 22\t0.22\t0.22\t0.37\t14.9%\n1981 / 1 / 23\t0.64\t0.64\t0.87\t75.3%\n1981 / 1 / 27\t2.04\t2.04\t2.66\t>99.9%\n1981 / 1 / 28\t1.30\t1.30\t2.89\t99.6%\n1981 / 1 / 29\t0.32\t0.32\t0.95\t25.7%\n1981 / 1 / 30\t0.02\t0.02\t0.07\t4.4%\n1981 / 2 / 8\t0.16\t0.16\t0.53\t10.7%\n1981 / 2 / 9\t0.25\t0.25\t0.45\t17.8%\n1981 / 2 / 11\t0.01\t0.01\t0.02\t4.3%\n1981 / 2 / 15\t0.01\t0.01\t0.01\t4.1%\n1981 / 2 / 24\t0.14\t0.14\t0.19\t9.3%\n1981 / 2 / 25\t0.17\t0.17\t0.30\t11.2%\n1981 / 2 / 26\t0.07\t0.07\t0.09\t6.1%\n1981 / 2 / 27\t0.36\t0.36\t0.51\t30.8%\n1981 / 2 / 28\t0.50\t0.50\t1.00\t53.8%\n1981 / 3 / 1\t0.74\t0.74\t1.80\t85.2%\n1981 / 3 / 2\t0.35\t0.35\t0.52\t29.3%\n1981 / 3 / 3\t0.17\t0.17\t0.23\t11.3%\n1981 / 3 / 4\t1.30\t1.30\t1.87\t99.6%\n1981 / 3 / 5\t1.29\t1.29\t2.27\t99.6%\n1981 / 3 / 13\t0.06\t0.06\t0.11\t5.6%\n1981 / 3 / 16\t0.01\t0.01\t0.03\t4.1%\n1981 / 3 / 18\t0.12\t0.12\t0.26\t8.2%\n1981 / 3 / 19\t1.30\t1.30\t1.81\t99.6%\n1981 / 3 / 20\t0.15\t0.15\t0.22\t9.8%\n1981 / 3 / 21\t0.13\t0.13\t0.22\t8.8%\n1981 / 3 / 22\t0.03\t0.03\t0.09\t4.6%\n1981 / 3 / 25\t0.07\t0.07\t0.10\t6.2%\n1981 / 3 / 26\t0.14\t0.14\t0.26\t9.3%\n1981 / 4 / 1\t0.02\t0.02\t0.02\t4.4%\n1981 / 4 / 2\t0.02\t0.02\t0.02\t4.4%\n1981 / 4 / 17\t0.30\t0.30\t0.30\t23.2%\n\nPrevious page Next page\nDownload displayed rows (CSV)\nMethods and downloads\nAssessment provenance and interpretation\n\nDisplayed-row CSV: current page and displayed rainfall units; numeric values retain full precision. Probability columns are explicitly labeled fractions (0–1), not percentages. Context columns identify the assessment, filters, page and units.\n\nAll saved design scenarios (canonical units)\nAll saved events (canonical units)\nAll saved thresholds (canonical units)\nSaved assessment manifest\nSaved validity mask\n\nSaved manifest and validity mask, when present, remain available with the normal browsable and archived module files."
+  },
+  {
+    "utc": "2026-09-16T23:12:04.675Z",
+    "stage": "FAIL",
+    "error": "page.waitForEvent: Timeout 30000ms exceeded while waiting for event \"download\"\n=========================== logs ===========================\nwaiting for event \"download\"\n============================================================"
+  }
+]

@@ -1,7 +1,7 @@
 # Postfire Debris Flow
 
 > WBT-based postfire debris-flow likelihood and rainfall-threshold
-> assessment using Staley et al. (2017), with RUSLE supplying M1 soil erodibility.
+> assessment using Staley et al. (2017), with NRCS-derived STATSGO fine-earth Kf for M1.
 
 ## Status
 
@@ -21,10 +21,9 @@ and [roadmap](implementation_roadmap.md) for scientific scope and remaining work
 
 1. Delineate the burned watershed of interest in a continental-US WBT project.
    The empirical model is intended for recently burned Western US basins.
-2. Enable **Post-fire debris flow** in Mods (also enables POLARIS and RUSLE).
-   Build project climate, set soil burn severity, and prepare POLARIS
-   Nomograph K through RUSLE. The control shows which prerequisites need work;
-   completion of the entire RUSLE model is not required.
+2. Enable **Post-fire debris flow** in Mods. Build project climate and set soil
+   burn severity. Run M1 automatically prepares [STATSGO fine-earth Kf](docs/kf_source.md);
+   POLARIS and RUSLE are not required. The control shows missing prerequisites.
 3. Upload a single-band GeoTIFF
    (preferred), self-contained IMG, or supported VRT with its referenced raster.
    **Auto** estimates the dNBR scale from values. If it cannot resolve the scale,
@@ -42,8 +41,7 @@ units. The model estimates occurrence likelihood, not volume or inundation exten
 
 Select M3 beside M1 in the existing control. The dNBR upload and K prerequisite
 are hidden; Soils is shown instead. Initial M3 eligibility requires the project's
-10 m cell size and NED13/2022 DEM source. Automatic POLARIS/RUSLE enablement stays
-in place, but M3 does not require their outputs. Prepare project soils, SBS and
+10 m cell size and NED13/2022 DEM source. M3 does not require Kf, POLARIS or RUSLE. Prepare project soils, SBS and
 climate before submitting. The task derives soil thickness from verified SSURGO
 records with original STATSGO THICK fallback, and ruggedness from the full basin.
 The summary reports exact Valid coverage and links its downloadable mask.
@@ -97,8 +95,8 @@ artifacts as well as completed outputs.
    Manually isolate a burned basin you suspect may be at risk when setting up
    the project. Assessment reuses that watershed and its existing outlet;
    additional or nested catchment delineation is not required.
-2. For M1, acquire POLARIS inputs and build the Nomograph K raster through RUSLE;
-   also supply continuous pre/post-fire dNBR.
+2. For M1, supply continuous pre/post-fire dNBR. Run M1 acquires bounded source
+   windows of the approved KFFACT raster and prepares Kf on the existing grid.
 3. Select M1 (default) or M3 explicitly. M3 requires soil thickness instead of K
    and does not require dNBR. Raw project SSURGO horizons are a feasible source;
    SSURGO is the approved primary source with original STATSGO THICK as fallback.
@@ -135,7 +133,7 @@ The specification and detailed contracts map the implemented source and UI paths
   are logged server-side; browser messages omit host paths and credentials.
 
 - WBT is the supported terrain backend for this new module.
-- M3 requires built project Soils; M1 requires current RUSLE K instead. Availability is restricted to
+- M3 requires built project Soils; M1 prepares its own fine-earth Kf. Availability is restricted to
   CONUS; the empirical model is intended for recently burned watersheds in the
   Western United States. Availability elsewhere in CONUS is not local validation.
 - UI and reports must follow project SI/English unit preferences without
@@ -143,8 +141,15 @@ The specification and detailed contracts map the implemented source and UI paths
 - dNBR uploads follow SBS file-format conventions and are normalized onto the
   project grid. Partial watershed coverage is supported with explicit coverage
   reporting; missing pixels are not zero. See the [upload design](docs/dnbr_upload.md).
-- RUSLE owns M1 K preparation and its UI; do not duplicate the K estimator.
-- The standard RUSLE build produces named K artifacts, not `rusle/k.tif`.
+- New M1 attempts own `kf/` source receipts, native/aligned rasters and metadata;
+  predictor schema 3 binds their identity. Source failures retain diagnostics and
+  leave the previous acceptance intact. Retry through Run M1; never fill missing Kf.
+- Legacy schema 1/2 M1 keeps its recorded POLARIS/RUSLE provenance and freshness.
+  Removing RUSLE does not remove the post-fire control or invalidate new Kf results.
+- Reports evaluate the accepted model on a bounded intensity grid for 15/30/60
+  minutes, with P50, saved design markers, numeric values and CSV. Unit changes
+  affect display only. NOAA scenarios are statistical design rainfall; recorded
+  GridMetPRISM/CLIGEN event peaks are modeled/disaggregated, even with calendar dates.
 - M3 offline thickness uses raw validated intervals and explicit fractional
   component support. Original units are inches; S is mean cm / 254.
   Production uses the separate accepted recorded-depth/common-valid policy;

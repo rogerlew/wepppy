@@ -1,0 +1,106 @@
+INFO:wctl2:docker compose config --services
+INFO:wctl2:docker compose exec rq-worker bash -lc set -euo pipefail; cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy /opt/venv/bin/python -c '
+import inspect
+import re
+
+import redis
+from rq import Queue, Worker, worker_registration
+from rq.job import Job
+from rq.utils import utcformat, utcnow
+
+from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+
+queue_names = ("default", "batch", "fork-archive")
+conn = redis.Redis(**redis_connection_kwargs(RedisDB.RQ))
+prefix = Worker.redis_worker_namespace_prefix
+queue_prefix = worker_registration.WORKERS_BY_QUEUE_KEY.split("%s", 1)[0]
+
+
+def _decode(value):
+    if isinstance(value, bytes):
+        return value.decode("utf-8", errors="replace")
+    return str(value)
+
+
+def _scan(pattern):
+    return sorted({_decode(key).strip() for key in conn.scan_iter(match=pattern) if key})
+
+
+def _get_started_job_ids(registry):
+    params = inspect.signature(registry.get_job_ids).parameters
+    if "cleanup" in params:
+        return registry.get_job_ids(start=0, end=-1, cleanup=False)
+    return registry.get_job_ids(start=0, end=-1)
+
+
+worker_keys = _scan(f"{prefix}*")
+queue_set_keys = _scan(f"{queue_prefix}*")
+conn.delete(Worker.redis_workers_keys, *queue_set_keys)
+for key in worker_keys:
+    worker = Worker.find_by_key(key, connection=conn)
+    if worker is None:
+        continue
+    worker_registration.register(worker)
+
+if conn.scard(Worker.redis_workers_keys) == 0:
+    now = utcformat(utcnow())
+    uuid_pattern = re.compile(r"^[0-9a-f]{32}$")
+    recovered = set()
+    for queue_name in queue_names:
+        queue = Queue(queue_name, connection=conn)
+        job_ids = list(_get_started_job_ids(queue.started_job_registry))
+        if not job_ids:
+            continue
+        jobs = Job.fetch_many(job_ids, connection=conn)
+        for job in jobs:
+            if job is None:
+                continue
+            worker_name = _decode(getattr(job, "worker_name", "")).strip()
+            if not worker_name or not uuid_pattern.match(worker_name):
+                continue
+            recovered.add(worker_name)
+
+    for worker_name in sorted(recovered):
+        worker_key = f"{prefix}{worker_name}"
+        if not conn.exists(worker_key):
+            conn.hset(
+                worker_key,
+                mapping={
+                    "birth": now,
+                    "last_heartbeat": now,
+                    "queues": ",".join(queue_names),
+                    "state": "busy",
+                    "hostname": "unknown",
+                    "ip_address": "unknown",
+                    "pid": "0",
+                    "version": "unknown",
+                    "python_version": "unknown",
+                },
+            )
+        conn.sadd(Worker.redis_workers_keys, worker_key)
+        for queue_name in queue_names:
+            conn.sadd(worker_registration.WORKERS_BY_QUEUE_KEY % queue_name, worker_key)
+'; redis_url="$(cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy /opt/venv/bin/python -c 'from wepppy.config.redis_settings import redis_url, RedisDB; print(redis_url(RedisDB.RQ))')"; exec /opt/venv/bin/rq info -u "$redis_url" default batch fork-archive
+default      | 0, 0 executing, 154 finished, 424 failed
+batch        | 0, 0 executing, 16 finished, 169 failed
+fork-archive | 0, 0 executing, 0 finished, 0 failed
+3 queues, 0 jobs total
+
+ac5d07f107414a32845a6ee6f67f309f (a51d7abc488e 172.28.0.18:37320 366): idle default. jobs: 0 finished, 0 failed
+37f76f28f2ee48c79a71a20f05741753 (a51d7abc488e 172.28.0.18:37286 362): idle default. jobs: 0 finished, 0 failed
+a56b2fee12a548a6a9e6a45e6a66e7f8 (9494e2cda419 172.28.0.19:53148 357): idle batch. jobs: 0 finished, 0 failed
+0107f4c76c884aa3bd1130bea2cf8f7a (2d85686fe2c0 172.28.0.23:47762 405): idle fork-archive. jobs: 0 finished, 0 failed
+df571ac90f13483e87b8fd47f01b3cb6 (a51d7abc488e 172.28.0.18:37312 364): idle default. jobs: 0 finished, 0 failed
+055f8c0f2d164e4c88ca1c75e6649cea (9494e2cda419 172.28.0.19:53230 362): idle batch. jobs: 0 finished, 0 failed
+a6c51a0576244b1c877bb7ee8c5b7e63 (a51d7abc488e 172.28.0.18:37218 357): idle default. jobs: 1 finished, 0 failed
+3376e4963c2348f1b174810269391d14 (9494e2cda419 172.28.0.19:53160 358): idle batch. jobs: 0 finished, 0 failed
+2a1936666e0d466ebe94f59067d77d1b (a51d7abc488e 172.28.0.18:37268 360): idle default. jobs: 1 finished, 0 failed
+8ce42c2efc5246e68e50670336351bbd (9494e2cda419 172.28.0.19:53212 360): idle batch. jobs: 0 finished, 0 failed
+4e9000292483499eaa257e390811f783 (a51d7abc488e 172.28.0.18:37238 358): idle default. jobs: 1 finished, 0 failed
+11 workers, 3 queues
+
+Updated: 2026-09-16 23:17:58.807163
+INFO:wctl2:docker compose exec rq-worker bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy /opt/venv/bin/python -m wepppy.rq.job_summary --queues default,batch,fork-archive --limit 50
+
+Jobs (started, queued)
+  (none)

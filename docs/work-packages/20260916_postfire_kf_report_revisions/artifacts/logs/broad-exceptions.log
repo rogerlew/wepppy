@@ -1,0 +1,39 @@
+Broad exception handler changed-file enforcement
+
+Repo root: /home/workdir/wepppy
+Base ref: origin/master
+Merge base: e6c821cdd844e1cde360bd76d3ce500f389b3f15
+Path filter: wepppy, services
+Allowlist source: /home/workdir/wepppy/docs/standards/broad-exception-boundary-allowlist.md
+Changed Python files scanned: 12
+
+Files:
+  M wepppy/nodb/mods/postfire_debris_flow/integration.py
+  M wepppy/nodb/mods/postfire_debris_flow/predictor_v2.py
+  M wepppy/nodb/mods/postfire_debris_flow/preflight.py
+  M wepppy/nodb/mods/postfire_debris_flow/production.py
+  M wepppy/nodb/mods/postfire_debris_flow/rainfall_io.py
+  A wepppy/nodb/mods/postfire_debris_flow/report.py
+  M wepppy/nodb/mods/postfire_debris_flow/results.py
+  M wepppy/nodb/mods/postfire_debris_flow/source_transport.py
+  M wepppy/rq/postfire_debris_flow_rq.py
+  M wepppy/weppcloud/_blueprints_context.py
+  M wepppy/weppcloud/routes/__init__.py
+  A wepppy/weppcloud/routes/nodb_api/postfire_report_bp.py
+
+Per-file delta (unsuppressed broad catches):
+  M wepppy/nodb/mods/postfire_debris_flow/integration.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/mods/postfire_debris_flow/predictor_v2.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/mods/postfire_debris_flow/preflight.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/mods/postfire_debris_flow/production.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/mods/postfire_debris_flow/rainfall_io.py (base=0 current=0 delta=+0)
+  A wepppy/nodb/mods/postfire_debris_flow/report.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/mods/postfire_debris_flow/results.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/mods/postfire_debris_flow/source_transport.py (base=0 current=0 delta=+0)
+  M wepppy/rq/postfire_debris_flow_rq.py (base=0 current=0 delta=+0)
+  M wepppy/weppcloud/_blueprints_context.py (base=0 current=0 delta=+0)
+  M wepppy/weppcloud/routes/__init__.py (base=0 current=0 delta=+0)
+  A wepppy/weppcloud/routes/nodb_api/postfire_report_bp.py (base=0 current=0 delta=+0)
+
+Net delta (all changed files): +0
+Result: PASS

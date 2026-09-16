@@ -1,4 +1,4 @@
-"""Explicit bounded transports for the two approved M3 source endpoints.
+"""Explicit bounded transports for the approved M3 and M1 Kf source endpoints.
 
 Run in a dedicated main-thread preparation process: SIGALRM bounds DNS/TLS,
 slow response bodies and native raster callbacks, not just socket inactivity.
@@ -14,8 +14,9 @@ import threading
 import time
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 
-__all__ = ['THICK_URL', 'SDA_URL', 'deadline', 'Transport', 'RangeFile']
+__all__ = ['THICK_URL', 'KF_URL', 'SDA_URL', 'deadline', 'Transport', 'RangeFile']
 THICK_URL = 'https://prod-is-usgs-sb-prod-publish.s3.amazonaws.com/675721b9d34e5c5dfd05c575/STATSGO-THICK.tif'
+KF_URL = 'https://prod-is-usgs-sb-prod-publish.s3.amazonaws.com/6750c172d34ed8d3858534d8/statsgo-KFFACT.tif'
 SDA_URL = 'https://SDMDataAccess.nrcs.usda.gov/Tabular/post.rest'
 MAX_BODY = 96*1024*1024
 MAX_TEXT = 1024*1024
@@ -60,7 +61,7 @@ class Transport:
         self.opener = build_opener(_NoRedirect())
 
     def request(self, url, *, method='GET', headers=None, data=None, expected=None, limit=None):
-        if url not in (THICK_URL,SDA_URL):
+        if url not in (THICK_URL,KF_URL,SDA_URL):
             raise ValueError('Unapproved source endpoint')
         if method not in ('GET','HEAD','POST') or (url == SDA_URL) != (method == 'POST'):
             raise ValueError('Unapproved source method')
@@ -135,13 +136,16 @@ class Transport:
 
 class RangeFile(io.RawIOBase):
     """Seekable original object, served solely by identity-pinned HTTP ranges."""
-    def __init__(self, transport):
+    def __init__(self, transport, *, url=None):
         self.transport = transport
-        headers,_ = transport.request(THICK_URL,method='HEAD')
+        self.url = THICK_URL if url is None else url
+        if self.url not in (THICK_URL, KF_URL):
+            raise ValueError('Unapproved raster endpoint')
+        headers,_ = transport.request(self.url,method='HEAD')
         self.identity = self._identity(headers)
         self.etag,self.size,self.modified = self.identity
         self.position = 0
-        self.path,self.mode,self.fs = 'STATSGO-THICK.tif','rb',self
+        self.path,self.mode,self.fs = self.url.rsplit('/',1)[-1],'rb',self
         self.blocks = {}
         self._failure = [None]
 
@@ -202,7 +206,7 @@ class RangeFile(io.RawIOBase):
                                 or headers.get('content-range') != f'bytes {start}-{stop}/{self.size}'
                                 or headers.get('content-length') != str(stop-start+1)):
                             raise ValueError('Range or object identity mismatch')
-                    _,block = self.transport.request(THICK_URL,headers={'Range':f'bytes={start}-{stop}','If-Match':self.etag},
+                    _,block = self.transport.request(self.url,headers={'Range':f'bytes={start}-{stop}','If-Match':self.etag},
                                                      expected=validate,limit=stop-start+1)
                     self.blocks[start] = block
                 count = min(end,self.position+(stop-self.position+1))-self.position
@@ -218,6 +222,6 @@ class RangeFile(io.RawIOBase):
     def verify(self):
         if self.failure is not None:
             raise self.failure
-        headers,_ = self.transport.request(THICK_URL,method='HEAD')
+        headers,_ = self.transport.request(self.url,method='HEAD')
         if self._identity(headers) != self.identity:
             raise ValueError('Source object changed during preparation')

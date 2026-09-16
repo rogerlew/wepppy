@@ -1,0 +1,16 @@
+{
+  "job_id": "b5232960-674f-4468-ba0f-a67588bed59d",
+  "runid": "nervous-mesquite",
+  "status": "finished",
+  "result": {
+    "message": "Model run complete."
+  },
+  "started_at": "2026-09-16 23:09:55.693714",
+  "ended_at": "2026-09-16 23:10:07.237920",
+  "description": "wepppy.rq.postfire_debris_flow_rq.run_m1_rq('nervous-mesquite', '0ea9c1f5b0964b22ba7f1b457c1a6c9f')",
+  "elapsed_s": 11.544206,
+  "exc_info": null,
+  "auth_actor": null,
+  "culvert_batch_uuid": null,
+  "children": {}
+}

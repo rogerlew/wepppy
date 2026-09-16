@@ -1,0 +1,8 @@
+INFO:wctl2:docker compose logs --tail=15 preflight
+weppcloud-preflight  | {"time":"2026-09-16T23:08:09.036904217Z","level":"INFO","msg":"starting preflight2","config":"listen=0.0.0.0:9001 redis=redis://:redacted@redis:6379/0 ping=5s pong=1m15s metrics=true origins=any"}
+weppcloud-preflight  | {"time":"2026-09-16T23:08:09.964356195Z","level":"INFO","msg":"shutdown signal received"}
+weppcloud-preflight  | {"time":"2026-09-16T23:08:09.964626909Z","level":"INFO","msg":"preflight2 stopped"}
+weppcloud-preflight  | {"time":"2026-09-16T23:08:30.985701468Z","level":"INFO","msg":"starting preflight2","config":"listen=0.0.0.0:9001 redis=redis://:redacted@redis:6379/0 ping=5s pong=1m15s metrics=true origins=any"}
+weppcloud-preflight  | {"time":"2026-09-16T23:08:31.070328524Z","level":"WARN","msg":"redis unavailable, retrying","error":"redis ping: dial tcp: lookup redis on 127.0.0.11:53: server misbehaving","attempt":1,"backoff":1000000000}
+weppcloud-preflight  | {"time":"2026-09-16T23:08:32.161291038Z","level":"WARN","msg":"redis unavailable, retrying","error":"redis ping: dial tcp: lookup redis on 127.0.0.11:53: server misbehaving","attempt":2,"backoff":2000000000}
+weppcloud-preflight  | {"time":"2026-09-16T23:08:34.291491866Z","level":"ERROR","msg":"failed to construct server","error":"redis ping: LOADING Redis is loading the dataset in memory"}

@@ -17,6 +17,7 @@ import numpy as np
 import rasterio
 
 from . import dnbr
+from .kf_source import POLICY as KF_POLICY
 from .encoding import inspect_encoding
 from .integration import M1Inputs, build_m1_predictors
 from .m1_inputs import digest, read_raster, prepare, read_json, companions
@@ -36,7 +37,7 @@ def result_files(accepted):
 
 LABELS = {'watershed': ('Delineate watershed', '#subcatchments-delineation'),
           'soils': ('Build soils', '#soils'), 'sbs': ('Set soil burn severity', '#disturbed-sbs'),
-          'k': ('Prepare in RUSLE', '#rusle'), 'climate': ('Build climate', '#climate'),
+          'k': ('Kf will be prepared when you run M1', '#postfire-debris-flow'), 'climate': ('Build climate', '#climate'),
           'dnbr': ('Upload dNBR', '#postfire-debris-flow')}
 
 
@@ -154,9 +155,12 @@ def k_current(wd, files, polaris_completed):
         return False
 
 
-def sources(wd, *, rainfall=True, frequency='cli', model='M1'):
+def sources(wd, *, rainfall=True, frequency='cli', model='M1', soil_policy=KF_POLICY):
     if model not in ('M1', 'M3'):
         raise WorkflowError('invalid_model', 'Choose M1 or M3.')
+    if soil_policy not in (None, KF_POLICY):
+        raise WorkflowError('invalid_input','Unsupported recorded soil policy.')
+    legacy_k = model == 'M1' and soil_policy is None
     from wepppy.nodb.core import Ron, Watershed, Soils, Climate
     from wepppy.nodb.mods.disturbed import Disturbed
     from wepppy.nodb.project_config_capabilities import resolve_run_capability_authority
@@ -167,7 +171,7 @@ def sources(wd, *, rainfall=True, frequency='cli', model='M1'):
     receipt_keys = {'watershed'}
     if rainfall:
         receipt_keys.update(('abstract', 'sbs', 'climate'))
-        receipt_keys.update(('polaris',) if model == 'M1' else ('soils', 'landuse', 'rangeland'))
+        receipt_keys.update(('polaris',) if legacy_k else () if model == 'M1' else ('soils', 'landuse', 'rangeland'))
     completed = {key: prep[str(task)] for key, task in (
         ("watershed", TaskEnum.build_subcatchments), ("soils", TaskEnum.build_soils),
         ("sbs", TaskEnum.init_sbs_map), ("climate", TaskEnum.build_climate),
@@ -204,7 +208,7 @@ def sources(wd, *, rainfall=True, frequency='cli', model='M1'):
                 files[f'soil_{index}'] = path
         if disturbed:
             files['sbs'] = Path(disturbed.sbs_4class_path)
-        if model == 'M1':
+        if legacy_k:
             files['k'] = Path(wd)/'rusle'/'k_polaris_nomograph.tif'
             files['k_manifest'] = Path(wd)/'rusle'/'manifest.json'
         files['cli'] = Path(wd)/'climate'/'wepp_cli.parquet'
@@ -224,8 +228,13 @@ def sources(wd, *, rainfall=True, frequency='cli', model='M1'):
         binary = Path(tool.exe_path)/tool.exe_name
         selections['wbt_sha256'] = cached_digest(binary)
         excluded = ('soils', 'landuse', 'rangeland') if model == 'M1' else ('polaris',)
+        if model == 'M1' and not legacy_k:
+            excluded += ('polaris',)
         selections['completed'] = {k:v for k,v in completed.items() if k not in excluded}
-        if model == 'M1':
+        if model == 'M1' and not legacy_k:
+            selections['soil_policy'] = KF_POLICY
+            checks['k'] = True  # Absent attempt-owned Kf is prepared by Run, never by state reads.
+        if legacy_k:
             candidate = Path(wd)/'polaris'/'manifest.json'
             if candidate.is_file(): files['polaris_manifest'] = candidate
             checks['k'] = files['k'].is_file() and files['k_manifest'].is_file() and k_current(wd, files, completed['polaris'])
@@ -347,7 +356,10 @@ def get_state(wd, config, *, frequency=None, model=None, reconcile=True):
         names = result_files(result)
         result_model = result.get('model', 'M1')
         result_frequency = result['snapshot']['frequency']
-        result_snapshot = snapshot if (result_model == model and result_frequency == state['frequency_source']) else sources(wd, frequency=result_frequency, model=result_model)[4]
+        result_policy = result.get('soil_policy')
+        result_snapshot = (snapshot if (result_model == model and result_frequency == state['frequency_source']
+                           and (result_model == 'M3' or result_policy == KF_POLICY))
+                           else sources(wd, frequency=result_frequency, model=result_model, soil_policy=result_policy)[4])
         expected = {'inputs': result_snapshot, 'dnbr': active['id'] if active and result_model == 'M1' else None, 'frequency': result_frequency}
         current = bool((result_model == 'M3' or checks['dnbr']) and artifacts_current(wd,result,strong=False) and result['snapshot'] == expected)
         result['model'] = result_model
@@ -359,6 +371,10 @@ def get_state(wd, config, *, frequency=None, model=None, reconcile=True):
         result['files'] = [{'name': name, 'url': f'/rq-engine/api/runs/{runid}/{config}/postfire-debris-flow/files/{result["id"]}/{name}'} for name in names]
     required = [{'key': key, 'ready': bool(checks.get(key)), 'reason': None if checks.get(key) else 'missing_input',
                  'message': '' if checks.get(key) else label, 'control': anchor} for key,(label,anchor) in LABELS.items() if key not in (('soils',) if model == 'M1' else ('k', 'dnbr'))]
+    if model == 'M1':
+        for item in required:
+            if item['key'] == 'k':
+                item['message'] = 'Kf will be prepared when you run M1'
     if model == 'M3' and (snapshot['selections'].get('cellsize') != 10 or snapshot['selections'].get('dem_source') != 'ned13/2022'):
         required[0]['message'] = 'Use a 10 m project with the NED13/2022 elevation source.'
     return {'schema_version': 1, 'model': model, 'eligible': eligible, 'readonly': readonly,
@@ -482,7 +498,8 @@ def engine_identity():
         'staley2017.py','dnbr.py','encoding.py','rainfall.py','rainfall_io.py','results.py','production.py',
         'analysis_support.py','predictor_v2.py','soil_policy.py','soil_thickness.py','soil_snapshot.py','soil_inputs.py',
         'm3_terrain.py','m3_integration.py','production_soils.py','result_support.py',
-        'run_preparation.py','source_preparation.py','source_acquisition.py','source_transport.py')}
+        'run_preparation.py','source_preparation.py','source_acquisition.py','source_transport.py','kf_source.py',
+        'data/kffact_metadata.xml','response_curve.py')}
 
 
 def partial_reason(manifest, partial):
@@ -516,7 +533,24 @@ def execute_model(wd, identity, binary):
         raise WorkflowError('superseded','Required project data changed. Run the model again.',409)
     if not artifacts_current(wd, active):
         raise WorkflowError('changed_source','Uploaded files changed. Upload the map again.',409)
+    def check_attempt(current):
+        running=current['run_attempt']
+        if (not running or running['id']!=identity or running.get('model','M1')!='M1'
+                or running['phase']!='running' or running['snapshot']!=expected
+                or current['model']!='M1' or current['frequency_source']!=frequency
+                or not current['active_dnbr'] or current['active_dnbr']['id']!=active['id']):
+            raise WorkflowError('superseded','M1 preparation was superseded. Run again.',409)
+    check_attempt(state_at(wd))
     root=directory(wd,identity); root.mkdir(exist_ok=True)
+    from .kf_source import acquire_kf
+    try:
+        acquire_kf(paths['dem'],paths['mask'],root/'kf')
+    except (OSError, ValueError) as exc:
+        raise WorkflowError('kf_preparation_failed', 'Kf preparation failed. See the retained source diagnostics and run M1 again.', 422) from exc
+    check_attempt(state_at(wd))
+    if not _current_authority(wd,frequency,'M1',snapshot):
+        raise WorkflowError('superseded','Project inputs changed during Kf preparation. Run again.',409)
+    paths.update(k=root/'kf/kf.tif',k_manifest=root/'kf/manifest.json')
     normalization=directory(wd,active['id'])/'normalized'
     manifest=read_json(normalization/'manifest.json')
     lineage=tuple(Path(p) for p in manifest['input_sha256'])
@@ -526,12 +560,10 @@ def execute_model(wd, identity, binary):
         safe(wd,p)
         if p.suffix.lower() in ('.tif','.tiff'):all_paths.update(companions(p))
     hashes={str(p.absolute()):digest(p) for p in all_paths}
-    binary_hash = digest(binary)
-    if not reuse_predictors(wd, state['last_successful_run'], hashes, binary_hash, root/'predictors'):
-        build_m1_predictors(M1Inputs(dem=paths['dem'],mask=paths['mask'],outlet=paths['outlet'],sbs=paths['sbs'],
+    build_m1_predictors(M1Inputs(dem=paths['dem'],mask=paths['mask'],outlet=paths['outlet'],sbs=paths['sbs'],
                            k=paths['k'],k_manifest=paths['k_manifest'],dnbr=paths['dnbr'],dnbr_manifest=paths['dnbr_manifest'],
                            lineage_sources=lineage,expected_sha256=hashes,wbt_sha256=digest(binary),source_kind='real',
-                           sbs_alignment='nearest'),root/'predictors',wbt_executable=binary,support_policy='common_valid_v1')
+                           sbs_alignment='nearest',soil_policy=KF_POLICY),root/'predictors',wbt_executable=binary,support_policy='common_valid_v1')
     predictor=root/'predictors'/'manifest.json'
     result_hashes={**hashes,str(predictor):digest(predictor)}
     from wepppy.nodb.core import Ron
@@ -551,14 +583,17 @@ def execute_model(wd, identity, binary):
         partial = partial or bool(frame['probability'].isna().any())
     predictor_artifacts = {str(path.relative_to(Path(wd))):signature(wd,path,strong=True) for path in (root/'predictors').rglob('*') if path.is_file()}
     result_artifacts = {str((destination/name).relative_to(Path(wd))):signature(wd,destination/name,strong=True) for name in (*FILES,'valid_mask.tif')}
+    result_artifacts.update({str(path.relative_to(Path(wd))):signature(wd,path,strong=True)
+                             for path in (root/'kf').rglob('*') if path.is_file()})
     def publish(current):
+        check_attempt(current)
         if (current['run_attempt']['id']!=identity or current['active_dnbr']['id']!=active['id']
                 or not _current_authority(wd,frequency,'M1',snapshot)
                 or not artifacts_current(wd,current['active_dnbr'], strong=False)
                 or not artifacts_current(wd, {'artifacts': result_artifacts}, strong=False)
                 or not artifacts_current(wd, {'artifacts': predictor_artifacts}, strong=False)):
             raise WorkflowError('superseded','Inputs changed. Run the model again.',409)
-        current['last_successful_run']={'id':identity,'model':'M1','completed_at':now(),'snapshot':expected,'partial':partial,'area_warning':area_warning,
+        current['last_successful_run']={'id':identity,'model':'M1','soil_policy':KF_POLICY,'completed_at':now(),'snapshot':expected,'partial':partial,'area_warning':area_warning,
             'artifacts': result_artifacts, 'predictor_artifacts': predictor_artifacts,'coverage':result_manifest['coverage'],
             'partial_reason':partial_reason(result_manifest,partial)}
         current['run_attempt'].update(phase='complete',retryable=True)

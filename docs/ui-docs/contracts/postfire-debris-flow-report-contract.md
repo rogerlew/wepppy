@@ -429,7 +429,7 @@ proposed durable report behavior; work-package plans/reviews own execution histo
 ## Kf, response curve and rainfall provenance amendment — 2026-09-16
 
 Status: accepted 2026-09-16 after two independent reviews; implementation
-conformance pending. This amendment supersedes the earlier prohibition on
+conformance verified on forest, 2026-09-16. This amendment supersedes the earlier prohibition on
 computed response curves. It does not authorize writes during report reads.
 The [Kf contract](../../../wepppy/nodb/mods/postfire_debris_flow/docs/kf_source.md)
 owns source identity and legacy/new freshness dispatch. Display the accepted

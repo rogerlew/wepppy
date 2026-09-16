@@ -419,7 +419,7 @@ source activation, results, publication/freshness and live acceptance remain ope
 ## Kf source amendment — 2026-09-16
 
 Status: accepted 2026-09-16 after two independent reviews; implementation
-conformance pending. The [Kf source/runtime contract](kf_source.md)
+conformance verified on forest, 2026-09-16. The [Kf source/runtime contract](kf_source.md)
 is the controlling amendment for new production M1.
 
 New M1 uses attempt-owned Kf preparation and schema 3; the shared bounded transport admits its fixed endpoint without changing THICK/SDA behavior.

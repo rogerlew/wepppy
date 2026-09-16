@@ -1,0 +1,1426 @@
+{
+  "attempt_id": "089792b89459438ebd5de3f2c4b972c0",
+  "design": [
+    {
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": 28.51685615169368,
+      "positive_samples": 30,
+      "probability": 0.8768430470036708,
+      "rainfall_mm": 7.12921403792342,
+      "rank_index": 29,
+      "reason": null,
+      "return_interval_years": 1,
+      "source": "cli",
+      "status": "available"
+    },
+    {
+      "duration_minutes": 30,
+      "intensity_mm_per_hour": 25.094212448163052,
+      "positive_samples": 30,
+      "probability": 0.9321148202171197,
+      "rainfall_mm": 12.547106224081526,
+      "rank_index": 29,
+      "reason": null,
+      "return_interval_years": 1,
+      "source": "cli",
+      "status": "available"
+    },
+    {
+      "duration_minutes": 60,
+      "intensity_mm_per_hour": 20.000000000000004,
+      "positive_samples": 30,
+      "probability": 0.9220117658375605,
+      "rainfall_mm": 20.000000000000004,
+      "rank_index": 29,
+      "reason": null,
+      "return_interval_years": 1,
+      "source": "cli",
+      "status": "available"
+    },
+    {
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": 28.51685615169368,
+      "positive_samples": 30,
+      "probability": 0.8768430470036708,
+      "rainfall_mm": 7.12921403792342,
+      "rank_index": 14,
+      "reason": null,
+      "return_interval_years": 2,
+      "source": "cli",
+      "status": "available"
+    },
+    {
+      "duration_minutes": 30,
+      "intensity_mm_per_hour": 25.094212448163052,
+      "positive_samples": 30,
+      "probability": 0.9321148202171197,
+      "rainfall_mm": 12.547106224081526,
+      "rank_index": 14,
+      "reason": null,
+      "return_interval_years": 2,
+      "source": "cli",
+      "status": "available"
+    },
+    {
+      "duration_minutes": 60,
+      "intensity_mm_per_hour": 20.000000000000004,
+      "positive_samples": 30,
+      "probability": 0.9220117658375605,
+      "rainfall_mm": 20.000000000000004,
+      "rank_index": 14,
+      "reason": null,
+      "return_interval_years": 2,
+      "source": "cli",
+      "status": "available"
+    },
+    {
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": 28.51685615169368,
+      "positive_samples": 30,
+      "probability": 0.8768430470036708,
+      "rainfall_mm": 7.12921403792342,
+      "rank_index": 5,
+      "reason": null,
+      "return_interval_years": 5,
+      "source": "cli",
+      "status": "available"
+    },
+    {
+      "duration_minutes": 30,
+      "intensity_mm_per_hour": 25.094212448163052,
+      "positive_samples": 30,
+      "probability": 0.9321148202171197,
+      "rainfall_mm": 12.547106224081526,
+      "rank_index": 5,
+      "reason": null,
+      "return_interval_years": 5,
+      "source": "cli",
+      "status": "available"
+    },
+    {
+      "duration_minutes": 60,
+      "intensity_mm_per_hour": 20.000000000000004,
+      "positive_samples": 30,
+      "probability": 0.9220117658375605,
+      "rainfall_mm": 20.000000000000004,
+      "rank_index": 5,
+      "reason": null,
+      "return_interval_years": 5,
+      "source": "cli",
+      "status": "available"
+    },
+    {
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": 28.51685615169368,
+      "positive_samples": 30,
+      "probability": 0.8768430470036708,
+      "rainfall_mm": 7.12921403792342,
+      "rank_index": 2,
+      "reason": null,
+      "return_interval_years": 10,
+      "source": "cli",
+      "status": "available"
+    },
+    {
+      "duration_minutes": 30,
+      "intensity_mm_per_hour": 25.094212448163052,
+      "positive_samples": 30,
+      "probability": 0.9321148202171197,
+      "rainfall_mm": 12.547106224081526,
+      "rank_index": 2,
+      "reason": null,
+      "return_interval_years": 10,
+      "source": "cli",
+      "status": "available"
+    },
+    {
+      "duration_minutes": 60,
+      "intensity_mm_per_hour": 20.000000000000004,
+      "positive_samples": 30,
+      "probability": 0.9220117658375605,
+      "rainfall_mm": 20.000000000000004,
+      "rank_index": 2,
+      "reason": null,
+      "return_interval_years": 10,
+      "source": "cli",
+      "status": "available"
+    }
+  ],
+  "events": {
+    "rows": [
+      {
+        "date_status": "invalid_or_missing",
+        "day_of_month": null,
+        "duration_minutes": 60,
+        "event_id": "91ec8f50d9294a5fdbe99531eadc4176b851cc6790c3cbc119d47026a49dfb60:0",
+        "intensity_mm_per_hour": 20.000000000000004,
+        "month": null,
+        "precipitation_mm": 20,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "reason": null,
+        "row_ordinal": 0,
+        "sim_day_index": null,
+        "status": "available",
+        "year": 1
+      },
+      {
+        "date_status": "invalid_or_missing",
+        "day_of_month": null,
+        "duration_minutes": 60,
+        "event_id": "91ec8f50d9294a5fdbe99531eadc4176b851cc6790c3cbc119d47026a49dfb60:1",
+        "intensity_mm_per_hour": 20.000000000000004,
+        "month": null,
+        "precipitation_mm": 20,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "reason": null,
+        "row_ordinal": 1,
+        "sim_day_index": null,
+        "status": "available",
+        "year": 2
+      },
+      {
+        "date_status": "invalid_or_missing",
+        "day_of_month": null,
+        "duration_minutes": 60,
+        "event_id": "91ec8f50d9294a5fdbe99531eadc4176b851cc6790c3cbc119d47026a49dfb60:2",
+        "intensity_mm_per_hour": 20.000000000000004,
+        "month": null,
+        "precipitation_mm": 20,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "reason": null,
+        "row_ordinal": 2,
+        "sim_day_index": null,
+        "status": "available",
+        "year": 3
+      },
+      {
+        "date_status": "invalid_or_missing",
+        "day_of_month": null,
+        "duration_minutes": 60,
+        "event_id": "91ec8f50d9294a5fdbe99531eadc4176b851cc6790c3cbc119d47026a49dfb60:3",
+        "intensity_mm_per_hour": 20.000000000000004,
+        "month": null,
+        "precipitation_mm": 20,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "reason": null,
+        "row_ordinal": 3,
+        "sim_day_index": null,
+        "status": "available",
+        "year": 4
+      },
+      {
+        "date_status": "invalid_or_missing",
+        "day_of_month": null,
+        "duration_minutes": 60,
+        "event_id": "91ec8f50d9294a5fdbe99531eadc4176b851cc6790c3cbc119d47026a49dfb60:4",
+        "intensity_mm_per_hour": 20.000000000000004,
+        "month": null,
+        "precipitation_mm": 20,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "reason": null,
+        "row_ordinal": 4,
+        "sim_day_index": null,
+        "status": "available",
+        "year": 5
+      },
+      {
+        "date_status": "invalid_or_missing",
+        "day_of_month": null,
+        "duration_minutes": 60,
+        "event_id": "91ec8f50d9294a5fdbe99531eadc4176b851cc6790c3cbc119d47026a49dfb60:5",
+        "intensity_mm_per_hour": 20.000000000000004,
+        "month": null,
+        "precipitation_mm": 20,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "reason": null,
+        "row_ordinal": 5,
+        "sim_day_index": null,
+        "status": "available",
+        "year": 6
+      },
+      {
+        "date_status": "invalid_or_missing",
+        "day_of_month": null,
+        "duration_minutes": 60,
+        "event_id": "91ec8f50d9294a5fdbe99531eadc4176b851cc6790c3cbc119d47026a49dfb60:6",
+        "intensity_mm_per_hour": 20.000000000000004,
+        "month": null,
+        "precipitation_mm": 20,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "reason": null,
+        "row_ordinal": 6,
+        "sim_day_index": null,
+        "status": "available",
+        "year": 7
+      },
+      {
+        "date_status": "invalid_or_missing",
+        "day_of_month": null,
+        "duration_minutes": 60,
+        "event_id": "91ec8f50d9294a5fdbe99531eadc4176b851cc6790c3cbc119d47026a49dfb60:7",
+        "intensity_mm_per_hour": 20.000000000000004,
+        "month": null,
+        "precipitation_mm": 20,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "reason": null,
+        "row_ordinal": 7,
+        "sim_day_index": null,
+        "status": "available",
+        "year": 8
+      },
+      {
+        "date_status": "invalid_or_missing",
+        "day_of_month": null,
+        "duration_minutes": 60,
+        "event_id": "91ec8f50d9294a5fdbe99531eadc4176b851cc6790c3cbc119d47026a49dfb60:8",
+        "intensity_mm_per_hour": 20.000000000000004,
+        "month": null,
+        "precipitation_mm": 20,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "reason": null,
+        "row_ordinal": 8,
+        "sim_day_index": null,
+        "status": "available",
+        "year": 9
+      },
+      {
+        "date_status": "invalid_or_missing",
+        "day_of_month": null,
+        "duration_minutes": 60,
+        "event_id": "91ec8f50d9294a5fdbe99531eadc4176b851cc6790c3cbc119d47026a49dfb60:9",
+        "intensity_mm_per_hour": 20.000000000000004,
+        "month": null,
+        "precipitation_mm": 20,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "reason": null,
+        "row_ordinal": 9,
+        "sim_day_index": null,
+        "status": "available",
+        "year": 10
+      },
+      {
+        "date_status": "invalid_or_missing",
+        "day_of_month": null,
+        "duration_minutes": 60,
+        "event_id": "91ec8f50d9294a5fdbe99531eadc4176b851cc6790c3cbc119d47026a49dfb60:10",
+        "intensity_mm_per_hour": 20.000000000000004,
+        "month": null,
+        "precipitation_mm": 20,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "reason": null,
+        "row_ordinal": 10,
+        "sim_day_index": null,
+        "status": "available",
+        "year": 11
+      },
+      {
+        "date_status": "invalid_or_missing",
+        "day_of_month": null,
+        "duration_minutes": 60,
+        "event_id": "91ec8f50d9294a5fdbe99531eadc4176b851cc6790c3cbc119d47026a49dfb60:11",
+        "intensity_mm_per_hour": 20.000000000000004,
+        "month": null,
+        "precipitation_mm": 20,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "reason": null,
+        "row_ordinal": 11,
+        "sim_day_index": null,
+        "status": "available",
+        "year": 12
+      },
+      {
+        "date_status": "invalid_or_missing",
+        "day_of_month": null,
+        "duration_minutes": 60,
+        "event_id": "91ec8f50d9294a5fdbe99531eadc4176b851cc6790c3cbc119d47026a49dfb60:12",
+        "intensity_mm_per_hour": 20.000000000000004,
+        "month": null,
+        "precipitation_mm": 20,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "reason": null,
+        "row_ordinal": 12,
+        "sim_day_index": null,
+        "status": "available",
+        "year": 13
+      },
+      {
+        "date_status": "invalid_or_missing",
+        "day_of_month": null,
+        "duration_minutes": 60,
+        "event_id": "91ec8f50d9294a5fdbe99531eadc4176b851cc6790c3cbc119d47026a49dfb60:13",
+        "intensity_mm_per_hour": 20.000000000000004,
+        "month": null,
+        "precipitation_mm": 20,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "reason": null,
+        "row_ordinal": 13,
+        "sim_day_index": null,
+        "status": "available",
+        "year": 14
+      },
+      {
+        "date_status": "invalid_or_missing",
+        "day_of_month": null,
+        "duration_minutes": 60,
+        "event_id": "91ec8f50d9294a5fdbe99531eadc4176b851cc6790c3cbc119d47026a49dfb60:14",
+        "intensity_mm_per_hour": 20.000000000000004,
+        "month": null,
+        "precipitation_mm": 20,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "reason": null,
+        "row_ordinal": 14,
+        "sim_day_index": null,
+        "status": "available",
+        "year": 15
+      },
+      {
+        "date_status": "invalid_or_missing",
+        "day_of_month": null,
+        "duration_minutes": 60,
+        "event_id": "91ec8f50d9294a5fdbe99531eadc4176b851cc6790c3cbc119d47026a49dfb60:15",
+        "intensity_mm_per_hour": 20.000000000000004,
+        "month": null,
+        "precipitation_mm": 20,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "reason": null,
+        "row_ordinal": 15,
+        "sim_day_index": null,
+        "status": "available",
+        "year": 16
+      },
+      {
+        "date_status": "invalid_or_missing",
+        "day_of_month": null,
+        "duration_minutes": 60,
+        "event_id": "91ec8f50d9294a5fdbe99531eadc4176b851cc6790c3cbc119d47026a49dfb60:16",
+        "intensity_mm_per_hour": 20.000000000000004,
+        "month": null,
+        "precipitation_mm": 20,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "reason": null,
+        "row_ordinal": 16,
+        "sim_day_index": null,
+        "status": "available",
+        "year": 17
+      },
+      {
+        "date_status": "invalid_or_missing",
+        "day_of_month": null,
+        "duration_minutes": 60,
+        "event_id": "91ec8f50d9294a5fdbe99531eadc4176b851cc6790c3cbc119d47026a49dfb60:17",
+        "intensity_mm_per_hour": 20.000000000000004,
+        "month": null,
+        "precipitation_mm": 20,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "reason": null,
+        "row_ordinal": 17,
+        "sim_day_index": null,
+        "status": "available",
+        "year": 18
+      },
+      {
+        "date_status": "invalid_or_missing",
+        "day_of_month": null,
+        "duration_minutes": 60,
+        "event_id": "91ec8f50d9294a5fdbe99531eadc4176b851cc6790c3cbc119d47026a49dfb60:18",
+        "intensity_mm_per_hour": 20.000000000000004,
+        "month": null,
+        "precipitation_mm": 20,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "reason": null,
+        "row_ordinal": 18,
+        "sim_day_index": null,
+        "status": "available",
+        "year": 19
+      },
+      {
+        "date_status": "invalid_or_missing",
+        "day_of_month": null,
+        "duration_minutes": 60,
+        "event_id": "91ec8f50d9294a5fdbe99531eadc4176b851cc6790c3cbc119d47026a49dfb60:19",
+        "intensity_mm_per_hour": 20.000000000000004,
+        "month": null,
+        "precipitation_mm": 20,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "reason": null,
+        "row_ordinal": 19,
+        "sim_day_index": null,
+        "status": "available",
+        "year": 20
+      },
+      {
+        "date_status": "invalid_or_missing",
+        "day_of_month": null,
+        "duration_minutes": 60,
+        "event_id": "91ec8f50d9294a5fdbe99531eadc4176b851cc6790c3cbc119d47026a49dfb60:20",
+        "intensity_mm_per_hour": 20.000000000000004,
+        "month": null,
+        "precipitation_mm": 20,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "reason": null,
+        "row_ordinal": 20,
+        "sim_day_index": null,
+        "status": "available",
+        "year": 21
+      },
+      {
+        "date_status": "invalid_or_missing",
+        "day_of_month": null,
+        "duration_minutes": 60,
+        "event_id": "91ec8f50d9294a5fdbe99531eadc4176b851cc6790c3cbc119d47026a49dfb60:21",
+        "intensity_mm_per_hour": 20.000000000000004,
+        "month": null,
+        "precipitation_mm": 20,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "reason": null,
+        "row_ordinal": 21,
+        "sim_day_index": null,
+        "status": "available",
+        "year": 22
+      },
+      {
+        "date_status": "invalid_or_missing",
+        "day_of_month": null,
+        "duration_minutes": 60,
+        "event_id": "91ec8f50d9294a5fdbe99531eadc4176b851cc6790c3cbc119d47026a49dfb60:22",
+        "intensity_mm_per_hour": 20.000000000000004,
+        "month": null,
+        "precipitation_mm": 20,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "reason": null,
+        "row_ordinal": 22,
+        "sim_day_index": null,
+        "status": "available",
+        "year": 23
+      },
+      {
+        "date_status": "invalid_or_missing",
+        "day_of_month": null,
+        "duration_minutes": 60,
+        "event_id": "91ec8f50d9294a5fdbe99531eadc4176b851cc6790c3cbc119d47026a49dfb60:23",
+        "intensity_mm_per_hour": 20.000000000000004,
+        "month": null,
+        "precipitation_mm": 20,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "reason": null,
+        "row_ordinal": 23,
+        "sim_day_index": null,
+        "status": "available",
+        "year": 24
+      },
+      {
+        "date_status": "invalid_or_missing",
+        "day_of_month": null,
+        "duration_minutes": 60,
+        "event_id": "91ec8f50d9294a5fdbe99531eadc4176b851cc6790c3cbc119d47026a49dfb60:24",
+        "intensity_mm_per_hour": 20.000000000000004,
+        "month": null,
+        "precipitation_mm": 20,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "reason": null,
+        "row_ordinal": 24,
+        "sim_day_index": null,
+        "status": "available",
+        "year": 25
+      },
+      {
+        "date_status": "invalid_or_missing",
+        "day_of_month": null,
+        "duration_minutes": 60,
+        "event_id": "91ec8f50d9294a5fdbe99531eadc4176b851cc6790c3cbc119d47026a49dfb60:25",
+        "intensity_mm_per_hour": 20.000000000000004,
+        "month": null,
+        "precipitation_mm": 20,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "reason": null,
+        "row_ordinal": 25,
+        "sim_day_index": null,
+        "status": "available",
+        "year": 26
+      },
+      {
+        "date_status": "invalid_or_missing",
+        "day_of_month": null,
+        "duration_minutes": 60,
+        "event_id": "91ec8f50d9294a5fdbe99531eadc4176b851cc6790c3cbc119d47026a49dfb60:26",
+        "intensity_mm_per_hour": 20.000000000000004,
+        "month": null,
+        "precipitation_mm": 20,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "reason": null,
+        "row_ordinal": 26,
+        "sim_day_index": null,
+        "status": "available",
+        "year": 27
+      },
+      {
+        "date_status": "invalid_or_missing",
+        "day_of_month": null,
+        "duration_minutes": 60,
+        "event_id": "91ec8f50d9294a5fdbe99531eadc4176b851cc6790c3cbc119d47026a49dfb60:27",
+        "intensity_mm_per_hour": 20.000000000000004,
+        "month": null,
+        "precipitation_mm": 20,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "reason": null,
+        "row_ordinal": 27,
+        "sim_day_index": null,
+        "status": "available",
+        "year": 28
+      },
+      {
+        "date_status": "invalid_or_missing",
+        "day_of_month": null,
+        "duration_minutes": 60,
+        "event_id": "91ec8f50d9294a5fdbe99531eadc4176b851cc6790c3cbc119d47026a49dfb60:28",
+        "intensity_mm_per_hour": 20.000000000000004,
+        "month": null,
+        "precipitation_mm": 20,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "reason": null,
+        "row_ordinal": 28,
+        "sim_day_index": null,
+        "status": "available",
+        "year": 29
+      },
+      {
+        "date_status": "invalid_or_missing",
+        "day_of_month": null,
+        "duration_minutes": 60,
+        "event_id": "91ec8f50d9294a5fdbe99531eadc4176b851cc6790c3cbc119d47026a49dfb60:29",
+        "intensity_mm_per_hour": 20.000000000000004,
+        "month": null,
+        "precipitation_mm": 20,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "reason": null,
+        "row_ordinal": 29,
+        "sim_day_index": null,
+        "status": "available",
+        "year": 30
+      }
+    ],
+    "total": 30,
+    "unfiltered_total": 30
+  },
+  "inverse": [
+    {
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": 18.50860415596226,
+      "probability": null,
+      "rainfall_mm": 4.627151038990565,
+      "reason": null,
+      "status": "available",
+      "target_probability": 0.5
+    },
+    {
+      "duration_minutes": 30,
+      "intensity_mm_per_hour": 14.541792503237467,
+      "probability": null,
+      "rainfall_mm": 7.270896251618733,
+      "reason": null,
+      "status": "available",
+      "target_probability": 0.5
+    },
+    {
+      "duration_minutes": 60,
+      "intensity_mm_per_hour": 11.302816874649665,
+      "probability": null,
+      "rainfall_mm": 11.302816874649665,
+      "reason": null,
+      "status": "available",
+      "target_probability": 0.5
+    }
+  ],
+  "query": {
+    "descending": false,
+    "duration_minutes": 60,
+    "limit": 100,
+    "min_probability": null,
+    "offset": 0,
+    "sort": "row_ordinal",
+    "year": null
+  },
+  "response_curve": {
+    "design_markers": [
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 20.000000000000004,
+        "positive_samples": 30,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "rank_index": 29,
+        "reason": null,
+        "return_interval_years": 1,
+        "source": "cli",
+        "status": "available"
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 20.000000000000004,
+        "positive_samples": 30,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "rank_index": 14,
+        "reason": null,
+        "return_interval_years": 2,
+        "source": "cli",
+        "status": "available"
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 20.000000000000004,
+        "positive_samples": 30,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "rank_index": 5,
+        "reason": null,
+        "return_interval_years": 5,
+        "source": "cli",
+        "status": "available"
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 20.000000000000004,
+        "positive_samples": 30,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004,
+        "rank_index": 2,
+        "reason": null,
+        "return_interval_years": 10,
+        "source": "cli",
+        "status": "available"
+      }
+    ],
+    "direction": "increasing",
+    "duration_minutes": 60,
+    "intensity_units": "mm/hour",
+    "p50": {
+      "intensity_mm_per_hour": 11.302816874649665,
+      "rainfall_mm": 11.302816874649665,
+      "reason": null,
+      "status": "available"
+    },
+    "points": [
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 0,
+        "probability": 0.038791134460236035,
+        "rainfall_mm": 0
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 0.2748281630864931,
+        "probability": 0.0418084673094527,
+        "rainfall_mm": 0.2748281630864931
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 0.5496563261729862,
+        "probability": 0.04504950079439606,
+        "rainfall_mm": 0.5496563261729862
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 0.8244844892594794,
+        "probability": 0.04852905754150499,
+        "rainfall_mm": 0.8244844892594794
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 1.0993126523459724,
+        "probability": 0.05226266159555184,
+        "rainfall_mm": 1.0993126523459724
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 1.3741408154324657,
+        "probability": 0.05626652538576647,
+        "rainfall_mm": 1.3741408154324657
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 1.6489689785189587,
+        "probability": 0.06055752721165224,
+        "rainfall_mm": 1.6489689785189587
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 1.923797141605452,
+        "probability": 0.06515317778796925,
+        "rainfall_mm": 1.923797141605452
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 2.198625304691945,
+        "probability": 0.07007157429484898,
+        "rainfall_mm": 2.198625304691945
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 2.473453467778438,
+        "probability": 0.07533134030447869,
+        "rainfall_mm": 2.473453467778438
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 2.7482816308649314,
+        "probability": 0.08095154990814495,
+        "rainfall_mm": 2.7482816308649314
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 3.0231097939514244,
+        "probability": 0.08695163435581753,
+        "rainfall_mm": 3.0231097939514244
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 3.2979379570379175,
+        "probability": 0.09335126955527831,
+        "rainfall_mm": 3.2979379570379175
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 3.5727661201244105,
+        "probability": 0.10017024287050838,
+        "rainfall_mm": 3.5727661201244105
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 3.847594283210904,
+        "probability": 0.10742829782189009,
+        "rainfall_mm": 3.847594283210904
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 4.122422446297397,
+        "probability": 0.11514495553634568,
+        "rainfall_mm": 4.122422446297397
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 4.39725060938389,
+        "probability": 0.12333931213615193,
+        "rainfall_mm": 4.39725060938389
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 4.672078772470384,
+        "probability": 0.13202981170204497,
+        "rainfall_mm": 4.672078772470384
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 4.946906935556876,
+        "probability": 0.14123399500845238,
+        "rainfall_mm": 4.946906935556876
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 5.22173509864337,
+        "probability": 0.1509682249119168,
+        "rainfall_mm": 5.22173509864337
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 5.496563261729863,
+        "probability": 0.16124739007885766,
+        "rainfall_mm": 5.496563261729863
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 5.771391424816355,
+        "probability": 0.17208458966020435,
+        "rainfall_mm": 5.771391424816355
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 6.046219587902849,
+        "probability": 0.18349080254462125,
+        "rainfall_mm": 6.046219587902849
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 6.321047750989342,
+        "probability": 0.19547454592613153,
+        "rainfall_mm": 6.321047750989342
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 6.595875914075835,
+        "probability": 0.20804152907246887,
+        "rainfall_mm": 6.595875914075835
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 6.870704077162328,
+        "probability": 0.2211943093327991,
+        "rainfall_mm": 6.870704077162328
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 7.145532240248821,
+        "probability": 0.2349319585218556,
+        "rainfall_mm": 7.145532240248821
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 7.420360403335315,
+        "probability": 0.24924974879634887,
+        "rainfall_mm": 7.420360403335315
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 7.695188566421808,
+        "probability": 0.26413886792539915,
+        "rainfall_mm": 7.695188566421808
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 7.9700167295083,
+        "probability": 0.2795861743722836,
+        "rainfall_mm": 7.9700167295083
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 8.244844892594793,
+        "probability": 0.2955740027733491,
+        "rainfall_mm": 8.244844892594793
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 8.519673055681286,
+        "probability": 0.312080030151793,
+        "rainfall_mm": 8.519673055681286
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 8.79450121876778,
+        "probability": 0.3290772124831186,
+        "rainfall_mm": 8.79450121876778
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 9.069329381854274,
+        "probability": 0.3465338000003069,
+        "rainfall_mm": 9.069329381854274
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 9.344157544940767,
+        "probability": 0.3644134378825627,
+        "rainfall_mm": 9.344157544940767
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 9.618985708027258,
+        "probability": 0.3826753567373928,
+        "rainfall_mm": 9.618985708027258
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 9.893813871113752,
+        "probability": 0.40127465462360473,
+        "rainfall_mm": 9.893813871113752
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 10.168642034200245,
+        "probability": 0.4201626693711919,
+        "rainfall_mm": 10.168642034200245
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 10.44347019728674,
+        "probability": 0.4392874367653367,
+        "rainfall_mm": 10.44347019728674
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 10.718298360373232,
+        "probability": 0.4585942269352476,
+        "rainfall_mm": 10.718298360373232
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 10.993126523459726,
+        "probability": 0.4780261482005199,
+        "rainfall_mm": 10.993126523459726
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 11.267954686546217,
+        "probability": 0.49752480485843686,
+        "rainfall_mm": 11.267954686546217
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 11.302816874649665,
+        "probability": 0.5,
+        "rainfall_mm": 11.302816874649665
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 11.54278284963271,
+        "probability": 0.5170309931151511,
+        "rainfall_mm": 11.54278284963271
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 11.817611012719205,
+        "probability": 0.5364854177171973,
+        "rainfall_mm": 11.817611012719205
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 12.092439175805698,
+        "probability": 0.5558294109348827,
+        "rainfall_mm": 12.092439175805698
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 12.36726733889219,
+        "probability": 0.5750056354457929,
+        "rainfall_mm": 12.36726733889219
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 12.642095501978684,
+        "probability": 0.593958753371825,
+        "rainfall_mm": 12.642095501978684
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 12.916923665065175,
+        "probability": 0.6126360451899571,
+        "rainfall_mm": 12.916923665065175
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 13.19175182815167,
+        "probability": 0.6309879643690569,
+        "rainfall_mm": 13.19175182815167
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 13.466579991238163,
+        "probability": 0.6489686162456502,
+        "rainfall_mm": 13.466579991238163
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 13.741408154324656,
+        "probability": 0.6665361526756521,
+        "rainfall_mm": 13.741408154324656
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 14.016236317411149,
+        "probability": 0.683653077207517,
+        "rainfall_mm": 14.016236317411149
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 14.291064480497642,
+        "probability": 0.7002864587365473,
+        "rainfall_mm": 14.291064480497642
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 14.565892643584137,
+        "probability": 0.7164080546554624,
+        "rainfall_mm": 14.565892643584137
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 14.84072080667063,
+        "probability": 0.7319943472728376,
+        "rainfall_mm": 14.84072080667063
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 15.115548969757123,
+        "probability": 0.7470264996210509,
+        "rainfall_mm": 15.115548969757123
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 15.390377132843616,
+        "probability": 0.7614902386476692,
+        "rainfall_mm": 15.390377132843616
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 15.665205295930107,
+        "probability": 0.7753756751442399,
+        "rainfall_mm": 15.665205295930107
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 15.9400334590166,
+        "probability": 0.7886770706138616,
+        "rainfall_mm": 15.9400334590166
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 16.214861622103093,
+        "probability": 0.8013925616423851,
+        "rainfall_mm": 16.214861622103093
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 16.489689785189587,
+        "probability": 0.8135238522690788,
+        "rainfall_mm": 16.489689785189587
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 16.76451794827608,
+        "probability": 0.8250758844179826,
+        "rainfall_mm": 16.76451794827608
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 17.039346111362573,
+        "probability": 0.8360564957264841,
+        "rainfall_mm": 17.039346111362573
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 17.314174274449066,
+        "probability": 0.8464760731705981,
+        "rainfall_mm": 17.314174274449066
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 17.58900243753556,
+        "probability": 0.8563472098118056,
+        "rainfall_mm": 17.58900243753556
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 17.86383060062205,
+        "probability": 0.8656843708459678,
+        "rainfall_mm": 17.86383060062205
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 18.13865876370855,
+        "probability": 0.874503573979192,
+        "rainfall_mm": 18.13865876370855
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 18.41348692679504,
+        "probability": 0.8828220880360427,
+        "rainfall_mm": 18.41348692679504
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 18.688315089881534,
+        "probability": 0.8906581526584774,
+        "rainfall_mm": 18.688315089881534
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 18.963143252968024,
+        "probability": 0.8980307210047791,
+        "rainfall_mm": 18.963143252968024
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 19.237971416054517,
+        "probability": 0.904959226522367,
+        "rainfall_mm": 19.237971416054517
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 19.51279957914101,
+        "probability": 0.9114633741540686,
+        "rainfall_mm": 19.51279957914101
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 19.787627742227503,
+        "probability": 0.9175629557448988,
+        "rainfall_mm": 19.787627742227503
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 20.000000000000004,
+        "probability": 0.9220117658375605,
+        "rainfall_mm": 20.000000000000004
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 20.062455905313996,
+        "probability": 0.9232776889409843,
+        "rainfall_mm": 20.062455905313996
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 20.33728406840049,
+        "probability": 0.928627078505711,
+        "rainfall_mm": 20.33728406840049
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 20.612112231486982,
+        "probability": 0.9336302987096148,
+        "rainfall_mm": 20.612112231486982
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 20.88694039457348,
+        "probability": 0.9383060952679113,
+        "rainfall_mm": 20.88694039457348
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 21.161768557659972,
+        "probability": 0.9426727051902345,
+        "rainfall_mm": 21.161768557659972
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 21.436596720746465,
+        "probability": 0.9467477928587672,
+        "rainfall_mm": 21.436596720746465
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 21.711424883832958,
+        "probability": 0.9505484006518093,
+        "rainfall_mm": 21.711424883832958
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 21.98625304691945,
+        "probability": 0.9540909124692399,
+        "rainfall_mm": 21.98625304691945
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 22.261081210005944,
+        "probability": 0.9573910285848534,
+        "rainfall_mm": 22.261081210005944
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 22.535909373092434,
+        "probability": 0.9604637503399014,
+        "rainfall_mm": 22.535909373092434
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 22.810737536178927,
+        "probability": 0.9633233732954793,
+        "rainfall_mm": 22.810737536178927
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 23.08556569926542,
+        "probability": 0.965983487572859,
+        "rainfall_mm": 23.08556569926542
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 23.360393862351916,
+        "probability": 0.9684569842259156,
+        "rainfall_mm": 23.360393862351916
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 23.63522202543841,
+        "probability": 0.9707560666047393,
+        "rainfall_mm": 23.63522202543841
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 23.910050188524902,
+        "probability": 0.972892265781662,
+        "rainfall_mm": 23.910050188524902
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 24.184878351611395,
+        "probability": 0.9748764592181817,
+        "rainfall_mm": 24.184878351611395
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 24.45970651469789,
+        "probability": 0.9767188919522762,
+        "rainfall_mm": 24.45970651469789
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 24.73453467778438,
+        "probability": 0.9784291996794372,
+        "rainfall_mm": 24.73453467778438
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 25.009362840870875,
+        "probability": 0.9800164331869453,
+        "rainfall_mm": 25.009362840870875
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 25.284191003957368,
+        "probability": 0.9814890836792658,
+        "rainfall_mm": 25.284191003957368
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 25.55901916704386,
+        "probability": 0.9828551086030366,
+        "rainfall_mm": 25.55901916704386
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 25.83384733013035,
+        "probability": 0.9841219576432013,
+        "rainfall_mm": 25.83384733013035
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 26.108675493216847,
+        "probability": 0.9852965986177572,
+        "rainfall_mm": 26.108675493216847
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 26.38350365630334,
+        "probability": 0.9863855430478122,
+        "rainfall_mm": 26.38350365630334
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 26.658331819389833,
+        "probability": 0.9873948712226754,
+        "rainfall_mm": 26.658331819389833
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 26.933159982476326,
+        "probability": 0.9883302566170535,
+        "rainfall_mm": 26.933159982476326
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 27.20798814556282,
+        "probability": 0.9891969895496444,
+        "rainfall_mm": 27.20798814556282
+      },
+      {
+        "duration_minutes": 60,
+        "intensity_mm_per_hour": 27.482816308649312,
+        "probability": 0.99,
+        "rainfall_mm": 27.482816308649312
+      }
+    ],
+    "probability_units": "fraction",
+    "range_max": 27.482816308649312,
+    "reason": null,
+    "status": "available"
+  },
+  "schema_version": 1,
+  "status": "available",
+  "summary": {
+    "area_km2": 0.1156,
+    "assessment_id": "2886a9f693b549d4b04efd153c54cce8",
+    "climate_mode": "Vanilla",
+    "completed_at": "2026-09-16T23:13:17.133145+00:00",
+    "coverage": {
+      "excluded_cells": 0,
+      "total_cells": 1156,
+      "valid_cells": 1156,
+      "valid_fraction": 1
+    },
+    "current": true,
+    "date_semantics": "simulation_labels",
+    "frequency": {
+      "represented_years": 30,
+      "wet_years": 30,
+      "year_max": 30,
+      "year_min": 1
+    },
+    "frequency_source": "cli",
+    "model": "M1",
+    "newer_attempt": null,
+    "predictors": [
+      {
+        "name": "F",
+        "reason": null,
+        "unit": "normalized_dNBR",
+        "value": 0.3500000000835149
+      },
+      {
+        "name": "S",
+        "reason": null,
+        "unit": "USLE_customary",
+        "value": 0.20000000298023224
+      },
+      {
+        "name": "T",
+        "reason": null,
+        "unit": "fraction",
+        "value": 1
+      }
+    ],
+    "rainfall_provenance": {
+      "climate_mode": "Vanilla",
+      "date_semantics": "simulation_labels",
+      "design_origin": "Project climate statistical design rainfall",
+      "event_origin": "Project climate events",
+      "subdaily_origin": "modeled_disaggregated"
+    },
+    "soil_source": "NRCS-derived STATSGO fine-earth Kf",
+    "warnings": [
+      "area_outside_study_range"
+    ]
+  },
+  "urls": {
+    "artifacts": {
+      "design.parquet": "/weppcloud/runs/pfdf-kf-e5c25f5b/disturbed9002_wbt/report/postfire_debris_flow/files/design.parquet?attempt_id=089792b89459438ebd5de3f2c4b972c0",
+      "events.parquet": "/weppcloud/runs/pfdf-kf-e5c25f5b/disturbed9002_wbt/report/postfire_debris_flow/files/events.parquet?attempt_id=089792b89459438ebd5de3f2c4b972c0",
+      "inverse.parquet": "/weppcloud/runs/pfdf-kf-e5c25f5b/disturbed9002_wbt/report/postfire_debris_flow/files/inverse.parquet?attempt_id=089792b89459438ebd5de3f2c4b972c0",
+      "manifest.json": "/weppcloud/runs/pfdf-kf-e5c25f5b/disturbed9002_wbt/report/postfire_debris_flow/files/manifest.json?attempt_id=089792b89459438ebd5de3f2c4b972c0",
+      "valid_mask.tif": "/weppcloud/runs/pfdf-kf-e5c25f5b/disturbed9002_wbt/report/postfire_debris_flow/files/valid_mask.tif?attempt_id=089792b89459438ebd5de3f2c4b972c0"
+    },
+    "control": "/weppcloud/runs/pfdf-kf-e5c25f5b/disturbed9002_wbt/#postfire-debris-flow",
+    "event": "/weppcloud/runs/pfdf-kf-e5c25f5b/disturbed9002_wbt/query/postfire_debris_flow/event",
+    "query": "/weppcloud/runs/pfdf-kf-e5c25f5b/disturbed9002_wbt/query/postfire_debris_flow/"
+  }
+}

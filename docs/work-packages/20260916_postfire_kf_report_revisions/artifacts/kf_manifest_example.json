@@ -1,0 +1,77 @@
+{
+  "aggregation": "all_recorded_layers_thickness_then_component_percentage_missing_excluded",
+  "artifacts_sha256": {
+    "kf.tif": "aee21670a1deebd630f1679c00a97839e4ba161d2368d3a0409e807aee8c3364",
+    "native_kf.tif": "6b8956ebfc3fbcc8c45c7c8df5b40ea191f1db5b43fed55b504aaed752fa34fd"
+  },
+  "field": "KFFACT",
+  "missing_cells": 0,
+  "native_grid": {
+    "crs": "EPSG:5069",
+    "shape": [
+      340,
+      326
+    ],
+    "transform": [
+      30.0,
+      0.0,
+      -2135956.75,
+      0.0,
+      -30.0,
+      1536385.75
+    ]
+  },
+  "object_identity": [
+    "\"978b86438e7a437429ccf062285e4de7\"",
+    353845954,
+    "Tue, 10 Dec 2024 19:47:23 GMT"
+  ],
+  "policy": "statsgo_kffact_1995_cog2025_v1",
+  "release_date": "2025-02-11",
+  "requests_sha256": {
+    "request-00001-start.json": "cf012dbcccd45040e25ac16e9d87550c1c22be123e3a8eadc7b43eb183cba962",
+    "request-00001.json": "6352f4458c2d7024ca5aec7d469b6db5cddce80afc35bb4ab605a99c9efef425",
+    "request-00002-start.json": "f49479d076edbc5cc259a038468c907744c57cb458a6442f70ae362f51a08143",
+    "request-00002.body": "1c19f7af1966c267fc92d250a86a01dd97ff7cbdb20b49d48b4de5ba29985dd0",
+    "request-00002.json": "f88cf141523e813bdbd130b202fbeaeec506afe62c6256d9c9d9faf0736bbaab",
+    "request-00003-start.json": "028d53e28a7af07bb31ae8adec45eb76af096dd9bc4e88992d023c3bac307fa1",
+    "request-00003.body": "00d2754afbe200f281cbd1c811d0a763fd191c2a5720d327e95826d6bf8b8026",
+    "request-00003.json": "97bc2abc1377af36178d1a27af40b1a65388ef8caa5f374c7bdb07771fa5ff8a",
+    "request-00004-start.json": "a0ffa4dbc8d55e8ab13530fde043d6bbc45bd361c1112660eb824d9fd615051a",
+    "request-00004.body": "077ace2809b06a0ed6e87da4e82181315ad9e72a6cc70263bde7e7721cb86f50",
+    "request-00004.json": "72a5ddab474416d529cd35cd15a4d0d538fa1896f323cdf361f9c75e722cfd48",
+    "request-00005-start.json": "ccbee43aa4d2bd9c91f5612962d9a2831dc929339d215143aee4e94862e277e3",
+    "request-00005.body": "933e403fbe154ff82615e0040073af5bc79f934e6b7b048fa0c45d70159b2d1d",
+    "request-00005.json": "cb015c1243f42cc0e3cc2ef3095352e75f52141ee5b45d6e5d1beb959e3ebe02",
+    "request-00006-start.json": "2d17aca836a4dfb1060f36609a238e53ce45c28d7fef8d30b28fdb7961232a99",
+    "request-00006.body": "f6842a3021e7e985088d2bcf91c36bccaa5b7593d4fb922db290e06c5debb727",
+    "request-00006.json": "0aa6f3c76b1afda9ad306ae7a8e934308fefba0499fb5e3991602f625054c9b8",
+    "request-00007-start.json": "cf012dbcccd45040e25ac16e9d87550c1c22be123e3a8eadc7b43eb183cba962",
+    "request-00007.json": "caa6682bd8dda1743e93114b1a215f5fe960a4d24983604323cdef7fbfa78690"
+  },
+  "resampling": "nearest",
+  "retrieved_at": "2026-09-16T23:10:02.183900+00:00",
+  "schema_version": 1,
+  "source_id": "6750c172d34ed8d3858534d8",
+  "source_metadata_sha256": "c9e8c40e2739891b04882d559b99e60f224e1b55f92d0134cbbb1f3cf9bfd9cb",
+  "source_url": "https://prod-is-usgs-sb-prod-publish.s3.amazonaws.com/6750c172d34ed8d3858534d8/statsgo-KFFACT.tif",
+  "status": "complete",
+  "target_grid": {
+    "crs": "EPSG:32611",
+    "shape": [
+      853,
+      812
+    ],
+    "transform": [
+      10.0,
+      0.0,
+      255373.91793810797,
+      0.0,
+      -10.0,
+      3819298.6325536324
+    ]
+  },
+  "units": "USLE_customary",
+  "units_interpretation": "original_kffact_field_verified",
+  "valid_cells": 77669
+}

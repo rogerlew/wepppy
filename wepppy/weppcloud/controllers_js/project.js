@@ -69,8 +69,7 @@ var Project = (function () {
         "x-csrf-token"
     ].join("|");
     var MOD_ENABLE_PROPAGATION = {
-        geneva: ["roads"],
-        postfire_debris_flow: ["polaris", "rusle"]
+        geneva: ["roads"]
     };
     var MOD_STICKY_FALSE_FLAGS = {
         openet_ts: true,

@@ -1,7 +1,7 @@
 # Kf and rainfall-response revisions tracker
 
 Started/updated: 2026-09-16 UTC. Status: execution started; source research and
-draft contract checkpoint prepared; reviews and ancestor commit pending.
+contract checkpoint `9395f4722` accepted; runtime implementation underway.
 Starting revision: `5f98c577a`. Security: high; dedicated review required.
 
 ## Progress
@@ -9,13 +9,12 @@ Starting revision: `5f98c577a`. Security: high; dedicated review required.
 - [x] Capture owner direction, exclusions, compatibility and complexity budget.
 - [x] Draft parameterization ADR and self-contained implementation ExecPlan.
 - [x] M1: establish Kf scientific source/aggregation proposal and authentic source comparisons.
-- [ ] M2: amend canonical contracts, complete two independent contract reviews,
-  and record a standalone ancestor checkpoint with commit authority.
-  Canonical amendments and input/state matrix are drafted; reviews and commit remain.
-- [ ] M3: implement and wire module-owned Kf; remove RUSLE coupling.
-- [ ] M4: implement response curve and rainfall provenance labels/exports.
-- [ ] M5: regression, real workflow evidence, correctness/security/UX review.
-- [ ] M5 live gate: restart forest stack, confirm health and updated web/worker
+- [x] M2: canonical amendments passed independent correctness/security reviews;
+  disposition and standalone ancestor checkpoint `9395f4722` recorded.
+- [x] M3: implement and wire module-owned Kf; remove RUSLE coupling.
+- [x] M4: implement response curve and rainfall provenance labels/exports.
+- [x] M5: regression, real workflow evidence, correctness/security/UX review.
+- [x] M5 live gate: restart forest stack, confirm health and updated web/worker
   code, then complete nervous-mesquite M1 UI/RQ → Kf results → report/export/reload.
 - [ ] M6: promote final docs and close implementation package.
 
@@ -61,7 +60,8 @@ All 301,379 compared native cells exactly match original polygon KFFACT.
 The COG metadata incorrectly labels conductivity; original field lineage and
 numerical comparison support customary erodibility units. This interpretation
 awaits independent review and does not claim publisher confirmation.
-No runtime files or existing projects were modified; no restart/rerun occurred.
+At the initial scientific checkpoint no runtime/project writes had occurred;
+implementation and live acceptance are recorded below.
 
 Thomas audit: `../20260916_thomas_fire_verification/artifacts/findings.md`.
 At I15=24 mm/hour: run 85.63%, USGS 69.35%; K 0.337162 versus Kf 0.139364.
@@ -98,3 +98,20 @@ stack restart and end-to-end run after the request for independent reviews and
 checkpoint commit. These required steps are authorized; no further permission
 stop is needed. Two independent contract reviews are running. The latest user
 rerun remains legacy code and will be preserved as the before-state.
+
+## Implementation progress
+
+Kf/schema-3, source decoupling, preflight dispatch and response curve are wired.
+633 module tests, 250 routes/render checks, canonical archive regression, Go
+preflight, 112 frontend suites/899 tests and facade stubtest pass. Independent
+review defects are fixed and covered. Full repository sanity passed: 8,693 passed, 103 skipped, 1,109.71s.
+
+Forest restart and both actual UI/RQ/browser acceptances passed. Named new
+attempt `0ea9c1f5b0964b22ba7f1b457c1a6c9f` has Kf 0.139396 and I15=24 probability
+72.19%. Fixture `pfdf-kf-e5c25f5b` ran without RUSLE/POLARIS and retained its
+post-fire control/current results immediately after RUSLE removal and after two
+reloads. Actual generated files round-trip through canonical archive/restore.
+
+Evidence: [restart](artifacts/forest_restart_validation.md),
+[named run](artifacts/nervous_mesquite_e2e.md),
+[generic/M3](artifacts/generic_e2e.md). All final independent reviews PASS; final documentation/commit closeout remains; no push or production deployment.

@@ -2,9 +2,8 @@
 
 
 This living ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`. The owner
-requested execution on 2026-09-16. Source research and proposed canonical
-amendments are prepared. Independent contract reviews, disposition and the
-required standalone ancestor commit remain pending before implementation.
+requested execution on 2026-09-16. Source research and canonical amendments passed independent contract review.
+Standalone ancestor checkpoint `9395f4722` precedes runtime implementation.
 The owner authorized completion after the explicit reviews/checkpoint-commit
 request; required review delegation and commits are authorized. No push is authorized.
 The owner's follow-up explicitly includes a forest-stack restart and a new M1
@@ -26,11 +25,11 @@ watershed delineation, M1/M3 equations and M3 thickness behavior stay unchanged.
 
 - [x] (2026-09-16 UTC) Scaffold package, provenance ADR and scope/compatibility plan.
 - [x] (2026-09-16 UTC) M1: establish supported Kf source and documented upstream aggregation; independently compare original polygons in two regions and compute a research basin mean.
-- [ ] M2: canonical proposals and input/state matrix prepared; independent reviews, disposition, acceptance and ancestor commit pending.
-- [ ] M3: implement and wire Kf preparation, publication and RUSLE decoupling.
-- [ ] M4: implement response curve, numeric equivalent and rainfall labeling.
-- [ ] M5: validate generic live behavior and complete independent reviews.
-- [ ] M5 live gate: restart forest and verify nervous-mesquite end to end with
+- [x] M2: independent correctness/security reviews PASS; disposition retained; standalone ancestor `9395f4722`.
+- [x] M3: implement and wire Kf preparation, publication and RUSLE decoupling.
+- [x] M4: implement response curve, numeric equivalent and rainfall labeling.
+- [x] M5: validate generic live behavior and complete independent reviews.
+- [x] M5 live gate: restart forest and verify nervous-mesquite end to end with
   new Kf-backed results, report/export/reload and preserved protected inputs.
 - [ ] M6: finish durable documentation and implementation closeout.
 
@@ -84,12 +83,15 @@ only; no other existing project or host is implicitly authorized.
 ## Outcomes & Retrospective
 
 
-Source research and the draft contract checkpoint are prepared. The independent
-probe confirms native KFFACT values against two regional polygon archives and
-gives research mean 0.1393960061975289 on nervous-mesquite's saved legacy support.
-That support is not the new production mask. No application change, run write,
-rerun, restart, commit or push occurred. Reviews and ancestor approval remain
-before M3/M4; all real workflow and closeout gates remain pending.
+Implementation and live acceptance passed. After a full forest restart, normal
+UI/RQ runs produced schema-3 Kf on nervous-mesquite and a no-RUSLE fixture.
+Independent raster/table/CSV checks and real generated-file archive/restore pass;
+M3 browser compatibility passes. Named K changed from 0.337162 to 0.139396 and
+I15=24 mm/hour probability from 85.63% to 72.19%, preserving T/F/support.
+Initial review issues (native snapshot integrity, selection races, POLARIS
+freshness and UX labels) are repaired with regression evidence. Full repository
+sanity passes: 8,693 passed, 103 skipped (18:29); all final reviews PASS.
+M6 records the final implementation revision and closes the package.
 
 ## Context and Orientation
 
@@ -117,7 +119,7 @@ The domain `specification.md`, `docs/m1_predictors.md`, `docs/production_m1.md`,
 `docs/production_m3.md`, `docs/production_m3_runtime.md`, `docs/rainfall_results.md`
 and the two `docs/ui-docs/contracts/postfire-debris-flow-*-contract.md` contracts
 must be reconciled before code changes. ADR-0059 documents the old K choice;
-ADR-0068 records the replacement direction, with scientific details pending.
+ADR-0068 records the accepted replacement policy and scientific evidence.
 
 ## Plan of Work
 
@@ -322,3 +324,20 @@ end-to-end acceptance after explicit reviews/commit permission request. Proceed
 through required reviews and commits without another permission stop. The user
 restarted and reran the old implementation before this continuation; capture the
 latest accepted attempt as baseline, not the earlier research attempt.
+
+Revision 2026-09-16 UTC: checkpoint `9395f4722` passed both independent reviews.
+M3/M4 implementation and focused tests underway. Every new M1 attempt prepares
+fresh Kf and recomputes its predictor bundle so source provenance remains owned
+by that attempt; legacy climate-only predictor reuse is not applied to schema 3.
+
+Revision 2026-09-16 UTC: 633 module tests, 250 route/render tests, archive
+regression, 112 frontend suites/899 tests and Go tests pass. Forest restarted;
+preflight required a second start after Redis finished LOADING. Both live browser
+flows pass, including RUSLE removal immediately and after two reloads. Named run
+and generic evidence, source receipts and generated-file archive roundtrips are
+retained. Full-suite sanity/final review remains in progress.
+
+Revision 2026-09-16 23:27 UTC: full repository gate passed, 8,693 tests with
+103 skips and 3,135 retained warnings (1,109.71s). All three final independent
+reviews PASS. Complete final telemetry/documentation/commit and move this plan
+to completed; no runtime or acceptance work remains.

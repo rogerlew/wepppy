@@ -1,0 +1,370 @@
+[
+  {
+    "utc": "2026-09-16T23:12:57.085Z",
+    "stage": "before",
+    "state": {
+      "schema_version": 1,
+      "model": "M1",
+      "eligible": true,
+      "readonly": false,
+      "unavailable_reason": null,
+      "required": [
+        {
+          "key": "watershed",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#subcatchments-delineation"
+        },
+        {
+          "key": "sbs",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#disturbed-sbs"
+        },
+        {
+          "key": "k",
+          "ready": true,
+          "reason": null,
+          "message": "Kf will be prepared when you run M1",
+          "control": "#postfire-debris-flow"
+        },
+        {
+          "key": "climate",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#climate"
+        },
+        {
+          "key": "dnbr",
+          "ready": false,
+          "reason": "missing_input",
+          "message": "Upload dNBR",
+          "control": "#postfire-debris-flow"
+        }
+      ],
+      "noaa_available": false,
+      "frequency_source": "cli",
+      "upload_ready": true,
+      "run_ready": false,
+      "upload": null,
+      "run": null,
+      "dnbr": null,
+      "results": null,
+      "freshness": "absent"
+    }
+  },
+  {
+    "utc": "2026-09-16T23:13:06.874Z",
+    "stage": "uploaded",
+    "state": {
+      "schema_version": 1,
+      "model": "M1",
+      "eligible": true,
+      "readonly": false,
+      "unavailable_reason": null,
+      "required": [
+        {
+          "key": "watershed",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#subcatchments-delineation"
+        },
+        {
+          "key": "sbs",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#disturbed-sbs"
+        },
+        {
+          "key": "k",
+          "ready": true,
+          "reason": null,
+          "message": "Kf will be prepared when you run M1",
+          "control": "#postfire-debris-flow"
+        },
+        {
+          "key": "climate",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#climate"
+        },
+        {
+          "key": "dnbr",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#postfire-debris-flow"
+        }
+      ],
+      "noaa_available": false,
+      "frequency_source": "cli",
+      "upload_ready": true,
+      "run_ready": true,
+      "upload": {
+        "id": "2886a9f693b549d4b04efd153c54cce8",
+        "job_id": "1dc180e9-a813-49b4-a1e1-0da815aa42d7",
+        "phase": "complete",
+        "created_at": "2026-09-16T23:12:58.800245+00:00",
+        "error": null,
+        "retryable": true,
+        "filename": "smoke-dnbr.tif"
+      },
+      "run": null,
+      "dnbr": {
+        "id": "2886a9f693b549d4b04efd153c54cce8",
+        "filename": "smoke-dnbr.tif",
+        "format": "GTiff",
+        "dtype": "float32",
+        "cell_size_m": [
+          10,
+          10
+        ],
+        "coverage_fraction": 1,
+        "source_range": [
+          -200,
+          900
+        ],
+        "prepared_range": [
+          -0.11538461595773697,
+          0.8153846263885498
+        ],
+        "scale_mode": "auto",
+        "scale_factor": 0.001,
+        "add_offset": 0,
+        "scale_method": "distribution",
+        "completed_at": "2026-09-16T23:13:05.633864+00:00",
+        "current": true
+      },
+      "results": null,
+      "freshness": "absent"
+    },
+    "rusle_absent": true
+  },
+  {
+    "utc": "2026-09-16T23:13:07.800Z",
+    "stage": "submitted",
+    "response": {
+      "job_id": "087cf30a-db0d-4ffa-afc2-7c9ea4e70a7a",
+      "result": {
+        "attempt_id": "089792b89459438ebd5de3f2c4b972c0"
+      }
+    }
+  },
+  {
+    "utc": "2026-09-16T23:13:19.120Z",
+    "stage": "completed",
+    "state": {
+      "schema_version": 1,
+      "model": "M1",
+      "eligible": true,
+      "readonly": false,
+      "unavailable_reason": null,
+      "required": [
+        {
+          "key": "watershed",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#subcatchments-delineation"
+        },
+        {
+          "key": "sbs",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#disturbed-sbs"
+        },
+        {
+          "key": "k",
+          "ready": true,
+          "reason": null,
+          "message": "Kf will be prepared when you run M1",
+          "control": "#postfire-debris-flow"
+        },
+        {
+          "key": "climate",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#climate"
+        },
+        {
+          "key": "dnbr",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#postfire-debris-flow"
+        }
+      ],
+      "noaa_available": false,
+      "frequency_source": "cli",
+      "upload_ready": true,
+      "run_ready": true,
+      "upload": {
+        "id": "2886a9f693b549d4b04efd153c54cce8",
+        "job_id": "1dc180e9-a813-49b4-a1e1-0da815aa42d7",
+        "phase": "complete",
+        "created_at": "2026-09-16T23:12:58.800245+00:00",
+        "error": null,
+        "retryable": true,
+        "filename": "smoke-dnbr.tif"
+      },
+      "run": {
+        "id": "089792b89459438ebd5de3f2c4b972c0",
+        "job_id": "087cf30a-db0d-4ffa-afc2-7c9ea4e70a7a",
+        "phase": "complete",
+        "created_at": "2026-09-16T23:13:07.209774+00:00",
+        "error": null,
+        "retryable": true,
+        "filename": null,
+        "model": "M1",
+        "frequency_source": "cli"
+      },
+      "dnbr": {
+        "id": "2886a9f693b549d4b04efd153c54cce8",
+        "filename": "smoke-dnbr.tif",
+        "format": "GTiff",
+        "dtype": "float32",
+        "cell_size_m": [
+          10,
+          10
+        ],
+        "coverage_fraction": 1,
+        "source_range": [
+          -200,
+          900
+        ],
+        "prepared_range": [
+          -0.11538461595773697,
+          0.8153846263885498
+        ],
+        "scale_mode": "auto",
+        "scale_factor": 0.001,
+        "add_offset": 0,
+        "scale_method": "distribution",
+        "completed_at": "2026-09-16T23:13:05.633864+00:00",
+        "current": true
+      },
+      "results": {
+        "id": "089792b89459438ebd5de3f2c4b972c0",
+        "model": "M1",
+        "soil_policy": "statsgo_kffact_1995_cog2025_v1",
+        "completed_at": "2026-09-16T23:13:17.133145+00:00",
+        "partial": false,
+        "area_warning": true,
+        "coverage": {
+          "excluded_cells": 0,
+          "mask": "valid_mask.tif",
+          "policy": "common_valid_v1",
+          "total_cells": 1156,
+          "valid_cells": 1156,
+          "valid_fraction": 1
+        },
+        "partial_reason": null,
+        "current": true,
+        "files": [
+          {
+            "name": "events.parquet",
+            "url": "/rq-engine/api/runs/pfdf-kf-e5c25f5b/disturbed9002_wbt/postfire-debris-flow/files/089792b89459438ebd5de3f2c4b972c0/events.parquet"
+          },
+          {
+            "name": "design.parquet",
+            "url": "/rq-engine/api/runs/pfdf-kf-e5c25f5b/disturbed9002_wbt/postfire-debris-flow/files/089792b89459438ebd5de3f2c4b972c0/design.parquet"
+          },
+          {
+            "name": "inverse.parquet",
+            "url": "/rq-engine/api/runs/pfdf-kf-e5c25f5b/disturbed9002_wbt/postfire-debris-flow/files/089792b89459438ebd5de3f2c4b972c0/inverse.parquet"
+          },
+          {
+            "name": "valid_mask.tif",
+            "url": "/rq-engine/api/runs/pfdf-kf-e5c25f5b/disturbed9002_wbt/postfire-debris-flow/files/089792b89459438ebd5de3f2c4b972c0/valid_mask.tif"
+          },
+          {
+            "name": "manifest.json",
+            "url": "/rq-engine/api/runs/pfdf-kf-e5c25f5b/disturbed9002_wbt/postfire-debris-flow/files/089792b89459438ebd5de3f2c4b972c0/manifest.json"
+          }
+        ]
+      },
+      "freshness": "current"
+    }
+  },
+  {
+    "utc": "2026-09-16T23:13:23.959Z",
+    "stage": "artifact",
+    "name": "design.parquet",
+    "sha256": "dbc3e8daff6e2d6fae36ef6eb1378243e6e3bf75dd17bbf343960cbdfd148180",
+    "bytes": 3245
+  },
+  {
+    "utc": "2026-09-16T23:13:24.177Z",
+    "stage": "artifact",
+    "name": "events.parquet",
+    "sha256": "ca1a57a144833c54673d089bb578b4ea0de512765b92f65763b82fd264480590",
+    "bytes": 5131
+  },
+  {
+    "utc": "2026-09-16T23:13:24.402Z",
+    "stage": "artifact",
+    "name": "inverse.parquet",
+    "sha256": "1bf300cc068930682beda12331b9a6a41576104691fdb930c79d2846e6cf4ba6",
+    "bytes": 2213
+  },
+  {
+    "utc": "2026-09-16T23:13:24.607Z",
+    "stage": "artifact",
+    "name": "manifest.json",
+    "sha256": "97737352588f89684bcccb8c5baa5f83f29b2bc1ee8be62720dd67d4bd6d2aab",
+    "bytes": 16029
+  },
+  {
+    "utc": "2026-09-16T23:13:24.821Z",
+    "stage": "artifact",
+    "name": "valid_mask.tif",
+    "sha256": "72fe73609729f2c4ed3dc2b42dc2e5a5a39f3f74ebd0ee17e8c1fd3d2d03fdd7",
+    "bytes": 414
+  },
+  {
+    "utc": "2026-09-16T23:13:24.839Z",
+    "stage": "source_browse",
+    "status": 200
+  },
+  {
+    "utc": "2026-09-16T23:13:25.293Z",
+    "stage": "report_verified",
+    "attempt_id": "089792b89459438ebd5de3f2c4b972c0",
+    "soil_source": "NRCS-derived STATSGO fine-earth Kf",
+    "curve_points": 103
+  },
+  {
+    "utc": "2026-09-16T23:13:30.007Z",
+    "stage": "rusle_removal",
+    "reload": 0,
+    "postfire_visible": true,
+    "current": true
+  },
+  {
+    "utc": "2026-09-16T23:13:32.757Z",
+    "stage": "rusle_removal",
+    "reload": 1,
+    "postfire_visible": true,
+    "current": true
+  },
+  {
+    "utc": "2026-09-16T23:13:35.271Z",
+    "stage": "rusle_removal",
+    "reload": 2,
+    "postfire_visible": true,
+    "current": true
+  },
+  {
+    "utc": "2026-09-16T23:13:35.311Z",
+    "stage": "PASS",
+    "attempt_id": "089792b89459438ebd5de3f2c4b972c0"
+  }
+]

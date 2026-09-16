@@ -1,0 +1,9 @@
+INFO:wctl2:docker compose run --rm preflight-build sh -lc 'cd /workspace/services/preflight2 && PATH=/usr/local/go/bin:$PATH go test ./...'
+time="2026-09-16T16:05:57-07:00" level=warning msg="Found orphan containers (wepppy-f-esri) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container wepppy-redis Running 
+ Container docker-preflight-build-run-a64e745a4dc2 Creating 
+ Container docker-preflight-build-run-a64e745a4dc2 Created 
+?   	github.com/rogerlew/wepppy/services/preflight2/cmd/preflight2	[no test files]
+ok  	github.com/rogerlew/wepppy/services/preflight2/internal/checklist	0.009s
+ok  	github.com/rogerlew/wepppy/services/preflight2/internal/config	0.006s
+ok  	github.com/rogerlew/wepppy/services/preflight2/internal/server	0.009s

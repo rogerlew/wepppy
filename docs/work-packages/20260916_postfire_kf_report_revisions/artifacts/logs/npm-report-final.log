@@ -1,0 +1,33 @@
+
+> weppcloud-static@0.1.0 test
+> NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.mjs postfire_report
+
+PASS ../controllers_js/__tests__/postfire_report.test.js
+  ✓ accepted model, stale warning, fixed likelihood scale and all three thresholds (197 ms)
+  ✓ scenario buttons link to accessible markers, bootstrap does not duplicate listeners (134 ms)
+  ✓ details are directly after selected event with preserved activating focus (87 ms)
+  ✓ duration/filter queries are typed, reset page and ignore out-of-order responses (98 ms)
+  ✓ replacement disables exports and clears details, including later unit events (79 ms)
+  ✓ CSV retains full precision, labels scope and neutralizes formula text (100 ms)
+  ✓ unit changes preserve selection and change chart, all tables and precise exports together (91 ms)
+  ✓ absent and unknown currentness never invent zero probabilities (113 ms)
+  ✓ percent and year filters normalize, numeric filters show unique unfiltered denominator (124 ms)
+  ✓ transient failure retains coherent values, marks CSV previous view, and retries same page (105 ms)
+  ✓ last-page-row inline detail is discoverable; response from an old selection is ignored (105 ms)
+  ✓ failed event details keep a local retry beside the selected event and recover (72 ms)
+  ✓ query in flight prevents detail requests canceling the selected page generation (88 ms)
+  ✓ invalid dates remain selectable and unknown reasons render safe support language (90 ms)
+  ✓ zero wet events remain distinct from filtered empty pages and retain design results (100 ms)
+  ✓ full common coverage does not hide missing terrain and row explanations (93 ms)
+  ✓ real Unitizer public API hydrates values, chart and detail without a private precision method (129 ms)
+  ✓ already initialized real Unitizer hydrates saved English radios locally without persistence (100 ms)
+  ✓ page-two selection survives duration reset and expands again when its page returns (130 ms)
+  ✓ duration change clears a selected event genuinely excluded by its new probability (143 ms)
+  ✓ unknown off-page selection uses bounded detail and discards an older in-flight response (95 ms)
+  ✓ curve has P50, numeric equivalent and provenance-aware export (80 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       22 passed, 22 total
+Snapshots:   0 total
+Time:        3.054 s, estimated 5 s
+Ran all test suites matching postfire_report.

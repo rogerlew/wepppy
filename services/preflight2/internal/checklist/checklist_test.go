@@ -248,18 +248,33 @@ func TestPostfirePublicationAndUpstreamInvalidation(t *testing.T) {
 }
 
 func TestPostfireModelDependencies(t *testing.T) {
-    for _, model := range []string{"M1", "M3", "invalid"} {
-        for _, task := range []string{"build_soils", "build_polaris", "build_rusle", "build_landuse"} {
-            check, _ := Evaluate(map[string]string{
-                "timestamps:run_postfire_debris_flow": "200",
-                "postfire_debris_flow:model": model,
-                "timestamps:" + task: "300",
-            })
-            relevant := (model == "M1" && (task == "build_polaris" || task == "build_rusle")) ||
-                (model == "M3" && (task == "build_soils" || task == "build_landuse"))
-            if check["postfire_debris_flow"] != (model != "invalid" && !relevant) {
-                t.Fatalf("unexpected %s freshness after %s", model, task)
-            }
-        }
-    }
+	for _, model := range []string{"M1", "M3", "invalid"} {
+		for _, task := range []string{"build_soils", "build_polaris", "build_rusle", "build_landuse"} {
+			check, _ := Evaluate(map[string]string{
+				"timestamps:run_postfire_debris_flow": "200",
+				"postfire_debris_flow:model":          model,
+				"timestamps:" + task:                  "300",
+			})
+			relevant := (model == "M1" && (task == "build_polaris" || task == "build_rusle")) ||
+				(model == "M3" && (task == "build_soils" || task == "build_landuse"))
+			if check["postfire_debris_flow"] != (model != "invalid" && !relevant) {
+				t.Fatalf("unexpected %s freshness after %s", model, task)
+			}
+		}
+	}
+}
+
+func TestPostfireKfPolicyExcludesLegacySoilTimestamps(t *testing.T) {
+	for _, policy := range []string{"", "statsgo_kffact_1995_cog2025_v1", "unknown"} {
+		check, _ := Evaluate(map[string]string{
+			"timestamps:run_postfire_debris_flow": "200",
+			"postfire_debris_flow:model":          "M1",
+			"postfire_debris_flow:soil_policy":    policy,
+			"timestamps:build_polaris":            "300",
+			"timestamps:build_rusle":              "300",
+		})
+		if check["postfire_debris_flow"] != (policy == "statsgo_kffact_1995_cog2025_v1") {
+			t.Fatalf("unexpected Kf freshness for policy %q", policy)
+		}
+	}
 }

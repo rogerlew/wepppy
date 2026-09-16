@@ -1,7 +1,7 @@
 # M1 fine-earth Kf source and runtime amendment
 
 Status: accepted 2026-09-16 after independent correctness and security reviews;
-implementation conformance pending. ADR-0068 records rationale and evidence.
+implementation conformance verified on forest, 2026-09-16. ADR-0068 records rationale and evidence.
 This amendment supersedes new-production M1 POLARIS/RUSLE requirements only
 after its contract checkpoint. Legacy v1/v2 and offline callers retain their
 existing contracts. M3 science and standalone RUSLE remain unchanged.

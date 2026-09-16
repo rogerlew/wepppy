@@ -1,0 +1,2 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && /opt/venv/bin/python tools/check_rq_dependency_graph.py
+RQ dependency graph artifacts are up to date

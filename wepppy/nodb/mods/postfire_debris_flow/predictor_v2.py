@@ -13,6 +13,12 @@ M3_ARTIFACTS = ('valid_mask.tif','wbt/relief.tif','wbt/area.tif','wbt/coverage.t
                 'terrain/manifest.json','terrain/wbt/watershed.tif','prepared/sbs.tif','prepared/domain.tif')
 
 
+def _artifacts(m):
+    if m.get('schema_version') == 3:
+        return (*ARTIFACTS, 'kf/kf.tif', 'kf/manifest.json')
+    return ARTIFACTS if m['model'] == 'M1' else M3_ARTIFACTS
+
+
 def validate(m):
     required = {'schema_version', 'model', 'support_policy', 'status', 'availability',
                 'source_kind', 'readiness', 'grid', 'outlet', 'area_km2', 'warnings',
@@ -31,7 +37,19 @@ def validate(m):
         hashes = m[name]
         if not isinstance(hashes, dict) or not hashes or any(not isinstance(k, str) or not io.hash_value(v) for k, v in hashes.items()):
             io.fail('invalid_input', 'Invalid predictor hashes')
-    inventory = ARTIFACTS if m['model'] == 'M1' else M3_ARTIFACTS
+    if m.get('schema_version') == 3:
+        from .kf_source import POLICY, validate_manifest
+        provenance = m.get('kf_provenance')
+        if (m['model'] != 'M1' or m.get('soil_policy') != POLICY or 'k_provenance' in m
+                or not isinstance(provenance,dict) or set(provenance) != {'manifest','sha256'}
+                or not io.hash_value(provenance['sha256'])):
+            io.fail('invalid_input','Invalid version-3 Kf predictor provenance')
+        validate_manifest(provenance['manifest'])
+        if (provenance['manifest']['target_grid'] != m['grid']
+                or provenance['sha256'] != m['artifacts_sha256'].get('kf/manifest.json')
+                or provenance['manifest']['artifacts_sha256']['kf.tif'] != m['artifacts_sha256'].get('kf/kf.tif')):
+            io.fail('provenance_mismatch','Kf provenance differs from predictor artifacts')
+    inventory = _artifacts(m)
     if set(m['artifacts_sha256']) != set(inventory) or not io.hash_value(m['tool'].get('sha256')):
         io.fail('invalid_input', 'Invalid predictor artifact/tool identity')
     coverage = m['coverage']
@@ -74,7 +92,7 @@ def validate(m):
         io.fail('invalid_input', 'Inconsistent predictor availability')
     if m['model'] == 'M1':
         _validate_m1_summary(m, total)
-        if count:
+        if count and m['schema_version'] == 2:
             io._validate_k(m.get('k_provenance'))
     else:
         if not {'terrain/manifest.json','soil/manifest.json'} <= m['prepared_sha256'].keys():
@@ -126,7 +144,7 @@ def _validate_m1_summary(m, total):
 
 
 def load_artifacts(root, m, consumed, limits):
-    for name in ARTIFACTS if m['model'] == 'M1' else M3_ARTIFACTS:
+    for name in _artifacts(m):
         limit = io.MAX_TEXT if name.endswith('.json') else io.MAX_PREDICTOR_BYTES
         path = io.regular(root/name, limit)
         actual = io.digest(path, limit)
@@ -157,6 +175,12 @@ def load_artifacts(root, m, consumed, limits):
     if (raw_grid != grid or np.any(common & (~determined | ~np.isin(intersection, [0, 1])))
             or (common.any() and m['predictors']['T']['value'] != np.count_nonzero(common & (intersection == 1))/int(common.sum()))):
         io.fail('invalid_input', 'Common T differs from raw intersection')
+    if m['schema_version'] == 3:
+        from .kf_source import read_prepared
+        k, usable, provenance = read_prepared(root/'kf/kf.tif',root/'kf/manifest.json',grid)
+        if (provenance != m['kf_provenance']['manifest'] or np.any(common & ~usable)
+                or (common.any() and float(np.mean(k[common],dtype=np.float64)) != m['predictors']['S']['value'])):
+            io.fail('provenance_mismatch','Common S differs from the saved Kf raster')
 
 
 def _load_m3(root,m,mask,domain,consumed,limits):
