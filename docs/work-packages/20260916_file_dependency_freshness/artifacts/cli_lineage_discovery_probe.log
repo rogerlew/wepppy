@@ -1,0 +1,103 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest docs/work-packages/20260916_file_dependency_freshness/artifacts/cli_lineage_discovery_probe.py -v -s --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0 -- /opt/venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collecting ... collected 10 items
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/cli_lineage_discovery_probe.py::test_parse_failure_keeps_previous_output PARSE_FAILURE {"prior_output_preserved": true}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/cli_lineage_discovery_probe.py::test_native_writer_failure_truncates_previous_output FAILED
+
+=================================== FAILURES ===================================
+_____________ test_native_writer_failure_truncates_previous_output _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-76/test_native_writer_failure_tru0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x72b6ec1d0980>
+
+    def test_native_writer_failure_truncates_previous_output(tmp_path, monkeypatch):
+        climate = climate_at(tmp_path)
+        service = ClimateArtifactExportService()
+        output = service.export_cli_parquet(climate)
+        previous = output.read_bytes()
+        observed = {}
+        def fail_write(self, table, row_group_size=None):
+            # The real native writer constructor has already opened the destination.
+            observed['size_at_write_table'] = output.stat().st_size
+            raise OSError(28, 'controlled native writer ENOSPC')
+        monkeypatch.setattr(pq.ParquetWriter, 'write_table', fail_write)
+        assert service.export_cli_parquet(climate) is None
+>       assert output.read_bytes() != previous
+               ^^^^^^^^^^^^^^^^^^^
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/cli_lineage_discovery_probe.py:70: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.12/pathlib.py:1019: in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/tmp/pytest-of-unknown/pytest-76/test_native_writer_failure_tru0/climate/wepp_cli.parquet')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-unknown/pytest-76/test_native_writer_failure_tru0/climate/wepp_cli.parquet'
+
+/usr/local/lib/python3.12/pathlib.py:1013: FileNotFoundError
+------------------------------ Captured log call -------------------------------
+ERROR    cli-lineage-discovery:climate_artifact_export_service.py:153 Failed exporting CLI parquet with peak intensities
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/nodb/core/climate_artifact_export_service.py", line 145, in export_cli_parquet
+    export_df.to_parquet(parquet_path, index=False)
+  File "/opt/venv/lib/python3.12/site-packages/pandas/util/_decorators.py", line 333, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/pandas/core/frame.py", line 3113, in to_parquet
+    return to_parquet(
+           ^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/pandas/io/parquet.py", line 480, in to_parquet
+    impl.write(
+  File "/opt/venv/lib/python3.12/site-packages/pandas/io/parquet.py", line 228, in write
+    self.api.parquet.write_table(
+  File "/opt/venv/lib/python3.12/site-packages/pyarrow/parquet/core.py", line 2015, in write_table
+    writer.write_table(table, row_group_size=row_group_size)
+  File "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/cli_lineage_discovery_probe.py", line 67, in fail_write
+    raise OSError(28, 'controlled native writer ENOSPC')
+OSError: [Errno 28] controlled native writer ENOSPC
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+tests/nodb/mods/test_postfire_debris_flow_production.py:6
+  /workdir/wepppy/tests/nodb/mods/test_postfire_debris_flow_production.py:6: PytestUnknownMarkWarning: Unknown pytest.mark.unit - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.unit
+
+tests/nodb/test_climate_artifact_export_service.py:12
+  /workdir/wepppy/tests/nodb/test_climate_artifact_export_service.py:12: PytestUnknownMarkWarning: Unknown pytest.mark.unit - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.unit
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/cli_lineage_discovery_probe.py:24
+  /workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/cli_lineage_discovery_probe.py:24: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.integration
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED docs/work-packages/20260916_file_dependency_freshness/artifacts/cli_lineage_discovery_probe.py::test_native_writer_failure_truncates_previous_output
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+=================== 1 failed, 1 passed, 5 warnings in 8.90s ====================

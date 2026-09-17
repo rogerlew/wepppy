@@ -1,0 +1,66 @@
+def write_table(table, where, row_group_size=None, version='2.6',
+                use_dictionary=True, compression='snappy',
+                write_statistics=True,
+                use_deprecated_int96_timestamps=None,
+                coerce_timestamps=None,
+                allow_truncated_timestamps=False,
+                data_page_size=None, flavor=None,
+                filesystem=None,
+                compression_level=None,
+                use_byte_stream_split=False,
+                column_encoding=None,
+                data_page_version='1.0',
+                use_compliant_nested_type=True,
+                encryption_properties=None,
+                write_batch_size=None,
+                dictionary_pagesize_limit=None,
+                store_schema=True,
+                write_page_index=False,
+                write_page_checksum=False,
+                sorting_columns=None,
+                store_decimal_as_integer=False,
+                write_time_adjusted_to_utc=False,
+                max_rows_per_page=None,
+                **kwargs):
+    # Implementor's note: when adding keywords here / updating defaults, also
+    # update it in write_to_dataset and _dataset_parquet.pyx ParquetFileWriteOptions
+    row_group_size = kwargs.pop('chunk_size', row_group_size)
+    use_int96 = use_deprecated_int96_timestamps
+    try:
+        with ParquetWriter(
+                where, table.schema,
+                filesystem=filesystem,
+                version=version,
+                flavor=flavor,
+                use_dictionary=use_dictionary,
+                write_statistics=write_statistics,
+                coerce_timestamps=coerce_timestamps,
+                data_page_size=data_page_size,
+                allow_truncated_timestamps=allow_truncated_timestamps,
+                compression=compression,
+                use_deprecated_int96_timestamps=use_int96,
+                compression_level=compression_level,
+                use_byte_stream_split=use_byte_stream_split,
+                column_encoding=column_encoding,
+                data_page_version=data_page_version,
+                use_compliant_nested_type=use_compliant_nested_type,
+                encryption_properties=encryption_properties,
+                write_batch_size=write_batch_size,
+                dictionary_pagesize_limit=dictionary_pagesize_limit,
+                store_schema=store_schema,
+                write_page_index=write_page_index,
+                write_page_checksum=write_page_checksum,
+                sorting_columns=sorting_columns,
+                store_decimal_as_integer=store_decimal_as_integer,
+                write_time_adjusted_to_utc=write_time_adjusted_to_utc,
+                max_rows_per_page=max_rows_per_page,
+                **kwargs) as writer:
+            writer.write_table(table, row_group_size=row_group_size)
+    except Exception:
+        if _is_path_like(where):
+            try:
+                os.remove(_stringify_path(where))
+            except os.error:
+                pass
+        raise
+

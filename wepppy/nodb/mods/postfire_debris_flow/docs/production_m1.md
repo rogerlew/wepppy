@@ -507,9 +507,12 @@ run readiness after a state-fetch or preflight connection failure are disabled.
 
 ### Publication verification and reuse
 
-Climate readiness also requires the active CLI file and an event parquet no older
-than that CLI. This rejects an old event table retained after a failed export,
-even if the overall climate build has a completion receipt. Climate receipt
+Climate readiness requires the active CLI and a successful event-Parquet producer
+lineage matching its selection and content, as specified by
+[Climate Parquet lineage](../../../../../docs/schemas/climate-parquet-lineage-contract.md).
+This supersedes mtime ordering: an old or proofless event table cannot establish
+new execution readiness after a failed export. Historical report/calendar reads
+remain compatible; state polling never creates provenance or regenerates climate. Climate receipt
 ordering follows the shared preflight contract relative to watershed abstraction.
 M3 Soils/landuse/rangeland checks are specified in model_selection.md; they are
 not independent M1 prerequisites. Upload requires only the delineated grid;

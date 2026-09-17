@@ -539,6 +539,10 @@ intervals), limited to intervals no greater than the number of represented
 wet-event years. These are project CLI-derived estimates; preserve the actual
 climate mode and provenance even when the selector is labeled CLIGEN.
 
+Producer lineage, atomic event-Parquet publication and legacy new-execution
+readiness follow the [Climate Parquet contract](../../../../docs/schemas/climate-parquet-lineage-contract.md);
+embedded metadata adds no columns or intensity changes.
+
 The Climate-owned NOAA artifact is
 `atlas14_intensity_pds_mean_metric.csv` under `Climate.cli_dir`. Current download
 eligibility checks for `2015` or `legacy` in `cligen_db`; availability is not

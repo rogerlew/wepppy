@@ -1,0 +1,20 @@
+{
+  "uid": 1000,
+  "cases": {
+    "empty_cli": {
+      "raised": "IndexError",
+      "message": "list index out of range",
+      "prior_output_unchanged": true
+    },
+    "invalid_header": {
+      "raised": "AssertionError",
+      "message": "['da', 'mo', 'year', 'prcp', 'bad', 'tp', 'ip', 'tmax', 'tmin', 'rad', 'w-vl', 'w-dir', 'tdew']",
+      "prior_output_unchanged": true
+    },
+    "readonly_output_writable_parent": {
+      "returned": null,
+      "prior_output_unchanged": true,
+      "parent_writable": true
+    }
+  }
+}

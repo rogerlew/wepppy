@@ -1,0 +1,84 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest docs/work-packages/20260916_file_dependency_freshness/artifacts/cli_lineage_discovery_probe_revision2.py -v -s --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0 -- /opt/venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collecting ... collected 10 items
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/cli_lineage_discovery_probe_revision2.py::test_parse_failure_keeps_previous_output PARSE_FAILURE {"prior_output_preserved": true}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/cli_lineage_discovery_probe_revision2.py::test_native_writer_failure_truncates_previous_output WRITE_FAILURE {"size_at_write_table": 4, "prior_size": 17289, "final_exists": false, "prior_output_preserved": false}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/cli_lineage_discovery_probe_revision2.py::test_source_changes_after_real_parse_are_published[rewrite] 2026-09-17 04:17:39 [INFO] wepppy.run.test_source_changes_after_real0.disturbed: disturbed.on(TriggerEvents.ON_INIT_FINISH)
+2026-09-17 04:17:39 [INFO] wepppy.run.test_source_changes_after_real0.soils: soils.dump_soils_parquet()
+2026-09-17 04:17:39 [INFO] wepppy.run.test_source_changes_after_real0.climate: Exported CLI parquet with peak intensities
+PARSE_RACE {"operation": "rewrite", "source_precip": 8.0, "output_precip": 4.0, "ready": true}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/cli_lineage_discovery_probe_revision2.py::test_source_changes_after_real_parse_are_published[selected_cli] 2026-09-17 04:17:42 [INFO] wepppy.run.test_source_changes_after_real1.disturbed: disturbed.on(TriggerEvents.ON_INIT_FINISH)
+2026-09-17 04:17:42 [INFO] wepppy.run.test_source_changes_after_real1.soils: soils.dump_soils_parquet()
+2026-09-17 04:17:42 [INFO] wepppy.run.test_source_changes_after_real1.climate: Exported CLI parquet with peak intensities
+PARSE_RACE {"operation": "selected_cli", "source_precip": 8.0, "output_precip": 4.0, "ready": true}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/cli_lineage_discovery_probe_revision2.py::test_existing_output_symlink_and_mode_followed DESTINATION {"symlink_preserved": true, "target_mode": "0640"}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/cli_lineage_discovery_probe_revision2.py::test_selected_source_symlink_supported SOURCE {"symlink_supported": true, "resolved_outside_cli_dir": true}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/cli_lineage_discovery_probe_revision2.py::test_denied_source_keeps_prior_output DENIED_SOURCE {"uid": 1000, "prior_output_preserved": true}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/cli_lineage_discovery_probe_revision2.py::test_interchange_materializer_is_another_producer[None-4] INTERCHANGE {"hint": null, "precip": 4.0, "metadata_keys": ["ARROW:schema", "pandas"]}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/cli_lineage_discovery_probe_revision2.py::test_interchange_materializer_is_another_producer[z-selected.cli-8] INTERCHANGE {"hint": "z-selected.cli", "precip": 8.0, "metadata_keys": ["ARROW:schema", "pandas"]}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/cli_lineage_discovery_probe_revision2.py::test_real_fixture_export_metadata_and_copy_cost PERFORMANCE {"source_bytes": 154409, "rows": 2192, "parquet_bytes": 151247, "actual_export_seconds": 0.06316737807355821, "copy_plus_three_sha_seconds": 0.00241329288110137, "separate_metadata_rewrite_seconds": 0.005089800106361508, "copied_embedded_proof_and_rows_coherent": true}
+PASSED
+
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+tests/nodb/mods/test_postfire_debris_flow_production.py:6
+  /workdir/wepppy/tests/nodb/mods/test_postfire_debris_flow_production.py:6: PytestUnknownMarkWarning: Unknown pytest.mark.unit - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.unit
+
+tests/nodb/test_climate_artifact_export_service.py:12
+  /workdir/wepppy/tests/nodb/test_climate_artifact_export_service.py:12: PytestUnknownMarkWarning: Unknown pytest.mark.unit - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.unit
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/cli_lineage_discovery_probe_revision2.py:24
+  /workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/cli_lineage_discovery_probe_revision2.py:24: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.integration
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/cli_lineage_discovery_probe_revision2.py::test_source_changes_after_real_parse_are_published[rewrite]
+  /workdir/wepppy/tests/nodb/mods/test_postfire_debris_flow_integration.py:16: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.integration
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/cli_lineage_discovery_probe_revision2.py::test_source_changes_after_real_parse_are_published[rewrite]
+  /opt/venv/lib/python3.12/site-packages/awesome_codename/data/__init__.py:1: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    from pkg_resources import resource_string
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/cli_lineage_discovery_probe_revision2.py::test_source_changes_after_real_parse_are_published[rewrite]
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/cli_lineage_discovery_probe_revision2.py::test_source_changes_after_real_parse_are_published[rewrite]
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The ConfirmRegisterForm and the confirm_register_form option are deprecated as of version 5.6.0 and will be removed in a future release.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/cli_lineage_discovery_probe_revision2.py::test_source_changes_after_real_parse_are_published[rewrite]
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The RegisterForm is deprecated as of version 5.6.0 and will be removed in a future release. The form RegisterFormV2 should be sub-classed instead.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/cli_lineage_discovery_probe_revision2.py::test_source_changes_after_real_parse_are_published[rewrite]
+docs/work-packages/20260916_file_dependency_freshness/artifacts/cli_lineage_discovery_probe_revision2.py::test_source_changes_after_real_parse_are_published[rewrite]
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 10 passed, 12 warnings in 17.95s =======================
