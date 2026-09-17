@@ -1,10 +1,15 @@
 from __future__ import annotations
 
+import errno
+import json
 import math
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Iterable, Mapping, Sequence
 
 from wepppy.nodb.mods.geneva.errors import GenevaKernelError
+from ._cache_freshness import (
+    GEOJSON_PROOF, _Attempt, _version, changed_source, geometry_inputs, matches, validate_inputs,
+)
 
 if TYPE_CHECKING:
     from wepppy.nodb.mods.geneva.geneva import Geneva
@@ -33,8 +38,12 @@ class GenevaHruMapGeometryService:
                 artifact_path=f"geneva/{HRU_MAP_LEGEND_RELPATH}",
             )
 
-        self._ensure_feature_collection_artifact(geneva)
-        feature_collection = geneva.artifact_io.read_json(geneva.wd, HRU_MAP_FEATURES_RELPATH)
+        try:
+            feature_collection = self._ensure_feature_collection_artifact(geneva)
+        except OSError as exc:
+            if exc.errno == errno.ESTALE:
+                raise changed_source() from exc
+            raise
         if str(feature_collection.get("type", "")) != "FeatureCollection":
             raise GenevaKernelError(
                 "Geneva HRU map features artifact must be a FeatureCollection.",
@@ -105,31 +114,38 @@ class GenevaHruMapGeometryService:
             "errors": [],
         }
 
-    def _ensure_feature_collection_artifact(self, geneva: "Geneva") -> None:
+    def _ensure_feature_collection_artifact(self, geneva: "Geneva") -> dict[str, Any]:
         source_path = geneva.artifact_io.resolve_path(geneva.wd, HRU_MAP_SOURCE_RELPATH)
         legend_path = geneva.artifact_io.resolve_path(geneva.wd, HRU_MAP_LEGEND_RELPATH)
         feature_path = geneva.artifact_io.resolve_path(geneva.wd, HRU_MAP_FEATURES_RELPATH)
-
-        if feature_path.exists() and not self._is_cache_stale(feature_path, source_path, legend_path):
-            return
-        self._materialize_feature_collection_from_raster(geneva, source_path=source_path)
-
-    def _is_cache_stale(self, feature_path: Path, source_path: Path, legend_path: Path) -> bool:
+        before = geometry_inputs(source_path, legend_path)
         try:
-            feature_mtime = feature_path.stat().st_mtime
-            return (
-                source_path.stat().st_mtime > feature_mtime
-                or legend_path.stat().st_mtime > feature_mtime
-            )
+            version = _version(feature_path)
+            payload = geneva.artifact_io.read_json(geneva.wd, HRU_MAP_FEATURES_RELPATH)
         except FileNotFoundError:
-            return True
+            payload = None
+        except (json.JSONDecodeError, ValueError):
+            payload = None
+        if payload is not None and matches(payload.get(GEOJSON_PROOF), 'hru_geometry', before):
+            validate_inputs(before, lambda: geometry_inputs(
+                geneva.artifact_io.resolve_path(geneva.wd, HRU_MAP_SOURCE_RELPATH),
+                geneva.artifact_io.resolve_path(geneva.wd, HRU_MAP_LEGEND_RELPATH)))
+            try:
+                current_version = _version(feature_path)
+            except FileNotFoundError as exc:
+                raise changed_source() from exc
+            if (geneva.artifact_io.resolve_path(geneva.wd, HRU_MAP_FEATURES_RELPATH) != feature_path
+                    or current_version != version):
+                raise changed_source()
+            return payload
+        return self._materialize_feature_collection_from_raster(geneva, source_path=source_path)
 
     def _materialize_feature_collection_from_raster(
         self,
         geneva: "Geneva",
         *,
         source_path: Path,
-    ) -> None:
+    ) -> dict[str, Any]:
         try:
             import rasterio
             from rasterio.features import shapes
@@ -142,70 +158,85 @@ class GenevaHruMapGeometryService:
                 status_code=500,
             ) from exc
 
-        hru_row_by_value = self._load_hru_row_by_value(geneva)
+        with _Attempt(geneva, HRU_MAP_FEATURES_RELPATH, 'hru_geometry') as attempt:
+            before = geometry_inputs(source_path, geneva.artifact_io.resolve_path(geneva.wd, HRU_MAP_LEGEND_RELPATH))
+            attempt.inputs = before.identity
+            def validate():
+                validate_inputs(before, lambda: geometry_inputs(
+                    geneva.artifact_io.resolve_path(geneva.wd, HRU_MAP_SOURCE_RELPATH),
+                    geneva.artifact_io.resolve_path(geneva.wd, HRU_MAP_LEGEND_RELPATH)))
+            attempt.input_validator = validate
+            hru_row_by_value = self._load_hru_row_by_value(geneva)
 
-        features: list[dict[str, Any]] = []
-        with rasterio.open(source_path) as dataset:
-            band = dataset.read(1, masked=True)
-            value_array = band.data if hasattr(band, "data") else band
-            mask = (~band.mask) if hasattr(band, "mask") else None
-            source_crs = dataset.crs
+            features: list[dict[str, Any]] = []
+            with rasterio.open(source_path) as dataset:
+                band = dataset.read(1, masked=True)
+                value_array = band.data if hasattr(band, "data") else band
+                mask = (~band.mask) if hasattr(band, "mask") else None
+                source_crs = dataset.crs
 
-            for geometry, raw_value in shapes(value_array, mask=mask, transform=dataset.transform):
-                hru_value = self._raster_value_to_positive_int(raw_value)
-                if hru_value is None:
-                    continue
+                for geometry, raw_value in shapes(value_array, mask=mask, transform=dataset.transform):
+                    hru_value = self._raster_value_to_positive_int(raw_value)
+                    if hru_value is None:
+                        continue
 
-                hru_row = hru_row_by_value.get(hru_value)
-                if hru_row is None:
-                    raise GenevaKernelError(
-                        "Geneva HRU raster contains hru_value with no legend crosswalk.",
-                        code="contract_violation",
-                        details={"hru_value": hru_value},
-                        status_code=500,
+                    hru_row = hru_row_by_value.get(hru_value)
+                    if hru_row is None:
+                        raise GenevaKernelError(
+                            "Geneva HRU raster contains hru_value with no legend crosswalk.",
+                            code="contract_violation",
+                            details={"hru_value": hru_value},
+                            status_code=500,
+                        )
+
+                    projected_geometry: dict[str, Any]
+                    if source_crs:
+                        projected_geometry = transform_geom(
+                            str(source_crs),
+                            "EPSG:4326",
+                            geometry,
+                            precision=6,
+                        )
+                    else:
+                        projected_geometry = geometry
+
+                    features.append(
+                        {
+                            "type": "Feature",
+                            "properties": {
+                                "hru_value": hru_value,
+                                "hru_id": str(hru_row["hru_id"]),
+                                "landuse_class": hru_row.get("landuse_class"),
+                                "hsg_group": hru_row.get("hsg_group"),
+                                "burn_severity_class": hru_row.get("burn_severity_class"),
+                                "hydrophobic_class": hru_row.get("hydrophobic_class"),
+                                "is_water": hru_row.get("is_water"),
+                            },
+                            "geometry": projected_geometry,
+                        }
                     )
 
-                projected_geometry: dict[str, Any]
-                if source_crs:
-                    projected_geometry = transform_geom(
-                        str(source_crs),
-                        "EPSG:4326",
-                        geometry,
-                        precision=6,
-                    )
-                else:
-                    projected_geometry = geometry
+            feature_collection: dict[str, Any] = {
+                "type": "FeatureCollection",
+                "features": features,
+            }
+            bounds = self._compute_bounds_from_features(features)
+            if bounds is not None:
+                feature_collection["bbox"] = bounds
 
-                features.append(
-                    {
-                        "type": "Feature",
-                        "properties": {
-                            "hru_value": hru_value,
-                            "hru_id": str(hru_row["hru_id"]),
-                            "landuse_class": hru_row.get("landuse_class"),
-                            "hsg_group": hru_row.get("hsg_group"),
-                            "burn_severity_class": hru_row.get("burn_severity_class"),
-                            "hydrophobic_class": hru_row.get("hydrophobic_class"),
-                            "is_water": hru_row.get("is_water"),
-                        },
-                        "geometry": projected_geometry,
-                    }
-                )
-
-        feature_collection: dict[str, Any] = {
-            "type": "FeatureCollection",
-            "features": features,
-        }
-        bounds = self._compute_bounds_from_features(features)
-        if bounds is not None:
-            feature_collection["bbox"] = bounds
-
-        # Route through artifact_io to keep run-scoped path guardrails consistent.
-        geneva.artifact_io.write_json(
-            geneva.wd,
-            HRU_MAP_FEATURES_RELPATH,
-            feature_collection,
-        )
+            after = geometry_inputs(
+                geneva.artifact_io.resolve_path(geneva.wd, HRU_MAP_SOURCE_RELPATH),
+                geneva.artifact_io.resolve_path(geneva.wd, HRU_MAP_LEGEND_RELPATH),
+            )
+            before.validate(after)
+            feature_collection[GEOJSON_PROOF] = attempt.proof(before)
+            candidate = attempt.candidate('candidate.geojson')
+            with candidate.open('w') as outgoing:
+                json.dump(feature_collection, outgoing, indent=2, sort_keys=True)
+                outgoing.write('\n')
+            # Keep final dependency validation immediately before publication.
+            attempt.publish(candidate, validate=validate)
+            return feature_collection
 
     def _load_hru_row_by_value(self, geneva: "Geneva") -> dict[int, dict[str, Any]]:
         legend = geneva.artifact_io.read_json(geneva.wd, HRU_MAP_LEGEND_RELPATH)

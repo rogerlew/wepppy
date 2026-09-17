@@ -1,0 +1,132 @@
+{
+  "scope": "C05/C06 actual service performance against explicit amended canonical checkpoint",
+  "canonical_checkpoint": "21aacd74f",
+  "measurement_file": "geneva_implementation_performance_amended.json",
+  "measurement_sha256": "63efb382d7ff96612d837006553ea6fbaf69ada5847a49c9bfa05ace422edd9e",
+  "decision": {
+    "decision": "geneva_performance_budget_amendment.md",
+    "decision_sha256": "2cce7aefcefd0299c6fdf8ca89a25175d514a5d2f100ae781f70deef64c67871",
+    "original_failures_retained": [
+      "geneva_implementation_performance.json",
+      "geneva_implementation_performance_revision2.json"
+    ],
+    "geometry_ms": {
+      "settled_hit": 40,
+      "cold_evicted_hit": 75,
+      "paired_miss_added": 125
+    },
+    "burn_ms": {
+      "settled_hit": 30,
+      "cold_evicted_hit": 40,
+      "paired_miss_added": 65
+    }
+  },
+  "source_module_hashes": {
+    "/workdir/wepppy/wepppy/all_your_base/file_digest.py": "d090094983c4f7575801969a1339ae3306745f6ff93aa100c037d83dd7fb9ee7",
+    "/workdir/wepppy/wepppy/all_your_base/raster_freshness.py": "b5e1602a6596cfb37a21d72ecc2b3839da92fac3163fa6a8e2fb121bde6cc738",
+    "/workdir/wepppy/wepppy/nodb/mods/geneva/collaborators/_cache_freshness.py": "405223512fbf699d35d008bdb0228802ee2a39b2095dfc8ed3f67b3521b8e2b1",
+    "/workdir/wepppy/wepppy/nodb/mods/geneva/collaborators/hru_map_geometry_service.py": "98c3f8c3b67abd21c10aacf9c0b278df1874a07c2a2684c038f18f6bbfa51034",
+    "/workdir/wepppy/wepppy/nodb/mods/geneva/collaborators/hsg_assignment_service.py": "59ee01affee3b9455327868d17f4b76191d622ef2c520f7307f480fe706da96f"
+  },
+  "gates": [
+    {
+      "name": "geometry_settled_hit_ms",
+      "actual": 27.849515760317445,
+      "limit": 40,
+      "passed": true
+    },
+    {
+      "name": "geometry_post_admission_hit_ms",
+      "actual": 30.33771796617657,
+      "limit": 40,
+      "passed": true
+    },
+    {
+      "name": "geometry_cold_hit_ms",
+      "actual": 37.121164379641414,
+      "limit": 75,
+      "passed": true
+    },
+    {
+      "name": "geometry_evicted_hit_ms",
+      "actual": 29.135395617534716,
+      "limit": 75,
+      "passed": true
+    },
+    {
+      "name": "geometry_settled_miss_added_ms",
+      "actual": -8.402293392767547,
+      "limit": 125,
+      "passed": true
+    },
+    {
+      "name": "geometry_cold_miss_added_ms",
+      "actual": 86.32773230783641,
+      "limit": 125,
+      "passed": true
+    },
+    {
+      "name": "geometry_settled_hit_payload_reads",
+      "actual": 0,
+      "limit": 0,
+      "passed": true
+    },
+    {
+      "name": "geometry_post_admission_hit_payload_reads",
+      "actual": 0,
+      "limit": 0,
+      "passed": true
+    },
+    {
+      "name": "burn_settled_hit_ms",
+      "actual": 21.786212044147153,
+      "limit": 30,
+      "passed": true
+    },
+    {
+      "name": "burn_post_admission_hit_ms",
+      "actual": 22.679567034356296,
+      "limit": 30,
+      "passed": true
+    },
+    {
+      "name": "burn_cold_hit_ms",
+      "actual": 21.61509737682839,
+      "limit": 40,
+      "passed": true
+    },
+    {
+      "name": "burn_evicted_hit_ms",
+      "actual": 23.23772533175846,
+      "limit": 40,
+      "passed": true
+    },
+    {
+      "name": "burn_settled_miss_added_ms",
+      "actual": 48.54295666640003,
+      "limit": 65,
+      "passed": true
+    },
+    {
+      "name": "burn_cold_miss_added_ms",
+      "actual": 41.27693867000441,
+      "limit": 65,
+      "passed": true
+    },
+    {
+      "name": "burn_settled_hit_payload_reads",
+      "actual": 0,
+      "limit": 0,
+      "passed": true
+    },
+    {
+      "name": "burn_post_admission_hit_payload_reads",
+      "actual": 0,
+      "limit": 0,
+      "passed": true
+    }
+  ],
+  "accepted": true,
+  "original_budget_runs_remain_failed": true,
+  "full_package_runtime_acceptance": false
+}

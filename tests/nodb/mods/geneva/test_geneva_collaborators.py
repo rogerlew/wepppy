@@ -834,6 +834,10 @@ def test_hsg_assignment_aligns_auto_discovered_sbs_4class_to_geneva_grid(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    import numpy as np
+    import rasterio
+    from rasterio.transform import from_origin
+
     run_dir = tmp_path / "run"
     bound = run_dir / "dem" / "wbt" / "bound.tif"
     landuse = run_dir / "landuse" / "nlcd.tif"
@@ -841,7 +845,10 @@ def test_hsg_assignment_aligns_auto_discovered_sbs_4class_to_geneva_grid(
     sbs_4class = run_dir / "disturbed" / "sbs_4class.tif"
     for path in (bound, landuse, hydgrpdcd, sbs_4class):
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text("raster", encoding="utf-8")
+        with rasterio.open(path, 'w', driver='GTiff', width=2, height=2,
+                           count=1, dtype='uint8', nodata=255, crs='EPSG:32611',
+                           transform=from_origin(500000, 5000000, 30, 30)) as dataset:
+            dataset.write(np.full((2, 2), 3, dtype='uint8'), 1)
 
     fake_disturbed = SimpleNamespace(
         sbs_4class_path=str(sbs_4class),
@@ -852,14 +859,6 @@ def test_hsg_assignment_aligns_auto_discovered_sbs_4class_to_geneva_grid(
         tryGetInstance=staticmethod(lambda _wd: fake_disturbed),
     )
     monkeypatch.setitem(sys.modules, "wepppy.nodb.mods.disturbed", disturbed_module)
-
-    stacker_calls: list[tuple[str, str, str, str]] = []
-
-    def _fake_raster_stacker(source, match, target, *, resample):
-        Path(target).write_text("aligned", encoding="utf-8")
-        stacker_calls.append((str(source), str(match), str(target), str(resample)))
-
-    monkeypatch.setattr(hsg_assignment_module, "raster_stacker", _fake_raster_stacker)
 
     service = GenevaHsgAssignmentService()
     geneva = SimpleNamespace(
@@ -874,8 +873,10 @@ def test_hsg_assignment_aligns_auto_discovered_sbs_4class_to_geneva_grid(
 
     expected_burn_path = run_dir / "geneva" / "inputs" / "burn_severity_4class.tif"
     assert refs["burn_severity_tif"] == str(expected_burn_path)
-    assert expected_burn_path.read_text(encoding="utf-8") == "aligned"
-    assert stacker_calls == [(str(sbs_4class), str(bound), str(expected_burn_path), "near")]
+    with rasterio.open(expected_burn_path) as dataset:
+        assert np.all(dataset.read(1) == 3)
+        assert dataset.crs.to_epsg() == 32611
+        assert dataset.transform == from_origin(500000, 5000000, 30, 30)
 
 
 def test_hsg_assignment_preserves_explicit_burn_override_without_auto_alignment(

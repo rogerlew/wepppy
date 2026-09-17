@@ -157,3 +157,15 @@ retry after the writer completes. Unverified raster layouts count natively on
 each build. Management assignments, units and generated WEPP formats are
 unchanged. Coverage and coherence limits are in the
 [raster dependency contract](../../docs/schemas/raster-dependency-freshness-contract.md).
+
+Geneva geometry and auto-aligned burn caches use the source/legend/grid identity
+specified in [Geneva's derived freshness contract](mods/geneva/specification.md#derived-rastergeometry-freshness).
+A legacy artifact rebuilds through the normal request. If inputs change during
+native generation, the request reports `changed_source` (409); finish the input
+update and retry the normal operation. Inspect retained
+`geneva/cache_attempts/<uuid>/status.json` and candidates when diagnosing failures.
+Unknown source layouts run uncached. Existing auxiliary-bearing aligned TIFFs
+retain native overwrite behavior and its weaker failure guarantee until a clean
+output can establish provenance. This does not add freshness to the separate
+`prepare_hrus(force_rebuild=False)` summary cache or update an already-open
+browser automatically.

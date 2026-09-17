@@ -1,0 +1,95 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/geneva tests/profile_recorder tests/rq/test_project_rq_archive.py tests/rq/test_project_rq_archive_helpers.py --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 135 items
+
+tests/nodb/mods/geneva/test_fixture_manifest.py .....                    [  3%]
+tests/nodb/mods/geneva/test_geneva_cache_freshness.py ............       [ 12%]
+tests/nodb/mods/geneva/test_geneva_cn_table_service.py .....             [ 16%]
+tests/nodb/mods/geneva/test_geneva_collaborators.py .................... [ 31%]
+                                                                         [ 31%]
+tests/nodb/mods/geneva/test_geneva_facade.py ......                      [ 35%]
+tests/nodb/mods/geneva/test_geneva_guardrails.py ..                      [ 37%]
+tests/nodb/mods/geneva/test_geneva_hru_event_measure_service.py ........ [ 42%]
+                                                                         [ 42%]
+tests/nodb/mods/geneva/test_geneva_hru_map_geometry_service.py ...       [ 45%]
+tests/nodb/mods/geneva/test_geneva_report_payload_service.py ......      [ 49%]
+tests/nodb/mods/geneva/test_geneva_schema_contracts.py ............      [ 58%]
+tests/nodb/mods/geneva/test_geneva_wp09_end_to_end.py .......            [ 63%]
+tests/profile_recorder/test_assembler.py ..                              [ 65%]
+tests/profile_recorder/test_expectations.py ....                         [ 68%]
+tests/profile_recorder/test_playback_session.py ......                   [ 72%]
+tests/profile_recorder/test_profile_recorder.py ....                     [ 75%]
+tests/profile_recorder/test_sbs_seed.py .....                            [ 79%]
+tests/rq/test_project_rq_archive.py .........................            [ 97%]
+tests/rq/test_project_rq_archive_helpers.py ...                          [100%]
+
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+wepppy/profile_recorder/assembler.py:14
+wepppy/profile_recorder/assembler.py:14
+  /workdir/wepppy/wepppy/profile_recorder/assembler.py:14: DeprecationWarning: __package__ != __spec__.parent
+    from .utils import sanitise_component
+
+tests/nodb/mods/geneva/test_geneva_cache_freshness.py: 1 warning
+tests/rq/test_project_rq_archive.py: 10 warnings
+  /workdir/wepppy/wepppy/rq/project_rq_archive.py:300: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+
+tests/nodb/mods/geneva/test_geneva_facade.py::test_geneva_auto_enables_on_first_initialization
+  /opt/venv/lib/python3.12/site-packages/awesome_codename/data/__init__.py:1: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    from pkg_resources import resource_string
+
+tests/nodb/mods/geneva/test_geneva_facade.py::test_geneva_auto_enables_on_first_initialization
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+tests/nodb/mods/geneva/test_geneva_facade.py::test_geneva_auto_enables_on_first_initialization
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The ConfirmRegisterForm and the confirm_register_form option are deprecated as of version 5.6.0 and will be removed in a future release.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+tests/nodb/mods/geneva/test_geneva_facade.py::test_geneva_auto_enables_on_first_initialization
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The RegisterForm is deprecated as of version 5.6.0 and will be removed in a future release. The form RegisterFormV2 should be sub-classed instead.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+tests/nodb/mods/geneva/test_geneva_facade.py::test_geneva_auto_enables_on_first_initialization
+tests/nodb/mods/geneva/test_geneva_facade.py::test_geneva_auto_enables_on_first_initialization
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+tests/profile_recorder/test_assembler.py::test_config_slug_prefers_event_metadata
+tests/profile_recorder/test_sbs_seed.py::test_two_response_events_promote_and_send_their_own_bytes
+tests/profile_recorder/test_sbs_seed.py::test_two_response_events_promote_and_send_their_own_bytes
+tests/profile_recorder/test_sbs_seed.py::test_failure_before_seed_creation_is_marked_and_never_uses_old_seed
+tests/profile_recorder/test_sbs_seed.py::test_failure_before_seed_creation_is_marked_and_never_uses_old_seed
+  /workdir/wepppy/wepppy/profile_recorder/assembler.py:66: DeprecationWarning: __package__ != __spec__.parent
+    from .sbs_seed import MARKER
+
+tests/profile_recorder/test_sbs_seed.py::test_two_response_events_promote_and_send_their_own_bytes
+tests/profile_recorder/test_sbs_seed.py::test_two_response_events_promote_and_send_their_own_bytes
+tests/profile_recorder/test_sbs_seed.py::test_failure_before_seed_creation_is_marked_and_never_uses_old_seed
+  /workdir/wepppy/wepppy/profile_recorder/assembler.py:345: DeprecationWarning: __package__ != __spec__.parent
+    from .sbs_seed import capture_event_seed
+
+tests/rq/test_project_rq_archive.py::test_archive_rq_fails_fast_when_nodb_files_are_locked
+tests/rq/test_project_rq_archive.py::test_archive_rq_checks_disk_headroom_before_writing_archive
+tests/rq/test_project_rq_archive.py::test_restore_archive_rq_validates_zip_integrity_before_removing_existing_files
+tests/rq/test_project_rq_archive.py::test_restore_archive_rq_rechecks_locks_before_removing_existing_files
+tests/rq/test_project_rq_archive.py::test_restore_archive_rq_checks_disk_headroom_before_removing_existing_files
+tests/rq/test_project_rq_archive.py::test_restore_archive_rq_fails_when_nodb_cache_clear_fails
+tests/rq/test_project_rq_archive.py::test_conflicting_directory_modes_reject_before_cleanup
+  /workdir/wepppy/wepppy/rq/exception_logging.py:35: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().isoformat() + "Z"
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+====================== 135 passed, 36 warnings in 11.26s =======================

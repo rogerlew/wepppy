@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import errno
+import json
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Mapping
 
@@ -7,6 +9,9 @@ from rasterio.errors import RasterioError
 
 from wepppy.all_your_base.geo import raster_stacker
 from wepppy.nodb.mods.geneva.errors import GenevaGuardrailError, GenevaValidationError
+from ._cache_freshness import (
+    TIFF_PROOF, _Attempt, alignment_inputs, changed_source, clean_tiff_proof, matches,
+)
 
 if TYPE_CHECKING:
     from wepppy.nodb.mods.geneva.geneva import Geneva
@@ -99,6 +104,10 @@ class GenevaHsgAssignmentService:
                     geneva,
                     source_path=discovered_burn,
                     bound_tif=resolved["bound_tif"],
+                    _selection=lambda: (
+                        self._discover_burn_severity_path(geneva),
+                        str(values.get("bound_tif") or getattr(geneva.watershed_instance, "bound", "") or ""),
+                    ),
                 )
 
         return resolved
@@ -137,34 +146,70 @@ class GenevaHsgAssignmentService:
         *,
         source_path: str,
         bound_tif: str,
+        _selection=None,
     ) -> str:
         artifact_io = geneva.artifact_io
         target_path = artifact_io.resolve_path(geneva.wd, _AUTO_ALIGNED_BURN_SEVERITY_RELPATH)
-        source = Path(source_path)
-        bound = Path(bound_tif)
+        source, bound = Path(source_path), Path(bound_tif)
 
-        if _is_current_auto_burn_artifact(
-            target_path=target_path,
-            source_path=source,
-            bound_tif=bound,
-        ):
-            return str(target_path)
+        def selected():
+            if _selection is not None and _selection() != (source_path, bound_tif):
+                raise changed_source()
 
-        target_path.parent.mkdir(parents=True, exist_ok=True)
         try:
-            raster_stacker(source, bound, target_path, resample="near")
+            selected()
+            clean, proof, target_observation = clean_tiff_proof(target_path)
+            if clean and proof is not None:
+                before = alignment_inputs(source, bound)
+                if matches(proof, 'aligned_burn', before):
+                    selected()
+                    before.check_unchanged()
+                    target_observation.check_unchanged()
+                    if artifact_io.resolve_path(geneva.wd, _AUTO_ALIGNED_BURN_SEVERITY_RELPATH) != target_path:
+                        raise changed_source()
+                    return str(target_path)
+
+            with _Attempt(geneva, _AUTO_ALIGNED_BURN_SEVERITY_RELPATH, 'aligned_burn') as attempt:
+                selected()
+                before = alignment_inputs(source, bound)
+                attempt.inputs = before.identity
+                def validate():
+                    selected()
+                    before.check_unchanged()
+                attempt.input_validator = validate
+                if not clean:
+                    # Compatibility: native overwrite removes existing auxiliary
+                    # files. Main-only replacement would retain a stale mask/PAM.
+                    attempt.compatibility = True
+                    attempt._status('native_compatibility_overwrite')
+                    raster_stacker(source, bound, target_path, resample='near')
+                    selected()
+                    before.check_unchanged()
+                    attempt.committed = True
+                    return str(target_path)
+                candidate = attempt.candidate('candidate.tif')
+                raster_stacker(source, bound, candidate, resample='near')
+                from osgeo import gdal
+                dataset = gdal.OpenEx(str(candidate), gdal.OF_RASTER | gdal.OF_UPDATE,
+                                      allowed_drivers=['GTiff'], sibling_files=[candidate.name])
+                if dataset is None:
+                    raise RuntimeError('Unable to attach Geneva alignment provenance')
+                try:
+                    dataset.SetMetadataItem(TIFF_PROOF, json.dumps(attempt.proof(before), sort_keys=True))
+                finally:
+                    dataset = None
+
+                attempt.publish(candidate, clean_tiff=True, validate=validate)
+            return str(target_path)
         except (OSError, RasterioError, ValueError) as exc:
+            if isinstance(exc, OSError) and exc.errno == errno.ESTALE:
+                raise changed_source() from exc
             raise GenevaValidationError(
                 "Failed to align auto-discovered burn-severity raster to the Geneva canonical grid.",
                 code="invalid_input",
-                details={
-                    "source_path": str(source),
-                    "bound_tif": str(bound),
-                    "target_path": str(target_path),
-                    "error": str(exc),
-                },
+                details={"source_path": str(source), "bound_tif": str(bound),
+                         "target_path": str(target_path), "error": str(exc)},
             ) from exc
-        return str(target_path)
 
     def _extract_lnglat(self, watershed: Any) -> tuple[float, float] | None:
         outlet = getattr(watershed, "outlet", None)
@@ -199,19 +244,6 @@ def _is_hsg_compatible(soils: Any) -> bool:
         or "ssurgo" in raster_path
         or "hydgrpdcd" in raster_path
     )
-
-
-def _is_current_auto_burn_artifact(
-    *,
-    target_path: Path,
-    source_path: Path,
-    bound_tif: Path,
-) -> bool:
-    if not target_path.exists():
-        return False
-
-    target_mtime = target_path.stat().st_mtime
-    return target_mtime >= source_path.stat().st_mtime and target_mtime >= bound_tif.stat().st_mtime
 
 
 __all__ = ["GenevaHsgAssignmentService"]
