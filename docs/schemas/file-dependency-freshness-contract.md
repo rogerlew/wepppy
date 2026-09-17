@@ -59,8 +59,13 @@ Reuse the existing bounded in-process digest cache with a 512-entry bound
 (two measured representative M3 working sets exceed the old 64-entry bound). Cache keys include absolute
 path, device, inode, size, nanosecond mtime and ctime. A cache miss hashes one
 opened regular-file descriptor and checks descriptor and pathname identity
-before and after reading. Replacement or concurrent mutation fails explicitly;
-a failed read is never cached. Validate containment using the existing domain
+before and after reading. Observable descriptor/path generation or byte-count drift fails explicitly;
+a failed read is never cached. A complete uncached read observes bytes at a
+point during the call; a same-quantum write after its last byte may leave that
+coherent earlier observation valid. The next observation rehashes during the
+admission interval. This is not arbitrary-writer snapshot isolation: existing
+immutable accepted-artifact and worker locking/before-after content checks
+remain the publication boundary. Validate containment using the existing domain
 path checks on every access. Access loss must fail even on a cached hash.
 
 These cache hints assume normal filesystem metadata semantics, not a hostile
@@ -107,3 +112,19 @@ eviction restarts this interval and uncached verification. Warm zero-byte-read
 acceptance applies after admission. The original rapid-rewrite probe must pass
 without sleeps or mocked filesystem timestamps. Coherent metadata-on-open remains
 a filesystem requirement; NFS acceptance must be measured on disposable runs.
+
+## Controller bundle header identity (implementation pending)
+
+The expected controller build ID is the `Build date:` value read from the
+current on-disk bundle header, scanning at most the existing 80 lines. It MUST
+NOT be reused solely because pathname, size and mtime match a prior read.
+Missing, unreadable or headerless files retain the existing unknown (`None`)
+behavior; unknown identity MUST NOT alone trigger the stale-client banner.
+A complete earlier header observed during atomic replacement remains a valid
+point-in-time read. The next lookup reads the current path again.
+
+Read the small header on each lookup. A full-bundle digest or persistent cache
+would cost more and provide no needed identity: the generated header is the
+existing UI contract. Same-size/restored-time deployments must expose the new
+header without restarting the reading process. Header format, asset path,
+served-file alignment, client comparison and authorization remain unchanged.
