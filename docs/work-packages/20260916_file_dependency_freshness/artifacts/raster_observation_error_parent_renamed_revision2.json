@@ -2,6 +2,6 @@
   "case": "parent_renamed",
   "error": "OSError",
   "errno": 116,
-  "message": "[Errno 116] Raster companion directory became unavailable: '/tmp/pytest-of-unknown/pytest-123/test_observed_members_become_u1/source/source.tif'",
+  "message": "[Errno 116] Raster companion directory became unavailable: '/tmp/pytest-of-unknown/pytest-136/test_observed_members_become_u1/source'",
   "source_change_errno": true
 }

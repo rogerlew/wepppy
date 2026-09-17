@@ -8,6 +8,7 @@ import numpy as np
 import pytest
 
 from wepppy.nodb.core.landuse import Landuse
+from wepppy.all_your_base.raster_freshness import RasterDependencyObservation
 from wepppy.wepp.management import InvalidManagementKey
 
 pytestmark = pytest.mark.unit
@@ -430,6 +431,10 @@ def test_build_managements_multi_ofe_reuses_pair_counts_for_same_cycle_inputs(
         _fake_pair_counts,
     )
 
+    monkeypatch.setattr(
+        "wepppy.nodb.core.landuse.observe_raster_dependencies",
+        lambda paths: RasterDependencyObservation(tuple(paths), ()),
+    )
     landuse.build_managements()
     first_snapshot = {
         key: (summary.area, summary.pct_coverage)
@@ -507,9 +512,8 @@ def test_build_managements_multi_ofe_pair_count_cache_miss_on_signature_drift(
         _fake_pair_counts,
     )
     monkeypatch.setattr(
-        Landuse,
-        "_mofe_pair_count_file_signature",
-        staticmethod(lambda path: (str(path), True, 10, 100 if str(path).endswith("a.tif") else 200)),
+        "wepppy.nodb.core.landuse.observe_raster_dependencies",
+        lambda paths: RasterDependencyObservation(tuple(paths), ()),
     )
 
     landuse.build_managements()

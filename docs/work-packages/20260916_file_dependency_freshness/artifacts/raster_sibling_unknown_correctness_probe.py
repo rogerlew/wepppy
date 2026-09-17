@@ -56,6 +56,13 @@ def test_native_world_file_visibility(tmp_path, filename, suffix):
     print(json.dumps(record))
     assert states[0]["transform"] == states[1]["transform"]
     assert states[0]["files"] == states[1]["files"]
+    if os.environ.get("RASTER_IMPLEMENTED_COMPANIONS") == "1":
+        initial = fresh.raster_dependency_signature(source)
+        assert initial is not None
+        assert set(states[0]["files"]) <= {row[0] for row in initial[-1]}
+        if str(world) in states[0]["files"]:
+            world.write_text("30\n0\n0\n-30\n600015\n4999985\n")
+            assert fresh.raster_dependency_signature(source) != initial
 
 
 def test_native_rpc_sidecar_visibility(tmp_path):
@@ -82,7 +89,8 @@ def test_native_rpc_sidecar_visibility(tmp_path):
     record = {"siblings": siblings, "on_disk": sorted(p.name for p in tmp_path.iterdir()), "states": states}
     Path(__file__).with_name("raster_sibling_unknown_rpc.json").write_text(json.dumps(record, indent=2) + "\n")
     print(json.dumps(record))
-    if os.environ.get("RASTER_PROPOSED_COMPANIONS") == "1":
+    if (os.environ.get("RASTER_PROPOSED_COMPANIONS") == "1"
+            or os.environ.get("RASTER_IMPLEMENTED_COMPANIONS") == "1"):
         assert fresh.raster_dependency_signature(source) is None
     else:
         assert states[0]["rpc"] == states[1]["rpc"]

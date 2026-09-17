@@ -145,3 +145,15 @@ restarting workers with this code.
 
 See [Batch hillslope and watershed jobs](../../docs/dev-notes/batch-task-boundary.md)
 for phase ownership, job-tree inspection, durable handoff records and retry.
+
+### MOFE pair-count freshness
+
+Normal `Landuse.build_managements()` reuses counts only after joint content
+validation of subwatershed/MOFE rasters and the MOFE ID structure. Old persisted
+metadata signatures miss once; no manual NoDb migration or deletion is needed.
+Updated native counts reach management areas and coverage. A detected source
+change rejects the build before replacing prior summaries/count associations;
+retry after the writer completes. Unverified raster layouts count natively on
+each build. Management assignments, units and generated WEPP formats are
+unchanged. Coverage and coherence limits are in the
+[raster dependency contract](../../docs/schemas/raster-dependency-freshness-contract.md).

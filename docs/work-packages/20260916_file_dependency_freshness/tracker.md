@@ -209,3 +209,40 @@ Explicit performance correction committed asf7c832864: actual settled4.85/6.14ms
 eviction14.69/27.86ms, full export394/876ms, zero settled CLI payload reads,
 exact row/type parity. Original budget failures remain retained. Scoped CLI
 implementation reviews pass; whole-state/live-runtime acceptance remains open.
+
+CLI producer/readiness implementation committed as36744f3b3 after the reviewed
+performance amendmentf7c832864. Next C03/C04 checkpoint is deliberately limited
+to verified local GTiff/AAIGrid reuse; VRT/Zarr/VSI and unproven layouts retain
+native uncached behavior. Eager remote references in auxiliary or internally
+encoded overview relationships require eligibility before GetFileList. Native
+probes and whole-consumer baselines are retained; no raster runtime edits yet.
+
+PF-R01 is explicitly justified unresolved, not fixed: seven existing SQLite
+metadata/physical-only operations can still false-stale M3. The narrow deferral
+is authorized by the package inventory allowance and independently reviewed;
+no polling, snapshot or strict execution control changes. README records the
+limitation and ordinary explicit rerun recovery. The plan's Decision Log records
+why a process cache is insufficient and what separate future authority is needed.
+All other implementation/runtime closeout gates remain active.
+
+C03/C04 ancestor checkpoint`ceb715c08` accepted; implementation/reviews in
+progress. Guard-inclusive native regression and measured whole-consumer budget
+acceptance remain pending. B-F01 independent QA confirms a dashboard currentness
+contract gap; retained review is not a fix or final disposition.
+
+
+C03/C04 final scoped acceptance passes after the whole-native read-guard fix:
+163 tests passed, one skipped; latest joint-observation test and stubtest pass.
+Independent correctness/security/QA reviews accept the revised implementation.
+All 46 measured budget gates pass, including twelve actual 512-entry eviction
+exercises. Settled SBS hits average 9.83/9.96 ms; large TOPAZ validation averages
+45.86–47.91 ms settled and 331–343 ms cold/evicted. Maximum mean added operation/
+lock times are 358.60/350.35 ms (450-ms budget). Settled digest payload reads are
+zero. Original failures and interrupted superseded measurements are retained.
+This accepts the bounded raster implementation, not package/runtime completion.
+
+Geneva C05/C06 ancestor checkpoint is `31f77bef1`. Implementation and independent
+reviews are active; four initial actual-native regressions pass. Existing mocked
+raster fixtures are being replaced with real native output assertions. Publication
+and typed-drift failure-path review findings remain open. S01/S02 checkpoint
+budget measurements are in progress; no S01/S02 production changes yet.

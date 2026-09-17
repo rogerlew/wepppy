@@ -1,0 +1,227 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20260916_file_dependency_freshness/artifacts/benchmark_raster_implementation.py
+GrizzlyCreek_SBS_final.tif initial_admission [actual]: 58.227 ms; hash bytes=1797588
+GrizzlyCreek_SBS_final.tif settled_hit [actual]: 9.585 ms; hash bytes=0
+GrizzlyCreek_SBS_final.tif native_direct [actual]: 50.162 ms; hash bytes=0
+GrizzlyCreek_SBS_final.tif settled_miss [actual]: 51.060 ms; hash bytes=0
+GrizzlyCreek_SBS_final.tif cold_hit [actual]: 10.331 ms; hash bytes=1198392
+GrizzlyCreek_SBS_final.tif cold_miss [actual]: 56.087 ms; hash bytes=1797588
+GrizzlyCreek_SBS_final.tif evicted_hit [actual]: 12.162 ms; hash bytes=1198392
+GrizzlyCreek_SBS_final.tif native_direct [actual]: 81.940 ms; hash bytes=0
+GrizzlyCreek_SBS_final.tif settled_miss [actual]: 55.643 ms; hash bytes=0
+GrizzlyCreek_SBS_final.tif cold_hit [actual]: 10.495 ms; hash bytes=1198392
+GrizzlyCreek_SBS_final.tif cold_miss [actual]: 59.706 ms; hash bytes=1797588
+GrizzlyCreek_SBS_final.tif evicted_hit [actual]: 11.701 ms; hash bytes=1198392
+GrizzlyCreek_SBS_final.tif native_direct [actual]: 68.465 ms; hash bytes=0
+GrizzlyCreek_SBS_final.tif settled_miss [actual]: 56.359 ms; hash bytes=0
+GrizzlyCreek_SBS_final.tif cold_hit [actual]: 10.831 ms; hash bytes=1198392
+GrizzlyCreek_SBS_final.tif cold_miss [actual]: 56.911 ms; hash bytes=1797588
+GrizzlyCreek_SBS_final.tif evicted_hit [actual]: 11.870 ms; hash bytes=1198392
+baer.cropped.tif initial_admission [actual]: 472.778 ms; hash bytes=1274892
+baer.cropped.tif settled_hit [actual]: 9.922 ms; hash bytes=0
+baer.cropped.tif native_direct [actual]: 496.156 ms; hash bytes=0
+baer.cropped.tif settled_miss [actual]: 479.723 ms; hash bytes=0
+baer.cropped.tif cold_hit [actual]: 9.523 ms; hash bytes=849928
+baer.cropped.tif cold_miss [actual]: 500.096 ms; hash bytes=1274892
+baer.cropped.tif evicted_hit [actual]: 12.810 ms; hash bytes=849928
+baer.cropped.tif native_direct [actual]: 517.742 ms; hash bytes=0
+baer.cropped.tif settled_miss [actual]: 471.207 ms; hash bytes=0
+baer.cropped.tif cold_hit [actual]: 9.018 ms; hash bytes=849928
+baer.cropped.tif cold_miss [actual]: 457.266 ms; hash bytes=1274892
+baer.cropped.tif evicted_hit [actual]: 10.602 ms; hash bytes=849928
+baer.cropped.tif native_direct [actual]: 522.358 ms; hash bytes=0
+baer.cropped.tif settled_miss [actual]: 467.220 ms; hash bytes=0
+baer.cropped.tif cold_hit [actual]: 9.316 ms; hash bytes=849928
+baer.cropped.tif cold_miss [actual]: 471.312 ms; hash bytes=1274892
+baer.cropped.tif evicted_hit [actual]: 11.290 ms; hash bytes=849928
+2026-09-17 05:53:48 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program legacy_admission [actual]: 153.332 ms; hash bytes=814096
+2026-09-17 05:53:48 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:53:48 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:53:49 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:53:50 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_hit [ancestor_control]: 91.134 ms; hash bytes=0
+2026-09-17 05:53:50 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:53:50 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_hit [actual]: 105.450 ms; hash bytes=0
+2026-09-17 05:53:50 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:53:50 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_hit [actual]: 90.930 ms; hash bytes=0
+2026-09-17 05:53:50 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:53:50 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_hit [ancestor_control]: 92.092 ms; hash bytes=0
+2026-09-17 05:53:50 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:53:51 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_hit [ancestor_control]: 108.606 ms; hash bytes=0
+2026-09-17 05:53:51 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:53:51 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_hit [actual]: 105.042 ms; hash bytes=0
+2026-09-17 05:53:51 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_miss [ancestor_control]: 136.506 ms; hash bytes=0
+2026-09-17 05:53:51 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_miss [actual]: 143.121 ms; hash bytes=0
+2026-09-17 05:53:51 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_miss [actual]: 144.080 ms; hash bytes=0
+2026-09-17 05:53:51 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_miss [ancestor_control]: 131.447 ms; hash bytes=0
+2026-09-17 05:53:52 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_miss [ancestor_control]: 131.191 ms; hash bytes=0
+2026-09-17 05:53:52 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_miss [actual]: 143.945 ms; hash bytes=0
+2026-09-17 05:53:52 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:53:52 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program cold_hit [ancestor_control]: 89.587 ms; hash bytes=0
+2026-09-17 05:53:52 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:53:52 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program cold_hit [actual]: 112.720 ms; hash bytes=814096
+2026-09-17 05:53:52 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:53:52 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:53:54 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:53:54 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program cold_hit [actual]: 112.916 ms; hash bytes=814096
+2026-09-17 05:53:54 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:53:54 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:53:55 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:53:55 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program cold_hit [ancestor_control]: 93.843 ms; hash bytes=0
+2026-09-17 05:53:56 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:53:56 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program cold_hit [ancestor_control]: 100.695 ms; hash bytes=0
+2026-09-17 05:53:56 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:53:56 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program cold_hit [actual]: 117.681 ms; hash bytes=814096
+2026-09-17 05:53:56 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:53:56 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:53:57 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program cold_miss [ancestor_control]: 172.846 ms; hash bytes=0
+2026-09-17 05:53:58 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program cold_miss [actual]: 163.818 ms; hash bytes=814096
+2026-09-17 05:53:58 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:53:58 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:53:59 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program cold_miss [actual]: 176.126 ms; hash bytes=814096
+2026-09-17 05:53:59 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:54:00 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:54:01 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program cold_miss [ancestor_control]: 149.471 ms; hash bytes=0
+2026-09-17 05:54:01 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program cold_miss [ancestor_control]: 131.020 ms; hash bytes=0
+2026-09-17 05:54:01 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program cold_miss [actual]: 145.083 ms; hash bytes=814096
+2026-09-17 05:54:01 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:54:01 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:54:03 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:54:03 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program evicted_hit [ancestor_control]: 91.934 ms; hash bytes=0
+2026-09-17 05:54:03 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:54:03 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program evicted_hit [actual]: 126.955 ms; hash bytes=814096
+2026-09-17 05:54:04 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:54:05 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:54:06 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:54:06 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program evicted_hit [actual]: 113.225 ms; hash bytes=814096
+2026-09-17 05:54:08 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:54:08 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:54:09 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:54:09 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program evicted_hit [ancestor_control]: 83.208 ms; hash bytes=0
+2026-09-17 05:54:09 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:54:09 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program evicted_hit [ancestor_control]: 91.626 ms; hash bytes=0
+2026-09-17 05:54:09 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:54:09 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program evicted_hit [actual]: 112.975 ms; hash bytes=814096
+2026-09-17 05:54:11 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:54:11 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:54:12 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:54:13 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:54:14 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit legacy_admission [actual]: 2082.121 ms; hash bytes=82859480
+2026-09-17 05:54:16 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:54:17 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:54:19 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:54:21 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_hit [ancestor_control]: 966.672 ms; hash bytes=0
+2026-09-17 05:54:22 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:54:24 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_hit [actual]: 1023.843 ms; hash bytes=0
+2026-09-17 05:54:25 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:54:26 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_hit [actual]: 1036.431 ms; hash bytes=0
+2026-09-17 05:54:27 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:54:28 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_hit [ancestor_control]: 1008.867 ms; hash bytes=0
+2026-09-17 05:54:30 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:54:31 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_hit [ancestor_control]: 998.729 ms; hash bytes=0
+2026-09-17 05:54:32 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:54:33 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_hit [actual]: 1023.951 ms; hash bytes=0
+2026-09-17 05:54:34 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_miss [ancestor_control]: 1725.469 ms; hash bytes=0
+2026-09-17 05:54:36 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_miss [actual]: 1773.404 ms; hash bytes=0
+2026-09-17 05:54:38 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_miss [actual]: 1763.944 ms; hash bytes=0
+2026-09-17 05:54:40 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_miss [ancestor_control]: 1699.028 ms; hash bytes=0
+2026-09-17 05:54:41 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_miss [ancestor_control]: 1725.743 ms; hash bytes=0
+2026-09-17 05:54:43 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_miss [actual]: 1742.721 ms; hash bytes=0
+2026-09-17 05:54:45 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:54:47 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit cold_hit [ancestor_control]: 991.253 ms; hash bytes=0
+2026-09-17 05:54:48 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:54:50 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit cold_hit [actual]: 1456.843 ms; hash bytes=82859480
+2026-09-17 05:54:51 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:54:52 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:54:54 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:54:55 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit cold_hit [actual]: 1285.176 ms; hash bytes=82859480
+2026-09-17 05:54:57 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:54:58 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:55:00 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:55:02 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit cold_hit [ancestor_control]: 957.135 ms; hash bytes=0
+2026-09-17 05:55:03 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:55:04 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit cold_hit [ancestor_control]: 998.959 ms; hash bytes=0
+2026-09-17 05:55:05 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:55:06 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit cold_hit [actual]: 1278.347 ms; hash bytes=82859480
+2026-09-17 05:55:08 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:55:09 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:55:11 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit cold_miss [ancestor_control]: 1714.579 ms; hash bytes=0
+2026-09-17 05:55:13 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit cold_miss [actual]: 2042.687 ms; hash bytes=82859480
+2026-09-17 05:55:15 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:55:16 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:55:18 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit cold_miss [actual]: 2101.698 ms; hash bytes=82859480
+2026-09-17 05:55:20 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:55:21 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:55:23 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit cold_miss [ancestor_control]: 1773.432 ms; hash bytes=0
+2026-09-17 05:55:25 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit cold_miss [ancestor_control]: 1699.414 ms; hash bytes=0
+2026-09-17 05:55:27 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit cold_miss [actual]: 2020.245 ms; hash bytes=82859480
+2026-09-17 05:55:29 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:55:30 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:55:32 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:55:34 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit evicted_hit [ancestor_control]: 1005.093 ms; hash bytes=0
+2026-09-17 05:55:35 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:55:37 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit evicted_hit [actual]: 1326.313 ms; hash bytes=82859480
+2026-09-17 05:55:41 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 05:55:42 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+Traceback (most recent call last):
+  File "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/benchmark_raster_implementation.py", line 358, in <module>
+    settle(owner.build_managements)
+  File "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/benchmark_raster_implementation.py", line 188, in settle
+    sleep(1.05)
+KeyboardInterrupt

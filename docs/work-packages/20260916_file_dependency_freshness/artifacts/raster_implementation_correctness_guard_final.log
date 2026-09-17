@@ -1,0 +1,146 @@
+INFO:wctl2:docker compose exec weppcloud env RASTER_IMPLEMENTED_COMPANIONS=1 PYTHONPATH=/workdir/wepppy /opt/venv/bin/pytest docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_sibling_unknown_correctness_probe.py docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_implementation_correctness_probe.py -q -s
+{"suffix": ".tifw", "siblings": ["source.tiff", "source.tifw"], "states": [{"restricted": false, "files": ["/tmp/pytest-of-unknown/pytest-134/test_native_world_file_visibil0/source.tiff"], "transform": [0.0, 1.0, 0.0, 0.0, 0.0, 1.0]}, {"restricted": true, "files": ["/tmp/pytest-of-unknown/pytest-134/test_native_world_file_visibil0/source.tiff"], "transform": [0.0, 1.0, 0.0, 0.0, 0.0, 1.0]}]}
+.{"suffix": ".tiffw", "siblings": ["source.tiff", "source.tiffw"], "states": [{"restricted": false, "files": ["/tmp/pytest-of-unknown/pytest-134/test_native_world_file_visibil1/source.tiff", "/tmp/pytest-of-unknown/pytest-134/test_native_world_file_visibil1/source.tiffw"], "transform": [500000.0, 30.0, 0.0, 5000000.0, 0.0, -30.0]}, {"restricted": true, "files": ["/tmp/pytest-of-unknown/pytest-134/test_native_world_file_visibil1/source.tiff", "/tmp/pytest-of-unknown/pytest-134/test_native_world_file_visibil1/source.tiffw"], "transform": [500000.0, 30.0, 0.0, 5000000.0, 0.0, -30.0]}]}
+.{"suffix": ".wld", "siblings": ["source.tiff", "source.wld"], "states": [{"restricted": false, "files": ["/tmp/pytest-of-unknown/pytest-134/test_native_world_file_visibil2/source.tiff", "/tmp/pytest-of-unknown/pytest-134/test_native_world_file_visibil2/source.wld"], "transform": [500000.0, 30.0, 0.0, 5000000.0, 0.0, -30.0]}, {"restricted": true, "files": ["/tmp/pytest-of-unknown/pytest-134/test_native_world_file_visibil2/source.tiff", "/tmp/pytest-of-unknown/pytest-134/test_native_world_file_visibil2/source.wld"], "transform": [500000.0, 30.0, 0.0, 5000000.0, 0.0, -30.0]}]}
+.{"suffix": ".foow", "siblings": ["source.foo", "source.foow"], "states": [{"restricted": false, "files": ["/tmp/pytest-of-unknown/pytest-134/test_native_world_file_visibil3/source.foo", "/tmp/pytest-of-unknown/pytest-134/test_native_world_file_visibil3/source.foow"], "transform": [500000.0, 30.0, 0.0, 5000000.0, 0.0, -30.0]}, {"restricted": true, "files": ["/tmp/pytest-of-unknown/pytest-134/test_native_world_file_visibil3/source.foo", "/tmp/pytest-of-unknown/pytest-134/test_native_world_file_visibil3/source.foow"], "transform": [500000.0, 30.0, 0.0, 5000000.0, 0.0, -30.0]}]}
+.{"suffix": ".fow", "siblings": ["source.foo", "source.fow"], "states": [{"restricted": false, "files": ["/tmp/pytest-of-unknown/pytest-134/test_native_world_file_visibil4/source.foo", "/tmp/pytest-of-unknown/pytest-134/test_native_world_file_visibil4/source.fow"], "transform": [500000.0, 30.0, 0.0, 5000000.0, 0.0, -30.0]}, {"restricted": true, "files": ["/tmp/pytest-of-unknown/pytest-134/test_native_world_file_visibil4/source.foo", "/tmp/pytest-of-unknown/pytest-134/test_native_world_file_visibil4/source.fow"], "transform": [500000.0, 30.0, 0.0, 5000000.0, 0.0, -30.0]}]}
+.{"suffix": ".TIFFW", "siblings": ["source.tiff", "source.TIFFW"], "states": [{"restricted": false, "files": ["/tmp/pytest-of-unknown/pytest-134/test_native_world_file_visibil5/source.tiff", "/tmp/pytest-of-unknown/pytest-134/test_native_world_file_visibil5/source.TIFFW"], "transform": [500000.0, 30.0, 0.0, 5000000.0, 0.0, -30.0]}, {"restricted": true, "files": ["/tmp/pytest-of-unknown/pytest-134/test_native_world_file_visibil5/source.tiff", "/tmp/pytest-of-unknown/pytest-134/test_native_world_file_visibil5/source.TIFFW"], "transform": [500000.0, 30.0, 0.0, 5000000.0, 0.0, -30.0]}]}
+.{"siblings": ["rpc.tif"], "on_disk": ["rpc.RPB", "rpc.tif"], "states": [{"restricted": false, "files": ["/tmp/pytest-of-unknown/pytest-134/test_native_rpc_sidecar_visibi0/rpc.tif", "/tmp/pytest-of-unknown/pytest-134/test_native_rpc_sidecar_visibi0/rpc.RPB"], "rpc": {"ERR_BIAS": "0.0", "ERR_RAND": "0.0", "HEIGHT_OFF": "1", "HEIGHT_SCALE": "1", "LAT_OFF": "1", "LAT_SCALE": "1", "LINE_DEN_COEFF": "1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0", "LINE_NUM_COEFF": "1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0", "LINE_OFF": "1", "LINE_SCALE": "1", "LONG_OFF": "1", "LONG_SCALE": "1", "SAMP_DEN_COEFF": "1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0", "SAMP_NUM_COEFF": "1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0", "SAMP_OFF": "1", "SAMP_SCALE": "1"}}, {"restricted": true, "files": ["/tmp/pytest-of-unknown/pytest-134/test_native_rpc_sidecar_visibi0/rpc.tif"], "rpc": {}}]}
+...post-rejection native SBS summary {'srs_valid': False, 'class_count': 1, 'unique_classes': [3], 'class_counts': [(3, 4)], 'has_non_integer': False, 'has_color_table': False, 'color_table_severities': [], 'color_table_valid': False, 'sanity_status': 1, 'sanity_message': 'Map contains an invalid projection. Try reprojecting to UTM.', 'size_bytes': 246}
+.....real two-OFE / three-year generated p7.man bytes 4251
+...F
+=================================== FAILURES ===================================
+__________ test_mofe_private_observation_roundtrip_then_touch_reuses ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-134/test_mofe_private_observation_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x73d64175e030>
+
+    def test_mofe_private_observation_roundtrip_then_touch_reuses(tmp_path, monkeypatch):
+        import jsonpickle
+    
+        instance, watershed = owner(tmp_path, monkeypatch)
+        instance.build_managements()
+        payload = {"counts": instance._mofe_pair_count_cache,
+                   "signature": instance._mofe_pair_count_cache_signature}
+        restored = jsonpickle.decode(jsonpickle.encode(payload))
+        assert restored["signature"] == payload["signature"]
+        assert restored["signature"][0].read_guard == payload["signature"][0].read_guard
+        instance._mofe_pair_count_cache = restored["counts"]
+        instance._mofe_pair_count_cache_signature = restored["signature"]
+        os.utime(watershed.mofe_map, None)
+    
+        def unexpected(**kwargs):
+            pytest.fail("unchanged numerical content was recounted after private-state roundtrip")
+    
+        monkeypatch.setattr(lu, "count_intersecting_raster_key_pairs", unexpected)
+>       instance.build_managements()
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_implementation_correctness_probe.py:289: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <wepppy.nodb.core.landuse.Landuse object at 0x73d64175e090>
+_map = 'disturbed'
+
+    def build_managements(self, _map: Optional[str] = None) -> None:
+        if _map is None:
+            _map = self._resolve_effective_mapping_reference(self.mapping)
+    
+        effective_map: Optional[dict[str, dict[str, Any]]] = None
+        base_map: Optional[dict[str, dict[str, Any]]] = None
+        if self.custom_mapping_relpath:
+            try:
+                effective_map = load_map(_map)
+            except ManagementMapLoadError as exc:
+                raise self._coerce_custom_mapping_load_error(exc) from exc
+            try:
+                base_map = load_map(self.mapping)
+            except ManagementMapLoadError:
+                base_map = None
+    
+        with self.locked():
+            watershed = self.watershed_instance
+            ron = self.ron_instance
+            cell2 = ron.cellsize ** 2
+            domlc_d = self.domlc_d
+            existing_managements: Dict[str, Any] = dict(getattr(self, "managements", {}) or {})
+    
+            def _resolve_management_summary(dom_key: str) -> Any:
+                try:
+                    man = get_management_summary(dom_key, _map)
+                except InvalidManagementKey:
+                    # Runtime-generated treatment keys (for example mulch_15/30/60 variants)
+                    # are persisted in landuse.managements but intentionally absent from
+                    # static mapping tables. Reuse the generated summary when rebuilding.
+                    cached = existing_managements.get(str(dom_key))
+                    if cached is None:
+                        raise
+                    return deepcopy(cached)
+    
+                if effective_map is not None:
+                    _relabel_summary_for_stale_custom_mapping_description(
+                        man,
+                        dom=dom_key,
+                        effective_map=effective_map,
+                        base_map=base_map,
+                    )
+                return man
+    
+            # create a dictionary of management keys and
+            # wepppy.landcover.ManagementSummary values
+    
+            # Always rebuild summaries from the active map reference so
+            # management metadata changes are not masked by stale cached objects.
+            managements: Dict[str, Any] = {}
+    
+            # while we are at it we will calculate the pct coverage
+            # for the landcover types in the watershed
+            total_area = 0.0
+            for topaz_id, k in domlc_d.items():
+                area = watershed.hillslope_area(topaz_id)
+    
+                if k not in managements:
+                    assert not k.endswith('-mulch_15') and not k.endswith('-mulch_30') and not k.endswith('-mulch_60'), k
+                    man = _resolve_management_summary(k)
+                    man.area = area
+                    managements[k] = man
+                else:
+                    managements[k].area += area
+    
+                if self.multi_ofe:
+                    managements[k].area = 0
+    
+                total_area += area
+    
+            if not hasattr(self, 'domlc_mofe_d'):
+                self.domlc_mofe_d = None
+    
+            if self.multi_ofe and isinstance(self.domlc_mofe_d, dict) and self.domlc_mofe_d:
+                pair_count_signature = self._build_mofe_pair_count_signature(
+                    subwta_fn=watershed.subwta,
+                    mofe_map_fn=watershed.mofe_map,
+                    domlc_mofe_d=self.domlc_mofe_d,
+                )
+                cached_signature = getattr(self, '_mofe_pair_count_cache_signature', None)
+                pair_counts = getattr(self, '_mofe_pair_count_cache', None)
+                if (pair_count_signature is not None and pair_counts is not None
+                        and cached_signature == pair_count_signature):
+>                   self.logger.debug(
+                    ^^^^^^^^^^^
+                        'Reusing MOFE pair-count cache for unchanged same-cycle inputs'
+                    )
+E                   AttributeError: 'Landuse' object has no attribute 'logger'
+
+wepppy/nodb/core/landuse.py:2079: AttributeError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_implementation_correctness_probe.py::test_mofe_private_observation_roundtrip_then_touch_reuses
+1 failed, 17 passed, 2 warnings in 15.22s

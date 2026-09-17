@@ -1,0 +1,4451 @@
+{
+  "scope": "Actual C03/C04 acceptance, transparent instrumentation and old-method controls.\n\nNo composed observer is inserted. Actual new consumers call their production\nhelper. Original C03 methods from ceb715c08 are used only in labeled same-owner\ncontrols. Every owner/native operation uses retained uniquely named QA copies.\n",
+  "root": "/wc1/batch/qa-raster-implementation-a6b26573a093",
+  "original_fixture_manifest": "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/benchmark-manifest.json",
+  "uid": 1000,
+  "gid": 993,
+  "gdal_version": "3100300",
+  "cache_note": "Retained filesystem-warm NFS copies; helper cold is not cold storage",
+  "baseline_revision": "ceb715c08",
+  "module_hashes": {
+    "/workdir/wepppy/wepppy/all_your_base/file_digest.py": "d090094983c4f7575801969a1339ae3306745f6ff93aa100c037d83dd7fb9ee7",
+    "/workdir/wepppy/wepppy/all_your_base/raster_freshness.py": "e67e40ca73d079ab4fd2deaf5dc4c710cf0faf8679ccfabaa4706fc586a7c9e8",
+    "/workdir/wepppy/wepppy/nodb/core/landuse.py": "2bec62c1af8594e259191cf6206fbc742f822e7d9c89dfae23b676c77730388d",
+    "/workdir/wepppy/wepppy/nodb/mods/baer/sbs_map.py": "f723eaf3ee120d949d89227b3729004b808c7ffb678c66b9297adba4577a714f"
+  },
+  "inputs": {
+    "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-GrizzlyCreek_SBS_final/GrizzlyCreek_SBS_final.tif": {
+      "version": [
+        64,
+        1182162,
+        599196,
+        1789604873876050046,
+        1789622094978143351
+      ],
+      "mode": "0o644",
+      "sha256": "7d1ed360d8e639050cf3879293efcdbee216bd9a4faac4e03399442416d97405"
+    },
+    "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-baer.cropped/baer.cropped.tif": {
+      "version": [
+        64,
+        1202828,
+        424964,
+        1789605319903862950,
+        1789622096718153817
+      ],
+      "mode": "0o644",
+      "sha256": "7a08b85e992fe5ae9f2fba3502f23b0400ddd91f4d61cb71bdd2db11ea3524f4"
+    },
+    "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/dem/wbt/subwta.tif": {
+      "version": [
+        64,
+        1189226,
+        325098,
+        1782858699441720000,
+        1789622101330181557
+      ],
+      "mode": "0o644",
+      "sha256": "4aa0eecb4562ac8b073f5c477a3a7d8e3b2fae9574f3ef2e0feb8ce6e9134427"
+    },
+    "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/watershed/mofe.tif": {
+      "version": [
+        64,
+        1201938,
+        81950,
+        1782858714820819000,
+        1789622101282181269
+      ],
+      "mode": "0o644",
+      "sha256": "e67436d7efaa824f635c34b9204c6fe49ceaffe28e7608346f3aa6a8762c1172"
+    },
+    "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.ARC": {
+      "version": [
+        64,
+        1192913,
+        35502567,
+        1784652198640021231,
+        1789622110184234810
+      ],
+      "mode": "0o644",
+      "sha256": "f415e6bcb791b8016d8c367d2f8dbb15deabc0617304c64c967e5c4f027d7ec1"
+    },
+    "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.PRJ": {
+      "version": [
+        64,
+        1201950,
+        403,
+        1784652198433019983,
+        1789622110207234949
+      ],
+      "mode": "0o644",
+      "sha256": "ab78490474b2fb27a27ad2566802a7f49338602419540dd07cbcf22af5e50b6f"
+    },
+    "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/watershed/mofe.tif": {
+      "version": [
+        64,
+        1202161,
+        5926770,
+        1784652310868700578,
+        1789622109791232447
+      ],
+      "mode": "0o644",
+      "sha256": "631a7ec1d802421bf349967ce294e0c3bc1d804cd79b8caa64161493c6f909d4"
+    }
+  },
+  "cases": {
+    "GrizzlyCreek_SBS_final.tif": {
+      "name": "GrizzlyCreek_SBS_final.tif",
+      "source": "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-GrizzlyCreek_SBS_final/GrizzlyCreek_SBS_final.tif",
+      "measurements": [
+        {
+          "phase": "initial_admission",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.05822689412161708
+          ],
+          "mean_seconds": 0.05822689412161708,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-GrizzlyCreek_SBS_final/GrizzlyCreek_SBS_final.tif": 1797588
+          },
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.04108805698342621
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.006279474124312401,
+              "verified": true
+            },
+            {
+              "seconds": 0.005296981893479824,
+              "verified": true
+            },
+            {
+              "seconds": 0.005544075043871999,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "settled_hit",
+          "mode": "actual",
+          "repeats": 30,
+          "seconds": [
+            0.013866198947653174,
+            0.013710280181840062,
+            0.013301186030730605,
+            0.013081309152767062,
+            0.01308436319231987,
+            0.012944526970386505,
+            0.012347623007372022,
+            0.011500453110784292,
+            0.011692862026393414,
+            0.011291709030047059,
+            0.010888149030506611,
+            0.009376419940963387,
+            0.009034520946443081,
+            0.008942156098783016,
+            0.008710141060873866,
+            0.008480689022690058,
+            0.00835369504056871,
+            0.008010938065126538,
+            0.00779147888533771,
+            0.007760559907183051,
+            0.007603042991831899,
+            0.0074355939868837595,
+            0.007363683078438044,
+            0.007367396028712392,
+            0.0077562539372593164,
+            0.007184561109170318,
+            0.007445710012689233,
+            0.0070639061741530895,
+            0.007105073193088174,
+            0.007046072976663709
+          ],
+          "mean_seconds": 0.009584685104588668,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.006993621122092009,
+              "verified": true
+            },
+            {
+              "seconds": 0.0068475729785859585,
+              "verified": true
+            },
+            {
+              "seconds": 0.006836988031864166,
+              "verified": true
+            },
+            {
+              "seconds": 0.006851270096376538,
+              "verified": true
+            },
+            {
+              "seconds": 0.006704022875055671,
+              "verified": true
+            },
+            {
+              "seconds": 0.006575340172275901,
+              "verified": true
+            },
+            {
+              "seconds": 0.006636821897700429,
+              "verified": true
+            },
+            {
+              "seconds": 0.0064235220197588205,
+              "verified": true
+            },
+            {
+              "seconds": 0.00661213300190866,
+              "verified": true
+            },
+            {
+              "seconds": 0.006452077999711037,
+              "verified": true
+            },
+            {
+              "seconds": 0.00648681609891355,
+              "verified": true
+            },
+            {
+              "seconds": 0.0064377449452877045,
+              "verified": true
+            },
+            {
+              "seconds": 0.006240142043679953,
+              "verified": true
+            },
+            {
+              "seconds": 0.006089327856898308,
+              "verified": true
+            },
+            {
+              "seconds": 0.005689715966582298,
+              "verified": true
+            },
+            {
+              "seconds": 0.005793571937829256,
+              "verified": true
+            },
+            {
+              "seconds": 0.00586855411529541,
+              "verified": true
+            },
+            {
+              "seconds": 0.005805027903988957,
+              "verified": true
+            },
+            {
+              "seconds": 0.005893903085961938,
+              "verified": true
+            },
+            {
+              "seconds": 0.005378364119678736,
+              "verified": true
+            },
+            {
+              "seconds": 0.005408025113865733,
+              "verified": true
+            },
+            {
+              "seconds": 0.005463144043460488,
+              "verified": true
+            },
+            {
+              "seconds": 0.004681021207943559,
+              "verified": true
+            },
+            {
+              "seconds": 0.004680713871493936,
+              "verified": true
+            },
+            {
+              "seconds": 0.004551299149170518,
+              "verified": true
+            },
+            {
+              "seconds": 0.004467652877792716,
+              "verified": true
+            },
+            {
+              "seconds": 0.0045866568107157946,
+              "verified": true
+            },
+            {
+              "seconds": 0.004342164844274521,
+              "verified": true
+            },
+            {
+              "seconds": 0.0042897111270576715,
+              "verified": true
+            },
+            {
+              "seconds": 0.0044068710412830114,
+              "verified": true
+            },
+            {
+              "seconds": 0.004311752039939165,
+              "verified": true
+            },
+            {
+              "seconds": 0.004156330833211541,
+              "verified": true
+            },
+            {
+              "seconds": 0.004155135015025735,
+              "verified": true
+            },
+            {
+              "seconds": 0.00418476783670485,
+              "verified": true
+            },
+            {
+              "seconds": 0.004077880876138806,
+              "verified": true
+            },
+            {
+              "seconds": 0.003921360010281205,
+              "verified": true
+            },
+            {
+              "seconds": 0.00391545589081943,
+              "verified": true
+            },
+            {
+              "seconds": 0.0038641178980469704,
+              "verified": true
+            },
+            {
+              "seconds": 0.003946160897612572,
+              "verified": true
+            },
+            {
+              "seconds": 0.0038030671421438456,
+              "verified": true
+            },
+            {
+              "seconds": 0.003789531998336315,
+              "verified": true
+            },
+            {
+              "seconds": 0.0038021758664399385,
+              "verified": true
+            },
+            {
+              "seconds": 0.003738496918231249,
+              "verified": true
+            },
+            {
+              "seconds": 0.003685937961563468,
+              "verified": true
+            },
+            {
+              "seconds": 0.003656530985608697,
+              "verified": true
+            },
+            {
+              "seconds": 0.003695660037919879,
+              "verified": true
+            },
+            {
+              "seconds": 0.0036734698805958033,
+              "verified": true
+            },
+            {
+              "seconds": 0.0036828331649303436,
+              "verified": true
+            },
+            {
+              "seconds": 0.003927299054339528,
+              "verified": true
+            },
+            {
+              "seconds": 0.0038183669093996286,
+              "verified": true
+            },
+            {
+              "seconds": 0.003628077916800976,
+              "verified": true
+            },
+            {
+              "seconds": 0.0035461178049445152,
+              "verified": true
+            },
+            {
+              "seconds": 0.003808761015534401,
+              "verified": true
+            },
+            {
+              "seconds": 0.003626797115430236,
+              "verified": true
+            },
+            {
+              "seconds": 0.003521486883983016,
+              "verified": true
+            },
+            {
+              "seconds": 0.003532715840265155,
+              "verified": true
+            },
+            {
+              "seconds": 0.0035531718749552965,
+              "verified": true
+            },
+            {
+              "seconds": 0.0035413578152656555,
+              "verified": true
+            },
+            {
+              "seconds": 0.0034359570126980543,
+              "verified": true
+            },
+            {
+              "seconds": 0.0036000111140310764,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "native_direct",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.05016239290125668
+          ],
+          "mean_seconds": 0.05016239290125668,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.05015848786570132
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.0510597238317132
+          ],
+          "mean_seconds": 0.0510597238317132,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.041460055159404874
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.003136866958811879,
+              "verified": true
+            },
+            {
+              "seconds": 0.0034283518325537443,
+              "verified": true
+            },
+            {
+              "seconds": 0.003017951035872102,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.010330630000680685
+          ],
+          "mean_seconds": 0.010330630000680685,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-GrizzlyCreek_SBS_final/GrizzlyCreek_SBS_final.tif": 1198392
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.005174734862521291,
+              "verified": true
+            },
+            {
+              "seconds": 0.005147380055859685,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.05608749995008111
+          ],
+          "mean_seconds": 0.05608749995008111,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-GrizzlyCreek_SBS_final/GrizzlyCreek_SBS_final.tif": 1797588
+          },
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.040770554915070534
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.004990390967577696,
+              "verified": true
+            },
+            {
+              "seconds": 0.0052446541376411915,
+              "verified": true
+            },
+            {
+              "seconds": 0.005068141967058182,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "evicted_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.012162466999143362
+          ],
+          "mean_seconds": 0.012162466999143362,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-GrizzlyCreek_SBS_final/GrizzlyCreek_SBS_final.tif": 1198392
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.006602469831705093,
+              "verified": true
+            },
+            {
+              "seconds": 0.005538292927667499,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "native_direct",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.08194017386995256
+          ],
+          "mean_seconds": 0.08194017386995256,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.08193442015908659
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.05564258387312293
+          ],
+          "mean_seconds": 0.05564258387312293,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.04538365895859897
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.0036495209205895662,
+              "verified": true
+            },
+            {
+              "seconds": 0.0032278229482471943,
+              "verified": true
+            },
+            {
+              "seconds": 0.0033663539215922356,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.01049479702487588
+          ],
+          "mean_seconds": 0.01049479702487588,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-GrizzlyCreek_SBS_final/GrizzlyCreek_SBS_final.tif": 1198392
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.005321773001924157,
+              "verified": true
+            },
+            {
+              "seconds": 0.005164022091776133,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.05970598990097642
+          ],
+          "mean_seconds": 0.05970598990097642,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-GrizzlyCreek_SBS_final/GrizzlyCreek_SBS_final.tif": 1797588
+          },
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.04371902300044894
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.005311653017997742,
+              "verified": true
+            },
+            {
+              "seconds": 0.005339768948033452,
+              "verified": true
+            },
+            {
+              "seconds": 0.005321105942130089,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "evicted_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.011701168026775122
+          ],
+          "mean_seconds": 0.011701168026775122,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-GrizzlyCreek_SBS_final/GrizzlyCreek_SBS_final.tif": 1198392
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.006492262007668614,
+              "verified": true
+            },
+            {
+              "seconds": 0.005195224890485406,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "native_direct",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.06846528500318527
+          ],
+          "mean_seconds": 0.06846528500318527,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.06846092618070543
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.05635946011170745
+          ],
+          "mean_seconds": 0.05635946011170745,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.04646189580671489
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.003346286015585065,
+              "verified": true
+            },
+            {
+              "seconds": 0.003313533030450344,
+              "verified": true
+            },
+            {
+              "seconds": 0.003221207996830344,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.010830668034031987
+          ],
+          "mean_seconds": 0.010830668034031987,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-GrizzlyCreek_SBS_final/GrizzlyCreek_SBS_final.tif": 1198392
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.005379776936024427,
+              "verified": true
+            },
+            {
+              "seconds": 0.0054415150079876184,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.056910840794444084
+          ],
+          "mean_seconds": 0.056910840794444084,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-GrizzlyCreek_SBS_final/GrizzlyCreek_SBS_final.tif": 1797588
+          },
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.041238351026549935
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.00524261686950922,
+              "verified": true
+            },
+            {
+              "seconds": 0.005289901979267597,
+              "verified": true
+            },
+            {
+              "seconds": 0.005126117961481214,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "evicted_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.011869790032505989
+          ],
+          "mean_seconds": 0.011869790032505989,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-GrizzlyCreek_SBS_final/GrizzlyCreek_SBS_final.tif": 1198392
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.006724166218191385,
+              "verified": true
+            },
+            {
+              "seconds": 0.005127470009028912,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        }
+      ],
+      "summary": {
+        "initial_admission/actual": {
+          "count": 1,
+          "mean_seconds": 0.05822689412161708,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.0,
+          "digest_read_bytes": 1797588,
+          "native_calls": 1,
+          "observation_count": 3
+        },
+        "settled_hit/actual": {
+          "count": 30,
+          "mean_seconds": 0.009584685104588668,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.0,
+          "digest_read_bytes": 0,
+          "native_calls": 0,
+          "observation_count": 60
+        },
+        "native_direct/actual": {
+          "count": 3,
+          "mean_seconds": 0.06685595059146483,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.0,
+          "digest_read_bytes": 0,
+          "native_calls": 3,
+          "observation_count": 0
+        },
+        "settled_miss/actual": {
+          "count": 3,
+          "mean_seconds": 0.054353922605514526,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.0,
+          "digest_read_bytes": 0,
+          "native_calls": 3,
+          "observation_count": 9
+        },
+        "cold_hit/actual": {
+          "count": 3,
+          "mean_seconds": 0.010552031686529517,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.0,
+          "digest_read_bytes": 3595176,
+          "native_calls": 0,
+          "observation_count": 6
+        },
+        "cold_miss/actual": {
+          "count": 3,
+          "mean_seconds": 0.0575681102151672,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.0,
+          "digest_read_bytes": 5392764,
+          "native_calls": 3,
+          "observation_count": 9
+        },
+        "evicted_hit/actual": {
+          "count": 3,
+          "mean_seconds": 0.011911141686141491,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.0,
+          "digest_read_bytes": 3595176,
+          "native_calls": 0,
+          "observation_count": 6
+        }
+      },
+      "summary_matches_native": true,
+      "numerical_cache_parameters": {
+        "maxsize": 8,
+        "typed": false
+      }
+    },
+    "baer.cropped.tif": {
+      "name": "baer.cropped.tif",
+      "source": "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-baer.cropped/baer.cropped.tif",
+      "measurements": [
+        {
+          "phase": "initial_admission",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.4727776658255607
+          ],
+          "mean_seconds": 0.4727776658255607,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-baer.cropped/baer.cropped.tif": 1274892
+          },
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.45945671619847417
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.004539670189842582,
+              "verified": true
+            },
+            {
+              "seconds": 0.004507563076913357,
+              "verified": true
+            },
+            {
+              "seconds": 0.004260486923158169,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "settled_hit",
+          "mode": "actual",
+          "repeats": 30,
+          "seconds": [
+            0.01262123417109251,
+            0.012963988119736314,
+            0.013096232898533344,
+            0.012882668059319258,
+            0.013057445175945759,
+            0.012994116870686412,
+            0.012941217049956322,
+            0.012148816138505936,
+            0.011978388065472245,
+            0.011280865175649524,
+            0.011294922092929482,
+            0.010773447109386325,
+            0.010394145036116242,
+            0.010623347945511341,
+            0.009879997931420803,
+            0.010196930030360818,
+            0.009117199806496501,
+            0.009537025121971965,
+            0.008216958958655596,
+            0.008013890124857426,
+            0.0078050990123301744,
+            0.007649048930034041,
+            0.007469512056559324,
+            0.007760562002658844,
+            0.007435561157763004,
+            0.007501951884478331,
+            0.007307518972083926,
+            0.006944286171346903,
+            0.006934040924534202,
+            0.0068256540689617395
+          ],
+          "mean_seconds": 0.00992153570211182,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.006402097176760435,
+              "verified": true
+            },
+            {
+              "seconds": 0.006197704933583736,
+              "verified": true
+            },
+            {
+              "seconds": 0.0064856670796871185,
+              "verified": true
+            },
+            {
+              "seconds": 0.006455766968429089,
+              "verified": true
+            },
+            {
+              "seconds": 0.006558727007359266,
+              "verified": true
+            },
+            {
+              "seconds": 0.006514552980661392,
+              "verified": true
+            },
+            {
+              "seconds": 0.006444914033636451,
+              "verified": true
+            },
+            {
+              "seconds": 0.00641538598574698,
+              "verified": true
+            },
+            {
+              "seconds": 0.006504508201032877,
+              "verified": true
+            },
+            {
+              "seconds": 0.006530666025355458,
+              "verified": true
+            },
+            {
+              "seconds": 0.006477897986769676,
+              "verified": true
+            },
+            {
+              "seconds": 0.006487618200480938,
+              "verified": true
+            },
+            {
+              "seconds": 0.006490634987130761,
+              "verified": true
+            },
+            {
+              "seconds": 0.0064287439454346895,
+              "verified": true
+            },
+            {
+              "seconds": 0.0059275138191878796,
+              "verified": true
+            },
+            {
+              "seconds": 0.0062020409386605024,
+              "verified": true
+            },
+            {
+              "seconds": 0.006014256970956922,
+              "verified": true
+            },
+            {
+              "seconds": 0.005944729084149003,
+              "verified": true
+            },
+            {
+              "seconds": 0.005714416038244963,
+              "verified": true
+            },
+            {
+              "seconds": 0.005548396147787571,
+              "verified": true
+            },
+            {
+              "seconds": 0.0055261948145926,
+              "verified": true
+            },
+            {
+              "seconds": 0.005750584881752729,
+              "verified": true
+            },
+            {
+              "seconds": 0.0053660988342016935,
+              "verified": true
+            },
+            {
+              "seconds": 0.00539004011079669,
+              "verified": true
+            },
+            {
+              "seconds": 0.005257211858406663,
+              "verified": true
+            },
+            {
+              "seconds": 0.005119838984683156,
+              "verified": true
+            },
+            {
+              "seconds": 0.0052531377878040075,
+              "verified": true
+            },
+            {
+              "seconds": 0.00535296811722219,
+              "verified": true
+            },
+            {
+              "seconds": 0.004943564999848604,
+              "verified": true
+            },
+            {
+              "seconds": 0.004920769948512316,
+              "verified": true
+            },
+            {
+              "seconds": 0.0050496619660407305,
+              "verified": true
+            },
+            {
+              "seconds": 0.0051280229818075895,
+              "verified": true
+            },
+            {
+              "seconds": 0.004626998910680413,
+              "verified": true
+            },
+            {
+              "seconds": 0.004475123947486281,
+              "verified": true
+            },
+            {
+              "seconds": 0.004997655050829053,
+              "verified": true
+            },
+            {
+              "seconds": 0.004523751093074679,
+              "verified": true
+            },
+            {
+              "seconds": 0.004069383954629302,
+              "verified": true
+            },
+            {
+              "seconds": 0.004133356036618352,
+              "verified": true
+            },
+            {
+              "seconds": 0.00408029300160706,
+              "verified": true
+            },
+            {
+              "seconds": 0.0039201960898935795,
+              "verified": true
+            },
+            {
+              "seconds": 0.0039661352057009935,
+              "verified": true
+            },
+            {
+              "seconds": 0.003825757186859846,
+              "verified": true
+            },
+            {
+              "seconds": 0.0038847371470183134,
+              "verified": true
+            },
+            {
+              "seconds": 0.0037516711745411158,
+              "verified": true
+            },
+            {
+              "seconds": 0.003731457982212305,
+              "verified": true
+            },
+            {
+              "seconds": 0.0037256060168147087,
+              "verified": true
+            },
+            {
+              "seconds": 0.0038778341840952635,
+              "verified": true
+            },
+            {
+              "seconds": 0.0038703421596437693,
+              "verified": true
+            },
+            {
+              "seconds": 0.0037124070804566145,
+              "verified": true
+            },
+            {
+              "seconds": 0.003711059922352433,
+              "verified": true
+            },
+            {
+              "seconds": 0.003696898929774761,
+              "verified": true
+            },
+            {
+              "seconds": 0.003792984876781702,
+              "verified": true
+            },
+            {
+              "seconds": 0.0037201798986643553,
+              "verified": true
+            },
+            {
+              "seconds": 0.0035756228026002645,
+              "verified": true
+            },
+            {
+              "seconds": 0.003521715058013797,
+              "verified": true
+            },
+            {
+              "seconds": 0.0034102899953722954,
+              "verified": true
+            },
+            {
+              "seconds": 0.0035364869982004166,
+              "verified": true
+            },
+            {
+              "seconds": 0.003386470954865217,
+              "verified": true
+            },
+            {
+              "seconds": 0.00337418494746089,
+              "verified": true
+            },
+            {
+              "seconds": 0.0034405698534101248,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "native_direct",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.49615634605288506
+          ],
+          "mean_seconds": 0.49615634605288506,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.49615144403651357
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.4797233361750841
+          ],
+          "mean_seconds": 0.4797233361750841,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.47036956204101443
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.0031653959304094315,
+              "verified": true
+            },
+            {
+              "seconds": 0.0031954729929566383,
+              "verified": true
+            },
+            {
+              "seconds": 0.0029746699146926403,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.009523171000182629
+          ],
+          "mean_seconds": 0.009523171000182629,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-baer.cropped/baer.cropped.tif": 849928
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.004687827080488205,
+              "verified": true
+            },
+            {
+              "seconds": 0.004825866082683206,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.5000962370540947
+          ],
+          "mean_seconds": 0.5000962370540947,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-baer.cropped/baer.cropped.tif": 1274892
+          },
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.4838911718688905
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.004831983940675855,
+              "verified": true
+            },
+            {
+              "seconds": 0.006688769906759262,
+              "verified": true
+            },
+            {
+              "seconds": 0.00463824300095439,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "evicted_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.01280956482514739
+          ],
+          "mean_seconds": 0.01280956482514739,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-baer.cropped/baer.cropped.tif": 849928
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.006952017080038786,
+              "verified": true
+            },
+            {
+              "seconds": 0.005841112229973078,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "native_direct",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.5177422731649131
+          ],
+          "mean_seconds": 0.5177422731649131,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.517697581090033
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.47120667598210275
+          ],
+          "mean_seconds": 0.47120667598210275,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.4617719310335815
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.0034325718879699707,
+              "verified": true
+            },
+            {
+              "seconds": 0.003000047989189625,
+              "verified": true
+            },
+            {
+              "seconds": 0.0029806068632751703,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.00901756389066577
+          ],
+          "mean_seconds": 0.00901756389066577,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-baer.cropped/baer.cropped.tif": 849928
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.004753607092425227,
+              "verified": true
+            },
+            {
+              "seconds": 0.004256202839314938,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.45726607786491513
+          ],
+          "mean_seconds": 0.45726607786491513,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-baer.cropped/baer.cropped.tif": 1274892
+          },
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.4437458978500217
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.004250427009537816,
+              "verified": true
+            },
+            {
+              "seconds": 0.00471438211388886,
+              "verified": true
+            },
+            {
+              "seconds": 0.004541506990790367,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "evicted_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.010601819958537817
+          ],
+          "mean_seconds": 0.010601819958537817,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-baer.cropped/baer.cropped.tif": 849928
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.005819923942908645,
+              "verified": true
+            },
+            {
+              "seconds": 0.004761307034641504,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "native_direct",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.5223579020239413
+          ],
+          "mean_seconds": 0.5223579020239413,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.5223457932006568
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.4672200148925185
+          ],
+          "mean_seconds": 0.4672200148925185,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.45719790481962264
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.004037847043946385,
+              "verified": true
+            },
+            {
+              "seconds": 0.003044273005798459,
+              "verified": true
+            },
+            {
+              "seconds": 0.0029228590428829193,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.009315889794379473
+          ],
+          "mean_seconds": 0.009315889794379473,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-baer.cropped/baer.cropped.tif": 849928
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.004603656940162182,
+              "verified": true
+            },
+            {
+              "seconds": 0.0047032758593559265,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.47131247189827263
+          ],
+          "mean_seconds": 0.47131247189827263,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-baer.cropped/baer.cropped.tif": 1274892
+          },
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.4564949572086334
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.004889089846983552,
+              "verified": true
+            },
+            {
+              "seconds": 0.004764537094160914,
+              "verified": true
+            },
+            {
+              "seconds": 0.005147177027538419,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "evicted_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.011289760004729033
+          ],
+          "mean_seconds": 0.011289760004729033,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-baer.cropped/baer.cropped.tif": 849928
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.006206518039107323,
+              "verified": true
+            },
+            {
+              "seconds": 0.005048883846029639,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        }
+      ],
+      "summary": {
+        "initial_admission/actual": {
+          "count": 1,
+          "mean_seconds": 0.4727776658255607,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.0,
+          "digest_read_bytes": 1274892,
+          "native_calls": 1,
+          "observation_count": 3
+        },
+        "settled_hit/actual": {
+          "count": 30,
+          "mean_seconds": 0.00992153570211182,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.0,
+          "digest_read_bytes": 0,
+          "native_calls": 0,
+          "observation_count": 60
+        },
+        "native_direct/actual": {
+          "count": 3,
+          "mean_seconds": 0.5120855070805798,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.0,
+          "digest_read_bytes": 0,
+          "native_calls": 3,
+          "observation_count": 0
+        },
+        "settled_miss/actual": {
+          "count": 3,
+          "mean_seconds": 0.4727166756832351,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.0,
+          "digest_read_bytes": 0,
+          "native_calls": 3,
+          "observation_count": 9
+        },
+        "cold_hit/actual": {
+          "count": 3,
+          "mean_seconds": 0.009285541561742624,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.0,
+          "digest_read_bytes": 2549784,
+          "native_calls": 0,
+          "observation_count": 6
+        },
+        "cold_miss/actual": {
+          "count": 3,
+          "mean_seconds": 0.4762249289390941,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.0,
+          "digest_read_bytes": 3824676,
+          "native_calls": 3,
+          "observation_count": 9
+        },
+        "evicted_hit/actual": {
+          "count": 3,
+          "mean_seconds": 0.011567048262804747,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.0,
+          "digest_read_bytes": 2549784,
+          "native_calls": 0,
+          "observation_count": 6
+        }
+      },
+      "summary_matches_native": true,
+      "numerical_cache_parameters": {
+        "maxsize": 8,
+        "typed": false
+      }
+    },
+    "curable-program": {
+      "name": "curable-program",
+      "root": "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810",
+      "measurements": [
+        {
+          "phase": "legacy_admission",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.15333200502209365
+          ],
+          "mean_seconds": 0.15333200502209365,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/dem/wbt/subwta.tif": 650196,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/watershed/mofe.tif": 163900
+          },
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.034338074969127774
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.009818122955039144,
+              "verified": true
+            },
+            {
+              "seconds": 0.008556623943150043,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.010354554979130626,
+              "verified": true
+            },
+            {
+              "seconds": 0.009043906116858125,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.12388243293389678,
+              "body_seconds": 0.0770615921355784,
+              "acquire_seconds": 0.001434597885236144,
+              "persist_unlock_seconds": 0.04538624291308224
+            }
+          ]
+        },
+        {
+          "phase": "settled_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.09113366296514869
+          ],
+          "mean_seconds": 0.09113366296514869,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.06395143107511103,
+              "body_seconds": 0.022540103178471327,
+              "acquire_seconds": 0.001208059024065733,
+              "persist_unlock_seconds": 0.04020326887257397
+            }
+          ]
+        },
+        {
+          "phase": "settled_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.10545002110302448
+          ],
+          "mean_seconds": 0.10545002110302448,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.006487841019406915,
+              "verified": true
+            },
+            {
+              "seconds": 0.006429601926356554,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.0069676239509135485,
+              "verified": true
+            },
+            {
+              "seconds": 0.006986132822930813,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.07849733205512166,
+              "body_seconds": 0.036684392020106316,
+              "acquire_seconds": 0.001195694087073207,
+              "persist_unlock_seconds": 0.04061724594794214
+            }
+          ]
+        },
+        {
+          "phase": "settled_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.09093011589720845
+          ],
+          "mean_seconds": 0.09093011589720845,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.0055089290253818035,
+              "verified": true
+            },
+            {
+              "seconds": 0.005420090863481164,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.006029498064890504,
+              "verified": true
+            },
+            {
+              "seconds": 0.005889188963919878,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.06963297096081078,
+              "body_seconds": 0.033685300033539534,
+              "acquire_seconds": 0.0011712268460541964,
+              "persist_unlock_seconds": 0.03477644408121705
+            }
+          ]
+        },
+        {
+          "phase": "settled_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.09209181391634047
+          ],
+          "mean_seconds": 0.09209181391634047,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.06517198705114424,
+              "body_seconds": 0.022863541962578893,
+              "acquire_seconds": 0.0012082431931048632,
+              "persist_unlock_seconds": 0.041100201895460486
+            }
+          ]
+        },
+        {
+          "phase": "settled_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.10860581113956869
+          ],
+          "mean_seconds": 0.10860581113956869,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.07832251093350351,
+              "body_seconds": 0.030689137987792492,
+              "acquire_seconds": 0.001411857083439827,
+              "persist_unlock_seconds": 0.04622151586227119
+            }
+          ]
+        },
+        {
+          "phase": "settled_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.1050422249827534
+          ],
+          "mean_seconds": 0.1050422249827534,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.006533687002956867,
+              "verified": true
+            },
+            {
+              "seconds": 0.006254794076085091,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.00697620096616447,
+              "verified": true
+            },
+            {
+              "seconds": 0.006746833911165595,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.07739634113386273,
+              "body_seconds": 0.03633634885773063,
+              "acquire_seconds": 0.0012768441811203957,
+              "persist_unlock_seconds": 0.03978314809501171
+            }
+          ]
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.13650633906945586
+          ],
+          "mean_seconds": 0.13650633906945586,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.04321170784533024
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.10952016594819725,
+              "body_seconds": 0.0684139970690012,
+              "acquire_seconds": 0.0012051069643348455,
+              "persist_unlock_seconds": 0.0399010619148612
+            }
+          ]
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.14312114915810525
+          ],
+          "mean_seconds": 0.14312114915810525,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.03891049697995186
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.006573283113539219,
+              "verified": true
+            },
+            {
+              "seconds": 0.005950004793703556,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.007143177092075348,
+              "verified": true
+            },
+            {
+              "seconds": 0.006430849898606539,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.11612012586556375,
+              "body_seconds": 0.07493503391742706,
+              "acquire_seconds": 0.0009577360469847918,
+              "persist_unlock_seconds": 0.040227355901151896
+            }
+          ]
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.14407955296337605
+          ],
+          "mean_seconds": 0.14407955296337605,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.03948110085912049
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.006393181160092354,
+              "verified": true
+            },
+            {
+              "seconds": 0.00634186714887619,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.0068511751014739275,
+              "verified": true
+            },
+            {
+              "seconds": 0.006822000024840236,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.11639356194064021,
+              "body_seconds": 0.07531152409501374,
+              "acquire_seconds": 0.0010039359331130981,
+              "persist_unlock_seconds": 0.040078101912513375
+            }
+          ]
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.13144672010093927
+          ],
+          "mean_seconds": 0.13144672010093927,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.039706790121272206
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.10441173310391605,
+              "body_seconds": 0.06245697685517371,
+              "acquire_seconds": 0.001179075101390481,
+              "persist_unlock_seconds": 0.04077568114735186
+            }
+          ]
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.13119074003770947
+          ],
+          "mean_seconds": 0.13119074003770947,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.03900749306194484
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.10359390685334802,
+              "body_seconds": 0.0613199919462204,
+              "acquire_seconds": 0.0010912239085882902,
+              "persist_unlock_seconds": 0.04118269099853933
+            }
+          ]
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.1439454760402441
+          ],
+          "mean_seconds": 0.1439454760402441,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.0391142179723829
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.00698372395709157,
+              "verified": true
+            },
+            {
+              "seconds": 0.006985330022871494,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.007480903994292021,
+              "verified": true
+            },
+            {
+              "seconds": 0.007414393126964569,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.11711413599550724,
+              "body_seconds": 0.07637567911297083,
+              "acquire_seconds": 0.0010346779599785805,
+              "persist_unlock_seconds": 0.03970377892255783
+            }
+          ]
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.0895873240660876
+          ],
+          "mean_seconds": 0.0895873240660876,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.06432664394378662,
+              "body_seconds": 0.02297949302010238,
+              "acquire_seconds": 0.0011957630049437284,
+              "persist_unlock_seconds": 0.04015138791874051
+            }
+          ]
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.11272008996456861
+          ],
+          "mean_seconds": 0.11272008996456861,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/dem/wbt/subwta.tif": 650196,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/watershed/mofe.tif": 163900
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.008753814036026597,
+              "verified": true
+            },
+            {
+              "seconds": 0.008078139973804355,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.009312208043411374,
+              "verified": true
+            },
+            {
+              "seconds": 0.008533288026228547,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.0846082610078156,
+              "body_seconds": 0.04110540496185422,
+              "acquire_seconds": 0.001304263947531581,
+              "persist_unlock_seconds": 0.0421985920984298
+            }
+          ]
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.11291624396108091
+          ],
+          "mean_seconds": 0.11291624396108091,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/dem/wbt/subwta.tif": 650196,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/watershed/mofe.tif": 163900
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.008520407136529684,
+              "verified": true
+            },
+            {
+              "seconds": 0.00842235004529357,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.009021824924275279,
+              "verified": true
+            },
+            {
+              "seconds": 0.00892524910159409,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.08707582391798496,
+              "body_seconds": 0.043945559998974204,
+              "acquire_seconds": 0.001309010898694396,
+              "persist_unlock_seconds": 0.04182125302031636
+            }
+          ]
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.09384348895400763
+          ],
+          "mean_seconds": 0.09384348895400763,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.06784803001210093,
+              "body_seconds": 0.024318492971360683,
+              "acquire_seconds": 0.0011051211040467024,
+              "persist_unlock_seconds": 0.04242441593669355
+            }
+          ]
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.10069525707513094
+          ],
+          "mean_seconds": 0.10069525707513094,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.07280196505598724,
+              "body_seconds": 0.02654365706257522,
+              "acquire_seconds": 0.002098466968163848,
+              "persist_unlock_seconds": 0.04415984102524817
+            }
+          ]
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.11768092890270054
+          ],
+          "mean_seconds": 0.11768092890270054,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/dem/wbt/subwta.tif": 650196,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/watershed/mofe.tif": 163900
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.008445157203823328,
+              "verified": true
+            },
+            {
+              "seconds": 0.00800431496463716,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.008912189165130258,
+              "verified": true
+            },
+            {
+              "seconds": 0.008561920141801238,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.08939827117137611,
+              "body_seconds": 0.04011584306135774,
+              "acquire_seconds": 0.0011733269784599543,
+              "persist_unlock_seconds": 0.04810910113155842
+            }
+          ]
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.17284578899852931
+          ],
+          "mean_seconds": 0.17284578899852931,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.0577365318313241
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.14324057498015463,
+              "body_seconds": 0.0975631158798933,
+              "acquire_seconds": 0.002048918977379799,
+              "persist_unlock_seconds": 0.04362854012288153
+            }
+          ]
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.16381755005568266
+          ],
+          "mean_seconds": 0.16381755005568266,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/dem/wbt/subwta.tif": 650196,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/watershed/mofe.tif": 163900
+          },
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.041311895940452814
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.009208902018144727,
+              "verified": true
+            },
+            {
+              "seconds": 0.008292606100440025,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.00977949914522469,
+              "verified": true
+            },
+            {
+              "seconds": 0.008808564161881804,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.13422650191932917,
+              "body_seconds": 0.08465325087308884,
+              "acquire_seconds": 0.0013703580480068922,
+              "persist_unlock_seconds": 0.04820289299823344
+            }
+          ]
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.17612613714300096
+          ],
+          "mean_seconds": 0.17612613714300096,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/dem/wbt/subwta.tif": 650196,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/watershed/mofe.tif": 163900
+          },
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.04800710896961391
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.010087689850479364,
+              "verified": true
+            },
+            {
+              "seconds": 0.008739003911614418,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.01068900409154594,
+              "verified": true
+            },
+            {
+              "seconds": 0.009283947991207242,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.1481942490208894,
+              "body_seconds": 0.10081612085923553,
+              "acquire_seconds": 0.0019013350829482079,
+              "persist_unlock_seconds": 0.04547679307870567
+            }
+          ]
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.14947084081359208
+          ],
+          "mean_seconds": 0.14947084081359208,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.04602856794372201
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.1219876860268414,
+              "body_seconds": 0.0780889589805156,
+              "acquire_seconds": 0.0018560739699751139,
+              "persist_unlock_seconds": 0.04204265307635069
+            }
+          ]
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.1310197829734534
+          ],
+          "mean_seconds": 0.1310197829734534,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.039995122933760285
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.10396832902915776,
+              "body_seconds": 0.06296957796439528,
+              "acquire_seconds": 0.0012893429957330227,
+              "persist_unlock_seconds": 0.03970940806902945
+            }
+          ]
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.1450829510577023
+          ],
+          "mean_seconds": 0.1450829510577023,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/dem/wbt/subwta.tif": 650196,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/watershed/mofe.tif": 163900
+          },
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.03893595887348056
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.008386962115764618,
+              "verified": true
+            },
+            {
+              "seconds": 0.007441570051014423,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.008894548052921891,
+              "verified": true
+            },
+            {
+              "seconds": 0.00792281492613256,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.11830910993739963,
+              "body_seconds": 0.07801678497344255,
+              "acquire_seconds": 0.0009622699581086636,
+              "persist_unlock_seconds": 0.03933005500584841
+            }
+          ]
+        },
+        {
+          "phase": "evicted_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.09193361108191311
+          ],
+          "mean_seconds": 0.09193361108191311,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.06617476302199066,
+              "body_seconds": 0.02340632793493569,
+              "acquire_seconds": 0.0015360850375145674,
+              "persist_unlock_seconds": 0.0412323500495404
+            }
+          ]
+        },
+        {
+          "phase": "evicted_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.12695549987256527
+          ],
+          "mean_seconds": 0.12695549987256527,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/dem/wbt/subwta.tif": 650196,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/watershed/mofe.tif": 163900
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.010790108004584908,
+              "verified": true
+            },
+            {
+              "seconds": 0.009774556150659919,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.011392310028895736,
+              "verified": true
+            },
+            {
+              "seconds": 0.010349927004426718,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.09510967903770506,
+              "body_seconds": 0.04776711785234511,
+              "acquire_seconds": 0.0015485971234738827,
+              "persist_unlock_seconds": 0.04579396406188607
+            }
+          ]
+        },
+        {
+          "phase": "evicted_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.11322484794072807
+          ],
+          "mean_seconds": 0.11322484794072807,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/dem/wbt/subwta.tif": 650196,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/watershed/mofe.tif": 163900
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.009221018990501761,
+              "verified": true
+            },
+            {
+              "seconds": 0.008192976005375385,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.009794468991458416,
+              "verified": true
+            },
+            {
+              "seconds": 0.008768665138632059,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.0844028010033071,
+              "body_seconds": 0.04043828300200403,
+              "acquire_seconds": 0.0017222089227288961,
+              "persist_unlock_seconds": 0.04224230907857418
+            }
+          ]
+        },
+        {
+          "phase": "evicted_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.08320849598385394
+          ],
+          "mean_seconds": 0.08320849598385394,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.05806435598060489,
+              "body_seconds": 0.022638333030045033,
+              "acquire_seconds": 0.0012368140742182732,
+              "persist_unlock_seconds": 0.03418920887634158
+            }
+          ]
+        },
+        {
+          "phase": "evicted_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.09162598405964673
+          ],
+          "mean_seconds": 0.09162598405964673,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.06452310597524047,
+              "body_seconds": 0.023189422907307744,
+              "acquire_seconds": 0.0010117839556187391,
+              "persist_unlock_seconds": 0.040321899112313986
+            }
+          ]
+        },
+        {
+          "phase": "evicted_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.11297507490962744
+          ],
+          "mean_seconds": 0.11297507490962744,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/dem/wbt/subwta.tif": 650196,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/watershed/mofe.tif": 163900
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.009155313950031996,
+              "verified": true
+            },
+            {
+              "seconds": 0.007564920000731945,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.009615263901650906,
+              "verified": true
+            },
+            {
+              "seconds": 0.008125327993184328,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.08667512401007116,
+              "body_seconds": 0.039429108146578074,
+              "acquire_seconds": 0.0013435508590191603,
+              "persist_unlock_seconds": 0.045902465004473925
+            }
+          ]
+        }
+      ],
+      "before_modes": {
+        "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/landuse.nodb": "0o644",
+        "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/landuse/landuse.parquet": "0o644"
+      },
+      "summary": {
+        "legacy_admission/actual": {
+          "count": 1,
+          "mean_seconds": 0.15333200502209365,
+          "mean_validation_seconds": 0.01939846109598875,
+          "mean_lock_seconds": 0.12388243293389678,
+          "digest_read_bytes": 814096,
+          "native_calls": 1,
+          "observation_count": 2
+        },
+        "settled_hit/ancestor_control": {
+          "count": 3,
+          "mean_seconds": 0.09727709600701928,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.06914864301991959,
+          "digest_read_bytes": 0,
+          "native_calls": 0,
+          "observation_count": 0
+        },
+        "settled_hit/actual": {
+          "count": 3,
+          "mean_seconds": 0.10047412066099544,
+          "mean_validation_seconds": 0.01319849289332827,
+          "mean_lock_seconds": 0.07517554804993172,
+          "digest_read_bytes": 0,
+          "native_calls": 0,
+          "observation_count": 6
+        },
+        "settled_miss/ancestor_control": {
+          "count": 3,
+          "mean_seconds": 0.1330479330693682,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.10584193530182044,
+          "digest_read_bytes": 0,
+          "native_calls": 3,
+          "observation_count": 0
+        },
+        "settled_miss/actual": {
+          "count": 3,
+          "mean_seconds": 0.14371539272057512,
+          "mean_validation_seconds": 0.014047499746084213,
+          "mean_lock_seconds": 0.11654260793390374,
+          "digest_read_bytes": 0,
+          "native_calls": 3,
+          "observation_count": 6
+        },
+        "cold_hit/ancestor_control": {
+          "count": 3,
+          "mean_seconds": 0.09470869003174205,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.0683255463372916,
+          "digest_read_bytes": 0,
+          "native_calls": 0,
+          "observation_count": 0
+        },
+        "cold_hit/actual": {
+          "count": 3,
+          "mean_seconds": 0.11443908760945003,
+          "mean_validation_seconds": 0.017755559800813597,
+          "mean_lock_seconds": 0.08702745203239222,
+          "digest_read_bytes": 2442288,
+          "native_calls": 0,
+          "observation_count": 6
+        },
+        "cold_miss/ancestor_control": {
+          "count": 3,
+          "mean_seconds": 0.1511121375951916,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.12306553001205127,
+          "digest_read_bytes": 0,
+          "native_calls": 3,
+          "observation_count": 0
+        },
+        "cold_miss/actual": {
+          "count": 3,
+          "mean_seconds": 0.16167554608546197,
+          "mean_validation_seconds": 0.01845945945630471,
+          "mean_lock_seconds": 0.1335766202925394,
+          "digest_read_bytes": 2442288,
+          "native_calls": 3,
+          "observation_count": 6
+        },
+        "evicted_hit/ancestor_control": {
+          "count": 3,
+          "mean_seconds": 0.0889226970418046,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.06292074165927868,
+          "digest_read_bytes": 0,
+          "native_calls": 0,
+          "observation_count": 0
+        },
+        "evicted_hit/actual": {
+          "count": 3,
+          "mean_seconds": 0.11771847424097359,
+          "mean_validation_seconds": 0.01934865435274939,
+          "mean_lock_seconds": 0.08872920135036111,
+          "digest_read_bytes": 2442288,
+          "native_calls": 0,
+          "observation_count": 6
+        }
+      },
+      "management_values_preserved": true,
+      "parquet_rows_types_values_preserved": true,
+      "after_modes": {
+        "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/landuse.nodb": "0o644",
+        "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/landuse/landuse.parquet": "0o644"
+      }
+    },
+    "beneficiary-forfeit": {
+      "name": "beneficiary-forfeit",
+      "root": "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1",
+      "measurements": [
+        {
+          "phase": "legacy_admission",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            2.082121127983555
+          ],
+          "mean_seconds": 2.082121127983555,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.ARC": 71005134,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.PRJ": 806,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/watershed/mofe.tif": 11853540
+          },
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.7319844400044531
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.15673664887435734,
+              "verified": true
+            },
+            {
+              "seconds": 0.15890054102055728,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.1729064208921045,
+              "verified": true
+            },
+            {
+              "seconds": 0.17753051896579564,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 1.8776322598569095,
+              "body_seconds": 1.586883378913626,
+              "acquire_seconds": 0.0010567980352789164,
+              "persist_unlock_seconds": 0.2896920829080045
+            }
+          ]
+        },
+        {
+          "phase": "settled_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.9666724989656359
+          ],
+          "mean_seconds": 0.9666724989656359,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.7627025730907917,
+              "body_seconds": 0.48808194790035486,
+              "acquire_seconds": 0.0013897721655666828,
+              "persist_unlock_seconds": 0.27323085302487016
+            }
+          ]
+        },
+        {
+          "phase": "settled_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            1.0238425778225064
+          ],
+          "mean_seconds": 1.0238425778225064,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.007341813063248992,
+              "verified": true
+            },
+            {
+              "seconds": 0.005956514971330762,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.023705908097326756,
+              "verified": true
+            },
+            {
+              "seconds": 0.02130052400752902,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.8260167909320444,
+              "body_seconds": 0.5640416529495269,
+              "acquire_seconds": 0.001317582093179226,
+              "persist_unlock_seconds": 0.26065755588933825
+            }
+          ]
+        },
+        {
+          "phase": "settled_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            1.0364307400304824
+          ],
+          "mean_seconds": 1.0364307400304824,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.007405172102153301,
+              "verified": true
+            },
+            {
+              "seconds": 0.0061459781136363745,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.02311498112976551,
+              "verified": true
+            },
+            {
+              "seconds": 0.021586760878562927,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.8255546109285206,
+              "body_seconds": 0.5609179721213877,
+              "acquire_seconds": 0.0014536709059029818,
+              "persist_unlock_seconds": 0.26318296790122986
+            }
+          ]
+        },
+        {
+          "phase": "settled_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            1.0088665229268372
+          ],
+          "mean_seconds": 1.0088665229268372,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.8071145508438349,
+              "body_seconds": 0.5278815031051636,
+              "acquire_seconds": 0.0014355818275362253,
+              "persist_unlock_seconds": 0.2777974659111351
+            }
+          ]
+        },
+        {
+          "phase": "settled_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.998728659003973
+          ],
+          "mean_seconds": 0.998728659003973,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.7864355898927897,
+              "body_seconds": 0.4992105739656836,
+              "acquire_seconds": 0.0011558658443391323,
+              "persist_unlock_seconds": 0.286069150082767
+            }
+          ]
+        },
+        {
+          "phase": "settled_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            1.0239506799262017
+          ],
+          "mean_seconds": 1.0239506799262017,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.008570191916078329,
+              "verified": true
+            },
+            {
+              "seconds": 0.006112734787166119,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.02634419803507626,
+              "verified": true
+            },
+            {
+              "seconds": 0.02218357496894896,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.818878771038726,
+              "body_seconds": 0.5316115331370384,
+              "acquire_seconds": 0.001412512967363,
+              "persist_unlock_seconds": 0.2858547249343246
+            }
+          ]
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            1.725468736840412
+          ],
+          "mean_seconds": 1.725468736840412,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.7379799331538379
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 1.5256694699637592,
+              "body_seconds": 1.240575660020113,
+              "acquire_seconds": 0.0012528279330581427,
+              "persist_unlock_seconds": 0.28384098201058805
+            }
+          ]
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            1.7734042790252715
+          ],
+          "mean_seconds": 1.7734042790252715,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.7378318030387163
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.007094232132658362,
+              "verified": true
+            },
+            {
+              "seconds": 0.007500944891944528,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.023812802974134684,
+              "verified": true
+            },
+            {
+              "seconds": 0.0253203259781003,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 1.5693918908946216,
+              "body_seconds": 1.2960916480515152,
+              "acquire_seconds": 0.0014577109832316637,
+              "persist_unlock_seconds": 0.2718425318598747
+            }
+          ]
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            1.763943632831797
+          ],
+          "mean_seconds": 1.763943632831797,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.745709755923599
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.007208239985629916,
+              "verified": true
+            },
+            {
+              "seconds": 0.0074947981629520655,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.023632758064195514,
+              "verified": true
+            },
+            {
+              "seconds": 0.024407208897173405,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 1.5582590638659894,
+              "body_seconds": 1.2873143090400845,
+              "acquire_seconds": 0.001086006872355938,
+              "persist_unlock_seconds": 0.269858747953549
+            }
+          ]
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            1.6990279138553888
+          ],
+          "mean_seconds": 1.6990279138553888,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.7033529209438711
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 1.4924572629388422,
+              "body_seconds": 1.2237148170825094,
+              "acquire_seconds": 0.0011647557839751244,
+              "persist_unlock_seconds": 0.26757769007235765
+            }
+          ]
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            1.725743134971708
+          ],
+          "mean_seconds": 1.725743134971708,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.7356554458383471
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 1.5164024669211358,
+              "body_seconds": 1.2425297098234296,
+              "acquire_seconds": 0.0010313501115888357,
+              "persist_unlock_seconds": 0.27284140698611736
+            }
+          ]
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            1.7427213590126485
+          ],
+          "mean_seconds": 1.7427213590126485,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.7533299520146102
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.007690981030464172,
+              "verified": true
+            },
+            {
+              "seconds": 0.0074549170676618814,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.024971514008939266,
+              "verified": true
+            },
+            {
+              "seconds": 0.02373104216530919,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 1.5418282230384648,
+              "body_seconds": 1.2729693539440632,
+              "acquire_seconds": 0.0011312621645629406,
+              "persist_unlock_seconds": 0.26772760692983866
+            }
+          ]
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.991253491025418
+          ],
+          "mean_seconds": 0.991253491025418,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.7902461669873446,
+              "body_seconds": 0.5127030410803854,
+              "acquire_seconds": 0.001303554978221655,
+              "persist_unlock_seconds": 0.2762395709287375
+            }
+          ]
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            1.4568433000240475
+          ],
+          "mean_seconds": 1.4568433000240475,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.ARC": 71005134,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.PRJ": 806,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/watershed/mofe.tif": 11853540
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.1504642739892006,
+              "verified": true
+            },
+            {
+              "seconds": 0.14460775395855308,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.16790347988717258,
+              "verified": true
+            },
+            {
+              "seconds": 0.16014510300010443,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 1.2463012940715998,
+              "body_seconds": 0.8148597639519721,
+              "acquire_seconds": 0.001543255988508463,
+              "persist_unlock_seconds": 0.42989827413111925
+            }
+          ]
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            1.2851764371152967
+          ],
+          "mean_seconds": 1.2851764371152967,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.ARC": 71005134,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.PRJ": 806,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/watershed/mofe.tif": 11853540
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.15080154687166214,
+              "verified": true
+            },
+            {
+              "seconds": 0.1459752139635384,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.16976411500945687,
+              "verified": true
+            },
+            {
+              "seconds": 0.16276675486005843,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 1.0847411057911813,
+              "body_seconds": 0.8137666031252593,
+              "acquire_seconds": 0.0015339278616011143,
+              "persist_unlock_seconds": 0.26944057480432093
+            }
+          ]
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.9571350740734488
+          ],
+          "mean_seconds": 0.9571350740734488,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.7583639610093087,
+              "body_seconds": 0.49310469697229564,
+              "acquire_seconds": 0.0014849381987005472,
+              "persist_unlock_seconds": 0.2637743258383125
+            }
+          ]
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.9989590449258685
+          ],
+          "mean_seconds": 0.9989590449258685,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.7979433331638575,
+              "body_seconds": 0.528943576849997,
+              "acquire_seconds": 0.0014593491796404123,
+              "persist_unlock_seconds": 0.26754040713422
+            }
+          ]
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            1.2783473189920187
+          ],
+          "mean_seconds": 1.2783473189920187,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.ARC": 71005134,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.PRJ": 806,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/watershed/mofe.tif": 11853540
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.14415460196323693,
+              "verified": true
+            },
+            {
+              "seconds": 0.1443722820840776,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.16006693616509438,
+              "verified": true
+            },
+            {
+              "seconds": 0.16082687000744045,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 1.0711549560073763,
+              "body_seconds": 0.801655262010172,
+              "acquire_seconds": 0.0014614129904657602,
+              "persist_unlock_seconds": 0.26803828100673854
+            }
+          ]
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            1.714579215971753
+          ],
+          "mean_seconds": 1.714579215971753,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.7306966478936374
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 1.5020498679950833,
+              "body_seconds": 1.2328506149351597,
+              "acquire_seconds": 0.0011654109694063663,
+              "persist_unlock_seconds": 0.2680338420905173
+            }
+          ]
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            2.0426866069901735
+          ],
+          "mean_seconds": 2.0426866069901735,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.ARC": 71005134,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.PRJ": 806,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/watershed/mofe.tif": 11853540
+          },
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.7480603221338242
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.14581293798983097,
+              "verified": true
+            },
+            {
+              "seconds": 0.14666123990900815,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.16182912490330637,
+              "verified": true
+            },
+            {
+              "seconds": 0.16450854809954762,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 1.8340695609804243,
+              "body_seconds": 1.5630236030556262,
+              "acquire_seconds": 0.0013182980474084616,
+              "persist_unlock_seconds": 0.26972765987738967
+            }
+          ]
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            2.1016976991668344
+          ],
+          "mean_seconds": 2.1016976991668344,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.ARC": 71005134,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.PRJ": 806,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/watershed/mofe.tif": 11853540
+          },
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.7858227149117738
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.1464826969895512,
+              "verified": true
+            },
+            {
+              "seconds": 0.14949766593053937,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.1639202230144292,
+              "verified": true
+            },
+            {
+              "seconds": 0.16774059389717877,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 1.893729151925072,
+              "body_seconds": 1.5965392349753529,
+              "acquire_seconds": 0.0016887548845261335,
+              "persist_unlock_seconds": 0.29550116206519306
+            }
+          ]
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            1.7734324170742184
+          ],
+          "mean_seconds": 1.7734324170742184,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.7927024909295142
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 1.569298752117902,
+              "body_seconds": 1.2887418940663338,
+              "acquire_seconds": 0.0017946050502359867,
+              "persist_unlock_seconds": 0.2787622530013323
+            }
+          ]
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            1.6994136760476977
+          ],
+          "mean_seconds": 1.6994136760476977,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.7286503959912807
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 1.49530568998307,
+              "body_seconds": 1.2240291610360146,
+              "acquire_seconds": 0.0011291890405118465,
+              "persist_unlock_seconds": 0.2701473399065435
+            }
+          ]
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            2.0202445259783417
+          ],
+          "mean_seconds": 2.0202445259783417,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.ARC": 71005134,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.PRJ": 806,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/watershed/mofe.tif": 11853540
+          },
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.7117792239878327
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.14419249002821743,
+              "verified": true
+            },
+            {
+              "seconds": 0.14376197406090796,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.16018340201117098,
+              "verified": true
+            },
+            {
+              "seconds": 0.15969415893778205,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 1.7986909709870815,
+              "body_seconds": 1.508243597112596,
+              "acquire_seconds": 0.000980157870799303,
+              "persist_unlock_seconds": 0.2894672160036862
+            }
+          ]
+        },
+        {
+          "phase": "evicted_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            1.0050927039701492
+          ],
+          "mean_seconds": 1.0050927039701492,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.7873036328237504,
+              "body_seconds": 0.515319355065003,
+              "acquire_seconds": 0.0012467128690332174,
+              "persist_unlock_seconds": 0.2707375648897141
+            }
+          ]
+        },
+        {
+          "phase": "evicted_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            1.3263130709528923
+          ],
+          "mean_seconds": 1.3263130709528923,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.ARC": 71005134,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.PRJ": 806,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/watershed/mofe.tif": 11853540
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.1472154960501939,
+              "verified": true
+            },
+            {
+              "seconds": 0.154829140054062,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.1654279949143529,
+              "verified": true
+            },
+            {
+              "seconds": 0.1734458350110799,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 1.12239163601771,
+              "body_seconds": 0.8253802680410445,
+              "acquire_seconds": 0.001201815903186798,
+              "persist_unlock_seconds": 0.2958095520734787
+            }
+          ]
+        }
+      ],
+      "before_modes": {
+        "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/landuse.nodb": "0o644",
+        "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/landuse/landuse.parquet": "0o644"
+      },
+      "summary": {
+        "legacy_admission/actual": {
+          "count": 1,
+          "mean_seconds": 2.082121127983555,
+          "mean_validation_seconds": 0.35043693985790014,
+          "mean_lock_seconds": 1.8776322598569095,
+          "digest_read_bytes": 82859480,
+          "native_calls": 1,
+          "observation_count": 2
+        },
+        "settled_hit/ancestor_control": {
+          "count": 3,
+          "mean_seconds": 0.9914225602988154,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.7854175712758055,
+          "digest_read_bytes": 0,
+          "native_calls": 0,
+          "observation_count": 0
+        },
+        "settled_hit/actual": {
+          "count": 3,
+          "mean_seconds": 1.0280746659263968,
+          "mean_validation_seconds": 0.04607864903906981,
+          "mean_lock_seconds": 0.8234833909664303,
+          "digest_read_bytes": 0,
+          "native_calls": 0,
+          "observation_count": 6
+        },
+        "settled_miss/ancestor_control": {
+          "count": 3,
+          "mean_seconds": 1.716746595222503,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 1.511509733274579,
+          "digest_read_bytes": 0,
+          "native_calls": 3,
+          "observation_count": 0
+        },
+        "settled_miss/actual": {
+          "count": 3,
+          "mean_seconds": 1.7600230902899057,
+          "mean_validation_seconds": 0.048625217362617455,
+          "mean_lock_seconds": 1.5564930592663586,
+          "digest_read_bytes": 0,
+          "native_calls": 3,
+          "observation_count": 6
+        },
+        "cold_hit/ancestor_control": {
+          "count": 3,
+          "mean_seconds": 0.9824492033415785,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.7821844870535036,
+          "digest_read_bytes": 0,
+          "native_calls": 0,
+          "observation_count": 0
+        },
+        "cold_hit/actual": {
+          "count": 3,
+          "mean_seconds": 1.3401223520437877,
+          "mean_validation_seconds": 0.3271577529764424,
+          "mean_lock_seconds": 1.1340657852900524,
+          "digest_read_bytes": 248578440,
+          "native_calls": 0,
+          "observation_count": 6
+        },
+        "cold_miss/ancestor_control": {
+          "count": 3,
+          "mean_seconds": 1.7291417696978897,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 1.5222181033653517,
+          "digest_read_bytes": 0,
+          "native_calls": 3,
+          "observation_count": 0
+        },
+        "cold_miss/actual": {
+          "count": 3,
+          "mean_seconds": 2.0548762773784497,
+          "mean_validation_seconds": 0.32595868362113833,
+          "mean_lock_seconds": 1.8421632279641926,
+          "digest_read_bytes": 248578440,
+          "native_calls": 3,
+          "observation_count": 6
+        }
+      }
+    }
+  },
+  "pressure": [
+    {
+      "files": 512,
+      "before": {
+        "digest": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        },
+        "observed": {
+          "hits": 2,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        }
+      },
+      "after": {
+        "digest": {
+          "hits": 0,
+          "misses": 512,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "observed": {
+          "hits": 514,
+          "misses": 513,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      }
+    },
+    {
+      "files": 512,
+      "before": {
+        "digest": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        },
+        "observed": {
+          "hits": 2,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        }
+      },
+      "after": {
+        "digest": {
+          "hits": 0,
+          "misses": 512,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "observed": {
+          "hits": 514,
+          "misses": 513,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      }
+    },
+    {
+      "files": 512,
+      "before": {
+        "digest": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        },
+        "observed": {
+          "hits": 2,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        }
+      },
+      "after": {
+        "digest": {
+          "hits": 0,
+          "misses": 512,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "observed": {
+          "hits": 514,
+          "misses": 513,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      }
+    },
+    {
+      "files": 512,
+      "before": {
+        "digest": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        },
+        "observed": {
+          "hits": 2,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        }
+      },
+      "after": {
+        "digest": {
+          "hits": 0,
+          "misses": 512,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "observed": {
+          "hits": 514,
+          "misses": 513,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      }
+    },
+    {
+      "files": 512,
+      "before": {
+        "digest": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        },
+        "observed": {
+          "hits": 2,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        }
+      },
+      "after": {
+        "digest": {
+          "hits": 0,
+          "misses": 512,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "observed": {
+          "hits": 514,
+          "misses": 513,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      }
+    },
+    {
+      "files": 512,
+      "before": {
+        "digest": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        },
+        "observed": {
+          "hits": 2,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        }
+      },
+      "after": {
+        "digest": {
+          "hits": 0,
+          "misses": 512,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "observed": {
+          "hits": 514,
+          "misses": 513,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      }
+    },
+    {
+      "files": 512,
+      "before": {
+        "digest": {
+          "hits": 6,
+          "misses": 2,
+          "maxsize": 512,
+          "currsize": 2
+        },
+        "observed": {
+          "hits": 14,
+          "misses": 2,
+          "maxsize": 512,
+          "currsize": 2
+        }
+      },
+      "after": {
+        "digest": {
+          "hits": 6,
+          "misses": 514,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "observed": {
+          "hits": 526,
+          "misses": 514,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      }
+    },
+    {
+      "files": 512,
+      "before": {
+        "digest": {
+          "hits": 12,
+          "misses": 516,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "observed": {
+          "hits": 540,
+          "misses": 516,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      },
+      "after": {
+        "digest": {
+          "hits": 12,
+          "misses": 1028,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "observed": {
+          "hits": 1052,
+          "misses": 1028,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      }
+    },
+    {
+      "files": 512,
+      "before": {
+        "digest": {
+          "hits": 18,
+          "misses": 1030,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "observed": {
+          "hits": 1066,
+          "misses": 1030,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      },
+      "after": {
+        "digest": {
+          "hits": 18,
+          "misses": 1542,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "observed": {
+          "hits": 1578,
+          "misses": 1542,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      }
+    },
+    {
+      "files": 512,
+      "before": {
+        "digest": {
+          "hits": 15,
+          "misses": 3,
+          "maxsize": 512,
+          "currsize": 3
+        },
+        "observed": {
+          "hits": 21,
+          "misses": 3,
+          "maxsize": 512,
+          "currsize": 3
+        }
+      },
+      "after": {
+        "digest": {
+          "hits": 15,
+          "misses": 515,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "observed": {
+          "hits": 533,
+          "misses": 515,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      }
+    }
+  ],
+  "gates": [
+    {
+      "name": "GrizzlyCreek_SBS_final.tif: settled complete hit",
+      "actual": 0.009584685104588668,
+      "limit": 0.025,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "GrizzlyCreek_SBS_final.tif: settled hash bytes",
+      "actual": 0,
+      "limit": 0,
+      "unit": "bytes",
+      "passed": true
+    },
+    {
+      "name": "GrizzlyCreek_SBS_final.tif: settled_miss added",
+      "actual": -0.012502027985950306,
+      "limit": 0.05,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "GrizzlyCreek_SBS_final.tif: cold_miss added",
+      "actual": -0.00928784037629763,
+      "limit": 0.05,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "baer.cropped.tif: settled complete hit",
+      "actual": 0.00992153570211182,
+      "limit": 0.025,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "baer.cropped.tif: settled hash bytes",
+      "actual": 0,
+      "limit": 0,
+      "unit": "bytes",
+      "passed": true
+    },
+    {
+      "name": "baer.cropped.tif: settled_miss added",
+      "actual": -0.03936883139734465,
+      "limit": 0.05,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "baer.cropped.tif: cold_miss added",
+      "actual": -0.03586057814148563,
+      "limit": 0.05,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "curable-program: settled_hit validation",
+      "actual": 0.01319849289332827,
+      "limit": 0.075,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "curable-program: settled_hit whole added",
+      "actual": 0.0031970246539761576,
+      "limit": 0.1,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "curable-program: settled_hit lock added",
+      "actual": 0.006026905030012131,
+      "limit": 0.1,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "curable-program: settled_hit hash bytes",
+      "actual": 0,
+      "limit": 0,
+      "unit": "bytes",
+      "passed": true
+    },
+    {
+      "name": "curable-program: settled_miss validation",
+      "actual": 0.014047499746084213,
+      "limit": 0.075,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "curable-program: settled_miss whole added",
+      "actual": 0.010667459651206912,
+      "limit": 0.1,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "curable-program: settled_miss lock added",
+      "actual": 0.010700672632083297,
+      "limit": 0.1,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "curable-program: settled_miss hash bytes",
+      "actual": 0,
+      "limit": 0,
+      "unit": "bytes",
+      "passed": true
+    },
+    {
+      "name": "curable-program: cold_hit validation",
+      "actual": 0.017755559800813597,
+      "limit": 0.4,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "curable-program: cold_hit whole added",
+      "actual": 0.019730397577707975,
+      "limit": 0.45,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "curable-program: cold_hit lock added",
+      "actual": 0.01870190569510062,
+      "limit": 0.45,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "curable-program: cold_miss validation",
+      "actual": 0.01845945945630471,
+      "limit": 0.4,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "curable-program: cold_miss whole added",
+      "actual": 0.010563408490270376,
+      "limit": 0.45,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "curable-program: cold_miss lock added",
+      "actual": 0.01051109028048812,
+      "limit": 0.45,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "curable-program: evicted_hit validation",
+      "actual": 0.01934865435274939,
+      "limit": 0.4,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "curable-program: evicted_hit whole added",
+      "actual": 0.028795777199168995,
+      "limit": 0.45,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "curable-program: evicted_hit lock added",
+      "actual": 0.025808459691082433,
+      "limit": 0.45,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "beneficiary-forfeit: settled_hit validation",
+      "actual": 0.04607864903906981,
+      "limit": 0.075,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "beneficiary-forfeit: settled_hit whole added",
+      "actual": 0.03665210562758148,
+      "limit": 0.1,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "beneficiary-forfeit: settled_hit lock added",
+      "actual": 0.038065819690624836,
+      "limit": 0.1,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "beneficiary-forfeit: settled_hit hash bytes",
+      "actual": 0,
+      "limit": 0,
+      "unit": "bytes",
+      "passed": true
+    },
+    {
+      "name": "beneficiary-forfeit: settled_miss validation",
+      "actual": 0.048625217362617455,
+      "limit": 0.075,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "beneficiary-forfeit: settled_miss whole added",
+      "actual": 0.04327649506740272,
+      "limit": 0.1,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "beneficiary-forfeit: settled_miss lock added",
+      "actual": 0.044983325991779566,
+      "limit": 0.1,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "beneficiary-forfeit: settled_miss hash bytes",
+      "actual": 0,
+      "limit": 0,
+      "unit": "bytes",
+      "passed": true
+    },
+    {
+      "name": "beneficiary-forfeit: cold_hit validation",
+      "actual": 0.3271577529764424,
+      "limit": 0.4,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "beneficiary-forfeit: cold_hit whole added",
+      "actual": 0.35767314870220923,
+      "limit": 0.45,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "beneficiary-forfeit: cold_hit lock added",
+      "actual": 0.3518812982365488,
+      "limit": 0.45,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "beneficiary-forfeit: cold_miss validation",
+      "actual": 0.32595868362113833,
+      "limit": 0.4,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "beneficiary-forfeit: cold_miss whole added",
+      "actual": 0.32573450768056,
+      "limit": 0.45,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "beneficiary-forfeit: cold_miss lock added",
+      "actual": 0.31994512459884095,
+      "limit": 0.45,
+      "unit": "seconds",
+      "passed": true
+    }
+  ],
+  "baseline_source_sha256": "c57a21ca8e10bfd30bec969c808cd16834f5c26c56d6e1d3e12c99a1ebe561a3",
+  "failure": {
+    "type": "KeyboardInterrupt",
+    "message": "",
+    "traceback": "Traceback (most recent call last):\n  File \"/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/benchmark_raster_implementation.py\", line 358, in <module>\n    settle(owner.build_managements)\n  File \"/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/benchmark_raster_implementation.py\", line 188, in settle\n    sleep(1.05)\nKeyboardInterrupt\n"
+  },
+  "inputs_unchanged": true,
+  "module_files_unchanged": true,
+  "acceptance_passed": false
+}

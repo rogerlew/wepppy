@@ -10,8 +10,8 @@
     {
       "restricted": false,
       "files": [
-        "/tmp/pytest-of-unknown/pytest-124/test_native_rpc_sidecar_visibi0/rpc.tif",
-        "/tmp/pytest-of-unknown/pytest-124/test_native_rpc_sidecar_visibi0/rpc.RPB"
+        "/tmp/pytest-of-unknown/pytest-134/test_native_rpc_sidecar_visibi0/rpc.tif",
+        "/tmp/pytest-of-unknown/pytest-134/test_native_rpc_sidecar_visibi0/rpc.RPB"
       ],
       "rpc": {
         "ERR_BIAS": "0.0",
@@ -35,7 +35,7 @@
     {
       "restricted": true,
       "files": [
-        "/tmp/pytest-of-unknown/pytest-124/test_native_rpc_sidecar_visibi0/rpc.tif"
+        "/tmp/pytest-of-unknown/pytest-134/test_native_rpc_sidecar_visibi0/rpc.tif"
       ],
       "rpc": {}
     }

@@ -1,0 +1,48 @@
+{
+  "errno": 116,
+  "same_content_identity": true,
+  "different_guard": true,
+  "original_native": {
+    "srs_valid": true,
+    "class_count": 1,
+    "unique_classes": [
+      1
+    ],
+    "class_counts": [
+      [
+        1,
+        16
+      ]
+    ],
+    "has_non_integer": false,
+    "has_color_table": false,
+    "color_table_severities": [],
+    "color_table_valid": false,
+    "sanity_status": 0,
+    "sanity_message": "Map has valid classes",
+    "size_bytes": 376
+  },
+  "intermediate_native": [
+    {
+      "srs_valid": true,
+      "class_count": 1,
+      "unique_classes": [
+        1
+      ],
+      "class_counts": [
+        [
+          1,
+          16
+        ]
+      ],
+      "has_non_integer": false,
+      "has_color_table": false,
+      "color_table_severities": [],
+      "color_table_valid": false,
+      "sanity_status": 0,
+      "sanity_message": "Map has valid classes",
+      "size_bytes": 376
+    }
+  ],
+  "cache_entries": 0
+}

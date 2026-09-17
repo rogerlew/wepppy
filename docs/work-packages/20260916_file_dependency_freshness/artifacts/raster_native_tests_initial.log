@@ -1,0 +1,42 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/test_raster_freshness.py tests/nodb/test_landuse_coverage_area_source.py --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 21 items
+
+tests/test_raster_freshness.py ...F
+
+=================================== FAILURES ===================================
+____________________ test_native_mask_content_is_dependency ____________________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-109/test_native_mask_content_is_de0')
+
+    def test_native_mask_content_is_dependency(tmp_path):
+        source = raster(tmp_path / 'source.tif')
+        ds = gdal.Open(str(source), gdal.GA_Update)
+        ds.GetRasterBand(1).CreateMaskBand(gdal.GMF_PER_DATASET)
+        ds.GetRasterBand(1).GetMaskBand().WriteArray(np.array([[255, 255], [255, 255]], dtype=np.uint8))
+        ds = None
+        mask = Path(str(source) + '.msk')
+>       assert mask.exists()
+E       AssertionError: assert False
+E        +  where False = exists()
+E        +    where exists = PosixPath('/tmp/pytest-of-unknown/pytest-109/test_native_mask_content_is_de0/source.tif.msk').exists
+
+tests/test_raster_freshness.py:92: AssertionError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_raster_freshness.py::test_native_mask_content_is_dependency
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+=================== 1 failed, 3 passed, 2 warnings in 9.38s ====================

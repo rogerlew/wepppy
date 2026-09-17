@@ -1,0 +1,22 @@
+{
+  "pid": 112218,
+  "reason": "Parent requested graceful termination of superseded old-import timings before ABA guard correction",
+  "before_measurements": {
+    "GrizzlyCreek_SBS_final.tif": 17,
+    "baer.cropped.tif": 17,
+    "curable-program": 31,
+    "beneficiary-forfeit": 27
+  },
+  "signal": "SIGINT queued while stopped, then SIGCONT solely to deliver interruption and run finally retention",
+  "epoch": 1789624619.8180094,
+  "exit_code": 130,
+  "after_measurements": {
+    "GrizzlyCreek_SBS_final.tif": 17,
+    "baer.cropped.tif": 17,
+    "curable-program": 31,
+    "beneficiary-forfeit": 27
+  },
+  "no_new_timing_after_pause": true,
+  "inputs_unchanged": true,
+  "retained_exception": "KeyboardInterrupt"
+}

@@ -1,0 +1,9 @@
+Running default: markdown-doc lint --staged --format json
+{
+  "summary": {
+    "files_scanned": 11,
+    "errors": 0,
+    "warnings": 0
+  },
+  "findings": []
+}

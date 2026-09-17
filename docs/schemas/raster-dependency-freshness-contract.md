@@ -89,8 +89,15 @@ run the existing native operation uncached, preserving its success/error boundar
 Never turn a native dependency exception into a reusable missing-file sentinel.
 
 Recheck membership and file versions during observation; reject an observably
-mixed observation. After native materialization or cache-hit selection, repeat
-the complete observation before admitting/returning its result. A verified
+mixed observation. Retain each observation's physical file versions, selected/resolved identities,
+companion-parent directory versions and effective configuration as a separate
+read guard across the whole native/reuse interval. Do not put this guard into
+numerical identity: metadata-only changes between completed calls still reuse
+content. Comparing only pre/post hashes is insufficient when a writer changes
+pixels during native computation and restores the original bytes afterward.
+After native materialization or cache-hit selection, repeat
+the complete observation and compare both content and the captured read guard
+before admitting/returning its result. A verified
 pre-observation becoming changed or unverified rejects admission and derived
 publication with an explicit source-change error. The bounded summary cache
 must admit only after a matching post-check, not cache a raw result and raise

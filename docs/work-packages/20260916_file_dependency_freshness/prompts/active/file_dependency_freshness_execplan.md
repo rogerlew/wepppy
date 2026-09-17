@@ -58,6 +58,29 @@ confirmed bugs. Removing all ctime checks would conflate separate concerns.
 
 ## Decision Log
 
+2026-09-17 UTC: B-F01 and the separately traced browser-family candidates receive
+explicit justified-unresolved inventory dispositions under the package complexity
+allowance, narrowly qualifying the generic confirmed-failure closeout gate as
+for PF-R01. The confirmed mixed-year defect remains unfixed and must appear in
+final limitations. Existing docs choose neither automatic post-rerun refresh nor
+an immutable snapshot; inventing a generation protocol or invalidating active
+analysis would select new UX beyond the demonstrated missing behavior. Durable
+currentness/reopen guidance is in`docs/ui-docs/gl-dashboard.md#currentness-after-a-run-is-regenerated`;
+independent QA scope/disposition artifacts retain precise candidate distinctions.
+All changed-code defects, other confirmed fixes and final runtime gates remain
+blocking; this does not declare all browser caches safe.
+
+2026-09-17 UTC: PF-R01 is explicitly dispositioned as justified unresolved under
+the package's inventory allowance. This narrowly qualifies the plan's generic
+confirmed-failure closeout statement: the seven existing soil SQLite false-stale
+cases are not fixed and cannot be included in completed-fix claims. Independent
+reviews find no changed-code security exception; no strict guard is weakened.
+Read-only polling and mandatory fresh visible SQLite snapshots conflict on a
+new physical generation, so a process cache cannot establish logical equality
+after restart/eviction/VACUUM. A future fix needs separately ratified polling/
+snapshot policy or evaluated owned-native support. All changed-code findings,
+other in-scope fixes and final runtime gates remain blocking.
+
 2026-09-17 UTC: preserve strict O_RDONLY/no-follow authority for CLI readiness.
 Profile and optimize same-call work before proposing an explicit prototype-budget
 correction; no cross-request descriptor cache or weakened access checks. Final
@@ -323,3 +346,51 @@ Explicit performance correction committed asf7c832864: actual settled4.85/6.14ms
 eviction14.69/27.86ms, full export394/876ms, zero settled CLI payload reads,
 exact row/type parity. Original budget failures remain retained. Scoped CLI
 implementation reviews pass; whole-state/live-runtime acceptance remains open.
+
+CLI producer/readiness implementation committed as36744f3b3 after the reviewed
+performance amendmentf7c832864. Next C03/C04 checkpoint is deliberately limited
+to verified local GTiff/AAIGrid reuse; VRT/Zarr/VSI and unproven layouts retain
+native uncached behavior. Eager remote references in auxiliary or internally
+encoded overview relationships require eligibility before GetFileList. Native
+probes and whole-consumer baselines are retained; no raster runtime edits yet.
+
+C03/C04 bounded raster contract checkpoint committed as`ceb715c08` after
+correctness/security/QA design approval. Implementation now in progress: shared
+local GTiff/AAIGrid observation, guarded native SBS LRU admission and joint MOFE
+count validation. Final implementation tests, performance and reviews remain
+open; initial unverified formats preserve native uncached execution. No claim
+that this observer closes C01/C02/C05/C06 publication scope.
+
+C03/C04 inspection sibling refinement committed as`308f9edee` after retained
+mask-replacement and hidden-worldfile/RPB findings. Actual implementation has
+143affected tests (one skip),23native observer regressions, stubtest and scoped
+independent correctness/security PASS; actual guard-inclusive timing is running.
+Native management preparation evidence reaches`wepp/runs/p7.man`; this is not
+a substitute for final RQ/model execution. Geneva C05/C06, S01 and S02 contracts
+are being drafted without their runtime edits.
+
+R-CI03/R-I03 reopened C03/C04 after an actual native changed-then-restored source
+probe failed: content-only comparisons accepted intermediate numerical results.
+Keep initial failure and partial performance baseline (terminatedoutside locks).
+Correction retains same-acquisition physical/context guards separately from
+content-key equality, validates them before admission and on hits, and preserves
+metadata-only inter-call reuse. Final reviews/timing reopened;58focused aftertests
+pass, additional paired/serialization/path tests running. This is conformance to
+the existing read-coherence requirement, not a new numerical identity policy.
+
+
+C03/C04 final scoped acceptance passes after the whole-native read-guard fix:
+163 tests passed, one skipped; latest joint-observation test and stubtest pass.
+Independent correctness/security/QA reviews accept the revised implementation.
+All 46 measured budget gates pass, including twelve actual 512-entry eviction
+exercises. Settled SBS hits average 9.83/9.96 ms; large TOPAZ validation averages
+45.86–47.91 ms settled and 331–343 ms cold/evicted. Maximum mean added operation/
+lock times are 358.60/350.35 ms (450-ms budget). Settled digest payload reads are
+zero. Original failures and interrupted superseded measurements are retained.
+This accepts the bounded raster implementation, not package/runtime completion.
+
+Geneva C05/C06 ancestor checkpoint is `31f77bef1`. Implementation and independent
+reviews are active; four initial actual-native regressions pass. Existing mocked
+raster fixtures are being replaced with real native output assertions. Publication
+and typed-drift failure-path review findings remain open. S01/S02 checkpoint
+budget measurements are in progress; no S01/S02 production changes yet.

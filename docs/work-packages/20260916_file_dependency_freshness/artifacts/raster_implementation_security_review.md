@@ -1,12 +1,15 @@
 # C03/C04 implementation security review
 
-**CHANGES REQUIRED: R-I01 remains open pending a reviewed discovery amendment
-and its actual implementation.** This is scoped to the uncommitted implementation
-after checkpoint `ceb715c08`: `all_your_base/raster_freshness.py/.pyi`,
+**PASS for the final reviewed C03/C04 implementation.** R-I01, R-I02 and R-I03
+are closed by the retained actual after-probes below. The original findings,
+superseded approval and failed evidence remain documented. Runtime and
+performance acceptance remain pending.
+This is scoped to the implementation after checkpoints `ceb715c08` and
+`308f9edee`: `all_your_base/raster_freshness.py/.pyi`,
 `nodb/core/landuse.py` and `nodb/mods/baer/sbs_map.py`.
 Reviewer: `freshness_security`. No production/test edits or benchmark loads.
 
-## R-I01 — Medium: automatic auxiliary reopening after preflight
+## R-I01 — Medium, closed: automatic auxiliary reopening after preflight
 
 The original implementation recursively verifies a real GTiff mask before
 opening the root GTiff. Replacing that mask with a local WarpedVRT immediately
@@ -73,6 +76,49 @@ installing counts, stages management values, and copies reused runtime-generated
 summaries. Independent correctness review and actual generated-output tests
 remain responsible for full mutation/noninterference coverage.
 
+## R-I03 — Medium, closed: changed then restored bytes admitted an intermediate result
+
+The root's actual native regression
+`tests/test_raster_freshness.py::test_changed_then_restored_native_input_is_not_admitted`
+changes a GTiff from class 1 to class 3, calls the real native summary, then
+restores the original bytes and mtime before returning. The pre/post content
+proofs agree even though the native result consumed class 3. The expected
+ESTALE assertion fails in `raster_native_aba_initial.log`; this is a confirmed
+ordinary filesystem/native-read case, not a fabricated stat-key collision or
+a write after final validation.
+
+Keep strict generation read guards across native computation and cache-hit
+validation, separately from the content/LRU key. Capture/bind those guards with
+the verified observation rather than assigning later path metadata to an older
+proof. Cover recorded members and companion/selection contexts; C03 needs the
+complete two-raster set. C04 must check before the cached function can admit its
+result, with an outer guard for hits. Completed same-byte metadata operations
+between calls must still preserve numerical cache identity. This restores the
+existing coherence contract; it does not authorize a new scientific identity or
+promise arbitrary concurrent-writer isolation beyond observable generation
+checks. Re-run the actual failing regression and independent read/access cases
+before restoring implementation approval.
+
+The correction uses frozen `RasterDependencyObservation`: content signature is
+its equality/hash identity; `read_guard` is explicitly excluded from both.
+The guard captures file/resolved identities, companion-parent directory versions
+and effective configuration in the **same validated acquisition**. C03 compares
+the complete set across counting. C04 compares before LRU admission and again
+across hit return. Content-only convenience functions remain available but do
+not claim to guard a native materialization interval.
+
+`raster_read_guard_security_probe_revision2.py/.log` independently verifies
+**3 passed**: actual class 1→3 native read→restored class 1 raises ESTALE with
+zero LRU admission; transient companion-directory mutation raises ESTALE; and
+completed link/unlink/chmod operations retain equal content/hash identity with
+one native call and an actual cache hit. The initial independent combined run
+retains **1 failed, 23 passed** in `raster_read_guard_security_after.log`: the
+failed reviewer assertion assumed temporary PAM nodata would change this native
+summary, but actual output stayed equal. Directory drift was correctly rejected.
+That negative scientific result is retained and is not presented as another
+numerical defect. Only that characterization assertion changed in revision2;
+the other 23 authority/access/error cases passed against the guard implementation.
+
 ## Smallest evidenced amendment proposal
 
 `raster_sibling_inventory_security_probe.py/.log` evaluates GDAL's existing
@@ -112,12 +158,35 @@ GTiff filename extensions and actual RPC creation. The checkpoint security
 artifact records scoped amendment PASS and exact document hashes. This does
 not substitute for implementing or independently verifying the final helper.
 
+## Final actual implementation verification
+
+The amended helper supplies restricted siblings itself; the final authority
+probe only schedules replacement and checks actual passed options, without
+injecting its own sibling restriction. `raster_sibling_inventory_security_probe_revision2.py/.log`
+retains **13 passed in 5.23s**. All four actual GTiff/AAIGrid mask/overview
+replacements make zero requests and raise ESTALE. The original initial
+replacement that issued HEAD/GET remains in its separate artifact.
+
+`raster_security_after_implementation.log` records **21 passed in 13.40s** from
+the revision2 implementation and observed-error probes: stationary remote
+refusal, effective thread-local configuration, same-byte alias retargeting,
+real file denial, native success through execute-only directories, zero-request
+replacement rejection and all three unavailable-observation ESTALE cases.
+Source/sidecar symlink support and numerical native options remain unchanged.
+These after-probes close R-I01/R-I02. They predate the distinct R-I03
+reproduction; R-I03 closure is recorded separately above.
+
+Reviewed source SHA-256 values:
+
+```text
+raster_freshness.py 7e218d1e7ec5e4da55914e8bbfd695dd423a2d1ae890afd87baf343761f80b24
+landuse.py 46954d6d325789972af2ad901458c3106f5d88dde1212715fd409baba5012cd8
+sbs_map.py 5212036fa8357987b65c7add0da435a1b4a95f26b510b18b44eba075cd4242b7
+```
+
 ## Remaining gate
 
-Review the final amended observer and rerun the real replacement case with zero
-requests as an acceptance condition. Include alias/ordinary-companion discovery,
-absence/denial, post-failure ESTALE and unchanged native result behavior. Bind the
-final source revision and retain the baseline. QA must measure the complete
+QA must measure the complete
 final implementation with all guards; none of these small probes establishes
 whole-consumer timing, management/WEPP propagation or restarted-stack acceptance.
 C01, other raster publication and PF-R01 dispositions remain separate.

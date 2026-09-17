@@ -1,0 +1,7 @@
+{
+  "native_calls": 1,
+  "cache_hits": 1,
+  "same_identity": true,
+  "same_hash": true,
+  "different_guard": true
+}

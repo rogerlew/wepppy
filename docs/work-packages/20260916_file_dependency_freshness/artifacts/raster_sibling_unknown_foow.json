@@ -8,8 +8,8 @@
     {
       "restricted": false,
       "files": [
-        "/tmp/pytest-of-unknown/pytest-124/test_native_world_file_visibil3/source.foo",
-        "/tmp/pytest-of-unknown/pytest-124/test_native_world_file_visibil3/source.foow"
+        "/tmp/pytest-of-unknown/pytest-134/test_native_world_file_visibil3/source.foo",
+        "/tmp/pytest-of-unknown/pytest-134/test_native_world_file_visibil3/source.foow"
       ],
       "transform": [
         500000.0,
@@ -23,8 +23,8 @@
     {
       "restricted": true,
       "files": [
-        "/tmp/pytest-of-unknown/pytest-124/test_native_world_file_visibil3/source.foo",
-        "/tmp/pytest-of-unknown/pytest-124/test_native_world_file_visibil3/source.foow"
+        "/tmp/pytest-of-unknown/pytest-134/test_native_world_file_visibil3/source.foo",
+        "/tmp/pytest-of-unknown/pytest-134/test_native_world_file_visibil3/source.foow"
       ],
       "transform": [
         500000.0,

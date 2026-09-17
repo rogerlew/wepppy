@@ -1,0 +1,15 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_implementation_correctness_probe.py -q -s
+.post-rejection native SBS summary {'srs_valid': False, 'class_count': 1, 'unique_classes': [3], 'class_counts': [(3, 4)], 'has_non_integer': False, 'has_color_table': False, 'color_table_severities': [], 'color_table_valid': False, 'sanity_status': 1, 'sanity_message': 'Map contains an invalid projection. Try reprojecting to UTM.', 'size_bytes': 246}
+.....real two-OFE / three-year generated p7.man bytes 4251
+.
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+7 passed, 2 warnings in 14.55s

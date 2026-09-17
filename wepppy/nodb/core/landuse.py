@@ -51,6 +51,8 @@ Warning:
 
 # standard library
 import csv
+import errno
+from wepppy.all_your_base.raster_freshness import observe_raster_dependencies
 import hashlib
 import json
 from concurrent.futures import FIRST_COMPLETED, wait
@@ -1959,19 +1961,6 @@ class Landuse(NoDbBase):
         return _COVERAGE_PERCENTAGES
 
     @staticmethod
-    def _mofe_pair_count_file_signature(path: str) -> Tuple[str, bool, Optional[int], Optional[int]]:
-        path_s = str(path)
-        if not _exists(path_s):
-            return path_s, False, None, None
-
-        try:
-            stat = os.stat(path_s)
-        except OSError:
-            return path_s, False, None, None
-
-        return path_s, True, int(stat.st_size), int(stat.st_mtime_ns)
-
-    @staticmethod
     def _mofe_structure_signature(domlc_mofe_d: Mapping[str, Mapping[str, Any]]) -> str:
         digest = hashlib.sha256()
         for topaz_id in sorted(domlc_mofe_d.keys(), key=lambda value: str(value)):
@@ -1991,16 +1980,11 @@ class Landuse(NoDbBase):
         subwta_fn: str,
         mofe_map_fn: str,
         domlc_mofe_d: Mapping[str, Mapping[str, Any]],
-    ) -> Tuple[
-        Tuple[str, bool, Optional[int], Optional[int]],
-        Tuple[str, bool, Optional[int], Optional[int]],
-        str,
-    ]:
-        return (
-            self._mofe_pair_count_file_signature(subwta_fn),
-            self._mofe_pair_count_file_signature(mofe_map_fn),
-            self._mofe_structure_signature(domlc_mofe_d),
-        )
+    ) -> Optional[tuple]:
+        rasters = observe_raster_dependencies((subwta_fn, mofe_map_fn))
+        if rasters is None:
+            return None
+        return rasters, self._mofe_structure_signature(domlc_mofe_d)
 
     def _invalidate_mofe_pair_count_cache(self, *, reason: str) -> None:
         had_cache = getattr(self, '_mofe_pair_count_cache', None) is not None
@@ -2042,7 +2026,7 @@ class Landuse(NoDbBase):
                     cached = existing_managements.get(str(dom_key))
                     if cached is None:
                         raise
-                    return cached
+                    return deepcopy(cached)
 
                 if effective_map is not None:
                     _relabel_summary_for_stale_custom_mapping_description(
@@ -2090,15 +2074,12 @@ class Landuse(NoDbBase):
                 )
                 cached_signature = getattr(self, '_mofe_pair_count_cache_signature', None)
                 pair_counts = getattr(self, '_mofe_pair_count_cache', None)
-                if pair_counts is not None and cached_signature == pair_count_signature:
+                if (pair_count_signature is not None and pair_counts is not None
+                        and cached_signature == pair_count_signature):
                     self.logger.debug(
                         'Reusing MOFE pair-count cache for unchanged same-cycle inputs'
                     )
                 else:
-                    if pair_counts is not None:
-                        self._invalidate_mofe_pair_count_cache(
-                            reason='pair_count_input_signature_changed'
-                        )
                     pair_counts = count_intersecting_raster_key_pairs(
                         key_fn=watershed.subwta,
                         key2_fn=watershed.mofe_map,
@@ -2106,8 +2087,15 @@ class Landuse(NoDbBase):
                         ignore_keys=None,
                         ignore_keys2=None,
                     )
-                    self._mofe_pair_count_cache = pair_counts
-                    self._mofe_pair_count_cache_signature = pair_count_signature
+                if pair_count_signature is not None:
+                    current_signature = self._build_mofe_pair_count_signature(
+                        subwta_fn=watershed.subwta,
+                        mofe_map_fn=watershed.mofe_map,
+                        domlc_mofe_d=self.domlc_mofe_d,
+                    )
+                    if (current_signature != pair_count_signature
+                            or current_signature[0].read_guard != pair_count_signature[0].read_guard):
+                        raise OSError(errno.ESTALE, "MOFE dependencies changed during management build")
                 total_area = 0.0
                 for topaz_id in self.domlc_mofe_d:
                     topaz_pair_counts = pair_counts.get(str(topaz_id), {})
@@ -2127,6 +2115,10 @@ class Landuse(NoDbBase):
                 coverage = 100.0 * managements[k].area / total_area
                 managements[k].pct_coverage = coverage
 
+            # Install counts only after validation and successful area calculation.
+            if self.multi_ofe and isinstance(self.domlc_mofe_d, dict) and self.domlc_mofe_d:
+                self._mofe_pair_count_cache = pair_counts if pair_count_signature is not None else None
+                self._mofe_pair_count_cache_signature = pair_count_signature
             # store the managements dict
             self.managements = managements
 

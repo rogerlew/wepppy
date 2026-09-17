@@ -1,0 +1,17 @@
+{
+  "scope": "Corrected C03/C04 actual consumer performance only; full package/runtime gates remain separate",
+  "evidence": "raster_implementation_performance_guarded.json",
+  "evidence_sha256": "50dd5ef5af21ca10922b7e607a5dd7096baf375380175f8f57ace35718875e2d",
+  "passed": true,
+  "passed_gate_count": 46,
+  "inputs_unchanged": true,
+  "module_files_unchanged": true,
+  "module_hashes": {
+    "/workdir/wepppy/wepppy/all_your_base/file_digest.py": "d090094983c4f7575801969a1339ae3306745f6ff93aa100c037d83dd7fb9ee7",
+    "/workdir/wepppy/wepppy/all_your_base/raster_freshness.py": "b5e1602a6596cfb37a21d72ecc2b3839da92fac3163fa6a8e2fb121bde6cc738",
+    "/workdir/wepppy/wepppy/nodb/core/landuse.py": "46954d6d325789972af2ad901458c3106f5d88dde1212715fd409baba5012cd8",
+    "/workdir/wepppy/wepppy/nodb/mods/baer/sbs_map.py": "5212036fa8357987b65c7add0da435a1b4a95f26b510b18b44eba075cd4242b7"
+  },
+  "pressure_runs": 12,
+  "superseded_evidence": "raster_implementation_performance.json (interrupted; superseded by same-acquisition read guards)"
+}

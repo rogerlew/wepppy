@@ -2,6 +2,6 @@
   "case": "source_removed",
   "error": "OSError",
   "errno": 116,
-  "message": "[Errno 116] Raster dependency became unavailable: '/tmp/pytest-of-unknown/pytest-123/test_observed_members_become_u0/source/source.tif'",
+  "message": "[Errno 116] Raster companion directory changed: '/tmp/pytest-of-unknown/pytest-136/test_observed_members_become_u0/source'",
   "source_change_errno": true
 }

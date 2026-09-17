@@ -1,0 +1,90 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_read_guard_security_probe.py docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_implementation_security_probe_revision2.py docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_observation_error_security_probe_revision2.py -q -s
+READ_GUARD {"case": "bytes_restored", "errno": 116, "same_content_identity": true, "different_guard": true, "original_native": {"srs_valid": true, "class_count": 1, "unique_classes": [1], "class_counts": [[1, 16]], "has_non_integer": false, "has_color_table": false, "color_table_severities": [], "color_table_valid": false, "sanity_status": 0, "sanity_message": "Map has valid classes", "size_bytes": 376}, "intermediate_native": [{"srs_valid": true, "class_count": 1, "unique_classes": [3], "class_counts": [[3, 16]], "has_non_integer": false, "has_color_table": false, "color_table_severities": [], "color_table_valid": false, "sanity_status": 0, "sanity_message": "Map has valid classes", "size_bytes": 376}], "cache_entries": 0}
+.READ_GUARD {"case": "temporary_pam", "errno": 116, "same_content_identity": true, "different_guard": true, "original_native": {"srs_valid": true, "class_count": 1, "unique_classes": [1], "class_counts": [[1, 16]], "has_non_integer": false, "has_color_table": false, "color_table_severities": [], "color_table_valid": false, "sanity_status": 0, "sanity_message": "Map has valid classes", "size_bytes": 376}, "intermediate_native": [{"srs_valid": true, "class_count": 1, "unique_classes": [1], "class_counts": [[1, 16]], "has_non_integer": false, "has_color_table": false, "color_table_severities": [], "color_table_valid": false, "sanity_status": 0, "sanity_message": "Map has valid classes", "size_bytes": 376}], "cache_entries": 0}
+FREAD_GUARD {"case": "completed_metadata", "native_calls": 1, "cache_hits": 1, "same_identity": true, "same_hash": true, "different_guard": true}
+.RASTER_SECURITY {"case": "vrt", "gdal": "3100300", "uid": 1000, "unverified": true, "requests": []}
+.RASTER_SECURITY {"case": "mask", "gdal": "3100300", "uid": 1000, "unverified": true, "requests": []}
+.RASTER_SECURITY {"case": "overview", "gdal": "3100300", "uid": 1000, "unverified": true, "requests": []}
+.RASTER_SECURITY {"case": "internal", "gdal": "3100300", "uid": 1000, "unverified": true, "requests": []}
+.RASTER_SECURITY {"case": "alias_mask", "gdal": "3100300", "uid": 1000, "unverified": true, "requests": []}
+.RASTER_SECURITY {"case": "stem_uppercase", "gdal": "3100300", "uid": 1000, "unverified": true, "requests": []}
+.RASTER_SECURITY {"case": "aaigrid_mask", "gdal": "3100300", "uid": 1000, "unverified": true, "requests": []}
+...........RASTER_SECURITY {"case": "preflight_replacement", "gdal": "3100300", "uid": 1000, "requests": [], "unverified": true, "error": {"type": "OSError", "errno": 116, "message": "[Errno 116] Raster companion directory changed: '/tmp/pytest-of-unknown/pytest-136/test_auxiliary_replacement_bet0'"}}
+.OBSERVATION_ERROR {"case": "source_removed", "error": "OSError", "errno": 116, "message": "[Errno 116] Raster companion directory changed: '/tmp/pytest-of-unknown/pytest-136/test_observed_members_become_u0/source'", "source_change_errno": true}
+.OBSERVATION_ERROR {"case": "parent_renamed", "error": "OSError", "errno": 116, "message": "[Errno 116] Raster companion directory became unavailable: '/tmp/pytest-of-unknown/pytest-136/test_observed_members_become_u1/source'", "source_change_errno": true}
+.OBSERVATION_ERROR {"case": "parent_denied", "error": "OSError", "errno": 116, "message": "[Errno 116] Raster companion directory changed: '/tmp/pytest-of-unknown/pytest-136/test_observed_members_become_u2/source'", "source_change_errno": true}
+.
+=================================== FAILURES ===================================
+______ test_intermediate_native_generation_is_not_admitted[temporary_pam] ______
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-136/test_intermediate_native_gener1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x784bcc1ae690>
+kind = 'temporary_pam'
+
+    @pytest.mark.parametrize("kind", ["bytes_restored", "temporary_pam"])
+    def test_intermediate_native_generation_is_not_admitted(tmp_path, monkeypatch, kind):
+        source = tmp_path / "source.tif"
+        raster(source)
+        original_bytes = source.read_bytes()
+        original_stat = source.stat()
+        before = freshness.observe_raster_dependencies((source,))
+        native = sbs_map._summarize_sbs_raster_rust
+        expected = native(str(source))
+        observed = []
+        sbs_map._summarize_sbs_raster_cached.cache_clear()
+    
+        def change_read_restore(path):
+            pam = Path(str(source)+".aux.xml")
+            try:
+                if kind == "bytes_restored":
+                    dataset = gdal.Open(str(source), gdal.GA_Update)
+                    dataset.GetRasterBand(1).Fill(3)
+                    dataset = None
+                else:
+                    pam.write_text('<PAMDataset><PAMRasterBand band="1"><NoDataValue>1</NoDataValue></PAMRasterBand></PAMDataset>')
+                result = native(path)
+                observed.append(result)
+                return result
+            finally:
+                if kind == "bytes_restored":
+                    source.write_bytes(original_bytes)
+                    os.utime(source, ns=(original_stat.st_atime_ns, original_stat.st_mtime_ns))
+                else:
+                    pam.unlink()
+    
+        monkeypatch.setattr(sbs_map, "_summarize_sbs_raster_rust", change_read_restore)
+        with pytest.raises(OSError) as caught:
+            sbs_map._summarize_sbs_raster(str(source))
+        after = freshness.observe_raster_dependencies((source,))
+        retain(kind, {"errno": caught.value.errno, "same_content_identity": before == after,
+                      "different_guard": before.read_guard != after.read_guard,
+                      "original_native": expected, "intermediate_native": observed,
+                      "cache_entries": sbs_map._summarize_sbs_raster_cached.cache_info().currsize})
+        assert caught.value.errno == errno.ESTALE
+        assert before == after
+        assert before.read_guard != after.read_guard
+>       assert observed and observed[0] != expected
+E       AssertionError: assert ([{'class_count': 1, 'class_counts': [(1, 16)], 'color_table_severities': [], 'color_table_valid': False, ...}] and {'class_count': 1, 'class_counts': [(1, 16)], 'color_table_severities': [], 'color_table_valid': False, ...} != {'class_count': 1, 'class_counts': [(1, 16)], 'color_table_severities': [], 'color_table_valid': False, ...})
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_read_guard_security_probe.py:62: AssertionError
+=============================== warnings summary ===============================
+docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_implementation_security_probe.py:15
+  /workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_implementation_security_probe.py:15: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.integration
+
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_implementation_security_probe_revision2.py:15
+  /workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_implementation_security_probe_revision2.py:15: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.integration
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_read_guard_security_probe.py::test_intermediate_native_generation_is_not_admitted[temporary_pam]
+1 failed, 23 passed, 4 warnings in 13.96s

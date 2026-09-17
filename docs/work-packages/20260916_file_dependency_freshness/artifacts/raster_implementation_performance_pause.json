@@ -1,0 +1,6 @@
+{
+  "pid": 112218,
+  "wait_channel": "hrtimer_nanosleep",
+  "reason": "Paused during explicit admission sleep outside consumer/lock; parent investigating cross-materialization guard",
+  "epoch": 1789624542.4991286
+}

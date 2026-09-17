@@ -43,9 +43,11 @@ def test_failed_summary_is_not_cached(monkeypatch):
             raise RuntimeError('native failure')
         return {'class_count': 1}
     monkeypatch.setattr(module, '_rust_sbs_map', SimpleNamespace(summarize_sbs_raster=summarize))
+    proof = module.RasterDependencyObservation(('proof',), ())
+    monkeypatch.setattr(module, 'observe_raster_dependencies', lambda paths: proof)
     with pytest.raises(RuntimeError):
-        module._summarize_sbs_raster_cached('unused', 0, 0)
-    assert module._summarize_sbs_raster_cached('unused', 0, 0) == {'class_count': 1}
+        module._summarize_sbs_raster_cached('unused', proof)
+    assert module._summarize_sbs_raster_cached('unused', proof) == {'class_count': 1}
     assert len(calls) == 2
     module._summarize_sbs_raster_cached.cache_clear()
 

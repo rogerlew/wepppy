@@ -11,6 +11,7 @@
 from __future__ import annotations
 
 import os
+import errno
 from os.path import exists as _exists
 from os.path import join as _join
 from os.path import split as _split
@@ -29,6 +30,7 @@ from numpy.typing import NDArray
 
 from wepppy.all_your_base import isint
 from wepppy.all_your_base.geo import read_raster
+from wepppy.all_your_base.raster_freshness import observe_raster_dependencies, RasterDependencyObservation
 
 from wepppy.landcover import LandcoverMap
 
@@ -179,14 +181,6 @@ def _export_sbs_4class_rust(
     )
 
 
-def _summary_cache_key(path: str) -> tuple[str, int, int]:
-    try:
-        stat = os.stat(path)
-    except OSError:
-        return path, 0, 0
-    return path, stat.st_mtime_ns, stat.st_size
-
-
 def _get_sbs_4class_export_colors(export_palette: ExportPaletteMode) -> dict[int, tuple[int, int, int, int]]:
     colors = _SBS_4CLASS_EXPORT_COLORS_BY_MODE.get(export_palette)
     if colors is None:
@@ -229,13 +223,23 @@ def _normalize_count_value(value: int | float) -> int | float:
 
 
 @lru_cache(maxsize=8)
-def _summarize_sbs_raster_cached(path: str, mtime_ns: int, size: int) -> Optional[dict]:
-    return _summarize_sbs_raster_rust(path)
+def _summarize_sbs_raster_cached(path: str, signature: RasterDependencyObservation) -> Optional[dict]:
+    summary = _summarize_sbs_raster_rust(path)
+    after = observe_raster_dependencies((path,))
+    if after != signature or after.read_guard != signature.read_guard:
+        raise OSError(errno.ESTALE, "SBS dependencies changed during summary", path)
+    return summary
 
 
 def _summarize_sbs_raster(path: str) -> Optional[dict]:
-    path_key = _summary_cache_key(path)
-    return _summarize_sbs_raster_cached(*path_key)
+    signature = observe_raster_dependencies((path,))
+    if signature is None:
+        return _summarize_sbs_raster_rust(path)
+    summary = _summarize_sbs_raster_cached(path, signature)
+    after = observe_raster_dependencies((path,))
+    if after != signature or after.read_guard != signature.read_guard:
+        raise OSError(errno.ESTALE, "SBS dependencies changed during reuse", path)
+    return summary
 
 
 def _counts_from_summary(summary: Optional[Mapping[str, object]]) -> Optional[ColorCounts]:

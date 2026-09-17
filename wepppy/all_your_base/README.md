@@ -253,6 +253,20 @@ The runtime environment should provide:
 
 These requirements are typically satisfied by the Docker development and production environments.
 
+## Raster dependency reuse
+
+`raster_freshness.raster_dependency_signature(s)` observes bounded local
+GTiff/AAIGrid dependencies for SBS summaries and MOFE counts. It returns an
+immutable content proof or `None` with a debug diagnostic for unverified layouts.
+Materializing consumers use`observe_raster_dependencies` to retain its separate
+whole-operation read guard; equality/hash ignore that guard, but callers compare
+it explicitly before accepting a result. Hash equality alone cannot detect
+changed-then-restored bytes during computation. Callers run the unchanged native
+operation uncached for unverified layouts. It is not an
+outside-lock publication validator for arbitrary GDAL formats. Source changes
+within an observation raise ESTALE; each consumer also checks after native work
+or reuse. See [the coverage contract](../../docs/schemas/raster-dependency-freshness-contract.md).
+
 ## Further Reading
 
 - [AGENTS.md](../../AGENTS.md) - Development guidelines and testing patterns

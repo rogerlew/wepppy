@@ -1,0 +1,4984 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20260916_file_dependency_freshness/artifacts/benchmark_raster_implementation_guarded.py
+GrizzlyCreek_SBS_final.tif initial_admission [actual]: 58.046 ms; hash bytes=1797588
+GrizzlyCreek_SBS_final.tif settled_hit [actual]: 9.829 ms; hash bytes=0
+GrizzlyCreek_SBS_final.tif native_direct [actual]: 48.225 ms; hash bytes=0
+GrizzlyCreek_SBS_final.tif settled_miss [actual]: 50.424 ms; hash bytes=0
+GrizzlyCreek_SBS_final.tif cold_hit [actual]: 10.346 ms; hash bytes=1198392
+GrizzlyCreek_SBS_final.tif cold_miss [actual]: 56.456 ms; hash bytes=1797588
+GrizzlyCreek_SBS_final.tif evicted_hit [actual]: 12.424 ms; hash bytes=1198392
+GrizzlyCreek_SBS_final.tif native_direct [actual]: 78.287 ms; hash bytes=0
+GrizzlyCreek_SBS_final.tif settled_miss [actual]: 57.489 ms; hash bytes=0
+GrizzlyCreek_SBS_final.tif cold_hit [actual]: 10.950 ms; hash bytes=1198392
+GrizzlyCreek_SBS_final.tif cold_miss [actual]: 60.005 ms; hash bytes=1797588
+GrizzlyCreek_SBS_final.tif evicted_hit [actual]: 11.981 ms; hash bytes=1198392
+GrizzlyCreek_SBS_final.tif native_direct [actual]: 50.720 ms; hash bytes=0
+GrizzlyCreek_SBS_final.tif settled_miss [actual]: 67.979 ms; hash bytes=0
+GrizzlyCreek_SBS_final.tif cold_hit [actual]: 11.102 ms; hash bytes=1198392
+GrizzlyCreek_SBS_final.tif cold_miss [actual]: 59.233 ms; hash bytes=1797588
+GrizzlyCreek_SBS_final.tif evicted_hit [actual]: 12.349 ms; hash bytes=1198392
+baer.cropped.tif initial_admission [actual]: 478.781 ms; hash bytes=1274892
+baer.cropped.tif settled_hit [actual]: 9.955 ms; hash bytes=0
+baer.cropped.tif native_direct [actual]: 499.544 ms; hash bytes=0
+baer.cropped.tif settled_miss [actual]: 494.074 ms; hash bytes=0
+baer.cropped.tif cold_hit [actual]: 9.710 ms; hash bytes=849928
+baer.cropped.tif cold_miss [actual]: 481.498 ms; hash bytes=1274892
+baer.cropped.tif evicted_hit [actual]: 10.609 ms; hash bytes=849928
+baer.cropped.tif native_direct [actual]: 508.762 ms; hash bytes=0
+baer.cropped.tif settled_miss [actual]: 492.365 ms; hash bytes=0
+baer.cropped.tif cold_hit [actual]: 8.864 ms; hash bytes=849928
+baer.cropped.tif cold_miss [actual]: 502.936 ms; hash bytes=1274892
+baer.cropped.tif evicted_hit [actual]: 9.977 ms; hash bytes=849928
+baer.cropped.tif native_direct [actual]: 481.749 ms; hash bytes=0
+baer.cropped.tif settled_miss [actual]: 465.426 ms; hash bytes=0
+baer.cropped.tif cold_hit [actual]: 9.749 ms; hash bytes=849928
+baer.cropped.tif cold_miss [actual]: 479.805 ms; hash bytes=1274892
+baer.cropped.tif evicted_hit [actual]: 10.432 ms; hash bytes=849928
+2026-09-17 06:08:24 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program legacy_admission [actual]: 152.975 ms; hash bytes=814096
+2026-09-17 06:08:25 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:25 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:26 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:26 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_hit [ancestor_control]: 90.301 ms; hash bytes=0
+2026-09-17 06:08:26 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:26 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_hit [actual]: 103.105 ms; hash bytes=0
+2026-09-17 06:08:27 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:27 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_hit [actual]: 108.376 ms; hash bytes=0
+2026-09-17 06:08:27 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:27 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_hit [ancestor_control]: 94.270 ms; hash bytes=0
+2026-09-17 06:08:27 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:27 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_hit [ancestor_control]: 92.568 ms; hash bytes=0
+2026-09-17 06:08:27 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:27 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_hit [actual]: 100.340 ms; hash bytes=0
+2026-09-17 06:08:27 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_miss [ancestor_control]: 133.153 ms; hash bytes=0
+2026-09-17 06:08:28 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_miss [actual]: 150.931 ms; hash bytes=0
+2026-09-17 06:08:28 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_miss [actual]: 143.829 ms; hash bytes=0
+2026-09-17 06:08:28 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_miss [ancestor_control]: 133.001 ms; hash bytes=0
+2026-09-17 06:08:28 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_miss [ancestor_control]: 127.848 ms; hash bytes=0
+2026-09-17 06:08:28 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program settled_miss [actual]: 142.976 ms; hash bytes=0
+2026-09-17 06:08:28 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:29 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program cold_hit [ancestor_control]: 94.642 ms; hash bytes=0
+2026-09-17 06:08:29 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:29 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program cold_hit [actual]: 112.438 ms; hash bytes=814096
+2026-09-17 06:08:29 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:29 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:30 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:30 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program cold_hit [actual]: 116.994 ms; hash bytes=814096
+2026-09-17 06:08:30 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:31 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:32 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:32 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program cold_hit [ancestor_control]: 93.165 ms; hash bytes=0
+2026-09-17 06:08:32 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:32 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program cold_hit [ancestor_control]: 90.970 ms; hash bytes=0
+2026-09-17 06:08:32 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:32 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program cold_hit [actual]: 109.280 ms; hash bytes=814096
+2026-09-17 06:08:33 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:33 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:34 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program cold_miss [ancestor_control]: 146.473 ms; hash bytes=0
+2026-09-17 06:08:34 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program cold_miss [actual]: 148.365 ms; hash bytes=814096
+2026-09-17 06:08:34 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:34 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:36 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program cold_miss [actual]: 167.354 ms; hash bytes=814096
+2026-09-17 06:08:36 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:36 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:37 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program cold_miss [ancestor_control]: 153.425 ms; hash bytes=0
+2026-09-17 06:08:37 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program cold_miss [ancestor_control]: 158.668 ms; hash bytes=0
+2026-09-17 06:08:38 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program cold_miss [actual]: 151.537 ms; hash bytes=814096
+2026-09-17 06:08:38 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:38 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:39 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:39 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program evicted_hit [ancestor_control]: 95.848 ms; hash bytes=0
+2026-09-17 06:08:39 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:40 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program evicted_hit [actual]: 112.643 ms; hash bytes=814096
+2026-09-17 06:08:41 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:41 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:43 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:43 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program evicted_hit [actual]: 117.907 ms; hash bytes=814096
+2026-09-17 06:08:44 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:44 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:46 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:46 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program evicted_hit [ancestor_control]: 90.280 ms; hash bytes=0
+2026-09-17 06:08:46 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:46 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program evicted_hit [ancestor_control]: 98.782 ms; hash bytes=0
+2026-09-17 06:08:46 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:46 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+curable-program evicted_hit [actual]: 116.563 ms; hash bytes=814096
+2026-09-17 06:08:48 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:48 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:49 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:49 [INFO] wepppy.run.curable-program-qa-3be41810.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:51 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit legacy_admission [actual]: 1985.943 ms; hash bytes=82859480
+2026-09-17 06:08:53 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:54 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:57 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:08:58 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_hit [ancestor_control]: 983.941 ms; hash bytes=0
+2026-09-17 06:08:59 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:09:01 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_hit [actual]: 1027.710 ms; hash bytes=0
+2026-09-17 06:09:02 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:09:03 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_hit [actual]: 1000.985 ms; hash bytes=0
+2026-09-17 06:09:04 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:09:06 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_hit [ancestor_control]: 1002.566 ms; hash bytes=0
+2026-09-17 06:09:07 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:09:08 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_hit [ancestor_control]: 958.740 ms; hash bytes=0
+2026-09-17 06:09:09 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:09:11 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_hit [actual]: 1003.669 ms; hash bytes=0
+2026-09-17 06:09:12 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_miss [ancestor_control]: 1723.088 ms; hash bytes=0
+2026-09-17 06:09:13 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_miss [actual]: 1755.477 ms; hash bytes=0
+2026-09-17 06:09:15 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_miss [actual]: 1753.373 ms; hash bytes=0
+2026-09-17 06:09:17 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_miss [ancestor_control]: 1689.475 ms; hash bytes=0
+2026-09-17 06:09:19 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_miss [ancestor_control]: 1703.659 ms; hash bytes=0
+2026-09-17 06:09:20 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit settled_miss [actual]: 1738.046 ms; hash bytes=0
+2026-09-17 06:09:22 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:09:24 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit cold_hit [ancestor_control]: 994.870 ms; hash bytes=0
+2026-09-17 06:09:25 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:09:27 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit cold_hit [actual]: 1314.780 ms; hash bytes=82859480
+2026-09-17 06:09:28 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:09:29 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:09:31 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:09:32 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit cold_hit [actual]: 1319.767 ms; hash bytes=82859480
+2026-09-17 06:09:34 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:09:35 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:09:37 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:09:39 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit cold_hit [ancestor_control]: 977.647 ms; hash bytes=0
+2026-09-17 06:09:40 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:09:41 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit cold_hit [ancestor_control]: 981.775 ms; hash bytes=0
+2026-09-17 06:09:42 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:09:43 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit cold_hit [actual]: 1297.022 ms; hash bytes=82859480
+2026-09-17 06:09:45 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:09:46 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:09:48 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit cold_miss [ancestor_control]: 1715.437 ms; hash bytes=0
+2026-09-17 06:09:50 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit cold_miss [actual]: 1986.316 ms; hash bytes=82859480
+2026-09-17 06:09:52 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:09:53 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:09:55 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit cold_miss [actual]: 1980.156 ms; hash bytes=82859480
+2026-09-17 06:09:57 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:09:58 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:10:00 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit cold_miss [ancestor_control]: 1722.273 ms; hash bytes=0
+2026-09-17 06:10:02 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit cold_miss [ancestor_control]: 1733.992 ms; hash bytes=0
+2026-09-17 06:10:04 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit cold_miss [actual]: 2094.159 ms; hash bytes=82859480
+2026-09-17 06:10:06 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:10:07 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:10:09 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:10:11 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit evicted_hit [ancestor_control]: 982.936 ms; hash bytes=0
+2026-09-17 06:10:12 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:10:14 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit evicted_hit [actual]: 1294.115 ms; hash bytes=82859480
+2026-09-17 06:10:17 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:10:18 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:10:21 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:10:22 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit evicted_hit [actual]: 1345.843 ms; hash bytes=82859480
+2026-09-17 06:10:24 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:10:25 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:10:27 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:10:29 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit evicted_hit [ancestor_control]: 945.480 ms; hash bytes=0
+2026-09-17 06:10:30 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:10:31 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit evicted_hit [ancestor_control]: 961.492 ms; hash bytes=0
+2026-09-17 06:10:32 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:10:34 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+beneficiary-forfeit evicted_hit [actual]: 1325.750 ms; hash bytes=82859480
+2026-09-17 06:10:37 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:10:38 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:10:40 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+2026-09-17 06:10:41 [INFO] wepppy.run.beneficiary-forfeit-qa-98ecc6c1.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+{
+  "scope": "Final guarded C03/C04 acceptance, transparent instrumentation and old-method controls.\n\nNo composed observer is inserted. Actual new consumers call their production\nhelper. Original C03 methods from ceb715c08 are used only in labeled same-owner\ncontrols. Every owner/native operation uses retained uniquely named QA copies.\n",
+  "root": "/wc1/batch/qa-raster-implementation-0648a5eb4663",
+  "original_fixture_manifest": "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/benchmark-manifest.json",
+  "uid": 1000,
+  "gid": 993,
+  "gdal_version": "3100300",
+  "cache_note": "Retained filesystem-warm NFS copies; helper cold is not cold storage",
+  "baseline_revision": "ceb715c08",
+  "module_hashes": {
+    "/workdir/wepppy/wepppy/all_your_base/file_digest.py": "d090094983c4f7575801969a1339ae3306745f6ff93aa100c037d83dd7fb9ee7",
+    "/workdir/wepppy/wepppy/all_your_base/raster_freshness.py": "b5e1602a6596cfb37a21d72ecc2b3839da92fac3163fa6a8e2fb121bde6cc738",
+    "/workdir/wepppy/wepppy/nodb/core/landuse.py": "46954d6d325789972af2ad901458c3106f5d88dde1212715fd409baba5012cd8",
+    "/workdir/wepppy/wepppy/nodb/mods/baer/sbs_map.py": "5212036fa8357987b65c7add0da435a1b4a95f26b510b18b44eba075cd4242b7"
+  },
+  "inputs": {
+    "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-GrizzlyCreek_SBS_final/GrizzlyCreek_SBS_final.tif": {
+      "version": [
+        64,
+        1182162,
+        599196,
+        1789604873876050046,
+        1789622094978143351
+      ],
+      "mode": "0o644",
+      "sha256": "7d1ed360d8e639050cf3879293efcdbee216bd9a4faac4e03399442416d97405"
+    },
+    "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-baer.cropped/baer.cropped.tif": {
+      "version": [
+        64,
+        1202828,
+        424964,
+        1789605319903862950,
+        1789622096718153817
+      ],
+      "mode": "0o644",
+      "sha256": "7a08b85e992fe5ae9f2fba3502f23b0400ddd91f4d61cb71bdd2db11ea3524f4"
+    },
+    "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/dem/wbt/subwta.tif": {
+      "version": [
+        64,
+        1189226,
+        325098,
+        1782858699441720000,
+        1789622101330181557
+      ],
+      "mode": "0o644",
+      "sha256": "4aa0eecb4562ac8b073f5c477a3a7d8e3b2fae9574f3ef2e0feb8ce6e9134427"
+    },
+    "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/watershed/mofe.tif": {
+      "version": [
+        64,
+        1201938,
+        81950,
+        1782858714820819000,
+        1789622101282181269
+      ],
+      "mode": "0o644",
+      "sha256": "e67436d7efaa824f635c34b9204c6fe49ceaffe28e7608346f3aa6a8762c1172"
+    },
+    "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.ARC": {
+      "version": [
+        64,
+        1192913,
+        35502567,
+        1784652198640021231,
+        1789622110184234810
+      ],
+      "mode": "0o644",
+      "sha256": "f415e6bcb791b8016d8c367d2f8dbb15deabc0617304c64c967e5c4f027d7ec1"
+    },
+    "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.PRJ": {
+      "version": [
+        64,
+        1201950,
+        403,
+        1784652198433019983,
+        1789622110207234949
+      ],
+      "mode": "0o644",
+      "sha256": "ab78490474b2fb27a27ad2566802a7f49338602419540dd07cbcf22af5e50b6f"
+    },
+    "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/watershed/mofe.tif": {
+      "version": [
+        64,
+        1202161,
+        5926770,
+        1784652310868700578,
+        1789622109791232447
+      ],
+      "mode": "0o644",
+      "sha256": "631a7ec1d802421bf349967ce294e0c3bc1d804cd79b8caa64161493c6f909d4"
+    }
+  },
+  "cases": {
+    "GrizzlyCreek_SBS_final.tif": {
+      "name": "GrizzlyCreek_SBS_final.tif",
+      "source": "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-GrizzlyCreek_SBS_final/GrizzlyCreek_SBS_final.tif",
+      "measurements": [
+        {
+          "phase": "initial_admission",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.05804592394270003
+          ],
+          "mean_seconds": 0.05804592394270003,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-GrizzlyCreek_SBS_final/GrizzlyCreek_SBS_final.tif": 1797588
+          },
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.041337264934554696
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.006333369994536042,
+              "verified": true
+            },
+            {
+              "seconds": 0.005394121864810586,
+              "verified": true
+            },
+            {
+              "seconds": 0.004956020042300224,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "settled_hit",
+          "mode": "actual",
+          "repeats": 30,
+          "seconds": [
+            0.012285834178328514,
+            0.011422164971008897,
+            0.0129170638974756,
+            0.01281287707388401,
+            0.012669509975239635,
+            0.01225396222434938,
+            0.011659976793453097,
+            0.01157662901096046,
+            0.010903929127380252,
+            0.010945219080895185,
+            0.011264286935329437,
+            0.010034692008048296,
+            0.00986363715492189,
+            0.009743083966895938,
+            0.00959237921051681,
+            0.009063670178875327,
+            0.008864806964993477,
+            0.008939544204622507,
+            0.009023878024891019,
+            0.008455996867269278,
+            0.008365596178919077,
+            0.008471314096823335,
+            0.008274249034002423,
+            0.008017082000151277,
+            0.007996410829946399,
+            0.008054450852796435,
+            0.00796764506958425,
+            0.007913239998742938,
+            0.007890115026384592,
+            0.007611881010234356
+          ],
+          "mean_seconds": 0.009828504198230803,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.006684525171294808,
+              "verified": true
+            },
+            {
+              "seconds": 0.00556816509924829,
+              "verified": true
+            },
+            {
+              "seconds": 0.005156924016773701,
+              "verified": true
+            },
+            {
+              "seconds": 0.006244088988751173,
+              "verified": true
+            },
+            {
+              "seconds": 0.006440384080633521,
+              "verified": true
+            },
+            {
+              "seconds": 0.0064462400041520596,
+              "verified": true
+            },
+            {
+              "seconds": 0.006396343000233173,
+              "verified": true
+            },
+            {
+              "seconds": 0.006386257940903306,
+              "verified": true
+            },
+            {
+              "seconds": 0.006353389006108046,
+              "verified": true
+            },
+            {
+              "seconds": 0.006284695118665695,
+              "verified": true
+            },
+            {
+              "seconds": 0.006238725036382675,
+              "verified": true
+            },
+            {
+              "seconds": 0.005986823933199048,
+              "verified": true
+            },
+            {
+              "seconds": 0.00578912696801126,
+              "verified": true
+            },
+            {
+              "seconds": 0.0058447138871997595,
+              "verified": true
+            },
+            {
+              "seconds": 0.005879573058336973,
+              "verified": true
+            },
+            {
+              "seconds": 0.005669937003403902,
+              "verified": true
+            },
+            {
+              "seconds": 0.005619812989607453,
+              "verified": true
+            },
+            {
+              "seconds": 0.005258606979623437,
+              "verified": true
+            },
+            {
+              "seconds": 0.005379160866141319,
+              "verified": true
+            },
+            {
+              "seconds": 0.005541590042412281,
+              "verified": true
+            },
+            {
+              "seconds": 0.005081865005195141,
+              "verified": true
+            },
+            {
+              "seconds": 0.006159160984680057,
+              "verified": true
+            },
+            {
+              "seconds": 0.005003563826903701,
+              "verified": true
+            },
+            {
+              "seconds": 0.0050082760863006115,
+              "verified": true
+            },
+            {
+              "seconds": 0.004942371975630522,
+              "verified": true
+            },
+            {
+              "seconds": 0.0048965709283947945,
+              "verified": true
+            },
+            {
+              "seconds": 0.00482502905651927,
+              "verified": true
+            },
+            {
+              "seconds": 0.0048953702207654715,
+              "verified": true
+            },
+            {
+              "seconds": 0.00494480412453413,
+              "verified": true
+            },
+            {
+              "seconds": 0.0046256110072135925,
+              "verified": true
+            },
+            {
+              "seconds": 0.00452342489734292,
+              "verified": true
+            },
+            {
+              "seconds": 0.004519576905295253,
+              "verified": true
+            },
+            {
+              "seconds": 0.0044375029392540455,
+              "verified": true
+            },
+            {
+              "seconds": 0.004404965089634061,
+              "verified": true
+            },
+            {
+              "seconds": 0.004476645961403847,
+              "verified": true
+            },
+            {
+              "seconds": 0.004443608224391937,
+              "verified": true
+            },
+            {
+              "seconds": 0.004518222063779831,
+              "verified": true
+            },
+            {
+              "seconds": 0.00448529701679945,
+              "verified": true
+            },
+            {
+              "seconds": 0.004228506935760379,
+              "verified": true
+            },
+            {
+              "seconds": 0.004209288861602545,
+              "verified": true
+            },
+            {
+              "seconds": 0.004168204963207245,
+              "verified": true
+            },
+            {
+              "seconds": 0.0041788199450820684,
+              "verified": true
+            },
+            {
+              "seconds": 0.004184182034805417,
+              "verified": true
+            },
+            {
+              "seconds": 0.004268567077815533,
+              "verified": true
+            },
+            {
+              "seconds": 0.004137209849432111,
+              "verified": true
+            },
+            {
+              "seconds": 0.00411863811314106,
+              "verified": true
+            },
+            {
+              "seconds": 0.0040066600777208805,
+              "verified": true
+            },
+            {
+              "seconds": 0.00399213214404881,
+              "verified": true
+            },
+            {
+              "seconds": 0.004002677975222468,
+              "verified": true
+            },
+            {
+              "seconds": 0.003976920153945684,
+              "verified": true
+            },
+            {
+              "seconds": 0.0040396698750555515,
+              "verified": true
+            },
+            {
+              "seconds": 0.003998133121058345,
+              "verified": true
+            },
+            {
+              "seconds": 0.004016963066533208,
+              "verified": true
+            },
+            {
+              "seconds": 0.00393438502214849,
+              "verified": true
+            },
+            {
+              "seconds": 0.003947491990402341,
+              "verified": true
+            },
+            {
+              "seconds": 0.003949803067371249,
+              "verified": true
+            },
+            {
+              "seconds": 0.003966143121942878,
+              "verified": true
+            },
+            {
+              "seconds": 0.003907712176442146,
+              "verified": true
+            },
+            {
+              "seconds": 0.003795058000832796,
+              "verified": true
+            },
+            {
+              "seconds": 0.0038012349978089333,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "native_direct",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.048224537167698145
+          ],
+          "mean_seconds": 0.048224537167698145,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.048220476834103465
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.050424118991941214
+          ],
+          "mean_seconds": 0.050424118991941214,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.04129168903455138
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.00304004386998713,
+              "verified": true
+            },
+            {
+              "seconds": 0.0030658638570457697,
+              "verified": true
+            },
+            {
+              "seconds": 0.0030068049672991037,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.010346452938392758
+          ],
+          "mean_seconds": 0.010346452938392758,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-GrizzlyCreek_SBS_final/GrizzlyCreek_SBS_final.tif": 1198392
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.005080997943878174,
+              "verified": true
+            },
+            {
+              "seconds": 0.005253524053841829,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.056456267135217786
+          ],
+          "mean_seconds": 0.056456267135217786,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-GrizzlyCreek_SBS_final/GrizzlyCreek_SBS_final.tif": 1797588
+          },
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.0411392159294337
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.00503315101377666,
+              "verified": true
+            },
+            {
+              "seconds": 0.005125944968312979,
+              "verified": true
+            },
+            {
+              "seconds": 0.005128566874191165,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "evicted_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.012423521839082241
+          ],
+          "mean_seconds": 0.012423521839082241,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-GrizzlyCreek_SBS_final/GrizzlyCreek_SBS_final.tif": 1198392
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.006783714983612299,
+              "verified": true
+            },
+            {
+              "seconds": 0.005595138994976878,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "native_direct",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.07828716398216784
+          ],
+          "mean_seconds": 0.07828716398216784,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.07828125008381903
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.05748945102095604
+          ],
+          "mean_seconds": 0.05748945102095604,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.047037660144269466
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.0036055250093340874,
+              "verified": true
+            },
+            {
+              "seconds": 0.0035364790819585323,
+              "verified": true
+            },
+            {
+              "seconds": 0.003289898158982396,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.010949780000373721
+          ],
+          "mean_seconds": 0.010949780000373721,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-GrizzlyCreek_SBS_final/GrizzlyCreek_SBS_final.tif": 1198392
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.005471981130540371,
+              "verified": true
+            },
+            {
+              "seconds": 0.005464552901685238,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.06000455981120467
+          ],
+          "mean_seconds": 0.06000455981120467,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-GrizzlyCreek_SBS_final/GrizzlyCreek_SBS_final.tif": 1797588
+          },
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.043730617966502905
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.005399140063673258,
+              "verified": true
+            },
+            {
+              "seconds": 0.005477050086483359,
+              "verified": true
+            },
+            {
+              "seconds": 0.005376423010602593,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "evicted_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.011980680981650949
+          ],
+          "mean_seconds": 0.011980680981650949,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-GrizzlyCreek_SBS_final/GrizzlyCreek_SBS_final.tif": 1198392
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.006375787081196904,
+              "verified": true
+            },
+            {
+              "seconds": 0.005588133120909333,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "native_direct",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.05071974406018853
+          ],
+          "mean_seconds": 0.05071974406018853,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.05071524600498378
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.06797941494733095
+          ],
+          "mean_seconds": 0.06797941494733095,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.056381503120064735
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.0047063028905540705,
+              "verified": true
+            },
+            {
+              "seconds": 0.003428769065067172,
+              "verified": true
+            },
+            {
+              "seconds": 0.00343836797401309,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.011101961135864258
+          ],
+          "mean_seconds": 0.011101961135864258,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-GrizzlyCreek_SBS_final/GrizzlyCreek_SBS_final.tif": 1198392
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.005516031989827752,
+              "verified": true
+            },
+            {
+              "seconds": 0.005572066875174642,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.05923317512497306
+          ],
+          "mean_seconds": 0.05923317512497306,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-GrizzlyCreek_SBS_final/GrizzlyCreek_SBS_final.tif": 1797588
+          },
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.04305253294296563
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.005456936080008745,
+              "verified": true
+            },
+            {
+              "seconds": 0.005441328044980764,
+              "verified": true
+            },
+            {
+              "seconds": 0.0052489780355244875,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "evicted_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.01234868704341352
+          ],
+          "mean_seconds": 0.01234868704341352,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-GrizzlyCreek_SBS_final/GrizzlyCreek_SBS_final.tif": 1198392
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.006704855943098664,
+              "verified": true
+            },
+            {
+              "seconds": 0.005626417929306626,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        }
+      ],
+      "summary": {
+        "initial_admission/actual": {
+          "count": 1,
+          "mean_seconds": 0.05804592394270003,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.0,
+          "digest_read_bytes": 1797588,
+          "native_calls": 1,
+          "mean_native_seconds": 0.041337264934554696,
+          "observation_count": 3
+        },
+        "settled_hit/actual": {
+          "count": 30,
+          "mean_seconds": 0.009828504198230803,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.0,
+          "digest_read_bytes": 0,
+          "native_calls": 0,
+          "mean_native_seconds": 0.0,
+          "observation_count": 60
+        },
+        "native_direct/actual": {
+          "count": 3,
+          "mean_seconds": 0.05907714840335151,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.0,
+          "digest_read_bytes": 0,
+          "native_calls": 3,
+          "mean_native_seconds": 0.059072324307635427,
+          "observation_count": 0
+        },
+        "settled_miss/actual": {
+          "count": 3,
+          "mean_seconds": 0.058630994986742735,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.0,
+          "digest_read_bytes": 0,
+          "native_calls": 3,
+          "mean_native_seconds": 0.048236950766295195,
+          "observation_count": 9
+        },
+        "cold_hit/actual": {
+          "count": 3,
+          "mean_seconds": 0.010799398024876913,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.0,
+          "digest_read_bytes": 3595176,
+          "native_calls": 0,
+          "mean_native_seconds": 0.0,
+          "observation_count": 6
+        },
+        "cold_miss/actual": {
+          "count": 3,
+          "mean_seconds": 0.05856466735713184,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.0,
+          "digest_read_bytes": 5392764,
+          "native_calls": 3,
+          "mean_native_seconds": 0.042640788946300745,
+          "observation_count": 9
+        },
+        "evicted_hit/actual": {
+          "count": 3,
+          "mean_seconds": 0.012250963288048903,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.0,
+          "digest_read_bytes": 3595176,
+          "native_calls": 0,
+          "mean_native_seconds": 0.0,
+          "observation_count": 6
+        }
+      },
+      "summary_matches_native": true,
+      "numerical_cache_parameters": {
+        "maxsize": 8,
+        "typed": false
+      }
+    },
+    "baer.cropped.tif": {
+      "name": "baer.cropped.tif",
+      "source": "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-baer.cropped/baer.cropped.tif",
+      "measurements": [
+        {
+          "phase": "initial_admission",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.47878109687007964
+          ],
+          "mean_seconds": 0.47878109687007964,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-baer.cropped/baer.cropped.tif": 1274892
+          },
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.4641536509152502
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.0051957720424979925,
+              "verified": true
+            },
+            {
+              "seconds": 0.004963433835655451,
+              "verified": true
+            },
+            {
+              "seconds": 0.00443401699885726,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "settled_hit",
+          "mode": "actual",
+          "repeats": 30,
+          "seconds": [
+            0.012983929133042693,
+            0.013195604784414172,
+            0.013362957863137126,
+            0.012686836067587137,
+            0.013044402003288269,
+            0.012776712886989117,
+            0.012044233037158847,
+            0.012152554001659155,
+            0.011732806917279959,
+            0.011141715105623007,
+            0.011291172821074724,
+            0.010787467006593943,
+            0.010341522051021457,
+            0.010110527975484729,
+            0.009761720197275281,
+            0.009815162047743797,
+            0.009499217150732875,
+            0.009209795854985714,
+            0.009692592080682516,
+            0.008752533933147788,
+            0.008121877908706665,
+            0.00808644387871027,
+            0.008101297076791525,
+            0.00795360910706222,
+            0.007831899914890528,
+            0.007726826937869191,
+            0.00707902992144227,
+            0.007027626968920231,
+            0.006239827023819089,
+            0.0060960359405726194
+          ],
+          "mean_seconds": 0.009954931253256897,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.00640283920802176,
+              "verified": true
+            },
+            {
+              "seconds": 0.006542619783431292,
+              "verified": true
+            },
+            {
+              "seconds": 0.0065631200559437275,
+              "verified": true
+            },
+            {
+              "seconds": 0.006596717983484268,
+              "verified": true
+            },
+            {
+              "seconds": 0.006659934064373374,
+              "verified": true
+            },
+            {
+              "seconds": 0.0066694950219243765,
+              "verified": true
+            },
+            {
+              "seconds": 0.006323368987068534,
+              "verified": true
+            },
+            {
+              "seconds": 0.006331111071631312,
+              "verified": true
+            },
+            {
+              "seconds": 0.0064683700911700726,
+              "verified": true
+            },
+            {
+              "seconds": 0.006541989045217633,
+              "verified": true
+            },
+            {
+              "seconds": 0.00643943902105093,
+              "verified": true
+            },
+            {
+              "seconds": 0.006303404923528433,
+              "verified": true
+            },
+            {
+              "seconds": 0.0059428291860967875,
+              "verified": true
+            },
+            {
+              "seconds": 0.006071050884202123,
+              "verified": true
+            },
+            {
+              "seconds": 0.00607334403321147,
+              "verified": true
+            },
+            {
+              "seconds": 0.006049605086445808,
+              "verified": true
+            },
+            {
+              "seconds": 0.005813000025227666,
+              "verified": true
+            },
+            {
+              "seconds": 0.005892314016819,
+              "verified": true
+            },
+            {
+              "seconds": 0.005704544018954039,
+              "verified": true
+            },
+            {
+              "seconds": 0.00541153596714139,
+              "verified": true
+            },
+            {
+              "seconds": 0.005643791984766722,
+              "verified": true
+            },
+            {
+              "seconds": 0.005615436937659979,
+              "verified": true
+            },
+            {
+              "seconds": 0.005453101824969053,
+              "verified": true
+            },
+            {
+              "seconds": 0.005309052066877484,
+              "verified": true
+            },
+            {
+              "seconds": 0.0050603828858584166,
+              "verified": true
+            },
+            {
+              "seconds": 0.005256359931081533,
+              "verified": true
+            },
+            {
+              "seconds": 0.005072493804618716,
+              "verified": true
+            },
+            {
+              "seconds": 0.005012613022699952,
+              "verified": true
+            },
+            {
+              "seconds": 0.004991746973246336,
+              "verified": true
+            },
+            {
+              "seconds": 0.004741759039461613,
+              "verified": true
+            },
+            {
+              "seconds": 0.004901400068774819,
+              "verified": true
+            },
+            {
+              "seconds": 0.00489033292979002,
+              "verified": true
+            },
+            {
+              "seconds": 0.004815873922780156,
+              "verified": true
+            },
+            {
+              "seconds": 0.004661134909838438,
+              "verified": true
+            },
+            {
+              "seconds": 0.0045668568927794695,
+              "verified": true
+            },
+            {
+              "seconds": 0.004621367901563644,
+              "verified": true
+            },
+            {
+              "seconds": 0.004858440952375531,
+              "verified": true
+            },
+            {
+              "seconds": 0.004811638966202736,
+              "verified": true
+            },
+            {
+              "seconds": 0.004642514977604151,
+              "verified": true
+            },
+            {
+              "seconds": 0.004075017059221864,
+              "verified": true
+            },
+            {
+              "seconds": 0.003967597149312496,
+              "verified": true
+            },
+            {
+              "seconds": 0.0041374098509550095,
+              "verified": true
+            },
+            {
+              "seconds": 0.0038650028873234987,
+              "verified": true
+            },
+            {
+              "seconds": 0.004205076955258846,
+              "verified": true
+            },
+            {
+              "seconds": 0.004086443921551108,
+              "verified": true
+            },
+            {
+              "seconds": 0.00399632309563458,
+              "verified": true
+            },
+            {
+              "seconds": 0.003958513028919697,
+              "verified": true
+            },
+            {
+              "seconds": 0.003976359032094479,
+              "verified": true
+            },
+            {
+              "seconds": 0.0039625808130949736,
+              "verified": true
+            },
+            {
+              "seconds": 0.0038370219990611076,
+              "verified": true
+            },
+            {
+              "seconds": 0.0037476469296962023,
+              "verified": true
+            },
+            {
+              "seconds": 0.003961869981139898,
+              "verified": true
+            },
+            {
+              "seconds": 0.003444056026637554,
+              "verified": true
+            },
+            {
+              "seconds": 0.0036201190669089556,
+              "verified": true
+            },
+            {
+              "seconds": 0.003441320965066552,
+              "verified": true
+            },
+            {
+              "seconds": 0.003568155923858285,
+              "verified": true
+            },
+            {
+              "seconds": 0.00323093100450933,
+              "verified": true
+            },
+            {
+              "seconds": 0.0029947739094495773,
+              "verified": true
+            },
+            {
+              "seconds": 0.002984308870509267,
+              "verified": true
+            },
+            {
+              "seconds": 0.003098081098869443,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "native_direct",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.4995436479803175
+          ],
+          "mean_seconds": 0.4995436479803175,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.4995266189798713
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.4940740638412535
+          ],
+          "mean_seconds": 0.4940740638412535,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.48306670715101063
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.003836092073470354,
+              "verified": true
+            },
+            {
+              "seconds": 0.004159447969868779,
+              "verified": true
+            },
+            {
+              "seconds": 0.002977526979520917,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.009710426907986403
+          ],
+          "mean_seconds": 0.009710426907986403,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-baer.cropped/baer.cropped.tif": 849928
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.004961688071489334,
+              "verified": true
+            },
+            {
+              "seconds": 0.004735501948744059,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.48149755992926657
+          ],
+          "mean_seconds": 0.48149755992926657,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-baer.cropped/baer.cropped.tif": 1274892
+          },
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.46697623701766133
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.005378682166337967,
+              "verified": true
+            },
+            {
+              "seconds": 0.0048361001536250114,
+              "verified": true
+            },
+            {
+              "seconds": 0.0042875600047409534,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "evicted_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.010609010001644492
+          ],
+          "mean_seconds": 0.010609010001644492,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-baer.cropped/baer.cropped.tif": 849928
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.006082415115088224,
+              "verified": true
+            },
+            {
+              "seconds": 0.004506169119849801,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "native_direct",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.5087619950063527
+          ],
+          "mean_seconds": 0.5087619950063527,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.5087495408952236
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.4923649828415364
+          ],
+          "mean_seconds": 0.4923649828415364,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.4816239189822227
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.004016305087134242,
+              "verified": true
+            },
+            {
+              "seconds": 0.003992458106949925,
+              "verified": true
+            },
+            {
+              "seconds": 0.0027045500464737415,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.00886411010287702
+          ],
+          "mean_seconds": 0.00886411010287702,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-baer.cropped/baer.cropped.tif": 849928
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.0045957190450280905,
+              "verified": true
+            },
+            {
+              "seconds": 0.00424154894426465,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.5029359448235482
+          ],
+          "mean_seconds": 0.5029359448235482,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-baer.cropped/baer.cropped.tif": 1274892
+          },
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.4880465029273182
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.004576033214107156,
+              "verified": true
+            },
+            {
+              "seconds": 0.00589424092322588,
+              "verified": true
+            },
+            {
+              "seconds": 0.004376757889986038,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "evicted_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.009977196110412478
+          ],
+          "mean_seconds": 0.009977196110412478,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-baer.cropped/baer.cropped.tif": 849928
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.00571170705370605,
+              "verified": true
+            },
+            {
+              "seconds": 0.004247177857905626,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "native_direct",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.48174904799088836
+          ],
+          "mean_seconds": 0.48174904799088836,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.4817340399604291
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.46542646107263863
+          ],
+          "mean_seconds": 0.46542646107263863,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.45643424103036523
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.003165974048897624,
+              "verified": true
+            },
+            {
+              "seconds": 0.0027886079624295235,
+              "verified": true
+            },
+            {
+              "seconds": 0.0030172548722475767,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.009748926851898432
+          ],
+          "mean_seconds": 0.009748926851898432,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-baer.cropped/baer.cropped.tif": 849928
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.004924946930259466,
+              "verified": true
+            },
+            {
+              "seconds": 0.004799060057848692,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.4798045561183244
+          ],
+          "mean_seconds": 0.4798045561183244,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-baer.cropped/baer.cropped.tif": 1274892
+          },
+          "native": [
+            {
+              "operation": "sbs_summary",
+              "seconds": 0.4661983968690038
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.004494474036619067,
+              "verified": true
+            },
+            {
+              "seconds": 0.004639219027012587,
+              "verified": true
+            },
+            {
+              "seconds": 0.004453877918422222,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        },
+        {
+          "phase": "evicted_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.010432020062580705
+          ],
+          "mean_seconds": 0.010432020062580705,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/sbs-baer.cropped/baer.cropped.tif": 849928
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.005671164020895958,
+              "verified": true
+            },
+            {
+              "seconds": 0.004745040088891983,
+              "verified": true
+            }
+          ],
+          "validations": [],
+          "locks": []
+        }
+      ],
+      "summary": {
+        "initial_admission/actual": {
+          "count": 1,
+          "mean_seconds": 0.47878109687007964,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.0,
+          "digest_read_bytes": 1274892,
+          "native_calls": 1,
+          "mean_native_seconds": 0.4641536509152502,
+          "observation_count": 3
+        },
+        "settled_hit/actual": {
+          "count": 30,
+          "mean_seconds": 0.009954931253256897,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.0,
+          "digest_read_bytes": 0,
+          "native_calls": 0,
+          "mean_native_seconds": 0.0,
+          "observation_count": 60
+        },
+        "native_direct/actual": {
+          "count": 3,
+          "mean_seconds": 0.4966848969925195,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.0,
+          "digest_read_bytes": 0,
+          "native_calls": 3,
+          "mean_native_seconds": 0.4966700666118413,
+          "observation_count": 0
+        },
+        "settled_miss/actual": {
+          "count": 3,
+          "mean_seconds": 0.48395516925180954,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.0,
+          "digest_read_bytes": 0,
+          "native_calls": 3,
+          "mean_native_seconds": 0.4737082890545328,
+          "observation_count": 9
+        },
+        "cold_hit/actual": {
+          "count": 3,
+          "mean_seconds": 0.009441154620920619,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.0,
+          "digest_read_bytes": 2549784,
+          "native_calls": 0,
+          "mean_native_seconds": 0.0,
+          "observation_count": 6
+        },
+        "cold_miss/actual": {
+          "count": 3,
+          "mean_seconds": 0.4880793536237131,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.0,
+          "digest_read_bytes": 3824676,
+          "native_calls": 3,
+          "mean_native_seconds": 0.4737403789379944,
+          "observation_count": 9
+        },
+        "evicted_hit/actual": {
+          "count": 3,
+          "mean_seconds": 0.010339408724879226,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.0,
+          "digest_read_bytes": 2549784,
+          "native_calls": 0,
+          "mean_native_seconds": 0.0,
+          "observation_count": 6
+        }
+      },
+      "summary_matches_native": true,
+      "numerical_cache_parameters": {
+        "maxsize": 8,
+        "typed": false
+      }
+    },
+    "curable-program": {
+      "name": "curable-program",
+      "root": "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810",
+      "measurements": [
+        {
+          "phase": "legacy_admission",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.15297476504929364
+          ],
+          "mean_seconds": 0.15297476504929364,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/dem/wbt/subwta.tif": 650196,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/watershed/mofe.tif": 163900
+          },
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.04003098513931036
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.00887108314782381,
+              "verified": true
+            },
+            {
+              "seconds": 0.008065192960202694,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.009360758122056723,
+              "verified": true
+            },
+            {
+              "seconds": 0.008493489120155573,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.12501964904367924,
+              "body_seconds": 0.08117052004672587,
+              "acquire_seconds": 0.0012324601411819458,
+              "persist_unlock_seconds": 0.04261666885577142
+            }
+          ]
+        },
+        {
+          "phase": "settled_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.09030070900917053
+          ],
+          "mean_seconds": 0.09030070900917053,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.063552042003721,
+              "body_seconds": 0.02343313000164926,
+              "acquire_seconds": 0.0012067570351064205,
+              "persist_unlock_seconds": 0.03891215496696532
+            }
+          ]
+        },
+        {
+          "phase": "settled_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.1031045918352902
+          ],
+          "mean_seconds": 0.1031045918352902,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.006734588881954551,
+              "verified": true
+            },
+            {
+              "seconds": 0.006223947973921895,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.007178852101787925,
+              "verified": true
+            },
+            {
+              "seconds": 0.006735621020197868,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.07775813504122198,
+              "body_seconds": 0.0362839219160378,
+              "acquire_seconds": 0.0010972421150654554,
+              "persist_unlock_seconds": 0.04037697101011872
+            }
+          ]
+        },
+        {
+          "phase": "settled_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.10837588389404118
+          ],
+          "mean_seconds": 0.10837588389404118,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.006808987120166421,
+              "verified": true
+            },
+            {
+              "seconds": 0.00660866592079401,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.007267022039741278,
+              "verified": true
+            },
+            {
+              "seconds": 0.0070598130114376545,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.08098676288500428,
+              "body_seconds": 0.03762855986133218,
+              "acquire_seconds": 0.0011951019987463951,
+              "persist_unlock_seconds": 0.04216310102492571
+            }
+          ]
+        },
+        {
+          "phase": "settled_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.09427015599794686
+          ],
+          "mean_seconds": 0.09427015599794686,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.06699296995066106,
+              "body_seconds": 0.023030517855659127,
+              "acquire_seconds": 0.0016665610019117594,
+              "persist_unlock_seconds": 0.04229589109309018
+            }
+          ]
+        },
+        {
+          "phase": "settled_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.09256807994097471
+          ],
+          "mean_seconds": 0.09256807994097471,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.0648467110004276,
+              "body_seconds": 0.024046471109613776,
+              "acquire_seconds": 0.0012127759400755167,
+              "persist_unlock_seconds": 0.03958746395073831
+            }
+          ]
+        },
+        {
+          "phase": "settled_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.10033968999050558
+          ],
+          "mean_seconds": 0.10033968999050558,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.006408168934285641,
+              "verified": true
+            },
+            {
+              "seconds": 0.006252949126064777,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.0068883749190717936,
+              "verified": true
+            },
+            {
+              "seconds": 0.006692964816465974,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.0762192050460726,
+              "body_seconds": 0.03580733807757497,
+              "acquire_seconds": 0.0013269409537315369,
+              "persist_unlock_seconds": 0.0390849260147661
+            }
+          ]
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.13315253192558885
+          ],
+          "mean_seconds": 0.13315253192558885,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.03997940104454756
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.10593553818762302,
+              "body_seconds": 0.06368078710511327,
+              "acquire_seconds": 0.0011204560287296772,
+              "persist_unlock_seconds": 0.04113429505378008
+            }
+          ]
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.15093077602796257
+          ],
+          "mean_seconds": 0.15093077602796257,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.03999904403463006
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.006621754029765725,
+              "verified": true
+            },
+            {
+              "seconds": 0.00635074102319777,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.0070734890177845955,
+              "verified": true
+            },
+            {
+              "seconds": 0.006802866002544761,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.1213190658017993,
+              "body_seconds": 0.07619073311798275,
+              "acquire_seconds": 0.0010479078628122807,
+              "persist_unlock_seconds": 0.04408042482100427
+            }
+          ]
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.14382858108729124
+          ],
+          "mean_seconds": 0.14382858108729124,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.03854729398153722
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.006575792096555233,
+              "verified": true
+            },
+            {
+              "seconds": 0.005986117059364915,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.007038775831460953,
+              "verified": true
+            },
+            {
+              "seconds": 0.006437206175178289,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.11603412008844316,
+              "body_seconds": 0.07433430594392121,
+              "acquire_seconds": 0.0010290159843862057,
+              "persist_unlock_seconds": 0.040670798160135746
+            }
+          ]
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.13300063321366906
+          ],
+          "mean_seconds": 0.13300063321366906,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.040314191952347755
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.10569496895186603,
+              "body_seconds": 0.06317869387567043,
+              "acquire_seconds": 0.0009770309552550316,
+              "persist_unlock_seconds": 0.041539244120940566
+            }
+          ]
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.12784839887171984
+          ],
+          "mean_seconds": 0.12784839887171984,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.03989487304352224
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.10278930701315403,
+              "body_seconds": 0.06226247898302972,
+              "acquire_seconds": 0.0009944599587470293,
+              "persist_unlock_seconds": 0.03953236807137728
+            }
+          ]
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.14297620113939047
+          ],
+          "mean_seconds": 0.14297620113939047,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.03923745104111731
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.006526130018755794,
+              "verified": true
+            },
+            {
+              "seconds": 0.006270921090617776,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.006988330977037549,
+              "verified": true
+            },
+            {
+              "seconds": 0.0067371230106800795,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.11675115907564759,
+              "body_seconds": 0.07499986700713634,
+              "acquire_seconds": 0.000901112100109458,
+              "persist_unlock_seconds": 0.04085017996840179
+            }
+          ]
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.09464230807498097
+          ],
+          "mean_seconds": 0.09464230807498097,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.06918422412127256,
+              "body_seconds": 0.023267642129212618,
+              "acquire_seconds": 0.0013638290110975504,
+              "persist_unlock_seconds": 0.044552752980962396
+            }
+          ]
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.11243783496320248
+          ],
+          "mean_seconds": 0.11243783496320248,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/dem/wbt/subwta.tif": 650196,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/watershed/mofe.tif": 163900
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.008736884221434593,
+              "verified": true
+            },
+            {
+              "seconds": 0.008119183126837015,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.009254712145775557,
+              "verified": true
+            },
+            {
+              "seconds": 0.008664682973176241,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.0848924529273063,
+              "body_seconds": 0.04116309597156942,
+              "acquire_seconds": 0.0012130478862673044,
+              "persist_unlock_seconds": 0.04251630906946957
+            }
+          ]
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.11699363100342453
+          ],
+          "mean_seconds": 0.11699363100342453,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/dem/wbt/subwta.tif": 650196,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/watershed/mofe.tif": 163900
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.009055840084329247,
+              "verified": true
+            },
+            {
+              "seconds": 0.009027480846270919,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.009574940195307136,
+              "verified": true
+            },
+            {
+              "seconds": 0.009573437040671706,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.08847562898881733,
+              "body_seconds": 0.044051575008779764,
+              "acquire_seconds": 0.001161766005679965,
+              "persist_unlock_seconds": 0.043262287974357605
+            }
+          ]
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.09316502697765827
+          ],
+          "mean_seconds": 0.09316502697765827,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.06547079817391932,
+              "body_seconds": 0.023388275876641273,
+              "acquire_seconds": 0.0012066480703651905,
+              "persist_unlock_seconds": 0.040875874226912856
+            }
+          ]
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.09097015298902988
+          ],
+          "mean_seconds": 0.09097015298902988,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.06423681089654565,
+              "body_seconds": 0.022986663971096277,
+              "acquire_seconds": 0.0010855838190764189,
+              "persist_unlock_seconds": 0.04016456310637295
+            }
+          ]
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.10927997389808297
+          ],
+          "mean_seconds": 0.10927997389808297,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/dem/wbt/subwta.tif": 650196,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/watershed/mofe.tif": 163900
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.009091382846236229,
+              "verified": true
+            },
+            {
+              "seconds": 0.007717346074059606,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.009588684886693954,
+              "verified": true
+            },
+            {
+              "seconds": 0.008173925103619695,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.08242168999277055,
+              "body_seconds": 0.0402284380979836,
+              "acquire_seconds": 0.0014612679369747639,
+              "persist_unlock_seconds": 0.04073198395781219
+            }
+          ]
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.14647320308722556
+          ],
+          "mean_seconds": 0.14647320308722556,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.0439553358592093
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.11880029202438891,
+              "body_seconds": 0.0734479168895632,
+              "acquire_seconds": 0.0012778481468558311,
+              "persist_unlock_seconds": 0.044074526987969875
+            }
+          ]
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.14836487593129277
+          ],
+          "mean_seconds": 0.14836487593129277,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/dem/wbt/subwta.tif": 650196,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/watershed/mofe.tif": 163900
+          },
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.039458286948502064
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.009016819996759295,
+              "verified": true
+            },
+            {
+              "seconds": 0.007747642928734422,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.009471530094742775,
+              "verified": true
+            },
+            {
+              "seconds": 0.008174821035936475,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.12194352713413537,
+              "body_seconds": 0.08015882805921137,
+              "acquire_seconds": 0.0009143960196524858,
+              "persist_unlock_seconds": 0.040870303055271506
+            }
+          ]
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.16735436511225998
+          ],
+          "mean_seconds": 0.16735436511225998,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/dem/wbt/subwta.tif": 650196,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/watershed/mofe.tif": 163900
+          },
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.0487372491043061
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.00979760312475264,
+              "verified": true
+            },
+            {
+              "seconds": 0.008456981973722577,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.010378611972555518,
+              "verified": true
+            },
+            {
+              "seconds": 0.008908906020224094,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.14094797195866704,
+              "body_seconds": 0.09759211004711688,
+              "acquire_seconds": 0.0014574718661606312,
+              "persist_unlock_seconds": 0.04189839004538953
+            }
+          ]
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.15342515613883734
+          ],
+          "mean_seconds": 0.15342515613883734,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.04858040902763605
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.12485467293299735,
+              "body_seconds": 0.08193497615866363,
+              "acquire_seconds": 0.0019209918100386858,
+              "persist_unlock_seconds": 0.04099870496429503
+            }
+          ]
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.15866787708364427
+          ],
+          "mean_seconds": 0.15866787708364427,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.0508592848200351
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.13060350506566465,
+              "body_seconds": 0.08627729979343712,
+              "acquire_seconds": 0.0019077351316809654,
+              "persist_unlock_seconds": 0.04241847014054656
+            }
+          ]
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.15153704397380352
+          ],
+          "mean_seconds": 0.15153704397380352,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/dem/wbt/subwta.tif": 650196,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/watershed/mofe.tif": 163900
+          },
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.03967924485914409
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.008763932855799794,
+              "verified": true
+            },
+            {
+              "seconds": 0.008126398082822561,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.009265576023608446,
+              "verified": true
+            },
+            {
+              "seconds": 0.00855321902781725,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.12416020804084837,
+              "body_seconds": 0.08089695312082767,
+              "acquire_seconds": 0.0010435788426548243,
+              "persist_unlock_seconds": 0.042219676077365875
+            }
+          ]
+        },
+        {
+          "phase": "evicted_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.09584841504693031
+          ],
+          "mean_seconds": 0.09584841504693031,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.06725875404663384,
+              "body_seconds": 0.023739681113511324,
+              "acquire_seconds": 0.0012722138781100512,
+              "persist_unlock_seconds": 0.042246859055012465
+            }
+          ]
+        },
+        {
+          "phase": "evicted_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.11264324188232422
+          ],
+          "mean_seconds": 0.11264324188232422,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/dem/wbt/subwta.tif": 650196,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/watershed/mofe.tif": 163900
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.009541880106553435,
+              "verified": true
+            },
+            {
+              "seconds": 0.008198192110285163,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.010008151875808835,
+              "verified": true
+            },
+            {
+              "seconds": 0.00877035385929048,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.08425542199984193,
+              "body_seconds": 0.0405409331433475,
+              "acquire_seconds": 0.0011844560503959656,
+              "persist_unlock_seconds": 0.04253003280609846
+            }
+          ]
+        },
+        {
+          "phase": "evicted_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.11790681187994778
+          ],
+          "mean_seconds": 0.11790681187994778,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/dem/wbt/subwta.tif": 650196,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/watershed/mofe.tif": 163900
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.010015295119956136,
+              "verified": true
+            },
+            {
+              "seconds": 0.008767911000177264,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.010567528894171119,
+              "verified": true
+            },
+            {
+              "seconds": 0.00924721802584827,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.09151111100800335,
+              "body_seconds": 0.04565810807980597,
+              "acquire_seconds": 0.001032262109220028,
+              "persist_unlock_seconds": 0.044820740818977356
+            }
+          ]
+        },
+        {
+          "phase": "evicted_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.09027988696470857
+          ],
+          "mean_seconds": 0.09027988696470857,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.06315024010837078,
+              "body_seconds": 0.023139243945479393,
+              "acquire_seconds": 0.0011374321766197681,
+              "persist_unlock_seconds": 0.03887356398627162
+            }
+          ]
+        },
+        {
+          "phase": "evicted_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.09878162411041558
+          ],
+          "mean_seconds": 0.09878162411041558,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.07018859614618123,
+              "body_seconds": 0.026133299805223942,
+              "acquire_seconds": 0.0013525171671062708,
+              "persist_unlock_seconds": 0.04270277917385101
+            }
+          ]
+        },
+        {
+          "phase": "evicted_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            0.11656323098577559
+          ],
+          "mean_seconds": 0.11656323098577559,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/dem/wbt/subwta.tif": 650196,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/watershed/mofe.tif": 163900
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.009820707840844989,
+              "verified": true
+            },
+            {
+              "seconds": 0.00846840301528573,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.010339268017560244,
+              "verified": true
+            },
+            {
+              "seconds": 0.009036235976964235,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.0879144340287894,
+              "body_seconds": 0.040619123028591275,
+              "acquire_seconds": 0.0009945109486579895,
+              "persist_unlock_seconds": 0.046300800051540136
+            }
+          ]
+        }
+      ],
+      "before_modes": {
+        "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/landuse.nodb": "0o644",
+        "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/landuse/landuse.parquet": "0o644"
+      },
+      "summary": {
+        "legacy_admission/actual": {
+          "count": 1,
+          "mean_seconds": 0.15297476504929364,
+          "mean_validation_seconds": 0.017854247242212296,
+          "mean_lock_seconds": 0.12501964904367924,
+          "digest_read_bytes": 814096,
+          "native_calls": 1,
+          "mean_native_seconds": 0.04003098513931036,
+          "observation_count": 2
+        },
+        "settled_hit/ancestor_control": {
+          "count": 3,
+          "mean_seconds": 0.0923796483160307,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.0651305743182699,
+          "digest_read_bytes": 0,
+          "native_calls": 0,
+          "mean_native_seconds": 0.0,
+          "observation_count": 0
+        },
+        "settled_hit/actual": {
+          "count": 3,
+          "mean_seconds": 0.10394005523994565,
+          "mean_validation_seconds": 0.013940882636234164,
+          "mean_lock_seconds": 0.07832136765743296,
+          "digest_read_bytes": 0,
+          "native_calls": 0,
+          "mean_native_seconds": 0.0,
+          "observation_count": 6
+        },
+        "settled_miss/ancestor_control": {
+          "count": 3,
+          "mean_seconds": 0.1313338546703259,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.1048066047175477,
+          "digest_read_bytes": 0,
+          "native_calls": 3,
+          "mean_native_seconds": 0.04006282201347252,
+          "observation_count": 0
+        },
+        "settled_miss/actual": {
+          "count": 3,
+          "mean_seconds": 0.14591185275154808,
+          "mean_validation_seconds": 0.01369259700489541,
+          "mean_lock_seconds": 0.11803478165529668,
+          "digest_read_bytes": 0,
+          "native_calls": 3,
+          "mean_native_seconds": 0.03926126301909486,
+          "observation_count": 6
+        },
+        "cold_hit/ancestor_control": {
+          "count": 3,
+          "mean_seconds": 0.09292582934722304,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.06629727773057918,
+          "digest_read_bytes": 0,
+          "native_calls": 0,
+          "mean_native_seconds": 0.0,
+          "observation_count": 0
+        },
+        "cold_hit/actual": {
+          "count": 3,
+          "mean_seconds": 0.11290381328823666,
+          "mean_validation_seconds": 0.01827679411508143,
+          "mean_lock_seconds": 0.08526325730296473,
+          "digest_read_bytes": 2442288,
+          "native_calls": 0,
+          "mean_native_seconds": 0.0,
+          "observation_count": 6
+        },
+        "cold_miss/ancestor_control": {
+          "count": 3,
+          "mean_seconds": 0.15285541210323572,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.12475282334101696,
+          "digest_read_bytes": 0,
+          "native_calls": 3,
+          "mean_native_seconds": 0.04779834323562682,
+          "observation_count": 0
+        },
+        "cold_miss/actual": {
+          "count": 3,
+          "mean_seconds": 0.15575209500578543,
+          "mean_validation_seconds": 0.01825088805829485,
+          "mean_lock_seconds": 0.12901723571121693,
+          "digest_read_bytes": 2442288,
+          "native_calls": 3,
+          "mean_native_seconds": 0.042624926970650755,
+          "observation_count": 6
+        },
+        "evicted_hit/ancestor_control": {
+          "count": 3,
+          "mean_seconds": 0.09496997537401815,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.06686586343372862,
+          "digest_read_bytes": 0,
+          "native_calls": 0,
+          "mean_native_seconds": 0.0,
+          "observation_count": 0
+        },
+        "evicted_hit/actual": {
+          "count": 3,
+          "mean_seconds": 0.11570442824934919,
+          "mean_validation_seconds": 0.019322918883214395,
+          "mean_lock_seconds": 0.08789365567887823,
+          "digest_read_bytes": 2442288,
+          "native_calls": 0,
+          "mean_native_seconds": 0.0,
+          "observation_count": 6
+        }
+      },
+      "management_values_preserved": true,
+      "parquet_rows_types_values_preserved": true,
+      "after_modes": {
+        "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/landuse.nodb": "0o644",
+        "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/curable-program-qa-3be41810/landuse/landuse.parquet": "0o644"
+      }
+    },
+    "beneficiary-forfeit": {
+      "name": "beneficiary-forfeit",
+      "root": "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1",
+      "measurements": [
+        {
+          "phase": "legacy_admission",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            1.9859430389478803
+          ],
+          "mean_seconds": 1.9859430389478803,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.ARC": 71005134,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.PRJ": 806,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/watershed/mofe.tif": 11853540
+          },
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.725019576959312
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.14162098593078554,
+              "verified": true
+            },
+            {
+              "seconds": 0.15154239907860756,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.1570580848492682,
+              "verified": true
+            },
+            {
+              "seconds": 0.16761453496292233,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 1.7897473478224128,
+              "body_seconds": 1.5244763940572739,
+              "acquire_seconds": 0.0012874198146164417,
+              "persist_unlock_seconds": 0.26398353395052254
+            }
+          ]
+        },
+        {
+          "phase": "settled_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.9839407850522548
+          ],
+          "mean_seconds": 0.9839407850522548,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.7769557889550924,
+              "body_seconds": 0.4924917120952159,
+              "acquire_seconds": 0.001362921902909875,
+              "persist_unlock_seconds": 0.28310115495696664
+            }
+          ]
+        },
+        {
+          "phase": "settled_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            1.0277102931868285
+          ],
+          "mean_seconds": 1.0277102931868285,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.008503095945343375,
+              "verified": true
+            },
+            {
+              "seconds": 0.006377499084919691,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.026265037013217807,
+              "verified": true
+            },
+            {
+              "seconds": 0.022280125878751278,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.8232915620319545,
+              "body_seconds": 0.5387007719837129,
+              "acquire_seconds": 0.001381648937240243,
+              "persist_unlock_seconds": 0.2832091411110014
+            }
+          ]
+        },
+        {
+          "phase": "settled_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            1.000984976068139
+          ],
+          "mean_seconds": 1.000984976068139,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.007905430160462856,
+              "verified": true
+            },
+            {
+              "seconds": 0.006289694923907518,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.023596744053065777,
+              "verified": true
+            },
+            {
+              "seconds": 0.02189199603162706,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.79104821709916,
+              "body_seconds": 0.5214146869257092,
+              "acquire_seconds": 0.0014655531849712133,
+              "persist_unlock_seconds": 0.2681679769884795
+            }
+          ]
+        },
+        {
+          "phase": "settled_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            1.002565581118688
+          ],
+          "mean_seconds": 1.002565581118688,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.8048508400097489,
+              "body_seconds": 0.5297021670266986,
+              "acquire_seconds": 0.0013936359900981188,
+              "persist_unlock_seconds": 0.2737550369929522
+            }
+          ]
+        },
+        {
+          "phase": "settled_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.9587400858290493
+          ],
+          "mean_seconds": 0.9587400858290493,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.7634801440872252,
+              "body_seconds": 0.4898804670665413,
+              "acquire_seconds": 0.0013661680277436972,
+              "persist_unlock_seconds": 0.2722335089929402
+            }
+          ]
+        },
+        {
+          "phase": "settled_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            1.0036689301487058
+          ],
+          "mean_seconds": 1.0036689301487058,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.006726366933435202,
+              "verified": true
+            },
+            {
+              "seconds": 0.005367787089198828,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.022513678995892406,
+              "verified": true
+            },
+            {
+              "seconds": 0.021035096840932965,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 0.7899242471903563,
+              "body_seconds": 0.5240651660133153,
+              "acquire_seconds": 0.0014303491916507483,
+              "persist_unlock_seconds": 0.2644287319853902
+            }
+          ]
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            1.7230880558490753
+          ],
+          "mean_seconds": 1.7230880558490753,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.7390667640138417
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 1.5213232159148902,
+              "body_seconds": 1.2351216340903193,
+              "acquire_seconds": 0.0012816309463232756,
+              "persist_unlock_seconds": 0.2849199508782476
+            }
+          ]
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            1.7554774929303676
+          ],
+          "mean_seconds": 1.7554774929303676,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.7531757510732859
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.0072190670762211084,
+              "verified": true
+            },
+            {
+              "seconds": 0.00743330898694694,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.023780575953423977,
+              "verified": true
+            },
+            {
+              "seconds": 0.02451327396556735,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 1.5537603998091072,
+              "body_seconds": 1.2749777529388666,
+              "acquire_seconds": 0.0010786589700728655,
+              "persist_unlock_seconds": 0.2777039879001677
+            }
+          ]
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            1.7533731570001692
+          ],
+          "mean_seconds": 1.7533731570001692,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.7244705141056329
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.0072952150367200375,
+              "verified": true
+            },
+            {
+              "seconds": 0.0072409179992973804,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.023678872035816312,
+              "verified": true
+            },
+            {
+              "seconds": 0.02428306289948523,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 1.534311474999413,
+              "body_seconds": 1.2528072171844542,
+              "acquire_seconds": 0.00107810297049582,
+              "persist_unlock_seconds": 0.28042615484446287
+            }
+          ]
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            1.6894746730104089
+          ],
+          "mean_seconds": 1.6894746730104089,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.7186474511399865
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 1.491863293107599,
+              "body_seconds": 1.216780090937391,
+              "acquire_seconds": 0.001099138054996729,
+              "persist_unlock_seconds": 0.27398406411521137
+            }
+          ]
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            1.7036591318901628
+          ],
+          "mean_seconds": 1.7036591318901628,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.7172884750179946
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 1.499561939155683,
+              "body_seconds": 1.2237157670315355,
+              "acquire_seconds": 0.001058113994076848,
+              "persist_unlock_seconds": 0.27478805813007057
+            }
+          ]
+        },
+        {
+          "phase": "settled_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            1.7380457061808556
+          ],
+          "mean_seconds": 1.7380457061808556,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.694646991090849
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.0076658150646835566,
+              "verified": true
+            },
+            {
+              "seconds": 0.007013707887381315,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.0246950329747051,
+              "verified": true
+            },
+            {
+              "seconds": 0.022791604977101088,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 1.5170240350998938,
+              "body_seconds": 1.2320025330409408,
+              "acquire_seconds": 0.001090924022719264,
+              "persist_unlock_seconds": 0.2839305780362338
+            }
+          ]
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.9948699749074876
+          ],
+          "mean_seconds": 0.9948699749074876,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.7920163329690695,
+              "body_seconds": 0.5193009441718459,
+              "acquire_seconds": 0.001361429924145341,
+              "persist_unlock_seconds": 0.2713539588730782
+            }
+          ]
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            1.3147799230646342
+          ],
+          "mean_seconds": 1.3147799230646342,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.ARC": 71005134,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.PRJ": 806,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/watershed/mofe.tif": 11853540
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.1567662670277059,
+              "verified": true
+            },
+            {
+              "seconds": 0.1579721150919795,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.17689279397018254,
+              "verified": true
+            },
+            {
+              "seconds": 0.17577809584327042,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 1.1166783031076193,
+              "body_seconds": 0.8397482549771667,
+              "acquire_seconds": 0.0016634250059723854,
+              "persist_unlock_seconds": 0.27526662312448025
+            }
+          ]
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            1.3197666318155825
+          ],
+          "mean_seconds": 1.3197666318155825,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.ARC": 71005134,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.PRJ": 806,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/watershed/mofe.tif": 11853540
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.15654317406006157,
+              "verified": true
+            },
+            {
+              "seconds": 0.14873829297721386,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.17334943497553468,
+              "verified": true
+            },
+            {
+              "seconds": 0.1648326739668846,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 1.1141650599893183,
+              "body_seconds": 0.8445795038715005,
+              "acquire_seconds": 0.001240694196894765,
+              "persist_unlock_seconds": 0.268344861920923
+            }
+          ]
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.9776465459726751
+          ],
+          "mean_seconds": 0.9776465459726751,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.7798302811570466,
+              "body_seconds": 0.511276040924713,
+              "acquire_seconds": 0.001170962117612362,
+              "persist_unlock_seconds": 0.2673832781147212
+            }
+          ]
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.9817752190865576
+          ],
+          "mean_seconds": 0.9817752190865576,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.7833944191224873,
+              "body_seconds": 0.5110858369152993,
+              "acquire_seconds": 0.0011257920414209366,
+              "persist_unlock_seconds": 0.2711827901657671
+            }
+          ]
+        },
+        {
+          "phase": "cold_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            1.2970220220740885
+          ],
+          "mean_seconds": 1.2970220220740885,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.ARC": 71005134,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.PRJ": 806,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/watershed/mofe.tif": 11853540
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.14587537781335413,
+              "verified": true
+            },
+            {
+              "seconds": 0.15740230400115252,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.16376268095336854,
+              "verified": true
+            },
+            {
+              "seconds": 0.17516431002877653,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 1.0973909250460565,
+              "body_seconds": 0.8202073590364307,
+              "acquire_seconds": 0.0016457620076835155,
+              "persist_unlock_seconds": 0.2755378040019423
+            }
+          ]
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            1.7154374117963016
+          ],
+          "mean_seconds": 1.7154374117963016,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.7305432800203562
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 1.514566149795428,
+              "body_seconds": 1.2397811871487647,
+              "acquire_seconds": 0.001483498839661479,
+              "persist_unlock_seconds": 0.2733014638070017
+            }
+          ]
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            1.9863159821834415
+          ],
+          "mean_seconds": 1.9863159821834415,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.ARC": 71005134,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.PRJ": 806,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/watershed/mofe.tif": 11853540
+          },
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.6940364339388907
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.14593054400756955,
+              "verified": true
+            },
+            {
+              "seconds": 0.15536221186630428,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.1615060509648174,
+              "verified": true
+            },
+            {
+              "seconds": 0.1713941339403391,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 1.778592832153663,
+              "body_seconds": 1.5039320648647845,
+              "acquire_seconds": 0.00116596813313663,
+              "persist_unlock_seconds": 0.27349479915574193
+            }
+          ]
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            1.9801559480838478
+          ],
+          "mean_seconds": 1.9801559480838478,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.ARC": 71005134,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.PRJ": 806,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/watershed/mofe.tif": 11853540
+          },
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.7159499570261687
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.14662136603146791,
+              "verified": true
+            },
+            {
+              "seconds": 0.14326516794972122,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.16279735509306192,
+              "verified": true
+            },
+            {
+              "seconds": 0.15937673393636942,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 1.7814026360865682,
+              "body_seconds": 1.5127157480455935,
+              "acquire_seconds": 0.0014923440758138895,
+              "persist_unlock_seconds": 0.26719454396516085
+            }
+          ]
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            1.722273132065311
+          ],
+          "mean_seconds": 1.722273132065311,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.7374215929303318
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 1.5241118432022631,
+              "body_seconds": 1.25032439106144,
+              "acquire_seconds": 0.0012729880400002003,
+              "persist_unlock_seconds": 0.2725144641008228
+            }
+          ]
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            1.7339918450452387
+          ],
+          "mean_seconds": 1.7339918450452387,
+          "digest_read_bytes": {},
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.7222845919895917
+            }
+          ],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 1.5252419291064143,
+              "body_seconds": 1.231576377991587,
+              "acquire_seconds": 0.0013164840638637543,
+              "persist_unlock_seconds": 0.29234906705096364
+            }
+          ]
+        },
+        {
+          "phase": "cold_miss",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            2.0941586850676686
+          ],
+          "mean_seconds": 2.0941586850676686,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.ARC": 71005134,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.PRJ": 806,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/watershed/mofe.tif": 11853540
+          },
+          "native": [
+            {
+              "operation": "pair_count",
+              "seconds": 0.7522023851051927
+            }
+          ],
+          "observations": [
+            {
+              "seconds": 0.15735222911462188,
+              "verified": true
+            },
+            {
+              "seconds": 0.14547708304598927,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.1754234170075506,
+              "verified": true
+            },
+            {
+              "seconds": 0.1634946910198778,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 1.8940208279527724,
+              "body_seconds": 1.611149305012077,
+              "acquire_seconds": 0.001587249105796218,
+              "persist_unlock_seconds": 0.28128427383489907
+            }
+          ]
+        },
+        {
+          "phase": "evicted_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.9829360048752278
+          ],
+          "mean_seconds": 0.9829360048752278,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.7832565628923476,
+              "body_seconds": 0.5043821830768138,
+              "acquire_seconds": 0.001533315982669592,
+              "persist_unlock_seconds": 0.27734106383286417
+            }
+          ]
+        },
+        {
+          "phase": "evicted_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            1.2941145999357104
+          ],
+          "mean_seconds": 1.2941145999357104,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.ARC": 71005134,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.PRJ": 806,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/watershed/mofe.tif": 11853540
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.1473615108989179,
+              "verified": true
+            },
+            {
+              "seconds": 0.14460489200428128,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.1645790331531316,
+              "verified": true
+            },
+            {
+              "seconds": 0.16026847600005567,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 1.0881707179360092,
+              "body_seconds": 0.8101760719437152,
+              "acquire_seconds": 0.001614720094949007,
+              "persist_unlock_seconds": 0.27637992589734495
+            }
+          ]
+        },
+        {
+          "phase": "evicted_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            1.3458432999905199
+          ],
+          "mean_seconds": 1.3458432999905199,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.ARC": 71005134,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.PRJ": 806,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/watershed/mofe.tif": 11853540
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.1465505629312247,
+              "verified": true
+            },
+            {
+              "seconds": 0.14577506692148745,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.16263558506034315,
+              "verified": true
+            },
+            {
+              "seconds": 0.1617766530252993,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 1.1373236919753253,
+              "body_seconds": 0.8427051960024983,
+              "acquire_seconds": 0.0017565060406923294,
+              "persist_unlock_seconds": 0.29286198993213475
+            }
+          ]
+        },
+        {
+          "phase": "evicted_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.9454799378290772
+          ],
+          "mean_seconds": 0.9454799378290772,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.752497412962839,
+              "body_seconds": 0.4896596141625196,
+              "acquire_seconds": 0.001218555960804224,
+              "persist_unlock_seconds": 0.2616192428395152
+            }
+          ]
+        },
+        {
+          "phase": "evicted_hit",
+          "mode": "ancestor_control",
+          "repeats": 1,
+          "seconds": [
+            0.9614919191226363
+          ],
+          "mean_seconds": 0.9614919191226363,
+          "digest_read_bytes": {},
+          "native": [],
+          "observations": [],
+          "validations": [],
+          "locks": [
+            {
+              "seconds": 0.7645597159862518,
+              "body_seconds": 0.49944107700139284,
+              "acquire_seconds": 0.0012210810091346502,
+              "persist_unlock_seconds": 0.26389755797572434
+            }
+          ]
+        },
+        {
+          "phase": "evicted_hit",
+          "mode": "actual",
+          "repeats": 1,
+          "seconds": [
+            1.3257499581668526
+          ],
+          "mean_seconds": 1.3257499581668526,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.ARC": 71005134,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/dem/topaz/SUBWTA.PRJ": 806,
+            "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/watershed/mofe.tif": 11853540
+          },
+          "native": [],
+          "observations": [
+            {
+              "seconds": 0.1572226060088724,
+              "verified": true
+            },
+            {
+              "seconds": 0.1514272231142968,
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "seconds": 0.17596469609998167,
+              "verified": true
+            },
+            {
+              "seconds": 0.16891497210599482,
+              "verified": true
+            }
+          ],
+          "locks": [
+            {
+              "seconds": 1.1258543329313397,
+              "body_seconds": 0.831475896993652,
+              "acquire_seconds": 0.0014290569815784693,
+              "persist_unlock_seconds": 0.2929493789561093
+            }
+          ]
+        }
+      ],
+      "before_modes": {
+        "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/landuse.nodb": "0o644",
+        "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/landuse/landuse.parquet": "0o644"
+      },
+      "summary": {
+        "legacy_admission/actual": {
+          "count": 1,
+          "mean_seconds": 1.9859430389478803,
+          "mean_validation_seconds": 0.32467261981219053,
+          "mean_lock_seconds": 1.7897473478224128,
+          "digest_read_bytes": 82859480,
+          "native_calls": 1,
+          "mean_native_seconds": 0.725019576959312,
+          "observation_count": 2
+        },
+        "settled_hit/ancestor_control": {
+          "count": 3,
+          "mean_seconds": 0.9817488173333307,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.7817622576840222,
+          "digest_read_bytes": 0,
+          "native_calls": 0,
+          "mean_native_seconds": 0.0,
+          "observation_count": 0
+        },
+        "settled_hit/actual": {
+          "count": 3,
+          "mean_seconds": 1.0107880664678912,
+          "mean_validation_seconds": 0.0458608929378291,
+          "mean_lock_seconds": 0.8014213421071569,
+          "digest_read_bytes": 0,
+          "native_calls": 0,
+          "mean_native_seconds": 0.0,
+          "observation_count": 6
+        },
+        "settled_miss/ancestor_control": {
+          "count": 3,
+          "mean_seconds": 1.705407286916549,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 1.5042494827260573,
+          "digest_read_bytes": 0,
+          "native_calls": 3,
+          "mean_native_seconds": 0.725000896723941,
+          "observation_count": 0
+        },
+        "settled_miss/actual": {
+          "count": 3,
+          "mean_seconds": 1.7489654520371307,
+          "mean_validation_seconds": 0.047914140935366355,
+          "mean_lock_seconds": 1.5350319699694712,
+          "digest_read_bytes": 0,
+          "native_calls": 3,
+          "mean_native_seconds": 0.7240977520899227,
+          "observation_count": 6
+        },
+        "cold_hit/ancestor_control": {
+          "count": 3,
+          "mean_seconds": 0.9847639133222401,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.7850803444162011,
+          "digest_read_bytes": 0,
+          "native_calls": 0,
+          "mean_native_seconds": 0.0,
+          "observation_count": 0
+        },
+        "cold_hit/actual": {
+          "count": 3,
+          "mean_seconds": 1.3105228589847684,
+          "mean_validation_seconds": 0.3432599965793391,
+          "mean_lock_seconds": 1.109411429380998,
+          "digest_read_bytes": 248578440,
+          "native_calls": 0,
+          "mean_native_seconds": 0.0,
+          "observation_count": 6
+        },
+        "cold_miss/ancestor_control": {
+          "count": 3,
+          "mean_seconds": 1.7239007963022839,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 1.5213066407013685,
+          "digest_read_bytes": 0,
+          "native_calls": 3,
+          "mean_native_seconds": 0.7300831549800932,
+          "observation_count": 0
+        },
+        "cold_miss/actual": {
+          "count": 3,
+          "mean_seconds": 2.0202102051116526,
+          "mean_validation_seconds": 0.3313307939873387,
+          "mean_lock_seconds": 1.8180054320643346,
+          "digest_read_bytes": 248578440,
+          "native_calls": 3,
+          "mean_native_seconds": 0.7207295920234174,
+          "observation_count": 6
+        },
+        "evicted_hit/ancestor_control": {
+          "count": 3,
+          "mean_seconds": 0.9633026206089804,
+          "mean_validation_seconds": 0.0,
+          "mean_lock_seconds": 0.7667712306138128,
+          "digest_read_bytes": 0,
+          "native_calls": 0,
+          "mean_native_seconds": 0.0,
+          "observation_count": 0
+        },
+        "evicted_hit/actual": {
+          "count": 3,
+          "mean_seconds": 1.321902619364361,
+          "mean_validation_seconds": 0.33137980514826876,
+          "mean_lock_seconds": 1.1171162476142247,
+          "digest_read_bytes": 248578440,
+          "native_calls": 0,
+          "mean_native_seconds": 0.0,
+          "observation_count": 6
+        }
+      },
+      "management_values_preserved": true,
+      "parquet_rows_types_values_preserved": true,
+      "after_modes": {
+        "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/landuse.nodb": "0o644",
+        "/wc1/batch/qa-raster-consumers-0fa74f3f2f95/beneficiary-forfeit-qa-98ecc6c1/landuse/landuse.parquet": "0o644"
+      }
+    }
+  },
+  "pressure": [
+    {
+      "files": 512,
+      "before": {
+        "digest": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        },
+        "observed": {
+          "hits": 2,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        }
+      },
+      "after": {
+        "digest": {
+          "hits": 0,
+          "misses": 512,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "observed": {
+          "hits": 514,
+          "misses": 513,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      }
+    },
+    {
+      "files": 512,
+      "before": {
+        "digest": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        },
+        "observed": {
+          "hits": 2,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        }
+      },
+      "after": {
+        "digest": {
+          "hits": 0,
+          "misses": 512,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "observed": {
+          "hits": 514,
+          "misses": 513,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      }
+    },
+    {
+      "files": 512,
+      "before": {
+        "digest": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        },
+        "observed": {
+          "hits": 2,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        }
+      },
+      "after": {
+        "digest": {
+          "hits": 0,
+          "misses": 512,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "observed": {
+          "hits": 514,
+          "misses": 513,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      }
+    },
+    {
+      "files": 512,
+      "before": {
+        "digest": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        },
+        "observed": {
+          "hits": 2,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        }
+      },
+      "after": {
+        "digest": {
+          "hits": 0,
+          "misses": 512,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "observed": {
+          "hits": 514,
+          "misses": 513,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      }
+    },
+    {
+      "files": 512,
+      "before": {
+        "digest": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        },
+        "observed": {
+          "hits": 2,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        }
+      },
+      "after": {
+        "digest": {
+          "hits": 0,
+          "misses": 512,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "observed": {
+          "hits": 514,
+          "misses": 513,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      }
+    },
+    {
+      "files": 512,
+      "before": {
+        "digest": {
+          "hits": 0,
+          "misses": 0,
+          "maxsize": 512,
+          "currsize": 0
+        },
+        "observed": {
+          "hits": 2,
+          "misses": 1,
+          "maxsize": 512,
+          "currsize": 1
+        }
+      },
+      "after": {
+        "digest": {
+          "hits": 0,
+          "misses": 512,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "observed": {
+          "hits": 514,
+          "misses": 513,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      }
+    },
+    {
+      "files": 512,
+      "before": {
+        "digest": {
+          "hits": 6,
+          "misses": 2,
+          "maxsize": 512,
+          "currsize": 2
+        },
+        "observed": {
+          "hits": 14,
+          "misses": 2,
+          "maxsize": 512,
+          "currsize": 2
+        }
+      },
+      "after": {
+        "digest": {
+          "hits": 6,
+          "misses": 514,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "observed": {
+          "hits": 526,
+          "misses": 514,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      }
+    },
+    {
+      "files": 512,
+      "before": {
+        "digest": {
+          "hits": 12,
+          "misses": 516,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "observed": {
+          "hits": 540,
+          "misses": 516,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      },
+      "after": {
+        "digest": {
+          "hits": 12,
+          "misses": 1028,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "observed": {
+          "hits": 1052,
+          "misses": 1028,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      }
+    },
+    {
+      "files": 512,
+      "before": {
+        "digest": {
+          "hits": 18,
+          "misses": 1030,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "observed": {
+          "hits": 1066,
+          "misses": 1030,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      },
+      "after": {
+        "digest": {
+          "hits": 18,
+          "misses": 1542,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "observed": {
+          "hits": 1578,
+          "misses": 1542,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      }
+    },
+    {
+      "files": 512,
+      "before": {
+        "digest": {
+          "hits": 15,
+          "misses": 3,
+          "maxsize": 512,
+          "currsize": 3
+        },
+        "observed": {
+          "hits": 21,
+          "misses": 3,
+          "maxsize": 512,
+          "currsize": 3
+        }
+      },
+      "after": {
+        "digest": {
+          "hits": 15,
+          "misses": 515,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "observed": {
+          "hits": 533,
+          "misses": 515,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      }
+    },
+    {
+      "files": 512,
+      "before": {
+        "digest": {
+          "hits": 30,
+          "misses": 518,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "observed": {
+          "hits": 554,
+          "misses": 518,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      },
+      "after": {
+        "digest": {
+          "hits": 30,
+          "misses": 1030,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "observed": {
+          "hits": 1066,
+          "misses": 1030,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      }
+    },
+    {
+      "files": 512,
+      "before": {
+        "digest": {
+          "hits": 45,
+          "misses": 1033,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "observed": {
+          "hits": 1087,
+          "misses": 1033,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      },
+      "after": {
+        "digest": {
+          "hits": 45,
+          "misses": 1545,
+          "maxsize": 512,
+          "currsize": 512
+        },
+        "observed": {
+          "hits": 1599,
+          "misses": 1545,
+          "maxsize": 512,
+          "currsize": 512
+        }
+      }
+    }
+  ],
+  "gates": [
+    {
+      "name": "GrizzlyCreek_SBS_final.tif: settled complete hit",
+      "actual": 0.009828504198230803,
+      "limit": 0.025,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "GrizzlyCreek_SBS_final.tif: settled hash bytes",
+      "actual": 0,
+      "limit": 0,
+      "unit": "bytes",
+      "passed": true
+    },
+    {
+      "name": "GrizzlyCreek_SBS_final.tif: settled_miss added",
+      "actual": -0.000446153416608773,
+      "limit": 0.05,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "GrizzlyCreek_SBS_final.tif: settled_miss measured nonnative overhead",
+      "actual": 0.01039404422044754,
+      "limit": 0.05,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "GrizzlyCreek_SBS_final.tif: cold_miss added",
+      "actual": -0.0005124810462196691,
+      "limit": 0.05,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "GrizzlyCreek_SBS_final.tif: cold_miss measured nonnative overhead",
+      "actual": 0.015923878410831094,
+      "limit": 0.05,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "baer.cropped.tif: settled complete hit",
+      "actual": 0.009954931253256897,
+      "limit": 0.025,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "baer.cropped.tif: settled hash bytes",
+      "actual": 0,
+      "limit": 0,
+      "unit": "bytes",
+      "passed": true
+    },
+    {
+      "name": "baer.cropped.tif: settled_miss added",
+      "actual": -0.012729727740709962,
+      "limit": 0.05,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "baer.cropped.tif: settled_miss measured nonnative overhead",
+      "actual": 0.010246880197276709,
+      "limit": 0.05,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "baer.cropped.tif: cold_miss added",
+      "actual": -0.008605543368806423,
+      "limit": 0.05,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "baer.cropped.tif: cold_miss measured nonnative overhead",
+      "actual": 0.014338974685718653,
+      "limit": 0.05,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "curable-program: settled_hit validation",
+      "actual": 0.013940882636234164,
+      "limit": 0.075,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "curable-program: settled_hit whole added",
+      "actual": 0.011560406923914954,
+      "limit": 0.1,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "curable-program: settled_hit lock added",
+      "actual": 0.013190793339163065,
+      "limit": 0.1,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "curable-program: settled_hit hash bytes",
+      "actual": 0,
+      "limit": 0,
+      "unit": "bytes",
+      "passed": true
+    },
+    {
+      "name": "curable-program: settled_miss validation",
+      "actual": 0.01369259700489541,
+      "limit": 0.075,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "curable-program: settled_miss whole added",
+      "actual": 0.014577998081222177,
+      "limit": 0.1,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "curable-program: settled_miss lock added",
+      "actual": 0.013228176937748984,
+      "limit": 0.1,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "curable-program: settled_miss hash bytes",
+      "actual": 0,
+      "limit": 0,
+      "unit": "bytes",
+      "passed": true
+    },
+    {
+      "name": "curable-program: cold_hit validation",
+      "actual": 0.01827679411508143,
+      "limit": 0.4,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "curable-program: cold_hit whole added",
+      "actual": 0.01997798394101362,
+      "limit": 0.45,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "curable-program: cold_hit lock added",
+      "actual": 0.01896597957238555,
+      "limit": 0.45,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "curable-program: cold_miss validation",
+      "actual": 0.01825088805829485,
+      "limit": 0.4,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "curable-program: cold_miss whole added",
+      "actual": 0.002896682902549713,
+      "limit": 0.45,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "curable-program: cold_miss lock added",
+      "actual": 0.004264412370199963,
+      "limit": 0.45,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "curable-program: evicted_hit validation",
+      "actual": 0.019322918883214395,
+      "limit": 0.4,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "curable-program: evicted_hit whole added",
+      "actual": 0.020734452875331044,
+      "limit": 0.45,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "curable-program: evicted_hit lock added",
+      "actual": 0.021027792245149612,
+      "limit": 0.45,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "beneficiary-forfeit: settled_hit validation",
+      "actual": 0.0458608929378291,
+      "limit": 0.075,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "beneficiary-forfeit: settled_hit whole added",
+      "actual": 0.029039249134560463,
+      "limit": 0.1,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "beneficiary-forfeit: settled_hit lock added",
+      "actual": 0.019659084423134687,
+      "limit": 0.1,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "beneficiary-forfeit: settled_hit hash bytes",
+      "actual": 0,
+      "limit": 0,
+      "unit": "bytes",
+      "passed": true
+    },
+    {
+      "name": "beneficiary-forfeit: settled_miss validation",
+      "actual": 0.047914140935366355,
+      "limit": 0.075,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "beneficiary-forfeit: settled_miss whole added",
+      "actual": 0.04355816512058164,
+      "limit": 0.1,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "beneficiary-forfeit: settled_miss lock added",
+      "actual": 0.030782487243413925,
+      "limit": 0.1,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "beneficiary-forfeit: settled_miss hash bytes",
+      "actual": 0,
+      "limit": 0,
+      "unit": "bytes",
+      "passed": true
+    },
+    {
+      "name": "beneficiary-forfeit: cold_hit validation",
+      "actual": 0.3432599965793391,
+      "limit": 0.4,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "beneficiary-forfeit: cold_hit whole added",
+      "actual": 0.3257589456625283,
+      "limit": 0.45,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "beneficiary-forfeit: cold_hit lock added",
+      "actual": 0.3243310849647969,
+      "limit": 0.45,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "beneficiary-forfeit: cold_miss validation",
+      "actual": 0.3313307939873387,
+      "limit": 0.4,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "beneficiary-forfeit: cold_miss whole added",
+      "actual": 0.29630940880936874,
+      "limit": 0.45,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "beneficiary-forfeit: cold_miss lock added",
+      "actual": 0.2966987913629662,
+      "limit": 0.45,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "beneficiary-forfeit: evicted_hit validation",
+      "actual": 0.33137980514826876,
+      "limit": 0.4,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "beneficiary-forfeit: evicted_hit whole added",
+      "actual": 0.3585999987553806,
+      "limit": 0.45,
+      "unit": "seconds",
+      "passed": true
+    },
+    {
+      "name": "beneficiary-forfeit: evicted_hit lock added",
+      "actual": 0.3503450170004119,
+      "limit": 0.45,
+      "unit": "seconds",
+      "passed": true
+    }
+  ],
+  "baseline_source_sha256": "c57a21ca8e10bfd30bec969c808cd16834f5c26c56d6e1d3e12c99a1ebe561a3",
+  "inputs_unchanged": true,
+  "module_files_unchanged": true,
+  "acceptance_passed": true
+}

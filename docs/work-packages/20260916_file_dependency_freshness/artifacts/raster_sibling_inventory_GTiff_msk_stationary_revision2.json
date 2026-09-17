@@ -1,0 +1,8 @@
+{
+  "case": "GTiff_msk_stationary",
+  "gdal": "3100300",
+  "requests": [],
+  "calls": [],
+  "unverified": true,
+  "error": null
+}

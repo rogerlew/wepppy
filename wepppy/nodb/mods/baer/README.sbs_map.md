@@ -206,6 +206,13 @@ Targeted tests:
 wctl run-pytest tests/nodb/mods/baer/test_sbs_map_extended.py tests/nodb/mods/baer/test_sbs_map_classify_validation.py tests/sbs_map/test_sbs_map.py
 ```
 
+The eight-entry native summary cache uses verified local raster dependency
+content, including supported masks and georeference files. Equal-size edits with
+restored timestamps invalidate reuse; metadata-only edits retain it. Unverified
+layouts (including VRT/PAM) retain native behavior without caching. A source
+change detected during summary/reuse raises ESTALE; retry after the upload or
+writer finishes. No Python summary fallback is introduced.
+
 ## Operational Notes
 
 - `sbs_map_sanity_check` validates projection, integer classes, class count, and color-table recognizability; it does not clip/crop rasters to a run extent.

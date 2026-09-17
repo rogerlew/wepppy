@@ -1,0 +1,47 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/test_raster_freshness.py::test_changed_then_restored_native_input_is_not_admitted --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 1 item
+
+tests/test_raster_freshness.py F
+
+=================================== FAILURES ===================================
+___________ test_changed_then_restored_native_input_is_not_admitted ____________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-131/test_changed_then_restored_nat0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7828a408d7c0>
+
+    def test_changed_then_restored_native_input_is_not_admitted(tmp_path, monkeypatch):
+        source = raster(tmp_path / 'source.tif', ((1, 1), (1, 1)))
+        accepted = source.read_bytes()
+        version = source.stat()
+        native = sbs_map._summarize_sbs_raster_rust
+        def changed_then_restored(path):
+            rewrite(source, 3)
+            summary = native(path)
+            source.write_bytes(accepted)
+            os.utime(source, ns=(version.st_atime_ns, version.st_mtime_ns))
+            return summary
+        monkeypatch.setattr(sbs_map, '_summarize_sbs_raster_rust', changed_then_restored)
+>       with pytest.raises(OSError) as error:
+             ^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'OSError'>
+
+tests/test_raster_freshness.py:262: Failed
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_raster_freshness.py::test_changed_then_restored_native_input_is_not_admitted
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+======================== 1 failed, 2 warnings in 8.99s =========================

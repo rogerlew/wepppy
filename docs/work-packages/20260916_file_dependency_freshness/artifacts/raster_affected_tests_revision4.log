@@ -1,0 +1,47 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/test_raster_freshness.py tests/nodb/test_landuse_coverage_area_source.py tests/nodb/test_landuse_mofe_freshness.py tests/nodb/mods/baer --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 138 items
+
+tests/test_raster_freshness.py .............                             [  9%]
+tests/nodb/test_landuse_coverage_area_source.py ........                 [ 15%]
+tests/nodb/test_landuse_mofe_freshness.py ......                         [ 19%]
+tests/nodb/mods/baer/test_baer_prep_timestamps.py .                      [ 20%]
+tests/nodb/mods/baer/test_landuse_remap_locking.py .                     [ 21%]
+tests/nodb/mods/baer/test_sbs_classify_comprehensive.py ................ [ 32%]
+...........                                                              [ 40%]
+tests/nodb/mods/baer/test_sbs_coverage_mask.py .....                     [ 44%]
+tests/nodb/mods/baer/test_sbs_display_transport_contract.py .            [ 44%]
+tests/nodb/mods/baer/test_sbs_map_classify_validation.py ............    [ 53%]
+tests/nodb/mods/baer/test_sbs_map_extended.py .......................... [ 72%]
+.................                                                        [ 84%]
+tests/nodb/mods/baer/test_sbs_native_required.py ....................    [ 99%]
+tests/nodb/mods/baer/test_sbs_rattlesnake_gdal.py .                      [100%]
+
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+tests/test_raster_freshness.py::test_unverified_preserves_native_boundary_without_cache[empty]
+tests/test_raster_freshness.py::test_denied_dependency_cannot_authorize_reuse
+  /opt/venv/lib/python3.12/site-packages/_pytest/raises.py:622: PytestWarning: matching against an empty string will *always* pass. If you want to check for an empty message you need to pass '^$'. If you don't want to match you should pass `None` or leave out the parameter.
+    super().__init__(match=match, check=check)
+
+tests/nodb/mods/baer/test_baer_prep_timestamps.py::test_modify_burn_class_updates_landuse_and_sbs_timestamps
+  /workdir/wepppy/tests/nodb/mods/baer/test_baer_prep_timestamps.py:32: DeprecationWarning: Call to deprecated class Baer. (supplanted by Disturbed, needed for Portland)
+    baer = Baer.__new__(Baer)
+
+tests/nodb/mods/baer/test_landuse_remap_locking.py::test_remap_landuse_rebuilds_managements_after_unlock
+  /workdir/wepppy/tests/nodb/mods/baer/test_landuse_remap_locking.py:64: DeprecationWarning: Call to deprecated class Baer. (supplanted by Disturbed, needed for Portland)
+    baer = Baer.__new__(Baer)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 138 passed, 6 warnings in 12.32s =======================
