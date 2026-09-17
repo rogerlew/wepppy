@@ -1489,3 +1489,17 @@ function syncGraphLayout() {
 **Document Status:** Complete  
 **Review:** Ready for developer onboarding and testing team handoff  
 **Maintenance:** Update when new layer types or graph modes added
+
+## Currentness after a run is regenerated
+
+An already open dashboard keeps some page-local results. If its run is
+regenerated, cached years can remain old while a newly requested year reads new
+outputs. The view is not a generation-pinned snapshot, and the standalone page
+does not currently subscribe to completion on the run page. After regeneration
+finishes, reopen the refreshed run-page dashboard link in a new tab or reload
+the existing document. Same-scenario selection does not clear every cache.
+
+This is an existing limitation, not a promise of live refresh or a coherent
+snapshot across independent queries. A future refresh contract must define the
+participating map/graph caches and handling of in-flight queries before adding
+automatic generation changes.

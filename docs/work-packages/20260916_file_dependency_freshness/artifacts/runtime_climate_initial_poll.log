@@ -1,0 +1,22 @@
+climate_initial_poll_0000 200
+tree 8dff6225-ff3c-4679-a448-d2ca9ef6f4f1 started {'completed': 0, 'total': 1, 'unit': 'jobs', 'percent': 0.0, 'updated_at': '2026-09-17T08:05:03Z'}
+climate_initial_poll_0001 200
+climate_initial_poll_0002 200
+climate_initial_poll_0003 200
+climate_initial_poll_0004 200
+climate_initial_poll_0005 200
+climate_initial_poll_0006 200
+climate_initial_poll_0007 200
+climate_initial_poll_0008 200
+climate_initial_poll_0009 200
+climate_initial_poll_0010 200
+climate_initial_poll_0011 200
+climate_initial_poll_0012 200
+climate_initial_poll_0013 200
+climate_initial_poll_0014 200
+climate_initial_poll_0015 200
+climate_initial_poll_0016 200
+climate_initial_poll_0017 200
+climate_initial_poll_0018 200
+tree 8dff6225-ff3c-4679-a448-d2ca9ef6f4f1 finished {'completed': 1, 'total': 1, 'unit': 'jobs', 'percent': 100.0, 'updated_at': '2026-09-17T08:06:48Z'}
+climate_initial_jobinfo 200

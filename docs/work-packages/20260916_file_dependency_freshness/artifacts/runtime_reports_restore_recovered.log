@@ -1,0 +1,6 @@
+restore_recovered_report_state 200
+Traceback (most recent call last):
+  File "/home/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/runtime_reports_http.py", line 57, in <module>
+    assert all(row['status'] == 200 for row in rows), 'One or more HTTP report rows failed; see retained complete evidence'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: One or more HTTP report rows failed; see retained complete evidence

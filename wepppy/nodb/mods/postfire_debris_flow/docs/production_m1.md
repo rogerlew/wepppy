@@ -672,7 +672,7 @@ Run M1 prepares absent Kf through the existing worker; new-run readiness and fre
 Earlier conflicting requirements remain the historical/legacy contract only
 once this checkpoint is accepted; do not reinterpret old accepted artifacts.
 
-## File-content currentness refinement (implementation pending)
+## File-content currentness refinement (implemented)
 
 The [file dependency freshness contract](../../../../../docs/schemas/file-dependency-freshness-contract.md)
 refines ordinary source/artifact currentness: new snapshots add content hashes,

@@ -1,0 +1,25 @@
+services/preflight2/cmd/preflight2/main.go:47:		IdleTimeout:       cfg.PongTimeout + cfg.PingInterval,
+services/status2/internal/config/config.go:17:	PongTimeout         time.Duration
+services/status2/internal/config/config.go:37:	defaultPongTimeout        = 75 * time.Second
+services/status2/internal/config/config.go:57:		PongTimeout:         getDurationEnv("PONG_TIMEOUT", defaultPongTimeout),
+services/status2/internal/config/config.go:128:	contents, err := os.ReadFile(path)
+services/status2/internal/config/config.go:263:		c.PongTimeout,
+services/preflight2/internal/checklist/checklist.go:125:			// Published Kf has no POLARIS/RUSLE task dependency.
+services/preflight2/internal/checklist/checklist.go:278:func Equal(a, b Payload) bool {
+services/preflight2/internal/checklist/checklist.go:282:	return reflect.DeepEqual(a.Checklist, b.Checklist) &&
+services/preflight2/internal/checklist/checklist.go:283:		reflect.DeepEqual(a.LockStatuses, b.LockStatuses) &&
+services/status2/cmd/status2/main.go:47:		IdleTimeout:       cfg.PingInterval + cfg.PongTimeout,
+services/preflight2/internal/config/config.go:18:	PongTimeout         time.Duration
+services/preflight2/internal/config/config.go:38:	defaultPongTimeout        = 75 * time.Second
+services/preflight2/internal/config/config.go:59:		PongTimeout:         getDurationEnv("PONG_TIMEOUT", defaultPongTimeout),
+services/preflight2/internal/config/config.go:131:	contents, err := os.ReadFile(path)
+services/preflight2/internal/config/config.go:267:		c.PongTimeout,
+services/preflight2/internal/server/server.go:157:	lastSeen atomic.Int64
+services/preflight2/internal/server/server.go:251:			if time.Since(time.Unix(0, c.lastSeen.Load())) > c.srv.cfg.PongTimeout {
+services/preflight2/internal/server/server.go:273:		pubsub := c.srv.redis.PSubscribe(ctx, pattern)
+services/preflight2/internal/server/server.go:378:	prep, err := c.srv.redis.HGetAll(fetchCtx, c.runID).Result()
+services/preflight2/internal/server/server.go:433:	c.lastSeen.Store(time.Now().UnixNano())
+services/status2/internal/server/server.go:141:	lastSeen atomic.Int64
+services/status2/internal/server/server.go:209:			if time.Since(time.Unix(0, c.lastSeen.Load())) > c.srv.cfg.PongTimeout {
+services/status2/internal/server/server.go:231:		pubsub := c.srv.redis.Subscribe(ctx, channel)
+services/status2/internal/server/server.go:351:	c.lastSeen.Store(time.Now().UnixNano())

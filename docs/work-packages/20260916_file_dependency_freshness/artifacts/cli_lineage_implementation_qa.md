@@ -2,7 +2,7 @@
 
 Review after contract checkpoint `166c8f79d`. **Scoped code/test quality and
 explicitly amended performance acceptance PASS.** The original budget failure
-remains recorded below; combined affected/full-state/runtime gates remain open. No production
+remains recorded below; full-state/runtime gates remain open. No production
 or test edits by this reviewer. This is not full-package closure.
 
 ## Maintainability and meaningful coverage
@@ -187,8 +187,10 @@ clones use unique QA runids. CLI-QA-P01 is **closed under the explicitly amended
 contract**, while the original failed gate remains immutable evidence. This is
 scoped component acceptance, not a substitute for whole-state or runtime evidence.
 
-Pending: complete affected tests and actual browser/runtime acceptance. The corrected native M3 fixture gate now
-passes all 36 cases; independent scoped security review passes after its three
+The final affected gate now passes **857 tests** in
+`cli_lineage_affected_final.log`; final stub completeness and changed broad-exception
+checks also pass. Pending: actual full-state and browser/runtime acceptance.
+The corrected native M3 fixture gate passes all 36 cases; independent scoped security review passes after its three
 verified corrections. Whole climate generation, NOAA/frequency
 work and the existing one-second wrapper delay are outside the export-entrypoint
 budget. Warm local storage measurements do not establish cold NFS performance.

@@ -1,0 +1,16 @@
+[
+  {
+    "path": "/weppcloud/batch/qa-freshness-archive-3a8be19a8e1e/download/runs/archive/geneva/cache_attempts/fe140f898bf74c8cb65b58bdff9e1d4a/status.json",
+    "status": 200,
+    "bytes": 268,
+    "sha256": "4f9c1c908efbe613c33717d095c1a0ac218d07488e724113f39bc2b7f3eff9a2",
+    "source_sha256": "4f9c1c908efbe613c33717d095c1a0ac218d07488e724113f39bc2b7f3eff9a2"
+  },
+  {
+    "path": "/weppcloud/batch/qa-freshness-archive-3a8be19a8e1e/download/runs/archive/geneva/cache_attempts/fe140f898bf74c8cb65b58bdff9e1d4a/failed.geojson",
+    "status": 200,
+    "bytes": 30,
+    "sha256": "e06d57905709c0d2b0899c84e56c94d2a2bfeb6045d222905d1f000dbd9a07e8",
+    "source_sha256": "e06d57905709c0d2b0899c84e56c94d2a2bfeb6045d222905d1f000dbd9a07e8"
+  }
+]

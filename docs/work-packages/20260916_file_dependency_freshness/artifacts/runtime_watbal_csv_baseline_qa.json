@@ -1,0 +1,69 @@
+{
+  "baseline": "7d78e9810",
+  "files": {
+    "wepppy/wepp/reports/hillslope_watbal.py": {
+      "baseline_sha256": "aad61a4b69985c6f89d84741cbe4a8e1b2b8cbea311982a9848d97dc0bf4f74e",
+      "current_sha256": "b3a14b6cbfa068207d5d0c459b36b3a67f196f505c86b6fbf60f8d0a96620d2d",
+      "unchanged": false,
+      "baseline_bases": [
+        "ReportBase"
+      ],
+      "baseline_methods": [
+        "__init__",
+        "_validate_cache_columns",
+        "_source_is_newer_than_cache",
+        "_initialise_empty",
+        "_build_summary",
+        "_write_native_summary",
+        "_load_roads_segment_target_map",
+        "_resolve_source_path",
+        "_resolve_cache_key",
+        "header",
+        "header",
+        "avg_annual_header",
+        "avg_annual_units",
+        "yearly_header",
+        "yearly_units",
+        "avg_annual_iter",
+        "yearly_iter"
+      ],
+      "current_bases": [
+        "ReportBase"
+      ],
+      "current_methods": [
+        "__init__",
+        "_historical",
+        "_load_or_build",
+        "_dependencies",
+        "_validate_cache_columns",
+        "_source_is_newer_than_cache",
+        "_initialise_empty",
+        "_build_summary",
+        "_resolve_mapping",
+        "_write_native_summary",
+        "_load_roads_segment_target_map",
+        "_resolve_source_path",
+        "_resolve_cache_key",
+        "header",
+        "header",
+        "avg_annual_header",
+        "avg_annual_units",
+        "yearly_header",
+        "yearly_units",
+        "avg_annual_iter",
+        "yearly_iter"
+      ]
+    },
+    "wepppy/wepp/reports/report_base.py": {
+      "baseline_sha256": "1e5bfed719b7c19fad0b04d12ff4ee347d671f282d95b56c7d8dbee54a1ea508",
+      "current_sha256": "1e5bfed719b7c19fad0b04d12ff4ee347d671f282d95b56c7d8dbee54a1ea508",
+      "unchanged": true
+    },
+    "wepppy/weppcloud/routes/nodb_api/wepp_bp.py": {
+      "baseline_sha256": "0ab91f60f7a08cbd1874d5f12d598b8c6ca16e204dd1460cbbaa8493aae0fe44",
+      "current_sha256": "0ab91f60f7a08cbd1874d5f12d598b8c6ca16e204dd1460cbbaa8493aae0fe44",
+      "unchanged": true
+    }
+  },
+  "scope": "Read-only static baseline/source comparison; live traceback is retained separately."
+}

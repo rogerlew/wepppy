@@ -1,0 +1,514 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20260916_file_dependency_freshness/artifacts/derived_rap_complete_set_probe.py
+2026-09-17 06:35:08 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1986 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:08 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1986 band BARE_GROUND
+2026-09-17 06:35:08 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1986 band LITTER
+2026-09-17 06:35:09 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1986 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:09 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1986 band SHRUB
+2026-09-17 06:35:09 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1986 band TREE
+2026-09-17 06:35:09 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1987 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:09 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1987 band BARE_GROUND
+2026-09-17 06:35:09 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1987 band LITTER
+2026-09-17 06:35:09 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1987 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:09 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1987 band SHRUB
+2026-09-17 06:35:09 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1987 band TREE
+2026-09-17 06:35:09 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1988 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:09 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1988 band BARE_GROUND
+2026-09-17 06:35:09 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1988 band LITTER
+2026-09-17 06:35:09 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1988 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:09 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1988 band SHRUB
+2026-09-17 06:35:10 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1988 band TREE
+2026-09-17 06:35:10 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1989 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:10 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1989 band BARE_GROUND
+2026-09-17 06:35:10 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1989 band LITTER
+2026-09-17 06:35:10 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1989 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:10 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1989 band SHRUB
+2026-09-17 06:35:10 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1989 band TREE
+2026-09-17 06:35:10 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1990 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:10 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1990 band BARE_GROUND
+2026-09-17 06:35:10 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1990 band LITTER
+2026-09-17 06:35:10 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1990 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:10 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1990 band SHRUB
+2026-09-17 06:35:10 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1990 band TREE
+2026-09-17 06:35:10 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1991 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:10 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1991 band BARE_GROUND
+2026-09-17 06:35:10 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1991 band LITTER
+2026-09-17 06:35:11 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1991 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:11 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1991 band SHRUB
+2026-09-17 06:35:11 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1991 band TREE
+2026-09-17 06:35:11 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1992 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:11 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1992 band BARE_GROUND
+2026-09-17 06:35:11 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1992 band LITTER
+2026-09-17 06:35:11 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1992 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:11 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1992 band SHRUB
+2026-09-17 06:35:11 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1992 band TREE
+2026-09-17 06:35:11 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1993 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:11 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1993 band BARE_GROUND
+2026-09-17 06:35:11 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1993 band LITTER
+2026-09-17 06:35:12 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1993 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:12 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1993 band SHRUB
+2026-09-17 06:35:12 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1993 band TREE
+2026-09-17 06:35:12 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1994 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:12 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1994 band BARE_GROUND
+2026-09-17 06:35:12 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1994 band LITTER
+2026-09-17 06:35:12 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1994 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:12 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1994 band SHRUB
+2026-09-17 06:35:12 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1994 band TREE
+2026-09-17 06:35:12 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1995 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:12 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1995 band BARE_GROUND
+2026-09-17 06:35:13 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1995 band LITTER
+2026-09-17 06:35:13 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1995 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:13 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1995 band SHRUB
+2026-09-17 06:35:13 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1995 band TREE
+2026-09-17 06:35:13 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1996 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:13 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1996 band BARE_GROUND
+2026-09-17 06:35:13 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1996 band LITTER
+2026-09-17 06:35:13 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1996 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:13 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1996 band SHRUB
+2026-09-17 06:35:13 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1996 band TREE
+2026-09-17 06:35:13 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1997 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:13 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1997 band BARE_GROUND
+2026-09-17 06:35:13 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1997 band LITTER
+2026-09-17 06:35:13 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1997 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:14 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1997 band SHRUB
+2026-09-17 06:35:14 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1997 band TREE
+2026-09-17 06:35:14 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1998 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:14 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1998 band BARE_GROUND
+2026-09-17 06:35:14 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1998 band LITTER
+2026-09-17 06:35:14 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1998 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:14 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1998 band SHRUB
+2026-09-17 06:35:14 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1998 band TREE
+2026-09-17 06:35:14 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1999 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:14 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1999 band BARE_GROUND
+2026-09-17 06:35:14 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1999 band LITTER
+2026-09-17 06:35:14 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1999 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:14 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1999 band SHRUB
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 1999 band TREE
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2000 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2000 band BARE_GROUND
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2000 band LITTER
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2000 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2000 band SHRUB
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2000 band TREE
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2001 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2001 band BARE_GROUND
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2000 band LITTER complete (1/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2000 band PERENNIAL_FORB_AND_GRASS complete (2/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1991 band SHRUB complete (3/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1993 band BARE_GROUND complete (4/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1994 band LITTER complete (5/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1999 band TREE complete (6/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1997 band LITTER complete (7/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1997 band TREE complete (8/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1999 band SHRUB complete (9/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1988 band SHRUB complete (10/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1994 band TREE complete (11/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1998 band TREE complete (12/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1988 band TREE complete (13/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1989 band TREE complete (14/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2000 band ANNUAL_FORB_AND_GRASS complete (15/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1994 band BARE_GROUND complete (16/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1993 band LITTER complete (17/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1990 band ANNUAL_FORB_AND_GRASS complete (18/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1993 band SHRUB complete (19/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1991 band BARE_GROUND complete (20/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1996 band ANNUAL_FORB_AND_GRASS complete (21/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1991 band LITTER complete (22/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1986 band PERENNIAL_FORB_AND_GRASS complete (23/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1991 band PERENNIAL_FORB_AND_GRASS complete (24/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1996 band LITTER complete (25/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1986 band SHRUB complete (26/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1995 band TREE complete (27/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1998 band ANNUAL_FORB_AND_GRASS complete (28/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1986 band LITTER complete (29/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1993 band PERENNIAL_FORB_AND_GRASS complete (30/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1989 band ANNUAL_FORB_AND_GRASS complete (31/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1986 band BARE_GROUND complete (32/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1989 band BARE_GROUND complete (33/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1998 band SHRUB complete (34/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1996 band TREE complete (35/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2001 band LITTER
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2001 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1989 band LITTER complete (36/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1989 band PERENNIAL_FORB_AND_GRASS complete (37/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1996 band SHRUB complete (38/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1986 band ANNUAL_FORB_AND_GRASS complete (39/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1991 band TREE complete (40/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1995 band PERENNIAL_FORB_AND_GRASS complete (41/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1998 band BARE_GROUND complete (42/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1992 band LITTER complete (43/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1992 band ANNUAL_FORB_AND_GRASS complete (44/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1999 band BARE_GROUND complete (45/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1995 band ANNUAL_FORB_AND_GRASS complete (46/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1999 band ANNUAL_FORB_AND_GRASS complete (47/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1996 band PERENNIAL_FORB_AND_GRASS complete (48/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1986 band TREE complete (49/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1995 band SHRUB complete (50/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1993 band TREE complete (51/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1998 band LITTER complete (52/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1987 band ANNUAL_FORB_AND_GRASS complete (53/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1987 band BARE_GROUND complete (54/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1999 band PERENNIAL_FORB_AND_GRASS complete (55/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1997 band SHRUB complete (56/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1998 band PERENNIAL_FORB_AND_GRASS complete (57/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1997 band BARE_GROUND complete (58/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1994 band SHRUB complete (59/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1990 band BARE_GROUND complete (60/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1990 band LITTER complete (61/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1992 band BARE_GROUND complete (62/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1987 band LITTER complete (63/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1987 band PERENNIAL_FORB_AND_GRASS complete (64/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1987 band SHRUB complete (65/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1999 band LITTER complete (66/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1987 band TREE complete (67/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1996 band BARE_GROUND complete (68/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1989 band SHRUB complete (69/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1994 band ANNUAL_FORB_AND_GRASS complete (70/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1988 band ANNUAL_FORB_AND_GRASS complete (71/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1997 band PERENNIAL_FORB_AND_GRASS complete (72/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1992 band TREE complete (73/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1997 band ANNUAL_FORB_AND_GRASS complete (74/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2000 band BARE_GROUND complete (75/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1995 band LITTER complete (76/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1988 band LITTER complete (77/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1992 band PERENNIAL_FORB_AND_GRASS complete (78/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2000 band SHRUB complete (79/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1988 band BARE_GROUND complete (80/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1994 band PERENNIAL_FORB_AND_GRASS complete (81/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1992 band SHRUB complete (82/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1988 band PERENNIAL_FORB_AND_GRASS complete (83/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1995 band BARE_GROUND complete (84/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1990 band PERENNIAL_FORB_AND_GRASS complete (85/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1990 band SHRUB complete (86/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1993 band ANNUAL_FORB_AND_GRASS complete (87/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1990 band TREE complete (88/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 1991 band ANNUAL_FORB_AND_GRASS complete (89/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2001 band BARE_GROUND complete (90/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2001 band ANNUAL_FORB_AND_GRASS complete (91/234)
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2001 band SHRUB
+2026-09-17 06:35:15 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2001 band TREE
+2026-09-17 06:35:16 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2002 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:16 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2001 band SHRUB complete (92/234)
+2026-09-17 06:35:16 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2000 band TREE complete (93/234)
+2026-09-17 06:35:16 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2001 band PERENNIAL_FORB_AND_GRASS complete (94/234)
+2026-09-17 06:35:16 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2002 band BARE_GROUND
+2026-09-17 06:35:16 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2002 band LITTER
+2026-09-17 06:35:16 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2002 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:16 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2002 band SHRUB
+2026-09-17 06:35:16 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2002 band TREE
+2026-09-17 06:35:16 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2002 band LITTER complete (95/234)
+2026-09-17 06:35:16 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2002 band BARE_GROUND complete (96/234)
+2026-09-17 06:35:16 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2001 band LITTER complete (97/234)
+2026-09-17 06:35:16 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2001 band TREE complete (98/234)
+2026-09-17 06:35:16 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2003 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:16 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2002 band SHRUB complete (99/234)
+2026-09-17 06:35:16 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2003 band BARE_GROUND
+2026-09-17 06:35:16 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2003 band LITTER
+2026-09-17 06:35:16 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2003 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:16 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2003 band SHRUB
+2026-09-17 06:35:17 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2003 band TREE
+2026-09-17 06:35:17 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2004 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:17 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2004 band BARE_GROUND
+2026-09-17 06:35:17 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2004 band LITTER
+2026-09-17 06:35:17 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2004 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:17 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2004 band SHRUB
+2026-09-17 06:35:17 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2004 band TREE
+2026-09-17 06:35:17 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2005 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:17 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2002 band ANNUAL_FORB_AND_GRASS complete (100/234)
+2026-09-17 06:35:17 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2003 band LITTER complete (101/234)
+2026-09-17 06:35:17 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2004 band SHRUB complete (102/234)
+2026-09-17 06:35:17 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2002 band PERENNIAL_FORB_AND_GRASS complete (103/234)
+2026-09-17 06:35:17 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2003 band TREE complete (104/234)
+2026-09-17 06:35:17 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2003 band ANNUAL_FORB_AND_GRASS complete (105/234)
+2026-09-17 06:35:17 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2004 band LITTER complete (106/234)
+2026-09-17 06:35:17 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2003 band PERENNIAL_FORB_AND_GRASS complete (107/234)
+2026-09-17 06:35:17 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2003 band BARE_GROUND complete (108/234)
+2026-09-17 06:35:17 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2003 band SHRUB complete (109/234)
+2026-09-17 06:35:17 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2002 band TREE complete (110/234)
+2026-09-17 06:35:17 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2005 band BARE_GROUND
+2026-09-17 06:35:17 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2005 band LITTER
+2026-09-17 06:35:17 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2005 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:17 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2005 band SHRUB
+2026-09-17 06:35:17 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2005 band TREE
+2026-09-17 06:35:18 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2006 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:18 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2006 band BARE_GROUND
+2026-09-17 06:35:18 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2006 band LITTER
+2026-09-17 06:35:18 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2006 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:18 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2006 band ANNUAL_FORB_AND_GRASS complete (111/234)
+2026-09-17 06:35:18 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2005 band SHRUB complete (112/234)
+2026-09-17 06:35:18 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2004 band TREE complete (113/234)
+2026-09-17 06:35:18 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2005 band LITTER complete (114/234)
+2026-09-17 06:35:18 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2004 band ANNUAL_FORB_AND_GRASS complete (115/234)
+2026-09-17 06:35:18 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2004 band PERENNIAL_FORB_AND_GRASS complete (116/234)
+2026-09-17 06:35:18 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2005 band ANNUAL_FORB_AND_GRASS complete (117/234)
+2026-09-17 06:35:18 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2005 band PERENNIAL_FORB_AND_GRASS complete (118/234)
+2026-09-17 06:35:18 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2004 band BARE_GROUND complete (119/234)
+2026-09-17 06:35:18 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2006 band SHRUB
+2026-09-17 06:35:18 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2006 band TREE
+2026-09-17 06:35:18 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2007 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:18 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2007 band BARE_GROUND
+2026-09-17 06:35:18 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2007 band LITTER
+2026-09-17 06:35:18 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2005 band BARE_GROUND complete (120/234)
+2026-09-17 06:35:18 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2006 band LITTER complete (121/234)
+2026-09-17 06:35:18 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2006 band BARE_GROUND complete (122/234)
+2026-09-17 06:35:18 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2006 band PERENNIAL_FORB_AND_GRASS complete (123/234)
+2026-09-17 06:35:18 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2006 band SHRUB complete (124/234)
+2026-09-17 06:35:18 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2007 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:18 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2007 band BARE_GROUND complete (125/234)
+2026-09-17 06:35:18 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2007 band SHRUB
+2026-09-17 06:35:19 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2007 band TREE
+2026-09-17 06:35:19 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2008 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:19 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2008 band BARE_GROUND
+2026-09-17 06:35:19 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2008 band LITTER
+2026-09-17 06:35:19 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2008 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:19 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2008 band SHRUB
+2026-09-17 06:35:19 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2008 band TREE
+2026-09-17 06:35:19 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2009 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:19 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2009 band BARE_GROUND
+2026-09-17 06:35:19 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2009 band LITTER
+2026-09-17 06:35:19 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2008 band LITTER complete (126/234)
+2026-09-17 06:35:19 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2007 band PERENNIAL_FORB_AND_GRASS complete (127/234)
+2026-09-17 06:35:19 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2006 band TREE complete (128/234)
+2026-09-17 06:35:19 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2007 band SHRUB complete (129/234)
+2026-09-17 06:35:19 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2005 band TREE complete (130/234)
+2026-09-17 06:35:19 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2007 band LITTER complete (131/234)
+2026-09-17 06:35:19 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2007 band ANNUAL_FORB_AND_GRASS complete (132/234)
+2026-09-17 06:35:19 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2008 band SHRUB complete (133/234)
+2026-09-17 06:35:19 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2007 band TREE complete (134/234)
+2026-09-17 06:35:19 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2009 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:19 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2009 band SHRUB
+2026-09-17 06:35:19 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2009 band TREE
+2026-09-17 06:35:20 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2010 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:20 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2009 band BARE_GROUND complete (135/234)
+2026-09-17 06:35:20 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2008 band ANNUAL_FORB_AND_GRASS complete (136/234)
+2026-09-17 06:35:20 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2009 band ANNUAL_FORB_AND_GRASS complete (137/234)
+2026-09-17 06:35:20 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2008 band BARE_GROUND complete (138/234)
+2026-09-17 06:35:20 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2010 band BARE_GROUND
+2026-09-17 06:35:20 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2010 band LITTER
+2026-09-17 06:35:20 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2010 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:20 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2010 band SHRUB
+2026-09-17 06:35:20 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2010 band TREE
+2026-09-17 06:35:20 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2011 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:20 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2011 band BARE_GROUND
+2026-09-17 06:35:20 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2011 band LITTER
+2026-09-17 06:35:20 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2011 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:20 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2009 band SHRUB complete (139/234)
+2026-09-17 06:35:20 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2008 band TREE complete (140/234)
+2026-09-17 06:35:20 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2010 band BARE_GROUND complete (141/234)
+2026-09-17 06:35:20 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2010 band SHRUB complete (142/234)
+2026-09-17 06:35:20 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2009 band LITTER complete (143/234)
+2026-09-17 06:35:20 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2009 band TREE complete (144/234)
+2026-09-17 06:35:20 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2010 band LITTER complete (145/234)
+2026-09-17 06:35:20 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2009 band PERENNIAL_FORB_AND_GRASS complete (146/234)
+2026-09-17 06:35:20 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2010 band ANNUAL_FORB_AND_GRASS complete (147/234)
+2026-09-17 06:35:20 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2011 band SHRUB
+2026-09-17 06:35:20 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2011 band TREE
+2026-09-17 06:35:20 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2011 band BARE_GROUND complete (148/234)
+2026-09-17 06:35:20 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2011 band LITTER complete (149/234)
+2026-09-17 06:35:20 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2012 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:21 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2012 band BARE_GROUND
+2026-09-17 06:35:21 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2012 band LITTER
+2026-09-17 06:35:21 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2012 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:21 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2010 band PERENNIAL_FORB_AND_GRASS complete (150/234)
+2026-09-17 06:35:21 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2011 band SHRUB complete (151/234)
+2026-09-17 06:35:21 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2011 band TREE complete (152/234)
+2026-09-17 06:35:21 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2012 band ANNUAL_FORB_AND_GRASS complete (153/234)
+2026-09-17 06:35:21 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2012 band SHRUB
+2026-09-17 06:35:21 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2012 band TREE
+2026-09-17 06:35:21 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2013 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:21 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2013 band BARE_GROUND
+2026-09-17 06:35:21 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2013 band LITTER
+2026-09-17 06:35:21 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2013 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:21 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2013 band SHRUB
+2026-09-17 06:35:21 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2013 band TREE
+2026-09-17 06:35:21 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2014 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:21 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2014 band BARE_GROUND
+2026-09-17 06:35:21 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2014 band LITTER
+2026-09-17 06:35:21 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2014 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:22 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2014 band SHRUB
+2026-09-17 06:35:22 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2014 band TREE
+2026-09-17 06:35:22 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2015 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:22 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2012 band SHRUB complete (154/234)
+2026-09-17 06:35:22 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2011 band ANNUAL_FORB_AND_GRASS complete (155/234)
+2026-09-17 06:35:22 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2013 band PERENNIAL_FORB_AND_GRASS complete (156/234)
+2026-09-17 06:35:22 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2013 band TREE complete (157/234)
+2026-09-17 06:35:22 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2013 band BARE_GROUND complete (158/234)
+2026-09-17 06:35:22 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2012 band LITTER complete (159/234)
+2026-09-17 06:35:22 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2011 band PERENNIAL_FORB_AND_GRASS complete (160/234)
+2026-09-17 06:35:22 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2008 band PERENNIAL_FORB_AND_GRASS complete (161/234)
+2026-09-17 06:35:22 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2012 band TREE complete (162/234)
+2026-09-17 06:35:22 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2013 band LITTER complete (163/234)
+2026-09-17 06:35:22 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2012 band PERENNIAL_FORB_AND_GRASS complete (164/234)
+2026-09-17 06:35:22 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2010 band TREE complete (165/234)
+2026-09-17 06:35:22 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2012 band BARE_GROUND complete (166/234)
+2026-09-17 06:35:22 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2013 band ANNUAL_FORB_AND_GRASS complete (167/234)
+2026-09-17 06:35:22 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2015 band BARE_GROUND
+2026-09-17 06:35:22 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2015 band LITTER
+2026-09-17 06:35:22 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2015 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:22 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2015 band SHRUB
+2026-09-17 06:35:22 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2015 band TREE
+2026-09-17 06:35:22 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2016 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:22 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2016 band BARE_GROUND
+2026-09-17 06:35:22 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2016 band LITTER
+2026-09-17 06:35:23 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2016 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:23 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2016 band SHRUB
+2026-09-17 06:35:23 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2016 band LITTER complete (168/234)
+2026-09-17 06:35:23 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2015 band BARE_GROUND complete (169/234)
+2026-09-17 06:35:23 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2014 band ANNUAL_FORB_AND_GRASS complete (170/234)
+2026-09-17 06:35:23 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2015 band LITTER complete (171/234)
+2026-09-17 06:35:23 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2015 band TREE complete (172/234)
+2026-09-17 06:35:23 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2015 band ANNUAL_FORB_AND_GRASS complete (173/234)
+2026-09-17 06:35:23 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2014 band BARE_GROUND complete (174/234)
+2026-09-17 06:35:23 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2015 band PERENNIAL_FORB_AND_GRASS complete (175/234)
+2026-09-17 06:35:23 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2016 band TREE
+2026-09-17 06:35:23 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2017 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:23 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2017 band BARE_GROUND
+2026-09-17 06:35:23 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2017 band LITTER
+2026-09-17 06:35:23 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2017 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:23 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2017 band SHRUB
+2026-09-17 06:35:23 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2017 band TREE
+2026-09-17 06:35:23 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2018 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:23 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2018 band BARE_GROUND
+2026-09-17 06:35:23 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2018 band LITTER
+2026-09-17 06:35:23 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2018 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2018 band SHRUB
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2018 band TREE
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2019 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2019 band BARE_GROUND
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2019 band LITTER
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2019 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2019 band SHRUB
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2019 band TREE
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2020 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2020 band BARE_GROUND
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2019 band ANNUAL_FORB_AND_GRASS complete (176/234)
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2017 band LITTER complete (177/234)
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2015 band SHRUB complete (178/234)
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2017 band SHRUB complete (179/234)
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2016 band ANNUAL_FORB_AND_GRASS complete (180/234)
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2014 band LITTER complete (181/234)
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2019 band SHRUB complete (182/234)
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2014 band PERENNIAL_FORB_AND_GRASS complete (183/234)
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2016 band BARE_GROUND complete (184/234)
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2018 band ANNUAL_FORB_AND_GRASS complete (185/234)
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2014 band SHRUB complete (186/234)
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2014 band TREE complete (187/234)
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2016 band PERENNIAL_FORB_AND_GRASS complete (188/234)
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2018 band LITTER complete (189/234)
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2016 band SHRUB complete (190/234)
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2018 band PERENNIAL_FORB_AND_GRASS complete (191/234)
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2018 band SHRUB complete (192/234)
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2018 band TREE complete (193/234)
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2013 band SHRUB complete (194/234)
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2017 band BARE_GROUND complete (195/234)
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2020 band LITTER
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2020 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2020 band SHRUB
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2020 band TREE
+2026-09-17 06:35:24 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2021 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:25 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2021 band BARE_GROUND
+2026-09-17 06:35:25 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2016 band TREE complete (196/234)
+2026-09-17 06:35:25 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2018 band BARE_GROUND complete (197/234)
+2026-09-17 06:35:25 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2019 band PERENNIAL_FORB_AND_GRASS complete (198/234)
+2026-09-17 06:35:25 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2020 band ANNUAL_FORB_AND_GRASS complete (199/234)
+2026-09-17 06:35:25 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2020 band PERENNIAL_FORB_AND_GRASS complete (200/234)
+2026-09-17 06:35:25 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2020 band BARE_GROUND complete (201/234)
+2026-09-17 06:35:25 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2021 band LITTER
+2026-09-17 06:35:25 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2021 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:25 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2021 band SHRUB
+2026-09-17 06:35:25 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2021 band TREE
+2026-09-17 06:35:25 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2022 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:25 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2022 band BARE_GROUND
+2026-09-17 06:35:25 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2020 band LITTER complete (202/234)
+2026-09-17 06:35:25 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2017 band TREE complete (203/234)
+2026-09-17 06:35:25 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2019 band BARE_GROUND complete (204/234)
+2026-09-17 06:35:25 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2021 band LITTER complete (205/234)
+2026-09-17 06:35:25 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2019 band LITTER complete (206/234)
+2026-09-17 06:35:25 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2021 band ANNUAL_FORB_AND_GRASS complete (207/234)
+2026-09-17 06:35:25 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2022 band LITTER
+2026-09-17 06:35:25 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2022 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:25 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2022 band SHRUB
+2026-09-17 06:35:25 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2022 band TREE
+2026-09-17 06:35:25 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2023 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:25 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2023 band BARE_GROUND
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2023 band LITTER
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2023 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2023 band SHRUB
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2023 band TREE
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2024 band ANNUAL_FORB_AND_GRASS
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2024 band BARE_GROUND
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2021 band PERENNIAL_FORB_AND_GRASS complete (208/234)
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2020 band SHRUB complete (209/234)
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2022 band ANNUAL_FORB_AND_GRASS complete (210/234)
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2023 band TREE complete (211/234)
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2021 band SHRUB complete (212/234)
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2022 band BARE_GROUND complete (213/234)
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2017 band ANNUAL_FORB_AND_GRASS complete (214/234)
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2017 band PERENNIAL_FORB_AND_GRASS complete (215/234)
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2023 band LITTER complete (216/234)
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2021 band TREE complete (217/234)
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2022 band LITTER complete (218/234)
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2019 band TREE complete (219/234)
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2024 band LITTER
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2024 band PERENNIAL_FORB_AND_GRASS
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2024 band SHRUB
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analyzing year 2024 band TREE
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2022 band TREE complete (220/234)
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2023 band BARE_GROUND complete (221/234)
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2023 band PERENNIAL_FORB_AND_GRASS complete (222/234)
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2024 band LITTER complete (223/234)
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2023 band ANNUAL_FORB_AND_GRASS complete (224/234)
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2022 band PERENNIAL_FORB_AND_GRASS complete (225/234)
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2023 band SHRUB complete (226/234)
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2024 band ANNUAL_FORB_AND_GRASS complete (227/234)
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2024 band BARE_GROUND complete (228/234)
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2022 band SHRUB complete (229/234)
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2024 band SHRUB complete (230/234)
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2021 band BARE_GROUND complete (231/234)
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2020 band TREE complete (232/234)
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2024 band TREE complete (233/234)
+2026-09-17 06:35:26 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: RAP analysis year 2024 band PERENNIAL_FORB_AND_GRASS complete (234/234)
+2026-09-17 06:35:30 [INFO] wepppy.run.qa-derived-rap-daa5702c3380.rap_ts: analysis complete...
+{
+  "scope": "Actual copied RAP 39-year analysis, complete input set and finalization lock.\n\nNamed inputs receive ordinary read/copy only. Real NoDb hydration, native median\ncalls, lock, validation, parquet publication and persistence operate on a unique\nretained disposable run. Transparent wrappers measure existing boundaries.\nThis small cropped single-OFE sample is not a universal workload/closure proof.\n",
+  "root": "/wc1/batch/qa-derived-rap-daa5702c3380",
+  "uid": 1000,
+  "gid": 993,
+  "module_hashes": {
+    "/workdir/wepppy/wepppy/nodb/_derived_build.py": "423c37c144cac5f8bee3c97930c4f8c65da26f72cb39104007370f3a5cedcc2e",
+    "/workdir/wepppy/wepppy/nodb/mods/rap/rap_ts_build.py": "eefddb841cf86791af02026af3b3444c9dc184b2d77e44a77b917e6b18bfe42f",
+    "/workdir/wepppy/wepppy/nodb/mods/rap/rap_ts.py": "da736327a60d4615c291e303e87345de5d4e5c4be4281987eaca0082c31ae753"
+  },
+  "lock_seconds": [
+    3.9678860639687628
+  ],
+  "validation_seconds": [
+    0.07654828391969204
+  ],
+  "cache_note": "Ordinary copies prime filesystem pages; no cold-storage claim.",
+  "success": true,
+  "years": [
+    1986,
+    2024
+  ],
+  "multi_ofe": false,
+  "bands": [
+    "ANNUAL_FORB_AND_GRASS",
+    "BARE_GROUND",
+    "LITTER",
+    "PERENNIAL_FORB_AND_GRASS",
+    "SHRUB",
+    "TREE"
+  ],
+  "input_bytes": 576244,
+  "whole_analysis_seconds": 22.090074300998822,
+  "published_rows": 1638,
+  "prior_output_rows": 1638,
+  "numerical_parity_with_prior": true,
+  "finalizer_hash_seconds": 0.05326526379212737,
+  "finalizer_hash_budget_seconds": 10.0,
+  "finalizer_hash_budget_pass": true,
+  "exact_two_signature_passes": true,
+  "expected_native_calls": 234,
+  "named_inputs_unchanged": true,
+  "modules_unchanged": true
+}

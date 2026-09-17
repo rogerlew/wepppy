@@ -1,0 +1,8 @@
+postfire_initial_poll_0000 200
+tree be361f87-01e5-4bef-a653-abf0e902271d started {'completed': 0, 'total': 1, 'unit': 'jobs', 'percent': 0.0, 'updated_at': '2026-09-17T08:07:21Z'}
+postfire_initial_poll_0001 200
+postfire_initial_poll_0002 200
+postfire_initial_poll_0003 200
+postfire_initial_poll_0004 200
+tree be361f87-01e5-4bef-a653-abf0e902271d finished {'completed': 1, 'total': 1, 'unit': 'jobs', 'percent': 100.0, 'updated_at': '2026-09-17T08:07:51Z'}
+postfire_initial_jobinfo 200

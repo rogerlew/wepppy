@@ -1,0 +1,13 @@
+>> Building development assets...
+
+> weppcloud-static@0.1.0 build:dev
+> NODE_ENV=development node scripts/build.mjs
+
+Static assets built to dist (development mode)
+>> Syncing built assets into /home/workdir/wepppy/wepppy/weppcloud/static/vendor
+>> Syncing archive_console.js into /home/workdir/wepppy/wepppy/weppcloud/static/js/archive_console.js
+>> Rebuilding controllers-gl.js bundle...
+Traceback (most recent call last):
+  File "/home/workdir/wepppy/wepppy/weppcloud/controllers_js/build_controllers_js.py", line 22, in <module>
+    from jinja2 import Environment, FileSystemLoader
+ModuleNotFoundError: No module named 'jinja2'

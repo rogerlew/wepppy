@@ -1,0 +1,77 @@
+{
+  "c32f7273-81d6-450d-b688-5d08bdf2e4f8": {
+    "declared_dependency_ids": [],
+    "dependency_keys": [],
+    "ended_at": "2026-09-17 08:28:46.135639",
+    "exception": null,
+    "function": "wepppy.rq.omni_rq.run_omni_scenarios_rq",
+    "origin": "batch",
+    "registered_children": {
+      "jobs:0,scenario:sbs_map_YWNjZXB0YW5jZV9zYnNfcWEtb21uaS1uYXRpdmUtMjAyNjA5MTctYTYxZjNlLnRpZg": "f6f313a2-4c7c-45cf-ac2e-40ff6b9dd199",
+      "jobs:2,func:_compile_hillslope_summaries_rq": "c7ce770a-7be5-4ac3-8e1c-f0317ff2722b",
+      "jobs:3,func:_finalize_omni_scenarios_rq": "de83de50-f933-4664-80b9-144cc9c378fe"
+    },
+    "result": "Unserializable return value",
+    "runid": "batch;;qa-omni-native-20260917-a61f3e;;qa-omni-native-20260917-a61f3e-grizzly",
+    "signature": null,
+    "started_at": "2026-09-17 08:28:41.120845",
+    "status": "finished",
+    "worker_name": "6043b80e3dee4529ab9b324fa847f303"
+  },
+  "c7ce770a-7be5-4ac3-8e1c-f0317ff2722b": {
+    "declared_dependency_ids": [
+      "f6f313a2-4c7c-45cf-ac2e-40ff6b9dd199"
+    ],
+    "dependency_keys": [
+      "rq:job:f6f313a2-4c7c-45cf-ac2e-40ff6b9dd199"
+    ],
+    "ended_at": "2026-09-17 08:34:35.682863",
+    "exception": null,
+    "function": "wepppy.rq.omni_rq._compile_hillslope_summaries_rq",
+    "origin": "batch",
+    "registered_children": {},
+    "result": null,
+    "runid": "batch;;qa-omni-native-20260917-a61f3e;;qa-omni-native-20260917-a61f3e-grizzly",
+    "signature": null,
+    "started_at": "2026-09-17 08:34:34.058141",
+    "status": "finished",
+    "worker_name": "34d5b8ce6c6e426abfac4c54e80ff22a"
+  },
+  "de83de50-f933-4664-80b9-144cc9c378fe": {
+    "declared_dependency_ids": [
+      "c7ce770a-7be5-4ac3-8e1c-f0317ff2722b"
+    ],
+    "dependency_keys": [
+      "rq:job:c7ce770a-7be5-4ac3-8e1c-f0317ff2722b"
+    ],
+    "ended_at": "2026-09-17 08:34:35.758477",
+    "exception": null,
+    "function": "wepppy.rq.omni_rq._finalize_omni_scenarios_rq",
+    "origin": "batch",
+    "registered_children": {},
+    "result": null,
+    "runid": "batch;;qa-omni-native-20260917-a61f3e;;qa-omni-native-20260917-a61f3e-grizzly",
+    "signature": null,
+    "started_at": "2026-09-17 08:34:35.723732",
+    "status": "finished",
+    "worker_name": "6043b80e3dee4529ab9b324fa847f303"
+  },
+  "f6f313a2-4c7c-45cf-ac2e-40ff6b9dd199": {
+    "declared_dependency_ids": [],
+    "dependency_keys": [],
+    "ended_at": "2026-09-17 08:34:34.014416",
+    "exception": null,
+    "function": "wepppy.rq.omni_rq.run_omni_scenario_rq",
+    "origin": "batch",
+    "registered_children": {},
+    "result": [
+      true,
+      347.8150510787964
+    ],
+    "runid": "batch;;qa-omni-native-20260917-a61f3e;;qa-omni-native-20260917-a61f3e-grizzly",
+    "signature": "{\"_sbs_content\": {\"sha256\": \"fe70fafea3c718c45a1a7f91b2c3c311cd936b8923f84c3d73ed7ded6656d380\", \"source_path\": \"/wc1/batch/qa-omni-native-20260917-a61f3e/runs/qa-omni-native-20260917-a61f3e-grizzly/omni/_limbo/0/acceptance_sbs_qa-omni-native-20260917-a61f3e.tif\", \"version\": 1}, \"sbs_file_path\": \"/wc1/batch/qa-omni-native-20260917-a61f3e/runs/qa-omni-native-20260917-a61f3e-grizzly/omni/_limbo/0/acceptance_sbs_qa-omni-native-20260917-a61f3e.tif\", \"type\": \"sbs_map\"}",
+    "started_at": "2026-09-17 08:28:46.191957",
+    "status": "finished",
+    "worker_name": "56f0404089484eac9298d68f53e24d80"
+  }
+}

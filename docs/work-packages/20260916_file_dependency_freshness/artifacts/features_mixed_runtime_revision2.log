@@ -1,0 +1,65 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20260916_file_dependency_freshness/artifacts/runtime_features_mixed.py --execute --label revision2
+COPY 250/3916 files
+COPY 500/3916 files
+COPY 750/3916 files
+COPY 1000/3916 files
+COPY 1250/3916 files
+COPY 1500/3916 files
+COPY 1750/3916 files
+COPY 2000/3916 files
+COPY 2250/3916 files
+COPY 2500/3916 files
+COPY 2750/3916 files
+COPY 3000/3916 files
+COPY 3250/3916 files
+COPY 3500/3916 files
+COPY 3750/3916 files
+{"status": "prepared", "runid": "batch;;qa-features-mixed-de5549eede4b;;qa-features-mixed-de5549eede4b-grizzly", "destination": "/wc1/batch/qa-features-mixed-de5549eede4b/runs/qa-features-mixed-de5549eede4b-grizzly", "manifest": "/wc1/batch/qa-features-mixed-de5549eede4b/full-project-copy.json", "files": 3916, "bytes": 6375730842}
+baseline:prep_details cache_hit False rows {'channels.csv': 87, 'hillslopes.csv': 217}
+baseline:prep_details:fresh_control cache_hit False rows {'channels.csv': 87, 'hillslopes.csv': 217}
+Warning 1: A geometry of type POLYGON is inserted into layer batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_chan_map_channels of geometry type MULTIPOLYGON, which is not normally allowed by the GeoPackage specification, but the driver will however do it. To create a conformant GeoPackage, if using ogr2ogr, the -nlt option can be used to override the layer geometry type. This warning will no longer be emitted for this combination of layer and feature geometry type.
+Warning 1: A geometry of type POLYGON is inserted into layer batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_sbs_map_subcatchments of geometry type MULTIPOLYGON, which is not normally allowed by the GeoPackage specification, but the driver will however do it. To create a conformant GeoPackage, if using ogr2ogr, the -nlt option can be used to override the layer geometry type. This warning will no longer be emitted for this combination of layer and feature geometry type.
+baseline:post_wepp cache_hit False rows {'batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_chan_map_channels': 87, 'batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_sbs_map_subcatchments': 217}
+Warning 1: A geometry of type POLYGON is inserted into layer batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_chan_map_channels of geometry type MULTIPOLYGON, which is not normally allowed by the GeoPackage specification, but the driver will however do it. To create a conformant GeoPackage, if using ogr2ogr, the -nlt option can be used to override the layer geometry type. This warning will no longer be emitted for this combination of layer and feature geometry type.
+Warning 1: A geometry of type POLYGON is inserted into layer batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_sbs_map_subcatchments of geometry type MULTIPOLYGON, which is not normally allowed by the GeoPackage specification, but the driver will however do it. To create a conformant GeoPackage, if using ogr2ogr, the -nlt option can be used to override the layer geometry type. This warning will no longer be emitted for this combination of layer and feature geometry type.
+baseline:post_wepp:fresh_control cache_hit False rows {'batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_chan_map_channels': 87, 'batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_sbs_map_subcatchments': 217}
+touch_only:prep_details cache_hit True rows {'channels.csv': 87, 'hillslopes.csv': 217}
+touch_only:post_wepp cache_hit True rows {'batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_chan_map_channels': 87, 'batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_sbs_map_subcatchments': 217}
+equal_byte_replace:prep_details cache_hit True rows {'channels.csv': 87, 'hillslopes.csv': 217}
+equal_byte_replace:post_wepp cache_hit True rows {'batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_chan_map_channels': 87, 'batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_sbs_map_subcatchments': 217}
+parquet_changed:prep_details cache_hit False rows {'channels.csv': 87, 'hillslopes.csv': 217}
+parquet_changed:prep_details:fresh_control cache_hit False rows {'channels.csv': 87, 'hillslopes.csv': 217}
+Warning 1: A geometry of type POLYGON is inserted into layer batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_chan_map_channels of geometry type MULTIPOLYGON, which is not normally allowed by the GeoPackage specification, but the driver will however do it. To create a conformant GeoPackage, if using ogr2ogr, the -nlt option can be used to override the layer geometry type. This warning will no longer be emitted for this combination of layer and feature geometry type.
+Warning 1: A geometry of type POLYGON is inserted into layer batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_sbs_map_subcatchments of geometry type MULTIPOLYGON, which is not normally allowed by the GeoPackage specification, but the driver will however do it. To create a conformant GeoPackage, if using ogr2ogr, the -nlt option can be used to override the layer geometry type. This warning will no longer be emitted for this combination of layer and feature geometry type.
+parquet_changed:post_wepp cache_hit False rows {'batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_chan_map_channels': 87, 'batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_sbs_map_subcatchments': 217}
+Warning 1: A geometry of type POLYGON is inserted into layer batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_chan_map_channels of geometry type MULTIPOLYGON, which is not normally allowed by the GeoPackage specification, but the driver will however do it. To create a conformant GeoPackage, if using ogr2ogr, the -nlt option can be used to override the layer geometry type. This warning will no longer be emitted for this combination of layer and feature geometry type.
+Warning 1: A geometry of type POLYGON is inserted into layer batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_sbs_map_subcatchments of geometry type MULTIPOLYGON, which is not normally allowed by the GeoPackage specification, but the driver will however do it. To create a conformant GeoPackage, if using ogr2ogr, the -nlt option can be used to override the layer geometry type. This warning will no longer be emitted for this combination of layer and feature geometry type.
+parquet_changed:post_wepp:fresh_control cache_hit False rows {'batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_chan_map_channels': 87, 'batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_sbs_map_subcatchments': 217}
+geometry_changed:prep_details cache_hit False rows {'channels.csv': 87, 'hillslopes.csv': 217}
+geometry_changed:prep_details:fresh_control cache_hit False rows {'channels.csv': 87, 'hillslopes.csv': 217}
+Warning 1: A geometry of type POLYGON is inserted into layer batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_chan_map_channels of geometry type MULTIPOLYGON, which is not normally allowed by the GeoPackage specification, but the driver will however do it. To create a conformant GeoPackage, if using ogr2ogr, the -nlt option can be used to override the layer geometry type. This warning will no longer be emitted for this combination of layer and feature geometry type.
+Warning 1: A geometry of type POLYGON is inserted into layer batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_sbs_map_subcatchments of geometry type MULTIPOLYGON, which is not normally allowed by the GeoPackage specification, but the driver will however do it. To create a conformant GeoPackage, if using ogr2ogr, the -nlt option can be used to override the layer geometry type. This warning will no longer be emitted for this combination of layer and feature geometry type.
+geometry_changed:post_wepp cache_hit False rows {'batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_chan_map_channels': 87, 'batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_sbs_map_subcatchments': 217}
+Warning 1: A geometry of type POLYGON is inserted into layer batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_chan_map_channels of geometry type MULTIPOLYGON, which is not normally allowed by the GeoPackage specification, but the driver will however do it. To create a conformant GeoPackage, if using ogr2ogr, the -nlt option can be used to override the layer geometry type. This warning will no longer be emitted for this combination of layer and feature geometry type.
+Warning 1: A geometry of type POLYGON is inserted into layer batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_sbs_map_subcatchments of geometry type MULTIPOLYGON, which is not normally allowed by the GeoPackage specification, but the driver will however do it. To create a conformant GeoPackage, if using ogr2ogr, the -nlt option can be used to override the layer geometry type. This warning will no longer be emitted for this combination of layer and feature geometry type.
+geometry_changed:post_wepp:fresh_control cache_hit False rows {'batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_chan_map_channels': 87, 'batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_sbs_map_subcatchments': 217}
+units_changed:prep_details cache_hit False rows {'channels.csv': 87, 'hillslopes.csv': 217}
+units_changed:prep_details:fresh_control cache_hit False rows {'channels.csv': 87, 'hillslopes.csv': 217}
+Warning 1: A geometry of type POLYGON is inserted into layer batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_chan_map_channels of geometry type MULTIPOLYGON, which is not normally allowed by the GeoPackage specification, but the driver will however do it. To create a conformant GeoPackage, if using ogr2ogr, the -nlt option can be used to override the layer geometry type. This warning will no longer be emitted for this combination of layer and feature geometry type.
+Warning 1: A geometry of type POLYGON is inserted into layer batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_sbs_map_subcatchments of geometry type MULTIPOLYGON, which is not normally allowed by the GeoPackage specification, but the driver will however do it. To create a conformant GeoPackage, if using ogr2ogr, the -nlt option can be used to override the layer geometry type. This warning will no longer be emitted for this combination of layer and feature geometry type.
+units_changed:post_wepp cache_hit False rows {'batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_chan_map_channels': 87, 'batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_sbs_map_subcatchments': 217}
+Warning 1: A geometry of type POLYGON is inserted into layer batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_chan_map_channels of geometry type MULTIPOLYGON, which is not normally allowed by the GeoPackage specification, but the driver will however do it. To create a conformant GeoPackage, if using ogr2ogr, the -nlt option can be used to override the layer geometry type. This warning will no longer be emitted for this combination of layer and feature geometry type.
+Warning 1: A geometry of type POLYGON is inserted into layer batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_sbs_map_subcatchments of geometry type MULTIPOLYGON, which is not normally allowed by the GeoPackage specification, but the driver will however do it. To create a conformant GeoPackage, if using ogr2ogr, the -nlt option can be used to override the layer geometry type. This warning will no longer be emitted for this combination of layer and feature geometry type.
+units_changed:post_wepp:fresh_control cache_hit False rows {'batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_chan_map_channels': 87, 'batch_qa_features_mixed_de5549eede4b_qa_features_mixed_de5549eede4b_grizzly_sbs_map_subcatchments': 217}
+{
+  "completed": true,
+  "errors": [],
+  "modules_unchanged": true,
+  "source_verification": {
+    "files": 3916,
+    "hashed_bytes": 6375730842,
+    "unchanged": true
+  },
+  "historical_artifact_count": 16,
+  "destination": "/wc1/batch/qa-features-mixed-de5549eede4b/runs/qa-features-mixed-de5549eede4b-grizzly"
+}

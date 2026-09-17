@@ -1,0 +1,66 @@
+{
+  "auth_actor": null,
+  "children": {
+    "0": [
+      {
+        "auth_actor": null,
+        "children": {},
+        "culvert_batch_uuid": null,
+        "description": "wepppy.rq.omni_rq.run_omni_scenario_rq('batch;;qa-omni-native-20260917-a61f3e;;qa-omni-native-20260917-a61f3e-griz..., {'type': <OmniScenario.SBSmap: 8>, 'sbs_file_path': '/wc1/batch/qa-omni-nat..., dependency_path='/wc1/batch/qa-omni-native-20260917-a61f3e/runs/qa-omni-native-20260917-a61..., dependency_target='sbs_map', signature='{\"_sbs_content\": {\"sha256\": \"fe70fafea3c718c45a1a7f91b2c3c311cd936b8923f84...)",
+        "elapsed_s": 347.822459,
+        "ended_at": "2026-09-17 08:34:34.014416",
+        "exc_info": null,
+        "job_id": "f6f313a2-4c7c-45cf-ac2e-40ff6b9dd199",
+        "result": [
+          true,
+          347.8150510787964
+        ],
+        "runid": "batch;;qa-omni-native-20260917-a61f3e;;qa-omni-native-20260917-a61f3e-grizzly",
+        "started_at": "2026-09-17 08:28:46.191957",
+        "status": "finished"
+      }
+    ],
+    "2": [
+      {
+        "auth_actor": null,
+        "children": {},
+        "culvert_batch_uuid": null,
+        "description": "wepppy.rq.omni_rq._compile_hillslope_summaries_rq('batch;;qa-omni-native-20260917-a61f3e;;qa-omni-native-20260917-a61f3e-griz...)",
+        "elapsed_s": 1.624722,
+        "ended_at": "2026-09-17 08:34:35.682863",
+        "exc_info": null,
+        "job_id": "c7ce770a-7be5-4ac3-8e1c-f0317ff2722b",
+        "result": null,
+        "runid": "batch;;qa-omni-native-20260917-a61f3e;;qa-omni-native-20260917-a61f3e-grizzly",
+        "started_at": "2026-09-17 08:34:34.058141",
+        "status": "finished"
+      }
+    ],
+    "3": [
+      {
+        "auth_actor": null,
+        "children": {},
+        "culvert_batch_uuid": null,
+        "description": "wepppy.rq.omni_rq._finalize_omni_scenarios_rq('batch;;qa-omni-native-20260917-a61f3e;;qa-omni-native-20260917-a61f3e-griz...)",
+        "elapsed_s": 0.034745,
+        "ended_at": "2026-09-17 08:34:35.758477",
+        "exc_info": null,
+        "job_id": "de83de50-f933-4664-80b9-144cc9c378fe",
+        "result": null,
+        "runid": "batch;;qa-omni-native-20260917-a61f3e;;qa-omni-native-20260917-a61f3e-grizzly",
+        "started_at": "2026-09-17 08:34:35.723732",
+        "status": "finished"
+      }
+    ]
+  },
+  "culvert_batch_uuid": null,
+  "description": "wepppy.rq.omni_rq.run_omni_scenarios_rq('batch;;qa-omni-native-20260917-a61f3e;;qa-omni-native-20260917-a61f3e-griz...)",
+  "elapsed_s": 5.014794,
+  "ended_at": "2026-09-17 08:28:46.135639",
+  "exc_info": null,
+  "job_id": "c32f7273-81d6-450d-b688-5d08bdf2e4f8",
+  "result": "Unserializable return value",
+  "runid": "batch;;qa-omni-native-20260917-a61f3e;;qa-omni-native-20260917-a61f3e-grizzly",
+  "started_at": "2026-09-17 08:28:41.120845",
+  "status": "finished"
+}

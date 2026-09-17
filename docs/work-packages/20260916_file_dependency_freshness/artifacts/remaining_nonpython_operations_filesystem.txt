@@ -1,0 +1,265 @@
+tools/ssurgo_empirical_study.py:303:    state = json.loads(state_path.read_text()) if state_path.is_file() else {"next_window": 0, "locations": {}}
+tools/ssurgo_empirical_study.py:890:    destination.write_text(json.dumps(document, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+tools/ssurgo_empirical_study.py:951:        inventory = json.loads(args.inventory.read_text(encoding="utf-8"))
+tools/ssurgo_empirical_study.py:957:        inventory = json.loads(args.inventory.read_text(encoding="utf-8"))
+tools/run_pytest_sharded.py:358:        size = Path(path).stat().st_size
+tools/run_pytest_sharded.py:383:        payload = json.loads(TIMING_CACHE_FILE.read_text(encoding="utf-8"))
+tools/run_pytest_sharded.py:438:    TIMING_CACHE_FILE.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+tools/run_pytest_sharded.py:587:        payload = json.loads(payload_path.read_text(encoding="utf-8"))
+tools/run_pytest_sharded.py:775:    Path(result_json).write_text(json.dumps(summary.to_payload()), encoding="utf-8")
+tools/run_pytest_sharded.py:810:            Path(args.result_json).write_text(json.dumps(failure_summary.to_payload()), encoding="utf-8")
+scripts/build_forest_workflows.py:83:    target.write_text(content, encoding="utf-8")
+scripts/build_forest_workflows.py:224:    readme_text = readme_path.read_text(encoding="utf-8")
+scripts/build_forest_workflows.py:293:            if not target_path.exists() or target_path.read_text(encoding="utf-8") != rendered:
+tools/check_stub_coverage.py:50:    args.output.write_text("\n".join(lines) + "\n", encoding="utf-8")
+tools/check_rq_dependency_graph.py:35:    static_current = static_path.read_text(encoding="utf-8") if static_path.exists() else ""
+tools/check_rq_dependency_graph.py:39:    catalog_current = catalog_path.read_text(encoding="utf-8") if catalog_path.exists() else ""
+tools/check_rq_dependency_graph.py:58:    static_path.write_text(static_payload, encoding="utf-8")
+tools/check_rq_dependency_graph.py:59:    catalog_path.write_text(catalog_payload, encoding="utf-8")
+tools/check_route_contract_checklist.py:49:    lines = inventory_path.read_text(encoding="utf-8").splitlines()
+tools/check_route_contract_checklist.py:86:    lines = checklist_path.read_text(encoding="utf-8").splitlines()
+tools/ablation_protocol.py:168:        dst.write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
+tools/ablation_protocol.py:176:        checksums_path.write_text("", encoding="utf-8")
+tools/ablation_protocol.py:233:            artifact_path.stat().st_mtime,
+tools/ablation_protocol.py:293:    text = incident_md_path.read_text(encoding="utf-8", errors="replace")
+services/cap/migrate-data.js:18:const root = fs.lstatSync(DATA_DIR);
+services/cap/migrate-data.js:22:const entries = fs.readdirSync(DATA_DIR);
+services/cap/migrate-data.js:30:  const ledger = fs.lstatSync(LEDGER);
+services/cap/migrate-data.js:34:  const contents = fs.readFileSync(LEDGER);
+services/cap/migrate-data.js:45:  const after = crypto.createHash("sha256").update(fs.readFileSync(LEDGER)).digest("hex");
+tools/gridmet_admission_probe.py:216:        if path.stat().st_size > 16 * 1024 * 1024:
+tools/gridmet_admission_probe.py:218:        for line in path.read_text().splitlines():
+services/preflight2/internal/config/config.go:131:	contents, err := os.ReadFile(path)
+tools/wctl2/context.py:34:    contents = path.read_text().splitlines()
+tools/wctl2/context.py:46:        text = path.read_text()
+tools/update_stub_requirements.py:162:        for raw in requirements_path.read_text(encoding="utf-8").splitlines():
+tools/update_stub_requirements.py:184:    requirements_path.write_text(header + body + ("\n" if body else ""), encoding="utf-8")
+tools/peakflow_gate21_acceptance.py:54:    manifest = json.loads(path.read_text())
+tools/peakflow_gate21_acceptance.py:69:    expected = json.loads((fixture / "expected-event.json").read_text())
+tools/peakflow_gate21_acceptance.py:122:        (packet_dir / name).write_text(json.dumps(packets[lane], indent=2, sort_keys=True) + "\n")
+tools/peakflow_gate21_acceptance.py:123:        (replay_dir / name).write_text(json.dumps(reports[lane], indent=2, sort_keys=True) + "\n")
+tools/peakflow_gate21_acceptance.py:124:    (artifacts / "observer-parity-report.json").write_text(json.dumps(parity, indent=2, sort_keys=True) + "\n")
+tools/peakflow_gate21_acceptance.py:125:    (artifacts / "gate21-acceptance-report.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
+tools/peakflow_gate21_acceptance.py:133:        packet_path.write_text(json.dumps(packet))
+services/cao/ci-samurai/run_fixer_loop.py:39:    for line in path.read_text(encoding="utf-8", errors="ignore").splitlines():
+services/cao/ci-samurai/run_fixer_loop.py:57:    lines = p.read_text(encoding="utf-8", errors="ignore").splitlines()
+services/cao/ci-samurai/run_fixer_loop.py:209:    tmp.write_text(patch_text, encoding="utf-8")
+services/cao/ci-samurai/run_fixer_loop.py:359:                (agent_logs_dir / f"{base}.log").write_text(full_out, encoding="utf-8")
+services/cao/ci-samurai/run_fixer_loop.py:416:            (agent_logs_dir / f"{base}.log").write_text(full_out, encoding="utf-8")
+services/cao/ci-samurai/run_fixer_loop.py:418:            (agent_logs_dir / f"{base}.result.json").write_text(json.dumps(result_json, indent=2), encoding="utf-8")
+services/cao/ci-samurai/run_fixer_loop.py:421:                (agent_logs_dir / f"{base}.patch").write_text(patch_text, encoding="utf-8")
+tools/peakflow_phase1_negative_control.py:33:    before = (baseline_runs / "p106.sol").read_text().splitlines()
+tools/peakflow_phase1_negative_control.py:34:    after = (control_runs / "p106.sol").read_text().splitlines()
+tools/peakflow_phase1_negative_control.py:75:        args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
+tools/peakflow_census.py:31:    return trial_plan_from_dict(json.loads(path.read_text()))
+tools/peakflow_census.py:113:    authority = json.loads(args.baseline_authority.read_text(encoding="utf-8"))
+tools/peakflow_census.py:136:    terminals = [json.loads(path.read_text()) for path in args.terminal]
+services/cao/src/cli_agent_orchestrator/providers/gemini.py:69:                    self._system_prompt_path.write_text(f"{prompt_text}\n", encoding="utf-8")
+tools/peakflow_phase1_1986_fixture.py:66:        args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
+tools/wctl2/util.py:47:        return cookie_path.read_text().strip()
+services/cap/canary.js:60:  const secret = fs.readFileSync(process.env.CAP_SECRET_FILE, "utf8").trim();
+tools/ssurgo_masked_valid_evaluation.py:1150:        cases = json.loads(args.input.read_text(encoding="utf-8"))
+tools/ssurgo_masked_valid_evaluation.py:1190:    args.output.write_text(json.dumps(results, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+tools/profile_playback_cli.py:39:        return cookie_path.read_text().strip()
+services/cao/src/cli_agent_orchestrator/__init__.py:14:        __version__ = _version_file.read_text(encoding="utf-8").strip()
+services/cao/src/cli_agent_orchestrator/cli/commands/install.py:32:        dest_file.write_text(content)
+services/cao/src/cli_agent_orchestrator/cli/commands/install.py:44:        dest_file.write_text(source_path.read_text())
+services/cao/src/cli_agent_orchestrator/cli/commands/install.py:95:            dest_file.write_text(src.read())
+services/cao/src/cli_agent_orchestrator/cli/commands/install.py:100:        codex_prompt_path.write_text(source_file.read_text())
+tools/compare_wepp_runs.py:36:        lines = path.read_text(encoding="utf-8", errors="ignore").splitlines()
+tools/wctl2/commands/playwright.py:121:        value = marker.read_text(encoding="utf-8").strip()
+docker/validate-cap-runtime-contract.sh:59:        "require('node:fs').writeFileSync('/var/lib/cap/tokensList.json', '${payload}', {mode: 0o600})"
+docker/validate-cap-runtime-contract.sh:177:    "require('node:fs').writeFileSync('/var/lib/cap/unexpected', 'x')"
+docker/prepare-cap-runtime.sh:120:    'const fs=require("node:fs"); const p="/var/lib/cap/.deploy-probe"; const f=fs.openSync(p,"wx",0o600); fs.fsyncSync(f); fs.closeSync(f); fs.unlinkSync(p); const l="/var/lib/cap/tokensList.json"; if(fs.existsSync(l)) fs.accessSync(l,fs.constants.R_OK|fs.constants.W_OK);'
+tools/extract_rq_dependency_graph.py:581:    source_text = module_path.read_text(encoding="utf-8")
+tools/extract_rq_dependency_graph.py:778:    current = output_path.read_text(encoding="utf-8") if output_path.exists() else ""
+tools/extract_rq_dependency_graph.py:794:    output_path.write_text(payload, encoding="utf-8")
+docker/validate-weppcloudr-runtime-contract.sh:63:assert os.stat("/probe/owned/input.parquet").st_mode & 0o777 == 0o600
+docker/validate-weppcloudr-runtime-contract.sh:74:assert Path("/probe/owned/output.txt").read_text().strip() == "worker-renderer access passed"
+docker/validate-weppcloudr-runtime-contract.sh:75:assert Path("/probe/owned/input.parquet").stat().st_mode & 0o777 == 0o600
+tools/triage_pipeline.py:586:        md_text = incident_md.read_text(encoding="utf-8") if incident_md.exists() else ""
+tools/triage_pipeline.py:587:        matrix_text = matrix_csv.read_text(encoding="utf-8") if matrix_csv.exists() else ""
+tools/triage_pipeline.py:801:    (ARTIFACTS_DIR / "precedent_crosswalk.md").write_text(crosswalk_md, encoding="utf-8")
+tools/triage_pipeline.py:803:    (ARTIFACTS_DIR / "defect_families.md").write_text(defect_families_md, encoding="utf-8")
+tools/triage_pipeline.py:804:    (ARTIFACTS_DIR / "triage_pipeline_metadata.json").write_text(
+services/cao/ci-samurai/diagnose_artifact.py:70:                print("".join(triage_nodb.read_text(encoding="utf-8", errors="ignore").splitlines(True)[:20]))
+services/cao/ci-samurai/diagnose_artifact.py:73:            fails = iter_failures(triage_nodb.read_text(encoding="utf-8", errors="ignore").splitlines())
+services/cao/ci-samurai/diagnose_artifact.py:76:            raw = triage_nodb.read_text(encoding="utf-8", errors="ignore").splitlines()
+services/cao/ci-samurai/diagnose_artifact.py:89:            print(first_fail.read_text(encoding="utf-8", errors="ignore").strip())
+services/cao/ci-samurai/diagnose_artifact.py:94:            lines = validate_first.read_text(encoding="utf-8", errors="ignore").splitlines()
+services/cao/ci-samurai/diagnose_artifact.py:100:            lines = flake_loop.read_text(encoding="utf-8", errors="ignore").splitlines()
+tools/peakflow_phase1_fixture.py:33:    for line in path.read_text().splitlines():
+tools/peakflow_phase1_fixture.py:76:    left = (baseline / "p106.sol").read_text().splitlines()
+tools/peakflow_phase1_fixture.py:77:    right = (mutant / "p106.sol").read_text().splitlines()
+tools/peakflow_phase1_fixture.py:116:    expected = json.loads((fixture / "expected-event.json").read_text())
+scripts/docs_quality_telemetry.js:27:  const raw = fs.readFileSync(lintJsonPath, "utf8");
+tools/eu_invalid_soil_search.py:253:    manifest_path.write_text(
+tools/eu_invalid_soil_search.py:471:    for line in path.read_text(encoding="utf-8").splitlines():
+tools/eu_invalid_soil_search.py:559:    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+tools/eu_invalid_soil_search.py:620:    screen_path.write_text(
+tools/repair_forked_run_identity.py:78:        text = path.read_text(encoding="utf-8")
+tools/repair_forked_run_identity.py:259:def _atomic_write_text(
+tools/repair_forked_run_identity.py:265:    source_stat = (mode_source or path).stat()
+tools/repair_forked_run_identity.py:349:    (backup_dir / "manifest.json").write_text(
+tools/repair_forked_run_identity.py:359:            current_text = repair.path.read_text(encoding="utf-8")
+tools/repair_forked_run_identity.py:369:            current_metadata = plan.metadata_repair.path.read_text(encoding="utf-8")
+tools/repair_forked_run_identity.py:390:            current_text = repair.path.read_text(encoding="utf-8")
+tools/repair_forked_run_identity.py:399:            backup_text = backup_path.read_text(encoding="utf-8")
+tools/repair_forked_run_identity.py:407:            _atomic_write_text(repair.path, backup_text)
+tools/repair_forked_run_identity.py:419:                backup_text = backup_path.read_text(encoding="utf-8")
+tools/repair_forked_run_identity.py:431:                        _atomic_write_text(
+tools/repair_forked_run_identity.py:454:    _atomic_write_text(
+tools/repair_forked_run_identity.py:484:                current_text = repair.path.read_text(encoding="utf-8")
+tools/repair_forked_run_identity.py:491:            _atomic_write_text(repair.path, repair.repaired_text)
+tools/repair_forked_run_identity.py:495:                current_metadata = plan.metadata_repair.path.read_text(
+tools/repair_forked_run_identity.py:665:            current_text = controller_path.read_text(encoding="utf-8")
+services/profile_playback/app.py:447:    path.write_text(json.dumps(payload.model_dump(), indent=2), encoding="utf-8")
+services/profile_playback/app.py:518:                active_text = active_marker.read_text(encoding="utf-8").strip()
+services/profile_playback/app.py:550:            (sandbox_run_dir / "active_config.txt").write_text(config_slug, encoding="utf-8")
+services/profile_playback/app.py:613:        content = config_path.read_text(encoding="utf-8").strip()
+services/profile_playback/app.py:921:    data = json.loads(path.read_text(encoding="utf-8"))
+tools/check_endpoint_inventory.py:64:    tree = ast.parse(init_path.read_text(encoding="utf-8"), filename=str(init_path))
+tools/check_endpoint_inventory.py:116:        tree = ast.parse(module_path.read_text(encoding="utf-8"), filename=str(module_path))
+tools/check_endpoint_inventory.py:153:    init_tree = ast.parse(init_path.read_text(encoding="utf-8"), filename=str(init_path))
+tools/check_endpoint_inventory.py:189:    tree = ast.parse(bootstrap_path.read_text(encoding="utf-8"), filename=str(bootstrap_path))
+tools/check_endpoint_inventory.py:242:    lines = inventory_path.read_text(encoding="utf-8").splitlines()
+tools/check_broad_exceptions.py:342:        raw_lines = path.read_text(encoding="utf-8").splitlines()
+tools/check_broad_exceptions.py:492:            raw = file_path.read_text(encoding="utf-8")
+tools/check_broad_exceptions.py:655:            current_source = current_file.read_text(encoding="utf-8")
+tools/sync_stubs.py:29:    (PACKAGE_ROOT / "py.typed").write_text("")
+tools/sync_stubs.py:31:    (STUB_ROOT / "py.typed").write_text("")
+tools/check_test_isolation.py:216:        data = json.loads(path.read_text())
+tools/check_test_isolation.py:267:    return tomllib.loads(config_path.read_text())
+tools/check_test_isolation.py:613:            json_data = json.loads(json_report_path.read_text())
+tools/check_test_isolation.py:657:        raw_payload = result_path.read_text()
+tools/check_test_isolation.py:769:    config = json.loads(Path(config_path).read_text())
+tools/check_test_isolation.py:794:        Path(result_path).write_text(json.dumps(payload))
+tools/check_test_isolation.py:809:    Path(result_path).write_text(json.dumps(payload))
+tools/check_test_isolation.py:973:    (log_dir / f"{safe_name}.out").write_text(stdout)
+tools/check_test_isolation.py:974:    (log_dir / f"{safe_name}.err").write_text(stderr)
+tools/hillslope_daily_closure_audit.py:1260:    summary_path.write_text(json.dumps(summary, indent=2, sort_keys=True), encoding="utf-8")
+tools/ssurgo_padded_shadow_evaluator.py:189:    state = json.loads((run_path / "soils.nodb").read_text(encoding="utf-8")).get("py/state", {})
+tools/ssurgo_padded_shadow_evaluator.py:273:    output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+tools/render_rq_dependency_graph_docs.py:35:    return json.loads(graph_path.read_text(encoding="utf-8"))
+tools/render_rq_dependency_graph_docs.py:121:    current_text = catalog_path.read_text(encoding="utf-8")
+tools/render_rq_dependency_graph_docs.py:131:    catalog_path.write_text(rendered_text, encoding="utf-8")
+tools/render_rq_dependency_graph_docs.py:140:    current = catalog_path.read_text(encoding="utf-8")
+tools/hillslope_mofe_daily_closure_audit.py:1015:    summary_path.write_text(json.dumps(summary, indent=2, sort_keys=True), encoding="utf-8")
+tools/check_stubs.py:40:    tree = ast.parse(init_file.read_text())
+tools/check_stubs.py:65:    content = file_path.read_text()
+tools/benchmarks/bench_sbs_map.py:91:            output["export_size_bytes"] = dst_path.stat().st_size if dst_path.exists() else None
+tools/benchmarks/bench_sbs_map.py:114:        Path(args.json_path).write_text(payload, encoding="utf-8")
+tools/ssurgo_fallback_adversarial_corpus.py:106:    fixture = json.loads(fixture_path.read_text(encoding="utf-8"))
+tools/ssurgo_fallback_adversarial_corpus.py:140:        arguments.report.write_text(f"{rendered}\n", encoding="utf-8")
+tools/peakflow_phase1_instrument.py:27:    args.destination.write_text(instrument(args.source.read_text()))
+tools/refine_mofe_taxonomy.py:1047:    (output_dir / "unclassified_profile.md").write_text("\n".join(lines), encoding="utf-8")
+tools/refine_mofe_taxonomy.py:1120:    (output_dir / "rule_gap_analysis.md").write_text("\n".join(lines), encoding="utf-8")
+tools/refine_mofe_taxonomy.py:1186:    (output_dir / "defect_families_v2.md").write_text(defect_md, encoding="utf-8")
+tools/refine_mofe_taxonomy.py:1189:    (output_dir / "taxonomy_evolution.md").write_text(evolution_md, encoding="utf-8")
+tools/refine_mofe_taxonomy.py:1219:    (output_dir / "refine_mofe_taxonomy_metadata.json").write_text(
+services/status2/internal/config/config.go:128:	contents, err := os.ReadFile(path)
+services/cao/src/cli_agent_orchestrator/services/cleanup_service.py:39:                if log_file.stat().st_mtime < cutoff_date.timestamp():
+services/cao/src/cli_agent_orchestrator/services/cleanup_service.py:48:                if log_file.stat().st_mtime < cutoff_date.timestamp():
+tools/perf/redis_nodb_cache_stress/run_harness.py:219:        blob = json.loads(path.read_text(encoding="utf-8"))
+tools/perf/redis_nodb_cache_stress/run_harness.py:253:        payload_text = path.read_text(encoding="utf-8")
+tools/perf/redis_nodb_cache_stress/run_harness.py:580:    report_path.write_text(json.dumps(summary, indent=2, sort_keys=True), encoding="utf-8")
+tools/totalwatsed3_daily_closure_audit.py:678:    summary_path.write_text(json.dumps(summary, indent=2, sort_keys=True), encoding="utf-8")
+services/cao/wepppy/cli_agent_orchestrator/services/flow_service.py:46:    text = file_path.read_text()
+tools/peakflow_phase1_protocol.py:335:        path.write_text(json.dumps(schema, indent=2, sort_keys=True) + "\n")
+tools/peakflow_phase1_protocol.py:346:        actual_schema = json.loads((schema_dir / f"{name}.schema.json").read_text())
+tools/normalize_project_config_sources.py:29:        original = path.read_text(encoding="utf-8")
+tools/normalize_project_config_sources.py:36:            temporary.write_text(normalized, encoding="utf-8", newline="\n")
+tools/benchmarks/bench_nfs_smallfiles.py:58:        total += os.stat(p).st_size
+tools/hillslope_mofe_scireview_compare.py:69:        payload = json.loads(summary_path.read_text(encoding="utf-8"))
+tools/hillslope_mofe_scireview_compare.py:486:    summary_path.write_text(json.dumps(summary, indent=2, sort_keys=True), encoding="utf-8")
+tools/code_quality_observability.py:129:    raw = json.loads(config_path.read_text(encoding="utf-8"))
+tools/code_quality_observability.py:264:def read_file(path: Path) -> str | None:
+tools/code_quality_observability.py:266:        return path.read_text(encoding="utf-8")
+tools/code_quality_observability.py:423:            fallback = run_eslint_complexity_for_content(fatal_path, read_file(repo_root / fatal_path) or "")
+tools/code_quality_observability.py:509:        text = read_file(REPO_ROOT / rel_path)
+tools/code_quality_observability.py:528:        text = read_file(REPO_ROOT / rel_path)
+tools/code_quality_observability.py:557:            current_text = read_file(REPO_ROOT / changed.path) if (REPO_ROOT / changed.path).exists() else None
+tools/code_quality_observability.py:867:    json_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+tools/code_quality_observability.py:868:    md_path.write_text(render_markdown(report), encoding="utf-8")
+tools/migrate_nodb_map_object_paths.py:61:        original_text = path.read_text(encoding="utf-8")
+tools/migrate_nodb_map_object_paths.py:77:            Path(f"{path}{backup_ext}").write_text(original_text, encoding="utf-8")
+tools/migrate_nodb_map_object_paths.py:78:        path.write_text(migrated_text, encoding="utf-8")
+tools/peakflow_phase1_replay.py:43:    rows = [line.split(",") for line in trace.read_text().splitlines()]
+tools/peakflow_phase1_replay.py:177:    packet = json.loads(packet_path.read_text())
+tools/peakflow_phase1_replay.py:252:        args.output.write_text(rendered)
+wctl/install.sh:138:text = path.read_text()
+wctl/install.sh:142:path.write_text(text)
+services/cao/src/cli_agent_orchestrator/utils/agent_profiles.py:16:            profile_data = frontmatter.loads(local_profile.read_text())
+services/cao/src/cli_agent_orchestrator/utils/agent_profiles.py:28:        profile_data = frontmatter.loads(profile_file.read_text())
+services/cao/scripts/install_cao_server_as_service.sh:32:data = tomllib.loads(pyproject.read_text())
+scripts/migrate_wctl_workflows.py:28:    if "wctl" not in path.read_text(encoding="utf-8"):
+scripts/migrate_wctl_workflows.py:62:        spec_path.write_text(dump_yaml(spec), encoding="utf-8")
+tools/run_profile_coverage_batch.py:92:    data = yaml.safe_load(path.read_text())
+tools/export_rq_observed_graph.py:36:    for raw_line in trace_path.read_text(encoding="utf-8").splitlines():
+tools/export_rq_observed_graph.py:142:    output_path.write_text(serialize_observed_graph(payload), encoding="utf-8")
+tools/export_rq_observed_graph.py:159:        current_payload = json.loads(output_path.read_text(encoding="utf-8"))
+services/cap/server.js:17:    SECRET = fs.readFileSync(SECRET_PATH, "utf8").trim();
+services/cap/server.js:25:  return fs.readFileSync(SECRET_PATH, "utf8").trim();
+services/cap/server.js:60:  const directory = fs.lstatSync(dataDir);
+services/cap/server.js:68:    const ledger = fs.lstatSync(ledgerPath);
+services/cap/server.js:73:    const parsed = JSON.parse(fs.readFileSync(ledgerPath, "utf8"));
+services/cap/server.js:80:  const descriptor = fs.openSync(probePath, "wx", 0o600);
+tools/split_d2b_taxonomy.py:189:    defect_v2_text = (input_dir / "defect_families_v2.md").read_text(encoding="utf-8")
+tools/split_d2b_taxonomy.py:852:    (output_dir / "defect_families_v3.md").write_text(defect_v3, encoding="utf-8")
+tools/split_d2b_taxonomy.py:855:    (output_dir / "taxonomy_evolution_v3.md").write_text(evolution, encoding="utf-8")
+tools/split_d2b_taxonomy.py:899:    (output_dir / "split_d2b_taxonomy_metadata.json").write_text(
+tools/peakflow_phase2a_pilot.py:156:    path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n")
+tools/peakflow_phase2a_pilot.py:164:        "bytes": path.stat().st_size,
+tools/peakflow_phase2a_pilot.py:175:        if path.stat().st_size != artifact["bytes"]:
+tools/peakflow_phase2a_pilot.py:189:    for offset, line in enumerate(path.read_text().splitlines()[1:], start=141):
+tools/peakflow_phase2a_pilot.py:222:    lines = path.read_text().splitlines()
+tools/peakflow_phase2a_pilot.py:252:    lines = path.read_text().splitlines()
+tools/peakflow_phase2a_pilot.py:321:    run_text = (source / f"p{hillslope_id}.run").read_text()
+tools/peakflow_phase2a_pilot.py:322:    (destination / f"p{hillslope_id}.run").write_text(adapt_run_deck(run_text))
+tools/peakflow_phase2a_pilot.py:364:    phase1 = json.loads((PHASE1_ARTIFACTS / "observer-build-manifest.json").read_text())
+tools/peakflow_phase2a_pilot.py:586:             "bytes": path.stat().st_size, "sha256": sha256_file(path), "retention": "retain"}
+tools/peakflow_phase2a_pilot.py:608:        lines = path.read_text().splitlines(keepends=True)
+tools/peakflow_phase2a_pilot.py:614:        path.write_text("".join(lines))
+tools/peakflow_phase2a_pilot.py:625:        lines = path.read_text().splitlines(keepends=True)
+tools/peakflow_phase2a_pilot.py:638:        path.write_text("".join(lines))
+tools/peakflow_phase2a_pilot.py:654:    lines = path.read_text().splitlines(keepends=True)
+tools/peakflow_phase2a_pilot.py:658:    path.write_text("".join(lines))
+tools/peakflow_phase2a_pilot.py:745:    selection = json.loads((ARTIFACTS / "pilot-selection.json").read_text())
+tools/peakflow_phase2a_pilot.py:776:        terminal = json.loads(terminal_path.read_text()) if terminal_path.exists() else fresh_results[trial.trial_id]
+tools/peakflow_phase2a_pilot.py:799:        "terminal_ledger": {"locator": str(terminal_path), "sha256": sha256_file(terminal_path), "bytes": terminal_path.stat().st_size},
+tools/peakflow_phase2a_pilot.py:800:        "event_pairs": {"locator": str(pair_path), "sha256": sha256_file(pair_path), "bytes": pair_path.stat().st_size},
+tools/peakflow_phase2a_pilot.py:811:            {"name": path.name, "locator": str(path), "format": "parquet", "bytes": path.stat().st_size,
+tools/peakflow_phase2a_pilot.py:825:        terminal = json.loads(terminal_path.read_text())
+tools/peakflow_phase2a_pilot.py:865:    packet_schema = json.loads((PHASE1_ARTIFACTS / "schemas/event-packet.schema.json").read_text())
+tools/peakflow_phase2a_pilot.py:869:    replay_schema = json.loads((PHASE1_ARTIFACTS / "schemas/replay-report.schema.json").read_text())
+tools/peakflow_phase2a_pilot.py:878:    selection = json.loads((ARTIFACTS / "pilot-selection.json").read_text())
+tools/peakflow_phase2a_pilot.py:887:    expected_replay_hash = json.loads((PHASE1_ARTIFACTS / "replay-build-manifest.json").read_text())["executable_sha256"]
+tools/peakflow_phase2a_pilot.py:969:        for report in [no_surplus_report] + [json.loads((replay_dir / f"h106-1986-day046-bracket-{label}.json").read_text()) for label in ("low", "high")]
+tools/peakflow_phase2a_pilot.py:1018:    text = run_deck.read_text()
+tools/peakflow_phase2a_pilot.py:1039:    run_deck.write_text("\n".join(adapted_lines[: final_hbp_index + 1] + minimal_watershed_tail) + "\n")
+tools/peakflow_phase2a_pilot.py:1040:    (runs / "chan.inp").write_text(
+tools/peakflow_phase2a_pilot.py:1063:        prior = json.loads(terminal_path.read_text())
+tools/peakflow_phase2a_pilot.py:1175:    selection = json.loads((ARTIFACTS / "pilot-selection.json").read_text())
+tools/peakflow_phase2a_pilot.py:1199:        mutation = json.loads(mutation_terminal.read_text())
+tools/peakflow_phase2a_pilot.py:1211:    topology = json.loads((ARTIFACTS / "routing-topology.json").read_text())
+tools/peakflow_phase2a_pilot.py:1247:        "raw_routing_bytes": sum(path.stat().st_size for path in raw_paths),
+tools/peakflow_phase2a_pilot.py:1267:    selection = json.loads((ARTIFACTS / "pilot-selection.json").read_text())
+tools/peakflow_phase2a_pilot.py:1268:    adjudication = json.loads((ARTIFACTS / "candidate-adjudication.json").read_text())
+tools/peakflow_phase2a_pilot.py:1269:    topology = json.loads((ARTIFACTS / "routing-topology.json").read_text())
+tools/peakflow_phase2a_pilot.py:1276:        terminal = json.loads((bracket_root / run_label / "runs/terminal.json").read_text())
+tools/peakflow_phase2a_pilot.py:1358:        "series": {"locator": str(external_series), "bytes": external_series.stat().st_size,
+tools/peakflow_phase2a_pilot.py:1378:    selection = json.loads((ARTIFACTS / "pilot-selection.json").read_text())
+tools/peakflow_phase2a_pilot.py:1391:    summary = json.loads(summary_path.read_text())
+tools/peakflow_phase2a_pilot.py:1398:    selection = json.loads((ARTIFACTS / "pilot-selection.json").read_text())
+tools/peakflow_phase2a_pilot.py:1399:    mutation = json.loads((ARTIFACTS / "mutation-terminal-summary.json").read_text())
+tools/peakflow_phase2a_pilot.py:1400:    routing = json.loads((ARTIFACTS / "routing-validation-summary.json").read_text())
+tools/peakflow_phase2a_pilot.py:1401:    hydrograph = json.loads((ARTIFACTS / "hydrograph-validation-summary.json").read_text())
+tools/peakflow_phase2a_pilot.py:1402:    adjudication = json.loads((ARTIFACTS / "candidate-adjudication.json").read_text())
+tools/peakflow_phase2a_pilot.py:1511:    (ARTIFACTS / "phase2a-exit-report.md").write_text("\n".join(markdown))
+tools/peakflow_phase2a_pilot.py:1516:    selection = json.loads((ARTIFACTS / "pilot-selection.json").read_text())
+tools/peakflow_phase2a_pilot.py:1545:        if not path.exists() or json.loads(path.read_text()) != schema:
+tools/peakflow_phase2a_pilot.py:1547:    jsonschema.validate(json.loads((ARTIFACTS / "scenario-manifest.json").read_text()), SCHEMAS["scenario-manifest"])
+tools/peakflow_phase2a_pilot.py:1548:    jsonschema.validate(json.loads((ARTIFACTS / "pilot-selection.json").read_text()), SCHEMAS["pilot-selection"])
+tools/peakflow_phase2a_pilot.py:1550:        jsonschema.validate(json.loads((ARTIFACTS / "mutation-terminal-summary.json").read_text()), SCHEMAS["terminal-ledger"])
+tools/peakflow_phase2a_pilot.py:1552:        jsonschema.validate(json.loads((ARTIFACTS / "phase2a-exit-report.json").read_text()), SCHEMAS["exit-report"])
+tools/peakflow_phase2a_pilot.py:1558:            validate_storage_manifest(json.loads(path.read_text()))

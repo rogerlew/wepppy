@@ -1,6 +1,6 @@
 # File dependency freshness audit and fixes
 
-**Status:** Executing M1, 2026-09-17 UTC (2026-09-16 Pacific).
+**Status:** Closed 2026-09-17.
 
 ## Purpose
 
@@ -55,21 +55,18 @@ or closed packages. Legacy records lacking hashes must not be silently blessed
 as current; choose and document an explicit compatible behavior at the contract
 checkpoint. Do not clear caches or rerun user projects to hide defects.
 
-Canonical changes belong in the contracts named by each subsystem AGENTS.
-If no suitable cross-cutting contract exists, propose
-`docs/schemas/file-dependency-freshness-contract.md` during execution, ratify it
-and link affected domain contracts. This proposed file does not exist yet and
-this scaffold does not replace current authority. For UI-coupled changes, follow
-the full contract-first checkpoint, independent reviews and ancestor commit.
+Canonical changes are ratified in [file dependency freshness](../../schemas/file-dependency-freshness-contract.md)
+and the linked domain contracts. Each implemented group has a reviewed ancestor
+checkpoint; bounded compatibility, performance and unresolved inventory decisions
+are retained in the ExecPlan and independent review artifacts.
 
 ## Security impact and reviews
 
 **Impact: high.** Signature changes can affect integrity, concurrency, path
 identity and hostile file replacement. Dedicated security and correctness
 reviews are mandatory before implementation checkpoint and final closeout;
-retain artifacts using repository review templates. Review valid-state
-noninterference alongside rejection of malformed/hostile states. No review
-has been conducted or approval granted by this scaffold.
+retain artifacts using repository review templates. Scoped correctness, security
+and QA reviews cover the implementation and retained runtime acceptance. Valid-state noninterference and rejection evidence are retained.
 
 ## Mandatory acceptance
 
@@ -102,6 +99,28 @@ removed, or repeated large reads on status polls. No temporary bypass or global
 cache flush is planned. Exercise the entire operation matrix before closeout;
 record a follow-up observation checkpoint after the next ordinary WEPP run.
 
+## Delivered outcome and follow-up
+
+Implementation through `de3a1eba0` fixes ordinary content currentness, guarded
+digest reuse, NoDb hydration, CLI lineage, reports, Features exports, D-Tale,
+bounded raster/Geneva caches, Omni/profile SBS receipts and archive directory
+modes. Development services and assets were rebuilt/restarted. Actual WEPP
+changed218 CLI link counts/ctimes without changing bytes or invalidating M3;
+actual climate changes still invalidate it. Final Python8,924/99 skipped and
+frontend899 tests pass; actual UI/RQ/native, archive and cache evidence is in
+[development acceptance](artifacts/runtime_acceptance.md). No production deploy.
+
+Follow-up remains explicit: PF-R01 soil physical inventory can false-stale M3
+after metadata changes or restore (ordinary M3 rerun recovers); indirect native
+reader closure, active dashboard generations and completion receipts have
+bounded unresolved dispositions. Canonical profile CLI bearer handling/false
+success and the existing water-balance CSV adapter defect are separately
+recorded. Closure uses the package's justified-unresolved inventory allowance;
+it does not claim those defects fixed. See
+[final disposition](artifacts/implementation_disposition.md),
+[correctness review](artifacts/final_implementation_correctness_review.md), and
+[security review](artifacts/20260917_security_review.md).
+
 ## Deliverables and references
 
 Deliver a complete inventory, per-consumer contract decisions, compatibility and
@@ -113,4 +132,4 @@ is intended; any formulas/defaults/unit-policy change requires a separate ADR.
 - [Operation matrix](artifacts/operation_matrix.md)
 - [Trigger evidence](../../investigations/20260917_dead_horse_cli_freshness/findings.md)
 - [Tracker](tracker.md)
-- [ExecPlan](prompts/active/file_dependency_freshness_execplan.md)
+- [ExecPlan](prompts/completed/file_dependency_freshness_execplan.md)

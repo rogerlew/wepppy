@@ -1,0 +1,29 @@
+{
+  "status": 200,
+  "body": {
+    "contract_version": "1.0.0-draft",
+    "deployment_revision": "dev",
+    "run_state_revision": "runstate:thespian-cleanness:94da27660795",
+    "run_state_domain": "metadata",
+    "run_state_vector": {
+      "orchestration_revision": null,
+      "metadata_revision": "runstate:thespian-cleanness:94da27660795",
+      "outputs_revision": null
+    },
+    "operation_id": "rq_engine_fork_project",
+    "resolved_defaults": {
+      "undisturbify": false,
+      "skip_wepp_runs_output": false,
+      "skip_omni_scenarios_contrasts": false
+    },
+    "defaults_context": {
+      "config": "config",
+      "active_mods": [
+        "disturbed",
+        "postfire_debris_flow"
+      ],
+      "region": "us"
+    },
+    "computed_at": "2026-09-17T07:23:58Z"
+  }
+}

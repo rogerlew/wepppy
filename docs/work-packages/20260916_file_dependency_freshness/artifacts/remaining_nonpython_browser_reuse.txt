@@ -1,0 +1,662 @@
+wepppy/weppcloud/controllers_js/team.js:405:        function refreshMembers(options) {
+wepppy/weppcloud/controllers_js/team.js:489:                    return refreshMembers({ silentStatus: true }).then(function () {
+wepppy/weppcloud/controllers_js/team.js:559:                    return refreshMembers({ silentStatus: true }).then(function () {
+wepppy/weppcloud/controllers_js/team.js:606:        team.refreshMembers = refreshMembers;
+wepppy/weppcloud/controllers_js/team.js:629:            return refreshMembers({});
+wepppy/weppcloud/controllers_js/roads_gl.js:444:                map.addLayer(state.hoverLayer, { skipRefresh: true });
+wepppy/weppcloud/controllers_js/roads_gl.js:457:                        map.addLayer(state.hoverLabelLayer, { skipRefresh: true });
+wepppy/weppcloud/controllers_js/roads_gl.js:594:            refreshLayers: function () {
+wepppy/weppcloud/static/js/parquet_schema_preview.js:2:  const schemaCache = new Map();
+wepppy/weppcloud/static/js/parquet_schema_preview.js:64:    if (schemaCache.has(schemaUrl)) {
+wepppy/weppcloud/static/js/parquet_schema_preview.js:65:      return schemaCache.get(schemaUrl);
+wepppy/weppcloud/static/js/parquet_schema_preview.js:78:    schemaCache.set(schemaUrl, request);
+wepppy/weppcloud/static/js/parquet_schema_preview.js:82:      schemaCache.delete(schemaUrl);
+wepppy/weppcloud/static/js/gl-dashboard/graphs/timeseries-graph.js:152:      // Query DOM after removing old toggle to get fresh references
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:71:    cacheNamespace: rawCacheNamespace,
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:88:  const cacheNamespace = rawCacheNamespace != null ? String(rawCacheNamespace) : '';
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:122:  function withCacheNamespace(key) {
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:123:    if (!cacheNamespace) return key;
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:125:    if (!normalized) return cacheNamespace;
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:126:    return `${cacheNamespace}::${normalized}`;
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:183:   * Get unique cache key for scenario.
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:221:    const cacheKey = withCacheNamespace(baseKey);
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:223:    if (state.hillLossCache[cacheKey]) {
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:224:      console.debug('gl-dashboard: cache hit for', cacheKey);
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:225:      return state.hillLossCache[cacheKey];
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:245:      console.debug('gl-dashboard: querying scenario', { scenPath, cacheKey });
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:266:      if (rows.length || !isBaseScenario || !state.hillLossCache[cacheKey]) {
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:267:        state.hillLossCache[cacheKey] = rows;
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:269:      if (!rows.length && isBaseScenario && Array.isArray(state.hillLossCache[cacheKey]) && state.hillLossCache[cacheKey].length) {
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:270:        return state.hillLossCache[cacheKey];
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:276:      state.hillslopeAreaCache[cacheKey] = totalArea;
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:280:      state.hillLossCache[cacheKey] = [];
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:287:    const cacheKey = withCacheNamespace(baseKey);
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:289:    if (state.channelLossCache[cacheKey]) return state.channelLossCache[cacheKey];
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:308:      if (rows.length || !isBaseScenario || !state.channelLossCache[cacheKey]) {
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:309:        state.channelLossCache[cacheKey] = rows;
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:311:      if (!rows.length && isBaseScenario && Array.isArray(state.channelLossCache[cacheKey]) && state.channelLossCache[cacheKey].length) {
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:312:        return state.channelLossCache[cacheKey];
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:317:      state.channelLossCache[cacheKey] = [];
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:324:    const cacheKey = withCacheNamespace(baseKey);
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:326:    if (state.outletAllYearsCache[cacheKey]) return state.outletAllYearsCache[cacheKey];
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:346:      if (Object.keys(map).length || !isBaseScenario || !state.outletAllYearsCache[cacheKey]) {
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:347:        state.outletAllYearsCache[cacheKey] = map;
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:349:      if (!Object.keys(map).length && isBaseScenario && state.outletAllYearsCache[cacheKey]) {
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:350:        return state.outletAllYearsCache[cacheKey];
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:355:      state.outletAllYearsCache[cacheKey] = {};
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:362:    const cacheKey = withCacheNamespace(baseKey);
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:363:    if (state.hillslopeAreaCache[cacheKey] != null) return state.hillslopeAreaCache[cacheKey];
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:365:    return state.hillslopeAreaCache[cacheKey] || 0;
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:717:    if (state.openetYearlyCache && Number.isFinite(state.openetYearlyCache.totalAreaM2)) {
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:718:      return state.openetYearlyCache.totalAreaM2;
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:730:    state.openetYearlyCache = { ...(state.openetYearlyCache || {}), totalAreaM2: area };
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:1065:  function graphCacheKey(key, options) {
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:1071:      return withCacheNamespace(`${key}:${measureKey}:${scenarioKeys}`);
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:1076:      return withCacheNamespace(`${key}:${water ? 'wy' : 'cy'}:${start}`);
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:1085:      return withCacheNamespace(`${key}:${dataset}:${water ? 'wy' : 'cy'}:${start}`);
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:1087:    return withCacheNamespace(key);
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:1091:    const cacheKey = graphCacheKey(key, options);
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:1092:    if (!force && state.graphDataCache[cacheKey]) {
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:1093:      return state.graphDataCache[cacheKey];
+wepppy/weppcloud/static/js/gl-dashboard/graphs/graph-loaders.js:1098:    state.graphDataCache[cacheKey] = data;
+wepppy/weppcloud/static/js/gl-dashboard/layers/renderer.js:17:  refreshWeppStatisticData,
+wepppy/weppcloud/static/js/gl-dashboard/layers/renderer.js:18:  refreshRapData,
+wepppy/weppcloud/static/js/gl-dashboard/layers/renderer.js:19:  refreshOpenetData,
+wepppy/weppcloud/static/js/gl-dashboard/layers/renderer.js:20:  refreshWeppEventData,
+wepppy/weppcloud/static/js/gl-dashboard/layers/renderer.js:140:    const cached = normalizeRasterRange(layer._rusleBaseRange, { allowEqual: true });
+wepppy/weppcloud/static/js/gl-dashboard/layers/renderer.js:141:    if (cached) return cached;
+wepppy/weppcloud/static/js/gl-dashboard/layers/renderer.js:289:    const commit = ({ refreshLegend = true, revertOnInvalid = true } = {}) => {
+wepppy/weppcloud/static/js/gl-dashboard/layers/renderer.js:290:      const nextValue = onCommit(input.value, { refreshLegend });
+wepppy/weppcloud/static/js/gl-dashboard/layers/renderer.js:299:      commit({ refreshLegend: false, revertOnInvalid: false });
+wepppy/weppcloud/static/js/gl-dashboard/layers/renderer.js:302:      commit({ refreshLegend: true, revertOnInvalid: true });
+wepppy/weppcloud/static/js/gl-dashboard/layers/renderer.js:307:        commit({ refreshLegend: true, revertOnInvalid: true });
+wepppy/weppcloud/static/js/gl-dashboard/layers/renderer.js:325:      onCommit: (candidateValue, { refreshLegend = true } = {}) => {
+wepppy/weppcloud/static/js/gl-dashboard/layers/renderer.js:330:        if (refreshLegend) {
+wepppy/weppcloud/static/js/gl-dashboard/layers/renderer.js:347:      onCommit: (candidateValue, { refreshLegend = true } = {}) => {
+wepppy/weppcloud/static/js/gl-dashboard/layers/renderer.js:352:        if (refreshLegend) {
+wepppy/weppcloud/static/js/gl-dashboard/layers/renderer.js:495:      await refreshRapData();
+wepppy/weppcloud/static/js/gl-dashboard/layers/renderer.js:531:          await refreshRapData();
+wepppy/weppcloud/static/js/gl-dashboard/layers/renderer.js:580:        await refreshWeppEventData();
+wepppy/weppcloud/static/js/gl-dashboard/layers/renderer.js:698:          await refreshWeppEventData();
+wepppy/weppcloud/static/js/gl-dashboard/layers/renderer.js:900:            await refreshWeppStatisticData();
+wepppy/weppcloud/static/js/gl-dashboard/layers/renderer.js:1026:              if (typeof refreshOpenetData === 'function') {
+wepppy/weppcloud/static/js/gl-dashboard/layers/renderer.js:1027:                await refreshOpenetData();
+wepppy/weppcloud/static/js/gl-dashboard/layers/renderer.js:1124:            if (typeof refreshWeppStatisticData === 'function') {
+wepppy/weppcloud/static/js/gl-dashboard/layers/renderer.js:1125:              await refreshWeppStatisticData();
+wepppy/weppcloud/static/js/archive_console.js:68:    var refreshButton = container.querySelector("#refresh_button");
+wepppy/weppcloud/static/js/archive_console.js:477:      return fetch(archivesUrl, { cache: "no-store" })
+wepppy/weppcloud/static/js/archive_console.js:769:    if (refreshButton) {
+wepppy/weppcloud/static/js/archive_console.js:770:      refreshButton.addEventListener("click", fetchArchives);
+wepppy/weppcloud/static/js/gl-dashboard/data/openet-data.js:2: * OpenET data helpers (summary refresh + selection resolution).
+wepppy/weppcloud/static/js/gl-dashboard/data/openet-data.js:28:  async function refreshOpenetData() {
+wepppy/weppcloud/static/js/gl-dashboard/data/openet-data.js:89:      console.warn('gl-dashboard: failed to refresh OpenET data', err);
+wepppy/weppcloud/static/js/gl-dashboard/data/openet-data.js:94:  return { refreshOpenetData };
+wepppy/weppcloud/controllers_js/run_sync_dashboard.js:161:        var refreshStatusFn = null;
+wepppy/weppcloud/controllers_js/run_sync_dashboard.js:169:        var lastStatusRefreshError = null;
+wepppy/weppcloud/controllers_js/run_sync_dashboard.js:273:            if (typeof refreshStatusFn === "function") {
+wepppy/weppcloud/controllers_js/run_sync_dashboard.js:274:                refreshStatusFn();
+wepppy/weppcloud/controllers_js/run_sync_dashboard.js:292:            if (typeof refreshStatusFn === "function") {
+wepppy/weppcloud/controllers_js/run_sync_dashboard.js:293:                refreshStatusFn();
+wepppy/weppcloud/controllers_js/run_sync_dashboard.js:539:            function refreshStatus() {
+wepppy/weppcloud/controllers_js/run_sync_dashboard.js:542:                    if (missingMessage !== lastStatusRefreshError) {
+wepppy/weppcloud/controllers_js/run_sync_dashboard.js:544:                        lastStatusRefreshError = missingMessage;
+wepppy/weppcloud/controllers_js/run_sync_dashboard.js:552:                        lastStatusRefreshError = null;
+wepppy/weppcloud/controllers_js/run_sync_dashboard.js:555:                        var message = "Status refresh failed: " + (error.message || error);
+wepppy/weppcloud/controllers_js/run_sync_dashboard.js:556:                        if (message !== lastStatusRefreshError) {
+wepppy/weppcloud/controllers_js/run_sync_dashboard.js:558:                            lastStatusRefreshError = message;
+wepppy/weppcloud/controllers_js/run_sync_dashboard.js:562:            refreshStatusFn = refreshStatus;
+wepppy/weppcloud/controllers_js/run_sync_dashboard.js:568:                statusPollTimer = setInterval(refreshStatus, statusPollIntervalMs);
+wepppy/weppcloud/controllers_js/run_sync_dashboard.js:611:                        refreshStatus();
+wepppy/weppcloud/controllers_js/run_sync_dashboard.js:628:            refreshStatus();
+wepppy/weppcloud/controllers_js/project.js:46:        "refresh_token",
+wepppy/weppcloud/controllers_js/project.js:959:                    console.warn("[Project] Failed to refresh TOC metadata", err);
+wepppy/weppcloud/controllers_js/project.js:1855:                            "Module enabled but failed to render. Refresh to continue."
+wepppy/weppcloud/controllers_js/geneva_summary_report.js:420:        this.mapRefreshButton = document.querySelector("[data-geneva-summary-map-refresh]");
+wepppy/weppcloud/controllers_js/geneva_summary_report.js:489:                controller.refreshFromQuery();
+wepppy/weppcloud/controllers_js/geneva_summary_report.js:494:                controller.refreshFromQuery();
+wepppy/weppcloud/controllers_js/geneva_summary_report.js:499:                controller.refreshFromQuery();
+wepppy/weppcloud/controllers_js/geneva_summary_report.js:504:                controller.refreshMapRows({ force: true });
+wepppy/weppcloud/controllers_js/geneva_summary_report.js:507:        if (this.mapRefreshButton) {
+wepppy/weppcloud/controllers_js/geneva_summary_report.js:508:            this.mapRefreshButton.addEventListener("click", function () {
+wepppy/weppcloud/controllers_js/geneva_summary_report.js:509:                controller.refreshMapRows({ force: true });
+wepppy/weppcloud/controllers_js/geneva_summary_report.js:521:    GenevaSummaryReportController.prototype.refreshFromQuery = function refreshFromQuery() {
+wepppy/weppcloud/controllers_js/geneva_summary_report.js:557:                console.error("[GenevaSummaryReport] Query refresh failed.", error);
+wepppy/weppcloud/controllers_js/geneva_summary_report.js:560:                    error: "Failed to refresh Geneva summary data. Check query endpoint availability."
+wepppy/weppcloud/controllers_js/geneva_summary_report.js:1302:        this.refreshMapRows();
+wepppy/weppcloud/controllers_js/geneva_summary_report.js:1475:    GenevaSummaryReportController.prototype.refreshMapRows = function refreshMapRows(options) {
+wepppy/weppcloud/controllers_js/geneva_summary_report.js:1534:            console.error("[GenevaSummaryReport] Map rows refresh failed.", error);
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:22: * @property {() => Promise<boolean>} refreshWeppStatisticData Refresh active WEPP summary and ranges for the current statistic.
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:25: * @property {(year: number) => Object} computeWeppYearlyDiffRanges Compute yearly diff ranges against base cache for a year.
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:26: * @property {(year: number) => Promise<Object|null>} loadBaseWeppYearlyData Load and cache base WEPP yearly summary for a year.
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:27: * @property {() => Promise<boolean>} refreshWeppYearlyData Refresh scenario/base yearly summaries and diff ranges.
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:29: * @property {() => Object|null} computeWeppEventDiffRanges Compute event diff ranges against base cache.
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:31: * @property {() => Promise<boolean>} refreshWeppEventData Refresh scenario event data (and base when in comparison).
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:33: * @property {() => Promise<boolean>} refreshWeppChannelStatisticData Refresh active WEPP channel summary and ranges for the current statistic.
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:35: * @property {() => Promise<boolean>} refreshWeppYearlyChannelData Refresh active WEPP yearly channel summary and ranges for the selected year.
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:268:  async function refreshWeppStatisticData() {
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:282:        const nextBaseSummary = { ...(state.baseSummaryCache || {}) };
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:286:        setState({ baseSummaryCache: nextBaseSummary });
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:290:      console.warn('gl-dashboard: failed to refresh WEPP data for statistic', err);
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:295:  async function refreshWeppChannelStatisticData() {
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:308:      console.warn('gl-dashboard: failed to refresh WEPP channel data for statistic', err);
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:313:  async function refreshWeppYearlyChannelData() {
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:320:    let summary = (state.weppYearlyChannelCache && state.weppYearlyChannelCache[year]) || null;
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:321:    let nextCache = state.weppYearlyChannelCache || {};
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:345:          nextCache = { ...nextCache, [year]: summary };
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:348:        console.warn('gl-dashboard: failed to refresh WEPP yearly channel data', err);
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:357:      weppYearlyChannelCache: { ...nextCache },
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:391:    const baseSummary = (state.baseWeppYearlyCache || {})[year];
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:432:    if (state.baseWeppYearlyCache && state.baseWeppYearlyCache[year]) {
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:433:      return state.baseWeppYearlyCache[year];
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:463:        const nextBase = { ...(state.baseWeppYearlyCache || {}) };
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:465:        setState({ baseWeppYearlyCache: nextBase });
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:474:  async function refreshWeppYearlyData() {
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:479:    let summary = (state.weppYearlyCache && state.weppYearlyCache[year]) || null;
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:480:    let nextCache = state.weppYearlyCache || {};
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:510:          nextCache = { ...nextCache, [year]: summary };
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:513:        console.warn('gl-dashboard: failed to refresh WEPP yearly data', err);
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:533:      weppYearlyCache: { ...nextCache },
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:534:      baseWeppYearlyCache: { ...(getState().baseWeppYearlyCache || {}) },
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:570:    if (!state.weppEventSummary || !state.baseSummaryCache || !state.baseSummaryCache.weppEvent) return null;
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:588:        const baseRow = state.baseSummaryCache.weppEvent[topazId];
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:728:      const nextBaseSummary = { ...(state.baseSummaryCache || {}) };
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:730:      setState({ baseSummaryCache: nextBaseSummary });
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:740:  async function refreshWeppEventData() {
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:838:      console.warn('gl-dashboard: failed to refresh WEPP Event data', err);
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:847:    refreshWeppStatisticData,
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:851:    refreshWeppChannelStatisticData,
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:853:    refreshWeppYearlyChannelData,
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:858:    refreshWeppYearlyData,
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:862:    refreshWeppEventData,
+wepppy/weppcloud/static/js/storm-event-analyzer/data/event-data.js:23:const warmupYearCache = new Map();
+wepppy/weppcloud/static/js/storm-event-analyzer/data/event-data.js:24:const warmupYearPromiseCache = new Map();
+wepppy/weppcloud/static/js/storm-event-analyzer/data/event-data.js:545:  if (warmupYearCache.has(runid)) {
+wepppy/weppcloud/static/js/storm-event-analyzer/data/event-data.js:546:    return warmupYearCache.get(runid);
+wepppy/weppcloud/static/js/storm-event-analyzer/data/event-data.js:548:  if (warmupYearPromiseCache.has(runid)) {
+wepppy/weppcloud/static/js/storm-event-analyzer/data/event-data.js:549:    return warmupYearPromiseCache.get(runid);
+wepppy/weppcloud/static/js/storm-event-analyzer/data/event-data.js:562:        warmupYearCache.set(runid, value);
+wepppy/weppcloud/static/js/storm-event-analyzer/data/event-data.js:567:      warmupYearPromiseCache.delete(runid);
+wepppy/weppcloud/static/js/storm-event-analyzer/data/event-data.js:571:  warmupYearPromiseCache.set(runid, promise);
+wepppy/weppcloud/static/js/gl-dashboard/data/rap-data.js:2: * RAP data helpers (summary refresh + active layer selection).
+wepppy/weppcloud/static/js/gl-dashboard/data/rap-data.js:16:  async function refreshRapData() {
+wepppy/weppcloud/static/js/gl-dashboard/data/rap-data.js:47:        console.warn('gl-dashboard: failed to refresh RAP cumulative data', err);
+wepppy/weppcloud/static/js/gl-dashboard/data/rap-data.js:73:      console.warn('gl-dashboard: failed to refresh RAP data', err);
+wepppy/weppcloud/static/js/gl-dashboard/data/rap-data.js:77:  return { refreshRapData, pickActiveRapLayer };
+wepppy/weppcloud/static/js/gl-dashboard/state.js:17:  baseSummaryCache: {},
+wepppy/weppcloud/static/js/gl-dashboard/state.js:32:  graphDataCache: {},
+wepppy/weppcloud/static/js/gl-dashboard/state.js:35:  hillLossCache: {},
+wepppy/weppcloud/static/js/gl-dashboard/state.js:36:  channelLossCache: {},
+wepppy/weppcloud/static/js/gl-dashboard/state.js:37:  outletAllYearsCache: {},
+wepppy/weppcloud/static/js/gl-dashboard/state.js:38:  hillslopeAreaCache: {},
+wepppy/weppcloud/static/js/gl-dashboard/state.js:69:  weppYearlyCache: {},
+wepppy/weppcloud/static/js/gl-dashboard/state.js:70:  baseWeppYearlyCache: {},
+wepppy/weppcloud/static/js/gl-dashboard/state.js:74:  weppYearlyChannelCache: {},
+wepppy/weppcloud/static/js/gl-dashboard/state.js:94:  openetYearlyCache: {},
+wepppy/weppcloud/controllers_js/config_builder.js:462:                        this._setStatus("Registered choices changed. The refreshed configuration is valid and ready for review.", true);
+wepppy/weppcloud/static/js/gl-dashboard.js:499:    refreshWeppStatisticData: refreshWeppStatisticDataCore,
+wepppy/weppcloud/static/js/gl-dashboard.js:500:    refreshWeppChannelStatisticData: refreshWeppChannelStatisticDataCore,
+wepppy/weppcloud/static/js/gl-dashboard.js:503:    refreshWeppYearlyChannelData: refreshWeppYearlyChannelDataCore,
+wepppy/weppcloud/static/js/gl-dashboard.js:507:    refreshWeppYearlyData: refreshWeppYearlyDataCore,
+wepppy/weppcloud/static/js/gl-dashboard.js:511:    refreshWeppEventData: refreshWeppEventDataCore,
+wepppy/weppcloud/static/js/gl-dashboard.js:518:  const { refreshRapData } = createRapDataManager({
+wepppy/weppcloud/static/js/gl-dashboard.js:528:  const { refreshOpenetData } = createOpenetDataManager({
+wepppy/weppcloud/static/js/gl-dashboard.js:590:  async function refreshWeppStatisticData() {
+wepppy/weppcloud/static/js/gl-dashboard.js:591:    const changed = await refreshWeppStatisticDataCore();
+wepppy/weppcloud/static/js/gl-dashboard.js:592:    const channelChanged = typeof refreshWeppChannelStatisticDataCore === 'function'
+wepppy/weppcloud/static/js/gl-dashboard.js:593:      ? await refreshWeppChannelStatisticDataCore()
+wepppy/weppcloud/static/js/gl-dashboard.js:607:  async function refreshWeppYearlyData() {
+wepppy/weppcloud/static/js/gl-dashboard.js:608:    const changed = await refreshWeppYearlyDataCore();
+wepppy/weppcloud/static/js/gl-dashboard.js:609:    const channelChanged = typeof refreshWeppYearlyChannelDataCore === 'function'
+wepppy/weppcloud/static/js/gl-dashboard.js:610:      ? await refreshWeppYearlyChannelDataCore()
+wepppy/weppcloud/static/js/gl-dashboard.js:627:  async function refreshWeppYearlyChannelData() {
+wepppy/weppcloud/static/js/gl-dashboard.js:628:    if (typeof refreshWeppYearlyChannelDataCore !== 'function') return;
+wepppy/weppcloud/static/js/gl-dashboard.js:629:    const changed = await refreshWeppYearlyChannelDataCore();
+wepppy/weppcloud/static/js/gl-dashboard.js:639:  async function refreshWeppEventData() {
+wepppy/weppcloud/static/js/gl-dashboard.js:640:    const changed = await refreshWeppEventDataCore();
+wepppy/weppcloud/static/js/gl-dashboard.js:888:        cacheNamespace: `${ctx.runid || ''}::${ctx.config || ''}`,
+wepppy/weppcloud/static/js/gl-dashboard.js:1039:    refreshWeppStatisticData,
+wepppy/weppcloud/static/js/gl-dashboard.js:1040:    refreshRapData,
+wepppy/weppcloud/static/js/gl-dashboard.js:1041:    refreshOpenetData,
+wepppy/weppcloud/static/js/gl-dashboard.js:1042:    refreshWeppEventData,
+wepppy/weppcloud/static/js/gl-dashboard.js:1122:    await refreshWeppYearlyData();
+wepppy/weppcloud/static/js/gl-dashboard.js:1142:    await refreshWeppYearlyChannelData();
+wepppy/weppcloud/static/js/gl-dashboard.js:1162:      await refreshRapData();
+wepppy/weppcloud/static/js/gl-dashboard.js:1174:      await refreshWeppYearlyData();
+wepppy/weppcloud/static/js/gl-dashboard.js:1180:      await refreshWeppYearlyChannelData();
+wepppy/weppcloud/static/js/gl-dashboard.js:1204:    const changed = await refreshOpenetData();
+wepppy/weppcloud/controllers_js/channel_gl.js:685:            map.addLayer(nextLayer, { skipRefresh: true });
+wepppy/weppcloud/controllers_js/channel_gl.js:1781:                    if (map && typeof map.clearFindFlashCache === "function") {
+wepppy/weppcloud/controllers_js/channel_gl.js:1782:                        map.clearFindFlashCache("channels");
+wepppy/weppcloud/controllers_js/channel_gl.js:1854:                    if (map && typeof map.clearFindFlashCache === "function") {
+wepppy/weppcloud/controllers_js/channel_gl.js:1855:                        map.clearFindFlashCache("channels");
+wepppy/weppcloud/controllers_js/channel_gl.js:1953:        channel.refreshLayers = function () {
+wepppy/weppcloud/controllers_js/disturbed.js:537:        function refreshLookupVariantSelection(reason) {
+wepppy/weppcloud/controllers_js/disturbed.js:585:                        return refreshLookupVariantSelection("set-lookup-variant-error");
+wepppy/weppcloud/controllers_js/disturbed.js:605:                    return refreshLookupVariantSelection("set-lookup-variant-error");
+wepppy/weppcloud/controllers_js/disturbed.js:739:        function refreshHasSbs(reason) {
+wepppy/weppcloud/controllers_js/disturbed.js:811:                    refreshLookupVariantSelection("reset-base");
+wepppy/weppcloud/controllers_js/disturbed.js:850:                    refreshLookupVariantSelection("load-extended");
+wepppy/weppcloud/controllers_js/disturbed.js:900:                    refreshLookupVariantSelection("delete-extended");
+wepppy/weppcloud/controllers_js/disturbed.js:939:                    refreshLookupVariantSelection("sync-base-to-extended");
+wepppy/weppcloud/controllers_js/disturbed.js:1001:                        refreshHasSbs("upload");
+wepppy/weppcloud/controllers_js/disturbed.js:1005:                    refreshHasSbs("upload");
+wepppy/weppcloud/controllers_js/disturbed.js:1011:                    refreshHasSbs("upload");
+wepppy/weppcloud/controllers_js/disturbed.js:1074:                        refreshHasSbs("remove");
+wepppy/weppcloud/controllers_js/disturbed.js:1079:                    refreshHasSbs("remove");
+wepppy/weppcloud/controllers_js/disturbed.js:1086:                    refreshHasSbs("remove");
+wepppy/weppcloud/controllers_js/disturbed.js:1152:                        refreshHasSbs("uniform");
+wepppy/weppcloud/controllers_js/disturbed.js:1157:                    refreshHasSbs("uniform");
+wepppy/weppcloud/controllers_js/disturbed.js:1164:                    refreshHasSbs("uniform");
+wepppy/weppcloud/controllers_js/disturbed.js:1307:        refreshLookupVariantSelection("bootstrap");
+wepppy/weppcloud/controllers_js/disturbed.js:1318:        disturbed.refresh_has_sbs = refreshHasSbs;
+wepppy/weppcloud/controllers_js/disturbed.js:1320:        disturbed.set_has_sbs_cached = function (value) {
+wepppy/weppcloud/controllers_js/disturbed.js:1324:        disturbed.get_has_sbs_cached = function () {
+wepppy/weppcloud/controllers_js/disturbed.js:1328:        disturbed.clear_has_sbs_cache = function () {
+wepppy/weppcloud/controllers_js/disturbed.js:1334:            if (opts.forceRefresh || state.hasSbs === undefined) {
+wepppy/weppcloud/controllers_js/disturbed.js:1335:                refreshHasSbs(opts.forceRefresh ? "force" : "lazy");
+wepppy/weppcloud/controllers_js/disturbed.js:1344:            if (flags.initialHasSbs !== undefined && typeof disturbed.set_has_sbs_cached === "function") {
+wepppy/weppcloud/controllers_js/disturbed.js:1345:                disturbed.set_has_sbs_cached(Boolean(flags.initialHasSbs));
+wepppy/weppcloud/controllers_js/map_gl_shared.js:20:        "map:layer:refreshed",
+wepppy/weppcloud/controllers_js/outlet_gl.js:18:        "outlet:display:refresh"
+wepppy/weppcloud/controllers_js/outlet_gl.js:522:            map.addLayer(layer, { skipRefresh: true });
+wepppy/weppcloud/controllers_js/outlet_gl.js:865:                    outlet.events.emit("outlet:display:refresh", {});
+wepppy/weppcloud/static/js/diagnostics/bandwidth_checks.js:201:      cache: "no-store"
+wepppy/weppcloud/static/js/gl-dashboard/colors.js:25:const soilColorCache = new Map();
+wepppy/weppcloud/static/js/gl-dashboard/colors.js:92:  if (soilColorCache.has(value)) {
+wepppy/weppcloud/static/js/gl-dashboard/colors.js:93:    return soilColorCache.get(value);
+wepppy/weppcloud/static/js/gl-dashboard/colors.js:100:  soilColorCache.set(value, hex);
+wepppy/weppcloud/static-src/js/archive_console.js:68:    var refreshButton = container.querySelector("#refresh_button");
+wepppy/weppcloud/static-src/js/archive_console.js:477:      return fetch(archivesUrl, { cache: "no-store" })
+wepppy/weppcloud/static-src/js/archive_console.js:769:    if (refreshButton) {
+wepppy/weppcloud/static-src/js/archive_console.js:770:      refreshButton.addEventListener("click", fetchArchives);
+wepppy/weppcloud/controllers_js/rangeland_cover_modify_gl.js:258:            map.addLayer(layer, { skipRefresh: true });
+wepppy/weppcloud/controllers_js/rangeland_cover_modify_gl.js:921:        function refreshDependentControllers() {
+wepppy/weppcloud/controllers_js/rangeland_cover_modify_gl.js:932:                            console.warn("RangelandCoverModify GL unable to refresh Subcatchment color map", err);
+wepppy/weppcloud/controllers_js/rangeland_cover_modify_gl.js:940:                console.warn("RangelandCoverModify GL: Subcatchment refresh failed", err2);
+wepppy/weppcloud/controllers_js/rangeland_cover_modify_gl.js:951:                console.warn("RangelandCoverModify GL: Rangeland report refresh failed", err3);
+wepppy/weppcloud/controllers_js/rangeland_cover_modify_gl.js:962:                    refreshDependentControllers();
+wepppy/weppcloud/controllers_js/rangeland_cover_modify_gl.js:964:                    console.warn("RangelandCoverModify GL: dependent controller refresh failed", err);
+wepppy/weppcloud/controllers_js/map_gl.js:216:            cache: {
+wepppy/weppcloud/controllers_js/map_gl.js:362:            var cacheKey = type === "channel" ? "channels" : "subcatchments";
+wepppy/weppcloud/controllers_js/map_gl.js:363:            var cached = flashState.cache[cacheKey];
+wepppy/weppcloud/controllers_js/map_gl.js:364:            if (cached) {
+wepppy/weppcloud/controllers_js/map_gl.js:365:                return Promise.resolve(cached);
+wepppy/weppcloud/controllers_js/map_gl.js:375:                    flashState.cache[cacheKey] = normalized;
+wepppy/weppcloud/controllers_js/map_gl.js:445:                mapInstance.addLayer(layer, { skipRefresh: true });
+wepppy/weppcloud/controllers_js/map_gl.js:1325:                if (!(options && options.skipRefresh)) {
+wepppy/weppcloud/controllers_js/map_gl.js:1388:                attachLayerRefresh(layerName, controller);
+wepppy/weppcloud/controllers_js/map_gl.js:1391:                controller.refresh(url).catch(function (error) {
+wepppy/weppcloud/controllers_js/map_gl.js:1400:                if (!map.hasLayer(map.usgs_gage) || typeof map.usgs_gage.refresh !== "function") {
+wepppy/weppcloud/controllers_js/map_gl.js:1404:                return map.usgs_gage.refresh("/resources/usgs/gage_locations/?&bbox=" + bbox).catch(function (error) {
+wepppy/weppcloud/controllers_js/map_gl.js:1405:                    console.warn("Map GL: failed to refresh USGS gage locations", error);
+wepppy/weppcloud/controllers_js/map_gl.js:1412:                if (!map.hasLayer(map.snotel_locations) || typeof map.snotel_locations.refresh !== "function") {
+wepppy/weppcloud/controllers_js/map_gl.js:1416:                return map.snotel_locations.refresh("/resources/snotel/snotel_locations/?&bbox=" + bbox).catch(function (error) {
+wepppy/weppcloud/controllers_js/map_gl.js:1417:                    console.warn("Map GL: failed to refresh SNOTEL locations", error);
+wepppy/weppcloud/controllers_js/map_gl.js:1424:                if (!map.hasLayer(map.nhd_flowlines) || typeof map.nhd_flowlines.refresh !== "function") {
+wepppy/weppcloud/controllers_js/map_gl.js:1432:                return map.nhd_flowlines.refresh(url).catch(function (error) {
+wepppy/weppcloud/controllers_js/map_gl.js:1433:                    console.warn("Map GL: failed to refresh NHD flowlines", error);
+wepppy/weppcloud/controllers_js/map_gl.js:1437:                if (!map.sbs_layer || !map.hasLayer(map.sbs_layer) || typeof map.sbs_layer.refresh !== "function") {
+wepppy/weppcloud/controllers_js/map_gl.js:1444:                return map.sbs_layer.refresh(url).then(function (data) {
+wepppy/weppcloud/controllers_js/map_gl.js:1455:                    console.warn("Map GL: failed to refresh SBS map", error);
+wepppy/weppcloud/controllers_js/map_gl.js:1538:            clearFindFlashCache: function (type) {
+wepppy/weppcloud/controllers_js/map_gl.js:1539:                if (!flashState || !flashState.cache) {
+wepppy/weppcloud/controllers_js/map_gl.js:1543:                    flashState.cache.subcatchments = null;
+wepppy/weppcloud/controllers_js/map_gl.js:1544:                    flashState.cache.channels = null;
+wepppy/weppcloud/controllers_js/map_gl.js:1549:                    flashState.cache.subcatchments = null;
+wepppy/weppcloud/controllers_js/map_gl.js:1552:                    flashState.cache.channels = null;
+wepppy/weppcloud/controllers_js/map_gl.js:1852:                refresh: refresh
+wepppy/weppcloud/controllers_js/map_gl.js:1856:                layer.refresh = controller.refresh;
+wepppy/weppcloud/controllers_js/map_gl.js:1905:                    map.addLayer(currentLayer, { skipRefresh: true });
+wepppy/weppcloud/controllers_js/map_gl.js:1910:            function refresh(urlInput) {
+wepppy/weppcloud/controllers_js/map_gl.js:1965:                refresh: refresh,
+wepppy/weppcloud/controllers_js/map_gl.js:1995:                currentLayer.refresh = controller.refresh;
+wepppy/weppcloud/controllers_js/map_gl.js:2015:                    map.addLayer(currentLayer, { skipRefresh: true });
+wepppy/weppcloud/controllers_js/map_gl.js:2064:            function refresh(urlInput) {
+wepppy/weppcloud/controllers_js/map_gl.js:2139:            currentLayer.refresh = refresh;
+wepppy/weppcloud/controllers_js/map_gl.js:2147:        function attachLayerRefresh(layerName, controller) {
+wepppy/weppcloud/controllers_js/map_gl.js:2148:            var baseRefresh = controller.refresh;
+wepppy/weppcloud/controllers_js/map_gl.js:2150:                return baseRefresh(url).then(function (data) {
+wepppy/weppcloud/controllers_js/map_gl.js:2152:                    emit("map:layer:refreshed", {
+wepppy/weppcloud/controllers_js/map_gl.js:2169:            controller.refresh = wrapped;
+wepppy/weppcloud/controllers_js/map_gl.js:2171:                controller.layer.refresh = wrapped;
+wepppy/weppcloud/controllers_js/map_gl.js:2251:            scheduleOverlayRefresh();
+wepppy/weppcloud/controllers_js/map_gl.js:2258:            if (overlayRefreshTimer) {
+wepppy/weppcloud/controllers_js/map_gl.js:2259:                clearTimeout(overlayRefreshTimer);
+wepppy/weppcloud/controllers_js/map_gl.js:2260:                overlayRefreshTimer = null;
+wepppy/weppcloud/controllers_js/map_gl.js:2304:        var overlayRefreshTimer = null;
+wepppy/weppcloud/controllers_js/map_gl.js:2306:        function scheduleOverlayRefresh() {
+wepppy/weppcloud/controllers_js/map_gl.js:2307:            if (overlayRefreshTimer) {
+wepppy/weppcloud/controllers_js/map_gl.js:2308:                clearTimeout(overlayRefreshTimer);
+wepppy/weppcloud/controllers_js/map_gl.js:2310:            overlayRefreshTimer = setTimeout(function () {
+wepppy/weppcloud/controllers_js/map_gl.js:2311:                overlayRefreshTimer = null;
+wepppy/weppcloud/controllers_js/map_gl.js:2378:        attachLayerRefresh(USGS_LAYER_NAME, usgsLayerController);
+wepppy/weppcloud/controllers_js/map_gl.js:2379:        attachLayerRefresh(SNOTEL_LAYER_NAME, snotelLayerController);
+wepppy/weppcloud/controllers_js/map_gl.js:2380:        attachLayerRefresh(NHD_LAYER_NAME, nhdLayerController);
+wepppy/weppcloud/controllers_js/map_gl.js:2381:        attachLayerRefresh(SBS_LAYER_NAME, sbsLayerController);
+wepppy/weppcloud/controllers_js/roads.js:858:        function refreshRoadsResults(taskKey) {
+wepppy/weppcloud/controllers_js/roads.js:875:        function refreshRoadsSummary() {
+wepppy/weppcloud/controllers_js/roads.js:888:        function refreshRoadsConfig() {
+wepppy/weppcloud/controllers_js/roads.js:989:                refreshRoadsResults("prepare");
+wepppy/weppcloud/controllers_js/roads.js:994:                refreshRoadsResults("run");
+wepppy/weppcloud/controllers_js/roads.js:1271:                refreshRoadsSummary();
+wepppy/weppcloud/controllers_js/roads.js:1323:            refreshRoadsConfig();
+wepppy/weppcloud/controllers_js/roads.js:1324:            refreshRoadsSummary();
+wepppy/weppcloud/controllers_js/postfire_report.js:341:        async function refresh(query) {
+wepppy/weppcloud/controllers_js/postfire_report.js:343:            pendingQuery = query; retryAction = function () { return refresh(pendingQuery); };
+wepppy/weppcloud/controllers_js/postfire_report.js:379:                    retryAction = function () { return refresh(pendingQuery); };
+wepppy/weppcloud/controllers_js/postfire_report.js:429:                if (action === "reset") { field("min_probability").value = ""; field("year").value = ""; field("sort").value = "row_ordinal"; field("descending").checked = false; refresh(queryFromFields(0)); }
+wepppy/weppcloud/controllers_js/postfire_report.js:430:                if (action === "previous" || action === "next") refresh(Object.assign({}, payload.query, {offset: payload.query.offset + (action === "next" ? 100 : -100)}));
+wepppy/weppcloud/controllers_js/postfire_report.js:432:            dom.delegate(root, "submit", "[data-pfr-filters]", function (event) { event.preventDefault(); refresh(queryFromFields(0)); });
+wepppy/weppcloud/controllers_js/postfire_report.js:433:            dom.delegate(root, "change", '[data-pfr-field="duration"]', function () { refresh(queryFromFields(0)); });
+wepppy/weppcloud/controllers_js/landuse_modify_gl.js:220:            map.addLayer(layer, { skipRefresh: true });
+wepppy/weppcloud/controllers_js/landuse_modify_gl.js:707:                    refreshDependentControllers();
+wepppy/weppcloud/controllers_js/landuse_modify_gl.js:729:        function refreshDependentControllers() {
+wepppy/weppcloud/controllers_js/landuse_modify_gl.js:739:                console.warn("LanduseModify GL: SubcatchmentDelineation refresh failed", err);
+wepppy/weppcloud/controllers_js/landuse_modify_gl.js:750:                console.warn("LanduseModify GL: Landuse report refresh failed", err2);
+wepppy/weppcloud/controllers_js/landuse_modify_gl.js:758:                    refreshDependentControllers();
+wepppy/weppcloud/controllers_js/landuse_modify_gl.js:760:                    console.warn("LanduseModify GL: dependent controller refresh failed", err);
+wepppy/weppcloud/static/js/gl-dashboard/map/raster-utils.js:9: * @property {() => { geoTiffLoader?: Promise<any> | null }} getState Read reactive state to reuse the GeoTIFF loader promise.
+wepppy/weppcloud/static/js/gl-dashboard/map/raster-utils.js:10: * @property {(key: string, value: any) => void} setValue Write a single state key (geoTiffLoader cache).
+wepppy/weppcloud/static/js/gl-dashboard/map/raster-utils.js:53:    const cached = getState().geoTiffLoader;
+wepppy/weppcloud/static/js/gl-dashboard/map/raster-utils.js:54:    if (cached) return cached;
+wepppy/weppcloud/static/js/gl-dashboard/map/raster-utils.js:171:    const fnCache = new Map();
+wepppy/weppcloud/static/js/gl-dashboard/map/raster-utils.js:216:            let fn = fnCache.get(colorMap);
+wepppy/weppcloud/static/js/gl-dashboard/map/raster-utils.js:219:              fnCache.set(colorMap, fn);
+wepppy/weppcloud/controllers_js/bootstrap_control.js:23:        actionRefresh: "[data-bootstrap-action=\"refresh\"]",
+wepppy/weppcloud/controllers_js/bootstrap_control.js:175:            refreshButton: dom.qs(SELECTORS.actionRefresh),
+wepppy/weppcloud/controllers_js/bootstrap_control.js:212:            elements.refreshButton = dom.qs(SELECTORS.actionRefresh);
+wepppy/weppcloud/controllers_js/bootstrap_control.js:402:            var canRefresh = state.enabled && !state.enablePending;
+wepppy/weppcloud/controllers_js/bootstrap_control.js:410:            setDisabled(elements.refreshButton, !canRefresh);
+wepppy/weppcloud/controllers_js/bootstrap_control.js:420:        function refreshCurrentRef() {
+wepppy/weppcloud/controllers_js/bootstrap_control.js:438:        function refreshCommits() {
+wepppy/weppcloud/controllers_js/bootstrap_control.js:457:        function refreshData() {
+wepppy/weppcloud/controllers_js/bootstrap_control.js:461:            refreshCurrentRef();
+wepppy/weppcloud/controllers_js/bootstrap_control.js:462:            refreshCommits();
+wepppy/weppcloud/controllers_js/bootstrap_control.js:487:            refreshData();
+wepppy/weppcloud/controllers_js/bootstrap_control.js:537:                    refreshData();
+wepppy/weppcloud/controllers_js/bootstrap_control.js:675:            dom.delegate(elements.root, "click", SELECTORS.actionRefresh, function (event) {
+wepppy/weppcloud/controllers_js/bootstrap_control.js:679:                refreshData();
+wepppy/weppcloud/controllers_js/bootstrap_control.js:775:                refreshData();
+wepppy/weppcloud/static/js/gl-dashboard/layers/detector.js:54:const _batchGeoJsonCache = new Map();
+wepppy/weppcloud/static/js/gl-dashboard/layers/detector.js:218:  const cacheKey = `${baseKey}::${String(ctx.config || '')}::${kind}`;
+wepppy/weppcloud/static/js/gl-dashboard/layers/detector.js:219:  if (_batchGeoJsonCache.has(cacheKey)) {
+wepppy/weppcloud/static/js/gl-dashboard/layers/detector.js:220:    return _batchGeoJsonCache.get(cacheKey);
+wepppy/weppcloud/static/js/gl-dashboard/layers/detector.js:251:  _batchGeoJsonCache.set(cacheKey, promise);
+wepppy/weppcloud/controllers_js/baer.js:1117:                        if (disturbed && typeof disturbed.set_has_sbs_cached === "function") {
+wepppy/weppcloud/controllers_js/baer.js:1118:                            disturbed.set_has_sbs_cached(true);
+wepppy/weppcloud/controllers_js/baer.js:1135:                        if (disturbed && typeof disturbed.set_has_sbs_cached === "function") {
+wepppy/weppcloud/controllers_js/baer.js:1136:                            disturbed.set_has_sbs_cached(false);
+wepppy/weppcloud/static/js/gl-dashboard/scenario/manager.js:155:    const baseSummary = baseSummaryOverride || state.baseSummaryCache || {};
+wepppy/weppcloud/static/js/gl-dashboard/scenario/manager.js:222:    setState({ baseSummaryCache: baseSummary, comparisonDiffRanges: {} });
+wepppy/weppcloud/static/js/gl-dashboard/scenario/manager.js:236:        baseSummaryCache: baseSummary,
+wepppy/weppcloud/static/js/gl-dashboard/scenario/manager.js:241:      setState({ baseSummaryCache: baseSummary });
+wepppy/weppcloud/static/js/gl-dashboard/scenario/manager.js:256:      weppYearlyCache: {},
+wepppy/weppcloud/static/js/gl-dashboard/scenario/manager.js:257:      baseWeppYearlyCache: {},
+wepppy/weppcloud/static/js/gl-dashboard/scenario/manager.js:260:      weppYearlyChannelCache: {},
+wepppy/weppcloud/controllers_js/http.js:9:    var sessionTokenCache = {};
+wepppy/weppcloud/controllers_js/http.js:183:    function _sessionCacheKey(runId, config) {
+wepppy/weppcloud/controllers_js/http.js:249:        var key = _sessionCacheKey(runId, config);
+wepppy/weppcloud/controllers_js/http.js:250:        var entry = sessionTokenCache[key];
+wepppy/weppcloud/controllers_js/http.js:286:                sessionTokenCache[key] = entry;
+wepppy/weppcloud/controllers_js/http.js:291:                sessionTokenCache[key] = entry;
+wepppy/weppcloud/controllers_js/http.js:299:                    sessionTokenCache[key] = entry;
+wepppy/weppcloud/controllers_js/http.js:307:        sessionTokenCache[key] = entry;
+wepppy/weppcloud/controllers_js/http.js:313:            sessionTokenCache = {};
+wepppy/weppcloud/controllers_js/http.js:316:        delete sessionTokenCache[_sessionCacheKey(runId, config)];
+wepppy/weppcloud/controllers_js/project_config_update.js:15:            stale_config_preview: "The preview is stale. Refresh it and review the current additions before applying.",
+wepppy/weppcloud/controllers_js/project_config_update.js:16:            capability_refresh_acknowledgment_required: "Review and accept the capability-authority warning before applying this refresh.",
+wepppy/weppcloud/controllers_js/project_config_update.js:17:            config_update_in_progress: "A configuration update is already active. Wait for it to finish, then refresh the preview.",
+wepppy/weppcloud/controllers_js/project_config_update.js:18:            config_update_unavailable: "This configuration update is no longer available. Refresh the preview.",
+wepppy/weppcloud/controllers_js/project_config_update.js:22:            job_failed: "The configuration update job failed. Review the run logs, then refresh the preview before retrying."
+wepppy/weppcloud/controllers_js/project_config_update.js:40:            /^[0-9a-f]{64}$/.test(String(result.prior_digest || "")) &&
+wepppy/weppcloud/controllers_js/project_config_update.js:41:            /^[0-9a-f]{64}$/.test(String(result.resulting_digest || "")) &&
+wepppy/weppcloud/controllers_js/project_config_update.js:42:            result.prior_digest === reviewed.current_digest &&
+wepppy/weppcloud/controllers_js/project_config_update.js:43:            result.resulting_digest === reviewed.resulting_digest);
+wepppy/weppcloud/controllers_js/project_config_update.js:51:        this.warning = root.querySelector("[data-project-config-digest-warning]");
+wepppy/weppcloud/controllers_js/project_config_update.js:64:        this.refreshButton = this.modal.querySelector("[data-project-config-update-refresh]");
+wepppy/weppcloud/controllers_js/project_config_update.js:79:        var hasRefresh = Boolean(this.preview.capability_refresh);
+wepppy/weppcloud/controllers_js/project_config_update.js:81:        return (hasRefresh || hasAdditions) && (!hasRefresh || this.acknowledgmentCheckbox.checked);
+wepppy/weppcloud/controllers_js/project_config_update.js:130:                self.warning.hidden = !state.digest_warning;
+wepppy/weppcloud/controllers_js/project_config_update.js:142:            self.root.hidden = !(state.available || state.digest_warning);
+wepppy/weppcloud/controllers_js/project_config_update.js:144:            self.warning.hidden = !state.digest_warning;
+wepppy/weppcloud/controllers_js/project_config_update.js:173:        var refresh = preview.capability_refresh;
+wepppy/weppcloud/controllers_js/project_config_update.js:174:        ((refresh && refresh.changes) || []).forEach(function (change) {
+wepppy/weppcloud/controllers_js/project_config_update.js:192:        this.capabilityPanel.hidden = !refresh;
+wepppy/weppcloud/controllers_js/project_config_update.js:205:        if (refresh) {
+wepppy/weppcloud/controllers_js/project_config_update.js:206:            appendDetail("project", "locale_profile", refresh.locale_profile);
+wepppy/weppcloud/controllers_js/project_config_update.js:207:            appendDetail("project", "locales", refresh.locales);
+wepppy/weppcloud/controllers_js/project_config_update.js:208:            Object.keys((refresh.preserved_project_selections || {}).capability_defaults || {}).sort().forEach(function (key) {
+wepppy/weppcloud/controllers_js/project_config_update.js:209:                appendDetail("preserved capability default", key, refresh.preserved_project_selections.capability_defaults[key]);
+wepppy/weppcloud/controllers_js/project_config_update.js:211:            appendDetail("preserved project selection", "nodb.mods", ((refresh.preserved_project_selections || {}).nodb || {}).mods || []);
+wepppy/weppcloud/controllers_js/project_config_update.js:212:            appendDetail("preserved project selection", "climate.cligen_db", ((refresh.preserved_project_selections || {}).climate || {}).cligen_db);
+wepppy/weppcloud/controllers_js/project_config_update.js:214:                var identity = refresh[scope] || {};
+wepppy/weppcloud/controllers_js/project_config_update.js:215:                ["graph_sha256", "structure_sha256", "provider_revision", "wepp_binary_revisions"].forEach(function (field) {
+wepppy/weppcloud/controllers_js/project_config_update.js:223:        this.capabilityDetailsPanel.hidden = !refresh;
+wepppy/weppcloud/controllers_js/project_config_update.js:224:        this.acknowledgment.hidden = !refresh;
+wepppy/weppcloud/controllers_js/project_config_update.js:230:            ((refresh && refresh.changes) || []).length + " capability changes across " +
+wepppy/weppcloud/controllers_js/project_config_update.js:257:                    state.current_digest === reviewed.resulting_digest) {
+wepppy/weppcloud/controllers_js/project_config_update.js:262:            } else if (reviewed && state.current_digest === reviewed.current_digest) {
+wepppy/weppcloud/controllers_js/project_config_update.js:298:                "Sequence " + result.sequence + ". Prior digest " + result.prior_digest +
+wepppy/weppcloud/controllers_js/project_config_update.js:299:                ". Resulting digest " + result.resulting_digest + ".",
+wepppy/weppcloud/controllers_js/project_config_update.js:342:            current_digest: this.preview.current_digest,
+wepppy/weppcloud/controllers_js/project_config_update.js:343:            resulting_digest: this.preview.resulting_digest
+wepppy/weppcloud/controllers_js/project_config_update.js:348:        if (this.preview.capability_refresh) {
+wepppy/weppcloud/controllers_js/project_config_update.js:351:                revision: this.preview.capability_refresh.acknowledgment.revision
+wepppy/weppcloud/controllers_js/project_config_update.js:379:                    resultBody.sequence + ". Prior digest " + resultBody.prior_digest +
+wepppy/weppcloud/controllers_js/project_config_update.js:380:                    ". Resulting digest " + resultBody.resulting_digest + ".",
+wepppy/weppcloud/controllers_js/project_config_update.js:401:        this.refreshButton.addEventListener("click", function () { self.loadPreview(); });
+wepppy/weppcloud/static/js/table_overflow_accessibility.js:227:  function refresh(root) {
+wepppy/weppcloud/static/js/table_overflow_accessibility.js:242:  function refreshMutations(mutations) {
+wepppy/weppcloud/static/js/table_overflow_accessibility.js:287:    refresh(document);
+wepppy/weppcloud/static/js/table_overflow_accessibility.js:290:      mutationObserver = new global.MutationObserver(refreshMutations);
+wepppy/weppcloud/static/js/table_overflow_accessibility.js:299:    refresh: refresh,
+wepppy/weppcloud/controllers_js/climate.js:719:                climate.setStationMode(nextValue, { silent: true, skipRefresh: true });
+wepppy/weppcloud/controllers_js/climate.js:721:                climate.setStationMode(currentValue, { silent: true, skipRefresh: true });
+wepppy/weppcloud/controllers_js/climate.js:724:            if (!(opts.skipStationRefresh || (allowed.length === 1 && allowed[0] === 4))) {
+wepppy/weppcloud/controllers_js/climate.js:725:                climate.refreshStationSelection();
+wepppy/weppcloud/controllers_js/climate.js:766:            var dataset = climate.applyDataset(catalogId, { skipPersist: true, skipStationRefresh: true });
+wepppy/weppcloud/controllers_js/climate.js:787:                        climate.refreshStationSelection();
+wepppy/weppcloud/controllers_js/climate.js:830:                if (!opts.skipRefresh) {
+wepppy/weppcloud/controllers_js/climate.js:831:                    climate.refreshStationSelection();
+wepppy/weppcloud/controllers_js/climate.js:847:                        skipRefresh: Boolean(opts.skipRefresh),
+wepppy/weppcloud/controllers_js/climate.js:885:        climate.refreshStationSelection = function () {
+wepppy/weppcloud/controllers_js/climate.js:1212:                    climate.setStationMode(4, { silent: false, skipRefresh: true });
+wepppy/weppcloud/controllers_js/climate.js:1256:                var skipRefresh = payload && payload.skipRefresh;
+wepppy/weppcloud/controllers_js/climate.js:1258:                if (!skipRefresh) {
+wepppy/weppcloud/controllers_js/climate.js:1259:                    climate.refreshStationSelection();
+wepppy/weppcloud/controllers_js/climate.js:1359:            climate.applyDataset(initialDatasetId, { skipPersist: true, skipStationRefresh: true });
+wepppy/weppcloud/controllers_js/climate.js:1375:        climate.refreshStationSelection();
+wepppy/weppcloud/controllers_js/climate.js:1380:            stationRefreshed: false
+wepppy/weppcloud/controllers_js/climate.js:1434:                if (typeof climate.refreshStationSelection === "function") {
+wepppy/weppcloud/controllers_js/climate.js:1435:                    climate.refreshStationSelection();
+wepppy/weppcloud/controllers_js/climate.js:1440:                bootstrapState.stationRefreshed = true;
+wepppy/weppcloud/controllers_js/climate.js:1441:            } else if (!bootstrapState.stationRefreshed && climateData.hasStation) {
+wepppy/weppcloud/controllers_js/climate.js:1442:                if (typeof climate.refreshStationSelection === "function") {
+wepppy/weppcloud/controllers_js/climate.js:1443:                    climate.refreshStationSelection();
+wepppy/weppcloud/controllers_js/climate.js:1448:                bootstrapState.stationRefreshed = true;
+wepppy/weppcloud/static/js/diagnostics/auth_checks.js:26:        fix_hint: "Refresh the page to obtain a fresh CSRF token and rerun diagnostics."
+wepppy/weppcloud/controllers_js/ag_fields.js:348:        controller._boundarySignature = null;
+wepppy/weppcloud/controllers_js/ag_fields.js:705:        function refreshDom() {
+wepppy/weppcloud/controllers_js/ag_fields.js:768:            var signature = [boundary.geojson_hash, boundary.geojson_timestamp, asArray(boundary.field_columns).join("|")].join(":");
+wepppy/weppcloud/controllers_js/ag_fields.js:769:            var boundaryChanged = force || signature !== controller._boundarySignature;
+wepppy/weppcloud/controllers_js/ag_fields.js:770:            controller._boundarySignature = signature;
+wepppy/weppcloud/controllers_js/ag_fields.js:1027:                blocked = "Run the watershed WEPP hillslopes first — sub-fields reuse their soil and climate files.";
+wepppy/weppcloud/controllers_js/ag_fields.js:1286:                    "Could not refresh plant files: " + resolveErrorMessage(error),
+wepppy/weppcloud/controllers_js/ag_fields.js:1320:            if (!refreshDom()) {
+wepppy/weppcloud/controllers_js/ag_fields.js:1404:                        refresh: overlayWasRegistered,
+wepppy/weppcloud/controllers_js/ag_fields.js:1985:        function refreshOverlay() {
+wepppy/weppcloud/controllers_js/ag_fields.js:1989:            if (layer && typeof layer.refresh === "function") {
+wepppy/weppcloud/controllers_js/ag_fields.js:1990:                return layer.refresh(url);
+wepppy/weppcloud/controllers_js/ag_fields.js:2036:                map.addLayer(layer, { skipRefresh: true });
+wepppy/weppcloud/controllers_js/ag_fields.js:2042:            if (!settings.refresh) {
+wepppy/weppcloud/controllers_js/ag_fields.js:2045:            return refreshOverlay().then(function () {
+wepppy/weppcloud/controllers_js/ag_fields.js:2048:                handleRequestError("overlay", controller.nodes.subfieldsStatus, "Could not refresh the sub-field map", error);
+wepppy/weppcloud/controllers_js/ag_fields.js:2077:            if (!refreshDom()) {
+wepppy/weppcloud/controllers_js/features_export.js:950:        function parseDiscoveryRefreshPayload(detail) {
+wepppy/weppcloud/controllers_js/features_export.js:974:            if (candidate.refresh_channel && String(candidate.refresh_channel).trim() !== STATUS_CHANNEL) {
+wepppy/weppcloud/controllers_js/features_export.js:987:        function applyDiscoveryRefresh(detail) {
+wepppy/weppcloud/controllers_js/features_export.js:988:            var refreshPayload = parseDiscoveryRefreshPayload(detail);
+wepppy/weppcloud/controllers_js/features_export.js:989:            if (!refreshPayload) {
+wepppy/weppcloud/controllers_js/features_export.js:992:            if (discoveryPayloadEqual(controller.state.discovery, refreshPayload)) {
+wepppy/weppcloud/controllers_js/features_export.js:995:            controller.state.discovery = normalizeDiscoveryPayload(refreshPayload);
+wepppy/weppcloud/controllers_js/features_export.js:1994:                if (result && Object.prototype.hasOwnProperty.call(result, "cache_hit")) {
+wepppy/weppcloud/controllers_js/features_export.js:1995:                    rows.push("cache_hit: <code>" + escapeHtml(String(Boolean(result.cache_hit))) + "</code>");
+wepppy/weppcloud/controllers_js/features_export.js:2773:                    applyDiscoveryRefresh(statusDetail);
+wepppy/weppcloud/controllers_js/path_ce.js:214:    function refreshUnitizer(scope) {
+wepppy/weppcloud/controllers_js/path_ce.js:613:        refreshUnitizer(controller.form);
+wepppy/weppcloud/controllers_js/path_ce.js:640:        refreshUnitizer(controller.form);
+wepppy/weppcloud/controllers_js/path_ce.js:849:                    refreshStatus();
+wepppy/weppcloud/controllers_js/path_ce.js:850:                    refreshResults();
+wepppy/weppcloud/controllers_js/path_ce.js:853:            refreshStatus();
+wepppy/weppcloud/controllers_js/path_ce.js:854:            refreshResults();
+wepppy/weppcloud/controllers_js/path_ce.js:918:        function refreshStatus() {
+wepppy/weppcloud/controllers_js/path_ce.js:937:        function refreshResults() {
+wepppy/weppcloud/controllers_js/path_ce.js:1058:                    refreshResults();
+wepppy/weppcloud/controllers_js/path_ce.js:1115:                    refreshStatus();
+wepppy/weppcloud/controllers_js/path_ce.js:1116:                    refreshResults();
+wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:36:let cachedLabelThemeSignature = null;
+wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:37:let cachedLabelTheme = null;
+wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:295:  const signature = [mutedRaw, textRaw, surfaceRaw, surfaceAltRaw, pageRaw].join('|');
+wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:296:  if (cachedLabelThemeSignature === signature && cachedLabelTheme) {
+wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:297:    return cachedLabelTheme;
+wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:310:  cachedLabelTheme = {
+wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:314:  cachedLabelThemeSignature = signature;
+wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:315:  return cachedLabelTheme;
+wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:566:    if (state.comparisonMode && state.currentScenarioPath && state.baseSummaryCache.landuse && ['cancov', 'inrcov', 'rilcov'].includes(mode)) {
+wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:567:      const baseRow = topazId != null ? state.baseSummaryCache.landuse[String(topazId)] : null;
+wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:860:          id: `landuse-${overlay.key}${state.comparisonMode && state.currentScenarioPath && state.baseSummaryCache.landuse && constants.COMPARISON_MEASURES.includes(overlay.mode) ? '-diff' : ''}`,
+wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:990:          state.baseSummaryCache.wepp;
+wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:1003:              const baseRow = identity.key != null ? state.baseSummaryCache.wepp[String(identity.key)] : null;
+wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:1101:          state.baseWeppYearlyCache[state.weppYearlySelectedYear];
+wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:1114:              const baseSummary = state.baseWeppYearlyCache[state.weppYearlySelectedYear] || {};
+wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:1276:          const cacheBusted = `${layer.imageUrl}${layer.imageUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
+wepppy/weppcloud/static/js/gl-dashboard/map/layers.js:1279:            image: cacheBusted,
+wepppy/weppcloud/controllers_js/postfire_debris_flow.js:104:            else if (next.freshness === 'stale') { message('Inputs changed. Run the model again.'); }
+wepppy/weppcloud/controllers_js/postfire_debris_flow.js:128:        function refresh() {
+wepppy/weppcloud/controllers_js/postfire_debris_flow.js:168:        function preflight() { global.clearTimeout(timer); timer=global.setTimeout(refresh,150); }
+wepppy/weppcloud/controllers_js/postfire_debris_flow.js:204:                await refresh();
+wepppy/weppcloud/controllers_js/postfire_debris_flow.js:224:        controller.bootstrap=function () {selection();refresh();if(global.UnitizerClient) {global.UnitizerClient.ready().then(function () {if(state) {render(state);}});}};
+wepppy/weppcloud/controllers_js/postfire_debris_flow.js:225:        controller.refresh=refresh;controller.render=render;
+wepppy/weppcloud/controllers_js/omni_contrasts_gl.js:411:                map.addLayer(nextLayer, { skipRefresh: true });
+wepppy/weppcloud/controllers_js/omni_contrasts_gl.js:421:            refreshContrastLayer();
+wepppy/weppcloud/controllers_js/omni_contrasts_gl.js:424:        function refreshContrastLayer() {
+wepppy/weppcloud/controllers_js/omni_contrasts_gl.js:440:        function refreshOverlays() {
+wepppy/weppcloud/controllers_js/omni_contrasts_gl.js:494:                    refreshOverlays();
+wepppy/weppcloud/controllers_js/omni_contrasts_gl.js:497:                    refreshOverlays();
+wepppy/weppcloud/controllers_js/omni_contrasts_gl.js:503:        overlay.refresh = refreshOverlays;
+wepppy/weppcloud/controllers_js/omni_contrasts_gl.js:511:                refreshOverlays();
+wepppy/weppcloud/controllers_js/geneva.js:695:        controller.refreshState = function (options) {
+wepppy/weppcloud/controllers_js/geneva.js:707:                controller.appendStatus("Refreshing Geneva state…", { phase: "sync" });
+wepppy/weppcloud/controllers_js/geneva.js:770:                    return controller.refreshState({ silent: true });
+wepppy/weppcloud/controllers_js/geneva.js:881:            controller.refreshState({ silent: true });
+wepppy/weppcloud/controllers_js/geneva.js:966:                controller.refreshState({ silent: true });
+wepppy/weppcloud/controllers_js/geneva.js:982:            controller.refreshState({ silent: true });
+wepppy/weppcloud/controllers_js/omni.js:85:                    if (typeof disturbed.get_has_sbs_cached === "function") {
+wepppy/weppcloud/controllers_js/omni.js:86:                        var cached = disturbed.get_has_sbs_cached();
+wepppy/weppcloud/controllers_js/omni.js:87:                        if (cached !== undefined) {
+wepppy/weppcloud/controllers_js/omni.js:88:                            hasSbs = cached === true;
+wepppy/weppcloud/controllers_js/omni.js:92:                            hasSbs = disturbed.has_sbs({ forceRefresh: false }) === true;
+wepppy/weppcloud/controllers_js/omni.js:1205:                    refreshScenarioOptions();
+wepppy/weppcloud/controllers_js/omni.js:1318:        function refreshScenarioOptions() {
+wepppy/weppcloud/controllers_js/omni.js:1422:            if (!opts.deferRefresh) {
+wepppy/weppcloud/controllers_js/omni.js:1423:                refreshScenarioOptions();
+wepppy/weppcloud/controllers_js/omni.js:1443:            refreshScenarioOptions();
+wepppy/weppcloud/controllers_js/omni.js:2748:                    var item = addScenario(scenario, { deferRefresh: true });
+wepppy/weppcloud/controllers_js/omni.js:2757:                refreshScenarioOptions();
+wepppy/weppcloud/controllers_js/omni.js:2943:            refreshScenarioOptions();
+wepppy/weppcloud/controllers_js/omni.js:2961:            refreshScenarioOptions();
+wepppy/weppcloud/static/js/diagnostics/diagnostics-realtime.js:602:      cache: "no-store"
+wepppy/weppcloud/controllers_js/ash.js:260:    function ensureModelCache(cache, model) {
+wepppy/weppcloud/controllers_js/ash.js:261:        if (!cache[model]) {
+wepppy/weppcloud/controllers_js/ash.js:262:            cache[model] = {
+wepppy/weppcloud/controllers_js/ash.js:267:        return cache[model];
+wepppy/weppcloud/controllers_js/ash.js:283:    function storeModelValue(cache, input) {
+wepppy/weppcloud/controllers_js/ash.js:296:        cache[color][key] = input.value;
+wepppy/weppcloud/controllers_js/ash.js:299:    function captureModelValues(formElement, cache, model, transportModeEl) {
+wepppy/weppcloud/controllers_js/ash.js:303:        var store = ensureModelCache(cache, model);
+wepppy/weppcloud/controllers_js/ash.js:387:        var modelValuesCache = {};
+wepppy/weppcloud/controllers_js/ash.js:402:        ensureModelCache(modelValuesCache, state.currentModel);
+wepppy/weppcloud/controllers_js/ash.js:513:            var cache = ensureModelCache(modelValuesCache, state.currentModel);
+wepppy/weppcloud/controllers_js/ash.js:514:            storeModelValue(cache, input);
+wepppy/weppcloud/controllers_js/ash.js:541:                captureModelValues(formElement, modelValuesCache, previousModel, transportModeEl);
+wepppy/weppcloud/controllers_js/ash.js:548:            var cache = ensureModelCache(modelValuesCache, selectedModel);
+wepppy/weppcloud/controllers_js/ash.js:556:                    var mode = cache.transport_mode || transportModeEl.value || "dynamic";
+wepppy/weppcloud/controllers_js/ash.js:565:                var mergedValues = mergeModelValues(paramsForModel[color] || {}, cache[color] || {});
+wepppy/weppcloud/controllers_js/ash.js:831:                var cache = ensureModelCache(modelValuesCache, state.currentModel);
+wepppy/weppcloud/controllers_js/ash.js:832:                cache.transport_mode = select.value || "dynamic";
+wepppy/weppcloud/controllers_js/bootstrap_observability.js:16:        "refresh_token",
+wepppy/weppcloud/controllers_js/subcatchments_gl.js:827:            map.addLayer(nextLayer, { skipRefresh: true });
+wepppy/weppcloud/controllers_js/subcatchments_gl.js:939:            postBuildRefreshTimer: null
+wepppy/weppcloud/controllers_js/subcatchments_gl.js:1136:        function refreshGlLayer() {
+wepppy/weppcloud/controllers_js/subcatchments_gl.js:1158:            refreshGlLayer();
+wepppy/weppcloud/controllers_js/subcatchments_gl.js:1490:                    if (map && typeof map.clearFindFlashCache === "function") {
+wepppy/weppcloud/controllers_js/subcatchments_gl.js:1491:                        map.clearFindFlashCache("subcatchments");
+wepppy/weppcloud/controllers_js/subcatchments_gl.js:1494:                    refreshGlLayer();
+wepppy/weppcloud/controllers_js/subcatchments_gl.js:1554:                    if (state.postBuildRefreshTimer) {
+wepppy/weppcloud/controllers_js/subcatchments_gl.js:1555:                        clearTimeout(state.postBuildRefreshTimer);
+wepppy/weppcloud/controllers_js/subcatchments_gl.js:1557:                    state.postBuildRefreshTimer = setTimeout(function () {
+wepppy/weppcloud/controllers_js/subcatchments_gl.js:1558:                        state.postBuildRefreshTimer = null;
+wepppy/weppcloud/static/js/storm-event-analyzer/main.js:379:  async function refreshEventRows() {
+wepppy/weppcloud/static/js/storm-event-analyzer/main.js:487:  async function refreshOmniSummary() {
+wepppy/weppcloud/static/js/storm-event-analyzer/main.js:523:    refreshEventRows();
+wepppy/weppcloud/static/js/storm-event-analyzer/main.js:527:    refreshEventRows();
+wepppy/weppcloud/static/js/storm-event-analyzer/main.js:532:    refreshEventRows();
+wepppy/weppcloud/static/js/storm-event-analyzer/main.js:551:    refreshOmniSummary();
+wepppy/weppcloud/controllers_js/subcatchment_delineation.js:699:                    refreshGlLayer();
+wepppy/weppcloud/controllers_js/subcatchment_delineation.js:982:        function refreshGlLayer() {
+wepppy/weppcloud/controllers_js/subcatchment_delineation.js:1201:                refreshGlLayer();
+wepppy/weppcloud/controllers_js/subcatchment_delineation.js:1253:        sub._refreshGlLayer = refreshGlLayer;
+wepppy/weppcloud/controllers_js/subcatchment_delineation.js:1266:                    refreshGlLayer();
+wepppy/weppcloud/controllers_js/subcatchment_delineation.js:1281:            refreshGlLayer();
+wepppy/weppcloud/controllers_js/subcatchment_delineation.js:1286:            refreshGlLayer();
+wepppy/weppcloud/controllers_js/subcatchment_delineation.js:1334:                    refreshGlLayer();
+wepppy/weppcloud/controllers_js/subcatchment_delineation.js:1392:        var lossMetricCache = Object.create(null);
+wepppy/weppcloud/controllers_js/subcatchment_delineation.js:1401:            if (lossMetricCache[metricKey]) {
+wepppy/weppcloud/controllers_js/subcatchment_delineation.js:1402:                return Promise.resolve(lossMetricCache[metricKey]);
+wepppy/weppcloud/controllers_js/subcatchment_delineation.js:1435:                lossMetricCache[metricKey] = map;
+wepppy/weppcloud/controllers_js/subcatchment_delineation.js:1455:                refreshGlLayer();
+wepppy/weppcloud/controllers_js/subcatchment_delineation.js:1464:                refreshGlLayer();
+wepppy/weppcloud/controllers_js/subcatchment_delineation.js:1473:                refreshGlLayer();
+wepppy/weppcloud/controllers_js/subcatchment_delineation.js:1482:                refreshGlLayer();
+wepppy/weppcloud/controllers_js/subcatchment_delineation.js:1501:                    refreshGlLayer();
+wepppy/weppcloud/controllers_js/subcatchment_delineation.js:1513:                    refreshGlLayer();
+wepppy/weppcloud/controllers_js/subcatchment_delineation.js:1524:                    refreshGlLayer();
+wepppy/weppcloud/controllers_js/subcatchment_delineation.js:1538:                    refreshGlLayer();
+wepppy/weppcloud/controllers_js/subcatchment_delineation.js:1549:                    refreshGlLayer();
+wepppy/weppcloud/controllers_js/subcatchment_delineation.js:1560:                    refreshGlLayer();
+wepppy/weppcloud/controllers_js/control_base.js:993:            statusText: statusText || "Unable to refresh job status",
+wepppy/weppcloud/controllers_js/wepp.js:1133:            var cachedResults = wepp.resultsContainer;
+wepppy/weppcloud/controllers_js/wepp.js:1139:            wepp.resultsContainer = cachedResults;
+wepppy/weppcloud/controllers_js/wepp.js:1190:            var cachedResults = wepp.resultsContainer;
+wepppy/weppcloud/controllers_js/wepp.js:1196:            wepp.resultsContainer = cachedResults;
+wepppy/weppcloud/controllers_js/batch_runner.js:316:            refreshTimer: null,
+wepppy/weppcloud/controllers_js/batch_runner.js:318:            refreshPending: false,
+wepppy/weppcloud/controllers_js/batch_runner.js:378:        controller.refreshRunstate = refreshRunstate;
+wepppy/weppcloud/controllers_js/batch_runner.js:479:            cacheElements();
+wepppy/weppcloud/controllers_js/batch_runner.js:489:            refreshRunstate({ force: true });
+wepppy/weppcloud/controllers_js/batch_runner.js:528:            controller.runstate.refreshPending = false;
+wepppy/weppcloud/controllers_js/batch_runner.js:538:        function cacheElements() {
+wepppy/weppcloud/controllers_js/batch_runner.js:772:            if (resource.checksum) {
+wepppy/weppcloud/controllers_js/batch_runner.js:773:                metaRows.push(renderMetaRow("Checksum", resource.checksum));
+wepppy/weppcloud/controllers_js/batch_runner.js:1403:            if (controller.runstate.refreshTimer) {
+wepppy/weppcloud/controllers_js/batch_runner.js:1404:                clearTimeout(controller.runstate.refreshTimer);
+wepppy/weppcloud/controllers_js/batch_runner.js:1405:                controller.runstate.refreshTimer = null;
+wepppy/weppcloud/controllers_js/batch_runner.js:1421:                if (controller.runstate.refreshTimer) {
+wepppy/weppcloud/controllers_js/batch_runner.js:1424:                controller.runstate.refreshTimer = setTimeout(function () {
+wepppy/weppcloud/controllers_js/batch_runner.js:1425:                    controller.runstate.refreshTimer = null;
+wepppy/weppcloud/controllers_js/batch_runner.js:1480:                    var message = resolveErrorMessage(error, "Unable to refresh batch progress.");
+wepppy/weppcloud/controllers_js/batch_runner.js:1481:                    console.warn("Unable to refresh batch runstate:", error);
+wepppy/weppcloud/controllers_js/batch_runner.js:1491:                    if (controller.runstate.refreshPending) {
+wepppy/weppcloud/controllers_js/batch_runner.js:1497:        function refreshRunstate(options) {
+wepppy/weppcloud/controllers_js/batch_runner.js:1505:                controller.runstate.refreshPending = true;
+wepppy/weppcloud/controllers_js/batch_runner.js:1513:            controller.runstate.refreshPending = true;
+wepppy/weppcloud/controllers_js/batch_runner.js:1656:                                if (analysis.checksum) {
+wepppy/weppcloud/controllers_js/batch_runner.js:1657:                                    resource.checksum = analysis.checksum;
+wepppy/weppcloud/controllers_js/batch_runner.js:1907:                    refreshRunstate({ force: true });
+wepppy/weppcloud/controllers_js/batch_runner.js:1946:            controller.runstate.refreshPending = false;
+wepppy/weppcloud/controllers_js/batch_runner.js:2028:                        refreshRunstate({ force: true });
+wepppy/weppcloud/controllers_js/batch_runner.js:2041:                    refreshRunstate();
+wepppy/weppcloud/controllers_js/batch_runner.js:2051:                    ctrl.runstate.refreshPending = false;
+wepppy/weppcloud/controllers_js/batch_runner.js:2082:                    refreshRunstate({ force: true });
+wepppy/weppcloud/controllers_js/batch_runner.js:2107:                    refreshRunstate({ force: true });
+wepppy/weppcloud/controllers_js/batch_runner.js:2109:                    refreshRunstate();

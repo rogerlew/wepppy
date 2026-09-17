@@ -1,0 +1,322 @@
+tools/run_pytest_sharded.py:23:TIMING_CACHE_FILE = REPO_ROOT / ".pytest_cache" / "wctl" / "run_pytest_sharded_module_timings.json"
+tools/run_pytest_sharded.py:24:TIMING_CACHE_VERSION = 1
+tools/run_pytest_sharded.py:25:TIMING_CACHE_ALPHA = 0.6
+tools/run_pytest_sharded.py:364:def _cache_key_from_path(path: str) -> str:
+tools/run_pytest_sharded.py:372:def _path_from_cache_key(key: str) -> str:
+tools/run_pytest_sharded.py:379:def load_module_timing_cache() -> dict[str, float]:
+tools/run_pytest_sharded.py:380:    if not TIMING_CACHE_FILE.exists():
+tools/run_pytest_sharded.py:383:        payload = json.loads(TIMING_CACHE_FILE.read_text(encoding="utf-8"))
+tools/run_pytest_sharded.py:394:    for cache_key, duration in raw_timings.items():
+tools/run_pytest_sharded.py:401:        timings[_path_from_cache_key(str(cache_key))] = normalized_duration
+tools/run_pytest_sharded.py:409:    alpha: float = TIMING_CACHE_ALPHA,
+tools/run_pytest_sharded.py:426:def save_module_timing_cache(module_timings: dict[str, float]) -> None:
+tools/run_pytest_sharded.py:427:    TIMING_CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
+tools/run_pytest_sharded.py:429:        _cache_key_from_path(path): round(float(duration), 6)
+tools/run_pytest_sharded.py:434:        "version": TIMING_CACHE_VERSION,
+tools/run_pytest_sharded.py:438:    TIMING_CACHE_FILE.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+tools/run_pytest_sharded.py:645:def should_update_timing_cache(first_failure: int, aggregate: AggregateSummary) -> bool:
+tools/run_pytest_sharded.py:686:    timing_cache = load_module_timing_cache()
+tools/run_pytest_sharded.py:687:    cached_modules = sum(1 for file_path in files if _normalize_path(file_path) in timing_cache)
+tools/run_pytest_sharded.py:688:    if cached_modules > 0:
+tools/run_pytest_sharded.py:690:            f"Using module timing cache for {cached_modules}/{len(files)} file(s) "
+tools/run_pytest_sharded.py:691:            f"from {TIMING_CACHE_FILE}."
+tools/run_pytest_sharded.py:694:        print("No module timing cache for selected files; using file-size weighting.")
+tools/run_pytest_sharded.py:696:    shards = plan_shards(files=files, workers=workers, module_timings=timing_cache)
+tools/run_pytest_sharded.py:740:    if observed_module_timings and should_update_timing_cache(first_failure, aggregate):
+tools/run_pytest_sharded.py:741:        merged_timings = merge_module_timings(timing_cache, observed_module_timings)
+tools/run_pytest_sharded.py:742:        save_module_timing_cache(merged_timings)
+tools/run_pytest_sharded.py:744:            f"Updated module timing cache with {len(observed_module_timings)} file(s): "
+tools/run_pytest_sharded.py:745:            f"{TIMING_CACHE_FILE}"
+tools/run_pytest_sharded.py:748:        print("Skipped timing cache update because the sharded run was not clean.")
+tools/ablation_protocol.py:120:        help="Regenerate artifacts manifest and checksums for an incident package.",
+tools/ablation_protocol.py:152:    checksums_path = artifacts_dir / "checksums.sha256"
+tools/ablation_protocol.py:175:    if force or not checksums_path.exists():
+tools/ablation_protocol.py:176:        checksums_path.write_text("", encoding="utf-8")
+tools/ablation_protocol.py:183:    if match:
+tools/ablation_protocol.py:268:def compute_sha256(path: Path) -> str:
+tools/ablation_protocol.py:269:    digest = hashlib.sha256()
+tools/ablation_protocol.py:272:            digest.update(chunk)
+tools/ablation_protocol.py:273:    return digest.hexdigest()
+tools/ablation_protocol.py:276:def write_checksums(incident_dir: Path, checksums_path: Path) -> int:
+tools/ablation_protocol.py:280:        if path.is_file() and path != checksums_path
+tools/ablation_protocol.py:282:    with checksums_path.open("w", encoding="utf-8") as handle:
+tools/ablation_protocol.py:284:            checksum = compute_sha256(target)
+tools/ablation_protocol.py:286:            handle.write(f"{checksum}  {relative}\n")
+tools/ablation_protocol.py:573:    checksums_path = artifacts_dir / "checksums.sha256"
+tools/ablation_protocol.py:591:    checksum_count = write_checksums(incident_dir, checksums_path)
+tools/ablation_protocol.py:593:    return len(rows), checksum_count, incident_dir
+tools/ablation_protocol.py:610:        row_count, checksum_count, incident_dir = finalize_incident_package(
+tools/ablation_protocol.py:617:            f"(manifest_rows={row_count}, checksummed_files={checksum_count})"
+services/cap/migrate-data.js:28:let checksum = "absent";
+services/cap/migrate-data.js:42:  checksum = crypto.createHash("sha256").update(contents).digest("hex");
+services/cap/migrate-data.js:45:  const after = crypto.createHash("sha256").update(fs.readFileSync(LEDGER)).digest("hex");
+services/cap/migrate-data.js:46:  if (after !== checksum) throw new Error("CAP ledger content changed during metadata migration");
+services/cap/migrate-data.js:51:console.log(`cap-data-migrated ledger_sha256=${checksum}`);
+tools/peakflow_gate21_acceptance.py:31:def sha256(path: Path) -> str:
+tools/peakflow_gate21_acceptance.py:32:    return hashlib.sha256(path.read_bytes()).hexdigest()
+tools/peakflow_gate21_acceptance.py:50:    return {path.name: sha256(path) for path in sorted(output.iterdir()) if path.is_file()}
+tools/peakflow_gate21_acceptance.py:64:    if sha256(args.observer_binary) != observer_manifest["executable_sha256"]:
+tools/peakflow_gate21_acceptance.py:66:    if sha256(args.replay_binary) != replay_manifest["executable_sha256"]:
+tools/peakflow_gate21_acceptance.py:93:            if packet["payload_sha256"] != contract["packet_sha256"]:
+tools/peakflow_phase1_negative_control.py:39:    diff_sha256 = hashlib.sha256(diff_contract.encode()).hexdigest()
+tools/peakflow_phase1_negative_control.py:52:                "sha256": hashlib.sha256(left.read_bytes()).hexdigest() if left.exists() else None,
+tools/peakflow_phase1_negative_control.py:59:        "input_diff_sha256": diff_sha256,
+tools/peakflow_census.py:12:from wepppy.wepp.peakflow_census.common import atomic_write_json, content_hash, sha256_file
+tools/peakflow_census.py:74:                                   Path(plan.executable["path"]), plan.executable["sha256"], args.file_prefix)
+tools/peakflow_census.py:81:    selection = build_execution_selection(plan, sha256_file(args.plan))
+tools/peakflow_census.py:104:    manifest = stage_input_snapshot(plan, selection, sha256_file(args.plan), args.output)
+tools/peakflow_census.py:115:                                                "path", "sha256")}
+tools/peakflow_census.py:120:    summary = aggregate_execution(plan, selection, Path(authority["path"]), authority["sha256"],
+tools/wctl2/commands/rq.py:44:    params = inspect.signature(registry.get_job_ids).parameters
+services/cap/canary.js:35:    while (crypto.createHash("sha256").update(salt + candidate).digest("hex").startsWith(target) === false) {
+tools/compare_wepp_runs.py:13:def sha256(path: Path) -> str:
+tools/compare_wepp_runs.py:15:    hasher = hashlib.sha256()
+tools/compare_wepp_runs.py:19:    return hasher.hexdigest()
+tools/compare_wepp_runs.py:22:def sha256_sol(path: Path) -> str:
+tools/compare_wepp_runs.py:24:    hasher = hashlib.sha256()
+tools/compare_wepp_runs.py:30:    return hasher.hexdigest()
+tools/compare_wepp_runs.py:33:def sha256_slp(path: Path) -> str:
+tools/compare_wepp_runs.py:38:        return sha256(path)
+tools/compare_wepp_runs.py:46:        return hashlib.sha256(normalized).hexdigest()
+tools/compare_wepp_runs.py:48:    return sha256(path)
+tools/compare_wepp_runs.py:54:        return sha256_sol(path)
+tools/compare_wepp_runs.py:56:        return sha256_slp(path)
+tools/compare_wepp_runs.py:57:    return sha256(path)
+docker/validate-cap-runtime-contract.sh:15:FRESH_VOLUME="cap-contract-fresh-${SUFFIX}"
+docker/validate-cap-runtime-contract.sh:26:    docker volume rm "${FRESH_VOLUME}" "${LEGACY_VOLUME}" "${BAD_VOLUME}" "${ZERO_VOLUME}" "${UNEXPECTED_VOLUME}" "${HOSTILE_VOLUME}" >/dev/null 2>&1 || true
+docker/validate-cap-runtime-contract.sh:46:docker volume create "${FRESH_VOLUME}" >/dev/null
+docker/validate-cap-runtime-contract.sh:119:run_migration "${FRESH_VOLUME}"
+docker/validate-cap-runtime-contract.sh:120:start_and_canary "${FRESH_VOLUME}"
+docker/validate-cap-runtime-contract.sh:127:start_and_canary "${FRESH_VOLUME}"
+docker/validate-cap-runtime-contract.sh:132:if start_and_canary "${FRESH_VOLUME}"; then
+docker/validate-cap-runtime-contract.sh:149:BEFORE="$(docker run --rm --network none --user 0:0 --mount "type=volume,src=${LEGACY_VOLUME},dst=/var/lib/cap,readonly" --entrypoint sha256sum "${IMAGE}" /var/lib/cap/tokensList.json | awk '{print $1}')"
+docker/validate-cap-runtime-contract.sh:161:AFTER="$(docker run --rm --network none --user 0:0 --mount "type=volume,src=${LEGACY_VOLUME},dst=/var/lib/cap,readonly" --entrypoint sha256sum "${IMAGE}" /var/lib/cap/tokensList.json | awk '{print $1}')"
+docker/validate-cap-runtime-contract.sh:209:echo "cap-runtime-contract: ACL, rotation, fresh, outstanding-token continuity, idempotent legacy, and full hostile-state matrix passed image=${IMAGE}"
+tools/triage_pipeline.py:207:        primary = matches[0] if matches else "D_UNCLASSIFIED"
+tools/triage_pipeline.py:620:                f"1. Status/signature: status=`{status}`; {summary}",
+tools/triage_pipeline.py:626:                    "3. Plausible D-family signature match: "
+tools/triage_pipeline.py:653:        "D2": "Mid-OFE chain anomaly: interior outlier coincides with chain-transfer residual signatures.",
+tools/triage_pipeline.py:670:        "D1": "PASS if outlet saturation signature disappears and flagged-day criteria no longer trigger.",
+tools/triage_pipeline.py:677:    signature = {
+tools/triage_pipeline.py:729:                "candidate_incident_id": f"{today}_{best_runid}_hillslope_{signature.get(family, 'unclassified')}",
+tools/triage_pipeline.py:780:                f"- signature stability: {'; '.join(spans)}",
+tools/wctl2/commands/playwright.py:143:            if match:
+tools/wctl2/commands/playwright.py:299:            help="Reuse existing run path (skips provisioning).",
+tools/eu_invalid_soil_search.py:260:class _CachedRasterSampler:
+tools/eu_invalid_soil_search.py:374:    sampler: _CachedRasterSampler,
+tools/eu_invalid_soil_search.py:561:    sampler = _CachedRasterSampler(esdac)
+tools/peakflow_phase1_fixture.py:23:def sha256(path: Path) -> str:
+tools/peakflow_phase1_fixture.py:24:    digest = hashlib.sha256()
+tools/peakflow_phase1_fixture.py:27:            digest.update(chunk)
+tools/peakflow_phase1_fixture.py:28:    return digest.hexdigest()
+tools/peakflow_phase1_fixture.py:117:    if sha256(binary) != expected["executable_sha256"]:
+tools/extract_rq_dependency_graph.py:78:    if match is None:
+docker/validate-aux-image-contract.sh:49:      redis:8.2.1-alpine@sha256:f887e6dacdcfa8e14af2f625fdf4474ff8c37dc36ce13b9e89e6e9a901f155ad \
+docker/validate-aux-image-contract.sh:76:    fontawesome_digest=$(
+docker/validate-aux-image-contract.sh:77:      docker run --rm --network none --entrypoint sha256sum "${image}" \
+docker/validate-aux-image-contract.sh:81:    [[ "${fontawesome_digest}" == "8cb270b4d9485a93b31df98113fda8723ffc067fa7bfa90cedd47b76f7b10be1" ]]
+docker/validate-aux-image-contract.sh:84:      --tmpfs /opt/weppcloudr/renv/cache:rw,nosuid,nodev \
+docker/validate-weppcloudr-runtime-contract.sh:24:PROBE_RECEIPT="$(printf '%s' '{"run_path":"/wc1/runs/contract","runid":"contract","config":"disturbed9002","skip_cache":true,"fencing_generation":1}' \
+services/preflight2/internal/checklist/checklist.go:77:		// Treat a fresh RUSLE build as satisfying legacy WEPP preflight gates.
+tools/repair_forked_run_identity.py:63:    cleared_cache_entries: tuple[str, ...]
+tools/repair_forked_run_identity.py:67:class CacheRetryResult:
+tools/repair_forked_run_identity.py:69:    cleared_cache_entries: tuple[str, ...]
+tools/repair_forked_run_identity.py:73:CacheClearer = Callable[[str, Path, Sequence[Path]], Sequence[object]]
+tools/repair_forked_run_identity.py:255:def _sha256_text(text: str) -> str:
+tools/repair_forked_run_identity.py:256:    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+tools/repair_forked_run_identity.py:284:def _default_cache_clearer(
+tools/repair_forked_run_identity.py:289:    from wepppy.nodb.base import clear_nodb_file_cache
+tools/repair_forked_run_identity.py:302:                f"Cache-clear scope must be one root NoDb file: {relative_path}"
+tools/repair_forked_run_identity.py:305:            clear_nodb_file_cache(runid, pup_relpath=str(relative_path))
+tools/repair_forked_run_identity.py:342:                "before_sha256": _sha256_text(repair.original_text),
+tools/repair_forked_run_identity.py:343:                "after_sha256": _sha256_text(repair.repaired_text),
+tools/repair_forked_run_identity.py:449:    cleared_cache_entries: Sequence[str],
+tools/repair_forked_run_identity.py:453:    manifest["cleared_cache_entries"] = list(cleared_cache_entries)
+tools/repair_forked_run_identity.py:463:    clear_cache: bool,
+tools/repair_forked_run_identity.py:464:    cache_clearer: CacheClearer | None = None,
+tools/repair_forked_run_identity.py:467:    """Apply a validated plan with backup, rollback, verification, and cache clear."""
+tools/repair_forked_run_identity.py:473:            cleared_cache_entries=(),
+tools/repair_forked_run_identity.py:529:    if clear_cache:
+tools/repair_forked_run_identity.py:530:        clearer = cache_clearer or _default_cache_clearer
+tools/repair_forked_run_identity.py:542:        cleared_cache_entries=cleared,
+tools/repair_forked_run_identity.py:551:        cleared_cache_entries=cleared,
+tools/repair_forked_run_identity.py:555:def retry_cache_clear_from_backup(
+tools/repair_forked_run_identity.py:561:    cache_clearer: CacheClearer | None = None,
+tools/repair_forked_run_identity.py:562:) -> CacheRetryResult:
+tools/repair_forked_run_identity.py:563:    """Retry only cache invalidation for an applied repair with a prepared manifest."""
+tools/repair_forked_run_identity.py:619:        prior_entries = manifest.get("cleared_cache_entries", [])
+tools/repair_forked_run_identity.py:623:            raise RepairError("Completed backup manifest has invalid cache entry records")
+tools/repair_forked_run_identity.py:624:        return CacheRetryResult(
+tools/repair_forked_run_identity.py:626:            cleared_cache_entries=tuple(prior_entries),
+tools/repair_forked_run_identity.py:639:            "Cache-only retry requires the file repair to be fully applied first"
+tools/repair_forked_run_identity.py:651:        after_sha256 = record.get("after_sha256")
+tools/repair_forked_run_identity.py:656:            or not isinstance(after_sha256, str)
+tools/repair_forked_run_identity.py:668:        if _sha256_text(current_text) != after_sha256:
+tools/repair_forked_run_identity.py:674:    clearer = cache_clearer or _default_cache_clearer
+tools/repair_forked_run_identity.py:682:        cleared_cache_entries=cleared,
+tools/repair_forked_run_identity.py:684:    return CacheRetryResult(
+tools/repair_forked_run_identity.py:686:        cleared_cache_entries=cleared,
+tools/repair_forked_run_identity.py:705:        "--clear-cache",
+tools/repair_forked_run_identity.py:707:        help="After apply, clear NoDb Redis cache entries for --runid",
+tools/repair_forked_run_identity.py:710:        "--retry-cache-from",
+tools/repair_forked_run_identity.py:713:            "Retry cache invalidation from an explicit prepared backup manifest; "
+tools/repair_forked_run_identity.py:714:            "cannot be combined with --apply or --clear-cache"
+tools/repair_forked_run_identity.py:733:    if args.clear_cache and not args.apply:
+tools/repair_forked_run_identity.py:734:        parser.error("--clear-cache requires --apply")
+tools/repair_forked_run_identity.py:735:    if args.retry_cache_from is not None and (args.apply or args.clear_cache):
+tools/repair_forked_run_identity.py:736:        parser.error("--retry-cache-from cannot be combined with --apply or --clear-cache")
+tools/repair_forked_run_identity.py:739:        if args.retry_cache_from is not None:
+tools/repair_forked_run_identity.py:740:            retry_result = retry_cache_clear_from_backup(
+tools/repair_forked_run_identity.py:743:                backup_dir=args.retry_cache_from,
+tools/repair_forked_run_identity.py:747:            print(f"cache_entries_cleared={len(retry_result.cleared_cache_entries)}")
+tools/repair_forked_run_identity.py:760:        result = apply_repair_plan(plan, clear_cache=bool(args.clear_cache))
+tools/repair_forked_run_identity.py:772:    print(f"cache_entries_cleared={len(result.cleared_cache_entries)}")
+services/profile_playback/app.py:477:            path = PlaybackSession._normalise_path(endpoint)  # reuse helper
+services/profile_playback/app.py:1000:    if match:
+tools/rebuild_vendor_wepp_260319.sh:50:echo "Vendor refresh complete:"
+tools/ssurgo_padded_shadow_evaluator.py:63:            return {"path": str(output_raster), "shape": [dataset.height, dataset.width], "reused": True}
+tools/ssurgo_padded_shadow_evaluator.py:80:    return {"path": str(output_raster), "shape": [int(window.height), int(window.width)], "reused": False}
+tools/ssurgo_padded_shadow_evaluator.py:197:    cache_path = output_dir / "ssurgo_candidate_study.sqlite"
+tools/ssurgo_padded_shadow_evaluator.py:198:    collection = SurgoSoilCollection(sorted(candidate_mukeys), cache_db_path=str(cache_path))
+tools/check_test_isolation.py:10:   singleton caches, filesystem)
+tools/check_test_isolation.py:54:    "_cache",
+tools/check_test_isolation.py:55:    "_caches",
+tools/check_test_isolation.py:63:    ".mypy_cache/*",
+tools/check_test_isolation.py:64:    ".pytest_cache/*",
+tools/check_test_isolation.py:70:    "__pycache__/*",
+tools/check_test_isolation.py:945:                    description=f"{file_path}: singleton cache drift detected",
+tools/wctl2/commands/npm.py:22:    "cache",
+services/cao/src/cli_agent_orchestrator/clients/database.py:164:        db.refresh(inbox_msg)
+services/cao/src/cli_agent_orchestrator/clients/database.py:224:        db.refresh(flow)
+tools/peakflow_phase1_instrument.py:11:SOURCE_SHA256 = "e4179702478561206d3024f00cacd57245d92e5b168862ac5cea801aa04538ad"
+tools/peakflow_phase1_instrument.py:16:    source_hash = hashlib.sha256(source.encode()).hexdigest()
+tools/peakflow_phase1_instrument.py:17:    if source_hash != SOURCE_SHA256:
+tools/peakflow_phase1_protocol.py:32:SHA256 = {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+tools/peakflow_phase1_protocol.py:108:        ["event_id", "source_build_id", "payload_sha256", "scalars", "post_surplus_forcing", "production"],
+tools/peakflow_phase1_protocol.py:112:            "payload_sha256": SHA256,
+tools/peakflow_phase1_protocol.py:164:        ["event_id", "packet_sha256", "replay_process", "selected_method_delta_m_s", "legacy_input_replay", "harmonized_forcing_diagnostic", "hdrive_stopping_condition"],
+tools/peakflow_phase1_protocol.py:167:            "packet_sha256": SHA256,
+tools/peakflow_phase1_protocol.py:177:        ["build_id", "source_commit", "compiler", "compiler_version", "source_clean", "executable_sha256"],
+tools/peakflow_phase1_protocol.py:191:            "instrumentation_patch_sha256": {"anyOf": [SHA256, {"type": "null"}]},
+tools/peakflow_phase1_protocol.py:192:            "input_tree_sha256": SHA256,
+tools/peakflow_phase1_protocol.py:193:            "executable_sha256": SHA256,
+tools/peakflow_phase1_protocol.py:199:        ["run_id", "build_id", "site_id", "scenario_id", "input_tree_sha256"],
+tools/peakflow_phase1_protocol.py:206:            "input_tree_sha256": SHA256,
+tools/peakflow_phase1_protocol.py:224:            "input_diff_sha256": SHA256,
+tools/peakflow_phase1_protocol.py:252:            "packet_sha256": SHA256,
+tools/peakflow_phase1_protocol.py:316:        ["artifact_id", "locator", "format", "byte_size", "sha256", "retention_status"],
+tools/peakflow_phase1_protocol.py:322:            "sha256": SHA256,
+tools/code_quality_observability.py:384:            if match:
+tools/wctl2/commands/migrations.py:94:            "MYPY_CACHE_DIR=/tmp/mypy_cache "
+tools/refine_mofe_taxonomy.py:277:        matched = [fam for fam in order if matches[fam]]
+tools/refine_mofe_taxonomy.py:278:        primary = matched[0] if matched else "D_UNCLASSIFIED"
+tools/refine_mofe_taxonomy.py:745:        "D4": "Single-day severe spike aligned with closure-spike precedent signatures.",
+tools/refine_mofe_taxonomy.py:772:        "D5": "PASS if persistent moderate signature no longer meets day/magnitude gates.",
+tools/refine_mofe_taxonomy.py:778:    signatures = {
+tools/refine_mofe_taxonomy.py:826:                "candidate_incident_id": f"{today}_{mode_run}_hillslope_{signatures.get(family, 'taxonomy-gap')}",
+tools/refine_mofe_taxonomy.py:860:            f"Flag persistence spans {day_min}-{day_max} review days, while signature stability is captured by "
+tools/check_wepp_binary_provenance.sh:24:  sha256sum "${bin}"
+tools/perf/redis_nodb_cache_stress/run_harness.py:2:"""Stress-test harness for Redis NoDb cache client behavior.
+tools/perf/redis_nodb_cache_stress/run_harness.py:4:This harness is intentionally scoped to Redis DB 13 (NoDb cache) and uses
+tools/perf/redis_nodb_cache_stress/run_harness.py:29:# Mirror wepppy.nodb.base NODB cache defaults used by redis_nodb_cache_client.
+tools/perf/redis_nodb_cache_stress/run_harness.py:44:    """Serializable payload fixture used to generate cache key/value pairs."""
+tools/perf/redis_nodb_cache_stress/run_harness.py:57:    """Prepared cache-key payload with optional decoded JSON object."""
+tools/perf/redis_nodb_cache_stress/run_harness.py:389:        raw_url = redis_url(RedisDB.NODB_CACHE)
+tools/perf/redis_nodb_cache_stress/run_harness.py:394:def prime_cache_keys(client: redis.Redis, key_payloads: List[KeyPayload], ttl_seconds: int) -> None:
+tools/perf/redis_nodb_cache_stress/run_harness.py:521:        "harness": "redis_nodb_cache_stress",
+tools/perf/redis_nodb_cache_stress/run_harness.py:579:    report_path = output_dir / f"redis_nodb_cache_stress_{timestamp}.json"
+tools/perf/redis_nodb_cache_stress/run_harness.py:585:    parser = argparse.ArgumentParser(description="Stress harness for Redis NoDb cache client behavior")
+tools/perf/redis_nodb_cache_stress/run_harness.py:588:    parser.add_argument("--run-root", default="/wc1/runs", help="Run-root path used when generating cache keys")
+tools/perf/redis_nodb_cache_stress/run_harness.py:589:    parser.add_argument("--runid-prefix", default="stresscache")
+tools/perf/redis_nodb_cache_stress/run_harness.py:685:    print("== redis_nodb_cache_stress ==")
+tools/perf/redis_nodb_cache_stress/run_harness.py:716:        prime_cache_keys(redis.Redis(connection_pool=pool), key_payloads, ttl_seconds=args.ttl_seconds)
+tools/peakflow_phase1_replay.py:27:def canonical_sha256(value: Any) -> str:
+tools/peakflow_phase1_replay.py:29:    return hashlib.sha256(encoded).hexdigest()
+tools/peakflow_phase1_replay.py:98:    return {"schema_version": SCHEMA_VERSION, "payload_sha256": canonical_sha256(payload), **payload}
+tools/peakflow_phase1_replay.py:102:    payload = {key: value for key, value in packet.items() if key not in {"schema_version", "payload_sha256"}}
+tools/peakflow_phase1_replay.py:105:    if canonical_sha256(payload) != packet["payload_sha256"]:
+tools/peakflow_phase1_replay.py:207:        "packet_sha256": packet["payload_sha256"],
+tools/wctl2/commands/python_tasks.py:36:            "MYPY_CACHE_DIR=/tmp/mypy_cache "
+tools/wctl2/commands/python_tasks.py:61:            "MYPY_CACHE_DIR=/tmp/mypy_cache "
+tools/wctl2/commands/python_tasks.py:81:            "MYPY_CACHE_DIR=/tmp/mypy_cache "
+tools/wctl2/commands/python_tasks.py:107:            "MYPY_CACHE_DIR=/tmp/mypy_cache "
+services/cao/scripts/install_cao_server_as_service.sh:20:  --exclude '__pycache__/' \
+tools/surf14a_local_acceptance.py:56:def _sha256(path: str) -> str:
+tools/surf14a_local_acceptance.py:57:    digest = hashlib.sha256()
+tools/surf14a_local_acceptance.py:60:            digest.update(block)
+tools/surf14a_local_acceptance.py:61:    return digest.hexdigest()
+tools/surf14a_local_acceptance.py:69:        session["_fresh"] = True
+tools/surf14a_local_acceptance.py:167:        for db in (RedisDB.LOCK, RedisDB.WD_CACHE, RedisDB.NODB_CACHE)
+tools/surf14a_local_acceptance.py:241:            unitizer_hash = _sha256(unitizer_path)
+tools/surf14a_local_acceptance.py:250:            assert _sha256(unitizer_path) == unitizer_hash
+tools/surf14a_local_acceptance.py:261:            assert _sha256(unitizer_path) == unitizer_hash
+tools/surf14a_local_acceptance.py:296:            assert _sha256(unitizer_path) == unitizer_hash
+tools/surf14a_local_acceptance.py:310:                "unitizer_sha256": unitizer_hash,
+tools/surf14a_local_acceptance.py:409:                    assert not state_redis[RedisDB.WD_CACHE].exists(runid)
+tools/surf14a_local_acceptance.py:414:                        state_redis[RedisDB.NODB_CACHE].scan_iter(
+tools/run_profile_coverage_batch.py:272:        "--skip-existing",
+tools/run_profile_coverage_batch.py:333:        if args.skip_existing and artifact_path.exists():
+tools/run_profile_coverage_batch.py:364:    skip_existing: bool = False,
+tools/run_profile_coverage_batch.py:380:        skip_existing=skip_existing,
+tools/split_d2b_taxonomy.py:553:    signatures = {
+tools/split_d2b_taxonomy.py:590:                "candidate_incident_id": f"{today}_{mode_run}_hillslope_{signatures[family]}",
+scripts/deploy-production.sh:505:    SCRIPT_SHA_BEFORE_PULL="$(sha256sum "${SCRIPT_DIR}/deploy-production.sh" | awk '{print $1}')"
+scripts/deploy-production.sh:507:    SCRIPT_SHA_AFTER_PULL="$(sha256sum "${SCRIPT_DIR}/deploy-production.sh" | awk '{print $1}')"
+scripts/deploy-production.sh:897:        wctl build --no-cache "${BASE_BUILD_SERVICES[@]}"
+scripts/deploy-production.sh:901:        wctl build --no-cache "${DEPENDENT_BUILD_SERVICES[@]}"
+scripts/deploy-production.sh:905:    echo ">>> Step 2b: Pruning Docker build cache..."
+scripts/deploy-production.sh:1354:    echo "    Build cache was pruned after the image build; unrelated host images are left intact."
+scripts/deploy-production.sh:1377:    echo "Remember to hard refresh your browser (Ctrl+Shift+R or Cmd+Shift+R)"
+scripts/deploy-production.sh:1378:    echo "to bypass cache and load the new assets."
+tools/peakflow_phase2a_pilot.py:60:        "required": ["schema_version", "source_commit", "observer_sha256", "scenarios"],
+tools/peakflow_phase2a_pilot.py:64:            "observer_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+tools/peakflow_phase2a_pilot.py:70:                    "required": ["authority", "input_tree_sha256", "hillslope_count"],
+tools/peakflow_phase2a_pilot.py:131:def sha256_file(path: Path) -> str:
+tools/peakflow_phase2a_pilot.py:132:    digest = hashlib.sha256()
+tools/peakflow_phase2a_pilot.py:135:            digest.update(chunk)
+tools/peakflow_phase2a_pilot.py:136:    return digest.hexdigest()
+tools/peakflow_phase2a_pilot.py:139:def sha256_json(value: Any) -> str:
+tools/peakflow_phase2a_pilot.py:141:    return hashlib.sha256(payload).hexdigest()
+tools/peakflow_phase2a_pilot.py:145:    digest = hashlib.sha256()
+tools/peakflow_phase2a_pilot.py:148:        digest.update(len(relative).to_bytes(4, "big"))
+tools/peakflow_phase2a_pilot.py:149:        digest.update(relative)
+tools/peakflow_phase2a_pilot.py:150:        digest.update(bytes.fromhex(sha256_file(path)))
+tools/peakflow_phase2a_pilot.py:151:    return digest.hexdigest()
+tools/peakflow_phase2a_pilot.py:165:        "sha256": sha256_file(path),
+tools/peakflow_phase2a_pilot.py:177:        if sha256_file(path) != artifact["sha256"]:
+tools/peakflow_phase2a_pilot.py:363:    observer_hash = sha256_file(observer)
+tools/peakflow_phase2a_pilot.py:365:    if observer_hash != phase1["executable_sha256"]:
+tools/peakflow_phase2a_pilot.py:376:            "authority": str(wepp), "input_tree_sha256": tree_hash(inputs, runs),
+tools/peakflow_phase2a_pilot.py:381:        "observer_build_id": OBSERVER_BUILD_ID, "observer_sha256": observer_hash,
+tools/peakflow_phase2a_pilot.py:382:        "routing_topology_sha256": sha256_file(SCENARIOS["burned"] / "runs/pw0.str"),
+tools/peakflow_phase2a_pilot.py:492:    selection["selection_id"] = sha256_json(selection)[:16]
+tools/peakflow_phase2a_pilot.py:499:    pilot_id = sha256_json(manifest)[:16]
+tools/peakflow_phase2a_pilot.py:505:        "schema_version": SCHEMA_VERSION, "topology_sha256": manifest["routing_topology_sha256"],
+tools/peakflow_phase2a_pilot.py:564:            "trace_sha256": sha256_file(trace),
+tools/peakflow_phase2a_pilot.py:565:            "hbp_sha256": sha256_file(run_dir.parent / "output" / f"H{hillslope_id}.hbp"),
+tools/peakflow_phase2a_pilot.py:574:    selection["inventory_sha256"] = sha256_file(inventory_path)
+tools/peakflow_phase2a_pilot.py:575:    selection["baseline_events_sha256"] = sha256_file(event_path)
+tools/peakflow_phase2a_pilot.py:586:             "bytes": path.stat().st_size, "sha256": sha256_file(path), "retention": "retain"}
+tools/peakflow_phase2a_pilot.py:673:    before = {path.name: sha256_file(path) for path in run_dir.iterdir() if path.is_file()}
+tools/peakflow_phase2a_pilot.py:675:    after = {path.name: sha256_file(path) for path in run_dir.iterdir() if path.is_file()}
+tools/peakflow_phase2a_pilot.py:695:        "trace": str(trace), "trace_sha256": sha256_file(trace) if trace.exists() else None,
+tools/peakflow_phase2a_pilot.py:696:        "hbp": str(hbp), "hbp_sha256": sha256_file(hbp) if hbp.exists() else None,
+tools/peakflow_phase2a_pilot.py:764:    fresh_results: dict[str, dict[str, Any]] = {}
+tools/peakflow_phase2a_pilot.py:769:                fresh_results[result["trial_id"]] = result
+tools/peakflow_phase2a_pilot.py:776:        terminal = json.loads(terminal_path.read_text()) if terminal_path.exists() else fresh_results[trial.trial_id]
+tools/peakflow_phase2a_pilot.py:799:        "terminal_ledger": {"locator": str(terminal_path), "sha256": sha256_file(terminal_path), "bytes": terminal_path.stat().st_size},
+tools/peakflow_phase2a_pilot.py:800:        "event_pairs": {"locator": str(pair_path), "sha256": sha256_file(pair_path), "bytes": pair_path.stat().st_size},
+tools/peakflow_phase2a_pilot.py:812:             "sha256": sha256_file(path), "retention": "retain"} for path in (terminal_path, pair_path)
+tools/peakflow_phase2a_pilot.py:845:        "runtime_s": runtime, "trace": str(trace), "trace_sha256": sha256_file(trace),
+tools/peakflow_phase2a_pilot.py:846:        "hbp": str(hbp), "hbp_sha256": sha256_file(hbp),
+tools/peakflow_phase2a_pilot.py:887:    expected_replay_hash = json.loads((PHASE1_ARTIFACTS / "replay-build-manifest.json").read_text())["executable_sha256"]
+tools/peakflow_phase2a_pilot.py:888:    if sha256_file(replay_binary) != expected_replay_hash:
+tools/peakflow_phase2a_pilot.py:959:            "surface_ksat_mm_h": value, "packet_sha256": packet["payload_sha256"],
+tools/peakflow_phase2a_pilot.py:975:        "observer_sha256": manifest["observer_sha256"], "replay_sha256": sha256_file(retained_replay),
+tools/peakflow_phase2a_pilot.py:979:            "packet_sha256": no_surplus_packet["payload_sha256"],
+tools/peakflow_phase2a_pilot.py:1055:        hbp_hashes[hillslope_id] = sha256_file(source_hbp)
+tools/peakflow_phase2a_pilot.py:1093:        hillslope_id: sha256_file(
+tools/peakflow_phase2a_pilot.py:1107:        "hbp_tree_sha256": sha256_json(hashes),
+tools/peakflow_phase2a_pilot.py:1186:        terminal["hbp_tree_sha256"] = sha256_json(hashes)
+tools/peakflow_phase2a_pilot.py:1263:    return {"lane_id": job["lane_id"], "hbp_tree_sha256": sha256_json(hashes), **terminal}
+tools/peakflow_phase2a_pilot.py:1359:                   "sha256": sha256_file(external_series), "format": "parquet", "retention": "retain"},

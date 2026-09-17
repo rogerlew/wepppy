@@ -101,6 +101,12 @@ String/integer/enum dispatcher controls distinguish signature normalization from
 changing persisted scenario definitions. The failed iterations remain evidence;
 they are not relabeled successful.
 
+`omni_sbs_implementation_correctness_review.md` records scoped PASS with ten
+independent controls across its six-case direct/helper run, three-case actual
+dispatcher/worker seam run and separate legacy missing-source control. These are
+separate phases, not one unchanged-revision suite. The final security disposition
+is retained in `omni_sbs_implementation_security_review.md`.
+
 Nonblocking debt: the new helper uses untyped receipt dictionaries and physical
 version tuples. A focused future typing pass could name these contracts without
 generalizing the mechanism. Some generation/authority controls remain retained

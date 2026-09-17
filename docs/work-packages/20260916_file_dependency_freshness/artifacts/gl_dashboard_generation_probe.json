@@ -1,0 +1,10 @@
+{
+  "original_year_2000": 25,
+  "cached_year_2000_after_rewrite": 25,
+  "new_year_2001_after_rewrite": 76,
+  "fresh_manager_year_2000": 75,
+  "requests": 2,
+  "real_parquet": true,
+  "real_duckdb": true,
+  "scope": "Actual active module. Query transport calls real DuckDB against a disposable Parquet; no deployed browser/model job. Demonstrates mixed file generations within one manager, not a claimed global filesystem snapshot contract."
+}

@@ -1,0 +1,2 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20260916_file_dependency_freshness/artifacts/runtime_restore_soil_attribution_qa.py
+Read-only archive soil attribution: True

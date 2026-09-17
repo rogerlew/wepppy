@@ -1,0 +1,2 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20260916_file_dependency_freshness/artifacts/runtime_archive_acceptance.py --restart-evidence docs/work-packages/20260916_file_dependency_freshness/artifacts/runtime_restart_verification.json
+{"manifest": "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/runtime_archive_acceptance_3a8be19a8e1e.json", "project": "/wc1/batch/qa-freshness-archive-3a8be19a8e1e/runs/archive", "success": true}

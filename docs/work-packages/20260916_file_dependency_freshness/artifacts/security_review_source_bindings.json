@@ -1,0 +1,359 @@
+{
+  "reviewer": "freshness_security",
+  "date": "2026-09-17",
+  "base_commit": "adb4f9b004459fc578460a95f30ac01ae1421f36",
+  "reviewed_commit": "de3a1eba03ba2a0a09beef84e7f3a768d34690fe",
+  "status": "scoped implementation review; runtime closeout pending",
+  "production_sources": [
+    {
+      "path": "wepppy/all_your_base/file_digest.py",
+      "commit_sha256": "d090094983c4f7575801969a1339ae3306745f6ff93aa100c037d83dd7fb9ee7",
+      "working_sha256": "d090094983c4f7575801969a1339ae3306745f6ff93aa100c037d83dd7fb9ee7",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/all_your_base/file_digest.pyi",
+      "commit_sha256": "4a9fa1f5e3296baeb5e986b6f5e4ed83f07daa38aa4d2b499b4b16c84ff91ae5",
+      "working_sha256": "4a9fa1f5e3296baeb5e986b6f5e4ed83f07daa38aa4d2b499b4b16c84ff91ae5",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/all_your_base/raster_freshness.py",
+      "commit_sha256": "b5e1602a6596cfb37a21d72ecc2b3839da92fac3163fa6a8e2fb121bde6cc738",
+      "working_sha256": "b5e1602a6596cfb37a21d72ecc2b3839da92fac3163fa6a8e2fb121bde6cc738",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/all_your_base/raster_freshness.pyi",
+      "commit_sha256": "2174f3b2ab51f63d804266c62a1d09833e54fc62a66d7d11d5e47ff649c10593",
+      "working_sha256": "2174f3b2ab51f63d804266c62a1d09833e54fc62a66d7d11d5e47ff649c10593",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/climates/cli_parquet.py",
+      "commit_sha256": "ef48004ff552b20ef5206b7b42d7b078dd0a2201003cfaa45ed772c09c5ac74f",
+      "working_sha256": "ef48004ff552b20ef5206b7b42d7b078dd0a2201003cfaa45ed772c09c5ac74f",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/microservices/rq_engine/postfire_debris_flow_routes.py",
+      "commit_sha256": "1de0d33f2f9519d3174673b2c8edf3f19d3de1ef6ba212bd2eb9fcc739e0e3c0",
+      "working_sha256": "1de0d33f2f9519d3174673b2c8edf3f19d3de1ef6ba212bd2eb9fcc739e0e3c0",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/microservices/rq_engine/schema_defaults_routes.py",
+      "commit_sha256": "9f3369d3a35bae6f67c2e489dcc38f0145710c3fe47847a969bd53c59f1f7dc5",
+      "working_sha256": "9f3369d3a35bae6f67c2e489dcc38f0145710c3fe47847a969bd53c59f1f7dc5",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/nodb/_derived_build.py",
+      "commit_sha256": "423c37c144cac5f8bee3c97930c4f8c65da26f72cb39104007370f3a5cedcc2e",
+      "working_sha256": "423c37c144cac5f8bee3c97930c4f8c65da26f72cb39104007370f3a5cedcc2e",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/nodb/_read_retry.py",
+      "commit_sha256": "1623c486e6a1ef5aaf8919ab77623ced931ad837160c78dd02fd1a586fe878fd",
+      "working_sha256": "1623c486e6a1ef5aaf8919ab77623ced931ad837160c78dd02fd1a586fe878fd",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/nodb/_read_retry.pyi",
+      "commit_sha256": "6cc844bc190b4129a3c53817447ec51bc47b85487f28c9168fa548c894c5b391",
+      "working_sha256": "6cc844bc190b4129a3c53817447ec51bc47b85487f28c9168fa548c894c5b391",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/nodb/base.py",
+      "commit_sha256": "7231fc8367062a024c05f64a0fa7045ab81fd2f83f7a025472ee051aa85e8522",
+      "working_sha256": "7231fc8367062a024c05f64a0fa7045ab81fd2f83f7a025472ee051aa85e8522",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/nodb/config_builder/registry.py",
+      "commit_sha256": "47a4ca7f1ef78058533748fa97ffb463df3cb35b18a9785094eeb3ea5020e86c",
+      "working_sha256": "47a4ca7f1ef78058533748fa97ffb463df3cb35b18a9785094eeb3ea5020e86c",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/nodb/core/climate_artifact_export_service.py",
+      "commit_sha256": "221901b6e643fd6f3cfe89e6e02cdd674ccef86604363a65ceb2977cb8dd5d2a",
+      "working_sha256": "221901b6e643fd6f3cfe89e6e02cdd674ccef86604363a65ceb2977cb8dd5d2a",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/nodb/core/climate_observed_build.py",
+      "commit_sha256": "c5c0f61d3d6903b7e2d9181a48b8a7ef28f1453ae744bc2398187655df2a9ef9",
+      "working_sha256": "c5c0f61d3d6903b7e2d9181a48b8a7ef28f1453ae744bc2398187655df2a9ef9",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/nodb/core/landuse.py",
+      "commit_sha256": "46954d6d325789972af2ad901458c3106f5d88dde1212715fd409baba5012cd8",
+      "working_sha256": "46954d6d325789972af2ad901458c3106f5d88dde1212715fd409baba5012cd8",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/nodb/mods/baer/sbs_map.py",
+      "commit_sha256": "5212036fa8357987b65c7add0da435a1b4a95f26b510b18b44eba075cd4242b7",
+      "working_sha256": "5212036fa8357987b65c7add0da435a1b4a95f26b510b18b44eba075cd4242b7",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/nodb/mods/features_export/dependency_tracker.py",
+      "commit_sha256": "b8722d4b4fc224d26370bb749fb1bd2899973d2da09d1fc7f41549ce7deb4c0d",
+      "working_sha256": "b8722d4b4fc224d26370bb749fb1bd2899973d2da09d1fc7f41549ce7deb4c0d",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/nodb/mods/features_export/exporters/geodatabase.py",
+      "commit_sha256": "f2138126063048a06ad828d562c39e2fa885a1e47b6a795705eabc061c0a9146",
+      "working_sha256": "f2138126063048a06ad828d562c39e2fa885a1e47b6a795705eabc061c0a9146",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/nodb/mods/features_export/readme_builder.py",
+      "commit_sha256": "68939aa79d5310299f96ba506256c3dc818a16ba9f1d25918a56566476b05fad",
+      "working_sha256": "68939aa79d5310299f96ba506256c3dc818a16ba9f1d25918a56566476b05fad",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/nodb/mods/features_export/service.py",
+      "commit_sha256": "007e1d51dc1e600a36da9ff8ff5060974a5639411338fb96e6347f4d6599b747",
+      "working_sha256": "007e1d51dc1e600a36da9ff8ff5060974a5639411338fb96e6347f4d6599b747",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/nodb/mods/geneva/collaborators/_cache_freshness.py",
+      "commit_sha256": "405223512fbf699d35d008bdb0228802ee2a39b2095dfc8ed3f67b3521b8e2b1",
+      "working_sha256": "405223512fbf699d35d008bdb0228802ee2a39b2095dfc8ed3f67b3521b8e2b1",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/nodb/mods/geneva/collaborators/hru_map_geometry_service.py",
+      "commit_sha256": "98c3f8c3b67abd21c10aacf9c0b278df1874a07c2a2684c038f18f6bbfa51034",
+      "working_sha256": "98c3f8c3b67abd21c10aacf9c0b278df1874a07c2a2684c038f18f6bbfa51034",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/nodb/mods/geneva/collaborators/hsg_assignment_service.py",
+      "commit_sha256": "59ee01affee3b9455327868d17f4b76191d622ef2c520f7307f480fe706da96f",
+      "working_sha256": "59ee01affee3b9455327868d17f4b76191d622ef2c520f7307f480fe706da96f",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/nodb/mods/omni/omni.py",
+      "commit_sha256": "22bd86e063d66ec94783037861b9428a30f4f2bdba6d29f1a0c816c08534e614",
+      "working_sha256": "22bd86e063d66ec94783037861b9428a30f4f2bdba6d29f1a0c816c08534e614",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/nodb/mods/omni/omni.pyi",
+      "commit_sha256": "f3385a24e1f3884b7564c73fb6df827b6c424b07a0f7cfeda561532bc4eddada",
+      "working_sha256": "f3385a24e1f3884b7564c73fb6df827b6c424b07a0f7cfeda561532bc4eddada",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/nodb/mods/omni/omni_clone_contrast_service.py",
+      "commit_sha256": "f7490428128e0fb34a81e9e7404c71b9e098ec49c70f38097ac840b6dfc419e6",
+      "working_sha256": "f7490428128e0fb34a81e9e7404c71b9e098ec49c70f38097ac840b6dfc419e6",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/nodb/mods/omni/omni_mode_build_services.py",
+      "commit_sha256": "8d6d4590947eed0a731295f0f0ff7f5082af840372f98090f1a2db62ed9f518d",
+      "working_sha256": "8d6d4590947eed0a731295f0f0ff7f5082af840372f98090f1a2db62ed9f518d",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/nodb/mods/omni/omni_run_orchestration_service.py",
+      "commit_sha256": "e09f1b19fe75d650b04df2d272219729964774817a7c989f44fdb986c316b134",
+      "working_sha256": "e09f1b19fe75d650b04df2d272219729964774817a7c989f44fdb986c316b134",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/nodb/mods/omni/omni_sbs_freshness.py",
+      "commit_sha256": "6f95a6f6f3bc8836259361fb5883697578b1a2392baee5540b87b2f3961e2832",
+      "working_sha256": "6f95a6f6f3bc8836259361fb5883697578b1a2392baee5540b87b2f3961e2832",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/nodb/mods/omni/omni_station_catalog_service.py",
+      "commit_sha256": "ecd08d23ab564e4065e5e9bcb3bdfca068063ea3db9c15dddb520855926139ae",
+      "working_sha256": "ecd08d23ab564e4065e5e9bcb3bdfca068063ea3db9c15dddb520855926139ae",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/nodb/mods/postfire_debris_flow/production.py",
+      "commit_sha256": "8c66a2f8c29b8da5e75bc27bfa0ed494fe4abb43cb7913a8ad5f394cf0ac38c3",
+      "working_sha256": "8c66a2f8c29b8da5e75bc27bfa0ed494fe4abb43cb7913a8ad5f394cf0ac38c3",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/nodb/mods/postfire_debris_flow/rainfall_io.py",
+      "commit_sha256": "f61f0c76caee6ba10583ce19a6628f48c6e0efca6b229f79f172450c3ae39898",
+      "working_sha256": "f61f0c76caee6ba10583ce19a6628f48c6e0efca6b229f79f172450c3ae39898",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/nodb/mods/rap/rap_ts_build.py",
+      "commit_sha256": "eefddb841cf86791af02026af3b3444c9dc184b2d77e44a77b917e6b18bfe42f",
+      "working_sha256": "eefddb841cf86791af02026af3b3444c9dc184b2d77e44a77b917e6b18bfe42f",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/nodb/skeletonize.py",
+      "commit_sha256": "7daef40abb5ed4e061ef6093251e830f2a0ac398fbc4d7a0256174d462fbb95f",
+      "working_sha256": "7daef40abb5ed4e061ef6093251e830f2a0ac398fbc4d7a0256174d462fbb95f",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/profile_recorder/assembler.py",
+      "commit_sha256": "881d3963013726e401f5d9cf99c3479d6add3714ddb3ab10ed8743a8bfc94aeb",
+      "working_sha256": "881d3963013726e401f5d9cf99c3479d6add3714ddb3ab10ed8743a8bfc94aeb",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/profile_recorder/playback.py",
+      "commit_sha256": "1339b90b9a9de633dc2447b1ac217f1659187cb9682d670c2b2e858c0e4e9c53",
+      "working_sha256": "1339b90b9a9de633dc2447b1ac217f1659187cb9682d670c2b2e858c0e4e9c53",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/profile_recorder/sbs_seed.py",
+      "commit_sha256": "a67475c34382fbd647dfd13b7b4be0f5f3da3be6dd987997af89e0ad5a218b86",
+      "working_sha256": "a67475c34382fbd647dfd13b7b4be0f5f3da3be6dd987997af89e0ad5a218b86",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/rq/omni_rq.py",
+      "commit_sha256": "0fca1007d49ed39ab0210ea42b90a651f752ca0bb7d828d64583e5da857924c7",
+      "working_sha256": "0fca1007d49ed39ab0210ea42b90a651f752ca0bb7d828d64583e5da857924c7",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/rq/project_rq_archive.py",
+      "commit_sha256": "76a3dbfb305f3ac9a2d9c092dadb442754fc20231ccca4dd74b403221762a089",
+      "working_sha256": "76a3dbfb305f3ac9a2d9c092dadb442754fc20231ccca4dd74b403221762a089",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/webservices/dtale/dtale.py",
+      "commit_sha256": "a5c150af6a57a40fa6a773b685cad7b0aec1fc518051998157d270c210851ea7",
+      "working_sha256": "a5c150af6a57a40fa6a773b685cad7b0aec1fc518051998157d270c210851ea7",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/webservices/dtale/dtale.pyi",
+      "commit_sha256": "8e10e5cd37e03fb95f9e5b7145ea4856a13341f6d6eabedb93a701411ca372cc",
+      "working_sha256": "8e10e5cd37e03fb95f9e5b7145ea4856a13341f6d6eabedb93a701411ca372cc",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/wepp/interchange/_utils.py",
+      "commit_sha256": "94e589a57107c061381d77ef5554aa650abffda32df9be126d7454bad8833ea9",
+      "working_sha256": "94e589a57107c061381d77ef5554aa650abffda32df9be126d7454bad8833ea9",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/wepp/reports/_cache_freshness.py",
+      "commit_sha256": "2f999913fc0557f7ea68a08f0c8bef7b3048a062dd9665afb5a9ddceed73ff24",
+      "working_sha256": "2f999913fc0557f7ea68a08f0c8bef7b3048a062dd9665afb5a9ddceed73ff24",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/wepp/reports/average_annuals_by_landuse.py",
+      "commit_sha256": "d8063ff1fbc9fba1f34e531c6788f3ffba0822feeb64dbe24f94a8b3900860ad",
+      "working_sha256": "d8063ff1fbc9fba1f34e531c6788f3ffba0822feeb64dbe24f94a8b3900860ad",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/wepp/reports/average_annuals_by_landuse.pyi",
+      "commit_sha256": "29e527405113cff515377d552d1bb3cf99ddad2a3fc3c3beda77402aa10e10ca",
+      "working_sha256": "29e527405113cff515377d552d1bb3cf99ddad2a3fc3c3beda77402aa10e10ca",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/wepp/reports/hillslope_watbal.py",
+      "commit_sha256": "b3a14b6cbfa068207d5d0c459b36b3a67f196f505c86b6fbf60f8d0a96620d2d",
+      "working_sha256": "b3a14b6cbfa068207d5d0c459b36b3a67f196f505c86b6fbf60f8d0a96620d2d",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/wepp/reports/hillslope_watbal.pyi",
+      "commit_sha256": "78ff93d770cb92bc723031127acd67a309b53a9b3814473f484aad9d186a3d35",
+      "working_sha256": "78ff93d770cb92bc723031127acd67a309b53a9b3814473f484aad9d186a3d35",
+      "matches_reviewed_commit": true
+    },
+    {
+      "path": "wepppy/weppcloud/utils/assets.py",
+      "commit_sha256": "0ac52522e8bc0cf7d6ac3284f2e292a21fed7724b7afd6dc2fa8e9fdc6ba51c5",
+      "working_sha256": "0ac52522e8bc0cf7d6ac3284f2e292a21fed7724b7afd6dc2fa8e9fdc6ba51c5",
+      "matches_reviewed_commit": true
+    }
+  ],
+  "canonical_working_documents": [
+    {
+      "path": "docs/schemas/file-dependency-freshness-contract.md",
+      "sha256": "48fe18e1a16f7788acd0414bdc07ccaf011eeb4c35598fe2feafad0de0006da9"
+    },
+    {
+      "path": "docs/adrs/20260917-file-digest-cache-admission.md",
+      "sha256": "b12d782a73cac3eb0d2cb06a333954f7504118c8ba10fdb2c15e55db5975bc5c"
+    },
+    {
+      "path": "docs/schemas/nodb-persistence-concurrency-contract.md",
+      "sha256": "c71a248420bda133102208609a988f4dcb26343efef5f99b951971f106f1e109"
+    },
+    {
+      "path": "docs/schemas/climate-parquet-lineage-contract.md",
+      "sha256": "450cad3593d9346517f5c6dae61e5de5b096f3f8267b1b5f68e5e669210c5b14"
+    },
+    {
+      "path": "docs/schemas/report-cache-freshness-contract.md",
+      "sha256": "a546cd8fbafa8a4433448c77150bcf9f80360db850dcaae7466457622d858180"
+    },
+    {
+      "path": "docs/schemas/output-scope-contract.md",
+      "sha256": "d0e34a4db88c8a1182734034bf30bb964ee21118cd8fc259fc0539c15856573d"
+    },
+    {
+      "path": "docs/schemas/raster-dependency-freshness-contract.md",
+      "sha256": "b4c42bd406ddc46a49545d446d1582705f2dbd36b07565522a7a10751aeccb01"
+    },
+    {
+      "path": "docs/schemas/omni-sbs-freshness-contract.md",
+      "sha256": "d4140a543719726397fc8ebcdf7fbbd7a99dab26b55035442eac83b89830f284"
+    },
+    {
+      "path": "docs/standards/artifact-observability-standard.md",
+      "sha256": "0470093fe1aa4a143cab2d7f84051d9f1e4e910f7aabe866d3fe41a7b1b72245"
+    },
+    {
+      "path": "wepppy/nodb/mods/features_export/specification.md",
+      "sha256": "d6eafa4a809290b7d2be43bff5fd63feae2d05fffbb9a55fccd2a3b7f4156889"
+    },
+    {
+      "path": "wepppy/nodb/mods/geneva/specification.md",
+      "sha256": "2757606ceb39a77a88ada8b24a5c99dca16930ccdcac48016685a65620453f9b"
+    },
+    {
+      "path": "wepppy/profile_recorder/PROFILE_TEST_ENGINE_SPEC.md",
+      "sha256": "7576fb1d327a329c8b54bb2fe8e0966977c43e562cf43e654062b5c8f50d6269"
+    },
+    {
+      "path": "wepppy/nodb/mods/rap/README.md",
+      "sha256": "a0c3f2730f9b1d6506ce9242836583b64c7160507ecfb072e638a123464a1df6"
+    },
+    {
+      "path": "wepppy/nodb/mods/postfire_debris_flow/README.md",
+      "sha256": "db2ecd286a971567cb1335a67d17d7c344943391810d808a7459192820c6b0bd"
+    },
+    {
+      "path": "docs/ui-docs/gl-dashboard.md",
+      "sha256": "fa42b536706b2418a7a7fd2e924c501aac372780085c767a934badc837755c6b"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "utc": "2026-09-17T08:14:11.542514+00:00",
+  "method": "GET",
+  "path": "/rq-engine/api/jobstatus/62761c4c-e749-41d0-92b7-09afc4eaed37",
+  "request": null,
+  "status": 200,
+  "body": {
+    "job_id": "62761c4c-e749-41d0-92b7-09afc4eaed37",
+    "runid": "qa-freshness-runtime-7e24c8d1",
+    "status": "started",
+    "started_at": "2026-09-17 08:12:43.575805",
+    "ended_at": null,
+    "progress": {
+      "completed": 0,
+      "total": 1,
+      "unit": "jobs",
+      "percent": 0.0,
+      "updated_at": "2026-09-17T08:12:43Z"
+    }
+  }
+}

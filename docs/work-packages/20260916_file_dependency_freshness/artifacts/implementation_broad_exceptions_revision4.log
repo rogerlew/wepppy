@@ -1,0 +1,122 @@
+Broad exception handler changed-file enforcement
+
+Repo root: /home/workdir/wepppy
+Base ref: origin/master
+Merge base: adb4f9b004459fc578460a95f30ac01ae1421f36
+Path filter: wepppy, services
+Allowlist source: /home/workdir/wepppy/docs/standards/broad-exception-boundary-allowlist.md
+Changed Python files scanned: 38
+
+Files:
+  A wepppy/all_your_base/file_digest.py
+  A wepppy/all_your_base/raster_freshness.py
+  A wepppy/climates/cli_parquet.py
+  M wepppy/microservices/rq_engine/postfire_debris_flow_routes.py
+  M wepppy/microservices/rq_engine/schema_defaults_routes.py
+  M wepppy/nodb/_derived_build.py
+  M wepppy/nodb/_read_retry.py
+  M wepppy/nodb/base.py
+  M wepppy/nodb/config_builder/registry.py
+  M wepppy/nodb/core/climate_artifact_export_service.py
+  M wepppy/nodb/core/climate_observed_build.py
+  M wepppy/nodb/core/landuse.py
+  M wepppy/nodb/mods/baer/sbs_map.py
+  M wepppy/nodb/mods/features_export/dependency_tracker.py
+  M wepppy/nodb/mods/features_export/exporters/geodatabase.py
+  M wepppy/nodb/mods/features_export/readme_builder.py
+  M wepppy/nodb/mods/features_export/service.py
+  M wepppy/nodb/mods/geneva/collaborators/hru_map_geometry_service.py
+  M wepppy/nodb/mods/geneva/collaborators/hsg_assignment_service.py
+  M wepppy/nodb/mods/omni/omni.py
+  M wepppy/nodb/mods/omni/omni_clone_contrast_service.py
+  M wepppy/nodb/mods/omni/omni_mode_build_services.py
+  M wepppy/nodb/mods/omni/omni_run_orchestration_service.py
+  M wepppy/nodb/mods/omni/omni_station_catalog_service.py
+  M wepppy/nodb/mods/postfire_debris_flow/production.py
+  M wepppy/nodb/mods/postfire_debris_flow/rainfall_io.py
+  M wepppy/nodb/mods/rap/rap_ts_build.py
+  M wepppy/nodb/skeletonize.py
+  M wepppy/profile_recorder/assembler.py
+  M wepppy/profile_recorder/playback.py
+  M wepppy/rq/omni_rq.py
+  M wepppy/rq/project_rq_archive.py
+  M wepppy/webservices/dtale/dtale.py
+  M wepppy/wepp/interchange/_utils.py
+  A wepppy/wepp/reports/_cache_freshness.py
+  M wepppy/wepp/reports/average_annuals_by_landuse.py
+  M wepppy/wepp/reports/hillslope_watbal.py
+  M wepppy/weppcloud/utils/assets.py
+
+Per-file delta (unsuppressed broad catches):
+  A wepppy/all_your_base/file_digest.py (base=0 current=0 delta=+0)
+  A wepppy/all_your_base/raster_freshness.py (base=0 current=0 delta=+0)
+  A wepppy/climates/cli_parquet.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/postfire_debris_flow_routes.py (base=0 current=0 delta=+0)
+  M wepppy/microservices/rq_engine/schema_defaults_routes.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/_derived_build.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/_read_retry.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/base.py (base=19 current=19 delta=+0)
+  M wepppy/nodb/config_builder/registry.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/core/climate_artifact_export_service.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/core/climate_observed_build.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/core/landuse.py (base=1 current=1 delta=+0)
+  M wepppy/nodb/mods/baer/sbs_map.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/mods/features_export/dependency_tracker.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/mods/features_export/exporters/geodatabase.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/mods/features_export/readme_builder.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/mods/features_export/service.py (base=1 current=1 delta=+0)
+  M wepppy/nodb/mods/geneva/collaborators/hru_map_geometry_service.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/mods/geneva/collaborators/hsg_assignment_service.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/mods/omni/omni.py (base=4 current=4 delta=+0)
+  M wepppy/nodb/mods/omni/omni_clone_contrast_service.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/mods/omni/omni_mode_build_services.py (base=2 current=2 delta=+0)
+  M wepppy/nodb/mods/omni/omni_run_orchestration_service.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/mods/omni/omni_station_catalog_service.py (base=2 current=2 delta=+0)
+  M wepppy/nodb/mods/postfire_debris_flow/production.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/mods/postfire_debris_flow/rainfall_io.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/mods/rap/rap_ts_build.py (base=0 current=0 delta=+0)
+  M wepppy/nodb/skeletonize.py (base=0 current=0 delta=+0)
+  M wepppy/profile_recorder/assembler.py (base=0 current=18 delta=+18)
+    + wepppy/profile_recorder/assembler.py:112:8 except-Exception  # except Exception as exc:
+    + wepppy/profile_recorder/assembler.py:176:8 except-Exception  # except Exception as exc:
+    + wepppy/profile_recorder/assembler.py:229:12 except-Exception  # except Exception as exc:
+    + wepppy/profile_recorder/assembler.py:275:8 except-Exception  # except Exception as exc:
+    + wepppy/profile_recorder/assembler.py:281:8 except-Exception  # except Exception as exc:
+    + wepppy/profile_recorder/assembler.py:313:8 except-Exception  # except Exception:
+    + wepppy/profile_recorder/assembler.py:329:8 except-Exception  # except Exception:
+    + wepppy/profile_recorder/assembler.py:361:8 except-Exception  # except Exception as exc:
+    + wepppy/profile_recorder/assembler.py:367:8 except-Exception  # except Exception as exc:
+    + wepppy/profile_recorder/assembler.py:385:8 except-Exception  # except Exception as exc:
+    + wepppy/profile_recorder/assembler.py:391:8 except-Exception  # except Exception as exc:
+    + wepppy/profile_recorder/assembler.py:412:8 except-Exception  # except Exception as exc:
+    + wepppy/profile_recorder/assembler.py:418:8 except-Exception  # except Exception as exc:
+    + wepppy/profile_recorder/assembler.py:453:12 except-Exception  # except Exception as exc:
+    + wepppy/profile_recorder/assembler.py:463:8 except-Exception  # except Exception as exc:
+    + wepppy/profile_recorder/assembler.py:523:20 except-Exception  # except Exception as exc:
+    + wepppy/profile_recorder/assembler.py:535:8 except-Exception  # except Exception as exc:
+    + wepppy/profile_recorder/assembler.py:544:16 except-Exception  # except Exception as exc:
+  M wepppy/profile_recorder/playback.py (base=0 current=13 delta=+13)
+    + wepppy/profile_recorder/playback.py:352:16 except-Exception  # except Exception:
+    + wepppy/profile_recorder/playback.py:574:8 except-Exception  # except Exception as exc:
+    + wepppy/profile_recorder/playback.py:602:12 except-Exception  # except Exception as exc:
+    + wepppy/profile_recorder/playback.py:845:16 except-Exception  # except Exception as exc:
+    + wepppy/profile_recorder/playback.py:856:20 except-Exception  # except Exception as exc:
+    + wepppy/profile_recorder/playback.py:861:12 except-Exception  # except Exception as exc:
+    + wepppy/profile_recorder/playback.py:871:8 except-Exception  # except Exception:
+    + wepppy/profile_recorder/playback.py:875:8 except-Exception  # except Exception:
+    + wepppy/profile_recorder/playback.py:882:8 except-Exception  # except Exception:
+    + wepppy/profile_recorder/playback.py:926:12 except-Exception  # except Exception as exc:
+    + wepppy/profile_recorder/playback.py:945:12 except-Exception  # except Exception as exc:
+    + wepppy/profile_recorder/playback.py:958:12 except-Exception  # except Exception as exc:
+    + wepppy/profile_recorder/playback.py:987:8 except-Exception  # except Exception as exc:  # pragma: no cover - defensive logging
+  M wepppy/rq/omni_rq.py (base=10 current=10 delta=+0)
+  M wepppy/rq/project_rq_archive.py (base=5 current=5 delta=+0)
+  M wepppy/webservices/dtale/dtale.py (base=6 current=6 delta=+0)
+  M wepppy/wepp/interchange/_utils.py (base=0 current=0 delta=+0)
+  A wepppy/wepp/reports/_cache_freshness.py (base=0 current=0 delta=+0)
+  M wepppy/wepp/reports/average_annuals_by_landuse.py (base=0 current=0 delta=+0)
+  M wepppy/wepp/reports/hillslope_watbal.py (base=0 current=0 delta=+0)
+  M wepppy/weppcloud/utils/assets.py (base=1 current=0 delta=-1)
+
+Net delta (all changed files): +30
+Result: FAIL (per-file broad-catch increase detected in changed files)

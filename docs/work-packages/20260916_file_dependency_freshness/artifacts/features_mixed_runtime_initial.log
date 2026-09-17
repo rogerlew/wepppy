@@ -1,0 +1,27 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20260916_file_dependency_freshness/artifacts/runtime_features_mixed.py --execute --label initial
+{
+  "completed": null,
+  "errors": [
+    {
+      "type": "ValueError",
+      "message": "Batch leaf must include its unique batch name because RedisPrep uses the leaf namespace",
+      "traceback": "Traceback (most recent call last):\n  File \"/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/runtime_features_mixed.py\", line 233, in main\n    copy_manifest = prepare_project_copy(args.source, wd, root / 'full-project-copy.json')\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/runtime_project_copy.py\", line 121, in prepare_project_copy\n    run_group, group_name, runid = _identity(destination)\n                                   ^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/runtime_project_copy.py\", line 96, in _identity\n    raise ValueError('Batch leaf must include its unique batch name because RedisPrep uses the leaf namespace')\nValueError: Batch leaf must include its unique batch name because RedisPrep uses the leaf namespace\n"
+    }
+  ],
+  "modules_unchanged": true,
+  "source_verification": null,
+  "historical_artifact_count": null,
+  "destination": "/wc1/batch/qa-features-mixed-81190f68fab2/runs/qa-features-81190f68fab2"
+}
+Traceback (most recent call last):
+  File "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/runtime_features_mixed.py", line 373, in <module>
+    main()
+  File "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/runtime_features_mixed.py", line 233, in main
+    copy_manifest = prepare_project_copy(args.source, wd, root / 'full-project-copy.json')
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/runtime_project_copy.py", line 121, in prepare_project_copy
+    run_group, group_name, runid = _identity(destination)
+                                   ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/runtime_project_copy.py", line 96, in _identity
+    raise ValueError('Batch leaf must include its unique batch name because RedisPrep uses the leaf namespace')
+ValueError: Batch leaf must include its unique batch name because RedisPrep uses the leaf namespace

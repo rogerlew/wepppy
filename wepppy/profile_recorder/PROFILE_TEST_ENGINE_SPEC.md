@@ -38,7 +38,7 @@ Event payloads intentionally match what the playback runner expects: `stage` (`r
 - `promote_draft(run_id, capture_id="stream", slug=Optional[str])` materializes a profile by copying the draft tree into `profiles/<slug>/capture` and cloning the run snapshot into `profiles/<slug>/run`.
 - The assembler currently focuses on preservation. Higher-level YAML manifests or curated step lists do not exist yet; consumers read the JSONL stream directly.
 
-### SBS event identity (intended; checkpoint pending)
+### SBS event identity (implemented)
 
 New SBS response captures retain an immutable main-file seed and version1
 receipt at`seed/uploads/sbs/events/<sha256(event-id)>/`, binding the event ID,
@@ -58,7 +58,7 @@ canonical-first behavior with unverified historical identity. Existing profiles 
 on read. Receipt locations cannot select paths outside their event seed folder;
 receipts retain no request secrets or PII. Other upload families are unchanged.
 
-### SBS event performance acceptance (intended; checkpoint pending)
+### SBS event performance acceptance (implemented)
 
 Use the reviewed actual 599,196-byte and 747,242-byte SBS fixtures and labeled
 16,779,862-byte valid TIFF stress fixture. On local warm filesystem pages,
@@ -152,6 +152,33 @@ Playback also looks for `capture/seed/uploads/<type>` when rebuilding multipart 
 - When a cookie is provided, it is forwarded verbatim to both playback and WEPPcloud.
 - Otherwise the service logs in with `ADMIN_EMAIL` / `ADMIN_PASSWORD` against the HTTPS host to honor the `Secure` cookie flag, mirrors cookies across hosts if required, and reuses the authenticated `requests.Session`.
 - Playback exposes login successes as INFO logs so streaming callers can confirm authentication state.
+
+### RQ bearer authentication and outcome verification
+
+The current `wctl run-test-profile` / playback service authenticates with cookies;
+it does not supply the Authorization bearer required by RQ routes such as
+`/rq-engine/api/runs/<runid>/<config>/tasks/upload-sbs/`. A recorded SBS replay can
+therefore receive HTTP 401 `Missing Authorization header` for every upload while
+the CLI exits 0 and prints `playback completed successfully`. This is a confirmed
+transport limitation, not successful replay. Inspect each request's status in
+the stream/result report and verify the resulting files and jobs; neither exit 0,
+a result token nor the service's streaming HTTP 200 establishes workflow success.
+
+For controlled diagnostics, the existing Python API accepts an already
+authenticated Requests session through `PlaybackSession(..., session=authorized_session)`.
+Use the intended HTTPS origin and disposable source/playback runs; playback also
+clears locks for the recorded source run.
+The session's bearer must satisfy the unchanged audience, scope and run-access
+checks. This supports an independently reported HTTP test; it does not fix or
+replace the failed canonical CLI result. Do not disable auth, broaden permissions
+or insert recorded credentials into profile events to make replay pass.
+
+Keep JWTs, cookies and Authorization values out of recorded events, receipts,
+command arguments and shared logs. The current CLI prints the resolved cookie
+payload to stderr, including with `--cookie-file`. For a necessary diagnostic
+using an explicit cookie, capture raw output only in private 0600 temporary
+storage and redact the cookie payload before displaying or retaining logs.
+Do not pipe raw output to a terminal, shared log collector or CI artifact.
 
 ## Result Storage & Retrieval
 - Every successful playback stores a `ProfileRunResult` JSON file under `profiles/_runs/<token>.json` containing profile slug, resolved run ids, run directory, report, and per-request outcome list.

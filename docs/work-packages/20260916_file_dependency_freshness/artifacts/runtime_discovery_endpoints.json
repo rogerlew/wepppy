@@ -1,0 +1,434 @@
+{
+  "contract_version": "1.0.0-draft",
+  "deployment_revision": "dev",
+  "operations": [
+    {
+      "operation_id": "rq_engine_list_configs",
+      "run_scoped": false,
+      "method": "GET",
+      "path": "/api/configs",
+      "accepted_auth": [
+        "bearer_jwt"
+      ],
+      "auth_requirements": {
+        "bearer_jwt": {
+          "required_any_scope": [
+            "rq:read",
+            "rq:status"
+          ]
+        }
+      },
+      "error_catalog_url": "/api/endpoints/rq_engine_list_configs/errors",
+      "write_precondition": {
+        "required": false,
+        "accepted": [],
+        "conflict_status_code": 409,
+        "conflict_error_code": "stale_run_state"
+      },
+      "idempotency_policy": {
+        "supported": false,
+        "key_locations": [],
+        "dedupe_window_seconds": 0,
+        "replay_behavior": "return_original_success",
+        "mismatch_status_code": 409,
+        "mismatch_error_code": "idempotency_key_conflict"
+      },
+      "execution_mode": "sync",
+      "returns_job": false,
+      "job_key": null,
+      "content_types": [
+        "application/json"
+      ],
+      "file_fields": [],
+      "success_status_codes": [
+        200
+      ],
+      "response_mode": "json",
+      "result_contract": {
+        "kind": "sync_result",
+        "required_response_fields": [
+          "configs"
+        ],
+        "terminal_signal": "http_status_2xx"
+      },
+      "estimated_duration": {
+        "bucket": "fast",
+        "typical_seconds": 1
+      },
+      "batch_mode_behavior": "n/a",
+      "base_project_behavior": "n/a",
+      "mutates_controllers": [],
+      "invalidates_steps": []
+    },
+    {
+      "operation_id": "rq_engine_get_config",
+      "run_scoped": false,
+      "method": "GET",
+      "path": "/api/configs/{config}",
+      "accepted_auth": [
+        "bearer_jwt"
+      ],
+      "auth_requirements": {
+        "bearer_jwt": {
+          "required_any_scope": [
+            "rq:read",
+            "rq:status"
+          ]
+        }
+      },
+      "error_catalog_url": "/api/endpoints/rq_engine_get_config/errors",
+      "write_precondition": {
+        "required": false,
+        "accepted": [],
+        "conflict_status_code": 409,
+        "conflict_error_code": "stale_run_state"
+      },
+      "idempotency_policy": {
+        "supported": false,
+        "key_locations": [],
+        "dedupe_window_seconds": 0,
+        "replay_behavior": "return_original_success",
+        "mismatch_status_code": 409,
+        "mismatch_error_code": "idempotency_key_conflict"
+      },
+      "execution_mode": "sync",
+      "returns_job": false,
+      "job_key": null,
+      "content_types": [
+        "application/json"
+      ],
+      "file_fields": [],
+      "success_status_codes": [
+        200
+      ],
+      "response_mode": "json",
+      "result_contract": {
+        "kind": "sync_result",
+        "required_response_fields": [
+          "config"
+        ],
+        "terminal_signal": "http_status_2xx"
+      },
+      "estimated_duration": {
+        "bucket": "fast",
+        "typical_seconds": 1
+      },
+      "batch_mode_behavior": "n/a",
+      "base_project_behavior": "n/a",
+      "mutates_controllers": [],
+      "invalidates_steps": []
+    },
+    {
+      "operation_id": "rq_engine_create",
+      "run_scoped": false,
+      "method": "POST",
+      "path": "/create/",
+      "path_aliases": [
+        "/api/create/"
+      ],
+      "config_catalog_url": "/api/configs",
+      "accepted_auth": [
+        "rq_token",
+        "bearer_jwt",
+        "session_cookie_same_origin",
+        "captcha"
+      ],
+      "auth_requirements": {
+        "rq_token": {
+          "required_scope": [
+            "rq:enqueue"
+          ]
+        },
+        "bearer_jwt": {
+          "required_scope": [
+            "rq:enqueue"
+          ]
+        },
+        "session_cookie_same_origin": {
+          "same_origin_required": true
+        },
+        "captcha": {
+          "challenge_required": true,
+          "required_if_no_authenticated_token": true
+        }
+      },
+      "error_catalog_url": "/api/endpoints/rq_engine_create/errors",
+      "write_precondition": {
+        "required": false,
+        "accepted": [],
+        "conflict_status_code": 409,
+        "conflict_error_code": "stale_run_state"
+      },
+      "idempotency_policy": {
+        "supported": false,
+        "key_locations": [],
+        "dedupe_window_seconds": 0,
+        "replay_behavior": "not_supported",
+        "mismatch_status_code": 409,
+        "mismatch_error_code": "idempotency_key_conflict"
+      },
+      "execution_mode": "sync_redirect",
+      "returns_job": false,
+      "job_key": null,
+      "content_types": [
+        "application/json",
+        "application/x-www-form-urlencoded",
+        "multipart/form-data"
+      ],
+      "file_fields": [],
+      "success_status_codes": [
+        303
+      ],
+      "response_mode": "redirect",
+      "result_contract": {
+        "kind": "sync_redirect",
+        "required_response_fields": [],
+        "location_header_required": true,
+        "terminal_signal": "http_status_303"
+      },
+      "estimated_duration": {
+        "bucket": "fast",
+        "typical_seconds": 2
+      },
+      "batch_mode_behavior": "n/a",
+      "base_project_behavior": "creates_new_run",
+      "mutates_controllers": [],
+      "invalidates_steps": []
+    },
+    {
+      "operation_id": "rq_engine_list_setup_endpoints",
+      "run_scoped": false,
+      "method": "GET",
+      "path": "/api/endpoints",
+      "accepted_auth": [
+        "bearer_jwt"
+      ],
+      "auth_requirements": {
+        "bearer_jwt": {
+          "required_any_scope": [
+            "rq:read",
+            "rq:status"
+          ]
+        }
+      },
+      "error_catalog_url": "/api/endpoints/rq_engine_list_setup_endpoints/errors",
+      "write_precondition": {
+        "required": false,
+        "accepted": [],
+        "conflict_status_code": 409,
+        "conflict_error_code": "stale_run_state"
+      },
+      "idempotency_policy": {
+        "supported": false,
+        "key_locations": [],
+        "dedupe_window_seconds": 0,
+        "replay_behavior": "return_original_success",
+        "mismatch_status_code": 409,
+        "mismatch_error_code": "idempotency_key_conflict"
+      },
+      "execution_mode": "sync",
+      "returns_job": false,
+      "job_key": null,
+      "content_types": [
+        "application/json"
+      ],
+      "file_fields": [],
+      "success_status_codes": [
+        200
+      ],
+      "response_mode": "json",
+      "result_contract": {
+        "kind": "sync_result",
+        "required_response_fields": [
+          "operations"
+        ],
+        "terminal_signal": "http_status_2xx"
+      },
+      "estimated_duration": {
+        "bucket": "fast",
+        "typical_seconds": 1
+      },
+      "batch_mode_behavior": "n/a",
+      "base_project_behavior": "n/a",
+      "mutates_controllers": [],
+      "invalidates_steps": []
+    },
+    {
+      "operation_id": "rq_engine_get_setup_endpoint_schema",
+      "run_scoped": false,
+      "method": "GET",
+      "path": "/api/endpoints/{operation_id}/schema",
+      "accepted_auth": [
+        "bearer_jwt"
+      ],
+      "auth_requirements": {
+        "bearer_jwt": {
+          "required_any_scope": [
+            "rq:read",
+            "rq:status"
+          ]
+        }
+      },
+      "error_catalog_url": "/api/endpoints/rq_engine_get_setup_endpoint_schema/errors",
+      "write_precondition": {
+        "required": false,
+        "accepted": [],
+        "conflict_status_code": 409,
+        "conflict_error_code": "stale_run_state"
+      },
+      "idempotency_policy": {
+        "supported": false,
+        "key_locations": [],
+        "dedupe_window_seconds": 0,
+        "replay_behavior": "return_original_success",
+        "mismatch_status_code": 409,
+        "mismatch_error_code": "idempotency_key_conflict"
+      },
+      "execution_mode": "sync",
+      "returns_job": false,
+      "job_key": null,
+      "content_types": [
+        "application/json"
+      ],
+      "file_fields": [],
+      "success_status_codes": [
+        200
+      ],
+      "response_mode": "json",
+      "result_contract": {
+        "kind": "sync_result",
+        "required_response_fields": [
+          "operation_id",
+          "request"
+        ],
+        "terminal_signal": "http_status_2xx"
+      },
+      "estimated_duration": {
+        "bucket": "fast",
+        "typical_seconds": 1
+      },
+      "batch_mode_behavior": "n/a",
+      "base_project_behavior": "n/a",
+      "mutates_controllers": [],
+      "invalidates_steps": []
+    },
+    {
+      "operation_id": "rq_engine_get_setup_endpoint_defaults",
+      "run_scoped": false,
+      "method": "GET",
+      "path": "/api/endpoints/{operation_id}/defaults",
+      "accepted_auth": [
+        "bearer_jwt"
+      ],
+      "auth_requirements": {
+        "bearer_jwt": {
+          "required_any_scope": [
+            "rq:read",
+            "rq:status"
+          ]
+        }
+      },
+      "error_catalog_url": "/api/endpoints/rq_engine_get_setup_endpoint_defaults/errors",
+      "write_precondition": {
+        "required": false,
+        "accepted": [],
+        "conflict_status_code": 409,
+        "conflict_error_code": "stale_run_state"
+      },
+      "idempotency_policy": {
+        "supported": false,
+        "key_locations": [],
+        "dedupe_window_seconds": 0,
+        "replay_behavior": "return_original_success",
+        "mismatch_status_code": 409,
+        "mismatch_error_code": "idempotency_key_conflict"
+      },
+      "execution_mode": "sync",
+      "returns_job": false,
+      "job_key": null,
+      "content_types": [
+        "application/json"
+      ],
+      "file_fields": [],
+      "success_status_codes": [
+        200
+      ],
+      "response_mode": "json",
+      "result_contract": {
+        "kind": "sync_result",
+        "required_response_fields": [
+          "operation_id",
+          "resolved_defaults"
+        ],
+        "terminal_signal": "http_status_2xx"
+      },
+      "estimated_duration": {
+        "bucket": "fast",
+        "typical_seconds": 1
+      },
+      "batch_mode_behavior": "n/a",
+      "base_project_behavior": "n/a",
+      "mutates_controllers": [],
+      "invalidates_steps": []
+    },
+    {
+      "operation_id": "rq_engine_get_setup_endpoint_errors",
+      "run_scoped": false,
+      "method": "GET",
+      "path": "/api/endpoints/{operation_id}/errors",
+      "accepted_auth": [
+        "bearer_jwt"
+      ],
+      "auth_requirements": {
+        "bearer_jwt": {
+          "required_any_scope": [
+            "rq:read",
+            "rq:status"
+          ]
+        }
+      },
+      "error_catalog_url": "/api/endpoints/rq_engine_get_setup_endpoint_errors/errors",
+      "write_precondition": {
+        "required": false,
+        "accepted": [],
+        "conflict_status_code": 409,
+        "conflict_error_code": "stale_run_state"
+      },
+      "idempotency_policy": {
+        "supported": false,
+        "key_locations": [],
+        "dedupe_window_seconds": 0,
+        "replay_behavior": "return_original_success",
+        "mismatch_status_code": 409,
+        "mismatch_error_code": "idempotency_key_conflict"
+      },
+      "execution_mode": "sync",
+      "returns_job": false,
+      "job_key": null,
+      "content_types": [
+        "application/json"
+      ],
+      "file_fields": [],
+      "success_status_codes": [
+        200
+      ],
+      "response_mode": "json",
+      "result_contract": {
+        "kind": "sync_result",
+        "required_response_fields": [
+          "operation_id",
+          "errors"
+        ],
+        "terminal_signal": "http_status_2xx"
+      },
+      "estimated_duration": {
+        "bucket": "fast",
+        "typical_seconds": 1
+      },
+      "batch_mode_behavior": "n/a",
+      "base_project_behavior": "n/a",
+      "mutates_controllers": [],
+      "invalidates_steps": []
+    }
+  ]
+}

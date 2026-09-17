@@ -1,0 +1,38 @@
+{
+  "utc": "2026-09-17T07:37:33.214300+00:00",
+  "method": "GET",
+  "path": "/rq-engine/api/runs/qa-freshness-runtime-7e24c8d1/config/endpoints/rq_engine_build_climate/defaults",
+  "request": null,
+  "status": 200,
+  "body": {
+    "contract_version": "1.0.0-draft",
+    "deployment_revision": "dev",
+    "run_state_revision": "runstate:qa-freshness-runtime-7e24c8d1:a6e653453366",
+    "run_state_domain": "metadata",
+    "run_state_vector": {
+      "orchestration_revision": null,
+      "metadata_revision": "runstate:qa-freshness-runtime-7e24c8d1:a6e653453366",
+      "outputs_revision": null
+    },
+    "operation_id": "rq_engine_build_climate",
+    "resolved_defaults": {
+      "climate_mode": 11,
+      "climate_catalog_id": "observed_gridmet",
+      "climate_station_method": "auto",
+      "climate_spatial_method": "multiple",
+      "climatestation_mode": -1,
+      "climate_spatialmode": 1,
+      "observed_start_year": 1990,
+      "observed_end_year": 2020
+    },
+    "defaults_context": {
+      "config": "config",
+      "active_mods": [
+        "disturbed",
+        "postfire_debris_flow"
+      ],
+      "region": "us"
+    },
+    "computed_at": "2026-09-17T07:37:33Z"
+  }
+}

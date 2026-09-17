@@ -1,0 +1,370 @@
+{
+  "success": true,
+  "root": "/wc1/batch/qa-freshness-archive-3a8be19a8e1e/runs/archive",
+  "uid": 1000,
+  "gid": 993,
+  "groups": [
+    993
+  ],
+  "restart_evidence": "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/runtime_restart_verification.json",
+  "restart_evidence_sha256": "a247e39493230cacc228822b194dd4fdfda26ff9ae593d6f69aeaab36fd96c94",
+  "scope": "After-restart native Geneva archive/browse acceptance on a unique new project.\n\nNo named-project writes, existing project reset, auth bypass or service restart.\nCanonical owner helpers run with the container's normal UID/GID/umask. Optional\nreal recorder seed roots are read-only controls, never relocated into the run.\nLive HTTP authorization/RQ transport and profile repository archival are separate.\n",
+  "module_sha256": {
+    "/workdir/wepppy/wepppy/nodb/mods/geneva/collaborators/_cache_freshness.py": "405223512fbf699d35d008bdb0228802ee2a39b2095dfc8ed3f67b3521b8e2b1",
+    "/workdir/wepppy/wepppy/nodb/mods/geneva/collaborators/hru_map_geometry_service.py": "98c3f8c3b67abd21c10aacf9c0b278df1874a07c2a2684c038f18f6bbfa51034",
+    "/workdir/wepppy/wepppy/nodb/mods/geneva/collaborators/hsg_assignment_service.py": "59ee01affee3b9455327868d17f4b76191d622ef2c520f7307f480fe706da96f",
+    "/workdir/wepppy/wepppy/rq/project_rq_archive.py": "76a3dbfb305f3ac9a2d9c092dadb442754fc20231ccca4dd74b403221762a089"
+  },
+  "umask": "0022",
+  "project_device": 64,
+  "profile_before": {},
+  "before": {
+    "geneva": {
+      "directory": true,
+      "mode": 493
+    },
+    "geneva/cache_attempts": {
+      "directory": true,
+      "mode": 448
+    },
+    "geneva/cache_attempts/820dd4cdc1df4ed59d0e8186997b8df5": {
+      "directory": true,
+      "mode": 448
+    },
+    "geneva/cache_attempts/820dd4cdc1df4ed59d0e8186997b8df5/status.json": {
+      "directory": false,
+      "mode": 384,
+      "size": 1492,
+      "sha256": "18844e6ef84a674b43a3388ef745f15bb2fdb36535804528cf6272b4a674d93c"
+    },
+    "geneva/cache_attempts/ce531a157ddd40e1aaf75d327866ec4f": {
+      "directory": true,
+      "mode": 448
+    },
+    "geneva/cache_attempts/ce531a157ddd40e1aaf75d327866ec4f/status.json": {
+      "directory": false,
+      "mode": 384,
+      "size": 1250,
+      "sha256": "db598af492fbc122f8717d8224d25d362ff560c35d1272f9fc79ce24c95fcf0d"
+    },
+    "geneva/cache_attempts/fe140f898bf74c8cb65b58bdff9e1d4a": {
+      "directory": true,
+      "mode": 448
+    },
+    "geneva/cache_attempts/fe140f898bf74c8cb65b58bdff9e1d4a/failed.geojson": {
+      "directory": false,
+      "mode": 420,
+      "size": 30,
+      "sha256": "e06d57905709c0d2b0899c84e56c94d2a2bfeb6045d222905d1f000dbd9a07e8"
+    },
+    "geneva/cache_attempts/fe140f898bf74c8cb65b58bdff9e1d4a/status.json": {
+      "directory": false,
+      "mode": 384,
+      "size": 268,
+      "sha256": "4f9c1c908efbe613c33717d095c1a0ac218d07488e724113f39bc2b7f3eff9a2"
+    },
+    "geneva/hru_map.tif": {
+      "directory": false,
+      "mode": 420,
+      "size": 376,
+      "sha256": "3cd5c716f77211ae3c27da23f4d877c5f1978cf26378b5afb292d4639aa3ab98"
+    },
+    "geneva/hru_map_features.wgs.geojson": {
+      "directory": false,
+      "mode": 420,
+      "size": 2132,
+      "sha256": "0922476564ad46229f7c60f1a9e991f29b1a22aead3969bd36e3479f61c09822"
+    },
+    "geneva/hru_map_legend.json": {
+      "directory": false,
+      "mode": 420,
+      "size": 45,
+      "sha256": "1ca776ea0aa2627f17dcd59254a7e8b1d661ec82185e60f291229c08071c730d"
+    },
+    "geneva/inputs": {
+      "directory": true,
+      "mode": 493
+    },
+    "geneva/inputs/burn_severity_4class.tif": {
+      "directory": false,
+      "mode": 420,
+      "size": 2279,
+      "sha256": "e302b0777635e232c26a5c12d3e88b8dc3ce9dcea6d832f753c5ac6544efc395"
+    },
+    "sources": {
+      "directory": true,
+      "mode": 493
+    },
+    "sources/bound.tif": {
+      "directory": false,
+      "mode": 420,
+      "size": 376,
+      "sha256": "3cd5c716f77211ae3c27da23f4d877c5f1978cf26378b5afb292d4639aa3ab98"
+    },
+    "sources/sbs.tif": {
+      "directory": false,
+      "mode": 420,
+      "size": 376,
+      "sha256": "9266d0aa1321590fee1626d75705afb27b0549fc86b4ebbdadbdb3654718cb7f"
+    }
+  },
+  "browse_before": {
+    ".": {
+      "names": [
+        "geneva",
+        "sources"
+      ],
+      "total": 2
+    },
+    "geneva": {
+      "names": [
+        "cache_attempts",
+        "hru_map.tif",
+        "hru_map_features.wgs.geojson",
+        "hru_map_legend.json",
+        "inputs"
+      ],
+      "total": 5
+    },
+    "geneva/cache_attempts": {
+      "names": [
+        "820dd4cdc1df4ed59d0e8186997b8df5",
+        "ce531a157ddd40e1aaf75d327866ec4f",
+        "fe140f898bf74c8cb65b58bdff9e1d4a"
+      ],
+      "total": 3
+    },
+    "geneva/cache_attempts/820dd4cdc1df4ed59d0e8186997b8df5": {
+      "names": [
+        "status.json"
+      ],
+      "total": 1
+    },
+    "geneva/cache_attempts/ce531a157ddd40e1aaf75d327866ec4f": {
+      "names": [
+        "status.json"
+      ],
+      "total": 1
+    },
+    "geneva/cache_attempts/fe140f898bf74c8cb65b58bdff9e1d4a": {
+      "names": [
+        "failed.geojson",
+        "status.json"
+      ],
+      "total": 2
+    },
+    "geneva/inputs": {
+      "names": [
+        "burn_severity_4class.tif"
+      ],
+      "total": 1
+    },
+    "sources": {
+      "names": [
+        "bound.tif",
+        "sbs.tif"
+      ],
+      "total": 2
+    }
+  },
+  "after": {
+    "geneva": {
+      "directory": true,
+      "mode": 493
+    },
+    "geneva/cache_attempts": {
+      "directory": true,
+      "mode": 448
+    },
+    "geneva/cache_attempts/820dd4cdc1df4ed59d0e8186997b8df5": {
+      "directory": true,
+      "mode": 448
+    },
+    "geneva/cache_attempts/820dd4cdc1df4ed59d0e8186997b8df5/status.json": {
+      "directory": false,
+      "mode": 384,
+      "size": 1492,
+      "sha256": "18844e6ef84a674b43a3388ef745f15bb2fdb36535804528cf6272b4a674d93c"
+    },
+    "geneva/cache_attempts/ce531a157ddd40e1aaf75d327866ec4f": {
+      "directory": true,
+      "mode": 448
+    },
+    "geneva/cache_attempts/ce531a157ddd40e1aaf75d327866ec4f/status.json": {
+      "directory": false,
+      "mode": 384,
+      "size": 1250,
+      "sha256": "db598af492fbc122f8717d8224d25d362ff560c35d1272f9fc79ce24c95fcf0d"
+    },
+    "geneva/cache_attempts/fe140f898bf74c8cb65b58bdff9e1d4a": {
+      "directory": true,
+      "mode": 448
+    },
+    "geneva/cache_attempts/fe140f898bf74c8cb65b58bdff9e1d4a/failed.geojson": {
+      "directory": false,
+      "mode": 420,
+      "size": 30,
+      "sha256": "e06d57905709c0d2b0899c84e56c94d2a2bfeb6045d222905d1f000dbd9a07e8"
+    },
+    "geneva/cache_attempts/fe140f898bf74c8cb65b58bdff9e1d4a/status.json": {
+      "directory": false,
+      "mode": 384,
+      "size": 268,
+      "sha256": "4f9c1c908efbe613c33717d095c1a0ac218d07488e724113f39bc2b7f3eff9a2"
+    },
+    "geneva/hru_map.tif": {
+      "directory": false,
+      "mode": 420,
+      "size": 376,
+      "sha256": "3cd5c716f77211ae3c27da23f4d877c5f1978cf26378b5afb292d4639aa3ab98"
+    },
+    "geneva/hru_map_features.wgs.geojson": {
+      "directory": false,
+      "mode": 420,
+      "size": 2132,
+      "sha256": "0922476564ad46229f7c60f1a9e991f29b1a22aead3969bd36e3479f61c09822"
+    },
+    "geneva/hru_map_legend.json": {
+      "directory": false,
+      "mode": 420,
+      "size": 45,
+      "sha256": "1ca776ea0aa2627f17dcd59254a7e8b1d661ec82185e60f291229c08071c730d"
+    },
+    "geneva/inputs": {
+      "directory": true,
+      "mode": 493
+    },
+    "geneva/inputs/burn_severity_4class.tif": {
+      "directory": false,
+      "mode": 420,
+      "size": 2279,
+      "sha256": "e302b0777635e232c26a5c12d3e88b8dc3ce9dcea6d832f753c5ac6544efc395"
+    },
+    "sources": {
+      "directory": true,
+      "mode": 493
+    },
+    "sources/bound.tif": {
+      "directory": false,
+      "mode": 420,
+      "size": 376,
+      "sha256": "3cd5c716f77211ae3c27da23f4d877c5f1978cf26378b5afb292d4639aa3ab98"
+    },
+    "sources/sbs.tif": {
+      "directory": false,
+      "mode": 420,
+      "size": 376,
+      "sha256": "9266d0aa1321590fee1626d75705afb27b0549fc86b4ebbdadbdb3654718cb7f"
+    }
+  },
+  "browse_after": {
+    ".": {
+      "names": [
+        "archives",
+        "geneva",
+        "sources"
+      ],
+      "total": 3
+    },
+    "geneva": {
+      "names": [
+        "cache_attempts",
+        "hru_map.tif",
+        "hru_map_features.wgs.geojson",
+        "hru_map_legend.json",
+        "inputs"
+      ],
+      "total": 5
+    },
+    "geneva/cache_attempts": {
+      "names": [
+        "820dd4cdc1df4ed59d0e8186997b8df5",
+        "ce531a157ddd40e1aaf75d327866ec4f",
+        "fe140f898bf74c8cb65b58bdff9e1d4a"
+      ],
+      "total": 3
+    },
+    "geneva/cache_attempts/820dd4cdc1df4ed59d0e8186997b8df5": {
+      "names": [
+        "status.json"
+      ],
+      "total": 1
+    },
+    "geneva/cache_attempts/ce531a157ddd40e1aaf75d327866ec4f": {
+      "names": [
+        "status.json"
+      ],
+      "total": 1
+    },
+    "geneva/cache_attempts/fe140f898bf74c8cb65b58bdff9e1d4a": {
+      "names": [
+        "failed.geojson",
+        "status.json"
+      ],
+      "total": 2
+    },
+    "geneva/inputs": {
+      "names": [
+        "burn_severity_4class.tif"
+      ],
+      "total": 1
+    },
+    "sources": {
+      "names": [
+        "bound.tif",
+        "sbs.tif"
+      ],
+      "total": 2
+    }
+  },
+  "profile_after": {},
+  "archive": "/wc1/batch/qa-freshness-archive-3a8be19a8e1e/runs/archive/archives/security-runtime-3a8be19a8e1e.20260917T080441Z.zip",
+  "archive_sha256": "6c5e96d033bdbff6fe62f822f77edcad5668d67bcce4ba131a6366befd481382",
+  "project_mode_byte_parity": true,
+  "restored_geometry_reused": true,
+  "helper_downloads_verified": true,
+  "statuses": [
+    "rq:security-runtime-3a8be19a8e1e STARTED archive_rq(security-runtime-3a8be19a8e1e)",
+    "Creating archive security-runtime-3a8be19a8e1e.20260917T080441Z.zip",
+    "Adding sources/bound.tif",
+    "Adding sources/sbs.tif",
+    "Adding geneva/hru_map_legend.json",
+    "Adding geneva/hru_map_features.wgs.geojson",
+    "Adding geneva/hru_map.tif",
+    "Adding geneva/inputs/burn_severity_4class.tif",
+    "Adding geneva/cache_attempts/ce531a157ddd40e1aaf75d327866ec4f/status.json",
+    "Adding geneva/cache_attempts/820dd4cdc1df4ed59d0e8186997b8df5/status.json",
+    "Adding geneva/cache_attempts/fe140f898bf74c8cb65b58bdff9e1d4a/failed.geojson",
+    "Adding geneva/cache_attempts/fe140f898bf74c8cb65b58bdff9e1d4a/status.json",
+    "Archive ready: security-runtime-3a8be19a8e1e.20260917T080441Z.zip",
+    "rq:security-runtime-3a8be19a8e1e COMPLETED archive_rq(security-runtime-3a8be19a8e1e)",
+    "rq:security-runtime-3a8be19a8e1e TRIGGER   archive ARCHIVE_COMPLETE",
+    "rq:security-runtime-3a8be19a8e1e STARTED restore_archive_rq(security-runtime-3a8be19a8e1e, security-runtime-3a8be19a8e1e.20260917T080441Z.zip)",
+    "Preparing to restore from security-runtime-3a8be19a8e1e.20260917T080441Z.zip",
+    "Removing directory geneva",
+    "Removing directory sources",
+    "Restored directory sources",
+    "Restored file sources/bound.tif",
+    "Restored file sources/sbs.tif",
+    "Restored directory geneva",
+    "Restored file geneva/hru_map_legend.json",
+    "Restored file geneva/hru_map_features.wgs.geojson",
+    "Restored file geneva/hru_map.tif",
+    "Restored directory geneva/inputs",
+    "Restored file geneva/inputs/burn_severity_4class.tif",
+    "Restored directory geneva/cache_attempts",
+    "Restored directory geneva/cache_attempts/ce531a157ddd40e1aaf75d327866ec4f",
+    "Restored file geneva/cache_attempts/ce531a157ddd40e1aaf75d327866ec4f/status.json",
+    "Restored directory geneva/cache_attempts/820dd4cdc1df4ed59d0e8186997b8df5",
+    "Restored file geneva/cache_attempts/820dd4cdc1df4ed59d0e8186997b8df5/status.json",
+    "Restored directory geneva/cache_attempts/fe140f898bf74c8cb65b58bdff9e1d4a",
+    "Restored file geneva/cache_attempts/fe140f898bf74c8cb65b58bdff9e1d4a/failed.geojson",
+    "Restored file geneva/cache_attempts/fe140f898bf74c8cb65b58bdff9e1d4a/status.json",
+    "Cleared NoDb cache entries after restore (0)",
+    "Restore complete: security-runtime-3a8be19a8e1e.20260917T080441Z.zip",
+    "rq:security-runtime-3a8be19a8e1e COMPLETED restore_archive_rq(security-runtime-3a8be19a8e1e)",
+    "rq:security-runtime-3a8be19a8e1e TRIGGER   archive RESTORE_COMPLETE"
+  ],
+  "live_browse_base": "/weppcloud/batch/qa-freshness-archive-3a8be19a8e1e/browse/runs/archive/",
+  "external_profile_archival": "Not performed or implied by project archive"
+}

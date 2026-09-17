@@ -1,0 +1,34 @@
+{
+  "status": "passed",
+  "profile": "/workdir/wepppy-test-engine-data/profiles/qa-freshness-profile-7e24c8d1-sbs-profile",
+  "original_disposable": "qa-freshness-profile-7e24c8d1",
+  "sandbox_runid": "profile;;tmp;;83663372a29a4b588884c9785fd1de5d",
+  "sandbox": "/workdir/wepppy-test-engine-data/playback_runs/83663372a29a4b588884c9785fd1de5d",
+  "requests": [
+    [
+      "freshness-upload-1",
+      "/rq-engine/api/runs/profile;;tmp;;83663372a29a4b588884c9785fd1de5d/config/tasks/upload-sbs/: HTTP 200 (2087ms)"
+    ],
+    [
+      "freshness-upload-2",
+      "/rq-engine/api/runs/profile;;tmp;;83663372a29a4b588884c9785fd1de5d/config/tasks/upload-sbs/: HTTP 200 (1738ms)"
+    ]
+  ],
+  "observations": [
+    {
+      "url": "https://wc.bearhive.duckdns.org/rq-engine/api/runs/profile;;tmp;;83663372a29a4b588884c9785fd1de5d/config/tasks/upload-sbs/",
+      "status": 200,
+      "bytes": 599196,
+      "wire_sha256": "7d1ed360d8e639050cf3879293efcdbee216bd9a4faac4e03399442416d97405",
+      "server_sha256": "7d1ed360d8e639050cf3879293efcdbee216bd9a4faac4e03399442416d97405"
+    },
+    {
+      "url": "https://wc.bearhive.duckdns.org/rq-engine/api/runs/profile;;tmp;;83663372a29a4b588884c9785fd1de5d/config/tasks/upload-sbs/",
+      "status": 200,
+      "bytes": 597742,
+      "wire_sha256": "a8a42913b4603f4e14b8e4d50556b26ae73b5636ba1ea59c2f72b42e6f46b2c0",
+      "server_sha256": "a8a42913b4603f4e14b8e4d50556b26ae73b5636ba1ea59c2f72b42e6f46b2c0"
+    }
+  ],
+  "canonical_cli": "separate evidence; this uses supported preauthenticated Session injection"
+}

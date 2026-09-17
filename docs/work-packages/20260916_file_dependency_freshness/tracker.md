@@ -1,8 +1,8 @@
 # File dependency freshness tracker
 
-**Phase:** M1 execution. **Updated:** 2026-09-17 UTC.
+**Phase:** Closed. **Updated:** 2026-09-17 UTC.
 **Security impact:** High; dedicated security and correctness reviews required
-at execution checkpoints. M1 reviews and three accepted contract checkpoints retained.
+at execution checkpoints. All implemented checkpoints and scoped reviews pass.
 
 ## Completed
 
@@ -14,17 +14,18 @@ at execution checkpoints. M1 reviews and three accepted contract checkpoints ret
 ## Ready for execution
 
 - [x] M1 seed inventory reviews and deterministic hard-link/SBS/NoDb baseline probes.
-- [ ] M1 remaining exhaustive consumer tracing and final dispositions.
-- [ ] M2: canonical contracts, compatibility/performance decisions, reviews and checkpoint.
-- [ ] M3: bounded post-fire fix, then confirmed consumer groups.
-- [ ] M4: full applicable gates, security/correctness reviews and benchmarks.
-- [ ] M5: rebuilt/restarted development stack, actual UI/RQ/WEPP and archive tests.
-- [ ] M6: all dispositions, durable docs and implementation closeout.
+- [x] M1 finite consumer tracing and explicit dispositions.
+- [x] M2: canonical contracts, compatibility/performance decisions, reviews and checkpoint.
+- [x] M3: bounded post-fire fix, then confirmed consumer groups.
+- [x] M4: full applicable gates, security/correctness reviews and benchmarks.
+- [x] M5: rebuilt/restarted development stack, actual UI/RQ/WEPP and archive tests.
+- [x] M6: all dispositions, durable docs and implementation closeout.
 
 ## Decisions and risks
 
-Owner authorized execution after the original scaffold. Two implementation waves
-are drafted; model reruns, stack restart and production deployment have not occurred.
+Owner authorized execution after the original scaffold. All implementation waves
+are committed and development services rebuilt/recreated; actual disposable
+model/UI/API acceptance is complete within the explicit dispositions. Production is not deployed.
 Broad discovery is required;
 mechanical removal of ctime is rejected because race/integrity checks may need it.
 A stat-keyed hash cache can still hide changes; audit the cache and consumer,
@@ -37,11 +38,15 @@ subject to the repository contract checkpoint and operational boundaries.
 ## Evidence and next action
 
 [Seed inventory](artifacts/seed_inventory.md), [operation matrix](artifacts/operation_matrix.md),
-[ExecPlan](prompts/active/file_dependency_freshness_execplan.md).
-Next: close review regressions and continue the remaining consumer checkpoints.
-Runtime tests are retained under artifacts; live acceptance remains open.
+[ExecPlan](prompts/completed/file_dependency_freshness_execplan.md).
+Final Omni direct/live-RQ acceptance and two-project cache observation pass.
+Implementation and final independent reviews are complete. Runtime failures and bounded recoveries remain explicit in
+[development acceptance](artifacts/runtime_acceptance.md).
 
-## Execution evidence
+## Historical execution evidence
+
+The following checkpoints retain their then-current status; final status above
+and the closing entry supersede historical pending statements.
 
 Baseline `adb4f9b004459fc578460a95f30ac01ae1421f36`; source search scope,
 independent inventories and probes are under artifacts/. Ordinary post-fire
@@ -246,3 +251,71 @@ reviews are active; four initial actual-native regressions pass. Existing mocked
 raster fixtures are being replaced with real native output assertions. Publication
 and typed-drift failure-path review findings remain open. S01/S02 checkpoint
 budget measurements are in progress; no S01/S02 production changes yet.
+
+
+Raster implementation is committed as `5bf504dbe`. Geneva now has85focused tests
+plus canonical archive bytes/cache acceptance; independent findings closed.
+Its original C06 performance gate failed, retained and undergoing measured
+same-call graph-validation optimization. Archive directory-mode loss was
+separately confirmed in the existing canonical archive writer/restore path;
+that integration gate is open. S02 checkpoint`eb2c33b2b` and S01 checkpoint
+`c28f81f59` are ratified ancestors. S02 implementation has begun; first combined
+Geneva/profile suite106passed. S01 production changes have not begun.
+
+C01 indirect closure is justified unresolved, with retained correctness scope
+and the RAP README limitation. Complete small RAP native analysis/held-lock
+measurement passes; no universal indirect-native proof or fullruntime claim.
+
+
+2026-09-17 latest scoped acceptance: Geneva passes135 combined Geneva/profile/archive
+tests and all16 amended performance gates after checkpoint `21aacd74f`; profile
+SBS passes all27 original performance gates (16MiB first capture545.60/550ms is
+close to the mean limit). Archive directory-mode implementation passes9 independent
+security probes; QA review is in progress. S01 direct/RQ implementation is active:
+61 focused tests pass; independent actual-owner review found and closed alias
+truncation, late child drift, legacy association resurrection and detached-refresh
+logger loss. Final S01 probes and implementation timing remain open. The dev
+stack has not been rebuilt/restarted; live HTTP/RQ/WEPP/archive acceptance and
+final full-suite gates remain mandatory. Earlier status paragraphs are historical.
+
+
+Current checkpoints: Geneva1556df345, profile7ad0ac609, archive7b4f22df9,
+Omni de3a1eba0. S01 all45 original performance gates pass; final five-module
+stubtest and refreshed146-edge RQ graph pass. Independent remaining-family
+classifications are adopted as documented in ExecPlan Decision Log and
+remaining_inventory_disposition_qa.md, without claiming indirect or completion
+boundaries fixed. Final fullsuite is running; dev restart/native HTTP acceptance
+has not started. Browser dev-agent authentication/discovery has succeeded.
+
+
+Runtime preparation update: the canonical dev image built successfully as
+`sha256:00a3e43a88a5c9079a7e58a8423432d69f22b7b09c0a9288078b67abbca1d3f8`.
+Sixteen running shared-image service identities/mounts are retained before
+restart. The first fullsuite stopped after3881passes/51skips on the unchanged
+simulated HTTP timing assertion (1.2377s versus1s) during build/copy work.
+The isolated quiet rerun passed; a complete quiet rerun is now running, with
+native acceptance still held. No assertion was relaxed. The full independent
+canary copy has3916files/6,375,730,842logical bytes and no shared source inodes at
+`/wc1/runs/qa/qa-freshness-runtime-7e24c8d1`; original source hashes and versions
+are in its retained copy manifest. Browser login/setup and run-scoped discovery
+succeeded. An initial config-token0 GET returned404; the stored config stem is
+`config`, whose pipeline/readiness/schema calls return200. No model job has yet
+been submitted. S02 canonical cookie-only playback has a separately reviewed
+preexisting bearer-auth mismatch; actual per-request failure evidence and an
+authorized Session HTTP control will be retained after restart.
+
+2026-09-17 08:04UTC: final quiet full Python suite8,924passed/99skipped; npm899tests/112suites and lint pass. Static assets rebuilt using canonical wctl with repository venv after retained missing-host-Jinja2 failure. Queues empty; development recreation in progress, actual acceptance still open.
+
+2026-09-17 runtime: normal18-job WEPP pipeline changes218CLIctime/linkcounts but zero hashes; M3 remains current. Supported climate change invalidates all218CLI and M3; rerun restores current UI/API. Live archive/restore preserves545artifact files/84directory modes, exposes retained PF-R01 physical-soil staleness; normal M3 recovery and actual report/downloads pass. Existing canonical-profileCLI401/exit0 and waterbalanceCSV500 remain explicit failures. Native Features/D-Tale/Geneva/profile/NoDb/NFS scopes pass. Direct Omni two46-year generations/consumed skips pass; liveRQ and interleaved-state final gates remain open.
+
+
+## Final closeout — 2026-09-17
+
+All six milestones are complete under explicit inventory dispositions. Omni
+actual direct/live-RQ numerical and skip checks pass; full final source audit
+preserves all3,916 original file bytes/modes with four reviewed operational
+metadata differences. Sixty alternating state reads have zero new digest
+misses/direct payload reads and395/512 entries; mean whole-state timings
+739.48/862.19ms are observations, not a new latency gate. Final independent
+reviews,8,924 Python/899 frontend passes and runtime limitations are linked
+from [package outcome](package.md#delivered-outcome-and-follow-up).

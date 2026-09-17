@@ -113,6 +113,14 @@ wctl run-archive-profile backed-globule --archive-comment "v2.3.1 baseline" --ti
 
 Commands resolve `PROFILE_PLAYBACK_URL` (default `http://127.0.0.1:8070`), `PROFILE_PLAYBACK_BASE_URL` (target WEPPcloud instance), and optional cookies from files (`--cookie-file`) or environment variables. Streaming output delivers logs to `stdout` while metadata appears on `stderr` for clean pipeline integration.
 
+**RQ replay limitation:** Cookie login does not supply RQ bearer authentication.
+`run-test-profile` can report success and exit 0 despite SBS upload 401 responses;
+check per-request outcomes and resulting artifacts. Its stderr may also contain
+the resolved cookie even with `--cookie-file`. Follow the
+[RQ authentication and outcome guidance](PROFILE_TEST_ENGINE_SPEC.md#rq-bearer-authentication-and-outcome-verification)
+for private diagnostic logging and the existing authenticated-session Python
+API. A successful diagnostic does not make the canonical CLI workflow pass.
+
 ## Data Flow
 
 ```

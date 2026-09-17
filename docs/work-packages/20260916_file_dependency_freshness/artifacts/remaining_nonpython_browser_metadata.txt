@@ -1,0 +1,7 @@
+wepppy/weppcloud/static/js/preflight.js:19:let lastModifiedMeta = null;
+wepppy/weppcloud/static/js/preflight.js:77:        return lastModifiedMeta;
+wepppy/weppcloud/static/js/preflight.js:80:    lastModifiedMeta = normalized;
+wepppy/weppcloud/static/js/preflight.js:99:function dispatchPreflightEvent(checklist, lockStatuses, lastModified) {
+wepppy/weppcloud/static/js/preflight.js:108:        lastModified: lastModified ? lastModified.epoch : null,
+wepppy/weppcloud/static/js/preflight.js:109:        lastModifiedDisplay: lastModified ? lastModified.display : null,
+wepppy/weppcloud/static/js/preflight.js:110:        last_modified: lastModified ? lastModified.epoch : null

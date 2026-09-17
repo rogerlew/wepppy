@@ -1,0 +1,23 @@
+{
+  "utc": "2026-09-17T08:16:41.818367+00:00",
+  "method": "GET",
+  "path": "/rq-engine/api/jobinfo/64639882-bfdf-4d18-b6fd-c40ccf8e19e6",
+  "request": null,
+  "status": 200,
+  "body": {
+    "job_id": "64639882-bfdf-4d18-b6fd-c40ccf8e19e6",
+    "runid": "qa-freshness-runtime-7e24c8d1",
+    "status": "finished",
+    "result": {
+      "message": "Model run complete."
+    },
+    "started_at": "2026-09-17 08:16:10.169717",
+    "ended_at": "2026-09-17 08:16:39.161418",
+    "description": "wepppy.rq.postfire_debris_flow_rq.run_m3_rq('qa-freshness-runtime-7e24c8d1', '6e31becce1644fb782d341f2d3dd4156')",
+    "elapsed_s": 28.991701,
+    "exc_info": null,
+    "auth_actor": null,
+    "culvert_batch_uuid": null,
+    "children": {}
+  }
+}

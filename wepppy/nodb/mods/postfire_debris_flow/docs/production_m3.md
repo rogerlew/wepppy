@@ -171,7 +171,7 @@ Only shared new-M1 composition/readers change; M3 recorded-depth sources, prepar
 Earlier conflicting requirements remain the historical/legacy contract only
 once this checkpoint is accepted; do not reinterpret old accepted artifacts.
 
-## File-content currentness refinement (implementation pending)
+## File-content currentness refinement (implemented)
 
 M3 adopts the [file dependency freshness contract](../../../../../docs/schemas/file-dependency-freshness-contract.md)
 for ordinary source files and accepted artifacts through the shared production

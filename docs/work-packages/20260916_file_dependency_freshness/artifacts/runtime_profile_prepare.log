@@ -1,0 +1,14 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/python docs/work-packages/20260916_file_dependency_freshness/artifacts/runtime_profile_prepare.py
+project_config_warning code=manifest_missing run_id=qa-freshness-profile-7e24c8d1 config_filename=config.cfg declared_digest=None observed_digest=None
+project_config_warning code=manifest_missing run_id=qa-freshness-profile-7e24c8d1 config_filename=config.cfg declared_digest=None observed_digest=None
+project_config_warning code=manifest_missing run_id=qa-freshness-profile-7e24c8d1 config_filename=config.cfg declared_digest=None observed_digest=None
+project_config_warning code=manifest_missing run_id=qa-freshness-profile-7e24c8d1 config_filename=config.cfg declared_digest=None observed_digest=None
+project_config_warning code=manifest_missing run_id=qa-freshness-profile-7e24c8d1 config_filename=config.cfg declared_digest=None observed_digest=None
+project_config_warning code=manifest_missing run_id=qa-freshness-profile-7e24c8d1 config_filename=config.cfg declared_digest=None observed_digest=None
+project_config_warning code=manifest_missing run_id=qa-freshness-profile-7e24c8d1 config_filename=config.cfg declared_digest=None observed_digest=None
+project_config_warning code=manifest_missing run_id=qa-freshness-profile-7e24c8d1 config_filename=config.cfg declared_digest=None observed_digest=None
+project_config_warning code=manifest_missing run_id=qa-freshness-profile-7e24c8d1 config_filename=config.cfg declared_digest=None observed_digest=None
+project_config_warning code=manifest_missing run_id=qa-freshness-profile-7e24c8d1 config_filename=config.cfg declared_digest=None observed_digest=None
+2026-09-17 08:04:42 [INFO] wepppy.run.qa-freshness-profile-7e24c8d1.disturbed: disturbed.on(TriggerEvents.ON_INIT_FINISH)
+2026-09-17 08:04:42 [INFO] wepppy.run.qa-freshness-profile-7e24c8d1.ron: ron.profile_recorder_assembler_enabled -> True
+{"runid": "qa-freshness-profile-7e24c8d1", "root": "/wc1/runs/qa/qa-freshness-profile-7e24c8d1", "first": "/wc1/runs/qa/qa-freshness-profile-7e24c8d1-inputs/first.tif", "second": "/wc1/runs/qa/qa-freshness-profile-7e24c8d1-inputs/second.tif", "config_source_sha256": "c4a758c0f84cdf2049b78ee3be40c14b72dea9eda2b4280ab801b28d6cec61a9", "raster_source_sha256": "7d1ed360d8e639050cf3879293efcdbee216bd9a4faac4e03399442416d97405", "changed_pixel": {"row": 386, "column": 64, "before": 2, "after": 3}}

@@ -129,3 +129,21 @@ AgFields cross-stage currentness boundaries, native indirect dependencies and
 remaining raw discovery families still need semantic coverage. Full live RQ,
 profile HTTP playback, representative performance and archive/restore acceptance
 were not exercised. Search hits/counts do not settle those obligations.
+
+## Geneva whole-preparation cache boundary
+
+`GenevaHruPreparationService.prepare_hrus(force_rebuild=False)` returns an
+existing `hru_prepare_summary.json` before resolving current raster references
+when its CN lookup SHA matches and HRU table/map/legend outputs exist.
+`_is_cached_summary_current` does not compare source rasters or the newly supplied
+`input_refs`. Thus the C06 alignment correction runs on new/forced preparation,
+not on every explicitly cached preparation request. The normal RQ run-all
+normalizer sets `force_rebuild=True`; its downstream acceptance must verify the
+corrected aligned artifact reaches the kernel payload.
+
+Disposition: preserve this separate existing cached-preparation contract in the
+bounded C05/C06 wave. It is a semantic inventory boundary requiring a separate
+decision if whole-HRU reuse is made sensitive to current source bytes. Do not
+declare it fixed by lower-level alignment freshness or silently change the
+meaning of `force_rebuild=False`. This entry is based on actual caller/writer
+tracing; no new native preparation, model run or permission mutation was executed.

@@ -1,6 +1,6 @@
 # Delay digest-cache admission across filesystem timestamp quanta
 
-Status: accepted checkpoint; implementation pending.
+Status: accepted and implemented; scoped validation and runtime evidence retained in the freshness work package.
 
 ## Context and evidence
 

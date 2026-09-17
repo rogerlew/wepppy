@@ -1,0 +1,19 @@
+{
+  "utc": "2026-09-17T08:05:03.492935+00:00",
+  "method": "POST",
+  "path": "/rq-engine/api/runs/qa-freshness-runtime-7e24c8d1/config/build-climate",
+  "request": {
+    "climate_mode": 11,
+    "climate_catalog_id": "observed_gridmet",
+    "climate_station_method": "auto",
+    "climate_spatial_method": "multiple",
+    "climatestation_mode": -1,
+    "climate_spatialmode": 1,
+    "observed_start_year": 2019,
+    "observed_end_year": 2021
+  },
+  "status": 200,
+  "body": {
+    "job_id": "8dff6225-ff3c-4679-a448-d2ca9ef6f4f1"
+  }
+}

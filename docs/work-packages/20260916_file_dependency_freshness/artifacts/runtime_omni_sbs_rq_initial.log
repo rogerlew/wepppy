@@ -1,0 +1,10 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/python docs/work-packages/20260916_file_dependency_freshness/artifacts/runtime_omni_sbs_rq_acceptance.py --native-manifest /wc1/batch/qa-omni-native-20260917-a61f3e/omni-native-manifest.json
+Traceback (most recent call last):
+  File "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/runtime_omni_sbs_rq_acceptance.py", line 294, in <module>
+    main()
+  File "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/runtime_omni_sbs_rq_acceptance.py", line 216, in main
+    manifest['source_preflight'] = verify_source(copy_manifest, hash_bytes=False)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/runtime_project_copy.py", line 207, in verify_source
+    raise RuntimeError(f'Named source version changed: {relative}')
+RuntimeError: Named source version changed: TTL

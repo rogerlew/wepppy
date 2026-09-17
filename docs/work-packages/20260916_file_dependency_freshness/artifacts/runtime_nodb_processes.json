@@ -1,0 +1,33 @@
+{
+  "root": "/wc1/runs/qa/qa-freshness-nodb-3e63187053fb",
+  "writer_pid": 137319,
+  "uid": 1000,
+  "gid": 993,
+  "observations": [
+    {
+      "pid": 137679,
+      "name": "freshness generation one",
+      "cached_mtime": 1789632874.7747512,
+      "cached_size": 581,
+      "disk_mtime": 1789632874.7747512,
+      "disk_size": 581
+    },
+    {
+      "pid": 137679,
+      "name": "freshness generation two",
+      "cached_mtime": 1789632883.9428077,
+      "cached_size": 581,
+      "disk_mtime": 1789632883.9428077,
+      "disk_size": 581
+    },
+    {
+      "pid": 137679,
+      "name": "freshness generation end",
+      "cached_mtime": 1789632883.981808,
+      "cached_size": 581,
+      "disk_mtime": 1789632883.981808,
+      "disk_size": 581
+    }
+  ],
+  "scope": "Normal completed atomic writes followed by a persistent cross-process reader; concurrent acquisition races remain covered by independent implementation tests."
+}

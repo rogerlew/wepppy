@@ -1,0 +1,12 @@
+{
+  "utc": "2026-09-17T08:17:26.643998+00:00",
+  "method": "POST",
+  "path": "/rq-engine/api/runs/qa-freshness-runtime-7e24c8d1/config/archive",
+  "request": {
+    "comment": "freshness-runtime"
+  },
+  "status": 200,
+  "body": {
+    "job_id": "b1a91401-afc7-4de1-8aa2-5d526143d7b9"
+  }
+}

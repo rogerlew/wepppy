@@ -1,6 +1,6 @@
 # Raster dependency freshness
 
-Status: intended bounded C03/C04 behavior; checkpoint reviews pass; implementation pending.
+Status: implemented bounded C03/C04 behavior; independent reviews and measured performance gates pass.
 
 ## Scope and native authority
 

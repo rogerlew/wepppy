@@ -1,0 +1,27 @@
+[wctl] POST https://wc.bearhive.duckdns.org/profile-playback/run/qa-freshness-profile-7e24c8d1-sbs-profile
+[cookie payload diagnostic redacted]
+2026-09-17 08:05:28,380 [profile_playback] INFO PlaybackSession created (execute=True, verbose=True)
+2026-09-17 08:05:28,382 [profile_playback] INFO Loaded 4 events from /workdir/wepppy-test-engine-data/profiles/qa-freshness-profile-7e24c8d1-sbs-profile/capture
+2026-09-17 08:05:28,382 [profile_playback] INFO Resolved run id: qa-freshness-profile-7e24c8d1
+2026-09-17 08:05:28,382 [profile_playback] INFO Using playback run id: profile;;tmp;;c08eb64cac8f4f4cb3165cc25adf5b5f
+2026-09-17 08:05:28,456 [profile_playback] INFO [locks:pre-seed] Cleared 9 locks for profile;;tmp;;c08eb64cac8f4f4cb3165cc25adf5b5f
+2026-09-17 08:05:28,518 [profile_playback] INFO [locks:pre-seed] Cleared 9 locks for qa-freshness-profile-7e24c8d1
+2026-09-17 08:05:28,519 [profile_playback] INFO Using existing run directory: /workdir/wepppy-test-engine-data/playback_runs/c08eb64cac8f4f4cb3165cc25adf5b5f
+2026-09-17 08:05:28,577 [profile_playback] INFO [locks:post-setup] Cleared 9 locks for profile;;tmp;;c08eb64cac8f4f4cb3165cc25adf5b5f
+2026-09-17 08:05:28,634 [profile_playback] INFO [locks:post-setup] Cleared 9 locks for qa-freshness-profile-7e24c8d1
+2026-09-17 08:05:28,634 [profile_playback] INFO Beginning playback
+2026-09-17 08:05:28,634 [profile_playback] INFO freshness-upload-1 POST https://wc.bearhive.duckdns.org/rq-engine/api/runs/profile;;tmp;;c08eb64cac8f4f4cb3165cc25adf5b5f/config/tasks/upload-sbs/ [/rq-engine/api/runs/profile;;tmp;;c08eb64cac8f4f4cb3165cc25adf5b5f/config/tasks/upload-sbs/ (source /rq-engine/api/runs/qa-freshness-profile-7e24c8d1/config/tasks/upload-sbs/)]
+2026-09-17 08:05:28,769 [profile_playback] INFO /rq-engine/api/runs/profile;;tmp;;c08eb64cac8f4f4cb3165cc25adf5b5f/config/tasks/upload-sbs/ response content-type application/json
+2026-09-17 08:05:28,770 [profile_playback] INFO /rq-engine/api/runs/profile;;tmp;;c08eb64cac8f4f4cb3165cc25adf5b5f/config/tasks/upload-sbs/ response preview {"error":{"message":"Missing Authorization header","details":"Missing Authorization header","code":"unauthorized"},"error_id":"96955473b5f04838934ead191198641c"}
+2026-09-17 08:05:28,770 [profile_playback] INFO response JSON did not include job_id
+2026-09-17 08:05:28,770 [profile_playback] INFO no job id detected in /rq-engine/api/runs/profile;;tmp;;c08eb64cac8f4f4cb3165cc25adf5b5f/config/tasks/upload-sbs/ response
+2026-09-17 08:05:28,770 [profile_playback] INFO freshness-upload-1 → HTTP 401 (135ms)
+2026-09-17 08:05:29,770 [profile_playback] INFO freshness-upload-2 POST https://wc.bearhive.duckdns.org/rq-engine/api/runs/profile;;tmp;;c08eb64cac8f4f4cb3165cc25adf5b5f/config/tasks/upload-sbs/ [/rq-engine/api/runs/profile;;tmp;;c08eb64cac8f4f4cb3165cc25adf5b5f/config/tasks/upload-sbs/ (source /rq-engine/api/runs/qa-freshness-profile-7e24c8d1/config/tasks/upload-sbs/)]
+2026-09-17 08:05:29,801 [profile_playback] INFO /rq-engine/api/runs/profile;;tmp;;c08eb64cac8f4f4cb3165cc25adf5b5f/config/tasks/upload-sbs/ response content-type application/json
+2026-09-17 08:05:29,801 [profile_playback] INFO /rq-engine/api/runs/profile;;tmp;;c08eb64cac8f4f4cb3165cc25adf5b5f/config/tasks/upload-sbs/ response preview {"error":{"message":"Missing Authorization header","details":"Missing Authorization header","code":"unauthorized"},"error_id":"e7a46397c8f341ee892c62cc263d9cd9"}
+2026-09-17 08:05:29,801 [profile_playback] INFO response JSON did not include job_id
+2026-09-17 08:05:29,801 [profile_playback] INFO no job id detected in /rq-engine/api/runs/profile;;tmp;;c08eb64cac8f4f4cb3165cc25adf5b5f/config/tasks/upload-sbs/ response
+2026-09-17 08:05:29,802 [profile_playback] INFO freshness-upload-2 → HTTP 401 (30ms)
+2026-09-17 08:05:30,802 [profile_playback] INFO Playback complete
+2026-09-17 08:05:30,822 [profile_playback] INFO result token=6cb424b7db17431680daa320521bdbdb stored at /workdir/wepppy-test-engine-data/profiles/_runs/6cb424b7db17431680daa320521bdbdb.json
+[wctl] playback completed successfully; token=6cb424b7db17431680daa320521bdbdb

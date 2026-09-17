@@ -1,0 +1,93 @@
+{
+  "reviewer": "freshness_security",
+  "observed_utc": "2026-09-17T08:26:18.883344+00:00",
+  "source": "/wc1/runs/th/thespian-cleanness",
+  "copy_manifest": "/wc1/batch/qa-omni-native-20260917-a61f3e/copy-manifest.json",
+  "copy_manifest_sha256": "67986a74a89690f97a1a1e44c8c845740117a757a0f25bd6eb52ae47367447ee",
+  "file_membership_unchanged": true,
+  "source_files": 3916,
+  "strict_version_unchanged_files": 3912,
+  "changes": [
+    {
+      "path": "TTL",
+      "before_version": [
+        64,
+        1192294,
+        427,
+        1789616871627589681,
+        1789616871629589695
+      ],
+      "current_version": [
+        64,
+        1303704,
+        427,
+        1789633294475347204,
+        1789633294476347210
+      ],
+      "sha256": "a3c165f423fcab435706508d630383733aa030b2bf41f3579c2f0e996bc02d40",
+      "mode": 420,
+      "matches_original_bytes_and_mode": true
+    },
+    {
+      "path": "disturbed.log",
+      "before_version": [
+        64,
+        1188477,
+        83255,
+        1789629757669088301,
+        1789629757669088301
+      ],
+      "current_version": [
+        64,
+        1188477,
+        83255,
+        1789633290009319504,
+        1789633290009319504
+      ],
+      "sha256": "0b4224c3eb8a0c926b624048a3541764c0df10bc6804b7eac692363b6d76db0e",
+      "mode": 420,
+      "matches_original_bytes_and_mode": true
+    },
+    {
+      "path": "ron.log",
+      "before_version": [
+        64,
+        1188573,
+        237,
+        1789629697544712568,
+        1789629697544712568
+      ],
+      "current_version": [
+        64,
+        1188573,
+        237,
+        1789633290001319455,
+        1789633290001319455
+      ],
+      "sha256": "b43e17ca865ae68e0988c4956b06a2b662085a168a25b759bddce15e07e77ebf",
+      "mode": 420,
+      "matches_original_bytes_and_mode": true
+    },
+    {
+      "path": "watershed.log",
+      "before_version": [
+        64,
+        1188577,
+        6488,
+        1789629757496087221,
+        1789629757496087221
+      ],
+      "current_version": [
+        64,
+        1188577,
+        6488,
+        1789633290016319548,
+        1789633290016319548
+      ],
+      "sha256": "b3664ea43391efe6ed815eca4c3a9989bb5f2e448ef4fa5e3fc1633bff5bd617",
+      "mode": 420,
+      "matches_original_bytes_and_mode": true
+    }
+  ],
+  "scope": "Read-only file inventory and four verified digests; no source owner hydration, writes, repairs or full 6.3GB rehash; baseline not rebased"
+}

@@ -121,7 +121,7 @@ set. Touching or restoring identical files can reuse an existing ZIP; changed
 bytes rebuild it even when size and modification time are preserved. Manifests
 retain timestamps for diagnostics and record dependency verification. Directory
 and indirect native dependencies still have separate closure requirements in
-[the specification](specification.md#file-content-cache-identity-amendment-implementation-pending).
+[the specification](specification.md#file-content-cache-identity-amendment-implemented).
 
 If inputs change during export, the job fails with `changed_source` (409).
 Submit a new export after the upstream operation finishes. Candidate files and

@@ -1,0 +1,131 @@
+{
+  "observed_utc": "2026-09-17T08:24:02.783954+00:00",
+  "source": "/wc1/runs/th/thespian-cleanness",
+  "membership_unchanged": true,
+  "changes": [
+    {
+      "path": "TTL",
+      "before": {
+        "bytes": 427,
+        "copied_version": [
+          64,
+          1210581,
+          427,
+          1789616871627589681,
+          1789630629733644926
+        ],
+        "mode": 420,
+        "sha256": "a3c165f423fcab435706508d630383733aa030b2bf41f3579c2f0e996bc02d40",
+        "version": [
+          64,
+          1192294,
+          427,
+          1789616871627589681,
+          1789616871629589695
+        ]
+      },
+      "current_version": [
+        64,
+        1303704,
+        427,
+        1789633294475347204,
+        1789633294476347210
+      ],
+      "current_sha256": "a3c165f423fcab435706508d630383733aa030b2bf41f3579c2f0e996bc02d40",
+      "current_payload": "{\n  \"created_at\": \"2026-09-17T00:27:41.972917Z\",\n  \"db_cleared\": false,\n  \"delete_state\": \"active\",\n  \"disabled_by_user_id\": null,\n  \"disabled_reason\": null,\n  \"expires_at\": \"2026-12-16T00:36:57.875513Z\",\n  \"last_accessed_at\": \"2026-09-17T00:36:57.875513Z\",\n  \"last_touched_by\": \"access_log\",\n  \"policy\": \"rolling_90d\",\n  \"ttl_days\": 90,\n  \"updated_at\": \"2026-09-17T00:36:57.875513Z\",\n  \"user_disabled\": false,\n  \"version\": 1\n}"
+    },
+    {
+      "path": "disturbed.log",
+      "before": {
+        "bytes": 83255,
+        "copied_version": [
+          64,
+          1279360,
+          83255,
+          1789629757669088301,
+          1789630643320733536
+        ],
+        "mode": 420,
+        "sha256": "0b4224c3eb8a0c926b624048a3541764c0df10bc6804b7eac692363b6d76db0e",
+        "version": [
+          64,
+          1188477,
+          83255,
+          1789629757669088301,
+          1789629757669088301
+        ]
+      },
+      "current_version": [
+        64,
+        1188477,
+        83255,
+        1789633290009319504,
+        1789633290009319504
+      ],
+      "current_sha256": "0b4224c3eb8a0c926b624048a3541764c0df10bc6804b7eac692363b6d76db0e",
+      "current_payload": null
+    },
+    {
+      "path": "ron.log",
+      "before": {
+        "bytes": 237,
+        "copied_version": [
+          64,
+          1278897,
+          237,
+          1789629697544712568,
+          1789630657377825115
+        ],
+        "mode": 420,
+        "sha256": "b43e17ca865ae68e0988c4956b06a2b662085a168a25b759bddce15e07e77ebf",
+        "version": [
+          64,
+          1188573,
+          237,
+          1789629697544712568,
+          1789629697544712568
+        ]
+      },
+      "current_version": [
+        64,
+        1188573,
+        237,
+        1789633290001319455,
+        1789633290001319455
+      ],
+      "current_sha256": "b43e17ca865ae68e0988c4956b06a2b662085a168a25b759bddce15e07e77ebf",
+      "current_payload": null
+    },
+    {
+      "path": "watershed.log",
+      "before": {
+        "bytes": 6488,
+        "copied_version": [
+          64,
+          1211712,
+          6488,
+          1789629757496087221,
+          1789630660793847355
+        ],
+        "mode": 420,
+        "sha256": "b3664ea43391efe6ed815eca4c3a9989bb5f2e448ef4fa5e3fc1633bff5bd617",
+        "version": [
+          64,
+          1188577,
+          6488,
+          1789629757496087221,
+          1789629757496087221
+        ]
+      },
+      "current_version": [
+        64,
+        1188577,
+        6488,
+        1789633290016319548,
+        1789633290016319548
+      ],
+      "current_sha256": "b3664ea43391efe6ed815eca4c3a9989bb5f2e448ef4fa5e3fc1633bff5bd617",
+      "current_payload": null
+    }
+  ]
+}

@@ -1,0 +1,144 @@
+{
+  "status": 200,
+  "body": {
+    "contract_version": "1.0.0-draft",
+    "deployment_revision": "dev",
+    "run_state_revision": "runstate:thespian-cleanness:94da27660795",
+    "run_state_domain": "metadata",
+    "run_state_vector": {
+      "orchestration_revision": null,
+      "metadata_revision": "runstate:thespian-cleanness:94da27660795",
+      "outputs_revision": null
+    },
+    "operation_id": "rq_engine_fork_project",
+    "run_scoped": true,
+    "method": "POST",
+    "path": "/api/runs/{runid}/{config}/fork",
+    "operation_descriptor": {
+      "operation_id": "rq_engine_fork_project",
+      "run_scoped": true,
+      "method": "POST",
+      "path": "/api/runs/{runid}/{config}/fork",
+      "accepted_auth": [
+        "bearer_jwt",
+        "captcha"
+      ],
+      "auth_requirements": {
+        "bearer_jwt": {
+          "required_scope": [
+            "rq:enqueue"
+          ]
+        },
+        "captcha": {
+          "challenge_required": true,
+          "required_if_no_authenticated_token": true
+        }
+      },
+      "required_if": [],
+      "available_if": [],
+      "error_catalog_url": "/api/runs/thespian-cleanness/config/endpoints/rq_engine_fork_project/errors",
+      "write_precondition": {
+        "required": false,
+        "accepted": [],
+        "conflict_status_code": 409,
+        "conflict_error_code": "stale_run_state"
+      },
+      "idempotency_policy": {
+        "supported": false,
+        "key_locations": [],
+        "dedupe_window_seconds": 0,
+        "replay_behavior": "not_supported",
+        "mismatch_status_code": 409,
+        "mismatch_error_code": "idempotency_key_conflict"
+      },
+      "execution_mode": "async",
+      "returns_job": true,
+      "job_key": "fork_rq",
+      "content_types": [
+        "application/json",
+        "application/x-www-form-urlencoded",
+        "multipart/form-data"
+      ],
+      "file_fields": [],
+      "success_status_codes": [
+        200
+      ],
+      "response_mode": "json",
+      "result_contract": {
+        "kind": "async_job",
+        "required_response_fields": [
+          "job_id",
+          "new_runid",
+          "undisturbify",
+          "skip_wepp_runs_output",
+          "skip_omni_scenarios_contrasts"
+        ],
+        "terminal_signal": "jobstatus.status in terminal_*_statuses",
+        "status_field": "status",
+        "non_terminal_statuses": [
+          "queued",
+          "started",
+          "deferred",
+          "scheduled"
+        ],
+        "terminal_success_statuses": [
+          "finished"
+        ],
+        "terminal_failure_statuses": [
+          "failed",
+          "stopped",
+          "canceled"
+        ],
+        "suggested_poll_interval_seconds": 5,
+        "progress_field": "progress",
+        "status_url_template": "/api/jobstatus/{job_id}"
+      },
+      "estimated_duration": {
+        "bucket": "fast",
+        "typical_seconds": 15
+      },
+      "batch_mode_behavior": "n/a",
+      "base_project_behavior": "allowed",
+      "mutates_controllers": [],
+      "invalidates_steps": []
+    },
+    "schema_version": 1,
+    "request": {
+      "type": "object",
+      "properties": {
+        "undisturbify": {
+          "type": "boolean",
+          "constraint_mode": "static"
+        },
+        "skip_wepp_runs_output": {
+          "type": "boolean",
+          "constraint_mode": "static"
+        },
+        "skip_omni_scenarios_contrasts": {
+          "type": "boolean",
+          "constraint_mode": "static"
+        },
+        "target_runid": {
+          "type": "string",
+          "constraint_mode": "static"
+        },
+        "cap_token": {
+          "type": "string",
+          "constraint_mode": "static"
+        }
+      },
+      "additional_properties": true
+    },
+    "responses": {
+      "success": {
+        "required": [
+          "job_id",
+          "new_runid",
+          "undisturbify",
+          "skip_wepp_runs_output",
+          "skip_omni_scenarios_contrasts"
+        ]
+      }
+    }
+  }
+}

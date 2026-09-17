@@ -1,0 +1,105 @@
+{
+  "utc": "2026-09-17T08:16:54.003124+00:00",
+  "method": "GET",
+  "path": "/rq-engine/api/runs/qa-freshness-runtime-7e24c8d1/config/postfire-debris-flow/state",
+  "request": null,
+  "status": 200,
+  "body": {
+    "result": {
+      "schema_version": 1,
+      "model": "M3",
+      "eligible": true,
+      "readonly": false,
+      "unavailable_reason": null,
+      "required": [
+        {
+          "key": "watershed",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#subcatchments-delineation"
+        },
+        {
+          "key": "soils",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#soils"
+        },
+        {
+          "key": "sbs",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#disturbed-sbs"
+        },
+        {
+          "key": "climate",
+          "ready": true,
+          "reason": null,
+          "message": "",
+          "control": "#climate"
+        }
+      ],
+      "noaa_available": true,
+      "frequency_source": "cli",
+      "upload_ready": true,
+      "run_ready": true,
+      "upload": null,
+      "run": {
+        "id": "6e31becce1644fb782d341f2d3dd4156",
+        "job_id": "64639882-bfdf-4d18-b6fd-c40ccf8e19e6",
+        "phase": "complete",
+        "created_at": "2026-09-17T08:16:09.244620+00:00",
+        "error": null,
+        "retryable": true,
+        "filename": null,
+        "model": "M3",
+        "frequency_source": "cli"
+      },
+      "dnbr": null,
+      "results": {
+        "id": "6e31becce1644fb782d341f2d3dd4156",
+        "model": "M3",
+        "completed_at": "2026-09-17T08:16:39.007234+00:00",
+        "partial": true,
+        "partial_reason": "Some rainfall observations or requested design-storm estimates are unavailable.",
+        "area_warning": true,
+        "coverage": {
+          "excluded_cells": 122168,
+          "fallback_valid_cells": 11272,
+          "mask": "valid_mask.tif",
+          "policy": "common_valid_v1",
+          "primary_valid_cells": 134889,
+          "total_cells": 268329,
+          "valid_cells": 146161,
+          "valid_fraction": 0.5447081754115284
+        },
+        "current": true,
+        "files": [
+          {
+            "name": "events.parquet",
+            "url": "/rq-engine/api/runs/qa-freshness-runtime-7e24c8d1/config/postfire-debris-flow/files/6e31becce1644fb782d341f2d3dd4156/events.parquet"
+          },
+          {
+            "name": "design.parquet",
+            "url": "/rq-engine/api/runs/qa-freshness-runtime-7e24c8d1/config/postfire-debris-flow/files/6e31becce1644fb782d341f2d3dd4156/design.parquet"
+          },
+          {
+            "name": "inverse.parquet",
+            "url": "/rq-engine/api/runs/qa-freshness-runtime-7e24c8d1/config/postfire-debris-flow/files/6e31becce1644fb782d341f2d3dd4156/inverse.parquet"
+          },
+          {
+            "name": "valid_mask.tif",
+            "url": "/rq-engine/api/runs/qa-freshness-runtime-7e24c8d1/config/postfire-debris-flow/files/6e31becce1644fb782d341f2d3dd4156/valid_mask.tif"
+          },
+          {
+            "name": "manifest.json",
+            "url": "/rq-engine/api/runs/qa-freshness-runtime-7e24c8d1/config/postfire-debris-flow/files/6e31becce1644fb782d341f2d3dd4156/manifest.json"
+          }
+        ]
+      },
+      "freshness": "current"
+    }
+  }
+}

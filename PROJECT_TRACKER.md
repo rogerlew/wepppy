@@ -7,6 +7,12 @@
 
 ## Purpose
 
+Completed: [File dependency freshness audit and fixes](docs/work-packages/20260916_file_dependency_freshness/package.md)
+— implementation and independent reviews complete;8,924 Python/899 frontend
+tests pass. Rebuilt development UI/RQ/WEPP, native Omni, archive/recovery and
+interleaved cache acceptance complete. Explicit unresolved boundaries and
+existing runtime failures remain documented; no production deployment.
+
 Completed: [Post-fire Kf and report revisions](docs/work-packages/20260916_postfire_kf_report_revisions/package.md)
 — replace new M1 RUSLE K with traceable Kf, remove RUSLE dependency, add a rainfall
 response curve and clarify event provenance. Contract ancestor `9395f4722`;

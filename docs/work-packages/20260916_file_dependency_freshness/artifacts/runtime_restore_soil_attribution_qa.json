@@ -1,0 +1,84 @@
+{
+  "uid": 1000,
+  "gid": 993,
+  "root": "/wc1/runs/qa/qa-freshness-runtime-7e24c8d1",
+  "accepted_result": "6e31becce1644fb782d341f2d3dd4156",
+  "scope": "Read-only byte attribution for the completed canary archive restore.\n\nNo SQLite connection, source write, checkpoint or freshness acceptance mutation.\nCompares all seven manifest-bound soil inputs, original accepted main/WAL copies,\nand physical source main/WAL/SHM against their actual archive members.\n",
+  "soil_sources": {
+    "postfire_debris_flow/inputs/soil_sources.json": {
+      "sha256": "8e00191b34d69f7f1995604e35a38edfde355115d3a1e8905d126adb3f333b11",
+      "accepted_sha256": "8e00191b34d69f7f1995604e35a38edfde355115d3a1e8905d126adb3f333b11",
+      "match": true,
+      "bytes": 1097
+    },
+    "postfire_debris_flow/source_preparation/52e4073c53914a518a467d4907b7eded/fallback_evidence.json": {
+      "sha256": "ace300fba0363496ab28e70f564e54dcdec913071e1a33a4e39f5a155c66bad7",
+      "accepted_sha256": "ace300fba0363496ab28e70f564e54dcdec913071e1a33a4e39f5a155c66bad7",
+      "match": true,
+      "bytes": 632
+    },
+    "postfire_debris_flow/source_preparation/52e4073c53914a518a467d4907b7eded/fallback_native.tif": {
+      "sha256": "b5d26917d00cf457edf48f0a26174966416d8e7155d96c4627259886e5c795a4",
+      "accepted_sha256": "b5d26917d00cf457edf48f0a26174966416d8e7155d96c4627259886e5c795a4",
+      "match": true,
+      "bytes": 22439
+    },
+    "postfire_debris_flow/source_preparation/52e4073c53914a518a467d4907b7eded/primary_evidence.json": {
+      "sha256": "5e08667a041285a3e0aea2ef2a932c3bb895d6051f371bb9cfea8f6c8917002d",
+      "accepted_sha256": "5e08667a041285a3e0aea2ef2a932c3bb895d6051f371bb9cfea8f6c8917002d",
+      "match": true,
+      "bytes": 724
+    },
+    "soils/ssurgo.tif": {
+      "sha256": "751f7609a64bc0b4cea8e570a28d572849ab50753f636cb9bf88ec492bdebc56",
+      "accepted_sha256": "751f7609a64bc0b4cea8e570a28d572849ab50753f636cb9bf88ec492bdebc56",
+      "match": true,
+      "bytes": 26410819
+    },
+    "soils/ssurgo.tif.meta": {
+      "sha256": "4cdb830039dbae3f8cb13cce67fd6080a5058b012288d96426ae8fac0482e37d",
+      "accepted_sha256": "4cdb830039dbae3f8cb13cce67fd6080a5058b012288d96426ae8fac0482e37d",
+      "match": true,
+      "bytes": 1667
+    },
+    "soils/ssurgo_tabular_cache.sqlite.meta.md": {
+      "sha256": "9e49c47011f9fc483f4303e348bc5a195ae6bbddb27278a21ebe80bd903cc143",
+      "accepted_sha256": "9e49c47011f9fc483f4303e348bc5a195ae6bbddb27278a21ebe80bd903cc143",
+      "match": true,
+      "bytes": 1744
+    }
+  },
+  "physical_cache": {
+    "soils/ssurgo_tabular_cache.sqlite": {
+      "sha256": "352a9bb23c329c5a9bf235baf56917358b5b64b03f1a11d261fadae9c3cdb721",
+      "archive_sha256": "352a9bb23c329c5a9bf235baf56917358b5b64b03f1a11d261fadae9c3cdb721",
+      "bytes": 4096,
+      "match": true
+    },
+    "soils/ssurgo_tabular_cache.sqlite-wal": {
+      "sha256": "8464b16ff894d1d041947151eb0ec5a25b667c6b50caf62228127ac37e356bc4",
+      "archive_sha256": "8464b16ff894d1d041947151eb0ec5a25b667c6b50caf62228127ac37e356bc4",
+      "bytes": 1203072,
+      "match": true
+    },
+    "soils/ssurgo_tabular_cache.sqlite-shm": {
+      "sha256": "5d05114a95827637d2bfb482d95696806fa3e9a70822f2e29896b39fc0ccda4f",
+      "archive_sha256": "5d05114a95827637d2bfb482d95696806fa3e9a70822f2e29896b39fc0ccda4f",
+      "bytes": 32768,
+      "match": true
+    }
+  },
+  "accepted_snapshot_comparison": {
+    "main": {
+      "source_sha256": "352a9bb23c329c5a9bf235baf56917358b5b64b03f1a11d261fadae9c3cdb721",
+      "accepted_copy_sha256": "352a9bb23c329c5a9bf235baf56917358b5b64b03f1a11d261fadae9c3cdb721",
+      "match": true
+    },
+    "-wal": {
+      "source_sha256": "8464b16ff894d1d041947151eb0ec5a25b667c6b50caf62228127ac37e356bc4",
+      "accepted_copy_sha256": "8464b16ff894d1d041947151eb0ec5a25b667c6b50caf62228127ac37e356bc4",
+      "match": true
+    }
+  },
+  "all_match": true
+}

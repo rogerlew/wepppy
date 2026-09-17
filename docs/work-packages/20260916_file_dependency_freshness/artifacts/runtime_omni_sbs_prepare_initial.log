@@ -1,0 +1,18 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/python docs/work-packages/20260916_file_dependency_freshness/artifacts/runtime_omni_sbs_acceptance.py --prepare-only --root /wc1/batch/qa-omni-native-20260917-a61f3e
+COPY 250/3916 files
+COPY 500/3916 files
+COPY 750/3916 files
+COPY 1000/3916 files
+COPY 1250/3916 files
+COPY 1500/3916 files
+COPY 1750/3916 files
+COPY 2000/3916 files
+COPY 2250/3916 files
+COPY 2500/3916 files
+COPY 2750/3916 files
+COPY 3000/3916 files
+COPY 3250/3916 files
+COPY 3500/3916 files
+COPY 3750/3916 files
+{"status": "prepared", "runid": "batch;;qa-omni-native-20260917-a61f3e;;grizzly", "destination": "/wc1/batch/qa-omni-native-20260917-a61f3e/runs/grizzly", "manifest": "/wc1/batch/qa-omni-native-20260917-a61f3e/copy-manifest.json", "files": 3916, "bytes": 6375730842}
+{"status": "prepared", "resume_copy_manifest": "/wc1/batch/qa-omni-native-20260917-a61f3e/copy-manifest.json"}

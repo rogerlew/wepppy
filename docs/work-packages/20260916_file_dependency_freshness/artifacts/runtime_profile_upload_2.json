@@ -1,0 +1,11 @@
+{
+  "event_id": "freshness-upload-2",
+  "source": "/wc1/runs/qa/qa-freshness-profile-7e24c8d1-inputs/second.tif",
+  "sha256": "a8a42913b4603f4e14b8e4d50556b26ae73b5636ba1ea59c2f72b42e6f46b2c0",
+  "status": 200,
+  "response": {
+    "result": {
+      "disturbed_fn": "same-sbs.tif"
+    }
+  }
+}

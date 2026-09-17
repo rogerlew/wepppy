@@ -1,0 +1,3150 @@
+{
+  "scope": "Actual copied RAP 39-year analysis, complete input set and finalization lock.\n\nNamed inputs receive ordinary read/copy only. Real NoDb hydration, native median\ncalls, lock, validation, parquet publication and persistence operate on a unique\nretained disposable run. Transparent wrappers measure existing boundaries.\nThis small cropped single-OFE sample is not a universal workload/closure proof.\n",
+  "root": "/wc1/batch/qa-derived-rap-daa5702c3380",
+  "uid": 1000,
+  "gid": 993,
+  "named_inputs": {
+    "/wc1/runs/ol/old-fluorosis/ron.nodb": {
+      "version": [
+        64,
+        1773023,
+        1033,
+        1782510036825215032,
+        1782510036826215038
+      ],
+      "sha256": "693f2efb12be3ab3f5981665049b3cbae68f93b36a97e1f8c8f0004117cbcff9"
+    },
+    "/wc1/runs/ol/old-fluorosis/watershed.nodb": {
+      "version": [
+        64,
+        1773483,
+        1930,
+        1782510126347731799,
+        1782510126349731810
+      ],
+      "sha256": "ae0030cad972c71a65cc72b62b5e55fb0eb90f5b532ebe9175609754d48d248d"
+    },
+    "/wc1/runs/ol/old-fluorosis/wepp.nodb": {
+      "version": [
+        64,
+        1773038,
+        2329,
+        1782510132085764871,
+        1782510132087764882
+      ],
+      "sha256": "c40cc93724ae4fdacb10a8f06a598a43b3de9eb0c062abccbff2fe43aba52ea8"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap_ts.nodb": {
+      "version": [
+        64,
+        1773281,
+        5638,
+        1782510119341691409,
+        1782510119343691420
+      ],
+      "sha256": "97a085a58e4dba82c5f5df903771309acd42938860a1d5204ed2e25256133fe6"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_1986.tif": {
+      "version": [
+        64,
+        1763911,
+        10649,
+        1782510094197546383,
+        1782510094197546383
+      ],
+      "sha256": "57a6df13e902646047c86d0c1b5bfe78005db7672d393425ce355dc58cdec027"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2024.tif": {
+      "version": [
+        64,
+        1773482,
+        14424,
+        1782510095305552776,
+        1782510095305552776
+      ],
+      "sha256": "c67d8f3ba9cf007e659ea2fe8731fda3f87cc1e32234dc06fb11c58a6279425b"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2023.tif": {
+      "version": [
+        64,
+        1773481,
+        14419,
+        1782510095315552834,
+        1782510095315552834
+      ],
+      "sha256": "0cc003a46460ecbb5d8f0cfd48238420622b52c83415054d058161a35e51e155"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_1988.tif": {
+      "version": [
+        64,
+        1763927,
+        14734,
+        1782510094470547958,
+        1782510094470547958
+      ],
+      "sha256": "5039108b3130692be92c7edda2bc466fc78eb8c50c127b6f1418e9b6101c0765"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2016.tif": {
+      "version": [
+        64,
+        1763926,
+        14626,
+        1782510094530548304,
+        1782510094530548304
+      ],
+      "sha256": "0fae58281abad4076135e7123b721e8255058086fb9cec4d9ec2b5693a47a423"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2011.tif": {
+      "version": [
+        64,
+        1763929,
+        14589,
+        1782510094536548339,
+        1782510094536548339
+      ],
+      "sha256": "e3e158e1587876330a2b66b91503e4a949e8474ec14fd195966e2424b11b8c0b"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2018.tif": {
+      "version": [
+        64,
+        1763934,
+        14934,
+        1782510095212552239,
+        1782510095212552239
+      ],
+      "sha256": "6f7c399e4621fca2e5491c671f1c266219790b84b0c7b6dea7135d1ed87386a4"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2009.tif": {
+      "version": [
+        64,
+        1763904,
+        14014,
+        1782510093332541391,
+        1782510093332541391
+      ],
+      "sha256": "91b149ad008bcf4b0919aa5d8220a659f8e9291d1e2e5895c20411e05d2d57f5"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2000.tif": {
+      "version": [
+        64,
+        1763930,
+        15135,
+        1782510094589548645,
+        1782510094589548645
+      ],
+      "sha256": "22451dde739b4b2b6103b6a940dd8fd0c603187c62dc692ab55be9764742019f"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2007.tif": {
+      "version": [
+        64,
+        1763914,
+        14604,
+        1782510093959545009,
+        1782510093959545009
+      ],
+      "sha256": "c836f3d27459d561dbf03b0b1edfbb4657f66daf920c61f2685ee4428dd3904f"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_1999.tif": {
+      "version": [
+        64,
+        1763923,
+        14953,
+        1782510094055545563,
+        1782510094055545563
+      ],
+      "sha256": "5cd8438052ba15c01a547d64cf6158c87d9278ede2ee7cba53ed31d82c8a3f4c"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_1990.tif": {
+      "version": [
+        64,
+        1763920,
+        13582,
+        1782510094148546100,
+        1782510094148546100
+      ],
+      "sha256": "b04e2026e9846c72ff236db8f41a5ad2d9283fffbbf58cbbd051c989404c2780"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_1997.tif": {
+      "version": [
+        64,
+        1763921,
+        13879,
+        1782510094374547404,
+        1782510094374547404
+      ],
+      "sha256": "4b1f6e4a6b1dc8fe7a1b2285f43ff3fb0595ca7cabf97cb1cdd37119a84a79bd"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2019.tif": {
+      "version": [
+        64,
+        1763931,
+        14557,
+        1782510095111551657,
+        1782510095111551657
+      ],
+      "sha256": "2e65f05de2f5ec8c934ce817f82f445240fc312caefab780101d065250f1b5e0"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2010.tif": {
+      "version": [
+        64,
+        1763919,
+        15156,
+        1782510094274546827,
+        1782510094274546827
+      ],
+      "sha256": "83468e07079512329660f193a16ed59d25337b818953a2d7e06e5edc1b7b3ea6"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2017.tif": {
+      "version": [
+        64,
+        1763915,
+        14796,
+        1782510094118545927,
+        1782510094118545927
+      ],
+      "sha256": "ef6531a33de8f325efcec6f8753e522f1302cebc376e9ff0e78c3e5a5f5a570f"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2022.tif": {
+      "version": [
+        64,
+        1763932,
+        14599,
+        1782510095068551408,
+        1782510095068551408
+      ],
+      "sha256": "4f37d66847996035d17b5ab34d4332179cb4e05677352f1818cddc950e37f238"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_1989.tif": {
+      "version": [
+        64,
+        1763906,
+        14325,
+        1782510093862544450,
+        1782510093862544450
+      ],
+      "sha256": "265939c738bf94859ddc1bb050078a7a5a2c5ec99ef03ff2eaa32d282b21d648"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_1987.tif": {
+      "version": [
+        64,
+        1763908,
+        14224,
+        1782510094092545777,
+        1782510094092545777
+      ],
+      "sha256": "161b438e954682abde767f730d954285a2c64eb1ce7c8a1b9f5717bc9bfc4a49"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_1996.tif": {
+      "version": [
+        64,
+        1763916,
+        13671,
+        1782510094223546533,
+        1782510094223546533
+      ],
+      "sha256": "4dcdeccf580210e36c75031ed8433d4624888d2751195a5e1a5879bb14a4315e"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_1991.tif": {
+      "version": [
+        64,
+        1763899,
+        12889,
+        1782510093386541703,
+        1782510093386541703
+      ],
+      "sha256": "28ae9d188e70663979acd104c0b5814a3d681156694ad4161a249eb25abcd846"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_1998.tif": {
+      "version": [
+        64,
+        1763925,
+        14419,
+        1782510094136546031,
+        1782510094136546031
+      ],
+      "sha256": "f4c7efdc994712e995f537dcc77c28d1b7be47473ad1215e8eb0d91724fd3ac3"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2006.tif": {
+      "version": [
+        64,
+        1763913,
+        14880,
+        1782510093981545136,
+        1782510093981545136
+      ],
+      "sha256": "99a2373e0492366d4477c3384c88ed0fb2e2d4a82760581f75d2c7352ad5428e"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2001.tif": {
+      "version": [
+        64,
+        1763924,
+        15471,
+        1782510094467547941,
+        1782510094467547941
+      ],
+      "sha256": "3bf3abe6817310008e4c4908d0fcf359b0589b4e4d1366a290ef8239adec4339"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2008.tif": {
+      "version": [
+        64,
+        1763903,
+        14047,
+        1782510093377541651,
+        1782510093377541651
+      ],
+      "sha256": "82b47ea767cdade5f9c420f8791c59a1967883e87c924fd9930a8da1ec054bb1"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_1992.tif": {
+      "version": [
+        64,
+        1763912,
+        13947,
+        1782510094315547064,
+        1782510094315547064
+      ],
+      "sha256": "6288f60bf3d14e21b004880982343e51ba62acc38763806238a9ad4dc856f7bc"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_1995.tif": {
+      "version": [
+        64,
+        1763910,
+        13513,
+        1782510093813544167,
+        1782510093813544167
+      ],
+      "sha256": "b9072fe34bf37ea817bd4f73dc6da22a133c6e7137d145346037eb159f018fbe"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2002.tif": {
+      "version": [
+        64,
+        1763901,
+        15553,
+        1782510094023545379,
+        1782510094023545379
+      ],
+      "sha256": "5951e8959babc0848f295669b559c6ecc324fd255d5010acf9868c83a5c9229f"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2005.tif": {
+      "version": [
+        64,
+        1763922,
+        15379,
+        1782510094757549614,
+        1782510094757549614
+      ],
+      "sha256": "d3571fd092ad2fd8ad0a1bc8d246d374b1bb4dd2ea9f952f10998ab1928a0d43"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/rap_ts.parquet": {
+      "version": [
+        64,
+        1768550,
+        7076,
+        1782510119308691218,
+        1782510119308691218
+      ],
+      "sha256": "ced4dbcc939d7406dece06feafe2645d3a026ecbfbd5a78ed7ad62a0138ce779"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2014.tif": {
+      "version": [
+        64,
+        1763928,
+        14713,
+        1782510094555548448,
+        1782510094555548448
+      ],
+      "sha256": "9b98499a808b2afe4693a8184d30c2a6082a2963792ab98f5ccb14fd6522600f"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2013.tif": {
+      "version": [
+        64,
+        1763917,
+        15216,
+        1782510094303546994,
+        1782510094303546994
+      ],
+      "sha256": "af9df1e9c0b3590530428162c071b44fd310aa97bcf95b5fd6744192f729e2da"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2021.tif": {
+      "version": [
+        64,
+        1770920,
+        14469,
+        1782510095108551639,
+        1782510095108551639
+      ],
+      "sha256": "fe0bd76d493ed7dd95eaa64cadfdc24c672840a46756019c9cf9e98bf77c2141"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2004.tif": {
+      "version": [
+        64,
+        1763907,
+        15214,
+        1782510094215546486,
+        1782510094215546486
+      ],
+      "sha256": "bba61073f7df2c72ba0d47708003d9f560b96e7754e763a14236e1d5cd7985ac"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2003.tif": {
+      "version": [
+        64,
+        1763905,
+        15447,
+        1782510093305541235,
+        1782510093305541235
+      ],
+      "sha256": "454633d1a2b868d12d689c5275fc3acf773db0ba07a166581b23fe8185f108d6"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_1994.tif": {
+      "version": [
+        64,
+        1763909,
+        14109,
+        1782510094217546498,
+        1782510094217546498
+      ],
+      "sha256": "5cbaaf5354c1b2223861eceb64c0465e382040bb05a61f14e65954f2387c4156"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_1993.tif": {
+      "version": [
+        64,
+        1763918,
+        14064,
+        1782510094536548339,
+        1782510094536548339
+      ],
+      "sha256": "6fa7a9f803547a758bce849a17c630dd742e8dca80c6b34199420a9220da316d"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2020.tif": {
+      "version": [
+        64,
+        1763933,
+        14892,
+        1782510095155551911,
+        1782510095155551911
+      ],
+      "sha256": "6115f892a73bc9c0fc892e14e342ae6eb48583a71e7ce30435c10f0166842fc3"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2012.tif": {
+      "version": [
+        64,
+        1763902,
+        15238,
+        1782510093925544813,
+        1782510093925544813
+      ],
+      "sha256": "afbdd8744f1375f645f393b0c4360b731b7e909da48eb1474f98c77135ce86c9"
+    },
+    "/wc1/runs/ol/old-fluorosis/rap/_rap_v3_2015.tif": {
+      "version": [
+        64,
+        1763900,
+        14728,
+        1782510093587542863,
+        1782510093587542863
+      ],
+      "sha256": "cb8779614467632dc815a0d8df7aa3893cb8aa0cf2103c8619d94b673c0282f7"
+    },
+    "/wc1/runs/ol/old-fluorosis/dem/wbt/subwta.tif": {
+      "version": [
+        64,
+        1767893,
+        12186,
+        1782506324232470642,
+        1782506324232470642
+      ],
+      "sha256": "8c490db5890517f52bd11e19fbec9e64678c0deee77a0663883e4d6d173f88a3"
+    },
+    "/wc1/runs/ol/old-fluorosis/dem/wbt/subwta.geojson": {
+      "version": [
+        64,
+        1767894,
+        17511,
+        1782506324247470738,
+        1782506324247470738
+      ],
+      "sha256": "3a9306acb5cac8afc5a9a5c531149bdc07f79f468f6d6be245698fcd24ff3a3b"
+    }
+  },
+  "module_hashes": {
+    "/workdir/wepppy/wepppy/nodb/_derived_build.py": "423c37c144cac5f8bee3c97930c4f8c65da26f72cb39104007370f3a5cedcc2e",
+    "/workdir/wepppy/wepppy/nodb/mods/rap/rap_ts_build.py": "eefddb841cf86791af02026af3b3444c9dc184b2d77e44a77b917e6b18bfe42f",
+    "/workdir/wepppy/wepppy/nodb/mods/rap/rap_ts.py": "da736327a60d4615c291e303e87345de5d4e5c4be4281987eaca0082c31ae753"
+  },
+  "input_set": [
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "bytes": 12186,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        1
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1986.tif",
+      "bytes": 10649,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1986.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1987.tif",
+      "bytes": 14224,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1987.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1988.tif",
+      "bytes": 14734,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1988.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1989.tif",
+      "bytes": 14325,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1989.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1990.tif",
+      "bytes": 13582,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1990.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1991.tif",
+      "bytes": 12889,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1991.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1992.tif",
+      "bytes": 13947,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1992.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1993.tif",
+      "bytes": 14064,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1993.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1994.tif",
+      "bytes": 14109,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1994.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1995.tif",
+      "bytes": 13513,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1995.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1996.tif",
+      "bytes": 13671,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1996.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1997.tif",
+      "bytes": 13879,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1997.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1998.tif",
+      "bytes": 14419,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1998.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1999.tif",
+      "bytes": 14953,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1999.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2000.tif",
+      "bytes": 15135,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2000.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2001.tif",
+      "bytes": 15471,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2001.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2002.tif",
+      "bytes": 15553,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2002.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2003.tif",
+      "bytes": 15447,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2003.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2004.tif",
+      "bytes": 15214,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2004.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2005.tif",
+      "bytes": 15379,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2005.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2006.tif",
+      "bytes": 14880,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2006.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2007.tif",
+      "bytes": 14604,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2007.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2008.tif",
+      "bytes": 14047,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2008.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2009.tif",
+      "bytes": 14014,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2009.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2010.tif",
+      "bytes": 15156,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2010.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2011.tif",
+      "bytes": 14589,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2011.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2012.tif",
+      "bytes": 15238,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2012.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2013.tif",
+      "bytes": 15216,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2013.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2014.tif",
+      "bytes": 14713,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2014.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2015.tif",
+      "bytes": 14728,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2015.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2016.tif",
+      "bytes": 14626,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2016.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2017.tif",
+      "bytes": 14796,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2017.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2018.tif",
+      "bytes": 14934,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2018.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2019.tif",
+      "bytes": 14557,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2019.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2020.tif",
+      "bytes": 14892,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2020.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2021.tif",
+      "bytes": 14469,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2021.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2022.tif",
+      "bytes": 14599,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2022.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2023.tif",
+      "bytes": 14419,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2023.tif"
+      ]
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2024.tif",
+      "bytes": 14424,
+      "native_driver": "GTiff",
+      "shape": [
+        53,
+        52,
+        6
+      ],
+      "immediate_native_members": [
+        "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2024.tif"
+      ]
+    }
+  ],
+  "signatures": [
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "seconds": 0.0005862531252205372,
+      "bytes": 12186,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1986.tif",
+      "seconds": 0.0005600920412689447,
+      "bytes": 10649,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1987.tif",
+      "seconds": 0.000560025917366147,
+      "bytes": 14224,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1988.tif",
+      "seconds": 0.0004975029733031988,
+      "bytes": 14734,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1989.tif",
+      "seconds": 0.00047750980593264103,
+      "bytes": 14325,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1990.tif",
+      "seconds": 0.0005306501407176256,
+      "bytes": 13582,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1991.tif",
+      "seconds": 0.000483927084133029,
+      "bytes": 12889,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1992.tif",
+      "seconds": 0.0005012131296098232,
+      "bytes": 13947,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1993.tif",
+      "seconds": 0.000480924965813756,
+      "bytes": 14064,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1994.tif",
+      "seconds": 0.0005019840318709612,
+      "bytes": 14109,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1995.tif",
+      "seconds": 0.0004904381930828094,
+      "bytes": 13513,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1996.tif",
+      "seconds": 0.0004793961998075247,
+      "bytes": 13671,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1997.tif",
+      "seconds": 0.0004834460560232401,
+      "bytes": 13879,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1998.tif",
+      "seconds": 0.00047840806655585766,
+      "bytes": 14419,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1999.tif",
+      "seconds": 0.0004629269242286682,
+      "bytes": 14953,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2000.tif",
+      "seconds": 0.000480178976431489,
+      "bytes": 15135,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2001.tif",
+      "seconds": 0.0004892218858003616,
+      "bytes": 15471,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2002.tif",
+      "seconds": 0.0004706310573965311,
+      "bytes": 15553,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2003.tif",
+      "seconds": 0.00047530699521303177,
+      "bytes": 15447,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2004.tif",
+      "seconds": 0.0004767749924212694,
+      "bytes": 15214,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2005.tif",
+      "seconds": 0.00046793115325272083,
+      "bytes": 15379,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2006.tif",
+      "seconds": 0.0004761831369251013,
+      "bytes": 14880,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2007.tif",
+      "seconds": 0.00047095585614442825,
+      "bytes": 14604,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2008.tif",
+      "seconds": 0.00045818998478353024,
+      "bytes": 14047,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2009.tif",
+      "seconds": 0.0004489629063755274,
+      "bytes": 14014,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2010.tif",
+      "seconds": 0.00047008111141622066,
+      "bytes": 15156,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2011.tif",
+      "seconds": 0.00046419096179306507,
+      "bytes": 14589,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2012.tif",
+      "seconds": 0.00045849988237023354,
+      "bytes": 15238,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2013.tif",
+      "seconds": 0.00045067002065479755,
+      "bytes": 15216,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2014.tif",
+      "seconds": 0.00044647487811744213,
+      "bytes": 14713,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2015.tif",
+      "seconds": 0.00045855087228119373,
+      "bytes": 14728,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2016.tif",
+      "seconds": 0.00044272211380302906,
+      "bytes": 14626,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2017.tif",
+      "seconds": 0.0004625131841748953,
+      "bytes": 14796,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2018.tif",
+      "seconds": 0.00044052116572856903,
+      "bytes": 14934,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2019.tif",
+      "seconds": 0.00040283985435962677,
+      "bytes": 14557,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2020.tif",
+      "seconds": 0.0004399630706757307,
+      "bytes": 14892,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2021.tif",
+      "seconds": 0.00042156479321420193,
+      "bytes": 14469,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2022.tif",
+      "seconds": 0.00042742607183754444,
+      "bytes": 14599,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2023.tif",
+      "seconds": 0.0004248740151524544,
+      "bytes": 14419,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2024.tif",
+      "seconds": 0.00043315882794559,
+      "bytes": 14424,
+      "under_finalization_lock": false
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "seconds": 0.0019030820112675428,
+      "bytes": 12186,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1986.tif",
+      "seconds": 0.0014878760557621717,
+      "bytes": 10649,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1987.tif",
+      "seconds": 0.0016969218850135803,
+      "bytes": 14224,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1988.tif",
+      "seconds": 0.0015882779844105244,
+      "bytes": 14734,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1989.tif",
+      "seconds": 0.0015287611167877913,
+      "bytes": 14325,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1990.tif",
+      "seconds": 0.0015719220973551273,
+      "bytes": 13582,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1991.tif",
+      "seconds": 0.0014994509983807802,
+      "bytes": 12889,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1992.tif",
+      "seconds": 0.0016258119139820337,
+      "bytes": 13947,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1993.tif",
+      "seconds": 0.0018336658831685781,
+      "bytes": 14064,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1994.tif",
+      "seconds": 0.0014803530648350716,
+      "bytes": 14109,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1995.tif",
+      "seconds": 0.0014653168618679047,
+      "bytes": 13513,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1996.tif",
+      "seconds": 0.0014202799648046494,
+      "bytes": 13671,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1997.tif",
+      "seconds": 0.0014325049705803394,
+      "bytes": 13879,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1998.tif",
+      "seconds": 0.0012792909983545542,
+      "bytes": 14419,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1999.tif",
+      "seconds": 0.0012549830134958029,
+      "bytes": 14953,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2000.tif",
+      "seconds": 0.0014833230525255203,
+      "bytes": 15135,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2001.tif",
+      "seconds": 0.001133170910179615,
+      "bytes": 15471,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2002.tif",
+      "seconds": 0.0011478071101009846,
+      "bytes": 15553,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2003.tif",
+      "seconds": 0.0010979620274156332,
+      "bytes": 15447,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2004.tif",
+      "seconds": 0.0011583559680730104,
+      "bytes": 15214,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2005.tif",
+      "seconds": 0.0011920989491045475,
+      "bytes": 15379,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2006.tif",
+      "seconds": 0.001158775994554162,
+      "bytes": 14880,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2007.tif",
+      "seconds": 0.0012274349573999643,
+      "bytes": 14604,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2008.tif",
+      "seconds": 0.001585866091772914,
+      "bytes": 14047,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2009.tif",
+      "seconds": 0.0011327248066663742,
+      "bytes": 14014,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2010.tif",
+      "seconds": 0.0011767619289457798,
+      "bytes": 15156,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2011.tif",
+      "seconds": 0.0012361740227788687,
+      "bytes": 14589,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2012.tif",
+      "seconds": 0.0011478590313345194,
+      "bytes": 15238,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2013.tif",
+      "seconds": 0.0011851480230689049,
+      "bytes": 15216,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2014.tif",
+      "seconds": 0.0012047968339174986,
+      "bytes": 14713,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2015.tif",
+      "seconds": 0.0010866951197385788,
+      "bytes": 14728,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2016.tif",
+      "seconds": 0.0010866690427064896,
+      "bytes": 14626,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2017.tif",
+      "seconds": 0.0009785210713744164,
+      "bytes": 14796,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2018.tif",
+      "seconds": 0.0011297289747744799,
+      "bytes": 14934,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2019.tif",
+      "seconds": 0.0011849189177155495,
+      "bytes": 14557,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2020.tif",
+      "seconds": 0.0011645378544926643,
+      "bytes": 14892,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2021.tif",
+      "seconds": 0.0011527000460773706,
+      "bytes": 14469,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2022.tif",
+      "seconds": 0.001144421985372901,
+      "bytes": 14599,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2023.tif",
+      "seconds": 0.0015624291263520718,
+      "bytes": 14419,
+      "under_finalization_lock": true
+    },
+    {
+      "path": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2024.tif",
+      "seconds": 0.0014378831256181002,
+      "bytes": 14424,
+      "under_finalization_lock": true
+    }
+  ],
+  "native_calls": [
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1986.tif",
+      "band_indx": 1,
+      "seconds": 0.060533236945047975,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1986.tif",
+      "band_indx": 2,
+      "seconds": 0.03593824291601777,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1986.tif",
+      "band_indx": 3,
+      "seconds": 0.1592630948871374,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1986.tif",
+      "band_indx": 4,
+      "seconds": 0.15086666494607925,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1986.tif",
+      "band_indx": 5,
+      "seconds": 0.1496585530694574,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1987.tif",
+      "band_indx": 1,
+      "seconds": 0.05075435899198055,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1986.tif",
+      "band_indx": 6,
+      "seconds": 0.12374157109297812,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1987.tif",
+      "band_indx": 2,
+      "seconds": 0.10176237882114947,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1987.tif",
+      "band_indx": 4,
+      "seconds": 0.11920868488959968,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1987.tif",
+      "band_indx": 5,
+      "seconds": 0.07831308105960488,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1987.tif",
+      "band_indx": 3,
+      "seconds": 0.15837454493157566,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1988.tif",
+      "band_indx": 1,
+      "seconds": 0.20192502299323678,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1988.tif",
+      "band_indx": 3,
+      "seconds": 0.08162512886337936,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1988.tif",
+      "band_indx": 2,
+      "seconds": 0.16811015596613288,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1987.tif",
+      "band_indx": 6,
+      "seconds": 0.4265311248600483,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1988.tif",
+      "band_indx": 4,
+      "seconds": 0.19220675784163177,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1988.tif",
+      "band_indx": 5,
+      "seconds": 0.11280106217600405,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1988.tif",
+      "band_indx": 6,
+      "seconds": 0.04692502901889384,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1989.tif",
+      "band_indx": 1,
+      "seconds": 0.11634774901904166,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1989.tif",
+      "band_indx": 2,
+      "seconds": 0.25966931716538966,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1989.tif",
+      "band_indx": 3,
+      "seconds": 0.1833425450604409,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1989.tif",
+      "band_indx": 4,
+      "seconds": 0.11270395410247147,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1989.tif",
+      "band_indx": 5,
+      "seconds": 0.13221535203047097,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1989.tif",
+      "band_indx": 6,
+      "seconds": 0.18959850305691361,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1990.tif",
+      "band_indx": 1,
+      "seconds": 0.10599634889513254,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1990.tif",
+      "band_indx": 2,
+      "seconds": 0.049758304143324494,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1990.tif",
+      "band_indx": 3,
+      "seconds": 0.13777150795795023,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1990.tif",
+      "band_indx": 4,
+      "seconds": 0.11079015512950718,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1990.tif",
+      "band_indx": 6,
+      "seconds": 0.13766141678206623,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1991.tif",
+      "band_indx": 1,
+      "seconds": 0.08589624799787998,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1990.tif",
+      "band_indx": 5,
+      "seconds": 0.24153717001900077,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1991.tif",
+      "band_indx": 2,
+      "seconds": 0.14372968999668956,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1991.tif",
+      "band_indx": 3,
+      "seconds": 0.0871529330033809,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1991.tif",
+      "band_indx": 5,
+      "seconds": 0.17426006915047765,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1991.tif",
+      "band_indx": 4,
+      "seconds": 0.32656636694446206,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1991.tif",
+      "band_indx": 6,
+      "seconds": 0.2627990508917719,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1992.tif",
+      "band_indx": 2,
+      "seconds": 0.09182243212126195,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1992.tif",
+      "band_indx": 1,
+      "seconds": 0.33527958183549345,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1992.tif",
+      "band_indx": 5,
+      "seconds": 0.06094528012908995,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1992.tif",
+      "band_indx": 3,
+      "seconds": 0.22171253082342446,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1992.tif",
+      "band_indx": 4,
+      "seconds": 0.15961277298629284,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1992.tif",
+      "band_indx": 6,
+      "seconds": 0.18831052095629275,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1993.tif",
+      "band_indx": 1,
+      "seconds": 0.18847194104455411,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1993.tif",
+      "band_indx": 2,
+      "seconds": 0.27570332516916096,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1993.tif",
+      "band_indx": 3,
+      "seconds": 0.19154663407243788,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1993.tif",
+      "band_indx": 4,
+      "seconds": 0.10995972692035139,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1993.tif",
+      "band_indx": 5,
+      "seconds": 0.21469775680452585,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1994.tif",
+      "band_indx": 2,
+      "seconds": 0.0866891189943999,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1993.tif",
+      "band_indx": 6,
+      "seconds": 0.2515674391761422,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1994.tif",
+      "band_indx": 1,
+      "seconds": 0.1907037408091128,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1994.tif",
+      "band_indx": 4,
+      "seconds": 0.2142691109329462,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1994.tif",
+      "band_indx": 3,
+      "seconds": 0.29644005512818694,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1994.tif",
+      "band_indx": 5,
+      "seconds": 0.11118938610889018,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1994.tif",
+      "band_indx": 6,
+      "seconds": 0.19055159389972687,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1995.tif",
+      "band_indx": 1,
+      "seconds": 0.18886480713263154,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1995.tif",
+      "band_indx": 2,
+      "seconds": 0.1490712808445096,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1995.tif",
+      "band_indx": 3,
+      "seconds": 0.06507431413047016,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1995.tif",
+      "band_indx": 5,
+      "seconds": 0.060237593948841095,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1995.tif",
+      "band_indx": 4,
+      "seconds": 0.1366562859620899,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1996.tif",
+      "band_indx": 1,
+      "seconds": 0.07789800316095352,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1995.tif",
+      "band_indx": 6,
+      "seconds": 0.11570783494971693,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1996.tif",
+      "band_indx": 2,
+      "seconds": 0.1535116930026561,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1996.tif",
+      "band_indx": 5,
+      "seconds": 0.08593498705886304,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1996.tif",
+      "band_indx": 6,
+      "seconds": 0.1639637309126556,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1996.tif",
+      "band_indx": 4,
+      "seconds": 0.40933958208188415,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1997.tif",
+      "band_indx": 2,
+      "seconds": 0.08027656096965075,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1997.tif",
+      "band_indx": 1,
+      "seconds": 0.18121075490489602,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1996.tif",
+      "band_indx": 3,
+      "seconds": 0.49438727810047567,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1997.tif",
+      "band_indx": 3,
+      "seconds": 0.13845767779275775,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1997.tif",
+      "band_indx": 4,
+      "seconds": 0.2309812291059643,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1997.tif",
+      "band_indx": 5,
+      "seconds": 0.25036495993845165,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1997.tif",
+      "band_indx": 6,
+      "seconds": 0.2643989589996636,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1998.tif",
+      "band_indx": 1,
+      "seconds": 0.325122341979295,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1998.tif",
+      "band_indx": 2,
+      "seconds": 0.27892170287668705,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1998.tif",
+      "band_indx": 3,
+      "seconds": 0.24692794494330883,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1998.tif",
+      "band_indx": 6,
+      "seconds": 0.1378060767892748,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1998.tif",
+      "band_indx": 4,
+      "seconds": 0.2577275140210986,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1999.tif",
+      "band_indx": 1,
+      "seconds": 0.08704676991328597,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1998.tif",
+      "band_indx": 5,
+      "seconds": 0.1815698950085789,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1999.tif",
+      "band_indx": 2,
+      "seconds": 0.3514730460010469,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1999.tif",
+      "band_indx": 4,
+      "seconds": 0.28370769997127354,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1999.tif",
+      "band_indx": 5,
+      "seconds": 0.28577285492792726,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1999.tif",
+      "band_indx": 3,
+      "seconds": 0.550780767807737,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2000.tif",
+      "band_indx": 1,
+      "seconds": 0.27188569493591785,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2000.tif",
+      "band_indx": 3,
+      "seconds": 0.17861907393671572,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_1999.tif",
+      "band_indx": 6,
+      "seconds": 0.4477124619297683,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2000.tif",
+      "band_indx": 2,
+      "seconds": 0.26987601700238883,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2000.tif",
+      "band_indx": 4,
+      "seconds": 0.08926131203770638,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2000.tif",
+      "band_indx": 5,
+      "seconds": 0.21176953800022602,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2001.tif",
+      "band_indx": 2,
+      "seconds": 0.08220260008238256,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2001.tif",
+      "band_indx": 1,
+      "seconds": 0.21397242695093155,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2001.tif",
+      "band_indx": 4,
+      "seconds": 0.05591525393538177,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2000.tif",
+      "band_indx": 6,
+      "seconds": 0.39545019483193755,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2001.tif",
+      "band_indx": 5,
+      "seconds": 0.13234885106794536,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2001.tif",
+      "band_indx": 6,
+      "seconds": 0.16138862096704543,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2001.tif",
+      "band_indx": 3,
+      "seconds": 0.4019414158537984,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2002.tif",
+      "band_indx": 2,
+      "seconds": 0.25917736417613924,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2002.tif",
+      "band_indx": 3,
+      "seconds": 0.2653592759743333,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2002.tif",
+      "band_indx": 5,
+      "seconds": 0.17972610983997583,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2002.tif",
+      "band_indx": 4,
+      "seconds": 0.3562711819540709,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2002.tif",
+      "band_indx": 6,
+      "seconds": 0.267440885072574,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2003.tif",
+      "band_indx": 2,
+      "seconds": 0.2658042721450329,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2002.tif",
+      "band_indx": 1,
+      "seconds": 0.9581457211170346,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2003.tif",
+      "band_indx": 4,
+      "seconds": 0.2663105430547148,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2003.tif",
+      "band_indx": 6,
+      "seconds": 0.17959757591597736,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2003.tif",
+      "band_indx": 3,
+      "seconds": 0.5302301328629255,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2003.tif",
+      "band_indx": 5,
+      "seconds": 0.44192143715918064,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2003.tif",
+      "band_indx": 1,
+      "seconds": 0.8833737529348582,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2004.tif",
+      "band_indx": 3,
+      "seconds": 0.26564337289892137,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2004.tif",
+      "band_indx": 5,
+      "seconds": 0.16506379703059793,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2004.tif",
+      "band_indx": 4,
+      "seconds": 0.33497891412116587,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2004.tif",
+      "band_indx": 6,
+      "seconds": 0.22322130808606744,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2005.tif",
+      "band_indx": 1,
+      "seconds": 0.2000491979997605,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2005.tif",
+      "band_indx": 3,
+      "seconds": 0.11283443379215896,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2005.tif",
+      "band_indx": 4,
+      "seconds": 0.13635915401391685,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2004.tif",
+      "band_indx": 2,
+      "seconds": 0.8459188221022487,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2004.tif",
+      "band_indx": 1,
+      "seconds": 1.025271168211475,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2005.tif",
+      "band_indx": 5,
+      "seconds": 0.33522158209234476,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2006.tif",
+      "band_indx": 1,
+      "seconds": 0.26581685710698366,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2006.tif",
+      "band_indx": 3,
+      "seconds": 0.17905568494461477,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2006.tif",
+      "band_indx": 2,
+      "seconds": 0.3529806211590767,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2006.tif",
+      "band_indx": 5,
+      "seconds": 0.17122628283686936,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2006.tif",
+      "band_indx": 4,
+      "seconds": 0.34721411811187863,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2005.tif",
+      "band_indx": 2,
+      "seconds": 1.0402167770080268,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2007.tif",
+      "band_indx": 2,
+      "seconds": 0.1816144089680165,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2007.tif",
+      "band_indx": 1,
+      "seconds": 0.3531604679301381,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2007.tif",
+      "band_indx": 3,
+      "seconds": 0.2680396600626409,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2007.tif",
+      "band_indx": 5,
+      "seconds": 0.17063420987688005,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2007.tif",
+      "band_indx": 4,
+      "seconds": 0.33408464514650404,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2005.tif",
+      "band_indx": 6,
+      "seconds": 1.443070963025093,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2008.tif",
+      "band_indx": 3,
+      "seconds": 0.1875039068982005,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2006.tif",
+      "band_indx": 6,
+      "seconds": 1.0474088608752936,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2008.tif",
+      "band_indx": 5,
+      "seconds": 0.21296757110394537,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2007.tif",
+      "band_indx": 6,
+      "seconds": 0.6907572869677097,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2008.tif",
+      "band_indx": 2,
+      "seconds": 0.6226524370722473,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2008.tif",
+      "band_indx": 1,
+      "seconds": 0.7882968739140779,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2009.tif",
+      "band_indx": 1,
+      "seconds": 0.43935195403173566,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2009.tif",
+      "band_indx": 2,
+      "seconds": 0.4436912718228996,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2009.tif",
+      "band_indx": 6,
+      "seconds": 0.16479893680661917,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2009.tif",
+      "band_indx": 4,
+      "seconds": 0.3832779999356717,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2010.tif",
+      "band_indx": 2,
+      "seconds": 0.08613620302639902,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2009.tif",
+      "band_indx": 5,
+      "seconds": 0.3868275908753276,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2008.tif",
+      "band_indx": 6,
+      "seconds": 0.9074231199920177,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2010.tif",
+      "band_indx": 3,
+      "seconds": 0.2675505168735981,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2010.tif",
+      "band_indx": 1,
+      "seconds": 0.4764669998548925,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2010.tif",
+      "band_indx": 5,
+      "seconds": 0.35376693890430033,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2009.tif",
+      "band_indx": 3,
+      "seconds": 0.9872843909543008,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2011.tif",
+      "band_indx": 3,
+      "seconds": 0.14322616602294147,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2011.tif",
+      "band_indx": 2,
+      "seconds": 0.30513857095502317,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2010.tif",
+      "band_indx": 4,
+      "seconds": 0.7088977231178433,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2011.tif",
+      "band_indx": 6,
+      "seconds": 0.17951471800915897,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2012.tif",
+      "band_indx": 1,
+      "seconds": 0.17558885994367301,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2011.tif",
+      "band_indx": 5,
+      "seconds": 0.3970606168732047,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2012.tif",
+      "band_indx": 3,
+      "seconds": 0.11221004812978208,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2011.tif",
+      "band_indx": 1,
+      "seconds": 0.8265033431816846,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2012.tif",
+      "band_indx": 2,
+      "seconds": 0.29302685987204313,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2012.tif",
+      "band_indx": 5,
+      "seconds": 0.13683485588990152,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2011.tif",
+      "band_indx": 4,
+      "seconds": 0.7133762179873884,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2013.tif",
+      "band_indx": 2,
+      "seconds": 0.10792519594542682,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2012.tif",
+      "band_indx": 6,
+      "seconds": 0.25987669196911156,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2012.tif",
+      "band_indx": 4,
+      "seconds": 0.45375797315500677,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2010.tif",
+      "band_indx": 6,
+      "seconds": 1.3402863568626344,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2013.tif",
+      "band_indx": 4,
+      "seconds": 0.3212719829753041,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2008.tif",
+      "band_indx": 4,
+      "seconds": 2.5162625340744853,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2013.tif",
+      "band_indx": 6,
+      "seconds": 0.34613337088376284,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2013.tif",
+      "band_indx": 1,
+      "seconds": 0.7386633409187198,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2013.tif",
+      "band_indx": 3,
+      "seconds": 0.8272448249626905,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2014.tif",
+      "band_indx": 2,
+      "seconds": 0.537801839178428,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2015.tif",
+      "band_indx": 1,
+      "seconds": 0.18139551510103047,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2014.tif",
+      "band_indx": 1,
+      "seconds": 0.8032495260704309,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2015.tif",
+      "band_indx": 2,
+      "seconds": 0.353042010916397,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2015.tif",
+      "band_indx": 3,
+      "seconds": 0.35445969994179904,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2015.tif",
+      "band_indx": 4,
+      "seconds": 0.47157914005219936,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2015.tif",
+      "band_indx": 6,
+      "seconds": 0.3852662858553231,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2016.tif",
+      "band_indx": 3,
+      "seconds": 0.1417333371937275,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2016.tif",
+      "band_indx": 4,
+      "seconds": 0.11554548214189708,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2016.tif",
+      "band_indx": 5,
+      "seconds": 0.10505492589436471,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2013.tif",
+      "band_indx": 5,
+      "seconds": 1.7637330719735473,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2014.tif",
+      "band_indx": 3,
+      "seconds": 1.5007881289348006,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2015.tif",
+      "band_indx": 5,
+      "seconds": 0.8607371000107378,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2017.tif",
+      "band_indx": 2,
+      "seconds": 0.24399393796920776,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2014.tif",
+      "band_indx": 6,
+      "seconds": 1.4832995450124145,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2017.tif",
+      "band_indx": 3,
+      "seconds": 0.33616621303372085,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2014.tif",
+      "band_indx": 4,
+      "seconds": 1.8407675279304385,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2017.tif",
+      "band_indx": 5,
+      "seconds": 0.44454894005320966,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2014.tif",
+      "band_indx": 5,
+      "seconds": 2.020450840005651,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2018.tif",
+      "band_indx": 1,
+      "seconds": 0.4478437970392406,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2018.tif",
+      "band_indx": 5,
+      "seconds": 0.17964310897514224,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2016.tif",
+      "band_indx": 1,
+      "seconds": 1.5685042541008443,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2018.tif",
+      "band_indx": 6,
+      "seconds": 0.25387873384170234,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2018.tif",
+      "band_indx": 3,
+      "seconds": 0.5613325720187277,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2019.tif",
+      "band_indx": 1,
+      "seconds": 0.24437152687460184,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2016.tif",
+      "band_indx": 2,
+      "seconds": 1.6800471949391067,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2019.tif",
+      "band_indx": 5,
+      "seconds": 0.08128965203650296,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2018.tif",
+      "band_indx": 4,
+      "seconds": 0.6359726581722498,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2018.tif",
+      "band_indx": 2,
+      "seconds": 0.8828527049627155,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2020.tif",
+      "band_indx": 2,
+      "seconds": 0.10645972099155188,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2016.tif",
+      "band_indx": 6,
+      "seconds": 1.5953531770501286,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2020.tif",
+      "band_indx": 1,
+      "seconds": 0.27940021408721805,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2020.tif",
+      "band_indx": 4,
+      "seconds": 0.2191214319318533,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2019.tif",
+      "band_indx": 4,
+      "seconds": 0.5787036949768662,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2021.tif",
+      "band_indx": 1,
+      "seconds": 0.17917067697271705,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2019.tif",
+      "band_indx": 2,
+      "seconds": 0.8761393609456718,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2020.tif",
+      "band_indx": 3,
+      "seconds": 0.6136312868911773,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2019.tif",
+      "band_indx": 3,
+      "seconds": 0.9757032641209662,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2017.tif",
+      "band_indx": 6,
+      "seconds": 1.856251454912126,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2021.tif",
+      "band_indx": 3,
+      "seconds": 0.4253209999296814,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2021.tif",
+      "band_indx": 5,
+      "seconds": 0.31220633001066744,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2022.tif",
+      "band_indx": 2,
+      "seconds": 0.10702514997683465,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2017.tif",
+      "band_indx": 4,
+      "seconds": 2.268804223043844,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2017.tif",
+      "band_indx": 1,
+      "seconds": 2.586865704972297,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2021.tif",
+      "band_indx": 6,
+      "seconds": 0.5043833118397743,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2021.tif",
+      "band_indx": 4,
+      "seconds": 0.7739613039884716,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2020.tif",
+      "band_indx": 5,
+      "seconds": 1.3003495607990772,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2022.tif",
+      "band_indx": 3,
+      "seconds": 0.5485038158949465,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2019.tif",
+      "band_indx": 6,
+      "seconds": 1.71326072094962,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2022.tif",
+      "band_indx": 1,
+      "seconds": 0.8603430800139904,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2023.tif",
+      "band_indx": 3,
+      "seconds": 0.3531019960064441,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2023.tif",
+      "band_indx": 6,
+      "seconds": 0.1476863760035485,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2023.tif",
+      "band_indx": 2,
+      "seconds": 0.5442967708222568,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2023.tif",
+      "band_indx": 1,
+      "seconds": 0.7159347839187831,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2022.tif",
+      "band_indx": 6,
+      "seconds": 0.8955851951614022,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2022.tif",
+      "band_indx": 4,
+      "seconds": 1.1095011502038687,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2023.tif",
+      "band_indx": 5,
+      "seconds": 0.6073918619658798,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2023.tif",
+      "band_indx": 4,
+      "seconds": 0.6957849899772555,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2024.tif",
+      "band_indx": 3,
+      "seconds": 0.3276969068683684,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2024.tif",
+      "band_indx": 1,
+      "seconds": 0.43119536503218114,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2024.tif",
+      "band_indx": 6,
+      "seconds": 0.09153573587536812,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2024.tif",
+      "band_indx": 2,
+      "seconds": 0.3724513058550656,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2024.tif",
+      "band_indx": 5,
+      "seconds": 0.15940438699908555,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2022.tif",
+      "band_indx": 5,
+      "seconds": 1.143428894924,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2020.tif",
+      "band_indx": 6,
+      "seconds": 2.0035988988820463,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2021.tif",
+      "band_indx": 2,
+      "seconds": 1.826923239044845,
+      "output_keys": 7
+    },
+    {
+      "key_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/dem/wbt/subwta.tif",
+      "parameter_fn": "/wc1/batch/qa-derived-rap-daa5702c3380/rap/_rap_v3_2024.tif",
+      "band_indx": 4,
+      "seconds": 0.2497093330603093,
+      "output_keys": 7
+    }
+  ],
+  "lock_seconds": [
+    3.9678860639687628
+  ],
+  "validation_seconds": [
+    0.07654828391969204
+  ],
+  "cache_note": "Ordinary copies prime filesystem pages; no cold-storage claim.",
+  "success": true,
+  "years": [
+    1986,
+    2024
+  ],
+  "multi_ofe": false,
+  "bands": [
+    "ANNUAL_FORB_AND_GRASS",
+    "BARE_GROUND",
+    "LITTER",
+    "PERENNIAL_FORB_AND_GRASS",
+    "SHRUB",
+    "TREE"
+  ],
+  "input_bytes": 576244,
+  "whole_analysis_seconds": 22.090074300998822,
+  "published_rows": 1638,
+  "prior_output_rows": 1638,
+  "numerical_parity_with_prior": true,
+  "finalizer_hash_seconds": 0.05326526379212737,
+  "finalizer_hash_budget_seconds": 10.0,
+  "finalizer_hash_budget_pass": true,
+  "exact_two_signature_passes": true,
+  "expected_native_calls": 234,
+  "named_inputs_unchanged": true,
+  "modules_unchanged": true
+}

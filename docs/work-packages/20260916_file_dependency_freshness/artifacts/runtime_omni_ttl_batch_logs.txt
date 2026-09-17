@@ -1,0 +1,46 @@
+INFO:wctl2:docker compose logs --since 30m rq-worker-batch
+wepppy-rq-worker-batch  | >>> WEPPpyo3 interchange import OK: /workdir/wepppyo3/release/linux/py312/wepppyo3/wepp_interchange/wepp_interchange_rust.so
+wepppy-rq-worker-batch  | >>> WEPPpyo3 interchange SHA256: c6b746bb77be39d38321a365df1762fd8d88ce0522f3a51215d5bb8bfdddf248
+wepppy-rq-worker-batch  | 08:03:29 Starting worker pool abf4151693774530852072344b412306 with pid 7...
+wepppy-rq-worker-batch  | 08:03:29 Starting worker started with PID 359
+wepppy-rq-worker-batch  | 08:03:29 Worker rq:worker:56f0404089484eac9298d68f53e24d80 started with PID 359, version 1.16.2
+wepppy-rq-worker-batch  | 08:03:29 Subscribing to channel rq:pubsub:56f0404089484eac9298d68f53e24d80
+wepppy-rq-worker-batch  | 08:03:29 *** Listening on batch...
+wepppy-rq-worker-batch  | 08:03:29 Starting worker started with PID 360
+wepppy-rq-worker-batch  | 08:03:29 Worker rq:worker:1391029b854845d68f51d91a8641e1e7 started with PID 360, version 1.16.2
+wepppy-rq-worker-batch  | 08:03:29 Subscribing to channel rq:pubsub:1391029b854845d68f51d91a8641e1e7
+wepppy-rq-worker-batch  | 08:03:29 Scheduler for batch started with PID 362
+wepppy-rq-worker-batch  | 08:03:29 Cleaning registries for queue: batch
+wepppy-rq-worker-batch  | 08:03:29 *** Listening on batch...
+wepppy-rq-worker-batch  | 08:03:29 Cleaning registries for queue: batch
+wepppy-rq-worker-batch  | 08:03:29 Starting worker started with PID 363
+wepppy-rq-worker-batch  | 08:03:29 Worker rq:worker:6043b80e3dee4529ab9b324fa847f303 started with PID 363, version 1.16.2
+wepppy-rq-worker-batch  | 08:03:29 Subscribing to channel rq:pubsub:6043b80e3dee4529ab9b324fa847f303
+wepppy-rq-worker-batch  | 08:03:29 *** Listening on batch...
+wepppy-rq-worker-batch  | 08:03:29 Cleaning registries for queue: batch
+wepppy-rq-worker-batch  | 08:03:29 Starting worker started with PID 365
+wepppy-rq-worker-batch  | 08:03:29 Worker rq:worker:34d5b8ce6c6e426abfac4c54e80ff22a started with PID 365, version 1.16.2
+wepppy-rq-worker-batch  | 08:03:29 Subscribing to channel rq:pubsub:34d5b8ce6c6e426abfac4c54e80ff22a
+wepppy-rq-worker-batch  | 08:03:29 *** Listening on batch...
+wepppy-rq-worker-batch  | 08:03:29 Cleaning registries for queue: batch
+wepppy-rq-worker-batch  | 08:16:59 Cleaning registries for queue: batch
+wepppy-rq-worker-batch  | 08:21:27 batch: wepppy.rq.project_rq.compile_dot_logs_rq() (3f8a415d-e8dd-4469-b785-44fe335be797)
+wepppy-rq-worker-batch  | Starting job 3f8a415d-e8dd-4469-b785-44fe335be797
+wepppy-rq-worker-batch  | failed to load Ron for shut-chlorofluorocarbon (/wc1/runs/sh/shut-chlorofluorocarbon): [Errno 2] No such file or directory: '/wc1/runs/sh/shut-chlorofluorocarbon/ron.nodb'
+wepppy-rq-worker-batch  | failed to load centroid for shut-chlorofluorocarbon (/wc1/runs/sh/shut-chlorofluorocarbon): [Errno 2] No such file or directory: '/wc1/runs/sh/shut-chlorofluorocarbon/watershed.nodb'
+wepppy-rq-worker-batch  | failed to load Ron for turbinate-split (/wc1/runs/tu/turbinate-split): [Errno 2] No such file or directory: '/wc1/runs/tu/turbinate-split/ron.nodb'
+wepppy-rq-worker-batch  | failed to load centroid for turbinate-split (/wc1/runs/tu/turbinate-split): [Errno 2] No such file or directory: '/wc1/runs/tu/turbinate-split/watershed.nodb'
+wepppy-rq-worker-batch  | failed to load Ron for vacant-better (/wc1/runs/va/vacant-better): [Errno 2] No such file or directory: '/wc1/runs/va/vacant-better/ron.nodb'
+wepppy-rq-worker-batch  | failed to load centroid for vacant-better (/wc1/runs/va/vacant-better): [Errno 2] No such file or directory: '/wc1/runs/va/vacant-better/watershed.nodb'
+wepppy-rq-worker-batch  | failed to load Ron for unlovable-perigee (/wc1/runs/un/unlovable-perigee): [Errno 2] No such file or directory: '/wc1/runs/un/unlovable-perigee/ron.nodb'
+wepppy-rq-worker-batch  | failed to load centroid for unlovable-perigee (/wc1/runs/un/unlovable-perigee): [Errno 2] No such file or directory: '/wc1/runs/un/unlovable-perigee/watershed.nodb'
+wepppy-rq-worker-batch  | failed to load Ron for worldly-moshav (/wc1/runs/wo/worldly-moshav): [Errno 2] No such file or directory: '/wc1/runs/wo/worldly-moshav/ron.nodb'
+wepppy-rq-worker-batch  | failed to load centroid for worldly-moshav (/wc1/runs/wo/worldly-moshav): [Errno 2] No such file or directory: '/wc1/runs/wo/worldly-moshav/watershed.nodb'
+wepppy-rq-worker-batch  | Finished job 3f8a415d-e8dd-4469-b785-44fe335be797
+wepppy-rq-worker-batch  | 08:21:35 batch: Job OK (3f8a415d-e8dd-4469-b785-44fe335be797)
+wepppy-rq-worker-batch  | 08:21:35 Result is kept for 86400 seconds
+wepppy-rq-worker-batch  | 08:21:57 batch: wepppy.rq.project_rq.index_usersum_docs_rq(require_vendor_files=False, sync_postgres=True, write_index=False) (39e02840-dc9c-464d-83d9-60bc27558cc8)
+wepppy-rq-worker-batch  | Starting job 39e02840-dc9c-464d-83d9-60bc27558cc8
+wepppy-rq-worker-batch  | Finished job 39e02840-dc9c-464d-83d9-60bc27558cc8
+wepppy-rq-worker-batch  | 08:21:59 batch: Job OK (39e02840-dc9c-464d-83d9-60bc27558cc8)
+wepppy-rq-worker-batch  | 08:21:59 Result is kept for 86400 seconds

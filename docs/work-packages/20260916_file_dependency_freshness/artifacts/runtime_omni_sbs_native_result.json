@@ -1,0 +1,138 @@
+{
+  "status": "passed",
+  "manifest": "/wc1/batch/qa-omni-native-20260917-a61f3e/omni-native-manifest.json",
+  "manifest_sha256": "d23a24ae279544316ec2fbe22283dc3da97d20884ad099afab66f8cf2092a982",
+  "runid": "batch;;qa-omni-native-20260917-a61f3e;;qa-omni-native-20260917-a61f3e-grizzly",
+  "project": "/wc1/batch/qa-omni-native-20260917-a61f3e/runs/qa-omni-native-20260917-a61f3e-grizzly",
+  "identity": {
+    "gid": 993,
+    "groups": [
+      993
+    ],
+    "uid": 1000,
+    "umask": "0o22"
+  },
+  "source_after": {
+    "files": 3916,
+    "hashed_bytes": 6375730842,
+    "unchanged": true
+  },
+  "wepp_binary": "wepp_260803",
+  "module_hashes": {
+    "wepppy/nodb/core/landuse.py": "46954d6d325789972af2ad901458c3106f5d88dde1212715fd409baba5012cd8",
+    "wepppy/nodb/core/soils.py": "50b0aa414feb3eb36db50a40e6d2396e41d6483cfb551c049b195e17ba712be6",
+    "wepppy/nodb/mods/omni/omni.py": "22bd86e063d66ec94783037861b9428a30f4f2bdba6d29f1a0c816c08534e614",
+    "wepppy/nodb/mods/omni/omni_clone_contrast_service.py": "f7490428128e0fb34a81e9e7404c71b9e098ec49c70f38097ac840b6dfc419e6",
+    "wepppy/nodb/mods/omni/omni_mode_build_services.py": "8d6d4590947eed0a731295f0f0ff7f5082af840372f98090f1a2db62ed9f518d",
+    "wepppy/nodb/mods/omni/omni_run_orchestration_service.py": "e09f1b19fe75d650b04df2d272219729964774817a7c989f44fdb986c316b134",
+    "wepppy/nodb/mods/omni/omni_sbs_freshness.py": "6f95a6f6f3bc8836259361fb5883697578b1a2392baee5540b87b2f3961e2832",
+    "wepppy/nodb/mods/omni/omni_station_catalog_service.py": "ecd08d23ab564e4065e5e9bcb3bdfca068063ea3db9c15dddb520855926139ae"
+  },
+  "actual_hillslopes": 217,
+  "generated_file_entries_including_watershed": 218,
+  "years": [
+    1980,
+    1981,
+    1982,
+    1983,
+    1984,
+    1985,
+    1986,
+    1987,
+    1988,
+    1989,
+    1990,
+    1991,
+    1992,
+    1993,
+    1994,
+    1995,
+    1996,
+    1997,
+    1998,
+    1999,
+    2000,
+    2001,
+    2002,
+    2003,
+    2004,
+    2005,
+    2006,
+    2007,
+    2008,
+    2009,
+    2010,
+    2011,
+    2012,
+    2013,
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "stages": [
+    {
+      "generation": 1,
+      "severity": 1,
+      "status": "passed",
+      "native_elapsed_seconds": 393.1961247669533,
+      "consumed_skip_seconds": 1.4676224750000983,
+      "retained_artifacts": "/wc1/batch/qa-omni-native-20260917-a61f3e/generation-1",
+      "retained_regular_files": 2812,
+      "receipt": {
+        "sha256": "fe70fafea3c718c45a1a7f91b2c3c311cd936b8923f84c3d73ed7ded6656d380",
+        "source_path": "/wc1/batch/qa-omni-native-20260917-a61f3e/runs/qa-omni-native-20260917-a61f3e-grizzly/omni/_limbo/0/acceptance_sbs_qa-omni-native-20260917-a61f3e.tif",
+        "version": 1
+      },
+      "generated": {
+        "man": 218,
+        "run": 218,
+        "sol": 218
+      },
+      "output_rows": {
+        "loss_pw0.all_years.class_data.parquet": 230,
+        "loss_pw0.hill.parquet": 217,
+        "loss_pw0.out.parquet": 11
+      },
+      "changed_generated_counts": {},
+      "watershed_output_changed": null
+    },
+    {
+      "generation": 2,
+      "severity": 3,
+      "status": "passed",
+      "native_elapsed_seconds": 386.4629452950321,
+      "consumed_skip_seconds": 1.4080461079720408,
+      "retained_artifacts": "/wc1/batch/qa-omni-native-20260917-a61f3e/generation-2",
+      "retained_regular_files": 2806,
+      "receipt": {
+        "sha256": "742f5eb7190e76f3270f143a045bd845f9e40497d161d56dece52b0da05e69f9",
+        "source_path": "/wc1/batch/qa-omni-native-20260917-a61f3e/runs/qa-omni-native-20260917-a61f3e-grizzly/omni/_limbo/0/acceptance_sbs_qa-omni-native-20260917-a61f3e.tif",
+        "version": 1
+      },
+      "generated": {
+        "man": 218,
+        "run": 218,
+        "sol": 218
+      },
+      "output_rows": {
+        "loss_pw0.all_years.class_data.parquet": 230,
+        "loss_pw0.hill.parquet": 217,
+        "loss_pw0.out.parquet": 11
+      },
+      "changed_generated_counts": {
+        "man": 203,
+        "sol": 217
+      },
+      "watershed_output_changed": true
+    }
+  ]
+}

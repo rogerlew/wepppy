@@ -1,0 +1,35 @@
+{
+  "utc": "2026-09-17T07:37:33.617084+00:00",
+  "method": "GET",
+  "path": "/rq-engine/api/runs/qa-freshness-runtime-7e24c8d1/config/endpoints/rq_engine_run_wepp/defaults",
+  "request": null,
+  "status": 200,
+  "body": {
+    "contract_version": "1.0.0-draft",
+    "deployment_revision": "dev",
+    "run_state_revision": "runstate:qa-freshness-runtime-7e24c8d1:a6e653453366",
+    "run_state_domain": "metadata",
+    "run_state_vector": {
+      "orchestration_revision": null,
+      "metadata_revision": "runstate:qa-freshness-runtime-7e24c8d1:a6e653453366",
+      "outputs_revision": null
+    },
+    "operation_id": "rq_engine_run_wepp",
+    "resolved_defaults": {
+      "clip_soils": true,
+      "clip_soils_depth": 25.0,
+      "delineation_backend": "wbt",
+      "watershed_representation": "single-ofe",
+      "wepp_bin": "wepp_260803"
+    },
+    "defaults_context": {
+      "config": "config",
+      "active_mods": [
+        "disturbed",
+        "postfire_debris_flow"
+      ],
+      "region": "us"
+    },
+    "computed_at": "2026-09-17T07:37:33Z"
+  }
+}

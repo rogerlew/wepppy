@@ -1,0 +1,35 @@
+INFO:wctl2:docker compose exec profile-playback python docs/work-packages/20260916_file_dependency_freshness/artifacts/runtime_profile_replay.py qa-freshness-profile-7e24c8d1-sbs-profile
+project_config_warning code=manifest_missing run_id=profile;;tmp;;83663372a29a4b588884c9785fd1de5d config_filename=config.cfg declared_digest=None observed_digest=None
+project_config_warning code=manifest_missing run_id=profile;;tmp;;83663372a29a4b588884c9785fd1de5d config_filename=config.cfg declared_digest=None observed_digest=None
+project_config_warning code=manifest_missing run_id=profile;;tmp;;83663372a29a4b588884c9785fd1de5d config_filename=config.cfg declared_digest=None observed_digest=None
+project_config_warning code=manifest_missing run_id=profile;;tmp;;83663372a29a4b588884c9785fd1de5d config_filename=config.cfg declared_digest=None observed_digest=None
+project_config_warning code=manifest_missing run_id=profile;;tmp;;83663372a29a4b588884c9785fd1de5d config_filename=config.cfg declared_digest=None observed_digest=None
+project_config_warning code=manifest_missing run_id=profile;;tmp;;83663372a29a4b588884c9785fd1de5d config_filename=config.cfg declared_digest=None observed_digest=None
+project_config_warning code=manifest_missing run_id=profile;;tmp;;83663372a29a4b588884c9785fd1de5d config_filename=config.cfg declared_digest=None observed_digest=None
+project_config_warning code=manifest_missing run_id=profile;;tmp;;83663372a29a4b588884c9785fd1de5d config_filename=config.cfg declared_digest=None observed_digest=None
+project_config_warning code=manifest_missing run_id=profile;;tmp;;83663372a29a4b588884c9785fd1de5d config_filename=config.cfg declared_digest=None observed_digest=None
+project_config_warning code=manifest_missing run_id=profile;;tmp;;83663372a29a4b588884c9785fd1de5d config_filename=config.cfg declared_digest=None observed_digest=None
+2026-09-17 08:06:35 [INFO] wepppy.run.profile;;tmp;;83663372a29a4b588884c9785fd1de5d.disturbed: disturbed.on(TriggerEvents.ON_INIT_FINISH)
+[playback] PlaybackSession created (execute=True, verbose=True)
+[playback] Loaded 4 events from /workdir/wepppy-test-engine-data/profiles/qa-freshness-profile-7e24c8d1-sbs-profile/capture
+[playback] Resolved run id: qa-freshness-profile-7e24c8d1
+[playback] Using playback run id: profile;;tmp;;83663372a29a4b588884c9785fd1de5d
+[playback] [locks:pre-seed] Cleared 9 locks for qa-freshness-profile-7e24c8d1
+[playback] [locks:pre-seed] Cleared 9 locks for profile;;tmp;;83663372a29a4b588884c9785fd1de5d
+[playback] Using existing run directory: /workdir/wepppy-test-engine-data/playback_runs/83663372a29a4b588884c9785fd1de5d
+[playback] [locks:post-setup] Cleared 9 locks for qa-freshness-profile-7e24c8d1
+[playback] [locks:post-setup] Cleared 9 locks for profile;;tmp;;83663372a29a4b588884c9785fd1de5d
+[playback] Beginning playback
+[playback] freshness-upload-1 POST https://wc.bearhive.duckdns.org/rq-engine/api/runs/profile;;tmp;;83663372a29a4b588884c9785fd1de5d/config/tasks/upload-sbs/ [/rq-engine/api/runs/profile;;tmp;;83663372a29a4b588884c9785fd1de5d/config/tasks/upload-sbs/ (source /rq-engine/api/runs/qa-freshness-profile-7e24c8d1/config/tasks/upload-sbs/)]
+[playback] /rq-engine/api/runs/profile;;tmp;;83663372a29a4b588884c9785fd1de5d/config/tasks/upload-sbs/ response content-type application/json
+[playback] /rq-engine/api/runs/profile;;tmp;;83663372a29a4b588884c9785fd1de5d/config/tasks/upload-sbs/ response preview {"result":{"disturbed_fn":"input_upload_sbs.tif"}}
+[playback] response JSON did not include job_id
+[playback] no job id detected in /rq-engine/api/runs/profile;;tmp;;83663372a29a4b588884c9785fd1de5d/config/tasks/upload-sbs/ response
+[playback] freshness-upload-1 → HTTP 200 (2087ms)
+[playback] freshness-upload-2 POST https://wc.bearhive.duckdns.org/rq-engine/api/runs/profile;;tmp;;83663372a29a4b588884c9785fd1de5d/config/tasks/upload-sbs/ [/rq-engine/api/runs/profile;;tmp;;83663372a29a4b588884c9785fd1de5d/config/tasks/upload-sbs/ (source /rq-engine/api/runs/qa-freshness-profile-7e24c8d1/config/tasks/upload-sbs/)]
+[playback] /rq-engine/api/runs/profile;;tmp;;83663372a29a4b588884c9785fd1de5d/config/tasks/upload-sbs/ response content-type application/json
+[playback] /rq-engine/api/runs/profile;;tmp;;83663372a29a4b588884c9785fd1de5d/config/tasks/upload-sbs/ response preview {"result":{"disturbed_fn":"input_upload_sbs.tif"}}
+[playback] response JSON did not include job_id
+[playback] no job id detected in /rq-engine/api/runs/profile;;tmp;;83663372a29a4b588884c9785fd1de5d/config/tasks/upload-sbs/ response
+[playback] freshness-upload-2 → HTTP 200 (1738ms)
+Actual HTTP seed/wire/server parity passed for both distinct uploads.

@@ -1,0 +1,13 @@
+restore_live_poll_0000 200
+tree a749ef59-db75-47c5-b2ee-e09cfd981c29 started {'completed': 0, 'total': 1, 'unit': 'jobs', 'percent': 0.0, 'updated_at': '2026-09-17T08:21:28Z'}
+restore_live_poll_0001 200
+restore_live_poll_0002 200
+restore_live_poll_0003 200
+restore_live_poll_0004 200
+restore_live_poll_0005 200
+restore_live_poll_0006 200
+restore_live_poll_0007 200
+restore_live_poll_0008 200
+restore_live_poll_0009 200
+tree a749ef59-db75-47c5-b2ee-e09cfd981c29 finished {'completed': 1, 'total': 1, 'unit': 'jobs', 'percent': 100.0, 'updated_at': '2026-09-17T08:22:33Z'}
+restore_live_jobinfo 200

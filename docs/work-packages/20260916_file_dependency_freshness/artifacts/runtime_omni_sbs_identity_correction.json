@@ -1,0 +1,68 @@
+{
+  "finished_unix": 1789632092.956544,
+  "model_or_controller_hydration": false,
+  "new_destination": "/wc1/batch/qa-omni-native-20260917-a61f3e/runs/qa-omni-native-20260917-a61f3e-grizzly",
+  "new_runid": "batch;;qa-omni-native-20260917-a61f3e;;qa-omni-native-20260917-a61f3e-grizzly",
+  "old_destination": "/wc1/batch/qa-omni-native-20260917-a61f3e/runs/grizzly",
+  "old_runid": "batch;;qa-omni-native-20260917-a61f3e;;grizzly",
+  "original_manifest": "/wc1/batch/qa-omni-native-20260917-a61f3e/copy-manifest-before-identity-correction.json",
+  "reason": "RedisPrep ordinary/batch namespace uses the leaf basename; unique batch alone is insufficient",
+  "rewritten": [
+    {
+      "after_sha256": "2246a89219607cc3ea2a782e20f9abf71a7ef914438f6869a08f2fe8672d63d8",
+      "before_sha256": "6d5569fa56c4d74be28003a7954ad83d1b9d0add07fec5a41e1ec435a6e97d57",
+      "path": "climate.nodb"
+    },
+    {
+      "after_sha256": "80adcb192ef924cf1573e98c6ef812ee17ee23f7398b14027b0df2239907c897",
+      "before_sha256": "c64eac5c3051c48bff33fa32c296fda4e311a591c85c91e14b7972594e8cfd82",
+      "path": "disturbed.nodb"
+    },
+    {
+      "after_sha256": "29886bfe30e1ef135cc0fedf6d040404026132aa423eaee4fbd2108d8c60ddc9",
+      "before_sha256": "93f0e034976be4381e1705905d223b6fa1ec7eab0795c8ef09de4f232e5a53cd",
+      "path": "landuse.nodb"
+    },
+    {
+      "after_sha256": "fa516185e59cada1bdb6fc2c6c4f61b5a2c6bda39e396314eb5301c12cab859f",
+      "before_sha256": "f272d38e46d3900d9ed431275fc2091c4fefcab2d47747c1330772c19e096a68",
+      "path": "observed.nodb"
+    },
+    {
+      "after_sha256": "3f7df7bb1f1ba87d71121a61b121b866171dbe1391fecb407d9b15e77b639068",
+      "before_sha256": "8fc8d6b888b5042c525e16a7fb9862045bbe2f90bcc262682606aecea39e5796",
+      "path": "postfire_debris_flow.nodb"
+    },
+    {
+      "after_sha256": "a98bf079132b03b9f0d486346bc69c503ca7c50fcf7da59635d4fae8bde16847",
+      "before_sha256": "8b2de94beb52c57fda8de98b0d080a3d60079e240661a52d35c006ff65ec4954",
+      "path": "ron.nodb"
+    },
+    {
+      "after_sha256": "efb59fb936217f2707564af7f935674086775d136a7e934f9198f82777753008",
+      "before_sha256": "8928bb57edb1c18970444d8a630da78e548b0566f9438d7938a8d07c3536574b",
+      "path": "soils.nodb"
+    },
+    {
+      "after_sha256": "8c363be61596a2782931131d2b2b2517df46b7cb7800f0cf5832ec5dc867d586",
+      "before_sha256": "b61c803f768ad92ba6333a2413b2f2e542d58914dc00192cb73adeb7f75294c2",
+      "path": "unitizer.nodb"
+    },
+    {
+      "after_sha256": "62731823bde21abbe83c6100d3ca988c5ecfe90cd0448cdb2e35ef7b11135bc8",
+      "before_sha256": "8c8244cc21740985c06b1513a670416f376869b7872d7e7896e1b8910f2cb2d3",
+      "path": "watershed.nodb"
+    },
+    {
+      "after_sha256": "291d5407ea7f2bbcd2c5c199c03ea23b52711b0bc7f1a57d3817fc0e51e31109",
+      "before_sha256": "92898a295f9a8e33e73e9a6beabe2d9b9738223a16a59583013b3911e1ca3205",
+      "path": "wepp.nodb"
+    },
+    {
+      "after_sha256": "c92188dfaf90167cf86690c35ff427cd4ece6143acce9254b01ea1c46bd44db3",
+      "before_sha256": "e2251cd3d1578dca0b1fb14f8a1e8cca86a00baae9107021a078ace862ec4838",
+      "path": "_query_engine/catalog.json"
+    }
+  ],
+  "status": "prepared"
+}

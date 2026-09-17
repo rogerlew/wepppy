@@ -1,0 +1,1087 @@
+[
+  {
+    "service": "profile-playback",
+    "container": "profile-playback",
+    "container_id": "25a4e1cc897bc53f3c662a07c3efbac0b2bd1127664461b30fdabda66e7693ca",
+    "image_id": "sha256:6ac7e71030467a10e5d73dc18893cbd85c9202976d4b1b561a19dbb0d7ef2b75",
+    "user": "1000:993",
+    "group_add": null,
+    "mounts": [
+      {
+        "source": "/home/workdir/weppcloud-wbt",
+        "destination": "/workdir/weppcloud-wbt",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy-test-engine-data",
+        "destination": "/workdir/wepppy-test-engine-data",
+        "rw": true
+      },
+      {
+        "source": "/wc1",
+        "destination": "/wc1",
+        "rw": true
+      },
+      {
+        "source": "/var/run/docker.sock",
+        "destination": "/var/run/docker.sock",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/peridot",
+        "destination": "/workdir/peridot",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy",
+        "destination": "/workdir/wepppy",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppyo3",
+        "destination": "/workdir/wepppyo3",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/rosetta",
+        "destination": "/workdir/rosetta",
+        "rw": true
+      },
+      {
+        "source": "/wc1/geodata",
+        "destination": "/geodata",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/admin_password",
+        "destination": "/run/secrets/admin_password",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/redis_password",
+        "destination": "/run/secrets/redis_password",
+        "rw": false
+      }
+    ]
+  },
+  {
+    "service": "weppcloud",
+    "container": "weppcloud",
+    "container_id": "f535b3f1b0473bca5ef078adb6e0e188303629b22bbd82d40d16330d1df4a43c",
+    "image_id": "sha256:6ac7e71030467a10e5d73dc18893cbd85c9202976d4b1b561a19dbb0d7ef2b75",
+    "user": "1000:993",
+    "group_add": null,
+    "mounts": [
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/climate_engine_api_key",
+        "destination": "/run/secrets/climate_engine_api_key",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/redis_password",
+        "destination": "/run/secrets/redis_password",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppyo3",
+        "destination": "/workdir/wepppyo3",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/rosetta",
+        "destination": "/workdir/rosetta",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/peridot",
+        "destination": "/workdir/peridot",
+        "rw": true
+      },
+      {
+        "source": "/wc1",
+        "destination": "/wc1",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/opentopography_api_key",
+        "destination": "/run/secrets/opentopography_api_key",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/flask_security_password_salt",
+        "destination": "/run/secrets/flask_security_password_salt",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppy",
+        "destination": "/workdir/wepppy",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/weppcloud-wbt",
+        "destination": "/workdir/weppcloud-wbt",
+        "rw": true
+      },
+      {
+        "source": "/var/run/docker.sock",
+        "destination": "/var/run/docker.sock",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/agent_jwt_secret",
+        "destination": "/run/secrets/agent_jwt_secret",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/zoho_noreply_email_password",
+        "destination": "/run/secrets/zoho_noreply_email_password",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/wepp_auth_jwt_secrets",
+        "destination": "/run/secrets/wepp_auth_jwt_secrets",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/cap_secret",
+        "destination": "/run/secrets/cap_secret",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/flask_secret_key",
+        "destination": "/run/secrets/flask_secret_key",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppy-test-engine-data",
+        "destination": "/workdir/wepppy-test-engine-data",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/postgres_password",
+        "destination": "/run/secrets/postgres_password",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/oauth_google_client_secret",
+        "destination": "/run/secrets/oauth_google_client_secret",
+        "rw": false
+      },
+      {
+        "source": "/wc1/geodata",
+        "destination": "/geodata",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/oauth_github_client_secret",
+        "destination": "/run/secrets/oauth_github_client_secret",
+        "rw": false
+      }
+    ]
+  },
+  {
+    "service": "browse",
+    "container": "wepppy-browse",
+    "container_id": "c378783cb8f6e3a40bfce1d7761cf2daffc38fb9e6666e2eb46c26d639ff8191",
+    "image_id": "sha256:6ac7e71030467a10e5d73dc18893cbd85c9202976d4b1b561a19dbb0d7ef2b75",
+    "user": "1000:993",
+    "group_add": null,
+    "mounts": [
+      {
+        "source": "/wc1/geodata",
+        "destination": "/geodata",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/redis_password",
+        "destination": "/run/secrets/redis_password",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/weppcloud-wbt",
+        "destination": "/workdir/weppcloud-wbt",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppyo3",
+        "destination": "/workdir/wepppyo3",
+        "rw": true
+      },
+      {
+        "source": "/wc1",
+        "destination": "/wc1",
+        "rw": true
+      },
+      {
+        "source": "/var/run/docker.sock",
+        "destination": "/var/run/docker.sock",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy",
+        "destination": "/workdir/wepppy",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy-test-engine-data",
+        "destination": "/workdir/wepppy-test-engine-data",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/dtale_internal_token",
+        "destination": "/run/secrets/dtale_internal_token",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/wepp_auth_jwt_secrets",
+        "destination": "/run/secrets/wepp_auth_jwt_secrets",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/rosetta",
+        "destination": "/workdir/rosetta",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/peridot",
+        "destination": "/workdir/peridot",
+        "rw": true
+      }
+    ]
+  },
+  {
+    "service": "download",
+    "container": "wepppy-download",
+    "container_id": "1eb26c0510a6c3f4463aa82cc3f2fbc3af8ed76724eb6319d83e021bf196eb97",
+    "image_id": "sha256:6ac7e71030467a10e5d73dc18893cbd85c9202976d4b1b561a19dbb0d7ef2b75",
+    "user": "1000:993",
+    "group_add": null,
+    "mounts": [
+      {
+        "source": "/home/workdir/wepppy-test-engine-data",
+        "destination": "/workdir/wepppy-test-engine-data",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/peridot",
+        "destination": "/workdir/peridot",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/weppcloud-wbt",
+        "destination": "/workdir/weppcloud-wbt",
+        "rw": true
+      },
+      {
+        "source": "/var/run/docker.sock",
+        "destination": "/var/run/docker.sock",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/rosetta",
+        "destination": "/workdir/rosetta",
+        "rw": true
+      },
+      {
+        "source": "/wc1",
+        "destination": "/wc1",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/redis_password",
+        "destination": "/run/secrets/redis_password",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/wepp_auth_jwt_secrets",
+        "destination": "/run/secrets/wepp_auth_jwt_secrets",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppy",
+        "destination": "/workdir/wepppy",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppyo3",
+        "destination": "/workdir/wepppyo3",
+        "rw": true
+      },
+      {
+        "source": "/wc1/geodata",
+        "destination": "/geodata",
+        "rw": true
+      }
+    ]
+  },
+  {
+    "service": "dtale",
+    "container": "wepppy-dtale",
+    "container_id": "0528cda9dbdebf2b26d8d0851850d13f77ce2e15804fdf868ec96bd9b7a7881c",
+    "image_id": "sha256:6ac7e71030467a10e5d73dc18893cbd85c9202976d4b1b561a19dbb0d7ef2b75",
+    "user": "1000:993",
+    "group_add": null,
+    "mounts": [
+      {
+        "source": "/home/workdir/peridot",
+        "destination": "/workdir/peridot",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/weppcloud-wbt",
+        "destination": "/workdir/weppcloud-wbt",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy-test-engine-data",
+        "destination": "/workdir/wepppy-test-engine-data",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy",
+        "destination": "/workdir/wepppy",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/rosetta",
+        "destination": "/workdir/rosetta",
+        "rw": true
+      },
+      {
+        "source": "/var/run/docker.sock",
+        "destination": "/var/run/docker.sock",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/redis_password",
+        "destination": "/run/secrets/redis_password",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppyo3",
+        "destination": "/workdir/wepppyo3",
+        "rw": true
+      },
+      {
+        "source": "/wc1",
+        "destination": "/wc1",
+        "rw": true
+      },
+      {
+        "source": "/wc1/geodata",
+        "destination": "/geodata",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/dtale_internal_token",
+        "destination": "/run/secrets/dtale_internal_token",
+        "rw": false
+      }
+    ]
+  },
+  {
+    "service": "elevationquery",
+    "container": "wepppy-elevationquery",
+    "container_id": "ba5884006041c7166e63845dc1d66f4a1b0be4fc08cf2afd52854e38abc403f1",
+    "image_id": "sha256:6ac7e71030467a10e5d73dc18893cbd85c9202976d4b1b561a19dbb0d7ef2b75",
+    "user": "1000:993",
+    "group_add": null,
+    "mounts": [
+      {
+        "source": "/home/workdir/wepppyo3",
+        "destination": "/workdir/wepppyo3",
+        "rw": true
+      },
+      {
+        "source": "/wc1",
+        "destination": "/wc1",
+        "rw": true
+      },
+      {
+        "source": "/var/run/docker.sock",
+        "destination": "/var/run/docker.sock",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy",
+        "destination": "/workdir/wepppy",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy-test-engine-data",
+        "destination": "/workdir/wepppy-test-engine-data",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/weppcloud-wbt",
+        "destination": "/workdir/weppcloud-wbt",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/redis_password",
+        "destination": "/run/secrets/redis_password",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/rosetta",
+        "destination": "/workdir/rosetta",
+        "rw": true
+      },
+      {
+        "source": "/wc1/geodata",
+        "destination": "/geodata",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/peridot",
+        "destination": "/workdir/peridot",
+        "rw": true
+      }
+    ]
+  },
+  {
+    "service": "metquery",
+    "container": "wepppy-metquery",
+    "container_id": "cab929cb049129f3a3d5f8cc968c2a8eae6ff70e51222b3cd96bdd28bee06e3c",
+    "image_id": "sha256:6ac7e71030467a10e5d73dc18893cbd85c9202976d4b1b561a19dbb0d7ef2b75",
+    "user": "1000:993",
+    "group_add": null,
+    "mounts": [
+      {
+        "source": "/home/workdir/weppcloud-wbt",
+        "destination": "/workdir/weppcloud-wbt",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppyo3",
+        "destination": "/workdir/wepppyo3",
+        "rw": true
+      },
+      {
+        "source": "/wc1",
+        "destination": "/wc1",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy-test-engine-data",
+        "destination": "/workdir/wepppy-test-engine-data",
+        "rw": true
+      },
+      {
+        "source": "/var/run/docker.sock",
+        "destination": "/var/run/docker.sock",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy",
+        "destination": "/workdir/wepppy",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/rosetta",
+        "destination": "/workdir/rosetta",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/redis_password",
+        "destination": "/run/secrets/redis_password",
+        "rw": false
+      },
+      {
+        "source": "/wc1/geodata",
+        "destination": "/geodata",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/peridot",
+        "destination": "/workdir/peridot",
+        "rw": true
+      }
+    ]
+  },
+  {
+    "service": "query-engine",
+    "container": "wepppy-query-engine",
+    "container_id": "5073638b15778f2aec6bc18306247821c82c3515a3a1e33e166f13736ea7385d",
+    "image_id": "sha256:6ac7e71030467a10e5d73dc18893cbd85c9202976d4b1b561a19dbb0d7ef2b75",
+    "user": "1000:993",
+    "group_add": null,
+    "mounts": [
+      {
+        "source": "/wc1",
+        "destination": "/wc1",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/weppcloud-wbt",
+        "destination": "/workdir/weppcloud-wbt",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/redis_password",
+        "destination": "/run/secrets/redis_password",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/wepp_mcp_jwt_secret",
+        "destination": "/run/secrets/wepp_mcp_jwt_secret",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppy-test-engine-data",
+        "destination": "/workdir/wepppy-test-engine-data",
+        "rw": true
+      },
+      {
+        "source": "/var/run/docker.sock",
+        "destination": "/var/run/docker.sock",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppyo3",
+        "destination": "/workdir/wepppyo3",
+        "rw": true
+      },
+      {
+        "source": "/wc1/geodata",
+        "destination": "/geodata",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy",
+        "destination": "/workdir/wepppy",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/rosetta",
+        "destination": "/workdir/rosetta",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/peridot",
+        "destination": "/workdir/peridot",
+        "rw": true
+      }
+    ]
+  },
+  {
+    "service": "rq-engine",
+    "container": "wepppy-rq-engine",
+    "container_id": "db25b7cc29b9a7dafa6cb073d98217691bbac4989fb7c6eef1ddaff094beee32",
+    "image_id": "sha256:6ac7e71030467a10e5d73dc18893cbd85c9202976d4b1b561a19dbb0d7ef2b75",
+    "user": "1000:993",
+    "group_add": null,
+    "mounts": [
+      {
+        "source": "/var/run/docker.sock",
+        "destination": "/var/run/docker.sock",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy",
+        "destination": "/workdir/wepppy",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppyo3",
+        "destination": "/workdir/wepppyo3",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy-test-engine-data",
+        "destination": "/workdir/wepppy-test-engine-data",
+        "rw": true
+      },
+      {
+        "source": "/wc1/geodata",
+        "destination": "/geodata",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/peridot",
+        "destination": "/workdir/peridot",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/flask_secret_key",
+        "destination": "/run/secrets/flask_secret_key",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/postgres_password",
+        "destination": "/run/secrets/postgres_password",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/redis_password",
+        "destination": "/run/secrets/redis_password",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/rosetta",
+        "destination": "/workdir/rosetta",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/wepp_auth_jwt_secrets",
+        "destination": "/run/secrets/wepp_auth_jwt_secrets",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/cap_secret",
+        "destination": "/run/secrets/cap_secret",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/flask_security_password_salt",
+        "destination": "/run/secrets/flask_security_password_salt",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/weppcloud-wbt",
+        "destination": "/workdir/weppcloud-wbt",
+        "rw": true
+      },
+      {
+        "source": "/wc1",
+        "destination": "/wc1",
+        "rw": true
+      }
+    ]
+  },
+  {
+    "service": "rq-worker",
+    "container": "wepppy-rq-worker",
+    "container_id": "a51d7abc488e0f1b3c4fa79df77f0948411d1bbdca44146fc99bc397ff078678",
+    "image_id": "sha256:6ac7e71030467a10e5d73dc18893cbd85c9202976d4b1b561a19dbb0d7ef2b75",
+    "user": "1000:993",
+    "group_add": null,
+    "mounts": [
+      {
+        "source": "/home/workdir/wepppy-test-engine-data",
+        "destination": "/workdir/wepppy-test-engine-data",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/rosetta",
+        "destination": "/workdir/rosetta",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/peridot",
+        "destination": "/workdir/peridot",
+        "rw": true
+      },
+      {
+        "source": "/var/run/docker.sock",
+        "destination": "/var/run/docker.sock",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/flask_secret_key",
+        "destination": "/run/secrets/flask_secret_key",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/flask_security_password_salt",
+        "destination": "/run/secrets/flask_security_password_salt",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppyo3",
+        "destination": "/workdir/wepppyo3",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/redis_password",
+        "destination": "/run/secrets/redis_password",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/opentopography_api_key",
+        "destination": "/run/secrets/opentopography_api_key",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/climate_engine_api_key",
+        "destination": "/run/secrets/climate_engine_api_key",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/weppcloud-wbt",
+        "destination": "/workdir/weppcloud-wbt",
+        "rw": true
+      },
+      {
+        "source": "/wc1",
+        "destination": "/wc1",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/postgres_password",
+        "destination": "/run/secrets/postgres_password",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppy",
+        "destination": "/workdir/wepppy",
+        "rw": true
+      },
+      {
+        "source": "/wc1/geodata",
+        "destination": "/geodata",
+        "rw": true
+      }
+    ]
+  },
+  {
+    "service": "rq-worker-batch",
+    "container": "wepppy-rq-worker-batch",
+    "container_id": "9494e2cda41961d53e918fdc500eeacd1cbc462eff1d70cf9b1bb686270de626",
+    "image_id": "sha256:6ac7e71030467a10e5d73dc18893cbd85c9202976d4b1b561a19dbb0d7ef2b75",
+    "user": "1000:993",
+    "group_add": null,
+    "mounts": [
+      {
+        "source": "/wc1/geodata",
+        "destination": "/geodata",
+        "rw": true
+      },
+      {
+        "source": "/var/run/docker.sock",
+        "destination": "/var/run/docker.sock",
+        "rw": true
+      },
+      {
+        "source": "/wc1",
+        "destination": "/wc1",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/postgres_password",
+        "destination": "/run/secrets/postgres_password",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/flask_security_password_salt",
+        "destination": "/run/secrets/flask_security_password_salt",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/opentopography_api_key",
+        "destination": "/run/secrets/opentopography_api_key",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/climate_engine_api_key",
+        "destination": "/run/secrets/climate_engine_api_key",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/rosetta",
+        "destination": "/workdir/rosetta",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppyo3",
+        "destination": "/workdir/wepppyo3",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/peridot",
+        "destination": "/workdir/peridot",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy-test-engine-data",
+        "destination": "/workdir/wepppy-test-engine-data",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/redis_password",
+        "destination": "/run/secrets/redis_password",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/flask_secret_key",
+        "destination": "/run/secrets/flask_secret_key",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppy",
+        "destination": "/workdir/wepppy",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/weppcloud-wbt",
+        "destination": "/workdir/weppcloud-wbt",
+        "rw": true
+      }
+    ]
+  },
+  {
+    "service": "rq-worker-fork-archive",
+    "container": "wepppy-rq-worker-fork-archive",
+    "container_id": "2d85686fe2c03631cc1f9bcb9c28a3ab28bd35a3501840b129bf62c1ad08caef",
+    "image_id": "sha256:6ac7e71030467a10e5d73dc18893cbd85c9202976d4b1b561a19dbb0d7ef2b75",
+    "user": "1000:993",
+    "group_add": null,
+    "mounts": [
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/redis_password",
+        "destination": "/run/secrets/redis_password",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppy",
+        "destination": "/workdir/wepppy",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/peridot",
+        "destination": "/workdir/peridot",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppyo3",
+        "destination": "/workdir/wepppyo3",
+        "rw": true
+      },
+      {
+        "source": "/var/run/docker.sock",
+        "destination": "/var/run/docker.sock",
+        "rw": true
+      },
+      {
+        "source": "/wc1",
+        "destination": "/wc1",
+        "rw": true
+      },
+      {
+        "source": "/wc1/geodata",
+        "destination": "/geodata",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/rosetta",
+        "destination": "/workdir/rosetta",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy-test-engine-data",
+        "destination": "/workdir/wepppy-test-engine-data",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/weppcloud-wbt",
+        "destination": "/workdir/weppcloud-wbt",
+        "rw": true
+      }
+    ]
+  },
+  {
+    "service": "scheduler",
+    "container": "wepppy-scheduler",
+    "container_id": "bb0aabec1c90b8af5162c96abf604e3bd08c427960b9142e828051329d7b94c5",
+    "image_id": "sha256:6ac7e71030467a10e5d73dc18893cbd85c9202976d4b1b561a19dbb0d7ef2b75",
+    "user": "1000:993",
+    "group_add": null,
+    "mounts": [
+      {
+        "source": "/wc1/geodata",
+        "destination": "/geodata",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/peridot",
+        "destination": "/workdir/peridot",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/weppcloud-wbt",
+        "destination": "/workdir/weppcloud-wbt",
+        "rw": true
+      },
+      {
+        "source": "/wc1",
+        "destination": "/wc1",
+        "rw": true
+      },
+      {
+        "source": "/var/run/docker.sock",
+        "destination": "/var/run/docker.sock",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/rosetta",
+        "destination": "/workdir/rosetta",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/redis_password",
+        "destination": "/run/secrets/redis_password",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppyo3",
+        "destination": "/workdir/wepppyo3",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy-test-engine-data",
+        "destination": "/workdir/wepppy-test-engine-data",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy",
+        "destination": "/workdir/wepppy",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/postgres_password",
+        "destination": "/run/secrets/postgres_password",
+        "rw": false
+      }
+    ]
+  },
+  {
+    "service": "shape-converter",
+    "container": "wepppy-shape-converter",
+    "container_id": "f9271dc4304e2357c117c6009f1c9720ea5c0f2bce81e194b3c3471bec219af2",
+    "image_id": "sha256:6ac7e71030467a10e5d73dc18893cbd85c9202976d4b1b561a19dbb0d7ef2b75",
+    "user": "10001:10001",
+    "group_add": null,
+    "mounts": [
+      {
+        "source": "/home/workdir/wepppy",
+        "destination": "/workdir/wepppy",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/redis_password",
+        "destination": "/run/secrets/redis_password",
+        "rw": false
+      }
+    ]
+  },
+  {
+    "service": "wmesque",
+    "container": "wepppy-wmesque",
+    "container_id": "705486f6a635c6cbb2e3502ea815b5fc15612b105c0bd4a57c9ce8349149a435",
+    "image_id": "sha256:6ac7e71030467a10e5d73dc18893cbd85c9202976d4b1b561a19dbb0d7ef2b75",
+    "user": "1000:993",
+    "group_add": null,
+    "mounts": [
+      {
+        "source": "/home/workdir/peridot",
+        "destination": "/workdir/peridot",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/weppcloud-wbt",
+        "destination": "/workdir/weppcloud-wbt",
+        "rw": true
+      },
+      {
+        "source": "/wc1/geodata",
+        "destination": "/geodata",
+        "rw": true
+      },
+      {
+        "source": "/var/run/docker.sock",
+        "destination": "/var/run/docker.sock",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/redis_password",
+        "destination": "/run/secrets/redis_password",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/wepppyo3",
+        "destination": "/workdir/wepppyo3",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy-test-engine-data",
+        "destination": "/workdir/wepppy-test-engine-data",
+        "rw": true
+      },
+      {
+        "source": "/wc1",
+        "destination": "/wc1",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy",
+        "destination": "/workdir/wepppy",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/rosetta",
+        "destination": "/workdir/rosetta",
+        "rw": true
+      }
+    ]
+  },
+  {
+    "service": "wmesque2",
+    "container": "wepppy-wmesque2",
+    "container_id": "727d2e24ebb0132fcaa3d5d2113a461fe4acf61462524d315ae4b2945878f463",
+    "image_id": "sha256:6ac7e71030467a10e5d73dc18893cbd85c9202976d4b1b561a19dbb0d7ef2b75",
+    "user": "1000:993",
+    "group_add": null,
+    "mounts": [
+      {
+        "source": "/var/run/docker.sock",
+        "destination": "/var/run/docker.sock",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy",
+        "destination": "/workdir/wepppy",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/peridot",
+        "destination": "/workdir/peridot",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy-test-engine-data",
+        "destination": "/workdir/wepppy-test-engine-data",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/rosetta",
+        "destination": "/workdir/rosetta",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppy/docker/secrets/redis_password",
+        "destination": "/run/secrets/redis_password",
+        "rw": false
+      },
+      {
+        "source": "/home/workdir/weppcloud-wbt",
+        "destination": "/workdir/weppcloud-wbt",
+        "rw": true
+      },
+      {
+        "source": "/home/workdir/wepppyo3",
+        "destination": "/workdir/wepppyo3",
+        "rw": true
+      },
+      {
+        "source": "/wc1/geodata",
+        "destination": "/geodata",
+        "rw": true
+      },
+      {
+        "source": "/wc1",
+        "destination": "/wc1",
+        "rw": true
+      }
+    ]
+  }
+]

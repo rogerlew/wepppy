@@ -1,0 +1,21 @@
+{
+  "utc": "2026-09-17T08:22:37.930025+00:00",
+  "method": "GET",
+  "path": "/rq-engine/api/jobinfo/a749ef59-db75-47c5-b2ee-e09cfd981c29",
+  "request": null,
+  "status": 200,
+  "body": {
+    "job_id": "a749ef59-db75-47c5-b2ee-e09cfd981c29",
+    "runid": "qa-freshness-runtime-7e24c8d1",
+    "status": "finished",
+    "result": null,
+    "started_at": "2026-09-17 08:21:28.920039",
+    "ended_at": "2026-09-17 08:22:33.721080",
+    "description": "wepppy.rq.project_rq.restore_archive_rq('qa-freshness-runtime-7e24c8d1', 'qa-freshness-runtime-7e24c8d1.20260917T081729Z.zip')",
+    "elapsed_s": 64.801041,
+    "exc_info": null,
+    "auth_actor": null,
+    "culvert_batch_uuid": null,
+    "children": {}
+  }
+}

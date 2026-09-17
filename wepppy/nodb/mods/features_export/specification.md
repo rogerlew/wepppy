@@ -1026,7 +1026,7 @@ WP-10: Standards-aligned artifact `README.md` generation and zip plumbing (plann
 - Keep catalog/path resolution logic centralized in `catalog_loader.py`; no duplicated path construction in writers.
 - Keep data-shaping joins/projections in DuckDB SQL paths; avoid pandas merge pipelines in export hot paths.
 
-## File-content cache identity amendment (implementation pending)
+## File-content cache identity amendment (implemented)
 
 Service submissions MUST use SHA-256 for each existing regular file in the
 resolved catalog dependency set. Keep `mtime_ns` in dependency manifests as

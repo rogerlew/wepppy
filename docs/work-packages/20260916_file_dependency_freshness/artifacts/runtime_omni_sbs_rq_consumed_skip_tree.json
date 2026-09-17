@@ -1,0 +1,54 @@
+{
+  "27efd5e3-64e5-4de9-bc64-5f02d41e01bc": {
+    "declared_dependency_ids": [],
+    "dependency_keys": [],
+    "ended_at": "2026-09-17 08:34:45.214725",
+    "exception": null,
+    "function": "wepppy.rq.omni_rq.run_omni_scenarios_rq",
+    "origin": "batch",
+    "registered_children": {
+      "jobs:2,func:_compile_hillslope_summaries_rq": "9cb6617a-f1a1-4423-bdbb-08f3e9374b91",
+      "jobs:3,func:_finalize_omni_scenarios_rq": "be8ddc74-4d2d-431d-aa4e-003c49a4799a"
+    },
+    "result": "Unserializable return value",
+    "runid": "batch;;qa-omni-native-20260917-a61f3e;;qa-omni-native-20260917-a61f3e-grizzly",
+    "signature": null,
+    "started_at": "2026-09-17 08:34:40.566514",
+    "status": "finished",
+    "worker_name": "1391029b854845d68f51d91a8641e1e7"
+  },
+  "9cb6617a-f1a1-4423-bdbb-08f3e9374b91": {
+    "declared_dependency_ids": [],
+    "dependency_keys": [],
+    "ended_at": "2026-09-17 08:34:46.873155",
+    "exception": null,
+    "function": "wepppy.rq.omni_rq._compile_hillslope_summaries_rq",
+    "origin": "batch",
+    "registered_children": {},
+    "result": null,
+    "runid": "batch;;qa-omni-native-20260917-a61f3e;;qa-omni-native-20260917-a61f3e-grizzly",
+    "signature": null,
+    "started_at": "2026-09-17 08:34:45.246050",
+    "status": "finished",
+    "worker_name": "34d5b8ce6c6e426abfac4c54e80ff22a"
+  },
+  "be8ddc74-4d2d-431d-aa4e-003c49a4799a": {
+    "declared_dependency_ids": [
+      "9cb6617a-f1a1-4423-bdbb-08f3e9374b91"
+    ],
+    "dependency_keys": [
+      "rq:job:9cb6617a-f1a1-4423-bdbb-08f3e9374b91"
+    ],
+    "ended_at": "2026-09-17 08:34:46.951299",
+    "exception": null,
+    "function": "wepppy.rq.omni_rq._finalize_omni_scenarios_rq",
+    "origin": "batch",
+    "registered_children": {},
+    "result": null,
+    "runid": "batch;;qa-omni-native-20260917-a61f3e;;qa-omni-native-20260917-a61f3e-grizzly",
+    "signature": null,
+    "started_at": "2026-09-17 08:34:46.916039",
+    "status": "finished",
+    "worker_name": "6043b80e3dee4529ab9b324fa847f303"
+  }
+}

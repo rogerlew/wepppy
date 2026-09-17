@@ -1,0 +1,44 @@
+wepppy/rq/wepp_rq_stage_post.py:26:    run_wepp_watershed_interchange,
+wepppy/rq/wepp_rq_stage_post.py:345:        run_wepp_watershed_interchange(
+wepppy/rq/wepp_rq_stage_post.py:362:        activate_query_engine(wd, run_interchange=False, force_refresh=True)
+wepppy/wepp/interchange/watershed_loss_interchange.py:17:    "hill": "loss_pw0.hill.parquet",
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:26: * @property {(year: number) => Promise<Object|null>} loadBaseWeppYearlyData Load and cache base WEPP yearly summary for a year.
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:391:    const baseSummary = (state.baseWeppYearlyCache || {})[year];
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:429:  async function loadBaseWeppYearlyData(year) {
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:432:    if (state.baseWeppYearlyCache && state.baseWeppYearlyCache[year]) {
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:433:      return state.baseWeppYearlyCache[year];
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:463:        const nextBase = { ...(state.baseWeppYearlyCache || {}) };
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:465:        setState({ baseWeppYearlyCache: nextBase });
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:479:    let summary = (state.weppYearlyCache && state.weppYearlyCache[year]) || null;
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:480:    let nextCache = state.weppYearlyCache || {};
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:523:      await loadBaseWeppYearlyData(year);
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:533:      weppYearlyCache: { ...nextCache },
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:534:      baseWeppYearlyCache: { ...(getState().baseWeppYearlyCache || {}) },
+wepppy/weppcloud/static/js/gl-dashboard/data/wepp-data.js:857:    loadBaseWeppYearlyData,
+wepppy/weppcloud/controllers_js/build_controllers_js.py:55:GL_EXCLUDED_MODULES: Final[Set[str]] = {
+wepppy/weppcloud/controllers_js/build_controllers_js.py:57:    "subcatchment_delineation.js",
+wepppy/weppcloud/controllers_js/build_controllers_js.py:75:        and path.name not in GL_EXCLUDED_MODULES
+wepppy/weppcloud/controllers_js/wepp.js:221:                    "wepp:run:completed",
+wepppy/weppcloud/controllers_js/wepp.js:400:                return "WEPP_RUN_TASK_COMPLETED";
+wepppy/weppcloud/controllers_js/wepp.js:404:                return "WEPP_RUN_TASK_COMPLETED";
+wepppy/weppcloud/controllers_js/wepp.js:422:            weppEvents.emit("wepp:run:completed", completionPayload);
+wepppy/weppcloud/controllers_js/wepp.js:440:            if (normalized === "WEPP_RUN_TASK_COMPLETED") {
+wepppy/weppcloud/controllers_js/wepp.js:769:                        wepp.poll_completion_event = "WEPP_RUN_TASK_COMPLETED";
+wepppy/weppcloud/controllers_js/wepp.js:778:                            weppEvents.emit("wepp:run:completed", { job_id: null, payload: payload });
+wepppy/weppcloud/controllers_js/wepp.js:898:                        wepp.poll_completion_event = "WEPP_RUN_TASK_COMPLETED";
+wepppy/weppcloud/controllers_js/wepp.js:1037:                        wepp.poll_completion_event = "WEPP_RUN_TASK_COMPLETED";
+wepppy/weppcloud/controllers_js/wepp.js:1046:                            weppEvents.emit("wepp:run:completed", { job_id: null, payload: payload });
+wepppy/weppcloud/controllers_js/wepp.js:1109:                        wepp.poll_completion_event = "WEPP_RUN_TASK_COMPLETED";
+wepppy/weppcloud/controllers_js/wepp.js:1464:                        completionEvent = "WEPP_RUN_TASK_COMPLETED";
+wepppy/weppcloud/controllers_js/wepp.js:1472:                        completionEvent = "WEPP_RUN_TASK_COMPLETED";
+wepppy/weppcloud/controllers_js/wepp.js:1480:                        completionEvent = "WEPP_RUN_TASK_COMPLETED";
+wepppy/weppcloud/controllers_js/wepp.js:1488:                        completionEvent = "WEPP_RUN_TASK_COMPLETED";
+wepppy/weppcloud/controllers_js/wepp.js:1510:                    wepp.poll_completion_event = completionEvent || "WEPP_RUN_TASK_COMPLETED";
+wepppy/weppcloud/controllers_js/wepp.js:1562:                wepp.poll_completion_event === "WEPP_RUN_TASK_COMPLETED" ||
+wepppy/weppcloud/static/js/gl-dashboard/scenario/manager.js:26: * @property {(year: number) => Promise<void>} [loadBaseWeppYearlyData]
+wepppy/weppcloud/static/js/gl-dashboard/scenario/manager.js:256:      weppYearlyCache: {},
+wepppy/weppcloud/static/js/gl-dashboard/scenario/manager.js:257:      baseWeppYearlyCache: {},
+wepppy/weppcloud/static/js/gl-dashboard/scenario/manager.js:275:      if (weppYearlySelectedYear != null && weppDataManager && typeof weppDataManager.loadBaseWeppYearlyData === 'function') {
+wepppy/weppcloud/static/js/gl-dashboard/scenario/manager.js:276:        await weppDataManager.loadBaseWeppYearlyData(weppYearlySelectedYear);
+wepppy/weppcloud/static/js/gl-dashboard/scenario/manager.js:309:      if (weppYearlySelectedYear != null && weppDataManager && typeof weppDataManager.loadBaseWeppYearlyData === 'function') {
+wepppy/weppcloud/static/js/gl-dashboard/scenario/manager.js:310:        await weppDataManager.loadBaseWeppYearlyData(weppYearlySelectedYear);

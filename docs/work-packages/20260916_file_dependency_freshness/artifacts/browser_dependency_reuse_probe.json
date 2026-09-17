@@ -1,0 +1,12 @@
+[
+  {
+    "case": "explicit runoff render after underlying same-path Parquet changes",
+    "before": 25,
+    "after": 25,
+    "reload": 75,
+    "queries_in_original_controller": 1,
+    "real_parquet": true,
+    "real_duckdb": true,
+    "limitation": "DOM, controlBase, and HTTP transport are isolated; no live RQ job or deployed browser exercised. Completion dispatch is diagnostic only; actual Wepp controller sends its own emitter event, to which this controller has no listener."
+  }
+]

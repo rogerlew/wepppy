@@ -1,0 +1,37 @@
+INFO:wctl2:docker compose logs --tail 160 weppcloud
+weppcloud  | >>> Building controllers-gl.js bundle via /workdir/wepppy/wepppy/weppcloud/controllers_js/build_controllers_js.py...
+weppcloud  | >>> controllers-gl.js bundle written to /workdir/wepppy/wepppy/weppcloud/static/js/controllers-gl.js.
+weppcloud  | >>> controllers-gl.js bundle ready.
+weppcloud  | >>> Validating wepppyo3 import...
+weppcloud  | >>> WEPPpyo3 interchange import OK: /workdir/wepppyo3/release/linux/py312/wepppyo3/wepp_interchange/wepp_interchange_rust.so
+weppcloud  | >>> WEPPpyo3 interchange SHA256: c6b746bb77be39d38321a365df1762fd8d88ce0522f3a51215d5bb8bfdddf248
+weppcloud  | >>> Validating whitebox_tools import...
+weppcloud  | >>> whitebox_tools import OK: /workdir/weppcloud-wbt/WBT/whitebox_tools.py
+weppcloud  | [2026-09-17 08:03:18 +0000] [7] [INFO] Starting gunicorn 23.0.0
+weppcloud  | [2026-09-17 08:03:18 +0000] [7] [INFO] Listening at: http://0.0.0.0:8000 (7)
+weppcloud  | [2026-09-17 08:03:18 +0000] [7] [INFO] Using worker: gthread
+weppcloud  | [2026-09-17 08:03:18 +0000] [211] [INFO] Booting worker with pid: 211
+weppcloud  | [2026-09-17 08:03:18 +0000] [212] [INFO] Booting worker with pid: 212
+weppcloud  | [2026-09-17 08:03:18 +0000] [213] [INFO] Booting worker with pid: 213
+weppcloud  | [2026-09-17 08:03:18 +0000] [214] [INFO] Booting worker with pid: 214
+weppcloud  | ERROR:wepppy.weppcloud.utils.helpers:Exception handling request for run qa-freshness-runtime-7e24c8d1 [error_id=b71f968621284d319562ec807196ff82]: NotImplementedError
+weppcloud  | Traceback (most recent call last):
+weppcloud  |   File "/workdir/wepppy/wepppy/weppcloud/utils/helpers.py", line 909, in wrapper
+weppcloud  |     return func(runid, config, *args, **kwargs)
+weppcloud  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+weppcloud  |   File "/workdir/wepppy/wepppy/weppcloud/utils/cap_guard.py", line 106, in wrapper
+weppcloud  |     return func(*args, **kwargs)
+weppcloud  |            ^^^^^^^^^^^^^^^^^^^^^
+weppcloud  |   File "/workdir/wepppy/wepppy/weppcloud/routes/nodb_api/wepp_bp.py", line 1214, in report_wepp_avg_annual_watbal
+weppcloud  |     return _render_report_csv(
+weppcloud  |            ^^^^^^^^^^^^^^^^^^^
+weppcloud  |   File "/workdir/wepppy/wepppy/weppcloud/routes/nodb_api/wepp_bp.py", line 289, in _render_report_csv
+weppcloud  |     df = report.to_dataframe()
+weppcloud  |          ^^^^^^^^^^^^^^^^^^^^^
+weppcloud  |   File "/workdir/wepppy/wepppy/wepp/reports/report_base.py", line 108, in to_dataframe
+weppcloud  |     for row in self:
+weppcloud  |                ^^^^
+weppcloud  |   File "/workdir/wepppy/wepppy/wepp/reports/report_base.py", line 30, in __iter__
+weppcloud  |     raise NotImplementedError
+weppcloud  | NotImplementedError
+weppcloud  | 

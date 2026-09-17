@@ -1,0 +1,2 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20260916_file_dependency_freshness/artifacts/runtime_dtale_public.py --execute --label initial
+Public D-Tale acceptance passed: /workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/dtale_public_runtime_initial.json

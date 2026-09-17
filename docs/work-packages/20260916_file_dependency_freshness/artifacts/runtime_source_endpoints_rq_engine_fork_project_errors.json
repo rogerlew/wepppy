@@ -1,0 +1,72 @@
+{
+  "status": 200,
+  "body": {
+    "contract_version": "1.0.0-draft",
+    "deployment_revision": "dev",
+    "run_state_revision": "runstate:thespian-cleanness:94da27660795",
+    "run_state_domain": "metadata",
+    "run_state_vector": {
+      "orchestration_revision": null,
+      "metadata_revision": "runstate:thespian-cleanness:94da27660795",
+      "outputs_revision": null
+    },
+    "operation_id": "rq_engine_fork_project",
+    "errors": [
+      {
+        "error_code": "unauthorized",
+        "recoverable": true,
+        "http_statuses": [
+          401
+        ],
+        "recovery_actions": []
+      },
+      {
+        "error_code": "forbidden",
+        "recoverable": true,
+        "http_statuses": [
+          403
+        ],
+        "recovery_actions": []
+      },
+      {
+        "error_code": "not_found",
+        "recoverable": true,
+        "http_statuses": [
+          404
+        ],
+        "recovery_actions": [
+          {
+            "operation_id": "rq_engine_list_run_endpoints",
+            "required_fields": []
+          }
+        ]
+      },
+      {
+        "error_code": "validation_error",
+        "recoverable": true,
+        "http_statuses": [
+          400
+        ],
+        "recovery_actions": [
+          {
+            "operation_id": "rq_engine_fork_project",
+            "required_fields": []
+          }
+        ]
+      },
+      {
+        "error_code": "enqueue_failed",
+        "recoverable": true,
+        "http_statuses": [
+          500
+        ],
+        "recovery_actions": [
+          {
+            "operation_id": "rq_engine_fork_project",
+            "required_fields": []
+          }
+        ]
+      }
+    ]
+  }
+}

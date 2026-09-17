@@ -1,9 +1,10 @@
 # Audit and repair file dependency freshness
 
-This ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`. The owner authorized execution on 2026-09-17 UTC after scaffolding. M1 remains active alongside scoped reviewed implementation waves. Remaining
-behavior changes stay gated on their own reviewed contract checkpoints.
-Maintain Progress, Surprises & Discoveries, Decision Log and Outcomes &
-Retrospective throughout execution.
+This completed ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`.
+Owner-authorized execution completed on2026-09-17 UTC. Implementation through
+`de3a1eba0`, rebuilt development runtime and independent reviews pass within
+explicit justified-unresolved dispositions. No production deployment occurred.
+Historical execution entries below preserve their then-current status.
 
 ## Purpose / Big Picture
 
@@ -21,15 +22,39 @@ not merely a changed helper or passing unit tests.
 
 - [x] Scaffold package, discovery seeds and operation matrix, 2026-09-17 UTC.
 - [x] M1 initial scope/revision searches, independent seed inventories and real hard-link baseline.
-- [ ] M1 remaining exhaustive hash/cache-only consumer tracing and full disposition.
+- [x] M1 finite Python/non-Python consumer tracing and explicit dispositions completed; native indirect/completion and browser limits are not universal safety claims.
 - [x] M2 first-wave and cache-admission contracts independently reviewed and committed (`43317704f`, `0fe02dc0f`).
-- [ ] M2 remaining consumer checkpoints; NoDb hydration checkpoint committed (`4e000950a`).
-- [ ] M3: reviewed post-fire, NoDb hydration, bundle header, derived main-file and shared ordinary-digest waves committed in `edff4db5a`; scoped tests/reviews pass. Features-export content/publication implemented in `ae314b581` (199 affected tests). D-Tale checkpoint `fbac92404` implemented in `cf261f6ac` with 22 tests and scoped reviews; remaining consumer waves open.
-- [ ] M4: first broad Python sanity passed (8,721 passed, 103 skipped); final-state gates, complete reviews and performance evidence remain open.
-- [ ] M5: rebuild/restart development stack and real UI/RQ/WEPP acceptance.
-- [ ] M6: complete dispositions, promote durable docs and close package.
+- [x] M2 implemented-consumer checkpoints are ratified ancestors; deferred boundaries have explicit dispositions.
+- [x] M3: all ratified implementation waves committed through `de3a1eba0`; scoped correctness, security and performance reviews pass. Runtime acceptance is complete.
+- [x] M4: final quiet Python suite8,924 passed/99 skipped; npm112 suites/899 tests and lint, five stub surfaces, stub completeness, RQ graph and changed broad-exception gates pass. Scoped independent reviews and measured budgets pass; final runtime reviews are retained.
+- [x] M5:16 development services rebuilt/recreated; actual UI/RQ/WEPP, archive/recovery, native direct/RQ Omni and interleaved state acceptance complete.
+- [x] M6: complete dispositions, durable docs, final independent reviews and package closeout,2026-09-17 UTC.
 
 ## Surprises & Discoveries
+
+Live archive/restore preserves545 selected artifact bytes/modes and84 directory
+modes but reproduces the already dispositioned PF-R01 soil physical-inventory
+false staleness. Only `selections.soil_inputs` causes the comparator mismatch;
+all7 manifest-bound soil inputs and restored SQLite main/WAL/SHM bytes verify.
+An ordinary M3 rerun restores API/browser/report currentness. Canonical profile
+CLI replay separately returns two401s yet exits0; supported authenticated-session
+replay preserves both event payloads. Water-balance CSV exposes an existing
+unimplemented adapter; HTML and provenance-bearing Parquet download pass.
+These failures remain explicit, not converted into passing runtime claims.
+
+The normal access-log compiler rewrote source TTL and touched three empty logs
+after a successful full-source audit. Independent review permits only an explicit
+acceptance-harness exception requiring original bytes/lengths/modes for those
+four operational files, original membership, strict other3912 versions and a
+final complete hash audit. Original manifests/failures remain immutable; no
+named-source repair, production guard relaxation or scheduler stop occurred.
+
+S01 actual-owner review caught detached hydration dropping runtime logging, a
+legacy skipped association resurrected after invalidation, and copyfile alias
+protection lost by a streaming rewrite. Reinitialize canonical logging, snapshot
+the accepted association, and compare opened source/destination inodes before
+truncation. Retained original failures and independent after-probes distinguish
+these fixes from normal runtime acceptance still to come.
 
 CLI lineage prototype timings omitted mandatory strict directory traversal. The
 actual predicate exceeded5/40-ms means; same-call parent descriptor reuse reduced
@@ -57,6 +82,45 @@ ctime used for caches/read-race guards. These are candidate mechanisms, not
 confirmed bugs. Removing all ctime checks would conflate separate concerns.
 
 ## Decision Log
+
+Closeout decision,2026-09-17: accept M5/M6 against the ratified finite-inventory
+dispositions and actual runtime evidence. Do not expand this package into soil
+logical snapshot publication, browser-generation UX, profile CLI authentication
+or the existing CSV adapter. Those require separate contracts; retained failures
+and durable operator guidance make this boundary reviewable. Interleaved state
+acceptance tests the existing bounded-cache/no warm digest reread obligation;
+whole-state latency is observational because no numerical deadline was ratified.
+
+2026-09-17: runtime-discovered profile CLI auth/result-reporting and water-balance
+CSV adapter failures are independently attributed to unchanged preexisting
+code. Preserve them as failed checks with durable operator guidance; do not add
+a new auth flow or choose water-balance CSV numerical/display semantics inside
+the freshness change. C08 HTML/validated compact Parquet and S02 supported
+authenticated HTTP event-byte parity retain their bounded passing claims.
+The observed restore false-stale case is an actual runtime manifestation of the
+already justified-unresolved PF-R01 boundary, with ordinary rerun recovery proven.
+See `artifacts/runtime_acceptance.md` and independent runtime reviews.
+
+2026-09-17: adopt the bounded classifications and follow-up evidence in
+`artifacts/remaining_inventory_disposition_qa.md` and C07 in
+`artifacts/features_omni_remaining_closure_qa.md`. Roads upstream closure,
+AgFields wider cross-stage/native closure, explicit cached Geneva preparation,
+other upload-event families and contrast/source-unavailable boundaries remain
+justified unresolved. Their inspected controlled-ingest/completion predicates
+are preserved. Source tracing is not an actual normal-workflow failure; fixing
+these wider boundaries would redefine existing completion/snapshot contracts
+without the required producer/result and cost evidence. C07's held-receipt
+native stale mechanism remains confirmed, while an ordinary missing-receipt
+producer path is unverified. Do not hide either fact or claim it fixed by S01.
+C02 still requires the maintained mixed-profile export acceptance now prepared.
+The finite search/disposition records define coverage, not a proof over arbitrary
+vendored readers or untraced scientific internals.
+
+2026-09-17: scoped implementations are committed: Geneva `1556df345`, profile
+`7ad0ac609`, archive `7b4f22df9`, Omni `de3a1eba0`. S01 passes45 original component
+budgets and11 security/10 correctness native-owner controls. Five canonical
+stub surfaces pass. RQ graph regeneration changes line references only;146edges
+are unchanged. Final full-suite and after-restart runtime remain open.
 
 2026-09-17 UTC: B-F01 and the separately traced browser-family candidates receive
 explicit justified-unresolved inventory dispositions under the package complexity
@@ -111,14 +175,45 @@ on the owner's earlier requirement that runtime delivery be verified. They are
 future execution work, not authorization to restart during this scaffold turn.
 Use disposable runs for mutations; do not silently rerun existing user projects.
 
+- C01 indirect native closure is explicitly justified unresolved under the package
+  inventory allowance. The retained native counterexamples cannot be fixed by
+  the bounded GTiff/AAIGrid cache observer's uncached fallback: RAP already builds
+  outside its finalization lock. Preserve accepted local VRT/directory inputs
+  and strict main checks; an owned native read-set proof requires separate scope.
+  This supersedes earlier blanket blocker wording without claiming the defect
+  fixed. The RAP README's "Dependency freshness limit" records the durable user
+  limitation. Actual complete small RAP analysis used40files/234nativecalls,
+  retained1,638equal rows,53.3ms finalizer hashing and3.968s lock residence; this
+  is one small copied workflow, not universal performance/runtime acceptance.
+
 ## Outcomes & Retrospective
 
+All six milestones are complete. Actual WEPP preparation changes218 CLI
+ctimes/link counts with unchanged hashes and preserves accepted M3 currentness;
+actual changed climate invalidates it. All implemented waves are committed
+through `de3a1eba0`, with final8,924 Python/899 frontend passes and independent
+review records. Sixteen dev services were recreated with preserved identities
+and mounts; no production deployment occurred. Omni direct/live-RQ outputs and
+consumed-source skips agree. Two interleaved working sets retain395/512 digest
+entries,12,840 added hits and zero warm misses/direct uncached payloads. Whole
+state means739.48/862.19ms are observations, not an invented latency budget.
 
-Execution now retains baseline source searches, independent inventories, real
-filesystem failing probes and initial digest costs. First-wave checkpoint and the measured cache-admission amendment are committed.
-Committed runtime waves pass 712 post-fire tests, 155 NoDb tests, scoped header/derived/shared-digest suites, stub checks and the real-clock cache collision probe. Implementation reviews found no blocking
-code defect; full inventory disposition, remaining consumer fixes and all
-restarted-stack acceptance remain open; this is not package completion.
+Archive/restore preserves545 selected files and84 directory modes but exposes
+PF-R01 physical-soil false staleness; normal M3 recovery passes. Canonical profile
+CLI401/false success and water-balance CSV500 are existing defects, separately
+documented with supported authenticated replay and HTML/Parquet alternatives.
+Indirect-reader, dashboard-generation and completion-receipt boundaries remain
+explicitly unresolved under the inventory allowance. The final source audit
+preserves all3,916 original bytes/modes; four operational metadata changes are
+recorded, so whole-tree physical immutability is not claimed.
+
+The central lesson is that content equivalence, coherent publication and access
+identity need separate evidence. Retaining failed prototypes and actual runtime
+failures prevented passing component tests from hiding unsupported claims.
+Canonical contracts and operator guidance live outside this closed package;
+`artifacts/runtime_acceptance.md` and independent final reviews retain provenance.
+The optional Geneva module stubtest remains limited by existing native/typing
+errors; canonical stub surfaces pass.
 
 ## Context and Orientation
 
@@ -167,7 +262,7 @@ a standalone checkpoint ancestor commit before implementation. Check existing
 execution authorization first; do not ask repeatedly for already approved work.
 
 M3 fixes the confirmed post-fire path first, with a real filesystem regression
-that fails before the change and passes afterward. Detect both harmless hard
+that fails before the change and passes afterwards. Detect both harmless hard
 links and actual changed input. Then work through independently reviewable
 consumer groups, updating each contract, tests and inventory disposition.
 Avoid a shared abstraction until repeated compatible behavior demonstrates its
@@ -278,6 +373,42 @@ implementation reviews underway. All unresolved scientific cache and raster
 closure findings remain package blockers, as does live acceptance.
 
 ## Latest execution evidence
+
+2026-09-17 08:04UTC: final quiet full suite8,924passed/99skipped in1192.22s.
+Frontend112suites/899tests and lint pass; stub completeness passes. Static build
+initially lacked host Jinja2; repeated canonical wctl build with repository venv
+PATH succeeds. Original failure retained. Read-only preflight finds all three
+queues empty; canonical16-service dev recreation is in progress using the
+completed local image. Runtime acceptance has not yet been claimed.
+
+
+Runtime preparation update: the canonical dev image built successfully as
+`sha256:00a3e43a88a5c9079a7e58a8423432d69f22b7b09c0a9288078b67abbca1d3f8`.
+Sixteen running shared-image service identities/mounts are retained before
+restart. The first fullsuite stopped after3881passes/51skips on the unchanged
+simulated HTTP timing assertion (1.2377s versus1s) during build/copy work.
+The isolated quiet rerun passed; a complete quiet rerun is now running, with
+native acceptance still held. No assertion was relaxed. The full independent
+canary copy has3916files/6,375,730,842logical bytes and no shared source inodes at
+`/wc1/runs/qa/qa-freshness-runtime-7e24c8d1`; original source hashes and versions
+are in its retained copy manifest. Browser login/setup and run-scoped discovery
+succeeded. An initial config-token0 GET returned404; the stored config stem is
+`config`, whose pipeline/readiness/schema calls return200. No model job has yet
+been submitted. S02 canonical cookie-only playback has a separately reviewed
+preexisting bearer-auth mismatch; actual per-request failure evidence and an
+authorized Session HTTP control will be retained after restart.
+
+
+2026-09-17 latest scoped acceptance: Geneva passes135 combined Geneva/profile/archive
+tests and all16 amended performance gates after checkpoint `21aacd74f`; profile
+SBS passes all27 original performance gates (16MiB first capture545.60/550ms is
+close to the mean limit). Archive directory-mode implementation passes9 independent
+security probes; QA review is in progress. S01 direct/RQ implementation is active:
+61 focused tests pass; independent actual-owner review found and closed alias
+truncation, late child drift, legacy association resurrection and detached-refresh
+logger loss. Final S01 probes and implementation timing remain open. The dev
+stack has not been rebuilt/restarted; live HTTP/RQ/WEPP/archive acceptance and
+final full-suite gates remain mandatory. Earlier status paragraphs are historical.
 
 2026-09-17 UTC: independent actual-consumer probes reproduced stale water-balance
 and landuse reports, live D-Tale CSV/Parquet behavior, post-fire soil logical
@@ -394,3 +525,7 @@ reviews are active; four initial actual-native regressions pass. Existing mocked
 raster fixtures are being replaced with real native output assertions. Publication
 and typed-drift failure-path review findings remain open. S01/S02 checkpoint
 budget measurements are in progress; no S01/S02 production changes yet.
+
+Revision2026-09-17: closed all milestones after final direct/live-RQ source audit,
+interleaved cache observation and independent reviews; retained all failed and
+unresolved boundaries explicitly rather than claiming universal freshness.

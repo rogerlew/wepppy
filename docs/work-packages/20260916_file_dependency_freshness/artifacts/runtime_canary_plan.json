@@ -1,0 +1,25 @@
+{
+  "runid": "qa-freshness-runtime-7e24c8d1",
+  "config": "config",
+  "initial_climate": {
+    "climate_mode": 11,
+    "climate_catalog_id": "observed_gridmet",
+    "climate_station_method": "auto",
+    "climate_spatial_method": "multiple",
+    "climatestation_mode": -1,
+    "climate_spatialmode": 1,
+    "observed_start_year": 2019,
+    "observed_end_year": 2021
+  },
+  "changed_climate": {
+    "climate_mode": 11,
+    "climate_catalog_id": "observed_gridmet",
+    "climate_station_method": "auto",
+    "climate_spatial_method": "multiple",
+    "climatestation_mode": -1,
+    "climate_spatialmode": 1,
+    "observed_start_year": 2019,
+    "observed_end_year": 2022
+  },
+  "rationale": "Three/four-year disposable API canary bounds rebuild/model runtime while preserving the actual 218-hillslope watershed. Separate Omni/native and performance fixtures retain the original46-year workload. These are test request selections, not production defaults."
+}

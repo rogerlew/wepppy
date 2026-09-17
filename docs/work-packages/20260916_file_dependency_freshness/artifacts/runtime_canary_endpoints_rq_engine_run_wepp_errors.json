@@ -1,0 +1,92 @@
+{
+  "utc": "2026-09-17T07:37:33.752357+00:00",
+  "method": "GET",
+  "path": "/rq-engine/api/runs/qa-freshness-runtime-7e24c8d1/config/endpoints/rq_engine_run_wepp/errors",
+  "request": null,
+  "status": 200,
+  "body": {
+    "contract_version": "1.0.0-draft",
+    "deployment_revision": "dev",
+    "run_state_revision": "runstate:qa-freshness-runtime-7e24c8d1:a6e653453366",
+    "run_state_domain": "metadata",
+    "run_state_vector": {
+      "orchestration_revision": null,
+      "metadata_revision": "runstate:qa-freshness-runtime-7e24c8d1:a6e653453366",
+      "outputs_revision": null
+    },
+    "operation_id": "rq_engine_run_wepp",
+    "errors": [
+      {
+        "error_code": "unauthorized",
+        "recoverable": true,
+        "http_statuses": [
+          401
+        ],
+        "recovery_actions": []
+      },
+      {
+        "error_code": "forbidden",
+        "recoverable": true,
+        "http_statuses": [
+          403
+        ],
+        "recovery_actions": []
+      },
+      {
+        "error_code": "not_found",
+        "recoverable": true,
+        "http_statuses": [
+          404
+        ],
+        "recovery_actions": [
+          {
+            "operation_id": "rq_engine_list_run_endpoints",
+            "required_fields": []
+          }
+        ]
+      },
+      {
+        "error_code": "validation_error",
+        "recoverable": true,
+        "http_statuses": [
+          400
+        ],
+        "recovery_actions": [
+          {
+            "operation_id": "rq_engine_run_wepp",
+            "required_fields": []
+          }
+        ]
+      },
+      {
+        "error_code": "enqueue_failed",
+        "recoverable": true,
+        "http_statuses": [
+          500
+        ],
+        "recovery_actions": [
+          {
+            "operation_id": "rq_engine_run_wepp",
+            "required_fields": []
+          }
+        ]
+      },
+      {
+        "error_code": "invalid_watershed_abstraction_state",
+        "recoverable": true,
+        "http_statuses": [
+          409
+        ],
+        "recovery_actions": [
+          {
+            "operation_id": "rq_engine_build_subcatchments_and_abstract_watershed",
+            "required_fields": []
+          }
+        ],
+        "recovery_notes": [
+          "This recovery action enqueues subcatchment rebuild work only outside batch/_base contexts. Batch/_base callers must materialize watershed.subwta through their normal setup flow before retrying run-wepp endpoints."
+        ]
+      }
+    ]
+  }
+}

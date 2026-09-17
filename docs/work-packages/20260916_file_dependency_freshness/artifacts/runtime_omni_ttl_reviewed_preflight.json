@@ -1,0 +1,86 @@
+{
+  "files": 3916,
+  "hashed_bytes": 90407,
+  "all_original_bytes_verified": false,
+  "strict_original_versions_except_recorded_operational_paths": true,
+  "operational_metadata_changes": [
+    {
+      "path": "TTL",
+      "original_version": [
+        64,
+        1192294,
+        427,
+        1789616871627589681,
+        1789616871629589695
+      ],
+      "observed_version": [
+        64,
+        1303704,
+        427,
+        1789633294475347204,
+        1789633294476347210
+      ],
+      "original_and_current_sha256": "a3c165f423fcab435706508d630383733aa030b2bf41f3579c2f0e996bc02d40",
+      "mode": 420
+    },
+    {
+      "path": "disturbed.log",
+      "original_version": [
+        64,
+        1188477,
+        83255,
+        1789629757669088301,
+        1789629757669088301
+      ],
+      "observed_version": [
+        64,
+        1188477,
+        83255,
+        1789633290009319504,
+        1789633290009319504
+      ],
+      "original_and_current_sha256": "0b4224c3eb8a0c926b624048a3541764c0df10bc6804b7eac692363b6d76db0e",
+      "mode": 420
+    },
+    {
+      "path": "ron.log",
+      "original_version": [
+        64,
+        1188573,
+        237,
+        1789629697544712568,
+        1789629697544712568
+      ],
+      "observed_version": [
+        64,
+        1188573,
+        237,
+        1789633290001319455,
+        1789633290001319455
+      ],
+      "original_and_current_sha256": "b43e17ca865ae68e0988c4956b06a2b662085a168a25b759bddce15e07e77ebf",
+      "mode": 420
+    },
+    {
+      "path": "watershed.log",
+      "original_version": [
+        64,
+        1188577,
+        6488,
+        1789629757496087221,
+        1789629757496087221
+      ],
+      "observed_version": [
+        64,
+        1188577,
+        6488,
+        1789633290016319548,
+        1789633290016319548
+      ],
+      "original_and_current_sha256": "b3664ea43391efe6ed815eca4c3a9989bb5f2e448ef4fa5e3fc1633bff5bd617",
+      "mode": 420
+    }
+  ],
+  "whole_tree_physical_identity_unchanged": false,
+  "review": "runtime_omni_ttl_attribution.md and independent security disposition"
+}

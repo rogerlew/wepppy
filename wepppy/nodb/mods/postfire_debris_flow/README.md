@@ -132,9 +132,21 @@ The specification and detailed contracts map the implemented source and UI paths
   including equal-size rewrites with restored modification time. Older snapshots
   without hashes retain strict metadata checks and may need an explicit rerun.
   Do not rewrite historical hashes or rerun projects automatically. Soil/SQLite
-  provenance and CLI/parquet readiness remain separate checks. See the
+  provenance and CLI/parquet readiness remain separate checks. New execution
+  requires a Parquet export with matching CLI producer lineage; rebuild older
+  proofless climate exports through normal **Build climate**. Reports retain
+  their supported legacy reads. See the
   [freshness contract](../../../../docs/schemas/file-dependency-freshness-contract.md)
   for compatibility and pending development acceptance.
+- Known M3 limitation: metadata changes in soil inputs, prepared source evidence
+  and SQLite main/WAL/SHM files can still mark an assessment stale when their
+  scientific content is unchanged. Byte-identical replacement, archive restore,
+  VACUUM/checkpoint or edits to unrelated tables can trigger this behavior.
+  A restored project's saved artifacts can remain intact while M3 shows stale.
+  Use an explicit **Run M3** after restore to establish fresh acceptance, then
+  wait for its current result before treating it as current. State polling does
+  not create SQLite snapshots or rewrite saved provenance; rebuilding soils or
+  editing saved hashes is not the recovery. Strict execution guards remain active.
 - Troubleshoot unavailable reports by checking retained acceptance and artifact
   evidence in the ordinary project browser. Do not rebuild soils, republish or
   run a model as an automatic report recovery action. Report technical errors

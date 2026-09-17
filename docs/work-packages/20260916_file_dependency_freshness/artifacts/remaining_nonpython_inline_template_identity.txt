@@ -1,0 +1,39 @@
+wepppy/weppcloud/templates/combined_ws_viewer2.htm:197:        // NEW: dataCache will store the fetched variable data (runoff, loss, etc.)
+wepppy/weppcloud/templates/combined_ws_viewer2.htm:198:        var dataCache;
+wepppy/weppcloud/templates/combined_ws_viewer2.htm:366:          if (dataCache === undefined) {
+wepppy/weppcloud/templates/combined_ws_viewer2.htm:372:            dataCache = {}; // Initialize cache object
+wepppy/weppcloud/templates/combined_ws_viewer2.htm:390:                dataCache[runid] = response;
+wepppy/weppcloud/templates/combined_ws_viewer2.htm:397:                dataCache[runid] = null;
+wepppy/weppcloud/templates/combined_ws_viewer2.htm:407:              if (dataCache[runid]) {
+wepppy/weppcloud/templates/combined_ws_viewer2.htm:408:                _render(runid, dataCache[runid]);
+wepppy/weppcloud/templates/combined_ws_viewer2.htm:469:                dataCache = undefined;
+wepppy/weppcloud/templates/combined_ws_viewer2.htm:687:          dataCache = undefined;
+wepppy/weppcloud/templates/controls/landuse_map.htm:164:    lookupSha256: null
+wepppy/weppcloud/templates/controls/landuse_map.htm:171:      state.lookupSha256 = payload.lookup_sha256 || null;
+wepppy/weppcloud/templates/controls/landuse_map.htm:175:      state.lookupSha256 = null;
+wepppy/weppcloud/templates/controls/landuse_map.htm:383:    state.lookupSha256 = content.lookup_sha256 || null;
+wepppy/weppcloud/templates/controls/landuse_map.htm:400:      if (!state.lookupSha256) {
+wepppy/weppcloud/templates/controls/landuse_map.htm:414:          "X-If-Match-Sha256": state.lookupSha256
+wepppy/weppcloud/templates/ui_showcase/component_gallery.htm:291:         error="The last upload failed checksum validation."
+wepppy/weppcloud/templates/controls/landuse_user_defined.htm:153:            <th>SHA256</th>
+wepppy/weppcloud/templates/controls/landuse_user_defined.htm:348:      shaCode.textContent = String(item.sha256 || "");
+wepppy/weppcloud/templates/controls/edit_csv.htm:214:    baselineSha256: null
+wepppy/weppcloud/templates/controls/edit_csv.htm:513:function markStale(remoteSha256) {
+wepppy/weppcloud/templates/controls/edit_csv.htm:518:    var suffix = remoteSha256 ? " (new version detected)." : ".";
+wepppy/weppcloud/templates/controls/edit_csv.htm:627:                sha256: String(content.lookup_sha256 || "").trim() || null,
+wepppy/weppcloud/templates/controls/edit_csv.htm:630:                mtimeEpoch: content.mtime_epoch
+wepppy/weppcloud/templates/controls/edit_csv.htm:650:                sha256: String(content.lookup_sha256 || "").trim() || null,
+wepppy/weppcloud/templates/controls/edit_csv.htm:653:                mtimeEpoch: content.mtime_epoch
+wepppy/weppcloud/templates/controls/edit_csv.htm:667:    if (!editorState.loaded || editorState.inFlightSave || editorState.stale || !editorState.baselineSha256) {
+wepppy/weppcloud/templates/controls/edit_csv.htm:672:            if (meta.sha256 && meta.sha256 !== editorState.baselineSha256) {
+wepppy/weppcloud/templates/controls/edit_csv.htm:673:                markStale(meta.sha256);
+wepppy/weppcloud/templates/controls/edit_csv.htm:741:    editorState.baselineSha256 = null;
+wepppy/weppcloud/templates/controls/edit_csv.htm:759:            editorState.baselineSha256 = snapshot.sha256;
+wepppy/weppcloud/templates/controls/edit_csv.htm:761:            if (!editorState.baselineSha256) {
+wepppy/weppcloud/templates/controls/edit_csv.htm:795:    var shaHeader = String(response.headers.get("X-Lookup-Sha256") || "").trim() || null;
+wepppy/weppcloud/templates/controls/edit_csv.htm:799:            lookupSha256: shaHeader
+wepppy/weppcloud/templates/controls/edit_csv.htm:817:    if (!editorState.baselineSha256) {
+wepppy/weppcloud/templates/controls/edit_csv.htm:851:            if_match_sha256: editorState.baselineSha256
+wepppy/weppcloud/templates/controls/edit_csv.htm:856:            if (result.lookupSha256) {
+wepppy/weppcloud/templates/controls/edit_csv.htm:857:                editorState.baselineSha256 = result.lookupSha256;
+wepppy/weppcloud/templates/controls/edit_csv.htm:870:                    var remoteSha = error.details && error.details.current_sha256 ? error.details.current_sha256 : null;

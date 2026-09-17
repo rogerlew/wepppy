@@ -1,0 +1,16 @@
+{
+  "utc": "2026-09-17T08:07:21.680944+00:00",
+  "method": "POST",
+  "path": "/rq-engine/api/runs/qa-freshness-runtime-7e24c8d1/config/postfire-debris-flow/run",
+  "request": {
+    "model": "M3",
+    "frequency_source": "cli"
+  },
+  "status": 200,
+  "body": {
+    "job_id": "be361f87-01e5-4bef-a653-abf0e902271d",
+    "result": {
+      "attempt_id": "b3b0e2e493014d5f92e71e549beef5dc"
+    }
+  }
+}

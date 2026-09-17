@@ -184,3 +184,13 @@ Those stored values are percent-scale RAP band summaries (`0..100`). `RAP_TS.get
 - `wepppy/nodb/core/landuse.py` (how RAP drives cover defaults during landuse build)
 - `wepppy/nodb/mods/rangeland_cover/rangeland_cover.py` (how RAPPointData is used to derive cover components)
 - `wepppy/rq/project_rq.py` (background job orchestration for RAP time series)
+
+## Dependency freshness limit
+
+Derived RAP publication checks the selected main files with uncached content
+signatures. This does not prove every indirect dependency consumed by native
+readers: a local VRT can refer to other files, and directory-backed raster stores
+can change chunks without changing their directory metadata. Those changes can
+still evade the finalization check. Keep such indirect inputs stable during
+analysis and rerun after changing them. Existing native formats and strict
+publication checks remain supported; no recursive dependency guarantee is made.

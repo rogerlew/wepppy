@@ -1,6 +1,6 @@
 # Omni SBS scenario input freshness
 
-Status: intended bounded S01 behavior; checkpoint pending.
+Status: bounded S01 implemented; actual direct and live-RQ acceptance completed on2026-09-17.
 
 ## Scope and identity
 

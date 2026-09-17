@@ -12,6 +12,8 @@ results=[]
 for path in paths:
     _digest_version.cache_clear()
     start=time.perf_counter(); checksum=cached_digest(path); cold=time.perf_counter()-start
+    time.sleep(1.01)
+    assert cached_digest(path)==checksum  # Fresh stable admission.
     start=time.perf_counter()
     for _ in range(100):
         assert cached_digest(path)==checksum

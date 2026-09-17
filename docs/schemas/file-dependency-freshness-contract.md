@@ -1,6 +1,6 @@
 # File dependency freshness contract
 
-Status: accepted first-wave checkpoint; implementation pending (2026-09-17 UTC).
+Status: implemented bounded contracts (2026-09-17 UTC); full runtime acceptance is tracked in the file-dependency-freshness work package.
 
 ## Identity obligations
 
@@ -99,7 +99,7 @@ its own owner-contract amendment, compatibility decision, failing baseline and
 reviewed checkpoint before adopting this behavior. Unresolved confirmed defects
 block repository-wide package completion; first-wave completion is not closure.
 
-## Timestamp-quantum cache admission amendment (accepted; implementation pending)
+## Timestamp-quantum cache admission amendment (implemented)
 
 Real rapid rewrites demonstrated identical complete stat keys with different
 bytes on the development filesystems. The immediate-reuse assumption above is
@@ -113,7 +113,7 @@ acceptance applies after admission. The original rapid-rewrite probe must pass
 without sleeps or mocked filesystem timestamps. Coherent metadata-on-open remains
 a filesystem requirement; NFS acceptance must be measured on disposable runs.
 
-## Controller bundle header identity (implementation pending)
+## Controller bundle header identity (implemented)
 
 The expected controller build ID is the `Build date:` value read from the
 current on-disk bundle header, scanning at most the existing 80 lines. It MUST
@@ -129,7 +129,7 @@ existing UI contract. Same-size/restored-time deployments must expose the new
 header without restarting the reading process. Header format, asset path,
 served-file alignment, client comparison and authorization remain unchanged.
 
-## Shared ordinary-file digest reuse (implementation pending)
+## Shared ordinary-file digest reuse (implemented)
 
 Ordinary local-file SHA-256 consumers MAY use one owned helper for verified,
 bounded reads and the observation-guarded cache specified by the digest-cache
@@ -162,7 +162,7 @@ shared helper is justified by reproduced stale output digests and the existing
 executable digest consumer using the same defective metadata shortcut; no
 watcher, daemon, datastore, dependency or new deployment topology is authorized.
 
-## D-Tale dataset generations (implementation pending)
+## D-Tale dataset generations (implemented)
 
 D-Tale loader and GeoJSON registration fingerprints MUST identify current
 ordinary-file bytes with the shared verified SHA-256 helper. Keep dataset IDs,

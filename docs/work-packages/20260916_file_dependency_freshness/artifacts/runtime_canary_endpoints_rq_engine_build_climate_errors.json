@@ -1,0 +1,149 @@
+{
+  "utc": "2026-09-17T07:37:33.350040+00:00",
+  "method": "GET",
+  "path": "/rq-engine/api/runs/qa-freshness-runtime-7e24c8d1/config/endpoints/rq_engine_build_climate/errors",
+  "request": null,
+  "status": 200,
+  "body": {
+    "contract_version": "1.0.0-draft",
+    "deployment_revision": "dev",
+    "run_state_revision": "runstate:qa-freshness-runtime-7e24c8d1:a6e653453366",
+    "run_state_domain": "metadata",
+    "run_state_vector": {
+      "orchestration_revision": null,
+      "metadata_revision": "runstate:qa-freshness-runtime-7e24c8d1:a6e653453366",
+      "outputs_revision": null
+    },
+    "operation_id": "rq_engine_build_climate",
+    "errors": [
+      {
+        "error_code": "unauthorized",
+        "recoverable": true,
+        "http_statuses": [
+          401
+        ],
+        "recovery_actions": []
+      },
+      {
+        "error_code": "forbidden",
+        "recoverable": true,
+        "http_statuses": [
+          403
+        ],
+        "recovery_actions": []
+      },
+      {
+        "error_code": "not_found",
+        "recoverable": true,
+        "http_statuses": [
+          404
+        ],
+        "recovery_actions": [
+          {
+            "operation_id": "rq_engine_list_run_endpoints",
+            "required_fields": []
+          }
+        ]
+      },
+      {
+        "error_code": "validation_error",
+        "recoverable": true,
+        "http_statuses": [
+          400
+        ],
+        "recovery_actions": [
+          {
+            "operation_id": "rq_engine_build_climate",
+            "required_fields": []
+          }
+        ]
+      },
+      {
+        "error_code": "enqueue_failed",
+        "recoverable": true,
+        "http_statuses": [
+          500
+        ],
+        "recovery_actions": [
+          {
+            "operation_id": "rq_engine_build_climate",
+            "required_fields": []
+          }
+        ]
+      },
+      {
+        "error_code": "missing_station_selection",
+        "recoverable": true,
+        "http_statuses": [
+          400,
+          409
+        ],
+        "recovery_actions": [
+          {
+            "operation_id": "rq_engine_build_climate",
+            "required_fields": [
+              "climatestation"
+            ]
+          }
+        ]
+      },
+      {
+        "error_code": "climate_mode_unavailable_for_region",
+        "recoverable": true,
+        "http_statuses": [
+          400
+        ],
+        "recovery_actions": [
+          {
+            "operation_id": "rq_engine_build_climate",
+            "required_fields": [
+              "climate_mode"
+            ]
+          }
+        ]
+      },
+      {
+        "error_code": "unsupported_capability",
+        "recoverable": true,
+        "http_statuses": [
+          400
+        ],
+        "recovery_actions": [
+          {
+            "operation_id": "rq_engine_build_climate",
+            "required_fields": []
+          }
+        ]
+      },
+      {
+        "error_code": "capability_authority_invalid",
+        "recoverable": false,
+        "http_statuses": [
+          409
+        ],
+        "recovery_actions": []
+      },
+      {
+        "error_code": "locale_authority_invalid",
+        "recoverable": false,
+        "http_statuses": [
+          409
+        ],
+        "recovery_actions": []
+      },
+      {
+        "error_code": "builder_registry_error",
+        "recoverable": true,
+        "http_statuses": [
+          503
+        ],
+        "recovery_actions": [
+          {
+            "operation_id": "rq_engine_build_climate",
+            "required_fields": []
+          }
+        ]
+      }
+    ]
+  }
+}

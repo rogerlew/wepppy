@@ -1,0 +1,1138 @@
+{
+  "scope": "Actual authenticated public browse-to-D-Tale acceptance, after coordinated restart.\n\nCreates a unique qa-freshness interactive run containing independently copied\nRon/Watershed metadata and generated two-row Parquet/GeoJSON fixtures. Named\nsource metadata is copied as bytes, never hydrated. Only copied owners hydrate.\nUses the public browse bridge, upstream grid/dtypes, and real Dash map callback;\nno internal loader request, service import, response interception or HTTP stub.\nRetains every attempt and disposable file. Requires root's runtime-window signal.\n",
+  "started_unix": 1789632292.5202188,
+  "uid": 1000,
+  "gid": 993,
+  "root": "/wc1/runs/qa/qa-freshness-dtale-aecf4f938bd0",
+  "runid": "qa-freshness-dtale-aecf4f938bd0",
+  "source": "/wc1/runs/th/thespian-cleanness",
+  "source_files": {
+    "config.cfg": {
+      "sha256": "c4a758c0f84cdf2049b78ee3be40c14b72dea9eda2b4280ab801b28d6cec61a9",
+      "version": [
+        64,
+        1181550,
+        34830,
+        1789604860334964875,
+        1789604860339964906
+      ],
+      "mode": 384,
+      "bytes": 34830,
+      "copied_version": [
+        64,
+        1283080,
+        34830,
+        1789604860334964875,
+        1789632292529181169
+      ]
+    },
+    "ron.nodb": {
+      "sha256": "aaa56bb2af24fb02d1b2761009713df54fc8ce4eb0b3f78689fa688a4e3952f9",
+      "version": [
+        64,
+        1187148,
+        1027,
+        1789605417274478376,
+        1789605417276478389
+      ],
+      "mode": 420,
+      "bytes": 1027,
+      "copied_version": [
+        64,
+        1283081,
+        1027,
+        1789605417274478376,
+        1789632292535181207
+      ]
+    },
+    "watershed.nodb": {
+      "sha256": "aa0c09df9fe301d9a16a8b81016bd9d83483cee147a48ac7ee6ae43ff432e734",
+      "version": [
+        64,
+        1188908,
+        8994,
+        1789606733102216652,
+        1789606733103216659
+      ],
+      "mode": 420,
+      "bytes": 8994,
+      "copied_version": [
+        64,
+        1283082,
+        8994,
+        1789606733102216652,
+        1789632292545181269
+      ]
+    }
+  },
+  "http": [
+    {
+      "label": "browse_table",
+      "method": "GET",
+      "path": "/weppcloud/runs/qa-freshness-dtale-aecf4f938bd0/config/browse/table.parquet",
+      "query": "",
+      "status": 200,
+      "seconds": 0.1105298709589988,
+      "bytes": 3264,
+      "sha256": "0f97b5bcd1a3882f40bf14952f08aff1e0417a6ec6abdafda9067b9a66b6564c",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "label": "first",
+      "method": "GET",
+      "path": "/weppcloud/runs/qa-freshness-dtale-aecf4f938bd0/config/dtale/table.parquet",
+      "query": "",
+      "status": 303,
+      "seconds": 0.21858568605966866,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "content_type": null,
+      "viewer_path": "/weppcloud/dtale/main/7f203385a58d",
+      "data_id": "7f203385a58d"
+    },
+    {
+      "label": "first_viewer",
+      "method": "GET",
+      "path": "/weppcloud/dtale/main/7f203385a58d",
+      "query": "",
+      "status": 200,
+      "seconds": 0.036410502856597304,
+      "bytes": 5066,
+      "sha256": "69e0e5a6729d7338faa146423ccb6c9a9785daac6fcd349bcb45e10a71f2b7ca",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "label": "first_grid",
+      "method": "GET",
+      "path": "/weppcloud/dtale/data/7f203385a58d",
+      "query": "ids=%5B%220-1%22%5D",
+      "status": 200,
+      "seconds": 0.025387683184817433,
+      "bytes": 625,
+      "sha256": "b326acd633918a99fb3f5cec652ee87e92118f7c8aabf748dfd738ff23487afd",
+      "content_type": "application/json",
+      "body": {
+        "columns": [
+          {
+            "dtype": "int64",
+            "name": "dtale_index",
+            "visible": true
+          },
+          {
+            "coord": null,
+            "dtype": "Int64",
+            "hasMissing": 0,
+            "hasOutliers": 0,
+            "index": 0,
+            "kurt": "nan",
+            "lowVariance": false,
+            "max": 1,
+            "min": 1,
+            "name": "wepp_id",
+            "outlierRange": {
+              "lower": 1.0,
+              "upper": 1.0
+            },
+            "skew": "nan",
+            "unique_ct": 1,
+            "visible": true
+          },
+          {
+            "coord": null,
+            "dtype": "Int64",
+            "hasMissing": 0,
+            "hasOutliers": 0,
+            "index": 1,
+            "kurt": "nan",
+            "lowVariance": false,
+            "max": 1,
+            "min": 1,
+            "name": "a",
+            "outlierRange": {
+              "lower": 1.0,
+              "upper": 1.0
+            },
+            "skew": "nan",
+            "unique_ct": 1,
+            "visible": true
+          }
+        ],
+        "final_query": null,
+        "results": {
+          "0": {
+            "a": 1,
+            "dtale_index": 0,
+            "wepp_id": 1
+          },
+          "1": {
+            "a": 2,
+            "dtale_index": 1,
+            "wepp_id": 2
+          }
+        },
+        "total": 2
+      }
+    },
+    {
+      "label": "first_schema",
+      "method": "GET",
+      "path": "/weppcloud/dtale/dtypes/7f203385a58d",
+      "query": "",
+      "status": 200,
+      "seconds": 0.005001846933737397,
+      "bytes": 464,
+      "sha256": "21b5110e99fde2a9823fcad66ffe798d72f6e6e37691c3394c0fa39a3ea933fe",
+      "content_type": "application/json",
+      "body": {
+        "dtypes": [
+          {
+            "coord": null,
+            "dtype": "Int64",
+            "hasMissing": 0,
+            "hasOutliers": 0,
+            "index": 0,
+            "kurt": "nan",
+            "lowVariance": false,
+            "max": 1,
+            "min": 1,
+            "name": "wepp_id",
+            "outlierRange": {
+              "lower": 1.0,
+              "upper": 1.0
+            },
+            "skew": "nan",
+            "unique_ct": 1,
+            "visible": true
+          },
+          {
+            "coord": null,
+            "dtype": "Int64",
+            "hasMissing": 0,
+            "hasOutliers": 0,
+            "index": 1,
+            "kurt": "nan",
+            "lowVariance": false,
+            "max": 1,
+            "min": 1,
+            "name": "a",
+            "outlierRange": {
+              "lower": 1.0,
+              "upper": 1.0
+            },
+            "skew": "nan",
+            "unique_ct": 1,
+            "visible": true
+          }
+        ],
+        "success": true
+      }
+    },
+    {
+      "label": "first_map",
+      "method": "POST",
+      "path": "/weppcloud/dtale/charts/_dash-update-component",
+      "query": "",
+      "status": 200,
+      "seconds": 0.06585165997967124,
+      "bytes": 129312,
+      "sha256": "72a287a8bf9f37aa6379c956730ff34418fb9729802289c579d2406d8c0f4aa4",
+      "content_type": "application/json",
+      "map_components": {
+        "geojson-dropdown": {
+          "options": [
+            {
+              "label": "Subcatchments",
+              "value": "qa-freshness-dtale-aecf4f938bd0-subcatchments"
+            },
+            {
+              "label": "Channels",
+              "value": "qa-freshness-dtale-aecf4f938bd0-channels"
+            }
+          ],
+          "value": null,
+          "placeholder": "Select Uploaded Data",
+          "style": {
+            "width": "inherit"
+          },
+          "id": "geojson-dropdown"
+        },
+        "featureidkey-dropdown": {
+          "options": [],
+          "value": null,
+          "placeholder": "Select Uploaded Data",
+          "disabled": false,
+          "style": {
+            "width": "inherit"
+          },
+          "id": "featureidkey-dropdown"
+        },
+        "selected_properties": {
+          "options": [
+            {
+              "label": "mark_old",
+              "value": "mark_old"
+            },
+            {
+              "label": "topaz_id",
+              "value": "topaz_id"
+            },
+            {
+              "label": "wepp_id",
+              "value": "wepp_id"
+            }
+          ],
+          "disabled": false,
+          "placeholder": "Select Uploaded Data"
+        }
+      }
+    },
+    {
+      "label": "first_map_selection",
+      "method": "POST",
+      "path": "/weppcloud/dtale/charts/_dash-update-component",
+      "query": "",
+      "status": 200,
+      "seconds": 0.007492332020774484,
+      "bytes": 237,
+      "sha256": "1dfcd90037cd678b29e84ffe2f3cb3c6cb6823f256a6b04553d34d44fa2cdd6d",
+      "content_type": "application/json",
+      "selected_properties": {
+        "options": [
+          {
+            "label": "mark_old",
+            "value": "mark_old"
+          },
+          {
+            "label": "topaz_id",
+            "value": "topaz_id"
+          },
+          {
+            "label": "wepp_id",
+            "value": "wepp_id"
+          }
+        ],
+        "disabled": false,
+        "placeholder": "Select Uploaded Data"
+      }
+    },
+    {
+      "label": "touch",
+      "method": "GET",
+      "path": "/weppcloud/runs/qa-freshness-dtale-aecf4f938bd0/config/dtale/table.parquet",
+      "query": "",
+      "status": 303,
+      "seconds": 0.04239612817764282,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "content_type": null,
+      "viewer_path": "/weppcloud/dtale/main/7f203385a58d",
+      "data_id": "7f203385a58d"
+    },
+    {
+      "label": "touch_viewer",
+      "method": "GET",
+      "path": "/weppcloud/dtale/main/7f203385a58d",
+      "query": "",
+      "status": 200,
+      "seconds": 0.015854044118896127,
+      "bytes": 5066,
+      "sha256": "69e0e5a6729d7338faa146423ccb6c9a9785daac6fcd349bcb45e10a71f2b7ca",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "label": "touch_grid",
+      "method": "GET",
+      "path": "/weppcloud/dtale/data/7f203385a58d",
+      "query": "ids=%5B%220-1%22%5D",
+      "status": 200,
+      "seconds": 0.03170369192957878,
+      "bytes": 625,
+      "sha256": "b326acd633918a99fb3f5cec652ee87e92118f7c8aabf748dfd738ff23487afd",
+      "content_type": "application/json",
+      "body": {
+        "columns": [
+          {
+            "dtype": "int64",
+            "name": "dtale_index",
+            "visible": true
+          },
+          {
+            "coord": null,
+            "dtype": "Int64",
+            "hasMissing": 0,
+            "hasOutliers": 0,
+            "index": 0,
+            "kurt": "nan",
+            "lowVariance": false,
+            "max": 1,
+            "min": 1,
+            "name": "wepp_id",
+            "outlierRange": {
+              "lower": 1.0,
+              "upper": 1.0
+            },
+            "skew": "nan",
+            "unique_ct": 1,
+            "visible": true
+          },
+          {
+            "coord": null,
+            "dtype": "Int64",
+            "hasMissing": 0,
+            "hasOutliers": 0,
+            "index": 1,
+            "kurt": "nan",
+            "lowVariance": false,
+            "max": 1,
+            "min": 1,
+            "name": "a",
+            "outlierRange": {
+              "lower": 1.0,
+              "upper": 1.0
+            },
+            "skew": "nan",
+            "unique_ct": 1,
+            "visible": true
+          }
+        ],
+        "final_query": null,
+        "results": {
+          "0": {
+            "a": 1,
+            "dtale_index": 0,
+            "wepp_id": 1
+          },
+          "1": {
+            "a": 2,
+            "dtale_index": 1,
+            "wepp_id": 2
+          }
+        },
+        "total": 2
+      }
+    },
+    {
+      "label": "same_bytes",
+      "method": "GET",
+      "path": "/weppcloud/runs/qa-freshness-dtale-aecf4f938bd0/config/dtale/table.parquet",
+      "query": "",
+      "status": 303,
+      "seconds": 0.033806440187618136,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "content_type": null,
+      "viewer_path": "/weppcloud/dtale/main/7f203385a58d",
+      "data_id": "7f203385a58d"
+    },
+    {
+      "label": "same_bytes_viewer",
+      "method": "GET",
+      "path": "/weppcloud/dtale/main/7f203385a58d",
+      "query": "",
+      "status": 200,
+      "seconds": 0.018321631010621786,
+      "bytes": 5066,
+      "sha256": "69e0e5a6729d7338faa146423ccb6c9a9785daac6fcd349bcb45e10a71f2b7ca",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "label": "same_bytes_grid",
+      "method": "GET",
+      "path": "/weppcloud/dtale/data/7f203385a58d",
+      "query": "ids=%5B%220-1%22%5D",
+      "status": 200,
+      "seconds": 0.04065844393335283,
+      "bytes": 625,
+      "sha256": "b326acd633918a99fb3f5cec652ee87e92118f7c8aabf748dfd738ff23487afd",
+      "content_type": "application/json",
+      "body": {
+        "columns": [
+          {
+            "dtype": "int64",
+            "name": "dtale_index",
+            "visible": true
+          },
+          {
+            "coord": null,
+            "dtype": "Int64",
+            "hasMissing": 0,
+            "hasOutliers": 0,
+            "index": 0,
+            "kurt": "nan",
+            "lowVariance": false,
+            "max": 1,
+            "min": 1,
+            "name": "wepp_id",
+            "outlierRange": {
+              "lower": 1.0,
+              "upper": 1.0
+            },
+            "skew": "nan",
+            "unique_ct": 1,
+            "visible": true
+          },
+          {
+            "coord": null,
+            "dtype": "Int64",
+            "hasMissing": 0,
+            "hasOutliers": 0,
+            "index": 1,
+            "kurt": "nan",
+            "lowVariance": false,
+            "max": 1,
+            "min": 1,
+            "name": "a",
+            "outlierRange": {
+              "lower": 1.0,
+              "upper": 1.0
+            },
+            "skew": "nan",
+            "unique_ct": 1,
+            "visible": true
+          }
+        ],
+        "final_query": null,
+        "results": {
+          "0": {
+            "a": 1,
+            "dtale_index": 0,
+            "wepp_id": 1
+          },
+          "1": {
+            "a": 2,
+            "dtale_index": 1,
+            "wepp_id": 2
+          }
+        },
+        "total": 2
+      }
+    },
+    {
+      "label": "old_generation_grid",
+      "method": "GET",
+      "path": "/weppcloud/dtale/data/7f203385a58d",
+      "query": "ids=%5B%220-1%22%5D",
+      "status": 200,
+      "seconds": 0.010954397963359952,
+      "bytes": 128,
+      "sha256": "cc9ab54bc9d6f7d5bd017ca99a32ab9bad2a71eef5b7407d091edeb27a1074bc",
+      "content_type": "application/json",
+      "body": {
+        "code": "changed_source",
+        "error": "The source file changed or is unavailable. Reopen this dataset from browse.",
+        "success": false
+      }
+    },
+    {
+      "label": "old_shell_schema",
+      "method": "GET",
+      "path": "/weppcloud/dtale/dtypes/7f203385a58d",
+      "query": "",
+      "status": 200,
+      "seconds": 0.00784282898530364,
+      "bytes": 464,
+      "sha256": "21b5110e99fde2a9823fcad66ffe798d72f6e6e37691c3394c0fa39a3ea933fe",
+      "content_type": "application/json",
+      "body": {
+        "dtypes": [
+          {
+            "coord": null,
+            "dtype": "Int64",
+            "hasMissing": 0,
+            "hasOutliers": 0,
+            "index": 0,
+            "kurt": "nan",
+            "lowVariance": false,
+            "max": 1,
+            "min": 1,
+            "name": "wepp_id",
+            "outlierRange": {
+              "lower": 1.0,
+              "upper": 1.0
+            },
+            "skew": "nan",
+            "unique_ct": 1,
+            "visible": true
+          },
+          {
+            "coord": null,
+            "dtype": "Int64",
+            "hasMissing": 0,
+            "hasOutliers": 0,
+            "index": 1,
+            "kurt": "nan",
+            "lowVariance": false,
+            "max": 1,
+            "min": 1,
+            "name": "a",
+            "outlierRange": {
+              "lower": 1.0,
+              "upper": 1.0
+            },
+            "skew": "nan",
+            "unique_ct": 1,
+            "visible": true
+          }
+        ],
+        "success": true
+      }
+    },
+    {
+      "label": "old_shell_schema_repeat",
+      "method": "GET",
+      "path": "/weppcloud/dtale/dtypes/7f203385a58d",
+      "query": "",
+      "status": 200,
+      "seconds": 0.00760698807425797,
+      "bytes": 464,
+      "sha256": "21b5110e99fde2a9823fcad66ffe798d72f6e6e37691c3394c0fa39a3ea933fe",
+      "content_type": "application/json",
+      "body": {
+        "dtypes": [
+          {
+            "coord": null,
+            "dtype": "Int64",
+            "hasMissing": 0,
+            "hasOutliers": 0,
+            "index": 0,
+            "kurt": "nan",
+            "lowVariance": false,
+            "max": 1,
+            "min": 1,
+            "name": "wepp_id",
+            "outlierRange": {
+              "lower": 1.0,
+              "upper": 1.0
+            },
+            "skew": "nan",
+            "unique_ct": 1,
+            "visible": true
+          },
+          {
+            "coord": null,
+            "dtype": "Int64",
+            "hasMissing": 0,
+            "hasOutliers": 0,
+            "index": 1,
+            "kurt": "nan",
+            "lowVariance": false,
+            "max": 1,
+            "min": 1,
+            "name": "a",
+            "outlierRange": {
+              "lower": 1.0,
+              "upper": 1.0
+            },
+            "skew": "nan",
+            "unique_ct": 1,
+            "visible": true
+          }
+        ],
+        "success": true
+      }
+    },
+    {
+      "label": "reopened",
+      "method": "GET",
+      "path": "/weppcloud/runs/qa-freshness-dtale-aecf4f938bd0/config/dtale/table.parquet",
+      "query": "",
+      "status": 303,
+      "seconds": 0.11445176880806684,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "content_type": null,
+      "viewer_path": "/weppcloud/dtale/main/7f203385a58d",
+      "data_id": "7f203385a58d"
+    },
+    {
+      "label": "reopened_viewer",
+      "method": "GET",
+      "path": "/weppcloud/dtale/main/7f203385a58d",
+      "query": "",
+      "status": 200,
+      "seconds": 0.01818327186629176,
+      "bytes": 5066,
+      "sha256": "69e0e5a6729d7338faa146423ccb6c9a9785daac6fcd349bcb45e10a71f2b7ca",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "label": "fresh_grid",
+      "method": "GET",
+      "path": "/weppcloud/dtale/data/7f203385a58d",
+      "query": "ids=%5B%220-1%22%5D",
+      "status": 200,
+      "seconds": 0.04057487682439387,
+      "bytes": 625,
+      "sha256": "3135f917c46544b67eda8f246bbbea7a6139d54c168e997573ffa6e0a31517bb",
+      "content_type": "application/json",
+      "body": {
+        "columns": [
+          {
+            "dtype": "int64",
+            "name": "dtale_index",
+            "visible": true
+          },
+          {
+            "coord": null,
+            "dtype": "Int64",
+            "hasMissing": 0,
+            "hasOutliers": 0,
+            "index": 0,
+            "kurt": "nan",
+            "lowVariance": false,
+            "max": 1,
+            "min": 1,
+            "name": "wepp_id",
+            "outlierRange": {
+              "lower": 1.0,
+              "upper": 1.0
+            },
+            "skew": "nan",
+            "unique_ct": 1,
+            "visible": true
+          },
+          {
+            "coord": null,
+            "dtype": "Int64",
+            "hasMissing": 0,
+            "hasOutliers": 0,
+            "index": 1,
+            "kurt": "nan",
+            "lowVariance": false,
+            "max": 8,
+            "min": 8,
+            "name": "z",
+            "outlierRange": {
+              "lower": 8.0,
+              "upper": 8.0
+            },
+            "skew": "nan",
+            "unique_ct": 1,
+            "visible": true
+          }
+        ],
+        "final_query": null,
+        "results": {
+          "0": {
+            "dtale_index": 0,
+            "wepp_id": 1,
+            "z": 8
+          },
+          "1": {
+            "dtale_index": 1,
+            "wepp_id": 2,
+            "z": 9
+          }
+        },
+        "total": 2
+      }
+    },
+    {
+      "label": "fresh_schema",
+      "method": "GET",
+      "path": "/weppcloud/dtale/dtypes/7f203385a58d",
+      "query": "",
+      "status": 200,
+      "seconds": 0.005674354964867234,
+      "bytes": 464,
+      "sha256": "95ccf6dcfd3df58e5da97871294a890739a0524d14524ae1db63e55b4270d4ff",
+      "content_type": "application/json",
+      "body": {
+        "dtypes": [
+          {
+            "coord": null,
+            "dtype": "Int64",
+            "hasMissing": 0,
+            "hasOutliers": 0,
+            "index": 0,
+            "kurt": "nan",
+            "lowVariance": false,
+            "max": 1,
+            "min": 1,
+            "name": "wepp_id",
+            "outlierRange": {
+              "lower": 1.0,
+              "upper": 1.0
+            },
+            "skew": "nan",
+            "unique_ct": 1,
+            "visible": true
+          },
+          {
+            "coord": null,
+            "dtype": "Int64",
+            "hasMissing": 0,
+            "hasOutliers": 0,
+            "index": 1,
+            "kurt": "nan",
+            "lowVariance": false,
+            "max": 8,
+            "min": 8,
+            "name": "z",
+            "outlierRange": {
+              "lower": 8.0,
+              "upper": 8.0
+            },
+            "skew": "nan",
+            "unique_ct": 1,
+            "visible": true
+          }
+        ],
+        "success": true
+      }
+    },
+    {
+      "label": "map_changed",
+      "method": "GET",
+      "path": "/weppcloud/runs/qa-freshness-dtale-aecf4f938bd0/config/dtale/table.parquet",
+      "query": "",
+      "status": 303,
+      "seconds": 0.06923358398489654,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "content_type": null,
+      "viewer_path": "/weppcloud/dtale/main/7f203385a58d",
+      "data_id": "7f203385a58d"
+    },
+    {
+      "label": "map_changed_viewer",
+      "method": "GET",
+      "path": "/weppcloud/dtale/main/7f203385a58d",
+      "query": "",
+      "status": 200,
+      "seconds": 0.024571727961301804,
+      "bytes": 5066,
+      "sha256": "69e0e5a6729d7338faa146423ccb6c9a9785daac6fcd349bcb45e10a71f2b7ca",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "label": "changed_map",
+      "method": "POST",
+      "path": "/weppcloud/dtale/charts/_dash-update-component",
+      "query": "",
+      "status": 200,
+      "seconds": 0.07016782090067863,
+      "bytes": 129312,
+      "sha256": "c2d37f1b6fc3be2231d122f271ad46d2b8a454ecf4d9fa93d739642c0f7d460f",
+      "content_type": "application/json",
+      "map_components": {
+        "geojson-dropdown": {
+          "options": [
+            {
+              "label": "Channels",
+              "value": "qa-freshness-dtale-aecf4f938bd0-channels"
+            },
+            {
+              "label": "Subcatchments",
+              "value": "qa-freshness-dtale-aecf4f938bd0-subcatchments"
+            }
+          ],
+          "value": null,
+          "placeholder": "Select Uploaded Data",
+          "style": {
+            "width": "inherit"
+          },
+          "id": "geojson-dropdown"
+        },
+        "featureidkey-dropdown": {
+          "options": [],
+          "value": null,
+          "placeholder": "Select Uploaded Data",
+          "disabled": false,
+          "style": {
+            "width": "inherit"
+          },
+          "id": "featureidkey-dropdown"
+        },
+        "selected_properties": {
+          "options": [
+            {
+              "label": "mark_new",
+              "value": "mark_new"
+            },
+            {
+              "label": "topaz_id",
+              "value": "topaz_id"
+            },
+            {
+              "label": "wepp_id",
+              "value": "wepp_id"
+            }
+          ],
+          "disabled": false,
+          "placeholder": "Select Uploaded Data"
+        }
+      }
+    },
+    {
+      "label": "changed_map_selection",
+      "method": "POST",
+      "path": "/weppcloud/dtale/charts/_dash-update-component",
+      "query": "",
+      "status": 200,
+      "seconds": 0.005285392981022596,
+      "bytes": 237,
+      "sha256": "0d5d2a75b2d5035487f0871970246e9edf2708c153722fbe26901462efc7a4ac",
+      "content_type": "application/json",
+      "selected_properties": {
+        "options": [
+          {
+            "label": "mark_new",
+            "value": "mark_new"
+          },
+          {
+            "label": "topaz_id",
+            "value": "topaz_id"
+          },
+          {
+            "label": "wepp_id",
+            "value": "wepp_id"
+          }
+        ],
+        "disabled": false,
+        "placeholder": "Select Uploaded Data"
+      }
+    },
+    {
+      "label": "map_removed",
+      "method": "GET",
+      "path": "/weppcloud/runs/qa-freshness-dtale-aecf4f938bd0/config/dtale/table.parquet",
+      "query": "",
+      "status": 303,
+      "seconds": 0.06092131300829351,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "content_type": null,
+      "viewer_path": "/weppcloud/dtale/main/7f203385a58d",
+      "data_id": "7f203385a58d"
+    },
+    {
+      "label": "map_removed_viewer",
+      "method": "GET",
+      "path": "/weppcloud/dtale/main/7f203385a58d",
+      "query": "",
+      "status": 200,
+      "seconds": 0.027226547012105584,
+      "bytes": 5066,
+      "sha256": "69e0e5a6729d7338faa146423ccb6c9a9785daac6fcd349bcb45e10a71f2b7ca",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "label": "removed_map",
+      "method": "POST",
+      "path": "/weppcloud/dtale/charts/_dash-update-component",
+      "query": "",
+      "status": 200,
+      "seconds": 0.0689782879780978,
+      "bytes": 129230,
+      "sha256": "108612eeac659322173cf419f1d16ce94908d950c71b3d0e5895cbbc4c257991",
+      "content_type": "application/json",
+      "map_components": {
+        "geojson-dropdown": {
+          "options": [
+            {
+              "label": "Channels",
+              "value": "qa-freshness-dtale-aecf4f938bd0-channels"
+            }
+          ],
+          "value": null,
+          "placeholder": "Select Uploaded Data",
+          "style": {
+            "width": "inherit"
+          },
+          "id": "geojson-dropdown"
+        },
+        "featureidkey-dropdown": {
+          "options": [],
+          "value": null,
+          "placeholder": "Select Uploaded Data",
+          "disabled": false,
+          "style": {
+            "width": "inherit"
+          },
+          "id": "featureidkey-dropdown"
+        },
+        "selected_properties": {
+          "options": [
+            {
+              "label": "mark_old",
+              "value": "mark_old"
+            },
+            {
+              "label": "topaz_id",
+              "value": "topaz_id"
+            },
+            {
+              "label": "wepp_id",
+              "value": "wepp_id"
+            }
+          ],
+          "disabled": false,
+          "placeholder": "Select Uploaded Data"
+        }
+      }
+    },
+    {
+      "label": "removed_map_selection",
+      "method": "POST",
+      "path": "/weppcloud/dtale/charts/_dash-update-component",
+      "query": "",
+      "status": 200,
+      "seconds": 0.005650484934449196,
+      "bytes": 237,
+      "sha256": "1dfcd90037cd678b29e84ffe2f3cb3c6cb6823f256a6b04553d34d44fa2cdd6d",
+      "content_type": "application/json",
+      "selected_properties": {
+        "options": [
+          {
+            "label": "mark_old",
+            "value": "mark_old"
+          },
+          {
+            "label": "topaz_id",
+            "value": "topaz_id"
+          },
+          {
+            "label": "wepp_id",
+            "value": "wepp_id"
+          }
+        ],
+        "disabled": false,
+        "placeholder": "Select Uploaded Data"
+      }
+    }
+  ],
+  "checks": {
+    "equal_size_parquet_fixture": true,
+    "browse_table_success": true,
+    "first_redirect": true,
+    "first_same_origin": true,
+    "first_viewer_location": true,
+    "first_viewer_http": true,
+    "first_grid_http": true,
+    "first_schema_http": true,
+    "first_schema": true,
+    "first_rows": true,
+    "first_map_http": true,
+    "first_map_components": true,
+    "first_map_selection_http": true,
+    "map_registered": true,
+    "map_original_properties": true,
+    "touch_redirect": true,
+    "touch_same_origin": true,
+    "touch_viewer_location": true,
+    "touch_viewer_http": true,
+    "metadata_only_logical_id": true,
+    "touch_grid_http": true,
+    "metadata_only_rows": true,
+    "same_bytes_redirect": true,
+    "same_bytes_same_origin": true,
+    "same_bytes_viewer_location": true,
+    "same_bytes_viewer_http": true,
+    "same_bytes_logical_id": true,
+    "same_bytes_grid_http": true,
+    "same_bytes_rows": true,
+    "changed_same_size_mtime": true,
+    "old_generation_grid_http": true,
+    "old_grid_visible_conflict": true,
+    "old_grid_no_success_payload": true,
+    "old_shell_schema_http": true,
+    "old_shell_schema_repeat_http": true,
+    "old_shell_schema_retained": true,
+    "reopened_redirect": true,
+    "reopened_same_origin": true,
+    "reopened_viewer_location": true,
+    "reopened_viewer_http": true,
+    "reopened_shared_logical_id": true,
+    "fresh_grid_http": true,
+    "fresh_schema_http": true,
+    "fresh_schema_replaced": true,
+    "fresh_rows": true,
+    "map_same_size_mtime": true,
+    "map_changed_redirect": true,
+    "map_changed_same_origin": true,
+    "map_changed_viewer_location": true,
+    "map_changed_viewer_http": true,
+    "map_change_table_id_reused": true,
+    "changed_map_http": true,
+    "changed_map_components": true,
+    "changed_map_selection_http": true,
+    "map_actual_registration_refreshed": true,
+    "map_removed_redirect": true,
+    "map_removed_same_origin": true,
+    "map_removed_viewer_location": true,
+    "map_removed_viewer_http": true,
+    "optional_map_missing_table_available": true,
+    "removed_map_http": true,
+    "removed_map_components": true,
+    "removed_map_selection_http": true,
+    "missing_map_registration_removed": true,
+    "remaining_map_registered": true
+  },
+  "completed": true,
+  "retained": [
+    "/wc1/runs/qa/qa-freshness-dtale-aecf4f938bd0/acceptance-evidence/after.geojson",
+    "/wc1/runs/qa/qa-freshness-dtale-aecf4f938bd0/acceptance-evidence/after.parquet",
+    "/wc1/runs/qa/qa-freshness-dtale-aecf4f938bd0/acceptance-evidence/before.geojson",
+    "/wc1/runs/qa/qa-freshness-dtale-aecf4f938bd0/acceptance-evidence/before.parquet"
+  ],
+  "limitations": [
+    "Stable shared logical dataset ID is contractual; reopened generation is fresh.",
+    "Dtypes describes the shell; the lazy grid enforces generation currentness.",
+    "Dash callback proves actual service registry and dropdown state, not rendered map pixels.",
+    "Two-row Parquet is bounded public transport acceptance, not the large-file performance gate.",
+    "A minimal copied run is not a complete watershed or native model execution."
+  ],
+  "fixture_hashes": {
+    "after.geojson": {
+      "sha256": "d77ec5f942f6cb68360c15c4ffb2dcccc3e9304043a86999d5fbfef1357f1119",
+      "version": [
+        64,
+        1282266,
+        205,
+        1789632292581181495,
+        1789632292581181495
+      ],
+      "mode": 420,
+      "bytes": 205
+    },
+    "after.parquet": {
+      "sha256": "82439e2d13a4dc2d1595243311854a5094e29d58addfedf0a4445c23cca5d2dc",
+      "version": [
+        64,
+        1282269,
+        551,
+        1789632292589181545,
+        1789632292589181545
+      ],
+      "mode": 420,
+      "bytes": 551
+    },
+    "before.geojson": {
+      "sha256": "27c9090f4ae29495b1b44e99b7ceb91a51ef82c60d9c3bed94a003650231dfc8",
+      "version": [
+        64,
+        1282265,
+        205,
+        1789632292580181489,
+        1789632292580181489
+      ],
+      "mode": 420,
+      "bytes": 205
+    },
+    "before.parquet": {
+      "sha256": "92c6fa2c8b903b2bf4277953bbae7bb6c76d8530a5520b67e1dc8ce1062bb559",
+      "version": [
+        64,
+        1282268,
+        551,
+        1789632292587181532,
+        1789632292587181532
+      ],
+      "mode": 420,
+      "bytes": 551
+    }
+  },
+  "named_source_unchanged": true,
+  "finished_unix": 1789632294.275772
+}

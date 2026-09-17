@@ -152,7 +152,7 @@ object hydrated before another writer committed.
 - `load_detached(wd)` MUST bypass singleton cache insertion and logging initialization side effects.
 - It MUST still enforce signature checks when using Redis cache payloads.
 
-### Coherent disk-read versions (implementation pending)
+### Coherent disk-read versions (implemented)
 
 Disk hydration MUST associate decoded bytes with the mtime/size of the same
 opened descriptor. It MUST NOT tag those bytes with a later pathname stat taken
@@ -310,7 +310,7 @@ failures. Unexpected errors, including untyped RuntimeError/RecursionError,
 propagate through the RQ boundary. This keeps finalizer dependencies and Omni
 linkage intact while preserving failure observability.
 
-### Derived input byte verification (implementation pending)
+### Derived input byte verification (implemented)
 
 PRISM climate revision and RAP analysis MUST compare actual input bytes at
 collection and locked finalization. Required-file signatures include resolved

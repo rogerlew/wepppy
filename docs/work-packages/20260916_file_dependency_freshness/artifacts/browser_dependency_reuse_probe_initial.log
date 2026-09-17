@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+duckdb.duckdb.BinderException: Binder Error: Unexpected prepared parameter. This type of statement can't be prepared!
+TypeError: Cannot read properties of null (reading '1')
+    at /home/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/browser_dependency_reuse_probe.cjs:47:38

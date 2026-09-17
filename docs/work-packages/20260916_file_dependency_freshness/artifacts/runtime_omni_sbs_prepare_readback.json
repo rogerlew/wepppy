@@ -1,0 +1,74 @@
+{
+  "status": "prepared",
+  "files": 3916,
+  "logical_bytes": 6375730842,
+  "copy_seconds": 76.72799682617188,
+  "identity": {
+    "gid": 993,
+    "groups": [
+      993
+    ],
+    "uid": 1000,
+    "umask": "0o22"
+  },
+  "runid": "batch;;qa-omni-native-20260917-a61f3e;;grizzly",
+  "source_unchanged_after_copy": true,
+  "independent_inodes": true,
+  "root_controllers": {
+    "disturbed.nodb": {
+      "wd": "/wc1/batch/qa-omni-native-20260917-a61f3e/runs/grizzly",
+      "run_group": "batch",
+      "group_name": "qa-omni-native-20260917-a61f3e"
+    },
+    "watershed.nodb": {
+      "wd": "/wc1/batch/qa-omni-native-20260917-a61f3e/runs/grizzly",
+      "run_group": "batch",
+      "group_name": "qa-omni-native-20260917-a61f3e"
+    },
+    "landuse.nodb": {
+      "wd": "/wc1/batch/qa-omni-native-20260917-a61f3e/runs/grizzly",
+      "run_group": "batch",
+      "group_name": "qa-omni-native-20260917-a61f3e"
+    },
+    "wepp.nodb": {
+      "wd": "/wc1/batch/qa-omni-native-20260917-a61f3e/runs/grizzly",
+      "run_group": "batch",
+      "group_name": "qa-omni-native-20260917-a61f3e"
+    },
+    "postfire_debris_flow.nodb": {
+      "wd": "/wc1/batch/qa-omni-native-20260917-a61f3e/runs/grizzly",
+      "run_group": "batch",
+      "group_name": "qa-omni-native-20260917-a61f3e"
+    },
+    "unitizer.nodb": {
+      "wd": "/wc1/batch/qa-omni-native-20260917-a61f3e/runs/grizzly",
+      "run_group": "batch",
+      "group_name": "qa-omni-native-20260917-a61f3e"
+    },
+    "ron.nodb": {
+      "wd": "/wc1/batch/qa-omni-native-20260917-a61f3e/runs/grizzly",
+      "run_group": "batch",
+      "group_name": "qa-omni-native-20260917-a61f3e"
+    },
+    "observed.nodb": {
+      "wd": "/wc1/batch/qa-omni-native-20260917-a61f3e/runs/grizzly",
+      "run_group": "batch",
+      "group_name": "qa-omni-native-20260917-a61f3e"
+    },
+    "climate.nodb": {
+      "wd": "/wc1/batch/qa-omni-native-20260917-a61f3e/runs/grizzly",
+      "run_group": "batch",
+      "group_name": "qa-omni-native-20260917-a61f3e"
+    },
+    "soils.nodb": {
+      "wd": "/wc1/batch/qa-omni-native-20260917-a61f3e/runs/grizzly",
+      "run_group": "batch",
+      "group_name": "qa-omni-native-20260917-a61f3e"
+    }
+  },
+  "root": "/wc1/batch/qa-omni-native-20260917-a61f3e",
+  "config_sha256": "c4a758c0f84cdf2049b78ee3be40c14b72dea9eda2b4280ab801b28d6cec61a9",
+  "named_sbs_sha256": "7d1ed360d8e639050cf3879293efcdbee216bd9a4faac4e03399442416d97405",
+  "baseline_hillslope_man_count": 218,
+  "native_executed": false
+}

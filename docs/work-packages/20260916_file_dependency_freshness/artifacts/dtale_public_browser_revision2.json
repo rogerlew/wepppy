@@ -1,0 +1,92 @@
+{
+  "root": "/wc1/runs/qa/qa-freshness-dtale-aecf4f938bd0",
+  "runid": "qa-freshness-dtale-aecf4f938bd0",
+  "transport": "public browser; no routes intercepted",
+  "phases": [
+    {
+      "name": "current",
+      "path": "/weppcloud/dtale/main/7f203385a58d",
+      "status": 200,
+      "grid": {
+        "columns": [
+          {
+            "dtype": "int64",
+            "name": "dtale_index",
+            "visible": true
+          },
+          {
+            "coord": null,
+            "dtype": "Int64",
+            "hasMissing": 0,
+            "hasOutliers": 0,
+            "index": 0,
+            "kurt": "nan",
+            "lowVariance": false,
+            "max": 1,
+            "min": 1,
+            "name": "wepp_id",
+            "outlierRange": {
+              "lower": 1,
+              "upper": 1
+            },
+            "skew": "nan",
+            "unique_ct": 1,
+            "visible": true
+          },
+          {
+            "coord": null,
+            "dtype": "Int64",
+            "hasMissing": 0,
+            "hasOutliers": 0,
+            "index": 1,
+            "kurt": "nan",
+            "lowVariance": false,
+            "max": 8,
+            "min": 8,
+            "name": "z",
+            "outlierRange": {
+              "lower": 8,
+              "upper": 8
+            },
+            "skew": "nan",
+            "unique_ct": 1,
+            "visible": true
+          }
+        ],
+        "final_query": null,
+        "results": {
+          "0": {
+            "dtale_index": 0,
+            "wepp_id": 1,
+            "z": 8
+          },
+          "1": {
+            "dtale_index": 1,
+            "wepp_id": 2,
+            "z": 9
+          }
+        },
+        "total": 2
+      },
+      "screenshot": "dtale_public_browser_revision2_current.png"
+    },
+    {
+      "name": "stale",
+      "path": "/weppcloud/dtale/main/7f203385a58d",
+      "status": 200,
+      "grid": {
+        "code": "changed_source",
+        "error": "The source file changed or is unavailable. Reopen this dataset from browse.",
+        "success": false
+      },
+      "visibleBody": "D-TALE\nActions\nVisualize\nHighlight\nSettings\nThe source file changed or is unavailable. Reopen this dataset from browse.\nAggregations\nColumn\nSelect...\nUse filtered data?\nWeighted Avg:Please select weights below\nWeights\nSelect...",
+      "alerts": [
+        "The source file changed or is unavailable. Reopen this dataset from browse."
+      ],
+      "failureScreenshot": "dtale_public_browser_revision2_stale_failure.png"
+    }
+  ],
+  "errors": [],
+  "completed": false,
+  "finalParquetSha256": "82439e2d13a4dc2d1595243311854a5094e29d58addfedf0a4445c23cca5d2dc"
+}

@@ -1,0 +1,893 @@
+{
+  "utc": "2026-09-17T07:37:33.087884+00:00",
+  "method": "GET",
+  "path": "/rq-engine/api/runs/qa-freshness-runtime-7e24c8d1/config/endpoints/rq_engine_build_climate/schema",
+  "request": null,
+  "status": 200,
+  "body": {
+    "contract_version": "1.0.0-draft",
+    "deployment_revision": "dev",
+    "run_state_revision": "runstate:qa-freshness-runtime-7e24c8d1:a6e653453366",
+    "run_state_domain": "metadata",
+    "run_state_vector": {
+      "orchestration_revision": null,
+      "metadata_revision": "runstate:qa-freshness-runtime-7e24c8d1:a6e653453366",
+      "outputs_revision": null
+    },
+    "operation_id": "rq_engine_build_climate",
+    "run_scoped": true,
+    "method": "POST",
+    "path": "/api/runs/{runid}/{config}/build-climate",
+    "operation_descriptor": {
+      "operation_id": "rq_engine_build_climate",
+      "run_scoped": true,
+      "method": "POST",
+      "path": "/api/runs/{runid}/{config}/build-climate",
+      "accepted_auth": [
+        "bearer_jwt"
+      ],
+      "auth_requirements": {
+        "bearer_jwt": {
+          "required_scope": [
+            "rq:enqueue"
+          ]
+        }
+      },
+      "required_if": [],
+      "available_if": [],
+      "error_catalog_url": "/api/runs/qa-freshness-runtime-7e24c8d1/config/endpoints/rq_engine_build_climate/errors",
+      "write_precondition": {
+        "required": false,
+        "accepted": [],
+        "conflict_status_code": 409,
+        "conflict_error_code": "stale_run_state"
+      },
+      "idempotency_policy": {
+        "supported": false,
+        "key_locations": [],
+        "dedupe_window_seconds": 0,
+        "replay_behavior": "not_supported",
+        "mismatch_status_code": 409,
+        "mismatch_error_code": "idempotency_key_conflict"
+      },
+      "execution_mode": "async",
+      "returns_job": true,
+      "job_key": "build_climate_rq",
+      "content_types": [
+        "application/json",
+        "application/x-www-form-urlencoded"
+      ],
+      "file_fields": [],
+      "success_status_codes": [
+        200
+      ],
+      "response_mode": "json",
+      "result_contract": {
+        "kind": "async_job",
+        "required_response_fields": [
+          "job_id"
+        ],
+        "terminal_signal": "jobstatus.status in terminal_*_statuses",
+        "status_field": "status",
+        "non_terminal_statuses": [
+          "queued",
+          "started",
+          "deferred",
+          "scheduled"
+        ],
+        "terminal_success_statuses": [
+          "finished"
+        ],
+        "terminal_failure_statuses": [
+          "failed",
+          "stopped",
+          "canceled"
+        ],
+        "suggested_poll_interval_seconds": 5,
+        "progress_field": "progress",
+        "status_url_template": "/api/jobstatus/{job_id}"
+      },
+      "estimated_duration": {
+        "bucket": "medium",
+        "typical_seconds": 120
+      },
+      "batch_mode_behavior": "batch_returns_message_no_queue",
+      "base_project_behavior": "allowed",
+      "mutates_controllers": [
+        "climate"
+      ],
+      "invalidates_steps": [
+        "prep-wepp-watershed",
+        "run-wepp",
+        "run-wepp-watershed"
+      ]
+    },
+    "schema_version": 1,
+    "request": {
+      "type": "object",
+      "properties": {
+        "climate_catalog_id": {
+          "type": "string",
+          "required": true,
+          "constraint_mode": "run_resolved",
+          "constraint_source": "project_capability_graph",
+          "resolved_at": "2026-09-17T07:37:33Z",
+          "enum": [
+            "vanilla_cligen",
+            "prism_stochastic",
+            "observed_daymet",
+            "observed_gridmet",
+            "dep_nexrad",
+            "future_cmip5",
+            "user_defined_cli"
+          ],
+          "enum_available": [
+            "vanilla_cligen",
+            "prism_stochastic",
+            "observed_daymet",
+            "observed_gridmet",
+            "dep_nexrad",
+            "future_cmip5",
+            "user_defined_cli"
+          ],
+          "current_value": "observed_gridmet",
+          "current_value_authorized": true,
+          "disabled_values": [],
+          "required_for_new_selection": true,
+          "runtime_mode_by_value": {
+            "vanilla_cligen": 0,
+            "prism_stochastic": 5,
+            "observed_daymet": 9,
+            "observed_gridmet": 11,
+            "dep_nexrad": 13,
+            "future_cmip5": 3,
+            "user_defined_cli": 12
+          }
+        },
+        "climate_station_method": {
+          "type": "string",
+          "required": true,
+          "constraint_mode": "run_resolved",
+          "constraint_source": "project_capability_graph",
+          "resolved_at": "2026-09-17T07:37:33Z",
+          "enum": [
+            "auto",
+            "distance",
+            "multi_factor",
+            "user_defined"
+          ],
+          "enum_available": [
+            "auto",
+            "distance",
+            "multi_factor"
+          ],
+          "current_value": "auto",
+          "current_value_authorized": true,
+          "disabled_values": [],
+          "allowed_by_climate_catalog_id": {
+            "vanilla_cligen": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ],
+            "prism_stochastic": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ],
+            "observed_daymet": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ],
+            "observed_gridmet": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ],
+            "dep_nexrad": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ],
+            "future_cmip5": [
+              "auto",
+              "distance",
+              "multi_factor"
+            ],
+            "user_defined_cli": [
+              "user_defined"
+            ]
+          },
+          "defaults_by_climate_catalog_id": {
+            "vanilla_cligen": "auto",
+            "prism_stochastic": "auto",
+            "observed_daymet": "auto",
+            "observed_gridmet": "auto",
+            "dep_nexrad": "auto",
+            "future_cmip5": "auto",
+            "user_defined_cli": "user_defined"
+          },
+          "runtime_mapping": {
+            "auto": -1,
+            "distance": 0,
+            "multi_factor": 1,
+            "eu_heuristic": 2,
+            "au_heuristic": 3,
+            "user_defined": 4
+          }
+        },
+        "climate_spatial_method": {
+          "type": "string",
+          "required": true,
+          "constraint_mode": "run_resolved",
+          "constraint_source": "project_capability_graph",
+          "resolved_at": "2026-09-17T07:37:33Z",
+          "enum": [
+            "single",
+            "multiple",
+            "interpolated"
+          ],
+          "enum_available": [
+            "single",
+            "multiple",
+            "interpolated"
+          ],
+          "current_value": "multiple",
+          "current_value_authorized": true,
+          "disabled_values": [],
+          "allowed_by_climate_catalog_id": {
+            "vanilla_cligen": [
+              "single",
+              "multiple"
+            ],
+            "prism_stochastic": [
+              "single",
+              "multiple"
+            ],
+            "observed_daymet": [
+              "single",
+              "multiple",
+              "interpolated"
+            ],
+            "observed_gridmet": [
+              "single",
+              "multiple",
+              "interpolated"
+            ],
+            "dep_nexrad": [
+              "single",
+              "multiple"
+            ],
+            "future_cmip5": [
+              "single",
+              "multiple"
+            ],
+            "user_defined_cli": [
+              "single",
+              "multiple"
+            ]
+          },
+          "defaults_by_climate_catalog_id": {
+            "vanilla_cligen": "single",
+            "prism_stochastic": "single",
+            "observed_daymet": "single",
+            "observed_gridmet": "single",
+            "dep_nexrad": "single",
+            "future_cmip5": "single",
+            "user_defined_cli": "single"
+          },
+          "runtime_mapping": {
+            "single": 0,
+            "multiple": 1,
+            "interpolated": 2
+          }
+        },
+        "climatestation_mode": {
+          "type": "integer",
+          "constraint_mode": "run_resolved",
+          "constraint_source": "project_capability_graph",
+          "resolved_at": "2026-09-17T07:37:33Z",
+          "enum": [
+            -1,
+            0,
+            1,
+            4
+          ],
+          "enum_available": [
+            -1,
+            0,
+            1
+          ],
+          "current_value": -1,
+          "current_value_authorized": true,
+          "disabled_values": [],
+          "runtime_mapping": {
+            "auto": -1,
+            "distance": 0,
+            "multi_factor": 1,
+            "eu_heuristic": 2,
+            "au_heuristic": 3,
+            "user_defined": 4
+          },
+          "allowed_by_climate_catalog_id": {
+            "vanilla_cligen": [
+              -1,
+              0,
+              1
+            ],
+            "prism_stochastic": [
+              -1,
+              0,
+              1
+            ],
+            "observed_daymet": [
+              -1,
+              0,
+              1
+            ],
+            "observed_gridmet": [
+              -1,
+              0,
+              1
+            ],
+            "dep_nexrad": [
+              -1,
+              0,
+              1
+            ],
+            "future_cmip5": [
+              -1,
+              0,
+              1
+            ],
+            "user_defined_cli": [
+              4
+            ]
+          },
+          "defaults_by_climate_catalog_id": {
+            "vanilla_cligen": -1,
+            "prism_stochastic": -1,
+            "observed_daymet": -1,
+            "observed_gridmet": -1,
+            "dep_nexrad": -1,
+            "future_cmip5": -1,
+            "user_defined_cli": 4
+          }
+        },
+        "climate_spatialmode": {
+          "type": "integer",
+          "constraint_mode": "run_resolved",
+          "constraint_source": "project_capability_graph",
+          "resolved_at": "2026-09-17T07:37:33Z",
+          "enum": [
+            0,
+            1,
+            2
+          ],
+          "enum_available": [
+            0,
+            1,
+            2
+          ],
+          "current_value": 1,
+          "current_value_authorized": true,
+          "disabled_values": [],
+          "runtime_mapping": {
+            "single": 0,
+            "multiple": 1,
+            "interpolated": 2
+          },
+          "allowed_by_climate_catalog_id": {
+            "vanilla_cligen": [
+              0,
+              1
+            ],
+            "prism_stochastic": [
+              0,
+              1
+            ],
+            "observed_daymet": [
+              0,
+              1,
+              2
+            ],
+            "observed_gridmet": [
+              0,
+              1,
+              2
+            ],
+            "dep_nexrad": [
+              0,
+              1
+            ],
+            "future_cmip5": [
+              0,
+              1
+            ],
+            "user_defined_cli": [
+              0,
+              1
+            ]
+          },
+          "defaults_by_climate_catalog_id": {
+            "vanilla_cligen": 0,
+            "prism_stochastic": 0,
+            "observed_daymet": 0,
+            "observed_gridmet": 0,
+            "dep_nexrad": 0,
+            "future_cmip5": 0,
+            "user_defined_cli": 0
+          }
+        },
+        "climate_mode": {
+          "type": "integer",
+          "required": true,
+          "constraint_mode": "run_resolved",
+          "constraint_source": "controller_state",
+          "resolved_at": "2026-09-17T07:37:33Z",
+          "enum": [
+            0,
+            5,
+            9,
+            11,
+            13,
+            3,
+            12
+          ],
+          "enum_available": [
+            0,
+            5,
+            9,
+            11,
+            13,
+            3,
+            12
+          ],
+          "enum_labels": {
+            "0": "Synthetic CLIGEN",
+            "2": "Observed station",
+            "3": "Future CMIP5",
+            "5": "Stochastic PRISM",
+            "6": "Observed database",
+            "9": "Observed DAYMET",
+            "11": "Observed GRIDMET"
+          },
+          "current_value": 11,
+          "current_value_authorized": true,
+          "disabled_values": []
+        },
+        "climatestation": {
+          "type": "string",
+          "constraint_mode": "run_resolved",
+          "constraint_source": "controller_state",
+          "available_if": {
+            "field": "climate_mode",
+            "op": "in",
+            "value": [
+              2,
+              6
+            ]
+          },
+          "required_if": {
+            "field": "climate_mode",
+            "op": "in",
+            "value": [
+              2,
+              6
+            ]
+          }
+        },
+        "observed_start_year": {
+          "type": "integer",
+          "minimum": 1900,
+          "maximum": 2100,
+          "constraint_mode": "static",
+          "required_if": {
+            "field": "climate_mode",
+            "op": "in",
+            "value": [
+              2,
+              9,
+              11
+            ]
+          }
+        },
+        "observed_end_year": {
+          "type": "integer",
+          "minimum": 1900,
+          "maximum": 2100,
+          "constraint_mode": "static",
+          "required_if": {
+            "field": "climate_mode",
+            "op": "in",
+            "value": [
+              2,
+              9,
+              11
+            ]
+          }
+        },
+        "future_start_year": {
+          "type": "integer",
+          "minimum": 2006,
+          "maximum": 2099,
+          "constraint_mode": "static",
+          "required_if": {
+            "field": "climate_mode",
+            "op": "eq",
+            "value": 3
+          }
+        },
+        "future_end_year": {
+          "type": "integer",
+          "minimum": 2006,
+          "maximum": 2099,
+          "constraint_mode": "static",
+          "required_if": {
+            "field": "climate_mode",
+            "op": "eq",
+            "value": 3
+          }
+        }
+      },
+      "additional_properties": true
+    },
+    "responses": {
+      "success": {
+        "required": [
+          "job_id"
+        ]
+      }
+    },
+    "capability_authority": {
+      "schema_version": 3,
+      "provider_revision": "882c6da6c2e62b86a8a4bab03e7ec864d4b6d3c41eb6795d8d7556e96a59e70b",
+      "climate_datasets": [
+        "vanilla_cligen",
+        "prism_stochastic",
+        "observed_daymet",
+        "observed_gridmet",
+        "dep_nexrad",
+        "future_cmip5",
+        "user_defined_cli"
+      ],
+      "climate_station_methods": [
+        "auto",
+        "distance",
+        "multi_factor",
+        "user_defined"
+      ],
+      "climate_spatial_methods": [
+        "single",
+        "multiple",
+        "interpolated"
+      ],
+      "climate_station_methods_by_dataset": {
+        "vanilla_cligen": [
+          "auto",
+          "distance",
+          "multi_factor"
+        ],
+        "prism_stochastic": [
+          "auto",
+          "distance",
+          "multi_factor"
+        ],
+        "observed_daymet": [
+          "auto",
+          "distance",
+          "multi_factor"
+        ],
+        "observed_gridmet": [
+          "auto",
+          "distance",
+          "multi_factor"
+        ],
+        "dep_nexrad": [
+          "auto",
+          "distance",
+          "multi_factor"
+        ],
+        "future_cmip5": [
+          "auto",
+          "distance",
+          "multi_factor"
+        ],
+        "user_defined_cli": [
+          "user_defined"
+        ]
+      },
+      "climate_spatial_methods_by_dataset": {
+        "vanilla_cligen": [
+          "single",
+          "multiple"
+        ],
+        "prism_stochastic": [
+          "single",
+          "multiple"
+        ],
+        "observed_daymet": [
+          "single",
+          "multiple",
+          "interpolated"
+        ],
+        "observed_gridmet": [
+          "single",
+          "multiple",
+          "interpolated"
+        ],
+        "dep_nexrad": [
+          "single",
+          "multiple"
+        ],
+        "future_cmip5": [
+          "single",
+          "multiple"
+        ],
+        "user_defined_cli": [
+          "single",
+          "multiple"
+        ]
+      },
+      "climate_station_defaults": {
+        "vanilla_cligen": "auto",
+        "prism_stochastic": "auto",
+        "observed_daymet": "auto",
+        "observed_gridmet": "auto",
+        "dep_nexrad": "auto",
+        "future_cmip5": "auto",
+        "user_defined_cli": "user_defined"
+      },
+      "climate_spatial_defaults": {
+        "vanilla_cligen": "single",
+        "prism_stochastic": "single",
+        "observed_daymet": "single",
+        "observed_gridmet": "single",
+        "dep_nexrad": "single",
+        "future_cmip5": "single",
+        "user_defined_cli": "single"
+      },
+      "defaults": {
+        "locale_profile": "continental-us",
+        "dem_source": "usgs-ned13-2022",
+        "climate_dataset": "vanilla_cligen",
+        "climate_station_database": "cligen-stations-2015",
+        "landuse_dataset": "nlcd-2019",
+        "soil_dataset": "ssurgo-gnatsgso-2025",
+        "delineation_backend": "wbt",
+        "watershed_representation": "single-ofe",
+        "wepp_binary": "wepp_260803"
+      },
+      "delineation_backends": [
+        "topaz",
+        "wbt"
+      ],
+      "watershed_representations": [
+        "single-ofe",
+        "multiple-ofe"
+      ],
+      "wepp_binaries": [
+        "latest",
+        "wepp_02a7043",
+        "wepp_050dd9d",
+        "wepp_127f751",
+        "wepp_201e020",
+        "wepp_250915",
+        "wepp_251003",
+        "wepp_260319",
+        "wepp_260324",
+        "wepp_260409",
+        "wepp_260414",
+        "wepp_260417",
+        "wepp_260418",
+        "wepp_260419",
+        "wepp_260420",
+        "wepp_260421",
+        "wepp_260421b",
+        "wepp_260425",
+        "wepp_260426",
+        "wepp_260427",
+        "wepp_260428",
+        "wepp_260429",
+        "wepp_260430",
+        "wepp_260514",
+        "wepp_260515d_hill_c015",
+        "wepp_260525",
+        "wepp_260606",
+        "wepp_260714",
+        "wepp_260723",
+        "wepp_260725",
+        "wepp_260726",
+        "wepp_260803",
+        "wepp_2708301",
+        "wepp_30ae9f7",
+        "wepp_31131a7",
+        "wepp_347f3bd",
+        "wepp_4f63445",
+        "wepp_548fe07",
+        "wepp_57943e5",
+        "wepp_57afbc8",
+        "wepp_580097",
+        "wepp_64bf5aa",
+        "wepp_6714fc",
+        "wepp_6e47b5a",
+        "wepp_726fbd5",
+        "wepp_726fbd5_debug",
+        "wepp_81fd281",
+        "wepp_8c6b313",
+        "wepp_a557997",
+        "wepp_aa57a1d",
+        "wepp_baer",
+        "wepp_bcf2ac5",
+        "wepp_bd16b69",
+        "wepp_da205e9",
+        "wepp_da7e67f",
+        "wepp_dbc4b57",
+        "wepp_dcc52a6",
+        "wepp_de244d1",
+        "wepp_e4cdc93",
+        "wepp_eeaed4b",
+        "wepp_reveg",
+        "wepp_reveg_0b83dee",
+        "wepp_reveg_1fcd1e8",
+        "wepp_reveg_2e59287",
+        "wepp_reveg_447f8a9",
+        "wepp_reveg_4ada0c6",
+        "wepp_reveg_5acde3e",
+        "wepp_reveg_8e0b643",
+        "wepp_reveg_a4a7678",
+        "wepp_reveg_d3da1f6",
+        "wepp_reveg_d724fbd",
+        "wepp_reveg_ea925d5"
+      ],
+      "allowed_model_tuples": [
+        "topaz|single-ofe|latest",
+        "wbt|single-ofe|latest",
+        "topaz|single-ofe|wepp_02a7043",
+        "wbt|single-ofe|wepp_02a7043",
+        "topaz|single-ofe|wepp_050dd9d",
+        "wbt|single-ofe|wepp_050dd9d",
+        "topaz|single-ofe|wepp_127f751",
+        "wbt|single-ofe|wepp_127f751",
+        "topaz|single-ofe|wepp_201e020",
+        "wbt|single-ofe|wepp_201e020",
+        "topaz|single-ofe|wepp_250915",
+        "wbt|single-ofe|wepp_250915",
+        "topaz|single-ofe|wepp_251003",
+        "wbt|single-ofe|wepp_251003",
+        "topaz|single-ofe|wepp_260319",
+        "wbt|single-ofe|wepp_260319",
+        "topaz|single-ofe|wepp_260324",
+        "wbt|single-ofe|wepp_260324",
+        "topaz|single-ofe|wepp_260409",
+        "wbt|single-ofe|wepp_260409",
+        "topaz|single-ofe|wepp_260414",
+        "wbt|single-ofe|wepp_260414",
+        "topaz|single-ofe|wepp_260417",
+        "wbt|single-ofe|wepp_260417",
+        "topaz|single-ofe|wepp_260418",
+        "wbt|single-ofe|wepp_260418",
+        "topaz|single-ofe|wepp_260419",
+        "wbt|single-ofe|wepp_260419",
+        "topaz|single-ofe|wepp_260420",
+        "wbt|single-ofe|wepp_260420",
+        "topaz|single-ofe|wepp_260421",
+        "wbt|single-ofe|wepp_260421",
+        "topaz|single-ofe|wepp_260421b",
+        "wbt|single-ofe|wepp_260421b",
+        "topaz|single-ofe|wepp_260425",
+        "wbt|single-ofe|wepp_260425",
+        "topaz|single-ofe|wepp_260426",
+        "wbt|single-ofe|wepp_260426",
+        "topaz|single-ofe|wepp_260427",
+        "wbt|single-ofe|wepp_260427",
+        "topaz|single-ofe|wepp_260428",
+        "wbt|single-ofe|wepp_260428",
+        "topaz|single-ofe|wepp_260429",
+        "wbt|single-ofe|wepp_260429",
+        "topaz|single-ofe|wepp_260430",
+        "wbt|single-ofe|wepp_260430",
+        "topaz|single-ofe|wepp_260514",
+        "wbt|single-ofe|wepp_260514",
+        "topaz|single-ofe|wepp_260515d_hill_c015",
+        "wbt|single-ofe|wepp_260515d_hill_c015",
+        "topaz|single-ofe|wepp_260525",
+        "wbt|single-ofe|wepp_260525",
+        "topaz|single-ofe|wepp_260606",
+        "wbt|single-ofe|wepp_260606",
+        "topaz|single-ofe|wepp_260714",
+        "wbt|single-ofe|wepp_260714",
+        "topaz|single-ofe|wepp_260723",
+        "wbt|single-ofe|wepp_260723",
+        "topaz|single-ofe|wepp_260725",
+        "wbt|single-ofe|wepp_260725",
+        "topaz|single-ofe|wepp_260726",
+        "wbt|single-ofe|wepp_260726",
+        "topaz|single-ofe|wepp_260803",
+        "wbt|single-ofe|wepp_260803",
+        "topaz|single-ofe|wepp_2708301",
+        "wbt|single-ofe|wepp_2708301",
+        "topaz|single-ofe|wepp_30ae9f7",
+        "wbt|single-ofe|wepp_30ae9f7",
+        "topaz|single-ofe|wepp_31131a7",
+        "wbt|single-ofe|wepp_31131a7",
+        "topaz|single-ofe|wepp_347f3bd",
+        "wbt|single-ofe|wepp_347f3bd",
+        "topaz|single-ofe|wepp_4f63445",
+        "wbt|single-ofe|wepp_4f63445",
+        "topaz|single-ofe|wepp_548fe07",
+        "wbt|single-ofe|wepp_548fe07",
+        "topaz|single-ofe|wepp_57943e5",
+        "wbt|single-ofe|wepp_57943e5",
+        "topaz|single-ofe|wepp_57afbc8",
+        "wbt|single-ofe|wepp_57afbc8",
+        "topaz|single-ofe|wepp_580097",
+        "wbt|single-ofe|wepp_580097",
+        "topaz|single-ofe|wepp_64bf5aa",
+        "wbt|single-ofe|wepp_64bf5aa",
+        "topaz|single-ofe|wepp_6714fc",
+        "wbt|single-ofe|wepp_6714fc",
+        "topaz|single-ofe|wepp_6e47b5a",
+        "wbt|single-ofe|wepp_6e47b5a",
+        "topaz|single-ofe|wepp_726fbd5",
+        "wbt|single-ofe|wepp_726fbd5",
+        "topaz|single-ofe|wepp_726fbd5_debug",
+        "wbt|single-ofe|wepp_726fbd5_debug",
+        "topaz|single-ofe|wepp_81fd281",
+        "wbt|single-ofe|wepp_81fd281",
+        "topaz|single-ofe|wepp_8c6b313",
+        "wbt|single-ofe|wepp_8c6b313",
+        "topaz|single-ofe|wepp_a557997",
+        "wbt|single-ofe|wepp_a557997",
+        "topaz|single-ofe|wepp_aa57a1d",
+        "wbt|single-ofe|wepp_aa57a1d",
+        "topaz|single-ofe|wepp_baer",
+        "wbt|single-ofe|wepp_baer",
+        "topaz|single-ofe|wepp_bcf2ac5",
+        "wbt|single-ofe|wepp_bcf2ac5",
+        "topaz|single-ofe|wepp_bd16b69",
+        "wbt|single-ofe|wepp_bd16b69",
+        "topaz|single-ofe|wepp_da205e9",
+        "wbt|single-ofe|wepp_da205e9",
+        "topaz|single-ofe|wepp_da7e67f",
+        "wbt|single-ofe|wepp_da7e67f",
+        "topaz|single-ofe|wepp_dbc4b57",
+        "wbt|single-ofe|wepp_dbc4b57",
+        "topaz|single-ofe|wepp_dcc52a6",
+        "wbt|single-ofe|wepp_dcc52a6",
+        "topaz|single-ofe|wepp_de244d1",
+        "wbt|single-ofe|wepp_de244d1",
+        "topaz|single-ofe|wepp_e4cdc93",
+        "wbt|single-ofe|wepp_e4cdc93",
+        "topaz|single-ofe|wepp_eeaed4b",
+        "wbt|single-ofe|wepp_eeaed4b",
+        "topaz|single-ofe|wepp_reveg",
+        "wbt|single-ofe|wepp_reveg",
+        "topaz|single-ofe|wepp_reveg_0b83dee",
+        "wbt|single-ofe|wepp_reveg_0b83dee",
+        "topaz|single-ofe|wepp_reveg_1fcd1e8",
+        "wbt|single-ofe|wepp_reveg_1fcd1e8",
+        "topaz|single-ofe|wepp_reveg_2e59287",
+        "wbt|single-ofe|wepp_reveg_2e59287",
+        "topaz|single-ofe|wepp_reveg_447f8a9",
+        "wbt|single-ofe|wepp_reveg_447f8a9",
+        "topaz|single-ofe|wepp_reveg_4ada0c6",
+        "wbt|single-ofe|wepp_reveg_4ada0c6",
+        "topaz|single-ofe|wepp_reveg_5acde3e",
+        "wbt|single-ofe|wepp_reveg_5acde3e",
+        "topaz|single-ofe|wepp_reveg_8e0b643",
+        "wbt|single-ofe|wepp_reveg_8e0b643",
+        "topaz|single-ofe|wepp_reveg_a4a7678",
+        "wbt|single-ofe|wepp_reveg_a4a7678",
+        "topaz|single-ofe|wepp_reveg_d3da1f6",
+        "wbt|single-ofe|wepp_reveg_d3da1f6",
+        "topaz|single-ofe|wepp_reveg_d724fbd",
+        "wbt|single-ofe|wepp_reveg_d724fbd",
+        "topaz|single-ofe|wepp_reveg_ea925d5",
+        "wbt|single-ofe|wepp_reveg_ea925d5",
+        "wbt|multiple-ofe|wepp_260803"
+      ]
+    }
+  }
+}

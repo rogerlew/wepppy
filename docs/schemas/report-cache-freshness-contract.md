@@ -1,6 +1,6 @@
 # Report cache content provenance
 
-## Scope and rationale (implementation pending)
+## Scope and rationale (implemented)
 
 This contract covers only `HillslopeWatbalReport` (baseline and Roads) and
 `AverageAnnualsByLanduseReport` (baseline). It supplements the
@@ -179,7 +179,7 @@ claims about source sizes/storage. Retain separate final runtime measurements,
 cache-admission/eviction counts and actual Redis-backed controller acquisition;
 the baseline used detached NoDb hydration and an OS-warm filesystem.
 
-## Relocated landuse catalogs (implementation pending)
+## Relocated landuse catalogs (implemented)
 
 A catalog's stored root records its original activation directory. Report-local
 selection MUST normalize that root to the requested RunContext base directory

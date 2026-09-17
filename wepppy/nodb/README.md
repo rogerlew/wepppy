@@ -54,12 +54,12 @@ Disk hydration pairs decoded state with the version of the same opened file.
 If an atomic replacement occurs during decoding, the older complete state keeps
 its older signature: cache reuse refreshes it and a stale write is rejected.
 Detectable changes during the read raise `ESTALE` under the existing bounded
-initial-read policy. See [Coherent disk-read versions](../../docs/schemas/nodb-persistence-concurrency-contract.md#coherent-disk-read-versions-implementation-pending).
+initial-read policy. See [Coherent disk-read versions](../../docs/schemas/nodb-persistence-concurrency-contract.md#coherent-disk-read-versions-implemented).
 
 PRISM revision and RAP analysis also verify required main-file bytes at
 collection and finalization, detecting equal-size changes even when mtime is
 restored. Existing metadata transaction checks remain conservative. Indirect
-raster dependencies need separate closure; see [Derived input byte verification](../../docs/schemas/nodb-persistence-concurrency-contract.md#derived-input-byte-verification-implementation-pending).
+raster dependencies need separate closure; see [Derived input byte verification](../../docs/schemas/nodb-persistence-concurrency-contract.md#derived-input-byte-verification-implemented).
 
 Project-config executable identities use verified SHA-256 reads with bounded
 cache reuse. Restored timestamps cannot alone authorize an old executable hash;

@@ -1,0 +1,54 @@
+
+docs/adrs/20260917-file-digest-cache-admission.md
+✅ 1 files validated, 0 errors, 0 warnings
+
+docs/schemas/file-dependency-freshness-contract.md
+✅ 1 files validated, 0 errors, 0 warnings
+
+docs/schemas/nodb-persistence-concurrency-contract.md
+✅ 1 files validated, 0 errors, 0 warnings
+
+docs/schemas/omni-sbs-freshness-contract.md
+✅ 1 files validated, 0 errors, 0 warnings
+
+docs/schemas/output-scope-contract.md
+✅ 1 files validated, 0 errors, 0 warnings
+
+docs/schemas/raster-dependency-freshness-contract.md
+✅ 1 files validated, 0 errors, 0 warnings
+
+docs/schemas/report-cache-freshness-contract.md
+✅ 1 files validated, 0 errors, 0 warnings
+
+docs/ui-docs/gl-dashboard.md
+✅ 1 files validated, 0 errors, 0 warnings
+
+wepppy/nodb/README.md
+✅ 1 files validated, 0 errors, 0 warnings
+
+wepppy/nodb/mods/features_export/README.md
+✅ 1 files validated, 0 errors, 0 warnings
+
+wepppy/nodb/mods/features_export/specification.md
+✅ 1 files validated, 0 errors, 0 warnings
+
+wepppy/nodb/mods/postfire_debris_flow/README.md
+✅ 1 files validated, 0 errors, 0 warnings
+
+wepppy/nodb/mods/postfire_debris_flow/docs/production_m1.md
+✅ 1 files validated, 0 errors, 0 warnings
+
+wepppy/nodb/mods/postfire_debris_flow/docs/production_m3.md
+✅ 1 files validated, 0 errors, 0 warnings
+
+wepppy/nodb/mods/rap/README.md
+✅ 1 files validated, 0 errors, 0 warnings
+
+wepppy/profile_recorder/PROFILE_TEST_ENGINE_SPEC.md
+✅ 1 files validated, 0 errors, 0 warnings
+
+wepppy/profile_recorder/README.md
+✅ 1 files validated, 0 errors, 0 warnings
+
+wepppy/wepp/reports/README.md
+✅ 1 files validated, 0 errors, 0 warnings

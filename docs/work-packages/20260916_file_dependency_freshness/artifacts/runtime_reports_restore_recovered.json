@@ -1,0 +1,75 @@
+[
+  {
+    "path": "/weppcloud/runs/qa-freshness-runtime-7e24c8d1/config/report/wepp/avg_annual_by_landuse/",
+    "status": 200,
+    "final_path": "/weppcloud/runs/qa-freshness-runtime-7e24c8d1/config/report/wepp/avg_annual_by_landuse/",
+    "content_type": "text/html; charset=utf-8",
+    "bytes": 135369,
+    "sha256": "1f9a29e6b5a48387d10ab6c104aaa31a244f4ac13047c755a01a10f46bdef239"
+  },
+  {
+    "path": "/weppcloud/runs/qa-freshness-runtime-7e24c8d1/config/report/wepp/avg_annual_by_landuse/?format=csv",
+    "status": 200,
+    "final_path": "/weppcloud/runs/qa-freshness-runtime-7e24c8d1/config/report/wepp/avg_annual_by_landuse/?format=csv",
+    "content_type": "text/csv; charset=utf-8",
+    "bytes": 1140,
+    "sha256": "8307684784da3ee0100f6b411d26dc328dd968a1c36bfe842cc5987271d09425"
+  },
+  {
+    "path": "/weppcloud/runs/qa-freshness-runtime-7e24c8d1/config/report/wepp/avg_annual_watbal/",
+    "status": 200,
+    "final_path": "/weppcloud/runs/qa-freshness-runtime-7e24c8d1/config/report/wepp/avg_annual_watbal/",
+    "content_type": "text/html; charset=utf-8",
+    "bytes": 557407,
+    "sha256": "258f7436598298800d571c2d17222271af8c3ec66a6a19842d28f6a374e140ed"
+  },
+  {
+    "path": "/weppcloud/runs/qa-freshness-runtime-7e24c8d1/config/report/wepp/avg_annual_watbal/?format=csv",
+    "status": 500,
+    "final_path": "/weppcloud/runs/qa-freshness-runtime-7e24c8d1/config/report/wepp/avg_annual_watbal/?format=csv",
+    "content_type": "application/json",
+    "bytes": 1095,
+    "sha256": "5863d5ebe434dbe8ff0517c8778e643c168e07d50c9951bf25cb391207cc1f9c"
+  },
+  {
+    "path": "/rq-engine/api/runs/qa-freshness-runtime-7e24c8d1/config/postfire-debris-flow/files/7902bf9bc67840b180df10ee22329450/events.parquet",
+    "status": 200,
+    "content_type": "application/octet-stream",
+    "bytes": 62949,
+    "sha256": "9ec7ccbefae7ede91136cdc684f416acc1a65d13f6f6986e4a2f4b1060e4a208"
+  },
+  {
+    "path": "/rq-engine/api/runs/qa-freshness-runtime-7e24c8d1/config/postfire-debris-flow/files/7902bf9bc67840b180df10ee22329450/design.parquet",
+    "status": 200,
+    "content_type": "application/octet-stream",
+    "bytes": 3473,
+    "sha256": "514ed4e4026e140185155c5a2a42ea918a26ee243a1108a2ef7af50d9ebda012"
+  },
+  {
+    "path": "/rq-engine/api/runs/qa-freshness-runtime-7e24c8d1/config/postfire-debris-flow/files/7902bf9bc67840b180df10ee22329450/inverse.parquet",
+    "status": 200,
+    "content_type": "application/octet-stream",
+    "bytes": 2213,
+    "sha256": "e9cc28b90ce754aa1e1c7c86f866a7f8fcebc659e385d5b0af49bded0fd8f16c"
+  },
+  {
+    "path": "/rq-engine/api/runs/qa-freshness-runtime-7e24c8d1/config/postfire-debris-flow/files/7902bf9bc67840b180df10ee22329450/valid_mask.tif",
+    "status": 200,
+    "content_type": "application/octet-stream",
+    "bytes": 42972,
+    "sha256": "cb4007997c6530b0f3c53be61120b344da7b77523994d48b951565a6648ad4c0"
+  },
+  {
+    "path": "/rq-engine/api/runs/qa-freshness-runtime-7e24c8d1/config/postfire-debris-flow/files/7902bf9bc67840b180df10ee22329450/manifest.json",
+    "status": 200,
+    "content_type": "application/octet-stream",
+    "bytes": 14621,
+    "sha256": "41950a8278d85a90cd12dec876be3c04fb12314a2eeb01e6e6d1e4d0284cbfd5"
+  },
+  {
+    "path": "/weppcloud/runs/qa-freshness-runtime-7e24c8d1/config/download/wepp/reports/cache/hillslope_watbal_summary.parquet",
+    "status": 200,
+    "sha256": "42a7129cb62515f59979ef887f913b72ddfcaf0296f6a1f3f455e6d3387fdd96",
+    "source_sha256": "42a7129cb62515f59979ef887f913b72ddfcaf0296f6a1f3f455e6d3387fdd96"
+  }
+]

@@ -1,0 +1,343 @@
+{
+  "reviewer": "freshness_security",
+  "date": "2026-09-17",
+  "production_commit": "de3a1eba03ba2a0a09beef84e7f3a768d34690fe",
+  "all_production_files_match_reviewed_commit": true,
+  "production_files": [
+    {
+      "path": "wepppy/all_your_base/file_digest.py",
+      "sha256": "d090094983c4f7575801969a1339ae3306745f6ff93aa100c037d83dd7fb9ee7"
+    },
+    {
+      "path": "wepppy/all_your_base/file_digest.pyi",
+      "sha256": "4a9fa1f5e3296baeb5e986b6f5e4ed83f07daa38aa4d2b499b4b16c84ff91ae5"
+    },
+    {
+      "path": "wepppy/all_your_base/raster_freshness.py",
+      "sha256": "b5e1602a6596cfb37a21d72ecc2b3839da92fac3163fa6a8e2fb121bde6cc738"
+    },
+    {
+      "path": "wepppy/all_your_base/raster_freshness.pyi",
+      "sha256": "2174f3b2ab51f63d804266c62a1d09833e54fc62a66d7d11d5e47ff649c10593"
+    },
+    {
+      "path": "wepppy/climates/cli_parquet.py",
+      "sha256": "ef48004ff552b20ef5206b7b42d7b078dd0a2201003cfaa45ed772c09c5ac74f"
+    },
+    {
+      "path": "wepppy/microservices/rq_engine/postfire_debris_flow_routes.py",
+      "sha256": "1de0d33f2f9519d3174673b2c8edf3f19d3de1ef6ba212bd2eb9fcc739e0e3c0"
+    },
+    {
+      "path": "wepppy/microservices/rq_engine/schema_defaults_routes.py",
+      "sha256": "9f3369d3a35bae6f67c2e489dcc38f0145710c3fe47847a969bd53c59f1f7dc5"
+    },
+    {
+      "path": "wepppy/nodb/_derived_build.py",
+      "sha256": "423c37c144cac5f8bee3c97930c4f8c65da26f72cb39104007370f3a5cedcc2e"
+    },
+    {
+      "path": "wepppy/nodb/_read_retry.py",
+      "sha256": "1623c486e6a1ef5aaf8919ab77623ced931ad837160c78dd02fd1a586fe878fd"
+    },
+    {
+      "path": "wepppy/nodb/_read_retry.pyi",
+      "sha256": "6cc844bc190b4129a3c53817447ec51bc47b85487f28c9168fa548c894c5b391"
+    },
+    {
+      "path": "wepppy/nodb/base.py",
+      "sha256": "7231fc8367062a024c05f64a0fa7045ab81fd2f83f7a025472ee051aa85e8522"
+    },
+    {
+      "path": "wepppy/nodb/config_builder/registry.py",
+      "sha256": "47a4ca7f1ef78058533748fa97ffb463df3cb35b18a9785094eeb3ea5020e86c"
+    },
+    {
+      "path": "wepppy/nodb/core/climate_artifact_export_service.py",
+      "sha256": "221901b6e643fd6f3cfe89e6e02cdd674ccef86604363a65ceb2977cb8dd5d2a"
+    },
+    {
+      "path": "wepppy/nodb/core/climate_observed_build.py",
+      "sha256": "c5c0f61d3d6903b7e2d9181a48b8a7ef28f1453ae744bc2398187655df2a9ef9"
+    },
+    {
+      "path": "wepppy/nodb/core/landuse.py",
+      "sha256": "46954d6d325789972af2ad901458c3106f5d88dde1212715fd409baba5012cd8"
+    },
+    {
+      "path": "wepppy/nodb/mods/baer/sbs_map.py",
+      "sha256": "5212036fa8357987b65c7add0da435a1b4a95f26b510b18b44eba075cd4242b7"
+    },
+    {
+      "path": "wepppy/nodb/mods/features_export/dependency_tracker.py",
+      "sha256": "b8722d4b4fc224d26370bb749fb1bd2899973d2da09d1fc7f41549ce7deb4c0d"
+    },
+    {
+      "path": "wepppy/nodb/mods/features_export/exporters/geodatabase.py",
+      "sha256": "f2138126063048a06ad828d562c39e2fa885a1e47b6a795705eabc061c0a9146"
+    },
+    {
+      "path": "wepppy/nodb/mods/features_export/readme_builder.py",
+      "sha256": "68939aa79d5310299f96ba506256c3dc818a16ba9f1d25918a56566476b05fad"
+    },
+    {
+      "path": "wepppy/nodb/mods/features_export/service.py",
+      "sha256": "007e1d51dc1e600a36da9ff8ff5060974a5639411338fb96e6347f4d6599b747"
+    },
+    {
+      "path": "wepppy/nodb/mods/geneva/collaborators/_cache_freshness.py",
+      "sha256": "405223512fbf699d35d008bdb0228802ee2a39b2095dfc8ed3f67b3521b8e2b1"
+    },
+    {
+      "path": "wepppy/nodb/mods/geneva/collaborators/hru_map_geometry_service.py",
+      "sha256": "98c3f8c3b67abd21c10aacf9c0b278df1874a07c2a2684c038f18f6bbfa51034"
+    },
+    {
+      "path": "wepppy/nodb/mods/geneva/collaborators/hsg_assignment_service.py",
+      "sha256": "59ee01affee3b9455327868d17f4b76191d622ef2c520f7307f480fe706da96f"
+    },
+    {
+      "path": "wepppy/nodb/mods/omni/omni.py",
+      "sha256": "22bd86e063d66ec94783037861b9428a30f4f2bdba6d29f1a0c816c08534e614"
+    },
+    {
+      "path": "wepppy/nodb/mods/omni/omni.pyi",
+      "sha256": "f3385a24e1f3884b7564c73fb6df827b6c424b07a0f7cfeda561532bc4eddada"
+    },
+    {
+      "path": "wepppy/nodb/mods/omni/omni_clone_contrast_service.py",
+      "sha256": "f7490428128e0fb34a81e9e7404c71b9e098ec49c70f38097ac840b6dfc419e6"
+    },
+    {
+      "path": "wepppy/nodb/mods/omni/omni_mode_build_services.py",
+      "sha256": "8d6d4590947eed0a731295f0f0ff7f5082af840372f98090f1a2db62ed9f518d"
+    },
+    {
+      "path": "wepppy/nodb/mods/omni/omni_run_orchestration_service.py",
+      "sha256": "e09f1b19fe75d650b04df2d272219729964774817a7c989f44fdb986c316b134"
+    },
+    {
+      "path": "wepppy/nodb/mods/omni/omni_sbs_freshness.py",
+      "sha256": "6f95a6f6f3bc8836259361fb5883697578b1a2392baee5540b87b2f3961e2832"
+    },
+    {
+      "path": "wepppy/nodb/mods/omni/omni_station_catalog_service.py",
+      "sha256": "ecd08d23ab564e4065e5e9bcb3bdfca068063ea3db9c15dddb520855926139ae"
+    },
+    {
+      "path": "wepppy/nodb/mods/postfire_debris_flow/production.py",
+      "sha256": "8c66a2f8c29b8da5e75bc27bfa0ed494fe4abb43cb7913a8ad5f394cf0ac38c3"
+    },
+    {
+      "path": "wepppy/nodb/mods/postfire_debris_flow/rainfall_io.py",
+      "sha256": "f61f0c76caee6ba10583ce19a6628f48c6e0efca6b229f79f172450c3ae39898"
+    },
+    {
+      "path": "wepppy/nodb/mods/rap/rap_ts_build.py",
+      "sha256": "eefddb841cf86791af02026af3b3444c9dc184b2d77e44a77b917e6b18bfe42f"
+    },
+    {
+      "path": "wepppy/nodb/skeletonize.py",
+      "sha256": "7daef40abb5ed4e061ef6093251e830f2a0ac398fbc4d7a0256174d462fbb95f"
+    },
+    {
+      "path": "wepppy/profile_recorder/assembler.py",
+      "sha256": "881d3963013726e401f5d9cf99c3479d6add3714ddb3ab10ed8743a8bfc94aeb"
+    },
+    {
+      "path": "wepppy/profile_recorder/playback.py",
+      "sha256": "1339b90b9a9de633dc2447b1ac217f1659187cb9682d670c2b2e858c0e4e9c53"
+    },
+    {
+      "path": "wepppy/profile_recorder/sbs_seed.py",
+      "sha256": "a67475c34382fbd647dfd13b7b4be0f5f3da3be6dd987997af89e0ad5a218b86"
+    },
+    {
+      "path": "wepppy/rq/omni_rq.py",
+      "sha256": "0fca1007d49ed39ab0210ea42b90a651f752ca0bb7d828d64583e5da857924c7"
+    },
+    {
+      "path": "wepppy/rq/project_rq_archive.py",
+      "sha256": "76a3dbfb305f3ac9a2d9c092dadb442754fc20231ccca4dd74b403221762a089"
+    },
+    {
+      "path": "wepppy/webservices/dtale/dtale.py",
+      "sha256": "a5c150af6a57a40fa6a773b685cad7b0aec1fc518051998157d270c210851ea7"
+    },
+    {
+      "path": "wepppy/webservices/dtale/dtale.pyi",
+      "sha256": "8e10e5cd37e03fb95f9e5b7145ea4856a13341f6d6eabedb93a701411ca372cc"
+    },
+    {
+      "path": "wepppy/wepp/interchange/_utils.py",
+      "sha256": "94e589a57107c061381d77ef5554aa650abffda32df9be126d7454bad8833ea9"
+    },
+    {
+      "path": "wepppy/wepp/reports/_cache_freshness.py",
+      "sha256": "2f999913fc0557f7ea68a08f0c8bef7b3048a062dd9665afb5a9ddceed73ff24"
+    },
+    {
+      "path": "wepppy/wepp/reports/average_annuals_by_landuse.py",
+      "sha256": "d8063ff1fbc9fba1f34e531c6788f3ffba0822feeb64dbe24f94a8b3900860ad"
+    },
+    {
+      "path": "wepppy/wepp/reports/average_annuals_by_landuse.pyi",
+      "sha256": "29e527405113cff515377d552d1bb3cf99ddad2a3fc3c3beda77402aa10e10ca"
+    },
+    {
+      "path": "wepppy/wepp/reports/hillslope_watbal.py",
+      "sha256": "b3a14b6cbfa068207d5d0c459b36b3a67f196f505c86b6fbf60f8d0a96620d2d"
+    },
+    {
+      "path": "wepppy/wepp/reports/hillslope_watbal.pyi",
+      "sha256": "78ff93d770cb92bc723031127acd67a309b53a9b3814473f484aad9d186a3d35"
+    },
+    {
+      "path": "wepppy/weppcloud/utils/assets.py",
+      "sha256": "0ac52522e8bc0cf7d6ac3284f2e292a21fed7724b7afd6dc2fa8e9fdc6ba51c5"
+    }
+  ],
+  "reviewed_evidence": [
+    {
+      "path": "runtime_restart_verification.json",
+      "bytes": 35735,
+      "sha256": "a247e39493230cacc228822b194dd4fdfda26ff9ae593d6f69aeaab36fd96c94"
+    },
+    {
+      "path": "runtime_m3_hardlink_acceptance.json",
+      "bytes": 3931,
+      "sha256": "314d19396cf8b323a9fb54ed14b3a4cbd4f123062030962351c355aa56721a30"
+    },
+    {
+      "path": "runtime_archive_live_jobinfo.json",
+      "bytes": 667,
+      "sha256": "15a7ee2b781335183306d9c466ebd613f43d4742be2e72db1b8269df87834a33"
+    },
+    {
+      "path": "runtime_restore_live_jobinfo.json",
+      "bytes": 707,
+      "sha256": "9e2eb5f19dcef9f1ecc189297f28dff8eb5b1a9bc351c2def5c8c1df626f191d"
+    },
+    {
+      "path": "runtime_archive_live_zip.json",
+      "bytes": 320,
+      "sha256": "4768df5230f0b8124125e66bc5ecc7071cf383536758bbbae3251e5bf2499987"
+    },
+    {
+      "path": "runtime_archive_inventory_after.json",
+      "bytes": 119382,
+      "sha256": "15cf664608d2aec3289880e59a339e85ddcc869a5c319fdce16763f05a71d478"
+    },
+    {
+      "path": "runtime_restore_soil_attribution_qa.json",
+      "bytes": 3905,
+      "sha256": "3248e8b86f86cbe0947f6c44dc58c068ca095ccc4f16a9094e129ead5415a343"
+    },
+    {
+      "path": "runtime_postfire_restore_recovery_jobinfo.json",
+      "bytes": 734,
+      "sha256": "3f9f1bd4995e1f5e29f854f817fa266d06874d5bc7f730c2875758be96c77918"
+    },
+    {
+      "path": "runtime_archive_acceptance_3a8be19a8e1e.json",
+      "bytes": 12441,
+      "sha256": "2a2c3e5059ca8f191bc18e0c55a1e4b6958a1108d68597a7db92297afa08d1ca"
+    },
+    {
+      "path": "runtime_archive_helper_public_browse.json",
+      "bytes": 4479,
+      "sha256": "d39bc61a72d028ee965c07129cbedfb1fac1e31908c6011a5cba98adc8baca22"
+    },
+    {
+      "path": "runtime_archive_helper_public_downloads.json",
+      "bytes": 747,
+      "sha256": "01ab6dc23cb697775d96e267e9205220787bce1d9873f2ac8f293a61d6d9b07b"
+    },
+    {
+      "path": "runtime_profile_capture.json",
+      "bytes": 1130,
+      "sha256": "5711db071714e152ae041c9c0db2ee86a68adad8d8fb602bcaad653e78bcdc68"
+    },
+    {
+      "path": "runtime_profile_http_acceptance.json",
+      "bytes": 1558,
+      "sha256": "addd50e078cc86726f2121a5dbdecaad1bf5731922afb02b0af62a6314cdd6c6"
+    },
+    {
+      "path": "runtime_profile_http_wire.json",
+      "bytes": 725,
+      "sha256": "251ca5e7c26280ee8d04f849c0bbb98a3489acdd09e5b9eebcab1392badd1deb"
+    },
+    {
+      "path": "runtime_profile_seed_security.json",
+      "bytes": 10738,
+      "sha256": "d3b657e3b9bdee9a922e9b95b4c62d21e0e130e718d080c2989d7872e10dca41"
+    },
+    {
+      "path": "runtime_profile_canonical_cli.log",
+      "bytes": 4106,
+      "sha256": "5acbbc53881b80e879f0bf966754f3f91d72a59bdbeee00b20d68eff5f9f7799"
+    },
+    {
+      "path": "runtime_watbal_csv_baseline_qa.json",
+      "bytes": 2180,
+      "sha256": "c8b1679a7af91ec07f49b2c18354b2ee00e838facff674f4d418f0aef2af1048"
+    },
+    {
+      "path": "runtime_omni_sbs_native_result.json",
+      "bytes": 4108,
+      "sha256": "9dd19132fc86e7b0dbf3372f000e06c9c5f7c755d8f14d9781da6eefa5fdbaab"
+    },
+    {
+      "path": "runtime_omni_sbs_rq_result.json",
+      "bytes": 24746,
+      "sha256": "89240fa18654108ae0fef7c5a8af4ac52a7e86f4d52bed43efe9323afa084770"
+    },
+    {
+      "path": "runtime_omni_operational_source_security_observations.json",
+      "bytes": 2429,
+      "sha256": "f7de4725e626f2092f18cc5e5663eaff001ea3d66401e962cdf34036f4dcf652"
+    },
+    {
+      "path": "features_mixed_runtime_revision2.json",
+      "bytes": 236670,
+      "sha256": "f1fc2b22a77a48335ef6f20d870bf7010ccea3a02fa8ecea2479faaf2f0796cf"
+    },
+    {
+      "path": "dtale_public_runtime_initial.json",
+      "bytes": 32052,
+      "sha256": "5bcc8a1bb73ee9696219f19c9a7c684e4389dfb8f684595cfb00701506a262ac"
+    },
+    {
+      "path": "dtale_public_browser_revision3.json",
+      "bytes": 5567,
+      "sha256": "47732364e6154ff5f9755fa43912c6c169b5b6a92b79c3049f96660e80610266"
+    },
+    {
+      "path": "runtime_nfs_digest.json",
+      "bytes": 401504,
+      "sha256": "a3cf4f1481ffd7f7ae12382ff2dc637ce172540488e6821954a5be3568bedddb"
+    },
+    {
+      "path": "runtime_nodb_processes.json",
+      "bytes": 929,
+      "sha256": "97943b9b9c7d1b654c2cbe7b5174e1d6149d2a4080078af7911f4454dafe72d0"
+    },
+    {
+      "path": "runtime_interleaved_state.json",
+      "bytes": 2563,
+      "sha256": "bc622e56c6f04ceac56a10836d2af941d78f6a688f459150f3b35cf364281ac6"
+    },
+    {
+      "path": "final_full_suite_quiet.log",
+      "bytes": 86363,
+      "sha256": "e980cd43db91e55f70845fbd488c43622d2ac46a70bdb08a6ab6b48725261393"
+    },
+    {
+      "path": "final_npm_test.log",
+      "bytes": 85597,
+      "sha256": "91eddf108dbd68142ca63a444d56dab4565e135553d7a96d19fdde6f19bff02b"
+    }
+  ],
+  "scope": "Final independent security evidence binding; no deployment or whole-package completion claim"
+}

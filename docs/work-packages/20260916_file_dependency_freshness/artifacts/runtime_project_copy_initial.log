@@ -1,0 +1,17 @@
+INFO:wctl2:docker compose exec weppcloud /opt/venv/bin/python /workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/runtime_project_copy.py --destination /wc1/runs/qa/qa-freshness-runtime-7e24c8d1 --manifest /wc1/runs/qa/qa-freshness-runtime-7e24c8d1-copy.json
+COPY 250/3916 files
+COPY 500/3916 files
+COPY 750/3916 files
+COPY 1000/3916 files
+COPY 1250/3916 files
+COPY 1500/3916 files
+COPY 1750/3916 files
+COPY 2000/3916 files
+COPY 2250/3916 files
+COPY 2500/3916 files
+COPY 2750/3916 files
+COPY 3000/3916 files
+COPY 3250/3916 files
+COPY 3500/3916 files
+COPY 3750/3916 files
+{"status": "prepared", "runid": "qa-freshness-runtime-7e24c8d1", "destination": "/wc1/runs/qa/qa-freshness-runtime-7e24c8d1", "manifest": "/wc1/runs/qa/qa-freshness-runtime-7e24c8d1-copy.json", "files": 3916, "bytes": 6375730842}

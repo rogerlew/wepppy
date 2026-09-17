@@ -109,3 +109,44 @@ real browse/download identities and final deployment acceptance are not proved
 by these disposable probes. No claim of arbitrary concurrent-writer isolation or
 full package closure is made. Any remaining independent security finding must
 also be resolved before handoff.
+
+## Final scoped disposition after budget amendment
+
+**Implementation/affected-test/component-performance PASS**, after the explicit
+budget amendment committed at `f7c832864`. This supersedes the original pending
+test/performance gates above; their failed and intermediate evidence remains
+retained. Browser/RQ, full-state and production-equivalent runtime acceptance
+remain separate, and the work package remains open.
+
+Verified [final affected test log](cli_lineage_affected_final.log): **857 passed**,
+34 warnings, 255.49 seconds. This includes the promoted real parent-replacement
+regressions in `tests/nodb/test_cli_parquet_lineage.py` and descriptor-cleanup
+regression in `tests/nodb/mods/test_postfire_debris_flow_freshness.py`.
+[Stub checks](cli_lineage_check_stubs_final.log) and
+[changed broad-exception enforcement](cli_lineage_broad_exceptions_final.log)
+also pass. The [same-call reuse review](cli_lineage_parent_reuse_correctness_review.md)
+retains the independent five-case correctness probe and the access/coherence
+assessment; security retains its separate nine-case review.
+
+The [canonical lineage contract](../../../schemas/climate-parquet-lineage-contract.md)
+now explicitly records 10-ms settled / 50-ms cold-or-evicted local mean limits
+and why the original 5/40-ms prototype omitted mandatory traversal cost.
+[Independent QA ratification](cli_lineage_performance_contract_qa.md) and the
+[bound acceptance record](cli_lineage_budget_acceptance.json) retain the original
+miss and the final actual implementation pass. Independently verified the final
+benchmark SHA-256 binding, unchanged start/end module hashes, and their match to
+the reviewed current production files.
+
+Settled actual predicates average 4.85/6.14 ms for the 46/120-year files, with zero
+CLI payload rereads and 65,548 bounded footer/framing bytes per call. Maximum
+cold/admission means are 13.79/26.35 ms; three actual cache-pressure eviction
+means are 14.69/27.86 ms. The 120-year full export averages 876.46 ms with the
+warm owner and 894.58 ms including rehydration; added warm export cost is
+66.16 ms. Thus the unchanged 1.5-second / 200-ms export limits also pass. Exact
+native rows/types, output modes and private retained attempts remain verified.
+
+No major correctness finding remains within this reviewed CLI implementation.
+These local component and disposable-fixture results do not establish deployed
+storage parity, cold-NFS tail latency, full scientific run completion or normal
+browser/archive access under runtime identities. They do not change the separate
+PF-R01 justified-unresolved soil limitation.

@@ -1,0 +1,21 @@
+{
+  "root": "/wc1/runs/qa/qa-freshness-runtime-7e24c8d1",
+  "redis_identity": "qa-freshness-runtime-7e24c8d1",
+  "canonical_helper": "_reset_forked_run_job_markers",
+  "removed": {
+    "rq:fetch_dem_and_build_channels_rq": "a015c674-49c6-4f09-a0c3-6fc8038bf92e",
+    "rq:set_outlet_rq": "be4c6272-b55c-4fd6-97c2-f6bdf1a1fe50",
+    "rq:build_subcatchments_and_abstract_watershed_rq": "2a8b38ee-5d9e-4236-8eec-03966585e8b6",
+    "rq:build_landuse_rq": "fa147763-32c6-48b8-a0d1-4e755f6f0f58",
+    "rq:build_soils_rq": "fa696505-a800-4ae8-afb2-cae31a9be5a6",
+    "rq:build_climate_rq": "fc437946-9e58-482f-9d27-9575366492d5",
+    "rq:postfire_m3_rq": "72a4ed0e-b762-4f57-b6fc-41a22dfdc175",
+    "rq:run_wepp_rq": "849966f5-1d44-4d2d-9195-efeb238465e7"
+  },
+  "changed": {
+    "last_modified": {
+      "before": "1789606738",
+      "after": "1789632280"
+    }
+  }
+}

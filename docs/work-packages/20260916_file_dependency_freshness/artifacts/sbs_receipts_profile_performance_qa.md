@@ -134,6 +134,7 @@ Keep source observation/copy and receipt validation cohesive; do not duplicate
 slightly different hashing rules between direct execution, workers and playback.
 Preserve append-before-fallible-capture and explicit malformed/failed evidence.
 The prototype intentionally does not establish all symlink/receipt publication
-race controls or execute locks/native models. Correctness/security contract
-ratification and final actual implementation benchmarks remain required.
-Whole-package browser/runtime acceptance remains open.
+race controls or execute locks/native models. The final S01/S02 correctness and security checkpoint artifacts now independently
+ratify these budget gates, including the primary-config limitation. Final actual
+implementation benchmarks remain required. Whole-package browser/runtime
+acceptance remains open.

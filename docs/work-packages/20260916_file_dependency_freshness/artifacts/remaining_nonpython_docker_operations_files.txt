@@ -1,0 +1,8 @@
+docker/install-cap-secret.sh
+docker/validate-aux-image-contract.sh
+docker/validate-weppcloudr-runtime-contract.sh
+docker/prepare-cap-runtime.sh
+docker/redis-entrypoint.sh
+docker/validate-cap-runtime-contract.sh
+docker/weppcloud-entrypoint.sh
+docker/rq-worker-startup.sh

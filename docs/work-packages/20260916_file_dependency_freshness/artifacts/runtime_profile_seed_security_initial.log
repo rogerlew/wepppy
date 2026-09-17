@@ -1,0 +1,2 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20260916_file_dependency_freshness/artifacts/runtime_profile_seed_security.py
+{"status": "passed", "roots": ["/workdir/wepppy-test-engine-data/profiles/_drafts/qa-freshness-profile-7e24c8d1/freshness-http/seed/uploads", "/workdir/wepppy-test-engine-data/profiles/qa-freshness-profile-7e24c8d1-sbs-profile/capture/seed/uploads"], "verified_events_per_root": 2, "draft_promotion_byte_mode_parity": true}

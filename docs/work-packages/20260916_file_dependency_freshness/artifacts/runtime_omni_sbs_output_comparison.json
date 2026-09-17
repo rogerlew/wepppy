@@ -1,0 +1,90 @@
+{
+  "status": "passed",
+  "source": "wepp/output/interchange/loss_pw0.out.parquet",
+  "rows": 11,
+  "columns": [
+    "key",
+    "value",
+    "units"
+  ],
+  "changed_values": [
+    {
+      "row": 3,
+      "low": {
+        "key": "Avg. Ann. water discharge from outlet",
+        "value": 7569628.0,
+        "units": "m^3/yr"
+      },
+      "high": {
+        "key": "Avg. Ann. water discharge from outlet",
+        "value": 10118168.0,
+        "units": "m^3/yr"
+      }
+    },
+    {
+      "row": 4,
+      "low": {
+        "key": "Avg. Ann. total hillslope soil loss",
+        "value": 697.8,
+        "units": "tonne/yr"
+      },
+      "high": {
+        "key": "Avg. Ann. total hillslope soil loss",
+        "value": 8643.3,
+        "units": "tonne/yr"
+      }
+    },
+    {
+      "row": 5,
+      "low": {
+        "key": "Avg. Ann. total channel soil loss",
+        "value": 972.9,
+        "units": "tonne/yr"
+      },
+      "high": {
+        "key": "Avg. Ann. total channel soil loss",
+        "value": 1263.7,
+        "units": "tonne/yr"
+      }
+    },
+    {
+      "row": 6,
+      "low": {
+        "key": "Avg. Ann. sediment discharge from outlet",
+        "value": 1651.2,
+        "units": "tonne/yr"
+      },
+      "high": {
+        "key": "Avg. Ann. sediment discharge from outlet",
+        "value": 9863.4,
+        "units": "tonne/yr"
+      }
+    },
+    {
+      "row": 7,
+      "low": {
+        "key": "Avg. Ann. Sed. delivery per unit area of watershed",
+        "value": 0.6,
+        "units": "tonne/ha/yr"
+      },
+      "high": {
+        "key": "Avg. Ann. Sed. delivery per unit area of watershed",
+        "value": 3.7,
+        "units": "tonne/ha/yr"
+      }
+    },
+    {
+      "row": 8,
+      "low": {
+        "key": "Sediment Delivery Ratio for Watershed",
+        "value": 0.988,
+        "units": ""
+      },
+      "high": {
+        "key": "Sediment Delivery Ratio for Watershed",
+        "value": 0.996,
+        "units": ""
+      }
+    }
+  ]
+}

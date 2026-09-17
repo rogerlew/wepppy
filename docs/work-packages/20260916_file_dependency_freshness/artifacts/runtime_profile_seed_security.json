@@ -1,0 +1,262 @@
+{
+  "status": "passed",
+  "uid": 1000,
+  "gid": 993,
+  "groups": [
+    993
+  ],
+  "roots": {
+    "/workdir/wepppy-test-engine-data/profiles/_drafts/qa-freshness-profile-7e24c8d1/freshness-http/seed/uploads": {
+      "events": [
+        {
+          "event_id": "freshness-upload-1",
+          "name": "input_upload_sbs.tif",
+          "bytes": 599196,
+          "sha256": "7d1ed360d8e639050cf3879293efcdbee216bd9a4faac4e03399442416d97405"
+        },
+        {
+          "event_id": "freshness-upload-2",
+          "name": "input_upload_sbs.tif",
+          "bytes": 597742,
+          "sha256": "a8a42913b4603f4e14b8e4d50556b26ae73b5636ba1ea59c2f72b42e6f46b2c0"
+        }
+      ],
+      "response_markers": [
+        1,
+        1
+      ],
+      "event_modes": {
+        "sbs/events/7286ec4c1f9d5b3c4c0803b00324cd8ee1a5585973c0b43c64f09f29351fe287": "0o700",
+        "sbs/events/31b6df94478bbca86f2a7c30b4a52c536d026441e39ec18166abfb28688562e5": "0o700",
+        "sbs/events/7286ec4c1f9d5b3c4c0803b00324cd8ee1a5585973c0b43c64f09f29351fe287/input_upload_sbs.tif": "0o644",
+        "sbs/events/7286ec4c1f9d5b3c4c0803b00324cd8ee1a5585973c0b43c64f09f29351fe287/status.json": "0o600",
+        "sbs/events/7286ec4c1f9d5b3c4c0803b00324cd8ee1a5585973c0b43c64f09f29351fe287/receipt.json": "0o600",
+        "sbs/events/31b6df94478bbca86f2a7c30b4a52c536d026441e39ec18166abfb28688562e5/input_upload_sbs.tif": "0o644",
+        "sbs/events/31b6df94478bbca86f2a7c30b4a52c536d026441e39ec18166abfb28688562e5/status.json": "0o600",
+        "sbs/events/31b6df94478bbca86f2a7c30b4a52c536d026441e39ec18166abfb28688562e5/receipt.json": "0o600"
+      }
+    },
+    "/workdir/wepppy-test-engine-data/profiles/qa-freshness-profile-7e24c8d1-sbs-profile/capture/seed/uploads": {
+      "events": [
+        {
+          "event_id": "freshness-upload-1",
+          "name": "input_upload_sbs.tif",
+          "bytes": 599196,
+          "sha256": "7d1ed360d8e639050cf3879293efcdbee216bd9a4faac4e03399442416d97405"
+        },
+        {
+          "event_id": "freshness-upload-2",
+          "name": "input_upload_sbs.tif",
+          "bytes": 597742,
+          "sha256": "a8a42913b4603f4e14b8e4d50556b26ae73b5636ba1ea59c2f72b42e6f46b2c0"
+        }
+      ],
+      "response_markers": [
+        1,
+        1
+      ],
+      "event_modes": {
+        "sbs/events/7286ec4c1f9d5b3c4c0803b00324cd8ee1a5585973c0b43c64f09f29351fe287": "0o700",
+        "sbs/events/31b6df94478bbca86f2a7c30b4a52c536d026441e39ec18166abfb28688562e5": "0o700",
+        "sbs/events/7286ec4c1f9d5b3c4c0803b00324cd8ee1a5585973c0b43c64f09f29351fe287/input_upload_sbs.tif": "0o644",
+        "sbs/events/7286ec4c1f9d5b3c4c0803b00324cd8ee1a5585973c0b43c64f09f29351fe287/status.json": "0o600",
+        "sbs/events/7286ec4c1f9d5b3c4c0803b00324cd8ee1a5585973c0b43c64f09f29351fe287/receipt.json": "0o600",
+        "sbs/events/31b6df94478bbca86f2a7c30b4a52c536d026441e39ec18166abfb28688562e5/input_upload_sbs.tif": "0o644",
+        "sbs/events/31b6df94478bbca86f2a7c30b4a52c536d026441e39ec18166abfb28688562e5/status.json": "0o600",
+        "sbs/events/31b6df94478bbca86f2a7c30b4a52c536d026441e39ec18166abfb28688562e5/receipt.json": "0o600"
+      }
+    }
+  },
+  "byte_mode_inventory": {
+    "/workdir/wepppy-test-engine-data/profiles/_drafts/qa-freshness-profile-7e24c8d1/freshness-http/seed/uploads": {
+      "events": {
+        "freshness-upload-1": {
+          "status": "complete",
+          "name": "input_upload_sbs.tif",
+          "sha256": "7d1ed360d8e639050cf3879293efcdbee216bd9a4faac4e03399442416d97405"
+        },
+        "freshness-upload-2": {
+          "status": "complete",
+          "name": "input_upload_sbs.tif",
+          "sha256": "a8a42913b4603f4e14b8e4d50556b26ae73b5636ba1ea59c2f72b42e6f46b2c0"
+        }
+      },
+      "inventory": {
+        "sbs": {
+          "directory": true,
+          "mode": 493
+        },
+        "sbs/events": {
+          "directory": true,
+          "mode": 493
+        },
+        "sbs/events/31b6df94478bbca86f2a7c30b4a52c536d026441e39ec18166abfb28688562e5": {
+          "directory": true,
+          "mode": 448
+        },
+        "sbs/events/31b6df94478bbca86f2a7c30b4a52c536d026441e39ec18166abfb28688562e5/input_upload_sbs.tif": {
+          "directory": false,
+          "mode": 420,
+          "size": 599196,
+          "sha256": "7d1ed360d8e639050cf3879293efcdbee216bd9a4faac4e03399442416d97405"
+        },
+        "sbs/events/31b6df94478bbca86f2a7c30b4a52c536d026441e39ec18166abfb28688562e5/receipt.json": {
+          "directory": false,
+          "mode": 384,
+          "size": 178,
+          "sha256": "d02af52d9caedc7a8b1bdf795818dfaaca76f78d96e4a999688512c615da64df"
+        },
+        "sbs/events/31b6df94478bbca86f2a7c30b4a52c536d026441e39ec18166abfb28688562e5/status.json": {
+          "directory": false,
+          "mode": 384,
+          "size": 57,
+          "sha256": "997f6542679b2985782dc886944f3917eac5a3999e237a92462b5a2332de2275"
+        },
+        "sbs/events/7286ec4c1f9d5b3c4c0803b00324cd8ee1a5585973c0b43c64f09f29351fe287": {
+          "directory": true,
+          "mode": 448
+        },
+        "sbs/events/7286ec4c1f9d5b3c4c0803b00324cd8ee1a5585973c0b43c64f09f29351fe287/input_upload_sbs.tif": {
+          "directory": false,
+          "mode": 420,
+          "size": 597742,
+          "sha256": "a8a42913b4603f4e14b8e4d50556b26ae73b5636ba1ea59c2f72b42e6f46b2c0"
+        },
+        "sbs/events/7286ec4c1f9d5b3c4c0803b00324cd8ee1a5585973c0b43c64f09f29351fe287/receipt.json": {
+          "directory": false,
+          "mode": 384,
+          "size": 178,
+          "sha256": "3069d6c8ab11f01d2c14d50d87f5321291dd2a7a5008781d88035ed47362edca"
+        },
+        "sbs/events/7286ec4c1f9d5b3c4c0803b00324cd8ee1a5585973c0b43c64f09f29351fe287/status.json": {
+          "directory": false,
+          "mode": 384,
+          "size": 57,
+          "sha256": "b415147fe0d99cbac1e99a0e710ceca93cde7875d1ba3579a3caf6b270c4094f"
+        },
+        "sbs/input_upload_sbs.tif": {
+          "directory": false,
+          "mode": 420,
+          "size": 599196,
+          "sha256": "7d1ed360d8e639050cf3879293efcdbee216bd9a4faac4e03399442416d97405"
+        },
+        "sbs/same-sbs.tif": {
+          "directory": false,
+          "mode": 420,
+          "size": 597742,
+          "sha256": "a8a42913b4603f4e14b8e4d50556b26ae73b5636ba1ea59c2f72b42e6f46b2c0"
+        },
+        "sbs/same-sbs.wgs.tif": {
+          "directory": false,
+          "mode": 420,
+          "size": 42505,
+          "sha256": "bd8d15fef26360f4fda0653f102b50acbaeacc14649b7fbfe9cc5e846a0f15c4"
+        },
+        "sbs/sbs_4class.tif": {
+          "directory": false,
+          "mode": 420,
+          "size": 58316,
+          "sha256": "aed64a5d510bc18e3d926af8658e60808d43955fa1f1eb67578fddf7d82ec6c3"
+        }
+      },
+      "scope": "external recorder repository; read-only control"
+    },
+    "/workdir/wepppy-test-engine-data/profiles/qa-freshness-profile-7e24c8d1-sbs-profile/capture/seed/uploads": {
+      "events": {
+        "freshness-upload-1": {
+          "status": "complete",
+          "name": "input_upload_sbs.tif",
+          "sha256": "7d1ed360d8e639050cf3879293efcdbee216bd9a4faac4e03399442416d97405"
+        },
+        "freshness-upload-2": {
+          "status": "complete",
+          "name": "input_upload_sbs.tif",
+          "sha256": "a8a42913b4603f4e14b8e4d50556b26ae73b5636ba1ea59c2f72b42e6f46b2c0"
+        }
+      },
+      "inventory": {
+        "sbs": {
+          "directory": true,
+          "mode": 493
+        },
+        "sbs/events": {
+          "directory": true,
+          "mode": 493
+        },
+        "sbs/events/31b6df94478bbca86f2a7c30b4a52c536d026441e39ec18166abfb28688562e5": {
+          "directory": true,
+          "mode": 448
+        },
+        "sbs/events/31b6df94478bbca86f2a7c30b4a52c536d026441e39ec18166abfb28688562e5/input_upload_sbs.tif": {
+          "directory": false,
+          "mode": 420,
+          "size": 599196,
+          "sha256": "7d1ed360d8e639050cf3879293efcdbee216bd9a4faac4e03399442416d97405"
+        },
+        "sbs/events/31b6df94478bbca86f2a7c30b4a52c536d026441e39ec18166abfb28688562e5/receipt.json": {
+          "directory": false,
+          "mode": 384,
+          "size": 178,
+          "sha256": "d02af52d9caedc7a8b1bdf795818dfaaca76f78d96e4a999688512c615da64df"
+        },
+        "sbs/events/31b6df94478bbca86f2a7c30b4a52c536d026441e39ec18166abfb28688562e5/status.json": {
+          "directory": false,
+          "mode": 384,
+          "size": 57,
+          "sha256": "997f6542679b2985782dc886944f3917eac5a3999e237a92462b5a2332de2275"
+        },
+        "sbs/events/7286ec4c1f9d5b3c4c0803b00324cd8ee1a5585973c0b43c64f09f29351fe287": {
+          "directory": true,
+          "mode": 448
+        },
+        "sbs/events/7286ec4c1f9d5b3c4c0803b00324cd8ee1a5585973c0b43c64f09f29351fe287/input_upload_sbs.tif": {
+          "directory": false,
+          "mode": 420,
+          "size": 597742,
+          "sha256": "a8a42913b4603f4e14b8e4d50556b26ae73b5636ba1ea59c2f72b42e6f46b2c0"
+        },
+        "sbs/events/7286ec4c1f9d5b3c4c0803b00324cd8ee1a5585973c0b43c64f09f29351fe287/receipt.json": {
+          "directory": false,
+          "mode": 384,
+          "size": 178,
+          "sha256": "3069d6c8ab11f01d2c14d50d87f5321291dd2a7a5008781d88035ed47362edca"
+        },
+        "sbs/events/7286ec4c1f9d5b3c4c0803b00324cd8ee1a5585973c0b43c64f09f29351fe287/status.json": {
+          "directory": false,
+          "mode": 384,
+          "size": 57,
+          "sha256": "b415147fe0d99cbac1e99a0e710ceca93cde7875d1ba3579a3caf6b270c4094f"
+        },
+        "sbs/input_upload_sbs.tif": {
+          "directory": false,
+          "mode": 420,
+          "size": 599196,
+          "sha256": "7d1ed360d8e639050cf3879293efcdbee216bd9a4faac4e03399442416d97405"
+        },
+        "sbs/same-sbs.tif": {
+          "directory": false,
+          "mode": 420,
+          "size": 597742,
+          "sha256": "a8a42913b4603f4e14b8e4d50556b26ae73b5636ba1ea59c2f72b42e6f46b2c0"
+        },
+        "sbs/same-sbs.wgs.tif": {
+          "directory": false,
+          "mode": 420,
+          "size": 42505,
+          "sha256": "bd8d15fef26360f4fda0653f102b50acbaeacc14649b7fbfe9cc5e846a0f15c4"
+        },
+        "sbs/sbs_4class.tif": {
+          "directory": false,
+          "mode": 420,
+          "size": 58316,
+          "sha256": "aed64a5d510bc18e3d926af8658e60808d43955fa1f1eb67578fddf7d82ec6c3"
+        }
+      },
+      "scope": "external recorder repository; read-only control"
+    }
+  },
+  "read_only_noninterference": true,
+  "draft_promotion_parity": true,
+  "external_profile_archival": "Not executed or implied by project archive",
+  "failed_event_runtime_scope": "No failed event in this actual capture; implementation failure probes remain separate"
+}

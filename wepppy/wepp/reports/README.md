@@ -165,3 +165,16 @@ explicitly; update the paired release and startup pin together.
 
 See the [summary cache contract](../../../docs/schemas/output-scope-contract.md#hillslope-water-balance-summary-cache)
 for exact fields, null behavior, and publication expectations.
+
+### Current CSV limitation
+
+The hillslope water-balance CSV request (`avg_annual_watbal/?format=csv`)
+currently returns HTTP 500 because its existing CSV adapter does not implement
+the report's row iterator. The HTML report remains usable. For data access,
+open the HTML report to build or validate its summary, then use project browse
+to download `wepp/reports/cache/hillslope_watbal_summary.parquet` (or the
+`_roads` variant for Roads). This compact file contains Topaz/year rows in its
+stored metric units; project display-unit conversion is separate. A direct
+download returns the retained file and does not itself rebuild or validate it.
+The CSV adapter limitation is separate from cache freshness; rebuilding inputs
+does not repair that adapter.
