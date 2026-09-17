@@ -55,3 +55,11 @@ added~101 ms. Bounded footer reads are included; full project sources/owner/rast
 checks are separate existing state acceptance. No physical cold-storage claim.
 Both independent reviews pass the behavior after refinements. Final implementation
 must demonstrate these budgets, resource retention and runtime acceptance.
+
+Implementation follow-up: the above5/40-ms approval records the original
+prototype checkpoint. Actual strict-path measurements failed it. The explicit
+[budget amendment](cli_lineage_budget_amendment.md) and
+[independent QA ratification](cli_lineage_performance_contract_qa.md) correct the
+component means to10/50ms, retaining the original miss and all access, payload,
+export and runtime gates. Final implemented measurements remain separately
+identified; the prototype is not retrospectively relabeled as complete.

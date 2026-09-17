@@ -126,3 +126,11 @@ must repeat the actual complete path; the prototype does not stand in for it.
 The measurements use warmed OS caches on disposable copies under UID 1000/GID
 993. They establish neither physical cold-storage/NFS latency nor live route
 acceptance. With those explicit limits, the checkpoint budget gate is satisfied.
+
+Implementation follow-up: the above5/40-ms approval records the original
+prototype checkpoint. Actual strict-path measurements failed it. The explicit
+[budget amendment](cli_lineage_budget_amendment.md) and
+[independent QA ratification](cli_lineage_performance_contract_qa.md) correct the
+component means to10/50ms, retaining the original miss and all access, payload,
+export and runtime gates. Final implemented measurements remain separately
+identified; the prototype is not retrospectively relabeled as complete.

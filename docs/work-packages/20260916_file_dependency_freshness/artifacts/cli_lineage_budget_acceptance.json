@@ -1,0 +1,58 @@
+{
+  "evidence": "cli_lineage_implementation_performance_budget_revision.json",
+  "evidence_sha256": "7f1b568210ec82bd21f2262db48778685a16180e7b6966ba511da4251066ec40",
+  "ratification": "cli_lineage_performance_contract_qa.md",
+  "budget_ms": {
+    "predicate_settled": 10,
+    "predicate_cold_or_evicted": 50,
+    "export_120_year": 1500,
+    "added_export": 200
+  },
+  "scope": "Actual standalone lineage predicate including strict guards; wider inventory and whole-state gates are separate",
+  "module_hashes_unchanged": true,
+  "cases": {
+    "thespian-cleanness": {
+      "settled_ms": 4.853386073373258,
+      "max_cold_admission_mean_ms": 13.787019066512585,
+      "evicted_mean_ms": 14.687845949083567,
+      "evicted_individual_ms": [
+        16.257504001259804,
+        13.140925904735923,
+        14.665107941254973
+      ],
+      "full_export_warm_owner_ms": 394.1365020194401,
+      "full_export_cold_owner_ms": 424.26454299129546,
+      "export_overhead_ms": 56.43362815802294,
+      "settled_cli_read_bytes": 0,
+      "settled_footer_bytes_per_call": 65548.0,
+      "settled_cli_digest_checks_per_call": 1.0,
+      "native_rows_types_equal": true,
+      "source_owner_inputs_unchanged": true,
+      "output_mode": "0o640",
+      "private_attempt_files": true,
+      "pass": true
+    },
+    "plastic-bundling": {
+      "settled_ms": 6.135845682583749,
+      "max_cold_admission_mean_ms": 26.3470069039613,
+      "evicted_mean_ms": 27.857349331801135,
+      "evicted_individual_ms": [
+        34.3097778968513,
+        20.157300168648362,
+        29.104969929903746
+      ],
+      "full_export_warm_owner_ms": 876.4610767054061,
+      "full_export_cold_owner_ms": 894.5849880110472,
+      "export_overhead_ms": 66.15571561269462,
+      "settled_cli_read_bytes": 0,
+      "settled_footer_bytes_per_call": 65548.0,
+      "settled_cli_digest_checks_per_call": 1.0,
+      "native_rows_types_equal": true,
+      "source_owner_inputs_unchanged": true,
+      "output_mode": "0o640",
+      "private_attempt_files": true,
+      "pass": true
+    }
+  },
+  "pass": true
+}

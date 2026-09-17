@@ -108,7 +108,7 @@ representative files before ratifying a latency budget; no new persistent cache,
 daemon, dependency or digest admission policy is authorized here.
 
 Representative local mean budgets (46-year/1.18-MB and 120-year/3.11-MB CLI,
-OS cache warm): lineage readiness component <=5 ms settled and <=40 ms with a
+OS cache warm): lineage readiness component <=10 ms settled and <=50 ms with a
 cold/evicted digest; zero settled CLI payload rereads, bounded footer reads.
 This excludes existing whole-project owner/raster checks, which retain their
 separate full-state acceptance gate. Complete snapshot/parse/export/metadata/
@@ -116,3 +116,15 @@ publication <=1.5 s for the 120-year case, with <=200 ms added lineage overhead.
 Measured prototype: settled1.25–1.44 ms, cold~12 ms, composed export~0.91 s and
 added overhead~101 ms. Implementation must repeat these full-path measurements;
 prototype timings do not prove final runtime performance or cold NFS behavior.
+
+Budget correction: the original <=5/40-ms prototype budget omitted mandatory
+post-fire no-follow directory traversal. The implemented predicate initially
+measured8.28/10.78ms settled, with43.85ms in the large eviction case, failing that
+budget. Profile-guided same-call parent-descriptor reuse reduced settled means
+to5.82/6.98ms while preserving O_RDONLY permissions, leaf opens, containment and
+parent/path association checks. No descriptor survives a call. Independent
+correctness, security and QA reviews support the explicit10/50-ms correction
+instead of weakening authority or adding a cross-request descriptor cache. The
+original failures remain evidence. Revised acceptance still requires actual full
+predicate measurements, zero settled payload reads, unchanged export budgets and
+separate full-state/runtime gates; quick profiles alone do not establish it.
