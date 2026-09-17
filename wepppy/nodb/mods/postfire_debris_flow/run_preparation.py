@@ -56,6 +56,9 @@ def prepare_for_run(wd, identity, expected, paths):
                 or not p._worker_source_snapshots_current(wd, _project_inputs(wd,expected['inputs']), _project_inputs(wd,snapshot))
                 or io.digest(Path(wd)/META,io.MAX_TEXT) != record['candidate_sha256']):
             raise p.WorkflowError('superseded', 'Project inputs changed after source preparation. Run again.', 409)
+        # Promotion cannot invent the original admission digest for legacy jobs.
+        if 'content_sha256' not in expected['inputs']:
+            snapshot.pop('content_sha256', None)
         rebased = dict(inputs=snapshot,dnbr=None,frequency=frequency)
         state['run_attempt'].update(snapshot=rebased,source_preparation={
             'receipt': str(Path(receipt).relative_to(Path(wd))),

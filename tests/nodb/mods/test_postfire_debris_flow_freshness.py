@@ -235,6 +235,9 @@ def worker_snapshot(root, path, *, content=True):
     record = {'selections': {'model': 'M3'}, 'files': {'active_cli': p.signature(root, path)}}
     if content:
         record['content_sha256'] = {'active_cli': p.signature(root, path, strong=True)[4]}
+    # Separate subsequent mutations from this filesystem's timestamp quantum.
+    import time
+    time.sleep(.01)
     return record
 
 
@@ -333,6 +336,8 @@ def test_worker_cli_generation_race_rejected(tmp_path, monkeypatch, mutation):
                 yield stream
                 if mutation == 'during_read':
                     os.link(path, tmp_path/'another_link')
+                    st = path.stat()
+                    os.utime(path, ns=(st.st_atime_ns, st.st_mtime_ns + 1))
         monkeypatch.setattr(rainfall_io, 'open_local', racing)
     else:
         original = p.signature
@@ -347,3 +352,13 @@ def test_worker_cli_generation_race_rejected(tmp_path, monkeypatch, mutation):
         pass  # Explicit coherent-read/path failure is the established contract.
     else:
         assert result is False
+
+
+@pytest.mark.parametrize('malformed', [None, [], {'files': None}, {'files': []}])
+@pytest.mark.parametrize('side', ['admitted', 'current'])
+def test_worker_snapshot_shape_rejects_without_untyped_error(tmp_path, malformed, side):
+    path = tmp_path/'climate.cli'
+    path.write_bytes(b'original climate')
+    valid = worker_snapshot(tmp_path, path)
+    admitted, current = (malformed, valid) if side == 'admitted' else (valid, malformed)
+    assert not p._worker_source_snapshots_current(tmp_path, admitted, current)

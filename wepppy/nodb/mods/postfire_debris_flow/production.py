@@ -334,6 +334,9 @@ def _source_snapshots_current(accepted, current):
 
 def _worker_source_snapshots_current(wd, admitted, current):
     """Allow only settled CLI ctime drift, verified against admission bytes."""
+    if not all(isinstance(value, dict) and isinstance(value.get('files'), dict)
+               for value in (admitted, current)):
+        return False
     # Self-comparison validates complete hash maps without relaxing other identity.
     if not all(_source_snapshots_current(value, value) for value in (admitted, current)):
         return False

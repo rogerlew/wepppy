@@ -578,14 +578,14 @@ def test_m3_task_retains_failure_and_preserves_previous_result(tmp_path, monkeyp
     pointer.parent.mkdir(parents=True)
     pointer.write_text(json.dumps({'schema_version':1}))
     controller = PostfireDebrisFlow(str(tmp_path), 'disturbed9002_wbt.cfg')
-    snapshot = {'inputs': {}, 'dnbr': None, 'frequency': 'cli'}
+    snapshot = {'inputs': {'files': {}}, 'dnbr': None, 'frequency': 'cli'}
     attempt = {'id': 'c'*32, 'model': 'M3', 'snapshot': snapshot, 'phase': 'queued',
                'created_at': p.now(), 'retryable': False, 'job_id': 'test-job'}
     controller.change(lambda state: state.update(run_attempt=attempt, model='M1', frequency_source='noaa'))
     monkeypatch.setattr(p, 'mutable', lambda wd: controller)
     paths = {key:tmp_path/(key+'.tif' if key != 'outlet' else 'outlet.json') for key in ('dem','pointer','mask','outlet','sbs')}
     for path in paths.values(): path.write_bytes(b'controlled worker failure boundary')
-    monkeypatch.setattr(p, 'sources', lambda wd, **kw: (True, False, {'watershed':True,'soils':True,'sbs':True,'climate':True,'noaa':False}, paths, {}))
+    monkeypatch.setattr(p, 'sources', lambda wd, **kw: (True, False, {'watershed':True,'soils':True,'sbs':True,'climate':True,'noaa':False}, paths, snapshot['inputs']))
     from wepppy.nodb.mods.postfire_debris_flow import m3_integration
     from wepppy.nodb.mods.postfire_debris_flow.rainfall_io import RainfallError
     def fail_native(*args,**kwargs):

@@ -403,3 +403,34 @@ def test_m3_admission_keeps_exact_outer_snapshot_shape(project, mutation):
     with pytest.raises(p.WorkflowError, match='Required project data changed'):
         p.execute_m3(wd, identity)
     assert p.state_at(wd)['last_successful_run'] is None
+
+
+def test_hashless_admission_stays_strict_after_source_preparation(project, monkeypatch):
+    from wepppy.nodb.mods.postfire_debris_flow import source_acquisition
+    from wepppy.nodb.mods.postfire_debris_flow.run_preparation import prepare_for_run
+    from wepppy.runtime_paths.wepp_inputs import copy_input_file
+    wd, dem, mask, catalog = project
+    monkeypatch.setattr(source_acquisition, 'acquire_sources',
+                        lambda *args: prepare_local_sources(wd, dem, mask, collection_catalog=catalog))
+    identity = enqueue_m3(wd)
+    def legacy(state):
+        state['run_attempt']['phase'] = 'running'
+        state['run_attempt']['snapshot']['inputs'].pop('content_sha256')
+    p.mutable(wd).change(legacy)
+    expected = p.state_at(wd)['run_attempt']['snapshot']
+    paths = p.sources(wd, model='M3')[3]
+    _, rebased = prepare_for_run(wd, identity, expected, paths)
+    assert 'content_sha256' not in rebased['inputs']
+    assert p.state_at(wd)['run_attempt']['snapshot'] == rebased
+    assert p._current_authority(wd, 'cli', 'M3', rebased['inputs'])
+    p.execute_m3(wd, identity)
+    accepted = p.state_at(wd)['last_successful_run']
+    assert accepted['id'] == identity
+    assert 'content_sha256' not in accepted['snapshot']['inputs']
+    replacement = enqueue_m3(wd)
+    p.mutable(wd).change(lambda state: state['run_attempt']['snapshot']['inputs'].pop('content_sha256'))
+    copy_input_file(str(wd), 'climate/owner.cli', wd/'wepp/runs/pw0.cli')
+    assert not p._current_authority(wd, 'cli', 'M3', rebased['inputs'])
+    with pytest.raises(p.WorkflowError, match='Required project data changed'):
+        p.execute_m3(wd, replacement)
+    assert p.state_at(wd)['last_successful_run'] == accepted
