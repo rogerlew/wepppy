@@ -668,3 +668,15 @@ is the controlling amendment for new production M1.
 Run M1 prepares absent Kf through the existing worker; new-run readiness and freshness no longer depend on RUSLE or POLARIS.
 Earlier conflicting requirements remain the historical/legacy contract only
 once this checkpoint is accepted; do not reinterpret old accepted artifacts.
+
+## File-content currentness refinement (implementation pending)
+
+The [file dependency freshness contract](../../../../../docs/schemas/file-dependency-freshness-contract.md)
+refines ordinary source/artifact currentness: new snapshots add content hashes,
+metadata-only changes revalidate bytes without alone staling accepted results,
+and legacy hashless snapshots retain strict metadata comparison. It supersedes
+stat-only accepted-currentness wording above for this explicit boundary. Strict
+worker publication, source association, engine identity and SQLite/soil coherent
+snapshot obligations remain unchanged. The rationale is that WEPP preparation
+creates a hard link to an unchanged CLI and thereby changes its ctime. Hash
+revalidation must also detect equal-size writes whose mtime was restored.

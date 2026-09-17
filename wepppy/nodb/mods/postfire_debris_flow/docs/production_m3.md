@@ -170,3 +170,11 @@ is the controlling amendment for new production M1.
 Only shared new-M1 composition/readers change; M3 recorded-depth sources, preparation and schema-2 behavior remain unchanged.
 Earlier conflicting requirements remain the historical/legacy contract only
 once this checkpoint is accepted; do not reinterpret old accepted artifacts.
+
+## File-content currentness refinement (implementation pending)
+
+M3 adopts the [file dependency freshness contract](../../../../../docs/schemas/file-dependency-freshness-contract.md)
+for ordinary source files and accepted artifacts through the shared production
+workflow. An unchanged climate hard link must not alone stale a newly accepted
+assessment. Soil/SQLite dependency snapshots remain governed by their existing
+coherent-snapshot contract and are separately inventoried in the freshness audit.

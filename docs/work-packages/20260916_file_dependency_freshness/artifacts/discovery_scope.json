@@ -1,0 +1,59 @@
+{
+  "revision": "adb4f9b004459fc578460a95f30ac01ae1421f36",
+  "utc": "2026-09-17T01:21:57.863885+00:00",
+  "scope": [
+    "wepppy",
+    "services",
+    "tools",
+    "scripts",
+    "wctl"
+  ],
+  "exclusions": "rg default ignored/vendor/generated files; tests corroborate separately; documentation excluded from source discovery",
+  "commands": {
+    "timestamps": {
+      "argv": [
+        "rg",
+        "-n",
+        "st_ctime|ctime_ns|st_mtime|mtime_ns|ModTime|LastWriteTime|mtimeMs|ctimeMs|getmtime|\\-nt\\b",
+        "wepppy",
+        "services",
+        "tools",
+        "scripts",
+        "wctl"
+      ],
+      "status": 0,
+      "stderr": "",
+      "lines": 153
+    },
+    "identities": {
+      "argv": [
+        "rg",
+        "-n",
+        "file_signature|fingerprint|content_hash|sha256|digest|ETag|etag",
+        "wepppy",
+        "services",
+        "tools",
+        "scripts",
+        "wctl"
+      ],
+      "status": 0,
+      "stderr": "",
+      "lines": 3046
+    },
+    "writers": {
+      "argv": [
+        "rg",
+        "-n",
+        "os\\.link|os\\.replace|shutil\\.(copy|move)|chmod|chown|wal_checkpoint|\\.backup\\(",
+        "wepppy",
+        "services",
+        "tools",
+        "scripts",
+        "wctl"
+      ],
+      "status": 0,
+      "stderr": "",
+      "lines": 348
+    }
+  }
+}

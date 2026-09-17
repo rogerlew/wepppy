@@ -1,0 +1,30 @@
+{
+  "before": [
+    "climate/wepp.cli",
+    24,
+    1789608184019352059,
+    1789608184019352059,
+    "5838a6cef25795ac7eb4174774d20c28953f765fa76762cdcab408d6e4c9d954"
+  ],
+  "linked": [
+    "climate/wepp.cli",
+    24,
+    1789608184019352059,
+    1789608184020352080,
+    "5838a6cef25795ac7eb4174774d20c28953f765fa76762cdcab408d6e4c9d954"
+  ],
+  "rewritten_restored_mtime": [
+    "climate/wepp.cli",
+    24,
+    1789608184019352059,
+    1789608184021352100,
+    "08da178503336b1d7a4c588537425309b31e86fb2d7190aadc799ede0ddf8242"
+  ],
+  "hardlink_same_content": true,
+  "hardlink_snapshot_equal": false,
+  "hardlink_artifacts_current": false,
+  "rewrite_same_size_mtime": true,
+  "rewrite_changed_digest": true,
+  "uid": 1000,
+  "gid": 993
+}

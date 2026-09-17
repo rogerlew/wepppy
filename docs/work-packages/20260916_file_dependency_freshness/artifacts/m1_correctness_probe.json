@@ -1,0 +1,96 @@
+{
+  "uid": 1000,
+  "gid": 993,
+  "groups": [
+    993
+  ],
+  "equal_size_restored_mtime": {
+    "changed_bytes": true,
+    "ctime_changed": true,
+    "derived_signature_unchanged": true,
+    "features_metadata_unchanged": true,
+    "features_hash_detects_change": true,
+    "landuse_signature_unchanged": true,
+    "sbs_signature_unchanged": true
+  },
+  "features_hash_touch": {
+    "digest_same": true,
+    "fingerprint_changes": true
+  },
+  "restored_source_time": {
+    "geneva_geometry_not_stale": true,
+    "geneva_burn_current": true,
+    "hillslope_cache_not_stale": true,
+    "omni_cache_not_stale": true
+  },
+  "assets": {
+    "stale_build_id_returned": true
+  },
+  "dtale": {
+    "predicate_only_unchanged_fingerprint": true
+  },
+  "sbs_native_cache": {
+    "same_size": true,
+    "old_summary": {
+      "srs_valid": false,
+      "class_count": 1,
+      "unique_classes": [
+        1
+      ],
+      "class_counts": [
+        [
+          1,
+          6
+        ]
+      ],
+      "has_non_integer": false,
+      "has_color_table": false,
+      "color_table_severities": [],
+      "color_table_valid": false,
+      "sanity_status": 1,
+      "sanity_message": "Map contains an invalid projection. Try reprojecting to UTM.",
+      "size_bytes": 152
+    },
+    "cached_summary": {
+      "srs_valid": false,
+      "class_count": 1,
+      "unique_classes": [
+        1
+      ],
+      "class_counts": [
+        [
+          1,
+          6
+        ]
+      ],
+      "has_non_integer": false,
+      "has_color_table": false,
+      "color_table_severities": [],
+      "color_table_valid": false,
+      "sanity_status": 1,
+      "sanity_message": "Map contains an invalid projection. Try reprojecting to UTM.",
+      "size_bytes": 152
+    },
+    "direct_summary": {
+      "srs_valid": false,
+      "class_count": 1,
+      "unique_classes": [
+        2
+      ],
+      "class_counts": [
+        [
+          2,
+          6
+        ]
+      ],
+      "has_non_integer": false,
+      "has_color_table": false,
+      "color_table_severities": [],
+      "color_table_valid": false,
+      "sanity_status": 1,
+      "sanity_message": "Map contains an invalid projection. Try reprojecting to UTM.",
+      "size_bytes": 152
+    },
+    "stale_summary_reused": true
+  }
+}
