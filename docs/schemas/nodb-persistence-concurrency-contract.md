@@ -327,6 +327,10 @@ controller comparisons. It does not claim complete raster dependency closure:
 GDAL auxiliary files, nested VRT sources and virtual filesystem members require
 a separate reviewed extension. Do not add a new raster format/path restriction
 or treat one level of GDAL GetFileList as proof of complete native inputs.
+Directory-backed native datasets (for example Zarr) retain their existing root
+path/mtime/size transaction identity in this bounded wave, with an explicit
+absent digest. Do not reject a valid directory-backed format or misrepresent
+root metadata as a content digest; member verification belongs to raster closure.
 
 Each file read MUST reject observable descriptor/path replacement, growth,
 truncation or version drift with an explicit filesystem error. Hash at most the

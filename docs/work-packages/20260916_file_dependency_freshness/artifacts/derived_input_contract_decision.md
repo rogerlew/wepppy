@@ -68,3 +68,21 @@ belong to the explicitly open follow-up wave.
 Run derived-builder suites plus full sanity. Final restarted native build and
 archive acceptance remains required. Separate correctness/security reviews and
 a docs-only checkpoint ancestor are required before implementation.
+
+## Implementation noninterference correction
+
+Independent security review demonstrated a valid local Zarr directory accepted
+by the native numerical reader and the original metadata signature. The new
+regular-file-only guard contradicted this checkpoint's no-format-restriction
+rule. Restore conformance through explicit directory handling: retain original
+root path/mtime/size identity with digest=None. This is an honest compatibility
+state, not proof that directory members are current. Directory-member content
+is added to the open shared raster closure blocker; no code may claim C01 fully
+closed on this evidence. Preserve explicit errors for missing/unreadable files.
+The real Zarr probe and initial failure remain retained.
+
+Both independent reviewers accepted the directory correction as restoration of
+the ratified no-format-restriction rule on 2026-09-17 UTC. Correctness and
+security explicitly require a typed directory branch, no catch-to-None fallback,
+and continued open directory-member closure status. Implementation regression
+must exercise real native Zarr and preserve prior output bytes on conflict.
