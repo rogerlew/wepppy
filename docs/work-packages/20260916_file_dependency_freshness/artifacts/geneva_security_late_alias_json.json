@@ -1,0 +1,11 @@
+{
+  "uid": 1000,
+  "error": {
+    "type": "ValueError",
+    "code": null,
+    "message": "Mask must have same shape as image"
+  },
+  "prior_old_preserved": true,
+  "prior_new_preserved": true,
+  "selected_target": "/tmp/pytest-of-unknown/pytest-144/test_destination_alias_retarge0/run/geneva/outputs/old.json"
+}

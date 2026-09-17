@@ -1,0 +1,52 @@
+{
+  "uid": 1000,
+  "outcomes": {
+    "old_native": {
+      "result": "success",
+      "pixels": [
+        [
+          3,
+          3
+        ],
+        [
+          3,
+          3
+        ]
+      ],
+      "mask": [
+        [
+          255,
+          255
+        ],
+        [
+          255,
+          255
+        ]
+      ]
+    },
+    "new_service": {
+      "result": "GenevaValidationError",
+      "error": "Failed to align auto-discovered burn-severity raster to the Geneva canonical grid.",
+      "pixels": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "mask": [
+        [
+          255,
+          255
+        ],
+        [
+          255,
+          255
+        ]
+      ]
+    }
+  }
+}

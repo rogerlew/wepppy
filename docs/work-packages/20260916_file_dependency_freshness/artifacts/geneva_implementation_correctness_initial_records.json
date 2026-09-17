@@ -1,0 +1,58 @@
+{
+  "geneva_implementation_correctness_alignment_aba.json": {
+    "error_code": "changed_source",
+    "status": 409,
+    "prior_preserved": true
+  },
+  "geneva_implementation_correctness_alignment_auxiliary.json": {
+    "values": [
+      [
+        3,
+        3
+      ],
+      [
+        3,
+        3
+      ]
+    ],
+    "mask": [
+      [
+        255,
+        255
+      ],
+      [
+        255,
+        255
+      ]
+    ],
+    "proof": null
+  },
+  "geneva_implementation_correctness_alignment_error.json": {
+    "error_code": "invalid_input",
+    "status": 400,
+    "prior_preserved": true
+  },
+  "geneva_implementation_correctness_alignment_identity.json": {
+    "changed_source_pixels": 3,
+    "metadata_and_bound_pixel_reuse": true
+  },
+  "geneva_implementation_correctness_geometry_aba.json": {
+    "error_code": "changed_source",
+    "prior_preserved": true,
+    "source_restored": true
+  },
+  "geneva_implementation_correctness_geometry_content.json": {
+    "changed_pixels_hru": "hru_2",
+    "changed_legend_hru": "new_2",
+    "same_bytes_touch_reused": true
+  },
+  "geneva_implementation_correctness_geometry_error.json": {
+    "error_code": "contract_violation",
+    "status": 500,
+    "prior_preserved": true
+  },
+  "geneva_implementation_correctness_unverified_vrt.json": {
+    "native_calls": 2,
+    "dependencies": null
+  }
+}

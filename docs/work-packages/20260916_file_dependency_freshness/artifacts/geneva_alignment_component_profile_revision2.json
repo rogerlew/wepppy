@@ -1,0 +1,1024 @@
+{
+  "scope": "Retained actual C06 component profile after failed revision2 acceptance run.\n\nNo production changes. Uses an isolated output owner and read-only copied\nrepresentative source/bound files. Inclusive component times must not be added\ntogether. cProfile output is diagnostic and is not an acceptance timing.\n",
+  "root": "/wc1/batch/qa-geneva-profile-63b3f95faf2a",
+  "measurements": [
+    {
+      "name": "actual_settled_hit",
+      "mean_ms": 21.31383921174953,
+      "seconds": [
+        0.0310604318510741,
+        0.030250106938183308,
+        0.028546337969601154,
+        0.025464033940806985,
+        0.024679959984496236,
+        0.023973110131919384,
+        0.02309133904054761,
+        0.022746491013094783,
+        0.022368652978911996,
+        0.02258388907648623,
+        0.021938089048489928,
+        0.024563465965911746,
+        0.021654129959642887,
+        0.019784733885899186,
+        0.01874795090407133,
+        0.019097837153822184,
+        0.019139935029670596,
+        0.018876841058954597,
+        0.019087204011157155,
+        0.01914004306308925,
+        0.01873399317264557,
+        0.019020009087398648,
+        0.018919679801911116,
+        0.019139850046485662,
+        0.018997743958607316,
+        0.0189175340346992,
+        0.018744817934930325,
+        0.017030230024829507,
+        0.016900345217436552,
+        0.016216390067711473
+      ],
+      "samples": [
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 2,
+              "ms": 2.449627034366131
+            },
+            "raster_observation": {
+              "calls": 3,
+              "ms": 16.62717922590673
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 6.825482938438654
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 17.76666403748095
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 3.754619974642992
+            }
+          }
+        },
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 2,
+              "ms": 2.3011479061096907
+            },
+            "raster_observation": {
+              "calls": 3,
+              "ms": 16.827033832669258
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 7.033427013084292
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 17.337399069219828
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 3.3229030668735504
+            }
+          }
+        },
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 2,
+              "ms": 2.0924180280417204
+            },
+            "raster_observation": {
+              "calls": 3,
+              "ms": 16.074122861027718
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 7.1567140985280275
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 15.872934134677052
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 3.1771231442689896
+            }
+          }
+        },
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 2,
+              "ms": 1.9017229788005352
+            },
+            "raster_observation": {
+              "calls": 3,
+              "ms": 14.205338200554252
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 5.999165819957852
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 14.521625125780702
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 2.832300029695034
+            }
+          }
+        },
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 2,
+              "ms": 1.8502501770853996
+            },
+            "raster_observation": {
+              "calls": 3,
+              "ms": 13.729371828958392
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 5.6901490315794945
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 14.100818894803524
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 2.8388360515236855
+            }
+          }
+        },
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 2,
+              "ms": 1.9597869832068682
+            },
+            "raster_observation": {
+              "calls": 3,
+              "ms": 13.347485801205039
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 5.537333199754357
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 13.588029891252518
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 2.697504125535488
+            }
+          }
+        },
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 2,
+              "ms": 1.8602260388433933
+            },
+            "raster_observation": {
+              "calls": 3,
+              "ms": 12.856620829552412
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 5.3847599774599075
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 13.074878137558699
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 2.590242074802518
+            }
+          }
+        },
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 2,
+              "ms": 1.767289126291871
+            },
+            "raster_observation": {
+              "calls": 3,
+              "ms": 12.700962834060192
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 5.1112910732626915
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 12.931994162499905
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 2.755952998995781
+            }
+          }
+        },
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 2,
+              "ms": 1.82523881085217
+            },
+            "raster_observation": {
+              "calls": 3,
+              "ms": 12.335110688582063
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 5.123244831338525
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 12.511742999777198
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 2.7368010487407446
+            }
+          }
+        },
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 2,
+              "ms": 1.7931750044226646
+            },
+            "raster_observation": {
+              "calls": 3,
+              "ms": 12.630145065486431
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 5.173559067770839
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 12.591361068189144
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 2.8476750012487173
+            }
+          }
+        },
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 2,
+              "ms": 1.868693856522441
+            },
+            "raster_observation": {
+              "calls": 3,
+              "ms": 11.920070042833686
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 4.8809119034558535
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 12.163002975285053
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 2.8505870141088963
+            }
+          }
+        },
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 2,
+              "ms": 2.1695520263165236
+            },
+            "raster_observation": {
+              "calls": 3,
+              "ms": 11.950646294280887
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 4.87827998585999
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 13.884807005524635
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 3.3580020535737276
+            }
+          }
+        },
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 2,
+              "ms": 1.9235610961914062
+            },
+            "raster_observation": {
+              "calls": 3,
+              "ms": 12.506731785833836
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 6.301199086010456
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 11.031222995370626
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 2.249235985800624
+            }
+          }
+        },
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 2,
+              "ms": 1.799107063561678
+            },
+            "raster_observation": {
+              "calls": 3,
+              "ms": 10.855427710339427
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 4.401740850880742
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 10.927888099104166
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 2.4992378894239664
+            }
+          }
+        },
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 2,
+              "ms": 1.9129361025989056
+            },
+            "raster_observation": {
+              "calls": 3,
+              "ms": 10.456334101036191
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 4.365107975900173
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 10.243730153888464
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 2.0867660641670227
+            }
+          }
+        },
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 2,
+              "ms": 1.9147098064422607
+            },
+            "raster_observation": {
+              "calls": 3,
+              "ms": 10.183434933423996
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 4.36341087333858
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 10.15510899014771
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 2.4474419187754393
+            }
+          }
+        },
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 2,
+              "ms": 1.8008309416472912
+            },
+            "raster_observation": {
+              "calls": 3,
+              "ms": 10.57526026852429
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 4.341325024142861
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 10.554210050031543
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 2.2999118082225323
+            }
+          }
+        },
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 2,
+              "ms": 1.667640171945095
+            },
+            "raster_observation": {
+              "calls": 3,
+              "ms": 10.50819898955524
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 4.306030925363302
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 10.476568015292287
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 2.2850672248750925
+            }
+          }
+        },
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 2,
+              "ms": 1.788903260603547
+            },
+            "raster_observation": {
+              "calls": 3,
+              "ms": 10.488659841939807
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 4.208824131637812
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 10.513575049117208
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 2.43288092315197
+            }
+          }
+        },
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 2,
+              "ms": 1.623988151550293
+            },
+            "raster_observation": {
+              "calls": 3,
+              "ms": 10.627054842188954
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 4.353764001280069
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 10.651000076904893
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 2.356496872380376
+            }
+          }
+        },
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 2,
+              "ms": 1.6410618554800749
+            },
+            "raster_observation": {
+              "calls": 3,
+              "ms": 10.334986029192805
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 4.135869909077883
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 10.481608798727393
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 2.3349300026893616
+            }
+          }
+        },
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 2,
+              "ms": 1.6721528954803944
+            },
+            "raster_observation": {
+              "calls": 3,
+              "ms": 10.545113123953342
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 4.367582034319639
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 10.59851492755115
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 2.2403050679713488
+            }
+          }
+        },
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 2,
+              "ms": 1.7029279842972755
+            },
+            "raster_observation": {
+              "calls": 3,
+              "ms": 10.483457939699292
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 4.256519954651594
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 10.462539969012141
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 2.3531122133135796
+            }
+          }
+        },
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 2,
+              "ms": 1.7197609413415194
+            },
+            "raster_observation": {
+              "calls": 3,
+              "ms": 10.505303973332047
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 4.282697103917599
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 10.585888056084514
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 2.409616019576788
+            }
+          }
+        },
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 2,
+              "ms": 1.6109517309814692
+            },
+            "raster_observation": {
+              "calls": 3,
+              "ms": 10.59677079319954
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 4.30551590397954
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 10.681804968044162
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 2.253236947581172
+            }
+          }
+        },
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 2,
+              "ms": 1.6248361207544804
+            },
+            "raster_observation": {
+              "calls": 3,
+              "ms": 10.587482014670968
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 4.304013913497329
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 10.57529984973371
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 2.2714741062372923
+            }
+          }
+        },
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 2,
+              "ms": 1.7853190656751394
+            },
+            "raster_observation": {
+              "calls": 3,
+              "ms": 10.662317974492908
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 4.311219090595841
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 10.441753081977367
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 2.092862967401743
+            }
+          }
+        },
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 2,
+              "ms": 1.8523340113461018
+            },
+            "raster_observation": {
+              "calls": 3,
+              "ms": 9.101151255890727
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 3.6593610420823097
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 9.118535090237856
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 2.2880330216139555
+            }
+          }
+        },
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 2,
+              "ms": 1.8621159251779318
+            },
+            "raster_observation": {
+              "calls": 3,
+              "ms": 9.452058002352715
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 3.707901109009981
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 9.314736118540168
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 1.9042340572923422
+            }
+          }
+        },
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 2,
+              "ms": 1.7345889937132597
+            },
+            "raster_observation": {
+              "calls": 3,
+              "ms": 8.93450016155839
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 3.6617000587284565
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 8.63720802590251
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 2.0677519496530294
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "actual_settled_miss_absent_target",
+      "mean_ms": 62.81931884586811,
+      "seconds": [
+        0.07395200408063829,
+        0.063243089010939,
+        0.05577680701389909,
+        0.05814290605485439,
+        0.06298178806900978
+      ],
+      "samples": [
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 5,
+              "ms": 5.946614779531956
+            },
+            "raster_observation": {
+              "calls": 2,
+              "ms": 6.12228992395103
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 1.2374378275126219
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 9.024041937664151
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 2.0595749374479055
+            },
+            "attempt_member_resolution": {
+              "calls": 5,
+              "ms": 6.517757661640644
+            },
+            "attempt_status": {
+              "calls": 2,
+              "ms": 12.27055606432259
+            },
+            "native_stacker": {
+              "calls": 1,
+              "ms": 33.928693970665336
+            },
+            "clean_tiff_proof_publication": {
+              "calls": 2,
+              "ms": 1.370506826788187
+            }
+          }
+        },
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 5,
+              "ms": 5.510338116437197
+            },
+            "raster_observation": {
+              "calls": 2,
+              "ms": 6.8131680600345135
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 1.0526978876441717
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 10.278136003762484
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 2.2226390428841114
+            },
+            "attempt_member_resolution": {
+              "calls": 5,
+              "ms": 5.883586360141635
+            },
+            "attempt_status": {
+              "calls": 2,
+              "ms": 11.877790093421936
+            },
+            "native_stacker": {
+              "calls": 1,
+              "ms": 23.555193096399307
+            },
+            "clean_tiff_proof_publication": {
+              "calls": 2,
+              "ms": 1.4139388222247362
+            }
+          }
+        },
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 5,
+              "ms": 4.387295804917812
+            },
+            "raster_observation": {
+              "calls": 2,
+              "ms": 6.464346079155803
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 0.7990170270204544
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 9.737846907228231
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 1.9905110821127892
+            },
+            "attempt_member_resolution": {
+              "calls": 5,
+              "ms": 5.162387154996395
+            },
+            "attempt_status": {
+              "calls": 2,
+              "ms": 10.965632274746895
+            },
+            "native_stacker": {
+              "calls": 1,
+              "ms": 20.065687131136656
+            },
+            "clean_tiff_proof_publication": {
+              "calls": 2,
+              "ms": 1.198404934257269
+            }
+          }
+        },
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 5,
+              "ms": 5.102635128423572
+            },
+            "raster_observation": {
+              "calls": 2,
+              "ms": 6.217393791303039
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 1.1445749551057816
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 9.39522497355938
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 2.219910966232419
+            },
+            "attempt_member_resolution": {
+              "calls": 5,
+              "ms": 4.885056056082249
+            },
+            "attempt_status": {
+              "calls": 2,
+              "ms": 10.583979077637196
+            },
+            "native_stacker": {
+              "calls": 1,
+              "ms": 21.433518966659904
+            },
+            "clean_tiff_proof_publication": {
+              "calls": 2,
+              "ms": 1.3260573614388704
+            }
+          }
+        },
+        {
+          "reads": 0,
+          "inclusive_components": {
+            "artifact_resolve": {
+              "calls": 5,
+              "ms": 5.732947960495949
+            },
+            "raster_observation": {
+              "calls": 2,
+              "ms": 6.341609172523022
+            },
+            "clean_tiff_proof_initial": {
+              "calls": 1,
+              "ms": 1.2430499773472548
+            },
+            "alignment_inputs": {
+              "calls": 1,
+              "ms": 9.671729989349842
+            },
+            "same_call_final_validation": {
+              "calls": 1,
+              "ms": 2.803170122206211
+            },
+            "attempt_member_resolution": {
+              "calls": 5,
+              "ms": 5.443081259727478
+            },
+            "attempt_status": {
+              "calls": 2,
+              "ms": 11.490508913993835
+            },
+            "native_stacker": {
+              "calls": 1,
+              "ms": 23.02146703004837
+            },
+            "clean_tiff_proof_publication": {
+              "calls": 2,
+              "ms": 1.4175809919834137
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "input_sha256": {
+    "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif": "df1a9d31edd46dffdc5f0e1429771dfdcdba1469f180b77f2c483e8f50eb3cf9",
+    "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif": "dec5c90caf8c5426c01812d1cb97dee66ed193db3fe5767014fb2936eeb0e9fd"
+  },
+  "module_hashes": {
+    "/workdir/wepppy/wepppy/all_your_base/file_digest.py": "d090094983c4f7575801969a1339ae3306745f6ff93aa100c037d83dd7fb9ee7",
+    "/workdir/wepppy/wepppy/nodb/mods/geneva/collaborators/_cache_freshness.py": "405223512fbf699d35d008bdb0228802ee2a39b2095dfc8ed3f67b3521b8e2b1",
+    "/workdir/wepppy/wepppy/nodb/mods/geneva/collaborators/hsg_assignment_service.py": "59ee01affee3b9455327868d17f4b76191d622ef2c520f7307f480fe706da96f"
+  },
+  "completed": true,
+  "inputs_unchanged": true,
+  "modules_unchanged": true
+}

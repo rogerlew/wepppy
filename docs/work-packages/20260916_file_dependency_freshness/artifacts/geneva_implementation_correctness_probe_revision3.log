@@ -1,0 +1,28 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest docs/work-packages/20260916_file_dependency_freshness/artifacts/geneva_implementation_correctness_probe.py -q -s
+GENEVA_CORRECTNESS geometry_content {"changed_legend_hru": "new_2", "changed_pixels_hru": "hru_2", "same_bytes_touch_reused": true}
+.GENEVA_CORRECTNESS geometry_aba {"error_code": "changed_source", "prior_preserved": true, "source_restored": true}
+.GENEVA_CORRECTNESS geometry_error {"error_code": "changed_source", "prior_preserved": true, "status": 409}
+.GENEVA_CORRECTNESS alignment_identity {"changed_source_pixels": 3, "metadata_and_bound_pixel_reuse": true}
+.GENEVA_CORRECTNESS alignment_auxiliary {"mask": [[255, 255], [255, 255]], "proof": null, "values": [[3, 3], [3, 3]]}
+.GENEVA_CORRECTNESS alignment_aba {"error_code": "changed_source", "prior_preserved": true, "status": 409}
+.GENEVA_CORRECTNESS alignment_error {"error_code": "changed_source", "prior_preserved": true, "status": 409}
+.GENEVA_CORRECTNESS unverified_vrt {"dependencies": null, "native_calls": 2}
+.GENEVA_CORRECTNESS stable_crosswalk_error {"error_code": "contract_violation", "prior_preserved": true, "status": 500}
+.GENEVA_CORRECTNESS materialization_missing_legend {"error_code": "changed_source", "prior_preserved": true, "status": 409}
+.GENEVA_CORRECTNESS hit_missing_legend {"error_code": "changed_source", "error_type": "GenevaKernelError", "prior_preserved": true, "status": 409}
+.GENEVA_CORRECTNESS hit_missing_source {"error_code": "changed_source", "prior_preserved": true, "status": 409}
+.GENEVA_CORRECTNESS joint_source_during_bound {"error_code": "changed_source", "prior_preserved": true, "status": 409}
+.GENEVA_CORRECTNESS missing_after_physical_guard {"error_code": "changed_source", "prior_preserved": true, "status": 409}
+.GENEVA_CORRECTNESS stable_eio {"errno": 5, "original_error_preserved": true}
+.
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+15 passed, 2 warnings in 9.78s

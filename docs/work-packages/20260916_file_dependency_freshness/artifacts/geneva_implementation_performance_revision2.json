@@ -1,0 +1,3046 @@
+{
+  "scope": "Revision 2 C05/C06 actual service/provenance/publication acceptance.\n\nCorrects initial phase preparation: observe all dependencies before admission\nwait. Original failed measurements and their diagnostic review remain retained.\n\nNative opens use a new copy of the retained audited representative fixture.\nActual current services are compared with exact ancestor 31f77bef1 modules.\nThe wd/ArtifactIO owner seam excludes HTTP/RQ/kernel and source owner discovery;\nno named project, controller status identity, or production/test mutation.\n",
+  "root": "/wc1/batch/qa-geneva-implementation-ce94b1a1b960",
+  "uid": 1000,
+  "gid": 993,
+  "source_fixture_manifest": "/wc1/batch/qa-geneva-consumers-d03fded2e37c/benchmark-manifest.json",
+  "cache_note": "Copied warm filesystem pages, not cold storage; cold/evicted refers to digest helper.",
+  "module_hashes": {
+    "/workdir/wepppy/wepppy/all_your_base/file_digest.py": "d090094983c4f7575801969a1339ae3306745f6ff93aa100c037d83dd7fb9ee7",
+    "/workdir/wepppy/wepppy/all_your_base/raster_freshness.py": "b5e1602a6596cfb37a21d72ecc2b3839da92fac3163fa6a8e2fb121bde6cc738",
+    "/workdir/wepppy/wepppy/nodb/mods/geneva/collaborators/_cache_freshness.py": "405223512fbf699d35d008bdb0228802ee2a39b2095dfc8ed3f67b3521b8e2b1",
+    "/workdir/wepppy/wepppy/nodb/mods/geneva/collaborators/hru_map_geometry_service.py": "98c3f8c3b67abd21c10aacf9c0b278df1874a07c2a2684c038f18f6bbfa51034",
+    "/workdir/wepppy/wepppy/nodb/mods/geneva/collaborators/hsg_assignment_service.py": "59ee01affee3b9455327868d17f4b76191d622ef2c520f7307f480fe706da96f"
+  },
+  "ancestor": "31f77bef1",
+  "ancestor_module_hashes": {
+    "wepppy/nodb/mods/geneva/collaborators/hru_map_geometry_service.py": "e9780f4b532c0d3219a8c384bac1fe710aad2004977f93d03026a033ee8b49d6",
+    "wepppy/nodb/mods/geneva/collaborators/hsg_assignment_service.py": "1bf7d52858cd88d8866465b7c9fc24e9b237388605d29a0a8275e41e2d0b2efd"
+  },
+  "copied_inputs": {
+    "/wc1/batch/qa-geneva-consumers-d03fded2e37c/geneva/hru_map.tif": {
+      "version": [
+        64,
+        1201980,
+        156939,
+        1782875388396983988,
+        1789623894777734239
+      ],
+      "sha256": "a8773122fba1fb1f538c9c5173e99f0150a7f8c46aa21212807ad5c63fd26c3d",
+      "bytes": 156939
+    },
+    "/wc1/batch/qa-geneva-consumers-d03fded2e37c/geneva/hru_map_legend.json": {
+      "version": [
+        64,
+        1201981,
+        49149,
+        1782875388399984010,
+        1789623894789734313
+      ],
+      "sha256": "487a2b1413bccd01656185af44bf74b564c1732f6a98f7dd283d5087aa454aa1",
+      "bytes": 49149
+    },
+    "/wc1/batch/qa-geneva-consumers-d03fded2e37c/geneva/hru_map_features.wgs.geojson": {
+      "version": [
+        64,
+        1190749,
+        1122670,
+        1789623902809783723,
+        1789623902809783723
+      ],
+      "sha256": "9de9cd3368fc15948eb971ff4b683dda9e9bd2d4d62133ce6fb7da497bd575d7",
+      "bytes": 1122670
+    },
+    "/wc1/batch/qa-geneva-consumers-d03fded2e37c/disturbed/sbs_4class.tif": {
+      "version": [
+        64,
+        1202752,
+        46216,
+        1782861927838756970,
+        1789623895138736463
+      ],
+      "sha256": "df1a9d31edd46dffdc5f0e1429771dfdcdba1469f180b77f2c483e8f50eb3cf9",
+      "bytes": 46216
+    },
+    "/wc1/batch/qa-geneva-consumers-d03fded2e37c/dem/wbt/bound.tif": {
+      "version": [
+        64,
+        1201984,
+        151730,
+        1782861997908234845,
+        1789623895170736660
+      ],
+      "sha256": "dec5c90caf8c5426c01812d1cb97dee66ed193db3fe5767014fb2936eeb0e9fd",
+      "bytes": 151730
+    },
+    "/wc1/batch/qa-geneva-consumers-d03fded2e37c/geneva/inputs/burn_severity_4class.tif": {
+      "version": [
+        64,
+        1184357,
+        15208,
+        1789623904957796956,
+        1789623904957796956
+      ],
+      "sha256": "4dc84bb58b6e519a8320721ac632d8699b852f341d80edf2278d3a49ca407d8c",
+      "bytes": 15208
+    }
+  },
+  "measurements": [
+    {
+      "name": "geometry_legacy_admission",
+      "repeats": 1,
+      "mean_ms": 1025.1109290402383,
+      "samples": [
+        {
+          "seconds": 1.0251109290402383,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map_legend.json": 196596,
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif": 627756
+          },
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.028657148126512766
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.004860576940700412
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.004600439919158816
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0036693508736789227
+            }
+          ],
+          "native_calls": [
+            "current_geometry"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "burn_legacy_admission",
+      "repeats": 1,
+      "mean_ms": 91.76881401799619,
+      "samples": [
+        {
+          "seconds": 0.09176881401799619,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif": 45624,
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif": 92432,
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif": 303460
+          },
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.003456749953329563
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.006808134960010648
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.00627898215316236
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.003420284017920494
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.003550400026142597
+            }
+          ],
+          "native_calls": [
+            "raster_stacker"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "geometry_settled_hit",
+      "repeats": 30,
+      "mean_ms": 28.29137344378978,
+      "samples": [
+        {
+          "seconds": 0.048914405051618814,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.006677718134596944
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.005041909171268344
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.04214371298439801,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.004998696036636829
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.004429462132975459
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.036706225015223026,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.004402654943987727
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0042159219738096
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.033881976967677474,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.00419754208996892
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.003922220086678863
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.03288257122039795,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0038373449351638556
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.003583331126719713
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.029624061891809106,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0037260730750858784
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0036071189679205418
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.02951718890108168,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.003696172032505274
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0037194848991930485
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.027804136974737048,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.00355874584056437
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0031964450608938932
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.026996487053111196,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.003232971066609025
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.003245576051995158
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.025872210040688515,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.003149898024275899
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0030454208608716726
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.025882123038172722,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0032377580646425486
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0030987451318651438
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.025133401155471802,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.00312910508364439
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0029947010334581137
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.026029014959931374,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.003151453100144863
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0031624280381947756
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.027006293879821897,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0034136101603507996
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0029553999193012714
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.024818733800202608,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.00323159690015018
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.003148590913042426
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.025180580094456673,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0029682181775569916
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0031800619326531887
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.028413265012204647,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.003254492999985814
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0032830170821398497
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.02747465204447508,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0033557680435478687
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.003381806192919612
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.026514170924201608,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0031516989693045616
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0032535619102418423
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.02593902009539306,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.003306159982457757
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0032356891315430403
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.02597936801612377,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0032852638978511095
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.003243381157517433
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.025147014064714313,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0031490609981119633
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.003104893025010824
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.02480277302674949,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0029055909253656864
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.003135827835649252
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.024832557886838913,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0030626438092440367
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.003005799138918519
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.025118635036051273,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.00315812393091619
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0029739970341324806
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.024642557138577104,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.00315004400908947
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.002819827990606427
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.024841360049322248,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.003058316186070442
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0031146309338510036
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.024679654045030475,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.003086237935349345
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.002910186070948839
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.026876557851210237,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.003129304852336645
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.003076296066865325
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.025086495094001293,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0032674658577889204
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0028801842126995325
+            }
+          ],
+          "native_calls": []
+        }
+      ]
+    },
+    {
+      "name": "geometry_cold_hit",
+      "repeats": 3,
+      "mean_ms": 29.508416696141165,
+      "samples": [
+        {
+          "seconds": 0.03034533397294581,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map_legend.json": 98298,
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif": 313878
+          },
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.004363120999187231
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.004279927117750049
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.02990811411291361,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map_legend.json": 98298,
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif": 313878
+          },
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.004308206029236317
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.003950183978304267
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.028271802002564073,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map_legend.json": 98298,
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif": 313878
+          },
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.004076614044606686
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.003941403003409505
+            }
+          ],
+          "native_calls": []
+        }
+      ]
+    },
+    {
+      "name": "geometry_post_admission_hit",
+      "repeats": 10,
+      "mean_ms": 27.286517014726996,
+      "samples": [
+        {
+          "seconds": 0.025967754889279604,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.00308400415815413
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.003614781890064478
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.03204601397737861,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.004076523007825017
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.003571236040443182
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.029692518059164286,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0035231951624155045
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0034241860266774893
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.028240991989150643,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0035185269080102444
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.003404374932870269
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.02756991609930992,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0032725869677960873
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0032188419718295336
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.026235222117975354,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0034422678872942924
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0031413950491696596
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.026950303930789232,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0031556349713355303
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0030100957956165075
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.025792464148253202,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0035048159770667553
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.003387998091056943
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.025430876994505525,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0033794729970395565
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.002937729936093092
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.02493910794146359,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.002974684117361903
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.002971456153318286
+            }
+          ],
+          "native_calls": []
+        }
+      ]
+    },
+    {
+      "name": "geometry_evicted_hit",
+      "repeats": 3,
+      "mean_ms": 29.987248436858255,
+      "samples": [
+        {
+          "seconds": 0.028837679186835885,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map_legend.json": 98298,
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif": 313878
+          },
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.004765636986121535
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0042977791745215654
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.031468605156987906,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map_legend.json": 98298,
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif": 313878
+          },
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.005074283108115196
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.003777930047363043
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.02965546096675098,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map_legend.json": 98298,
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif": 313878
+          },
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.00484291510656476
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0037034079432487488
+            }
+          ],
+          "native_calls": []
+        }
+      ]
+    },
+    {
+      "name": "burn_settled_hit",
+      "repeats": 30,
+      "mean_ms": 21.987746260128915,
+      "samples": [
+        {
+          "seconds": 0.027870171004906297,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.0053525278344750404
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.005037530092522502
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.005113126942887902
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.02767112199217081,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.005179369822144508
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.005128307035192847
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.005138985114172101
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.028191152960062027,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.005379997892305255
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.00507040717639029
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.005157981999218464
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.027303962968289852,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.005281658843159676
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.004973198054358363
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.005130737088620663
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.026648308150470257,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.004902783781290054
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.00485296780243516
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.004926936933770776
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.025168898049741983,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.004720343044027686
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.004687570966780186
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.004701161989942193
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.02376367710530758,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.004608870018273592
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.00414358195848763
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.004165200050920248
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.0230752220377326,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.004510300001129508
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.00429170485585928
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.004106323001906276
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.022948740981519222,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.004508293000981212
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.004314600955694914
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.004127979977056384
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.022931168088689446,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.004432400921359658
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.004397030919790268
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.004030279815196991
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.02197459083981812,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.0043187569826841354
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.004058093996718526
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.004215186927467585
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.020833067130297422,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.003975956002250314
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.0035983070265501738
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.003774455050006509
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.021179907023906708,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.003772467141970992
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.004027024144306779
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.004019441083073616
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.020313055953010917,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.003742178902029991
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.0036808280274271965
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.003726230002939701
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.020401586079970002,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.00387785118073225
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.0036924718879163265
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.0038928750436753035
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.019508301047608256,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.0036840529646724463
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.003524084109812975
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.0035821569617837667
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.019555632025003433,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.0035477359779179096
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.0034735959488898516
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.0036378500517457724
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.020012850174680352,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.0037559480406343937
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.003643353935331106
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.003754550125449896
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.019830220146104693,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.0036788489669561386
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.0037116599269211292
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.0035395449958741665
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.020201794104650617,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.00365810701623559
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.003562498139217496
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.0037708000745624304
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.01952915103174746,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.0035662020090967417
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.0034957050811499357
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.003860018914565444
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.02049890300258994,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.0038734248373657465
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.003502143081277609
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.003844396909698844
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.019939586985856295,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.003660712158307433
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.0037823650054633617
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.0036308919079601765
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.020087819080799818,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.0039828449953347445
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.0035006809048354626
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.00352434697560966
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.020573713118210435,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.004058404825627804
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.0035559148527681828
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.0038688229396939278
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.020255798008292913,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.003869373816996813
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.0036559889558702707
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.0036967559717595577
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.02020501298829913,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.0035788710229098797
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.00372290494851768
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.0038273660466074944
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.019760025897994637,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.0036027501337230206
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.0035783161874860525
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.003710635006427765
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.01994837587699294,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.003769202157855034
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.0034721309784799814
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.0037153970915824175
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.01945057394914329,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.0036987471394240856
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.003453283803537488
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.0035594089422374964
+            }
+          ],
+          "native_calls": []
+        }
+      ]
+    },
+    {
+      "name": "burn_cold_hit",
+      "repeats": 3,
+      "mean_ms": 26.710548360521596,
+      "samples": [
+        {
+          "seconds": 0.027181235142052174,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif": 19800,
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif": 92432,
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif": 303460
+          },
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.004765527090057731
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.004665005020797253
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.00542853306978941
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.02628753404133022,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif": 19800,
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif": 92432,
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif": 303460
+          },
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.0046255518682301044
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.004806426120921969
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.005350444931536913
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.026662875898182392,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif": 19800,
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif": 92432,
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif": 303460
+          },
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.005070974817499518
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.004881993867456913
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.005137719912454486
+            }
+          ],
+          "native_calls": []
+        }
+      ]
+    },
+    {
+      "name": "burn_post_admission_hit",
+      "repeats": 10,
+      "mean_ms": 25.073801237158477,
+      "samples": [
+        {
+          "seconds": 0.027351121185347438,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.005207153037190437
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.0050627600867301226
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.0051433679182082415
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.02742216899059713,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.00500213704071939
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.005014041904360056
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.005236889934167266
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.027387989917770028,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.005251148948445916
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.005079359980300069
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.004982850980013609
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.026057356968522072,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.0051426999270915985
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.004697707016021013
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.004987871972844005
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.024909598054364324,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.004515796899795532
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.0044767099898308516
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.0047115429770201445
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.024684459902346134,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.004700514953583479
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.004612674005329609
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.004532557213678956
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.023931781062856317,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.004514262778684497
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.004370591137558222
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.004348580026999116
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.02306542405858636,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.004371133865788579
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.0042763890232890844
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.004334120079874992
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.022996003041043878,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.004425534047186375
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.00443824497051537
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.004208850208669901
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.022932109190151095,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.004463510122150183
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.0041471440345048904
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.004314330872148275
+            }
+          ],
+          "native_calls": []
+        }
+      ]
+    },
+    {
+      "name": "burn_evicted_hit",
+      "repeats": 3,
+      "mean_ms": 22.524232355256874,
+      "samples": [
+        {
+          "seconds": 0.02278134599328041,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif": 19800,
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif": 92432,
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif": 303460
+          },
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.004721201024949551
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.0035298229195177555
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.004127993946895003
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.02344478410668671,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif": 19800,
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif": 92432,
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif": 303460
+          },
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.004677821882069111
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.003725223010405898
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.003983946051448584
+            }
+          ],
+          "native_calls": []
+        },
+        {
+          "seconds": 0.021346566965803504,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif": 19800,
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif": 92432,
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif": 303460
+          },
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/inputs/burn_severity_4class.tif"
+              ],
+              "seconds": 0.004134167218580842
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.0035257369745522738
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.0038109382148832083
+            }
+          ],
+          "native_calls": []
+        }
+      ]
+    },
+    {
+      "name": "geometry_settled_miss_ancestor_0",
+      "repeats": 1,
+      "mean_ms": 914.2054051626474,
+      "samples": [
+        {
+          "seconds": 0.9142054051626474,
+          "digest_read_bytes": {},
+          "observations": [],
+          "native_calls": [
+            "ancestor_geometry"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "geometry_settled_miss_current_0",
+      "repeats": 1,
+      "mean_ms": 920.5555869266391,
+      "samples": [
+        {
+          "seconds": 0.9205555869266391,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.00447216909378767
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0031011439859867096
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.004013256169855595
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.003307033097371459
+            }
+          ],
+          "native_calls": [
+            "current_geometry"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "geometry_settled_miss_ancestor_1",
+      "repeats": 1,
+      "mean_ms": 1071.5823450591415,
+      "samples": [
+        {
+          "seconds": 1.0715823450591415,
+          "digest_read_bytes": {},
+          "observations": [],
+          "native_calls": [
+            "ancestor_geometry"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "geometry_settled_miss_current_1",
+      "repeats": 1,
+      "mean_ms": 926.4387229923159,
+      "samples": [
+        {
+          "seconds": 0.9264387229923159,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.004679790930822492
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.00329778203740716
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.003797821933403611
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0034555939491838217
+            }
+          ],
+          "native_calls": [
+            "current_geometry"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "geometry_settled_miss_ancestor_2",
+      "repeats": 1,
+      "mean_ms": 897.8341929614544,
+      "samples": [
+        {
+          "seconds": 0.8978341929614544,
+          "digest_read_bytes": {},
+          "observations": [],
+          "native_calls": [
+            "ancestor_geometry"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "geometry_settled_miss_current_2",
+      "repeats": 1,
+      "mean_ms": 981.4832108095288,
+      "samples": [
+        {
+          "seconds": 0.9814832108095288,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.005757590988650918
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0031464318744838238
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0038694238755851984
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0036539100110530853
+            }
+          ],
+          "native_calls": [
+            "current_geometry"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "burn_settled_miss_ancestor_0",
+      "repeats": 1,
+      "mean_ms": 39.71909102983773,
+      "samples": [
+        {
+          "seconds": 0.03971909102983773,
+          "digest_read_bytes": {},
+          "observations": [],
+          "native_calls": [
+            "raster_stacker"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "burn_settled_miss_current_0",
+      "repeats": 1,
+      "mean_ms": 91.7181980330497,
+      "samples": [
+        {
+          "seconds": 0.0917181980330497,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.0056890929117798805
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.005427326075732708
+            }
+          ],
+          "native_calls": [
+            "raster_stacker"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "burn_settled_miss_ancestor_1",
+      "repeats": 1,
+      "mean_ms": 35.87872697971761,
+      "samples": [
+        {
+          "seconds": 0.03587872697971761,
+          "digest_read_bytes": {},
+          "observations": [],
+          "native_calls": [
+            "raster_stacker"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "burn_settled_miss_current_1",
+      "repeats": 1,
+      "mean_ms": 87.43691607378423,
+      "samples": [
+        {
+          "seconds": 0.08743691607378423,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.005116237094625831
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.00526778120547533
+            }
+          ],
+          "native_calls": [
+            "raster_stacker"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "burn_settled_miss_ancestor_2",
+      "repeats": 1,
+      "mean_ms": 35.531576024368405,
+      "samples": [
+        {
+          "seconds": 0.035531576024368405,
+          "digest_read_bytes": {},
+          "observations": [],
+          "native_calls": [
+            "raster_stacker"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "burn_settled_miss_current_2",
+      "repeats": 1,
+      "mean_ms": 87.17860607430339,
+      "samples": [
+        {
+          "seconds": 0.08717860607430339,
+          "digest_read_bytes": {},
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.005147357005625963
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.005050841951742768
+            }
+          ],
+          "native_calls": [
+            "raster_stacker"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "geometry_cold_miss_ancestor_0",
+      "repeats": 1,
+      "mean_ms": 915.2966979891062,
+      "samples": [
+        {
+          "seconds": 0.9152966979891062,
+          "digest_read_bytes": {},
+          "observations": [],
+          "native_calls": [
+            "ancestor_geometry"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "geometry_cold_miss_current_0",
+      "repeats": 1,
+      "mean_ms": 917.0794219244272,
+      "samples": [
+        {
+          "seconds": 0.9170794219244272,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map_legend.json": 196596,
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif": 627756
+          },
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.005427458789199591
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.003984048031270504
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.004119971999898553
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.004179480951279402
+            }
+          ],
+          "native_calls": [
+            "current_geometry"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "geometry_cold_miss_ancestor_1",
+      "repeats": 1,
+      "mean_ms": 896.5846679639071,
+      "samples": [
+        {
+          "seconds": 0.8965846679639071,
+          "digest_read_bytes": {},
+          "observations": [],
+          "native_calls": [
+            "ancestor_geometry"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "geometry_cold_miss_current_1",
+      "repeats": 1,
+      "mean_ms": 1187.4589840881526,
+      "samples": [
+        {
+          "seconds": 1.1874589840881526,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map_legend.json": 147447,
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif": 470817
+          },
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.005254667019471526
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.003663405077531934
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.004623922985047102
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.003275515977293253
+            }
+          ],
+          "native_calls": [
+            "current_geometry"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "geometry_cold_miss_ancestor_2",
+      "repeats": 1,
+      "mean_ms": 887.8054858651012,
+      "samples": [
+        {
+          "seconds": 0.8878054858651012,
+          "digest_read_bytes": {},
+          "observations": [],
+          "native_calls": [
+            "ancestor_geometry"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "geometry_cold_miss_current_2",
+      "repeats": 1,
+      "mean_ms": 914.5598108880222,
+      "samples": [
+        {
+          "seconds": 0.9145598108880222,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map_legend.json": 196596,
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif": 627756
+          },
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.005016061943024397
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.003966675838455558
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.0038409880362451077
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/geneva/hru_map.tif"
+              ],
+              "seconds": 0.004768647952005267
+            }
+          ],
+          "native_calls": [
+            "current_geometry"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "burn_cold_miss_ancestor_0",
+      "repeats": 1,
+      "mean_ms": 24.490858893841505,
+      "samples": [
+        {
+          "seconds": 0.024490858893841505,
+          "digest_read_bytes": {},
+          "observations": [],
+          "native_calls": [
+            "raster_stacker"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "burn_cold_miss_current_0",
+      "repeats": 1,
+      "mean_ms": 59.323741821572185,
+      "samples": [
+        {
+          "seconds": 0.059323741821572185,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif": 92432,
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif": 303460
+          },
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.00351676600985229
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.0038223520386964083
+            }
+          ],
+          "native_calls": [
+            "raster_stacker"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "burn_cold_miss_ancestor_1",
+      "repeats": 1,
+      "mean_ms": 21.997591014951468,
+      "samples": [
+        {
+          "seconds": 0.021997591014951468,
+          "digest_read_bytes": {},
+          "observations": [],
+          "native_calls": [
+            "raster_stacker"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "burn_cold_miss_current_1",
+      "repeats": 1,
+      "mean_ms": 59.82310581021011,
+      "samples": [
+        {
+          "seconds": 0.05982310581021011,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif": 92432,
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif": 303460
+          },
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.0036766978446394205
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.003986780997365713
+            }
+          ],
+          "native_calls": [
+            "raster_stacker"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "burn_cold_miss_ancestor_2",
+      "repeats": 1,
+      "mean_ms": 20.759838866069913,
+      "samples": [
+        {
+          "seconds": 0.020759838866069913,
+          "digest_read_bytes": {},
+          "observations": [],
+          "native_calls": [
+            "raster_stacker"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "burn_cold_miss_current_2",
+      "repeats": 1,
+      "mean_ms": 59.405081905424595,
+      "samples": [
+        {
+          "seconds": 0.059405081905424595,
+          "digest_read_bytes": {
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif": 92432,
+            "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif": 303460
+          },
+          "observations": [
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/disturbed/sbs_4class.tif"
+              ],
+              "seconds": 0.003477195044979453
+            },
+            {
+              "paths": [
+                "/wc1/batch/qa-geneva-implementation-ce94b1a1b960/dem/wbt/bound.tif"
+              ],
+              "seconds": 0.0037287340965121984
+            }
+          ],
+          "native_calls": [
+            "raster_stacker"
+          ]
+        }
+      ]
+    }
+  ],
+  "gates": [
+    {
+      "name": "geometry_settled_hit_ms",
+      "actual": 28.29137344378978,
+      "limit": 40,
+      "passed": true
+    },
+    {
+      "name": "geometry_post_admission_hit_ms",
+      "actual": 27.286517014726996,
+      "limit": 40,
+      "passed": true
+    },
+    {
+      "name": "geometry_cold_hit_ms",
+      "actual": 29.508416696141165,
+      "limit": 75,
+      "passed": true
+    },
+    {
+      "name": "geometry_evicted_hit_ms",
+      "actual": 29.987248436858255,
+      "limit": 75,
+      "passed": true
+    },
+    {
+      "name": "geometry_settled_miss_added_ms",
+      "actual": -18.38147415158653,
+      "limit": 100,
+      "passed": true
+    },
+    {
+      "name": "geometry_cold_miss_added_ms",
+      "actual": 106.47045502749586,
+      "limit": 100,
+      "passed": false
+    },
+    {
+      "name": "geometry_settled_hit_payload_reads",
+      "actual": 0,
+      "limit": 0,
+      "passed": true
+    },
+    {
+      "name": "geometry_post_admission_hit_payload_reads",
+      "actual": 0,
+      "limit": 0,
+      "passed": true
+    },
+    {
+      "name": "burn_settled_hit_ms",
+      "actual": 21.987746260128915,
+      "limit": 25,
+      "passed": true
+    },
+    {
+      "name": "burn_post_admission_hit_ms",
+      "actual": 25.073801237158477,
+      "limit": 25,
+      "passed": false
+    },
+    {
+      "name": "burn_cold_hit_ms",
+      "actual": 26.710548360521596,
+      "limit": 40,
+      "passed": true
+    },
+    {
+      "name": "burn_evicted_hit_ms",
+      "actual": 22.524232355256874,
+      "limit": 40,
+      "passed": true
+    },
+    {
+      "name": "burn_settled_miss_added_ms",
+      "actual": 51.73477538240453,
+      "limit": 35,
+      "passed": false
+    },
+    {
+      "name": "burn_cold_miss_added_ms",
+      "actual": 37.101213587448,
+      "limit": 35,
+      "passed": false
+    },
+    {
+      "name": "burn_settled_hit_payload_reads",
+      "actual": 0,
+      "limit": 0,
+      "passed": true
+    },
+    {
+      "name": "burn_post_admission_hit_payload_reads",
+      "actual": 0,
+      "limit": 0,
+      "passed": true
+    }
+  ],
+  "errors": [],
+  "legacy_admission_modes_preserved": true,
+  "actual512_evictions": 6,
+  "geometry_matches_original": true,
+  "feature_count": 990,
+  "burn_pixels_profile_match_original": true,
+  "target_proofs_present": true,
+  "paired_misses": [
+    {
+      "name": "geometry_settled",
+      "ancestor_mean_ms": 961.2073143944144,
+      "current_mean_ms": 942.8258402428279,
+      "added_mean_ms": -18.38147415158653
+    },
+    {
+      "name": "geometry_cold",
+      "ancestor_mean_ms": 899.8956172727048,
+      "current_mean_ms": 1006.3660723002007,
+      "added_mean_ms": 106.47045502749586
+    },
+    {
+      "name": "burn_settled",
+      "ancestor_mean_ms": 37.043131344641246,
+      "current_mean_ms": 88.77790672704577,
+      "added_mean_ms": 51.73477538240453
+    },
+    {
+      "name": "burn_cold",
+      "ancestor_mean_ms": 22.416096258287627,
+      "current_mean_ms": 59.51730984573563,
+      "added_mean_ms": 37.101213587448
+    }
+  ],
+  "completed": true,
+  "acceptance_passed": false,
+  "source_fixture_unchanged": true,
+  "module_files_unchanged_during_measurement": true
+}

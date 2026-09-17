@@ -1,0 +1,11 @@
+{
+  "uid": 1000,
+  "error": {
+    "type": "GenevaKernelError",
+    "code": "changed_source",
+    "message": "Geneva dependencies changed during derivation."
+  },
+  "prior_old_preserved": true,
+  "prior_new_preserved": true,
+  "selected_target": "/tmp/pytest-of-unknown/pytest-148/test_destination_alias_retarge0/run/geneva/outputs/new.json"
+}

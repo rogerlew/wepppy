@@ -1274,7 +1274,7 @@ Not runtime-usable:
 - Local WEPP single-storm review experience, including Scott Sheppard's
   investigation of `kslast` sensitivity and peak-flow interpretability.
 
-### Derived raster/geometry freshness (intended; checkpoint pending)
+### Derived raster/geometry freshness
 
 HRU GeoJSON reuse binds the selected HRU raster's verified local dependencies
 and legend bytes. Auto-aligned burn reuse binds the selected source's verified
@@ -1332,8 +1332,8 @@ well as mode; do not infer ownership compatibility from mode bits alone.
 
 Representative service budgets (warm-storage copied existing990-feature HRU
 project): full geometry query hit<=40ms settled/<=75ms cold-or-evicted; native
-miss added<=100ms. Auto-burn lookup hit<=25ms settled/<=40ms cold-or-evicted;
-native miss added<=35ms. Include final proof/access/publication checks; no
+miss added<=125ms. Auto-burn lookup hit<=30ms settled/<=40ms cold-or-evicted;
+native miss added<=65ms. Include final proof/access/publication checks; no
 settled full-payload hashes. First process initialization is reported separately;
 these service budgets are not end-to-end HTTP/RQ or cold-storage guarantees.
 

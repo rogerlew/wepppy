@@ -1,0 +1,88 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest docs/work-packages/20260916_file_dependency_freshness/artifacts/geneva_implementation_correctness_probe.py -q -s
+GENEVA_CORRECTNESS geometry_content {"changed_legend_hru": "new_2", "changed_pixels_hru": "hru_2", "same_bytes_touch_reused": true}
+.GENEVA_CORRECTNESS geometry_aba {"error_code": "changed_source", "prior_preserved": true, "source_restored": true}
+.GENEVA_CORRECTNESS geometry_error {"error_code": "contract_violation", "prior_preserved": true, "status": 500}
+FGENEVA_CORRECTNESS alignment_identity {"changed_source_pixels": 3, "metadata_and_bound_pixel_reuse": true}
+.GENEVA_CORRECTNESS alignment_auxiliary {"mask": [[255, 255], [255, 255]], "proof": null, "values": [[3, 3], [3, 3]]}
+.GENEVA_CORRECTNESS alignment_aba {"error_code": "changed_source", "prior_preserved": true, "status": 409}
+.GENEVA_CORRECTNESS alignment_error {"error_code": "invalid_input", "prior_preserved": true, "status": 400}
+FGENEVA_CORRECTNESS unverified_vrt {"dependencies": null, "native_calls": 2}
+.
+=================================== FAILURES ===================================
+_________ test_geometry_changed_source_native_error_is_changed_source __________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-145/test_geometry_changed_source_n0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x72ed5d5c8e60>
+
+    def test_geometry_changed_source_native_error_is_changed_source(tmp_path, monkeypatch):
+        geneva, service, source, target = geometry_fixture(tmp_path, two_rows=False)
+        prior = target.read_bytes()
+        alternate = tmp_path / 'alternative.tif'
+        raster(alternate, 2)
+        actual_open = rasterio.open
+        triggered = False
+    
+        def mutate_before_open(path, *args, **kwargs):
+            nonlocal triggered
+            if Path(path) == source and not triggered:
+                triggered = True
+                replace_bytes(source, alternate.read_bytes())
+            return actual_open(path, *args, **kwargs)
+    
+        monkeypatch.setattr(rasterio, 'open', mutate_before_open)
+        with pytest.raises(GenevaNoDbError) as caught:
+            service._materialize_feature_collection_from_raster(geneva, source_path=source)
+        record('geometry_error', {'error_code': caught.value.code, 'status': caught.value.status_code,
+                                  'prior_preserved': target.read_bytes() == prior})
+        assert target.read_bytes() == prior
+>       assert caught.value.code == 'changed_source' and caught.value.status_code == 409
+E       AssertionError: assert ('contract_violation' == 'changed_source'
+E         
+E         - changed_source
+E         + contract_violation)
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/geneva_implementation_correctness_probe.py:152: AssertionError
+_________ test_alignment_changed_source_native_error_is_changed_source _________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-145/test_alignment_changed_source_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x72ed5d5ca2a0>
+
+    def test_alignment_changed_source_native_error_is_changed_source(tmp_path, monkeypatch):
+        geneva, service, source, bound, target = alignment_fixture(tmp_path)
+        ds = gdal.Open(str(target), gdal.GA_Update)
+        ds.SetMetadataItem(freshness.TIFF_PROOF, None)
+        ds = None
+        prior = target.read_bytes()
+        native = alignment.raster_stacker
+    
+        def fail_after_source_change(*args, **kwargs):
+            replace_bytes(source, b'not a raster after observable replacement')
+            return native(*args, **kwargs)
+    
+        monkeypatch.setattr(alignment, 'raster_stacker', fail_after_source_change)
+        with pytest.raises(GenevaNoDbError) as caught:
+            service._materialize_auto_burn_severity(geneva, source_path=str(source), bound_tif=str(bound))
+        record('alignment_error', {'error_code': caught.value.code, 'status': caught.value.status_code,
+                                   'prior_preserved': target.read_bytes() == prior})
+        assert target.read_bytes() == prior
+>       assert caught.value.code == 'changed_source' and caught.value.status_code == 409
+E       AssertionError: assert ('invalid_input' == 'changed_source'
+E         
+E         - changed_source
+E         + invalid_input)
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/geneva_implementation_correctness_probe.py:243: AssertionError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED docs/work-packages/20260916_file_dependency_freshness/artifacts/geneva_implementation_correctness_probe.py::test_geometry_changed_source_native_error_is_changed_source
+FAILED docs/work-packages/20260916_file_dependency_freshness/artifacts/geneva_implementation_correctness_probe.py::test_alignment_changed_source_native_error_is_changed_source
+2 failed, 6 passed, 2 warnings in 9.53s

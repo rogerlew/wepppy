@@ -1,0 +1,84 @@
+{
+  "uid": 1000,
+  "target": {
+    "pixels": [
+      [
+        3,
+        3
+      ],
+      [
+        3,
+        3
+      ]
+    ],
+    "mask": [
+      [
+        255,
+        255
+      ],
+      [
+        255,
+        255
+      ]
+    ]
+  },
+  "statuses": [
+    {
+      "attempt_id": "78c9b8c517ec4786a4ee587442af7695",
+      "compatibility_native_overwrite": true,
+      "dependencies": {
+        "bound": [
+          "/tmp/pytest-of-unknown/pytest-148/test_existing_mask_uses_actual0/sources/bound.tif",
+          "/tmp/pytest-of-unknown/pytest-148/test_existing_mask_uses_actual0/sources/bound.tif",
+          {
+            "blockysize": 2,
+            "crs": "EPSG:32611",
+            "height": 2,
+            "interleave": "band",
+            "tiled": false,
+            "transform": [
+              30.0,
+              0.0,
+              500000.0,
+              0.0,
+              -30.0,
+              5000000.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "width": 2
+          }
+        ],
+        "source": [
+          "local-raster-v1",
+          [
+            "/tmp/pytest-of-unknown/pytest-148/test_existing_mask_uses_actual0/sources/source.tif"
+          ],
+          [
+            [
+              "/tmp/pytest-of-unknown/pytest-148/test_existing_mask_uses_actual0/sources/source.tif",
+              [
+                [
+                  "/tmp/pytest-of-unknown/pytest-148/test_existing_mask_uses_actual0/sources/source.tif"
+                ],
+                []
+              ]
+            ]
+          ],
+          [
+            [
+              "/tmp/pytest-of-unknown/pytest-148/test_existing_mask_uses_actual0/sources/source.tif",
+              "/tmp/pytest-of-unknown/pytest-148/test_existing_mask_uses_actual0/sources/source.tif",
+              "9266d0aa1321590fee1626d75705afb27b0549fc86b4ebbdadbdb3654718cb7f"
+            ]
+          ]
+        ]
+      },
+      "error": null,
+      "kind": "aligned_burn",
+      "status": "complete",
+      "target": "inputs/burn_severity_4class.tif"
+    }
+  ]
+}

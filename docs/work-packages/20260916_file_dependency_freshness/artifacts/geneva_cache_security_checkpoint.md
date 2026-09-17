@@ -148,3 +148,38 @@ Reviewed document SHA-256 values:
 specification.md b245cb2c57d806888f38e0d2c228da805aadcdecc69f8b52ef90d4eb5c9c5510
 geneva_cache_contract_decision.md f38d1c913b79c85af0bc84861ba88fa9851cd660dcd5e92ef39e9c73483cb097
 ```
+
+After checkpoint ancestor `31f77bef1`, read-only review of the supporting
+`RasterDependencyObservation.check_unchanged()` found no new authority or
+coherence objection. It compares captured file resolution/version, scanned
+directory version and effective configuration; unavailable recorded state
+becomes ESTALE. It performs no hash/native discovery, changes no configuration
+and does not affect C03/C04 callers. This supports joining legend/profile reads
+to the same acquisition. Geneva caller integration remains to be reviewed.
+No runtime probe was run during QA's exclusive raster performance measurement.
+
+## Complete-operation performance amendment
+
+**Ratified for a fresh acceptance run.** The explicit QA amendment retains the
+original failed measurements and identifies publication/status/authority work
+omitted from preliminary composition. It changes the representative local mean
+budgets to C05 added native miss 125 ms and C06 settled hit 30 ms / added native
+miss 65 ms; other hit and cold/evicted limits stay unchanged. These measured,
+bounded costs do not justify weakening directory authority, coherent content
+checks, retained evidence or target publication guards. No such weakening is
+proposed. The reviewed same-call content-aware validation remains required.
+
+This ratification is a checkpoint decision, not retrospective acceptance of the
+failed runs, a universal latency guarantee or permission to increase future
+failed limits automatically. Fresh complete-service measurement with actual
+bounded-cache eviction, no payload/native work on settled hits, module hashes
+and unchanged native results remains required. Whole HTTP/RQ/owner and archive
+gates remain separate. No extra runtime load was introduced by this review.
+
+Updated SHA-256 bindings:
+
+```text
+specification.md 2757606ceb39a77a88ada8b24a5c99dca16930ccdcac48016685a65620453f9b
+geneva_cache_contract_decision.md 3a29b3d77ac410d4ec62bc618d37999604d034df9a4dd4f45983e732d4b96152
+geneva_performance_budget_amendment.md 2cce7aefcefd0299c6fdf8ca89a25175d514a5d2f100ae781f70deef64c67871
+```

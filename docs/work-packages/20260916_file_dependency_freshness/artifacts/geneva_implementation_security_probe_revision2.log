@@ -1,0 +1,35 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest docs/work-packages/20260916_file_dependency_freshness/artifacts/geneva_implementation_security_probe_revision2.py -v -s
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0 -- /opt/venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collecting ... collected 7 items
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/geneva_implementation_security_probe_revision2.py::test_real_readonly_native_writer_compatibility {"uid": 1000, "outcomes": {"old_native": {"result": "success", "pixels": [[3, 3], [3, 3]], "mask": [[255, 255], [255, 255]]}, "new_service": {"result": "success", "pixels": [[3, 3], [3, 3]], "mask": [[255, 255], [255, 255]]}}}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/geneva_implementation_security_probe_revision2.py::test_destination_alias_retarget_during_final_validation_rejects[json] {"uid": 1000, "error": {"type": "GenevaKernelError", "code": "changed_source", "message": "Geneva dependencies changed during derivation."}, "prior_old_preserved": true, "prior_new_preserved": true, "selected_target": "/tmp/pytest-of-unknown/pytest-148/test_destination_alias_retarge0/run/geneva/outputs/new.json"}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/geneva_implementation_security_probe_revision2.py::test_destination_alias_retarget_during_final_validation_rejects[tiff] {"uid": 1000, "error": {"type": "GenevaKernelError", "code": "changed_source", "message": "Geneva dependencies changed during derivation."}, "prior_old_preserved": true, "prior_new_preserved": true, "selected_target": "/tmp/pytest-of-unknown/pytest-148/test_destination_alias_retarge1/run/geneva/outputs/new.tiff"}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/geneva_implementation_security_probe_revision2.py::test_late_external_mask_rejects_before_atomic_publish {"uid": 1000, "error": {"type": "GenevaKernelError", "code": "changed_source"}, "target": {"pixels": [[1, 1], [1, 1]], "mask": [[0, 0], [0, 0]]}}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/geneva_implementation_security_probe_revision2.py::test_existing_mask_uses_actual_native_compatibility {"uid": 1000, "target": {"pixels": [[3, 3], [3, 3]], "mask": [[255, 255], [255, 255]]}, "statuses": [{"attempt_id": "78c9b8c517ec4786a4ee587442af7695", "compatibility_native_overwrite": true, "dependencies": {"bound": ["/tmp/pytest-of-unknown/pytest-148/test_existing_mask_uses_actual0/sources/bound.tif", "/tmp/pytest-of-unknown/pytest-148/test_existing_mask_uses_actual0/sources/bound.tif", {"blockysize": 2, "crs": "EPSG:32611", "height": 2, "interleave": "band", "tiled": false, "transform": [30.0, 0.0, 500000.0, 0.0, -30.0, 5000000.0, 0.0, 0.0, 1.0], "width": 2}], "source": ["local-raster-v1", ["/tmp/pytest-of-unknown/pytest-148/test_existing_mask_uses_actual0/sources/source.tif"], [["/tmp/pytest-of-unknown/pytest-148/test_existing_mask_uses_actual0/sources/source.tif", [["/tmp/pytest-of-unknown/pytest-148/test_existing_mask_uses_actual0/sources/source.tif"], []]]], [["/tmp/pytest-of-unknown/pytest-148/test_existing_mask_uses_actual0/sources/source.tif", "/tmp/pytest-of-unknown/pytest-148/test_existing_mask_uses_actual0/sources/source.tif", "9266d0aa1321590fee1626d75705afb27b0549fc86b4ebbdadbdb3654718cb7f"]]]}, "error": null, "kind": "aligned_burn", "status": "complete", "target": "inputs/burn_severity_4class.tif"}]}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/geneva_implementation_security_probe_revision2.py::test_stable_target_symlink_modes_and_private_attempts[384] {"uid": 1000, "target": {"pixels": [[3, 3], [3, 3]], "mask": [[255, 255], [255, 255]]}, "mode": 384}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/geneva_implementation_security_probe_revision2.py::test_stable_target_symlink_modes_and_private_attempts[416] {"uid": 1000, "target": {"pixels": [[3, 3], [3, 3]], "mask": [[255, 255], [255, 255]]}, "mode": 416}
+PASSED
+
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 7 passed, 2 warnings in 9.64s =========================

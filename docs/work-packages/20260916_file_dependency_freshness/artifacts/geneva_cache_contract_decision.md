@@ -77,3 +77,28 @@ versions/context from the same verified acquisition across native work, separate
 from numerical identity. Geneva complete-set guards must span materialization,
 not merely each observation. Create attempt directories before acquisition so
 owned setup does not itself invalidate the source-parent directory guard.
+
+## Explicit performance amendment after implementation measurement
+
+The original 40/75-ms geometry hits and 100-ms added miss, and 25/40-ms burn
+hits and 35-ms added miss, were not all met. Original failure artifacts remain
+unaltered. Their preliminary composition omitted actual retained status/attempt
+publication and complete target/authority checks. A reviewed implementation
+optimization removed duplicate native source/bound acquisition while retaining
+same-call content, companion and joint physical/config checks.
+
+Root proposes, and independent QA ratifies in
+`geneva_performance_budget_amendment.md`, geometry hits unchanged at40/75ms and
+added native miss<=125ms; burn hits<=30ms settled/<=40ms cold-or-evicted and
+added native miss<=65ms. These complete mean gates apply to the same disposable
+representative service boundary and paired ancestor, include required status/
+proof/access/publication work, and preserve zero settled payload reads/native
+regeneration. They do not expand cold-storage, workload or HTTP/RQ claims.
+
+Measured current paired added costs are106.47ms for geometry cold misses and
+51.73/37.10ms for burn settled/cold misses; isolated current burn nonnative work
+is38.42ms. The allowance and measured variation are explicit. No guard or visible
+failure record may be removed to meet it. Canonical adoption and a newly named
+actual complete benchmark are required; original failed runs cannot be
+retroactively called passing. Archive permission and full runtime acceptance
+remain separate open gates.

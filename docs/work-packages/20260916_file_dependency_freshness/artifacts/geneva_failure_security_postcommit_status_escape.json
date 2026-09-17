@@ -1,0 +1,30 @@
+{
+  "error": {
+    "type": "GenevaValidationError",
+    "message": "Failed to align auto-discovered burn-severity raster to the Geneva canonical grid.",
+    "code": "invalid_input"
+  },
+  "output": {
+    "pixels": [
+      [
+        3,
+        3
+      ],
+      [
+        3,
+        3
+      ]
+    ],
+    "mask": [
+      [
+        255,
+        255
+      ],
+      [
+        255,
+        255
+      ]
+    ]
+  },
+  "outside": "private unrelated record"
+}

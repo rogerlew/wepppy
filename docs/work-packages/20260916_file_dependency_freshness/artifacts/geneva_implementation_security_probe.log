@@ -1,0 +1,200 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest docs/work-packages/20260916_file_dependency_freshness/artifacts/geneva_implementation_security_probe.py -v -s
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0 -- /opt/venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collecting ... collected 7 items
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/geneva_implementation_security_probe.py::test_real_readonly_native_writer_compatibility {"uid": 1000, "outcomes": {"old_native": {"result": "success", "pixels": [[3, 3], [3, 3]], "mask": [[255, 255], [255, 255]]}, "new_service": {"result": "GenevaValidationError", "error": "Failed to align auto-discovered burn-severity raster to the Geneva canonical grid.", "pixels": [[1, 1], [1, 1]], "mask": [[255, 255], [255, 255]]}}}
+FAILED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/geneva_implementation_security_probe.py::test_destination_alias_retarget_during_final_validation_rejects[json] {"uid": 1000, "error": {"type": "ValueError", "code": null, "message": "Mask must have same shape as image"}, "prior_old_preserved": true, "prior_new_preserved": true, "selected_target": "/tmp/pytest-of-unknown/pytest-144/test_destination_alias_retarge0/run/geneva/outputs/old.json"}
+FAILED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/geneva_implementation_security_probe.py::test_destination_alias_retarget_during_final_validation_rejects[tiff] {"uid": 1000, "error": null, "prior_old_preserved": false, "prior_new_preserved": true, "selected_target": "/tmp/pytest-of-unknown/pytest-144/test_destination_alias_retarge1/run/geneva/outputs/new.tiff"}
+FAILED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/geneva_implementation_security_probe.py::test_late_external_mask_rejects_before_atomic_publish {"uid": 1000, "error": null, "target": {"pixels": [[3, 3], [3, 3]], "mask": [[0, 0], [0, 0]]}}
+FAILED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/geneva_implementation_security_probe.py::test_existing_mask_uses_actual_native_compatibility {"uid": 1000, "target": {"pixels": [[3, 3], [3, 3]], "mask": [[255, 255], [255, 255]]}, "statuses": [{"attempt_id": "ad2b790086a6459699f3824b98c4a085", "compatibility_native_overwrite": true, "dependencies": {"bound": ["/tmp/pytest-of-unknown/pytest-144/test_existing_mask_uses_actual0/sources/bound.tif", "/tmp/pytest-of-unknown/pytest-144/test_existing_mask_uses_actual0/sources/bound.tif", {"blockysize": 2, "crs": "EPSG:32611", "height": 2, "interleave": "band", "tiled": false, "transform": [30.0, 0.0, 500000.0, 0.0, -30.0, 5000000.0, 0.0, 0.0, 1.0], "width": 2}], "source": ["local-raster-v1", ["/tmp/pytest-of-unknown/pytest-144/test_existing_mask_uses_actual0/sources/source.tif"], [["/tmp/pytest-of-unknown/pytest-144/test_existing_mask_uses_actual0/sources/source.tif", [["/tmp/pytest-of-unknown/pytest-144/test_existing_mask_uses_actual0/sources/source.tif"], []]]], [["/tmp/pytest-of-unknown/pytest-144/test_existing_mask_uses_actual0/sources/source.tif", "/tmp/pytest-of-unknown/pytest-144/test_existing_mask_uses_actual0/sources/source.tif", "b6c555f2cc3eb9ff3f418225e95cd2ac0b47726e44282b8dcb8bcf830c16742f"]]]}, "error": null, "kind": "aligned_burn", "status": "complete", "target": "inputs/burn_severity_4class.tif"}]}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/geneva_implementation_security_probe.py::test_stable_target_symlink_modes_and_private_attempts[384] {"uid": 1000, "target": {"pixels": [[3, 3], [3, 3]], "mask": [[255, 255], [255, 255]]}, "mode": 384}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/geneva_implementation_security_probe.py::test_stable_target_symlink_modes_and_private_attempts[416] {"uid": 1000, "target": {"pixels": [[3, 3], [3, 3]], "mask": [[255, 255], [255, 255]]}, "mode": 416}
+PASSED
+
+=================================== FAILURES ===================================
+________________ test_real_readonly_native_writer_compatibility ________________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-144/test_real_readonly_native_writ0')
+
+    def test_real_readonly_native_writer_compatibility(tmp_path):
+        assert os.geteuid() != 0
+        geneva, root, source, bound = fixture(tmp_path)
+        direct = tmp_path / 'direct.tif'
+        target = root / 'inputs/burn_severity_4class.tif'
+        for path in (direct, target):
+            raster(path, 1)
+            path.chmod(0o444)
+        outcomes = {}
+        for name, operation, target_path in (
+            ('old_native', lambda: raster_stacker(source, bound, direct, resample='near'), direct),
+            ('new_service', lambda: align(geneva, source, bound), target),
+        ):
+            try:
+                operation()
+                outcomes[name] = {'result': 'success', **state(target_path)}
+            except Exception as exc:
+                outcomes[name] = {'result': type(exc).__name__, 'error': str(exc), **state(target_path)}
+        record('readonly_native', outcomes=outcomes)
+>       assert outcomes['new_service']['result'] == outcomes['old_native']['result']
+E       AssertionError: assert 'GenevaValidationError' == 'success'
+E         
+E         - success
+E         + GenevaValidationError
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/geneva_implementation_security_probe.py:82: AssertionError
+____ test_destination_alias_retarget_during_final_validation_rejects[json] _____
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-144/test_destination_alias_retarge0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x751cc380e900>
+kind = 'json'
+
+    @pytest.mark.parametrize('kind', ['json', 'tiff'])
+    def test_destination_alias_retarget_during_final_validation_rejects(tmp_path, monkeypatch, kind):
+        geneva, root, source, bound = fixture(tmp_path)
+        outputs = root / 'outputs'
+        outputs.mkdir()
+        old, new = outputs / ('old.' + kind), outputs / ('new.' + kind)
+        if kind == 'tiff':
+            raster(old, 1)
+            raster(new, 2)
+            lexical = root / 'inputs/burn_severity_4class.tif'
+            lexical.parent.mkdir()
+            operation = lambda: align(geneva, source, bound)
+        else:
+            raster(root / 'hru_map.tif', 1)
+            (root / 'hru_map_legend.json').write_text(json.dumps({'rows': [{'hru_value': 1, 'hru_id': 'one'}]}))
+            old.write_text('{"type":"FeatureCollection","features":[]}')
+            new.write_text('{"type":"FeatureCollection","features":[]}')
+            lexical = root / 'hru_map_features.wgs.geojson'
+            operation = lambda: GenevaHruMapGeometryService().query_feature_collection(geneva)
+        lexical.symlink_to(old)
+        prior_old, prior_new = old.read_bytes(), new.read_bytes()
+        publish = freshness._Attempt.publish
+    
+        def intercepted(self, candidate, *, clean_tiff=False, validate=None):
+            def swap_after_validation():
+                if validate is not None:
+                    validate()
+                lexical.unlink()
+                lexical.symlink_to(new)
+            return publish(self, candidate, clean_tiff=clean_tiff, validate=swap_after_validation)
+    
+        monkeypatch.setattr(freshness._Attempt, 'publish', intercepted)
+        error = None
+        try:
+            operation()
+        except Exception as exc:
+            error = {'type': type(exc).__name__, 'code': getattr(exc, 'code', None), 'message': str(exc)}
+        result = {'error': error, 'prior_old_preserved': old.read_bytes() == prior_old,
+                  'prior_new_preserved': new.read_bytes() == prior_new, 'selected_target': str(lexical.resolve())}
+        record('late_alias_' + kind, **result)
+>       assert error is not None and error['code'] == 'changed_source'
+E       AssertionError: assert ({'code': None, 'message': 'Mask must have same shape as image', 'type': 'ValueError'} is not None and None == 'changed_source')
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/geneva_implementation_security_probe.py:125: AssertionError
+____ test_destination_alias_retarget_during_final_validation_rejects[tiff] _____
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-144/test_destination_alias_retarge1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x751cc380f230>
+kind = 'tiff'
+
+    @pytest.mark.parametrize('kind', ['json', 'tiff'])
+    def test_destination_alias_retarget_during_final_validation_rejects(tmp_path, monkeypatch, kind):
+        geneva, root, source, bound = fixture(tmp_path)
+        outputs = root / 'outputs'
+        outputs.mkdir()
+        old, new = outputs / ('old.' + kind), outputs / ('new.' + kind)
+        if kind == 'tiff':
+            raster(old, 1)
+            raster(new, 2)
+            lexical = root / 'inputs/burn_severity_4class.tif'
+            lexical.parent.mkdir()
+            operation = lambda: align(geneva, source, bound)
+        else:
+            raster(root / 'hru_map.tif', 1)
+            (root / 'hru_map_legend.json').write_text(json.dumps({'rows': [{'hru_value': 1, 'hru_id': 'one'}]}))
+            old.write_text('{"type":"FeatureCollection","features":[]}')
+            new.write_text('{"type":"FeatureCollection","features":[]}')
+            lexical = root / 'hru_map_features.wgs.geojson'
+            operation = lambda: GenevaHruMapGeometryService().query_feature_collection(geneva)
+        lexical.symlink_to(old)
+        prior_old, prior_new = old.read_bytes(), new.read_bytes()
+        publish = freshness._Attempt.publish
+    
+        def intercepted(self, candidate, *, clean_tiff=False, validate=None):
+            def swap_after_validation():
+                if validate is not None:
+                    validate()
+                lexical.unlink()
+                lexical.symlink_to(new)
+            return publish(self, candidate, clean_tiff=clean_tiff, validate=swap_after_validation)
+    
+        monkeypatch.setattr(freshness._Attempt, 'publish', intercepted)
+        error = None
+        try:
+            operation()
+        except Exception as exc:
+            error = {'type': type(exc).__name__, 'code': getattr(exc, 'code', None), 'message': str(exc)}
+        result = {'error': error, 'prior_old_preserved': old.read_bytes() == prior_old,
+                  'prior_new_preserved': new.read_bytes() == prior_new, 'selected_target': str(lexical.resolve())}
+        record('late_alias_' + kind, **result)
+>       assert error is not None and error['code'] == 'changed_source'
+E       assert (None is not None)
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/geneva_implementation_security_probe.py:125: AssertionError
+____________ test_late_external_mask_rejects_before_atomic_publish _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-144/test_late_external_mask_reject0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x751cc380f920>
+
+    def test_late_external_mask_rejects_before_atomic_publish(tmp_path, monkeypatch):
+        geneva, root, source, bound = fixture(tmp_path)
+        target = root / 'inputs/burn_severity_4class.tif'
+        raster(target, 1)
+        publish = freshness._Attempt.publish
+    
+        def intercepted(self, candidate, *, clean_tiff=False, validate=None):
+            def add_mask_after_validation():
+                if validate is not None:
+                    validate()
+                mask(target)
+            return publish(self, candidate, clean_tiff=clean_tiff, validate=add_mask_after_validation)
+    
+        monkeypatch.setattr(freshness._Attempt, 'publish', intercepted)
+        error = None
+        try:
+            align(geneva, source, bound)
+        except Exception as exc:
+            error = {'type': type(exc).__name__, 'code': getattr(exc, 'code', None)}
+        record('late_mask', error=error, target=state(target))
+>       assert error is not None and error['code'] == 'changed_source'
+E       assert (None is not None)
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/geneva_implementation_security_probe.py:149: AssertionError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED docs/work-packages/20260916_file_dependency_freshness/artifacts/geneva_implementation_security_probe.py::test_real_readonly_native_writer_compatibility
+FAILED docs/work-packages/20260916_file_dependency_freshness/artifacts/geneva_implementation_security_probe.py::test_destination_alias_retarget_during_final_validation_rejects[json]
+FAILED docs/work-packages/20260916_file_dependency_freshness/artifacts/geneva_implementation_security_probe.py::test_destination_alias_retarget_during_final_validation_rejects[tiff]
+FAILED docs/work-packages/20260916_file_dependency_freshness/artifacts/geneva_implementation_security_probe.py::test_late_external_mask_rejects_before_atomic_publish
+=================== 4 failed, 3 passed, 2 warnings in 9.38s ====================

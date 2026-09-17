@@ -139,3 +139,51 @@ Final reviewed identities are:
 geneva/specification.md b245cb2c57d806888f38e0d2c228da805aadcdecc69f8b52ef90d4eb5c9c5510
 geneva_cache_contract_decision.md f38d1c913b79c85af0bc84861ba88fa9851cd660dcd5e92ef39e9c73483cb097
 ```
+
+## Explicit complete-operation performance amendment
+
+**PASS for this finite budget amendment, pending fresh acceptance measurement.**
+Independent correctness reviewed `geneva_performance_budget_amendment.md`, the
+canonical specification change, and the raw revision2 acceptance/component
+JSON. The original failed gates remain failures; this does not retroactively
+approve them or substitute a component profile for complete service timing.
+
+Ratify C05 hits unchanged at40/75ms settled/cold-or-evicted and native-miss
+addition<=125ms; C06 hits<=30/40ms and native-miss addition<=65ms. Both miss
+limits include the settled and helper-cold paired operations against ancestor
+`31f77bef1`. The same representative990-feature copy, mean statistic, warm
+filesystem scope, complete publication boundary and zero settled digest reads/
+native generation remain mandatory. No broader workload or HTTP/RQ guarantee
+is inferred.
+
+The original composition did not include the implemented retained attempt/
+status and full publication/authority lifecycle. A concrete optimization has
+already removed duplicate native source/bound acquisition without weakening
+content, companion or joint physical/config validation; the independent final
+15-case correctness probe covers that current implementation. The raw revision2
+file records the same helper/service hashes, unchanged inputs/modules, six real
+512-entry evictions, valid geometry/pixels/profile, zero settled payload reads,
+and `acceptance_passed: false` with four failed original gates.
+
+The costs remain explicit: geometry cold addition106.47ms; burn additions51.73ms
+settled and37.10ms cold; burn secondary settled hit25.07ms. The isolated current
+miss leaves38.42ms outside native stacking, including retained status work and
+verified paths. Inclusive profile components overlap and are not additive proof
+of a threshold. The revised finite headroom addresses the documented incomplete
+estimate and observed local variation; dropping required work or introducing
+cross-request state merely to meet the old estimate would require a separate
+correctness justification.
+
+Approval requires a separately named complete run under the adopted amendment,
+preserving all samples, original failure files, source/module identities, actual
+admission/eviction preparation, native parity and permissions. A new miss remains
+a failure to investigate, not authority for another automatic increase. Owner,
+HTTP/RQ, archive/service identity and whole-package runtime gates stay open.
+
+Reviewed SHA-256 values:
+
+```text
+geneva/specification.md 2757606ceb39a77a88ada8b24a5c99dca16930ccdcac48016685a65620453f9b
+geneva_cache_contract_decision.md 3a29b3d77ac410d4ec62bc618d37999604d034df9a4dd4f45983e732d4b96152
+geneva_performance_budget_amendment.md 2cce7aefcefd0299c6fdf8ca89a25175d514a5d2f100ae781f70deef64c67871
+```

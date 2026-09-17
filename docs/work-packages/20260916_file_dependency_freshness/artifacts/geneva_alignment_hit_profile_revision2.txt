@@ -1,0 +1,63 @@
+         102741 function calls (102521 primitive calls) in 0.406 seconds
+
+   Ordered by: cumulative time
+   List reduced from 226 to 55 due to restriction <55>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+       20    0.000    0.000    0.406    0.020 profile_geneva_alignment_revision2.py:38(<lambda>)
+       20    0.000    0.000    0.406    0.020 hsg_assignment_service.py:143(_materialize_auto_burn_severity)
+  160/100    0.001    0.000    0.402    0.004 profile_geneva_alignment_revision2.py:67(wrapper)
+       60    0.001    0.000    0.218    0.004 raster_freshness.py:198(observe_raster_dependencies)
+       20    0.002    0.000    0.216    0.011 _cache_freshness.py:91(alignment_inputs)
+       60    0.004    0.000    0.148    0.002 raster_freshness.py:122(discover)
+      160    0.006    0.000    0.107    0.001 raster_freshness.py:87(_companions)
+       20    0.001    0.000    0.091    0.005 _cache_freshness.py:120(clean_tiff_proof)
+      160    0.083    0.001    0.083    0.001 {built-in method posix.scandir}
+      760    0.002    0.000    0.076    0.000 <frozen posixpath>:420(realpath)
+      760    0.012    0.000    0.067    0.000 <frozen posixpath>:429(_joinrealpath)
+       60    0.000    0.000    0.056    0.001 gdal.py:4683(GetFileList)
+       60    0.056    0.001    0.056    0.001 {built-in method osgeo._gdal.Dataset_GetFileList}
+       20    0.001    0.000    0.055    0.003 _cache_freshness.py:43(check_unchanged)
+       20    0.000    0.000    0.049    0.002 env.py:430(wrapper)
+       60    0.001    0.000    0.049    0.001 raster_freshness.py:174(validate)
+       20    0.040    0.002    0.041    0.002 __init__.py:108(open)
+       40    0.000    0.000    0.040    0.001 artifact_io.py:23(resolve_path)
+     4240    0.031    0.000    0.031    0.000 {built-in method posix.lstat}
+      160    0.002    0.000    0.024    0.000 raster_freshness.py:27(check_unchanged)
+       40    0.000    0.000    0.023    0.001 artifact_io.py:18(root_dir)
+      140    0.000    0.000    0.023    0.000 pathlib.py:1228(resolve)
+       40    0.000    0.000    0.022    0.001 pathlib.py:1306(mkdir)
+      100    0.002    0.000    0.022    0.000 file_digest.py:46(sha256_file)
+       40    0.021    0.001    0.021    0.001 {built-in method posix.mkdir}
+     4360    0.011    0.000    0.019    0.000 <frozen posixpath>:71(join)
+      120    0.001    0.000    0.016    0.000 profile_geneva_alignment_revision2.py:60(opened)
+      120    0.000    0.000    0.014    0.000 pathlib.py:1005(open)
+     1400    0.003    0.000    0.014    0.000 pathlib.py:437(__str__)
+      120    0.011    0.000    0.014    0.000 {built-in method _io.open}
+      120    0.000    0.000    0.014    0.000 raster_freshness.py:212(<genexpr>)
+       80    0.000    0.000    0.013    0.000 gdal.py:9241(OpenEx)
+       40    0.001    0.000    0.013    0.000 env.py:271(__enter__)
+      120    0.000    0.000    0.013    0.000 raster_freshness.py:116(remember)
+     1000    0.009    0.000    0.013    0.000 {built-in method posix.stat}
+       40    0.011    0.000    0.012    0.000 env.py:316(defenv)
+       80    0.012    0.000    0.012    0.000 {built-in method osgeo._gdal.OpenEx}
+      700    0.001    0.000    0.011    0.000 pathlib.py:447(__fspath__)
+      660    0.002    0.000    0.011    0.000 pathlib.py:551(drive)
+      640    0.001    0.000    0.010    0.000 pathlib.py:407(_load_parts)
+      380    0.000    0.000    0.008    0.000 pathlib.py:835(stat)
+       80    0.000    0.000    0.008    0.000 gdal.py:9312(IdentifyDriver)
+       80    0.008    0.000    0.008    0.000 {built-in method osgeo._gdal.IdentifyDriver}
+      640    0.004    0.000    0.008    0.000 pathlib.py:387(_parse_path)
+       20    0.000    0.000    0.007    0.000 contextlib.py:511(enter_context)
+9380/9220    0.002    0.000    0.006    0.000 {built-in method posix.fspath}
+     1960    0.001    0.000    0.004    0.000 gdal.py:3255(GetConfigOption)
+     6220    0.002    0.000    0.004    0.000 <frozen posixpath>:41(_get_sep)
+      700    0.002    0.000    0.004    0.000 pathlib.py:1157(__init__)
+       20    0.000    0.000    0.004    0.000 _cache_freshness.py:33(_json_value)
+     1520    0.002    0.000    0.004    0.000 <frozen posixpath>:60(isabs)
+      460    0.001    0.000    0.004    0.000 {built-in method builtins.sorted}
+      760    0.001    0.000    0.004    0.000 <frozen posixpath>:405(abspath)
+     1960    0.003    0.000    0.003    0.000 {built-in method osgeo._gdal.GetConfigOption}
+      340    0.001    0.000    0.003    0.000 raster_freshness.py:72(_version)
+
+

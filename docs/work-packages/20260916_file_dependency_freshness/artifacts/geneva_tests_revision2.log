@@ -1,0 +1,128 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/geneva --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 74 items
+
+tests/nodb/mods/geneva/test_fixture_manifest.py .....                    [  6%]
+tests/nodb/mods/geneva/test_geneva_cn_table_service.py .....             [ 13%]
+tests/nodb/mods/geneva/test_geneva_collaborators.py ................F
+
+=================================== FAILURES ===================================
+_____ test_hsg_assignment_aligns_auto_discovered_sbs_4class_to_geneva_grid _____
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-142/test_hsg_assignment_aligns_aut0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x78e7092cac90>
+
+    def test_hsg_assignment_aligns_auto_discovered_sbs_4class_to_geneva_grid(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        run_dir = tmp_path / "run"
+        bound = run_dir / "dem" / "wbt" / "bound.tif"
+        landuse = run_dir / "landuse" / "nlcd.tif"
+        hydgrpdcd = run_dir / "soils" / "hydgrpdcd.tif"
+        sbs_4class = run_dir / "disturbed" / "sbs_4class.tif"
+        for path in (bound, landuse, hydgrpdcd, sbs_4class):
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("raster", encoding="utf-8")
+    
+        fake_disturbed = SimpleNamespace(
+            sbs_4class_path=str(sbs_4class),
+            disturbed_cropped=None,
+        )
+        disturbed_module = types.ModuleType("wepppy.nodb.mods.disturbed")
+        disturbed_module.Disturbed = SimpleNamespace(
+            tryGetInstance=staticmethod(lambda _wd: fake_disturbed),
+        )
+        monkeypatch.setitem(sys.modules, "wepppy.nodb.mods.disturbed", disturbed_module)
+    
+        stacker_calls: list[tuple[str, str, str, str]] = []
+    
+        def _fake_raster_stacker(source, match, target, *, resample):
+            Path(target).write_text("aligned", encoding="utf-8")
+            stacker_calls.append((str(source), str(match), str(target), str(resample)))
+    
+        monkeypatch.setattr(hsg_assignment_module, "raster_stacker", _fake_raster_stacker)
+    
+        service = GenevaHsgAssignmentService()
+        geneva = SimpleNamespace(
+            wd=str(run_dir),
+            artifact_io=GenevaArtifactIO(),
+            watershed_instance=SimpleNamespace(bound=str(bound)),
+            landuse_instance=SimpleNamespace(lc_fn=str(landuse)),
+            soils_instance=SimpleNamespace(ssurgo_fn=str(hydgrpdcd)),
+        )
+    
+>       refs = service.resolve_prepare_input_refs(geneva)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/nodb/mods/geneva/test_geneva_collaborators.py:873: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+wepppy/nodb/mods/geneva/collaborators/hsg_assignment_service.py:103: in resolve_prepare_input_refs
+    resolved["burn_severity_tif"] = self._materialize_auto_burn_severity(
+wepppy/nodb/mods/geneva/collaborators/hsg_assignment_service.py:187: in _materialize_auto_burn_severity
+    dataset = gdal.OpenEx(str(candidate), gdal.OF_RASTER | gdal.OF_UPDATE,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = ('/tmp/pytest-of-unknown/pytest-142/test_hsg_assignment_aligns_aut0/run/geneva/cache_attempts/85070f05290c42d990f75d2c6a7c5dd8/candidate.tif', 3)
+kwargs = {'allowed_drivers': ['GTiff'], 'sibling_files': ['candidate.tif']}
+
+    def OpenEx(*args, **kwargs) -> "GDALDatasetShadow *":
+        r"""
+        OpenEx(char const * utf8_path, unsigned int nOpenFlags=0, char ** allowed_drivers=None, char ** open_options=None, char ** sibling_files=None) -> Dataset
+    
+    
+        Open a raster or vector file as a :py:class:`Dataset`.
+        See :cpp:func:`GDALOpenEx`.
+    
+        Parameters
+        ----------
+        utf8_path : str
+            name of the file to open
+        flags : int
+                Flags controlling how the Dataset is opened. Multiple ``gdal.OF_XXX`` flags
+                may be combined using the ``|`` operator. See :cpp:func:`GDALOpenEx`.
+        allowed_drivers : list, optional
+                A list of the names of drivers that may attempt to open the dataset.
+        open_options : dict/list, optional
+                A dict or list of name=value driver-specific opening options.
+        sibling_files: list, optional
+                A list of filenames that are auxiliary to the main filename
+    
+        Returns
+        -------
+        Dataset, or ``None`` on failure.
+    
+        See Also
+        --------
+        :py:func:`Open`
+        :py:func:`OpenShared`
+    
+    
+        """
+    
+        _WarnIfUserHasNotSpecifiedIfUsingExceptions()
+    
+    
+>       return _gdal.OpenEx(*args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       RuntimeError: `/tmp/pytest-of-unknown/pytest-142/test_hsg_assignment_aligns_aut0/run/geneva/cache_attempts/85070f05290c42d990f75d2c6a7c5dd8/candidate.tif' not recognized as being in a supported file format.
+
+/opt/venv/lib/python3.12/site-packages/osgeo/gdal.py:9278: RuntimeError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/nodb/mods/geneva/test_geneva_collaborators.py::test_hsg_assignment_aligns_auto_discovered_sbs_4class_to_geneva_grid
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+=================== 1 failed, 26 passed, 2 warnings in 9.88s ===================
