@@ -362,9 +362,9 @@ Dependency resolver contract:
 - Resolve final dataset relpaths after all selectors are applied (`output_scopes`, scenarios/contrast_ids, SWAT run/table filters, temporal mode).
 - Build dependency entries from actual resolved `geometry.locator`, `sources`, and `dependencies` in `layer_catalog.yaml`, including `unitizer.nodb` when `units=project`.
 - Include `layer_catalog.yaml` metadata/version signature in dependency resolution.
-- Fingerprint each dependency entry from canonical relpath plus file metadata (`size`, `mtime_ns`) and optional content hash when configured.
+- Service fingerprints regular files from canonical relpath/provenance, size and verified SHA-256; mtime remains diagnostic. Explicit low-level metadata mode preserves size/mtime identity. See the file-content amendment below.
 - Parent-run dependencies for canonical Omni child runs are valid cache dependencies when the resolved path stays within the inferred parent run root.
-- Build the final dependency fingerprint from ordered dependency entries serialized in canonical JSON.
+- Build the final dependency fingerprint from ordered identity projections serialized in canonical JSON; omit mtime only for valid SHA-256 entries.
 
 ### 6.3 AgFields Interchange Preparation (Parity+)
 Trigger:
@@ -691,7 +691,7 @@ Known metadata gaps to track separately (do not block initial README rollout):
 ### 11.3 Dynamic Artifact README Contract
 README generation behavior:
 - `README.md` is generated dynamically for each cache-miss artifact publication and packaged into the artifact zip root.
-- Cache-hit jobs reuse the cached artifact `README.md`; cache-hit job manifests remain job-scoped and can differ only in `cache_hit`/`source_job_id` context.
+- Cache-hit jobs reuse the immutable artifact `README.md` and bundled manifest. Job-scoped manifests may record the new job timestamp, `cache_hit`/`source_job_id`, current dependency observation (including diagnostic mtime), and selection verification context. They must preserve the artifact identity and accepted content fingerprint; new observations do not rewrite producer provenance.
 - `README.md` is deterministic for the same artifact payload/manifest inputs (stable ordering and section structure).
 
 README minimum sections:
@@ -1025,3 +1025,84 @@ WP-10: Standards-aligned artifact `README.md` generation and zip plumbing (plann
 - Keep warning-code definitions centralized in `contracts.py`.
 - Keep catalog/path resolution logic centralized in `catalog_loader.py`; no duplicated path construction in writers.
 - Keep data-shaping joins/projections in DuckDB SQL paths; avoid pandas merge pipelines in export hot paths.
+
+## File-content cache identity amendment (implementation pending)
+
+Service submissions MUST use SHA-256 for each existing regular file in the
+resolved catalog dependency set. Keep `mtime_ns` in dependency manifests as
+observability metadata. For a valid SHA-256 entry, the cache fingerprint uses
+path/provenance, existence, size and hash, excluding mtime; metadata-only changes
+therefore do not create another cache key. Explicit low-level `none` mode keeps
+its legacy metadata identity. Missing entries and directory entries retain
+explicit existing states; this amendment does not invent a content digest for
+an absent file or a directory. Indirect vector/raster/directory dependency closure
+is a separate open conformance obligation, not claimed by hashing the main path.
+
+Hash reads use the verified bounded ordinary-file helper and its admitted-cache
+contract; metadata must agree around the hash observation. An invalid or missing
+hash never authorizes dropping metadata from a fingerprint. Existing source
+containment, parent-run roots, selectors, Unitizer settings, catalog/code versions
+and required-source validation remain unchanged.
+
+Before publishing a newly materialized artifact into the reusable cache, re-read
+the same catalog dependency snapshot and compare its fingerprint. A mismatch or
+read failure MUST fail explicitly with `FeaturesExportServiceError` code
+`changed_source`, status 409, and leave existing cache/artifact bindings intact.
+Retain the candidate files and a manifest with `dependency_verification.status`
+`rejected` (or `error`) and before/after fingerprint diagnostics; the RQ job fails
+through its existing exception contract. On success, the manifest records
+`dependency_verification.status="verified"` and the observed fingerprint.
+Settle this verdict before writing any success manifest or README and before
+packaging the ZIP, so artifact, bundle and job copies agree. On failure retain
+artifact and job manifests with the same failure verdict; do not package or
+publish a success bundle. This added manifest member is additive; old readers
+may ignore it. Initial snapshot read failures also fail explicitly with
+`changed_source`; never fall back to metadata-only identity after a hash error.
+
+The recheck bounds the materialization window under existing producer behavior;
+it is not a multi-file filesystem transaction and cannot detect arbitrary
+change-and-restore entirely inside collection. A cache hit uses its initial
+verified dependency snapshot and immutable existing artifact; it does not
+recompute model output. Post-selection source changes are observed on the next
+submission. Job and published downloads remain historical artifact retrieval;
+this amendment does not require today's inputs to match a previously published
+artifact before downloading it.
+
+New content fingerprints naturally miss prior metadata-only cache entries and
+rebuild on submission. Keep prior artifacts, manifests, cache entries, job URLs
+and publication bindings readable; do not migrate or manufacture historical
+hashes. Cache index and manifest schema versions remain compatible. Same-byte
+archive restoration can reuse a content-keyed artifact; actual changed source
+bytes require a new artifact even when size/mtime are restored.
+
+Companion GeoPackage-to-FileGDB conversion MUST use the accepted producer's
+provenance, never associate historical payload with today's source fingerprint.
+Before conversion, require the source artifact's matching cache binding and a
+verified content manifest. The binding must equal the corresponding current
+GeoPackage request key (including Unitizer and version markers); its accepted
+dependency fingerprint must equal the current companion dependency snapshot.
+Resolve both plans from the same catalog; normalized requests must agree except
+for format. Recheck the companion snapshot and request identity after conversion
+before adding a reusable binding. Missing historical proof or a changed source
+fails with `changed_source` 409, preserving previous published/cache bindings.
+Use a distinct artifact candidate directory per conversion attempt; never
+unlink or overwrite a previously accepted companion or the source GeoPackage.
+Retain the rejected candidate and its own companion verification manifest when
+conversion has produced files. Successful companion ZIPs add their own manifest
+and README alongside the existing GDB tree; cache/result bindings reference
+that companion manifest. Preserve the source GeoPackage manifest unchanged. Existing historical downloads remain available; do not infer
+accepted hashes for legacy artifacts. Ordinary dual-format generation first
+creates a newly verified GeoPackage and therefore remains supported. Verify
+the companion before updating either profile publication registry entry, so
+companion rejection preserves both prior published bindings. This ordering does
+not promise a cross-file transaction for unrelated later I/O failures.
+
+Profile publication derives request/dependency identity from the actual
+artifact-matching cache binding, checking the requested format, instead of
+collecting today's source snapshot. Publishing is selection of a completed
+artifact, not certification against later model inputs. Reject missing or
+incompatible bindings explicitly using the existing `stale_publication` contract.
+The rationale for rejecting unsupported historical conversion is that old
+manifests do not retain all Unitizer and request version inputs needed to derive
+a different-format cache key honestly. Rebuilding through ordinary export is
+the supported route; existing artifact retrieval does not need a rebuild.
