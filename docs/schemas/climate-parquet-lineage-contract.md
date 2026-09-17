@@ -129,3 +129,25 @@ instead of weakening authority or adding a cross-request descriptor cache. The
 original failures remain evidence. Revised acceptance still requires actual full
 predicate measurements, zero settled payload reads, unchanged export budgets and
 separate full-state/runtime gates; quick profiles alone do not establish it.
+
+## Daymet acquisition source preservation
+
+Daymet acquisition parquets (`daymet_<start>-<end>.parquet` and interpolated
+`daymet_observed_<id>_<start>-<end>.parquet`) are source artifacts distinct from
+CLI-derived `wepp_cli.parquet`. After acquisition writes them, downstream PRN
+and CLI preparation must treat them as read-only: preserve precipitation in
+millimeters, temperatures in Celsius, original radiation, and source columns.
+Use a separate working copy for unit conversion. Generated radiation adjustments
+and their provenance belong in the existing normalization CSV and CLI, not an
+overwrite of the source parquet (ADR-0006).
+
+This preserves auditability: a labeled source column cannot silently become a
+converted CLIGEN field. It does not impose filesystem chmod or prevent a normal
+explicit climate rebuild from acquiring new source data. Existing artifacts are
+not automatically migrated or interpreted by value magnitude. Legacy radiation
+provenance columns remain readable and unchanged by downstream preparation;
+previously mislabeled precipitation/temperature artifacts require an explicit
+rebuild from original data, not an unqualified unit conversion. CLI-derived
+parquet producer lineage and interpretation versions are unaffected.
+
+Implementation conformance for this amendment: pending source-preservation fix.

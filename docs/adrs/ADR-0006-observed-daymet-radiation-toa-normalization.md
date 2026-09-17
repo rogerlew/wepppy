@@ -34,8 +34,8 @@ over-TOA daily radiation rows before writing generated WEPP CLI radiation:
   or below `sunmap.r3` but the integer CLI `rad` formatter would round it above
   `sunmap.r3`;
 - leave all non-over-bound rows unchanged;
-- preserve original source values in the exported Daymet parquet with explicit
-  provenance columns;
+- preserve the acquisition Daymet parquet unchanged; keep normalization
+  provenance in the separate CSV rather than rewriting source columns;
 - write a `daymet_radiation_toa_normalization_<label>.csv` artifact listing
   affected dates, original values, computed bounds, normalized values, excess,
   latitude, and reason.
@@ -66,7 +66,7 @@ New behavior:
 - rows above `sunmap.r3`, or rows whose integer CLI publication would exceed
   `sunmap.r3`, are bounded to the publication-safe integer value below
   `sunmap.r3`;
-- provenance columns and CSV artifact preserve the original source value and
+- working-DataFrame provenance columns and CSV artifact preserve the original source value and
   the exact physical bound plus the publication-safe value used.
 
 ## Rationale
@@ -104,7 +104,7 @@ otherwise a normalized fractional bound such as `458.706289` can publish as
 - Positive:
   - Observed-Daymet CLI publication no longer emits radiation above the
     downstream TOA bound.
-  - Affected values remain auditable through parquet provenance columns and CSV
+  - Affected values remain auditable through unchanged source parquet and CSV
     artifacts.
   - openWEPP source-bound guards can remain strict.
 - Risks:
@@ -139,10 +139,21 @@ which will again let downstream guards fail closed on over-bound rows.
   `tests/nodb/test_climate_build_helpers.py`
 - Normalization artifact naming:
   `daymet_radiation_toa_normalization_<label>.csv`
-- Parquet provenance columns:
+- Working-DataFrame provenance columns (not persisted over source parquet):
   - `srad_source(l/day)`
   - `srad_toa_bound(l/day)`
   - `srad_toa_publication_bound(l/day)`
   - `srad_toa_normalized`
   - `srad_toa_normalization_reason`
   - `srad_toa_bound_latitude(deg)`
+
+## Source preservation amendment (2026-09-17)
+
+Operator explicitly requested that retained Daymet source parquet be read-only
+for downstream PRN/CLI preparation. The earlier source overwrite exposed
+in-place PRN unit conversions under incorrect physical-unit labels. Both single
+and interpolated builders must preserve acquisition artifacts; use the existing
+normalization CSV for derived values and provenance. Numerical bounds, source
+radiation handling (including legacy source columns), CLI units and publication
+rounding are unchanged. Conformance pending implementation. This supersedes the
+original requirement to persist normalization columns into the source parquet.
