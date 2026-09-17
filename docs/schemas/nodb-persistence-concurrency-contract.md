@@ -152,6 +152,29 @@ object hydrated before another writer committed.
 - `load_detached(wd)` MUST bypass singleton cache insertion and logging initialization side effects.
 - It MUST still enforce signature checks when using Redis cache payloads.
 
+### Coherent disk-read versions (implementation pending)
+
+Disk hydration MUST associate decoded bytes with the mtime/size of the same
+opened descriptor. It MUST NOT tag those bytes with a later pathname stat taken
+after decoding. A concurrent atomic replacement may return the complete earlier
+generation with its own tracked signature; subsequent cache reuse and writes
+still compare against current disk and refresh/reject that older generation.
+
+Compare descriptor device, inode, size and nanosecond mtime before/after reading.
+Observable drift raises `OSError(ESTALE)` through the existing initial-read retry
+boundary; outside that opt-in boundary it propagates immediately. Optional ENOENT
+still returns absence; permission and other required-read errors retain their
+existing classification. This explicitly classifies detected read drift, without
+adding a retry loop or changing the 120-second budget.
+
+Do not reject an old open descriptor solely because ctime changed: an ordinary
+atomic replacement removes its former directory entry and may change ctime
+while its bytes remain a valid complete generation. Canonical producers remain
+atomic, with monotonic mtime for same-size changes; this amendment does not
+extend the supported writer contract to arbitrary in-place preserved-time edits.
+The rationale and real replacement baseline are retained in the file-dependency
+freshness execution package; payload/version association is durable governance.
+
 ### Redis cache usage
 - Redis cache reads MAY be used before disk hydration.
 - Corrupt cache payload decode failures MUST NOT block disk fallback.
