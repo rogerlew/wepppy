@@ -1,0 +1,18 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_copy_boundary_probe.py -q -s
+OMNI_COPY_BOUNDARY {"copied_main_hash_matches": true, "destination_observation": {"members": ["/tmp/pytest-of-unknown/pytest-107/test_actual_copy_uses_destinat0/run/_pups/omni/scenarios/sbs_map_probe/disturbed/sbs.tif", "/tmp/pytest-of-unknown/pytest-107/test_actual_copy_uses_destinat0/run/_pups/omni/scenarios/sbs_map_probe/disturbed/sbs.tfw"], "transform": [600000.0, 10.0, 0.0, 5000060.0, 0.0, -10.0], "values": [[3, 3], [3, 3]]}, "source_main_exists": false, "source_transform": [500000.0, 30.0, 0.0, 5000060.0, 0.0, -30.0], "source_worldfile_exists": true}
+.
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_copy_boundary_probe.py:20
+  /workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_copy_boundary_probe.py:20: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.integration
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1 passed, 3 warnings in 9.07s

@@ -1,0 +1,37 @@
+{
+  "source_main_exists": false,
+  "source_worldfile_exists": true,
+  "source_transform": [
+    500000.0,
+    30.0,
+    0.0,
+    5000060.0,
+    0.0,
+    -30.0
+  ],
+  "destination_observation": {
+    "transform": [
+      600000.0,
+      10.0,
+      0.0,
+      5000060.0,
+      0.0,
+      -10.0
+    ],
+    "members": [
+      "/tmp/pytest-of-unknown/pytest-107/test_actual_copy_uses_destinat0/run/_pups/omni/scenarios/sbs_map_probe/disturbed/sbs.tif",
+      "/tmp/pytest-of-unknown/pytest-107/test_actual_copy_uses_destinat0/run/_pups/omni/scenarios/sbs_map_probe/disturbed/sbs.tfw"
+    ],
+    "values": [
+      [
+        3,
+        3
+      ],
+      [
+        3,
+        3
+      ]
+    ]
+  },
+  "copied_main_hash_matches": true
+}
