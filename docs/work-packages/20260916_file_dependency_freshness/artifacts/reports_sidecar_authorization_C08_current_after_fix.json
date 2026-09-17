@@ -1,0 +1,15 @@
+{
+  "kind": "C08",
+  "revision": "current",
+  "uid": 1000,
+  "parent_writable": true,
+  "prior_target_write_open_denied": true,
+  "error_type": "PermissionError",
+  "error": "[Errno 13] Permission denied: '/tmp/pytest-of-unknown/pytest-84/test_readonly_target_writable_0/run/wepp/reports/cache/hillslope_watbal_summary.meta.json'",
+  "returned": false,
+  "exists": true,
+  "prior_bytes_unchanged": true,
+  "final_mode": "0o644",
+  "prior_sidecar_unchanged": true,
+  "sidecar_final_mode": "0o444"
+}

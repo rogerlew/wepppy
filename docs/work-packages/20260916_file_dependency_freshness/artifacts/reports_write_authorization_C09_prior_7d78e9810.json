@@ -1,0 +1,13 @@
+{
+  "kind": "C09",
+  "revision": "prior_7d78e9810",
+  "uid": 1000,
+  "parent_writable": true,
+  "prior_target_write_open_denied": true,
+  "error_type": "PermissionError",
+  "error": "[Errno 13] Permission denied: '/tmp/pytest-of-unknown/pytest-79/test_readonly_target_writable_1/run/wepp/reports/cache/average_annuals_by_landuse.parquet'",
+  "returned": false,
+  "exists": true,
+  "prior_bytes_unchanged": true,
+  "final_mode": "0o444"
+}

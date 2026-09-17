@@ -8,6 +8,13 @@ artifacts were written by this reviewer.
 
 ## Findings and disposition
 
+Follow-up after `0f2826a25`: the scoped PASS was reopened and is now restored by
+the separately retained [publication authorization review](reports_write_authorization_security_review.md).
+RP-SI04 (C09 data-file write denial) and RP-SI05 (both writers' version-sidecar
+authorization/mode) are independently fixed: eight after-fix cases pass, and the
+affected report suite now has 93 passing tests. Original evidence below remains
+valid for its tested boundaries.
+
 **Scoped PASS after the verified corrections below.** No unresolved medium/high
 security finding remains in this bounded implementation. Runtime browse/download,
 identity parity and wider package acceptance remain separate gates.
@@ -148,6 +155,6 @@ No deployment or package closeout is approved by this artifact.
 
 Final reviewed SHA-256 values:
 
-- `_cache_freshness.py`: `9b84e9c2ccf621976b1c7f47b762161a0d2bda5c15481a77437a6f967a4896c3`
+- `_cache_freshness.py`: `2f999913fc0557f7ea68a08f0c8bef7b3048a062dd9665afb5a9ddceed73ff24` (authorization follow-up; earlier reviewed hash `9b84e9c2ccf621976b1c7f47b762161a0d2bda5c15481a77437a6f967a4896c3`)
 - `hillslope_watbal.py`: `b3a14b6cbfa068207d5d0c459b36b3a67f196f505c86b6fbf60f8d0a96620d2d`
 - `average_annuals_by_landuse.py`: `d8063ff1fbc9fba1f34e531c6788f3ffba0822feeb64dbe24f94a8b3900860ad`

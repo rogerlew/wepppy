@@ -1,0 +1,33 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest docs/work-packages/20260916_file_dependency_freshness/artifacts/reports_write_authorization_after_probe.py -v -s --maxfail=1 -k current
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0 -- /opt/venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collecting ... collected 4 items / 2 deselected / 2 selected
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/reports_write_authorization_after_probe.py::test_readonly_target_writable_parent[current-C08] WRITE_AUTHORIZATION {"cache_status": "built", "exists": true, "final_mode": "0o444", "kind": "C08", "parent_writable": true, "prior_bytes_unchanged": false, "prior_target_write_open_denied": true, "returned": true, "revision": "current", "uid": 1000}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/reports_write_authorization_after_probe.py::test_readonly_target_writable_parent[current-C09] WRITE_AUTHORIZATION {"error": "[Errno 13] Permission denied: '/tmp/pytest-of-unknown/pytest-81/test_readonly_target_writable_1/run/wepp/reports/cache/average_annuals_by_landuse.parquet'", "error_type": "PermissionError", "exists": true, "final_mode": "0o444", "kind": "C09", "parent_writable": true, "prior_bytes_unchanged": true, "prior_target_write_open_denied": true, "returned": false, "revision": "current", "uid": 1000}
+PASSED
+
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+tests/wepp/reports/test_report_cache_freshness.py:19
+  /workdir/wepppy/tests/wepp/reports/test_report_cache_freshness.py:19: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.integration
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/reports_write_authorization_after_probe.py:14
+  /workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/reports_write_authorization_after_probe.py:14: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.integration
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================= 2 passed, 2 deselected, 4 warnings in 9.15s ==================

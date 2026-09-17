@@ -300,6 +300,56 @@ def test_real_publication_denial_retains_prior_and_failed_candidate(run, monkeyp
     assert (failed[0] / ("native.parquet" if report_type is HillslopeWatbalReport else "query.parquet")).is_file()
 
 
+@pytest.mark.parametrize("report_type", [HillslopeWatbalReport, AverageAnnualsByLanduseReport])
+def test_existing_readonly_cache_preserves_writer_access_contract(run, report_type):
+    assert os.geteuid() != 0
+    report_type(run)
+    cache = run / "wepp/reports/cache" / f"{report_type._CACHE_KEY}.parquet"
+    before = cache.read_bytes()
+    cache.chmod(0o444)
+    source = run / ("wepp/output/interchange/H.wat.parquet" if report_type is HillslopeWatbalReport else "wepp/output/interchange/loss_pw0.hill.parquet")
+    _rewrite(source, "P" if report_type is HillslopeWatbalReport else "Runoff Volume", 9.0)
+    try:
+        if report_type is AverageAnnualsByLanduseReport:
+            with pytest.raises(PermissionError):
+                report_type(run)
+            assert cache.read_bytes() == before
+            failed = [p.parent for p in cache.parent.glob(f"{report_type._CACHE_KEY}.attempts/*/status.json")
+                      if json.loads(p.read_text())["status"] == "failed"]
+            assert len(failed) == 1
+            assert (failed[0] / "candidate.parquet").is_file()
+        else:
+            assert report_type(run).cache_status == "built"
+            assert cache.read_bytes() != before
+        assert cache.stat().st_mode & 0o777 == 0o444
+    finally:
+        cache.chmod(0o644)
+
+
+@pytest.mark.parametrize("report_type", [HillslopeWatbalReport, AverageAnnualsByLanduseReport])
+@pytest.mark.parametrize("mode", [0o444, 0o640])
+def test_version_sidecar_preserves_own_access_and_mode(run, report_type, mode):
+    assert os.geteuid() != 0
+    report_type(run)
+    cache = run / "wepp/reports/cache" / f"{report_type._CACHE_KEY}.parquet"
+    sidecar = cache.with_suffix(".meta.json")
+    sidecar.write_text('{"version":"old"}')
+    sidecar.chmod(mode)
+    before = cache.read_bytes()
+    try:
+        if mode == 0o444:
+            with pytest.raises(PermissionError):
+                report_type(run)
+            assert sidecar.read_text() == '{"version":"old"}'
+            assert cache.read_bytes() == before
+        else:
+            assert report_type(run).cache_status == "built"
+            assert json.loads(sidecar.read_text()) == {"version": "1"}
+        assert sidecar.stat().st_mode & 0o777 == mode
+    finally:
+        sidecar.chmod(0o644)
+
+
 def test_postcommit_status_failure_does_not_rollback(run, monkeypatch):
     HillslopeWatbalReport(run)
     _rewrite(run / "wepp/output/interchange/H.wat.parquet", "P", 9.0)

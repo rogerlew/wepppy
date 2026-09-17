@@ -46,6 +46,11 @@ new cache; a later diagnostic-write failure is logged without rolling it back.
 An interrupted attempt's embedded ID can be compared with the accepted Parquet
 metadata. Do not delete the attempt to hide a failed build.
 
+Land-use cache rebuilds require write access to an existing cache file as well as
+its directory. Water-balance keeps its native atomic-writer permission behavior.
+Version-sidecar repairs preserve their own access permissions and mode.
+Denied publication retains the prior file and visible failed candidate.
+
 Developers should use the [report cache contract](../../../docs/schemas/report-cache-freshness-contract.md)
 for dependency selection, legacy behavior, publication/access preservation and
 performance limits. Run `wctl run-pytest tests/wepp/reports` after changes. Source

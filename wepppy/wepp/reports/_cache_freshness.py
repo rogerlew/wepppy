@@ -182,7 +182,15 @@ class _CacheBuild:
 
         sidecar = self.cache_path.with_suffix(".meta.json")
         if ReportCacheManager._read_metadata(sidecar).get("version") != "1":
+            try:
+                sidecar_mode = stat.S_IMODE(sidecar.stat().st_mode) & 0o777
+            except FileNotFoundError:
+                sidecar_mode = None
+            if sidecar_mode is not None:
+                os.close(os.open(sidecar, os.O_WRONLY))
             with self.open_payload("version.meta.json") as outgoing:
+                if sidecar_mode is not None:
+                    os.fchmod(outgoing.fileno(), sidecar_mode)
                 outgoing.write(b'{"version": "1"}\n')
             os.replace(self.root / "version.meta.json", sidecar.resolve())
         self._status("ready_to_publish")
@@ -190,6 +198,10 @@ class _CacheBuild:
             raise RuntimeError("Report cache destination changed before publication")
         mode = self._target_mode()
         if mode is not None:
+            if self.native_source is None:
+                # C09's pandas writer required inode write access. C08's native
+                # atomic writer did not; preserve each existing boundary.
+                os.close(os.open(self.target, os.O_WRONLY))
             (self.root / "candidate.parquet").chmod(mode)
         os.replace(self.root / "candidate.parquet", self.target)
         self.committed = True
