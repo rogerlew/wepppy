@@ -1,0 +1,104 @@
+{
+  "root": "/wc1/batch/qa-omni-correctness-f9210653f2f1",
+  "cases": {
+    "legacy_invalidated": {
+      "error": 116,
+      "association_resurrected": false,
+      "states": []
+    },
+    "direct_generations": {
+      "states": [
+        "executed",
+        "skipped",
+        "executed",
+        "skipped"
+      ],
+      "native_pixels": [
+        [
+          "sbs_map_c2FtZS50aWY",
+          [
+            [
+              1,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        ],
+        [
+          "sbs_map_c2FtZS50aWY",
+          [
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              3
+            ]
+          ]
+        ]
+      ],
+      "final_pixels": [
+        [
+          3,
+          3
+        ],
+        [
+          3,
+          3
+        ]
+      ],
+      "source_consumed": true
+    },
+    "durable_fields": {
+      "unrelated": "concurrent-durable-value",
+      "states": [
+        {
+          "scenario": "other",
+          "status": "executed"
+        },
+        {
+          "scenario": "sbs_map_c2FtZS50aWY",
+          "status": "executed",
+          "reason": "dependency_changed",
+          "dependency_target": "undisturbed",
+          "dependency_path": "/wc1/batch/qa-omni-correctness-f9210653f2f1/runs/test_direct_native_admission_preserves_concurrent_unrelated_fields-d0608e/base-loss.txt",
+          "dependency_sha1": "18848ae530440cd0546b35dbca88170210f26299",
+          "timestamp": 1789629202.8173606
+        }
+      ]
+    },
+    "direct_order": {
+      "states": [
+        "sbs_map_c2FtZS50aWY",
+        "uniform_low",
+        "mulch_30_uniform_low"
+      ],
+      "executions": [
+        "sbs_map_c2FtZS50aWY",
+        "uniform_low",
+        "mulch_30_uniform_low"
+      ]
+    },
+    "failed_reset": {
+      "association_present": false,
+      "partial_retained": true,
+      "old_child_present": false
+    },
+    "queued_drift": {
+      "error": 116,
+      "no_native": true,
+      "prior_tree_preserved": true,
+      "prior_child_preserved": true
+    }
+  },
+  "module_hashes": {
+    "/workdir/wepppy/wepppy/nodb/mods/omni/omni.py": "22bd86e063d66ec94783037861b9428a30f4f2bdba6d29f1a0c816c08534e614",
+    "/workdir/wepppy/wepppy/nodb/mods/omni/omni_sbs_freshness.py": "82eb071a9e97f772b005d21c675ede523da8656b0f3f80e406d12220a15e916a",
+    "/workdir/wepppy/wepppy/rq/omni_rq.py": "0fca1007d49ed39ab0210ea42b90a651f752ca0bb7d828d64583e5da857924c7"
+  },
+  "modules_unchanged": true
+}

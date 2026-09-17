@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from enum import IntEnum
-from typing import Any, ClassVar, Dict, Iterable, List, Optional, Set, Tuple
+from typing import Any, Callable, ClassVar, Dict, Iterable, List, Optional, Set, Tuple
 
 import pandas as pd
 
@@ -58,7 +58,7 @@ def _run_contrast(
     output_options: Dict[str, bool] | None = ...,
 ) -> str: ...
 
-def _omni_clone(scenario_def: ScenarioDef, wd: str, runid: str) -> str: ...
+def _omni_clone(scenario_def: ScenarioDef, wd: str, runid: str, *, before_reset: Callable[[], None] | None = ...) -> str: ...
 
 def _omni_clone_sibling(new_wd: str, omni_clone_sibling_name: str, runid: str, parent_wd: str) -> None: ...
 
@@ -455,7 +455,7 @@ class Omni(NoDbBase):
 
     def run_omni_scenarios(self) -> None: ...
 
-    def run_omni_scenario(self, scenario_def: ScenarioDef) -> Tuple[str, str]: ...
+    def run_omni_scenario(self, scenario_def: ScenarioDef, *, _sbs_execution: Any = ...) -> Tuple[str, str]: ...
 
     @property
     def has_ran_scenarios(self) -> bool: ...

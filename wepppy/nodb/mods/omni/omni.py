@@ -457,7 +457,10 @@ def _run_contrast(
     )
 
 
-def _omni_clone(scenario_def: Dict[str, Any], wd: str, runid: str) -> str:
+def _omni_clone(scenario_def: Dict[str, Any], wd: str, runid: str, *, before_reset=None) -> str:
+    if before_reset is not None:
+        return _OMNI_CLONE_CONTRAST_SERVICE.omni_clone(
+            scenario_def=scenario_def, wd=wd, runid=runid, before_reset=before_reset)
     return _OMNI_CLONE_CONTRAST_SERVICE.omni_clone(
         scenario_def=scenario_def,
         wd=wd,
@@ -1297,7 +1300,10 @@ class Omni(OmniStateContrastMixin, NoDbBase):
     def run_omni_scenarios(self) -> None:
         _OMNI_RUN_ORCHESTRATION_SERVICE.run_omni_scenarios(self)
 
-    def run_omni_scenario(self, scenario_def: ScenarioDef) -> Tuple[str, str]:
+    def run_omni_scenario(self, scenario_def: ScenarioDef, *, _sbs_execution=None) -> Tuple[str, str]:
+        if _sbs_execution is not None:
+            return _OMNI_RUN_ORCHESTRATION_SERVICE.run_omni_scenario(
+                self, scenario_def, _sbs_execution=_sbs_execution)
         return _OMNI_RUN_ORCHESTRATION_SERVICE.run_omni_scenario(self, scenario_def)
 
     @property

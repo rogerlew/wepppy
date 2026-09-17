@@ -1,0 +1,121 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_security_probe.py -v -s
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0 -- /opt/venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collecting ... collected 8 items
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_security_probe.py::test_child_change_during_replacement_upload_observation_rejects {"joint_guard": {"error": null, "mutated": true, "child": "native child changed after last child guard"}}
+FAILED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_security_probe.py::test_actual_mode_same_inode_rejects_before_source_truncation {"same_inode": {"error": {"type": "OSError", "errno": 116, "message": "[Errno 116] Omni SBS input changed during scenario execution"}, "source_bytes": "", "old_copy_preserved": "only copy of the uploaded bytes"}}
+FAILED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_security_probe.py::test_newer_upload_is_preserved_at_copy_verification {"newer_upload": {"error": {"type": "OSError", "errno": 116, "message": "[Errno 116] Omni SBS input changed during scenario execution"}, "source": "new uploaded main", "child": "old uploaded main"}}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_security_probe.py::test_source_and_destination_alias_modes_follow_existing_copy_authority {"aliases": {"source_target_retained": true, "destination_alias_retained": true, "mode": 416}}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_security_probe.py::test_readonly_copy_target_preserves_prior_bytes_and_source {"readonly_target": {"uid": 1000, "error": {"type": "PermissionError", "errno": 13, "message": "[Errno 13] Permission denied: '/tmp/pytest-of-unknown/pytest-166/test_readonly_copy_target_pres0/child.tif'"}}}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_security_probe.py::test_consumed_receipt_denied_present_upload_cannot_reuse_child {"denied_present": {"error": {"type": "PermissionError", "errno": 13, "message": "[Errno 13] Permission denied: '/tmp/pytest-of-unknown/pytest-166/test_consumed_receipt_denied_p0/denied/upload.tif'"}}}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_security_probe.py::test_changed_then_restored_child_rejects_and_normal_siblings_do_not {"child_aba": {"error": {"type": "OSError", "errno": 116, "message": "[Errno 116] Omni SBS input changed during scenario execution"}, "original_bytes_restored": true}}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_security_probe.py::test_real_locked_admission_refreshes_durable_fields_and_uses_one_lock {"locked_admission": {"locks": 1, "marker": "new durable value", "unrelated": {"value": "new durable value"}, "run_state": [{"scenario": "sbs_map_dXBsb2FkLnRpZg", "status": "ran"}]}}
+PASSED
+
+=================================== FAILURES ===================================
+_______ test_child_change_during_replacement_upload_observation_rejects ________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-166/test_child_change_during_repla0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7694765f2b10>
+
+    def test_child_change_during_replacement_upload_observation_rejects(tmp_path, monkeypatch):
+        source, child, selected, execution = make_execution(tmp_path)
+        source.write_bytes(child.read_bytes())
+        original = fresh.sha256_file
+        mutated = []
+    
+        def digest(path):
+            result = original(path)
+            if Path(path) == source:
+                child.write_bytes(b'native child changed after last child guard')
+                mutated.append(True)
+            return result
+    
+        monkeypatch.setattr(fresh, 'sha256_file', digest)
+        error = capture_error(lambda: execution.validate_admission(SimpleNamespace(scenarios=[selected])))
+        record('joint_guard', {'error': error, 'mutated': bool(mutated), 'child': child.read_text()})
+>       assert mutated and error is not None and error['errno'] == errno.ESTALE
+E       assert ([True] and None is not None)
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_security_probe.py:67: AssertionError
+_________ test_actual_mode_same_inode_rejects_before_source_truncation _________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-166/test_actual_mode_same_inode_re0')
+
+    def test_actual_mode_same_inode_rejects_before_source_truncation(tmp_path):
+        source = tmp_path / 'upload.tif'
+        source.write_bytes(b'only copy of the uploaded bytes')
+        child_dir = tmp_path / 'disturbed'
+        child_dir.mkdir()
+        child = child_dir / source.name
+        os.link(source, child)
+        before = source.read_bytes()
+        with pytest.raises(shutil.SameFileError):
+            shutil.copyfile(source, child)
+        assert source.read_bytes() == before
+        owner = SimpleNamespace(logger=logging.getLogger(__name__), timed=lambda _: nullcontext(),
+                                rq_job_pool_max_worker_per_scenario_task=1)
+        error = capture_error(lambda: mode.OmniModeBuildServices().apply_scenario_mode(
+            owner, scenario_name='sbs_map_probe', scenario=OmniScenario.SBSmap,
+            scenario_def=definition(source), new_wd=str(tmp_path),
+            disturbed=SimpleNamespace(disturbed_dir=str(child_dir), validate=lambda *a, **k: None),
+            landuse=SimpleNamespace(build=lambda: None), soils=SimpleNamespace(build=lambda **kwargs: None),
+            omni_base_scenario_name=None))
+        record('same_inode', {'error': error, 'source_bytes': source.read_text(),
+                              'old_copy_preserved': before.decode()})
+        assert error is not None
+>       assert source.read_bytes() == before and child.read_bytes() == before
+E       AssertionError: assert (b'' == b'only copy o...ploaded bytes'
+E         
+E         Full diff:
+E         - (b'only copy of the uploaded bytes')
+E         + b'')
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_security_probe.py:92: AssertionError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_security_probe.py::test_real_locked_admission_refreshes_durable_fields_and_uses_one_lock
+  /opt/venv/lib/python3.12/site-packages/awesome_codename/data/__init__.py:1: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    from pkg_resources import resource_string
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_security_probe.py::test_real_locked_admission_refreshes_durable_fields_and_uses_one_lock
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_security_probe.py::test_real_locked_admission_refreshes_durable_fields_and_uses_one_lock
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The ConfirmRegisterForm and the confirm_register_form option are deprecated as of version 5.6.0 and will be removed in a future release.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_security_probe.py::test_real_locked_admission_refreshes_durable_fields_and_uses_one_lock
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The RegisterForm is deprecated as of version 5.6.0 and will be removed in a future release. The form RegisterFormV2 should be sub-classed instead.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_security_probe.py::test_real_locked_admission_refreshes_durable_fields_and_uses_one_lock
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_security_probe.py::test_real_locked_admission_refreshes_durable_fields_and_uses_one_lock
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_security_probe.py::test_child_change_during_replacement_upload_observation_rejects
+FAILED docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_security_probe.py::test_actual_mode_same_inode_rejects_before_source_truncation
+=================== 2 failed, 6 passed, 8 warnings in 12.82s ===================

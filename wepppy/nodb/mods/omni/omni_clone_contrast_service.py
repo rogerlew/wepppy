@@ -328,7 +328,7 @@ class OmniCloneContrastService:
             _update_nodb_wd,
         )
 
-    def omni_clone(self, scenario_def: Dict[str, Any], wd: str, runid: str) -> str:
+    def omni_clone(self, scenario_def: Dict[str, Any], wd: str, runid: str, *, before_reset=None) -> str:
         (
             logger,
             omni_rel_dir,
@@ -341,6 +341,9 @@ class OmniCloneContrastService:
         scenario_name = scenario_name_from_scenario_definition(scenario_def)
         new_wd = _join(wd, omni_rel_dir, "scenarios", scenario_name)
         pup_relpath = os.path.relpath(new_wd, wd)
+
+        if before_reset is not None:
+            before_reset()
 
         if _exists(new_wd):
             _reset_workspace(new_wd, logger=logger)

@@ -1,0 +1,26 @@
+{
+  "root": "/wc1/batch/qa-omni-correctness-4045193c98e6",
+  "cases": {
+    "legacy_invalidated": {
+      "error": null,
+      "association_resurrected": true,
+      "states": [
+        {
+          "scenario": "sbs_map_c2FtZS50aWY",
+          "status": "skipped"
+        }
+      ]
+    },
+    "failed_reset": {
+      "association_present": false,
+      "partial_retained": true,
+      "old_child_present": false
+    },
+    "queued_drift": {
+      "error": null,
+      "no_native": true,
+      "prior_tree_preserved": true,
+      "prior_child_preserved": true
+    }
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "joint_guard": {
+    "error": null,
+    "mutated": true,
+    "child": "native child changed after last child guard"
+  },
+  "same_inode": {
+    "error": {
+      "type": "OSError",
+      "errno": 116,
+      "message": "[Errno 116] Omni SBS input changed during scenario execution"
+    },
+    "source_bytes": "",
+    "old_copy_preserved": "only copy of the uploaded bytes"
+  },
+  "newer_upload": {
+    "error": {
+      "type": "OSError",
+      "errno": 116,
+      "message": "[Errno 116] Omni SBS input changed during scenario execution"
+    },
+    "source": "new uploaded main",
+    "child": "old uploaded main"
+  },
+  "aliases": {
+    "source_target_retained": true,
+    "destination_alias_retained": true,
+    "mode": 416
+  },
+  "readonly_target": {
+    "uid": 1000,
+    "error": {
+      "type": "PermissionError",
+      "errno": 13,
+      "message": "[Errno 13] Permission denied: '/tmp/pytest-of-unknown/pytest-166/test_readonly_copy_target_pres0/child.tif'"
+    }
+  },
+  "denied_present": {
+    "error": {
+      "type": "PermissionError",
+      "errno": 13,
+      "message": "[Errno 13] Permission denied: '/tmp/pytest-of-unknown/pytest-166/test_consumed_receipt_denied_p0/denied/upload.tif'"
+    }
+  },
+  "child_aba": {
+    "error": {
+      "type": "OSError",
+      "errno": 116,
+      "message": "[Errno 116] Omni SBS input changed during scenario execution"
+    },
+    "original_bytes_restored": true
+  },
+  "locked_admission": {
+    "locks": 1,
+    "marker": "new durable value",
+    "unrelated": {
+      "value": "new durable value"
+    },
+    "run_state": [
+      {
+        "scenario": "sbs_map_dXBsb2FkLnRpZg",
+        "status": "ran"
+      }
+    ]
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "root": "/wc1/batch/qa-omni-correctness-97a30493a58b",
+  "cases": {
+    "rq_type_sbs_map": {
+      "error": null,
+      "native_calls": [
+        [
+          "sbs_map_c2FtZS50aWY",
+          [
+            [
+              1,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        ]
+      ],
+      "states": [
+        {
+          "scenario": "sbs_map_c2FtZS50aWY",
+          "status": "skipped",
+          "reason": "dependency_unchanged",
+          "dependency_target": "undisturbed",
+          "dependency_path": "/wc1/batch/qa-omni-correctness-97a30493a58b/runs/test_actual_dispatcher_worker_and_consumed_skip[enum]-e7823a/base-loss.txt",
+          "dependency_sha1": "18848ae530440cd0546b35dbca88170210f26299",
+          "timestamp": 1789629311.3705535
+        }
+      ],
+      "second_queued_functions": [
+        "_compile_hillslope_summaries_rq",
+        "_finalize_omni_scenarios_rq"
+      ]
+    },
+    "rq_type_8": {
+      "error": null,
+      "native_calls": [
+        [
+          "sbs_map_c2FtZS50aWY",
+          [
+            [
+              1,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        ]
+      ],
+      "states": [
+        {
+          "scenario": "sbs_map_c2FtZS50aWY",
+          "status": "skipped",
+          "reason": "dependency_unchanged",
+          "dependency_target": "undisturbed",
+          "dependency_path": "/wc1/batch/qa-omni-correctness-97a30493a58b/runs/test_actual_dispatcher_worker_and_consumed_skip[integer]-b4198f/base-loss.txt",
+          "dependency_sha1": "18848ae530440cd0546b35dbca88170210f26299",
+          "timestamp": 1789629308.915059
+        }
+      ],
+      "second_queued_functions": [
+        "_compile_hillslope_summaries_rq",
+        "_finalize_omni_scenarios_rq"
+      ]
+    }
+  },
+  "module_hashes": {
+    "/workdir/wepppy/wepppy/nodb/mods/omni/omni.py": "22bd86e063d66ec94783037861b9428a30f4f2bdba6d29f1a0c816c08534e614",
+    "/workdir/wepppy/wepppy/nodb/mods/omni/omni_sbs_freshness.py": "445cecd57e23b2fe9f53e7aa9d52d28932c298bdf029875eadfedd327ee3cf1d",
+    "/workdir/wepppy/wepppy/rq/omni_rq.py": "0fca1007d49ed39ab0210ea42b90a651f752ca0bb7d828d64583e5da857924c7"
+  },
+  "modules_unchanged": false
+}

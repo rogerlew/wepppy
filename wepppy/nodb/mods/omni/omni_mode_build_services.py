@@ -307,6 +307,7 @@ class OmniModeBuildServices:
         landuse: Any,
         soils: Any,
         omni_base_scenario_name: Optional[str],
+        _sbs_execution=None,
     ) -> None:
         scenario_key = str(scenario)
         (
@@ -395,8 +396,10 @@ class OmniModeBuildServices:
             with omni.timed(f"  {scenario_name}: copy sbs to disturbed dir from _limbo"):
                 sbs_fn = _split(sbs_file_path)[-1]
                 new_sbs_file_path = _join(disturbed.disturbed_dir, sbs_fn)
-                shutil.copyfile(sbs_file_path, new_sbs_file_path)
-                os.remove(sbs_file_path)
+                from .omni_sbs_freshness import SbsExecution
+                if _sbs_execution is None:
+                    _sbs_execution = SbsExecution.capture(scenario_def)
+                _sbs_execution.copy_to(new_sbs_file_path)
 
             with omni.timed(f"  {scenario_name}: validate sbs {sbs_fn}"):
                 disturbed.validate(sbs_fn, mode=0)

@@ -1,0 +1,17 @@
+{
+  "root": "/wc1/batch/qa-omni-correctness-6ee471498343",
+  "cases": {
+    "legacy_year_rerun": {
+      "error_type": "FileNotFoundError",
+      "message": "[Errno 2] No such file or directory: '/wc1/batch/qa-omni-correctness-6ee471498343/runs/test_legacy_consumed_source_needed_for_year_rerun_keeps_missing_error-8331b7/omni/_limbo/0/same.tif'",
+      "prior_association_preserved": true,
+      "no_native": true
+    }
+  },
+  "module_hashes": {
+    "/workdir/wepppy/wepppy/nodb/mods/omni/omni.py": "22bd86e063d66ec94783037861b9428a30f4f2bdba6d29f1a0c816c08534e614",
+    "/workdir/wepppy/wepppy/nodb/mods/omni/omni_sbs_freshness.py": "6f95a6f6f3bc8836259361fb5883697578b1a2392baee5540b87b2f3961e2832",
+    "/workdir/wepppy/wepppy/rq/omni_rq.py": "0fca1007d49ed39ab0210ea42b90a651f752ca0bb7d828d64583e5da857924c7"
+  },
+  "modules_unchanged": true
+}

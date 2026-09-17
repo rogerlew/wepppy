@@ -1,0 +1,3726 @@
+{
+  "scope": "Actual S01 receipt/copy/reuse components, with separate real NoDb lock cost.\n\nUses unchanged retained real/stress fixtures through new disposable copies.\nCalls complete implemented helpers in their actual direct/worker order. Native\nclone/reset, SBS validation, landuse/soil/WEPP and live RQ transport are excluded.\nThe separate locked sequence uses real Omni persistence, detached refresh and\nRedis locks. Component-only checks do not substitute for whole native runtime.\n",
+  "root": "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463",
+  "uid": 1000,
+  "gid": 993,
+  "cache_note": "Warm filesystem pages; helper-cold and actual eviction are not cold storage.",
+  "module_hashes": {
+    "/workdir/wepppy/wepppy/all_your_base/file_digest.py": "d090094983c4f7575801969a1339ae3306745f6ff93aa100c037d83dd7fb9ee7",
+    "/workdir/wepppy/wepppy/nodb/mods/omni/omni_sbs_freshness.py": "6f95a6f6f3bc8836259361fb5883697578b1a2392baee5540b87b2f3961e2832",
+    "/workdir/wepppy/wepppy/nodb/mods/omni/omni.py": "22bd86e063d66ec94783037861b9428a30f4f2bdba6d29f1a0c816c08534e614",
+    "/workdir/wepppy/wepppy/nodb/mods/omni/omni_mode_build_services.py": "8d6d4590947eed0a731295f0f0ff7f5082af840372f98090f1a2db62ed9f518d",
+    "/workdir/wepppy/wepppy/nodb/mods/omni/omni_run_orchestration_service.py": "e09f1b19fe75d650b04df2d272219729964774817a7c989f44fdb986c316b134",
+    "/workdir/wepppy/wepppy/rq/omni_rq.py": "0fca1007d49ed39ab0210ea42b90a651f752ca0bb7d828d64583e5da857924c7"
+  },
+  "input_fixtures": {
+    "/wc1/batch/qa-sbs-receipts-89a2b9544fb5/grizzly-original/disturbed/GrizzlyCreek_SBS_final.tif": {
+      "version": [
+        64,
+        1204418,
+        599196,
+        1789604873876050046,
+        1789626241224285957
+      ],
+      "sha256": "7d1ed360d8e639050cf3879293efcdbee216bd9a4faac4e03399442416d97405"
+    },
+    "/wc1/batch/qa-sbs-receipts-89a2b9544fb5/rattlesnake-original/disturbed/Rattlesnake.tif": {
+      "version": [
+        64,
+        1204422,
+        747242,
+        1782861926624748654,
+        1789626241514287604
+      ],
+      "sha256": "ae47292c64b0410ee987b38d0925f445ab5ef971c869bbc8bf924123b015b7c6"
+    },
+    "/wc1/batch/qa-sbs-receipts-89a2b9544fb5/stress16m-original/disturbed/stress16m.tif": {
+      "version": [
+        64,
+        1204613,
+        16779862,
+        1789626242295292037,
+        1789626242295292037
+      ],
+      "sha256": "56f98e0d5146c0ace4bad2911d0c0085c9a977b853baf47b0c268bbfeda7e191"
+    }
+  },
+  "cases": {
+    "grizzly": {
+      "name": "grizzly",
+      "source": "/wc1/batch/qa-sbs-receipts-89a2b9544fb5/grizzly-original/disturbed/GrizzlyCreek_SBS_final.tif",
+      "source_bytes": 599196,
+      "source_sha256": "7d1ed360d8e639050cf3879293efcdbee216bd9a4faac4e03399442416d97405",
+      "fixture_note": "Unmodified actual uploaded main bytes",
+      "owner_wd": "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617",
+      "runid": "batch;;qa-omni-sbs-implementation-7d7951e1b463;;run-grizzly-be26c617",
+      "child": "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/_pups/omni/scenarios/sbs_map_R3JpenpseUNyZWVrX1NCU19maW5hbC50aWY/disturbed/GrizzlyCreek_SBS_final.tif",
+      "measurements": [
+        {
+          "name": "present_upload_reuse_cold",
+          "mean_ms": 9.946076525375247,
+          "samples": [
+            {
+              "ms": 12.920588022097945,
+              "main_read_bytes": 1797588,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/omni/_limbo/0/GrizzlyCreek_SBS_final.tif": 1797588
+              },
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 10.216944850981236,
+              "main_read_bytes": 1797588,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/omni/_limbo/0/GrizzlyCreek_SBS_final.tif": 1797588
+              },
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 9.495701873674989,
+              "main_read_bytes": 1797588,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/omni/_limbo/0/GrizzlyCreek_SBS_final.tif": 1797588
+              },
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 8.822700940072536,
+              "main_read_bytes": 1797588,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/omni/_limbo/0/GrizzlyCreek_SBS_final.tif": 1797588
+              },
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 8.274446940049529,
+              "main_read_bytes": 1797588,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/omni/_limbo/0/GrizzlyCreek_SBS_final.tif": 1797588
+              },
+              "digest_check_count": 3,
+              "locks": []
+            }
+          ]
+        },
+        {
+          "name": "present_upload_reuse_settled",
+          "mean_ms": 3.4549687445784607,
+          "samples": [
+            {
+              "ms": 3.7926980294287205,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.8131880573928356,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.7516439333558083,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.845245111733675,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.7131221033632755,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.844579914584756,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.7371700163930655,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.6988360807299614,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.7418368738144636,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.719654167070985,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.6964239552617073,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.707954892888665,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.639963921159506,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 4.094365984201431,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.7060100585222244,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.6889889743179083,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.574992995709181,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.397874068468809,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.4789929632097483,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.383056027814746,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.1512470450252295,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.1722630374133587,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.127485979348421,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 2.9626970645040274,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 2.9830720741301775,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 2.9722070321440697,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 2.940376987680793,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 2.792083891108632,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 2.766035031527281,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 2.7549960650503635,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            }
+          ]
+        },
+        {
+          "name": "present_upload_reuse_actual512evicted",
+          "mean_ms": 8.58778467712303,
+          "samples": [
+            {
+              "ms": 8.32354393787682,
+              "main_read_bytes": 1797588,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/omni/_limbo/0/GrizzlyCreek_SBS_final.tif": 1797588
+              },
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 9.054121095687151,
+              "main_read_bytes": 1797588,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/omni/_limbo/0/GrizzlyCreek_SBS_final.tif": 1797588
+              },
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 8.385688997805119,
+              "main_read_bytes": 1797588,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/omni/_limbo/0/GrizzlyCreek_SBS_final.tif": 1797588
+              },
+              "digest_check_count": 3,
+              "locks": []
+            }
+          ]
+        },
+        {
+          "name": "present_upload_reuse_post_eviction_settled",
+          "mean_ms": 3.726358385756612,
+          "samples": [
+            {
+              "ms": 3.6722421646118164,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.6947201006114483,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.7637969944626093,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.7341618444770575,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.65007808431983,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.662247909232974,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.6664509680122137,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.7033408880233765,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.681256901472807,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 4.035288002341986,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            }
+          ]
+        },
+        {
+          "name": "consumed_child_reuse_cold",
+          "mean_ms": 12.29221997782588,
+          "samples": [
+            {
+              "ms": 12.544508092105389,
+              "main_read_bytes": 1797588,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/_pups/omni/scenarios/sbs_map_R3JpenpseUNyZWVrX1NCU19maW5hbC50aWY/disturbed/GrizzlyCreek_SBS_final.tif": 1797588
+              },
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 8.842455921694636,
+              "main_read_bytes": 1797588,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/_pups/omni/scenarios/sbs_map_R3JpenpseUNyZWVrX1NCU19maW5hbC50aWY/disturbed/GrizzlyCreek_SBS_final.tif": 1797588
+              },
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 14.593486906960607,
+              "main_read_bytes": 1797588,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/_pups/omni/scenarios/sbs_map_R3JpenpseUNyZWVrX1NCU19maW5hbC50aWY/disturbed/GrizzlyCreek_SBS_final.tif": 1797588
+              },
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 13.301663100719452,
+              "main_read_bytes": 1797588,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/_pups/omni/scenarios/sbs_map_R3JpenpseUNyZWVrX1NCU19maW5hbC50aWY/disturbed/GrizzlyCreek_SBS_final.tif": 1797588
+              },
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 12.178985867649317,
+              "main_read_bytes": 1797588,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/_pups/omni/scenarios/sbs_map_R3JpenpseUNyZWVrX1NCU19maW5hbC50aWY/disturbed/GrizzlyCreek_SBS_final.tif": 1797588
+              },
+              "digest_check_count": 5,
+              "locks": []
+            }
+          ]
+        },
+        {
+          "name": "consumed_child_reuse_settled",
+          "mean_ms": 4.470303708997865,
+          "samples": [
+            {
+              "ms": 5.537616088986397,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.546100903302431,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.525016924366355,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.5100880563259125,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.4936709348112345,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.491168005391955,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.481087835505605,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.485942820087075,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.455140955746174,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.426718853414059,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.088314181193709,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.089699057862163,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 4.877998027950525,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 4.731159191578627,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 4.467566963285208,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 4.421520978212357,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 4.34888107702136,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 4.115652991458774,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 4.087226931005716,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 3.8629868067801,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 3.883815137669444,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 3.698146203532815,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 3.654022002592683,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 3.4713209606707096,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 3.3998838625848293,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 3.4272598568350077,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 3.0963639728724957,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 3.22253187187016,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 3.134361933916807,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 3.077847883105278,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            }
+          ]
+        },
+        {
+          "name": "consumed_child_reuse_actual512evicted",
+          "mean_ms": 9.19144763611257,
+          "samples": [
+            {
+              "ms": 9.414025116711855,
+              "main_read_bytes": 1797588,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/_pups/omni/scenarios/sbs_map_R3JpenpseUNyZWVrX1NCU19maW5hbC50aWY/disturbed/GrizzlyCreek_SBS_final.tif": 1797588
+              },
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 8.900351822376251,
+              "main_read_bytes": 1797588,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/_pups/omni/scenarios/sbs_map_R3JpenpseUNyZWVrX1NCU19maW5hbC50aWY/disturbed/GrizzlyCreek_SBS_final.tif": 1797588
+              },
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 9.259965969249606,
+              "main_read_bytes": 1797588,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/_pups/omni/scenarios/sbs_map_R3JpenpseUNyZWVrX1NCU19maW5hbC50aWY/disturbed/GrizzlyCreek_SBS_final.tif": 1797588
+              },
+              "digest_check_count": 5,
+              "locks": []
+            }
+          ]
+        },
+        {
+          "name": "consumed_child_reuse_post_eviction_settled",
+          "mean_ms": 5.5507923709228635,
+          "samples": [
+            {
+              "ms": 5.568776978179812,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.491077899932861,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.512577015906572,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.653454922139645,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.516011966392398,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.542750004678965,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.593813955783844,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.492865806445479,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.737896077334881,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.398699082434177,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            }
+          ]
+        },
+        {
+          "name": "execution_complete_helper_cold",
+          "mean_ms": 38.11301845125854,
+          "samples": [
+            {
+              "ms": 38.274940103292465,
+              "main_read_bytes": 4793568,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/omni/_limbo/0/GrizzlyCreek_SBS_final.tif": 2995980,
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/_pups/omni/scenarios/sbs_map_R3JpenpseUNyZWVrX1NCU19maW5hbC50aWY/disturbed/GrizzlyCreek_SBS_final.tif": 1797588
+              },
+              "digest_check_count": 9,
+              "locks": []
+            },
+            {
+              "ms": 36.96947102434933,
+              "main_read_bytes": 4793568,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/omni/_limbo/0/GrizzlyCreek_SBS_final.tif": 2995980,
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/_pups/omni/scenarios/sbs_map_R3JpenpseUNyZWVrX1NCU19maW5hbC50aWY/disturbed/GrizzlyCreek_SBS_final.tif": 1797588
+              },
+              "digest_check_count": 9,
+              "locks": []
+            },
+            {
+              "ms": 35.85539711639285,
+              "main_read_bytes": 4793568,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/omni/_limbo/0/GrizzlyCreek_SBS_final.tif": 2995980,
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/_pups/omni/scenarios/sbs_map_R3JpenpseUNyZWVrX1NCU19maW5hbC50aWY/disturbed/GrizzlyCreek_SBS_final.tif": 1797588
+              },
+              "digest_check_count": 9,
+              "locks": []
+            },
+            {
+              "ms": 40.36303702741861,
+              "main_read_bytes": 4793568,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/omni/_limbo/0/GrizzlyCreek_SBS_final.tif": 2995980,
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/_pups/omni/scenarios/sbs_map_R3JpenpseUNyZWVrX1NCU19maW5hbC50aWY/disturbed/GrizzlyCreek_SBS_final.tif": 1797588
+              },
+              "digest_check_count": 9,
+              "locks": []
+            },
+            {
+              "ms": 39.10224698483944,
+              "main_read_bytes": 4793568,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/omni/_limbo/0/GrizzlyCreek_SBS_final.tif": 2995980,
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/_pups/omni/scenarios/sbs_map_R3JpenpseUNyZWVrX1NCU19maW5hbC50aWY/disturbed/GrizzlyCreek_SBS_final.tif": 1797588
+              },
+              "digest_check_count": 9,
+              "locks": []
+            }
+          ]
+        },
+        {
+          "name": "execution_complete_initial_upload_settled",
+          "mean_ms": 37.315151964624725,
+          "samples": [
+            {
+              "ms": 48.539603827521205,
+              "main_read_bytes": 2396784,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/omni/_limbo/0/GrizzlyCreek_SBS_final.tif": 599196,
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/_pups/omni/scenarios/sbs_map_R3JpenpseUNyZWVrX1NCU19maW5hbC50aWY/disturbed/GrizzlyCreek_SBS_final.tif": 1797588
+              },
+              "digest_check_count": 9,
+              "locks": []
+            },
+            {
+              "ms": 31.21105907484889,
+              "main_read_bytes": 2396784,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/omni/_limbo/0/GrizzlyCreek_SBS_final.tif": 599196,
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/_pups/omni/scenarios/sbs_map_R3JpenpseUNyZWVrX1NCU19maW5hbC50aWY/disturbed/GrizzlyCreek_SBS_final.tif": 1797588
+              },
+              "digest_check_count": 9,
+              "locks": []
+            },
+            {
+              "ms": 32.19479299150407,
+              "main_read_bytes": 2396784,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/omni/_limbo/0/GrizzlyCreek_SBS_final.tif": 599196,
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/_pups/omni/scenarios/sbs_map_R3JpenpseUNyZWVrX1NCU19maW5hbC50aWY/disturbed/GrizzlyCreek_SBS_final.tif": 1797588
+              },
+              "digest_check_count": 9,
+              "locks": []
+            }
+          ]
+        },
+        {
+          "name": "execution_with_real_reset_and_admission_locks",
+          "mean_ms": 130.03318097131947,
+          "samples": [
+            {
+              "ms": 147.57500402629375,
+              "main_read_bytes": 4793568,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/omni/_limbo/0/GrizzlyCreek_SBS_final.tif": 2995980,
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/_pups/omni/scenarios/sbs_map_R3JpenpseUNyZWVrX1NCU19maW5hbC50aWY/disturbed/GrizzlyCreek_SBS_final.tif": 1797588
+              },
+              "digest_check_count": 9,
+              "locks": [
+                {
+                  "acquire_ms": 1.8336321227252483,
+                  "body_ms": 4.82234894298017,
+                  "acquired_to_exit_ms": 66.43361295573413,
+                  "total_ms": 68.26724507845938
+                },
+                {
+                  "acquire_ms": 1.1694170534610748,
+                  "body_ms": 8.097508922219276,
+                  "acquired_to_exit_ms": 43.013210874050856,
+                  "total_ms": 44.18262792751193
+                }
+              ]
+            },
+            {
+              "ms": 118.61323285847902,
+              "main_read_bytes": 4793568,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/omni/_limbo/0/GrizzlyCreek_SBS_final.tif": 2995980,
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/_pups/omni/scenarios/sbs_map_R3JpenpseUNyZWVrX1NCU19maW5hbC50aWY/disturbed/GrizzlyCreek_SBS_final.tif": 1797588
+              },
+              "digest_check_count": 9,
+              "locks": [
+                {
+                  "acquire_ms": 1.1057439260184765,
+                  "body_ms": 3.7741430569440126,
+                  "acquired_to_exit_ms": 35.62195017002523,
+                  "total_ms": 36.727694096043706
+                },
+                {
+                  "acquire_ms": 0.9695680346339941,
+                  "body_ms": 4.336799960583448,
+                  "acquired_to_exit_ms": 45.587170869112015,
+                  "total_ms": 46.55673890374601
+                }
+              ]
+            },
+            {
+              "ms": 123.91130602918565,
+              "main_read_bytes": 4793568,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/omni/_limbo/0/GrizzlyCreek_SBS_final.tif": 2995980,
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-grizzly-be26c617/_pups/omni/scenarios/sbs_map_R3JpenpseUNyZWVrX1NCU19maW5hbC50aWY/disturbed/GrizzlyCreek_SBS_final.tif": 1797588
+              },
+              "digest_check_count": 9,
+              "locks": [
+                {
+                  "acquire_ms": 1.0827130172401667,
+                  "body_ms": 3.574481001123786,
+                  "acquired_to_exit_ms": 43.97623799741268,
+                  "total_ms": 45.05895101465285
+                },
+                {
+                  "acquire_ms": 1.0942360386252403,
+                  "body_ms": 4.23089787364006,
+                  "acquired_to_exit_ms": 42.97334305010736,
+                  "total_ms": 44.0675790887326
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "consumed_reuse_with_real_admission_lock_settled",
+          "mean_ms": 43.372621992602944,
+          "samples": [
+            {
+              "ms": 52.81378305517137,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": [
+                {
+                  "acquire_ms": 1.3169718440622091,
+                  "body_ms": 2.837049076333642,
+                  "acquired_to_exit_ms": 49.084582133218646,
+                  "total_ms": 50.401553977280855
+                }
+              ]
+            },
+            {
+              "ms": 45.30685301870108,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": [
+                {
+                  "acquire_ms": 1.090147066861391,
+                  "body_ms": 2.314680954441428,
+                  "acquired_to_exit_ms": 42.241586837917566,
+                  "total_ms": 43.33173390477896
+                }
+              ]
+            },
+            {
+              "ms": 40.90144904330373,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": [
+                {
+                  "acquire_ms": 0.855801161378622,
+                  "body_ms": 1.7925878055393696,
+                  "acquired_to_exit_ms": 38.56218280270696,
+                  "total_ms": 39.41798396408558
+                }
+              ]
+            },
+            {
+              "ms": 38.47216395661235,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": [
+                {
+                  "acquire_ms": 0.8935830555856228,
+                  "body_ms": 1.8039969727396965,
+                  "acquired_to_exit_ms": 35.98797903396189,
+                  "total_ms": 36.881562089547515
+                }
+              ]
+            },
+            {
+              "ms": 39.3688608892262,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": [
+                {
+                  "acquire_ms": 0.908553833141923,
+                  "body_ms": 1.9327951595187187,
+                  "acquired_to_exit_ms": 36.86972404830158,
+                  "total_ms": 37.7782778814435
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "final_child_sha256": "7d1ed360d8e639050cf3879293efcdbee216bd9a4faac4e03399442416d97405",
+      "final_child_mode": "0o640",
+      "source_consumed": true,
+      "final_run_state_count": 10
+    },
+    "rattlesnake": {
+      "name": "rattlesnake",
+      "source": "/wc1/batch/qa-sbs-receipts-89a2b9544fb5/rattlesnake-original/disturbed/Rattlesnake.tif",
+      "source_bytes": 747242,
+      "source_sha256": "ae47292c64b0410ee987b38d0925f445ab5ef971c869bbc8bf924123b015b7c6",
+      "fixture_note": "Unmodified actual uploaded main bytes",
+      "owner_wd": "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2",
+      "runid": "batch;;qa-omni-sbs-implementation-7d7951e1b463;;run-rattlesnake-43a37dc2",
+      "child": "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/_pups/omni/scenarios/sbs_map_UmF0dGxlc25ha2UudGlm/disturbed/Rattlesnake.tif",
+      "measurements": [
+        {
+          "name": "present_upload_reuse_cold",
+          "mean_ms": 14.906283188611269,
+          "samples": [
+            {
+              "ms": 19.494556821882725,
+              "main_read_bytes": 2241726,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/omni/_limbo/0/Rattlesnake.tif": 2241726
+              },
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 16.652574064210057,
+              "main_read_bytes": 2241726,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/omni/_limbo/0/Rattlesnake.tif": 2241726
+              },
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 13.958424096927047,
+              "main_read_bytes": 2241726,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/omni/_limbo/0/Rattlesnake.tif": 2241726
+              },
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 12.69388198852539,
+              "main_read_bytes": 2241726,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/omni/_limbo/0/Rattlesnake.tif": 2241726
+              },
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 11.731978971511126,
+              "main_read_bytes": 2241726,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/omni/_limbo/0/Rattlesnake.tif": 2241726
+              },
+              "digest_check_count": 3,
+              "locks": []
+            }
+          ]
+        },
+        {
+          "name": "present_upload_reuse_settled",
+          "mean_ms": 3.4189066772038736,
+          "samples": [
+            {
+              "ms": 3.7938018795102835,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.7778650876134634,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.788549918681383,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.748816903680563,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.779164981096983,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.847877960652113,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.7599410861730576,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.7759230472147465,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.7707099691033363,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 4.00187517516315,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.8079910445958376,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.730078926309943,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.761598840355873,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.7485379725694656,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.74617800116539,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.5100190434604883,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.444492118433118,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.435553051531315,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.3044270239770412,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.1654390040785074,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.162672044709325,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.092224942520261,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 2.998674986883998,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 2.933110110461712,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 2.996062859892845,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 2.804929157719016,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 2.7878480032086372,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 2.7577229775488377,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 2.778309164568782,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 2.556805033236742,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            }
+          ]
+        },
+        {
+          "name": "present_upload_reuse_actual512evicted",
+          "mean_ms": 10.258838922406236,
+          "samples": [
+            {
+              "ms": 10.004080832004547,
+              "main_read_bytes": 2241726,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/omni/_limbo/0/Rattlesnake.tif": 2241726
+              },
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 10.174314957112074,
+              "main_read_bytes": 2241726,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/omni/_limbo/0/Rattlesnake.tif": 2241726
+              },
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 10.598120978102088,
+              "main_read_bytes": 2241726,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/omni/_limbo/0/Rattlesnake.tif": 2241726
+              },
+              "digest_check_count": 3,
+              "locks": []
+            }
+          ]
+        },
+        {
+          "name": "present_upload_reuse_post_eviction_settled",
+          "mean_ms": 3.752320888452232,
+          "samples": [
+            {
+              "ms": 3.8295660633593798,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.662050934508443,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.7098859902471304,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.7196381017565727,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.7351378705352545,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.881933866068721,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.7466289941221476,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.7545920349657536,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.7458138540387154,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 3.7379611749202013,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            }
+          ]
+        },
+        {
+          "name": "consumed_child_reuse_cold",
+          "mean_ms": 13.008624734357,
+          "samples": [
+            {
+              "ms": 13.959474861621857,
+              "main_read_bytes": 2241726,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/_pups/omni/scenarios/sbs_map_UmF0dGxlc25ha2UudGlm/disturbed/Rattlesnake.tif": 2241726
+              },
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 10.539666982367635,
+              "main_read_bytes": 2241726,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/_pups/omni/scenarios/sbs_map_UmF0dGxlc25ha2UudGlm/disturbed/Rattlesnake.tif": 2241726
+              },
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 14.755025040358305,
+              "main_read_bytes": 2241726,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/_pups/omni/scenarios/sbs_map_UmF0dGxlc25ha2UudGlm/disturbed/Rattlesnake.tif": 2241726
+              },
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 13.597209937870502,
+              "main_read_bytes": 2241726,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/_pups/omni/scenarios/sbs_map_UmF0dGxlc25ha2UudGlm/disturbed/Rattlesnake.tif": 2241726
+              },
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 12.191746849566698,
+              "main_read_bytes": 2241726,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/_pups/omni/scenarios/sbs_map_UmF0dGxlc25ha2UudGlm/disturbed/Rattlesnake.tif": 2241726
+              },
+              "digest_check_count": 5,
+              "locks": []
+            }
+          ]
+        },
+        {
+          "name": "consumed_child_reuse_settled",
+          "mean_ms": 4.4844986870884895,
+          "samples": [
+            {
+              "ms": 5.52259711548686,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.532211158424616,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.524655804038048,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.566848907619715,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.612272070720792,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.4860590025782585,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.566032836213708,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.495284916833043,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.5432680528610945,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.464639980345964,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.173990968614817,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.008363863453269,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 4.719145828858018,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 4.769254010170698,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 4.532631952315569,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 4.380681086331606,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 4.323284840211272,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 4.184609977528453,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 3.9785399567335844,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 3.865682054311037,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 3.893662942573428,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 3.68707999587059,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 3.646363038569689,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 3.4927960950881243,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 3.434801008552313,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 3.3857091329991817,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 3.2693110406398773,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 3.2152580097317696,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 3.118047956377268,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 3.141877008602023,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            }
+          ]
+        },
+        {
+          "name": "consumed_child_reuse_actual512evicted",
+          "mean_ms": 10.14412931787471,
+          "samples": [
+            {
+              "ms": 10.212751105427742,
+              "main_read_bytes": 2241726,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/_pups/omni/scenarios/sbs_map_UmF0dGxlc25ha2UudGlm/disturbed/Rattlesnake.tif": 2241726
+              },
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 10.286289034411311,
+              "main_read_bytes": 2241726,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/_pups/omni/scenarios/sbs_map_UmF0dGxlc25ha2UudGlm/disturbed/Rattlesnake.tif": 2241726
+              },
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 9.933347813785076,
+              "main_read_bytes": 2241726,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/_pups/omni/scenarios/sbs_map_UmF0dGxlc25ha2UudGlm/disturbed/Rattlesnake.tif": 2241726
+              },
+              "digest_check_count": 5,
+              "locks": []
+            }
+          ]
+        },
+        {
+          "name": "consumed_child_reuse_post_eviction_settled",
+          "mean_ms": 5.46255202498287,
+          "samples": [
+            {
+              "ms": 5.519466008991003,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.449861055240035,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.447058007121086,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.4506100714206696,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.559203214943409,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.4513318464159966,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.424968199804425,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.454518832266331,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.4361410439014435,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 5.4323619697242975,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            }
+          ]
+        },
+        {
+          "name": "execution_complete_helper_cold",
+          "mean_ms": 42.30132936500013,
+          "samples": [
+            {
+              "ms": 43.34712284617126,
+              "main_read_bytes": 5977936,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/omni/_limbo/0/Rattlesnake.tif": 3736210,
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/_pups/omni/scenarios/sbs_map_UmF0dGxlc25ha2UudGlm/disturbed/Rattlesnake.tif": 2241726
+              },
+              "digest_check_count": 9,
+              "locks": []
+            },
+            {
+              "ms": 41.64883401244879,
+              "main_read_bytes": 5977936,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/omni/_limbo/0/Rattlesnake.tif": 3736210,
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/_pups/omni/scenarios/sbs_map_UmF0dGxlc25ha2UudGlm/disturbed/Rattlesnake.tif": 2241726
+              },
+              "digest_check_count": 9,
+              "locks": []
+            },
+            {
+              "ms": 40.68951518274844,
+              "main_read_bytes": 5977936,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/omni/_limbo/0/Rattlesnake.tif": 3736210,
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/_pups/omni/scenarios/sbs_map_UmF0dGxlc25ha2UudGlm/disturbed/Rattlesnake.tif": 2241726
+              },
+              "digest_check_count": 9,
+              "locks": []
+            },
+            {
+              "ms": 43.82369481027126,
+              "main_read_bytes": 5977936,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/omni/_limbo/0/Rattlesnake.tif": 3736210,
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/_pups/omni/scenarios/sbs_map_UmF0dGxlc25ha2UudGlm/disturbed/Rattlesnake.tif": 2241726
+              },
+              "digest_check_count": 9,
+              "locks": []
+            },
+            {
+              "ms": 41.997479973360896,
+              "main_read_bytes": 5977936,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/omni/_limbo/0/Rattlesnake.tif": 3736210,
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/_pups/omni/scenarios/sbs_map_UmF0dGxlc25ha2UudGlm/disturbed/Rattlesnake.tif": 2241726
+              },
+              "digest_check_count": 9,
+              "locks": []
+            }
+          ]
+        },
+        {
+          "name": "execution_complete_initial_upload_settled",
+          "mean_ms": 30.933314313491184,
+          "samples": [
+            {
+              "ms": 30.57962004095316,
+              "main_read_bytes": 2988968,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/omni/_limbo/0/Rattlesnake.tif": 747242,
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/_pups/omni/scenarios/sbs_map_UmF0dGxlc25ha2UudGlm/disturbed/Rattlesnake.tif": 2241726
+              },
+              "digest_check_count": 9,
+              "locks": []
+            },
+            {
+              "ms": 34.674422815442085,
+              "main_read_bytes": 2988968,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/omni/_limbo/0/Rattlesnake.tif": 747242,
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/_pups/omni/scenarios/sbs_map_UmF0dGxlc25ha2UudGlm/disturbed/Rattlesnake.tif": 2241726
+              },
+              "digest_check_count": 9,
+              "locks": []
+            },
+            {
+              "ms": 27.545900084078312,
+              "main_read_bytes": 2988968,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/omni/_limbo/0/Rattlesnake.tif": 747242,
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/_pups/omni/scenarios/sbs_map_UmF0dGxlc25ha2UudGlm/disturbed/Rattlesnake.tif": 2241726
+              },
+              "digest_check_count": 9,
+              "locks": []
+            }
+          ]
+        },
+        {
+          "name": "execution_with_real_reset_and_admission_locks",
+          "mean_ms": 127.2382983006537,
+          "samples": [
+            {
+              "ms": 144.91219189949334,
+              "main_read_bytes": 5977936,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/omni/_limbo/0/Rattlesnake.tif": 3736210,
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/_pups/omni/scenarios/sbs_map_UmF0dGxlc25ha2UudGlm/disturbed/Rattlesnake.tif": 2241726
+              },
+              "digest_check_count": 9,
+              "locks": [
+                {
+                  "acquire_ms": 1.8029999919235706,
+                  "body_ms": 5.310057196766138,
+                  "acquired_to_exit_ms": 47.66411799937487,
+                  "total_ms": 49.46711799129844
+                },
+                {
+                  "acquire_ms": 1.4315990265458822,
+                  "body_ms": 6.732773035764694,
+                  "acquired_to_exit_ms": 49.57905295304954,
+                  "total_ms": 51.01065197959542
+                }
+              ]
+            },
+            {
+              "ms": 126.607954967767,
+              "main_read_bytes": 5977936,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/omni/_limbo/0/Rattlesnake.tif": 3736210,
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/_pups/omni/scenarios/sbs_map_UmF0dGxlc25ha2UudGlm/disturbed/Rattlesnake.tif": 2241726
+              },
+              "digest_check_count": 9,
+              "locks": [
+                {
+                  "acquire_ms": 1.1308270040899515,
+                  "body_ms": 4.016523016616702,
+                  "acquired_to_exit_ms": 39.549357956275344,
+                  "total_ms": 40.680184960365295
+                },
+                {
+                  "acquire_ms": 1.065156189724803,
+                  "body_ms": 4.789664875715971,
+                  "acquired_to_exit_ms": 46.78256087936461,
+                  "total_ms": 47.84771706908941
+                }
+              ]
+            },
+            {
+              "ms": 110.19474803470075,
+              "main_read_bytes": 5977936,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/omni/_limbo/0/Rattlesnake.tif": 3736210,
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-rattlesnake-43a37dc2/_pups/omni/scenarios/sbs_map_UmF0dGxlc25ha2UudGlm/disturbed/Rattlesnake.tif": 2241726
+              },
+              "digest_check_count": 9,
+              "locks": [
+                {
+                  "acquire_ms": 1.1098547838628292,
+                  "body_ms": 4.385451087728143,
+                  "acquired_to_exit_ms": 35.26199306361377,
+                  "total_ms": 36.3718478474766
+                },
+                {
+                  "acquire_ms": 1.3116409536451101,
+                  "body_ms": 4.876371007412672,
+                  "acquired_to_exit_ms": 39.74422113969922,
+                  "total_ms": 41.05586209334433
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "consumed_reuse_with_real_admission_lock_settled",
+          "mean_ms": 53.865566570311785,
+          "samples": [
+            {
+              "ms": 61.74267386086285,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": [
+                {
+                  "acquire_ms": 2.277758903801441,
+                  "body_ms": 4.644823027774692,
+                  "acquired_to_exit_ms": 56.38130800798535,
+                  "total_ms": 58.659066911786795
+                }
+              ]
+            },
+            {
+              "ms": 52.281534066423774,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": [
+                {
+                  "acquire_ms": 1.6660559922456741,
+                  "body_ms": 3.329050960019231,
+                  "acquired_to_exit_ms": 47.86885902285576,
+                  "total_ms": 49.53491501510143
+                }
+              ]
+            },
+            {
+              "ms": 55.224383948370814,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": [
+                {
+                  "acquire_ms": 1.7308800015598536,
+                  "body_ms": 3.445034148171544,
+                  "acquired_to_exit_ms": 50.8068660274148,
+                  "total_ms": 52.53774602897465
+                }
+              ]
+            },
+            {
+              "ms": 53.49571700207889,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": [
+                {
+                  "acquire_ms": 1.7191029619425535,
+                  "body_ms": 3.5656020045280457,
+                  "acquired_to_exit_ms": 49.03603903949261,
+                  "total_ms": 50.75514200143516
+                }
+              ]
+            },
+            {
+              "ms": 46.583523973822594,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": [
+                {
+                  "acquire_ms": 1.2988259550184011,
+                  "body_ms": 2.7228728868067265,
+                  "acquired_to_exit_ms": 42.89533686824143,
+                  "total_ms": 44.19416282325983
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "final_child_sha256": "ae47292c64b0410ee987b38d0925f445ab5ef971c869bbc8bf924123b015b7c6",
+      "final_child_mode": "0o640",
+      "source_consumed": true,
+      "final_run_state_count": 10
+    },
+    "stress16m": {
+      "name": "stress16m",
+      "source": "/wc1/batch/qa-sbs-receipts-89a2b9544fb5/stress16m-original/disturbed/stress16m.tif",
+      "source_bytes": 16779862,
+      "source_sha256": "56f98e0d5146c0ace4bad2911d0c0085c9a977b853baf47b0c268bbfeda7e191",
+      "fixture_note": "Valid 4096x4096 uncompressed Byte TIFF derived from copied Grizzly pixels by nearest resampling; not an actual uploaded file",
+      "owner_wd": "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48",
+      "runid": "batch;;qa-omni-sbs-implementation-7d7951e1b463;;run-stress16m-c9455f48",
+      "child": "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/_pups/omni/scenarios/sbs_map_c3RyZXNzMTZtLnRpZg/disturbed/stress16m.tif",
+      "measurements": [
+        {
+          "name": "present_upload_reuse_cold",
+          "mean_ms": 173.4694937709719,
+          "samples": [
+            {
+              "ms": 169.9577469844371,
+              "main_read_bytes": 50339586,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/omni/_limbo/0/stress16m.tif": 50339586
+              },
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 171.805779915303,
+              "main_read_bytes": 50339586,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/omni/_limbo/0/stress16m.tif": 50339586
+              },
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 174.83961279504,
+              "main_read_bytes": 50339586,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/omni/_limbo/0/stress16m.tif": 50339586
+              },
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 178.32553014159203,
+              "main_read_bytes": 50339586,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/omni/_limbo/0/stress16m.tif": 50339586
+              },
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 172.41879901848733,
+              "main_read_bytes": 50339586,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/omni/_limbo/0/stress16m.tif": 50339586
+              },
+              "digest_check_count": 3,
+              "locks": []
+            }
+          ]
+        },
+        {
+          "name": "present_upload_reuse_settled",
+          "mean_ms": 1.4510067490239937,
+          "samples": [
+            {
+              "ms": 1.5508381184190512,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.537450822070241,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.5112960245460272,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.4521549455821514,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.5112748369574547,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.4165660832077265,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.4184729661792517,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.3853299897164106,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.3735098764300346,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.39815011061728,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.3460239861160517,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.3669391628354788,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.3358218129724264,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.4092039782553911,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.4269379898905754,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.4217121060937643,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.4572490472346544,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.456407830119133,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.4322369825094938,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.4997879043221474,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.4160149730741978,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.4796021860092878,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.5342559199780226,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.4773861039429903,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.5693919267505407,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.4654300175607204,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.4570888597518206,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.5225529205054045,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.464681001380086,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.4364339876919985,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            }
+          ]
+        },
+        {
+          "name": "present_upload_reuse_actual512evicted",
+          "mean_ms": 169.1751623681436,
+          "samples": [
+            {
+              "ms": 170.53121188655496,
+              "main_read_bytes": 50339586,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/omni/_limbo/0/stress16m.tif": 50339586
+              },
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 169.60774408653378,
+              "main_read_bytes": 50339586,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/omni/_limbo/0/stress16m.tif": 50339586
+              },
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 167.38653113134205,
+              "main_read_bytes": 50339586,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/omni/_limbo/0/stress16m.tif": 50339586
+              },
+              "digest_check_count": 3,
+              "locks": []
+            }
+          ]
+        },
+        {
+          "name": "present_upload_reuse_post_eviction_settled",
+          "mean_ms": 1.4179813209921122,
+          "samples": [
+            {
+              "ms": 1.4772668946534395,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.4669520314782858,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.4032588806003332,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.4174061361700296,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.3793539255857468,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.404372975230217,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.3843730557709932,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.4888150617480278,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.3913121074438095,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            },
+            {
+              "ms": 1.3667021412402391,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 3,
+              "locks": []
+            }
+          ]
+        },
+        {
+          "name": "consumed_child_reuse_cold",
+          "mean_ms": 175.0590437091887,
+          "samples": [
+            {
+              "ms": 199.7974719852209,
+              "main_read_bytes": 50339586,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/_pups/omni/scenarios/sbs_map_c3RyZXNzMTZtLnRpZg/disturbed/stress16m.tif": 50339586
+              },
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 176.3912218157202,
+              "main_read_bytes": 50339586,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/_pups/omni/scenarios/sbs_map_c3RyZXNzMTZtLnRpZg/disturbed/stress16m.tif": 50339586
+              },
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 174.28253684192896,
+              "main_read_bytes": 50339586,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/_pups/omni/scenarios/sbs_map_c3RyZXNzMTZtLnRpZg/disturbed/stress16m.tif": 50339586
+              },
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 163.2845480926335,
+              "main_read_bytes": 50339586,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/_pups/omni/scenarios/sbs_map_c3RyZXNzMTZtLnRpZg/disturbed/stress16m.tif": 50339586
+              },
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 161.53943981043994,
+              "main_read_bytes": 50339586,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/_pups/omni/scenarios/sbs_map_c3RyZXNzMTZtLnRpZg/disturbed/stress16m.tif": 50339586
+              },
+              "digest_check_count": 5,
+              "locks": []
+            }
+          ]
+        },
+        {
+          "name": "consumed_child_reuse_settled",
+          "mean_ms": 2.082921906063954,
+          "samples": [
+            {
+              "ms": 2.1414849907159805,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 2.0554568618535995,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 2.0462488755583763,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 2.106877975165844,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 2.074671909213066,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 1.9739489071071148,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 1.9291432108730078,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 2.0064960699528456,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 2.068724948912859,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 2.3734739515930414,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 2.0905002020299435,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 2.221886068582535,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 2.2197070065885782,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 2.1269998978823423,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 2.094054827466607,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 1.9727330654859543,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 2.09226505830884,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 2.368918852880597,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 2.135767135769129,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 2.064538886770606,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 2.0440928637981415,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 1.957004889845848,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 2.1271100267767906,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 2.023167908191681,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 1.9590279553085566,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 1.955646090209484,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 1.9672580529004335,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 2.3027989082038403,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 1.9579369109123945,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 2.029714873060584,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            }
+          ]
+        },
+        {
+          "name": "consumed_child_reuse_actual512evicted",
+          "mean_ms": 168.6430493524919,
+          "samples": [
+            {
+              "ms": 169.02324906550348,
+              "main_read_bytes": 50339586,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/_pups/omni/scenarios/sbs_map_c3RyZXNzMTZtLnRpZg/disturbed/stress16m.tif": 50339586
+              },
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 169.33502512983978,
+              "main_read_bytes": 50339586,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/_pups/omni/scenarios/sbs_map_c3RyZXNzMTZtLnRpZg/disturbed/stress16m.tif": 50339586
+              },
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 167.57087386213243,
+              "main_read_bytes": 50339586,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/_pups/omni/scenarios/sbs_map_c3RyZXNzMTZtLnRpZg/disturbed/stress16m.tif": 50339586
+              },
+              "digest_check_count": 5,
+              "locks": []
+            }
+          ]
+        },
+        {
+          "name": "consumed_child_reuse_post_eviction_settled",
+          "mean_ms": 2.5196195347234607,
+          "samples": [
+            {
+              "ms": 2.728530904278159,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 2.6973248459398746,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 2.585330046713352,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 2.529185963794589,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 2.504129894077778,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 2.5326970499008894,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 2.435044851154089,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 2.437956864014268,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 2.34312005341053,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            },
+            {
+              "ms": 2.4028748739510775,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": []
+            }
+          ]
+        },
+        {
+          "name": "execution_complete_helper_cold",
+          "mean_ms": 582.0630154572427,
+          "samples": [
+            {
+              "ms": 626.962693175301,
+              "main_read_bytes": 134238896,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/omni/_limbo/0/stress16m.tif": 83899310,
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/_pups/omni/scenarios/sbs_map_c3RyZXNzMTZtLnRpZg/disturbed/stress16m.tif": 50339586
+              },
+              "digest_check_count": 9,
+              "locks": []
+            },
+            {
+              "ms": 607.5834028888494,
+              "main_read_bytes": 134238896,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/omni/_limbo/0/stress16m.tif": 83899310,
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/_pups/omni/scenarios/sbs_map_c3RyZXNzMTZtLnRpZg/disturbed/stress16m.tif": 50339586
+              },
+              "digest_check_count": 9,
+              "locks": []
+            },
+            {
+              "ms": 570.8844820037484,
+              "main_read_bytes": 134238896,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/omni/_limbo/0/stress16m.tif": 83899310,
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/_pups/omni/scenarios/sbs_map_c3RyZXNzMTZtLnRpZg/disturbed/stress16m.tif": 50339586
+              },
+              "digest_check_count": 9,
+              "locks": []
+            },
+            {
+              "ms": 543.0092881433666,
+              "main_read_bytes": 134238896,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/omni/_limbo/0/stress16m.tif": 83899310,
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/_pups/omni/scenarios/sbs_map_c3RyZXNzMTZtLnRpZg/disturbed/stress16m.tif": 50339586
+              },
+              "digest_check_count": 9,
+              "locks": []
+            },
+            {
+              "ms": 561.8752110749483,
+              "main_read_bytes": 134238896,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/omni/_limbo/0/stress16m.tif": 83899310,
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/_pups/omni/scenarios/sbs_map_c3RyZXNzMTZtLnRpZg/disturbed/stress16m.tif": 50339586
+              },
+              "digest_check_count": 9,
+              "locks": []
+            }
+          ]
+        },
+        {
+          "name": "execution_complete_initial_upload_settled",
+          "mean_ms": 313.7111706503977,
+          "samples": [
+            {
+              "ms": 311.83683197014034,
+              "main_read_bytes": 67119448,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/omni/_limbo/0/stress16m.tif": 16779862,
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/_pups/omni/scenarios/sbs_map_c3RyZXNzMTZtLnRpZg/disturbed/stress16m.tif": 50339586
+              },
+              "digest_check_count": 9,
+              "locks": []
+            },
+            {
+              "ms": 302.5768860243261,
+              "main_read_bytes": 67119448,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/omni/_limbo/0/stress16m.tif": 16779862,
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/_pups/omni/scenarios/sbs_map_c3RyZXNzMTZtLnRpZg/disturbed/stress16m.tif": 50339586
+              },
+              "digest_check_count": 9,
+              "locks": []
+            },
+            {
+              "ms": 326.7197939567268,
+              "main_read_bytes": 67119448,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/omni/_limbo/0/stress16m.tif": 16779862,
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/_pups/omni/scenarios/sbs_map_c3RyZXNzMTZtLnRpZg/disturbed/stress16m.tif": 50339586
+              },
+              "digest_check_count": 9,
+              "locks": []
+            }
+          ]
+        },
+        {
+          "name": "execution_with_real_reset_and_admission_locks",
+          "mean_ms": 672.5564180718114,
+          "samples": [
+            {
+              "ms": 655.6422100402415,
+              "main_read_bytes": 134238896,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/omni/_limbo/0/stress16m.tif": 83899310,
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/_pups/omni/scenarios/sbs_map_c3RyZXNzMTZtLnRpZg/disturbed/stress16m.tif": 50339586
+              },
+              "digest_check_count": 9,
+              "locks": [
+                {
+                  "acquire_ms": 1.5429060440510511,
+                  "body_ms": 57.64831299893558,
+                  "acquired_to_exit_ms": 99.77573296055198,
+                  "total_ms": 101.31863900460303
+                },
+                {
+                  "acquire_ms": 1.087113982066512,
+                  "body_ms": 59.15076588280499,
+                  "acquired_to_exit_ms": 93.24094280600548,
+                  "total_ms": 94.32805678807199
+                }
+              ]
+            },
+            {
+              "ms": 669.9489241000265,
+              "main_read_bytes": 134238896,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/omni/_limbo/0/stress16m.tif": 83899310,
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/_pups/omni/scenarios/sbs_map_c3RyZXNzMTZtLnRpZg/disturbed/stress16m.tif": 50339586
+              },
+              "digest_check_count": 9,
+              "locks": [
+                {
+                  "acquire_ms": 1.090311212465167,
+                  "body_ms": 60.020733857527375,
+                  "acquired_to_exit_ms": 99.6866449713707,
+                  "total_ms": 100.77695618383586
+                },
+                {
+                  "acquire_ms": 1.1399798095226288,
+                  "body_ms": 57.03185615129769,
+                  "acquired_to_exit_ms": 93.38955907151103,
+                  "total_ms": 94.52953888103366
+                }
+              ]
+            },
+            {
+              "ms": 692.0781200751662,
+              "main_read_bytes": 134238896,
+              "reads_by_path": {
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/omni/_limbo/0/stress16m.tif": 83899310,
+                "/wc1/batch/qa-omni-sbs-implementation-7d7951e1b463/run-stress16m-c9455f48/_pups/omni/scenarios/sbs_map_c3RyZXNzMTZtLnRpZg/disturbed/stress16m.tif": 50339586
+              },
+              "digest_check_count": 9,
+              "locks": [
+                {
+                  "acquire_ms": 1.0685368906706572,
+                  "body_ms": 58.816815027967095,
+                  "acquired_to_exit_ms": 98.30864798277617,
+                  "total_ms": 99.37718487344682
+                },
+                {
+                  "acquire_ms": 1.3226729352027178,
+                  "body_ms": 59.166950872167945,
+                  "acquired_to_exit_ms": 95.63161106780171,
+                  "total_ms": 96.95428400300443
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "consumed_reuse_with_real_admission_lock_settled",
+          "mean_ms": 55.87400458753109,
+          "samples": [
+            {
+              "ms": 50.352565944194794,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": [
+                {
+                  "acquire_ms": 1.3993021566420794,
+                  "body_ms": 2.7139249723404646,
+                  "acquired_to_exit_ms": 46.716291923075914,
+                  "total_ms": 48.115594079717994
+                }
+              ]
+            },
+            {
+              "ms": 54.786585038527846,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": [
+                {
+                  "acquire_ms": 1.569726038724184,
+                  "body_ms": 2.8855109121650457,
+                  "acquired_to_exit_ms": 50.8831599727273,
+                  "total_ms": 52.45288601145148
+                }
+              ]
+            },
+            {
+              "ms": 62.84677796065807,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": [
+                {
+                  "acquire_ms": 1.6455708537250757,
+                  "body_ms": 3.3060191199183464,
+                  "acquired_to_exit_ms": 58.29921318218112,
+                  "total_ms": 59.944784035906196
+                }
+              ]
+            },
+            {
+              "ms": 56.89431098289788,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": [
+                {
+                  "acquire_ms": 1.6281087882816792,
+                  "body_ms": 3.6561840679496527,
+                  "acquired_to_exit_ms": 52.53949109464884,
+                  "total_ms": 54.16759988293052
+                }
+              ]
+            },
+            {
+              "ms": 54.48978301137686,
+              "main_read_bytes": 0,
+              "reads_by_path": {},
+              "digest_check_count": 5,
+              "locks": [
+                {
+                  "acquire_ms": 1.6775231342762709,
+                  "body_ms": 3.2687338534742594,
+                  "acquired_to_exit_ms": 50.11231801472604,
+                  "total_ms": 51.789841149002314
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "final_child_sha256": "56f98e0d5146c0ace4bad2911d0c0085c9a977b853baf47b0c268bbfeda7e191",
+      "final_child_mode": "0o640",
+      "source_consumed": true,
+      "final_run_state_count": 10
+    }
+  },
+  "gates": [
+    {
+      "case": "grizzly",
+      "operation": "present_upload_reuse_cold",
+      "gate": "mean_ms",
+      "actual": 9.946076525375247,
+      "maximum": 30,
+      "pass": true
+    },
+    {
+      "case": "grizzly",
+      "operation": "present_upload_reuse_settled",
+      "gate": "mean_ms",
+      "actual": 3.4549687445784607,
+      "maximum": 10,
+      "pass": true
+    },
+    {
+      "case": "grizzly",
+      "operation": "present_upload_reuse_settled",
+      "gate": "settled_payload_reads",
+      "actual": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "maximum": 0,
+      "pass": true
+    },
+    {
+      "case": "grizzly",
+      "operation": "present_upload_reuse_actual512evicted",
+      "gate": "mean_ms",
+      "actual": 8.58778467712303,
+      "maximum": 30,
+      "pass": true
+    },
+    {
+      "case": "grizzly",
+      "operation": "present_upload_reuse_post_eviction_settled",
+      "gate": "mean_ms",
+      "actual": 3.726358385756612,
+      "maximum": 10,
+      "pass": true
+    },
+    {
+      "case": "grizzly",
+      "operation": "present_upload_reuse_post_eviction_settled",
+      "gate": "settled_payload_reads",
+      "actual": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "maximum": 0,
+      "pass": true
+    },
+    {
+      "case": "grizzly",
+      "operation": "consumed_child_reuse_cold",
+      "gate": "mean_ms",
+      "actual": 12.29221997782588,
+      "maximum": 30,
+      "pass": true
+    },
+    {
+      "case": "grizzly",
+      "operation": "consumed_child_reuse_settled",
+      "gate": "mean_ms",
+      "actual": 4.470303708997865,
+      "maximum": 10,
+      "pass": true
+    },
+    {
+      "case": "grizzly",
+      "operation": "consumed_child_reuse_settled",
+      "gate": "settled_payload_reads",
+      "actual": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "maximum": 0,
+      "pass": true
+    },
+    {
+      "case": "grizzly",
+      "operation": "consumed_child_reuse_actual512evicted",
+      "gate": "mean_ms",
+      "actual": 9.19144763611257,
+      "maximum": 30,
+      "pass": true
+    },
+    {
+      "case": "grizzly",
+      "operation": "consumed_child_reuse_post_eviction_settled",
+      "gate": "mean_ms",
+      "actual": 5.5507923709228635,
+      "maximum": 10,
+      "pass": true
+    },
+    {
+      "case": "grizzly",
+      "operation": "consumed_child_reuse_post_eviction_settled",
+      "gate": "settled_payload_reads",
+      "actual": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "maximum": 0,
+      "pass": true
+    },
+    {
+      "case": "grizzly",
+      "operation": "execution_complete_helper_cold",
+      "gate": "mean_ms",
+      "actual": 38.11301845125854,
+      "maximum": 75,
+      "pass": true
+    },
+    {
+      "case": "grizzly",
+      "operation": "execution_complete_initial_upload_settled",
+      "gate": "mean_ms",
+      "actual": 37.315151964624725,
+      "maximum": 75,
+      "pass": true
+    },
+    {
+      "case": "grizzly",
+      "operation": "consumed_reuse_with_real_admission_lock_settled",
+      "gate": "settled_payload_reads",
+      "actual": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "maximum": 0,
+      "pass": true
+    },
+    {
+      "case": "rattlesnake",
+      "operation": "present_upload_reuse_cold",
+      "gate": "mean_ms",
+      "actual": 14.906283188611269,
+      "maximum": 30,
+      "pass": true
+    },
+    {
+      "case": "rattlesnake",
+      "operation": "present_upload_reuse_settled",
+      "gate": "mean_ms",
+      "actual": 3.4189066772038736,
+      "maximum": 10,
+      "pass": true
+    },
+    {
+      "case": "rattlesnake",
+      "operation": "present_upload_reuse_settled",
+      "gate": "settled_payload_reads",
+      "actual": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "maximum": 0,
+      "pass": true
+    },
+    {
+      "case": "rattlesnake",
+      "operation": "present_upload_reuse_actual512evicted",
+      "gate": "mean_ms",
+      "actual": 10.258838922406236,
+      "maximum": 30,
+      "pass": true
+    },
+    {
+      "case": "rattlesnake",
+      "operation": "present_upload_reuse_post_eviction_settled",
+      "gate": "mean_ms",
+      "actual": 3.752320888452232,
+      "maximum": 10,
+      "pass": true
+    },
+    {
+      "case": "rattlesnake",
+      "operation": "present_upload_reuse_post_eviction_settled",
+      "gate": "settled_payload_reads",
+      "actual": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "maximum": 0,
+      "pass": true
+    },
+    {
+      "case": "rattlesnake",
+      "operation": "consumed_child_reuse_cold",
+      "gate": "mean_ms",
+      "actual": 13.008624734357,
+      "maximum": 30,
+      "pass": true
+    },
+    {
+      "case": "rattlesnake",
+      "operation": "consumed_child_reuse_settled",
+      "gate": "mean_ms",
+      "actual": 4.4844986870884895,
+      "maximum": 10,
+      "pass": true
+    },
+    {
+      "case": "rattlesnake",
+      "operation": "consumed_child_reuse_settled",
+      "gate": "settled_payload_reads",
+      "actual": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "maximum": 0,
+      "pass": true
+    },
+    {
+      "case": "rattlesnake",
+      "operation": "consumed_child_reuse_actual512evicted",
+      "gate": "mean_ms",
+      "actual": 10.14412931787471,
+      "maximum": 30,
+      "pass": true
+    },
+    {
+      "case": "rattlesnake",
+      "operation": "consumed_child_reuse_post_eviction_settled",
+      "gate": "mean_ms",
+      "actual": 5.46255202498287,
+      "maximum": 10,
+      "pass": true
+    },
+    {
+      "case": "rattlesnake",
+      "operation": "consumed_child_reuse_post_eviction_settled",
+      "gate": "settled_payload_reads",
+      "actual": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "maximum": 0,
+      "pass": true
+    },
+    {
+      "case": "rattlesnake",
+      "operation": "execution_complete_helper_cold",
+      "gate": "mean_ms",
+      "actual": 42.30132936500013,
+      "maximum": 75,
+      "pass": true
+    },
+    {
+      "case": "rattlesnake",
+      "operation": "execution_complete_initial_upload_settled",
+      "gate": "mean_ms",
+      "actual": 30.933314313491184,
+      "maximum": 75,
+      "pass": true
+    },
+    {
+      "case": "rattlesnake",
+      "operation": "consumed_reuse_with_real_admission_lock_settled",
+      "gate": "settled_payload_reads",
+      "actual": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "maximum": 0,
+      "pass": true
+    },
+    {
+      "case": "stress16m",
+      "operation": "present_upload_reuse_cold",
+      "gate": "mean_ms",
+      "actual": 173.4694937709719,
+      "maximum": 200,
+      "pass": true
+    },
+    {
+      "case": "stress16m",
+      "operation": "present_upload_reuse_settled",
+      "gate": "mean_ms",
+      "actual": 1.4510067490239937,
+      "maximum": 10,
+      "pass": true
+    },
+    {
+      "case": "stress16m",
+      "operation": "present_upload_reuse_settled",
+      "gate": "settled_payload_reads",
+      "actual": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "maximum": 0,
+      "pass": true
+    },
+    {
+      "case": "stress16m",
+      "operation": "present_upload_reuse_actual512evicted",
+      "gate": "mean_ms",
+      "actual": 169.1751623681436,
+      "maximum": 200,
+      "pass": true
+    },
+    {
+      "case": "stress16m",
+      "operation": "present_upload_reuse_post_eviction_settled",
+      "gate": "mean_ms",
+      "actual": 1.4179813209921122,
+      "maximum": 10,
+      "pass": true
+    },
+    {
+      "case": "stress16m",
+      "operation": "present_upload_reuse_post_eviction_settled",
+      "gate": "settled_payload_reads",
+      "actual": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "maximum": 0,
+      "pass": true
+    },
+    {
+      "case": "stress16m",
+      "operation": "consumed_child_reuse_cold",
+      "gate": "mean_ms",
+      "actual": 175.0590437091887,
+      "maximum": 200,
+      "pass": true
+    },
+    {
+      "case": "stress16m",
+      "operation": "consumed_child_reuse_settled",
+      "gate": "mean_ms",
+      "actual": 2.082921906063954,
+      "maximum": 10,
+      "pass": true
+    },
+    {
+      "case": "stress16m",
+      "operation": "consumed_child_reuse_settled",
+      "gate": "settled_payload_reads",
+      "actual": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "maximum": 0,
+      "pass": true
+    },
+    {
+      "case": "stress16m",
+      "operation": "consumed_child_reuse_actual512evicted",
+      "gate": "mean_ms",
+      "actual": 168.6430493524919,
+      "maximum": 200,
+      "pass": true
+    },
+    {
+      "case": "stress16m",
+      "operation": "consumed_child_reuse_post_eviction_settled",
+      "gate": "mean_ms",
+      "actual": 2.5196195347234607,
+      "maximum": 10,
+      "pass": true
+    },
+    {
+      "case": "stress16m",
+      "operation": "consumed_child_reuse_post_eviction_settled",
+      "gate": "settled_payload_reads",
+      "actual": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "maximum": 0,
+      "pass": true
+    },
+    {
+      "case": "stress16m",
+      "operation": "execution_complete_helper_cold",
+      "gate": "mean_ms",
+      "actual": 582.0630154572427,
+      "maximum": 650,
+      "pass": true
+    },
+    {
+      "case": "stress16m",
+      "operation": "execution_complete_initial_upload_settled",
+      "gate": "mean_ms",
+      "actual": 313.7111706503977,
+      "maximum": 650,
+      "pass": true
+    },
+    {
+      "case": "stress16m",
+      "operation": "consumed_reuse_with_real_admission_lock_settled",
+      "gate": "settled_payload_reads",
+      "actual": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "maximum": 0,
+      "pass": true
+    }
+  ],
+  "errors": [],
+  "limits": [
+    "No native calculation, clone/reset, live HTTP or queued job execution.",
+    "Component gates exclude canonical lock acquisition/refresh/dump; actual checks inside locks are included as equivalent calls.",
+    "Separate real-lock sequence includes invalidation and admission, detached hydration and persistence.",
+    "Lock residence is acquired-context entry through context exit including dump/release; body time is also retained.",
+    "Python read counters cover all main-file payload reads in the changed helper; fixture fast-copy preparation is untimed."
+  ],
+  "completed": true,
+  "all_gates_pass": true,
+  "inputs_unchanged": true,
+  "modules_unchanged": true
+}

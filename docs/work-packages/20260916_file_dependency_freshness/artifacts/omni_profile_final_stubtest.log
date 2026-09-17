@@ -1,0 +1,2 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /tmp && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/stubtest wepppy.all_your_base.raster_freshness wepppy.nodb.mods.omni.omni wepppy.profile_recorder.assembler wepppy.profile_recorder.playback
+Success: no issues found in 4 modules

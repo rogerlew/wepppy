@@ -217,15 +217,8 @@ class OmniStationCatalogService:
             return None
 
     def scenario_signature(self, omni: "Omni", scenario_def: "ScenarioDef") -> str:
-        from wepppy.nodb.mods.omni.omni import OmniScenario
-
-        sanitized: Dict[str, Any] = {}
-        for key, value in scenario_def.items():
-            if key == "type" and isinstance(value, OmniScenario):
-                sanitized[key] = str(value)
-            else:
-                sanitized[key] = value
-        return json.dumps(sanitized, sort_keys=True, default=str)
+        from .omni_sbs_freshness import scenario_signature
+        return scenario_signature(omni, scenario_def)
 
     def scenario_dependency_target(
         self,

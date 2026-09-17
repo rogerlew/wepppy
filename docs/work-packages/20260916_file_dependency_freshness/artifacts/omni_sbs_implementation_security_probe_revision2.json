@@ -1,0 +1,11 @@
+{
+  "joint_guard": {
+    "error": {
+      "type": "OSError",
+      "errno": 116,
+      "message": "[Errno 116] Omni SBS input changed during scenario execution"
+    },
+    "mutated": true,
+    "child": "native child changed after last child guard"
+  }
+}

@@ -162,6 +162,21 @@ Apply the same soil burn severity (SBS) class to all hillslopes:
 
 Upload your own soil burn severity raster (GeoTIFF or IMG format) to capture spatial variability from BAER field mapping.
 
+Re-uploading changed bytes under the same filename reruns that SBS scenario.
+The accepted private dependency signature records the uploaded main-file SHA256;
+scenario names and public definitions stay unchanged. After the upload is consumed,
+reuse checks the accepted receipt against the expected child copy. Historical
+consumed uploads without receipts retain their previous skip behavior without
+historical byte proof. Re-upload to establish a new verified receipt.
+
+Observed upload or child changes during execution fail before success admission.
+Failed child work remains available through normal browse/archive; replacing a
+child is not an atomic rollback of its previous outputs. The receipt covers the
+main file copied by the existing SBS workflow, not inherited child sidecars.
+See [SBS freshness contract](../../../../docs/schemas/omni-sbs-freshness-contract.md)
+for concurrency limits and direct/RQ compatibility.
+
+
 ### Treatment Scenarios
 
 #### Thinning

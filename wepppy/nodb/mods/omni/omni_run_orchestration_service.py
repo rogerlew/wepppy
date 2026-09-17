@@ -206,10 +206,13 @@ class OmniRunOrchestrationService:
         self,
         omni: "Omni",
         scenario_def: "ScenarioDef",
+        *, _sbs_execution=None,
     ) -> tuple[str, str]:
         """Run one scenario without changing the caller's process CWD."""
         previous_cwd = os.getcwd()
         try:
+            if _sbs_execution is not None:
+                return self._run_omni_scenario(omni, scenario_def, _sbs_execution=_sbs_execution)
             return self._run_omni_scenario(omni, scenario_def)
         finally:
             os.chdir(previous_cwd)
@@ -218,6 +221,7 @@ class OmniRunOrchestrationService:
         self,
         omni: "Omni",
         scenario_def: "ScenarioDef",
+        *, _sbs_execution=None,
     ) -> tuple[str, str]:
         from wepppy.nodb.core import Climate, Landuse, Soils, Wepp
         from wepppy.nodb.mods.disturbed import Disturbed
@@ -248,8 +252,17 @@ class OmniRunOrchestrationService:
 
         if not isinstance(scenario, OmniScenario):
             raise TypeError(f"Invalid omni scenario type: {scenario!r}")
+        if scenario == OmniScenario.SBSmap:
+            from .omni_sbs_freshness import SbsExecution, invalidate_sbs_association
+            if _sbs_execution is None:
+                _sbs_execution = SbsExecution.capture(scenario_def)
+            _sbs_execution.before_reset(omni)
         with omni.timed(f"  {scenario_name}: _omni_clone({scenario_def}, {wd}, {omni.runid})"):
-            new_wd = _omni_clone(scenario_def, wd, omni.runid)
+            if _sbs_execution is not None:
+                new_wd = _omni_clone(scenario_def, wd, omni.runid,
+                    before_reset=lambda: invalidate_sbs_association(omni, _sbs_execution))
+            else:
+                new_wd = _omni_clone(scenario_def, wd, omni.runid)
 
         if omni_base_scenario_name is not None:
             if not omni_base_scenario_name == str(base_scenario):
@@ -272,6 +285,7 @@ class OmniRunOrchestrationService:
             landuse=landuse,
             soils=soils,
             omni_base_scenario_name=omni_base_scenario_name,
+            **({'_sbs_execution': _sbs_execution} if _sbs_execution is not None else {}),
         )
 
         landuse.build_managements()
@@ -330,6 +344,8 @@ class OmniRunOrchestrationService:
             wepp.run_watershed()
             _post_watershed_run_cleanup(wepp)
 
+        if _sbs_execution is not None:
+            _sbs_execution.validate_admission(omni)
         return new_wd, scenario_name
 
     def run_omni_scenarios(self, omni: "Omni") -> None:
@@ -346,6 +362,11 @@ class OmniRunOrchestrationService:
             omni.logger.info("  run_omni_scenarios: No scenarios to run")
             raise RuntimeError("No scenarios to run")
 
+        from .omni_sbs_freshness import (
+            SbsExecution, SbsReuse, admit_sbs_association, is_sbs, prune_sbs_dependency_state,
+        )
+        sbs_guards = {}
+        has_sbs = any(is_sbs(item) for item in omni.scenarios)
         dependency_tree: ScenarioDependency = dict(omni.scenario_dependency_tree)
 
         run_states: List[Dict[str, Any]] = []
@@ -375,6 +396,8 @@ class OmniRunOrchestrationService:
                 prev_entry.get("dependency_sha1") == dependency_hash and
                 prev_entry.get("signature") == signature
             )
+            if up_to_date and is_sbs(scenario_def):
+                sbs_guards[scenario_name] = SbsReuse.capture(omni, scenario_def, signature)
             return scenario_name, dependency_target, dependency_path, dependency_hash, signature, up_to_date, years_match
 
         for scenario_def in omni.scenarios:
@@ -411,7 +434,8 @@ class OmniRunOrchestrationService:
                     "signature": signature,
                     "timestamp": ts,
                 }
-                omni.scenario_dependency_tree = dependency_tree
+                if not is_sbs(scenario_def):
+                    omni.scenario_dependency_tree = dependency_tree
                 run_states.append(
                     {
                         "scenario": scenario_name,
@@ -423,7 +447,13 @@ class OmniRunOrchestrationService:
                         "timestamp": ts,
                     }
                 )
-                omni.scenario_run_state = run_states
+                if is_sbs(scenario_def):
+                    admit_sbs_association(omni, sbs_guards[scenario_name], scenario_name,
+                                          dependency_tree[scenario_name], run_states[-1])
+                    dependency_tree = dict(omni.scenario_dependency_tree)
+                    run_states = list(omni.scenario_run_state)
+                else:
+                    omni.scenario_run_state = run_states
                 continue
 
             run_reason = "dependency_changed"
@@ -434,7 +464,12 @@ class OmniRunOrchestrationService:
                 )
             else:
                 omni.logger.info(f"  run_omni_scenarios: {scenario_name}")
-            omni_dir, scenario_name = omni.run_omni_scenario(scenario_def)
+            if is_sbs(scenario_def):
+                sbs_guards[scenario_name] = SbsExecution.capture(scenario_def, signature, require_selection=True)
+                omni_dir, scenario_name = omni.run_omni_scenario(
+                    scenario_def, _sbs_execution=sbs_guards[scenario_name])
+            else:
+                omni_dir, scenario_name = omni.run_omni_scenario(scenario_def)
             omni._post_omni_run(omni_dir, scenario_name)
 
             updated_hash = _hash_file_sha1(dependency_path)
@@ -446,7 +481,8 @@ class OmniRunOrchestrationService:
                 "signature": signature,
                 "timestamp": ts,
             }
-            omni.scenario_dependency_tree = dependency_tree
+            if not is_sbs(scenario_def):
+                omni.scenario_dependency_tree = dependency_tree
             run_states.append(
                 {
                     "scenario": scenario_name,
@@ -458,7 +494,13 @@ class OmniRunOrchestrationService:
                     "timestamp": ts,
                 }
             )
-            omni.scenario_run_state = run_states
+            if is_sbs(scenario_def):
+                admit_sbs_association(omni, sbs_guards[scenario_name], scenario_name,
+                                      dependency_tree[scenario_name], run_states[-1])
+                dependency_tree = dict(omni.scenario_dependency_tree)
+                run_states = list(omni.scenario_run_state)
+            else:
+                omni.scenario_run_state = run_states
 
         for scenario_def in omni.scenarios:
             scenario_enum = OmniScenario.parse(scenario_def.get("type"))
@@ -489,7 +531,8 @@ class OmniRunOrchestrationService:
                     "signature": signature,
                     "timestamp": ts,
                 }
-                omni.scenario_dependency_tree = dependency_tree
+                if not is_sbs(scenario_def):
+                    omni.scenario_dependency_tree = dependency_tree
                 run_states.append(
                     {
                         "scenario": scenario_name,
@@ -501,7 +544,13 @@ class OmniRunOrchestrationService:
                         "timestamp": ts,
                     }
                 )
-                omni.scenario_run_state = run_states
+                if is_sbs(scenario_def):
+                    admit_sbs_association(omni, sbs_guards[scenario_name], scenario_name,
+                                          dependency_tree[scenario_name], run_states[-1])
+                    dependency_tree = dict(omni.scenario_dependency_tree)
+                    run_states = list(omni.scenario_run_state)
+                else:
+                    omni.scenario_run_state = run_states
                 continue
 
             run_reason = "dependency_changed"
@@ -512,7 +561,12 @@ class OmniRunOrchestrationService:
                 )
             else:
                 omni.logger.info(f"  run_omni_scenarios: {scenario_name}")
-            omni_dir, scenario_name = omni.run_omni_scenario(scenario_def)
+            if is_sbs(scenario_def):
+                sbs_guards[scenario_name] = SbsExecution.capture(scenario_def, signature, require_selection=True)
+                omni_dir, scenario_name = omni.run_omni_scenario(
+                    scenario_def, _sbs_execution=sbs_guards[scenario_name])
+            else:
+                omni_dir, scenario_name = omni.run_omni_scenario(scenario_def)
             omni._post_omni_run(omni_dir, scenario_name)
 
             updated_hash = _hash_file_sha1(dependency_path)
@@ -524,7 +578,8 @@ class OmniRunOrchestrationService:
                 "signature": signature,
                 "timestamp": ts,
             }
-            omni.scenario_dependency_tree = dependency_tree
+            if not is_sbs(scenario_def):
+                omni.scenario_dependency_tree = dependency_tree
             run_states.append(
                 {
                     "scenario": scenario_name,
@@ -536,12 +591,21 @@ class OmniRunOrchestrationService:
                     "timestamp": ts,
                 }
             )
-            omni.scenario_run_state = run_states
+            if is_sbs(scenario_def):
+                admit_sbs_association(omni, sbs_guards[scenario_name], scenario_name,
+                                      dependency_tree[scenario_name], run_states[-1])
+                dependency_tree = dict(omni.scenario_dependency_tree)
+                run_states = list(omni.scenario_run_state)
+            else:
+                omni.scenario_run_state = run_states
 
-        stale = set(dependency_tree.keys()) - active_scenarios
-        for scenario_name in stale:
-            dependency_tree.pop(scenario_name, None)
-        omni.scenario_dependency_tree = dependency_tree
+        if has_sbs:
+            prune_sbs_dependency_state(omni)
+        else:
+            stale = set(dependency_tree.keys()) - active_scenarios
+            for scenario_name in stale:
+                dependency_tree.pop(scenario_name, None)
+            omni.scenario_dependency_tree = dependency_tree
 
         omni.logger.info("  run_omni_scenarios: compiling hillslope summaries")
         omni.compile_hillslope_summaries()

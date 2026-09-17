@@ -568,7 +568,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_omni_contrasts_rq",
-    "source_lineno": 849,
+    "source_lineno": 889,
     "source_module": "wepppy/rq/omni_rq.py"
   },
   {
@@ -580,7 +580,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_omni_contrasts_rq",
-    "source_lineno": 864,
+    "source_lineno": 904,
     "source_module": "wepppy/rq/omni_rq.py"
   },
   {
@@ -590,7 +590,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_omni_scenarios_rq",
-    "source_lineno": 661,
+    "source_lineno": 701,
     "source_module": "wepppy/rq/omni_rq.py"
   },
   {
@@ -602,7 +602,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_omni_scenarios_rq",
-    "source_lineno": 679,
+    "source_lineno": 719,
     "source_module": "wepppy/rq/omni_rq.py"
   },
   {
@@ -614,7 +614,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_omni_scenarios_rq",
-    "source_lineno": 697,
+    "source_lineno": 737,
     "source_module": "wepppy/rq/omni_rq.py"
   },
   {
@@ -626,7 +626,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_omni_scenarios_rq",
-    "source_lineno": 708,
+    "source_lineno": 748,
     "source_module": "wepppy/rq/omni_rq.py"
   },
   {

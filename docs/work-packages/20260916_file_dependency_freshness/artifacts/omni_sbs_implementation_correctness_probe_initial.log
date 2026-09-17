@@ -1,0 +1,889 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_correctness_probe.py -v -s
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0 -- /opt/venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collecting ... collected 6 items
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_correctness_probe.py::test_legacy_invalidated_between_skip_decision_and_admission_is_not_resurrected 2026-09-17 07:11:37 [INFO] wepppy.run.batch;;qa-omni-correctness-4045193c98e6;;test_legacy_invalidated_between_skip_decision_and_admission_is_not_res-776a34.omni: omni.scenarios -> [{'type': 'sbs_map', 'sbs_file_path': '/wc1/batch/qa-omni-correctness-4045193c98e6/test_legacy_invalidated_between_skip_decision_and_admission_is_not_res-776a34/omni/_limbo/0/same.tif'}]
+2026-09-17 07:11:38 [INFO] wepppy.run.batch;;qa-omni-correctness-4045193c98e6;;test_legacy_invalidated_between_skip_decision_and_admission_is_not_res-776a34.omni: omni.scenario_dependency_tree -> {'sbs_map_c2FtZS50aWY': {'dependency_target': 'undisturbed', 'dependency_path': '/wc1/batch/qa-omni-correctness-4045193c98e6/test_legacy_invalidated_between_skip_decision_and_admission_is_not_res-776a34/base-loss.txt', 'dependency_sha1': '18848ae530440cd0546b35dbca88170210f26299', 'signature': '{"sbs_file_path": "/wc1/batch/qa-omni-correctness-4045193c98e6/test_legacy_invalidated_between_skip_decision_and_admission_is_not_res-776a34/omni/_limbo/0/same.tif", "type": "sbs_map"}', 'timestamp': 1}}
+OMNI_CORRECTNESS legacy_invalidated {"association_resurrected": true, "error": null, "states": [{"scenario": "sbs_map_c2FtZS50aWY", "status": "skipped"}]}
+FAILED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_correctness_probe.py::test_direct_native_upload_change_consumed_reuse_and_touch 2026-09-17 07:11:38 [INFO] wepppy.run.batch;;qa-omni-correctness-4045193c98e6;;test_direct_native_upload_change_consumed_reuse_and_touch-bb6d83.omni: omni.scenarios -> [{'type': 'sbs_map', 'sbs_file_path': '/wc1/batch/qa-omni-correctness-4045193c98e6/test_direct_native_upload_change_consumed_reuse_and_touch-bb6d83/omni/_limbo/0/same.tif'}]
+2026-09-17 07:11:38 [INFO] wepppy.run.batch;;qa-omni-correctness-4045193c98e6;;test_direct_native_upload_change_consumed_reuse_and_touch-bb6d83.omni: run_omni_scenarios
+2026-09-17 07:11:38 [INFO] wepppy.run.batch;;qa-omni-correctness-4045193c98e6;;test_direct_native_upload_change_consumed_reuse_and_touch-bb6d83.omni: omni.scenario_run_state -> []
+2026-09-17 07:11:38 [INFO] wepppy.run.batch;;qa-omni-correctness-4045193c98e6;;test_direct_native_upload_change_consumed_reuse_and_touch-bb6d83.omni:   run_omni_scenarios: sbs_map_c2FtZS50aWY
+FAILED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_correctness_probe.py::test_direct_native_admission_preserves_concurrent_unrelated_fields 2026-09-17 07:11:39 [INFO] wepppy.run.batch;;qa-omni-correctness-4045193c98e6;;test_direct_native_admission_preserves_concurrent_unrelated_fields-ed10d4.omni: omni.scenarios -> [{'type': 'sbs_map', 'sbs_file_path': '/wc1/batch/qa-omni-correctness-4045193c98e6/test_direct_native_admission_preserves_concurrent_unrelated_fields-ed10d4/omni/_limbo/0/same.tif'}]
+2026-09-17 07:11:39 [INFO] wepppy.run.batch;;qa-omni-correctness-4045193c98e6;;test_direct_native_admission_preserves_concurrent_unrelated_fields-ed10d4.omni: run_omni_scenarios
+2026-09-17 07:11:39 [INFO] wepppy.run.batch;;qa-omni-correctness-4045193c98e6;;test_direct_native_admission_preserves_concurrent_unrelated_fields-ed10d4.omni: omni.scenario_run_state -> []
+2026-09-17 07:11:39 [INFO] wepppy.run.batch;;qa-omni-correctness-4045193c98e6;;test_direct_native_admission_preserves_concurrent_unrelated_fields-ed10d4.omni:   run_omni_scenarios: sbs_map_c2FtZS50aWY
+FAILED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_correctness_probe.py::test_mixed_direct_order_remains_sbs_uniform_then_mulch 2026-09-17 07:11:39 [INFO] wepppy.run.batch;;qa-omni-correctness-4045193c98e6;;test_mixed_direct_order_remains_sbs_uniform_then_mulch-4d5930.omni: omni.scenarios -> [{'type': 'sbs_map', 'sbs_file_path': '/wc1/batch/qa-omni-correctness-4045193c98e6/test_mixed_direct_order_remains_sbs_uniform_then_mulch-4d5930/omni/_limbo/0/same.tif'}]
+2026-09-17 07:11:39 [INFO] wepppy.run.batch;;qa-omni-correctness-4045193c98e6;;test_mixed_direct_order_remains_sbs_uniform_then_mulch-4d5930.omni: omni.scenarios -> [{'type': 'mulch', 'base_scenario': 'uniform_low', 'ground_cover_increase': '30'}, {'type': 'sbs_map', 'sbs_file_path': '/wc1/batch/qa-omni-correctness-4045193c98e6/test_mixed_direct_order_remains_sbs_uniform_then_mulch-4d5930/omni/_limbo/0/same.tif'}, {'type': 'uniform_low'}]
+2026-09-17 07:11:39 [INFO] wepppy.run.batch;;qa-omni-correctness-4045193c98e6;;test_mixed_direct_order_remains_sbs_uniform_then_mulch-4d5930.omni: run_omni_scenarios
+2026-09-17 07:11:39 [INFO] wepppy.run.batch;;qa-omni-correctness-4045193c98e6;;test_mixed_direct_order_remains_sbs_uniform_then_mulch-4d5930.omni: omni.scenario_run_state -> []
+2026-09-17 07:11:39 [INFO] wepppy.run.batch;;qa-omni-correctness-4045193c98e6;;test_mixed_direct_order_remains_sbs_uniform_then_mulch-4d5930.omni:   run_omni_scenarios: sbs_map_c2FtZS50aWY
+FAILED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_correctness_probe.py::test_failed_destructive_rerun_keeps_partial_without_old_association 2026-09-17 07:11:39 [INFO] wepppy.run.batch;;qa-omni-correctness-4045193c98e6;;test_failed_destructive_rerun_keeps_partial_without_old_association-e29ed6.omni: omni.scenarios -> [{'type': 'sbs_map', 'sbs_file_path': '/wc1/batch/qa-omni-correctness-4045193c98e6/test_failed_destructive_rerun_keeps_partial_without_old_association-e29ed6/omni/_limbo/0/same.tif'}]
+2026-09-17 07:11:39 [INFO] wepppy.run.batch;;qa-omni-correctness-4045193c98e6;;test_failed_destructive_rerun_keeps_partial_without_old_association-e29ed6.omni: omni.scenario_dependency_tree -> {'sbs_map_c2FtZS50aWY': {'dependency_target': 'undisturbed', 'dependency_path': '/wc1/batch/qa-omni-correctness-4045193c98e6/test_failed_destructive_rerun_keeps_partial_without_old_association-e29ed6/base-loss.txt', 'dependency_sha1': '18848ae530440cd0546b35dbca88170210f26299', 'signature': '{"sbs_file_path": "/wc1/batch/qa-omni-correctness-4045193c98e6/test_failed_destructive_rerun_keeps_partial_without_old_association-e29ed6/omni/_limbo/0/same.tif", "type": "sbs_map"}', 'timestamp': 1}}
+2026-09-17 07:11:40 [INFO] wepppy.run.batch;;qa-omni-correctness-4045193c98e6;;test_failed_destructive_rerun_keeps_partial_without_old_association-e29ed6.omni: run_omni_scenarios
+2026-09-17 07:11:40 [INFO] wepppy.run.batch;;qa-omni-correctness-4045193c98e6;;test_failed_destructive_rerun_keeps_partial_without_old_association-e29ed6.omni: omni.scenario_run_state -> []
+2026-09-17 07:11:40 [INFO] wepppy.run.batch;;qa-omni-correctness-4045193c98e6;;test_failed_destructive_rerun_keeps_partial_without_old_association-e29ed6.omni:   run_omni_scenarios: sbs_map_c2FtZS50aWY
+OMNI_CORRECTNESS failed_reset {"association_present": false, "old_child_present": false, "partial_retained": true}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_correctness_probe.py::test_rq_worker_queued_drift_rejects_before_clone_and_preserves_prior 2026-09-17 07:11:40 [INFO] wepppy.run.batch;;qa-omni-correctness-4045193c98e6;;test_rq_worker_queued_drift_rejects_before_clone_and_preserves_prior-a3fd86.omni: omni.scenarios -> [{'type': 'sbs_map', 'sbs_file_path': '/wc1/batch/qa-omni-correctness-4045193c98e6/test_rq_worker_queued_drift_rejects_before_clone_and_preserves_prior-a3fd86/omni/_limbo/0/same.tif'}]
+2026-09-17 07:11:40 [INFO] wepppy.run.batch;;qa-omni-correctness-4045193c98e6;;test_rq_worker_queued_drift_rejects_before_clone_and_preserves_prior-a3fd86.omni: omni.scenario_dependency_tree -> {'sbs_map_c2FtZS50aWY': {'dependency_target': 'undisturbed', 'dependency_path': '/wc1/batch/qa-omni-correctness-4045193c98e6/test_rq_worker_queued_drift_rejects_before_clone_and_preserves_prior-a3fd86/base-loss.txt', 'dependency_sha1': '18848ae530440cd0546b35dbca88170210f26299', 'signature': '{"_sbs_content": {"sha256": "3b45b1ed0e4392c52e15c066d6a53c06105ff7d110af7a8b449bb75751333d3e", "source_path": "/wc1/batch/qa-omni-correctness-4045193c98e6/test_rq_worker_queued_drift_rejects_before_clone_and_preserves_prior-a3fd86/omni/_limbo/0/same.tif", "version": 1}, "sbs_file_path": "/wc1/batch/qa-omni-correctness-4045193c98e6/test_rq_worker_queued_drift_rejects_before_clone_and_preserves_prior-a3fd86/omni/_limbo/0/same.tif", "type": "sbs_map"}', 'timestamp': 1}}
+OMNI_CORRECTNESS queued_drift {"error": null, "no_native": true, "prior_child_preserved": true, "prior_tree_preserved": true}
+FAILED
+
+=================================== FAILURES ===================================
+_ test_legacy_invalidated_between_skip_decision_and_admission_is_not_resurrected _
+
+owner = (<wepppy.nodb.mods.omni.omni.Omni object at 0x731aeb61b800>, PosixPath('/wc1/batch/qa-omni-correctness-4045193c98e6/te...correctness-4045193c98e6/test_legacy_invalidated_between_skip_decision_and_admission_is_not_res-776a34/base-loss.txt'))
+
+    def test_legacy_invalidated_between_skip_decision_and_admission_is_not_resurrected(owner):
+        omni, source, definition, loss = owner
+        name, entry = prior_entry(omni, definition, loss, legacy=True)
+        source.unlink()
+        guard = fresh.SbsReuse.capture(omni, definition, entry['signature'])
+        concurrent = Omni.load_detached(omni.wd)
+        with concurrent.locked():
+            concurrent._scenario_dependency_tree = {}
+        error = None
+        try:
+            fresh.admit_sbs_association(omni, guard, name, entry, {'scenario': name, 'status': 'skipped'})
+        except OSError as exc:
+            error = exc.errno
+        durable = Omni.load_detached(omni.wd)
+        result = {'error': error, 'association_resurrected': name in durable.scenario_dependency_tree,
+                  'states': durable.scenario_run_state}
+        record('legacy_invalidated', result)
+>       assert error == errno.ESTALE
+E       assert None == 116
+E        +  where 116 = errno.ESTALE
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_correctness_probe.py:126: AssertionError
+__________ test_direct_native_upload_change_consumed_reuse_and_touch ___________
+
+owner = (<wepppy.nodb.mods.omni.omni.Omni object at 0x731ae8388620>, PosixPath('/wc1/batch/qa-omni-correctness-4045193c98e6/te...atch/qa-omni-correctness-4045193c98e6/test_direct_native_upload_change_consumed_reuse_and_touch-bb6d83/base-loss.txt'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x731ae8a99dc0>
+
+    def test_direct_native_upload_change_consumed_reuse_and_touch(owner, monkeypatch):
+        omni, source, definition, _ = owner
+        observed = []
+        executor(monkeypatch, observed)
+        states = []
+>       omni.run_omni_scenarios()
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_correctness_probe.py:135: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+wepppy/nodb/mods/omni/omni.py:1301: in run_omni_scenarios
+    _OMNI_RUN_ORCHESTRATION_SERVICE.run_omni_scenarios(self)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <wepppy.nodb.mods.omni.omni_run_orchestration_service.OmniRunOrchestrationService object at 0x731aeb72b200>
+omni = <wepppy.nodb.mods.omni.omni.Omni object at 0x731ae8388620>
+
+    def run_omni_scenarios(self, omni: "Omni") -> None:
+        from wepppy.nodb.mods.omni.omni import (
+            OmniScenario,
+            ScenarioDependency,
+            _hash_file_sha1,
+            _scenario_name_from_scenario_definition,
+        )
+    
+        omni.logger.info("run_omni_scenarios")
+    
+        if not omni.scenarios:
+            omni.logger.info("  run_omni_scenarios: No scenarios to run")
+            raise RuntimeError("No scenarios to run")
+    
+        from .omni_sbs_freshness import (
+            SbsExecution, SbsReuse, admit_sbs_association, is_sbs, prune_sbs_dependency_state,
+        )
+        sbs_guards = {}
+        has_sbs = any(is_sbs(item) for item in omni.scenarios)
+        dependency_tree: ScenarioDependency = dict(omni.scenario_dependency_tree)
+    
+        run_states: List[Dict[str, Any]] = []
+        omni.scenario_run_state = run_states
+    
+        active_scenarios = set()
+        processed_scenarios = set()
+        base_scenario_key = str(omni.base_scenario)
+    
+        def dependency_info(scenario_enum: Any, scenario_def: "ScenarioDef"):
+            scenario_name = _scenario_name_from_scenario_definition(scenario_def)
+            active_scenarios.add(scenario_name)
+            dependency_target = omni._scenario_dependency_target(scenario_enum, scenario_def)
+            dependency_path = omni._loss_pw0_path_for_scenario(dependency_target)
+            dependency_hash = _hash_file_sha1(dependency_path)
+            signature = omni._scenario_signature(scenario_def)
+            base_years = omni._year_set_for_scenario(base_scenario_key)
+            scenario_years = omni._year_set_for_scenario(scenario_name)
+            years_match = (
+                base_years is not None and
+                scenario_years is not None and
+                scenario_years == base_years
+            )
+            prev_entry = dependency_tree.get(scenario_name)
+            up_to_date = (
+                prev_entry is not None and
+                prev_entry.get("dependency_sha1") == dependency_hash and
+                prev_entry.get("signature") == signature
+            )
+            if up_to_date and is_sbs(scenario_def):
+                sbs_guards[scenario_name] = SbsReuse.capture(omni, scenario_def, signature)
+            return scenario_name, dependency_target, dependency_path, dependency_hash, signature, up_to_date, years_match
+    
+        for scenario_def in omni.scenarios:
+            scenario_enum = OmniScenario.parse(scenario_def.get("type"))
+            if scenario_enum == OmniScenario.Mulch:
+                continue
+    
+            if omni.base_scenario != OmniScenario.Undisturbed and scenario_enum in [
+                OmniScenario.Thinning,
+                OmniScenario.PrescribedFire,
+            ]:
+                continue
+    
+            (
+                scenario_name,
+                dependency_target,
+                dependency_path,
+                dependency_hash,
+                signature,
+                up_to_date,
+                years_match,
+            ) = dependency_info(scenario_enum, scenario_def)
+            processed_scenarios.add(scenario_name)
+    
+            target_key = omni._normalize_scenario_key(dependency_target)
+    
+            if up_to_date and years_match:
+                omni.logger.info(f"  run_omni_scenarios: {scenario_name} dependency unchanged, skipping")
+                ts = time.time()
+                dependency_tree[scenario_name] = {
+                    "dependency_target": target_key,
+                    "dependency_path": dependency_path,
+                    "dependency_sha1": dependency_hash,
+                    "signature": signature,
+                    "timestamp": ts,
+                }
+                if not is_sbs(scenario_def):
+                    omni.scenario_dependency_tree = dependency_tree
+                run_states.append(
+                    {
+                        "scenario": scenario_name,
+                        "status": "skipped",
+                        "reason": "dependency_unchanged",
+                        "dependency_target": target_key,
+                        "dependency_path": dependency_path,
+                        "dependency_sha1": dependency_hash,
+                        "timestamp": ts,
+                    }
+                )
+                if is_sbs(scenario_def):
+                    admit_sbs_association(omni, sbs_guards[scenario_name], scenario_name,
+                                          dependency_tree[scenario_name], run_states[-1])
+                    dependency_tree = dict(omni.scenario_dependency_tree)
+                    run_states = list(omni.scenario_run_state)
+                else:
+                    omni.scenario_run_state = run_states
+                continue
+    
+            run_reason = "dependency_changed"
+            if up_to_date and not years_match:
+                run_reason = "year_set_mismatch"
+                omni.logger.info(
+                    f"  run_omni_scenarios: {scenario_name} year set mismatch vs base scenario, rerunning"
+                )
+            else:
+                omni.logger.info(f"  run_omni_scenarios: {scenario_name}")
+            if is_sbs(scenario_def):
+                sbs_guards[scenario_name] = SbsExecution.capture(scenario_def, signature, require_selection=True)
+                omni_dir, scenario_name = omni.run_omni_scenario(
+                    scenario_def, _sbs_execution=sbs_guards[scenario_name])
+            else:
+                omni_dir, scenario_name = omni.run_omni_scenario(scenario_def)
+            omni._post_omni_run(omni_dir, scenario_name)
+    
+            updated_hash = _hash_file_sha1(dependency_path)
+            ts = time.time()
+            dependency_tree[scenario_name] = {
+                "dependency_target": target_key,
+                "dependency_path": dependency_path,
+                "dependency_sha1": updated_hash,
+                "signature": signature,
+                "timestamp": ts,
+            }
+            if not is_sbs(scenario_def):
+                omni.scenario_dependency_tree = dependency_tree
+            run_states.append(
+                {
+                    "scenario": scenario_name,
+                    "status": "executed",
+                    "reason": run_reason,
+                    "dependency_target": target_key,
+                    "dependency_path": dependency_path,
+                    "dependency_sha1": updated_hash,
+                    "timestamp": ts,
+                }
+            )
+            if is_sbs(scenario_def):
+                admit_sbs_association(omni, sbs_guards[scenario_name], scenario_name,
+                                      dependency_tree[scenario_name], run_states[-1])
+                dependency_tree = dict(omni.scenario_dependency_tree)
+                run_states = list(omni.scenario_run_state)
+            else:
+                omni.scenario_run_state = run_states
+    
+        for scenario_def in omni.scenarios:
+            scenario_enum = OmniScenario.parse(scenario_def.get("type"))
+            scenario_name = _scenario_name_from_scenario_definition(scenario_def)
+            if scenario_name in processed_scenarios:
+                continue
+    
+            (
+                scenario_name,
+                dependency_target,
+                dependency_path,
+                dependency_hash,
+                signature,
+                up_to_date,
+                years_match,
+            ) = dependency_info(scenario_enum, scenario_def)
+            processed_scenarios.add(scenario_name)
+    
+            target_key = omni._normalize_scenario_key(dependency_target)
+    
+            if up_to_date and years_match:
+                omni.logger.info(f"  run_omni_scenarios: {scenario_name} dependency unchanged, skipping")
+                ts = time.time()
+                dependency_tree[scenario_name] = {
+                    "dependency_target": target_key,
+                    "dependency_path": dependency_path,
+                    "dependency_sha1": dependency_hash,
+                    "signature": signature,
+                    "timestamp": ts,
+                }
+                if not is_sbs(scenario_def):
+                    omni.scenario_dependency_tree = dependency_tree
+                run_states.append(
+                    {
+                        "scenario": scenario_name,
+                        "status": "skipped",
+                        "reason": "dependency_unchanged",
+                        "dependency_target": target_key,
+                        "dependency_path": dependency_path,
+                        "dependency_sha1": dependency_hash,
+                        "timestamp": ts,
+                    }
+                )
+                if is_sbs(scenario_def):
+                    admit_sbs_association(omni, sbs_guards[scenario_name], scenario_name,
+                                          dependency_tree[scenario_name], run_states[-1])
+                    dependency_tree = dict(omni.scenario_dependency_tree)
+                    run_states = list(omni.scenario_run_state)
+                else:
+                    omni.scenario_run_state = run_states
+                continue
+    
+            run_reason = "dependency_changed"
+            if up_to_date and not years_match:
+                run_reason = "year_set_mismatch"
+                omni.logger.info(
+                    f"  run_omni_scenarios: {scenario_name} year set mismatch vs base scenario, rerunning"
+                )
+            else:
+                omni.logger.info(f"  run_omni_scenarios: {scenario_name}")
+            if is_sbs(scenario_def):
+                sbs_guards[scenario_name] = SbsExecution.capture(scenario_def, signature, require_selection=True)
+                omni_dir, scenario_name = omni.run_omni_scenario(
+                    scenario_def, _sbs_execution=sbs_guards[scenario_name])
+            else:
+                omni_dir, scenario_name = omni.run_omni_scenario(scenario_def)
+            omni._post_omni_run(omni_dir, scenario_name)
+    
+            updated_hash = _hash_file_sha1(dependency_path)
+            ts = time.time()
+            dependency_tree[scenario_name] = {
+                "dependency_target": target_key,
+                "dependency_path": dependency_path,
+                "dependency_sha1": updated_hash,
+                "signature": signature,
+                "timestamp": ts,
+            }
+            if not is_sbs(scenario_def):
+                omni.scenario_dependency_tree = dependency_tree
+            run_states.append(
+                {
+                    "scenario": scenario_name,
+                    "status": "executed",
+                    "reason": run_reason,
+                    "dependency_target": target_key,
+                    "dependency_path": dependency_path,
+                    "dependency_sha1": updated_hash,
+                    "timestamp": ts,
+                }
+            )
+            if is_sbs(scenario_def):
+                admit_sbs_association(omni, sbs_guards[scenario_name], scenario_name,
+                                      dependency_tree[scenario_name], run_states[-1])
+                dependency_tree = dict(omni.scenario_dependency_tree)
+                run_states = list(omni.scenario_run_state)
+            else:
+                omni.scenario_run_state = run_states
+    
+        if has_sbs:
+            prune_sbs_dependency_state(omni)
+        else:
+            stale = set(dependency_tree.keys()) - active_scenarios
+            for scenario_name in stale:
+                dependency_tree.pop(scenario_name, None)
+            omni.scenario_dependency_tree = dependency_tree
+    
+>       omni.logger.info("  run_omni_scenarios: compiling hillslope summaries")
+        ^^^^^^^^^^^
+E       AttributeError: 'Omni' object has no attribute 'logger'
+
+wepppy/nodb/mods/omni/omni_run_orchestration_service.py:610: AttributeError
+------------------------------ Captured log call -------------------------------
+WARNING  wepppy.nodb.mods.omni.omni:omni_clone_contrast_service.py:400 Skipping soils copy for omni clone; source directory missing: /wc1/batch/qa-omni-correctness-4045193c98e6/test_direct_native_upload_change_consumed_reuse_and_touch-bb6d83/soils
+WARNING  wepppy.nodb.mods.omni.omni:omni_clone_contrast_service.py:418 Skipping landuse copy for omni clone; source directory missing: /wc1/batch/qa-omni-correctness-4045193c98e6/test_direct_native_upload_change_consumed_reuse_and_touch-bb6d83/landuse
+______ test_direct_native_admission_preserves_concurrent_unrelated_fields ______
+
+owner = (<wepppy.nodb.mods.omni.omni.Omni object at 0x731ae838b170>, PosixPath('/wc1/batch/qa-omni-correctness-4045193c98e6/te...mni-correctness-4045193c98e6/test_direct_native_admission_preserves_concurrent_unrelated_fields-ed10d4/base-loss.txt'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x731ae8389a00>
+
+    def test_direct_native_admission_preserves_concurrent_unrelated_fields(owner, monkeypatch):
+        omni, _, _, _ = owner
+        observed = []
+    
+        def concurrent_update(self, execution, target):
+            fresh_owner = Omni.load_detached(self.wd)
+            with fresh_owner.locked():
+                fresh_owner._review_unrelated = 'concurrent-durable-value'
+                fresh_owner._scenario_run_state = [{'scenario': 'other', 'status': 'executed'}]
+    
+        executor(monkeypatch, observed, after_native=concurrent_update)
+>       omni.run_omni_scenarios()
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_correctness_probe.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+wepppy/nodb/mods/omni/omni.py:1301: in run_omni_scenarios
+    _OMNI_RUN_ORCHESTRATION_SERVICE.run_omni_scenarios(self)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <wepppy.nodb.mods.omni.omni_run_orchestration_service.OmniRunOrchestrationService object at 0x731aeb72b200>
+omni = <wepppy.nodb.mods.omni.omni.Omni object at 0x731ae838b170>
+
+    def run_omni_scenarios(self, omni: "Omni") -> None:
+        from wepppy.nodb.mods.omni.omni import (
+            OmniScenario,
+            ScenarioDependency,
+            _hash_file_sha1,
+            _scenario_name_from_scenario_definition,
+        )
+    
+        omni.logger.info("run_omni_scenarios")
+    
+        if not omni.scenarios:
+            omni.logger.info("  run_omni_scenarios: No scenarios to run")
+            raise RuntimeError("No scenarios to run")
+    
+        from .omni_sbs_freshness import (
+            SbsExecution, SbsReuse, admit_sbs_association, is_sbs, prune_sbs_dependency_state,
+        )
+        sbs_guards = {}
+        has_sbs = any(is_sbs(item) for item in omni.scenarios)
+        dependency_tree: ScenarioDependency = dict(omni.scenario_dependency_tree)
+    
+        run_states: List[Dict[str, Any]] = []
+        omni.scenario_run_state = run_states
+    
+        active_scenarios = set()
+        processed_scenarios = set()
+        base_scenario_key = str(omni.base_scenario)
+    
+        def dependency_info(scenario_enum: Any, scenario_def: "ScenarioDef"):
+            scenario_name = _scenario_name_from_scenario_definition(scenario_def)
+            active_scenarios.add(scenario_name)
+            dependency_target = omni._scenario_dependency_target(scenario_enum, scenario_def)
+            dependency_path = omni._loss_pw0_path_for_scenario(dependency_target)
+            dependency_hash = _hash_file_sha1(dependency_path)
+            signature = omni._scenario_signature(scenario_def)
+            base_years = omni._year_set_for_scenario(base_scenario_key)
+            scenario_years = omni._year_set_for_scenario(scenario_name)
+            years_match = (
+                base_years is not None and
+                scenario_years is not None and
+                scenario_years == base_years
+            )
+            prev_entry = dependency_tree.get(scenario_name)
+            up_to_date = (
+                prev_entry is not None and
+                prev_entry.get("dependency_sha1") == dependency_hash and
+                prev_entry.get("signature") == signature
+            )
+            if up_to_date and is_sbs(scenario_def):
+                sbs_guards[scenario_name] = SbsReuse.capture(omni, scenario_def, signature)
+            return scenario_name, dependency_target, dependency_path, dependency_hash, signature, up_to_date, years_match
+    
+        for scenario_def in omni.scenarios:
+            scenario_enum = OmniScenario.parse(scenario_def.get("type"))
+            if scenario_enum == OmniScenario.Mulch:
+                continue
+    
+            if omni.base_scenario != OmniScenario.Undisturbed and scenario_enum in [
+                OmniScenario.Thinning,
+                OmniScenario.PrescribedFire,
+            ]:
+                continue
+    
+            (
+                scenario_name,
+                dependency_target,
+                dependency_path,
+                dependency_hash,
+                signature,
+                up_to_date,
+                years_match,
+            ) = dependency_info(scenario_enum, scenario_def)
+            processed_scenarios.add(scenario_name)
+    
+            target_key = omni._normalize_scenario_key(dependency_target)
+    
+            if up_to_date and years_match:
+                omni.logger.info(f"  run_omni_scenarios: {scenario_name} dependency unchanged, skipping")
+                ts = time.time()
+                dependency_tree[scenario_name] = {
+                    "dependency_target": target_key,
+                    "dependency_path": dependency_path,
+                    "dependency_sha1": dependency_hash,
+                    "signature": signature,
+                    "timestamp": ts,
+                }
+                if not is_sbs(scenario_def):
+                    omni.scenario_dependency_tree = dependency_tree
+                run_states.append(
+                    {
+                        "scenario": scenario_name,
+                        "status": "skipped",
+                        "reason": "dependency_unchanged",
+                        "dependency_target": target_key,
+                        "dependency_path": dependency_path,
+                        "dependency_sha1": dependency_hash,
+                        "timestamp": ts,
+                    }
+                )
+                if is_sbs(scenario_def):
+                    admit_sbs_association(omni, sbs_guards[scenario_name], scenario_name,
+                                          dependency_tree[scenario_name], run_states[-1])
+                    dependency_tree = dict(omni.scenario_dependency_tree)
+                    run_states = list(omni.scenario_run_state)
+                else:
+                    omni.scenario_run_state = run_states
+                continue
+    
+            run_reason = "dependency_changed"
+            if up_to_date and not years_match:
+                run_reason = "year_set_mismatch"
+                omni.logger.info(
+                    f"  run_omni_scenarios: {scenario_name} year set mismatch vs base scenario, rerunning"
+                )
+            else:
+                omni.logger.info(f"  run_omni_scenarios: {scenario_name}")
+            if is_sbs(scenario_def):
+                sbs_guards[scenario_name] = SbsExecution.capture(scenario_def, signature, require_selection=True)
+                omni_dir, scenario_name = omni.run_omni_scenario(
+                    scenario_def, _sbs_execution=sbs_guards[scenario_name])
+            else:
+                omni_dir, scenario_name = omni.run_omni_scenario(scenario_def)
+            omni._post_omni_run(omni_dir, scenario_name)
+    
+            updated_hash = _hash_file_sha1(dependency_path)
+            ts = time.time()
+            dependency_tree[scenario_name] = {
+                "dependency_target": target_key,
+                "dependency_path": dependency_path,
+                "dependency_sha1": updated_hash,
+                "signature": signature,
+                "timestamp": ts,
+            }
+            if not is_sbs(scenario_def):
+                omni.scenario_dependency_tree = dependency_tree
+            run_states.append(
+                {
+                    "scenario": scenario_name,
+                    "status": "executed",
+                    "reason": run_reason,
+                    "dependency_target": target_key,
+                    "dependency_path": dependency_path,
+                    "dependency_sha1": updated_hash,
+                    "timestamp": ts,
+                }
+            )
+            if is_sbs(scenario_def):
+                admit_sbs_association(omni, sbs_guards[scenario_name], scenario_name,
+                                      dependency_tree[scenario_name], run_states[-1])
+                dependency_tree = dict(omni.scenario_dependency_tree)
+                run_states = list(omni.scenario_run_state)
+            else:
+                omni.scenario_run_state = run_states
+    
+        for scenario_def in omni.scenarios:
+            scenario_enum = OmniScenario.parse(scenario_def.get("type"))
+            scenario_name = _scenario_name_from_scenario_definition(scenario_def)
+            if scenario_name in processed_scenarios:
+                continue
+    
+            (
+                scenario_name,
+                dependency_target,
+                dependency_path,
+                dependency_hash,
+                signature,
+                up_to_date,
+                years_match,
+            ) = dependency_info(scenario_enum, scenario_def)
+            processed_scenarios.add(scenario_name)
+    
+            target_key = omni._normalize_scenario_key(dependency_target)
+    
+            if up_to_date and years_match:
+                omni.logger.info(f"  run_omni_scenarios: {scenario_name} dependency unchanged, skipping")
+                ts = time.time()
+                dependency_tree[scenario_name] = {
+                    "dependency_target": target_key,
+                    "dependency_path": dependency_path,
+                    "dependency_sha1": dependency_hash,
+                    "signature": signature,
+                    "timestamp": ts,
+                }
+                if not is_sbs(scenario_def):
+                    omni.scenario_dependency_tree = dependency_tree
+                run_states.append(
+                    {
+                        "scenario": scenario_name,
+                        "status": "skipped",
+                        "reason": "dependency_unchanged",
+                        "dependency_target": target_key,
+                        "dependency_path": dependency_path,
+                        "dependency_sha1": dependency_hash,
+                        "timestamp": ts,
+                    }
+                )
+                if is_sbs(scenario_def):
+                    admit_sbs_association(omni, sbs_guards[scenario_name], scenario_name,
+                                          dependency_tree[scenario_name], run_states[-1])
+                    dependency_tree = dict(omni.scenario_dependency_tree)
+                    run_states = list(omni.scenario_run_state)
+                else:
+                    omni.scenario_run_state = run_states
+                continue
+    
+            run_reason = "dependency_changed"
+            if up_to_date and not years_match:
+                run_reason = "year_set_mismatch"
+                omni.logger.info(
+                    f"  run_omni_scenarios: {scenario_name} year set mismatch vs base scenario, rerunning"
+                )
+            else:
+                omni.logger.info(f"  run_omni_scenarios: {scenario_name}")
+            if is_sbs(scenario_def):
+                sbs_guards[scenario_name] = SbsExecution.capture(scenario_def, signature, require_selection=True)
+                omni_dir, scenario_name = omni.run_omni_scenario(
+                    scenario_def, _sbs_execution=sbs_guards[scenario_name])
+            else:
+                omni_dir, scenario_name = omni.run_omni_scenario(scenario_def)
+            omni._post_omni_run(omni_dir, scenario_name)
+    
+            updated_hash = _hash_file_sha1(dependency_path)
+            ts = time.time()
+            dependency_tree[scenario_name] = {
+                "dependency_target": target_key,
+                "dependency_path": dependency_path,
+                "dependency_sha1": updated_hash,
+                "signature": signature,
+                "timestamp": ts,
+            }
+            if not is_sbs(scenario_def):
+                omni.scenario_dependency_tree = dependency_tree
+            run_states.append(
+                {
+                    "scenario": scenario_name,
+                    "status": "executed",
+                    "reason": run_reason,
+                    "dependency_target": target_key,
+                    "dependency_path": dependency_path,
+                    "dependency_sha1": updated_hash,
+                    "timestamp": ts,
+                }
+            )
+            if is_sbs(scenario_def):
+                admit_sbs_association(omni, sbs_guards[scenario_name], scenario_name,
+                                      dependency_tree[scenario_name], run_states[-1])
+                dependency_tree = dict(omni.scenario_dependency_tree)
+                run_states = list(omni.scenario_run_state)
+            else:
+                omni.scenario_run_state = run_states
+    
+        if has_sbs:
+            prune_sbs_dependency_state(omni)
+        else:
+            stale = set(dependency_tree.keys()) - active_scenarios
+            for scenario_name in stale:
+                dependency_tree.pop(scenario_name, None)
+            omni.scenario_dependency_tree = dependency_tree
+    
+>       omni.logger.info("  run_omni_scenarios: compiling hillslope summaries")
+        ^^^^^^^^^^^
+E       AttributeError: 'Omni' object has no attribute 'logger'
+
+wepppy/nodb/mods/omni/omni_run_orchestration_service.py:610: AttributeError
+------------------------------ Captured log call -------------------------------
+WARNING  wepppy.nodb.mods.omni.omni:omni_clone_contrast_service.py:400 Skipping soils copy for omni clone; source directory missing: /wc1/batch/qa-omni-correctness-4045193c98e6/test_direct_native_admission_preserves_concurrent_unrelated_fields-ed10d4/soils
+WARNING  wepppy.nodb.mods.omni.omni:omni_clone_contrast_service.py:418 Skipping landuse copy for omni clone; source directory missing: /wc1/batch/qa-omni-correctness-4045193c98e6/test_direct_native_admission_preserves_concurrent_unrelated_fields-ed10d4/landuse
+____________ test_mixed_direct_order_remains_sbs_uniform_then_mulch ____________
+
+owner = (<wepppy.nodb.mods.omni.omni.Omni object at 0x731ae826c860>, PosixPath('/wc1/batch/qa-omni-correctness-4045193c98e6/te...1/batch/qa-omni-correctness-4045193c98e6/test_mixed_direct_order_remains_sbs_uniform_then_mulch-4d5930/base-loss.txt'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x731ae826c470>
+
+    def test_mixed_direct_order_remains_sbs_uniform_then_mulch(owner, monkeypatch):
+        omni, _, definition, _ = owner
+        mulch = {'type': 'mulch', 'base_scenario': 'uniform_low', 'ground_cover_increase': '30'}
+        omni.scenarios = [mulch, definition, {'type': 'uniform_low'}]
+        observed = []
+        executor(monkeypatch, observed)
+>       omni.run_omni_scenarios()
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_correctness_probe.py:177: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+wepppy/nodb/mods/omni/omni.py:1301: in run_omni_scenarios
+    _OMNI_RUN_ORCHESTRATION_SERVICE.run_omni_scenarios(self)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <wepppy.nodb.mods.omni.omni_run_orchestration_service.OmniRunOrchestrationService object at 0x731aeb72b200>
+omni = <wepppy.nodb.mods.omni.omni.Omni object at 0x731ae826c860>
+
+    def run_omni_scenarios(self, omni: "Omni") -> None:
+        from wepppy.nodb.mods.omni.omni import (
+            OmniScenario,
+            ScenarioDependency,
+            _hash_file_sha1,
+            _scenario_name_from_scenario_definition,
+        )
+    
+        omni.logger.info("run_omni_scenarios")
+    
+        if not omni.scenarios:
+            omni.logger.info("  run_omni_scenarios: No scenarios to run")
+            raise RuntimeError("No scenarios to run")
+    
+        from .omni_sbs_freshness import (
+            SbsExecution, SbsReuse, admit_sbs_association, is_sbs, prune_sbs_dependency_state,
+        )
+        sbs_guards = {}
+        has_sbs = any(is_sbs(item) for item in omni.scenarios)
+        dependency_tree: ScenarioDependency = dict(omni.scenario_dependency_tree)
+    
+        run_states: List[Dict[str, Any]] = []
+        omni.scenario_run_state = run_states
+    
+        active_scenarios = set()
+        processed_scenarios = set()
+        base_scenario_key = str(omni.base_scenario)
+    
+        def dependency_info(scenario_enum: Any, scenario_def: "ScenarioDef"):
+            scenario_name = _scenario_name_from_scenario_definition(scenario_def)
+            active_scenarios.add(scenario_name)
+            dependency_target = omni._scenario_dependency_target(scenario_enum, scenario_def)
+            dependency_path = omni._loss_pw0_path_for_scenario(dependency_target)
+            dependency_hash = _hash_file_sha1(dependency_path)
+            signature = omni._scenario_signature(scenario_def)
+            base_years = omni._year_set_for_scenario(base_scenario_key)
+            scenario_years = omni._year_set_for_scenario(scenario_name)
+            years_match = (
+                base_years is not None and
+                scenario_years is not None and
+                scenario_years == base_years
+            )
+            prev_entry = dependency_tree.get(scenario_name)
+            up_to_date = (
+                prev_entry is not None and
+                prev_entry.get("dependency_sha1") == dependency_hash and
+                prev_entry.get("signature") == signature
+            )
+            if up_to_date and is_sbs(scenario_def):
+                sbs_guards[scenario_name] = SbsReuse.capture(omni, scenario_def, signature)
+            return scenario_name, dependency_target, dependency_path, dependency_hash, signature, up_to_date, years_match
+    
+        for scenario_def in omni.scenarios:
+            scenario_enum = OmniScenario.parse(scenario_def.get("type"))
+            if scenario_enum == OmniScenario.Mulch:
+                continue
+    
+            if omni.base_scenario != OmniScenario.Undisturbed and scenario_enum in [
+                OmniScenario.Thinning,
+                OmniScenario.PrescribedFire,
+            ]:
+                continue
+    
+            (
+                scenario_name,
+                dependency_target,
+                dependency_path,
+                dependency_hash,
+                signature,
+                up_to_date,
+                years_match,
+            ) = dependency_info(scenario_enum, scenario_def)
+            processed_scenarios.add(scenario_name)
+    
+            target_key = omni._normalize_scenario_key(dependency_target)
+    
+            if up_to_date and years_match:
+                omni.logger.info(f"  run_omni_scenarios: {scenario_name} dependency unchanged, skipping")
+                ts = time.time()
+                dependency_tree[scenario_name] = {
+                    "dependency_target": target_key,
+                    "dependency_path": dependency_path,
+                    "dependency_sha1": dependency_hash,
+                    "signature": signature,
+                    "timestamp": ts,
+                }
+                if not is_sbs(scenario_def):
+                    omni.scenario_dependency_tree = dependency_tree
+                run_states.append(
+                    {
+                        "scenario": scenario_name,
+                        "status": "skipped",
+                        "reason": "dependency_unchanged",
+                        "dependency_target": target_key,
+                        "dependency_path": dependency_path,
+                        "dependency_sha1": dependency_hash,
+                        "timestamp": ts,
+                    }
+                )
+                if is_sbs(scenario_def):
+                    admit_sbs_association(omni, sbs_guards[scenario_name], scenario_name,
+                                          dependency_tree[scenario_name], run_states[-1])
+                    dependency_tree = dict(omni.scenario_dependency_tree)
+                    run_states = list(omni.scenario_run_state)
+                else:
+                    omni.scenario_run_state = run_states
+                continue
+    
+            run_reason = "dependency_changed"
+            if up_to_date and not years_match:
+                run_reason = "year_set_mismatch"
+                omni.logger.info(
+                    f"  run_omni_scenarios: {scenario_name} year set mismatch vs base scenario, rerunning"
+                )
+            else:
+>               omni.logger.info(f"  run_omni_scenarios: {scenario_name}")
+                ^^^^^^^^^^^
+E               AttributeError: 'Omni' object has no attribute 'logger'
+
+wepppy/nodb/mods/omni/omni_run_orchestration_service.py:466: AttributeError
+------------------------------ Captured log call -------------------------------
+WARNING  wepppy.nodb.mods.omni.omni:omni_clone_contrast_service.py:400 Skipping soils copy for omni clone; source directory missing: /wc1/batch/qa-omni-correctness-4045193c98e6/test_mixed_direct_order_remains_sbs_uniform_then_mulch-4d5930/soils
+WARNING  wepppy.nodb.mods.omni.omni:omni_clone_contrast_service.py:418 Skipping landuse copy for omni clone; source directory missing: /wc1/batch/qa-omni-correctness-4045193c98e6/test_mixed_direct_order_remains_sbs_uniform_then_mulch-4d5930/landuse
+_____ test_rq_worker_queued_drift_rejects_before_clone_and_preserves_prior _____
+
+owner = (<wepppy.nodb.mods.omni.omni.Omni object at 0x731ae838a810>, PosixPath('/wc1/batch/qa-omni-correctness-4045193c98e6/te...i-correctness-4045193c98e6/test_rq_worker_queued_drift_rejects_before_clone_and_preserves_prior-a3fd86/base-loss.txt'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x731ae83880b0>
+
+    def test_rq_worker_queued_drift_rejects_before_clone_and_preserves_prior(owner, monkeypatch):
+        omni, source, definition, loss = owner
+        name, entry = prior_entry(omni, definition, loss)
+        child = fresh.child_source(omni, definition)
+        child.parent.mkdir(parents=True)
+        child.write_bytes(b'prior accepted child')
+        before_tree = deepcopy(omni.scenario_dependency_tree)
+        source.write_bytes(b'new queued bytes')
+        observed = []
+        executor(monkeypatch, observed)
+        job = SimpleNamespace(id='independent-disposable-worker')
+        monkeypatch.setattr(omni_rq, 'get_current_job', lambda: job)
+        monkeypatch.setattr(omni_rq, 'get_wd', lambda runid: omni.wd if runid == omni.runid else None)
+        monkeypatch.setattr(exception_logging, 'get_wd', lambda runid: omni.wd if runid == omni.runid else None)
+        monkeypatch.setattr(omni_rq.StatusMessenger, 'publish', lambda *args: None)
+        with pytest.raises(OSError) as error:
+            omni_rq.run_omni_scenario_rq(omni.runid, definition, dependency_target='undisturbed',
+                                        dependency_path=str(loss), signature=entry['signature'])
+        durable = Omni.load_detached(omni.wd)
+        record('queued_drift', {'error': error.value.errno, 'no_native': not observed,
+                                'prior_tree_preserved': durable.scenario_dependency_tree == before_tree,
+                                'prior_child_preserved': child.read_bytes() == b'prior accepted child'})
+>       assert error.value.errno == errno.ESTALE and not observed
+E       AssertionError: assert (None == 116)
+E        +  where None = FileNotFoundError('Working directory not found for runid batch;;qa-omni-correctness-4045193c98e6;;test_rq_worker_queued_drift_rejects_before_clone_and_preserves_prior-a3fd86: /wc1/batch/qa-omni-correctness-4045193c98e6/runs/test_rq_worker_queued_drift_rejects_before_clone_and_preserves_prior-a3fd86').errno
+E        +    where FileNotFoundError('Working directory not found for runid batch;;qa-omni-correctness-4045193c98e6;;test_rq_worker_queued_drift_rejects_before_clone_and_preserves_prior-a3fd86: /wc1/batch/qa-omni-correctness-4045193c98e6/runs/test_rq_worker_queued_drift_rejects_before_clone_and_preserves_prior-a3fd86') = <ExceptionInfo FileNotFoundError('Working directory not found for runid batch;;qa-omni-correctness-4045193c98e6;;test_rq_worker_queue...tch/qa-omni-correctness-4045193c98e6/runs/test_rq_worker_queued_drift_rejects_before_clone_and_preserves_prior-a3fd86') tblen=4>.value
+E        +  and   116 = errno.ESTALE
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_correctness_probe.py:222: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    wepppy.rq.omni_rq:omni_rq.py:412 Boundary exception at wepppy/rq/omni_rq.py:190
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/rq/omni_rq.py", line 349, in run_omni_scenario_rq
+    clear_nodb_file_cache(runid, pup_relpath="omni.nodb")
+  File "/workdir/wepppy/wepppy/nodb/base.py", line 2871, in clear_nodb_file_cache
+    raise FileNotFoundError(f'Working directory not found for runid {runid}: {wd}')
+FileNotFoundError: Working directory not found for runid batch;;qa-omni-correctness-4045193c98e6;;test_rq_worker_queued_drift_rejects_before_clone_and_preserves_prior-a3fd86: /wc1/batch/qa-omni-correctness-4045193c98e6/runs/test_rq_worker_queued_drift_rejects_before_clone_and_preserves_prior-a3fd86
+ERROR    wepppy.rq.exception_logging:exception_logging.py:62 RQ task failed: run_omni_scenario_rq (runid=batch;;qa-omni-correctness-4045193c98e6;;test_rq_worker_queued_drift_rejects_before_clone_and_preserves_prior-a3fd86 job_id=None)
+Traceback (most recent call last):
+  File "/workdir/wepppy/wepppy/rq/exception_logging.py", line 57, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/rq/omni_rq.py", line 349, in run_omni_scenario_rq
+    clear_nodb_file_cache(runid, pup_relpath="omni.nodb")
+  File "/workdir/wepppy/wepppy/nodb/base.py", line 2871, in clear_nodb_file_cache
+    raise FileNotFoundError(f'Working directory not found for runid {runid}: {wd}')
+FileNotFoundError: Working directory not found for runid batch;;qa-omni-correctness-4045193c98e6;;test_rq_worker_queued_drift_rejects_before_clone_and_preserves_prior-a3fd86: /wc1/batch/qa-omni-correctness-4045193c98e6/runs/test_rq_worker_queued_drift_rejects_before_clone_and_preserves_prior-a3fd86
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_correctness_probe.py::test_legacy_invalidated_between_skip_decision_and_admission_is_not_resurrected
+  /opt/venv/lib/python3.12/site-packages/awesome_codename/data/__init__.py:1: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    from pkg_resources import resource_string
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_correctness_probe.py::test_legacy_invalidated_between_skip_decision_and_admission_is_not_resurrected
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_correctness_probe.py::test_legacy_invalidated_between_skip_decision_and_admission_is_not_resurrected
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The ConfirmRegisterForm and the confirm_register_form option are deprecated as of version 5.6.0 and will be removed in a future release.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_correctness_probe.py::test_legacy_invalidated_between_skip_decision_and_admission_is_not_resurrected
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The RegisterForm is deprecated as of version 5.6.0 and will be removed in a future release. The form RegisterFormV2 should be sub-classed instead.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_correctness_probe.py::test_legacy_invalidated_between_skip_decision_and_admission_is_not_resurrected
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_correctness_probe.py::test_legacy_invalidated_between_skip_decision_and_admission_is_not_resurrected
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_correctness_probe.py::test_rq_worker_queued_drift_rejects_before_clone_and_preserves_prior
+  /workdir/wepppy/wepppy/rq/exception_logging.py:35: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().isoformat() + "Z"
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_correctness_probe.py::test_legacy_invalidated_between_skip_decision_and_admission_is_not_resurrected
+FAILED docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_correctness_probe.py::test_direct_native_upload_change_consumed_reuse_and_touch
+FAILED docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_correctness_probe.py::test_direct_native_admission_preserves_concurrent_unrelated_fields
+FAILED docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_correctness_probe.py::test_mixed_direct_order_remains_sbs_uniform_then_mulch
+FAILED docs/work-packages/20260916_file_dependency_freshness/artifacts/omni_sbs_implementation_correctness_probe.py::test_rq_worker_queued_drift_rejects_before_clone_and_preserves_prior
+=================== 5 failed, 1 passed, 9 warnings in 15.19s ===================

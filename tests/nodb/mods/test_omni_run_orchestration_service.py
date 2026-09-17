@@ -34,6 +34,7 @@ def _install_omni_module_stub(
     module = types.ModuleType("wepppy.nodb.mods.omni.omni")
 
     class OmniScenario(IntEnum):
+        SBSmap = 8
         UniformLow = 1
         Thinning = 4
         Mulch = 5
@@ -341,6 +342,7 @@ def test_run_omni_scenario_defers_hillslope_source_deletion_until_after_watershe
     omni_module = types.ModuleType("wepppy.nodb.mods.omni.omni")
 
     class OmniScenario(IntEnum):
+        SBSmap = 8
         UniformLow = 1
         Thinning = 4
         Undisturbed = 9

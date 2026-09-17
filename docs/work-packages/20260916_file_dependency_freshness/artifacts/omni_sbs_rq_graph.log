@@ -1,0 +1,4 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && /opt/venv/bin/python tools/check_rq_dependency_graph.py
+RQ dependency graph drift detected:
+- wepppy/rq/job-dependency-graph.static.json
+- wepppy/rq/job-dependencies-catalog.md

@@ -1,0 +1,97 @@
+{
+  "joint_guard": {
+    "error": {
+      "type": "OSError",
+      "errno": 116,
+      "message": "[Errno 116] Omni SBS input changed during scenario execution"
+    },
+    "mutated": true,
+    "child": "native child changed after last child guard"
+  },
+  "same_inode": {
+    "error": {
+      "type": "SameFileError",
+      "errno": null,
+      "message": "PosixPath('/tmp/pytest-of-unknown/pytest-171/test_actual_mode_same_inode_re0/upload.tif') and PosixPath('/tmp/pytest-of-unknown/pytest-171/test_actual_mode_same_inode_re0/disturbed/upload.tif') are the same file"
+    },
+    "source_bytes": "only copy of the uploaded bytes",
+    "old_copy_preserved": "only copy of the uploaded bytes"
+  },
+  "newer_upload": {
+    "error": {
+      "type": "OSError",
+      "errno": 116,
+      "message": "[Errno 116] Omni SBS input changed during scenario execution"
+    },
+    "source": "new uploaded main",
+    "child": "old uploaded main"
+  },
+  "aliases": {
+    "source_target_retained": true,
+    "destination_alias_retained": true,
+    "mode": 416
+  },
+  "readonly_target": {
+    "uid": 1000,
+    "error": {
+      "type": "PermissionError",
+      "errno": 13,
+      "message": "[Errno 13] Permission denied: '/tmp/pytest-of-unknown/pytest-171/test_readonly_copy_target_pres0/child.tif'"
+    }
+  },
+  "denied_present": {
+    "error": {
+      "type": "PermissionError",
+      "errno": 13,
+      "message": "[Errno 13] Permission denied: '/tmp/pytest-of-unknown/pytest-171/test_consumed_receipt_denied_p0/denied/upload.tif'"
+    }
+  },
+  "child_aba": {
+    "error": {
+      "type": "OSError",
+      "errno": 116,
+      "message": "[Errno 116] Omni SBS input changed during scenario execution"
+    },
+    "original_bytes_restored": true
+  },
+  "locked_admission": {
+    "locks": 1,
+    "marker": "new durable value",
+    "unrelated": {
+      "value": "new durable value"
+    },
+    "run_state": [
+      {
+        "scenario": "sbs_map_dXBsb2FkLnRpZg",
+        "status": "ran"
+      }
+    ]
+  },
+  "late_same_inode": {
+    "error": {
+      "type": "SameFileError",
+      "errno": null,
+      "message": "PosixPath('/tmp/pytest-of-unknown/pytest-171/test_destination_alias_retarge0/upload.tif') and PosixPath('/tmp/pytest-of-unknown/pytest-171/test_destination_alias_retarge0/child.tif') are the same file"
+    },
+    "source": "only uploaded copy",
+    "prior_output": "prior output"
+  },
+  "pathlike": {
+    "name": "sbs_map_dXBsb2FkLnRpZg",
+    "receipt_source_type": "str",
+    "copied_bytes": "pathlike supported bytes"
+  },
+  "same_byte_new_upload": {
+    "error": {
+      "type": "OSError",
+      "errno": 116,
+      "message": "[Errno 116] Omni SBS input changed during scenario execution"
+    },
+    "source_retained": true,
+    "initial_inode": 24250427,
+    "new_inodes": [
+      24250429
+    ],
+    "copied_bytes": "accepted uploaded bytes"
+  }
+}

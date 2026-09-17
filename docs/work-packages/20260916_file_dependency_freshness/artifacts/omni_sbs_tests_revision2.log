@@ -1,0 +1,80 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/test_omni_sbs_freshness.py tests/nodb/mods/test_omni_run_orchestration_service.py tests/nodb/mods/test_omni_mode_build_services.py tests/nodb/mods/test_omni_station_catalog_service.py tests/rq/test_omni_rq.py --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 61 items
+
+tests/nodb/mods/test_omni_sbs_freshness.py .......F
+
+=================================== FAILURES ===================================
+________ test_path_input_and_reserved_receipt_do_not_change_definition _________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-167/test_path_input_and_reserved_r0')
+
+    def test_path_input_and_reserved_receipt_do_not_change_definition(tmp_path):
+        omni, definition, source = owner(tmp_path)
+        definition['sbs_file_path'] = source
+        definition['_sbs_content'] = {'untrusted': True}
+        signature = freshness.scenario_signature(omni, definition)
+        execution = freshness.SbsExecution.capture(definition, signature)
+        execution.before_reset(omni)
+        assert '_sbs_content' not in json.loads(freshness.definition_json(definition))
+        non_sbs = {'type': 'unchanged_non_sbs', '_sbs_content': 'ordinary-field'}
+>       assert json.loads(freshness.definition_json(non_sbs)) == non_sbs
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/nodb/mods/test_omni_sbs_freshness.py:132: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+wepppy/nodb/mods/omni/omni_sbs_freshness.py:33: in definition_json
+    if key != _RECEIPT or not is_sbs(definition)}, sort_keys=True, default=str)
+                              ^^^^^^^^^^^^^^^^^^
+wepppy/nodb/mods/omni/omni_sbs_freshness.py:26: in is_sbs
+    return definition.get('type') in (OmniScenario.SBSmap, 'sbs_map')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wepppy/nodb/mods/omni/omni.py:344: in __eq__
+    return self.value == OmniScenario.parse(other).value
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = 'unchanged_non_sbs'
+
+    @staticmethod
+    def parse(value: int | str | OmniScenario) -> OmniScenario:
+        if isinstance(value, OmniScenario):
+            return value
+        if value == 'uniform_low' or value == OmniScenario.UniformLow.value:
+            return OmniScenario.UniformLow
+        elif value == 'uniform_moderate' or value == OmniScenario.UniformModerate.value:
+            return OmniScenario.UniformModerate
+        elif value == 'uniform_high' or value == OmniScenario.UniformHigh.value:
+            return OmniScenario.UniformHigh
+        elif value == 'thinning' or value == OmniScenario.Thinning.value:
+            return OmniScenario.Thinning
+        elif value == 'mulch' or value == OmniScenario.Mulch.value:
+            return OmniScenario.Mulch
+        elif value == 'sbs_map' or value == OmniScenario.SBSmap.value:
+            return OmniScenario.SBSmap
+        elif value == 'undisturbed' or value == OmniScenario.Undisturbed.value:
+            return OmniScenario.Undisturbed
+        elif value == 'prescribed_fire' or value == OmniScenario.PrescribedFire.value:
+            return OmniScenario.PrescribedFire
+>       raise KeyError(f"Invalid scenario: {value}")
+E       KeyError: 'Invalid scenario: unchanged_non_sbs'
+
+wepppy/nodb/mods/omni/omni.py:314: KeyError
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/nodb/mods/test_omni_sbs_freshness.py::test_path_input_and_reserved_receipt_do_not_change_definition
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+=================== 1 failed, 7 passed, 2 warnings in 9.51s ====================

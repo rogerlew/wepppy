@@ -95,6 +95,7 @@ def _update_dependency_state(
     scenario_name: str,
     dependency_entry: Dict[str, Any],
     run_state_entry: Dict[str, Any],
+    *, _sbs_execution=None,
 ) -> None:
     """Persist dependency and run state metadata with retry semantics."""
 
@@ -104,9 +105,13 @@ def _update_dependency_state(
     for attempt in range(max_tries):
         try:
             omni = Omni.getInstance(omni.wd)
-            with omni.locked():
-                omni.scenario_dependency_tree[scenario_name] = dependency_entry
-                omni.scenario_run_state.append(run_state_entry)
+            if _sbs_execution is not None:
+                from wepppy.nodb.mods.omni.omni_sbs_freshness import admit_sbs_association
+                admit_sbs_association(omni, _sbs_execution, scenario_name, dependency_entry, run_state_entry)
+            else:
+                with omni.locked():
+                    omni.scenario_dependency_tree[scenario_name] = dependency_entry
+                    omni.scenario_run_state.append(run_state_entry)
 
         except NoDbAlreadyLockedError:
             if attempt + 1 == max_tries:
@@ -359,7 +364,14 @@ def run_omni_scenario_rq(
             dependency_loss_path = omni._loss_pw0_path_for_scenario(dependency_target_raw)
             scenario_signature = omni._scenario_signature(scenario_payload)
 
-        omni.run_omni_scenario(scenario_payload)
+        from wepppy.nodb.mods.omni.omni_sbs_freshness import SbsExecution, is_sbs
+        sbs_execution = None
+        if is_sbs(scenario_payload):
+            sbs_execution = SbsExecution.capture(scenario_payload, scenario_signature, require_selection=True)
+            sbs_execution.before_reset(omni)
+            omni.run_omni_scenario(scenario_payload, _sbs_execution=sbs_execution)
+        else:
+            omni.run_omni_scenario(scenario_payload)
 
         dependency_sha1 = _hash_file_sha1(dependency_loss_path)
         timestamp = time.time()
@@ -381,7 +393,11 @@ def run_omni_scenario_rq(
             'timestamp': timestamp,
         }
 
-        _update_dependency_state(omni, scenario_name, dependency_entry, run_state_entry)
+        if sbs_execution is not None:
+            _update_dependency_state(omni, scenario_name, dependency_entry, run_state_entry,
+                                     _sbs_execution=sbs_execution)
+        else:
+            _update_dependency_state(omni, scenario_name, dependency_entry, run_state_entry)
 
         elapsed = time.time() - start_ts
         status = True
@@ -501,6 +517,11 @@ def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
             omni.logger.info('  run_omni_scenarios: No scenarios to run')
             raise Exception('No scenarios to run')
 
+        from wepppy.nodb.mods.omni.omni_sbs_freshness import (
+            SbsReuse, admit_sbs_association, is_sbs, prune_sbs_dependency_state,
+        )
+        sbs_guards = {}
+        has_sbs = any(is_sbs(item) for item in omni.scenarios)
         dependency_tree = dict(omni.scenario_dependency_tree)
         run_states: List[Dict[str, Any]] = []
         omni.scenario_run_state = run_states
@@ -526,6 +547,8 @@ def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
                 and previous.get('signature') == signature_value
             )
             target_key = omni._normalize_scenario_key(dependency_target)
+            if up_to_date and is_sbs(scenario_def):
+                sbs_guards[scenario_name] = SbsReuse.capture(omni, scenario_def, signature_value)
             return scenario_name, target_key, dependency_path, dependency_hash, signature_value, up_to_date
 
         # stage 1 scenarios: dependent on base scenario
@@ -561,7 +584,8 @@ def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
                     'signature': signature_value,
                     'timestamp': ts,
                 }
-                omni.scenario_dependency_tree = dependency_tree
+                if not is_sbs(scenario_payload):
+                    omni.scenario_dependency_tree = dependency_tree
                 run_states.append({
                     'scenario': scenario_name,
                     'status': 'skipped',
@@ -571,7 +595,13 @@ def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
                     'dependency_sha1': dependency_hash,
                     'timestamp': ts,
                 })
-                omni.scenario_run_state = run_states
+                if is_sbs(scenario_payload):
+                    admit_sbs_association(omni, sbs_guards[scenario_name], scenario_name,
+                                          dependency_tree[scenario_name], run_states[-1])
+                    dependency_tree = dict(omni.scenario_dependency_tree)
+                    run_states = list(omni.scenario_run_state)
+                else:
+                    omni.scenario_run_state = run_states
                 continue
 
             omni.logger.info(f'  run_omni_scenarios: queue {scenario_name}')
@@ -614,7 +644,8 @@ def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
                     'signature': signature_value,
                     'timestamp': ts,
                 }
-                omni.scenario_dependency_tree = dependency_tree
+                if not is_sbs(scenario_payload):
+                    omni.scenario_dependency_tree = dependency_tree
                 run_states.append({
                     'scenario': scenario_name,
                     'status': 'skipped',
@@ -624,7 +655,13 @@ def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
                     'dependency_sha1': dependency_hash,
                     'timestamp': ts,
                 })
-                omni.scenario_run_state = run_states
+                if is_sbs(scenario_payload):
+                    admit_sbs_association(omni, sbs_guards[scenario_name], scenario_name,
+                                          dependency_tree[scenario_name], run_states[-1])
+                    dependency_tree = dict(omni.scenario_dependency_tree)
+                    run_states = list(omni.scenario_run_state)
+                else:
+                    omni.scenario_run_state = run_states
                 continue
 
             omni.logger.info(f'  run_omni_scenarios: queue {scenario_name}')
@@ -642,10 +679,13 @@ def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
         if scenarios_ran_count == 0:
             omni.logger.info('  run_omni_scenarios: All scenarios up to date, nothing to run')
 
-        stale = set(dependency_tree.keys()) - active_scenarios
-        for scenario_name in stale:
-            dependency_tree.pop(scenario_name, None)
-        omni.scenario_dependency_tree = dependency_tree
+        if has_sbs:
+            prune_sbs_dependency_state(omni)
+        else:
+            stale = set(dependency_tree.keys()) - active_scenarios
+            for scenario_name in stale:
+                dependency_tree.pop(scenario_name, None)
+            omni.scenario_dependency_tree = dependency_tree
 
         stage1_jobs: List[Job] = []
         stage2_jobs: List[Job] = []
