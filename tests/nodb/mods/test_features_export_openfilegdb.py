@@ -143,7 +143,7 @@ def test_conversion_fails_before_execution_without_create_capability(
 
 
 @pytest.mark.unit
-def test_conversion_timeout_removes_partial_target(
+def test_conversion_timeout_retains_partial_target(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -164,11 +164,11 @@ def test_conversion_timeout_removes_partial_target(
             str(target_path),
             timeout=42,
         )
-    assert not target_path.exists()
+    assert target_path.is_dir()
 
 
 @pytest.mark.unit
-def test_conversion_failure_reports_diagnostics_and_removes_partial_target(
+def test_conversion_failure_reports_diagnostics_and_retains_partial_target(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -188,7 +188,7 @@ def test_conversion_failure_reports_diagnostics_and_removes_partial_target(
             str(source_path),
             str(target_path),
         )
-    assert not target_path.exists()
+    assert target_path.is_dir()
 
 
 @pytest.mark.integration

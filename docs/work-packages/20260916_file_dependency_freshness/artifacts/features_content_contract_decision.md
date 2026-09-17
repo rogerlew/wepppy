@@ -107,3 +107,22 @@ registry profile. A changed-source conversion failure preserves both previous
 published bindings; no new cross-file transaction is introduced. Independent
 ENOSPC retention probe reproduced deletion of the accepted9,760-byte ZIP under
 the old same-directory retry; isolated candidate storage addresses that defect.
+
+## Implementation evidence (checkpoint 90a8a3dc9)
+
+Six actual export/native regressions pass; the affected service/planner/writer/
+RQ/route set passes195 tests. A subsequent13-test native retention set also
+passes, including failure inside the real converter's archive step. The old
+synthetic companion fixture had no producer cache or manifest proof; it now
+asserts legacy-proof rejection, while real dual-profile success/retention is
+covered by `test_features_export_freshness.py`.
+
+The first performance script compared full service preparation/recheck against
+only the low-level dependency resolver and hashing, omitting existing catalog,
+plan and Unitizer preparation. Retain its failed budget assertion. Revision2
+measures the actual metadata-mode preparation through the same service with only
+hash mode disabled:0.2141s. Cold content preparation plus verification is0.2745s,
+within the ratified2x hashing-plus-existing-preparation budget0.4996s. Settled
+preparation/recheck is0.2255s with zero digest misses across ten iterations.
+Actual representative24 entries/14 unique files; no source mutation performed.
+Native large/export runtime and archive acceptance remain open.

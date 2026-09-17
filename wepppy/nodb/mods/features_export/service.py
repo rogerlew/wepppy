@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import collections.abc as cabc
+from copy import deepcopy
 from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 import json
@@ -54,7 +55,7 @@ from .contracts import (
     ResolvedExportPlan,
     ResolvedLayerPlan,
 )
-from .dependency_tracker import DependencySnapshot, build_dependency_snapshot
+from .dependency_tracker import DependencyResolutionError, DependencySnapshot, build_dependency_snapshot
 from .discovery import layer_key_candidates, resolve_geometry_relpath
 from .duckdb_materializer import (
     LayerCarrierInput,
@@ -64,6 +65,7 @@ from .exporters import (
     ExportArtifactMetadata,
     ExportedLayerArtifact,
     ExportWriterRequest,
+    FeaturesExportWriterError,
     PreparedLayerPayload,
     get_export_writer,
 )
@@ -186,12 +188,16 @@ def prepare_export_submission(
     resolved_plan = _resolve_plan_swat_run_id(plan, wd_path)
     _require_current_ag_fields_interchange(wd_path, resolved_plan)
 
-    dependency_snapshot = build_dependency_snapshot(
-        resolved_plan,
-        layer_catalog,
-        wd_path,
-        nodb_ref_resolver=_resolve_nodb_ref_relpath,
-    )
+    try:
+        dependency_snapshot = build_dependency_snapshot(
+            resolved_plan,
+            layer_catalog,
+            wd_path,
+            nodb_ref_resolver=_resolve_nodb_ref_relpath,
+            content_hash_mode="sha256",
+        )
+    except OSError as exc:
+        raise _changed_source_error() from exc
 
     unitizer_preferences_fingerprint = _resolve_unitizer_preferences_fingerprint(
         wd_path,
@@ -211,6 +217,39 @@ def prepare_export_submission(
         cache_key_parts=cache_key_parts,
         unitizer_preferences_fingerprint=unitizer_preferences_fingerprint,
     )
+
+
+def _changed_source_error() -> FeaturesExportServiceError:
+    return FeaturesExportServiceError(
+        "Export inputs changed or could not be verified. Submit a new export.",
+        status_code=409,
+        code="changed_source",
+    )
+
+
+def _verify_export_submission(
+    wd: Path, submission: FeaturesExportSubmission,
+) -> tuple[dict[str, object], Exception | None]:
+    """Observe publication inputs again; callers retain the verdict before raising."""
+    verification: dict[str, object] = {
+        "status": "error",
+        "scope": "catalog_dependency_observations",
+        "before_fingerprint": submission.dependency_snapshot.fingerprint,
+        "after_fingerprint": None,
+    }
+    try:
+        current = prepare_export_submission(
+            wd, submission.plan.request.to_mapping(), catalog=submission.catalog,
+        )
+    except (OSError, DependencyResolutionError, FeaturesExportServiceError) as exc:
+        verification["error_type"] = type(exc).__name__
+        return verification, exc
+    verification["after_fingerprint"] = current.dependency_snapshot.fingerprint
+    if current.cache_key_parts.cache_key != submission.cache_key_parts.cache_key:
+        verification["status"] = "rejected"
+        return verification, _changed_source_error()
+    verification["status"] = "verified"
+    return verification, None
 
 
 def _require_current_ag_fields_interchange(
@@ -526,7 +565,19 @@ def publish_profile_artifact(
             details=f"Missing artifact at {artifact_relpath}.",
         )
 
-    submission = prepare_export_submission(wd_path, request_payload)
+    format_token = str(request_payload["format"])
+    matches = [
+        item for item in _find_cache_entries_by_artifact_relpath(
+            wd_path, artifact_relpath=artifact_relpath,
+        )
+        if _cache_entry_has_valid_artifact_for_format(wd_path, item[1], format_token=format_token)
+    ]
+    if not matches:
+        raise _stale_publication_error(canonical_profile, "Artifact has no compatible cache binding.")
+    cache_key, _cache_entry = _select_latest_cache_entry(matches)
+    request_hash, dependency_fingerprint = _parse_cache_key_components(cache_key)
+    if not request_hash or not dependency_fingerprint:
+        raise _stale_publication_error(canonical_profile, "Artifact cache identity is invalid.")
     manifest_relpath = _job_manifest_relpath(job_id)
     if isinstance(job_result, dict):
         candidate_manifest_relpath = job_result.get("manifest_relpath")
@@ -543,10 +594,10 @@ def publish_profile_artifact(
         ),
         "artifact_relpath": artifact_relpath,
         "manifest_relpath": manifest_relpath,
-        "format": str(submission.plan.request.format),
-        "request_hash": str(submission.cache_key_parts.request_hash),
-        "dependency_fingerprint": str(submission.dependency_snapshot.fingerprint),
-        "cache_key": str(submission.cache_key_parts.cache_key),
+        "format": format_token,
+        "request_hash": request_hash,
+        "dependency_fingerprint": dependency_fingerprint,
+        "cache_key": cache_key,
         "published_at_utc": _utcnow_iso(),
     }
 
@@ -586,67 +637,120 @@ def co_create_post_wepp_geodatabase_artifact(
         job_id=source_job_id,
         job_result=source_job_result,
     )
+    geodatabase_request = resolve_published_profile_request("prep-wepp-geodatabase")[1]
+    submission = prepare_export_submission(wd_path, geodatabase_request)
+    source_submission = prepare_export_submission(
+        wd_path, {**geodatabase_request, "format": "geopackage"}, catalog=submission.catalog,
+    )
+    source_cache = get_cache_index_entry(wd_path, source_submission.cache_key_parts.cache_key)
+    if (
+        source_cache is None
+        or _cache_entry_artifact_relpath(source_cache) != source_artifact_relpath
+        or source_submission.dependency_snapshot.fingerprint != submission.dependency_snapshot.fingerprint
+    ):
+        raise _changed_source_error()
+    manifest_relpath = source_cache.get("manifest_relpath")
+    if not isinstance(manifest_relpath, str) or not manifest_relpath:
+        raise _changed_source_error()
+    try:
+        source_manifest = json.loads(_resolve_relpath(wd_path, manifest_relpath).read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise _changed_source_error() from exc
+    if not isinstance(source_manifest, dict):
+        raise _changed_source_error()
+    source_verification = source_manifest.get("dependency_verification")
+    source_snapshot = source_manifest.get("dependency_snapshot")
+    source_request = source_manifest.get("request")
+    run_context = source_manifest.get("run_context")
+    if (
+        not isinstance(source_verification, dict)
+        or source_verification.get("status") != "verified"
+        or not isinstance(source_snapshot, dict)
+        or source_snapshot.get("fingerprint") != submission.dependency_snapshot.fingerprint
+        or not isinstance(source_request, dict)
+        or source_request.get("resolved") != source_submission.plan.request.to_mapping()
+        or source_manifest.get("artifact_id") != source_cache.get("artifact_id")
+        or not isinstance(run_context, dict)
+        or not all(isinstance(run_context.get(key), str) and run_context[key].strip() for key in ("runid", "config"))
+    ):
+        raise _changed_source_error()
+
     gpkg_path = _resolve_geopackage_co_creation_source(
         source_artifact_path=source_artifact_path,
         source_artifact_relpath=source_artifact_relpath,
     )
-    artifact_dir = source_artifact_path.parent
+    artifact_id = uuid4().hex
+    artifact_dir = _resolve_relpath(wd_path, f"{FEATURES_EXPORT_ARTIFACTS_RELPATH}/{artifact_id}")
+    artifact_dir.mkdir(parents=True, exist_ok=False)
     gdb_container_path = artifact_dir / "features_export.gdb"
     gdb_zip_path = gdb_container_path.with_suffix(".gdb.zip")
-    if gdb_container_path.exists() and gdb_container_path.is_dir():
-        shutil.rmtree(gdb_container_path, ignore_errors=True)
-    if gdb_zip_path.exists() and gdb_zip_path.is_file():
-        gdb_zip_path.unlink()
-
-    convert_geopackage_to_openfilegdb(str(gpkg_path), str(gdb_container_path))
-
+    companion_manifest_path = artifact_dir / FEATURES_EXPORT_MANIFEST_NAME
+    try:
+        convert_geopackage_to_openfilegdb(str(gpkg_path), str(gdb_container_path))
+    except (OSError, FeaturesExportWriterError) as exc:
+        write_export_manifest(companion_manifest_path, {
+            "artifact_id": artifact_id, "source_artifact_id": source_manifest["artifact_id"],
+            "dependency_snapshot": submission.dependency_snapshot.to_mapping(),
+            "dependency_verification": {"status": "error", "stage": "conversion", "error_type": type(exc).__name__},
+        })
+        raise
     if not gdb_zip_path.is_file():
         raise FeaturesExportServiceError(
             "OpenFileGDB conversion did not produce expected FileGDB archive.",
-            status_code=500,
-            code="artifact_missing",
-            details=f"Missing geodatabase archive at {gdb_zip_path}.",
+            status_code=500, code="artifact_missing",
+            details=f"Missing geodatabase archive at {_to_relpath(wd_path, gdb_zip_path)}.",
         )
+
+    verification, verification_error = _verify_export_submission(wd_path, submission)
+    manifest = deepcopy(source_manifest)
+    manifest.update({
+        "artifact_id": artifact_id,
+        "source_artifact_id": source_manifest["artifact_id"],
+        "source_job_id": source_job_id,
+        "cache_hit": False,
+        "generated_at_utc": _utcnow_iso(),
+        "dependency_snapshot": submission.dependency_snapshot.to_mapping(),
+        "dependency_verification": verification,
+    })
+    manifest["request"]["resolved"] = submission.plan.request.to_mapping()
+    with zipfile.ZipFile(gdb_zip_path) as archive:
+        members = sorted([*archive.namelist(), FEATURES_EXPORT_MANIFEST_NAME, FEATURES_EXPORT_ARTIFACT_README_NAME])
+    manifest["artifact"] = {
+        "format": "geodatabase", "artifact_relpath": gdb_zip_path.name,
+        "artifact_path": str(gdb_zip_path), "packaged_member_relpaths": members,
+    }
+    for layer in manifest.get("layers", []):
+        layer["artifact_relpath"] = gdb_container_path.name
+    write_export_manifest(companion_manifest_path, manifest)
+    if verification_error is not None:
+        raise _changed_source_error() from verification_error
+    readme_path = artifact_dir / FEATURES_EXPORT_ARTIFACT_README_NAME
+    readme_path.write_text(build_export_readme(
+        manifest=manifest, runid=source_manifest["run_context"]["runid"],
+        config=source_manifest["run_context"]["config"],
+    ), encoding="utf-8")
+    with zipfile.ZipFile(gdb_zip_path, "a", compression=zipfile.ZIP_DEFLATED) as archive:
+        archive.write(companion_manifest_path, FEATURES_EXPORT_MANIFEST_NAME)
+        archive.write(readme_path, FEATURES_EXPORT_ARTIFACT_README_NAME)
     if gdb_container_path.exists():
-        if gdb_container_path.is_dir():
-            shutil.rmtree(gdb_container_path)
-        else:
-            gdb_container_path.unlink()
+        shutil.rmtree(gdb_container_path)
 
-    gdb_artifact_relpath = _to_relpath(wd_path, gdb_zip_path)
-    geodatabase_request = resolve_published_profile_request("prep-wepp-geodatabase")[1]
-    submission = prepare_export_submission(wd_path, geodatabase_request)
-    _upsert_co_created_published_cache_entry(
-        wd_path,
-        cache_key=submission.cache_key_parts.cache_key,
-        artifact_relpath=gdb_artifact_relpath,
-        artifact_path=gdb_zip_path,
-        source_job_id=source_job_id,
-        source_job_result=source_job_result,
-    )
-
-    source_manifest_relpath = (
-        str(source_job_result.get("manifest_relpath") or "").strip()
-        if isinstance(source_job_result, dict)
-        else ""
-    )
-    if not source_manifest_relpath:
-        source_manifest_relpath = _job_manifest_relpath(source_job_id)
-
-    source_artifact_id = (
-        str(source_job_result.get("artifact_id") or "").strip()
-        if isinstance(source_job_result, dict)
-        else ""
-    )
-    if source_artifact_id:
-        geodatabase_artifact_id = f"{source_artifact_id}-geodatabase"
-    else:
-        geodatabase_artifact_id = gdb_zip_path.parent.name
-
+    artifact_relpath = _to_relpath(wd_path, gdb_zip_path)
+    companion_manifest_relpath = _to_relpath(wd_path, companion_manifest_path)
+    cache_entry = deepcopy(source_cache)
+    cache_entry.update({
+        "artifact_id": artifact_id, "artifact_relpath": artifact_relpath,
+        "artifact_path": str(gdb_zip_path), "artifact_paths": [artifact_relpath],
+        "artifact_format": "geodatabase", "packaged_member_relpaths": members,
+        "source_job_id": source_job_id, "manifest_relpath": companion_manifest_relpath,
+    })
+    for layer in cache_entry.get("layer_outputs", []):
+        layer["relpath"] = gdb_container_path.name
+        layer["format"] = "geodatabase"
+    upsert_cache_index_entry(wd_path, submission.cache_key_parts.cache_key, cache_entry)
     return {
-        "artifact_id": geodatabase_artifact_id,
-        "artifact_relpath": gdb_artifact_relpath,
-        "manifest_relpath": source_manifest_relpath,
+        "artifact_id": artifact_id, "artifact_relpath": artifact_relpath,
+        "manifest_relpath": companion_manifest_relpath,
     }
 
 
@@ -670,16 +774,16 @@ def publish_profile_execution_artifacts(
 
     published_entries: dict[str, dict[str, object]] = {}
     if canonical_profile == "prep-wepp-gpkg-gdb":
+        geodatabase_result = co_create_post_wepp_geodatabase_artifact(
+            wd,
+            source_job_id=job_id,
+            source_job_result=job_result,
+        )
         published_entries["prep-wepp"] = publish_profile_artifact(
             wd,
             profile="prep-wepp",
             job_id=job_id,
             job_result=job_result,
-        )
-        geodatabase_result = co_create_post_wepp_geodatabase_artifact(
-            wd,
-            source_job_id=job_id,
-            source_job_result=job_result,
         )
         published_entries["prep-wepp-geodatabase"] = publish_profile_artifact(
             wd,
@@ -820,51 +924,6 @@ def resolve_published_artifact_path(
         _write_publication_registry(wd_path, registry)
 
     return artifact_path, artifact_relpath
-
-
-def _upsert_co_created_published_cache_entry(
-    wd: Path,
-    *,
-    cache_key: str,
-    artifact_relpath: str,
-    artifact_path: Path,
-    source_job_id: str,
-    source_job_result: dict[str, object] | None,
-) -> None:
-    source_warnings = _normalize_warnings_payload(
-        source_job_result.get("warnings") if isinstance(source_job_result, dict) else None
-    )
-    source_manifest_relpath = (
-        str(source_job_result.get("manifest_relpath") or "").strip()
-        if isinstance(source_job_result, dict)
-        else ""
-    )
-    if not source_manifest_relpath:
-        source_manifest_relpath = _job_manifest_relpath(source_job_id)
-
-    source_artifact_id = (
-        str(source_job_result.get("artifact_id") or "").strip()
-        if isinstance(source_job_result, dict)
-        else ""
-    )
-    if source_artifact_id:
-        artifact_id = f"{source_artifact_id}-geodatabase"
-    else:
-        artifact_id = artifact_path.parent.name
-
-    cache_entry = {
-        "artifact_id": artifact_id,
-        "artifact_relpath": artifact_relpath,
-        "artifact_path": str(artifact_path),
-        "artifact_paths": [artifact_relpath],
-        "artifact_format": "geodatabase",
-        "layer_outputs": [],
-        "packaged_member_relpaths": [artifact_path.name],
-        "source_job_id": source_job_id,
-        "manifest_relpath": source_manifest_relpath,
-        "warnings": source_warnings,
-    }
-    upsert_cache_index_entry(wd, cache_key, cache_entry)
 
 
 def _resolve_geopackage_co_creation_source(
@@ -1043,9 +1102,15 @@ def _run_cache_miss_export(
         request_column_selection_by_layer_id=_request_column_selection_payload(submission.plan),
     )
 
+    manifest["run_context"] = {"runid": runid, "config": config}
+    verification, verification_error = _verify_export_submission(wd, submission)
+    manifest["dependency_verification"] = verification
     artifact_manifest_relpath = f"{artifact_dir_relpath}/{FEATURES_EXPORT_MANIFEST_NAME}"
     artifact_manifest_path = _resolve_relpath(wd, artifact_manifest_relpath)
     write_export_manifest(artifact_manifest_path, manifest)
+    if verification_error is not None:
+        write_export_manifest(_resolve_relpath(wd, _job_manifest_relpath(job_id)), manifest)
+        raise _changed_source_error() from verification_error
 
     readme_path = artifact_dir / FEATURES_EXPORT_ARTIFACT_README_NAME
     readme_path.write_text(
@@ -1163,6 +1228,12 @@ def _finalize_cache_hit(
         additional_warnings=warnings_payload,
         request_column_selection_by_layer_id=_request_column_selection_payload(submission.plan),
     )
+
+    manifest["dependency_verification"] = {
+        "status": "verified", "scope": "cache_selection",
+        "before_fingerprint": submission.dependency_snapshot.fingerprint,
+        "after_fingerprint": submission.dependency_snapshot.fingerprint,
+    }
 
     job_manifest_relpath = _job_manifest_relpath(job_id)
     write_export_manifest(_resolve_relpath(wd, job_manifest_relpath), manifest)

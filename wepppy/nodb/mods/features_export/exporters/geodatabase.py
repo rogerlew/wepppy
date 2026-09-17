@@ -127,19 +127,16 @@ def convert_geopackage_to_openfilegdb(
             f"OpenFileGDB conversion executable is not runnable: {ogr2ogr_binary}"
         ) from exc
     except subprocess.TimeoutExpired as exc:
-        _remove_gdb_container(target_path)
         raise FeaturesExportWriterError(
             f"OpenFileGDB conversion exceeded the {timeout}-second timeout."
         ) from exc
 
     if result.returncode != 0:
-        _remove_gdb_container(target_path)
         raise FeaturesExportWriterError(
             "OpenFileGDB conversion failed:\n"
             f"STDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}"
         )
     if not target_path.is_dir():
-        _remove_gdb_container(target_path)
         raise FeaturesExportWriterError(
             f"OpenFileGDB conversion did not create expected directory: {target_path}"
         )
@@ -153,9 +150,8 @@ def convert_geopackage_to_openfilegdb(
             base_dir=target_path.name,
         )
     except OSError as exc:
-        if zip_path.exists():
-            zip_path.unlink()
-        _remove_gdb_container(target_path)
+        # Failed candidates remain browsable/archivable; callers publish only
+        # verified success and allocate distinct artifact attempt directories.
         raise FeaturesExportWriterError(
             f"Failed to package OpenFileGDB output: {zip_path}"
         ) from exc

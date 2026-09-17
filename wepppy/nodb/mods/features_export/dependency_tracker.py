@@ -4,11 +4,15 @@ from __future__ import annotations
 
 import collections.abc as cabc
 from dataclasses import dataclass
+import errno
 from hashlib import sha256
 import json
 import os
 from pathlib import Path
 import string
+import stat
+
+from wepppy.all_your_base.file_digest import sha256_file
 
 from .catalog_loader import CatalogLayer, LayerCatalog
 from .contracts import DEFAULT_SWAT_RUN_ID, ResolvedExportPlan, ResolvedLayerPlan
@@ -169,10 +173,24 @@ def dependency_fingerprint(
 
     payload = {
         "catalog_signature": catalog_signature,
-        "entries": [entry.to_mapping() for entry in entries],
+        "entries": [_entry_identity(entry) for entry in entries],
     }
     canonical_payload = json.dumps(payload, sort_keys=True, separators=(",", ":"))
     return sha256(canonical_payload.encode("utf-8")).hexdigest()
+
+
+def _entry_identity(entry: DependencyEntry) -> dict[str, object]:
+    identity = entry.to_mapping()
+    digest = entry.content_hash_value
+    if (
+        entry.exists
+        and entry.content_hash_marker == "sha256"
+        and isinstance(digest, str)
+        and len(digest) == 64
+        and all(character in "0123456789abcdef" for character in digest)
+    ):
+        identity.pop("mtime_ns")
+    return identity
 
 
 def _resolve_layer_entries(
@@ -552,9 +570,15 @@ def _build_entry_for_relpath(
         size = stat_result.st_size
         mtime_ns = stat_result.st_mtime_ns
 
-        if content_hash_mode == "sha256" and abs_path.is_file():
+        if content_hash_mode == "sha256" and stat.S_ISREG(stat_result.st_mode):
             content_hash_marker = "sha256"
             content_hash_value = _hash_file_sha256(abs_path)
+            after = abs_path.stat()
+            if any(
+                getattr(stat_result, field) != getattr(after, field)
+                for field in ("st_dev", "st_ino", "st_size", "st_mtime_ns", "st_ctime_ns")
+            ):
+                raise OSError(errno.ESTALE, "Export dependency changed while hashing", str(abs_path))
 
     return DependencyEntry(
         relpath=relpath,
@@ -571,14 +595,7 @@ def _build_entry_for_relpath(
 
 
 def _hash_file_sha256(path: Path) -> str:
-    digest = sha256()
-    with path.open("rb") as stream:
-        while True:
-            chunk = stream.read(65536)
-            if not chunk:
-                break
-            digest.update(chunk)
-    return digest.hexdigest()
+    return sha256_file(path)
 
 
 def _require_mapping(value: object, *, context: str) -> cabc.Mapping[str, object]:

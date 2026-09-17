@@ -547,3 +547,36 @@ def test_build_dependency_snapshot_requires_table_name_resolution_for_path_templ
         "swat/outputs/run_run_424242/interchange/basin_wb.parquet",
         "swat/outputs/run_run_424242/interchange/hru_wb.parquet",
     ]
+
+
+@pytest.mark.parametrize("digest", [None, "bad", "A" * 64, "0" * 64])
+def test_content_fingerprint_ignores_mtime_only_for_valid_digest(digest):
+    from dataclasses import replace
+    from wepppy.nodb.mods.features_export.dependency_tracker import DependencyEntry, dependency_fingerprint
+
+    entry = DependencyEntry("input.bin", True, 4, 1, "sha256", digest)
+    changed = replace(entry, mtime_ns=2)
+    first = dependency_fingerprint([entry], catalog_signature="catalog")
+    second = dependency_fingerprint([changed], catalog_signature="catalog")
+    assert (first == second) is (digest == "0" * 64)
+
+
+def test_verified_entry_rejects_change_between_digest_and_snapshot_stat(tmp_path, monkeypatch):
+    from wepppy.nodb.mods.features_export import dependency_tracker as tracker
+    source = tmp_path / "attrs.parquet"
+    source.write_bytes(b"old1")
+    original = tracker._hash_file_sha256
+
+    def change_after_hash(path):
+        digest = original(path)
+        replacement = path.with_name("replacement.parquet")
+        replacement.write_bytes(b"new2")
+        replacement.replace(path)
+        return digest
+
+    monkeypatch.setattr(tracker, "_hash_file_sha256", change_after_hash)
+    with pytest.raises(OSError, match="changed while hashing"):
+        tracker._build_entry_for_relpath(
+            relpath="attrs.parquet", wd_path=tmp_path, layer_id=None, output_layer_id=None,
+            dependency_role="source", dependency_id="attrs", content_hash_mode="sha256",
+        )

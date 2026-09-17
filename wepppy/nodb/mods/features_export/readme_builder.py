@@ -83,6 +83,9 @@ def build_export_readme(
             dependency_entries=dependency_entries,
         )
     )
+    verification = _mapping_value(normalized_manifest.get("dependency_verification"))
+    if verification:
+        lines.append(f"- Catalog dependency observation: `{verification.get('status')}`.")
     lines.append("")
     lines.extend(_render_warning_summary(warnings))
     lines.append("")

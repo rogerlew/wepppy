@@ -2265,7 +2265,7 @@ def test_execute_features_export_creates_export_root_before_cache_miss(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     submission = _build_submission(cache_key="request-hash+dependency-fingerprint")
-    monkeypatch.setattr(service, "prepare_export_submission", lambda wd, payload: submission)
+    monkeypatch.setattr(service, "prepare_export_submission", lambda wd, payload, **kwargs: submission)
     monkeypatch.setattr(service, "get_cache_index_entry", lambda wd, cache_key: None)
 
     def _fake_cache_miss(
@@ -2304,7 +2304,7 @@ def test_execute_features_export_cache_miss_result_shape(
 ) -> None:
     monkeypatch.setenv("SITE_PREFIX", "/weppcloud")
     submission = _build_submission(cache_key="request-hash+dependency-fingerprint")
-    monkeypatch.setattr(service, "prepare_export_submission", lambda wd, payload: submission)
+    monkeypatch.setattr(service, "prepare_export_submission", lambda wd, payload, **kwargs: submission)
     monkeypatch.setattr(service, "get_export_writer", lambda fmt: _DummyWriter(tmp_path))
     monkeypatch.setattr(service, "_materialize_export_payloads", _stub_materialize_export_payloads)
 
@@ -2369,7 +2369,7 @@ def test_execute_features_export_cache_miss_retains_final_zip_for_zip_writer(
         cache_key="request-hash+dependency-fingerprint+parquet",
         format_token="parquet",
     )
-    monkeypatch.setattr(service, "prepare_export_submission", lambda wd, payload: submission)
+    monkeypatch.setattr(service, "prepare_export_submission", lambda wd, payload, **kwargs: submission)
     monkeypatch.setattr(service, "get_export_writer", lambda fmt: _DummyZipWriter(tmp_path))
     monkeypatch.setattr(service, "_materialize_export_payloads", _stub_materialize_export_payloads)
 
@@ -2406,7 +2406,7 @@ def test_execute_features_export_cache_hit_returns_new_job_id_and_source_job_id(
 ) -> None:
     monkeypatch.setenv("SITE_PREFIX", "/weppcloud")
     submission = _build_submission(cache_key="request-hash+dependency-fingerprint")
-    monkeypatch.setattr(service, "prepare_export_submission", lambda wd, payload: submission)
+    monkeypatch.setattr(service, "prepare_export_submission", lambda wd, payload, **kwargs: submission)
     monkeypatch.setattr(service, "get_export_writer", lambda fmt: _DummyWriter(tmp_path))
     monkeypatch.setattr(service, "_materialize_export_payloads", _stub_materialize_export_payloads)
 
@@ -2758,7 +2758,7 @@ def test_execute_features_export_invalid_cached_geopackage_forces_regeneration(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     submission = _build_submission(cache_key="request-hash+dependency-fingerprint")
-    monkeypatch.setattr(service, "prepare_export_submission", lambda wd, payload: submission)
+    monkeypatch.setattr(service, "prepare_export_submission", lambda wd, payload, **kwargs: submission)
     monkeypatch.setattr(service, "get_export_writer", lambda fmt: _DummyWriter(tmp_path))
     monkeypatch.setattr(service, "_materialize_export_payloads", _stub_materialize_export_payloads)
 
@@ -2797,7 +2797,7 @@ def test_execute_features_export_cached_sqlite_without_gpkg_markers_forces_regen
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     submission = _build_submission(cache_key="request-hash+dependency-fingerprint")
-    monkeypatch.setattr(service, "prepare_export_submission", lambda wd, payload: submission)
+    monkeypatch.setattr(service, "prepare_export_submission", lambda wd, payload, **kwargs: submission)
     monkeypatch.setattr(service, "get_export_writer", lambda fmt: _DummyWriter(tmp_path))
     monkeypatch.setattr(service, "_materialize_export_payloads", _stub_materialize_export_payloads)
 
@@ -3136,7 +3136,7 @@ def test_execute_features_export_writes_spatial_geopackage_layers(
         unitizer_preferences_fingerprint=None,
     )
 
-    monkeypatch.setattr(service, "prepare_export_submission", lambda wd, payload: submission)
+    monkeypatch.setattr(service, "prepare_export_submission", lambda wd, payload, **kwargs: submission)
 
     result = service.execute_features_export(
         tmp_path,
@@ -3184,7 +3184,7 @@ def test_publish_profile_artifact_and_resolve_published_artifact_path(
     artifact_relpath = artifact_path.relative_to(tmp_path).as_posix()
 
     submission = _build_submission(cache_key="request-hash+dependency-fingerprint")
-    monkeypatch.setattr(service, "prepare_export_submission", lambda wd, payload: submission)
+    monkeypatch.setattr(service, "prepare_export_submission", lambda wd, payload, **kwargs: submission)
 
     service.upsert_cache_index_entry(
         tmp_path,
@@ -3238,7 +3238,7 @@ def test_resolve_published_artifact_path_repairs_registry_from_cache_entry(
     artifact_relpath = artifact_path.relative_to(tmp_path).as_posix()
 
     submission_fresh = _build_submission(cache_key="request-hash+dependency-fingerprint")
-    monkeypatch.setattr(service, "prepare_export_submission", lambda wd, payload: submission_fresh)
+    monkeypatch.setattr(service, "prepare_export_submission", lambda wd, payload, **kwargs: submission_fresh)
     service.upsert_cache_index_entry(
         tmp_path,
         submission_fresh.cache_key_parts.cache_key,
@@ -3317,7 +3317,7 @@ def test_resolve_published_artifact_path_rejects_missing_cache_mapping(
     artifact_relpath = artifact_path.relative_to(tmp_path).as_posix()
 
     submission = _build_submission(cache_key="request-hash+dependency-fingerprint")
-    monkeypatch.setattr(service, "prepare_export_submission", lambda wd, payload: submission)
+    monkeypatch.setattr(service, "prepare_export_submission", lambda wd, payload, **kwargs: submission)
     service.upsert_cache_index_entry(
         tmp_path,
         submission.cache_key_parts.cache_key,
@@ -3371,7 +3371,7 @@ def test_resolve_published_artifact_path_rejects_incompatible_cache_artifact_for
     gpkg_artifact_relpath = gpkg_artifact_path.relative_to(tmp_path).as_posix()
 
     submission = _build_submission(cache_key="request-hash+dependency-fingerprint")
-    monkeypatch.setattr(service, "prepare_export_submission", lambda wd, payload: submission)
+    monkeypatch.setattr(service, "prepare_export_submission", lambda wd, payload, **kwargs: submission)
     service.upsert_cache_index_entry(
         tmp_path,
         submission.cache_key_parts.cache_key,
@@ -3552,71 +3552,25 @@ def test_resolve_published_profile_request_supports_cutover_profiles() -> None:
     assert geodatabase_request["format"] == "geodatabase"
 
 
-def test_publish_profile_execution_artifacts_dual_profile_co_creates_geodatabase(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    artifact_dir = tmp_path / "export" / "features" / "artifacts" / "artifact-1"
-    artifact_dir.mkdir(parents=True, exist_ok=True)
-    source_zip_path = artifact_dir / "features_export.geopackage.zip"
-    source_zip_path.write_bytes(b"source-geopackage-zip")
-    source_gpkg_path = artifact_dir / "features_export.gpkg"
-    source_gpkg_path.write_bytes(b"source-gpkg")
-
-    def _fake_prepare_export_submission(_wd: Path, payload: dict[str, object]):
-        format_token = str(payload.get("format") or "").strip().lower()
-        if format_token == "geodatabase":
-            return _build_submission(
-                cache_key="request-hash+dependency-fingerprint-geodatabase",
-                format_token="geodatabase",
-            )
-        return _build_submission(
-            cache_key="request-hash+dependency-fingerprint-geopackage",
-            format_token="geopackage",
-        )
-
-    monkeypatch.setattr(service, "prepare_export_submission", _fake_prepare_export_submission)
+def test_companion_rejects_unproven_legacy_source_without_conversion(tmp_path, monkeypatch):
+    # Native dual-profile generation and retention are covered in
+    # test_features_export_freshness; this old synthetic source has no proof.
+    artifact = tmp_path / "export/features/artifacts/legacy/features_export.gpkg"
+    artifact.parent.mkdir(parents=True)
+    artifact.write_bytes(b"legacy-source")
+    submission = _build_submission(cache_key="request+dependency", format_token="geopackage")
+    monkeypatch.setattr(service, "prepare_export_submission", lambda wd, payload, **kwargs: submission)
     monkeypatch.setattr(service, "openfilegdb_create_available", lambda: True)
 
-    def _fake_convert_gpkg_to_gdb(gpkg_path: str, gdb_path: str, zip_output: bool = True) -> None:
-        assert Path(gpkg_path) == source_gpkg_path
-        assert zip_output is True
-        gdb_dir = Path(gdb_path)
-        gdb_dir.mkdir(parents=True, exist_ok=True)
-        with zipfile.ZipFile(gdb_dir.with_suffix(".gdb.zip"), "w") as zip_handle:
-            zip_handle.writestr("features_export.gdb/table.gdbtable", b"co-created-gdb-bytes")
+    def unexpected_conversion(*args, **kwargs):
+        pytest.fail("Legacy source without accepted provenance must not be converted")
 
-    monkeypatch.setattr(service, "convert_geopackage_to_openfilegdb", _fake_convert_gpkg_to_gdb)
-
-    source_artifact_relpath = source_zip_path.relative_to(tmp_path).as_posix()
-    published_entries = service.publish_profile_execution_artifacts(
-        tmp_path,
-        requested_profile="prep-wepp-gpkg-gdb",
-        job_id="job-1",
-        job_result={
-            "artifact_id": "artifact-1",
-            "artifact_relpath": source_artifact_relpath,
-            "manifest_relpath": "export/features/jobs/job-1/manifest.json",
-        },
-    )
-
-    assert set(published_entries.keys()) == {"prep-wepp", "prep-wepp-geodatabase"}
-    gdb_entry = published_entries["prep-wepp-geodatabase"]
-    gdb_relpath = str(gdb_entry["artifact_relpath"])
-    assert gdb_relpath.endswith("features_export.gdb.zip")
-    assert (tmp_path / gdb_relpath).is_file()
-    assert not (artifact_dir / "features_export.gdb").exists()
-
-    gdb_cache_entry = service.get_cache_index_entry(
-        tmp_path,
-        "request-hash+dependency-fingerprint-geodatabase",
-    )
-    assert isinstance(gdb_cache_entry, dict)
-    assert gdb_cache_entry["artifact_relpath"] == gdb_relpath
-
-    resolved_path, resolved_relpath = service.resolve_published_artifact_path(
-        tmp_path,
-        profile="prep-wepp-geodatabase",
-    )
-    assert resolved_relpath == gdb_relpath
-    assert resolved_path == tmp_path / gdb_relpath
+    monkeypatch.setattr(service, "convert_geopackage_to_openfilegdb", unexpected_conversion)
+    with pytest.raises(service.FeaturesExportServiceError) as error:
+        service.co_create_post_wepp_geodatabase_artifact(
+            tmp_path, source_job_id="legacy", source_job_result={
+                "artifact_relpath": artifact.relative_to(tmp_path).as_posix(),
+            },
+        )
+    assert (error.value.status_code, error.value.code) == (409, "changed_source")
+    assert artifact.read_bytes() == b"legacy-source"

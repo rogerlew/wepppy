@@ -113,3 +113,26 @@ Channel summary note:
 | AgFields Spatial | `ag_fields.fields` | `fields.WGS.geojson` |
 | AgFields Metrics | `ag_fields.metrics.subfields` | `H.pass.parquet` |
 | AgFields Metrics | `ag_fields.metrics.fields` | `H.pass.parquet` |
+
+## Cache Freshness And Interrupted Exports
+
+Exports compare the bytes of regular files in the resolved catalog dependency
+set. Touching or restoring identical files can reuse an existing ZIP; changed
+bytes rebuild it even when size and modification time are preserved. Manifests
+retain timestamps for diagnostics and record dependency verification. Directory
+and indirect native dependencies still have separate closure requirements in
+[the specification](specification.md#file-content-cache-identity-amendment-implementation-pending).
+
+If inputs change during export, the job fails with `changed_source` (409).
+Submit a new export after the upstream operation finishes. Candidate files and
+failure manifests remain under `export/features/artifacts/` for browsing and
+archiving; prior cache entries and downloads remain intact. Existing historical
+ZIPs keep their producer provenance even when a later cache-hit job records a
+new selection time.
+
+Dual GeoPackage/FileGDB exports verify the source artifact before conversion,
+use a separate candidate directory, and verify inputs again before publication.
+A failed conversion preserves previous artifacts and published bindings. Legacy
+artifacts without verified producer provenance remain downloadable; use a new
+ordinary export to generate a verified companion. Successful companions include
+their own manifest and README alongside the native GDB tree.
