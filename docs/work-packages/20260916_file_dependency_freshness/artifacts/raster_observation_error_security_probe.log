@@ -1,0 +1,16 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_observation_error_security_probe.py -q -s
+OBSERVATION_ERROR {"case": "source_removed", "error": "OSError", "errno": 116, "message": "[Errno 116] Raster dependency became unavailable: '/tmp/pytest-of-unknown/pytest-120/test_observed_members_become_u0/source/source.tif'", "source_change_errno": true}
+.OBSERVATION_ERROR {"case": "parent_renamed", "error": "FileNotFoundError", "errno": 2, "message": "[Errno 2] No such file or directory: '/tmp/pytest-of-unknown/pytest-120/test_observed_members_become_u1/source'", "source_change_errno": false}
+.OBSERVATION_ERROR {"case": "parent_denied", "error": "PermissionError", "errno": 13, "message": "[Errno 13] Permission denied: '/tmp/pytest-of-unknown/pytest-120/test_observed_members_become_u2/source'", "source_change_errno": false}
+.
+=============================== warnings summary ===============================
+docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_implementation_security_probe.py:15
+  /workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_implementation_security_probe.py:15: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.integration
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_observation_error_security_probe.py::test_observed_members_become_unavailable[source_removed]
+  /opt/venv/lib/python3.12/site-packages/osgeo/gdal.py:314: FutureWarning: Neither gdal.UseExceptions() nor gdal.DontUseExceptions() has been explicitly called. In GDAL 4.0, exceptions will be enabled by default.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+3 passed, 2 warnings in 1.09s

@@ -1,0 +1,7 @@
+{
+  "case": "parent_denied",
+  "error": "PermissionError",
+  "errno": 13,
+  "message": "[Errno 13] Permission denied: '/tmp/pytest-of-unknown/pytest-120/test_observed_members_become_u2/source'",
+  "source_change_errno": false
+}

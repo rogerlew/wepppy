@@ -1,0 +1,7 @@
+{
+  "case": "parent_renamed",
+  "error": "FileNotFoundError",
+  "errno": 2,
+  "message": "[Errno 2] No such file or directory: '/tmp/pytest-of-unknown/pytest-120/test_observed_members_become_u1/source'",
+  "source_change_errno": false
+}

@@ -61,3 +61,25 @@ OVERVIEW_FILE. Companion preflight, opaque-PAM exclusion, restricted driver open
 and pre-GetFileList metadata eligibility are required. Actual plain GTiff and
 AAIGrid+.prj controls make no requests. AAIGrid is included for the real large
 TOPAZ MOFE source; QA retained complete native/NoDb management measurements and interleaved controls. The canonical whole-consumer and lock budgets now include settled and cold/evicted validation separately; final implementation remeasurement remains mandatory.
+
+## Inspection sibling amendment (implementation finding R-I01)
+
+Initial implementation recursively preflighted masks/overviews, but root GDAL
+inventory could reopen a replacement WarpedVRT before postvalidation, issuing
+HEAD/GET. Retain this failed attempt. Restrict discovery siblings to the selected
+source and proven ordinary companion names, inspect auxiliary rasters separately
+with the same restricted options, and compose their explicit edges/digests.
+Actual installed-GDAL probes cover GTiff/AAIGrid, stationary and replaced masks/
+overviews, and unchanged ordinary georeference/projection controls:13passed,
+zero discovery requests after restriction. This changes inspection only; actual
+native calculations/options remain unchanged. Failure-path validation must
+preserve detected source drift as ESTALE. Independent checkpoint review required
+before this sibling restriction is implemented in production code.
+
+Correctness control found restricted inventory hid native`.tiffw` georeferencing
+with the initial fixed suffix list. Extend ordinary world candidates using native
+extension naming rules (extension plus`w`, first/last extension letters plus`w`,
+and`.wld`); retain case variants and driver identification independent of suffix.
+Opaque RPC/IMD/RRD layouts remain unverified before restricted discovery. This
+finite correction avoids equating a restricted file list with universal closure.
+The failing native transform comparison remains evidence. Review remains open.

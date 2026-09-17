@@ -1,0 +1,17 @@
+{
+  "case": "preflight_replacement",
+  "gdal": "3100300",
+  "uid": 1000,
+  "requests": [
+    {
+      "method": "HEAD",
+      "path": "/child.tif"
+    },
+    {
+      "method": "GET",
+      "path": "/child.tif"
+    }
+  ],
+  "unverified": true,
+  "error": null
+}

@@ -1,0 +1,39 @@
+{
+  "suffix": ".fow",
+  "siblings": [
+    "source.foo",
+    "source.fow"
+  ],
+  "states": [
+    {
+      "restricted": false,
+      "files": [
+        "/tmp/pytest-of-unknown/pytest-124/test_native_world_file_visibil4/source.foo",
+        "/tmp/pytest-of-unknown/pytest-124/test_native_world_file_visibil4/source.fow"
+      ],
+      "transform": [
+        500000.0,
+        30.0,
+        0.0,
+        5000000.0,
+        0.0,
+        -30.0
+      ]
+    },
+    {
+      "restricted": true,
+      "files": [
+        "/tmp/pytest-of-unknown/pytest-124/test_native_world_file_visibil4/source.foo",
+        "/tmp/pytest-of-unknown/pytest-124/test_native_world_file_visibil4/source.fow"
+      ],
+      "transform": [
+        500000.0,
+        30.0,
+        0.0,
+        5000000.0,
+        0.0,
+        -30.0
+      ]
+    }
+  ]
+}

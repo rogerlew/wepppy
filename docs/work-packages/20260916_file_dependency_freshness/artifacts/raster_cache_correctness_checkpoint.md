@@ -210,3 +210,54 @@ Reviewed final SHA-256 values match the independent security record:
 raster-dependency-freshness-contract.md bac31a24504998816ff8b160daa1a35a23887e521bf6a84447bf74130fb135e3
 raster_cache_contract_decision.md 722cea5cfab1ce7ac87ed15fc74e1403c1a92b62c3744ccafe539c8c66c80217
 ```
+
+## Inspection sibling amendment review
+
+**PASS for the revised amendment before its production implementation.** The
+original preflight ordering does not stop GDAL from reopening a replaced
+auxiliary while inventorying its parent. Security's retained R-I01 fixture
+demonstrates two remote requests before rejection. Supplying inspection-only
+sibling names, separately inspecting mask/overview datasets and composing their
+explicit edges is a bounded correction. The original numerical native call must
+retain its path and options. Existing access, configuration, failed-observation
+validation and post-materialization guards remain required.
+
+The first sibling proposal hid two actual native relationships. In
+[the correctness probe](raster_sibling_unknown_correctness_probe.py), a GTiff
+named `source.tiff` consumes `source.tiffw`: unrestricted inspection reports
+the world file and a 30-m transform; the initial sibling list reports neither
+and returns the identity transform. Native GDAL creation with `RPB=YES` and
+`PROFILE=BASELINE` generates `rpc.RPB`; unrestricted inspection reports it and
+populated RPC metadata, while the initial list hides both. The original
+[revision2 log](raster_sibling_unknown_correctness_probe_revision2.log) retains
+**2 failed, 2 passed**. These prove incomplete inspection, not a demonstrated
+change in the two consumers' numerical outputs from RPC.
+
+The revised canonical policy closes those finite omissions: discover world
+files by the actual source extension plus `w`, first/last extension letters
+plus `w`, and `.wld`, with case variants; conservatively exclude external
+RPC/IMD/RRD layouts before restricted discovery. This preserves filename
+flexibility without extending the eligible native drivers or parsing external
+metadata. The `.rpb`, `_rpc.txt`, `.rpc.txt`, `.imd` and `.rrd` candidates are
+opaque coverage decisions, not new bans on native inputs.
+
+An artifact-only proposed-policy seam now gives **7 passed in 1.05s** in
+[the corrected proposal log](raster_sibling_unknown_correctness_proposed_revision2.log).
+Actual `.tiffw`/`.TIFFW`, `.wld`, and GTiff content named `source.foo` with
+`.foow`/`.fow` preserve native membership and transforms. The unused `.tifw`
+beside `.tiff` is a negative control. The actual RPB layout becomes unverified.
+Security's separate 13-case sibling experiment retains unchanged ordinary
+projection/georeference controls and zero requests for the masked/overview
+replacement cases. This is proposal evidence, not final helper acceptance.
+
+The first attempted proposed-policy command did not forward its environment
+variable through `wctl run-pytest`; its retained log shows the old-policy
+failures. The corrected `wctl exec weppcloud env RASTER_PROPOSED_COMPANIONS=1`
+invocation explicitly enables the seam. No production/test file was edited.
+
+Reviewed amended identities:
+
+```text
+raster-dependency-freshness-contract.md aad6f0d1b3e71c1321af113b747d99c4686848a89ad760b2deb6d84f68f58ead
+raster_cache_contract_decision.md 6cf1bda79bb12942891a05642929440dc78ba1a908cb850bc37754fa1e025df2
+```

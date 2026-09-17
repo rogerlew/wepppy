@@ -1,0 +1,25 @@
+{
+  "case": "AAIGrid_ovr_replacement",
+  "gdal": "3100300",
+  "requests": [],
+  "calls": [
+    {
+      "path": "source.asc.ovr",
+      "siblings": [
+        "source.asc.ovr"
+      ]
+    },
+    {
+      "path": "source.asc",
+      "siblings": [
+        "source.asc",
+        "source.prj"
+      ]
+    }
+  ],
+  "unverified": true,
+  "error": {
+    "errno": 116,
+    "message": "[Errno 116] Raster dependency changed: '/tmp/pytest-of-unknown/pytest-114/test_discovery_sibling_authori7/source.asc.ovr'"
+  }
+}

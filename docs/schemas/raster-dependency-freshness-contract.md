@@ -52,7 +52,22 @@ configuration eligibility again after observation. These are the existing native
 defaults, not changes to native settings or scientific parameters.
 
 Open eligible datasets read-only with allowed drivers restricted to GTiff and
-AAIGrid. Before GetFileList, reject reuse coverage for a nonempty OVERVIEWS or
+AAIGrid. Discovery supplies an explicit sibling list containing the source
+basename and preflight ordinary companions only. World-file candidates include
+`.wld`, the source extension plus `w` (for example `.tiffw`) and its first/last
+letters plus `w`, with case variants, independent of the identified driver.
+Reject opaque RPC/IMD/RRD sidecar layouts before restricted discovery rather
+than silently hiding them; they are outside verified coverage. Exclude opaque metadata,
+masks and overviews from automatic sibling reopening. Inspect each eligible
+mask/overview separately with the same restricted discovery options, and retain
+those explicit companion edges and digests in the composed proof even when the
+root file list omits them. Actual GTiff/AAIGrid replacement probes show this
+prevents GetFileList from opening a newly replaced WarpedVRT auxiliary; a final
+stat check alone cannot undo its remote requests. Recheck versions/membership
+on failed inspection too: observed drift raises source-change instead of being
+reclassified as initially unverified. Discovery options apply only to inspection;
+the original numerical native operation receives its unchanged path/options.
+Before GetFileList, reject reuse coverage for a nonempty OVERVIEWS or
 other unproven external-dataset metadata relationship. Actual probes show a true
 TIFF can encode a remote OVERVIEW_FILE internally without any sibling sidecar;
 metadata inspection itself makes no request but GetFileList fetches it. A local

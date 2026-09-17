@@ -1,0 +1,25 @@
+{
+  "case": "AAIGrid_msk_replacement",
+  "gdal": "3100300",
+  "requests": [],
+  "calls": [
+    {
+      "path": "source.asc.msk",
+      "siblings": [
+        "source.asc.msk"
+      ]
+    },
+    {
+      "path": "source.asc",
+      "siblings": [
+        "source.asc",
+        "source.prj"
+      ]
+    }
+  ],
+  "unverified": true,
+  "error": {
+    "errno": 116,
+    "message": "[Errno 116] Raster dependency changed: '/tmp/pytest-of-unknown/pytest-114/test_discovery_sibling_authori5/source.asc.msk'"
+  }
+}

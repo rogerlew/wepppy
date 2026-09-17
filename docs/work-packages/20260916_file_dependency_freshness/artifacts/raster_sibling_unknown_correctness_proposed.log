@@ -1,0 +1,199 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_sibling_unknown_correctness_probe.py -q -s
+{"suffix": ".tifw", "siblings": ["source.tiff", "source.tifw"], "states": [{"restricted": false, "files": ["/tmp/pytest-of-unknown/pytest-122/test_native_world_file_visibil0/source.tiff"], "transform": [0.0, 1.0, 0.0, 0.0, 0.0, 1.0]}, {"restricted": true, "files": ["/tmp/pytest-of-unknown/pytest-122/test_native_world_file_visibil0/source.tiff"], "transform": [0.0, 1.0, 0.0, 0.0, 0.0, 1.0]}]}
+.{"suffix": ".tiffw", "siblings": ["source.tiff"], "states": [{"restricted": false, "files": ["/tmp/pytest-of-unknown/pytest-122/test_native_world_file_visibil1/source.tiff", "/tmp/pytest-of-unknown/pytest-122/test_native_world_file_visibil1/source.tiffw"], "transform": [500000.0, 30.0, 0.0, 5000000.0, 0.0, -30.0]}, {"restricted": true, "files": ["/tmp/pytest-of-unknown/pytest-122/test_native_world_file_visibil1/source.tiff"], "transform": [0.0, 1.0, 0.0, 0.0, 0.0, 1.0]}]}
+F{"suffix": ".wld", "siblings": ["source.tiff", "source.wld"], "states": [{"restricted": false, "files": ["/tmp/pytest-of-unknown/pytest-122/test_native_world_file_visibil2/source.tiff", "/tmp/pytest-of-unknown/pytest-122/test_native_world_file_visibil2/source.wld"], "transform": [500000.0, 30.0, 0.0, 5000000.0, 0.0, -30.0]}, {"restricted": true, "files": ["/tmp/pytest-of-unknown/pytest-122/test_native_world_file_visibil2/source.tiff", "/tmp/pytest-of-unknown/pytest-122/test_native_world_file_visibil2/source.wld"], "transform": [500000.0, 30.0, 0.0, 5000000.0, 0.0, -30.0]}]}
+.{"suffix": ".foow", "siblings": ["source.foo"], "states": [{"restricted": false, "files": ["/tmp/pytest-of-unknown/pytest-122/test_native_world_file_visibil3/source.foo", "/tmp/pytest-of-unknown/pytest-122/test_native_world_file_visibil3/source.foow"], "transform": [500000.0, 30.0, 0.0, 5000000.0, 0.0, -30.0]}, {"restricted": true, "files": ["/tmp/pytest-of-unknown/pytest-122/test_native_world_file_visibil3/source.foo"], "transform": [0.0, 1.0, 0.0, 0.0, 0.0, 1.0]}]}
+F{"suffix": ".fow", "siblings": ["source.foo"], "states": [{"restricted": false, "files": ["/tmp/pytest-of-unknown/pytest-122/test_native_world_file_visibil4/source.foo", "/tmp/pytest-of-unknown/pytest-122/test_native_world_file_visibil4/source.fow"], "transform": [500000.0, 30.0, 0.0, 5000000.0, 0.0, -30.0]}, {"restricted": true, "files": ["/tmp/pytest-of-unknown/pytest-122/test_native_world_file_visibil4/source.foo"], "transform": [0.0, 1.0, 0.0, 0.0, 0.0, 1.0]}]}
+F{"suffix": ".TIFFW", "siblings": ["source.tiff"], "states": [{"restricted": false, "files": ["/tmp/pytest-of-unknown/pytest-122/test_native_world_file_visibil5/source.tiff", "/tmp/pytest-of-unknown/pytest-122/test_native_world_file_visibil5/source.TIFFW"], "transform": [500000.0, 30.0, 0.0, 5000000.0, 0.0, -30.0]}, {"restricted": true, "files": ["/tmp/pytest-of-unknown/pytest-122/test_native_world_file_visibil5/source.tiff"], "transform": [0.0, 1.0, 0.0, 0.0, 0.0, 1.0]}]}
+F{"siblings": ["rpc.tif"], "on_disk": ["rpc.RPB", "rpc.tif"], "states": [{"restricted": false, "files": ["/tmp/pytest-of-unknown/pytest-122/test_native_rpc_sidecar_visibi0/rpc.tif", "/tmp/pytest-of-unknown/pytest-122/test_native_rpc_sidecar_visibi0/rpc.RPB"], "rpc": {"ERR_BIAS": "0.0", "ERR_RAND": "0.0", "HEIGHT_OFF": "1", "HEIGHT_SCALE": "1", "LAT_OFF": "1", "LAT_SCALE": "1", "LINE_DEN_COEFF": "1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0", "LINE_NUM_COEFF": "1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0", "LINE_OFF": "1", "LINE_SCALE": "1", "LONG_OFF": "1", "LONG_SCALE": "1", "SAMP_DEN_COEFF": "1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0", "SAMP_NUM_COEFF": "1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0", "SAMP_OFF": "1", "SAMP_SCALE": "1"}}, {"restricted": true, "files": ["/tmp/pytest-of-unknown/pytest-122/test_native_rpc_sidecar_visibi0/rpc.tif"], "rpc": {}}]}
+F
+=================================== FAILURES ===================================
+____________ test_native_world_file_visibility[source.tiff-.tiffw] _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-122/test_native_world_file_visibil1')
+filename = 'source.tiff', suffix = '.tiffw'
+
+    @pytest.mark.parametrize("filename,suffix", [("source.tiff", ".tifw"), ("source.tiff", ".tiffw"),
+                                                 ("source.tiff", ".wld"), ("source.foo", ".foow"),
+                                                 ("source.foo", ".fow"), ("source.tiff", ".TIFFW")])
+    def test_native_world_file_visibility(tmp_path, filename, suffix):
+        source = tmp_path / filename
+        ds = gdal.GetDriverByName("GTiff").Create(str(source), 2, 2, 1, gdal.GDT_Byte)
+        ds.GetRasterBand(1).Fill(1)
+        ds = None
+        world = tmp_path / ("source" + suffix)
+        world.write_text("30\n0\n0\n-30\n500015\n4999985\n")
+        siblings = [source.name, *[Path(path).name for path, kind in fresh._companions(str(source)) if kind in fresh._ORDINARY]]
+        states = []
+        for restricted in (False, True):
+            kwargs = {"sibling_files": siblings} if restricted else {}
+            ds = gdal.OpenEx(str(source), gdal.OF_RASTER | gdal.OF_READONLY,
+                             allowed_drivers=["GTiff", "AAIGrid"], **kwargs)
+            states.append({"restricted": restricted, "files": ds.GetFileList(), "transform": ds.GetGeoTransform()})
+            ds = None
+        record = {"suffix": suffix, "siblings": siblings, "states": states}
+        Path(__file__).with_name("raster_sibling_unknown_" + suffix[1:] + ".json").write_text(json.dumps(record, indent=2) + "\n")
+        print(json.dumps(record))
+>       assert states[0]["transform"] == states[1]["transform"]
+E       assert (500000.0, 30...0, 0.0, -30.0) == (0.0, 1.0, 0.0, 0.0, 0.0, 1.0)
+E         
+E         At index 0 diff: 500000.0 != 0.0
+E         Use -v to get more diff
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_sibling_unknown_correctness_probe.py:57: AssertionError
+_____________ test_native_world_file_visibility[source.foo-.foow] ______________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-122/test_native_world_file_visibil3')
+filename = 'source.foo', suffix = '.foow'
+
+    @pytest.mark.parametrize("filename,suffix", [("source.tiff", ".tifw"), ("source.tiff", ".tiffw"),
+                                                 ("source.tiff", ".wld"), ("source.foo", ".foow"),
+                                                 ("source.foo", ".fow"), ("source.tiff", ".TIFFW")])
+    def test_native_world_file_visibility(tmp_path, filename, suffix):
+        source = tmp_path / filename
+        ds = gdal.GetDriverByName("GTiff").Create(str(source), 2, 2, 1, gdal.GDT_Byte)
+        ds.GetRasterBand(1).Fill(1)
+        ds = None
+        world = tmp_path / ("source" + suffix)
+        world.write_text("30\n0\n0\n-30\n500015\n4999985\n")
+        siblings = [source.name, *[Path(path).name for path, kind in fresh._companions(str(source)) if kind in fresh._ORDINARY]]
+        states = []
+        for restricted in (False, True):
+            kwargs = {"sibling_files": siblings} if restricted else {}
+            ds = gdal.OpenEx(str(source), gdal.OF_RASTER | gdal.OF_READONLY,
+                             allowed_drivers=["GTiff", "AAIGrid"], **kwargs)
+            states.append({"restricted": restricted, "files": ds.GetFileList(), "transform": ds.GetGeoTransform()})
+            ds = None
+        record = {"suffix": suffix, "siblings": siblings, "states": states}
+        Path(__file__).with_name("raster_sibling_unknown_" + suffix[1:] + ".json").write_text(json.dumps(record, indent=2) + "\n")
+        print(json.dumps(record))
+>       assert states[0]["transform"] == states[1]["transform"]
+E       assert (500000.0, 30...0, 0.0, -30.0) == (0.0, 1.0, 0.0, 0.0, 0.0, 1.0)
+E         
+E         At index 0 diff: 500000.0 != 0.0
+E         Use -v to get more diff
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_sibling_unknown_correctness_probe.py:57: AssertionError
+______________ test_native_world_file_visibility[source.foo-.fow] ______________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-122/test_native_world_file_visibil4')
+filename = 'source.foo', suffix = '.fow'
+
+    @pytest.mark.parametrize("filename,suffix", [("source.tiff", ".tifw"), ("source.tiff", ".tiffw"),
+                                                 ("source.tiff", ".wld"), ("source.foo", ".foow"),
+                                                 ("source.foo", ".fow"), ("source.tiff", ".TIFFW")])
+    def test_native_world_file_visibility(tmp_path, filename, suffix):
+        source = tmp_path / filename
+        ds = gdal.GetDriverByName("GTiff").Create(str(source), 2, 2, 1, gdal.GDT_Byte)
+        ds.GetRasterBand(1).Fill(1)
+        ds = None
+        world = tmp_path / ("source" + suffix)
+        world.write_text("30\n0\n0\n-30\n500015\n4999985\n")
+        siblings = [source.name, *[Path(path).name for path, kind in fresh._companions(str(source)) if kind in fresh._ORDINARY]]
+        states = []
+        for restricted in (False, True):
+            kwargs = {"sibling_files": siblings} if restricted else {}
+            ds = gdal.OpenEx(str(source), gdal.OF_RASTER | gdal.OF_READONLY,
+                             allowed_drivers=["GTiff", "AAIGrid"], **kwargs)
+            states.append({"restricted": restricted, "files": ds.GetFileList(), "transform": ds.GetGeoTransform()})
+            ds = None
+        record = {"suffix": suffix, "siblings": siblings, "states": states}
+        Path(__file__).with_name("raster_sibling_unknown_" + suffix[1:] + ".json").write_text(json.dumps(record, indent=2) + "\n")
+        print(json.dumps(record))
+>       assert states[0]["transform"] == states[1]["transform"]
+E       assert (500000.0, 30...0, 0.0, -30.0) == (0.0, 1.0, 0.0, 0.0, 0.0, 1.0)
+E         
+E         At index 0 diff: 500000.0 != 0.0
+E         Use -v to get more diff
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_sibling_unknown_correctness_probe.py:57: AssertionError
+____________ test_native_world_file_visibility[source.tiff-.TIFFW] _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-122/test_native_world_file_visibil5')
+filename = 'source.tiff', suffix = '.TIFFW'
+
+    @pytest.mark.parametrize("filename,suffix", [("source.tiff", ".tifw"), ("source.tiff", ".tiffw"),
+                                                 ("source.tiff", ".wld"), ("source.foo", ".foow"),
+                                                 ("source.foo", ".fow"), ("source.tiff", ".TIFFW")])
+    def test_native_world_file_visibility(tmp_path, filename, suffix):
+        source = tmp_path / filename
+        ds = gdal.GetDriverByName("GTiff").Create(str(source), 2, 2, 1, gdal.GDT_Byte)
+        ds.GetRasterBand(1).Fill(1)
+        ds = None
+        world = tmp_path / ("source" + suffix)
+        world.write_text("30\n0\n0\n-30\n500015\n4999985\n")
+        siblings = [source.name, *[Path(path).name for path, kind in fresh._companions(str(source)) if kind in fresh._ORDINARY]]
+        states = []
+        for restricted in (False, True):
+            kwargs = {"sibling_files": siblings} if restricted else {}
+            ds = gdal.OpenEx(str(source), gdal.OF_RASTER | gdal.OF_READONLY,
+                             allowed_drivers=["GTiff", "AAIGrid"], **kwargs)
+            states.append({"restricted": restricted, "files": ds.GetFileList(), "transform": ds.GetGeoTransform()})
+            ds = None
+        record = {"suffix": suffix, "siblings": siblings, "states": states}
+        Path(__file__).with_name("raster_sibling_unknown_" + suffix[1:] + ".json").write_text(json.dumps(record, indent=2) + "\n")
+        print(json.dumps(record))
+>       assert states[0]["transform"] == states[1]["transform"]
+E       assert (500000.0, 30...0, 0.0, -30.0) == (0.0, 1.0, 0.0, 0.0, 0.0, 1.0)
+E         
+E         At index 0 diff: 500000.0 != 0.0
+E         Use -v to get more diff
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_sibling_unknown_correctness_probe.py:57: AssertionError
+______________________ test_native_rpc_sidecar_visibility ______________________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-122/test_native_rpc_sidecar_visibi0')
+
+    def test_native_rpc_sidecar_visibility(tmp_path):
+        source = tmp_path / "rpc.tif"
+        ds = gdal.GetDriverByName("MEM").Create("", 2, 2, 1, gdal.GDT_Byte)
+        coeff = " ".join(["1"] + ["0"] * 19)
+        rpc = {name: "1" for name in ("LINE_OFF", "SAMP_OFF", "LAT_OFF", "LONG_OFF", "HEIGHT_OFF",
+                                       "LINE_SCALE", "SAMP_SCALE", "LAT_SCALE", "LONG_SCALE", "HEIGHT_SCALE")}
+        rpc.update({name: coeff for name in ("LINE_NUM_COEFF", "LINE_DEN_COEFF", "SAMP_NUM_COEFF", "SAMP_DEN_COEFF")})
+        ds.SetMetadata(rpc, "RPC")
+        output = gdal.GetDriverByName("GTiff").CreateCopy(str(source), ds, options=["RPB=YES", "PROFILE=BASELINE"])
+        output = ds = None
+        # BASELINE may emit unrelated PAM; remove it so the native RPB relationship
+        # is isolated and no existing opaque-PAM guard decides this experiment.
+        source.with_name(source.name + ".aux.xml").unlink(missing_ok=True)
+        siblings = [source.name, *[Path(path).name for path, kind in fresh._companions(str(source)) if kind in fresh._ORDINARY]]
+        states = []
+        for restricted in (False, True):
+            kwargs = {"sibling_files": siblings} if restricted else {}
+            ds = gdal.OpenEx(str(source), gdal.OF_RASTER | gdal.OF_READONLY,
+                             allowed_drivers=["GTiff", "AAIGrid"], **kwargs)
+            states.append({"restricted": restricted, "files": ds.GetFileList(), "rpc": ds.GetMetadata("RPC")})
+            ds = None
+        record = {"siblings": siblings, "on_disk": sorted(p.name for p in tmp_path.iterdir()), "states": states}
+        Path(__file__).with_name("raster_sibling_unknown_rpc.json").write_text(json.dumps(record, indent=2) + "\n")
+        print(json.dumps(record))
+        if os.environ.get("RASTER_PROPOSED_COMPANIONS") == "1":
+            assert fresh.raster_dependency_signature(source) is None
+        else:
+>           assert states[0]["rpc"] == states[1]["rpc"]
+E           AssertionError: assert {'ERR_BIAS': ...LE': '1', ...} == {}
+E             
+E             Left contains 16 more items:
+E             {'ERR_BIAS': '0.0',
+E              'ERR_RAND': '0.0',
+E              'HEIGHT_OFF': '1',
+E              'HEIGHT_SCALE': '1',
+E              'LAT_OFF': '1',...
+E             
+E             ...Full output truncated (12 lines hidden), use '-vv' to show
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_sibling_unknown_correctness_probe.py:88: AssertionError
+=============================== warnings summary ===============================
+docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_sibling_unknown_correctness_probe.py::test_native_world_file_visibility[source.tiff-.tifw]
+  /opt/venv/lib/python3.12/site-packages/osgeo/gdal.py:314: FutureWarning: Neither gdal.UseExceptions() nor gdal.DontUseExceptions() has been explicitly called. In GDAL 4.0, exceptions will be enabled by default.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_sibling_unknown_correctness_probe.py::test_native_world_file_visibility[source.tiff-.tiffw]
+FAILED docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_sibling_unknown_correctness_probe.py::test_native_world_file_visibility[source.foo-.foow]
+FAILED docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_sibling_unknown_correctness_probe.py::test_native_world_file_visibility[source.foo-.fow]
+FAILED docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_sibling_unknown_correctness_probe.py::test_native_world_file_visibility[source.tiff-.TIFFW]
+FAILED docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_sibling_unknown_correctness_probe.py::test_native_rpc_sidecar_visibility
+5 failed, 2 passed, 1 warning in 1.18s

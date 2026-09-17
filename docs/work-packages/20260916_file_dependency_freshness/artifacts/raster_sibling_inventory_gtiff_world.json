@@ -1,0 +1,42 @@
+{
+  "case": "gtiff_world",
+  "gdal": "3100300",
+  "states": [
+    {
+      "restricted": false,
+      "members": [
+        "/tmp/pytest-of-unknown/pytest-114/test_local_ordinary_inventory_2/source.tif",
+        "/tmp/pytest-of-unknown/pytest-114/test_local_ordinary_inventory_2/source.tfw"
+      ],
+      "transform": [
+        500000.0,
+        30.0,
+        0.0,
+        5000000.0,
+        0.0,
+        -30.0
+      ],
+      "projection": ""
+    },
+    {
+      "restricted": true,
+      "members": [
+        "/tmp/pytest-of-unknown/pytest-114/test_local_ordinary_inventory_2/source.tif",
+        "/tmp/pytest-of-unknown/pytest-114/test_local_ordinary_inventory_2/source.tfw"
+      ],
+      "transform": [
+        500000.0,
+        30.0,
+        0.0,
+        5000000.0,
+        0.0,
+        -30.0
+      ],
+      "projection": ""
+    }
+  ],
+  "siblings": [
+    "source.tif",
+    "source.tfw"
+  ]
+}

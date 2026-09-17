@@ -1,0 +1,39 @@
+{
+  "suffix": ".wld",
+  "siblings": [
+    "source.tiff",
+    "source.wld"
+  ],
+  "states": [
+    {
+      "restricted": false,
+      "files": [
+        "/tmp/pytest-of-unknown/pytest-124/test_native_world_file_visibil2/source.tiff",
+        "/tmp/pytest-of-unknown/pytest-124/test_native_world_file_visibil2/source.wld"
+      ],
+      "transform": [
+        500000.0,
+        30.0,
+        0.0,
+        5000000.0,
+        0.0,
+        -30.0
+      ]
+    },
+    {
+      "restricted": true,
+      "files": [
+        "/tmp/pytest-of-unknown/pytest-124/test_native_world_file_visibil2/source.tiff",
+        "/tmp/pytest-of-unknown/pytest-124/test_native_world_file_visibil2/source.wld"
+      ],
+      "transform": [
+        500000.0,
+        30.0,
+        0.0,
+        5000000.0,
+        0.0,
+        -30.0
+      ]
+    }
+  ]
+}

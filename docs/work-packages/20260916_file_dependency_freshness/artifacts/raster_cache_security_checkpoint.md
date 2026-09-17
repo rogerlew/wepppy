@@ -224,3 +224,42 @@ Reviewed canonical SHA-256 including final configuration and measured budgets:
 raster-dependency-freshness-contract.md bac31a24504998816ff8b160daa1a35a23887e521bf6a84447bf74130fb135e3
 raster_cache_contract_decision.md 722cea5cfab1ce7ac87ed15fc74e1403c1a92b62c3744ccafe539c8c66c80217
 ```
+
+## Discovery sibling amendment checkpoint
+
+**PASS for the revised bounded amendment**, with implementation review pending.
+The original implementation's R-I01 remains retained in
+`raster_implementation_security_review.md`: a vetted mask replaced before root
+inventory caused loopback HEAD/GET. A later stat rejection could not prevent
+that added discovery authority.
+
+`raster_sibling_inventory_security_probe.py/.log` supplies **13 passed** actual
+GDAL 3.10.3 controls. Discovery-only explicit sibling lists prevent automatic
+mask/overview reopening in GTiff and AAIGrid replacement cases; all four reject
+with ESTALE and zero requests. Ordinary `.prj` and world-file membership,
+projection and transforms remain unchanged in the tested controls. Independently
+inspected auxiliary rasters must remain in composed proof even when omitted by
+the restricted root list. The numerical native operation retains its original
+path/options, and no process-wide configuration is changed.
+
+Correctness subsequently proved an initial restricted-list proposal could hide
+`.tiffw` georeferencing and `.RPB` metadata. The revised amendment requires native
+suffix-derived world-file names plus case variants, and rejects opaque
+RPC/IMD/RRD families before restriction. Include `.rpb`, `_rpc.txt`, `.rpc.txt`,
+`.imd` and `.rrd` in that conservative preflight. Retain the failed controls;
+the restricted list alone is not a proof of complete dependency coverage.
+Implementation must demonstrate world-file invalidation and opaque-family
+bypass with original native behavior, including selected/resolved aliases.
+
+Failure-path validation of previously recorded paths/members/configuration is
+required; an inspection error must not turn observed mutation into initially
+unverified/native fallback. Initially unverified inputs retain the existing
+uncached native success/error boundary. These requirements address the concrete
+findings without authorizing a generalized metadata parser or remote validator.
+
+Reviewed amendment SHA-256:
+
+```text
+raster-dependency-freshness-contract.md aad6f0d1b3e71c1321af113b747d99c4686848a89ad760b2deb6d84f68f58ead
+raster_cache_contract_decision.md 6cf1bda79bb12942891a05642929440dc78ba1a908cb850bc37754fa1e025df2
+```

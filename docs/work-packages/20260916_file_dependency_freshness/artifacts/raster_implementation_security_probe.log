@@ -1,0 +1,29 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_implementation_security_probe.py -q -s
+RASTER_SECURITY {"case": "vrt", "gdal": "3100300", "uid": 1000, "unverified": true, "requests": []}
+.RASTER_SECURITY {"case": "mask", "gdal": "3100300", "uid": 1000, "unverified": true, "requests": []}
+.RASTER_SECURITY {"case": "overview", "gdal": "3100300", "uid": 1000, "unverified": true, "requests": []}
+.RASTER_SECURITY {"case": "internal", "gdal": "3100300", "uid": 1000, "unverified": true, "requests": []}
+.RASTER_SECURITY {"case": "alias_mask", "gdal": "3100300", "uid": 1000, "unverified": true, "requests": []}
+.RASTER_SECURITY {"case": "stem_uppercase", "gdal": "3100300", "uid": 1000, "unverified": true, "requests": []}
+.RASTER_SECURITY {"case": "aaigrid_mask", "gdal": "3100300", "uid": 1000, "unverified": true, "requests": []}
+...........RASTER_SECURITY {"case": "preflight_replacement", "gdal": "3100300", "uid": 1000, "requests": [{"method": "HEAD", "path": "/child.tif"}, {"method": "GET", "path": "/child.tif"}], "unverified": true, "error": null}
+.
+=============================== warnings summary ===============================
+docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_implementation_security_probe.py:15
+  /workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_implementation_security_probe.py:15: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.integration
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_implementation_security_probe.py::test_preflight_has_no_remote_discovery[vrt]
+  /opt/venv/lib/python3.12/site-packages/osgeo/gdal.py:314: FutureWarning: Neither gdal.UseExceptions() nor gdal.DontUseExceptions() has been explicitly called. In GDAL 4.0, exceptions will be enabled by default.
+    warnings.warn(
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_implementation_security_probe.py::test_access_preserves_native_boundary[file_denied]
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/raster_implementation_security_probe.py::test_access_preserves_native_boundary[file_denied]
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+18 passed, 4 warnings in 13.19s

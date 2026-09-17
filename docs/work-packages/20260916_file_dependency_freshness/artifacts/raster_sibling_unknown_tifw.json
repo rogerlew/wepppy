@@ -1,0 +1,37 @@
+{
+  "suffix": ".tifw",
+  "siblings": [
+    "source.tiff",
+    "source.tifw"
+  ],
+  "states": [
+    {
+      "restricted": false,
+      "files": [
+        "/tmp/pytest-of-unknown/pytest-124/test_native_world_file_visibil0/source.tiff"
+      ],
+      "transform": [
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "restricted": true,
+      "files": [
+        "/tmp/pytest-of-unknown/pytest-124/test_native_world_file_visibil0/source.tiff"
+      ],
+      "transform": [
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    }
+  ]
+}
