@@ -1,11 +1,15 @@
 # Canonical archive directory permissions discovery
 
-**A-S01, medium, OPEN: canonical roundtrip loses private attempt directory
-permissions.** This is an integration gate for the package's new artifact
+**A-S01, medium, verified closed by the bounded implementation after-probe.**
+The original finding below was that canonical roundtrip loses private attempt
+directory permissions. This is an integration gate for the package's new artifact
 producers. The underlying archive omission predates this package; the changed
 workflows nevertheless depend on private directories to contain readable native
-intermediates. The scoped Geneva generation review remains PASS, but archive
-permission parity and whole-package runtime acceptance do not pass.
+intermediates. At discovery, the scoped Geneva generation review remained PASS,
+but archive permission parity and whole-package runtime acceptance did not pass.
+See `archive_directory_implementation_security_review.md` for the accepted
+checkpoint and actual successful producer roundtrip. Whole-package runtime
+acceptance remains a separate gate.
 
 ## Actual evidence
 

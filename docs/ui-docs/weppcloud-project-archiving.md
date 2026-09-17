@@ -72,3 +72,18 @@ Module: `wepppy/rq/project_rq.py`
   config authority. Invalid or newer project manifests do not block restore;
   the reader reopens them in degraded mode with updates disabled.
 - Dedicated archive download service health is observable through `download.complete` logs with status, bytes, duration, range metadata, request id, and sanitized archive basename.
+
+## Directory permissions in restored snapshots
+
+New snapshots retain ordinary directory modes and empty folders. Restore applies
+private directory restrictions before writing payloads, then restores final
+modes, so retained failed/intermediate attempts keep their directory privacy.
+File modes and the restoring service's existing ownership behavior are unchanged.
+Conflicting directory-mode records fail validation before current contents are
+removed; inability to apply a recorded directory mode is a visible restore error.
+
+Older ZIPs without directory-mode records still use the restoring process's
+normal directory defaults. Their historical modes cannot be reconstructed from
+filenames. This limitation does not mean their file bytes were omitted. The
+[artifact observability standard](../standards/artifact-observability-standard.md#project-archive-directory-metadata)
+defines the new and legacy behavior precisely.

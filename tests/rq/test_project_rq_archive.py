@@ -580,3 +580,85 @@ def test_batch_handoff_records_survive_archive_restore(archive_rq_environment, s
     receipt.unlink()
     project.restore_archive_rq("demo", archive.name)
     assert receipt.read_bytes() == payload
+
+
+def _directory_member(name, mode):
+    import stat
+    member = zipfile.ZipInfo(name.rstrip('/') + '/')
+    member.create_system = 3
+    member.external_attr = (stat.S_IFDIR | mode) << 16
+    return member
+
+
+def test_archive_restores_directory_modes_and_empty_folders(archive_rq_environment):
+    import stat
+    project, tmp_path, _, _ = archive_rq_environment
+    run = tmp_path / 'demo'
+    private = run / 'geneva' / 'cache_attempts' / 'attempt'
+    private.mkdir(parents=True, mode=0o700)
+    private.chmod(0o700)
+    empty = private / 'empty'
+    empty.mkdir(mode=0o750)
+    empty.chmod(0o750)
+    payload = private / 'candidate.tif'
+    payload.write_bytes(b'failed native candidate')
+    project.archive_rq('demo', comment='private attempt directory modes')
+    archive = next((run / 'archives').glob('*.zip'))
+    with zipfile.ZipFile(archive) as zipped:
+        assert stat.S_IMODE(zipped.getinfo('geneva/cache_attempts/attempt/').external_attr >> 16) == 0o700
+        assert stat.S_IMODE(zipped.getinfo('geneva/cache_attempts/attempt/empty/').external_attr >> 16) == 0o750
+    private.chmod(0o755)
+    empty.chmod(0o755)
+    project.restore_archive_rq('demo', archive.name)
+    assert stat.S_IMODE(private.stat().st_mode) == 0o700
+    assert stat.S_IMODE(empty.stat().st_mode) == 0o750
+    assert payload.read_bytes() == b'failed native candidate'
+
+
+def test_restore_stages_private_ancestry_before_payload_and_restores_zero_mode(
+        archive_rq_environment, monkeypatch):
+    import builtins
+    import stat
+    from wepppy.rq import project_rq_archive as archive_module
+    project, tmp_path, _, _ = archive_rq_environment
+    run = tmp_path / 'demo'
+    archives = run / 'archives'
+    archives.mkdir(parents=True)
+    root_mode = stat.S_IMODE(run.stat().st_mode)
+    archive = archives / 'unordered.zip'
+    with zipfile.ZipFile(archive, 'w') as zipped:
+        zipped.writestr('private/readonly/payload.txt', b'contents')
+        zipped.writestr(_directory_member('private/readonly', 0o000), b'')
+        zipped.writestr(_directory_member('private', 0o700), b'')
+        zipped.writestr(_directory_member('.', 0o777), b'')
+    observed = []
+    def checked_open(path, mode='r', *args, **kwargs):
+        if mode == 'wb' and Path(path).name == 'payload.txt':
+            observed.append(True)
+            assert stat.S_IMODE((run / 'private').stat().st_mode) == 0o700
+            assert stat.S_IMODE((run / 'private/readonly').stat().st_mode) == 0o700
+        return builtins.open(path, mode, *args, **kwargs)
+    monkeypatch.setattr(archive_module, 'open', checked_open, raising=False)
+    project.restore_archive_rq('demo', archive.name)
+    assert observed == [True]
+    assert stat.S_IMODE((run / 'private/readonly').stat().st_mode) == 0
+    assert stat.S_IMODE(run.stat().st_mode) == root_mode
+    (run / 'private/readonly').chmod(0o700)
+    assert (run / 'private/readonly/payload.txt').read_bytes() == b'contents'
+
+
+def test_conflicting_directory_modes_reject_before_cleanup(archive_rq_environment):
+    project, tmp_path, _, _ = archive_rq_environment
+    run = tmp_path / 'demo'
+    archives = run / 'archives'
+    archives.mkdir(parents=True)
+    marker = run / 'keep.txt'
+    marker.write_text('existing project')
+    archive = archives / 'conflict.zip'
+    with zipfile.ZipFile(archive, 'w') as zipped:
+        zipped.writestr(_directory_member('private', 0o700), b'')
+        with pytest.warns(UserWarning, match='Duplicate name'):
+            zipped.writestr(_directory_member('private', 0o755), b'')
+    with pytest.raises(ValueError, match='Conflicting archive directory modes'):
+        project.restore_archive_rq('demo', archive.name)
+    assert marker.read_text() == 'existing project'

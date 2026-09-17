@@ -151,6 +151,24 @@ def _collect_restore_members(
     return members, total_bytes, file_count
 
 
+def _restore_directory_modes(members, wd):
+    """Validate explicit UNIX directory modes before destructive restoration."""
+    modes = {}
+    file_targets = {target for member, target, _ in members if not member.is_dir()}
+    for member, target, _ in members:
+        mode = member.external_attr >> 16
+        if (target == wd or not member.is_dir() or member.create_system != 3
+                or not stat.S_ISDIR(mode)):
+            continue
+        permissions = stat.S_IMODE(mode)
+        if target in modes and modes[target] != permissions:
+            raise ValueError(f'Conflicting archive directory modes: {member.filename}')
+        if target in file_targets or any(parent in file_targets for parent in target.parents if parent != wd):
+            raise ValueError(f'Archive directory conflicts with a file: {member.filename}')
+        modes[target] = permissions
+    return modes
+
+
 def _grant_owner_cleanup_perms(path: Path) -> None:
     try:
         mode = path.lstat().st_mode
@@ -308,6 +326,11 @@ def archive_rq(runid: str, comment: str | None, *, runtime: ArchiveRuntime) -> N
                         if not _is_archive_excluded_relpath(os.path.relpath(os.path.join(root, d), wd))
                     ]
 
+                    if rel_root:
+                        # os.walk does not traverse symlink directories. Retain
+                        # ordinary directory metadata, including empty folders.
+                        zf.write(root, rel_root + "/")
+
                     for filename in files:
                         abs_path = os.path.join(root, filename)
                         arcname = os.path.relpath(abs_path, wd)
@@ -373,6 +396,7 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                 )
 
             restore_members, restore_bytes, restore_file_count = _collect_restore_members(zf, wd)
+            directory_modes = _restore_directory_modes(restore_members, wd)
             reclaimable_bytes, _ = _calculate_run_payload_bytes(wd)
             required_bytes = _estimate_archive_required_bytes(restore_bytes, restore_file_count)
             _assert_sufficient_disk_space(
@@ -408,6 +432,12 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                 except FileNotFoundError:
                     continue
 
+            # ZIP ordering cannot expose a private payload before its ancestry
+            # is restricted. Owner access is temporary for readonly directories.
+            for directory, mode in sorted(directory_modes.items(), key=lambda item: len(item[0].parts)):
+                directory.mkdir(mode=mode | 0o700, parents=True, exist_ok=True)
+                os.chmod(directory, mode | 0o700)
+
             for member, target_path, relative_target in restore_members:
                 if member.is_dir():
                     target_path.mkdir(parents=True, exist_ok=True)
@@ -426,6 +456,9 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                         pass
 
                 runtime.publish_status(status_channel, f"Restored file {relative_target}")
+
+            for directory, mode in sorted(directory_modes.items(), key=lambda item: len(item[0].parts), reverse=True):
+                os.chmod(directory, mode)
 
         try:
             cleared_entries = runtime.clear_nodb_file_cache(runid)

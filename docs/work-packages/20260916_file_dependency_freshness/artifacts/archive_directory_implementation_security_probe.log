@@ -1,0 +1,44 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest docs/work-packages/20260916_file_dependency_freshness/artifacts/archive_attempt_permissions_security_probe_revision2.py docs/work-packages/20260916_file_dependency_freshness/artifacts/archive_directory_implementation_security_probe.py -v -s
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0 -- /opt/venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collecting ... collected 9 items
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/archive_attempt_permissions_security_probe_revision2.py::test_failed_attempt_permissions_survive_canonical_archive_restore {"uid": 1000, "gid": 993, "before": {"geneva/cache_attempts": 448, "geneva/cache_attempts/588063276db94bc691a2768ca131ecfa": 448, "geneva/cache_attempts/588063276db94bc691a2768ca131ecfa/candidate.geojson": 420, "geneva/cache_attempts/588063276db94bc691a2768ca131ecfa/status.json": 384, "ordinary": 488, "ordinary/private.txt": 384}, "after": {"geneva/cache_attempts": 448, "geneva/cache_attempts/588063276db94bc691a2768ca131ecfa": 448, "geneva/cache_attempts/588063276db94bc691a2768ca131ecfa/candidate.geojson": 420, "geneva/cache_attempts/588063276db94bc691a2768ca131ecfa/status.json": 384, "ordinary": 488, "ordinary/private.txt": 384}, "archive_mode": 420, "zip_members": {"geneva/": {"directory": true, "mode": 493, "create_system": 3}, "geneva/cache_attempts/": {"directory": true, "mode": 448, "create_system": 3}, "geneva/cache_attempts/588063276db94bc691a2768ca131ecfa/": {"directory": true, "mode": 448, "create_system": 3}, "geneva/cache_attempts/588063276db94bc691a2768ca131ecfa/candidate.geojson": {"directory": false, "mode": 420, "create_system": 3}, "geneva/cache_attempts/588063276db94bc691a2768ca131ecfa/status.json": {"directory": false, "mode": 384, "create_system": 3}, "ordinary/": {"directory": true, "mode": 488, "create_system": 3}, "ordinary/private.txt": {"directory": false, "mode": 384, "create_system": 3}}, "all_bytes_preserved": true, "scope": "actual producer attempt and canonical archive/restore; job/Redis transport supplied by ArchiveRuntime"}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/archive_directory_implementation_security_probe.py::test_private_ancestry_precedes_payload_and_final_modes_follow_children[0] {"prepayload_0": {"uid": 1000, "first_payload": [{"parent": 448, "child": 448, "root": 488}], "parent_final": 0, "child_final": 256, "root_final": 488, "empty_final": 457, "bytes": "private bytes", "completed": true}}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/archive_directory_implementation_security_probe.py::test_private_ancestry_precedes_payload_and_final_modes_follow_children[320] {"prepayload_500": {"uid": 1000, "first_payload": [{"parent": 448, "child": 448, "root": 488}], "parent_final": 320, "child_final": 256, "root_final": 488, "empty_final": 457, "bytes": "private bytes", "completed": true}}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/archive_directory_implementation_security_probe.py::test_private_ancestry_precedes_payload_and_final_modes_follow_children[488] {"prepayload_750": {"uid": 1000, "first_payload": [{"parent": 488, "child": 448, "root": 488}], "parent_final": 488, "child_final": 256, "root_final": 488, "empty_final": 457, "bytes": "private bytes", "completed": true}}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/archive_directory_implementation_security_probe.py::test_resolved_duplicate_directory_modes_are_validated_before_removal[False] {"duplicate_False": {"rejected": false, "prior_present": false}}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/archive_directory_implementation_security_probe.py::test_resolved_duplicate_directory_modes_are_validated_before_removal[True] {"duplicate_True": {"rejected": true, "prior_present": true}}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/archive_directory_implementation_security_probe.py::test_legacy_metadata_exclusions_and_directory_symlink_policy {"legacy_exclusions": {"legacy_mode": 493, "nonunix_mode": 493, "new_members": ["nonunix/", "nonunix/payload.txt", "legacy/", "legacy/payload.txt", "ordinary-empty/"]}}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/archive_directory_implementation_security_probe.py::test_required_directory_mode_failure_is_explicit[False] {"chmod_failure_False": {"archive_retained": true, "payload_created": false}}
+PASSED
+docs/work-packages/20260916_file_dependency_freshness/artifacts/archive_directory_implementation_security_probe.py::test_required_directory_mode_failure_is_explicit[True] {"chmod_failure_True": {"archive_retained": true, "payload_created": true}}
+PASSED
+
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/archive_attempt_permissions_security_probe_revision2.py::test_failed_attempt_permissions_survive_canonical_archive_restore
+docs/work-packages/20260916_file_dependency_freshness/artifacts/archive_directory_implementation_security_probe.py::test_legacy_metadata_exclusions_and_directory_symlink_policy
+  /workdir/wepppy/wepppy/rq/project_rq_archive.py:300: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 9 passed, 4 warnings in 9.19s =========================

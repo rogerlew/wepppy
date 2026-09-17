@@ -1,0 +1,77 @@
+{
+  "prepayload_0": {
+    "uid": 1000,
+    "first_payload": [
+      {
+        "parent": 448,
+        "child": 448,
+        "root": 488
+      }
+    ],
+    "parent_final": 0,
+    "child_final": 256,
+    "root_final": 488,
+    "empty_final": 457,
+    "bytes": "private bytes",
+    "completed": true
+  },
+  "prepayload_500": {
+    "uid": 1000,
+    "first_payload": [
+      {
+        "parent": 448,
+        "child": 448,
+        "root": 488
+      }
+    ],
+    "parent_final": 320,
+    "child_final": 256,
+    "root_final": 488,
+    "empty_final": 457,
+    "bytes": "private bytes",
+    "completed": true
+  },
+  "prepayload_750": {
+    "uid": 1000,
+    "first_payload": [
+      {
+        "parent": 488,
+        "child": 448,
+        "root": 488
+      }
+    ],
+    "parent_final": 488,
+    "child_final": 256,
+    "root_final": 488,
+    "empty_final": 457,
+    "bytes": "private bytes",
+    "completed": true
+  },
+  "duplicate_False": {
+    "rejected": false,
+    "prior_present": false
+  },
+  "duplicate_True": {
+    "rejected": true,
+    "prior_present": true
+  },
+  "legacy_exclusions": {
+    "legacy_mode": 493,
+    "nonunix_mode": 493,
+    "new_members": [
+      "nonunix/",
+      "nonunix/payload.txt",
+      "legacy/",
+      "legacy/payload.txt",
+      "ordinary-empty/"
+    ]
+  },
+  "chmod_failure_False": {
+    "archive_retained": true,
+    "payload_created": false
+  },
+  "chmod_failure_True": {
+    "archive_retained": true,
+    "payload_created": true
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "uid": 1000,
+  "gid": 993,
+  "before": {
+    "geneva/cache_attempts": 448,
+    "geneva/cache_attempts/588063276db94bc691a2768ca131ecfa": 448,
+    "geneva/cache_attempts/588063276db94bc691a2768ca131ecfa/candidate.geojson": 420,
+    "geneva/cache_attempts/588063276db94bc691a2768ca131ecfa/status.json": 384,
+    "ordinary": 488,
+    "ordinary/private.txt": 384
+  },
+  "after": {
+    "geneva/cache_attempts": 448,
+    "geneva/cache_attempts/588063276db94bc691a2768ca131ecfa": 448,
+    "geneva/cache_attempts/588063276db94bc691a2768ca131ecfa/candidate.geojson": 420,
+    "geneva/cache_attempts/588063276db94bc691a2768ca131ecfa/status.json": 384,
+    "ordinary": 488,
+    "ordinary/private.txt": 384
+  },
+  "archive_mode": 420,
+  "zip_members": {
+    "geneva/": {
+      "directory": true,
+      "mode": 493,
+      "create_system": 3
+    },
+    "geneva/cache_attempts/": {
+      "directory": true,
+      "mode": 448,
+      "create_system": 3
+    },
+    "geneva/cache_attempts/588063276db94bc691a2768ca131ecfa/": {
+      "directory": true,
+      "mode": 448,
+      "create_system": 3
+    },
+    "geneva/cache_attempts/588063276db94bc691a2768ca131ecfa/candidate.geojson": {
+      "directory": false,
+      "mode": 420,
+      "create_system": 3
+    },
+    "geneva/cache_attempts/588063276db94bc691a2768ca131ecfa/status.json": {
+      "directory": false,
+      "mode": 384,
+      "create_system": 3
+    },
+    "ordinary/": {
+      "directory": true,
+      "mode": 488,
+      "create_system": 3
+    },
+    "ordinary/private.txt": {
+      "directory": false,
+      "mode": 384,
+      "create_system": 3
+    }
+  },
+  "all_bytes_preserved": true,
+  "scope": "actual producer attempt and canonical archive/restore; job/Redis transport supplied by ArchiveRuntime"
+}
