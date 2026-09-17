@@ -1,0 +1,401 @@
+{
+  "run": "nervous-mesquite",
+  "attempt": "a909f2c1b3c0468084d31a8cdd0e24f2",
+  "model": "M1",
+  "source_hash_mismatches": [],
+  "table_hashes_match": {
+    "design": true,
+    "events": true,
+    "inverse": true
+  },
+  "arithmetic": {
+    "design": {
+      "rows": 12,
+      "available": 12,
+      "max_probability_error": 0.0,
+      "max_unit_error_mm": 0.0
+    },
+    "events": {
+      "rows": 8067,
+      "available": 8067,
+      "max_probability_error": 1.1102230246251565e-16,
+      "max_unit_error_mm": 7.105427357601002e-15
+    },
+    "inverse": {
+      "rows": 3,
+      "available": 3,
+      "max_probability_error": 1.1102230246251565e-16,
+      "max_unit_error_mm": 0.0
+    }
+  },
+  "raster": {
+    "basin_cells": 77669,
+    "common_cells": 77667,
+    "area_km2": 7.7669,
+    "independent_predictors": {
+      "T": 0.7412672048617817,
+      "F": 0.5410453359946719,
+      "S": 0.33716159651753175
+    },
+    "predictor_abs_errors": {
+      "T": 0.0,
+      "F": 0.0,
+      "S": 0.0
+    },
+    "max_horn_slope_error_degrees": 0.0,
+    "horn_threshold_disagreements": 0,
+    "intersection_disagreements": 0,
+    "mod_high_fraction_all_basin": 0.8441334380512173,
+    "sbs_unknown_basin": 97
+  },
+  "report": {
+    "attempt_id": "a909f2c1b3c0468084d31a8cdd0e24f2",
+    "summary": {
+      "model": "M1",
+      "completed_at": "2026-09-16T20:53:29.453309+00:00",
+      "assessment_id": "052cbf59f446418dac7c501c8462d0e6",
+      "current": true,
+      "newer_attempt": null,
+      "climate_mode": "GridMetPRISM",
+      "date_semantics": "calendar",
+      "frequency_source": "noaa",
+      "frequency": {
+        "represented_years": 46,
+        "year_min": 1980.0,
+        "year_max": 2025.0,
+        "wet_years": 46
+      },
+      "area_km2": 7.7669,
+      "coverage": {
+        "total_cells": 77669,
+        "valid_cells": 77667,
+        "excluded_cells": 2,
+        "valid_fraction": 0.9999742497006527
+      },
+      "warnings": [],
+      "predictors": [
+        {
+          "name": "F",
+          "value": 0.5410453359946719,
+          "unit": "normalized_dNBR",
+          "reason": null
+        },
+        {
+          "name": "S",
+          "value": 0.33716159651753175,
+          "unit": "USLE_customary",
+          "reason": null
+        },
+        {
+          "name": "T",
+          "value": 0.7412672048617817,
+          "unit": "fraction",
+          "reason": null
+        }
+      ]
+    },
+    "design_matches": true,
+    "inverse_matches": true,
+    "event_rows_in_selected_duration": 2689
+  },
+  "rainfall_source_checks": {
+    "max_event_intensity_error": 0.0,
+    "max_noaa_design_intensity_error": 0.0,
+    "january_9_2018_cli": {
+      "prcp": 55.4,
+      "dur": 1.5,
+      "tp": 0.6,
+      "ip": 1.0
+    }
+  },
+  "design": [
+    {
+      "return_interval_years": 1,
+      "source": "noaa",
+      "rank_index": null,
+      "positive_samples": null,
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": 36.0,
+      "rainfall_mm": 9.0,
+      "probability": 0.9889246631162447,
+      "status": "available",
+      "reason": null
+    },
+    {
+      "return_interval_years": 1,
+      "source": "noaa",
+      "rank_index": null,
+      "positive_samples": null,
+      "duration_minutes": 30,
+      "intensity_mm_per_hour": 26.0,
+      "rainfall_mm": 13.0,
+      "probability": 0.9787544510616575,
+      "status": "available",
+      "reason": null
+    },
+    {
+      "return_interval_years": 1,
+      "source": "noaa",
+      "rank_index": null,
+      "positive_samples": null,
+      "duration_minutes": 60,
+      "intensity_mm_per_hour": 21.0,
+      "rainfall_mm": 21.0,
+      "probability": 0.9632580047653034,
+      "status": "available",
+      "reason": null
+    },
+    {
+      "return_interval_years": 2,
+      "source": "noaa",
+      "rank_index": null,
+      "positive_samples": null,
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": 46.0,
+      "rainfall_mm": 11.5,
+      "probability": 0.998828127750799,
+      "status": "available",
+      "reason": null
+    },
+    {
+      "return_interval_years": 2,
+      "source": "noaa",
+      "rank_index": null,
+      "positive_samples": null,
+      "duration_minutes": 30,
+      "intensity_mm_per_hour": 34.0,
+      "rainfall_mm": 17.0,
+      "probability": 0.9978050643326352,
+      "status": "available",
+      "reason": null
+    },
+    {
+      "return_interval_years": 2,
+      "source": "noaa",
+      "rank_index": null,
+      "positive_samples": null,
+      "duration_minutes": 60,
+      "intensity_mm_per_hour": 26.0,
+      "rainfall_mm": 26.0,
+      "probability": 0.9919051636012504,
+      "status": "available",
+      "reason": null
+    },
+    {
+      "return_interval_years": 5,
+      "source": "noaa",
+      "rank_index": null,
+      "positive_samples": null,
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": 59.0,
+      "rainfall_mm": 14.75,
+      "probability": 0.9999375378573602,
+      "status": "available",
+      "reason": null
+    },
+    {
+      "return_interval_years": 5,
+      "source": "noaa",
+      "rank_index": null,
+      "positive_samples": null,
+      "duration_minutes": 30,
+      "intensity_mm_per_hour": 43.0,
+      "rainfall_mm": 21.5,
+      "probability": 0.9998325797457884,
+      "status": "available",
+      "reason": null
+    },
+    {
+      "return_interval_years": 5,
+      "source": "noaa",
+      "rank_index": null,
+      "positive_samples": null,
+      "duration_minutes": 60,
+      "intensity_mm_per_hour": 34.0,
+      "rainfall_mm": 34.0,
+      "probability": 0.9993082551989559,
+      "status": "available",
+      "reason": null
+    },
+    {
+      "return_interval_years": 10,
+      "source": "noaa",
+      "rank_index": null,
+      "positive_samples": null,
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": 69.0,
+      "rainfall_mm": 17.25,
+      "probability": 0.9999934560958058,
+      "status": "available",
+      "reason": null
+    },
+    {
+      "return_interval_years": 10,
+      "source": "noaa",
+      "rank_index": null,
+      "positive_samples": null,
+      "duration_minutes": 30,
+      "intensity_mm_per_hour": 51.0,
+      "rainfall_mm": 25.5,
+      "probability": 0.9999830310399013,
+      "status": "available",
+      "reason": null
+    },
+    {
+      "return_interval_years": 10,
+      "source": "noaa",
+      "rank_index": null,
+      "positive_samples": null,
+      "duration_minutes": 60,
+      "intensity_mm_per_hour": 40.0,
+      "rainfall_mm": 40.0,
+      "probability": 0.9998912121088356,
+      "status": "available",
+      "reason": null
+    }
+  ],
+  "inverse": [
+    {
+      "target_probability": 0.5,
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": 16.089836308129946,
+      "rainfall_mm": 4.022459077032487,
+      "probability": null,
+      "status": "available",
+      "reason": null
+    },
+    {
+      "target_probability": 0.5,
+      "duration_minutes": 30,
+      "intensity_mm_per_hour": 12.615365231328475,
+      "rainfall_mm": 6.307682615664238,
+      "probability": null,
+      "status": "available",
+      "reason": null
+    },
+    {
+      "target_probability": 0.5,
+      "duration_minutes": 60,
+      "intensity_mm_per_hour": 10.40855885127461,
+      "rainfall_mm": 10.40855885127461,
+      "probability": null,
+      "status": "available",
+      "reason": null
+    }
+  ],
+  "january_9_2018": [
+    {
+      "event_id": "d02ef262449967b8f12a41178de43ef003ed89b8a3441d9a3caed53a0a057ea5:13888",
+      "row_ordinal": 13888,
+      "year": 2018.0,
+      "month": 1.0,
+      "day_of_month": 9.0,
+      "sim_day_index": 13889.0,
+      "precipitation_mm": 55.4,
+      "date_status": "calendar",
+      "duration_minutes": 15,
+      "intensity_mm_per_hour": 36.93333333333335,
+      "rainfall_mm": 9.233333333333338,
+      "probability": 0.9910086934132268,
+      "status": "available",
+      "reason": null
+    },
+    {
+      "event_id": "d02ef262449967b8f12a41178de43ef003ed89b8a3441d9a3caed53a0a057ea5:13888",
+      "row_ordinal": 13888,
+      "year": 2018.0,
+      "month": 1.0,
+      "day_of_month": 9.0,
+      "sim_day_index": 13889.0,
+      "precipitation_mm": 55.4,
+      "date_status": "calendar",
+      "duration_minutes": 30,
+      "intensity_mm_per_hour": 36.93333333333334,
+      "rainfall_mm": 18.46666666666667,
+      "probability": 0.9990506705243339,
+      "status": "available",
+      "reason": null
+    },
+    {
+      "event_id": "d02ef262449967b8f12a41178de43ef003ed89b8a3441d9a3caed53a0a057ea5:13888",
+      "row_ordinal": 13888,
+      "year": 2018.0,
+      "month": 1.0,
+      "day_of_month": 9.0,
+      "sim_day_index": 13889.0,
+      "precipitation_mm": 55.4,
+      "date_status": "calendar",
+      "duration_minutes": 60,
+      "intensity_mm_per_hour": 36.93333333333333,
+      "rainfall_mm": 36.93333333333333,
+      "probability": 0.9997199442010632,
+      "status": "available",
+      "reason": null
+    }
+  ],
+  "same_storm": {
+    "I15_mm_h": 24,
+    "rainfall_mm": 6,
+    "probability": 0.8562637321686197,
+    "published_san_ysidro_probability": 0.69,
+    "soil_only_counterfactual_for_69": 0.10276183939370218
+  },
+  "monitored_files": 53,
+  "unchanged": true,
+  "before_sha256": {
+    "climate/atlas14_intensity_pds_mean_metric.csv": "56b393810c2e66c13396095b8a2e645fc53646c3d7d0a3de50a8f9bdeb34af08",
+    "climate/wepp_cli.parquet": "d02ef262449967b8f12a41178de43ef003ed89b8a3441d9a3caed53a0a057ea5",
+    "climate.nodb": "ac91a525151493fd837325a6cd00c67af39791873c307026087c69022d6d9641",
+    "dem/dem.tif": "22c7935a5ef327769377a1caa5b8d9b694c628c6c5392961f0215a202fe0b152",
+    "dem/wbt/bound.tif": "63f096513f0cb7ec6aeba8d62afe79a86df29c075d5ae03d6faf3aae354b8007",
+    "dem/wbt/outlet.geojson": "65e6a8af5ad0f6ad5c23f2cc9a8c81379536e04523832194c47a66ee5185f58b",
+    "disturbed/sbs_4class.tif": "09158b0a903b7114addf40cac6fdc3babe052ed5b5233040565687f86dbc1f88",
+    "disturbed.nodb": "5e1368b32d36841a13ad1d7e5374dd80e517b634c74a48bf4619716387bad024",
+    "landuse.nodb": "43179ddff8f51eb56f72f1bd9a2503358d3091ae5171b20df1871a6b7c72c7d1",
+    "observed.nodb": "5ac8921a62f52c51b572a4e936dee74df31c9a76c9d802a64a8bcc30c970e713",
+    "polaris.nodb": "03f1a795533c67e5da15788b0dad0002fc3836bee7cb36414874ad63a1972a4a",
+    "postfire_debris_flow/attempts/052cbf59f446418dac7c501c8462d0e6/dem.tif": "b8e75f60740339124b44507f94a977db014bfabb515b60e0f7941ae5d5d59158",
+    "postfire_debris_flow/attempts/052cbf59f446418dac7c501c8462d0e6/encoding.json": "31dbe7d5bf122d589bfe9511c887553d2d6fafcb60d04fe63facaa9df3ab5055",
+    "postfire_debris_flow/attempts/052cbf59f446418dac7c501c8462d0e6/mask.tif": "baa1438fbf08715befbe68bf5e79c25d8c7265bd8f8a9d5e02f70136a2f4aea3",
+    "postfire_debris_flow/attempts/052cbf59f446418dac7c501c8462d0e6/normalized/dnbr.tif": "f0048d0ac68a7b748bbb092179927567be03b3d725dd1c0e4fbd6fc9132bd9ef",
+    "postfire_debris_flow/attempts/052cbf59f446418dac7c501c8462d0e6/normalized/manifest.json": "44a2d68dfdd915a9cba8aa00f99293ba577c21ece32e9e9fdfec72b98d3300fc",
+    "postfire_debris_flow/attempts/052cbf59f446418dac7c501c8462d0e6/source/thomas_s2_20171128_21071228_dnbr.tif": "7b6021fe757402376a2a1893786515bb983f2b695b04738986ba9c5264bbf140",
+    "postfire_debris_flow/attempts/052cbf59f446418dac7c501c8462d0e6/status.json": "3776b14f2901f9fd3134b091b34ed6a36d5d328c30594cf2d804a2c798255c9d",
+    "postfire_debris_flow/attempts/a909f2c1b3c0468084d31a8cdd0e24f2/predictors/manifest.json": "75fd3c051fea06d24232d16352a0f9a231bb4a8a737b20b8a06a5b69969a9da2",
+    "postfire_debris_flow/attempts/a909f2c1b3c0468084d31a8cdd0e24f2/predictors/prepared/common_domain.tif": "c4b03a07e253cc376f35c497aff1b50e44f825f4da39ffd8d1114d077fcacaed",
+    "postfire_debris_flow/attempts/a909f2c1b3c0468084d31a8cdd0e24f2/predictors/prepared/dem.tif": "b8e75f60740339124b44507f94a977db014bfabb515b60e0f7941ae5d5d59158",
+    "postfire_debris_flow/attempts/a909f2c1b3c0468084d31a8cdd0e24f2/predictors/prepared/dnbr.tif": "ccd3896783e79398fa60ce9d951a75600aba3703afaaca04451d0a9ce6a1d444",
+    "postfire_debris_flow/attempts/a909f2c1b3c0468084d31a8cdd0e24f2/predictors/prepared/domain.tif": "baa1438fbf08715befbe68bf5e79c25d8c7265bd8f8a9d5e02f70136a2f4aea3",
+    "postfire_debris_flow/attempts/a909f2c1b3c0468084d31a8cdd0e24f2/predictors/prepared/mask.tif": "c54088658ad87fd96821a2bf332f28f50c18d037f0ee04fbb99a9146f95a5ffb",
+    "postfire_debris_flow/attempts/a909f2c1b3c0468084d31a8cdd0e24f2/predictors/prepared/sbs.tif": "73ddaa0b5c49a50653d6715b2f93d3e3475a4c92c3d0b4592a89de1f109b91ea",
+    "postfire_debris_flow/attempts/a909f2c1b3c0468084d31a8cdd0e24f2/predictors/valid_mask.tif": "ef8bb093171986de8adf7da00ab00c65f58105832b233c382164550582b75508",
+    "postfire_debris_flow/attempts/a909f2c1b3c0468084d31a8cdd0e24f2/predictors/wbt/intersection.tif": "63a06a93c67b4882a487769baf71f12da53e866cd19fc71e6a0887d32981837d",
+    "postfire_debris_flow/attempts/a909f2c1b3c0468084d31a8cdd0e24f2/predictors/wbt/slope.tif": "0227462d0f00c36755a27a569852f85fd1e1f58bd0fb8ec0b2cafdfaf938bdd5",
+    "postfire_debris_flow/attempts/a909f2c1b3c0468084d31a8cdd0e24f2/predictors/wbt/summary.json": "f3f3cdc95b469c5602ce76fcbc51892321dc972ecbfc1a151448fa271a3d2c92",
+    "postfire_debris_flow/attempts/a909f2c1b3c0468084d31a8cdd0e24f2/predictors/wbt/support.tif": "370540992f6988458093a2b4feb5b1483092f229503b026ff1d6bde908945e22",
+    "postfire_debris_flow/attempts/a909f2c1b3c0468084d31a8cdd0e24f2/results/design.parquet": "bb93e27bc5c2d72b03a6dc2c25d90e46d044cccc0489e3fd50ea9c1581156286",
+    "postfire_debris_flow/attempts/a909f2c1b3c0468084d31a8cdd0e24f2/results/events.parquet": "33bf0b8d22b7117f5995ac937f1fe24d23768bc039bd840cf2eb3e55510f81bb",
+    "postfire_debris_flow/attempts/a909f2c1b3c0468084d31a8cdd0e24f2/results/incomplete.json": "6bae5bddc98f5af1514c9157b5e4ac9d6a9abf5ff475040977511d733afa4569",
+    "postfire_debris_flow/attempts/a909f2c1b3c0468084d31a8cdd0e24f2/results/inverse.parquet": "8c2aee44c7562eca56174657abd959c85960afefb0ae1a69e19efdd5bf06f632",
+    "postfire_debris_flow/attempts/a909f2c1b3c0468084d31a8cdd0e24f2/results/manifest.json": "bb55b7985d108caec34db242481e92a56175a7d912873acbb659e2662ca6cb6f",
+    "postfire_debris_flow/attempts/a909f2c1b3c0468084d31a8cdd0e24f2/results/valid_mask.tif": "ef8bb093171986de8adf7da00ab00c65f58105832b233c382164550582b75508",
+    "postfire_debris_flow/attempts/a909f2c1b3c0468084d31a8cdd0e24f2/status.json": "496761d9317950e16ddba60005148305de119b15e194a3a314a50ae342d4318d",
+    "postfire_debris_flow/design.parquet": "bb93e27bc5c2d72b03a6dc2c25d90e46d044cccc0489e3fd50ea9c1581156286",
+    "postfire_debris_flow/events.parquet": "33bf0b8d22b7117f5995ac937f1fe24d23768bc039bd840cf2eb3e55510f81bb",
+    "postfire_debris_flow/inverse.parquet": "8c2aee44c7562eca56174657abd959c85960afefb0ae1a69e19efdd5bf06f632",
+    "postfire_debris_flow/manifest.json": "bb55b7985d108caec34db242481e92a56175a7d912873acbb659e2662ca6cb6f",
+    "postfire_debris_flow/publication_work/338ec4ec8c274bf1871d5e2869799006/status.json": "d20a0e17b1c57713d9d06c302b772324e06ec772912bcda28611aca6fe9fcce7",
+    "postfire_debris_flow/valid_mask.tif": "ef8bb093171986de8adf7da00ab00c65f58105832b233c382164550582b75508",
+    "postfire_debris_flow.nodb": "dbefd39f29f4ba712689eba3ce3789526a9d5a2a43db5fda7efa9151e5351bec",
+    "redisprep.dump": "f7a2c8bccbeeef8e59a296837473801fd95031d4ada2a92cc0d344e4e6b7c59d",
+    "ron.nodb": "a28b54eeeaca84aedc40e592956a31303096fbb671a52d4112ff742b893f1ea4",
+    "rusle/k_polaris_nomograph.tif": "48d016796a81b7ddb8546911ec2ed011933f2de2456eb0399824e9e52b1184c5",
+    "rusle/manifest.json": "de98e10e98f73b0552fb4d472d9b9bd5e80b382666d30717a67d2367d53b421b",
+    "rusle.nodb": "43a036e4eab729b9c0f3c9ca6b2978df9fec0baeb8886c8e6ba6324135b6af92",
+    "soils.nodb": "b401e59574eb4ba5a1ed0c3be5a81ec7bd50f5c8f6eb8de8feeb268b425a55cd",
+    "unitizer.nodb": "803e8d7ac3d569cb09359647de402d280a73364b018eb0283396a78de7fabb62",
+    "watershed.nodb": "87457cf7c954e4acc536b80529aed1fb3fee6643bb26bd74f3779443f94c6c57",
+    "wepp.nodb": "7181445ca9cdfb2642aaf80ec9953f62cc5d6b82152bb86ce4f983ad60f310df"
+  },
+  "changed_files": []
+}

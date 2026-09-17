@@ -1,0 +1,2850 @@
+{
+  "url": "https://landslides.usgs.gov/static/landslides-realtime/fires/20171204_thomas/Shapefiles.zip",
+  "nested": null,
+  "archive_bytes": 170382860,
+  "transferred_bytes": 1998636,
+  "inventory": [
+    {
+      "name": "thm2017_analysis_extent_feat.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_analysis_extent_feat.dbf",
+      "bytes": 267,
+      "compressed_bytes": 137
+    },
+    {
+      "name": "thm2017_analysis_extent_feat.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_analysis_extent_feat.sbn",
+      "bytes": 132,
+      "compressed_bytes": 68
+    },
+    {
+      "name": "thm2017_analysis_extent_feat.sbx",
+      "bytes": 116,
+      "compressed_bytes": 61
+    },
+    {
+      "name": "thm2017_analysis_extent_feat.shp",
+      "bytes": 5340,
+      "compressed_bytes": 4263
+    },
+    {
+      "name": "thm2017_analysis_extent_feat.shp.xml",
+      "bytes": 7620,
+      "compressed_bytes": 2585
+    },
+    {
+      "name": "thm2017_analysis_extent_feat.shx",
+      "bytes": 108,
+      "compressed_bytes": 59
+    },
+    {
+      "name": "thm2017_basinpt_feat.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_basinpt_feat.dbf",
+      "bytes": 78449,
+      "compressed_bytes": 7634
+    },
+    {
+      "name": "thm2017_basinpt_feat.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_basinpt_feat.sbn",
+      "bytes": 16892,
+      "compressed_bytes": 9553
+    },
+    {
+      "name": "thm2017_basinpt_feat.sbx",
+      "bytes": 1052,
+      "compressed_bytes": 547
+    },
+    {
+      "name": "thm2017_basinpt_feat.shp",
+      "bytes": 48792,
+      "compressed_bytes": 14790
+    },
+    {
+      "name": "thm2017_basinpt_feat.shp.xml",
+      "bytes": 6101,
+      "compressed_bytes": 2273
+    },
+    {
+      "name": "thm2017_basinpt_feat.shx",
+      "bytes": 14012,
+      "compressed_bytes": 3838
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_12mmh.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_12mmh.dbf",
+      "bytes": 848226,
+      "compressed_bytes": 187879
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_12mmh.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_12mmh.sbn",
+      "bytes": 17004,
+      "compressed_bytes": 11272
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_12mmh.sbx",
+      "bytes": 1156,
+      "compressed_bytes": 591
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_12mmh.shp",
+      "bytes": 5725276,
+      "compressed_bytes": 976839
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_12mmh.shp.xml",
+      "bytes": 20291,
+      "compressed_bytes": 4951
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_12mmh.shx",
+      "bytes": 13988,
+      "compressed_bytes": 9570
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_16mmh.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_16mmh.dbf",
+      "bytes": 848226,
+      "compressed_bytes": 189124
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_16mmh.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_16mmh.sbn",
+      "bytes": 17004,
+      "compressed_bytes": 11272
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_16mmh.sbx",
+      "bytes": 1156,
+      "compressed_bytes": 591
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_16mmh.shp",
+      "bytes": 5725276,
+      "compressed_bytes": 976839
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_16mmh.shp.xml",
+      "bytes": 20291,
+      "compressed_bytes": 4948
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_16mmh.shx",
+      "bytes": 13988,
+      "compressed_bytes": 9570
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_20mmh.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_20mmh.dbf",
+      "bytes": 848226,
+      "compressed_bytes": 189542
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_20mmh.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_20mmh.sbn",
+      "bytes": 17004,
+      "compressed_bytes": 11272
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_20mmh.sbx",
+      "bytes": 1156,
+      "compressed_bytes": 591
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_20mmh.shp",
+      "bytes": 5725276,
+      "compressed_bytes": 976839
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_20mmh.shp.xml",
+      "bytes": 20291,
+      "compressed_bytes": 4948
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_20mmh.shx",
+      "bytes": 13988,
+      "compressed_bytes": 9570
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_24mmh.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_24mmh.dbf",
+      "bytes": 848226,
+      "compressed_bytes": 190600
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_24mmh.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_24mmh.sbn",
+      "bytes": 17004,
+      "compressed_bytes": 11272
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_24mmh.sbx",
+      "bytes": 1156,
+      "compressed_bytes": 591
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_24mmh.shp",
+      "bytes": 5725276,
+      "compressed_bytes": 976839
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_24mmh.shp.xml",
+      "bytes": 20291,
+      "compressed_bytes": 4948
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_24mmh.shx",
+      "bytes": 13988,
+      "compressed_bytes": 9570
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_28mmh.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_28mmh.dbf",
+      "bytes": 848226,
+      "compressed_bytes": 190729
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_28mmh.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_28mmh.sbn",
+      "bytes": 17004,
+      "compressed_bytes": 11272
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_28mmh.sbx",
+      "bytes": 1156,
+      "compressed_bytes": 591
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_28mmh.shp",
+      "bytes": 5725276,
+      "compressed_bytes": 976839
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_28mmh.shp.xml",
+      "bytes": 20291,
+      "compressed_bytes": 4948
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_28mmh.shx",
+      "bytes": 13988,
+      "compressed_bytes": 9570
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_32mmh.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_32mmh.dbf",
+      "bytes": 848226,
+      "compressed_bytes": 190476
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_32mmh.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_32mmh.sbn",
+      "bytes": 17004,
+      "compressed_bytes": 11272
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_32mmh.sbx",
+      "bytes": 1156,
+      "compressed_bytes": 591
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_32mmh.shp",
+      "bytes": 5725276,
+      "compressed_bytes": 976839
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_32mmh.shp.xml",
+      "bytes": 20291,
+      "compressed_bytes": 4948
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_32mmh.shx",
+      "bytes": 13988,
+      "compressed_bytes": 9570
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_36mmh.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_36mmh.dbf",
+      "bytes": 848226,
+      "compressed_bytes": 190989
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_36mmh.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_36mmh.sbn",
+      "bytes": 17004,
+      "compressed_bytes": 11272
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_36mmh.sbx",
+      "bytes": 1156,
+      "compressed_bytes": 591
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_36mmh.shp",
+      "bytes": 5725276,
+      "compressed_bytes": 976839
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_36mmh.shp.xml",
+      "bytes": 20291,
+      "compressed_bytes": 4948
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_36mmh.shx",
+      "bytes": 13988,
+      "compressed_bytes": 9570
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_40mmh.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_40mmh.dbf",
+      "bytes": 848226,
+      "compressed_bytes": 189536
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_40mmh.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_40mmh.sbn",
+      "bytes": 17004,
+      "compressed_bytes": 11272
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_40mmh.sbx",
+      "bytes": 1156,
+      "compressed_bytes": 591
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_40mmh.shp",
+      "bytes": 5725276,
+      "compressed_bytes": 976839
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_40mmh.shp.xml",
+      "bytes": 20291,
+      "compressed_bytes": 4948
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_40mmh.shx",
+      "bytes": 13988,
+      "compressed_bytes": 9570
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtAllP.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtAllP.dbf",
+      "bytes": 1411010,
+      "compressed_bytes": 277644
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtAllP.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtAllP.sbn",
+      "bytes": 17004,
+      "compressed_bytes": 11272
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtAllP.sbx",
+      "bytes": 1156,
+      "compressed_bytes": 591
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtAllP.shp",
+      "bytes": 5725276,
+      "compressed_bytes": 976839
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtAllP.shp.xml",
+      "bytes": 36281,
+      "compressed_bytes": 4928
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtAllP.shx",
+      "bytes": 13988,
+      "compressed_bytes": 9570
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_10.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_10.dbf",
+      "bytes": 493634,
+      "compressed_bytes": 94342
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_10.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_10.sbn",
+      "bytes": 17004,
+      "compressed_bytes": 11272
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_10.sbx",
+      "bytes": 1156,
+      "compressed_bytes": 591
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_10.shp",
+      "bytes": 5725276,
+      "compressed_bytes": 976839
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_10.shp.xml",
+      "bytes": 19939,
+      "compressed_bytes": 4836
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_10.shx",
+      "bytes": 13988,
+      "compressed_bytes": 9570
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_25.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_25.dbf",
+      "bytes": 493634,
+      "compressed_bytes": 95048
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_25.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_25.sbn",
+      "bytes": 17004,
+      "compressed_bytes": 11272
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_25.sbx",
+      "bytes": 1156,
+      "compressed_bytes": 591
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_25.shp",
+      "bytes": 5725276,
+      "compressed_bytes": 976839
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_25.shp.xml",
+      "bytes": 19939,
+      "compressed_bytes": 4834
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_25.shx",
+      "bytes": 13988,
+      "compressed_bytes": 9570
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_40.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_40.dbf",
+      "bytes": 493634,
+      "compressed_bytes": 95212
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_40.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_40.sbn",
+      "bytes": 17004,
+      "compressed_bytes": 11272
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_40.sbx",
+      "bytes": 1156,
+      "compressed_bytes": 591
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_40.shp",
+      "bytes": 5725276,
+      "compressed_bytes": 976839
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_40.shp.xml",
+      "bytes": 19939,
+      "compressed_bytes": 4836
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_40.shx",
+      "bytes": 13988,
+      "compressed_bytes": 9570
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_50.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_50.dbf",
+      "bytes": 493634,
+      "compressed_bytes": 95232
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_50.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_50.sbn",
+      "bytes": 17004,
+      "compressed_bytes": 11272
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_50.sbx",
+      "bytes": 1156,
+      "compressed_bytes": 591
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_50.shp",
+      "bytes": 5725276,
+      "compressed_bytes": 976839
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_50.shp.xml",
+      "bytes": 19939,
+      "compressed_bytes": 4835
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_50.shx",
+      "bytes": 13988,
+      "compressed_bytes": 9570
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_60.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_60.dbf",
+      "bytes": 493634,
+      "compressed_bytes": 95104
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_60.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_60.sbn",
+      "bytes": 17004,
+      "compressed_bytes": 11272
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_60.sbx",
+      "bytes": 1156,
+      "compressed_bytes": 591
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_60.shp",
+      "bytes": 5725276,
+      "compressed_bytes": 976839
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_60.shp.xml",
+      "bytes": 19939,
+      "compressed_bytes": 4835
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_60.shx",
+      "bytes": 13988,
+      "compressed_bytes": 9570
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_75.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_75.dbf",
+      "bytes": 493634,
+      "compressed_bytes": 94937
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_75.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_75.sbn",
+      "bytes": 17004,
+      "compressed_bytes": 11272
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_75.sbx",
+      "bytes": 1156,
+      "compressed_bytes": 591
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_75.shp",
+      "bytes": 5725276,
+      "compressed_bytes": 976839
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_75.shp.xml",
+      "bytes": 19939,
+      "compressed_bytes": 4836
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_75.shx",
+      "bytes": 13988,
+      "compressed_bytes": 9570
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_90.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_90.dbf",
+      "bytes": 493634,
+      "compressed_bytes": 94576
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_90.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_90.sbn",
+      "bytes": 17004,
+      "compressed_bytes": 11272
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_90.sbx",
+      "bytes": 1156,
+      "compressed_bytes": 591
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_90.shp",
+      "bytes": 5725276,
+      "compressed_bytes": 976839
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_90.shp.xml",
+      "bytes": 19939,
+      "compressed_bytes": 4836
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_15min_RainAtP_90.shx",
+      "bytes": 13988,
+      "compressed_bytes": 9570
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtAllP.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtAllP.dbf",
+      "bytes": 1411010,
+      "compressed_bytes": 274999
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtAllP.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtAllP.sbn",
+      "bytes": 17004,
+      "compressed_bytes": 11272
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtAllP.sbx",
+      "bytes": 1156,
+      "compressed_bytes": 591
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtAllP.shp",
+      "bytes": 5725276,
+      "compressed_bytes": 976839
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtAllP.shp.xml",
+      "bytes": 19496,
+      "compressed_bytes": 2960
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtAllP.shx",
+      "bytes": 13988,
+      "compressed_bytes": 9570
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_10.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_10.dbf",
+      "bytes": 493634,
+      "compressed_bytes": 94382
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_10.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_10.sbn",
+      "bytes": 17004,
+      "compressed_bytes": 11272
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_10.sbx",
+      "bytes": 1156,
+      "compressed_bytes": 591
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_10.shp",
+      "bytes": 5725276,
+      "compressed_bytes": 976839
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_10.shp.xml",
+      "bytes": 13712,
+      "compressed_bytes": 2733
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_10.shx",
+      "bytes": 13988,
+      "compressed_bytes": 9570
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_25.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_25.dbf",
+      "bytes": 493634,
+      "compressed_bytes": 94885
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_25.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_25.sbn",
+      "bytes": 17004,
+      "compressed_bytes": 11272
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_25.sbx",
+      "bytes": 1156,
+      "compressed_bytes": 591
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_25.shp",
+      "bytes": 5725276,
+      "compressed_bytes": 976839
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_25.shp.xml",
+      "bytes": 13712,
+      "compressed_bytes": 2732
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_25.shx",
+      "bytes": 13988,
+      "compressed_bytes": 9570
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_40.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_40.dbf",
+      "bytes": 493634,
+      "compressed_bytes": 94885
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_40.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_40.sbn",
+      "bytes": 17004,
+      "compressed_bytes": 11272
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_40.sbx",
+      "bytes": 1156,
+      "compressed_bytes": 591
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_40.shp",
+      "bytes": 5725276,
+      "compressed_bytes": 976839
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_40.shp.xml",
+      "bytes": 13712,
+      "compressed_bytes": 2734
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_40.shx",
+      "bytes": 13988,
+      "compressed_bytes": 9570
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_50.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_50.dbf",
+      "bytes": 493634,
+      "compressed_bytes": 94780
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_50.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_50.sbn",
+      "bytes": 17004,
+      "compressed_bytes": 11272
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_50.sbx",
+      "bytes": 1156,
+      "compressed_bytes": 591
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_50.shp",
+      "bytes": 5725276,
+      "compressed_bytes": 976839
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_50.shp.xml",
+      "bytes": 13712,
+      "compressed_bytes": 2735
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_50.shx",
+      "bytes": 13988,
+      "compressed_bytes": 9570
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_60.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_60.dbf",
+      "bytes": 493634,
+      "compressed_bytes": 94748
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_60.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_60.sbn",
+      "bytes": 17004,
+      "compressed_bytes": 11272
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_60.sbx",
+      "bytes": 1156,
+      "compressed_bytes": 591
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_60.shp",
+      "bytes": 5725276,
+      "compressed_bytes": 976839
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_60.shp.xml",
+      "bytes": 13712,
+      "compressed_bytes": 2731
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_60.shx",
+      "bytes": 13988,
+      "compressed_bytes": 9570
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_75.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_75.dbf",
+      "bytes": 493634,
+      "compressed_bytes": 94665
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_75.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_75.sbn",
+      "bytes": 17004,
+      "compressed_bytes": 11272
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_75.sbx",
+      "bytes": 1156,
+      "compressed_bytes": 591
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_75.shp",
+      "bytes": 5725276,
+      "compressed_bytes": 976839
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_75.shp.xml",
+      "bytes": 13712,
+      "compressed_bytes": 2733
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_75.shx",
+      "bytes": 13988,
+      "compressed_bytes": 9570
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_90.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_90.dbf",
+      "bytes": 493634,
+      "compressed_bytes": 94429
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_90.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_90.sbn",
+      "bytes": 17004,
+      "compressed_bytes": 11272
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_90.sbx",
+      "bytes": 1156,
+      "compressed_bytes": 591
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_90.shp",
+      "bytes": 5725276,
+      "compressed_bytes": 976839
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_90.shp.xml",
+      "bytes": 13712,
+      "compressed_bytes": 2733
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_30min_RainAtP_90.shx",
+      "bytes": 13988,
+      "compressed_bytes": 9570
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtAllP.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtAllP.dbf",
+      "bytes": 1411010,
+      "compressed_bytes": 214272
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtAllP.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtAllP.sbn",
+      "bytes": 17004,
+      "compressed_bytes": 11272
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtAllP.sbx",
+      "bytes": 1156,
+      "compressed_bytes": 591
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtAllP.shp",
+      "bytes": 5725276,
+      "compressed_bytes": 976839
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtAllP.shp.xml",
+      "bytes": 19496,
+      "compressed_bytes": 2964
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtAllP.shx",
+      "bytes": 13988,
+      "compressed_bytes": 9570
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_10.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_10.dbf",
+      "bytes": 493634,
+      "compressed_bytes": 84873
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_10.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_10.sbn",
+      "bytes": 17004,
+      "compressed_bytes": 11272
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_10.sbx",
+      "bytes": 1156,
+      "compressed_bytes": 591
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_10.shp",
+      "bytes": 5725276,
+      "compressed_bytes": 976839
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_10.shp.xml",
+      "bytes": 13712,
+      "compressed_bytes": 2734
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_10.shx",
+      "bytes": 13988,
+      "compressed_bytes": 9570
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_25.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_25.dbf",
+      "bytes": 493634,
+      "compressed_bytes": 85111
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_25.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_25.sbn",
+      "bytes": 17004,
+      "compressed_bytes": 11272
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_25.sbx",
+      "bytes": 1156,
+      "compressed_bytes": 591
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_25.shp",
+      "bytes": 5725276,
+      "compressed_bytes": 976839
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_25.shp.xml",
+      "bytes": 13712,
+      "compressed_bytes": 2733
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_25.shx",
+      "bytes": 13988,
+      "compressed_bytes": 9570
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_40.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_40.dbf",
+      "bytes": 493634,
+      "compressed_bytes": 85042
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_40.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_40.sbn",
+      "bytes": 17004,
+      "compressed_bytes": 11272
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_40.sbx",
+      "bytes": 1156,
+      "compressed_bytes": 591
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_40.shp",
+      "bytes": 5725276,
+      "compressed_bytes": 976839
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_40.shp.xml",
+      "bytes": 13712,
+      "compressed_bytes": 2734
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_40.shx",
+      "bytes": 13988,
+      "compressed_bytes": 9570
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_50.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_50.dbf",
+      "bytes": 493634,
+      "compressed_bytes": 84987
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_50.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_50.sbn",
+      "bytes": 17004,
+      "compressed_bytes": 11272
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_50.sbx",
+      "bytes": 1156,
+      "compressed_bytes": 591
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_50.shp",
+      "bytes": 5725276,
+      "compressed_bytes": 976839
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_50.shp.xml",
+      "bytes": 13712,
+      "compressed_bytes": 2734
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_50.shx",
+      "bytes": 13988,
+      "compressed_bytes": 9570
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_60.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_60.dbf",
+      "bytes": 493634,
+      "compressed_bytes": 85010
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_60.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_60.sbn",
+      "bytes": 17004,
+      "compressed_bytes": 11272
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_60.sbx",
+      "bytes": 1156,
+      "compressed_bytes": 591
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_60.shp",
+      "bytes": 5725276,
+      "compressed_bytes": 976839
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_60.shp.xml",
+      "bytes": 13712,
+      "compressed_bytes": 2736
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_60.shx",
+      "bytes": 13988,
+      "compressed_bytes": 9570
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_75.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_75.dbf",
+      "bytes": 493634,
+      "compressed_bytes": 85122
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_75.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_75.sbn",
+      "bytes": 17004,
+      "compressed_bytes": 11272
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_75.sbx",
+      "bytes": 1156,
+      "compressed_bytes": 591
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_75.shp",
+      "bytes": 5725276,
+      "compressed_bytes": 976839
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_75.shp.xml",
+      "bytes": 13712,
+      "compressed_bytes": 2732
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_75.shx",
+      "bytes": 13988,
+      "compressed_bytes": 9570
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_90.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_90.dbf",
+      "bytes": 493634,
+      "compressed_bytes": 85204
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_90.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_90.sbn",
+      "bytes": 17004,
+      "compressed_bytes": 11272
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_90.sbx",
+      "bytes": 1156,
+      "compressed_bytes": 591
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_90.shp",
+      "bytes": 5725276,
+      "compressed_bytes": 976839
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_90.shp.xml",
+      "bytes": 13712,
+      "compressed_bytes": 2734
+    },
+    {
+      "name": "thm2017_Basin_RainfallEstimates_60min_RainAtP_90.shx",
+      "bytes": 13988,
+      "compressed_bytes": 9570
+    },
+    {
+      "name": "thm2017_centroid_feat.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_centroid_feat.dbf",
+      "bytes": 1511,
+      "compressed_bytes": 392
+    },
+    {
+      "name": "thm2017_centroid_feat.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_centroid_feat.sbn",
+      "bytes": 148,
+      "compressed_bytes": 60
+    },
+    {
+      "name": "thm2017_centroid_feat.sbx",
+      "bytes": 116,
+      "compressed_bytes": 47
+    },
+    {
+      "name": "thm2017_centroid_feat.shp",
+      "bytes": 128,
+      "compressed_bytes": 44
+    },
+    {
+      "name": "thm2017_centroid_feat.shp.xml",
+      "bytes": 6928,
+      "compressed_bytes": 2496
+    },
+    {
+      "name": "thm2017_centroid_feat.shx",
+      "bytes": 108,
+      "compressed_bytes": 42
+    },
+    {
+      "name": "thm2017_perim_feat.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_perim_feat.dbf",
+      "bytes": 1650,
+      "compressed_bytes": 447
+    },
+    {
+      "name": "thm2017_perim_feat.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_perim_feat.sbn",
+      "bytes": 132,
+      "compressed_bytes": 68
+    },
+    {
+      "name": "thm2017_perim_feat.sbx",
+      "bytes": 116,
+      "compressed_bytes": 60
+    },
+    {
+      "name": "thm2017_perim_feat.shp",
+      "bytes": 226400,
+      "compressed_bytes": 152342
+    },
+    {
+      "name": "thm2017_perim_feat.shp.xml",
+      "bytes": 7702,
+      "compressed_bytes": 2606
+    },
+    {
+      "name": "thm2017_perim_feat.shx",
+      "bytes": 108,
+      "compressed_bytes": 58
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_12mmh.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_12mmh.dbf",
+      "bytes": 17595656,
+      "compressed_bytes": 3381172
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_12mmh.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_12mmh.sbn",
+      "bytes": 437164,
+      "compressed_bytes": 205169
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_12mmh.sbx",
+      "bytes": 27748,
+      "compressed_bytes": 12464
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_12mmh.shp",
+      "bytes": 6120540,
+      "compressed_bytes": 1548716
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_12mmh.shp.xml",
+      "bytes": 20050,
+      "compressed_bytes": 4930
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_12mmh.shx",
+      "bytes": 346796,
+      "compressed_bytes": 147424
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_16mmh.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_16mmh.dbf",
+      "bytes": 17595656,
+      "compressed_bytes": 3405176
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_16mmh.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_16mmh.sbn",
+      "bytes": 437164,
+      "compressed_bytes": 205169
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_16mmh.sbx",
+      "bytes": 27748,
+      "compressed_bytes": 12464
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_16mmh.shp",
+      "bytes": 6120540,
+      "compressed_bytes": 1548716
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_16mmh.shp.xml",
+      "bytes": 20050,
+      "compressed_bytes": 4930
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_16mmh.shx",
+      "bytes": 346796,
+      "compressed_bytes": 147424
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_20mmh.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_20mmh.dbf",
+      "bytes": 17595656,
+      "compressed_bytes": 3414866
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_20mmh.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_20mmh.sbn",
+      "bytes": 437164,
+      "compressed_bytes": 205169
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_20mmh.sbx",
+      "bytes": 27748,
+      "compressed_bytes": 12464
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_20mmh.shp",
+      "bytes": 6120540,
+      "compressed_bytes": 1548716
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_20mmh.shp.xml",
+      "bytes": 20050,
+      "compressed_bytes": 4931
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_20mmh.shx",
+      "bytes": 346796,
+      "compressed_bytes": 147424
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_24mmh.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_24mmh.dbf",
+      "bytes": 17595656,
+      "compressed_bytes": 3429485
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_24mmh.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_24mmh.sbn",
+      "bytes": 437164,
+      "compressed_bytes": 205169
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_24mmh.sbx",
+      "bytes": 27748,
+      "compressed_bytes": 12464
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_24mmh.shp",
+      "bytes": 6120540,
+      "compressed_bytes": 1548716
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_24mmh.shp.xml",
+      "bytes": 20050,
+      "compressed_bytes": 4931
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_24mmh.shx",
+      "bytes": 346796,
+      "compressed_bytes": 147424
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_28mmh.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_28mmh.dbf",
+      "bytes": 17595656,
+      "compressed_bytes": 3434254
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_28mmh.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_28mmh.sbn",
+      "bytes": 437164,
+      "compressed_bytes": 205169
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_28mmh.sbx",
+      "bytes": 27748,
+      "compressed_bytes": 12464
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_28mmh.shp",
+      "bytes": 6120540,
+      "compressed_bytes": 1548716
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_28mmh.shp.xml",
+      "bytes": 20050,
+      "compressed_bytes": 4931
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_28mmh.shx",
+      "bytes": 346796,
+      "compressed_bytes": 147424
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_32mmh.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_32mmh.dbf",
+      "bytes": 17595656,
+      "compressed_bytes": 3423499
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_32mmh.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_32mmh.sbn",
+      "bytes": 437164,
+      "compressed_bytes": 205169
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_32mmh.sbx",
+      "bytes": 27748,
+      "compressed_bytes": 12464
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_32mmh.shp",
+      "bytes": 6120540,
+      "compressed_bytes": 1548716
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_32mmh.shp.xml",
+      "bytes": 20050,
+      "compressed_bytes": 4931
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_32mmh.shx",
+      "bytes": 346796,
+      "compressed_bytes": 147424
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_36mmh.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_36mmh.dbf",
+      "bytes": 17595656,
+      "compressed_bytes": 3424945
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_36mmh.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_36mmh.sbn",
+      "bytes": 437164,
+      "compressed_bytes": 205169
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_36mmh.sbx",
+      "bytes": 27748,
+      "compressed_bytes": 12464
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_36mmh.shp",
+      "bytes": 6120540,
+      "compressed_bytes": 1548716
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_36mmh.shp.xml",
+      "bytes": 20050,
+      "compressed_bytes": 4931
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_36mmh.shx",
+      "bytes": 346796,
+      "compressed_bytes": 147424
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_40mmh.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_40mmh.dbf",
+      "bytes": 17595656,
+      "compressed_bytes": 3402522
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_40mmh.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_40mmh.sbn",
+      "bytes": 437164,
+      "compressed_bytes": 205169
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_40mmh.sbx",
+      "bytes": 27748,
+      "compressed_bytes": 12464
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_40mmh.shp",
+      "bytes": 6120540,
+      "compressed_bytes": 1548716
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_40mmh.shp.xml",
+      "bytes": 20050,
+      "compressed_bytes": 4931
+    },
+    {
+      "name": "thm2017_Segment_DFPredictions_15min_40mmh.shx",
+      "bytes": 346796,
+      "compressed_bytes": 147424
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtAllP.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtAllP.dbf",
+      "bytes": 31637164,
+      "compressed_bytes": 5316674
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtAllP.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtAllP.sbn",
+      "bytes": 437164,
+      "compressed_bytes": 205169
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtAllP.sbx",
+      "bytes": 27748,
+      "compressed_bytes": 12464
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtAllP.shp",
+      "bytes": 6120540,
+      "compressed_bytes": 1548716
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtAllP.shp.xml",
+      "bytes": 36254,
+      "compressed_bytes": 4945
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtAllP.shx",
+      "bytes": 346796,
+      "compressed_bytes": 147424
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_10.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_10.dbf",
+      "bytes": 8754460,
+      "compressed_bytes": 1460172
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_10.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_10.sbn",
+      "bytes": 437164,
+      "compressed_bytes": 205169
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_10.sbx",
+      "bytes": 27748,
+      "compressed_bytes": 12464
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_10.shp",
+      "bytes": 6120540,
+      "compressed_bytes": 1548716
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_10.shp.xml",
+      "bytes": 19939,
+      "compressed_bytes": 4836
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_10.shx",
+      "bytes": 346796,
+      "compressed_bytes": 147424
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_25.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_25.dbf",
+      "bytes": 8754460,
+      "compressed_bytes": 1468511
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_25.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_25.sbn",
+      "bytes": 437164,
+      "compressed_bytes": 205169
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_25.sbx",
+      "bytes": 27748,
+      "compressed_bytes": 12464
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_25.shp",
+      "bytes": 6120540,
+      "compressed_bytes": 1548716
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_25.shp.xml",
+      "bytes": 19939,
+      "compressed_bytes": 4834
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_25.shx",
+      "bytes": 346796,
+      "compressed_bytes": 147424
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_40.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_40.dbf",
+      "bytes": 8754460,
+      "compressed_bytes": 1470890
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_40.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_40.sbn",
+      "bytes": 437164,
+      "compressed_bytes": 205169
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_40.sbx",
+      "bytes": 27748,
+      "compressed_bytes": 12464
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_40.shp",
+      "bytes": 6120540,
+      "compressed_bytes": 1548716
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_40.shp.xml",
+      "bytes": 19939,
+      "compressed_bytes": 4836
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_40.shx",
+      "bytes": 346796,
+      "compressed_bytes": 147424
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_50.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_50.dbf",
+      "bytes": 8754460,
+      "compressed_bytes": 1472790
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_50.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_50.sbn",
+      "bytes": 437164,
+      "compressed_bytes": 205169
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_50.sbx",
+      "bytes": 27748,
+      "compressed_bytes": 12464
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_50.shp",
+      "bytes": 6120540,
+      "compressed_bytes": 1548716
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_50.shp.xml",
+      "bytes": 19939,
+      "compressed_bytes": 4835
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_50.shx",
+      "bytes": 346796,
+      "compressed_bytes": 147424
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_60.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_60.dbf",
+      "bytes": 8754460,
+      "compressed_bytes": 1472398
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_60.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_60.sbn",
+      "bytes": 437164,
+      "compressed_bytes": 205169
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_60.sbx",
+      "bytes": 27748,
+      "compressed_bytes": 12464
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_60.shp",
+      "bytes": 6120540,
+      "compressed_bytes": 1548716
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_60.shp.xml",
+      "bytes": 19939,
+      "compressed_bytes": 4835
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_60.shx",
+      "bytes": 346796,
+      "compressed_bytes": 147424
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_75.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_75.dbf",
+      "bytes": 8754460,
+      "compressed_bytes": 1471129
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_75.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_75.sbn",
+      "bytes": 437164,
+      "compressed_bytes": 205169
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_75.sbx",
+      "bytes": 27748,
+      "compressed_bytes": 12464
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_75.shp",
+      "bytes": 6120540,
+      "compressed_bytes": 1548716
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_75.shp.xml",
+      "bytes": 19939,
+      "compressed_bytes": 4836
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_75.shx",
+      "bytes": 346796,
+      "compressed_bytes": 147424
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_90.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_90.dbf",
+      "bytes": 8754460,
+      "compressed_bytes": 1466410
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_90.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_90.sbn",
+      "bytes": 437164,
+      "compressed_bytes": 205169
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_90.sbx",
+      "bytes": 27748,
+      "compressed_bytes": 12464
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_90.shp",
+      "bytes": 6120540,
+      "compressed_bytes": 1548716
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_90.shp.xml",
+      "bytes": 19939,
+      "compressed_bytes": 4836
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_15min_RainAtP_90.shx",
+      "bytes": 346796,
+      "compressed_bytes": 147424
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtAllP.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtAllP.dbf",
+      "bytes": 31637164,
+      "compressed_bytes": 5279323
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtAllP.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtAllP.sbn",
+      "bytes": 437164,
+      "compressed_bytes": 205169
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtAllP.sbx",
+      "bytes": 27748,
+      "compressed_bytes": 12464
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtAllP.shp",
+      "bytes": 6120540,
+      "compressed_bytes": 1548716
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtAllP.shp.xml",
+      "bytes": 103927,
+      "compressed_bytes": 6815
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtAllP.shx",
+      "bytes": 346796,
+      "compressed_bytes": 147424
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_10.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_10.dbf",
+      "bytes": 8754460,
+      "compressed_bytes": 1460608
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_10.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_10.sbn",
+      "bytes": 437164,
+      "compressed_bytes": 205169
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_10.sbx",
+      "bytes": 27748,
+      "compressed_bytes": 12464
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_10.shp",
+      "bytes": 6120540,
+      "compressed_bytes": 1548716
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_10.shp.xml",
+      "bytes": 69917,
+      "compressed_bytes": 5180
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_10.shx",
+      "bytes": 346796,
+      "compressed_bytes": 147424
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_25.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_25.dbf",
+      "bytes": 8754460,
+      "compressed_bytes": 1469979
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_25.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_25.sbn",
+      "bytes": 437164,
+      "compressed_bytes": 205169
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_25.sbx",
+      "bytes": 27748,
+      "compressed_bytes": 12464
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_25.shp",
+      "bytes": 6120540,
+      "compressed_bytes": 1548716
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_25.shp.xml",
+      "bytes": 69917,
+      "compressed_bytes": 5187
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_25.shx",
+      "bytes": 346796,
+      "compressed_bytes": 147424
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_40.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_40.dbf",
+      "bytes": 8754460,
+      "compressed_bytes": 1467998
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_40.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_40.sbn",
+      "bytes": 437164,
+      "compressed_bytes": 205169
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_40.sbx",
+      "bytes": 27748,
+      "compressed_bytes": 12464
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_40.shp",
+      "bytes": 6120540,
+      "compressed_bytes": 1548716
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_40.shp.xml",
+      "bytes": 69919,
+      "compressed_bytes": 5182
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_40.shx",
+      "bytes": 346796,
+      "compressed_bytes": 147424
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_50.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_50.dbf",
+      "bytes": 8754460,
+      "compressed_bytes": 1466696
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_50.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_50.sbn",
+      "bytes": 437164,
+      "compressed_bytes": 205169
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_50.sbx",
+      "bytes": 27748,
+      "compressed_bytes": 12464
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_50.shp",
+      "bytes": 6120540,
+      "compressed_bytes": 1548716
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_50.shp.xml",
+      "bytes": 69895,
+      "compressed_bytes": 5176
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_50.shx",
+      "bytes": 346796,
+      "compressed_bytes": 147424
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_60.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_60.dbf",
+      "bytes": 8754460,
+      "compressed_bytes": 1465980
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_60.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_60.sbn",
+      "bytes": 437164,
+      "compressed_bytes": 205169
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_60.sbx",
+      "bytes": 27748,
+      "compressed_bytes": 12464
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_60.shp",
+      "bytes": 6120540,
+      "compressed_bytes": 1548716
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_60.shp.xml",
+      "bytes": 69917,
+      "compressed_bytes": 5178
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_60.shx",
+      "bytes": 346796,
+      "compressed_bytes": 147424
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_75.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_75.dbf",
+      "bytes": 8754460,
+      "compressed_bytes": 1464911
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_75.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_75.sbn",
+      "bytes": 437164,
+      "compressed_bytes": 205169
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_75.sbx",
+      "bytes": 27748,
+      "compressed_bytes": 12464
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_75.shp",
+      "bytes": 6120540,
+      "compressed_bytes": 1548716
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_75.shp.xml",
+      "bytes": 69915,
+      "compressed_bytes": 5180
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_75.shx",
+      "bytes": 346796,
+      "compressed_bytes": 147424
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_90.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_90.dbf",
+      "bytes": 8754460,
+      "compressed_bytes": 1461379
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_90.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_90.sbn",
+      "bytes": 437164,
+      "compressed_bytes": 205169
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_90.sbx",
+      "bytes": 27748,
+      "compressed_bytes": 12464
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_90.shp",
+      "bytes": 6120540,
+      "compressed_bytes": 1548716
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_90.shp.xml",
+      "bytes": 69915,
+      "compressed_bytes": 5185
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_30min_RainAtP_90.shx",
+      "bytes": 346796,
+      "compressed_bytes": 147424
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtAllP.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtAllP.dbf",
+      "bytes": 31637164,
+      "compressed_bytes": 4035610
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtAllP.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtAllP.sbn",
+      "bytes": 437164,
+      "compressed_bytes": 205169
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtAllP.sbx",
+      "bytes": 27748,
+      "compressed_bytes": 12464
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtAllP.shp",
+      "bytes": 6120540,
+      "compressed_bytes": 1548716
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtAllP.shp.xml",
+      "bytes": 103857,
+      "compressed_bytes": 6479
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtAllP.shx",
+      "bytes": 346796,
+      "compressed_bytes": 147424
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_10.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_10.dbf",
+      "bytes": 8754460,
+      "compressed_bytes": 1274913
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_10.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_10.sbn",
+      "bytes": 437164,
+      "compressed_bytes": 205169
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_10.sbx",
+      "bytes": 27748,
+      "compressed_bytes": 12464
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_10.shp",
+      "bytes": 6120540,
+      "compressed_bytes": 1548716
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_10.shp.xml",
+      "bytes": 69929,
+      "compressed_bytes": 5133
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_10.shx",
+      "bytes": 346796,
+      "compressed_bytes": 147424
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_25.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_25.dbf",
+      "bytes": 8754460,
+      "compressed_bytes": 1276396
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_25.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_25.sbn",
+      "bytes": 437164,
+      "compressed_bytes": 205169
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_25.sbx",
+      "bytes": 27748,
+      "compressed_bytes": 12464
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_25.shp",
+      "bytes": 6120540,
+      "compressed_bytes": 1548716
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_25.shp.xml",
+      "bytes": 69929,
+      "compressed_bytes": 5142
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_25.shx",
+      "bytes": 346796,
+      "compressed_bytes": 147424
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_40.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_40.dbf",
+      "bytes": 8754460,
+      "compressed_bytes": 1275181
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_40.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_40.sbn",
+      "bytes": 437164,
+      "compressed_bytes": 205169
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_40.sbx",
+      "bytes": 27748,
+      "compressed_bytes": 12464
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_40.shp",
+      "bytes": 6120540,
+      "compressed_bytes": 1548716
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_40.shp.xml",
+      "bytes": 69931,
+      "compressed_bytes": 5139
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_40.shx",
+      "bytes": 346796,
+      "compressed_bytes": 147424
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_50.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_50.dbf",
+      "bytes": 8754460,
+      "compressed_bytes": 1272562
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_50.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_50.sbn",
+      "bytes": 437164,
+      "compressed_bytes": 205169
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_50.sbx",
+      "bytes": 27748,
+      "compressed_bytes": 12464
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_50.shp",
+      "bytes": 6120540,
+      "compressed_bytes": 1548716
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_50.shp.xml",
+      "bytes": 69907,
+      "compressed_bytes": 5122
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_50.shx",
+      "bytes": 346796,
+      "compressed_bytes": 147424
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_60.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_60.dbf",
+      "bytes": 8754460,
+      "compressed_bytes": 1270511
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_60.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_60.sbn",
+      "bytes": 437164,
+      "compressed_bytes": 205169
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_60.sbx",
+      "bytes": 27748,
+      "compressed_bytes": 12464
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_60.shp",
+      "bytes": 6120540,
+      "compressed_bytes": 1548716
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_60.shp.xml",
+      "bytes": 69929,
+      "compressed_bytes": 5133
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_60.shx",
+      "bytes": 346796,
+      "compressed_bytes": 147424
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_75.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_75.dbf",
+      "bytes": 8754460,
+      "compressed_bytes": 1271874
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_75.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_75.sbn",
+      "bytes": 437164,
+      "compressed_bytes": 205169
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_75.sbx",
+      "bytes": 27748,
+      "compressed_bytes": 12464
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_75.shp",
+      "bytes": 6120540,
+      "compressed_bytes": 1548716
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_75.shp.xml",
+      "bytes": 69927,
+      "compressed_bytes": 5134
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_75.shx",
+      "bytes": 346796,
+      "compressed_bytes": 147424
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_90.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_90.dbf",
+      "bytes": 8754460,
+      "compressed_bytes": 1274458
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_90.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_90.sbn",
+      "bytes": 437164,
+      "compressed_bytes": 205169
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_90.sbx",
+      "bytes": 27748,
+      "compressed_bytes": 12464
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_90.shp",
+      "bytes": 6120540,
+      "compressed_bytes": 1548716
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_90.shp.xml",
+      "bytes": 69927,
+      "compressed_bytes": 5133
+    },
+    {
+      "name": "thm2017_Segment_RainfallEstimates_60min_RainAtP_90.shx",
+      "bytes": 346796,
+      "compressed_bytes": 147424
+    },
+    {
+      "name": "thm2017_watchstream_feat.cpg",
+      "bytes": 5,
+      "compressed_bytes": 7
+    },
+    {
+      "name": "thm2017_watchstream_feat.dbf",
+      "bytes": 161725,
+      "compressed_bytes": 25960
+    },
+    {
+      "name": "thm2017_watchstream_feat.prj",
+      "bytes": 425,
+      "compressed_bytes": 268
+    },
+    {
+      "name": "thm2017_watchstream_feat.sbn",
+      "bytes": 47300,
+      "compressed_bytes": 22879
+    },
+    {
+      "name": "thm2017_watchstream_feat.sbx",
+      "bytes": 2516,
+      "compressed_bytes": 1212
+    },
+    {
+      "name": "thm2017_watchstream_feat.shp",
+      "bytes": 677020,
+      "compressed_bytes": 173379
+    },
+    {
+      "name": "thm2017_watchstream_feat.shp.xml",
+      "bytes": 9730,
+      "compressed_bytes": 3382
+    },
+    {
+      "name": "thm2017_watchstream_feat.shx",
+      "bytes": 37036,
+      "compressed_bytes": 15728
+    },
+    {
+      "name": "PostFireDFEstimates_README.pdf",
+      "bytes": 484767,
+      "compressed_bytes": 465357
+    },
+    {
+      "name": "PostFireDFThresholdEstimates_README.pdf",
+      "bytes": 282717,
+      "compressed_bytes": 270370
+    },
+    {
+      "name": "thm2017_ThresholdGuidance_Basin.txt",
+      "bytes": 783,
+      "compressed_bytes": 308
+    },
+    {
+      "name": "thm2017_ThresholdGuidance_Segment.txt",
+      "bytes": 782,
+      "compressed_bytes": 296
+    }
+  ],
+  "members": [
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_24mmh.shp",
+      "local": "thm2017_Basin_DFPredictions_15min_24mmh.shp",
+      "sha256": "31165de61a60853a12b58cc1eb56f8ed74c28697951c96ca1ac5e2d445a1cd5d"
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_24mmh.shx",
+      "local": "thm2017_Basin_DFPredictions_15min_24mmh.shx",
+      "sha256": "a20f94e7c79bbc5906a7bfbb90dbdb24c6d357db836c94875f8e85cb41a63292"
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_24mmh.dbf",
+      "local": "thm2017_Basin_DFPredictions_15min_24mmh.dbf",
+      "sha256": "232593479f46cf8441be439485c8d99074bd3da44b38de484e89ce7982d794e2"
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_24mmh.prj",
+      "local": "thm2017_Basin_DFPredictions_15min_24mmh.prj",
+      "sha256": "874cddfe1c0757654bb76ace194e1641ddb2acb55694c8339e71eb1a0fda66f2"
+    },
+    {
+      "name": "thm2017_Basin_DFPredictions_15min_24mmh.shp.xml",
+      "local": "thm2017_Basin_DFPredictions_15min_24mmh.shp.xml",
+      "sha256": "1f65ddaa752ba32ecc2f3ff4a3c1c7a3a9c1628ed82b807f44b2013c725b9cb0"
+    },
+    {
+      "name": "thm2017_basinpt_feat.shp",
+      "local": "thm2017_basinpt_feat.shp",
+      "sha256": "30a250591cbf54c0bc4f7625f8c0fd5275f5fdcc8df3b4afc11be49ba5486472"
+    },
+    {
+      "name": "thm2017_basinpt_feat.shx",
+      "local": "thm2017_basinpt_feat.shx",
+      "sha256": "ddabcdaf49f4374d6dabb2a7dc29db35d3763b767ac546d1632704ad1a7c177c"
+    },
+    {
+      "name": "thm2017_basinpt_feat.dbf",
+      "local": "thm2017_basinpt_feat.dbf",
+      "sha256": "9ed829edfb0befdcdbb9dd59f897412f21ad077694f98a89fef03c56b8c07db0"
+    },
+    {
+      "name": "thm2017_basinpt_feat.prj",
+      "local": "thm2017_basinpt_feat.prj",
+      "sha256": "874cddfe1c0757654bb76ace194e1641ddb2acb55694c8339e71eb1a0fda66f2"
+    },
+    {
+      "name": "PostFireDFEstimates_README.pdf",
+      "local": "PostFireDFEstimates_README.pdf",
+      "sha256": "e1919a004bad1f88f7b5e96c21115388bfd78730e4ffe8f1cbf680f4819cbbfe"
+    },
+    {
+      "name": "PostFireDFThresholdEstimates_README.pdf",
+      "local": "PostFireDFThresholdEstimates_README.pdf",
+      "sha256": "dffa9ea5f9e2eb9861257f2a948d5523fd7834d31791f040106c93e297880b88"
+    },
+    {
+      "name": "thm2017_ThresholdGuidance_Basin.txt",
+      "local": "thm2017_ThresholdGuidance_Basin.txt",
+      "sha256": "58c5c981f26bc29790f7f56bb211e943a89699610e31c5169201e98081af2f25"
+    }
+  ]
+}
