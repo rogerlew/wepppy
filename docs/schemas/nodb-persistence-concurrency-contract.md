@@ -309,3 +309,33 @@ Named lock-contention/stale-write, I/O, and Redis errors remain logged receipt
 failures. Unexpected errors, including untyped RuntimeError/RecursionError,
 propagate through the RQ boundary. This keeps finalizer dependencies and Omni
 linkage intact while preserving failure observability.
+
+### Derived input byte verification (implementation pending)
+
+PRISM climate revision and RAP analysis MUST compare actual input bytes at
+collection and locked finalization. Required-file signatures include resolved
+source path, size, mtime and an uncached SHA-256 read from a verified descriptor.
+Size/mtime alone cannot detect restored-time rewrites. Retain mtime comparison
+as the existing conservative transaction guard: a touch during collection may
+still produce a superseded outcome. This is distinct from persisted accepted
+scientific output currentness, where byte-equivalent metadata changes can be
+irrelevant. Do not weaken rollback ownership checks to content equivalence.
+
+This bounded amendment verifies only the existing main-path input set. Preserve
+source-path provenance, configured years/bands, watershed selection and existing
+controller comparisons. It does not claim complete raster dependency closure:
+GDAL auxiliary files, nested VRT sources and virtual filesystem members require
+a separate reviewed extension. Do not add a new raster format/path restriction
+or treat one level of GDAL GetFileList as proof of complete native inputs.
+
+Each file read MUST reject observable descriptor/path replacement, growth,
+truncation or version drift with an explicit filesystem error. Hash at most the
+captured size plus one byte. Do not cache these transaction-local hashes: each
+build collects once and rechecks once, and correctness must not depend on stat
+clock resolution. Existing atomic-producer/locking assumptions still apply;
+a before/after snapshot cannot detect an arbitrary change-and-restore entirely
+inside numerical processing. No new general writer-isolation guarantee is made.
+Missing or unreadable required files fail explicitly; present empty files remain
+hashable and existing numerical consumers retain their own validation.
+There is no persisted signature migration. Existing NoDb stale-write, atomic
+publication and rollback behavior remain mandatory.
