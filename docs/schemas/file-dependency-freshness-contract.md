@@ -161,3 +161,58 @@ explicitly distinct from settled warm reads in validation. Introducing a
 shared helper is justified by reproduced stale output digests and the existing
 executable digest consumer using the same defective metadata shortcut; no
 watcher, daemon, datastore, dependency or new deployment topology is authorized.
+
+## D-Tale dataset generations (implementation pending)
+
+D-Tale loader and GeoJSON registration fingerprints MUST identify current
+ordinary-file bytes with the shared verified SHA-256 helper. Keep dataset IDs,
+run/config/filter partitioning, authentication, containment, NoDir materialization,
+limits, identifier aliases and supported readers unchanged. Same-byte metadata
+changes may reuse a dataset; changed bytes require refresh even when size and
+mtime are restored. Reuse also requires the same resolved source path; a
+same-byte symlink retarget must rebuild the lazy reader against its new path.
+No persisted cache or deployment topology is added.
+
+Bind eager data, lazy schema/sample/count and registered GeoJSON to the observed
+fingerprint by checking before and after acquisition. Observable content drift
+or loss of read access must not publish a dataset tagged with an unrelated
+fingerprint. Failed initialization removes partial dataset state; it does not
+silently reuse old rows as current. An absent optional GeoJSON remains optional;
+a later registration must not reuse a prior overlay after its file disappears.
+Optional overlay parse/read failures, absent controller state and absent paths
+retain table-launch availability: remove the affected old registration and map
+choice/default references instead of blocking the table or retaining stale maps.
+Already materialized eager datasets remain point-in-time views until relaunched.
+
+A lazy Parquet instance retains the accepted content fingerprint. Check it before
+and after each filesystem-backed count/page query, and before returning cached
+counts or samples. If the current file differs or cannot be verified, fail
+explicitly with `changed_source` and a message to reopen the dataset
+from browse; do not mix an old schema/count with new rows, silently refresh a
+schema under an existing grid, or load the entire file into pandas. Recheck observations on query failure as well as success: a detected generation
+change takes the changed-source path even if the native query raised first. A
+stable-generation parser/query failure retains its original error. The internal
+loader returns HTTP409 with `error.code="changed_source"`, `error.message` and a
+matching `description` on acquisition drift. The lazy grid endpoint follows
+upstream D-Tale's HTTP200 error envelope: `success=false`, top-level string
+`error` with reopen guidance, and `code="changed_source"`, without successful
+row data. Upstream grid transport drops non-2xx bodies; this envelope preserves
+visible error feedback without adding a frontend transport patch. Other reader/filter errors
+retain their established contracts. The next normal launch rebuilds the same
+stable dataset ID from current bytes. This explicit relaunch resets the shared
+server dataset; other open tabs using that ID may also need to reopen. The
+no-silent-refresh rule applies to lazy page reads, not per-browser generation
+isolation or a new version-token protocol. Metadata-only changes remain harmless.
+This is bounded before/after observation under existing producer assumptions,
+not arbitrary concurrent-writer snapshot isolation.
+
+The rationale for explicit lazy invalidation is that grid columns, filters,
+counts and page queries share one schema generation, while the lazy backend
+reopens its path per query. Reopening through browse recompiles filters and
+rebuilds the shell consistently. Preserve the same `pqf` partition on relaunch
+and recompile against the new schema; an invalidated field remains a422 filter
+error, never silently drops the filter or reuses the old shell. Settled fingerprint checks must perform no
+content rereads and meet the existing sub-millisecond per-file digest budget;
+cold/changed loads may hash their source. Retain bounded DuckDB/PyArrow paging
+and upstream non-lazy endpoint delegation. Verify launch/page error presentation
+with the actual D-Tale UI, including same-schema and changed-schema source edits.
