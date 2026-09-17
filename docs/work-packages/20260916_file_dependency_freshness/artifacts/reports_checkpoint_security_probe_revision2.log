@@ -1,0 +1,34 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20260916_file_dependency_freshness/artifacts/reports_checkpoint_security_probe_revision2.py
+{
+  "uid": 1000,
+  "gid": 993,
+  "catalog_alias_dependency": {
+    "source_hashes_unchanged": true,
+    "selected_paths_unchanged": true,
+    "catalog_change": "loss schema set to supported optional None",
+    "cached_rows": [
+      {
+        "Landuse ID": 100,
+        "Management Description": "Forest",
+        "Landuse Area (ha)": 0.1,
+        "Avg Runoff Depth (mm/yr)": 100.0,
+        "Avg Lateral Flow Depth (mm/yr)": 20.0,
+        "Avg Baseflow Depth (mm/yr)": 10.0,
+        "Avg Soil Loss (kg/yr)": 5.0,
+        "Avg Sediment Yield (kg/yr)": 3.0,
+        "Avg Sediment Deposition (kg/yr)": 2.0
+      }
+    ],
+    "actual_query_failure": {
+      "type": "BinderException",
+      "message": "Binder Error: Table \"loss\" does not have a column named \"wepp_id\"\nLINE 1: ...shed/hillslopes.parquet')) AS hills ON loss.wepp_id = hills.wepp_id INNER JOIN...\n                                                  ^"
+    }
+  },
+  "native_destination": {
+    "symlink_error": "OSError",
+    "alias_and_prior_target_preserved": true,
+    "regular_existing_mode_preserved": "0640",
+    "new_candidate_mode_with_0022_umask": "0o644",
+    "same_report_payload": true
+  }
+}

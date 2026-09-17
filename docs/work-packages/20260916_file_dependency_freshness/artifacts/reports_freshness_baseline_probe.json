@@ -1,0 +1,340 @@
+{
+  "C08_source": {
+    "before": [
+      {
+        "TopazID": 101,
+        "Precipitation (mm)": 1.0,
+        "Percolation (mm)": 0.5,
+        "Surface Runoff (mm)": 0.2,
+        "Lateral Flow (mm)": 0.1,
+        "Transpiration + Evaporation (mm)": 0.1
+      }
+    ],
+    "cached_after_change": [
+      {
+        "TopazID": 101,
+        "Precipitation (mm)": 1.0,
+        "Percolation (mm)": 0.5,
+        "Surface Runoff (mm)": 0.2,
+        "Lateral Flow (mm)": 0.1,
+        "Transpiration + Evaporation (mm)": 0.1
+      }
+    ],
+    "native_rebuilt_control": [
+      {
+        "TopazID": 101,
+        "Precipitation (mm)": 9.0,
+        "Percolation (mm)": 0.5,
+        "Surface Runoff (mm)": 0.2,
+        "Lateral Flow (mm)": 0.1,
+        "Transpiration + Evaporation (mm)": 0.1
+      }
+    ],
+    "stale_report_confirmed": true
+  },
+  "C08_translator": {
+    "before": [
+      {
+        "TopazID": 101,
+        "Precipitation (mm)": 1.0,
+        "Percolation (mm)": 0.5,
+        "Surface Runoff (mm)": 0.2,
+        "Lateral Flow (mm)": 0.1,
+        "Transpiration + Evaporation (mm)": 0.1
+      }
+    ],
+    "cached_after_change": [
+      {
+        "TopazID": 101,
+        "Precipitation (mm)": 1.0,
+        "Percolation (mm)": 0.5,
+        "Surface Runoff (mm)": 0.2,
+        "Lateral Flow (mm)": 0.1,
+        "Transpiration + Evaporation (mm)": 0.1
+      }
+    ],
+    "native_rebuilt_control": [
+      {
+        "TopazID": 301,
+        "Precipitation (mm)": 1.0,
+        "Percolation (mm)": 0.5,
+        "Surface Runoff (mm)": 0.2,
+        "Lateral Flow (mm)": 0.1,
+        "Transpiration + Evaporation (mm)": 0.1
+      }
+    ],
+    "stale_report_confirmed": true
+  },
+  "C08_roads_manifest": {
+    "before": [
+      {
+        "TopazID": 101,
+        "Precipitation (mm)": 3.0,
+        "Percolation (mm)": 0.5,
+        "Surface Runoff (mm)": 0.2,
+        "Lateral Flow (mm)": 0.1,
+        "Transpiration + Evaporation (mm)": 0.1
+      }
+    ],
+    "cached_after_change": [
+      {
+        "TopazID": 101,
+        "Precipitation (mm)": 3.0,
+        "Percolation (mm)": 0.5,
+        "Surface Runoff (mm)": 0.2,
+        "Lateral Flow (mm)": 0.1,
+        "Transpiration + Evaporation (mm)": 0.1
+      }
+    ],
+    "native_rebuilt_control": [
+      {
+        "TopazID": 201,
+        "Precipitation (mm)": 3.0,
+        "Percolation (mm)": 0.5,
+        "Surface Runoff (mm)": 0.2,
+        "Lateral Flow (mm)": 0.1,
+        "Transpiration + Evaporation (mm)": 0.1
+      }
+    ],
+    "stale_report_confirmed": true,
+    "baseline_scope_preserved": true
+  },
+  "C08_cache_only_current": {
+    "source_and_mapping_absent": true,
+    "reads_prior_rows_without_rebuild": true
+  },
+  "C08_cache_only_legacy": {
+    "source_and_mapping_absent": true,
+    "reads_prior_rows_without_rebuild": true
+  },
+  "C09_loss": {
+    "before": [
+      {
+        "Landuse ID": 200,
+        "Management Description": "Meadow",
+        "Landuse Area (ha)": 0.3,
+        "Avg Runoff Depth (mm/yr)": 10.0,
+        "Avg Lateral Flow Depth (mm/yr)": 2.0,
+        "Avg Baseflow Depth (mm/yr)": 1.0,
+        "Avg Soil Loss (kg/yr)": 2.0,
+        "Avg Sediment Yield (kg/yr)": 1.0,
+        "Avg Sediment Deposition (kg/yr)": 1.0
+      },
+      {
+        "Landuse ID": 100,
+        "Management Description": "Forest",
+        "Landuse Area (ha)": 0.1,
+        "Avg Runoff Depth (mm/yr)": 100.0,
+        "Avg Lateral Flow Depth (mm/yr)": 20.0,
+        "Avg Baseflow Depth (mm/yr)": 10.0,
+        "Avg Soil Loss (kg/yr)": 5.0,
+        "Avg Sediment Yield (kg/yr)": 3.0,
+        "Avg Sediment Deposition (kg/yr)": 2.0
+      }
+    ],
+    "cached_after_change": [
+      {
+        "Landuse ID": 200,
+        "Management Description": "Meadow",
+        "Landuse Area (ha)": 0.3,
+        "Avg Runoff Depth (mm/yr)": 10.0,
+        "Avg Lateral Flow Depth (mm/yr)": 2.0,
+        "Avg Baseflow Depth (mm/yr)": 1.0,
+        "Avg Soil Loss (kg/yr)": 2.0,
+        "Avg Sediment Yield (kg/yr)": 1.0,
+        "Avg Sediment Deposition (kg/yr)": 1.0
+      },
+      {
+        "Landuse ID": 100,
+        "Management Description": "Forest",
+        "Landuse Area (ha)": 0.1,
+        "Avg Runoff Depth (mm/yr)": 100.0,
+        "Avg Lateral Flow Depth (mm/yr)": 20.0,
+        "Avg Baseflow Depth (mm/yr)": 10.0,
+        "Avg Soil Loss (kg/yr)": 5.0,
+        "Avg Sediment Yield (kg/yr)": 3.0,
+        "Avg Sediment Deposition (kg/yr)": 2.0
+      }
+    ],
+    "duckdb_rebuilt_control": [
+      {
+        "Landuse ID": 200,
+        "Management Description": "Meadow",
+        "Landuse Area (ha)": 0.3,
+        "Avg Runoff Depth (mm/yr)": 10.0,
+        "Avg Lateral Flow Depth (mm/yr)": 2.0,
+        "Avg Baseflow Depth (mm/yr)": 1.0,
+        "Avg Soil Loss (kg/yr)": 2.0,
+        "Avg Sediment Yield (kg/yr)": 1.0,
+        "Avg Sediment Deposition (kg/yr)": 1.0
+      },
+      {
+        "Landuse ID": 100,
+        "Management Description": "Forest",
+        "Landuse Area (ha)": 0.1,
+        "Avg Runoff Depth (mm/yr)": 900.0,
+        "Avg Lateral Flow Depth (mm/yr)": 20.0,
+        "Avg Baseflow Depth (mm/yr)": 10.0,
+        "Avg Soil Loss (kg/yr)": 5.0,
+        "Avg Sediment Yield (kg/yr)": 3.0,
+        "Avg Sediment Deposition (kg/yr)": 2.0
+      }
+    ],
+    "stale_report_confirmed": true
+  },
+  "C09_hillslope_area": {
+    "before": [
+      {
+        "Landuse ID": 200,
+        "Management Description": "Meadow",
+        "Landuse Area (ha)": 0.3,
+        "Avg Runoff Depth (mm/yr)": 10.0,
+        "Avg Lateral Flow Depth (mm/yr)": 2.0,
+        "Avg Baseflow Depth (mm/yr)": 1.0,
+        "Avg Soil Loss (kg/yr)": 2.0,
+        "Avg Sediment Yield (kg/yr)": 1.0,
+        "Avg Sediment Deposition (kg/yr)": 1.0
+      },
+      {
+        "Landuse ID": 100,
+        "Management Description": "Forest",
+        "Landuse Area (ha)": 0.1,
+        "Avg Runoff Depth (mm/yr)": 100.0,
+        "Avg Lateral Flow Depth (mm/yr)": 20.0,
+        "Avg Baseflow Depth (mm/yr)": 10.0,
+        "Avg Soil Loss (kg/yr)": 5.0,
+        "Avg Sediment Yield (kg/yr)": 3.0,
+        "Avg Sediment Deposition (kg/yr)": 2.0
+      }
+    ],
+    "cached_after_change": [
+      {
+        "Landuse ID": 200,
+        "Management Description": "Meadow",
+        "Landuse Area (ha)": 0.3,
+        "Avg Runoff Depth (mm/yr)": 10.0,
+        "Avg Lateral Flow Depth (mm/yr)": 2.0,
+        "Avg Baseflow Depth (mm/yr)": 1.0,
+        "Avg Soil Loss (kg/yr)": 2.0,
+        "Avg Sediment Yield (kg/yr)": 1.0,
+        "Avg Sediment Deposition (kg/yr)": 1.0
+      },
+      {
+        "Landuse ID": 100,
+        "Management Description": "Forest",
+        "Landuse Area (ha)": 0.1,
+        "Avg Runoff Depth (mm/yr)": 100.0,
+        "Avg Lateral Flow Depth (mm/yr)": 20.0,
+        "Avg Baseflow Depth (mm/yr)": 10.0,
+        "Avg Soil Loss (kg/yr)": 5.0,
+        "Avg Sediment Yield (kg/yr)": 3.0,
+        "Avg Sediment Deposition (kg/yr)": 2.0
+      }
+    ],
+    "duckdb_rebuilt_control": [
+      {
+        "Landuse ID": 200,
+        "Management Description": "Meadow",
+        "Landuse Area (ha)": 0.3,
+        "Avg Runoff Depth (mm/yr)": 10.0,
+        "Avg Lateral Flow Depth (mm/yr)": 2.0,
+        "Avg Baseflow Depth (mm/yr)": 1.0,
+        "Avg Soil Loss (kg/yr)": 2.0,
+        "Avg Sediment Yield (kg/yr)": 1.0,
+        "Avg Sediment Deposition (kg/yr)": 1.0
+      },
+      {
+        "Landuse ID": 100,
+        "Management Description": "Forest",
+        "Landuse Area (ha)": 0.2,
+        "Avg Runoff Depth (mm/yr)": 50.0,
+        "Avg Lateral Flow Depth (mm/yr)": 10.0,
+        "Avg Baseflow Depth (mm/yr)": 5.0,
+        "Avg Soil Loss (kg/yr)": 5.0,
+        "Avg Sediment Yield (kg/yr)": 3.0,
+        "Avg Sediment Deposition (kg/yr)": 2.0
+      }
+    ],
+    "stale_report_confirmed": true
+  },
+  "C09_landuse_mapping": {
+    "before": [
+      {
+        "Landuse ID": 200,
+        "Management Description": "Meadow",
+        "Landuse Area (ha)": 0.3,
+        "Avg Runoff Depth (mm/yr)": 10.0,
+        "Avg Lateral Flow Depth (mm/yr)": 2.0,
+        "Avg Baseflow Depth (mm/yr)": 1.0,
+        "Avg Soil Loss (kg/yr)": 2.0,
+        "Avg Sediment Yield (kg/yr)": 1.0,
+        "Avg Sediment Deposition (kg/yr)": 1.0
+      },
+      {
+        "Landuse ID": 100,
+        "Management Description": "Forest",
+        "Landuse Area (ha)": 0.1,
+        "Avg Runoff Depth (mm/yr)": 100.0,
+        "Avg Lateral Flow Depth (mm/yr)": 20.0,
+        "Avg Baseflow Depth (mm/yr)": 10.0,
+        "Avg Soil Loss (kg/yr)": 5.0,
+        "Avg Sediment Yield (kg/yr)": 3.0,
+        "Avg Sediment Deposition (kg/yr)": 2.0
+      }
+    ],
+    "cached_after_change": [
+      {
+        "Landuse ID": 200,
+        "Management Description": "Meadow",
+        "Landuse Area (ha)": 0.3,
+        "Avg Runoff Depth (mm/yr)": 10.0,
+        "Avg Lateral Flow Depth (mm/yr)": 2.0,
+        "Avg Baseflow Depth (mm/yr)": 1.0,
+        "Avg Soil Loss (kg/yr)": 2.0,
+        "Avg Sediment Yield (kg/yr)": 1.0,
+        "Avg Sediment Deposition (kg/yr)": 1.0
+      },
+      {
+        "Landuse ID": 100,
+        "Management Description": "Forest",
+        "Landuse Area (ha)": 0.1,
+        "Avg Runoff Depth (mm/yr)": 100.0,
+        "Avg Lateral Flow Depth (mm/yr)": 20.0,
+        "Avg Baseflow Depth (mm/yr)": 10.0,
+        "Avg Soil Loss (kg/yr)": 5.0,
+        "Avg Sediment Yield (kg/yr)": 3.0,
+        "Avg Sediment Deposition (kg/yr)": 2.0
+      }
+    ],
+    "duckdb_rebuilt_control": [
+      {
+        "Landuse ID": 200,
+        "Management Description": "Meadow",
+        "Landuse Area (ha)": 0.3,
+        "Avg Runoff Depth (mm/yr)": 10.0,
+        "Avg Lateral Flow Depth (mm/yr)": 2.0,
+        "Avg Baseflow Depth (mm/yr)": 1.0,
+        "Avg Soil Loss (kg/yr)": 2.0,
+        "Avg Sediment Yield (kg/yr)": 1.0,
+        "Avg Sediment Deposition (kg/yr)": 1.0
+      },
+      {
+        "Landuse ID": 100,
+        "Management Description": "Shrubs",
+        "Landuse Area (ha)": 0.1,
+        "Avg Runoff Depth (mm/yr)": 100.0,
+        "Avg Lateral Flow Depth (mm/yr)": 20.0,
+        "Avg Baseflow Depth (mm/yr)": 10.0,
+        "Avg Soil Loss (kg/yr)": 5.0,
+        "Avg Sediment Yield (kg/yr)": 3.0,
+        "Avg Sediment Deposition (kg/yr)": 2.0
+      }
+    ],
+    "stale_report_confirmed": true
+  },
+  "C09_cache_only_observed": {
+    "all_three_sources_absent": true,
+    "reads_prior_rows_without_query": true,
+    "explicit_normative_compatibility_not_yet_ratified": true
+  }
+}

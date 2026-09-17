@@ -174,7 +174,10 @@ defaults and source data while correcting those two user-visible defects.
 
 `HillslopeWatbalReport` retains `hillslope_watbal_summary.parquet` under
 `wepp/reports/cache`, with `_roads` for Roads, version `1` sidecars, baseline
-legacy-cache reads, and source-newer-than-cache rebuilding. Required native
+legacy-cache reads. Content provenance, historical availability and publication
+follow the [report cache freshness contract](report-cache-freshness-contract.md)
+(implementation pending). That amendment replaces mtime-only currentness for
+new verified caches while retaining the legacy native-unavailable rule. Required native
 `hillslope_watbal_wepp_ids` discovers distinct IDs in bounded batches;
 `hillslope_watbal_to_parquet` produces the compact summary atomically.
 WEPPpy retains translator policy and Roads manifest/raw-ID logging. There is

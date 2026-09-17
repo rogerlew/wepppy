@@ -1,0 +1,29 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20260916_file_dependency_freshness/artifacts/benchmark_report_dependencies.py
+hwat_digest_first_observation: 267.920 ms
+hwat_digest_during_admission: 264.311 ms
+hwat_digest_admitting: 296.700 ms
+hwat_digest_settled: 0.218 ms
+native_hwat_wepp_id_scan: 140.615 ms
+watershed_detached_disk_load: 3.978 ms
+actual_translator_factory: 0.207 ms
+effective_mapping_for_retained_source_ids: 0.191 ms
+mapping_canonical_json: 0.080 ms
+existing_c08_cached_report_first: 45.510 ms
+existing_c08_cached_report_repeat: 15.076 ms
+existing_c08_cached_parquet_only: 2.920 ms
+Traceback (most recent call last):
+  File "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/benchmark_report_dependencies.py", line 200, in <module>
+    summary = measured("native_summary_to_disposable_cache", lambda: generated._write_native_summary(native, SOURCE, mapping))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/benchmark_report_dependencies.py", line 120, in measured
+    value = callback()
+            ^^^^^^^^^^
+  File "/workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/benchmark_report_dependencies.py", line 200, in <lambda>
+    summary = measured("native_summary_to_disposable_cache", lambda: generated._write_native_summary(native, SOURCE, mapping))
+                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/wepp/reports/hillslope_watbal.py", line 209, in _write_native_summary
+    cache = ReportCacheManager(self.wd)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workdir/wepppy/wepppy/wepp/reports/helpers.py", line 114, in __init__
+    raise FileNotFoundError(base)
+FileNotFoundError: /workdir/wepppy/docs/work-packages/20260916_file_dependency_freshness/artifacts/reports_performance_outputs/6466937a9e91/hwat
