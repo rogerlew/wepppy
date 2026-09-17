@@ -1,11 +1,17 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-09-16
-**Active Packages**: 37
+**Last Updated**: 2026-09-17
+**Active Packages**: 38
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
+
+Active incident remediation: [MOFE scenario artifact integrity and Abdisa run repair](docs/work-packages/20260917_mofe_scenario_artifact_integrity/package.md)
+— correct classified SBS consumption, global mapping artifact regeneration, and
+thinning canopy propagation. Actual-project Forest acceptance is a hard gate;
+Roger owns WEPPcloud deployment, after which all eight named runs require manual
+rebuild/rerun and retained evidence.
 
 Completed: [Daymet source preservation](docs/work-packages/20260917_daymet_source_preservation/package.md)
 — source overwrite removed; 42 focused tests and real CLIGEN byte-parity checks pass.
@@ -521,6 +527,25 @@ When resuming Kubernetes work:
 ---
 
 ## 🚧 In Progress
+
+
+### MOFE Scenario Artifact Integrity and Abdisa Run Repair
+
+**Started**: 2026-09-17 UTC
+
+**Priority/Security**: Critical / `low`
+
+**Link**: [docs/work-packages/20260917_mofe_scenario_artifact_integrity/](docs/work-packages/20260917_mofe_scenario_artifact_integrity/)
+
+**Scope**: Correct three confirmed MOFE propagation defects, prove the exact
+candidate on an actual Rithet Creek clone/restored project on Forest, then stop
+for the operator's WEPPcloud deployment before manually rebuilding and rerunning
+all eight Abdisa production runs.
+
+**Status**: Incident evidence and active ExecPlan scaffolded. The broader evidence
+chain and completion vocabulary are now canonical and agent-discoverable. Contract
+checkpoint, implementation, local gates, and Forest acceptance remain. Production
+mutation is blocked until Forest passes and Roger explicitly confirms deployment.
 
 
 ### Batch and Culvert Climate Rehydration Hardening

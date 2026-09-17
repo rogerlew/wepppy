@@ -10,6 +10,7 @@ This directory groups long-running initiatives into self-contained "work package
 - [`docs/prompt_templates/correctness_review_template.md`](../prompt_templates/correctness_review_template.md) — Valid-state and user-experience review gate
 - [`docs/prompt_templates/security_review_template.md`](../prompt_templates/security_review_template.md) — Dedicated security review checklist and artifact template
 - [`docs/standards/hardening-lifecycle-standard.md`](../standards/hardening-lifecycle-standard.md) — Incident hardening and callus-softening lifecycle standard
+- [`docs/standards/generated-artifact-validation-standard.md`](../standards/generated-artifact-validation-standard.md) — Generated/consumed artifact evidence and completion-claim standard
 - [`docs/god-tier-prompting-strategy.md`](../god-tier-prompting-strategy.md) — Guide to writing effective prompts for work packages
 
 ## Naming convention
@@ -49,6 +50,9 @@ Feel free to omit `notes/` or `artifacts/` if the package stays simple.
 8. **Update `PROJECT_TRACKER.md`** (root) when starting, progressing, or closing packages so other agents can discover active work.
 9. When the initiative ends, update `package.md` with the closure date and highlight deliverables or follow-ups.
 10. If the package changes parameterization defaults/formulas/thresholds/unit conversions/fallback rules, add or update an ADR in `docs/adrs/` per `docs/standards/parameterization-adr-standard.md`.
+11. If the package changes or repairs an artifact-producing workflow, apply
+    `docs/standards/generated-artifact-validation-standard.md` and record the
+    highest completion claim supported by direct evidence.
 
 ## Simplicity and escalation gate
 
@@ -77,6 +81,29 @@ For modernization/migration packages, avoid ambiguous completion claims:
 2. Treat `implemented` and `wired` as separate states in trackers/disposition notes.
 3. Require generated-output evidence from current build/path for implementation closeout unless explicitly waived.
 4. If scaffold-first is intentional, mark the package as non-closeable implementation scope and name the successor package.
+
+## Generated Artifact Validation
+
+For workflows that create, transform, prepare, execute from, summarize, or
+publish artifacts, persisted state and job success do not establish output
+correctness. Apply the generated artifact validation gate in `package.md` and the
+correctness review:
+
+1. Define acceptance from the original user-visible symptom.
+2. Trace intent through durable state, generated intermediates, the exact input
+   consumed by the next stage, fresh execution output, and the user-facing result.
+3. Exercise the failing writer/serializer/copy/consumer boundary directly and
+   read back semantic content; do not replace it with a mock.
+4. Use an actual project and production-equivalent environment when the failure
+   is data/environment dependent, previously escaped fixture validation, or the
+   user requests it.
+5. Distinguish implemented, locally validated, environment validated, deployed,
+   repaired, and incident resolved. Missing deployment or recovery evidence must
+   remain explicit.
+
+See
+[`generated-artifact-validation-standard.md`](../standards/generated-artifact-validation-standard.md)
+for the evidence matrix, comparison rules, and blocked-validation policy.
 
 ## Hardening and Softening Expectations
 
@@ -230,6 +257,8 @@ correctness artifact based on
   separately from input/flag combinations;
 - include direct, unmocked evidence at each changed safety or persistence
   boundary;
+- include the generated-artifact evidence chain and highest supported completion
+  claim when the workflow produces artifacts;
 - prove that security controls do not reject valid states; and
 - refuse unsupported claims that coverage is exhaustive or complete.
 

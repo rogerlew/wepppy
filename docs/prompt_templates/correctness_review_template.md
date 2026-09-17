@@ -44,6 +44,27 @@ Expected absence of optional state must not become an internal exception unless
 the canonical contract explicitly requires it. Every newly reachable exception
 needs a contract-based justification and regression evidence.
 
+## Generated Artifact Evidence Chain (Required When Applicable)
+
+Follow the
+[generated artifact validation standard](../standards/generated-artifact-validation-standard.md).
+Mark a stage N/A only with a reason. Persisted intent and job success cannot stand
+in for content readback from generated and consumed artifacts.
+
+| Stage | Expected semantics | Direct evidence | Result |
+| --- | --- | --- | --- |
+| User/request intent | [selection/config/scenario] | [payload/path] | pass/fail/N/A |
+| Reloaded persisted state | [durable values] | [reader/path] | pass/fail/N/A |
+| Generated intermediate | [content meaning] | [manifest + semantic parse] | pass/fail/N/A |
+| Prepared/executable input | [consumer-visible meaning] | [exact consumed path] | pass/fail/N/A |
+| Execution output | [fresh result] | [revision/job/output] | pass/fail/N/A |
+| User-facing result | [fresh report/export] | [browser/download/readback] | pass/fail/N/A |
+
+- **Direct unmocked failing boundary**: [test/path/result]
+- **Actual-project/environment evidence**: [host/project/revision or reason N/A]
+- **Highest completion claim supported**: [status from the standard]
+- **Deployment/recovery still outstanding**: [scope, owner, and gate]
+
 ## Review Checks
 
 - [ ] Canonical intent is named; implementation and tests are not treated as
@@ -56,6 +77,13 @@ needs a contract-based justification and regression evidence.
   persistence boundary.
 - [ ] Mocks do not replace the function or boundary where the production
   failure can occur.
+- [ ] Generated artifacts are parsed at the boundary that consumes them; metadata,
+  job success, file existence, timestamps, and broad-suite results are not used
+  as substitutes.
+- [ ] Test doubles that model an artifact producer/consumer have direct contract
+  evidence against the real implementation.
+- [ ] Status language distinguishes implementation, validation, deployment,
+  affected-resource repair, and incident resolution.
 - [ ] Security controls prove noninterference with every valid state in
   addition to rejecting hostile states.
 - [ ] Partial success, readiness, retry, and cleanup semantics are explicit.

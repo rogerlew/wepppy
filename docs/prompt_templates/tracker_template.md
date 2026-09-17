@@ -120,6 +120,16 @@ Pre-closure validation steps. Check these off as the package nears completion.
 - [ ] Edge cases documented and tested
 - [ ] Backward compatibility verified
 
+### Generated Artifacts (when applicable)
+- [ ] Original user-visible symptom and expected correction are explicit.
+- [ ] Intent, durable state, generated intermediate, consumed input, execution
+      output, and user-facing result are directly checked or marked N/A with a
+      reason.
+- [ ] The failing writer/serializer/copy/consumer boundary is exercised unmocked.
+- [ ] Exact candidate revision and production-equivalent identity are recorded.
+- [ ] Completion language does not exceed evidence; deployment and affected-run
+      repair remain separate gates.
+
 ### Deployment
 - [ ] Tested in docker-compose.dev.yml environment
 - [ ] Deployed to forest1 (test production) if applicable

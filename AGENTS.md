@@ -17,7 +17,7 @@
 ## Core Directives
 - `??` in prompt means provide critical analysis only; do not implement code.
 - Ask for human clarification when requirements or debug context are ambiguous.
-- **Observability is paramount:** follow [artifact observability](docs/standards/artifact-observability-standard.md); project records, including failed/intermediate artifacts, must be browsable and archivable.
+- **Artifacts are the executable truth:** follow [artifact observability](docs/standards/artifact-observability-standard.md) and [generated-artifact validation](docs/standards/generated-artifact-validation-standard.md); persisted state or job success alone cannot prove output correctness.
 - Keep docs terse: Codex loads context in bulk and does not compress verbose guidance.
 - Do not add fallback wrappers that silently mask missing required dependencies; prefer explicit failures over hidden recovery paths.
 - Do not create or switch to a new git branch unless the user explicitly asks for it.
@@ -41,7 +41,7 @@
 - Standard location for active ExecPlans is `docs/work-packages/*/prompts/active/`.
 - Ad hoc ExecPlans may live under `docs/mini-work-packages/*.md` when explicitly designated by the user.
 - Current ad hoc active ExecPlan: `none`.
-- Current work-package active ExecPlans: Project Config Builder locale expansion at `docs/work-packages/20260827_project_config_builder_locale_expansion/prompts/active/project_config_builder_locale_expansion_execplan.md`; Project Config run UI authority at `docs/work-packages/20260827_project_config_run_ui_authority/prompts/active/project_config_run_ui_authority_execplan.md`; WEPPcloudR execution backend refactor at `docs/work-packages/20260821_weppcloudr_execution_backend_refactor/prompts/active/weppcloudr_execution_backend_refactor_execplan.md`; Pure UI controller testing at `docs/work-packages/20260716_pure_ui_contract_standardization_c/prompts/active/pure_ui_contract_standardization_execplan.md`; run-statistics ledger at `docs/work-packages/20260505_run_statistics_ledger/prompts/active/run_statistics_ledger_execplan.md`; SSURGO study at `docs/work-packages/20260721_ssurgo_intelligent_fallback_study/prompts/active/ssurgo_intelligent_fallback_empirical_study_execplan.md`.
+- Current work-package active ExecPlans: MOFE scenario artifact integrity at `docs/work-packages/20260917_mofe_scenario_artifact_integrity/prompts/active/mofe_scenario_artifact_integrity_execplan.md`; Project Config Builder locale expansion at `docs/work-packages/20260827_project_config_builder_locale_expansion/prompts/active/project_config_builder_locale_expansion_execplan.md`; Project Config run UI authority at `docs/work-packages/20260827_project_config_run_ui_authority/prompts/active/project_config_run_ui_authority_execplan.md`; WEPPcloudR execution backend refactor at `docs/work-packages/20260821_weppcloudr_execution_backend_refactor/prompts/active/weppcloudr_execution_backend_refactor_execplan.md`; Pure UI controller testing at `docs/work-packages/20260716_pure_ui_contract_standardization_c/prompts/active/pure_ui_contract_standardization_execplan.md`; run-statistics ledger at `docs/work-packages/20260505_run_statistics_ledger/prompts/active/run_statistics_ledger_execplan.md`; SSURGO study at `docs/work-packages/20260721_ssurgo_intelligent_fallback_study/prompts/active/ssurgo_intelligent_fallback_empirical_study_execplan.md`.
 - Before authoring or revising an ExecPlan, read `docs/prompt_templates/codex_exec_plans.md`.
 - Active plans are living documents: keep `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` current.
 - When asked to run a plan end-to-end, proceed milestone by milestone without pausing for extra confirmation unless blocked by an external dependency.
@@ -115,7 +115,7 @@
 - Active initiative board: `PROJECT_TRACKER.md`
 - Work package process: `docs/work-packages/README.md`; mini packages: `docs/mini-work-packages/`
 - Prompt/template catalog: `docs/prompt_templates/AGENTS.md`
-- Hardening lifecycle standard (including callus softening): `docs/standards/hardening-lifecycle-standard.md`
+- Incident and artifact validation: `docs/standards/hardening-lifecycle-standard.md`; `docs/standards/generated-artifact-validation-standard.md`
 - Parameterization ADR requirement: `docs/standards/parameterization-adr-standard.md`
 - RQ scoped NoDb mutation cache-guard standard: `docs/standards/rq-scoped-nodb-mutation-cache-guard-standard.md`
 - NoDb facade/collaborator implementation standard: `docs/standards/nodb-facade-collaborator-pattern.md`

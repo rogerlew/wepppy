@@ -142,6 +142,9 @@ Required gates:
 
 - targeted tests for touched surfaces,
 - a direct, unmocked regression at the boundary that produced the incident,
+- generated and consumed artifact readback under the
+  [generated artifact validation standard](generated-artifact-validation-standard.md)
+  when the incident affects artifacts,
 - a valid-state matrix covering absent, empty, populated, supported legacy,
   and hostile states where applicable,
 - pre-handoff sanity (`wctl run-pytest tests --maxfail=1`) unless blocked (document blocker),
@@ -165,6 +168,8 @@ identity/host, and actual output readback. Verify the fix is retained by support
 restart and deployment paths. Preserve the regression at the responsible test or
 deployment boundary and block that rollout when the workflow check fails; reuse
 existing validation entry points rather than adding a new framework by default.
+For artifact-producing workflows, inventory and prove the full evidence chain
+required by `docs/standards/generated-artifact-validation-standard.md`.
 
 Report what was recovered, what was permanently corrected, and any unverified
 rollout scope separately. Do not call the incident fixed while necessary coverage

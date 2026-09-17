@@ -47,6 +47,28 @@ new operational/recovery cost before expanding the package.
 - **Cutover proof required**: [How you will prove production path is wired, not only implemented]
 - **Acceptance evidence type**: `generated-output | fixture-only | both` (default `generated-output` for implementation closeout)
 
+## Generated Artifact Validation Gate
+
+[Required when the workflow creates, transforms, prepares, executes from,
+summarizes, or publishes generated artifacts. Follow
+`docs/standards/generated-artifact-validation-standard.md`.]
+
+- **Applicable**: `yes | no` ([reason when no])
+- **User-visible failure/outcome**: [Original symptom and observable correction]
+- **Intent evidence**: [Request, selection, config, or scenario]
+- **Persisted-state evidence**: [Durable state reloaded through the normal reader]
+- **Generated-intermediate evidence**: [Relative-path content manifest + semantic parse]
+- **Prepared/consumed-input evidence**: [Exact artifact opened by the next stage]
+- **Execution/output evidence**: [Exact revision/identity, job tree, and fresh output]
+- **User-facing result evidence**: [Fresh report/export readback]
+- **Direct unmocked boundary**: [Writer/serializer/copy/consumer exercised]
+- **Actual-project/environment gate**: [Required host/project or reason not required]
+- **Highest completion claim currently supported**: `diagnosed | implemented | locally validated | environment validated | deployed | repaired | incident resolved`
+
+Persisted state, job success, file existence, timestamps, and broad-suite success
+are supporting signals, not substitutes for generated-content readback. If a
+stage cannot be validated, record the blocker and use a narrower status claim.
+
 ## Stakeholders
 [Who cares about this work? Who needs to review or approve?]
 - **Primary**: [Team or role that will use/maintain this]

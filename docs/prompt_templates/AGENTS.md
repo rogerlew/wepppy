@@ -26,6 +26,7 @@ See `docs/work-packages/README.md` for guidance on when and how to use work pack
 
 ## Using Templates
 - Reference templates when a task aligns with the documented workflow. Example: use `module_documentation_workflow.prompt.md` whenever improving docstrings, type hints, and `.pyi` coverage together.
+- For artifact-producing workflows and incident claims, apply `docs/standards/generated-artifact-validation-standard.md` through the package and correctness-review templates.
 - Copy relevant sections into working notes or the active prompt; adapt details (paths, module names) while preserving required validation steps.
 - If the existing templates do not fit, note gaps in your summary so maintainers can expand the catalog.
 

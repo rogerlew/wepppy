@@ -7,6 +7,10 @@ archive/restore workflows. Filesystem visibility is not a completion flag or an
 authorization mechanism. Communicate readiness, failure and freshness through
 status/metadata; enforce access with the existing project authorization boundary.
 
+Visibility is necessary but does not prove correctness. For evidence that a
+generated artifact carries approved intent through the path that consumes it,
+follow the [generated artifact validation standard](generated-artifact-validation-standard.md).
+
 ## Required design and review gate
 
 For every new or changed artifact-producing workflow:
