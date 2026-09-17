@@ -127,6 +127,14 @@ The specification and detailed contracts map the implemented source and UI paths
   project state to satisfy a read. Existing Redis/session caches retain their
   normal behavior. A source-code identity change may legitimately mark earlier
   results stale without changing their scientific values.
+- New source snapshots record file-content hashes. WEPP's unchanged climate
+  hard links preserve accepted currentness; changed bytes still invalidate it,
+  including equal-size rewrites with restored modification time. Older snapshots
+  without hashes retain strict metadata checks and may need an explicit rerun.
+  Do not rewrite historical hashes or rerun projects automatically. Soil/SQLite
+  provenance and CLI/parquet readiness remain separate checks. See the
+  [freshness contract](../../../../docs/schemas/file-dependency-freshness-contract.md)
+  for compatibility and pending development acceptance.
 - Troubleshoot unavailable reports by checking retained acceptance and artifact
   evidence in the ordinary project browser. Do not rebuild soils, republish or
   run a model as an automatic report recovery action. Report technical errors

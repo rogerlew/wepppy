@@ -621,3 +621,51 @@ def test_rap_collection_logs_year_band_and_progress(controllers, monkeypatch, ca
         with pytest.raises(ValueError, match="injected backend"):
             rap.analyze()
     assert "RAP collection failed: analysis year 2001 band" in caplog.text
+
+
+@pytest.mark.parametrize("consumer", ["prism", "rap"])
+def test_restored_time_main_source_change_rejects_publication(controllers, monkeypatch, consumer):
+    climate, rap = controllers
+    changed = False
+    gate = threading.Lock()
+
+    def rewrite(path):
+        nonlocal changed
+        with gate:
+            if changed:
+                return
+            path = Path(path)
+            version = path.stat()
+            path.write_bytes(b"X" * version.st_size)
+            os.utime(path, ns=(version.st_atime_ns, version.st_mtime_ns))
+            changed = True
+
+    if consumer == "prism":
+        monkeypatch.setattr(helpers, "_retrieve_prism_revision_tiles", lambda *args: None)
+        monkeypatch.setattr(helpers, "_collect_prism_revision_monthlies", lambda *args: ([], [], []))
+        monkeypatch.setattr(helpers, "ClimateFile", lambda path: SimpleNamespace(cli_fn=path, breakpoint=False))
+        def revise(*args):
+            rewrite(climate.cli_path)
+            Path(args[-1]).write_text("collected old input")
+        monkeypatch.setattr(helpers, "cli_revision", revise)
+        operation = climate._prism_revision
+        output = Path(climate.cli_dir, "_1.cli")
+        controller = climate
+    else:
+        monkeypatch.setattr(rap_module, "identify_median_single_raster_key", lambda **kwargs: {"1": 25.0})
+        rap.analyze()
+        def analyze(**kwargs):
+            rewrite(kwargs["parameter_fn"])
+            return {"1": 25.0}
+        monkeypatch.setattr(rap_module, "identify_median_single_raster_key", analyze)
+        operation = rap.analyze
+        output = Path(rap.rap_dir, "rap_ts.parquet")
+        controller = rap
+    if consumer == "prism":
+        output.write_bytes(b"previous accepted output")
+    previous = output.read_bytes()
+    before = Path(controller._nodb).read_bytes()
+    with pytest.raises(RuntimeError, match="superseded"):
+        operation()
+    assert Path(controller._nodb).read_bytes() == before
+    assert output.read_bytes() == previous

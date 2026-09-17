@@ -465,6 +465,42 @@ def test_dump_rejects_stale_overwrite_when_on_disk_payload_changed(
     assert nodb_path.read_text(encoding="utf-8") == '{"external":"newer"}'
 
 
+@pytest.mark.parametrize("loader", ["hydrate", "detached"])
+def test_decode_time_replacement_rejects_subsequent_stale_dump(
+    tmp_path, redis_lock_stub, disable_redis_cache, monkeypatch, loader,
+):
+    _install_db_api_stub(monkeypatch, update_last_modified=lambda *_args, **_kwargs: None)
+    writer = _DummyNoDb(str(tmp_path))
+    with writer.locked():
+        writer.value = "A"
+    target = tmp_path / writer.filename
+    old = target.stat()
+    writer.value = "B"
+    replacement = tmp_path / "replacement"
+    replacement.write_text(base.jsonpickle.encode(writer), encoding="utf-8")
+    os.utime(replacement, ns=(old.st_atime_ns, old.st_mtime_ns + 2_000_000_000))
+    expected = replacement.read_bytes()
+    decode = _DummyNoDb._decode_jsonpickle
+
+    def replacing_decode(cls, text):
+        observed = decode(text)
+        os.replace(replacement, target)
+        return observed
+
+    monkeypatch.setattr(_DummyNoDb, "_decode_jsonpickle", classmethod(replacing_decode))
+    if loader == "hydrate":
+        observed = _DummyNoDb._hydrate_instance(
+            str(tmp_path), False, False, True, use_redis_cache=False,
+        )
+    else:
+        observed = _DummyNoDb.load_detached(str(tmp_path))
+    assert observed.value == "A"
+    with pytest.raises(base.NoDbStaleWriteError):
+        with observed.locked():
+            observed.value = "C"
+    assert target.read_bytes() == expected
+
+
 def test_dump_forces_mtime_advance_on_unchanged_signature_then_rejects_stale_writer(
     tmp_path: Path,
     redis_lock_stub: _RedisStub,
@@ -1060,7 +1096,7 @@ def test_initial_retry_hydrates_real_payload_after_transient_error(
     if cache_kind == "cold" or (cache_kind == "singleton" and load_method == "load_detached"):
         monkeypatch.setattr(retry, 'open', fail_once(real_open), raising=False)
     else:
-        monkeypatch.setattr(retry, 'os', types.SimpleNamespace(stat=fail_once(real_stat)))
+        monkeypatch.setattr(retry, 'os', types.SimpleNamespace(stat=fail_once(real_stat), fstat=os.fstat))
     monkeypatch.setattr(retry, 'time', types.SimpleNamespace(monotonic=lambda: now[0], sleep=lambda delay: now.__setitem__(0, now[0] + delay)))
     try:
         with retry.initial_read_retry(runid="recover", job_id="job"):
@@ -1099,7 +1135,11 @@ def test_optional_disappearance_at_signature_does_not_retry(
         Path(path).unlink(missing_ok=True)
         raise FileNotFoundError(errno.ENOENT, 'removed during signature check', path)
 
-    monkeypatch.setattr(retry, 'os', types.SimpleNamespace(stat=disappear))
+    if cache_kind == 'cold':
+        # Cold hydration no longer performs a separate pathname stat after read.
+        monkeypatch.setattr(retry, 'open', disappear, raising=False)
+    else:
+        monkeypatch.setattr(retry, 'os', types.SimpleNamespace(stat=disappear, fstat=os.fstat))
     monkeypatch.setattr(retry, 'time', types.SimpleNamespace(monotonic=lambda: 0.0, sleep=sleeps.append))
     try:
         with retry.initial_read_retry(runid='optional', job_id='job'):

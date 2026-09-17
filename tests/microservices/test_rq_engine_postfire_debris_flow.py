@@ -45,7 +45,7 @@ def test_duplicate_multipart_and_parts(client):
 def test_download_acceptance_and_changed_file(client,tmp_path,monkeypatch):
     identity='a'*32; root=p.directory(tmp_path,identity)/'results';root.mkdir(parents=True)
     path=root/'events.parquet';path.write_bytes(b'accepted bytes')
-    accepted={'id':identity,'artifacts':{str(path.relative_to(tmp_path)):p.signature(tmp_path,path)}}
+    accepted={'id':identity,'artifacts':{str(path.relative_to(tmp_path)):p.signature(tmp_path,path,strong=True)}}
     monkeypatch.setattr(p,'state_at',lambda wd:{'last_successful_run':accepted})
     url=f'/runs/test/config/postfire-debris-flow/files/{identity}/events.parquet'
     response=client.get(url)
@@ -54,6 +54,33 @@ def test_download_acceptance_and_changed_file(client,tmp_path,monkeypatch):
     assert client.get(url.replace('events.parquet','source.tif')).status_code==404
     path.write_bytes(b'changed')
     assert client.get(url).status_code==409
+
+
+def test_download_changed_acceptance_closes_verified_handle(client, tmp_path, monkeypatch):
+    from wepppy.nodb.mods.postfire_debris_flow import rainfall_io
+
+    identity = 'a' * 32
+    root = p.directory(tmp_path, identity) / 'results'
+    root.mkdir(parents=True)
+    path = root / 'events.parquet'
+    path.write_bytes(b'accepted bytes')
+    accepted = {'id': identity, 'artifacts': {
+        str(path.relative_to(tmp_path)): p.signature(tmp_path, path, strong=True),
+    }}
+    states = iter([{'last_successful_run': accepted}, {'last_successful_run': None}])
+    monkeypatch.setattr(p, 'state_at', lambda wd: next(states))
+    opened = []
+    real_open = rainfall_io.open_local
+
+    def capture_open(*args, **kwargs):
+        handle = real_open(*args, **kwargs)
+        opened.append(handle)
+        return handle
+
+    monkeypatch.setattr(rainfall_io, 'open_local', capture_open)
+    response = client.get(f'/runs/test/config/postfire-debris-flow/files/{identity}/events.parquet')
+    assert response.status_code == 409
+    assert len(opened) == 1 and opened[0].closed
 
 
 def test_config_readonly_and_export_scope(tmp_path,monkeypatch):
@@ -321,3 +348,70 @@ def test_selection_does_not_rewrite_running_attempt(client, tmp_path, monkeypatc
     saved = PostfireDebrisFlow.load_detached(str(tmp_path)).state
     assert saved['model'] == 'M3' and saved['frequency_source'] == 'noaa'
     assert saved['run_attempt'] == attempt
+
+
+def test_download_metadata_only_restore_and_hashless_rejection(client, tmp_path, monkeypatch):
+    import os
+    identity = 'a'*32
+    root = p.directory(tmp_path, identity)/'results'
+    root.mkdir(parents=True)
+    path = root/'events.parquet'
+    path.write_bytes(b'accepted bytes')
+    relative = str(path.relative_to(tmp_path))
+    accepted = {'id': identity, 'artifacts': {relative: p.signature(tmp_path, path, strong=True)}}
+    monkeypatch.setattr(p, 'state_at', lambda wd: {'last_successful_run': accepted})
+    url = f'/runs/test/config/postfire-debris-flow/files/{identity}/events.parquet'
+    replacement = root/'restored'
+    replacement.write_bytes(path.read_bytes())
+    os.replace(replacement, path)
+    response = client.get(url)
+    assert response.status_code == 200 and response.content == b'accepted bytes'
+    accepted['artifacts'][relative] = p.signature(tmp_path, path)
+    assert client.get(url).status_code == 409
+
+
+def test_download_rejects_mutation_during_hash(client, tmp_path, monkeypatch):
+    identity = 'a'*32
+    root = p.directory(tmp_path, identity)/'results'
+    root.mkdir(parents=True)
+    path = root/'events.parquet'
+    path.write_bytes(b'accepted bytes')
+    accepted = {'id': identity, 'artifacts': {str(path.relative_to(tmp_path)): p.signature(tmp_path, path, strong=True)}}
+    monkeypatch.setattr(p, 'state_at', lambda wd: {'last_successful_run': accepted})
+    original = routes.hashlib.sha256
+    def changing_hash():
+        checksum = original()
+        class ChangingHash:
+            def update(self, block):
+                checksum.update(block)
+                before = path.stat()
+                path.write_bytes(b'altered! bytes')
+                import os
+                os.utime(path, ns=(before.st_atime_ns, before.st_mtime_ns + 1))
+            def hexdigest(self):
+                return checksum.hexdigest()
+        return ChangingHash()
+    monkeypatch.setattr(routes.hashlib, 'sha256', changing_hash)
+    assert client.get(f'/runs/test/config/postfire-debris-flow/files/{identity}/events.parquet').status_code == 409
+
+
+def test_download_rejects_symlink_swap_at_open(client, tmp_path, monkeypatch):
+    from wepppy.nodb.mods.postfire_debris_flow import rainfall_io as io
+    identity = 'a'*32
+    root = p.directory(tmp_path, identity)/'results'
+    root.mkdir(parents=True)
+    path = root/'events.parquet'
+    path.write_bytes(b'accepted bytes')
+    accepted = {'id': identity, 'artifacts': {str(path.relative_to(tmp_path)): p.signature(tmp_path, path, strong=True)}}
+    monkeypatch.setattr(p, 'state_at', lambda wd: {'last_successful_run': accepted})
+    outside = tmp_path/'outside'
+    outside.write_bytes(b'private bytes')
+    original = io.open_local
+    def swapped(target, limit):
+        path.unlink()
+        path.symlink_to(outside)
+        return original(target, limit)
+    monkeypatch.setattr(io, 'open_local', swapped)
+    response = client.get(f'/runs/test/config/postfire-debris-flow/files/{identity}/events.parquet')
+    assert response.status_code == 409
+    assert b'private bytes' not in response.content

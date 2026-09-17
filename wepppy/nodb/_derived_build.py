@@ -1,7 +1,10 @@
 """Private publication primitives shared by Climate and RAP derived builders."""
 
 from contextlib import ExitStack, contextmanager
+import errno
+import hashlib
 import os
+import stat
 from pathlib import Path
 import shutil
 import tempfile
@@ -16,11 +19,35 @@ class _CommitOutcomeUnknown(RuntimeError):
     """Keep both artifact generations when the durable commit cannot be read."""
 
 
-def file_signature(path: str | Path) -> tuple[str, int, int]:
-    """Fingerprint a required input file without suppressing filesystem errors."""
+def file_signature(path: str | Path) -> tuple[str, int, int, str | None]:
+    """Verify required main-file bytes for a collect/finalize transaction."""
     path = Path(path)
-    stat = path.stat()
-    return (str(path.resolve()), stat.st_mtime_ns, stat.st_size)
+    resolved = path.resolve(strict=True)
+    before = path.stat()
+    def version(info):
+        return (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
+    if stat.S_ISDIR(before.st_mode):
+        # Native directory-backed rasters retain their prior metadata identity;
+        # None explicitly carries no member-content verification.
+        return (str(resolved), before.st_mtime_ns, before.st_size, None)
+    if not stat.S_ISREG(before.st_mode):
+        raise OSError(errno.EINVAL, "Required input is not a regular file", str(path))
+    checksum = hashlib.sha256()
+    size = 0
+    with path.open("rb") as stream:
+        if version(os.fstat(stream.fileno())) != version(before):
+            raise OSError(errno.ESTALE, "Derived input changed while opening", str(path))
+        while block := stream.read(min(1024 * 1024, before.st_size - size + 1)):
+            size += len(block)
+            if size > before.st_size:
+                raise OSError(errno.ESTALE, "Derived input grew while reading", str(path))
+            checksum.update(block)
+        if (size != before.st_size
+                or version(os.fstat(stream.fileno())) != version(before)
+                or version(path.stat()) != version(before)
+                or path.resolve(strict=True) != resolved):
+            raise OSError(errno.ESTALE, "Derived input changed while reading", str(path))
+    return (str(resolved), before.st_mtime_ns, before.st_size, checksum.hexdigest())
 
 
 def _identity(path: str | Path) -> tuple[int, int, int, int]:

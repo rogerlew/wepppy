@@ -336,13 +336,33 @@ async def download(runid:str,config:str,attempt_id:str,name:str,request:Request)
         path=p.safe(wd,root/'results'/name,exists=False)
         if not path.is_file():raise p.WorkflowError('changed_file','Model files changed. Run the model again.',409)
         expected=accepted['artifacts'].get(str(path.relative_to(Path(wd))))
-        handle=path.open('rb');st=os.fstat(handle.fileno())
-        actual=[str(path.relative_to(Path(wd))),st.st_size,st.st_mtime_ns,st.st_ctime_ns]
-        if expected and len(expected)==5:
-            checksum=hashlib.file_digest(handle, 'sha256').hexdigest()
-            handle.seek(0)
-            actual.append(checksum)
-        if not stat.S_ISREG(st.st_mode) or expected!=actual:raise p.WorkflowError('changed_file','Model files changed. Run the model again.',409)
+        from wepppy.nodb.mods.postfire_debris_flow import rainfall_io as io
+        if (not isinstance(expected, list) or len(expected) != 5
+                or expected[0] != str(path.relative_to(Path(wd)))
+                or any(type(value) is not int or value < 0 for value in expected[1:4])
+                or not io.hash_value(expected[4])):
+            raise p.WorkflowError('changed_file','Model files changed. Run the model again.',409)
+        limit = io.MAX_PREDICTOR_BYTES if name == 'valid_mask.tif' else io.MAX_TEXT if name == 'manifest.json' else io.MAX_BYTES
+        try:
+            handle=io.open_local(path, limit)
+        except io.RainfallError as exc:
+            raise p.WorkflowError('changed_file','Model files changed. Run the model again.',409) from exc
+        st=os.fstat(handle.fileno())
+        checksum=hashlib.sha256()
+        size=0
+        for block in iter(lambda: handle.read(1024*1024), b''):
+            size += len(block)
+            if size > expected[1]:
+                raise p.WorkflowError('changed_file','Model files changed. Run the model again.',409)
+            checksum.update(block)
+        after=os.fstat(handle.fileno())
+        if (not stat.S_ISREG(st.st_mode) or st.st_size != expected[1] or size != expected[1] or checksum.hexdigest() != expected[4]
+                or (st.st_dev,st.st_ino,st.st_size,st.st_mtime_ns,st.st_ctime_ns) !=
+                   (after.st_dev,after.st_ino,after.st_size,after.st_mtime_ns,after.st_ctime_ns)):
+            raise p.WorkflowError('changed_file','Model files changed. Run the model again.',409)
+        if p.state_at(wd)['last_successful_run'] != accepted:
+            raise p.WorkflowError('changed_file','Accepted model changed. Reload the project.',409)
+        handle.seek(0)
         return DownloadResponse(handle,media_type='application/octet-stream',headers={'Content-Disposition':f'attachment; filename="{name}"'})
     except (AuthError,p.WorkflowError,OSError,ValueError,RedisError) as exc:
         if handle is not None:handle.close()

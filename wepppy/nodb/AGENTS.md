@@ -109,6 +109,15 @@ errno, optional absence returns None immediately, and scoped signature errors
 must not authorize stale cache reuse. See the canonical persistence contract's
 "Bounded Initial Preparation Reads" section and `tests/nodb/test_initial_read_retry.py`.
 
+Cold disk hydration uses `_read_retry.read_text_snapshot`: text and tracked
+mtime/size come from one opened descriptor. Never replace that version with a
+later pathname stat after decoding. Atomic replacement may return the complete
+old generation with its own signature; cache reuse/dump then refresh/reject it.
+Read-time device/inode/size/mtime drift raises ESTALE through the existing
+initial-read scope. Ctime alone is not a rejection: unlinking an old inode can
+change ctime without changing its open bytes. See the canonical contract's
+"Coherent disk-read versions" section.
+
 ## Persistence Semantics (Atomic Write Path)
 
 * `NoDbBase.dump()` persists via temp-file write + `os.replace()` in the same

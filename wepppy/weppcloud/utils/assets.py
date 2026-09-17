@@ -8,9 +8,6 @@ from pathlib import Path
 
 LOGGER = logging.getLogger(__name__)
 
-_CONTROLLERS_GL_BUILD_ID_CACHE: dict[str, tuple[int, int, str | None]] = {}
-
-
 def resolve_asset_version() -> str:
     """Return a stable asset version string for cache busting."""
     env_version = os.getenv("ASSET_VERSION")
@@ -39,17 +36,6 @@ def resolve_controllers_gl_build_id(path: Path) -> str | None:
     the `Build date:` line. Callers should treat None as "unknown" and avoid
     triggering stale-client UX based solely on a missing value.
     """
-    cache_key = str(path)
-
-    try:
-        stat = path.stat()
-    except OSError:
-        return None
-
-    cached = _CONTROLLERS_GL_BUILD_ID_CACHE.get(cache_key)
-    if cached and cached[0] == stat.st_mtime_ns and cached[1] == stat.st_size:
-        return cached[2]
-
     build_id: str | None = None
     try:
         with path.open("r", encoding="utf-8", errors="replace") as handle:
@@ -67,5 +53,4 @@ def resolve_controllers_gl_build_id(path: Path) -> str | None:
     except OSError:
         build_id = None
 
-    _CONTROLLERS_GL_BUILD_ID_CACHE[cache_key] = (stat.st_mtime_ns, stat.st_size, build_id)
     return build_id

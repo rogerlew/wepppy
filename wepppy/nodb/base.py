@@ -1306,9 +1306,10 @@ class NoDbBase(object):
                             exc_info=True,
                         )
 
-        json_text = _read_retry.read_text(filepath, allow_missing=allow_nonexistent)
-        if json_text is None:
+        snapshot = _read_retry.read_text_snapshot(filepath, allow_missing=allow_nonexistent)
+        if snapshot is None:
             return None
+        json_text, stat_result = snapshot
 
         json_text = cls._preprocess_json_for_decode(json_text)
         cls._ensure_legacy_module_imports(json_text)
@@ -1350,19 +1351,8 @@ class NoDbBase(object):
             db.wd = abs_wd
 
         db._init_logging()
-        db._nodb_mtime = None
-        db._nodb_size = None
-        try:
-            stat_result = _read_retry.stat_path(filepath, allow_missing=allow_nonexistent)
-        except OSError:
-            if _read_retry.read_retry_active():
-                raise
-            stat_result = None
-        if stat_result is None and allow_nonexistent and _read_retry.read_retry_active():
-            return None
-        if stat_result is not None:
-            db._nodb_mtime = stat_result.st_mtime
-            db._nodb_size = stat_result.st_size
+        db._nodb_mtime = stat_result.st_mtime
+        db._nodb_size = stat_result.st_size
 
         if redis_nodb_cache_client:
             try:
@@ -1514,9 +1504,10 @@ class NoDbBase(object):
                             exc_info=True,
                         )
 
-        json_text = _read_retry.read_text(filepath, allow_missing=allow_nonexistent)
-        if json_text is None:
+        snapshot = _read_retry.read_text_snapshot(filepath, allow_missing=allow_nonexistent)
+        if snapshot is None:
             return None
+        json_text, stat_result = snapshot
 
         json_text = cls._preprocess_json_for_decode(json_text)
         cls._ensure_legacy_module_imports(json_text)
@@ -1544,19 +1535,8 @@ class NoDbBase(object):
 
         db = cls._post_instance_loaded(db)
         db.wd = abs_wd
-        db._nodb_mtime = None
-        db._nodb_size = None
-        try:
-            stat_result = _read_retry.stat_path(filepath, allow_missing=allow_nonexistent)
-        except OSError:
-            if _read_retry.read_retry_active():
-                raise
-            stat_result = None
-        if stat_result is None and allow_nonexistent and _read_retry.read_retry_active():
-            return None
-        if stat_result is not None:
-            db._nodb_mtime = stat_result.st_mtime
-            db._nodb_size = stat_result.st_size
+        db._nodb_mtime = stat_result.st_mtime
+        db._nodb_size = stat_result.st_size
         return db
 
     @classmethod

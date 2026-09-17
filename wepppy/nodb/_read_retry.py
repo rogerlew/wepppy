@@ -11,7 +11,7 @@ from contextvars import ContextVar
 from dataclasses import dataclass
 from typing import Callable, Iterator, TypeVar
 
-__all__ = ["initial_read_retry", "read_retry_active", "read_text", "stat_path"]
+__all__ = ["initial_read_retry", "read_retry_active", "read_text", "read_text_snapshot", "stat_path"]
 
 _LOG = logging.getLogger(__name__)
 _RETRY_ERRNOS = frozenset((errno.ENOENT, errno.ESTALE))
@@ -102,3 +102,20 @@ def read_text(path: str, *, allow_missing: bool = False) -> str | None:
             return stream.read()
 
     return _call("open/read", path, read, allow_missing=allow_missing)
+
+
+def read_text_snapshot(path: str, *, allow_missing: bool = False) -> tuple[str, os.stat_result] | None:
+    """Bind text to its opened generation, including across atomic replacement."""
+    def read() -> tuple[str, os.stat_result]:
+        with open(path) as stream:
+            before = os.fstat(stream.fileno())
+            text = stream.read()
+            after = os.fstat(stream.fileno())
+        # Unlinking an old inode during atomic replacement can change ctime;
+        # its complete bytes and mtime/size remain a valid earlier generation.
+        fields = ('st_dev', 'st_ino', 'st_size', 'st_mtime_ns')
+        if any(getattr(before, field) != getattr(after, field) for field in fields):
+            raise OSError(errno.ESTALE, "NoDb file changed during read", path)
+        return text, before
+
+    return _call("open/read snapshot", path, read, allow_missing=allow_missing)

@@ -322,6 +322,12 @@ docker exec weppcloud bash -c "cd /workdir/wepppy/wepppy/weppcloud/static-src &&
 
 The `build_controllers_js.py` script automatically runs on container startup in development mode.
 
+The expected controller build ID is read from the bundle header on each template
+context lookup. A same-size deployment preserving mtime therefore exposes its
+new build date without a reader restart. Missing or unreadable headers remain
+unknown and do not alone trigger the stale-client banner. See the
+[file freshness contract](../../docs/schemas/file-dependency-freshness-contract.md#controller-bundle-header-identity-implementation-pending).
+
 ### Performance Considerations
 
 - **Keep routes fast**: Offload work to RQ for tasks >2 seconds

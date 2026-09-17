@@ -108,6 +108,9 @@ def test_upload_and_model_real_artifacts(tmp_path,monkeypatch,prepared_inputs):
     runid=uuid.uuid4().hex;p.directory(tmp_path,runid).mkdir()
     controller.change(lambda state:state.update(run_attempt={'id':runid,'job_id':None,'phase':'queued','created_at':p.now(),
         'retryable':False,'error':None,'snapshot':{'inputs':snapshot,'dnbr':identity,'frequency':'cli'}}))
+    # A metadata-only change before admission remains a usable accepted upload.
+    import os
+    os.link(folder/'normalized'/'dnbr.tif', folder/'same-content-link.tif')
     p.execute_model(tmp_path,runid,BINARY)
     accepted=PostfireDebrisFlow.load_detached(str(tmp_path)).state['last_successful_run']
     assert accepted['id']==runid
@@ -150,6 +153,22 @@ def test_upload_and_model_real_artifacts(tmp_path,monkeypatch,prepared_inputs):
         'id':stale_id,'job_id':None,'phase':'queued','created_at':p.now(),'retryable':False,'error':None,'snapshot':{'inputs':snapshot,'dnbr':identity,'frequency':'cli'}}))
     with pytest.raises(p.WorkflowError,match='superseded'):
         p.execute_model(tmp_path,stale_id,BINARY)
+    assert PostfireDebrisFlow.load_detached(str(tmp_path)).state['last_successful_run']['id']==next_id
+    # Unlike pre-admission metadata churn, drift during this run rejects publication.
+    monkeypatch.setattr(controller, 'change', original_change)
+    during_id=uuid.uuid4().hex
+    controller.change(lambda state:state.update(model='M1',frequency_source='cli',run_attempt={
+        'id':during_id,'job_id':None,'phase':'queued','created_at':p.now(),'retryable':False,'error':None,'snapshot':{'inputs':snapshot,'dnbr':identity,'frequency':'cli'}}))
+    build_results=p.build_m1_results
+    def drift_during_build(*args,**kwargs):
+        result=build_results(*args,**kwargs)
+        path=folder/'normalized'/'dnbr.tif'; st=path.stat()
+        os.utime(path,ns=(st.st_atime_ns,st.st_mtime_ns+1))
+        return result
+    with monkeypatch.context() as patch:
+        patch.setattr(p,'build_m1_results',drift_during_build)
+        with pytest.raises(p.WorkflowError,match='Inputs changed'):
+            p.execute_model(tmp_path,during_id,BINARY)
     assert PostfireDebrisFlow.load_detached(str(tmp_path)).state['last_successful_run']['id']==next_id
     statistics.unlink()
     assert p.artifacts_current(tmp_path, PostfireDebrisFlow.load_detached(str(tmp_path)).state['active_dnbr'])

@@ -92,6 +92,13 @@ def test_fresh_basin_run_prepares_sources_and_reuses_them(project,monkeypatch):
     assert calls == [wd]
     assert p.state_at(wd)['last_successful_run']['coverage']['valid_cells'] == 3
     assert p.get_state(wd,'config',model='M3',reconcile=False)['freshness'] == 'current'
+    # Actual WEPP materialization changes ctime without changing accepted climate.
+    from wepppy.runtime_paths.wepp_inputs import copy_input_file
+    linked = wd/'wepp/runs/pw0.cli'
+    copy_input_file(str(wd), 'climate/owner.cli', linked)
+    assert p.get_state(wd,'config',model='M3',reconcile=False)['freshness'] == 'current'
+    linked.unlink()
+    assert p.get_state(wd,'config',model='M3',reconcile=False)['freshness'] == 'current'
     assert pd.read_parquet(p.directory(wd,identity)/'results/events.parquet').probability.notna().all()
     # A new absent-pointer preparation can commit before later calculation fails.
     (wd/META).unlink()

@@ -90,3 +90,27 @@ def test_static_url_skips_controllers_build_id_when_unavailable(
     assert controllers_qs.get("v") == ["testsha"]
     assert "cg" not in controllers_qs
     assert context["controllers_gl_expected_build_id"] is None
+
+
+def test_context_refreshes_restored_bundle_but_keeps_one_request_id(tmp_path, monkeypatch):
+    import os
+
+    sync_root = tmp_path / "sync-assets"
+    first_id, next_id = "2099-01-02T03:04:05Z", "2099-01-03T03:04:05Z"
+    _write_controllers_gl(sync_root, first_id)
+    target = sync_root / "js" / "controllers-gl.js"
+    original = target.stat()
+    monkeypatch.setenv("STATIC_ASSET_SYNC_DIR", str(sync_root))
+    app = Flask(__name__)
+    app.config["ASSET_VERSION"] = "testsha"
+    register_context_processors(app, get_all_runs=lambda: [], user_model=None, run_model=None)
+    with app.test_request_context("/"):
+        first = _collect_template_context(app)
+        _write_controllers_gl(sync_root, next_id)
+        os.utime(target, ns=(original.st_atime_ns, original.st_mtime_ns))
+        assert first["controllers_gl_expected_build_id"] == first_id
+        assert parse_qs(urlparse(first["static_url"]("js/controllers-gl.js")).query)["cg"] == [first_id]
+    with app.test_request_context("/"):
+        current = _collect_template_context(app)
+        assert current["controllers_gl_expected_build_id"] == next_id
+        assert parse_qs(urlparse(current["static_url"]("js/controllers-gl.js")).query)["cg"] == [next_id]

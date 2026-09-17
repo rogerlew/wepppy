@@ -11,6 +11,7 @@ from pathlib import Path
 import re
 import tomllib
 
+from wepppy.all_your_base.file_digest import sha256_file
 from wepppy.nodb.config_builder.schema import (
     ComponentDefinition,
     ComponentKind,
@@ -116,7 +117,6 @@ _LOCALE_VIEW = {
     "australia": ((-27.0, 133.5), 4, False),
     "global-earth": ((40.0, -99.0), 3, False),
 }
-_EXECUTABLE_DIGEST_CACHE: dict[tuple[str, int, int, int, int], str] = {}
 
 
 class RegistryError(ValueError):
@@ -343,24 +343,11 @@ def _executable_sha256(path_text: str, binary_id: str, role: str) -> str:
             f"WEPP binary provider value {binary_id!r} has unusable {role} executable {path}"
         )
     try:
-        stat = path.stat()
-        cache_key = (
-            str(path.resolve()), stat.st_ino, stat.st_size, stat.st_mtime_ns,
-            stat.st_ctime_ns,
-        )
-        cached = _EXECUTABLE_DIGEST_CACHE.get(cache_key)
-        if cached is not None:
-            return cached
-        digest = hashlib.sha256()
-        with path.open("rb") as stream:
-            for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-                digest.update(chunk)
+        identity = sha256_file(path)
     except OSError as exc:
         raise RegistryError(
             f"WEPP binary provider value {binary_id!r} has unreadable {role} executable {path}"
         ) from exc
-    identity = digest.hexdigest()
-    _EXECUTABLE_DIGEST_CACHE[cache_key] = identity
     return identity
 
 

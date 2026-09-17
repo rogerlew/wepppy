@@ -426,6 +426,10 @@ def test_outputs_artifact_source_run_revision_uses_unknown_sentinel_when_unavail
 
     assert artifact is not None
     assert artifact["source_run_state_revision"] == schema_defaults_routes.UNKNOWN_SOURCE_RUN_STATE_REVISION
+    def changed_file(*args, **kwargs):
+        raise OSError("artifact changed during hash")
+    monkeypatch.setattr(schema_defaults_routes, "sha256_file", changed_file)
+    assert schema_defaults_routes._build_features_export_artifact(runtime, wd=str(tmp_path)) is None
 
 
 def test_outputs_artifact_accepts_legacy_missing_job_runid_when_artifact_is_run_scoped(
@@ -466,3 +470,32 @@ def test_outputs_artifact_accepts_legacy_missing_job_runid_when_artifact_is_run_
 
     assert artifact is not None
     assert artifact["producer_job_id"] == "rq-999"
+
+
+def test_output_sha_changes_for_restored_time_bytes_and_checks_expectations(tmp_path):
+    import hashlib
+    import os
+
+    path = tmp_path / 'export.zip'
+    path.write_bytes(b'first bytes')
+    before = path.stat()
+    first = schema_defaults_routes._sha256_file(path)
+    path.write_bytes(b'other bytes')
+    os.utime(path, ns=(before.st_atime_ns, before.st_mtime_ns))
+    current = schema_defaults_routes._sha256_file(path, size_bytes=before.st_size, mtime_ns=before.st_mtime_ns)
+    assert current != first and current == hashlib.sha256(b'other bytes').hexdigest()
+    with pytest.raises(OSError):
+        schema_defaults_routes._sha256_file(path, size_bytes=1)
+
+
+def test_output_sha_rechecks_metadata_after_helper(tmp_path, monkeypatch):
+    path = tmp_path / 'export.zip'
+    path.write_bytes(b'old')
+    before = path.stat()
+    real_digest = schema_defaults_routes.sha256_file
+    def change_then_hash(path):
+        path.write_bytes(b'new larger artifact')
+        return real_digest(path)
+    monkeypatch.setattr(schema_defaults_routes, 'sha256_file', change_then_hash)
+    with pytest.raises(OSError):
+        schema_defaults_routes._sha256_file(path, size_bytes=before.st_size, mtime_ns=before.st_mtime_ns)

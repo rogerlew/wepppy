@@ -6,6 +6,10 @@ from copy import deepcopy
 from functools import lru_cache
 from datetime import datetime, timezone
 import json
+import hashlib
+import os
+import stat
+from time import monotonic_ns
 import logging
 from redis.exceptions import RedisError
 from pathlib import Path
@@ -102,7 +106,12 @@ def directory(wd, identity):
 def signature(wd, path, *, strong=False):
     p = safe(wd, path)
     st = p.stat()
-    return [str(p.relative_to(Path(wd).absolute())), st.st_size, st.st_mtime_ns, st.st_ctime_ns] + ([digest(p)] if strong else [])
+    record = [str(p.relative_to(Path(wd).absolute())), st.st_size, st.st_mtime_ns, st.st_ctime_ns]
+    if strong:
+        record.append(_digest_version.__wrapped__(str(p), _file_version(st), local=True))
+        if _file_version(safe(wd, p).stat()) != _file_version(st):
+            raise WorkflowError('changed_source', 'Project data changed while reading.', 409)
+    return record
 
 
 def noaa_current(wd, path, centroid):
@@ -155,7 +164,7 @@ def k_current(wd, files, polaris_completed):
         return False
 
 
-def sources(wd, *, rainfall=True, frequency='cli', model='M1', soil_policy=KF_POLICY):
+def sources(wd, *, rainfall=True, frequency='cli', model='M1', soil_policy=KF_POLICY, content=True):
     if model not in ('M1', 'M3'):
         raise WorkflowError('invalid_model', 'Choose M1 or M3.')
     if soil_policy not in (None, KF_POLICY):
@@ -253,20 +262,78 @@ def sources(wd, *, rainfall=True, frequency='cli', model='M1', soil_policy=KF_PO
         companion = Path(str(files[key]) + '.msk')
         if companion.exists() or companion.is_symlink():
             files[key + '_mask'] = safe(wd, companion)
-    snapshot = {'selections': selections, 'files': {key: signature(wd,p) if p.is_file() else None for key,p in files.items()}}
+    records, hashes = {}, {}
+    for key, path in files.items():
+        records[key] = signature(wd, path) if path.is_file() else None
+        if content:
+            hashes[key] = cached_digest(path, local=True) if records[key] is not None else None
+        if records[key] is not None and signature(wd, path) != records[key]:
+            raise WorkflowError('changed_source', 'Project data changed while reading.', 409)
+    snapshot = {'selections': selections, 'files': records}
+    if content:
+        snapshot['content_sha256'] = hashes
     return eligible, bool(ron.readonly), checks, files, snapshot
 
 
-def artifacts_current(wd, record, *, strong=True):
+def _source_snapshots_current(accepted, current):
+    """Compare accepted content; legacy snapshots retain exact stat checks."""
+    from .rainfall_io import hash_value
+    for snapshot in (accepted, current):
+        if 'content_sha256' not in snapshot:
+            continue
+        hashes, records = snapshot['content_sha256'], snapshot.get('files')
+        if not isinstance(hashes, dict) or not isinstance(records, dict) or hashes.keys() != records.keys():
+            return False
+        for key, record in records.items():
+            if record is None:
+                if hashes[key] is not None:
+                    return False
+            elif (not isinstance(record, list) or len(record) != 4
+                  or not isinstance(record[0], str)
+                  or any(type(value) is not int or value < 0 for value in record[1:])
+                  or not hash_value(hashes[key])):
+                return False
+    if 'content_sha256' not in accepted or 'content_sha256' not in current:
+        return ({key: value for key, value in accepted.items() if key != 'content_sha256'} ==
+                {key: value for key, value in current.items() if key != 'content_sha256'})
+    def content(snapshot):
+        return {**snapshot, 'files': {key: record[:2] if record is not None else None
+                                     for key, record in snapshot['files'].items()}}
+    return content(accepted) == content(current)
+
+
+def artifacts_current(wd, record, *, strong=True, strict=False):
+    """Content for accepted reads; strict stat identity for locked finalizers."""
+    from .rainfall_io import hash_value
     try:
-        return bool(record.get('artifacts')) and all(signature(wd, Path(wd)/rel,strong=strong and len(sig)==5)==(sig if strong else sig[:4]) for rel,sig in record['artifacts'].items())
-    except (OSError, WorkflowError):
+        artifacts = record.get('artifacts')
+        if not isinstance(artifacts, dict) or not artifacts:
+            return False
+        for relative, expected in artifacts.items():
+            if (not isinstance(relative, str) or not isinstance(expected, list) or len(expected) not in (4, 5)
+                    or expected[0] != relative
+                    or any(type(value) is not int or value < 0 for value in expected[1:4])
+                    or (len(expected) == 5 and not hash_value(expected[4]))):
+                return False
+            path = safe(wd, Path(wd)/relative)
+            actual = signature(wd, path)
+            if strict or len(expected) == 4:
+                if actual != expected[:4]:
+                    return False
+                continue
+            checksum = signature(wd, path, strong=True)[4] if strong else cached_digest(path, local=True)
+            if actual[:2] != expected[:2] or checksum != expected[4]:
+                return False
+            if signature(wd, path) != actual:
+                return False
+        return True
+    except (OSError, WorkflowError, ValueError):
         return False
 
 
 def _current_authority(wd, frequency, model, snapshot):
-    eligible,readonly,checks,_,current = sources(wd,frequency=frequency,model=model)
-    return eligible and not readonly and current == snapshot and all(
+    eligible,readonly,checks,_,current = sources(wd,frequency=frequency,model=model,content=False)
+    return eligible and not readonly and current == {key: value for key, value in snapshot.items() if key != 'content_sha256'} and all(
         value for key,value in checks.items() if key != 'noaa' or frequency == 'noaa')
 
 
@@ -346,7 +413,7 @@ def get_state(wd, config, *, frequency=None, model=None, reconcile=True):
     eligible, readonly, checks, paths, snapshot = sources(wd, frequency=state['frequency_source'], model=model)
     active = deepcopy(state['active_dnbr'])
     upload_sources = sources(wd, rainfall=False)
-    checks['dnbr'] = bool(active and active['snapshot'] == upload_sources[4] and artifacts_current(wd,active,strong=False))
+    checks['dnbr'] = bool(active and _source_snapshots_current(active['snapshot'], upload_sources[4]) and artifacts_current(wd,active,strong=False))
     if active:
         active['current'] = checks['dnbr']
         active = {k:v for k,v in active.items() if k not in ('snapshot','source_id','source_sha256','artifacts')}
@@ -361,7 +428,9 @@ def get_state(wd, config, *, frequency=None, model=None, reconcile=True):
                            and (result_model == 'M3' or result_policy == KF_POLICY))
                            else sources(wd, frequency=result_frequency, model=result_model, soil_policy=result_policy)[4])
         expected = {'inputs': result_snapshot, 'dnbr': active['id'] if active and result_model == 'M1' else None, 'frequency': result_frequency}
-        current = bool((result_model == 'M3' or checks['dnbr']) and artifacts_current(wd,result,strong=False) and result['snapshot'] == expected)
+        current = bool((result_model == 'M3' or checks['dnbr']) and artifacts_current(wd,result,strong=False) and {key: value for key, value in result['snapshot'].items() if key != 'inputs'} ==
+                       {key: value for key, value in expected.items() if key != 'inputs'}
+                       and _source_snapshots_current(result['snapshot']['inputs'], result_snapshot))
         result['model'] = result_model
     if result:
         result.pop('snapshot', None)
@@ -445,7 +514,7 @@ def execute_upload(wd, identity):
     def publish(current):
         if any(signature(wd, Path(wd)/rel)!=sig for rel,sig in verified_sources.items()):
             raise WorkflowError('changed_source','Uploaded files changed. Upload the map again.',409)
-        if current['upload_attempt']['id'] != identity or sources(wd,rainfall=False)[4] != snapshot:
+        if current['upload_attempt']['id'] != identity or sources(wd,rainfall=False,content=False)[4] != {key: value for key, value in snapshot.items() if key != 'content_sha256'}:
             raise WorkflowError('superseded', 'Upload was superseded.', 409)
         current['active_dnbr'] = summary
         current['upload_attempt'].update(phase='complete', retryable=True)
@@ -481,15 +550,56 @@ def reuse_predictors(wd, accepted, hashes, binary_hash, output):
     return True
 
 
-@lru_cache(maxsize=64)
-def _digest_version(path, version):
-    return digest(path)
+def _file_version(info):
+    return (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
 
 
-def cached_digest(path):
-    path = Path(path)
-    stat = path.stat()
-    return _digest_version(str(path), (stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns))
+@lru_cache(maxsize=512)
+def _digest_observed_at(path, version):
+    # Key arguments distinguish versions; monotonic time avoids NFS clock skew.
+    return monotonic_ns()
+
+
+@lru_cache(maxsize=512)
+def _digest_version(path, version, *, local=False, _observation=None):
+    from .rainfall_io import open_local
+    checksum = hashlib.sha256()
+    with (open_local(path, version[2]) if local else Path(path).open('rb')) as stream:
+        before = os.fstat(stream.fileno())
+        if not stat.S_ISREG(before.st_mode) or _file_version(before) != version:
+            raise WorkflowError('changed_source', 'Project data changed while reading.', 409)
+        size = 0
+        for block in iter(lambda: stream.read(min(1024 * 1024, version[2] - size + 1)), b''):
+            size += len(block)
+            if size > version[2]:
+                raise WorkflowError('changed_source', 'Project data grew while reading.', 409)
+            checksum.update(block)
+        if (size != version[2] or _file_version(os.fstat(stream.fileno())) != version
+                or _file_version(Path(path).stat()) != version):
+            raise WorkflowError('changed_source', 'Project data changed while reading.', 409)
+    return checksum.hexdigest()
+
+
+def cached_digest(path, *, local=False):
+    from .rainfall_io import open_local
+    path = Path(path).absolute()
+    # Even warm hits must recheck read access and descriptor/path association.
+    with (open_local(path, path.stat().st_size) if local else path.open('rb')) as stream:
+        info = os.fstat(stream.fileno())
+        version = _file_version(info)
+        if not stat.S_ISREG(info.st_mode) or _file_version(path.stat()) != version:
+            raise WorkflowError('changed_source', 'Project data changed while reading.', 409)
+        observed = _digest_observed_at(str(path), version)
+        # ADR 20260917-file-digest-cache-admission: stat keys can collide within
+        # a timestamp quantum. Never cache the digests read during observation.
+        if monotonic_ns() - observed < 1_000_000_000:
+            checksum = _digest_version.__wrapped__(str(path), version, local=local)
+        else:
+            checksum = _digest_version(str(path), version, local=local, _observation=observed)
+        if (_file_version(os.fstat(stream.fileno())) != version
+                or _file_version(path.stat()) != version):
+            raise WorkflowError('changed_source', 'Project data changed while reading.', 409)
+    return checksum
 
 
 def engine_identity():
@@ -531,7 +641,10 @@ def execute_model(wd, identity, binary):
     expected={'inputs':snapshot,'dnbr':active['id'],'frequency':frequency}
     if not eligible or readonly or expected != attempt['snapshot'] or not all(checks.values() if frequency=='noaa' else (v for k,v in checks.items() if k!='noaa')):
         raise WorkflowError('superseded','Required project data changed. Run the model again.',409)
-    if not artifacts_current(wd, active):
+    verified_active = {'artifacts': {relative: signature(wd, Path(wd)/relative)
+                                     for relative in active['artifacts']}}
+    if (not artifacts_current(wd, active)
+            or not artifacts_current(wd, verified_active, strict=True)):
         raise WorkflowError('changed_source','Uploaded files changed. Upload the map again.',409)
     def check_attempt(current):
         running=current['run_attempt']
@@ -589,9 +702,9 @@ def execute_model(wd, identity, binary):
         check_attempt(current)
         if (current['run_attempt']['id']!=identity or current['active_dnbr']['id']!=active['id']
                 or not _current_authority(wd,frequency,'M1',snapshot)
-                or not artifacts_current(wd,current['active_dnbr'], strong=False)
-                or not artifacts_current(wd, {'artifacts': result_artifacts}, strong=False)
-                or not artifacts_current(wd, {'artifacts': predictor_artifacts}, strong=False)):
+                or not artifacts_current(wd, verified_active, strong=False, strict=True)
+                or not artifacts_current(wd, {'artifacts': result_artifacts}, strong=False, strict=True)
+                or not artifacts_current(wd, {'artifacts': predictor_artifacts}, strong=False, strict=True)):
             raise WorkflowError('superseded','Inputs changed. Run the model again.',409)
         current['last_successful_run']={'id':identity,'model':'M1','soil_policy':KF_POLICY,'completed_at':now(),'snapshot':expected,'partial':partial,'area_warning':area_warning,
             'artifacts': result_artifacts, 'predictor_artifacts': predictor_artifacts,'coverage':result_manifest['coverage'],
@@ -652,8 +765,8 @@ def execute_m3(wd, identity):
     def publish(current):
         if (not current['run_attempt'] or current['run_attempt']['id'] != identity
                 or not _current_authority(wd,frequency,'M3',snapshot)
-                or not artifacts_current(wd,{'artifacts':artifacts},strong=False)
-                or not artifacts_current(wd,{'artifacts':predictor_artifacts},strong=False)):
+                or not artifacts_current(wd,{'artifacts':artifacts},strong=False,strict=True)
+                or not artifacts_current(wd,{'artifacts':predictor_artifacts},strong=False,strict=True)):
             raise WorkflowError('superseded','Inputs changed. Run the model again.',409)
         current['last_successful_run'] = dict(id=identity,model='M3',completed_at=now(),snapshot=expected,
             partial=partial,partial_reason=partial_reason(manifest,partial),

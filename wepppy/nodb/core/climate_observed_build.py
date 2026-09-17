@@ -23,7 +23,7 @@ def _require_climate_directory(climate):
 
 
 def _spatial_inputs(climate, *, prism=False) -> dict[str, Any]:
-    """Copy coordinates/settings; source is (resolved path, mtime_ns, size)."""
+    """Copy coordinates/settings; source is (resolved path, mtime_ns, size, sha256)."""
     watershed = climate.watershed_instance
     inputs = {"centroid": tuple(watershed.require_centroid())}
     if prism:

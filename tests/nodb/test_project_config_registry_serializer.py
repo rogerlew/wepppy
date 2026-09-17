@@ -572,3 +572,50 @@ def test_duplicate_component_ids_are_rejected(tmp_path: Path) -> None:
 
     with pytest.raises(RegistryError, match="Duplicate or case-colliding"):
         load_registry(tmp_path)
+
+
+def test_executable_digest_rapid_restored_time_rewrites(tmp_path):
+    import hashlib
+    import os
+
+    path = tmp_path / 'binary-fixture'
+    path.write_bytes(b'A' * 1024)
+    path.chmod(0o700)
+    before = path.stat()
+    for i in range(100):
+        content = bytes([65 + i % 2]) * 1024
+        path.write_bytes(content)
+        os.utime(path, ns=(before.st_atime_ns, before.st_mtime_ns))
+        assert registry_module._executable_sha256(str(path), 'fixture', 'watershed') == hashlib.sha256(content).hexdigest()
+    path.chmod(0o600)
+    with pytest.raises(RegistryError, match='unusable watershed executable'):
+        registry_module._executable_sha256(str(path), 'fixture', 'watershed')
+
+
+def test_registry_revision_tracks_restored_time_executable_bytes(tmp_path, monkeypatch):
+    import os
+
+    paths = _provider_fixture_paths(tmp_path, ('wepp_260803',))
+    monkeypatch.setattr(registry_module, 'get_linux_wepp_bin_opts', lambda: ['wepp_260803'])
+    monkeypatch.setattr(registry_module, 'get_linux_wepp_bin_role_paths', lambda binary_id: paths[binary_id])
+    first = load_registry()
+    path = Path(paths['wepp_260803'][0])
+    before = path.stat()
+    path.write_bytes(b'X' * before.st_size)
+    os.utime(path, ns=(before.st_atime_ns, before.st_mtime_ns))
+    current = load_registry()
+    assert current.revision != first.revision
+    assert current.get('wepp_260803').source_revision != first.get('wepp_260803').source_revision
+
+
+def test_executable_hash_failure_keeps_registry_error_translation(tmp_path, monkeypatch):
+    path = tmp_path / 'fixture'
+    path.write_bytes(b'bytes')
+    path.chmod(0o700)
+    original = PermissionError('read denied during hash')
+    def denied(*args, **kwargs):
+        raise original
+    monkeypatch.setattr(registry_module, 'sha256_file', denied)
+    with pytest.raises(RegistryError, match='unreadable watershed executable') as caught:
+        registry_module._executable_sha256(str(path), 'fixture', 'watershed')
+    assert caught.value.__cause__ is original

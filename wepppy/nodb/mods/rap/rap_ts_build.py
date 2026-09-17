@@ -22,7 +22,7 @@ def _years(start, end) -> tuple[int, int]:
 
 
 def _inputs(controller, *, analysis=False) -> dict[str, Any]:
-    """Copy settings plus (year, (resolved path, mtime_ns, size)) raster inputs."""
+    """Copy settings plus (year, (resolved path, mtime_ns, size, sha256)) raster inputs."""
     from . import rap_ts as module
 
     map_obj = module.Ron.getInstance(controller.wd).map

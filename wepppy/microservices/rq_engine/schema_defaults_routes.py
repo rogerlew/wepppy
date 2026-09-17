@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import errno
 import hashlib
 import json
 import logging
@@ -8,7 +9,6 @@ import mimetypes
 import os
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from functools import lru_cache
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -16,6 +16,7 @@ from fastapi import APIRouter, Query, Request
 from fastapi.responses import JSONResponse
 from werkzeug.utils import secure_filename
 
+from wepppy.all_your_base.file_digest import sha256_file
 from wepppy.nodb.mods.features_export import (
     FeaturesExportServiceError,
     load_job_manifest,
@@ -1767,25 +1768,20 @@ def _parse_iso_datetime(value: Any) -> str | None:
     return parsed.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-@lru_cache(maxsize=256)
-def _sha256_file_cached(path_text: str, size_bytes: int, mtime_ns: int) -> str:
-    path = Path(path_text)
-    digest = hashlib.sha256()
-    with path.open("rb") as fp:
-        for chunk in iter(lambda: fp.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
 def _sha256_file(path: Path, *, size_bytes: int | None = None, mtime_ns: int | None = None) -> str:
-    stat_result = path.stat() if (size_bytes is None or mtime_ns is None) else None
-    resolved_size = int(size_bytes if size_bytes is not None else stat_result.st_size)
-    if mtime_ns is not None:
-        resolved_mtime_ns = int(mtime_ns)
-    else:
-        raw_mtime_ns = getattr(stat_result, "st_mtime_ns", int(float(stat_result.st_mtime) * 1_000_000_000))
-        resolved_mtime_ns = int(raw_mtime_ns)
-    return _sha256_file_cached(str(path.resolve()), resolved_size, resolved_mtime_ns)
+    before = path.stat()
+    expected_size = int(size_bytes) if size_bytes is not None else before.st_size
+    expected_mtime = int(mtime_ns) if mtime_ns is not None else before.st_mtime_ns
+    expected = (expected_size, expected_mtime)
+    if (before.st_size, before.st_mtime_ns) != expected:
+        raise OSError(errno.ESTALE, "Export artifact metadata changed", str(path))
+    digest = sha256_file(path)
+    after = path.stat()
+    if ((after.st_size, after.st_mtime_ns) != expected
+            or (before.st_dev, before.st_ino, before.st_ctime_ns) !=
+               (after.st_dev, after.st_ino, after.st_ctime_ns)):
+        raise OSError(errno.ESTALE, "Export artifact changed while hashing", str(path))
+    return digest
 
 
 def _artifact_kind(path: Path) -> str:

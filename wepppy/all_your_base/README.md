@@ -59,6 +59,16 @@ The main module exports general-purpose helpers and constants:
 
 See individual subpackage READMEs for detailed API documentation.
 
+### Verified ordinary-file hashes
+
+`file_digest.sha256_file(path, use_cache=True)` verifies bounded regular-file
+reads and exposes SHA-256 for output metadata and executable identity. Settled
+cache hits still open/check access; changed versions remain uncached through
+the observation interval defined in the [file freshness contract](../../docs/schemas/file-dependency-freshness-contract.md#shared-ordinary-file-digest-reuse-implementation-pending).
+Callers retain containment, symlink and execute-access policy. This helper follows
+ordinary symlinks; project-local no-follow readers retain their own opener.
+Filesystem errors remain explicit. `use_cache=False` always reads the bytes.
+
 ## Quick Start
 
 ### Basic Numeric Helpers
