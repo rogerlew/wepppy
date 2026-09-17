@@ -1,0 +1,674 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+<idinfo>
+<citation>
+<citeinfo>
+<origin>USGS Landslide Hazards Program</origin>
+<pubdate>20180103</pubdate>
+<title>Post-Fire Debris-Flow Likelihood, Volume, and Combined Hazard Estimates</title>
+<geoform>Vector Digital Data Set (Polygon)</geoform>
+</citeinfo>
+</citation>
+<descript>
+<abstract>Post-fire debris-flow probability, volume, and combined hazards are estimated at both the drainage-basin scale and in a spatially distributed manner along the drainage network within each basin. The characteristics of basins affected by the fire were calculated using a geographic information system (GIS). Debris-flow probability and volume were estimated for each basin outlet as well as along the upstream drainage networks (pixels where the contributing area is greater than or equal to 0.02 km2). Independent variable values were calculated for each pixel along the drainage network and summarized at the stream segment scale to obtain estimates of debris-flow probability and volume.</abstract>
+<purpose>Rapid assessment of post-fire debris-flow hazard in the western United States</purpose>
+</descript>
+<timeperd>
+<timeinfo>
+<sngdate>
+<caldate>20180103</caldate>
+</sngdate>
+</timeinfo>
+<current>See Supplemental Info</current>
+</timeperd>
+<status>
+<progress>Complete</progress>
+<update>None planned</update>
+</status>
+<spdom>
+<bounding>
+<westbc>-13323109.0428</westbc>
+<eastbc>-13238835.8803</eastbc>
+<northbc>4114575.5827</northbc>
+<southbc>4066670.5238</southbc>
+</bounding>
+</spdom>
+<keywords>
+<theme>
+<themekt>None</themekt>
+<themekey>Wildfire</themekey>
+<themekey>Debris Flow</themekey>
+</theme>
+</keywords>
+<accconst>None. Users are advised to read the data set's metadata thoroughly to understand appropriate use and data limitations.</accconst>
+<useconst>
+The hazard assessments use a storm of a defined intensity to predict the probability, volume, and combined relative hazard of debris flows in basins burned by the fire. Differences in model predictions and actual debris-flow occurrence will arise with differences in actual storm duration and intensity. The occurrence of higher rainfall intensities or longer storm durations may increase the probability or volume of potential debris flows.
+In addition, this hazard assessment relies upon readily available geospatial data, the accuracy and precision of which may influence the estimated likelihood and magnitude of post-fire debris flows. However, local conditions (such as debris supply) certainly influence both the probability and volume of debris flows. Unfortunately, locally specific data are not presently available at the spatial scale of the post-fire debris-flow hazard assessment. As such, local conditions that are not constrained by the model may serve to dramatically increase or decrease the probability and(or) volume of a debris flow at a basin outlet. The input geospatial data are also subject to error based upon mapping resolution, elevation interpolation techniques, and mapping and(or) classification methods. Finally, this assessment is specific to debris-flow hazards; hazards from flash-flooding are not described in this study and may be significant.
+This assessment also characterizes potential debris-flow hazards at a static point in time immediately following wildfire. Studies of post-fire debris flows in southern California and the intermountain western United States have indicated that debris-flow activity in recently burned areas typically occurs within 2 yr of wildfire. As vegetation cover and soil properties return to pre-fire conditions, the threat of debris-flow activity decreases with time elapsed since wildfire. Conversely, the hazards from flash-flooding may persist for several years after wildfire.
+Finally, this work is preliminary and is subject to revision. It is being provided due to the need for timely best science information. The assessment is provided on the condition that neither the U.S. Geological Survey nor the Unites States Government may be held liable for any damages resulting from the authorized or unauthorized use of the assessment.
+</useconst>
+<ptcontac>
+<cntinfo>
+<cntorgp>
+<cntorg>U.S. Geological Survey Landslide Hazards Program</cntorg>
+<cntper>Dennis Staley</cntper>
+</cntorgp>
+<cntpos>Research Geologist</cntpos>
+<cntaddr>
+<addrtype>Mailing</addrtype>
+<address>Box 25046 MS966 DFC</address>
+<city>Denver</city>
+<state>CO</state>
+<postal>80225</postal>
+<country>USA</country>
+</cntaddr>
+<cntvoice>303-273-8568</cntvoice>
+<cntemail>dstaley@usgs.gov</cntemail>
+</cntinfo>
+</ptcontac>
+<native>Environment as of Metadata Creation: Microsoft Windows 7 Version 6.1 (Build 7601) Service Pack 1; Esri ArcGIS 10.2.1 (Build 3497) Service Pack N/A (Build N/A)</native>
+</idinfo>
+<dataqual>
+<attracc>
+<attraccr>No formal attribute accuracy tests were conducted.</attraccr>
+</attracc>
+<logic>No formal logical accuracy tests were conducted.</logic>
+<complete>Data set is considered complete for the information presented, as described in the abstract. Users are advised to read the rest of the metadata record carefully for additional details.</complete>
+<posacc>
+<horizpa>
+<horizpar>A formal accuracy assessment of the horizontal positional information in the data set has not been conducted.</horizpar>
+</horizpa>
+<vertacc>
+<vertaccr>A formal accuracy assessment of the vertical positional information in the data set has either not been conducted, or is not applicable.</vertaccr>
+</vertacc>
+</posacc>
+<lineage>
+<srcinfo>
+<srccite>
+<citeinfo>
+<origin>USGS</origin>
+<pubdate>20180103</pubdate>
+<title>National Elevation Dataset</title>
+<geoform>Raster Digital Data Set</geoform>
+<pubinfo>
+<pubplace>National Map</pubplace>
+<publish>National Map</publish>
+</pubinfo>
+<onlink>http://viewer.nationalmap.gov/basic/</onlink>
+</citeinfo>
+</srccite>
+<typesrc>Digital and/or Hardcopy Resources</typesrc>
+<srctime>
+<timeinfo>
+<sngdate>
+<caldate>20180103</caldate>
+</sngdate>
+</timeinfo>
+<srccurr>publication date</srccurr>
+</srctime>
+<srccitea>Source Input 1</srccitea>
+<srccontr>Source information used in support of the development of the data set.</srccontr>
+</srcinfo>
+<srcinfo>
+<srccite>
+<citeinfo>
+<origin>USFS/USGS</origin>
+<pubdate>20180103</pubdate>
+<title>dNBR</title>
+<geoform>Raster Digital Data Set</geoform>
+<pubinfo>
+<pubplace>Boise, ID</pubplace>
+<publish>RSAC/EROS</publish>
+</pubinfo>
+<onlink>http://activefiremaps.fs.fed.us/baer/download.php</onlink>
+</citeinfo>
+</srccite>
+<typesrc>Digital and/or Hardcopy Resources</typesrc>
+<srctime>
+<timeinfo>
+<sngdate>
+<caldate>20180103</caldate>
+</sngdate>
+</timeinfo>
+<srccurr>publication date</srccurr>
+</srctime>
+<srccitea>Source Input 2</srccitea>
+<srccontr>Source information used in support of the development of the data set.</srccontr>
+</srcinfo>
+<srcinfo>
+<srccite>
+<citeinfo>
+<origin>NRCS</origin>
+<pubdate>20180103</pubdate>
+<title>STATSGO</title>
+<geoform>Vector Digital Data Set</geoform>
+<pubinfo>
+<pubplace>NRCS</pubplace>
+<publish>NRCS</publish>
+</pubinfo>
+<onlink>http://www.nrcs.usda.gov/wps/portal/nrcs/detail/soils/survey/geo/?cid=nrcs142p2_053629</onlink>
+</citeinfo>
+</srccite>
+<typesrc>Digital and/or Hardcopy Resources</typesrc>
+<srctime>
+<timeinfo>
+<sngdate>
+<caldate>20180103</caldate>
+</sngdate>
+</timeinfo>
+<srccurr>publication date</srccurr>
+</srctime>
+<srccitea>Source Input 3</srccitea>
+<srccontr>Source information used in support of the development of the data set.</srccontr>
+</srcinfo>
+<procstep>
+<procdesc>Development of the data set by the agency / individuals identified in the 'Originator' element in the Identification Info section of the record.</procdesc>
+<procdate>20180103</procdate>
+</procstep>
+</lineage>
+</dataqual>
+<spdoinfo>
+<direct>Vector</direct>
+<ptvctinf>
+<sdtsterm>
+<sdtstype>G-polygon</sdtstype>
+<ptvctcnt>2507</ptvctcnt>
+</sdtsterm>
+</ptvctinf>
+</spdoinfo>
+<spref>
+<horizsys>
+<planar>
+<gridsys>
+<gridsysn>Universal Transverse Mercator</gridsysn>
+<utm>
+<utmzone>11</utmzone>
+<transmer>
+<sfctrmer>0.9996</sfctrmer>
+<longcm>-117.0</longcm>
+<latprjo>0.0</latprjo>
+<feast>500000.0</feast>
+<fnorth>0.0</fnorth>
+</transmer>
+</utm>
+</gridsys>
+<planci>
+<plance>coordinate pair</plance>
+<coordrep>
+<absres>0.6096</absres>
+<ordres>0.6096</ordres>
+</coordrep>
+<plandu>Meter</plandu>
+</planci>
+</planar>
+<geodetic>
+<horizdn>D_North_American_1983</horizdn>
+<ellips>GRS_1980</ellips>
+<semiaxis>6378137.0</semiaxis>
+<denflat>298.257222101</denflat>
+</geodetic>
+</horizsys>
+</spref>
+<eainfo>
+<detailed Name="thm2017_Basin_DFPredictions_15min_24mmh">
+<enttyp>
+<enttypl>Attribute Table</enttypl>
+<enttypd>Table containing attribute information associated with the data set.</enttypd>
+<enttypds>Producer defined</enttypds>
+</enttyp>
+<attr>
+<attrlabl>BASIN_ID</attrlabl>
+<attrdef>Unique Basin ID</attrdef>
+<attrdefs>Producer defined</attrdefs>
+<attrdomv>
+<rdom>
+<rdommin>1</rdommin>
+<rdommax>2147483647</rdommax>
+</rdom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>Shape_Length</attrlabl>
+<attrdef>Stream segment length (m)</attrdef>
+<attrdefs>Producer defined</attrdefs>
+<attrdomv>
+<rdom>
+<rdommin>1</rdommin>
+<rdommax>2147483647</rdommax>
+</rdom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>Shape_Area</attrlabl>
+<attrdef>Basin Area (square meters)</attrdef>
+<attrdefs>Producer defined</attrdefs>
+<attrdomv>
+<rdom>
+<rdommin>1</rdommin>
+<rdommax>2147483647</rdommax>
+</rdom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>Segment_ID</attrlabl>
+<attrdef>Unique Stream Segment ID</attrdef>
+<attrdefs>Producer defined</attrdefs>
+<attrdomv>
+<rdom>
+<rdommin>1</rdommin>
+<rdommax>2147483647</rdommax>
+</rdom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>FID_thm2017_Basin_DFPredictions_15min_24mmh</attrlabl>
+<attrdef>Feature ID</attrdef>
+<attrdefs>Producer defined</attrdefs>
+<attrdomv>
+<rdom>
+<rdommin>1</rdommin>
+<rdommax>2147483647</rdommax>
+</rdom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>Fire_ID</attrlabl>
+<attrdef>Fire Abbreviation</attrdef>
+<attrdefs>Producer defined</attrdefs>
+<attrdomv>
+<edom>
+<edomv>thm2017</edomv>
+<edomvd>Fire Name Abbreviation</edomvd>
+<edomvds>Producer defined</edomvds>
+</edom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>Fire_SegmentID</attrlabl>
+<attrdef>Concatenated Fire ID and Segment ID</attrdef>
+<attrdefs>Producer defined</attrdefs>
+<attrdomv>
+<udom>Unknown</udom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>M1_X1</attrlabl>
+<attrdef>Likelihood Model M1 X1: Proportion of the contributing area burned at high or moderate severity with gradients in excess of 23 degrees (Staley Et Al, In Review, USGS Open-File Report XXXX)</attrdef>
+<attrdefs>Producer defined</attrdefs>
+<attrdomv>
+<rdom>
+<rdommin>0</rdommin>
+<rdommax>1</rdommax>
+</rdom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>M1_X2</attrlabl>
+<attrdef>Likelihood Model M1 X2: Average dNBR of the contributing area divided by 1000 (Staley Et Al, In Review, USGS Open-File Report XXXX)</attrdef>
+<attrdefs>Producer defined</attrdefs>
+<attrdomv>
+<rdom>
+<rdommin>0</rdommin>
+<rdommax>1</rdommax>
+</rdom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>M1_X3</attrlabl>
+<attrdef>Likelihood Model M1 X3: Average USSoils KF-Factor of the contributing area (Staley Et Al, In Review, USGS Open-File Report XXXX)</attrdef>
+<attrdefs>Producer defined</attrdefs>
+<attrdomv>
+<rdom>
+<rdommin>0</rdommin>
+<rdommax>1</rdommax>
+</rdom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>V_X1</attrlabl>
+<attrdef>Volume Model X1: square root of the relief (in meters) of the contributing area (Gartner et al., 2014, Engineering Geology 176:45-56 doi:http://dx.doi.org/10.1016/j.enggeo.2014.04.008)</attrdef>
+<attrdefs>Producer defined</attrdefs>
+<attrdomv>
+<rdom>
+<rdommin>0</rdommin>
+<rdommax>2147483647</rdommax>
+<attrunit>sqrt(m)</attrunit>
+</rdom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>V_X2</attrlabl>
+<attrdef>Volume Model X1: natural log of the total area (km^2) burned at high or moderate severity in the contributing area (Gartner et al., 2014, Engineering Geology 176:45-56 doi:http://dx.doi.org/10.1016/j.enggeo.2014.04.008)</attrdef>
+<attrdefs>Producer defined</attrdefs>
+<attrdomv>
+<rdom>
+<rdommin>-2147483647</rdommin>
+<rdommax>2147483647</rdommax>
+</rdom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>Shape_Length_12</attrlabl>
+<attrdef>Unknown</attrdef>
+<attrdefs>Producer defined</attrdefs>
+<attrdomv>
+<rdom>
+<rdommin>0</rdommin>
+<rdommax>2147483647</rdommax>
+</rdom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>M1_R</attrlabl>
+<attrdef>Likelihood Model M1 R: Modeled 15-minute rainfall accumulation (mm) (Staley Et Al, In Review, USGS Open-File Report XXXX)</attrdef>
+<attrdefs>Producer defined</attrdefs>
+<attrdomv>
+<rdom>
+<rdommin>0</rdommin>
+<rdommax>2147483647</rdommax>
+<attrunit>mm</attrunit>
+</rdom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>V_X3</attrlabl>
+<attrdef>%V_X3_DESCRIPTION%</attrdef>
+<attrdefs>Producer defined</attrdefs>
+<attrdomv>
+<rdom>
+<rdommin>0</rdommin>
+<rdommax>2147483647</rdommax>
+<attrunit>sqrt(mm/h)</attrunit>
+</rdom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>X</attrlabl>
+<attrdef>X = -3.632692(0.41154 * M1_X1 * M1_R) + (0.667247 * M1_X2 * M1_R) + (0.704605 * M1_X2 * M1_R) (Staley Et Al, In Review, USGS Open-File Report XXXX)</attrdef>
+<attrdefs>Producer defined</attrdefs>
+<attrdomv>
+<rdom>
+<rdommin>-2147483647</rdommin>
+<rdommax>2147483647</rdommax>
+</rdom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>ExpX</attrlabl>
+<attrdef>Likelihood Model exponentiated X = exp(X)</attrdef>
+<attrdefs>Producer defined</attrdefs>
+<attrdomv>
+<rdom>
+<rdommin>0</rdommin>
+<rdommax>2147483647</rdommax>
+</rdom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>P</attrlabl>
+<attrdef>Likelihood Model statistical likelihood, P = ExpX / (1 + ExpX)</attrdef>
+<attrdefs>Producer defined</attrdefs>
+<attrdomv>
+<rdom>
+<rdommin>0</rdommin>
+<rdommax>1</rdommax>
+</rdom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>PCl</attrlabl>
+<attrdef>Classified P values</attrdef>
+<attrdefs>Producer defined</attrdefs>
+<attrdomv>
+<rdom>
+<rdommin>1</rdommin>
+<rdommax>5</rdommax>
+</rdom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>PCl_Legend</attrlabl>
+<attrdef>Legend field for displaying classified likelihood values</attrdef>
+<attrdefs>Producer defined</attrdefs>
+<attrdomv>
+<edom>
+<edomv>0-20%</edomv>
+<edomvd>Unknown</edomvd>
+<edomvds>Producer defined</edomvds>
+</edom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>20-40%</edomv>
+<edomvd>Unknown</edomvd>
+<edomvds>Producer defined</edomvds>
+</edom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>40-60%</edomv>
+<edomvd>Unknown</edomvd>
+<edomvds>Producer defined</edomvds>
+</edom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>60-80%</edomv>
+<edomvd>Unknown</edomvd>
+<edomvds>Producer defined</edomvds>
+</edom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>80-100%</edomv>
+<edomvd>Unknown</edomvd>
+<edomvds>Producer defined</edomvds>
+</edom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>LnV</attrlabl>
+<attrdef>Unknown</attrdef>
+<attrdefs>Producer defined</attrdefs>
+<attrdomv>
+<rdom>
+<rdommin>0</rdommin>
+<rdommax>2147483647</rdommax>
+</rdom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>Volume</attrlabl>
+<attrdef>LnV = 2.89 + (0.17 * V_X1) + (0.3 * V_X2) + (0.47 * V_X3) (Gartner et al., 2014, Engineering Geology 176:45-56 doi:http://dx.doi.org/10.1016/j.enggeo.2014.04.008)</attrdef>
+<attrdefs>Producer defined</attrdefs>
+<attrdomv>
+<rdom>
+<rdommin>0</rdommin>
+<rdommax>2147483647</rdommax>
+</rdom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>VolMin</attrlabl>
+<attrdef>Miniumum predicted volume (cubic meters) = MinV = Volume - 1 standard error</attrdef>
+<attrdefs>Producer defined</attrdefs>
+<attrdomv>
+<rdom>
+<rdommin>0</rdommin>
+<rdommax>2147483647</rdommax>
+</rdom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>VolMax</attrlabl>
+<attrdef>Maximum predicted volume (cubic meters) = MaxV = Volume + 1 standard error</attrdef>
+<attrdefs>Producer defined</attrdefs>
+<attrdomv>
+<rdom>
+<rdommin>0</rdommin>
+<rdommax>2147483647</rdommax>
+</rdom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>VolCl</attrlabl>
+<attrdef>Classified Predicted Volume</attrdef>
+<attrdefs>Producer defined</attrdefs>
+<attrdomv>
+<rdom>
+<rdommin>1</rdommin>
+<rdommax>4</rdommax>
+</rdom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>VolCl__Legend</attrlabl>
+<attrdef>Legend field for mapping classified volume estimates</attrdef>
+<attrdefs>Producer defined</attrdefs>
+<attrdomv>
+<edom>
+<edomv>1,000-10,000</edomv>
+<edomvd>Unknown</edomvd>
+<edomvds>Producer defined</edomvds>
+</edom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>10,000-100,000</edomv>
+<edomvd>Unknown</edomvd>
+<edomvds>Producer defined</edomvds>
+</edom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>&lt;1,000</edomv>
+<edomvd>Unknown</edomvd>
+<edomvds>Producer defined</edomvds>
+</edom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>&gt;100,000</edomv>
+<edomvd>Unknown</edomvd>
+<edomvds>Producer defined</edomvds>
+</edom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>CombHaz</attrlabl>
+<attrdef>Combined Hazard Ranking, CombHaz = PCl + VCl</attrdef>
+<attrdefs>Producer defined</attrdefs>
+<attrdomv>
+<rdom>
+<rdommin>2</rdommin>
+<rdommax>9</rdommax>
+</rdom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>CombHazCl</attrlabl>
+<attrdef>Classified combined hazard ranking</attrdef>
+<attrdefs>Producer defined</attrdefs>
+<attrdomv>
+<rdom>
+<rdommin>1</rdommin>
+<rdommax>3</rdommax>
+</rdom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>CombHazCl_Legend</attrlabl>
+<attrdef>Legend field for mapping classified combined hazard estimates</attrdef>
+<attrdefs>Producer defined</attrdefs>
+<attrdomv>
+<edom>
+<edomv>High</edomv>
+<edomvd>Unknown</edomvd>
+<edomvds>Producer defined</edomvds>
+</edom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>Low</edomv>
+<edomvd>Unknown</edomvd>
+<edomvds>Producer defined</edomvds>
+</edom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>Moderate</edomv>
+<edomvd>Unknown</edomvd>
+<edomvds>Producer defined</edomvds>
+</edom>
+</attrdomv>
+</attr>
+</detailed>
+<overview>
+<eaover>The entity and attribute information provided here describes the tabular data associated with the data set. Please review the detailed descriptions that are provided (the individual attribute descriptions) for information on the values that appear as fields/table entries of the data set.</eaover>
+<eadetcit>The entity and attribute information was generated by the individual and/or agency identified as the originator of the data set. Please review the rest of the metadata record for additional details and information.</eadetcit>
+</overview>
+</eainfo>
+<distinfo>
+<distrib>
+<cntinfo>
+<cntorgp>
+<cntorg>U.S. Geological Survey - Landslide Hazards Program</cntorg>
+<cntper>Dennis Staley</cntper>
+</cntorgp>
+<cntpos>Research Geologist</cntpos>
+<cntaddr>
+<addrtype>Mailing</addrtype>
+<address>Box 25046 MS966 DFC</address>
+<city>Denver</city>
+<state>CO</state>
+<postal>80225</postal>
+<country>USA</country>
+</cntaddr>
+<cntvoice>303-273-8568</cntvoice>
+<cntemail>dstaley@usgs.gov</cntemail>
+</cntinfo>
+</distrib>
+<distliab>Distributor assumes no liability for misuse of data.</distliab>
+<stdorder>
+<digform>
+<digtinfo>
+<formname>Vector Digital Data Set (Polygon)</formname>
+</digtinfo>
+<digtopt>
+<onlinopt>
+<computer>
+<networka>
+<networkr>http://landslides.usgs.gov/hazards/postfire_debrisflow/</networkr>
+</networka>
+</computer>
+</onlinopt>
+</digtopt>
+</digform>
+<fees>None. No fees are applicable for obtaining the data set.</fees>
+</stdorder>
+</distinfo>
+<metainfo>
+<metd>20180103</metd>
+<metc>
+<cntinfo>
+<cntperp>
+<cntper>Dennis Staley</cntper>
+<cntorg>U.S. Geological Survey - Landslide Hazards Program</cntorg>
+</cntperp>
+<cntpos>Research Geologist</cntpos>
+<cntaddr>
+<addrtype>Mailing</addrtype>
+<address>Box 25046 MS966 DFC</address>
+<city>Denver</city>
+<state>CO</state>
+<postal>80225</postal>
+<country>USA</country>
+</cntaddr>
+<cntvoice>303-273-8568</cntvoice>
+<cntemail>dstaley@usgs.go</cntemail>
+</cntinfo>
+</metc>
+<metstdn>FGDC Content Standard for Digital Geospatial Metadata</metstdn>
+<metstdv>FGDC-STD-001-1998</metstdv>
+</metainfo>
+</metadata>

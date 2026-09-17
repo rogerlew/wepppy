@@ -1,0 +1,156 @@
+{
+  "reference_crs": "EPSG:26911",
+  "run_crs": "EPSG:32611",
+  "datum_transform": "Inverse of UTM zone 11N + Inverse of NAD83 to WGS 84 (1) + UTM zone 11N",
+  "best_match_basin": 19384,
+  "geometry": {
+    "run_area_km2": 7.7668999999077215,
+    "usgs_area_km2": 7.625999999999004,
+    "intersection_km2": 7.543412484929336,
+    "intersection_over_union": 0.9610070046657164,
+    "fraction_run_inside_usgs": 0.9712256479443484,
+    "fraction_usgs_inside_run": 0.9891702707750225,
+    "run_outlet_distance_to_usgs_polygon_m": 72.81786711176899
+  },
+  "top_overlap_basins": [
+    {
+      "basin_id": 19384,
+      "overlap_km2": 7.543412484929336
+    },
+    {
+      "basin_id": 19381,
+      "overlap_km2": 0.13359830111120385
+    },
+    {
+      "basin_id": 17347,
+      "overlap_km2": 0.022716846802125292
+    },
+    {
+      "basin_id": 19451,
+      "overlap_km2": 0.011361137757049975
+    },
+    {
+      "basin_id": 19512,
+      "overlap_km2": 0.0069646955900955106
+    }
+  ],
+  "nearest_usgs_pourpoints": [
+    [
+      69.16650669137644,
+      {
+        "Acc_Cl": 1.0,
+        "Perim_Buff": 10,
+        "InsidePeri": 100,
+        "OutsidePer": 0,
+        "BASIN_ID": 19381
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          259059.83974298742,
+          3815219.558799356
+        ]
+      }
+    ],
+    [
+      72.81786711058254,
+      {
+        "Acc_Cl": 1.0,
+        "Perim_Buff": 10,
+        "InsidePeri": 100,
+        "OutsidePer": 0,
+        "BASIN_ID": 19384
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          259069.83974298276,
+          3815219.558799356
+        ]
+      }
+    ],
+    [
+      636.3148270910926,
+      {
+        "Acc_Cl": 1.0,
+        "Perim_Buff": 10,
+        "InsidePeri": 0,
+        "OutsidePer": 0,
+        "BASIN_ID": 21078
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          259384.83974298742,
+          3814619.558799358
+        ]
+      }
+    ]
+  ],
+  "usgs_fields": {
+    "BASIN_ID": 19384,
+    "Shape_Leng": 16440.0,
+    "Shape_Area": 7626000.0,
+    "Segment_ID": 19384,
+    "Acc_Cl": 1.0,
+    "Perim_Buff": 10,
+    "InsidePeri": 100,
+    "OutsidePer": 0,
+    "Fire_ID": "thm2017",
+    "Fire_Segme": "thm2017_19384",
+    "L_X1": 0.683425,
+    "L_X2": 0.542329,
+    "L_X3": 0.139364,
+    "V_X1": 30.6731,
+    "V_X2": 1.87484,
+    "Shape_Le_1": 14.142135625,
+    "R": 6.0,
+    "V_X3": 4.89897948557,
+    "X": 0.816713016,
+    "ExpX": 2.26304899301,
+    "P": 0.693538159512,
+    "PCl": 4,
+    "PCl_Legend": "60-80%",
+    "LnV": 10.7930488394,
+    "Volume": 48681.2312432,
+    "VolMin": 6081.75654931,
+    "VolMax": 389667.402196,
+    "VolCl": 3,
+    "VolCl_Lege": "10,000-100,000",
+    "CombHaz": 7,
+    "CombHazCl": 3,
+    "CombHazCl_": "High"
+  },
+  "run_predictors": {
+    "T": 0.7412672048617817,
+    "F": 0.5410453359946719,
+    "S": 0.33716159651753175
+  },
+  "usgs_predictors": {
+    "T": 0.683425,
+    "F": 0.542329,
+    "S": 0.139364
+  },
+  "run_predictors_on_shared_spatial_support": {
+    "T": 0.7573178988171886,
+    "F": 0.5433005958945553,
+    "S": 0.3372977232701285
+  },
+  "usgs_rounded_predictor_probability_error": 8.212652180539237e-07,
+  "usgs_rounding_error_bound": 1.33501e-06,
+  "I15_24": {
+    "run_probability": 0.8562637321686197,
+    "usgs_probability": 0.693538159512,
+    "independently_recomputed_usgs_probability": 0.6935389807772181,
+    "probability_difference_points": 16.27255726566197,
+    "run_with_only_usgs_soil": 0.7218884582891923,
+    "logit_difference_contributions": {
+      "T": 0.142291823959983,
+      "F": -0.005160329301418918,
+      "S": 0.8307499053736332
+    },
+    "soil_share_of_net_logit_difference": 0.8583178738076769
+  },
+  "usgs_P50_intensity_mm_h": 19.5919826584507,
+  "run_P50_intensity_mm_h": 16.089836308129946
+}

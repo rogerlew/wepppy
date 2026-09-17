@@ -1,0 +1,80 @@
+{
+  "url": "https://edcintl.cr.usgs.gov/downloads/sciweb1/shared/MTBS_Fire/data/baer/ca3442911910020171205.zip",
+  "nested": null,
+  "archive_bytes": 127333600,
+  "transferred_bytes": 30046803,
+  "inventory": [
+    {
+      "name": "postfire_image_S2_20171228.jpg",
+      "bytes": 4934371,
+      "compressed_bytes": 4872587
+    },
+    {
+      "name": "prefire_image_S2_20171128.jpg",
+      "bytes": 4928675,
+      "compressed_bytes": 4867332
+    },
+    {
+      "name": "S2_refl_20171128_b5_8a_12.aux",
+      "bytes": 6099,
+      "compressed_bytes": 1272
+    },
+    {
+      "name": "S2_refl_20171128_b5_8a_12.tif",
+      "bytes": 50766654,
+      "compressed_bytes": 38470463
+    },
+    {
+      "name": "S2_refl_20171128_b5_8a_12.tif.aux.xml",
+      "bytes": 11152,
+      "compressed_bytes": 3431
+    },
+    {
+      "name": "S2_refl_20171128_b5_8a_12.tif.xml",
+      "bytes": 690,
+      "compressed_bytes": 360
+    },
+    {
+      "name": "S2_refl_20171228_b5_8a_12.aux",
+      "bytes": 6099,
+      "compressed_bytes": 1272
+    },
+    {
+      "name": "S2_refl_20171228_b5_8a_12.tif",
+      "bytes": 50766654,
+      "compressed_bytes": 39045018
+    },
+    {
+      "name": "S2_refl_20171228_b5_8a_12.tif.aux.xml",
+      "bytes": 10748,
+      "compressed_bytes": 3024
+    },
+    {
+      "name": "S2_refl_20171228_b5_8a_12.tif.xml",
+      "bytes": 690,
+      "compressed_bytes": 358
+    },
+    {
+      "name": "thomas_s2_20171128_21071228_dnbr.aux",
+      "bytes": 12666,
+      "compressed_bytes": 2560
+    },
+    {
+      "name": "thomas_s2_20171128_21071228_dnbr.rrd",
+      "bytes": 11790470,
+      "compressed_bytes": 10018393
+    },
+    {
+      "name": "thomas_s2_20171128_21071228_dnbr.tif",
+      "bytes": 41945032,
+      "compressed_bytes": 30045206
+    }
+  ],
+  "members": [
+    {
+      "name": "thomas_s2_20171128_21071228_dnbr.tif",
+      "local": null,
+      "sha256": "7b6021fe757402376a2a1893786515bb983f2b695b04738986ba9c5264bbf140"
+    }
+  ]
+}

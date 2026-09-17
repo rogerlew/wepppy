@@ -1,0 +1,889 @@
+{
+  "url": "https://landslides.usgs.gov/static/landslides-realtime/fires/20171204_thomas/PostFireDebrisFlowEstimates.zip",
+  "nested": "thm2017_dfestimates_utm.zip",
+  "archive_bytes": 57315781,
+  "transferred_bytes": 16950,
+  "inventory": [
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000001.gdbindexes",
+      "bytes": 110,
+      "compressed_bytes": 80
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000001.gdbtable",
+      "bytes": 1242,
+      "compressed_bytes": 355
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000001.gdbtablx",
+      "bytes": 5152,
+      "compressed_bytes": 118
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000001.TablesByName.atx",
+      "bytes": 12310,
+      "compressed_bytes": 458
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000002.gdbtable",
+      "bytes": 2055,
+      "compressed_bytes": 641
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000002.gdbtablx",
+      "bytes": 5152,
+      "compressed_bytes": 133
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000003.gdbindexes",
+      "bytes": 42,
+      "compressed_bytes": 33
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000003.gdbtable",
+      "bytes": 1551,
+      "compressed_bytes": 545
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000003.gdbtablx",
+      "bytes": 5152,
+      "compressed_bytes": 44
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000004.CatItemsByPhysicalName.atx",
+      "bytes": 4118,
+      "compressed_bytes": 299
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000004.CatItemsByType.atx",
+      "bytes": 4118,
+      "compressed_bytes": 177
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000004.FDO_UUID.atx",
+      "bytes": 4118,
+      "compressed_bytes": 612
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000004.freelist",
+      "bytes": 65880,
+      "compressed_bytes": 1272
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000004.gdbindexes",
+      "bytes": 310,
+      "compressed_bytes": 131
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000004.gdbtable",
+      "bytes": 2500859,
+      "compressed_bytes": 161127
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000004.gdbtablx",
+      "bytes": 5152,
+      "compressed_bytes": 148
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000004.spx",
+      "bytes": 471062,
+      "compressed_bytes": 8315
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000005.CatItemTypesByName.atx",
+      "bytes": 12310,
+      "compressed_bytes": 531
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000005.CatItemTypesByParentTypeID.atx",
+      "bytes": 4118,
+      "compressed_bytes": 280
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000005.CatItemTypesByUUID.atx",
+      "bytes": 4118,
+      "compressed_bytes": 871
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000005.gdbindexes",
+      "bytes": 296,
+      "compressed_bytes": 114
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000005.gdbtable",
+      "bytes": 1803,
+      "compressed_bytes": 1122
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000005.gdbtablx",
+      "bytes": 5152,
+      "compressed_bytes": 129
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000006.CatRelsByDestinationID.atx",
+      "bytes": 4118,
+      "compressed_bytes": 564
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000006.CatRelsByOriginID.atx",
+      "bytes": 4118,
+      "compressed_bytes": 127
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000006.CatRelsByType.atx",
+      "bytes": 4118,
+      "compressed_bytes": 124
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000006.FDO_UUID.atx",
+      "bytes": 4118,
+      "compressed_bytes": 563
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000006.gdbindexes",
+      "bytes": 318,
+      "compressed_bytes": 128
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000006.gdbtable",
+      "bytes": 1723,
+      "compressed_bytes": 965
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000006.gdbtablx",
+      "bytes": 5152,
+      "compressed_bytes": 92
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000007.CatRelTypesByBackwardLabel.atx",
+      "bytes": 4118,
+      "compressed_bytes": 324
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000007.CatRelTypesByDestItemTypeID.atx",
+      "bytes": 4118,
+      "compressed_bytes": 306
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000007.CatRelTypesByForwardLabel.atx",
+      "bytes": 4118,
+      "compressed_bytes": 261
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000007.CatRelTypesByName.atx",
+      "bytes": 4118,
+      "compressed_bytes": 322
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000007.CatRelTypesByOriginItemTypeID.atx",
+      "bytes": 4118,
+      "compressed_bytes": 388
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000007.CatRelTypesByUUID.atx",
+      "bytes": 4118,
+      "compressed_bytes": 492
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000007.gdbindexes",
+      "bytes": 602,
+      "compressed_bytes": 173
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000007.gdbtable",
+      "bytes": 2504,
+      "compressed_bytes": 1309
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000007.gdbtablx",
+      "bytes": 5152,
+      "compressed_bytes": 87
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000009.freelist",
+      "bytes": 581976,
+      "compressed_bytes": 213680
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000009.gdbindexes",
+      "bytes": 116,
+      "compressed_bytes": 67
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000009.gdbtable",
+      "bytes": 15080847,
+      "compressed_bytes": 5721828
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000009.gdbtablx",
+      "bytes": 220192,
+      "compressed_bytes": 137085
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000009.spx",
+      "bytes": 958486,
+      "compressed_bytes": 208712
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000000a.freelist",
+      "bytes": 4440,
+      "compressed_bytes": 50
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000000a.gdbindexes",
+      "bytes": 116,
+      "compressed_bytes": 67
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000000a.gdbtable",
+      "bytes": 2559464,
+      "compressed_bytes": 552867
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000000a.gdbtablx",
+      "bytes": 10272,
+      "compressed_bytes": 4764
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000000a.spx",
+      "bytes": 40982,
+      "compressed_bytes": 4874
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000000b.freelist",
+      "bytes": 557400,
+      "compressed_bytes": 206461
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000000b.gdbindexes",
+      "bytes": 116,
+      "compressed_bytes": 67
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000000b.gdbtable",
+      "bytes": 15142469,
+      "compressed_bytes": 5809448
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000000b.gdbtablx",
+      "bytes": 220192,
+      "compressed_bytes": 137346
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000000b.spx",
+      "bytes": 958486,
+      "compressed_bytes": 208712
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000000c.freelist",
+      "bytes": 4440,
+      "compressed_bytes": 50
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000000c.gdbindexes",
+      "bytes": 116,
+      "compressed_bytes": 67
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000000c.gdbtable",
+      "bytes": 2562494,
+      "compressed_bytes": 553663
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000000c.gdbtablx",
+      "bytes": 10272,
+      "compressed_bytes": 4765
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000000c.spx",
+      "bytes": 40982,
+      "compressed_bytes": 4874
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000000d.freelist",
+      "bytes": 541016,
+      "compressed_bytes": 199147
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000000d.gdbindexes",
+      "bytes": 116,
+      "compressed_bytes": 67
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000000d.gdbtable",
+      "bytes": 15102347,
+      "compressed_bytes": 5862913
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000000d.gdbtablx",
+      "bytes": 220192,
+      "compressed_bytes": 137191
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000000d.spx",
+      "bytes": 958486,
+      "compressed_bytes": 208712
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000000e.freelist",
+      "bytes": 4440,
+      "compressed_bytes": 50
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000000e.gdbindexes",
+      "bytes": 116,
+      "compressed_bytes": 67
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000000e.gdbtable",
+      "bytes": 2564944,
+      "compressed_bytes": 553981
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000000e.gdbtablx",
+      "bytes": 10272,
+      "compressed_bytes": 4777
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000000e.spx",
+      "bytes": 40982,
+      "compressed_bytes": 4874
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000000f.freelist",
+      "bytes": 541016,
+      "compressed_bytes": 199999
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000000f.gdbindexes",
+      "bytes": 116,
+      "compressed_bytes": 67
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000000f.gdbtable",
+      "bytes": 15146329,
+      "compressed_bytes": 5906134
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000000f.gdbtablx",
+      "bytes": 220192,
+      "compressed_bytes": 137122
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000000f.spx",
+      "bytes": 958486,
+      "compressed_bytes": 208712
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000010.freelist",
+      "bytes": 4440,
+      "compressed_bytes": 50
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000010.gdbindexes",
+      "bytes": 116,
+      "compressed_bytes": 67
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000010.gdbtable",
+      "bytes": 2566317,
+      "compressed_bytes": 554022
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000010.gdbtablx",
+      "bytes": 10272,
+      "compressed_bytes": 4764
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000010.spx",
+      "bytes": 40982,
+      "compressed_bytes": 4874
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000011.freelist",
+      "bytes": 553304,
+      "compressed_bytes": 205985
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000011.gdbindexes",
+      "bytes": 116,
+      "compressed_bytes": 67
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000011.gdbtable",
+      "bytes": 15328124,
+      "compressed_bytes": 5946523
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000011.gdbtablx",
+      "bytes": 220192,
+      "compressed_bytes": 137138
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000011.spx",
+      "bytes": 958486,
+      "compressed_bytes": 208712
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000012.freelist",
+      "bytes": 4440,
+      "compressed_bytes": 50
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000012.gdbindexes",
+      "bytes": 116,
+      "compressed_bytes": 67
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000012.gdbtable",
+      "bytes": 2567571,
+      "compressed_bytes": 553887
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000012.gdbtablx",
+      "bytes": 10272,
+      "compressed_bytes": 4767
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000012.spx",
+      "bytes": 40982,
+      "compressed_bytes": 4874
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000013.freelist",
+      "bytes": 569688,
+      "compressed_bytes": 213226
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000013.gdbindexes",
+      "bytes": 116,
+      "compressed_bytes": 67
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000013.gdbtable",
+      "bytes": 15542728,
+      "compressed_bytes": 5975525
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000013.gdbtablx",
+      "bytes": 220192,
+      "compressed_bytes": 137026
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000013.spx",
+      "bytes": 958486,
+      "compressed_bytes": 208712
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000014.freelist",
+      "bytes": 4440,
+      "compressed_bytes": 50
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000014.gdbindexes",
+      "bytes": 116,
+      "compressed_bytes": 67
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000014.gdbtable",
+      "bytes": 2568591,
+      "compressed_bytes": 553441
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000014.gdbtablx",
+      "bytes": 10272,
+      "compressed_bytes": 4769
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000014.spx",
+      "bytes": 40982,
+      "compressed_bytes": 4874
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000015.freelist",
+      "bytes": 586072,
+      "compressed_bytes": 219256
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000015.gdbindexes",
+      "bytes": 116,
+      "compressed_bytes": 67
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000015.gdbtable",
+      "bytes": 15678797,
+      "compressed_bytes": 6011519
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000015.gdbtablx",
+      "bytes": 220192,
+      "compressed_bytes": 136938
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000015.spx",
+      "bytes": 958486,
+      "compressed_bytes": 208712
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000016.freelist",
+      "bytes": 4440,
+      "compressed_bytes": 50
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000016.gdbindexes",
+      "bytes": 116,
+      "compressed_bytes": 67
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000016.gdbtable",
+      "bytes": 2569160,
+      "compressed_bytes": 553172
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000016.gdbtablx",
+      "bytes": 10272,
+      "compressed_bytes": 4763
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000016.spx",
+      "bytes": 40982,
+      "compressed_bytes": 4874
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000017.freelist",
+      "bytes": 602456,
+      "compressed_bytes": 225537
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000017.gdbindexes",
+      "bytes": 116,
+      "compressed_bytes": 67
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000017.gdbtable",
+      "bytes": 15833152,
+      "compressed_bytes": 5987740
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000017.gdbtablx",
+      "bytes": 220192,
+      "compressed_bytes": 136970
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000017.spx",
+      "bytes": 958486,
+      "compressed_bytes": 208712
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000018.freelist",
+      "bytes": 4440,
+      "compressed_bytes": 50
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000018.gdbindexes",
+      "bytes": 116,
+      "compressed_bytes": 67
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000018.gdbtable",
+      "bytes": 2569429,
+      "compressed_bytes": 552833
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000018.gdbtablx",
+      "bytes": 10272,
+      "compressed_bytes": 4773
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000018.spx",
+      "bytes": 40982,
+      "compressed_bytes": 4874
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000019.gdbindexes",
+      "bytes": 116,
+      "compressed_bytes": 67
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000019.gdbtable",
+      "bytes": 1479,
+      "compressed_bytes": 863
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000019.gdbtablx",
+      "bytes": 5152,
+      "compressed_bytes": 38
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a00000019.spx",
+      "bytes": 4118,
+      "compressed_bytes": 67
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000001a.gdbindexes",
+      "bytes": 116,
+      "compressed_bytes": 67
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000001a.gdbtable",
+      "bytes": 85309,
+      "compressed_bytes": 80689
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000001a.gdbtablx",
+      "bytes": 5152,
+      "compressed_bytes": 37
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000001a.spx",
+      "bytes": 4118,
+      "compressed_bytes": 60
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000001b.gdbindexes",
+      "bytes": 116,
+      "compressed_bytes": 67
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000001b.gdbtable",
+      "bytes": 1755,
+      "compressed_bytes": 854
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000001b.gdbtablx",
+      "bytes": 5152,
+      "compressed_bytes": 38
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000001b.spx",
+      "bytes": 4118,
+      "compressed_bytes": 39
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000001c.gdbindexes",
+      "bytes": 116,
+      "compressed_bytes": 67
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000001c.gdbtable",
+      "bytes": 72507,
+      "compressed_bytes": 27705
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000001c.gdbtablx",
+      "bytes": 10272,
+      "compressed_bytes": 3188
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000001c.spx",
+      "bytes": 28694,
+      "compressed_bytes": 4262
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000001d.gdbindexes",
+      "bytes": 116,
+      "compressed_bytes": 67
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000001d.gdbtable",
+      "bytes": 476050,
+      "compressed_bytes": 183208
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000001d.gdbtablx",
+      "bytes": 25632,
+      "compressed_bytes": 9678
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/a0000001d.spx",
+      "bytes": 106518,
+      "compressed_bytes": 22197
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/gdb",
+      "bytes": 4,
+      "compressed_bytes": 6
+    },
+    {
+      "name": "thm2017_dfestimates_utm.gdb/timestamps",
+      "bytes": 400,
+      "compressed_bytes": 31
+    },
+    {
+      "name": "PostFireDFEstimates_README.pdf",
+      "bytes": 484767,
+      "compressed_bytes": 465357
+    },
+    {
+      "name": "thm2017_M1_XMLFiles/thm2017_analysis_extent_feat.xml",
+      "bytes": 7620,
+      "compressed_bytes": 2585
+    },
+    {
+      "name": "thm2017_M1_XMLFiles/thm2017_basinpt_feat.xml",
+      "bytes": 6101,
+      "compressed_bytes": 2273
+    },
+    {
+      "name": "thm2017_M1_XMLFiles/thm2017_Basin_DFPredictions_15min_12mmh.xml",
+      "bytes": 20291,
+      "compressed_bytes": 4951
+    },
+    {
+      "name": "thm2017_M1_XMLFiles/thm2017_Basin_DFPredictions_15min_16mmh.xml",
+      "bytes": 20291,
+      "compressed_bytes": 4948
+    },
+    {
+      "name": "thm2017_M1_XMLFiles/thm2017_Basin_DFPredictions_15min_20mmh.xml",
+      "bytes": 20291,
+      "compressed_bytes": 4948
+    },
+    {
+      "name": "thm2017_M1_XMLFiles/thm2017_Basin_DFPredictions_15min_24mmh.xml",
+      "bytes": 20291,
+      "compressed_bytes": 4948
+    },
+    {
+      "name": "thm2017_M1_XMLFiles/thm2017_Basin_DFPredictions_15min_28mmh.xml",
+      "bytes": 20291,
+      "compressed_bytes": 4948
+    },
+    {
+      "name": "thm2017_M1_XMLFiles/thm2017_Basin_DFPredictions_15min_32mmh.xml",
+      "bytes": 20291,
+      "compressed_bytes": 4948
+    },
+    {
+      "name": "thm2017_M1_XMLFiles/thm2017_Basin_DFPredictions_15min_36mmh.xml",
+      "bytes": 20291,
+      "compressed_bytes": 4948
+    },
+    {
+      "name": "thm2017_M1_XMLFiles/thm2017_Basin_DFPredictions_15min_40mmh.xml",
+      "bytes": 20291,
+      "compressed_bytes": 4948
+    },
+    {
+      "name": "thm2017_M1_XMLFiles/thm2017_centroid_feat.xml",
+      "bytes": 6928,
+      "compressed_bytes": 2496
+    },
+    {
+      "name": "thm2017_M1_XMLFiles/thm2017_perim_feat.xml",
+      "bytes": 7702,
+      "compressed_bytes": 2606
+    },
+    {
+      "name": "thm2017_M1_XMLFiles/thm2017_Segment_DFPredictions_15min_12mmh.xml",
+      "bytes": 20050,
+      "compressed_bytes": 4930
+    },
+    {
+      "name": "thm2017_M1_XMLFiles/thm2017_Segment_DFPredictions_15min_16mmh.xml",
+      "bytes": 20050,
+      "compressed_bytes": 4930
+    },
+    {
+      "name": "thm2017_M1_XMLFiles/thm2017_Segment_DFPredictions_15min_20mmh.xml",
+      "bytes": 20050,
+      "compressed_bytes": 4931
+    },
+    {
+      "name": "thm2017_M1_XMLFiles/thm2017_Segment_DFPredictions_15min_24mmh.xml",
+      "bytes": 20050,
+      "compressed_bytes": 4931
+    },
+    {
+      "name": "thm2017_M1_XMLFiles/thm2017_Segment_DFPredictions_15min_28mmh.xml",
+      "bytes": 20050,
+      "compressed_bytes": 4931
+    },
+    {
+      "name": "thm2017_M1_XMLFiles/thm2017_Segment_DFPredictions_15min_32mmh.xml",
+      "bytes": 20050,
+      "compressed_bytes": 4931
+    },
+    {
+      "name": "thm2017_M1_XMLFiles/thm2017_Segment_DFPredictions_15min_36mmh.xml",
+      "bytes": 20050,
+      "compressed_bytes": 4931
+    },
+    {
+      "name": "thm2017_M1_XMLFiles/thm2017_Segment_DFPredictions_15min_40mmh.xml",
+      "bytes": 20050,
+      "compressed_bytes": 4931
+    },
+    {
+      "name": "thm2017_M1_XMLFiles/thm2017_watchstream_feat.xml",
+      "bytes": 9730,
+      "compressed_bytes": 3382
+    },
+    {
+      "name": "Estimates_Symbology/Basins_CombHazlCl.lyr",
+      "bytes": 10752,
+      "compressed_bytes": 2551
+    },
+    {
+      "name": "Estimates_Symbology/Basins_ProbCl.lyr",
+      "bytes": 11264,
+      "compressed_bytes": 2665
+    },
+    {
+      "name": "Estimates_Symbology/Basins_VolCl.lyr",
+      "bytes": 11264,
+      "compressed_bytes": 2636
+    },
+    {
+      "name": "Estimates_Symbology/Basin_CombHazlCl.lyr",
+      "bytes": 10752,
+      "compressed_bytes": 2551
+    },
+    {
+      "name": "Estimates_Symbology/Basin_ProbCl.lyr",
+      "bytes": 11264,
+      "compressed_bytes": 2665
+    },
+    {
+      "name": "Estimates_Symbology/Basin_VolCl.lyr",
+      "bytes": 11264,
+      "compressed_bytes": 2636
+    },
+    {
+      "name": "Estimates_Symbology/PourPt.lyr",
+      "bytes": 7680,
+      "compressed_bytes": 1887
+    },
+    {
+      "name": "Estimates_Symbology/Segments_CombHazlCl.lyr",
+      "bytes": 10240,
+      "compressed_bytes": 2478
+    },
+    {
+      "name": "Estimates_Symbology/Segments_ProbCl.lyr",
+      "bytes": 10752,
+      "compressed_bytes": 2580
+    },
+    {
+      "name": "Estimates_Symbology/Segments_VolCl.lyr",
+      "bytes": 10752,
+      "compressed_bytes": 2557
+    },
+    {
+      "name": "Estimates_Symbology/Segment_CombHazlCl.lyr",
+      "bytes": 10240,
+      "compressed_bytes": 2478
+    },
+    {
+      "name": "Estimates_Symbology/Segment_ProbCl.lyr",
+      "bytes": 10752,
+      "compressed_bytes": 2580
+    },
+    {
+      "name": "Estimates_Symbology/Segment_VolCl.lyr",
+      "bytes": 10752,
+      "compressed_bytes": 2557
+    }
+  ],
+  "members": []
+}
