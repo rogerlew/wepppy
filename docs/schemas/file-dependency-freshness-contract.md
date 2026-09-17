@@ -216,3 +216,21 @@ content rereads and meet the existing sub-millisecond per-file digest budget;
 cold/changed loads may hash their source. Retain bounded DuckDB/PyArrow paging
 and upstream non-lazy endpoint delegation. Verify launch/page error presentation
 with the actual D-Tale UI, including same-schema and changed-schema source edits.
+
+## 2026-09-17 active CLI hard-link amendment
+
+Owner requested repair after concurrent WEPP preparation superseded an M3 job
+with identical source bytes. Implementation pending this checkpoint. This narrow
+amendment supersedes strict active-worker equality only for `files.active_cli`
+ctime-only drift. At admission, source-preparation rebase and pre/locked
+publication, unchanged CLI path, size and mtime may remain equivalent when the
+admission snapshot contains a valid SHA-256 and a fresh uncached descriptor-bound
+read proves those bytes unchanged. Verify the read's observed file generation
+still matches the current snapshot; an unstable read or path swap fails closed.
+A hash cache hit alone cannot authorize this exception. Hashless legacy inputs,
+other source metadata, all selections and owner/attempt checks remain strict.
+Current new-snapshot hash maps, when present, must remain identical as well.
+The worker must not fabricate an old digest, rebase an actual changed input or
+weaken result-artifact/SQLite publication guards. Semantic/parsed equality is
+not sufficient. Hard-link creation/removal outside the coherent read window is
+ordinary valid behavior; mutation during verification still fails explicitly.

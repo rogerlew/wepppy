@@ -178,3 +178,14 @@ for ordinary source files and accepted artifacts through the shared production
 workflow. An unchanged climate hard link must not alone stale a newly accepted
 assessment. Soil/SQLite dependency snapshots remain governed by their existing
 coherent-snapshot contract and are separately inventoried in the freshness audit.
+
+## Active CLI hard-link exception — 2026-09-17
+
+Implementation pending checkpoint. The active CLI amendment in the
+[file dependency freshness contract](../../../../../docs/schemas/file-dependency-freshness-contract.md#2026-09-17-active-cli-hard-link-amendment)
+supersedes strict worker source equality only for unchanged active-CLI ctime
+drift proven by a fresh coherent uncached hash. It applies to M1/M3 admission,
+source preparation and pre/locked publication. All other source identities,
+owner/selection checks, SQLite coherence and result-artifact guards stay strict.
+This permits ordinary concurrent WEPP hard-link preparation without accepting
+changed climate bytes or inventing a hash for legacy records.

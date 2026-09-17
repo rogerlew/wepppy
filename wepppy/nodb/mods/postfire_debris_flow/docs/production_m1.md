@@ -683,3 +683,14 @@ worker publication, source association, engine identity and SQLite/soil coherent
 snapshot obligations remain unchanged. The rationale is that WEPP preparation
 creates a hard link to an unchanged CLI and thereby changes its ctime. Hash
 revalidation must also detect equal-size writes whose mtime was restored.
+
+## Active CLI hard-link exception — 2026-09-17
+
+Implementation pending checkpoint. The active CLI amendment in the
+[file dependency freshness contract](../../../../../docs/schemas/file-dependency-freshness-contract.md#2026-09-17-active-cli-hard-link-amendment)
+supersedes strict worker source equality only for unchanged active-CLI ctime
+drift proven by a fresh coherent uncached hash. It applies to M1/M3 admission,
+source preparation and pre/locked publication. All other source identities,
+owner/selection checks, SQLite coherence and result-artifact guards stay strict.
+This permits ordinary concurrent WEPP hard-link preparation without accepting
+changed climate bytes or inventing a hash for legacy records.

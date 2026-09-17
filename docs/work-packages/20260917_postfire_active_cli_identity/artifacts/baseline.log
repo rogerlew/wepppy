@@ -1,0 +1,158 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/mods/test_postfire_debris_flow_runtime_m3.py -k 'wepp_hardlink and results' --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 44 items / 42 deselected / 2 selected
+
+tests/nodb/mods/test_postfire_debris_flow_runtime_m3.py F
+
+=================================== FAILURES ===================================
+_ test_wepp_hardlink_during_m3_preserves_unchanged_climate[western-key7-results] _
+
+project = (PosixPath('/tmp/pytest-of-unknown/pytest-0/test_wepp_hardlink_during_m3_p0'), PosixPath('/tmp/pytest-of-unknown/pytes...g_m3_p0/dem/wbt/bound.tif'), PosixPath('/tmp/pytest-of-unknown/pytest-0/test_wepp_hardlink_during_m3_p0/lineage.json'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7cc0f02f5970>
+stage = 'results'
+
+    @pytest.mark.parametrize('stage', ['queued', 'preparation', 'results', 'locked'])
+    def test_wepp_hardlink_during_m3_preserves_unchanged_climate(project, monkeypatch, stage):
+        """Actual WEPP materialization must not supersede unchanged active inputs."""
+        from wepppy.runtime_paths.wepp_inputs import copy_input_file
+        from wepppy.nodb.mods.postfire_debris_flow import source_acquisition
+        wd, dem, mask, catalog = project
+        linked = wd/'wepp/runs/pw0.cli'
+        mutations = []
+    
+        def materialize():
+            copy_input_file(str(wd), 'climate/owner.cli', linked)
+            assert linked.stat().st_ino == (wd/'climate/owner.cli').stat().st_ino
+            mutations.append(stage)
+    
+        def acquire(*args):
+            receipt = prepare_local_sources(wd, dem, mask, collection_catalog=catalog)
+            if stage == 'preparation':
+                materialize()
+            return receipt
+    
+        monkeypatch.setattr(source_acquisition, 'acquire_sources', acquire)
+        if stage != 'preparation':
+            receipt = prepare_local_sources(wd, dem, mask, collection_catalog=catalog)
+            activate_sources(wd, receipt, expected_sha256=io.digest(receipt))
+        identity = enqueue_m3(wd)
+        if stage == 'queued':
+            materialize()
+        build = p.build_results
+    
+        def results(*args, **kwargs):
+            result = build(*args, **kwargs)
+            if stage == 'results':
+                materialize()
+            return result
+    
+        monkeypatch.setattr(p, 'build_results', results)
+        owner = p.mutable(wd)
+        change = owner.change
+    
+        def locked(callback):
+            if stage == 'locked' and callback.__name__ == 'publish':
+                def wrapped(state):
+                    materialize()
+                    return callback(state)
+                return change(wrapped)
+            return change(callback)
+    
+        monkeypatch.setattr(owner, 'change', locked)
+>       p.execute_m3(wd, identity)
+
+tests/nodb/mods/test_postfire_debris_flow_runtime_m3.py:380: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+wd = PosixPath('/tmp/pytest-of-unknown/pytest-0/test_wepp_hardlink_during_m3_p0')
+identity = 'bcdb617b32784910909ffd1faa6c71aa'
+
+    def execute_m3(wd, identity):
+        """Prepare absent bounded sources and execute M3; never rebuild soils."""
+        state = state_at(wd)
+        attempt = state['run_attempt']
+        if not attempt or attempt['id'] != identity or attempt.get('model') != 'M3':
+            raise WorkflowError('superseded', 'M3 run was superseded.', 409)
+        update_attempt(wd, 'run_attempt', identity, phase='running')
+        frequency = attempt['snapshot']['frequency']
+        eligible, readonly, checks, paths, snapshot = sources(wd, frequency=frequency, model='M3')
+        expected = {'inputs': snapshot, 'dnbr': None, 'frequency': frequency}
+        if not eligible or readonly or expected != attempt['snapshot'] or not all(
+                value for key, value in checks.items() if key != 'noaa' or frequency == 'noaa'):
+            raise WorkflowError('superseded', 'Required project data changed. Run the model again.', 409)
+        from .run_preparation import prepare_for_run
+        paths, expected = prepare_for_run(wd, identity, expected, paths)
+        snapshot = expected['inputs']
+        from whitebox_tools import WhiteboxTools
+        from .m3_integration import M3Inputs, build_m3_predictors
+        from .production_soils import verify_soil
+        from wepppy.nodb.core import Ron
+        tool = WhiteboxTools()
+        binary = Path(tool.exe_path)/tool.exe_name
+        root = directory(wd,identity); root.mkdir(exist_ok=True)
+        all_paths = set(paths.values())
+        for path in tuple(all_paths):
+            safe(wd,path)
+            if path.suffix.lower() in ('.tif','.tiff'):
+                all_paths.update(companions(path))
+        hashes = {str(path.absolute()):digest(path) for path in all_paths}
+        build_m3_predictors(M3Inputs(Path(wd),paths['dem'],paths['pointer'],paths['mask'],paths['outlet'],paths['sbs'],
+            hashes,digest(binary),'real',sbs_alignment='nearest'),root/'predictors',wbt_executable=binary)
+        predictor = root/'predictors/manifest.json'
+        mode = snapshot['selections']['climate_mode']
+        build_results(RainfallInputs(predictor,paths['cli'],{**hashes,str(predictor):digest(predictor)},
+            Ron.getInstance(str(wd)).runid,mode,'simulation_labels' if mode in ('Vanilla','Future','PRISM') else 'calendar',
+            identity,noaa_csv=paths.get('noaa')),root/'results',frequency_source=frequency,
+            return_intervals=(1,2,5,10),durations=(15,30,60),target_probabilities=(.5,),expected_model='M3')
+        verify_soil(wd,root/'predictors',root/'soil_final_verification')
+        if any(digest(path) != checksum for path,checksum in hashes.items()) or not _current_authority(wd,frequency,'M3',snapshot):
+>           raise WorkflowError('superseded','Inputs changed. Run the model again.',409)
+E           wepppy.nodb.mods.postfire_debris_flow.production.WorkflowError: Inputs changed. Run the model again.
+
+wepppy/nodb/mods/postfire_debris_flow/production.py:790: WorkflowError
+---------------------------- Captured stderr setup -----------------------------
+2026-09-17 18:31:29 [INFO] wepppy.run.test_wepp_hardlink_during_m3_p0.disturbed: disturbed.on(TriggerEvents.ON_INIT_FINISH)
+2026-09-17 18:31:29 [INFO] wepppy.run.test_wepp_hardlink_during_m3_p0.soils: soils.dump_soils_parquet()
+2026-09-17 18:31:29 [INFO] wepppy.run.test_wepp_hardlink_during_m3_p0.climate: Exported CLI parquet with peak intensities
+2026-09-17 18:31:29 [INFO] wepppy.run.test_wepp_hardlink_during_m3_p0.climate: Exported CLI parquet with peak intensities
+------------------------------ Captured log setup ------------------------------
+WARNING  wepppy.weppcloud.app:agent_auth.py:40 AGENT_JWT_SECRET not configured; falling back to SECRET_KEY for agent JWTs
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+tests/nodb/mods/test_postfire_debris_flow_runtime_m3.py::test_wepp_hardlink_during_m3_preserves_unchanged_climate[western-key7-results]
+  /opt/venv/lib/python3.12/site-packages/awesome_codename/data/__init__.py:1: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    from pkg_resources import resource_string
+
+tests/nodb/mods/test_postfire_debris_flow_runtime_m3.py::test_wepp_hardlink_during_m3_preserves_unchanged_climate[western-key7-results]
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+tests/nodb/mods/test_postfire_debris_flow_runtime_m3.py::test_wepp_hardlink_during_m3_preserves_unchanged_climate[western-key7-results]
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The ConfirmRegisterForm and the confirm_register_form option are deprecated as of version 5.6.0 and will be removed in a future release.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+tests/nodb/mods/test_postfire_debris_flow_runtime_m3.py::test_wepp_hardlink_during_m3_preserves_unchanged_climate[western-key7-results]
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The RegisterForm is deprecated as of version 5.6.0 and will be removed in a future release. The form RegisterFormV2 should be sub-classed instead.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+tests/nodb/mods/test_postfire_debris_flow_runtime_m3.py::test_wepp_hardlink_during_m3_preserves_unchanged_climate[western-key7-results]
+tests/nodb/mods/test_postfire_debris_flow_runtime_m3.py::test_wepp_hardlink_during_m3_preserves_unchanged_climate[western-key7-results]
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/nodb/mods/test_postfire_debris_flow_runtime_m3.py::test_wepp_hardlink_during_m3_preserves_unchanged_climate[western-key7-results]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+================ 1 failed, 42 deselected, 8 warnings in 20.16s =================

@@ -425,3 +425,14 @@ is the controlling amendment for new production M1.
 New M1 uses attempt-owned Kf preparation and schema 3; the shared bounded transport admits its fixed endpoint without changing THICK/SDA behavior.
 Earlier conflicting requirements remain the historical/legacy contract only
 once this checkpoint is accepted; do not reinterpret old accepted artifacts.
+
+## Active CLI hard-link exception — 2026-09-17
+
+Implementation pending checkpoint. The active CLI amendment in the
+[file dependency freshness contract](../../../../../docs/schemas/file-dependency-freshness-contract.md#2026-09-17-active-cli-hard-link-amendment)
+supersedes strict worker source equality only for unchanged active-CLI ctime
+drift proven by a fresh coherent uncached hash. It applies to M1/M3 admission,
+source preparation and pre/locked publication. All other source identities,
+owner/selection checks, SQLite coherence and result-artifact guards stay strict.
+This permits ordinary concurrent WEPP hard-link preparation without accepting
+changed climate bytes or inventing a hash for legacy records.
