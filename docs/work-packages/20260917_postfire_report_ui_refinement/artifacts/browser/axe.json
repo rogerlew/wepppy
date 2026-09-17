@@ -1,0 +1,231 @@
+{
+  "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/report/postfire_debris_flow/",
+  "timestamp": "2026-09-17T22:58:08.122Z",
+  "test_engine": {
+    "name": "axe-core",
+    "version": "4.11.2"
+  },
+  "violations": [],
+  "incomplete": [
+    {
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "node_count": 17,
+      "targets": [
+        [
+          "#pfr-duration"
+        ],
+        [
+          "text[y=\"255\"]"
+        ],
+        [
+          "text[y=\"205\"]"
+        ],
+        [
+          "text[y=\"155\"]"
+        ],
+        [
+          "text[y=\"105\"]"
+        ],
+        [
+          "text[y=\"55\"]"
+        ],
+        [
+          "text[x=\"65\"][y=\"270\"][text-anchor=\"middle\"]"
+        ],
+        [
+          "text[x=\"206.25\"]"
+        ],
+        [
+          "text[x=\"347.5\"]"
+        ],
+        [
+          "text[x=\"488.75\"]"
+        ]
+      ]
+    }
+  ],
+  "passes": [
+    {
+      "id": "aria-allowed-attr",
+      "impact": null,
+      "node_count": 121
+    },
+    {
+      "id": "aria-allowed-role",
+      "impact": null,
+      "node_count": 9
+    },
+    {
+      "id": "aria-command-name",
+      "impact": null,
+      "node_count": 4
+    },
+    {
+      "id": "aria-conditional-attr",
+      "impact": null,
+      "node_count": 121
+    },
+    {
+      "id": "aria-deprecated-role",
+      "impact": null,
+      "node_count": 9
+    },
+    {
+      "id": "aria-hidden-focus",
+      "impact": null,
+      "node_count": 1
+    },
+    {
+      "id": "aria-prohibited-attr",
+      "impact": null,
+      "node_count": 121
+    },
+    {
+      "id": "aria-required-attr",
+      "impact": null,
+      "node_count": 9
+    },
+    {
+      "id": "aria-roles",
+      "impact": null,
+      "node_count": 9
+    },
+    {
+      "id": "aria-valid-attr-value",
+      "impact": null,
+      "node_count": 121
+    },
+    {
+      "id": "aria-valid-attr",
+      "impact": null,
+      "node_count": 121
+    },
+    {
+      "id": "avoid-inline-spacing",
+      "impact": null,
+      "node_count": 5
+    },
+    {
+      "id": "button-name",
+      "impact": null,
+      "node_count": 111
+    },
+    {
+      "id": "color-contrast",
+      "impact": "serious",
+      "node_count": 595
+    },
+    {
+      "id": "definition-list",
+      "impact": null,
+      "node_count": 1
+    },
+    {
+      "id": "dlitem",
+      "impact": null,
+      "node_count": 8
+    },
+    {
+      "id": "duplicate-id-aria",
+      "impact": null,
+      "node_count": 11
+    },
+    {
+      "id": "empty-heading",
+      "impact": null,
+      "node_count": 6
+    },
+    {
+      "id": "empty-table-header",
+      "impact": null,
+      "node_count": 12
+    },
+    {
+      "id": "form-field-multiple-labels",
+      "impact": null,
+      "node_count": 5
+    },
+    {
+      "id": "heading-order",
+      "impact": null,
+      "node_count": 6
+    },
+    {
+      "id": "label-title-only",
+      "impact": null,
+      "node_count": 5
+    },
+    {
+      "id": "label",
+      "impact": null,
+      "node_count": 3
+    },
+    {
+      "id": "landmark-unique",
+      "impact": null,
+      "node_count": 5
+    },
+    {
+      "id": "link-name",
+      "impact": null,
+      "node_count": 5
+    },
+    {
+      "id": "list",
+      "impact": null,
+      "node_count": 1
+    },
+    {
+      "id": "listitem",
+      "impact": null,
+      "node_count": 5
+    },
+    {
+      "id": "nested-interactive",
+      "impact": null,
+      "node_count": 125
+    },
+    {
+      "id": "scope-attr-valid",
+      "impact": null,
+      "node_count": 12
+    },
+    {
+      "id": "select-name",
+      "impact": null,
+      "node_count": 2
+    },
+    {
+      "id": "summary-name",
+      "impact": null,
+      "node_count": 2
+    },
+    {
+      "id": "svg-img-alt",
+      "impact": null,
+      "node_count": 1
+    },
+    {
+      "id": "tabindex",
+      "impact": null,
+      "node_count": 115
+    },
+    {
+      "id": "table-duplicate-name",
+      "impact": null,
+      "node_count": 3
+    },
+    {
+      "id": "td-headers-attr",
+      "impact": null,
+      "node_count": 3
+    },
+    {
+      "id": "th-has-data-cells",
+      "impact": null,
+      "node_count": 3
+    }
+  ]
+}

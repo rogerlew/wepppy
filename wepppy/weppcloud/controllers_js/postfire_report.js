@@ -125,7 +125,7 @@
             summary.predictors.filter(function (predictor) { return !finite(predictor.value); }).forEach(function (predictor) {
                 notices.push("Unavailable input " + predictor.name + ": " + reason(predictor.reason) + ".");
             });
-            setText("[data-pfr-warnings]", notices.join(" "));
+            setText("[data-pfr-warnings]", notices.length ? notices.join(" ") : "None recorded.");
             var frequency = summary.frequency;
             var provenance = summary.rainfall_provenance || {};
             var subdaily = provenance.subdaily_origin === "modeled_disaggregated" ? " Event subdaily peaks are modeled/disaggregated rainfall, including events with calendar dates." : " Event subdaily rainfall origin was not recorded.";
@@ -191,16 +191,17 @@
             var maximum = Math.max.apply(null, points.concat(curvePoints).map(function (row) { return converted(row.intensity_mm_per_hour, intensity); }));
             if (maximum === 0) maximum = 1;
             var svg = svgNode("svg", {viewBox: "0 0 680 300", width: "100%", style: "max-width:56rem", "aria-label": payload.query.duration_minutes + "-minute rainfall scenarios; likelihood scale zero to one hundred percent", role: "group"});
+            var labelLayer = svgNode("g", {"class": "wc-chart-label-layer", "data-pfr-chart-labels": "", "aria-hidden": "true"});
             [0, 25, 50, 75, 100].forEach(function (percent) {
                 var y = 250 - percent * 2;
                 svg.appendChild(svgNode("line", {x1: 65, y1: y, x2: 630, y2: y, stroke: "currentColor", "stroke-opacity": ".2"}));
-                svg.appendChild(svgNode("text", {x: 55, y: y + 5, "text-anchor": "end", fill: "currentColor", "font-size": 13}, percent + "%"));
+                labelLayer.appendChild(svgNode("text", {x: 55, y: y + 5, "text-anchor": "end", "class": "wc-chart-label", "font-size": 13}, percent + "%"));
             });
             [0, 0.25, 0.5, 0.75, 1].forEach(function (fraction) {
-                svg.appendChild(svgNode("text", {x: 65 + fraction * 565, y: 270, "text-anchor": "middle", fill: "currentColor", "font-size": 13}, (fraction * maximum).toFixed(intensity.precision)));
+                labelLayer.appendChild(svgNode("text", {x: 65 + fraction * 565, y: 270, "text-anchor": "middle", "class": "wc-chart-label", "font-size": 13}, (fraction * maximum).toFixed(intensity.precision)));
             });
-            svg.appendChild(svgNode("text", {x: 345, y: 294, "text-anchor": "middle", fill: "currentColor", "font-size": 14}, "Peak rainfall intensity (" + intensity.key + ")"));
-            svg.appendChild(svgNode("text", {x: 65, y: 22, fill: "currentColor", "font-size": 14}, "Modeled likelihood · " + payload.query.duration_minutes + "-minute window"));
+            labelLayer.appendChild(svgNode("text", {x: 345, y: 294, "text-anchor": "middle", "class": "wc-chart-label", "font-size": 14}, "Peak rainfall intensity (" + intensity.key + ")"));
+            labelLayer.appendChild(svgNode("text", {x: 65, y: 22, "class": "wc-chart-label", "font-size": 14}, "Modeled likelihood · " + payload.query.duration_minutes + "-minute window"));
             if (curvePoints.length) {
                 svg.appendChild(svgNode("polyline", {points: curvePoints.map(function (row) {
                     return (65 + converted(row.intensity_mm_per_hour, intensity) / maximum * 565) + "," + (250 - row.probability * 200);
@@ -209,7 +210,7 @@
                     var p50x = 65 + converted(curve.p50.intensity_mm_per_hour, intensity) / maximum * 565;
                     svg.appendChild(svgNode("path", {d: "M " + p50x + " 142 l 8 8 l -8 8 l -8 -8 Z", fill: "currentColor", tabindex: 0, role: "img",
                         "data-pfr-p50": "", "aria-label": "P50: " + quantity(curve.p50.intensity_mm_per_hour, "mm/hour") + " " + intensity.key + ", 50% modeled likelihood"}));
-                    svg.appendChild(svgNode("text", {x: p50x + 10, y: 140, fill: "currentColor", "font-size": 13}, "P50"));
+                    labelLayer.appendChild(svgNode("text", {x: p50x + 10, y: 140, "class": "wc-chart-label", "font-size": 13}, "P50"));
                 }
             }
             rows.forEach(function (row, index) {
@@ -220,6 +221,7 @@
                     ", window rainfall " + quantity(row.rainfall_mm, "mm") + " " + unit("mm").key + ", likelihood " + probability(row.probability);
                 svg.appendChild(svgNode("circle", {cx: x, cy: y, r: 7, fill: "currentColor", stroke: "currentColor", tabindex: 0, role: "button", "aria-label": label, "aria-pressed": "false", "data-pfr-scenario": index}));
             });
+            svg.appendChild(labelLayer);
             chart.appendChild(svg);
         }
         function syncScenario() {
@@ -269,7 +271,7 @@
             unitsRow(body, ["", unit("mm/hour").key, unit("mm").key, unit("mm").key, "%"]);
             payload.events.rows.forEach(function (row) {
                 var tr = node("tr"); var cell = node("td");
-                cell.appendChild(node("button", dateLabel(row), {type: "button", "class": "pure-button pure-button-link", "data-pfr-event": row.event_id, "aria-expanded": "false"}));
+                cell.appendChild(node("button", dateLabel(row), {type: "button", "class": "pure-button pure-button-link wc-report-event-link", "data-pfr-event": row.event_id, "aria-expanded": "false"}));
                 cell.firstChild.disabled = loadingQuery;
                 tr.appendChild(cell);
                 [quantity(row.intensity_mm_per_hour, "mm/hour", row.reason), quantity(row.rainfall_mm, "mm", row.reason), quantity(row.precipitation_mm, "mm", row.reason), likelihood(row)].forEach(function (text) { tr.appendChild(node("td", text)); });

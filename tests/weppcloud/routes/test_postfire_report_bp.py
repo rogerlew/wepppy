@@ -195,3 +195,21 @@ def test_rendered_report_inheritance_suppresses_only_postfire_passive_unitizer_b
     assert 'id="postfire-report-seed"' in postfire
     assert 'data-pfr-field="duration"' in postfire
     assert '<option value="15" selected>15 minutes</option>' in postfire
+    assert 'class="wc-summary-pane" data-pfr-assessment-summary' in postfire
+    assert postfire.count('class="wc-summary-pane__item"') == 4
+    assert all(label in postfire for label in ('Assessment', 'Result status', 'Input coverage', 'Notices'))
+    assert 'class="pure-form pure-form-stacked wc-report-filter-form" data-pfr-filters' in postfire
+    assert 'class="wc-report-filter-fields" data-pfr-filter-fields' in postfire
+    for field_id, hook in (('pfr-minimum', 'min_probability'), ('pfr-year', 'year'),
+                           ('pfr-sort', 'sort'), ('pfr-descending', 'descending')):
+        assert f'id="{field_id}"' in postfire
+        assert f'data-pfr-field="{hook}"' in postfire
+    assert postfire.count('class="wc-field__control wc-field__control--number"') >= 2
+    assert 'min="0"' in postfire and 'max="100"' in postfire
+    assert 'step="any"' in postfire and 'step="1"' in postfire
+    assert all(f'<option value="{value}"' in postfire
+               for value in ('row_ordinal', 'rainfall_mm', 'probability'))
+    assert 'style="max-width: 34rem;"' in postfire
+    assert 'class="wc-choice wc-choice--checkbox"' in postfire
+    assert 'wc-button-row wc-report-filter-actions' in postfire
+    assert postfire.index('data-pfr-action="apply"') < postfire.index('data-pfr-action="reset"')

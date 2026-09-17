@@ -6,5 +6,5 @@ every theme, and rebuild the Storm events filters with canonical fields and
 spacing. Scientific calculations, queries, saved tables and report authorization
 remain unchanged.
 
-See the [active plan](prompts/active/postfire_report_ui_refinement_execplan.md)
+See the [completed plan](prompts/completed/postfire_report_ui_refinement_execplan.md)
 and [tracker](tracker.md).

@@ -511,7 +511,7 @@ leave scientific state and artifacts unchanged.
 
 ## 2026-09-17 presentation refinement
 
-Status: operator authorized; implementation conformance pending.
+Status: implemented and authenticated browser acceptance passed (2026-09-17).
 
 Render **Assessment summary** as the shared `wc-summary-pane` definition-list
 component. Give model/time/area, currentness, input coverage and notices explicit
@@ -541,6 +541,10 @@ all four filter hooks, decimal 0–100 minimum-likelihood bounds, integral year
 step, every sort option, descending checked and unchecked submissions,
 Apply-before-Reset order and unchanged query encoding. This amendment is
 presentation and accessibility only; no report API or scientific value changes.
+
+Event-date link buttons in striped result rows use a theme token that meets the
+AA text-contrast threshold against the row backgrounds in the default, light
+high-contrast and AA dark validation themes.
 
 Rationale: these changes align the report with familiar WEPPcloud components,
 keep dense plot labels readable across themes and restore predictable form

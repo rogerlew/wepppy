@@ -1,4 +1,6 @@
 {% extends "reports/_base_report.htm" %}
+{% import 'controls/_pure_macros.html' as ui with context %}
+{% from 'shared/console_macros.htm' import button_row %}
 {% block report_title %}Post-fire debris-flow likelihood{% endblock %}
 {% block report_unitizer_bootstrap %}{% endblock %}
 {% block report_content %}
@@ -18,10 +20,26 @@
   <div class="wc-stack" data-pfr-results hidden>
     <section class="wc-panel wc-stack-sm" aria-labelledby="pfr-summary-heading">
       <h2 id="pfr-summary-heading">Assessment summary</h2>
-      <p data-pfr-summary></p>
-      <p data-pfr-current></p>
-      <p data-pfr-coverage></p>
-      <p data-pfr-warnings></p>
+      <div class="wc-summary-pane" data-pfr-assessment-summary>
+        <dl class="wc-summary-pane__list">
+          <div class="wc-summary-pane__item">
+            <dt class="wc-summary-pane__term">Assessment</dt>
+            <dd class="wc-summary-pane__definition" data-pfr-summary></dd>
+          </div>
+          <div class="wc-summary-pane__item">
+            <dt class="wc-summary-pane__term">Result status</dt>
+            <dd class="wc-summary-pane__definition" data-pfr-current></dd>
+          </div>
+          <div class="wc-summary-pane__item">
+            <dt class="wc-summary-pane__term">Input coverage</dt>
+            <dd class="wc-summary-pane__definition" data-pfr-coverage></dd>
+          </div>
+          <div class="wc-summary-pane__item">
+            <dt class="wc-summary-pane__term">Notices</dt>
+            <dd class="wc-summary-pane__definition" data-pfr-warnings></dd>
+          </div>
+        </dl>
+      </div>
       <p>Likelihood is conditional on the rainfall shown and the modeled post-fire conditions. It is not the annual chance of a debris flow and does not predict where debris will travel. This is not an official warning or evacuation threshold.</p>
     </section>
     <section class="wc-panel wc-stack-sm" aria-labelledby="pfr-design-heading">
@@ -53,13 +71,44 @@
       <h2 id="pfr-events-heading">Storm events — <span data-pfr-window></span></h2>
       <p data-pfr-climate></p>
       <p>Every storm uses the same fixed post-fire conditions. A long climate record does not simulate landscape recovery. Total event rainfall is separate from rainfall in the selected window.</p>
-      <form class="pure-form" data-pfr-filters>
-        <label for="pfr-minimum">Minimum likelihood (%)</label> <input id="pfr-minimum" data-pfr-field="min_probability" type="number" min="0" max="100" step="any" aria-describedby="pfr-filter-help">
-        <label for="pfr-year">Year (original label)</label> <input id="pfr-year" data-pfr-field="year" type="number" step="1">
-        <label for="pfr-sort">Order by</label> <select id="pfr-sort" data-pfr-field="sort"><option value="row_ordinal">Original event order</option><option value="rainfall_mm">Rainfall in the window</option><option value="probability">Modeled likelihood</option></select>
-        <label><input data-pfr-field="descending" type="checkbox"> Descending</label>
-        <button type="submit" class="pure-button" data-pfr-action="apply">Apply filters</button>
-        <button type="button" class="pure-button pure-button-link" data-pfr-action="reset">Reset filters</button>
+      <form class="pure-form pure-form-stacked wc-report-filter-form" data-pfr-filters>
+        <div class="wc-report-filter-fields" data-pfr-filter-fields>
+          {{ ui.numeric_field(
+              'pfr-minimum',
+              'Minimum likelihood',
+              unit_label='%',
+              min=0,
+              max=100,
+              nullable=True,
+              attrs={'data-pfr-field': 'min_probability', 'step': 'any', 'aria-describedby': 'pfr-filter-help'},
+              max_width='34rem'
+          ) }}
+          {{ ui.numeric_field(
+              'pfr-year',
+              'Year (original label)',
+              nullable=True,
+              attrs={'data-pfr-field': 'year', 'step': '1'},
+              max_width='34rem'
+          ) }}
+          {{ ui.select_field(
+              'pfr-sort',
+              'Order by',
+              [('row_ordinal', 'Original event order'), ('rainfall_mm', 'Rainfall in the window'), ('probability', 'Modeled likelihood')],
+              selected='row_ordinal',
+              attrs={'data-pfr-field': 'sort'},
+              max_width='30rem'
+          ) }}
+          {{ ui.checkbox_field(
+              'pfr-descending',
+              'Descending',
+              attrs={'data-pfr-field': 'descending'},
+              max_width='30rem'
+          ) }}
+        </div>
+        {% call button_row(extra_class='wc-report-filter-actions') %}
+          <button type="submit" class="pure-button" data-pfr-action="apply">Apply filters</button>
+          <button type="button" class="pure-button pure-button-link" data-pfr-action="reset">Reset filters</button>
+        {% endcall %}
       </form>
       <p id="pfr-filter-help" class="wc-text-muted">Blank filters include all storms. A minimum likelihood excludes storms with unavailable likelihoods.</p>
       <p data-pfr-event-status role="status" aria-live="polite"></p>

@@ -26,6 +26,16 @@ function markup(payload) {
     // Use the actual report's markup, with only its Jinja shell/seed expressions removed.
     const template = fs.readFileSync(path.join(__dirname, "../../templates/reports/postfire_debris_flow/report.htm"), "utf8");
     document.body.innerHTML = template.replace(/\{%[\s\S]*?%\}/g, "").replace(/\{\{[\s\S]*?\}\}/g, "");
+    // Jinja macro output is covered by the rendered-template pytest. Supply the
+    // controls here so controller tests can exercise their preserved hooks.
+    const filterFields = document.querySelector("[data-pfr-filter-fields]");
+    if (filterFields && !filterFields.querySelector("[data-pfr-field=min_probability]")) {
+        filterFields.innerHTML = `
+            <div class="wc-field"><input id="pfr-minimum" class="wc-field__control wc-field__control--number" data-pfr-field="min_probability" type="number" min="0" max="100" step="any"></div>
+            <div class="wc-field"><input id="pfr-year" class="wc-field__control wc-field__control--number" data-pfr-field="year" type="number" step="1"></div>
+            <div class="wc-field"><select id="pfr-sort" class="wc-field__control" data-pfr-field="sort"><option value="row_ordinal">Original event order</option><option value="rainfall_mm">Rainfall in the window</option><option value="probability">Modeled likelihood</option></select></div>
+            <div class="wc-field wc-field--checkbox"><input id="pfr-descending" data-pfr-field="descending" type="checkbox"></div>`;
+    }
     document.getElementById("postfire-report-seed").textContent = JSON.stringify(payload);
 }
 const flush = () => new Promise(resolve => setTimeout(resolve, 0));
@@ -59,6 +69,11 @@ afterEach(() => {
 });
 
 test("accepted model, stale warning, fixed likelihood scale and all three thresholds", () => {
+    const summary = document.querySelector("[data-pfr-assessment-summary]");
+    expect(summary.matches(".wc-summary-pane")).toBe(true);
+    expect(summary.querySelector("dl").matches(".wc-summary-pane__list")).toBe(true);
+    expect(summary.querySelectorAll(".wc-summary-pane__item")).toHaveLength(4);
+    expect(Array.from(summary.querySelectorAll("dt")).map(term => term.textContent)).toEqual(["Assessment", "Result status", "Input coverage", "Notices"]);
     expect(document.querySelector("[data-pfr-summary]").textContent).toContain("M1");
     expect(document.querySelector("[data-pfr-current]").textContent).toContain("Inputs have changed");
     expect(document.querySelector("[data-pfr-chart]").textContent).toContain("100%");
@@ -66,6 +81,27 @@ test("accepted model, stale warning, fixed likelihood scale and all three thresh
     expect(document.querySelector("[data-pfr-body=design]").textContent).toContain("<0.1%");
     expect(document.querySelectorAll("[data-pfr-body=inverse] tr")).toHaveLength(4);
     expect(document.querySelector("[data-pfr-count]").textContent).toContain("of 101 matching storm events");
+    expect(document.querySelector("[data-pfr-event]").matches(".wc-report-event-link")).toBe(true);
+});
+
+test("assessment summary gives the notices definition an explicit empty-state value", () => {
+    const payload = seed(); payload.summary.area_km2 = 1;
+    markup(payload); window.PostfireReport.getInstance().bootstrap();
+    expect(document.querySelector("[data-pfr-warnings]").textContent).toBe("None recorded.");
+});
+
+test("chart text is in the pointer-transparent final layer above data marks", () => {
+    const svg = document.querySelector("[data-pfr-chart] svg");
+    const labels = svg.querySelector("[data-pfr-chart-labels]");
+    expect(svg.lastElementChild).toBe(labels);
+    expect(labels.matches(".wc-chart-label-layer")).toBe(true);
+    expect(labels.getAttribute("aria-hidden")).toBe("true");
+    expect(labels.querySelectorAll("text")).toHaveLength(svg.querySelectorAll("text").length);
+    labels.querySelectorAll("text").forEach(label => expect(label.matches(".wc-chart-label")).toBe(true));
+    expect(Array.from(svg.children).indexOf(svg.querySelector("circle[data-pfr-scenario]"))).toBeLessThan(Array.from(svg.children).indexOf(labels));
+    const css = fs.readFileSync(path.join(__dirname, "../../static/css/ui-foundation.css"), "utf8");
+    expect(css).toMatch(/\.wc-chart-label-layer\s*\{[^}]*pointer-events:\s*none;/s);
+    expect(css).toMatch(/\.wc-chart-label\s*\{[^}]*fill:\s*var\(--wc-color-text\);[^}]*stroke:\s*var\(--wc-color-surface\);[^}]*stroke-width:\s*3px;[^}]*stroke-linejoin:\s*round;[^}]*paint-order:\s*stroke fill;[^}]*pointer-events:\s*none;/s);
 });
 
 test("scenario buttons link to accessible markers, bootstrap does not duplicate listeners", () => {
@@ -148,20 +184,40 @@ test("absent and unknown currentness never invent zero probabilities", () => {
 
 test("percent and year filters normalize, numeric filters show unique unfiltered denominator", async () => {
     const next = seed(); next.events = {rows: [], total: 0, unfiltered_total: 101};
-    next.query.min_probability = 0.75; next.query.year = 2;
+    next.query.min_probability = 0.75; next.query.year = 2; next.query.sort = "probability"; next.query.descending = true;
     window.WCHttp.getJson.mockResolvedValue(next);
     document.querySelector("[data-pfr-field=min_probability]").value = "75";
     document.querySelector("[data-pfr-field=year]").value = "2";
+    document.querySelector("[data-pfr-field=sort]").value = "probability";
+    document.querySelector("[data-pfr-field=descending]").checked = true;
     document.querySelector("[data-pfr-filters]").dispatchEvent(new Event("submit", {bubbles: true, cancelable: true}));
     await flush();
     expect(window.WCHttp.getJson.mock.calls[0][0]).toContain("min_probability=0.75");
     expect(window.WCHttp.getJson.mock.calls[0][0]).toContain("year=2");
+    expect(window.WCHttp.getJson.mock.calls[0][0]).toContain("sort=probability");
+    expect(window.WCHttp.getJson.mock.calls[0][0]).toContain("descending=true");
     expect(document.querySelector("[data-pfr-count]").textContent).toContain("101 storm events before filters");
     expect(document.querySelector("[data-pfr-count]").textContent).toContain("No storms match these filters");
     window.WCHttp.getJson.mockResolvedValue(seed());
     click("[data-pfr-action=reset]"); await flush();
     expect(window.WCHttp.getJson.mock.calls[1][0]).not.toContain("min_probability");
+    expect(window.WCHttp.getJson.mock.calls[1][0]).toContain("sort=row_ordinal");
+    expect(window.WCHttp.getJson.mock.calls[1][0]).toContain("descending=false");
     expect(document.querySelector("[data-pfr-field=year]").value).toBe("");
+});
+
+test("storm event filters retain every field, sort option and action order", () => {
+    expect(document.querySelectorAll("[data-pfr-filter-fields] .wc-field")).toHaveLength(4);
+    expect(Array.from(document.querySelectorAll("[data-pfr-field]")).map(field => field.dataset.pfrField)).toEqual([
+        "duration", "min_probability", "year", "sort", "descending"
+    ]);
+    expect(Array.from(document.querySelector("[data-pfr-field=sort]").options).map(option => option.value)).toEqual([
+        "row_ordinal", "rainfall_mm", "probability"
+    ]);
+    expect(Array.from(document.querySelectorAll("[data-pfr-filters] [data-pfr-action]")).map(button => button.dataset.pfrAction)).toEqual(["apply", "reset"]);
+    const css = fs.readFileSync(path.join(__dirname, "../../static/css/ui-foundation.css"), "utf8");
+    expect(css).toMatch(/\.wc-report-filter-fields\s*\{[^}]*gap:\s*var\(--wc-space-lg\);/s);
+    expect(css).toMatch(/\.wc-report-filter-actions\s*\{[^}]*margin-top:\s*var\(--wc-space-md\);/s);
 });
 
 test("transient failure retains coherent values, marks CSV previous view, and retries same page", async () => {
@@ -215,7 +271,9 @@ test("query in flight prevents detail requests canceling the selected page gener
     click("[data-pfr-action=next]");
     unitHandler(); // Re-rendering while loading must not revive competing event requests.
     const button = document.querySelector("[data-pfr-event]");
-    expect(button.disabled).toBe(true); button.click();
+    expect(button.disabled).toBe(true);
+    expect(button.matches(".wc-report-event-link:disabled")).toBe(true);
+    button.click();
     expect(window.WCHttp.getJson).toHaveBeenCalledTimes(1);
     resolve(seed()); await flush();
     expect(document.querySelector("[data-pfr-event]").disabled).toBe(false);

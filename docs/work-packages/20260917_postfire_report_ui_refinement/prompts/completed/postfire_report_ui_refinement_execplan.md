@@ -14,10 +14,13 @@ properly spaced inputs instead of full-width browser controls.
 - [x] (2026-09-17) Inspect source, contracts, shared components and tests.
 - [x] (2026-09-17) Obtain two independent contract reviews; both passed after
   the contract clarified authority, spacing, pointer behavior and empty notices.
-- [ ] Commit the standalone contract checkpoint.
-- [ ] Implement template, JavaScript, CSS and regression tests.
-- [ ] Rebuild generated assets and validate the authenticated report.
-- [ ] Complete independent implementation review and close.
+- [x] (2026-09-17) Commit standalone contract checkpoint `714693a00`.
+- [x] (2026-09-17) Implement template, JavaScript, CSS, user guidance and
+  regression tests.
+- [x] (2026-09-17) Rebuild assets, restart the complete stack and pass focused,
+  full frontend, route, theme-metrics and authenticated browser acceptance.
+- [x] (2026-09-17) Resolve the independent review's disabled-link loading-state
+  finding and receive final approval with no open findings.
 
 ## Surprises & Discoveries
 
@@ -25,6 +28,12 @@ properly spaced inputs instead of full-width browser controls.
   markers, so later SVG elements can paint over text.
 - The event form uses unclassed native controls instead of the shared numeric,
   select, checkbox and button-row conventions.
+- Pure form specificity overrode the shared numeric control width inside this
+  report, so the browser initially measured 232- and 200-pixel inputs. A
+  report-scoped canonical-width rule restores both to 120 pixels.
+- Authenticated axe testing found 4.08:1 contrast on event-date links against
+  striped rows. The existing theme hover token provides sufficient contrast in
+  the required default, light high-contrast and AA dark themes.
 
 ## Decision Log
 
@@ -44,7 +53,18 @@ properly spaced inputs instead of full-width browser controls.
 
 ## Outcomes & Retrospective
 
-Pending implementation.
+The report now uses the shared semantic summary pane, keeps every chart label
+above data marks with a pointer-transparent theme-token halo, and presents Storm
+events filters with canonical bounded controls and consistent spacing. The
+complete stack was restarted and the saved `thespian-cleanness` M3 report passed
+authenticated desktop/narrow acceptance in default, light high-contrast and AA
+dark themes, including zero axe violations, pointer overlap, keyboard marker
+selection, loading state and real filter requests.
+
+Browser evidence found and drove two additional scoped fixes: Pure form
+specificity had stretched the numeric controls, and event links needed both an
+AA-contrast enabled color and preservation of the shared disabled color. Final
+independent review approved the implementation with no open findings.
 
 ## Context and Orientation
 

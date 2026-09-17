@@ -57,20 +57,17 @@ External references:
 - https://www.section508.gov/manage/governance/section-508-for-change-control-processes/
 - https://www.access-board.gov/ict/
 
-## Pending Targeted Remediation
+## Current Coverage (Already in Repo)
 
 ### Post-fire debris-flow report presentation
 
-The report contract requires theme-token chart-label halos, final SVG label
-paint order, semantic assessment summary rows and canonical labeled filter
-controls. Implementation and validation are pending. Targeted validation will
-cover default/dark/high-contrast rendering, pointer and keyboard marker
-activation, axe, mobile reflow and the saved-results table alternative. Status
-and retained evidence are tracked in the 2026-09-17 post-fire report UI
-refinement work package. Move this item to current coverage only after those
-checks pass.
-
-## Current Coverage (Already in Repo)
+The report uses a semantic assessment summary, canonical labeled filter fields,
+and a pointer-transparent final SVG text layer with a theme-token halo. Retained
+authenticated validation covers default, light high-contrast and AA dark themes
+at desktop and narrow widths; marker overlap hit-testing; Tab, Enter and Space;
+filter application/reset; and axe with zero violations in all three themes.
+Evidence and screenshots are in the 2026-09-17 post-fire report UI refinement
+work package.
 
 ### SBS burn-severity maps
 

@@ -2578,6 +2578,31 @@ a.wc-maturity-pill:focus-visible {
   gap: var(--wc-space-xs);
 }
 
+.wc-report-filter-form {
+  display: grid;
+  gap: var(--wc-space-md);
+}
+
+.wc-report-filter-fields {
+  display: grid;
+  gap: var(--wc-space-lg);
+  align-items: start;
+}
+
+.wc-report-filter-fields > .wc-field {
+  margin-bottom: 0;
+}
+
+.pure-form.wc-report-filter-form .wc-field__control--number {
+  width: 120px;
+  min-width: 100px;
+  flex: 0 0 auto;
+}
+
+.wc-report-filter-actions {
+  margin-top: var(--wc-space-md);
+}
+
 .wc-choice-group {
   display: grid;
   gap: var(--wc-space-xs);
@@ -3823,6 +3848,23 @@ a.wc-maturity-pill:focus-visible {
 .wc-button-row--full .pure-button {
   width: 100%;
   flex: 1 1 auto;
+}
+
+.wc-chart-label-layer {
+  pointer-events: none;
+}
+
+.wc-chart-label {
+  fill: var(--wc-color-text);
+  stroke: var(--wc-color-surface);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+  paint-order: stroke fill;
+  pointer-events: none;
+}
+
+.pure-button.pure-button-link.wc-report-event-link:not(:disabled):not([disabled]) {
+  color: var(--wc-color-link-hover) !important;
 }
 
 #sbs_mode1_controls {

@@ -54,6 +54,10 @@ results for those inputs. Reloading the report alone does not recompute it.
 
 ## Read the report
 
+- **Assessment summary** groups the accepted model and completion time, result
+  status, input coverage and assessment-specific notices. “None recorded.” means
+  the accepted assessment has no additional notice; it does not remove the
+  interpretation limits shown below the pane.
 - **Likelihood** is conditional on the displayed rainfall and post-fire inputs.
   A value of 70% is not a 70% annual probability of a debris flow.
 - **Rainfall window** selects 15, 30 or 60 minutes. Intensity is a rate: 24 mm/h
@@ -67,6 +71,10 @@ results for those inputs. Reloading the report alone does not recompute it.
 - **Event rows** evaluate the project climate's storms against the same fixed
   post-fire landscape. Calendar dates do not mean the landscape's recovery was
   simulated. Synthetic climate year labels are not historical event dates.
+- **Storm event filters** accept a minimum likelihood from 0% to 100%, an
+  original year label and one of the listed sort orders. Select **Apply filters**
+  after changing them; **Reset filters** restores the original event order and
+  includes all storms.
 - **Valid coverage** measures the area with usable required inputs. Missing
   cells are excluded rather than treated as zero. Coverage is not a confidence
   score; inspect the downloadable mask when coverage is incomplete.

@@ -1,0 +1,421 @@
+[
+  {
+    "utc": "2026-09-17T22:58:05.525Z",
+    "stage": "desktop-structure-observed",
+    "presentation": {
+      "summary_items": 4,
+      "summary_terms": [
+        "Assessment",
+        "Result status",
+        "Input coverage",
+        "Notices"
+      ],
+      "notices": "Watershed area is outside the published study range of 0.2–8 km²; interpret applicability with care.",
+      "final_label_layer": true,
+      "all_text_in_layer": true,
+      "label_style": {
+        "fill": "rgb(31, 35, 40)",
+        "stroke": "rgb(255, 255, 255)",
+        "text_token": "#1f2328",
+        "surface_token": "#ffffff",
+        "text_token_computed": "rgb(31, 35, 40)",
+        "surface_token_computed": "rgb(255, 255, 255)",
+        "stroke_width": "3px",
+        "stroke_linejoin": "round",
+        "paint_order": "stroke",
+        "pointer_events": "none",
+        "layer_pointer_events": "none"
+      },
+      "field_gap": "16px",
+      "field_count": 4,
+      "input_widths": [
+        120,
+        120
+      ],
+      "form_width": 1326,
+      "form_overflow": false,
+      "actions": [
+        "apply",
+        "reset"
+      ],
+      "numeric_contract": {
+        "minimum": {
+          "min": "0",
+          "max": "100",
+          "step": "any"
+        },
+        "year": {
+          "step": "1"
+        }
+      }
+    }
+  },
+  {
+    "utc": "2026-09-17T22:58:05.529Z",
+    "stage": "desktop-structure",
+    "acceptance": "passed"
+  },
+  {
+    "utc": "2026-09-17T22:58:05.615Z",
+    "stage": "pointer-overlap-observed",
+    "overlap": {
+      "x": 324.6413269042969,
+      "y": 640.21435546875,
+      "width": 18.44647216796875,
+      "height": 18.446533203125,
+      "hit": "circle",
+      "hit_scenario": "0"
+    }
+  },
+  {
+    "utc": "2026-09-17T22:58:05.672Z",
+    "stage": "pointer-overlap",
+    "selected": true
+  },
+  {
+    "utc": "2026-09-17T22:58:05.741Z",
+    "stage": "keyboard-markers",
+    "tab_enter_space": "passed"
+  },
+  {
+    "utc": "2026-09-17T22:58:09.932Z",
+    "stage": "axe",
+    "violations": 0,
+    "passes": 36
+  },
+  {
+    "utc": "2026-09-17T22:58:15.210Z",
+    "stage": "theme",
+    "theme": "default",
+    "axe_violations": 0,
+    "desktop": {
+      "summary_items": 4,
+      "summary_terms": [
+        "Assessment",
+        "Result status",
+        "Input coverage",
+        "Notices"
+      ],
+      "notices": "Watershed area is outside the published study range of 0.2–8 km²; interpret applicability with care.",
+      "final_label_layer": true,
+      "all_text_in_layer": true,
+      "label_style": {
+        "fill": "rgb(31, 35, 40)",
+        "stroke": "rgb(255, 255, 255)",
+        "text_token": "#1f2328",
+        "surface_token": "#ffffff",
+        "text_token_computed": "rgb(31, 35, 40)",
+        "surface_token_computed": "rgb(255, 255, 255)",
+        "stroke_width": "3px",
+        "stroke_linejoin": "round",
+        "paint_order": "stroke",
+        "pointer_events": "none",
+        "layer_pointer_events": "none"
+      },
+      "field_gap": "16px",
+      "field_count": 4,
+      "input_widths": [
+        120,
+        120
+      ],
+      "form_width": 1326,
+      "form_overflow": false,
+      "actions": [
+        "apply",
+        "reset"
+      ],
+      "numeric_contract": {
+        "minimum": {
+          "min": "0",
+          "max": "100",
+          "step": "any"
+        },
+        "year": {
+          "step": "1"
+        }
+      }
+    },
+    "narrow": {
+      "summary_items": 4,
+      "summary_terms": [
+        "Assessment",
+        "Result status",
+        "Input coverage",
+        "Notices"
+      ],
+      "notices": "Watershed area is outside the published study range of 0.2–8 km²; interpret applicability with care.",
+      "final_label_layer": true,
+      "all_text_in_layer": true,
+      "label_style": {
+        "fill": "rgb(31, 35, 40)",
+        "stroke": "rgb(255, 255, 255)",
+        "text_token": "#1f2328",
+        "surface_token": "#ffffff",
+        "text_token_computed": "rgb(31, 35, 40)",
+        "surface_token_computed": "rgb(255, 255, 255)",
+        "stroke_width": "3px",
+        "stroke_linejoin": "round",
+        "paint_order": "stroke",
+        "pointer_events": "none",
+        "layer_pointer_events": "none"
+      },
+      "field_gap": "16px",
+      "field_count": 4,
+      "input_widths": [
+        120,
+        120
+      ],
+      "form_width": 364,
+      "form_overflow": false,
+      "actions": [
+        "apply",
+        "reset"
+      ],
+      "numeric_contract": {
+        "minimum": {
+          "min": "0",
+          "max": "100",
+          "step": "any"
+        },
+        "year": {
+          "step": "1"
+        }
+      }
+    }
+  },
+  {
+    "utc": "2026-09-17T22:58:21.013Z",
+    "stage": "theme",
+    "theme": "light-high-contrast",
+    "axe_violations": 0,
+    "desktop": {
+      "summary_items": 4,
+      "summary_terms": [
+        "Assessment",
+        "Result status",
+        "Input coverage",
+        "Notices"
+      ],
+      "notices": "Watershed area is outside the published study range of 0.2–8 km²; interpret applicability with care.",
+      "final_label_layer": true,
+      "all_text_in_layer": true,
+      "label_style": {
+        "fill": "rgb(5, 21, 38)",
+        "stroke": "rgb(255, 254, 250)",
+        "text_token": "#051526",
+        "surface_token": "#FFFEFA",
+        "text_token_computed": "rgb(5, 21, 38)",
+        "surface_token_computed": "rgb(255, 254, 250)",
+        "stroke_width": "3px",
+        "stroke_linejoin": "round",
+        "paint_order": "stroke",
+        "pointer_events": "none",
+        "layer_pointer_events": "none"
+      },
+      "field_gap": "18px",
+      "field_count": 4,
+      "input_widths": [
+        120,
+        120
+      ],
+      "form_width": 1312,
+      "form_overflow": false,
+      "actions": [
+        "apply",
+        "reset"
+      ],
+      "numeric_contract": {
+        "minimum": {
+          "min": "0",
+          "max": "100",
+          "step": "any"
+        },
+        "year": {
+          "step": "1"
+        }
+      }
+    },
+    "narrow": {
+      "summary_items": 4,
+      "summary_terms": [
+        "Assessment",
+        "Result status",
+        "Input coverage",
+        "Notices"
+      ],
+      "notices": "Watershed area is outside the published study range of 0.2–8 km²; interpret applicability with care.",
+      "final_label_layer": true,
+      "all_text_in_layer": true,
+      "label_style": {
+        "fill": "rgb(5, 21, 38)",
+        "stroke": "rgb(255, 254, 250)",
+        "text_token": "#051526",
+        "surface_token": "#FFFEFA",
+        "text_token_computed": "rgb(5, 21, 38)",
+        "surface_token_computed": "rgb(255, 254, 250)",
+        "stroke_width": "3px",
+        "stroke_linejoin": "round",
+        "paint_order": "stroke",
+        "pointer_events": "none",
+        "layer_pointer_events": "none"
+      },
+      "field_gap": "18px",
+      "field_count": 4,
+      "input_widths": [
+        120,
+        120
+      ],
+      "form_width": 361,
+      "form_overflow": false,
+      "actions": [
+        "apply",
+        "reset"
+      ],
+      "numeric_contract": {
+        "minimum": {
+          "min": "0",
+          "max": "100",
+          "step": "any"
+        },
+        "year": {
+          "step": "1"
+        }
+      }
+    }
+  },
+  {
+    "utc": "2026-09-17T22:58:26.257Z",
+    "stage": "theme",
+    "theme": "cursor-dark-midnight",
+    "axe_violations": 0,
+    "desktop": {
+      "summary_items": 4,
+      "summary_terms": [
+        "Assessment",
+        "Result status",
+        "Input coverage",
+        "Notices"
+      ],
+      "notices": "Watershed area is outside the published study range of 0.2–8 km²; interpret applicability with care.",
+      "final_label_layer": true,
+      "all_text_in_layer": true,
+      "label_style": {
+        "fill": "rgb(123, 136, 161)",
+        "stroke": "rgb(30, 33, 39)",
+        "text_token": "#7b88a1",
+        "surface_token": "#1e2127",
+        "text_token_computed": "rgb(123, 136, 161)",
+        "surface_token_computed": "rgb(30, 33, 39)",
+        "stroke_width": "3px",
+        "stroke_linejoin": "round",
+        "paint_order": "stroke",
+        "pointer_events": "none",
+        "layer_pointer_events": "none"
+      },
+      "field_gap": "17px",
+      "field_count": 4,
+      "input_widths": [
+        120,
+        120
+      ],
+      "form_width": 1319,
+      "form_overflow": false,
+      "actions": [
+        "apply",
+        "reset"
+      ],
+      "numeric_contract": {
+        "minimum": {
+          "min": "0",
+          "max": "100",
+          "step": "any"
+        },
+        "year": {
+          "step": "1"
+        }
+      }
+    },
+    "narrow": {
+      "summary_items": 4,
+      "summary_terms": [
+        "Assessment",
+        "Result status",
+        "Input coverage",
+        "Notices"
+      ],
+      "notices": "Watershed area is outside the published study range of 0.2–8 km²; interpret applicability with care.",
+      "final_label_layer": true,
+      "all_text_in_layer": true,
+      "label_style": {
+        "fill": "rgb(123, 136, 161)",
+        "stroke": "rgb(30, 33, 39)",
+        "text_token": "#7b88a1",
+        "surface_token": "#1e2127",
+        "text_token_computed": "rgb(123, 136, 161)",
+        "surface_token_computed": "rgb(30, 33, 39)",
+        "stroke_width": "3px",
+        "stroke_linejoin": "round",
+        "paint_order": "stroke",
+        "pointer_events": "none",
+        "layer_pointer_events": "none"
+      },
+      "field_gap": "17px",
+      "field_count": 4,
+      "input_widths": [
+        120,
+        120
+      ],
+      "form_width": 362.5,
+      "form_overflow": false,
+      "actions": [
+        "apply",
+        "reset"
+      ],
+      "numeric_contract": {
+        "minimum": {
+          "min": "0",
+          "max": "100",
+          "step": "any"
+        },
+        "year": {
+          "step": "1"
+        }
+      }
+    }
+  },
+  {
+    "utc": "2026-09-17T22:58:26.762Z",
+    "stage": "filter-loading-observed",
+    "loadingStyle": {
+      "disabled": true,
+      "color": "rgb(31, 35, 40)",
+      "disabledToken": "rgb(31, 35, 40)",
+      "disabledTokenRaw": "#1f2328",
+      "enabledTokenRaw": "#0d4bcf",
+      "opacity": "1"
+    }
+  },
+  {
+    "utc": "2026-09-17T22:58:26.797Z",
+    "stage": "filter-loading",
+    "loadingStyle": {
+      "disabled": true,
+      "color": "rgb(31, 35, 40)",
+      "disabledToken": "rgb(31, 35, 40)",
+      "disabledTokenRaw": "#1f2328",
+      "enabledTokenRaw": "#0d4bcf",
+      "opacity": "1"
+    }
+  },
+  {
+    "utc": "2026-09-17T22:58:33.556Z",
+    "stage": "filters",
+    "apply_reset": "passed"
+  },
+  {
+    "utc": "2026-09-17T22:58:33.558Z",
+    "stage": "complete",
+    "page_errors": [],
+    "acceptance": "passed"
+  }
+]
