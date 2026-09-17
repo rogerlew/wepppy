@@ -7,13 +7,13 @@ Place the accepted report and its metadata in the standard middle Summary card, 
 ## Progress
 
 - [x] Inspect control, shared macros, reference Features Export summary and contracts.
-- [ ] Obtain independent contract reviews and commit ancestor.
-- [ ] Implement template/controller and regression tests.
-- [ ] Rebuild bundle, run frontend checks and verify browser states.
+- [x] Obtain independent contract reviews and commit ancestor ca3d58471.
+- [x] Implement template/controller and regression tests.
+- [x] Rebuild bundle, run frontend checks and verify browser states after web restart.
 
 ## Surprises & Discoveries
 
-The control suppresses the shared Summary card and puts report/downloads in the input column. Shared control_shell already places Summary between Status and Details.
+The control suppressed the shared Summary card and put report/downloads in the input column. Shared control_shell already places Summary between Status and Details. Host Python lacked Jinja; the container build succeeded. Browser reload exposed mixed cached templates; restarted only weppcloud before final acceptance.
 
 ## Decision Log
 
@@ -21,7 +21,7 @@ The control suppresses the shared Summary card and puts report/downloads in the 
 
 ## Outcomes & Retrospective
 
-Pending implementation.
+Implementation and independent review complete. Frontend 901 tests and 193 rendered-control tests pass. Browser verification after web restart passed, including report navigation, absent/failed state transitions, desktop/mobile inspection and reload. Scoped work complete.
 
 ## Context and Orientation
 
@@ -33,7 +33,7 @@ First review and commit the contract delta. Then move help above the comparison,
 
 ## Concrete Steps
 
-From repo root run wctl run-npm lint, wctl run-npm test, targeted postfire template pytest, and python3 wepppy/weppcloud/controllers_js/build_controllers_js.py. Use an authenticated development browser on thespian-cleanness to check the rebuilt control, then exercise absent, accepted, stale and failure states with the real controller without running scientific jobs.
+From repo root run wctl run-npm lint, wctl run-npm test, targeted postfire template pytest, and wctl exec weppcloud python wepppy/weppcloud/controllers_js/build_controllers_js.py. Use an authenticated development browser on thespian-cleanness to check the rebuilt control, then exercise absent, accepted, stale and failure states with the real controller without running scientific jobs.
 
 ## Validation and Acceptance
 

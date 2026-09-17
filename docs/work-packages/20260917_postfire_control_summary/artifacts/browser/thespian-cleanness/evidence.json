@@ -1,0 +1,39 @@
+[
+  {
+    "utc": "2026-09-17T21:34:35.965Z",
+    "stage": "loaded",
+    "panelCount": 1,
+    "message": ""
+  },
+  {
+    "utc": "2026-09-17T21:34:42.241Z",
+    "stage": "actual_accepted",
+    "summary": "Summary\n\nView likelihood report\n\nAssessment\tPrevious run\nModel\tM3\nCompleted\t9/17/2026, 1:39:03 PM\nValid coverage\t54.47082% (146161 of 268329 cells)\nCoverage interpretation\tEstimates represent the area with usable inputs. Excluded cells are shown in the validity mask available from the likelihood report.\nStudy basin size\tPrevious run: watershed outside the study basin size range (\n20 ha\n–\n800 ha\n). Interpret these likelihood estimates with caution.",
+    "panels": [
+      "postfire_status_panel",
+      "postfire_summary_panel",
+      "postfire_stacktrace_panel"
+    ],
+    "helpBeforeTable": true
+  },
+  {
+    "utc": "2026-09-17T21:34:51.789Z",
+    "stage": "report_open",
+    "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/report/postfire_debris_flow/"
+  },
+  {
+    "utc": "2026-09-17T21:35:01.760Z",
+    "stage": "absent",
+    "report_visible": false
+  },
+  {
+    "utc": "2026-09-17T21:35:01.806Z",
+    "stage": "failed_replacement",
+    "previous_report_visible": true
+  },
+  {
+    "utc": "2026-09-17T21:35:13.751Z",
+    "stage": "reload",
+    "report_visible": true
+  }
+]

@@ -1,0 +1,7 @@
+locator.waitFor: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for locator('[data-pfdf-result-panel]') to be visible[22m
+
+    at /home/workdir/wepppy/docs/work-packages/20260917_postfire_control_summary/artifacts/browser.cjs:62:50 {
+  name: 'TimeoutError'
+}

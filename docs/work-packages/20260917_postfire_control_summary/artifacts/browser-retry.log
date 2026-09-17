@@ -1,0 +1,11 @@
+{"stage":"loaded","panelCount":1,"message":""}
+{"page_error":"Cannot read properties of null (reading 'replaceChildren')"}
+{"page_error":"Cannot read properties of null (reading 'replaceChildren')"}
+locator.waitFor: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for locator('[data-pfdf-result-panel]') to be visible[22m
+[2m    57 × locator resolved to hidden <section hidden="" class="wc-control__panel" data-pfdf-result-panel="" id="postfire_summary_panel">…</section>[22m
+
+    at /home/workdir/wepppy/docs/work-packages/20260917_postfire_control_summary/artifacts/browser.cjs:63:50 {
+  name: 'TimeoutError'
+}

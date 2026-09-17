@@ -294,13 +294,17 @@ transient disappearance after RUSLE removal, not just persisted server state.
 
 ## 2026-09-17 control summary layout amendment
 
-Status: operator authorized; implementation conformance pending.
+Status: implemented and browser-verified on forest, 2026-09-17; contract ancestor ca3d58471.
 
 Place About this model before the M1/M3 comparison table. Add shared vertical
 spacing above Required project data and Design storm rainfall. Use the standard
 Summary card between Status and Details, hidden until state contains an accepted
-result. Put View likelihood report inside that card as a native report link,
-followed by a table inside wc-control__panel-summary. Include accepted currentness
+result. Use wc-summary-pane with a wc-summary-pane__list definition list,
+wc-summary-pane__item rows, wc-summary-pane__term labels and
+wc-summary-pane__definition values inside wc-control__panel-summary, matching
+the existing RHEM run summary. Place View likelihood report below the pane as a
+native wc-link wc-link--file link. The operator explicitly clarified that this
+summary-pane component, not a compact HTML table, is the intended style. Include accepted currentness
 (Current result or Previous run), model, completion time, exact valid coverage,
 coverage explanation, and the unitized study-size warning when applicable.
 Legacy coverage is explicitly not recorded. A previous accepted result remains
@@ -314,3 +318,8 @@ freshness change. This supersedes earlier control placement/download wording;
 the rationale is familiar summary placement and an actionable report link only
 after acceptance. Reuse control_shell summary_panel_override and shared panel
 classes, as in Features Export; no new card grid or custom visual system.
+
+The **Required project data** readiness list uses the same `wc-summary-pane`
+definition-list structure. Each prerequisite is a summary item with its project
+data label as the term and its ready state or existing preparation link as the
+definition. Model changes replace its rows without changing the component.

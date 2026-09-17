@@ -5,7 +5,7 @@ describe('PostfireDebrisFlow', () => {
     beforeEach(async () => {
         jest.resetModules();
         window.preflightConnected = true;
-        document.body.innerHTML = `<form id="postfire_debris_flow_form"><div data-pfdf-dnbr-fields></div><input type="radio" name="model" value="M1" checked><input type="radio" name="model" value="M3"><div data-pfdf-required></div><div data-pfdf-candidate-field hidden><div class="wc-field wc-field--display"><span class="wc-field__label">Uploaded dNBR map</span><div class="wc-text-display"><code data-pfdf-candidate></code></div></div></div><div data-pfdf-summary></div><p data-job-hint></p><div id="postfire_status_panel"><div id="status"></div><div id="rq_job"></div></div><details id="postfire_stacktrace_panel"><div id="stacktrace"></div></details><p data-pfdf-message></p><p data-pfdf-warning></p><div data-pfdf-files></div><input name="file" type="file"><input name="companion" type="file"><select name="scale_mode"><option value="auto">Auto</option><option value="custom">Custom</option></select><div data-pfdf-custom></div><div data-pfdf-companion></div><input type="radio" name="frequency_source" value="cli" checked><input type="radio" name="frequency_source" value="noaa"><p data-pfdf-noaa></p><button data-pfdf-action="upload"></button><button data-pfdf-action="run"></button></form>`;
+        document.body.innerHTML = `<form id="postfire_debris_flow_form"><div data-pfdf-dnbr-fields></div><input type="radio" name="model" value="M1" checked><input type="radio" name="model" value="M3"><div class="wc-summary-pane" data-pfdf-required></div><div data-pfdf-candidate-field hidden><div class="wc-field wc-field--display"><span class="wc-field__label">Uploaded dNBR map</span><div class="wc-text-display"><code data-pfdf-candidate></code></div></div></div><div data-pfdf-summary></div><p data-job-hint></p><div id="postfire_status_panel"><div id="status"></div><div id="rq_job"></div></div><details id="postfire_stacktrace_panel"><div id="stacktrace"></div></details><p data-pfdf-message></p><section data-pfdf-result-panel hidden><a href="/report">View likelihood report</a><div class="wc-control__panel-summary"><div data-pfdf-result-summary></div></div></section><input name="file" type="file"><input name="companion" type="file"><select name="scale_mode"><option value="auto">Auto</option><option value="custom">Custom</option></select><div data-pfdf-custom></div><div data-pfdf-companion></div><input type="radio" name="frequency_source" value="cli" checked><input type="radio" name="frequency_source" value="noaa"><p data-pfdf-noaa></p><button data-pfdf-action="upload"></button><button data-pfdf-action="run"></button></form>`;
         await import('../dom.js'); await import('../events.js');
         window.WCHttp = {requestWithSessionToken: jest.fn().mockResolvedValue({body: {result: {}}})};
         global.url_for_run = (path) => path;
@@ -26,6 +26,10 @@ describe('PostfireDebrisFlow', () => {
         window.WCHttp.requestWithSessionToken.mockResolvedValue({body:{result:{required:[{key:'k',ready:false,message:'Prepare in RUSLE'}],frequency_source:'cli'}}});
         await instance.refresh();
         expect(replacement.querySelector('[data-pfdf-required]').textContent).toContain('Prepare in RUSLE');
+        expect(replacement.querySelector('[data-pfdf-required]').classList.contains('wc-summary-pane')).toBe(true);
+        expect(replacement.querySelector('[data-pfdf-required] dl').classList.contains('wc-summary-pane__list')).toBe(true);
+        expect(replacement.querySelector('[data-pfdf-required] dt').classList.contains('wc-summary-pane__term')).toBe(true);
+        expect(replacement.querySelector('[data-pfdf-required] dd').classList.contains('wc-summary-pane__definition')).toBe(true);
         expect(old.querySelector('[data-pfdf-required]').textContent).toBe('');
     });
     test('summary is escaped, persists and NOAA is disabled', () => {
@@ -47,11 +51,11 @@ describe('PostfireDebrisFlow', () => {
         instance.render({required:[],frequency_source:'cli',results:{model:'M3',current:true,
             completed_at:'2026-09-14T00:00:00Z',coverage:{total_cells:10000000,valid_cells:valid,valid_fraction:valid/10000000},
             files:[{name:'valid_mask.tif',url:'/accepted-mask'}]}});
-        const summary = document.querySelector('[data-pfdf-files]').textContent;
+        const summary = document.querySelector('[data-pfdf-result-summary]').textContent;
         expect(summary).toContain('Valid coverage');
         expect(summary).toContain(valid + ' of 10000000 cells');
         expect(summary.includes('100.0000%')).toBe(valid === 10000000);
-        expect(document.querySelector('[data-pfdf-download="valid_mask.tif"]').getAttribute('href')).toBe('/accepted-mask');
+        expect(document.querySelector('[data-pfdf-download]')).toBeNull();
         expect(summary).toContain('Estimates represent the area with usable inputs.');
     });
     test('full soil coverage explains unavailable terrain without inventing probabilities', () => {
@@ -60,12 +64,42 @@ describe('PostfireDebrisFlow', () => {
             completed_at:'2026-09-14T00:00:00Z',partial:true,partial_reason:reason,
             coverage:{total_cells:100,valid_cells:100,valid_fraction:1},files:[]}});
         expect(document.querySelector('[data-pfdf-message]').textContent).toContain(reason);
-        expect(document.querySelector('[data-pfdf-files]').textContent).toContain('100 of 100');
+        expect(document.querySelector('[data-pfdf-result-summary]').textContent).toContain('100 of 100');
     });
     test('legacy accepted results explicitly lack recorded coverage', () => {
         instance.render({required:[],frequency_source:'cli',results:{current:false,completed_at:'2026-09-14T00:00:00Z',files:[]}});
-        expect(document.querySelector('[data-pfdf-files]').textContent).toContain('Not recorded for this result');
+        expect(document.querySelector('[data-pfdf-result-summary]').textContent).toContain('Not recorded for this result');
         expect(document.querySelector('[data-pfdf-download="valid_mask.tif"]')).toBeNull();
+    });
+    test('report card follows accepted results through first runs, replacements and absent state', () => {
+        const base = {required:[],frequency_source:'cli',model:'M3'};
+        const panel = document.querySelector('[data-pfdf-result-panel]');
+        for (const phase of ['queued', 'running', 'failed']) {
+            instance.render({...base,run:{phase}});
+            expect(panel.hidden).toBe(true);
+        }
+        const results = {current:true,model:'M3',completed_at:'2026-09-17T00:00:00Z',files:[{name:'events.parquet',url:'/events'}]};
+        instance.render({...base,results});
+        expect(panel.hidden).toBe(false);
+        expect(panel.textContent).toContain('Current result');
+        expect(panel.querySelector('table')).toBeNull();
+        expect(panel.querySelector('dl').className).toBe('wc-summary-pane__list');
+        expect(panel.querySelector('.wc-summary-pane__item dt').className).toBe('wc-summary-pane__term');
+        expect(panel.querySelector('.wc-summary-pane__definition').textContent).toBe('Current result');
+        expect(panel.textContent).toContain('M3');
+        expect(document.querySelector('[data-pfdf-dnbr-fields]').hidden).toBe(true);
+        expect(panel.querySelector('[data-pfdf-download]')).toBeNull();
+        instance.render({...base,run:{phase:'failed'},results:{...results,current:false}});
+        expect(panel.hidden).toBe(false);
+        expect(panel.textContent).toContain('Previous run');
+        instance.render(base);
+        expect(panel.hidden).toBe(true);
+        expect(document.querySelector('[data-pfdf-result-summary]').textContent).toBe('');
+    });
+    test('result metadata is rendered as text', () => {
+        instance.render({required:[],frequency_source:'cli',results:{model:'<img src=x onerror=alert(1)>',current:true,completed_at:'2026-09-17T00:00:00Z'}});
+        expect(document.querySelector('[data-pfdf-result-summary] img')).toBeNull();
+        expect(document.querySelector('[data-pfdf-result-summary]').textContent).toContain('<img');
     });
     test('state-fetch failure disables cached readiness and empty upload', async () => {
         const ready={eligible:true,readonly:false,required:[{key:'dnbr',ready:true}],noaa_available:false,frequency_source:'cli',upload_ready:true,run_ready:true};
@@ -138,7 +172,7 @@ describe('PostfireDebrisFlow', () => {
             results:{current:true,area_warning:true,files:[],completed_at:'2026-09-10T00:00:00Z'}};
         window.WCHttp.requestWithSessionToken.mockResolvedValue({body:{result:state}});
         await instance.refresh();
-        expect(document.querySelector('[data-pfdf-warning]').textContent).toContain('outside the study basin size range');
+        expect(document.querySelector('[data-pfdf-result-summary]').textContent).toContain('outside the study basin size range');
         expect(document.querySelector('[data-pfdf-action="run"]').disabled).toBe(false);
     });
 

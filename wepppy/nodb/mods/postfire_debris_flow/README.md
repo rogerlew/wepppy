@@ -57,7 +57,10 @@ of the radio selection. A failed M3 task does not erase a current M1 result.
 
 ## Read the likelihood report
 
-The report adds **View likelihood report** to the existing control. It reads the
+The control shows **View likelihood report** in its standard Summary card only
+after an assessment has been accepted. The card also contains accepted model/time,
+currentness, valid coverage and applicability warnings. Raw-file links are available
+in the report and authorized project browser rather than the input control. It reads the
 last accepted assessment, not the currently selected model. Opening it does not
 run a model, acquire data or repair missing inputs. Before a first assessment,
 the page explains that no completed assessment is available.

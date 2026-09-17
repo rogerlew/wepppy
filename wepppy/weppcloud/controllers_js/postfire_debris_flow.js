@@ -32,14 +32,29 @@
         controller.stacktracePanelEl = dom.qs('#postfire_stacktrace_panel');
         controller.poll_completion_event = 'POSTFIRE_TASK_COMPLETED';
         controller.attach_status_stream(controller, {element: dom.qs('#postfire_status_panel'), channel: 'postfire_debris_flow', runId: global.runid, logLimit:200});
+        function summaryPane(rows) {
+            var list = document.createElement('dl');
+            list.className = 'wc-summary-pane__list';
+            rows.forEach(function (row) {
+                var item = document.createElement('div');
+                var term = document.createElement('dt'), definition = document.createElement('dd');
+                item.className = 'wc-summary-pane__item';
+                term.className = 'wc-summary-pane__term'; term.textContent = row[0];
+                definition.className = 'wc-summary-pane__definition';
+                if (row[1] instanceof global.Node) { definition.append(row[1]); } else { definition.textContent = row[1]; }
+                item.append(term, definition); list.append(item);
+            });
+            return list;
+        }
         function table(rows) {
             var result = document.createElement('table');
             result.className = 'wc-table';
+            var body = result.createTBody();
             rows.forEach(function (row) {
                 var tr = document.createElement('tr'), th = document.createElement('th'), td = document.createElement('td');
                 th.scope = 'row'; th.textContent = row[0];
                 if (row[1] instanceof global.Node) { td.append(row[1]); } else { td.textContent = row[1]; }
-                tr.append(th,td); result.append(tr);
+                tr.append(th,td); body.append(tr);
             });
             return result;
         }
@@ -59,7 +74,7 @@
                 if (!item.ready) { value = document.createElement('a'); value.href = item.control; value.textContent = item.message; }
                 return [labels[item.key],value];
             });
-            node('required').replaceChildren(table(rows));
+            node('required').replaceChildren(summaryPane(rows));
             field('frequency_source').disabled = !!next.readonly || !!submitting || !live;
             var noaa = form.querySelector('[name="frequency_source"][value="noaa"]');
             noaa.disabled = !!next.readonly || !!submitting || !live || !next.noaa_available;
@@ -105,24 +120,27 @@
             else if (next.results) { message(next.results.partial ? 'Run complete. Some probabilities could not be calculated.' + (next.results.partial_reason ? ' ' + next.results.partial_reason : '') : 'Run complete.'); }
             else if ((!model || model.value === 'M1') && d && d.coverage_fraction < 1) { message('The dNBR map covers only part of the watershed. Calculations will use the available dNBR values.'); }
             else { message((next.required || []).filter(function (item) {return !item.ready;}).map(function (item) {return item.message;}).join('. ')); }
-            node('warning').replaceChildren();
-            if (next.results && next.results.area_warning) {
-                node('warning').append(next.results.current ? 'This watershed is outside the study basin size range (' : 'Previous run: watershed outside the study basin size range (', dimensional(.2,'km^2'),'–',dimensional(8,'km^2'),'). Interpret these likelihood estimates with caution.');
-            }
-            node('files').replaceChildren();
+            node('result-panel').hidden = !next.results;
+            node('result-summary').replaceChildren();
             if (next.results) {
-                var title = document.createElement('p'); title.textContent = (next.results.current ? 'Download model files' : 'Previous run') + ' — ' + (next.results.model || 'M1') + ' — ' + new Date(next.results.completed_at).toLocaleString();
-                node('files').append(title);
+                var resultRows = [
+                    ['Assessment', next.results.current ? 'Current result' : 'Previous run'],
+                    ['Model', next.results.model || 'M1'],
+                    ['Completed', new Date(next.results.completed_at).toLocaleString()]
+                ];
                 if (next.results.coverage) {
                     var coverage = next.results.coverage;
-                    node('files').append(table([ ['Valid coverage', (coverage.valid_fraction < 1 && (100 * coverage.valid_fraction).toPrecision(7) === '100.0000' ? '<100' : (100 * coverage.valid_fraction).toPrecision(7)) + '% (' + coverage.valid_cells + ' of ' + coverage.total_cells + ' cells)'] ]));
-                    var explanation = document.createElement('p');
-                    explanation.textContent = 'Estimates represent the area with usable inputs. Excluded cells are shown in the downloadable validity mask.';
-                    node('files').append(explanation);
+                    resultRows.push(['Valid coverage', (coverage.valid_fraction < 1 && (100 * coverage.valid_fraction).toPrecision(7) === '100.0000' ? '<100' : (100 * coverage.valid_fraction).toPrecision(7)) + '% (' + coverage.valid_cells + ' of ' + coverage.total_cells + ' cells)']);
+                    resultRows.push(['Coverage interpretation', 'Estimates represent the area with usable inputs. Excluded cells are shown in the validity mask available from the likelihood report.']);
                 } else {
-                    node('files').append(table([ ['Valid coverage', 'Not recorded for this result'] ]));
+                    resultRows.push(['Valid coverage', 'Not recorded for this result']);
                 }
-                next.results.files.forEach(function (file) { var link=document.createElement('a'); link.href=file.url; link.dataset.pfdfDownload=file.name; link.textContent=file.name; node('files').append(link,document.createTextNode(' ')); });
+                if (next.results.area_warning) {
+                    var warning = document.createElement('span');
+                    warning.append(next.results.current ? 'This watershed is outside the study basin size range (' : 'Previous run: watershed outside the study basin size range (', dimensional(.2,'km^2'),'–',dimensional(8,'km^2'),'). Interpret these likelihood estimates with caution.');
+                    resultRows.push(['Study basin size', warning]);
+                }
+                node('result-summary').append(summaryPane(resultRows));
             }
         }
         function refresh() {
@@ -205,15 +223,6 @@
             } catch (error) { failure=error.message || 'The operation could not finish.'; }
             finally {submitting=false; if(state) {render(state);} if(failure) {message(failure);}}
         }
-        dom.delegate(form,'click','[data-pfdf-download]',async function (event) {
-            event.preventDefault();
-            try {
-                var response=await http.requestWithSessionToken(this.href,{method:'GET'});
-                var blobUrl=global.URL.createObjectURL(response.body);
-                var anchor=document.createElement('a');anchor.href=blobUrl;anchor.download=this.dataset.pfdfDownload;anchor.click();
-                global.setTimeout(function () {global.URL.revokeObjectURL(blobUrl);},1000);
-            } catch (error) {message('Could not download model files.');}
-        });
         dom.delegate(form,'click','[data-pfdf-action]',function (event) {event.preventDefault();submit(this.dataset.pfdfAction);});
         form.addEventListener('change',function(event) {selection();if(event.target.name==='frequency_source' || event.target.name==='model') {if (!submitting && live) {saveSelection();} else if (state) {render(state);}} else if(state) {render(state);}});
         function unitChange() { if(state) {render(state);} }

@@ -1,0 +1,41 @@
+npm warn "postfire_debris_flow" is being parsed as a normal command line argument.
+npm warn Unknown cli config "--runInBand". This will stop working in the next major version of npm.
+
+> weppcloud-static@0.1.0 test
+> NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.mjs postfire_debris_flow
+
+(node:59458) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS ../controllers_js/__tests__/postfire_debris_flow.test.js
+  PostfireDebrisFlow
+    ✓ remount binds readiness to the replacement form (96 ms)
+    ✓ summary is escaped, persists and NOAA is disabled (33 ms)
+    ✓ preflight refreshes state and disconnection disables run (25 ms)
+    ✓ accepted coverage preserves exact counts and mask link (0 cells) (50 ms)
+    ✓ accepted coverage preserves exact counts and mask link (9999999 cells) (23 ms)
+    ✓ accepted coverage preserves exact counts and mask link (10000000 cells) (23 ms)
+    ✓ full soil coverage explains unavailable terrain without inventing probabilities (22 ms)
+    ✓ legacy accepted results explicitly lack recorded coverage (20 ms)
+    ✓ report card follows accepted results through first runs, replacements and absent state (43 ms)
+    ✓ result metadata is rendered as text (19 ms)
+    ✓ state-fetch failure disables cached readiness and empty upload (21 ms)
+    ✓ failed candidate is named while accepted summary persists (20 ms)
+    ✓ reload reattaches the latest failed job once and preserves its message (21 ms)
+    ✓ standard job HTML keeps links and separated timestamps, and escapes tracebacks (28 ms)
+    ✓ retry clears old Details before posting without losing the accepted map or job link (35 ms)
+    ✓ out-of-study area warning is inline and nonblocking (18 ms)
+    ✓ restores saved selections before accepting a model change (32 ms)
+    ✓ model saves are serialized and M3 run submits explicit identity (78 ms)
+    ✓ selection retries only explicit busy, with bounded attempts (409/job_active) (63 ms)
+    ✓ selection retries only explicit busy, with bounded attempts (409/changed_file) (34 ms)
+    ✓ selection retries only explicit busy, with bounded attempts (403/job_active) (32 ms)
+    ✓ selection retries only explicit busy, with bounded attempts (0/undefined) (32 ms)
+    ✓ busy selection preserves payload order and destruction stops delayed writes (40 ms)
+    ✓ pending run receipt locks selectors and ignores selection changes (28 ms)
+    ✓ new M3 failure remains visible while an older dNBR upload runs (14 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       25 passed, 25 total
+Snapshots:   0 total
+Time:        1.702 s, estimated 3 s
+Ran all test suites matching postfire_debris_flow.

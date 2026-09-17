@@ -235,4 +235,4 @@ once this checkpoint is accepted; do not reinterpret old accepted artifacts.
 
 ## 2026-09-17 control summary placement
 
-Operator-authorized; implementation pending. The [control layout amendment](../../../../../docs/ui-docs/contracts/postfire-debris-flow-control-contract.md#2026-09-17-control-summary-layout-amendment) governs help placement, section spacing and the accepted-only Summary card/report link. It supersedes earlier direct control download/placement language. Report endpoints, empty direct-report behavior, saved artifacts and download authorization remain unchanged.
+Implemented and browser-verified on forest, 2026-09-17 (ancestor ca3d58471). The [control layout amendment](../../../../../docs/ui-docs/contracts/postfire-debris-flow-control-contract.md#2026-09-17-control-summary-layout-amendment) governs help placement, section spacing and the accepted-only Summary card/report link. It supersedes earlier direct control download/placement language. Report endpoints, empty direct-report behavior, saved artifacts and download authorization remain unchanged.

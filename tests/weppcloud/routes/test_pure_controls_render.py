@@ -4922,8 +4922,21 @@ def test_postfire_model_header_and_conditional_upload_group(jinja_env: Environme
     header = rendered.split('<header class="wc-control__header">', 1)[1].split('</header>', 1)[0]
     assert '<table class="wc-table">' in header
     assert 'Staley et al. (2017) recommend M1' in header
+    assert header.index('About this model') < header.index('<table')
+    assert 'data-pfdf-result-panel hidden' in rendered
+    assert rendered.count('View likelihood report') == 1
+    assert rendered.index('id="postfire_status_panel"') < rendered.index('id="postfire_summary_panel"') < rendered.index('id="postfire_stacktrace_panel"')
+    summary = rendered.split('id="postfire_summary_panel"', 1)[1].split('</section>', 1)[0]
+    assert 'wc-control__panel-summary' in summary
+    assert 'View likelihood report' in summary
+    assert 'class="wc-summary-pane" data-pfdf-result-summary' in summary
+    assert summary.index('data-pfdf-result-summary') < summary.index('View likelihood report')
+    assert 'wc-link wc-link--file' in summary
+    assert 'data-pfdf-files' not in rendered
+
     assert re.search(r'name="model"[^>]*value="M1"[^>]*checked', rendered)
     assert re.search(r'name="model"[^>]*value="M3"', rendered)
     assert 'wc-choice-group--horizontal' in rendered
+    assert '<div class="wc-summary-pane" data-pfdf-required aria-live="polite">' in rendered
     assert 'data-pfdf-dnbr-fields' in rendered
     assert rendered.index('data-pfdf-dnbr-fields') < rendered.index('data-pfdf-summary') < rendered.index('Design storm rainfall')

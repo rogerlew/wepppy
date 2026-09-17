@@ -38,12 +38,17 @@ US watersheds. The reported study range is approximately 0.2–8 km².
    cannot resolve it, select the appropriate scale and retry the retained map.
    For M3, build project Soils; no dNBR upload is required.
 5. Select **Project climate** or available **NOAA** design rainfall and run the
-   model. Wait for completion, then open **View likelihood report**.
+   model. After a completed assessment, the **Summary** card appears between
+   Status and Details. Open **View likelihood report** below the summary pane.
 6. Review input coverage and rainfall provenance before interpreting the results.
    Download the result tables and response-curve CSV for your records.
 
 Changing the selected model does not relabel an earlier result. The report
-shows the latest accepted assessment and identifies the model used. After
+shows the latest accepted assessment and identifies the model used. The Summary
+card lists its model, completion time, valid coverage and any basin-size warning.
+It labels retained stale assessments **Previous run**. Before the first completed
+assessment, no report card is shown. Raw model files and the validity mask remain
+available through the likelihood report and project file browser. After
 changing climate, SBS or other relevant inputs, rerun the assessment to obtain
 results for those inputs. Reloading the report alone does not recompute it.
 

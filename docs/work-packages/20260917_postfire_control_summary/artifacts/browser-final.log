@@ -1,0 +1,17 @@
+{"stage":"loaded","panelCount":1,"message":""}
+{"stage":"actual_accepted","summary":"Summary\n\nView likelihood report\n\nAssessment\tPrevious run\nModel\tM3\nCompleted\t9/17/2026, 1:39:03 PM\nValid coverage\t54.47082% (146161 of 268329 cells)\nCoverage interpretation\tEstimates represent the area with usable inputs. Excluded cells are shown in the validity mask available from the likelihood report.\nStudy basin size\tPrevious run: watershed outside the study basin size range (\n20 ha\n–\n800 ha\n). Interpret these likelihood estimates with caution.","panels":["postfire_status_panel","postfire_summary_panel","postfire_stacktrace_panel"],"helpBeforeTable":true}
+{"stage":"report_open","url":"https://wc.bearhive.duckdns.org/weppcloud/runs/thespian-cleanness/config/report/postfire_debris_flow/"}
+{"stage":"absent","report_visible":false}
+{"stage":"failed_replacement","previous_report_visible":true}
+{"page_error":"Cannot set properties of null (setting 'hidden')"}
+{"page_error":"Cannot set properties of null (setting 'hidden')"}
+{"page_error":"Cannot set properties of null (setting 'hidden')"}
+{"page_error":"Cannot set properties of null (setting 'hidden')"}
+{"page_error":"Cannot set properties of null (setting 'hidden')"}
+locator.waitFor: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for locator('[data-pfdf-result-panel]') to be visible[22m
+
+    at /home/workdir/wepppy/docs/work-packages/20260917_postfire_control_summary/artifacts/browser.cjs:86:70 {
+  name: 'TimeoutError'
+}
