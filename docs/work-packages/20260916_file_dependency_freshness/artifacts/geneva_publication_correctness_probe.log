@@ -1,0 +1,34 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest docs/work-packages/20260916_file_dependency_freshness/artifacts/geneva_publication_correctness_probe.py -q -s
+{"direct_native": {"pixels": [[3, 3], [3, 3]], "mask": [[255, 255], [255, 255]], "files": ["/tmp/pytest-of-unknown/pytest-130/test_direct_native_rebuild_ver0/direct.tif"], "driver": "GTiff"}, "atomic_candidate": {"pixels": [[3, 3], [3, 3]], "mask": [[0, 0], [0, 0]], "files": ["/tmp/pytest-of-unknown/pytest-130/test_direct_native_rebuild_ver0/replaced.tif", "/tmp/pytest-of-unknown/pytest-130/test_direct_native_rebuild_ver0/replaced.tif.msk"], "driver": "GTiff"}}
+F
+=================================== FAILURES ===================================
+______ test_direct_native_rebuild_versus_atomic_candidate_with_prior_mask ______
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-130/test_direct_native_rebuild_ver0')
+
+    def test_direct_native_rebuild_versus_atomic_candidate_with_prior_mask(tmp_path):
+        source, bound = tmp_path / "source.tif", tmp_path / "bound.tif"
+        direct, replaced = tmp_path / "direct.tif", tmp_path / "replaced.tif"
+        candidate = tmp_path / "candidate.tif"
+        raster(source, 3)
+        raster(bound, 1)
+        for target in (direct, replaced):
+            raster(target, 1)
+            external_mask(target)
+        raster_stacker(source, bound, direct, resample="near")
+        raster_stacker(source, bound, candidate, resample="near")
+        os.replace(candidate, replaced)
+        record = {"direct_native": state(direct), "atomic_candidate": state(replaced)}
+        Path(__file__).with_suffix(".json").write_text(json.dumps(record, indent=2) + "\n")
+        print(json.dumps(record))
+        assert record["direct_native"]["pixels"] == record["atomic_candidate"]["pixels"]
+>       assert record["direct_native"]["mask"] == record["atomic_candidate"]["mask"]
+E       assert [[255, 255], [255, 255]] == [[0, 0], [0, 0]]
+E         
+E         At index 0 diff: [255, 255] != [0, 0]
+E         Use -v to get more diff
+
+docs/work-packages/20260916_file_dependency_freshness/artifacts/geneva_publication_correctness_probe.py:54: AssertionError
+=========================== short test summary info ============================
+FAILED docs/work-packages/20260916_file_dependency_freshness/artifacts/geneva_publication_correctness_probe.py::test_direct_native_rebuild_versus_atomic_candidate_with_prior_mask
+1 failed in 2.29s

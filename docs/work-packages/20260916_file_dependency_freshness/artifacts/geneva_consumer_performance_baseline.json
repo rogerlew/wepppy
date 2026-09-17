@@ -1,0 +1,564 @@
+{
+  "scope": "C05/C06 actual consumer baseline and composed identity-cost discovery.\n\nNamed files are ordinary-read copied before any native raster open. Actual\nservices and ArtifactIO consume only disposable copies. The wd/ArtifactIO owner\nseam excludes HTTP/RQ/NoDb orchestration; no named status identity is constructed.\nComposition is a pre-implementation cost probe, not a publication/coherence fix.\n",
+  "root": "/wc1/batch/qa-geneva-consumers-d03fded2e37c",
+  "uid": 1000,
+  "gid": 993,
+  "cache_note": "Copied files prime NFS pages; helper-cold is not cold storage",
+  "named_inputs": {
+    "/wc1/runs/in/incomparable-gracefulness/geneva/hru_map.tif": {
+      "version": [
+        64,
+        3567920,
+        156939,
+        1782875388396983988,
+        1782875388396983988
+      ],
+      "sha256": "a8773122fba1fb1f538c9c5173e99f0150a7f8c46aa21212807ad5c63fd26c3d"
+    },
+    "/wc1/runs/in/incomparable-gracefulness/geneva/hru_map_legend.json": {
+      "version": [
+        64,
+        3401866,
+        49149,
+        1782875388399984010,
+        1782875388399984010
+      ],
+      "sha256": "487a2b1413bccd01656185af44bf74b564c1732f6a98f7dd283d5087aa454aa1"
+    },
+    "/wc1/runs/in/incomparable-gracefulness/geneva/hru_map_features.wgs.geojson": {
+      "version": [
+        64,
+        3568550,
+        1122670,
+        1782875466792531048,
+        1782875466792531048
+      ],
+      "sha256": "9de9cd3368fc15948eb971ff4b683dda9e9bd2d4d62133ce6fb7da497bd575d7"
+    },
+    "/wc1/runs/in/incomparable-gracefulness/disturbed/sbs_4class.tif": {
+      "version": [
+        64,
+        3399236,
+        46216,
+        1782861927838756970,
+        1782861927838756970
+      ],
+      "sha256": "df1a9d31edd46dffdc5f0e1429771dfdcdba1469f180b77f2c483e8f50eb3cf9"
+    },
+    "/wc1/runs/in/incomparable-gracefulness/dem/wbt/bound.tif": {
+      "version": [
+        64,
+        3393107,
+        151730,
+        1782861997908234845,
+        1782861997908234845
+      ],
+      "sha256": "dec5c90caf8c5426c01812d1cb97dee66ed193db3fe5767014fb2936eeb0e9fd"
+    },
+    "/wc1/runs/in/incomparable-gracefulness/geneva/inputs/burn_severity_4class.tif": {
+      "version": [
+        64,
+        3398737,
+        15208,
+        1782862116260033834,
+        1782862116260033834
+      ],
+      "sha256": "4dc84bb58b6e519a8320721ac632d8699b852f341d80edf2278d3a49ca407d8c"
+    }
+  },
+  "measurements": [
+    {
+      "name": "geometry_existing_query_hit",
+      "repeats": 20,
+      "seconds": [
+        0.02285355399362743,
+        0.020712774014100432,
+        0.017725117038935423,
+        0.016459792153909802,
+        0.015468716155737638,
+        0.015433150110766292,
+        0.01576958503574133,
+        0.014841580064967275,
+        0.018184443935751915,
+        0.015697228023782372,
+        0.015439311973750591,
+        0.015794442035257816,
+        0.015194703824818134,
+        0.01479717600159347,
+        0.015476137166842818,
+        0.014076043153181672,
+        0.015360319055616856,
+        0.014344393974170089,
+        0.015075224917382002,
+        0.014321617083624005
+      ],
+      "mean_seconds": 0.016151265485677867,
+      "native": [],
+      "digest_read_bytes": {}
+    },
+    {
+      "name": "geometry_actual_native_query_miss",
+      "repeats": 3,
+      "seconds": [
+        0.8880462250672281,
+        0.874478667974472,
+        0.890519583132118
+      ],
+      "mean_seconds": 0.884348158724606,
+      "native": [
+        {
+          "operation": "geometry_materialization",
+          "seconds": 0.8702483561355621
+        },
+        {
+          "operation": "geometry_materialization",
+          "seconds": 0.8565296439919621
+        },
+        {
+          "operation": "geometry_materialization",
+          "seconds": 0.8695234120823443
+        }
+      ],
+      "digest_read_bytes": {}
+    },
+    {
+      "name": "geometry_identity_cold",
+      "repeats": 1,
+      "seconds": [
+        0.027845525182783604
+      ],
+      "mean_seconds": 0.027845525182783604,
+      "native": [],
+      "digest_read_bytes": {
+        "/wc1/batch/qa-geneva-consumers-d03fded2e37c/geneva/hru_map.tif": 156939,
+        "/wc1/batch/qa-geneva-consumers-d03fded2e37c/geneva/hru_map_legend.json": 49149
+      }
+    },
+    {
+      "name": "geometry_identity_settled",
+      "repeats": 30,
+      "seconds": [
+        0.0042448879685252905,
+        0.004127526888623834,
+        0.004126552026718855,
+        0.0038176579400897026,
+        0.003999733831733465,
+        0.004034270998090506,
+        0.004018968902528286,
+        0.004004159942269325,
+        0.003852508030831814,
+        0.004021124914288521,
+        0.0039208270609378815,
+        0.004070631926879287,
+        0.004052185919135809,
+        0.0038585709407925606,
+        0.003609397914260626,
+        0.0038602871354669333,
+        0.0037036659196019173,
+        0.003634451888501644,
+        0.0037176681216806173,
+        0.003895082976669073,
+        0.0036066779866814613,
+        0.003817915916442871,
+        0.004080247133970261,
+        0.004040088038891554,
+        0.004030244192108512,
+        0.004176195943728089,
+        0.003937446977943182,
+        0.0039488940965384245,
+        0.004084239015355706,
+        0.003969916142523289
+      ],
+      "mean_seconds": 0.0039420675563936435,
+      "native": [],
+      "digest_read_bytes": {}
+    },
+    {
+      "name": "geometry_composed_query_hit_settled",
+      "repeats": 20,
+      "seconds": [
+        0.02476381487213075,
+        0.0271690608933568,
+        0.024559068959206343,
+        0.02511410997249186,
+        0.023828261997550726,
+        0.023175847018137574,
+        0.02286752499639988,
+        0.023595196893438697,
+        0.02317065396346152,
+        0.02341159712523222,
+        0.026134696090593934,
+        0.025631959084421396,
+        0.02453359100036323,
+        0.02437666803598404,
+        0.02362623787485063,
+        0.02260785596445203,
+        0.023389238165691495,
+        0.022800465114414692,
+        0.02284684288315475,
+        0.02292903303168714
+      ],
+      "mean_seconds": 0.024026586196850986,
+      "native": [],
+      "digest_read_bytes": {}
+    },
+    {
+      "name": "geometry_composed_query_miss_settled",
+      "repeats": 3,
+      "seconds": [
+        0.8974104959052056,
+        1.020226129796356,
+        0.9031830569729209
+      ],
+      "mean_seconds": 0.9402732275581608,
+      "native": [
+        {
+          "operation": "geometry_materialization",
+          "seconds": 0.8670876889955252
+        },
+        {
+          "operation": "geometry_materialization",
+          "seconds": 0.9905516291037202
+        },
+        {
+          "operation": "geometry_materialization",
+          "seconds": 0.8780582658946514
+        }
+      ],
+      "digest_read_bytes": {}
+    },
+    {
+      "name": "geometry_composed_query_hit_cold",
+      "repeats": 1,
+      "seconds": [
+        0.02560393209569156
+      ],
+      "mean_seconds": 0.02560393209569156,
+      "native": [],
+      "digest_read_bytes": {
+        "/wc1/batch/qa-geneva-consumers-d03fded2e37c/geneva/hru_map.tif": 313878,
+        "/wc1/batch/qa-geneva-consumers-d03fded2e37c/geneva/hru_map_legend.json": 98298
+      }
+    },
+    {
+      "name": "burn_existing_materializer_hit",
+      "repeats": 30,
+      "seconds": [
+        0.0009757599327713251,
+        0.0009045570623129606,
+        0.0009764169808477163,
+        0.0012120218016207218,
+        0.001062509836629033,
+        0.0009896650444716215,
+        0.0008289399556815624,
+        0.0008861490059643984,
+        0.0009000110439956188,
+        0.0006613340228796005,
+        0.0008541480638086796,
+        0.0008134290110319853,
+        0.0008575441315770149,
+        0.000902483006939292,
+        0.0009295109193772078,
+        0.0010074099991470575,
+        0.0010352239478379488,
+        0.000990594970062375,
+        0.0009534119162708521,
+        0.0009757340885698795,
+        0.0008969460614025593,
+        0.0006515439599752426,
+        0.0007487230468541384,
+        0.0008703321218490601,
+        0.0009549520909786224,
+        0.0009116691071540117,
+        0.0009847849141806364,
+        0.0009723948314785957,
+        0.000986004015430808,
+        0.0006916888523846865
+      ],
+      "mean_seconds": 0.0009128631247828404,
+      "native": [],
+      "digest_read_bytes": {}
+    },
+    {
+      "name": "burn_actual_native_materializer_miss",
+      "repeats": 3,
+      "seconds": [
+        0.04107987810857594,
+        0.023817372042685747,
+        0.023149013053625822
+      ],
+      "mean_seconds": 0.02934875440162917,
+      "native": [
+        {
+          "operation": "raster_stacker",
+          "seconds": 0.037975139915943146
+        },
+        {
+          "operation": "raster_stacker",
+          "seconds": 0.02107761800289154
+        },
+        {
+          "operation": "raster_stacker",
+          "seconds": 0.02054864796809852
+        }
+      ],
+      "digest_read_bytes": {}
+    },
+    {
+      "name": "burn_identity_cold",
+      "repeats": 1,
+      "seconds": [
+        0.00847282400354743
+      ],
+      "mean_seconds": 0.00847282400354743,
+      "native": [],
+      "digest_read_bytes": {
+        "/wc1/batch/qa-geneva-consumers-d03fded2e37c/disturbed/sbs_4class.tif": 46216
+      }
+    },
+    {
+      "name": "bound_rasterio_profile_only",
+      "repeats": 30,
+      "seconds": [
+        0.0032474990002810955,
+        0.0030172038823366165,
+        0.0030284561216831207,
+        0.0037930398248136044,
+        0.003725247923284769,
+        0.003664397168904543,
+        0.003394603030756116,
+        0.0035361801274120808,
+        0.0034047160297632217,
+        0.0036567971110343933,
+        0.003342285053804517,
+        0.0033666801173239946,
+        0.0032925489358603954,
+        0.003213976975530386,
+        0.0031790288630872965,
+        0.003114915918558836,
+        0.0030675819143652916,
+        0.003654414089396596,
+        0.003176094964146614,
+        0.0031966730020940304,
+        0.00312854815274477,
+        0.0029941629618406296,
+        0.002864689799025655,
+        0.002822666894644499,
+        0.003546631895005703,
+        0.002807147102430463,
+        0.0028664469718933105,
+        0.0027275318279862404,
+        0.002770173130556941,
+        0.002761862939223647
+      ],
+      "mean_seconds": 0.003212073390992979,
+      "native": [],
+      "digest_read_bytes": {}
+    },
+    {
+      "name": "burn_identity_settled",
+      "repeats": 30,
+      "seconds": [
+        0.007669009966775775,
+        0.00755484402179718,
+        0.007924129953607917,
+        0.007961523020640016,
+        0.007955978158861399,
+        0.007756500970572233,
+        0.008042386965826154,
+        0.008274759165942669,
+        0.008082799846306443,
+        0.008337792009115219,
+        0.00811359821818769,
+        0.008009952027350664,
+        0.008112071081995964,
+        0.007824445143342018,
+        0.007892159977927804,
+        0.007144831120967865,
+        0.007147402968257666,
+        0.006966681918129325,
+        0.006614603102207184,
+        0.007011060137301683,
+        0.006888708099722862,
+        0.006563948001712561,
+        0.006840263959020376,
+        0.006740728160366416,
+        0.006749975960701704,
+        0.006678140955045819,
+        0.006880979053676128,
+        0.006710973102599382,
+        0.006704874103888869,
+        0.00651210593059659
+      ],
+      "mean_seconds": 0.007388907570081453,
+      "native": [],
+      "digest_read_bytes": {}
+    },
+    {
+      "name": "burn_composed_materializer_hit_settled",
+      "repeats": 30,
+      "seconds": [
+        0.014025967800989747,
+        0.013968028826639056,
+        0.01443321187980473,
+        0.014348852913826704,
+        0.01427995297126472,
+        0.013387801824137568,
+        0.01393996481783688,
+        0.01438492489978671,
+        0.014316678047180176,
+        0.01444588485173881,
+        0.01401079399511218,
+        0.014378372114151716,
+        0.014121321961283684,
+        0.014374332036823034,
+        0.014149300986900926,
+        0.019257279112935066,
+        0.014835932990536094,
+        0.014010736020281911,
+        0.014171992195770144,
+        0.013988842954859138,
+        0.014910386875271797,
+        0.0145641821436584,
+        0.014476286945864558,
+        0.013014604104682803,
+        0.01388071896508336,
+        0.01433331798762083,
+        0.014680227963253856,
+        0.012086603790521622,
+        0.01211650506593287,
+        0.012662093853577971
+      ],
+      "mean_seconds": 0.014185170029910902,
+      "native": [],
+      "digest_read_bytes": {}
+    },
+    {
+      "name": "burn_composed_materializer_miss_settled",
+      "repeats": 3,
+      "seconds": [
+        0.03332416410557926,
+        0.03476196201518178,
+        0.03448049305006862
+      ],
+      "mean_seconds": 0.034188873056943216,
+      "native": [
+        {
+          "operation": "raster_stacker",
+          "seconds": 0.01913023693487048
+        },
+        {
+          "operation": "raster_stacker",
+          "seconds": 0.01935530500486493
+        },
+        {
+          "operation": "raster_stacker",
+          "seconds": 0.018618831876665354
+        }
+      ],
+      "digest_read_bytes": {}
+    },
+    {
+      "name": "burn_composed_materializer_hit_cold",
+      "repeats": 1,
+      "seconds": [
+        0.014319095993414521
+      ],
+      "mean_seconds": 0.014319095993414521,
+      "native": [],
+      "digest_read_bytes": {
+        "/wc1/batch/qa-geneva-consumers-d03fded2e37c/disturbed/sbs_4class.tif": 92432
+      }
+    }
+  ],
+  "module_hashes": {
+    "/workdir/wepppy/wepppy/all_your_base/file_digest.py": "d090094983c4f7575801969a1339ae3306745f6ff93aa100c037d83dd7fb9ee7",
+    "/workdir/wepppy/wepppy/all_your_base/raster_freshness.py": "c0b0a079b11574ef7d46b2d852afa6cae908d18a84279627633b8163aa2ad6f2",
+    "/workdir/wepppy/wepppy/nodb/mods/geneva/collaborators/hru_map_geometry_service.py": "e9780f4b532c0d3219a8c384bac1fe710aad2004977f93d03026a033ee8b49d6",
+    "/workdir/wepppy/wepppy/nodb/mods/geneva/collaborators/hsg_assignment_service.py": "1bf7d52858cd88d8866465b7c9fc24e9b237388605d29a0a8275e41e2d0b2efd"
+  },
+  "rasterio_version": "1.3.10",
+  "selected_source": "Existing preferred Disturbed.sbs_4class_path; source-selection owner lookup excluded from component timing",
+  "inputs": {
+    "geneva/hru_map.tif": {
+      "bytes": 156939,
+      "shape": [
+        192,
+        195
+      ],
+      "driver": "GTiff",
+      "profile": {
+        "driver": "'GTiff'",
+        "dtype": "'int32'",
+        "nodata": "0.0",
+        "width": "195",
+        "height": "192",
+        "count": "1",
+        "crs": "CRS.from_epsg(32611)",
+        "transform": "Affine(30.0, 0.0, 545685.0271209454,\n       0.0, -30.0, 5016328.908335674)",
+        "blockysize": "10",
+        "tiled": "False",
+        "interleave": "'band'"
+      },
+      "files": [
+        "/wc1/batch/qa-geneva-consumers-d03fded2e37c/geneva/hru_map.tif"
+      ]
+    },
+    "disturbed/sbs_4class.tif": {
+      "bytes": 46216,
+      "shape": [
+        933,
+        789
+      ],
+      "driver": "GTiff",
+      "profile": {
+        "driver": "'GTiff'",
+        "dtype": "'uint8'",
+        "nodata": "255.0",
+        "width": "789",
+        "height": "933",
+        "count": "1",
+        "crs": "CRS.from_epsg(26911)",
+        "transform": "Affine(20.0, 0.0, 541070.0,\n       0.0, -20.0, 5018470.0)",
+        "blockysize": "10",
+        "tiled": "False",
+        "compress": "'lzw'",
+        "interleave": "'band'"
+      },
+      "files": [
+        "/wc1/batch/qa-geneva-consumers-d03fded2e37c/disturbed/sbs_4class.tif"
+      ]
+    },
+    "dem/wbt/bound.tif": {
+      "bytes": 151730,
+      "shape": [
+        192,
+        195
+      ],
+      "driver": "GTiff",
+      "profile": {
+        "driver": "'GTiff'",
+        "dtype": "'int32'",
+        "nodata": "-32768.0",
+        "width": "195",
+        "height": "192",
+        "count": "1",
+        "crs": "CRS.from_epsg(32611)",
+        "transform": "Affine(30.0, 0.0, 545685.0271209454,\n       0.0, -30.0, 5016328.908335674)",
+        "blockysize": "1",
+        "tiled": "False",
+        "interleave": "'band'"
+      },
+      "files": [
+        "/wc1/batch/qa-geneva-consumers-d03fded2e37c/dem/wbt/bound.tif"
+      ]
+    }
+  },
+  "legend_bytes": 49149,
+  "existing_geometry_bytes": 1122670,
+  "feature_count": 990,
+  "geometry_matches_original": true,
+  "burn_pixels_profile_match_original": true,
+  "named_inputs_unchanged": true,
+  "module_files_unchanged_during_measurement": true
+}

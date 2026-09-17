@@ -1273,3 +1273,79 @@ Not runtime-usable:
   detachment, transport, and deposition scope.
 - Local WEPP single-storm review experience, including Scott Sheppard's
   investigation of `kslast` sensitivity and peak-flow interpretability.
+
+### Derived raster/geometry freshness (intended; checkpoint pending)
+
+HRU GeoJSON reuse binds the selected HRU raster's verified local dependencies
+and legend bytes. Auto-aligned burn reuse binds the selected source's verified
+local dependencies and the actual canonical bound raster profile consumed by
+`raster_stacker` (grid, CRS and retained creation options, not its pixel/mask
+values or the driver/count/compress/nodata/dtype fields overridden by the
+stacker). Use the
+bounded GTiff/AAIGrid observer in the raster dependency freshness contract;
+unverified source layouts retain the same native operation uncached. Main-file
+mtime ordering is not content proof. Source/legend/path/profile changes reject
+old reuse, including restored timestamps and selection of an older source path.
+
+New GeoJSON embeds `_wepppy_freshness`; new GTiff aligned burn embeds the JSON
+metadata tag`WEPPPY_GENEVA_FRESHNESS`. Each proof is an object with exactly
+`version: 1`, `kind: hru_geometry | aligned_burn`, `attempt_id`, and
+`dependencies` (the canonical JSON form of the observed identity). A null
+`dependencies` denotes newly generated unverified input, never reusable proof;
+missing/invalid objects are legacy/malformed and require normal rebuild. Public filenames,
+feature schema/envelope, nearest-neighbor alignment and explicit burn overrides
+are unchanged. Proofless/malformed/mismatched artifacts rebuild on the next
+normal request; do not invent provenance from current sources for old outputs.
+Archive relocation may cause conservative rebuild; no renamed user fields or
+NoDb migrations are required.
+
+Use unique retained`geneva/cache_attempts/<uuid>/` for candidates and status;
+attempt directories are private0700 from creation, status0600, candidates stay
+private until publication with the existing target mode or normal umask-derived
+new-file mode. Preserve ArtifactIO run-root containment, selected output symlink
+target, source symlink rules and the existing writer's target write authorization.
+Recheck the selected destination before commit. Existing artifact read/access
+errors propagate rather than being disguised as malformed proof or bypassed by
+an in-memory result. Only proven local GTiff targets may be opened for metadata
+inspection; unknown targets cannot trigger eager native discovery to read a tag. Native generation completes in the candidate;
+repeat dependency/selection checks before atomically publishing the complete
+GeoJSON or GTiff plus embedded proof. Reject observed drift without replacing
+prior accepted output. Failed candidates/status remain browsable and archived.
+C05 raster/legend and C06 source/effective-bound-profile observations use joint
+read guards across each complete set and the whole native materialization
+interval. Retain versions/context from the same verified acquisition separately
+from content identity; a changed-then-restored input cannot be accepted merely
+because its final bytes equal the initial bytes. Recheck current auto-discovery selection
+inside the publication boundary. Observed drift uses`GenevaKernelError` or
+`GenevaValidationError` with`changed_source`, HTTP409, through the existing typed
+envelope. Atomic replacement is the commit point; later status-write failure is
+logged and cannot be reported as rollback or failure to publish.
+Cache hits also recheck after reading the artifact; return the validated payload
+instead of reopening a potentially replaced shared GeoJSON after validation.
+Do not present unverified layouts as coherent dependency proof. The stacker
+already forces GTiff output regardless of the bound input driver; retain this
+single-TIFF candidate publication for all native-successful inputs. An unverified
+bound input bypasses reuse and added profile inspection before the original
+native generation, without changing its accepted native format. Publication
+acceptance must preserve supported UID/GID and normal service-group parity as
+well as mode; do not infer ownership compatibility from mode bits alone.
+
+Representative service budgets (warm-storage copied existing990-feature HRU
+project): full geometry query hit<=40ms settled/<=75ms cold-or-evicted; native
+miss added<=100ms. Auto-burn lookup hit<=25ms settled/<=40ms cold-or-evicted;
+native miss added<=35ms. Include final proof/access/publication checks; no
+settled full-payload hashes. First process initialization is reported separately;
+these service budgets are not end-to-end HTTP/RQ or cold-storage guarantees.
+
+The atomic aligned-TIFF path requires a clean canonical target companion layout.
+Existing external masks/PAM/world/overview or other unproven target auxiliaries
+cannot survive unnoticed beside a newly replaced main file. Such layouts use
+the original native overwrite behavior uncached, with explicit attempt evidence
+and its preexisting weaker failure/publication guarantee; no prior-output rollback
+is claimed for this compatibility branch. GDAL's original overwrite can remove
+old auxiliaries, while main-only replacement demonstrably preserves a stale
+mask. Recheck clean target membership before atomic publication. This bounded
+exception avoids a new multi-file transaction protocol or changing accepted
+native input formats. After native overwrite leaves a clean target, the next
+normal request may establish verified embedded provenance through candidate
+publication; do not stamp the compatibility result with unearned strong proof.

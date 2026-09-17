@@ -1,0 +1,55 @@
+{
+  "direct_native": {
+    "pixels": [
+      [
+        3,
+        3
+      ],
+      [
+        3,
+        3
+      ]
+    ],
+    "mask": [
+      [
+        255,
+        255
+      ],
+      [
+        255,
+        255
+      ]
+    ],
+    "files": [
+      "/tmp/pytest-of-unknown/pytest-130/test_direct_native_rebuild_ver0/direct.tif"
+    ],
+    "driver": "GTiff"
+  },
+  "atomic_candidate": {
+    "pixels": [
+      [
+        3,
+        3
+      ],
+      [
+        3,
+        3
+      ]
+    ],
+    "mask": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ],
+    "files": [
+      "/tmp/pytest-of-unknown/pytest-130/test_direct_native_rebuild_ver0/replaced.tif",
+      "/tmp/pytest-of-unknown/pytest-130/test_direct_native_rebuild_ver0/replaced.tif.msk"
+    ],
+    "driver": "GTiff"
+  }
+}
