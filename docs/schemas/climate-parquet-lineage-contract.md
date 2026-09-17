@@ -1,6 +1,7 @@
 # Climate Parquet producer lineage
 
-Status: intended PF-R02 behavior; implementation conformance pending.
+Status: implemented PF-R02 behavior; scoped tests/reviews pass. Development-stack
+acceptance remains pending in the active freshness package.
 
 ## Ownership and identity
 

@@ -1,0 +1,36 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/test_cli_parquet_lineage.py tests/nodb/test_climate_artifact_export_service.py tests/nodb/mods/test_postfire_debris_flow_production.py tests/wepp/interchange/test_calendar_utils.py tests/wepp/interchange/test_utils_phase7.py --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 84 items
+
+tests/nodb/test_cli_parquet_lineage.py E
+
+==================================== ERRORS ====================================
+_ ERROR at setup of test_content_and_metadata_readiness_including_locked_authority _
+file /workdir/wepppy/tests/nodb/test_cli_parquet_lineage.py, line 45
+  def test_content_and_metadata_readiness_including_locked_authority(owner_project):
+file /workdir/wepppy/tests/nodb/mods/test_postfire_debris_flow_production.py, line 180
+  @pytest.fixture
+  def owner_project(tmp_path,prepared_inputs):
+E       fixture 'prepared_inputs' not found
+>       available fixtures: TestServer, _clear_secret_file_env, _ensure_all_your_base, _ensure_wepppy_namespace, _import_nodb_base, _install_redis_stub, _install_test_required_secrets, _test_required_secret_files, anyio_backend, anyio_backend_name, anyio_backend_options, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, clear_env, config_file, cov, dash_br, dash_duo, dash_duo_mp, dash_multi_process_server, dash_process_server, dash_thread_server, dashjl, dashjl_server, dashr, dashr_server, diskcache_manager, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, home_path, home_user_name, monkeypatch, no_cover, owner_project, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, rq_environment, rq_recorder, server, session, session_params, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory, user_path, zshrc
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/workdir/wepppy/tests/nodb/mods/test_postfire_debris_flow_production.py:180
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+ERROR tests/nodb/test_cli_parquet_lineage.py::test_content_and_metadata_readiness_including_locked_authority
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+========================= 2 warnings, 1 error in 8.98s =========================

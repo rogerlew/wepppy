@@ -203,8 +203,9 @@ def owner_project(tmp_path,prepared_inputs):
     climate=Climate.getInstance(str(tmp_path))
     with climate.locked():climate.cli_fn='owner.cli'
     Path(climate.cli_dir).mkdir(exist_ok=True)
-    (Path(climate.cli_dir)/climate.cli_fn).write_text('owner CLI')
-    (tmp_path/'climate').mkdir(exist_ok=True);(tmp_path/'climate'/'wepp_cli.parquet').write_bytes(b'owner climate artifact')
+    from tests.nodb.test_climate_artifact_export_service import _write_minimal_cli
+    _write_minimal_cli(Path(climate.cli_dir)/climate.cli_fn)
+    assert climate._export_cli_parquet() is not None
     dest=tmp_path/'rusle';dest.mkdir(exist_ok=True);shutil.copyfile(prepared_inputs.k,dest/'k_polaris_nomograph.tif')
     manifest=json.loads(prepared_inputs.k_manifest.read_text());manifest['k'].update(generated_utc=p.now(),statistic='mean',selected_modes=['polaris_nomograph'],artifacts={'nomograph':'rusle/k_polaris_nomograph.tif'})
     (dest/'manifest.json').write_text(json.dumps(manifest))
@@ -251,6 +252,7 @@ def test_completed_climate_with_failed_parquet_export_is_not_ready(owner_project
     assert p.sources(wd)[2]['climate']
     climate=Climate.getInstance(str(wd));cli=Path(climate.cli_dir)/climate.cli_fn
     exported=(wd/'climate/wepp_cli.parquet').stat().st_mtime_ns
+    cli.write_text(cli.read_text().replace('1980   4.0', '1980   8.0'))
     os.utime(cli,ns=(exported+1,exported+1))
     assert not p.sources(wd)[2]['climate']
 

@@ -577,3 +577,23 @@ climates/
 **License**: BSD-3 Clause (see `license.txt` in repository root)
 
 **Funding**: NSF Idaho EPSCoR (IIA-1301792), USDA Forest Service, USGS, NASA
+
+## CLI Parquet lineage and failed exports
+
+Climate export and interchange's missing-Parquet producer write source lineage
+inside `climate/wepp_cli.parquet`. Existing columns and calculations are unchanged.
+Each export parses a verified CLI snapshot, rechecks the selected source, and
+atomically publishes the complete Parquet. Export errors retain a prior output
+present at the export entrypoint; earlier climate build cleanup is unchanged.
+
+Post-fire execution requires matching producer lineage. For an older proofless
+Parquet, use the normal **Build climate** workflow to regenerate it. Reports and
+calendar readers still accept their supported legacy tables. Touching or linking
+an unchanged CLI no longer makes a proven export unready; changing its content
+or selection does. State reads never rebuild climate or add proof to old rows.
+
+Inspect `climate_artifacts/cli_parquet/attempts/<id>/` through project browse for
+source snapshots, failed candidates and status. This history survives climate
+cleanup, skeletonization and normal archive/restore. Existing output symlinks and
+write permissions remain effective. See the [lineage contract](../../docs/schemas/climate-parquet-lineage-contract.md)
+for producer versions, compatibility and bounded readiness checks.

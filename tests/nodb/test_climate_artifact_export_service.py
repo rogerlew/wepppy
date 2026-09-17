@@ -12,6 +12,14 @@ from wepppy.nodb.core.climate_artifact_export_service import ClimateArtifactExpo
 pytestmark = pytest.mark.unit
 
 
+@pytest.fixture(autouse=True)
+def fake_owner_selection(monkeypatch):
+    # These formatting/export unit tests use SimpleNamespace owners. Actual
+    # cross-instance owner hydration is covered by the lineage integration tests.
+    monkeypatch.setattr("wepppy.nodb.core.climate_artifact_export_service._active_cli_path",
+                        lambda climate: Path(climate.cli_dir) / climate.cli_fn)
+
+
 def _write_minimal_cli(path: Path) -> None:
     path.write_text(
         "\n".join(

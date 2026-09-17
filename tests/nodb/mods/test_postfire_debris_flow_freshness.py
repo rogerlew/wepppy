@@ -201,3 +201,31 @@ def test_complete_uncached_read_has_a_point_in_time(tmp_path, monkeypatch):
             assert observed == original(b'before').hexdigest()
     assert p._digest_version.cache_info().misses == misses
     assert p.cached_digest(path) == original(b'AFTER!').hexdigest()
+
+
+def test_default_open_closes_leaf_when_parent_changes(tmp_path, monkeypatch):
+    import errno
+    from wepppy.nodb.mods.postfire_debris_flow import rainfall_io
+    parent = tmp_path / 'parent'
+    parent.mkdir()
+    target = parent / 'leaf'
+    target.write_bytes(b'original')
+    replacement = tmp_path / 'replacement'
+    replacement.mkdir()
+    os.link(target, replacement / target.name)
+    real = os.open
+    leaf = []
+    def open_then_replace(path, flags, *args, **kwargs):
+        result = real(path, flags, *args, **kwargs)
+        if path == 'leaf' and kwargs.get('dir_fd') is not None:
+            leaf.append(result)
+            parent.rename(tmp_path / 'former')
+            replacement.rename(parent)
+        return result
+    monkeypatch.setattr(os, 'open', open_then_replace)
+    with pytest.raises(OSError) as caught:
+        rainfall_io.open_local(target)
+    assert caught.value.errno == errno.ESTALE
+    with pytest.raises(OSError) as closed:
+        os.fstat(leaf[0])
+    assert closed.value.errno == errno.EBADF

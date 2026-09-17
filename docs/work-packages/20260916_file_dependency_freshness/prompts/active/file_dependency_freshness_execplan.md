@@ -1,7 +1,7 @@
 # Audit and repair file dependency freshness
 
-This ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`. The owner authorized execution on 2026-09-17 UTC after scaffolding. M1 is
-active; implementation remains gated on the reviewed contract checkpoint.
+This ExecPlan follows `docs/prompt_templates/codex_exec_plans.md`. The owner authorized execution on 2026-09-17 UTC after scaffolding. M1 remains active alongside scoped reviewed implementation waves. Remaining
+behavior changes stay gated on their own reviewed contract checkpoints.
 Maintain Progress, Surprises & Discoveries, Decision Log and Outcomes &
 Retrospective throughout execution.
 
@@ -22,13 +22,21 @@ not merely a changed helper or passing unit tests.
 - [x] Scaffold package, discovery seeds and operation matrix, 2026-09-17 UTC.
 - [x] M1 initial scope/revision searches, independent seed inventories and real hard-link baseline.
 - [ ] M1 remaining exhaustive hash/cache-only consumer tracing and full disposition.
-- [ ] M2: contracts, compatibility/performance budgets and reviewed checkpoint.
-- [ ] M3: bounded first fix and per-consumer implementation waves.
-- [ ] M4: broad regression, security/correctness review and performance evidence.
+- [x] M2 first-wave and cache-admission contracts independently reviewed and committed (`43317704f`, `0fe02dc0f`).
+- [ ] M2 remaining consumer checkpoints; NoDb hydration checkpoint committed (`4e000950a`).
+- [ ] M3: reviewed post-fire, NoDb hydration, bundle header, derived main-file and shared ordinary-digest waves committed in `edff4db5a`; scoped tests/reviews pass. Features-export content/publication implemented in `ae314b581` (199 affected tests). D-Tale checkpoint `fbac92404` implemented in `cf261f6ac` with 22 tests and scoped reviews; remaining consumer waves open.
+- [ ] M4: first broad Python sanity passed (8,721 passed, 103 skipped); final-state gates, complete reviews and performance evidence remain open.
 - [ ] M5: rebuild/restart development stack and real UI/RQ/WEPP acceptance.
 - [ ] M6: complete dispositions, promote durable docs and close package.
 
 ## Surprises & Discoveries
+
+CLI lineage prototype timings omitted mandatory strict directory traversal. The
+actual predicate exceeded5/40-ms means; same-call parent descriptor reuse reduced
+settled means from8.28/10.78ms to5.82/6.98ms without changing access authority.
+Explicit10/50-ms budget correction is being independently reviewed and measured;
+original misses remain evidence. The active GL dashboard also mixes cached old
+year values with newly queried years after a same-path data replacement (B-F01).
 
 
 Execution reproduced unchanged-content hard-link false staleness, a native SBS
@@ -49,6 +57,11 @@ ctime used for caches/read-race guards. These are candidate mechanisms, not
 confirmed bugs. Removing all ctime checks would conflate separate concerns.
 
 ## Decision Log
+
+2026-09-17 UTC: preserve strict O_RDONLY/no-follow authority for CLI readiness.
+Profile and optimize same-call work before proposing an explicit prototype-budget
+correction; no cross-request descriptor cache or weakened access checks. Final
+actual measurements and independent reviews must ratify the correction.
 
 
 2026-09-17 UTC: stage M2/M3 checkpoints by coherent consumer group while keeping
@@ -79,8 +92,9 @@ Use disposable runs for mutations; do not silently rerun existing user projects.
 
 
 Execution now retains baseline source searches, independent inventories, real
-filesystem failing probes and initial digest costs. First-wave checkpoint is
-under review. Runtime implementation, full inventory disposition and all
+filesystem failing probes and initial digest costs. First-wave checkpoint and the measured cache-admission amendment are committed.
+Committed runtime waves pass 712 post-fire tests, 155 NoDb tests, scoped header/derived/shared-digest suites, stub checks and the real-clock cache collision probe. Implementation reviews found no blocking
+code defect; full inventory disposition, remaining consumer fixes and all
 restarted-stack acceptance remain open; this is not package completion.
 
 ## Context and Orientation
@@ -221,3 +235,91 @@ explicitly retained contract, security, compatibility and restarted-stack gates.
 
 Revision note (2026-09-17 UTC): activated execution on owner instruction and
 retained discovery scope/revision before implementation.
+
+Revision note (2026-09-17 UTC): recorded two contract ancestors, actual
+timestamp-collision correction and partial focused validation; package remains
+active, with NoDb checkpoint and all final acceptance gates outstanding.
+
+Revision note (2026-09-17 UTC): C10 checkpoint committed (`984023c18`), 12 tests
+and actual-bundle benchmark pass. NoDb/download review regressions close scoped
+QA findings. C01 main-file checkpoint under review; original flat GDAL closure
+proposal rejected by real nested-VRT and local-ZIP evidence, retained as an open
+separate raster dependency wave. Full Python sanity is still running.
+
+Revision note (2026-09-17 UTC): C01 main-file checkpoint (`b8c63ab1e`) and
+native directory compatibility precision (`dbec83d30`) implemented; 46 focused
+tests and scoped reviews pass. Shared ordinary-file digest checkpoint
+(`dd5d09ca7`) implemented for output and executable identities; 151 tests pass,
+actual registry rapid-rewrite stale count falls from 452 to zero. Stub and
+implementation reviews underway. All unresolved scientific cache and raster
+closure findings remain package blockers, as does live acceptance.
+
+## Latest execution evidence
+
+2026-09-17 UTC: independent actual-consumer probes reproduced stale water-balance
+and landuse reports, live D-Tale CSV/Parquet behavior, post-fire soil logical
+false staleness and CLI/parquet lineage defects. Features-export service ZIP
+and native GDB companion probes both confirm stale output; companion retry also
+deletes an accepted ZIP on conversion failure. A reviewed content/publication
+checkpoint includes all three features-export paths and distinct retained
+companion candidates. No scope waiver or package completion is implied.
+Current per-consumer status: `artifacts/implementation_disposition.md`.
+
+2026-09-17 UTC: features-export checkpoint90a8a3dc9 and implementationae314b581
+close the bounded catalog-main-file/companion publication wave; recursive native
+closure remains open. D-Tale checkpointfbac92404 precedes generation guards and
+optional-map cleanup.22tests pass without availability skips; stub/broad gates
+pass. Review fixes close overlay feature-ID/default propagation, eager partial
+registration and alias-loop error presentation. Real77MiB Parquet pages show
+settled55ms/zero hash bytes versus859–886ms/three full hash reads during cold
+admission or eviction, within the reviewed budget. Normal restarted browser
+workflows remain untested; intercepted UI error-envelope evidence is distinct.
+
+2026-09-17 UTC: C08/C09 report checkpoint drafted with additive embedded Parquet
+provenance, effective mapping/query inputs and explicit historical compatibility.
+Independent reviews and measured budgets precede implementation.
+
+2026-09-17 UTC: C08/C09 implementation follows checkpoints `7d78e9810` and
+`32c7bed70`.87 report tests pass, including actual archive/restore, read and
+publication denial, concurrent generations and relocated catalogs. Scoped reviews
+close historical/malformed/access/root-selection findings; scoped security review passes and implementation is committed as `0f2826a25`. Large native and DuckDB measured
+build/hit budgets pass. Recursive raster closure and soil logical-identity
+performance discovery continue independently; no remaining blocker is waived.
+
+Revision note (2026-09-17 UTC): PF-R02 producer-lineage/publication checkpoint is
+under independent review after report commit0f2826a25. Native export failure
+removes prior output; source mutation/selection during parse admits old rows.
+No runtime edits precede checkpoint. New attempt retention across climate rebuild
+cleanup is an unresolved design finding. Recursive raster discovery and 21
+nonmutating soil snapshot benchmarks are retained; neither has a ratified
+implementation contract yet. Package final runtime/gates remain outstanding.
+
+Revision note (2026-09-17 UTC): PF-R02 ancestor166c8f79d ratified lineage and
+atomic publication after independent correctness/security review and measured
+46/120-year CLI budgets. Implementation now covers both producers, retained
+snapshot parsing, owner/fallback re-selection, strict bounded footer proof and
+content=False readiness, private anchored history, skeleton/archive retention.
+84 then91 focused tests and17 dedicated boundary tests passed. A broader850-test
+run stopped after583passes at a proofless analytical M3 fixture; replaced that
+fixture with a real30-year breakpoint export preserving exact10mm/40,20,10
+intensities. Final affected run, implemented QA timings and scoped security review
+remain open. No runtime deployment/acceptance claim.
+
+Security cross-check restored report authorization in57e60aae9: C09 target write
+access and both version-sidecar access/modes preserve former writer behavior;
+C08 native target behavior stays unchanged. Independent eight after-probes and
+93reporttests pass; original permission regressions retained. All first-wave and
+recursive raster/soil discovery evidence is committed inafe5aed36.
+
+Revision note: CLI same-call authority probes pass; actual budget correction and
+final affected tests remain open. C03/C04 recursive-raster checkpoint drafted,
+without runtime edits. Non-Python audit adds active GL dashboard finding B-F01;
+M1 and final runtime gates remain open.
+
+PF-R02 final affected gate:857passed,34warnings,255.49s. Both native producers,
+post-fire M1/M3, parent replacement, publication and archive boundaries are in
+the combined run. Stub completeness, changed broad-exception and docs gates pass.
+Explicit performance correction committed asf7c832864: actual settled4.85/6.14ms,
+eviction14.69/27.86ms, full export394/876ms, zero settled CLI payload reads,
+exact row/type parity. Original budget failures remain retained. Scoped CLI
+implementation reviews pass; whole-state/live-runtime acceptance remains open.

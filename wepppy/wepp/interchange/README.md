@@ -108,6 +108,11 @@ query engines do not apply conversions automatically.
 Calendar-aware formats use a discovered `climate/wepp_cli.parquet` when present.
 If no climate resource exists, native writers use their established Gregorian
 behavior. An existing unreadable climate Parquet fails explicitly.
+The missing-Parquet producer records verified CLI lineage and atomically publishes
+rows without changing hint/first-CLI selection. Existing-file calendar reads do
+not certify legacy lineage for post-fire execution. See the
+[CLI lineage contract](../../../docs/schemas/climate-parquet-lineage-contract.md);
+retained export history is under `climate_artifacts/cli_parquet/attempts/`.
 
 ## Public APIs
 

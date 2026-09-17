@@ -1,0 +1,1604 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20260916_file_dependency_freshness/artifacts/benchmark_cli_lineage_implementation.py
+ERROR:root:Warning: working directory mismatch: /wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness != /wc1/runs/th/thespian-cleanness
+2026-09-17 04:41:11 [INFO] wepppy.run.thespian-cleanness.climate: Exported CLI parquet with peak intensities
+thespian-cleanness actual_export_with_owner_rehydration: 478.092 ms
+2026-09-17 04:41:12 [INFO] wepppy.run.thespian-cleanness.climate: Exported CLI parquet with peak intensities
+2026-09-17 04:41:12 [INFO] wepppy.run.thespian-cleanness.climate: Exported CLI parquet with peak intensities
+2026-09-17 04:41:13 [INFO] wepppy.run.thespian-cleanness.climate: Exported CLI parquet with peak intensities
+thespian-cleanness actual_export_settled_owner: 417.478 ms
+thespian-cleanness actual_interchange_including_disposable_input_copy: 414.286 ms
+thespian-cleanness content_false_helper_cold: 14.975 ms
+thespian-cleanness content_false_during_admission: 15.244 ms
+thespian-cleanness content_false_admitting: 17.299 ms
+thespian-cleanness content_false_settled: 7.948 ms
+thespian-cleanness content_false_evicted_0: 15.552 ms
+thespian-cleanness content_false_evicted_1: 14.139 ms
+thespian-cleanness content_false_evicted_2: 19.095 ms
+thespian-cleanness content_true_helper_cold: 43.325 ms
+thespian-cleanness content_true_during_admission: 40.081 ms
+thespian-cleanness content_true_admitting: 48.554 ms
+thespian-cleanness content_true_settled: 14.395 ms
+thespian-cleanness content_true_evicted_0: 32.328 ms
+thespian-cleanness content_true_evicted_1: 35.299 ms
+thespian-cleanness content_true_evicted_2: 29.035 ms
+ERROR:root:Warning: working directory mismatch: /wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling != /wc1/runs/pl/plastic-bundling
+2026-09-17 04:42:09 [INFO] wepppy.run.plastic-bundling.climate: Exported CLI parquet with peak intensities
+plastic-bundling actual_export_with_owner_rehydration: 992.715 ms
+2026-09-17 04:42:10 [INFO] wepppy.run.plastic-bundling.climate: Exported CLI parquet with peak intensities
+2026-09-17 04:42:11 [INFO] wepppy.run.plastic-bundling.climate: Exported CLI parquet with peak intensities
+2026-09-17 04:42:12 [INFO] wepppy.run.plastic-bundling.climate: Exported CLI parquet with peak intensities
+plastic-bundling actual_export_settled_owner: 923.666 ms
+plastic-bundling actual_interchange_including_disposable_input_copy: 954.293 ms
+plastic-bundling content_false_helper_cold: 25.649 ms
+plastic-bundling content_false_during_admission: 23.561 ms
+plastic-bundling content_false_admitting: 22.918 ms
+plastic-bundling content_false_settled: 9.263 ms
+plastic-bundling content_false_evicted_0: 25.034 ms
+plastic-bundling content_false_evicted_1: 23.525 ms
+plastic-bundling content_false_evicted_2: 22.813 ms
+plastic-bundling content_true_helper_cold: 40.577 ms
+plastic-bundling content_true_during_admission: 36.730 ms
+plastic-bundling content_true_admitting: 38.008 ms
+plastic-bundling content_true_settled: 12.169 ms
+plastic-bundling content_true_evicted_0: 41.134 ms
+plastic-bundling content_true_evicted_1: 34.677 ms
+plastic-bundling content_true_evicted_2: 38.576 ms
+{
+  "root": "/wc1/batch/qa-cli-lineage-implementation-505e09edd923",
+  "uid": 1000,
+  "gid": 993,
+  "cases": {
+    "thespian-cleanness": {
+      "name": "thespian-cleanness",
+      "source_bytes": 1177082,
+      "source": "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli",
+      "output": "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp_cli.parquet",
+      "owner": "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate.nodb",
+      "measurements": [
+        {
+          "name": "actual_export_with_owner_rehydration",
+          "repeats": 1,
+          "seconds": [
+            0.4780921000055969
+          ],
+          "mean_seconds": 0.4780921000055969,
+          "tracked_read_bytes": {
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli": 3531246
+          },
+          "digest_checks": {
+            "export:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli": 2
+          },
+          "owner_reloads": [
+            {
+              "seconds": 0.004657587967813015,
+              "selected": "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli"
+            }
+          ]
+        },
+        {
+          "name": "actual_export_settled_owner",
+          "repeats": 3,
+          "seconds": [
+            0.45215494208969176,
+            0.3971649198792875,
+            0.40311268297955394
+          ],
+          "mean_seconds": 0.4174775149828444,
+          "tracked_read_bytes": {
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli": 10593738
+          },
+          "digest_checks": {
+            "export:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli": 6
+          },
+          "owner_reloads": [
+            {
+              "seconds": 0.00024639908224344254,
+              "selected": "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli"
+            },
+            {
+              "seconds": 0.00020777597092092037,
+              "selected": "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli"
+            },
+            {
+              "seconds": 0.0002721310593187809,
+              "selected": "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli"
+            }
+          ]
+        },
+        {
+          "name": "actual_interchange_including_disposable_input_copy",
+          "repeats": 3,
+          "seconds": [
+            0.4128406329546124,
+            0.41403668792918324,
+            0.41598121100105345
+          ],
+          "mean_seconds": 0.4142861772949497,
+          "tracked_read_bytes": {},
+          "digest_checks": {
+            "export:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/interchange-c1c657d7/climate/wepp.cli": 2,
+            "export:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/interchange-a96531e6/climate/wepp.cli": 2,
+            "export:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/interchange-1da98b89/climate/wepp.cli": 2
+          },
+          "owner_reloads": []
+        },
+        {
+          "name": "content_false_helper_cold",
+          "repeats": 1,
+          "seconds": [
+            0.014975190861150622
+          ],
+          "mean_seconds": 0.014975190861150622,
+          "tracked_read_bytes": {
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli": 1177082,
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp_cli.parquet": 65548
+          },
+          "digest_checks": {
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli": 1
+          },
+          "owner_reloads": []
+        },
+        {
+          "name": "content_false_during_admission",
+          "repeats": 2,
+          "seconds": [
+            0.01582481898367405,
+            0.01466224598698318
+          ],
+          "mean_seconds": 0.015243532485328615,
+          "tracked_read_bytes": {
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli": 2354164,
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp_cli.parquet": 131096
+          },
+          "digest_checks": {
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli": 2
+          },
+          "owner_reloads": []
+        },
+        {
+          "name": "content_false_admitting",
+          "repeats": 1,
+          "seconds": [
+            0.017299241852015257
+          ],
+          "mean_seconds": 0.017299241852015257,
+          "tracked_read_bytes": {
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli": 1177082,
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp_cli.parquet": 65548
+          },
+          "digest_checks": {
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli": 1
+          },
+          "owner_reloads": []
+        },
+        {
+          "name": "content_false_settled",
+          "repeats": 100,
+          "seconds": [
+            0.008490809006616473,
+            0.008403010200709105,
+            0.008240037132054567,
+            0.008225549012422562,
+            0.008893689140677452,
+            0.00783959380351007,
+            0.008591665886342525,
+            0.007636928930878639,
+            0.007612426998093724,
+            0.00827017892152071,
+            0.008285365998744965,
+            0.008673720993101597,
+            0.007718228967860341,
+            0.009113065898418427,
+            0.00740721495822072,
+            0.0077229279559105635,
+            0.008261806098744273,
+            0.00806636898778379,
+            0.007708173943683505,
+            0.00867104111239314,
+            0.007771522039547563,
+            0.008857357082888484,
+            0.007713912054896355,
+            0.007982481038197875,
+            0.008741501020267606,
+            0.007117151981219649,
+            0.007973031140863895,
+            0.008988177869468927,
+            0.008844278054311872,
+            0.009179468965157866,
+            0.008570591919124126,
+            0.009371269959956408,
+            0.008412701077759266,
+            0.008403073064982891,
+            0.009233878226950765,
+            0.00884954584762454,
+            0.008663471788167953,
+            0.008897749008610845,
+            0.009084444027394056,
+            0.009093157947063446,
+            0.009026753017678857,
+            0.008892916841432452,
+            0.008669928880408406,
+            0.00889869686216116,
+            0.00841757096350193,
+            0.008849092992022634,
+            0.008118466008454561,
+            0.008388899033889174,
+            0.008085429901257157,
+            0.007955387933179736,
+            0.007531834067776799,
+            0.00835911207832396,
+            0.007950346916913986,
+            0.007494693156331778,
+            0.0066179209388792515,
+            0.006452749948948622,
+            0.006269353907555342,
+            0.006183621007949114,
+            0.006045971997082233,
+            0.006024888949468732,
+            0.00644951406866312,
+            0.006447098916396499,
+            0.006626953836530447,
+            0.00763710611499846,
+            0.007465731119737029,
+            0.006575364852324128,
+            0.008010393008589745,
+            0.007114248815923929,
+            0.006578135071322322,
+            0.007250556955114007,
+            0.006719461875036359,
+            0.006968787172809243,
+            0.007376010995358229,
+            0.007458469830453396,
+            0.007815930992364883,
+            0.008373515913262963,
+            0.008600645931437612,
+            0.00810167589224875,
+            0.007482738932594657,
+            0.008254660060629249,
+            0.007986770942807198,
+            0.0082503710873425,
+            0.007746066898107529,
+            0.008204390993341804,
+            0.007627286948263645,
+            0.008965794928371906,
+            0.007478741928935051,
+            0.008936658967286348,
+            0.007571333786472678,
+            0.008329211035743356,
+            0.007841749116778374,
+            0.008068833034485579,
+            0.008760762866586447,
+            0.007937524002045393,
+            0.0074856949504464865,
+            0.007610412081703544,
+            0.006798138841986656,
+            0.007344142999500036,
+            0.007219310849905014,
+            0.0074740261770784855
+          ],
+          "mean_seconds": 0.007947584262583405,
+          "tracked_read_bytes": {
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp_cli.parquet": 6554800
+          },
+          "digest_checks": {
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli": 100
+          },
+          "owner_reloads": []
+        },
+        {
+          "name": "content_false_evicted_0",
+          "repeats": 1,
+          "seconds": [
+            0.015552043914794922
+          ],
+          "mean_seconds": 0.015552043914794922,
+          "tracked_read_bytes": {
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli": 1177082,
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp_cli.parquet": 65548
+          },
+          "digest_checks": {
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli": 1
+          },
+          "owner_reloads": []
+        },
+        {
+          "name": "content_false_evicted_1",
+          "repeats": 1,
+          "seconds": [
+            0.014138508820906281
+          ],
+          "mean_seconds": 0.014138508820906281,
+          "tracked_read_bytes": {
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli": 1177082,
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp_cli.parquet": 65548
+          },
+          "digest_checks": {
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli": 1
+          },
+          "owner_reloads": []
+        },
+        {
+          "name": "content_false_evicted_2",
+          "repeats": 1,
+          "seconds": [
+            0.019094947027042508
+          ],
+          "mean_seconds": 0.019094947027042508,
+          "tracked_read_bytes": {
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli": 1177082,
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp_cli.parquet": 65548
+          },
+          "digest_checks": {
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli": 1
+          },
+          "owner_reloads": []
+        },
+        {
+          "name": "content_true_helper_cold",
+          "repeats": 1,
+          "seconds": [
+            0.04332547797821462
+          ],
+          "mean_seconds": 0.04332547797821462,
+          "tracked_read_bytes": {
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli": 1177082,
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp_cli.parquet": 920439
+          },
+          "digest_checks": {
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli": 1,
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp_cli.parquet": 1
+          },
+          "owner_reloads": []
+        },
+        {
+          "name": "content_true_during_admission",
+          "repeats": 2,
+          "seconds": [
+            0.041458028834313154,
+            0.03870365093462169
+          ],
+          "mean_seconds": 0.04008083988446742,
+          "tracked_read_bytes": {
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli": 2354164,
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp_cli.parquet": 1840878
+          },
+          "digest_checks": {
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli": 2,
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp_cli.parquet": 2
+          },
+          "owner_reloads": []
+        },
+        {
+          "name": "content_true_admitting",
+          "repeats": 1,
+          "seconds": [
+            0.04855430289171636
+          ],
+          "mean_seconds": 0.04855430289171636,
+          "tracked_read_bytes": {
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli": 1177082,
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp_cli.parquet": 920439
+          },
+          "digest_checks": {
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli": 1,
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp_cli.parquet": 1
+          },
+          "owner_reloads": []
+        },
+        {
+          "name": "content_true_settled",
+          "repeats": 100,
+          "seconds": [
+            0.02274476015008986,
+            0.01994374580681324,
+            0.01964051788672805,
+            0.01980864512734115,
+            0.02217726712115109,
+            0.02091286890208721,
+            0.022498321952298284,
+            0.022296679904684424,
+            0.021605701884254813,
+            0.02132342802360654,
+            0.020932701881974936,
+            0.020115524996072054,
+            0.019566206028684974,
+            0.018516684882342815,
+            0.017067807028070092,
+            0.013467161916196346,
+            0.015051513910293579,
+            0.016701919957995415,
+            0.01630856399424374,
+            0.016502059996128082,
+            0.01751616201363504,
+            0.017614356009289622,
+            0.01830951403826475,
+            0.022587211104109883,
+            0.01843838393688202,
+            0.01857591513544321,
+            0.017763989977538586,
+            0.018894504057243466,
+            0.018561671022325754,
+            0.018167038913816214,
+            0.018852441105991602,
+            0.017347936052829027,
+            0.018084847135469317,
+            0.01769641600549221,
+            0.017296127043664455,
+            0.012753644026815891,
+            0.010452391114085913,
+            0.01130466302856803,
+            0.010140521917492151,
+            0.00996746914461255,
+            0.011834898963570595,
+            0.012213087873533368,
+            0.012715924996882677,
+            0.01137827499769628,
+            0.011964163975790143,
+            0.010124291991814971,
+            0.011455447180196643,
+            0.009259720798581839,
+            0.00800057896412909,
+            0.009155187057331204,
+            0.008829855127260089,
+            0.0077897170558571815,
+            0.008128912886604667,
+            0.007872781017795205,
+            0.009031676920130849,
+            0.009271704126149416,
+            0.010277236811816692,
+            0.009655550122261047,
+            0.009134849067777395,
+            0.00870133307762444,
+            0.009795797057449818,
+            0.010674254037439823,
+            0.012402447871863842,
+            0.011195538798347116,
+            0.0104785340372473,
+            0.01206758408807218,
+            0.011458235792815685,
+            0.013110670959576964,
+            0.013320155208930373,
+            0.013148779980838299,
+            0.013495742110535502,
+            0.013510609976947308,
+            0.012473169015720487,
+            0.012040989939123392,
+            0.018780292943120003,
+            0.013843161053955555,
+            0.014009648934006691,
+            0.0135684828273952,
+            0.012569803046062589,
+            0.012090889969840646,
+            0.013033450115472078,
+            0.013714654138311744,
+            0.013972504995763302,
+            0.014402186963707209,
+            0.012879959074780345,
+            0.01319439010694623,
+            0.013807079056277871,
+            0.014255850110203028,
+            0.013273978140205145,
+            0.013064435217529535,
+            0.013579698046669364,
+            0.013817775063216686,
+            0.013195590116083622,
+            0.01281604403629899,
+            0.015151505125686526,
+            0.01422752789221704,
+            0.012772583868354559,
+            0.01308914297260344,
+            0.013396216090768576,
+            0.01353719993494451
+          ],
+          "mean_seconds": 0.014395190358627588,
+          "tracked_read_bytes": {
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp_cli.parquet": 6554800
+          },
+          "digest_checks": {
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli": 100,
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp_cli.parquet": 100
+          },
+          "owner_reloads": []
+        },
+        {
+          "name": "content_true_evicted_0",
+          "repeats": 1,
+          "seconds": [
+            0.03232809994369745
+          ],
+          "mean_seconds": 0.03232809994369745,
+          "tracked_read_bytes": {
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli": 1177082,
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp_cli.parquet": 920439
+          },
+          "digest_checks": {
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli": 1,
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp_cli.parquet": 1
+          },
+          "owner_reloads": []
+        },
+        {
+          "name": "content_true_evicted_1",
+          "repeats": 1,
+          "seconds": [
+            0.03529863618314266
+          ],
+          "mean_seconds": 0.03529863618314266,
+          "tracked_read_bytes": {
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli": 1177082,
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp_cli.parquet": 920439
+          },
+          "digest_checks": {
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli": 1,
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp_cli.parquet": 1
+          },
+          "owner_reloads": []
+        },
+        {
+          "name": "content_true_evicted_2",
+          "repeats": 1,
+          "seconds": [
+            0.02903504902496934
+          ],
+          "mean_seconds": 0.02903504902496934,
+          "tracked_read_bytes": {
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli": 1177082,
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp_cli.parquet": 920439
+          },
+          "digest_checks": {
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp.cli": 1,
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp_cli.parquet": 1
+          },
+          "owner_reloads": []
+        }
+      ],
+      "rows_and_types_equal_original": true,
+      "rows": 16802,
+      "output_bytes": 854891,
+      "output_mode": "0o640",
+      "proof": {
+        "interpretation": "1",
+        "producer": "climate",
+        "resolved_source": "climate/wepp.cli",
+        "source": "climate/wepp.cli",
+        "source_sha256": "83b75b82327f0ee66ce9c353edde0af737a4e3df9d992f80435f03b65b064e09",
+        "version": 1
+      },
+      "interchange_equal_rows_types": true,
+      "content_false_eviction_cache_states": [
+        {
+          "before": {
+            "digest": {
+              "hits": 100,
+              "misses": 513,
+              "maxsize": 512,
+              "currsize": 512
+            },
+            "observation": {
+              "hits": 615,
+              "misses": 513,
+              "maxsize": 512,
+              "currsize": 512
+            }
+          },
+          "after": {
+            "digest": {
+              "hits": 100,
+              "misses": 513,
+              "maxsize": 512,
+              "currsize": 512
+            },
+            "observation": {
+              "hits": 615,
+              "misses": 514,
+              "maxsize": 512,
+              "currsize": 512
+            }
+          }
+        },
+        {
+          "before": {
+            "digest": {
+              "hits": 100,
+              "misses": 1025,
+              "maxsize": 512,
+              "currsize": 512
+            },
+            "observation": {
+              "hits": 1127,
+              "misses": 1026,
+              "maxsize": 512,
+              "currsize": 512
+            }
+          },
+          "after": {
+            "digest": {
+              "hits": 100,
+              "misses": 1025,
+              "maxsize": 512,
+              "currsize": 512
+            },
+            "observation": {
+              "hits": 1127,
+              "misses": 1027,
+              "maxsize": 512,
+              "currsize": 512
+            }
+          }
+        },
+        {
+          "before": {
+            "digest": {
+              "hits": 100,
+              "misses": 1537,
+              "maxsize": 512,
+              "currsize": 512
+            },
+            "observation": {
+              "hits": 1639,
+              "misses": 1539,
+              "maxsize": 512,
+              "currsize": 512
+            }
+          },
+          "after": {
+            "digest": {
+              "hits": 100,
+              "misses": 1537,
+              "maxsize": 512,
+              "currsize": 512
+            },
+            "observation": {
+              "hits": 1639,
+              "misses": 1540,
+              "maxsize": 512,
+              "currsize": 512
+            }
+          }
+        }
+      ],
+      "content_true_eviction_cache_states": [
+        {
+          "before": {
+            "digest": {
+              "hits": 200,
+              "misses": 514,
+              "maxsize": 512,
+              "currsize": 512
+            },
+            "observation": {
+              "hits": 718,
+              "misses": 514,
+              "maxsize": 512,
+              "currsize": 512
+            }
+          },
+          "after": {
+            "digest": {
+              "hits": 200,
+              "misses": 514,
+              "maxsize": 512,
+              "currsize": 512
+            },
+            "observation": {
+              "hits": 718,
+              "misses": 516,
+              "maxsize": 512,
+              "currsize": 512
+            }
+          }
+        },
+        {
+          "before": {
+            "digest": {
+              "hits": 200,
+              "misses": 1026,
+              "maxsize": 512,
+              "currsize": 512
+            },
+            "observation": {
+              "hits": 1230,
+              "misses": 1028,
+              "maxsize": 512,
+              "currsize": 512
+            }
+          },
+          "after": {
+            "digest": {
+              "hits": 200,
+              "misses": 1026,
+              "maxsize": 512,
+              "currsize": 512
+            },
+            "observation": {
+              "hits": 1230,
+              "misses": 1030,
+              "maxsize": 512,
+              "currsize": 512
+            }
+          }
+        },
+        {
+          "before": {
+            "digest": {
+              "hits": 200,
+              "misses": 1538,
+              "maxsize": 512,
+              "currsize": 512
+            },
+            "observation": {
+              "hits": 1742,
+              "misses": 1542,
+              "maxsize": 512,
+              "currsize": 512
+            }
+          },
+          "after": {
+            "digest": {
+              "hits": 200,
+              "misses": 1538,
+              "maxsize": 512,
+              "currsize": 512
+            },
+            "observation": {
+              "hits": 1742,
+              "misses": 1544,
+              "maxsize": 512,
+              "currsize": 512
+            }
+          }
+        }
+      ],
+      "named_owner_inputs_unchanged": true,
+      "attempts": [
+        {
+          "path": "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate_artifacts/cli_parquet/attempts/bd7edd3e0fe8474e84c5e53ee1f93833",
+          "mode": "0o700",
+          "status": {
+            "status": "complete",
+            "source": {
+              "source": "climate/wepp.cli",
+              "resolved_source": "climate/wepp.cli"
+            },
+            "source_sha256": "83b75b82327f0ee66ce9c353edde0af737a4e3df9d992f80435f03b65b064e09",
+            "target": "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp_cli.parquet",
+            "producer": "climate",
+            "error": null
+          },
+          "snapshot_bytes": 1177082
+        },
+        {
+          "path": "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate_artifacts/cli_parquet/attempts/3cfc02afed0c4a6ab0265c12944b6c12",
+          "mode": "0o700",
+          "status": {
+            "status": "complete",
+            "source": {
+              "source": "climate/wepp.cli",
+              "resolved_source": "climate/wepp.cli"
+            },
+            "source_sha256": "83b75b82327f0ee66ce9c353edde0af737a4e3df9d992f80435f03b65b064e09",
+            "target": "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp_cli.parquet",
+            "producer": "climate",
+            "error": null
+          },
+          "snapshot_bytes": 1177082
+        },
+        {
+          "path": "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate_artifacts/cli_parquet/attempts/f4c7d6383091466db7102a04bfd7566e",
+          "mode": "0o700",
+          "status": {
+            "status": "complete",
+            "source": {
+              "source": "climate/wepp.cli",
+              "resolved_source": "climate/wepp.cli"
+            },
+            "source_sha256": "83b75b82327f0ee66ce9c353edde0af737a4e3df9d992f80435f03b65b064e09",
+            "target": "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp_cli.parquet",
+            "producer": "climate",
+            "error": null
+          },
+          "snapshot_bytes": 1177082
+        },
+        {
+          "path": "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate_artifacts/cli_parquet/attempts/52562923d9194159a471efcdce9e5dac",
+          "mode": "0o700",
+          "status": {
+            "status": "complete",
+            "source": {
+              "source": "climate/wepp.cli",
+              "resolved_source": "climate/wepp.cli"
+            },
+            "source_sha256": "83b75b82327f0ee66ce9c353edde0af737a4e3df9d992f80435f03b65b064e09",
+            "target": "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/thespian-cleanness/climate/wepp_cli.parquet",
+            "producer": "climate",
+            "error": null
+          },
+          "snapshot_bytes": 1177082
+        }
+      ]
+    },
+    "plastic-bundling": {
+      "name": "plastic-bundling",
+      "source_bytes": 3112776,
+      "source": "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli",
+      "output": "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp_cli.parquet",
+      "owner": "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate.nodb",
+      "measurements": [
+        {
+          "name": "actual_export_with_owner_rehydration",
+          "repeats": 1,
+          "seconds": [
+            0.9927152351010591
+          ],
+          "mean_seconds": 0.9927152351010591,
+          "tracked_read_bytes": {
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli": 9338328
+          },
+          "digest_checks": {
+            "export:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli": 2
+          },
+          "owner_reloads": [
+            {
+              "seconds": 0.004202990094199777,
+              "selected": "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli"
+            }
+          ]
+        },
+        {
+          "name": "actual_export_settled_owner",
+          "repeats": 3,
+          "seconds": [
+            0.9154265930410475,
+            0.9327931059524417,
+            0.9227775000035763
+          ],
+          "mean_seconds": 0.9236657329990218,
+          "tracked_read_bytes": {
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli": 28014984
+          },
+          "digest_checks": {
+            "export:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli": 6
+          },
+          "owner_reloads": [
+            {
+              "seconds": 0.00025986903347074986,
+              "selected": "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli"
+            },
+            {
+              "seconds": 0.00021945894695818424,
+              "selected": "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli"
+            },
+            {
+              "seconds": 0.0002974439412355423,
+              "selected": "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli"
+            }
+          ]
+        },
+        {
+          "name": "actual_interchange_including_disposable_input_copy",
+          "repeats": 3,
+          "seconds": [
+            0.9604660759214312,
+            0.9565298648085445,
+            0.9458831970114261
+          ],
+          "mean_seconds": 0.9542930459138006,
+          "tracked_read_bytes": {},
+          "digest_checks": {
+            "export:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/interchange-5098e165/climate/wepp.cli": 2,
+            "export:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/interchange-ff36c99e/climate/wepp.cli": 2,
+            "export:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/interchange-a619458c/climate/wepp.cli": 2
+          },
+          "owner_reloads": []
+        },
+        {
+          "name": "content_false_helper_cold",
+          "repeats": 1,
+          "seconds": [
+            0.025649243965744972
+          ],
+          "mean_seconds": 0.025649243965744972,
+          "tracked_read_bytes": {
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli": 3112776,
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp_cli.parquet": 65548
+          },
+          "digest_checks": {
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli": 1
+          },
+          "owner_reloads": []
+        },
+        {
+          "name": "content_false_during_admission",
+          "repeats": 2,
+          "seconds": [
+            0.023265014868229628,
+            0.02385708410292864
+          ],
+          "mean_seconds": 0.023561049485579133,
+          "tracked_read_bytes": {
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli": 6225552,
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp_cli.parquet": 131096
+          },
+          "digest_checks": {
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli": 2
+          },
+          "owner_reloads": []
+        },
+        {
+          "name": "content_false_admitting",
+          "repeats": 1,
+          "seconds": [
+            0.022918245056644082
+          ],
+          "mean_seconds": 0.022918245056644082,
+          "tracked_read_bytes": {
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli": 3112776,
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp_cli.parquet": 65548
+          },
+          "digest_checks": {
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli": 1
+          },
+          "owner_reloads": []
+        },
+        {
+          "name": "content_false_settled",
+          "repeats": 100,
+          "seconds": [
+            0.009616879979148507,
+            0.009695329004898667,
+            0.00966028799302876,
+            0.009562722174450755,
+            0.00894199893809855,
+            0.009091621963307261,
+            0.009059773990884423,
+            0.009188186144456267,
+            0.015507215866819024,
+            0.013040731893852353,
+            0.011074990965425968,
+            0.010991065064445138,
+            0.008906120900064707,
+            0.009263135027140379,
+            0.009373092092573643,
+            0.009702873881906271,
+            0.009845616994425654,
+            0.009096310008317232,
+            0.009533670963719487,
+            0.009002519072964787,
+            0.008919044863432646,
+            0.009095540968701243,
+            0.008909421972930431,
+            0.0089844879694283,
+            0.00954302097670734,
+            0.009372703032568097,
+            0.009307144908234477,
+            0.009565131040289998,
+            0.009482237976044416,
+            0.009111926890909672,
+            0.009091879008337855,
+            0.008971880190074444,
+            0.00881198886781931,
+            0.008796414127573371,
+            0.00885408604517579,
+            0.009544405154883862,
+            0.009523639921098948,
+            0.009812182048335671,
+            0.010528014041483402,
+            0.010615202132612467,
+            0.009475814178586006,
+            0.0077796808909624815,
+            0.008194342954084277,
+            0.008018509950488806,
+            0.008987608132883906,
+            0.00911127612926066,
+            0.00891529698856175,
+            0.010286919074133039,
+            0.009815884986892343,
+            0.01029339898377657,
+            0.00912395492196083,
+            0.009008457884192467,
+            0.008996499003842473,
+            0.008952492149546742,
+            0.008912937017157674,
+            0.008686727844178677,
+            0.008778476854786277,
+            0.009151089005172253,
+            0.009042432997375727,
+            0.009314356837421656,
+            0.008718017023056746,
+            0.00879882788285613,
+            0.009113091975450516,
+            0.009079160168766975,
+            0.008945527952164412,
+            0.00863059819675982,
+            0.008353214943781495,
+            0.009182941168546677,
+            0.008881469955667853,
+            0.00960075599141419,
+            0.009466337040066719,
+            0.008613198064267635,
+            0.008260970935225487,
+            0.008138200966641307,
+            0.008372205076739192,
+            0.008978302823379636,
+            0.009185713017359376,
+            0.008710358059033751,
+            0.008596444968134165,
+            0.008923400891944766,
+            0.008597592124715447,
+            0.0095271619502455,
+            0.009074668167158961,
+            0.009525880916044116,
+            0.009412789950147271,
+            0.008973276009783149,
+            0.008913292083889246,
+            0.008941038977354765,
+            0.00948959612287581,
+            0.009523109998553991,
+            0.009084081975743175,
+            0.008931369986385107,
+            0.009499709820374846,
+            0.009080789983272552,
+            0.008950559888035059,
+            0.008478579111397266,
+            0.009163829032331705,
+            0.008918729843571782,
+            0.008968343026936054,
+            0.008889994118362665
+          ],
+          "mean_seconds": 0.009263337820302696,
+          "tracked_read_bytes": {
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp_cli.parquet": 6554800
+          },
+          "digest_checks": {
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli": 100
+          },
+          "owner_reloads": []
+        },
+        {
+          "name": "content_false_evicted_0",
+          "repeats": 1,
+          "seconds": [
+            0.025033839978277683
+          ],
+          "mean_seconds": 0.025033839978277683,
+          "tracked_read_bytes": {
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli": 3112776,
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp_cli.parquet": 65548
+          },
+          "digest_checks": {
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli": 1
+          },
+          "owner_reloads": []
+        },
+        {
+          "name": "content_false_evicted_1",
+          "repeats": 1,
+          "seconds": [
+            0.023525134893134236
+          ],
+          "mean_seconds": 0.023525134893134236,
+          "tracked_read_bytes": {
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli": 3112776,
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp_cli.parquet": 65548
+          },
+          "digest_checks": {
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli": 1
+          },
+          "owner_reloads": []
+        },
+        {
+          "name": "content_false_evicted_2",
+          "repeats": 1,
+          "seconds": [
+            0.022812583949416876
+          ],
+          "mean_seconds": 0.022812583949416876,
+          "tracked_read_bytes": {
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli": 3112776,
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp_cli.parquet": 65548
+          },
+          "digest_checks": {
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli": 1
+          },
+          "owner_reloads": []
+        },
+        {
+          "name": "content_true_helper_cold",
+          "repeats": 1,
+          "seconds": [
+            0.04057733900845051
+          ],
+          "mean_seconds": 0.04057733900845051,
+          "tracked_read_bytes": {
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli": 3112776,
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp_cli.parquet": 2504626
+          },
+          "digest_checks": {
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli": 1,
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp_cli.parquet": 1
+          },
+          "owner_reloads": []
+        },
+        {
+          "name": "content_true_during_admission",
+          "repeats": 2,
+          "seconds": [
+            0.035717485938221216,
+            0.03774208016693592
+          ],
+          "mean_seconds": 0.03672978305257857,
+          "tracked_read_bytes": {
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli": 6225552,
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp_cli.parquet": 5009252
+          },
+          "digest_checks": {
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli": 2,
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp_cli.parquet": 2
+          },
+          "owner_reloads": []
+        },
+        {
+          "name": "content_true_admitting",
+          "repeats": 1,
+          "seconds": [
+            0.038007902912795544
+          ],
+          "mean_seconds": 0.038007902912795544,
+          "tracked_read_bytes": {
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli": 3112776,
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp_cli.parquet": 2504626
+          },
+          "digest_checks": {
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli": 1,
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp_cli.parquet": 1
+          },
+          "owner_reloads": []
+        },
+        {
+          "name": "content_true_settled",
+          "repeats": 100,
+          "seconds": [
+            0.009845017921179533,
+            0.01168740401044488,
+            0.011832186952233315,
+            0.012263848911970854,
+            0.013462975854054093,
+            0.011920432094484568,
+            0.01073256297968328,
+            0.011593688977882266,
+            0.011013732990249991,
+            0.012656243983656168,
+            0.011639298871159554,
+            0.011305953143164515,
+            0.010537979891523719,
+            0.012411002069711685,
+            0.011814279947429895,
+            0.012467808788642287,
+            0.015800986904650927,
+            0.012300197966396809,
+            0.011669934960082173,
+            0.011945385951548815,
+            0.01237064995802939,
+            0.012105318019166589,
+            0.01228997204452753,
+            0.012251639971509576,
+            0.012210018001496792,
+            0.012332431972026825,
+            0.01252704719081521,
+            0.012380277970805764,
+            0.012540638912469149,
+            0.013012983137741685,
+            0.013509779004380107,
+            0.013384143123403192,
+            0.012759246863424778,
+            0.012127741938456893,
+            0.011634845985099673,
+            0.012523629935458302,
+            0.013109886087477207,
+            0.013303139014169574,
+            0.012358852894976735,
+            0.013137699104845524,
+            0.011519522871822119,
+            0.010238708928227425,
+            0.013222895096987486,
+            0.012134034186601639,
+            0.01129832398146391,
+            0.011637462070211768,
+            0.012026882963255048,
+            0.012025765143334866,
+            0.011923674959689379,
+            0.01203620689921081,
+            0.012895432068035007,
+            0.012579817092046142,
+            0.01320589892566204,
+            0.013882115948945284,
+            0.01326859393157065,
+            0.012953494908288121,
+            0.012409886810928583,
+            0.013096370035782456,
+            0.012721286853775382,
+            0.014713675947859883,
+            0.01191995502449572,
+            0.011433935957029462,
+            0.011602983111515641,
+            0.013211244018748403,
+            0.012688094982877374,
+            0.011353282956406474,
+            0.012199119897559285,
+            0.012515810085460544,
+            0.013514920137822628,
+            0.013017532881349325,
+            0.012834093999117613,
+            0.013017753139138222,
+            0.01302959001623094,
+            0.012966381153091788,
+            0.01250428194180131,
+            0.011929062893614173,
+            0.012870986945927143,
+            0.013182703871279955,
+            0.01151886093430221,
+            0.012044182047247887,
+            0.011977211106568575,
+            0.01221899688243866,
+            0.011903943959623575,
+            0.012812554836273193,
+            0.012585729826241732,
+            0.011902221944183111,
+            0.011651759035885334,
+            0.012129608076065779,
+            0.011789833195507526,
+            0.012473382987082005,
+            0.01204027608036995,
+            0.011951606953516603,
+            0.013162479968741536,
+            0.012734706979244947,
+            0.012652315897867084,
+            0.010496830800548196,
+            0.00825709500350058,
+            0.008171072928234935,
+            0.007969547994434834,
+            0.008113163989037275
+          ],
+          "mean_seconds": 0.012169100283645094,
+          "tracked_read_bytes": {
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp_cli.parquet": 6554800
+          },
+          "digest_checks": {
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli": 100,
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp_cli.parquet": 100
+          },
+          "owner_reloads": []
+        },
+        {
+          "name": "content_true_evicted_0",
+          "repeats": 1,
+          "seconds": [
+            0.041133800987154245
+          ],
+          "mean_seconds": 0.041133800987154245,
+          "tracked_read_bytes": {
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli": 3112776,
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp_cli.parquet": 2504626
+          },
+          "digest_checks": {
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli": 1,
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp_cli.parquet": 1
+          },
+          "owner_reloads": []
+        },
+        {
+          "name": "content_true_evicted_1",
+          "repeats": 1,
+          "seconds": [
+            0.03467746498063207
+          ],
+          "mean_seconds": 0.03467746498063207,
+          "tracked_read_bytes": {
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli": 3112776,
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp_cli.parquet": 2504626
+          },
+          "digest_checks": {
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli": 1,
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp_cli.parquet": 1
+          },
+          "owner_reloads": []
+        },
+        {
+          "name": "content_true_evicted_2",
+          "repeats": 1,
+          "seconds": [
+            0.038575961953029037
+          ],
+          "mean_seconds": 0.038575961953029037,
+          "tracked_read_bytes": {
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli": 3112776,
+            "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp_cli.parquet": 2504626
+          },
+          "digest_checks": {
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp.cli": 1,
+            "readiness:/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp_cli.parquet": 1
+          },
+          "owner_reloads": []
+        }
+      ],
+      "rows_and_types_equal_original": true,
+      "rows": 43829,
+      "output_bytes": 2439078,
+      "output_mode": "0o640",
+      "proof": {
+        "interpretation": "1",
+        "producer": "climate",
+        "resolved_source": "climate/wepp.cli",
+        "source": "climate/wepp.cli",
+        "source_sha256": "abdbe1106cb2d4ff691d0b40e28cd8cfc192acb6d5b9d1401f02d06060f50d29",
+        "version": 1
+      },
+      "interchange_equal_rows_types": true,
+      "content_false_eviction_cache_states": [
+        {
+          "before": {
+            "digest": {
+              "hits": 100,
+              "misses": 513,
+              "maxsize": 512,
+              "currsize": 512
+            },
+            "observation": {
+              "hits": 615,
+              "misses": 513,
+              "maxsize": 512,
+              "currsize": 512
+            }
+          },
+          "after": {
+            "digest": {
+              "hits": 100,
+              "misses": 513,
+              "maxsize": 512,
+              "currsize": 512
+            },
+            "observation": {
+              "hits": 615,
+              "misses": 514,
+              "maxsize": 512,
+              "currsize": 512
+            }
+          }
+        },
+        {
+          "before": {
+            "digest": {
+              "hits": 100,
+              "misses": 1025,
+              "maxsize": 512,
+              "currsize": 512
+            },
+            "observation": {
+              "hits": 1127,
+              "misses": 1026,
+              "maxsize": 512,
+              "currsize": 512
+            }
+          },
+          "after": {
+            "digest": {
+              "hits": 100,
+              "misses": 1025,
+              "maxsize": 512,
+              "currsize": 512
+            },
+            "observation": {
+              "hits": 1127,
+              "misses": 1027,
+              "maxsize": 512,
+              "currsize": 512
+            }
+          }
+        },
+        {
+          "before": {
+            "digest": {
+              "hits": 100,
+              "misses": 1537,
+              "maxsize": 512,
+              "currsize": 512
+            },
+            "observation": {
+              "hits": 1639,
+              "misses": 1539,
+              "maxsize": 512,
+              "currsize": 512
+            }
+          },
+          "after": {
+            "digest": {
+              "hits": 100,
+              "misses": 1537,
+              "maxsize": 512,
+              "currsize": 512
+            },
+            "observation": {
+              "hits": 1639,
+              "misses": 1540,
+              "maxsize": 512,
+              "currsize": 512
+            }
+          }
+        }
+      ],
+      "content_true_eviction_cache_states": [
+        {
+          "before": {
+            "digest": {
+              "hits": 200,
+              "misses": 514,
+              "maxsize": 512,
+              "currsize": 512
+            },
+            "observation": {
+              "hits": 718,
+              "misses": 514,
+              "maxsize": 512,
+              "currsize": 512
+            }
+          },
+          "after": {
+            "digest": {
+              "hits": 200,
+              "misses": 514,
+              "maxsize": 512,
+              "currsize": 512
+            },
+            "observation": {
+              "hits": 718,
+              "misses": 516,
+              "maxsize": 512,
+              "currsize": 512
+            }
+          }
+        },
+        {
+          "before": {
+            "digest": {
+              "hits": 200,
+              "misses": 1026,
+              "maxsize": 512,
+              "currsize": 512
+            },
+            "observation": {
+              "hits": 1230,
+              "misses": 1028,
+              "maxsize": 512,
+              "currsize": 512
+            }
+          },
+          "after": {
+            "digest": {
+              "hits": 200,
+              "misses": 1026,
+              "maxsize": 512,
+              "currsize": 512
+            },
+            "observation": {
+              "hits": 1230,
+              "misses": 1030,
+              "maxsize": 512,
+              "currsize": 512
+            }
+          }
+        },
+        {
+          "before": {
+            "digest": {
+              "hits": 200,
+              "misses": 1538,
+              "maxsize": 512,
+              "currsize": 512
+            },
+            "observation": {
+              "hits": 1742,
+              "misses": 1542,
+              "maxsize": 512,
+              "currsize": 512
+            }
+          },
+          "after": {
+            "digest": {
+              "hits": 200,
+              "misses": 1538,
+              "maxsize": 512,
+              "currsize": 512
+            },
+            "observation": {
+              "hits": 1742,
+              "misses": 1544,
+              "maxsize": 512,
+              "currsize": 512
+            }
+          }
+        }
+      ],
+      "named_owner_inputs_unchanged": true,
+      "attempts": [
+        {
+          "path": "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate_artifacts/cli_parquet/attempts/c3be022afb824b7991fbf5e18932d4c2",
+          "mode": "0o700",
+          "status": {
+            "status": "complete",
+            "source": {
+              "source": "climate/wepp.cli",
+              "resolved_source": "climate/wepp.cli"
+            },
+            "source_sha256": "abdbe1106cb2d4ff691d0b40e28cd8cfc192acb6d5b9d1401f02d06060f50d29",
+            "target": "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp_cli.parquet",
+            "producer": "climate",
+            "error": null
+          },
+          "snapshot_bytes": 3112776
+        },
+        {
+          "path": "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate_artifacts/cli_parquet/attempts/269b7eccda3444a6a0c7a145e5fea601",
+          "mode": "0o700",
+          "status": {
+            "status": "complete",
+            "source": {
+              "source": "climate/wepp.cli",
+              "resolved_source": "climate/wepp.cli"
+            },
+            "source_sha256": "abdbe1106cb2d4ff691d0b40e28cd8cfc192acb6d5b9d1401f02d06060f50d29",
+            "target": "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp_cli.parquet",
+            "producer": "climate",
+            "error": null
+          },
+          "snapshot_bytes": 3112776
+        },
+        {
+          "path": "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate_artifacts/cli_parquet/attempts/d5b42488613c49b48e01fb88f92c83a7",
+          "mode": "0o700",
+          "status": {
+            "status": "complete",
+            "source": {
+              "source": "climate/wepp.cli",
+              "resolved_source": "climate/wepp.cli"
+            },
+            "source_sha256": "abdbe1106cb2d4ff691d0b40e28cd8cfc192acb6d5b9d1401f02d06060f50d29",
+            "target": "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp_cli.parquet",
+            "producer": "climate",
+            "error": null
+          },
+          "snapshot_bytes": 3112776
+        },
+        {
+          "path": "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate_artifacts/cli_parquet/attempts/43c913e143e74f7d91d702452bb60484",
+          "mode": "0o700",
+          "status": {
+            "status": "complete",
+            "source": {
+              "source": "climate/wepp.cli",
+              "resolved_source": "climate/wepp.cli"
+            },
+            "source_sha256": "abdbe1106cb2d4ff691d0b40e28cd8cfc192acb6d5b9d1401f02d06060f50d29",
+            "target": "/wc1/batch/qa-cli-lineage-implementation-505e09edd923/plastic-bundling/climate/wepp_cli.parquet",
+            "producer": "climate",
+            "error": null
+          },
+          "snapshot_bytes": 3112776
+        }
+      ]
+    }
+  },
+  "scope": "Actual producer with real copied Climate owner and actual selected-CLI/Parquet lineage validation",
+  "limits": "Warm OS cache; no cache drop; source slice excludes other owners/global/raster checks and accepted-result validation",
+  "module_hashes_start": {
+    "/workdir/wepppy/wepppy/climates/cli_parquet.py": "ef48004ff552b20ef5206b7b42d7b078dd0a2201003cfaa45ed772c09c5ac74f",
+    "/workdir/wepppy/wepppy/nodb/core/climate_artifact_export_service.py": "221901b6e643fd6f3cfe89e6e02cdd674ccef86604363a65ceb2977cb8dd5d2a",
+    "/workdir/wepppy/wepppy/wepp/interchange/_utils.py": "94e589a57107c061381d77ef5554aa650abffda32df9be126d7454bad8833ea9",
+    "/workdir/wepppy/wepppy/nodb/mods/postfire_debris_flow/production.py": "651b87f0b01dbba6e5e64954bd8df456d87940e8e96a3e61505838f45ccb9481"
+  },
+  "module_hashes_end": {
+    "/workdir/wepppy/wepppy/climates/cli_parquet.py": "ef48004ff552b20ef5206b7b42d7b078dd0a2201003cfaa45ed772c09c5ac74f",
+    "/workdir/wepppy/wepppy/nodb/core/climate_artifact_export_service.py": "221901b6e643fd6f3cfe89e6e02cdd674ccef86604363a65ceb2977cb8dd5d2a",
+    "/workdir/wepppy/wepppy/wepp/interchange/_utils.py": "94e589a57107c061381d77ef5554aa650abffda32df9be126d7454bad8833ea9",
+    "/workdir/wepppy/wepppy/nodb/mods/postfire_debris_flow/production.py": "651b87f0b01dbba6e5e64954bd8df456d87940e8e96a3e61505838f45ccb9481"
+  }
+}

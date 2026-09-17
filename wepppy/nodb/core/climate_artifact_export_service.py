@@ -12,6 +12,7 @@ import pandas as pd
 
 from wepppy.all_your_base.stats import weibull_series
 from wepppy.climates.cligen import ClimateFile
+from wepppy.climates.cli_parquet import _CliParquetAttempt
 from wepppy.climates.noaa import atlas14
 
 if TYPE_CHECKING:
@@ -54,6 +55,11 @@ def _retry_backoff_seconds(*, attempt_index: int, base_seconds: float, cap_secon
     return min(cap_seconds, base_seconds * (2**attempt_index))
 
 
+def _active_cli_path(climate):
+    owner = climate.getInstance(climate.wd)
+    return Path(owner.cli_dir) / owner.cli_fn
+
+
 class ClimateArtifactExportService:
     """Create report-facing climate artifacts after CLI generation."""
 
@@ -75,79 +81,74 @@ class ClimateArtifactExportService:
             return None
 
         try:
-            cli_df = ClimateFile(str(cli_path)).as_dataframe(calc_peak_intensities=True)
-            export_df = cli_df.copy()
-            export_df["year"] = export_df.get("year")
-            export_df["month"] = export_df.get("mo")
-            export_df["day_of_month"] = export_df.get("da")
-            if {"year", "month", "day_of_month"}.issubset(export_df.columns):
-                date_df = export_df[["year", "month", "day_of_month"]].copy()
-                for col in ("year", "month", "day_of_month"):
-                    date_df[col] = pd.to_numeric(date_df[col], errors="coerce")
-                date_df = date_df.dropna()
-                if not date_df.empty:
-                    date_df["year"] = date_df["year"].astype(int)
-                    date_df["month"] = date_df["month"].astype(int)
-                    date_df["day_of_month"] = date_df["day_of_month"].astype(int)
-                    ordered = date_df.sort_values(["year", "month", "day_of_month"])
-                    ordered["julian"] = ordered.groupby("year").cumcount() + 1
-                    year_counts = ordered.groupby("year")["julian"].max().sort_index()
-                    offsets = year_counts.cumsum().shift(fill_value=0)
-                    ordered["sim_day_index"] = ordered["julian"] + ordered["year"].map(offsets)
-                    export_df["julian"] = ordered["julian"].reindex(export_df.index).astype("Int64")
-                    export_df["sim_day_index"] = ordered["sim_day_index"].reindex(export_df.index).astype("Int64")
-
-            def _coalesce_series(canonical: str, legacy: str) -> pd.Series:
-                canonical_series = export_df.get(canonical)
-                legacy_series = export_df.get(legacy)
-                if canonical_series is None and legacy_series is None:
-                    return pd.Series(pd.NA, index=export_df.index, dtype="Float64")
-                if canonical_series is None:
-                    return pd.to_numeric(legacy_series, errors="coerce")
-                canonical_numeric = pd.to_numeric(canonical_series, errors="coerce")
-                if legacy_series is None:
-                    return canonical_numeric
-                return canonical_numeric.fillna(pd.to_numeric(legacy_series, errors="coerce"))
-
-            export_df["peak_intensity_10"] = _coalesce_series(
-                "peak_intensity_10", "10-min Peak Rainfall Intensity (mm/hour)"
-            )
-            export_df["peak_intensity_15"] = _coalesce_series(
-                "peak_intensity_15", "15-min Peak Rainfall Intensity (mm/hour)"
-            )
-            export_df["peak_intensity_30"] = _coalesce_series(
-                "peak_intensity_30", "30-min Peak Rainfall Intensity (mm/hour)"
-            )
-            export_df["peak_intensity_60"] = _coalesce_series(
-                "peak_intensity_60", "60-min Peak Rainfall Intensity (mm/hour)"
-            )
-
-            for canonical, legacy in (
-                ("peak_intensity_10", "10-min Peak Rainfall Intensity (mm/hour)"),
-                ("peak_intensity_15", "15-min Peak Rainfall Intensity (mm/hour)"),
-                ("peak_intensity_30", "30-min Peak Rainfall Intensity (mm/hour)"),
-                ("peak_intensity_60", "60-min Peak Rainfall Intensity (mm/hour)"),
-            ):
-                export_df[legacy] = export_df[canonical]
-
-            if "dur" not in export_df.columns:
-                export_df["dur"] = pd.Series(pd.NA, index=export_df.index, dtype="Float64")
-            if "tp" not in export_df.columns:
-                export_df["tp"] = pd.Series(pd.NA, index=export_df.index, dtype="Float64")
-            if "ip" not in export_df.columns:
-                export_df["ip"] = pd.Series(pd.NA, index=export_df.index, dtype="Float64")
-
-            export_df["storm_duration_hours"] = pd.to_numeric(export_df.get("dur"), errors="coerce")
-            export_df["storm_duration"] = pd.to_numeric(export_df.get("dur"), errors="coerce")
-
             parquet_path = Path(climate.wd) / "climate" / "wepp_cli.parquet"
-            parquet_path.parent.mkdir(parents=True, exist_ok=True)
-            export_df.to_parquet(parquet_path, index=False)
-            climate.logger.info("Exported CLI parquet with peak intensities", extra={"parquet": str(parquet_path)})
-            if (Path(climate.wd) / "postfire_debris_flow.nodb").is_file():
-                from wepppy.nodb.mods.postfire_debris_flow.production import notify
-                notify(climate.wd)
-            return parquet_path
+            with _CliParquetAttempt(climate.wd, cli_path, parquet_path, "climate") as attempt:
+                cli_df = ClimateFile(str(attempt.snapshot)).as_dataframe(calc_peak_intensities=True)
+                export_df = cli_df.copy()
+                export_df["year"] = export_df.get("year")
+                export_df["month"] = export_df.get("mo")
+                export_df["day_of_month"] = export_df.get("da")
+                if {"year", "month", "day_of_month"}.issubset(export_df.columns):
+                    date_df = export_df[["year", "month", "day_of_month"]].copy()
+                    for col in ("year", "month", "day_of_month"):
+                        date_df[col] = pd.to_numeric(date_df[col], errors="coerce")
+                    date_df = date_df.dropna()
+                    if not date_df.empty:
+                        date_df["year"] = date_df["year"].astype(int)
+                        date_df["month"] = date_df["month"].astype(int)
+                        date_df["day_of_month"] = date_df["day_of_month"].astype(int)
+                        ordered = date_df.sort_values(["year", "month", "day_of_month"])
+                        ordered["julian"] = ordered.groupby("year").cumcount() + 1
+                        year_counts = ordered.groupby("year")["julian"].max().sort_index()
+                        offsets = year_counts.cumsum().shift(fill_value=0)
+                        ordered["sim_day_index"] = ordered["julian"] + ordered["year"].map(offsets)
+                        export_df["julian"] = ordered["julian"].reindex(export_df.index).astype("Int64")
+                        export_df["sim_day_index"] = ordered["sim_day_index"].reindex(export_df.index).astype("Int64")
+
+                def _coalesce_series(canonical: str, legacy: str) -> pd.Series:
+                    canonical_series = export_df.get(canonical)
+                    legacy_series = export_df.get(legacy)
+                    if canonical_series is None and legacy_series is None:
+                        return pd.Series(pd.NA, index=export_df.index, dtype="Float64")
+                    if canonical_series is None:
+                        return pd.to_numeric(legacy_series, errors="coerce")
+                    canonical_numeric = pd.to_numeric(canonical_series, errors="coerce")
+                    if legacy_series is None:
+                        return canonical_numeric
+                    return canonical_numeric.fillna(pd.to_numeric(legacy_series, errors="coerce"))
+
+                export_df["peak_intensity_10"] = _coalesce_series(
+                    "peak_intensity_10", "10-min Peak Rainfall Intensity (mm/hour)"
+                )
+                export_df["peak_intensity_15"] = _coalesce_series(
+                    "peak_intensity_15", "15-min Peak Rainfall Intensity (mm/hour)"
+                )
+                export_df["peak_intensity_30"] = _coalesce_series(
+                    "peak_intensity_30", "30-min Peak Rainfall Intensity (mm/hour)"
+                )
+                export_df["peak_intensity_60"] = _coalesce_series(
+                    "peak_intensity_60", "60-min Peak Rainfall Intensity (mm/hour)"
+                )
+
+                for canonical, legacy in (
+                    ("peak_intensity_10", "10-min Peak Rainfall Intensity (mm/hour)"),
+                    ("peak_intensity_15", "15-min Peak Rainfall Intensity (mm/hour)"),
+                    ("peak_intensity_30", "30-min Peak Rainfall Intensity (mm/hour)"),
+                    ("peak_intensity_60", "60-min Peak Rainfall Intensity (mm/hour)"),
+                ):
+                    export_df[legacy] = export_df[canonical]
+
+                if "dur" not in export_df.columns:
+                    export_df["dur"] = pd.Series(pd.NA, index=export_df.index, dtype="Float64")
+                if "tp" not in export_df.columns:
+                    export_df["tp"] = pd.Series(pd.NA, index=export_df.index, dtype="Float64")
+                if "ip" not in export_df.columns:
+                    export_df["ip"] = pd.Series(pd.NA, index=export_df.index, dtype="Float64")
+
+                export_df["storm_duration_hours"] = pd.to_numeric(export_df.get("dur"), errors="coerce")
+                export_df["storm_duration"] = pd.to_numeric(export_df.get("dur"), errors="coerce")
+
+                attempt.publish(export_df, lambda: _active_cli_path(climate))
         # Export boundary: any parse/serialization backend error should be logged and skipped.
         except (ImportError, KeyError, OSError, RuntimeError, TypeError, ValueError):
             climate.logger.exception(
@@ -155,6 +156,16 @@ class ClimateArtifactExportService:
                 extra={"cli_path": str(cli_path)},
             )
             return None
+
+        climate.logger.info("Exported CLI parquet with peak intensities", extra={"parquet": str(parquet_path)})
+        try:
+            if (Path(climate.wd) / "postfire_debris_flow.nodb").is_file():
+                from wepppy.nodb.mods.postfire_debris_flow.production import notify
+                notify(climate.wd)
+        except (ImportError, KeyError, OSError, RuntimeError, TypeError, ValueError):
+            # Notification follows durable publication; do not misreport commit.
+            climate.logger.exception("CLI parquet committed but notification failed")
+        return parquet_path
 
     def export_cli_precip_frequency_csv(self, climate: "Climate", parquet_path: Path) -> Optional[Path]:
         """Write NOAA-style PDS frequency stats derived from ``wepp_cli.parquet``."""

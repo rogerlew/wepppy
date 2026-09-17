@@ -50,8 +50,22 @@ def project(owner_project,terrain,monkeypatch,request):
     with rasterio.open(wd/'soils/ssurgo.tif','w',**profile) as ds: ds.write(np.full((7,7),float(key)),1)
     catalog = wd/'lineage.json'
     io.write_json(catalog,dict(schema_version=1,collection_by_mukey={str(key):'SSURGO'},source='analytical fixture',retrieved_at='2026-09-14'))
-    pd.DataFrame({'prcp':[10.]*30,'year':list(range(1,31)),'month':[1]*30,'day_of_month':[1]*30,
-                  'peak_intensity_15':[40.]*30,'peak_intensity_30':[20.]*30,'peak_intensity_60':[10.]*30}).to_parquet(wd/'climate/wepp_cli.parquet')
+    from tests.nodb.test_climate_artifact_export_service import _write_minimal_breakpoint_cli
+    from wepppy.nodb.core import Climate
+    climate = Climate.getInstance(str(wd))
+    cli = Path(climate.cli_dir)/climate.cli_fn
+    _write_minimal_breakpoint_cli(cli)
+    lines = cli.read_text().splitlines()[:15]
+    lines[4] = lines[4].replace('2011             2', '2000            30')
+    for year in range(2000, 2030):
+        lines.extend([f'    1   1  {year}   2    -4.28  -23.72 277.6    2.20  290.0 -25.6',
+                      '00.00     0.000', '00.25     10.000'])
+    cli.write_text('\n'.join(lines)+'\n')
+    assert climate._export_cli_parquet() is not None
+    events = pd.read_parquet(wd/'climate/wepp_cli.parquet')
+    assert len(events) == 30
+    for column, expected in [('peak_intensity_15', 40.), ('peak_intensity_30', 20.), ('peak_intensity_60', 10.)]:
+        assert np.allclose(events[column], expected)
     downstream=wd/'wepp/runs';downstream.mkdir(parents=True,exist_ok=True)
     shutil.copyfile(wd/'soils/123.sol',downstream/'p1.sol')
     (downstream/'p1.run').write_text('retained soil reference: p1.sol\n')

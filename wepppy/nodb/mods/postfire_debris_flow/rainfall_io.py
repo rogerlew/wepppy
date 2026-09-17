@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import hashlib
+from contextlib import contextmanager
+import errno
 import json
 import math
 import os
@@ -61,18 +63,46 @@ def digest(path, limit=MAX_BYTES):
     return h.hexdigest()
 
 
-def open_local(path, limit=MAX_BYTES):
-    """Open a bounded regular file without following any path-component symlink."""
-    p = regular(path, limit)
+@contextmanager
+def _local_parent(path):
+    """Hold one no-follow directory traversal for a bounded same-call read."""
+    p = Path(path).absolute()
+    if '..' in p.parts:
+        fail('invalid_input', 'Parent traversal is unsupported')
     directory = os.open(p.anchor, os.O_RDONLY | os.O_DIRECTORY)
     try:
-        for part in p.parts[1:-1]:
+        for part in p.parts[1:]:
             child = os.open(part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=directory)
             os.close(directory)
             directory = child
-        descriptor = os.open(p.name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=directory)
+        yield directory
+        _verify_parent(p, directory)
     finally:
         os.close(directory)
+
+
+def _verify_parent(path, directory):
+    current = Path(path).lstat()
+    opened = os.fstat(directory)
+    if not stat.S_ISDIR(current.st_mode) or (current.st_dev, current.st_ino) != (opened.st_dev, opened.st_ino):
+        raise OSError(errno.ESTALE, 'Local source directory changed', str(path))
+
+
+def open_local(path, limit=MAX_BYTES, *, _parent_fd=None):
+    """Open a bounded regular file without following any path-component symlink."""
+    p = regular(path, limit)
+    descriptor = None
+    try:
+        if _parent_fd is None:
+            with _local_parent(p.parent) as directory:
+                descriptor = os.open(p.name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=directory)
+        else:
+            _verify_parent(p.parent, _parent_fd)
+            descriptor = os.open(p.name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=_parent_fd)
+    except OSError:
+        if descriptor is not None:
+            os.close(descriptor)
+        raise
     try:
         info = os.fstat(descriptor)
         if not stat.S_ISREG(info.st_mode) or info.st_size > limit:

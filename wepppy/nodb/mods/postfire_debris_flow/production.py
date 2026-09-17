@@ -6,6 +6,7 @@ from copy import deepcopy
 from functools import lru_cache
 from datetime import datetime, timezone
 import json
+import errno
 import hashlib
 import os
 import stat
@@ -164,6 +165,34 @@ def k_current(wd, files, polaris_completed):
         return False
 
 
+def _cli_lineage_current(wd, files, records, hashes):
+    from wepppy.climates.cli_parquet import _read_proof
+    from .rainfall_io import MAX_TEXT, open_local, _local_parent
+    path = safe(wd, files['cli'])
+    active = safe(wd, files['active_cli'])
+    try:
+        with _local_parent(path.parent) as parent, open_local(path, _parent_fd=parent) as stream:
+            try:
+                proof, version = _read_proof(stream, MAX_TEXT)
+            except ValueError:
+                return False
+            checksum = hashes.get('active_cli') or cached_digest(
+                active, local=True, _parent_fd=parent if active.parent == path.parent else None)
+            if (version != _file_version(path.stat())
+                    or signature(wd, path) != records['cli']
+                    or signature(wd, active) != records['active_cli']):
+                raise WorkflowError('changed_source', 'Climate changed while verifying export lineage.', 409)
+            # The strict no-follow checks above establish identical selected/resolved
+            # names here; generic exporter aliases still use their own resolver.
+            relative = str(active.relative_to(Path(wd).absolute()))
+            return bool(proof and proof['source_sha256'] == checksum
+                        and proof['source'] == relative and proof['resolved_source'] == relative)
+    except OSError as exc:
+        if exc.errno == errno.ESTALE:
+            raise WorkflowError('changed_source', 'Climate changed while verifying export lineage.', 409) from exc
+        raise
+
+
 def sources(wd, *, rainfall=True, frequency='cli', model='M1', soil_policy=KF_POLICY, content=True):
     if model not in ('M1', 'M3'):
         raise WorkflowError('invalid_model', 'Choose M1 or M3.')
@@ -229,8 +258,7 @@ def sources(wd, *, rainfall=True, frequency='cli', model='M1', soil_policy=KF_PO
             files['noaa'] = noaa
         checks.update(sbs=bool(completed['sbs'] and disturbed and files['sbs'].is_file()),
                       climate=bool(after('climate','abstract') and climate and files['cli'].is_file()
-                          and files.get('active_cli') and files['active_cli'].is_file()
-                          and files['cli'].stat().st_mtime_ns >= files['active_cli'].stat().st_mtime_ns), noaa=noaa_current(wd,noaa,getattr(watershed,'_centroid',None)))
+                          and files.get('active_cli') and files['active_cli'].is_file()), noaa=noaa_current(wd,noaa,getattr(watershed,'_centroid',None)))
         selections['engine_sha256'] = engine_identity()
         from whitebox_tools import WhiteboxTools
         tool = WhiteboxTools()
@@ -269,6 +297,8 @@ def sources(wd, *, rainfall=True, frequency='cli', model='M1', soil_policy=KF_PO
             hashes[key] = cached_digest(path, local=True) if records[key] is not None else None
         if records[key] is not None and signature(wd, path) != records[key]:
             raise WorkflowError('changed_source', 'Project data changed while reading.', 409)
+    if rainfall and checks['climate']:
+        checks['climate'] = _cli_lineage_current(wd, files, records, hashes)
     snapshot = {'selections': selections, 'files': records}
     if content:
         snapshot['content_sha256'] = hashes
@@ -580,11 +610,16 @@ def _digest_version(path, version, *, local=False, _observation=None):
     return checksum.hexdigest()
 
 
-def cached_digest(path, *, local=False):
+def cached_digest(path, *, local=False, _parent_fd=None):
     from .rainfall_io import open_local
     path = Path(path).absolute()
     # Even warm hits must recheck read access and descriptor/path association.
-    with (open_local(path, path.stat().st_size) if local else path.open('rb')) as stream:
+    if local:
+        incoming = (open_local(path, path.stat().st_size) if _parent_fd is None
+                    else open_local(path, path.stat().st_size, _parent_fd=_parent_fd))
+    else:
+        incoming = path.open('rb')
+    with incoming as stream:
         info = os.fstat(stream.fileno())
         version = _file_version(info)
         if not stat.S_ISREG(info.st_mode) or _file_version(path.stat()) != version:

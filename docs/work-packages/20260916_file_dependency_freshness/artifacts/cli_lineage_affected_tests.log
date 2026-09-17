@@ -1,0 +1,144 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/test_climate_artifact_export_service.py tests/nodb/test_climate_build_helpers.py tests/nodb/test_climate_build_router_services.py tests/nodb/test_climate_catalog.py tests/nodb/test_climate_facade_collaborators.py tests/nodb/test_climate_gridmet_multiple_build_service.py tests/nodb/test_climate_input_parser_service.py tests/nodb/test_climate_multiple_build.py tests/nodb/test_climate_observed_year_bounds.py tests/nodb/test_climate_scaling_service.py tests/nodb/test_climate_station_catalog_service.py tests/nodb/test_climate_type_hints.py tests/nodb/test_climate_user_defined_station_meta_service.py tests/nodb/test_cli_parquet_lineage.py tests/nodb/mods/test_postfire_debris_flow_dnbr.py tests/nodb/mods/test_postfire_debris_flow_encoding.py tests/nodb/mods/test_postfire_debris_flow_freshness.py tests/nodb/mods/test_postfire_debris_flow_integration.py tests/nodb/mods/test_postfire_debris_flow_kf.py tests/nodb/mods/test_postfire_debris_flow_m3_integration.py tests/nodb/mods/test_postfire_debris_flow_m3_terrain.py tests/nodb/mods/test_postfire_debris_flow_observability.py tests/nodb/mods/test_postfire_debris_flow_production.py tests/nodb/mods/test_postfire_debris_flow_production_soils.py tests/nodb/mods/test_postfire_debris_flow_publication.py tests/nodb/mods/test_postfire_debris_flow_rainfall.py tests/nodb/mods/test_postfire_debris_flow_report.py tests/nodb/mods/test_postfire_debris_flow_results.py tests/nodb/mods/test_postfire_debris_flow_run_preparation.py tests/nodb/mods/test_postfire_debris_flow_runtime_m3.py tests/nodb/mods/test_postfire_debris_flow_soil_thickness.py tests/nodb/mods/test_postfire_debris_flow_source_acquisition.py tests/nodb/mods/test_postfire_debris_flow_source_preparation.py tests/nodb/mods/test_postfire_debris_flow_source_transport.py tests/nodb/mods/test_postfire_debris_flow_staley2017.py tests/nodb/mods/test_postfire_debris_flow_wallow_fixtures.py tests/wepp/interchange/test_calendar_utils.py tests/wepp/interchange/test_utils_phase7.py --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 850 items
+
+tests/nodb/test_climate_artifact_export_service.py ............          [  1%]
+tests/nodb/test_climate_build_helpers.py ............................... [  5%]
+......                                                                   [  5%]
+tests/nodb/test_climate_build_router_services.py ...........             [  7%]
+tests/nodb/test_climate_catalog.py ..................................    [ 11%]
+tests/nodb/test_climate_facade_collaborators.py .............            [ 12%]
+tests/nodb/test_climate_gridmet_multiple_build_service.py ............   [ 14%]
+tests/nodb/test_climate_input_parser_service.py ........................ [ 16%]
+                                                                         [ 16%]
+tests/nodb/test_climate_multiple_build.py ...                            [ 17%]
+tests/nodb/test_climate_observed_year_bounds.py .....                    [ 17%]
+tests/nodb/test_climate_scaling_service.py ..........                    [ 18%]
+tests/nodb/test_climate_station_catalog_service.py .......               [ 19%]
+tests/nodb/test_climate_type_hints.py ....                               [ 20%]
+tests/nodb/test_climate_user_defined_station_meta_service.py ...         [ 20%]
+tests/nodb/test_cli_parquet_lineage.py ...................               [ 22%]
+tests/nodb/mods/test_postfire_debris_flow_dnbr.py ...................... [ 25%]
+.......................                                                  [ 28%]
+tests/nodb/mods/test_postfire_debris_flow_encoding.py .........          [ 29%]
+tests/nodb/mods/test_postfire_debris_flow_freshness.py ................. [ 31%]
+..                                                                       [ 31%]
+tests/nodb/mods/test_postfire_debris_flow_integration.py ............... [ 33%]
+........................................                                 [ 37%]
+tests/nodb/mods/test_postfire_debris_flow_kf.py .................        [ 39%]
+tests/nodb/mods/test_postfire_debris_flow_m3_integration.py ............ [ 41%]
+.                                                                        [ 41%]
+tests/nodb/mods/test_postfire_debris_flow_m3_terrain.py ......           [ 42%]
+tests/nodb/mods/test_postfire_debris_flow_observability.py ............. [ 43%]
+...........                                                              [ 44%]
+tests/nodb/mods/test_postfire_debris_flow_production.py ................ [ 46%]
+........................................                                 [ 51%]
+tests/nodb/mods/test_postfire_debris_flow_production_soils.py .......... [ 52%]
+............................                                             [ 56%]
+tests/nodb/mods/test_postfire_debris_flow_publication.py ..............  [ 57%]
+tests/nodb/mods/test_postfire_debris_flow_rainfall.py .................. [ 59%]
+.......                                                                  [ 60%]
+tests/nodb/mods/test_postfire_debris_flow_report.py ..................   [ 62%]
+tests/nodb/mods/test_postfire_debris_flow_results.py ................... [ 64%]
+.......................                                                  [ 67%]
+tests/nodb/mods/test_postfire_debris_flow_run_preparation.py ........    [ 68%]
+tests/nodb/mods/test_postfire_debris_flow_runtime_m3.py F
+
+=================================== FAILURES ===================================
+_____ test_fresh_basin_run_prepares_sources_and_reuses_them[western-key7] ______
+
+project = (PosixPath('/tmp/pytest-of-unknown/pytest-94/test_fresh_basin_run_prepares_0'), PosixPath('/tmp/pytest-of-unknown/pyte...ares_0/dem/wbt/bound.tif'), PosixPath('/tmp/pytest-of-unknown/pytest-94/test_fresh_basin_run_prepares_0/lineage.json'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x733c1a08b5f0>
+
+    def test_fresh_basin_run_prepares_sources_and_reuses_them(project,monkeypatch):
+        from wepppy.nodb.mods.postfire_debris_flow import source_acquisition
+        wd,dem,mask,catalog = project
+        before = protected(wd)
+        calls = []
+        def acquire(root,source_dem,source_mask):
+            assert (root,source_dem,source_mask) == (wd,dem,mask)
+            calls.append(root)
+            return prepare_local_sources(root,source_dem,source_mask,collection_catalog=catalog)
+        monkeypatch.setattr(source_acquisition,'acquire_sources',acquire)
+        assert not (wd/META).exists()
+        identity = enqueue_m3(wd)
+>       assert p.get_state(wd,'config',model='M3',reconcile=False)['run_ready']
+E       assert False
+
+tests/nodb/mods/test_postfire_debris_flow_runtime_m3.py:89: AssertionError
+---------------------------- Captured stderr setup -----------------------------
+2026-09-17 04:40:48 [INFO] wepppy.run.test_fresh_basin_run_prepares_0.disturbed: disturbed.on(TriggerEvents.ON_INIT_FINISH)
+2026-09-17 04:40:48 [INFO] wepppy.run.test_fresh_basin_run_prepares_0.soils: soils.dump_soils_parquet()
+2026-09-17 04:40:48 [INFO] wepppy.run.test_fresh_basin_run_prepares_0.climate: Exported CLI parquet with peak intensities
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+tests/nodb/test_climate_artifact_export_service.py::test_export_cli_precip_frequency_csv_writes_recurrence_limited_by_years
+  /workdir/wepppy/wepppy/nodb/core/climate_artifact_export_service.py:331: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().strftime("%a %b %d %H:%M:%S %Y")
+
+tests/nodb/test_climate_catalog.py::test_config_owned_scale_map_persists_and_reloads[missing-settings0-None]
+  /opt/venv/lib/python3.12/site-packages/awesome_codename/data/__init__.py:1: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    from pkg_resources import resource_string
+
+tests/nodb/test_climate_catalog.py::test_config_owned_scale_map_persists_and_reloads[missing-settings0-None]
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+tests/nodb/test_climate_catalog.py::test_config_owned_scale_map_persists_and_reloads[missing-settings0-None]
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The ConfirmRegisterForm and the confirm_register_form option are deprecated as of version 5.6.0 and will be removed in a future release.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+tests/nodb/test_climate_catalog.py::test_config_owned_scale_map_persists_and_reloads[missing-settings0-None]
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The RegisterForm is deprecated as of version 5.6.0 and will be removed in a future release. The form RegisterFormV2 should be sub-classed instead.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+tests/nodb/test_climate_catalog.py::test_config_owned_scale_map_persists_and_reloads[missing-settings0-None]
+tests/nodb/test_climate_catalog.py::test_config_owned_scale_map_persists_and_reloads[missing-settings0-None]
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+tests/nodb/test_cli_parquet_lineage.py::test_cleanup_skeleton_archive_restore_keep_history
+  /workdir/wepppy/wepppy/rq/project_rq_archive.py:282: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+
+tests/nodb/mods/test_postfire_debris_flow_integration.py::test_external_mask_dnbr
+tests/nodb/mods/test_postfire_debris_flow_integration.py::test_external_mask_without_gdal_flag_rejected
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_upload_rejects_mutation_and_preserves_accepted[dem_mask_after_auto]
+  /opt/venv/lib/python3.12/site-packages/rasterio/__init__.py:304: NotGeoreferencedWarning: Dataset has no geotransform, gcps, or rpcs. The identity matrix will be returned.
+    dataset = DatasetReader(path, driver=driver, sharing=sharing, **kwargs)
+
+tests/nodb/mods/test_postfire_debris_flow_integration.py::test_external_mask_without_gdal_flag_rejected
+  /opt/venv/lib/python3.12/site-packages/rasterio/__init__.py:314: NotGeoreferencedWarning: Dataset has no geotransform, gcps, or rpcs. The identity matrix will be returned.
+    dataset = writer(
+
+tests/nodb/mods/test_postfire_debris_flow_kf.py::test_acquire_and_schema3_roundtrip
+tests/nodb/mods/test_postfire_debris_flow_kf.py::test_native_replacement_after_decode_cannot_be_blessed
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_upload_and_model_real_artifacts
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_upload_and_model_real_artifacts
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_upload_and_model_real_artifacts
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_upload_and_model_real_artifacts
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_upload_and_model_real_artifacts
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_upload_and_model_real_artifacts
+  /usr/local/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=71196) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    self.pid = os.fork()
+
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_m3_task_retains_failure_and_preserves_previous_result
+  /workdir/wepppy/wepppy/rq/exception_logging.py:35: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().isoformat() + "Z"
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/nodb/mods/test_postfire_debris_flow_runtime_m3.py::test_fresh_basin_run_prepares_sources_and_reuses_them[western-key7]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+============ 1 failed, 583 passed, 23 warnings in 92.23s (0:01:32) =============

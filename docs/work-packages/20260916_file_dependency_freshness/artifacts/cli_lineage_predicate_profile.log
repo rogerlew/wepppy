@@ -1,0 +1,101 @@
+INFO:wctl2:docker compose exec weppcloud python docs/work-packages/20260916_file_dependency_freshness/artifacts/profile_cli_lineage_predicate.py
+thespian-cleanness full_predicate 7.597 ms
+thespian-cleanness metadata_with_local_opener 4.181 ms
+thespian-cleanness cached_cli_digest_with_local_opener 3.547 ms
+thespian-cleanness selection 0.593 ms
+thespian-cleanness both_post_read_signatures 0.498 ms
+thespian-cleanness both_initial_safe 0.289 ms
+         341201 function calls (327401 primitive calls) in 0.889 seconds
+
+   Ordered by: cumulative time
+   List reduced from 117 to 35 due to restriction <35>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+      100    0.001    0.000    0.889    0.009 profile_cli_lineage_predicate.py:27(predicate)
+      100    0.004    0.000    0.889    0.009 production.py:167(_cli_lineage_current)
+      200    0.006    0.000    0.503    0.003 rainfall_io.py:64(open_local)
+     1400    0.433    0.000    0.433    0.000 {built-in method posix.open}
+      100    0.004    0.000    0.262    0.003 production.py:603(cached_digest)
+      400    0.009    0.000    0.161    0.000 production.py:83(safe)
+      200    0.002    0.000    0.133    0.001 production.py:106(signature)
+     8100    0.007    0.000    0.100    0.000 <frozen _collections_abc>:1022(__iter__)
+     7300    0.015    0.000    0.093    0.000 pathlib.py:277(__getitem__)
+      800    0.003    0.000    0.081    0.000 pathlib.py:690(is_relative_to)
+      100    0.009    0.000    0.078    0.001 cli_parquet.py:47(_read_proof)
+      100    0.001    0.000    0.072    0.001 cli_parquet.py:29(_selection)
+     6900    0.010    0.000    0.062    0.000 pathlib.py:551(drive)
+     6400    0.009    0.000    0.061    0.000 pathlib.py:420(_from_parsed_parts)
+     4000    0.002    0.000    0.059    0.000 pathlib.py:835(stat)
+      300    0.004    0.000    0.058    0.000 pathlib.py:663(relative_to)
+     4000    0.043    0.000    0.057    0.000 {built-in method posix.stat}
+     3600    0.005    0.000    0.057    0.000 pathlib.py:519(__eq__)
+     8000    0.014    0.000    0.056    0.000 pathlib.py:380(with_segments)
+     9000    0.011    0.000    0.055    0.000 pathlib.py:437(__str__)
+      200    0.003    0.000    0.052    0.000 rainfall_io.py:40(regular)
+     3700    0.007    0.000    0.052    0.000 pathlib.py:407(_load_parts)
+     7200    0.017    0.000    0.051    0.000 pathlib.py:484(_str_normcase)
+    10300    0.016    0.000    0.044    0.000 pathlib.py:1157(__init__)
+      100    0.034    0.000    0.042    0.000 core.py:311(__init__)
+     3700    0.021    0.000    0.041    0.000 pathlib.py:387(_parse_path)
+      800    0.004    0.000    0.039    0.000 <frozen _collections_abc>:1032(__contains__)
+     2600    0.004    0.000    0.039    0.000 pathlib.py:909(is_symlink)
+     2600    0.002    0.000    0.034    0.000 pathlib.py:842(lstat)
+      200    0.001    0.000    0.033    0.000 pathlib.py:1228(resolve)
+    10300    0.018    0.000    0.028    0.000 pathlib.py:358(__init__)
+      400    0.002    0.000    0.024    0.000 {built-in method builtins.any}
+      200    0.001    0.000    0.022    0.000 <frozen posixpath>:420(realpath)
+     1200    0.003    0.000    0.022    0.000 pathlib.py:702(parts)
+     1600    0.001    0.000    0.020    0.000 rainfall_io.py:42(<genexpr>)
+
+
+
+plastic-bundling full_predicate 9.720 ms
+plastic-bundling metadata_with_local_opener 4.426 ms
+plastic-bundling cached_cli_digest_with_local_opener 2.927 ms
+plastic-bundling selection 0.527 ms
+plastic-bundling both_post_read_signatures 0.482 ms
+plastic-bundling both_initial_safe 0.286 ms
+         341201 function calls (327401 primitive calls) in 0.728 seconds
+
+   Ordered by: cumulative time
+   List reduced from 117 to 35 due to restriction <35>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+      100    0.000    0.000    0.728    0.007 profile_cli_lineage_predicate.py:27(predicate)
+      100    0.003    0.000    0.727    0.007 production.py:167(_cli_lineage_current)
+      200    0.005    0.000    0.396    0.002 rainfall_io.py:64(open_local)
+     1400    0.337    0.000    0.337    0.000 {built-in method posix.open}
+      100    0.003    0.000    0.212    0.002 production.py:603(cached_digest)
+      400    0.008    0.000    0.137    0.000 production.py:83(safe)
+      200    0.002    0.000    0.114    0.001 production.py:106(signature)
+     8100    0.006    0.000    0.085    0.000 <frozen _collections_abc>:1022(__iter__)
+     7300    0.013    0.000    0.080    0.000 pathlib.py:277(__getitem__)
+      800    0.003    0.000    0.069    0.000 pathlib.py:690(is_relative_to)
+      100    0.008    0.000    0.067    0.001 cli_parquet.py:47(_read_proof)
+      100    0.001    0.000    0.063    0.001 cli_parquet.py:29(_selection)
+     6400    0.007    0.000    0.053    0.000 pathlib.py:420(_from_parsed_parts)
+     6900    0.009    0.000    0.052    0.000 pathlib.py:551(drive)
+     4000    0.002    0.000    0.052    0.000 pathlib.py:835(stat)
+      300    0.004    0.000    0.051    0.000 pathlib.py:663(relative_to)
+     4000    0.038    0.000    0.050    0.000 {built-in method posix.stat}
+     3600    0.004    0.000    0.048    0.000 pathlib.py:519(__eq__)
+     8000    0.012    0.000    0.048    0.000 pathlib.py:380(with_segments)
+     9000    0.010    0.000    0.047    0.000 pathlib.py:437(__str__)
+      200    0.002    0.000    0.044    0.000 rainfall_io.py:40(regular)
+     3700    0.006    0.000    0.044    0.000 pathlib.py:407(_load_parts)
+     7200    0.014    0.000    0.044    0.000 pathlib.py:484(_str_normcase)
+    10300    0.014    0.000    0.038    0.000 pathlib.py:1157(__init__)
+      100    0.029    0.000    0.035    0.000 core.py:311(__init__)
+     3700    0.018    0.000    0.034    0.000 pathlib.py:387(_parse_path)
+     2600    0.003    0.000    0.034    0.000 pathlib.py:909(is_symlink)
+      800    0.003    0.000    0.033    0.000 <frozen _collections_abc>:1032(__contains__)
+     2600    0.001    0.000    0.030    0.000 pathlib.py:842(lstat)
+      200    0.001    0.000    0.028    0.000 pathlib.py:1228(resolve)
+    10300    0.015    0.000    0.024    0.000 pathlib.py:358(__init__)
+      400    0.002    0.000    0.020    0.000 {built-in method builtins.any}
+      200    0.000    0.000    0.020    0.000 <frozen posixpath>:420(realpath)
+     1200    0.003    0.000    0.018    0.000 pathlib.py:702(parts)
+     1600    0.001    0.000    0.017    0.000 rainfall_io.py:42(<genexpr>)
+
+
+

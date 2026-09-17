@@ -1,0 +1,72 @@
+INFO:wctl2:docker compose exec weppcloud bash -lc cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy MYPY_CACHE_DIR=/tmp/mypy_cache /opt/venv/bin/pytest tests/nodb/test_cli_parquet_lineage.py tests/nodb/test_climate_artifact_export_service.py tests/nodb/mods/test_postfire_debris_flow_production.py tests/wepp/interchange/test_calendar_utils.py tests/wepp/interchange/test_utils_phase7.py --maxfail=1
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /workdir/wepppy
+configfile: pyproject.toml
+plugins: reportlog-0.4.0, timeout-2.4.0, cov-7.0.0, libtmux-0.47.0, dash-4.2.0, anyio-4.14.2
+collected 91 items
+
+tests/nodb/test_cli_parquet_lineage.py ...................               [ 20%]
+tests/nodb/test_climate_artifact_export_service.py ............          [ 34%]
+tests/nodb/mods/test_postfire_debris_flow_production.py ................ [ 51%]
+........................................                                 [ 95%]
+tests/wepp/interchange/test_calendar_utils.py .                          [ 96%]
+tests/wepp/interchange/test_utils_phase7.py ...                          [100%]
+
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27
+  /opt/venv/lib/python3.12/site-packages/pytz/tzinfo.py:27: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    _epoch = datetime.utcfromtimestamp(0)
+
+../../opt/venv/lib/python3.12/site-packages/pyparsing.py:108
+  /opt/venv/lib/python3.12/site-packages/pyparsing.py:108: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+tests/nodb/test_cli_parquet_lineage.py::test_content_and_metadata_readiness_including_locked_authority
+  /opt/venv/lib/python3.12/site-packages/awesome_codename/data/__init__.py:1: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    from pkg_resources import resource_string
+
+tests/nodb/test_cli_parquet_lineage.py::test_content_and_metadata_readiness_including_locked_authority
+  /opt/venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+tests/nodb/test_cli_parquet_lineage.py::test_content_and_metadata_readiness_including_locked_authority
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The ConfirmRegisterForm and the confirm_register_form option are deprecated as of version 5.6.0 and will be removed in a future release.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+tests/nodb/test_cli_parquet_lineage.py::test_content_and_metadata_readiness_including_locked_authority
+  /opt/venv/lib/python3.12/site-packages/flask_security/core.py:1426: DeprecationWarning: The RegisterForm is deprecated as of version 5.6.0 and will be removed in a future release. The form RegisterFormV2 should be sub-classed instead.
+    self.init_app(app, datastore, register_blueprint=register_blueprint)
+
+tests/nodb/test_cli_parquet_lineage.py::test_content_and_metadata_readiness_including_locked_authority
+tests/nodb/test_cli_parquet_lineage.py::test_content_and_metadata_readiness_including_locked_authority
+  /opt/venv/lib/python3.12/site-packages/starlette/applications.py:239: DeprecationWarning: The `middleware` decorator is deprecated, and will be removed in version 1.0.0. Refer to https://starlette.dev/middleware/#using-middleware for recommended approach.
+    warnings.warn(
+
+tests/nodb/test_cli_parquet_lineage.py::test_cleanup_skeleton_archive_restore_keep_history
+  /workdir/wepppy/wepppy/rq/project_rq_archive.py:282: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+
+tests/nodb/test_climate_artifact_export_service.py::test_export_cli_precip_frequency_csv_writes_recurrence_limited_by_years
+  /workdir/wepppy/wepppy/nodb/core/climate_artifact_export_service.py:331: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().strftime("%a %b %d %H:%M:%S %Y")
+
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_upload_and_model_real_artifacts
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_upload_and_model_real_artifacts
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_upload_and_model_real_artifacts
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_upload_and_model_real_artifacts
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_upload_and_model_real_artifacts
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_upload_and_model_real_artifacts
+  /usr/local/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=69501) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    self.pid = os.fork()
+
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_upload_rejects_mutation_and_preserves_accepted[dem_mask_after_auto]
+  /opt/venv/lib/python3.12/site-packages/rasterio/__init__.py:304: NotGeoreferencedWarning: Dataset has no geotransform, gcps, or rpcs. The identity matrix will be returned.
+    dataset = DatasetReader(path, driver=driver, sharing=sharing, **kwargs)
+
+tests/nodb/mods/test_postfire_debris_flow_production.py::test_m3_task_retains_failure_and_preserves_previous_result
+  /workdir/wepppy/wepppy/rq/exception_logging.py:35: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().isoformat() + "Z"
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 91 passed, 18 warnings in 44.36s =======================
